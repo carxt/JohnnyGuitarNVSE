@@ -42,39 +42,3 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 
 
 //This two are weird experiments that I won't check right now.
-
-bool Cmd_AddHeadPart_Execute(COMMAND_ARGS)
-{
-	BGSHeadPart* hp;
-	TESNPC* npc;
-	if (ExtractArgs(EXTRACT_ARGS, &npc, &hp)  && IS_TYPE(npc, TESNPC) && IS_TYPE(hp, BGSHeadPart))
-	{
-		tList<BGSHeadPart>::_Node* _nod;
-		tList<BGSHeadPart>::Iterator iter(npc->headPart, hp);
-		if (_nod = iter.GetNode())return true;
-		npc->headPart.AddAt(hp, eListEnd);
-		if (IsConsoleMode())
-			Console_Print("success");
-	}
-	return true;
-}
-bool Cmd_RemoveHeadPart_Execute(COMMAND_ARGS)
-{
-	BGSHeadPart* hp;
-	TESNPC* npc;
-	if (ExtractArgs(EXTRACT_ARGS, &npc, &hp) && IS_TYPE(npc, TESNPC) && IS_TYPE(hp, BGSHeadPart))
-	{
-		tList<BGSHeadPart>::_Node* _nod;
-		tList<BGSHeadPart>::Iterator iter(npc->headPart,hp);
-		if (_nod = iter.GetNode())
-		{
-			_nod->RemoveMe();
-			if (IsConsoleMode())
-				Console_Print("success");
-		}
-
-	}
-	return true;
-}
-
-
