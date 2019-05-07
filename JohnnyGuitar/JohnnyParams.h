@@ -14,7 +14,7 @@ ParamInfo kParamsJohnnyOneStringOneOptionalObjectID[2] =
 };
 
 
-static ParamInfo kParamsJohnny_OneString_OneInt[] =
+ ParamInfo kParamsJohnny_OneString_OneInt[2] =
 {
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 0 },

@@ -2,7 +2,6 @@
 #pragma once
 
 NVSEArrayVarInterface *ArrIfc = NULL;
-//PlayerCharacter *thePlayer = *(PlayerCharacter**) 0x011DEA3C;
 NVSEStringVarInterface *StrIfc = NULL;
 NVSEMessagingInterface *g_msg = NULL;
 NVSEScriptInterface *g_script = NULL;

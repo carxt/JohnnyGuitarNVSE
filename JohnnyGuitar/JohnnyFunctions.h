@@ -31,7 +31,7 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 		}
 		NiPointAssign(xIn, yIn, zIn);
 		float xOut = 0, yOut = 0, zOut = 0, outOfX = 0, outOfY = 0;
-		*result = (WorldPtToScreenPt3Alt(NiPointBuffer, xOut, yOut, zOut, HandleType) ? 1 : 0);
+		*result = (WorldToScreen(NiPointBuffer, xOut, yOut, zOut, HandleType) ? 1 : 0);
 		setVarByName(PASS_VARARGS, X_outS, xOut);
 		setVarByName(PASS_VARARGS, Y_outS, yOut);
 		setVarByName(PASS_VARARGS, Z_outS, zOut);
@@ -40,5 +40,3 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 }
 
 
-
-//This two are weird experiments that I won't check right now.

@@ -1,8 +1,5 @@
 #pragma once
 
-//CMD BULLSHIT
-
-
 //Ni BULLSHIT
 
 
@@ -14,7 +11,7 @@ struct NiPoint3
 };
 
 
-struct NiCameraAF
+struct NiCameraAlt //Defined here because the one in NVSE is wrong.
 {
 	UInt8			undefinedDataStruct[156];
 	float			m_aafWorldToCam[4][4];	// 09C
@@ -29,10 +26,8 @@ struct NiCameraAF
 
 __forceinline void FOVCorrection(float &xOut, float &yOut, float &zOut)
 {
-	//UInt8* p_isThirdPerson = (UInt8*)((*(UInt32*)0x11DEA3C) + 0x64A;
-	//float* p_WorldFOV = (float *)((*(UInt32 *)0x11DEA3C) + 0x670;
+
 	UInt32 PlayerAddress = *(UInt32 *)0x11DEA3C;
-	//float* p_1stPersonFOV = (float *)((*(UInt32 *)0x11DEA3C) + 0x674;
 	float fmult = 1;
 	if (((*(UInt8*)(PlayerAddress + 0x64A)) == 0)) {
 
@@ -44,7 +39,7 @@ __forceinline void FOVCorrection(float &xOut, float &yOut, float &zOut)
 }
 
 
-bool __fastcall W2S3AltEX(NiCameraAF* cam, NiPoint3* kPt, float &fBx, float &fBy,
+bool __fastcall WorldToScreenPoint3(NiCameraAlt* cam, NiPoint3* kPt, float &fBx, float &fBy,
 	float &fBz, float fZeroTolerance, float HandleType)
 {
 	bool st = false;
@@ -125,14 +120,11 @@ bool __fastcall W2S3AltEX(NiCameraAF* cam, NiPoint3* kPt, float &fBx, float &fBy
 
 
 
-
-
-
 NiPoint3* NiPointBuffer = NULL;
 
-__forceinline bool WorldPtToScreenPt3Alt(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, float HandleType, float zeroTolerance = 0.0000099999997)
+__forceinline bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, float HandleType, float zeroTolerance = 0.0000099999997)
 {
-	return W2S3AltEX((NiCameraAF*)(*(UInt32*)((*(UInt32*)0x11DEB7C) + 0xAC)), p_in, x_out, y_out, z_out, zeroTolerance, HandleType);
+	return WorldToScreenPoint3((NiCameraAlt*)(*(UInt32*)((*(UInt32*)0x11DEB7C) + 0xAC)), p_in, x_out, y_out, z_out, zeroTolerance, HandleType);
 
 }
 
