@@ -1,0 +1,4 @@
+LIBRARY	"JohnnyGuitarNVSE"
+EXPORTS
+NVSEPlugin_Query
+NVSEPlugin_Load

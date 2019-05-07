@@ -1,0 +1,80 @@
+#pragma once
+#define VarNameSize 64
+DEFINE_COMMAND_PLUGIN(WorldToScreen, , 0, 8, kParamsProjectionArgs);
+
+
+__forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
+{
+	NiPointBuffer->x = xIn;
+	NiPointBuffer->y = yIn;
+	NiPointBuffer->z = zIn;
+}
+
+
+
+
+
+bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
+{
+
+	*result = 0;
+	float xIn = 0, yIn = 0, zIn = 0;
+	UInt32 HandleType = 0;
+	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
+	TESObjectREFR* refr = NULL;
+
+	if (ExtractArgs(EXTRACT_ARGS, &X_outS, &Y_outS, &Z_outS, &xIn, &yIn, &zIn, &HandleType, &refr))
+	{
+		if (refr)
+		{
+			xIn += refr->posX; yIn += refr->posY; zIn += refr->posZ;
+		}
+		NiPointAssign(xIn, yIn, zIn);
+		float xOut = 0, yOut = 0, zOut = 0, outOfX = 0, outOfY = 0;
+		*result = (WorldPtToScreenPt3Alt(NiPointBuffer, xOut, yOut, zOut, HandleType) ? 1 : 0);
+		setVarByName(PASS_VARARGS, X_outS, xOut);
+		setVarByName(PASS_VARARGS, Y_outS, yOut);
+		setVarByName(PASS_VARARGS, Z_outS, zOut);
+		}
+	return true;
+}
+
+
+
+//This two are weird experiments that I won't check right now.
+
+bool Cmd_AddHeadPart_Execute(COMMAND_ARGS)
+{
+	BGSHeadPart* hp;
+	TESNPC* npc;
+	if (ExtractArgs(EXTRACT_ARGS, &npc, &hp)  && IS_TYPE(npc, TESNPC) && IS_TYPE(hp, BGSHeadPart))
+	{
+		tList<BGSHeadPart>::_Node* _nod;
+		tList<BGSHeadPart>::Iterator iter(npc->headPart, hp);
+		if (_nod = iter.GetNode())return true;
+		npc->headPart.AddAt(hp, eListEnd);
+		if (IsConsoleMode())
+			Console_Print("success");
+	}
+	return true;
+}
+bool Cmd_RemoveHeadPart_Execute(COMMAND_ARGS)
+{
+	BGSHeadPart* hp;
+	TESNPC* npc;
+	if (ExtractArgs(EXTRACT_ARGS, &npc, &hp) && IS_TYPE(npc, TESNPC) && IS_TYPE(hp, BGSHeadPart))
+	{
+		tList<BGSHeadPart>::_Node* _nod;
+		tList<BGSHeadPart>::Iterator iter(npc->headPart,hp);
+		if (_nod = iter.GetNode())
+		{
+			_nod->RemoveMe();
+			if (IsConsoleMode())
+				Console_Print("success");
+		}
+
+	}
+	return true;
+}
+
+
