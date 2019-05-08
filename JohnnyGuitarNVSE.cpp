@@ -22,9 +22,22 @@ HMODULE JohnnyHandle;
 IDebugLog		gLog;
 int J_bRemoveRedOutline = 0;
 int J_bRemoveTags = 0;	
-//char inifile[] = "Data\\nvse\\plugins\\JohnnyGuitar.ini";
-//PluginHandle	g_pluginHandle = kPluginHandle_Invalid;
-//NVSEScriptInterface* g_script;
+
+
+void MessageHandler(NVSEMessagingInterface::Message* msg)
+{
+	
+	switch (msg->type)
+	{
+
+	case NVSEMessagingInterface::kMessage_NewGame:
+	case NVSEMessagingInterface::kMessage_PostLoadGame:
+		isShowLevelUp = true;
+		break;
+	}
+
+}
+
 extern "C"{
 bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 {
@@ -73,32 +86,21 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 
 bool NVSEPlugin_Load(const NVSEInterface * nvse)
 {
-
+	((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
 	NiPointBuffer = (NiPoint3*) malloc(sizeof(NiPoint3));
 	char filename[MAX_PATH];
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini)");
-	/*if (nvse->isEditor)*/ 
-	/*J_bRemoveRedOutline = GetPrivateProfileIntA("Main", "bRemoveRedOutlines", 0, filename) ? 1 : 0;
-	J_bRemoveTags = GetPrivateProfileIntA("Main", "bRemoveTags", 0, filename);
-	InitPatches(nvse, J_bRemoveRedOutline, J_bRemoveTags);*/
 	nvse->SetOpcodeBase(0x3100);
 	REG_CMD(WorldToScreen);
-
-
-	//REG_TYPED_CMD(WeirdProjectionShitFromRef, Array);
-	//InitializeCriticalSection(&GeneralCS);
-//	REG_CMD(PrintStuff);
-	//REG_CMD(DebugArmorJ);
+	REG_CMD(ToggleLevelUpMenu);
+	REG_CMD(IsLevelUpMenuEnabled);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
-	//REG_CMD(SetHeightAlt);
-	//nvse->RegisterTypedCommand(&kCommandInfo_CustomArrayElement, kRetnType_Array);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
-	_MESSAGE("Address patched: 0x%X", (((*(UInt32*)0x5ACCD5) + 0x5ACCD9) + 0x3E));
-
+	if (!nvse->isEditor)	HandleGameHooks();
 	return true;
 }
 	BOOL WINAPI DllMain(
