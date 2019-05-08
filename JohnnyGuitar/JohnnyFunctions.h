@@ -1,6 +1,8 @@
 #pragma once
 #define VarNameSize 64
 DEFINE_COMMAND_PLUGIN(WorldToScreen, , 0, 8, kParamsProjectionArgs);
+DEFINE_COMMAND_PLUGIN(ToggleLevelUpMenu, , 0, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, NULL);
 
 
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
@@ -11,7 +13,17 @@ __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 }
 
 
+bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS)
+{
+	ExtractArgs(EXTRACT_ARGS, &isShowLevelUp);
+	return true;
+}
 
+bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS)
+{
+	*result = isShowLevelUp;
+	return true;
+}
 
 
 bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
