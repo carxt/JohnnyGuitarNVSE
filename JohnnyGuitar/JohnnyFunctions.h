@@ -18,6 +18,8 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 	TESObjectCELL *cell = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &cell) && IS_TYPE(cell, TESObjectCELL)) {
 		*result = HasSeenData(cell);
+		if (IsConsoleMode())
+			Console_Print("IsCellVisited >> %.0f", *result);
 	}
 	return true;
 }
