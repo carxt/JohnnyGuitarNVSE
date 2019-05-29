@@ -5,13 +5,22 @@ DEFINE_COMMAND_PLUGIN(ToggleLevelUpMenu, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetBaseEffectAV, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetBaseEffectArchetype, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(IsCellVisited, , 0, 1, kParams_OneForm);
+
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 {
 	NiPointBuffer->x = xIn;
 	NiPointBuffer->y = yIn;
 	NiPointBuffer->z = zIn;
 }
-
+bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectCELL *cell = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &cell) && IS_TYPE(cell, TESObjectCELL)) {
+		*result = HasSeenData(cell);
+	}
+	return true;
+}
 
 bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS)
 {
@@ -65,5 +74,3 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 		}
 	return true;
 }
-
-
