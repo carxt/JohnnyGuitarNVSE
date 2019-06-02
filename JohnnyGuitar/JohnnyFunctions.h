@@ -6,7 +6,7 @@ DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetBaseEffectAV, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetBaseEffectArchetype, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(IsCellVisited, , 0, 1, kParams_OneForm);
-
+DEFINE_COMMAND_PLUGIN(IsCellExpired, , 0, 1, kParams_OneForm);
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 {
 	NiPointBuffer->x = xIn;
@@ -22,6 +22,27 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 			Console_Print("IsCellVisited >> %.0f", *result);
 	}
 	return true;
+}
+
+bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectCELL *cell = NULL;
+	float hoursToRespawn = 0;
+	float detachTime = 0;
+	float gameHoursPassed = 0;
+		if (ExtractArgs(EXTRACT_ARGS, &cell) && IS_TYPE(cell, TESObjectCELL)) {
+		detachTime = GetDetachTime(cell);
+		if (detachTime == 0) *result = -1;
+		else if (detachTime == -1) *result = 1;
+		else { 
+			hoursToRespawn = GetHoursToRespawn();
+			gameHoursPassed = GetHoursPassed((UInt32*)0x11DE7B8);
+			if ((gameHoursPassed - detachTime) > hoursToRespawn) *result = 1;
+		}
+		if (IsConsoleMode())
+			Console_Print("IsCellExpired >> %.0f", *result);
+	}
+	return true; 
 }
 
 bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS)

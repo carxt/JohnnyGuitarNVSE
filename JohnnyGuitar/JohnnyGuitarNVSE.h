@@ -28,7 +28,32 @@ __declspec(naked) bool __fastcall HasSeenData(TESObjectCELL *cell) {
 		retn
 	}
 }
-
+__declspec(naked) SInt32 __fastcall GetDetachTime(TESObjectCELL *cell) {
+	__asm {
+		push	kExtraData_DetachTime
+		add		ecx, 0x28
+		call	BaseExtraList::GetByType
+		test	eax, eax
+		jz done
+		mov eax, [eax+0xC]
+		done:
+			retn
+	}
+}
+// returns daysPassed times 24 and floored
+__declspec(naked) UInt32 __fastcall GetHoursPassed(UInt32 *gameTimeGlobal) {
+	static const UInt32 procAddr = 0x867E30;
+	__asm {
+		jmp procAddr
+	}
+}
+// checks gmst
+__declspec(naked) UInt32 GetHoursToRespawn() {
+	static const UInt32 procAddr = 0x526100;
+	__asm {
+		jmp procAddr
+	}
+}
 _declspec(naked) void LevelUpHook() {
 	static const UInt32 noShowAddr = 0x77D903;
 	static const UInt32 showAddr = 0x77D618;

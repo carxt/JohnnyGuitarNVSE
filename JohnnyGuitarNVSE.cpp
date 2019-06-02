@@ -97,6 +97,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(GetBaseEffectAV);
 	REG_CMD(GetBaseEffectArchetype);
 	REG_CMD(IsCellVisited);
+	REG_CMD(IsCellExpired);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
