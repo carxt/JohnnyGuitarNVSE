@@ -10,6 +10,7 @@
 #include "nvse/GameRTTI.h"
 #include "nvse/GameOSDepend.h"
 #include "nvse/GameUI.h"
+#include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
 #include "nvse/NiObjects.h"
 #include "JohnnyGuitar/misc.h"
@@ -17,7 +18,8 @@
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
 #include "JohnnyGuitar/JohnnyParams.h"
 #include "JohnnyGuitar/JohnnyFunctions.h"
-
+#include "JohnnyGuitar/md5/md5.h"
+#include "JohnnyGuitar/sha1/sha1.h"
 HMODULE JohnnyHandle;
 IDebugLog		gLog;
 int J_bRemoveRedOutline = 0;
@@ -98,6 +100,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(GetBaseEffectArchetype);
 	REG_CMD(IsCellVisited);
 	REG_CMD(IsCellExpired);
+	REG_CMD(MD5File);
+	REG_CMD(SHA1File);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

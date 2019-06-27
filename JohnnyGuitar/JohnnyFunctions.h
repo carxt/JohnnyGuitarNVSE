@@ -7,11 +7,45 @@ DEFINE_COMMAND_PLUGIN(GetBaseEffectAV, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetBaseEffectArchetype, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(IsCellVisited, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(IsCellExpired, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(MD5File, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(SHA1File, , 0, 1, kParams_OneString);
+#include "JohnnyGuitar\md5\md5.h"
+#include "JohnnyGuitar\sha1\sha1.h"
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 {
 	NiPointBuffer->x = xIn;
 	NiPointBuffer->y = yIn;
 	NiPointBuffer->z = zIn;
+}
+
+bool Cmd_MD5File_Execute(COMMAND_ARGS) {
+	char filename[MAX_PATH];
+	GetModuleFileNameA(NULL, filename, MAX_PATH);
+	char path[MAX_PATH];
+	char outHash[0x10];
+	if (ExtractArgs(EXTRACT_ARGS, &path)) {
+		strcpy((char *)(strrchr(filename, '\\') + 1), path);
+		MD5::GetMD5File(filename, outHash);
+		if (IsConsoleMode())
+			Console_Print(outHash);
+		StrIfc->Assign(PASS_COMMAND_ARGS, outHash);
+	}
+	return true;
+}
+
+bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
+	char filename[MAX_PATH];
+	GetModuleFileNameA(NULL, filename, MAX_PATH);
+	char path[MAX_PATH];
+	char outHash[0x14];
+	if (ExtractArgs(EXTRACT_ARGS, &path)) {
+		strcpy((char *)(strrchr(filename, '\\') + 1), path);
+		SHA1::GetSHA1File(filename, outHash);
+		if (IsConsoleMode())
+			Console_Print(outHash);
+		StrIfc->Assign(PASS_COMMAND_ARGS, outHash);
+	}
+	return true;
 }
 bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -97,3 +131,6 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 		}
 	return true;
 }
+
+
+
