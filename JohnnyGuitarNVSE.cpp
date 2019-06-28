@@ -100,8 +100,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(GetBaseEffectArchetype);
 	REG_CMD(IsCellVisited);
 	REG_CMD(IsCellExpired);
-	REG_CMD(MD5File);
-	REG_CMD(SHA1File);
+	REG_TYPED_CMD(MD5File, String);
+	REG_TYPED_CMD(SHA1File, String);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
