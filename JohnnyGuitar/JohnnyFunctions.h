@@ -69,8 +69,8 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 		if (detachTime == 0) *result = -1;
 		else if (detachTime == -1) *result = 1;
 		else { 
-			hoursToRespawn = GetHoursToRespawn();
-			gameHoursPassed = GetHoursPassed((UInt32*)0x11DE7B8);
+			hoursToRespawn = (float)*(UInt32*)ThisStdCall(0x43D4D0, (char*)0x11CA160);
+			gameHoursPassed = (float)ThisStdCall(0x867E30, (UInt32*)0x11DE7B8);
 			if ((gameHoursPassed - detachTime) > hoursToRespawn) *result = 1;
 		}
 		if (IsConsoleMode())
