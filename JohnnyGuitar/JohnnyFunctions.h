@@ -9,8 +9,8 @@ DEFINE_COMMAND_PLUGIN(IsCellVisited, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(IsCellExpired, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(MD5File, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(SHA1File, , 0, 1, kParams_OneString);
-#include "JohnnyGuitar\md5\md5.h"
-#include "JohnnyGuitar\sha1\sha1.h"
+DEFINE_COMMAND_PLUGIN(TogglePipBoy, , 0, 1, kParams_OneOptionalInt);
+// DEFINE_COMMAND_PLUGIN(ShowPerkMenu, , 0, 0, NULL); TBD
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 {
 	NiPointBuffer->x = xIn;
@@ -18,14 +18,43 @@ __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 	NiPointBuffer->z = zIn;
 }
 
+/*bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS) {
+	InterfaceManager* g_interfaceManager = *(InterfaceManager **)0x011D8A80;
+	if (g_interfaceManager) {
+		ThisStdCall(0x784C80, NULL);
+		LevelUpMenu* g_levelUpMenu = *(LevelUpMenu **)0x11D9FDC;
+		if (g_levelUpMenu)
+			g_levelUpMenu->isPerkMenu = 0;
+			Tile::SetFloat(g_levelUpMenu->id)
+		ThisStdCall(0x785830, g_levelUpMenu, (SInt32)1);
+	}
+	return true;
+} */
+
+bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
+	int pipboyTab = 0;
+	ExtractArgs(EXTRACT_ARGS, &pipboyTab);
+	if (pipboyTab == 0 || pipboyTab == 1002 || pipboyTab == 1003 || pipboyTab == 1023) {
+		InterfaceManager* g_interfaceManager = *(InterfaceManager **)0x011D8A80;
+		if (g_interfaceManager) {
+			if (!g_interfaceManager->pipBoyMode)
+				ThisStdCall(0x70F4E0, g_interfaceManager, 0, pipboyTab);
+			else if (g_interfaceManager->pipBoyMode == 3)
+				ThisStdCall(0x70F690, g_interfaceManager, 0);
+			ThisStdCall(0x70EE80, g_interfaceManager);
+		}
+	}
+	return true;
+}
+
 bool Cmd_MD5File_Execute(COMMAND_ARGS) {
 	char filename[MAX_PATH];
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	char path[MAX_PATH];
-	char outHash[0x10];
+	char outHash[0x21];
 	if (ExtractArgs(EXTRACT_ARGS, &path)) {
 		strcpy((char *)(strrchr(filename, '\\') + 1), path);
-		MD5::GetMD5File(filename, outHash);
+		GetMD5File(filename, outHash);
 		if (IsConsoleMode())
 			Console_Print(outHash);
 		StrIfc->Assign(PASS_COMMAND_ARGS, outHash);
@@ -37,10 +66,10 @@ bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
 	char filename[MAX_PATH];
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	char path[MAX_PATH];
-	char outHash[0x14];
+	char outHash[0x29];
 	if (ExtractArgs(EXTRACT_ARGS, &path)) {
 		strcpy((char *)(strrchr(filename, '\\') + 1), path);
-		SHA1::GetSHA1File(filename, outHash);
+		GetSHA1File(filename, outHash);
 		if (IsConsoleMode())
 			Console_Print(outHash);
 		StrIfc->Assign(PASS_COMMAND_ARGS, outHash);

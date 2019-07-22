@@ -12,14 +12,11 @@
 #include "nvse/GameUI.h"
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
-#include "nvse/NiObjects.h"
 #include "JohnnyGuitar/misc.h"
 #include "JohnnyGuitar/WorldToScreen.h"
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
 #include "JohnnyGuitar/JohnnyParams.h"
 #include "JohnnyGuitar/JohnnyFunctions.h"
-#include "JohnnyGuitar/md5/md5.h"
-#include "JohnnyGuitar/sha1/sha1.h"
 HMODULE JohnnyHandle;
 IDebugLog		gLog;
 int J_bRemoveRedOutline = 0;
@@ -102,6 +99,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(IsCellExpired);
 	REG_TYPED_CMD(MD5File, String);
 	REG_TYPED_CMD(SHA1File, String);
+	REG_CMD(TogglePipBoy);
+//	REG_CMD(ShowPerkMenu); TBD
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

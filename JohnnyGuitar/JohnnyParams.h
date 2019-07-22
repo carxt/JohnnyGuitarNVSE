@@ -61,3 +61,10 @@ ParamInfo kParamsJohnny_TwoForms[2] =
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "form",	kParamType_AnyForm,	0 },
 };
+
+ParamInfo kParamsJohnny_TwoStrings_OneInt[3] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "string",	kParamType_String,	0 },
+	{ "Integer", kParamType_Integer, 0 },
+};

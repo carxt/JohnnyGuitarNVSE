@@ -16,7 +16,6 @@ char* StrArgBuf;
 #define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 IDebugLog ParamLog;
-
 __declspec(naked) bool __fastcall HasSeenData(TESObjectCELL *cell) {
 	__asm {
 		push	kExtraData_SeenData
