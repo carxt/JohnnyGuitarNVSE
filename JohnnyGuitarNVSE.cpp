@@ -7,6 +7,7 @@
 #include "nvse/GameForms.h"
 #include "nvse/GameExtraData.h"
 #include "nvse/GameTasks.h"
+#include "nvse/GameProcess.h"
 #include "nvse/GameRTTI.h"
 #include "nvse/GameOSDepend.h"
 #include "nvse/GameUI.h"
@@ -17,7 +18,7 @@
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
 #include "JohnnyGuitar/JohnnyParams.h"
 #include "JohnnyGuitar/JohnnyFunctions.h"
-
+#include "internal/decoding.h"
 HMODULE JohnnyHandle;
 IDebugLog		gLog;
 int J_bRemoveRedOutline = 0;
@@ -44,7 +45,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 1;
+	info->version = 2;
 
 	if (nvse->isNogore) 
 	{
@@ -101,16 +102,25 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_TYPED_CMD(MD5File, String);
 	REG_TYPED_CMD(SHA1File, String);
 	REG_CMD(TogglePipBoy);
+//	REG_CMD(ShowPerkMenu); TBD
+	REG_CMD(GetCalculatedWeaponDPS);
+	REG_CMD(GetInteriorLightingTraitNumeric);
+	REG_CMD(SetInteriorLightingTraitNumeric);
 	REG_CMD(GetPixelFromBMP);
 	REG_TYPED_CMD(GetWorldSpaceMapTexture, String);
-	//	REG_CMD(ShowPerkMenu); TBD
-
+	REG_CMD(Jump);
+	REG_CMD(SetCameraShake);
+	REG_CMD(StopVATSCam);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
-	if (!nvse->isEditor)	HandleGameHooks();
+	if (!nvse->isEditor) {
+		NVSEDataInterface *nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
+		InventoryRefGetForID = (InventoryRef* (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
+		HandleGameHooks();
+	}
 	return true;
 }
 	BOOL WINAPI DllMain(

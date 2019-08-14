@@ -85,7 +85,7 @@ public:
 	TileText *tile40;
 	TileImage *tile44;
 	TileImage *tile48;
-	TileImage *tile4C;
+	TileImage *tileBackBtn;
 	TileImage *tile50;
 	UInt32 unk54;
 	UInt32 unk58;
@@ -95,7 +95,45 @@ public:
 	UInt32 listBoxPerk[12];
 	UInt32 unkC4[2];
 };
+struct ItemEntryData
+{
+	TESForm				*type;
+	ContChangesEntry	*entry;
+	ExtraDataList		*xData;
 
+	ItemEntryData() {}
+	ItemEntryData(TESForm *_type, ContChangesEntry *_entry, ExtraDataList *_xData) : type(_type), entry(_entry), xData(_xData) {}
+};
+class InventoryRef
+{
+public:
+	ItemEntryData	data;
+	TESObjectREFR	*containerRef;
+	TESObjectREFR	*tempRef;
+	UInt32			deferredActions[6];
+	bool			doValidation;
+	bool			removed;
+
+	bool CreateExtraData(BSExtraData *xBSData);
+};
+
+bool InventoryRef::CreateExtraData(BSExtraData *xBSData)
+{
+	ExtraContainerChanges::EntryDataList *entryList = containerRef->GetContainerChangesList();
+	if (!entryList) return false;
+	ContChangesEntry *entry = entryList->FindForItem(data.type);
+	if (!entry) return false;
+	data.xData = ExtraDataList::Create(xBSData);
+	if (!entry->extendData)
+	{
+		entry->extendData = (ExtraContainerChanges::ExtendDataList*)GameHeapAlloc(8);
+		entry->extendData->Init();
+	}
+	entry->extendData->Insert(data.xData);
+	return true;
+}
+
+InventoryRef* (*InventoryRefCreate)(TESObjectREFR *container, const ItemEntryData &data, bool bValidate);
 
 //Only ready for a 24-bit BMP, will check for non-24 bit later.
 //Also currently doesn't handle negative height/width BMPs, will fix later
