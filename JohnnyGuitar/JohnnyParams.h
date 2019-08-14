@@ -68,3 +68,16 @@ ParamInfo kParamsJohnny_TwoStrings_OneInt[3] =
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 0 },
 };
+
+ParamInfo kParamsBMPArgs[6] =
+{
+	{ "filename", kParamType_String, 0 },
+	{ "R_Out", kParamType_String, 0 },
+	{ "G_Out", kParamType_String, 0 },
+	{ "B_Out", kParamType_String, 0 },
+	{ "INT", kParamType_Integer, 0 },
+	{ "INT", kParamType_Integer, 0 },
+
+};
+
+
