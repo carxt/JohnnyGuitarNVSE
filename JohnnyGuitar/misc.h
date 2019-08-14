@@ -97,4 +97,29 @@ public:
 };
 
 
+//Only ready for a 24-bit BMP, will check for non-24 bit later.
+//Also currently doesn't handle negative height/width BMPs, will fix later
+bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long& B, unsigned long PixelW, unsigned long PixelH)
+{
+	FILE* f = fopen(filename, "rb");
 
+	if (f == NULL)
+		return false;
+	char info[54];
+	fread(info, sizeof(char), 54, f);
+	int width = *(int*)& info[18];
+	int height = *(int*)& info[22];
+	if (width < PixelW || height < PixelH) return false;
+	int XPadding = (width * 3 + 3) & (~3);
+	char* data = new char[XPadding];
+	PixelH = height - PixelH;
+	fseek(f, XPadding * PixelH, SEEK_CUR);
+	fread(data, sizeof(char), XPadding, f);
+	UInt32 PosX = PixelW * 3;
+	B = data[PosX];
+	G = data[PosX + 1];
+	R = data[PosX + 2];
+	fclose(f);
+	delete data;
+	return true;
+}

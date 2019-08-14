@@ -10,6 +10,9 @@ DEFINE_COMMAND_PLUGIN(IsCellExpired, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(MD5File, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(SHA1File, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(TogglePipBoy, , 0, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetPixelFromBMP, , 0, 6, kParamsBMPArgs);
+DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , 0, 1, kParams_OneForm);
+
 // DEFINE_COMMAND_PLUGIN(ShowPerkMenu, , 0, 0, NULL); TBD
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 {
@@ -17,7 +20,6 @@ __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 	NiPointBuffer->y = yIn;
 	NiPointBuffer->z = zIn;
 }
-
 /*bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS) {
 	InterfaceManager* g_interfaceManager = *(InterfaceManager **)0x011D8A80;
 	if (g_interfaceManager) {
@@ -86,6 +88,7 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 
 bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -163,3 +166,34 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 
 
 
+bool Cmd_GetPixelFromBMP_Execute(COMMAND_ARGS) {
+	char filename[MAX_PATH];
+	GetModuleFileNameA(NULL, filename, MAX_PATH);
+	char path[MAX_PATH];
+	char RED[VarNameSize], GREEN[VarNameSize], BLUE[VarNameSize];
+	UInt32 width = 0, height = 0;
+
+	if (ExtractArgs(EXTRACT_ARGS, &path, &RED, &GREEN, &BLUE, &width, &height)) {
+		strcpy((char*)(strrchr(filename, '\\') + 1), path);
+		UInt32 R = 0, G = 0, B = 0;
+		if (ReadBMP24(filename, R, G, B, width, height));
+		setVarByName(PASS_VARARGS, RED, R);
+		setVarByName(PASS_VARARGS, GREEN, G);
+		setVarByName(PASS_VARARGS, BLUE, B);
+	}
+	return true;
+}
+
+
+bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESWorldSpace* worlspace = NULL;
+	char path[MAX_PATH];
+	if (ExtractArgs(EXTRACT_ARGS, &worlspace) && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.m_data)) {
+		strcpy(path, worlspace->texture.ddsPath.m_data);
+		StrIfc->Assign(PASS_COMMAND_ARGS, path);
+		if (IsConsoleMode())
+			Console_Print("GetWorldSpaceMapTexture >> %s", path);
+	}
+	return true;
+}
