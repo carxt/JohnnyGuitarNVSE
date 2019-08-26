@@ -9,12 +9,12 @@ ParamInfo kParamsJohnnyAnyExpr[1] =
 
 ParamInfo kParamsJohnnyOneStringOneOptionalObjectID[2] =
 {
-	{ "String", kParamType_String, 0},
+	{ "String", kParamType_String, 0 },
 	{ "ObjectID",	kParamType_ObjectID, 1 },
 };
 
 
- ParamInfo kParamsJohnny_OneString_OneInt[2] =
+ParamInfo kParamsJohnny_OneString_OneInt[2] =
 {
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 0 },
@@ -62,6 +62,16 @@ ParamInfo kParamsJohnny_TwoForms[2] =
 	{ "form",	kParamType_AnyForm,	0 },
 };
 
+ParamInfo kParamsJohnny_OneIMOD[1] =
+{
+	{ "IMOD",	kParamType_ImageSpaceModifier,	0 },
+};
+
+ParamInfo kParamsJohnny_OneIMOD_OneInt[2] =
+{
+	{ "IMOD",	kParamType_ImageSpaceModifier,	0 },
+	{ "int",	kParamType_Integer, 0 },
+};
 ParamInfo kParamsJohnny_TwoStrings_OneInt[3] =
 {
 	{ "string",	kParamType_String,	0 },

@@ -19,7 +19,7 @@ char* StrArgBuf;
 #define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 IDebugLog ParamLog;
-
+bool loadEditorIDs = 0;
 __declspec(naked) bool __fastcall HasSeenData(TESObjectCELL *cell) {
 	__asm {
 		push	kExtraData_SeenData
@@ -117,12 +117,42 @@ _declspec(naked) void PerkMenuHook() {
 		jmp noBackBtnAddr
 	}
 }
+__declspec(naked) void GetFullTypeNameHook() {
+	__asm jmp TESForm::hk_GetFullTypeName
+}
+__declspec(naked) void GetNameHook() {
+	__asm jmp TESForm::hk_GetName
+}
+__declspec(naked) void GetRefNameHook() {
+	__asm jmp TESObjectREFR::hk_GetName
+}
+__declspec(naked) void SetEditorIdHook() {
+	__asm jmp TESForm::hk_SetEditorId
+}
+
+void LoadEditorIDs() {
+	for (uint32_t i = 0; i < ARRAYSIZE(TESForm_Vtables); i++)
+	{
+		// Sanity check, certain ones like TESObjectCELL shouldn't be hooked
+		if (*(uintptr_t *)(TESForm_Vtables[i] + 0x90) == 0x004868F0)
+			SafeWrite32(TESForm_Vtables[i] + 0x90, (UInt32)GetFullTypeNameHook);
+
+		if (*(uintptr_t *)(TESForm_Vtables[i] + 0x130) == 0x00401280)
+			SafeWrite32(TESForm_Vtables[i] + 0x130, (UInt32)GetNameHook);
+
+		if (*(uintptr_t *)(TESForm_Vtables[i] + 0x130) == 0x0055D480)
+			SafeWrite32(TESForm_Vtables[i] + 0x130, (UInt32)GetRefNameHook);
+
+		if (*(uintptr_t *)(TESForm_Vtables[i] + 0x134) == 0x00401290)
+			SafeWrite32(TESForm_Vtables[i] + 0x134, (UInt32)SetEditorIdHook);
+	}
+}
 void HandleGameHooks()
 {
 	WriteRelJump(0x77D612, UInt32(LevelUpHook));
-//	WriteRelJump(0x785D18, UInt32(PerkMenuHook)); TBD
+	//	WriteRelJump(0x785D18, UInt32(PerkMenuHook)); TBD
+	if (loadEditorIDs) LoadEditorIDs();
 }
-
 static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 {
 	DWORD d = 0;

@@ -19,12 +19,107 @@ DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(Jump, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(StopVATSCam, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCameraShake, , 0, 2, kParams_TwoFloats);
+DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 0, 2, kParamsJohnny_TwoForms);
+DEFINE_COMMAND_PLUGIN(GetIMODAnimatable, , 0, 1, kParamsJohnny_OneIMOD);
+DEFINE_COMMAND_PLUGIN(SetIMODAnimatable, , 0, 2, kParamsJohnny_OneIMOD_OneInt);
+DEFINE_COMMAND_PLUGIN(GetEditorID, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(GetJohnnyPatch, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(SetVelEx, , 1, 3, kParamsJohnnyThreeFloats);
 #include "internal/decoding.h"
+
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 {
 	NiPointBuffer->x = xIn;
 	NiPointBuffer->y = yIn;
 	NiPointBuffer->z = zIn;
+}
+
+bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
+	NiPoint3 Point;
+	if (ExtractArgs(EXTRACT_ARGS, &(Point.x), &(Point.y), &(Point.z))) 
+		((void(__cdecl*)(NiNode*, NiPoint3*, int))(0x62B8D0))(thisObj->GetNiNode(), &Point, 1);
+	return true;
+}
+
+bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS)
+{
+	bool enabled = false;
+	if (ExtractArgs(EXTRACT_ARGS, StrArgBuf))
+	{
+		if (!strcmp(StrArgBuf, "bLoadEditorIDs")) {
+			enabled = loadEditorIDs;	
+		}
+		if (IsConsoleMode())
+			Console_Print("GetJohnnyPatch %s >> %d", StrArgBuf, enabled);
+	}
+	*result = enabled;
+	return true;
+}
+
+bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
+	TESForm *form;
+	const char* edid;
+	if (ExtractArgs(EXTRACT_ARGS, &form)) { 
+	//	(IS_TYPE(form, TESWeather) || IS_TYPE(form, TESImageSpace) || IS_TYPE(form, TESImageSpaceModifier))) {
+		edid = form->hk_GetName();
+		StrIfc->Assign(PASS_COMMAND_ARGS, edid);
+		if (IsConsoleMode())
+			Console_Print("GetEditorID >> %s", edid);
+	}
+	return true;
+}
+
+bool Cmd_GetIMODAnimatable_Execute(COMMAND_ARGS) {
+	TESImageSpaceModifier *imod;
+	if (ExtractArgs(EXTRACT_ARGS, &imod)) {
+		*result = imod->animable;
+		if (IsConsoleMode())
+			Console_Print("GetIMODAnimatable >> %.f", *result);
+	}
+	return true;
+}
+
+bool Cmd_SetIMODAnimatable_Execute(COMMAND_ARGS) {
+	TESImageSpaceModifier *imod;
+	int newVal = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &imod, &newVal) && (newVal == 0 || newVal == 1)) {
+		imod->animable = newVal;
+		if (IsConsoleMode())
+			Console_Print("SetIMODAnimatable >> %d", imod->animable);
+	}
+	return true;
+}
+
+bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
+	TESObjectREFR* stolenItem;
+	TESObjectREFR* owner;
+	if (ExtractArgs(EXTRACT_ARGS, &owner, &stolenItem)) {
+		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
+		ThisStdCall(0x8BFA40, g_thePlayer, owner, owner, stolenItem->baseForm, 1, 1, owner);
+		Console_Print("done");
+	}
+	return true;
+}
+bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
+	AlchemyItem *poison;
+	if (ExtractArgs(EXTRACT_ARGS, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {
+		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
+		ContChangesEntry *wpnInfo = g_thePlayer->baseProcess->GetWeaponInfo();
+		if (wpnInfo && wpnInfo->extendData)
+		{
+			UInt32 weaponSkill = ((TESObjectWEAP*)wpnInfo->type)->weaponSkill;
+			if (weaponSkill != kAVCode_Unarmed && weaponSkill != kAVCode_MeleeWeapons) return true;
+			ExtraDataList *xDataList = wpnInfo->extendData->GetFirstItem();
+			if (xDataList)
+			{
+				ExtraPoison *xPoison = GetExtraType((*xDataList), Poison);
+				if (!xPoison)
+					ThisStdCall(0x4BDD20, wpnInfo, poison); // ContChangesEntry::AddExtraPoison
+			}
+		}
+	}
+	return true;
 }
 
 bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS) {
@@ -136,7 +231,6 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-
 
 bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	*result = 0;

@@ -18,6 +18,7 @@
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
 #include "JohnnyGuitar/JohnnyParams.h"
 #include "JohnnyGuitar/JohnnyFunctions.h"
+#include "EditorIDs.h"
 #include "internal/decoding.h"
 HMODULE JohnnyHandle;
 IDebugLog		gLog;
@@ -90,8 +91,13 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	NiPointBuffer = (NiPoint3*) malloc(sizeof(NiPoint3));
 	char filename[MAX_PATH];
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
-	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini)");
+	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
+	loadEditorIDs = GetPrivateProfileInt("MAIN", "bLoadEditorIDs", 0, filename);
 	nvse->SetOpcodeBase(0x3100);
+	//  TBD
+	//	REG_CMD(ShowPerkMenu);
+	//	REG_CMD(ApplyWeaponPoison);
+	//	REG_CMD(SendStealingAlarm); 
 	REG_CMD(WorldToScreen);
 	REG_CMD(ToggleLevelUpMenu);
 	REG_CMD(IsLevelUpMenuEnabled);
@@ -102,7 +108,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_TYPED_CMD(MD5File, String);
 	REG_TYPED_CMD(SHA1File, String);
 	REG_CMD(TogglePipBoy);
-//	REG_CMD(ShowPerkMenu); TBD
 	REG_CMD(GetCalculatedWeaponDPS);
 	REG_CMD(GetInteriorLightingTraitNumeric);
 	REG_CMD(SetInteriorLightingTraitNumeric);
@@ -111,6 +116,11 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(Jump);
 	REG_CMD(SetCameraShake);
 	REG_CMD(StopVATSCam);
+	REG_CMD(GetIMODAnimatable);
+	REG_CMD(SetIMODAnimatable);
+	REG_TYPED_CMD(GetEditorID, String);
+	REG_CMD(GetJohnnyPatch);
+	REG_CMD(SetVelEx);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
