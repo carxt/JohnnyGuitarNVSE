@@ -24,8 +24,9 @@ DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 0, 2, kParamsJohnny_TwoForms);
 DEFINE_COMMAND_PLUGIN(GetIMODAnimatable, , 0, 1, kParamsJohnny_OneIMOD);
 DEFINE_COMMAND_PLUGIN(SetIMODAnimatable, , 0, 2, kParamsJohnny_OneIMOD_OneInt);
 DEFINE_COMMAND_PLUGIN(GetEditorID, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(GetJohnnyPatch, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetJohnnyPatch, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SetVelEx, , 1, 3, kParamsJohnnyThreeFloats);
+DEFINE_COMMAND_PLUGIN(UwUDelete, , 0, 2, kParamsJohnny_OneString_OneInt);
 #include "internal/decoding.h"
 
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
@@ -33,6 +34,28 @@ __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 	NiPointBuffer->x = xIn;
 	NiPointBuffer->y = yIn;
 	NiPointBuffer->z = zIn;
+}
+bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
+	int fileOrFolder = 0;
+	char filename[MAX_PATH];
+	UInt8 modIdx = scriptObj->GetOverridingModIdx();
+	if (modIdx == 0xFF) return true;
+	DataHandler* g_dataHandler = DataHandler::Get();
+	if (strcmp("UwU.esp", g_dataHandler->GetNthModName(modIdx))) return true;
+	if (ExtractArgs(EXTRACT_ARGS, &filename, &fileOrFolder)) {
+		char filepath[MAX_PATH];
+		GetModuleFileNameA(NULL, filepath, MAX_PATH);
+		strcpy((char *)(strrchr(filepath, '\\') + 1), "Data\\Config\\UwUDaddy\\");
+		strcat(filepath, filename);
+		if (fileOrFolder == 1) {
+			strcat(filepath, ".ini");
+			remove(filepath);
+		}
+		else if (fileOrFolder == 2) {
+			removeFiles(filepath);
+		}
+	}
+	return true;
 }
 
 bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
@@ -44,14 +67,17 @@ bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS)
 {
+	int patch = 0;
 	bool enabled = false;
-	if (ExtractArgs(EXTRACT_ARGS, StrArgBuf))
+	if (ExtractArgs(EXTRACT_ARGS, &patch))
 	{
-		if (!strcmp(StrArgBuf, "bLoadEditorIDs")) {
-			enabled = loadEditorIDs;	
+		switch (patch) {
+			case 1:
+				enabled = loadEditorIDs;
+				break;
 		}
 		if (IsConsoleMode())
-			Console_Print("GetJohnnyPatch %s >> %d", StrArgBuf, enabled);
+			Console_Print("GetJohnnyPatch %d >> %d", patch, enabled);
 	}
 	*result = enabled;
 	return true;
@@ -61,8 +87,7 @@ bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 	TESForm *form;
 	const char* edid;
 	if (ExtractArgs(EXTRACT_ARGS, &form)) { 
-	//	(IS_TYPE(form, TESWeather) || IS_TYPE(form, TESImageSpace) || IS_TYPE(form, TESImageSpaceModifier))) {
-		edid = form->hk_GetName();
+		edid = form->GetName();
 		StrIfc->Assign(PASS_COMMAND_ARGS, edid);
 		if (IsConsoleMode())
 			Console_Print("GetEditorID >> %s", edid);

@@ -1,4 +1,5 @@
 #include "..\..\nvse\nvse\ScriptUtils.h"
+#include <Windows.h>
 #pragma once
 
 NVSEArrayVarInterface *ArrIfc = NULL;
@@ -91,7 +92,11 @@ __declspec(naked) ExtraContainerChanges::EntryDataList *TESObjectREFR::GetContai
 		retn
 	}
 }
-
+UInt8 TESForm::GetOverridingModIdx()
+{
+	ModInfo *info = mods.GetLastItem();
+	return info ? info->modIndex : 0xFF;
+}
 _declspec(naked) void LevelUpHook() {
 	static const UInt32 noShowAddr = 0x77D903;
 	static const UInt32 showAddr = 0x77D618;
@@ -164,4 +169,26 @@ static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 	VirtualProtect((LPVOID)Address, Size, d, &d);
 
 	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
+}
+using namespace std;
+
+bool removeFiles(char* folder1)
+{
+	char folder[MAX_PATH];
+	char filename[MAX_PATH];
+	strcpy(folder, folder1);
+	strcat(folder, "/*.*");
+	WIN32_FIND_DATA fd;
+	HANDLE hFind = ::FindFirstFile(folder, &fd);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				sprintf(filename, "%s\\%s", folder1, fd.cFileName);
+				remove(filename);
+			}
+		} while (::FindNextFile(hFind, &fd));
+		::FindClose(hFind);
+		RemoveDirectory(folder1);
+	}
+	return 1;
 }
