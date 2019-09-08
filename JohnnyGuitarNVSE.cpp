@@ -122,6 +122,12 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(GetJohnnyPatch);
 	REG_CMD(SetVelEx);
 	REG_CMD(UwUDelete);
+	REG_CMD(GetMediaSetTraitNumeric);
+	REG_CMD(SetMediaSetTraitNumeric);
+	REG_TYPED_CMD(GetMediaSetTraitString, String);
+	REG_CMD(SetMediaSetTraitString);
+	REG_CMD(GetMediaSetTraitSound);
+	REG_CMD(SetMediaSetTraitSound);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

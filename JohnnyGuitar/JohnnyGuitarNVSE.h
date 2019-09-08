@@ -136,12 +136,9 @@ __declspec(naked) void SetEditorIdHook() {
 }
 
 void LoadEditorIDs() {
+	WriteRelCall(0x486903, (UInt32(GetNameHook))); // replaces empty string with editor id in GetDebugName
 	for (uint32_t i = 0; i < ARRAYSIZE(TESForm_Vtables); i++)
 	{
-		// Sanity check, certain ones like TESObjectCELL shouldn't be hooked
-		if (*(uintptr_t *)(TESForm_Vtables[i] + 0x90) == 0x004868F0)
-			SafeWrite32(TESForm_Vtables[i] + 0x90, (UInt32)GetFullTypeNameHook);
-
 		if (*(uintptr_t *)(TESForm_Vtables[i] + 0x130) == 0x00401280)
 			SafeWrite32(TESForm_Vtables[i] + 0x130, (UInt32)GetNameHook);
 

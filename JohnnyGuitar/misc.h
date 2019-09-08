@@ -95,6 +95,30 @@ public:
 	UInt32 listBoxPerk[12];
 	UInt32 unkC4[2];
 };
+struct MediaSetData
+{
+	String filepath; // NAM2 NAM3 NAM4 NAM5 NAM6 NAM7
+	float dB; // NAM8 NAM9 NAM0 ANAM BNAM CNAM
+	float boundary; // JNAM KNAM LNAM MNAM NNAM ONAM
+};
+
+class MediaSet : public TESForm {
+public:
+	MediaSet();
+	~MediaSet();
+	TESFullName	fullName;
+	UInt32 unk24[8];
+	UInt32 type; // NAM1
+	MediaSetData data[6];
+	UInt32 flags; //PNAM
+	float DNAM;
+	float ENAM;
+	float FNAM;
+	float GNAM;
+	TESSound *HNAM;
+	TESSound *INAM;
+};
+STATIC_ASSERT(sizeof(MediaSet) == 0xC4);
 struct ItemEntryData
 {
 	TESForm				*type;

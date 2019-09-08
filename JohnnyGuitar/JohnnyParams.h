@@ -26,6 +26,18 @@ ParamInfo kParamsJohnnyOneForm_OneInt_OneFloat[3] =
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Float", kParamType_Float, 0 }
 };
+ParamInfo kParamsJohnnyOneForm_OneInt_OneForm[3] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Form", kParamType_AnyForm, 0 }
+};
+ParamInfo kParamsJohnnyOneForm_OneInt_OneString[3] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "String", kParamType_String, 0 }
+};
 ParamInfo kParamsJohnnyOneOptionalFloat[1] =
 {
 	{ "Float", kParamType_Float, 1 },
