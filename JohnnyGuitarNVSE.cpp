@@ -128,6 +128,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetMediaSetTraitString);
 	REG_CMD(GetMediaSetTraitSound);
 	REG_CMD(SetMediaSetTraitSound);
+	REG_CMD(GetWeapon1stPersonModel);
+	REG_CMD(SetWeapon1stPersonModel);
+	REG_TYPED_CMD(GetBufferedCellsAlt, Array);
+	REG_CMD(GetTimePlayed);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

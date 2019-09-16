@@ -33,6 +33,10 @@ DEFINE_COMMAND_PLUGIN(GetMediaSetTraitString, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitNumeric, , 0, 3, kParamsJohnnyOneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitString, , 0, 3, kParamsJohnnyOneForm_OneInt_OneString);
+DEFINE_COMMAND_PLUGIN(SetWeapon1stPersonModel, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(GetWeapon1stPersonModel, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetBufferedCellsAlt, , 0, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
 #include "internal/decoding.h"
 
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
@@ -41,6 +45,122 @@ __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 	NiPointBuffer->y = yIn;
 	NiPointBuffer->z = zIn;
 }
+bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
+	int type = 0;
+	UInt32 tickCount;
+	ExtractArgs(EXTRACT_ARGS, &type);
+	PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
+	tickCount = ThisStdCall(0x457FE0, NULL);
+	double timePlayed = tickCount - g_thePlayer->unk774[6];
+	switch (type) {
+		case 0:
+			*result = timePlayed;
+			break;
+		case 1:
+			*result = timePlayed / 1000;
+			break;
+		case 2:
+			*result = timePlayed / 60000;
+			break;
+		}
+	if (IsConsoleMode()) {
+		Console_Print("%f", *result);
+	return true;
+	}
+
+}
+// JIP function with a sanity check to prevent errors
+bool Cmd_GetBufferedCellsAlt_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 interiors;
+	TES* g_TES = *(TES**)0x11DEA10;
+	if (ExtractArgs(EXTRACT_ARGS, &interiors))
+	{
+		NVSEArrayVar *cellsArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
+		TESObjectCELL **cellsBuffer = interiors ? g_TES->interiorsBuffer : g_TES->exteriorsBuffer, *cell;
+		UInt32 maxVal = interiors ? *(UInt32*)(0x11C3E38+4) : *(UInt32*)(0x11C3C90+4);
+		if (cellsBuffer)
+		{
+			while ((cell = *cellsBuffer) && maxVal != 0)
+			{
+				ArrIfc->AppendElement(cellsArr, NVSEArrayElement(cell));
+				cellsBuffer++;
+				maxVal--;
+			}
+		}
+		ArrIfc->AssignCommandResult(cellsArr, result);
+	}
+	return true;
+}
+bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
+	TESObjectWEAP *weap;
+	int id = -1;
+	TESObjectSTAT *model;
+	if (ExtractArgs(EXTRACT_ARGS, &weap, &id, &model) && IS_TYPE(weap, TESObjectWEAP) && IS_TYPE(model, TESObjectSTAT) && id <= 7) {
+		switch (id) {
+		case 0:
+			weap->worldStatic = model;
+			break;
+		case 1:
+			weap->modStatics[0] = model;
+			break;
+		case 2:
+			weap->modStatics[1] = model;
+			break;
+		case 3:
+			weap->modStatics[3] = model;
+			break;
+		case 4:
+			weap->modStatics[2] = model;
+			break;
+		case 5:
+			weap->modStatics[5] = model;
+			break;
+		case 6:
+			weap->modStatics[4] = model;
+			break;
+		case 7:
+			weap->modStatics[6] = model;
+			break;
+		}
+	}
+	return true;
+}
+bool Cmd_GetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
+	TESObjectWEAP *weap;
+	int id = -1;
+	if (ExtractArgs(EXTRACT_ARGS, &weap, &id) && IS_TYPE(weap, TESObjectWEAP) && id <= 7) {
+		switch (id) {
+		case 0:
+			*(UInt32*)result = weap->worldStatic->refID;
+			break;
+		case 1:
+			*(UInt32*)result = weap->modStatics[0]->refID;
+			break;
+		case 2:
+			*(UInt32*)result = weap->modStatics[1]->refID;
+			break;
+		case 3:
+			*(UInt32*)result = weap->modStatics[3]->refID;
+			break;
+		case 4:
+			*(UInt32*)result = weap->modStatics[2]->refID;
+			break;
+		case 5:
+			*(UInt32*)result = weap->modStatics[5]->refID;
+			break;
+		case 6:
+			*(UInt32*)result = weap->modStatics[4]->refID;
+			break;
+		case 7:
+			*(UInt32*)result = weap->modStatics[6]->refID;
+			break;
+		}
+	}
+	return true;
+}
+
 bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;

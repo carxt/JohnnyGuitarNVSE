@@ -167,7 +167,6 @@ static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 
 	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
 }
-using namespace std;
 
 bool removeFiles(char* folder1)
 {
