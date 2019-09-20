@@ -45,6 +45,7 @@ __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 	NiPointBuffer->y = yIn;
 	NiPointBuffer->z = zIn;
 }
+
 bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	int type = 0;
 	UInt32 tickCount;
@@ -346,6 +347,9 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS)
 		switch (patch) {
 			case 1:
 				enabled = loadEditorIDs;
+				break;
+			case 2:
+				enabled = fixHighNoon;
 				break;
 		}
 		if (IsConsoleMode())
@@ -743,10 +747,11 @@ bool Cmd_GetPixelFromBMP_Execute(COMMAND_ARGS) {
 	if (ExtractArgs(EXTRACT_ARGS, &path, &RED, &GREEN, &BLUE, &width, &height)) {
 		strcpy((char*)(strrchr(filename, '\\') + 1), path);
 		UInt32 R = 0, G = 0, B = 0;
-		if (ReadBMP24(filename, R, G, B, width, height));
-		setVarByName(PASS_VARARGS, RED, R);
-		setVarByName(PASS_VARARGS, GREEN, G);
-		setVarByName(PASS_VARARGS, BLUE, B);
+		if (ReadBMP24(filename, R, G, B, width, height)) {
+			setVarByName(PASS_VARARGS, RED, R);
+			setVarByName(PASS_VARARGS, GREEN, G);
+			setVarByName(PASS_VARARGS, BLUE, B);
+		}
 	}
 	return true;
 }

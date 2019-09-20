@@ -1,4 +1,5 @@
 #include "..\..\nvse\nvse\ScriptUtils.h"
+#include "internal/decoding.h"
 #include <Windows.h>
 #pragma once
 
@@ -21,6 +22,7 @@ char* StrArgBuf;
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 IDebugLog ParamLog;
 bool loadEditorIDs = 0;
+bool fixHighNoon = 1;
 __declspec(naked) bool __fastcall HasSeenData(TESObjectCELL *cell) {
 	__asm {
 		push	kExtraData_SeenData
@@ -149,11 +151,56 @@ void LoadEditorIDs() {
 			SafeWrite32(TESForm_Vtables[i] + 0x134, (UInt32)SetEditorIdHook);
 	}
 }
+bool __fastcall CheckForHighNoon(Sky* sky)
+{
+	return (float)(sky->firstClimate->sunriseEnd) / 6.0 < sky->gameHour && sky->gameHour < (float)(sky->firstClimate->sunsetBegin) / 6.0;
+}
+
+__declspec (naked) void HookforIMOD1()
+{
+	static const UInt32 retaddress = 0x063F575;
+	__asm {
+		mov ecx, dword ptr ds : [0x11DEA20]
+		call CheckForHighNoon
+		test al, al
+		mov ecx, [ebp - 0x7C]
+		jz HandleNormal
+		mov ecx, [ecx + 0x120]
+		jmp RETURN
+		HandleNormal :
+		mov ecx, [ecx + 0x11C]
+			RETURN :
+			jmp retaddress
+	}
+}
+
+__declspec (naked) void HookforIMOD2()
+{
+	static const UInt32 retaddress = 0x063F5F6;
+
+	__asm {
+		mov ecx, dword ptr ds : [0x11DEA20]
+		call CheckForHighNoon
+		test al, al
+		mov ecx, [ebp - 0x7C]
+		jz HandleNormal
+		mov ecx, [ecx + 0x11C]
+		jmp RETURN
+		HandleNormal :
+		mov ecx, [ecx + 0x120]
+			RETURN :
+			jmp retaddress
+	}
+}
 void HandleGameHooks()
 {
 	WriteRelJump(0x77D612, UInt32(LevelUpHook));
 	//	WriteRelJump(0x785D18, UInt32(PerkMenuHook)); TBD
 	if (loadEditorIDs) LoadEditorIDs();
+	if (fixHighNoon) {
+		WriteRelJump((UInt32)0x063F56C, (UInt32)HookforIMOD1);
+		WriteRelJump((UInt32)0x063F5ED, (UInt32)HookforIMOD2);
+	}
 }
 static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 {

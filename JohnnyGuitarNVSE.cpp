@@ -93,6 +93,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 	loadEditorIDs = GetPrivateProfileInt("MAIN", "bLoadEditorIDs", 0, filename);
+	fixHighNoon = GetPrivateProfileInt("MAIN", "bFixHighNoon", 1, filename);
 	nvse->SetOpcodeBase(0x3100);
 	//  TBD
 	//	REG_CMD(ShowPerkMenu);
