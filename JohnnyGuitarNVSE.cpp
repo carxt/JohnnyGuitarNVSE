@@ -7,19 +7,19 @@
 #include "nvse/GameForms.h"
 #include "nvse/GameExtraData.h"
 #include "nvse/GameTasks.h"
+#include "nvse/GameProcess.h"
 #include "nvse/GameRTTI.h"
 #include "nvse/GameOSDepend.h"
 #include "nvse/GameUI.h"
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
-#include "nvse/NiObjects.h"
 #include "JohnnyGuitar/misc.h"
 #include "JohnnyGuitar/WorldToScreen.h"
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
 #include "JohnnyGuitar/JohnnyParams.h"
 #include "JohnnyGuitar/JohnnyFunctions.h"
-#include "JohnnyGuitar/md5/md5.h"
-#include "JohnnyGuitar/sha1/sha1.h"
+#include "JohnnyGuitar/EditorIDs.h"
+#include "internal/decoding.h"
 HMODULE JohnnyHandle;
 IDebugLog		gLog;
 int J_bRemoveRedOutline = 0;
@@ -46,7 +46,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 1;
+	info->version = 2;
 
 	if (nvse->isNogore) 
 	{
@@ -91,8 +91,14 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	NiPointBuffer = (NiPoint3*) malloc(sizeof(NiPoint3));
 	char filename[MAX_PATH];
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
-	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini)");
+	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
+	loadEditorIDs = GetPrivateProfileInt("MAIN", "bLoadEditorIDs", 0, filename);
+	fixHighNoon = GetPrivateProfileInt("MAIN", "bFixHighNoon", 1, filename);
 	nvse->SetOpcodeBase(0x3100);
+	//  TBD
+	//	REG_CMD(ShowPerkMenu);
+	//	REG_CMD(ApplyWeaponPoison);
+	//	REG_CMD(SendStealingAlarm); 
 	REG_CMD(WorldToScreen);
 	REG_CMD(ToggleLevelUpMenu);
 	REG_CMD(IsLevelUpMenuEnabled);
@@ -102,12 +108,41 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(IsCellExpired);
 	REG_TYPED_CMD(MD5File, String);
 	REG_TYPED_CMD(SHA1File, String);
+	REG_CMD(TogglePipBoy);
+	REG_CMD(GetCalculatedWeaponDPS);
+	REG_CMD(GetInteriorLightingTraitNumeric);
+	REG_CMD(SetInteriorLightingTraitNumeric);
+	REG_CMD(GetPixelFromBMP);
+	REG_TYPED_CMD(GetWorldSpaceMapTexture, String);
+	REG_CMD(Jump);
+	REG_CMD(SetCameraShake);
+	REG_CMD(StopVATSCam);
+	REG_CMD(GetIMODAnimatable);
+	REG_CMD(SetIMODAnimatable);
+	REG_TYPED_CMD(GetEditorID, String);
+	REG_CMD(GetJohnnyPatch);
+	REG_CMD(SetVelEx);
+	REG_CMD(UwUDelete);
+	REG_CMD(GetMediaSetTraitNumeric);
+	REG_CMD(SetMediaSetTraitNumeric);
+	REG_TYPED_CMD(GetMediaSetTraitString, String);
+	REG_CMD(SetMediaSetTraitString);
+	REG_CMD(GetMediaSetTraitSound);
+	REG_CMD(SetMediaSetTraitSound);
+	REG_CMD(GetWeapon1stPersonModel);
+	REG_CMD(SetWeapon1stPersonModel);
+	REG_TYPED_CMD(GetBufferedCellsAlt, Array);
+	REG_CMD(GetTimePlayed);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
-	if (!nvse->isEditor)	HandleGameHooks();
+	if (!nvse->isEditor) {
+		NVSEDataInterface *nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
+		InventoryRefGetForID = (InventoryRef* (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
+		HandleGameHooks();
+	}
 	return true;
 }
 	BOOL WINAPI DllMain(

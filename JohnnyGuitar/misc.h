@@ -1,19 +1,5 @@
 #pragma once
 
-const double
-kDblZero = 0,
-kDblPI = 3.141592653589793,
-kDblPIx2 = 6.283185307179586,
-kDblPIx3d2 = 4.71238898038469,
-kDblPId2 = 1.5707963267948966,
-kDblPId4 = 0.7853981633974483,
-kDblPId6 = 0.5235987755982989,
-kDblPId12 = 0.26179938779914946,
-kDbl2dPI = 0.6366197723675814,
-kDbl4dPI = 1.2732395447351628,
-kDblTanPId6 = 0.5773502691896257,
-kDblTanPId12 = 0.2679491924311227,
-kDblPId180 = 0.017453292519943295;
 
 //All thanks to jazzisparis for the code, since it's way faster than tanf.
 
@@ -72,235 +58,292 @@ float fastDTan(float value) {
 
 void setVarByName(VARARGS, const char *var_name, float value)
 {
-	for (Script::VarInfoEntry *entry = &(scriptObj->varList); entry; entry = entry->next)
+	ListNode<VariableInfo>* traverse = scriptObj->varList.Head();
+	VariableInfo *varInfo;
+	do
 	{
-		if (!strcmp(((char*)entry->data->name.CStr()), var_name))
+		varInfo = traverse->data;
+		if (!strcmp(((char*)varInfo->name.CStr()), var_name))
 		{
-			eventList->GetVariable(entry->data->idx)->data = value;
+			eventList->GetVariable(varInfo->idx)->data = value;
 			break;
 		}
-	}
+	} while (traverse = traverse->next);
+
 }
 
-
-//This is useful when you don't want to bother with DYNAMIC_CAST and you don't need it. 
-//These are the values of each first member of the game's classes, which are pointers to vftables
-//All thanks to jazzisparis.
-
-enum
+class LevelUpMenu : public Menu {
+public:
+	LevelUpMenu();
+	~LevelUpMenu();
+	UInt32 isPerkMenu;
+	TileText *tile2C;
+	TileImage *tile30;
+	TileImage *tile34;
+	TileImage *tile38;
+	TileText *tile3C;
+	TileText *tile40;
+	TileImage *tile44;
+	TileImage *tile48;
+	TileImage *tileBackBtn;
+	TileImage *tile50;
+	UInt32 unk54;
+	UInt32 unk58;
+	UInt32 unk5C;
+	UInt32 unk60;
+	UInt32 listBoxActorValue[12];
+	UInt32 listBoxPerk[12];
+	UInt32 unkC4[2];
+};
+struct MediaSetData
 {
-	kVtbl_BGSTextureSet = 0x1033D1C,
-	kVtbl_BGSMenuIcon = 0x1033654,
-	kVtbl_TESGlobal = 0x1036524,
-	kVtbl_TESClass = 0x1048BB4,
-	kVtbl_TESFaction = 0x10498DC,
-	kVtbl_BGSHeadPart = 0x10464B4,
-	kVtbl_TESHair = 0x1049B9C,
-	kVtbl_TESEyes = 0x104973C,
-	kVtbl_TESRace = 0x104B4BC,
-	kVtbl_TESSound = 0x1044FFC,
-	kVtbl_BGSAcousticSpace = 0x10320FC,
-	kVtbl_TESSkill = 0x104CC0C,
-	kVtbl_EffectSetting = 0x1012834,
-	kVtbl_Script = 0x1037094,
-	kVtbl_TESLandTexture = 0x102E6C4,
-	kVtbl_EnchantmentItem = 0x1012EA4,
-	kVtbl_SpellItem = 0x1013F8C,
-	kVtbl_TESObjectACTI = 0x1029D5C,
-	kVtbl_BGSTalkingActivator = 0x1025594,
-	kVtbl_BGSTerminal = 0x1025914,
-	kVtbl_TESObjectARMO = 0x102A62C,
-	kVtbl_TESObjectBOOK = 0x102A9C4,
-	kVtbl_TESObjectCLOT = 0x102AC0C,
-	kVtbl_TESObjectCONT = 0x102AEB4,
-	kVtbl_TESObjectDOOR = 0x102B1FC,
-	kVtbl_IngredientItem = 0x1013284,
-	kVtbl_TESObjectLIGH = 0x1028EE4,
-	kVtbl_TESObjectMISC = 0x102B844,
-	kVtbl_TESObjectSTAT = 0x102BA2C,
-	kVtbl_BGSStaticCollection = 0x102535C,
-	kVtbl_BGSMovableStatic = 0x1024E84,
-	kVtbl_BGSPlaceableWater = 0x1024F4C,
-	kVtbl_TESGrass = 0x102814C,
-	kVtbl_TESObjectTREE = 0x102BC94,
-	kVtbl_TESFlora = 0x1026BD0,
-	kVtbl_TESFurniture = 0x1026D0C,
-	kVtbl_TESObjectWEAP = 0x102C51C,
-	kVtbl_TESAmmo = 0x1026064,
-	kVtbl_TESNPC = 0x104A2F4,
-	kVtbl_TESCreature = 0x1048F5C,
-	kVtbl_TESLevCreature = 0x102886C,
-	kVtbl_TESLevCharacter = 0x102864C,
-	kVtbl_TESKey = 0x1028444,
-	kVtbl_AlchemyItem = 0x1011964,
-	kVtbl_BGSIdleMarker = 0x104664C,
-	kVtbl_BGSNote = 0x1046874,
-	kVtbl_BGSConstructibleObject = 0x10245A4,
-	kVtbl_BGSProjectile = 0x10251AC,
-	kVtbl_TESLevItem = 0x1028A64,
-	kVtbl_TESWeather = 0x103168C,
-	kVtbl_TESClimate = 0x102D5C4,
-	kVtbl_TESRegion = 0x102397C,
-	kVtbl_NavMeshInfoMap = 0x106BB8C,
-	kVtbl_TESObjectCELL = 0x102E9B4,
-	kVtbl_TESObjectREFR = 0x102F55C,
-	kVtbl_Character = 0x1086A6C,
-	kVtbl_Creature = 0x10870AC,
-	kVtbl_MissileProjectile = 0x108FA44,
-	kVtbl_GrenadeProjectile = 0x108F674,
-	kVtbl_BeamProjectile = 0x108C3C4,
-	kVtbl_FlameProjectile = 0x108F2F4,
-	kVtbl_TESWorldSpace = 0x103195C,
-	kVtbl_TESObjectLAND = 0x102DCD4,
-	kVtbl_NavMesh = 0x106A0B4,
-	kVtbl_TESTopic = 0x104D19C,
-	kVtbl_TESTopicInfo = 0x104D5B4,
-	kVtbl_TESQuest = 0x104AC44,
-	kVtbl_TESIdleForm = 0x1049D0C,
-	kVtbl_TESPackage = 0x106847C,
-	kVtbl_TESCombatStyle = 0x10266E4,
-	kVtbl_TESLoadScreen = 0x10366CC,
-	kVtbl_TESLevSpell = 0x1028C5C,
-	kVtbl_TESObjectANIO = 0x102A0A4,
-	kVtbl_TESWaterForm = 0x103140C,
-	kVtbl_TESEffectShader = 0x102685C,
-	kVtbl_BGSExplosion = 0x1024A94,
-	kVtbl_BGSDebris = 0x1024834,
-	kVtbl_TESImageSpace = 0x102D7F4,
-	kVtbl_TESImageSpaceModifier = 0x102D97C,
-	kVtbl_BGSListForm = 0x10334B4,
-	kVtbl_BGSPerk = 0x1046EC4,
-	kVtbl_BGSBodyPartData = 0x1045504,
-	kVtbl_BGSAddonNode = 0x1024214,
-	kVtbl_ActorValueInfo = 0x1067A2C,
-	kVtbl_BGSRadiationStage = 0x1033B34,
-	kVtbl_BGSCameraShot = 0x10327F4,
-	kVtbl_BGSCameraPath = 0x103245C,
-	kVtbl_BGSVoiceType = 0x104733C,
-	kVtbl_BGSImpactData = 0x1032F6C,
-	kVtbl_BGSImpactDataSet = 0x103323C,
-	kVtbl_TESObjectARMA = 0x102A31C,
-	kVtbl_BGSEncounterZone = 0x102CBBC,
-	kVtbl_BGSMessage = 0x10337C4,
-	kVtbl_BGSRagdoll = 0x10470EC,
-	kVtbl_BGSLightingTemplate = 0x102CD94,
-	kVtbl_BGSMusicType = 0x103397C,
-	kVtbl_TESObjectIMOD = 0x102B5AC,
-	kVtbl_TESReputation = 0x104BA24,
-	kVtbl_ContinuousBeamProjectile = 0x108EA64,
-	kVtbl_TESRecipe = 0x1036B2C,
-	kVtbl_TESRecipeCategory = 0x10369DC,
-	kVtbl_TESCasinoChips = 0x10263DC,
-	kVtbl_TESCasino = 0x1026574,
-	kVtbl_TESLoadScreenType = 0x1036854,
-	kVtbl_MediaSet = 0x10342EC,
-	kVtbl_MediaLocationController = 0x10340C4,
-	kVtbl_TESChallenge = 0x104891C,
-	kVtbl_TESAmmoEffect = 0x103449C,
-	kVtbl_TESCaravanCard = 0x103478C,
-	kVtbl_TESCaravanMoney = 0x10349B4,
-	kVtbl_TESCaravanDeck = 0x1034B4C,
-	kVtbl_BGSDehydrationStage = 0x101144C,
-	kVtbl_BGSHungerStage = 0x10115B4,
-	kVtbl_BGSSleepDeprevationStage = 0x10116FC,
-	kVtbl_PlayerCharacter = 0x108AA3C,
-
-	kVtbl_BGSQuestObjective = 0x1047088,
-	kVtbl_TESModelTextureSwap = 0x101D124,
-	kVtbl_BGSPrimitiveBox = 0x101E8C4,
-	kVtbl_BGSPrimitiveSphere = 0x101EA64,
-	kVtbl_BGSPrimitivePlane = 0x101E75C,
-	kVtbl_MagicShaderHitEffect = 0x107B70C,
-
-	kVtbl_BGSQuestPerkEntry = 0x1046B84,
-	kVtbl_BGSAbilityPerkEntry = 0x1046C44,
-	kVtbl_BGSEntryPointPerkEntry = 0x1046D0C,
-	kVtbl_BGSEntryPointFunctionDataOneValue = 0x10462C0,
-	kVtbl_BGSEntryPointFunctionDataTwoValue = 0x1046300,
-	kVtbl_BGSEntryPointFunctionDataLeveledList = 0x1046320,
-	kVtbl_BGSEntryPointFunctionDataActivateChoice = 0x1046340,
-
-	kVtbl_ExtraSeenData = 0x1014294,
-	kVtbl_ExtraSpecialRenderFlags = 0x1014458,
-	kVtbl_ExtraPrimitive = 0x10151B4,
-	kVtbl_ExtraLinkedRef = 0x1015CC0,
-	kVtbl_ExtraRadius = 0x1015208,
-	kVtbl_ExtraCellWaterType = 0x1014270,
-	kVtbl_ExtraCellImageSpace = 0x1014258,
-	kVtbl_ExtraCellMusicType = 0x1014234,
-	kVtbl_ExtraCellClimate = 0x101424C,
-	kVtbl_ExtraTerminalState = 0x1015190,
-	kVtbl_ExtraCellAcousticSpace = 0x1014240,
-	kVtbl_ExtraOriginalReference = 0x1015BC4,
-	kVtbl_ExtraContainerChanges = 0x1015BB8,
-	kVtbl_ExtraWorn = 0x1015BDC,
-	kVtbl_ExtraHealth = 0x10158E4,
-	kVtbl_ExtraLock = 0x101589C,
-	kVtbl_ExtraCount = 0x10158D8,
-	kVtbl_ExtraTeleport = 0x10158A8,
-	kVtbl_ExtraWeaponModFlags = 0x10159A4,
-	kVtbl_ExtraHotkey = 0x101592C,
-	kVtbl_ExtraCannotWear = 0x1015BF4,
-	kVtbl_ExtraOwnership = 0x10158B4,
-	kVtbl_ExtraRank = 0x10158CC,
-	kVtbl_ExtraAction = 0x1015BAC,
-	kVtbl_ExtraFactionChanges = 0x1015F30,
-	kVtbl_ExtraScript = 0x1015914,
-	kVtbl_ExtraObjectHealth = 0x1015184,
-
-	kVtbl_SeenData = 0x1083FC4,
-
-	kVtbl_TileMenu = 0x106ED44,
-
-	kVtbl_MessageMenu = 0x107566C,
-	kVtbl_InventoryMenu = 0x10739B4,
-	kVtbl_StatsMenu = 0x106FFD4,
-	kVtbl_HUDMainMenu = 0x1072DF4,
-	kVtbl_LoadingMenu = 0x1073EBC,
-	kVtbl_ContainerMenu = 0x10721AC,
-	kVtbl_DialogMenu = 0x107257C,
-	kVtbl_SleepWaitMenu = 0x10763AC,
-	kVtbl_StartMenu = 0x1076D1C,
-	kVtbl_LockpickMenu = 0x107439C,
-	kVtbl_QuantityMenu = 0x10701C4,
-	kVtbl_MapMenu = 0x1074D44,
-	kVtbl_LevelUpMenu = 0x1073CDC,
-	kVtbl_RepairMenu = 0x1075C5C,
-	kVtbl_RaceSexMenu = 0x1075974,
-	kVtbl_CharGenMenu = 0x1071BB4,
-	kVtbl_TextEditMenu = 0x1070034,
-	kVtbl_BarterMenu = 0x10706EC,
-	kVtbl_SurgeryMenu = 0x1070084,
-	kVtbl_HackingMenu = 0x10728F4,
-	kVtbl_VATSMenu = 0x10700D4,
-	kVtbl_ComputersMenu = 0x1072004,
-	kVtbl_RepairServicesMenu = 0x1075DB4,
-	kVtbl_TutorialMenu = 0x106FF84,
-	kVtbl_SpecialBookMenu = 0x1070124,
-	kVtbl_ItemModMenu = 0x1073B7C,
-	kVtbl_LoveTesterMenu = 0x1070174,
-	kVtbl_CompanionWheelMenu = 0x1071D0C,
-	kVtbl_TraitSelectMenu = 0x1077ABC,
-	kVtbl_RecipeMenu = 0x107048C,
-	kVtbl_SlotMachineMenu = 0x10764DC,
-	kVtbl_BlackjackMenu = 0x10708FC,
-	kVtbl_RouletteMenu = 0x1075F7C,
-	kVtbl_CaravanMenu = 0x107108C,
-	kVtbl_TraitMenu = 0x10779BC,
-
-	kVtbl_NiNode = 0x109B5AC,
-	kVtbl_BSFadeNode = 0x10A8F90,
-	kVtbl_NiControllerManager = 0x109619C,
-
-	kVtbl_hkpAabbPhantom = 0x10CC004,
-	kVtbl_hkpSimpleShapePhantom = 0x10CE15C,
-	kVtbl_hkpCachingShapePhantom = 0x10D087C,
-	kVtbl_hkpRigidBody = 0x10C7888,
-	kVtbl_hkpSphereMotion = 0x10C6D54,
-	kVtbl_hkpBoxMotion = 0x10C6DC4,
-	kVtbl_hkpThinBoxMotion = 0x10C6E34,
-	kVtbl_ahkpCharacterProxy = 0x10C83E8,
+	String filepath; // NAM2 NAM3 NAM4 NAM5 NAM6 NAM7
+	float dB; // NAM8 NAM9 NAM0 ANAM BNAM CNAM
+	float boundary; // JNAM KNAM LNAM MNAM NNAM ONAM
 };
 
+class MediaSet : public TESForm {
+public:
+	MediaSet();
+	~MediaSet();
+	TESFullName	fullName;
+	UInt32 unk24[8];
+	UInt32 type; // NAM1
+	MediaSetData data[6];
+	UInt32 flags; //PNAM
+	float DNAM;
+	float ENAM;
+	float FNAM;
+	float GNAM;
+	TESSound *HNAM;
+	TESSound *INAM;
+};
+STATIC_ASSERT(sizeof(MediaSet) == 0xC4);
+struct ItemEntryData
+{
+	TESForm				*type;
+	ContChangesEntry	*entry;
+	ExtraDataList		*xData;
 
+	ItemEntryData() {}
+	ItemEntryData(TESForm *_type, ContChangesEntry *_entry, ExtraDataList *_xData) : type(_type), entry(_entry), xData(_xData) {}
+};
+class InventoryRef
+{
+public:
+	ItemEntryData	data;
+	TESObjectREFR	*containerRef;
+	TESObjectREFR	*tempRef;
+	UInt32			deferredActions[6];
+	bool			doValidation;
+	bool			removed;
 
+	bool CreateExtraData(BSExtraData *xBSData);
+};
+
+bool InventoryRef::CreateExtraData(BSExtraData *xBSData)
+{
+	ExtraContainerChanges::EntryDataList *entryList = containerRef->GetContainerChangesList();
+	if (!entryList) return false;
+	ContChangesEntry *entry = entryList->FindForItem(data.type);
+	if (!entry) return false;
+	data.xData = ExtraDataList::Create(xBSData);
+	if (!entry->extendData)
+	{
+		entry->extendData = (ExtraContainerChanges::ExtendDataList*)GameHeapAlloc(8);
+		entry->extendData->Init();
+	}
+	entry->extendData->Insert(data.xData);
+	return true;
+}
+
+InventoryRef* (*InventoryRefCreate)(TESObjectREFR *container, const ItemEntryData &data, bool bValidate);
+
+//Only ready for a 24-bit BMP, will check for non-24 bit later.
+//Also currently doesn't handle negative height/width BMPs, will fix later
+bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long& B, unsigned long PixelW, unsigned long PixelH)
+{
+	FILE* f = fopen(filename, "rb");
+
+	if (f == NULL)
+		return false;
+	char info[54];
+	fread(info, sizeof(char), 54, f);
+	int width = *(int*)& info[18];
+	int height = *(int*)& info[22];
+	if (width < PixelW || height < PixelH) return false;
+	int XPadding = (width * 3 + 3) & (~3);
+	char* data = new char[XPadding];
+	PixelH = height - PixelH;
+	fseek(f, XPadding * PixelH, SEEK_CUR);
+	fread(data, sizeof(char), XPadding, f);
+	UInt32 PosX = PixelW * 3;
+	B = data[PosX];
+	G = data[PosX + 1];
+	R = data[PosX + 2];
+	fclose(f);
+	delete data;
+	return true;
+}
+
+bool AlchemyItem::IsPoison()
+{
+	EffectItem *effItem;
+	EffectSetting *effSetting = NULL;
+	ListNode<EffectItem> *iter = magicItem.list.list.Head();
+	do
+	{
+		if (!(effItem = iter->data)) continue;
+		effSetting = effItem->setting;
+		if (effSetting && !(effSetting->effectFlags & 4)) return false;
+	} while (iter = iter->next);
+	return effSetting != NULL;
+}
+
+const uintptr_t TESForm_Vtables[] =
+{
+	0x010939EC,
+	0x0103195C,
+	0x0103168C,
+	0x0103140C,
+	0x0104D5B4,
+	0x0104D19C,
+	0x01044FFC,
+	0x0104CC0C,
+	0x0104BA24,
+	0x0102397C,
+	0x010369DC,
+	0x01036B2C,
+	0x0104B4BC,
+	0x0104AC44,
+	0x0106847C,
+	0x0102C51C,
+	0x0102BC94,
+	0x0102BA2C,
+	0x0102F55C,
+	0x0102B844,
+	0x01028EE4,
+	0x0102DCD4,
+	0x0102B5AC,
+	0x0102B1FC,
+	0x0102AEB4,
+	0x0102AC0C,
+	0x0102E9B4,
+	0x0102A9C4,
+	0x0102A62C,
+	0x0102A31C,
+	0x0102A0A4,
+	0x01029D5C,
+	0x01029B1C,
+	0x0104A2F4,
+	0x01036854,
+	0x010366CC,
+	0x01028C5C,
+	0x01028A64,
+	0x0102886C,
+	0x0102864C,
+	0x0102E6C4,
+	0x01028444,
+	0x0102D97C,
+	0x0102D7F4,
+	0x01049D0C,
+	0x01049B9C,
+	0x0102814C,
+	0x01036524,
+	0x01026D0C,
+	0x01026A4C,
+	0x01026BD0,
+	0x010498DC,
+	0x0104973C,
+	0x0102685C,
+	0x01048F5C,
+	0x010266E4,
+	0x0102D5C4,
+	0x01048BB4,
+	0x0104891C,
+	0x010263DC,
+	0x01026574,
+	0x010349B4,
+	0x01034B4C,
+	0x0103478C,
+	0x01029994,
+	0x0102960C,
+	0x0102980C,
+	0x0103449C,
+	0x01026064,
+	0x010492AC,
+	0x01013F8C,
+	0x0109381C,
+	0x01093674,
+	0x01037094,
+	0x010900DC,
+	0x0108AA3C,
+	0x0106BB8C,
+	0x0106A0B4,
+	0x0108A49C,
+	0x0108FA44,
+	0x010342EC,
+	0x010340C4,
+	0x0107B8C4,
+	0x0107B394,
+	0x01011B4C,
+	0x01013044,
+	0x0107AD84,
+	0x0107A8F4,
+	0x0107A554,
+	0x01013284,
+	0x0108F674,
+	0x010931E4,
+	0x0108F2F4,
+	0x0108EE04,
+	0x01012EA4,
+	0x01012834,
+	0x01092F6C,
+	0x010870AC,
+	0x0108EA64,
+	0x0108CE74,
+	0x01086A6C,
+	0x0108C3C4,
+	0x01092D84,
+	0x0104733C,
+	0x01033D1C,
+	0x01025914,
+	0x01025594,
+	0x0102535C,
+	0x010116FC,
+	0x010470EC,
+	0x01033B34,
+	0x010251AC,
+	0x01024F4C,
+	0x01046EC4,
+	0x01046874,
+	0x0103397C,
+	0x01024CEC,
+	0x01024E70,
+	0x01024E84,
+	0x010337C4,
+	0x01033654,
+	0x010334B4,
+	0x0102CD94,
+	0x0103323C,
+	0x01032F6C,
+	0x0104664C,
+	0x010115B4,
+	0x010464B4,
+	0x01024A94,
+	0x0102CBBC,
+	0x0101144C,
+	0x01032DC4,
+	0x01024834,
+	0x010245A4,
+	0x010327F4,
+	0x0103245C,
+	0x01045504,
+	0x01024214,
+	0x010320FC,
+	0x01085954,
+	0x01011964,
+	0x01092BDC,
+	0x01067A2C,
+	0x01084254,
+};
