@@ -29,7 +29,7 @@ __forceinline void FOVCorrection(float &xOut, float &yOut, float &zOut)
 
 	UInt32 PlayerAddress = *(UInt32 *)0x11DEA3C;
 	float fmult = 1;
-	if (((*(UInt8*)(PlayerAddress + 0x64A)) == 0) || !(*(0x11F91AC) + 0x2B4)) { // this should solve it in the meantime, until I properly fix it
+	if (((*(UInt8*)(PlayerAddress + 0x64A)) == 0) || !( (float) ((*(UInt32*)(0x11F91AC)) + 0x2B4)) ) { // this should solve it in the meantime, until I properly fix it
 
 		fmult = (fastDTan(0.5 * (*(float *)(PlayerAddress + 0x674))) / (fastDTan((*(float *)(PlayerAddress + 0x670)) * 0.5)));
 	}
