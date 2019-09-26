@@ -37,8 +37,10 @@ DEFINE_COMMAND_PLUGIN(SetWeapon1stPersonModel, , 0, 3, kParamsJohnnyOneForm_OneI
 DEFINE_COMMAND_PLUGIN(GetWeapon1stPersonModel, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetBufferedCellsAlt, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(GetActorValueModifierAlt, GetAVModAlt, , 1, 2, kParamsJohnny_OneActorValue_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(RefAddr, , 1, 0, NULL);
 #include "internal/decoding.h"
-
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 {
 	NiPointBuffer->x = xIn;
@@ -46,6 +48,39 @@ __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 	NiPointBuffer->z = zIn;
 }
 
+bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
+	Console_Print("0x%08X", thisObj);
+	return true;
+}
+bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
+	__asm int 3
+	return true;
+}
+// JIP function with a fix for detrimental effects
+bool Cmd_GetActorValueModifierAlt_Execute(COMMAND_ARGS) {
+	*result = 0;
+	UInt32 actorVal, duration = 3;
+	if (!ExtractArgs(EXTRACT_ARGS, &actorVal, &duration) || !thisObj->IsActor()) return true;
+	ActiveEffectList *effList = ((Actor*)thisObj)->magicTarget.GetEffectList();
+	if (!effList) return true;
+	float modifier = 0;
+	ActiveEffect *activeEff;
+	EffectSetting *effSetting;
+	ListNode<ActiveEffect> *iter = effList->Head();
+	do
+	{
+		activeEff = iter->data;
+		if (!activeEff || !activeEff->bApplied || !activeEff->effectItem) continue;
+		effSetting = activeEff->effectItem->setting;
+		if (!effSetting || effSetting->archtype || (effSetting->actorVal != actorVal) ||
+			!(effSetting->effectFlags & 2) || !((activeEff->duration ? 2 : 1) & duration)) continue;
+		modifier += activeEff->magnitude;
+	} while (iter = iter->next);
+	*result = modifier;
+	if (IsConsoleMode())
+		Console_Print("GetActorValueModifierAlt >> %f", *result);
+	return true;
+}
 bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	int type = 0;
 	UInt32 tickCount;

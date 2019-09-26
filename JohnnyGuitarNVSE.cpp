@@ -2,9 +2,10 @@
 #include "nvse/PluginAPI.h"
 #include "nvse/GameAPI.h"
 #include "nvse/CommandTable.h"
-#include "nvse/GameObjects.h"
-#include "nvse/GameData.h"
 #include "nvse/GameForms.h"
+#include "nvse/GameObjects.h"
+#include "nvse/GameEffects.h"
+#include "nvse/GameData.h"
 #include "nvse/GameExtraData.h"
 #include "nvse/GameTasks.h"
 #include "nvse/GameProcess.h"
@@ -133,6 +134,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetWeapon1stPersonModel);
 	REG_TYPED_CMD(GetBufferedCellsAlt, Array);
 	REG_CMD(GetTimePlayed);
+	REG_CMD(GetActorValueModifierAlt);
+	REG_CMD(AsmBreak);
+	REG_CMD(RefAddr);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

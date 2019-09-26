@@ -90,7 +90,11 @@ ParamInfo kParamsJohnny_TwoStrings_OneInt[3] =
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 0 },
 };
-
+ParamInfo kParamsJohnny_OneActorValue_OneOptionalInt[2] =
+{
+	{ "AV",	kParamType_ActorValue,	0 },
+	{ "Integer",	kParamType_Integer,	1 },
+};
 ParamInfo kParamsBMPArgs[6] =
 {
 	{ "filename", kParamType_String, 0 },

@@ -29,7 +29,7 @@ __forceinline void FOVCorrection(float &xOut, float &yOut, float &zOut)
 
 	UInt32 PlayerAddress = *(UInt32 *)0x11DEA3C;
 	float fmult = 1;
-	if (((*(UInt8*)(PlayerAddress + 0x64A)) == 0) && !( *(float*) ((*(UInt32*)(0x11F91AC)) + 0x2B4)) ) { // this should solve it in the meantime, until I properly fix it
+	if (((*(UInt8*)(PlayerAddress + 0x64A)) == 0) && !(*(float*)((*(UInt32*)(0x11F91AC)) + 0x2B4))) { // this should solve it in the meantime, until I properly fix it
 
 		fmult = (fastDTan(0.5 * (*(float *)(PlayerAddress + 0x674))) / (fastDTan((*(float *)(PlayerAddress + 0x670)) * 0.5)));
 	}
@@ -57,8 +57,8 @@ bool __fastcall WorldToScreenPoint3(NiCameraAlt* cam, NiPoint3* kPt, float &fBx,
 	float fInvW = 1.0f / fW;
 	// Transform Z, not entirely sure if it works. This indicates whether you're in front or behind the camera.
 	fBz = kPt->x * cam->m_aafWorldToCam[2][0] + kPt->y *
-	cam->m_aafWorldToCam[2][1] + kPt->z * cam->m_aafWorldToCam[2][2] +
-	cam->m_aafWorldToCam[2][3];
+		cam->m_aafWorldToCam[2][1] + kPt->z * cam->m_aafWorldToCam[2][2] +
+		cam->m_aafWorldToCam[2][3];
 	fBz = fBz * fInvW;
 
 	if (!(fW > fZeroTolerance))
@@ -93,14 +93,16 @@ bool __fastcall WorldToScreenPoint3(NiCameraAlt* cam, NiPoint3* kPt, float &fBx,
 			fBx = (((r * fBx + (1 - r) * x2)));//find point that divides the segment
 			fBy = (((r * fBy + (1 - r) * y2)));//into the ratio (1-r):r, this yields circle coordinates
 			if (!(HandleType)) //We get square coordinates, since the circle we got is actually a circle inside the square.
-			{	x2 = fBx - 0.5; y2 = fBy - 0.5;
+			{
+				x2 = fBx - 0.5; y2 = fBy - 0.5;
 				float Divider = (((y2)* (y2)) > 0.125) ? fabs(y2) : fabs(x2);
 				fBx = 0.5 * (((x2) / Divider) + 1);
-				fBy = 0.5 * (((y2) / Divider) + 1);}
+				fBy = 0.5 * (((y2) / Divider) + 1);
+			}
 			//Next two lines of code are not actually necessary at all, I'm just a paranoid fuck
-			fBx = fBx > 0 ? ((fBx < 1) ? fBx : 1) : 0; 
+			fBx = fBx > 0 ? ((fBx < 1) ? fBx : 1) : 0;
 			fBy = fBy > 0 ? ((fBy < 1) ? fBy : 1) : 0;
-		} 
+		}
 		return false;
 	}
 
@@ -140,11 +142,3 @@ ParamInfo kParamsProjectionArgs[8] =
 	{ "Object Ref", kParamType_ObjectRef, 1 }
 
 };
-
-
-
-
-
-
-
-

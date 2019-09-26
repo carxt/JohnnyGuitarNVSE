@@ -136,16 +136,20 @@ __declspec(naked) void GetRefNameHook() {
 __declspec(naked) void SetEditorIdHook() {
 	__asm jmp TESForm::hk_SetEditorId
 }
-
+const char* __fastcall ConsoleNameHook(TESObjectREFR* ref) {
+	const char* name = ref->baseForm->GetTheName();
+	if (!strlen(name)) name = ref->baseForm->GetName();
+	return name;
+}
 void LoadEditorIDs() {
-	WriteRelCall(0x486903, (UInt32(GetNameHook))); // replaces empty string with editor id in GetDebugName
+	WriteRelCall(0x486903, (UInt32(GetNameHook))); // replaces empty string with editor id in TESForm::GetDebugName
+	WriteRelCall(0x71B748, UInt32(ConsoleNameHook)); // replaces empty string with editor id in selected ref name in console
+	WriteRelCall(0x710BFC, UInt32(ConsoleNameHook));
+	WriteRelCall(0x55D498, (UInt32(GetNameHook))); // replaces empty string with editor id in TESObjectREFR::GetDebugName
 	for (uint32_t i = 0; i < ARRAYSIZE(TESForm_Vtables); i++)
 	{
 		if (*(uintptr_t *)(TESForm_Vtables[i] + 0x130) == 0x00401280)
 			SafeWrite32(TESForm_Vtables[i] + 0x130, (UInt32)GetNameHook);
-
-		if (*(uintptr_t *)(TESForm_Vtables[i] + 0x130) == 0x0055D480)
-			SafeWrite32(TESForm_Vtables[i] + 0x130, (UInt32)GetRefNameHook);
 
 		if (*(uintptr_t *)(TESForm_Vtables[i] + 0x134) == 0x00401290)
 			SafeWrite32(TESForm_Vtables[i] + 0x134, (UInt32)SetEditorIdHook);
