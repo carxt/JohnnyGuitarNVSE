@@ -12,7 +12,11 @@ ParamInfo kParamsJohnnyOneStringOneOptionalObjectID[2] =
 	{ "String", kParamType_String, 0 },
 	{ "ObjectID",	kParamType_ObjectID, 1 },
 };
-
+ParamInfo kParamsJohnny_OneForm_OneString[2] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "String", kParamType_String, 0 },
+};
 
 ParamInfo kParamsJohnny_OneString_OneInt[2] =
 {
@@ -106,4 +110,10 @@ ParamInfo kParamsBMPArgs[6] =
 
 };
 
-
+ParamInfo kParams_Johnny_OneForm_OneWeatherID_OneInt_OneOptionalGlobal[] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Weather ID", kParamType_WeatherID, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Global", kParamType_Global, 1 }
+};

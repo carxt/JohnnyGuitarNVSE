@@ -18,8 +18,8 @@
 #include "JohnnyGuitar/WorldToScreen.h"
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
 #include "JohnnyGuitar/JohnnyParams.h"
-#include "JohnnyGuitar/JohnnyFunctions.h"
 #include "JohnnyGuitar/EditorIDs.h"
+#include "JohnnyGuitar/JohnnyFunctions.h"
 #include "internal/decoding.h"
 HMODULE JohnnyHandle;
 IDebugLog		gLog;
@@ -137,6 +137,19 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(GetActorValueModifierAlt);
 	REG_CMD(AsmBreak);
 	REG_CMD(RefAddr);
+	REG_TYPED_CMD(GetMusicTypePath, String);
+	REG_CMD(GetMusicTypeDB);
+	REG_CMD(SetMusicTypeDB);
+	REG_CMD(EditorIDToFormID);
+	REG_CMD(GetRegionWeatherOverride);
+	REG_CMD(SetRegionWeatherOverride);
+	REG_CMD(GetRegionWeatherPriority);
+	REG_CMD(SetRegionWeatherPriority);
+	REG_CMD(IsWeatherInRegion);
+	REG_CMD(RemoveRegionWeather);
+	REG_CMD(AddRegionWeather);
+	REG_TYPED_CMD(GetRegionWeathers, Array);
+	REG_CMD(ClearRegionWeathers);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

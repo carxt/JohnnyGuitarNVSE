@@ -124,14 +124,9 @@ _declspec(naked) void PerkMenuHook() {
 		jmp noBackBtnAddr
 	}
 }
-__declspec(naked) void GetFullTypeNameHook() {
-	__asm jmp TESForm::hk_GetFullTypeName
-}
+
 __declspec(naked) void GetNameHook() {
 	__asm jmp TESForm::hk_GetName
-}
-__declspec(naked) void GetRefNameHook() {
-	__asm jmp TESObjectREFR::hk_GetName
 }
 __declspec(naked) void SetEditorIdHook() {
 	__asm jmp TESForm::hk_SetEditorId
@@ -196,6 +191,7 @@ __declspec (naked) void HookforIMOD2()
 			jmp retaddress
 	}
 }
+
 void HandleGameHooks()
 {
 	WriteRelJump(0x77D612, UInt32(LevelUpHook));
@@ -238,4 +234,16 @@ bool removeFiles(char* folder1)
 		RemoveDirectory(folder1);
 	}
 	return 1;
+}
+
+TESRegionDataWeather* GetWeatherData(TESRegion* region) {
+	ListNode<TESRegionData> *iter = region->dataEntries->Head();
+	TESRegionData *regData;
+	do
+	{
+		regData = iter->data;
+		if ((*(UInt32*)regData == 0x1023E18))
+			return (TESRegionDataWeather*)regData;
+	} while (iter = iter->next);
+	return NULL;
 }

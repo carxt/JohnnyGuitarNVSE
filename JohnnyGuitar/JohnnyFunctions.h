@@ -40,12 +40,236 @@ DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(GetActorValueModifierAlt, GetAVModAlt, , 1, 2, kParamsJohnny_OneActorValue_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(RefAddr, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetMusicTypePath, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(GetMusicTypeDB, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetMusicTypeDB, , 0, 2, kParams_OneForm_OneFloat);
+DEFINE_COMMAND_PLUGIN(EditorIDToFormID, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetRegionWeatherOverride, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetRegionWeatherOverride, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetRegionWeatherPriority, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetRegionWeatherPriority, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(IsWeatherInRegion, , 0, 2, kParamsJohnny_TwoForms);
+DEFINE_COMMAND_PLUGIN(RemoveRegionWeather, , 0, 2, kParamsJohnny_TwoForms);
+DEFINE_COMMAND_PLUGIN(AddRegionWeather, , 0, 4, kParams_Johnny_OneForm_OneWeatherID_OneInt_OneOptionalGlobal);
+DEFINE_COMMAND_PLUGIN(GetRegionWeathers, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(ClearRegionWeathers, , 0, 1, kParams_OneForm);
 #include "internal/decoding.h"
+
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 {
 	NiPointBuffer->x = xIn;
 	NiPointBuffer->y = yIn;
 	NiPointBuffer->z = zIn;
+}
+bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
+	TESRegion* region = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
+		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		if (weatherData) {
+			NVSEArrayVar* weatherArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
+			ListNode<WeatherEntry> *iter = weatherData->weatherTypes.Head();
+			WeatherEntry *weatherType;
+			do
+			{
+				if (iter->data) {
+					ArrIfc->AppendElement(weatherArr, NVSEArrayElement(iter->data->weather));
+					if (IsConsoleMode())
+						Console_Print(iter->data->weather->GetName());
+				}
+			} while (iter = iter->next);
+			if (ArrIfc->GetArraySize(weatherArr)) ArrIfc->AssignCommandResult(weatherArr, result);
+		}
+		return true;
+	}
+}
+bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
+	TESRegion* region = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
+		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		if (weatherData) {
+			ListNode<WeatherEntry> *headNode = weatherData->weatherTypes.Head(), *iter = headNode->next;
+			while (iter)
+			{
+				GameHeapFree(iter->data);
+				iter = iter->RemoveMe();
+			}
+			if (headNode->next) {
+				headNode->RemoveNext();
+			}
+			else {
+				GameHeapFree(headNode->data);
+				headNode->RemoveMe();
+			}
+		}
+		return true;
+	}
+}
+bool Cmd_GetRegionWeatherOverride_Execute(COMMAND_ARGS) {
+	TESRegion* region = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
+		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		if (weatherData) {
+			*result = weatherData->bOverride;
+			if (IsConsoleMode()) {
+				Console_Print("GetRegionWeatherOverride >> %.f", *result);
+			}
+		}
+	}
+	return true;
+}
+bool Cmd_SetRegionWeatherOverride_Execute(COMMAND_ARGS) {
+	TESRegion* region = NULL;
+	int bOverride = -1;
+	if (ExtractArgs(EXTRACT_ARGS, &region, &bOverride) && IS_TYPE(region, TESRegion)) {
+		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		if (weatherData)
+			weatherData->bOverride = bOverride;
+	}
+	return true;
+}
+bool Cmd_GetRegionWeatherPriority_Execute(COMMAND_ARGS) {
+	TESRegion* region = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
+		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		if (weatherData) {
+			*result = weatherData->priority;
+			if (IsConsoleMode()) {
+				Console_Print("GetRegionWeatherPriority >> %.f", *result);
+			}
+		}
+	}
+	return true;
+}
+bool Cmd_SetRegionWeatherPriority_Execute(COMMAND_ARGS) {
+	TESRegion* region = NULL;
+	int priority = -1;
+	if (ExtractArgs(EXTRACT_ARGS, &region, &priority) && IS_TYPE(region, TESRegion) && priority >= 0 && priority <= 100) {
+		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		if (weatherData)
+			weatherData->priority = priority;
+	}
+	return true;
+}
+bool Cmd_IsWeatherInRegion_Execute(COMMAND_ARGS) {
+	TESRegion* region = NULL;
+	TESWeather* weather = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &region, &weather) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
+		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		if (weatherData) {
+			ListNode<WeatherEntry> *iter = weatherData->weatherTypes.Head();
+			WeatherEntry *weatherType;
+			do
+			{
+				weatherType = iter->data;
+				if (weatherType->weather == weather) {
+					*result = 1;
+					if (IsConsoleMode())
+						Console_Print("The weather is found in Region Data");
+					return true;
+				}
+			} while (iter = iter->next);
+			*result = 0;
+			if (IsConsoleMode())
+				Console_Print("The weather is NOT found in Region Data");
+		}
+	}
+	return true;
+}
+bool Cmd_RemoveRegionWeather_Execute(COMMAND_ARGS) {
+	TESRegion* region = NULL;
+	TESWeather* weather = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &region, &weather) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
+		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		if (weatherData) {
+			ListNode<WeatherEntry> *iter = weatherData->weatherTypes.Head();
+			WeatherEntry *weatherType;
+			do
+			{
+				weatherType = iter->data;
+				if (weatherType->weather == weather) {
+					iter = iter->RemoveMe();
+					if (IsConsoleMode())
+						Console_Print("The weather is removed from Region Data");
+					return true;
+				}
+			} while (iter = iter->next);
+			if (IsConsoleMode())
+				Console_Print("The weather is NOT found in Region Data");
+		}
+	}
+	return true;
+}
+bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
+	TESRegion* region = NULL;
+	TESWeather* weather = NULL;
+	UInt32 chance = 0;
+	TESGlobal *global = NULL;
+	WeatherEntry *entry;
+	if (ExtractArgs(EXTRACT_ARGS, &region, &weather, &chance, &global) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
+		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		if (weatherData) {
+			ListNode<WeatherEntry> *iter = weatherData->weatherTypes.Head();
+			do
+			{
+				if (iter->data)
+					if (iter->data->weather == weather) return true;
+			} while (iter = iter->next);
+			entry = (WeatherEntry*)GameHeapAlloc(sizeof(WeatherEntry));
+			entry->chance = chance;
+			entry->global = global;
+			entry->weather = weather;
+			weatherData->weatherTypes.Insert(entry);
+		}
+	}
+	return true;
+}
+bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
+	char edid[MAX_PATH];
+	TESForm* form = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &edid)) {
+		form = ((TESForm*(__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
+		if (form) {
+			*(UInt32*)result = form->refID;
+		}
+		else {
+			*(UInt32*)result = GetRefIDFromEditorID(edid);
+		}
+		if (IsConsoleMode()) {
+			Console_Print("EditorIDToFormID >> 0x%X", *result);
+		}
+
+	}
+	return true;
+}
+bool Cmd_GetMusicTypePath_Execute(COMMAND_ARGS) {
+	BGSMusicType* mtype;
+	const char* path = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &mtype) && IS_TYPE(mtype, BGSMusicType)) {
+		path = mtype->soundFile.path.CStr();
+		StrIfc->Assign(PASS_COMMAND_ARGS, path);
+		if (IsConsoleMode()) {
+			Console_Print("GetMusicTypePath >> %s", path);
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetMusicTypeDB_Execute(COMMAND_ARGS) {
+	BGSMusicType* mtype;
+	if (ExtractArgs(EXTRACT_ARGS, &mtype) && IS_TYPE(mtype, BGSMusicType)) {
+		*result = mtype->dB;
+		if (IsConsoleMode())
+			Console_Print("GetMusicTypeDB >> %f", *result);
+	}
+	return true;
+}
+bool Cmd_SetMusicTypeDB_Execute(COMMAND_ARGS) {
+	BGSMusicType* mtype;
+	float newVal = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &mtype, &newVal) && IS_TYPE(mtype, BGSMusicType)) {
+		mtype->dB = newVal;
+	}
+	return true;
 }
 
 bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
@@ -101,9 +325,8 @@ bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 		}
 	if (IsConsoleMode()) {
 		Console_Print("%f", *result);
-	return true;
 	}
-
+	return true;
 }
 // JIP function with a sanity check to prevent errors
 bool Cmd_GetBufferedCellsAlt_Execute(COMMAND_ARGS)
@@ -647,7 +870,7 @@ bool Cmd_GetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	TESObjectCELL *cell = NULL;
 	int traitID = -1;
 	if (ExtractArgs(EXTRACT_ARGS, &cell, &traitID) && IS_TYPE(cell, TESObjectCELL)) {
-		if (!cell->IsInterior() || traitID < 0 || traitID > 15) return false;
+		if (!cell->IsInterior() || traitID < 0 || traitID > 15) return true;
 		TESObjectCELL::LightingData* lightingData = cell->coords.interior;
 		switch (traitID) {
 		case 0:
@@ -699,7 +922,7 @@ bool Cmd_GetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 			*result = lightingData->fogClipDist;
 			break;
 		default:
-			return false;
+			return true;
 		}
 		if (IsConsoleMode())
 			Console_Print("GetInteriorLightingTraitNumeric %d >> %.2f", traitID, *result);
@@ -712,7 +935,7 @@ bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	int traitID = -1;
 	float value = -1;
 	if (ExtractArgs(EXTRACT_ARGS, &cell, &traitID, &value) && IS_TYPE(cell, TESObjectCELL)) {
-		if (!cell->IsInterior() || traitID < 0 || traitID > 15) return false;
+		if (!cell->IsInterior() || traitID < 0 || traitID > 15) return true;
 		TESObjectCELL::LightingData* lightingData = cell->coords.interior;
 		switch (traitID) {
 		case 0:
@@ -764,7 +987,7 @@ bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 			lightingData->fogClipDist = value;
 			break;
 		default:
-			return false;
+			return true;
 		}
 		if (IsConsoleMode())
 			Console_Print("SetInteriorLightingTraitNumeric %d >> %.2f", traitID, value);
