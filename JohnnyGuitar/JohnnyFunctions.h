@@ -68,7 +68,6 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 		if (weatherData) {
 			NVSEArrayVar* weatherArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
 			ListNode<WeatherEntry> *iter = weatherData->weatherTypes.Head();
-			WeatherEntry *weatherType;
 			do
 			{
 				if (iter->data) {
@@ -79,8 +78,8 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 			} while (iter = iter->next);
 			if (ArrIfc->GetArraySize(weatherArr)) ArrIfc->AssignCommandResult(weatherArr, result);
 		}
-		return true;
 	}
+	return true;
 }
 bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
@@ -101,8 +100,8 @@ bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 				headNode->RemoveMe();
 			}
 		}
-		return true;
 	}
+	return true;
 }
 bool Cmd_GetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
@@ -237,7 +236,6 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 		if (IsConsoleMode()) {
 			Console_Print("EditorIDToFormID >> 0x%X", *result);
 		}
-
 	}
 	return true;
 }
