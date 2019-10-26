@@ -150,6 +150,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(AddRegionWeather);
 	REG_TYPED_CMD(GetRegionWeathers, Array);
 	REG_CMD(ClearRegionWeathers);
+	REG_CMD(StopSoundAlt);
+	REG_CMD(RemovePrimitive);
+	REG_CMD(GetPrimitiveType);
+
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

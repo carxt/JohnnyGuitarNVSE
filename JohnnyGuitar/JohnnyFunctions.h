@@ -53,6 +53,9 @@ DEFINE_COMMAND_PLUGIN(RemoveRegionWeather, , 0, 2, kParamsJohnny_TwoForms);
 DEFINE_COMMAND_PLUGIN(AddRegionWeather, , 0, 4, kParams_Johnny_OneForm_OneWeatherID_OneInt_OneOptionalGlobal);
 DEFINE_COMMAND_PLUGIN(GetRegionWeathers, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(ClearRegionWeathers, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 2, kParamsJohnny_TwoForms);
+DEFINE_COMMAND_PLUGIN(RemovePrimitive, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetPrimitiveType, , 1, 0, NULL);
 #include "internal/decoding.h"
 
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
@@ -60,6 +63,52 @@ __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 	NiPointBuffer->x = xIn;
 	NiPointBuffer->y = yIn;
 	NiPointBuffer->z = zIn;
+}
+bool Cmd_RemovePrimitive_Execute(COMMAND_ARGS) {
+	*result = 0;
+	ExtraPrimitive* xPrimitive;
+	if (thisObj->extraDataList.HasType(kExtraData_Primitive)) {
+		xPrimitive = GetExtraType(thisObj->extraDataList, Primitive);
+		thisObj->extraDataList.Remove(xPrimitive, true);
+		thisObj->Update3D();
+		*result = 1;
+	}
+	return true;
+}
+bool Cmd_GetPrimitiveType_Execute(COMMAND_ARGS) {
+	ExtraPrimitive *xPrimitive = GetExtraType(thisObj->extraDataList, Primitive);
+	*result = (xPrimitive && xPrimitive->primitive) ? xPrimitive->primitive->type : 0;
+	return true;
+}
+bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
+	BSAudioManager *g_audioManager = (BSAudioManager*)0x11F6EF0;
+	TESSound *soundForm;
+	TESObjectREFR* source;
+	BSFadeNode *fadeNode;
+	*result = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &soundForm, &source))
+	{
+		if (soundForm->soundFile.path.m_dataLen)
+		{
+			const char *soundPath = soundForm->soundFile.path.m_data;
+			BSGameSound *gameSound;
+			for (NiTPointerMap<BSGameSound>::Iterator sndIter(&g_audioManager->playingSounds); !sndIter.Done(); sndIter.Next())
+			{
+				gameSound = sndIter.Get();
+				if (gameSound && StrBeginsCI(gameSound->filePath + 0xB, soundPath)) {
+					fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
+					if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == source)
+					{
+						gameSound->flags010 &= 0xFFFFFF0F;
+						gameSound->flags010 |= 0x10;
+						*result = 1;
+						break;
+					}
+				}
+			}
+		}
+	}
+	return true;
 }
 bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;

@@ -14,6 +14,7 @@ UInt32 GetRefIDFromEditorID(char* edid) {
 			return it->first;
 		}
 	}
+	return 0;
 }
 
 // vftable + 0x130
