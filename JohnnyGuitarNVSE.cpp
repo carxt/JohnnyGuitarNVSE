@@ -20,6 +20,7 @@
 #include "JohnnyGuitar/JohnnyParams.h"
 #include "JohnnyGuitar/EditorIDs.h"
 #include "JohnnyGuitar/JohnnyFunctions.h"
+#include "JohnnyGuitar/BMPHandling.h"
 #include "internal/decoding.h"
 HMODULE JohnnyHandle;
 IDebugLog		gLog;
@@ -153,7 +154,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(StopSoundAlt);
 	REG_CMD(RemovePrimitive);
 	REG_CMD(GetPrimitiveType);
-
+	REG_CMD(GetPixelFromBMPInMem);
+	REG_CMD(BMPOpen);
+	REG_CMD(BMPClose);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
