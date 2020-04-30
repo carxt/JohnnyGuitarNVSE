@@ -35,19 +35,10 @@ public:
 		this->height = *(unsigned int*)& info[22];
 		this->Pixels = new BMPPixel[this->width * this->height];
 		int row_padded = (this->width * 3 + 3) & (~3);
-		unsigned char* data = new unsigned char[row_padded];
-		for(int i = 0; i < height; i++)
-		{
-			fread(data, sizeof(unsigned char), row_padded, f);
-			for(int j = 0; j < width*3; j += 3)
-			{
-				BMPPixel* destination = &(Pixels[j + i * this->width]);
-				destination->red = data[j+2];
-				destination->green data[j+1];
-				destination->blue = data[j];
-			}
-		}
-		delete[] data;
+		//for (int i = 0; i < this->height; i++)
+		//{
+			fread(Pixels, sizeof(unsigned char), row_padded * this->height, filestream);
+		//}
 		fclose(filestream);
 	}
 	~BMPImageAtrributes(void)
@@ -83,10 +74,10 @@ ParamInfo kParamsBMPArgsAlt[5] =
 
 
 
-DEFINE_COMMAND_PLUGIN(GetPixelFromBMPInMem, , 0, 6, kParamsBMPArgsAlt);
+DEFINE_COMMAND_PLUGIN(GetPixelFromJohnnyImage, , 0, 6, kParamsBMPArgsAlt);
 
 
-bool Cmd_GetPixelFromBMPInMem_Execute(COMMAND_ARGS) {
+bool Cmd_GetPixelFromJohnnyImage_Execute(COMMAND_ARGS) {
 
 	UInt32 memory;
 	char RED[VarNameSize], GREEN[VarNameSize], BLUE[VarNameSize];
@@ -95,10 +86,11 @@ bool Cmd_GetPixelFromBMPInMem_Execute(COMMAND_ARGS) {
 	if (ExtractArgs(EXTRACT_ARGS, &memory, &RED, &GREEN, &BLUE, &width, &height) && memory) {
 		BMPImageAtrributes* Image = (BMPImageAtrributes*)memory;
 		UInt32 R = 0, G = 0, B = 0;
-		if (Image->GetPixel(R, G, B, width, height));
-		setVarByName(PASS_VARARGS, RED, R);
-		setVarByName(PASS_VARARGS, GREEN, G);
-		setVarByName(PASS_VARARGS, BLUE, B);
+		if (Image->GetPixel(R, G, B, width, height)) {
+			setVarByName(PASS_VARARGS, RED, R);
+			setVarByName(PASS_VARARGS, GREEN, G);
+			setVarByName(PASS_VARARGS, BLUE, B);
+		}
 	}
 	return true;
 }
@@ -114,9 +106,9 @@ bool Cmd_BMPOpen_Execute(COMMAND_ARGS)
 			{
 				*(UInt32*)result = (UInt32)BMPFile;
 			}
-		return true;
 	}
 
+	return true;
 }
 DEFINE_COMMAND_PLUGIN(BMPClose, , 0, 1, kParams_OneInt);
 
@@ -131,7 +123,7 @@ bool Cmd_BMPClose_Execute(COMMAND_ARGS)
 		{
 			*(UInt32*)result = (UInt32)BMPFile;
 		}
-		return true;
 	}
 
+	return true;
 }

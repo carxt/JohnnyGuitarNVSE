@@ -56,7 +56,199 @@ DEFINE_COMMAND_PLUGIN(ClearRegionWeathers, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 2, kParamsJohnny_TwoForms);
 DEFINE_COMMAND_PLUGIN(RemovePrimitive, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetPrimitiveType, , 1, 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetBaseScale, , , 1, NULL);
+DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(UnsetAV, , 1, 1, kParams_OneActorValue);
+DEFINE_COMMAND_PLUGIN(UnforceAV, , 1, 1, kParams_OneActorValue);
+DEFINE_COMMAND_PLUGIN(ToggleNthPipboyLight, , 0, 2, kParams_TwoInts);
+DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , 0, 3, kParamsJohnny_OneString_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(GetFacegenModelFlag, , 0, 3, kParamsJohnny_OneForm_TwoInts);
+DEFINE_COMMAND_PLUGIN(SetFacegenModelFlag, , 0, 4, kParamsJohnny_OneForm_ThreeInts);
+DEFINE_COMMAND_PLUGIN(GetRaceBodyModelPath, , 0, 3, kParamsJohnny_OneForm_TwoInts);
+DEFINE_COMMAND_PLUGIN(SetEquipType, , 0, 2, kParams_OneForm_OneInt);
 #include "internal/decoding.h"
+
+float (__fastcall *GetBaseScale)(TESObjectREFR*) = (float(__fastcall *)(TESObjectREFR*)) 0x00567400;
+void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
+(void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
+
+bool Cmd_SetEquipType_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESForm* pForm = 0;
+	UInt32 newEquipType;
+	if (ExtractArgs(EXTRACT_ARGS, &pForm, &newEquipType) && newEquipType <= 13) {
+		pForm = pForm->TryGetREFRParent();
+		BGSEquipType* pEquipType = DYNAMIC_CAST(pForm, TESForm, BGSEquipType);
+		if (pEquipType) {
+			pEquipType->equipType = newEquipType;
+		}
+	}
+	return true;
+}
+bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
+	TESRace *race;
+	UInt32 modelID, isFemale;
+	const char* path = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &race, &modelID, &isFemale)) {
+		if (isFemale <= 1 && modelID <= 2) {
+			path = race->bodyModels[isFemale][modelID].nifPath.CStr();
+			StrIfc->Assign(PASS_COMMAND_ARGS, path);
+			if (IsConsoleMode()) {
+				Console_Print("GetRaceModelPath %i %i >> %s", modelID, isFemale, path);
+			}
+		}
+	}
+	return true;
+}
+bool Cmd_GetFacegenModelFlag_Execute(COMMAND_ARGS) {
+	TESObjectARMO *armor;
+	UInt32 isFemale, flagID;
+	*result = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &armor, &flagID, &isFemale)) {
+		if (isFemale <= 1 && flagID <= 3) {
+			*result = (armor->bipedModel.bipedModel[isFemale].facegenFlags & (1 << flagID)) ? 1 : 0;
+			if (IsConsoleMode()) {
+				Console_Print("GetFacegenModelFlag %i %i >> %.f", flagID, isFemale, *result);
+			}
+		}
+	}
+	return true;
+}
+bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
+	TESObjectARMO *armor;
+	UInt32 isFemale;
+	UInt32 flagID;
+	bool bEnable;
+	*result = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &armor, &flagID, &isFemale, &bEnable) && flagID <= 3) {
+			armor->SetFacegenFlag(1 << flagID, isFemale, bEnable);
+	}
+	return true;
+}
+bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
+	bool isFemale = 0;
+	TESForm* form = NULL;
+	char newPath[kMaxMessageLength] = { 0 };
+
+	if (ExtractArgs(EXTRACT_ARGS, &newPath, &isFemale, &form))
+	{
+
+		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
+		if (bipedModel)
+		{
+			bipedModel->SetPath(newPath, 2, isFemale);
+		}
+	}
+
+	return true;
+}
+bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS)
+{
+	UInt32 index, isVisible;
+	if (ExtractArgs(EXTRACT_ARGS, &index, &isVisible) && index < 3)
+	{
+		FOPipboyManager* pipboyManager = InterfaceManager::GetSingleton()->pipboyManager;
+		if (pipboyManager->byte028)
+		{
+			if (isVisible)
+			{
+				pipboyManager->pipboyLightGlow[index]->m_flags &= ~1;
+			}
+			else
+			{
+				pipboyManager->pipboyLightGlow[index]->m_flags |= 1;
+			}
+		}
+	}
+	return true;
+}
+bool Cmd_UnsetAV_Execute(COMMAND_ARGS)
+{
+	UInt32 avCode;
+	if (thisObj->IsActor() && ExtractArgs(EXTRACT_ARGS, &avCode))
+	{
+		Actor* actor = (Actor*)thisObj;
+		ActorValueOwner* avOwner = &actor->avOwner;
+		float oldVal = avOwner->GetActorValue(avCode);
+
+		tList<void>* actorPermSetAVList = &actor->list0E0;
+		void* avEntry = (void*)ThisStdCall(0x937760, actorPermSetAVList, avCode);
+		ThisStdCall(0x937400, actorPermSetAVList, avEntry);
+		thisObj->MarkAsModified(0x400000);
+
+		if (!actor->IsPlayerRef())
+		{
+			BaseProcess* base = actor->baseProcess;
+			if (base)
+			{
+				base->Unk_EC(avCode);
+			}
+		}
+
+		// call handle change with new value
+		float newVal = avOwner->GetActorValue(avCode);
+		HandleActorValueChange(avOwner, avCode, oldVal, newVal, NULL);
+	}
+	return true;
+}
+
+bool Cmd_UnforceAV_Execute(COMMAND_ARGS)
+{
+	UInt32 avCode;
+	if (thisObj->IsActor() && ExtractArgs(EXTRACT_ARGS, &avCode))
+	{
+		Actor* actor = (Actor*)thisObj;
+		ActorValueOwner* avOwner = &actor->avOwner;
+		float oldVal = avOwner->GetActorValue(avCode);
+
+		tList<void>* actorPermForceAVList = &actor->list0D0;
+		void* avEntry = (void*)ThisStdCall(0x937760, actorPermForceAVList, avCode);
+		ThisStdCall(0x937400, actorPermForceAVList, avEntry);
+		thisObj->MarkAsModified(0x800000);
+
+		if (!actor->IsPlayerRef())
+		{
+			BaseProcess* base = actor->baseProcess;
+			if (base)
+			{
+				base->Unk_EC(avCode);
+			}
+		}
+
+		// call handle change with new value
+		float newVal = avOwner->GetActorValue(avCode);
+		HandleActorValueChange(avOwner, avCode, oldVal, newVal, NULL);
+	}
+	return true;
+}
+bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
+	*result = 0;
+	PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
+	TESObjectREFR* markerRef = (TESObjectREFR*)ThisStdCall(0x77A400, g_thePlayer);
+	if (markerRef) {
+		*(UInt32*)result = markerRef->refID;
+	}
+	return true;
+}
+bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL)
+{
+	if (thisObj)
+	{
+		*result = GetBaseScale(thisObj);
+		if (IsConsoleMode())
+			Console_Print("GetBaseScale : %0.2f", *result);
+	}
+	return true;
+}
+
+bool Cmd_GetBaseScale_Execute(COMMAND_ARGS)
+{
+
+	return Cmd_GetBaseScale_Eval(thisObj, 0, 0, result);
+
+}
+
 
 __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 {
@@ -861,13 +1053,15 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 
 bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS)
 {
-	ExtractArgs(EXTRACT_ARGS, &isShowLevelUp);
+	UInt32 ToExtract;
+	if (ExtractArgs(EXTRACT_ARGS, &ToExtract)) isShowLevelUp = ToExtract;
 	return true;
 }
 
 bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS)
 {
-	*result = isShowLevelUp;
+	*(UInt32*)result = isShowLevelUp == true ? 1 : 0;
+	if (IsConsoleMode()) Console_Print("IsLevelUpMenuEnabled >> %u", *(UInt32*) result);
 	return true;
 }
 bool Cmd_GetBaseEffectAV_Execute(COMMAND_ARGS)
