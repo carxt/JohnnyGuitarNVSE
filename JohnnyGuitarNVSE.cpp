@@ -1,4 +1,3 @@
-
 #include "nvse/PluginAPI.h"
 #include "nvse/GameAPI.h"
 #include "nvse/CommandTable.h"
@@ -12,6 +11,7 @@
 #include "nvse/GameRTTI.h"
 #include "nvse/GameOSDepend.h"
 #include "nvse/GameUI.h"
+#include "nvse/GameUI.cpp"
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
 #include "JohnnyGuitar/misc.h"
@@ -24,8 +24,6 @@
 #include "internal/decoding.h"
 HMODULE JohnnyHandle;
 IDebugLog		gLog;
-int J_bRemoveRedOutline = 0;
-int J_bRemoveTags = 0;	
 
 void MessageHandler(NVSEMessagingInterface::Message* msg)
 {
@@ -34,21 +32,26 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 	{
 
 	case NVSEMessagingInterface::kMessage_NewGame:
-	case NVSEMessagingInterface::kMessage_PostLoadGame:
+	case NVSEMessagingInterface::kMessage_PostLoadGame: {
 		isShowLevelUp = true;
+		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
+		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
+		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 		break;
+	}
 	}
 
 }
 
 extern "C"{
+
 bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 {
 	// fill out the info structure
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 2;
+	info->version = 265;
 
 	if (nvse->isNogore) 
 	{
@@ -95,12 +98,14 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 	loadEditorIDs = GetPrivateProfileInt("MAIN", "bLoadEditorIDs", 0, filename);
-	fixHighNoon = GetPrivateProfileInt("MAIN", "bFixHighNoon", 1, filename);
+	fixHighNoon = GetPrivateProfileInt("MAIN", "bFixHighNoon", 0, filename);
+
+
+	WorldMatrx = new JGWorldToScreenMatrix;
+
+
 	nvse->SetOpcodeBase(0x3100);
-	//  TBD
-	//	REG_CMD(ShowPerkMenu);
-	//	REG_CMD(ApplyWeaponPoison);
-	//	REG_CMD(SendStealingAlarm); 
+
 	REG_CMD(WorldToScreen);
 	REG_CMD(ToggleLevelUpMenu);
 	REG_CMD(IsLevelUpMenuEnabled);
@@ -154,9 +159,18 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(StopSoundAlt);
 	REG_CMD(RemovePrimitive);
 	REG_CMD(GetPrimitiveType);
-	REG_CMD(GetPixelFromBMPInMem);
-	REG_CMD(BMPOpen);
-	REG_CMD(BMPClose);
+	REG_CMD(GetBaseScale);
+	REG_CMD(GetCustomMapMarker);
+	REG_CMD(UnsetAV);
+	REG_CMD(UnforceAV);
+	REG_CMD(ToggleNthPipboyLight);
+	REG_CMD(SetBipedIconPathAlt);
+	REG_CMD(GetFacegenModelFlag);
+	REG_CMD(SetFacegenModelFlag);
+	REG_TYPED_CMD(GetRaceBodyModelPath, String);
+	REG_CMD(SetEquipType);
+	REG_TYPED_CMD(GetFactionMembers, Array);
+	REG_TYPED_CMD(GetRaceHeadModelPath, String);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

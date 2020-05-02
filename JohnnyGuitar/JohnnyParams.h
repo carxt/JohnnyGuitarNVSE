@@ -57,7 +57,7 @@ ParamInfo kParamsJohnnyThreeFloats[3] =
 ParamInfo kParamsJohnny_OneForm_OneOptionalInt[2] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
-	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 1 },
 };
 ParamInfo kParamsJohnny_OneObjectID_OneOptionalInt[2] =
 {
@@ -71,13 +71,24 @@ ParamInfo kParamsJohnny_OneForm_TwoInts[3] =
 	{ "int",	kParamType_Integer, 0 },
 	{ "int",	kParamType_Integer, 0 },
 };
-
+ParamInfo kParamsJohnny_OneForm_ThreeInts[4] =
+{
+	{ "form",	kParamType_AnyForm,	0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+};
 ParamInfo kParamsJohnny_TwoForms[2] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "form",	kParamType_AnyForm,	0 },
 };
-
+ParamInfo kParamsJohnny_OneString_OneInt_OneForm[3] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "form",	kParamType_AnyForm,	0 },
+};
 ParamInfo kParamsJohnny_OneIMOD[1] =
 {
 	{ "IMOD",	kParamType_ImageSpaceModifier,	0 },

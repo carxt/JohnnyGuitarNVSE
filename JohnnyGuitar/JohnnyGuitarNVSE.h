@@ -22,7 +22,8 @@ char* StrArgBuf;
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 IDebugLog ParamLog;
 bool loadEditorIDs = 0;
-bool fixHighNoon = 1;
+bool fixHighNoon = 0;
+
 __declspec(naked) bool __fastcall HasSeenData(TESObjectCELL *cell) {
 	__asm {
 		push	kExtraData_SeenData
@@ -111,25 +112,15 @@ _declspec(naked) void LevelUpHook() {
 		jmp noShowAddr
 	}
 }
-bool isInPerkMenu = false;
-_declspec(naked) void PerkMenuHook() {
-	static const UInt32 noBackBtnAddr = 0x785DE8;
-	static const UInt32 retnAddr = 0x785D1B;
-	_asm {
-		cmp dword ptr ds : [isInPerkMenu], 0
-		je noBackBtn
-		mov eax, [ebp-0x10]
-		jmp retnAddr
-		noBackBtn:
-		jmp noBackBtnAddr
-	}
-}
 
 __declspec(naked) void GetNameHook() {
 	__asm jmp TESForm::hk_GetName
 }
 __declspec(naked) void SetEditorIdHook() {
 	__asm jmp TESForm::hk_SetEditorId
+}
+__declspec(naked) void SetEditorIdHook_REFR()
+{	__asm jmp TESForm::hk_SetEditorID_REFR
 }
 const char* __fastcall ConsoleNameHook(TESObjectREFR* ref) {
 	const char* name = ref->baseForm->GetTheName();
@@ -141,13 +132,21 @@ void LoadEditorIDs() {
 	WriteRelCall(0x71B748, UInt32(ConsoleNameHook)); // replaces empty string with editor id in selected ref name in console
 	WriteRelCall(0x710BFC, UInt32(ConsoleNameHook));
 	WriteRelCall(0x55D498, (UInt32(GetNameHook))); // replaces empty string with editor id in TESObjectREFR::GetDebugName
+	WriteRelJump(0x467A15, 0x467A4E); // loads more types in game's editor:form map
 	for (uint32_t i = 0; i < ARRAYSIZE(TESForm_Vtables); i++)
 	{
-		if (*(uintptr_t *)(TESForm_Vtables[i] + 0x130) == 0x00401280)
+		if (*(uintptr_t*)(TESForm_Vtables[i] + 0x130) == 0x00401280)
 			SafeWrite32(TESForm_Vtables[i] + 0x130, (UInt32)GetNameHook);
 
-		if (*(uintptr_t *)(TESForm_Vtables[i] + 0x134) == 0x00401290)
+		if (*(uintptr_t*)(TESForm_Vtables[i] + 0x134) == 0x00401290)
 			SafeWrite32(TESForm_Vtables[i] + 0x134, (UInt32)SetEditorIdHook);
+	}
+	for (uint32_t i = 0; i < ARRAYSIZE(TESForm_REFR_Vtables); i++)
+	{		if (*(uintptr_t*)(TESForm_REFR_Vtables[i] + 0x130) == 0x00401280)
+			SafeWrite32(TESForm_REFR_Vtables[i] + 0x130, (UInt32)GetNameHook);
+
+		if (*(uintptr_t*)(TESForm_REFR_Vtables[i] + 0x134) == 0x00401290)
+			SafeWrite32(TESForm_REFR_Vtables[i] + 0x134, (UInt32)SetEditorIdHook_REFR);
 	}
 }
 bool __fastcall CheckForHighNoon(Sky* sky)
@@ -194,8 +193,8 @@ __declspec (naked) void HookforIMOD2()
 
 void HandleGameHooks()
 {
+	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
 	WriteRelJump(0x77D612, UInt32(LevelUpHook));
-	//	WriteRelJump(0x785D18, UInt32(PerkMenuHook)); TBD
 	if (loadEditorIDs) LoadEditorIDs();
 	if (fixHighNoon) {
 		WriteRelJump((UInt32)0x063F56C, (UInt32)HookforIMOD1);
