@@ -32,9 +32,13 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 	{
 
 	case NVSEMessagingInterface::kMessage_NewGame:
-	case NVSEMessagingInterface::kMessage_PostLoadGame:
+	case NVSEMessagingInterface::kMessage_PostLoadGame: {
 		isShowLevelUp = true;
+		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
+		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
+		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 		break;
+	}
 	}
 
 }
@@ -47,7 +51,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 2;
+	info->version = 265;
 
 	if (nvse->isNogore) 
 	{
@@ -163,9 +167,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetBipedIconPathAlt);
 	REG_CMD(GetFacegenModelFlag);
 	REG_CMD(SetFacegenModelFlag);
-	REG_CMD(GetRaceBodyModelPath);
+	REG_TYPED_CMD(GetRaceBodyModelPath, String);
 	REG_CMD(SetEquipType);
-
+	REG_TYPED_CMD(GetFactionMembers, Array);
+	REG_TYPED_CMD(GetRaceHeadModelPath, String);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

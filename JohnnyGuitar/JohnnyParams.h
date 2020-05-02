@@ -57,7 +57,7 @@ ParamInfo kParamsJohnnyThreeFloats[3] =
 ParamInfo kParamsJohnny_OneForm_OneOptionalInt[2] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
-	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 1 },
 };
 ParamInfo kParamsJohnny_OneObjectID_OneOptionalInt[2] =
 {

@@ -66,12 +66,43 @@ DEFINE_COMMAND_PLUGIN(GetFacegenModelFlag, , 0, 3, kParamsJohnny_OneForm_TwoInts
 DEFINE_COMMAND_PLUGIN(SetFacegenModelFlag, , 0, 4, kParamsJohnny_OneForm_ThreeInts);
 DEFINE_COMMAND_PLUGIN(GetRaceBodyModelPath, , 0, 3, kParamsJohnny_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(SetEquipType, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetFactionMembers, , 0, 2, kParamsJohnny_OneForm_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetRaceHeadModelPath, , 0, 3, kParamsJohnny_OneForm_TwoInts);
 #include "internal/decoding.h"
 
 float (__fastcall *GetBaseScale)(TESObjectREFR*) = (float(__fastcall *)(TESObjectREFR*)) 0x00567400;
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 
+bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESFaction *faction;
+	SInt32 rank = -1;
+	ExtractArgs(EXTRACT_ARGS, &faction, &rank);
+	if (faction) {
+		DataHandler* g_dataHandler = DataHandler::Get();
+		NVSEArrayVar* factionMemberArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
+		for (TESBoundObject *object = g_dataHandler->boundObjectList->first; object; object = object->next)
+		{
+			TESActorBase *actorBase = DYNAMIC_CAST(object, TESBoundObject, TESActorBase);
+			if (actorBase && actorBase->baseData.factionList.Count() != 0) {
+				ListNode<FactionListData> *fctIter = actorBase->baseData.factionList.Head();
+				FactionListData *factionData;
+				do
+				{
+					factionData = fctIter->data;
+					if (factionData && factionData->faction && factionData->faction == faction) {
+						if (rank == -1 || (rank == factionData->rank)) {
+							ArrIfc->AppendElement(factionMemberArr, NVSEArrayElement(actorBase));
+						}
+					}
+				} while (fctIter = fctIter->next);
+			}	
+		}
+		if (ArrIfc->GetArraySize(factionMemberArr)) ArrIfc->AssignCommandResult(factionMemberArr, result);
+	}
+	return true;
+}
 bool Cmd_SetEquipType_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -86,6 +117,23 @@ bool Cmd_SetEquipType_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
+	TESRace *race;
+	UInt32 modelID, isFemale;
+	const char* path = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &race, &modelID, &isFemale)) {
+		if (isFemale <= 1 && modelID <= 7) {
+			path = race->faceModels[isFemale][modelID].nifPath.CStr();
+			if (path) {
+				StrIfc->Assign(PASS_COMMAND_ARGS, path);
+				if (IsConsoleMode()) {
+					Console_Print("GetRaceHeadModelPath %i %i >> %s", modelID, isFemale, path);
+				}
+			}
+		}
+	}
+	return true;
+}
 bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
 	TESRace *race;
 	UInt32 modelID, isFemale;
@@ -93,9 +141,11 @@ bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgs(EXTRACT_ARGS, &race, &modelID, &isFemale)) {
 		if (isFemale <= 1 && modelID <= 2) {
 			path = race->bodyModels[isFemale][modelID].nifPath.CStr();
-			StrIfc->Assign(PASS_COMMAND_ARGS, path);
-			if (IsConsoleMode()) {
-				Console_Print("GetRaceModelPath %i %i >> %s", modelID, isFemale, path);
+			if (path) {
+				StrIfc->Assign(PASS_COMMAND_ARGS, path);
+				if (IsConsoleMode()) {
+					Console_Print("GetRaceModelPath %i %i >> %s", modelID, isFemale, path);
+				}
 			}
 		}
 	}
@@ -127,9 +177,9 @@ bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
-	bool isFemale = 0;
+	UInt32 isFemale = 0;
 	TESForm* form = NULL;
-	char newPath[kMaxMessageLength] = { 0 };
+	char newPath[MAX_PATH];
 
 	if (ExtractArgs(EXTRACT_ARGS, &newPath, &isFemale, &form))
 	{
@@ -137,7 +187,7 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel)
 		{
-			bipedModel->SetPath(newPath, 2, isFemale);
+			bipedModel->icon[isFemale].ddsPath.Set(newPath);
 		}
 	}
 
