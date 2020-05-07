@@ -68,12 +68,74 @@ DEFINE_COMMAND_PLUGIN(GetRaceBodyModelPath, , 0, 3, kParamsJohnny_OneForm_TwoInt
 DEFINE_COMMAND_PLUGIN(SetEquipType, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFactionMembers, , 0, 2, kParamsJohnny_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetRaceHeadModelPath, , 0, 3, kParamsJohnny_OneForm_TwoInts);
+DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(Get3DDistanceBetweenNiNodes, , 0, 4, kParamsJohnnyTwoRefsTwoStrings);
+DEFINE_COMMAND_PLUGIN(Get3DDistanceToNiNode, , 1, 4, kParamsJohnnyOneStringThreeFloats);
+DEFINE_COMMAND_PLUGIN(Get3DDistanceFromHitToNiNode, , 1, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetVector3DDistance, , 0, 6, kParamsJohnny_SixFloats);
 #include "internal/decoding.h"
-
 float (__fastcall *GetBaseScale)(TESObjectREFR*) = (float(__fastcall *)(TESObjectREFR*)) 0x00567400;
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 
+bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
+	*result = 0;
+	NiVector3 pos1;
+	NiVector3 pos2;
+	if (ExtractArgs(EXTRACT_ARGS, &(pos1.x), &(pos1.y), &(pos1.z), &(pos2.x), &(pos2.y), &(pos2.z))) {
+		*result = NiNodeComputeDistance(&pos1, &pos2);
+		if (IsConsoleMode()) Console_Print("Get3DDistance >> %f", *result);
+	}
+	return true;
+}
+
+bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS)
+{
+	Actor* actor = (Actor*)thisObj;
+	char NiName[MAX_PATH];
+	if (ExtractArgs(EXTRACT_ARGS, &NiName) && actor->IsActor() && actor->baseProcess)
+	{
+		NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
+		ActorHitData* hitData = actor->baseProcess->GetHitData();
+		if (!hitData || !t_Node) return true;
+		*result = NiNodeComputeDistance(&(t_Node->m_worldTranslate), &(hitData->impactPos));
+
+	}
+
+	return true;
+}
+bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char NiName[MAX_PATH];
+	NiVector3 Coord;
+	if (!thisObj || !(ExtractArgs(EXTRACT_ARGS, &NiName, &(Coord.x), &(Coord.y), &(Coord.z)))) return true;
+	NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
+	if (!t_Node) return true;
+	*result = NiNodeComputeDistance(&(t_Node->m_worldTranslate), &Coord);
+	if (IsConsoleMode()) Console_Print("Get3DDistanceToNiNode >> %f", *result);
+	return true;
+}
+
+bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char NiName1[MAX_PATH], NiName2[MAX_PATH];
+	TESObjectREFR* ref1;
+	TESObjectREFR* ref2;
+	if (!(ExtractArgs(EXTRACT_ARGS, &ref1, &ref2, &NiName1, &NiName2))) return true;
+	NiAVObject* Node1 = ref1->GetNiBlock(NiName1);
+	NiAVObject* Node2 = ref1->GetNiBlock(NiName2);
+	if (!Node1 || !Node2) return true;
+	*result = NiNodeComputeDistance(&(Node1->m_worldTranslate), &(Node2->m_worldTranslate));
+	if (IsConsoleMode()) Console_Print("Get3DDistanceBetweenNiNodes >> %f", *result);
+	return true;
+}
+bool Cmd_GetDefaultHeapSize_Execute(COMMAND_ARGS) {
+	UInt32 heapSize = *(reinterpret_cast<UInt32*>(0x866E9F + 1));
+	*result = heapSize / 1024 / 1024;
+	if (IsConsoleMode())
+		Console_Print("DefaultHeapInitialAllocMB >> `%f", *result);
+	return true;
+}
 bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESFaction *faction;

@@ -171,6 +171,11 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetEquipType);
 	REG_TYPED_CMD(GetFactionMembers, Array);
 	REG_TYPED_CMD(GetRaceHeadModelPath, String);
+	REG_CMD(GetDefaultHeapSize);
+	REG_CMD(Get3DDistanceBetweenNiNodes);
+	REG_CMD(Get3DDistanceToNiNode);
+	REG_CMD(Get3DDistanceFromHitToNiNode);
+	REG_CMD(GetVector3DDistance);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

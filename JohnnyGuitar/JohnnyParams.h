@@ -5,7 +5,22 @@ ParamInfo kParamsJohnnyAnyExpr[1] =
 {
 	{ "any expression", kNVSEParamType_BasicType, 0 },
 };
+ParamInfo kParamsJohnnyOneStringThreeFloats[4] =
+{
+	{ "String", kParamType_String, 0 },
+	{ "float", kParamType_Float, 0 },
+	{ "float", kParamType_Float, 0 },
+	{ "float", kParamType_Float, 0 },
 
+};
+ParamInfo kParamsJohnnyTwoRefsTwoStrings[4] =
+{
+	{ "ref", kParamType_ObjectRef, 0 },
+	{ "ref", kParamType_ObjectRef, 0 },
+	{ "String", kParamType_String, 0 },
+	{ "String", kParamType_String, 0 },
+
+};
 
 ParamInfo kParamsJohnnyOneStringOneOptionalObjectID[2] =
 {
@@ -70,6 +85,15 @@ ParamInfo kParamsJohnny_OneForm_TwoInts[3] =
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "int",	kParamType_Integer, 0 },
 	{ "int",	kParamType_Integer, 0 },
+};
+ParamInfo kParamsJohnny_SixFloats[6] =
+{
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
 };
 ParamInfo kParamsJohnny_OneForm_ThreeInts[4] =
 {

@@ -3,6 +3,14 @@
 #include <Windows.h>
 #pragma once
 
+
+
+
+
+
+
+
+
 NVSEArrayVarInterface *ArrIfc = NULL;
 NVSEStringVarInterface *StrIfc = NULL;
 NVSEMessagingInterface *g_msg = NULL;
@@ -23,7 +31,10 @@ char* StrArgBuf;
 IDebugLog ParamLog;
 bool loadEditorIDs = 0;
 bool fixHighNoon = 0;
-
+namespace SpecialCaseEDIDs {
+	void Handle();
+}
+	
 __declspec(naked) bool __fastcall HasSeenData(TESObjectCELL *cell) {
 	__asm {
 		push	kExtraData_SeenData
@@ -75,6 +86,30 @@ __declspec(naked) ContChangesEntry *ExtraContainerChanges::EntryDataList::FindFo
 			xor		eax, eax
 			done :
 		retn	4
+	}
+}
+
+float __declspec(naked) __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2)
+{
+	__asm
+	{
+		movd xmm0, [ecx]
+		subss xmm0, [edx]
+		mulss xmm0, xmm0
+		movd xmm1, [ecx + 4]
+		subss xmm1, [edx + 4]
+		mulss xmm1, xmm1
+		movd xmm2, [ecx + 8]
+		subss xmm2, [edx + 8]
+		mulss xmm2, xmm2
+		addss xmm0, xmm1
+		addss xmm0, xmm2
+		sqrtss xmm0, xmm0
+		movd eax, xmm0
+		push eax
+		fld dword ptr[esp]
+		add esp, 4
+		ret
 	}
 }
 
@@ -148,6 +183,11 @@ void LoadEditorIDs() {
 		if (*(uintptr_t*)(TESForm_REFR_Vtables[i] + 0x134) == 0x00401290)
 			SafeWrite32(TESForm_REFR_Vtables[i] + 0x134, (UInt32)SetEditorIdHook_REFR);
 	}
+
+
+
+	SpecialCaseEDIDs::Handle();
+
 }
 bool __fastcall CheckForHighNoon(Sky* sky)
 {
@@ -190,9 +230,56 @@ __declspec (naked) void HookforIMOD2()
 			jmp retaddress
 	}
 }
-
+TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
+	if (weap->ammo.ammo) {
+		if (IS_TYPE(weap->ammo.ammo, BGSListForm)) {
+			BGSListForm* ammoList = (BGSListForm*)weap->ammo.ammo;
+			PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
+			ExtraContainerChanges* xChanges = GetExtraType(g_thePlayer->extraDataList, ContainerChanges);
+			TESForm* ammo = 0;
+			for (int i = 0; i < ammoList->Count(); i++) {
+				ammo = ammoList->GetNthForm(i);
+				UInt32 count = ThisStdCall(0x4C8F30, xChanges->data, ammo);
+				if (count > 0) return ammo;
+			}
+		}
+	}
+	return 0;
+}
+__declspec(naked) void InventoryAmmoHook() {
+	static const UInt32 retnAddr = 0x7080A8;
+	__asm {
+		mov ecx, dword ptr[ebp - 0x2D4]
+		call GetAmmoInInventory
+		mov dword ptr[ebp - 0x2C8], eax
+		jmp retnAddr
+	}
+}
+NiAVObject *NiNode::GetBlock(const char *blockName)
+{
+	if (StrEqualCI(m_blockName, blockName))
+		return this;
+	NiAVObject *found = NULL;
+	for (NiTArray<NiAVObject*>::Iterator iter(m_children); !iter.End(); ++iter)
+	{
+		if (!*iter) continue;
+		if (iter->GetNiNode())
+			found = ((NiNode*)*iter)->GetBlock(blockName);
+		else if (StrEqualCI(iter->m_blockName, blockName))
+			found = *iter;
+		else continue;
+		if (found) break;
+	}
+	return found;
+}
+NiAVObject *TESObjectREFR::GetNiBlock(const char *blockName)
+{
+	NiNode *rootNode = GetNiNode();
+	return rootNode ? rootNode->GetBlock(blockName) : NULL;
+}
 void HandleGameHooks()
 {
+//	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // WIP
 	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
 	WriteRelJump(0x77D612, UInt32(LevelUpHook));
 	if (loadEditorIDs) LoadEditorIDs();
