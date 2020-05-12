@@ -13,6 +13,14 @@ ParamInfo kParamsJohnnyOneStringThreeFloats[4] =
 	{ "float", kParamType_Float, 0 },
 
 };
+ParamInfo kParamsJohnnyFourStrings[4] =
+{
+	{ "String", kParamType_String, 0 },
+	{ "X_Out", kParamType_String, 0 },
+	{ "Y_Out", kParamType_String, 0 },
+	{ "Z_Out", kParamType_String, 0 },
+
+};
 ParamInfo kParamsJohnnyTwoRefsTwoStrings[4] =
 {
 	{ "ref", kParamType_ObjectRef, 0 },

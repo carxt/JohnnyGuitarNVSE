@@ -73,11 +73,63 @@ DEFINE_COMMAND_PLUGIN(Get3DDistanceBetweenNiNodes, , 0, 4, kParamsJohnnyTwoRefsT
 DEFINE_COMMAND_PLUGIN(Get3DDistanceToNiNode, , 1, 4, kParamsJohnnyOneStringThreeFloats);
 DEFINE_COMMAND_PLUGIN(Get3DDistanceFromHitToNiNode, , 1, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetVector3DDistance, , 0, 6, kParamsJohnny_SixFloats);
+DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParamsJohnnyFourStrings);
+DEFINE_COMMAND_PLUGIN(GetLifeState, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetRaceFlag, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetRaceFlag, , 0, 3, kParamsJohnny_OneForm_TwoInts);
 #include "internal/decoding.h"
 float (__fastcall *GetBaseScale)(TESObjectREFR*) = (float(__fastcall *)(TESObjectREFR*)) 0x00567400;
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 
+bool Cmd_GetRaceFlag_Execute(COMMAND_ARGS) {
+	TESRace* race;
+	UINT32 bit;
+	if (ExtractArgs(EXTRACT_ARGS, &race, &bit) && IS_TYPE(race, TESRace))
+	{
+		*result = (race->raceFlags & 1 << bit);
+		if (IsConsoleMode()) Console_Print("GetRaceFlag >> %.f", *result);
+	}
+	return true;
+}
+
+
+bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
+	TESRace* race;
+	UINT32 bit;
+	UINT32 setorclear;
+	if (ExtractArgs(EXTRACT_ARGS, &race, &bit, &setorclear) && IS_TYPE(race, TESRace))
+	{
+		setorclear ? race->raceFlags |= (1 << bit) : race->raceFlags &= ~(1 << bit);
+	}
+	return true;
+}
+// 0 - alive, 1 - dying/ragdolled, 2 - dead, 3 - unconscious, 5 - restrained
+bool Cmd_GetLifeState_Execute(COMMAND_ARGS) {
+	Actor* actor = (Actor*)thisObj;
+	*result = -1;
+	if (actor) {
+		*result = actor->lifeState;
+		if (IsConsoleMode()) Console_Print("GetLifeState >> %.f", *result);
+	}
+	return true;
+}
+bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
+	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
+	char nodeName[MAX_PATH];
+	if (ExtractArgs(EXTRACT_ARGS, &nodeName, &X_outS, &Y_outS, &Z_outS))
+	{
+		hkpRigidBody *rigidBody = thisObj->GetRigidBody(nodeName);
+		if (rigidBody)
+		{
+			NiVector4 linVelocity = rigidBody->motion.linVelocity;
+			setVarByName(PASS_VARARGS, X_outS, linVelocity.x);
+			setVarByName(PASS_VARARGS, Y_outS, linVelocity.y);
+			setVarByName(PASS_VARARGS, Z_outS, linVelocity.z);
+		}
+	}
+	return true;
+}
 bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NiVector3 pos1;

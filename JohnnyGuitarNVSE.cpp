@@ -51,7 +51,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 270;
+	info->version = 275;
 
 	if (nvse->isNogore) 
 	{
@@ -176,6 +176,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(Get3DDistanceToNiNode);
 	REG_CMD(Get3DDistanceFromHitToNiNode);
 	REG_CMD(GetVector3DDistance);
+	REG_CMD(GetLinearVelocity);
+	REG_CMD(GetLifeState);
+	REG_CMD(GetRaceFlag);
+	REG_CMD(SetRaceFlag);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

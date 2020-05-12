@@ -112,7 +112,36 @@ float __declspec(naked) __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiV
 		ret
 	}
 }
-
+NiNode *NiNode::GetNode(const char *nodeName)
+{
+	NiAVObject *found = GetBlock(nodeName);
+	return found ? found->GetNiNode() : NULL;
+}
+NiNode *TESObjectREFR::GetNode(const char *nodeName)
+{
+	NiNode *rootNode = GetNiNode();
+	return rootNode ? (*nodeName ? rootNode->GetNode(nodeName) : rootNode) : NULL;
+}
+hkpRigidBody *TESObjectREFR::GetRigidBody(const char *nodeName)
+{
+	NiNode *rootNode = GetNiNode();
+	if (rootNode)
+	{
+		NiNode *targetNode = rootNode->GetNode(nodeName);
+		if (targetNode && targetNode->m_collisionObject)
+		{
+			bhkWorldObject *hWorldObj = targetNode->m_collisionObject->worldObj;
+			if (hWorldObj)
+			{
+				hkpRigidBody *rigidBody = (hkpRigidBody*)hWorldObj->refObject;
+				UInt8 motionType = rigidBody->motion.type;
+				if ((motionType == 2) || (motionType == 3) || (motionType == 6))
+					return rigidBody;
+			}
+		}
+	}
+	return NULL;
+}
 __declspec(naked) ExtraContainerChanges::EntryDataList *TESObjectREFR::GetContainerChangesList()
 {
 	__asm
@@ -277,6 +306,7 @@ NiAVObject *TESObjectREFR::GetNiBlock(const char *blockName)
 	NiNode *rootNode = GetNiNode();
 	return rootNode ? rootNode->GetBlock(blockName) : NULL;
 }
+
 void HandleGameHooks()
 {
 //	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // WIP
