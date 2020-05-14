@@ -1,0 +1,36 @@
+﻿  JohnnyGuitarNVSE.cpp
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/misc.h(166): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(211) : see declaration of 'fopen'
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyGuitarNVSE.h(354): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(112) : see declaration of 'strcpy'
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyGuitarNVSE.h(355): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(118) : see declaration of 'strcat'
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyGuitarNVSE.h(361): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(356) : see declaration of 'sprintf'
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyFunctions.h(571): warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyFunctions.h(1023): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(112) : see declaration of 'strcpy'
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyFunctions.h(1024): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(118) : see declaration of 'strcat'
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyFunctions.h(1026): warning C4996: 'strcat': This function or variable may be unsafe. Consider using strcat_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(118) : see declaration of 'strcat'
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyFunctions.h(1204): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(112) : see declaration of 'strcpy'
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyFunctions.h(1219): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(112) : see declaration of 'strcpy'
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyFunctions.h(1262): warning C4800: 'UInt32' : forcing value to bool 'true' or 'false' (performance warning)
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyFunctions.h(1452): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(112) : see declaration of 'strcpy'
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/JohnnyFunctions.h(1468): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(112) : see declaration of 'strcpy'
+e:\modding\nvse\johnnyjip_new\jg\JohnnyGuitar/BMPHandling.h(57): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\stdio.h(211) : see declaration of 'fopen'
+JohnnyGuitarNVSE.cpp(99): warning C4996: 'strcpy': This function or variable may be unsafe. Consider using strcpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\string.h(112) : see declaration of 'strcpy'
+JohnnyGuitarNVSE.cpp(100): warning C4800: 'UINT' : forcing value to bool 'true' or 'false' (performance warning)
+JohnnyGuitarNVSE.cpp(101): warning C4800: 'UINT' : forcing value to bool 'true' or 'false' (performance warning)
+     Creating library E:\modding\NVSE\JohnnyJIP_new\JG\Release\johnnyguitar.lib and object E:\modding\NVSE\JohnnyJIP_new\JG\Release\johnnyguitar.exp
+  Generating code
+  Finished generating code
+  nvse_plugin_example.vcxproj -> E:\modding\NVSE\JohnnyJIP_new\JG\Release\johnnyguitar.dll
+          1 file(s) copied.
