@@ -307,9 +307,25 @@ NiAVObject *TESObjectREFR::GetNiBlock(const char *blockName)
 	return rootNode ? rootNode->GetBlock(blockName) : NULL;
 }
 
+void __fastcall checkExists(TESObjectREFR* thisObj, TESObjectREFR* arg) {
+	Console_Print("thisobj %i", thisObj->refID);
+	Console_Print("arg %i", arg->refID);
+}
+
+__declspec(naked) void ExistsHook() {
+	static const UInt32 retnAddr = 0x5A4228;
+	__asm {
+		mov ecx, eax
+		mov edx, [ebp+0x8]
+		call checkExists
+		jmp retnAddr
+	}
+}
+
 void HandleGameHooks()
 {
-//	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // WIP
+	//	WriteRelJump(0x5A421A, (UInt32)ExistsHook);
+	//	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // WIP
 	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
 	WriteRelJump(0x77D612, UInt32(LevelUpHook));
 	if (loadEditorIDs) LoadEditorIDs();

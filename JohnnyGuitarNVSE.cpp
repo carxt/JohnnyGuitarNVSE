@@ -180,6 +180,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(GetLifeState);
 	REG_CMD(GetRaceFlag);
 	REG_CMD(SetRaceFlag);
+	REG_CMD(GetContainerSound);
+	REG_CMD(SetContainerSound);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);

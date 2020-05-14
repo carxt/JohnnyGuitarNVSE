@@ -77,10 +77,51 @@ DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParamsJohnnyFourStrings);
 DEFINE_COMMAND_PLUGIN(GetLifeState, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetRaceFlag, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetRaceFlag, , 0, 3, kParamsJohnny_OneForm_TwoInts);
+DEFINE_COMMAND_PLUGIN(GetContainerSound, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetContainerSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
 #include "internal/decoding.h"
 float (__fastcall *GetBaseScale)(TESObjectREFR*) = (float(__fastcall *)(TESObjectREFR*)) 0x00567400;
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
+
+bool Cmd_SetContainerSound_Execute(COMMAND_ARGS) {
+	int whichSound = -1;
+	TESObjectCONT* container;
+	TESSound* newSound;
+	if (ExtractArgs(EXTRACT_ARGS, &container, &whichSound, &newSound) && IS_TYPE(container, TESObjectCONT) && IS_TYPE(newSound, TESSound)) {
+		switch (whichSound) {
+		case 0:
+			container->openSound = newSound;
+			break;
+		case 1:
+			container->closeSound = newSound;
+			break;
+		case 2:
+			container->randomLoopingSound = newSound;
+			break;
+		}
+	}
+	return true;
+}
+bool Cmd_GetContainerSound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	int whichSound = -1;
+	TESObjectCONT* container;
+	if (ExtractArgs(EXTRACT_ARGS, &container, &whichSound) && IS_TYPE(container, TESObjectCONT)) {
+		switch (whichSound) {
+		case 0:
+			*(UInt32*)result = container->openSound->refID;
+			break;
+		case 1:
+			*(UInt32*)result = container->closeSound->refID;
+			break;
+		case 2:
+			*(UInt32*)result = container->randomLoopingSound->refID;
+			break;
+		}
+	}
+	return true;
+}
 
 bool Cmd_GetRaceFlag_Execute(COMMAND_ARGS) {
 	TESRace* race;
