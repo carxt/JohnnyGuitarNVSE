@@ -205,24 +205,6 @@ bool Cmd_UnregisterEventHandlerScript_Execute(COMMAND_ARGS)
 	}
 }
 
-//DEFINE_COMMAND_PLUGIN(RegisterWasteMemoryEvent, , 0, 3, kParamsJohnnyEventOneForm_OneInt_OneOptionalForm);
-/*
-bool Cmd_RegisterWasteMemoryEvent_Execute(COMMAND_ARGS)
-{
-	Script* script;
-	UInt32 setOrRemove;
-	TESForm* filter1;
-
-	if (!(ExtractArgs(EXTRACT_ARGS, &script, &setOrRemove, &filter1) || !IS_TYPE(script, Script))) return true;
-	{
-		if (setOrRemove)
-			FuncEvent::RegisterEvent(script, filter1);
-		else RemoveEventFromGame(script, BaseEventContainer(FuncEvent::v_ScriptCallbacks.begin(), FuncEvent::v_ScriptCallbacks.end()));
-		return true;
-	}
-}
-*/
-
 
 
 
