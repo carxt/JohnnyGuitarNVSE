@@ -29,8 +29,10 @@ public:
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return false;
 		//RefUnorderedSet::const_iterator got = FilterSet->find(toSearch);
-		return  (FilterSet->find(toSearch) != FilterSet->end());
+		return  FilterSet->empty() || (FilterSet->find(toSearch) != FilterSet->end());
 	}
+
+
 	void InsertToFilter(UInt32 filterNum, unsigned int toInsert)
 	{
 		RefUnorderedSet* FilterSet;
@@ -56,10 +58,23 @@ public:
 class BaseEventClass
 {
 public:
-	UInt32 GetNumArgs();
-	UInt32 GetNumFilters();
+
 	Script* ScriptForEvent;
 	JohnnyEventFilters* eventFilter;
+	TESForm* Filters[2];
+	bool __forceinline IsInFilter(UInt32 filterNum, TESForm* form)
+	{
+		if (!form) return false;
+		return this->eventFilter->IsInFilter(filterNum, form->refID);
+	}
+
+	bool __forceinline IsBaseInFilter(UInt32 filterNum, TESForm* form)
+	{
+		if (!form) return false;
+		if (form->GetIsReference()) return this->eventFilter->IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->refID);
+		return this->eventFilter->IsInFilter(filterNum, form->refID);
+	}
+
 	void insertFormList(BGSListForm* List, UInt32 filter)
 	{
 		ListNode<TESForm>* iterator = ((BGSListForm*)List)->list.Head();
@@ -72,24 +87,24 @@ public:
 
 template<class T> using EventContainer = std::vector<T*>;
 typedef EventContainer<BaseEventClass> BaseEventContainer;
-
-void RemoveEventFromGame(Script* script, BaseEventContainer eContainer)
+/*
+void RemoveEventFromGame(Script* script, TESForm** filters)
 {
-	
+
 	auto it = eContainer.begin();
 	while (it != eContainer.end())
 	{
 		if ((*it)->ScriptForEvent == script)
 		{
-			delete (*it)->eventFilter;
+			for (int i = 0; i < )
+				delete (*it)->eventFilter;
 			delete (*it);
 			it = eContainer.erase(it);
-			
-		}
-		else it++;
-	}
-}
 
+		}
+		it++;
+	}
+}*/
 
 
 
