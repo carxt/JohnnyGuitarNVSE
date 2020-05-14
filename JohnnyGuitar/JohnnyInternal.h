@@ -108,3 +108,9 @@ void RemoveEventFromGame(Script* script, TESForm** filters)
 
 
 
+inline UInt32 RetrieveAddrFromDisp32Opcode(UInt32 address)
+{
+	//works for 5 byte opcodes like far call, far jmp, etc
+	//for a 6 byte opcode you should pass address + 1
+	return *(UInt32*)(address + 1) + address + 5;
+}

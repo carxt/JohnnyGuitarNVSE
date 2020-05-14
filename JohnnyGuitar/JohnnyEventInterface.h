@@ -61,6 +61,7 @@ public:
 		NewEvent->ScriptForEvent = script;
 		if (maxFilters)
 		{
+			for (int i = 0; i < maxFilters; i++) NewEvent->Filters[i] = filters[i];
 			NewEvent->eventFilter = new JohnnyEventFilters(maxFilters);
 			SetUpFiltering(this, NewEvent);
 		}
@@ -106,26 +107,34 @@ bool __fastcall GenericAcceptedParameter(TESForm* parameter)
 }
 
 
+bool TESForm::IsReference() { return typeID >= FormType::kFormType_TESObjectREFR && typeID <= FormType::kFormType_Creature; }
+
 void __fastcall GenericFilter(EventInformation* eventinfo, BaseEventClass* BaseToFilter)
 {
 	for (int i = 0; i < eventinfo->numMaxFilters; i++)
 	{
 		TESForm* currentFilter = BaseToFilter->Filters[i];
 		if (!currentFilter) continue;
-		if (currentFilter->GetIsReference()) continue;
+		if (currentFilter->GetIsReference())
+		{
+			BaseToFilter->eventFilter->InsertToFilter(i, ((TESObjectREFR*)currentFilter)->baseForm->refID);
+			continue;
+		}
 		if (IS_TYPE(currentFilter, BGSListForm))
 		{
+			//Console_Print("filter looping");
 			ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
 			do {
 				TESForm* it = iterator->data;
 				if (it->GetIsReference()) continue;
-				if (GenericAcceptedParameter(it))
+				if (eventinfo->IsAcceptedParameter(it))
 					BaseToFilter->eventFilter->InsertToFilter(i, it->refID);
 			} while (iterator = iterator->next);
 
 		}
 		else BaseToFilter->eventFilter->InsertToFilter(i, currentFilter->refID);
-
+		
+		
 	}
 
 	
@@ -172,11 +181,11 @@ DEFINE_COMMAND_PLUGIN(UnregisterEventHandlerScript, , 0, 7, kParamsJohnnyEventOn
 
 bool Cmd_RegisterEventHandlerScript_Execute(COMMAND_ARGS)
 {
-	Script* script;
-	TESForm* filters[4];
-	UInt32 flags;
+	Script* script = NULL;
+	TESForm* filters[4] = { NULL, NULL, NULL, NULL };
+	UInt32 flags = 0;
 	char EventName[MAX_PATH];
-	if (!(ExtractArgs(EXTRACT_ARGS,&EventName , &script, &flags, &filters[1], &filters[2], &filters[3], &filters[4]) || !IS_TYPE(script, Script))) return true;
+	if (!(ExtractArgs(EXTRACT_ARGS,&EventName , &script, &flags, &filters[0], &filters[1], &filters[2], &filters[3]) || !IS_TYPE(script, Script))) return true;
 	{	
 		EventInformation* EventHand = FindHandlerInfoByChar(EventName);
 		if (EventHand)
@@ -190,11 +199,11 @@ bool Cmd_RegisterEventHandlerScript_Execute(COMMAND_ARGS)
 
 bool Cmd_UnregisterEventHandlerScript_Execute(COMMAND_ARGS)
 {
-	Script* script;
-	TESForm* filters[4];
+	Script* script = NULL;
+	TESForm* filters[4] = { NULL, NULL, NULL, NULL };
+	UInt32 flags = 0;
 	char EventName[MAX_PATH];
-	UInt32 flags;
-	if (!(ExtractArgs(EXTRACT_ARGS, &EventName, &script, &flags, &filters[1], &filters[2], &filters[3], &filters[4]) || !IS_TYPE(script, Script))) return true;
+	if (!(ExtractArgs(EXTRACT_ARGS, &EventName, &script, &flags, &filters[0], &filters[1], &filters[2], &filters[3]) || !IS_TYPE(script, Script))) return true;
 	{
 		EventInformation* EventHand = FindHandlerInfoByChar(EventName);
 		if (EventHand)
@@ -204,6 +213,8 @@ bool Cmd_UnregisterEventHandlerScript_Execute(COMMAND_ARGS)
 		return true;
 	}
 }
+
+
 
 
 
