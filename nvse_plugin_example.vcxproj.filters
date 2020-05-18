@@ -171,6 +171,9 @@
     <ClInclude Include="JohnnyGuitar\JohnnyEventPredefinitions.h">
       <Filter>JohnnyGuitar</Filter>
     </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameUI.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

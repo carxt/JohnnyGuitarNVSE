@@ -53,6 +53,10 @@ ParamInfo kParamsJohnnyOneForm_OneInt_OneFloat[3] =
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Float", kParamType_Float, 0 }
 };
+ParamInfo kParamsJohnny_OneActorBase[1] =
+{
+	{ "ActorBase", kParamType_ActorBase, 0 },
+};
 ParamInfo kParamsJohnnyOneForm_OneInt_OneForm[3] =
 {
 	{ "Form", kParamType_AnyForm, 0 },

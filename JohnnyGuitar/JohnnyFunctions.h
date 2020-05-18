@@ -79,11 +79,23 @@ DEFINE_COMMAND_PLUGIN(GetRaceFlag, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetRaceFlag, , 0, 3, kParamsJohnny_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetContainerSound, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetContainerSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(GetCreatureCombatSkill, , 0, 1, kParamsJohnny_OneActorBase);
 #include "internal/decoding.h"
 float (__fastcall *GetBaseScale)(TESObjectREFR*) = (float(__fastcall *)(TESObjectREFR*)) 0x00567400;
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
-
+bool Cmd_GetCreatureCombatSkill_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCreature *creature = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &creature) && IS_TYPE(creature, TESCreature)) {
+			*result = creature->combatSkill;
+			if (IsConsoleMode()) {
+				Console_Print("GetCreatureCombatSkill >> %.f", *result);
+			}
+	}
+	return true;
+}
 bool Cmd_SetContainerSound_Execute(COMMAND_ARGS) {
 	int whichSound = -1;
 	TESObjectCONT* container;
