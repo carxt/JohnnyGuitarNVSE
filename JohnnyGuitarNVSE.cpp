@@ -14,6 +14,7 @@
 #include "nvse/GameUI.cpp"
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
+#include "JohnnyGuitar/JohnnyEventPredefinitions.h"
 #include "JohnnyGuitar/misc.h"
 #include "JohnnyGuitar/WorldToScreen.h"
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
@@ -22,6 +23,8 @@
 #include "JohnnyGuitar/JohnnyFunctions.h"
 #include "JohnnyGuitar/BMPHandling.h"
 #include "internal/decoding.h"
+#include "JohnnyGuitar/JohnnyEvents.h"
+
 HMODULE JohnnyHandle;
 IDebugLog		gLog;
 
@@ -186,6 +189,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
+	initEventHooksAndFunctions(nvse);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	if (!nvse->isEditor) {
 		NVSEDataInterface *nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
