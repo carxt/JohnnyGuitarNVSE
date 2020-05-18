@@ -239,11 +239,10 @@
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="JohnnyGuitar\BMPHandling.h" />
     <ClInclude Include="JohnnyGuitar\EditorIDs.h" />
-    <ClInclude Include="JohnnyGuitar\JohnnyEventInterface.h" />
+    <ClInclude Include="JohnnyGuitar\EventFilteringInterface.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyEventPredefinitions.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyFunctions.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyGuitarNVSE.h" />
-    <ClInclude Include="JohnnyGuitar\JohnnyH.h" />
-    <ClInclude Include="JohnnyGuitar\JohnnyInternal.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyParams.h" />
     <ClInclude Include="JohnnyGuitar\misc.h" />
     <ClInclude Include="JohnnyGuitar\WorldToScreen.h" />

@@ -165,13 +165,10 @@
     <ClInclude Include="JohnnyGuitar\EditorIDs.h">
       <Filter>JohnnyGuitar</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyH.h">
+    <ClInclude Include="JohnnyGuitar\EventFilteringInterface.h">
       <Filter>JohnnyGuitar</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyEventInterface.h">
-      <Filter>JohnnyGuitar</Filter>
-    </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyInternal.h">
+    <ClInclude Include="JohnnyGuitar\JohnnyEventPredefinitions.h">
       <Filter>JohnnyGuitar</Filter>
     </ClInclude>
   </ItemGroup>

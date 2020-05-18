@@ -14,6 +14,7 @@
 #include "nvse/GameUI.cpp"
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
+#include "internal/decoding.h"
 #include "JohnnyGuitar/JohnnyEventPredefinitions.h"
 #include "JohnnyGuitar/misc.h"
 #include "JohnnyGuitar/WorldToScreen.h"
@@ -22,7 +23,6 @@
 #include "JohnnyGuitar/EditorIDs.h"
 #include "JohnnyGuitar/JohnnyFunctions.h"
 #include "JohnnyGuitar/BMPHandling.h"
-#include "internal/decoding.h"
 #include "JohnnyGuitar/JohnnyEvents.h"
 
 HMODULE JohnnyHandle;
@@ -58,7 +58,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 
 	if (nvse->isNogore) 
 	{
-		_ERROR("Unsupported");
+		_ERROR("NV noGore is unsupported");
 		return false;
 	}
 
