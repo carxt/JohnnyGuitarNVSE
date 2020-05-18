@@ -63,6 +63,7 @@ public:
 	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 filterNum) = 0;
 	//Function used by the filter to check if the object passed is an accepted parameter
 	virtual bool IsAcceptedParameter(GenericFilters toCheck) = 0;
+	virtual UInt32 GetNumFilters() { return numFilters; }
 
 };
 
@@ -77,3 +78,13 @@ public:
 
 EventContainerInterface* (_cdecl* CreateScriptEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CustomConstructor)( void**, UInt32) );
 void (__cdecl* FreeScriptEvent)(EventContainerInterface*& toRemove);
+
+class BaseEventClass
+{
+public:
+
+	Script* ScriptForEvent;
+	EventHandlerInterface* eventFilter;
+
+};
+

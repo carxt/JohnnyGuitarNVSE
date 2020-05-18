@@ -9,7 +9,7 @@ EventInformation* OnStopQuestHandler;
 
 void __stdcall handleDyingEvent(TESObjectREFR* thisObj) {
 	for (auto const& callback : OnDyingHandler->EventCallbacks) 
-		if (callback.eventFilter->IsBaseInFilter(0, thisObj)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnDyingHandler->numMaxArgs, thisObj);
 		}

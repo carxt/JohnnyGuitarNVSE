@@ -41,7 +41,6 @@ public:
 		delete[] Filters;
 		delete[] GenFilters;
 	}
-	UInt32 GetNumFilters() { return numFilters; }
 
 	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch)
 	{
@@ -129,21 +128,6 @@ public:
 		} while (iterator = iterator->next);
 	}
 };
-class BaseEventClass
-{
-public:
-	/*BaseEventClass(){
-	}
-	~BaseEventClass()
-	{
-		delete eventFilter;
-		delete[] Filters;
-	}*/
-	Script* ScriptForEvent;
-	JohnnyEventFiltersForm* eventFilter;
-
-};
-
 
 
 
