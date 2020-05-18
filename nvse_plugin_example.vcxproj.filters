@@ -93,9 +93,6 @@
     <ClInclude Include="..\nvse\nvse\GameForms.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="..\nvse\nvse\GameMenus.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameObjects.h">
       <Filter>nvse</Filter>
     </ClInclude>
@@ -169,6 +166,9 @@
       <Filter>JohnnyGuitar</Filter>
     </ClInclude>
     <ClInclude Include="JohnnyGuitar\JohnnyEventPredefinitions.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyEvents.h">
       <Filter>JohnnyGuitar</Filter>
     </ClInclude>
   </ItemGroup>

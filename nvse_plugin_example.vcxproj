@@ -220,7 +220,6 @@
     <ClInclude Include="..\nvse\nvse\GameEffects.h" />
     <ClInclude Include="..\nvse\nvse\GameExtraData.h" />
     <ClInclude Include="..\nvse\nvse\GameForms.h" />
-    <ClInclude Include="..\nvse\nvse\GameMenus.h" />
     <ClInclude Include="..\nvse\nvse\GameObjects.h" />
     <ClInclude Include="..\nvse\nvse\GameOSDepend.h" />
     <ClInclude Include="..\nvse\nvse\GameRTTI.h" />
@@ -241,6 +240,7 @@
     <ClInclude Include="JohnnyGuitar\EditorIDs.h" />
     <ClInclude Include="JohnnyGuitar\EventFilteringInterface.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyEventPredefinitions.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyEvents.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyFunctions.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyGuitarNVSE.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyParams.h" />
