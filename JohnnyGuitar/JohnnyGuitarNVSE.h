@@ -369,6 +369,7 @@ void HandleGameHooks()
 	if (fixHighNoon) {
 		WriteRelJump((UInt32)0x063F56C, (UInt32)HookforIMOD1);
 		WriteRelJump((UInt32)0x063F5ED, (UInt32)HookforIMOD2);
+
 	}
 	//ContainerMenuDestroy = (void* (__thiscall*)(ContainerMenu*, bool)) (*(UInt32*)0x10721AC);
 	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
