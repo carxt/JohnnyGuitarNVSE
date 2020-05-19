@@ -322,6 +322,43 @@ __declspec(naked) void ExistsHook() {
 	}
 }
 
+
+
+
+
+//kept because i like it 
+
+/*void* (__thiscall* ContainerMenuDestroy)(ContainerMenu*, bool);
+void __fastcall CompanionBarterEndHook(ContainerMenu* menu, UInt32 EDX, bool doFree)
+{
+	Actor* Acteur = (Actor*)menu->containerRef;
+	if (Acteur && Acteur->IsActor())
+	{
+		Acteur->unk7C = 1;
+		Acteur->unk7D = 0;
+	}
+	ContainerMenuDestroy(menu, doFree);
+}
+*/
+__declspec(naked) void OnCloseContainerHook()
+{
+	static const UInt32 retnAddr = 0x75B240;
+	__asm
+	{
+		push    ecx
+		mov     ecx, [ecx + 0x74]
+		test    ecx, ecx
+		jz      done
+		mov     eax, [ecx]
+		call    dword ptr[eax + 0x100]
+		test    al, al
+		jz      done
+		mov     word ptr[ecx + 0x7C], 1
+		done:
+		pop     ecx
+			jmp     retnAddr
+	}
+}
 void HandleGameHooks()
 {
 	//	WriteRelJump(0x5A421A, (UInt32)ExistsHook);
@@ -333,7 +370,16 @@ void HandleGameHooks()
 		WriteRelJump((UInt32)0x063F56C, (UInt32)HookforIMOD1);
 		WriteRelJump((UInt32)0x063F5ED, (UInt32)HookforIMOD2);
 	}
+	//ContainerMenuDestroy = (void* (__thiscall*)(ContainerMenu*, bool)) (*(UInt32*)0x10721AC);
+	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
+
+
 }
+
+
+
+
+
 static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 {
 	DWORD d = 0;

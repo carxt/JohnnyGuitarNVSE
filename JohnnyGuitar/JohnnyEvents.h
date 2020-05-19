@@ -86,7 +86,7 @@ bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS)
 		if (OnDyingHandler)
 		{
 			if (setOrRemove)
-				OnDyingHandler->RegisterEvent(script, (void**)filter);
+				OnDyingHandler->RegisterEventForGame(script, (void**)filter);
 			else OnDyingHandler->RemoveEventFromGame(script, (void**)filter);
 
 		}
@@ -108,7 +108,7 @@ bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS)
 		if (OnStartQuestHandler)
 		{
 			if (setOrRemove)
-				OnStartQuestHandler->RegisterEvent(script, (void**)filter);
+				OnStartQuestHandler->RegisterEventForGame(script, (void**)filter);
 			else OnStartQuestHandler->RemoveEventFromGame(script, (void**)filter);
 
 		}
@@ -128,7 +128,7 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
 		if (OnStopQuestHandler)
 		{
 			if (setOrRemove)
-				OnStopQuestHandler->RegisterEvent(script, (void**)filter);
+				OnStopQuestHandler->RegisterEventForGame(script, (void**)filter);
 			else OnStopQuestHandler->RemoveEventFromGame(script, (void**)filter);
 
 		}

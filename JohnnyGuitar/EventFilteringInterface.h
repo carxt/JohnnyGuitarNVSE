@@ -71,8 +71,11 @@ public:
 class EventContainerInterface
 {
 public:
-	void virtual RegisterEvent(Script* script, void** filters);
-	void virtual RemoveEvent(Script* script, void** filters);
+	void virtual RegisterEventForGame(Script* script, void** filters) = 0;
+	void virtual RemoveEventFromGame(Script* script, void** filters) = 0;
+	const char* EventName;
+	UInt8 numMaxArgs;
+	UInt8 numMaxFilters;
 };
 
 
