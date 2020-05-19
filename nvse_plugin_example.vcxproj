@@ -227,6 +227,7 @@
     <ClInclude Include="..\nvse\nvse\GameTasks.h" />
     <ClInclude Include="..\nvse\nvse\GameTiles.h" />
     <ClInclude Include="..\nvse\nvse\GameTypes.h" />
+    <ClInclude Include="..\nvse\nvse\GameUI.h" />
     <ClInclude Include="..\nvse\nvse\SafeWrite.h" />
     <ClInclude Include="..\nvse\nvse\Utilities.h" />
     <ClInclude Include="internal\containers.h" />

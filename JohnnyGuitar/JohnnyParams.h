@@ -47,11 +47,23 @@ ParamInfo kParamsJohnny_OneString_OneInt[2] =
 	{ "Integer", kParamType_Integer, 0 },
 };
 
+ParamInfo kParamsJohnnyEventOneFormFilter[4] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+	{ "Form", kParamType_AnyForm, 1 }
+
+};
 ParamInfo kParamsJohnnyOneForm_OneInt_OneFloat[3] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Float", kParamType_Float, 0 }
+};
+ParamInfo kParamsJohnny_OneActorBase[1] =
+{
+	{ "ActorBase", kParamType_ActorBase, 0 },
 };
 ParamInfo kParamsJohnnyOneForm_OneInt_OneForm[3] =
 {
