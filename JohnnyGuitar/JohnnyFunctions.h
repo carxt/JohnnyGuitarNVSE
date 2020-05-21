@@ -39,7 +39,7 @@ DEFINE_COMMAND_PLUGIN(GetBufferedCellsAlt, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(GetActorValueModifierAlt, GetAVModAlt, , 1, 2, kParamsJohnny_OneActorValue_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(RefAddr, , 0, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(RefAddr, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetMusicTypePath, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetMusicTypeDB, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetMusicTypeDB, , 0, 2, kParams_OneForm_OneFloat);
@@ -729,13 +729,8 @@ bool Cmd_SetMusicTypeDB_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
-	TESForm* form;
-	if (thisObj) 
-		Console_Print("0x%08X", thisObj);	
-	else if (ExtractArgs(EXTRACT_ARGS, &form) && form)
-		Console_Print("0x%08X", form);
+	Console_Print("0x%08X", thisObj);
 	return true;
-
 }
 bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 	__asm int 3

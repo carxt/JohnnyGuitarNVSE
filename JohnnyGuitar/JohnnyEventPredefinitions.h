@@ -149,17 +149,20 @@ NVSEArrayElement e_eventResult;
 
 
 
-class EventInformation : public EventContainerInterface
+class EventInformation
 {
 private:
 	void* (__fastcall* CreateFilter)(void**, UInt32); // supposed to be passing itself
 public:
+	const char* EventName;
+	UInt8 numMaxArgs;
+	UInt8 numMaxFilters;
 	std::vector<BaseEventClass> EventCallbacks;
 	EventInformation(const char* EventName, UInt8& numMaxArgs, UInt8& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32))
 	{
-		/*this->EventName = EventName;
+		this->EventName = EventName;
 		this->numMaxArgs = numMaxArgs;
-		this->numMaxFilters = numMaxFilters;*/
+		this->numMaxFilters = numMaxFilters;
 		this->CreateFilter = GenericCreateFilterFunction;
 		if (CreatorFunction) this->CreateFilter = CreatorFunction;
 	}
@@ -174,7 +177,7 @@ public:
 	}
 
 
-	void virtual RegisterEventForGame(Script* script, void** filters)
+	void virtual RegisterEvent(Script* script, void** filters)
 	{
 		UInt32 maxFilters = this->numMaxFilters;
 		for (std::vector<BaseEventClass>::iterator it = this->EventCallbacks.begin(); it != this->EventCallbacks.end(); ++it)

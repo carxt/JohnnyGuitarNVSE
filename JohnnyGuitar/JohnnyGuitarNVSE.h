@@ -11,13 +11,13 @@
 
 
 
-NVSEArrayVarInterface *ArrIfc = NULL;
-NVSEStringVarInterface *StrIfc = NULL;
-NVSEMessagingInterface *g_msg = NULL;
-NVSEScriptInterface *g_script = NULL;
-NVSECommandTableInterface *CmdIfc = NULL; 
+NVSEArrayVarInterface* ArrIfc = NULL;
+NVSEStringVarInterface* StrIfc = NULL;
+NVSEMessagingInterface* g_msg = NULL;
+NVSEScriptInterface* g_script = NULL;
+NVSECommandTableInterface* CmdIfc = NULL;
 InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
-float(*GetWeaponDPS)(ActorValueOwner *avOwner, TESObjectWEAP *weapon, float condition, UInt8 arg4, ContChangesEntry *entry, UInt8 arg6, UInt8 arg7, int arg8, float arg9, float arg10, UInt8 arg11, UInt8 arg12, TESForm *ammo) =
+float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, UInt8 arg4, ContChangesEntry* entry, UInt8 arg6, UInt8 arg7, int arg8, float arg9, float arg10, UInt8 arg11, UInt8 arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, UInt8, ContChangesEntry*, UInt8, UInt8, int, float, float, UInt8, UInt8, TESForm*))0x645380;
 bool isShowLevelUp = true;
 char* StrArgBuf;
@@ -34,8 +34,8 @@ bool fixHighNoon = 0;
 namespace SpecialCaseEDIDs {
 	void Handle();
 }
-	
-__declspec(naked) bool __fastcall HasSeenData(TESObjectCELL *cell) {
+
+__declspec(naked) bool __fastcall HasSeenData(TESObjectCELL* cell) {
 	__asm {
 		push	kExtraData_SeenData
 		add		ecx, 0x28
@@ -45,16 +45,16 @@ __declspec(naked) bool __fastcall HasSeenData(TESObjectCELL *cell) {
 		retn
 	}
 }
-__declspec(naked) SInt32 __fastcall GetDetachTime(TESObjectCELL *cell) {
+__declspec(naked) SInt32 __fastcall GetDetachTime(TESObjectCELL* cell) {
 	__asm {
 		push	kExtraData_DetachTime
 		add		ecx, 0x28
 		call	BaseExtraList::GetByType
 		test	eax, eax
 		jz done
-		mov eax, [eax+0xC]
+		mov eax, [eax + 0xC]
 		done:
-			retn
+		retn
 	}
 }
 __declspec(naked) void Tile::SetFloat(UInt32 id, float fltVal, bool bPropagate)
@@ -68,7 +68,7 @@ __declspec(naked) float ExtraContainerChanges::EntryData::GetItemHealthPerc(bool
 	static const UInt32 procAddr = 0x4BCDB0;
 	__asm	jmp		procAddr
 }
-__declspec(naked) ContChangesEntry *ExtraContainerChanges::EntryDataList::FindForItem(TESForm *item)
+__declspec(naked) ContChangesEntry* ExtraContainerChanges::EntryDataList::FindForItem(TESForm* item)
 {
 	__asm
 	{
@@ -83,7 +83,7 @@ __declspec(naked) ContChangesEntry *ExtraContainerChanges::EntryDataList::FindFo
 		mov		ecx, [ecx + 4]
 			test	ecx, ecx
 			jnz		listIter
-			xor		eax, eax
+			xor eax, eax
 			done :
 		retn	4
 	}
@@ -112,28 +112,28 @@ float __declspec(naked) __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiV
 		ret
 	}
 }
-NiNode *NiNode::GetNode(const char *nodeName)
+NiNode* NiNode::GetNode(const char* nodeName)
 {
-	NiAVObject *found = GetBlock(nodeName);
+	NiAVObject* found = GetBlock(nodeName);
 	return found ? found->GetNiNode() : NULL;
 }
-NiNode *TESObjectREFR::GetNode(const char *nodeName)
+NiNode* TESObjectREFR::GetNode(const char* nodeName)
 {
-	NiNode *rootNode = GetNiNode();
+	NiNode* rootNode = GetNiNode();
 	return rootNode ? (*nodeName ? rootNode->GetNode(nodeName) : rootNode) : NULL;
 }
-hkpRigidBody *TESObjectREFR::GetRigidBody(const char *nodeName)
+hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName)
 {
-	NiNode *rootNode = GetNiNode();
+	NiNode* rootNode = GetNiNode();
 	if (rootNode)
 	{
-		NiNode *targetNode = rootNode->GetNode(nodeName);
+		NiNode* targetNode = rootNode->GetNode(nodeName);
 		if (targetNode && targetNode->m_collisionObject)
 		{
-			bhkWorldObject *hWorldObj = targetNode->m_collisionObject->worldObj;
+			bhkWorldObject* hWorldObj = targetNode->m_collisionObject->worldObj;
 			if (hWorldObj)
 			{
-				hkpRigidBody *rigidBody = (hkpRigidBody*)hWorldObj->refObject;
+				hkpRigidBody* rigidBody = (hkpRigidBody*)hWorldObj->refObject;
 				UInt8 motionType = rigidBody->motion.type;
 				if ((motionType == 2) || (motionType == 3) || (motionType == 6))
 					return rigidBody;
@@ -142,7 +142,7 @@ hkpRigidBody *TESObjectREFR::GetRigidBody(const char *nodeName)
 	}
 	return NULL;
 }
-__declspec(naked) ExtraContainerChanges::EntryDataList *TESObjectREFR::GetContainerChangesList()
+__declspec(naked) ExtraContainerChanges::EntryDataList* TESObjectREFR::GetContainerChangesList()
 {
 	__asm
 	{
@@ -161,7 +161,7 @@ __declspec(naked) ExtraContainerChanges::EntryDataList *TESObjectREFR::GetContai
 }
 UInt8 TESForm::GetOverridingModIdx()
 {
-	ModInfo *info = mods.GetLastItem();
+	ModInfo* info = mods.GetLastItem();
 	return info ? info->modIndex : 0xFF;
 }
 _declspec(naked) void LevelUpHook() {
@@ -169,10 +169,10 @@ _declspec(naked) void LevelUpHook() {
 	static const UInt32 showAddr = 0x77D618;
 	_asm {
 		jne noLevelUp
-		cmp dword ptr ds : [isShowLevelUp], 0
+		cmp dword ptr ds : [isShowLevelUp] , 0
 		je noLevelUp
 		jmp showAddr
-		noLevelUp:
+		noLevelUp :
 		jmp noShowAddr
 	}
 }
@@ -184,7 +184,8 @@ __declspec(naked) void SetEditorIdHook() {
 	__asm jmp TESForm::hk_SetEditorId
 }
 __declspec(naked) void SetEditorIdHook_REFR()
-{	__asm jmp TESForm::hk_SetEditorID_REFR
+{
+	__asm jmp TESForm::hk_SetEditorID_REFR
 }
 const char* __fastcall ConsoleNameHook(TESObjectREFR* ref) {
 	const char* name = ref->baseForm->GetTheName();
@@ -206,7 +207,8 @@ void LoadEditorIDs() {
 			SafeWrite32(TESForm_Vtables[i] + 0x134, (UInt32)SetEditorIdHook);
 	}
 	for (uint32_t i = 0; i < ARRAYSIZE(TESForm_REFR_Vtables); i++)
-	{		if (*(uintptr_t*)(TESForm_REFR_Vtables[i] + 0x130) == 0x00401280)
+	{
+		if (*(uintptr_t*)(TESForm_REFR_Vtables[i] + 0x130) == 0x00401280)
 			SafeWrite32(TESForm_REFR_Vtables[i] + 0x130, (UInt32)GetNameHook);
 
 		if (*(uintptr_t*)(TESForm_REFR_Vtables[i] + 0x134) == 0x00401290)
@@ -284,16 +286,16 @@ __declspec(naked) void InventoryAmmoHook() {
 		jmp retnAddr
 	}
 }
-NiAVObject *NiNode::GetBlock(const char *blockName)
+NiAVObject* NiNode::GetBlock(const char* blockName)
 {
 	if (StrEqualCI(m_blockName, blockName))
 		return this;
-	NiAVObject *found = NULL;
+	NiAVObject* found = NULL;
 	for (NiTArray<NiAVObject*>::Iterator iter(m_children); !iter.End(); ++iter)
 	{
 		if (!*iter) continue;
 		if (iter->GetNiNode())
-			found = ((NiNode*)*iter)->GetBlock(blockName);
+			found = ((NiNode*)* iter)->GetBlock(blockName);
 		else if (StrEqualCI(iter->m_blockName, blockName))
 			found = *iter;
 		else continue;
@@ -301,9 +303,9 @@ NiAVObject *NiNode::GetBlock(const char *blockName)
 	}
 	return found;
 }
-NiAVObject *TESObjectREFR::GetNiBlock(const char *blockName)
+NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName)
 {
-	NiNode *rootNode = GetNiNode();
+	NiNode* rootNode = GetNiNode();
 	return rootNode ? rootNode->GetBlock(blockName) : NULL;
 }
 
@@ -316,7 +318,7 @@ __declspec(naked) void ExistsHook() {
 	static const UInt32 retnAddr = 0x5A4228;
 	__asm {
 		mov ecx, eax
-		mov edx, [ebp+0x8]
+		mov edx, [ebp + 0x8]
 		call checkExists
 		jmp retnAddr
 	}
@@ -369,7 +371,6 @@ void HandleGameHooks()
 	if (fixHighNoon) {
 		WriteRelJump((UInt32)0x063F56C, (UInt32)HookforIMOD1);
 		WriteRelJump((UInt32)0x063F5ED, (UInt32)HookforIMOD2);
-
 	}
 	//ContainerMenuDestroy = (void* (__thiscall*)(ContainerMenu*, bool)) (*(UInt32*)0x10721AC);
 	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
@@ -387,7 +388,7 @@ static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 	VirtualProtect((LPVOID)Address, Size, PAGE_EXECUTE_READWRITE, &d);
 
 	for (SIZE_T i = 0; i < Size; i++)
-		*(volatile BYTE *)(Address + i) = 0x90; //0x90 == opcode for NOP
+		* (volatile BYTE*)(Address + i) = 0x90; //0x90 == opcode for NOP
 
 	VirtualProtect((LPVOID)Address, Size, d, &d);
 
@@ -416,8 +417,8 @@ bool removeFiles(char* folder1)
 }
 
 TESRegionDataWeather* GetWeatherData(TESRegion* region) {
-	ListNode<TESRegionData> *iter = region->dataEntries->Head();
-	TESRegionData *regData;
+	ListNode<TESRegionData>* iter = region->dataEntries->Head();
+	TESRegionData* regData;
 	do
 	{
 		regData = iter->data;

@@ -10,7 +10,7 @@ EventInformation* OnStopQuestHandler;
 
 
 void __stdcall handleDyingEvent(TESObjectREFR* thisObj) {
-	for (auto const& callback : OnDyingHandler->EventCallbacks) 
+	for (auto const& callback : OnDyingHandler->EventCallbacks)
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnDyingHandler->numMaxArgs, thisObj);
@@ -21,7 +21,7 @@ void __stdcall handleDyingEvent(TESObjectREFR* thisObj) {
 void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
 	EventInformation* thisEvent = IsStarted ? OnStartQuestHandler : OnStopQuestHandler;
 	for (auto const& callback : thisEvent->EventCallbacks)
-		if (callback.eventFilter->IsInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, thisEvent->numMaxArgs, Quest);
 		}
@@ -33,13 +33,13 @@ __declspec (naked) void OnDyingEventAsm()
 {
 	__asm
 	{
-		cmp dword ptr [ebp+8], 1
+		cmp dword ptr[ebp + 8], 1
 		jnz done
 		push dword ptr[ebp - 0x2C]
 		call handleDyingEvent
-		done:
-		mov ecx, dword ptr [ebp-0x2C]
-		jmp OnDyingOriginalCall
+		done :
+		mov ecx, dword ptr[ebp - 0x2C]
+			jmp OnDyingOriginalCall
 	}
 }
 
@@ -47,7 +47,7 @@ __declspec (naked) void OnQuestStartStopEventAsm()
 {
 	__asm
 	{
-		mov ecx, dword ptr[ebp-4]
+		mov ecx, dword ptr[ebp - 4]
 		mov dl, byte ptr[ebp + 8]
 		call handleQuestStartStop
 		mov esp, ebp
@@ -67,7 +67,7 @@ bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS)
 		if (OnDyingHandler)
 		{
 			if (setOrRemove)
-				OnDyingHandler->RegisterEventForGame(script, (void**)filter);
+				OnDyingHandler->RegisterEvent(script, (void**)filter);
 			else OnDyingHandler->RemoveEventFromGame(script, (void**)filter);
 
 		}
@@ -86,7 +86,7 @@ bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS)
 		if (OnStartQuestHandler)
 		{
 			if (setOrRemove)
-				OnStartQuestHandler->RegisterEventForGame(script, (void**)filter);
+				OnStartQuestHandler->RegisterEvent(script, (void**)filter);
 			else OnStartQuestHandler->RemoveEventFromGame(script, (void**)filter);
 
 		}
@@ -106,7 +106,7 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
 		if (OnStopQuestHandler)
 		{
 			if (setOrRemove)
-				OnStopQuestHandler->RegisterEventForGame(script, (void**)filter);
+				OnStopQuestHandler->RegisterEvent(script, (void**)filter);
 			else OnStopQuestHandler->RemoveEventFromGame(script, (void**)filter);
 
 		}
