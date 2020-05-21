@@ -10,7 +10,7 @@ EventInformation* OnStopQuestHandler;
 
 
 void __stdcall handleDyingEvent(TESObjectREFR* thisObj) {
-	for (auto const& callback : OnDyingHandler->EventCallbacks) 
+	for (auto const& callback : OnDyingHandler->EventCallbacks)
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnDyingHandler->numMaxArgs, thisObj);
@@ -33,13 +33,13 @@ __declspec (naked) void OnDyingEventAsm()
 {
 	__asm
 	{
-		cmp dword ptr [ebp+8], 1
+		cmp dword ptr[ebp + 8], 1
 		jnz done
 		push dword ptr[ebp - 0x2C]
 		call handleDyingEvent
-		done:
-		mov ecx, dword ptr [ebp-0x2C]
-		jmp OnDyingOriginalCall
+		done :
+		mov ecx, dword ptr[ebp - 0x2C]
+			jmp OnDyingOriginalCall
 	}
 }
 
@@ -47,7 +47,7 @@ __declspec (naked) void OnQuestStartStopEventAsm()
 {
 	__asm
 	{
-		mov ecx, dword ptr[ebp-4]
+		mov ecx, dword ptr[ebp - 4]
 		mov dl, byte ptr[ebp + 8]
 		call handleQuestStartStop
 		mov esp, ebp
