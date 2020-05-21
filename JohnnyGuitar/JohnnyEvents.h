@@ -1,5 +1,7 @@
 #pragma once
-
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnDyingEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnStartQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnStopQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 
 
 EventInformation* OnDyingHandler;
@@ -16,12 +18,10 @@ void __stdcall handleDyingEvent(TESObjectREFR* thisObj) {
 }
 
 
-
-
 void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
 	EventInformation* thisEvent = IsStarted ? OnStartQuestHandler : OnStopQuestHandler;
 	for (auto const& callback : thisEvent->EventCallbacks)
-		if (callback.eventFilter->IsInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, thisEvent->numMaxArgs, Quest);
 		}
@@ -56,25 +56,6 @@ __declspec (naked) void OnQuestStartStopEventAsm()
 	}
 }
 
-
-
-
-
-
-
-ParamInfo kParamsJohnnyEventOneFormFilter[4] =
-{
-	{ "setOrRemove", kParamType_Integer, 0 },
-	{ "Script", kParamType_AnyForm, 0 },
-	{ "flags", kParamType_Integer, 1 },
-	{ "Form", kParamType_AnyForm, 1 }
-
-};
-
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnDyingEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnStartQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnStopQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-
 bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
@@ -93,9 +74,6 @@ bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS)
 		return true;
 	}
 }
-
-
-
 
 bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS)
 {
@@ -137,7 +115,6 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
 }
 
 
-
 void initEventHooksAndFunctions(const NVSEInterface* nvse)
 {
 
@@ -159,5 +136,3 @@ void initEventHooksAndFunctions(const NVSEInterface* nvse)
 	}
 
 }
-
-
