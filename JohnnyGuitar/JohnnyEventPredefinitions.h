@@ -115,7 +115,6 @@ public:
 
 	__forceinline bool IsBaseInFilter(UInt32 filterNum, TESForm* form)
 	{
-		//Returns if some base form is in the filter
 		if (!form) return false;
 		if (form->GetIsReference()) return IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->refID);
 		return IsInFilter(filterNum, form->refID);
