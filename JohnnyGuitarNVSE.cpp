@@ -185,12 +185,18 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetRaceFlag);
 	REG_CMD(GetContainerSound);
 	REG_CMD(SetContainerSound);
+	//Events
+	REG_CMD(SetJohnnyOnDyingEventHandler);
+	REG_CMD(SetJohnnyOnStartQuestEventHandler);
+	REG_CMD(SetJohnnyOnStopQuestEventHandler);
+	REG_CMD(DisableMuzzleFlashLights);
+	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
+	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
+	initEventHooks(nvse);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
-	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
-	initEventHooksAndFunctions(nvse);
-	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
+
 	if (!nvse->isEditor) {
 		NVSEDataInterface *nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 		InventoryRefGetForID = (InventoryRef* (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);

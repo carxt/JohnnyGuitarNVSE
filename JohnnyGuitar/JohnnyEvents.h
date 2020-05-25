@@ -115,12 +115,9 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
 }
 
 
-void initEventHooksAndFunctions(const NVSEInterface* nvse)
+void initEventHooks(const NVSEInterface* nvse)
 {
 
-	REG_CMD(SetJohnnyOnDyingEventHandler);
-	REG_CMD(SetJohnnyOnStartQuestEventHandler);
-	REG_CMD(SetJohnnyOnStopQuestEventHandler);
 
 	if (!(nvse->isEditor))
 	{

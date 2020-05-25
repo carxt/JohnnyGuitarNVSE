@@ -80,6 +80,8 @@ DEFINE_COMMAND_PLUGIN(SetRaceFlag, , 0, 3, kParamsJohnny_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetContainerSound, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetContainerSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetCreatureCombatSkill, , 0, 1, kParamsJohnny_OneActorBase);
+DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
+
 #include "internal/decoding.h"
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
@@ -1505,5 +1507,23 @@ bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 		*(float*)(0x11DFED4) = shakeMult;
 		*(float*)(0x11DFED8) = time;
 	}
+	return true;
+}
+
+
+bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
+	UInt8* CodeToPatch = (UInt8*)0x9BB813;
+	UInt32 Disable = (UInt32)-1;
+	if (ExtractArgs(EXTRACT_ARGS, &Disable) && (*CodeToPatch == 0x74 || *CodeToPatch == 0xEB) && Disable <= 1)
+	{
+		if (Disable)
+			SafeWrite8((UInt32)CodeToPatch, 0xEB);
+
+		else
+			SafeWrite8((UInt32)CodeToPatch, 0x74);
+	}
+
+	*(UInt32*)result = (*CodeToPatch == 0xEB);
+	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %u", *result);
 	return true;
 }
