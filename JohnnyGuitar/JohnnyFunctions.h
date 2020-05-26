@@ -81,6 +81,8 @@ DEFINE_COMMAND_PLUGIN(GetContainerSound, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetContainerSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetCreatureCombatSkill, , 0, 1, kParamsJohnny_OneActorBase);
 DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParamsJohnny_OneForm_OneString);
+
 
 #include "internal/decoding.h"
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
@@ -1511,19 +1513,82 @@ bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 }
 
 
-bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
-	UInt8* CodeToPatch = (UInt8*)0x9BB813;
-	UInt32 Disable = (UInt32)-1;
-	if (ExtractArgs(EXTRACT_ARGS, &Disable) && (*CodeToPatch == 0x74 || *CodeToPatch == 0xEB) && Disable <= 1)
+
+UInt32 DoSkipMuzzleLights = -1;
+
+__declspec (naked) void DisableMuzzleFlashLightsHook()
+{
+	static const UInt32 retAddrDisable = 0x9BB843;
+	static const UInt32 retAddrKeep = 0x9BB81A;
+	__asm
 	{
-		if (Disable)
-			SafeWrite8((UInt32)CodeToPatch, 0xEB);
-
-		else
-			SafeWrite8((UInt32)CodeToPatch, 0x74);
+		cmp DoSkipMuzzleLights, 1
+		jz Skip
+		push 1
+		mov ecx, [ebp-4]
+		jmp retAddrKeep
+		Skip:
+		jmp retAddrDisable
 	}
+}
 
-	*(UInt32*)result = (*CodeToPatch == 0xEB);
+
+
+
+bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
+	UInt32 toExtract = -1;
+	if (ExtractArgs(EXTRACT_ARGS, &toExtract) && toExtract <= 1) DoSkipMuzzleLights = toExtract;
+	*(UInt32*)result = (DoSkipMuzzleLights == 1);
 	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %u", *result);
+	return true;
+}
+
+
+
+
+
+
+void DoCustomMapMarker(TESObjectREFR* Marker, char* PathToPass)
+{
+
+	auto Position = CustomMapMarkerMap.find(Marker->refID);
+	char* MapMarkerAllocString = new char[strlen(PathToPass) + 1];
+	strcpy(MapMarkerAllocString, PathToPass);
+
+	if (Position != CustomMapMarkerMap.end())
+	{
+		delete[] Position->second;
+		Position->second = MapMarkerAllocString;
+	}
+	else 
+	{
+		CustomMapMarkerMap.insert({ Marker->refID, MapMarkerAllocString });
+	}
+}
+
+
+
+bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
+	TESObjectREFR* form;
+	char MapMarkerRoute[MAX_PATH];
+	if (!ExtractArgs(EXTRACT_ARGS, &form, &MapMarkerRoute) || (!IS_TYPE(form, BGSListForm) && (!form->GetIsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)) )) return true;
+	if (IS_TYPE(form, BGSListForm))
+	{
+		ListNode<TESForm>* iterator = ((BGSListForm*)form)->list.Head();
+		while (iterator)
+		{
+			TESObjectREFR* Refer = (TESObjectREFR*) (iterator->data);
+			if (Refer->GetIsReference() && Refer->IsMapMarker() && GetExtraType(form->extraDataList, MapMarker)) 
+			{
+				DoCustomMapMarker(Refer, MapMarkerRoute);
+			}
+			iterator = iterator->next;
+		}
+	}
+	else
+	{
+		DoCustomMapMarker(form, MapMarkerRoute);
+	}
+	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->refID,  MapMarkerRoute);
 	return true;
 }

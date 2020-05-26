@@ -1,6 +1,7 @@
 #include "..\..\nvse\nvse\ScriptUtils.h"
 #include "internal/decoding.h"
 #include <Windows.h>
+#include <unordered_map>
 #pragma once
 
 
@@ -17,6 +18,7 @@ NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_script = NULL;
 NVSECommandTableInterface* CmdIfc = NULL;
 InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
+void DisableMuzzleFlashLightsHook();
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, UInt8 arg4, ContChangesEntry* entry, UInt8 arg6, UInt8 arg7, int arg8, float arg9, float arg10, UInt8 arg11, UInt8 arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, UInt8, ContChangesEntry*, UInt8, UInt8, int, float, float, UInt8, UInt8, TESForm*))0x645380;
 bool isShowLevelUp = true;
@@ -31,9 +33,38 @@ char* StrArgBuf;
 IDebugLog ParamLog;
 bool loadEditorIDs = 0;
 bool fixHighNoon = 0;
+
+std::unordered_map<UInt32, char*> CustomMapMarkerMap;
+
 namespace SpecialCaseEDIDs {
 	void Handle();
 }
+
+
+char** DefaultMarkers = (char**) 0x11A0404;
+
+char* __fastcall hk_GetMapMarker(TESObjectREFR* thisObj, UInt16 MapMarkerType)
+{
+	
+	auto it = CustomMapMarkerMap.find(thisObj->refID);
+	if (it != CustomMapMarkerMap.end()) return it->second;
+	return DefaultMarkers[MapMarkerType];
+}
+
+__declspec (naked) void AsmGetMapMarkerRoute()
+{
+	//UInt32 static const retAddr = 0x079D337;
+	__asm
+	{
+		mov edx, eax
+		mov ecx, [ebp-0x24]
+		jmp hk_GetMapMarker
+	}
+}
+
+
+
+
 
 __declspec(naked) bool __fastcall HasSeenData(TESObjectCELL* cell) {
 	__asm {
@@ -374,7 +405,9 @@ void HandleGameHooks()
 	}
 	//ContainerMenuDestroy = (void* (__thiscall*)(ContainerMenu*, bool)) (*(UInt32*)0x10721AC);
 	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
-
+	WriteRelJump(0x9BB815, (UInt32)DisableMuzzleFlashLightsHook);
+	SafeWrite16(0x79D330, 0x9090);
+	WriteRelCall(0x79D332, (UInt32)AsmGetMapMarkerRoute);
 
 }
 

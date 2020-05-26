@@ -1,3 +1,4 @@
+#include <memory>
 #include "nvse/PluginAPI.h"
 #include "nvse/GameAPI.h"
 #include "nvse/CommandTable.h"
@@ -40,6 +41,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
 		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
 		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
+		DoSkipMuzzleLights = 0; //reset the muzzle hook every time
 		break;
 	}
 	}
@@ -190,6 +192,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetJohnnyOnStartQuestEventHandler);
 	REG_CMD(SetJohnnyOnStopQuestEventHandler);
 	REG_CMD(DisableMuzzleFlashLights);
+	REG_CMD(SetCustomMapMarkerIcon)
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
