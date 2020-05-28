@@ -39,6 +39,11 @@ std::unordered_map<UInt32, char*> CustomMapMarkerMap;
 namespace SpecialCaseEDIDs {
 	void Handle();
 }
+TESActorBase* Actor::GetActorBase()
+{
+	ExtraLeveledCreature* xLvlCre = GetExtraType(extraDataList, LeveledCreature);
+	return (xLvlCre && xLvlCre->form) ? (TESActorBase*)xLvlCre->form : (TESActorBase*)baseForm;
+}
 
 
 char** DefaultMarkers = (char**) 0x11A0404;

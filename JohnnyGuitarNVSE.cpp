@@ -103,8 +103,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 	loadEditorIDs = GetPrivateProfileInt("MAIN", "bLoadEditorIDs", 0, filename);
-	fixHighNoon = GetPrivateProfileInt("MAIN", "bFixHighNoon", 0, filename);
-
+	//fixHighNoon = GetPrivateProfileInt("MAIN", "bFixHighNoon", 0, filename);
+	fixHighNoon = 0;
 
 	WorldMatrx = new JGWorldToScreenMatrix;
 
