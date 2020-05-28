@@ -192,7 +192,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetJohnnyOnStartQuestEventHandler);
 	REG_CMD(SetJohnnyOnStopQuestEventHandler);
 	REG_CMD(DisableMuzzleFlashLights);
-	REG_CMD(SetCustomMapMarkerIcon)
+	REG_CMD(SetCustomMapMarkerIcon);
+	REG_CMD(GetCreatureCombatSkill);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
