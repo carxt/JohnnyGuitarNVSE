@@ -82,12 +82,85 @@ DEFINE_COMMAND_PLUGIN(SetContainerSound, , 0, 3, kParamsJohnnyOneForm_OneInt_One
 DEFINE_COMMAND_PLUGIN(GetCreatureCombatSkill, , 0, 1, kParams_OneOptionalActorBase);
 DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParamsJohnny_OneForm_OneString);
-
+DEFINE_COMMAND_PLUGIN(SetExplosionSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(SetProjectileSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(SetWeaponWorldModelPath, , 0, 2, kParamsJohnny_OneForm_OneString);
+DEFINE_COMMAND_PLUGIN(Clamp, , 0, 3, kParamsJohnnyThreeFloats);
+DEFINE_COMMAND_PLUGIN(Remap, , 0, 5, kParamsJohnnyFiveFloats);
+DEFINE_COMMAND_PLUGIN(Lerp, , 0, 3, kParamsJohnnyThreeFloats);
 #include "internal/decoding.h"
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
+bool Cmd_Lerp_Execute(COMMAND_ARGS) {
+	float v0 = 0, v1 = 0, t = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &v0, &v1, &t)) {
+		*result = (1 - t) * v0 + t * v1;
+	}
+	return true;
+}
+bool Cmd_Remap_Execute(COMMAND_ARGS) {
+	float v1current = 0, v1min = 0, v1max = 0, v2min = 0, v2max = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &v1current, &v1min, &v1max, &v2min, &v2max)) {
+		*result = (v1current - v1min) / (v1max - v1min) * (v2max - v2min) + v2min;
+	}
+	return true;
+}
+bool Cmd_Clamp_Execute(COMMAND_ARGS) {
+	float value = 0, min = 0, max = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &value, &min, &max)) {
+		*result = value;
+		if (value < min) {
+			*result = min;
+		}
+		else if (value > max) {
+			*result = max;
+		}
 
+	}
+	return true;
+	
+}
+bool Cmd_SetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectWEAP* weapon;
+	char modelPath[MAX_PATH];
+	if (ExtractArgs(EXTRACT_ARGS, &weapon, &modelPath) && IS_TYPE(weapon, TESObjectWEAP)) {
+		weapon->model200.SetModelPath(modelPath);
+	}
+	return true;
+}
+bool Cmd_SetProjectileSound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSProjectile* projectile;
+	TESSound* sound = NULL;
+	int soundID = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &projectile, &soundID, &sound) && IS_TYPE(projectile, BGSProjectile) && soundID && soundID <= 3) {
+		switch (soundID) {
+		case 1:
+			projectile->soundProjectile = sound;
+			break;
+		case 2:
+			projectile->soundCountDown = sound;
+			break;
+		case 3:
+			projectile->soundDisable = sound;
+			break;
+		}
+	}
+	return true;
+}
+
+bool Cmd_SetExplosionSound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSExplosion* explosion;
+	TESSound* sound = NULL;
+	int soundID = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &explosion, &soundID, &sound) && IS_TYPE(explosion, BGSExplosion) && soundID && soundID <= 2) {
+		soundID == 1 ? (explosion->sound1 = sound) : (explosion->sound2 = sound);
+	}
+	return true;
+}
 bool Cmd_GetCreatureCombatSkill_Execute(COMMAND_ARGS)
 {
 	*result = 0;

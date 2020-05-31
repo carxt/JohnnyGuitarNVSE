@@ -233,7 +233,7 @@ void LoadEditorIDs() {
 	WriteRelCall(0x71B748, UInt32(ConsoleNameHook)); // replaces empty string with editor id in selected ref name in console
 	WriteRelCall(0x710BFC, UInt32(ConsoleNameHook));
 	WriteRelCall(0x55D498, (UInt32(GetNameHook))); // replaces empty string with editor id in TESObjectREFR::GetDebugName
-	WriteRelJump(0x467A15, 0x467A4E); // loads more types in game's editor:form map
+	SafeWrite16(0x467A12, 0x3AEB); // loads more types in game's editor:form map
 	for (uint32_t i = 0; i < ARRAYSIZE(TESForm_Vtables); i++)
 	{
 		if (*(uintptr_t*)(TESForm_Vtables[i] + 0x130) == 0x00401280)

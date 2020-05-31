@@ -56,7 +56,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 285;
+	info->version = 290;
 
 	if (nvse->isNogore) 
 	{
@@ -194,6 +194,12 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(DisableMuzzleFlashLights);
 	REG_CMD(SetCustomMapMarkerIcon);
 	REG_CMD(GetCreatureCombatSkill);
+	REG_CMD(SetExplosionSound);
+	REG_CMD(SetProjectileSound);
+	REG_CMD(SetWeaponWorldModelPath);
+	REG_CMD(Clamp);
+	REG_CMD(Remap);
+	REG_CMD(Lerp);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
