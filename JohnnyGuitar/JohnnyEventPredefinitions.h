@@ -200,7 +200,7 @@ public:
 		if (maxFilters)
 		{
 
-			*(void**) &(NewEvent.eventFilter) = GenericCreateFilterFunction(filters, maxFilters);
+			*(void**) &(NewEvent.eventFilter) = this->CreateFilter(filters, maxFilters);
 			NewEvent.eventFilter->SetUpFiltering();
 		}
 		this->EventCallbacks.push_back(NewEvent);
