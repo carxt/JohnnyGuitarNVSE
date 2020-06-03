@@ -55,6 +55,16 @@ ParamInfo kParamsJohnnyEventOneFormFilter[4] =
 	{ "Form", kParamType_AnyForm, 1 }
 
 };
+
+ParamInfo kParamsJohnnyEventOneFormOneIntFilter[5] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+	{ "Form", kParamType_AnyForm, 1 },
+	{ "Integer", kParamType_Integer, 1 },
+
+};
 ParamInfo kParamsJohnnyOneForm_OneInt_OneFloat[3] =
 {
 	{ "Form", kParamType_AnyForm, 0 },

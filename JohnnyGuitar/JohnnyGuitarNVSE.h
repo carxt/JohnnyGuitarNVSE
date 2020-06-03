@@ -68,31 +68,6 @@ __declspec (naked) void AsmGetMapMarkerRoute()
 }
 
 
-
-
-
-__declspec(naked) bool __fastcall HasSeenData(TESObjectCELL* cell) {
-	__asm {
-		push	kExtraData_SeenData
-		add		ecx, 0x28
-		call	BaseExtraList::GetByType
-		test	eax, eax
-		setnz	al
-		retn
-	}
-}
-__declspec(naked) SInt32 __fastcall GetDetachTime(TESObjectCELL* cell) {
-	__asm {
-		push	kExtraData_DetachTime
-		add		ecx, 0x28
-		call	BaseExtraList::GetByType
-		test	eax, eax
-		jz done
-		mov eax, [eax + 0xC]
-		done:
-		retn
-	}
-}
 __declspec(naked) void Tile::SetFloat(UInt32 id, float fltVal, bool bPropagate)
 {
 	static const UInt32 procAddr = 0xA012D0;

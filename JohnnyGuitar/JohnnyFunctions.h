@@ -89,9 +89,11 @@ DEFINE_COMMAND_PLUGIN(Clamp, , 0, 3, kParamsJohnnyThreeFloats);
 DEFINE_COMMAND_PLUGIN(Remap, , 0, 5, kParamsJohnnyFiveFloats);
 DEFINE_COMMAND_PLUGIN(Lerp, , 0, 3, kParamsJohnnyThreeFloats);
 #include "internal/decoding.h"
+#include "GameSettings.h"
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
+
 bool Cmd_Lerp_Execute(COMMAND_ARGS) {
 	float v0 = 0, v1 = 0, t = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &v0, &v1, &t)) {
@@ -1321,7 +1323,8 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* cell = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &cell) && IS_TYPE(cell, TESObjectCELL)) {
-		*result = HasSeenData(cell);
+		ExtraSeenData* seenData = (ExtraSeenData*)cell->extraDataList.GetByType(kExtraData_SeenData);
+		if (seenData && seenData->data) *result = 1;
 		if (IsConsoleMode())
 			Console_Print("IsCellVisited >> %.0f", *result);
 	}
@@ -1331,17 +1334,23 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* cell = NULL;
-	float hoursToRespawn = 0;
-	float detachTime = 0;
-	float gameHoursPassed = 0;
+	Setting* hoursToRespawnCell = (Setting*)0x11CA160;
+	GameTimeGlobals* g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
+	float hoursToRespawn = 0, detachTime = 0, gameHoursPassed = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &cell) && IS_TYPE(cell, TESObjectCELL)) {
-		detachTime = GetDetachTime(cell);
-		if (detachTime == 0)* result = -1;
-		else if (detachTime == -1)* result = 1;
+		ExtraDetachTime* xDetachTime = (ExtraDetachTime*)cell->extraDataList.GetByType(kExtraData_DetachTime);
+		detachTime = xDetachTime == 0 ? 0 : xDetachTime->time;
+		if (detachTime == 0) {
+			*result = -1;
+		}
+		else if (detachTime == -1) {
+			*result = 1;
+		}
 		else {
-			hoursToRespawn = (float) * (UInt32*)ThisStdCall(0x43D4D0, (char*)0x11CA160);
-			gameHoursPassed = (float)ThisStdCall(0x867E30, (UInt32*)0x11DE7B8);
-			if ((gameHoursPassed - detachTime) > hoursToRespawn)* result = 1;
+			float daysPassed = g_gameTimeGlobals->daysPassed == 0 ? 1.0 : g_gameTimeGlobals->daysPassed->data;
+			gameHoursPassed = floor(daysPassed * 24.0);
+			hoursToRespawn = hoursToRespawnCell->data.i;
+			*result = ((gameHoursPassed - detachTime) > hoursToRespawn);
 		}
 		if (IsConsoleMode())
 			Console_Print("IsCellExpired >> %.0f", *result);

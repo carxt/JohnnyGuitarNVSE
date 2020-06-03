@@ -200,6 +200,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(Clamp);
 	REG_CMD(Remap);
 	REG_CMD(Lerp);
+	REG_CMD(SetJohnnySeenDataEventHandler);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

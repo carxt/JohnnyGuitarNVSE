@@ -17,6 +17,14 @@ class BSAudioManagerThread;
 class ImageSpaceModifierInstanceRB;
 struct NavMeshClosedDoorInfo;
 
+class ExtraDetachTime : public BSExtraData
+{
+public:
+	ExtraDetachTime();
+	~ExtraDetachTime();
+
+	UInt32 time;
+};
 // 34
 class BGSPrimitive
 {
