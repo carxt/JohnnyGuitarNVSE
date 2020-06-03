@@ -11,6 +11,7 @@ union GenericFilters
 	char* str;
 	GenericFilters()
 	{
+		this->ptr = NULL;
 	}
 	GenericFilters(void* ptr)
 	{

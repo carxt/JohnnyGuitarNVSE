@@ -32,7 +32,7 @@ public:
 	{
 		numFilters = nuFilters;
 		Filters = new RefUnorderedSet[numFilters];
-		GenFilters = new GenericFilters[nuFilters];
+		GenFilters = new GenericFilters[numFilters];
 		for (int i = 0; i < nuFilters; i++) GenFilters[i].ptr = filters[i];
 
 	}
@@ -185,16 +185,16 @@ public:
 			if (script == it->ScriptForEvent)
 			{
 				if (!maxFilters) return;
-				if (!it->eventFilter->GetNumFilters()) goto Create;
-				for (int i = 0; i < maxFilters; i++)
+				if (!it->eventFilter->GetNumFilters()) continue;
+				int i = 0; // filter iterator
+				for (; i < maxFilters; i++)
 				{
-					if ((it->eventFilter->IsFilterEqual(filters[i],i ))) break;
+					if (!(it->eventFilter->IsFilterEqual(filters[i],i ))) break;
 				}
-				return;
+				if (i >= maxFilters) return;
 			}
 
 		}
-	Create:
 		BaseEventClass NewEvent;
 		NewEvent.ScriptForEvent = script;
 		if (maxFilters)
