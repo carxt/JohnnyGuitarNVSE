@@ -214,6 +214,7 @@
     <ClCompile Include="JohnnyGuitarNVSE.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\nvse\nvse\CommandTable.h" />
     <ClInclude Include="..\nvse\nvse\GameAPI.h" />
     <ClInclude Include="..\nvse\nvse\GameBSExtraData.h" />
     <ClInclude Include="..\nvse\nvse\GameData.h" />
@@ -238,6 +239,7 @@
     <ClInclude Include="internal\sha1\sha1.h" />
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="JohnnyGuitar\BMPHandling.h" />
+    <ClInclude Include="JohnnyGuitar\CustomEventFilters.h" />
     <ClInclude Include="JohnnyGuitar\EditorIDs.h" />
     <ClInclude Include="JohnnyGuitar\EventFilteringInterface.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyEventPredefinitions.h" />

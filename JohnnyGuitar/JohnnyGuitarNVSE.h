@@ -55,7 +55,26 @@ char* __fastcall hk_GetMapMarker(TESObjectREFR* thisObj, UInt16 MapMarkerType)
 	if (it != CustomMapMarkerMap.end()) return it->second;
 	return DefaultMarkers[MapMarkerType];
 }
+CommandTable::CommandTable() { }
+CommandTable::~CommandTable() { }
+void CommandTable::Dump(void)
+{
+	for (CommandList::iterator iter = m_commands.begin(); iter != m_commands.end(); ++iter)
+	{
+		_MESSAGE("%08X %04X %s %s", iter->opcode, iter->needsParent, iter->longName, iter->shortName);
+		gLog.Indent();
 
+#if 0
+		for (UInt32 i = 0; i < iter->numParams; i++)
+		{
+			ParamInfo* param = &iter->params[i];
+			_DMESSAGE("%08X %08X %s", param->typeID, param->isOptional, param->typeStr);
+		}
+#endif
+
+		gLog.Outdent();
+	}
+}
 __declspec (naked) void AsmGetMapMarkerRoute()
 {
 	//UInt32 static const retAddr = 0x079D337;

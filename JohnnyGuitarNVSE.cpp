@@ -24,6 +24,8 @@
 #include "JohnnyGuitar/EditorIDs.h"
 #include "JohnnyGuitar/JohnnyFunctions.h"
 #include "JohnnyGuitar/BMPHandling.h"
+#include "JohnnyGuitar/EventFilteringInterface.h"
+#include "JohnnyGuitar/CustomEventFilters.h"
 #include "JohnnyGuitar/JohnnyEvents.h"
 
 HMODULE JohnnyHandle;
@@ -201,6 +203,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(Remap);
 	REG_CMD(Lerp);
 	REG_CMD(SetJohnnySeenDataEventHandler);
+	REG_CMD(SetJohnnyOnLimbGoneEventHandler);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
