@@ -45,6 +45,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 		DoSkipMuzzleLights = 0; //reset the muzzle hook every time
 		OnDyingHandler->FlushEventCallbacks();
+		OnSeenDataUpdateHandler->FlushEventCallbacks();
+		OnStartQuestHandler->FlushEventCallbacks();
+		OnStopQuestHandler->FlushEventCallbacks();
 		break;
 	}
 	}

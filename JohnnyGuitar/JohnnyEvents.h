@@ -9,7 +9,7 @@ EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
 EventInformation* OnSeenDataUpdateHandler;
 EventInformation* OnLimbGoneHandler;
-void __stdcall handleDyingEvent(TESObjectREFR* thisObj) {
+void __stdcall handleDyingEvent(Actor* thisObj) {
 	for (auto const& callback : OnDyingHandler->EventCallbacks)
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
@@ -44,18 +44,17 @@ ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL *cell) {
 }
 
 
-static UInt32 OnDyingOriginalCall;
 __declspec (naked) void OnDyingEventAsm()
 {
 	__asm
 	{
-		cmp dword ptr[ebp + 8], 1
-		jnz done
-		push dword ptr[ebp - 0x2C]
+		push dword ptr[ebp - 0x18]
 		call handleDyingEvent
-		done :
-		mov ecx, dword ptr[ebp - 0x2C]
-			jmp OnDyingOriginalCall
+		mov esp, ebp
+		pop ebp
+		mov esp, ebx
+		pop ebx
+		retn 8
 	}
 }
 
@@ -178,10 +177,9 @@ void initEventHooks(const NVSEInterface* nvse)
 		OnSeenDataUpdateHandler = JGCreateEvent("OnSeenDataUpdate", 1, 1, NULL);
 		OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2, 2, CreateOneFormOneIntFilter);
 		FunctionCallScript = g_script->CallFunction;
-		OnDyingOriginalCall = RetrieveAddrFromDisp32Opcode(0x8A1898);
 		WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 		WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
-		WriteRelCall(0x8A1898, (UINT)OnDyingEventAsm);
+		WriteRelJump(0x89F4BA, (UINT)OnDyingEventAsm);
 		WriteRelJump(0x60CA24, (UINT)OnQuestStartStopEventAsm);
 		WriteRelCall(0x572FF1, (UINT)HandleLimbGoneEvent);
 		SafeWrite8(0x60CA29, 0xCC);

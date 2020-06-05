@@ -172,7 +172,6 @@ public:
 	}
 	void FlushEventCallbacks()
 	{
-
 		auto it = EventCallbacks.begin();
 		while (it != EventCallbacks.end())
 		{
