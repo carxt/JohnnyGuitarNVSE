@@ -166,7 +166,11 @@ public:
 		this->CreateFilter = GenericCreateFilterFunction;
 		if (CreatorFunction) this->CreateFilter = CreatorFunction;
 	}
-	~EventInformation()
+	virtual ~EventInformation()
+	{
+		FlushEventCallbacks();
+	}
+	void FlushEventCallbacks()
 	{
 		auto it = EventCallbacks.begin();
 		while (it != EventCallbacks.end())
