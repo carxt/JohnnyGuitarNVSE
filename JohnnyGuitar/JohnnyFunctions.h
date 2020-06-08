@@ -764,13 +764,11 @@ bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
 bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 	char edid[MAX_PATH];
 	TESForm* form = NULL;
+	*result = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &edid)) {
 		form = ((TESForm * (__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
 		if (form) {
 			*(UInt32*)result = form->refID;
-		}
-		else {
-			*(UInt32*)result = GetRefIDFromEditorID(edid);
 		}
 		if (IsConsoleMode()) {
 			Console_Print("EditorIDToFormID >> 0x%X", *result);

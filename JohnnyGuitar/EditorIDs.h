@@ -3,7 +3,6 @@
 #include <mutex>
 std::unordered_map<uint32_t, const char *> g_EditorNameMap;
 std::mutex g_NameMapLock;
-UInt32 GetRefIDFromEditorID(char* edid);
 
 
 namespace SpecialCaseEDIDs
@@ -30,18 +29,8 @@ namespace SpecialCaseEDIDs
 
 UInt32 __cdecl JGNVSE_GetFormIDFromEDID(char* edid) {
 	TESForm *form = ((TESForm * (__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
-	if (form)  return form->refID;
-	else return GetRefIDFromEditorID(edid);
-}
-// TESForm::GetName() is the vfunc at +0x130
-// TESForm::GetId() returns the form id
-
-UInt32 GetRefIDFromEditorID(char* edid) {
-	std::lock_guard<std::mutex> lock(g_NameMapLock);
-	for (std::unordered_map<uint32_t, const char *>::const_iterator it = g_EditorNameMap.begin(); it != g_EditorNameMap.end(); ++it) {
-		if (!_stricmp(edid, it->second)) {
-			return it->first;
-		}
+	if (form) {
+		return form->refID;
 	}
 	return 0;
 }
@@ -72,8 +61,9 @@ bool TESForm::hk_SetEditorId(const char *Name)
 bool TESForm::hk_SetEditorID_REFR(const char* Name)
 {
 	std::lock_guard<std::mutex> lock(g_NameMapLock);
-	if ((refID < 0xFF000000) && ((flags & 0xC20) == 0x400))
+	if ((refID < 0xFF000000) && ((flags & 0xC20) == 0x400)) {
 		g_EditorNameMap.insert(std::make_pair(GetId(), _strdup(Name)));
+	}
 	return true;
 }
 

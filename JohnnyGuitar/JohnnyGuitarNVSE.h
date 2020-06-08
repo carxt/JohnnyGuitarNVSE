@@ -393,21 +393,14 @@ __declspec(naked) void OnCloseContainerHook()
 }
 void HandleGameHooks()
 {
-	//	WriteRelJump(0x5A421A, (UInt32)ExistsHook);
 	//	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // WIP
 	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
 	WriteRelJump(0x77D612, UInt32(LevelUpHook));
-	if (loadEditorIDs) LoadEditorIDs();
-	if (fixHighNoon) {
-		WriteRelJump((UInt32)0x063F56C, (UInt32)HookforIMOD1);
-		WriteRelJump((UInt32)0x063F5ED, (UInt32)HookforIMOD2);
-	}
-	//ContainerMenuDestroy = (void* (__thiscall*)(ContainerMenu*, bool)) (*(UInt32*)0x10721AC);
 	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
 	WriteRelJump(0x9BB815, (UInt32)DisableMuzzleFlashLightsHook);
 	SafeWrite16(0x79D330, 0x9090);
 	WriteRelCall(0x79D332, (UInt32)AsmGetMapMarkerRoute);
-
+	if (loadEditorIDs) LoadEditorIDs();
 }
 
 
