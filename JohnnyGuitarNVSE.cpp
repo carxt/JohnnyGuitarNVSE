@@ -45,9 +45,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 		DoSkipMuzzleLights = 0; //reset the muzzle hook every time
 		OnDyingHandler->FlushEventCallbacks();
-		OnSeenDataUpdateHandler->FlushEventCallbacks();
-		OnStartQuestHandler->FlushEventCallbacks();
-		OnStopQuestHandler->FlushEventCallbacks();
+		OnLimbGoneHandler->FlushEventCallbacks();
 		break;
 	}
 	}
@@ -62,7 +60,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 300;
+	info->version = 305;
 
 	if (nvse->isNogore) 
 	{
