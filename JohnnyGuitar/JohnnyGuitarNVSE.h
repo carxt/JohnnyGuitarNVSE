@@ -391,6 +391,19 @@ __declspec(naked) void OnCloseContainerHook()
 			jmp     retnAddr
 	}
 }
+void patchFixDisintegrationsStat()
+{
+	// check if user has Unnecessary Tweaks or lStewieAl's Tweaks installed
+	if (*(UInt8*)0x8A1B4D == 0xE9 || *(UInt8*)0x8A1B51 == 0x26) return;
+	// critical stage 1, jump to checks for IncPCMiscStat
+	SafeWrite8(0x8A1B51, 0x26); // change JE offset
+
+	// critical stage 3, jump to checks for IncPCMiscStat
+	SafeWriteBuf(0x8A1B1B, "\xF9\x01\x74\x12\x83\xF9\x02\x74\x30\x83\xF9\x04\x74\x2B\x83\xF9\x03\x74\x4A\xEB\x22\x90", 22);
+
+	// critical stages 2 and 4, skip IncPCMiscStat
+	SafeWriteBuf(0x8A1B6E, "\x82\xC0\x01\x00\x00\xFF\xD0\xEB\x53\x90", 10);
+}
 void HandleGameHooks()
 {
 	//	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // WIP
@@ -400,6 +413,7 @@ void HandleGameHooks()
 	WriteRelJump(0x9BB815, (UInt32)DisableMuzzleFlashLightsHook);
 	SafeWrite16(0x79D330, 0x9090);
 	WriteRelCall(0x79D332, (UInt32)AsmGetMapMarkerRoute);
+	patchFixDisintegrationsStat();
 	if (loadEditorIDs) LoadEditorIDs();
 }
 
