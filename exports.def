@@ -1,4 +1,5 @@
-LIBRARY	"JohnnyGuitarNVSE"
+LIBRARY	"johnnyguitar"
 EXPORTS
 NVSEPlugin_Query
 NVSEPlugin_Load
+JGNVSE_GetFormIDFromEDID

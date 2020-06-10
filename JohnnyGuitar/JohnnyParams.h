@@ -5,7 +5,30 @@ ParamInfo kParamsJohnnyAnyExpr[1] =
 {
 	{ "any expression", kNVSEParamType_BasicType, 0 },
 };
+ParamInfo kParamsJohnnyOneStringThreeFloats[4] =
+{
+	{ "String", kParamType_String, 0 },
+	{ "float", kParamType_Float, 0 },
+	{ "float", kParamType_Float, 0 },
+	{ "float", kParamType_Float, 0 },
 
+};
+ParamInfo kParamsJohnnyFourStrings[4] =
+{
+	{ "String", kParamType_String, 0 },
+	{ "X_Out", kParamType_String, 0 },
+	{ "Y_Out", kParamType_String, 0 },
+	{ "Z_Out", kParamType_String, 0 },
+
+};
+ParamInfo kParamsJohnnyTwoRefsTwoStrings[4] =
+{
+	{ "ref", kParamType_ObjectRef, 0 },
+	{ "ref", kParamType_ObjectRef, 0 },
+	{ "String", kParamType_String, 0 },
+	{ "String", kParamType_String, 0 },
+
+};
 
 ParamInfo kParamsJohnnyOneStringOneOptionalObjectID[2] =
 {
@@ -24,11 +47,33 @@ ParamInfo kParamsJohnny_OneString_OneInt[2] =
 	{ "Integer", kParamType_Integer, 0 },
 };
 
+ParamInfo kParamsJohnnyEventOneFormFilter[4] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+	{ "Form", kParamType_AnyForm, 1 }
+
+};
+
+ParamInfo kParamsJohnnyEventOneFormOneIntFilter[5] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+	{ "Form", kParamType_AnyForm, 1 },
+	{ "Integer", kParamType_Integer, 1 },
+
+};
 ParamInfo kParamsJohnnyOneForm_OneInt_OneFloat[3] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Float", kParamType_Float, 0 }
+};
+ParamInfo kParamsJohnny_OneActorBase[1] =
+{
+	{ "ActorBase", kParamType_ActorBase, 0 },
 };
 ParamInfo kParamsJohnnyOneForm_OneInt_OneForm[3] =
 {
@@ -53,7 +98,14 @@ ParamInfo kParamsJohnnyThreeFloats[3] =
 	{ "Float", kParamType_Float, 0 },
 	{ "Float", kParamType_Float, 0 },
 };
-
+ParamInfo kParamsJohnnyFiveFloats[5] =
+{
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+};
 ParamInfo kParamsJohnny_OneForm_OneOptionalInt[2] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
@@ -70,6 +122,15 @@ ParamInfo kParamsJohnny_OneForm_TwoInts[3] =
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "int",	kParamType_Integer, 0 },
 	{ "int",	kParamType_Integer, 0 },
+};
+ParamInfo kParamsJohnny_SixFloats[6] =
+{
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
 };
 ParamInfo kParamsJohnny_OneForm_ThreeInts[4] =
 {

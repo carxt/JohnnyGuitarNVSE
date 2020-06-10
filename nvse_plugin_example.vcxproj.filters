@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="nvse">
+      <UniqueIdentifier>{2eaaadcd-6d04-40fb-8af0-7ccfba826342}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="internal">
+      <UniqueIdentifier>{52c8a8cc-3ee5-4c0b-bd07-b5947bc93985}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="internal\md5">
+      <UniqueIdentifier>{f342ad93-a4cc-436a-9027-316b41bbc130}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JohnnyGuitar">
+      <UniqueIdentifier>{c46b493e-012e-48b1-adb7-84fea8c2fc6f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="internal\sha1">
+      <UniqueIdentifier>{92cbffb5-c87c-4e83-8834-99510ec93917}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameBSExtraData.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameData.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameExtraData.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameForms.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameObjects.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameRTTI.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameScript.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameSettings.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameTasks.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameTiles.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameTypes.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\SafeWrite.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\Utilities.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\utility.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\md5\md5.cpp">
+      <Filter>internal\md5</Filter>
+    </ClCompile>
+    <ClCompile Include="JohnnyGuitarNVSE.cpp" />
+    <ClCompile Include="internal\sha1\sha1.cpp">
+      <Filter>internal\sha1</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\nvse\nvse\GameAPI.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameBSExtraData.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameData.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameEffects.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameExtraData.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameForms.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameObjects.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameOSDepend.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameRTTI.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameSettings.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameTasks.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameTiles.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameTypes.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\SafeWrite.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\Utilities.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\containers.h">
+      <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\decoding.h">
+      <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\havok.h">
+      <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\netimmerse.h">
+      <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\utility.h">
+      <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\md5\md5.h">
+      <Filter>internal\md5</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyGuitarNVSE.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyParams.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\misc.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\WorldToScreen.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\sha1\sha1.h">
+      <Filter>internal\sha1</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\BMPHandling.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\EditorIDs.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\EventFilteringInterface.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyEventPredefinitions.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameUI.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyEvents.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\CommandTable.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\CustomEventFilters.h">
+      <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="exports.def" />
+  </ItemGroup>
+</Project>

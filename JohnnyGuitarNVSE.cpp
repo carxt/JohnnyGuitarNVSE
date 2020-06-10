@@ -1,3 +1,4 @@
+#include <memory>
 #include "nvse/PluginAPI.h"
 #include "nvse/GameAPI.h"
 #include "nvse/CommandTable.h"
@@ -14,6 +15,8 @@
 #include "nvse/GameUI.cpp"
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
+#include "internal/decoding.h"
+#include "JohnnyGuitar/JohnnyEventPredefinitions.h"
 #include "JohnnyGuitar/misc.h"
 #include "JohnnyGuitar/WorldToScreen.h"
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
@@ -21,7 +24,10 @@
 #include "JohnnyGuitar/EditorIDs.h"
 #include "JohnnyGuitar/JohnnyFunctions.h"
 #include "JohnnyGuitar/BMPHandling.h"
-#include "internal/decoding.h"
+#include "JohnnyGuitar/EventFilteringInterface.h"
+#include "JohnnyGuitar/CustomEventFilters.h"
+#include "JohnnyGuitar/JohnnyEvents.h"
+
 HMODULE JohnnyHandle;
 IDebugLog		gLog;
 
@@ -37,6 +43,11 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
 		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
 		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
+		DoSkipMuzzleLights = 0; //reset the muzzle hook every time
+		OnDyingHandler->FlushEventCallbacks();
+		OnSeenDataUpdateHandler->FlushEventCallbacks();
+		OnStartQuestHandler->FlushEventCallbacks();
+		OnStopQuestHandler->FlushEventCallbacks();
 		break;
 	}
 	}
@@ -51,11 +62,11 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 265;
+	info->version = 300;
 
 	if (nvse->isNogore) 
 	{
-		_ERROR("Unsupported");
+		_ERROR("NV noGore is unsupported");
 		return false;
 	}
 
@@ -98,8 +109,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 	loadEditorIDs = GetPrivateProfileInt("MAIN", "bLoadEditorIDs", 0, filename);
-	fixHighNoon = GetPrivateProfileInt("MAIN", "bFixHighNoon", 0, filename);
-
+	//fixHighNoon = GetPrivateProfileInt("MAIN", "bFixHighNoon", 0, filename);
+	fixHighNoon = 0;
 
 	WorldMatrx = new JGWorldToScreenMatrix;
 
@@ -171,11 +182,39 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetEquipType);
 	REG_TYPED_CMD(GetFactionMembers, Array);
 	REG_TYPED_CMD(GetRaceHeadModelPath, String);
+	REG_CMD(GetDefaultHeapSize);
+	REG_CMD(Get3DDistanceBetweenNiNodes);
+	REG_CMD(Get3DDistanceToNiNode);
+	REG_CMD(Get3DDistanceFromHitToNiNode);
+	REG_CMD(GetVector3DDistance);
+	REG_CMD(GetLinearVelocity);
+	REG_CMD(GetLifeState);
+	REG_CMD(GetRaceFlag);
+	REG_CMD(SetRaceFlag);
+	REG_CMD(GetContainerSound);
+	REG_CMD(SetContainerSound);
+	//Events
+	REG_CMD(SetJohnnyOnDyingEventHandler);
+	REG_CMD(SetJohnnyOnStartQuestEventHandler);
+	REG_CMD(SetJohnnyOnStopQuestEventHandler);
+	REG_CMD(DisableMuzzleFlashLights);
+	REG_CMD(SetCustomMapMarkerIcon);
+	REG_CMD(GetCreatureCombatSkill);
+	REG_CMD(SetExplosionSound);
+	REG_CMD(SetProjectileSound);
+	REG_CMD(SetWeaponWorldModelPath);
+	REG_CMD(Clamp);
+	REG_CMD(Remap);
+	REG_CMD(Lerp);
+	REG_CMD(SetJohnnySeenDataEventHandler);
+	REG_CMD(SetJohnnyOnLimbGoneEventHandler);
+	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
+	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
+	initEventHooks(nvse);
 	StrArgBuf = (char*) malloc((sizeof(char))*1024);
 	ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 	StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
-	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
-	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
+
 	if (!nvse->isEditor) {
 		NVSEDataInterface *nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 		InventoryRefGetForID = (InventoryRef* (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);

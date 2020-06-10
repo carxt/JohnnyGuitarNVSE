@@ -39,7 +39,7 @@ DEFINE_COMMAND_PLUGIN(GetBufferedCellsAlt, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(GetActorValueModifierAlt, GetAVModAlt, , 1, 2, kParamsJohnny_OneActorValue_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(RefAddr, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(RefAddr, , 0, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetMusicTypePath, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetMusicTypeDB, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetMusicTypeDB, , 0, 2, kParams_OneForm_OneFloat);
@@ -68,26 +68,274 @@ DEFINE_COMMAND_PLUGIN(GetRaceBodyModelPath, , 0, 3, kParamsJohnny_OneForm_TwoInt
 DEFINE_COMMAND_PLUGIN(SetEquipType, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFactionMembers, , 0, 2, kParamsJohnny_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetRaceHeadModelPath, , 0, 3, kParamsJohnny_OneForm_TwoInts);
+DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(Get3DDistanceBetweenNiNodes, , 0, 4, kParamsJohnnyTwoRefsTwoStrings);
+DEFINE_COMMAND_PLUGIN(Get3DDistanceToNiNode, , 1, 4, kParamsJohnnyOneStringThreeFloats);
+DEFINE_COMMAND_PLUGIN(Get3DDistanceFromHitToNiNode, , 1, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetVector3DDistance, , 0, 6, kParamsJohnny_SixFloats);
+DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParamsJohnnyFourStrings);
+DEFINE_COMMAND_PLUGIN(GetLifeState, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetRaceFlag, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetRaceFlag, , 0, 3, kParamsJohnny_OneForm_TwoInts);
+DEFINE_COMMAND_PLUGIN(GetContainerSound, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetContainerSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(GetCreatureCombatSkill, , 0, 1, kParams_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParamsJohnny_OneForm_OneString);
+DEFINE_COMMAND_PLUGIN(SetExplosionSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(SetProjectileSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(SetWeaponWorldModelPath, , 0, 2, kParamsJohnny_OneForm_OneString);
+DEFINE_COMMAND_PLUGIN(Clamp, , 0, 3, kParamsJohnnyThreeFloats);
+DEFINE_COMMAND_PLUGIN(Remap, , 0, 5, kParamsJohnnyFiveFloats);
+DEFINE_COMMAND_PLUGIN(Lerp, , 0, 3, kParamsJohnnyThreeFloats);
 #include "internal/decoding.h"
-
-float (__fastcall *GetBaseScale)(TESObjectREFR*) = (float(__fastcall *)(TESObjectREFR*)) 0x00567400;
+#include "GameSettings.h"
+float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 
+bool Cmd_Lerp_Execute(COMMAND_ARGS) {
+	float v0 = 0, v1 = 0, t = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &v0, &v1, &t)) {
+		*result = (1 - t) * v0 + t * v1;
+	}
+	return true;
+}
+bool Cmd_Remap_Execute(COMMAND_ARGS) {
+	float v1current = 0, v1min = 0, v1max = 0, v2min = 0, v2max = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &v1current, &v1min, &v1max, &v2min, &v2max)) {
+		*result = (v1current - v1min) / (v1max - v1min) * (v2max - v2min) + v2min;
+	}
+	return true;
+}
+bool Cmd_Clamp_Execute(COMMAND_ARGS) {
+	float value = 0, min = 0, max = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &value, &min, &max)) {
+		*result = value;
+		if (value < min) {
+			*result = min;
+		}
+		else if (value > max) {
+			*result = max;
+		}
+
+	}
+	return true;
+	
+}
+bool Cmd_SetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectWEAP* weapon;
+	char modelPath[MAX_PATH];
+	if (ExtractArgs(EXTRACT_ARGS, &weapon, &modelPath) && IS_TYPE(weapon, TESObjectWEAP)) {
+		weapon->model200.SetModelPath(modelPath);
+	}
+	return true;
+}
+bool Cmd_SetProjectileSound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSProjectile* projectile;
+	TESSound* sound = NULL;
+	int soundID = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &projectile, &soundID, &sound) && IS_TYPE(projectile, BGSProjectile) && soundID && soundID <= 3) {
+		switch (soundID) {
+		case 1:
+			projectile->soundProjectile = sound;
+			break;
+		case 2:
+			projectile->soundCountDown = sound;
+			break;
+		case 3:
+			projectile->soundDisable = sound;
+			break;
+		}
+	}
+	return true;
+}
+
+bool Cmd_SetExplosionSound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSExplosion* explosion;
+	TESSound* sound = NULL;
+	int soundID = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &explosion, &soundID, &sound) && IS_TYPE(explosion, BGSExplosion) && soundID && soundID <= 2) {
+		soundID == 1 ? (explosion->sound1 = sound) : (explosion->sound2 = sound);
+	}
+	return true;
+}
+bool Cmd_GetCreatureCombatSkill_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCreature *creature = NULL;
+	if (!ExtractArgs(EXTRACT_ARGS, &creature)) return true;
+	if (!creature)
+	{
+		if (!thisObj || !thisObj->IsActor()) return true;
+		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
+	}
+	if IS_TYPE(creature, TESCreature)
+		*result = creature->combatSkill;
+	return true;
+}
+bool Cmd_SetContainerSound_Execute(COMMAND_ARGS) {
+	int whichSound = -1;
+	TESObjectCONT* container;
+	TESSound* newSound;
+	if (ExtractArgs(EXTRACT_ARGS, &container, &whichSound, &newSound) && IS_TYPE(container, TESObjectCONT) && IS_TYPE(newSound, TESSound)) {
+		switch (whichSound) {
+		case 0:
+			container->openSound = newSound;
+			break;
+		case 1:
+			container->closeSound = newSound;
+			break;
+		case 2:
+			container->randomLoopingSound = newSound;
+			break;
+		}
+	}
+	return true;
+}
+bool Cmd_GetContainerSound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	int whichSound = -1;
+	TESObjectCONT* container;
+	if (ExtractArgs(EXTRACT_ARGS, &container, &whichSound) && IS_TYPE(container, TESObjectCONT)) {
+		switch (whichSound) {
+		case 0:
+			*(UInt32*)result = container->openSound->refID;
+			break;
+		case 1:
+			*(UInt32*)result = container->closeSound->refID;
+			break;
+		case 2:
+			*(UInt32*)result = container->randomLoopingSound->refID;
+			break;
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetRaceFlag_Execute(COMMAND_ARGS) {
+	TESRace* race;
+	UINT32 bit;
+	if (ExtractArgs(EXTRACT_ARGS, &race, &bit) && IS_TYPE(race, TESRace))
+	{
+		*result = (race->raceFlags & 1 << bit);
+		if (IsConsoleMode()) Console_Print("GetRaceFlag >> %.f", *result);
+	}
+	return true;
+}
+
+
+bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
+	TESRace* race;
+	UINT32 bit;
+	UINT32 setorclear;
+	if (ExtractArgs(EXTRACT_ARGS, &race, &bit, &setorclear) && IS_TYPE(race, TESRace))
+	{
+		setorclear ? race->raceFlags |= (1 << bit) : race->raceFlags &= ~(1 << bit);
+	}
+	return true;
+}
+// 0 - alive, 1 - dying/ragdolled, 2 - dead, 3 - unconscious, 5 - restrained
+bool Cmd_GetLifeState_Execute(COMMAND_ARGS) {
+	Actor* actor = (Actor*)thisObj;
+	*result = -1;
+	if (actor) {
+		*result = actor->lifeState;
+		if (IsConsoleMode()) Console_Print("GetLifeState >> %.f", *result);
+	}
+	return true;
+}
+bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
+	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
+	char nodeName[MAX_PATH];
+	if (ExtractArgs(EXTRACT_ARGS, &nodeName, &X_outS, &Y_outS, &Z_outS))
+	{
+		hkpRigidBody* rigidBody = thisObj->GetRigidBody(nodeName);
+		if (rigidBody)
+		{
+			NiVector4 linVelocity = rigidBody->motion.linVelocity;
+			setVarByName(PASS_VARARGS, X_outS, linVelocity.x);
+			setVarByName(PASS_VARARGS, Y_outS, linVelocity.y);
+			setVarByName(PASS_VARARGS, Z_outS, linVelocity.z);
+		}
+	}
+	return true;
+}
+bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
+	*result = 0;
+	NiVector3 pos1;
+	NiVector3 pos2;
+	if (ExtractArgs(EXTRACT_ARGS, &(pos1.x), &(pos1.y), &(pos1.z), &(pos2.x), &(pos2.y), &(pos2.z))) {
+		*result = NiNodeComputeDistance(&pos1, &pos2);
+		if (IsConsoleMode()) Console_Print("Get3DDistance >> %f", *result);
+	}
+	return true;
+}
+
+bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS)
+{
+	Actor* actor = (Actor*)thisObj;
+	char NiName[MAX_PATH];
+	if (ExtractArgs(EXTRACT_ARGS, &NiName) && actor->IsActor() && actor->baseProcess)
+	{
+		NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
+		ActorHitData* hitData = actor->baseProcess->GetHitData();
+		if (!hitData || !t_Node) return true;
+		*result = NiNodeComputeDistance(&(t_Node->m_worldTranslate), &(hitData->impactPos));
+
+	}
+
+	return true;
+}
+bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char NiName[MAX_PATH];
+	NiVector3 Coord;
+	if (!thisObj || !(ExtractArgs(EXTRACT_ARGS, &NiName, &(Coord.x), &(Coord.y), &(Coord.z)))) return true;
+	NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
+	if (!t_Node) return true;
+	*result = NiNodeComputeDistance(&(t_Node->m_worldTranslate), &Coord);
+	if (IsConsoleMode()) Console_Print("Get3DDistanceToNiNode >> %f", *result);
+	return true;
+}
+
+bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char NiName1[MAX_PATH], NiName2[MAX_PATH];
+	TESObjectREFR* ref1;
+	TESObjectREFR* ref2;
+	if (!(ExtractArgs(EXTRACT_ARGS, &ref1, &ref2, &NiName1, &NiName2))) return true;
+	NiAVObject* Node1 = ref1->GetNiBlock(NiName1);
+	NiAVObject* Node2 = ref1->GetNiBlock(NiName2);
+	if (!Node1 || !Node2) return true;
+	*result = NiNodeComputeDistance(&(Node1->m_worldTranslate), &(Node2->m_worldTranslate));
+	if (IsConsoleMode()) Console_Print("Get3DDistanceBetweenNiNodes >> %f", *result);
+	return true;
+}
+bool Cmd_GetDefaultHeapSize_Execute(COMMAND_ARGS) {
+	UInt32 heapSize = *(reinterpret_cast<UInt32*>(0x866E9F + 1));
+	*result = heapSize / 1024 / 1024;
+	if (IsConsoleMode())
+		Console_Print("DefaultHeapInitialAllocMB >> `%f", *result);
+	return true;
+}
 bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESFaction *faction;
+	TESFaction* faction;
 	SInt32 rank = -1;
 	ExtractArgs(EXTRACT_ARGS, &faction, &rank);
 	if (faction) {
 		DataHandler* g_dataHandler = DataHandler::Get();
 		NVSEArrayVar* factionMemberArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
-		for (TESBoundObject *object = g_dataHandler->boundObjectList->first; object; object = object->next)
+		for (TESBoundObject* object = g_dataHandler->boundObjectList->first; object; object = object->next)
 		{
-			TESActorBase *actorBase = DYNAMIC_CAST(object, TESBoundObject, TESActorBase);
+			TESActorBase* actorBase = DYNAMIC_CAST(object, TESBoundObject, TESActorBase);
 			if (actorBase && actorBase->baseData.factionList.Count() != 0) {
-				ListNode<FactionListData> *fctIter = actorBase->baseData.factionList.Head();
-				FactionListData *factionData;
+				ListNode<FactionListData>* fctIter = actorBase->baseData.factionList.Head();
+				FactionListData* factionData;
 				do
 				{
 					factionData = fctIter->data;
@@ -97,7 +345,7 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 						}
 					}
 				} while (fctIter = fctIter->next);
-			}	
+			}
 		}
 		if (ArrIfc->GetArraySize(factionMemberArr)) ArrIfc->AssignCommandResult(factionMemberArr, result);
 	}
@@ -118,7 +366,7 @@ bool Cmd_SetEquipType_Execute(COMMAND_ARGS)
 	return true;
 }
 bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
-	TESRace *race;
+	TESRace* race;
 	UInt32 modelID, isFemale;
 	const char* path = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &race, &modelID, &isFemale)) {
@@ -135,7 +383,7 @@ bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
-	TESRace *race;
+	TESRace* race;
 	UInt32 modelID, isFemale;
 	const char* path = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &race, &modelID, &isFemale)) {
@@ -152,7 +400,7 @@ bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_GetFacegenModelFlag_Execute(COMMAND_ARGS) {
-	TESObjectARMO *armor;
+	TESObjectARMO* armor;
 	UInt32 isFemale, flagID;
 	*result = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &armor, &flagID, &isFemale)) {
@@ -166,13 +414,13 @@ bool Cmd_GetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
-	TESObjectARMO *armor;
+	TESObjectARMO* armor;
 	UInt32 isFemale;
 	UInt32 flagID;
 	bool bEnable;
 	*result = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &armor, &flagID, &isFemale, &bEnable) && flagID <= 3) {
-			armor->SetFacegenFlag(1 << flagID, isFemale, bEnable);
+		armor->SetFacegenFlag(1 << flagID, isFemale, bEnable);
 	}
 	return true;
 }
@@ -318,22 +566,22 @@ bool Cmd_RemovePrimitive_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_GetPrimitiveType_Execute(COMMAND_ARGS) {
-	ExtraPrimitive *xPrimitive = GetExtraType(thisObj->extraDataList, Primitive);
+	ExtraPrimitive* xPrimitive = GetExtraType(thisObj->extraDataList, Primitive);
 	*result = (xPrimitive && xPrimitive->primitive) ? xPrimitive->primitive->type : 0;
 	return true;
 }
 bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
-	BSAudioManager *g_audioManager = (BSAudioManager*)0x11F6EF0;
-	TESSound *soundForm;
+	BSAudioManager* g_audioManager = (BSAudioManager*)0x11F6EF0;
+	TESSound* soundForm;
 	TESObjectREFR* source;
-	BSFadeNode *fadeNode;
+	BSFadeNode* fadeNode;
 	*result = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &soundForm, &source))
 	{
 		if (soundForm->soundFile.path.m_dataLen)
 		{
-			const char *soundPath = soundForm->soundFile.path.m_data;
-			BSGameSound *gameSound;
+			const char* soundPath = soundForm->soundFile.path.m_data;
+			BSGameSound* gameSound;
 			for (NiTPointerMap<BSGameSound>::Iterator sndIter(&g_audioManager->playingSounds); !sndIter.Done(); sndIter.Next())
 			{
 				gameSound = sndIter.Get();
@@ -355,10 +603,10 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
-		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			NVSEArrayVar* weatherArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
-			ListNode<WeatherEntry> *iter = weatherData->weatherTypes.Head();
+			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
 			do
 			{
 				if (iter->data) {
@@ -375,9 +623,9 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
-		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
-			ListNode<WeatherEntry> *headNode = weatherData->weatherTypes.Head(), *iter = headNode->next;
+			ListNode<WeatherEntry>* headNode = weatherData->weatherTypes.Head(), * iter = headNode->next;
 			while (iter)
 			{
 				GameHeapFree(iter->data);
@@ -397,7 +645,7 @@ bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 bool Cmd_GetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
-		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			*result = weatherData->bOverride;
 			if (IsConsoleMode()) {
@@ -411,7 +659,7 @@ bool Cmd_SetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	int bOverride = -1;
 	if (ExtractArgs(EXTRACT_ARGS, &region, &bOverride) && IS_TYPE(region, TESRegion)) {
-		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData)
 			weatherData->bOverride = bOverride;
 	}
@@ -420,7 +668,7 @@ bool Cmd_SetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 bool Cmd_GetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
-		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			*result = weatherData->priority;
 			if (IsConsoleMode()) {
@@ -434,7 +682,7 @@ bool Cmd_SetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	int priority = -1;
 	if (ExtractArgs(EXTRACT_ARGS, &region, &priority) && IS_TYPE(region, TESRegion) && priority >= 0 && priority <= 100) {
-		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData)
 			weatherData->priority = priority;
 	}
@@ -444,10 +692,10 @@ bool Cmd_IsWeatherInRegion_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	TESWeather* weather = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &region, &weather) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
-		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
-			ListNode<WeatherEntry> *iter = weatherData->weatherTypes.Head();
-			WeatherEntry *weatherType;
+			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
+			WeatherEntry* weatherType;
 			do
 			{
 				weatherType = iter->data;
@@ -469,10 +717,10 @@ bool Cmd_RemoveRegionWeather_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	TESWeather* weather = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &region, &weather) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
-		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
-			ListNode<WeatherEntry> *iter = weatherData->weatherTypes.Head();
-			WeatherEntry *weatherType;
+			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
+			WeatherEntry* weatherType;
 			do
 			{
 				weatherType = iter->data;
@@ -493,12 +741,12 @@ bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	TESWeather* weather = NULL;
 	UInt32 chance = 0;
-	TESGlobal *global = NULL;
-	WeatherEntry *entry;
+	TESGlobal* global = NULL;
+	WeatherEntry* entry;
 	if (ExtractArgs(EXTRACT_ARGS, &region, &weather, &chance, &global) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
-		TESRegionDataWeather *weatherData = GetWeatherData(region);
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
-			ListNode<WeatherEntry> *iter = weatherData->weatherTypes.Head();
+			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
 			do
 			{
 				if (iter->data)
@@ -516,13 +764,11 @@ bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
 bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 	char edid[MAX_PATH];
 	TESForm* form = NULL;
+	*result = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &edid)) {
-		form = ((TESForm*(__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
+		form = ((TESForm * (__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
 		if (form) {
 			*(UInt32*)result = form->refID;
-		}
-		else {
-			*(UInt32*)result = GetRefIDFromEditorID(edid);
 		}
 		if (IsConsoleMode()) {
 			Console_Print("EditorIDToFormID >> 0x%X", *result);
@@ -562,36 +808,18 @@ bool Cmd_SetMusicTypeDB_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
-	Console_Print("0x%08X", thisObj);
+	TESForm* form = NULL;
+	if (thisObj) Console_Print("0x%08X", thisObj);
+	else if (ExtractArgs(EXTRACT_ARGS, &form) && form) Console_Print("0x%08X", form);
 	return true;
 }
 bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 	__asm int 3
 	return true;
 }
-// JIP function with a fix for detrimental effects
+// JIP function with a fix for detrimental effects, deprecated
 bool Cmd_GetActorValueModifierAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt32 actorVal, duration = 3;
-	if (!ExtractArgs(EXTRACT_ARGS, &actorVal, &duration) || !thisObj->IsActor()) return true;
-	ActiveEffectList *effList = ((Actor*)thisObj)->magicTarget.GetEffectList();
-	if (!effList) return true;
-	float modifier = 0;
-	ActiveEffect *activeEff;
-	EffectSetting *effSetting;
-	ListNode<ActiveEffect> *iter = effList->Head();
-	do
-	{
-		activeEff = iter->data;
-		if (!activeEff || !activeEff->bApplied || !activeEff->effectItem) continue;
-		effSetting = activeEff->effectItem->setting;
-		if (!effSetting || effSetting->archtype || (effSetting->actorVal != actorVal) ||
-			!(effSetting->effectFlags & 2) || !((activeEff->duration ? 2 : 1) & duration)) continue;
-		modifier += activeEff->magnitude;
-	} while (iter = iter->next);
-	*result = modifier;
-	if (IsConsoleMode())
-		Console_Print("GetActorValueModifierAlt >> %f", *result);
 	return true;
 }
 bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
@@ -602,49 +830,31 @@ bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	tickCount = ThisStdCall(0x457FE0, NULL);
 	double timePlayed = tickCount - g_thePlayer->unk774[6];
 	switch (type) {
-		case 0:
-			*result = timePlayed;
-			break;
-		case 1:
-			*result = timePlayed / 1000;
-			break;
-		case 2:
-			*result = timePlayed / 60000;
-			break;
-		}
+	case 0:
+		*result = timePlayed;
+		break;
+	case 1:
+		*result = timePlayed / 1000;
+		break;
+	case 2:
+		*result = timePlayed / 60000;
+		break;
+	}
 	if (IsConsoleMode()) {
 		Console_Print("%f", *result);
 	}
 	return true;
 }
-// JIP function with a sanity check to prevent errors
+// JIP function with a sanity check to prevent errors, deprecated
 bool Cmd_GetBufferedCellsAlt_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 interiors;
-	TES* g_TES = *(TES**)0x11DEA10;
-	if (ExtractArgs(EXTRACT_ARGS, &interiors))
-	{
-		NVSEArrayVar *cellsArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
-		TESObjectCELL **cellsBuffer = interiors ? g_TES->interiorsBuffer : g_TES->exteriorsBuffer, *cell;
-		UInt32 maxVal = interiors ? *(UInt32*)(0x11C3E38+4) : *(UInt32*)(0x11C3C90+4);
-		if (cellsBuffer)
-		{
-			while ((cell = *cellsBuffer) && maxVal != 0)
-			{
-				ArrIfc->AppendElement(cellsArr, NVSEArrayElement(cell));
-				cellsBuffer++;
-				maxVal--;
-			}
-		}
-		ArrIfc->AssignCommandResult(cellsArr, result);
-	}
 	return true;
 }
 bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
-	TESObjectWEAP *weap;
+	TESObjectWEAP* weap;
 	int id = -1;
-	TESObjectSTAT *model;
+	TESObjectSTAT* model;
 	if (ExtractArgs(EXTRACT_ARGS, &weap, &id, &model) && IS_TYPE(weap, TESObjectWEAP) && IS_TYPE(model, TESObjectSTAT) && id <= 7) {
 		switch (id) {
 		case 0:
@@ -676,7 +886,7 @@ bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_GetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
-	TESObjectWEAP *weap;
+	TESObjectWEAP* weap;
 	int id = -1;
 	if (ExtractArgs(EXTRACT_ARGS, &weap, &id) && IS_TYPE(weap, TESObjectWEAP) && id <= 7) {
 		switch (id) {
@@ -723,7 +933,7 @@ bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 		case 4:
 		case 5:
 		case 6:
-			*result = mediaset->data[traitID-1].dB;
+			*result = mediaset->data[traitID - 1].dB;
 			break;
 		case 7:
 		case 8:
@@ -731,7 +941,7 @@ bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 		case 10:
 		case 11:
 		case 12:
-			*result = mediaset->data[traitID-7].boundary;
+			*result = mediaset->data[traitID - 7].boundary;
 			break;
 		case 13:
 			*result = mediaset->flags;
@@ -833,7 +1043,7 @@ bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
-	const char *resStr = NULL;
+	const char* resStr = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &mediaset, &traitID) && IS_TYPE(mediaset, MediaSet)) {
 		if (traitID >= 0 && traitID <= 5) {
 			resStr = mediaset->data[traitID].filepath.CStr();
@@ -847,7 +1057,7 @@ bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 bool Cmd_SetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
-	const char *newStr = NULL;
+	const char* newStr = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &mediaset, &traitID, &newStr) && IS_TYPE(mediaset, MediaSet)) {
 		if (traitID >= 0 && traitID <= 5) {
 			mediaset->data[traitID].filepath.Set(newStr);
@@ -865,7 +1075,7 @@ bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 	if (ExtractArgs(EXTRACT_ARGS, &filename, &fileOrFolder)) {
 		char filepath[MAX_PATH];
 		GetModuleFileNameA(NULL, filepath, MAX_PATH);
-		strcpy((char *)(strrchr(filepath, '\\') + 1), "Data\\Config\\UwUDaddy\\");
+		strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Config\\UwUDaddy\\");
 		strcat(filepath, filename);
 		if (fileOrFolder == 1) {
 			strcat(filepath, ".ini");
@@ -880,7 +1090,7 @@ bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 	NiPoint3 Point;
-	if (ExtractArgs(EXTRACT_ARGS, &(Point.x), &(Point.y), &(Point.z))) 
+	if (ExtractArgs(EXTRACT_ARGS, &(Point.x), &(Point.y), &(Point.z)))
 		((void(__cdecl*)(NiNode*, NiPoint3*, int))(0x62B8D0))(thisObj->GetNiNode(), &Point, 1);
 	return true;
 }
@@ -892,12 +1102,12 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS)
 	if (ExtractArgs(EXTRACT_ARGS, &patch))
 	{
 		switch (patch) {
-			case 1:
-				enabled = loadEditorIDs;
-				break;
-			case 2:
-				enabled = fixHighNoon;
-				break;
+		case 1:
+			enabled = loadEditorIDs;
+			break;
+		case 2:
+			enabled = fixHighNoon;
+			break;
 		}
 		if (IsConsoleMode())
 			Console_Print("GetJohnnyPatch %d >> %d", patch, enabled);
@@ -907,9 +1117,9 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS)
 }
 
 bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
-	TESForm *form;
+	TESForm* form;
 	const char* edid;
-	if (ExtractArgs(EXTRACT_ARGS, &form)) { 
+	if (ExtractArgs(EXTRACT_ARGS, &form)) {
 		edid = form->GetName();
 		StrIfc->Assign(PASS_COMMAND_ARGS, edid);
 		if (IsConsoleMode())
@@ -919,7 +1129,7 @@ bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetIMODAnimatable_Execute(COMMAND_ARGS) {
-	TESImageSpaceModifier *imod;
+	TESImageSpaceModifier* imod;
 	if (ExtractArgs(EXTRACT_ARGS, &imod)) {
 		*result = imod->animable;
 		if (IsConsoleMode())
@@ -929,7 +1139,7 @@ bool Cmd_GetIMODAnimatable_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetIMODAnimatable_Execute(COMMAND_ARGS) {
-	TESImageSpaceModifier *imod;
+	TESImageSpaceModifier* imod;
 	int newVal = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &imod, &newVal) && (newVal == 0 || newVal == 1)) {
 		imod->animable = newVal;
@@ -950,18 +1160,18 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
-	AlchemyItem *poison;
+	AlchemyItem* poison;
 	if (ExtractArgs(EXTRACT_ARGS, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {
 		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
-		ContChangesEntry *wpnInfo = g_thePlayer->baseProcess->GetWeaponInfo();
+		ContChangesEntry* wpnInfo = g_thePlayer->baseProcess->GetWeaponInfo();
 		if (wpnInfo && wpnInfo->extendData)
 		{
 			UInt32 weaponSkill = ((TESObjectWEAP*)wpnInfo->type)->weaponSkill;
 			if (weaponSkill != kAVCode_Unarmed && weaponSkill != kAVCode_MeleeWeapons) return true;
-			ExtraDataList *xDataList = wpnInfo->extendData->GetFirstItem();
+			ExtraDataList* xDataList = wpnInfo->extendData->GetFirstItem();
 			if (xDataList)
 			{
-				ExtraPoison *xPoison = GetExtraType((*xDataList), Poison);
+				ExtraPoison* xPoison = GetExtraType((*xDataList), Poison);
 				if (!xPoison)
 					ThisStdCall(0x4BDD20, wpnInfo, poison); // ContChangesEntry::AddExtraPoison
 			}
@@ -971,7 +1181,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS) {
-	InterfaceManager* g_interfaceManager = *(InterfaceManager **)0x011D8A80;
+	InterfaceManager* g_interfaceManager = *(InterfaceManager * *)0x011D8A80;
 	if (g_interfaceManager) {
 		PatchMemoryNop(0x784F47, 6); // NOP-ing iLevelsPerPerk check
 		SafeWrite8(0x7850D6, 0x01);
@@ -980,23 +1190,23 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS) {
 		SafeWriteBuf(0x784F47, "\x0F\x85\x2D\x01\x00\x00", 6); // Restoring iLevelsPerPerk check
 		SafeWrite8(0x7850D6, 0x00);
 		SafeWriteBuf(0x785D25, "\xE8\x06\xFB\xFF\xFF", 5);
-		LevelUpMenu* g_levelUpMenu = *(LevelUpMenu**)0x11D9FDC;
+		LevelUpMenu* g_levelUpMenu = *(LevelUpMenu * *)0x11D9FDC;
 		g_levelUpMenu->tileBackBtn->SetFloat(kTileValue_visible, 0);
 	}
 	return true;
-} 
+}
 // A modified version of GetCalculatedWeaponDamage, all credits go to JazzIsParis
 bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	TESObjectWEAP *weapon = NULL;
+	TESObjectWEAP* weapon = NULL;
 	if (!ExtractArgs(EXTRACT_ARGS, &weapon)) return true;
 	float condition = 1.0F;
-	ListNode<ExtraDataList> *extendPtr = NULL;
+	ListNode<ExtraDataList>* extendPtr = NULL;
 	if (!weapon)
 	{
 		if (!thisObj) return true;
-		InventoryRef *invRef = InventoryRefGetForID(thisObj->refID);
+		InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
 		if (!invRef) return true;
 		weapon = (TESObjectWEAP*)invRef->data.type;
 		if NOT_ID(weapon, TESObjectWEAP) return true;
@@ -1008,10 +1218,10 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS)
 		}
 	}
 	else if NOT_ID(weapon, TESObjectWEAP) return true;
-	PlayerCharacter* g_thePlayer = *(PlayerCharacter**)0x11DEA3C;
-	MiddleHighProcess *midHiProc = (MiddleHighProcess*)g_thePlayer->baseProcess;
-	ContChangesEntry *weaponInfo = midHiProc->weaponInfo;
-	TESForm *ammo = NULL;
+	PlayerCharacter* g_thePlayer = *(PlayerCharacter * *)0x11DEA3C;
+	MiddleHighProcess* midHiProc = (MiddleHighProcess*)g_thePlayer->baseProcess;
+	ContChangesEntry* weaponInfo = midHiProc->weaponInfo;
+	TESForm* ammo = NULL;
 	if (extendPtr && weaponInfo && (weaponInfo->type == weapon) && midHiProc->ammoInfo)
 		ammo = midHiProc->ammoInfo->type;
 	if (!ammo) ammo = weapon->GetAmmo();
@@ -1028,7 +1238,7 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	int pipboyTab = 0;
 	ExtractArgs(EXTRACT_ARGS, &pipboyTab);
 	if (pipboyTab == 0 || pipboyTab == 1002 || pipboyTab == 1003 || pipboyTab == 1023) {
-		InterfaceManager* g_interfaceManager = *(InterfaceManager **)0x011D8A80;
+		InterfaceManager* g_interfaceManager = *(InterfaceManager * *)0x011D8A80;
 		if (g_interfaceManager) {
 			if (!g_interfaceManager->pipBoyMode)
 				ThisStdCall(0x70F4E0, g_interfaceManager, 0, pipboyTab);
@@ -1046,7 +1256,7 @@ bool Cmd_MD5File_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH];
 	char outHash[0x21];
 	if (ExtractArgs(EXTRACT_ARGS, &path)) {
-		strcpy((char *)(strrchr(filename, '\\') + 1), path);
+		strcpy((char*)(strrchr(filename, '\\') + 1), path);
 		GetMD5File(filename, outHash);
 		if (IsConsoleMode())
 			Console_Print(outHash);
@@ -1061,7 +1271,7 @@ bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH];
 	char outHash[0x29];
 	if (ExtractArgs(EXTRACT_ARGS, &path)) {
-		strcpy((char *)(strrchr(filename, '\\') + 1), path);
+		strcpy((char*)(strrchr(filename, '\\') + 1), path);
 		GetSHA1File(filename, outHash);
 		if (IsConsoleMode())
 			Console_Print(outHash);
@@ -1071,9 +1281,10 @@ bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
 }
 bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL *cell = NULL;
+	TESObjectCELL* cell = NULL;
 	if (ExtractArgs(EXTRACT_ARGS, &cell) && IS_TYPE(cell, TESObjectCELL)) {
-		*result = HasSeenData(cell);
+		ExtraSeenData* seenData = (ExtraSeenData*)cell->extraDataList.GetByType(kExtraData_SeenData);
+		if (seenData && seenData->data) *result = 1;
 		if (IsConsoleMode())
 			Console_Print("IsCellVisited >> %.0f", *result);
 	}
@@ -1082,23 +1293,29 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 
 bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL *cell = NULL;
-	float hoursToRespawn = 0;
-	float detachTime = 0;
-	float gameHoursPassed = 0;
-		if (ExtractArgs(EXTRACT_ARGS, &cell) && IS_TYPE(cell, TESObjectCELL)) {
-		detachTime = GetDetachTime(cell);
-		if (detachTime == 0) *result = -1;
-		else if (detachTime == -1) *result = 1;
-		else { 
-			hoursToRespawn = (float)*(UInt32*)ThisStdCall(0x43D4D0, (char*)0x11CA160);
-			gameHoursPassed = (float)ThisStdCall(0x867E30, (UInt32*)0x11DE7B8);
-			if ((gameHoursPassed - detachTime) > hoursToRespawn) *result = 1;
+	TESObjectCELL* cell = NULL;
+	Setting* hoursToRespawnCell = (Setting*)0x11CA160;
+	GameTimeGlobals* g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
+	float hoursToRespawn = 0, detachTime = 0, gameHoursPassed = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &cell) && IS_TYPE(cell, TESObjectCELL)) {
+		ExtraDetachTime* xDetachTime = (ExtraDetachTime*)cell->extraDataList.GetByType(kExtraData_DetachTime);
+		detachTime = xDetachTime == 0 ? 0 : xDetachTime->time;
+		if (detachTime == 0) {
+			*result = -1;
+		}
+		else if (detachTime == -1) {
+			*result = 1;
+		}
+		else {
+			float daysPassed = g_gameTimeGlobals->daysPassed == 0 ? 1.0 : g_gameTimeGlobals->daysPassed->data;
+			gameHoursPassed = floor(daysPassed * 24.0);
+			hoursToRespawn = hoursToRespawnCell->data.i;
+			*result = ((gameHoursPassed - detachTime) > hoursToRespawn);
 		}
 		if (IsConsoleMode())
 			Console_Print("IsCellExpired >> %.0f", *result);
 	}
-	return true; 
+	return true;
 }
 
 bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS)
@@ -1111,23 +1328,23 @@ bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS)
 bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS)
 {
 	*(UInt32*)result = isShowLevelUp == true ? 1 : 0;
-	if (IsConsoleMode()) Console_Print("IsLevelUpMenuEnabled >> %u", *(UInt32*) result);
+	if (IsConsoleMode()) Console_Print("IsLevelUpMenuEnabled >> %u", *(UInt32*)result);
 	return true;
 }
 bool Cmd_GetBaseEffectAV_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	EffectSetting *effect;
+	EffectSetting* effect;
 	if (ExtractArgs(EXTRACT_ARGS, &effect) && IS_TYPE(effect, EffectSetting) && (effect->archtype == 0) && effect->actorVal)
-		*result = effect->actorVal;
+		* result = effect->actorVal;
 	return true;
 }
 bool Cmd_GetBaseEffectArchetype_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	EffectSetting *effect;
+	EffectSetting* effect;
 	if (ExtractArgs(EXTRACT_ARGS, &effect) && IS_TYPE(effect, EffectSetting))
-		*result = effect->archtype;
+		* result = effect->archtype;
 	return true;
 }
 
@@ -1152,13 +1369,13 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 		setVarByName(PASS_VARARGS, X_outS, xOut);
 		setVarByName(PASS_VARARGS, Y_outS, yOut);
 		setVarByName(PASS_VARARGS, Z_outS, zOut);
-		}
+	}
 	return true;
 }
 
 bool Cmd_GetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL *cell = NULL;
+	TESObjectCELL* cell = NULL;
 	int traitID = -1;
 	if (ExtractArgs(EXTRACT_ARGS, &cell, &traitID) && IS_TYPE(cell, TESObjectCELL)) {
 		if (!cell->IsInterior() || traitID < 0 || traitID > 15) return true;
@@ -1222,7 +1439,7 @@ bool Cmd_GetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 }
 bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL *cell = NULL;
+	TESObjectCELL* cell = NULL;
 	int traitID = -1;
 	float value = -1;
 	if (ExtractArgs(EXTRACT_ARGS, &cell, &traitID, &value) && IS_TYPE(cell, TESObjectCELL)) {
@@ -1336,5 +1553,86 @@ bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 		*(float*)(0x11DFED4) = shakeMult;
 		*(float*)(0x11DFED8) = time;
 	}
+	return true;
+}
+
+
+
+UInt32 DoSkipMuzzleLights = -1;
+
+__declspec (naked) void DisableMuzzleFlashLightsHook()
+{
+	static const UInt32 retAddrDisable = 0x9BB843;
+	static const UInt32 retAddrKeep = 0x9BB81A;
+	__asm
+	{
+		cmp DoSkipMuzzleLights, 1
+		jz Skip
+		push 1
+		mov ecx, [ebp-4]
+		jmp retAddrKeep
+		Skip:
+		jmp retAddrDisable
+	}
+}
+
+
+
+
+bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
+	UInt32 toExtract = -1;
+	if (ExtractArgs(EXTRACT_ARGS, &toExtract) && toExtract <= 1) DoSkipMuzzleLights = toExtract;
+	*(UInt32*)result = (DoSkipMuzzleLights == 1);
+	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %u", *result);
+	return true;
+}
+
+
+
+
+
+
+void DoCustomMapMarker(TESObjectREFR* Marker, char* PathToPass)
+{
+
+	auto Position = CustomMapMarkerMap.find(Marker->refID);
+	char* MapMarkerAllocString = new char[strlen(PathToPass) + 1];
+	strcpy(MapMarkerAllocString, PathToPass);
+
+	if (Position != CustomMapMarkerMap.end())
+	{
+		delete[] Position->second;
+		Position->second = MapMarkerAllocString;
+	}
+	else 
+	{
+		CustomMapMarkerMap.insert({ Marker->refID, MapMarkerAllocString });
+	}
+}
+
+
+
+bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
+	TESObjectREFR* form;
+	char MapMarkerRoute[MAX_PATH];
+	if (!ExtractArgs(EXTRACT_ARGS, &form, &MapMarkerRoute) || (!IS_TYPE(form, BGSListForm) && (!form->GetIsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)) )) return true;
+	if (IS_TYPE(form, BGSListForm))
+	{
+		ListNode<TESForm>* iterator = ((BGSListForm*)form)->list.Head();
+		while (iterator)
+		{
+			TESObjectREFR* Refer = (TESObjectREFR*) (iterator->data);
+			if (Refer->GetIsReference() && Refer->IsMapMarker() && GetExtraType(form->extraDataList, MapMarker)) 
+			{
+				DoCustomMapMarker(Refer, MapMarkerRoute);
+			}
+			iterator = iterator->next;
+		}
+	}
+	else
+	{
+		DoCustomMapMarker(form, MapMarkerRoute);
+	}
+	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->refID,  MapMarkerRoute);
 	return true;
 }
