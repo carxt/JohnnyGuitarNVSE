@@ -817,29 +817,9 @@ bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 	__asm int 3
 	return true;
 }
-// JIP function with a fix for detrimental effects
+// JIP function with a fix for detrimental effects, deprecated
 bool Cmd_GetActorValueModifierAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt32 actorVal, duration = 3;
-	if (!ExtractArgs(EXTRACT_ARGS, &actorVal, &duration) || !thisObj->IsActor()) return true;
-	ActiveEffectList* effList = ((Actor*)thisObj)->magicTarget.GetEffectList();
-	if (!effList) return true;
-	float modifier = 0;
-	ActiveEffect* activeEff;
-	EffectSetting* effSetting;
-	ListNode<ActiveEffect>* iter = effList->Head();
-	do
-	{
-		activeEff = iter->data;
-		if (!activeEff || !activeEff->bApplied || !activeEff->effectItem) continue;
-		effSetting = activeEff->effectItem->setting;
-		if (!effSetting || effSetting->archtype || (effSetting->actorVal != actorVal) ||
-			!(effSetting->effectFlags & 2) || !((activeEff->duration ? 2 : 1) & duration)) continue;
-		modifier += activeEff->magnitude;
-	} while (iter = iter->next);
-	*result = modifier;
-	if (IsConsoleMode())
-		Console_Print("GetActorValueModifierAlt >> %f", *result);
 	return true;
 }
 bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
@@ -865,28 +845,10 @@ bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-// JIP function with a sanity check to prevent errors
+// JIP function with a sanity check to prevent errors, deprecated
 bool Cmd_GetBufferedCellsAlt_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 interiors;
-	TES* g_TES = *(TES * *)0x11DEA10;
-	if (ExtractArgs(EXTRACT_ARGS, &interiors))
-	{
-		NVSEArrayVar* cellsArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
-		TESObjectCELL** cellsBuffer = interiors ? g_TES->interiorsBuffer : g_TES->exteriorsBuffer, * cell;
-		UInt32 maxVal = interiors ? *(UInt32*)(0x11C3E38 + 4) : *(UInt32*)(0x11C3C90 + 4);
-		if (cellsBuffer)
-		{
-			while ((cell = *cellsBuffer) && maxVal != 0)
-			{
-				ArrIfc->AppendElement(cellsArr, NVSEArrayElement(cell));
-				cellsBuffer++;
-				maxVal--;
-			}
-		}
-		ArrIfc->AssignCommandResult(cellsArr, result);
-	}
 	return true;
 }
 bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
