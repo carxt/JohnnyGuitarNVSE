@@ -87,13 +87,21 @@ DEFINE_COMMAND_PLUGIN(SetProjectileSound, , 0, 3, kParamsJohnnyOneForm_OneInt_On
 DEFINE_COMMAND_PLUGIN(SetWeaponWorldModelPath, , 0, 2, kParamsJohnny_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(Clamp, , 0, 3, kParamsJohnnyThreeFloats);
 DEFINE_COMMAND_PLUGIN(Remap, , 0, 5, kParamsJohnnyFiveFloats);
-DEFINE_COMMAND_PLUGIN(Lerp, , 0, 3, kParamsJohnnyThreeFloats);
+DEFINE_COMMAND_PLUGIN(Lerp, , 0, 3, kParamsJohnnyThreeFloats); 
+DEFINE_COMMAND_PLUGIN(Sign, , 0, 1, kParams_OneFloat);
 #include "internal/decoding.h"
 #include "GameSettings.h"
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
-
+bool Cmd_Sign_Execute(COMMAND_ARGS) {
+	float value;
+	*result = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &value) && value != 0) {
+		*result = value > 0 ? 1 : -1;
+	}
+	return true;
+}
 bool Cmd_Lerp_Execute(COMMAND_ARGS) {
 	float v0 = 0, v1 = 0, t = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &v0, &v1, &t)) {

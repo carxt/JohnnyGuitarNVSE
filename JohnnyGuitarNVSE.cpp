@@ -206,6 +206,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(Lerp);
 	REG_CMD(SetJohnnySeenDataEventHandler);
 	REG_CMD(SetJohnnyOnLimbGoneEventHandler);
+	REG_CMD(Sign);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
