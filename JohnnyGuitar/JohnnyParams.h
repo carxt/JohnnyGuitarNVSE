@@ -81,6 +81,13 @@ ParamInfo kParamsJohnnyOneForm_OneInt_OneForm[3] =
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Form", kParamType_AnyForm, 0 }
 };
+ParamInfo kParamsJohnnyOneForm_OneInt_OneForm_OneInt[4] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 }
+};
 ParamInfo kParamsJohnnyOneForm_OneInt_OneString[3] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
@@ -122,6 +129,13 @@ ParamInfo kParamsJohnny_OneForm_TwoInts[3] =
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "int",	kParamType_Integer, 0 },
 	{ "int",	kParamType_Integer, 0 },
+};
+ParamInfo kParamsJohnny_OneForm_TwoInts_OneString[4] =
+{
+	{ "form",	kParamType_AnyForm,	0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "string",	kParamType_String,	0 },
 };
 ParamInfo kParamsJohnny_SixFloats[6] =
 {

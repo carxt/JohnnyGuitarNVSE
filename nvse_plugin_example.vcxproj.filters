@@ -16,6 +16,9 @@
     <Filter Include="internal\sha1">
       <UniqueIdentifier>{92cbffb5-c87c-4e83-8834-99510ec93917}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JohnnyGuitar\JohnnyFunctions">
+      <UniqueIdentifier>{a3c29436-c711-4568-ad26-90e99fd225f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
@@ -153,9 +156,6 @@
     <ClInclude Include="internal\sha1\sha1.h">
       <Filter>internal\sha1</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions.h">
-      <Filter>JohnnyGuitar</Filter>
-    </ClInclude>
     <ClInclude Include="JohnnyGuitar\BMPHandling.h">
       <Filter>JohnnyGuitar</Filter>
     </ClInclude>
@@ -179,6 +179,30 @@
     </ClInclude>
     <ClInclude Include="JohnnyGuitar\CustomEventFilters.h">
       <Filter>JohnnyGuitar</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_form.h">
+      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_math.h">
+      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_utility.h">
+      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_file.h">
+      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_gameplay.h">
+      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_mediaset.h">
+      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_region.h">
+      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_terminal.h">
+      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

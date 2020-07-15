@@ -22,7 +22,14 @@
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
 #include "JohnnyGuitar/JohnnyParams.h"
 #include "JohnnyGuitar/EditorIDs.h"
-#include "JohnnyGuitar/JohnnyFunctions.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_form.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_utility.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_math.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_file.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_gameplay.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_mediaset.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_region.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_terminal.h"
 #include "JohnnyGuitar/BMPHandling.h"
 #include "JohnnyGuitar/EventFilteringInterface.h"
 #include "JohnnyGuitar/CustomEventFilters.h"
@@ -207,6 +214,14 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetJohnnySeenDataEventHandler);
 	REG_CMD(SetJohnnyOnLimbGoneEventHandler);
 	REG_CMD(Sign);
+	REG_CMD(AddTerminalMenuItem);
+	REG_TYPED_CMD(GetTerminalMenuItemText, String);
+	REG_CMD(SetTerminalMenuItemText);
+	REG_CMD(GetTerminalMenuItemNote);
+	REG_CMD(SetTerminalMenuItemNote);
+	REG_CMD(GetTerminalMenuItemSubmenu);
+	REG_CMD(SetTerminalMenuItemSubmenu);
+	REG_CMD(GetRunSpeed);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

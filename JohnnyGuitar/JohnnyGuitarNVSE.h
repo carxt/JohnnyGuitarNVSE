@@ -4,14 +4,6 @@
 #include <unordered_map>
 #pragma once
 
-
-
-
-
-
-
-
-
 NVSEArrayVarInterface* ArrIfc = NULL;
 NVSEStringVarInterface* StrIfc = NULL;
 NVSEMessagingInterface* g_msg = NULL;
@@ -30,6 +22,8 @@ char* StrArgBuf;
 #define IS_ID(form, type) (form->typeID == kFormType_##type)
 #define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
+#define VarNameSize 64
+
 IDebugLog ParamLog;
 bool loadEditorIDs = 0;
 bool fixHighNoon = 0;
@@ -171,6 +165,46 @@ hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName)
 		}
 	}
 	return NULL;
+}
+__forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
+{
+	NiPointBuffer->x = xIn;
+	NiPointBuffer->y = yIn;
+	NiPointBuffer->z = zIn;
+}
+UInt32 DoSkipMuzzleLights = -1;
+
+__declspec (naked) void DisableMuzzleFlashLightsHook()
+{
+	static const UInt32 retAddrDisable = 0x9BB843;
+	static const UInt32 retAddrKeep = 0x9BB81A;
+	__asm
+	{
+		cmp DoSkipMuzzleLights, 1
+		jz Skip
+		push 1
+		mov ecx, [ebp - 4]
+		jmp retAddrKeep
+		Skip :
+		jmp retAddrDisable
+	}
+}
+void DoCustomMapMarker(TESObjectREFR* Marker, char* PathToPass)
+{
+
+	auto Position = CustomMapMarkerMap.find(Marker->refID);
+	char* MapMarkerAllocString = new char[strlen(PathToPass) + 1];
+	strcpy(MapMarkerAllocString, PathToPass);
+
+	if (Position != CustomMapMarkerMap.end())
+	{
+		delete[] Position->second;
+		Position->second = MapMarkerAllocString;
+	}
+	else
+	{
+		CustomMapMarkerMap.insert({ Marker->refID, MapMarkerAllocString });
+	}
 }
 __declspec(naked) ExtraContainerChanges::EntryDataList* TESObjectREFR::GetContainerChangesList()
 {
@@ -404,22 +438,23 @@ void patchFixDisintegrationsStat()
 	// critical stages 2 and 4, skip IncPCMiscStat
 	SafeWriteBuf(0x8A1B6E, "\x82\xC0\x01\x00\x00\xFF\xD0\xEB\x53\x90", 10);
 }
-void HandleGameHooks()
-{
-	//	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // WIP
-	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
-	WriteRelJump(0x77D612, UInt32(LevelUpHook));
-	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
-	WriteRelJump(0x9BB815, (UInt32)DisableMuzzleFlashLightsHook);
-	SafeWrite16(0x79D330, 0x9090);
-	WriteRelCall(0x79D332, (UInt32)AsmGetMapMarkerRoute);
-	patchFixDisintegrationsStat();
-	if (loadEditorIDs) LoadEditorIDs();
+static float value = 15.0;
+float* __fastcall VATSSpreadMultHook(void* ecx) {
+	return &value;
 }
+__declspec(naked) void DialogueAnimHook() {
+	static const UInt32 jumpAddr = 0x8A56DF;
+	static const UInt32 retnAddr = 0x8A566B;
+	__asm {
+		movzx eax, byte ptr ss : [ebp + 0x10]
+		test eax, eax
+		jnz ANIM
+		jmp retnAddr
+		ANIM:
 
-
-
-
+		jmp jumpAddr
+	}
+}
 
 static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 {
@@ -427,12 +462,29 @@ static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 	VirtualProtect((LPVOID)Address, Size, PAGE_EXECUTE_READWRITE, &d);
 
 	for (SIZE_T i = 0; i < Size; i++)
-		* (volatile BYTE*)(Address + i) = 0x90; //0x90 == opcode for NOP
+		*(volatile BYTE*)(Address + i) = 0x90; //0x90 == opcode for NOP
 
 	VirtualProtect((LPVOID)Address, Size, d, &d);
 
 	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
 }
+
+void HandleGameHooks()
+{
+	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // use available ammo in inventory instead of NULL when default ammo isn't present
+	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
+	WriteRelJump(0x77D612, UInt32(LevelUpHook)); // for ToggleLevelUpMenu
+	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
+	WriteRelJump(0x9BB815, (UInt32)DisableMuzzleFlashLightsHook); // for DisableMuzzleFlashLights
+	SafeWrite16(0x79D330, 0x9090);
+	WriteRelCall(0x79D332, (UInt32)AsmGetMapMarkerRoute);
+	WriteRelCall(0x8B102B, (UInt32)VATSSpreadMultHook); // replace fNPCMaxWobbleAngle with 15.0 for VATS
+	PatchMemoryNop(0x8A56C4, 4); // Fix for animations not working in dialog topics with sound
+	PatchMemoryNop(0x8A56C8, 4);
+	patchFixDisintegrationsStat();
+	if (loadEditorIDs) LoadEditorIDs();
+}
+
 
 bool removeFiles(char* folder1)
 {

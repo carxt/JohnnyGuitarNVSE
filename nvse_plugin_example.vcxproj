@@ -244,7 +244,14 @@
     <ClInclude Include="JohnnyGuitar\EventFilteringInterface.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyEventPredefinitions.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyEvents.h" />
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_file.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_form.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_gameplay.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_math.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_mediaset.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_region.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_terminal.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_utility.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyGuitarNVSE.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyParams.h" />
     <ClInclude Include="JohnnyGuitar\misc.h" />

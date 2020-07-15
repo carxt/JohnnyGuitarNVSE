@@ -52,10 +52,18 @@ ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL *cell) {
 
 __declspec (naked) void OnDyingEventAsm()
 {
+	static const UInt32 checkProtect = 0xEC408C;
 	__asm
 	{
 		push dword ptr[ebp - 0x18]
 		call handleDyingEvent
+		mov ecx, dword ptr ss : [ebp - 0xC]
+		mov dword ptr fs : [0] , ecx
+		pop ecx
+		pop esi
+		mov ecx, dword ptr ss : [ebp - 0x14]
+		xor ecx, ebp
+		call checkProtect
 		mov esp, ebp
 		pop ebp
 		mov esp, ebx
@@ -185,7 +193,7 @@ void initEventHooks(const NVSEInterface* nvse)
 		FunctionCallScript = g_script->CallFunction;
 		WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 		WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
-		WriteRelJump(0x89F4BA, (UINT)OnDyingEventAsm);
+		WriteRelJump(0x89F4A4, (UINT)OnDyingEventAsm);
 		WriteRelJump(0x60CA24, (UINT)OnQuestStartStopEventAsm);
 		WriteRelCall(0x572FF1, (UINT)HandleLimbGoneEvent);
 		SafeWrite8(0x60CA29, 0xCC);
