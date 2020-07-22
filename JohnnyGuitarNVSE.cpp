@@ -53,6 +53,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		DoSkipMuzzleLights = 0; //reset the muzzle hook every time
 		OnDyingHandler->FlushEventCallbacks();
 		OnLimbGoneHandler->FlushEventCallbacks();
+		if (bArrowKeysDisabled) {
+			bArrowKeysDisabled = false;
+		}
 		break;
 	}
 	}
@@ -222,6 +225,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(GetTerminalMenuItemSubmenu);
 	REG_CMD(SetTerminalMenuItemSubmenu);
 	REG_CMD(GetRunSpeed);
+	REG_CMD(DisableMenuArrowKeys);
+	REG_CMD(EnableMenuArrowKeys);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

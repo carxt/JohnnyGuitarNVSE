@@ -14,6 +14,7 @@ void DisableMuzzleFlashLightsHook();
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, UInt8 arg4, ContChangesEntry* entry, UInt8 arg6, UInt8 arg7, int arg8, float arg9, float arg10, UInt8 arg11, UInt8 arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, UInt8, ContChangesEntry*, UInt8, UInt8, int, float, float, UInt8, UInt8, TESForm*))0x645380;
 bool isShowLevelUp = true;
+bool bArrowKeysDisabled = false;
 char* StrArgBuf;
 #define ExtractArgsEx(...) g_script->ExtractArgsEx(__VA_ARGS__)
 #define ExtractFormatStringArgs(...) g_script->ExtractFormatStringArgs(__VA_ARGS__)
@@ -455,6 +456,28 @@ __declspec(naked) void DialogueAnimHook() {
 		jmp jumpAddr
 	}
 }
+__declspec(naked) void DisableArrowKeysHook() {
+	static const UInt32 retnAddr = 0x70F711;
+	__asm {
+		cmp byte ptr [bArrowKeysDisabled], 1
+		jnz DONE
+		cmp dword ptr [ebp+8], 4
+		jnz MATCHED
+		cmp dword ptr[ebp + 8], 3
+		jnz MATCHED
+		cmp dword ptr[ebp + 8], 1
+		jnz MATCHED
+		cmp dword ptr[ebp + 8], 2
+		jnz MATCHED
+		jmp DONE
+		MATCHED:
+			mov dword ptr[ebp+8], 0
+		DONE:
+			mov byte ptr[ebp-0xD], 0
+			mov eax, 1
+			jmp retnAddr
+	}
+}
 
 static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 {
@@ -481,6 +504,7 @@ void HandleGameHooks()
 	WriteRelCall(0x8B102B, (UInt32)VATSSpreadMultHook); // replace fNPCMaxWobbleAngle with 15.0 for VATS
 	PatchMemoryNop(0x8A56C4, 4); // Fix for animations not working in dialog topics with sound
 	PatchMemoryNop(0x8A56C8, 4);
+	WriteRelJump(0x70F708, (UInt32)DisableArrowKeysHook);
 	patchFixDisintegrationsStat();
 	if (loadEditorIDs) LoadEditorIDs();
 }

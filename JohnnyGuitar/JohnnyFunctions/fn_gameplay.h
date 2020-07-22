@@ -15,8 +15,23 @@ DEFINE_COMMAND_PLUGIN(UnsetAV, , 1, 1, kParams_OneActorValue);
 DEFINE_COMMAND_PLUGIN(UnforceAV, , 1, 1, kParams_OneActorValue);
 DEFINE_COMMAND_PLUGIN(ToggleNthPipboyLight, , 0, 2, kParams_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetRunSpeed, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(DisableMenuArrowKeys, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(EnableMenuArrowKeys, , 0, 0, NULL);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
+
+bool Cmd_DisableMenuArrowKeys_Execute(COMMAND_ARGS) {
+	if (!bArrowKeysDisabled) {
+		bArrowKeysDisabled = true;
+	}
+	return true;
+}
+bool Cmd_EnableMenuArrowKeys_Execute(COMMAND_ARGS) {
+	if (bArrowKeysDisabled) {
+		bArrowKeysDisabled = false;
+	}
+	return true;
+}
 bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* actor = (Actor*)thisObj;
