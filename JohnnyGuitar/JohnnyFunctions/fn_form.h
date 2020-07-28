@@ -39,9 +39,16 @@ DEFINE_COMMAND_PLUGIN(GetPrimitiveType, , 1, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetBaseScale, , , 1, NULL);
 DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParamsJohnny_OneForm_OneString);
-
+DEFINE_COMMAND_PLUGIN(GetQuestFailed, , 0, 1, kParams_OneForm);
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
-
+bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESQuest* quest;
+	if (ExtractArgs(EXTRACT_ARGS, &quest))
+		*result = (quest->flags & 0x40) ? 1 : 0;
+	if (IsConsoleMode()) Console_Print("GetQuestFailed >> %.2f", *result);
+	return true;
+}
 bool Cmd_SetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectWEAP* weapon;

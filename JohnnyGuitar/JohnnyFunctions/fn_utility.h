@@ -120,7 +120,7 @@ bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 }
 bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS)
 {
-	*(UInt32*)result = isShowLevelUp == true ? 1 : 0;
-	if (IsConsoleMode()) Console_Print("IsLevelUpMenuEnabled >> %u", *(UInt32*)result);
+	*result = isShowLevelUp;
+	if (IsConsoleMode()) Console_Print("IsLevelUpMenuEnabled >> %.f", *result);
 	return true;
 }
