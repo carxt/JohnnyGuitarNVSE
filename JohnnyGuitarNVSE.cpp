@@ -228,6 +228,11 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(DisableMenuArrowKeys);
 	REG_CMD(EnableMenuArrowKeys);
 	REG_CMD(GetQuestFailed);
+	REG_CMD(SetJohnnyOnChallengeCompleteEventHandler);
+	REG_CMD(GetTerminalMenuItemCount);
+	REG_CMD(GetPipBoyMode);
+	REG_CMD(GetWeaponVATSTraitNumeric);
+	REG_CMD(SetWeaponVATSTraitNumeric);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

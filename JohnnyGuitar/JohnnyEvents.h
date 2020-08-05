@@ -4,11 +4,13 @@ DEFINE_COMMAND_PLUGIN(SetJohnnyOnStartQuestEventHandler, , 0, 4, kParamsJohnnyEv
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnStopQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnySeenDataEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnLimbGoneEventHandler, , 0,5, kParamsJohnnyEventOneFormOneIntFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
 EventInformation* OnSeenDataUpdateHandler;
 EventInformation* OnLimbGoneHandler;
+EventInformation* OnChallengeCompleteHandler;
 void __stdcall handleDyingEvent(Actor* thisObj) {
 	if (thisObj->lifeState == 1) {
 		for (auto const& callback : OnDyingHandler->EventCallbacks) {
@@ -48,7 +50,15 @@ ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL *cell) {
 	}
 	return &cell->extraDataList;
 }
-
+UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
+	for (auto const& callback : OnChallengeCompleteHandler->EventCallbacks) {
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, challenge)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		{
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnChallengeCompleteHandler->numMaxArgs, challenge);
+		}
+	}
+	return challenge->data.type;
+}
 
 __declspec (naked) void OnDyingEventAsm()
 {
@@ -97,6 +107,24 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
 			if (setOrRemove)
 				OnLimbGoneHandler->RegisterEvent(script, (void**)&filter);
 			else OnLimbGoneHandler->RemoveEventFromGame(script, (void**)&filter);
+
+		}
+		return true;
+	}
+}
+bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	TESForm* filter[1] = { NULL };
+	UInt32 flags = 0;
+	if (!(ExtractArgs(EXTRACT_ARGS, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	{
+		if (OnChallengeCompleteHandler)
+		{
+			if (setOrRemove)
+				OnChallengeCompleteHandler->RegisterEvent(script, (void**)filter);
+			else OnChallengeCompleteHandler->RemoveEventFromGame(script, (void**)filter);
 
 		}
 		return true;
@@ -190,12 +218,15 @@ void initEventHooks(const NVSEInterface* nvse)
 		OnStopQuestHandler = JGCreateEvent("OnStopQuest", 1, 1, NULL);
 		OnSeenDataUpdateHandler = JGCreateEvent("OnSeenDataUpdate", 1, 1, NULL);
 		OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2, 2, CreateOneFormOneIntFilter);
+		OnChallengeCompleteHandler = JGCreateEvent("OnChallengeComplete", 1, 1, NULL);
 		FunctionCallScript = g_script->CallFunction;
 		WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 		WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
 		WriteRelJump(0x89F4A4, (UINT)OnDyingEventAsm);
 		WriteRelJump(0x60CA24, (UINT)OnQuestStartStopEventAsm);
 		WriteRelCall(0x572FF1, (UINT)HandleLimbGoneEvent);
+		WriteRelCall(0x5F5C78, (UINT)HandleChallengeCompleteEvent);
+		WriteRelCall(0x5F6222, (UINT)HandleChallengeCompleteEvent);
 		SafeWrite8(0x60CA29, 0xCC);
 	}
 

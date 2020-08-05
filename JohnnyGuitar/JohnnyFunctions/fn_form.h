@@ -40,6 +40,61 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetBaseScale, , , 1, NULL);
 DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParamsJohnny_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(GetQuestFailed, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(GetWeaponVATSTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetWeaponVATSTraitNumeric, , 0, 3, kParamsJohnnyOneForm_OneInt_OneFloat);
+
+bool Cmd_GetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectWEAP* weap;
+	UInt32 traitID = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &weap, &traitID) && IS_TYPE(weap, TESObjectWEAP)) {
+		switch (traitID) {
+			case 1:
+				*result = weap->vatsSkill;
+				break;
+			case 2:
+				*result = weap->vatsDamMult;
+				break;
+			case 3:
+				*result = weap->vatsAP;
+				break;
+			case 4:
+				*result = weap->isSilent;
+				break;
+			case 5:
+				*result = weap->modRequired;
+				break;
+			}
+		if (IsConsoleMode()) Console_Print("GetWeaponVATSTraitNumeric %d >> %f", traitID, *result);
+	}
+	return true;
+}
+bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectWEAP* weap;
+	UInt32 traitID = 0;
+	float value;
+	if (ExtractArgs(EXTRACT_ARGS, &weap, &traitID, &value) && IS_TYPE(weap, TESObjectWEAP)) {
+		switch (traitID) {
+			case 1:
+				weap->vatsSkill = value;
+				break;
+			case 2:
+				weap->vatsDamMult = value;
+				break;
+			case 3:
+				weap->vatsAP = value;
+				break;
+			case 4:
+				weap->isSilent = (value > 0 ? 1 : 0);
+				break;
+			case 5:
+				weap->modRequired = (value > 0 ? 1 : 0);
+				break;
+			}
+	}
+	return true;
+}
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
 	*result = 0;

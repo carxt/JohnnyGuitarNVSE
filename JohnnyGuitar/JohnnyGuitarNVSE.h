@@ -253,9 +253,15 @@ __declspec(naked) void SetEditorIdHook_REFR()
 	__asm jmp TESForm::hk_SetEditorID_REFR
 }
 const char* __fastcall ConsoleNameHook(TESObjectREFR* ref) {
-	const char* name = ref->baseForm->GetTheName();
-	if (!strlen(name)) name = ref->baseForm->GetName();
-	return name;
+	try {
+		const char* name = ref->baseForm->GetTheName();
+		if (!strlen(name)) name = ref->baseForm->GetName();
+		return name;
+	}
+	catch (...) {
+		_MESSAGE("Couldn't retrieve EDID for %u", ref->refID);
+	}
+	return "";
 }
 void LoadEditorIDs() {
 	WriteRelCall(0x486903, (UInt32(GetNameHook))); // replaces empty string with editor id in TESForm::GetDebugName

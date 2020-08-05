@@ -9,6 +9,15 @@ DEFINE_COMMAND_PLUGIN(EditorIDToFormID, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParamsJohnnyFourStrings);
 DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetPipBoyMode, , 0, 0, NULL);
+
+bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
+	*result = 0;
+	InterfaceManager* g_interfaceManager = *(InterfaceManager**)0x011D8A80;
+	if (g_interfaceManager) *result = g_interfaceManager->pipBoyMode;
+	if (IsConsoleMode()) Console_Print("GetPipBoyMode >> %.2f", *result);
+	return true;
+}
 
 bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];

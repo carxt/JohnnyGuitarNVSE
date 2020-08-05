@@ -6,7 +6,17 @@ DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemNote, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemNote, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemSubmenu, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemSubmenu, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemCount, , 0, 1, kParams_OneForm);
 
+bool Cmd_GetTerminalMenuItemCount_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSTerminal* terminal;
+	if (ExtractArgs(EXTRACT_ARGS, &terminal) && IS_TYPE(terminal, BGSTerminal)) {
+		*result = terminal->menuEntries.Count();
+		if (IsConsoleMode()) Console_Print("GetTerminalMenuItemCount >> %.f", *result);
+	}
+	return true;
+}
 bool Cmd_GetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* terminal;
