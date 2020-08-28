@@ -70,7 +70,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 315;
+	info->version = 320;
 
 	if (nvse->isNogore) 
 	{
@@ -233,6 +233,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(GetPipBoyMode);
 	REG_CMD(GetWeaponVATSTraitNumeric);
 	REG_CMD(SetWeaponVATSTraitNumeric);
+	REG_CMD(RemoveTerminalMenuItem);
+	REG_CMD(SetWorldSpaceMapTexture);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

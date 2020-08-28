@@ -29,6 +29,7 @@ DEFINE_COMMAND_PLUGIN(SetEquipType, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFactionMembers, , 0, 2, kParamsJohnny_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetRaceHeadModelPath, , 0, 3, kParamsJohnny_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetWorldSpaceMapTexture, , 0, 2, kParamsJohnny_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(GetCalculatedWeaponDPS, , 0, 1, kParams_OneOptionalObjectID);
 DEFINE_COMMAND_PLUGIN(IsCellVisited, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(IsCellExpired, , 0, 1, kParams_OneForm);
@@ -754,6 +755,15 @@ bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESWorldSpace* worlspace = NULL;
+	char path[MAX_PATH];
+	if (ExtractArgs(EXTRACT_ARGS, &worlspace, &path) && IS_TYPE(worlspace, TESWorldSpace)) {
+		worlspace->texture.ddsPath.Set(path);
+	}
+	return true;
+}
 bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESWorldSpace* worlspace = NULL;
@@ -766,7 +776,6 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-
 bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	TESObjectREFR* form;
 	char MapMarkerRoute[MAX_PATH];

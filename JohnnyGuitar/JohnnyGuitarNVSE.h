@@ -484,7 +484,22 @@ __declspec(naked) void DisableArrowKeysHook() {
 			jmp retnAddr
 	}
 }
-
+__declspec(naked) void FixNPCIncrementingChallenges() {
+	static const UInt32 retnAddr = 0x88D0D8;
+	static const UInt32 noIncrementAddr = 0x88D100;
+	__asm {
+		mov eax, [ebp-0x80]
+		cmp eax, dword ptr ds:[0x11DEA3C]
+		jz INCREMENT
+		jmp noIncrementAddr
+		INCREMENT:
+		push 0
+		push 0
+		push 0
+		push 0
+		jmp retnAddr
+	}
+}
 static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 {
 	DWORD d = 0;
@@ -512,6 +527,7 @@ void HandleGameHooks()
 	PatchMemoryNop(0x8A56C8, 4);
 	WriteRelJump(0x70F708, (UInt32)DisableArrowKeysHook);
 	patchFixDisintegrationsStat();
+	WriteRelJump(0x88D0D0, (UInt32)FixNPCIncrementingChallenges);
 	if (loadEditorIDs) LoadEditorIDs();
 }
 

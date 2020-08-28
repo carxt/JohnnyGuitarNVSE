@@ -7,7 +7,23 @@ DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemNote, , 0, 3, kParamsJohnnyOneForm_OneI
 DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemSubmenu, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemSubmenu, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemCount, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(RemoveTerminalMenuItem, , 0, 2, kParams_OneForm_OneInt);
 
+bool Cmd_RemoveTerminalMenuItem_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSTerminal* terminal;
+	int menuEntryID = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &terminal, &menuEntryID) && IS_TYPE(terminal, BGSTerminal)) {
+		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
+		if (entry) {
+			ThisStdCall(0x5010F0, entry);
+			terminal->menuEntries.RemoveNth(menuEntryID);
+			GameHeapFree(entry);
+			*result = 1;
+		}
+	}
+	return true;
+}
 bool Cmd_GetTerminalMenuItemCount_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* terminal;
