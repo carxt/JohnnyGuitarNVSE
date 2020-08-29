@@ -235,6 +235,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetWeaponVATSTraitNumeric);
 	REG_CMD(RemoveTerminalMenuItem);
 	REG_CMD(SetWorldSpaceMapTexture);
+	REG_CMD(GetFormOverrideIndex);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

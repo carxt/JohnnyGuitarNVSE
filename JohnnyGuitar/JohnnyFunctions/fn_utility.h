@@ -10,7 +10,20 @@ DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParamsJohnnyFourStrings);
 DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetPipBoyMode, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetFormOverrideIndex, , 0, 1, kParams_OneForm);
 
+bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESForm* form;
+	if (scriptObj && ExtractArgs(EXTRACT_ARGS, &form))
+	{
+		UInt8 overriding = form->GetOverridingModIdx();
+		*result = ((overriding > scriptObj->modIndex) ? overriding : 0);
+		if (IsConsoleMode) Console_Print("GetFormOverrideIndex >> %.f", *result);
+	}
+	return true;
+}
 bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
 	*result = 0;
 	InterfaceManager* g_interfaceManager = *(InterfaceManager**)0x011D8A80;
