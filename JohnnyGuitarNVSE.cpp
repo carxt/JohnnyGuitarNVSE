@@ -54,6 +54,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		DoSkipMuzzleLights = 0; //reset the muzzle hook every time
 		OnDyingHandler->FlushEventCallbacks();
 		OnLimbGoneHandler->FlushEventCallbacks();
+		OnCrosshairHandler->FlushEventCallbacks();
 		if (bArrowKeysDisabled) {
 			bArrowKeysDisabled = false;
 		}
