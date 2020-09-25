@@ -11,7 +11,26 @@ DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParamsJohnnyFourStrings);
 DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetPipBoyMode, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetFormOverrideIndex, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(GetSequenceAnimGroup, , 0, 1, kParams_OneInt);
 
+bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	UInt32 sequenceID;
+	if (ExtractArgs(EXTRACT_ARGS, &sequenceID) && sequenceID < 8)
+	{
+		if (auto animData = thisObj->GetAnimData())
+		{
+			if (auto sequence = animData->animSequence[sequenceID])
+			{
+				UInt16 groupID = animData->groupIDs[sequenceID] & 0xFF;
+				*result = groupID;
+			}
+		}
+	}
+
+	return true;
+}
 bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -89,7 +108,7 @@ bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	UInt32 tickCount;
 	ExtractArgs(EXTRACT_ARGS, &type);
 	PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
-	tickCount = ThisStdCall(0x457FE0, NULL);
+	tickCount = ThisStdCall<UInt32>(0x457FE0, NULL);
 	double timePlayed = tickCount - g_thePlayer->unk774[6];
 	switch (type) {
 	case 0:

@@ -21,15 +21,12 @@ DEFINE_COMMAND_PLUGIN(SetRaceFlag, , 0, 3, kParamsJohnny_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetContainerSound, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetContainerSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetCreatureCombatSkill, , 0, 1, kParams_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , 0, 3, kParamsJohnny_OneString_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetFacegenModelFlag, , 0, 3, kParamsJohnny_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(SetFacegenModelFlag, , 0, 4, kParamsJohnny_OneForm_ThreeInts);
 DEFINE_COMMAND_PLUGIN(GetRaceBodyModelPath, , 0, 3, kParamsJohnny_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(SetEquipType, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFactionMembers, , 0, 2, kParamsJohnny_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetRaceHeadModelPath, , 0, 3, kParamsJohnny_OneForm_TwoInts);
-DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(SetWorldSpaceMapTexture, , 0, 2, kParamsJohnny_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(GetCalculatedWeaponDPS, , 0, 1, kParams_OneOptionalObjectID);
 DEFINE_COMMAND_PLUGIN(IsCellVisited, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(IsCellExpired, , 0, 1, kParams_OneForm);
@@ -38,8 +35,6 @@ DEFINE_COMMAND_ALT_PLUGIN(GetActorValueModifierAlt, GetAVModAlt, , 1, 2, kParams
 DEFINE_COMMAND_PLUGIN(RemovePrimitive, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetPrimitiveType, , 1, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetBaseScale, , , 1, NULL);
-DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParamsJohnny_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(GetQuestFailed, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetWeaponVATSTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetWeaponVATSTraitNumeric, , 0, 3, kParamsJohnnyOneForm_OneInt_OneFloat);
@@ -333,33 +328,7 @@ bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
-	UInt32 isFemale = 0;
-	TESForm* form = NULL;
-	char newPath[MAX_PATH];
 
-	if (ExtractArgs(EXTRACT_ARGS, &newPath, &isFemale, &form))
-	{
-
-		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
-		if (bipedModel)
-		{
-			bipedModel->icon[isFemale].ddsPath.Set(newPath);
-		}
-	}
-
-	return true;
-}
-
-bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
-	*result = 0;
-	PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
-	TESObjectREFR* markerRef = (TESObjectREFR*)ThisStdCall(0x77A400, g_thePlayer);
-	if (markerRef) {
-		*(UInt32*)result = markerRef->refID;
-	}
-	return true;
-}
 bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL)
 {
 	if (thisObj)
@@ -394,8 +363,6 @@ bool Cmd_GetPrimitiveType_Execute(COMMAND_ARGS) {
 	*result = (xPrimitive && xPrimitive->primitive) ? xPrimitive->primitive->type : 0;
 	return true;
 }
-
-
 
 bool Cmd_GetMusicTypePath_Execute(COMMAND_ARGS) {
 	BGSMusicType* mtype;
@@ -755,48 +722,4 @@ bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
-	*result = 0;
-	TESWorldSpace* worlspace = NULL;
-	char path[MAX_PATH];
-	if (ExtractArgs(EXTRACT_ARGS, &worlspace, &path) && IS_TYPE(worlspace, TESWorldSpace)) {
-		worlspace->texture.ddsPath.Set(path);
-	}
-	return true;
-}
-bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
-	*result = 0;
-	TESWorldSpace* worlspace = NULL;
-	char path[MAX_PATH];
-	if (ExtractArgs(EXTRACT_ARGS, &worlspace) && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.m_data)) {
-		strcpy(path, worlspace->texture.ddsPath.m_data);
-		StrIfc->Assign(PASS_COMMAND_ARGS, path);
-		if (IsConsoleMode())
-			Console_Print("GetWorldSpaceMapTexture >> %s", path);
-	}
-	return true;
-}
-bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
-	TESObjectREFR* form;
-	char MapMarkerRoute[MAX_PATH];
-	if (!ExtractArgs(EXTRACT_ARGS, &form, &MapMarkerRoute) || (!IS_TYPE(form, BGSListForm) && (!form->GetIsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)))) return true;
-	if (IS_TYPE(form, BGSListForm))
-	{
-		ListNode<TESForm>* iterator = ((BGSListForm*)form)->list.Head();
-		while (iterator)
-		{
-			TESObjectREFR* Refer = (TESObjectREFR*)(iterator->data);
-			if (Refer->GetIsReference() && Refer->IsMapMarker() && GetExtraType(form->extraDataList, MapMarker))
-			{
-				DoCustomMapMarker(Refer, MapMarkerRoute);
-			}
-			iterator = iterator->next;
-		}
-	}
-	else
-	{
-		DoCustomMapMarker(form, MapMarkerRoute);
-	}
-	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->refID, MapMarkerRoute);
-	return true;
-}
+

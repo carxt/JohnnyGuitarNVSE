@@ -69,7 +69,7 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS)
 		float oldVal = avOwner->GetActorValue(avCode);
 
 		tList<void>* actorPermSetAVList = &actor->list0E0;
-		void* avEntry = (void*)ThisStdCall(0x937760, actorPermSetAVList, avCode);
+		void* avEntry = ThisStdCall<void*>(0x937760, actorPermSetAVList, avCode);
 		ThisStdCall(0x937400, actorPermSetAVList, avEntry);
 		thisObj->MarkAsModified(0x400000);
 
@@ -99,7 +99,7 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS)
 		float oldVal = avOwner->GetActorValue(avCode);
 
 		tList<void>* actorPermForceAVList = &actor->list0D0;
-		void* avEntry = (void*)ThisStdCall(0x937760, actorPermForceAVList, avCode);
+		void* avEntry = ThisStdCall<void*>(0x937760, actorPermForceAVList, avCode);
 		ThisStdCall(0x937400, actorPermForceAVList, avEntry);
 		thisObj->MarkAsModified(0x800000);
 

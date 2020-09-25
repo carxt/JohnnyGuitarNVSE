@@ -41,6 +41,23 @@ ParamInfo kParamsJohnny_OneForm_OneString[2] =
 	{ "String", kParamType_String, 0 },
 };
 
+ParamInfo kParamsJohnnyOneStringTwoOptionalInts[3] =
+{
+	{"String", kParamType_String, 0},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+};
+
+ParamInfo kParamsJohnnyTwoStringsOneOptionalStringFourOptionalInts[7] =
+{
+	{"String", kParamType_String, 0},
+	{"String", kParamType_String, 0},
+	{"String", kParamType_String, 1},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+};
 ParamInfo kParamsJohnny_OneString_OneInt[2] =
 {
 	{ "string",	kParamType_String,	0 },

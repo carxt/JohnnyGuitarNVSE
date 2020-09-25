@@ -30,6 +30,7 @@
 #include "JohnnyGuitar/JohnnyFunctions/fn_mediaset.h"
 #include "JohnnyGuitar/JohnnyFunctions/fn_region.h"
 #include "JohnnyGuitar/JohnnyFunctions/fn_terminal.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_ui.h"
 #include "JohnnyGuitar/BMPHandling.h"
 #include "JohnnyGuitar/EventFilteringInterface.h"
 #include "JohnnyGuitar/CustomEventFilters.h"
@@ -236,6 +237,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(RemoveTerminalMenuItem);
 	REG_CMD(SetWorldSpaceMapTexture);
 	REG_CMD(GetFormOverrideIndex);
+	REG_CMD(SetJohnnyOnCrosshairEventHandler);
+	REG_CMD(GetSequenceAnimGroup);
+	REG_CMD(QueueObjectiveText);
+	REG_CMD(QueueCinematicText);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

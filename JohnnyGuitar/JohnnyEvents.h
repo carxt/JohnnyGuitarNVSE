@@ -5,12 +5,14 @@ DEFINE_COMMAND_PLUGIN(SetJohnnyOnStopQuestEventHandler, , 0, 4, kParamsJohnnyEve
 DEFINE_COMMAND_PLUGIN(SetJohnnySeenDataEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnLimbGoneEventHandler, , 0,5, kParamsJohnnyEventOneFormOneIntFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnCrosshairEventHandler, , 0, 5, kParamsJohnnyEventOneFormOneIntFilter);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
 EventInformation* OnSeenDataUpdateHandler;
 EventInformation* OnLimbGoneHandler;
 EventInformation* OnChallengeCompleteHandler;
+EventInformation* OnCrosshairHandler;
 void __stdcall handleDyingEvent(Actor* thisObj) {
 	if (thisObj->lifeState == 1) {
 		for (auto const& callback : OnDyingHandler->EventCallbacks) {
@@ -21,7 +23,18 @@ void __stdcall handleDyingEvent(Actor* thisObj) {
 		}
 	}
 }
-
+UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
+	if (crosshairRef) {
+		for (auto const& callback : OnCrosshairHandler->EventCallbacks) {
+			JohnnyEventFiltersOneFormOneInt* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter);
+			if ((filter->IsInFilter(0, crosshairRef->refID) || filter->IsInFilter(0, crosshairRef->baseForm->refID)) && filter->IsInFilter(1, crosshairRef->baseForm->typeID))
+			{
+				FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCrosshairHandler->numMaxArgs, crosshairRef);
+			}
+		}
+	}
+	return ThisStdCall<UInt32>(0x579280, crosshairRef);
+}
 bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, byte dummy, int limb, byte isExplode) {
 	for (auto const& callback : OnLimbGoneHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(0, actor->refID) &&
@@ -59,7 +72,16 @@ UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 	}
 	return challenge->data.type;
 }
-
+__declspec(naked) void OnCrosshairEventAsm() {
+	static const UInt32 retnAddr = 0x775A69;
+	__asm {
+		mov ecx, [ebp+0x8]
+		call handleCrosshairEvent
+		movzx ecx, [ebp+0x10]
+		test ecx, ecx
+		jmp retnAddr
+	}
+}
 __declspec (naked) void OnDyingEventAsm()
 {
 	static const UInt32 checkProtect = 0xEC408C;
@@ -107,6 +129,25 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
 			if (setOrRemove)
 				OnLimbGoneHandler->RegisterEvent(script, (void**)&filter);
 			else OnLimbGoneHandler->RemoveEventFromGame(script, (void**)&filter);
+
+		}
+		return true;
+	}
+}
+
+bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	EventFilterStructOneFormOneInt filter = { NULL, -1 };
+	UInt32 flags = 0;
+	if (!(ExtractArgs(EXTRACT_ARGS, &setOrRemove, &script, &flags, &filter.form, &filter.intID) || NOT_TYPE(script, Script))) return true;
+	{
+		if (OnCrosshairHandler)
+		{
+			if (setOrRemove)
+				OnCrosshairHandler->RegisterEvent(script, (void**)&filter);
+			else OnCrosshairHandler->RemoveEventFromGame(script, (void**)&filter);
 
 		}
 		return true;
@@ -219,6 +260,7 @@ void initEventHooks(const NVSEInterface* nvse)
 		OnSeenDataUpdateHandler = JGCreateEvent("OnSeenDataUpdate", 1, 1, NULL);
 		OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2, 2, CreateOneFormOneIntFilter);
 		OnChallengeCompleteHandler = JGCreateEvent("OnChallengeComplete", 1, 1, NULL);
+		OnCrosshairHandler = JGCreateEvent("OnCrosshair", 1, 2, CreateOneFormOneIntFilter);
 		FunctionCallScript = g_script->CallFunction;
 		WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 		WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
@@ -227,6 +269,7 @@ void initEventHooks(const NVSEInterface* nvse)
 		WriteRelCall(0x572FF1, (UINT)HandleLimbGoneEvent);
 		WriteRelCall(0x5F5C78, (UINT)HandleChallengeCompleteEvent);
 		WriteRelCall(0x5F6222, (UINT)HandleChallengeCompleteEvent);
+		WriteRelCall(0x776010, (UINT)handleCrosshairEvent);
 		SafeWrite8(0x60CA29, 0xCC);
 	}
 

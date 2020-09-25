@@ -251,6 +251,7 @@
     <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_mediaset.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_region.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_terminal.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_ui.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_utility.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyGuitarNVSE.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyParams.h" />

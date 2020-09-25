@@ -32,9 +32,13 @@ public:
 
 	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch)
 	{
+		//Console_Print("in filter");
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return false;
+		//Console_Print("found filter %d", filterNum);
 		//RefUnorderedSet::const_iterator got = FilterSet->find(toSearch);
+	//	if (FilterSet->empty()) Console_Print("Filter %d empty, returning 1", filterNum);
+		//else if (FilterSet->find(toSearch.refID) != FilterSet->end()) Console_Print("found in filter %d, returning 1", filterNum);
 		return  FilterSet->empty() || (FilterSet->find(toSearch.refID) != FilterSet->end());
 	}
 
@@ -64,8 +68,7 @@ public:
 	}
 	virtual bool IsAcceptedParameter(GenericFilters parameter)
 	{
-
-		return parameter.form->typeID == kFormType_Character;
+		return parameter.form->refID != 0x3B; // xMarker
 
 	}
 
