@@ -2,6 +2,7 @@
 
 #include "GameTypes.h"
 #include "GameScript.h"
+#include <string>
 
 struct ParamInfo;
 class TESForm;

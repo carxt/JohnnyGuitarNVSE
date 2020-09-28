@@ -14,7 +14,7 @@
 #include "Utilities.h"
 #include "PluginManager.h"
 
-#include "Commands_Console.h"
+#include "nvse/nvse/Commands_Console.h"
 #include "Commands_Game.h"
 #include "Commands_Input.h"
 #include "Commands_Inventory.h"

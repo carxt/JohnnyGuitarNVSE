@@ -2664,12 +2664,12 @@ public:
 	{
 		String				entryText;
 		String				resultText;
-		UInt8				entryFlags;
-		UInt8				pad[3];
+		Script*				resultScript;
+		UInt8				pad[78];
+		tList<Condition>	conditions;
 		BGSNote				*displayNote;
 		BGSTerminal			*subMenu;
-		ScriptEventList		*scriptEventList;
-		tList<Condition*>	conditions;
+		UInt8				entryFlags;
 	};
 
 	String				desc;			// 090	DESC
@@ -2677,7 +2677,6 @@ public:
 	BGSNote				*password;		// 0A0	PNAM
 	TermData			data;			// 0A4	DNAM
 };
-
 // 190
 class TESObjectARMO : public TESBoundObject
 {
@@ -3261,12 +3260,13 @@ public:
 	UInt32				soundLevel;			// 364
 	UInt32				unk368;				// 368
 	UInt32				unk36C;				// 36C
-	SpellItem			*VATSEffect;		// 370
-	UInt32				unk374;				// 374
-	UInt32				unk378;				// 378
-	UInt32				unk37C;				// 37C
-	UInt32				recharge;			// 380 maybe recharge
-	UInt32				unk384;				// 384
+	SpellItem			*VATSEffect;			// 370
+	float				vatsSkill;				// 374
+	float				vatsDamMult;			// 378
+	float				vatsAP;					// 37C
+	byte				isSilent;				// 380
+	byte				modRequired;			// 381
+	byte				pad382[3];
 
 	bool IsAutomatic() const { return weaponFlags1.IsSet(eFlag_IsAutomatic); }
 	void SetIsAutomatic(bool bAuto) { weaponFlags1.Write(eFlag_IsAutomatic, bAuto); }

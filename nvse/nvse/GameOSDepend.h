@@ -35,7 +35,48 @@ enum XboxControlCode
 	kXboxCtrl_LS_RIGHT = 0x16,
 	kXboxCtrl_LS_LEFT,
 };
+enum KeyState
+{
+	isHeld = 0x0,
+	isPressed = 0x1,
+	isDepressed = 0x2,
+	isChanged = 0x3,
+};
 
+enum ControlCode
+{
+	Forward = 0x0,
+	Backward = 0x1,
+	Left = 0x2,
+	Right = 0x3,
+	Attack = 0x4,
+	Activate = 0x5,
+	Aim = 0x6,
+	ReadyItem = 0x7,
+	Crouch = 0x8,
+	Run = 0x9,
+	AlwaysRun = 0xA,
+	AutoMove = 0xB,
+	Jump = 0xC,
+	TogglePOV = 0xD,
+	MenuMode = 0xE,
+	Rest = 0xF,
+	VATS_ = 0x10,
+	Hotkey1 = 0x11,
+	AmmoSwap = 0x12,
+	Hotkey3 = 0x13,
+	Hotkey4 = 0x14,
+	Hotkey5 = 0x15,
+	Hotkey6 = 0x16,
+	Hotkey7 = 0x17,
+	Hotkey8 = 0x18,
+	QuickSave = 0x19,
+	QuickLoad = 0x1A,
+	Grab = 0x1B,
+	Escape_ = 0x1C,
+	Console = 0x1D,
+	Screenshot = 0x1E,
+};
 // 1C04
 class OSInputGlobals
 {
@@ -141,6 +182,12 @@ public:
 	UInt8			mouseBinds[28];			// 1BB0
 	UInt8			joystickBinds[28];		// 1BCC
 	UInt8			controllerBinds[28];	// 1BE8
+	bool GetControlState(ControlCode code, KeyState state) { return ((bool(__thiscall*)(OSInputGlobals*, ControlCode, KeyState))(0xA24660))(this, code, state); }
+	void SetControlHeld(ControlCode code) { ((void(__thiscall*)(OSInputGlobals*, ControlCode))(0xA24280))(this, code); };
+	bool GetMouseState(int buttonID, KeyState state) { return ((bool(__thiscall*)(OSInputGlobals*, int, KeyState))(0xA23A50))(this, buttonID, state); };
+
+	bool GetKeyState(int key, KeyState state) { return 	((bool(__thiscall*)(OSInputGlobals*, int, KeyState))(0xA24180))(this, key, state); };
+	static OSInputGlobals* GetSingleton() { return *(OSInputGlobals * *)(0x11F35CC); }
 };
 STATIC_ASSERT(sizeof(OSInputGlobals) == 0x1C04);
 

@@ -11,9 +11,11 @@
 *.userprefs
 
 # Build results
+[Dd]ebug VC9/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
+[Rr]elease VC9/
 [Rr]eleases/
 [Xx]64/
 [Xx]86/

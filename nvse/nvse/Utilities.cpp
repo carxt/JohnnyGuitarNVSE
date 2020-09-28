@@ -570,14 +570,6 @@ void ErrOutput::vShow(ErrOutput::Message& msg, va_list args)
 		ShowError(msgText);
 }
 
-void ErrOutput::Show(ErrOutput::Message& msg, ...)
-{
-	va_list args;
-	va_start(args, msg);
-
-	vShow(msg, args);
-}
-
 void ErrOutput::Show(const char* msg, ...)
 {
 	va_list args;

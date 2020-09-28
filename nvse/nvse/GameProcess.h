@@ -487,7 +487,7 @@ public:
 	virtual void	Unk_1A4();
 	virtual void	Unk_1A5();
 	virtual void	Unk_1A6();
-	virtual void	Unk_1A7();
+	virtual float	GetTimeDied();
 	virtual void	Unk_1A8();
 	virtual void	Unk_1A9();
 	virtual void	Unk_1AA();
@@ -703,7 +703,8 @@ struct AnimData
 	NiNode							*nWeapon;			// 038
 	UInt32							unk03C[2];			// 03C
 	NiNode							*nNeck1;			// 044
-	UInt32							unk048[5];			// 048
+	float							unk048;				// 048
+	UInt16							groupIDs[8];		// 04C
 	SInt32							sequenceState1[8];	// 05C
 	SInt32							sequenceState2[8];	// 07C
 	UInt32							unk09C[12];			// 09C
