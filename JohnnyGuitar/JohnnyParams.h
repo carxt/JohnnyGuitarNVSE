@@ -47,7 +47,11 @@ ParamInfo kParamsJohnnyOneStringTwoOptionalInts[3] =
 	{"Integer", kParamType_Integer, 1},
 	{"Integer", kParamType_Integer, 1},
 };
-
+ParamInfo kParams_ar_SortEditor[] =
+{
+	{	"array",		kNVSEParamType_Array,	0	},
+	{	"bDescending",	kNVSEParamType_Number,	1	},
+};
 ParamInfo kParamsJohnnyTwoStringsOneOptionalStringFourOptionalInts[7] =
 {
 	{"String", kParamType_String, 0},

@@ -15,6 +15,7 @@
 #include "nvse/GameUI.cpp"
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
+#include "nvse/ScriptUtils.h"
 #include "internal/decoding.h"
 #include "JohnnyGuitar/JohnnyEventPredefinitions.h"
 #include "JohnnyGuitar/misc.h"
@@ -242,6 +243,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(GetSequenceAnimGroup);
 	REG_CMD(QueueObjectiveText);
 	REG_CMD(QueueCinematicText);
+	REG_TYPED_CMD(ar_SortEditor, Array);
+	REG_CMD(SetUIUpdateSound);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

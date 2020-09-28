@@ -28,7 +28,10 @@ char* StrArgBuf;
 IDebugLog ParamLog;
 bool loadEditorIDs = 0;
 bool fixHighNoon = 0;
-
+TESSound* questFailSound = 0;
+TESSound* questNewSound = 0;
+TESSound* questCompeteSound = 0;
+TESSound* locationDiscoverSound = 0;
 std::unordered_map<UInt32, char*> CustomMapMarkerMap;
 
 namespace SpecialCaseEDIDs {
@@ -380,39 +383,8 @@ NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName)
 	return rootNode ? rootNode->GetBlock(blockName) : NULL;
 }
 
-void __fastcall checkExists(TESObjectREFR* thisObj, TESObjectREFR* arg) {
-	Console_Print("thisobj %i", thisObj->refID);
-	Console_Print("arg %i", arg->refID);
-}
-
-__declspec(naked) void ExistsHook() {
-	static const UInt32 retnAddr = 0x5A4228;
-	__asm {
-		mov ecx, eax
-		mov edx, [ebp + 0x8]
-		call checkExists
-		jmp retnAddr
-	}
-}
 
 
-
-
-
-//kept because i like it 
-
-/*void* (__thiscall* ContainerMenuDestroy)(ContainerMenu*, bool);
-void __fastcall CompanionBarterEndHook(ContainerMenu* menu, UInt32 EDX, bool doFree)
-{
-	Actor* Acteur = (Actor*)menu->containerRef;
-	if (Acteur && Acteur->IsActor())
-	{
-		Acteur->unk7C = 1;
-		Acteur->unk7D = 0;
-	}
-	ContainerMenuDestroy(menu, doFree);
-}
-*/
 __declspec(naked) void OnCloseContainerHook()
 {
 	static const UInt32 retnAddr = 0x75B240;
@@ -500,6 +472,29 @@ __declspec(naked) void FixNPCIncrementingChallenges() {
 		jmp retnAddr
 	}
 }
+void __fastcall PlayQuestFailSound(Sound* sound, int dummy) {
+	tList<QuestUpdateManager>* g_questUpdateManager = (tList <QuestUpdateManager>*)0x11D970C;
+	if (g_questUpdateManager) {
+		ListNode<QuestUpdateManager>* iter = g_questUpdateManager->Head();
+		do {
+			switch (iter->data->updateType) {
+			case QuestAdded:
+				if (questNewSound) sound = &Sound(questNewSound->refID, 0x121);
+				break;
+			case QuestCompleted:
+				if (questCompeteSound) sound = &Sound(questCompeteSound->refID, 0x121);
+				break;
+			case QuestFailed:
+				if (questFailSound) sound = &Sound(questFailSound->refID, 0x121);
+				break;
+			case LocationDiscovered:
+				if (locationDiscoverSound) sound = &Sound(locationDiscoverSound->refID, 0x121);
+				break;
+			}
+			sound->Play();
+		} while (iter = iter->next);
+	}
+}
 static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 {
 	DWORD d = 0;
@@ -528,6 +523,7 @@ void HandleGameHooks()
 	WriteRelJump(0x70F708, (UInt32)DisableArrowKeysHook);
 	patchFixDisintegrationsStat();
 	WriteRelJump(0x88D0D0, (UInt32)FixNPCIncrementingChallenges);
+	WriteRelCall(0x77A8E9, (UInt32)PlayQuestFailSound);
 	if (loadEditorIDs) LoadEditorIDs();
 }
 

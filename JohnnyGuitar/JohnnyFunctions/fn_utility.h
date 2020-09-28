@@ -12,7 +12,65 @@ DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetPipBoyMode, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetFormOverrideIndex, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetSequenceAnimGroup, , 0, 1, kParams_OneInt);
-
+DEFINE_COMMAND_PLUGIN(ar_SortEditor, , 0, 2, kParams_TwoInts)
+DEFINE_COMMAND_PLUGIN(SetUIUpdateSound, , 0, 2, kParams_OneForm_OneInt);
+bool Cmd_SetUIUpdateSound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESSound* sound;
+	UInt32 type = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &sound, &type) && IS_TYPE(sound, TESSound)) {
+		switch (type) {
+			case 1:
+				questFailSound = sound;
+				break;
+			case 2:
+				questNewSound = sound;
+				break;
+			case 3:
+				questCompeteSound = sound;
+				break;
+			case 4:
+				locationDiscoverSound = sound;
+				break;
+		}
+	}
+	return true;
+}
+struct cmp_str
+{
+	public:
+		cmp_str(bool s_) : s(s_) {};
+		bool operator()(char const* a, char const* b) const
+		{
+			return s ? std::strcmp(a, b) > 0 : std::strcmp(a, b) < 0;
+		}
+	private:
+		bool s;
+};
+bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
+	*result = 0;
+	UInt32 arrID, isReverse;
+	if (!ExtractArgs(EXTRACT_ARGS, &arrID, &isReverse)) return true;
+	if (!loadEditorIDs) return true;
+	NVSEArrayVar* inArr = ArrIfc->LookupArrayByID(arrID);
+	if (!inArr) return true;
+	NVSEArrayVar* outArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
+	UInt32 size = ArrIfc->GetArraySize(inArr);
+	NVSEArrayElement* elements = new NVSEArrayElement[size];
+	ArrIfc->GetElements(inArr, elements, NULL);
+	std::map<char*, TESForm*, cmp_str> smap(cmp_str(isReverse > 0));
+	for (int i = 0; i < size; i++) {
+		if (elements[i].Form() == NULL) return true;
+		smap.insert(std::pair<char*, TESForm*>(elements[i].Form()->GetName(), elements[i].Form()));
+	}
+	for (std::map<char*, TESForm*>::iterator it = smap.begin(); it != smap.end(); ++it) {
+		ArrIfc->AppendElement(outArr, NVSEArrayElement(it->second));
+	}
+	
+	ArrIfc->AssignCommandResult(outArr, result);
+	delete[] elements;
+	return true;
+}
 bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS)
 {
 	*result = -1;

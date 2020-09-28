@@ -5,6 +5,7 @@ DEFINE_COMMAND_PLUGIN(SHA1File, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetPixelFromBMP, , 0, 6, kParamsBMPArgs);
 DEFINE_COMMAND_PLUGIN(UwUDelete, , 0, 2, kParamsJohnny_OneString_OneInt);
 
+#include <filesystem>
 bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 	int fileOrFolder = 0;
 	char filename[MAX_PATH];
@@ -22,7 +23,7 @@ bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 			remove(filepath);
 		}
 		else if (fileOrFolder == 2) {
-			removeFiles(filepath);
+			std::filesystem::remove_all(filepath);
 		}
 	}
 	return true;
