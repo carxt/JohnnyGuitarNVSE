@@ -4,52 +4,98 @@ DEFINE_COMMAND_PLUGIN(SetJohnnyOnStartQuestEventHandler, , 0, 4, kParamsJohnnyEv
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnStopQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnySeenDataEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnLimbGoneEventHandler, , 0,5, kParamsJohnnyEventOneFormOneIntFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnCrosshairEventHandler, , 0, 5, kParamsJohnnyEventOneFormOneIntFilter);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
 EventInformation* OnSeenDataUpdateHandler;
 EventInformation* OnLimbGoneHandler;
+EventInformation* OnChallengeCompleteHandler;
+EventInformation* OnCrosshairHandler;
 void __stdcall handleDyingEvent(Actor* thisObj) {
-	for (auto const& callback : OnDyingHandler->EventCallbacks)
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) // 0 is filter one, and we only use an argument so we don't need to check further filters
-		{
-			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnDyingHandler->numMaxArgs, thisObj);
+	if (thisObj->lifeState == 1) {
+		for (auto const& callback : OnDyingHandler->EventCallbacks) {
+			if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+			{
+				FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnDyingHandler->numMaxArgs, thisObj);
+			}
 		}
+	}
 }
-
+UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
+	if (crosshairRef) {
+		for (auto const& callback : OnCrosshairHandler->EventCallbacks) {
+			JohnnyEventFiltersOneFormOneInt* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter);
+			if ((filter->IsInFilter(0, crosshairRef->refID) || filter->IsInFilter(0, crosshairRef->baseForm->refID)) && filter->IsInFilter(1, crosshairRef->baseForm->typeID))
+			{
+				FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCrosshairHandler->numMaxArgs, crosshairRef);
+			}
+		}
+	}
+	return ThisStdCall<UInt32>(0x579280, crosshairRef);
+}
 bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, byte dummy, int limb, byte isExplode) {
-	for (auto const& callback : OnLimbGoneHandler->EventCallbacks)
+	for (auto const& callback : OnLimbGoneHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(0, actor->refID) &&
 			reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, limb)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnLimbGoneHandler->numMaxArgs, actor, limb);
 		}
+	}
 	return ThisStdCall_B(0x430410, xData, actor, limb, isExplode);
 }
 void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
 	EventInformation* thisEvent = IsStarted ? OnStartQuestHandler : OnStopQuestHandler;
-	for (auto const& callback : thisEvent->EventCallbacks)
+	for (auto const& callback : thisEvent->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, thisEvent->numMaxArgs, Quest);
 		}
+	}
 }
 ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL *cell) {
-	for (auto const& callback : OnSeenDataUpdateHandler->EventCallbacks)
+	for (auto const& callback : OnSeenDataUpdateHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, cell)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSeenDataUpdateHandler->numMaxArgs, cell);
 		}
+	}
 	return &cell->extraDataList;
 }
-
-
+UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
+	for (auto const& callback : OnChallengeCompleteHandler->EventCallbacks) {
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, challenge)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		{
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnChallengeCompleteHandler->numMaxArgs, challenge);
+		}
+	}
+	return challenge->data.type;
+}
+__declspec(naked) void OnCrosshairEventAsm() {
+	static const UInt32 retnAddr = 0x775A69;
+	__asm {
+		mov ecx, [ebp+0x8]
+		call handleCrosshairEvent
+		movzx ecx, [ebp+0x10]
+		test ecx, ecx
+		jmp retnAddr
+	}
+}
 __declspec (naked) void OnDyingEventAsm()
 {
+	static const UInt32 checkProtect = 0xEC408C;
 	__asm
 	{
 		push dword ptr[ebp - 0x18]
 		call handleDyingEvent
+		mov ecx, dword ptr ss : [ebp - 0xC]
+		mov dword ptr fs : [0] , ecx
+		pop ecx
+		pop esi
+		mov ecx, dword ptr ss : [ebp - 0x14]
+		xor ecx, ebp
+		call checkProtect
 		mov esp, ebp
 		pop ebp
 		mov esp, ebx
@@ -83,6 +129,43 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
 			if (setOrRemove)
 				OnLimbGoneHandler->RegisterEvent(script, (void**)&filter);
 			else OnLimbGoneHandler->RemoveEventFromGame(script, (void**)&filter);
+
+		}
+		return true;
+	}
+}
+
+bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	EventFilterStructOneFormOneInt filter = { NULL, -1 };
+	UInt32 flags = 0;
+	if (!(ExtractArgs(EXTRACT_ARGS, &setOrRemove, &script, &flags, &filter.form, &filter.intID) || NOT_TYPE(script, Script))) return true;
+	{
+		if (OnCrosshairHandler)
+		{
+			if (setOrRemove)
+				OnCrosshairHandler->RegisterEvent(script, (void**)&filter);
+			else OnCrosshairHandler->RemoveEventFromGame(script, (void**)&filter);
+
+		}
+		return true;
+	}
+}
+bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	TESForm* filter[1] = { NULL };
+	UInt32 flags = 0;
+	if (!(ExtractArgs(EXTRACT_ARGS, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	{
+		if (OnChallengeCompleteHandler)
+		{
+			if (setOrRemove)
+				OnChallengeCompleteHandler->RegisterEvent(script, (void**)filter);
+			else OnChallengeCompleteHandler->RemoveEventFromGame(script, (void**)filter);
 
 		}
 		return true;
@@ -176,12 +259,17 @@ void initEventHooks(const NVSEInterface* nvse)
 		OnStopQuestHandler = JGCreateEvent("OnStopQuest", 1, 1, NULL);
 		OnSeenDataUpdateHandler = JGCreateEvent("OnSeenDataUpdate", 1, 1, NULL);
 		OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2, 2, CreateOneFormOneIntFilter);
+		OnChallengeCompleteHandler = JGCreateEvent("OnChallengeComplete", 1, 1, NULL);
+		OnCrosshairHandler = JGCreateEvent("OnCrosshair", 1, 2, CreateOneFormOneIntFilter);
 		FunctionCallScript = g_script->CallFunction;
 		WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 		WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
-		WriteRelJump(0x89F4BA, (UINT)OnDyingEventAsm);
+		WriteRelJump(0x89F4A4, (UINT)OnDyingEventAsm);
 		WriteRelJump(0x60CA24, (UINT)OnQuestStartStopEventAsm);
 		WriteRelCall(0x572FF1, (UINT)HandleLimbGoneEvent);
+		WriteRelCall(0x5F5C78, (UINT)HandleChallengeCompleteEvent);
+		WriteRelCall(0x5F6222, (UINT)HandleChallengeCompleteEvent);
+		WriteRelCall(0x776010, (UINT)handleCrosshairEvent);
 		SafeWrite8(0x60CA29, 0xCC);
 	}
 

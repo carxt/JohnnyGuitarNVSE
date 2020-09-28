@@ -15,6 +15,7 @@
 #include "nvse/GameUI.cpp"
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
+#include "nvse/ScriptUtils.h"
 #include "internal/decoding.h"
 #include "JohnnyGuitar/JohnnyEventPredefinitions.h"
 #include "JohnnyGuitar/misc.h"
@@ -22,7 +23,15 @@
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
 #include "JohnnyGuitar/JohnnyParams.h"
 #include "JohnnyGuitar/EditorIDs.h"
-#include "JohnnyGuitar/JohnnyFunctions.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_form.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_utility.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_math.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_file.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_gameplay.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_mediaset.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_region.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_terminal.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_ui.h"
 #include "JohnnyGuitar/BMPHandling.h"
 #include "JohnnyGuitar/EventFilteringInterface.h"
 #include "JohnnyGuitar/CustomEventFilters.h"
@@ -45,9 +54,11 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 		DoSkipMuzzleLights = 0; //reset the muzzle hook every time
 		OnDyingHandler->FlushEventCallbacks();
-		OnSeenDataUpdateHandler->FlushEventCallbacks();
-		OnStartQuestHandler->FlushEventCallbacks();
-		OnStopQuestHandler->FlushEventCallbacks();
+		OnLimbGoneHandler->FlushEventCallbacks();
+		OnCrosshairHandler->FlushEventCallbacks();
+		if (bArrowKeysDisabled) {
+			bArrowKeysDisabled = false;
+		}
 		break;
 	}
 	}
@@ -62,7 +73,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 300;
+	info->version = 325;
 
 	if (nvse->isNogore) 
 	{
@@ -208,6 +219,32 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(Lerp);
 	REG_CMD(SetJohnnySeenDataEventHandler);
 	REG_CMD(SetJohnnyOnLimbGoneEventHandler);
+	REG_CMD(Sign);
+	REG_CMD(AddTerminalMenuItem);
+	REG_TYPED_CMD(GetTerminalMenuItemText, String);
+	REG_CMD(SetTerminalMenuItemText);
+	REG_CMD(GetTerminalMenuItemNote);
+	REG_CMD(SetTerminalMenuItemNote);
+	REG_CMD(GetTerminalMenuItemSubmenu);
+	REG_CMD(SetTerminalMenuItemSubmenu);
+	REG_CMD(GetRunSpeed);
+	REG_CMD(DisableMenuArrowKeys);
+	REG_CMD(EnableMenuArrowKeys);
+	REG_CMD(GetQuestFailed);
+	REG_CMD(SetJohnnyOnChallengeCompleteEventHandler);
+	REG_CMD(GetTerminalMenuItemCount);
+	REG_CMD(GetPipBoyMode);
+	REG_CMD(GetWeaponVATSTraitNumeric);
+	REG_CMD(SetWeaponVATSTraitNumeric);
+	REG_CMD(RemoveTerminalMenuItem);
+	REG_CMD(SetWorldSpaceMapTexture);
+	REG_CMD(GetFormOverrideIndex);
+	REG_CMD(SetJohnnyOnCrosshairEventHandler);
+	REG_CMD(GetSequenceAnimGroup);
+	REG_CMD(QueueObjectiveText);
+	REG_CMD(QueueCinematicText);
+	REG_TYPED_CMD(ar_SortEditor, Array);
+	REG_CMD(SetUIUpdateSound);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

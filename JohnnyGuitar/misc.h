@@ -71,7 +71,25 @@ void setVarByName(VARARGS, const char *var_name, float value)
 	} while (traverse = traverse->next);
 
 }
+enum UpdateType
+{
+	QuestAdded = 0x0,
+	QuestCompleted = 0x1,
+	QuestFailed = 0x2,
+	LocationDiscovered = 0x3,
+};
 
+struct QuestUpdateManager {
+	TESQuest* quest;
+	UpdateType updateType;
+	char title[260];
+	char subtitle[260];
+	UInt32 unk210;
+	UInt32 queuePriority;
+	UInt32 titleFont;
+	UInt32 subtitleFont;
+	char sound[260];
+};
 class LevelUpMenu : public Menu {
 public:
 	LevelUpMenu();
@@ -298,6 +316,7 @@ const UInt32 TESForm_Vtables[] =
 	0x1024214,	//	BGSAddonNode
 	0x10320FC,	//	BGSAcousticSpace
 	0x1011964,	//	AlchemyItem
+	0x1024CEC,  //  BGSMovableStatic
 };
 
 

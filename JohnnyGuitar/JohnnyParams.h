@@ -41,6 +41,27 @@ ParamInfo kParamsJohnny_OneForm_OneString[2] =
 	{ "String", kParamType_String, 0 },
 };
 
+ParamInfo kParamsJohnnyOneStringTwoOptionalInts[3] =
+{
+	{"String", kParamType_String, 0},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+};
+ParamInfo kParams_ar_SortEditor[] =
+{
+	{	"array",		kNVSEParamType_Array,	0	},
+	{	"bDescending",	kNVSEParamType_Number,	1	},
+};
+ParamInfo kParamsJohnnyTwoStringsOneOptionalStringFourOptionalInts[7] =
+{
+	{"String", kParamType_String, 0},
+	{"String", kParamType_String, 0},
+	{"String", kParamType_String, 1},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+};
 ParamInfo kParamsJohnny_OneString_OneInt[2] =
 {
 	{ "string",	kParamType_String,	0 },
@@ -80,6 +101,13 @@ ParamInfo kParamsJohnnyOneForm_OneInt_OneForm[3] =
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Form", kParamType_AnyForm, 0 }
+};
+ParamInfo kParamsJohnnyOneForm_OneInt_OneForm_OneInt[4] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 }
 };
 ParamInfo kParamsJohnnyOneForm_OneInt_OneString[3] =
 {
@@ -122,6 +150,13 @@ ParamInfo kParamsJohnny_OneForm_TwoInts[3] =
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "int",	kParamType_Integer, 0 },
 	{ "int",	kParamType_Integer, 0 },
+};
+ParamInfo kParamsJohnny_OneForm_TwoInts_OneString[4] =
+{
+	{ "form",	kParamType_AnyForm,	0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "string",	kParamType_String,	0 },
 };
 ParamInfo kParamsJohnny_SixFloats[6] =
 {

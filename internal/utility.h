@@ -31,8 +31,8 @@ kFlt12288 = 12288.0F,
 kFlt40000 = 40000.0F,
 kFltMax = FLT_MAX;
 
-#define GameHeapAlloc(size) ThisStdCall(0xAA3E40, (void*)0x11F6238, size)
-#define GameHeapFree(ptr) ThisStdCall(0xAA4060, (void*)0x11F6238, ptr)
+#define GameHeapAlloc(size) ThisStdCall<void*>(0xAA3E40, (void*)0x11F6238, size)
+#define GameHeapFree(ptr) ThisStdCall<void*>(0xAA4060, (void*)0x11F6238, ptr)   
 
 union Coordinate
 {

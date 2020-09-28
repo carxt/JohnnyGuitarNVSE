@@ -176,6 +176,7 @@ public:
 		while (it != EventCallbacks.end())
 		{
 			delete it->eventFilter;
+			++it;
 		}
 		EventCallbacks.clear();
 	}
