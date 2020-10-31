@@ -17,8 +17,24 @@ DEFINE_COMMAND_PLUGIN(ToggleNthPipboyLight, , 0, 2, kParams_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetRunSpeed, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(DisableMenuArrowKeys, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(EnableMenuArrowKeys, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(HighlightBodyPartAlt, , 1, 1, kParamsJohnnyOneOptionalFloat);
+DEFINE_COMMAND_PLUGIN(DeactivateAllHighlightsAlt, , 1, 1, kParamsJohnnyOneOptionalFloat);
+
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
+bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
+bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
+
+
+bool Cmd_HighlightBodyPartAlt_Execute(COMMAND_ARGS)
+{
+	return Cmd_HighLightBodyPart(PASS_COMMAND_ARGS);
+}
+
+bool Cmd_DeactivateAllHighlightsAlt_Execute(COMMAND_ARGS)
+{
+	return Cmd_DeactivateAllHighlights(PASS_COMMAND_ARGS);
+}
 
 bool Cmd_DisableMenuArrowKeys_Execute(COMMAND_ARGS) {
 	if (!bArrowKeysDisabled) {

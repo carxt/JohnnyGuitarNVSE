@@ -134,6 +134,11 @@ ParamInfo kParamsJohnnyFiveFloats[5] =
 	{ "Float", kParamType_Float, 0 },
 	{ "Float", kParamType_Float, 0 },
 };
+ParamInfo kParamsJohnnyOneIntOneFloat[2] =
+{
+	{ "int", kParamType_Integer, 0 },
+	{ "Float", kParamType_Float, 0 },
+};
 ParamInfo kParamsJohnny_OneForm_OneOptionalInt[2] =
 {
 	{ "form",	kParamType_AnyForm,	0 },

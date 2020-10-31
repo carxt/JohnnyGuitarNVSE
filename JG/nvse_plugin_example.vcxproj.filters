@@ -207,6 +207,9 @@
     <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_ui.h">
       <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
     </ClInclude>
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_av.h">
+      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

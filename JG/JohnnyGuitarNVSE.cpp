@@ -23,6 +23,7 @@
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
 #include "JohnnyGuitar/JohnnyParams.h"
 #include "JohnnyGuitar/EditorIDs.h"
+#include "JohnnyGuitar/JohnnyFunctions/fn_av.h"
 #include "JohnnyGuitar/JohnnyFunctions/fn_form.h"
 #include "JohnnyGuitar/JohnnyFunctions/fn_utility.h"
 #include "JohnnyGuitar/JohnnyFunctions/fn_math.h"
@@ -245,6 +246,15 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(QueueCinematicText);
 	REG_TYPED_CMD(ar_SortEditor, Array);
 	REG_CMD(SetUIUpdateSound);
+	REG_CMD(GetActorValueAlt);
+	REG_CMD(ModActorValueAlt);
+	REG_CMD(SetActorValueAlt);
+	REG_CMD(ForceActorValueAlt);
+	REG_CMD(DamageActorValueAlt);
+	REG_CMD(GetBaseActorValueAlt);
+	REG_CMD(RestoreActorValueAlt);
+	REG_CMD(HighlightBodyPartAlt);
+	REG_CMD(DeactivateAllHighlightsAlt);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

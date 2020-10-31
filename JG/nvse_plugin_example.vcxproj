@@ -246,6 +246,7 @@
     <ClInclude Include="JohnnyGuitar\EventFilteringInterface.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyEventPredefinitions.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyEvents.h" />
+    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_av.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_file.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_form.h" />
     <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_gameplay.h" />
