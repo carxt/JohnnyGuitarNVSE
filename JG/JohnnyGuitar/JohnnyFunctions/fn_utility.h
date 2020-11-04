@@ -12,7 +12,7 @@ DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetPipBoyMode, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetFormOverrideIndex, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetSequenceAnimGroup, , 0, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(ar_SortEditor, , 0, 2, kParams_TwoInts)
+DEFINE_COMMAND_PLUGIN(ar_SortEditor, , 0, 2, kParams_OneInt_OneOptionalInt)
 DEFINE_COMMAND_PLUGIN(SetUIUpdateSound, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , 0, 3, kParamsJohnnyOneInt_OneForm_OneInt);
 
@@ -98,7 +98,8 @@ struct cmp_str
 };
 bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt32 arrID, isReverse;
+	UInt32 arrID;
+	UInt32 isReverse = 0;
 	if (!ExtractArgs(EXTRACT_ARGS, &arrID, &isReverse)) return true;
 	if (!loadEditorIDs) return true;
 	NVSEArrayVar* inArr = ArrIfc->LookupArrayByID(arrID);

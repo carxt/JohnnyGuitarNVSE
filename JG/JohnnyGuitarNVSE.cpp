@@ -74,7 +74,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 325;
+	info->version = 330;
 
 	if (nvse->isNogore) 
 	{
@@ -251,7 +251,6 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetActorValueAlt);
 	REG_CMD(ForceActorValueAlt);
 	REG_CMD(DamageActorValueAlt);
-	REG_CMD(GetBaseActorValueAlt);
 	REG_CMD(RestoreActorValueAlt);
 	REG_CMD(HighlightBodyPartAlt);
 	REG_CMD(DeactivateAllHighlightsAlt);
