@@ -14,6 +14,55 @@ DEFINE_COMMAND_PLUGIN(GetFormOverrideIndex, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetSequenceAnimGroup, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(ar_SortEditor, , 0, 2, kParams_TwoInts)
 DEFINE_COMMAND_PLUGIN(SetUIUpdateSound, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , 0, 3, kParamsJohnnyOneInt_OneForm_OneInt);
+
+bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
+	*result = 0;
+	UInt32 arrID, fullMatch;
+	BGSListForm* formList;
+	if (!ExtractArgs(EXTRACT_ARGS, &arrID, &formList, &fullMatch)) return true;
+	NVSEArrayVar* inArr = ArrIfc->LookupArrayByID(arrID);
+	if (!inArr) return true;
+	UInt32 size = ArrIfc->GetArraySize(inArr);
+	NVSEArrayElement* elements = new NVSEArrayElement[size];
+	ArrIfc->GetElements(inArr, elements, NULL);
+	if (!fullMatch) {
+		for (int i = 0; i < size; i++) {
+			if (elements[i].Form() == NULL) return true;
+			ListNode<TESForm>* listIter = formList->list.Head();
+			do
+			{
+				if (elements[i].Form() == listIter->data) {
+					*result = 1;
+					delete[] elements;
+					return true;
+				}
+			} while (listIter = listIter->next);
+		}
+	}
+	else {
+		for (int i = 0; i < size; i++) {
+			if (elements[i].Form() == NULL) return true;
+			int elementFound = 0;
+			ListNode<TESForm>* listIter = formList->list.Head();
+			do
+			{
+				if (elements[i].Form() == listIter->data) {
+					elementFound = 1;
+					break;
+				}
+			} while (listIter = listIter->next);
+			if (elementFound == 0) {
+				delete[] elements;
+				return true;
+			}
+		}
+		*result = 1;
+	}
+	
+	delete[] elements;
+	return true;
+}
 bool Cmd_SetUIUpdateSound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESSound* sound;

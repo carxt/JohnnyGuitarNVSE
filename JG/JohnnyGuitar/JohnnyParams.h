@@ -102,6 +102,13 @@ ParamInfo kParamsJohnnyOneForm_OneInt_OneForm[3] =
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Form", kParamType_AnyForm, 0 }
 };
+
+ParamInfo kParamsJohnnyOneInt_OneForm_OneInt[3] =
+{
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 }
+};
 ParamInfo kParamsJohnnyOneForm_OneInt_OneForm_OneInt[4] =
 {
 	{ "Form", kParamType_AnyForm, 0 },

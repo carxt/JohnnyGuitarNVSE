@@ -6,9 +6,13 @@ DEFINE_COMMAND_PLUGIN(SetJohnnySeenDataEventHandler, , 0, 4, kParamsJohnnyEventO
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnLimbGoneEventHandler, , 0,5, kParamsJohnnyEventOneFormOneIntFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnCrosshairEventHandler, , 0, 5, kParamsJohnnyEventOneFormOneIntFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnFailQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
+EventInformation* OnFailQuestHandler;
+EventInformation* OnCompleteQuestHandler;
 EventInformation* OnSeenDataUpdateHandler;
 EventInformation* OnLimbGoneHandler;
 EventInformation* OnChallengeCompleteHandler;
@@ -53,6 +57,26 @@ void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, thisEvent->numMaxArgs, Quest);
 		}
 	}
+}
+
+void __cdecl handleQuestComplete(TESQuest* Quest) {
+	for (auto const& callback : OnCompleteQuestHandler->EventCallbacks) {
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		{
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCompleteQuestHandler->numMaxArgs, Quest);
+		}
+	}
+	CdeclCall(0x77A480, Quest);
+}
+
+void __cdecl handleQuestFail(TESQuest* Quest) {
+	for (auto const& callback : OnFailQuestHandler->EventCallbacks) {
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		{
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnFailQuestHandler->numMaxArgs, Quest);
+		}
+	}
+	CdeclCall(0x77A480, Quest);
 }
 ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL *cell) {
 	for (auto const& callback : OnSeenDataUpdateHandler->EventCallbacks) {
@@ -247,6 +271,43 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
 	}
 }
 
+bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	TESForm* filter[1] = { NULL }; 
+	UInt32 flags = 0;
+	if (!(ExtractArgs(EXTRACT_ARGS, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	{
+		if (OnCompleteQuestHandler)
+		{
+			if (setOrRemove)
+				OnCompleteQuestHandler->RegisterEvent(script, (void**)filter);
+			else OnCompleteQuestHandler->RemoveEventFromGame(script, (void**)filter);
+
+		}
+		return true;
+	}
+}
+
+bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	TESForm* filter[1] = { NULL };
+	UInt32 flags = 0;
+	if (!(ExtractArgs(EXTRACT_ARGS, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	{
+		if (OnFailQuestHandler)
+		{
+			if (setOrRemove)
+				OnFailQuestHandler->RegisterEvent(script, (void**)filter);
+			else OnFailQuestHandler->RemoveEventFromGame(script, (void**)filter);
+
+		}
+		return true;
+	}
+}
 
 void initEventHooks(const NVSEInterface* nvse)
 {
@@ -261,6 +322,8 @@ void initEventHooks(const NVSEInterface* nvse)
 		OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2, 2, CreateOneFormOneIntFilter);
 		OnChallengeCompleteHandler = JGCreateEvent("OnChallengeComplete", 1, 1, NULL);
 		OnCrosshairHandler = JGCreateEvent("OnCrosshair", 1, 2, CreateOneFormOneIntFilter);
+		OnCompleteQuestHandler = JGCreateEvent("OnCompleteQuest", 1, 1, NULL);
+		OnFailQuestHandler = JGCreateEvent("OnFailQuest", 1, 1, NULL);
 		FunctionCallScript = g_script->CallFunction;
 		WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 		WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
@@ -270,6 +333,8 @@ void initEventHooks(const NVSEInterface* nvse)
 		WriteRelCall(0x5F5C78, (UINT)HandleChallengeCompleteEvent);
 		WriteRelCall(0x5F6222, (UINT)HandleChallengeCompleteEvent);
 		WriteRelCall(0x776010, (UINT)handleCrosshairEvent);
+		WriteRelCall(0x60CB5A, (UINT)handleQuestFail);
+		WriteRelCall(0x60CA78, (UINT)handleQuestComplete);
 		SafeWrite8(0x60CA29, 0xCC);
 	}
 

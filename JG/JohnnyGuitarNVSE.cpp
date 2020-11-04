@@ -255,6 +255,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(RestoreActorValueAlt);
 	REG_CMD(HighlightBodyPartAlt);
 	REG_CMD(DeactivateAllHighlightsAlt);
+	REG_CMD(SetJohnnyOnCompleteQuestEventHandler);
+	REG_CMD(SetJohnnyOnFailQuestEventHandler);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
