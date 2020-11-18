@@ -8,6 +8,7 @@ DEFINE_COMMAND_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, , 0, 4, kParamsJ
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnCrosshairEventHandler, , 0, 5, kParamsJohnnyEventOneFormOneIntFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnFailQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, , 0, 3, kParamsJohnnyEventUnfiltered);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
@@ -17,6 +18,7 @@ EventInformation* OnSeenDataUpdateHandler;
 EventInformation* OnLimbGoneHandler;
 EventInformation* OnChallengeCompleteHandler;
 EventInformation* OnCrosshairHandler;
+EventInformation* OnSettingsUpdateHandler;
 void __stdcall handleDyingEvent(Actor* thisObj) {
 	if (thisObj->lifeState == 1) {
 		for (auto const& callback : OnDyingHandler->EventCallbacks) {
@@ -77,6 +79,13 @@ void __cdecl handleQuestFail(TESQuest* Quest) {
 		}
 	}
 	CdeclCall(0x77A480, Quest);
+}
+
+void __cdecl handleSettingsUpdate() {
+	CdeclCall(0x7D6D70);
+	for (auto const& callback : OnSettingsUpdateHandler->EventCallbacks) {
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSettingsUpdateHandler->numMaxArgs);
+	}
 }
 ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL *cell) {
 	for (auto const& callback : OnSeenDataUpdateHandler->EventCallbacks) {
@@ -158,7 +167,23 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
 		return true;
 	}
 }
+bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	UInt32 flags = 0;
+	if (!(ExtractArgs(EXTRACT_ARGS, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
+	{
+		if (OnSettingsUpdateHandler)
+		{
+			if (setOrRemove)
+				OnSettingsUpdateHandler->RegisterEvent(script, NULL);
+			else OnSettingsUpdateHandler->RemoveEventFromGame(script, NULL);
 
+		}
+		return true;
+	}
+}
 bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
@@ -324,6 +349,7 @@ void initEventHooks(const NVSEInterface* nvse)
 		OnCrosshairHandler = JGCreateEvent("OnCrosshair", 1, 2, CreateOneFormOneIntFilter);
 		OnCompleteQuestHandler = JGCreateEvent("OnCompleteQuest", 1, 1, NULL);
 		OnFailQuestHandler = JGCreateEvent("OnFailQuest", 1, 1, NULL);
+		OnSettingsUpdateHandler = JGCreateEvent("OnSettingsUpdate", 0, 0, NULL);
 		FunctionCallScript = g_script->CallFunction;
 		WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 		WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
@@ -335,6 +361,8 @@ void initEventHooks(const NVSEInterface* nvse)
 		WriteRelCall(0x776010, (UINT)handleCrosshairEvent);
 		WriteRelCall(0x60CB5A, (UINT)handleQuestFail);
 		WriteRelCall(0x60CA78, (UINT)handleQuestComplete);
+		WriteRelCall(0x7CEC93, (UINT)handleSettingsUpdate);
+		WriteRelCall(0x7D11AD, (UINT)handleSettingsUpdate);
 		SafeWrite8(0x60CA29, 0xCC);
 	}
 

@@ -67,7 +67,11 @@ ParamInfo kParamsJohnny_OneString_OneInt[2] =
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 0 },
 };
-
+ParamInfo kParamsJohnny_OneString_OneOptionalInt[2] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "Integer", kParamType_Integer, 1 },
+};
 ParamInfo kParamsJohnnyEventOneFormFilter[4] =
 {
 	{ "setOrRemove", kParamType_Integer, 0 },
@@ -76,7 +80,13 @@ ParamInfo kParamsJohnnyEventOneFormFilter[4] =
 	{ "Form", kParamType_AnyForm, 1 }
 
 };
+ParamInfo kParamsJohnnyEventUnfiltered[3] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
 
+};
 ParamInfo kParamsJohnnyEventOneFormOneIntFilter[5] =
 {
 	{ "setOrRemove", kParamType_Integer, 0 },

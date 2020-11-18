@@ -19,13 +19,51 @@ DEFINE_COMMAND_PLUGIN(DisableMenuArrowKeys, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(EnableMenuArrowKeys, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(HighlightBodyPartAlt, , 1, 1, kParamsJohnnyOneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(DeactivateAllHighlightsAlt, , 1, 1, kParamsJohnnyOneOptionalFloat);
+DEFINE_COMMAND_PLUGIN(GetNearestCompassHostileDirection, , 0, 0, NULL);
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 
+bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
+{
+	*result = -1;
 
+	NiPoint3* playerPos = PlayerCharacter::GetSingleton()->GetPos();
+	float minDist = 128000.0F;
+	Actor* closestHostile = nullptr;
+
+	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
+	for (; !iter.End(); ++iter)
+	{
+		PlayerCharacter::CompassTarget* target = iter.Get();
+		if (target->isHostile)
+		{
+			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
+			if (distToPlayer < minDist)
+			{
+				minDist = distToPlayer;
+				closestHostile = target->target;
+			}
+		}
+	}
+
+	if (closestHostile)
+	{
+		auto playerRotation = PlayerCharacter::GetSingleton()->AdjustRot(0);
+		double headingAngle = GetAngleBetweenPoints(closestHostile->GetPos(), playerPos, playerRotation);
+
+		// shift the coordinates from -180:180 to 0:360 and offset them (360 / 8 quadrants / 2) degrees
+		int angle = headingAngle + 180 + 22.5;
+
+		// convert the angle to which quadrant the NPC is in
+		angle /= 45;
+		*result = (angle + 4) % 8; // make 0 in front, 1 front right, 2 right, 3 back right ...
+	}
+
+	return true;
+}
 bool Cmd_HighlightBodyPartAlt_Execute(COMMAND_ARGS)
 {
 	return Cmd_HighLightBodyPart(PASS_COMMAND_ARGS);

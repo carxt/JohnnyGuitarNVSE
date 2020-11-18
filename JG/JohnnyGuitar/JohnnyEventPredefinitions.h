@@ -1,15 +1,10 @@
 #pragma once
 #include "JohnnyGuitar/EventFilteringInterface.h"
-//NVSEScriptInterface* scrInterface;
+
 bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
 NVSEArrayElement EventResultPtr;
 class EventInformation;
-/*bool __fastcall GenericAcceptedParameter(TESForm* parameter);
-void  __fastcall GenericFilterFunction(EventInformation* eventinfo, BaseEventClass* BaseToFilter);*/
 void*  __fastcall GenericCreateFilterFunction( void** maxFilters, UInt32 numFilters);
-
-// = sizeof(JGEventIDs) / sizeof(UInt32);
-
 
 
 class JohnnyEventFiltersForm : EventHandlerInterface

@@ -34,6 +34,54 @@ TESSound* questCompeteSound = 0;
 TESSound* locationDiscoverSound = 0;
 std::unordered_map<UInt32, char*> CustomMapMarkerMap;
 
+double GetVectorAngle2D(NiPoint3* pt)
+{
+	double angle;
+	if (pt->y == 0)
+	{
+		if (pt->x <= 0)
+		{
+			angle = kDblPIx3d2;
+		}
+		else
+		{
+			angle = kDblPId2;
+		}
+	}
+	else
+	{
+		double ratio = pt->x / pt->y;
+		angle = dAtan(ratio);
+		if (pt->y < 0.0)
+		{
+			angle += kDblPI;
+		}
+	}
+
+	return angle;
+}
+
+
+double GetAngleBetweenPoints(NiPoint3* actorPos, NiPoint3* playerPos, float offset)
+{
+	NiPoint3 diff;
+	diff.Init(actorPos);
+	diff.Subtract(playerPos);
+
+	double angle = GetVectorAngle2D(&diff) - offset;
+	if (angle > -kDblPI)
+	{
+		if (angle > kDblPI)
+		{
+			angle = kDblPIx2 - angle;
+		}
+	}
+	else
+	{
+		angle += kDblPIx2;
+	}
+	return angle * 57.295779513;
+}
 namespace SpecialCaseEDIDs {
 	void Handle();
 }

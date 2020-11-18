@@ -38,7 +38,17 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetBaseScale, , , 1, NULL);
 DEFINE_COMMAND_PLUGIN(GetQuestFailed, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetWeaponVATSTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetWeaponVATSTraitNumeric, , 0, 3, kParamsJohnnyOneForm_OneInt_OneFloat);
+DEFINE_COMMAND_PLUGIN(GetQuestDelay, , 0, 1, kParams_OneForm);
 
+bool Cmd_GetQuestDelay_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESQuest* quest;
+	if (ExtractArgs(EXTRACT_ARGS, &quest) && IS_TYPE(quest, TESQuest)) {
+		*result = quest->questDelayTime;
+		if (IsConsoleMode()) Console_Print("GetQuestDelay >> *.3f", *result);
+	}
+	return true;
+}
 bool Cmd_GetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectWEAP* weap;

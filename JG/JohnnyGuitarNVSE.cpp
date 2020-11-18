@@ -256,6 +256,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(DeactivateAllHighlightsAlt);
 	REG_CMD(SetJohnnyOnCompleteQuestEventHandler);
 	REG_CMD(SetJohnnyOnFailQuestEventHandler);
+	REG_CMD(IsDLLLoaded);
+	REG_CMD(SetJohnnyOnSettingsUpdateEventHandler);
+	REG_CMD(GetQuestDelay);
+	REG_CMD(GetNearestCompassHostileDirection);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

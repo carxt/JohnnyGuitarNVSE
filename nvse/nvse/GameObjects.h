@@ -25,7 +25,7 @@ static const UInt32 s_TESObjectREFR_Set3D = 0x4E0F80;
 #error
 #endif
 const UInt32 kUpdateAppearanceAddr = 0x8D3FA0;
-
+struct NiPoint3;
 // 68
 class TESObjectREFR : public TESForm
 {
@@ -83,7 +83,7 @@ public:
 	virtual ValidBip01Names * GetValidBip01Names(void);	// 007A	Character only
 	virtual ValidBip01Names * CallGetValidBip01Names(void);
 	virtual void		SetValidBip01Names(ValidBip01Names *validBip01Names);
-	virtual void		GetPos();				// GetPos or GetDistance
+	virtual NiPoint3*	GetPos();				// GetPos or GetDistance
 	virtual void		Unk_7E(UInt32 arg0);
 	virtual void		Unk_7F(void);
 	virtual void		Unk_80(UInt32 arg0);
@@ -244,7 +244,7 @@ public:
 	virtual void		Unk_AC(void);
 	virtual void		Unk_AD(void);
 	virtual void		Unk_AE(void);
-	virtual float		Unk_AF(UInt32 arg1);
+	virtual float		AdjustRot(UInt32 arg1);
 	virtual void		Unk_B0(void);
 	virtual void		Unk_B1(void);
 	virtual void		Unk_B2(void);

@@ -15,7 +15,31 @@ DEFINE_COMMAND_PLUGIN(GetSequenceAnimGroup, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(ar_SortEditor, , 0, 2, kParams_OneInt_OneOptionalInt)
 DEFINE_COMMAND_PLUGIN(SetUIUpdateSound, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , 0, 3, kParamsJohnnyOneInt_OneForm_OneInt);
-
+DEFINE_COMMAND_PLUGIN(IsDLLLoaded, , 0, 2, kParamsJohnny_OneString_OneOptionalInt);
+bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
+	*result = 0;
+	int checkOutsideOfGameFolder = 0;
+	char dllName[MAX_PATH];
+	char dllPath[MAX_PATH];
+	char fnvPath[MAX_PATH];
+	if (ExtractArgs(EXTRACT_ARGS, &dllName, &checkOutsideOfGameFolder)) {
+		strncat(dllName, ".dll", 4);
+		HMODULE module = GetModuleHandle(dllName);
+		if (module) {
+			if (!checkOutsideOfGameFolder) {
+				GetModuleFileNameA(module, dllPath, MAX_PATH);
+				GetModuleFileNameA(NULL, fnvPath, MAX_PATH);
+				fnvPath[strlen(fnvPath) - 13] = '\0';
+				if (strstr(dllPath, fnvPath) != NULL) *result = 1;
+			}
+			else {
+				*result = 1;
+			}
+		}
+		if (IsConsoleMode()) Console_Print("IsDLLLoaded \"%s\" >> %.f", dllName, *result);
+	}
+	return true;
+}
 bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 arrID, fullMatch;
