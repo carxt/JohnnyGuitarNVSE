@@ -154,9 +154,9 @@ struct NiPlane
 template <typename T_Data>
 struct NiTArray
 {
-	virtual NiTArray	*Destroy(UInt32 doFree);
+	virtual void* Destroy(UInt32 doFree);
 
-	T_Data		*data;			// 04
+	T_Data* data;			// 04
 	UInt16		capacity;		// 08 - init'd to size of preallocation
 	UInt16		firstFreeEntry;	// 0A - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
 	UInt16		numObjs;		// 0C - init'd to 0
@@ -169,38 +169,36 @@ struct NiTArray
 		return NULL;
 	}
 
-	T_Data Get(UInt32 idx) {return data[idx];}
+	T_Data Get(UInt32 idx) { return data[idx]; }
 
-	UInt16 Length() {return firstFreeEntry;}
-	void AddAtIndex(UInt32 index, T_Data *item);	// no bounds checking
+	UInt16 Length() { return firstFreeEntry; }
+	void AddAtIndex(UInt32 index, T_Data* item);	// no bounds checking
 	void SetCapacity(UInt16 newCapacity);	// grow and copy data if needed
 
 	class Iterator
 	{
-	protected:
 		friend NiTArray;
 
-		T_Data		*pData;
+		T_Data* pData;
 		UInt16		count;
-		UInt8		pad06[2];
 
 	public:
-		bool End() const {return !count;}
+		bool End() const { return !count; }
 		void operator++()
 		{
-			count--;
 			pData++;
+			count--;
 		}
 
-		T_Data& operator*() const {return *pData;}
-		T_Data& operator->() const {return *pData;}
-		T_Data& Get() const {return *pData;}
+		T_Data& operator*() const { return *pData; }
+		T_Data& operator->() const { return *pData; }
+		T_Data& Get() const { return *pData; }
 
-		Iterator() {}
-		Iterator(NiTArray &source) : pData(source.data), count(source.firstFreeEntry) {}
+		Iterator(NiTArray& source) : pData(source.data), count(source.firstFreeEntry) {}
 	};
-};
 
+	Iterator Begin() { return Iterator(*this); }
+};
 #if RUNTIME
 
 template <typename T> void NiTArray<T>::AddAtIndex(UInt32 index, T* item)
@@ -322,35 +320,34 @@ public:
 	{
 		friend NiTPointerMap;
 
-		NiTPointerMap	*m_table;
-		Entry			*m_entry;
-		UInt32			m_bucket;
+		NiTPointerMap* table;
+		Entry** bucket;
+		Entry* entry;
 
-		void FindValid()
+		void FindNonEmpty()
 		{
-			for (; m_bucket < m_table->m_numBuckets; m_bucket++)
-			{
-				m_entry = m_table->m_buckets[m_bucket];
-				if (m_entry) break;
-			}
+			for (Entry** end = &table->m_buckets[table->m_numBuckets]; bucket != end; bucket++)
+				if (entry = *bucket) return;
 		}
 
 	public:
-		Iterator(NiTPointerMap *table) : m_table(table), m_entry(NULL), m_bucket(0) {FindValid();}
+		Iterator(NiTPointerMap& _table) : table(&_table), bucket(table->m_buckets), entry(NULL) { FindNonEmpty(); }
 
-		bool Done() const {return m_entry == NULL;}
-		void Next()
+		bool End() const { return !entry; }
+		void operator++()
 		{
-			m_entry = m_entry->next;
-			if (!m_entry)
+			entry = entry->next;
+			if (!entry)
 			{
-				m_bucket++;
-				FindValid();
+				bucket++;
+				FindNonEmpty();
 			}
 		}
-		T_Data *Get() const {return m_entry->data;}
-		UInt32 Key() const {return m_entry->key;}
+		T_Data* Get() const { return entry->data; }
+		UInt32 Key() const { return entry->key; }
 	};
+
+	Iterator Begin() { return Iterator(*this); }
 };
 
 // 10

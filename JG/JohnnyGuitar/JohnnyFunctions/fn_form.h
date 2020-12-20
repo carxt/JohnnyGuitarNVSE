@@ -39,7 +39,16 @@ DEFINE_COMMAND_PLUGIN(GetQuestFailed, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetWeaponVATSTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetWeaponVATSTraitNumeric, , 0, 3, kParamsJohnnyOneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetQuestDelay, , 0, 1, kParams_OneForm);
-
+DEFINE_COMMAND_PLUGIN(SetNoteRead, , 0, 2, kParams_OneForm_OneInt);
+bool Cmd_SetNoteRead_Execute(COMMAND_ARGS) {
+	UInt32 isRead = 0;
+	*result = 0;
+	BGSNote* note;
+	if (ExtractArgs(EXTRACT_ARGS, &note, &isRead)) {
+		note->read = isRead > 0 ? 1 : 0;
+	}
+	return true;
+}
 bool Cmd_GetQuestDelay_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESQuest* quest;

@@ -19,31 +19,99 @@ DEFINE_COMMAND_PLUGIN(DisableMenuArrowKeys, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(EnableMenuArrowKeys, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(HighlightBodyPartAlt, , 1, 1, kParamsJohnnyOneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(DeactivateAllHighlightsAlt, , 1, 1, kParamsJohnnyOneOptionalFloat);
-DEFINE_COMMAND_PLUGIN(GetNearestCompassHostileDirection, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetNearestCompassHostileDirection, , 0, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetNearestCompassHostile, , 0, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetDisablePlayerControlsHUDVisibilityFlags, SetDPCHUDFlags, , 0, 1, kParams_OneOptionalInt);
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
+void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
+#define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+void RestoreDisabledPlayerControlsHUDFlags()
+{
+	SafeWrite32(0x771A53, HUDMainMenu::kXpMeter | HUDMainMenu::kSubtitles | HUDMainMenu::kMessages | HUDMainMenu::kQuestReminder | HUDMainMenu::kRadiationMeter);
+}
 
-bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
+bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS)
+{
+	UInt32 flags;
+	if (NUM_ARGS && ExtractArgs(EXTRACT_ARGS, &flags))
+	{
+		SafeWrite32(0x771A53, flags);
+		HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
+	}
+	else
+	{
+		RestoreDisabledPlayerControlsHUDFlags();
+	}
+
+	return true;
+}
+bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS)
 {
 	*result = -1;
 
 	NiPoint3* playerPos = PlayerCharacter::GetSingleton()->GetPos();
-	float minDist = 128000.0F;
-	Actor* closestHostile = nullptr;
 
+	Setting* fSneakMaxDistance = (Setting*)0x11CD7D8;
+	Setting* fSneakExteriorDistanceMult = (Setting*)0x11CDCBC;
+	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->IsInterior();
+	float interiorDistanceSquared = fSneakMaxDistance->data.f * fSneakMaxDistance->data.f;
+	float exteriorDistanceSquared = (fSneakMaxDistance->data.f * fSneakExteriorDistanceMult->data.f) * (fSneakMaxDistance->data.f * fSneakExteriorDistanceMult->data.f);
+	float maxDist = isInterior ? interiorDistanceSquared : exteriorDistanceSquared;
+	Actor* closestHostile = nullptr;
+	UInt32 skipInvisible = 0;
+	ExtractArgs(EXTRACT_ARGS, &skipInvisible);
 	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
 	for (; !iter.End(); ++iter)
 	{
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile)
 		{
+			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) || target->target->avOwner.Fn_02(kAVCode_Chameleon))) {
+				continue;
+			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
-			if (distToPlayer < minDist)
+			if (distToPlayer < maxDist)
 			{
-				minDist = distToPlayer;
+				maxDist = distToPlayer;
+				closestHostile = target->target;
+			}
+		}
+	}
+
+	if (closestHostile)	*(UInt32*)result = closestHostile->refID;
+
+	return true;
+}
+bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+
+	NiPoint3* playerPos = PlayerCharacter::GetSingleton()->GetPos();
+	
+	Setting* fSneakMaxDistance = (Setting*)0x11CD7D8;
+	Setting* fSneakExteriorDistanceMult = (Setting*)0x11CDCBC;
+	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->IsInterior();
+	float maxDist = isInterior ? powf(fSneakMaxDistance->data.f, 2) : powf((fSneakMaxDistance->data.f * fSneakExteriorDistanceMult->data.f), 2);
+	Actor* closestHostile = nullptr;
+	UInt32 skipInvisible = 0;
+	ExtractArgs(EXTRACT_ARGS, &skipInvisible);
+	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
+	for (; !iter.End(); ++iter)
+	{
+		PlayerCharacter::CompassTarget* target = iter.Get();
+		if (target->isHostile)
+		{
+			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) || target->target->avOwner.Fn_02(kAVCode_Chameleon))) {
+				continue;
+			}
+			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
+			if (distToPlayer < maxDist)
+			{
+				maxDist = distToPlayer;
 				closestHostile = target->target;
 			}
 		}
@@ -185,15 +253,15 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 		{
 			const char* soundPath = soundForm->soundFile.path.m_data;
 			BSGameSound* gameSound;
-			for (NiTPointerMap<BSGameSound>::Iterator sndIter(&g_audioManager->playingSounds); !sndIter.Done(); sndIter.Next())
+			for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter)
 			{
 				gameSound = sndIter.Get();
 				if (gameSound && StrBeginsCI(gameSound->filePath + 0xB, soundPath)) {
 					fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
 					if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == source)
 					{
-						gameSound->flags010 &= 0xFFFFFF0F;
-						gameSound->flags010 |= 0x10;
+						gameSound->stateFlags &= 0xFFFFFF0F;
+						gameSound->stateFlags |= 0x10;
 						*result = 1;
 						break;
 					}

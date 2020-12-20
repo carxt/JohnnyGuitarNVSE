@@ -741,6 +741,8 @@ public:
 	NiNode **GetNodeOffset(const char *nodeName);
 	bool IsMovable();
 	void ToggleCollision(bool enable);
+	void RemoveCollision();
+	void BulkSetMaterialPropertyTraitValue(UInt32 traitID, float value);
 	void GetContactObjects(ContactObjects *contactObjs);
 	bool HasPhantom();
 	void GetBodyMass(float *totalMass);
@@ -758,7 +760,7 @@ public:
 
 	float			fltAC[4];		// AC
 	UInt32			unkBC[2];		// BC
-	UInt32			unkC4;			// C4
+	UInt32			fadeType;			// C4
 	UInt32			unkC8;			// C8
 	TESObjectREFR	*linkedObj;		// CC
 	UInt32			unkD0[5];		// D0

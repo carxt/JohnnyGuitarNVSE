@@ -760,6 +760,54 @@ public:
 		UInt8		byte1D;		// 1D
 		UInt8		pad1E[2];	// 1E
 	};
+	enum VisibilityFlags
+	{
+		kActionPoints = 0x1,
+		kHitPoints = 0x2,
+		kRadiationMeter = 0x4,
+		kEnemyHealth = 0x8,
+		kQuestReminder = 0x10,
+		kRegionLocation = 0x20,
+		kReticleCenter = 0x40,
+		kSneakMeter = 0x80,
+		kMessages = 0x100,
+		kInfo = 0x200,
+		kSubtitles = 0x400,
+		kHotkeys = 0x800,
+		kXpMeter = 0x1000,
+		kBreathMeter = 0x2000,
+		kExplosivePositioning = 0x4000,
+		kCrippledLimbIndicator = 0x8000,
+		kHardcoreMode = 0x10000,
+	};
+	enum HUDStates
+	{
+		kHUDState_RECALCULATE = 0x1,
+		kHUDState_Normal = 0x2,
+		kHUDState_PipBoy = 0x3,
+		kHUDState_Pause = 0x4,
+		kHUDState_Loading = 0x5,
+		kHUDState_Dialog = 0x6,
+		kHUDState_VATSMenu = 0x7,
+		kHUDState_VATSPlayback = 0x8,
+		kHUDState_Container = 0x9,
+		kHUDState_BeginSit = 0xA,
+		kHUDState_SleepWait = 0xB,
+		kHUDState_PlayerDisabledControls = 0xC,
+		kHUDState_D = 0xD,
+		kHUDState_LevelUpMenu = 0xE,
+		kHUDState_Hacking = 0xF,
+		kHUDState_Computers = 0x10,
+		kHUDState_Message = 0x11,
+		kHUDState_SpecialBook = 0x12,
+		kHUDState_LoveTester = 0x13,
+		kHUDState_VanityCam = 0x14,
+		kHUDState_15 = 0x15,
+		kHUDState_Aiming = 0x16,
+		kHUDState_AimingScope = 0x17,
+		kHUDState_IntroMovie = 0x18,
+		kHUDState_Gambling = 0x19,
+	};
 
 	UInt32							unk028;			// 028
 	TileImage						*tile02C;		// 02C	HitPoints\meter
@@ -1390,10 +1438,24 @@ STATIC_ASSERT(sizeof(HackingMenu) == 0x1DC);
 
 struct VATSTargetInfo
 {
-	TESObjectREFR	*targetRef;
-	UInt32			unk04;
+	UInt32 actionType;
+	UInt8 isSuccess;
+	UInt8 byte05;
+	UInt8 isMysteriousStrangerVisit;
+	UInt8 byte07;
+	UInt8 remainingShotsToFire_Burst;
+	UInt8 count09;
+	UInt8 gap0A[2];
+	TESObjectREFR* ref;
+	UInt32 avCode;
+	ActorHitData* hitData;
+	float unk18;
+	float unk1C;
+	float apCost;
+	UInt8 isMissFortuneVisit;
+	UInt8 gap25[3];
 };
-
+STATIC_ASSERT(sizeof(VATSTargetInfo) == 0x28);
 // 144
 class VATSMenu : public Menu			// 1056
 {
@@ -2317,9 +2379,9 @@ public:
 	virtual void	Seek(UInt32 timePoint);
 
 	UInt32			mapKey;					// 004
-	UInt32			flags008;				// 008
-	UInt32			unk00C;					// 00C
-	UInt32			flags010;				// 010
+	UInt32			soundFlags;				// 008
+	UInt32			flags00C;				// 00C
+	UInt32			stateFlags;				// 010
 	UInt32			duration;				// 014
 	UInt16			staticAttenuation;		// 018	dB * -1000
 	UInt16			unk01A;					// 01A
@@ -2327,50 +2389,154 @@ public:
 	UInt16			unk01E;					// 01E
 	UInt16			unk020;					// 020
 	UInt16			unk022;					// 022
-	float			flt024;					// 024
+	float			volume;					// 024	0.0 to 1.0
 	float			flt028;					// 028
 	float			flt02C;					// 02C
 	UInt32			unk030;					// 030
-	UInt16			unk034;					// 034
-	char			filePath[MAX_PATH];		// 036
-	UInt16			unk13A;					// 13A
-	float			flt13C;					// 13C
-	float			flt140;					// 140
-	UInt32			unk144[3];				// 144
+	UInt16			baseSamplingFreq;		// 034
+	char			filePath[254];			// 036	Originally: filePath[260]
+	TESSound* sourceSound;			// 134	"Stolen" from filePath
+	float			frequencyMod;			// 138	^
+	float			maxAttenuationDist;		// 13C
+	float			minAttenuationDist;		// 140
+	UInt32			pathHashFile;			// 144
+	UInt32			pathHashFolder;			// 148
+	UInt32			unk14C;					// 14C
 	float			flt150;					// 150
-	UInt32			unk154[18];				// 154
-	UInt32			*unk19C;				// 19C
-	UInt32			unk1A0[26];				// 1A0
-	UInt32			*unk208;				// 208
-	UInt32			unk20C[9];				// 20C
+	UInt32			unk154;					// 154
+	SInt8			randFrequencyShift;		// 158
+	UInt8			byte159;				// 159
+	UInt16			samplingFreq;			// 15A
+	UInt32			unk15C;					// 15C
+	UInt32			unk160;					// 160
+	UInt32			unk164;					// 164
+	UInt32			unk168;					// 168
+	UInt32			unk16C;					// 16C
+	UInt32			unk170;					// 170
+	UInt32			unk174[5];				// 174
+	UInt32			priority;				// 188
+	UInt32			unk18C[3];				// 18C
 };
-STATIC_ASSERT(sizeof(BSGameSound) == 0x230);
+STATIC_ASSERT(sizeof(BSGameSound) == 0x198);
 
+enum AudioRequestTypes
+{
+	kRequestType_Stop = 3,
+	kRequestType_Stop2 = 4,
+	kRequestType_Delay = 5,
+	kRequestType_StopSoundFadeOutTime = 9,
+	kRequestType_DialogueFadeInOrOut = 0xD,
+	kRequestType_RecalculateVolumesForChangesToMasterVolume = 0xE,
+	kRequestType_Volume = 0x10,
+	kRequestType_FrequencyAdjustment = 0x14,
+	kRequestType_FadeAllSFX = 0x18,
+	kRequestType_SetState400ForSomeSounds = 0x1A,
+	kRequestType_ClearState400ForSomeSounds = 0x1B,
+	kRequestType_SetState400ForSomeSounds2 = 0x1C,
+	kRequestType_ClearState400ForSomeSounds2 = 0x1D,
+	kRequestType_SoundAtPos = 0x1E,
+	kRequestType_Attenuation = 0x21,
+	kRequestType_ReverbAttenuation = 0x22,
+	kRequestType_PlayWithMinMaxDistance = 0x23,
+	kRequestType_SetsPlayingSoundClearStateBit200 = 0x26,
+	kRequestType_PlayAtNode = 0x27,
+	kRequestType_NiNodeSound = 0x29,
+	kRequestType_StopAllSoundsWithFlags = 0x2A,
+	kRequestType_SetAudioListenerPosition = 0x38,
+	kRequestType_HasCompletionCallback = 0x3A,
+	kRequestType_HasSomeCallback = 0x3B,
+	kRequestType_StartsAtEndsAt = 0x3E,
+	kRequestType_MultiThreaded = 0x35,
+	kRequestType_ToggleFirstPersonForPlayingSound = 0x40,
+	kRequestType_Priority = 0x41,
+	kRequestType_Speed = 0x42
+};
+
+union FunctionArg
+{
+	void* pVal;
+	float		fVal;
+	UInt32		uVal;
+	SInt32		iVal;
+
+	FunctionArg& operator=(void* other)
+	{
+		pVal = other;
+		return *this;
+	}
+	FunctionArg& operator=(float other)
+	{
+		fVal = other;
+		return *this;
+	}
+	FunctionArg& operator=(UInt32 other)
+	{
+		uVal = other;
+		return *this;
+	}
+	FunctionArg& operator=(SInt32 other)
+	{
+		iVal = other;
+		return *this;
+	}
+};
+
+
+// 20
+struct AudioRequestData
+{
+	UInt32				type;		// 00
+	UInt32				soundKey;	// 04
+	FunctionArg			value1;		// 08
+	FunctionArg			value2;		// 0C
+	NiNode* niNode;	// 10
+	NiVector3			pos;		// 14
+};
 // 188
 class BSAudioManager
 {
 public:
-	BSAudioManager();
-	~BSAudioManager();
-
 	virtual void				Destroy(bool doFree);
 
-	UInt32						unk004[10];			// 004
-	void						*unk02C;			// 02C
-	float						flt030;				// 030
-	UInt32						unk034[2];			// 034
-	void						*unk03C;			// 03C
-	UInt32						unk040[5];			// 040
+	// 10
+	struct AudioRequest
+	{
+		UInt32				count;			// 00
+		UInt8				byte04;			// 04
+		UInt8				pad05[3];		// 05
+		AudioRequestData* requestData;	// 08
+		UInt32				tickCount;		// 0C
+	};
+
+	UInt32						unk004[8];			// 004
+	AudioRequest				request024;			// 024
+	AudioRequest				request034;			// 034
+	AudioRequest				request044;			// 044
 	NiTPointerMap<BSGameSound>	playingSounds;		// 054
 	NiTPointerMap<BSSoundInfo>	playingSoundInfos1;	// 064
 	NiTPointerMap<BSSoundInfo>	playingSoundInfos2;	// 074
 	NiTPointerMap<NiAVObject>	soundPlayingObjects;// 084
-	DList<BSGameSound>			gameSounds;			// 094
+	DList<BSGameSound>			cachedSounds;		// 094
 	UInt32						unk0A0;				// 0A0
 	UInt32						unk0A4;				// 0A4
 	float						flt0A8;				// 0A8
-	UInt32						unk0AC[36];			// 0AC
-	BSAudioManagerThread		*audioMgrThread;	// 13C
+	LPCRITICAL_SECTION			cs0AC;				// 0AC
+	UInt32						unk0B0[5];			// 0B0
+	LPCRITICAL_SECTION			cs0C4;				// 0C4
+	UInt32						unk0C8[5];			// 0C8
+	LPCRITICAL_SECTION			cs0DC;				// 0DC
+	UInt32						unk0E0[5];			// 0E0
+	LPCRITICAL_SECTION			cs0F4;				// 0F4
+	UInt32						unk0F8[5];			// 0F8
+	LPCRITICAL_SECTION			cs10C;				// 10C
+	UInt32						unk110[5];			// 110
+	DList<void>					list124;			// 124
+	UInt32						lastTickCount;		// 130
+	UInt8						byte134;			// 134
+	UInt8						byte135;			// 135
+	UInt8						pad136[2];			// 136
+	UInt32						unk138;				// 138
+	BSAudioManagerThread* audioMgrThread;	// 13C
 	float						volumes[12];		// 140
 	//	0	Master
 	//	1	Foot
@@ -2378,9 +2544,15 @@ public:
 	//	3	Effects
 	//	4	Music
 	//	5	Radio
-	UInt32						unk170[4];			// 170
+	UInt32						unk170;				// 170
+	UInt8						byte174;			// 174
+	UInt8						byte175;			// 175
+	UInt8						pad176[2];			// 176
+	UInt32						unk178;				// 178
+	UInt32						unk17C;				// 17C
 	UInt32						nextMapKey;			// 180
-	UInt32						unk184;				// 184
+	UInt8						byte184;			// 184
+	UInt8						pad185[3];			// 185
 };
 STATIC_ASSERT(sizeof(BSAudioManager) == 0x188);
 
@@ -3198,22 +3370,22 @@ public:
 // 48
 struct VATSCameraData
 {
-	tList<void>						targetsList;	// 00
+	tList<VATSTargetInfo>						targetsList;	// 00
 	UInt32							mode;			// 08
-	UInt32							unk0C;			// 0C
+	UInt32							cameraShots;			// 0C
 	BGSCameraShot					*camShot;		// 10
 	float							flt14;			// 14
 	float							flt18;			// 18
 	UInt32							unk1C;			// 1C
 	UInt32							unk20;			// 20
-	UInt32							unk24;			// 24
+	TESIdleForm						*attackAnim;			// 24
 	ImageSpaceModifierInstanceForm	*isModInstForm;	// 28
 	ImageSpaceModifierInstanceRB	*isModInstRB;	// 2C
 	UInt32							unk30;			// 30
-	NiObject						*object34;		// 34
+	NiPointLight*					niPointLight;		// 34
 	UInt8							byte38;			// 38
 	UInt8							pad39[3];		// 39
-	UInt32							unk3C;			// 3C
+	UInt32							numKills;			// 3C
 	UInt32							unk40;			// 40
 	UInt32							unk44;			// 44
 };

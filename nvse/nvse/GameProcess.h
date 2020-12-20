@@ -455,7 +455,7 @@ public:
 	virtual void	Unk_184();
 	virtual void	SetQueuedIdleFlags(UInt32 flags);
 	virtual UInt32	GetQueuedIdleFlags();
-	virtual void	Unk_187();
+	virtual void	ResetQueuedIdleFlags();
 	virtual void	Unk_188();
 	virtual void	Unk_189();
 	virtual void	Unk_18A(Actor *actor);

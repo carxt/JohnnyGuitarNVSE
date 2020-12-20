@@ -57,9 +57,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		OnDyingHandler->FlushEventCallbacks();
 		OnLimbGoneHandler->FlushEventCallbacks();
 		OnCrosshairHandler->FlushEventCallbacks();
-		if (bArrowKeysDisabled) {
-			bArrowKeysDisabled = false;
-		}
+		bArrowKeysDisabled = false;
+		bFormsInitialized = false;
+		RestoreDisabledPlayerControlsHUDFlags();
 		break;
 	}
 	}
@@ -259,6 +259,10 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetJohnnyOnSettingsUpdateEventHandler);
 	REG_CMD(GetQuestDelay);
 	REG_CMD(GetNearestCompassHostileDirection);
+	REG_CMD(GetNearestCompassHostile);
+	REG_CMD(RefreshIdle);
+	REG_CMD(SetNoteRead);
+	REG_CMD(SetDisablePlayerControlsHUDVisibilityFlags);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
@@ -283,6 +287,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 		{
 		case (DLL_PROCESS_ATTACH) :
 			JohnnyHandle = (HMODULE)hDllHandle;
+			DisableThreadLibraryCalls((HMODULE)hDllHandle);
 			break;
 		}
 		return TRUE;

@@ -16,6 +16,20 @@ DEFINE_COMMAND_PLUGIN(ar_SortEditor, , 0, 2, kParams_OneInt_OneOptionalInt)
 DEFINE_COMMAND_PLUGIN(SetUIUpdateSound, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , 0, 3, kParamsJohnnyOneInt_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(IsDLLLoaded, , 0, 2, kParamsJohnny_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(RefreshIdle, , 1, 1, kParams_OneOptionalInt);
+
+bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
+	*result = 0;
+	UInt32 stopAnim = 0;
+	Actor* actor = (Actor*)thisObj;
+	ExtractArgs(EXTRACT_ARGS, &stopAnim);
+	if (actor->baseProcess->GetIdleForm350()) {
+		actor->baseProcess->ResetQueuedIdleFlags();
+		actor->baseProcess->SetIdleForm350(NULL);
+		if (stopAnim > 0) ThisStdCall(0x498910, actor->GetAnimData(), 1, 1); // SpecialIdleFree
+	}
+	return true;
+}
 bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
 	*result = 0;
 	int checkOutsideOfGameFolder = 0;
