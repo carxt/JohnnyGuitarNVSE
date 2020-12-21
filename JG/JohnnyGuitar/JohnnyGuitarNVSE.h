@@ -1062,6 +1062,31 @@ static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
 }
 
+void ResetVanityWheel()
+{
+	float* VanityWheel = (float*) 0x11E0B5C;
+	float* MaxChaseCam = (ThisStdCall<float*>((uintptr_t)0x0403E20,(void*)0x11CD568));
+	if (*MaxChaseCam < *VanityWheel)
+		* VanityWheel = *MaxChaseCam;
+}
+
+
+
+__declspec (naked) void hk_VanityModeBug()
+{
+	static uintptr_t jmpDest = 0x942D43;
+	static uintptr_t getGS = 0x403E20;
+	__asm
+	{
+		fstp dword ptr ds : [0x011E07C4]
+		call ResetVanityWheel
+		jmp jmpDest
+	}
+
+}
+
+
+
 void HandleGameHooks()
 {
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // use available ammo in inventory instead of NULL when default ammo isn't present
@@ -1078,6 +1103,7 @@ void HandleGameHooks()
 	patchFixDisintegrationsStat();
 	WriteRelJump(0x88D0D0, (UInt32)FixNPCIncrementingChallenges);
 	WriteRelCall(0x77A8E9, (UInt32)PlayQuestFailSound);
+	WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
 	// TF
 	// WriteRelCall(0x63D5B1, (UInt32)TFWeatherControl);
 	if (loadEditorIDs) LoadEditorIDs();

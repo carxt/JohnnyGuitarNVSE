@@ -246,3 +246,11 @@ ParamInfo kParams_Johnny_OneForm_OneWeatherID_OneInt_OneOptionalGlobal[] =
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Global", kParamType_Global, 1 }
 };
+
+ParamInfo kParams_Johnny_ThreeStrings_OneInt[] =
+{
+	{ "string", kParamType_String, 0 },
+	{ "string", kParamType_String, 0 },
+	{ "string", kParamType_String, 0 },
+	{ "Integer", kParamType_Integer, 0 }
+};

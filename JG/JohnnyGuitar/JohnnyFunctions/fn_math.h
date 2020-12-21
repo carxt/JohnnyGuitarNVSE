@@ -9,6 +9,7 @@ DEFINE_COMMAND_PLUGIN(Clamp, , 0, 3, kParamsJohnnyThreeFloats);
 DEFINE_COMMAND_PLUGIN(Remap, , 0, 5, kParamsJohnnyFiveFloats);
 DEFINE_COMMAND_PLUGIN(Lerp, , 0, 3, kParamsJohnnyThreeFloats);
 DEFINE_COMMAND_PLUGIN(Sign, , 0, 1, kParams_OneFloat);
+DEFINE_COMMAND_PLUGIN(GetCameraTranslation, , FALSE, 4, kParams_Johnny_ThreeStrings_OneInt);
 
 bool Cmd_Sign_Execute(COMMAND_ARGS) {
 	float value;
@@ -121,6 +122,39 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 		setVarByName(PASS_VARARGS, X_outS, xOut);
 		setVarByName(PASS_VARARGS, Y_outS, yOut);
 		setVarByName(PASS_VARARGS, Z_outS, zOut);
+	}
+	return true;
+}
+
+
+
+bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS)
+{
+
+	*result = 0;
+	float xIn = 0, yIn = 0, zIn = 0;
+	UInt32 doGetLocal = 0;
+	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
+	TESObjectREFR* refr = NULL;
+
+	if (ExtractArgs(EXTRACT_ARGS, &X_outS, &Y_outS, &Z_outS, &doGetLocal))
+	{
+		if (auto m_GameCameraPos = JGGameCamera.CamPos) {
+			if (doGetLocal)
+			{
+				setVarByName(PASS_VARARGS, X_outS, m_GameCameraPos->m_localTranslate.x);
+				setVarByName(PASS_VARARGS, Y_outS, m_GameCameraPos->m_localTranslate.y);
+				setVarByName(PASS_VARARGS, Z_outS, m_GameCameraPos->m_localTranslate.z);
+			}
+			else
+			{
+				setVarByName(PASS_VARARGS, X_outS, m_GameCameraPos->m_worldTranslate.x);
+				setVarByName(PASS_VARARGS, Y_outS, m_GameCameraPos->m_worldTranslate.y);
+				setVarByName(PASS_VARARGS, Z_outS, m_GameCameraPos->m_worldTranslate.z);
+			}
+		}
+
+
 	}
 	return true;
 }

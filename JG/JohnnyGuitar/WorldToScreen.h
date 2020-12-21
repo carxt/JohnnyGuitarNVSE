@@ -138,8 +138,24 @@ struct JGWorldToScreenMatrix
 		float			LODAdjust;			// 110
 
 };
-JGWorldToScreenMatrix* WorldMatrx = NULL;
 
+struct JGCameraPosition 
+{
+	NiMatrix33				m_localRotate;			// 34
+	NiVector3				m_localTranslate;		// 58
+	float					m_localScale;			// 64
+	NiMatrix33				m_worldRotate;			// 68
+	NiVector3				m_worldTranslate;		// 8C
+	float					m_worldScale;			// 98
+
+};
+
+struct JGCameraParams
+{
+	JGCameraPosition* CamPos = NULL;
+	JGWorldToScreenMatrix* WorldMatrx = NULL;
+};
+JGCameraParams JGGameCamera;
 
 
 
@@ -324,7 +340,7 @@ NiPoint3* NiPointBuffer = NULL;
 
 __forceinline bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, float HandleType, float zeroTolerance = 0.0000099999997)
 {
-	return WorldToScreenPoint3(WorldMatrx, p_in, x_out, y_out, z_out, zeroTolerance, HandleType);
+	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, p_in, x_out, y_out, z_out, zeroTolerance, HandleType);
 
 }
 
@@ -349,7 +365,8 @@ void __stdcall CopyNiCamera(NiCameraAlt* MemoryAddressToCopy, float fov)
 	PlayerCharacter* g_ThePlayer = *(PlayerCharacter * *)0x11DEA3C;
 	if (!sing_SceneGraph || !g_ThePlayer) return;
 	if ((NiCamera*)MemoryAddressToCopy != sing_SceneGraph->camera || fabs(fov - g_ThePlayer->worldFOV) > 0.0000099999997) return;
-	memcpy(WorldMatrx, &(MemoryAddressToCopy->m_aafWorldToCam[0][0]), sizeof(JGWorldToScreenMatrix));
+	memcpy(JGGameCamera.CamPos, &(((NiAVObject*)MemoryAddressToCopy)->m_localRotate), sizeof(JGCameraPosition));
+	memcpy(JGGameCamera.WorldMatrx, &(MemoryAddressToCopy->m_aafWorldToCam[0][0]), sizeof(JGWorldToScreenMatrix));
 }
 
 
