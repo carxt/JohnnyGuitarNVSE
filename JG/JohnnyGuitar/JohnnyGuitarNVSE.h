@@ -751,14 +751,16 @@ void EnableRef(TESObjectREFR* ref) {
 	}
 }
 void DisableRef(TESObjectREFR* ref) {
-	if (ref->GetNiNode() && ref->GetNiNode()->GetFadeNode())
-		ref->GetNiNode()->GetFadeNode()->fadeType = 9;
-	ExtraSpecialRenderFlags* xRenderFlags = (ExtraSpecialRenderFlags*)ref->extraDataList.GetByType(kExtraData_SpecialRenderFlags);
-	if (!xRenderFlags || !(xRenderFlags->flags & 8)) {
-		ThisStdCall(0x5650D0, ref, 1);
+	if (!ref->GetDisabled()) {
+		if (ref->GetNiNode() && ref->GetNiNode()->GetFadeNode())
+			ref->GetNiNode()->GetFadeNode()->fadeType = 9;
+		ExtraSpecialRenderFlags* xRenderFlags = (ExtraSpecialRenderFlags*)ref->extraDataList.GetByType(kExtraData_SpecialRenderFlags);
+		if (!xRenderFlags || !(xRenderFlags->flags & 8)) {
+			ThisStdCall(0x5650D0, ref, 1);
+		}
+		CdeclCall(0x5AA500, ref, 0);
+		_MESSAGE("Disabled FX ref %s", ref->GetName());
 	}
-	CdeclCall(0x5AA500, ref, 0);
-	_MESSAGE("Disabled FX ref %s", ref->GetName());
 }
 bool IsSoundPlaying(TESSound* sound) {
 	auto sndIter = g_audioManager->playingSounds.Begin();
@@ -831,7 +833,7 @@ void FadeInSound(float pct, TESSound* sound) {
 		sound->staticAttenuation = (1 - pct) * 10000;
 		Sound sound1;
 		ThisStdCall(0x933150, g_thePlayer, &sound1, sound->refID, 0, 0x102, 1);
-		_MESSAGE("FADE IN SOUND %s: Started playing, %.2f", sound->GetName(), pct);
+		_MESSAGE("FADE IN SOUND %s: Started playing, %u", sound->GetName(), sound->staticAttenuation);
 	}
 	else {
 		BSGameSound* gameSound;
@@ -840,7 +842,7 @@ void FadeInSound(float pct, TESSound* sound) {
 			gameSound = sndIter.Get();
 			if (gameSound && (gameSound->sourceSound == sound)) {
 				gameSound->staticAttenuation = ((1 - pct) * 10000);
-				_MESSAGE("	FADE IN SOUND %s: %.2f", sound->GetName(), pct);
+				_MESSAGE("	FADE IN SOUND %s: %u", sound->GetName(), gameSound->staticAttenuation);
 			}
 		}
 	}
@@ -852,7 +854,7 @@ void FadeOutSound(float pct, TESSound* sound) {
 		gameSound = sndIter.Get();
 		if (gameSound && (gameSound->sourceSound == sound)) {
 			gameSound->staticAttenuation = pct * 10000;
-			_MESSAGE("	FADE OUT SOUND %s: %.2f", sound->GetName(), pct);
+			_MESSAGE("	FADE OUT SOUND %s: %u", sound->GetName(), gameSound->staticAttenuation);
 			if (pct >= 1) {
 				gameSound->stateFlags &= 0xFFFFFF0F;
 				gameSound->stateFlags |= 0x10;
