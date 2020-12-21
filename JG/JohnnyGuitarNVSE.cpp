@@ -123,8 +123,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	loadEditorIDs = GetPrivateProfileInt("MAIN", "bLoadEditorIDs", 1, filename);
 	fixHighNoon = 0;
 
-	WorldMatrx = new JGWorldToScreenMatrix;
-
+	JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
+	JGGameCamera.CamPos = new JGCameraPosition;
 
 	nvse->SetOpcodeBase(0x3100);
 
@@ -263,6 +263,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(RefreshIdle);
 	REG_CMD(SetNoteRead);
 	REG_CMD(SetDisablePlayerControlsHUDVisibilityFlags);
+	REG_CMD(GetCameraTranslation);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
