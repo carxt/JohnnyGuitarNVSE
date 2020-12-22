@@ -70,7 +70,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS)
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile)
 		{
-			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) || target->target->avOwner.Fn_02(kAVCode_Chameleon))) {
+			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
@@ -105,7 +105,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile)
 		{
-			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) || target->target->avOwner.Fn_02(kAVCode_Chameleon))) {
+			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);

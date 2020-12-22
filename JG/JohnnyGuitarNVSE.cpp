@@ -58,7 +58,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		OnLimbGoneHandler->FlushEventCallbacks();
 		OnCrosshairHandler->FlushEventCallbacks();
 		bArrowKeysDisabled = false;
-		bFormsInitialized = false;
 		RestoreDisabledPlayerControlsHUDFlags();
 		break;
 	}
