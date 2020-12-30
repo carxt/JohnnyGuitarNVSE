@@ -14,6 +14,7 @@ bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 	DataHandler* g_dataHandler = DataHandler::Get();
 	if (strcmp("UwU.esp", g_dataHandler->GetNthModName(modIdx))) return true;
 	if (ExtractArgs(EXTRACT_ARGS, &filename, &fileOrFolder)) {
+		if (strstr(filename, "..\\")) return true;
 		char filepath[MAX_PATH];
 		GetModuleFileNameA(NULL, filepath, MAX_PATH);
 		strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Config\\UwUDaddy\\");

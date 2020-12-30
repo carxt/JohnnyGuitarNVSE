@@ -1288,7 +1288,8 @@ public:
 	float							flt0EC;			// 0EC
 	float							flt0F0;			// 0F0
 	float							flt0F4;			// 0F4
-	UInt32							unk0F8[4];		// 0F8
+	TESForm*						markerForm;		// 0F8
+	NiPoint3						markerPos;		// 0FC
 	TESObjectCELL					*cell108;		// 108
 	TESWorldSpace					*wspc10C;		// 10C
 	UInt32							unk110;			// 110

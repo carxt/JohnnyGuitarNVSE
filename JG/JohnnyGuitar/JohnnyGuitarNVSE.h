@@ -543,16 +543,16 @@ void __fastcall PlayQuestFailSound(Sound* sound, int dummy) {
 		do {
 			switch (iter->data->updateType) {
 			case QuestAdded:
-				if (questNewSound) sound = &Sound(questNewSound->refID, 0x121);
+				if (questNewSound != nullptr) sound = &Sound(questNewSound->refID, 0x121);
 				break;
 			case QuestCompleted:
-				if (questCompeteSound) sound = &Sound(questCompeteSound->refID, 0x121);
+				if (questCompeteSound != nullptr) sound = &Sound(questCompeteSound->refID, 0x121);
 				break;
 			case QuestFailed:
-				if (questFailSound) sound = &Sound(questFailSound->refID, 0x121);
+				if (questFailSound != nullptr) sound = &Sound(questFailSound->refID, 0x121);
 				break;
 			case LocationDiscovered:
-				if (locationDiscoverSound) sound = &Sound(locationDiscoverSound->refID, 0x121);
+				if (locationDiscoverSound != nullptr) sound = &Sound(locationDiscoverSound->refID, 0x121);
 				break;
 			}
 			sound->Play();
