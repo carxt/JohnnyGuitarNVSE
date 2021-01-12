@@ -1245,7 +1245,7 @@ public:
 	TileImage			*tile3C;		// 3C
 	float				currentQtt;		// 40
 };
-
+struct NiPoint3;
 // 230
 class MapMenu : public Menu				// 1023
 {
@@ -1307,7 +1307,7 @@ public:
 	ListBox<TESChallenge>			challengeList;	// 1F0
 	BSSimpleArray<Tile>				arr220;			// 220
 };
-
+STATIC_ASSERT(sizeof(MapMenu) == 0x230);
 // 8C
 class RepairMenu : public Menu			// 1035
 {

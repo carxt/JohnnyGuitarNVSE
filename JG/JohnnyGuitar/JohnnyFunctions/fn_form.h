@@ -40,6 +40,48 @@ DEFINE_COMMAND_PLUGIN(GetWeaponVATSTraitNumeric, , 0, 2, kParams_OneForm_OneInt)
 DEFINE_COMMAND_PLUGIN(SetWeaponVATSTraitNumeric, , 0, 3, kParamsJohnnyOneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetQuestDelay, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetNoteRead, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetMessageIconPath, , 0, 3, kParamsJohnnyOneString_OneForm_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetMessageIconPath, , 0, 2, kParamsJohnny_OneForm_OneOptionalInt);
+bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
+	UInt32 isFemale;
+	TESForm* form = nullptr;
+	const char* path = NULL;
+	if (ExtractArgs(EXTRACT_ARGS, &form, &isFemale)) {
+		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
+		if (bipedModel)
+		{
+			path = bipedModel->messageIcon[isFemale].icon.ddsPath.CStr();
+		}
+		else {
+			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
+			if (icon) {
+				path = icon->icon.ddsPath.CStr();
+			}
+		}
+		if (IsConsoleMode()) Console_Print("GetMessageIconPath >> %s", path);
+		StrIfc->Assign(PASS_COMMAND_ARGS, path);
+	}
+	return true;
+}
+bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
+	char path[MAX_PATH];
+	UInt32 isFemale;
+	TESForm* form = nullptr;
+	if (ExtractArgs(EXTRACT_ARGS, &path, &form, &isFemale)) {
+		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
+		if (bipedModel)
+		{
+			bipedModel->messageIcon[isFemale].icon.ddsPath.Set(path);
+		}
+		else {
+			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
+			if (icon) {
+				icon->icon.ddsPath.Set(path);
+			}
+		}
+	}
+	return true;
+}
 bool Cmd_SetNoteRead_Execute(COMMAND_ARGS) {
 	UInt32 isRead = 0;
 	*result = 0;

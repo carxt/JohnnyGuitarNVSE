@@ -16,10 +16,10 @@
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
 #include "nvse/ScriptUtils.h"
+#include "JohnnyGuitar/WorldToScreen.h"
 #include "internal/decoding.h"
 #include "JohnnyGuitar/JohnnyEventPredefinitions.h"
 #include "JohnnyGuitar/misc.h"
-#include "JohnnyGuitar/WorldToScreen.h"
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
 #include "JohnnyGuitar/JohnnyParams.h"
 #include "JohnnyGuitar/EditorIDs.h"
@@ -263,6 +263,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetNoteRead);
 	REG_CMD(SetDisablePlayerControlsHUDVisibilityFlags);
 	REG_CMD(GetCameraTranslation);
+//	REG_CMD(SetMessageIconPath);
+//	REG_TYPED_CMD(GetMessageIconPath, String);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

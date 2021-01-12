@@ -96,6 +96,12 @@ ParamInfo kParamsJohnnyEventOneFormOneIntFilter[5] =
 	{ "Integer", kParamType_Integer, 1 },
 
 };
+ParamInfo kParamsJohnnyOneString_OneForm_OneOptionalInt[3] =
+{
+	{ "String", kParamType_String, 0 },
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 1 },
+};
 ParamInfo kParamsJohnnyOneForm_OneInt_OneFloat[3] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
