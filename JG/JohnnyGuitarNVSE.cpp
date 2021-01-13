@@ -263,6 +263,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetNoteRead);
 	REG_CMD(SetDisablePlayerControlsHUDVisibilityFlags);
 	REG_CMD(GetCameraTranslation);
+	REG_CMD(IsCompassHostile);
 //	REG_CMD(SetMessageIconPath);
 //	REG_TYPED_CMD(GetMessageIconPath, String);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
