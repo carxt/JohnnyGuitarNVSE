@@ -610,10 +610,11 @@ void HandleGameHooks()
 	PatchMemoryNop(0x8A56C4, 4); // Fix for animations not working in dialog topics with sound
 	PatchMemoryNop(0x8A56C8, 4);
 	WriteRelJump(0x70F708, (UInt32)DisableArrowKeysHook);
-	patchFixDisintegrationsStat();
-	WriteRelJump(0x88D0D0, (UInt32)FixNPCIncrementingChallenges);
+	patchFixDisintegrationsStat(); 
+	WriteRelJump(0x88D0D0, (UInt32)FixNPCIncrementingChallenges); 
 	WriteRelCall(0x77A8E9, (UInt32)PlayQuestFailSound);
 	WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
+	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4); // to use fWeapSkillReqPenalty correctly in spread calc
 	if (loadEditorIDs) LoadEditorIDs();
 }
 

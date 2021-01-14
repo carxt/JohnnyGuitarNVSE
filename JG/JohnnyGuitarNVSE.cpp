@@ -73,7 +73,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 340;
+	info->version = 345;
 
 	if (nvse->isNogore) 
 	{
@@ -264,8 +264,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetDisablePlayerControlsHUDVisibilityFlags);
 	REG_CMD(GetCameraTranslation);
 	REG_CMD(IsCompassHostile);
-//	REG_CMD(SetMessageIconPath);
-//	REG_TYPED_CMD(GetMessageIconPath, String);
+	REG_CMD(SetMessageIconPath);
+	REG_TYPED_CMD(GetMessageIconPath, String);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
