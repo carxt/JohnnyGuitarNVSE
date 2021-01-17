@@ -266,6 +266,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(IsCompassHostile);
 	REG_CMD(SetMessageIconPath);
 	REG_TYPED_CMD(GetMessageIconPath, String);
+	REG_CMD(ExitGameAlt);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

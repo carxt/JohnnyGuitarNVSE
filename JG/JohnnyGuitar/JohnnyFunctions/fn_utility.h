@@ -17,6 +17,7 @@ DEFINE_COMMAND_PLUGIN(SetUIUpdateSound, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , 0, 3, kParamsJohnnyOneInt_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(IsDLLLoaded, , 0, 2, kParamsJohnny_OneString_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(RefreshIdle, , 1, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(ExitGameAlt, , 0, 0, NULL);
 
 bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -309,5 +310,13 @@ bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS)
 {
 	*result = isShowLevelUp;
 	if (IsConsoleMode()) Console_Print("IsLevelUpMenuEnabled >> %.f", *result);
+	return true;
+}
+
+bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS)
+{
+	
+	ThisStdCall(0x0703DA0, nullptr);
+	ThisStdCall(0x07D0A70, nullptr);
 	return true;
 }
