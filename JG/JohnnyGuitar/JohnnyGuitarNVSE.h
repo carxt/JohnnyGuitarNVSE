@@ -15,6 +15,7 @@ float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float cond
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, UInt8, ContChangesEntry*, UInt8, UInt8, int, float, float, UInt8, UInt8, TESForm*))0x645380;
 bool isShowLevelUp = true;
 bool bArrowKeysDisabled = false;
+bool bCombatMusicDisabled = false;
 char* StrArgBuf;
 #define ExtractArgsEx(...) g_script->ExtractArgsEx(__VA_ARGS__)
 #define ExtractFormatStringArgs(...) g_script->ExtractFormatStringArgs(__VA_ARGS__)
@@ -595,7 +596,10 @@ __declspec (naked) void hk_VanityModeBug()
 	}
 
 }
-
+bool __fastcall ShouldPlayCombatMusic(UInt32* a1) {
+	if (bCombatMusicDisabled) return false;
+	return ThisStdCall_B(0x992D90, a1);
+}
 
 void HandleGameHooks()
 {
@@ -615,6 +619,7 @@ void HandleGameHooks()
 	WriteRelCall(0x77A8E9, (UInt32)PlayQuestFailSound);
 	WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
 	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4); // to use fWeapSkillReqPenalty correctly in spread calc
+	WriteRelCall(0x82FC0B, (UInt32)ShouldPlayCombatMusic);
 	if (loadEditorIDs) LoadEditorIDs();
 }
 

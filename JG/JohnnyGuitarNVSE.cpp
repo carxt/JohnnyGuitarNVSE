@@ -267,6 +267,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetMessageIconPath);
 	REG_TYPED_CMD(GetMessageIconPath, String);
 	REG_CMD(ExitGameAlt);
+	REG_CMD(ToggleCombatMusic);
+	REG_CMD(IsCombatMusicEnabled);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
