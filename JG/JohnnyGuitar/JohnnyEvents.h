@@ -20,7 +20,7 @@ EventInformation* OnChallengeCompleteHandler;
 EventInformation* OnCrosshairHandler;
 EventInformation* OnSettingsUpdateHandler;
 void __stdcall handleDyingEvent(Actor* thisObj) {
-	if (thisObj->IsActor() && thisObj->lifeState == 1 && *thisObj->GetTheName()) {
+	if (thisObj->IsActor() && thisObj->lifeState == 1 && (*thisObj->GetTheName() || thisObj == PlayerCharacter::GetSingleton())) {
 		for (auto const& callback : OnDyingHandler->EventCallbacks) {
 			if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 			{
