@@ -61,7 +61,7 @@ bool TESForm::hk_SetEditorId(const char *Name)
 bool TESForm::hk_SetEditorID_REFR(const char* Name)
 {
 	std::lock_guard<std::mutex> lock(g_NameMapLock);
-	if ((refID < 0xFF000000) && ((flags & 0xC20) == 0x400)) {
+	if ((refID < 0xFF000000) && ((flags & 0x420) == 0x400)) {
 		g_EditorNameMap.insert(std::make_pair(GetId(), _strdup(Name)));
 	}
 	return true;

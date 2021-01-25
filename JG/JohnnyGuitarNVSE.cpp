@@ -269,6 +269,8 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(ExitGameAlt);
 	REG_CMD(ToggleCombatMusic);
 	REG_CMD(IsCombatMusicEnabled);
+	REG_CMD(SetJohnnyOnAddPerkEventHandler);
+	REG_CMD(SetJohnnyOnRemovePerkEventHandler);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

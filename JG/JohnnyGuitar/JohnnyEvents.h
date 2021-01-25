@@ -9,6 +9,8 @@ DEFINE_COMMAND_PLUGIN(SetJohnnyOnCrosshairEventHandler, , 0, 5, kParamsJohnnyEve
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnFailQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, , 0, 3, kParamsJohnnyEventUnfiltered);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnAddPerkEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnRemovePerkEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
@@ -19,6 +21,28 @@ EventInformation* OnLimbGoneHandler;
 EventInformation* OnChallengeCompleteHandler;
 EventInformation* OnCrosshairHandler;
 EventInformation* OnSettingsUpdateHandler;
+EventInformation* OnAddPerkHandler;
+EventInformation* OnRemovePerkHandler;
+void __fastcall handleRemovePerkEvent(BGSPerk* perk, void* edx, PlayerCharacter* player, bool isTeammatePerk) {
+	for (auto const& callback : OnRemovePerkHandler->EventCallbacks) {
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		{
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRemovePerkHandler->numMaxArgs, perk);
+		}
+	}
+	ThisStdCall(0x5EB800, perk, player, isTeammatePerk);
+
+}
+void __fastcall handleAddPerkEvent(BGSPerk *perk, void* edx, PlayerCharacter* player, UInt8 oldRank, UInt8 newRank, bool isTeammatePerk) {
+	for (auto const& callback : OnAddPerkHandler->EventCallbacks) {
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		{
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnAddPerkHandler->numMaxArgs, perk, oldRank, newRank);
+		}
+	}
+	ThisStdCall(0x5EB6A0, perk, player, oldRank, newRank, isTeammatePerk);
+
+}
 void __stdcall handleDyingEvent(Actor* thisObj) {
 	if (thisObj->IsActor() && thisObj->lifeState == 1 && (*thisObj->GetTheName() || thisObj == PlayerCharacter::GetSingleton())) {
 		for (auto const& callback : OnDyingHandler->EventCallbacks) {
@@ -202,6 +226,42 @@ bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
 		return true;
 	}
 }
+bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	TESForm* filter[1] = { NULL };
+	UInt32 flags = 0;
+	if (!(ExtractArgs(EXTRACT_ARGS, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	{
+		if (OnRemovePerkHandler)
+		{
+			if (setOrRemove)
+				OnRemovePerkHandler->RegisterEvent(script, (void**)filter);
+			else OnRemovePerkHandler->RemoveEventFromGame(script, (void**)filter);
+
+		}
+		return true;
+	}
+}
+bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	TESForm* filter[1] = { NULL };
+	UInt32 flags = 0;
+	if (!(ExtractArgs(EXTRACT_ARGS, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	{
+		if (OnAddPerkHandler)
+		{
+			if (setOrRemove)
+				OnAddPerkHandler->RegisterEvent(script, (void**)filter);
+			else OnAddPerkHandler->RemoveEventFromGame(script, (void**)filter);
+
+		}
+		return true;
+	}
+}
 bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
@@ -350,6 +410,8 @@ void initEventHooks(const NVSEInterface* nvse)
 		OnCompleteQuestHandler = JGCreateEvent("OnCompleteQuest", 1, 1, NULL);
 		OnFailQuestHandler = JGCreateEvent("OnFailQuest", 1, 1, NULL);
 		OnSettingsUpdateHandler = JGCreateEvent("OnSettingsUpdate", 0, 0, NULL);
+		OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3, 1, NULL);
+		OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1, 1, NULL);
 		FunctionCallScript = g_script->CallFunction;
 		WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 		WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
@@ -363,6 +425,9 @@ void initEventHooks(const NVSEInterface* nvse)
 		WriteRelCall(0x60CA78, (UINT)handleQuestComplete);
 		WriteRelCall(0x7CEC93, (UINT)handleSettingsUpdate);
 		WriteRelCall(0x7D11AD, (UINT)handleSettingsUpdate);
+		WriteRelCall(0x96380E, (UINT)handleAddPerkEvent);
+		WriteRelCall(0x9638D2, (UINT)handleAddPerkEvent);
+		WriteRelCall(0x96398C, (UINT)handleRemovePerkEvent);
 		SafeWrite8(0x60CA29, 0xCC);
 	}
 
