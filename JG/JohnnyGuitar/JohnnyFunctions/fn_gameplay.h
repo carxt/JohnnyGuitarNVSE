@@ -25,13 +25,21 @@ DEFINE_COMMAND_ALT_PLUGIN(SetDisablePlayerControlsHUDVisibilityFlags, SetDPCHUDF
 DEFINE_COMMAND_PLUGIN(IsCompassHostile, , 1,0, NULL);
 DEFINE_COMMAND_PLUGIN(ToggleCombatMusic, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
-
+bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
+	*result = 0;
+	ProcessManager* g_processManager = (ProcessManager*)0x11E0E80;
+	TESObjectCELL* actorCell = PlayerCharacter::GetSingleton()->parentCell;
+	if (actorCell)
+		*result = ThisStdCall_B(0x9764A0, g_processManager, actorCell->IsInterior());
+	return true;
+}
 bool Cmd_ToggleCombatMusic_Execute(COMMAND_ARGS) {
 	UInt32 toggle = 1;
 	ExtractArgs(EXTRACT_ARGS, &toggle);
