@@ -34,6 +34,10 @@ TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
 TESSound* locationDiscoverSound = 0;
 std::unordered_map<UInt32, char*> CustomMapMarkerMap;
+
+UInt32 DoSkipMuzzleLights = -1;
+static float vatsSpreadMultValue = 15.0;
+
 __declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
 {
 	__asm
@@ -99,9 +103,7 @@ double GetAngleBetweenPoints(NiPoint3* actorPos, NiPoint3* playerPos, float offs
 	}
 	return angle * 57.295779513;
 }
-namespace SpecialCaseEDIDs {
-	void Handle();
-}
+
 TESActorBase* Actor::GetActorBase()
 {
 	ExtraLeveledCreature* xLvlCre = GetExtraType(extraDataList, LeveledCreature);
@@ -118,26 +120,7 @@ char* __fastcall hk_GetMapMarker(TESObjectREFR* thisObj, UInt16 MapMarkerType)
 	if (it != CustomMapMarkerMap.end()) return it->second;
 	return DefaultMarkers[MapMarkerType];
 }
-CommandTable::CommandTable() { }
-CommandTable::~CommandTable() { }
-void CommandTable::Dump(void)
-{
-	for (CommandList::iterator iter = m_commands.begin(); iter != m_commands.end(); ++iter)
-	{
-		_MESSAGE("%08X %04X %s %s", iter->opcode, iter->needsParent, iter->longName, iter->shortName);
-		gLog.Indent();
 
-#if 0
-		for (UInt32 i = 0; i < iter->numParams; i++)
-		{
-			ParamInfo* param = &iter->params[i];
-			_DMESSAGE("%08X %08X %s", param->typeID, param->isOptional, param->typeStr);
-		}
-#endif
-
-		gLog.Outdent();
-	}
-}
 __declspec (naked) void AsmGetMapMarkerRoute()
 {
 	//UInt32 static const retAddr = 0x079D337;
@@ -241,7 +224,7 @@ __forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
 	NiPointBuffer->y = yIn;
 	NiPointBuffer->z = zIn;
 }
-UInt32 DoSkipMuzzleLights = -1;
+
 
 __declspec (naked) void DisableMuzzleFlashLightsHook()
 {
@@ -310,96 +293,7 @@ _declspec(naked) void LevelUpHook() {
 	}
 }
 
-__declspec(naked) void GetNameHook() {
-	__asm jmp TESForm::hk_GetName
-}
-__declspec(naked) void SetEditorIdHook() {
-	__asm jmp TESForm::hk_SetEditorId
-}
-__declspec(naked) void SetEditorIdHook_REFR()
-{
-	__asm jmp TESForm::hk_SetEditorID_REFR
-}
-const char* __fastcall ConsoleNameHook(TESObjectREFR* ref) {
-	try {
-		const char* name = ref->baseForm->GetTheName();
-		if (!strlen(name)) name = ref->baseForm->GetName();
-		return name;
-	}
-	catch (...) {
-		_MESSAGE("Couldn't retrieve EDID for %u", ref->refID);
-	}
-	return "";
-}
-void LoadEditorIDs() {
-	WriteRelCall(0x486903, (UInt32(GetNameHook))); // replaces empty string with editor id in TESForm::GetDebugName
-	WriteRelCall(0x71B748, UInt32(ConsoleNameHook)); // replaces empty string with editor id in selected ref name in console
-	WriteRelCall(0x710BFC, UInt32(ConsoleNameHook));
-	WriteRelCall(0x55D498, (UInt32(GetNameHook))); // replaces empty string with editor id in TESObjectREFR::GetDebugName
-	SafeWrite16(0x467A12, 0x3AEB); // loads more types in game's editor:form map
-	for (uint32_t i = 0; i < ARRAYSIZE(TESForm_Vtables); i++)
-	{
-		if (*(uintptr_t*)(TESForm_Vtables[i] + 0x130) == 0x00401280)
-			SafeWrite32(TESForm_Vtables[i] + 0x130, (UInt32)GetNameHook);
 
-		if (*(uintptr_t*)(TESForm_Vtables[i] + 0x134) == 0x00401290)
-			SafeWrite32(TESForm_Vtables[i] + 0x134, (UInt32)SetEditorIdHook);
-	}
-	for (uint32_t i = 0; i < ARRAYSIZE(TESForm_REFR_Vtables); i++)
-	{
-		if (*(uintptr_t*)(TESForm_REFR_Vtables[i] + 0x130) == 0x00401280)
-			SafeWrite32(TESForm_REFR_Vtables[i] + 0x130, (UInt32)GetNameHook);
-
-		if (*(uintptr_t*)(TESForm_REFR_Vtables[i] + 0x134) == 0x00401290)
-			SafeWrite32(TESForm_REFR_Vtables[i] + 0x134, (UInt32)SetEditorIdHook_REFR);
-	}
-
-
-
-	SpecialCaseEDIDs::Handle();
-
-}
-bool __fastcall CheckForHighNoon(Sky* sky)
-{
-	return (float)(sky->firstClimate->sunriseEnd) / 6.0 < sky->gameHour && sky->gameHour < (float)(sky->firstClimate->sunsetBegin) / 6.0;
-}
-
-__declspec (naked) void HookforIMOD1()
-{
-	static const UInt32 retaddress = 0x063F575;
-	__asm {
-		mov ecx, dword ptr ds : [0x11DEA20]
-		call CheckForHighNoon
-		test al, al
-		mov ecx, [ebp - 0x7C]
-		jz HandleNormal
-		mov ecx, [ecx + 0x120]
-		jmp RETURN
-		HandleNormal :
-		mov ecx, [ecx + 0x11C]
-			RETURN :
-			jmp retaddress
-	}
-}
-
-__declspec (naked) void HookforIMOD2()
-{
-	static const UInt32 retaddress = 0x063F5F6;
-
-	__asm {
-		mov ecx, dword ptr ds : [0x11DEA20]
-		call CheckForHighNoon
-		test al, al
-		mov ecx, [ebp - 0x7C]
-		jz HandleNormal
-		mov ecx, [ecx + 0x11C]
-		jmp RETURN
-		HandleNormal :
-		mov ecx, [ecx + 0x120]
-			RETURN :
-			jmp retaddress
-	}
-}
 TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
 	if (weap->ammo.ammo) {
 		if (IS_TYPE(weap->ammo.ammo, BGSListForm)) {
@@ -448,8 +342,6 @@ NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName)
 	return rootNode ? rootNode->GetBlock(blockName) : NULL;
 }
 
-
-
 __declspec(naked) void OnCloseContainerHook()
 {
 	static const UInt32 retnAddr = 0x75B240;
@@ -469,6 +361,7 @@ __declspec(naked) void OnCloseContainerHook()
 			jmp     retnAddr
 	}
 }
+
 void patchFixDisintegrationsStat()
 {
 	// check if user has Unnecessary Tweaks or lStewieAl's Tweaks installed
@@ -482,10 +375,12 @@ void patchFixDisintegrationsStat()
 	// critical stages 2 and 4, skip IncPCMiscStat
 	SafeWriteBuf(0x8A1B6E, "\x82\xC0\x01\x00\x00\xFF\xD0\xEB\x53\x90", 10);
 }
-static float value = 15.0;
+
+
 float* __fastcall VATSSpreadMultHook(void* ecx) {
-	return &value;
+	return &vatsSpreadMultValue;
 }
+
 __declspec(naked) void DialogueAnimHook() {
 	static const UInt32 jumpAddr = 0x8A56DF;
 	static const UInt32 retnAddr = 0x8A566B;
@@ -583,7 +478,6 @@ void ResetVanityWheel()
 }
 
 
-
 __declspec (naked) void hk_VanityModeBug()
 {
 	static uintptr_t jmpDest = 0x942D43;
@@ -599,6 +493,18 @@ __declspec (naked) void hk_VanityModeBug()
 bool __fastcall ShouldPlayCombatMusic(UInt32* a1) {
 	if (bCombatMusicDisabled) return false;
 	return ThisStdCall_B(0x992D90, a1);
+}
+
+TESRegionDataWeather* GetWeatherData(TESRegion* region) {
+	ListNode<TESRegionData>* iter = region->dataEntries->Head();
+	TESRegionData* regData;
+	do
+	{
+		regData = iter->data;
+		if ((*(UInt32*)regData == 0x1023E18))
+			return (TESRegionDataWeather*)regData;
+	} while (iter = iter->next);
+	return NULL;
 }
 
 void HandleGameHooks()
@@ -624,35 +530,3 @@ void HandleGameHooks()
 }
 
 
-bool removeFiles(char* folder1)
-{
-	char folder[MAX_PATH];
-	char filename[MAX_PATH];
-	strcpy(folder, folder1);
-	strcat(folder, "/*.*");
-	WIN32_FIND_DATA fd;
-	HANDLE hFind = ::FindFirstFile(folder, &fd);
-	if (hFind != INVALID_HANDLE_VALUE) {
-		do {
-			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-				sprintf(filename, "%s\\%s", folder1, fd.cFileName);
-				remove(filename);
-			}
-		} while (::FindNextFile(hFind, &fd));
-		::FindClose(hFind);
-		RemoveDirectory(folder1);
-	}
-	return 1;
-}
-
-TESRegionDataWeather* GetWeatherData(TESRegion* region) {
-	ListNode<TESRegionData>* iter = region->dataEntries->Head();
-	TESRegionData* regData;
-	do
-	{
-		regData = iter->data;
-		if ((*(UInt32*)regData == 0x1023E18))
-			return (TESRegionDataWeather*)regData;
-	} while (iter = iter->next);
-	return NULL;
-}
