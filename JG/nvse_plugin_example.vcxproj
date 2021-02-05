@@ -240,7 +240,6 @@
     <ClInclude Include="internal\netimmerse.h" />
     <ClInclude Include="internal\sha1\sha1.h" />
     <ClInclude Include="internal\utility.h" />
-    <ClInclude Include="JohnnyGuitar\BMPHandling.h" />
     <ClInclude Include="JohnnyGuitar\CustomEventFilters.h" />
     <ClInclude Include="JohnnyGuitar\EditorIDs.h" />
     <ClInclude Include="JohnnyGuitar\EventFilteringInterface.h" />

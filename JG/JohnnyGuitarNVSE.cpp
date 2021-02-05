@@ -33,7 +33,6 @@
 #include "JohnnyGuitar/JohnnyFunctions/fn_region.h"
 #include "JohnnyGuitar/JohnnyFunctions/fn_terminal.h"
 #include "JohnnyGuitar/JohnnyFunctions/fn_ui.h"
-#include "JohnnyGuitar/BMPHandling.h"
 #include "JohnnyGuitar/EventFilteringInterface.h"
 #include "JohnnyGuitar/CustomEventFilters.h"
 #include "JohnnyGuitar/JohnnyEvents.h"

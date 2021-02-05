@@ -156,9 +156,6 @@
     <ClInclude Include="internal\sha1\sha1.h">
       <Filter>internal\sha1</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\BMPHandling.h">
-      <Filter>JohnnyGuitar</Filter>
-    </ClInclude>
     <ClInclude Include="JohnnyGuitar\EditorIDs.h">
       <Filter>JohnnyGuitar</Filter>
     </ClInclude>

@@ -261,9 +261,10 @@ __declspec(naked) void NiCameraGetAltHook()
 {
 	__asm
 	{
-		push dword ptr ss:[ebp+8]
-		push dword ptr ss:[ebp-8]
+		push dword ptr ss : [ebp + 8]
+		push dword ptr ss : [ebp - 8]
 		call CopyNiCamera
 		leave
 		retn 0x10
 	}
+}
