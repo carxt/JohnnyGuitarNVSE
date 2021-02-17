@@ -239,7 +239,6 @@ public:
 					}
 				}
 				it->SetDeleted(true);
-				continue;
 			}
 		NotFound:
 			it++;
