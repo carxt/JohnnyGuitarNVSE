@@ -89,7 +89,7 @@ public:
 	EventHandlerInterface* eventFilter;
 	enum GlobalEventFlags
 	{
-		kEventFlag_Deleted = 0,
+		kEventFlag_Deleted = 1 << 0,
 	};
 
 	bool GetDeleted()
