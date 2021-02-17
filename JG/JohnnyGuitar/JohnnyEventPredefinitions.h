@@ -148,6 +148,7 @@ class EventInformation
 {
 private:
 	void* (__fastcall* CreateFilter)(void**, UInt32); // supposed to be passing itself
+	std::vector<BaseEventClass> EventQueueAdd;
 public:
 	const char* EventName;
 	UInt8 numMaxArgs;
@@ -195,6 +196,21 @@ public:
 			}
 
 		}
+		for (std::vector<BaseEventClass>::iterator it = this->EventQueueAdd.begin(); it != this->EventQueueAdd.end(); ++it)
+		{
+			if (script == it->ScriptForEvent)
+			{
+				if (!maxFilters) return;
+				if (!it->eventFilter->GetNumFilters()) continue;
+				int i = 0; // filter iterator
+				for (; i < maxFilters; i++)
+				{
+					if (!(it->eventFilter->IsFilterEqual(filters[i], i))) break;
+				}
+				if (i >= maxFilters) return;
+			}
+
+		}
 		BaseEventClass NewEvent;
 		NewEvent.ScriptForEvent = script;
 		if (maxFilters)
@@ -203,7 +219,7 @@ public:
 			*(void**) &(NewEvent.eventFilter) = this->CreateFilter(filters, maxFilters);
 			NewEvent.eventFilter->SetUpFiltering();
 		}
-		this->EventCallbacks.push_back(NewEvent);
+		this->EventQueueAdd.push_back(NewEvent);
 	}
 	void virtual RemoveEventFromGame(Script* script, void** filters)
 	{
@@ -221,6 +237,32 @@ public:
 						if (!(it->eventFilter->IsFilterEqual(filters[i], i))) goto NotFound;
 
 					}
+				}
+				it->SetDeleted(true);
+				continue;
+			}
+		NotFound:
+			it++;
+
+		}
+	}
+	void virtual AddQueuedEvents()
+	{
+
+		EventCallbacks.insert(EventCallbacks.end(), EventQueueAdd.begin(), EventQueueAdd.end());
+		EventQueueAdd.clear();
+	}
+	void virtual DeleteEventsFromMemory()
+	{
+		auto it = EventCallbacks.begin();
+		while (it != EventCallbacks.end())
+		{
+			if (it->GetDeleted())
+			{
+				UInt32 maxFilters = it->eventFilter->GetNumFilters();
+
+				if (maxFilters)
+				{
 					delete it->eventFilter;
 				}
 

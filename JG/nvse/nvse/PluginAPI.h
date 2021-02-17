@@ -230,7 +230,13 @@ struct NVSEMessagingInterface
 		kMessage_DeleteGameName,		// version of the messages sent with a save file name instead of a save file path.
 		kMessage_RenameGameName,
 		kMessage_RenameNewGameName,
+// added for kVersion == 4 (xNVSE)
+		kMessage_DeferredInit,
+		kMessage_ClearScriptDataCache,
+		kMessage_MainGameLoop,			// called each game loop
+		kMessage_ScriptCompile   // EDITOR: called after successful script compilation in GECK. data: pointer to Script
 	};
+
 
 	UInt32	version;
 	bool	(* RegisterListener)(PluginHandle listener, const char* sender, EventCallback handler);

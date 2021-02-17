@@ -259,6 +259,7 @@
     <ClInclude Include="JohnnyGuitar\JohnnyParams.h" />
     <ClInclude Include="JohnnyGuitar\misc.h" />
     <ClInclude Include="JohnnyGuitar\WorldToScreen.h" />
+    <ClInclude Include="nvse\nvse\PluginAPI.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

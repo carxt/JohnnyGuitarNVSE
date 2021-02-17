@@ -52,6 +52,7 @@ public:
 	//When the framework passes filters, it passes them to the GenFilters array pointer, specifying the number of filters in the numFilters member
 	//This function is called by the framework so you can add the objects inside a struct more suitable for search, such as an unordered set
 	virtual void SetUpFiltering() = 0;
+
 	//Checks if an object is in the filter, recommended to use a fast lookup data structure
 	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch) = 0;
 	//Inserts the desired element to the Nth filter.
@@ -83,9 +84,22 @@ void (__cdecl* FreeScriptEvent)(EventContainerInterface*& toRemove);
 class BaseEventClass
 {
 public:
-
+	ULONG_PTR Flags = 0;
 	Script* ScriptForEvent;
 	EventHandlerInterface* eventFilter;
+	enum GlobalEventFlags
+	{
+		kEventFlag_Deleted = 0,
+	};
 
+	bool GetDeleted()
+	{
+		return Flags & kEventFlag_Deleted;
+	}
+	void SetDeleted(bool doSet)
+	{
+
+		doSet ? Flags |= kEventFlag_Deleted : Flags &= ~kEventFlag_Deleted;
+	}
 };
 

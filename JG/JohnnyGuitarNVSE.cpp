@@ -59,6 +59,13 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		bArrowKeysDisabled = false;
 		RestoreDisabledPlayerControlsHUDFlags();
 		break;
+	case NVSEMessagingInterface::kMessage_MainGameLoop:
+		for (const auto& EventInformat : EventsArray)
+		{
+			EventInformat->AddQueuedEvents();
+			EventInformat->DeleteEventsFromMemory();
+		}
+		break;
 	}
 	}
 
