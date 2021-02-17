@@ -59,6 +59,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		bArrowKeysDisabled = false;
 		RestoreDisabledPlayerControlsHUDFlags();
 		break;
+	}
 	case NVSEMessagingInterface::kMessage_MainGameLoop:
 		for (const auto& EventInformat : EventsArray)
 		{
@@ -66,7 +67,11 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			EventInformat->DeleteEventsFromMemory();
 		}
 		break;
-	}
+	case NVSEMessagingInterface::kMessage_DeferredInit:
+		//Placeholder to do stuff after the game initializes its singletons.
+		break;
+	default:
+		break;
 	}
 
 }
