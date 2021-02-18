@@ -2,7 +2,6 @@
 // Functions affecting gameplay
 DEFINE_COMMAND_PLUGIN(ToggleLevelUpMenu, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(TogglePipBoy, , 0, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(ShowPerkMenu, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(Jump, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(StopVATSCam, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCameraShake, , 0, 2, kParams_TwoFloats);
@@ -26,16 +25,17 @@ DEFINE_COMMAND_PLUGIN(IsCompassHostile, , 1,0, NULL);
 DEFINE_COMMAND_PLUGIN(ToggleCombatMusic, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
+
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+
 bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ProcessManager* g_processManager = (ProcessManager*)0x11E0E80;
-	TESObjectCELL* actorCell = PlayerCharacter::GetSingleton()->parentCell;
+	TESObjectCELL* actorCell = g_thePlayer->parentCell;
 	if (actorCell)
 		*result = ThisStdCall_B(0x9764A0, g_processManager, actorCell->IsInterior());
 	return true;
@@ -54,7 +54,7 @@ bool Cmd_IsCombatMusicEnabled_Execute(COMMAND_ARGS) {
 bool Cmd_IsCompassHostile_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* toCheck = (Actor*)thisObj;
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
+	auto iter = g_thePlayer->compassTargets->Begin();
 	for (; !iter.End(); ++iter)
 	{
 		PlayerCharacter::CompassTarget* target = iter.Get();
@@ -91,18 +91,18 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS)
 {
 	*result = -1;
 
-	NiPoint3* playerPos = PlayerCharacter::GetSingleton()->GetPos();
+	NiPoint3* playerPos = g_thePlayer->GetPos();
 
 	Setting* fSneakMaxDistance = (Setting*)0x11CD7D8;
 	Setting* fSneakExteriorDistanceMult = (Setting*)0x11CDCBC;
-	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->IsInterior();
+	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();
 	float interiorDistanceSquared = fSneakMaxDistance->data.f * fSneakMaxDistance->data.f;
 	float exteriorDistanceSquared = (fSneakMaxDistance->data.f * fSneakExteriorDistanceMult->data.f) * (fSneakMaxDistance->data.f * fSneakExteriorDistanceMult->data.f);
 	float maxDist = isInterior ? interiorDistanceSquared : exteriorDistanceSquared;
 	Actor* closestHostile = nullptr;
 	UInt32 skipInvisible = 0;
 	ExtractArgs(EXTRACT_ARGS, &skipInvisible);
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
+	auto iter = g_thePlayer->compassTargets->Begin();
 	for (; !iter.End(); ++iter)
 	{
 		PlayerCharacter::CompassTarget* target = iter.Get();
@@ -128,16 +128,16 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
 {
 	*result = -1;
 
-	NiPoint3* playerPos = PlayerCharacter::GetSingleton()->GetPos();
+	NiPoint3* playerPos = g_thePlayer->GetPos();
 	
 	Setting* fSneakMaxDistance = (Setting*)0x11CD7D8;
 	Setting* fSneakExteriorDistanceMult = (Setting*)0x11CDCBC;
-	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->IsInterior();
+	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();
 	float maxDist = isInterior ? powf(fSneakMaxDistance->data.f, 2) : powf((fSneakMaxDistance->data.f * fSneakExteriorDistanceMult->data.f), 2);
 	Actor* closestHostile = nullptr;
 	UInt32 skipInvisible = 0;
 	ExtractArgs(EXTRACT_ARGS, &skipInvisible);
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
+	auto iter = g_thePlayer->compassTargets->Begin();
 	for (; !iter.End(); ++iter)
 	{
 		PlayerCharacter::CompassTarget* target = iter.Get();
@@ -157,7 +157,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
 
 	if (closestHostile)
 	{
-		auto playerRotation = PlayerCharacter::GetSingleton()->AdjustRot(0);
+		auto playerRotation = g_thePlayer->AdjustRot(0);
 		double headingAngle = GetAngleBetweenPoints(closestHostile->GetPos(), playerPos, playerRotation);
 
 		// shift the coordinates from -180:180 to 0:360 and offset them (360 / 8 quadrants / 2) degrees
@@ -204,7 +204,7 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS)
 	UInt32 index, isVisible;
 	if (ExtractArgs(EXTRACT_ARGS, &index, &isVisible) && index < 3)
 	{
-		FOPipboyManager* pipboyManager = InterfaceManager::GetSingleton()->pipboyManager;
+		FOPipboyManager* pipboyManager = g_interfaceManager->pipboyManager;
 		if (pipboyManager->byte028)
 		{
 			if (isVisible)
@@ -280,7 +280,6 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS)
 }
 
 bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
-	BSAudioManager* g_audioManager = (BSAudioManager*)0x11F6EF0;
 	TESSound* soundForm;
 	TESObjectREFR* source;
 	BSFadeNode* fadeNode;
@@ -321,7 +320,6 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 	TESObjectREFR* stolenItem;
 	TESObjectREFR* owner;
 	if (ExtractArgs(EXTRACT_ARGS, &owner, &stolenItem)) {
-		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
 		ThisStdCall(0x8BFA40, g_thePlayer, owner, owner, stolenItem->baseForm, 1, 1, owner);
 		Console_Print("done");
 	}
@@ -330,7 +328,6 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	AlchemyItem* poison;
 	if (ExtractArgs(EXTRACT_ARGS, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {
-		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
 		ContChangesEntry* wpnInfo = g_thePlayer->baseProcess->GetWeaponInfo();
 		if (wpnInfo && wpnInfo->extendData)
 		{
@@ -348,27 +345,10 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS) {
-	InterfaceManager* g_interfaceManager = *(InterfaceManager**)0x011D8A80;
-	if (g_interfaceManager) {
-		PatchMemoryNop(0x784F47, 6); // NOP-ing iLevelsPerPerk check
-		SafeWrite8(0x7850D6, 0x01);
-		PatchMemoryNop(0x785D25, 5);
-		ThisStdCall(0x784C80, NULL);						// LevelUpMenu::Create
-		SafeWriteBuf(0x784F47, "\x0F\x85\x2D\x01\x00\x00", 6); // Restoring iLevelsPerPerk check
-		SafeWrite8(0x7850D6, 0x00);
-		SafeWriteBuf(0x785D25, "\xE8\x06\xFB\xFF\xFF", 5);
-		LevelUpMenu* g_levelUpMenu = *(LevelUpMenu**)0x11D9FDC;
-		g_levelUpMenu->tileBackBtn->SetFloat(kTileValue_visible, 0);
-	}
-	return true;
-}
-
 bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	int pipboyTab = 0;
 	ExtractArgs(EXTRACT_ARGS, &pipboyTab);
 	if (pipboyTab == 0 || pipboyTab == 1002 || pipboyTab == 1003 || pipboyTab == 1023) {
-		InterfaceManager* g_interfaceManager = *(InterfaceManager**)0x011D8A80;
 		if (g_interfaceManager) {
 			if (!g_interfaceManager->pipBoyMode)
 				ThisStdCall(0x70F4E0, g_interfaceManager, 0, pipboyTab);
@@ -395,7 +375,7 @@ bool Cmd_Jump_Execute(COMMAND_ARGS) {
 
 bool Cmd_StopVATSCam_Execute(COMMAND_ARGS)
 {
-	ThisStdCall(0x93E770, PlayerCharacter::GetSingleton(), 2, 0);
+	ThisStdCall(0x93E770, g_thePlayer, 2, 0);
 	return true;
 }
 

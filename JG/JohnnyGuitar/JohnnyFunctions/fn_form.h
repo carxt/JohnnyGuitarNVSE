@@ -42,6 +42,9 @@ DEFINE_COMMAND_PLUGIN(GetQuestDelay, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetNoteRead, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetMessageIconPath, , 0, 3, kParamsJohnnyOneString_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetMessageIconPath, , 0, 2, kParamsJohnny_OneForm_OneOptionalInt);
+
+float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
+
 bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 	UInt32 isFemale;
 	TESForm* form = nullptr;
@@ -152,7 +155,7 @@ bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
+
 bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESQuest* quest;
@@ -276,7 +279,7 @@ bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-// 0 - alive, 1 - dying/ragdolled, 2 - dead, 3 - unconscious, 5 - restrained
+// 0 - alive, 1 - dying/ragdolled, 2 - dead, 3 - unconscious, 5 - restrained, 6 - essential unconscious
 bool Cmd_GetLifeState_Execute(COMMAND_ARGS) {
 	Actor* actor = (Actor*)thisObj;
 	*result = -1;
@@ -293,7 +296,6 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 	SInt32 rank = -1;
 	ExtractArgs(EXTRACT_ARGS, &faction, &rank);
 	if (faction) {
-		DataHandler* g_dataHandler = DataHandler::Get();
 		NVSEArrayVar* factionMemberArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
 		for (TESBoundObject* object = g_dataHandler->boundObjectList->first; object; object = object->next)
 		{
@@ -403,9 +405,7 @@ bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL)
 
 bool Cmd_GetBaseScale_Execute(COMMAND_ARGS)
 {
-
 	return Cmd_GetBaseScale_Eval(thisObj, 0, 0, result);
-
 }
 
 bool Cmd_RemovePrimitive_Execute(COMMAND_ARGS) {
@@ -581,7 +581,6 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS)
 		}
 	}
 	else if NOT_ID(weapon, TESObjectWEAP) return true;
-	PlayerCharacter* g_thePlayer = *(PlayerCharacter**)0x11DEA3C;
 	MiddleHighProcess* midHiProc = (MiddleHighProcess*)g_thePlayer->baseProcess;
 	ContChangesEntry* weaponInfo = midHiProc->weaponInfo;
 	TESForm* ammo = NULL;

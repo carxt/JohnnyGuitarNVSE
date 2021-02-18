@@ -2635,7 +2635,7 @@ struct Sound
 	}
 	Sound(UInt32 refId, UInt32 flags)
 	{
-		ThisStdCall(0xAD73B0, BSWin32Audio::GetSingleton, this, refId, flags);
+		ThisStdCall(0xAD73B0, BSWin32Audio::GetSingleton(), this, refId, flags);
 	}
 
 	void Play()

@@ -67,7 +67,6 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
-	PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
 	TESObjectREFR* markerRef = ThisStdCall<TESObjectREFR*>(0x77A400, g_thePlayer);
 	if (markerRef) {
 		*(UInt32*)result = markerRef->refID;

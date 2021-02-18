@@ -192,7 +192,6 @@ bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS)
 }
 bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
 	*result = 0;
-	InterfaceManager* g_interfaceManager = *(InterfaceManager**)0x011D8A80;
 	if (g_interfaceManager) *result = g_interfaceManager->pipBoyMode;
 	if (IsConsoleMode()) Console_Print("GetPipBoyMode >> %.2f", *result);
 	return true;
@@ -254,7 +253,6 @@ bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	int type = 0;
 	UInt32 tickCount;
 	ExtractArgs(EXTRACT_ARGS, &type);
-	PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
 	tickCount = ThisStdCall<UInt32>(0x457FE0, NULL);
 	double timePlayed = tickCount - g_thePlayer->unk774[6];
 	switch (type) {

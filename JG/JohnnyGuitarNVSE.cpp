@@ -17,10 +17,10 @@
 #include "nvse/SafeWrite.h"
 #include "nvse/ScriptUtils.h"
 #include "JohnnyGuitar/WorldToScreen.h"
-#include "internal/decoding.h"
 #include "JohnnyGuitar/JohnnyEventPredefinitions.h"
 #include "JohnnyGuitar/misc.h"
 #include "JohnnyGuitar/EditorIDs.h"
+#include "internal/decoding.h"
 #include "JohnnyGuitar/JohnnyGuitarNVSE.h"
 #include "JohnnyGuitar/JohnnyParams.h"
 #include "JohnnyGuitar/JohnnyFunctions/fn_av.h"
@@ -61,15 +61,21 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_MainGameLoop:
-		for (const auto& EventInformat : EventsArray)
+		for (const auto& EventInfo : EventsArray)
 		{
-			EventInformat->AddQueuedEvents();
-			EventInformat->DeleteEventsFromMemory();
+			EventInfo->AddQueuedEvents();
+			EventInfo->DeleteEventsFromMemory();
 		}
 		break;
-	case NVSEMessagingInterface::kMessage_DeferredInit:
-		//Placeholder to do stuff after the game initializes its singletons.
+	case NVSEMessagingInterface::kMessage_DeferredInit: {
+		g_thePlayer = PlayerCharacter::GetSingleton();
+		g_processManager = (ProcessManager*)0x11E0E80;
+		g_interfaceManager = InterfaceManager::GetSingleton();
+		g_bsWin32Audio = BSWin32Audio::GetSingleton();
+		g_dataHandler = DataHandler::Get();
+		g_audioManager = (BSAudioManager*)0x11F6EF0;
 		break;
+	}
 	default:
 		break;
 	}

@@ -1,5 +1,4 @@
 #include "..\..\nvse\nvse\ScriptUtils.h"
-#include "internal/decoding.h"
 #include <Windows.h>
 #include <unordered_map>
 #pragma once
@@ -37,6 +36,14 @@ std::unordered_map<UInt32, char*> CustomMapMarkerMap;
 
 UInt32 DoSkipMuzzleLights = -1;
 static float vatsSpreadMultValue = 15.0;
+
+// Singletons
+PlayerCharacter* g_thePlayer = nullptr;
+ProcessManager* g_processManager = nullptr;
+InterfaceManager* g_interfaceManager = nullptr;
+BSWin32Audio* g_bsWin32Audio = nullptr;
+DataHandler* g_dataHandler = nullptr;
+BSAudioManager* g_audioManager = nullptr;
 
 __declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
 {
@@ -298,7 +305,6 @@ TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
 	if (weap->ammo.ammo) {
 		if (IS_TYPE(weap->ammo.ammo, BGSListForm)) {
 			BGSListForm* ammoList = (BGSListForm*)weap->ammo.ammo;
-			PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
 			ExtraContainerChanges* xChanges = GetExtraType(g_thePlayer->extraDataList, ContainerChanges);
 			TESForm* ammo = 0;
 			for (int i = 0; i < ammoList->Count(); i++) {

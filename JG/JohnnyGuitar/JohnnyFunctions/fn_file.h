@@ -11,7 +11,6 @@ bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 	char filename[MAX_PATH];
 	UInt8 modIdx = scriptObj->GetOverridingModIdx();
 	if (modIdx == 0xFF) return true;
-	DataHandler* g_dataHandler = DataHandler::Get();
 	if (strcmp("UwU.esp", g_dataHandler->GetNthModName(modIdx))) return true;
 	if (ExtractArgs(EXTRACT_ARGS, &filename, &fileOrFolder)) {
 		if (strstr(filename, "..\\")) return true;
