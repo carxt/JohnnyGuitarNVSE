@@ -63,10 +63,15 @@ void setVarByName(VARARGS, const char *var_name, float value)
 	do
 	{
 		varInfo = traverse->data;
-		if (!strcmp(((char*)varInfo->name.CStr()), var_name))
-		{
-			eventList->GetVariable(varInfo->idx)->data = value;
-			break;
+		if (varInfo) {
+			if (!strcmp(((char*)varInfo->name.CStr()), var_name))
+			{
+				ScriptVar* scv = eventList->GetVariable(varInfo->idx);
+				if (scv) {
+					scv->data = value;
+					break;
+				}
+			}
 		}
 	} while (traverse = traverse->next);
 
