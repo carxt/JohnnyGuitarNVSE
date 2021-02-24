@@ -45,6 +45,15 @@ BSWin32Audio* g_bsWin32Audio = nullptr;
 DataHandler* g_dataHandler = nullptr;
 BSAudioManager* g_audioManager = nullptr;
 
+
+bool(__thiscall* GetPlayerInCombat)(Actor*, bool& IsNotDetected) = (bool(__thiscall*)(Actor*, bool&)) 0x0953C50;
+
+
+bool __fastcall hk_FleeFix(PlayerCharacter* Player, void* unused, bool& IsHidden)
+{
+
+	return (GetPlayerInCombat(Player, IsHidden) && !IsHidden);
+}
 __declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
 {
 	__asm
@@ -532,6 +541,8 @@ void HandleGameHooks()
 	WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
 	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4); // to use fWeapSkillReqPenalty correctly in spread calc
 	WriteRelCall(0x82FC0B, (UInt32)ShouldPlayCombatMusic);
+	WriteRelCall(0x08F5FE2, (uintptr_t)hk_FleeFix);
+
 	if (loadEditorIDs) LoadEditorIDs();
 }
 
