@@ -138,7 +138,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	strcpy((char *)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 	loadEditorIDs = GetPrivateProfileInt("MAIN", "bLoadEditorIDs", 1, filename);
 	fixHighNoon = 0;
-
+	fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 	JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 	JGGameCamera.CamPos = new JGCameraPosition;
 

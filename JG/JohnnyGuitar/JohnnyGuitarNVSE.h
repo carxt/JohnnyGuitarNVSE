@@ -28,6 +28,7 @@ char* StrArgBuf;
 IDebugLog ParamLog;
 bool loadEditorIDs = 0;
 bool fixHighNoon = 0;
+bool fixFleeing = 0;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -49,10 +50,10 @@ BSAudioManager* g_audioManager = nullptr;
 bool(__thiscall* GetPlayerInCombat)(Actor*, bool& IsNotDetected) = (bool(__thiscall*)(Actor*, bool&)) 0x0953C50;
 
 
-bool __fastcall hk_FleeFix(PlayerCharacter* Player, void* unused, bool& IsHidden)
+bool __fastcall FleeFixHook(PlayerCharacter* Player, void* unused, bool& IsHidden)
 {
 
-	return (GetPlayerInCombat(Player, IsHidden) && !IsHidden);
+	return (!IsHidden && GetPlayerInCombat(Player, IsHidden));
 }
 __declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
 {
@@ -541,7 +542,7 @@ void HandleGameHooks()
 	WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
 	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4); // to use fWeapSkillReqPenalty correctly in spread calc
 	WriteRelCall(0x82FC0B, (UInt32)ShouldPlayCombatMusic);
-	WriteRelCall(0x08F5FE2, (uintptr_t)hk_FleeFix);
+	if (fixFleeing) WriteRelCall(0x8F5FE2, (UInt32)FleeFixHook);
 
 	if (loadEditorIDs) LoadEditorIDs();
 }
