@@ -522,7 +522,15 @@ TESRegionDataWeather* GetWeatherData(TESRegion* region) {
 	} while (iter = iter->next);
 	return NULL;
 }
-
+void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseExtraList* a3, UInt32 itemCount, NiPoint3* a5, void* a6) {
+	if (itemCount > 10000) {
+		while (itemCount > 10000) {
+			itemCount -= 10000;
+			ThisStdCall(0x954610, a1, a2, a3, 10000, a5, a6);
+		}
+		ThisStdCall(0x954610, a1, a2, a3, itemCount, a5, a6);
+	}
+}
 void HandleGameHooks()
 {
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // use available ammo in inventory instead of NULL when default ammo isn't present
@@ -543,7 +551,7 @@ void HandleGameHooks()
 	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4); // to use fWeapSkillReqPenalty correctly in spread calc
 	WriteRelCall(0x82FC0B, (UInt32)ShouldPlayCombatMusic);
 	if (fixFleeing) WriteRelCall(0x8F5FE2, (UInt32)FleeFixHook);
-
+	WriteRelCall(0x780D17, (UInt32)DropItemHook);
 	if (loadEditorIDs) LoadEditorIDs();
 }
 
