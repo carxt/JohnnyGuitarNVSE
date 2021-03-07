@@ -51,7 +51,10 @@ public:
 	TESForm			*data;				// 40 - in ScriptEffect this is a Script *
 	UInt32			unk44;				// 44
 
-	void	Remove(bool immediate);
+	__forceinline void Remove(bool immediate)
+	{
+		ThisStdCall(0x804210, this, immediate);
+	}
 };
 
 // 4C

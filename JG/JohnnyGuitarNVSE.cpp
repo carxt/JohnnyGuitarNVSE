@@ -139,6 +139,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	loadEditorIDs = GetPrivateProfileInt("MAIN", "bLoadEditorIDs", 1, filename);
 	fixHighNoon = 0;
 	fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
+	fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
 	JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 	JGGameCamera.CamPos = new JGCameraPosition;
 
@@ -289,6 +290,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetJohnnyOnAddPerkEventHandler);
 	REG_CMD(SetJohnnyOnRemovePerkEventHandler);
 	REG_CMD(IsHostilesNearby);
+	REG_CMD(ModNthTempEffectTimeLeft);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

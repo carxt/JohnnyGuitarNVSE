@@ -25,7 +25,7 @@ DEFINE_COMMAND_PLUGIN(IsCompassHostile, , 1,0, NULL);
 DEFINE_COMMAND_PLUGIN(ToggleCombatMusic, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
-
+DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParamsJohnnyOneIntOneFloat);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -33,6 +33,38 @@ bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5B
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
+bool __fastcall ValidTempEffect(EffectItem* effectItem)
+{
+	if (!effectItem || (effectItem->duration <= 0) || !effectItem->setting) return false;
+	UInt8 archtype = effectItem->setting->archtype;
+	return !archtype || ((archtype == 1) && (effectItem->setting->effectFlags & 0x2000)) || ((archtype > 10) && (archtype < 14)) || (archtype == 24) || (archtype > 33);
+}
+
+bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 index;
+	float modTimeLeft;
+	if (!ExtractArgs(EXTRACT_ARGS, &index, &modTimeLeft) || !thisObj->IsActor()) return true;
+	ActiveEffectList* effList = ((Actor*)thisObj)->magicTarget.GetEffectList();
+	if (!effList) return true;
+	ListNode<ActiveEffect>* iter = effList->Head();
+	ActiveEffect* activeEff;
+	do
+	{
+		activeEff = iter->data;
+		if (!activeEff || !activeEff->bApplied || !ValidTempEffect(activeEff->effectItem) || !activeEff->magicItem ||
+			!DYNAMIC_CAST(activeEff->magicItem, MagicItem, TESForm)) continue;
+		if (!index--)
+		{
+			activeEff->timeElapsed += -modTimeLeft;
+			if (activeEff->timeElapsed > activeEff->duration) activeEff->Remove(true);
+			*result = 1;
+			break;
+		}
+	} while (iter = iter->next);
+	return true;
+}
 bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* actorCell = g_thePlayer->parentCell;

@@ -29,6 +29,7 @@ IDebugLog ParamLog;
 bool loadEditorIDs = 0;
 bool fixHighNoon = 0;
 bool fixFleeing = 0;
+bool fixItemStacks = 0;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -530,6 +531,9 @@ void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseEx
 		}
 		ThisStdCall(0x954610, a1, a2, a3, itemCount, a5, a6);
 	}
+	else {
+		ThisStdCall(0x954610, a1, a2, a3, itemCount, a5, a6);
+	}
 }
 void HandleGameHooks()
 {
@@ -551,7 +555,7 @@ void HandleGameHooks()
 	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4); // to use fWeapSkillReqPenalty correctly in spread calc
 	WriteRelCall(0x82FC0B, (UInt32)ShouldPlayCombatMusic);
 	if (fixFleeing) WriteRelCall(0x8F5FE2, (UInt32)FleeFixHook);
-	WriteRelCall(0x780D17, (UInt32)DropItemHook);
+	if (fixItemStacks) WriteRelCall(0x780D17, (UInt32)DropItemHook);
 	if (loadEditorIDs) LoadEditorIDs();
 }
 
