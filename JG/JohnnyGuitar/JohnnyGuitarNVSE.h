@@ -50,19 +50,17 @@ BSAudioManager* g_audioManager = nullptr;
 void(__thiscall* OriginalBipedModelUpdateWeapon)(ValidBip01Names*, TESObjectWEAP*, int) = (void(__thiscall*)(ValidBip01Names*, TESObjectWEAP*, int)) 0x4AB400;
 UInt8(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (UInt8(__thiscall*)(ContChangesEntry*)) 0x4BD820;
 
-void __fastcall hk_BipedModel_UpdateWeapon(ValidBip01Names* BipedAnim, Character* Character, TESObjectWEAP* weap, int weapMods)
+void __fastcall hk_BipedModel_UpdateWeapon(ValidBip01Names* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods)
 {
 
-	if (auto charc = Character)
+	if (fnCharacter && fnCharacter->baseProcess)
 	{
-		if (charc->baseProcess)
+		if (auto weapInfo = fnCharacter->baseProcess->GetWeaponInfo())
 		{
-			if (auto weapInfo = charc->baseProcess->GetWeaponInfo())
-			{
 				weapMods = ContChangesEntry_GetWeaponModFlags(weapInfo);
 
-			}
 		}
+		
 	}
 	OriginalBipedModelUpdateWeapon(BipedAnim, weap, weapMods);
 }
@@ -71,7 +69,7 @@ __declspec (naked) void asm_BipedModelUpdateWeapon()
 {
 	__asm
 	{
-		mov edx, [ebp+0x8]
+		mov edx, dword ptr [ebp+0x8]
 		jmp hk_BipedModel_UpdateWeapon
 	}
 }
