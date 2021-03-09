@@ -81,7 +81,7 @@ bool(__thiscall* GetPlayerInCombat)(Actor*, bool& IsNotDetected) = (bool(__thisc
 bool __fastcall FleeFixHook(PlayerCharacter* Player, void* unused, bool& IsHidden)
 {
 
-	return (!IsHidden && GetPlayerInCombat(Player, IsHidden));
+	return (GetPlayerInCombat(Player, IsHidden) && !IsHidden);
 }
 __declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
 {
