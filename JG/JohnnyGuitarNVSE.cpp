@@ -140,6 +140,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	fixHighNoon = 0;
 	fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 	fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
+	capLoadScreensTo60 = GetPrivateProfileInt("MAIN", "b60FPSDuringLoading", 0, filename);
 	JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 	JGGameCamera.CamPos = new JGCameraPosition;
 

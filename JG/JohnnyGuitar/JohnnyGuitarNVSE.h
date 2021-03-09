@@ -30,6 +30,7 @@ bool loadEditorIDs = 0;
 bool fixHighNoon = 0;
 bool fixFleeing = 0;
 bool fixItemStacks = 0;
+bool capLoadScreensTo60 = 0;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -584,6 +585,7 @@ void HandleGameHooks()
 	if (fixItemStacks) WriteRelCall(0x780D17, (UInt32)DropItemHook);
 	if (loadEditorIDs) LoadEditorIDs();
 	WriteRelCall(0x06061E8, (uintptr_t)asm_BipedModelUpdateWeapon);
+	if (capLoadScreensTo60)SafeWrite8(0x78D4A4, 0x10);
 }
 
 
