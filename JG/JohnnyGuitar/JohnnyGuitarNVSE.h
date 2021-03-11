@@ -582,7 +582,10 @@ void HandleGameHooks()
 	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4); // to use fWeapSkillReqPenalty correctly in spread calc
 	WriteRelCall(0x82FC0B, (UInt32)ShouldPlayCombatMusic);
 	if (fixFleeing) WriteRelCall(0x8F5FE2, (UInt32)FleeFixHook);
-	if (fixItemStacks) WriteRelCall(0x780D17, (UInt32)DropItemHook);
+	if (fixItemStacks) {
+		WriteRelCall(0x780D11, (UInt32)DropItemHook);
+		SafeWriteBuf(0x780D11 + 5, "\x90\x90\x90", 3);
+	}
 	if (loadEditorIDs) LoadEditorIDs();
 	WriteRelCall(0x06061E8, (uintptr_t)asm_BipedModelUpdateWeapon);
 	if (capLoadScreensTo60)SafeWrite8(0x78D4A4, 0x10);
