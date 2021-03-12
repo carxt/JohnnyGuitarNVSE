@@ -14,6 +14,7 @@ DEFINE_COMMAND_PLUGIN(GetMusicTypeDB, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetMusicTypeDB, , 0, 2, kParams_OneForm_OneFloat);
 DEFINE_COMMAND_PLUGIN(SetExplosionSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(SetProjectileSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(GetWeaponWorldModelPath, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetWeaponWorldModelPath, , 0, 2, kParamsJohnny_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(GetLifeState, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetRaceFlag, , 0, 2, kParams_OneForm_OneInt);
@@ -162,6 +163,18 @@ bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
 	if (ExtractArgs(EXTRACT_ARGS, &quest))
 		*result = (quest->flags & 0x40) ? 1 : 0;
 	if (IsConsoleMode()) Console_Print("GetQuestFailed >> %.2f", *result);
+	return true;
+}
+bool Cmd_GetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectWEAP* weapon;
+	const char *modelPath;
+	if (ExtractArgs(EXTRACT_ARGS, &weapon) && IS_TYPE(weapon, TESObjectWEAP)) {
+		modelPath = weapon->model200.GetModelPath();
+		StrIfc->Assign(PASS_COMMAND_ARGS, modelPath);
+		*result = 1;
+		if (IsConsoleMode()) Console_Print("GetWeaponWorldModelPath >> %s", modelPath);
+	}
 	return true;
 }
 bool Cmd_SetWeaponWorldModelPath_Execute(COMMAND_ARGS) {

@@ -292,6 +292,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(SetJohnnyOnRemovePerkEventHandler);
 	REG_CMD(IsHostilesNearby);
 	REG_CMD(ModNthTempEffectTimeLeft);
+	REG_TYPED_CMD(GetWeaponWorldModelPath, String);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
