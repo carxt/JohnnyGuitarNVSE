@@ -1,4 +1,6 @@
 #include <memory>
+#include <mutex>
+#include <shared_mutex>
 #include "nvse/PluginAPI.h"
 #include "nvse/GameAPI.h"
 #include "nvse/CommandTable.h"
