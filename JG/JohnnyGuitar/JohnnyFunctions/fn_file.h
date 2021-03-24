@@ -12,7 +12,7 @@ bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 	UInt8 modIdx = scriptObj->GetOverridingModIdx();
 	if (modIdx == 0xFF) return true;
 	if (strcmp("UwU.esp", g_dataHandler->GetNthModName(modIdx))) return true;
-	if (ExtractArgs(EXTRACT_ARGS, &filename, &fileOrFolder)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &filename, &fileOrFolder)) {
 		if (strstr(filename, "..\\")) return true;
 		char filepath[MAX_PATH];
 		GetModuleFileNameA(NULL, filepath, MAX_PATH);
@@ -34,7 +34,7 @@ bool Cmd_MD5File_Execute(COMMAND_ARGS) {
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	char path[MAX_PATH];
 	char outHash[0x21];
-	if (ExtractArgs(EXTRACT_ARGS, &path)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
 		strcpy((char*)(strrchr(filename, '\\') + 1), path);
 		GetMD5File(filename, outHash);
 		if (IsConsoleMode())
@@ -49,7 +49,7 @@ bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	char path[MAX_PATH];
 	char outHash[0x29];
-	if (ExtractArgs(EXTRACT_ARGS, &path)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
 		strcpy((char*)(strrchr(filename, '\\') + 1), path);
 		GetSHA1File(filename, outHash);
 		if (IsConsoleMode())
@@ -66,7 +66,7 @@ bool Cmd_GetPixelFromBMP_Execute(COMMAND_ARGS) {
 	char RED[VarNameSize], GREEN[VarNameSize], BLUE[VarNameSize];
 	UInt32 width = 0, height = 0;
 
-	if (ExtractArgs(EXTRACT_ARGS, &path, &RED, &GREEN, &BLUE, &width, &height)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &RED, &GREEN, &BLUE, &width, &height)) {
 		strcpy((char*)(strrchr(filename, '\\') + 1), path);
 		UInt32 R = 0, G = 0, B = 0;
 		if (ReadBMP24(filename, R, G, B, width, height)) {

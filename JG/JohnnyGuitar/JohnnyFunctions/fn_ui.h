@@ -11,7 +11,7 @@ bool Cmd_QueueObjectiveText_Execute(COMMAND_ARGS)
 {
 	char text[MAX_PATH];
 	UInt32 isCompleted, allowDisplayMultiple;
-	if (ExtractArgs(EXTRACT_ARGS, &text, &isCompleted, &allowDisplayMultiple))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &text, &isCompleted, &allowDisplayMultiple))
 	{
 		CdeclCall(0x77A5B0, text, isCompleted, allowDisplayMultiple == 0);
 	}
@@ -36,7 +36,7 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS)
 	UInt32 queuePriority = kPriorityAppend;
 	UInt32 justification = kJustifyLeft;
 	UInt32 titleFont = -1, subTitleFont = -1;
-	if (ExtractArgs(EXTRACT_ARGS, &title, &subtitle, &soundPath, &queuePriority, &justification, &titleFont, &subTitleFont))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &title, &subtitle, &soundPath, &queuePriority, &justification, &titleFont, &subTitleFont))
 	{
 		if (justification > kJustifyRight) justification = kJustifyRight;
 
@@ -52,7 +52,7 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 	TESForm* form = NULL;
 	char newPath[MAX_PATH];
 
-	if (ExtractArgs(EXTRACT_ARGS, &newPath, &isFemale, &form))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPath, &isFemale, &form))
 	{
 
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
@@ -78,7 +78,7 @@ bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESWorldSpace* worlspace = NULL;
 	char path[MAX_PATH];
-	if (ExtractArgs(EXTRACT_ARGS, &worlspace, &path) && IS_TYPE(worlspace, TESWorldSpace)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace, &path) && IS_TYPE(worlspace, TESWorldSpace)) {
 		worlspace->texture.ddsPath.Set(path);
 	}
 	return true;
@@ -87,7 +87,7 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESWorldSpace* worlspace = NULL;
 	char path[MAX_PATH];
-	if (ExtractArgs(EXTRACT_ARGS, &worlspace) && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.m_data)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace) && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.m_data)) {
 		strcpy(path, worlspace->texture.ddsPath.m_data);
 		StrIfc->Assign(PASS_COMMAND_ARGS, path);
 		if (IsConsoleMode())
@@ -99,7 +99,7 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	TESObjectREFR* form;
 	char MapMarkerRoute[MAX_PATH];
-	if (!ExtractArgs(EXTRACT_ARGS, &form, &MapMarkerRoute) || (!IS_TYPE(form, BGSListForm) && (!form->GetIsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)))) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &MapMarkerRoute) || (!IS_TYPE(form, BGSListForm) && (!form->GetIsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)))) return true;
 	if (IS_TYPE(form, BGSListForm))
 	{
 		ListNode<TESForm>* iterator = ((BGSListForm*)form)->list.Head();

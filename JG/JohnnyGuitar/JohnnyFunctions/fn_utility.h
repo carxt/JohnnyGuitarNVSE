@@ -23,7 +23,7 @@ bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 stopAnim = 0;
 	Actor* actor = (Actor*)thisObj;
-	ExtractArgs(EXTRACT_ARGS, &stopAnim);
+	ExtractArgsEx(EXTRACT_ARGS_EX, &stopAnim);
 	if (actor->baseProcess->GetIdleForm350()) {
 		actor->baseProcess->ResetQueuedIdleFlags();
 		actor->baseProcess->SetIdleForm350(NULL);
@@ -37,7 +37,7 @@ bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
 	char dllName[MAX_PATH];
 	char dllPath[MAX_PATH];
 	char fnvPath[MAX_PATH];
-	if (ExtractArgs(EXTRACT_ARGS, &dllName, &checkOutsideOfGameFolder)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dllName, &checkOutsideOfGameFolder)) {
 		strncat(dllName, ".dll", 4);
 		HMODULE module = GetModuleHandle(dllName);
 		if (module) {
@@ -59,7 +59,7 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 arrID, fullMatch;
 	BGSListForm* formList;
-	if (!ExtractArgs(EXTRACT_ARGS, &arrID, &formList, &fullMatch)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &formList, &fullMatch)) return true;
 	NVSEArrayVar* inArr = ArrIfc->LookupArrayByID(arrID);
 	if (!inArr) return true;
 	UInt32 size = ArrIfc->GetArraySize(inArr);
@@ -106,7 +106,7 @@ bool Cmd_SetUIUpdateSound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESSound* sound;
 	UInt32 type = 0;
-	if (ExtractArgs(EXTRACT_ARGS, &sound, &type) && IS_TYPE(sound, TESSound)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &type) && IS_TYPE(sound, TESSound)) {
 		switch (type) {
 			case 1:
 				questFailSound = sound;
@@ -139,7 +139,7 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 arrID;
 	UInt32 isReverse = 0;
-	if (!ExtractArgs(EXTRACT_ARGS, &arrID, &isReverse)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &isReverse)) return true;
 	if (!loadEditorIDs) return true;
 	NVSEArrayVar* inArr = ArrIfc->LookupArrayByID(arrID);
 	if (!inArr) return true;
@@ -164,7 +164,7 @@ bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS)
 {
 	*result = -1;
 	UInt32 sequenceID;
-	if (ExtractArgs(EXTRACT_ARGS, &sequenceID) && sequenceID < 8)
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sequenceID) && sequenceID < 8)
 	{
 		if (auto animData = thisObj->GetAnimData())
 		{
@@ -182,7 +182,7 @@ bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESForm* form;
-	if (scriptObj && ExtractArgs(EXTRACT_ARGS, &form))
+	if (scriptObj && ExtractArgsEx(EXTRACT_ARGS_EX, &form))
 	{
 		UInt8 overriding = form->GetOverridingModIdx();
 		*result = ((overriding > scriptObj->modIndex) ? overriding : 0);
@@ -200,7 +200,7 @@ bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
 bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
 	char nodeName[MAX_PATH];
-	if (ExtractArgs(EXTRACT_ARGS, &nodeName, &X_outS, &Y_outS, &Z_outS))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nodeName, &X_outS, &Y_outS, &Z_outS))
 	{
 		hkpRigidBody* rigidBody = thisObj->GetRigidBody(nodeName);
 		if (rigidBody)
@@ -226,7 +226,7 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 	char edid[MAX_PATH];
 	TESForm* form = NULL;
 	*result = 0;
-	if (ExtractArgs(EXTRACT_ARGS, &edid)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &edid)) {
 		form = ((TESForm * (__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
 		if (form) {
 			*(UInt32*)result = form->refID;
@@ -241,7 +241,7 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
 	TESForm* form = NULL;
 	if (thisObj) Console_Print("0x%08X", thisObj);
-	else if (ExtractArgs(EXTRACT_ARGS, &form) && form) Console_Print("0x%08X", form);
+	else if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) Console_Print("0x%08X", form);
 	return true;
 }
 bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
@@ -252,7 +252,7 @@ bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	int type = 0;
 	UInt32 tickCount;
-	ExtractArgs(EXTRACT_ARGS, &type);
+	ExtractArgsEx(EXTRACT_ARGS_EX, &type);
 	tickCount = ThisStdCall<UInt32>(0x457FE0, NULL);
 	double timePlayed = tickCount - g_thePlayer->unk774[6];
 	switch (type) {
@@ -276,7 +276,7 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS)
 {
 	int patch = 0;
 	bool enabled = false;
-	if (ExtractArgs(EXTRACT_ARGS, &patch))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &patch))
 	{
 		switch (patch) {
 		case 1:
@@ -296,7 +296,7 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS)
 bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 	TESForm* form;
 	const char* edid;
-	if (ExtractArgs(EXTRACT_ARGS, &form)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
 		edid = form->GetName();
 		StrIfc->Assign(PASS_COMMAND_ARGS, edid);
 		if (IsConsoleMode())

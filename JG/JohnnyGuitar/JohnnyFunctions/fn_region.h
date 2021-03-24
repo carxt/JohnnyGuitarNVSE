@@ -12,7 +12,7 @@ DEFINE_COMMAND_PLUGIN(ClearRegionWeathers, , 0, 1, kParams_OneForm);
 
 bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
-	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && IS_TYPE(region, TESRegion)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			NVSEArrayVar* weatherArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
@@ -32,7 +32,7 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 }
 bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
-	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && IS_TYPE(region, TESRegion)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			ListNode<WeatherEntry>* headNode = weatherData->weatherTypes.Head(), * iter = headNode->next;
@@ -54,7 +54,7 @@ bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
-	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && IS_TYPE(region, TESRegion)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			*result = weatherData->bOverride;
@@ -68,7 +68,7 @@ bool Cmd_GetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 bool Cmd_SetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	int bOverride = -1;
-	if (ExtractArgs(EXTRACT_ARGS, &region, &bOverride) && IS_TYPE(region, TESRegion)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &bOverride) && IS_TYPE(region, TESRegion)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData)
 			weatherData->bOverride = bOverride;
@@ -77,7 +77,7 @@ bool Cmd_SetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
-	if (ExtractArgs(EXTRACT_ARGS, &region) && IS_TYPE(region, TESRegion)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && IS_TYPE(region, TESRegion)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			*result = weatherData->priority;
@@ -91,7 +91,7 @@ bool Cmd_GetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 bool Cmd_SetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	int priority = -1;
-	if (ExtractArgs(EXTRACT_ARGS, &region, &priority) && IS_TYPE(region, TESRegion) && priority >= 0 && priority <= 100) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &priority) && IS_TYPE(region, TESRegion) && priority >= 0 && priority <= 100) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData)
 			weatherData->priority = priority;
@@ -101,7 +101,7 @@ bool Cmd_SetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 bool Cmd_IsWeatherInRegion_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	TESWeather* weather = NULL;
-	if (ExtractArgs(EXTRACT_ARGS, &region, &weather) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &weather) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
@@ -126,7 +126,7 @@ bool Cmd_IsWeatherInRegion_Execute(COMMAND_ARGS) {
 bool Cmd_RemoveRegionWeather_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	TESWeather* weather = NULL;
-	if (ExtractArgs(EXTRACT_ARGS, &region, &weather) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &weather) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
@@ -153,7 +153,7 @@ bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
 	UInt32 chance = 0;
 	TESGlobal* global = NULL;
 	WeatherEntry* entry;
-	if (ExtractArgs(EXTRACT_ARGS, &region, &weather, &chance, &global) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &weather, &chance, &global) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();

@@ -14,28 +14,28 @@ DEFINE_COMMAND_PLUGIN(GetCameraTranslation, , FALSE, 4, kParams_Johnny_ThreeStri
 bool Cmd_Sign_Execute(COMMAND_ARGS) {
 	float value;
 	*result = 0;
-	if (ExtractArgs(EXTRACT_ARGS, &value) && value != 0) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &value) && value != 0) {
 		*result = value > 0 ? 1 : -1;
 	}
 	return true;
 }
 bool Cmd_Lerp_Execute(COMMAND_ARGS) {
 	float v0 = 0, v1 = 0, t = 0;
-	if (ExtractArgs(EXTRACT_ARGS, &v0, &v1, &t)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &v0, &v1, &t)) {
 		*result = (1 - t) * v0 + t * v1;
 	}
 	return true;
 }
 bool Cmd_Remap_Execute(COMMAND_ARGS) {
 	float v1current = 0, v1min = 0, v1max = 0, v2min = 0, v2max = 0;
-	if (ExtractArgs(EXTRACT_ARGS, &v1current, &v1min, &v1max, &v2min, &v2max)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &v1current, &v1min, &v1max, &v2min, &v2max)) {
 		*result = (v1current - v1min) / (v1max - v1min) * (v2max - v2min) + v2min;
 	}
 	return true;
 }
 bool Cmd_Clamp_Execute(COMMAND_ARGS) {
 	float value = 0, min = 0, max = 0;
-	if (ExtractArgs(EXTRACT_ARGS, &value, &min, &max)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &value, &min, &max)) {
 		*result = value;
 		if (value < min) {
 			*result = min;
@@ -53,7 +53,7 @@ bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NiVector3 pos1;
 	NiVector3 pos2;
-	if (ExtractArgs(EXTRACT_ARGS, &(pos1.x), &(pos1.y), &(pos1.z), &(pos2.x), &(pos2.y), &(pos2.z))) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &(pos1.x), &(pos1.y), &(pos1.z), &(pos2.x), &(pos2.y), &(pos2.z))) {
 		*result = NiNodeComputeDistance(&pos1, &pos2);
 		if (IsConsoleMode()) Console_Print("Get3DDistance >> %f", *result);
 	}
@@ -64,7 +64,7 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS)
 {
 	Actor* actor = (Actor*)thisObj;
 	char NiName[MAX_PATH];
-	if (ExtractArgs(EXTRACT_ARGS, &NiName) && actor->IsActor() && actor->baseProcess)
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &NiName) && actor->IsActor() && actor->baseProcess)
 	{
 		NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
 		ActorHitData* hitData = actor->baseProcess->GetHitData();
@@ -79,7 +79,7 @@ bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char NiName[MAX_PATH];
 	NiVector3 Coord;
-	if (!thisObj || !(ExtractArgs(EXTRACT_ARGS, &NiName, &(Coord.x), &(Coord.y), &(Coord.z)))) return true;
+	if (!thisObj || !(ExtractArgsEx(EXTRACT_ARGS_EX, &NiName, &(Coord.x), &(Coord.y), &(Coord.z)))) return true;
 	NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
 	if (!t_Node) return true;
 	*result = NiNodeComputeDistance(&(t_Node->m_worldTranslate), &Coord);
@@ -92,7 +92,7 @@ bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	char NiName1[MAX_PATH], NiName2[MAX_PATH];
 	TESObjectREFR* ref1;
 	TESObjectREFR* ref2;
-	if (!(ExtractArgs(EXTRACT_ARGS, &ref1, &ref2, &NiName1, &NiName2))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &ref1, &ref2, &NiName1, &NiName2))) return true;
 	NiAVObject* Node1 = ref1->GetNiBlock(NiName1);
 	NiAVObject* Node2 = ref1->GetNiBlock(NiName2);
 	if (!Node1 || !Node2) return true;
@@ -110,7 +110,7 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
 	TESObjectREFR* refr = NULL;
 
-	if (ExtractArgs(EXTRACT_ARGS, &X_outS, &Y_outS, &Z_outS, &xIn, &yIn, &zIn, &HandleType, &refr))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &xIn, &yIn, &zIn, &HandleType, &refr))
 	{
 		if (refr)
 		{
@@ -137,7 +137,7 @@ bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS)
 	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
 	TESObjectREFR* refr = NULL;
 
-	if (ExtractArgs(EXTRACT_ARGS, &X_outS, &Y_outS, &Z_outS, &doGetLocal))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &doGetLocal))
 	{
 		if (auto m_GameCameraPos = JGGameCamera.CamPos) {
 			if (doGetLocal)

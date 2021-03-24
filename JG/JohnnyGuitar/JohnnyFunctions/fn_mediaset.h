@@ -10,7 +10,7 @@ DEFINE_COMMAND_PLUGIN(SetMediaSetTraitString, , 0, 3, kParamsJohnnyOneForm_OneIn
 bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
-	if (ExtractArgs(EXTRACT_ARGS, &mediaset, &traitID) && IS_TYPE(mediaset, MediaSet)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && IS_TYPE(mediaset, MediaSet)) {
 		switch (traitID) {
 		case 0:
 			*result = mediaset->type;
@@ -56,7 +56,7 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
 	float newVal = -1;
-	if (ExtractArgs(EXTRACT_ARGS, &mediaset, &traitID, &newVal) && IS_TYPE(mediaset, MediaSet)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newVal) && IS_TYPE(mediaset, MediaSet)) {
 		switch (traitID) {
 		case 0:
 			mediaset->type = newVal;
@@ -99,7 +99,7 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 bool Cmd_GetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
-	if (ExtractArgs(EXTRACT_ARGS, &mediaset, &traitID) && IS_TYPE(mediaset, MediaSet)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && IS_TYPE(mediaset, MediaSet)) {
 		switch (traitID) {
 		case 0:
 			*(UInt32*)result = mediaset->HNAM->refID;
@@ -116,7 +116,7 @@ bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	TESSound* soundForm;
 	int traitID = -1;
-	if (ExtractArgs(EXTRACT_ARGS, &mediaset, &traitID, &soundForm) && IS_TYPE(mediaset, MediaSet) && IS_TYPE(soundForm, TESSound)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &soundForm) && IS_TYPE(mediaset, MediaSet) && IS_TYPE(soundForm, TESSound)) {
 		switch (traitID) {
 		case 0:
 			mediaset->HNAM = soundForm;
@@ -132,7 +132,7 @@ bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
 	const char* resStr = NULL;
-	if (ExtractArgs(EXTRACT_ARGS, &mediaset, &traitID) && IS_TYPE(mediaset, MediaSet)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && IS_TYPE(mediaset, MediaSet)) {
 		if (traitID >= 0 && traitID <= 5) {
 			resStr = mediaset->data[traitID].filepath.CStr();
 			StrIfc->Assign(PASS_COMMAND_ARGS, resStr);
@@ -146,7 +146,7 @@ bool Cmd_SetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
 	const char* newStr = NULL;
-	if (ExtractArgs(EXTRACT_ARGS, &mediaset, &traitID, &newStr) && IS_TYPE(mediaset, MediaSet)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newStr) && IS_TYPE(mediaset, MediaSet)) {
 		if (traitID >= 0 && traitID <= 5) {
 			mediaset->data[traitID].filepath.Set(newStr);
 		}

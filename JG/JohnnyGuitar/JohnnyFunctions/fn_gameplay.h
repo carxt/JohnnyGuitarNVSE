@@ -45,7 +45,7 @@ bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS)
 	*result = 0;
 	UInt32 index;
 	float modTimeLeft;
-	if (!ExtractArgs(EXTRACT_ARGS, &index, &modTimeLeft) || !thisObj->IsActor()) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &index, &modTimeLeft) || !thisObj->IsActor()) return true;
 	ActiveEffectList* effList = ((Actor*)thisObj)->magicTarget.GetEffectList();
 	if (!effList) return true;
 	ListNode<ActiveEffect>* iter = effList->Head();
@@ -74,7 +74,7 @@ bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 }
 bool Cmd_ToggleCombatMusic_Execute(COMMAND_ARGS) {
 	UInt32 toggle = 1;
-	ExtractArgs(EXTRACT_ARGS, &toggle);
+	ExtractArgsEx(EXTRACT_ARGS_EX, &toggle);
 	bCombatMusicDisabled = (toggle == 0);
 	return true;
 }
@@ -107,7 +107,7 @@ void RestoreDisabledPlayerControlsHUDFlags()
 bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS)
 {
 	UInt32 flags;
-	if (NUM_ARGS && ExtractArgs(EXTRACT_ARGS, &flags))
+	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &flags))
 	{
 		SafeWrite32(0x771A53, flags);
 		HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
@@ -133,7 +133,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS)
 	float maxDist = isInterior ? interiorDistanceSquared : exteriorDistanceSquared;
 	Actor* closestHostile = nullptr;
 	UInt32 skipInvisible = 0;
-	ExtractArgs(EXTRACT_ARGS, &skipInvisible);
+	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
 	auto iter = g_thePlayer->compassTargets->Begin();
 	for (; !iter.End(); ++iter)
 	{
@@ -168,7 +168,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
 	float maxDist = isInterior ? powf(fSneakMaxDistance->data.f, 2) : powf((fSneakMaxDistance->data.f * fSneakExteriorDistanceMult->data.f), 2);
 	Actor* closestHostile = nullptr;
 	UInt32 skipInvisible = 0;
-	ExtractArgs(EXTRACT_ARGS, &skipInvisible);
+	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
 	auto iter = g_thePlayer->compassTargets->Begin();
 	for (; !iter.End(); ++iter)
 	{
@@ -234,7 +234,7 @@ bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
 bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS)
 {
 	UInt32 index, isVisible;
-	if (ExtractArgs(EXTRACT_ARGS, &index, &isVisible) && index < 3)
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &index, &isVisible) && index < 3)
 	{
 		FOPipboyManager* pipboyManager = g_interfaceManager->pipboyManager;
 		if (pipboyManager->byte028)
@@ -254,7 +254,7 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS)
 bool Cmd_UnsetAV_Execute(COMMAND_ARGS)
 {
 	UInt32 avCode;
-	if (thisObj->IsActor() && ExtractArgs(EXTRACT_ARGS, &avCode))
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode))
 	{
 		Actor* actor = (Actor*)thisObj;
 		ActorValueOwner* avOwner = &actor->avOwner;
@@ -284,7 +284,7 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS)
 bool Cmd_UnforceAV_Execute(COMMAND_ARGS)
 {
 	UInt32 avCode;
-	if (thisObj->IsActor() && ExtractArgs(EXTRACT_ARGS, &avCode))
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode))
 	{
 		Actor* actor = (Actor*)thisObj;
 		ActorValueOwner* avOwner = &actor->avOwner;
@@ -316,7 +316,7 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 	TESObjectREFR* source;
 	BSFadeNode* fadeNode;
 	*result = 0;
-	if (ExtractArgs(EXTRACT_ARGS, &soundForm, &source))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source))
 	{
 		if (soundForm->soundFile.path.m_dataLen)
 		{
@@ -343,7 +343,7 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 	NiPoint3 Point;
-	if (ExtractArgs(EXTRACT_ARGS, &(Point.x), &(Point.y), &(Point.z)))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &(Point.x), &(Point.y), &(Point.z)))
 		((void(__cdecl*)(NiNode*, NiPoint3*, int))(0x62B8D0))(thisObj->GetNiNode(), &Point, 1);
 	return true;
 }
@@ -351,7 +351,7 @@ bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 	TESObjectREFR* stolenItem;
 	TESObjectREFR* owner;
-	if (ExtractArgs(EXTRACT_ARGS, &owner, &stolenItem)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &owner, &stolenItem)) {
 		ThisStdCall(0x8BFA40, g_thePlayer, owner, owner, stolenItem->baseForm, 1, 1, owner);
 		Console_Print("done");
 	}
@@ -359,7 +359,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 }
 bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	AlchemyItem* poison;
-	if (ExtractArgs(EXTRACT_ARGS, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {
 		ContChangesEntry* wpnInfo = g_thePlayer->baseProcess->GetWeaponInfo();
 		if (wpnInfo && wpnInfo->extendData)
 		{
@@ -379,7 +379,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 
 bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	int pipboyTab = 0;
-	ExtractArgs(EXTRACT_ARGS, &pipboyTab);
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pipboyTab);
 	if (pipboyTab == 0 || pipboyTab == 1002 || pipboyTab == 1003 || pipboyTab == 1023) {
 		if (g_interfaceManager) {
 			if (!g_interfaceManager->pipBoyMode)
@@ -395,7 +395,7 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS)
 {
 	UInt32 ToExtract;
-	if (ExtractArgs(EXTRACT_ARGS, &ToExtract)) isShowLevelUp = ToExtract;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &ToExtract)) isShowLevelUp = ToExtract;
 	return true;
 }
 
@@ -413,7 +413,7 @@ bool Cmd_StopVATSCam_Execute(COMMAND_ARGS)
 
 bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 	float shakeMult, time;
-	if (ExtractArgs(EXTRACT_ARGS, &shakeMult, &time)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shakeMult, &time)) {
 		*(float*)(0x11DFED4) = shakeMult;
 		*(float*)(0x11DFED8) = time;
 	}
@@ -422,7 +422,7 @@ bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 
 bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
 	UInt32 toExtract = -1;
-	if (ExtractArgs(EXTRACT_ARGS, &toExtract) && toExtract <= 1) DoSkipMuzzleLights = toExtract;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &toExtract) && toExtract <= 1) DoSkipMuzzleLights = toExtract;
 	*(UInt32*)result = (DoSkipMuzzleLights == 1);
 	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %u", *result);
 	return true;
