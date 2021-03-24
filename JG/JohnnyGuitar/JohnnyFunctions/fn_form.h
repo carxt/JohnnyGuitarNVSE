@@ -43,8 +43,44 @@ DEFINE_COMMAND_PLUGIN(GetQuestDelay, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetNoteRead, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetMessageIconPath, , 0, 3, kParamsJohnnyOneString_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetMessageIconPath, , 0, 2, kParamsJohnny_OneForm_OneOptionalInt);
-
+DEFINE_COMMAND_PLUGIN(GetBodyPartTraitString, , 0, 3, kParamsJohnny_OneForm_TwoInts);
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
+
+bool Cmd_GetBodyPartTraitString_Execute(COMMAND_ARGS) {
+	const char* resStr = NULL;
+	BGSBodyPartData* bpData;
+	UInt32 partID;
+	UInt32 traitID;
+	*result = 0;
+	if (ExtractArgs(EXTRACT_ARGS, &bpData, &partID, &traitID) && IS_ID(bpData, BGSBodyPartData) && (partID <= 14) && (traitID <= 5))
+	{
+		BGSBodyPart* bodyPart = bpData->bodyParts[partID];
+		if (bodyPart) {
+			switch (traitID) {
+			case 1:
+				if (bodyPart->partNode.m_dataLen) resStr = bodyPart->partNode.m_data;
+				break;
+			case 2:
+				if (bodyPart->VATSTarget.m_dataLen) resStr = bodyPart->VATSTarget.m_data;
+				break;
+			case 3:
+				if (bodyPart->startNode.m_dataLen) resStr = bodyPart->startNode.m_data;
+				break;
+			case 4:
+				if (bodyPart->partName.m_dataLen) resStr = bodyPart->partName.m_data;
+				break;
+			case 5:
+				if (bodyPart->targetBone.m_dataLen) resStr = bodyPart->targetBone.m_data;
+				break;
+			default:
+				break;
+			}
+			StrIfc->Assign(PASS_COMMAND_ARGS, resStr);
+		}
+		
+	}
+	return true;
+}
 
 bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 	UInt32 isFemale;
