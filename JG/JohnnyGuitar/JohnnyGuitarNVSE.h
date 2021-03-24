@@ -16,7 +16,6 @@ bool isShowLevelUp = true;
 bool bArrowKeysDisabled = false;
 bool bCombatMusicDisabled = false;
 char* StrArgBuf;
-#define ExtractArgsEx(...) g_script->ExtractArgsEx(__VA_ARGS__)
 #define ExtractFormatStringArgs(...) g_script->ExtractFormatStringArgs(__VA_ARGS__)
 #define IS_TYPE(form, type) (*(UInt32*)form == kVtbl_##type)
 #define NOT_ID(form, type) (form->typeID != kFormType_##type)
