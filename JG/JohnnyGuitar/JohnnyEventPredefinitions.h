@@ -149,6 +149,7 @@ class EventInformation
 private:
 	void* (__fastcall* CreateFilter)(void**, UInt32); // supposed to be passing itself
 	std::vector<BaseEventClass> EventQueueAdd;
+	std::shared_mutex QueueRWLock; //need a readers writer lock to protect from multiple users registering an event in the same frame (very rare, but can happen)
 public:
 	const char* EventName;
 	UInt8 numMaxArgs;
@@ -196,8 +197,10 @@ public:
 			}
 
 		}
+		std::shared_lock rLock(QueueRWLock);
 		for (std::vector<BaseEventClass>::iterator it = this->EventQueueAdd.begin(); it != this->EventQueueAdd.end(); ++it)
 		{
+
 			if (script == it->ScriptForEvent)
 			{
 				if (!maxFilters) return;
@@ -211,14 +214,16 @@ public:
 			}
 
 		}
+		rLock.unlock();
 		BaseEventClass NewEvent;
 		NewEvent.ScriptForEvent = script;
 		if (maxFilters)
 		{
 
-			*(void**) &(NewEvent.eventFilter) = this->CreateFilter(filters, maxFilters);
+			*(void**)& (NewEvent.eventFilter) = this->CreateFilter(filters, maxFilters);
 			NewEvent.eventFilter->SetUpFiltering();
 		}
+		std::unique_lock wLock(QueueRWLock);
 		this->EventQueueAdd.push_back(NewEvent);
 	}
 	void virtual RemoveEventFromGame(Script* script, void** filters)
