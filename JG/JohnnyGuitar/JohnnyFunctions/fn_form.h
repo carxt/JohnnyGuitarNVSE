@@ -44,8 +44,20 @@ DEFINE_COMMAND_PLUGIN(SetNoteRead, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetMessageIconPath, , 0, 3, kParamsJohnnyOneString_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetMessageIconPath, , 0, 2, kParamsJohnny_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetBodyPartTraitString, , 0, 3, kParamsJohnny_OneForm_TwoInts);
+DEFINE_COMMAND_PLUGIN(GetActorEffectType, , 0, 1, kParams_OneForm);
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
-
+bool Cmd_GetActorEffectType_Execute(COMMAND_ARGS) {
+	*result = 0;
+	SpellItem* effect;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &effect) && IS_TYPE(effect, SpellItem)) {
+		*result = effect->type;
+		if (IsConsoleMode()) Console_Print("GetActorEffectType >> %.2f", *result);
+	}
+	else {
+		*result = -1;
+	}
+	return true;
+}
 bool Cmd_GetBodyPartTraitString_Execute(COMMAND_ARGS) {
 	const char* resStr = NULL;
 	BGSBodyPartData* bpData;
