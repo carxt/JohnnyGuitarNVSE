@@ -35,7 +35,7 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS)
 	*soundPath = '\0';
 	UInt32 queuePriority = kPriorityAppend;
 	UInt32 justification = kJustifyLeft;
-	UInt32 titleFont = -1, subTitleFont = -1;
+	int titleFont = -1, subTitleFont = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &title, &subtitle, &soundPath, &queuePriority, &justification, &titleFont, &subTitleFont))
 	{
 		if (justification > kJustifyRight) justification = kJustifyRight;

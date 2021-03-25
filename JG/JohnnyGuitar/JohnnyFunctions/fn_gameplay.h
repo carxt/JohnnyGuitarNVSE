@@ -421,7 +421,7 @@ bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
-	UInt32 toExtract = -1;
+	int toExtract = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &toExtract) && toExtract <= 1) DoSkipMuzzleLights = toExtract;
 	*(UInt32*)result = (DoSkipMuzzleLights == 1);
 	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %u", *result);
