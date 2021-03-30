@@ -35,6 +35,7 @@ bool Cmd_MD5File_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH];
 	char outHash[0x21];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+		if (strstr(path, "..\\")) return true;
 		strcpy((char*)(strrchr(filename, '\\') + 1), path);
 		GetMD5File(filename, outHash);
 		if (IsConsoleMode())
@@ -50,6 +51,7 @@ bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH];
 	char outHash[0x29];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+		if (strstr(path, "..\\")) return true;
 		strcpy((char*)(strrchr(filename, '\\') + 1), path);
 		GetSHA1File(filename, outHash);
 		if (IsConsoleMode())
