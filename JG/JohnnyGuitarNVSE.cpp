@@ -76,6 +76,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_bsWin32Audio = BSWin32Audio::GetSingleton();
 		g_dataHandler = DataHandler::Get();
 		g_audioManager = (BSAudioManager*)0x11F6EF0;
+		g_currentSky = (Sky**)0x11DEA20;
 		break;
 	}
 	default:
@@ -92,7 +93,7 @@ bool NVSEPlugin_Query(const NVSEInterface * nvse, PluginInfo * info)
 	gLog.Open("JohnnyGuitarNVSE.log");
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
-	info->version = 370;
+	info->version = 371;
 
 	if (nvse->isNogore) 
 	{
