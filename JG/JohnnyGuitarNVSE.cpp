@@ -298,6 +298,9 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_TYPED_CMD(GetWeaponWorldModelPath, String);
 	REG_TYPED_CMD(GetBodyPartTraitString, String);
 	REG_CMD(GetActorEffectType);
+	REG_CMD(GetTextureWidth);
+	REG_CMD(GetTextureHeight);
+	REG_CMD(GetTextureFormat);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);
