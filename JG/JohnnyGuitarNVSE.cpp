@@ -301,6 +301,7 @@ bool NVSEPlugin_Load(const NVSEInterface * nvse)
 	REG_CMD(GetTextureWidth);
 	REG_CMD(GetTextureHeight);
 	REG_CMD(GetTextureFormat);
+	REG_CMD(GetTextureMipMapCount);
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 	CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 	initEventHooks(nvse);

@@ -7,7 +7,29 @@ DEFINE_COMMAND_PLUGIN(UwUDelete, , 0, 2, kParamsJohnny_OneString_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTextureWidth, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetTextureHeight, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParams_OneString);
 #include <filesystem>
+
+
+bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
+	char filepath[MAX_PATH];
+	*result = 0;
+	GetModuleFileNameA(NULL, filepath, MAX_PATH);
+	char path[MAX_PATH];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+		if (strstr(path, "..\\")) return true;
+		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
+		FileStream sourceFile;
+		if (sourceFile.OpenAt(filepath, 0x1C))
+		{
+			DWORD mipMapCount;
+			sourceFile.ReadBuf(&mipMapCount, 4);
+			*result = mipMapCount;
+			if (IsConsoleMode()) Console_Print("GetTextureMipMapCount >> %.f", *result);
+		}
+	}
+	return true;
+}
 bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 	char filepath[MAX_PATH];
 	*result = 0;
