@@ -1,5 +1,5 @@
 #pragma once
-#include "JohnnyGuitar/EventFilteringInterface.h"
+#include "events/EventFilteringInterface.h"
 
 bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
 NVSEArrayElement EventResultPtr;
