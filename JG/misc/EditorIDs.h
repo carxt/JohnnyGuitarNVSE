@@ -1,7 +1,7 @@
 #include <unordered_map>
 #include <inttypes.h>
 #include <mutex>
-std::unordered_map<uint32_t, const char *> g_EditorNameMap;
+std::unordered_map<uint32_t, const char*> g_EditorNameMap;
 std::mutex g_NameMapLock;
 
 __declspec(naked) void GetNameHook() {
@@ -37,7 +37,7 @@ namespace SpecialCaseEDIDs
 
 
 UInt32 __cdecl JGNVSE_GetFormIDFromEDID(char* edid) {
-	TESForm *form = ((TESForm * (__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
+	TESForm* form = ((TESForm * (__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
 	if (form) {
 		return form->refID;
 	}
@@ -45,7 +45,7 @@ UInt32 __cdecl JGNVSE_GetFormIDFromEDID(char* edid) {
 }
 
 // vftable + 0x130
-const char *TESForm::hk_GetName()
+const char* TESForm::hk_GetName()
 {
 	std::lock_guard<std::mutex> lock(g_NameMapLock);
 	auto itr = g_EditorNameMap.find(GetId());
@@ -58,7 +58,7 @@ const char *TESForm::hk_GetName()
 }
 
 // vftable + 0x134
-bool TESForm::hk_SetEditorId(const char *Name)
+bool TESForm::hk_SetEditorId(const char* Name)
 {
 	if (strcmp(Name, "SysWindowCompileAndRun")) {
 		std::lock_guard<std::mutex> lock(g_NameMapLock);

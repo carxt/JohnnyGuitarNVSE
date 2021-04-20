@@ -105,7 +105,7 @@ bool Cmd_GetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 		else if (textID == 2) {
 			text = entry->resultText.CStr();
 		}
-		StrIfc->Assign(PASS_COMMAND_ARGS, text);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, text);
 		if (IsConsoleMode()) Console_Print("GetTerminalMenuItemText >> %s", text);
 	}
 	return true;

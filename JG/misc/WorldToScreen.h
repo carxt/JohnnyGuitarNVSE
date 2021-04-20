@@ -125,16 +125,16 @@ struct NiCameraAlt //Defined here because the one in NVSE is wrong.
 struct JGWorldToScreenMatrix
 {
 
-		float			m_aafWorldToCam[4][4];	// 09C
-		NiFrustum		frustum;			// 0DC
-		float			minNearPlaneDist;	// 0F8
-		float			maxFarNearRatio;	// 0FC
-		NiViewport		m_kPort;			// 100
-		float			LODAdjust;			// 110
+	float			m_aafWorldToCam[4][4];	// 09C
+	NiFrustum		frustum;			// 0DC
+	float			minNearPlaneDist;	// 0F8
+	float			maxFarNearRatio;	// 0FC
+	NiViewport		m_kPort;			// 100
+	float			LODAdjust;			// 110
 
 };
 
-struct JGCameraPosition 
+struct JGCameraPosition
 {
 	NiMatrix33				m_localRotate;			// 34
 	NiVector3				m_localTranslate;		// 58
@@ -248,8 +248,8 @@ ParamInfo kParamsProjectionArgs[8] =
 
 void __stdcall CopyNiCamera(NiCameraAlt* MemoryAddressToCopy, float fov)
 {
-	SceneGraph* sing_SceneGraph = *(SceneGraph **)0x11DEB7C;
-	PlayerCharacter* g_ThePlayer = *(PlayerCharacter * *)0x11DEA3C;
+	SceneGraph* sing_SceneGraph = *(SceneGraph**)0x11DEB7C;
+	PlayerCharacter* g_ThePlayer = *(PlayerCharacter**)0x11DEA3C;
 	if (!sing_SceneGraph || !g_ThePlayer) return;
 	if ((NiCamera*)MemoryAddressToCopy != sing_SceneGraph->camera || fabs(fov - g_ThePlayer->worldFOV) > 0.0000099999997) return;
 	memcpy(JGGameCamera.CamPos, &(((NiAVObject*)MemoryAddressToCopy)->m_localRotate), sizeof(JGCameraPosition));

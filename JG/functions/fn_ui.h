@@ -1,5 +1,5 @@
 #pragma once
-DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , 0, 3, kParamsJohnny_OneString_OneInt_OneForm); 
+DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , 0, 3, kParamsJohnny_OneString_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetWorldSpaceMapTexture, , 0, 2, kParamsJohnny_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, NULL);
@@ -89,7 +89,7 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace) && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.m_data)) {
 		strcpy(path, worlspace->texture.ddsPath.m_data);
-		StrIfc->Assign(PASS_COMMAND_ARGS, path);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 		if (IsConsoleMode())
 			Console_Print("GetWorldSpaceMapTexture >> %s", path);
 	}

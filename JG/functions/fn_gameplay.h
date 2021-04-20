@@ -21,7 +21,7 @@ DEFINE_COMMAND_PLUGIN(DeactivateAllHighlightsAlt, , 1, 1, kParamsJohnnyOneOption
 DEFINE_COMMAND_PLUGIN(GetNearestCompassHostileDirection, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetNearestCompassHostile, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetDisablePlayerControlsHUDVisibilityFlags, SetDPCHUDFlags, , 0, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(IsCompassHostile, , 1,0, NULL);
+DEFINE_COMMAND_PLUGIN(IsCompassHostile, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(ToggleCombatMusic, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
@@ -161,7 +161,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
 	*result = -1;
 
 	NiPoint3* playerPos = g_thePlayer->GetPos();
-	
+
 	Setting* fSneakMaxDistance = (Setting*)0x11CD7D8;
 	Setting* fSneakExteriorDistanceMult = (Setting*)0x11CDCBC;
 	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();

@@ -3,7 +3,7 @@ DEFINE_COMMAND_PLUGIN(SetJohnnyOnDyingEventHandler, , 0, 4, kParamsJohnnyEventOn
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnStartQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnStopQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnySeenDataEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnLimbGoneEventHandler, , 0,5, kParamsJohnnyEventOneFormOneIntFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnLimbGoneEventHandler, , 0, 5, kParamsJohnnyEventOneFormOneIntFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnCrosshairEventHandler, , 0, 5, kParamsJohnnyEventOneFormOneIntFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnFailQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
@@ -33,7 +33,7 @@ void __fastcall handleRemovePerkEvent(BGSPerk* perk, void* edx, PlayerCharacter*
 	ThisStdCall(0x5EB800, perk, player, isTeammatePerk);
 
 }
-void __fastcall handleAddPerkEvent(BGSPerk *perk, void* edx, PlayerCharacter* player, UInt8 oldRank, UInt8 newRank, bool isTeammatePerk) {
+void __fastcall handleAddPerkEvent(BGSPerk* perk, void* edx, PlayerCharacter* player, UInt8 oldRank, UInt8 newRank, bool isTeammatePerk) {
 	for (auto const& callback : OnAddPerkHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
@@ -108,10 +108,10 @@ void __cdecl handleQuestFail(TESQuest* Quest) {
 void __cdecl handleSettingsUpdate() {
 	CdeclCall(0x7D6D70);
 	for (auto const& callback : OnSettingsUpdateHandler->EventCallbacks) {
-			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSettingsUpdateHandler->numMaxArgs);
+		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSettingsUpdateHandler->numMaxArgs);
 	}
 }
-ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL *cell) {
+ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
 	for (auto const& callback : OnSeenDataUpdateHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, cell)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
@@ -132,9 +132,9 @@ UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 __declspec(naked) void OnCrosshairEventAsm() {
 	static const UInt32 retnAddr = 0x775A69;
 	__asm {
-		mov ecx, [ebp+0x8]
+		mov ecx, [ebp + 0x8]
 		call handleCrosshairEvent
-		movzx ecx, [ebp+0x10]
+		movzx ecx, [ebp + 0x10]
 		test ecx, ecx
 		jmp retnAddr
 	}
@@ -360,7 +360,7 @@ bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL }; 
+	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
 	{
@@ -394,41 +394,35 @@ bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
 	}
 }
 
-void initEventHooks(const NVSEInterface* nvse)
+void HandleEventHooks()
 {
-
-
-	if (!(nvse->isEditor))
-	{
-		OnDyingHandler = JGCreateEvent("OnDying", 1, 1, NULL);
-		OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1, NULL);
-		OnStopQuestHandler = JGCreateEvent("OnStopQuest", 1, 1, NULL);
-		OnSeenDataUpdateHandler = JGCreateEvent("OnSeenDataUpdate", 1, 1, NULL);
-		OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2, 2, CreateOneFormOneIntFilter);
-		OnChallengeCompleteHandler = JGCreateEvent("OnChallengeComplete", 1, 1, NULL);
-		OnCrosshairHandler = JGCreateEvent("OnCrosshair", 1, 2, CreateOneFormOneIntFilter);
-		OnCompleteQuestHandler = JGCreateEvent("OnCompleteQuest", 1, 1, NULL);
-		OnFailQuestHandler = JGCreateEvent("OnFailQuest", 1, 1, NULL);
-		OnSettingsUpdateHandler = JGCreateEvent("OnSettingsUpdate", 0, 0, NULL);
-		OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3, 1, NULL);
-		OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1, 1, NULL);
-		FunctionCallScript = g_script->CallFunction;
-		WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
-		WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
-		WriteRelJump(0x89F4A4, (UINT)OnDyingEventAsm);
-		WriteRelJump(0x60CA24, (UINT)OnQuestStartStopEventAsm);
-		WriteRelCall(0x572FF1, (UINT)HandleLimbGoneEvent);
-		WriteRelCall(0x5F5C78, (UINT)HandleChallengeCompleteEvent);
-		WriteRelCall(0x5F6222, (UINT)HandleChallengeCompleteEvent);
-		WriteRelCall(0x776010, (UINT)handleCrosshairEvent);
-		WriteRelCall(0x60CB5A, (UINT)handleQuestFail);
-		WriteRelCall(0x60CA78, (UINT)handleQuestComplete);
-		WriteRelCall(0x7CEC93, (UINT)handleSettingsUpdate);
-		WriteRelCall(0x7D11AD, (UINT)handleSettingsUpdate);
-		WriteRelCall(0x96380E, (UINT)handleAddPerkEvent);
-		WriteRelCall(0x9638D2, (UINT)handleAddPerkEvent);
-		WriteRelCall(0x96398C, (UINT)handleRemovePerkEvent);
-		SafeWrite8(0x60CA29, 0xCC);
-	}
-
+	OnDyingHandler = JGCreateEvent("OnDying", 1, 1, NULL);
+	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1, NULL);
+	OnStopQuestHandler = JGCreateEvent("OnStopQuest", 1, 1, NULL);
+	OnSeenDataUpdateHandler = JGCreateEvent("OnSeenDataUpdate", 1, 1, NULL);
+	OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2, 2, CreateOneFormOneIntFilter);
+	OnChallengeCompleteHandler = JGCreateEvent("OnChallengeComplete", 1, 1, NULL);
+	OnCrosshairHandler = JGCreateEvent("OnCrosshair", 1, 2, CreateOneFormOneIntFilter);
+	OnCompleteQuestHandler = JGCreateEvent("OnCompleteQuest", 1, 1, NULL);
+	OnFailQuestHandler = JGCreateEvent("OnFailQuest", 1, 1, NULL);
+	OnSettingsUpdateHandler = JGCreateEvent("OnSettingsUpdate", 0, 0, NULL);
+	OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3, 1, NULL);
+	OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1, 1, NULL);
+	FunctionCallScript = g_scriptInterface->CallFunction;
+	WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
+	WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
+	WriteRelJump(0x89F4A4, (UINT)OnDyingEventAsm);
+	WriteRelJump(0x60CA24, (UINT)OnQuestStartStopEventAsm);
+	WriteRelCall(0x572FF1, (UINT)HandleLimbGoneEvent);
+	WriteRelCall(0x5F5C78, (UINT)HandleChallengeCompleteEvent);
+	WriteRelCall(0x5F6222, (UINT)HandleChallengeCompleteEvent);
+	WriteRelCall(0x776010, (UINT)handleCrosshairEvent);
+	WriteRelCall(0x60CB5A, (UINT)handleQuestFail);
+	WriteRelCall(0x60CA78, (UINT)handleQuestComplete);
+	WriteRelCall(0x7CEC93, (UINT)handleSettingsUpdate);
+	WriteRelCall(0x7D11AD, (UINT)handleSettingsUpdate);
+	WriteRelCall(0x96380E, (UINT)handleAddPerkEvent);
+	WriteRelCall(0x9638D2, (UINT)handleAddPerkEvent);
+	WriteRelCall(0x96398C, (UINT)handleRemovePerkEvent);
+	SafeWrite8(0x60CA29, 0xCC);
 }

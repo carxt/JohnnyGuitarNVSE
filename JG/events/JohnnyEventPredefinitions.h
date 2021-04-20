@@ -4,7 +4,7 @@
 bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
 NVSEArrayElement EventResultPtr;
 class EventInformation;
-void*  __fastcall GenericCreateFilterFunction( void** maxFilters, UInt32 numFilters);
+void* __fastcall GenericCreateFilterFunction(void** maxFilters, UInt32 numFilters);
 
 
 class JohnnyEventFiltersForm : EventHandlerInterface
@@ -22,7 +22,7 @@ private:
 	}
 public:
 
-	
+
 	JohnnyEventFiltersForm(void** filters, UInt32 nuFilters)
 	{
 		numFilters = nuFilters;
@@ -191,7 +191,7 @@ public:
 				int i = 0; // filter iterator
 				for (; i < maxFilters; i++)
 				{
-					if (!(it->eventFilter->IsFilterEqual(filters[i],i ))) break;
+					if (!(it->eventFilter->IsFilterEqual(filters[i], i))) break;
 				}
 				if (i >= maxFilters) return;
 			}
@@ -220,7 +220,7 @@ public:
 		if (maxFilters)
 		{
 
-			*(void**)& (NewEvent.eventFilter) = this->CreateFilter(filters, maxFilters);
+			*(void**)&(NewEvent.eventFilter) = this->CreateFilter(filters, maxFilters);
 			NewEvent.eventFilter->SetUpFiltering();
 		}
 		std::unique_lock wLock(QueueRWLock);
@@ -285,8 +285,8 @@ std::vector<EventInfo> EventsArray;
 
 
 
-void*  __fastcall GenericCreateFilterFunction(void** Filters, UInt32 numFilters) {
-	return new JohnnyEventFiltersForm( Filters, numFilters );
+void* __fastcall GenericCreateFilterFunction(void** Filters, UInt32 numFilters) {
+	return new JohnnyEventFiltersForm(Filters, numFilters);
 }
 
 
@@ -303,7 +303,7 @@ EventInfo FindHandlerInfoByChar(const char* nameToFind)
 	return NULL;
 }
 
-EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)( void**, UInt32) )
+EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32))
 {
 	EventInfo eventinfo = new EventInformation(EventName, maxArgs, maxFilters, CreatorFunction);
 	EventsArray.push_back(eventinfo);

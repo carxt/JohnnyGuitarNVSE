@@ -15,17 +15,17 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && IS_TYPE(region, TESRegion)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
-			NVSEArrayVar* weatherArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
+			NVSEArrayVar* weatherArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
 			do
 			{
 				if (iter->data) {
-					ArrIfc->AppendElement(weatherArr, NVSEArrayElement(iter->data->weather));
+					g_arrInterface->AppendElement(weatherArr, NVSEArrayElement(iter->data->weather));
 					if (IsConsoleMode())
 						Console_Print(iter->data->weather->GetName());
 				}
 			} while (iter = iter->next);
-			if (ArrIfc->GetArraySize(weatherArr)) ArrIfc->AssignCommandResult(weatherArr, result);
+			if (g_arrInterface->GetArraySize(weatherArr)) g_arrInterface->AssignCommandResult(weatherArr, result);
 		}
 	}
 	return true;

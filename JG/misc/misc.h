@@ -11,34 +11,34 @@ inline float tan_p(float angle)
 }
 
 
- 
- __forceinline float dTan(float angle) {
-	 {
-		 while (angle > kDblPIx2)
-			 angle -= kDblPIx2;
 
-		 int octant = int(angle * kDbl4dPI);
-		 switch (octant)
-		 {
-		 case 0:
-			 return tan_p(angle);
-		 case 1:
-			 return 1.0 / tan_p(kDblPId2 - angle);
-		 case 2:
-			 return -1.0 / tan_p(angle - kDblPId2);
-		 case 3:
-			 return -tan_p(kDblPI - angle);
-		 case 4:
-			 return tan_p(angle - kDblPI);
-		 case 5:
-			 return 1.0 / tan_p(kDblPIx3d2 - angle);
-		 case 6:
-			 return -1.0 / tan_p(angle - kDblPIx3d2);
-		 default:
-			 return -tan_p(kDblPIx2 - angle);
-		 }
-	 }
- }
+__forceinline float dTan(float angle) {
+	{
+		while (angle > kDblPIx2)
+			angle -= kDblPIx2;
+
+		int octant = int(angle * kDbl4dPI);
+		switch (octant)
+		{
+		case 0:
+			return tan_p(angle);
+		case 1:
+			return 1.0 / tan_p(kDblPId2 - angle);
+		case 2:
+			return -1.0 / tan_p(angle - kDblPId2);
+		case 3:
+			return -tan_p(kDblPI - angle);
+		case 4:
+			return tan_p(angle - kDblPI);
+		case 5:
+			return 1.0 / tan_p(kDblPIx3d2 - angle);
+		case 6:
+			return -1.0 / tan_p(angle - kDblPIx3d2);
+		default:
+			return -tan_p(kDblPIx2 - angle);
+		}
+	}
+}
 
 float fastDTan(float value) {
 	bool sign = (value < 0);
@@ -56,10 +56,10 @@ float fastDTan(float value) {
 
 
 
-void setVarByName(VARARGS, const char *var_name, float value)
+void setVarByName(VARARGS, const char* var_name, float value)
 {
 	ListNode<VariableInfo>* traverse = scriptObj->varList.Head();
-	VariableInfo *varInfo;
+	VariableInfo* varInfo;
 	do
 	{
 		varInfo = traverse->data;
@@ -100,16 +100,16 @@ public:
 	LevelUpMenu();
 	~LevelUpMenu();
 	UInt32 isPerkMenu;
-	TileText *tile2C;
-	TileImage *tile30;
-	TileImage *tile34;
-	TileImage *tile38;
-	TileText *tile3C;
-	TileText *tile40;
-	TileImage *tile44;
-	TileImage *tile48;
-	TileImage *tileBackBtn;
-	TileImage *tile50;
+	TileText* tile2C;
+	TileImage* tile30;
+	TileImage* tile34;
+	TileImage* tile38;
+	TileText* tile3C;
+	TileText* tile40;
+	TileImage* tile44;
+	TileImage* tile48;
+	TileImage* tileBackBtn;
+	TileImage* tile50;
 	UInt32 unk54;
 	UInt32 unk58;
 	UInt32 unk5C;
@@ -138,37 +138,37 @@ public:
 	float ENAM;
 	float FNAM;
 	float GNAM;
-	TESSound *HNAM;
-	TESSound *INAM;
+	TESSound* HNAM;
+	TESSound* INAM;
 };
 STATIC_ASSERT(sizeof(MediaSet) == 0xC4);
 struct ItemEntryData
 {
-	TESForm				*type;
-	ContChangesEntry	*entry;
-	ExtraDataList		*xData;
+	TESForm* type;
+	ContChangesEntry* entry;
+	ExtraDataList* xData;
 
 	ItemEntryData() {}
-	ItemEntryData(TESForm *_type, ContChangesEntry *_entry, ExtraDataList *_xData) : type(_type), entry(_entry), xData(_xData) {}
+	ItemEntryData(TESForm* _type, ContChangesEntry* _entry, ExtraDataList* _xData) : type(_type), entry(_entry), xData(_xData) {}
 };
 class InventoryRef
 {
 public:
 	ItemEntryData	data;
-	TESObjectREFR	*containerRef;
-	TESObjectREFR	*tempRef;
+	TESObjectREFR* containerRef;
+	TESObjectREFR* tempRef;
 	UInt32			deferredActions[6];
 	bool			doValidation;
 	bool			removed;
 
-	bool CreateExtraData(BSExtraData *xBSData);
+	bool CreateExtraData(BSExtraData* xBSData);
 };
 
-bool InventoryRef::CreateExtraData(BSExtraData *xBSData)
+bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
 {
-	ExtraContainerChanges::EntryDataList *entryList = containerRef->GetContainerChangesList();
+	ExtraContainerChanges::EntryDataList* entryList = containerRef->GetContainerChangesList();
 	if (!entryList) return false;
-	ContChangesEntry *entry = entryList->FindForItem(data.type);
+	ContChangesEntry* entry = entryList->FindForItem(data.type);
 	if (!entry) return false;
 	data.xData = ExtraDataList::Create(xBSData);
 	if (!entry->extendData)
@@ -180,7 +180,7 @@ bool InventoryRef::CreateExtraData(BSExtraData *xBSData)
 	return true;
 }
 
-InventoryRef* (*InventoryRefCreate)(TESObjectREFR *container, const ItemEntryData &data, bool bValidate);
+InventoryRef* (*InventoryRefCreate)(TESObjectREFR* container, const ItemEntryData& data, bool bValidate);
 
 //Only ready for a 24-bit BMP, will check for non-24 bit later.
 //Also currently doesn't handle negative height/width BMPs, will fix later
@@ -192,8 +192,8 @@ bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long
 		return false;
 	char info[54];
 	fread(info, sizeof(char), 54, f);
-	int width = *(int*)& info[18];
-	int height = *(int*)& info[22];
+	int width = *(int*)&info[18];
+	int height = *(int*)&info[22];
 	if (width < PixelW || height < PixelH) return false;
 	int XPadding = (width * 3 + 3) & (~3);
 	BYTE* data = new BYTE[XPadding];
@@ -211,9 +211,9 @@ bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long
 
 bool AlchemyItem::IsPoison()
 {
-	EffectItem *effItem;
-	EffectSetting *effSetting = NULL;
-	ListNode<EffectItem> *iter = magicItem.list.list.Head();
+	EffectItem* effItem;
+	EffectSetting* effSetting = NULL;
+	ListNode<EffectItem>* iter = magicItem.list.list.Head();
 	do
 	{
 		if (!(effItem = iter->data)) continue;

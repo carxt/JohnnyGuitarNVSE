@@ -3,11 +3,11 @@
 #include <unordered_map>
 #pragma once
 
-NVSEArrayVarInterface* ArrIfc = NULL;
-NVSEStringVarInterface* StrIfc = NULL;
+NVSEArrayVarInterface* g_arrInterface = NULL;
+NVSEStringVarInterface* g_strInterface = NULL;
 NVSEMessagingInterface* g_msg = NULL;
-NVSEScriptInterface* g_script = NULL;
-NVSECommandTableInterface* CmdIfc = NULL;
+NVSEScriptInterface* g_scriptInterface = NULL;
+NVSECommandTableInterface* g_cmdTableInterface = NULL;
 InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
 void DisableMuzzleFlashLightsHook();
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, UInt8 arg4, ContChangesEntry* entry, UInt8 arg6, UInt8 arg7, int arg8, float arg9, float arg10, UInt8 arg11, UInt8 arg12, TESForm* ammo) =
@@ -15,8 +15,8 @@ float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float cond
 bool isShowLevelUp = true;
 bool bArrowKeysDisabled = false;
 bool bCombatMusicDisabled = false;
-char* StrArgBuf;
-#define ExtractFormatStringArgs(...) g_script->ExtractFormatStringArgs(__VA_ARGS__)
+char* s_strArgBuf;
+#define ExtractFormatStringArgs(...) g_scriptInterface->ExtractFormatStringArgs(__VA_ARGS__)
 #define IS_TYPE(form, type) (*(UInt32*)form == kVtbl_##type)
 #define NOT_ID(form, type) (form->typeID != kFormType_##type)
 #define IS_ID(form, type) (form->typeID == kFormType_##type)
@@ -57,10 +57,10 @@ void __fastcall hk_BipedModel_UpdateWeapon(ValidBip01Names* BipedAnim, Character
 	{
 		if (auto weapInfo = fnCharacter->baseProcess->GetWeaponInfo())
 		{
-				weapMods = ContChangesEntry_GetWeaponModFlags(weapInfo);
+			weapMods = ContChangesEntry_GetWeaponModFlags(weapInfo);
 
 		}
-		
+
 	}
 	OriginalBipedModelUpdateWeapon(BipedAnim, weap, weapMods);
 }
@@ -69,7 +69,7 @@ __declspec (naked) void asm_BipedModelUpdateWeapon()
 {
 	__asm
 	{
-		mov edx, dword ptr [ebp+0x8]
+		mov edx, dword ptr[ebp + 0x8]
 		jmp hk_BipedModel_UpdateWeapon
 	}
 }
@@ -155,11 +155,11 @@ TESActorBase* Actor::GetActorBase()
 }
 
 
-char** DefaultMarkers = (char**) 0x11A0404;
+char** DefaultMarkers = (char**)0x11A0404;
 
 char* __fastcall hk_GetMapMarker(TESObjectREFR* thisObj, UInt16 MapMarkerType)
 {
-	
+
 	auto it = CustomMapMarkerMap.find(thisObj->refID);
 	if (it != CustomMapMarkerMap.end()) return it->second;
 	return DefaultMarkers[MapMarkerType];
@@ -171,7 +171,7 @@ __declspec (naked) void AsmGetMapMarkerRoute()
 	__asm
 	{
 		mov edx, eax
-		mov ecx, [ebp-0x24]
+		mov ecx, [ebp - 0x24]
 		jmp hk_GetMapMarker
 	}
 }
@@ -371,7 +371,7 @@ NiAVObject* NiNode::GetBlock(const char* blockName)
 	{
 		if (!*iter) continue;
 		if (iter->GetNiNode())
-			found = ((NiNode*)* iter)->GetBlock(blockName);
+			found = ((NiNode*)*iter)->GetBlock(blockName);
 		else if (StrEqualCI(iter->m_blockName, blockName))
 			found = *iter;
 		else continue;
@@ -432,7 +432,7 @@ __declspec(naked) void DialogueAnimHook() {
 		test eax, eax
 		jnz ANIM
 		jmp retnAddr
-		ANIM:
+		ANIM :
 
 		jmp jumpAddr
 	}
@@ -440,9 +440,9 @@ __declspec(naked) void DialogueAnimHook() {
 __declspec(naked) void DisableArrowKeysHook() {
 	static const UInt32 retnAddr = 0x70F711;
 	__asm {
-		cmp byte ptr [bArrowKeysDisabled], 1
+		cmp byte ptr[bArrowKeysDisabled], 1
 		jnz DONE
-		cmp dword ptr [ebp+8], 4
+		cmp dword ptr[ebp + 8], 4
 		jnz MATCHED
 		cmp dword ptr[ebp + 8], 3
 		jnz MATCHED
@@ -451,10 +451,10 @@ __declspec(naked) void DisableArrowKeysHook() {
 		cmp dword ptr[ebp + 8], 2
 		jnz MATCHED
 		jmp DONE
-		MATCHED:
-			mov dword ptr[ebp+8], 0
-		DONE:
-			mov byte ptr[ebp-0xD], 0
+		MATCHED :
+		mov dword ptr[ebp + 8], 0
+			DONE :
+			mov byte ptr[ebp - 0xD], 0
 			mov eax, 1
 			jmp retnAddr
 	}
@@ -463,16 +463,16 @@ __declspec(naked) void FixNPCIncrementingChallenges() {
 	static const UInt32 retnAddr = 0x88D0D8;
 	static const UInt32 noIncrementAddr = 0x88D100;
 	__asm {
-		mov eax, [ebp-0x80]
-		cmp eax, dword ptr ds:[0x11DEA3C]
+		mov eax, [ebp - 0x80]
+		cmp eax, dword ptr ds : [0x11DEA3C]
 		jz INCREMENT
 		jmp noIncrementAddr
-		INCREMENT:
+		INCREMENT :
 		push 0
-		push 0
-		push 0
-		push 0
-		jmp retnAddr
+			push 0
+			push 0
+			push 0
+			jmp retnAddr
 	}
 }
 void __fastcall PlayQuestFailSound(Sound* sound, int dummy) {
@@ -514,10 +514,10 @@ static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 
 void ResetVanityWheel()
 {
-	float* VanityWheel = (float*) 0x11E0B5C;
-	float* MaxChaseCam = (ThisStdCall<float*>((uintptr_t)0x0403E20,(void*)0x11CD568));
+	float* VanityWheel = (float*)0x11E0B5C;
+	float* MaxChaseCam = (ThisStdCall<float*>((uintptr_t)0x0403E20, (void*)0x11CD568));
 	if (*MaxChaseCam < *VanityWheel)
-		* VanityWheel = *MaxChaseCam;
+		*VanityWheel = *MaxChaseCam;
 }
 
 
@@ -575,8 +575,8 @@ void HandleGameHooks()
 	PatchMemoryNop(0x8A56C4, 4); // Fix for animations not working in dialog topics with sound
 	PatchMemoryNop(0x8A56C8, 4);
 	WriteRelJump(0x70F708, (UInt32)DisableArrowKeysHook);
-	patchFixDisintegrationsStat(); 
-	WriteRelJump(0x88D0D0, (UInt32)FixNPCIncrementingChallenges); 
+	patchFixDisintegrationsStat();
+	WriteRelJump(0x88D0D0, (UInt32)FixNPCIncrementingChallenges);
 	WriteRelCall(0x77A8E9, (UInt32)PlayQuestFailSound);
 	WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
 	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4); // to use fWeapSkillReqPenalty correctly in spread calc
@@ -589,7 +589,7 @@ void HandleGameHooks()
 	if (loadEditorIDs) LoadEditorIDs();
 	WriteRelCall(0x06061E8, (uintptr_t)asm_BipedModelUpdateWeapon);
 	if (capLoadScreensTo60)SafeWrite8(0x78D4A4, 0x10);
-	
+
 }
 
 

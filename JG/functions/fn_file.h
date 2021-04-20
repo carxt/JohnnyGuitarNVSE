@@ -122,7 +122,7 @@ bool Cmd_MD5File_Execute(COMMAND_ARGS) {
 		GetMD5File(filename, outHash);
 		if (IsConsoleMode())
 			Console_Print(outHash);
-		StrIfc->Assign(PASS_COMMAND_ARGS, outHash);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, outHash);
 	}
 	return true;
 }
@@ -138,7 +138,7 @@ bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
 		GetSHA1File(filename, outHash);
 		if (IsConsoleMode())
 			Console_Print(outHash);
-		StrIfc->Assign(PASS_COMMAND_ARGS, outHash);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, outHash);
 	}
 	return true;
 }

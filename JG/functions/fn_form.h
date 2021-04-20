@@ -87,9 +87,9 @@ bool Cmd_GetBodyPartTraitString_Execute(COMMAND_ARGS) {
 			default:
 				break;
 			}
-			StrIfc->Assign(PASS_COMMAND_ARGS, resStr);
+			g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
 		}
-		
+
 	}
 	return true;
 }
@@ -111,7 +111,7 @@ bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 			}
 		}
 		if (IsConsoleMode()) Console_Print("GetMessageIconPath >> %s", path);
-		StrIfc->Assign(PASS_COMMAND_ARGS, path);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 	}
 	return true;
 }
@@ -158,22 +158,22 @@ bool Cmd_GetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	UInt32 traitID = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &traitID) && IS_TYPE(weap, TESObjectWEAP)) {
 		switch (traitID) {
-			case 1:
-				*result = weap->vatsSkill;
-				break;
-			case 2:
-				*result = weap->vatsDamMult;
-				break;
-			case 3:
-				*result = weap->vatsAP;
-				break;
-			case 4:
-				*result = weap->isSilent;
-				break;
-			case 5:
-				*result = weap->modRequired;
-				break;
-			}
+		case 1:
+			*result = weap->vatsSkill;
+			break;
+		case 2:
+			*result = weap->vatsDamMult;
+			break;
+		case 3:
+			*result = weap->vatsAP;
+			break;
+		case 4:
+			*result = weap->isSilent;
+			break;
+		case 5:
+			*result = weap->modRequired;
+			break;
+		}
 		if (IsConsoleMode()) Console_Print("GetWeaponVATSTraitNumeric %d >> %f", traitID, *result);
 	}
 	return true;
@@ -185,22 +185,22 @@ bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	float value;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &traitID, &value) && IS_TYPE(weap, TESObjectWEAP)) {
 		switch (traitID) {
-			case 1:
-				weap->vatsSkill = value;
-				break;
-			case 2:
-				weap->vatsDamMult = value;
-				break;
-			case 3:
-				weap->vatsAP = value;
-				break;
-			case 4:
-				weap->isSilent = (value > 0 ? 1 : 0);
-				break;
-			case 5:
-				weap->modRequired = (value > 0 ? 1 : 0);
-				break;
-			}
+		case 1:
+			weap->vatsSkill = value;
+			break;
+		case 2:
+			weap->vatsDamMult = value;
+			break;
+		case 3:
+			weap->vatsAP = value;
+			break;
+		case 4:
+			weap->isSilent = (value > 0 ? 1 : 0);
+			break;
+		case 5:
+			weap->modRequired = (value > 0 ? 1 : 0);
+			break;
+		}
 	}
 	return true;
 }
@@ -216,10 +216,10 @@ bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
 bool Cmd_GetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectWEAP* weapon;
-	const char *modelPath;
+	const char* modelPath;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && IS_TYPE(weapon, TESObjectWEAP)) {
 		modelPath = weapon->model200.GetModelPath();
-		StrIfc->Assign(PASS_COMMAND_ARGS, modelPath);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, modelPath);
 		*result = 1;
 		if (IsConsoleMode()) Console_Print("GetWeaponWorldModelPath >> %s", modelPath);
 	}
@@ -357,7 +357,7 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 	SInt32 rank = -1;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &faction, &rank);
 	if (faction) {
-		NVSEArrayVar* factionMemberArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
+		NVSEArrayVar* factionMemberArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 		for (TESBoundObject* object = g_dataHandler->boundObjectList->first; object; object = object->next)
 		{
 			TESActorBase* actorBase = DYNAMIC_CAST(object, TESBoundObject, TESActorBase);
@@ -369,13 +369,13 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 					factionData = fctIter->data;
 					if (factionData && factionData->faction && factionData->faction == faction) {
 						if (rank == -1 || (rank == factionData->rank)) {
-							ArrIfc->AppendElement(factionMemberArr, NVSEArrayElement(actorBase));
+							g_arrInterface->AppendElement(factionMemberArr, NVSEArrayElement(actorBase));
 						}
 					}
 				} while (fctIter = fctIter->next);
 			}
 		}
-		if (ArrIfc->GetArraySize(factionMemberArr)) ArrIfc->AssignCommandResult(factionMemberArr, result);
+		if (g_arrInterface->GetArraySize(factionMemberArr)) g_arrInterface->AssignCommandResult(factionMemberArr, result);
 	}
 	return true;
 }
@@ -401,7 +401,7 @@ bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
 		if (isFemale <= 1 && modelID <= 7) {
 			path = race->faceModels[isFemale][modelID].nifPath.CStr();
 			if (path) {
-				StrIfc->Assign(PASS_COMMAND_ARGS, path);
+				g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 				if (IsConsoleMode()) {
 					Console_Print("GetRaceHeadModelPath %i %i >> %s", modelID, isFemale, path);
 				}
@@ -418,7 +418,7 @@ bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
 		if (isFemale <= 1 && modelID <= 2) {
 			path = race->bodyModels[isFemale][modelID].nifPath.CStr();
 			if (path) {
-				StrIfc->Assign(PASS_COMMAND_ARGS, path);
+				g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 				if (IsConsoleMode()) {
 					Console_Print("GetRaceModelPath %i %i >> %s", modelID, isFemale, path);
 				}
@@ -491,7 +491,7 @@ bool Cmd_GetMusicTypePath_Execute(COMMAND_ARGS) {
 	const char* path = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype) && IS_TYPE(mtype, BGSMusicType)) {
 		path = mtype->soundFile.path.CStr();
-		StrIfc->Assign(PASS_COMMAND_ARGS, path);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 		if (IsConsoleMode()) {
 			Console_Print("GetMusicTypePath >> %s", path);
 		}

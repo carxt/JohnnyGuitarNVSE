@@ -17,7 +17,7 @@ public:
 
 	JohnnyEventFiltersOneFormOneInt(void** filters, UInt32 nuFilters)
 	{
-		
+
 		numFilters = nuFilters;
 		Filters = new RefUnorderedSet[numFilters];
 		GenFilters = new GenericFilters[numFilters];
@@ -91,7 +91,7 @@ public:
 		else if (IsAcceptedParameter(currentFilter)) InsertToFilter(0, currentFilter->refID);
 
 	}
-	
+
 };
 void* __fastcall CreateOneFormOneIntFilter(void** Filters, UInt32 numFilters) {
 	return new JohnnyEventFiltersOneFormOneInt(Filters, numFilters);
