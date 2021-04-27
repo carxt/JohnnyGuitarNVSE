@@ -1,4 +1,5 @@
 #pragma once
+// Alternative actor value functions to allow using numeric AV IDs
 DEFINE_COMMAND_ALT_PLUGIN(GetActorValueAlt, GetAVAlt, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetActorValueAlt, SetAVAlt, , 1, 2, kParams_TwoInts);
 DEFINE_COMMAND_ALT_PLUGIN(GetBaseActorValueAlt, GetBaseAVAlt, , 1, 1, kParams_OneInt);

@@ -46,6 +46,7 @@ InterfaceManager* g_interfaceManager = nullptr;
 BSWin32Audio* g_bsWin32Audio = nullptr;
 DataHandler* g_dataHandler = nullptr;
 BSAudioManager* g_audioManager = nullptr;
+GameTimeGlobals* g_gameTimeGlobals = nullptr;
 Sky** g_currentSky = nullptr;
 void(__thiscall* OriginalBipedModelUpdateWeapon)(ValidBip01Names*, TESObjectWEAP*, int) = (void(__thiscall*)(ValidBip01Names*, TESObjectWEAP*, int)) 0x4AB400;
 UInt8(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (UInt8(__thiscall*)(ContChangesEntry*)) 0x4BD820;
@@ -551,15 +552,11 @@ TESRegionDataWeather* GetWeatherData(TESRegion* region) {
 }
 void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseExtraList* a3, UInt32 itemCount, NiPoint3* a5, void* a6) {
 	if (itemCount > 10000) {
-		while (itemCount > 10000) {
-			itemCount -= 10000;
+		for (itemCount; itemCount > 10000; itemCount -= 10000) {
 			ThisStdCall(0x954610, a1, a2, a3, 10000, a5, a6);
 		}
-		ThisStdCall(0x954610, a1, a2, a3, itemCount, a5, a6);
 	}
-	else {
-		ThisStdCall(0x954610, a1, a2, a3, itemCount, a5, a6);
-	}
+	ThisStdCall(0x954610, a1, a2, a3, itemCount, a5, a6);
 }
 
 void HandleGameHooks()

@@ -4,14 +4,13 @@
 bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
 NVSEArrayElement EventResultPtr;
 class EventInformation;
-void* __fastcall GenericCreateFilterFunction(void** maxFilters, UInt32 numFilters);
+void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
 
 
 class JohnnyEventFiltersForm : EventHandlerInterface
 {
-
-
 	typedef  std::unordered_set<unsigned int> RefUnorderedSet;
+
 private:
 	RefUnorderedSet* Filters = 0;
 
@@ -21,8 +20,6 @@ private:
 		return &(Filters[filter]);
 	}
 public:
-
-
 	JohnnyEventFiltersForm(void** filters, UInt32 nuFilters)
 	{
 		numFilters = nuFilters;
@@ -101,11 +98,7 @@ public:
 
 			}
 			else InsertToFilter(i, currentFilter->refID);
-
-
 		}
-
-
 	}
 
 	__forceinline bool IsBaseInFilter(UInt32 filterNum, TESForm* form)
@@ -124,26 +117,6 @@ public:
 	}
 };
 
-
-
-
-
-inline UInt32 RetrieveAddrFromDisp32Opcode(UInt32 address)
-{
-	//works for 5 byte opcodes like far call, far jmp, etc
-	//for a 6 byte opcode you should pass address + 1
-	return *(UInt32*)(address + 1) + address + 5;
-}
-
-UInt32 NumEvents = 0;
-
-
-
-NVSEArrayElement e_eventResult;
-
-
-
-
 class EventInformation
 {
 private:
@@ -160,7 +133,7 @@ public:
 		this->EventName = EventName;
 		this->numMaxArgs = numMaxArgs;
 		this->numMaxFilters = numMaxFilters;
-		this->CreateFilter = GenericCreateFilterFunction;
+		this->CreateFilter = GenericCreateFilter;
 		if (CreatorFunction) this->CreateFilter = CreatorFunction;
 	}
 	virtual ~EventInformation()
@@ -226,7 +199,7 @@ public:
 		std::unique_lock wLock(QueueRWLock);
 		this->EventQueueAdd.push_back(NewEvent);
 	}
-	void virtual RemoveEventFromGame(Script* script, void** filters)
+	void virtual RemoveEvent(Script* script, void** filters)
 	{
 		auto it = EventCallbacks.begin();
 		while (it != EventCallbacks.end())
@@ -256,7 +229,7 @@ public:
 		EventCallbacks.insert(EventCallbacks.end(), EventQueueAdd.begin(), EventQueueAdd.end());
 		EventQueueAdd.clear();
 	}
-	void virtual DeleteEventsFromMemory()
+	void virtual DeleteEvents()
 	{
 		auto it = EventCallbacks.begin();
 		while (it != EventCallbacks.end())
@@ -285,7 +258,7 @@ std::vector<EventInfo> EventsArray;
 
 
 
-void* __fastcall GenericCreateFilterFunction(void** Filters, UInt32 numFilters) {
+void* __fastcall GenericCreateFilter(void** Filters, UInt32 numFilters) {
 	return new JohnnyEventFiltersForm(Filters, numFilters);
 }
 

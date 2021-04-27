@@ -66,7 +66,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		for (const auto& EventInfo : EventsArray)
 		{
 			EventInfo->AddQueuedEvents();
-			EventInfo->DeleteEventsFromMemory();
+			EventInfo->DeleteEvents();
 		}
 		break;
 	case NVSEMessagingInterface::kMessage_DeferredInit: {
@@ -77,6 +77,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_dataHandler = DataHandler::Get();
 		g_audioManager = (BSAudioManager*)0x11F6EF0;
 		g_currentSky = (Sky**)0x11DEA20;
+		g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 		break;
 	}
 	default:

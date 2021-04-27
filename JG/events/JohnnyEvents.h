@@ -11,6 +11,7 @@ DEFINE_COMMAND_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, , 0, 4, kParamsJohnn
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, , 0, 3, kParamsJohnnyEventUnfiltered);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnAddPerkEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnRemovePerkEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
+
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
@@ -23,6 +24,7 @@ EventInformation* OnCrosshairHandler;
 EventInformation* OnSettingsUpdateHandler;
 EventInformation* OnAddPerkHandler;
 EventInformation* OnRemovePerkHandler;
+
 void __fastcall handleRemovePerkEvent(BGSPerk* perk, void* edx, PlayerCharacter* player, bool isTeammatePerk) {
 	for (auto const& callback : OnRemovePerkHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
@@ -185,7 +187,7 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnLimbGoneHandler->RegisterEvent(script, (void**)&filter);
-			else OnLimbGoneHandler->RemoveEventFromGame(script, (void**)&filter);
+			else OnLimbGoneHandler->RemoveEvent(script, (void**)&filter);
 
 		}
 		return true;
@@ -202,7 +204,7 @@ bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnSettingsUpdateHandler->RegisterEvent(script, NULL);
-			else OnSettingsUpdateHandler->RemoveEventFromGame(script, NULL);
+			else OnSettingsUpdateHandler->RemoveEvent(script, NULL);
 
 		}
 		return true;
@@ -220,7 +222,7 @@ bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnCrosshairHandler->RegisterEvent(script, (void**)&filter);
-			else OnCrosshairHandler->RemoveEventFromGame(script, (void**)&filter);
+			else OnCrosshairHandler->RemoveEvent(script, (void**)&filter);
 
 		}
 		return true;
@@ -238,7 +240,7 @@ bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnRemovePerkHandler->RegisterEvent(script, (void**)filter);
-			else OnRemovePerkHandler->RemoveEventFromGame(script, (void**)filter);
+			else OnRemovePerkHandler->RemoveEvent(script, (void**)filter);
 
 		}
 		return true;
@@ -256,7 +258,7 @@ bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnAddPerkHandler->RegisterEvent(script, (void**)filter);
-			else OnAddPerkHandler->RemoveEventFromGame(script, (void**)filter);
+			else OnAddPerkHandler->RemoveEvent(script, (void**)filter);
 
 		}
 		return true;
@@ -274,7 +276,7 @@ bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnChallengeCompleteHandler->RegisterEvent(script, (void**)filter);
-			else OnChallengeCompleteHandler->RemoveEventFromGame(script, (void**)filter);
+			else OnChallengeCompleteHandler->RemoveEvent(script, (void**)filter);
 
 		}
 		return true;
@@ -292,7 +294,7 @@ bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnSeenDataUpdateHandler->RegisterEvent(script, (void**)filter);
-			else OnSeenDataUpdateHandler->RemoveEventFromGame(script, (void**)filter);
+			else OnSeenDataUpdateHandler->RemoveEvent(script, (void**)filter);
 
 		}
 		return true;
@@ -310,7 +312,7 @@ bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnDyingHandler->RegisterEvent(script, (void**)filter);
-			else OnDyingHandler->RemoveEventFromGame(script, (void**)filter);
+			else OnDyingHandler->RemoveEvent(script, (void**)filter);
 
 		}
 		return true;
@@ -329,7 +331,7 @@ bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnStartQuestHandler->RegisterEvent(script, (void**)filter);
-			else OnStartQuestHandler->RemoveEventFromGame(script, (void**)filter);
+			else OnStartQuestHandler->RemoveEvent(script, (void**)filter);
 
 		}
 		return true;
@@ -349,7 +351,7 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnStopQuestHandler->RegisterEvent(script, (void**)filter);
-			else OnStopQuestHandler->RemoveEventFromGame(script, (void**)filter);
+			else OnStopQuestHandler->RemoveEvent(script, (void**)filter);
 
 		}
 		return true;
@@ -368,7 +370,7 @@ bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnCompleteQuestHandler->RegisterEvent(script, (void**)filter);
-			else OnCompleteQuestHandler->RemoveEventFromGame(script, (void**)filter);
+			else OnCompleteQuestHandler->RemoveEvent(script, (void**)filter);
 
 		}
 		return true;
@@ -387,7 +389,7 @@ bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
 		{
 			if (setOrRemove)
 				OnFailQuestHandler->RegisterEvent(script, (void**)filter);
-			else OnFailQuestHandler->RemoveEventFromGame(script, (void**)filter);
+			else OnFailQuestHandler->RemoveEvent(script, (void**)filter);
 
 		}
 		return true;

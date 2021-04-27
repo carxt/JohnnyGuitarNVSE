@@ -6,7 +6,6 @@ DEFINE_COMMAND_PLUGIN(Jump, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(StopVATSCam, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCameraShake, , 0, 2, kParams_TwoFloats);
 DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 0, 2, kParamsJohnny_TwoForms);
 DEFINE_COMMAND_PLUGIN(SetVelEx, , 1, 3, kParamsJohnnyThreeFloats);
 DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 2, kParamsJohnny_TwoForms);
 DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
@@ -26,6 +25,7 @@ DEFINE_COMMAND_PLUGIN(ToggleCombatMusic, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParamsJohnnyOneIntOneFloat);
+
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -125,11 +125,11 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS)
 
 	NiPoint3* playerPos = g_thePlayer->GetPos();
 
-	Setting* fSneakMaxDistance = (Setting*)0x11CD7D8;
-	Setting* fSneakExteriorDistanceMult = (Setting*)0x11CDCBC;
+	float fSneakMaxDistance = *(float*)(0x11CD7D8+4);
+	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC+4);
 	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();
-	float interiorDistanceSquared = fSneakMaxDistance->data.f * fSneakMaxDistance->data.f;
-	float exteriorDistanceSquared = (fSneakMaxDistance->data.f * fSneakExteriorDistanceMult->data.f) * (fSneakMaxDistance->data.f * fSneakExteriorDistanceMult->data.f);
+	float interiorDistanceSquared = fSneakMaxDistance * fSneakMaxDistance;
+	float exteriorDistanceSquared = (fSneakMaxDistance * fSneakExteriorDistanceMult) * (fSneakMaxDistance * fSneakExteriorDistanceMult);
 	float maxDist = isInterior ? interiorDistanceSquared : exteriorDistanceSquared;
 	Actor* closestHostile = nullptr;
 	UInt32 skipInvisible = 0;
@@ -162,10 +162,10 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
 
 	NiPoint3* playerPos = g_thePlayer->GetPos();
 
-	Setting* fSneakMaxDistance = (Setting*)0x11CD7D8;
-	Setting* fSneakExteriorDistanceMult = (Setting*)0x11CDCBC;
+	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
+	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
 	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();
-	float maxDist = isInterior ? powf(fSneakMaxDistance->data.f, 2) : powf((fSneakMaxDistance->data.f * fSneakExteriorDistanceMult->data.f), 2);
+	float maxDist = isInterior ? powf(fSneakMaxDistance, 2) : powf((fSneakMaxDistance * fSneakExteriorDistanceMult), 2);
 	Actor* closestHostile = nullptr;
 	UInt32 skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
@@ -348,15 +348,6 @@ bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
-	TESObjectREFR* stolenItem;
-	TESObjectREFR* owner;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &owner, &stolenItem)) {
-		ThisStdCall(0x8BFA40, g_thePlayer, owner, owner, stolenItem->baseForm, 1, 1, owner);
-		Console_Print("done");
-	}
-	return true;
-}
 bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	AlchemyItem* poison;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {

@@ -524,8 +524,7 @@ bool Cmd_GetActorValueModifierAlt_Execute(COMMAND_ARGS) {
 }
 
 // JIP function with a sanity check to prevent errors, deprecated
-bool Cmd_GetBufferedCellsAlt_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetBufferedCellsAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	return true;
 }
@@ -672,9 +671,8 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* cell = NULL;
-	Setting* hoursToRespawnCell = (Setting*)0x11CA160;
-	GameTimeGlobals* g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
-	float hoursToRespawn = 0, detachTime = 0, gameHoursPassed = 0;
+	UInt32 iHoursToRespawnCell = *(UInt32*)0x11CA164;
+	float detachTime = 0, gameHoursPassed = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell) && IS_TYPE(cell, TESObjectCELL)) {
 		ExtraDetachTime* xDetachTime = (ExtraDetachTime*)cell->extraDataList.GetByType(kExtraData_DetachTime);
 		detachTime = xDetachTime == 0 ? 0 : xDetachTime->time;
@@ -687,8 +685,7 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 		else {
 			float daysPassed = g_gameTimeGlobals->daysPassed == 0 ? 1.0 : g_gameTimeGlobals->daysPassed->data;
 			gameHoursPassed = floor(daysPassed * 24.0);
-			hoursToRespawn = hoursToRespawnCell->data.i;
-			*result = ((gameHoursPassed - detachTime) > hoursToRespawn);
+			*result = ((gameHoursPassed - detachTime) > iHoursToRespawnCell);
 		}
 		if (IsConsoleMode())
 			Console_Print("IsCellExpired >> %.0f", *result);
