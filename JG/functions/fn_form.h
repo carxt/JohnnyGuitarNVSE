@@ -220,7 +220,6 @@ bool Cmd_GetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && IS_TYPE(weapon, TESObjectWEAP)) {
 		modelPath = weapon->model200.GetModelPath();
 		g_strInterface->Assign(PASS_COMMAND_ARGS, modelPath);
-		*result = 1;
 		if (IsConsoleMode()) Console_Print("GetWeaponWorldModelPath >> %s", modelPath);
 	}
 	return true;
