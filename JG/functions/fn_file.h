@@ -4,10 +4,10 @@ DEFINE_COMMAND_PLUGIN(MD5File, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(SHA1File, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetPixelFromBMP, , 0, 6, kParamsBMPArgs);
 DEFINE_COMMAND_PLUGIN(UwUDelete, , 0, 2, kParamsJohnny_OneString_OneInt);
-DEFINE_COMMAND_PLUGIN(GetTextureWidth, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(GetTextureHeight, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetTextureWidth, , 0, 2, kParamsJohnny_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetTextureHeight, , 0, 1, kParamsJohnny_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParamsJohnny_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParamsJohnny_OneString_OneOptionalInt);
 #include <filesystem>
 
 
@@ -16,8 +16,10 @@ bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 	*result = 0;
 	GetModuleFileNameA(NULL, filepath, MAX_PATH);
 	char path[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+	UInt32 useDataTextures = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
 		if (strstr(path, "..\\")) return true;
+		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
 		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
 		FileStream sourceFile;
 		if (sourceFile.OpenAt(filepath, 0x1C))
@@ -35,8 +37,10 @@ bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 	*result = 0;
 	GetModuleFileNameA(NULL, filepath, MAX_PATH);
 	char path[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+	UInt32 useDataTextures = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
 		if (strstr(path, "..\\")) return true;
+		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
 		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
 		FileStream sourceFile;
 		if (sourceFile.OpenAt(filepath, 0x57))
@@ -54,8 +58,10 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 	*result = 0;
 	GetModuleFileNameA(NULL, filepath, MAX_PATH);
 	char path[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+	UInt32 useDataTextures = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
 		if (strstr(path, "..\\")) return true;
+		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
 		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
 		FileStream sourceFile;
 		if (sourceFile.OpenAt(filepath, 0x10))
@@ -74,8 +80,10 @@ bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 	*result = 0;
 	GetModuleFileNameA(NULL, filepath, MAX_PATH);
 	char path[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+	UInt32 useDataTextures = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
 		if (strstr(path, "..\\")) return true;
+		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
 		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
 		FileStream sourceFile;
 		if (sourceFile.OpenAt(filepath, 0x0C))

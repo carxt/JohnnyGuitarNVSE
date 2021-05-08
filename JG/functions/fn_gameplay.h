@@ -25,6 +25,7 @@ DEFINE_COMMAND_PLUGIN(ToggleCombatMusic, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParamsJohnnyOneIntOneFloat);
+DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -32,6 +33,41 @@ bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+
+bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
+	*result = 0;
+	Actor* actor = (Actor*)thisObj;
+	ContChangesEntry* weapInfo = actor->baseProcess->GetWeaponInfo();
+	if (weapInfo && weapInfo->type) {
+		UInt32 moveFlags = actor->actorMover->GetMovementFlags();
+		bool isWalking = moveFlags & 0x100;
+		bool isRunning = (moveFlags & 0xF) && (moveFlags & 0x200);
+		bool isSneaking = (moveFlags & 0x400) && !(moveFlags & 0x800);
+		bool isAiming = actor->baseProcess->IsAiming();
+		float spread;
+		if (g_VATSCameraData->mode == 2 || g_VATSCameraData->mode == 3) {
+			spread = CdeclCall<float>(0x646910, actor, weapInfo->type, NULL, 1, 0, isWalking, isRunning);
+		}
+		else {
+			spread = CdeclCall<float>(0x646910, actor, weapInfo->type, NULL, isAiming, isSneaking, isWalking, isRunning);
+		}
+		ApplyPerkModifiers(kPerkEntry_CalculateGunSpread, actor, weapInfo->type, &spread);
+		bool hasDecreaseSpreadEffect = ThisStdCall<bool>(0x4BDA70, weapInfo, 3);
+		float minSpread = ThisStdCall<float>(0x524B80, weapInfo->type, hasDecreaseSpreadEffect);
+		float weapSpread = ThisStdCall<float>(0x524BE0, weapInfo->type, hasDecreaseSpreadEffect);
+		float totalSpread = (weapSpread * spread + minSpread) * 0.01745329238474369;
+		TESAmmo* eqAmmo = ThisStdCall<TESAmmo*>(0x525980, weapInfo->type, (MobileObject*)actor);
+		totalSpread = CdeclCall<float>(0x59A030, 3, (eqAmmo ? &eqAmmo->effectList : 0), totalSpread);
+		bool hasSplitBeamEffect = ThisStdCall<bool>(0x4BDA70, weapInfo, 0xC);
+		if (hasSplitBeamEffect) {
+			totalSpread *= ThisStdCall<float>(0x4BCF60, weapInfo->type, 0xC, 1);
+		}
+		*result = totalSpread;
+	}
+	if (IsConsoleMode()) Console_Print("GetCalculatedSpread >> %f", *result);
+	return true;
+}
+
 
 bool __fastcall ValidTempEffect(EffectItem* effectItem)
 {

@@ -78,6 +78,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_audioManager = (BSAudioManager*)0x11F6EF0;
 		g_currentSky = (Sky**)0x11DEA20;
 		g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
+		g_VATSCameraData = (VATSCameraData*)0x11F2250;
 		break;
 	}
 	default:
@@ -302,6 +303,7 @@ extern "C" {
 		REG_CMD(GetTextureHeight);
 		REG_CMD(GetTextureFormat);
 		REG_CMD(GetTextureMipMapCount);
+		REG_CMD(GetCalculatedSpread);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

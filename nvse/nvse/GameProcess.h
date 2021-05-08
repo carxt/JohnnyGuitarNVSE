@@ -321,7 +321,7 @@ public:
 	virtual void	Unk_FE();
 	virtual void	Unk_FF();
 	virtual void	Unk_100();
-	virtual void	Unk_101();
+	virtual bool	IsAiming();
 	virtual void	Unk_102();
 	virtual SInt32	GetKnockedState();
 	virtual void	SetKnockedState(char state);
