@@ -153,7 +153,7 @@
     <ClInclude Include="..\nvse\nvse\CommandTable.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="nvse\nvse\PluginAPI.h">
+    <ClInclude Include="..\nvse\nvse\PluginAPI.h">
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="JohnnyGuitarNVSE.h" />

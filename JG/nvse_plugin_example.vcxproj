@@ -259,7 +259,7 @@
     <ClInclude Include="misc\JohnnyParams.h" />
     <ClInclude Include="misc\misc.h" />
     <ClInclude Include="misc\WorldToScreen.h" />
-    <ClInclude Include="nvse\nvse\PluginAPI.h" />
+    <ClInclude Include="..\nvse\nvse\PluginAPI.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
