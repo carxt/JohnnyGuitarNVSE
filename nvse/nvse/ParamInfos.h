@@ -597,9 +597,8 @@ static ParamInfo kParams_ThreeStrings_OneInt[] =
 	{ "Integer", kParamType_Integer, 0 }
 };
 
-static ParamInfo kParams_OneRef_OneForm_OneInt[3] =
+static ParamInfo kParams_OneRef_OneInt[2] =
 {
 	{ "target",            kParamType_ObjectRef,    0    },
-	{ "form",            kParamType_AnyForm,        1    },
 	{ "quantity",        kParamType_Integer,        1    },
 };

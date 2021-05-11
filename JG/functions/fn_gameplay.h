@@ -26,7 +26,7 @@ DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParams_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 3, kParams_OneRef_OneForm_OneInt); 
+DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 3, kParams_OneRef_OneInt); 
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -42,9 +42,10 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
 	TESForm* item = nullptr;
 	int quantity = 1;
 
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &target, &item, &quantity))
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &target, &quantity))
 	{
-		ThisStdCall(0x8BFA40, thisObj, target, item, quantity, 0, nullptr); // Actor::HandleStealing
+		ExtraOwnership* xOwn = ThisStdCall<ExtraOwnership*>(0x567790, target); // TESObjectREFR::ResolveOwnership
+		ThisStdCall(0x8BFA40, thisObj, target, target->baseForm, quantity, 0, xOwn); // Actor::HandleStealing, 
 	}
 	return true;
 }
