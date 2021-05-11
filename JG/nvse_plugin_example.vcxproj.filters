@@ -203,14 +203,14 @@
     <ClInclude Include="misc\EditorIDs.h">
       <Filter>misc</Filter>
     </ClInclude>
-    <ClInclude Include="misc\JohnnyParams.h">
-      <Filter>misc</Filter>
-    </ClInclude>
     <ClInclude Include="misc\misc.h">
       <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="misc\WorldToScreen.h">
       <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\ParamInfos.h">
+      <Filter>nvse</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

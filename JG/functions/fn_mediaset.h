@@ -3,9 +3,9 @@
 DEFINE_COMMAND_PLUGIN(GetMediaSetTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetMediaSetTraitSound, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetMediaSetTraitString, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetMediaSetTraitNumeric, , 0, 3, kParamsJohnnyOneForm_OneInt_OneFloat);
-DEFINE_COMMAND_PLUGIN(SetMediaSetTraitSound, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
-DEFINE_COMMAND_PLUGIN(SetMediaSetTraitString, , 0, 3, kParamsJohnnyOneForm_OneInt_OneString);
+DEFINE_COMMAND_PLUGIN(SetMediaSetTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
+DEFINE_COMMAND_PLUGIN(SetMediaSetTraitSound, , 0, 3, kParams_OneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(SetMediaSetTraitString, , 0, 3, kParams_OneForm_OneInt_OneString);
 
 bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;

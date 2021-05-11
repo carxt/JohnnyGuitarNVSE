@@ -24,7 +24,7 @@
 #include "misc/EditorIDs.h"
 #include "internal/decoding.h"
 #include "JohnnyGuitarNVSE.h"
-#include "misc/JohnnyParams.h"
+#include "nvse/ParamInfos.h"
 #include "functions/fn_av.h"
 #include "functions/fn_form.h"
 #include "functions/fn_utility.h"
@@ -304,6 +304,7 @@ extern "C" {
 		REG_CMD(GetTextureFormat);
 		REG_CMD(GetTextureMipMapCount);
 		REG_CMD(GetCalculatedSpread);
+		REG_CMD(SendStealingAlarm);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

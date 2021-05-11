@@ -4,9 +4,9 @@ DEFINE_COMMAND_PLUGIN(GetRegionWeatherOverride, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetRegionWeatherOverride, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetRegionWeatherPriority, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetRegionWeatherPriority, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(IsWeatherInRegion, , 0, 2, kParamsJohnny_TwoForms);
-DEFINE_COMMAND_PLUGIN(RemoveRegionWeather, , 0, 2, kParamsJohnny_TwoForms);
-DEFINE_COMMAND_PLUGIN(AddRegionWeather, , 0, 4, kParams_Johnny_OneForm_OneWeatherID_OneInt_OneOptionalGlobal);
+DEFINE_COMMAND_PLUGIN(IsWeatherInRegion, , 0, 2, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(RemoveRegionWeather, , 0, 2, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(AddRegionWeather, , 0, 4, kParams_OneForm_OneWeatherID_OneInt_OneOptionalGlobal);
 DEFINE_COMMAND_PLUGIN(GetRegionWeathers, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(ClearRegionWeathers, , 0, 1, kParams_OneForm);
 

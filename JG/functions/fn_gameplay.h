@@ -6,8 +6,8 @@ DEFINE_COMMAND_PLUGIN(Jump, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(StopVATSCam, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCameraShake, , 0, 2, kParams_TwoFloats);
 DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(SetVelEx, , 1, 3, kParamsJohnnyThreeFloats);
-DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 2, kParamsJohnny_TwoForms);
+DEFINE_COMMAND_PLUGIN(SetVelEx, , 1, 3, kParams_ThreeFloats);
+DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(UnsetAV, , 1, 1, kParams_OneActorValue);
 DEFINE_COMMAND_PLUGIN(UnforceAV, , 1, 1, kParams_OneActorValue);
@@ -15,8 +15,8 @@ DEFINE_COMMAND_PLUGIN(ToggleNthPipboyLight, , 0, 2, kParams_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetRunSpeed, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(DisableMenuArrowKeys, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(EnableMenuArrowKeys, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(HighlightBodyPartAlt, , 1, 1, kParamsJohnnyOneOptionalFloat);
-DEFINE_COMMAND_PLUGIN(DeactivateAllHighlightsAlt, , 1, 1, kParamsJohnnyOneOptionalFloat);
+DEFINE_COMMAND_PLUGIN(HighlightBodyPartAlt, , 1, 1, kParams_OneOptionalFloat);
+DEFINE_COMMAND_PLUGIN(DeactivateAllHighlightsAlt, , 1, 1, kParams_OneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(GetNearestCompassHostileDirection, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetNearestCompassHostile, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetDisablePlayerControlsHUDVisibilityFlags, SetDPCHUDFlags, , 0, 1, kParams_OneOptionalInt);
@@ -24,8 +24,9 @@ DEFINE_COMMAND_PLUGIN(IsCompassHostile, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(ToggleCombatMusic, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParamsJohnnyOneIntOneFloat);
+DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParams_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 4, kParams_OneRef_OneForm_OneInt); 
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -34,6 +35,19 @@ bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5B
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
+
+bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
+{
+	TESObjectREFR* target;
+	TESForm* item = nullptr;
+	int quantity = 1;
+
+	if (thisObj->IsActor() && ExtractArgs(EXTRACT_ARGS, &target, &item, &quantity))
+	{
+		ThisStdCall(0x8BFA40, thisObj, target, item, quantity, 0, nullptr); // Actor::HandleStealing
+	}
+	return true;
+}
 bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* actor = (Actor*)thisObj;

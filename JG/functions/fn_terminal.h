@@ -1,11 +1,11 @@
 #pragma once
 DEFINE_COMMAND_PLUGIN(AddTerminalMenuItem, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemText, , 0, 3, kParamsJohnny_OneForm_TwoInts);
-DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemText, , 0, 4, kParamsJohnny_OneForm_TwoInts_OneString);
+DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemText, , 0, 3, kParams_OneForm_TwoInts);
+DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemText, , 0, 4, kParams_OneForm_TwoInts_OneString);
 DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemNote, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemNote, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemNote, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemSubmenu, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemSubmenu, , 0, 3, kParamsJohnnyOneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemSubmenu, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemCount, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(RemoveTerminalMenuItem, , 0, 2, kParams_OneForm_OneInt);
 

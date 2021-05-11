@@ -1,11 +1,11 @@
 #pragma once
-DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , 0, 3, kParamsJohnny_OneString_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , 0, 3, kParams_OneString_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(SetWorldSpaceMapTexture, , 0, 2, kParamsJohnny_OneForm_OneString);
+DEFINE_COMMAND_PLUGIN(SetWorldSpaceMapTexture, , 0, 2, kParams_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParamsJohnny_OneForm_OneString);
-DEFINE_COMMAND_PLUGIN(QueueCinematicText, , 0, 7, kParamsJohnnyTwoStringsOneOptionalStringFourOptionalInts);
-DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , 0, 3, kParamsJohnnyOneStringTwoOptionalInts);
+DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParams_OneForm_OneString);
+DEFINE_COMMAND_PLUGIN(QueueCinematicText, , 0, 7, kParams_TwoStrings_OneOptionalString_FourOptionalInts);
+DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , 0, 3, kParams_OneString_TwoOptionalInts);
 
 bool Cmd_QueueObjectiveText_Execute(COMMAND_ARGS)
 {

@@ -1,15 +1,15 @@
 #pragma once
 // Functions that perform mathematical calculations
 DEFINE_COMMAND_PLUGIN(WorldToScreen, , 0, 8, kParamsProjectionArgs);
-DEFINE_COMMAND_PLUGIN(Get3DDistanceBetweenNiNodes, , 0, 4, kParamsJohnnyTwoRefsTwoStrings);
-DEFINE_COMMAND_PLUGIN(Get3DDistanceToNiNode, , 1, 4, kParamsJohnnyOneStringThreeFloats);
+DEFINE_COMMAND_PLUGIN(Get3DDistanceBetweenNiNodes, , 0, 4, kParams_TwoRefs_TwoStrings);
+DEFINE_COMMAND_PLUGIN(Get3DDistanceToNiNode, , 1, 4, kParams_OneString_ThreeFloats);
 DEFINE_COMMAND_PLUGIN(Get3DDistanceFromHitToNiNode, , 1, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(GetVector3DDistance, , 0, 6, kParamsJohnny_SixFloats);
-DEFINE_COMMAND_PLUGIN(Clamp, , 0, 3, kParamsJohnnyThreeFloats);
-DEFINE_COMMAND_PLUGIN(Remap, , 0, 5, kParamsJohnnyFiveFloats);
-DEFINE_COMMAND_PLUGIN(Lerp, , 0, 3, kParamsJohnnyThreeFloats);
+DEFINE_COMMAND_PLUGIN(GetVector3DDistance, , 0, 6, kParams_SixFloats);
+DEFINE_COMMAND_PLUGIN(Clamp, , 0, 3, kParams_ThreeFloats);
+DEFINE_COMMAND_PLUGIN(Remap, , 0, 5, kParams_FiveFloats);
+DEFINE_COMMAND_PLUGIN(Lerp, , 0, 3, kParams_ThreeFloats);
 DEFINE_COMMAND_PLUGIN(Sign, , 0, 1, kParams_OneFloat);
-DEFINE_COMMAND_PLUGIN(GetCameraTranslation, , FALSE, 4, kParams_Johnny_ThreeStrings_OneInt);
+DEFINE_COMMAND_PLUGIN(GetCameraTranslation, , FALSE, 4, kParams_ThreeStrings_OneInt);
 
 bool Cmd_Sign_Execute(COMMAND_ARGS) {
 	float value;

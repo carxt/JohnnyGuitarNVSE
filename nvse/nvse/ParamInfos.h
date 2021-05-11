@@ -46,21 +46,6 @@ static ParamInfo kParams_TwoFloats[2] =
 	{	"float",	kParamType_Float,	0 },
 };
 
-// static ParamInfo kParams_OneSpellItem[1] =
-// {
-// 	{	"spell", kParamType_SpellItem, 0 }, 
-// };
-// 
-// static ParamInfo kParams_OneMagicItem[1] =
-// {
-// 	{	"spell", kParamType_MagicItem, 0 }, 
-// };
-// 
-// static ParamInfo kParams_OneMagicEffect[1] =
-// {
-// 	{	"magic effect", kParamType_MagicEffect, 0 }, 
-// };
-
 static ParamInfo kParams_OneObjectID[1] =
 {
 	{	"item", kParamType_ObjectID, 0},
@@ -164,12 +149,6 @@ static ParamInfo kParams_FormList[1] =
 	{	"form list", kParamType_FormList,	0		},
 };
 
-static ParamInfo kParams_OneString_OneOptionalObjectID[2] =
-{
-	{	"string",		kParamType_String,			0	},
-	{	"item",			kParamType_ObjectID,	1	},
-};
-
 static ParamInfo kParams_TwoStrings[2] =
 {
 	{	"string",	kParamType_String,	0	},
@@ -210,7 +189,7 @@ static ParamInfo kParams_SetEquippedFloat[2] =
 	{	"slot", kParamType_Integer, 0 },
 };
 
-static ParamInfo kParams_FormListInteger[2] =
+static ParamInfo kParams_FormList_Integer[2] =
 {
 	{	"form list", kParamType_FormList,	0		},
 	{	"index",	 kParamType_Integer,	0		}
@@ -231,19 +210,19 @@ static ParamInfo kParams_OneOptionalObjectRef[1] =
 	{	"ref", kParamType_ObjectRef, 1},
 };
 
-static ParamInfo kParams_OneIntOneOptionalObjectRef[2] =
+static ParamInfo kParams_OneInt_OneOptionalObjectRef[2] =
 {
 	{	"flag",		kParamType_Integer,	0	},
 	{	"ref",		kParamType_ObjectRef,	1	},
 };
 
-static ParamInfo kParams_OneIndexOneOptionalObjectRef[2] =
+static ParamInfo kParams_OneIndex_OneOptionalObjectRef[2] =
 {
 	{	"index",		kParamType_Integer,	0	},
 	{	"ref",		kParamType_ObjectRef,	1	},
 };
 
-static ParamInfo kParams_OnePackageOneIndexOneOptionalObjectRef[3] =
+static ParamInfo kParams_OnePackage_OneIndex_OneOptionalObjectRef[3] =
 {
 	{	"package",		kParamType_AnyForm,		0	},
 	{	"index",		kParamType_Integer,		0	},
@@ -295,7 +274,7 @@ static ParamInfo kParams_OneOptionalActorBase[1] =
 	{	"base actor",	kParamType_ActorBase,	1	},
 };
 
-static ParamInfo kParams_OneIntOneOptionalActorBase[2] =
+static ParamInfo kParams_OneInt_OneOptionalActorBase[2] =
 {
 	{	"bool",			kParamType_Integer,		0	},
 	{	"base actor",	kParamType_ActorBase,	1	},
@@ -321,9 +300,306 @@ static ParamInfo kParams_GenericDeleteForm[3] =
 	{	"index",			kParamType_Integer,	0	},
 };
 
-static ParamInfo kParams_OneIntOneForm[2] =
+static ParamInfo kParams_OneInt_OneForm[2] =
 {
 	{	"index",	kParamType_Integer, 0	}, 
 	{	"form",		kParamType_AnyForm,	0	},
 };
 
+static ParamInfo kParams_AnyExpr[1] =
+{
+	{ "any expression", kNVSEParamType_BasicType, 0 },
+};
+
+static ParamInfo kParams_OneString_ThreeFloats[4] =
+{
+	{ "String", kParamType_String, 0 },
+	{ "float", kParamType_Float, 0 },
+	{ "float", kParamType_Float, 0 },
+	{ "float", kParamType_Float, 0 },
+
+};
+
+static ParamInfo kParams_FourStrings[4] =
+{
+	{ "String", kParamType_String, 0 },
+	{ "X_Out", kParamType_String, 0 },
+	{ "Y_Out", kParamType_String, 0 },
+	{ "Z_Out", kParamType_String, 0 },
+
+};
+
+static ParamInfo kParams_TwoRefs_TwoStrings[4] =
+{
+	{ "ref", kParamType_ObjectRef, 0 },
+	{ "ref", kParamType_ObjectRef, 0 },
+	{ "String", kParamType_String, 0 },
+	{ "String", kParamType_String, 0 },
+
+};
+
+static ParamInfo kParams_OneString_OneOptionalObjectID[2] =
+{
+	{ "String", kParamType_String, 0 },
+	{ "ObjectID",	kParamType_ObjectID, 1 },
+};
+
+static ParamInfo kParams_OneForm_OneString[2] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "String", kParamType_String, 0 },
+};
+
+static ParamInfo kParams_OneString_TwoOptionalInts[3] =
+{
+	{"String", kParamType_String, 0},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+};
+
+static ParamInfo kParams_ar_SortEditor[] =
+{
+	{	"array",		kNVSEParamType_Array,	0	},
+	{	"bDescending",	kNVSEParamType_Number,	1	},
+};
+
+static ParamInfo kParams_TwoStrings_OneOptionalString_FourOptionalInts[7] =
+{
+	{"String", kParamType_String, 0},
+	{"String", kParamType_String, 0},
+	{"String", kParamType_String, 1},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+};
+
+static ParamInfo kParams_OneString_OneInt[2] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "Integer", kParamType_Integer, 0 },
+};
+
+static ParamInfo kParams_OneString_OneOptionalInt[2] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "Integer", kParamType_Integer, 1 },
+};
+
+static ParamInfo kParams_Event_OneForm[4] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+	{ "Form", kParamType_AnyForm, 1 }
+
+};
+
+static ParamInfo kParams_Event[3] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+
+};
+
+static ParamInfo kParams_Event_OneForm_OneInt[5] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+	{ "Form", kParamType_AnyForm, 1 },
+	{ "Integer", kParamType_Integer, 1 },
+
+};
+
+static ParamInfo kParams_OneString_OneForm_OneOptionalInt[3] =
+{
+	{ "String", kParamType_String, 0 },
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 1 },
+};
+
+static ParamInfo kParams_OneForm_OneInt_OneFloat[3] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Float", kParamType_Float, 0 }
+};
+
+static ParamInfo kParams_OneActorBase[1] =
+{
+	{ "ActorBase", kParamType_ActorBase, 0 },
+};
+
+static ParamInfo kParams_OneForm_OneInt_OneForm[3] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Form", kParamType_AnyForm, 0 }
+};
+
+static ParamInfo kParams_OneInt_OneForm_OneInt[3] =
+{
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 }
+};
+
+static ParamInfo kParams_OneForm_OneInt_OneForm_OneInt[4] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 }
+};
+
+static ParamInfo kParams_OneForm_OneInt_OneString[3] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "String", kParamType_String, 0 }
+};
+
+static ParamInfo kParams_OneOptionalFloat[1] =
+{
+	{ "Float", kParamType_Float, 1 },
+};
+
+static ParamInfo kParams_ThreeFloats[3] =
+{
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+};
+
+static ParamInfo kParams_FiveFloats[5] =
+{
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+};
+
+static ParamInfo kParams_OneInt_OneFloat[2] =
+{
+	{ "int", kParamType_Integer, 0 },
+	{ "Float", kParamType_Float, 0 },
+};
+
+static ParamInfo kParams_OneForm_OneOptionalInt[2] =
+{
+	{ "form",	kParamType_AnyForm,	0 },
+	{ "int",	kParamType_Integer, 1 },
+};
+
+static ParamInfo kParams_OneObjectID_OneOptionalInt[2] =
+{
+	{ "item",		kParamType_ObjectID,	0 },
+	{ "integer",	kParamType_Integer,		1 },
+};
+
+static ParamInfo kParams_OneForm_TwoInts[3] =
+{
+	{ "form",	kParamType_AnyForm,	0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+};
+
+static ParamInfo kParams_OneForm_TwoInts_OneString[4] =
+{
+	{ "form",	kParamType_AnyForm,	0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "string",	kParamType_String,	0 },
+};
+
+static ParamInfo kParams_SixFloats[6] =
+{
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+};
+
+static ParamInfo kParams_OneForm_ThreeInts[4] =
+{
+	{ "form",	kParamType_AnyForm,	0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+};
+
+static ParamInfo kParams_TwoForms[2] =
+{
+	{ "form",	kParamType_AnyForm,	0 },
+	{ "form",	kParamType_AnyForm,	0 },
+};
+
+static ParamInfo kParams_OneString_OneInt_OneForm[3] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "form",	kParamType_AnyForm,	0 },
+};
+
+static ParamInfo kParams_OneIMOD[1] =
+{
+	{ "IMOD",	kParamType_ImageSpaceModifier,	0 },
+};
+
+static ParamInfo kParams_OneIMOD_OneInt[2] =
+{
+	{ "IMOD",	kParamType_ImageSpaceModifier,	0 },
+	{ "int",	kParamType_Integer, 0 },
+};
+
+static ParamInfo kParams_TwoStrings_OneInt[3] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "string",	kParamType_String,	0 },
+	{ "Integer", kParamType_Integer, 0 },
+};
+
+static ParamInfo kParams_OneActorValue_OneOptionalInt[2] =
+{
+	{ "AV",	kParamType_ActorValue,	0 },
+	{ "Integer",	kParamType_Integer,	1 },
+};
+
+static ParamInfo kParams_BMP[6] =
+{
+	{ "filename", kParamType_String, 0 },
+	{ "R_Out", kParamType_String, 0 },
+	{ "G_Out", kParamType_String, 0 },
+	{ "B_Out", kParamType_String, 0 },
+	{ "INT", kParamType_Integer, 0 },
+	{ "INT", kParamType_Integer, 0 },
+
+};
+
+static ParamInfo kParams_OneForm_OneWeatherID_OneInt_OneOptionalGlobal[] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Weather ID", kParamType_WeatherID, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Global", kParamType_Global, 1 }
+};
+
+static ParamInfo kParams_ThreeStrings_OneInt[] =
+{
+	{ "string", kParamType_String, 0 },
+	{ "string", kParamType_String, 0 },
+	{ "string", kParamType_String, 0 },
+	{ "Integer", kParamType_Integer, 0 }
+};
+
+static ParamInfo kParams_OneRef_OneForm_OneInt[3] =
+{
+	{ "target",            kParamType_ObjectRef,    0    },
+	{ "form",            kParamType_AnyForm,        1    },
+	{ "quantity",        kParamType_Integer,        1    },
+};

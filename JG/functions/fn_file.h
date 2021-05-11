@@ -2,12 +2,12 @@
 // Functions that operate on files
 DEFINE_COMMAND_PLUGIN(MD5File, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(SHA1File, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(GetPixelFromBMP, , 0, 6, kParamsBMPArgs);
-DEFINE_COMMAND_PLUGIN(UwUDelete, , 0, 2, kParamsJohnny_OneString_OneInt);
-DEFINE_COMMAND_PLUGIN(GetTextureWidth, , 0, 2, kParamsJohnny_OneString_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetTextureHeight, , 0, 1, kParamsJohnny_OneString_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParamsJohnny_OneString_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParamsJohnny_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetPixelFromBMP, , 0, 6, kParams_BMP);
+DEFINE_COMMAND_PLUGIN(UwUDelete, , 0, 2, kParams_OneString_OneInt);
+DEFINE_COMMAND_PLUGIN(GetTextureWidth, , 0, 2, kParams_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetTextureHeight, , 0, 1, kParams_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParams_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParams_OneString_OneOptionalInt);
 #include <filesystem>
 
 

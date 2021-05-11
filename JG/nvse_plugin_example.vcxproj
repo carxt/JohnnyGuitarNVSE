@@ -231,6 +231,7 @@
     <ClInclude Include="..\nvse\nvse\GameTiles.h" />
     <ClInclude Include="..\nvse\nvse\GameTypes.h" />
     <ClInclude Include="..\nvse\nvse\GameUI.h" />
+    <ClInclude Include="..\nvse\nvse\ParamInfos.h" />
     <ClInclude Include="..\nvse\nvse\SafeWrite.h" />
     <ClInclude Include="..\nvse\nvse\Utilities.h" />
     <ClInclude Include="events\CustomEventFilters.h" />
@@ -256,7 +257,6 @@
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="JohnnyGuitarNVSE.h" />
     <ClInclude Include="misc\EditorIDs.h" />
-    <ClInclude Include="misc\JohnnyParams.h" />
     <ClInclude Include="misc\misc.h" />
     <ClInclude Include="misc\WorldToScreen.h" />
     <ClInclude Include="..\nvse\nvse\PluginAPI.h" />

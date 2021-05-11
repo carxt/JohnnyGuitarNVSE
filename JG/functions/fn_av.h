@@ -4,8 +4,8 @@ DEFINE_COMMAND_ALT_PLUGIN(GetActorValueAlt, GetAVAlt, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetActorValueAlt, SetAVAlt, , 1, 2, kParams_TwoInts);
 DEFINE_COMMAND_ALT_PLUGIN(GetBaseActorValueAlt, GetBaseAVAlt, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(ForceActorValueAlt, ForceAVAlt, , 1, 2, kParams_TwoInts);
-DEFINE_COMMAND_ALT_PLUGIN(DamageActorValueAlt, DamageAVAlt, , 1, 2, kParamsJohnnyOneIntOneFloat);
-DEFINE_COMMAND_ALT_PLUGIN(RestoreActorValueAlt, RestoreAVAlt, , 1, 2, kParamsJohnnyOneIntOneFloat);
+DEFINE_COMMAND_ALT_PLUGIN(DamageActorValueAlt, DamageAVAlt, , 1, 2, kParams_OneInt_OneFloat);
+DEFINE_COMMAND_ALT_PLUGIN(RestoreActorValueAlt, RestoreAVAlt, , 1, 2, kParams_OneInt_OneFloat);
 DEFINE_COMMAND_ALT_PLUGIN(ModActorValueAlt, ModAVAlt, , 1, 2, kParams_TwoInts);
 
 bool(__cdecl* Cmd_GetAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BD8A0;

@@ -7,15 +7,15 @@ DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(RefAddr, , 0, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(EditorIDToFormID, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParamsJohnnyFourStrings);
+DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParams_FourStrings);
 DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetPipBoyMode, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetFormOverrideIndex, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetSequenceAnimGroup, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(ar_SortEditor, , 0, 2, kParams_OneInt_OneOptionalInt)
 DEFINE_COMMAND_PLUGIN(SetUIUpdateSound, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , 0, 3, kParamsJohnnyOneInt_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(IsDLLLoaded, , 0, 2, kParamsJohnny_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , 0, 3, kParams_OneInt_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(IsDLLLoaded, , 0, 2, kParams_OneString_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(RefreshIdle, , 1, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(ExitGameAlt, , 0, 0, NULL);
 

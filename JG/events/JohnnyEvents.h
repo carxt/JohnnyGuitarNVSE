@@ -1,16 +1,16 @@
 #pragma once
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnDyingEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnStartQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnStopQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnySeenDataEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnLimbGoneEventHandler, , 0, 5, kParamsJohnnyEventOneFormOneIntFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnCrosshairEventHandler, , 0, 5, kParamsJohnnyEventOneFormOneIntFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnFailQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, , 0, 3, kParamsJohnnyEventUnfiltered);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnAddPerkEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnRemovePerkEventHandler, , 0, 4, kParamsJohnnyEventOneFormFilter);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnDyingEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnStartQuestEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnStopQuestEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_PLUGIN(SetJohnnySeenDataEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnLimbGoneEventHandler, , 0, 5, kParams_Event_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnCrosshairEventHandler, , 0, 5, kParams_Event_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnFailQuestEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, , 0, 3, kParams_Event);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnAddPerkEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnRemovePerkEventHandler, , 0, 4, kParams_Event_OneForm);
 
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
