@@ -5,7 +5,7 @@ DEFINE_COMMAND_PLUGIN(TogglePipBoy, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(Jump, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(StopVATSCam, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCameraShake, , 0, 2, kParams_TwoFloats);
-DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 1, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetVelEx, , 1, 3, kParams_ThreeFloats);
 DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
@@ -403,14 +403,14 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	TESObjectWEAP* weapon;
 	ExtraDataList* xData;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {
-		if (thisObj) {
+		if (!thisObj->IsActor()) {
 			InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
 			if (!invRef) return true;
 			weapon = (TESObjectWEAP*)(invRef->data.type);
 			xData = invRef->data.xData;
 		}
 		else {
-			ContChangesEntry* wpnInfo = g_thePlayer->baseProcess->GetWeaponInfo();
+			ContChangesEntry* wpnInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo();
 			if (wpnInfo && wpnInfo->extendData)
 			{
 				weapon = ((TESObjectWEAP*)wpnInfo->type);
