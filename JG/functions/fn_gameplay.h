@@ -39,7 +39,6 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
 {
 	TESObjectREFR* target;
-	TESForm* item = nullptr;
 	int quantity = 1;
 
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &target, &quantity))
@@ -401,19 +400,29 @@ bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 
 bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	AlchemyItem* poison;
+	TESObjectWEAP* weapon;
+	ExtraDataList* xData;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {
-		ContChangesEntry* wpnInfo = g_thePlayer->baseProcess->GetWeaponInfo();
-		if (wpnInfo && wpnInfo->extendData)
-		{
-			UInt32 weaponSkill = ((TESObjectWEAP*)wpnInfo->type)->weaponSkill;
-			if (weaponSkill != kAVCode_Unarmed && weaponSkill != kAVCode_MeleeWeapons) return true;
-			ExtraDataList* xDataList = wpnInfo->extendData->GetFirstItem();
-			if (xDataList)
+		if (thisObj) {
+			InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
+			if (!invRef) return true;
+			weapon = (TESObjectWEAP*)(invRef->data.type);
+			xData = invRef->data.xData;
+		}
+		else {
+			ContChangesEntry* wpnInfo = g_thePlayer->baseProcess->GetWeaponInfo();
+			if (wpnInfo && wpnInfo->extendData)
 			{
-				ExtraPoison* xPoison = GetExtraType((*xDataList), Poison);
-				if (!xPoison)
-					ThisStdCall(0x4BDD20, wpnInfo, poison); // ContChangesEntry::AddExtraPoison
+				weapon = ((TESObjectWEAP*)wpnInfo->type);
+				xData = wpnInfo->extendData->GetFirstItem();
 			}
+		}
+		UInt32 weaponSkill = weapon->weaponSkill;
+		if (weaponSkill != kAVCode_Unarmed && weaponSkill != kAVCode_MeleeWeapons) return true;
+		if (xData)
+		{
+			ExtraPoison* xPoison = GetExtraType((*xData), Poison);
+			if (!xPoison) ThisStdCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
 		}
 	}
 	return true;

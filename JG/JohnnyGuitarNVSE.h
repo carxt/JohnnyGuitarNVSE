@@ -346,11 +346,13 @@ TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
 		if (IS_TYPE(weap->ammo.ammo, BGSListForm)) {
 			BGSListForm* ammoList = (BGSListForm*)weap->ammo.ammo;
 			ExtraContainerChanges* xChanges = GetExtraType(g_thePlayer->extraDataList, ContainerChanges);
-			TESForm* ammo = 0;
-			for (int i = 0; i < ammoList->Count(); i++) {
-				ammo = ammoList->GetNthForm(i);
-				UInt32 count = ThisStdCall<UInt32>(0x4C8F30, xChanges->data, ammo);
-				if (count > 0) return ammo;
+			TESForm* ammo = nullptr;
+			if (ammoList && xChanges && xChanges->data) {
+				for (int i = 0; i < ammoList->Count(); i++) {
+					ammo = ammoList->GetNthForm(i);
+					UInt32 count = ThisStdCall<UInt32>(0x4C8F30, xChanges->data, ammo);
+					if (count > 0) return ammo;
+				}
 			}
 		}
 	}
