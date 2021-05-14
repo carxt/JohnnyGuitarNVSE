@@ -563,6 +563,15 @@ void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseEx
 	ThisStdCall(0x954610, a1, a2, a3, itemCount, a5, a6);
 }
 
+void __fastcall TESRegionDataSoundLoadIncidentalID(ModInfo* info, void* edx, UInt32* refID)
+{
+	ThisStdCall(0x4727F0, info, refID);
+	if (*refID)
+	{
+		CdeclCall(0x485D50, refID, info);
+	}
+}
+
 void HandleGameHooks()
 {
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // use available ammo in inventory instead of NULL when default ammo isn't present
@@ -591,6 +600,7 @@ void HandleGameHooks()
 	WriteRelCall(0x06061E8, (uintptr_t)asm_BipedModelUpdateWeapon);
 	if (capLoadScreensTo60)SafeWrite8(0x78D4A4, 0x10);
 
+	WriteRelCall(0x4F49AB, UInt32(TESRegionDataSoundLoadIncidentalID));
 }
 
 
