@@ -254,6 +254,7 @@ public:
 	int a = sizeof(std::unordered_set<char>);
 };
 typedef EventInformation* EventInfo;
+std::mutex EventsArrayMutex;
 std::vector<EventInfo> EventsArray;
 
 
@@ -278,6 +279,7 @@ EventInfo FindHandlerInfoByChar(const char* nameToFind)
 
 EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32))
 {
+	std::lock_guard<std::mutex> lock(EventsArrayMutex);
 	EventInfo eventinfo = new EventInformation(EventName, maxArgs, maxFilters, CreatorFunction);
 	EventsArray.push_back(eventinfo);
 	return eventinfo;
@@ -287,6 +289,7 @@ EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxF
 
 void __cdecl JGFreeEvent(EventInfo& toRemove)
 {
+	std::lock_guard<std::mutex> lock(EventsArrayMutex);
 	if (!toRemove) return;
 	auto it = std::find(std::begin(EventsArray), std::end(EventsArray), toRemove);
 	if (it != EventsArray.end())
