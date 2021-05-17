@@ -33,7 +33,31 @@ kFltMax = FLT_MAX;
 
 #define GameHeapAlloc(size) ThisStdCall<void*>(0xAA3E40, (void*)0x11F6238, size)
 #define GameHeapFree(ptr) ThisStdCall<void*>(0xAA4060, (void*)0x11F6238, ptr)   
+class CriticalSection
+{
+	CRITICAL_SECTION	critSection;
 
+public:
+	CriticalSection() { InitializeCriticalSection(&critSection); }
+	~CriticalSection() { DeleteCriticalSection(&critSection); }
+
+	void Enter() { EnterCriticalSection(&critSection); }
+	void Leave() { LeaveCriticalSection(&critSection); }
+	bool TryEnter() { return TryEnterCriticalSection(&critSection) != 0; }
+};
+
+class LightCS
+{
+	UInt32	owningThread;
+	UInt32	enterCount;
+
+public:
+	LightCS() : owningThread(0), enterCount(0) {}
+
+	void Enter();
+	void EnterSleep();
+	void Leave();
+};
 union Coordinate
 {
 	UInt32		xy;

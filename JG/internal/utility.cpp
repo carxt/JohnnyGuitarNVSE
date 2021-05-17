@@ -3,7 +3,46 @@
 #include "internal/md5/md5.h"
 #include "internal/sha1/sha1.h"
 #include <time.h>
+void LightCS::Enter()
+{
+	UInt32 threadID = GetCurrentThreadId();
+	if (owningThread == threadID)
+	{
+		enterCount++;
+		return;
+	}
+	while (InterlockedCompareExchange(&owningThread, threadID, 0));
+	enterCount = 1;
+}
 
+#define FAST_SLEEP_COUNT 10000UL
+
+void LightCS::EnterSleep()
+{
+	UInt32 threadID = GetCurrentThreadId();
+	if (owningThread == threadID)
+	{
+		enterCount++;
+		return;
+	}
+	UInt32 fastIdx = FAST_SLEEP_COUNT;
+	while (InterlockedCompareExchange(&owningThread, threadID, 0))
+	{
+		if (fastIdx)
+		{
+			fastIdx--;
+			Sleep(0);
+		}
+		else Sleep(1);
+	}
+	enterCount = 1;
+}
+
+void LightCS::Leave()
+{
+	if (!--enterCount)
+		owningThread = 0;
+}
 bool fCompare(float lval, float rval)
 {
 	return fabs(lval - rval) < FLT_EPSILON;
