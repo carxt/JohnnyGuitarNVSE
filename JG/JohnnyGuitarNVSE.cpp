@@ -102,10 +102,11 @@ extern "C" {
 			_ERROR("NV noGore is unsupported");
 			return false;
 		}
-
-		if (nvse->nvseVersion < NVSE_VERSION_INTEGER)
+		int version = nvse->nvseVersion;
+		double s_nvseVersion = (version >> 24) + (((version >> 16) & 0xFF) * 0.1) + (((version & 0xFF) >> 4) * 0.01);
+		if (version < 0x6000060)
 		{
-			_ERROR("NVSE version too old (got %08X expected at least %08X)", nvse->nvseVersion, NVSE_VERSION_INTEGER);
+			_ERROR("NVSE version is outdated (v%.2f). This plugin requires v6.06 minimum.", s_nvseVersion);
 			return false;
 		}
 

@@ -294,7 +294,7 @@ enum
 	kExtraData_Max
 };
 
-#define GetExtraType(xDataList, Type) (Extra ## Type*)xDataList.GetByType(kExtraData_ ## Type)
+#define GetExtraType(xDataList, Type) (Extra ## Type*)(xDataList).GetByType(kExtraData_ ## Type)
 extern char *GetExtraDataValue(BSExtraData *traverse);
 extern const char *GetExtraDataName(UInt8 extraDataType);
 
