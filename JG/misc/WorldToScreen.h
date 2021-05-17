@@ -225,6 +225,9 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 
 NiPoint3* NiPointBuffer = NULL;
 
+bool JG_WorldToScreen(NiPoint3* posXYZ, float& x_out, float& y_out, float& z_out, float offscreenHandling) {
+	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, posXYZ, x_out, y_out, z_out, 0.0000099999997, offscreenHandling);
+}
 __forceinline bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, float HandleType, float zeroTolerance = 0.0000099999997)
 {
 	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, p_in, x_out, y_out, z_out, zeroTolerance, HandleType);
