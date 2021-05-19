@@ -146,6 +146,7 @@ extern "C" {
 		fixHighNoon = 0;
 		fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 		fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
+		fixNPCShootingAngle = GetPrivateProfileInt("MAIN", "bFixNPCShootingAngle", 1, filename);
 		capLoadScreensTo60 = GetPrivateProfileInt("MAIN", "b60FPSDuringLoading", 0, filename);
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;

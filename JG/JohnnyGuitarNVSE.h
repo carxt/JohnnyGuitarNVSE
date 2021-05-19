@@ -32,6 +32,7 @@ bool fixHighNoon = 0;
 bool fixFleeing = 0;
 bool fixItemStacks = 0;
 bool capLoadScreensTo60 = 0;
+bool fixNPCShootingAngle = 0;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -601,6 +602,7 @@ void HandleGameHooks()
 	if (capLoadScreensTo60)SafeWrite8(0x78D4A4, 0x10);
 
 	WriteRelCall(0x4F49AB, UInt32(TESRegionDataSoundLoadIncidentalID));
+	if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
 }
 
 
