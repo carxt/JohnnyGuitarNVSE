@@ -246,7 +246,6 @@ public:
 				it = EventCallbacks.erase(it);
 				continue;
 			}
-		NotFound:
 			it++;
 
 		}

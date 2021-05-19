@@ -186,7 +186,7 @@ bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS)
 	{
 		UInt8 overriding = form->GetOverridingModIdx();
 		*result = ((overriding > scriptObj->modIndex) ? overriding : 0);
-		if (IsConsoleMode) Console_Print("GetFormOverrideIndex >> %.f", *result);
+		if (IsConsoleMode()) Console_Print("GetFormOverrideIndex >> %.f", *result);
 	}
 	return true;
 }

@@ -74,7 +74,6 @@ public:
 		if (!currentFilter) return;
 		if (IS_TYPE(currentFilter, BGSListForm))
 		{
-			//Console_Print("filter looping");
 			ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
 			do {
 				TESForm* it = iterator->data;
@@ -94,5 +93,5 @@ void* __fastcall CreateOneFormOneIntFilter(void** Filters, UInt32 numFilters) {
 
 struct EventFilterStructOneFormOneInt {
 	TESForm* form;
-	UInt32 intID;
+	int intID;
 };
