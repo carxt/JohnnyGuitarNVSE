@@ -1,6 +1,6 @@
 #pragma once
 // Functions that perform mathematical calculations
-DEFINE_COMMAND_PLUGIN(WorldToScreen, , 0, 8, kParamsProjectionArgs);
+DEFINE_COMMAND_PLUGIN(JGLegacyWorldToScreen, , 0, 8, kParamsProjectionArgsLegacy);
 DEFINE_COMMAND_PLUGIN(Get3DDistanceBetweenNiNodes, , 0, 4, kParams_TwoRefs_TwoStrings);
 DEFINE_COMMAND_PLUGIN(Get3DDistanceToNiNode, , 1, 4, kParams_OneString_ThreeFloats);
 DEFINE_COMMAND_PLUGIN(Get3DDistanceFromHitToNiNode, , 1, 1, kParams_OneString);
@@ -10,7 +10,7 @@ DEFINE_COMMAND_PLUGIN(Remap, , 0, 5, kParams_FiveFloats);
 DEFINE_COMMAND_PLUGIN(Lerp, , 0, 3, kParams_ThreeFloats);
 DEFINE_COMMAND_PLUGIN(Sign, , 0, 1, kParams_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetCameraTranslation, , FALSE, 4, kParams_ThreeStrings_OneInt);
-
+DEFINE_COMMAND_PLUGIN(WorldToScreen, , 0, 8, kParamsProjectionArgs);
 bool Cmd_Sign_Execute(COMMAND_ARGS) {
 	float value;
 	*result = 0;
@@ -101,7 +101,7 @@ bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
+bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS)
 {
 
 	*result = 0;
@@ -116,9 +116,10 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 		{
 			xIn += refr->posX; yIn += refr->posY; zIn += refr->posZ;
 		}
-		NiPointAssign(xIn, yIn, zIn);
+		NiPoint3 NiPointBuffer = { 0,0,0 };
+		NiPointAssign(&NiPointBuffer, xIn, yIn, zIn);
 		float xOut = 0, yOut = 0, zOut = 0, outOfX = 0, outOfY = 0;
-		*result = (WorldToScreen(NiPointBuffer, xOut, yOut, zOut, HandleType) ? 1 : 0);
+		*result = (WorldToScreen(&NiPointBuffer, xOut, yOut, zOut, HandleType) ? 1 : 0);
 		setVarByName(PASS_VARARGS, X_outS, xOut);
 		setVarByName(PASS_VARARGS, Y_outS, yOut);
 		setVarByName(PASS_VARARGS, Z_outS, zOut);
@@ -126,7 +127,29 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 	return true;
 }
 
+bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
+{
 
+	*result = 0;
+	float xIn = 0, yIn = 0, zIn = 0;
+	UInt32 HandleType = 0;
+	NiPoint3 NiPosIn = { 0,0,0 };
+	TESObjectREFR* refr = NULL;
+	ScriptVar* X_outS, *Y_outS, *Z_outS;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &NiPosIn.x, &NiPosIn.y, &NiPosIn.z, &HandleType, &refr))
+	{
+		if (refr)
+		{
+			NiPosIn.x += refr->posX; NiPosIn.y += refr->posY; NiPosIn.z += refr->posZ;
+		}
+		NiPoint3 NiPosOut = { 0, 0, 0 };
+		*result = (WorldToScreen(&NiPosIn, NiPosOut.x, NiPosOut.y, NiPosOut.z, HandleType) ? 1 : 0);
+		X_outS->data = NiPosOut.x;
+		Y_outS->data = NiPosOut.y;
+		Z_outS->data = NiPosOut.z;
+	}
+	return true;
+}
 
 bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS)
 {
