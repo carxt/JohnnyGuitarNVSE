@@ -138,7 +138,7 @@ extern "C" {
 	bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
-		NiPointBuffer = (NiPoint3*)malloc(sizeof(NiPoint3));
+		//NiPointBuffer = (NiPoint3*)malloc(sizeof(NiPoint3));
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
 		strcpy((char*)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
@@ -153,7 +153,7 @@ extern "C" {
 
 		nvse->SetOpcodeBase(0x3100);
 
-		REG_CMD(WorldToScreen);
+		REG_CMD(JGLegacyWorldToScreen);
 		REG_CMD(ToggleLevelUpMenu);
 		REG_CMD(IsLevelUpMenuEnabled);
 		REG_CMD(GetBaseEffectAV);
@@ -310,6 +310,8 @@ extern "C" {
 		REG_CMD(ApplyWeaponPoison);
 		REG_CMD(GetTalkingActivatorActor);
 		REG_TYPED_CMD(GetPlayerKarmaTitle, String);
+		REG_CMD(SetJohnnyOnRenderUpdateEventHandler);
+		REG_CMD(WorldToScreen);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

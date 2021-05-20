@@ -223,7 +223,7 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 }
 
 
-NiPoint3* NiPointBuffer = NULL;
+//NiPoint3* NiPointBuffer = NULL;
 
 bool __cdecl JG_WorldToScreen(NiPoint3* posXYZ, NiPoint3& posOut, float offscreenHandling) {
 	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, posXYZ, posOut.x, posOut.y, posOut.z, 0.0000099999997, offscreenHandling);
@@ -234,7 +234,7 @@ __forceinline bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, flo
 
 }
 
-ParamInfo kParamsProjectionArgs[8] =
+ParamInfo kParamsProjectionArgsLegacy[8] =
 {
 	{ "X_Out", kParamType_String, 0 },
 	{ "Y_Out", kParamType_String, 0 },
@@ -247,6 +247,19 @@ ParamInfo kParamsProjectionArgs[8] =
 
 };
 
+
+ParamInfo kParamsProjectionArgs[8] =
+{
+	{ "X_Out", kParamType_ScriptVariable , 0 },
+	{ "Y_Out", kParamType_ScriptVariable , 0 },
+	{ "Z_Out", kParamType_ScriptVariable , 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "HandleMode", kParamType_Integer, 0 },
+	{ "Object Ref", kParamType_ObjectRef, 1 }
+
+};
 
 
 void __stdcall CopyNiCamera(NiCameraAlt* MemoryAddressToCopy, float fov)

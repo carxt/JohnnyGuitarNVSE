@@ -11,6 +11,7 @@ DEFINE_COMMAND_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, , 0, 4, kParams_Even
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, , 0, 3, kParams_Event);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnAddPerkEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_PLUGIN(SetJohnnyOnRemovePerkEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, , 0, 3, kParams_Event);
 
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
@@ -24,6 +25,8 @@ EventInformation* OnCrosshairHandler;
 EventInformation* OnSettingsUpdateHandler;
 EventInformation* OnAddPerkHandler;
 EventInformation* OnRemovePerkHandler;
+EventInformation* OnRenderGameModeUpdateHandler;
+EventInformation* OnRenderRenderedMenuUpdateHandler;
 
 void __fastcall handleRemovePerkEvent(BGSPerk* perk, void* edx, PlayerCharacter* player, bool isTeammatePerk) {
 	for (auto const& callback : OnRemovePerkHandler->EventCallbacks) {
@@ -130,6 +133,25 @@ UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 		}
 	}
 	return challenge->data.type;
+}
+
+
+UInt32 __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
+	for (auto const& callback : OnRenderGameModeUpdateHandler->EventCallbacks) {
+
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRenderGameModeUpdateHandler->numMaxArgs);
+
+	}
+	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
+}
+
+UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
+	for (auto const& callback : OnRenderRenderedMenuUpdateHandler->EventCallbacks) {
+
+		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRenderRenderedMenuUpdateHandler->numMaxArgs);
+
+	}
+	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
 }
 __declspec(naked) void OnCrosshairEventAsm() {
 	static const UInt32 retnAddr = 0x775A69;
@@ -396,6 +418,36 @@ bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
 	}
 }
 
+bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	UInt32 flags = 0;
+	enum EnumFlags {
+		kDoNotFireInRenderMenu = 1 << 0,
+		kDoNotFireInGameMode = 1 << 1,
+	};
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
+	{
+		if (!(flags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler)
+		{
+			if (setOrRemove)
+				OnRenderGameModeUpdateHandler->RegisterEvent(script, NULL);
+			else OnRenderGameModeUpdateHandler->RemoveEvent(script, NULL);
+
+		}
+
+		if (!(flags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler)
+		{
+			if (setOrRemove)
+				OnRenderRenderedMenuUpdateHandler->RegisterEvent(script, NULL);
+			else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script, NULL);
+
+		}
+		return true;
+	}
+}
+
 void HandleEventHooks()
 {
 	OnDyingHandler = JGCreateEvent("OnDying", 1, 1, NULL);
@@ -427,4 +479,12 @@ void HandleEventHooks()
 	WriteRelCall(0x9638D2, (UINT)handleAddPerkEvent);
 	WriteRelCall(0x96398C, (UINT)handleRemovePerkEvent);
 	SafeWrite8(0x60CA29, 0xCC);
+
+
+	//testing
+	OnRenderGameModeUpdateHandler = JGCreateEvent("OnRenderGameModeUpdateHandler", 0, 0, NULL);
+	WriteRelCall(0x870244, (uintptr_t)handlerRenderGameEvent);
+	OnRenderRenderedMenuUpdateHandler = JGCreateEvent("OnRenderRenderedMenuUpdateHandler", 0, 0, NULL);
+	WriteRelCall(0x8702A9, (uintptr_t)handlerRenderMenuEvent);
+
 }
