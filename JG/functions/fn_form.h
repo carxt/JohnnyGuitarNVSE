@@ -45,7 +45,50 @@ DEFINE_COMMAND_PLUGIN(SetMessageIconPath, , 0, 3, kParams_OneString_OneForm_OneO
 DEFINE_COMMAND_PLUGIN(GetMessageIconPath, , 0, 2, kParams_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetBodyPartTraitString, , 0, 3, kParams_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetActorEffectType, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(GetTalkingActivatorActor, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(GetPlayerKarmaTitle, , 0, 1, kParams_OneOptionalInt);
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
+
+bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char *title;
+	UInt32 titleOrTier = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &titleOrTier);
+	if (titleOrTier == 1) {
+		int karmaTier = CdeclCall<int>(0x47E040, g_thePlayer->avOwner.GetActorValue(kAVCode_Karma)); // GetKarmaTier
+		switch (karmaTier) {
+		case 0:
+			title = *(char**)0x11D41B4; // sAlignGood
+			break;
+		case 1:
+			title = *(char**)0x11D3208; // sAlignNeutral
+			break;
+		case 2:
+			title = *(char**)0x11D4580; // sAlignEvil
+			break;
+		case 3:
+			title = *(char**)0x11D5000; // sAlignVeryGood
+			break;
+		case 4:
+			title = *(char**)0x11D31D8; // sAlignVeryEvil
+			break;
+		}
+	}
+	else {
+		title = CdeclCall<char*>(0x47E0E0, g_thePlayer); // Actor::GetKarmaTitle
+	}
+	if (IsConsoleMode()) Console_Print("GetPlayerKarmaTitle >> %s", title);
+	g_strInterface->Assign(PASS_COMMAND_ARGS, title);
+	return true;
+}
+bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSTalkingActivator* activator;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &activator) && IS_TYPE(activator, BGSTalkingActivator)) {
+		*(UInt32*)result = activator->talkingActor->refID;
+		if (IsConsoleMode()) Console_Print("GetTalkingActivatorActor >> 0x%X", *result);
+	}
+}
 bool Cmd_GetActorEffectType_Execute(COMMAND_ARGS) {
 	*result = 0;
 	SpellItem* effect;
