@@ -266,7 +266,7 @@ hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName)
 	}
 	return NULL;
 }
-__forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
+__forceinline void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn, float& zIn)
 {
 	NiPointBuffer->x = xIn;
 	NiPointBuffer->y = yIn;
