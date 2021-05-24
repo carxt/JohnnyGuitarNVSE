@@ -27,7 +27,7 @@ DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParams_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 3, kParams_OneRef_OneInt); 
-
+DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , 0, 1, kParams_OneOptionalInt);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -35,6 +35,26 @@ bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5B
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
+bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
+	*result = 0;
+	UInt32 skipInvisible = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
+	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	auto iter = g_thePlayer->compassTargets->Begin();
+	for (; !iter.End(); ++iter)
+	{
+		PlayerCharacter::CompassTarget* target = iter.Get();
+		if (target->isHostile)
+		{
+			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
+				continue;
+			}
+			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
+			}
+	}
+	if (g_arrInterface->GetArraySize(hostileArr)) g_arrInterface->AssignCommandResult(hostileArr, result);
+	return true;
+}
 
 bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
 {
