@@ -181,9 +181,9 @@ extern "C" {
 		REG_CMD(SetMediaSetTraitNumeric);
 		REG_TYPED_CMD(GetMediaSetTraitString, String);
 		REG_CMD(SetMediaSetTraitString);
-		REG_CMD(GetMediaSetTraitSound);
+		REG_TYPED_CMD(GetMediaSetTraitSound, Form);
 		REG_CMD(SetMediaSetTraitSound);
-		REG_CMD(GetWeapon1stPersonModel);
+		REG_TYPED_CMD(GetWeapon1stPersonModel, Form);
 		REG_CMD(SetWeapon1stPersonModel);
 		REG_TYPED_CMD(GetBufferedCellsAlt, Array);
 		REG_CMD(GetTimePlayed);
@@ -193,7 +193,7 @@ extern "C" {
 		REG_TYPED_CMD(GetMusicTypePath, String);
 		REG_CMD(GetMusicTypeDB);
 		REG_CMD(SetMusicTypeDB);
-		REG_CMD(EditorIDToFormID);
+		REG_TYPED_CMD(EditorIDToFormID, Form);
 		REG_CMD(GetRegionWeatherOverride);
 		REG_CMD(SetRegionWeatherOverride);
 		REG_CMD(GetRegionWeatherPriority);
@@ -207,7 +207,7 @@ extern "C" {
 		REG_CMD(RemovePrimitive);
 		REG_CMD(GetPrimitiveType);
 		REG_CMD(GetBaseScale);
-		REG_CMD(GetCustomMapMarker);
+		REG_TYPED_CMD(GetCustomMapMarker, Form);
 		REG_CMD(UnsetAV);
 		REG_CMD(UnforceAV);
 		REG_CMD(ToggleNthPipboyLight);
@@ -227,7 +227,7 @@ extern "C" {
 		REG_CMD(GetLifeState);
 		REG_CMD(GetRaceFlag);
 		REG_CMD(SetRaceFlag);
-		REG_CMD(GetContainerSound);
+		REG_TYPED_CMD(GetContainerSound, Form);
 		REG_CMD(SetContainerSound);
 		REG_CMD(SetJohnnyOnDyingEventHandler);
 		REG_CMD(SetJohnnyOnStartQuestEventHandler);
@@ -247,9 +247,9 @@ extern "C" {
 		REG_CMD(AddTerminalMenuItem);
 		REG_TYPED_CMD(GetTerminalMenuItemText, String);
 		REG_CMD(SetTerminalMenuItemText);
-		REG_CMD(GetTerminalMenuItemNote);
+		REG_TYPED_CMD(GetTerminalMenuItemNote, Form);
 		REG_CMD(SetTerminalMenuItemNote);
-		REG_CMD(GetTerminalMenuItemSubmenu);
+		REG_TYPED_CMD(GetTerminalMenuItemSubmenu, Form);
 		REG_CMD(SetTerminalMenuItemSubmenu);
 		REG_CMD(GetRunSpeed);
 		REG_CMD(DisableMenuArrowKeys);
@@ -283,7 +283,7 @@ extern "C" {
 		REG_CMD(SetJohnnyOnSettingsUpdateEventHandler);
 		REG_CMD(GetQuestDelay);
 		REG_CMD(GetNearestCompassHostileDirection);
-		REG_CMD(GetNearestCompassHostile);
+		REG_TYPED_CMD(GetNearestCompassHostile, Form);
 		REG_CMD(RefreshIdle);
 		REG_CMD(SetNoteRead);
 		REG_CMD(SetDisablePlayerControlsHUDVisibilityFlags);
@@ -308,7 +308,7 @@ extern "C" {
 		REG_CMD(GetCalculatedSpread);
 		REG_CMD(SendStealingAlarm);
 		REG_CMD(ApplyWeaponPoison);
-		REG_CMD(GetTalkingActivatorActor);
+		REG_TYPED_CMD(GetTalkingActivatorActor, Form);
 		REG_TYPED_CMD(GetPlayerKarmaTitle, String);
 		REG_TYPED_CMD(GetCompassHostiles, Array);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
