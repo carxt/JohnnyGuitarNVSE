@@ -88,6 +88,7 @@ bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
 		*(UInt32*)result = activator->talkingActor->refID;
 		if (IsConsoleMode()) Console_Print("GetTalkingActivatorActor >> 0x%X", *result);
 	}
+	return true;
 }
 bool Cmd_GetActorEffectType_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -714,7 +715,8 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* cell = NULL;
 	UInt32 iHoursToRespawnCell = *(UInt32*)0x11CA164;
-	float detachTime = 0, gameHoursPassed = 0;
+	SInt32 detachTime = 0;
+	float gameHoursPassed = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell) && IS_TYPE(cell, TESObjectCELL)) {
 		ExtraDetachTime* xDetachTime = (ExtraDetachTime*)cell->extraDataList.GetByType(kExtraData_DetachTime);
 		detachTime = xDetachTime == 0 ? 0 : xDetachTime->time;
@@ -727,7 +729,7 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 		else {
 			float daysPassed = g_gameTimeGlobals->daysPassed == 0 ? 1.0 : g_gameTimeGlobals->daysPassed->data;
 			gameHoursPassed = floor(daysPassed * 24.0);
-			*result = ((gameHoursPassed - detachTime) > iHoursToRespawnCell);
+			*result = ((gameHoursPassed - detachTime) >= iHoursToRespawnCell);
 		}
 		if (IsConsoleMode())
 			Console_Print("IsCellExpired >> %.0f", *result);

@@ -23,7 +23,7 @@ public:
 	ExtraDetachTime();
 	~ExtraDetachTime();
 
-	UInt32 time;
+	SInt32 time;
 };
 // 34
 class BGSPrimitive
