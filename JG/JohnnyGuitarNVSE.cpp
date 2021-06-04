@@ -60,6 +60,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		OnCrosshairHandler->FlushEventCallbacks();
 		bArrowKeysDisabled = false;
 		RestoreDisabledPlayerControlsHUDFlags();
+		SaveGameUMap.clear();
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_MainGameLoop:
@@ -311,6 +312,7 @@ extern "C" {
 		REG_TYPED_CMD(GetTalkingActivatorActor, Form);
 		REG_TYPED_CMD(GetPlayerKarmaTitle, String);
 		REG_TYPED_CMD(GetCompassHostiles, Array);
+		REG_CMD(ToggleDisableSaves);
 		REG_CMD(SetJohnnyOnRenderUpdateEventHandler);
 		REG_CMD(WorldToScreen);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
