@@ -151,7 +151,7 @@ extern "C" {
 		capLoadScreensTo60 = GetPrivateProfileInt("MAIN", "b60FPSDuringLoading", 0, filename);
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
-
+		SaveGameUMap.reserve(0xFF);
 		nvse->SetOpcodeBase(0x3100);
 
 		REG_CMD(JGLegacyWorldToScreen);
