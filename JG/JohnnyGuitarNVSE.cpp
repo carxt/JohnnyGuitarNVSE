@@ -311,6 +311,7 @@ extern "C" {
 		REG_TYPED_CMD(GetTalkingActivatorActor, Form);
 		REG_TYPED_CMD(GetPlayerKarmaTitle, String);
 		REG_TYPED_CMD(GetCompassHostiles, Array);
+		REG_CMD(SendContainerStealingAlarm);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

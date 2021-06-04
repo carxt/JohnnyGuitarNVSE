@@ -602,3 +602,10 @@ static ParamInfo kParams_OneRef_OneInt[2] =
 	{ "target",            kParamType_ObjectRef,    0    },
 	{ "quantity",        kParamType_Integer,        1    },
 };
+
+static ParamInfo kParams_OneRef_OneForm_OneInt[3] =
+{
+	{ "target",            kParamType_ObjectRef,    0    },
+	{ "Form",			kParamType_AnyForm, 0		},
+	{ "quantity",        kParamType_Integer,        1    },
+};

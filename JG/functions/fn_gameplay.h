@@ -26,7 +26,8 @@ DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParams_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 3, kParams_OneRef_OneInt); 
+DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 2, kParams_OneRef_OneInt); 
+DEFINE_COMMAND_PLUGIN(SendContainerStealingAlarm, , 1, 3, kParams_OneRef_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , 0, 1, kParams_OneOptionalInt);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -55,7 +56,19 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	if (g_arrInterface->GetArraySize(hostileArr)) g_arrInterface->AssignCommandResult(hostileArr, result);
 	return true;
 }
+bool Cmd_SendContainerStealingAlarm_Execute(COMMAND_ARGS)
+{
+	TESObjectREFR* container;
+	TESForm* item;
+	int quantity = 1;
 
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &item, &quantity))
+	{
+		ExtraOwnership* xOwn = ThisStdCall<ExtraOwnership*>(0x567790, container); // TESObjectREFR::ResolveOwnership
+		ThisStdCall(0x8BFA40, thisObj, container, item, quantity, 1, xOwn); // Actor::HandleStealing, 
+	}
+	return true;
+}
 bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
 {
 	TESObjectREFR* target;
