@@ -96,7 +96,7 @@ extern "C" {
 		gLog.Open("JohnnyGuitarNVSE.log");
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "JohnnyGuitarNVSE";
-		info->version = 380;
+		info->version = 390;
 
 		if (nvse->isNogore)
 		{
@@ -105,9 +105,9 @@ extern "C" {
 		}
 		int version = nvse->nvseVersion;
 		double s_nvseVersion = (version >> 24) + (((version >> 16) & 0xFF) * 0.1) + (((version & 0xFF) >> 4) * 0.01);
-		if (version < 0x6000060)
+		if (version < 0x6010000)
 		{
-			_ERROR("NVSE version is outdated (v%.2f). This plugin requires v6.06 minimum.", s_nvseVersion);
+			_ERROR("NVSE version is outdated (v%.2f). This plugin requires v6.1 minimum.", s_nvseVersion);
 			return false;
 		}
 
