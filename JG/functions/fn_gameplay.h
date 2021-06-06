@@ -28,6 +28,7 @@ DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParams_OneInt_OneFloat)
 DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 1, kParams_OneRef);
 DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , 0, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(ToggleDisableSaves, , 0, 1, kParams_OneInt);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -495,5 +496,22 @@ bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &toExtract) && toExtract <= 1) DoSkipMuzzleLights = toExtract;
 	*(UInt32*)result = (DoSkipMuzzleLights == 1);
 	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %u", *result);
+	return true;
+}
+bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS)
+{
+	int doDisable = 1;
+	BYTE modIdx = scriptObj->GetModIndex();
+	if (modIdx < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &doDisable))
+	{
+		if (doDisable)
+		{
+			SaveGameUMap.insert(modIdx);
+		}
+		else
+		{
+			SaveGameUMap.erase(modIdx);
+		}
+	}
 	return true;
 }

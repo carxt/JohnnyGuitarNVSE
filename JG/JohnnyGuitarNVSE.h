@@ -53,7 +53,22 @@ GameTimeGlobals* g_gameTimeGlobals = nullptr;
 Sky** g_currentSky = nullptr;
 void(__thiscall* OriginalBipedModelUpdateWeapon)(ValidBip01Names*, TESObjectWEAP*, int) = (void(__thiscall*)(ValidBip01Names*, TESObjectWEAP*, int)) 0x4AB400;
 UInt8(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (UInt8(__thiscall*)(ContChangesEntry*)) 0x4BD820;
+std::unordered_set<BYTE> SaveGameUMap;
+uintptr_t FNVCanSaveOriginalCall = 0;
+uintptr_t FNVCanSaveMenuOriginalCall = 0;
+bool __fastcall HookCanSaveNow(void* ThisObj, void* edx, int isAutoSave)
+{
 
+	return ThisStdCall_B(FNVCanSaveOriginalCall, ThisObj, isAutoSave) && SaveGameUMap.empty();
+
+}
+
+bool __fastcall HookCanSaveNowMenu(void* ThisObj, void* edx, int isAutoSave)
+{
+
+	return ThisStdCall_B(FNVCanSaveMenuOriginalCall, ThisObj, isAutoSave) && SaveGameUMap.empty();
+
+}
 void __fastcall hk_BipedModel_UpdateWeapon(ValidBip01Names* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods)
 {
 
@@ -266,7 +281,7 @@ hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName)
 	}
 	return NULL;
 }
-__forceinline void NiPointAssign(float& xIn, float& yIn, float& zIn)
+__forceinline void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn, float& zIn)
 {
 	NiPointBuffer->x = xIn;
 	NiPointBuffer->y = yIn;
@@ -592,6 +607,11 @@ void HandleGameHooks()
 	WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
 	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4); // to use fWeapSkillReqPenalty correctly in spread calc
 	WriteRelCall(0x82FC0B, (UInt32)ShouldPlayCombatMusic);
+	//SaveGameHook
+	FNVCanSaveOriginalCall = (*(UInt32*)0x0850443) + 5 + 0x0850442;
+	WriteRelCall(0x0850442, (uintptr_t)HookCanSaveNow);
+	FNVCanSaveMenuOriginalCall = (*(UInt32*)0x07CBDC8) + 5 + 0x07CBDC7;
+	WriteRelCall(0x07CBDC7, (uintptr_t)HookCanSaveNowMenu);
 	if (fixFleeing) WriteRelCall(0x8F5FE2, (UInt32)FleeFixHook);
 	if (fixItemStacks) {
 		WriteRelCall(0x780D11, (UInt32)DropItemHook);
