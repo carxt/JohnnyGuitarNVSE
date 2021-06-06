@@ -10,14 +10,17 @@
     <Filter Include="internal\md5">
       <UniqueIdentifier>{f342ad93-a4cc-436a-9027-316b41bbc130}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JohnnyGuitar">
-      <UniqueIdentifier>{c46b493e-012e-48b1-adb7-84fea8c2fc6f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="internal\sha1">
       <UniqueIdentifier>{92cbffb5-c87c-4e83-8834-99510ec93917}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JohnnyGuitar\JohnnyFunctions">
-      <UniqueIdentifier>{a3c29436-c711-4568-ad26-90e99fd225f0}</UniqueIdentifier>
+    <Filter Include="events">
+      <UniqueIdentifier>{f444b756-9369-4af3-8c79-55b7c623bcf5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="functions">
+      <UniqueIdentifier>{b6e6f5cd-9eab-4706-a728-12e4730c85c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{4714bb52-e742-43b4-9391-6acc122a3c7b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -141,74 +144,73 @@
     <ClInclude Include="internal\md5\md5.h">
       <Filter>internal\md5</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyGuitarNVSE.h">
-      <Filter>JohnnyGuitar</Filter>
-    </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyParams.h">
-      <Filter>JohnnyGuitar</Filter>
-    </ClInclude>
-    <ClInclude Include="JohnnyGuitar\misc.h">
-      <Filter>JohnnyGuitar</Filter>
-    </ClInclude>
-    <ClInclude Include="JohnnyGuitar\WorldToScreen.h">
-      <Filter>JohnnyGuitar</Filter>
-    </ClInclude>
     <ClInclude Include="internal\sha1\sha1.h">
       <Filter>internal\sha1</Filter>
-    </ClInclude>
-    <ClInclude Include="JohnnyGuitar\BMPHandling.h">
-      <Filter>JohnnyGuitar</Filter>
-    </ClInclude>
-    <ClInclude Include="JohnnyGuitar\EditorIDs.h">
-      <Filter>JohnnyGuitar</Filter>
-    </ClInclude>
-    <ClInclude Include="JohnnyGuitar\EventFilteringInterface.h">
-      <Filter>JohnnyGuitar</Filter>
-    </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyEventPredefinitions.h">
-      <Filter>JohnnyGuitar</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameUI.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyEvents.h">
-      <Filter>JohnnyGuitar</Filter>
-    </ClInclude>
     <ClInclude Include="..\nvse\nvse\CommandTable.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\CustomEventFilters.h">
-      <Filter>JohnnyGuitar</Filter>
+    <ClInclude Include="..\nvse\nvse\PluginAPI.h">
+      <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_form.h">
-      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    <ClInclude Include="JohnnyGuitarNVSE.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="events\CustomEventFilters.h">
+      <Filter>events</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_math.h">
-      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    <ClInclude Include="events\EventFilteringInterface.h">
+      <Filter>events</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_utility.h">
-      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    <ClInclude Include="events\JohnnyEventPredefinitions.h">
+      <Filter>events</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_file.h">
-      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    <ClInclude Include="events\JohnnyEvents.h">
+      <Filter>events</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_gameplay.h">
-      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    <ClInclude Include="functions\fn_av.h">
+      <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_mediaset.h">
-      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    <ClInclude Include="functions\fn_file.h">
+      <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_region.h">
-      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    <ClInclude Include="functions\fn_form.h">
+      <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_terminal.h">
-      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    <ClInclude Include="functions\fn_gameplay.h">
+      <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_ui.h">
-      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    <ClInclude Include="functions\fn_math.h">
+      <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="JohnnyGuitar\JohnnyFunctions\fn_av.h">
-      <Filter>JohnnyGuitar\JohnnyFunctions</Filter>
+    <ClInclude Include="functions\fn_mediaset.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\fn_region.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\fn_terminal.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\fn_ui.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\fn_utility.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="misc\EditorIDs.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="misc\misc.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="misc\WorldToScreen.h">
+      <Filter>misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\ParamInfos.h">
+      <Filter>nvse</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -2,11 +2,11 @@
 #define __NVSE_VERSION_H__
 
 // these have to be macros so they can be used in the .rc
-#define NVSE_VERSION_INTEGER		4
-#define NVSE_VERSION_INTEGER_MINOR	5
-#define NVSE_VERSION_INTEGER_BETA	7
-#define NVSE_VERSION_VERSTRING		"0, 4, 5, 7"
-#define NVSE_VERSION_PADDEDSTRING	"0004"
+#define NVSE_VERSION_INTEGER		6
+#define NVSE_VERSION_INTEGER_MINOR	0
+#define NVSE_VERSION_INTEGER_BETA	6
+#define NVSE_VERSION_VERSTRING		"0, 6, 0, 6"
+#define NVSE_VERSION_PADDEDSTRING	"0006"
 
 // build numbers do not appear to follow the same format as with oblivion
 #define MAKE_NEW_VEGAS_VERSION_EX(major, minor, build, sub)	(((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFFF) << 4) | (sub & 0xF))

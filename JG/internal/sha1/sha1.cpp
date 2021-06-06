@@ -6,7 +6,7 @@ http://tamale.net/
 
 This file is licensed under the terms described in the
 accompanying LICENSE file.
-The source code has an open source license (the so-called "MIT License" ) 
+The source code has an open source license (the so-called "MIT License" )
 which allows it to be used in commercial software.
 */
 
@@ -89,7 +89,7 @@ void SHA1::process()
 		+ (bytes[t * 4 + 1] << 16)
 		+ (bytes[t * 4 + 2] << 8)
 		+ bytes[t * 4 + 3];
-	for (; t< 80; t++) W[t] = lrot(W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16], 1);
+	for (; t < 80; t++) W[t] = lrot(W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16], 1);
 
 	/* main loop */
 	Uint32 temp;

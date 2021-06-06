@@ -444,7 +444,7 @@ char * GetExtraDataValue(BSExtraData* traverse)
 		case	kExtraData_Action                   	: 
 			pXAction = (ExtraAction*)traverse;
 			if (pXAction->actionRef && pXAction->actionRef->GetFullName())
-				sprintf_s(buffer, sizeof(buffer), "{%#2X} [%#10X] (%s)", pXAction->byte0C, pXAction->actionRef->refID, pXAction->actionRef->GetFullName()->name);
+				sprintf_s(buffer, sizeof(buffer), "{%#2X} [%#10X] (%s)", pXAction->byte0C, pXAction->actionRef->refID, pXAction->actionRef->GetFullName()->name.CStr());
 			else
 				sprintf_s(buffer, sizeof(buffer), "{%#2X} [%#10X] ()", pXAction->byte0C, pXAction->actionRef->refID);
 			return buffer; break;
@@ -463,7 +463,7 @@ char * GetExtraDataValue(BSExtraData* traverse)
 		case	kExtraData_ReferencePointer         	: 
 			refr = ((ExtraReferencePointer*)traverse)->refr;
 			if (refr && refr->GetFullName())
-				sprintf_s(buffer, sizeof(buffer), "[%#10X] (%s) [%#10X]", refr->refID, refr->GetFullName()->name, refr->extraDataList.m_data);
+				sprintf_s(buffer, sizeof(buffer), "[%#10X] (%s) [%#10X]", refr->refID, refr->GetFullName()->name.CStr(), refr->extraDataList.m_data);
 			else
 				sprintf_s(buffer, sizeof(buffer), "[%#10X] () [%#10X]", refr->refID, refr->extraDataList.m_data);
 			return buffer; break;
@@ -475,7 +475,7 @@ char * GetExtraDataValue(BSExtraData* traverse)
 			pXOwner = (ExtraOwnership*)traverse;
 			if (pXOwner->owner)
 				if (pXOwner->owner->GetFullName())
-					sprintf_s(buffer, sizeof(buffer), "[%#10X] (%s)", pXOwner->owner->refID, pXOwner->owner->GetFullName()->name);
+					sprintf_s(buffer, sizeof(buffer), "[%#10X] (%s)", pXOwner->owner->refID, pXOwner->owner->GetFullName()->name.CStr());
 				else
 					sprintf_s(buffer, sizeof(buffer), "[%#10X]", pXOwner->owner->refID);
 			else

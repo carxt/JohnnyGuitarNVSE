@@ -55,7 +55,7 @@ public:
 	void MD5Update(BYTE*, DWORD);
 	void MD5Final(BYTE[16]);
 
-	MD5() {MD5Init();}
+	MD5() { MD5Init(); }
 };
 
 #endif

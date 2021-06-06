@@ -23,7 +23,7 @@ public:
 	ExtraDetachTime();
 	~ExtraDetachTime();
 
-	UInt32 time;
+	SInt32 time;
 };
 // 34
 class BGSPrimitive
@@ -1245,7 +1245,7 @@ public:
 	TileImage			*tile3C;		// 3C
 	float				currentQtt;		// 40
 };
-
+struct NiPoint3;
 // 230
 class MapMenu : public Menu				// 1023
 {
@@ -1288,7 +1288,8 @@ public:
 	float							flt0EC;			// 0EC
 	float							flt0F0;			// 0F0
 	float							flt0F4;			// 0F4
-	UInt32							unk0F8[4];		// 0F8
+	TESForm*						markerForm;		// 0F8
+	NiPoint3						markerPos;		// 0FC
 	TESObjectCELL					*cell108;		// 108
 	TESWorldSpace					*wspc10C;		// 10C
 	UInt32							unk110;			// 110
@@ -1306,7 +1307,7 @@ public:
 	ListBox<TESChallenge>			challengeList;	// 1F0
 	BSSimpleArray<Tile>				arr220;			// 220
 };
-
+STATIC_ASSERT(sizeof(MapMenu) == 0x230);
 // 8C
 class RepairMenu : public Menu			// 1035
 {
@@ -2634,7 +2635,7 @@ struct Sound
 	}
 	Sound(UInt32 refId, UInt32 flags)
 	{
-		ThisStdCall(0xAD73B0, BSWin32Audio::GetSingleton, this, refId, flags);
+		ThisStdCall(0xAD73B0, BSWin32Audio::GetSingleton(), this, refId, flags);
 	}
 
 	void Play()

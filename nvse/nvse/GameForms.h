@@ -2627,7 +2627,7 @@ public:
 	BGSTalkingActivator();
 	~BGSTalkingActivator();
 
-	UInt32				unk90;		// 90
+	Actor				*talkingActor;		// 90
 	BGSVoiceType		*voiceType;	// 94
 };
 STATIC_ASSERT(sizeof(BGSTalkingActivator) == 0x98);

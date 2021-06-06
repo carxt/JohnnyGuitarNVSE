@@ -13,29 +13,37 @@ __declspec(naked) BSExtraData *BaseExtraList::GetByType(UInt32 type) const
 {
 	__asm
 	{
-		push	ebx
-		mov		ebx, [esp+8]
-		mov		edx, ecx
-		mov		ecx, ebx
-		and		cl, 7
-		mov		al, 1
-		shl		al, cl
-		mov		ecx, ebx
-		shr		cl, 3
-		test	[ecx+edx+8], al
+		cmp		dword ptr[ecx + 4], 0
 		jz		retnNULL
-		mov		eax, [edx+4]
-	iterHead:
+		mov		edx, [esp + 4]
+		shr		edx, 3
+		movzx	eax, byte ptr[ecx + edx + 8]
+		mov		edx, [esp + 4]
+		and		edx, 7
+		bt		eax, edx
+		jnc		retnNULL
+		push	ecx
+		mov		ecx, 0x11C3920
+		call	LightCS::EnterSleep
+		pop		ecx
+		mov		eax, [ecx + 4]
+		mov		edx, [esp + 4]
+		ALIGN	16
+		iterHead:
+		cmp		[eax + 4], dl
+		jz		lockLeave
+		mov		eax, [eax + 8]
 		test	eax, eax
-		jz		done
-		cmp		byte ptr [eax+4], bl
-		jz		done
-		mov		eax, [eax+8]
-		jmp		iterHead
-	retnNULL:
+		jnz		iterHead
+		lockLeave :
+		mov		edx, 0x11C3920
+		dec		dword ptr[edx + 4]
+		jnz		done
+		mov		dword ptr[edx], 0
+		done :
+		retn	4
+		retnNULL :
 		xor		eax, eax
-	done:
-		pop		ebx
 		retn	4
 	}
 }

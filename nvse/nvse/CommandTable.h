@@ -58,7 +58,7 @@ enum ParamType
 	kParamType_ImageSpaceModifier =		0x2A,	//							kFormType_ImageSpaceModifier
 	kParamType_ImageSpace =				0x2B,	//							kFormType_ImageSpace
 	kParamType_Double =					0x2C,	// 
-	kParamType_Unhandled2D =			0x2D,	// 
+	kParamType_ScriptVariable =			0x2D,	// 
 	kParamType_Unhandled2E =			0x2E,	// 
 	kParamType_EncounterZone =			0x2F,	//							kFormType_EncounterZone
 	kParamType_Unhandled30 =			0x30,	// 
@@ -186,7 +186,8 @@ struct ParamInfo
 
 #define DEFINE_CMD_COND(name, description, refRequired, paramInfo) \
 	DEFINE_CMD_ALT_COND(name, , description, refRequired, paramInfo)
-
+#define DEFINE_CMD_NO_ARGS(name) \
+	DEFINE_COMMAND_PLUGIN(name, , 0, 0, NULL)
 typedef bool (* Cmd_Execute)(COMMAND_ARGS);
 bool Cmd_Default_Execute(COMMAND_ARGS);
 
