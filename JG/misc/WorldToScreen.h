@@ -219,7 +219,7 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 		}
 		return false;
 	}
-
+	fBz = NiNodeComputeDistance(&(((NiAVObject*)cam)->m_worldTranslate), (NiVector3*)kPt);
 }
 
 
