@@ -90,11 +90,10 @@ bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char NiName1[MAX_PATH], NiName2[MAX_PATH];
-	TESObjectREFR* ref1;
-	TESObjectREFR* ref2;
+	TESObjectREFR *ref1, *ref2;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &ref1, &ref2, &NiName1, &NiName2))) return true;
 	NiAVObject* Node1 = ref1->GetNiBlock(NiName1);
-	NiAVObject* Node2 = ref1->GetNiBlock(NiName2);
+	NiAVObject* Node2 = ref2->GetNiBlock(NiName2);
 	if (!Node1 || !Node2) return true;
 	*result = NiNodeComputeDistance(&(Node1->m_worldTranslate), &(Node2->m_worldTranslate));
 	if (IsConsoleMode()) Console_Print("Get3DDistanceBetweenNiNodes >> %f", *result);
