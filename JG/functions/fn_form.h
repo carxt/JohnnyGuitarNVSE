@@ -63,10 +63,11 @@ bool Cmd_GetFaceGenNthProperty_Execute(COMMAND_ARGS)
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &npc, &PropertyListIndex, &PropertyIndex) && npc && IS_TYPE(npc, TESNPC) && PropertyListIndex < 3)
 	{
-		if (auto FaceGenPTR = npc->faceGenDataPtr)
+		if (auto FaceGenPTR = &(npc->faceGenData[0].unk00))
 		{
-			*result = ThisStdCall<float>(0x652230, FaceGenPTR, PropertyListIndex == 1, PropertyListIndex > 1, PropertyIndex);
-
+			*result = CdeclCall<float>(0x652230, FaceGenPTR, UInt32(PropertyListIndex < 1), UInt32(PropertyListIndex > 1), PropertyIndex);
+			if (IsConsoleMode())
+				Console_Print("GetFaceGenNthProperty %.2f", *result);
 		}
 	}
 	return true;
@@ -80,9 +81,13 @@ bool Cmd_SetFaceGenNthProperty_Execute(COMMAND_ARGS)
 	float val = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &npc, &PropertyListIndex, &PropertyIndex, &val) && npc && IS_TYPE(npc, TESNPC) && PropertyListIndex < 3)
 	{
-		if (auto FaceGenPTR = npc->faceGenDataPtr)
+		if (auto FaceGenPTR = &(npc->faceGenData[0].unk00))
 		{
-			ThisStdCall<void>(0x652320, FaceGenPTR, PropertyListIndex == 1, PropertyListIndex > 1, PropertyIndex, val);
+			CdeclCall<void>(0x652320, FaceGenPTR, (PropertyListIndex < 1), (PropertyListIndex > 1), PropertyIndex, val);
+			if (IsConsoleMode())
+			{
+				Console_Print("SetFaceGenNthProperty called");
+			}
 		}
 	}
 	return true;
