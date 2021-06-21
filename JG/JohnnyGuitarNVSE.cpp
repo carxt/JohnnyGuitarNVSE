@@ -317,6 +317,7 @@ extern "C" {
 		REG_CMD(WorldToScreen);
 		REG_CMD(GetFaceGenNthProperty);
 		REG_CMD(SetFaceGenNthProperty);
+		REG_CMD(FaceGenRefreshAppearance);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
