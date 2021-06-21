@@ -47,7 +47,46 @@ DEFINE_COMMAND_PLUGIN(GetBodyPartTraitString, , 0, 3, kParams_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetActorEffectType, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetTalkingActivatorActor, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetPlayerKarmaTitle, , 0, 1, kParams_OneOptionalInt);
+
+DEFINE_COMMAND_PLUGIN(GetFaceGenNthProperty, , 0, 3, kParams_OneActorBase_TwoInts);
+DEFINE_COMMAND_PLUGIN(SetFaceGenNthProperty, , 0, 4, kParams_OneActorBase_TwoInts_OneFloat);
+
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
+
+
+
+bool Cmd_GetFaceGenNthProperty_Execute(COMMAND_ARGS)
+{
+	TESNPC* npc = NULL;
+	UInt32 PropertyListIndex = 0;
+	UInt32 PropertyIndex = 0;
+	*result = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &npc, &PropertyListIndex, &PropertyIndex) && npc && IS_TYPE(npc, TESNPC) && PropertyListIndex < 3)
+	{
+		if (auto FaceGenPTR = npc->faceGenDataPtr)
+		{
+			*result = ThisStdCall<float>(0x652230, FaceGenPTR, PropertyListIndex == 1, PropertyListIndex > 1, PropertyIndex);
+
+		}
+	}
+	return true;
+}
+
+bool Cmd_SetFaceGenNthProperty_Execute(COMMAND_ARGS)
+{
+	TESNPC* npc = NULL;
+	UInt32 PropertyListIndex = 0;
+	UInt32 PropertyIndex = 0;
+	float val = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &npc, &PropertyListIndex, &PropertyIndex, &val) && npc && IS_TYPE(npc, TESNPC) && PropertyListIndex < 3)
+	{
+		if (auto FaceGenPTR = npc->faceGenDataPtr)
+		{
+			ThisStdCall<void>(0x652320, FaceGenPTR, PropertyListIndex == 1, PropertyListIndex > 1, PropertyIndex, val);
+		}
+	}
+	return true;
+}
 
 bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 	*result = 0;

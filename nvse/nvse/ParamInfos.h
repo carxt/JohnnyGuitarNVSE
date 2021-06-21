@@ -614,3 +614,20 @@ static ParamInfo kParams_OneRef[1] =
 {
 	{ "target",            kParamType_ObjectRef,    0    }
 };
+
+static ParamInfo kParams_OneActorBase_TwoInts_OneFloat[4] =
+{
+	{ "target",         kParamType_ActorBase,    0    },
+	{ "Property Type",	kParamType_Integer,			0},
+	{ "Property",       kParamType_Integer,        0 },
+	{ "value",       kParamType_Float,        0 },
+
+};
+
+static ParamInfo kParams_OneActorBase_TwoInts[3] =
+{
+	{ "target",         kParamType_ActorBase,    0    },
+	{ "Property Type",	kParamType_Integer,			0},
+	{ "Property",       kParamType_Integer,        0 },
+
+};
