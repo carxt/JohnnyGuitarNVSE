@@ -316,6 +316,7 @@ const UInt32 TESForm_Vtables[] =
 	0x10320FC,	//	BGSAcousticSpace
 	0x1011964,	//	AlchemyItem
 	0x1024CEC,  //  BGSMovableStatic
+	0x1067A2C,  //  ActorValueInfo
 };
 
 
