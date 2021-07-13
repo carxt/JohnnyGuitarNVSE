@@ -321,7 +321,7 @@ const UInt32 TESForm_Vtables[] =
 
 
 //special for references, so it only uses persistent ones
-const UInt32 TESForm_REFR_Vtables[] =
+const UInt32 TESObjectREFR_Vtables[] =
 {
 	0x102F55C,    //    TESObjectREFR
 	0x1086A6C,    //    Character

@@ -534,7 +534,7 @@ public:
 
 	const char *hk_GetName();
 	bool hk_SetEditorId(const char *Name);
-	bool hk_SetEditorID_REFR(const char* Name);
+	bool hk_REFRSetEditorID(const char* Name);
 	struct EditorData {
 		String		editorID;			// 00
 		UInt32		vcMasterFormID;		// 08 - Version control 1 (looks to be a refID inside the Version Control master)
