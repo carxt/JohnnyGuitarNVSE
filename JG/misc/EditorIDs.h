@@ -14,6 +14,12 @@ __declspec(naked) void SetEditorIdHook_REFR()
 {
 	__asm jmp TESForm::hk_SetEditorID_REFR
 }
+
+void __fastcall SetEditorID(TESForm* form, UInt32 EDX, char* name)
+{
+	form->SetEditorID(name);
+}
+
 namespace SpecialCaseEDIDs
 {
 	bool __fastcall SetEditorIdHookForTESQuest(TESQuest* Form, UInt32 EDX, const char* Name)
@@ -32,6 +38,9 @@ namespace SpecialCaseEDIDs
 
 		SafeWrite32(0x104AC44 + 0x130, (UInt32)GetNameHook);
 		SafeWrite32(0x104AC44 + 0x134, (UInt32)(SetEditorIdHookForTESQuest));
+
+		// ActorValueInfo
+		WriteRelCall(0x66FF57, reinterpret_cast<UInt32>(SetEditorID));
 	}
 }
 
