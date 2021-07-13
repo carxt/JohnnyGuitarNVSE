@@ -85,8 +85,8 @@ class BaseEventClass
 {
 public:
 	ULONG_PTR Flags = 0;
-	Script* ScriptForEvent;
-	EventHandlerInterface* eventFilter;
+	Script* ScriptForEvent = NULL;
+	EventHandlerInterface* eventFilter = NULL;
 	enum GlobalEventFlags
 	{
 		kEventFlag_Deleted = 1 << 0,

@@ -206,10 +206,9 @@ public:
 		{
 			if (script == it->ScriptForEvent)
 			{
-				UInt32 maxFilters = it->eventFilter->GetNumFilters();
-
-				if (maxFilters)
+				if (auto eventFilters = it->eventFilter)
 				{
+					UInt32 maxFilters = eventFilters->GetNumFilters();
 					for (int i = 0; i < maxFilters; i++)
 					{
 						if (!(it->eventFilter->IsFilterEqual(filters[i], i))) goto NotFound;
@@ -236,9 +235,8 @@ public:
 		{
 			if (it->GetDeleted())
 			{
-				UInt32 maxFilters = it->eventFilter->GetNumFilters();
 
-				if (maxFilters)
+				if (it->eventFilter)
 				{
 					delete it->eventFilter;
 				}

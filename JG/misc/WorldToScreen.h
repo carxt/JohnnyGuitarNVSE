@@ -152,7 +152,7 @@ struct JGCameraParams
 };
 JGCameraParams JGGameCamera;
 
-
+extern float __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2);
 
 bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, float& fBx, float& fBy,
 	float& fBz, float fZeroTolerance, float HandleType)
@@ -219,7 +219,7 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 		}
 		return false;
 	}
-
+	fBz = NiNodeComputeDistance(&(((NiAVObject*)cam)->m_worldTranslate), (NiVector3*)kPt);
 }
 
 
