@@ -79,7 +79,7 @@ const char* __fastcall ConsoleNameHook(TESObjectREFR* ref) {
 		return name;
 	}
 	catch (...) {
-		_MESSAGE("Couldn't retrieve EDID for %u", ref->refID);
+		Console_Print("Couldn't retrieve EDID for selected console ref");
 	}
 	return "";
 }
