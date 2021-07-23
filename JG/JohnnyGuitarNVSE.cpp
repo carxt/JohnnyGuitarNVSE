@@ -19,6 +19,7 @@
 #include "nvse/SafeWrite.h"
 #include "nvse/ScriptUtils.h"
 #include "misc/WorldToScreen.h"
+#include "events/LambdaVariableContext.h"
 #include "events/JohnnyEventPredefinitions.h"
 #include "misc/misc.h"
 #include "misc/EditorIDs.h"
@@ -35,12 +36,13 @@
 #include "functions/fn_region.h"
 #include "functions/fn_terminal.h"
 #include "functions/fn_ui.h"
-#include "events/EventFilteringInterface.h"
 #include "events/CustomEventFilters.h"
 #include "events/JohnnyEvents.h"
 
 HMODULE JohnnyHandle;
 IDebugLog		gLog;
+_CaptureLambdaVars CaptureLambdaVars;
+_UncaptureLambdaVars UncaptureLambdaVars;
 
 void MessageHandler(NVSEMessagingInterface::Message* msg)
 {
@@ -327,6 +329,8 @@ extern "C" {
 		if (!nvse->isEditor) {
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
+			CaptureLambdaVars = (_CaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList);
+			UncaptureLambdaVars = (_UncaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList);
 			HandleGameHooks();
 			HandleEventHooks();
 			ExtractArgsEx = g_scriptInterface->ExtractArgsEx;

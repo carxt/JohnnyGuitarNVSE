@@ -56,6 +56,7 @@ UInt8(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntr
 std::unordered_set<BYTE> SaveGameUMap;
 uintptr_t FNVCanSaveOriginalCall = 0;
 uintptr_t FNVCanSaveMenuOriginalCall = 0;
+
 bool __fastcall HookCanSaveNow(void* ThisObj, void* edx, int isAutoSave)
 {
 

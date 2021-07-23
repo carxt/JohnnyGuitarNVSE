@@ -79,6 +79,9 @@
     <ClCompile Include="internal\sha1\sha1.cpp">
       <Filter>internal\sha1</Filter>
     </ClCompile>
+    <ClCompile Include="events\LambdaVariableContext.cpp">
+      <Filter>events</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -211,6 +214,9 @@
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\ParamInfos.h">
       <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="events\LambdaVariableContext.h">
+      <Filter>events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

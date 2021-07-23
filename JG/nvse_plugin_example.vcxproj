@@ -210,6 +210,7 @@
     <ClCompile Include="..\nvse\nvse\GameTypes.cpp" />
     <ClCompile Include="..\nvse\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\nvse\Utilities.cpp" />
+    <ClCompile Include="events\LambdaVariableContext.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
     <ClCompile Include="internal\sha1\sha1.cpp" />
     <ClCompile Include="internal\utility.cpp" />
@@ -238,6 +239,7 @@
     <ClInclude Include="events\EventFilteringInterface.h" />
     <ClInclude Include="events\JohnnyEventPredefinitions.h" />
     <ClInclude Include="events\JohnnyEvents.h" />
+    <ClInclude Include="events\LambdaVariableContext.h" />
     <ClInclude Include="functions\fn_av.h" />
     <ClInclude Include="functions\fn_file.h" />
     <ClInclude Include="functions\fn_form.h" />
