@@ -1,17 +1,17 @@
 #pragma once
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnDyingEventHandler, SetOnDyingEventHandler, 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnStartQuestEventHandler, SetOnStartQuestEventHandler, 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnStopQuestEventHandler, SetOnStopQuestEventHandler, 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_PLUGIN(SetJohnnySeenDataEventHandler, SetSeenDataEventHandler, 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnLimbGoneEventHandler, SetOnLimbGoneEventHandler, 0, 5, kParams_Event_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, SetOnChallengeCompleteEventHandler, 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnCrosshairEventHandler, SetOnCrosshairEventHandler, 0, 5, kParams_Event_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnFailQuestEventHandler, SetOnFailQuestEventHandler, 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, SetOnCompleteQuestEventHandler, 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, SetOnSettingsUpdateEventHandler, 0, 3, kParams_Event);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnAddPerkEventHandler, SetOnAddPerkEventHandler, 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEventHandler, 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, 0, 3, kParams_Event);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnDyingEventHandler, SetOnDyingEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnStartQuestEventHandler, SetOnStartQuestEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnStopQuestEventHandler, SetOnStopQuestEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnySeenDataEventHandler, SetSeenDataEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnLimbGoneEventHandler, SetOnLimbGoneEventHandler, , 0, 5, kParams_Event_OneForm_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, SetOnChallengeCompleteEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnCrosshairEventHandler, SetOnCrosshairEventHandler, , 0, 5, kParams_Event_OneForm_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnFailQuestEventHandler, SetOnFailQuestEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, SetOnCompleteQuestEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, SetOnSettingsUpdateEventHandler, , 0, 3, kParams_Event);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnAddPerkEventHandler, SetOnAddPerkEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEventHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , 0, 3, kParams_Event);
 
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
