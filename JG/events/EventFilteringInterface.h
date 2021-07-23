@@ -1,5 +1,4 @@
 #pragma once
-#include <unordered_set>
 
 union GenericFilters
 {
@@ -87,6 +86,10 @@ public:
 	ULONG_PTR Flags = 0;
 	Script* ScriptForEvent = NULL;
 	EventHandlerInterface* eventFilter = NULL;
+	LambdaVariableContext capturedLambdaVars;
+
+	BaseEventClass() : capturedLambdaVars(nullptr){}
+
 	enum GlobalEventFlags
 	{
 		kEventFlag_Deleted = 1 << 0,
@@ -102,4 +105,3 @@ public:
 		doSet ? Flags |= kEventFlag_Deleted : Flags &= ~kEventFlag_Deleted;
 	}
 };
-

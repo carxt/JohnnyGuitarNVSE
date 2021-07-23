@@ -1,11 +1,11 @@
 #pragma once
 #include "events/EventFilteringInterface.h"
-
+#include <unordered_set>
 bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
+
 NVSEArrayElement EventResultPtr;
 class EventInformation;
 void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
-
 
 class JohnnyEventFiltersForm : EventHandlerInterface
 {
@@ -190,6 +190,7 @@ public:
 		rLock.unlock();
 		BaseEventClass NewEvent;
 		NewEvent.ScriptForEvent = script;
+		NewEvent.capturedLambdaVars = LambdaVariableContext(script);
 		if (maxFilters)
 		{
 
@@ -197,7 +198,7 @@ public:
 			NewEvent.eventFilter->SetUpFiltering();
 		}
 		std::unique_lock wLock(QueueRWLock);
-		this->EventQueueAdd.push_back(NewEvent);
+		this->EventQueueAdd.push_back(std::move(NewEvent));
 	}
 	void virtual RemoveEvent(Script* script, void** filters)
 	{
@@ -224,8 +225,7 @@ public:
 	}
 	void virtual AddQueuedEvents()
 	{
-
-		EventCallbacks.insert(EventCallbacks.end(), EventQueueAdd.begin(), EventQueueAdd.end());
+		EventCallbacks.insert(EventCallbacks.end(), std::make_move_iterator(EventQueueAdd.begin()), std::make_move_iterator(EventQueueAdd.end()));
 		EventQueueAdd.clear();
 	}
 	void virtual DeleteEvents()
@@ -296,11 +296,3 @@ void __cdecl JGFreeEvent(EventInfo& toRemove)
 	}
 	toRemove = NULL;
 }
-
-
-
-
-
-
-
-
