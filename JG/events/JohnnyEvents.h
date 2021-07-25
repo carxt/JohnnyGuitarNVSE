@@ -28,26 +28,32 @@ EventInformation* OnRemovePerkHandler;
 EventInformation* OnRenderGameModeUpdateHandler;
 EventInformation* OnRenderRenderedMenuUpdateHandler;
 
-void __fastcall handleRemovePerkEvent(BGSPerk* perk, void* edx, PlayerCharacter* player, bool isTeammatePerk) {
-	for (auto const& callback : OnRemovePerkHandler->EventCallbacks) {
+void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool isTeammatePerk)
+{
+	if (!actor->GetPerkRank(perk, isTeammatePerk))
+		return;
+	for (auto const& callback : OnRemovePerkHandler->EventCallbacks)
+	{
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
-			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRemovePerkHandler->numMaxArgs, perk);
+			FunctionCallScript(callback.ScriptForEvent, actor, 0, &EventResultPtr, OnRemovePerkHandler->numMaxArgs, perk);
 		}
 	}
-	ThisStdCall(0x5EB800, perk, player, isTeammatePerk);
-
+	actor->RemovePerk(perk, isTeammatePerk);
 }
-void __fastcall handleAddPerkEvent(BGSPerk* perk, void* edx, PlayerCharacter* player, UInt8 oldRank, UInt8 newRank, bool isTeammatePerk) {
-	for (auto const& callback : OnAddPerkHandler->EventCallbacks) {
+
+void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, UInt8 newRank, bool isTeammatePerk)
+{
+	for (auto const& callback : OnAddPerkHandler->EventCallbacks)
+	{
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
-			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnAddPerkHandler->numMaxArgs, perk, oldRank, newRank);
+			FunctionCallScript(callback.ScriptForEvent, actor, 0, &EventResultPtr, OnAddPerkHandler->numMaxArgs, perk, newRank - 1, newRank);
 		}
 	}
-	ThisStdCall(0x5EB6A0, perk, player, oldRank, newRank, isTeammatePerk);
-
+	actor->SetPerkRank(perk, newRank, isTeammatePerk);
 }
+
 void __stdcall handleDyingEvent(Actor* thisObj) {
 	if (thisObj->IsActor() && thisObj->lifeState == 1 && (*thisObj->GetTheName() || thisObj == g_thePlayer)) {
 		for (auto const& callback : OnDyingHandler->EventCallbacks) {
@@ -475,9 +481,10 @@ void HandleEventHooks()
 	WriteRelCall(0x60CA78, (UINT)handleQuestComplete);
 	WriteRelCall(0x7CEC93, (UINT)handleSettingsUpdate);
 	WriteRelCall(0x7D11AD, (UINT)handleSettingsUpdate);
-	WriteRelCall(0x96380E, (UINT)handleAddPerkEvent);
-	WriteRelCall(0x9638D2, (UINT)handleAddPerkEvent);
-	WriteRelCall(0x96398C, (UINT)handleRemovePerkEvent);
+	WriteRelCall(0x5D4E5B, (UINT)handleAddPerkEvent);
+	SafeWriteBuf(0x5D4E60, "\x0F\x1F\x00", 3);
+	WriteRelCall(0x5D4F89, (UINT)handleRemovePerkEvent);
+	SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00", 3);
 	SafeWrite8(0x60CA29, 0xCC);
 
 
