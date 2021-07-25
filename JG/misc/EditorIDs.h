@@ -1,7 +1,10 @@
 #include <unordered_map>
 #include <inttypes.h>
 #include <mutex>
-std::unordered_map<uint32_t, const char*> g_EditorNameMap;
+
+extern NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap;
+
+std::unordered_map<uint32_t, const char**> g_EditorNameMap;
 std::mutex g_NameMapLock;
 
 __declspec(naked) void GetNameHook() {
@@ -20,13 +23,23 @@ void __fastcall AVInfoSetEditorIDHook(TESForm* form, UInt32 EDX, char* name)
 	form->SetEditorID(name);
 }
 
+const char** AddToGameMap(const char* name, TESForm* form)
+{
+	ThisStdCall<NiTMap<const char*, TESForm*>::Entry*>(0x470200, *g_gameFormEditorIDsMap, name, form); // adds it to the game map
+	auto* entry = (*g_gameFormEditorIDsMap)->LookupEntry(name);
+	if (!entry) // shouldn't happen
+		return nullptr;
+	return &entry->key;
+}
 
 bool __fastcall TESQuestSetEditorIdHook(TESQuest* Form, UInt32 EDX, const char* Name)
 {
 	if (!(((bool(__thiscall*)(TESQuest*, const char*))(0x60DAB0))(Form, Name))) return false;
 	if (strcmp(Name, "SysWindowCompileAndRun")) {
 		std::lock_guard<std::mutex> lock(g_NameMapLock);
-		g_EditorNameMap.insert(std::make_pair(Form->GetId(), _strdup(Name)));
+		auto** name = AddToGameMap(Name, Form);
+		if (name)
+			g_EditorNameMap.insert(std::make_pair(Form->GetId(), name));
 	}
 	return true;
 }
@@ -48,7 +61,7 @@ const char* TESForm::hk_GetName()
 	auto itr = g_EditorNameMap.find(GetId());
 
 	if (itr != g_EditorNameMap.end())
-		return itr->second;
+		return *itr->second;
 
 	// By default the game returns an empty string
 	return "";
@@ -59,7 +72,9 @@ bool TESForm::hk_SetEditorId(const char* Name)
 {
 	if (strcmp(Name, "SysWindowCompileAndRun")) {
 		std::lock_guard<std::mutex> lock(g_NameMapLock);
-		g_EditorNameMap.insert(std::make_pair(GetId(), _strdup(Name)));
+		auto** name = AddToGameMap(Name, this);
+		if (name)
+			g_EditorNameMap.insert(std::make_pair(GetId(), name));
 	}
 	return true;
 }
@@ -68,7 +83,9 @@ bool TESForm::hk_REFRSetEditorID(const char* Name)
 {
 	std::lock_guard<std::mutex> lock(g_NameMapLock);
 	if ((refID < 0xFF000000) && ((flags & 0x420) == 0x400)) {
-		g_EditorNameMap.insert(std::make_pair(GetId(), _strdup(Name)));
+		auto** name = AddToGameMap(Name, this);
+		if (name)
+			g_EditorNameMap.insert(std::make_pair(GetId(), name));
 	}
 	return true;
 }

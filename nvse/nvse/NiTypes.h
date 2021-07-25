@@ -367,6 +367,16 @@ public:
 		T_Data		data;
 	};
 
+	Entry* LookupEntry(T_Key key)
+	{
+		for (Entry* traverse = buckets[Hash(key) % numBuckets]; traverse; traverse = traverse->next)
+			if constexpr (std::is_same<const char*, T_Key>::value)
+				if (_stricmp(traverse->key, key) == 0) return traverse;
+			else
+				if (traverse->key == key) return traverse;
+		return NULL;
+	}
+
 	virtual NiTMapBase	*Destructor(bool doFree);
 	virtual UInt32		Hash(T_Key key);
 	virtual void		Equal(T_Key key1, T_Key key2);
