@@ -29,6 +29,7 @@ DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 1, kParams_OneRef);
 DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(ToggleDisableSaves, , 0, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , 1, 0, NULL);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -36,6 +37,12 @@ bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5B
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
+bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
+	*result = 0;
+	ExtraOwnership* xOwn = ThisStdCall<ExtraOwnership*>(0x567790, thisObj); // TESObjectREFR::ResolveOwnership
+	if (xOwn) ThisStdCall(0x8C0EC0, g_thePlayer, thisObj, xOwn, 0xFFFFFFFF); //TESObjectREFR::HandleMinorCrime 
+	return true;
+}
 bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 skipInvisible = 0;
