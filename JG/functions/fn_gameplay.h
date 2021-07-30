@@ -77,28 +77,29 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
 
 bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	*result = 0;
-	Actor* actor = (Actor*)thisObj;
+	Actor* actor = static_cast<Actor*>(thisObj);
 	ContChangesEntry* weapInfo = actor->baseProcess->GetWeaponInfo();
 	if (weapInfo && weapInfo->type) {
-		UInt32 moveFlags = actor->actorMover->GetMovementFlags();
-		bool isWalking = moveFlags & 0x100;
-		bool isRunning = (moveFlags & 0xF) && (moveFlags & 0x200);
-		bool isSneaking = (moveFlags & 0x400) && !(moveFlags & 0x800);
-		bool isAiming = actor->baseProcess->IsAiming();
-		float spread;
-		if (g_VATSCameraData->mode == 2 || g_VATSCameraData->mode == 3) {
-			spread = CdeclCall<float>(0x646910, actor, weapInfo->type, NULL, 1, 0, isWalking, isRunning);
-		}
-		else {
-			spread = CdeclCall<float>(0x646910, actor, weapInfo->type, NULL, isAiming, isSneaking, isWalking, isRunning);
-		}
-		ApplyPerkModifiers(kPerkEntry_CalculateGunSpread, actor, weapInfo->type, &spread);
 		bool hasDecreaseSpreadEffect = ThisStdCall<bool>(0x4BDA70, weapInfo, 3);
-		float minSpread = ThisStdCall<float>(0x524B80, weapInfo->type, hasDecreaseSpreadEffect);
-		float weapSpread = ThisStdCall<float>(0x524BE0, weapInfo->type, hasDecreaseSpreadEffect);
+		double minSpread = ThisStdCall<double>(0x524B80, weapInfo->type, hasDecreaseSpreadEffect);
+		double weapSpread = ThisStdCall<float>(0x524BE0, weapInfo->type, hasDecreaseSpreadEffect);
+		double spread = ThisStdCall<double>(0x8B0DD0, PlayerCharacter::GetSingleton(), 1);
+
 		float totalSpread = (weapSpread * spread + minSpread) * 0.01745329238474369;
-		TESAmmo* eqAmmo = ThisStdCall<TESAmmo*>(0x525980, weapInfo->type, (MobileObject*)actor);
-		totalSpread = CdeclCall<float>(0x59A030, 3, (eqAmmo ? &eqAmmo->effectList : 0), totalSpread);
+
+		TESAmmo* eqAmmo = ThisStdCall<TESAmmo*>(0x525980, weapInfo->type, static_cast<MobileObject*>(actor));
+		totalSpread = CdeclCall<float>(0x59A030, 3, (eqAmmo ? &eqAmmo->effectList : nullptr), totalSpread);
+
+		double spreadPenalty = ThisStdCall<double>(0x8B0DD0, PlayerCharacter::GetSingleton(), 2);
+
+		Setting* fNPCMaxGunWobbleAngle;
+		GameSettingCollection::GetSingleton()->GetGameSetting("fNPCMaxGunWobbleAngle", &fNPCMaxGunWobbleAngle);
+
+		totalSpread += spreadPenalty * fNPCMaxGunWobbleAngle->data.f * 0.01745329238474369;
+		
+		float noIdea = ThisStdCall<HighProcess*>(0x8D8520, actor)->angle1D0;
+		totalSpread = totalSpread + noIdea;
+
 		bool hasSplitBeamEffect = ThisStdCall<bool>(0x4BDA70, weapInfo, 0xC);
 		if (hasSplitBeamEffect) {
 			totalSpread *= ThisStdCall<float>(0x4BCF60, weapInfo->type, 0xC, 1);
