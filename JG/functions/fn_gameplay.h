@@ -30,12 +30,46 @@ DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 1, kParams_OneRef);
 DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(ToggleDisableSaves, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(IsCrimeOrEnemy, , 1, 0, NULL);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+
+bool IsCombatTarget(Actor* source, Actor* toSearch) {
+	if (source->isInCombat && source->combatTargets) {
+		Actor** actorsArr = source->combatTargets->data;
+		UInt32 count = source->combatTargets->size;
+		if (!actorsArr) return false;
+		for (; count; count--, actorsArr++)
+		{
+			if (*actorsArr == toSearch) return true;
+		}
+	}
+	return false;
+}
+
+bool IsHostileCompassTarget(Actor* toSearch) {
+	auto iter = g_thePlayer->compassTargets->Begin();
+	for (; !iter.End(); ++iter)
+	{
+		PlayerCharacter::CompassTarget* target = iter.Get();
+		if (target->isHostile && target->target == toSearch) return true;
+	}
+	return false;
+}
+bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
+	*result = 0;
+	Actor* actor = (Actor*)thisObj;
+	if (ThisStdCall_B(0x579690, thisObj) && (!thisObj->IsActor() || !actor->isTeammate) ||
+		thisObj->IsActor() && (IsCombatTarget(actor, g_thePlayer) || IsHostileCompassTarget(actor))) {
+		*result = 1;
+	}
+	if (IsConsoleMode()) Console_Print("IsCrimeOrEnemy >> %.f", *result);
+	return true;
+}
 
 bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -58,7 +92,7 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 				continue;
 			}
 			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
-			}
+		}
 	}
 	if (g_arrInterface->GetArraySize(hostileArr)) g_arrInterface->AssignCommandResult(hostileArr, result);
 	return true;
@@ -202,8 +236,8 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS)
 
 	NiPoint3* playerPos = g_thePlayer->GetPos();
 
-	float fSneakMaxDistance = *(float*)(0x11CD7D8+4);
-	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC+4);
+	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
+	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
 	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();
 	float interiorDistanceSquared = fSneakMaxDistance * fSneakMaxDistance;
 	float exteriorDistanceSquared = (fSneakMaxDistance * fSneakExteriorDistanceMult) * (fSneakMaxDistance * fSneakExteriorDistanceMult);
