@@ -36,7 +36,7 @@ DEFINE_COMMAND_ALT_PLUGIN(GetActorValueModifierAlt, GetAVModAlt, , 1, 2, kParams
 DEFINE_COMMAND_PLUGIN(RemovePrimitive, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetPrimitiveType, , 1, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetBaseScale, , , 1, NULL);
-DEFINE_COMMAND_PLUGIN(GetQuestFailed, , 0, 1, kParams_OneForm);
+DEFINE_CMD_ALT_COND_PLUGIN(GetQuestFailed, , "", false, kParams_OneQuest);
 DEFINE_COMMAND_PLUGIN(GetWeaponVATSTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetWeaponVATSTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetQuestDelay, , 0, 1, kParams_OneForm);
@@ -308,6 +308,13 @@ bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &quest))
 		*result = (quest->flags & 0x40) ? 1 : 0;
 	if (IsConsoleMode()) Console_Print("GetQuestFailed >> %.2f", *result);
+	return true;
+}
+bool Cmd_GetQuestFailed_Eval(COMMAND_ARGS_EVAL) {
+	*result = 0;
+	TESQuest* quest = (TESQuest*)arg1;
+	if (quest)
+		*result = (quest->flags & 0x40) ? 1 : 0;
 	return true;
 }
 bool Cmd_GetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
