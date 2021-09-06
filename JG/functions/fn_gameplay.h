@@ -536,10 +536,11 @@ bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
-	int toExtract = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &toExtract) && toExtract <= 1) DoSkipMuzzleLights = toExtract;
-	*(UInt32*)result = (DoSkipMuzzleLights == 1);
-	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %u", *result);
+	int disable = -1;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &disable);
+	if (disable >= 0 && disable <= 3) disableMuzzleLights = disable;
+	*result = disableMuzzleLights;
+	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %.f", *result);
 	return true;
 }
 bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS)

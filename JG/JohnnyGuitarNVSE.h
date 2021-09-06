@@ -10,7 +10,6 @@ NVSEScriptInterface* g_scriptInterface = NULL;
 NVSECommandTableInterface* g_cmdTableInterface = NULL;
 VATSCameraData* g_VATSCameraData = NULL;
 InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
-void DisableMuzzleFlashLightsHook();
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, UInt8 arg4, ContChangesEntry* entry, UInt8 arg6, UInt8 arg7, int arg8, float arg9, float arg10, UInt8 arg11, UInt8 arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, UInt8, ContChangesEntry*, UInt8, UInt8, int, float, float, UInt8, UInt8, TESForm*))0x645380;
 void (*ApplyPerkModifiers)(UInt32 entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(UInt32, TESObjectREFR*, void*, ...))0x5E58F0;
@@ -39,7 +38,7 @@ TESSound* questCompeteSound = 0;
 TESSound* locationDiscoverSound = 0;
 std::unordered_map<UInt32, char*> CustomMapMarkerMap;
 
-UInt32 DoSkipMuzzleLights = -1;
+UInt32 disableMuzzleLights = -1;
 static float vatsSpreadMultValue = 15.0;
 
 // Singletons
@@ -290,19 +289,13 @@ __forceinline void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn
 }
 
 
-__declspec (naked) void DisableMuzzleFlashLightsHook()
+void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1)
 {
-	static const UInt32 retAddrDisable = 0x9BB843;
-	static const UInt32 retAddrKeep = 0x9BB81A;
-	__asm
-	{
-		cmp DoSkipMuzzleLights, 1
-		jz Skip
-		push 1
-		mov ecx, [ebp - 4]
-		jmp retAddrKeep
-		Skip :
-		jmp retAddrDisable
+	if (*&a1->muzzleFlash && a1->projectile->lightMuzzleFlash) {
+		if (!disableMuzzleLights || (disableMuzzleLights == 2 && a1->sourceActor != (Actor*)g_thePlayer) || (disableMuzzleLights == 3 && a1->sourceActor == (Actor*)g_thePlayer)) {
+			NiNode* niNode = ThisStdCall<NiNode*>(0x50D810, a1->projectile->lightMuzzleFlash, 0, *&a1->muzzleFlash, 1);
+			ThisStdCall(0x66B0D0, &a1->flashLight, niNode);
+		}
 	}
 }
 void DoCustomMapMarker(TESObjectREFR* Marker, char* PathToPass)
@@ -595,7 +588,7 @@ void HandleGameHooks()
 	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
 	WriteRelJump(0x77D612, UInt32(LevelUpHook)); // for ToggleLevelUpMenu
 	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
-	WriteRelJump(0x9BB815, (UInt32)DisableMuzzleFlashLightsHook); // for DisableMuzzleFlashLights
+	WriteRelCall(0x9BAFED, (UInt32)DisableMuzzleFlashLightsHook); // for DisableMuzzleFlashLights
 	SafeWrite16(0x79D330, 0x9090);
 	WriteRelCall(0x79D332, (UInt32)AsmGetMapMarkerRoute);
 	WriteRelCall(0x8B102B, (UInt32)VATSSpreadMultHook); // replace fNPCMaxWobbleAngle with 15.0 for VATS

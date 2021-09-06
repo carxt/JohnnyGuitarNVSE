@@ -415,6 +415,21 @@ public:
 };
 STATIC_ASSERT(sizeof(Projectile) == 0x150);
 
+struct ProjectileData
+{
+	UInt8 byte00;
+	UInt8 byte01;
+	UInt8 byte02;
+	UInt8 gap03;
+	float unk04;
+	float flashDuration;
+	NiNode* muzzleFlash;
+	NiPointLight* flashLight;
+	BGSProjectile* projectile;
+	TESObjectWEAP* sourceWeap;
+	Actor* sourceActor;
+};
+
 // 154
 class BeamProjectile : public Projectile
 {

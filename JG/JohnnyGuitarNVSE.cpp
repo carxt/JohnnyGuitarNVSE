@@ -57,7 +57,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
 		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
 		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
-		DoSkipMuzzleLights = 0; //reset the muzzle hook every time
+		disableMuzzleLights = 0; //reset the muzzle hook every time
 		OnDyingHandler->FlushEventCallbacks();
 		OnLimbGoneHandler->FlushEventCallbacks();
 		OnCrosshairHandler->FlushEventCallbacks();
