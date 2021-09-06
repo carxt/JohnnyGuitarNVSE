@@ -52,7 +52,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 	{
 
 	case NVSEMessagingInterface::kMessage_NewGame:
-	case NVSEMessagingInterface::kMessage_PostLoadGame: {
+	case NVSEMessagingInterface::kMessage_PostLoadGame:
+	{
 		isShowLevelUp = true;
 		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
 		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
@@ -73,7 +74,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			EventInfo->DeleteEvents();
 		}
 		break;
-	case NVSEMessagingInterface::kMessage_DeferredInit: {
+	case NVSEMessagingInterface::kMessage_DeferredInit:
+	{
 		g_thePlayer = PlayerCharacter::GetSingleton();
 		g_processManager = (ProcessManager*)0x11E0E80;
 		g_interfaceManager = InterfaceManager::GetSingleton();
@@ -152,6 +154,7 @@ extern "C" {
 		fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
 		fixNPCShootingAngle = GetPrivateProfileInt("MAIN", "bFixNPCShootingAngle", 1, filename);
 		capLoadScreensTo60 = GetPrivateProfileInt("MAIN", "b60FPSDuringLoading", 0, filename);
+		noMuzzleFlashCooldown = GetPrivateProfileInt("MAIN", "noMuzzleFlashCooldown", 0, filename);
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);
@@ -356,8 +359,3 @@ extern "C" {
 		return TRUE;
 	}
 };
-
-
-
-
-

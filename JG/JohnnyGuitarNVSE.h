@@ -32,6 +32,7 @@ bool fixFleeing = 0;
 bool fixItemStacks = 0;
 bool capLoadScreensTo60 = 0;
 bool fixNPCShootingAngle = 0;
+bool noMuzzleFlashCooldown = 0;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -618,6 +619,6 @@ void HandleGameHooks()
 	WriteRelCall(0x4F49AB, UInt32(TESRegionDataSoundLoadIncidentalID));
 	if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
 	SafeWriteBuf(0x8BFBC1, "\x85\xC9\x74\x36\x80\x79\x04", 7); // missing null check in Actor::HandleStealing
+	if (noMuzzleFlashCooldown)	SafeWriteBuf(0x9BB6A8, "\x90\x90", 2);
+
 }
-
-
