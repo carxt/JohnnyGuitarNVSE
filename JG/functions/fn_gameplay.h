@@ -494,11 +494,13 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pipboyTab);
 	if (pipboyTab == 0 || pipboyTab == 1002 || pipboyTab == 1003 || pipboyTab == 1023) {
 		if (g_interfaceManager) {
-			if (!g_interfaceManager->pipBoyMode)
+			if (!g_interfaceManager->pipBoyMode) {
 				ThisStdCall(0x70F4E0, g_interfaceManager, 0, pipboyTab);
-			else if (g_interfaceManager->pipBoyMode == 3)
+			}
+				
+			else if (g_interfaceManager->pipBoyMode == 3) {
 				ThisStdCall(0x70F690, g_interfaceManager, 0);
-			ThisStdCall(0x70EE80, g_interfaceManager);
+			}
 		}
 	}
 	return true;

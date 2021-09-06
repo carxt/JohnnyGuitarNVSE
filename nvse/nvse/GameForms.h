@@ -5709,7 +5709,11 @@ public:
 	~BGSAddonNode();
 
 	TESModel	model;				// 030
-	UInt32 unk48[(0x60-0x48) >> 2]; // 048
+	UInt32 unk48[2];
+	UInt32 nodeIndex;
+	TESSound* sound;
+	UInt32 flags;
+	UInt32 unk5C[1];
 };
 
 STATIC_ASSERT(sizeof(BGSAddonNode) == 0x60);
