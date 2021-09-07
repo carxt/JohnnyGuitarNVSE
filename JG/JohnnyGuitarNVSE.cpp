@@ -159,7 +159,7 @@ extern "C" {
 		fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
 		fixNPCShootingAngle = GetPrivateProfileInt("MAIN", "bFixNPCShootingAngle", 1, filename);
 		capLoadScreensTo60 = GetPrivateProfileInt("MAIN", "b60FPSDuringLoading", 0, filename);
-		noMuzzleFlashCooldown = GetPrivateProfileInt("MAIN", "noMuzzleFlashCooldown", 0, filename);
+		noMuzzleFlashCooldown = GetPrivateProfileInt("MAIN", "bNoMuzzleFlashCooldown", 0, filename);
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);
