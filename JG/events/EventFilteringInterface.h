@@ -43,10 +43,10 @@ public:
 	virtual bool DeleteFromFilter(UInt32 filterNum, FilterTypes toDelete) = 0;
 	//Returns if the filter is empty
 	virtual bool IsFilterEmpty(UInt32 filterNum) = 0;
-	//Used by the framework to check if the Nth filter equals the passed value. Useful to avoid adding the same event repeatedly
-	virtual bool IsFilterEqual(UInt32 filterNum, FilterTypes filter) = 0;
+	//Used by the framework to check if the Nth filter equals the passed value set. Useful to avoid adding the same event repeatedly
+	virtual bool IsFilterEqual(UInt32 filterNum, FilterTypeSets cmpFilterSet) = 0;
 	//Function used by the filter to check if the object passed is an accepted parameter
-	virtual bool IsAcceptedParameter(FilterTypes toCheck) = 0;
+	virtual bool IsAcceptedParameter(FilterTypes parameter) = 0;
 	//Hope a UInt32 is large enough.
 	virtual UInt32 GetNumFilters() { return filtersArr.size(); }
 	

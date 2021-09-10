@@ -181,34 +181,28 @@ public:
 		return isEmpty;
 	}
 	
-	bool IsFilterEqual(UInt32 filterNum, FilterTypes cmpFilter) override
+	bool IsFilterEqual(UInt32 filterNum, FilterTypeSets cmpFilterSet) override
 	{
 		FilterTypeSets* filterSet;
-		if (!(filterSet = GetFilter(filterNum)))
-		{
-			if (cmpFilter.valueless_by_exception()) return true;	// rare case
-			return false;
-		}
-		UInt32 size;
-		std::visit([&size](auto& filter) { size = filter.size(); }, *filterSet);
-		if (size > 1) return false;	// comparing a single value to an array of values.
-		if (size == 1)
-		{
-			bool isEqual;
-			//std::visit([&isEqual](auto& filter) { isEqual = filter.size(); }, *filterSet); //todo
-			return isEqual;
-		}
-		//if (size == 0)
-		return cmpFilter.valueless_by_exception() ? true : false;
+		if (!(filterSet = GetFilter(filterNum))) return false;
+		return cmpFilterSet == *filterSet;
 	}
-	/*
-	bool IsAcceptedParameter(FilterTypes parameter) override
+	
+	bool IsAcceptedParameter(FilterTypes param) override
 	{
-		return parameter.form->refID != 0x3B; // xMarker
+		bool isAccepted;
+		UInt32 const xMarkerID = 0x3B;
+		std::visit(overload{
+			[&](TESForm* &filter) { isAccepted = filter->refID != xMarkerID; },
+			[&](RefID &filter) { isAccepted = filter != xMarkerID; },
+			[&](auto& filter) { isAccepted = true; } /*Default case*/
+			}, param);
+		return isAccepted;
 	}
-
+	
 	void SetUpFiltering() override
 	{
+		/* TODO
 		if (GenFilters[1].intVal != -1) InsertToFilter(1, GenFilters[1].intVal);
 		TESForm* currentFilter = GenFilters[0].form;
 		if (!currentFilter) return;
@@ -223,10 +217,10 @@ public:
 		}
 		else if (IsAcceptedParameter(currentFilter)) 
 			InsertToFilter(0, currentFilter->refID);
+		*/
 	}
-	*/
-
 };
+
 void* __fastcall CreateGenericFilters(void** Filters, UInt32 numFilters) {
 	//todo: return new GenericEventFilters(Filters, numFilters);
 }
