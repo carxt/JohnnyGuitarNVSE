@@ -195,8 +195,8 @@ public:
 		if (size == 1)
 		{
 			bool isEqual;
-			std::visit([&size](auto& filter) { size = filter.size(); }, *filterSet);
-			//return (Filter.ptr == GenFilters[nuFilter].ptr);
+			//std::visit([&isEqual](auto& filter) { isEqual = filter.size(); }, *filterSet); //todo
+			return isEqual;
 		}
 		//if (size == 0)
 		return cmpFilter.valueless_by_exception() ? true : false;
