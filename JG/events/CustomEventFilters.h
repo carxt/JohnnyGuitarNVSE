@@ -108,7 +108,7 @@ template<class... Ts> struct overload : Ts...
 };
 template<class... Ts> overload(Ts...)->overload<Ts...>;
 
-FilterTypeSets testFilter1 = { RefIDSet {5, 0x7} };
+FilterTypeSets testFilter1 = { IntSet {5, 0x7} };
 FilterTypeSets testFilter2 = { StringSet {"testStr", "testStr2", "tt"} };
 FilterTypeSetArray testFilters = { testFilter1, testFilter2 };
 
@@ -128,14 +128,12 @@ public:
 	{
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetFilter(filterNum))) return false;
-		bool isFound;
-		std::visit(overload{
-		[&isFound](RefIDSet& arg1, RefID& arg2) { isFound = arg1.find(arg2) != arg1.end(); },
-		[&isFound](FormSet &arg1, TESForm* &arg2) { isFound = arg1.find(arg2) != arg1.end(); },
-		[&isFound](IntSet &arg1, int &arg2) { isFound = arg1.find(arg2) != arg1.end(); },
-		[&isFound](FloatSet &arg1, float &arg2) { isFound = arg1.find(arg2) != arg1.end(); },
-		[&isFound](StringSet &arg1, std::string &arg2) { isFound = arg1.find(arg2) != arg1.end(); },
-		[&isFound](auto &arg1, auto &arg2) {isFound = false; /*Types do not match*/ },
+		bool const isFound = std::visit(overload{
+		[](FormSet &arg1, TESForm* &arg2) { return arg1.find(arg2) != arg1.end(); },
+		[](IntSet &arg1, int &arg2) { return arg1.find(arg2) != arg1.end(); },
+		[](FloatSet &arg1, float &arg2) { return arg1.find(arg2) != arg1.end(); },
+		[](StringSet &arg1, std::string &arg2) { return arg1.find(arg2) != arg1.end(); },
+		[](auto &arg1, auto &arg2) { return false; /*Types do not match*/ },
 			},	*filterSet, toSearch);
 		return isFound;
 	}
@@ -144,14 +142,12 @@ public:
 	{
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetFilter(filterNum))) return false;
-		bool isInserted;
-		std::visit(overload{
-		[&isInserted](RefIDSet& arg1, RefID& arg2) { isInserted = arg1.insert(arg2).second; },
-		[&isInserted](FormSet& arg1, TESForm*& arg2) { isInserted = arg1.insert(arg2).second; },
-		[&isInserted](IntSet& arg1, int& arg2) { isInserted = arg1.insert(arg2).second; },
-		[&isInserted](FloatSet& arg1, float& arg2) { isInserted = arg1.insert(arg2).second; },
-		[&isInserted](StringSet& arg1, std::string& arg2) { isInserted = arg1.insert(arg2).second; },
-		[&isInserted](auto& arg1, auto& arg2) {isInserted = false; /*Types do not match*/ },
+		bool const isInserted = std::visit(overload{
+		[](FormSet& arg1, TESForm*& arg2) { return arg1.insert(arg2).second; },
+		[](IntSet& arg1, int& arg2) { return arg1.insert(arg2).second; },
+		[](FloatSet& arg1, float& arg2) { return arg1.insert(arg2).second; },
+		[](StringSet& arg1, std::string& arg2) { return arg1.insert(arg2).second; },
+		[](auto& arg1, auto& arg2) { return false; /*Types do not match*/ },
 			}, *filterSet, toInsert);
 		return isInserted;
 	}
@@ -160,14 +156,12 @@ public:
 	{
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetFilter(filterNum))) return false;
-		bool isDeleted;
-		std::visit(overload{
-		[&isDeleted](RefIDSet& arg1, RefID& arg2) { isDeleted = arg1.erase(arg2); },
-		[&isDeleted](FormSet& arg1, TESForm*& arg2) { isDeleted = arg1.erase(arg2); },
-		[&isDeleted](IntSet& arg1, int& arg2) { isDeleted = arg1.erase(arg2); },
-		[&isDeleted](FloatSet& arg1, float& arg2) { isDeleted = arg1.erase(arg2); },
-		[&isDeleted](StringSet& arg1, std::string& arg2) { isDeleted = arg1.erase(arg2); },
-		[&isDeleted](auto& arg1, auto& arg2) {isDeleted = false; /*Types do not match*/ },
+		bool const isDeleted = std::visit(overload{
+		[](FormSet& arg1, TESForm* &arg2) { return arg1.erase(arg2); },
+		[](IntSet& arg1, int &arg2) { return arg1.erase(arg2); },
+		[](FloatSet& arg1, float &arg2) { return arg1.erase(arg2); },
+		[](StringSet& arg1, std::string &arg2) { return arg1.erase(arg2); },
+		[](auto& arg1, auto& arg2) {return false; /*Types do not match*/ },
 			}, *filterSet, toDelete);
 		return isDeleted;
 	}
@@ -176,8 +170,7 @@ public:
 	{
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetFilter(filterNum))) return true;	// technically empty if there is no filter
-		bool isEmpty;
-		std::visit([&isEmpty](auto &filter) { isEmpty = filter.empty(); }, *filterSet);
+		bool const isEmpty = std::visit([](auto &filter) { return filter.empty(); }, *filterSet);
 		return isEmpty;
 	}
 	
@@ -187,41 +180,61 @@ public:
 		if (!(filterSet = GetFilter(filterNum))) return false;
 		return cmpFilterSet == *filterSet;
 	}
-	
-	bool IsAcceptedParameter(FilterTypes param) override
-	{
-		bool isAccepted;
-		UInt32 const xMarkerID = 0x3B;
-		std::visit(overload{
-			[&](TESForm* &filter) { isAccepted = filter->refID != xMarkerID; },
-			[&](RefID &filter) { isAccepted = filter != xMarkerID; },
-			[&](auto& filter) { isAccepted = true; } /*Default case*/
-			}, param);
-		return isAccepted;
-	}
+
+	//	Unused in SetUpFiltering, so it's useless.
+	//bool IsAcceptedParameter(FilterTypes param) override
+	//{
+	//	bool const isAccepted = std::visit(overload{
+	//		[&](TESForm* &filter) { return filter->refID != g_xMarkerID; },
+	//		[&](auto& filter) { return true; } /*Default case*/
+	//		}, param);
+	//	return isAccepted;
+	//}
+	//
 	
 	void SetUpFiltering() override
 	{
-		/* TODO
-		if (GenFilters[1].intVal != -1) InsertToFilter(1, GenFilters[1].intVal);
-		TESForm* currentFilter = GenFilters[0].form;
-		if (!currentFilter) return;
-		if (IS_TYPE(currentFilter, BGSListForm))
+		// Filters out all -1 values from IntSets.
+		// Transforms all BGSListForm*-type TESForm* into the TESForm* that were contained.
+		// Filters out xMarker refs.
+		for (auto& filterSet : filtersArr)
 		{
-			ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
-			do {
-				TESForm* it = iterator->data;
-				if (IsAcceptedParameter(it))
-					InsertToFilter(0, it->refID);
-			} while (iterator = iterator->next);
+			std::visit(overload{
+			[](FormSet &filter)
+			{
+				FormSet newSet;
+				// Append forms that were inside form-lists to newSet.
+				// Note: does not support deep form-lists.
+				for (auto const &formIter : filter)
+				{
+					if (auto const listForm = DYNAMIC_CAST(formIter, TESForm, BGSListForm))
+					{
+						// Insert only the form-list elements; omit the form-list itself.
+						ListNode<TESForm>* listFormIter = listForm->list.Head();
+						do { newSet.insert(listFormIter->Data());}
+						while (listFormIter = listFormIter->next);
+					}
+					else
+					{
+						newSet.insert(formIter);
+					}
+				}
+				newSet.erase(LookupFormByID(g_xMarkerID));	// todo: refactor to use IsAcceptedParameter instead?
+				filter = newSet;	// todo: check if filterSet needs to be captured and set instead.
+			},
+			[](IntSet &filter)
+			{
+				filter.erase(-1);	// todo: refactor to use IsAcceptedParameter instead?
+			},
+			[](auto &filter) { return; } /*Default case*/
+				}, filterSet);
 		}
-		else if (IsAcceptedParameter(currentFilter)) 
-			InsertToFilter(0, currentFilter->refID);
-		*/
 	}
 };
 
+/*
 void* __fastcall CreateGenericFilters(void** Filters, UInt32 numFilters) {
-	//todo: return new GenericEventFilters(Filters, numFilters);
+	return new GenericEventFilters(Filters, numFilters);
 }
+*/
 	
