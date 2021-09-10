@@ -5,8 +5,9 @@ bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObj
 
 NVSEArrayElement EventResultPtr;
 class EventInformation;
-void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
+//void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
 
+#if NULL
 class JohnnyEventFiltersForm : EventHandlerInterface
 {
 	typedef  std::unordered_set<unsigned int> RefUnorderedSet;
@@ -114,25 +115,23 @@ public:
 		} while (iterator = iterator->next);
 	}
 };
+#endif
 
 class EventInformation
 {
 private:
-	void* (__fastcall* CreateFilter)(void**, UInt32); // supposed to be passing itself
-	std::vector<BaseEventClass> EventQueueAdd;
-	std::shared_mutex QueueRWLock; //need a readers writer lock to protect from multiple users registering an event in the same frame (very rare, but can happen)
+	std::vector<BaseEventClass> event_queue_add;
+	std::shared_mutex queue_rw_lock; //need a readers writer lock to protect from multiple users registering an event in the same frame (very rare, but can happen)
 public:
-	const char* EventName;
-	UInt8 numMaxArgs;
-	UInt8 numMaxFilters;
-	std::vector<BaseEventClass> EventCallbacks;
-	EventInformation(const char* EventName, UInt8& numMaxArgs, UInt8& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32))
+	const char* event_name;
+	UInt8 num_max_args;
+	UInt8 num_max_filters;
+	std::vector<BaseEventClass> event_callbacks;
+	EventInformation(const char* eventName, UInt8& numMaxArgs, UInt8& numMaxFilters)
 	{
-		this->EventName = EventName;
-		this->numMaxArgs = numMaxArgs;
-		this->numMaxFilters = numMaxFilters;
-		this->CreateFilter = GenericCreateFilter;
-		if (CreatorFunction) this->CreateFilter = CreatorFunction;
+		this->event_name = eventName;
+		this->num_max_args = numMaxArgs;
+		this->num_max_filters = numMaxFilters;
 	}
 	virtual ~EventInformation()
 	{
@@ -140,20 +139,19 @@ public:
 	}
 	void FlushEventCallbacks()
 	{
-		auto it = EventCallbacks.begin();
-		while (it != EventCallbacks.end())
+		auto it = event_callbacks.begin();
+		while (it != event_callbacks.end())
 		{
 			delete it->eventFilter;
 			++it;
 		}
-		EventCallbacks.clear();
+		event_callbacks.clear();
 	}
-
 
 	void virtual RegisterEvent(Script* script, void** filters)
 	{
-		UInt32 maxFilters = this->numMaxFilters;
-		for (auto it = this->EventCallbacks.begin(); it != this->EventCallbacks.end(); ++it)
+		UInt32 maxFilters = this->num_max_filters;
+		for (auto it = this->event_callbacks.begin(); it != this->event_callbacks.end(); ++it)
 		{
 			if (script == it->ScriptForEvent)
 			{
@@ -168,10 +166,9 @@ public:
 			}
 
 		}
-		std::shared_lock rLock(QueueRWLock);
-		for (auto it = this->EventQueueAdd.begin(); it != this->EventQueueAdd.end(); ++it)
+		std::shared_lock rLock(queue_rw_lock);
+		for (auto it = this->event_queue_add.begin(); it != this->event_queue_add.end(); ++it)
 		{
-
 			if (script == it->ScriptForEvent)
 			{
 				if (!maxFilters) return;
@@ -194,13 +191,14 @@ public:
 			*(void**)&(NewEvent.eventFilter) = this->CreateFilter(filters, maxFilters);
 			NewEvent.eventFilter->SetUpFiltering();
 		}
-		std::unique_lock wLock(QueueRWLock);
-		this->EventQueueAdd.push_back(std::move(NewEvent));
+		std::unique_lock wLock(queue_rw_lock);
+		this->event_queue_add.push_back(std::move(NewEvent));
 	}
+	
 	void virtual RemoveEvent(Script* script, void** filters)
 	{
-		auto it = EventCallbacks.begin();
-		while (it != EventCallbacks.end())
+		auto it = event_callbacks.begin();
+		while (it != event_callbacks.end())
 		{
 			if (script == it->ScriptForEvent)
 			{
@@ -209,54 +207,48 @@ public:
 					UInt32 maxFilters = eventFilters->GetNumFilters();
 					for (int i = 0; i < maxFilters; i++)
 					{
-						if (!(it->eventFilter->IsFilterEqual(filters[i], i))) goto NotFound;
-
+						if (!(it->eventFilter->IsFilterEqual(filters[i], i))) 
+							goto NotFound;
 					}
 				}
 				it->SetDeleted(true);
 			}
 		NotFound:
-			it++;
+			++it;
 
 		}
 	}
 	void virtual AddQueuedEvents()
 	{
-		EventCallbacks.insert(EventCallbacks.end(), std::make_move_iterator(EventQueueAdd.begin()), std::make_move_iterator(EventQueueAdd.end()));
-		EventQueueAdd.clear();
+		event_callbacks.insert(event_callbacks.end(), std::make_move_iterator(event_queue_add.begin()), std::make_move_iterator(event_queue_add.end()));
+		event_queue_add.clear();
 	}
 	void virtual DeleteEvents()
 	{
-		auto it = EventCallbacks.begin();
-		while (it != EventCallbacks.end())
+		auto it = event_callbacks.begin();
+		while (it != event_callbacks.end())
 		{
 			if (it->GetDeleted())
 			{
-
-				if (it->eventFilter)
-				{
-					delete it->eventFilter;
-				}
-
-				it = EventCallbacks.erase(it);
+				delete it->eventFilter;	// deleting nullptr is safe.
+				it = event_callbacks.erase(it);
 				continue;
 			}
-			it++;
-
+			++it;
 		}
 	}
-	int a = sizeof(std::unordered_set<char>);
+	//int a = sizeof(std::unordered_set<char>);
 };
 typedef EventInformation* EventInfo;
 std::mutex EventsArrayMutex;
 std::vector<EventInfo> EventsArray;
 
 
-
+/*
 void* __fastcall GenericCreateFilter(void** Filters, UInt32 numFilters) {
 	return new JohnnyEventFiltersForm(Filters, numFilters);
 }
-
+*/
 
 
 EventInfo FindHandlerInfoByChar(const char* nameToFind)
@@ -264,32 +256,32 @@ EventInfo FindHandlerInfoByChar(const char* nameToFind)
 	auto it = EventsArray.begin();
 	while (it != EventsArray.end())
 	{
-		if (!(_stricmp((*it)->EventName, nameToFind)))
+		if (!(_stricmp((*it)->event_name, nameToFind)))
 			return *it;
-		it++;
+		++it;
 	}
-	return NULL;
+	return nullptr;
 }
 
-EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32))
+EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters)
 {
-	std::lock_guard<std::mutex> lock(EventsArrayMutex);
-	EventInfo eventinfo = new EventInformation(EventName, maxArgs, maxFilters, CreatorFunction);
-	EventsArray.push_back(eventinfo);
-	return eventinfo;
+	std::lock_guard lock(EventsArrayMutex);
+	auto const eventInfo = new EventInformation(EventName, maxArgs, maxFilters);
+	EventsArray.push_back(eventInfo);
+	return eventInfo;
 
 }
 
 
 void __cdecl JGFreeEvent(EventInfo& toRemove)
 {
-	std::lock_guard<std::mutex> lock(EventsArrayMutex);
+	std::lock_guard lock(EventsArrayMutex);
 	if (!toRemove) return;
-	auto it = std::find(std::begin(EventsArray), std::end(EventsArray), toRemove);
-	if (it != EventsArray.end())
+	if (auto it = std::find(std::begin(EventsArray), std::end(EventsArray), toRemove); 
+		it != EventsArray.end())
 	{
 		delete* it;
 		it = EventsArray.erase(it);
 	}
-	toRemove = NULL;
+	toRemove = nullptr;
 }

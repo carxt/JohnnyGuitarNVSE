@@ -24,12 +24,13 @@ static_assert(std::variant_size_v<FilterTypeSets> == std::variant_size_v<FilterT
 class EventHandlerInterface
 {
 public:
-	FilterTypeSetArray filtersArr;	//todo: make private?
-
+	FilterTypeSetArray filtersArr;
+	
 	// Framework passes the objects to add to filter here
 	virtual ~EventHandlerInterface() = default;
 	
-	// Used to filter out "-1" int codes, transform a form-list TESForm* into a bunch of TESForm*, etc.
+	// Used to filter out "-1" int codes, transform a form-list TESForm* into a bunch of TESForm*s, etc.
+	// Alternatively, can set up one's own data structures here.
 	virtual void SetUpFiltering() = 0;
 
 	// Checks if an object is in the filter, recommended to use a fast lookup data structure
@@ -69,9 +70,9 @@ public:
 	void virtual RemoveEvent(Script* script, void** filters);
 };
 
-
 EventContainerInterface* (_cdecl* CreateScriptEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CustomConstructor)(void**, UInt32));
 void(__cdecl* FreeScriptEvent)(EventContainerInterface*& toRemove);
+*/
 
 class BaseEventClass
 {
@@ -94,8 +95,7 @@ public:
 	}
 	void SetDeleted(bool doSet)
 	{
-
 		doSet ? Flags |= kEventFlag_Deleted : Flags &= ~kEventFlag_Deleted;
 	}
 };
-*/
+
