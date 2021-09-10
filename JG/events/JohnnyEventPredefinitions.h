@@ -11,8 +11,7 @@ class JohnnyEventFiltersForm : EventHandlerInterface
 {
 	typedef  std::unordered_set<unsigned int> RefUnorderedSet;
 
-private:
-	RefUnorderedSet* Filters = 0;
+	RefUnorderedSet* Filters = nullptr;	// In order to search filters more efficiently.
 
 	RefUnorderedSet* GetFilter(UInt32 filter)
 	{
@@ -38,8 +37,7 @@ public:
 	{
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return false;
-		//RefUnorderedSet::const_iterator got = FilterSet->find(toSearch);
-		return  FilterSet->empty() || (FilterSet->find(toSearch.refID) != FilterSet->end());
+		return FilterSet->empty() || (FilterSet->find(toSearch.refID) != FilterSet->end());
 	}
 
 
@@ -155,7 +153,7 @@ public:
 	void virtual RegisterEvent(Script* script, void** filters)
 	{
 		UInt32 maxFilters = this->numMaxFilters;
-		for (std::vector<BaseEventClass>::iterator it = this->EventCallbacks.begin(); it != this->EventCallbacks.end(); ++it)
+		for (auto it = this->EventCallbacks.begin(); it != this->EventCallbacks.end(); ++it)
 		{
 			if (script == it->ScriptForEvent)
 			{
@@ -171,7 +169,7 @@ public:
 
 		}
 		std::shared_lock rLock(QueueRWLock);
-		for (std::vector<BaseEventClass>::iterator it = this->EventQueueAdd.begin(); it != this->EventQueueAdd.end(); ++it)
+		for (auto it = this->EventQueueAdd.begin(); it != this->EventQueueAdd.end(); ++it)
 		{
 
 			if (script == it->ScriptForEvent)
@@ -193,7 +191,6 @@ public:
 		NewEvent.capturedLambdaVars = LambdaVariableContext(script);
 		if (maxFilters)
 		{
-
 			*(void**)&(NewEvent.eventFilter) = this->CreateFilter(filters, maxFilters);
 			NewEvent.eventFilter->SetUpFiltering();
 		}
