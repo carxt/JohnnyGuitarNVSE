@@ -32,9 +32,9 @@ void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool
 {
 	if (!actor->GetPerkRank(perk, isTeammatePerk))
 		return;
-	for (auto const& callback : OnRemovePerkHandler->EventCallbacks)
+	for (auto const& callback : OnRemovePerkHandler->event_callbacks)
 	{
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, actor, 0, &EventResultPtr, OnRemovePerkHandler->num_max_args, perk);
 		}
@@ -44,9 +44,9 @@ void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool
 
 void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, UInt8 newRank, bool isTeammatePerk)
 {
-	for (auto const& callback : OnAddPerkHandler->EventCallbacks)
+	for (auto const& callback : OnAddPerkHandler->event_callbacks)
 	{
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, actor, 0, &EventResultPtr, OnAddPerkHandler->num_max_args, perk, newRank - 1, newRank);
 		}
@@ -56,8 +56,8 @@ void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, UInt8 n
 
 void __stdcall handleDyingEvent(Actor* thisObj) {
 	if (thisObj->IsActor() && thisObj->lifeState == 1 && (*thisObj->GetTheName() || thisObj == g_thePlayer)) {
-		for (auto const& callback : OnDyingHandler->EventCallbacks) {
-			if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+		for (auto const& callback : OnDyingHandler->event_callbacks) {
+			if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 			{
 				FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnDyingHandler->num_max_args, thisObj);
 			}
@@ -66,9 +66,9 @@ void __stdcall handleDyingEvent(Actor* thisObj) {
 }
 UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 	if (crosshairRef) {
-		for (auto const& callback : OnCrosshairHandler->EventCallbacks) {
-			JohnnyEventFiltersOneFormOneInt* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter);
-			if ((filter->IsInFilter(0, crosshairRef->refID) || filter->IsInFilter(0, crosshairRef->baseForm->refID)) && filter->IsInFilter(1, crosshairRef->baseForm->typeID))
+		for (auto const& callback : OnCrosshairHandler->event_callbacks) {
+			auto filter = reinterpret_cast<GenericEventFilters*>(callback.eventFilter);
+			if ((filter->IsInFilter(0, crosshairRef) || filter->IsBaseInFilter(0, crosshairRef)) && filter->IsInFilter(1, crosshairRef->baseForm->typeID))
 			{
 				FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCrosshairHandler->num_max_args, crosshairRef);
 			}
@@ -77,9 +77,9 @@ UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 	return ThisStdCall<UInt32>(0x579280, crosshairRef);
 }
 bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, byte dummy, int limb, byte isExplode) {
-	for (auto const& callback : OnLimbGoneHandler->EventCallbacks) {
-		if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(0, actor->refID) &&
-			reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, limb)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+	for (auto const& callback : OnLimbGoneHandler->event_callbacks) {
+		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsInFilter(0, actor) &&
+			reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsInFilter(1, limb)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnLimbGoneHandler->num_max_args, actor, limb);
 		}
@@ -88,8 +88,8 @@ bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, 
 }
 void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
 	EventInformation* thisEvent = IsStarted ? OnStartQuestHandler : OnStopQuestHandler;
-	for (auto const& callback : thisEvent->EventCallbacks) {
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+	for (auto const& callback : thisEvent->event_callbacks) {
+		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, thisEvent->num_max_args, Quest);
 		}
@@ -97,8 +97,8 @@ void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
 }
 
 void __cdecl handleQuestComplete(TESQuest* Quest) {
-	for (auto const& callback : OnCompleteQuestHandler->EventCallbacks) {
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+	for (auto const& callback : OnCompleteQuestHandler->event_callbacks) {
+		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCompleteQuestHandler->num_max_args, Quest);
 		}
@@ -107,8 +107,8 @@ void __cdecl handleQuestComplete(TESQuest* Quest) {
 }
 
 void __cdecl handleQuestFail(TESQuest* Quest) {
-	for (auto const& callback : OnFailQuestHandler->EventCallbacks) {
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+	for (auto const& callback : OnFailQuestHandler->event_callbacks) {
+		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnFailQuestHandler->num_max_args, Quest);
 		}
@@ -118,13 +118,13 @@ void __cdecl handleQuestFail(TESQuest* Quest) {
 
 void __cdecl handleSettingsUpdate() {
 	CdeclCall(0x7D6D70);
-	for (auto const& callback : OnSettingsUpdateHandler->EventCallbacks) {
+	for (auto const& callback : OnSettingsUpdateHandler->event_callbacks) {
 		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSettingsUpdateHandler->num_max_args);
 	}
 }
 ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
-	for (auto const& callback : OnSeenDataUpdateHandler->EventCallbacks) {
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, cell)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+	for (auto const& callback : OnSeenDataUpdateHandler->event_callbacks) {
+		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsBaseInFilter(0, cell)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSeenDataUpdateHandler->num_max_args, cell);
 		}
@@ -132,8 +132,8 @@ ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
 	return &cell->extraDataList;
 }
 UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
-	for (auto const& callback : OnChallengeCompleteHandler->EventCallbacks) {
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, challenge)) // 0 is filter one, and we only use an argument so we don't need to check further filters
+	for (auto const& callback : OnChallengeCompleteHandler->event_callbacks) {
+		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsBaseInFilter(0, challenge)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnChallengeCompleteHandler->num_max_args, challenge);
 		}
@@ -143,7 +143,7 @@ UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 
 
 UInt32 __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
-	for (auto const& callback : OnRenderGameModeUpdateHandler->EventCallbacks) {
+	for (auto const& callback : OnRenderGameModeUpdateHandler->event_callbacks) {
 
 			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRenderGameModeUpdateHandler->num_max_args);
 
@@ -152,7 +152,7 @@ UInt32 __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg
 }
 
 UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
-	for (auto const& callback : OnRenderRenderedMenuUpdateHandler->EventCallbacks) {
+	for (auto const& callback : OnRenderRenderedMenuUpdateHandler->event_callbacks) {
 
 		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRenderRenderedMenuUpdateHandler->num_max_args);
 
@@ -206,17 +206,17 @@ __declspec (naked) void OnQuestStartStopEventAsm()
 bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
-	Script* script = NULL;
-	EventFilterStructOneFormOneInt filter = { NULL, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
+	Script* script = nullptr;
+	EventFilter_OneForm_OneInt filter;
 	UInt32 flags = 0;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnLimbGoneHandler)
 		{
+			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnLimbGoneHandler->RegisterEvent(script, (void**)&filter);
-			else OnLimbGoneHandler->RemoveEvent(script, (void**)&filter);
-
+				OnLimbGoneHandler->RegisterEvent(script, filterArr);
+			else OnLimbGoneHandler->RemoveEvent(script, filterArr);
 		}
 		return true;
 	}
@@ -224,16 +224,15 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
 bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
-	Script* script = NULL;
+	Script* script = nullptr;
 	UInt32 flags = 0;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnSettingsUpdateHandler)
 		{
 			if (setOrRemove)
-				OnSettingsUpdateHandler->RegisterEvent(script, NULL);
-			else OnSettingsUpdateHandler->RemoveEvent(script, NULL);
-
+				OnSettingsUpdateHandler->RegisterEvent(script);
+			else OnSettingsUpdateHandler->RemoveEvent(script);
 		}
 		return true;
 	}
@@ -241,17 +240,17 @@ bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS)
 bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
-	Script* script = NULL;
-	EventFilterStructOneFormOneInt filter = { NULL, -1 };
+	Script* script = nullptr;
+	EventFilter_OneForm_OneInt filter;
 	UInt32 flags = 0;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnCrosshairHandler)
 		{
+			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnCrosshairHandler->RegisterEvent(script, (void**)&filter);
-			else OnCrosshairHandler->RemoveEvent(script, (void**)&filter);
-
+				OnCrosshairHandler->RegisterEvent(script, filterArr);
+			else OnCrosshairHandler->RemoveEvent(script, filterArr);
 		}
 		return true;
 	}
@@ -260,16 +259,16 @@ bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL };
+	EventFilter_OneForm filter;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnRemovePerkHandler)
 		{
+			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnRemovePerkHandler->RegisterEvent(script, (void**)filter);
-			else OnRemovePerkHandler->RemoveEvent(script, (void**)filter);
-
+				OnRemovePerkHandler->RegisterEvent(script, filterArr);
+			else OnRemovePerkHandler->RemoveEvent(script, filterArr);
 		}
 		return true;
 	}
@@ -278,16 +277,16 @@ bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL };
+	EventFilter_OneForm filter;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnAddPerkHandler)
 		{
+			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnAddPerkHandler->RegisterEvent(script, (void**)filter);
-			else OnAddPerkHandler->RemoveEvent(script, (void**)filter);
-
+				OnAddPerkHandler->RegisterEvent(script, filterArr);
+			else OnAddPerkHandler->RemoveEvent(script, filterArr);
 		}
 		return true;
 	}
@@ -296,16 +295,16 @@ bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL };
+	EventFilter_OneForm filter;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnChallengeCompleteHandler)
 		{
+			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnChallengeCompleteHandler->RegisterEvent(script, (void**)filter);
-			else OnChallengeCompleteHandler->RemoveEvent(script, (void**)filter);
-
+				OnChallengeCompleteHandler->RegisterEvent(script, filterArr);
+			else OnChallengeCompleteHandler->RemoveEvent(script, filterArr);
 		}
 		return true;
 	}
@@ -314,16 +313,16 @@ bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
+	EventFilter_OneForm filter;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnSeenDataUpdateHandler)
 		{
+			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnSeenDataUpdateHandler->RegisterEvent(script, (void**)filter);
-			else OnSeenDataUpdateHandler->RemoveEvent(script, (void**)filter);
-
+				OnSeenDataUpdateHandler->RegisterEvent(script, filterArr);
+			else OnSeenDataUpdateHandler->RemoveEvent(script, filterArr);
 		}
 		return true;
 	}
@@ -332,16 +331,16 @@ bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
+	EventFilter_OneForm filter;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnDyingHandler)
 		{
+			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnDyingHandler->RegisterEvent(script, (void**)filter);
-			else OnDyingHandler->RemoveEvent(script, (void**)filter);
-
+				OnDyingHandler->RegisterEvent(script, filterArr);
+			else OnDyingHandler->RemoveEvent(script, filterArr);
 		}
 		return true;
 	}
@@ -351,16 +350,16 @@ bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
+	EventFilter_OneForm filter;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnStartQuestHandler)
 		{
+			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnStartQuestHandler->RegisterEvent(script, (void**)filter);
-			else OnStartQuestHandler->RemoveEvent(script, (void**)filter);
-
+				OnStartQuestHandler->RegisterEvent(script, filterArr);
+			else OnStartQuestHandler->RemoveEvent(script, filterArr);
 		}
 		return true;
 	}
@@ -371,16 +370,16 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
+	EventFilter_OneForm filter;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnStopQuestHandler)
 		{
+			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnStopQuestHandler->RegisterEvent(script, (void**)filter);
-			else OnStopQuestHandler->RemoveEvent(script, (void**)filter);
-
+				OnStopQuestHandler->RegisterEvent(script, filterArr);
+			else OnStopQuestHandler->RemoveEvent(script, filterArr);
 		}
 		return true;
 	}
@@ -390,16 +389,16 @@ bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL };
+	EventFilter_OneForm filter;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnCompleteQuestHandler)
 		{
+			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnCompleteQuestHandler->RegisterEvent(script, (void**)filter);
-			else OnCompleteQuestHandler->RemoveEvent(script, (void**)filter);
-
+				OnCompleteQuestHandler->RegisterEvent(script, filterArr);
+			else OnCompleteQuestHandler->RemoveEvent(script, filterArr);
 		}
 		return true;
 	}
@@ -409,18 +408,16 @@ bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter;
+	EventFilter_OneForm filter;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form) || NOT_TYPE(script, Script))) return true;
 	{
-		FormSet formSet { filter };
-		FilterTypeSets genericSet = formSet;
 		if (OnFailQuestHandler)
 		{
+			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnFailQuestHandler->RegisterEvent(script, genericSet);
-			else OnFailQuestHandler->RemoveEvent(script, genericSet);
-
+				OnFailQuestHandler->RegisterEvent(script, filterArr);
+			else OnFailQuestHandler->RemoveEvent(script, filterArr);
 		}
 		return true;
 	}
@@ -437,21 +434,18 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 	};
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
 	{
-		FilterTypeSetArray nullArr;
 		if (!(flags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler)
 		{
 			if (setOrRemove)
-				OnRenderGameModeUpdateHandler->RegisterEvent(script, nullArr);
-			else OnRenderGameModeUpdateHandler->RemoveEvent(script, nullArr);
-
+				OnRenderGameModeUpdateHandler->RegisterEvent(script);
+			else OnRenderGameModeUpdateHandler->RemoveEvent(script);
 		}
 
 		if (!(flags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler)
 		{
 			if (setOrRemove)
-				OnRenderRenderedMenuUpdateHandler->RegisterEvent(script, nullArr);
-			else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script, nullArr);
-
+				OnRenderRenderedMenuUpdateHandler->RegisterEvent(script);
+			else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script);
 		}
 		return true;
 	}
@@ -492,9 +486,9 @@ void HandleEventHooks()
 
 
 	//testing
-	OnRenderGameModeUpdateHandler = JGCreateEvent("OnRenderGameModeUpdateHandler", 0, 0, NULL);
+	OnRenderGameModeUpdateHandler = JGCreateEvent("OnRenderGameModeUpdateHandler", 0, 0);
 	WriteRelCall(0x870244, (uintptr_t)handlerRenderGameEvent);
-	OnRenderRenderedMenuUpdateHandler = JGCreateEvent("OnRenderRenderedMenuUpdateHandler", 0, 0, NULL);
+	OnRenderRenderedMenuUpdateHandler = JGCreateEvent("OnRenderRenderedMenuUpdateHandler", 0, 0);
 	WriteRelCall(0x8702A9, (uintptr_t)handlerRenderMenuEvent);
 
 }

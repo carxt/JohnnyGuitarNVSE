@@ -211,6 +211,11 @@ public:
 		FilterTypeSetArray arr { filter };
 		return RegisterEvent(script, arr);
 	}
+	bool virtual RegisterEvent(Script* script)
+	{
+		FilterTypeSetArray nullArr{};
+		return RegisterEvent(script, nullArr);
+	}
 	
 	void virtual RemoveEvent(Script* script, FilterTypeSetArray &filters)
 	{
@@ -238,6 +243,11 @@ public:
 	{
 		FilterTypeSetArray arr { filter };
 		RemoveEvent(script, arr);
+	}
+	void virtual RemoveEvent(Script* script)
+	{
+		FilterTypeSetArray nullArr{};
+		RemoveEvent(script, nullArr);
 	}
 	
 	void virtual AddQueuedEvents()

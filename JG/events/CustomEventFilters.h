@@ -90,12 +90,10 @@ public:
 void* __fastcall CreateOneFormOneIntFilter(void** Filters, UInt32 numFilters) {
 	return new JohnnyEventFiltersOneFormOneInt(Filters, numFilters);
 }
-
-struct EventFilterStructOneFormOneInt {
-	TESForm* form;
-	int intID;
-};
 #endif
+
+
+
 
 
 
@@ -136,6 +134,15 @@ public:
 		[](auto &arg1, auto &arg2) { return false; /*Types do not match*/ },
 			},	*filterSet, toSearch);
 		return isFound;
+	}
+
+	bool IsBaseInFilter(UInt32 filterNum, TESForm* toSearch)
+	{
+		if (!toSearch) return false;
+		if (toSearch->GetIsReference())
+			toSearch = ((TESObjectREFR*)toSearch)->baseForm;
+		FilterTypes filter = toSearch;
+		return IsInFilter(filterNum, toSearch);
 	}
 	
 	bool InsertToFilter(UInt32 filterNum, FilterTypes toInsert) override
@@ -236,4 +243,26 @@ public:
 void* __fastcall CreateGenericFilters(FilterTypeSetArray &filters) {
 	return new GenericEventFilters(filters);
 }
-	
+
+
+struct EventFilter_OneForm {
+	TESForm* form = nullptr;
+
+	FilterTypeSetArray ToFilter() const
+	{
+		FormSet formSet{ form };
+		return FilterTypeSetArray{ formSet };
+	}
+};
+
+struct EventFilter_OneForm_OneInt {
+	TESForm* form = nullptr;
+	int intID = -1;
+
+	FilterTypeSetArray ToFilter() const
+	{
+		FormSet formSet{ form };
+		IntSet idSet{ intID };
+		return FilterTypeSetArray{ formSet, idSet };
+	}
+};
