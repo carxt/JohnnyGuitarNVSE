@@ -59,7 +59,7 @@ public:
 		if (!FilterSet) return true;
 		return FilterSet->empty();
 	}
-	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 nuFilter)
+	virtual bool IsGenFilterEqual(GenericFilters Filter, UInt32 nuFilter)
 	{
 		return (Filter.ptr == GenFilters[nuFilter].ptr);
 	}
@@ -205,7 +205,7 @@ public:
 		return isEmpty;
 	}
 	
-	bool IsFilterEqual(UInt32 filterNum, FilterTypeSets cmpFilterSet) override
+	bool IsGenFilterEqual(UInt32 filterNum, FilterTypeSets cmpFilterSet) override
 	{
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthGenFilter(filterNum))) return false;
@@ -254,7 +254,7 @@ public:
 	// Modifies by reference.
 	static void SetUpIntFilters(IntSet& intFilters)
 	{
-		intFilters.erase(-1);
+		intFilters.erase(g_IgnoreIntFilter);
 	}
 	
 	void SetUpFiltering() override

@@ -6,7 +6,10 @@
 #include "events/LambdaVariableContext.h"
 
 using RefID = UInt32;
+
+// Ignored refID filter for GenericEventFilters.
 UInt32 const g_xMarkerID = 0x3B;
+int const g_IgnoreIntFilter = -1;
 
 using FilterTypes = std::variant<RefID, int, float, std::string>;
 
@@ -36,7 +39,7 @@ public:
 	FilterTypeSetArray filtersArr;
 	
 	// The original filters array that was passed, before SetUpFiltering() was called.
-	// Costs more mem, but saves us from having to deep-check form-lists when checking IsFilterEqual().
+	// Costs more mem, but saves us from having to deep-check form-lists when checking IsGenFilterEqual().
 	FilterTypeSetArray genFiltersArr; 
 	
 	// Framework passes the objects to add to filter here
@@ -59,13 +62,14 @@ public:
 	virtual bool IsFilterEmpty(UInt32 filterNum) = 0;
 	
 	// Used by the framework to check if the Nth Gen filter equals the passed value set. Useful to avoid adding the same event repeatedly
-	virtual bool IsFilterEqual(UInt32 filterNum, FilterTypeSets cmpFilterSet) = 0;
+	virtual bool IsGenFilterEqual(UInt32 filterNum, FilterTypeSets cmpFilterSet) = 0;
 	
 	// Function used by the filter to check if the object passed is an accepted parameter
 	virtual bool IsAcceptedParameter(FilterTypes parameter) = 0;
 	
 	// Hope a UInt32 is large enough.
 	virtual UInt32 GetNumFilters() { return filtersArr.size(); }
+	virtual UInt32 GetNumGenFilters() { return genFiltersArr.size(); }
 	
 	// numFilter is 0-indexed
 	FilterTypeSets* GetNthFilter(UInt32 numFilter)

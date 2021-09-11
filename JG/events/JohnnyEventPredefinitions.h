@@ -64,7 +64,7 @@ public:
 		if (!FilterSet) return true;
 		return FilterSet->empty();
 	}
-	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 nuFilter)
+	virtual bool IsGenFilterEqual(GenericFilters Filter, UInt32 nuFilter)
 	{
 		return (Filter.ptr == GenFilters[nuFilter].ptr);
 	}
@@ -172,10 +172,10 @@ public:
 			if (script == eventIter.ScriptForEvent)
 			{
 				if (!num_max_filters) return kRetn_Return;	// filter-less event was already registered
-				if (!eventIter.eventFilter->GetNumFilters()) return kRetn_Continue;
+				if (!eventIter.eventFilter->GetNumGenFilters()) return kRetn_Continue;
 				for (int i = 0; i < num_max_filters; i++)
 				{
-					if (!eventIter.eventFilter->IsFilterEqual(i, filters[i]))
+					if (!eventIter.eventFilter->IsGenFilterEqual(i, filters[i]))
 						return kRetn_Continue;	// new event has sufficiently different filters, look for another event match.
 				}
 				return kRetn_Return; // event is already registered with the same filters.
@@ -229,10 +229,10 @@ public:
 			{
 				if (auto eventFilters = it->eventFilter)
 				{
-					auto const maxFilters = eventFilters->GetNumFilters();
+					auto const maxFilters = eventFilters->GetNumGenFilters();
 					for (int i = 0; i < maxFilters; i++)
 					{
-						if (!it->eventFilter->IsFilterEqual(i, filters[i]))
+						if (!it->eventFilter->IsGenFilterEqual(i, filters[i]))
 							goto NotFound;
 					}
 				}

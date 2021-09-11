@@ -24,7 +24,7 @@ struct EventFilter_OneForm : EventFilter_BaseStruct
 struct EventFilter_OneForm_OneInt : EventFilter_BaseStruct
 {
 	TESForm* form = nullptr;
-	int intID = -1;
+	int intID = g_IgnoreIntFilter;
 
 	[[nodiscard]] FilterTypeSetArray ToFilter() const override
 	{
