@@ -1,6 +1,9 @@
 #pragma once
 #include <variant>
 #include <unordered_set>
+#include "PluginAPI.h"
+#include "GameForms.h"
+#include "events/LambdaVariableContext.h"
 
 //using RefID = UInt32;
 UInt32 const g_xMarkerID = 0x3B;

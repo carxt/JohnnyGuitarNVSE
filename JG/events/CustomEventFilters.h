@@ -1,4 +1,6 @@
 #pragma once
+#include "GameRTTI.h"
+#include "events/EventFilteringInterface.h"
 
 #if NULL
 class JohnnyEventFiltersOneFormOneInt : EventHandlerFilterBase
@@ -168,7 +170,11 @@ public:
 		[](IntSet& arg1, int &arg2) { return arg1.erase(arg2); },
 		[](FloatSet& arg1, float &arg2) { return arg1.erase(arg2); },
 		[](StringSet& arg1, std::string &arg2) { return arg1.erase(arg2); },
-		[](auto& arg1, auto& arg2) {return false; /*Types do not match*/ },
+		[](auto& arg1, auto& arg2)	/*Types do not match*/
+		{
+			size_t const t = 0;
+			return t;
+		},
 			}, *filterSet, toDelete);
 		return isDeleted;
 	}
@@ -240,7 +246,7 @@ public:
 	}
 };
 
-void* __fastcall CreateGenericFilters(FilterTypeSetArray &filters) {
+void* __fastcall GenericCreateFilters(FilterTypeSetArray &filters) {
 	return new GenericEventFilters(filters);
 }
 

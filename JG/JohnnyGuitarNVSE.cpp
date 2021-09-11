@@ -19,8 +19,6 @@
 #include "nvse/SafeWrite.h"
 #include "nvse/ScriptUtils.h"
 #include "misc/WorldToScreen.h"
-#include "events/LambdaVariableContext.h"
-#include "events/JohnnyEventPredefinitions.h"
 #include "misc/misc.h"
 #include "misc/EditorIDs.h"
 #include "internal/decoding.h"
@@ -36,7 +34,8 @@
 #include "functions/fn_region.h"
 #include "functions/fn_terminal.h"
 #include "functions/fn_ui.h"
-#include "events/CustomEventFilters.h"
+#include "events/LambdaVariableContext.h"
+#include "events/JohnnyEventPredefinitions.h"
 #include "events/JohnnyEvents.h"
 
 HMODULE JohnnyHandle;

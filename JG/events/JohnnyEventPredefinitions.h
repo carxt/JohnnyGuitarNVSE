@@ -1,6 +1,8 @@
 #pragma once
-#include "events/EventFilteringInterface.h"
+#include <shared_mutex>
+#include "events/CustomEventFilters.h"
 #include <unordered_set>
+
 
 bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
 NVSEArrayElement EventResultPtr;
