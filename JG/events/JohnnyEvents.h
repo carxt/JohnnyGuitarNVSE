@@ -1,4 +1,6 @@
 #pragma once
+#include "EventFilterStructs.h"
+
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnDyingEventHandler, SetOnDyingEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnStartQuestEventHandler, SetOnStartQuestEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnStopQuestEventHandler, SetOnStopQuestEventHandler, , 0, 4, kParams_Event_OneForm);
@@ -64,6 +66,7 @@ void __stdcall handleDyingEvent(Actor* thisObj) {
 		}
 	}
 }
+
 UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 	if (crosshairRef) {
 		for (auto const& callback : OnCrosshairHandler->event_callbacks) {
@@ -76,6 +79,7 @@ UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 	}
 	return ThisStdCall<UInt32>(0x579280, crosshairRef);
 }
+
 bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, byte dummy, int limb, byte isExplode) {
 	for (auto const& callback : OnLimbGoneHandler->event_callbacks) {
 		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsInFilter(0, actor) &&
@@ -122,6 +126,7 @@ void __cdecl handleSettingsUpdate() {
 		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSettingsUpdateHandler->num_max_args);
 	}
 }
+
 ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
 	for (auto const& callback : OnSeenDataUpdateHandler->event_callbacks) {
 		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsBaseInFilter(0, cell)) // 0 is filter one, and we only use an argument so we don't need to check further filters
@@ -131,6 +136,7 @@ ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
 	}
 	return &cell->extraDataList;
 }
+
 UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 	for (auto const& callback : OnChallengeCompleteHandler->event_callbacks) {
 		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsBaseInFilter(0, challenge)) // 0 is filter one, and we only use an argument so we don't need to check further filters
@@ -159,6 +165,7 @@ UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg
 	}
 	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
 }
+
 __declspec(naked) void OnCrosshairEventAsm() {
 	static const UInt32 retnAddr = 0x775A69;
 	__asm {
@@ -169,6 +176,7 @@ __declspec(naked) void OnCrosshairEventAsm() {
 		jmp retnAddr
 	}
 }
+
 __declspec (naked) void OnDyingEventAsm()
 {
 	static const UInt32 checkProtect = 0xEC408C;
@@ -203,6 +211,7 @@ __declspec (naked) void OnQuestStartStopEventAsm()
 		ret 4
 	}
 }
+
 bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
@@ -465,7 +474,9 @@ void HandleEventHooks()
 	OnSettingsUpdateHandler = JGCreateEvent("OnSettingsUpdate", 0, 0);
 	OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3, 1);
 	OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1, 1);
+	
 	FunctionCallScript = g_scriptInterface->CallFunction;
+	
 	WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 	WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
 	WriteRelJump(0x89F4A4, (UINT)OnDyingEventAsm);

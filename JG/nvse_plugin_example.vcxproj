@@ -237,6 +237,7 @@
     <ClInclude Include="..\nvse\nvse\Utilities.h" />
     <ClInclude Include="events\CustomEventFilters.h" />
     <ClInclude Include="events\EventFilteringInterface.h" />
+    <ClInclude Include="events\EventFilterStructs.h" />
     <ClInclude Include="events\JohnnyEventPredefinitions.h" />
     <ClInclude Include="events\JohnnyEvents.h" />
     <ClInclude Include="events\LambdaVariableContext.h" />

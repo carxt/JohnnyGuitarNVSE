@@ -1,5 +1,5 @@
 #pragma once
-#include "GameRTTI.h"
+#include "GameRTTI.h"	// for DYNAMIC_CAST
 #include "events/EventFilteringInterface.h"
 
 #if NULL
@@ -99,7 +99,7 @@ void* __fastcall CreateOneFormOneIntFilter(void** Filters, UInt32 numFilters) {
 
 
 
-//== Demo's Generic Filter
+//== Demo's Generic Filter System
 
 // Taken from https://www.cppstories.com/2018/09/visit-variants/. Also shows up in https://gummif.github.io/blog/overloading_lambdas.html.
 template<class... Ts> struct overload : Ts...
@@ -108,9 +108,11 @@ template<class... Ts> struct overload : Ts...
 };
 template<class... Ts> overload(Ts...)->overload<Ts...>;
 
+/*
 FilterTypeSets testFilter1 = { IntSet {5, 0x7} };
-FilterTypeSets testFilter2 = { StringSet {"testStr", "testStr2", "tt"} };
+FilterTypeSets testFilter2 = { StringSet {"testStr", "testStr2", "tt"}};
 FilterTypeSetArray testFilters = { testFilter1, testFilter2 };
+*/
 
 class GenericEventFilters : EventHandlerFilterBase
 {
@@ -249,26 +251,3 @@ public:
 void* __fastcall GenericCreateFilters(FilterTypeSetArray &filters) {
 	return new GenericEventFilters(filters);
 }
-
-
-struct EventFilter_OneForm {
-	TESForm* form = nullptr;
-
-	FilterTypeSetArray ToFilter() const
-	{
-		FormSet formSet{ form };
-		return FilterTypeSetArray{ formSet };
-	}
-};
-
-struct EventFilter_OneForm_OneInt {
-	TESForm* form = nullptr;
-	int intID = -1;
-
-	FilterTypeSetArray ToFilter() const
-	{
-		FormSet formSet{ form };
-		IntSet idSet{ intID };
-		return FilterTypeSetArray{ formSet, idSet };
-	}
-};
