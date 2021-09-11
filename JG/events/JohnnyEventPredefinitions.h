@@ -17,7 +17,7 @@ class JohnnyEventFiltersForm : EventHandlerFilterBase
 
 	RefUnorderedSet* Filters = nullptr;	// In order to search filters more efficiently.
 
-	RefUnorderedSet* GetFilter(UInt32 filter)
+	RefUnorderedSet* GetNthFilter(UInt32 filter)
 	{
 		if (filter >= numFilters) return NULL;
 		return &(Filters[filter]);
@@ -40,7 +40,7 @@ public:
 	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch)
 	{
 		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return false;
+		if (!(FilterSet = GetNthFilter(filterNum))) return false;
 		return FilterSet->empty() || (FilterSet->find(toSearch.refID) != FilterSet->end());
 	}
 
@@ -48,19 +48,19 @@ public:
 	virtual void InsertToFilter(UInt32 filterNum, GenericFilters toInsert)
 	{
 		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return;
+		if (!(FilterSet = GetNthFilter(filterNum))) return;
 		FilterSet->insert(toInsert.refID);
 	}
 	virtual void DeleteFromFilter(UInt32 filterNum, GenericFilters toDelete)
 	{
 		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return;
+		if (!(FilterSet = GetNthFilter(filterNum))) return;
 		FilterSet->erase(toDelete.refID);
 
 	}
 	virtual bool IsFilterEmpty(UInt32 filterNum)
 	{
-		RefUnorderedSet* FilterSet = GetFilter(filterNum);
+		RefUnorderedSet* FilterSet = GetNthFilter(filterNum);
 		if (!FilterSet) return true;
 		return FilterSet->empty();
 	}
