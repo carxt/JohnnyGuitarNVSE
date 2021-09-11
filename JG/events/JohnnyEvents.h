@@ -36,7 +36,7 @@ void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool
 	{
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
-			FunctionCallScript(callback.ScriptForEvent, actor, 0, &EventResultPtr, OnRemovePerkHandler->numMaxArgs, perk);
+			FunctionCallScript(callback.ScriptForEvent, actor, 0, &EventResultPtr, OnRemovePerkHandler->num_max_args, perk);
 		}
 	}
 	actor->RemovePerk(perk, isTeammatePerk);
@@ -48,7 +48,7 @@ void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, UInt8 n
 	{
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
-			FunctionCallScript(callback.ScriptForEvent, actor, 0, &EventResultPtr, OnAddPerkHandler->numMaxArgs, perk, newRank - 1, newRank);
+			FunctionCallScript(callback.ScriptForEvent, actor, 0, &EventResultPtr, OnAddPerkHandler->num_max_args, perk, newRank - 1, newRank);
 		}
 	}
 	actor->SetPerkRank(perk, newRank, isTeammatePerk);
@@ -59,7 +59,7 @@ void __stdcall handleDyingEvent(Actor* thisObj) {
 		for (auto const& callback : OnDyingHandler->EventCallbacks) {
 			if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 			{
-				FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnDyingHandler->numMaxArgs, thisObj);
+				FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnDyingHandler->num_max_args, thisObj);
 			}
 		}
 	}
@@ -70,7 +70,7 @@ UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 			JohnnyEventFiltersOneFormOneInt* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter);
 			if ((filter->IsInFilter(0, crosshairRef->refID) || filter->IsInFilter(0, crosshairRef->baseForm->refID)) && filter->IsInFilter(1, crosshairRef->baseForm->typeID))
 			{
-				FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCrosshairHandler->numMaxArgs, crosshairRef);
+				FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCrosshairHandler->num_max_args, crosshairRef);
 			}
 		}
 	}
@@ -81,7 +81,7 @@ bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, 
 		if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(0, actor->refID) &&
 			reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, limb)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
-			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnLimbGoneHandler->numMaxArgs, actor, limb);
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnLimbGoneHandler->num_max_args, actor, limb);
 		}
 	}
 	return ThisStdCall_B(0x430410, xData, actor, limb, isExplode);
@@ -91,7 +91,7 @@ void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
 	for (auto const& callback : thisEvent->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
-			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, thisEvent->numMaxArgs, Quest);
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, thisEvent->num_max_args, Quest);
 		}
 	}
 }
@@ -100,7 +100,7 @@ void __cdecl handleQuestComplete(TESQuest* Quest) {
 	for (auto const& callback : OnCompleteQuestHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
-			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCompleteQuestHandler->numMaxArgs, Quest);
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCompleteQuestHandler->num_max_args, Quest);
 		}
 	}
 	CdeclCall(0x77A480, Quest);
@@ -110,7 +110,7 @@ void __cdecl handleQuestFail(TESQuest* Quest) {
 	for (auto const& callback : OnFailQuestHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
-			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnFailQuestHandler->numMaxArgs, Quest);
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnFailQuestHandler->num_max_args, Quest);
 		}
 	}
 	CdeclCall(0x77A480, Quest);
@@ -119,14 +119,14 @@ void __cdecl handleQuestFail(TESQuest* Quest) {
 void __cdecl handleSettingsUpdate() {
 	CdeclCall(0x7D6D70);
 	for (auto const& callback : OnSettingsUpdateHandler->EventCallbacks) {
-		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSettingsUpdateHandler->numMaxArgs);
+		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSettingsUpdateHandler->num_max_args);
 	}
 }
 ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
 	for (auto const& callback : OnSeenDataUpdateHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, cell)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
-			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSeenDataUpdateHandler->numMaxArgs, cell);
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSeenDataUpdateHandler->num_max_args, cell);
 		}
 	}
 	return &cell->extraDataList;
@@ -135,7 +135,7 @@ UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 	for (auto const& callback : OnChallengeCompleteHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, challenge)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
-			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnChallengeCompleteHandler->numMaxArgs, challenge);
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnChallengeCompleteHandler->num_max_args, challenge);
 		}
 	}
 	return challenge->data.type;
@@ -145,7 +145,7 @@ UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 UInt32 __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
 	for (auto const& callback : OnRenderGameModeUpdateHandler->EventCallbacks) {
 
-			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRenderGameModeUpdateHandler->numMaxArgs);
+			FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRenderGameModeUpdateHandler->num_max_args);
 
 	}
 	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
@@ -154,7 +154,7 @@ UInt32 __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg
 UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
 	for (auto const& callback : OnRenderRenderedMenuUpdateHandler->EventCallbacks) {
 
-		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRenderRenderedMenuUpdateHandler->numMaxArgs);
+		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRenderRenderedMenuUpdateHandler->num_max_args);
 
 	}
 	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
@@ -409,15 +409,17 @@ bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL };
+	TESForm* filter;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter) || NOT_TYPE(script, Script))) return true;
 	{
+		FormSet formSet { filter };
+		FilterTypeSets genericSet = formSet;
 		if (OnFailQuestHandler)
 		{
 			if (setOrRemove)
-				OnFailQuestHandler->RegisterEvent(script, (void**)filter);
-			else OnFailQuestHandler->RemoveEvent(script, (void**)filter);
+				OnFailQuestHandler->RegisterEvent(script, genericSet);
+			else OnFailQuestHandler->RemoveEvent(script, genericSet);
 
 		}
 		return true;
@@ -435,19 +437,20 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 	};
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
 	{
+		FilterTypeSetArray nullArr;
 		if (!(flags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler)
 		{
 			if (setOrRemove)
-				OnRenderGameModeUpdateHandler->RegisterEvent(script, NULL);
-			else OnRenderGameModeUpdateHandler->RemoveEvent(script, NULL);
+				OnRenderGameModeUpdateHandler->RegisterEvent(script, nullArr);
+			else OnRenderGameModeUpdateHandler->RemoveEvent(script, nullArr);
 
 		}
 
 		if (!(flags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler)
 		{
 			if (setOrRemove)
-				OnRenderRenderedMenuUpdateHandler->RegisterEvent(script, NULL);
-			else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script, NULL);
+				OnRenderRenderedMenuUpdateHandler->RegisterEvent(script, nullArr);
+			else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script, nullArr);
 
 		}
 		return true;
@@ -456,18 +459,18 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 
 void HandleEventHooks()
 {
-	OnDyingHandler = JGCreateEvent("OnDying", 1, 1, NULL);
-	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1, NULL);
-	OnStopQuestHandler = JGCreateEvent("OnStopQuest", 1, 1, NULL);
-	OnSeenDataUpdateHandler = JGCreateEvent("OnSeenDataUpdate", 1, 1, NULL);
-	OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2, 2, CreateOneFormOneIntFilter);
-	OnChallengeCompleteHandler = JGCreateEvent("OnChallengeComplete", 1, 1, NULL);
-	OnCrosshairHandler = JGCreateEvent("OnCrosshair", 1, 2, CreateOneFormOneIntFilter);
-	OnCompleteQuestHandler = JGCreateEvent("OnCompleteQuest", 1, 1, NULL);
-	OnFailQuestHandler = JGCreateEvent("OnFailQuest", 1, 1, NULL);
-	OnSettingsUpdateHandler = JGCreateEvent("OnSettingsUpdate", 0, 0, NULL);
-	OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3, 1, NULL);
-	OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1, 1, NULL);
+	OnDyingHandler = JGCreateEvent("OnDying", 1, 1);
+	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1);
+	OnStopQuestHandler = JGCreateEvent("OnStopQuest", 1, 1);
+	OnSeenDataUpdateHandler = JGCreateEvent("OnSeenDataUpdate", 1, 1);
+	OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2, 2);
+	OnChallengeCompleteHandler = JGCreateEvent("OnChallengeComplete", 1, 1);
+	OnCrosshairHandler = JGCreateEvent("OnCrosshair", 1, 2);
+	OnCompleteQuestHandler = JGCreateEvent("OnCompleteQuest", 1, 1);
+	OnFailQuestHandler = JGCreateEvent("OnFailQuest", 1, 1);
+	OnSettingsUpdateHandler = JGCreateEvent("OnSettingsUpdate", 0, 0);
+	OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3, 1);
+	OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1, 1);
 	FunctionCallScript = g_scriptInterface->CallFunction;
 	WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 	WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);

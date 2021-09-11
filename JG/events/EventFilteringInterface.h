@@ -21,13 +21,13 @@ using FilterTypeSetArray = std::vector<FilterTypeSets>;
 
 static_assert(std::variant_size_v<FilterTypeSets> == std::variant_size_v<FilterTypes>);
 
-class EventHandlerInterface
+class EventHandlerFilterBase
 {
 public:
 	FilterTypeSetArray filtersArr;
 	
 	// Framework passes the objects to add to filter here
-	virtual ~EventHandlerInterface() = default;
+	virtual ~EventHandlerFilterBase() = default;
 	
 	// Used to filter out "-1" int codes, transform a form-list TESForm* into a bunch of TESForm*s, etc.
 	// Alternatively, can set up one's own data structures here.
@@ -70,7 +70,7 @@ public:
 	void virtual RemoveEvent(Script* script, void** filters);
 };
 
-EventContainerInterface* (_cdecl* CreateScriptEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CustomConstructor)(void**, UInt32));
+EventContainerInterface* (_cdecl* CreateScriptEvent)(const char* event_name, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CustomConstructor)(void**, UInt32));
 void(__cdecl* FreeScriptEvent)(EventContainerInterface*& toRemove);
 */
 
@@ -79,7 +79,7 @@ class BaseEventClass
 public:
 	ULONG_PTR Flags = 0;
 	Script* ScriptForEvent = NULL;
-	EventHandlerInterface* eventFilter = NULL;
+	EventHandlerFilterBase* eventFilter = NULL;
 	LambdaVariableContext capturedLambdaVars;
 
 	BaseEventClass() : capturedLambdaVars(nullptr){}

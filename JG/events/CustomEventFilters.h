@@ -1,7 +1,7 @@
 #pragma once
 
 #if NULL
-class JohnnyEventFiltersOneFormOneInt : EventHandlerInterface
+class JohnnyEventFiltersOneFormOneInt : EventHandlerFilterBase
 {
 
 
@@ -112,7 +112,7 @@ FilterTypeSets testFilter1 = { IntSet {5, 0x7} };
 FilterTypeSets testFilter2 = { StringSet {"testStr", "testStr2", "tt"} };
 FilterTypeSetArray testFilters = { testFilter1, testFilter2 };
 
-class GenericEventFilters : EventHandlerInterface
+class GenericEventFilters : EventHandlerFilterBase
 {
 public:
 	GenericEventFilters(FilterTypeSetArray &filters)
@@ -182,14 +182,15 @@ public:
 	}
 
 	//	Unused in SetUpFiltering, so it's useless.
-	//bool IsAcceptedParameter(FilterTypes param) override
-	//{
+	bool IsAcceptedParameter(FilterTypes param) override
+	{
 	//	bool const isAccepted = std::visit(overload{
 	//		[&](TESForm* &filter) { return filter->refID != g_xMarkerID; },
 	//		[&](auto& filter) { return true; } /*Default case*/
 	//		}, param);
 	//	return isAccepted;
-	//}
+		return true;
+	}
 	//
 	
 	void SetUpFiltering() override
@@ -232,9 +233,7 @@ public:
 	}
 };
 
-/*
-void* __fastcall CreateGenericFilters(void** Filters, UInt32 numFilters) {
-	return new GenericEventFilters(Filters, numFilters);
+void* __fastcall CreateGenericFilters(FilterTypeSetArray &filters) {
+	return new GenericEventFilters(filters);
 }
-*/
 	

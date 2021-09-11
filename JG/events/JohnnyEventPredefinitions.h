@@ -1,14 +1,15 @@
 #pragma once
 #include "events/EventFilteringInterface.h"
 #include <unordered_set>
-bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
 
+bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
 NVSEArrayElement EventResultPtr;
 class EventInformation;
-//void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
+void* __fastcall GenericCreateFilters(FilterTypeSetArray &filters);
+using _FilterCreatorFunction = void* (__fastcall* )(FilterTypeSetArray& filters);
 
 #if NULL
-class JohnnyEventFiltersForm : EventHandlerInterface
+class JohnnyEventFiltersForm : EventHandlerFilterBase
 {
 	typedef  std::unordered_set<unsigned int> RefUnorderedSet;
 
@@ -120,18 +121,21 @@ public:
 class EventInformation
 {
 private:
+	_FilterCreatorFunction filter_creator_func; // supposed to be passing a class that inherits from EventHandlerFilterBase
 	std::vector<BaseEventClass> event_queue_add;
 	std::shared_mutex queue_rw_lock; //need a readers writer lock to protect from multiple users registering an event in the same frame (very rare, but can happen)
 public:
-	const char* event_name;
-	UInt8 num_max_args;
-	UInt8 num_max_filters;
+	std::string const event_name;
+	UInt8 const num_max_args;	// used when invoking script UDFs.
+	UInt8 const num_max_filters;
 	std::vector<BaseEventClass> event_callbacks;
-	EventInformation(const char* eventName, UInt8& numMaxArgs, UInt8& numMaxFilters)
+	EventInformation(std::string eventName, UInt8 const& numMaxArgs, UInt8 const& numMaxFilters, _FilterCreatorFunction FilterCreatorFunction)
+		: event_name{ std::move(eventName) }, num_max_args(numMaxArgs), num_max_filters(numMaxFilters)
 	{
-		this->event_name = eventName;
-		this->num_max_args = numMaxArgs;
-		this->num_max_filters = numMaxFilters;
+		if (!FilterCreatorFunction)
+			this->filter_creator_func = GenericCreateFilters;
+		else
+			this->filter_creator_func = FilterCreatorFunction;
 	}
 	virtual ~EventInformation()
 	{
@@ -139,63 +143,76 @@ public:
 	}
 	void FlushEventCallbacks()
 	{
-		auto it = event_callbacks.begin();
-		while (it != event_callbacks.end())
+		for (auto &callbackIter : event_callbacks)
 		{
-			delete it->eventFilter;
-			++it;
+			delete callbackIter.eventFilter;
 		}
 		event_callbacks.clear();
 	}
 
-	void virtual RegisterEvent(Script* script, void** filters)
+	bool virtual RegisterEvent(Script* script, FilterTypeSetArray &filters)
 	{
-		UInt32 maxFilters = this->num_max_filters;
-		for (auto it = this->event_callbacks.begin(); it != this->event_callbacks.end(); ++it)
+		if (filters.size() > num_max_filters)
 		{
-			if (script == it->ScriptForEvent)
-			{
-				if (!maxFilters) return;
-				if (!it->eventFilter->GetNumFilters()) continue;
-				int i = 0; // filter iterator
-				for (; i < maxFilters; i++)
-				{
-					if (!(it->eventFilter->IsFilterEqual(filters[i], i))) break;
-				}
-				if (i >= maxFilters) return;
-			}
-
+			throw std::logic_error("Filter array must not have greater size than EventInfo's num_max_args.");
 		}
-		std::shared_lock rLock(queue_rw_lock);
-		for (auto it = this->event_queue_add.begin(); it != this->event_queue_add.end(); ++it)
-		{
-			if (script == it->ScriptForEvent)
-			{
-				if (!maxFilters) return;
-				if (!it->eventFilter->GetNumFilters()) continue;
-				int i = 0; // filter iterator
-				for (; i < maxFilters; i++)
-				{
-					if (!(it->eventFilter->IsFilterEqual(filters[i], i))) break;
-				}
-				if (i >= maxFilters) return;
-			}
 
+		enum CheckFilterFunc_ReturnValues
+		{
+			kRetn_Break = 0,
+			kRetn_Continue = 1,
+			kRetn_Return = 2,
+		};
+		auto CheckFilterFunc = [&, this](BaseEventClass &eventIter) -> UInt8
+		{
+			if (script == eventIter.ScriptForEvent)
+			{
+				if (!eventIter.eventFilter->GetNumFilters()) return kRetn_Continue;
+				for (int i = 0; i < num_max_filters; i++)
+				{
+					if (!eventIter.eventFilter->IsFilterEqual(i, filters[i]))
+						return kRetn_Break;
+				}
+				return kRetn_Return; // event is already registered.
+			}
+			return kRetn_Continue;
+		};
+		
+		for (auto &callbackIter: event_callbacks)
+		{
+			auto const check = CheckFilterFunc(callbackIter);
+			if (check == kRetn_Break) break;
+			if (check == kRetn_Return) return false;
+		}
+		
+		std::shared_lock rLock(queue_rw_lock);
+		for (auto &eventQueueIter : event_queue_add)
+		{
+			auto const check = CheckFilterFunc(eventQueueIter);
+			if (check == kRetn_Break) break;
+			if (check == kRetn_Return) return false;
 		}
 		rLock.unlock();
+		
 		BaseEventClass NewEvent;
 		NewEvent.ScriptForEvent = script;
 		NewEvent.capturedLambdaVars = LambdaVariableContext(script);
-		if (maxFilters)
+		if (num_max_filters)
 		{
-			*(void**)&(NewEvent.eventFilter) = this->CreateFilter(filters, maxFilters);
+			*(void**)&(NewEvent.eventFilter) = this->filter_creator_func(filters);
 			NewEvent.eventFilter->SetUpFiltering();
 		}
 		std::unique_lock wLock(queue_rw_lock);
 		this->event_queue_add.push_back(std::move(NewEvent));
+		return true;
+	}
+	bool virtual RegisterEvent(Script* script, FilterTypeSets& filter)
+	{
+		FilterTypeSetArray arr { filter };
+		return RegisterEvent(script, arr);
 	}
 	
-	void virtual RemoveEvent(Script* script, void** filters)
+	void virtual RemoveEvent(Script* script, FilterTypeSetArray &filters)
 	{
 		auto it = event_callbacks.begin();
 		while (it != event_callbacks.end())
@@ -204,10 +221,10 @@ public:
 			{
 				if (auto eventFilters = it->eventFilter)
 				{
-					UInt32 maxFilters = eventFilters->GetNumFilters();
+					auto const maxFilters = eventFilters->GetNumFilters();
 					for (int i = 0; i < maxFilters; i++)
 					{
-						if (!(it->eventFilter->IsFilterEqual(filters[i], i))) 
+						if (!it->eventFilter->IsFilterEqual(i, filters[i]))
 							goto NotFound;
 					}
 				}
@@ -215,14 +232,20 @@ public:
 			}
 		NotFound:
 			++it;
-
 		}
 	}
+	void virtual RemoveEvent(Script* script, FilterTypeSets& filter)
+	{
+		FilterTypeSetArray arr { filter };
+		RemoveEvent(script, arr);
+	}
+	
 	void virtual AddQueuedEvents()
 	{
 		event_callbacks.insert(event_callbacks.end(), std::make_move_iterator(event_queue_add.begin()), std::make_move_iterator(event_queue_add.end()));
 		event_queue_add.clear();
 	}
+	
 	void virtual DeleteEvents()
 	{
 		auto it = event_callbacks.begin();
@@ -237,46 +260,33 @@ public:
 			++it;
 		}
 	}
-	//int a = sizeof(std::unordered_set<char>);
 };
 typedef EventInformation* EventInfo;
 std::mutex EventsArrayMutex;
 std::vector<EventInfo> EventsArray;
 
-
-/*
-void* __fastcall GenericCreateFilter(void** Filters, UInt32 numFilters) {
-	return new JohnnyEventFiltersForm(Filters, numFilters);
-}
-*/
-
-
-EventInfo FindHandlerInfoByChar(const char* nameToFind)
+EventInfo FindHandlerInfoByChar(std::string &nameToFind)
 {
-	auto it = EventsArray.begin();
-	while (it != EventsArray.end())
+	for (auto const &eventsIter : EventsArray)
 	{
-		if (!(_stricmp((*it)->event_name, nameToFind)))
-			return *it;
-		++it;
+		if (eventsIter->event_name == nameToFind)
+			return eventsIter;
 	}
 	return nullptr;
 }
 
-EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters)
+EventInfo __cdecl JGCreateEvent(std::string const &eventName, UInt8 const maxArgs, UInt8 const maxFilters, _FilterCreatorFunction FilterCreatorFunction = nullptr)
 {
 	std::lock_guard lock(EventsArrayMutex);
-	auto const eventInfo = new EventInformation(EventName, maxArgs, maxFilters);
+	auto const eventInfo = new EventInformation(eventName, maxArgs, maxFilters, FilterCreatorFunction);
 	EventsArray.push_back(eventInfo);
 	return eventInfo;
-
 }
 
-
-void __cdecl JGFreeEvent(EventInfo& toRemove)
+void __cdecl JGFreeEvent(EventInfo &toRemove)
 {
-	std::lock_guard lock(EventsArrayMutex);
 	if (!toRemove) return;
+	std::lock_guard lock(EventsArrayMutex);
 	if (auto it = std::find(std::begin(EventsArray), std::end(EventsArray), toRemove); 
 		it != EventsArray.end())
 	{
