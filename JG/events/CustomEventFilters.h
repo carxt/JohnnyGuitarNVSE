@@ -102,6 +102,7 @@ void* __fastcall CreateOneFormOneIntFilter(void** Filters, UInt32 numFilters) {
 //== Demo's Generic Filter System
 
 
+// Allow overloading lambda functions, used for std::visit on std::variants.
 // Taken from https://www.cppstories.com/2018/09/visit-variants/. Also shows up in https://gummif.github.io/blog/overloading_lambdas.html.
 template<class... Ts> struct overload : Ts...
 {
