@@ -218,7 +218,8 @@ public:
 			std::visit(overload{
 			[](FormSet &filter)
 			{
-				FormSet newSet;
+				FormSet newSet;	// To avoid iterator invalidation by adding mid-loop, + inconsistent behavior with deep form-lists.
+				
 				// Append forms that were inside form-lists to newSet.
 				// Note: does not support deep form-lists.
 				for (auto const &formIter : filter)
@@ -236,6 +237,7 @@ public:
 					}
 				}
 				newSet.erase(LookupFormByID(g_xMarkerID));	// todo: refactor to use IsAcceptedParameter instead?
+				//newSet.erase(nullptr);	// maybe filtering to only null forms could be useful?
 				filter = newSet;	// todo: check if filterSet needs to be captured and set instead.
 			},
 			[](IntSet &filter)

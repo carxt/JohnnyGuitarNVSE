@@ -57,7 +57,7 @@ public:
 	// Hope a UInt32 is large enough.
 	virtual UInt32 GetNumFilters() { return filtersArr.size(); }
 	
-	// numFilter is 0-indexed	//todo: add to private or w/e
+	// numFilter is 0-indexed
 	FilterTypeSets* GetFilter(UInt32 numFilter)
 	{
 		if (numFilter >= filtersArr.size()) return nullptr;
@@ -81,8 +81,8 @@ class BaseEventClass
 {
 public:
 	ULONG_PTR Flags = 0;
-	Script* ScriptForEvent = NULL;
-	EventHandlerFilterBase* eventFilter = NULL;
+	Script* ScriptForEvent = nullptr;
+	EventHandlerFilterBase* eventFilter = nullptr;
 	LambdaVariableContext capturedLambdaVars;
 
 	BaseEventClass() : capturedLambdaVars(nullptr){}
@@ -92,7 +92,7 @@ public:
 		kEventFlag_Deleted = 1 << 0,
 	};
 
-	bool GetDeleted()
+	bool GetDeleted() const
 	{
 		return Flags & kEventFlag_Deleted;
 	}

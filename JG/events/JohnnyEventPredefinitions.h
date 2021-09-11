@@ -135,9 +135,9 @@ public:
 		: event_name{ std::move(eventName) }, num_max_args(numMaxArgs), num_max_filters(numMaxFilters)
 	{
 		if (!FilterCreatorFunction)
-			this->filter_creator_func = GenericCreateFilters;
+			filter_creator_func = GenericCreateFilters;
 		else
-			this->filter_creator_func = FilterCreatorFunction;
+			filter_creator_func = FilterCreatorFunction;
 	}
 	virtual ~EventInformation()
 	{
@@ -165,6 +165,10 @@ public:
 			kRetn_Continue = 1,
 			kRetn_Return = 2,
 		};
+
+		// TODO: Make this account for forms inside form-lists???
+		// todo: either store the unmodified GenFilters (pre-formlist and filtering)
+		// or... repeat those steps here somehow.
 		auto CheckFilterFunc = [&, this](BaseEventClass &eventIter) -> UInt8
 		{
 			if (script == eventIter.ScriptForEvent)
@@ -175,7 +179,7 @@ public:
 					if (!eventIter.eventFilter->IsFilterEqual(i, filters[i]))
 						return kRetn_Break;
 				}
-				return kRetn_Return; // event is already registered.
+				return kRetn_Return; // event is already registered with the same filters.
 			}
 			return kRetn_Continue;
 		};
