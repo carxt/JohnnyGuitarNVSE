@@ -6,12 +6,20 @@
 #include "events/LambdaVariableContext.h"
 
 using RefID = UInt32;
-
-// Ignored refID filter for GenericEventFilters.
-UInt32 const g_xMarkerID = 0x3B;
-int const g_IgnoreIntFilter = -1;
-
 using FilterTypes = std::variant<RefID, int, float, std::string>;
+
+// The following filter values are ignored by GenericEventFilters (unfiltered).
+enum IgnoreFilter_Values
+{
+	// For RefID filters
+	kIgnFilter_xMarkerID = 0x3B,
+	kIgnFilter_RefID = kIgnFilter_xMarkerID,
+	kIgnFilter_FormID = kIgnFilter_xMarkerID,
+	kIgnFilter_Form = kIgnFilter_xMarkerID,
+
+	// For int filters
+	kIgnFilter_Int = -1,
+};
 
 // If there are more than 1 item per filter, will search for any match.
 // Example: can fill an IntSet with multiple EquipSlot codes, and if any are matched, then event handler will fire.

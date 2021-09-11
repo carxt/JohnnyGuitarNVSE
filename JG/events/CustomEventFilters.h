@@ -222,7 +222,6 @@ public:
 	//	return isAccepted;
 		return true;
 	}
-	//
 
 	static RefIDSet SetUpFormFilters(RefIDSet const &refIDFilters)
 	{
@@ -246,7 +245,7 @@ public:
 			}
 		}
 
-		newSet.erase(g_xMarkerID);
+		newSet.erase(kIgnFilter_RefID);
 		//newSet.erase(nullptr);	// maybe filtering to only null forms could be useful?
 		return newSet;
 	}
@@ -254,7 +253,7 @@ public:
 	// Modifies by reference.
 	static void SetUpIntFilters(IntSet& intFilters)
 	{
-		intFilters.erase(g_IgnoreIntFilter);
+		intFilters.erase(kIgnFilter_Int);
 	}
 	
 	void SetUpFiltering() override

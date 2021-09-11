@@ -14,7 +14,7 @@ struct EventFilter_OneForm : EventFilter_BaseStruct
 
 	[[nodiscard]] FilterTypeSetArray ToFilter() const override
 	{
-		RefID refID = g_xMarkerID;
+		RefID refID = kIgnFilter_RefID;
 		if (form) refID = form->refID;
 		RefIDSet formSet{ refID };
 		return FilterTypeSetArray{ formSet };
@@ -24,11 +24,11 @@ struct EventFilter_OneForm : EventFilter_BaseStruct
 struct EventFilter_OneForm_OneInt : EventFilter_BaseStruct
 {
 	TESForm* form = nullptr;
-	int intID = g_IgnoreIntFilter;
+	int intID = kIgnFilter_Int;
 
 	[[nodiscard]] FilterTypeSetArray ToFilter() const override
 	{
-		RefID refID = g_xMarkerID;
+		RefID refID = kIgnFilter_RefID;
 		if (form) refID = form->refID;
 		RefIDSet formSet{ refID };
 		IntSet idSet{ intID };
