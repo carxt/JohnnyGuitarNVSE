@@ -165,14 +165,11 @@ public:
 			kRetn_Continue = 1,
 			kRetn_Return = 2,
 		};
-
-		// TODO: Make this account for forms inside form-lists???
-		// todo: either store the unmodified GenFilters (pre-formlist and filtering)
-		// or... repeat those steps here somehow.
 		auto CheckFilterFunc = [&, this](BaseEventClass &eventIter) -> UInt8
 		{
 			if (script == eventIter.ScriptForEvent)
 			{
+				if (!num_max_filters) return kRetn_Return;	// filter-less event was already registered
 				if (!eventIter.eventFilter->GetNumFilters()) return kRetn_Continue;
 				for (int i = 0; i < num_max_filters; i++)
 				{
