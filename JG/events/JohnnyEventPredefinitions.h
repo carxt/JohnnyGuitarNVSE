@@ -164,9 +164,8 @@ public:
 
 		enum CheckFilterFunc_ReturnValues
 		{
-			kRetn_Break = 0,
-			kRetn_Continue = 1,
-			kRetn_Return = 2,
+			kRetn_Continue = 0,
+			kRetn_Return = 1,
 		};
 		auto CheckFilterFunc = [&, this](BaseEventClass &eventIter) -> UInt8
 		{
@@ -177,7 +176,7 @@ public:
 				for (int i = 0; i < num_max_filters; i++)
 				{
 					if (!eventIter.eventFilter->IsFilterEqual(i, filters[i]))
-						return kRetn_Break;
+						return kRetn_Continue;	// new event has sufficiently different filters, look for another event match.
 				}
 				return kRetn_Return; // event is already registered with the same filters.
 			}
@@ -187,7 +186,6 @@ public:
 		for (auto &callbackIter: event_callbacks)
 		{
 			auto const check = CheckFilterFunc(callbackIter);
-			if (check == kRetn_Break) break;
 			if (check == kRetn_Return) return false;
 		}
 		
@@ -195,7 +193,6 @@ public:
 		for (auto &eventQueueIter : event_queue_add)
 		{
 			auto const check = CheckFilterFunc(eventQueueIter);
-			if (check == kRetn_Break) break;
 			if (check == kRetn_Return) return false;
 		}
 		rLock.unlock();
