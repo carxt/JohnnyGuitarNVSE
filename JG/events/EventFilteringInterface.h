@@ -5,21 +5,20 @@
 #include "GameForms.h"
 #include "events/LambdaVariableContext.h"
 
-//using RefID = UInt32;
+using RefID = UInt32;
 UInt32 const g_xMarkerID = 0x3B;
 
-using FilterTypes = std::variant<TESForm*, int, float, std::string>;
+using FilterTypes = std::variant<RefID, int, float, std::string>;
 
 // If there are more than 1 item per filter, will search for any match.
 // Example: can fill an IntSet with multiple EquipSlot codes, and if any are matched, then event handler will fire.
 using StringSet = std::unordered_set<std::string>;
 using FloatSet = std::unordered_set<float>;
 using IntSet = std::unordered_set<int>;
-using FormSet = std::unordered_set<TESForm*>;
-//using RefIDSet = std::unordered_set<RefID>;
-// Removed support for direct RefIDs, as it is cumbersome to look-up the form each time to check if it's a form-list.
+// Storing TESForm* can cause rare crashes due to dynamic refs, so use RefIDs.
+using RefIDSet = std::unordered_set<RefID>;
 
-using FilterTypeSets = std::variant<FormSet, IntSet, FloatSet, StringSet>;
+using FilterTypeSets = std::variant<RefIDSet, IntSet, FloatSet, StringSet>;
 using FilterTypeSetArray = std::vector<FilterTypeSets>;
 
 static_assert(std::variant_size_v<FilterTypeSets> == std::variant_size_v<FilterTypes>);

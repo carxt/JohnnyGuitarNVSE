@@ -127,7 +127,7 @@ public:
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthFilter(filterNum))) return false;
 		bool const isFound = std::visit(overload{
-		[](FormSet &arg1, TESForm* &arg2) { return arg1.find(arg2) != arg1.end(); },
+		[](RefIDSet &arg1, RefID &arg2) { return arg1.find(arg2) != arg1.end(); },
 		[](IntSet &arg1, int &arg2) { return arg1.find(arg2) != arg1.end(); },
 		[](FloatSet &arg1, float &arg2) { return arg1.find(arg2) != arg1.end(); },
 		[](StringSet &arg1, std::string &arg2) { return arg1.find(arg2) != arg1.end(); },
@@ -135,14 +135,31 @@ public:
 			},	*filterSet, toSearch);
 		return isFound;
 	}
+	bool IsInFilter(UInt32 filterNum, TESForm* toSearch)
+	{
+		FilterTypeSets* filterSet;
+		if (!(filterSet = GetNthFilter(filterNum))) return false;
+		bool const isFound = std::visit(overload{
+		[&toSearch](RefIDSet& set) { return set.find(toSearch->refID) != set.end(); },
+		[](auto& set) { return false; /*Types do not match*/ },
+			}, *filterSet);
+		return isFound;
+	}
 
+	bool IsBaseInFilter(UInt32 filterNum, RefID toSearch)
+	{
+		if (!toSearch) return false;
+		auto const formToSearch = LookupFormByID(toSearch);
+		if (formToSearch->GetIsReference())
+			toSearch = ((TESObjectREFR*)formToSearch)->baseForm->refID;
+		return IsInFilter(filterNum, toSearch);
+	}
 	bool IsBaseInFilter(UInt32 filterNum, TESForm* toSearch)
 	{
 		if (!toSearch) return false;
 		if (toSearch->GetIsReference())
 			toSearch = ((TESObjectREFR*)toSearch)->baseForm;
-		FilterTypes filter = toSearch;
-		return IsInFilter(filterNum, toSearch);
+		return IsInFilter(filterNum, toSearch->refID);
 	}
 
 	// Unused
@@ -151,7 +168,7 @@ public:
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthFilter(filterNum))) return false;
 		bool const isInserted = std::visit(overload{
-		[](FormSet& arg1, TESForm*& arg2) { return arg1.insert(arg2).second; },
+		[](RefIDSet& arg1, RefID& arg2) { return arg1.insert(arg2).second; },
 		[](IntSet& arg1, int& arg2) { return arg1.insert(arg2).second; },
 		[](FloatSet& arg1, float& arg2) { return arg1.insert(arg2).second; },
 		[](StringSet& arg1, std::string& arg2) { return arg1.insert(arg2).second; },
@@ -166,7 +183,7 @@ public:
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthFilter(filterNum))) return false;
 		bool const isDeleted = std::visit(overload{
-		[](FormSet& arg1, TESForm* &arg2) { return arg1.erase(arg2); },
+		[](RefIDSet& arg1, RefID &arg2) { return arg1.erase(arg2); },
 		[](IntSet& arg1, int &arg2) { return arg1.erase(arg2); },
 		[](FloatSet& arg1, float &arg2) { return arg1.erase(arg2); },
 		[](StringSet& arg1, std::string &arg2) { return arg1.erase(arg2); },
@@ -207,29 +224,30 @@ public:
 	}
 	//
 
-	static FormSet SetUpFormFilters(FormSet const &formFilters)
+	static RefIDSet SetUpFormFilters(RefIDSet const &refIDFilters)
 	{
-		FormSet newSet;	// To avoid iterator invalidation by adding mid-loop, + avoid inconsistent behavior with deep form-lists.
+		RefIDSet newSet;	// To avoid iterator invalidation by adding mid-loop, + avoid inconsistent behavior with deep form-lists.
 
 		// Append forms that were inside form-lists to newSet.
 		// Note: does not support deep form-lists.
-		for (auto const& formIter : formFilters)
+		for (auto const& refIDIter : refIDFilters)
 		{
+			auto const formIter = LookupFormByID(refIDIter);
 			if (auto const listForm = DYNAMIC_CAST(formIter, TESForm, BGSListForm))
 			{
 				// Insert only the form-list elements; omit the form-list itself.
 				ListNode<TESForm>* listFormIter = listForm->list.Head();
-				do { newSet.insert(listFormIter->Data()); } while (listFormIter = listFormIter->next);
+				do { newSet.insert(listFormIter->Data()->refID); }
+				while (listFormIter = listFormIter->next);
 			}
 			else
 			{
-				newSet.insert(formIter);
+				newSet.insert(refIDIter);
 			}
 		}
-		
-		newSet.erase(LookupFormByID(g_xMarkerID));	// todo: refactor to use IsAcceptedParameter instead?
+
+		newSet.erase(g_xMarkerID);
 		//newSet.erase(nullptr);	// maybe filtering to only null forms could be useful?
-		
 		return newSet;
 	}
 
@@ -247,7 +265,7 @@ public:
 		for (auto& filterSet : filtersArr)
 		{
 			std::visit(overload{
-			[](FormSet &filter)
+			[](RefIDSet &filter)
 			{
 				filter = SetUpFormFilters(filter);	// todo: check if filterSet needs to be captured and set instead.
 			},

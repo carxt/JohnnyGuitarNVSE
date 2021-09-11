@@ -72,7 +72,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_MainGameLoop:
-		for (const auto& EventInfo : EventsArray)
+		for (const auto& EventInfo : g_EventsArray)
 		{
 			EventInfo->AddQueuedEvents();
 			EventInfo->DeleteEvents();
