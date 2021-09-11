@@ -24,6 +24,13 @@ using FilterTypeSetArray = std::vector<FilterTypeSets>;
 
 static_assert(std::variant_size_v<FilterTypeSets> == std::variant_size_v<FilterTypes>);
 
+#if NULL // Use examples:
+	FilterTypeSets testFilter1 = { IntSet {5, 0x7} };
+	FilterTypeSets testFilter2 = { StringSet {"testStr", "testStr2", "tt"}};
+	FilterTypeSetArray testFilters = { testFilter1, testFilter2 };
+#endif
+
+
 class EventHandlerFilterBase
 {
 public:

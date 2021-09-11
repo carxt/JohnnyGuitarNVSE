@@ -8,7 +8,7 @@ bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObj
 NVSEArrayElement EventResultPtr;
 class EventInformation;
 void* __fastcall GenericCreateFilters(FilterTypeSetArray &filters);
-using _FilterCreatorFunction = void* (__fastcall* )(FilterTypeSetArray& filters);
+using _FilterCreatorFunction = void* (__fastcall* )(FilterTypeSetArray& filters);	//todo: look into why ReSharper says this uses a reserved identifier...
 
 #if NULL
 class JohnnyEventFiltersForm : EventHandlerFilterBase
@@ -131,6 +131,7 @@ public:
 	UInt8 const num_max_args;	// used when invoking script UDFs.
 	UInt8 const num_max_filters;
 	std::vector<BaseEventClass> event_callbacks;
+	
 	EventInformation(std::string eventName, UInt8 const& numMaxArgs, UInt8 const& numMaxFilters, _FilterCreatorFunction FilterCreatorFunction)
 		: event_name{ std::move(eventName) }, num_max_args(numMaxArgs), num_max_filters(numMaxFilters)
 	{
@@ -139,10 +140,12 @@ public:
 		else
 			filter_creator_func = FilterCreatorFunction;
 	}
+	
 	virtual ~EventInformation()
 	{
 		FlushEventCallbacks();
 	}
+
 	void FlushEventCallbacks()
 	{
 		for (auto &callbackIter : event_callbacks)
@@ -275,12 +278,12 @@ public:
 	}
 };
 typedef EventInformation* EventInfo;
-std::mutex EventsArrayMutex;
-std::vector<EventInfo> EventsArray;
+std::mutex g_EventsArrayMutex;
+std::vector<EventInfo> g_EventsArray;
 
-EventInfo FindHandlerInfoByChar(std::string &nameToFind)
+EventInfo FindHandlerInfoByString(std::string const &nameToFind)
 {
-	for (auto const &eventsIter : EventsArray)
+	for (auto const &eventsIter : g_EventsArray)
 	{
 		if (eventsIter->event_name == nameToFind)
 			return eventsIter;
@@ -290,21 +293,21 @@ EventInfo FindHandlerInfoByChar(std::string &nameToFind)
 
 EventInfo __cdecl JGCreateEvent(std::string const &eventName, UInt8 const maxArgs, UInt8 const maxFilters, _FilterCreatorFunction FilterCreatorFunction = nullptr)
 {
-	std::lock_guard lock(EventsArrayMutex);
+	std::lock_guard lock(g_EventsArrayMutex);
 	auto const eventInfo = new EventInformation(eventName, maxArgs, maxFilters, FilterCreatorFunction);
-	EventsArray.push_back(eventInfo);
+	g_EventsArray.push_back(eventInfo);
 	return eventInfo;
 }
 
 void __cdecl JGFreeEvent(EventInfo &toRemove)
 {
 	if (!toRemove) return;
-	std::lock_guard lock(EventsArrayMutex);
-	if (auto it = std::find(std::begin(EventsArray), std::end(EventsArray), toRemove); 
-		it != EventsArray.end())
+	std::lock_guard lock(g_EventsArrayMutex);
+	if (auto it = std::find(std::begin(g_EventsArray), std::end(g_EventsArray), toRemove); 
+		it != g_EventsArray.end())
 	{
 		delete* it;
-		it = EventsArray.erase(it);
+		it = g_EventsArray.erase(it);
 	}
 	toRemove = nullptr;
 }

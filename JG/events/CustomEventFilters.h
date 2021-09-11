@@ -101,6 +101,7 @@ void* __fastcall CreateOneFormOneIntFilter(void** Filters, UInt32 numFilters) {
 
 //== Demo's Generic Filter System
 
+
 // Taken from https://www.cppstories.com/2018/09/visit-variants/. Also shows up in https://gummif.github.io/blog/overloading_lambdas.html.
 template<class... Ts> struct overload : Ts...
 {
@@ -108,11 +109,6 @@ template<class... Ts> struct overload : Ts...
 };
 template<class... Ts> overload(Ts...)->overload<Ts...>;
 
-/*
-FilterTypeSets testFilter1 = { IntSet {5, 0x7} };
-FilterTypeSets testFilter2 = { StringSet {"testStr", "testStr2", "tt"}};
-FilterTypeSetArray testFilters = { testFilter1, testFilter2 };
-*/
 
 class GenericEventFilters : EventHandlerFilterBase
 {
