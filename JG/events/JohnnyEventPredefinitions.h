@@ -1,6 +1,6 @@
 #pragma once
 #include <shared_mutex>
-#include "events/CustomEventFilters.h"
+#include "events/EventFilteringInterface.h"
 #include <unordered_set>
 
 

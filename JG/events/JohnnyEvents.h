@@ -1,4 +1,5 @@
 #pragma once
+#include "CustomEventFilters.h"
 #include "EventFilterStructs.h"
 
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnDyingEventHandler, SetOnDyingEventHandler, , 0, 4, kParams_Event_OneForm);
