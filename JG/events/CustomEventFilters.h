@@ -207,6 +207,38 @@ public:
 		return true;
 	}
 	//
+
+	static FormSet SetUpFormFilters(FormSet const &formFilters)
+	{
+		FormSet newSet;	// To avoid iterator invalidation by adding mid-loop, + avoid inconsistent behavior with deep form-lists.
+
+		// Append forms that were inside form-lists to newSet.
+		// Note: does not support deep form-lists.
+		for (auto const& formIter : formFilters)
+		{
+			if (auto const listForm = DYNAMIC_CAST(formIter, TESForm, BGSListForm))
+			{
+				// Insert only the form-list elements; omit the form-list itself.
+				ListNode<TESForm>* listFormIter = listForm->list.Head();
+				do { newSet.insert(listFormIter->Data()); } while (listFormIter = listFormIter->next);
+			}
+			else
+			{
+				newSet.insert(formIter);
+			}
+		}
+		
+		newSet.erase(LookupFormByID(g_xMarkerID));	// todo: refactor to use IsAcceptedParameter instead?
+		//newSet.erase(nullptr);	// maybe filtering to only null forms could be useful?
+		
+		return newSet;
+	}
+
+	// Modifies by reference.
+	static void SetUpIntFilters(IntSet& intFilters)
+	{
+		intFilters.erase(-1);
+	}
 	
 	void SetUpFiltering() override
 	{
@@ -218,31 +250,11 @@ public:
 			std::visit(overload{
 			[](FormSet &filter)
 			{
-				FormSet newSet;	// To avoid iterator invalidation by adding mid-loop, + inconsistent behavior with deep form-lists.
-				
-				// Append forms that were inside form-lists to newSet.
-				// Note: does not support deep form-lists.
-				for (auto const &formIter : filter)
-				{
-					if (auto const listForm = DYNAMIC_CAST(formIter, TESForm, BGSListForm))
-					{
-						// Insert only the form-list elements; omit the form-list itself.
-						ListNode<TESForm>* listFormIter = listForm->list.Head();
-						do { newSet.insert(listFormIter->Data());}
-						while (listFormIter = listFormIter->next);
-					}
-					else
-					{
-						newSet.insert(formIter);
-					}
-				}
-				newSet.erase(LookupFormByID(g_xMarkerID));	// todo: refactor to use IsAcceptedParameter instead?
-				//newSet.erase(nullptr);	// maybe filtering to only null forms could be useful?
-				filter = newSet;	// todo: check if filterSet needs to be captured and set instead.
+				filter = SetUpFormFilters(filter);	// todo: check if filterSet needs to be captured and set instead.
 			},
 			[](IntSet &filter)
 			{
-				filter.erase(-1);	// todo: refactor to use IsAcceptedParameter instead?
+				SetUpIntFilters(filter);
 			},
 			[](auto &filter) { return; } /*Default case*/
 				}, filterSet);
