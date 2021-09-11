@@ -11,7 +11,7 @@ class JohnnyEventFiltersOneFormOneInt : EventHandlerFilterBase
 private:
 	RefUnorderedSet* Filters = nullptr;
 
-	RefUnorderedSet* GetFilter(UInt32 filter)
+	RefUnorderedSet* GetNthFilter(UInt32 filter)
 	{
 		if (filter >= numFilters) return nullptr;
 		return &(Filters[filter]);
@@ -35,7 +35,7 @@ public:
 	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch)
 	{
 		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return false;
+		if (!(FilterSet = GetNthFilter(filterNum))) return false;
 		return  FilterSet->empty() || (FilterSet->find(toSearch.refID) != FilterSet->end());
 	}
 
@@ -43,19 +43,19 @@ public:
 	virtual void InsertToFilter(UInt32 filterNum, GenericFilters toInsert)
 	{
 		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return;
+		if (!(FilterSet = GetNthFilter(filterNum))) return;
 		FilterSet->insert(toInsert.refID);
 	}
 	virtual void DeleteFromFilter(UInt32 filterNum, GenericFilters toDelete)
 	{
 		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return;
+		if (!(FilterSet = GetNthFilter(filterNum))) return;
 		FilterSet->erase(toDelete.refID);
 
 	}
 	virtual bool IsFilterEmpty(UInt32 filterNum)
 	{
-		RefUnorderedSet* FilterSet = GetFilter(filterNum);
+		RefUnorderedSet* FilterSet = GetNthFilter(filterNum);
 		if (!FilterSet) return true;
 		return FilterSet->empty();
 	}
@@ -119,17 +119,17 @@ class GenericEventFilters : EventHandlerFilterBase
 public:
 	GenericEventFilters(FilterTypeSetArray &filters)
 	{
-		filtersArr = filters;
+		filtersArr = genFiltersArr = filters;
 	}
 	GenericEventFilters(FilterTypeSets& filter)
 	{
-		filtersArr = FilterTypeSetArray { filter };
+		filtersArr = genFiltersArr = FilterTypeSetArray { filter };
 	}
 
 	bool IsInFilter(UInt32 filterNum, FilterTypes toSearch) override
 	{
 		FilterTypeSets* filterSet;
-		if (!(filterSet = GetFilter(filterNum))) return false;
+		if (!(filterSet = GetNthFilter(filterNum))) return false;
 		bool const isFound = std::visit(overload{
 		[](FormSet &arg1, TESForm* &arg2) { return arg1.find(arg2) != arg1.end(); },
 		[](IntSet &arg1, int &arg2) { return arg1.find(arg2) != arg1.end(); },
@@ -148,11 +148,12 @@ public:
 		FilterTypes filter = toSearch;
 		return IsInFilter(filterNum, toSearch);
 	}
-	
+
+	// Unused
 	bool InsertToFilter(UInt32 filterNum, FilterTypes toInsert) override
 	{
 		FilterTypeSets* filterSet;
-		if (!(filterSet = GetFilter(filterNum))) return false;
+		if (!(filterSet = GetNthFilter(filterNum))) return false;
 		bool const isInserted = std::visit(overload{
 		[](FormSet& arg1, TESForm*& arg2) { return arg1.insert(arg2).second; },
 		[](IntSet& arg1, int& arg2) { return arg1.insert(arg2).second; },
@@ -162,11 +163,12 @@ public:
 			}, *filterSet, toInsert);
 		return isInserted;
 	}
-	
+
+	// Unused
 	bool DeleteFromFilter(UInt32 filterNum, FilterTypes toDelete) override
 	{
 		FilterTypeSets* filterSet;
-		if (!(filterSet = GetFilter(filterNum))) return false;
+		if (!(filterSet = GetNthFilter(filterNum))) return false;
 		bool const isDeleted = std::visit(overload{
 		[](FormSet& arg1, TESForm* &arg2) { return arg1.erase(arg2); },
 		[](IntSet& arg1, int &arg2) { return arg1.erase(arg2); },
@@ -180,11 +182,12 @@ public:
 			}, *filterSet, toDelete);
 		return isDeleted;
 	}
-	
+
+	// Unused
 	bool IsFilterEmpty(UInt32 filterNum) override
 	{
 		FilterTypeSets* filterSet;
-		if (!(filterSet = GetFilter(filterNum))) return true;	// technically empty if there is no filter
+		if (!(filterSet = GetNthFilter(filterNum))) return true;	// technically empty if there is no filter
 		bool const isEmpty = std::visit([](auto &filter) { return filter.empty(); }, *filterSet);
 		return isEmpty;
 	}
@@ -192,7 +195,7 @@ public:
 	bool IsFilterEqual(UInt32 filterNum, FilterTypeSets cmpFilterSet) override
 	{
 		FilterTypeSets* filterSet;
-		if (!(filterSet = GetFilter(filterNum))) return false;
+		if (!(filterSet = GetNthGenFilter(filterNum))) return false;
 		return cmpFilterSet == *filterSet;
 	}
 

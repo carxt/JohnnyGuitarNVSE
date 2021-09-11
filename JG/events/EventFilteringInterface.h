@@ -29,6 +29,10 @@ class EventHandlerFilterBase
 public:
 	FilterTypeSetArray filtersArr;
 	
+	// The original filters array that was passed, before SetUpFiltering() was called.
+	// Costs more mem, but saves us from having to deep-check form-lists when checking IsFilterEqual().
+	FilterTypeSetArray genFiltersArr; 
+	
 	// Framework passes the objects to add to filter here
 	virtual ~EventHandlerFilterBase() = default;
 	
@@ -48,7 +52,7 @@ public:
 	// Returns if the filter is empty
 	virtual bool IsFilterEmpty(UInt32 filterNum) = 0;
 	
-	// Used by the framework to check if the Nth filter equals the passed value set. Useful to avoid adding the same event repeatedly
+	// Used by the framework to check if the Nth Gen filter equals the passed value set. Useful to avoid adding the same event repeatedly
 	virtual bool IsFilterEqual(UInt32 filterNum, FilterTypeSets cmpFilterSet) = 0;
 	
 	// Function used by the filter to check if the object passed is an accepted parameter
@@ -58,10 +62,15 @@ public:
 	virtual UInt32 GetNumFilters() { return filtersArr.size(); }
 	
 	// numFilter is 0-indexed
-	FilterTypeSets* GetFilter(UInt32 numFilter)
+	FilterTypeSets* GetNthFilter(UInt32 numFilter)
 	{
 		if (numFilter >= filtersArr.size()) return nullptr;
 		return &filtersArr[numFilter];
+	}
+	FilterTypeSets* GetNthGenFilter(UInt32 numFilter)
+	{
+		if (numFilter >= genFiltersArr.size()) return nullptr;
+		return &genFiltersArr[numFilter];
 	}
 };
 
