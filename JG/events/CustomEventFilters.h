@@ -127,10 +127,10 @@ public:
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthFilter(filterNum))) return false;
 		bool const isFound = std::visit(overload{
-		[](RefIDSet &arg1, RefID &arg2) { return arg1.find(arg2) != arg1.end(); },
-		[](IntSet &arg1, int &arg2) { return arg1.find(arg2) != arg1.end(); },
-		[](FloatSet &arg1, float &arg2) { return arg1.find(arg2) != arg1.end(); },
-		[](StringSet &arg1, std::string &arg2) { return arg1.find(arg2) != arg1.end(); },
+		[](RefIDSet &arg1, RefID &arg2) { return arg1.empty() || arg1.find(arg2) != arg1.end(); },
+		[](IntSet &arg1, int &arg2) { return arg1.empty() || arg1.find(arg2) != arg1.end(); },
+		[](FloatSet &arg1, float &arg2) { return arg1.empty() || arg1.find(arg2) != arg1.end(); },
+		[](StringSet &arg1, std::string &arg2) { return arg1.empty() || arg1.find(arg2) != arg1.end(); },
 		[](auto &arg1, auto &arg2) { return false; /*Types do not match*/ },
 			},	*filterSet, toSearch);
 		return isFound;
@@ -140,7 +140,7 @@ public:
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthFilter(filterNum))) return false;
 		bool const isFound = std::visit(overload{
-		[&toSearch](RefIDSet& set) { return set.find(toSearch->refID) != set.end(); },
+		[&toSearch](RefIDSet& set) { return set.empty() || set.find(toSearch->refID) != set.end(); },
 		[](auto& set) { return false; /*Types do not match*/ },
 			}, *filterSet);
 		return isFound;
@@ -159,7 +159,7 @@ public:
 		if (!toSearch) return false;
 		if (toSearch->GetIsReference())
 			toSearch = ((TESObjectREFR*)toSearch)->baseForm;
-		return IsInFilter(filterNum, toSearch->refID);
+		return IsInFilter(filterNum, toSearch);
 	}
 
 	// Unused
@@ -261,7 +261,7 @@ public:
 		// Filters out all -1 values from IntSets.
 		// Transforms all BGSListForm*-type TESForm* into the TESForm* that were contained.
 		// Filters out xMarker refs.
-		for (auto& filterSet : filtersArr)
+		for (auto &filterSetIter : filtersArr )
 		{
 			std::visit(overload{
 			[](RefIDSet &filter)
@@ -273,7 +273,7 @@ public:
 				SetUpIntFilters(filter);
 			},
 			[](auto &filter) { return; } /*Default case*/
-				}, filterSet);
+				}, filterSetIter);
 		}
 	}
 };
