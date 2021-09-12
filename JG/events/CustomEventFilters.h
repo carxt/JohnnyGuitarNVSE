@@ -1,4 +1,5 @@
 #pragma once
+#include "GameForms.h"
 #include "GameRTTI.h"	// for DYNAMIC_CAST
 #include "events/EventFilteringInterface.h"
 

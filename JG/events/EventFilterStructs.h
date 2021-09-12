@@ -9,7 +9,6 @@ struct EventFilter_Null : EventFilter_Base
 	}
 };
 
-
 struct EventFilter_OneForm : EventFilter_Base
 {
 	TESForm* form = nullptr;

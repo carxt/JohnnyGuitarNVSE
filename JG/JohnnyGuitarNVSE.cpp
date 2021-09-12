@@ -58,9 +58,14 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
 		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 
-		OnDyingHandler->FlushEventCallbacks();
-		OnLimbGoneHandler->FlushEventCallbacks();
-		OnCrosshairHandler->FlushEventCallbacks();
+		for (const auto& EventInfo : g_EventsArray)
+		{
+			if (EventInfo->GetFlags() & BaseEventInformation::eFlag_FlushOnLoad)
+			{
+				EventInfo->FlushEventCallbacks();
+			}
+		}
+			
 		bArrowKeysDisabled = false;
 		RestoreDisabledPlayerControlsHUDFlags();
 		SaveGameUMap.clear();

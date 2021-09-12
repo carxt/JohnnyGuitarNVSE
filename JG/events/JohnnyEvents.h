@@ -223,10 +223,9 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
 	{
 		if (OnLimbGoneHandler)
 		{
-			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnLimbGoneHandler->RegisterEvent(script, filterArr);
-			else OnLimbGoneHandler->RemoveEvent(script, filterArr);
+				OnLimbGoneHandler->RegisterEvent(script, filter);
+			else OnLimbGoneHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -235,14 +234,15 @@ bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = nullptr;
+	EventFilter_Null filter;
 	UInt32 flags = 0;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnSettingsUpdateHandler)
 		{
 			if (setOrRemove)
-				OnSettingsUpdateHandler->RegisterEvent(script);
-			else OnSettingsUpdateHandler->RemoveEvent(script);
+				OnSettingsUpdateHandler->RegisterEvent(script, filter);
+			else OnSettingsUpdateHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -257,10 +257,9 @@ bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
 	{
 		if (OnCrosshairHandler)
 		{
-			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnCrosshairHandler->RegisterEvent(script, filterArr);
-			else OnCrosshairHandler->RemoveEvent(script, filterArr);
+				OnCrosshairHandler->RegisterEvent(script, filter);
+			else OnCrosshairHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -275,10 +274,9 @@ bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS)
 	{
 		if (OnRemovePerkHandler)
 		{
-			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnRemovePerkHandler->RegisterEvent(script, filterArr);
-			else OnRemovePerkHandler->RemoveEvent(script, filterArr);
+				OnRemovePerkHandler->RegisterEvent(script, filter);
+			else OnRemovePerkHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -293,10 +291,9 @@ bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS)
 	{
 		if (OnAddPerkHandler)
 		{
-			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnAddPerkHandler->RegisterEvent(script, filterArr);
-			else OnAddPerkHandler->RemoveEvent(script, filterArr);
+				OnAddPerkHandler->RegisterEvent(script, filter);
+			else OnAddPerkHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -311,10 +308,9 @@ bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS)
 	{
 		if (OnChallengeCompleteHandler)
 		{
-			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnChallengeCompleteHandler->RegisterEvent(script, filterArr);
-			else OnChallengeCompleteHandler->RemoveEvent(script, filterArr);
+				OnChallengeCompleteHandler->RegisterEvent(script, filter);
+			else OnChallengeCompleteHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -329,10 +325,9 @@ bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS)
 	{
 		if (OnSeenDataUpdateHandler)
 		{
-			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnSeenDataUpdateHandler->RegisterEvent(script, filterArr);
-			else OnSeenDataUpdateHandler->RemoveEvent(script, filterArr);
+				OnSeenDataUpdateHandler->RegisterEvent(script, filter);
+			else OnSeenDataUpdateHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -347,10 +342,9 @@ bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS)
 	{
 		if (OnDyingHandler)
 		{
-			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnDyingHandler->RegisterEvent(script, filterArr);
-			else OnDyingHandler->RemoveEvent(script, filterArr);
+				OnDyingHandler->RegisterEvent(script, filter);
+			else OnDyingHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -366,15 +360,13 @@ bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS)
 	{
 		if (OnStartQuestHandler)
 		{
-			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnStartQuestHandler->RegisterEvent(script, filterArr);
-			else OnStartQuestHandler->RemoveEvent(script, filterArr);
+				OnStartQuestHandler->RegisterEvent(script, filter);
+			else OnStartQuestHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
 }
-
 
 bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
 {
@@ -386,10 +378,9 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
 	{
 		if (OnStopQuestHandler)
 		{
-			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnStopQuestHandler->RegisterEvent(script, filterArr);
-			else OnStopQuestHandler->RemoveEvent(script, filterArr);
+				OnStopQuestHandler->RegisterEvent(script, filter);
+			else OnStopQuestHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -405,10 +396,9 @@ bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS)
 	{
 		if (OnCompleteQuestHandler)
 		{
-			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnCompleteQuestHandler->RegisterEvent(script, filterArr);
-			else OnCompleteQuestHandler->RemoveEvent(script, filterArr);
+				OnCompleteQuestHandler->RegisterEvent(script, filter);
+			else OnCompleteQuestHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -424,10 +414,9 @@ bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
 	{
 		if (OnFailQuestHandler)
 		{
-			auto filterArr = filter.ToFilter();
 			if (setOrRemove)
-				OnFailQuestHandler->RegisterEvent(script, filterArr);
-			else OnFailQuestHandler->RemoveEvent(script, filterArr);
+				OnFailQuestHandler->RegisterEvent(script, filter);
+			else OnFailQuestHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -438,6 +427,7 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	UInt32 flags = 0;
+	EventFilter_Null filter;
 	enum EnumFlags {
 		kDoNotFireInRenderMenu = 1 << 0,
 		kDoNotFireInGameMode = 1 << 1,
@@ -447,15 +437,15 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 		if (!(flags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler)
 		{
 			if (setOrRemove)
-				OnRenderGameModeUpdateHandler->RegisterEvent(script);
-			else OnRenderGameModeUpdateHandler->RemoveEvent(script);
+				OnRenderGameModeUpdateHandler->RegisterEvent(script, filter);
+			else OnRenderGameModeUpdateHandler->RemoveEvent(script, filter);
 		}
 
 		if (!(flags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler)
 		{
 			if (setOrRemove)
-				OnRenderRenderedMenuUpdateHandler->RegisterEvent(script);
-			else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script);
+				OnRenderRenderedMenuUpdateHandler->RegisterEvent(script, filter);
+			else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script, filter);
 		}
 		return true;
 	}
@@ -463,18 +453,19 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 
 void HandleEventHooks()
 {
-	OnDyingHandler = JGCreateEvent("OnDying", 1);
-	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1);
-	OnStopQuestHandler = JGCreateEvent("OnStopQuest", 1);
-	OnSeenDataUpdateHandler = JGCreateEvent("OnSeenDataUpdate", 1);
-	OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2);
-	OnChallengeCompleteHandler = JGCreateEvent("OnChallengeComplete", 1);
-	OnCrosshairHandler = JGCreateEvent("OnCrosshair", 1);
-	OnCompleteQuestHandler = JGCreateEvent("OnCompleteQuest", 1);
-	OnFailQuestHandler = JGCreateEvent("OnFailQuest", 1);
-	OnSettingsUpdateHandler = JGCreateEvent("OnSettingsUpdate", 0);
-	OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3);
-	OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1);
+	//todo: move to C++20 and use `using enum` for the BaseEvenInfo flag enum. 
+	OnDyingHandler = JGCreateEvent<EventFilter_OneForm>("OnDying", 1, (BaseEventInformation::eFlag_FlushOnLoad));
+	OnStartQuestHandler = JGCreateEvent<EventFilter_OneForm>("OnStartQuest", 1);
+	OnStopQuestHandler = JGCreateEvent<EventFilter_OneForm>("OnStopQuest", 1);
+	OnSeenDataUpdateHandler = JGCreateEvent<EventFilter_OneForm>("OnSeenDataUpdate", 1);
+	OnLimbGoneHandler = JGCreateEvent<EventFilter_OneForm_OneInt>("OnLimbGone", 2, (BaseEventInformation::eFlag_FlushOnLoad));
+	OnChallengeCompleteHandler = JGCreateEvent<EventFilter_OneForm>("OnChallengeComplete", 1);
+	OnCrosshairHandler = JGCreateEvent<EventFilter_OneForm_OneInt>("OnCrosshair", 1, (BaseEventInformation::eFlag_FlushOnLoad));
+	OnCompleteQuestHandler = JGCreateEvent<EventFilter_OneForm>("OnCompleteQuest", 1);
+	OnFailQuestHandler = JGCreateEvent<EventFilter_OneForm>("OnFailQuest", 1);
+	OnSettingsUpdateHandler = JGCreateEvent<EventFilter_Null>("OnSettingsUpdate", 0);
+	OnAddPerkHandler = JGCreateEvent<EventFilter_OneForm>("OnAddPerk", 3);
+	OnRemovePerkHandler = JGCreateEvent<EventFilter_OneForm>("OnRemovePerk", 1);
 	
 	FunctionCallScript = g_scriptInterface->CallFunction;
 	
@@ -496,9 +487,8 @@ void HandleEventHooks()
 	SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00", 3);
 	SafeWrite8(0x60CA29, 0xCC);
 
-
 	//testing
-	OnRenderGameModeUpdateHandler = JGCreateEvent("OnRenderGameModeUpdateHandler", 0);
+	OnRenderGameModeUpdateHandler = JGCreateEvent<EventFilter_Null>("OnRenderGameModeUpdateHandler", 0);
 	WriteRelCall(0x870244, (uintptr_t)handlerRenderGameEvent);
 	OnRenderRenderedMenuUpdateHandler = JGCreateEvent<EventFilter_Null>("OnRenderRenderedMenuUpdateHandler", 0);
 	WriteRelCall(0x8702A9, (uintptr_t)handlerRenderMenuEvent);
