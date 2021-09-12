@@ -65,7 +65,7 @@ public:
 
 
 template<typename _Filter>
-class EventInformation : BaseEventInformation
+class EventInformation : public BaseEventInformation
 {
 	using BaseEventInformation::BaseEventInformation; //steal the constructor
 	

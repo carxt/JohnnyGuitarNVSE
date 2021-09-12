@@ -92,7 +92,7 @@ bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, 
 	return ThisStdCall_B(0x430410, xData, actor, limb, isExplode);
 }
 void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
-	EventInformation* thisEvent = IsStarted ? OnStartQuestHandler : OnStopQuestHandler;
+	auto thisEvent = IsStarted ? OnStartQuestHandler : OnStopQuestHandler;
 	for (auto const& callback : thisEvent->event_callbacks) {
 		if (reinterpret_cast<GenericEventFilters*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) // 0 is filter one, and we only use an argument so we don't need to check further filters
 		{
