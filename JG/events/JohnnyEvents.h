@@ -16,20 +16,20 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnAddPerkEventHandler, SetOnAddPerkEventHandl
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , 0, 3, kParams_Event);
 
-EventInformation* OnDyingHandler;
-EventInformation* OnStartQuestHandler;
-EventInformation* OnStopQuestHandler;
-EventInformation* OnFailQuestHandler;
-EventInformation* OnCompleteQuestHandler;
-EventInformation* OnSeenDataUpdateHandler;
-EventInformation* OnLimbGoneHandler;
-EventInformation* OnChallengeCompleteHandler;
-EventInformation* OnCrosshairHandler;
-EventInformation* OnSettingsUpdateHandler;
-EventInformation* OnAddPerkHandler;
-EventInformation* OnRemovePerkHandler;
-EventInformation* OnRenderGameModeUpdateHandler;
-EventInformation* OnRenderRenderedMenuUpdateHandler;
+EventInformation<EventFilter_OneForm>* OnDyingHandler;
+EventInformation<EventFilter_OneForm>* OnStartQuestHandler;
+EventInformation<EventFilter_OneForm>* OnStopQuestHandler;
+EventInformation<EventFilter_OneForm>* OnFailQuestHandler;
+EventInformation<EventFilter_OneForm>* OnCompleteQuestHandler;
+EventInformation<EventFilter_OneForm>* OnSeenDataUpdateHandler;
+EventInformation<EventFilter_OneForm_OneInt>* OnLimbGoneHandler;
+EventInformation<EventFilter_OneForm>* OnChallengeCompleteHandler;
+EventInformation<EventFilter_OneForm_OneInt>* OnCrosshairHandler;
+EventInformation<EventFilter_Null>* OnSettingsUpdateHandler;
+EventInformation<EventFilter_OneForm>* OnAddPerkHandler;
+EventInformation<EventFilter_OneForm>* OnRemovePerkHandler;
+EventInformation<EventFilter_Null>* OnRenderGameModeUpdateHandler;
+EventInformation<EventFilter_Null>* OnRenderRenderedMenuUpdateHandler;
 
 void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool isTeammatePerk)
 {
@@ -463,18 +463,18 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 
 void HandleEventHooks()
 {
-	OnDyingHandler = JGCreateEvent("OnDying", 1, 1);
-	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1);
-	OnStopQuestHandler = JGCreateEvent("OnStopQuest", 1, 1);
-	OnSeenDataUpdateHandler = JGCreateEvent("OnSeenDataUpdate", 1, 1);
-	OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2, 2);
-	OnChallengeCompleteHandler = JGCreateEvent("OnChallengeComplete", 1, 1);
-	OnCrosshairHandler = JGCreateEvent("OnCrosshair", 1, 2);
-	OnCompleteQuestHandler = JGCreateEvent("OnCompleteQuest", 1, 1);
-	OnFailQuestHandler = JGCreateEvent("OnFailQuest", 1, 1);
-	OnSettingsUpdateHandler = JGCreateEvent("OnSettingsUpdate", 0, 0);
-	OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3, 1);
-	OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1, 1);
+	OnDyingHandler = JGCreateEvent("OnDying", 1);
+	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1);
+	OnStopQuestHandler = JGCreateEvent("OnStopQuest", 1);
+	OnSeenDataUpdateHandler = JGCreateEvent("OnSeenDataUpdate", 1);
+	OnLimbGoneHandler = JGCreateEvent("OnLimbGone", 2);
+	OnChallengeCompleteHandler = JGCreateEvent("OnChallengeComplete", 1);
+	OnCrosshairHandler = JGCreateEvent("OnCrosshair", 1);
+	OnCompleteQuestHandler = JGCreateEvent("OnCompleteQuest", 1);
+	OnFailQuestHandler = JGCreateEvent("OnFailQuest", 1);
+	OnSettingsUpdateHandler = JGCreateEvent("OnSettingsUpdate", 0);
+	OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3);
+	OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1);
 	
 	FunctionCallScript = g_scriptInterface->CallFunction;
 	
@@ -498,9 +498,9 @@ void HandleEventHooks()
 
 
 	//testing
-	OnRenderGameModeUpdateHandler = JGCreateEvent("OnRenderGameModeUpdateHandler", 0, 0);
+	OnRenderGameModeUpdateHandler = JGCreateEvent("OnRenderGameModeUpdateHandler", 0);
 	WriteRelCall(0x870244, (uintptr_t)handlerRenderGameEvent);
-	OnRenderRenderedMenuUpdateHandler = JGCreateEvent("OnRenderRenderedMenuUpdateHandler", 0, 0);
+	OnRenderRenderedMenuUpdateHandler = JGCreateEvent<EventFilter_Null>("OnRenderRenderedMenuUpdateHandler", 0);
 	WriteRelCall(0x8702A9, (uintptr_t)handlerRenderMenuEvent);
 
 }

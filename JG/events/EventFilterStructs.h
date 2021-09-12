@@ -1,14 +1,16 @@
 ﻿#pragma once
 #include "events/EventFilteringInterface.h"
 
-// In order to enforce having the ToFilter() method.
-struct EventFilter_BaseStruct
+struct EventFilter_Null : EventFilter_Base
 {
-	virtual ~EventFilter_BaseStruct() = default;
-	[[nodiscard]] virtual FilterTypeSetArray ToFilter() const = 0;
+	[[nodiscard]] FilterTypeSetArray ToFilter() const override
+	{
+		return FilterTypeSetArray{};
+	}
 };
 
-struct EventFilter_OneForm : EventFilter_BaseStruct
+
+struct EventFilter_OneForm : EventFilter_Base
 {
 	TESForm* form = nullptr;
 
@@ -21,7 +23,7 @@ struct EventFilter_OneForm : EventFilter_BaseStruct
 	}
 };
 
-struct EventFilter_OneForm_OneInt : EventFilter_BaseStruct
+struct EventFilter_OneForm_OneInt : EventFilter_Base
 {
 	TESForm* form = nullptr;
 	int intID = kIgnFilter_Int;

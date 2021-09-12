@@ -92,40 +92,11 @@ public:
 	}
 };
 
-/* UNUSED
-class EventContainerInterface
+// All event filters should inherit from this.
+// Used by EventInformation class to ensure that the declared filter type is the same when registering/removing events.
+struct EventFilter_Base
 {
-public:
-	void virtual RegisterEvent(Script* script, void** filters);
-	void virtual RemoveEvent(Script* script, void** filters);
-};
-
-EventContainerInterface* (_cdecl* CreateScriptEvent)(const char* event_name, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CustomConstructor)(void**, UInt32));
-void(__cdecl* FreeScriptEvent)(EventContainerInterface*& toRemove);
-*/
-
-class BaseEventClass
-{
-public:
-	ULONG_PTR Flags = 0;
-	Script* ScriptForEvent = nullptr;
-	EventHandlerFilterBase* eventFilter = nullptr;
-	LambdaVariableContext capturedLambdaVars;
-
-	BaseEventClass() : capturedLambdaVars(nullptr){}
-
-	enum GlobalEventFlags
-	{
-		kEventFlag_Deleted = 1 << 0,
-	};
-
-	bool GetDeleted() const
-	{
-		return Flags & kEventFlag_Deleted;
-	}
-	void SetDeleted(bool doSet)
-	{
-		doSet ? Flags |= kEventFlag_Deleted : Flags &= ~kEventFlag_Deleted;
-	}
+	virtual ~EventFilter_Base() = default;
+	[[nodiscard]] virtual FilterTypeSetArray ToFilter() const = 0;
 };
 
