@@ -124,7 +124,7 @@ public:
 		filtersArr = genFiltersArr = FilterTypeSetArray { filter };
 	}
 
-	bool IsInFilter(UInt32 filterNum, FilterTypes toSearch) override
+	bool IsInFilter(UInt32 const filterNum, FilterTypes toSearch) override
 	{
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthFilter(filterNum))) return false;
@@ -137,7 +137,7 @@ public:
 			},	*filterSet, toSearch);
 		return isFound;
 	}
-	bool IsInFilter(UInt32 filterNum, TESForm* toSearch)
+	bool IsInFilter(UInt32 const filterNum, TESForm* toSearch)
 	{
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthFilter(filterNum))) return false;
@@ -148,7 +148,7 @@ public:
 		return isFound;
 	}
 
-	bool IsBaseInFilter(UInt32 filterNum, RefID toSearch)
+	bool IsBaseInFilter(UInt32 const filterNum, RefID toSearch)
 	{
 		if (!toSearch) return false;
 		auto const formToSearch = LookupFormByID(toSearch);
@@ -156,7 +156,7 @@ public:
 			toSearch = ((TESObjectREFR*)formToSearch)->baseForm->refID;
 		return IsInFilter(filterNum, toSearch);
 	}
-	bool IsBaseInFilter(UInt32 filterNum, TESForm* toSearch)
+	bool IsBaseInFilter(UInt32 const filterNum, TESForm* toSearch)
 	{
 		if (!toSearch) return false;
 		if (toSearch->GetIsReference())
@@ -165,7 +165,7 @@ public:
 	}
 
 	// Unused
-	bool InsertToFilter(UInt32 filterNum, FilterTypes toInsert) override
+	bool InsertToFilter(UInt32 const filterNum, FilterTypes toInsert) override
 	{
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthFilter(filterNum))) return false;
@@ -180,7 +180,7 @@ public:
 	}
 
 	// Unused
-	bool DeleteFromFilter(UInt32 filterNum, FilterTypes toDelete) override
+	bool DeleteFromFilter(UInt32 const filterNum, FilterTypes toDelete) override
 	{
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthFilter(filterNum))) return false;
@@ -199,7 +199,7 @@ public:
 	}
 
 	// Unused
-	bool IsFilterEmpty(UInt32 filterNum) override
+	bool IsFilterEmpty(UInt32 const filterNum) override
 	{
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthFilter(filterNum))) return true;	// technically empty if there is no filter
@@ -207,18 +207,55 @@ public:
 		return isEmpty;
 	}
 	
-	bool IsGenFilterEqual(UInt32 filterNum, FilterTypeSets cmpFilterSet) override
+	bool IsGenFilterEqual(UInt32 const filterNum, FilterTypeSets const &cmpFilterSet) override
 	{
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthGenFilter(filterNum))) return false;
 		return cmpFilterSet == *filterSet;
 	}
 
+	static bool IsDefaultFilterValue(FilterTypes const &filterVal)
+	{
+		bool const isAccepted = std::visit(overload{
+		[&](RefID &filter) { return filter == kIgnFilter_FormID; },
+		[&](int filter) { return filter == kIgnFilter_Int; },
+		[&](auto& filter) { return true; } /*Default case*/
+		}, filterVal);
+		return isAccepted;
+	}
+
+	bool IsGenFilterEqualAlt(UInt32 const filterNum, FilterTypeSets const &cmpFilterSet) override
+	{
+		FilterTypeSets* filterSet;
+		if (!(filterSet = GetNthGenFilter(filterNum))) return false;
+		bool const isEqual = std::visit(
+		[](auto& genSet, auto& cmpSet)	/*Types do not match*/
+		{
+			if constexpr (std::is_same_v<decltype(genSet), decltype(cmpSet)>)
+			{
+				if (cmpSet.size() != genSet.size())
+					return false;
+				
+				auto const setElemIter = genSet.begin();
+				for (auto const cmpElemIter = cmpSet.begin(); setElemIter != genSet.end(); ++setElemIter, ++cmpElemIter)
+				{
+					if (IsDefaultFilterValue(setElemIter))
+						continue;
+					if (setElemIter != cmpElemIter)
+						return false;
+				}
+				return true;
+			}
+			else return false;
+		}, *filterSet, cmpFilterSet);
+		return isEqual;
+	}
+
 	//	Unused in SetUpFiltering, so it's useless.
 	bool IsAcceptedParameter(FilterTypes param) override
 	{
 	//	bool const isAccepted = std::visit(overload{
-	//		[&](TESForm* &filter) { return filter->refID != g_xMarkerID; },
+	//		[&](RefID filter) { return filter != g_xMarkerID; },
 	//		[&](auto& filter) { return true; } /*Default case*/
 	//		}, param);
 	//	return isAccepted;

@@ -69,7 +69,12 @@ public:
 	virtual bool IsFilterEmpty(UInt32 filterNum) = 0;
 	
 	// Used by the framework to check if the Nth Gen filter equals the passed value set. Useful to avoid adding the same event repeatedly
-	virtual bool IsGenFilterEqual(UInt32 filterNum, FilterTypeSets cmpFilterSet) = 0;
+	virtual bool IsGenFilterEqual(UInt32 filterNum, FilterTypeSets const &cmpFilterSet) = 0;
+
+	// Used to check if the Nth Gen filter equals the passed value set.
+	// ALL default-value Gen filters are said to be "equal".
+	// Useful to mass-remove events by using default filters.
+	virtual bool IsGenFilterEqualAlt(UInt32 filterNum, FilterTypeSets const &cmpFilterSet) = 0;
 	
 	// Function used by the filter to check if the object passed is an accepted parameter
 	virtual bool IsAcceptedParameter(FilterTypes parameter) = 0;

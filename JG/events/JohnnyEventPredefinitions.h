@@ -147,7 +147,7 @@ class EventInformation : public BaseEventInformation
 					auto const maxFilters = eventFilters->GetNumGenFilters();
 					for (int i = 0; i < maxFilters; i++)
 					{
-						if (!it->eventFilter->IsGenFilterEqual(i, filters[i]))
+						if (!it->eventFilter->IsGenFilterEqualAlt(i, filters[i]))
 							goto NotFound;
 					}
 				}
