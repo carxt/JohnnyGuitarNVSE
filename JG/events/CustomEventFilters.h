@@ -217,9 +217,9 @@ public:
 	static bool IsDefaultFilterValue(FilterTypes const &filterVal)
 	{
 		bool const isDefault = std::visit(overload{
-		[&](RefID &filter) { return filter == kIgnFilter_FormID; },
-		[&](int filter) { return filter == kIgnFilter_Int; },
-		[&](auto& filter) { return true; } /*Default case*/
+		[](RefID filter) { return filter == kIgnFilter_FormID; },
+		[](int filter) { return filter == kIgnFilter_Int; },
+		[](auto& filter) { return false; } /*Default case*/
 		}, filterVal);
 		return isDefault;
 	}
@@ -229,7 +229,7 @@ public:
 		FilterTypeSets* filterSet;
 		if (!(filterSet = GetNthGenFilter(filterNum))) return false;
 		bool const isEqual = std::visit(
-		[](auto& genSet, auto& cmpSet)	/*Types do not match*/
+		[](auto& genSet, auto& cmpSet)
 		{
 			// Use std::decay_t to remove const type from comparison.
 			if constexpr (std::is_same_v<std::decay_t<decltype(genSet)>, std::decay_t<decltype(cmpSet)>>)
@@ -240,7 +240,7 @@ public:
 				auto setElemIter = genSet.begin();
 				for (auto cmpElemIter = cmpSet.begin(); setElemIter != genSet.end(); ++setElemIter, ++cmpElemIter)
 				{
-					if (IsDefaultFilterValue(*setElemIter))
+					if (IsDefaultFilterValue(*cmpElemIter))
 						continue;
 					if (*setElemIter != *cmpElemIter)
 						return false;
