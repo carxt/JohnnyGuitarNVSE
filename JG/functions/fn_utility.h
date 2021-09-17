@@ -253,8 +253,8 @@ bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	int type = 0;
 	UInt32 tickCount;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &type);
-	tickCount = ThisStdCall<UInt32>(0x457FE0, NULL);
-	double timePlayed = tickCount - g_thePlayer->unk774[6];
+	tickCount = GetTickCount();
+	double timePlayed = tickCount - g_initialTickCount;
 	switch (type) {
 	case 0:
 		*result = timePlayed;

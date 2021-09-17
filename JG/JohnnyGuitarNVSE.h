@@ -41,7 +41,7 @@ std::unordered_map<UInt32, char*> CustomMapMarkerMap;
 
 UInt32 disableMuzzleLights = -1;
 static float vatsSpreadMultValue = 15.0;
-
+UInt32 g_initialTickCount = 0;
 // Singletons
 PlayerCharacter* g_thePlayer = nullptr;
 ProcessManager* g_processManager = nullptr;

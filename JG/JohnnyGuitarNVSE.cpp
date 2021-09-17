@@ -90,6 +90,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_currentSky = (Sky**)0x11DEA20;
 		g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 		g_VATSCameraData = (VATSCameraData*)0x11F2250;
+		g_initialTickCount = GetTickCount();
 		break;
 	}
 	default:
