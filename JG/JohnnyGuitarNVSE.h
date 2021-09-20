@@ -1,6 +1,7 @@
 #include "..\..\nvse\nvse\ScriptUtils.h"
 #include <Windows.h>
 #include <unordered_map>
+#include <unordered_set>
 #pragma once
 
 NVSEArrayVarInterface* g_arrInterface = NULL;
