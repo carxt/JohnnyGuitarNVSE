@@ -47,15 +47,45 @@ DEFINE_COMMAND_PLUGIN(GetBodyPartTraitString, , 0, 3, kParams_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetActorEffectType, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetTalkingActivatorActor, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetPlayerKarmaTitle, , 0, 1, kParams_OneOptionalInt);
-
 DEFINE_COMMAND_PLUGIN(GetFaceGenNthProperty, , 0, 3, kParams_OneActorBase_TwoInts);
 DEFINE_COMMAND_PLUGIN(SetFaceGenNthProperty, , 0, 4, kParams_OneActorBase_TwoInts_OneFloat);
 DEFINE_COMMAND_PLUGIN(FaceGenRefreshAppearance, , 1, 0, NULL);
+DEFINE_CMD_NO_ARGS(GetAvailablePerks);
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
-
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
 
+bool IsApplicable(BGSPerk* perk) {
+	for (int i = 0; i < perk->conditions.Count(); i++) {
+		Condition* condition = perk->conditions.GetNthItem(i);
+		bool result = false;
+		if (condition->opcode == 0x46 && !condition->Evaluate(g_thePlayer, 0, &result)) return false;
+	}
+	return true;
+}
+
+bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
+	*result = 0;
+	NVSEArrayVar* perkArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	ListNode<BGSPerk>* perkIter = g_dataHandler->perkList.Head();
+	BGSPerk* perk;
+	int perkRank;
+	do
+	{
+		perk = perkIter->data;
+		if (perk->data.isPlayable && perk->data.minLevel > 0 && perk->data.minLevel <= g_thePlayer->avOwner.GetLevel()) {
+			perkRank = g_thePlayer->GetPerkRank(perk, 0);
+			bool result = false;
+			if (perkRank < perk->data.numRanks && !perk->data.isTrait && IsApplicable(perk) 
+				&& perk->conditions.Evaluate(g_thePlayer, 0, &result, 0)) {
+				g_arrInterface->AppendElement(perkArr, NVSEArrayElement(perk));
+			}
+		}
+		
+	} while (perkIter = perkIter->next);
+	if (g_arrInterface->GetArraySize(perkArr)) g_arrInterface->AssignCommandResult(perkArr, result);
+	return true;
+}
 bool Cmd_FaceGenRefreshAppearance_Execute(COMMAND_ARGS)
 {
 	if (thisObj && thisObj->IsCharacter())

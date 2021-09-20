@@ -638,16 +638,15 @@ struct Condition
 		TESForm		*form;
 	}				parameter2;			// 10
 	UInt32			runOnType;			// 14	Subject, Target, Reference, CombatTarget, LinkedReference
-	TESObjectREFR	*reference;			// 18
+	TESObjectREFR	*reference;			// 18 
 
-	bool Evaluate(TESObjectREFR *runOnRef, TESForm *arg2, bool *result);
+	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result) { return ThisStdCall_B(0x681600, this, runOnRef, arg2, result); }
 };
 
 struct ConditionList : tList<Condition>
 {
-	bool Evaluate(TESObjectREFR *runOnRef, TESForm *arg2, bool *result, bool arg4);
+	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result, bool arg4) { return ThisStdCall<bool>(0x680C60, this, runOnRef, arg2, result, arg4); }
 };
-
 class TESObject : public TESForm
 {
 public:
