@@ -154,7 +154,6 @@ extern "C" {
 	bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
-		//NiPointBuffer = (NiPoint3*)malloc(sizeof(NiPoint3));
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
 		strcpy((char*)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
@@ -165,6 +164,7 @@ extern "C" {
 		fixNPCShootingAngle = GetPrivateProfileInt("MAIN", "bFixNPCShootingAngle", 1, filename);
 		capLoadScreensTo60 = GetPrivateProfileInt("MAIN", "b60FPSDuringLoading", 0, filename);
 		noMuzzleFlashCooldown = GetPrivateProfileInt("MAIN", "bNoMuzzleFlashCooldown", 0, filename);
+		resetVanityCam = GetPrivateProfileInt("MAIN", "bReset3rdPersonCamera", 0, filename);
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);

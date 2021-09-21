@@ -31,6 +31,7 @@ bool loadEditorIDs = 0;
 bool fixHighNoon = 0;
 bool fixFleeing = 0;
 bool fixItemStacks = 0;
+bool resetVanityCam = 0;
 bool capLoadScreensTo60 = 0;
 bool fixNPCShootingAngle = 0;
 bool noMuzzleFlashCooldown = 0;
@@ -600,7 +601,7 @@ void HandleGameHooks()
 	patchFixDisintegrationsStat();
 	WriteRelJump(0x88D0D0, (UInt32)FixNPCIncrementingChallenges);
 	WriteRelCall(0x77A8E9, (UInt32)PlayQuestFailSound);
-	WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
+	if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
 	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4); // to use fWeapSkillReqPenalty correctly in spread calc
 	WriteRelCall(0x82FC0B, (UInt32)ShouldPlayCombatMusic);
 	//SaveGameHook
