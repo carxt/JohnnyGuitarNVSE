@@ -19,6 +19,8 @@
 #include "nvse/SafeWrite.h"
 #include "nvse/ScriptUtils.h"
 #include "misc/WorldToScreen.h"
+#include "events/LambdaVariableContext.h"
+#include "events/JohnnyEventPredefinitions.h"
 #include "misc/misc.h"
 #include "misc/EditorIDs.h"
 #include "internal/decoding.h"
@@ -34,8 +36,7 @@
 #include "functions/fn_region.h"
 #include "functions/fn_terminal.h"
 #include "functions/fn_ui.h"
-#include "events/LambdaVariableContext.h"
-#include "events/JohnnyEventPredefinitions.h"
+#include "events/CustomEventFilters.h"
 #include "events/JohnnyEvents.h"
 
 HMODULE JohnnyHandle;
@@ -58,14 +59,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
 		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 
-		for (const auto& EventInfo : g_EventsArray)
-		{
-			if (EventInfo->GetFlags() & BaseEventInformation::eFlag_FlushOnLoad)
-			{
-				EventInfo->FlushEventCallbacks();
-			}
-		}
-			
+		OnDyingHandler->FlushEventCallbacks();
+		OnLimbGoneHandler->FlushEventCallbacks();
+		OnCrosshairHandler->FlushEventCallbacks();
 		bArrowKeysDisabled = false;
 		RestoreDisabledPlayerControlsHUDFlags();
 		SaveGameUMap.clear();
@@ -77,7 +73,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_MainGameLoop:
-		for (const auto& EventInfo : g_EventsArray)
+		for (const auto& EventInfo : EventsArray)
 		{
 			EventInfo->AddQueuedEvents();
 			EventInfo->DeleteEvents();
