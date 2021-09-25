@@ -218,9 +218,6 @@
     <ClInclude Include="events\LambdaVariableContext.h">
       <Filter>events</Filter>
     </ClInclude>
-    <ClInclude Include="events\EventFilterStructs.h">
-      <Filter>events</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
