@@ -287,7 +287,7 @@ bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	EventFilter_OneForm filter;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form) || NOT_TYPE(script, Script))) return true;
 	{
 		if (OnAddPerkHandler)
 		{
