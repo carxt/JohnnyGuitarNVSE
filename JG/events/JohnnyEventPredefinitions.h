@@ -1,298 +1,252 @@
 #pragma once
+#include <shared_mutex>
 #include "events/EventFilteringInterface.h"
 #include <unordered_set>
+
+
 bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
-
 NVSEArrayElement EventResultPtr;
-class EventInformation;
-void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
+void* __fastcall GenericCreateFilters(FilterTypeSetArray &filters);
+using _FilterCreatorFunction = void* (__fastcall* )(FilterTypeSetArray& filters);	//todo: look into why ReSharper says this uses a reserved identifier...
 
-class JohnnyEventFiltersForm : EventHandlerInterface
+
+class BaseEventClass
 {
-	typedef  std::unordered_set<unsigned int> RefUnorderedSet;
-
-private:
-	RefUnorderedSet* Filters = 0;
-
-	RefUnorderedSet* GetFilter(UInt32 filter)
-	{
-		if (filter >= numFilters) return NULL;
-		return &(Filters[filter]);
-	}
 public:
-	JohnnyEventFiltersForm(void** filters, UInt32 nuFilters)
-	{
-		numFilters = nuFilters;
-		Filters = new RefUnorderedSet[numFilters];
-		GenFilters = new GenericFilters[numFilters];
-		for (int i = 0; i < nuFilters; i++) GenFilters[i].ptr = filters[i];
+	ULONG_PTR Flags = 0;
+	Script* ScriptForEvent = nullptr;
+	EventHandlerFilterBase* eventFilter = nullptr;
+	LambdaVariableContext capturedLambdaVars;
 
+	BaseEventClass() : capturedLambdaVars(nullptr) {}
+
+	enum GlobalEventFlags
+	{
+		kEventFlag_Deleted = 1 << 0,
+	};
+
+	bool GetDeleted() const
+	{
+		return Flags & kEventFlag_Deleted;
 	}
-	virtual ~JohnnyEventFiltersForm()
+	void SetDeleted(bool doSet)
 	{
-		delete[] Filters;
-		delete[] GenFilters;
-	}
-
-	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch)
-	{
-		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return false;
-		//RefUnorderedSet::const_iterator got = FilterSet->find(toSearch);
-		return  FilterSet->empty() || (FilterSet->find(toSearch.refID) != FilterSet->end());
-	}
-
-
-	virtual void InsertToFilter(UInt32 filterNum, GenericFilters toInsert)
-	{
-		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return;
-		FilterSet->insert(toInsert.refID);
-	}
-	virtual void DeleteFromFilter(UInt32 filterNum, GenericFilters toDelete)
-	{
-		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return;
-		FilterSet->erase(toDelete.refID);
-
-	}
-	virtual bool IsFilterEmpty(UInt32 filterNum)
-	{
-		RefUnorderedSet* FilterSet = GetFilter(filterNum);
-		if (!FilterSet) return true;
-		return FilterSet->empty();
-	}
-	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 nuFilter)
-	{
-		return (Filter.ptr == GenFilters[nuFilter].ptr);
-	}
-	virtual bool IsAcceptedParameter(GenericFilters parameter)
-	{
-
-		return parameter.form->typeID != kFormType_TESObjectSTAT;
-
-	}
-
-	virtual void SetUpFiltering()
-	{
-		for (int i = 0; i < numFilters; i++)
-		{
-			TESForm* currentFilter = GenFilters[i].form;
-			if (!currentFilter) continue;
-			if (!(IsAcceptedParameter(currentFilter))) continue;
-			if (currentFilter->GetIsReference())
-			{
-				InsertToFilter(i, ((TESObjectREFR*)currentFilter)->baseForm->refID);
-				continue;
-			}
-			if (IS_TYPE(currentFilter, BGSListForm))
-			{
-				//Console_Print("filter looping");
-				ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
-				do {
-					TESForm* it = iterator->data;
-					if (it->GetIsReference()) continue;
-					if (IsAcceptedParameter(it))
-						InsertToFilter(i, it->refID);
-				} while (iterator = iterator->next);
-
-			}
-			else InsertToFilter(i, currentFilter->refID);
-		}
-	}
-
-	__forceinline bool IsBaseInFilter(UInt32 filterNum, TESForm* form)
-	{
-		if (!form) return false;
-		if (form->GetIsReference()) return IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->refID);
-		return IsInFilter(filterNum, form->refID);
-	}
-
-	void insertFormList(BGSListForm* List, UInt32 filter)
-	{
-		ListNode<TESForm>* iterator = ((BGSListForm*)List)->list.Head();
-		do {
-			InsertToFilter(filter, iterator->data->refID);
-		} while (iterator = iterator->next);
+		doSet ? Flags |= kEventFlag_Deleted : Flags &= ~kEventFlag_Deleted;
 	}
 };
 
-class EventInformation
+
+class BaseEventInformation
 {
-private:
-	void* (__fastcall* CreateFilter)(void**, UInt32); // supposed to be passing itself
-	std::vector<BaseEventClass> EventQueueAdd;
-	std::shared_mutex QueueRWLock; //need a readers writer lock to protect from multiple users registering an event in the same frame (very rare, but can happen)
 public:
-	const char* EventName;
-	UInt8 numMaxArgs;
-	UInt8 numMaxFilters;
-	std::vector<BaseEventClass> EventCallbacks;
-	EventInformation(const char* EventName, UInt8& numMaxArgs, UInt8& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32))
+	// Values are stored here for ease of accessibility from the outside.
+	_FilterCreatorFunction filter_creator_func; // supposed to be passing a class that inherits from EventHandlerFilterBase
+	std::vector<BaseEventClass> event_queue_add;
+	std::shared_mutex queue_rw_lock; //need a readers writer lock to protect from multiple users registering an event in the same frame (very rare, but can happen)
+
+	std::string const event_name;	// to identify the event, for lookup and etc.
+	UInt8 const num_max_args;	// used when invoking script UDFs.
+	std::vector<BaseEventClass> event_callbacks;
+
+	using flagType = uint16_t;
+	enum EventFlags : flagType
 	{
-		this->EventName = EventName;
-		this->numMaxArgs = numMaxArgs;
-		this->numMaxFilters = numMaxFilters;
-		this->CreateFilter = GenericCreateFilter;
-		if (CreatorFunction) this->CreateFilter = CreatorFunction;
-	}
-	virtual ~EventInformation()
+		eFlag_FlushOnLoad = 1 << 0,
+	};
+	flagType const event_flags;
+	[[nodiscard]] EventFlags GetFlags() const { return (EventFlags)event_flags; }
+
+	BaseEventInformation(std::string eventName, UInt8 const& numMaxArgs, flagType flags, _FilterCreatorFunction FilterCreatorFunction)
+		: event_name{ std::move(eventName) }, num_max_args(numMaxArgs), event_flags(flags)
 	{
-		FlushEventCallbacks();
+		if (!FilterCreatorFunction)
+			filter_creator_func = GenericCreateFilters;
+		else
+			filter_creator_func = FilterCreatorFunction;
 	}
-	void FlushEventCallbacks()
-	{
-		auto it = EventCallbacks.begin();
-		while (it != EventCallbacks.end())
-		{
-			delete it->eventFilter;
-			++it;
-		}
-		EventCallbacks.clear();
-	}
+	
+	virtual ~BaseEventInformation() = default;
+	void virtual FlushEventCallbacks() = 0;
+	bool virtual RegisterEvent(Script* script, FilterTypeSetArray& filters) = 0;
+	void virtual RemoveEvent(Script* script, FilterTypeSetArray& filters) = 0;
+	void virtual AddQueuedEvents() = 0;
+	void virtual DeleteEvents() = 0;
+};
 
 
-	void virtual RegisterEvent(Script* script, void** filters)
+template<typename _Filter>
+class EventInformation : public BaseEventInformation
+{
+	// Note: events must wait a frame before being fully registered. Thus, they cannot be removed on the same frame they were created.
+	bool RegisterEvent(Script* script, FilterTypeSetArray& filters) override
 	{
-		UInt32 maxFilters = this->numMaxFilters;
-		for (std::vector<BaseEventClass>::iterator it = this->EventCallbacks.begin(); it != this->EventCallbacks.end(); ++it)
+		auto const numMaxFilters = filters.size();
+
+		enum CheckFilterFunc_ReturnValues
 		{
-			if (script == it->ScriptForEvent)
+			kRetn_Continue = 0,
+			kRetn_Return = 1,
+		};
+		auto CheckFilterFunc = [&, this](BaseEventClass& eventIter) -> UInt8
+		{
+			if (script == eventIter.ScriptForEvent)
 			{
-				if (!maxFilters) return;
-				if (!it->eventFilter->GetNumFilters()) continue;
-				int i = 0; // filter iterator
-				for (; i < maxFilters; i++)
+				if (!numMaxFilters) return kRetn_Return;	// filter-less event was already registered
+				if (!eventIter.eventFilter->GetNumGenFilters()) return kRetn_Continue;
+				for (int i = 0; i < numMaxFilters; i++)
 				{
-					if (!(it->eventFilter->IsFilterEqual(filters[i], i))) break;
+					if (!eventIter.eventFilter->IsGenFilterEqual(i, filters[i]))
+						return kRetn_Continue;	// new event has sufficiently different filters, look for another event match.
 				}
-				if (i >= maxFilters) return;
+				return kRetn_Return; // event is already registered with the same filters.
 			}
+			return kRetn_Continue;
+		};
 
-		}
-		std::shared_lock rLock(QueueRWLock);
-		for (std::vector<BaseEventClass>::iterator it = this->EventQueueAdd.begin(); it != this->EventQueueAdd.end(); ++it)
+		for (auto& callbackIter : event_callbacks)
 		{
+			auto const check = CheckFilterFunc(callbackIter);
+			if (check == kRetn_Return) return false;
+		}
 
-			if (script == it->ScriptForEvent)
-			{
-				if (!maxFilters) return;
-				if (!it->eventFilter->GetNumFilters()) continue;
-				int i = 0; // filter iterator
-				for (; i < maxFilters; i++)
-				{
-					if (!(it->eventFilter->IsFilterEqual(filters[i], i))) break;
-				}
-				if (i >= maxFilters) return;
-			}
-
+		std::shared_lock rLock(queue_rw_lock);
+		for (auto& eventQueueIter : event_queue_add)
+		{
+			auto const check = CheckFilterFunc(eventQueueIter);
+			if (check == kRetn_Return) return false;
 		}
 		rLock.unlock();
+
 		BaseEventClass NewEvent;
 		NewEvent.ScriptForEvent = script;
 		NewEvent.capturedLambdaVars = LambdaVariableContext(script);
-		if (maxFilters)
+		if (numMaxFilters)
 		{
-
-			*(void**)&(NewEvent.eventFilter) = this->CreateFilter(filters, maxFilters);
+			*(void**)&(NewEvent.eventFilter) = this->filter_creator_func(filters);
 			NewEvent.eventFilter->SetUpFiltering();
 		}
-		std::unique_lock wLock(QueueRWLock);
-		this->EventQueueAdd.push_back(std::move(NewEvent));
+		std::unique_lock wLock(queue_rw_lock);
+		this->event_queue_add.push_back(std::move(NewEvent));
+		return true;
 	}
-	void virtual RemoveEvent(Script* script, void** filters)
+	bool virtual RegisterEvent(Script* script, FilterTypeSets& filter)
 	{
-		auto it = EventCallbacks.begin();
-		while (it != EventCallbacks.end())
+		FilterTypeSetArray arr{ filter };
+		return RegisterEvent(script, arr);
+	}
+
+	void RemoveEvent(Script* script, FilterTypeSetArray& filters) override
+	{
+		auto it = event_callbacks.begin();
+		while (it != event_callbacks.end())
 		{
 			if (script == it->ScriptForEvent)
 			{
 				if (auto eventFilters = it->eventFilter)
 				{
-					UInt32 maxFilters = eventFilters->GetNumFilters();
+					auto const maxFilters = eventFilters->GetNumGenFilters();
 					for (int i = 0; i < maxFilters; i++)
 					{
-						if (!(it->eventFilter->IsFilterEqual(filters[i], i))) goto NotFound;
-
+						if (!it->eventFilter->IsGenFilterEqualAlt(i, filters[i]))
+							goto NotFound;
 					}
 				}
 				it->SetDeleted(true);
 			}
 		NotFound:
-			it++;
-
+			++it;
 		}
 	}
-	void virtual AddQueuedEvents()
+	void virtual RemoveEvent(Script* script, FilterTypeSets& filter)
 	{
-		EventCallbacks.insert(EventCallbacks.end(), std::make_move_iterator(EventQueueAdd.begin()), std::make_move_iterator(EventQueueAdd.end()));
-		EventQueueAdd.clear();
+		FilterTypeSetArray arr{ filter };
+		RemoveEvent(script, arr);
 	}
-	void virtual DeleteEvents()
+	
+public:
+	using BaseEventInformation::BaseEventInformation; //steal the constructor
+	
+	~EventInformation() override
 	{
-		auto it = EventCallbacks.begin();
-		while (it != EventCallbacks.end())
+		FlushEventCallbacks();
+	}
+
+	void FlushEventCallbacks() override
+	{
+		for (auto &callbackIter : event_callbacks)
+		{
+			delete callbackIter.eventFilter;
+		}
+		event_callbacks.clear();
+	}
+	
+	bool virtual RegisterEvent(Script* script, _Filter &filter)
+	{
+		auto filterSetArr = filter.ToFilter();
+		return RegisterEvent(script, filterSetArr);
+	}
+	
+	void virtual RemoveEvent(Script* script, _Filter &filter)
+	{
+		auto filterSetArr = filter.ToFilter();
+		RemoveEvent(script, filterSetArr);
+	}
+	
+	void AddQueuedEvents() override
+	{
+		event_callbacks.insert(event_callbacks.end(), std::make_move_iterator(event_queue_add.begin()), std::make_move_iterator(event_queue_add.end()));
+		event_queue_add.clear();
+	}
+	
+	void DeleteEvents() override
+	{
+		auto it = event_callbacks.begin();
+		while (it != event_callbacks.end())
 		{
 			if (it->GetDeleted())
 			{
-
-				if (it->eventFilter)
-				{
-					delete it->eventFilter;
-				}
-
-				it = EventCallbacks.erase(it);
+				delete it->eventFilter;	// deleting nullptr is safe.
+				it = event_callbacks.erase(it);
 				continue;
 			}
-			it++;
-
+			++it;
 		}
 	}
-	int a = sizeof(std::unordered_set<char>);
 };
-typedef EventInformation* EventInfo;
-std::mutex EventsArrayMutex;
-std::vector<EventInfo> EventsArray;
 
+using EventInfo = BaseEventInformation*;
+std::mutex g_EventsArrayMutex;
+std::vector<EventInfo> g_EventsArray;
 
-
-void* __fastcall GenericCreateFilter(void** Filters, UInt32 numFilters) {
-	return new JohnnyEventFiltersForm(Filters, numFilters);
-}
-
-
-
-EventInfo FindHandlerInfoByChar(const char* nameToFind)
+EventInfo FindHandlerInfoByString(std::string const &nameToFind)
 {
-	auto it = EventsArray.begin();
-	while (it != EventsArray.end())
+	for (auto const &eventsIter : g_EventsArray)
 	{
-		if (!(_stricmp((*it)->EventName, nameToFind)))
-			return *it;
-		it++;
+		if (eventsIter->event_name == nameToFind)
+			return eventsIter;
 	}
-	return NULL;
+	return nullptr;
 }
 
-EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32))
+template<typename _Filter>
+EventInformation<_Filter>* __cdecl JGCreateEvent(const char* eventName, UInt8 const maxArgs, uint16_t const flags = 0, _FilterCreatorFunction FilterCreatorFunction = nullptr)
 {
-	std::lock_guard<std::mutex> lock(EventsArrayMutex);
-	EventInfo eventinfo = new EventInformation(EventName, maxArgs, maxFilters, CreatorFunction);
-	EventsArray.push_back(eventinfo);
-	return eventinfo;
-
+	std::lock_guard lock(g_EventsArrayMutex);
+	auto const eventInfo = new EventInformation<_Filter>(eventName, maxArgs, flags, FilterCreatorFunction);
+	g_EventsArray.push_back(eventInfo);
+	return eventInfo;
 }
 
-
-void __cdecl JGFreeEvent(EventInfo& toRemove)
+// Unused
+void __cdecl JGFreeEvent(EventInfo &toRemove)
 {
-	std::lock_guard<std::mutex> lock(EventsArrayMutex);
 	if (!toRemove) return;
-	auto it = std::find(std::begin(EventsArray), std::end(EventsArray), toRemove);
-	if (it != EventsArray.end())
+	std::lock_guard lock(g_EventsArrayMutex);
+	if (auto it = std::find(std::begin(g_EventsArray), std::end(g_EventsArray), toRemove); 
+		it != g_EventsArray.end())
 	{
 		delete* it;
-		it = EventsArray.erase(it);
+		it = g_EventsArray.erase(it);
 	}
-	toRemove = NULL;
+	toRemove = nullptr;
 }
