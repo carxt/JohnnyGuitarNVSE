@@ -482,6 +482,8 @@ void HandleEventHooks()
 	WriteRelCall(0x7CEC93, (UINT)handleSettingsUpdate);
 	WriteRelCall(0x7D11AD, (UINT)handleSettingsUpdate);
 	WriteRelCall(0x5D4E5B, (UINT)handleAddPerkEvent);
+	WriteRelCall(0x7865BD, (UINT)handleAddPerkEvent);
+	SafeWriteBuf(0x7865C2, "\x0F\x1F\x00", 3);
 	SafeWriteBuf(0x5D4E60, "\x0F\x1F\x00", 3);
 	WriteRelCall(0x5D4F89, (UINT)handleRemovePerkEvent);
 	SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00", 3);
