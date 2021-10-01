@@ -74,7 +74,10 @@ bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ExtraOwnership* xOwn = ThisStdCall<ExtraOwnership*>(0x567790, thisObj); // TESObjectREFR::ResolveOwnership
-	if (xOwn) ThisStdCall(0x8C0EC0, g_thePlayer, thisObj, xOwn, 0xFFFFFFFF); //TESObjectREFR::HandleMinorCrime 
+	if (xOwn) {
+		ThisStdCall(0x8C0EC0, g_thePlayer, thisObj, xOwn, 0xFFFFFFFF); //TESObjectREFR::HandleMinorCrime 
+		*result = 1;
+	}
 	return true;
 }
 bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
@@ -100,11 +103,12 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
 {
 	TESObjectREFR* container;
-
+	*result = 0;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container))
 	{
 		ExtraOwnership* xOwn = ThisStdCall<ExtraOwnership*>(0x567790, container); // TESObjectREFR::ResolveOwnership
 		ThisStdCall(0x8BFA40, thisObj, container, NULL, NULL, 1, xOwn); // Actor::HandleStealing, 
+		*result = 1;
 	}
 	return true;
 }
@@ -346,6 +350,7 @@ bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
 bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS)
 {
 	UInt32 index, isVisible;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &index, &isVisible) && index < 3)
 	{
 		FOPipboyManager* pipboyManager = g_interfaceManager->pipboyManager;
@@ -359,12 +364,14 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS)
 			{
 				pipboyManager->pipboyLightGlow[index]->m_flags |= 1;
 			}
+			*result = 1;
 		}
 	}
 	return true;
 }
 bool Cmd_UnsetAV_Execute(COMMAND_ARGS)
 {
+	*result = 0;
 	UInt32 avCode;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode))
 	{
@@ -389,6 +396,7 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS)
 		// call handle change with new value
 		float newVal = avOwner->GetActorValue(avCode);
 		HandleActorValueChange(avOwner, avCode, oldVal, newVal, NULL);
+		*result = 1;
 	}
 	return true;
 }
@@ -396,6 +404,7 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS)
 bool Cmd_UnforceAV_Execute(COMMAND_ARGS)
 {
 	UInt32 avCode;
+	*result = 0;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode))
 	{
 		Actor* actor = (Actor*)thisObj;
@@ -419,6 +428,7 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS)
 		// call handle change with new value
 		float newVal = avOwner->GetActorValue(avCode);
 		HandleActorValueChange(avOwner, avCode, oldVal, newVal, NULL);
+		*result = 1;
 	}
 	return true;
 }
@@ -455,8 +465,11 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 	NiPoint3 Point;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &(Point.x), &(Point.y), &(Point.z)))
+	*result = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &(Point.x), &(Point.y), &(Point.z))) {
 		((void(__cdecl*)(NiNode*, NiPoint3*, int))(0x62B8D0))(thisObj->GetNiNode(), &Point, 1);
+		*result = 1;
+	}
 	return true;
 }
 
@@ -464,6 +477,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	AlchemyItem* poison;
 	TESObjectWEAP* weapon;
 	ExtraDataList* xData;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {
 		if (!thisObj->IsActor()) {
 			InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
@@ -484,7 +498,10 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 		if (xData)
 		{
 			ExtraPoison* xPoison = GetExtraType((*xData), Poison);
-			if (!xPoison) ThisStdCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
+			if (!xPoison) {
+				ThisStdCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
+				*result = 1;
+			}
 		}
 	}
 	return true;
@@ -493,15 +510,15 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	int pipboyTab = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pipboyTab);
+	*result = 0;
 	if (pipboyTab == 0 || pipboyTab == 1002 || pipboyTab == 1003 || pipboyTab == 1023) {
 		if (g_interfaceManager) {
 			if (!g_interfaceManager->pipBoyMode) {
 				ThisStdCall(0x70F4E0, g_interfaceManager, 0, pipboyTab);
-			}
-				
-			else if (g_interfaceManager->pipBoyMode == 3) {
+			} else if (g_interfaceManager->pipBoyMode == 3) {
 				ThisStdCall(0x70F690, g_interfaceManager, 0);
 			}
+			*result = 1;
 		}
 	}
 	return true;
@@ -528,9 +545,11 @@ bool Cmd_StopVATSCam_Execute(COMMAND_ARGS)
 
 bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 	float shakeMult, time;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shakeMult, &time)) {
 		*(float*)(0x11DFED4) = shakeMult;
 		*(float*)(0x11DFED8) = time;
+		*result = 1;
 	}
 	return true;
 }
@@ -547,6 +566,7 @@ bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS)
 {
 	int doDisable = 1;
 	BYTE modIdx = scriptObj->GetModIndex();
+	*result = 0;
 	if (modIdx < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &doDisable))
 	{
 		if (doDisable)
@@ -557,6 +577,7 @@ bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS)
 		{
 			SaveGameUMap.erase(modIdx);
 		}
+		*result = 1;
 	}
 	return true;
 }

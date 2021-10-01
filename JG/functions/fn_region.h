@@ -32,6 +32,7 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 }
 bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && IS_TYPE(region, TESRegion)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
@@ -48,6 +49,7 @@ bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 				GameHeapFree(headNode->data);
 				headNode->RemoveMe();
 			}
+			*result = 1;
 		}
 	}
 	return true;
@@ -68,10 +70,13 @@ bool Cmd_GetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 bool Cmd_SetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	int bOverride = -1;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &bOverride) && IS_TYPE(region, TESRegion)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
-		if (weatherData)
+		if (weatherData) {
 			weatherData->bOverride = bOverride;
+			*result = 1;
+		}
 	}
 	return true;
 }
@@ -91,10 +96,13 @@ bool Cmd_GetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 bool Cmd_SetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	int priority = -1;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &priority) && IS_TYPE(region, TESRegion) && priority >= 0 && priority <= 100) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
-		if (weatherData)
+		if (weatherData) {
 			weatherData->priority = priority;
+			*result = 1;
+		}
 	}
 	return true;
 }
@@ -126,6 +134,7 @@ bool Cmd_IsWeatherInRegion_Execute(COMMAND_ARGS) {
 bool Cmd_RemoveRegionWeather_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
 	TESWeather* weather = NULL;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &weather) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
@@ -136,6 +145,7 @@ bool Cmd_RemoveRegionWeather_Execute(COMMAND_ARGS) {
 				weatherType = iter->data;
 				if (weatherType->weather == weather) {
 					iter = iter->RemoveMe();
+					*result = 1;
 					if (IsConsoleMode())
 						Console_Print("The weather is removed from Region Data");
 					return true;
@@ -153,20 +163,21 @@ bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
 	UInt32 chance = 0;
 	TESGlobal* global = NULL;
 	WeatherEntry* entry;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &weather, &chance, &global) && IS_TYPE(region, TESRegion) && IS_TYPE(weather, TESWeather)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
 			do
 			{
-				if (iter->data)
-					if (iter->data->weather == weather) return true;
+				if (iter->data && iter->data->weather == weather) return true;
 			} while (iter = iter->next);
 			entry = (WeatherEntry*)GameHeapAlloc(sizeof(WeatherEntry));
 			entry->chance = chance;
 			entry->global = global;
 			entry->weather = weather;
 			weatherData->weatherTypes.Insert(entry);
+			*result = 1;
 		}
 	}
 	return true;

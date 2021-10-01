@@ -11,9 +11,11 @@ bool Cmd_QueueObjectiveText_Execute(COMMAND_ARGS)
 {
 	char text[MAX_PATH];
 	UInt32 isCompleted, allowDisplayMultiple;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &text, &isCompleted, &allowDisplayMultiple))
 	{
 		CdeclCall(0x77A5B0, text, isCompleted, allowDisplayMultiple == 0);
+		*result = 1;
 	}
 	return true;
 };
@@ -36,6 +38,7 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS)
 	UInt32 queuePriority = kPriorityAppend;
 	UInt32 justification = kJustifyLeft;
 	int titleFont = -1, subTitleFont = -1;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &title, &subtitle, &soundPath, &queuePriority, &justification, &titleFont, &subTitleFont))
 	{
 		if (justification > kJustifyRight) justification = kJustifyRight;
@@ -43,6 +46,7 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS)
 		if (queuePriority == kPriorityClearQueueShowNow) CdeclCall(0x77F500); // HUDMainMenu::HideQuestLocationText
 
 		CdeclCall(0x76B960, title, subtitle, queuePriority == kPriorityAppend, justification, titleFont, subTitleFont, soundPath); // QuestUpdateManager::SetCustomQuestText
+		*result = 1;
 	}
 	return true;
 };
@@ -51,7 +55,7 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 	UInt32 isFemale = 0;
 	TESForm* form = NULL;
 	char newPath[MAX_PATH];
-
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPath, &isFemale, &form))
 	{
 
@@ -59,6 +63,7 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 		if (bipedModel)
 		{
 			bipedModel->icon[isFemale].ddsPath.Set(newPath);
+			*result = 1;
 		}
 	}
 
@@ -80,6 +85,7 @@ bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace, &path) && IS_TYPE(worlspace, TESWorldSpace)) {
 		worlspace->texture.ddsPath.Set(path);
+		*result = 1;
 	}
 	return true;
 }

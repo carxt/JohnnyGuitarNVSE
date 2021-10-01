@@ -56,7 +56,9 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
 	float newVal = -1;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newVal) && IS_TYPE(mediaset, MediaSet)) {
+		*result = 1;
 		switch (traitID) {
 		case 0:
 			mediaset->type = newVal;
@@ -92,6 +94,9 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 		case 17:
 			mediaset->GNAM = newVal;
 			break;
+		default:
+			*result = 0;
+			break;
 		}
 	}
 	return true;
@@ -116,13 +121,16 @@ bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	TESSound* soundForm;
 	int traitID = -1;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &soundForm) && IS_TYPE(mediaset, MediaSet) && IS_TYPE(soundForm, TESSound)) {
 		switch (traitID) {
 		case 0:
 			mediaset->HNAM = soundForm;
+			*result = 1;
 			break;
 		case 1:
 			mediaset->INAM = soundForm;
+			*result = 1;
 			break;
 		}
 	}
@@ -146,9 +154,11 @@ bool Cmd_SetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
 	const char* newStr = NULL;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newStr) && IS_TYPE(mediaset, MediaSet)) {
 		if (traitID >= 0 && traitID <= 5) {
 			mediaset->data[traitID].filepath.Set(newStr);
+			*result = 1;
 		}
 	}
 	return true;

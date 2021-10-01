@@ -28,6 +28,7 @@ bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 		actor->baseProcess->ResetQueuedIdleFlags();
 		actor->baseProcess->SetIdleForm350(NULL);
 		if (stopAnim > 0) ThisStdCall(0x498910, actor->GetAnimData(), 1, 1); // SpecialIdleFree
+		*result = 1;
 	}
 	return true;
 }
@@ -107,6 +108,7 @@ bool Cmd_SetUIUpdateSound_Execute(COMMAND_ARGS) {
 	TESSound* sound;
 	UInt32 type = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &type) && IS_TYPE(sound, TESSound)) {
+		*result = 1;
 		switch (type) {
 		case 1:
 			questFailSound = sound;
@@ -119,6 +121,9 @@ bool Cmd_SetUIUpdateSound_Execute(COMMAND_ARGS) {
 			break;
 		case 4:
 			locationDiscoverSound = sound;
+			break;
+		default:
+			*result = 0;
 			break;
 		}
 	}

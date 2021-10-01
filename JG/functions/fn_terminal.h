@@ -50,7 +50,10 @@ bool Cmd_SetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	int menuEntryID = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &submenu) && IS_TYPE(terminal, BGSTerminal) && IS_TYPE(submenu, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry) entry->subMenu = submenu;
+		if (entry) {
+			entry->subMenu = submenu;
+			*result = 1;
+		}
 	}
 	return true;
 }
@@ -61,7 +64,10 @@ bool Cmd_SetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 	int menuEntryID = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &note) && IS_TYPE(terminal, BGSTerminal) && IS_TYPE(note, BGSNote)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry) entry->displayNote = note;
+		if (entry) {
+			entry->displayNote = note;
+			*result = 1;
+		}
 	}
 	return true;
 }
@@ -85,9 +91,11 @@ bool Cmd_SetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (textID == 1) {
 			entry->entryText.Set(text);
+			*result = 1;
 		}
 		else if (textID == 2) {
 			entry->resultText.Set(text);
+			*result = 1;
 		}
 	}
 	return true;

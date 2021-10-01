@@ -97,6 +97,7 @@ bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
+	*result = 0;
 	int fileOrFolder = 0;
 	char filename[MAX_PATH];
 	UInt8 modIdx = scriptObj->GetOverridingModIdx();
@@ -111,9 +112,11 @@ bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 		if (fileOrFolder == 1) {
 			strcat(filepath, ".ini");
 			remove(filepath);
+			*result = 1;
 		}
 		else if (fileOrFolder == 2) {
 			std::filesystem::remove_all(filepath);
+			*result = 1;
 		}
 	}
 	return true;

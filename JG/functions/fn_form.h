@@ -88,9 +88,11 @@ bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 }
 bool Cmd_FaceGenRefreshAppearance_Execute(COMMAND_ARGS)
 {
+	*result = 0;
 	if (thisObj && thisObj->IsCharacter())
 	{
 		ThisStdCall(0x08D3FA0, thisObj);
+		*result = 1;
 	}
 	return true;
 }
@@ -118,11 +120,13 @@ bool Cmd_SetFaceGenNthProperty_Execute(COMMAND_ARGS)
 	UInt32 PropertyListIndex = 0;
 	UInt32 PropertyIndex = 0;
 	float val = 0;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &npc, &PropertyListIndex, &PropertyIndex, &val) && npc && IS_TYPE(npc, TESNPC) && PropertyListIndex < 3)
 	{
 		if (auto FaceGenPTR = TESNPC_GetFaceGenData(npc))
 		{
 			CdeclCall<void>(0x652320, FaceGenPTR, (PropertyListIndex < 1), (PropertyListIndex > 1), PropertyIndex, val);
+			*result = 1;
 			if (IsConsoleMode())
 			{
 				Console_Print("SetFaceGenNthProperty called");
@@ -243,6 +247,7 @@ bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
+	*result = 0;
 	char path[MAX_PATH];
 	UInt32 isFemale;
 	TESForm* form = nullptr;
@@ -251,11 +256,13 @@ bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
 		if (bipedModel)
 		{
 			bipedModel->messageIcon[isFemale].icon.ddsPath.Set(path);
+			*result = 1;
 		}
 		else {
 			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
 			if (icon) {
 				icon->icon.ddsPath.Set(path);
+				*result = 1;
 			}
 		}
 	}
@@ -267,6 +274,7 @@ bool Cmd_SetNoteRead_Execute(COMMAND_ARGS) {
 	BGSNote* note;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &isRead)) {
 		note->read = isRead > 0 ? 1 : 0;
+		*result = 1;
 	}
 	return true;
 }
@@ -311,6 +319,7 @@ bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	UInt32 traitID = 0;
 	float value;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &traitID, &value) && IS_TYPE(weap, TESObjectWEAP)) {
+		*result = 1;
 		switch (traitID) {
 		case 1:
 			weap->vatsSkill = value;
@@ -326,6 +335,9 @@ bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 			break;
 		case 5:
 			weap->modRequired = (value > 0 ? 1 : 0);
+			break;
+		default:
+			*result = 0;
 			break;
 		}
 	}
@@ -364,6 +376,7 @@ bool Cmd_SetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	char modelPath[MAX_PATH];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &modelPath) && IS_TYPE(weapon, TESObjectWEAP)) {
 		weapon->model200.SetModelPath(modelPath);
+		*result = 1;
 	}
 	return true;
 }
@@ -373,6 +386,7 @@ bool Cmd_SetProjectileSound_Execute(COMMAND_ARGS) {
 	TESSound* sound = NULL;
 	int soundID = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &projectile, &soundID, &sound) && IS_TYPE(projectile, BGSProjectile) && soundID && soundID <= 3) {
+		*result = 1;
 		switch (soundID) {
 		case 1:
 			projectile->soundProjectile = sound;
@@ -382,6 +396,9 @@ bool Cmd_SetProjectileSound_Execute(COMMAND_ARGS) {
 			break;
 		case 3:
 			projectile->soundDisable = sound;
+			break;
+		default:
+			*result = 0;
 			break;
 		}
 	}
@@ -395,6 +412,7 @@ bool Cmd_SetExplosionSound_Execute(COMMAND_ARGS) {
 	int soundID = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &explosion, &soundID, &sound) && IS_TYPE(explosion, BGSExplosion) && soundID && soundID <= 2) {
 		soundID == 1 ? (explosion->sound1 = sound) : (explosion->sound2 = sound);
+		*result = 1;
 	}
 	return true;
 }
@@ -417,6 +435,7 @@ bool Cmd_SetContainerSound_Execute(COMMAND_ARGS) {
 	TESObjectCONT* container;
 	TESSound* newSound;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &container, &whichSound, &newSound) && IS_TYPE(container, TESObjectCONT) && IS_TYPE(newSound, TESSound)) {
+		*result = 1;
 		switch (whichSound) {
 		case 0:
 			container->openSound = newSound;
@@ -426,6 +445,9 @@ bool Cmd_SetContainerSound_Execute(COMMAND_ARGS) {
 			break;
 		case 2:
 			container->randomLoopingSound = newSound;
+			break;
+		default:
+			*result = 0;
 			break;
 		}
 	}
@@ -467,9 +489,11 @@ bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 	TESRace* race;
 	UINT32 bit;
 	UINT32 setorclear;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &race, &bit, &setorclear) && IS_TYPE(race, TESRace))
 	{
 		setorclear ? race->raceFlags |= (1 << bit) : race->raceFlags &= ~(1 << bit);
+		*result = 1;
 	}
 	return true;
 }
@@ -522,6 +546,7 @@ bool Cmd_SetEquipType_Execute(COMMAND_ARGS)
 		BGSEquipType* pEquipType = DYNAMIC_CAST(pForm, TESForm, BGSEquipType);
 		if (pEquipType) {
 			pEquipType->equipType = newEquipType;
+			*result = 1;
 		}
 	}
 	return true;
@@ -582,6 +607,7 @@ bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &flagID, &isFemale, &bEnable) && flagID <= 3) {
 		armor->SetFacegenFlag(1 << flagID, isFemale, bEnable);
+		*result = 1;
 	}
 	return true;
 }
@@ -646,6 +672,7 @@ bool Cmd_SetMusicTypeDB_Execute(COMMAND_ARGS) {
 	float newVal = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype, &newVal) && IS_TYPE(mtype, BGSMusicType)) {
 		mtype->dB = newVal;
+		*result = 1;
 	}
 	return true;
 }
@@ -666,7 +693,9 @@ bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 	TESObjectWEAP* weap;
 	int id = -1;
 	TESObjectSTAT* model;
+	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &id, &model) && IS_TYPE(weap, TESObjectWEAP) && IS_TYPE(model, TESObjectSTAT) && id <= 7) {
+		*result = 1;
 		switch (id) {
 		case 0:
 			weap->worldStatic = model;
@@ -691,6 +720,9 @@ bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 			break;
 		case 7:
 			weap->modStatics[6] = model;
+			break;
+		default:
+			*result = 0;
 			break;
 		}
 	}
@@ -745,6 +777,7 @@ bool Cmd_SetIMODAnimatable_Execute(COMMAND_ARGS) {
 	int newVal = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &imod, &newVal) && (newVal == 0 || newVal == 1)) {
 		imod->animable = newVal;
+		*result = 1;
 		if (IsConsoleMode())
 			Console_Print("SetIMODAnimatable >> %d", imod->animable);
 	}
@@ -916,6 +949,7 @@ bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell, &traitID, &value) && IS_TYPE(cell, TESObjectCELL)) {
 		if (!cell->IsInterior() || traitID < 0 || traitID > 15) return true;
 		TESObjectCELL::LightingData* lightingData = cell->coords.interior;
+		*result = 1;
 		switch (traitID) {
 		case 0:
 			lightingData->ambientRGB.r = value;
@@ -966,6 +1000,7 @@ bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 			lightingData->fogClipDist = value;
 			break;
 		default:
+			*result = 0;
 			return true;
 		}
 		if (IsConsoleMode())
