@@ -279,12 +279,29 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS)
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &patch))
 	{
 		switch (patch) {
-		case 1:
-			enabled = loadEditorIDs;
-			break;
-		case 2:
-			enabled = fixHighNoon;
-			break;
+			case 1:
+				enabled = loadEditorIDs;
+				break;
+			case 2:
+				enabled = fixHighNoon;
+				break;
+			case 3:
+				enabled = fixFleeing;
+				break;
+			case 4:
+				enabled = fixItemStacks;
+				break;
+			case 5:
+				enabled = fixNPCShootingAngle;
+				break;
+			case 6:
+				enabled = noMuzzleFlashCooldown;
+				break;
+			case 7:
+				enabled = resetVanityCam;
+				break;
+			default:
+				break;
 		}
 		if (IsConsoleMode())
 			Console_Print("GetJohnnyPatch %d >> %d", patch, enabled);
