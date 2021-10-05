@@ -165,6 +165,8 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 48:
 		case 49:
 		case 61:
+			*result = shader->shaderData.addonModels->refID;
+			break;
 		case 67:
 		case 69:
 		case 70:
