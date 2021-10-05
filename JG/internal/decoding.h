@@ -3870,3 +3870,92 @@ enum SpecialInputCode
 	kInputCode_PageUp =		0x80000009,
 	kInputCode_PageDown =	0x8000000A
 };
+
+// TESEffectShader (170)
+class TESEffectShader : public TESForm
+{
+public:
+	TESEffectShader();
+	~TESEffectShader();
+
+	struct EffectShaderData
+	{
+		UInt8 flags;
+		UInt32 membraneSourceBlendMode;
+		UInt32 membraneBlendOp;
+		UInt32 membraneZTestFunc;
+		UInt32 fillTextureRGB;
+		float fillTextureAlphaFadeInTime;
+		float fillTextureFullAlphaTime;
+		float fillTextureAlphaFadeOutTime;
+		float fillTexturePersistentAlphaRatio;
+		float fillTextureAlphaPulseAmpl;
+		float fillTextureAlphaPulseFreq;
+		float fillTextureAnimSpeedU;
+		float fillTextureAnimSpeedV;
+		float edgeFallOff;
+		UInt32 edgeColor;
+		float edgeAlphaFadeInTime;
+		float edgeFullAlphaTime;
+		float edgeAlphaFadeOutTime;
+		float edgePersistentAlphaRatio;
+		float edgeAlphaPulseAmpl;
+		float edgeAlphaPulseFreq;
+		float fillTextureFullAlphaRatio;
+		float edgeFullAlphaRatio;
+		UInt32 membraneDestBlendMode;
+		UInt32 particleSourceBlendMode;
+		UInt32 particleBlendOp;
+		UInt32 particleZTestFunc;
+		UInt32 particleDestBlendMode;
+		float particleBirthRampUpTime;
+		float particleBirthFullTime;
+		float particleBirthRampDownTime;
+		float particleBirthFullRatio;
+		float particleBirthPersistRatio;
+		float particleLifetime;
+		float particleLifetimeVar;
+		float particleInitSpeedAlongNormal;
+		float particleAccelAlongNormal;
+		NiPoint3 initialVelocity;
+		NiPoint3 acceleration;
+		float scaleKey1;
+		float scaleKey2;
+		float scaleKey1Time;
+		float scaleKey2Time;
+		UInt32 colorKey1RGB;
+		UInt32 colorKey2RGB;
+		UInt32 colorKey3RGB;
+		float colorKey1Alpha;
+		float colorKey2Alpha;
+		float colorKey3Alpha;
+		float colorKey1Time;
+		float colorKey2Time;
+		float colorKey3Time;
+		float particleInitSpeedAlongNormalVar;
+		float particleInitRotDeg;
+		float particleInitRotDegVar;
+		float particleRotSpeedDegPerSec;
+		float particleRotSpeedDegPerSecVar;
+		BGSDebris* addonModels;
+		float holesStartTime;
+		float holesEndTime;
+		float holesStartVal;
+		float holesEndVal;
+		float edgeWidthAlphaUnits;
+		UInt32 edgeColorRGB;
+		float explosionWindSpeed;
+		UInt32 textureCountU;
+		UInt32 textureCountV;
+		float addonFadeInTime;
+		float addonFadeOutTime;
+		float addonScaleStart;
+		float addonScaleEnd;
+		float addonScaleInTime;
+		float addonScaleOutTime;
+	} shaderData;
+	TESTexture fillTexture;
+	TESTexture particleShaderTexture;
+	TESTexture holesTexture;
+};
+STATIC_ASSERT(sizeof(TESEffectShader) == 0x170);

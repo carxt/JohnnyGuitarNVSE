@@ -333,6 +333,11 @@ extern "C" {
 		REG_CMD(SendTrespassAlarmAlt);
 		REG_CMD(IsCrimeOrEnemy);
 		REG_TYPED_CMD(GetAvailablePerks, Array);
+		REG_CMD(GetThresholdedActorValue);
+		REG_CMD(GetEffectShaderTraitNumeric);
+		REG_CMD(SetEffectShaderTraitNumeric);
+		REG_TYPED_CMD(GetEffectShaderTexturePath, String);
+		REG_CMD(SetEffectShaderTexturePath);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

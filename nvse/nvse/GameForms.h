@@ -5089,15 +5089,7 @@ public:
 	UInt32					unk18C[2];		// 18C
 };
 
-// TESEffectShader (170)
-class TESEffectShader : public TESForm
-{
-public:
-	TESEffectShader();
-	~TESEffectShader();
 
-	UInt32 unk018[(0x170 - 0x18) >> 2];
-};
 
 // A8
 class BGSExplosion : public TESBoundObject

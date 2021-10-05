@@ -51,9 +51,133 @@ DEFINE_COMMAND_PLUGIN(GetFaceGenNthProperty, , 0, 3, kParams_OneActorBase_TwoInt
 DEFINE_COMMAND_PLUGIN(SetFaceGenNthProperty, , 0, 4, kParams_OneActorBase_TwoInts_OneFloat);
 DEFINE_COMMAND_PLUGIN(FaceGenRefreshAppearance, , 1, 0, NULL);
 DEFINE_CMD_NO_ARGS(GetAvailablePerks);
+DEFINE_COMMAND_PLUGIN(GetEffectShaderTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetEffectShaderTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
+DEFINE_COMMAND_PLUGIN(GetEffectShaderTexturePath, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetEffectShaderTexturePath, , 0, 3, kParams_OneForm_OneInt_OneString);
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+bool Cmd_SetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESEffectShader* shader;
+	UInt32 traitID;
+	char newPath[MAX_PATH];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID, &newPath) && traitID >= 0 && traitID <= 2) {
+		switch (traitID) {
+		case 0:
+			shader->fillTexture.ddsPath.Set(newPath);
+			break;
+		case 1:
+			shader->particleShaderTexture.ddsPath.Set(newPath);
+			break;
+		case 2:
+			shader->holesTexture.ddsPath.Set(newPath);
+			break;
+		}
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESEffectShader* shader;
+	UInt32 traitID;
+	const char* resStr = NULL;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID) && traitID >= 0 && traitID <= 2) {
+		switch (traitID) {
+		case 0:
+			resStr = shader->fillTexture.ddsPath.m_data;
+			break;
+		case 1:
+			resStr = shader->particleShaderTexture.ddsPath.m_data;
+			break;
+		case 2:
+			resStr = shader->holesTexture.ddsPath.m_data;
+			break;
+		}
+		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
+	}
+	return true;
+}
+
+bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESEffectShader* shader;
+	UInt32 traitID;
+	float value;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID, &value) && traitID >= 0 && traitID <= 76) {
+		switch (traitID) {
+		case 0:
+			shader->shaderData.flags = (UInt8)value;
+			break;
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 14:
+		case 23:
+		case 24:
+		case 25:
+		case 26:
+		case 27:
+		case 47:
+		case 48:
+		case 49:
+		case 61:
+			shader->shaderData.addonModels->refID = (UInt32)value;
+			break;
+		case 67:
+		case 69:
+		case 70:
+			((UInt32*)shader)[6 + traitID] = (UInt32)value;
+			break;
+		default:
+			((float*)shader)[6 + traitID] = value;
+			break;
+		}
+		*result = 1;
+	}
+	return true;
+}
+bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESEffectShader* shader;
+	UInt32 traitID;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID) && traitID >= 0 && traitID <= 76) {
+		switch (traitID) {
+		case 0:
+			*result = shader->shaderData.flags;
+			break;
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 14:
+		case 23:
+		case 24:
+		case 25:
+		case 26:
+		case 27:
+		case 47:
+		case 48:
+		case 49:
+		case 61:
+		case 67:
+		case 69:
+		case 70:
+			*result = ((UInt32*)shader)[6 + traitID];
+			break;
+		default:
+			*result = ((float*)shader)[6 + traitID];
+			break;
+		}
+		if (IsConsoleMode()) Console_Print("GetEffectShaderTraitNumeric %d >> %.2f", traitID, *result);
+	}
+	return true;
+}
 
 bool IsApplicable(BGSPerk* perk) {
 	for (int i = 0; i < perk->conditions.Count(); i++) {
