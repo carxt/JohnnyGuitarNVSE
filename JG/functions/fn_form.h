@@ -113,6 +113,9 @@ bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 0:
 			shader->shaderData.flags = (UInt8)value;
 			break;
+		case 61:
+			shader->shaderData.addonModels->refID = (UInt32)value;
+			break;
 		case 1:
 		case 2:
 		case 3:
@@ -126,9 +129,6 @@ bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 47:
 		case 48:
 		case 49:
-		case 61:
-			shader->shaderData.addonModels->refID = (UInt32)value;
-			break;
 		case 67:
 		case 69:
 		case 70:
@@ -151,6 +151,9 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 0:
 			*result = shader->shaderData.flags;
 			break;
+		case 61:
+			*result = shader->shaderData.addonModels->refID;
+			break;
 		case 1:
 		case 2:
 		case 3:
@@ -164,9 +167,6 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 47:
 		case 48:
 		case 49:
-		case 61:
-			*result = shader->shaderData.addonModels->refID;
-			break;
 		case 67:
 		case 69:
 		case 70:
