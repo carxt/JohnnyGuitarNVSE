@@ -107,11 +107,11 @@ extern "C" {
 		gLog.Open("JohnnyGuitarNVSE.log");
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "JohnnyGuitarNVSE";
-		info->version = 410;
+		info->version = 420;
 
 		if (nvse->isNogore)
 		{
-			_ERROR("NV noGore is unsupported");
+			_ERROR("German NoGore release of the game is not supported");
 			return false;
 		}
 		int version = nvse->nvseVersion;
@@ -126,7 +126,7 @@ extern "C" {
 		{
 			if (nvse->runtimeVersion < RUNTIME_VERSION_1_4_0_525)
 			{
-				_ERROR("incorrect runtime version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
+				_ERROR("incorrect New Vegas version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
 				return false;
 			}
 		}
@@ -134,13 +134,13 @@ extern "C" {
 		{
 			if (nvse->editorVersion < CS_VERSION_1_4_0_518)
 			{
-				_ERROR("incorrect editor version (got %08X need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
+				_ERROR("incorrect GECK version (got %08X need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
 				return false;
 			}
 		};
 
 		// version checks pass
-		_MESSAGE("JohnnyGuitarNVSE Loaded succesfully.\nJohnnyGuitarNVSE plugin version: %u\n", info->version);
+		_MESSAGE("JohnnyGuitarNVSE %u Loaded succesfully.", info->version);
 		char filename[MAX_PATH];
 		GetModuleFileNameA(JohnnyHandle, filename, MAX_PATH);
 		return true;
