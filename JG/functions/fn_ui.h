@@ -6,6 +6,18 @@ DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParams_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(QueueCinematicText, , 0, 7, kParams_TwoStrings_OneOptionalString_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , 0, 3, kParams_OneString_TwoOptionalInts);
+DEFINE_COMMAND_PLUGIN(GetSystemColor, , 0, 1, kParams_OneInt);
+
+bool Cmd_GetSystemColor_Execute(COMMAND_ARGS) {
+	UInt32 type;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &type) && type > 0 && type <= 5) {
+		SystemColorManager* colorMgr = SystemColorManager::GetSingleton();
+		UInt32 color = (colorMgr->GetColor(type) >> 0x8);
+		*result = color;
+		if (IsConsoleMode()) Console_Print("GetSystemColor %d >> 0x%X", type, color);
+	}
+	return true;
+};
 
 bool Cmd_QueueObjectiveText_Execute(COMMAND_ARGS)
 {

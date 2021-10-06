@@ -102,6 +102,12 @@ bool Cmd_GetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+UInt32 SwapRGB(UInt32 rgbhex) {
+	UInt32 r = (rgbhex >> 0x10) & 0xFF;
+	UInt32 g = (rgbhex >> 0x8) & 0xFF;
+	UInt32 b = (rgbhex) & 0xFF;
+	return (b << 0x10) + (g << 0x8) + r;
+}
 
 bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -116,19 +122,21 @@ bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 61:
 			shader->shaderData.addonModels->refID = (UInt32)value;
 			break;
+		case 4:
+		case 14:
+		case 47:
+		case 48:
+		case 49:
+			((UInt32*)shader)[6 + traitID] = SwapRGB((UInt32)value);
+			break;
 		case 1:
 		case 2:
 		case 3:
-		case 4:
-		case 14:
 		case 23:
 		case 24:
 		case 25:
 		case 26:
 		case 27:
-		case 47:
-		case 48:
-		case 49:
 		case 67:
 		case 69:
 		case 70:
@@ -146,6 +154,7 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESEffectShader* shader;
 	UInt32 traitID;
+	UInt32 color;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID) && traitID >= 0 && traitID <= 76) {
 		switch (traitID) {
 		case 0:
@@ -154,19 +163,24 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 61:
 			*result = shader->shaderData.addonModels->refID;
 			break;
+		case 4:
+		case 14:
+		case 47:
+		case 48:
+		case 49:
+			color = SwapRGB(((UInt32*)shader)[6 + traitID]);
+			*result = color;
+			if (IsConsoleMode()) Console_Print("GetEffectShaderTraitNumeric %d >> 0x%X", traitID, color);
+			return true;
+			break;
 		case 1:
 		case 2:
 		case 3:
-		case 4:
-		case 14:
 		case 23:
 		case 24:
 		case 25:
 		case 26:
 		case 27:
-		case 47:
-		case 48:
-		case 49:
 		case 67:
 		case 69:
 		case 70:

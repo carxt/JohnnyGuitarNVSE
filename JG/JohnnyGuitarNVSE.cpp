@@ -338,6 +338,7 @@ extern "C" {
 		REG_CMD(SetEffectShaderTraitNumeric);
 		REG_TYPED_CMD(GetEffectShaderTexturePath, String);
 		REG_CMD(SetEffectShaderTexturePath);
+		REG_CMD(GetSystemColor);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

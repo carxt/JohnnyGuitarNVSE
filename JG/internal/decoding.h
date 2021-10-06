@@ -3450,6 +3450,9 @@ struct SystemColorManager
 
 	DList<SystemColor>	sysColors;
 	UInt32				unk0C;
+
+	static SystemColorManager* GetSingleton() { return ThisStdCall<SystemColorManager*>(0x718B60, nullptr); }
+	UInt32 GetColor(UInt32 type) { return ThisStdCall<UInt32>(0x7190A0, this, type); }
 };
 
 __declspec(naked) void SystemColorManager::SystemColor::SetColorRGB(UInt32 r, UInt32 g, UInt32 b)
