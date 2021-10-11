@@ -635,3 +635,13 @@ static ParamInfo kParams_OneActorBase_TwoInts[3] =
 	{ "Property",       kParamType_Integer,        0 },
 
 };
+
+static ParamInfo kParams_SixScriptVars[6] =
+{
+	{ "Script Var", kParamType_ScriptVariable , 0 },
+	{ "Script Var", kParamType_ScriptVariable , 0 },
+	{ "Script Var", kParamType_ScriptVariable , 0 },
+	{ "Script Var", kParamType_ScriptVariable , 0 },
+	{ "Script Var", kParamType_ScriptVariable , 0 },
+	{ "Script Var", kParamType_ScriptVariable , 0 },
+};
