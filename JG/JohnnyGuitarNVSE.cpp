@@ -52,24 +52,19 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 	{
 
 	case NVSEMessagingInterface::kMessage_NewGame:
-	case NVSEMessagingInterface::kMessage_PostLoadGame:
+	case NVSEMessagingInterface::kMessage_PreLoadGame:
 	{
+		disableMuzzleLights = 0; //reset the muzzle hook every time
+		bArrowKeysDisabled = false;
 		isShowLevelUp = true;
-		PlayerCharacter* g_thePlayer = PlayerCharacter::GetSingleton();
 		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
 		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 
 		OnDyingHandler->FlushEventCallbacks();
 		OnLimbGoneHandler->FlushEventCallbacks();
 		OnCrosshairHandler->FlushEventCallbacks();
-		bArrowKeysDisabled = false;
 		RestoreDisabledPlayerControlsHUDFlags();
 		SaveGameUMap.clear();
-		break;
-	}
-	case NVSEMessagingInterface::kMessage_PreLoadGame:
-	{
-		disableMuzzleLights = 0; //reset the muzzle hook every time
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_MainGameLoop:

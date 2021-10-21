@@ -621,5 +621,5 @@ void HandleGameHooks()
 	if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
 	SafeWriteBuf(0x8BFBC1, "\x85\xC9\x74\x36\x80\x79\x04", 7); // missing null check in Actor::HandleStealing
 	if (noMuzzleFlashCooldown)	SafeWriteBuf(0x9BB6A8, "\x90\x90", 2);
-
+	SafeWrite8(0x833876, 0x84);
 }
