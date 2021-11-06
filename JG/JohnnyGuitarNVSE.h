@@ -34,6 +34,7 @@ bool resetVanityCam = 0;
 bool capLoadScreensTo60 = 0;
 bool fixNPCShootingAngle = 0;
 bool noMuzzleFlashCooldown = 0;
+bool enableRadioSubtitles = 0;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -621,5 +622,5 @@ void HandleGameHooks()
 	if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
 	SafeWriteBuf(0x8BFBC1, "\x85\xC9\x74\x36\x80\x79\x04", 7); // missing null check in Actor::HandleStealing
 	if (noMuzzleFlashCooldown)	SafeWriteBuf(0x9BB6A8, "\x90\x90", 2);
-	SafeWrite8(0x833876, 0x84);
+	if (enableRadioSubtitles) SafeWrite8(0x833876, 0x84);
 }
