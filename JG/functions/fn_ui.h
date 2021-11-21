@@ -45,19 +45,19 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS)
 		kJustifyRight
 	};
 
-	char title[MAX_PATH], subtitle[MAX_PATH], soundPath[MAX_PATH];
-	*soundPath = '\0';
+	char title[MAX_PATH], subtitle[MAX_PATH], soundEdid[MAX_PATH];
+	*soundEdid = '\0';
 	UInt32 queuePriority = kPriorityAppend;
 	UInt32 justification = kJustifyLeft;
 	int titleFont = -1, subTitleFont = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &title, &subtitle, &soundPath, &queuePriority, &justification, &titleFont, &subTitleFont))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &title, &subtitle, &soundEdid, &queuePriority, &justification, &titleFont, &subTitleFont))
 	{
 		if (justification > kJustifyRight) justification = kJustifyRight;
 
 		if (queuePriority == kPriorityClearQueueShowNow) CdeclCall(0x77F500); // HUDMainMenu::HideQuestLocationText
 
-		CdeclCall(0x76B960, title, subtitle, queuePriority == kPriorityAppend, justification, titleFont, subTitleFont, soundPath); // QuestUpdateManager::SetCustomQuestText
+		CdeclCall(0x76B960, title, subtitle, queuePriority == kPriorityAppend, justification, titleFont, subTitleFont, soundEdid); // QuestUpdateManager::SetCustomQuestText
 		*result = 1;
 	}
 	return true;
