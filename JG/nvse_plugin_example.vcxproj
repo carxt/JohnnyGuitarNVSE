@@ -262,7 +262,6 @@
     <ClInclude Include="misc\misc.h" />
     <ClInclude Include="misc\WorldToScreen.h" />
     <ClInclude Include="..\nvse\nvse\PluginAPI.h" />
-    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

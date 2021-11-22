@@ -28,7 +28,6 @@ public:
 	// utility methods
 	static Uint32 SHA1::lrot(Uint32 x, int bits);
 	static void SHA1::storeBigEndianUint32(unsigned char* byte, Uint32 num);
-	static void SHA1::hexPrinter(unsigned char* c, int l);
 };
 
 #define SHA1_HEADER

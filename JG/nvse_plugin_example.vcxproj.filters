@@ -160,7 +160,6 @@
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="JohnnyGuitarNVSE.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="events\CustomEventFilters.h">
       <Filter>events</Filter>
     </ClInclude>

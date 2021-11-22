@@ -1,6 +1,4 @@
 #include <unordered_map>
-#include <inttypes.h>
-#include <mutex>
 
 extern NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap;
 

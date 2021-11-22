@@ -1336,26 +1336,6 @@ __declspec(naked) UInt32 __fastcall ByteSwap(UInt32 dword)
 	}
 }
 
-void DumpMemImg(void *data, UInt32 size, UInt8 extra)
-{
-	UInt32 *ptr = (UInt32*)data;
-	//Console_Print("Output");
-	_MESSAGE("\nDumping  %08X\n", ptr);
-	for (UInt32 iter = 0; iter < size; iter += 4, ptr++)
-	{
-		if (!extra) _MESSAGE("%03X\t\t%08X\t", iter, *ptr);
-		else if (extra == 1) _MESSAGE("%03X\t\t%08X\t[%08X]\t", iter, *ptr, ByteSwap(*ptr));
-		else if (extra == 2) _MESSAGE("%03X\t\t%08X\t%f", iter, *ptr, *(float*)ptr);
-		/*else
-		{
-			UInt32 addr = *ptr;
-			if (!(addr & 3) && (addr > 0x08000000) && (addr < 0x34000000))
-				_MESSAGE("%03X\t\t%08X\t%08X\t", iter, *ptr, *(UInt32*)addr);
-			else _MESSAGE("%03X\t\t%08X\t", iter, *ptr);
-		}*/
-	}
-}
-
 void GetMD5File(const char *filePath, char *outHash)
 {
 	FileStream sourceFile;

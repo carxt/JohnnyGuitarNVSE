@@ -16,18 +16,6 @@ which allows it to be used in commercial software.
 #include <assert.h>
 #include "sha1.h"
 
-// print out memory in hexadecimal
-void SHA1::hexPrinter(unsigned char* c, int l)
-{
-	assert(c);
-	assert(l > 0);
-	while (l > 0)
-	{
-		printf(" %02x", *c);
-		l--;
-		c++;
-	}
-}
 
 // circular left bit rotation.  MSB wraps around to LSB
 Uint32 SHA1::lrot(Uint32 x, int bits)

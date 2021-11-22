@@ -1,6 +1,3 @@
-#include "..\..\nvse\nvse\ScriptUtils.h"
-#include <Windows.h>
-#include <unordered_map>
 #pragma once
 
 NVSEArrayVarInterface* g_arrInterface = NULL;
@@ -59,59 +56,15 @@ std::unordered_set<BYTE> SaveGameUMap;
 uintptr_t FNVCanSaveOriginalCall = 0;
 uintptr_t FNVCanSaveMenuOriginalCall = 0;
 
-bool __fastcall HookCanSaveNow(void* ThisObj, void* edx, int isAutoSave)
-{
-
-	return ThisStdCall_B(FNVCanSaveOriginalCall, ThisObj, isAutoSave) && SaveGameUMap.empty();
-
-}
-
-bool __fastcall HookCanSaveNowMenu(void* ThisObj, void* edx, int isAutoSave)
-{
-
-	return ThisStdCall_B(FNVCanSaveMenuOriginalCall, ThisObj, isAutoSave) && SaveGameUMap.empty();
-
-}
-void __fastcall hk_BipedModel_UpdateWeapon(ValidBip01Names* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods)
-{
-
-	if (fnCharacter && fnCharacter->baseProcess)
-	{
-		if (auto weapInfo = fnCharacter->baseProcess->GetWeaponInfo())
-		{
-			weapMods = ContChangesEntry_GetWeaponModFlags(weapInfo);
-
-		}
-
-	}
-	OriginalBipedModelUpdateWeapon(BipedAnim, weap, weapMods);
-}
-
-__declspec (naked) void asm_BipedModelUpdateWeapon()
-{
-	__asm
-	{
-		mov edx, dword ptr[ebp + 0x8]
-		jmp hk_BipedModel_UpdateWeapon
-	}
-}
-
-bool(__thiscall* GetPlayerInCombat)(Actor*, bool& IsNotDetected) = (bool(__thiscall*)(Actor*, bool&)) 0x0953C50;
-
-
-bool __fastcall FleeFixHook(PlayerCharacter* Player, void* unused, bool& IsHidden)
-{
-
-	return (GetPlayerInCombat(Player, IsHidden) && !IsHidden);
-}
 TESObjectCELL* TESObjectREFR::GetParentCell()
 {
 	if (this->parentCell) return parentCell;
 	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
 	if (xPersistentCell && xPersistentCell->persistentCell) return xPersistentCell->persistentCell;
 	return nullptr;
-	
+
 }
+
 double GetVectorAngle2D(NiPoint3* pt)
 {
 	double angle;
@@ -161,40 +114,6 @@ double GetAngleBetweenPoints(NiPoint3* actorPos, NiPoint3* playerPos, float offs
 	return angle * 57.295779513;
 }
 
-
-char** DefaultMarkers = (char**)0x11A0404;
-
-char* __fastcall hk_GetMapMarker(TESObjectREFR* thisObj, UInt16 MapMarkerType)
-{
-
-	auto it = CustomMapMarkerMap.find(thisObj->refID);
-	if (it != CustomMapMarkerMap.end()) return it->second;
-	return DefaultMarkers[MapMarkerType];
-}
-
-__declspec (naked) void AsmGetMapMarkerRoute()
-{
-	//UInt32 static const retAddr = 0x079D337;
-	__asm
-	{
-		mov edx, eax
-		mov ecx, [ebp - 0x24]
-		jmp hk_GetMapMarker
-	}
-}
-
-
-__declspec(naked) void Tile::SetFloat(UInt32 id, float fltVal, bool bPropagate)
-{
-	static const UInt32 procAddr = 0xA012D0;
-	__asm	jmp		procAddr
-}
-
-__declspec(naked) float ExtraContainerChanges::EntryData::GetItemHealthPerc(bool arg1)
-{
-	static const UInt32 procAddr = 0x4BCDB0;
-	__asm	jmp		procAddr
-}
 __declspec(naked) ContChangesEntry* ExtraContainerChanges::EntryDataList::FindForItem(TESForm* item)
 {
 	__asm
@@ -252,6 +171,104 @@ __forceinline void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn
 	NiPointBuffer->z = zIn;
 }
 
+UInt8 TESForm::GetOverridingModIdx()
+{
+	return mods.GetLastItem() ? mods.GetLastItem()->modIndex : 0xFF;
+}
+
+NiAVObject* NiNode::GetBlock(const char* blockName)
+{
+	if (StrEqualCI(m_blockName, blockName))
+		return this;
+	NiAVObject* found = NULL;
+	for (NiTArray<NiAVObject*>::Iterator iter(m_children); !iter.End(); ++iter)
+	{
+		if (!*iter) continue;
+		if (iter->GetNiNode())
+			found = ((NiNode*)*iter)->GetBlock(blockName);
+		else if (StrEqualCI(iter->m_blockName, blockName))
+			found = *iter;
+		else continue;
+		if (found) break;
+	}
+	return found;
+}
+
+static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
+{
+	DWORD d = 0;
+	VirtualProtect((LPVOID)Address, Size, PAGE_EXECUTE_READWRITE, &d);
+
+	for (SIZE_T i = 0; i < Size; i++)
+		*(volatile BYTE*)(Address + i) = 0x90; //0x90 == opcode for NOP
+
+	VirtualProtect((LPVOID)Address, Size, d, &d);
+
+	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
+}
+
+bool __fastcall HookCanSaveNow(void* ThisObj, void* edx, int isAutoSave)
+{
+	return ThisStdCall_B(FNVCanSaveOriginalCall, ThisObj, isAutoSave) && SaveGameUMap.empty();
+}
+
+bool __fastcall HookCanSaveNowMenu(void* ThisObj, void* edx, int isAutoSave)
+{
+	return ThisStdCall_B(FNVCanSaveMenuOriginalCall, ThisObj, isAutoSave) && SaveGameUMap.empty();
+}
+
+void __fastcall hk_BipedModel_UpdateWeapon(ValidBip01Names* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods)
+{
+
+	if (fnCharacter && fnCharacter->baseProcess)
+	{
+		if (auto weapInfo = fnCharacter->baseProcess->GetWeaponInfo())
+		{
+			weapMods = ContChangesEntry_GetWeaponModFlags(weapInfo);
+
+		}
+
+	}
+	OriginalBipedModelUpdateWeapon(BipedAnim, weap, weapMods);
+}
+
+__declspec (naked) void asm_BipedModelUpdateWeapon()
+{
+	__asm
+	{
+		mov edx, dword ptr[ebp + 0x8]
+		jmp hk_BipedModel_UpdateWeapon
+	}
+}
+
+bool(__thiscall* GetPlayerInCombat)(Actor*, bool& IsNotDetected) = (bool(__thiscall*)(Actor*, bool&)) 0x0953C50;
+
+
+bool __fastcall FleeFixHook(PlayerCharacter* Player, void* unused, bool& IsHidden)
+{
+	return (GetPlayerInCombat(Player, IsHidden) && !IsHidden);
+}
+
+char** DefaultMarkers = (char**)0x11A0404;
+
+char* __fastcall hk_GetMapMarker(TESObjectREFR* thisObj, UInt16 MapMarkerType)
+{
+
+	auto it = CustomMapMarkerMap.find(thisObj->refID);
+	if (it != CustomMapMarkerMap.end()) return it->second;
+	return DefaultMarkers[MapMarkerType];
+}
+
+__declspec (naked) void AsmGetMapMarkerRoute()
+{
+	//UInt32 static const retAddr = 0x079D337;
+	__asm
+	{
+		mov edx, eax
+		mov ecx, [ebp - 0x24]
+		jmp hk_GetMapMarker
+	}
+}
 
 void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1)
 {
@@ -279,27 +296,8 @@ void DoCustomMapMarker(TESObjectREFR* Marker, char* PathToPass)
 		CustomMapMarkerMap.insert({ Marker->refID, MapMarkerAllocString });
 	}
 }
-__declspec(naked) ExtraContainerChanges::EntryDataList* TESObjectREFR::GetContainerChangesList()
-{
-	__asm
-	{
-		push	kExtraData_ContainerChanges
-		add		ecx, 0x44
-		call	BaseExtraList::GetByType
-		test	eax, eax
-		jz		done
-		mov		eax, [eax + 0xC]
-		test	eax, eax
-		jz		done
-		mov		eax, [eax]
-		done:
-		retn
-	}
-}
-UInt8 TESForm::GetOverridingModIdx()
-{
-	return mods.GetLastItem() ? mods.GetLastItem()->modIndex : 0xFF;
-}
+
+
 _declspec(naked) void LevelUpHook() {
 	static const UInt32 noShowAddr = 0x77D903;
 	static const UInt32 showAddr = 0x77D618;
@@ -340,23 +338,7 @@ __declspec(naked) void InventoryAmmoHook() {
 		jmp retnAddr
 	}
 }
-NiAVObject* NiNode::GetBlock(const char* blockName)
-{
-	if (StrEqualCI(m_blockName, blockName))
-		return this;
-	NiAVObject* found = NULL;
-	for (NiTArray<NiAVObject*>::Iterator iter(m_children); !iter.End(); ++iter)
-	{
-		if (!*iter) continue;
-		if (iter->GetNiNode())
-			found = ((NiNode*)*iter)->GetBlock(blockName);
-		else if (StrEqualCI(iter->m_blockName, blockName))
-			found = *iter;
-		else continue;
-		if (found) break;
-	}
-	return found;
-}
+
 
 
 __declspec(naked) void OnCloseContainerHook()
@@ -473,18 +455,7 @@ void __fastcall PlayQuestFailSound(Sound* sound, int dummy) {
 	}
 }
 
-static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
-{
-	DWORD d = 0;
-	VirtualProtect((LPVOID)Address, Size, PAGE_EXECUTE_READWRITE, &d);
 
-	for (SIZE_T i = 0; i < Size; i++)
-		*(volatile BYTE*)(Address + i) = 0x90; //0x90 == opcode for NOP
-
-	VirtualProtect((LPVOID)Address, Size, d, &d);
-
-	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
-}
 
 void ResetVanityWheel()
 {

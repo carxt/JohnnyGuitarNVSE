@@ -354,7 +354,7 @@ public:
 
 		void Cleanup();
 		void RemoveCannotWear();
-		float GetItemHealthPerc(bool arg1 = true);
+		float GetItemHealthPerc(bool arg1 = true) { return ThisStdCall_F(0x4BCDB0, this, arg1); }
 		ExtraDataList *GetEquippedExtra();
 		float CalculateWeaponDamage(float condition, TESForm *ammo);
 	};

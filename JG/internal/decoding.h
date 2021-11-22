@@ -4029,6 +4029,13 @@ public:
 	bool CreateExtraData(BSExtraData* xBSData);
 };
 
+ExtraContainerChanges::EntryDataList* TESObjectREFR::GetContainerChangesList()
+{
+	ExtraContainerChanges* xChanges = (ExtraContainerChanges*)this->extraDataList.GetByType(kExtraData_ContainerChanges);
+	if (xChanges && xChanges->data) return xChanges->data->objList;
+	return nullptr;
+}
+
 bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
 {
 	ExtraContainerChanges::EntryDataList* entryList = containerRef->GetContainerChangesList();
