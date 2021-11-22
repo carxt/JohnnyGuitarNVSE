@@ -1016,6 +1016,7 @@ public:
 };
 
 // 020
+class BGSTextureSet;
 class TESModelTextureSwap : public TESModel
 {
 public:
@@ -1024,7 +1025,7 @@ public:
 
 	struct Texture 
 	{
-		UInt32	textureID;			// 00
+		BGSTextureSet*	textureID;	// 00
 		UInt32	index3D;			// 04
 		char	textureName[0x80];	// 08
 	};	// there seem to be an array (length 6) post 0x88

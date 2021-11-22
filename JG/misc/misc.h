@@ -1,5 +1,7 @@
 #pragma once
 
+#define PASS_VARARGS  scriptObj, eventList
+#define VARARGS Script *scriptObj, ScriptEventList *eventList
 
 //All thanks to jazzisparis for the code, since it's way faster than tanf.
 
@@ -9,7 +11,6 @@ inline float tan_p(float angle)
 	double ang2 = angle * angle;
 	return angle * (211.849369664121 - 12.5288887278448 * ang2) / (269.7350131214121 + ang2 * (ang2 - 71.4145309347748));
 }
-
 
 
 __forceinline float dTan(float angle) {
@@ -48,14 +49,6 @@ float fastDTan(float value) {
 }
 
 
-//As defined in NVSE.
-
-
-#define PASS_VARARGS  scriptObj, eventList
-#define VARARGS Script *scriptObj, ScriptEventList *eventList
-
-
-
 void setVarByName(VARARGS, const char* var_name, float value)
 {
 	ListNode<VariableInfo>* traverse = scriptObj->varList.Head();
@@ -76,111 +69,7 @@ void setVarByName(VARARGS, const char* var_name, float value)
 	} while (traverse = traverse->next);
 
 }
-enum UpdateType
-{
-	QuestAdded = 0x0,
-	QuestCompleted = 0x1,
-	QuestFailed = 0x2,
-	LocationDiscovered = 0x3,
-};
 
-struct QuestUpdateManager {
-	TESQuest* quest;
-	UpdateType updateType;
-	char title[260];
-	char subtitle[260];
-	UInt32 unk210;
-	UInt32 queuePriority;
-	UInt32 titleFont;
-	UInt32 subtitleFont;
-	char sound[260];
-};
-class LevelUpMenu : public Menu {
-public:
-	LevelUpMenu();
-	~LevelUpMenu();
-	UInt32 isPerkMenu;
-	TileText* tile2C;
-	TileImage* tile30;
-	TileImage* tile34;
-	TileImage* tile38;
-	TileText* tile3C;
-	TileText* tile40;
-	TileImage* tile44;
-	TileImage* tile48;
-	TileImage* tileBackBtn;
-	TileImage* tile50;
-	UInt32 unk54;
-	UInt32 unk58;
-	UInt32 unk5C;
-	UInt32 unk60;
-	UInt32 listBoxActorValue[12];
-	UInt32 listBoxPerk[12];
-	UInt32 unkC4[2];
-};
-struct MediaSetData
-{
-	String filepath; // NAM2 NAM3 NAM4 NAM5 NAM6 NAM7
-	float dB; // NAM8 NAM9 NAM0 ANAM BNAM CNAM
-	float boundary; // JNAM KNAM LNAM MNAM NNAM ONAM
-};
-
-class MediaSet : public TESForm {
-public:
-	MediaSet();
-	~MediaSet();
-	TESFullName	fullName;
-	UInt32 unk24[8];
-	UInt32 type; // NAM1
-	MediaSetData data[6];
-	UInt32 flags; //PNAM
-	float DNAM;
-	float ENAM;
-	float FNAM;
-	float GNAM;
-	TESSound* HNAM;
-	TESSound* INAM;
-};
-STATIC_ASSERT(sizeof(MediaSet) == 0xC4);
-struct ItemEntryData
-{
-	TESForm* type;
-	ContChangesEntry* entry;
-	ExtraDataList* xData;
-
-	ItemEntryData() {}
-	ItemEntryData(TESForm* _type, ContChangesEntry* _entry, ExtraDataList* _xData) : type(_type), entry(_entry), xData(_xData) {}
-};
-class InventoryRef
-{
-public:
-	ItemEntryData	data;
-	TESObjectREFR* containerRef;
-	TESObjectREFR* tempRef;
-	UInt32			deferredActions[6];
-	bool			doValidation;
-	bool			removed;
-
-	bool CreateExtraData(BSExtraData* xBSData);
-};
-
-bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
-{
-	ExtraContainerChanges::EntryDataList* entryList = containerRef->GetContainerChangesList();
-	if (!entryList) return false;
-	ContChangesEntry* entry = entryList->FindForItem(data.type);
-	if (!entry) return false;
-	data.xData = ExtraDataList::Create(xBSData);
-	if (!entry->extendData)
-	{
-		entry->extendData = (ExtraContainerChanges::ExtendDataList*)GameHeapAlloc(8);
-		entry->extendData->Init();
-	}
-	entry->extendData->Insert(data.xData);
-	return true;
-}
-
-InventoryRef* (*InventoryRefCreate)(TESObjectREFR* container, const ItemEntryData& data, bool bValidate);
 
 //Only ready for a 24-bit BMP, will check for non-24 bit later.
 //Also currently doesn't handle negative height/width BMPs, will fix later
@@ -208,22 +97,6 @@ bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long
 	delete data;
 	return true;
 }
-
-bool AlchemyItem::IsPoison()
-{
-	EffectItem* effItem;
-	EffectSetting* effSetting = NULL;
-	ListNode<EffectItem>* iter = magicItem.list.list.Head();
-	do
-	{
-		if (!(effItem = iter->data)) continue;
-		effSetting = effItem->setting;
-		if (effSetting && !(effSetting->effectFlags & 4)) return false;
-	} while (iter = iter->next);
-	return effSetting != NULL;
-}
-
-
 
 //changed tables to only loop through the ones that actually need it, credits to jazzisparis
 

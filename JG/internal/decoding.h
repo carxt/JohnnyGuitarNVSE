@@ -3962,3 +3962,87 @@ public:
 	TESTexture holesTexture;
 };
 STATIC_ASSERT(sizeof(TESEffectShader) == 0x170);
+
+enum UpdateType
+{
+	QuestAdded = 0x0,
+	QuestCompleted = 0x1,
+	QuestFailed = 0x2,
+	LocationDiscovered = 0x3,
+};
+
+struct QuestUpdateManager {
+	TESQuest* quest;
+	UpdateType updateType;
+	char title[260];
+	char subtitle[260];
+	UInt32 unk210;
+	UInt32 queuePriority;
+	UInt32 titleFont;
+	UInt32 subtitleFont;
+	char sound[260];
+};
+
+struct MediaSetData
+{
+	String filepath; // NAM2 NAM3 NAM4 NAM5 NAM6 NAM7
+	float dB; // NAM8 NAM9 NAM0 ANAM BNAM CNAM
+	float boundary; // JNAM KNAM LNAM MNAM NNAM ONAM
+};
+
+class MediaSet : public TESForm {
+public:
+	MediaSet();
+	~MediaSet();
+	TESFullName	fullName;
+	UInt32 unk24[8];
+	UInt32 type; // NAM1
+	MediaSetData data[6];
+	UInt32 flags; //PNAM
+	float DNAM;
+	float ENAM;
+	float FNAM;
+	float GNAM;
+	TESSound* HNAM;
+	TESSound* INAM;
+};
+STATIC_ASSERT(sizeof(MediaSet) == 0xC4);
+struct ItemEntryData
+{
+	TESForm* type;
+	ContChangesEntry* entry;
+	ExtraDataList* xData;
+
+	ItemEntryData() {}
+	ItemEntryData(TESForm* _type, ContChangesEntry* _entry, ExtraDataList* _xData) : type(_type), entry(_entry), xData(_xData) {}
+};
+class InventoryRef
+{
+public:
+	ItemEntryData	data;
+	TESObjectREFR* containerRef;
+	TESObjectREFR* tempRef;
+	UInt32			deferredActions[6];
+	bool			doValidation;
+	bool			removed;
+
+	bool CreateExtraData(BSExtraData* xBSData);
+};
+
+bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
+{
+	ExtraContainerChanges::EntryDataList* entryList = containerRef->GetContainerChangesList();
+	if (!entryList) return false;
+	ContChangesEntry* entry = entryList->FindForItem(data.type);
+	if (!entry) return false;
+	data.xData = ExtraDataList::Create(xBSData);
+	if (!entry->extendData)
+	{
+		entry->extendData = (ExtraContainerChanges::ExtendDataList*)GameHeapAlloc(8);
+		entry->extendData->Init();
+	}
+	entry->extendData->Insert(data.xData);
+	return true;
+}
+
+InventoryRef* (*InventoryRefCreate)(TESObjectREFR* container, const ItemEntryData& data, bool bValidate);

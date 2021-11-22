@@ -55,9 +55,48 @@ DEFINE_COMMAND_PLUGIN(GetEffectShaderTraitNumeric, , 0, 2, kParams_OneForm_OneIn
 DEFINE_COMMAND_PLUGIN(SetEffectShaderTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetEffectShaderTexturePath, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetEffectShaderTexturePath, , 0, 3, kParams_OneForm_OneInt_OneString);
+DEFINE_COMMAND_PLUGIN(GetArmorAltTextures, , 0, 2, kParams_OneForm_OneInt);
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectARMO* armor;
+	UInt32 whichModel;
+
+	if (ExtractArgs(EXTRACT_ARGS, &armor, &whichModel) && IS_TYPE(armor, TESObjectARMO)) {
+
+		TESModelTextureSwap* model;
+		switch (whichModel) {
+			case 1:
+				model = &armor->bipedModel.bipedModel[0]; // male biped
+				break;
+			case 2:
+				model = &armor->bipedModel.bipedModel[1]; // female biped
+				break;
+			case 3:
+				model = &armor->bipedModel.groundModel[0]; // male world
+				break;
+			case 4:
+				model = &armor->bipedModel.groundModel[1]; //female world
+				break;
+			default:
+				return true;
+		}
+
+		NVSEArrayVar* txstArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+
+		do
+		{
+			if (iter->data && iter->data->textureID) g_arrInterface->AppendElement(txstArr, NVSEArrayElement(iter->data->textureID));
+		} while (iter = iter->next);
+
+		if (g_arrInterface->GetArraySize(txstArr)) g_arrInterface->AssignCommandResult(txstArr, result);
+	}
+	return true;
+}
 
 bool Cmd_SetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	*result = 0;

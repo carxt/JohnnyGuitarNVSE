@@ -735,3 +735,17 @@ BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton()
 {
 	return *g_defaultObjectManager;
 }
+
+bool AlchemyItem::IsPoison()
+{
+	EffectItem* effItem;
+	EffectSetting* effSetting = NULL;
+	ListNode<EffectItem>* iter = magicItem.list.list.Head();
+	do
+	{
+		if (!(effItem = iter->data)) continue;
+		effSetting = effItem->setting;
+		if (effSetting && !(effSetting->effectFlags & 4)) return false;
+	} while (iter = iter->next);
+	return effSetting != NULL;
+}

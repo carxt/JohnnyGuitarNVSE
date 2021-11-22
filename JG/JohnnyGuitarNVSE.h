@@ -104,22 +104,13 @@ bool __fastcall FleeFixHook(PlayerCharacter* Player, void* unused, bool& IsHidde
 
 	return (GetPlayerInCombat(Player, IsHidden) && !IsHidden);
 }
-__declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
+TESObjectCELL* TESObjectREFR::GetParentCell()
 {
-	__asm
-	{
-		mov		eax, [ecx + 0x40]
-		test	eax, eax
-		jnz		done
-		push	kExtraData_PersistentCell
-		add		ecx, 0x44
-		call	BaseExtraList::GetByType
-		test	eax, eax
-		jz		done
-		mov		eax, [eax + 0xC]
-		done:
-		retn
-	}
+	if (this->parentCell) return parentCell;
+	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
+	if (xPersistentCell && xPersistentCell->persistentCell) return xPersistentCell->persistentCell;
+	return nullptr;
+	
 }
 double GetVectorAngle2D(NiPoint3* pt)
 {
@@ -168,12 +159,6 @@ double GetAngleBetweenPoints(NiPoint3* actorPos, NiPoint3* playerPos, float offs
 		angle += kDblPIx2;
 	}
 	return angle * 57.295779513;
-}
-
-TESActorBase* Actor::GetActorBase()
-{
-	ExtraLeveledCreature* xLvlCre = GetExtraType(extraDataList, LeveledCreature);
-	return (xLvlCre && xLvlCre->form) ? (TESActorBase*)xLvlCre->form : (TESActorBase*)baseForm;
 }
 
 
@@ -259,31 +244,7 @@ NiNode* NiNode::GetNode(const char* nodeName)
 	NiAVObject* found = GetBlock(nodeName);
 	return found ? found->GetNiNode() : NULL;
 }
-NiNode* TESObjectREFR::GetNode(const char* nodeName)
-{
-	NiNode* rootNode = GetNiNode();
-	return rootNode ? (*nodeName ? rootNode->GetNode(nodeName) : rootNode) : NULL;
-}
-hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName)
-{
-	NiNode* rootNode = GetNiNode();
-	if (rootNode)
-	{
-		NiNode* targetNode = rootNode->GetNode(nodeName);
-		if (targetNode && targetNode->m_collisionObject)
-		{
-			bhkWorldObject* hWorldObj = targetNode->m_collisionObject->worldObj;
-			if (hWorldObj)
-			{
-				hkpRigidBody* rigidBody = (hkpRigidBody*)hWorldObj->refObject;
-				UInt8 motionType = rigidBody->motion.type;
-				if ((motionType == 2) || (motionType == 3) || (motionType == 6))
-					return rigidBody;
-			}
-		}
-	}
-	return NULL;
-}
+
 __forceinline void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn, float& zIn)
 {
 	NiPointBuffer->x = xIn;
@@ -337,8 +298,7 @@ __declspec(naked) ExtraContainerChanges::EntryDataList* TESObjectREFR::GetContai
 }
 UInt8 TESForm::GetOverridingModIdx()
 {
-	ModInfo* info = mods.GetLastItem();
-	return info ? info->modIndex : 0xFF;
+	return mods.GetLastItem() ? mods.GetLastItem()->modIndex : 0xFF;
 }
 _declspec(naked) void LevelUpHook() {
 	static const UInt32 noShowAddr = 0x77D903;
@@ -397,11 +357,7 @@ NiAVObject* NiNode::GetBlock(const char* blockName)
 	}
 	return found;
 }
-NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName)
-{
-	NiNode* rootNode = GetNiNode();
-	return rootNode ? rootNode->GetBlock(blockName) : NULL;
-}
+
 
 __declspec(naked) void OnCloseContainerHook()
 {

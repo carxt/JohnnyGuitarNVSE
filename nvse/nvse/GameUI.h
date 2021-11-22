@@ -240,3 +240,27 @@ public:
 
 	void UpdatePlayerHead(void);
 };
+
+class LevelUpMenu : public Menu {
+public:
+	LevelUpMenu();
+	~LevelUpMenu();
+	UInt32 isPerkMenu;
+	TileText* tile2C;
+	TileImage* tile30;
+	TileImage* tile34;
+	TileImage* tile38;
+	TileText* tile3C;
+	TileText* tile40;
+	TileImage* tile44;
+	TileImage* tile48;
+	TileImage* tileBackBtn;
+	TileImage* tile50;
+	UInt32 unk54;
+	UInt32 unk58;
+	UInt32 unk5C;
+	UInt32 unk60;
+	UInt32 listBoxActorValue[12];
+	UInt32 listBoxPerk[12];
+	UInt32 unkC4[2];
+};
