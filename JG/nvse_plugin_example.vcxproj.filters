@@ -82,6 +82,9 @@
     <ClCompile Include="events\LambdaVariableContext.cpp">
       <Filter>events</Filter>
     </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameUI.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">

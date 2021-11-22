@@ -228,6 +228,7 @@ public:
 };
 
 // 170
+class TESNPC;
 class RaceSexMenu : public Menu		// 1036
 {
 public:

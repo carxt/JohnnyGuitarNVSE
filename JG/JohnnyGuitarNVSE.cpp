@@ -13,7 +13,6 @@
 #include "nvse/GameRTTI.h"
 #include "nvse/GameOSDepend.h"
 #include "nvse/GameUI.h"
-#include "nvse/GameUI.cpp"
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
 #include "nvse/ScriptUtils.h"
