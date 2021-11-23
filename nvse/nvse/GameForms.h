@@ -3598,8 +3598,32 @@ public:
 
 STATIC_ASSERT(sizeof(AlchemyItem) == 0xD8);
 
-// BGSIdleMarker (40)
-class BGSIdleMarker;
+
+class BGSIdleCollection : public BaseFormComponent
+{
+public:
+	BGSIdleCollection();
+	~BGSIdleCollection();
+
+	UInt8 flags;
+	UInt8 animCount;
+	TESIdleForm **idleList;
+	float idleTimer;
+};
+
+STATIC_ASSERT(sizeof(BGSIdleCollection) == 0x10);
+
+
+
+class BGSIdleMarker : public TESBoundObject {
+public:
+	BGSIdleMarker();
+	~BGSIdleMarker();
+	BGSIdleCollection idleCollection;
+};
+
+STATIC_ASSERT(sizeof(BGSIdleMarker) == 0x40);
+
 
 // BGSNote (80)
 class BGSNote : public TESBoundObject

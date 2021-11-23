@@ -56,9 +56,47 @@ DEFINE_COMMAND_PLUGIN(SetEffectShaderTraitNumeric, , 0, 3, kParams_OneForm_OneIn
 DEFINE_COMMAND_PLUGIN(GetEffectShaderTexturePath, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetEffectShaderTexturePath, , 0, 3, kParams_OneForm_OneInt_OneString);
 DEFINE_COMMAND_PLUGIN(GetArmorAltTextures, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetIdleMarkerTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetIdleMarkerAnimations, , 0, 1, kParams_OneForm);
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+bool Cmd_GetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSIdleMarker* marker;
+	if (ExtractArgs(EXTRACT_ARGS, &marker) && marker->idleCollection.animCount > 0) {
+		NVSEArrayVar* idleArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+		for (int i = 0; i < marker->idleCollection.animCount; i++) {
+			g_arrInterface->AppendElement(idleArr, NVSEArrayElement(marker->idleCollection.idleList[i]));
+		}
+		if (g_arrInterface->GetArraySize(idleArr)) g_arrInterface->AssignCommandResult(idleArr, result);
+	}
+	
+	return true;
+}
+bool Cmd_GetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSIdleMarker* marker;
+	UInt32 traitID;
+	if (ExtractArgs(EXTRACT_ARGS, &marker, &traitID)) {
+		switch (traitID) {
+		case 1:
+			*result = marker->idleCollection.flags;
+			break;
+		case 2:
+			*result = marker->idleCollection.idleTimer;
+			break;
+		case 3:
+			*result = marker->idleCollection.animCount;
+			break;
+		default:
+			return true;
+		}
+		if (IsConsoleMode()) Console_Print("GetIdleMarkerTraitNumeric %d >> %.2f", traitID, *result);
+	}
+	return true;
+}
 
 bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {
 	*result = 0;
