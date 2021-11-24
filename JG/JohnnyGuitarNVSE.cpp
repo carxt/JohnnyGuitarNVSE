@@ -339,6 +339,9 @@ extern "C" {
 		REG_TYPED_CMD(GetArmorAltTextures, Array);
 		REG_CMD(GetIdleMarkerTraitNumeric);
 		REG_TYPED_CMD(GetIdleMarkerAnimations, Array);
+		REG_CMD(SetIdleMarkerTraitNumeric);
+		REG_CMD(SetIdleMarkerAnimation);
+		REG_CMD(SetIdleMarkerAnimations);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

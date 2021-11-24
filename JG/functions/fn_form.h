@@ -58,6 +58,9 @@ DEFINE_COMMAND_PLUGIN(SetEffectShaderTexturePath, , 0, 3, kParams_OneForm_OneInt
 DEFINE_COMMAND_PLUGIN(GetArmorAltTextures, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetIdleMarkerTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetIdleMarkerAnimations, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetIdleMarkerTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
+DEFINE_COMMAND_PLUGIN(SetIdleMarkerAnimation, , 0, 3, kParams_OneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(SetIdleMarkerAnimations, , 0, 2, kParams_OneForm_OneInt);
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
@@ -75,6 +78,44 @@ bool Cmd_GetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 	
 	return true;
 }
+
+bool Cmd_SetIdleMarkerAnimation_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSIdleMarker* marker;
+	TESIdleForm* newAnim;
+	UInt32 animId;
+	if (ExtractArgs(EXTRACT_ARGS, &marker, &animId, &newAnim) && marker->idleCollection.animCount > animId) {
+		marker->idleCollection.idleList[animId] = newAnim;
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_SetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSIdleMarker* marker;
+	UInt32 arrID;
+	if (ExtractArgs(EXTRACT_ARGS, &marker, &arrID)) {
+		NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
+		if (!inArr) return true;
+		UInt32 size = g_arrInterface->GetArraySize(inArr);
+		if (!size) return true;
+		NVSEArrayElement* elements = new NVSEArrayElement[size];
+		g_arrInterface->GetElements(inArr, elements, NULL);
+		TESIdleForm** idleList = (TESIdleForm**)GameHeapAlloc(4 * size);
+		for (int i = 0; i < size; i++) {
+			idleList[i] = (TESIdleForm*)elements[i].Form();
+		}
+		if (marker->idleCollection.idleList) GameHeapFree(marker->idleCollection.idleList);
+		marker->idleCollection.idleList = idleList;
+		marker->idleCollection.animCount = size;
+		delete[] elements;
+		*result = 1;
+	}
+
+	return true;
+}
+
 bool Cmd_GetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSIdleMarker* marker;
@@ -98,6 +139,38 @@ bool Cmd_GetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+bool Cmd_SetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSIdleMarker* marker;
+	UInt32 traitID;
+	float newVal;
+	if (ExtractArgs(EXTRACT_ARGS, &marker, &traitID, &newVal)) {
+		switch (traitID) {
+		case 1:
+			marker->idleCollection.flags = newVal;
+			break;
+		case 2:
+			marker->idleCollection.idleTimer = newVal;
+			break;
+		default:
+			return true;
+		}
+		*result = 1;
+	}
+	return true;
+}
+TESModelTextureSwap* GetArmorModel(TESObjectARMO* armor, UInt32 id) {
+	switch (id) {
+	case 1:
+		return &armor->bipedModel.bipedModel[0]; // male biped
+	case 2:
+		return &armor->bipedModel.bipedModel[1]; // female biped
+	case 3:
+		return &armor->bipedModel.groundModel[0]; // male world
+	case 4:
+		return &armor->bipedModel.groundModel[1]; //female world
+	}
+}
 bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectARMO* armor;
@@ -105,24 +178,8 @@ bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {
 
 	if (ExtractArgs(EXTRACT_ARGS, &armor, &whichModel) && IS_TYPE(armor, TESObjectARMO)) {
 
-		TESModelTextureSwap* model;
-		switch (whichModel) {
-			case 1:
-				model = &armor->bipedModel.bipedModel[0]; // male biped
-				break;
-			case 2:
-				model = &armor->bipedModel.bipedModel[1]; // female biped
-				break;
-			case 3:
-				model = &armor->bipedModel.groundModel[0]; // male world
-				break;
-			case 4:
-				model = &armor->bipedModel.groundModel[1]; //female world
-				break;
-			default:
-				return true;
-		}
-
+		TESModelTextureSwap* model = GetArmorModel(armor, whichModel);
+		if (!model) return true;
 		NVSEArrayVar* txstArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
 
