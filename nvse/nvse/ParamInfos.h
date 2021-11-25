@@ -652,3 +652,10 @@ static ParamInfo kParams_SixScriptVars[6] =
 	{ "Script Var", kParamType_ScriptVariable , 0 },
 	{ "Script Var", kParamType_ScriptVariable , 0 },
 };
+
+static ParamInfo kParams_OneForm_OneInt_OneOptionalForm[3] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Form", kParamType_AnyForm, 1 }
+};

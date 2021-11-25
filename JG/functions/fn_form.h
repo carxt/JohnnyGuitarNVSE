@@ -7,7 +7,7 @@ DEFINE_COMMAND_PLUGIN(GetInteriorLightingTraitNumeric, , 0, 2, kParams_OneForm_O
 DEFINE_COMMAND_PLUGIN(SetInteriorLightingTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetIMODAnimatable, , 0, 1, kParams_OneIMOD);
 DEFINE_COMMAND_PLUGIN(SetIMODAnimatable, , 0, 2, kParams_OneIMOD_OneInt);
-DEFINE_COMMAND_PLUGIN(SetWeapon1stPersonModel, , 0, 3, kParams_OneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(SetWeapon1stPersonModel, , 0, 3, kParams_OneForm_OneInt_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetWeapon1stPersonModel, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetMusicTypePath, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetMusicTypeDB, , 0, 1, kParams_OneForm);
@@ -966,9 +966,9 @@ bool Cmd_GetBufferedCellsAlt_Execute(COMMAND_ARGS) {
 bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 	TESObjectWEAP* weap;
 	int id = -1;
-	TESObjectSTAT* model;
+	TESObjectSTAT* model = nullptr;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &id, &model) && IS_TYPE(weap, TESObjectWEAP) && IS_TYPE(model, TESObjectSTAT) && id <= 7) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &id, &model) && IS_TYPE(weap, TESObjectWEAP) && (!model || IS_TYPE(model, TESObjectSTAT)) && id <= 7) {
 		*result = 1;
 		switch (id) {
 		case 0:
