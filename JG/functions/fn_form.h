@@ -61,9 +61,30 @@ DEFINE_COMMAND_PLUGIN(GetIdleMarkerAnimations, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetIdleMarkerTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(SetIdleMarkerAnimation, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(SetIdleMarkerAnimations, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetWeaponAltTextures, , 0, 1, kParams_OneForm);
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+bool Cmd_GetWeaponAltTextures_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectWEAP* weapon;
+	if (ExtractArgs(EXTRACT_ARGS, &weapon) && IS_TYPE(weapon, TESObjectWEAP)) {
+		TESModelTextureSwap* model = &weapon->textureSwap;
+		if (!model) return true;
+		NVSEArrayVar* txstArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+
+		do
+		{
+			if (iter->data && iter->data->textureID) g_arrInterface->AppendElement(txstArr, NVSEArrayElement(iter->data->textureID));
+		} while (iter = iter->next);
+
+		if (g_arrInterface->GetArraySize(txstArr)) g_arrInterface->AssignCommandResult(txstArr, result);
+	}
+	return true;
+}
+
 
 bool Cmd_GetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 	*result = 0;
