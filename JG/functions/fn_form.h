@@ -62,9 +62,40 @@ DEFINE_COMMAND_PLUGIN(SetIdleMarkerTraitNumeric, , 0, 3, kParams_OneForm_OneInt_
 DEFINE_COMMAND_PLUGIN(SetIdleMarkerAnimation, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(SetIdleMarkerAnimations, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetWeaponAltTextures, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(GetRefActivationPromptOverride, GetXATO, , 1, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(SetRefActivationPromptOverride, SetXATO, , 1, 1, kParams_OneString);
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char newPrompt[MAX_PATH];
+	if (ExtractArgs(EXTRACT_ARGS, &newPrompt)) {
+		ExtraActivateRef* xActivateRef = (ExtraActivateRef*)thisObj->extraDataList.GetByType(kExtraData_ActivateRef);
+		if (xActivateRef) {
+			xActivateRef->activationPromptOverride.Set(newPrompt);
+		}
+		else {
+			xActivateRef = (ExtraActivateRef*)GameHeapAlloc(0x20);
+			ThisStdCall(0x4338B0, xActivateRef);
+			xActivateRef->activationPromptOverride.Set(newPrompt);
+			thisObj->extraDataList.Add(xActivateRef);
+		}
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
+	*result = 0;
+	ExtraActivateRef* xActivateRef = (ExtraActivateRef*)thisObj->extraDataList.GetByType(kExtraData_ActivateRef);
+	if (xActivateRef) {
+		g_strInterface->Assign(PASS_COMMAND_ARGS, xActivateRef->activationPromptOverride.CStr());
+		if (IsConsoleMode()) Console_Print("GetRefActivationPromptOverride >> %s", xActivateRef->activationPromptOverride.CStr());
+	}
+	return true;
+}
 
 bool Cmd_GetWeaponAltTextures_Execute(COMMAND_ARGS) {
 	*result = 0;

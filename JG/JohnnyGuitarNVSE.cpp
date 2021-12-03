@@ -22,6 +22,7 @@
 #include "misc/misc.h"
 #include "misc/EditorIDs.h"
 #include "internal/decoding.h"
+#include "nvse/GameSettings.h"
 #include "JohnnyGuitarNVSE.h"
 #include "nvse/ParamInfos.h"
 #include "functions/fn_av.h"
@@ -343,6 +344,8 @@ extern "C" {
 		REG_CMD(SetIdleMarkerAnimation);
 		REG_CMD(SetIdleMarkerAnimations);
 		REG_TYPED_CMD(GetWeaponAltTextures, Array);
+		REG_TYPED_CMD(GetRefActivationPromptOverride, String);
+		REG_CMD(SetRefActivationPromptOverride);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
