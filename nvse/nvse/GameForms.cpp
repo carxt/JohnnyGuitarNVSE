@@ -34,23 +34,18 @@ UInt8 TESForm::GetModIndex() const
 	return modIndex;
 }
 
-TESFullName *TESForm::GetFullName()
+TESFullName* TESForm::GetFullName() 
 {
-	TESForm *baseForm = this;
-	TESFullName *fullName = NULL;
-
-	if (GetIsReference())
-		baseForm = ((TESObjectREFR*)this)->baseForm;
-	else if IS_TYPE(this, TESObjectCELL)
+	if (typeID == kFormType_TESObjectCELL) // some exterior cells inherit name of parent worldspace
 	{
-		TESObjectCELL *cell = (TESObjectCELL*)this;
-		fullName = &cell->fullName;
+		TESObjectCELL* cell = (TESObjectCELL*)this;
+		TESFullName* fullName = &cell->fullName;
 		if ((!fullName->name.m_data || !fullName->name.m_dataLen) && cell->worldSpace)
-			fullName = &cell->worldSpace->fullName;
+			return &cell->worldSpace->fullName;
+		return fullName;
 	}
-	if (!fullName)
-		fullName = DYNAMIC_CAST(baseForm, TESForm, TESFullName);
-	return fullName;
+	const TESForm* baseForm = GetIsReference() ? ((TESObjectREFR*)this)->baseForm : this;
+	return DYNAMIC_CAST(baseForm, TESForm, TESFullName);
 }
 
 const char *TESForm::GetTheName()
