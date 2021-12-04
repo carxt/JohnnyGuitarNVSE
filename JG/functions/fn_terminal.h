@@ -8,6 +8,36 @@ DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemSubmenu, , 0, 2, kParams_OneForm_OneInt
 DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemSubmenu, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemCount, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(RemoveTerminalMenuItem, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemFlags, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemFlags, , 0, 3, kParams_OneForm_TwoInts);
+
+bool Cmd_SetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSTerminal* terminal;
+	int menuEntryID = 0;
+	UInt32 flags;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &flags) && IS_TYPE(terminal, BGSTerminal)) {
+		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
+		if (entry) {
+			entry->entryFlags = flags;
+			*result = 1;
+		}
+	}
+	return true;
+}
+bool Cmd_GetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSTerminal* terminal;
+	int menuEntryID = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && IS_TYPE(terminal, BGSTerminal)) {
+		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
+		if (entry) {
+			*result = entry->entryFlags;
+			if (IsConsoleMode()) Console_Print("GetTerminalMenuItemFlags %d >> %.f", menuEntryID, *result);
+		}
+	}
+	return true;
+}
 
 bool Cmd_RemoveTerminalMenuItem_Execute(COMMAND_ARGS) {
 	*result = 0;

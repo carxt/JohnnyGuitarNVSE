@@ -346,6 +346,8 @@ extern "C" {
 		REG_TYPED_CMD(GetWeaponAltTextures, Array);
 		REG_TYPED_CMD(GetRefActivationPromptOverride, String);
 		REG_CMD(SetRefActivationPromptOverride);
+		REG_CMD(GetTerminalMenuItemFlags);
+		REG_CMD(SetTerminalMenuItemFlags);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
