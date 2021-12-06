@@ -4131,13 +4131,14 @@ STATIC_ASSERT(sizeof(LODdata) == 0x3C);
 typedef NiTPointerMap<TESObjectCELL> CellPointerMap;
 
 // EC
+struct NiPoint3;
 class TESWorldSpace : public TESForm
 {
 public:
 	TESWorldSpace();
 	~TESWorldSpace();
 
-	virtual bool	Unk_4E(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4);
+	virtual bool	Unk_4E(String* arg1,  NiPoint3 pos);
 	virtual void	Unk_4F(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5, UInt32 arg6);
 
 	struct DCoordXY
@@ -4253,10 +4254,7 @@ STATIC_ASSERT(sizeof(TESWorldSpace) == 0xEC);
 class TESChildCell
 {
 public:
-	TESChildCell();
-	~TESChildCell();
-
-	virtual TESObjectCELL	*GetChildCell();
+	virtual TESObjectCELL	*GetPersistentCell();
 };
 
 // 2C

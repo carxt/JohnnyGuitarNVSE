@@ -85,6 +85,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 		g_VATSCameraData = (VATSCameraData*)0x11F2250;
 		g_initialTickCount = GetTickCount();
+		stringBuf = (String*)GameHeapAlloc(sizeof(String));
 		break;
 	}
 	default:
@@ -348,6 +349,7 @@ extern "C" {
 		REG_CMD(SetRefActivationPromptOverride);
 		REG_CMD(GetTerminalMenuItemFlags);
 		REG_CMD(SetTerminalMenuItemFlags);
+		REG_TYPED_CMD(GetLocationName, String);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

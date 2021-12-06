@@ -32,12 +32,39 @@ DEFINE_COMMAND_PLUGIN(ToggleDisableSaves, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsCrimeOrEnemy, , 1, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetLocationSpecificLoadScreensOnly, , , 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetLocationName, , 1, 0, NULL);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+
+
+TESWorldSpace* GetWorldspace(TESObjectREFR* ref) {
+	TESObjectCELL* cell = ref->parentCell;
+	if (!cell) cell = ref->childCell.GetPersistentCell();
+	if (cell && (cell->cellFlags & 1) == 0) return cell->worldSpace;
+	return nullptr;
+}
+
+bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
+	*result = 0;
+	const char* locationName = nullptr;
+	if (thisObj->parentCell && (thisObj->parentCell->cellFlags & 1) != 0) {
+		locationName = thisObj->parentCell->fullName.name.CStr();
+	}
+	else {
+		TESWorldSpace* wspc = GetWorldspace(thisObj);
+		if (wspc) {
+			NiPoint3* pos = thisObj->GetPos();
+			wspc->Unk_4E(stringBuf, *pos);
+			locationName = stringBuf->CStr();
+		}
+	}
+	if (locationName) g_strInterface->Assign(PASS_COMMAND_ARGS, locationName);
+	return true;
+}
 
 bool Cmd_GetLocationSpecificLoadScreensOnly_Execute(COMMAND_ARGS) {
 	*result = (float)(*(UInt8*)0x11CABB8);
