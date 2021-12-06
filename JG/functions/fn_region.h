@@ -9,6 +9,36 @@ DEFINE_COMMAND_PLUGIN(RemoveRegionWeather, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(AddRegionWeather, , 0, 4, kParams_OneForm_OneWeatherID_OneInt_OneOptionalGlobal);
 DEFINE_COMMAND_PLUGIN(GetRegionWeathers, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(ClearRegionWeathers, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(GetRegionMapName, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetRegionMapName, , 0, 2, kParams_OneForm_OneString);
+
+bool Cmd_SetRegionMapName_Execute(COMMAND_ARGS) {
+	TESRegion* region = nullptr;
+	char newName[MAX_PATH];
+	*result = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &newName) && IS_TYPE(region, TESRegion)) {
+		TESRegionDataMap* mapData = GetMapData(region);
+		if (mapData) {
+			mapData->mapName.Set(newName);
+		}
+		else {
+			mapData = (TESRegionDataMap*)GameHeapAlloc(0x10);
+			ThisStdCall(0x4F3CA0, mapData);
+			mapData->mapName.Set(newName);
+			region->dataEntries->Append(mapData);
+		}
+		*result = 1;
+	}
+	return true;
+}
+bool Cmd_GetRegionMapName_Execute(COMMAND_ARGS) {
+	TESRegion* region = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && IS_TYPE(region, TESRegion)) {
+		TESRegionDataMap* mapData = GetMapData(region);
+		if (mapData) g_strInterface->Assign(PASS_COMMAND_ARGS, mapData->mapName.CStr());
+	}
+	return true;
+}
 
 bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;

@@ -483,6 +483,17 @@ bool __fastcall ShouldPlayCombatMusic(UInt32* a1) {
 	if (bCombatMusicDisabled) return false;
 	return ThisStdCall_B(0x992D90, a1);
 }
+TESRegionDataMap* GetMapData(TESRegion* region) {
+	ListNode<TESRegionData>* iter = region->dataEntries->Head();
+	TESRegionData* regData;
+	do
+	{
+		regData = iter->data;
+		if ((*(UInt32*)regData == 0x1023D28))
+			return (TESRegionDataMap*)regData;
+	} while (iter = iter->next);
+	return NULL;
+}
 
 TESRegionDataWeather* GetWeatherData(TESRegion* region) {
 	ListNode<TESRegionData>* iter = region->dataEntries->Head();
