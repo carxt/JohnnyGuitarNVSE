@@ -209,7 +209,7 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	EventFilterStructOneFormOneInt filter = { NULL, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script))
 	{
 		if (OnLimbGoneHandler)
 		{
@@ -218,15 +218,15 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
 			else OnLimbGoneHandler->RemoveEvent(script, (void**)&filter);
 
 		}
-		return true;
 	}
+	return true;
 }
 bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) && IS_TYPE(script, Script))
 	{
 		if (OnSettingsUpdateHandler)
 		{
@@ -235,8 +235,8 @@ bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS)
 			else OnSettingsUpdateHandler->RemoveEvent(script, NULL);
 
 		}
-		return true;
 	}
+	return true;
 }
 bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
 {
@@ -244,7 +244,7 @@ bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	EventFilterStructOneFormOneInt filter = { NULL, -1 };
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script))
 	{
 		if (OnCrosshairHandler)
 		{
@@ -253,8 +253,8 @@ bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
 			else OnCrosshairHandler->RemoveEvent(script, (void**)&filter);
 
 		}
-		return true;
 	}
+	return true;
 }
 bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS)
 {
@@ -262,7 +262,7 @@ bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
 	{
 		if (OnRemovePerkHandler)
 		{
@@ -271,8 +271,8 @@ bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS)
 			else OnRemovePerkHandler->RemoveEvent(script, (void**)filter);
 
 		}
-		return true;
 	}
+	return true;
 }
 bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS)
 {
@@ -280,7 +280,7 @@ bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
 	{
 		if (OnAddPerkHandler)
 		{
@@ -289,8 +289,8 @@ bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS)
 			else OnAddPerkHandler->RemoveEvent(script, (void**)filter);
 
 		}
-		return true;
 	}
+	return true;
 }
 bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS)
 {
@@ -298,7 +298,7 @@ bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
 	{
 		if (OnChallengeCompleteHandler)
 		{
@@ -307,8 +307,8 @@ bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS)
 			else OnChallengeCompleteHandler->RemoveEvent(script, (void**)filter);
 
 		}
-		return true;
 	}
+	return true;
 }
 bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS)
 {
@@ -316,7 +316,7 @@ bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
 	{
 		if (OnSeenDataUpdateHandler)
 		{
@@ -325,8 +325,9 @@ bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS)
 			else OnSeenDataUpdateHandler->RemoveEvent(script, (void**)filter);
 
 		}
-		return true;
+		
 	}
+	return true;
 }
 bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS)
 {
@@ -334,7 +335,7 @@ bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
 	{
 		if (OnDyingHandler)
 		{
@@ -343,8 +344,8 @@ bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS)
 			else OnDyingHandler->RemoveEvent(script, (void**)filter);
 
 		}
-		return true;
 	}
+	return true;
 }
 
 bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS)
@@ -353,7 +354,7 @@ bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
 	{
 		if (OnStartQuestHandler)
 		{
@@ -362,8 +363,9 @@ bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS)
 			else OnStartQuestHandler->RemoveEvent(script, (void**)filter);
 
 		}
-		return true;
 	}
+
+	return true;
 }
 
 
@@ -373,7 +375,7 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
 	{
 		if (OnStopQuestHandler)
 		{
@@ -382,8 +384,9 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
 			else OnStopQuestHandler->RemoveEvent(script, (void**)filter);
 
 		}
-		return true;
 	}
+
+	return true;
 }
 
 bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS)
@@ -392,7 +395,7 @@ bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
 	{
 		if (OnCompleteQuestHandler)
 		{
@@ -401,8 +404,8 @@ bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS)
 			else OnCompleteQuestHandler->RemoveEvent(script, (void**)filter);
 
 		}
-		return true;
 	}
+	return true;
 }
 
 bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
@@ -411,7 +414,7 @@ bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
 	{
 		if (OnFailQuestHandler)
 		{
@@ -420,8 +423,8 @@ bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
 			else OnFailQuestHandler->RemoveEvent(script, (void**)filter);
 
 		}
-		return true;
 	}
+	return true;
 }
 
 bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
@@ -433,7 +436,7 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 		kDoNotFireInRenderMenu = 1 << 0,
 		kDoNotFireInGameMode = 1 << 1,
 	};
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) && IS_TYPE(script, Script))
 	{
 		if (!(flags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler)
 		{
@@ -450,8 +453,9 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 			else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script, NULL);
 
 		}
-		return true;
 	}
+
+	return true;
 }
 
 void HandleEventHooks()

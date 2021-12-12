@@ -513,7 +513,7 @@ bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 
 bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	AlchemyItem* poison;
-	TESObjectWEAP* weapon;
+	TESObjectWEAP* weapon = nullptr;
 	ExtraDataList* xData;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {
@@ -531,14 +531,16 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 				xData = wpnInfo->extendData->GetFirstItem();
 			}
 		}
-		UInt32 weaponSkill = weapon->weaponSkill;
-		if (weaponSkill != kAVCode_Unarmed && weaponSkill != kAVCode_MeleeWeapons) return true;
-		if (xData)
-		{
-			ExtraPoison* xPoison = GetExtraType((*xData), Poison);
-			if (!xPoison) {
-				ThisStdCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
-				*result = 1;
+		if (weapon) {
+			UInt32 weaponSkill = weapon->weaponSkill;
+			if (weaponSkill != kAVCode_Unarmed && weaponSkill != kAVCode_MeleeWeapons) return true;
+			if (xData)
+			{
+				ExtraPoison* xPoison = GetExtraType((*xData), Poison);
+				if (!xPoison) {
+					ThisStdCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
+					*result = 1;
+				}
 			}
 		}
 	}
