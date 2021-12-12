@@ -12,7 +12,7 @@ class NiNode;
 class BSShaderAccumulator;
 class ShadowSceneNode;
 class NiSourceTexture;
-
+class FORenderedMenu;
 typedef Menu* (*_TempMenuByType)(UInt32 menuType);
 extern const _TempMenuByType TempMenuByType;
 
@@ -117,8 +117,13 @@ public:
 	UInt32					unk140[5];			// 140
 	UInt32					unk154;				// 154
 	UInt32					unk158;				// 158
-	UInt32					unk15C[5];			// 15C
-	UInt8					byte170;			// 170
+	UInt32					unk15C;
+	UInt32					time160;
+	UInt32					ptr164;
+	UInt8					isRenderedMenuSet;
+	UInt8					gap169[3];
+	FORenderedMenu*			renderedMenu;
+	UInt8					isMovedMouseInRenderedMenu;
 	UInt8					byte171;			// 171
 	UInt8					byte172;			// 172
 	UInt8					byte173;			// 173

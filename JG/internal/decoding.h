@@ -2710,6 +2710,21 @@ public:
 	float burstIntensity;
 	UInt32 unk060[30];
 };
+
+// 70
+class FORenderedTerminal : public FORenderedMenu
+{
+public:
+	FORenderedTerminal();
+	~FORenderedTerminal();
+
+	NiVector3 localTranslate;
+	NiAVObject* powerButton;
+	float fltE8;
+	UInt8 bytEC;
+};
+STATIC_ASSERT(sizeof(FORenderedTerminal), 0x70);
+
 class FOPipboyManager : public FORenderedMenu
 {
 public:

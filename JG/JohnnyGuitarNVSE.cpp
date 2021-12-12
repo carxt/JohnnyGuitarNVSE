@@ -148,7 +148,7 @@ extern "C" {
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
 		strcpy((char*)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
-		loadEditorIDs = GetPrivateProfileInt("MAIN", "bLoadEditorIDs", 1, filename);
+		loadEditorIDs = 1;
 		fixHighNoon = 0;
 		fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 		fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
@@ -352,6 +352,7 @@ extern "C" {
 		REG_TYPED_CMD(GetLocationName, String);
 		REG_TYPED_CMD(GetRegionMapName, String);
 		REG_CMD(SetRegionMapName);
+		REG_CMD(TestRM);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
