@@ -102,7 +102,7 @@ extern "C" {
 		gLog.Open("JohnnyGuitarNVSE.log");
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "JohnnyGuitarNVSE";
-		info->version = 430;
+		info->version = 435;
 
 		if (nvse->isNogore)
 		{
