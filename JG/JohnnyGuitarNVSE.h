@@ -484,6 +484,7 @@ bool __fastcall ShouldPlayCombatMusic(UInt32* a1) {
 	return ThisStdCall_B(0x992D90, a1);
 }
 TESRegionDataMap* GetMapData(TESRegion* region) {
+	if (region->dataEntries->Empty()) return nullptr;
 	ListNode<TESRegionData>* iter = region->dataEntries->Head();
 	TESRegionData* regData;
 	do
@@ -492,10 +493,11 @@ TESRegionDataMap* GetMapData(TESRegion* region) {
 		if ((*(UInt32*)regData == 0x1023D28))
 			return (TESRegionDataMap*)regData;
 	} while (iter = iter->next);
-	return NULL;
+	return nullptr;;
 }
 
 TESRegionDataWeather* GetWeatherData(TESRegion* region) {
+	if (region->dataEntries->Empty()) return nullptr;
 	ListNode<TESRegionData>* iter = region->dataEntries->Head();
 	TESRegionData* regData;
 	do
@@ -504,7 +506,7 @@ TESRegionDataWeather* GetWeatherData(TESRegion* region) {
 		if ((*(UInt32*)regData == 0x1023E18))
 			return (TESRegionDataWeather*)regData;
 	} while (iter = iter->next);
-	return NULL;
+	return nullptr;
 }
 void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseExtraList* a3, UInt32 itemCount, NiPoint3* a5, void* a6) {
 	if (itemCount > 10000) {
