@@ -352,6 +352,7 @@ extern "C" {
 		REG_TYPED_CMD(GetLocationName, String);
 		REG_TYPED_CMD(GetRegionMapName, String);
 		REG_CMD(SetRegionMapName);
+		REG_CMD(GetRGBColor);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
