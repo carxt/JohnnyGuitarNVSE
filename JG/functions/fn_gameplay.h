@@ -33,12 +33,54 @@ DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsCrimeOrEnemy, , 1, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetLocationSpecificLoadScreensOnly, , , 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLocationName, , 1, 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(HasScriptPackage, , , 1, NULL);
+DEFINE_COMMAND_PLUGIN(GetPlayingEffectShaders, , 1, 0, NULL);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+
+bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
+	*result = 0;
+	ListNode<BSTempEffect>* iter = g_processManager->tempEffects.Head();
+	MagicShaderHitEffect* effect;
+	NVSEArrayVar* effArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+
+	do
+	{
+		effect = (MagicShaderHitEffect*)iter->data;
+		if (effect && IS_TYPE(effect, MagicShaderHitEffect) && effect->target && effect->target->refID == thisObj->refID) {
+			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effect->effectShader));
+		}
+	} while (iter = iter->next);
+
+	if (g_arrInterface->GetArraySize(effArr)) g_arrInterface->AssignCommandResult(effArr, result);
+	return true;
+}
+
+bool HasScriptPackage(TESObjectREFR* ref) {
+	Actor* actor = DYNAMIC_CAST(ref, TESObjectREFR, Actor);
+	if (actor && actor->baseProcess) {
+		TESPackage* package = actor->baseProcess->GetStablePackage();
+		if (package) {
+			ExtraPackage* xPackage = (ExtraPackage*)actor->extraDataList.GetByType(kExtraData_Package);
+			if (xPackage && xPackage->package && (xPackage->package->packageFlags & 0x800 != 0)) return true;
+		}
+	}
+	return false;
+}
+
+bool Cmd_HasScriptPackage_Eval(COMMAND_ARGS_EVAL) {
+	*result = HasScriptPackage(thisObj);
+	return true;
+}
+
+bool Cmd_HasScriptPackage_Execute(COMMAND_ARGS) {
+	*result = HasScriptPackage(thisObj);
+	return true;
+}
 
 
 TESWorldSpace* GetWorldspace(TESObjectREFR* ref) {
@@ -57,9 +99,11 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	else {
 		TESWorldSpace* wspc = GetWorldspace(thisObj);
 		if (wspc) {
+			String* stringBuf = (String*)GameHeapAlloc(sizeof(String));;
 			NiPoint3* pos = thisObj->GetPos();
 			wspc->Unk_4E(stringBuf, *pos);
 			locationName = stringBuf->CStr();
+			GameHeapFree(stringBuf);
 		}
 	}
 	if (locationName) g_strInterface->Assign(PASS_COMMAND_ARGS, locationName);

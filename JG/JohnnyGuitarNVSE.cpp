@@ -85,7 +85,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 		g_VATSCameraData = (VATSCameraData*)0x11F2250;
 		g_initialTickCount = GetTickCount();
-		stringBuf = (String*)GameHeapAlloc(sizeof(String));
 		break;
 	}
 	default:
@@ -353,6 +352,8 @@ extern "C" {
 		REG_TYPED_CMD(GetRegionMapName, String);
 		REG_CMD(SetRegionMapName);
 		REG_CMD(GetRGBColor);
+		REG_TYPED_CMD(GetPlayingEffectShaders, Array);
+
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
