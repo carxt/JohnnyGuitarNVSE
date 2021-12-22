@@ -98,6 +98,9 @@ extern "C" {
 	{
 		// fill out the info structure
 		gLog.Create("JohnnyGuitarNVSE.log");
+#if _DEBUG
+		s_debug.Create("JohnnyGuitarNVSE_debug.log");
+#endif
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "JohnnyGuitarNVSE";
 		info->version = 435;
