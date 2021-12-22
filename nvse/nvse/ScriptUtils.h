@@ -83,7 +83,7 @@ class ExpressionEvaluator
 		kFlag_StackTraceOnError		= 1 << 2,
 	};
 
-	Bitfield<UInt32>	 m_flags;
+	UInt32				m_flags;
 	UInt8				* m_scriptData;
 	UInt32				* m_opcodeOffsetPtr;
 	double				* m_result;
@@ -112,7 +112,7 @@ public:
 	ScriptEventList	* eventList;
 
 	void			Error(const char* fmt, ...);
-	bool			HasErrors() { return m_flags.IsSet(kFlag_ErrorOccurred); }
+	bool			HasErrors() { return (m_flags & kFlag_ErrorOccurred) != 0; }
 
 	// extract args compiled by ExpressionParser
 	bool			ExtractArgs();

@@ -44,32 +44,6 @@ const _MarkBaseExtraListScriptEvent MarkBaseExtraListScriptEvent = (_MarkBaseExt
 
 SaveGameManager ** g_saveGameManager = (SaveGameManager**)0x011DE134;
 
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-
-const _ExtractArgs ExtractArgs = (_ExtractArgs)0x005ACE60;
-
-const _FormHeap_Allocate FormHeap_Allocate = (_FormHeap_Allocate)0x00401000;
-const _FormHeap_Free FormHeap_Free = (_FormHeap_Free)0x0042F4D0;
-
-const _LookupFormByID LookupFormByID = (_LookupFormByID)0x004849B0;
-const _CreateFormInstance CreateFormInstance = (_CreateFormInstance)0x00465F10;
-
-const _GetSingleton ConsoleManager_GetSingleton = (_GetSingleton)0x0071B110;
-bool * bEchoConsole = (bool*)0x011F158C;
-
-const _QueueUIMessage QueueUIMessage = (_QueueUIMessage)0x00705220;
-
-const _ShowMessageBox ShowMessageBox = (_ShowMessageBox)0x00703DB0;
-const _ShowMessageBox_Callback ShowMessageBox_Callback = (_ShowMessageBox_Callback)0x005B4B10;
-const _ShowMessageBox_pScriptRefID ShowMessageBox_pScriptRefID = (_ShowMessageBox_pScriptRefID)0x011CAC64;
-const _ShowMessageBox_button ShowMessageBox_button = (_ShowMessageBox_button)0x0118C684;
-
-const _GetActorValueName GetActorValueName = (_GetActorValueName)0x0066E620;	// See Cmd_GetActorValue_Eval
-const UInt32 * g_TlsIndexPtr = (UInt32 *)0x0126FD98;
-const _MarkBaseExtraListScriptEvent MarkBaseExtraListScriptEvent = (_MarkBaseExtraListScriptEvent)0x005AC900;
-
-SaveGameManager ** g_saveGameManager = (SaveGameManager**)0x011DE134;
-
 #elif EDITOR
 
 //	FormMap* g_FormMap = (FormMap *)0x009EE18C;		// currently unused
@@ -330,15 +304,10 @@ TESForm* ResolveForm(UInt8* &scriptData, Script* scriptObj, ScriptEventList* eve
 
 static const char* StringFromStringVar(UInt32 strID)
 {
-#if NVSE_CORE
-	StringVar* strVar = g_StringMap.Get(strID);
-	return strVar ? strVar->GetCString() : "";
-#else
 	if (s_StringVarInterface)
 		return s_StringVarInterface->GetString(strID);
 	else
 		return "";
-#endif
 }
 
 static const char* ResolveStringArgument(ScriptEventList* eventList, const char* stringArg)
@@ -361,20 +330,6 @@ static const char* ResolveStringArgument(ScriptEventList* eventList, const char*
 
 static bool v_ExtractArgsEx(SInt16 numArgs, ParamInfo * paramInfo, UInt8* &scriptData, Script * scriptObj, ScriptEventList * eventList, va_list args)
 {
-#if NVSE_CORE
-	if (numArgs < 0) {
-		UInt32 opcodeOffsetPtr = 0;
-		if (ExtractArgsOverride::ExtractArgs(paramInfo, scriptData, scriptObj, eventList, &opcodeOffsetPtr, args, false, numArgs)) {
-			scriptData += opcodeOffsetPtr;
-			return true;
-		}
-		else {
-			DEBUG_PRINT("v_ExtractArgsEx returns false");
-			return false;
-		}
-	}
-#endif
-
 	for(UInt32 i = 0; i < numArgs; i++)
 	{
 		ParamInfo	* info = &paramInfo[i];
@@ -1310,58 +1265,6 @@ void RegisterStringVarInterface(NVSEStringVarInterface* intfc)
 {
 	s_StringVarInterface = intfc;
 }
-
-#if NVSE_CORE
-
-//fmtStringPos is index of fmtString param in paramInfo, with first param = 0
-bool ExtractFormatStringArgs(UInt32 fmtStringPos, char* buffer, ParamInfo * paramInfo, void * scriptDataIn, UInt32 * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, UInt32 maxParams, ...)
-{
-	va_list args;
-	va_start(args, maxParams);
-
-	UInt8	* scriptData = ((UInt8 *)scriptDataIn) + *scriptDataOffset;
-	SInt16	numArgs = *((SInt16 *)scriptData);
-	scriptData += 2;
-
-	if (numArgs < 0) {
-		UInt32 offsetPtr = 0;
-		bool bResult = ExtractArgsOverride::ExtractFormattedString(paramInfo, scriptData, scriptObj, eventList, &offsetPtr, args,
-			fmtStringPos, buffer, maxParams);
-		if (!bResult) {
-			DEBUG_PRINT("ExtractFormatStringArgs returns false");
-		}
-		return bResult;
-	}
-
-	numArgs -= fmtStringPos + 1;
-
-	bool bExtracted = false;
-	if (fmtStringPos > 0)
-	{
-		bExtracted = v_ExtractArgsEx(fmtStringPos, paramInfo, scriptData, scriptObj, eventList, args);
-		if (!bExtracted)
-			return false;
-	}
-
-	ScriptFormatStringArgs scriptArgs(numArgs, scriptData, scriptObj, eventList);
-	bExtracted = ExtractFormattedString(scriptArgs, buffer);
-
-	numArgs = scriptArgs.GetNumArgs();
-	scriptData = scriptArgs.GetScriptData();
-	//NOTE: if v_ExtractArgsEx was called above, passing args again in second call below = undefined behavior. Needs fixing.
-	if (bExtracted && numArgs > 0)			//some optional normal params following format string params
-	{
-		if ((numArgs + fmtStringPos + 21) > maxParams)		//scripter included too many optional params - adjust to prevent crash
-			numArgs = (maxParams - fmtStringPos - 21);
-
-		bExtracted = v_ExtractArgsEx(numArgs, &(paramInfo[fmtStringPos + 21]), scriptData, scriptObj, eventList, args);
-	}
-
-	va_end(args);
-	return bExtracted;
-}
-
-#endif
 
 bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* scriptDataIn, double * outVarData, UInt8* outModIndex, bool shortPath)
 {

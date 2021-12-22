@@ -12,13 +12,9 @@
 // winxp and above
 #define _WIN32_WINNT	0x0501
 
-#include <cstdlib>
-#include <cstdio>
-#include <cstring>
-#include "common/ITypes.h"
-#include "common/IErrors.h"
-#include "common/IDynamicCreate.h"
-#include "common/IDebugLog.h"
-#include "common/ISingleton.h"
-#include <winsock2.h>
+#include <map>
+#include "IDebugLog.h"
+#include "IErrors.h"
+#include "ITypes.h"
+#include "IDataStream.h"
 #include <Windows.h>

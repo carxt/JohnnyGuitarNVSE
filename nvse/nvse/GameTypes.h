@@ -570,69 +570,6 @@ public:
 };
 STATIC_ASSERT(sizeof(BSSimpleList<void *>) == 0xC);
 
-//#if RUNTIME
-//
-//#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-//const UInt32 _NiTMap_Lookup = 0x00853130;
-//#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-//const UInt32 _NiTMap_Lookup = 0x00844740;
-//#else
-//#error
-//#endif
-//
-//#else
-//const UInt32 _NiTMap_Lookup = 0;
-//#endif
-
-//// 10
-//template <typename T_Key, typename T_Data>
-//class NiTMapBase
-//{
-//public:
-//	NiTMapBase();
-//	virtual ~NiTMapBase();
-//
-//	virtual UInt32	CalcBucket(T_Key data);
-//	virtual bool	CompareKey(T_Key lhs, T_Key rhs);
-//	virtual void	Unk_03(void);
-//	virtual void	Unk_04(void);
-//	virtual void	AllocateNewData(void);
-//	virtual void	FreeData(T_Data data);
-//
-//	DEFINE_MEMBER_FN_LONG(NiTMapBase, Lookup, bool, _NiTMap_Lookup, T_Key key, T_Data * dataOut);
-//
-//	struct Bucket
-//	{
-//		Bucket	* next;
-//		T_Key	key;
-//		T_Data	data;
-//	};
-//
-//	// void		** vtbl				// 00
-//	UInt32		m_numBuckets;		// 04
-//	Bucket		** m_buckets;		// 08
-//	UInt32		m_numItems;			// 0C
-//};
-
-//template <typename T>
-//struct NiTArray
-//{
-//	void	* _vtbl;	// 00
-//	T		* data;		// 04
-//	UInt16	unk08;		// 08 - current size init'd to size of preallocation
-//	UInt16	length;		// 0A - init'd to 0
-//	UInt16	unk0C;		// 0C - count of not null elements init'd to 0
-//	UInt16	unk0E;		// 0E - available size init'd to size of preallocation
-//
-//	T operator[](UInt32 idx) {
-//		if (idx < length)
-//			return data[idx];
-//		return NULL;
-//	}
-//
-//	T Get(UInt32 idx) { return (*this)[idx]; }
-//};
-
 template <typename T_Data>
 struct BSSimpleArray
 {

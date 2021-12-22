@@ -14,12 +14,6 @@ static const UInt32	s_Actor_EquipItem = 0x88C650;				// maybe, also, would be: 0
 static const UInt32	s_Actor_UnequipItem = 0x88C790;				// maybe, also, would be: 007133E0 for FOSE next sub after EquipItem
 static const UInt32 s_TESObjectREFR__GetContainer = 0x55D310;	// First call in REFR::RemoveItem
 static const UInt32 s_TESObjectREFR_Set3D = 0x5702E0;			// void : (const char*)
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-static const UInt32 s_TESObject_REFR_init = 0x55A6B0;
-static const UInt32	s_Actor_EquipItem = 0x88C2B0;
-static const UInt32	s_Actor_UnequipItem = 0x88C3F0;
-static const UInt32 s_TESObjectREFR__GetContainer = 0x55D6B0;
-static const UInt32 s_TESObjectREFR_Set3D = 0x4E0F80;
 #elif EDITOR
 #else
 #error
@@ -195,8 +189,6 @@ public:
 	MEMBER_FN_PREFIX(TESObjectREFR);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(Activate, bool, 0x00573170, TESObjectREFR*, UInt32, UInt32, UInt32);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute as the last call (190 bytes)
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	DEFINE_MEMBER_FN(Activate, bool, 0x00573430, TESObjectREFR*, UInt32, UInt32, UInt32);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute
 #elif EDITOR
 #else
 #error

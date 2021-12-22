@@ -6,8 +6,6 @@
 
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 const UInt32 kNiTMapLookupAddr = 0x853130;
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-const UInt32 kNiTMapLookupAddr = 0x844740;
 #else
 #error
 #endif

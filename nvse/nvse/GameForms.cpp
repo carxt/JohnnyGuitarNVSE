@@ -8,10 +8,6 @@
 static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo
 static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x00066E920;	// See GetActorValueName
 BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo (same as gore)
-static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x0066E480;	// See GetActorValueName
-BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
 #else
 static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0;
 static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0;
@@ -319,8 +315,6 @@ bool TESForm::IsInventoryObject() const
 	typedef bool (*_IsInventoryObjectType)(UInt32 formType);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x481F30;
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x482F50;
 #elif EDITOR
 	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x4F4100;
 #else
@@ -536,7 +530,7 @@ UInt8 TESPackage::ObjectCodeForString(const char* objString)
 	return kObjectType_Max;
 }
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525 || RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
+#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	static const char** s_procNames = (const char**)0x011A3CC0;
 #elif EDITOR
 #else

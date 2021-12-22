@@ -14,8 +14,6 @@ struct BaseExtraList;
 
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	static const UInt32 s_Console__Print = 0x0071D0A0;
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	static const UInt32 s_Console__Print = 0x0071D070;
 #elif EDITOR
 #else
 #error
@@ -80,11 +78,6 @@ typedef bool (*_QueueUIMessage)(const char *msgText, UInt32 iconType, const char
 extern const _QueueUIMessage QueueUIMessage;
 
 const UInt32 kMaxMessageLength = 0x4000;
-
-#if NVSE_CORE
-bool ExtractArgsEx(ParamInfo * paramInfo, void * scriptData, UInt32 * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, ...);
-extern bool ExtractFormatStringArgs(UInt32 fmtStringPos, char* buffer, ParamInfo * paramInfo, void * scriptDataIn, UInt32 * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, UInt32 maxParams, ...);
-#endif
 
 void ShowCompilerError(ScriptLineBuffer* lineBuf, const char* fmt, ...);
 
@@ -722,8 +715,6 @@ public:
 	MEMBER_FN_PREFIX(TESSaveLoadGame);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(AddCreatedForm, UInt32, 0x00861780, TESForm * pForm);
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	DEFINE_MEMBER_FN(AddCreatedForm, UInt32, 0x00861330, TESForm * pForm);
 #elif EDITOR
 #else
 #error
@@ -733,9 +724,6 @@ public:
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 const UInt32 _SaveGameManager_ConstructSavegameFilename = 0x0084FF90;
 const UInt32 _SaveGameManager_ConstructSavegamePath		= 0x0084FF30;
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-const UInt32 _SaveGameManager_ConstructSavegameFilename = 0x0084F9E0;
-const UInt32 _SaveGameManager_ConstructSavegamePath		= 0x0084F980;
 #elif EDITOR
 #else
 #error
@@ -938,56 +926,3 @@ struct NavMeshStaticAvoidNode
 	UInt32	unk020;	// 20
 	UInt32	unk024;	// 24
 };	// Alloc'd to 0x28
-
-/* I need to port NiTypes 
-
-class NavMesh: public TESForm
-{
-	NavMesh();
-	~NavMesh();
-
-	struct NavMeshGridCells
-	{
-		UInt32					cellCount;	// 00
-		BSSimpleArray<UInt16>	cells[1];	// 04
-	};	// 4 + cellCount*0x10
-
-	struct NavMeshGrid
-	{
-		UInt32	size;					// 000 = 0
-		float	unk004;					// 004
-		float	unk008;					// 008
-		float	flt00C;					// 00C Init'd to MAXFLOAT
-		float	unk010;					// 010
-		float	unk014;					// 014
-		float	unk018;					// 018
-		float	unk01C;					// 01C
-		float	unk020;					// 020
-		NavMeshGridCells	* cells;	// 024 = 0, array of size size*size
-	};
-
-	TESChildCell								childCell;				// 018
-	NiRefObject									niro;					// 01C
-	TESObjectCELL								* cell;					// 024
-	BSSimpleArray<NavMeshVertex>				vertices;				// 028
-	BSSimpleArray<NavMeshTriangle>				triangles;				// 038
-	BSSimpleArray<EdgeExtraInfo>				edgesExtraInfo;			// 048
-	BSSimpleArray<NavMeshTriangleDoorPortal>	trianglesDoorPortal;	// 058
-	BSSimpleArray<NavMeshClosedDoorInfo>		closedDoorsInfo;		// 068
-	BSSimpleArray<UInt16>						arr07NVCA;				// 078
-	NiTMap<ushort,NavMeshPOVData>				povDataMap;				// 088
-	BSSimpleArray<UInt8>						arr098;					// 098
-	NavMeshGrid									grid;					// 0A8
-	BSSimpleArray<NiTPointer<ObstacleUndoData>>	obstaclesUndoData;		// 0D0
-	NiTMap<ushort,NiPointer<ObstacleData>>		* obstaclesData;		// 0E0
-	BSSimpleArray<UInt8>						arr0E4;					// 0E4
-	BSSimpleArray<NavMeshStaticAvoidNode>		staticAvoidNodes;		// 0F4
-};
-
-class NavMeshInfoMap: public TESForm
-{
-	// 1C is NiTPointerMap indexed by NavMesh refID
-	// 2C is a map of map indexed by Worldspace/Cell refID
-};
-
-*/

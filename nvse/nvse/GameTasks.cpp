@@ -8,10 +8,6 @@
 	// IOManager** g_ioManager = (IOManager**)0x00B33A10;
 	UInt32 kModelLoader_QueueReference = 0x00444850;
 	UInt32 * kBSTaskCounter = (UInt32*) 0x0011C3B38;
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	// IOManager** g_ioManager = (IOManager**)0x00B33A10;
-	UInt32 kModelLoader_QueueReference = 0x004446D0;
-	UInt32 * kBSTaskCounter = (UInt32*)0x0011C3B38;
 #else
 #error unsupported Oblivion version
 #endif

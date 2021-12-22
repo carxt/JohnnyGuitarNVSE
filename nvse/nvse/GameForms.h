@@ -605,8 +605,6 @@ public:
 	MEMBER_FN_PREFIX(TESForm);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00484490);	// probably a member of TESForm
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00485480);	// probably a member of TESForm
 #elif EDITOR
 #else
 #error
@@ -3095,29 +3093,31 @@ public:
 	STATIC_ASSERT(eReload_Count == 23);
 
 	enum EWeaponFlags1 {
-		eFlag_IgnoresNormalWeapResist	= 0x1,
-		eFlag_IsAutomatic				= 0x2,
-		eFlag_HasScope					= 0x4,
-		eFlag_CantDrop					= 0x8,
-		eFlag_HideBackpack				= 0x10,
-		eFlag_EmbeddedWeapon			= 0x20,
-		eFlag_No1stPersonISAnims		= 0x40,
-		Eflag_NonPlayable				= 0x80
+		eFlag_IgnoresNormalWeapResist = 0x1,
+		eFlag_IsAutomatic = 0x2,
+		eFlag_HasScope = 0x4,
+		eFlag_CantDrop = 0x8,
+		eFlag_HideBackpack = 0x10,
+		eFlag_EmbeddedWeapon = 0x20,
+		eFlag_No1stPersonISAnims = 0x40,
+		eflag_NonPlayable = 0x80
 	};
 
 	enum EWeaponFlags2 {
-		eFlag_PlayerOnly				= 0x1,
-		eFlag_NPCsUseAmmo				= 0x2,
-		eFlag_NoJamAfterReload			= 0x4,
-		eFlag_ActionPointOverride		= 0x8,
-		eFlag_MinorCrime				= 0x10,
-		eFlag_FixedRange				= 0x20,
-		eFlag_NotUsedNormalCombat		= 0x40,
-		eFlag_DamageToWeaponOverride	= 0x80,
-		eFlag_No3rdPersonISAnims		= 0x100,
-		eFlag_BurstShot					= 0x200,
-		eFlag_RumbleAlternate			= 0x400,
-		eFlag_LongBurst					= 0x800,
+		eFlag_PlayerOnly = 0x1,
+		eFlag_NPCsUseAmmo = 0x2,
+		eFlag_NoJamAfterReload = 0x4,
+		eFlag_ActionPointOverride = 0x8,
+		eFlag_MinorCrime = 0x10,
+		eFlag_FixedRange = 0x20,
+		eFlag_NotUsedNormalCombat = 0x40,
+		eFlag_DamageToWeaponOverride = 0x80,
+		eFlag_No3rdPersonISAnims = 0x100,
+		eFlag_BurstShot = 0x200,
+		eFlag_RumbleAlternate = 0x400,
+		eFlag_LongBurst = 0x800,
+		eFlag_ScopeNightVision = 0x1000,
+		eFlag_ScopeFromMod = 0x2000
 	};
 
 	enum EEmbedWeapAV {
@@ -3191,7 +3191,7 @@ public:
 	UInt8				pad[3];
 	float				animMult;			// 0F8
 	float				reach;				// 0FC
-	Bitfield8			weaponFlags1;		// 100
+	UInt8				weaponFlags1;		// 100
 	UInt8				handGrip;			// 101
 	UInt8				ammoUse;			// 102
 	UInt8				reloadAnim;			// 103
@@ -3208,7 +3208,7 @@ public:
 	float				minRange;			// 120
 	float				maxRange;			// 124
 	UInt32				onHit;				// 128
-	Bitfield32			weaponFlags2;		// 12C
+	UInt32				weaponFlags2;		// 12C
 	float				animAttackMult;		// 130
 	float				fireRate;			// 134
 	float				AP;					// 138
@@ -3268,12 +3268,20 @@ public:
 	byte				modRequired;			// 381
 	byte				pad382[3];
 
-	bool IsAutomatic() const { return weaponFlags1.IsSet(eFlag_IsAutomatic); }
-	void SetIsAutomatic(bool bAuto) { weaponFlags1.Write(eFlag_IsAutomatic, bAuto); }
-	bool HasScope() const { return weaponFlags1.IsSet(eFlag_HasScope); }
-	bool IsNonPlayable() { return weaponFlags1.IsSet( 0x80 ); }
+	bool IsAutomatic() const { return (weaponFlags1 & eFlag_IsAutomatic) != 0; }
+	void SetIsAutomatic(bool bAuto)
+	{
+		if (bAuto) weaponFlags1 |= eFlag_IsAutomatic;
+		else weaponFlags1 &= ~eFlag_IsAutomatic;
+	}
+	bool HasScope() const { return (weaponFlags1 & eFlag_HasScope) != 0; }
+	bool IsNonPlayable() { return (weaponFlags1 & eflag_NonPlayable) != 0; }
 	bool IsPlayable() { return !IsNonPlayable(); }
-	void SetPlayable(bool doset) { weaponFlags1.Write(Eflag_NonPlayable, !doset); }
+	void SetPlayable(bool doset)
+	{
+		if (doset) weaponFlags1 &= ~eflag_NonPlayable;
+		else weaponFlags1 |= eflag_NonPlayable;
+	}
 	UInt8 HandGrip() const;
 	void SetHandGrip(UInt8 handGrip);
 	UInt8 AttackAnimation() const;

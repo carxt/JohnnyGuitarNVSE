@@ -1,4 +1,4 @@
-This license applies to all of the files in src/common:
+This license applies to all of the files in internal/common:
 
 Copyright (c) 2006-2011 Ian Patterson
 

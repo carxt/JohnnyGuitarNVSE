@@ -1,6 +1,4 @@
 #include "IFileStream.h"
-#include "IDebugLog.h"
-#include "IErrors.h"
 #include <direct.h>
 
 IFileStream::IFileStream()
