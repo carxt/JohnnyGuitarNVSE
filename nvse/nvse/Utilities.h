@@ -44,7 +44,7 @@ const char * GetObjectClassName(void * obj);
 #if RUNTIME
 #ifdef _DEBUG
 #define DEBUG_PRINT(x, ...) { Console_Print((x), __VA_ARGS__); }
-#define DEBUG_MESSAGE(x, ...) { _MESSAGE((x), __VA_ARGS__); }
+#define DEBUG_MESSAGE(x, ...) { PrintDebug((x), __VA_ARGS__); }
 #else
 #define DEBUG_PRINT(x, ...) { }
 #define DEBUG_MESSAGE(x, ...) { }

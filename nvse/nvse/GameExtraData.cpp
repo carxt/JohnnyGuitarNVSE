@@ -197,40 +197,40 @@ void ExtraContainerChanges::Cleanup()
 
 void ExtraContainerChanges::DebugDump()
 {
-	_MESSAGE("Dumping ExtraContainerChanges");
-	gLog.Indent();
+	PrintDebug("Dumping ExtraContainerChanges");
+	s_debug.Indent();
 
 	if (data && data->objList)
 	{
 		for (ExtraContainerChanges::EntryDataList::Iterator entry = data->objList->Begin(); !entry.End(); ++entry)
 		{
-			_MESSAGE("Type: %s CountDelta: %d [%08X]", GetFullName(entry.Get()->type), entry.Get()->countDelta, entry.Get());
-			gLog.Indent();
+			PrintDebug("Type: %s CountDelta: %d [%08X]", GetFullName(entry.Get()->type), entry.Get()->countDelta, entry.Get());
+			s_debug.Indent();
 			if (!entry.Get() || !entry.Get()->extendData)
-				_MESSAGE("* No extend data *");
+				PrintDebug("* No extend data *");
 			else
 			{
 				for (ExtraContainerChanges::ExtendDataList::Iterator extendData = entry.Get()->extendData->Begin(); !extendData.End(); ++extendData)
 				{
-					_MESSAGE("Extend Data: [%08X]", extendData.Get());
-					gLog.Indent();
+					PrintDebug("Extend Data: [%08X]", extendData.Get());
+					s_debug.Indent();
 					if (extendData.Get()) {
 						extendData.Get()->DebugDump();
 						ExtraCount* xCount = (ExtraCount*)extendData.Get()->GetByType(kExtraData_Count);
 						if (xCount) {
-							_MESSAGE("ExtraCount value : %d", xCount->count);
+							PrintDebug("ExtraCount value : %d", xCount->count);
 						}
 					}
 					else
-						_MESSAGE("NULL");
+						PrintDebug("NULL");
 
-					gLog.Outdent();
+					s_debug.Outdent();
 				}
 			}
-			gLog.Outdent();
+			s_debug.Outdent();
 		}
 	}
-	gLog.Outdent();
+	s_debug.Outdent();
 }
 #endif
 

@@ -22,9 +22,6 @@
     <Filter Include="misc">
       <UniqueIdentifier>{4714bb52-e742-43b4-9391-6acc122a3c7b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="internal\common">
-      <UniqueIdentifier>{35c006e0-65ec-4310-9af4-127169ad887b}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
@@ -87,18 +84,6 @@
     </ClCompile>
     <ClCompile Include="..\nvse\nvse\GameUI.cpp">
       <Filter>nvse</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\common\IDataStream.cpp">
-      <Filter>internal\common</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\common\IDebugLog.cpp">
-      <Filter>internal\common</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\common\IErrors.cpp">
-      <Filter>internal\common</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\common\IFileStream.cpp">
-      <Filter>internal\common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,23 +220,8 @@
     <ClInclude Include="events\LambdaVariableContext.h">
       <Filter>events</Filter>
     </ClInclude>
-    <ClInclude Include="internal\common\IDataStream.h">
-      <Filter>internal\common</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\common\IDebugLog.h">
-      <Filter>internal\common</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\common\IErrors.h">
-      <Filter>internal\common</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\common\IFileStream.h">
-      <Filter>internal\common</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\common\IPrefix.h">
-      <Filter>internal\common</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\common\ITypes.h">
-      <Filter>internal\common</Filter>
+    <ClInclude Include="..\nvse\nvse\prefix.h">
+      <Filter>nvse</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

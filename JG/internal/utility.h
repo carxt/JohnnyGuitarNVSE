@@ -1,3 +1,4 @@
+// all credits to JazzisParis
 #pragma once
 
 const double
@@ -227,6 +228,27 @@ public:
 
 	static void MakeAllDirs(char* fullPath);
 };
+
+class DebugLog
+{
+	FILE* theFile;
+	UInt32			indent;
+
+public:
+	DebugLog() : theFile(NULL), indent(40) {}
+	~DebugLog() { if (theFile) fclose(theFile); }
+
+	bool Create(const char* filePath);
+	void Message(const char* msgStr);
+	void FmtMessage(const char* fmt, va_list args);
+	void Indent() { if (indent) indent--; }
+	void Outdent() { if (indent < 40) indent++; }
+};
+
+extern DebugLog gLog, s_debug;
+
+void PrintLog(const char* fmt, ...);
+void PrintDebug(const char* fmt, ...);
 
 class LineIterator
 {

@@ -79,7 +79,7 @@ extern const _QueueUIMessage QueueUIMessage;
 
 const UInt32 kMaxMessageLength = 0x4000;
 
-void ShowCompilerError(ScriptLineBuffer* lineBuf, const char* fmt, ...);
+
 
 #else
 
@@ -222,7 +222,7 @@ struct ExtractedParam
 	} data;
 };
 
-bool ExtractArgsRaw(ParamInfo * paramInfo, void * scriptDataIn, UInt32 * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, ...);
+
 
 enum EActorVals {
 	eActorVal_Aggression			= 0,

@@ -3289,9 +3289,9 @@ public:
 	TESObjectIMOD* GetItemMod(UInt8 which);
 	TESAmmo *GetAmmo();
 	float GetModBonuses(UInt8 modFlags, UInt32 effectID);
-	UInt32 GetItemModEffect(UInt8 which)	{ which -= 1; ASSERT(which < 3); return effectMods[which]; }
-	float GetItemModValue1(UInt8 which)		{ which -= 1; ASSERT(which < 3); return value1Mod[which]; }
-	float GetItemModValue2(UInt8 which)		{ which -= 1; ASSERT(which < 3); return value2Mod[which]; }
+	UInt32 GetItemModEffect(UInt8 which) { which -= 1; return (which < 3) ? effectMods[which] : 0; }
+	float GetItemModValue1(UInt8 which) { which -= 1; return (which < 3) ? value1Mod[which] : 0; }
+	float GetItemModValue2(UInt8 which) { which -= 1; return (which < 3) ? value2Mod[which] : 0; }
 };
 STATIC_ASSERT(sizeof(TESObjectWEAP) == 0x388);
 
@@ -5345,7 +5345,7 @@ public:
 		{
 			if(numAddedObjects == 0)
 			{
-				_MESSAGE("BGSListForm::RemoveNthForm: numAddedObjects = 0");
+				PrintDebug("BGSListForm::RemoveNthForm: numAddedObjects = 0");
 			}
 			else
 			{

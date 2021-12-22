@@ -1,3 +1,4 @@
+// all credits to JazzisParis
 #include "internal/utility.h"
 #include "nvse/GameAPI.h"
 #include "internal/md5/md5.h"
@@ -1273,7 +1274,51 @@ void FileStream::MakeAllDirs(char *fullPath)
 		traverse++;
 	}
 }
+bool DebugLog::Create(const char* filePath)
+{
+	theFile = _fsopen(filePath, "wb", 0x20);
+	return theFile != NULL;
+}
 
+const char kIndentLevelStr[] = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+
+void DebugLog::Message(const char* msgStr)
+{
+	if (!theFile) return;
+	if (indent < 40)
+		fputs(kIndentLevelStr + indent, theFile);
+	fputs(msgStr, theFile);
+	fputc('\n', theFile);
+	fflush(theFile);
+}
+
+void DebugLog::FmtMessage(const char* fmt, va_list args)
+{
+	if (!theFile) return;
+	if (indent < 40)
+		fputs(kIndentLevelStr + indent, theFile);
+	vfprintf(theFile, fmt, args);
+	fputc('\n', theFile);
+	fflush(theFile);
+}
+
+DebugLog gLog, s_debug;
+
+void PrintLog(const char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	gLog.FmtMessage(fmt, args);
+	va_end(args);
+}
+
+void PrintDebug(const char* fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+	s_debug.FmtMessage(fmt, args);
+	va_end(args);
+}
 LineIterator::LineIterator(const char *filePath, char *buffer)
 {
 	dataPtr = buffer;

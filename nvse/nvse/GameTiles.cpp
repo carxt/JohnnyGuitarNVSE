@@ -192,12 +192,12 @@ Tile *Tile::GetComponentTile(const char *componentPath)
 
 void Tile::Dump()
 {
-	_MESSAGE("%08X\t%s", this, name.m_data);
-	gLog.Indent();
+	PrintDebug("%08X\t%s", this, name.m_data);
+	s_debug.Indent();
 
-	_MESSAGE("Values:");
+	PrintDebug("Values:");
 
-	gLog.Indent();
+	s_debug.Indent();
 	
 	Value *value;
 	const char *traitName;
@@ -213,19 +213,19 @@ void Tile::Dump()
 			traitName = traitID;
 		}
 		if (value->str)
-			_MESSAGE("%d  %s: %s", value->id, traitName, value->str);
+			PrintDebug("%d  %s: %s", value->id, traitName, value->str);
 		/*else if (value->action)
-			_MESSAGE("%d  %s: Action %08X", value->id, traitName, value->action);*/
+			PrintDebug("%d  %s: Action %08X", value->id, traitName, value->action);*/
 		else
-			_MESSAGE("%d  %s: %.4f", value->id, traitName, value->num);
+			PrintDebug("%d  %s: %.4f", value->id, traitName, value->num);
 	}
 
-	gLog.Outdent();
+	s_debug.Outdent();
 
 	for (DListNode<Tile> *traverse = children.Tail(); traverse; traverse = traverse->prev)
 		if (traverse->data) traverse->data->Dump();
 
-	gLog.Outdent();
+	s_debug.Outdent();
 }
 
 void Debug_DumpTraits(void)
@@ -234,7 +234,7 @@ void Debug_DumpTraits(void)
 	{
 		for (TraitNameMap::Entry * bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next)
 		{
-			_MESSAGE("%s %d", bucket->key, bucket->data);
+			PrintDebug("%s %d", bucket->key, bucket->data);
 		}
 	}
 }

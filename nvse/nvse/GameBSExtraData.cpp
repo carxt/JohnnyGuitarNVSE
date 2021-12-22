@@ -121,24 +121,24 @@ char BaseExtraList::GetExtraFactionRank(TESFaction *faction)
 
 void BaseExtraList::DebugDump() const
 {
-	_MESSAGE("\nBaseExtraList Dump:");
+	PrintDebug("\nBaseExtraList Dump:");
 	Console_Print("BaseExtraList Dump:");
-	gLog.Indent();
+	s_debug.Indent();
 	if (m_data)
 	{
 		for (BSExtraData *traverse = m_data; traverse; traverse = traverse->next)
 		{
-			_MESSAGE("%08X\t%02X\t%s\t%08X", traverse, traverse->type, GetExtraDataName(traverse->type), ((UInt32*)traverse)[3]);
+			PrintDebug("%08X\t%02X\t%s\t%08X", traverse, traverse->type, GetExtraDataName(traverse->type), ((UInt32*)traverse)[3]);
 			Console_Print("%08X  %02X  %s  %08X", traverse, traverse->type, GetExtraDataName(traverse->type), ((UInt32*)traverse)[3]);
 		}
 		Console_Print(" ");
 	}
 	else
 	{
-		_MESSAGE("No data in list");
+		PrintDebug("No data in list");
 		Console_Print("No data in list");
 	}
-	gLog.Outdent();
+	s_debug.Outdent();
 }
 
 bool BaseExtraList::MarkScriptEvent(UInt32 eventMask, TESForm* eventTarget)

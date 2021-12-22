@@ -23,7 +23,6 @@ String* stringBuf;
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 #define VarNameSize 64
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
-IDebugLog ParamLog;
 bool loadEditorIDs = 0;
 bool fixHighNoon = 0;
 bool fixFleeing = 0;

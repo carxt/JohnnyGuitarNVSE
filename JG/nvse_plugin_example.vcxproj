@@ -124,10 +124,6 @@
     <ClCompile Include="..\nvse\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\nvse\Utilities.cpp" />
     <ClCompile Include="events\LambdaVariableContext.cpp" />
-    <ClCompile Include="internal\common\IDataStream.cpp" />
-    <ClCompile Include="internal\common\IDebugLog.cpp" />
-    <ClCompile Include="internal\common\IErrors.cpp" />
-    <ClCompile Include="internal\common\IFileStream.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
     <ClCompile Include="internal\sha1\sha1.cpp" />
     <ClCompile Include="internal\utility.cpp" />
@@ -150,6 +146,7 @@
     <ClInclude Include="..\nvse\nvse\GameTypes.h" />
     <ClInclude Include="..\nvse\nvse\GameUI.h" />
     <ClInclude Include="..\nvse\nvse\ParamInfos.h" />
+    <ClInclude Include="..\nvse\nvse\prefix.h" />
     <ClInclude Include="..\nvse\nvse\SafeWrite.h" />
     <ClInclude Include="..\nvse\nvse\Utilities.h" />
     <ClInclude Include="events\CustomEventFilters.h" />
@@ -167,12 +164,6 @@
     <ClInclude Include="functions\fn_terminal.h" />
     <ClInclude Include="functions\fn_ui.h" />
     <ClInclude Include="functions\fn_utility.h" />
-    <ClInclude Include="internal\common\IDataStream.h" />
-    <ClInclude Include="internal\common\IDebugLog.h" />
-    <ClInclude Include="internal\common\IErrors.h" />
-    <ClInclude Include="internal\common\IFileStream.h" />
-    <ClInclude Include="internal\common\IPrefix.h" />
-    <ClInclude Include="internal\common\ITypes.h" />
     <ClInclude Include="internal\containers.h" />
     <ClInclude Include="internal\decoding.h" />
     <ClInclude Include="internal\havok.h" />

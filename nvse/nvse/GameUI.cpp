@@ -109,12 +109,12 @@ void Debug_DumpMenus(void)
 
 		if(tileMenu)
 		{
-			_MESSAGE("menu %d:");
-			gLog.Indent();
+			PrintDebug("menu %d:");
+			s_debug.Indent();
 
 			tileMenu->Dump();
 
-			gLog.Outdent();
+			s_debug.Outdent();
 		}
 	}
 }

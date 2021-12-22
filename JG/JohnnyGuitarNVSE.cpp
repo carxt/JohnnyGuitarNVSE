@@ -39,7 +39,6 @@
 #include "events/JohnnyEvents.h"
 
 HMODULE JohnnyHandle;
-IDebugLog		gLog;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
@@ -98,21 +97,21 @@ extern "C" {
 	bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info)
 	{
 		// fill out the info structure
-		gLog.Open("JohnnyGuitarNVSE.log");
+		gLog.Create("JohnnyGuitarNVSE.log");
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "JohnnyGuitarNVSE";
 		info->version = 435;
 
 		if (nvse->isNogore)
 		{
-			_ERROR("German NoGore release of the game is not supported");
+			PrintLog("German NoGore release of the game is not supported");
 			return false;
 		}
 		int version = nvse->nvseVersion;
 		double s_nvseVersion = (version >> 24) + (((version >> 16) & 0xFF) * 0.1) + (((version & 0xFF) >> 4) * 0.01);
 		if (version < 0x6020030)
 		{
-			_ERROR("NVSE version is outdated (v%.2f). This plugin requires v6.1 minimum.", s_nvseVersion);
+			PrintLog("NVSE version is outdated (v%.2f). This plugin requires v6.1 minimum.", s_nvseVersion);
 			return false;
 		}
 
@@ -120,7 +119,7 @@ extern "C" {
 		{
 			if (nvse->runtimeVersion < RUNTIME_VERSION_1_4_0_525)
 			{
-				_ERROR("incorrect New Vegas version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
+				PrintLog("incorrect New Vegas version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
 				return false;
 			}
 		}
@@ -128,13 +127,13 @@ extern "C" {
 		{
 			if (nvse->editorVersion < CS_VERSION_1_4_0_518)
 			{
-				_ERROR("incorrect GECK version (got %08X need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
+				PrintLog("incorrect GECK version (got %08X need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
 				return false;
 			}
 		};
 
 		// version checks pass
-		_MESSAGE("JohnnyGuitarNVSE %u Loaded succesfully.", info->version);
+		PrintLog("JohnnyGuitarNVSE %u Loaded succesfully.", info->version);
 		char filename[MAX_PATH];
 		GetModuleFileNameA(JohnnyHandle, filename, MAX_PATH);
 		return true;
