@@ -51,7 +51,7 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	do
 	{
 		effect = (MagicShaderHitEffect*)iter->data;
-		if (effect && IS_TYPE(effect, MagicShaderHitEffect) && effect->target && effect->target->refID == thisObj->refID) {
+		if (effect && IS_TYPE(effect, MagicShaderHitEffect) && effect->flags != 1 && effect->target && effect->target->refID == thisObj->refID) {
 			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effect->effectShader));
 		}
 	} while (iter = iter->next);

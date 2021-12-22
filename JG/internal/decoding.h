@@ -98,8 +98,8 @@ public:
 
 	float			duration;	// 08
 	TESObjectCELL	*cell;		// 0C
-	float			unk10;		// 10
-	UInt8			unk14;		// 14
+	float			age;		// 10
+	bool			initialized;// 14
 	UInt8			pad15[3];	// 15
 };
 
@@ -121,7 +121,7 @@ public:
 
 	ActiveEffect	*activeEffect;	// 18
 	TESObjectREFR	*target;		// 1C
-	float			unk20;			// 20
+	float			timeElapsed;			// 20
 	UInt8			flags;			// 24	1 - Stop
 	UInt8			pad25[3];		// 25
 };
@@ -135,7 +135,7 @@ public:
 
 	UInt32									unk28[2];		// 28
 	TESEffectShader							*effectShader;	// 30
-	float									flt34;			// 34
+	float									timeElapsed;	// 34
 	BSSimpleArray<ParticleShaderProperty>	shaderProps;	// 38
 	NiNode									*shaderNode;	// 48
 	UInt32									unk4C;			// 4C
@@ -460,8 +460,8 @@ public:
 
 	virtual void	Unk_CC(void);
 
-	float		flt150;		// 150
-	float		flt154;		// 154
+	float		fExpirationTimer;		// 150
+	float		fConeAngle;		// 154
 };
 
 // 154
@@ -1849,10 +1849,10 @@ public:
 	~ImageSpaceModifierInstanceForm();
 
 	TESImageSpaceModifier	*imageSpace;	// 1C
-	void					*ptr20;			// 20
-	float					flt24;			// 24
-	NiObject				*obj28;			// 28
-	float					flt2C;			// 2C
+	TESImageSpaceModifier	*lastImageSpace;			// 20
+	float					lastStrength;			// 24
+	NiObject				*lastTarget;			// 28
+	float					transitionTime;			// 2C
 };
 
 // 30
@@ -1938,10 +1938,10 @@ public:
 	float							flt110;				// 110
 	UInt32							unk114;				// 114
 	UInt32							flags;				// 118
-	ImageSpaceModifierInstanceForm	*ismif11C;			// 11C
-	ImageSpaceModifierInstanceForm	*ismif120;			// 120
-	ImageSpaceModifierInstanceForm	*ismif124;			// 124
-	ImageSpaceModifierInstanceForm	*ismif128;			// 128
+	ImageSpaceModifierInstanceForm	*pCurrentWeatherImageSpaceMod;			// 11C
+	ImageSpaceModifierInstanceForm	*pCurrentWeatherImageSpaceMod2;			// 120
+	ImageSpaceModifierInstanceForm	*pLastWeatherImageSpaceMod;			// 124
+	ImageSpaceModifierInstanceForm	*pLastWeatherImageSpaceMod2;			// 128
 	float							flt12C;				// 12C
 	float							flt130;				// 130
 	float							flt134;				// 134
@@ -3291,7 +3291,7 @@ public:
 	ExtraCollisionData();
 	virtual ~ExtraCollisionData();
 
-	UInt32			unk0C;			// 0C
+	UInt32			layer;			// 0C
 };
 
 // 10
@@ -3345,14 +3345,20 @@ class ExtraFollowerSwimBreadcrumbs : public BSExtraData
 public:
 	ExtraFollowerSwimBreadcrumbs();
 	virtual ~ExtraFollowerSwimBreadcrumbs();
-
-	UInt32			unk0C;
-	float			unk10;
-	float			unk14;
-	float			unk18;
-	UInt32			unk1C;
-	tList<void>		list20;
+	struct ExtraFollowerSwimBreadcrumb
+	{
+		NiPoint3 StartLocation;
+		UInt32 StartNavMeshID;
+		NiPoint3 EndLocation;
+		UInt32 EndNavMeshID;
+		bool bEnteringWater;
+	};
+	UInt32			leaderState;
+	NiPoint3		leaderLocation;
+	UInt32			leaderNavmeshID;
+	tList<ExtraFollowerSwimBreadcrumb*>		crumbList;
 };
+STATIC_ASSERT(sizeof(ExtraFollowerSwimBreadcrumbs) == 0x28);
 
 // 10
 class ExtraAudioMarker : public BSExtraData
