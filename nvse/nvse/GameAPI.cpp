@@ -7,11 +7,6 @@
 #include "GameScript.h"
 #include "StringVar.h"
 
-#if NVSE_CORE
-#include "Hooks_Script.h"
-#include "ScriptUtils.h"
-#endif
-
 static NVSEStringVarInterface* s_StringVarInterface = NULL;
 bool extraTraces = false;
 
