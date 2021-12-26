@@ -64,6 +64,25 @@ DEFINE_COMMAND_PLUGIN(SetIdleMarkerAnimations, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetWeaponAltTextures, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(GetRefActivationPromptOverride, GetXATO, , 1, 0, NULL);
 DEFINE_COMMAND_ALT_PLUGIN(SetRefActivationPromptOverride, SetXATO, , 1, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(RemoveScopeModelPath, , 0, 1, kParams_OneForm);
+
+bool Cmd_RemoveScopeModelPath_Execute(COMMAND_ARGS)
+{
+	TESObjectWEAP* weapon = NULL;
+	TESModel* model = NULL;
+	*result = 0;
+
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && IS_TYPE(weapon, TESObjectWEAP))
+	{
+		if (weapon && weapon->HasScope()) model = &(weapon->targetNIF);
+		if (model) {
+			model->nifPath.Set("");
+			*result = 1;
+		}
+	}
+
+	return true;
+}
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;

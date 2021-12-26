@@ -33,8 +33,8 @@ DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsCrimeOrEnemy, , 1, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetLocationSpecificLoadScreensOnly, , , 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLocationName, , 1, 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(HasScriptPackage, , , 1, NULL);
 DEFINE_COMMAND_PLUGIN(GetPlayingEffectShaders, , 1, 0, NULL);
+
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -59,29 +59,6 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	if (g_arrInterface->GetArraySize(effArr)) g_arrInterface->AssignCommandResult(effArr, result);
 	return true;
 }
-
-bool HasScriptPackage(TESObjectREFR* ref) {
-	Actor* actor = DYNAMIC_CAST(ref, TESObjectREFR, Actor);
-	if (actor && actor->baseProcess) {
-		TESPackage* package = actor->baseProcess->GetStablePackage();
-		if (package) {
-			ExtraPackage* xPackage = (ExtraPackage*)actor->extraDataList.GetByType(kExtraData_Package);
-			if (xPackage && xPackage->package && (xPackage->package->packageFlags & 0x800 != 0)) return true;
-		}
-	}
-	return false;
-}
-
-bool Cmd_HasScriptPackage_Eval(COMMAND_ARGS_EVAL) {
-	*result = HasScriptPackage(thisObj);
-	return true;
-}
-
-bool Cmd_HasScriptPackage_Execute(COMMAND_ARGS) {
-	*result = HasScriptPackage(thisObj);
-	return true;
-}
-
 
 TESWorldSpace* GetWorldspace(TESObjectREFR* ref) {
 	TESObjectCELL* cell = ref->parentCell;
