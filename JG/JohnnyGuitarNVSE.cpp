@@ -355,7 +355,6 @@ extern "C" {
 		REG_CMD(SetRegionMapName);
 		REG_CMD(GetRGBColor);
 		REG_TYPED_CMD(GetPlayingEffectShaders, Array);
-		REG_CMD(RemoveScopeModelPath);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

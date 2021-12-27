@@ -14,8 +14,6 @@ DEFINE_COMMAND_PLUGIN(WorldToScreen, , 0, 8, kParamsProjectionArgs);
 DEFINE_COMMAND_PLUGIN(RGBtoHSV, , 0, 6, kParams_SixScriptVars);
 DEFINE_COMMAND_PLUGIN(HSVtoRGB, , 0, 6, kParams_SixScriptVars);
 DEFINE_COMMAND_PLUGIN(GetRGBColor, , 0, 3, kParams_ThreeInts);
-DEFINE_COMMAND_PLUGIN(IsEven, , 0, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(IsOdd, , 0, 1, kParams_OneInt);
 
 bool Cmd_GetRGBColor_Execute(COMMAND_ARGS) {
 	*result = 0;
