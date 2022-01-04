@@ -3366,15 +3366,50 @@ public:
 	bool IsPlayable() {return !IsNonPlayable();}
 	void SetPlayable(bool doset) {if (doset) flags &= ~kFlags_NonPlayable; else flags |= kFlags_NonPlayable;}
 };
-
+enum CardSuits {
+	kHearts = 1,
+	kSpades,
+	kDiamonds,
+	kClubs,
+	kJoker
+};
+enum CardValues {
+	kAce = 1,
+	k2,
+	k3,
+	k4,
+	k5,
+	k6,
+	k7,
+	k8,
+	k9,
+	k10,
+	kJack = 12,
+	kQueen,
+	kKing,
+	kJoker
+};
 STATIC_ASSERT(sizeof(TESAmmo) == 0xDC);
-
 class TESCaravanCard : public TESBoundObject
 {
 public:
 	TESCaravanCard();
 	~TESCaravanCard();
+
+	TESFullName name;
+	TESModelTextureSwap model;
+	TESIcon icon;
+	BGSMessageIcon messageIcon;
+	TESValueForm value;
+	TESScriptableForm script;
+	BGSPickupPutdownSounds pickupSound;
+	void* pad98;
+	TESTexture textureFace;
+	TESTexture textureBack;
+	CardValues cardValue;
+	CardSuits cardSuit;
 };
+STATIC_ASSERT(sizeof(TESCaravanCard) == 0xBC);
 
 class BSFaceGenNiNode;
 

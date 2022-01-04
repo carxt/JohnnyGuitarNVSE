@@ -4075,3 +4075,13 @@ bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
 }
 
 InventoryRef* (*InventoryRefCreate)(TESObjectREFR* container, const ItemEntryData& data, bool bValidate);
+
+class TESCaravanDeck : public TESForm {
+	public:
+		TESCaravanDeck();
+		~TESCaravanDeck();
+		TESFullName name;
+		tList<TESCaravanCard> *cards;
+		UInt32 count;
+};
+STATIC_ASSERT(sizeof(TESCaravanDeck) == 0x2C);
