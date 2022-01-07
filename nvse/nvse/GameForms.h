@@ -3387,7 +3387,7 @@ enum CardValues {
 	kJack = 12,
 	kQueen,
 	kKing,
-	kJoker
+	kJokerCard
 };
 STATIC_ASSERT(sizeof(TESAmmo) == 0xDC);
 class TESCaravanCard : public TESBoundObject

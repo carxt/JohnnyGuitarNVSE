@@ -3447,7 +3447,7 @@ struct SystemColorManager
 
 		String		traitName;
 
-		void SetColorRGB(UInt32 r, UInt32 g, UInt32 b);
+		void SetColorRGB(UInt32 r, UInt32 g, UInt32 b) { this->SetColor(((r & 0xFF) << 16) + ((g & 0xFF) << 8) + (b & 0xFF)); }
 	};
 
 	// 10
@@ -3476,23 +3476,6 @@ struct SystemColorManager
 	static SystemColorManager* GetSingleton() { return ThisStdCall<SystemColorManager*>(0x718B60, nullptr); }
 	UInt32 GetColor(UInt32 type) { return ThisStdCall<UInt32>(0x7190A0, this, type); }
 };
-
-__declspec(naked) void SystemColorManager::SystemColor::SetColorRGB(UInt32 r, UInt32 g, UInt32 b)
-{
-	__asm
-	{
-		xor		eax, eax
-		mov		ah, [esp+4]
-		mov		al, [esp+8]
-		shl		eax, 0x10
-		mov		ah, [esp+0xC]
-		mov		al, 0xFF
-		push	eax
-		mov		eax, [ecx]
-		call	dword ptr [eax+8]
-		retn	0xC
-	}
-}
 
 // 8C
 class ObstacleData : public NiRefObject

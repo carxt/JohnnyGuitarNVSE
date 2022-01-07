@@ -114,25 +114,15 @@ double GetAngleBetweenPoints(NiPoint3* actorPos, NiPoint3* playerPos, float offs
 	return angle * 57.295779513;
 }
 
-__declspec(naked) ContChangesEntry* ExtraContainerChanges::EntryDataList::FindForItem(TESForm* item)
+ContChangesEntry* ExtraContainerChanges::EntryDataList::FindForItem(TESForm* item)
 {
-	__asm
-	{
-		mov		edx, [esp + 4]
-		listIter:
-		mov		eax, [ecx]
-			test	eax, eax
-			jz		listNext
-			cmp[eax + 8], edx
-			jz		done
-			listNext :
-		mov		ecx, [ecx + 4]
-			test	ecx, ecx
-			jnz		listIter
-			xor eax, eax
-			done :
-		retn	4
-	}
+	ListNode<ContChangesEntry>* iter = this->Head();
+
+	do {
+		if (iter->data && iter->data->type == item) return iter->data;
+	} while (iter = iter->next);
+
+	return nullptr;
 }
 
 float __declspec(naked) __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2)
