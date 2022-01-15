@@ -13,6 +13,11 @@ static ParamInfo kParams_TwoInts[2] =
 	{	"int", kParamType_Integer, 0 },
 };
 
+static ParamInfo kParams_OneRef_OneOptionalInt[2] =
+{
+	{ "target",kParamType_ObjectRef, 0 },
+	{	"int", kParamType_Integer, 1 },
+};
 static ParamInfo kParams_OneOptionalInt[1] =
 {
 	{	"int", kParamType_Integer, 1 }, 

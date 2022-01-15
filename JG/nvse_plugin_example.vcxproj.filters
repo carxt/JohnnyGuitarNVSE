@@ -223,6 +223,9 @@
     <ClInclude Include="..\nvse\nvse\prefix.h">
       <Filter>nvse</Filter>
     </ClInclude>
+    <ClInclude Include="functions\fn_book.h">
+      <Filter>functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

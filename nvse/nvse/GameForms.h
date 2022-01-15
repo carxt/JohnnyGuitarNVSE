@@ -2747,8 +2747,10 @@ public:
 	BGSDestructibleObjectForm	destuctible;	// 9C
 	BGSMessageIcon				messageIcon;	// A4
 	BGSPickupPutdownSounds		sounds;			// B4
-
-	UInt32						unkC0;			// C0
+	UInt8						flags;			// C0
+	UInt8						skillCode;		// C1
+	UInt8						byteC2;			// C2
+	UInt8						byteC3;			// C3
 };
 STATIC_ASSERT(sizeof(TESObjectBOOK) == 0xC4);
 
@@ -3366,6 +3368,9 @@ public:
 	bool IsPlayable() {return !IsNonPlayable();}
 	void SetPlayable(bool doset) {if (doset) flags &= ~kFlags_NonPlayable; else flags |= kFlags_NonPlayable;}
 };
+
+STATIC_ASSERT(sizeof(TESAmmo) == 0xDC);
+
 enum CardSuits {
 	kHearts = 1,
 	kSpades,
@@ -3389,7 +3394,6 @@ enum CardValues {
 	kKing,
 	kJokerCard
 };
-STATIC_ASSERT(sizeof(TESAmmo) == 0xDC);
 class TESCaravanCard : public TESBoundObject
 {
 public:

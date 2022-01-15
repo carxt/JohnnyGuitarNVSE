@@ -35,6 +35,7 @@
 #include "functions/fn_region.h"
 #include "functions/fn_terminal.h"
 #include "functions/fn_ui.h"
+#include "functions/fn_book.h"
 #include "events/CustomEventFilters.h"
 #include "events/JohnnyEvents.h"
 
@@ -355,6 +356,10 @@ extern "C" {
 		REG_CMD(SetRegionMapName);
 		REG_CMD(GetRGBColor);
 		REG_TYPED_CMD(GetPlayingEffectShaders, Array);
+		REG_CMD(GetBookFlags);
+		REG_CMD(SetBookFlags);
+		REG_CMD(GetBookSkill);
+		REG_CMD(SetBookSkill);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

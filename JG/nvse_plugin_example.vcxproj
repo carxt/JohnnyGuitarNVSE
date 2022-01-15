@@ -155,6 +155,7 @@
     <ClInclude Include="events\JohnnyEvents.h" />
     <ClInclude Include="events\LambdaVariableContext.h" />
     <ClInclude Include="functions\fn_av.h" />
+    <ClInclude Include="functions\fn_book.h" />
     <ClInclude Include="functions\fn_file.h" />
     <ClInclude Include="functions\fn_form.h" />
     <ClInclude Include="functions\fn_gameplay.h" />

@@ -26,7 +26,7 @@ DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParams_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 1, kParams_OneRef);
+DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 2, kParams_OneRef_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(ToggleDisableSaves, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , 1, 0, NULL);
@@ -162,12 +162,45 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
 {
 	TESObjectREFR* container;
+	int checkItems = 0;
 	*result = 0;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container))
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems))
 	{
-		ExtraOwnership* xOwn = ThisStdCall<ExtraOwnership*>(0x567790, container); // TESObjectREFR::ResolveOwnership
-		ThisStdCall(0x8BFA40, thisObj, container, NULL, NULL, 1, xOwn); // Actor::HandleStealing, 
-		*result = 1;
+		if (checkItems) {
+			TESForm* containerOwner = ThisStdCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
+			if (!containerOwner) return true;
+			ExtraContainerChanges* xChanges = (ExtraContainerChanges*)((Actor*)thisObj)->extraDataList.GetByType(kExtraData_ContainerChanges);
+			if (!xChanges || !xChanges->data || !xChanges->data->objList)
+				return true;
+			ListNode<ContChangesEntry>* contChangesIter = xChanges->data->objList->Head();
+			ContChangesEntry* entry;
+			TESForm* item;
+			do
+			{
+				if (!(entry = contChangesIter->data) || !entry->extendData || !entry->type) continue;
+				ListNode<ExtraDataList>* xdlIter = entry->extendData->Head();
+				ExtraDataList* xData;
+				do
+				{
+					xData = xdlIter->data;
+					if (xData && xData->HasType(kExtraData_Ownership)) {
+						ExtraOwnership* xOwn = (ExtraOwnership*)xData->GetByType(kExtraData_Ownership);
+						if (xOwn->owner) {
+							if (xOwn->owner->refID == containerOwner->refID) {
+								ThisStdCall(0x8BFA40, thisObj, container, NULL, NULL, 1, containerOwner); // Actor::HandleStealing
+								*result = 1;
+								return true;
+							}
+						}
+					}
+				} while (xdlIter = xdlIter->next);
+			} while (contChangesIter = contChangesIter->next);
+		}
+		else {
+			TESForm* owner = ThisStdCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
+			ThisStdCall(0x8BFA40, thisObj, container, NULL, NULL, 1, owner); // Actor::HandleStealing, 
+			*result = 1;
+		}
 	}
 	return true;
 }
