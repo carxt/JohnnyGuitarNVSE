@@ -111,11 +111,10 @@ extern "C" {
 			PrintLog("German NoGore release of the game is not supported");
 			return false;
 		}
-		int version = nvse->nvseVersion;
-		double s_nvseVersion = (version >> 24) + (((version >> 16) & 0xFF) * 0.1) + (((version & 0xFF) >> 4) * 0.01);
-		if (version < 0x6020030)
+
+		if (nvse->nvseVersion < 0x6020030)
 		{
-			PrintLog("NVSE version is outdated (v%.2f). This plugin requires v6.1 minimum.", s_nvseVersion);
+			PrintLog("NVSE version is outdated. This plugin requires v6.2.3 minimum.");
 			return false;
 		}
 
