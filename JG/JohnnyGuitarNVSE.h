@@ -36,7 +36,7 @@ TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
 TESSound* locationDiscoverSound = 0;
-std::unordered_map<UInt32, char*> CustomMapMarkerMap;
+std::unordered_map<UInt32, char*> markerIconMap;
 
 UInt32 disableMuzzleLights = -1;
 static float vatsSpreadMultValue = 15.0;
@@ -244,8 +244,8 @@ char** DefaultMarkers = (char**)0x11A0404;
 char* __fastcall hk_GetMapMarker(TESObjectREFR* thisObj, UInt16 MapMarkerType)
 {
 
-	auto it = CustomMapMarkerMap.find(thisObj->refID);
-	if (it != CustomMapMarkerMap.end()) return it->second;
+	auto it = markerIconMap.find(thisObj->refID);
+	if (it != markerIconMap.end()) return it->second;
 	return DefaultMarkers[MapMarkerType];
 }
 
@@ -269,21 +269,21 @@ void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1)
 		}
 	}
 }
-void DoCustomMapMarker(TESObjectREFR* Marker, char* PathToPass)
+void SetCustomMapMarker(TESObjectREFR* marker, char* iconPath)
 {
 
-	auto Position = CustomMapMarkerMap.find(Marker->refID);
-	char* MapMarkerAllocString = new char[strlen(PathToPass) + 1];
-	strcpy(MapMarkerAllocString, PathToPass);
+	auto pos = markerIconMap.find(marker->refID);
+	char* pathCopy = new char[strlen(iconPath) + 1];
+	strcpy(pathCopy, iconPath);
 
-	if (Position != CustomMapMarkerMap.end())
+	if (pos != markerIconMap.end())
 	{
-		delete[] Position->second;
-		Position->second = MapMarkerAllocString;
+		delete[] pos->second;
+		pos->second = pathCopy;
 	}
 	else
 	{
-		CustomMapMarkerMap.insert({ Marker->refID, MapMarkerAllocString });
+		markerIconMap.insert({ marker->refID, pathCopy });
 	}
 }
 
@@ -553,4 +553,5 @@ void HandleGameHooks()
 	SafeWriteBuf(0x8BFBC1, "\x85\xC9\x74\x36\x80\x79\x04", 7); // missing null check in Actor::HandleStealing
 	if (noMuzzleFlashCooldown)	SafeWriteBuf(0x9BB6A8, "\x90\x90", 2);
 	if (enableRadioSubtitles) SafeWrite8(0x833876, 0x84);
+	PatchMemoryNop(0x8A1915, 5);
 }

@@ -116,25 +116,25 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	TESObjectREFR* form;
-	char MapMarkerRoute[MAX_PATH];
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &MapMarkerRoute) || (!IS_TYPE(form, BGSListForm) && (!form->GetIsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)))) return true;
+	char iconPath[MAX_PATH];
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || (!IS_TYPE(form, BGSListForm) && (!form->GetIsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)))) return true;
 	if (IS_TYPE(form, BGSListForm))
 	{
 		ListNode<TESForm>* iterator = ((BGSListForm*)form)->list.Head();
 		while (iterator)
 		{
-			TESObjectREFR* Refer = (TESObjectREFR*)(iterator->data);
-			if (Refer->GetIsReference() && Refer->IsMapMarker() && GetExtraType(form->extraDataList, MapMarker))
+			TESObjectREFR* ref = (TESObjectREFR*)(iterator->data);
+			if (ref->GetIsReference() && ref->IsMapMarker() && GetExtraType(ref->extraDataList, MapMarker))
 			{
-				DoCustomMapMarker(Refer, MapMarkerRoute);
+				SetCustomMapMarker(ref, iconPath);
 			}
 			iterator = iterator->next;
 		}
 	}
 	else
 	{
-		DoCustomMapMarker(form, MapMarkerRoute);
+		SetCustomMapMarker(form, iconPath);
 	}
-	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->refID, MapMarkerRoute);
+	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->refID, iconPath);
 	return true;
 }
