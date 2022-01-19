@@ -12,7 +12,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, SetOnSettingsUp
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnAddPerkEventHandler, SetOnAddPerkEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , 0, 3, kParams_Event);
-
+DEFINE_COMMAND_PLUGIN(SetOnActorValueChangeEventHandler, , 0, 4, kParams_Event_OneInt);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
@@ -27,6 +27,7 @@ EventInformation* OnAddPerkHandler;
 EventInformation* OnRemovePerkHandler;
 EventInformation* OnRenderGameModeUpdateHandler;
 EventInformation* OnRenderRenderedMenuUpdateHandler;
+EventInformation* OnAVChangeHandler;
 
 void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool isTeammatePerk)
 {
@@ -159,6 +160,22 @@ UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg
 	}
 	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
 }
+
+void __cdecl HandleAVChangeEvent(ActorValueOwner* avOwner, int avCode, float previousVal, float modVal, ActorValueOwner* attackerAVOwner) {
+	ActorValueInfo* avInfo = CdeclCall<ActorValueInfo*>(0x66E920, avCode);
+	if (avInfo) {
+		if (avOwner == &g_thePlayer->avOwner) {
+			for (auto const& callback : OnAVChangeHandler->EventCallbacks) {
+				if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, avCode))
+				{
+					float newVal = previousVal + modVal;
+					CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&previousVal, *(UInt32*)&newVal);
+				}
+			}
+		}
+		if (avInfo->onChangeCallback) avInfo->onChangeCallback(avOwner, avCode, previousVal, modVal, attackerAVOwner);
+	}
+}
 __declspec(naked) void OnCrosshairEventAsm() {
 	static const UInt32 retnAddr = 0x775A69;
 	__asm {
@@ -251,6 +268,25 @@ bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
 			if (setOrRemove)
 				OnCrosshairHandler->RegisterEvent(script, (void**)&filter);
 			else OnCrosshairHandler->RemoveEvent(script, (void**)&filter);
+
+		}
+	}
+	return true;
+}
+
+bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	EventFilterStructOneFormOneInt filter = { g_thePlayer, -1 };
+	UInt32 flags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold)
+	{
+		if (OnAVChangeHandler)
+		{
+			if (setOrRemove)
+				OnAVChangeHandler->RegisterEvent(script, (void**)&filter);
+			else OnAVChangeHandler->RemoveEvent(script, (void**)&filter);
 
 		}
 	}
@@ -421,7 +457,7 @@ bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
 			if (setOrRemove)
 				OnFailQuestHandler->RegisterEvent(script, (void**)filter);
 			else OnFailQuestHandler->RemoveEvent(script, (void**)filter);
-
+				
 		}
 	}
 	return true;
@@ -472,6 +508,7 @@ void HandleEventHooks()
 	OnSettingsUpdateHandler = JGCreateEvent("OnSettingsUpdate", 0, 0, NULL);
 	OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3, 1, NULL);
 	OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1, 1, NULL);
+	OnAVChangeHandler = JGCreateEvent("OnActorValueChange", 3, 2, CreateOneFormOneIntFilter);
 	CallUDF = g_scriptInterface->CallFunction;
 	WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 	WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
@@ -494,6 +531,7 @@ void HandleEventHooks()
 	WriteRelCall(0x5D4F89, (UINT)handleRemovePerkEvent);
 	SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00", 3);
 	SafeWrite8(0x60CA29, 0xCC);
+	WriteRelJump(0x66EE50, (UINT)HandleAVChangeEvent);
 
 
 	//testing

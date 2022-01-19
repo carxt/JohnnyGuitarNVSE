@@ -5804,7 +5804,7 @@ public:
 	UInt32				unk48;			// 48
 	UInt32				callback4C;		// 4C
 	UInt32				unk50;			// 50
-	UInt32				callback54;		// 54
+	void(__cdecl* onChangeCallback)(ActorValueOwner* avOwner, int avCode, float previousVal, float newVal, ActorValueOwner* avOwner2);
 	UInt32				unk4C[27];		// 4C
 };
 

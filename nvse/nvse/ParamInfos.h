@@ -428,7 +428,14 @@ static ParamInfo kParams_Event_OneForm_OneInt[5] =
 	{ "Integer", kParamType_Integer, 1 },
 
 };
+static ParamInfo kParams_Event_OneInt[4] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+	{ "Integer", kParamType_Integer, 1 },
 
+};
 static ParamInfo kParams_OneString_OneForm_OneOptionalInt[3] =
 {
 	{ "String", kParamType_String, 0 },
