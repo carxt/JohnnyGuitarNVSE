@@ -76,11 +76,13 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	else {
 		TESWorldSpace* wspc = GetWorldspace(thisObj);
 		if (wspc) {
-			String* stringBuf = (String*)GameHeapAlloc(sizeof(String));;
+			String str;
+			str.m_data = nullptr;
+			str.Init(0);
 			NiPoint3* pos = thisObj->GetPos();
-			wspc->Unk_4E(stringBuf, *pos);
-			locationName = stringBuf->CStr();
-			GameHeapFree(stringBuf);
+			wspc->Unk_4E(&str, pos->x, pos->y, pos->z);
+			locationName = str.CStr();
+			str.Set(nullptr);
 		}
 	}
 	if (locationName) g_strInterface->Assign(PASS_COMMAND_ARGS, locationName);

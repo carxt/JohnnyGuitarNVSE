@@ -1,5 +1,7 @@
 #pragma once
 // Utility or miscellaneous functions
+#include <iostream>
+#include <fstream>
 DEFINE_COMMAND_PLUGIN(GetEditorID, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetJohnnyPatch, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
@@ -18,6 +20,144 @@ DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , 0, 3, kParams_OneInt_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(IsDLLLoaded, , 0, 2, kParams_OneString_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(RefreshIdle, , 1, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(ExitGameAlt, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(DumpINI, , 0, 0, NULL);
+enum EType
+{
+	kSetting_Bool = 0,
+	kSetting_c,
+	kSetting_h,
+	kSetting_Integer,
+	kSetting_Unsigned,
+	kSetting_Float,
+	kSetting_String,
+	kSetting_r,
+	kSetting_a,
+	kSetting_Other
+};
+bool Cmd_DumpINI_Execute(COMMAND_ARGS) {
+	IniSettingCollection* ini = IniSettingCollection::GetIniSettings();
+	IniSettingCollection* prefs = IniSettingCollection::GetIniPrefs();
+	IniSettingCollection* renderer = *(IniSettingCollection**)0x11F35A4;
+	IniSettingCollection* blend = *(IniSettingCollection**)0x11CC694;
+	std::ofstream csv;
+	csv.open("settings.csv");
+	Setting* setting;
+	int value;
+	float fvalue;
+	const char* cvalue;
+	csv << "fallout.ini" << std::endl;
+	ListNode<Setting>* istIter = ini->settings.Head();
+	do
+	{
+		setting = istIter->data;
+		if (setting && setting->ValidType()) {
+			std::string name = setting->name;
+			if (name.find("i") != std::string::npos) {
+				std::string sname = name.substr(0, name.find(":"));
+				std::string cat = name.substr(name.find(":") + 1);
+				switch (setting->GetType()) {
+				case kSetting_Bool:
+				case kSetting_Integer:
+					csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
+					break;
+				case kSetting_Unsigned:
+					csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
+					break;
+				case kSetting_String:
+					csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
+					break;
+				case kSetting_Float:
+					csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
+					break;
+				}
+			}
+		}
+	} while (istIter = istIter->next);
+	csv << "falloutprefs.ini" << std::endl;
+	istIter = prefs->settings.Head();
+	do
+	{
+		setting = istIter->data;
+		if (setting && setting->ValidType()) {
+			std::string name = setting->name;
+			if (name.find("i") != std::string::npos) {
+				std::string sname = name.substr(0, name.find(":"));
+				std::string cat = name.substr(name.find(":") + 1);
+				switch (setting->GetType()) {
+				case kSetting_Bool:
+				case kSetting_Integer:
+					csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
+					break;
+				case kSetting_Unsigned:
+					csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
+					break;
+				case kSetting_String:
+					csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
+					break;
+				case kSetting_Float:
+					csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
+					break;
+				}
+			}
+		}
+	} while (istIter = istIter->next);
+	istIter = renderer->settings.Head();
+	do
+	{
+		setting = istIter->data;
+		if (setting && setting->ValidType()) {
+			std::string name = setting->name;
+			if (name.find("i") != std::string::npos) {
+				std::string sname = name.substr(0, name.find(":"));
+				std::string cat = name.substr(name.find(":") + 1);
+				switch (setting->GetType()) {
+				case kSetting_Bool:
+				case kSetting_Integer:
+					csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
+					break;
+				case kSetting_Unsigned:
+					csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
+					break;
+				case kSetting_String:
+					csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
+					break;
+				case kSetting_Float:
+					csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
+					break;
+				}
+			}
+		}
+	} while (istIter = istIter->next);
+	istIter = blend->settings.Head();
+	do
+	{
+		setting = istIter->data;
+		if (setting && setting->ValidType()) {
+			std::string name = setting->name;
+			if (name.find("i") != std::string::npos) {
+				std::string sname = name.substr(0, name.find(":"));
+				std::string cat = name.substr(name.find(":") + 1);
+				switch (setting->GetType()) {
+				case kSetting_Bool:
+				case kSetting_Integer:
+					csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
+					break;
+				case kSetting_Unsigned:
+					csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
+					break;
+				case kSetting_String:
+					csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
+					break;
+				case kSetting_Float:
+					csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
+					break;
+				}
+			}
+		}
+	} while (istIter = istIter->next);
+	csv.close();
+	return true;
+}
 
 bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	*result = 0;
