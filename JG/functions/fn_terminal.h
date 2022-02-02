@@ -13,8 +13,12 @@ DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemFlags, , 0, 3, kParams_OneForm_TwoInts)
 DEFINE_COMMAND_ALT_PLUGIN(RefreshTerminalMenu, rtm, , 0, 0, NULL);
 
 bool Cmd_RefreshTerminalMenu_Execute(COMMAND_ARGS) {
+	*result = 0;
 	ComputersMenu* g_computersMenu = *(ComputersMenu**)0x11D9334;
-	ThisStdCall(0x7586E0, g_computersMenu, 0);
+	if (g_computersMenu) {
+		ThisStdCall(0x7586E0, g_computersMenu, 0);
+		*result = 1;
+	}
 	return true;
 }
 
