@@ -360,6 +360,7 @@ extern "C" {
 		REG_CMD(GetBookSkill);
 		REG_CMD(SetBookSkill);
 		REG_CMD(SetOnActorValueChangeEventHandler);
+		REG_CMD(RefreshTerminalMenu);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

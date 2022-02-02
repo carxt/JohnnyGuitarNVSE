@@ -10,6 +10,13 @@ DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemCount, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(RemoveTerminalMenuItem, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemFlags, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemFlags, , 0, 3, kParams_OneForm_TwoInts);
+DEFINE_COMMAND_ALT_PLUGIN(RefreshTerminalMenu, rtm, , 0, 0, NULL);
+
+bool Cmd_RefreshTerminalMenu_Execute(COMMAND_ARGS) {
+	ComputersMenu* g_computersMenu = *(ComputersMenu**)0x11D9334;
+	ThisStdCall(0x7586E0, g_computersMenu, 0);
+	return true;
+}
 
 bool Cmd_SetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
