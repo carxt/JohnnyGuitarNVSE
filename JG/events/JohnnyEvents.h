@@ -531,7 +531,7 @@ void HandleEventHooks()
 	WriteRelCall(0x5D4F89, (UINT)handleRemovePerkEvent);
 	SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00", 3);
 	SafeWrite8(0x60CA29, 0xCC);
-	WriteRelJump(0x66EE50, (UINT)HandleAVChangeEvent);
+	//WriteRelJump(0x66EE50, (UINT)HandleAVChangeEvent);
 
 
 	//testing
