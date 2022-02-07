@@ -104,7 +104,7 @@ extern "C" {
 #endif
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "JohnnyGuitarNVSE";
-		info->version = 445;
+		info->version = 450;
 
 		if (nvse->isNogore)
 		{
