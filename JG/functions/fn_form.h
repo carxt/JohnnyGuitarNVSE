@@ -64,9 +64,90 @@ DEFINE_COMMAND_PLUGIN(SetIdleMarkerAnimations, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetWeaponAltTextures, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(GetRefActivationPromptOverride, GetXATO, , 1, 0, NULL);
 DEFINE_COMMAND_ALT_PLUGIN(SetRefActivationPromptOverride, SetXATO, , 1, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetRefEncounterZone, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(SetRefEncounterZone, , 1, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(GetCellEncounterZone, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetCellEncounterZone, , 0, 2, kParams_OneForm_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(GetWorldspaceEncounterZone, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetWorldspaceEncounterZone, , 0, 2, kParams_OneForm_OneOptionalForm);
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+BGSEncounterZone* GetEncounterZone(ExtraDataList* list) {
+	ExtraEncounterZone* xZone = (ExtraEncounterZone*)list->GetByType(kExtraData_EncounterZone);
+	if (xZone && xZone->zone) return xZone->zone;
+	return nullptr;
+}
+
+void SetEncounterZone(ExtraDataList* list, BGSEncounterZone* zone) {
+	ThisStdCall(0x421C60, list, zone);
+}
+
+bool Cmd_SetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSEncounterZone* zone = nullptr;
+	TESWorldSpace* world;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &world, &zone);
+	if (!world || !IS_TYPE(world, TESWorldSpace)) return true;
+	if (!zone || IS_TYPE(zone, BGSEncounterZone)) {
+		world->encounterZone = zone;
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESWorldSpace* world;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &world) && IS_TYPE(world, TESWorldSpace)) {
+		BGSEncounterZone* zone = world->encounterZone;
+		if (zone) *(UInt32*)result = zone->refID;
+	}
+	return true;
+}
+
+bool Cmd_SetCellEncounterZone_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSEncounterZone* zone = nullptr;
+	TESObjectCELL* cell;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &cell, &zone);
+	if (!cell || !IS_TYPE(cell, TESObjectCELL)) return true;
+	if (!zone || IS_TYPE(zone, BGSEncounterZone)) {
+		SetEncounterZone(&cell->extraDataList, zone);
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectCELL* cell;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell) && IS_TYPE(cell, TESObjectCELL)) {
+		BGSEncounterZone* zone = GetEncounterZone(&cell->extraDataList);
+		if (zone) *(UInt32*)result = zone->refID;
+	}
+	return true;
+}
+
+bool Cmd_SetRefEncounterZone_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSEncounterZone* zone = nullptr;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &zone);
+	if (!zone || IS_TYPE(zone, BGSEncounterZone)) {
+		SetEncounterZone(&thisObj->extraDataList, zone);
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetRefEncounterZone_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSEncounterZone* zone = GetEncounterZone(&thisObj->extraDataList);
+	if (zone) *(UInt32*)result = zone->refID;
+	return true;
+}
+
 
 bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;

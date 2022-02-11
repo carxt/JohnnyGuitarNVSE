@@ -104,7 +104,7 @@ extern "C" {
 #endif
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "JohnnyGuitarNVSE";
-		info->version = 450;
+		info->version = 455;
 
 		if (nvse->isNogore)
 		{
@@ -361,6 +361,13 @@ extern "C" {
 		REG_CMD(SetBookSkill);
 		REG_CMD(SetOnActorValueChangeEventHandler);
 		REG_CMD(RefreshTerminalMenu);
+		REG_CMD(SetRefEncounterZone);
+		REG_TYPED_CMD(GetRefEncounterZone, Form);
+		REG_CMD(SetCellEncounterZone);
+		REG_TYPED_CMD(GetCellEncounterZone, Form);
+		REG_CMD(SetWorldspaceEncounterZone);
+		REG_TYPED_CMD(GetWorldspaceEncounterZone, Form);
+
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
