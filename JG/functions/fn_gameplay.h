@@ -215,14 +215,14 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 		bool hasDecreaseSpreadEffect = ThisStdCall<bool>(0x4BDA70, weapInfo, 3);
 		double minSpread = ThisStdCall<double>(0x524B80, weapInfo->type, hasDecreaseSpreadEffect);
 		double weapSpread = ThisStdCall<float>(0x524BE0, weapInfo->type, hasDecreaseSpreadEffect);
-		double spread = ThisStdCall<double>(0x8B0DD0, PlayerCharacter::GetSingleton(), 1);
+		double spread = ThisStdCall<double>(0x8B0DD0, actor, 1);
 
 		float totalSpread = (weapSpread * spread + minSpread) * 0.01745329238474369;
 
 		TESAmmo* eqAmmo = ThisStdCall<TESAmmo*>(0x525980, weapInfo->type, static_cast<MobileObject*>(actor));
 		totalSpread = CdeclCall<float>(0x59A030, 3, (eqAmmo ? &eqAmmo->effectList : nullptr), totalSpread);
 
-		double spreadPenalty = ThisStdCall<double>(0x8B0DD0, PlayerCharacter::GetSingleton(), 2);
+		double spreadPenalty = ThisStdCall<double>(0x8B0DD0, actor, 2);
 
 		Setting* fNPCMaxGunWobbleAngle;
 		GameSettingCollection::GetSingleton()->GetGameSetting("fNPCMaxGunWobbleAngle", &fNPCMaxGunWobbleAngle);
