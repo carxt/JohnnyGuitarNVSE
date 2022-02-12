@@ -364,7 +364,6 @@ extern "C" {
 		REG_CMD(SetRefEncounterZone);
 		REG_TYPED_CMD(GetRefEncounterZone, Form);
 		REG_CMD(SetCellEncounterZone);
-		REG_TYPED_CMD(GetCellEncounterZone, Form);
 		REG_CMD(SetWorldspaceEncounterZone);
 		REG_TYPED_CMD(GetWorldspaceEncounterZone, Form);
 

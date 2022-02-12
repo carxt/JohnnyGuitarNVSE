@@ -120,15 +120,6 @@ bool Cmd_SetCellEncounterZone_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS) {
-	*result = 0;
-	TESObjectCELL* cell;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell) && IS_TYPE(cell, TESObjectCELL)) {
-		BGSEncounterZone* zone = GetEncounterZone(&cell->extraDataList);
-		if (zone) *(UInt32*)result = zone->refID;
-	}
-	return true;
-}
 
 bool Cmd_SetRefEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
