@@ -161,21 +161,47 @@ UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg
 	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
 }
 
-void __cdecl HandleAVChangeEvent(ActorValueOwner* avOwner, int avCode, float previousVal, float modVal, ActorValueOwner* attackerAVOwner) {
-	ActorValueInfo* avInfo = CdeclCall<ActorValueInfo*>(0x66E920, avCode);
-	if (avInfo) {
-		if (avOwner == &g_thePlayer->avOwner) {
-			for (auto const& callback : OnAVChangeHandler->EventCallbacks) {
-				if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, avCode))
-				{
-					float newVal = previousVal + modVal;
-					CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&previousVal, *(UInt32*)&newVal);
-				}
-			}
+void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal)
+{
+	float newVal = previousVal + modVal;
+	for (auto const& callback : OnAVChangeHandler->EventCallbacks) {
+		if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
+			CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&previousVal, *(UInt32*)&newVal);
 		}
-		if (avInfo->onChangeCallback) avInfo->onChangeCallback(avOwner, avCode, previousVal, modVal, attackerAVOwner);
 	}
 }
+
+__declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32 avCode, float prevVal, float newVal, ActorValueOwner* attacker)
+{
+	__asm
+	{
+		push    ebp
+		mov     ebp, esp
+		mov     eax, [ebp + 0xC]
+		cmp     eax, 0x4D
+		jnb     done
+		mov     ecx, ds:0x11D61C8[eax * 4]
+		test    ecx, ecx
+		jz      done
+		cmp     dword ptr[ecx + 0x54], 0
+		jz      done
+		push    ecx
+		mov     ecx, [ebp + 8]
+		cmp     dword ptr[ecx - 0x98], 0x14
+		jnz     skipHandler
+		push    dword ptr[ebp + 0x14]
+		push    dword ptr[ebp + 0x10]
+		push    eax
+		call    HandleAVChangeEvent
+		skipHandler :
+		mov     eax, 0x66EE72
+			jmp     eax
+			done :
+		leave
+			retn
+	}
+}
+
 __declspec(naked) void OnCrosshairEventAsm() {
 	static const UInt32 retnAddr = 0x775A69;
 	__asm {
@@ -531,7 +557,7 @@ void HandleEventHooks()
 	WriteRelCall(0x5D4F89, (UINT)handleRemovePerkEvent);
 	SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00", 3);
 	SafeWrite8(0x60CA29, 0xCC);
-	//WriteRelJump(0x66EE50, (UINT)HandleAVChangeEvent);
+	WriteRelJump(0x66EE50, (UINT)AVChangeEventAsm);
 
 
 	//testing

@@ -21,6 +21,13 @@ DEFINE_COMMAND_PLUGIN(IsDLLLoaded, , 0, 2, kParams_OneString_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(RefreshIdle, , 1, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(ExitGameAlt, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(DumpINI, , 0, 0, NULL);
+DEFINE_CMD_NO_ARGS(UpdateCrosshairPrompt);
+
+bool Cmd_UpdateCrosshairPrompt_Execute(COMMAND_ARGS) {
+	*result = 0;
+	ThisStdCall<void>(0x778B10, NULL);
+	return true;
+}
 enum EType
 {
 	kSetting_Bool = 0,

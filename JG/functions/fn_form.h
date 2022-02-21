@@ -66,7 +66,6 @@ DEFINE_COMMAND_ALT_PLUGIN(GetRefActivationPromptOverride, GetXATO, , 1, 0, NULL)
 DEFINE_COMMAND_ALT_PLUGIN(SetRefActivationPromptOverride, SetXATO, , 1, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetRefEncounterZone, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetRefEncounterZone, , 1, 1, kParams_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(GetCellEncounterZone, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetCellEncounterZone, , 0, 2, kParams_OneForm_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetWorldspaceEncounterZone, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetWorldspaceEncounterZone, , 0, 2, kParams_OneForm_OneOptionalForm);

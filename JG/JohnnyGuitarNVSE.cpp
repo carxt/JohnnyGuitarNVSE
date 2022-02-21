@@ -366,7 +366,7 @@ extern "C" {
 		REG_CMD(SetCellEncounterZone);
 		REG_CMD(SetWorldspaceEncounterZone);
 		REG_TYPED_CMD(GetWorldspaceEncounterZone, Form);
-
+		REG_CMD(UpdateCrosshairPrompt);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
