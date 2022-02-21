@@ -1,7 +1,7 @@
 #pragma once
 #include "events/EventFilteringInterface.h"
 #include <unordered_set>
-bool (*CallUDF)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
+bool (*CallUDF)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
 
 NVSEArrayElement EventResultPtr;
 class EventInformation;

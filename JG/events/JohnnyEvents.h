@@ -37,7 +37,7 @@ void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool
 	{
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) 
 		{
-			CallUDF(callback.ScriptForEvent, actor, 0, &EventResultPtr, OnRemovePerkHandler->numMaxArgs, perk);
+			CallUDF(callback.ScriptForEvent, actor, OnRemovePerkHandler->numMaxArgs, perk);
 		}
 	}
 	actor->RemovePerk(perk, isTeammatePerk);
@@ -49,7 +49,7 @@ void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, UInt8 n
 	{
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) 
 		{
-			CallUDF(callback.ScriptForEvent, actor, 0, &EventResultPtr, OnAddPerkHandler->numMaxArgs, perk, newRank - 1, newRank);
+			CallUDF(callback.ScriptForEvent, actor, OnAddPerkHandler->numMaxArgs, perk, newRank - 1, newRank);
 		}
 	}
 	actor->SetPerkRank(perk, newRank, isTeammatePerk);
@@ -60,7 +60,7 @@ void __stdcall handleDyingEvent(Actor* thisObj) {
 		for (auto const& callback : OnDyingHandler->EventCallbacks) {
 			if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) 
 			{
-				CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnDyingHandler->numMaxArgs, thisObj);
+				CallUDF(callback.ScriptForEvent, NULL, OnDyingHandler->numMaxArgs, thisObj);
 			}
 		}
 	}
@@ -71,7 +71,7 @@ UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 			JohnnyEventFiltersOneFormOneInt* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter);
 			if ((filter->IsInFilter(0, crosshairRef->refID) || filter->IsInFilter(0, crosshairRef->baseForm->refID)) && filter->IsInFilter(1, crosshairRef->baseForm->typeID))
 			{
-				CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCrosshairHandler->numMaxArgs, crosshairRef);
+				CallUDF(callback.ScriptForEvent, NULL, OnCrosshairHandler->numMaxArgs, crosshairRef);
 			}
 		}
 	}
@@ -82,7 +82,7 @@ bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, 
 		if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(0, actor->refID) &&
 			reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, limb)) 
 		{
-			CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnLimbGoneHandler->numMaxArgs, actor, limb);
+			CallUDF(callback.ScriptForEvent, NULL, OnLimbGoneHandler->numMaxArgs, actor, limb);
 		}
 	}
 	return ThisStdCall_B(0x430410, xData, actor, limb, isExplode);
@@ -92,7 +92,7 @@ void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
 	for (auto const& callback : thisEvent->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) 
 		{
-			CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, thisEvent->numMaxArgs, Quest);
+			CallUDF(callback.ScriptForEvent, NULL, thisEvent->numMaxArgs, Quest);
 		}
 	}
 }
@@ -101,7 +101,7 @@ void __cdecl handleQuestComplete(TESQuest* Quest) {
 	for (auto const& callback : OnCompleteQuestHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest))
 		{
-			CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCompleteQuestHandler->numMaxArgs, Quest);
+			CallUDF(callback.ScriptForEvent, NULL, OnCompleteQuestHandler->numMaxArgs, Quest);
 		}
 	}
 	CdeclCall(0x77A480, Quest);
@@ -111,7 +111,7 @@ void __cdecl handleQuestFail(TESQuest* Quest) {
 	for (auto const& callback : OnFailQuestHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) 
 		{
-			CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnFailQuestHandler->numMaxArgs, Quest);
+			CallUDF(callback.ScriptForEvent, NULL, OnFailQuestHandler->numMaxArgs, Quest);
 		}
 	}
 	CdeclCall(0x77A480, Quest);
@@ -120,14 +120,14 @@ void __cdecl handleQuestFail(TESQuest* Quest) {
 void __cdecl handleSettingsUpdate() {
 	CdeclCall(0x7D6D70);
 	for (auto const& callback : OnSettingsUpdateHandler->EventCallbacks) {
-		CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSettingsUpdateHandler->numMaxArgs);
+		CallUDF(callback.ScriptForEvent, NULL, OnSettingsUpdateHandler->numMaxArgs);
 	}
 }
 ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
 	for (auto const& callback : OnSeenDataUpdateHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, cell)) 
 		{
-			CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnSeenDataUpdateHandler->numMaxArgs, cell);
+			CallUDF(callback.ScriptForEvent, NULL, OnSeenDataUpdateHandler->numMaxArgs, cell);
 		}
 	}
 	return &cell->extraDataList;
@@ -136,7 +136,7 @@ UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 	for (auto const& callback : OnChallengeCompleteHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, challenge)) 
 		{
-			CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnChallengeCompleteHandler->numMaxArgs, challenge);
+			CallUDF(callback.ScriptForEvent, NULL, OnChallengeCompleteHandler->numMaxArgs, challenge);
 		}
 	}
 	return challenge->data.type;
@@ -146,7 +146,7 @@ UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 UInt32 __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
 	for (auto const& callback : OnRenderGameModeUpdateHandler->EventCallbacks) {
 
-			CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRenderGameModeUpdateHandler->numMaxArgs);
+			CallUDF(callback.ScriptForEvent, NULL, OnRenderGameModeUpdateHandler->numMaxArgs);
 
 	}
 	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
@@ -155,7 +155,7 @@ UInt32 __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg
 UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
 	for (auto const& callback : OnRenderRenderedMenuUpdateHandler->EventCallbacks) {
 
-		CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnRenderRenderedMenuUpdateHandler->numMaxArgs);
+		CallUDF(callback.ScriptForEvent, NULL, OnRenderRenderedMenuUpdateHandler->numMaxArgs);
 
 	}
 	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
@@ -166,7 +166,7 @@ void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal)
 	float newVal = previousVal + modVal;
 	for (auto const& callback : OnAVChangeHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
-			CallUDF(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&previousVal, *(UInt32*)&newVal);
+			CallUDF(callback.ScriptForEvent, NULL, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&previousVal, *(UInt32*)&newVal);
 		}
 	}
 }
@@ -535,7 +535,7 @@ void HandleEventHooks()
 	OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3, 1, NULL);
 	OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1, 1, NULL);
 	OnAVChangeHandler = JGCreateEvent("OnActorValueChange", 3, 2, CreateOneFormOneIntFilter);
-	CallUDF = g_scriptInterface->CallFunction;
+	CallUDF = g_scriptInterface->CallFunctionAlt;
 	WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 	WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
 	WriteRelJump(0x89F4A4, (UINT)OnDyingEventAsm);
