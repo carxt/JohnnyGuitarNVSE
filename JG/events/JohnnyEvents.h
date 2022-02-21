@@ -25,9 +25,19 @@ EventInformation* OnCrosshairHandler;
 EventInformation* OnSettingsUpdateHandler;
 EventInformation* OnAddPerkHandler;
 EventInformation* OnRemovePerkHandler;
+EventInformation* OnRenderGamePreUpdateHandler;
 EventInformation* OnRenderGameModeUpdateHandler;
 EventInformation* OnRenderRenderedMenuUpdateHandler;
 EventInformation* OnAVChangeHandler;
+
+UInt32 handlePreRenderEvent() {
+	for (auto const& callback : OnRenderGamePreUpdateHandler->EventCallbacks) {
+
+		CallUDF(callback.ScriptForEvent, NULL, OnRenderGamePreUpdateHandler->numMaxArgs);
+
+	}
+	return CdeclCall<bool>(0x7050D0);
+}
 
 void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool isTeammatePerk)
 {
@@ -164,6 +174,8 @@ UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg
 void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal)
 {
 	float newVal = previousVal + modVal;
+	const char* avName = CdeclCall<char*>(0x66EB00, avCode);
+	Console_Print("%s - prev %f mod %f new %f", avName, previousVal, modVal, newVal);
 	for (auto const& callback : OnAVChangeHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
 			CallUDF(callback.ScriptForEvent, NULL, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&previousVal, *(UInt32*)&newVal);
@@ -497,14 +509,23 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 	enum EnumFlags {
 		kDoNotFireInRenderMenu = 1 << 0,
 		kDoNotFireInGameMode = 1 << 1,
+		kUseGamePreEvent = 1 << 2,
 	};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) && IS_TYPE(script, Script))
 	{
 		if (!(flags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler)
 		{
-			if (setOrRemove)
-				OnRenderGameModeUpdateHandler->RegisterEvent(script, NULL);
-			else OnRenderGameModeUpdateHandler->RemoveEvent(script, NULL);
+			if (!(flags & kUseGamePreEvent)) {
+				if (setOrRemove)
+					OnRenderGameModeUpdateHandler->RegisterEvent(script, NULL);
+				else OnRenderGameModeUpdateHandler->RemoveEvent(script, NULL);
+			}
+			else if (OnRenderGamePreUpdateHandler)
+			{
+				if (setOrRemove)
+					OnRenderGamePreUpdateHandler->RegisterEvent(script, NULL);
+				else OnRenderGamePreUpdateHandler->RemoveEvent(script, NULL);
+			}
 
 		}
 
@@ -561,6 +582,8 @@ void HandleEventHooks()
 
 
 	//testing
+	OnRenderGamePreUpdateHandler = JGCreateEvent("OnRenderGamePreUpdateHandler", 0, 0, NULL);
+	WriteRelCall(0x943748, (uintptr_t)handlePreRenderEvent);
 	OnRenderGameModeUpdateHandler = JGCreateEvent("OnRenderGameModeUpdateHandler", 0, 0, NULL);
 	WriteRelCall(0x870244, (uintptr_t)handlerRenderGameEvent);
 	OnRenderRenderedMenuUpdateHandler = JGCreateEvent("OnRenderRenderedMenuUpdateHandler", 0, 0, NULL);
