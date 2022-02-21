@@ -174,8 +174,6 @@ UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg
 void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal)
 {
 	float newVal = previousVal + modVal;
-	const char* avName = CdeclCall<char*>(0x66EB00, avCode);
-	Console_Print("%s - prev %f mod %f new %f", avName, previousVal, modVal, newVal);
 	for (auto const& callback : OnAVChangeHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
 			CallUDF(callback.ScriptForEvent, NULL, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&previousVal, *(UInt32*)&newVal);
