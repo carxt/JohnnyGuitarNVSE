@@ -552,5 +552,6 @@ void HandleGameHooks()
 	SafeWriteBuf(0x8BFBC1, "\x85\xC9\x74\x36\x80\x79\x04", 7); // missing null check in Actor::HandleStealing
 	if (noMuzzleFlashCooldown)	SafeWriteBuf(0x9BB6A8, "\x90\x90", 2);
 	if (enableRadioSubtitles) SafeWrite8(0x833876, 0x84);
+	SafeWrite8(0x8EC5D9, 0xEB); //Fix for death topics getting cut off
 	
 }
