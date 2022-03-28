@@ -1371,7 +1371,7 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 		if (detachTime == 0) {
 			*result = -1;
 		}
-		else if (detachTime == -1) {
+		else if (detachTime == -1 || detachTime == -2) {	//-1 is used by ResetInterior, -2 by ShowOff's ResetInteriorAlt.
 			*result = 1;
 		}
 		else {
