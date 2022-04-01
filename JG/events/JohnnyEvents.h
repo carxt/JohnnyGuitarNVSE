@@ -173,6 +173,7 @@ UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg
 
 void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal)
 {
+	if (previousVal = 0.0) previousVal = g_thePlayer->avOwner.GetActorValue(avCode);
 	float newVal = previousVal + modVal;
 	for (auto const& callback : OnAVChangeHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
