@@ -43,7 +43,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-
+#define JG_VERSION 460
 void MessageHandler(NVSEMessagingInterface::Message* msg)
 {
 
@@ -85,6 +85,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 		g_VATSCameraData = (VATSCameraData*)0x11F2250;
 		g_initialTickCount = GetTickCount();
+		Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 		break;
 	}
 	default:
@@ -104,7 +105,7 @@ extern "C" {
 #endif
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "JohnnyGuitarNVSE";
-		info->version = 460;
+		info->version = JG_VERSION;
 
 		if (nvse->isNogore)
 		{
