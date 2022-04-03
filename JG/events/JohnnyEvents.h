@@ -11,7 +11,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, SetOnCompleteQue
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, SetOnSettingsUpdateEventHandler, , 0, 3, kParams_Event);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnAddPerkEventHandler, SetOnAddPerkEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEventHandler, , 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , 0, 3, kParams_Event);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , 0, 4, kParams_Event_OptionalFlag);
 DEFINE_COMMAND_PLUGIN(SetOnActorValueChangeEventHandler, , 0, 4, kParams_Event_OneInt);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
@@ -505,16 +505,18 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	UInt32 flags = 0;
+	UInt32 optionalFlags = 0;
+
 	enum EnumFlags {
 		kDoNotFireInRenderMenu = 1 << 0,
 		kDoNotFireInGameMode = 1 << 1,
 		kUseGamePreEvent = 1 << 2,
 	};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) && IS_TYPE(script, Script))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &optionalFlags) && IS_TYPE(script, Script))
 	{
-		if (!(flags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler)
+		if (!(optionalFlags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler)
 		{
-			if (!(flags & kUseGamePreEvent)) {
+			if (!(optionalFlags & kUseGamePreEvent)) {
 				if (setOrRemove)
 					OnRenderGameModeUpdateHandler->RegisterEvent(script, NULL);
 				else OnRenderGameModeUpdateHandler->RemoveEvent(script, NULL);
@@ -528,7 +530,7 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 
 		}
 
-		if (!(flags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler)
+		if (!(optionalFlags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler)
 		{
 			if (setOrRemove)
 				OnRenderRenderedMenuUpdateHandler->RegisterEvent(script, NULL);
