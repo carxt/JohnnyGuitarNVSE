@@ -73,9 +73,28 @@ DEFINE_COMMAND_PLUGIN(GetLightingTemplateTraitNumeric, , 0, 2, kParams_OneForm_O
 DEFINE_COMMAND_PLUGIN(SetLightingTemplateTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetLightingTemplateCell, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetLightingTemplateCell, , 0, 2, kParams_TwoForms);
-
+DEFINE_COMMAND_PLUGIN(RemoveScopeModelPath, , 0, 1, kParams_OneForm);
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+bool Cmd_RemoveScopeModelPath_Execute(COMMAND_ARGS)
+{
+	TESObjectWEAP* weapon = NULL;
+	TESModel* model = NULL;
+	*result = 0;
+
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && IS_TYPE(weapon, TESObjectWEAP))
+	{
+		if (weapon && weapon->HasScope()) model = &(weapon->targetNIF);
+		if (model) {
+			model->nifPath.Set("");
+			*result = 1;
+		}
+	}
+
+	return true;
+}
+
 
 bool Cmd_SetLightingTemplateCell_Execute(COMMAND_ARGS) {
 	*result = 0;
