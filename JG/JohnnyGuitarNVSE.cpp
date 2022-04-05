@@ -373,6 +373,9 @@ extern "C" {
 		REG_TYPED_CMD(GetLightingTemplateCell, Form);
 		REG_CMD(SetLightingTemplateCell);
 		REG_CMD(RemoveScopeModelPath);
+		REG_TYPED_CMD(GetNthRegionWeatherType, Form);
+		REG_CMD(GetNthRegionWeatherChance);
+		REG_TYPED_CMD(GetNthRegionWeatherGlobal, Form);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
