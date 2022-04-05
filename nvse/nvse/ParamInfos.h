@@ -400,6 +400,12 @@ static ParamInfo kParams_OneString_OneInt[2] =
 	{ "Integer", kParamType_Integer, 0 },
 };
 
+static ParamInfo kParams_OneInt_OneString[2] =
+{
+	{ "Integer", kParamType_Integer, 0 },
+	{ "string",	kParamType_String,	0 },
+};
+
 static ParamInfo kParams_OneString_OneOptionalInt[2] =
 {
 	{ "string",	kParamType_String,	0 },
