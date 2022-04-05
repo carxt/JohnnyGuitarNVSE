@@ -11,7 +11,47 @@ DEFINE_COMMAND_PLUGIN(GetRegionWeathers, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(ClearRegionWeathers, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetRegionMapName, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetRegionMapName, , 0, 2, kParams_OneForm_OneString);
+DEFINE_COMMAND_PLUGIN(GetNthRegionWeatherType, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetNthRegionWeatherChance, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetNthRegionWeatherGlobal, , 0, 2, kParams_OneForm_OneInt);
 
+bool Cmd_GetNthRegionWeatherGlobal_Execute(COMMAND_ARGS) {
+	TESRegion* region = nullptr;
+	int id = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &id) && id > 0 && IS_TYPE(region, TESRegion)) {
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
+		if (weatherData && !weatherData->weatherTypes.Empty()) {
+			WeatherEntry* entry = weatherData->weatherTypes.GetNthItem(id);
+			if (entry && entry->chance) *(UInt32*)result = entry->global->refID;
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetNthRegionWeatherChance_Execute(COMMAND_ARGS) {
+	TESRegion* region = nullptr;
+	int id = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &id) && id > 0 && IS_TYPE(region, TESRegion)) {
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
+		if (weatherData && !weatherData->weatherTypes.Empty()) {
+			WeatherEntry* entry = weatherData->weatherTypes.GetNthItem(id);
+			if (entry && entry->chance) *result = entry->chance;
+		}
+	}
+	return true;
+}
+bool Cmd_GetNthRegionWeatherType_Execute(COMMAND_ARGS) {
+	TESRegion* region = nullptr;
+	int id = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &id) && id > 0 && IS_TYPE(region, TESRegion)) {
+		TESRegionDataWeather* weatherData = GetWeatherData(region);
+		if (weatherData && !weatherData->weatherTypes.Empty()) {
+			WeatherEntry* entry = weatherData->weatherTypes.GetNthItem(id);
+			if (entry && entry->weather) *(UInt32*)result = entry->weather->refID;
+		}
+	}
+	return true;
+}
 bool Cmd_SetRegionMapName_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	char newName[MAX_PATH];
