@@ -99,12 +99,12 @@ bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, 
 }
 void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
 	EventInformation* thisEvent = IsStarted ? OnStartQuestHandler : OnStopQuestHandler;
-	for (auto const& callback : thisEvent->EventCallbacks) {
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) 
-		{
-			CallUDF(callback.ScriptForEvent, NULL, thisEvent->numMaxArgs, Quest);
+		for (auto const& callback : thisEvent->EventCallbacks) {
+			if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest))
+			{
+				CallUDF(callback.ScriptForEvent, NULL, thisEvent->numMaxArgs, Quest);
+			}
 		}
-	}
 }
 
 void __cdecl handleQuestComplete(TESQuest* Quest) {

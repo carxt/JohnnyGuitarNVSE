@@ -2634,14 +2634,14 @@ public:
 };
 struct Sound
 {
-	UInt32 unk00;
+	UInt32 soundKey;
 	UInt8 byte04;
 	UInt8 pad05;
 	UInt8 pad06;
 	UInt8 pad07;
 	UInt32 unk08;
 
-	Sound() : unk00(0xFFFFFFFF), byte04(0), unk08(0) {}
+	Sound() : soundKey(0xFFFFFFFF), byte04(0), unk08(0) {}
 
 
 	Sound(const char* soundPath, UInt32 flags)
@@ -2656,6 +2656,14 @@ struct Sound
 	void Play()
 	{
 		ThisStdCall(0xAD8830, this, 0);
+	}
+	__forceinline void SetPos(const NiVector3& posVec)
+	{
+		ThisStdCall<void>(0xAD8B60, this, posVec.x, posVec.y, posVec.z);
+	}
+	__forceinline void SetNiNode(NiNode* node)
+	{
+		ThisStdCall<void>(0xAD8F20, this, node);
 	}
 };
 // D8

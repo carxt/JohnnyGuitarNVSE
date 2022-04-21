@@ -8,8 +8,27 @@ DEFINE_COMMAND_PLUGIN(GetTextureWidth, , 0, 2, kParams_OneString_OneOptionalInt)
 DEFINE_COMMAND_PLUGIN(GetTextureHeight, , 0, 1, kParams_OneString_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParams_OneString_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParams_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(PlaySoundFile, , 0, 3, kParams_OneString_TwoOptionalInts);
+DEFINE_COMMAND_PLUGIN(StopSoundFile, , 0, 0, NULL);
 #include <filesystem>
 
+bool Cmd_StopSoundFile_Execute(COMMAND_ARGS) {
+	*result = 0;
+	CdeclCall<void>(0x8304A0);
+	*result = 1;
+	return true;
+}
+bool Cmd_PlaySoundFile_Execute(COMMAND_ARGS) {
+	char path[MAX_PATH];
+	*result = 0;
+	UInt32 forcePlay = 0;
+	UInt32 shouldLoop = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &forcePlay, &shouldLoop)) {
+		CdeclCall<void>(0x8300C0, 6, path, 1000, shouldLoop, forcePlay, 0.0, 0);
+		*result = 1;
+	}
+	return true;
+}
 
 bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 	char filepath[MAX_PATH];

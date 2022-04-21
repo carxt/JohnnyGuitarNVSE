@@ -411,7 +411,13 @@ static ParamInfo kParams_OneString_OneOptionalInt[2] =
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 1 },
 };
-
+static ParamInfo kParams_OneString_TwoOptionalInts_OneOptionalFloat[4] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "Integer", kParamType_Integer, 1 },
+	{ "Integer", kParamType_Integer, 1 },
+	{ "Float", kParamType_Float, 1 },
+};
 static ParamInfo kParams_Event_OneForm[4] =
 {
 	{ "setOrRemove", kParamType_Integer, 0 },

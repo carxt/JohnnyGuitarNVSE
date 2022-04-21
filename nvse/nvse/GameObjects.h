@@ -151,6 +151,7 @@ public:
 	bool IsTemporary() {return (flags & kFlags_Temporary) ? true : false;}
 	bool IsDeleted() {return (flags & kFlags_Deleted) ? true : false;}
 	bool IsDestroyed() {return (flags & kFlags_Destroyed) ? true : false;}
+	__forceinline NiNode* GetRefNiNode() { return renderState ? renderState->niNode14 : nullptr; }
 	const char *hk_GetName();
 	NiVector3 *PosVector() {return (NiVector3*)&posX;}
 	CoordXY *PosXY() {return (CoordXY*)&posX;}
