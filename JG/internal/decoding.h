@@ -17,6 +17,8 @@ class BSAudioManagerThread;
 class ImageSpaceModifierInstanceRB;
 struct NavMeshClosedDoorInfo;
 
+
+
 class ExtraDetachTime : public BSExtraData
 {
 public:
@@ -2569,6 +2571,8 @@ public:
 	UInt32						nextMapKey;			// 180
 	UInt8						byte184;			// 184
 	UInt8						pad185[3];			// 185
+
+	__forceinline static BSAudioManager* Get() { return (BSAudioManager*)0x11F6EF0; }
 };
 STATIC_ASSERT(sizeof(BSAudioManager) == 0x188);
 

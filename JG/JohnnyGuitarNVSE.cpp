@@ -378,6 +378,7 @@ extern "C" {
 		REG_TYPED_CMD(GetNthRegionWeatherGlobal, Form);
 		REG_CMD(PlaySoundFile);
 		REG_CMD(StopSoundFile);
+		REG_CMD(StopSoundLooping);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
