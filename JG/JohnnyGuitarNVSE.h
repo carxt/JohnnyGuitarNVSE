@@ -31,6 +31,7 @@ bool capLoadScreensTo60 = 0;
 bool fixNPCShootingAngle = 0;
 bool noMuzzleFlashCooldown = 0;
 bool enableRadioSubtitles = 0;
+bool removeMainMenuMusic = 0;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -553,5 +554,6 @@ void HandleGameHooks()
 	if (noMuzzleFlashCooldown)	SafeWriteBuf(0x9BB6A8, "\x90\x90", 2);
 	if (enableRadioSubtitles) SafeWrite8(0x833876, 0x84);
 	SafeWrite8(0x8EC5D9, 0xEB); //Fix for death topics getting cut off
+	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
 	
 }
