@@ -22,6 +22,9 @@ DEFINE_COMMAND_PLUGIN(RefreshIdle, , 1, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(ExitGameAlt, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(DumpINI, , 0, 0, NULL);
 DEFINE_CMD_NO_ARGS(UpdateCrosshairPrompt);
+DEFINE_COMMAND_PLUGIN(SetOptionalBone, , 1, 2, kParams_OneInt_OneString);
+DEFINE_COMMAND_PLUGIN(GetOptionalBone, , 1, 2, kParams_OneInt);
+
 
 bool Cmd_UpdateCrosshairPrompt_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -485,5 +488,54 @@ bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS)
 
 	ThisStdCall(0x0703DA0, nullptr);
 	ThisStdCall(0x07D0A70, nullptr);
+	return true;
+}
+
+
+bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS)
+{
+	uintptr_t optIdx = -1;
+	*result = 0;
+	char boneName[MAX_PATH] = { 0 };
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, optIdx, &boneName)) {
+		if (optIdx > 4) return true;
+		auto doUpdateBone = [optIdx, &boneName, &result](ValidBip01Names* BipedAnim) {
+			if (BipedAnim) {
+				if (BipedAnim->bip01 && BipedAnim->bip01->GetNiNode())
+				{
+					auto vb = CdeclCall<NiNode*>(0x04AAE30, BipedAnim->bip01, boneName);
+					if (vb && vb->GetNiNode()) {
+						BipedAnim->bones[optIdx].bone = vb;
+						*result = 1;
+					}
+				}
+			}
+		};
+		if (thisObj && thisObj->IsCharacter()) {
+			doUpdateBone(((Character*)thisObj)->validBip01Names);
+			if (thisObj == PlayerCharacter::GetSingleton()) {
+				doUpdateBone(((PlayerCharacter*)thisObj)->VB01N1stPerson);
+			}
+		}
+	}
+	return true;
+}
+
+
+bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
+	uintptr_t optIdx = -1;
+
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &optIdx)) {
+		if (thisObj && thisObj->IsCharacter() && optIdx <= 4)
+		if (auto BipedAnim = ((Character*)thisObj)->validBip01Names) {
+			if (BipedAnim->bones[optIdx].bone && BipedAnim->bones[optIdx].bone->GetNiNode())
+			{
+				g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->bones[optIdx].bone->m_blockName);
+				if (IsConsoleMode())
+					Console_Print("GetOptionalBone >> %s", BipedAnim->bones[optIdx].bone->m_blockName);
+			}
+		}
+		
+	}
 	return true;
 }

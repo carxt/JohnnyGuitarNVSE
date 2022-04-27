@@ -34,6 +34,7 @@ DEFINE_COMMAND_PLUGIN(IsCrimeOrEnemy, , 1, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetLocationSpecificLoadScreensOnly, , , 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLocationName, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetPlayingEffectShaders, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(StopSoundLooping, , 0, 1, kParams_OneForm);
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -41,6 +42,26 @@ bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+
+bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESSound* sound = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound) && IS_TYPE(sound, TESSound)) {
+		BSGameSound* gameSound;
+		for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter)
+		{
+			gameSound = sndIter.Get();
+			if (!gameSound || (gameSound->sourceSound != sound))
+				continue;
+			gameSound->Unk_0E();
+			ThisStdCall<void>(0xADA5D0, BSAudioManager::Get(), gameSound->mapKey, gameSound);
+			*result = 1;
+		}
+	}
+
+	return true;
+}
+
 
 bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	*result = 0;
