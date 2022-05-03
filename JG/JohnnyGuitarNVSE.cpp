@@ -43,7 +43,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-
+#define JG_VERSION 460
 void MessageHandler(NVSEMessagingInterface::Message* msg)
 {
 
@@ -85,6 +85,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 		g_VATSCameraData = (VATSCameraData*)0x11F2250;
 		g_initialTickCount = GetTickCount();
+		Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 		break;
 	}
 	default:
@@ -104,7 +105,7 @@ extern "C" {
 #endif
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "JohnnyGuitarNVSE";
-		info->version = 455;
+		info->version = JG_VERSION;
 
 		if (nvse->isNogore)
 		{
@@ -158,6 +159,8 @@ extern "C" {
 		noMuzzleFlashCooldown = GetPrivateProfileInt("MAIN", "bNoMuzzleFlashCooldown", 0, filename);
 		resetVanityCam = GetPrivateProfileInt("MAIN", "bReset3rdPersonCamera", 0, filename);
 		enableRadioSubtitles = GetPrivateProfileInt("MAIN", "bEnableRadioSubtitles", 0, filename);
+		removeMainMenuMusic = GetPrivateProfileInt("MAIN", "bRemoveMainMenuMusic", 0, filename);
+		fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 0, filename);
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);
@@ -367,6 +370,18 @@ extern "C" {
 		REG_CMD(SetWorldspaceEncounterZone);
 		REG_TYPED_CMD(GetWorldspaceEncounterZone, Form);
 		REG_CMD(UpdateCrosshairPrompt);
+		REG_CMD(GetLightingTemplateTraitNumeric);
+		REG_CMD(SetLightingTemplateTraitNumeric);
+		REG_TYPED_CMD(GetLightingTemplateCell, Form);
+		REG_CMD(SetLightingTemplateCell);
+		REG_CMD(RemoveScopeModelPath);
+		REG_TYPED_CMD(GetNthRegionWeatherType, Form);
+		REG_CMD(GetNthRegionWeatherChance);
+		REG_TYPED_CMD(GetNthRegionWeatherGlobal, Form);
+		REG_CMD(PlaySoundFile);
+		REG_CMD(StopSoundFile);
+		REG_CMD(StopSoundLooping);
+		REG_TYPED_CMD(GetCompassTargets, Array);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

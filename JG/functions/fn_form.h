@@ -69,9 +69,156 @@ DEFINE_COMMAND_PLUGIN(SetRefEncounterZone, , 1, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(SetCellEncounterZone, , 0, 2, kParams_OneForm_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetWorldspaceEncounterZone, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetWorldspaceEncounterZone, , 0, 2, kParams_OneForm_OneOptionalForm);
-
+DEFINE_COMMAND_PLUGIN(GetLightingTemplateTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetLightingTemplateTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
+DEFINE_COMMAND_PLUGIN(GetLightingTemplateCell, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetLightingTemplateCell, , 0, 2, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(RemoveScopeModelPath, , 0, 1, kParams_OneForm);
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+bool Cmd_RemoveScopeModelPath_Execute(COMMAND_ARGS)
+{
+	TESObjectWEAP* weapon = NULL;
+	TESModel* model = NULL;
+	*result = 0;
+
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && IS_TYPE(weapon, TESObjectWEAP))
+	{
+		if (weapon && weapon->HasScope()) model = &(weapon->targetNIF);
+		if (model) {
+			model->nifPath.Set("");
+			*result = 1;
+		}
+	}
+
+	return true;
+}
+
+
+bool Cmd_SetLightingTemplateCell_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSLightingTemplate* tmpl = nullptr;
+	TESObjectCELL* cell = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tmpl, &cell) && IS_TYPE(tmpl, BGSLightingTemplate) && IS_TYPE(cell, TESObjectCELL)) {
+		tmpl->getValuesFrom = cell;
+	}
+	return true;
+}
+
+bool Cmd_GetLightingTemplateCell_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSLightingTemplate* tmpl = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tmpl) && IS_TYPE(tmpl, BGSLightingTemplate)) {
+		*(UInt32*)result = tmpl->getValuesFrom != nullptr ? tmpl->getValuesFrom->refID : 0;
+		if (IsConsoleMode()) Console_Print("GetLightingTemplateCell >> 0x%X", *result);
+	}
+	return true;
+}
+bool Cmd_SetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
+	*result = 0;
+	UInt32 traitID = 0;
+	BGSLightingTemplate* tmpl = nullptr;
+	float value = 0.0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tmpl, &traitID, &value) && IS_TYPE(tmpl, BGSLightingTemplate) && traitID > 0) {
+		switch (traitID) {
+		case 1:
+		case 2:
+		case 3:
+			tmpl->ambientRGB[traitID-1] = value;
+			break;
+		case 4:
+		case 5:
+		case 6:
+			tmpl->directionalRGB[traitID-4] = value;
+			break;
+		case 7:
+		case 8:
+		case 9:
+			tmpl->fogRGB[traitID-7] = value;
+			break;
+		case 10:
+			tmpl->fogNear = value;
+			break;
+		case 11:
+			tmpl->fogFar = value;
+			break;
+		case 12:
+			tmpl->directionalXY = value;
+			break;
+		case 13:
+			tmpl->directionalZ = value;
+			break;
+		case 14:
+			tmpl->directionalFade = value;
+			break;
+		case 15:
+			tmpl->fogClipDist = value;
+			break;
+		case 16:
+			tmpl->fogPower = value;
+			break;
+		default:
+			return true;
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
+	*result = 0;
+	UInt32 traitID = 0;
+	BGSLightingTemplate* tmpl = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tmpl, &traitID) && IS_TYPE(tmpl, BGSLightingTemplate) && traitID > 0) {
+		switch (traitID) {
+		case 1:
+		case 2:
+		case 3:
+			*result = tmpl->ambientRGB[traitID-1];
+			break;
+		case 4:
+		case 5:
+		case 6:
+			*result = tmpl->directionalRGB[traitID-4];
+			break;
+		case 7:
+		case 8:
+		case 9:
+			*result = tmpl->fogRGB[traitID-7];
+			break;
+		case 10:
+			*result = tmpl->fogNear;
+			break;
+		case 11:
+			*result = tmpl->fogFar;
+			break;
+		case 12:
+			*result = tmpl->directionalXY;
+			break;
+		case 13:
+			*result = tmpl->directionalZ;
+			break;
+		case 14:
+			*result = tmpl->directionalFade;
+			break;
+		case 15:
+			*result = tmpl->fogClipDist;
+			break;
+		case 16:
+			*result = tmpl->fogPower;
+			break;
+		default:
+			return true;
+		}
+		if (IsConsoleMode()) Console_Print("GetLightingTemplateTraitNumeric %d >> %f", traitID, *result);
+	}
+	return true;
+}
+/* 	UInt32			directionalXY;		// 2C
+UInt32			directionalZ;		// 30
+float			directionalFade;	// 34
+float			fogClipDist;		// 38
+float			fogPower;*/
 
 BGSEncounterZone* GetEncounterZone(ExtraDataList* list) {
 	ExtraEncounterZone* xZone = (ExtraEncounterZone*)list->GetByType(kExtraData_EncounterZone);
@@ -1245,7 +1392,7 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 		if (detachTime == 0) {
 			*result = -1;
 		}
-		else if (detachTime == -1) {
+		else if (detachTime == -1 || detachTime == -2) {	//-1 is used by ResetInterior, -2 by ShowOff's ResetInteriorAlt.
 			*result = 1;
 		}
 		else {

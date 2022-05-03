@@ -6032,9 +6032,9 @@ public:
 	BGSLightingTemplate();
 	~BGSLightingTemplate();
 
-	UInt32			ambientRGB;			// 18
-	UInt32			directionalRGB;		// 1C
-	UInt32			fogRGB;				// 20
+	UInt8			ambientRGB[4];			// 18
+	UInt8			directionalRGB[4];		// 1C
+	UInt8			fogRGB[4];				// 20
 	float			fogNear;			// 24
 	float			fogFar;				// 28
 	UInt32			directionalXY;		// 2C

@@ -28,12 +28,14 @@ DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParams_OneInt_OneFloat)
 DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 2, kParams_OneRef_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , 0, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetCompassTargets, , 0, 2, kParams_TwoOptionalInts);
 DEFINE_COMMAND_PLUGIN(ToggleDisableSaves, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsCrimeOrEnemy, , 1, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetLocationSpecificLoadScreensOnly, , , 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLocationName, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetPlayingEffectShaders, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(StopSoundLooping, , 0, 1, kParams_OneForm);
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -41,6 +43,26 @@ bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+
+bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESSound* sound = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound) && IS_TYPE(sound, TESSound)) {
+		BSGameSound* gameSound;
+		for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter)
+		{
+			gameSound = sndIter.Get();
+			if (!gameSound || (gameSound->sourceSound != sound))
+				continue;
+			gameSound->Unk_0E();
+			ThisStdCall<void>(0xADA5D0, BSAudioManager::Get(), gameSound->mapKey, gameSound);
+			*result = 1;
+		}
+	}
+
+	return true;
+}
+
 
 bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -159,6 +181,46 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 		}
 	}
 	if (g_arrInterface->GetArraySize(hostileArr)) g_arrInterface->AssignCommandResult(hostileArr, result);
+	return true;
+}
+bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+
+	enum TargetFlag : UInt32
+	{
+		IncludeAll = 0,
+		IncludeDetected = 1,
+		IncludeHostiles = 2,
+	} includeWhat = IncludeAll;
+
+	UInt32 skipInvisible = 0;
+
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &includeWhat, &skipInvisible))
+		return true;
+
+	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	for (auto iter = g_thePlayer->compassTargets->Begin(); 
+		!iter.End(); ++iter)
+	{
+		const PlayerCharacter::CompassTarget* target = iter.Get();
+
+		if (includeWhat == IncludeAll || (includeWhat == IncludeDetected && target->isDetected)
+			|| (includeWhat == IncludeHostiles && target->isHostile) )
+		{
+			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0
+				|| target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0))
+			{
+				continue;
+			}
+
+			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
+		}
+	}
+	if (g_arrInterface->GetArraySize(hostileArr))
+	{
+		g_arrInterface->AssignCommandResult(hostileArr, result);
+	}
 	return true;
 }
 bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
