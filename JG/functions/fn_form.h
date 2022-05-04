@@ -716,7 +716,9 @@ bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTalkingActivator* activator;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &activator) && IS_TYPE(activator, BGSTalkingActivator)) {
-		*(UInt32*)result = activator->talkingActor->refID;
+		if (activator->talkingActor) {
+			*(UInt32*)result = activator->talkingActor->refID;
+		}
 		if (IsConsoleMode()) Console_Print("GetTalkingActivatorActor >> 0x%X", *result);
 	}
 	return true;
