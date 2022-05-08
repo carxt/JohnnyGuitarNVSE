@@ -7,7 +7,22 @@ DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParams_OneForm_OneString)
 DEFINE_COMMAND_PLUGIN(QueueCinematicText, , 0, 7, kParams_TwoStrings_OneOptionalString_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , 0, 3, kParams_OneString_TwoOptionalInts);
 DEFINE_COMMAND_PLUGIN(GetSystemColor, , 0, 1, kParams_OneInt);
-
+DEFINE_COMMAND_PLUGIN(GetSystemColorAlt, , 0, 4, kParams_OneInt_ThreeScriptVars);
+bool Cmd_GetSystemColorAlt_Execute(COMMAND_ARGS) {
+	*result = 0;
+	ScriptVar* rOut, *gOut, *bOut;
+	UInt32 type;
+	UInt8 color[3] = { 0, 0, 0 };
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &type, &rOut, &gOut, &bOut) && type > 0 && type <= 5) {
+		SystemColorManager* colorMgr = SystemColorManager::GetSingleton();
+		UInt32 color = (colorMgr->GetColor(type) >> 0x8);
+		bOut->data = color & 0xFF;
+		gOut->data = (color >> 8) & 0xFF;
+		rOut->data = (color >> 16) & 0xFF;
+		if (IsConsoleMode()) Console_Print("GetSystemColor %d >> %d %d %d", type, rOut->data, gOut->data, bOut->data);
+	}
+	return true;
+}
 bool Cmd_GetSystemColor_Execute(COMMAND_ARGS) {
 	UInt32 type;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &type) && type > 0 && type <= 5) {
