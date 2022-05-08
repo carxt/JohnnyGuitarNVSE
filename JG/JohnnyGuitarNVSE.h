@@ -516,6 +516,40 @@ void __fastcall TESRegionDataSoundLoadIncidentalID(ModInfo* info, void* edx, UIn
 	}
 }
 
+
+
+bool _fastcall HighProcessGetIsTalking(HighProcess* thisObj) {
+	if (!thisObj) { return false; }
+	uintptr_t* highProcessvTable = *((uintptr_t**)(thisObj));
+
+}
+/*
+float __fastcall CFixDeathResponseCutOff(HighProcess* thisObj, Actor* Actor) {
+	uintptr_t* highProcessvTable = *((uintptr_t**)(thisObj));
+	float DyingTimer = ThisStdCall<float>(highProcessvTable[0x12C], thisObj); //GetDyingTimer, or Unk_12C, too lazy to name
+	bool IsTalking = (ThisStdCall<bool>(0x08A67F0, Actor) && ThisStdCall<bool>(0x9336C0, Actor)); //Set whenever lipsync is playing iirc
+	if (false && IsTalking) { return 1; }
+	return DyingTimer;
+
+}*/
+float __fastcall CFixDeathResponseCutOff(HighProcess* thisObj, Actor* Actor) {
+	uintptr_t* highProcessvTable = *((uintptr_t**)(thisObj));
+	float DyingTimer = ThisStdCall<float>(highProcessvTable[0x12C], thisObj); //GetDyingTimer, or Unk_12C, too lazy to name
+	bool IsTalking = !(Actor->unk80 & 1);
+	if (IsTalking && (DyingTimer <= FLT_EPSILON)) { DyingTimer = FLT_EPSILON; }
+	return DyingTimer;
+
+}
+__declspec (naked) void AsmFixDeathResponseCuttoffHandler() {
+	static const uintptr_t  jumptGt = (uintptr_t)CFixDeathResponseCutOff;
+	__asm {
+		mov edx, dword ptr [ebp+8]
+		jmp jumptGt
+	}
+}
+
+
+
 void HandleGameHooks()
 {
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // use available ammo in inventory instead of NULL when default ammo isn't present
@@ -554,7 +588,10 @@ void HandleGameHooks()
 	SafeWriteBuf(0x8BFBC1, "\x85\xC9\x74\x36\x80\x79\x04", 7); // missing null check in Actor::HandleStealing
 	if (noMuzzleFlashCooldown)	SafeWriteBuf(0x9BB6A8, "\x90\x90", 2);
 	if (enableRadioSubtitles) SafeWrite8(0x833876, 0x84);
-	if (fixDeathSounds) SafeWrite8(0x8EC5D9, 0xEB); //Fix for death topics getting cut off
+	 //Fix for death topics getting cut off
+	if (fixDeathSounds){
+	SafeWrite16(0x8EC5C6, 0xBA90);
+	SafeWrite32(0x8EC5C8, (uintptr_t)AsmFixDeathResponseCuttoffHandler); }
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
 	
 }
