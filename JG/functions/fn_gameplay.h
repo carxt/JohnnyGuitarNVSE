@@ -27,7 +27,7 @@ DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParams_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 2, kParams_OneRef_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , 0, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , 0, 1, kParams_TwoOptionalInts);
 DEFINE_COMMAND_PLUGIN(GetCompassTargets, , 0, 2, kParams_TwoOptionalInts);
 DEFINE_COMMAND_PLUGIN(ToggleDisableSaves, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , 1, 0, NULL);
@@ -166,7 +166,21 @@ bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 skipInvisible = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
+
+	//If player has ImprovedDetection perk effect, then they'll see invisible actors in compass.
+	UInt32 accountForImprovedDetection = 0;  
+
+	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible, &accountForImprovedDetection);
+
+	bool hasImprovedDetection = false;
+	if (accountForImprovedDetection)
+	{
+		float hasPerk = 0.0; //copying code at 0x77A0C4
+		ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, g_thePlayer, &hasPerk);
+		if (hasPerk > 0.0)
+			hasImprovedDetection = true;
+	}
+
 	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	auto iter = g_thePlayer->compassTargets->Begin();
 	for (; !iter.End(); ++iter)
@@ -174,7 +188,9 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile)
 		{
-			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0
+				|| target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) 
+			{
 				continue;
 			}
 			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
