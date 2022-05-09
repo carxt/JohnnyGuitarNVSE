@@ -199,6 +199,7 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	if (g_arrInterface->GetArraySize(hostileArr)) g_arrInterface->AssignCommandResult(hostileArr, result);
 	return true;
 }
+
 bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -206,45 +207,26 @@ bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS)
 	enum TargetFlag : UInt32
 	{
 		IncludeAll = 0,
-		IncludeDetected = 1,
+		IncludeNonHostiles = 1,
 		IncludeHostiles = 2,
 	} includeWhat = IncludeAll;
 
-	UInt32 skipInvisible = 0;
+	UInt32 unused; // kept so as to not break compiled scripts, used to be "skipInvisible"
 
-	//If player has ImprovedDetection perk effect, then they'll see invisible actors in compass.
-	UInt32 accountForImprovedDetection = 0;
-
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &includeWhat, &skipInvisible, &accountForImprovedDetection))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &includeWhat, &unused))
 		return true;
 
-	bool hasImprovedDetection = false;
-	if (accountForImprovedDetection)
+	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	for (auto const iter : GetCompassTargets::g_TargetsInCompass)
 	{
-		float hasPerk = 0.0; //copying code at 0x77A0C4
-		ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, g_thePlayer, &hasPerk);
-		if (hasPerk > 0.0)
-			hasImprovedDetection = true;
-	}
-
-	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
-	for (auto iter = g_thePlayer->compassTargets->Begin(); 
-		!iter.End(); ++iter)
-	{
-		const PlayerCharacter::CompassTarget* target = iter.Get();
-
-		if (includeWhat == IncludeAll || (includeWhat == IncludeDetected && target->isDetected)
-			|| (includeWhat == IncludeHostiles && target->isHostile) )
+		if (includeWhat == IncludeAll
+			|| (includeWhat == IncludeNonHostiles && !iter->isHostile)
+			|| (includeWhat == IncludeHostiles && iter->isHostile))
 		{
-			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0
-				|| target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0))
-			{
-				continue;
-			}
-
-			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
+			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(iter->target));
 		}
 	}
+
 	if (g_arrInterface->GetArraySize(hostileArr))
 	{
 		g_arrInterface->AssignCommandResult(hostileArr, result);

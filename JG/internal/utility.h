@@ -1,6 +1,8 @@
 // all credits to JazzisParis
 #pragma once
 
+#include <intrin.h>
+
 const double
 kDblZero = 0,
 kDblPI = 3.141592653589793,
@@ -304,3 +306,7 @@ void DumpMemImg(void* data, UInt32 size, UInt8 extra = 0);
 void GetMD5File(const char* filePath, char* outHash);
 
 void GetSHA1File(const char* filePath, char* outHash);
+
+// Taken from xNVSE
+// Pair this with _AddressOfReturnAddress()
+UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda = false);
