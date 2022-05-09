@@ -562,7 +562,7 @@ namespace GetCompassTargets
 		return compassTargets->Count();
 	}
 
-	void __fastcall PropagateIntValue_Hook(Tile* tile, UInt32 tileValue, int a3)
+	void __fastcall PropagateIntValue_Hook(Tile* tile, void* edx, UInt32 tileValue, int a3)
 	{
 		ThisStdCall<void>(0x700320, tile, tileValue, a3); // Regular code
 
@@ -575,6 +575,7 @@ namespace GetCompassTargets
 	void WriteHooks()
 	{
 		// Will empty the list.
+		// Replace "call TList__GetSize"
 		WriteRelCall(0x779F7A, (UInt32)GetSize_Hook);
 
 		// Will fill the list.
