@@ -383,6 +383,12 @@ static ParamInfo kParams_TwoOptionalInts[2] =
 	{"Integer", kParamType_Integer, 1},
 	{"Integer", kParamType_Integer, 1},
 };
+static ParamInfo kParams_ThreeOptionalInts[3] =
+{
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+};
 static ParamInfo kParams_ar_SortEditor[] =
 {
 	{	"array",		kNVSEParamType_Array,	0	},
