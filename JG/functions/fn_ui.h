@@ -22,7 +22,7 @@ bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 
 	if (pos != factionRepIcons.end())
 	{
-		if (strlen(pos->second[tierID-1]) > 0) delete[] pos->second[tierID-1];
+		if (*pos->second[tierID-1]) delete[] pos->second[tierID-1];
 		pos->second[tierID-1] = pathCopy;
 	}
 	else

@@ -566,7 +566,7 @@ char* __fastcall GetReputationIconHook(TESReputation* rep) {
 		else {
 			tierID = 3; // very happy
 		}
-		if (strlen(it->second[tierID]) > 0) return it->second[tierID];
+		if (*it->second[tierID]) return it->second[tierID];
 	}
 	return ThisStdCall<char*>(0x6167D0, rep);
 }
