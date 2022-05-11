@@ -2258,13 +2258,6 @@ __declspec(naked) NiVector3 *FontManager::GetStringDimensions(NiVector3 *outDims
 	__asm	jmp		procAddr
 }
 
-// 24
-struct RadioEntry
-{
-	TESObjectREFR	*radioRef;
-	void			*ptr04;
-	UInt32			unk08[7];
-};
 
 // 18
 class LoadedReferenceMap : public NiTPointerMap<TESObjectREFR>
@@ -2670,6 +2663,73 @@ struct Sound
 		ThisStdCall<void>(0xAD8F20, this, node);
 	}
 };
+struct ExtraInfoGeneralTopicDataElement
+{
+	String responseText;
+	UInt32 emotionType;
+	UInt32 emotionValue;
+	String voiceFilePath;
+	TESIdleForm* speakerAnimation;
+	TESIdleForm* listenerAnimation;
+	UInt32 sound;
+	UInt8 flags;
+	UInt8 gap25[3];
+	UInt32 responseNumber;
+};
+
+struct List11DD58CItem
+{
+	TESObjectREFR* ref;
+	Sound sound04;
+	Sound sound10;
+	UInt8 byte1C;
+	UInt8 byte1D;
+	UInt8 byte1E;
+	UInt8 byte1F;
+};
+struct VoiceEntry
+{
+	tList<ExtraInfoGeneralTopicDataElement> list00;
+	char* response;
+	TESTopicInfo* topicInfo;
+	TESTopic* topic;
+	TESQuest* quest;
+	Actor* actor;
+};
+
+struct VoiceEntryList
+{
+	tList<VoiceEntry> list00;
+	UInt32 unk08;
+};
+enum RadioEntryDataFlags
+{
+	kMaybeActive = 0x1,
+	kSignalLost = 0x4,
+	kIsBroadcastingContinuously = 0x20,
+	kMaybeTracklistEmpty = 0x100,
+};
+struct RadioEntryData
+{
+	VoiceEntryList* voiceEntry;
+	VoiceEntryList* voiceEntry04;
+	UInt32 offset;
+	UInt32 soundTimeRemaining0C;
+	UInt8 lastSignalToNoiseRatioPct;
+	UInt8 signalToNoiseRatioPct;
+	UInt8 gap12[2];
+	RadioEntryDataFlags flags;
+	tList<List11DD58CItem> list18;
+};
+// 24
+struct RadioEntry
+{
+	TESObjectREFR* radioRef;
+	RadioEntryData data;
+};
+
+
+
 // D8
 class FORenderedMenu
 {

@@ -383,6 +383,7 @@ extern "C" {
 		REG_CMD(StopSoundLooping);
 		REG_TYPED_CMD(GetCompassTargets, Array);
 		REG_CMD(GetSystemColorAlt);
+		REG_CMD(SetCustomReputationChangeIcon);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
