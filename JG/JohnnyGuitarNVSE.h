@@ -570,7 +570,19 @@ char* __fastcall GetReputationIconHook(TESReputation* rep) {
 	}
 	return ThisStdCall<char*>(0x6167D0, rep);
 }
-
+Setting*__fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char* name) {
+	Setting* result = ThisStdCall<Setting*>(0x5E02B0, ini, name);
+	if (result) return result;
+	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
+	if (rendererSettings && !rendererSettings->settings.Empty()) {
+		ListNode<Setting>* iter = rendererSettings->settings.Head();
+		do {
+			if (iter->data && !stricmp(iter->data->name, name)) return iter->data;
+		} while (iter = iter->next);
+	}
+	return nullptr;
+	
+}
 void HandleGameHooks()
 {
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // use available ammo in inventory instead of NULL when default ammo isn't present
@@ -616,4 +628,6 @@ void HandleGameHooks()
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
 	WriteRelCall(0x6156A2, UInt32(GetReputationIconHook));	
 	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
+	SafeWrite8(0x4F064E, 0x7A);
+	WriteRelCall(0x5BED66, (UInt32)GetINISettingHook);
 }
