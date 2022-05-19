@@ -384,6 +384,8 @@ extern "C" {
 		REG_TYPED_CMD(GetCompassTargets, Array);
 		REG_CMD(GetSystemColorAlt);
 		REG_CMD(SetCustomReputationChangeIcon);
+		REG_CMD(SetArmorAltTexture);
+		REG_CMD(SetWeaponAltTexture);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

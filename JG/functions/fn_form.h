@@ -74,8 +74,11 @@ DEFINE_COMMAND_PLUGIN(SetLightingTemplateTraitNumeric, , 0, 3, kParams_OneForm_O
 DEFINE_COMMAND_PLUGIN(GetLightingTemplateCell, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetLightingTemplateCell, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(RemoveScopeModelPath, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetArmorAltTexture, , 0, 4, kParams_OneForm_TwoInts_OneForm);
+DEFINE_COMMAND_PLUGIN(SetWeaponAltTexture, , 0, 3, kParams_OneForm_OneInt_OneForm);
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
 
 bool Cmd_RemoveScopeModelPath_Execute(COMMAND_ARGS)
 {
@@ -459,6 +462,47 @@ bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {
 		} while (iter = iter->next);
 
 		if (g_arrInterface->GetArraySize(txstArr)) g_arrInterface->AssignCommandResult(txstArr, result);
+	}
+	return true;
+}
+bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectWEAP* weapon;
+	BGSTextureSet* txst = nullptr;
+	int id = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &id, &txst) && IS_TYPE(weapon, TESObjectWEAP) && IS_TYPE(txst, BGSTextureSet)) {
+		TESModelTextureSwap* model = &weapon->textureSwap;
+		if (!model) return true;
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+		do
+		{
+			if (iter->data && iter->data->index3D == id) {
+				iter->data->textureID = txst;
+				*result = 1;
+				break;
+			}
+		} while (iter = iter->next);
+	}
+	return true;
+}
+bool Cmd_SetArmorAltTexture_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSTextureSet* txst = nullptr;
+	TESObjectARMO* armor = nullptr;
+	int id = -1;
+	UInt32 whichModel;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &whichModel, &id, &txst) && IS_TYPE(txst, BGSTextureSet) && IS_TYPE(armor, TESObjectARMO)) {
+		TESModelTextureSwap* model = GetArmorModel(armor, whichModel);
+		if (!model) return true;
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+		do
+		{
+			if (iter->data && iter->data->index3D == id) {
+				iter->data->textureID = txst;
+				*result = 1;
+				break;
+			}
+		} while (iter = iter->next);
 	}
 	return true;
 }

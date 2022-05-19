@@ -472,7 +472,13 @@ static ParamInfo kParams_OneString_OneForm_OneOptionalInt[3] =
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 1 },
 };
-
+static ParamInfo kParams_OneForm_TwoInts_OneForm[4] =
+{
+	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Form", kParamType_AnyForm, 0 }
+};
 static ParamInfo kParams_OneForm_OneInt_OneFloat[3] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
