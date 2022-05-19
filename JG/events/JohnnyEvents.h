@@ -12,7 +12,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, SetOnSettingsUp
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnAddPerkEventHandler, SetOnAddPerkEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , 0, 4, kParams_Event_OptionalFlag);
-DEFINE_COMMAND_PLUGIN(SetOnActorValueChangeEventHandler, , 0, 4, kParams_Event_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetOnActorValueChangeEventHandler, SetJohnnyOnActorValueChangeEventHandler, , 0, 4, kParams_Event_OneInt);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
