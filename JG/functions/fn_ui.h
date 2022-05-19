@@ -8,6 +8,34 @@ DEFINE_COMMAND_PLUGIN(QueueCinematicText, , 0, 7, kParams_TwoStrings_OneOptional
 DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , 0, 3, kParams_OneString_TwoOptionalInts);
 DEFINE_COMMAND_PLUGIN(GetSystemColor, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetSystemColorAlt, , 0, 4, kParams_OneInt_ThreeScriptVars);
+DEFINE_COMMAND_ALT_PLUGIN(SetCustomReputationChangeIcon, scrci, , 0, 4, kParams_OneForm_OneInt_OneString);
+
+bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESReputation* rep;
+	UInt32 tierID = 0;
+	char path[MAX_PATH];
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &rep, &tierID, &path) && IS_TYPE(rep, TESReputation) && tierID >= 1 && tierID <= 4)) return true;
+	auto pos = factionRepIcons.find(rep->refID);
+	char* pathCopy = new char[strlen(path) + 1];
+	strcpy(pathCopy, path);
+
+	if (pos != factionRepIcons.end())
+	{
+		if (*pos->second[tierID-1]) delete[] pos->second[tierID-1];
+		pos->second[tierID-1] = pathCopy;
+	}
+	else
+	{
+		std::vector<char*> v{ "", "", "", "" };
+		v[tierID-1] = pathCopy;
+		factionRepIcons.insert(std::pair<UInt32, std::vector<char*>>(rep->refID, v));
+	}
+	*result = 1;
+	return true;
+
+}
+
 bool Cmd_GetSystemColorAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ScriptVar* rOut, *gOut, *bOut;

@@ -38,7 +38,7 @@ TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
 TESSound* locationDiscoverSound = 0;
 std::unordered_map<UInt32, char*> markerIconMap;
-
+std::unordered_map <UInt32, std::vector<char*>> factionRepIcons;
 UInt32 disableMuzzleLights = -1;
 static float vatsSpreadMultValue = 15.0;
 UInt32 g_initialTickCount = 0;
@@ -548,6 +548,42 @@ __declspec (naked) void AsmFixDeathResponseCuttoffHandler() {
 	}
 }
 
+char* __fastcall GetReputationIconHook(TESReputation* rep) {
+	auto it = factionRepIcons.find(rep->refID);
+	if (it != factionRepIcons.end()) {
+		UInt8 tierID = 0;
+		UInt8 pos = ThisStdCall<UInt8>(0x616950, rep, 1);
+		UInt8 neg = ThisStdCall<UInt8>(0x616950, rep, 0);
+		if ((pos == 0 && neg == 1) || (pos == 2 && (neg == 2 || neg == 3)) || (pos == 3 && neg == 3)) {
+			tierID = 0; // in pain
+		}
+		else if (((neg == 2 || neg == 3) && (pos == 0 || pos == 1)) || (pos == 3 && neg == 2)) {
+			tierID = 1; // sad
+		}
+		else if (((pos == 0 || pos == 1) && neg == 0) || (pos == 1 && neg == 1)) {
+			tierID = 2; // neutral
+		}
+		else {
+			tierID = 3; // very happy
+		}
+		if (*it->second[tierID]) return it->second[tierID];
+	}
+	return ThisStdCall<char*>(0x6167D0, rep);
+}
+Setting*__fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char* name) {
+	Setting* result = ThisStdCall<Setting*>(0x5E02B0, ini, name);
+	if (result) return result;
+	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
+	if (rendererSettings && !rendererSettings->settings.Empty()) {
+		ListNode<Setting>* iter = rendererSettings->settings.Head();
+		do {
+			if (iter->data && !stricmp(iter->data->name, name)) return iter->data;
+		} while (iter = iter->next);
+	}
+	return nullptr;
+	
+}
+
 void HandleGameHooks()
 {
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // use available ammo in inventory instead of NULL when default ammo isn't present
@@ -591,4 +627,9 @@ void HandleGameHooks()
 	SafeWrite16(0x8EC5C6, 0xBA90);
 	SafeWrite32(0x8EC5C8, (uintptr_t)AsmFixDeathResponseCuttoffHandler); }
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
+	WriteRelCall(0x6156A2, UInt32(GetReputationIconHook));	
+	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
+	SafeWrite8(0x4F064E, 0x7A);
+	WriteRelCall(0x5BED66, (UInt32)GetINISettingHook);
+
 }

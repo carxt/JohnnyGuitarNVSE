@@ -24,7 +24,15 @@ DEFINE_COMMAND_PLUGIN(DumpINI, , 0, 0, NULL);
 DEFINE_CMD_NO_ARGS(UpdateCrosshairPrompt);
 DEFINE_COMMAND_PLUGIN(SetOptionalBone, , 1, 2, kParams_OneInt_OneString);
 DEFINE_COMMAND_PLUGIN(GetOptionalBone, , 1, 2, kParams_OneInt);
+DEFINE_CMD_NO_ARGS(DumpIconMap);
 
+bool Cmd_DumpIconMap_Execute(COMMAND_ARGS) {
+	auto it = factionRepIcons.begin();
+	for (auto const& it : factionRepIcons) {
+		Console_Print("0x%X - %s %s %s %s", it.first, it.second[0], it.second[1], it.second[2], it.second[3]);
+	}
+	return true;
+}
 
 bool Cmd_UpdateCrosshairPrompt_Execute(COMMAND_ARGS) {
 	*result = 0;
