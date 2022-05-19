@@ -381,7 +381,6 @@ extern "C" {
 		REG_CMD(PlaySoundFile);
 		REG_CMD(StopSoundFile);
 		REG_CMD(StopSoundLooping);
-		REG_TYPED_CMD(GetCompassTargets, Array);
 		REG_CMD(GetSystemColorAlt);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);

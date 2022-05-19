@@ -28,7 +28,6 @@ DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParams_OneInt_OneFloat)
 DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 2, kParams_OneRef_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , 0, 2, kParams_TwoOptionalInts);
-DEFINE_COMMAND_PLUGIN(GetCompassTargets, , 0, 3, kParams_ThreeOptionalInts);
 DEFINE_COMMAND_PLUGIN(ToggleDisableSaves, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsCrimeOrEnemy, , 1, 0, NULL);
@@ -200,39 +199,6 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS)
-{
-	*result = 0;
-
-	enum TargetFlag : UInt32
-	{
-		IncludeAll = 0,
-		IncludeNonHostiles = 1,
-		IncludeHostiles = 2,
-	} includeWhat = IncludeAll;
-
-	UInt32 unused; // kept so as to not break compiled scripts, used to be "skipInvisible"
-
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &includeWhat, &unused))
-		return true;
-
-	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	for (auto const iter : GetCompassTargets::g_TargetsInCompass)
-	{
-		if (includeWhat == IncludeAll
-			|| (includeWhat == IncludeNonHostiles && !iter->isHostile)
-			|| (includeWhat == IncludeHostiles && iter->isHostile))
-		{
-			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(iter->target));
-		}
-	}
-
-	if (g_arrInterface->GetArraySize(hostileArr))
-	{
-		g_arrInterface->AssignCommandResult(hostileArr, result);
-	}
-	return true;
-}
 bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
 {
 	TESObjectREFR* container;

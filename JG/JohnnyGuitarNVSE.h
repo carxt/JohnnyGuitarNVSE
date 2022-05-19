@@ -548,41 +548,6 @@ __declspec (naked) void AsmFixDeathResponseCuttoffHandler() {
 	}
 }
 
-namespace GetCompassTargets
-{
-	using CompassTarget = PlayerCharacter::CompassTarget;
-
-	// Caches CompassTargets that are actually shown in compass.
-	// Should be refreshed every frame.
-	std::vector<CompassTarget*> g_TargetsInCompass;
-
-	int __fastcall GetSize_Hook(tList<CompassTarget>* compassTargets)
-	{
-		g_TargetsInCompass.clear();
-		return compassTargets->Count();
-	}
-
-	void __fastcall PropagateIntValue_Hook(Tile* tile, void* edx, UInt32 tileValue, int a3)
-	{
-		ThisStdCall<void>(0x700320, tile, tileValue, a3); // Regular code
-
-		// Fill in the list.
-		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
-		auto* target = *reinterpret_cast<CompassTarget**>(ebp - 0xFC);
-		g_TargetsInCompass.push_back(target);
-	}
-
-	void WriteHooks()
-	{
-		// Will empty the list.
-		// Replace "call TList__GetSize"
-		WriteRelCall(0x779F7A, (UInt32)GetSize_Hook);
-
-		// Will fill the list.
-		WriteRelCall(0x77A2FA, (UInt32)PropagateIntValue_Hook);
-	}
-}
-
 void HandleGameHooks()
 {
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // use available ammo in inventory instead of NULL when default ammo isn't present
@@ -626,6 +591,4 @@ void HandleGameHooks()
 	SafeWrite16(0x8EC5C6, 0xBA90);
 	SafeWrite32(0x8EC5C8, (uintptr_t)AsmFixDeathResponseCuttoffHandler); }
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
-
-	GetCompassTargets::WriteHooks();
 }
