@@ -9,7 +9,7 @@ VATSCameraData* g_VATSCameraData = NULL;
 InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, UInt8 arg4, ContChangesEntry* entry, UInt8 arg6, UInt8 arg7, int arg8, float arg9, float arg10, UInt8 arg11, UInt8 arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, UInt8, ContChangesEntry*, UInt8, UInt8, int, float, float, UInt8, UInt8, TESForm*))0x645380;
-void (*ApplyPerkModifiers)(UInt32 entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(UInt32, TESObjectREFR*, void*, ...))0x5E58F0;
+void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
 bool isShowLevelUp = true;
 bool bArrowKeysDisabled = false;
 bool bCombatMusicDisabled = false;
@@ -583,6 +583,7 @@ Setting*__fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char*
 	return nullptr;
 	
 }
+
 void HandleGameHooks()
 {
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // use available ammo in inventory instead of NULL when default ammo isn't present
@@ -630,4 +631,5 @@ void HandleGameHooks()
 	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
 	SafeWrite8(0x4F064E, 0x7A);
 	WriteRelCall(0x5BED66, (UInt32)GetINISettingHook);
+
 }

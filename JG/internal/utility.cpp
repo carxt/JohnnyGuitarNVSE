@@ -1430,3 +1430,14 @@ void GetSHA1File(const char *filePath, char *outHash)
 	for (UInt8 idx = 0; idx < 0x14; idx++, outHash += 2)
 		sprintf_s(outHash, 3, "%02X", digest[idx]);
 }
+
+// Taken from xNVSE
+UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda)
+{
+	auto* basePtr = static_cast<UInt8*>(addressOfReturnAddress) - 4;
+#if _DEBUG
+	if (lambda) // in debug mode, lambdas are wrapped inside a closure wrapper function, so one more step needed
+		basePtr = *reinterpret_cast<UInt8**>(basePtr);
+#endif
+	return *reinterpret_cast<UInt8**>(basePtr);
+}
