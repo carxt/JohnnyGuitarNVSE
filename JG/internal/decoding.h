@@ -3858,7 +3858,7 @@ enum MiscStatCode
 	kMiscStat_SlotsGamesPlayed,
 };
 
-enum PerkEntryPointID
+enum PerkEntryPointID : UInt32
 {
 	kPerkEntry_CalculateWeaponDamage,
 	kPerkEntry_CalculateMyCriticalHitChance,
