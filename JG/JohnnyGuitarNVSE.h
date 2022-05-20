@@ -629,7 +629,7 @@ void HandleGameHooks()
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
 	WriteRelCall(0x6156A2, UInt32(GetReputationIconHook));	
 	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
-	SafeWrite8(0x4F064E, 0x7A);
+	SafeWrite8(0x4F064E, 0x7A); // NiMultiTargetTransformController::RemoveNodeRecurse NPE fix
 	WriteRelCall(0x5BED66, (UInt32)GetINISettingHook);
 
 }
