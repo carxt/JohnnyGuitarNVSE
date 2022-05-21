@@ -35,6 +35,8 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetLocationSpecificLoadScreensOnly, , , 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLocationName, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetPlayingEffectShaders, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(StopSoundLooping, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(AddNavmeshObstacle, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(RemoveNavmeshObstacle, , 1, 0, NULL);
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -43,6 +45,23 @@ bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5B
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
+bool Cmd_RemoveNavmeshObstacle_Execute(COMMAND_ARGS) {
+
+	*result = 0;
+	NavMeshObstacleManager* g_nomgr = ThisStdCall<NavMeshObstacleManager*>(0x6C0720, nullptr);
+	ThisStdCall<void>(0x6C0C80, g_nomgr, thisObj);
+	*result = 1;
+	return true;
+}
+
+bool Cmd_AddNavmeshObstacle_Execute(COMMAND_ARGS) {
+
+	*result = 0;
+	NavMeshObstacleManager* g_nomgr = ThisStdCall<NavMeshObstacleManager*>(0x6C0720, nullptr);
+	ThisStdCall<void>(0x6C0C30, g_nomgr, thisObj);
+	*result = 1;
+	return true;
+}
 bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESSound* sound = nullptr;

@@ -3596,6 +3596,106 @@ public:
 };
 STATIC_ASSERT(sizeof(NavMesh) == 0x108);
 
+class NavMeshObstacleManager
+{
+	enum OBSTACLE_MANAGER_BACKGROUND_STATE : __int32
+	{
+		OBSTACLE_MANAGER_BACKGROUND_STATE_PROCESSING_OBSTACLES = 0x0,
+		OBSTACLE_MANAGER_BACKGROUND_STATE_WAITING_FOR_PATH_MANAGER_PAUSE = 0x1,
+		OBSTACLE_MANAGER_BACKGROUND_STATE_PAUSE_REQUESTED = 0x2,
+		OBSTACLE_MANAGER_BACKGROUND_STATE_PAUSED = 0x3,
+	};
+	_RTL_CRITICAL_SECTION criticalSection;
+	UInt8 byte018;
+	UInt8 gap019[3];
+	UInt32 formIDMap;
+	UInt32 unk020;
+	UInt32 unk024;
+	UInt32 unk028;
+	tList<TESObjectREFR> queuedRefsToAdd;
+	tList<TESObjectREFR> queuedRefsToRemove;
+	UInt32 unk03C;
+	UInt32 unk040;
+	UInt32 unk044;
+	UInt32 unk048;
+	UInt32 unk04C;
+	UInt32 unk050;
+	UInt32 unk054;
+	UInt32 unk058;
+	UInt32 unk05C;
+	UInt32 unk060;
+	UInt32 unk064;
+	UInt32 unk068;
+	UInt32 unk06C;
+	UInt32 unk070;
+	UInt32 unk074;
+	UInt32 unk078;
+	UInt32 unk07C;
+	UInt32 unk080;
+	UInt32 unk084;
+	UInt32 unk088;
+	UInt32 unk08C;
+	UInt32 unk090;
+	UInt32 unk094;
+	UInt32 unk098;
+	UInt32 unk09C;
+	UInt32 unk0A0;
+	UInt32 unk0A4;
+	UInt32 unk0A8;
+	UInt32 unk0AC;
+	UInt32 unk0B0;
+	UInt32 unk0B4;
+	UInt32 unk0B8;
+	UInt32 unk0BC;
+	UInt32 unk0C0;
+	UInt32 unk0C4;
+	UInt32 unk0C8;
+	UInt32 unk0CC;
+	UInt32 unk0D0;
+	UInt32 unk0D4;
+	UInt32 unk0D8;
+	UInt32 unk0DC;
+	UInt32 unk0E0;
+	UInt32 unk0E4;
+	UInt32 unk0E8;
+	UInt32 unk0EC;
+	tList<void> queuedClosedDoors;
+	tList<void> queuedOpenDoors;
+	UInt32 openDoorMap;
+	UInt32 unk104;
+	UInt32 unk108;
+	UInt32 unk10C;
+	UInt32 closedDoorMap;
+	UInt32 unk114;
+	UInt32 unk118;
+	UInt32 unk11C;
+	UInt32 unk120;
+	UInt32 unk124;
+	UInt32 unk128;
+	UInt32 unk12C;
+	UInt32 unk130;
+	UInt32 unk134;
+	UInt32 unk138;
+	BSSimpleArray<void> backgroundTasks;
+	BSSimpleArray<void> processedTasks;
+	UInt32 unk15C;
+	RTL_CRITICAL_SECTION taskCS160;
+	UInt32 unk178;
+	UInt32 unk17C;
+	UInt32 unk180;
+	UInt32 unk184;
+	UInt32 unk188;
+	UInt32 unk18C;
+	NavMeshObstacleManager::OBSTACLE_MANAGER_BACKGROUND_STATE eState;
+	float fTimeToNextSwap;
+	UInt8 byte198[4];
+	UInt32 obstacleRootNode;
+	UInt8 mainThreadPerformaceTimer;
+	UInt8 backgroundThreadPerformanceTimer;
+	UInt8 gap1A2[2];
+};
+STATIC_ASSERT(sizeof(NavMeshObstacleManager), 0x1A4);
+
 class BSArchiveHeader
 {
 public:
