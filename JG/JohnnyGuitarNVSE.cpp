@@ -385,6 +385,8 @@ extern "C" {
 		REG_CMD(SetCustomReputationChangeIcon);
 		REG_CMD(SetArmorAltTexture);
 		REG_CMD(SetWeaponAltTexture);
+		REG_CMD(ClearWeaponAltTexture);
+		REG_CMD(ClearArmorAltTexture);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

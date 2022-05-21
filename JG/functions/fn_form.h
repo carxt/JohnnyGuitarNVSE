@@ -76,6 +76,9 @@ DEFINE_COMMAND_PLUGIN(SetLightingTemplateCell, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(RemoveScopeModelPath, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetArmorAltTexture, , 0, 4, kParams_OneForm_TwoInts_OneForm);
 DEFINE_COMMAND_PLUGIN(SetWeaponAltTexture, , 0, 3, kParams_OneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(ClearArmorAltTexture, , 0, 3, kParams_OneForm_TwoInts);
+DEFINE_COMMAND_PLUGIN(ClearWeaponAltTexture, , 0, 2, kParams_OneForm_OneInt);
+
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
 
@@ -507,6 +510,58 @@ bool Cmd_SetArmorAltTexture_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+bool Cmd_ClearWeaponAltTexture_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectWEAP* weapon;
+	int id = -2;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &id) && IS_TYPE(weapon, TESObjectWEAP)) {
+		TESModelTextureSwap* model = &weapon->textureSwap;
+		if (!model) return true;
+
+		if (id == -1) {
+			model->textureList.RemoveAll();
+			*result = 1;
+			return true;
+		}
+
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+		do
+		{
+			if (iter->data && iter->data->index3D == id) {
+				model->textureList.Remove(iter->data);
+				*result = 1;
+				break;
+			}
+		} while (iter = iter->next);
+	}
+	return true;
+}
+
+bool Cmd_ClearArmorAltTexture_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectARMO* armor = nullptr;
+	int id = -2;
+	UInt32 whichModel;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &whichModel, &id) && IS_TYPE(armor, TESObjectARMO)) {
+		TESModelTextureSwap* model = GetArmorModel(armor, whichModel);
+		if (!model) return true;
+		if (id == -1) {
+			model->textureList.RemoveAll();
+			*result = 1;
+			return true;
+		}
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+		do
+		{
+			if (iter->data && iter->data->index3D == id) {
+				model->textureList.Remove(iter->data);
+				*result = 1;
+				break;
+			}
+		} while (iter = iter->next);
+	}
+	return true;
+}
 bool Cmd_SetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESEffectShader* shader;
