@@ -583,7 +583,19 @@ Setting*__fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char*
 	return nullptr;
 	
 }
-
+bool __fastcall MenuGetFlagHook(StartMenu* menu, UInt32 flags) {
+	return menu != nullptr ? ((flags & menu->flags) != 0) : false;
+}
+void __fastcall MenuSetFlagHook(StartMenu* menu, UInt32 flags, bool doSet) {
+	if (menu != nullptr) {
+		if (doSet) {
+			menu->flags |= flags;
+		}
+		else {
+			menu->flags &= ~flags;
+		}
+	}
+}
 void HandleGameHooks()
 {
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // use available ammo in inventory instead of NULL when default ammo isn't present
@@ -632,4 +644,8 @@ void HandleGameHooks()
 	SafeWrite8(0x4F064E, 0x7A); // NiMultiTargetTransformController::RemoveNodeRecurse NPE fix
 	WriteRelCall(0x5BED66, (UInt32)GetINISettingHook);
 
+	// fixes for null pointers when showing credits outside of start menu
+	WriteRelCall(0x75F770, (UInt32)MenuGetFlagHook);
+	WriteRelCall(0x75F8AE, (UInt32)MenuSetFlagHook);
+	WriteRelCall(0x75F6DA, (UInt32)MenuSetFlagHook);
 }

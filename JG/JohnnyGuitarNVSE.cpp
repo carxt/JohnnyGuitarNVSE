@@ -389,6 +389,7 @@ extern "C" {
 		REG_CMD(ClearArmorAltTexture);
 		REG_CMD(AddNavmeshObstacle);
 		REG_CMD(RemoveNavmeshObstacle);
+		REG_CMD(RollCredits);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
