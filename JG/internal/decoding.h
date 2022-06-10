@@ -248,7 +248,7 @@ public:
 	UInt32								unk2FC[5];			// 2FC
 	float								flt310;				// 310
 	UInt32								unk314[7];			// 314
-	float								flt330;				// 330
+	float								dyingTimer;				// 330
 	float								flt334;				// 334
 	float								flt338;				// 338
 	float								diveBreath;			// 33C

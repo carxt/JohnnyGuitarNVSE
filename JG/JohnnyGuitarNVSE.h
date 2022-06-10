@@ -54,8 +54,8 @@ Sky** g_currentSky = nullptr;
 void(__thiscall* OriginalBipedModelUpdateWeapon)(ValidBip01Names*, TESObjectWEAP*, int) = (void(__thiscall*)(ValidBip01Names*, TESObjectWEAP*, int)) 0x4AB400;
 UInt8(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (UInt8(__thiscall*)(ContChangesEntry*)) 0x4BD820;
 std::unordered_set<BYTE> SaveGameUMap;
-uintptr_t FNVCanSaveOriginalCall = 0;
-uintptr_t FNVCanSaveMenuOriginalCall = 0;
+uintptr_t g_canSaveNowAddr = 0;
+uintptr_t g_canSaveNowMenuAddr = 0;
 
 TESObjectCELL* TESObjectREFR::GetParentCell()
 {
@@ -198,17 +198,17 @@ static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
 }
 
-bool __fastcall HookCanSaveNow(void* ThisObj, void* edx, int isAutoSave)
+bool __fastcall CanSaveNowHook(void* ThisObj, void* edx, int isAutoSave)
 {
-	return ThisStdCall_B(FNVCanSaveOriginalCall, ThisObj, isAutoSave) && SaveGameUMap.empty();
+	return ThisStdCall_B(g_canSaveNowAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
 }
 
-bool __fastcall HookCanSaveNowMenu(void* ThisObj, void* edx, int isAutoSave)
+bool __fastcall CanSaveNowMenuHook(void* ThisObj, void* edx, int isAutoSave)
 {
-	return ThisStdCall_B(FNVCanSaveMenuOriginalCall, ThisObj, isAutoSave) && SaveGameUMap.empty();
+	return ThisStdCall_B(g_canSaveNowMenuAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
 }
 
-void __fastcall hk_BipedModel_UpdateWeapon(ValidBip01Names* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods)
+void __fastcall BipedModelUpdateWeapon(ValidBip01Names* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods)
 {
 
 	if (fnCharacter && fnCharacter->baseProcess)
@@ -223,12 +223,12 @@ void __fastcall hk_BipedModel_UpdateWeapon(ValidBip01Names* BipedAnim, Character
 	OriginalBipedModelUpdateWeapon(BipedAnim, weap, weapMods);
 }
 
-__declspec (naked) void asm_BipedModelUpdateWeapon()
+__declspec (naked) void BipedModelUpdateWeaponHook()
 {
 	__asm
 	{
 		mov edx, dword ptr[ebp + 0x8]
-		jmp hk_BipedModel_UpdateWeapon
+		jmp BipedModelUpdateWeapon
 	}
 }
 
@@ -406,7 +406,7 @@ __declspec(naked) void DisableArrowKeysHook() {
 			jmp retnAddr
 	}
 }
-__declspec(naked) void FixNPCIncrementingChallenges() {
+__declspec(naked) void NPCIncrementingChallengesHook() {
 	static const UInt32 retnAddr = 0x88D0D8;
 	static const UInt32 noIncrementAddr = 0x88D100;
 	__asm {
@@ -516,35 +516,17 @@ void __fastcall TESRegionDataSoundLoadIncidentalID(ModInfo* info, void* edx, UIn
 	}
 }
 
-
-
-bool _fastcall HighProcessGetIsTalking(HighProcess* thisObj) {
-	if (!thisObj) { return false; }
-	uintptr_t* highProcessvTable = *((uintptr_t**)(thisObj));
-
-}
-/*
-float __fastcall CFixDeathResponseCutOff(HighProcess* thisObj, Actor* Actor) {
-	uintptr_t* highProcessvTable = *((uintptr_t**)(thisObj));
-	float DyingTimer = ThisStdCall<float>(highProcessvTable[0x12C], thisObj); //GetDyingTimer, or Unk_12C, too lazy to name
-	bool IsTalking = (ThisStdCall<bool>(0x08A67F0, Actor) && ThisStdCall<bool>(0x9336C0, Actor)); //Set whenever lipsync is playing iirc
-	if (false && IsTalking) { return 1; }
-	return DyingTimer;
-
-}*/
-float __fastcall CFixDeathResponseCutOff(HighProcess* thisObj, Actor* Actor) {
-	uintptr_t* highProcessvTable = *((uintptr_t**)(thisObj));
-	float DyingTimer = ThisStdCall<float>(highProcessvTable[0x12C], thisObj); //GetDyingTimer, or Unk_12C, too lazy to name
-	bool IsTalking = !(Actor->unk80 & 1);
-	if (IsTalking && (DyingTimer <= FLT_EPSILON)) { DyingTimer = FLT_EPSILON; }
-	return DyingTimer;
+float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) {
+	float dyingTimer = thisObj->dyingTimer;
+	bool isTalking = !(actor->unk80 & 1);
+	if (isTalking && (dyingTimer <= FLT_EPSILON)) { dyingTimer = FLT_EPSILON; }
+	return dyingTimer;
 
 }
-__declspec (naked) void AsmFixDeathResponseCuttoffHandler() {
-	static const uintptr_t  jumptGt = (uintptr_t)CFixDeathResponseCutOff;
+__declspec (naked) void FixDeathSoundsHook() {
 	__asm {
 		mov edx, dword ptr [ebp+8]
-		jmp jumptGt
+		jmp FixDeathSounds
 	}
 }
 
@@ -598,54 +580,121 @@ void __fastcall MenuSetFlagHook(StartMenu* menu, UInt32 flags, bool doSet) {
 }
 void HandleGameHooks()
 {
-	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); // use available ammo in inventory instead of NULL when default ammo isn't present
-	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
-	WriteRelJump(0x77D612, UInt32(LevelUpHook)); // for ToggleLevelUpMenu
-	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
-	WriteRelCall(0x9BAFED, (UInt32)DisableMuzzleFlashLightsHook); // for DisableMuzzleFlashLights
-	SafeWrite16(0x79D330, 0x9090);
-	WriteRelCall(0x79D332, (UInt32)AsmGetMapMarkerRoute);
-	WriteRelCall(0x8B102B, (UInt32)VATSSpreadMultHook); // replace fNPCMaxWobbleAngle with 15.0 for VATS
-	PatchMemoryNop(0x8A56C4, 4); // Fix for animations not working in dialog topics with sound
-	PatchMemoryNop(0x8A56C8, 4);
-	WriteRelJump(0x70F708, (UInt32)DisableArrowKeysHook);
-	patchFixDisintegrationsStat();
-	WriteRelJump(0x88D0D0, (UInt32)FixNPCIncrementingChallenges);
-	WriteRelCall(0x77A8E9, (UInt32)PlayQuestFailSound);
-	if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
-	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4); // to use fWeapSkillReqPenalty correctly in spread calc
-	WriteRelCall(0x82FC0B, (UInt32)ShouldPlayCombatMusic);
-	//SaveGameHook
-	FNVCanSaveOriginalCall = (*(UInt32*)0x0850443) + 5 + 0x0850442;
-	WriteRelCall(0x0850442, (uintptr_t)HookCanSaveNow);
-	FNVCanSaveMenuOriginalCall = (*(UInt32*)0x07CBDC8) + 5 + 0x07CBDC7;
-	WriteRelCall(0x07CBDC7, (uintptr_t)HookCanSaveNowMenu);
-	if (fixFleeing) WriteRelCall(0x8F5FE2, (UInt32)FleeFixHook);
-	if (fixItemStacks) {
-		WriteRelCall(0x780D11, (UInt32)DropItemHook);
-		SafeWriteBuf(0x780D11 + 5, "\x90\x90\x90", 3);
-	}
-	if (loadEditorIDs) LoadEditorIDs();
-	WriteRelCall(0x06061E8, (uintptr_t)asm_BipedModelUpdateWeapon);
-	if (capLoadScreensTo60)SafeWrite8(0x78D4A4, 0x10);
+	// FIXES
+	
+	// use available ammo in inventory instead of NULL when default ammo isn't present
+	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook); 
 
-	WriteRelCall(0x4F49AB, UInt32(TESRegionDataSoundLoadIncidentalID));
-	if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
-	SafeWriteBuf(0x8BFBC1, "\x85\xC9\x74\x36\x80\x79\x04", 7); // missing null check in Actor::HandleStealing
-	if (noMuzzleFlashCooldown)	SafeWriteBuf(0x9BB6A8, "\x90\x90", 2);
-	if (enableRadioSubtitles) SafeWrite8(0x833876, 0x84);
-	 //Fix for death topics getting cut off
-	if (fixDeathSounds){
-	SafeWrite16(0x8EC5C6, 0xBA90);
-	SafeWrite32(0x8EC5C8, (uintptr_t)AsmFixDeathResponseCuttoffHandler); }
-	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
-	WriteRelCall(0x6156A2, UInt32(GetReputationIconHook));	
-	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
-	SafeWrite8(0x4F064E, 0x7A); // NiMultiTargetTransformController::RemoveNodeRecurse NPE fix
+	// fix for companions not saying the next topic after opening ContainerMenu through dialog
+	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
+
+	// replace fNPCMaxWobbleAngle with 15.0 for VATS
+	WriteRelCall(0x8B102B, (UInt32)VATSSpreadMultHook);
+
+	// Fix for animations not working in dialog topics with sound
+	PatchMemoryNop(0x8A56C4, 4);
+	PatchMemoryNop(0x8A56C8, 4);
+
+	// fix Disintegrations stat not incrementing properly
+	patchFixDisintegrationsStat();
+
+	// fix NPCs incrementing player challenges
+	WriteRelJump(0x88D0D0, (UInt32)NPCIncrementingChallengesHook);
+
+	// use correct weapon skill req penalty setting in weapon spread calculation
+	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4);
+
+	// fix for various biped model update bugs
+	WriteRelCall(0x06061E8, (uintptr_t)BipedModelUpdateWeaponHook);
+
+	// missing nullcheck in NiMultiTargetTransformController::RemoveNodeRecurse
+	SafeWrite8(0x4F064E, 0x7A);
+
+	// fix for GetINISetting not reading renderer INI setting list
 	WriteRelCall(0x5BED66, (UInt32)GetINISettingHook);
 
 	// fixes for null pointers when showing credits outside of start menu
 	WriteRelCall(0x75F770, (UInt32)MenuGetFlagHook);
 	WriteRelCall(0x75F8AE, (UInt32)MenuSetFlagHook);
 	WriteRelCall(0x75F6DA, (UInt32)MenuSetFlagHook);
+
+	// missing nullcheck in HandleStealing
+	SafeWriteBuf(0x8BFBC1, "\x85\xC9\x74\x36\x80\x79\x04", 7);
+
+	// fix for incidental sounds not working in regions
+	WriteRelCall(0x4F49AB, UInt32(TESRegionDataSoundLoadIncidentalID));
+
+	// INI OPTIONS
+	
+	// for bReset3rdPersonCamera
+	if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
+
+	// for bFixFleeing
+	if (fixFleeing) WriteRelCall(0x8F5FE2, (UInt32)FleeFixHook);
+
+	// for bFixItemStackCount
+	if (fixItemStacks) {
+		WriteRelCall(0x780D11, (UInt32)DropItemHook);
+		SafeWriteBuf(0x780D11 + 5, "\x90\x90\x90", 3);
+	}
+
+	// for Runtime EDIDs
+	if (loadEditorIDs) LoadEditorIDs();
+
+
+	// for b60FPSDuringLoading
+	if (capLoadScreensTo60)SafeWrite8(0x78D4A4, 0x10);
+
+	// for bFixNPCShootingAngle
+	if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
+
+	// for bNoMuzzleFlashCooldown
+	if (noMuzzleFlashCooldown)	SafeWriteBuf(0x9BB6A8, "\x90\x90", 2);
+
+	// for bEnableRadioSubtitles
+	if (enableRadioSubtitles) SafeWrite8(0x833876, 0x84);
+
+	// fix for death topics getting cut off
+	if (fixDeathSounds) {
+		SafeWrite16(0x8EC5C6, 0xBA90);
+		SafeWrite32(0x8EC5C8, (uintptr_t)FixDeathSoundsHook);
+	}
+
+	// for bRemoveMainMenuMusic
+	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
+
+	// FUNCTION PATCHES
+
+	// WorldToScreen
+	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
+
+	// ToggleLevelUpMenu
+	WriteRelJump(0x77D612, UInt32(LevelUpHook)); 
+
+	// DisableMuzzleFlashLights
+	WriteRelCall(0x9BAFED, (UInt32)DisableMuzzleFlashLightsHook); 
+
+	// SetCustomMapMarkerIcon
+	SafeWrite16(0x79D330, 0x9090);
+	WriteRelCall(0x79D332, (UInt32)AsmGetMapMarkerRoute);
+
+	// DisableMenuArrowKeys
+	WriteRelJump(0x70F708, (UInt32)DisableArrowKeysHook);
+
+	// SetUIUpdateSound
+	WriteRelCall(0x77A8E9, (UInt32)PlayQuestFailSound);
+
+	// DisableCombatMusic
+	WriteRelCall(0x82FC0B, (UInt32)ShouldPlayCombatMusic);
+
+	// ToggleDisableSaves
+	g_canSaveNowAddr = (*(UInt32*)0x0850443) + 5 + 0x0850442;
+	WriteRelCall(0x0850442, (uintptr_t)CanSaveNowHook);
+	g_canSaveNowMenuAddr = (*(UInt32*)0x07CBDC8) + 5 + 0x07CBDC7;
+	WriteRelCall(0x07CBDC7, (uintptr_t)CanSaveNowMenuHook);
+
+	// for SetCustomReputationChangeIcon
+	WriteRelCall(0x6156A2, UInt32(GetReputationIconHook));	
+	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
+
 }
