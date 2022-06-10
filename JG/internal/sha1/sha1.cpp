@@ -16,16 +16,13 @@ which allows it to be used in commercial software.
 #include <assert.h>
 #include "sha1.h"
 
-
 // circular left bit rotation.  MSB wraps around to LSB
-Uint32 SHA1::lrot(Uint32 x, int bits)
-{
+Uint32 SHA1::lrot(Uint32 x, int bits) {
 	return (x << bits) | (x >> (32 - bits));
 };
 
 // Save a 32-bit unsigned integer to memory, in big-endian order
-void SHA1::storeBigEndianUint32(unsigned char* byte, Uint32 num)
-{
+void SHA1::storeBigEndianUint32(unsigned char* byte, Uint32 num) {
 	assert(byte);
 	byte[0] = (unsigned char)(num >> 24);
 	byte[1] = (unsigned char)(num >> 16);
@@ -33,10 +30,8 @@ void SHA1::storeBigEndianUint32(unsigned char* byte, Uint32 num)
 	byte[3] = (unsigned char)num;
 }
 
-
 // Constructor *******************************************************
-SHA1::SHA1()
-{
+SHA1::SHA1() {
 	// make sure that the data type is the right size
 	assert(sizeof(Uint32) * 5 == 20);
 
@@ -51,8 +46,7 @@ SHA1::SHA1()
 }
 
 // Destructor ********************************************************
-SHA1::~SHA1()
-{
+SHA1::~SHA1() {
 	// erase data
 	H0 = H1 = H2 = H3 = H4 = 0;
 	for (int c = 0; c < 64; c++) bytes[c] = 0;
@@ -60,8 +54,7 @@ SHA1::~SHA1()
 }
 
 // process ***********************************************************
-void SHA1::process()
-{
+void SHA1::process() {
 	assert(unprocessedBytes == 64);
 	//printf( "process: " ); hexPrinter( bytes, 64 ); printf( "\n" );
 	int t;
@@ -81,8 +74,7 @@ void SHA1::process()
 
 	/* main loop */
 	Uint32 temp;
-	for (t = 0; t < 80; t++)
-	{
+	for (t = 0; t < 80; t++) {
 		if (t < 20) {
 			K = 0x5a827999;
 			f = (b & c) | ((b ^ 0xFFFFFFFF) & d);//TODO: try using ~
@@ -119,15 +111,13 @@ void SHA1::process()
 }
 
 // addBytes **********************************************************
-void SHA1::addBytes(const char* data, int num)
-{
+void SHA1::addBytes(const char* data, int num) {
 	assert(data);
 	assert(num > 0);
 	// add these bytes to the running total
 	size += num;
 	// repeat until all data is processed
-	while (num > 0)
-	{
+	while (num > 0) {
 		// number of bytes required to complete block
 		int needed = 64 - unprocessedBytes;
 		assert(needed > 0);
@@ -146,8 +136,7 @@ void SHA1::addBytes(const char* data, int num)
 }
 
 // digest ************************************************************
-unsigned char* SHA1::getDigest()
-{
+unsigned char* SHA1::getDigest() {
 	// save the message size
 	Uint32 totalBitsL = size << 3;
 	Uint32 totalBitsH = size >> 29;

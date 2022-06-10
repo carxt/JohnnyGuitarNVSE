@@ -10,15 +10,15 @@ class TESRegionManager;
 class BSFile;
 
 struct ChunkAndFormType {
-	UInt32		chunkType;	// ie 
+	UInt32		chunkType;	// ie
 	UInt32		formType;	// ie 0x2A
-	const char	* formName;	// ie 'NPC_'
+	const char* formName;	// ie 'NPC_'
 };
 
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 static const UInt32 _ModInfo_GetNextChunk = 0x004726B0; // args: none retn: UInt32 subrecordType (third call in TESObjectARMO_LoadForm)
 static const UInt32 _ModInfo_GetChunkData = 0x00472890;	// args: void* buf, UInt32 bufSize retn: bool readSucceeded (fifth call in TESObjectARMO_LoadForm)
-static const UInt32 _ModInfo_Read32		  =	0x004727F0;	// args: void* buf retn: void (find 'LPER', then next call, still in TESObjectARMO_LoadForm)
+static const UInt32 _ModInfo_Read32 = 0x004727F0;	// args: void* buf retn: void (find 'LPER', then next call, still in TESObjectARMO_LoadForm)
 static const UInt32 _ModInfo_HasMoreSubrecords = 0x004726F0;	// Last call before "looping" to GetNextChunk in TESObjectARMO_LoadForm.
 static const UInt32 _ModInfo_InitializeForm = 0x00472F60;	// args: TESForm* retn: void (second call in TESObjectARMO_LoadForm)
 
@@ -32,36 +32,33 @@ static const ChunkAndFormType* s_ModInfo_ChunkAndFormTypes = (const ChunkAndForm
 
 static UInt8** g_CreatedObjectData = (UInt8**)0x011C54CC;	// pointer to FormInfo + form data, filled out by TESForm::SaveForm()
 static UInt32* g_CreatedObjectSize = (UInt32*)0x011C54D0;
-		// in first call (Form_startSaveForm) in TESObjectARMO__SaveForm:
-		//		g_CreatedObjectSize is set to 18h
-		//		g_CreatedObjectData is set to the eax result of the next call
+// in first call (Form_startSaveForm) in TESObjectARMO__SaveForm:
+//		g_CreatedObjectSize is set to 18h
+//		g_CreatedObjectData is set to the eax result of the next call
 #elif EDITOR
 #else
 #error
 #endif
 
 // 10
-class BoundObjectListHead
-{
+class BoundObjectListHead {
 public:
 	BoundObjectListHead();
 	~BoundObjectListHead();
 
 	UInt32			boundObjectCount;	// 0
-	TESBoundObject	* first;			// 4
-	TESBoundObject	* last;				// 8
+	TESBoundObject* first;			// 4
+	TESBoundObject* last;				// 8
 	UInt32			unkC;				// C
 };
 
-struct FormRecordData
-{
+struct FormRecordData {
 	UInt8		typeID;		// corresponds to kFormType_XXX
 	UInt32		typeCode;	// i.e. 'GMST', 'FACT'
 	UInt32		unk08;		// only seen zero
 };
 
-struct ChunkHeader
-{
+struct ChunkHeader {
 	UInt32	type : 4;	// i.e. 'XGRD', 'DATA'
 	UInt16	size : 2;
 };
@@ -109,12 +106,12 @@ struct ModInfo		// referred to by game as TESFile
 	};
 
 	tList<UInt32>						unkList;			// 000 treated as ModInfo during InitializeForm, looks to be a linked list of modInfo
-	UInt32 /*NiTPointerMap<TESFile*>*/	* pointerMap;		// 008
+	UInt32 /*NiTPointerMap<TESFile*>*/* pointerMap;		// 008
 	UInt32								unk00C;				// 00C
-	BSFile*								unkFile;			// 010
-	UInt32								unk014;				// 014 
-	void								* unk018;			// 018 seen all zeroes. size unknown, seen not valid pointer in FalloutNV.esm
-	void								* unk01C;			// 01C as above
+	BSFile* unkFile;			// 010
+	UInt32								unk014;				// 014
+	void* unk018;			// 018 seen all zeroes. size unknown, seen not valid pointer in FalloutNV.esm
+	void* unk01C;			// 01C as above
 	char								name[0x104];		// 020
 	char								filepath[0x104];	// 124
 	UInt32								unk228;				// 228
@@ -141,26 +138,26 @@ struct ModInfo		// referred to by game as TESFile
 	FileHeader							header;				// 3DC
 	UInt8								flags;				// 3E8	Bit 0 is ESM . Runtime: Bit 2 is Valid, Bit 3 is Unselected Editor: 2 is selected, 3 is active, 4 may be invalid, 6 is endian, 14 controls VCI.
 	UInt8								pad3E9[3];
-	tList<char*>						* refModNames;		// 3EC	paired with 3F0
+	tList<char*>* refModNames;		// 3EC	paired with 3F0
 	UInt32								unk3F0;				// 3F0
-	tList<MasterSize*>					* refModData;		// 3F4 most likely full of 0
+	tList<MasterSize*>* refModData;		// 3F4 most likely full of 0
 	UInt32								unk3F8;				// 3F8
 	UInt32								numRefMods;			// 3FC related to modindex; see 4472D0
 																// formIDs in mod are as saved in GECK, must fix up at runtime
-	ModInfo								** refModInfo;		// 400 used to look up modInfo based on fixed mod index, double-check
+	ModInfo** refModInfo;		// 400 used to look up modInfo based on fixed mod index, double-check
 	UInt32								unk404;				// 404
 	UInt32								unk408;				// 408
 	UInt8								modIndex;			// 40C init to 0xFF
 	UInt8								pad40D[3];
 	String								author;				// 410
 	String								description;		// 418
-	void								* dataBuf;			// 420 
+	void* dataBuf;			// 420
 	UInt32								dataBufSize;		// 424 looks like size of entire record
 	UInt8								unk428;				// 428 decide if forms needs to be reloaded on LoadFiles
 	UInt8								pad429[3];
 
 	// In Editor: 430 = ONAM array and 434 ONAM array count. Allocated at 0438
-	
+
 	bool IsLoaded() const { return true; }
 
 #if !EDITOR
@@ -176,25 +173,21 @@ struct ModInfo		// referred to by game as TESFile
 STATIC_ASSERT(sizeof(WIN32_FIND_DATA) == 0x140);
 STATIC_ASSERT(sizeof(ModInfo) == 0x42C);
 
-
-
-struct ModList
-{
+struct ModList {
 	tList<ModInfo>		modInfoList;		// 00
 	UInt32				loadedModCount;		// 08
-	ModInfo*			loadedMods[0xFF];	// 0C
+	ModInfo* loadedMods[0xFF];	// 0C
 };
 STATIC_ASSERT(sizeof(ModList) == 0x408);
 
 // 5B8
-class DataHandler
-{
+class DataHandler {
 public:
 	DataHandler();
 	~DataHandler();
 
 	UInt32							unk00;					// 000
-	BoundObjectListHead				*boundObjectList;		// 004
+	BoundObjectListHead* boundObjectList;		// 004
 	tList<TESPackage>				packageList;			// 008
 	tList<TESWorldSpace>			worldSpaceList;			// 010
 	tList<TESClimate>				climateList;			// 018
@@ -253,7 +246,7 @@ public:
 	tList<TESLoadScreenType>		loadScreenTypeList;		// 1C0
 	tList<MediaSet>					mediaSetList;			// 1C8
 	tList<MediaLocationController>	mediaLocControllerList;	// 1D0
-	TESRegionList					*regionList;			// 1D8
+	TESRegionList* regionList;			// 1D8
 	NiTArray<TESObjectCELL*>		cellArray;				// 1DC
 	NiTArray<BGSAddonNode*>			addonArray;				// 1EC
 
@@ -270,15 +263,15 @@ public:
 	UInt8							loading;				// 621	Init'd to 0 after loadForms
 	UInt8							unk622;					// 622	referenced during loading of modules
 	UInt8							unk623;					// 623
-	TESRegionManager				*regionManager;			// 624
-	ExtraContainerChanges::Data		*vendorContainer;		// 628
-	UInt32							unk62C;					// 62C	
+	TESRegionManager* regionManager;			// 624
+	ExtraContainerChanges::Data* vendorContainer;		// 628
+	UInt32							unk62C;					// 62C
 	UInt32							unk630;					// 630
 	UInt32							unk634;					// 634
 	UInt32							unk638;					// 638
 
 	static DataHandler* Get();
-	const ModInfo ** GetActiveModList();		// returns array of modEntry* corresponding to loaded mods sorted by mod index
+	const ModInfo** GetActiveModList();		// returns array of modEntry* corresponding to loaded mods sorted by mod index
 	const ModInfo* LookupModByName(const char* modName);
 	UInt8 GetModIndex(const char* modName);
 	UInt8 GetActiveModCount() const;
@@ -286,7 +279,7 @@ public:
 
 	MEMBER_FN_PREFIX(DataHandler);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	DEFINE_MEMBER_FN(DoAddForm, UInt32, 0x004603B0, TESForm * pForm);	// stupid name is because AddForm is redefined in windows header files
+	DEFINE_MEMBER_FN(DoAddForm, UInt32, 0x004603B0, TESForm* pForm);	// stupid name is because AddForm is redefined in windows header files
 #elif EDITOR
 #else
 #error

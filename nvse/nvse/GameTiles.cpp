@@ -6,25 +6,21 @@
 #include "internal/utility.h"
 
 typedef NiTMapBase<const char*, int> TraitNameMap;
-TraitNameMap *g_traitNameMap = (TraitNameMap*)0x11F32F4;
+TraitNameMap* g_traitNameMap = (TraitNameMap*)0x11F32F4;
 const _TraitNameToID TraitNameToID = (_TraitNameToID)0xA01860;
-UInt32 (*TraitNameToIDAdd)(const char*, UInt32) = (UInt32 (*)(const char*, UInt32))0xA00940;
+UInt32(*TraitNameToIDAdd)(const char*, UInt32) = (UInt32(*)(const char*, UInt32))0xA00940;
 
-UInt32 Tile::TraitNameToID(const char *traitName)
-{
+UInt32 Tile::TraitNameToID(const char* traitName) {
 	return ::TraitNameToID(traitName);
 }
 
-UInt32 Tile::TraitNameToIDAdd(const char *traitName)
-{
+UInt32 Tile::TraitNameToIDAdd(const char* traitName) {
 	return ::TraitNameToIDAdd(traitName, 0xFFFFFFFF);
 }
 
-Tile::Value *Tile::GetValue(UInt32 typeID)
-{
-	Value *value;
-	for (BSSimpleArray<Value*>::Iterator iter(values); !iter.End(); ++iter)
-	{
+Tile::Value* Tile::GetValue(UInt32 typeID) {
+	Value* value;
+	for (BSSimpleArray<Value*>::Iterator iter(values); !iter.End(); ++iter) {
 		value = *iter;
 		if (!value || (value->id > typeID)) break;
 		if (value->id == typeID) return value;
@@ -32,62 +28,54 @@ Tile::Value *Tile::GetValue(UInt32 typeID)
 	return NULL;
 }
 
-Tile::Value *Tile::GetValueName(const char *valueName)
-{
+Tile::Value* Tile::GetValueName(const char* valueName) {
 	return GetValue(TraitNameToID(valueName));
 }
 
-DListNode<Tile> *Tile::GetNthChild(UInt32 index)
-{
+DListNode<Tile>* Tile::GetNthChild(UInt32 index) {
 	return children.Tail()->Regress(index);
 }
 
-char *Tile::GetComponentFullName(char *resStr)
-{
+char* Tile::GetComponentFullName(char* resStr) {
 	if IS_TYPE(this, TileMenu)
 		return StrCopy(resStr, name.m_data);
-	char *fullName = parent->GetComponentFullName(resStr);
+	char* fullName = parent->GetComponentFullName(resStr);
 	*fullName++ = '/';
 	fullName = StrCopy(fullName, name.m_data);
-	DListNode<Tile> *node = parent->children.Tail();
+	DListNode<Tile>* node = parent->children.Tail();
 	while (node->data != this)
 		node = node->prev;
 	int index = 0;
 	while ((node = node->prev) && StrEqualCS(name.m_data, node->data->name.m_data))
 		index++;
-	if (index)
-	{
+	if (index) {
 		*fullName++ = ':';
 		fullName = IntToStr(index, fullName);
 	}
 	return fullName;
 }
 
-Menu *Tile::GetParentMenu()
-{
-	Tile *tile = this;
-	do
-	{
+Menu* Tile::GetParentMenu() {
+	Tile* tile = this;
+	do {
 		if IS_TYPE(tile, TileMenu)
 			return ((TileMenu*)tile)->menu;
-	}
-	while (tile = tile->parent);
+	} while (tile = tile->parent);
 	return NULL;
 }
 
-__declspec(naked) void Tile::PokeValue(UInt32 valueID)
-{
+__declspec(naked) void Tile::PokeValue(UInt32 valueID) {
 	__asm
 	{
 		push	esi
 		mov		esi, ecx
-		mov		eax, [esp+8]
+		mov		eax, [esp + 8]
 		push	1
 		push	0x3F800000
 		push	eax
 		mov		eax, 0xA012D0
 		call	eax
-		mov		eax, [esp+8]
+		mov		eax, [esp + 8]
 		push	1
 		push	0
 		push	eax
@@ -99,8 +87,7 @@ __declspec(naked) void Tile::PokeValue(UInt32 valueID)
 	}
 }
 
-__declspec(naked) void Tile::FakeClick()
-{
+__declspec(naked) void Tile::FakeClick() {
 	__asm
 	{
 		push	esi
@@ -121,33 +108,27 @@ __declspec(naked) void Tile::FakeClick()
 	}
 }
 
-void Tile::DestroyAllChildren()
-{
-	DListNode<Tile> *node = children.Tail();
-	Tile *child;
-	while (node)
-	{
+void Tile::DestroyAllChildren() {
+	DListNode<Tile>* node = children.Tail();
+	Tile* child;
+	while (node) {
 		child = node->data;
 		node = node->prev;
 		if (child) child->Destroy(true);
 	}
 }
 
-Tile *Tile::GetChild(const char *childName)
-{
+Tile* Tile::GetChild(const char* childName) {
 	int childIndex = 0;
-	char *colon = FindChr(childName, ':');
-	if (colon)
-	{
+	char* colon = FindChr(childName, ':');
+	if (colon) {
 		if (colon == childName) return NULL;
 		*colon = 0;
 		childIndex = StrToInt(colon + 1);
 	}
-	Tile *result = NULL;
-	for (DListNode<Tile> *node = children.Head(); node; node = node->next)
-	{
-		if (node->data && ((*childName == '*') || StrEqualCI(node->data->name.m_data, childName)) && !childIndex--)
-		{
+	Tile* result = NULL;
+	for (DListNode<Tile>* node = children.Head(); node; node = node->next) {
+		if (node->data && ((*childName == '*') || StrEqualCI(node->data->name.m_data, childName)) && !childIndex--) {
 			result = node->data;
 			break;
 		}
@@ -156,59 +137,51 @@ Tile *Tile::GetChild(const char *childName)
 	return result;
 }
 
-Tile *Tile::GetComponent(const char *componentPath, const char *&trait)
-{
-	Tile *parentTile = this;
-	char *slashPos;
-	while (slashPos = SlashPos(componentPath))
-	{
+Tile* Tile::GetComponent(const char* componentPath, const char*& trait) {
+	Tile* parentTile = this;
+	char* slashPos;
+	while (slashPos = SlashPos(componentPath)) {
 		*slashPos = 0;
 		parentTile = parentTile->GetChild(componentPath);
 		if (!parentTile) return NULL;
 		componentPath = slashPos + 1;
 	}
-	if (*componentPath)
-	{
-		Tile *result = parentTile->GetChild(componentPath);
+	if (*componentPath) {
+		Tile* result = parentTile->GetChild(componentPath);
 		if (result) return result;
 		trait = componentPath;
 	}
 	return parentTile;
 }
 
-Tile::Value *Tile::GetComponentValue(const char *componentPath)
-{
-	const char *trait = NULL;
-	Tile *tile = GetComponent(componentPath, trait);
+Tile::Value* Tile::GetComponentValue(const char* componentPath) {
+	const char* trait = NULL;
+	Tile* tile = GetComponent(componentPath, trait);
 	return (tile && trait) ? tile->GetValueName(trait) : NULL;
 }
 
-Tile *Tile::GetComponentTile(const char *componentPath)
-{
-	const char *trait = NULL;
-	Tile *tile = GetComponent(componentPath, trait);
+Tile* Tile::GetComponentTile(const char* componentPath) {
+	const char* trait = NULL;
+	Tile* tile = GetComponent(componentPath, trait);
 	return (tile && !trait) ? tile : NULL;
 }
 
-void Tile::Dump()
-{
+void Tile::Dump() {
 	PrintDebug("%08X\t%s", this, name.m_data);
 	s_debug.Indent();
 
 	PrintDebug("Values:");
 
 	s_debug.Indent();
-	
-	Value *value;
-	const char *traitName;
+
+	Value* value;
+	const char* traitName;
 	char traitID[9];
-	for (BSSimpleArray<Value*>::Iterator iter(values); !iter.End(); ++iter)
-	{
+	for (BSSimpleArray<Value*>::Iterator iter(values); !iter.End(); ++iter) {
 		value = *iter;
 		traitName = TraitIDToName(value->id);
 
-		if (!traitName)
-		{
+		if (!traitName) {
 			UIntToHex(value->id, traitID);
 			traitName = traitID;
 		}
@@ -222,18 +195,15 @@ void Tile::Dump()
 
 	s_debug.Outdent();
 
-	for (DListNode<Tile> *traverse = children.Tail(); traverse; traverse = traverse->prev)
+	for (DListNode<Tile>* traverse = children.Tail(); traverse; traverse = traverse->prev)
 		if (traverse->data) traverse->data->Dump();
 
 	s_debug.Outdent();
 }
 
-void Debug_DumpTraits(void)
-{
-	for(UInt32 i = 0; i < g_traitNameMap->numBuckets; i++)
-	{
-		for (TraitNameMap::Entry * bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next)
-		{
+void Debug_DumpTraits(void) {
+	for (UInt32 i = 0; i < g_traitNameMap->numBuckets; i++) {
+		for (TraitNameMap::Entry* bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next) {
 			PrintDebug("%s %d", bucket->key, bucket->data);
 		}
 	}
@@ -241,11 +211,10 @@ void Debug_DumpTraits(void)
 
 // not a one-way mapping, so we just return the first
 // also this is slow and sucks
-const char *TraitIDToName(int id)
-{
+const char* TraitIDToName(int id) {
 	for (UInt32 i = 0; i < g_traitNameMap->numBuckets; i++)
-		for (TraitNameMap::Entry * bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next)
-			if(bucket->data == id)
+		for (TraitNameMap::Entry* bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next)
+			if (bucket->data == id)
 				return bucket->key;
 
 	return NULL;

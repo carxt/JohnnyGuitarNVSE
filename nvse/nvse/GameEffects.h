@@ -1,13 +1,12 @@
 #pragma once
 #include "GameObjects.h"
 // 48
-class ActiveEffect
-{
+class ActiveEffect {
 public:
 	ActiveEffect();
 	virtual ~ActiveEffect();
 
-	virtual ActiveEffect	*Clone(void);
+	virtual ActiveEffect* Clone(void);
 	virtual void			Unk_02(UInt32 arg);
 	virtual void			Unk_03(UInt32 arg);
 	virtual void			SaveGame(UInt32 arg);
@@ -15,9 +14,9 @@ public:
 	virtual void			Unk_06(UInt32 arg);
 	virtual void			Unk_07(UInt32 arg);
 	virtual void			Unk_08(UInt32 arg);
-	virtual bool			UnregisterCaster(MagicCaster *_caster);	// returns 1 and clears caster if it matches the parameter, else returns 0
+	virtual bool			UnregisterCaster(MagicCaster* _caster);	// returns 1 and clears caster if it matches the parameter, else returns 0
 	virtual bool			Unk_0A(void);
-	virtual void			CopyTo(ActiveEffect *_target);
+	virtual void			CopyTo(ActiveEffect* _target);
 	virtual bool			Unk_0C(UInt32 arg);
 	virtual bool			Unk_0D(UInt32 arg);
 	virtual void			Unk_0E(UInt32 arg);		// update/add effect?
@@ -31,8 +30,8 @@ public:
 	virtual void			Unk_16(void);
 
 	float			timeElapsed;		// 04
-	MagicItem		*magicItem;			// 08
-	EffectItem		*effectItem;		// 0C
+	MagicItem* magicItem;			// 08
+	EffectItem* effectItem;		// 0C
 	bool			bApplied;			// 10
 	bool			bTerminated;		// 11 set to 1 when effect is to be removed
 	UInt8			flags12;			// 12
@@ -41,25 +40,23 @@ public:
 	UInt32			unk18;				// 18
 	float			magnitude;			// 1C - adjusted based on target?
 	float			duration;			// 20 - adjusted based on target?
-	MagicTarget		*target;			// 24
-	MagicCaster		*caster;			// 28
+	MagicTarget* target;			// 24
+	MagicCaster* caster;			// 28
 	UInt32			spellType;			// 2C e.g. SpellItem::kType_Ability
 	UInt32			unk30;				// 30
 	UInt32			unk34;				// 34
 	UInt32			unk38;				// 38
-	TESForm			*enchantObject;		// 3C enchanted obj responsible for effect
-	TESForm			*data;				// 40 - in ScriptEffect this is a Script *
+	TESForm* enchantObject;		// 3C enchanted obj responsible for effect
+	TESForm* data;				// 40 - in ScriptEffect this is a Script *
 	UInt32			unk44;				// 44
 
-	__forceinline void Remove(bool immediate)
-	{
+	__forceinline void Remove(bool immediate) {
 		ThisStdCall(0x804210, this, immediate);
 	}
 };
 
 // 4C
-class ValueModifierEffect : public ActiveEffect
-{
+class ValueModifierEffect : public ActiveEffect {
 public:
 	ValueModifierEffect();
 	~ValueModifierEffect();
@@ -72,8 +69,7 @@ public:
 };
 
 // 50
-class ScriptEffect : public ActiveEffect
-{
+class ScriptEffect : public ActiveEffect {
 public:
 	ScriptEffect();
 	~ScriptEffect();
@@ -82,8 +78,7 @@ public:
 };
 
 // 48
-class DispelEffect : public ActiveEffect
-{
+class DispelEffect : public ActiveEffect {
 public:
 	DispelEffect();
 	~DispelEffect();
@@ -92,8 +87,7 @@ public:
 };
 
 // 50
-class CureEffect : public ActiveEffect
-{
+class CureEffect : public ActiveEffect {
 public:
 	CureEffect();
 	~CureEffect();
@@ -104,8 +98,7 @@ public:
 };
 
 // 5C
-class AbsorbEffect : public ValueModifierEffect
-{
+class AbsorbEffect : public ValueModifierEffect {
 public:
 	AbsorbEffect();
 	~AbsorbEffect();
@@ -116,8 +109,7 @@ public:
 };
 
 // 50
-class ShieldEffect : public ValueModifierEffect
-{
+class ShieldEffect : public ValueModifierEffect {
 public:
 	ShieldEffect();
 	~ShieldEffect();
@@ -128,8 +120,7 @@ public:
 };
 
 // 4C
-class CalmEffect : public ValueModifierEffect
-{
+class CalmEffect : public ValueModifierEffect {
 public:
 	CalmEffect();
 	~CalmEffect();
@@ -138,8 +129,7 @@ public:
 };
 
 // 4C
-class DemoralizeEffect : public ActiveEffect
-{
+class DemoralizeEffect : public ActiveEffect {
 public:
 	DemoralizeEffect();
 	~DemoralizeEffect();
@@ -150,8 +140,7 @@ public:
 };
 
 // 50
-class FrenzyEffect : public ValueModifierEffect
-{
+class FrenzyEffect : public ValueModifierEffect {
 public:
 	FrenzyEffect();
 	~FrenzyEffect();
@@ -162,8 +151,7 @@ public:
 };
 
 // 48
-class CommandEffect : public ActiveEffect
-{
+class CommandEffect : public ActiveEffect {
 public:
 	CommandEffect();
 	~CommandEffect();
@@ -172,24 +160,21 @@ public:
 };
 
 // 48
-class CommandCreatureEffect : public CommandEffect
-{
+class CommandCreatureEffect : public CommandEffect {
 public:
 	CommandCreatureEffect();
 	~CommandCreatureEffect();
 };
 
 // 48
-class CommandHumanoidEffect : public CommandEffect
-{
+class CommandHumanoidEffect : public CommandEffect {
 public:
 	CommandHumanoidEffect();
 	~CommandHumanoidEffect();
 };
 
 // 4C
-class InvisibilityEffect : public ValueModifierEffect
-{
+class InvisibilityEffect : public ValueModifierEffect {
 public:
 	InvisibilityEffect();
 	~InvisibilityEffect();
@@ -198,8 +183,7 @@ public:
 };
 
 // 4C
-class ChameleonEffect : public ValueModifierEffect
-{
+class ChameleonEffect : public ValueModifierEffect {
 public:
 	ChameleonEffect();
 	~ChameleonEffect();
@@ -208,8 +192,7 @@ public:
 };
 
 // 4C
-class LightEffect : public ActiveEffect
-{
+class LightEffect : public ActiveEffect {
 public:
 	LightEffect();
 	~LightEffect();
@@ -218,8 +201,7 @@ public:
 };
 
 // 4C
-class DarknessEffect : public ValueModifierEffect
-{
+class DarknessEffect : public ValueModifierEffect {
 public:
 	DarknessEffect();
 	~DarknessEffect();
@@ -228,8 +210,7 @@ public:
 };
 
 // 4C
-class NightEyeEffect : public ValueModifierEffect
-{
+class NightEyeEffect : public ValueModifierEffect {
 public:
 	NightEyeEffect();
 	~NightEyeEffect();
@@ -238,8 +219,7 @@ public:
 };
 
 // 48
-class LockEffect : public ActiveEffect
-{
+class LockEffect : public ActiveEffect {
 public:
 	LockEffect();
 	~LockEffect();
@@ -248,8 +228,7 @@ public:
 };
 
 // 48
-class OpenEffect : public ActiveEffect
-{
+class OpenEffect : public ActiveEffect {
 public:
 	OpenEffect();
 	~OpenEffect();
@@ -258,20 +237,18 @@ public:
 };
 
 // 4C
-class AssociatedItemEffect : public ActiveEffect
-{
+class AssociatedItemEffect : public ActiveEffect {
 public:
 	AssociatedItemEffect();
 	~AssociatedItemEffect();
 
 	virtual void	Unk_17(void);
 
-	TESObject	*item;	// 48 - creature, armor, weapon
+	TESObject* item;	// 48 - creature, armor, weapon
 };
 
 // AC
-class BoundItemEffect : public AssociatedItemEffect
-{
+class BoundItemEffect : public AssociatedItemEffect {
 public:
 	BoundItemEffect();
 	~BoundItemEffect();
@@ -280,8 +257,7 @@ public:
 };
 
 // 74
-class SummonCreatureEffect : public AssociatedItemEffect
-{
+class SummonCreatureEffect : public AssociatedItemEffect {
 public:
 	SummonCreatureEffect();
 	~SummonCreatureEffect();
@@ -290,8 +266,7 @@ public:
 };
 
 // 4C
-class DetectLifeEffect : public ValueModifierEffect
-{
+class DetectLifeEffect : public ValueModifierEffect {
 public:
 	DetectLifeEffect();
 	~DetectLifeEffect();
@@ -300,8 +275,7 @@ public:
 };
 
 // 60
-class TelekinesisEffect : public ValueModifierEffect
-{
+class TelekinesisEffect : public ValueModifierEffect {
 public:
 	TelekinesisEffect();
 	~TelekinesisEffect();
@@ -312,8 +286,7 @@ public:
 };
 
 // 4C
-class DisintegrateArmorEffect : public ActiveEffect
-{
+class DisintegrateArmorEffect : public ActiveEffect {
 public:
 	DisintegrateArmorEffect();
 	~DisintegrateArmorEffect();
@@ -322,16 +295,14 @@ public:
 };
 
 // 48
-class DisintegrateWeaponEffect : public ActiveEffect
-{
+class DisintegrateWeaponEffect : public ActiveEffect {
 public:
 	DisintegrateWeaponEffect();
 	~DisintegrateWeaponEffect();
 };
 
 // 4C
-class ParalysisEffect : public ValueModifierEffect
-{
+class ParalysisEffect : public ValueModifierEffect {
 public:
 	ParalysisEffect();
 	~ParalysisEffect();
@@ -340,8 +311,7 @@ public:
 };
 
 // 70
-class ReanimateEffect : public ActiveEffect
-{
+class ReanimateEffect : public ActiveEffect {
 public:
 	ReanimateEffect();
 	~ReanimateEffect();
@@ -350,8 +320,7 @@ public:
 };
 
 // 4C
-class TurnUndeadEffect : public ActiveEffect
-{
+class TurnUndeadEffect : public ActiveEffect {
 public:
 	TurnUndeadEffect();
 	~TurnUndeadEffect();
@@ -362,8 +331,7 @@ public:
 };
 
 // 50
-class SunDamageEffect : public ActiveEffect
-{
+class SunDamageEffect : public ActiveEffect {
 public:
 	SunDamageEffect();
 	~SunDamageEffect();
@@ -374,8 +342,7 @@ public:
 };
 
 // 48
-class VampirismEffect : public ActiveEffect
-{
+class VampirismEffect : public ActiveEffect {
 public:
 	VampirismEffect();
 	~VampirismEffect();
@@ -384,8 +351,7 @@ public:
 };
 
 // 4C
-class ConcussionEffect : public ActiveEffect
-{
+class ConcussionEffect : public ActiveEffect {
 public:
 	ConcussionEffect();
 	~ConcussionEffect();
@@ -394,8 +360,7 @@ public:
 };
 
 // 50
-class ValueAndConditionsEffect : public ValueModifierEffect
-{
+class ValueAndConditionsEffect : public ValueModifierEffect {
 public:
 	ValueAndConditionsEffect();
 	~ValueAndConditionsEffect();
@@ -406,8 +371,7 @@ public:
 };
 
 // 50
-class LimbConditionEffect : public ValueModifierEffect
-{
+class LimbConditionEffect : public ValueModifierEffect {
 public:
 	LimbConditionEffect();
 	~LimbConditionEffect();

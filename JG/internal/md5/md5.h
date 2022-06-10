@@ -31,14 +31,12 @@
 	documentation and/or software.
 */
 
-//---------------------------------------------------------------------- 
+//----------------------------------------------------------------------
 #ifndef MD5_H
 #define MD5_H
 
-class MD5
-{
-	struct MD5_CTX
-	{
+class MD5 {
+	struct MD5_CTX {
 		DWORD	state[4];		// State (ABCD)
 		DWORD	count[2];		// Number of bits, modulo 2^64 (lsb first)
 		BYTE	buffer[64];		// Input buffer

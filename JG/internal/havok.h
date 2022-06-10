@@ -1,44 +1,39 @@
 #pragma once
 
-struct hkVector4
-{
+struct hkVector4 {
 	float	x, y, z, w;
 };
 
-template <typename T_Data> class hkArray
-{
+template <typename T_Data> class hkArray {
 public:
-	enum
-	{
-		kFlag_NoDealloc =		0x80000000,	// data not owned by us
-		kFlag_Locked =			0x40000000,	// will never be destroyed
+	enum {
+		kFlag_NoDealloc = 0x80000000,	// data not owned by us
+		kFlag_Locked = 0x40000000,	// will never be destroyed
 	};
 
-	T_Data		*data;				// 00
+	T_Data* data;				// 00
 	UInt32		size;				// 04
 	UInt32		capacityAndFlags;	// 08
 
-	class Iterator
-	{
+	class Iterator {
 	protected:
 		friend hkArray;
 
-		T_Data		*pData;
+		T_Data* pData;
 		UInt32		count;
 
 	public:
-		bool End() const {return !count;}
-		void operator++()
-		{
+		bool End() const { return !count; }
+		void operator++() {
 			count--;
 			pData++;
 		}
 
-		T_Data& operator*() const {return *pData;}
-		T_Data& operator->() const {return *pData;}
-		T_Data& Get() const {return *pData;}
+		T_Data& operator*() const { return *pData; }
+		T_Data& operator->() const { return *pData; }
+		T_Data& Get() const { return *pData; }
 
-		Iterator(hkArray &source) : pData(source.data), count(source.size) {}
+		Iterator(hkArray& source) : pData(source.data), count(source.size) {}
 	};
 };
 
@@ -66,20 +61,18 @@ class bhkShape;
 class hkpCachingShapePhantom;
 
 // 04
-class hkBaseObject
-{
+class hkBaseObject {
 public:
 	virtual void	Destroy(bool doFree);
 };
 
 // 08
-class hkReferencedObject : public hkBaseObject
-{
+class hkReferencedObject : public hkBaseObject {
 public:
 	hkReferencedObject();
 	~hkReferencedObject();
 
-	virtual void	CalcStatistics(hkStatisticsCollector *collector);
+	virtual void	CalcStatistics(hkStatisticsCollector* collector);
 	virtual void	Unk_02(void);
 
 	UInt16			sizeAndFlags;		// 04
@@ -87,8 +80,7 @@ public:
 };
 
 // 04
-class hkpEntityListener
-{
+class hkpEntityListener {
 public:
 	hkpEntityListener();
 	~hkpEntityListener();
@@ -102,8 +94,7 @@ public:
 };
 
 // 04
-class hkpPhantomListener
-{
+class hkpPhantomListener {
 public:
 	hkpPhantomListener();
 	~hkpPhantomListener();
@@ -116,8 +107,7 @@ public:
 };
 
 // D0
-class hkpCharacterProxy : public hkReferencedObject
-{
+class hkpCharacterProxy : public hkReferencedObject {
 public:
 	hkpCharacterProxy();
 	~hkpCharacterProxy();
@@ -131,62 +121,56 @@ public:
 	float					velocity[3];		// 10
 	float					unk1C;				// 1C
 	UInt32					unk20[4];			// 20
-	hkpCachingShapePhantom	*shapePhantom;		// 30
+	hkpCachingShapePhantom* shapePhantom;		// 30
 	UInt32					unk34[39];			// 34
 };
 STATIC_ASSERT(sizeof(hkpCharacterProxy) == 0xD0);
 
 // D0
-class ahkpCharacterProxy : public hkpCharacterProxy
-{
+class ahkpCharacterProxy : public hkpCharacterProxy {
 public:
 	ahkpCharacterProxy();
 	~ahkpCharacterProxy();
 };
 
 // 10
-struct hkCdBody
-{
-	hkReferencedObject		*shape;			// 00
+struct hkCdBody {
+	hkReferencedObject* shape;			// 00
 	UInt32					shapeKey;		// 04
-	void					*motion;		// 08 - either hkTransform or hkMotionState
-	hkCdBody				*parent;		// 0C
+	void* motion;		// 08 - either hkTransform or hkMotionState
+	hkCdBody* parent;		// 0C
 
-	hkpWorldObject *GetWorldObj() const {return (hkpWorldObject*)((UInt8*)this - 0x10);}
+	hkpWorldObject* GetWorldObj() const { return (hkpWorldObject*)((UInt8*)this - 0x10); }
 };
 
 // 80
-struct ContactData
-{
+struct ContactData {
 	UInt16							unk00;
 	UInt16							flags;
 	UInt32							key;
-	hkpSimpleConstraintContactMgr	*contactMgr;
+	hkpSimpleConstraintContactMgr* contactMgr;
 	UInt32							unk0C;
-	hkCdBody						*cdBody1;
-	hkCdBody						*cdBody2;
+	hkCdBody* cdBody1;
+	hkCdBody* cdBody2;
 	UInt32							unk18[26];
 };
 
 // 08
-struct CdBodyLinker
-{
-	ContactData		*data;
-	hkCdBody		*cdBody;
+struct CdBodyLinker {
+	ContactData* data;
+	hkCdBody* cdBody;
 };
 
 // 10
-struct CdParentObj
-{
-	void		*unk00;
+struct CdParentObj {
+	void* unk00;
 	UInt32		unk04;
-	void		*object;
+	void* object;
 	UInt32		unk0C;
 };
 
 // 8C
-class hkpWorldObject : public hkReferencedObject
-{
+class hkpWorldObject : public hkReferencedObject {
 public:
 	hkpWorldObject();
 	~hkpWorldObject();
@@ -194,8 +178,8 @@ public:
 	virtual void	Unk_03(void);
 	virtual void	Unk_04(void);
 
-	hkpWorld				*pWorld;		// 08
-	bhkWorldObject			*object;		// 0C
+	hkpWorld* pWorld;		// 08
+	bhkWorldObject* object;		// 0C
 	hkCdBody				cdBody;			// 10
 	UInt32					unk20[2];		// 20
 	UInt8					collisionType;	// 28	Known: 1 - hkpRigidBody, 2 - hkpPhantom
@@ -212,8 +196,7 @@ public:
 STATIC_ASSERT(sizeof(hkpWorldObject) == 0x8C);
 
 // 10
-class hkpShape : public hkReferencedObject
-{
+class hkpShape : public hkReferencedObject {
 public:
 	hkpShape();
 	~hkpShape();
@@ -228,49 +211,46 @@ public:
 	virtual void	Unk_0A(void);
 	virtual void	Unk_0B(void);
 
-	bhkShape		*shape;		// 08
+	bhkShape* shape;		// 08
 	UInt32			unk0C;		// 0C
 };
 
 // 0C
-class bhkRefObject : public NiObject
-{
+class bhkRefObject : public NiObject {
 public:
 	bhkRefObject();
 	~bhkRefObject();
 
-	virtual void	SetObject(hkReferencedObject *object);
+	virtual void	SetObject(hkReferencedObject* object);
 	virtual void	UpdateRefCount(bool incRef);	// inc/dec ref, depending on arg
 
-	hkReferencedObject	*refObject;		// 08
+	hkReferencedObject* refObject;		// 08
 };
 
 // 10
-class bhkSerializable : public bhkRefObject
-{
+class bhkSerializable : public bhkRefObject {
 public:
 	bhkSerializable();
 	~bhkSerializable();
 
 	virtual void		Unk_25(UInt32 arg);
-	virtual hkpWorld	*GetWorld(void);
+	virtual hkpWorld* GetWorld(void);
 	virtual bool		Unk_27(UInt32 arg);
 	virtual bool		Unk_28(void);
 	virtual void		FreeData(bool del);	// free hkData
 	virtual UInt32		Unk_2A(void);
-	virtual void		LoadHavokData(NiStream *stream);	// called from bhkSerializable::Load after primary load is done
+	virtual void		LoadHavokData(NiStream* stream);	// called from bhkSerializable::Load after primary load is done
 	virtual void		Unk_2C(void);	// create object
-	virtual void		*CreateHavokData(UInt8 *arg);	// create Cinfo, return hkData
+	virtual void* CreateHavokData(UInt8* arg);	// create Cinfo, return hkData
 	virtual void		Unk_2E(void);		// destroy object
 	virtual void		Unk_2F(void);
 	virtual void		Unk_30(void);
 
-	void				*hkData;	// 0C - stores hkConstraintData (descriptor used to build hkObj)
+	void* hkData;	// 0C - stores hkConstraintData (descriptor used to build hkObj)
 };
 
 // 14
-class bhkWorldObject : public bhkSerializable
-{
+class bhkWorldObject : public bhkSerializable {
 public:
 	bhkWorldObject();
 	~bhkWorldObject();
@@ -282,12 +262,11 @@ public:
 
 	UInt32				bodyFlags;		// 10
 
-	void ApplyForce(hkVector4 *forceVector);
+	void ApplyForce(hkVector4* forceVector);
 };
 
 // 18
-class bhkPhantom : public bhkWorldObject
-{
+class bhkPhantom : public bhkWorldObject {
 public:
 	bhkPhantom();
 	~bhkPhantom();
@@ -296,39 +275,34 @@ public:
 };
 
 // 18
-class bhkShapePhantom : public bhkPhantom
-{
+class bhkShapePhantom : public bhkPhantom {
 public:
 	bhkShapePhantom();
 	~bhkShapePhantom();
 };
 
 // 18
-class bhkSimpleShapePhantom : public bhkShapePhantom
-{
+class bhkSimpleShapePhantom : public bhkShapePhantom {
 public:
 	bhkSimpleShapePhantom();
 	~bhkSimpleShapePhantom();
 };
 
-class bhkCachingShapePhantom : public bhkShapePhantom
-{
+class bhkCachingShapePhantom : public bhkShapePhantom {
 public:
 	bhkCachingShapePhantom();
 	~bhkCachingShapePhantom();
 };
 
 // 10
-class hkpTransformShape : public hkpShape
-{
+class hkpTransformShape : public hkpShape {
 public:
 	hkpTransformShape();
 	~hkpTransformShape();
 };
 
 // 14
-class bhkShape : public bhkSerializable
-{
+class bhkShape : public bhkSerializable {
 public:
 	bhkShape();
 	~bhkShape();
@@ -346,24 +320,21 @@ public:
 };
 
 // 14
-class bhkTransformShape : public bhkShape
-{
+class bhkTransformShape : public bhkShape {
 public:
 	bhkTransformShape();
 	~bhkTransformShape();
 };
 
-struct hkpCdBodyPair
-{
-	hkCdBody		*cdBody1;
+struct hkpCdBodyPair {
+	hkCdBody* cdBody1;
 	UInt32			unk04;
-	hkCdBody		*cdBody2;
+	hkCdBody* cdBody2;
 	UInt32			unk0C;
 };
 
 // 14
-class hkpCdBodyPairCollector
-{
+class hkpCdBodyPairCollector {
 public:
 	hkpCdBodyPairCollector();
 	~hkpCdBodyPairCollector();
@@ -377,8 +348,7 @@ public:
 };
 
 // 114
-class hkpAllCdBodyPairCollector : public hkpCdBodyPairCollector
-{
+class hkpAllCdBodyPairCollector : public hkpCdBodyPairCollector {
 public:
 	hkpAllCdBodyPairCollector();
 	~hkpAllCdBodyPairCollector();
@@ -388,8 +358,7 @@ public:
 STATIC_ASSERT(sizeof(hkpAllCdBodyPairCollector) == 0x114);
 
 // A4
-class hkpPhantom : public hkpWorldObject
-{
+class hkpPhantom : public hkpWorldObject {
 public:
 	hkpPhantom();
 	~hkpPhantom();
@@ -409,8 +378,7 @@ public:
 STATIC_ASSERT(sizeof(hkpPhantom) == 0xA4);
 
 // E0
-class hkpAabbPhantom : public hkpPhantom
-{
+class hkpAabbPhantom : public hkpPhantom {
 public:
 	hkpAabbPhantom();
 	~hkpAabbPhantom();
@@ -422,24 +390,22 @@ public:
 STATIC_ASSERT(sizeof(hkpAabbPhantom) == 0xE0);
 
 // 160
-class hkpShapePhantom : public hkpPhantom
-{
+class hkpShapePhantom : public hkpPhantom {
 public:
 	hkpShapePhantom();
 	~hkpShapePhantom();
 
 	virtual void	Unk_0E(void);
 	virtual void	Unk_0F(void);
-	virtual void	Unk_10(hkpCdBodyPairCollector *pairCollector, UInt32 arg2);
-	virtual void	GetCdBodyData(hkpCdBodyPairCollector *pairCollector, UInt32 arg2);
+	virtual void	Unk_10(hkpCdBodyPairCollector* pairCollector, UInt32 arg2);
+	virtual void	GetCdBodyData(hkpCdBodyPairCollector* pairCollector, UInt32 arg2);
 
 	UInt32				unk0A4[47];		// 0A4
 };
 STATIC_ASSERT(sizeof(hkpShapePhantom) == 0x160);
 
 // 170
-class hkpSimpleShapePhantom : public hkpShapePhantom
-{
+class hkpSimpleShapePhantom : public hkpShapePhantom {
 public:
 	hkpSimpleShapePhantom();
 	~hkpSimpleShapePhantom();
@@ -450,8 +416,7 @@ public:
 STATIC_ASSERT(sizeof(hkpSimpleShapePhantom) == 0x170);
 
 // 170
-class hkpCachingShapePhantom : public hkpShapePhantom
-{
+class hkpCachingShapePhantom : public hkpShapePhantom {
 public:
 	hkpCachingShapePhantom();
 	~hkpCachingShapePhantom();
@@ -461,8 +426,7 @@ public:
 };
 STATIC_ASSERT(sizeof(hkpCachingShapePhantom) == 0x170);
 
-class hkpConstraintOwner : public hkReferencedObject
-{
+class hkpConstraintOwner : public hkReferencedObject {
 public:
 	hkpConstraintOwner();
 	~hkpConstraintOwner();
@@ -474,55 +438,53 @@ public:
 };
 
 // 6C
-class hkpSimulationIsland : public hkpConstraintOwner
-{
+class hkpSimulationIsland : public hkpConstraintOwner {
 public:
 	hkpSimulationIsland();
 	~hkpSimulationIsland();
 
 	UInt32					unk08[4];		// 08
-	ahkpWorld				*world;			// 18
+	ahkpWorld* world;			// 18
 	UInt32					unk1C[11];		// 1C
 	hkArray<hkpRigidBody*>	rigidBodies;	// 48
-	hkpRigidBody			*rgdBody54;		// 54
+	hkpRigidBody* rgdBody54;		// 54
 	UInt32					unk58;			// 58
 	hkArray<ContactData*>	contactData;	// 5C
-	ContactData				*data68;		// 68
+	ContactData* data68;		// 68
 };
 
 // 1B8
-class hkpWorld : public hkReferencedObject
-{
+class hkpWorld : public hkReferencedObject {
 public:
 	hkpWorld();
 	~hkpWorld();
 
-	hkpContinuousSimulation				*simulation;				// 008
+	hkpContinuousSimulation* simulation;				// 008
 	float								flt00C;						// 00C
 	hkVector4							gravity;					// 010
-	hkpSimulationIsland					*fixedIsland;				// 020
-	hkpRigidBody						*fixedRigidBody;			// 024
+	hkpSimulationIsland* fixedIsland;				// 020
+	hkpRigidBody* fixedRigidBody;			// 024
 	hkArray<hkpSimulationIsland*>		activeSimulationIslands;	// 028
 	hkArray<hkpSimulationIsland*>		inactiveSimulationIslands;	// 034
 	hkArray<hkpSimulationIsland*>		dirtySimulationIslands;		// 040
-	hkpDefaultWorldMaintenanceMgr		*maintenanceMgr;			// 04C
+	hkpDefaultWorldMaintenanceMgr* maintenanceMgr;			// 04C
 	UInt32								unk050;						// 050
 	UInt32								unk054;						// 054
-	hkpBroadPhase						*broadPhase;				// 058
+	hkpBroadPhase* broadPhase;				// 058
 	UInt32								unk05C;						// 05C
 	UInt32								unk060;						// 060
-	hkpBroadPhaseListener				**broadPhaseListeners;		// 064
-	hkpPhantomBroadPhaseListener		*phantomBroadPhaseListener;	// 068
-	hkpEntityEntityBroadPhaseListener	*entityBroadPhaseListener;	// 06C
-	hkpBroadPhaseBorderListener			*broadPhaseBorderListener;	// 070
-	void								*ptr074;					// 074
-	void								*ptr078;					// 078
-	bhkCollisionFilter					*collisionFilter;			// 07C
-	hkpCollisionDispatcher				*collisionDispatcher;		// 080
-	hkpDefaultConvexListFilter			*convexListFilter;			// 084
-	void								*ptr088;					// 088
+	hkpBroadPhaseListener** broadPhaseListeners;		// 064
+	hkpPhantomBroadPhaseListener* phantomBroadPhaseListener;	// 068
+	hkpEntityEntityBroadPhaseListener* entityBroadPhaseListener;	// 06C
+	hkpBroadPhaseBorderListener* broadPhaseBorderListener;	// 070
+	void* ptr074;					// 074
+	void* ptr078;					// 078
+	bhkCollisionFilter* collisionFilter;			// 07C
+	hkpCollisionDispatcher* collisionDispatcher;		// 080
+	hkpDefaultConvexListFilter* convexListFilter;			// 084
+	void* ptr088;					// 088
 	UInt32								unk08C[13];					// 08C
-	void								*ptr0C0;					// 0C0
+	void* ptr0C0;					// 0C0
 	UInt32								unk0C4[19];					// 0C4
 	hkArray<hkpPhantom*>				phantoms;					// 110
 	UInt32								unk11C[3];					// 11C
@@ -537,8 +499,7 @@ public:
 STATIC_ASSERT(sizeof(hkpWorld) == 0x1B8);
 
 // 354
-class ahkpWorld : public hkpWorld
-{
+class ahkpWorld : public hkpWorld {
 public:
 	ahkpWorld();
 	~ahkpWorld();
@@ -553,41 +514,39 @@ public:
 STATIC_ASSERT(sizeof(ahkpWorld) == 0x354);
 
 // 94
-class bhkWorld : public bhkSerializable
-{
+class bhkWorld : public bhkSerializable {
 public:
 	bhkWorld();
 	~bhkWorld();
 
-	void				*unk10;		// 10 - 0x108 byte object
-	NiRefObject			*visDebug;	// 14
+	void* unk10;		// 10 - 0x108 byte object
+	NiRefObject* visDebug;	// 14
 	UInt8				unk18;		// 18
 	UInt8				enabled;	// 19
 	UInt8				unk1A;		// 1A
 	UInt8				pad1B;		// 1B
 	UInt32				unk1C[3];	// 1C
-	void				*unk28;		// 28 - 0x2EE0 byte buffer
+	void* unk28;		// 28 - 0x2EE0 byte buffer
 	UInt32				unk2C;		// 2C
-	void				*unk30;		// 30 - 0x320 byte buffer
+	void* unk30;		// 30 - 0x320 byte buffer
 	UInt32				unk34;		// 34
-	void				*unk38;		// 38 - 0x190 byte buffer
+	void* unk38;		// 38 - 0x190 byte buffer
 	UInt32				unk3C;		// 3C
-	void				*unk40;		// 40 - 0x320 byte buffer
+	void* unk40;		// 40 - 0x320 byte buffer
 	UInt32				unk44;		// 44
-	void				*unk48;		// 48 - 0x2EE0 byte buffer
+	void* unk48;		// 48 - 0x2EE0 byte buffer
 	UInt32				unk4C;		// 4C
 	NiVector4			unk50;		// 50
-	NiRefObject			**unk60;	// 60 - simple array
+	NiRefObject** unk60;	// 60 - simple array
 	UInt32				unk64;		// 64 - num elements in 060
 	UInt32				unk68;		// 68
-	void				*unk6C;		// 6C
+	void* unk6C;		// 6C
 	UInt32				unk70[9];	// 70
 };
 STATIC_ASSERT(sizeof(bhkWorld) == 0x94);
 
 // E0
-class bhkWorldM : public bhkWorld
-{
+class bhkWorldM : public bhkWorld {
 public:
 	bhkWorldM();
 	~bhkWorldM();
@@ -603,24 +562,22 @@ public:
 STATIC_ASSERT(sizeof(bhkWorldM) == 0xE0);
 
 // 0C
-class NiCollisionObject : public NiObject
-{
+class NiCollisionObject : public NiObject {
 public:
 	NiCollisionObject();
 	~NiCollisionObject();
 
-	virtual void	Attach(NiAVObject *obj);
+	virtual void	Attach(NiAVObject* obj);
 	virtual void	Unk_24(UInt32 arg);
 	virtual void	Unk_25(void);
 	virtual void	LoadBoundingVolume(UInt32 arg);
 	virtual void	Unk_27(UInt32 version, UInt32 arg1);
 
-	NiNode			*linkedNode;	// 08
+	NiNode* linkedNode;	// 08
 };
 
 // 14
-class bhkNiCollisionObject : public NiCollisionObject
-{
+class bhkNiCollisionObject : public NiCollisionObject {
 public:
 	bhkNiCollisionObject();
 	~bhkNiCollisionObject();
@@ -636,36 +593,32 @@ public:
 	virtual void	Unk_30(void);
 
 	UInt32			flags;			// 0C
-	bhkWorldObject	*worldObj;		// 10
+	bhkWorldObject* worldObj;		// 10
 };
 
 // 14
-class bhkCollisionObject : public bhkNiCollisionObject
-{
+class bhkCollisionObject : public bhkNiCollisionObject {
 public:
 	bhkCollisionObject();
 	~bhkCollisionObject();
 };
 
 // 14
-class bhkPCollisionObject : public bhkNiCollisionObject
-{
+class bhkPCollisionObject : public bhkNiCollisionObject {
 public:
 	bhkPCollisionObject();
 	~bhkPCollisionObject();
 };
 
 // 14
-class bhkSPCollisionObject : public bhkPCollisionObject
-{
+class bhkSPCollisionObject : public bhkPCollisionObject {
 public:
 	bhkSPCollisionObject();
 	~bhkSPCollisionObject();
 };
 
 // 08
-class hkpCdPointCollector
-{
+class hkpCdPointCollector {
 public:
 	hkpCdPointCollector();
 	~hkpCdPointCollector();
@@ -678,17 +631,16 @@ public:
 };
 
 // 70
-struct hkCdPoint
-{
+struct hkCdPoint {
 	hkVector4		point00;		// 00
 	hkVector4		point10;		// 10
-	hkCdBody		*cdBody1;		// 20
+	hkCdBody* cdBody1;		// 20
 	UInt8			body1Key;		// 24
 	UInt8			pad25[2];		// 25
 	UInt8			obj1Flag;		// 27
 	hkVector4		point28;		// 28
 	hkVector4		point38;		// 38
-	hkCdBody		*cdBody2;		// 48
+	hkCdBody* cdBody2;		// 48
 	UInt8			body2Key;		// 4C
 	UInt8			pad4D[2];		// 4D
 	UInt8			obj2Flag;		// 4F
@@ -697,8 +649,7 @@ struct hkCdPoint
 };
 
 // 3A0
-class hkpAllCdPointCollector : public hkpCdPointCollector
-{
+class hkpAllCdPointCollector : public hkpCdPointCollector {
 public:
 	hkpAllCdPointCollector();
 	~hkpAllCdPointCollector();
@@ -713,8 +664,7 @@ public:
 STATIC_ASSERT(sizeof(hkpAllCdPointCollector) == 0x3A0);
 
 // 3C8
-class bhkCharacterPointCollector : public hkpAllCdPointCollector
-{
+class bhkCharacterPointCollector : public hkpAllCdPointCollector {
 public:
 	bhkCharacterPointCollector();
 	~bhkCharacterPointCollector();
@@ -727,8 +677,7 @@ public:
 STATIC_ASSERT(sizeof(bhkCharacterPointCollector) == 0x3C8);
 
 // 3E0
-class bhkCharacterProxy : public bhkSerializable
-{
+class bhkCharacterProxy : public bhkSerializable {
 public:
 	bhkCharacterProxy();
 	~bhkCharacterProxy();
@@ -739,8 +688,7 @@ public:
 STATIC_ASSERT(sizeof(bhkCharacterProxy) == 0x3E0);
 
 // 08
-class hkpCharacterState : public hkReferencedObject
-{
+class hkpCharacterState : public hkReferencedObject {
 public:
 	hkpCharacterState();
 	~hkpCharacterState();
@@ -753,95 +701,84 @@ public:
 	virtual void	Unk_08(void);
 };
 
-class bhkCharacterState : public hkpCharacterState
-{
+class bhkCharacterState : public hkpCharacterState {
 public:
 	bhkCharacterState();
 	~bhkCharacterState();
 };
 
-class bhkCharacterStateOnGround : public bhkCharacterState
-{
+class bhkCharacterStateOnGround : public bhkCharacterState {
 public:
 	bhkCharacterStateOnGround();
 	~bhkCharacterStateOnGround();
 };
 
-class bhkCharacterStateJumping : public bhkCharacterState
-{
+class bhkCharacterStateJumping : public bhkCharacterState {
 public:
 	bhkCharacterStateJumping();
 	~bhkCharacterStateJumping();
 };
 
-class bhkCharacterStateInAir : public bhkCharacterState
-{
+class bhkCharacterStateInAir : public bhkCharacterState {
 public:
 	bhkCharacterStateInAir();
 	~bhkCharacterStateInAir();
 };
 
-class bhkCharacterStateClimbing : public bhkCharacterState
-{
+class bhkCharacterStateClimbing : public bhkCharacterState {
 public:
 	bhkCharacterStateClimbing();
 	~bhkCharacterStateClimbing();
 };
 
-class bhkCharacterStateFlying : public bhkCharacterState
-{
+class bhkCharacterStateFlying : public bhkCharacterState {
 public:
 	bhkCharacterStateFlying();
 	~bhkCharacterStateFlying();
 };
 
-class bhkCharacterStateSwimming : public bhkCharacterState
-{
+class bhkCharacterStateSwimming : public bhkCharacterState {
 public:
 	bhkCharacterStateSwimming();
 	~bhkCharacterStateSwimming();
 };
 
-class bhkCharacterStateProjectile : public bhkCharacterState
-{
+class bhkCharacterStateProjectile : public bhkCharacterState {
 public:
 	bhkCharacterStateProjectile();
 	~bhkCharacterStateProjectile();
 };
 
 // 34
-class hkpCharacterStateManager : public hkReferencedObject
-{
+class hkpCharacterStateManager : public hkReferencedObject {
 public:
 	hkpCharacterStateManager();
 	~hkpCharacterStateManager();
 
-	bhkCharacterStateOnGround		*stateOnGround;		// 08
-	bhkCharacterStateJumping		*stateJumping;		// 0C
-	bhkCharacterStateInAir			*stateInAir;		// 10
-	bhkCharacterStateClimbing		*stateClimbing;		// 14
-	bhkCharacterStateFlying			*stateFlying;		// 18
-	bhkCharacterStateSwimming		*stateSwimming;		// 1C
-	bhkCharacterStateProjectile		*stateProjectile;	// 20
+	bhkCharacterStateOnGround* stateOnGround;		// 08
+	bhkCharacterStateJumping* stateJumping;		// 0C
+	bhkCharacterStateInAir* stateInAir;		// 10
+	bhkCharacterStateClimbing* stateClimbing;		// 14
+	bhkCharacterStateFlying* stateFlying;		// 18
+	bhkCharacterStateSwimming* stateSwimming;		// 1C
+	bhkCharacterStateProjectile* stateProjectile;	// 20
 	UInt32							unk24[4];			// 24
 };
 
 // 30
-class hkpCharacterContext : public hkReferencedObject
-{
+class hkpCharacterContext : public hkReferencedObject {
 public:
 	hkpCharacterContext();
 	~hkpCharacterContext();
 
 	UInt32						unk08;			// 08
-	hkpCharacterStateManager	*stateMngr;		// 0C
+	hkpCharacterStateManager* stateMngr;		// 0C
 	UInt32						hkState;		// 10
 	UInt32						unk14[7];		// 14
 };
 
 // 04
-class hkpCharacterProxyListener
-{
+class hkpCharacterProxyListener {
 public:
 	hkpCharacterProxyListener();
 	~hkpCharacterProxyListener();
@@ -855,8 +792,7 @@ public:
 };
 
 // 70
-class bhkCharacterListener : public hkpCharacterProxyListener
-{
+class bhkCharacterListener : public hkpCharacterProxyListener {
 public:
 	bhkCharacterListener();
 	~bhkCharacterListener();
@@ -864,23 +800,20 @@ public:
 	UInt32			unk04[27];
 };
 
-class hkpSphereRepShape : public hkpShape
-{
+class hkpSphereRepShape : public hkpShape {
 public:
 	hkpSphereRepShape();
 	~hkpSphereRepShape();
 };
 
-class hkpConvexShape : public hkpSphereRepShape
-{
+class hkpConvexShape : public hkpSphereRepShape {
 public:
 	hkpConvexShape();
 	~hkpConvexShape();
 };
 
 // 20
-class hkpSphereShape : public hkpConvexShape
-{
+class hkpSphereShape : public hkpConvexShape {
 public:
 	hkpSphereShape();
 	~hkpSphereShape();
@@ -889,8 +822,7 @@ public:
 };
 
 // 30
-class hkpBoxShape : public hkpConvexShape
-{
+class hkpBoxShape : public hkpConvexShape {
 public:
 	hkpBoxShape();
 	~hkpBoxShape();
@@ -913,16 +845,14 @@ public:
 };
 STATIC_ASSERT(sizeof(hkpBoxShape) == 0x30);
 
-struct VerticesBlock
-{
+struct VerticesBlock {
 	NiVector4	rowX;
 	NiVector4	rowY;
 	NiVector4	rowZ;
 };
 
 // 70
-class hkpConvexVerticesShape : public hkpConvexShape
-{
+class hkpConvexVerticesShape : public hkpConvexShape {
 public:
 	hkpConvexVerticesShape();
 	~hkpConvexVerticesShape();
@@ -946,12 +876,12 @@ public:
 	UInt32			unk34;			// 34
 	UInt32			unk38;			// 38
 	UInt32			unk3C;			// 3C
-	VerticesBlock	*verticesArray;	// 40
+	VerticesBlock* verticesArray;	// 40
 	UInt32			numBlocks;		// 44
 	UInt32			unk48;			// 48
 	UInt32			numVertices;	// 4C
 	UInt32			unk50;			// 50
-	NiVector4		*normalsArray;	// 54
+	NiVector4* normalsArray;	// 54
 	UInt32			numNormals;		// 58
 	UInt32			unk5C;			// 5C
 	UInt32			unk60;			// 60
@@ -962,8 +892,7 @@ public:
 STATIC_ASSERT(sizeof(hkpConvexVerticesShape) == 0x70);
 
 // 70
-class hkCharControllerShape : public hkpConvexVerticesShape
-{
+class hkCharControllerShape : public hkpConvexVerticesShape {
 public:
 	hkCharControllerShape();
 	~hkCharControllerShape();
@@ -972,8 +901,7 @@ public:
 };
 
 // 40
-class hkpCapsuleShape : public hkpConvexShape
-{
+class hkpCapsuleShape : public hkpConvexShape {
 public:
 	hkpCapsuleShape();
 	~hkpCapsuleShape();
@@ -987,7 +915,7 @@ public:
 
 	float			flt10;		// 10
 	UInt32			unk14;		// 14
-	BSFadeNode		*fadeNode;	// 18
+	BSFadeNode* fadeNode;	// 18
 	UInt32			unk1C;		// 1C
 	UInt32			unk20;		// 20
 	UInt32			unk24;		// 24
@@ -1001,48 +929,42 @@ public:
 STATIC_ASSERT(sizeof(hkpCapsuleShape) == 0x40);
 
 // 14
-class bhkSphereRepShape : public bhkShape
-{
+class bhkSphereRepShape : public bhkShape {
 public:
 	bhkSphereRepShape();
 	~bhkSphereRepShape();
 };
 
 // 14
-class bhkConvexShape : public bhkSphereRepShape
-{
+class bhkConvexShape : public bhkSphereRepShape {
 public:
 	bhkConvexShape();
 	~bhkConvexShape();
 };
 
 // 14
-class bhkCapsuleShape : public bhkConvexShape
-{
+class bhkCapsuleShape : public bhkConvexShape {
 public:
 	bhkCapsuleShape();
 	~bhkCapsuleShape();
 };
 
 // 14
-class bhkConvexVerticesShape : public bhkConvexShape
-{
+class bhkConvexVerticesShape : public bhkConvexShape {
 public:
 	bhkConvexVerticesShape();
 	~bhkConvexVerticesShape();
 };
 
 // 14
-class bhkCharControllerShape : public bhkConvexVerticesShape
-{
+class bhkCharControllerShape : public bhkConvexVerticesShape {
 public:
 	bhkCharControllerShape();
 	~bhkCharControllerShape();
 };
 
 // 660
-class bhkCharacterController : public bhkCharacterProxy
-{
+class bhkCharacterController : public bhkCharacterProxy {
 public:
 	bhkCharacterController();
 	~bhkCharacterController();
@@ -1073,22 +995,21 @@ public:
 	float					fallTimeElapsed;	// 548
 	float					flt54C;				// 54C
 	UInt32					unk550[17];			// 550
-	bhkCachingShapePhantom	*chrPhantom;		// 594
+	bhkCachingShapePhantom* chrPhantom;		// 594
 	UInt32					unk598[3];			// 598
-	bhkCapsuleShape			*capsuleShape;		// 5A4
-	bhkCharControllerShape	*charCtrlShape;		// 5A8
+	bhkCapsuleShape* capsuleShape;		// 5A4
+	bhkCharControllerShape* charCtrlShape;		// 5A8
 	UInt32					unk5AC[23];			// 5AC
 	UInt8					byte608;			// 608
 	UInt8					pad609[3];			// 609
-	hkpRigidBody			*bodyUnderFeet;		// 60C
+	hkpRigidBody* bodyUnderFeet;		// 60C
 	UInt32					unk610[11];			// 610
 	hkArray<hkCdPoint>		arr63C;				// 63C
 	UInt32					unk648[6];			// 648
 };
 STATIC_ASSERT(sizeof(bhkCharacterController) == 0x660);
 
-class hkpEntity : public hkpWorldObject
-{
+class hkpEntity : public hkpWorldObject {
 public:
 	hkpEntity();
 	~hkpEntity();
@@ -1096,8 +1017,7 @@ public:
 	virtual void	Unk_05(void);
 };
 
-class hkpConstraintData : public hkReferencedObject
-{
+class hkpConstraintData : public hkReferencedObject {
 public:
 	hkpConstraintData();
 	~hkpConstraintData();
@@ -1118,8 +1038,7 @@ public:
 };
 
 // 38
-class hkpConstraintInstance : public hkReferencedObject
-{
+class hkpConstraintInstance : public hkReferencedObject {
 public:
 	hkpConstraintInstance();
 	~hkpConstraintInstance();
@@ -1130,19 +1049,18 @@ public:
 	virtual void	Unk_06(void);
 	virtual void	Unk_07(void);
 
-	hkpSimulationIsland		*simIsle;			// 08
-	hkpConstraintData		*constraintData;	// 0C
+	hkpSimulationIsland* simIsle;			// 08
+	hkpConstraintData* constraintData;	// 0C
 	UInt32					unk10;				// 10
-	hkpRigidBody			*contactBody;		// 14
-	hkpRigidBody			*parentBody;		// 18
+	hkpRigidBody* contactBody;		// 14
+	hkpRigidBody* parentBody;		// 18
 	UInt32					unk1C[5];			// 1C
-	void					*ptr30;				// 30
+	void* ptr30;				// 30
 	UInt32					unk34;				// 34
 };
 
 // F0+
-class hkpMotion : public hkReferencedObject
-{
+class hkpMotion : public hkReferencedObject {
 public:
 	hkpMotion();
 	~hkpMotion();
@@ -1160,8 +1078,8 @@ public:
 	virtual void	Unk_0D(void);
 	virtual void	Unk_0E(void);
 	virtual void	Unk_0F(void);
-	virtual void	SetLinearVelocity(NiVector4 *velocity);
-	virtual void	SetAngularVelocity(NiVector4 *velocity);
+	virtual void	SetLinearVelocity(NiVector4* velocity);
+	virtual void	SetAngularVelocity(NiVector4* velocity);
 	virtual void	Unk_12(void);
 	virtual void	Unk_13(void);
 	virtual void	Unk_14(void);
@@ -1171,8 +1089,7 @@ public:
 	virtual void	Unk_18(void);
 	virtual void	Unk_19(void);
 
-	enum
-	{
+	enum {
 		kMotionType_Sphere = 2,
 		kMotionType_Box,
 		kMotionType_KeyframedRigid,
@@ -1217,8 +1134,7 @@ public:
 };
 STATIC_ASSERT(sizeof(hkpMotion) == 0x140);
 
-class hkpSphereMotion : public hkpMotion
-{
+class hkpSphereMotion : public hkpMotion {
 public:
 	hkpSphereMotion();
 	~hkpSphereMotion();
@@ -1226,8 +1142,7 @@ public:
 	virtual void	Unk_1A(void);
 };
 
-class hkpBoxMotion : public hkpMotion
-{
+class hkpBoxMotion : public hkpMotion {
 public:
 	hkpBoxMotion();
 	~hkpBoxMotion();
@@ -1235,27 +1150,24 @@ public:
 	virtual void	Unk_1A(void);
 };
 
-class hkpThinBoxMotion : public hkpBoxMotion
-{
+class hkpThinBoxMotion : public hkpBoxMotion {
 public:
 	hkpThinBoxMotion();
 	~hkpThinBoxMotion();
 };
 
 // 30
-struct ConstraintContact
-{
-	hkpConstraintInstance	*instance;		// 00
-	hkpRigidBody			*parentBody;	// 04
-	hkpRigidBody			*contactBody;	// 08
-	void					*ptr0C;			// 0C
+struct ConstraintContact {
+	hkpConstraintInstance* instance;		// 00
+	hkpRigidBody* parentBody;	// 04
+	hkpRigidBody* contactBody;	// 08
+	void* ptr0C;			// 0C
 	UInt32					unk10[5];		// 10
 	float					flt24[3];		// 24
 };
 
 // 220
-class hkpRigidBody : public hkpEntity
-{
+class hkpRigidBody : public hkpEntity {
 public:
 	hkpRigidBody();
 	~hkpRigidBody();
@@ -1268,12 +1180,12 @@ public:
 	float							friction;		// 90
 	float							restitution;	// 94
 	UInt32							unk98[5];		// 98
-	ConstraintContact				*contactsArr;	// AC
+	ConstraintContact* contactsArr;	// AC
 	UInt16							contactsSize;	// B0
 	UInt16							contactsCap;	// B2
 	hkArray<hkpConstraintInstance*>	constraintInst;	// B4
 	UInt32							unkC0[3];		// C0
-	hkpSimulationIsland				*simIsle;		// CC
+	hkpSimulationIsland* simIsle;		// CC
 	UInt32							unkD0[4];		// D0
 	hkpMotion						motion;			// E0
 
@@ -1281,16 +1193,14 @@ public:
 };
 
 // 14
-class bhkEntity : public bhkWorldObject
-{
+class bhkEntity : public bhkWorldObject {
 public:
 	bhkEntity();
 	~bhkEntity();
 };
 
 // 1C
-class bhkRigidBody : public bhkEntity
-{
+class bhkRigidBody : public bhkEntity {
 public:
 	bhkRigidBody();
 	~bhkRigidBody();
@@ -1311,8 +1221,7 @@ public:
 };
 
 // 50
-class bhkRigidBodyT : public bhkRigidBody
-{
+class bhkRigidBodyT : public bhkRigidBody {
 public:
 	bhkRigidBodyT();
 	~bhkRigidBodyT();

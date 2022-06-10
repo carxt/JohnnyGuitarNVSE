@@ -87,8 +87,7 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 		if (weatherData) {
 			NVSEArrayVar* weatherArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
-			do
-			{
+			do {
 				if (iter->data) {
 					g_arrInterface->AppendElement(weatherArr, NVSEArrayElement(iter->data->weather));
 					if (IsConsoleMode())
@@ -107,8 +106,7 @@ bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			ListNode<WeatherEntry>* headNode = weatherData->weatherTypes.Head(), * iter = headNode->next;
-			while (iter)
-			{
+			while (iter) {
 				GameHeapFree(iter->data);
 				iter = iter->RemoveMe();
 			}
@@ -184,8 +182,7 @@ bool Cmd_IsWeatherInRegion_Execute(COMMAND_ARGS) {
 		if (weatherData) {
 			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
 			WeatherEntry* weatherType;
-			do
-			{
+			do {
 				weatherType = iter->data;
 				if (weatherType->weather == weather) {
 					*result = 1;
@@ -210,8 +207,7 @@ bool Cmd_RemoveRegionWeather_Execute(COMMAND_ARGS) {
 		if (weatherData) {
 			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
 			WeatherEntry* weatherType;
-			do
-			{
+			do {
 				weatherType = iter->data;
 				if (weatherType->weather == weather) {
 					iter = iter->RemoveMe();
@@ -238,8 +234,7 @@ bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
 			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
-			do
-			{
+			do {
 				if (iter->data && iter->data->weather == weather) return true;
 			} while (iter = iter->next);
 			entry = (WeatherEntry*)GameHeapAlloc(sizeof(WeatherEntry));

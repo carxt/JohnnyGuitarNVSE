@@ -5,13 +5,11 @@
 
 //All thanks to jazzisparis for the code, since it's way faster than tanf.
 
-inline float tan_p(float angle)
-{
+inline float tan_p(float angle) {
 	angle *= kDbl4dPI;
 	double ang2 = angle * angle;
 	return angle * (211.849369664121 - 12.5288887278448 * ang2) / (269.7350131214121 + ang2 * (ang2 - 71.4145309347748));
 }
-
 
 __forceinline float dTan(float angle) {
 	{
@@ -19,24 +17,23 @@ __forceinline float dTan(float angle) {
 			angle -= kDblPIx2;
 
 		int octant = int(angle * kDbl4dPI);
-		switch (octant)
-		{
-		case 0:
-			return tan_p(angle);
-		case 1:
-			return 1.0 / tan_p(kDblPId2 - angle);
-		case 2:
-			return -1.0 / tan_p(angle - kDblPId2);
-		case 3:
-			return -tan_p(kDblPI - angle);
-		case 4:
-			return tan_p(angle - kDblPI);
-		case 5:
-			return 1.0 / tan_p(kDblPIx3d2 - angle);
-		case 6:
-			return -1.0 / tan_p(angle - kDblPIx3d2);
-		default:
-			return -tan_p(kDblPIx2 - angle);
+		switch (octant) {
+			case 0:
+				return tan_p(angle);
+			case 1:
+				return 1.0 / tan_p(kDblPId2 - angle);
+			case 2:
+				return -1.0 / tan_p(angle - kDblPId2);
+			case 3:
+				return -tan_p(kDblPI - angle);
+			case 4:
+				return tan_p(angle - kDblPI);
+			case 5:
+				return 1.0 / tan_p(kDblPIx3d2 - angle);
+			case 6:
+				return -1.0 / tan_p(angle - kDblPIx3d2);
+			default:
+				return -tan_p(kDblPIx2 - angle);
 		}
 	}
 }
@@ -48,17 +45,13 @@ float fastDTan(float value) {
 	return (sign ? -tempRes : tempRes);
 }
 
-
-void setVarByName(VARARGS, const char* var_name, float value)
-{
+void setVarByName(VARARGS, const char* var_name, float value) {
 	ListNode<VariableInfo>* traverse = scriptObj->varList.Head();
 	VariableInfo* varInfo;
-	do
-	{
+	do {
 		varInfo = traverse->data;
 		if (varInfo) {
-			if (!strcmp(((char*)varInfo->name.CStr()), var_name))
-			{
+			if (!strcmp(((char*)varInfo->name.CStr()), var_name)) {
 				ScriptVar* scv = eventList->GetVariable(varInfo->idx);
 				if (scv) {
 					scv->data = value;
@@ -67,14 +60,11 @@ void setVarByName(VARARGS, const char* var_name, float value)
 			}
 		}
 	} while (traverse = traverse->next);
-
 }
-
 
 //Only ready for a 24-bit BMP, will check for non-24 bit later.
 //Also currently doesn't handle negative height/width BMPs, will fix later
-bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long& B, unsigned long PixelW, unsigned long PixelH)
-{
+bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long& B, unsigned long PixelW, unsigned long PixelH) {
 	FILE* f = fopen(filename, "rb");
 
 	if (f == NULL)
@@ -192,7 +182,6 @@ const UInt32 TESForm_Vtables[] =
 	0x1067A2C,  //  ActorValueInfo
 };
 
-
 //special for references, so it only uses persistent ones
 const UInt32 TESObjectREFR_Vtables[] =
 {
@@ -202,4 +191,3 @@ const UInt32 TESObjectREFR_Vtables[] =
 	0x108AA3C,    //    PlayerCharacter
 	0x108F674,    //    GrenadeProjectile
 };
-

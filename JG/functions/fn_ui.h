@@ -20,25 +20,22 @@ bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	char* pathCopy = new char[strlen(path) + 1];
 	strcpy(pathCopy, path);
 
-	if (pos != factionRepIcons.end())
-	{
-		if (*pos->second[tierID-1]) delete[] pos->second[tierID-1];
-		pos->second[tierID-1] = pathCopy;
+	if (pos != factionRepIcons.end()) {
+		if (*pos->second[tierID - 1]) delete[] pos->second[tierID - 1];
+		pos->second[tierID - 1] = pathCopy;
 	}
-	else
-	{
+	else {
 		std::vector<char*> v{ "", "", "", "" };
-		v[tierID-1] = pathCopy;
+		v[tierID - 1] = pathCopy;
 		factionRepIcons.insert(std::pair<UInt32, std::vector<char*>>(rep->refID, v));
 	}
 	*result = 1;
 	return true;
-
 }
 
 bool Cmd_GetSystemColorAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ScriptVar* rOut, *gOut, *bOut;
+	ScriptVar* rOut, * gOut, * bOut;
 	UInt32 type;
 	UInt8 color[3] = { 0, 0, 0 };
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &type, &rOut, &gOut, &bOut) && type > 0 && type <= 5) {
@@ -62,21 +59,18 @@ bool Cmd_GetSystemColor_Execute(COMMAND_ARGS) {
 	return true;
 };
 
-bool Cmd_QueueObjectiveText_Execute(COMMAND_ARGS)
-{
+bool Cmd_QueueObjectiveText_Execute(COMMAND_ARGS) {
 	char text[MAX_PATH];
 	UInt32 isCompleted, allowDisplayMultiple;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &text, &isCompleted, &allowDisplayMultiple))
-	{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &text, &isCompleted, &allowDisplayMultiple)) {
 		CdeclCall(0x77A5B0, text, isCompleted, allowDisplayMultiple == 0);
 		*result = 1;
 	}
 	return true;
 };
 
-bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS)
-{
+bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS) {
 	enum {
 		kPriorityAppend = 0,
 		kPriorityPrepend,
@@ -94,8 +88,7 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS)
 	UInt32 justification = kJustifyLeft;
 	int titleFont = -1, subTitleFont = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &title, &subtitle, &soundEdid, &queuePriority, &justification, &titleFont, &subTitleFont))
-	{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &title, &subtitle, &soundEdid, &queuePriority, &justification, &titleFont, &subTitleFont)) {
 		if (justification > kJustifyRight) justification = kJustifyRight;
 
 		if (queuePriority == kPriorityClearQueueShowNow) CdeclCall(0x77F500); // HUDMainMenu::HideQuestLocationText
@@ -111,12 +104,9 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 	TESForm* form = NULL;
 	char newPath[MAX_PATH];
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPath, &isFemale, &form))
-	{
-
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPath, &isFemale, &form)) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
-		if (bipedModel)
-		{
+		if (bipedModel) {
 			bipedModel->icon[isFemale].ddsPath.Set(newPath);
 			*result = 1;
 		}
@@ -161,21 +151,17 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	TESObjectREFR* form;
 	char iconPath[MAX_PATH];
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || (!IS_TYPE(form, BGSListForm) && (!form->GetIsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)))) return true;
-	if (IS_TYPE(form, BGSListForm))
-	{
+	if (IS_TYPE(form, BGSListForm)) {
 		ListNode<TESForm>* iterator = ((BGSListForm*)form)->list.Head();
-		while (iterator)
-		{
+		while (iterator) {
 			TESObjectREFR* ref = (TESObjectREFR*)(iterator->data);
-			if (ref->GetIsReference() && ref->IsMapMarker() && GetExtraType(ref->extraDataList, MapMarker))
-			{
+			if (ref->GetIsReference() && ref->IsMapMarker() && GetExtraType(ref->extraDataList, MapMarker)) {
 				SetCustomMapMarker(ref, iconPath);
 			}
 			iterator = iterator->next;
 		}
 	}
-	else
-	{
+	else {
 		SetCustomMapMarker(form, iconPath);
 	}
 	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->refID, iconPath);

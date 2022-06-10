@@ -46,7 +46,6 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
 bool Cmd_RemoveNavmeshObstacle_Execute(COMMAND_ARGS) {
-
 	*result = 0;
 	NavMeshObstacleManager* g_nomgr = ThisStdCall<NavMeshObstacleManager*>(0x6C0720, nullptr);
 	ThisStdCall<void>(0x6C0C80, g_nomgr, thisObj);
@@ -55,7 +54,6 @@ bool Cmd_RemoveNavmeshObstacle_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_AddNavmeshObstacle_Execute(COMMAND_ARGS) {
-
 	*result = 0;
 	NavMeshObstacleManager* g_nomgr = ThisStdCall<NavMeshObstacleManager*>(0x6C0720, nullptr);
 	ThisStdCall<void>(0x6C0C30, g_nomgr, thisObj);
@@ -67,8 +65,7 @@ bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 	TESSound* sound = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound) && IS_TYPE(sound, TESSound)) {
 		BSGameSound* gameSound;
-		for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter)
-		{
+		for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 			gameSound = sndIter.Get();
 			if (!gameSound || (gameSound->sourceSound != sound))
 				continue;
@@ -81,15 +78,13 @@ bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-
 bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ListNode<BSTempEffect>* iter = g_processManager->tempEffects.Head();
 	MagicShaderHitEffect* effect;
 	NVSEArrayVar* effArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 
-	do
-	{
+	do {
 		effect = (MagicShaderHitEffect*)iter->data;
 		if (effect && IS_TYPE(effect, MagicShaderHitEffect) && effect->flags != 1 && effect->target && effect->target->refID == thisObj->refID) {
 			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effect->effectShader));
@@ -144,8 +139,7 @@ bool IsCombatTarget(Actor* source, Actor* toSearch) {
 		Actor** actorsArr = source->combatTargets->data;
 		UInt32 count = source->combatTargets->size;
 		if (!actorsArr) return false;
-		for (; count; count--, actorsArr++)
-		{
+		for (; count; count--, actorsArr++) {
 			if (*actorsArr == toSearch) return true;
 		}
 	}
@@ -154,8 +148,7 @@ bool IsCombatTarget(Actor* source, Actor* toSearch) {
 
 bool IsHostileCompassTarget(Actor* toSearch) {
 	auto iter = g_thePlayer->compassTargets->Begin();
-	for (; !iter.End(); ++iter)
-	{
+	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile && target->target == toSearch) return true;
 	}
@@ -176,7 +169,7 @@ bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ExtraOwnership* xOwn = ThisStdCall<ExtraOwnership*>(0x567790, thisObj); // TESObjectREFR::ResolveOwnership
 	if (xOwn) {
-		ThisStdCall(0x8C0EC0, g_thePlayer, thisObj, xOwn, 0xFFFFFFFF); //TESObjectREFR::HandleMinorCrime 
+		ThisStdCall(0x8C0EC0, g_thePlayer, thisObj, xOwn, 0xFFFFFFFF); //TESObjectREFR::HandleMinorCrime
 		*result = 1;
 	}
 	return true;
@@ -186,13 +179,12 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	UInt32 skipInvisible = 0;
 
 	//If player has ImprovedDetection perk effect, then they'll see invisible actors in compass.
-	UInt32 accountForImprovedDetection = 0;  
+	UInt32 accountForImprovedDetection = 0;
 
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible, &accountForImprovedDetection);
 
 	bool hasImprovedDetection = false;
-	if (accountForImprovedDetection)
-	{
+	if (accountForImprovedDetection) {
 		float hasPerk = 0.0; //copying code at 0x77A0C4
 		ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, g_thePlayer, &hasPerk);
 		if (hasPerk > 0.0)
@@ -201,14 +193,11 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 
 	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	auto iter = g_thePlayer->compassTargets->Begin();
-	for (; !iter.End(); ++iter)
-	{
+	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
-		if (target->isHostile)
-		{
+		if (target->isHostile) {
 			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0
-				|| target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) 
-			{
+				|| target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
@@ -218,13 +207,11 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
-{
+bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 	TESObjectREFR* container;
 	int checkItems = 0;
 	*result = 0;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems))
-	{
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems)) {
 		if (checkItems) {
 			TESForm* containerOwner = ThisStdCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
 			if (!containerOwner) return true;
@@ -234,13 +221,11 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
 			ListNode<ContChangesEntry>* contChangesIter = xChanges->data->objList->Head();
 			ContChangesEntry* entry;
 			TESForm* item;
-			do
-			{
+			do {
 				if (!(entry = contChangesIter->data) || !entry->extendData || !entry->type) continue;
 				ListNode<ExtraDataList>* xdlIter = entry->extendData->Head();
 				ExtraDataList* xData;
-				do
-				{
+				do {
 					xData = xdlIter->data;
 					if (xData && xData->HasType(kExtraData_Ownership)) {
 						ExtraOwnership* xOwn = (ExtraOwnership*)xData->GetByType(kExtraData_Ownership);
@@ -257,7 +242,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS)
 		}
 		else {
 			TESForm* owner = ThisStdCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
-			ThisStdCall(0x8BFA40, thisObj, container, NULL, NULL, 1, owner); // Actor::HandleStealing, 
+			ThisStdCall(0x8BFA40, thisObj, container, NULL, NULL, 1, owner); // Actor::HandleStealing,
 			*result = 1;
 		}
 	}
@@ -285,7 +270,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 		GameSettingCollection::GetSingleton()->GetGameSetting("fNPCMaxGunWobbleAngle", &fNPCMaxGunWobbleAngle);
 
 		totalSpread += spreadPenalty * fNPCMaxGunWobbleAngle->data.f * 0.01745329238474369;
-		
+
 		float noIdea = ThisStdCall<HighProcess*>(0x8D8520, actor)->angle1D0;
 		totalSpread = totalSpread + noIdea;
 
@@ -299,16 +284,13 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-
-bool __fastcall ValidTempEffect(EffectItem* effectItem)
-{
+bool __fastcall ValidTempEffect(EffectItem* effectItem) {
 	if (!effectItem || (effectItem->duration <= 0) || !effectItem->setting) return false;
 	UInt8 archtype = effectItem->setting->archtype;
 	return !archtype || ((archtype == 1) && (effectItem->setting->effectFlags & 0x2000)) || ((archtype > 10) && (archtype < 14)) || (archtype == 24) || (archtype > 33);
 }
 
-bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS)
-{
+bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 index;
 	float modTimeLeft;
@@ -317,13 +299,11 @@ bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS)
 	if (!effList) return true;
 	ListNode<ActiveEffect>* iter = effList->Head();
 	ActiveEffect* activeEff;
-	do
-	{
+	do {
 		activeEff = iter->data;
 		if (!activeEff || !activeEff->bApplied || !ValidTempEffect(activeEff->effectItem) || !activeEff->magicItem ||
 			!DYNAMIC_CAST(activeEff->magicItem, MagicItem, TESForm)) continue;
-		if (!index--)
-		{
+		if (!index--) {
 			activeEff->timeElapsed += -modTimeLeft;
 			if (activeEff->timeElapsed > activeEff->duration) activeEff->Remove(true);
 			*result = 1;
@@ -354,11 +334,9 @@ bool Cmd_IsCompassHostile_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* toCheck = (Actor*)thisObj;
 	auto iter = g_thePlayer->compassTargets->Begin();
-	for (; !iter.End(); ++iter)
-	{
+	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
-		if (target->isHostile && target->target == toCheck)
-		{
+		if (target->isHostile && target->target == toCheck) {
 			*result = 1;
 			break;
 		}
@@ -366,28 +344,23 @@ bool Cmd_IsCompassHostile_Execute(COMMAND_ARGS) {
 	if (IsConsoleMode()) Console_Print("IsCompassHostile >> %.f", *result);
 	return true;
 }
-void RestoreDisabledPlayerControlsHUDFlags()
-{
+void RestoreDisabledPlayerControlsHUDFlags() {
 	SafeWrite32(0x771A53, HUDMainMenu::kXpMeter | HUDMainMenu::kSubtitles | HUDMainMenu::kMessages | HUDMainMenu::kQuestReminder | HUDMainMenu::kRadiationMeter);
 }
 
-bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
 	UInt32 flags;
-	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &flags))
-	{
+	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &flags)) {
 		SafeWrite32(0x771A53, flags);
 		HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
 	}
-	else
-	{
+	else {
 		RestoreDisabledPlayerControlsHUDFlags();
 	}
 
 	return true;
 }
-bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	*result = -1;
 
 	NiPoint3* playerPos = g_thePlayer->GetPos();
@@ -402,17 +375,14 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS)
 	UInt32 skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
 	auto iter = g_thePlayer->compassTargets->Begin();
-	for (; !iter.End(); ++iter)
-	{
+	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
-		if (target->isHostile)
-		{
+		if (target->isHostile) {
 			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
-			if (distToPlayer < maxDist)
-			{
+			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
 				closestHostile = target->target;
 			}
@@ -423,8 +393,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS)
 
 	return true;
 }
-bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	*result = -1;
 
 	NiPoint3* playerPos = g_thePlayer->GetPos();
@@ -437,25 +406,21 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
 	UInt32 skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
 	auto iter = g_thePlayer->compassTargets->Begin();
-	for (; !iter.End(); ++iter)
-	{
+	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
-		if (target->isHostile)
-		{
+		if (target->isHostile) {
 			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
-			if (distToPlayer < maxDist)
-			{
+			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
 				closestHostile = target->target;
 			}
 		}
 	}
 
-	if (closestHostile)
-	{
+	if (closestHostile) {
 		auto playerRotation = g_thePlayer->AdjustRot(0);
 		double headingAngle = GetAngleBetweenPoints(closestHostile->GetPos(), playerPos, playerRotation);
 
@@ -469,13 +434,11 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS)
 
 	return true;
 }
-bool Cmd_HighlightBodyPartAlt_Execute(COMMAND_ARGS)
-{
+bool Cmd_HighlightBodyPartAlt_Execute(COMMAND_ARGS) {
 	return Cmd_HighLightBodyPart(PASS_COMMAND_ARGS);
 }
 
-bool Cmd_DeactivateAllHighlightsAlt_Execute(COMMAND_ARGS)
-{
+bool Cmd_DeactivateAllHighlightsAlt_Execute(COMMAND_ARGS) {
 	return Cmd_DeactivateAllHighlights(PASS_COMMAND_ARGS);
 }
 
@@ -498,21 +461,16 @@ bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
 	if (IsConsoleMode()) Console_Print("GetRunSpeed >> %.2f", *result);
 	return true;
 }
-bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS)
-{
+bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
 	UInt32 index, isVisible;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &index, &isVisible) && index < 3)
-	{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &index, &isVisible) && index < 3) {
 		FOPipboyManager* pipboyManager = g_interfaceManager->pipboyManager;
-		if (pipboyManager->byte028)
-		{
-			if (isVisible)
-			{
+		if (pipboyManager->byte028) {
+			if (isVisible) {
 				pipboyManager->pipboyLightGlow[index]->m_flags &= ~1;
 			}
-			else
-			{
+			else {
 				pipboyManager->pipboyLightGlow[index]->m_flags |= 1;
 			}
 			*result = 1;
@@ -520,12 +478,10 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
-bool Cmd_UnsetAV_Execute(COMMAND_ARGS)
-{
+bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 avCode;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode))
-	{
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode)) {
 		Actor* actor = (Actor*)thisObj;
 		ActorValueOwner* avOwner = &actor->avOwner;
 		float oldVal = avOwner->GetActorValue(avCode);
@@ -535,11 +491,9 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS)
 		ThisStdCall(0x937400, actorPermSetAVList, avEntry);
 		thisObj->MarkAsModified(0x400000);
 
-		if (!actor->IsPlayerRef())
-		{
+		if (!actor->IsPlayerRef()) {
 			BaseProcess* base = actor->baseProcess;
-			if (base)
-			{
+			if (base) {
 				base->Unk_EC(avCode);
 			}
 		}
@@ -552,12 +506,10 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_UnforceAV_Execute(COMMAND_ARGS)
-{
+bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 	UInt32 avCode;
 	*result = 0;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode))
-	{
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode)) {
 		Actor* actor = (Actor*)thisObj;
 		ActorValueOwner* avOwner = &actor->avOwner;
 		float oldVal = avOwner->GetActorValue(avCode);
@@ -567,11 +519,9 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS)
 		ThisStdCall(0x937400, actorPermForceAVList, avEntry);
 		thisObj->MarkAsModified(0x800000);
 
-		if (!actor->IsPlayerRef())
-		{
+		if (!actor->IsPlayerRef()) {
 			BaseProcess* base = actor->baseProcess;
-			if (base)
-			{
+			if (base) {
 				base->Unk_EC(avCode);
 			}
 		}
@@ -589,19 +539,15 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 	TESObjectREFR* source;
 	BSFadeNode* fadeNode;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source))
-	{
-		if (soundForm->soundFile.path.m_dataLen)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source)) {
+		if (soundForm->soundFile.path.m_dataLen) {
 			const char* soundPath = soundForm->soundFile.path.m_data;
 			BSGameSound* gameSound;
-			for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter)
-			{
+			for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 				gameSound = sndIter.Get();
 				if (gameSound && StrBeginsCI(gameSound->filePath + 0xB, soundPath)) {
 					fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
-					if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == source)
-					{
+					if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == source) {
 						gameSound->stateFlags &= 0xFFFFFF0F;
 						gameSound->stateFlags |= 0x10;
 						*result = 1;
@@ -638,8 +584,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 		}
 		else {
 			ContChangesEntry* wpnInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo();
-			if (wpnInfo && wpnInfo->extendData)
-			{
+			if (wpnInfo && wpnInfo->extendData) {
 				weapon = ((TESObjectWEAP*)wpnInfo->type);
 				xData = wpnInfo->extendData->GetFirstItem();
 			}
@@ -647,8 +592,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 		if (weapon) {
 			UInt32 weaponSkill = weapon->weaponSkill;
 			if (weaponSkill != kAVCode_Unarmed && weaponSkill != kAVCode_MeleeWeapons) return true;
-			if (xData)
-			{
+			if (xData) {
 				ExtraPoison* xPoison = GetExtraType((*xData), Poison);
 				if (!xPoison) {
 					ThisStdCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
@@ -668,7 +612,8 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 		if (g_interfaceManager) {
 			if (!g_interfaceManager->pipBoyMode) {
 				ThisStdCall(0x70F4E0, g_interfaceManager, 0, pipboyTab);
-			} else if (g_interfaceManager->pipBoyMode == 3) {
+			}
+			else if (g_interfaceManager->pipBoyMode == 3) {
 				ThisStdCall(0x70F690, g_interfaceManager, 0);
 			}
 			*result = 1;
@@ -677,8 +622,7 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS)
-{
+bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS) {
 	UInt32 ToExtract;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &ToExtract)) isShowLevelUp = ToExtract;
 	return true;
@@ -690,8 +634,7 @@ bool Cmd_Jump_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_StopVATSCam_Execute(COMMAND_ARGS)
-{
+bool Cmd_StopVATSCam_Execute(COMMAND_ARGS) {
 	ThisStdCall(0x93E770, g_thePlayer, 2, 0);
 	return true;
 }
@@ -715,19 +658,15 @@ bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
 	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %.f", *result);
 	return true;
 }
-bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS)
-{
+bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 	int doDisable = 1;
 	BYTE modIdx = scriptObj->GetModIndex();
 	*result = 0;
-	if (modIdx < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &doDisable))
-	{
-		if (doDisable)
-		{
+	if (modIdx < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &doDisable)) {
+		if (doDisable) {
 			SaveGameUMap.insert(modIdx);
 		}
-		else
-		{
+		else {
 			SaveGameUMap.erase(modIdx);
 		}
 		*result = 1;
