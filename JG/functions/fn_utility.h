@@ -66,9 +66,6 @@ bool Cmd_DumpINI_Execute(COMMAND_ARGS) {
 	std::ofstream csv;
 	csv.open("settings.csv");
 	Setting* setting;
-	int value;
-	float fvalue;
-	const char* cvalue;
 	csv << "fallout.ini" << std::endl;
 	ListNode<Setting>* istIter = ini->settings.Head();
 	do {

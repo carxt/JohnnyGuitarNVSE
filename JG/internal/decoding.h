@@ -2677,7 +2677,7 @@ public:
 	float fltE8;
 	UInt8 bytEC;
 };
-STATIC_ASSERT(sizeof(FORenderedTerminal), 0x70);
+//STATIC_ASSERT(sizeof(FORenderedTerminal) == 0x70); FIXME
 
 class FOPipboyManager : public FORenderedMenu {
 public:
@@ -3509,7 +3509,7 @@ class NavMeshObstacleManager {
 	UInt8 backgroundThreadPerformanceTimer;
 	UInt8 gap1A2[2];
 };
-STATIC_ASSERT(sizeof(NavMeshObstacleManager), 0x1A4);
+STATIC_ASSERT(sizeof(NavMeshObstacleManager) == 0x1A4);
 
 class BSArchiveHeader {
 public:

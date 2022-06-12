@@ -208,21 +208,21 @@ bool __fastcall FleeFixHook(PlayerCharacter* Player, void* unused, bool& IsHidde
 	return (GetPlayerInCombat(Player, IsHidden) && !IsHidden);
 }
 
-char** DefaultMarkers = (char**)0x11A0404;
+char** defaultMarkerList = (char**)0x11A0404;
 
-char* __fastcall hk_GetMapMarker(TESObjectREFR* thisObj, UInt16 MapMarkerType) {
+char* __fastcall GetMapMarker(TESObjectREFR* thisObj, UInt16 mapMarkerType) {
 	auto it = markerIconMap.find(thisObj->refID);
 	if (it != markerIconMap.end()) return it->second;
-	return DefaultMarkers[MapMarkerType];
+	return defaultMarkerList[mapMarkerType];
 }
 
-__declspec (naked) void AsmGetMapMarkerRoute() {
+__declspec (naked) void GetMapMarkerHook() {
 	//UInt32 static const retAddr = 0x079D337;
 	__asm
 	{
 		mov edx, eax
 		mov ecx, [ebp - 0x24]
-		jmp hk_GetMapMarker
+		jmp GetMapMarker
 	}
 }
 
@@ -375,7 +375,7 @@ __declspec(naked) void NPCIncrementingChallengesHook() {
 			jmp retnAddr
 	}
 }
-void __fastcall PlayQuestFailSound(Sound* sound, int dummy) {
+void __fastcall UIUpdateSoundHook(Sound* sound, int dummy) {
 	tList<QuestUpdateManager>* g_questUpdateManager = (tList <QuestUpdateManager>*)0x11D970C;
 	if (g_questUpdateManager) {
 		ListNode<QuestUpdateManager>* iter = g_questUpdateManager->Head();
@@ -406,7 +406,7 @@ void ResetVanityWheel() {
 		*VanityWheel = *MaxChaseCam;
 }
 
-__declspec (naked) void hk_VanityModeBug() {
+__declspec (naked) void VanityModeHook() {
 	static uintptr_t jmpDest = 0x942D43;
 	static uintptr_t getGS = 0x403E20;
 	__asm
@@ -416,7 +416,7 @@ __declspec (naked) void hk_VanityModeBug() {
 		jmp jmpDest
 	}
 }
-bool __fastcall ShouldPlayCombatMusic(UInt32* a1) {
+bool __fastcall CombatMusicHook(UInt32* a1) {
 	if (bCombatMusicDisabled) return false;
 	return ThisStdCall_B(0x992D90, a1);
 }
@@ -452,7 +452,7 @@ void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseEx
 	ThisStdCall(0x954610, a1, a2, a3, itemCount, a5, a6);
 }
 
-void __fastcall TESRegionDataSoundLoadIncidentalID(ModInfo* info, void* edx, UInt32* refID) {
+void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, UInt32* refID) {
 	ThisStdCall(0x4727F0, info, refID);
 	if (*refID) {
 		CdeclCall(0x485D50, refID, info);
@@ -562,12 +562,12 @@ void HandleGameHooks() {
 	SafeWriteBuf(0x8BFBC1, "\x85\xC9\x74\x36\x80\x79\x04", 7);
 
 	// fix for incidental sounds not working in regions
-	WriteRelCall(0x4F49AB, UInt32(TESRegionDataSoundLoadIncidentalID));
+	WriteRelCall(0x4F49AB, UInt32(TESRegionDataSoundIncidentalIDHook));
 
 	// INI OPTIONS
 
 	// for bReset3rdPersonCamera
-	if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)hk_VanityModeBug);
+	if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)VanityModeHook);
 
 	// for bFixFleeing
 	if (fixFleeing) WriteRelCall(0x8F5FE2, (UInt32)FleeFixHook);
@@ -615,16 +615,16 @@ void HandleGameHooks() {
 
 	// SetCustomMapMarkerIcon
 	SafeWrite16(0x79D330, 0x9090);
-	WriteRelCall(0x79D332, (UInt32)AsmGetMapMarkerRoute);
+	WriteRelCall(0x79D332, (UInt32)GetMapMarkerHook);
 
 	// DisableMenuArrowKeys
 	WriteRelJump(0x70F708, (UInt32)DisableArrowKeysHook);
 
 	// SetUIUpdateSound
-	WriteRelCall(0x77A8E9, (UInt32)PlayQuestFailSound);
+	WriteRelCall(0x77A8E9, (UInt32)UIUpdateSoundHook);
 
 	// DisableCombatMusic
-	WriteRelCall(0x82FC0B, (UInt32)ShouldPlayCombatMusic);
+	WriteRelCall(0x82FC0B, (UInt32)CombatMusicHook);
 
 	// ToggleDisableSaves
 	g_canSaveNowAddr = (*(UInt32*)0x0850443) + 5 + 0x0850442;

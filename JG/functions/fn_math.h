@@ -18,7 +18,7 @@ DEFINE_COMMAND_PLUGIN(GetRGBColor, , 0, 3, kParams_ThreeInts);
 bool Cmd_GetRGBColor_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 r, g, b;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &r, &g, &b) && r <= 255 && g <= 255 & b <= 255) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &r, &g, &b) && r <= 255 && g <= 255 && b <= 255) {
 		*result = ((r & 0xFF) << 16) + ((g & 0xFF) << 8) + (b & 0xFF);
 		if (IsConsoleMode()) Console_Print("0x%X", (UInt32)*result);
 	}

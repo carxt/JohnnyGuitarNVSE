@@ -437,6 +437,8 @@ TESModelTextureSwap* GetArmorModel(TESObjectARMO* armor, UInt32 id) {
 			return &armor->bipedModel.groundModel[0]; // male world
 		case 4:
 			return &armor->bipedModel.groundModel[1]; //female world
+		default:
+			return nullptr;
 	}
 }
 bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {

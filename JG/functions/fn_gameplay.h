@@ -220,7 +220,6 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 				return true;
 			ListNode<ContChangesEntry>* contChangesIter = xChanges->data->objList->Head();
 			ContChangesEntry* entry;
-			TESForm* item;
 			do {
 				if (!(entry = contChangesIter->data) || !entry->extendData || !entry->type) continue;
 				ListNode<ExtraDataList>* xdlIter = entry->extendData->Head();
