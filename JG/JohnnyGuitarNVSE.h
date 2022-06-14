@@ -525,7 +525,9 @@ __declspec (naked) void FixStimpakHotkeyPipboyCrash() {
 	__asm {
 		xor eax, eax
 		test ecx, ecx
-		cmovnz eax, dword ptr ds:[ecx+8]
+		jz doneLabel
+		mov eax, dword ptr ds : [ecx+0x8]
+		doneLabel:
 		ret
 	}
 }
