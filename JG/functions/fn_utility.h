@@ -2,12 +2,12 @@
 // Utility or miscellaneous functions
 #include <iostream>
 #include <fstream>
-DEFINE_COMMAND_PLUGIN(GetEditorID, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(GetEditorID, FormIDToEditorID, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetJohnnyPatch, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(RefAddr, , 0, 1, kParams_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(EditorIDToFormID, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_ALT_PLUGIN(EditorIDToFormID, GetFormID, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParams_FourStrings);
 DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, NULL);
