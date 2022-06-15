@@ -37,13 +37,27 @@ DEFINE_COMMAND_PLUGIN(GetPlayingEffectShaders, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(StopSoundLooping, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(AddNavmeshObstacle, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(RemoveNavmeshObstacle, , 1, 0, NULL);
-
+DEFINE_COMMAND_PLUGIN(GetLandTextureUnderFeet, , 1, 0, NULL);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+
+bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectCELL* cell = thisObj->GetParentCell();
+	if (cell->IsInterior()) return true;
+	NiPoint3* pos = thisObj->GetPos();
+	COORD_DATA coordData;
+	TESObjectLAND* landscape = ThisStdCall<TESObjectLAND*>(0x546FB0, cell); // TESObjectCELL::GetLand
+	if (!landscape) return true;
+	ThisStdCall<void>(0x53B550, landscape, &coordData, pos, 1); // TESObjectLAND::GetCoordData
+	TESLandTexture* txt = ThisStdCall<TESLandTexture*>(0x53A630, landscape, coordData.iBlock, coordData.iVertidx); // TESObjectLAND::GetMainTexture
+	if (txt) *(UInt32*)result = txt->refID;
+	return true;
+}
 
 bool Cmd_RemoveNavmeshObstacle_Execute(COMMAND_ARGS) {
 	*result = 0;

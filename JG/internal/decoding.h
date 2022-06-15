@@ -4035,3 +4035,26 @@ public:
 	UInt32 count;
 };
 STATIC_ASSERT(sizeof(TESCaravanDeck) == 0x2C);
+
+struct NiPoint2 {
+	float x;
+	float y;
+	NiPoint2() : x(0.f), y(0.f) {};
+};
+
+struct COORD_DATA {
+	COORD_DATA() : Blockpoint(), Cellpoint(), Vertcoord() {};
+
+	NiPoint2 Cellpoint;
+	NiPoint2 Blockpoint;
+	tagPOINT Block;
+	int iBlock;
+	NiPoint2 Tilepoint;
+	tagPOINT Tile;
+	int iShape;
+	NiPoint3 Vertcoord;
+	int iVertidx;
+	int iTrivertidx[3];
+	bool bTriright;
+	bool bTriupper;
+};
