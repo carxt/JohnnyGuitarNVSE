@@ -78,9 +78,32 @@ DEFINE_COMMAND_PLUGIN(SetArmorAltTexture, , 0, 4, kParams_OneForm_TwoInts_OneFor
 DEFINE_COMMAND_PLUGIN(SetWeaponAltTexture, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(ClearArmorAltTexture, , 0, 3, kParams_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(ClearWeaponAltTexture, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetFactionFlags, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetFactionFlags, , 0, 2, kParams_OneForm_OneInt);
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+bool Cmd_SetFactionFlags_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESFaction* faction = nullptr;
+	UInt32 flags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction, &flags) && IS_TYPE(faction, TESFaction)) {
+		faction->factionFlags = flags;
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetFactionFlags_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESFaction* faction = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction) && IS_TYPE(faction, TESFaction)) {
+		*result = faction->factionFlags;
+		if (IsConsoleMode()) Console_Print("GetFactionFlags >> %.f", *result);
+	}
+	return true;
+}
 
 bool Cmd_RemoveScopeModelPath_Execute(COMMAND_ARGS) {
 	TESObjectWEAP* weapon = NULL;

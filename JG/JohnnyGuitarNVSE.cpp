@@ -374,6 +374,8 @@ extern "C" {
 		REG_CMD(AddNavmeshObstacle);
 		REG_CMD(RemoveNavmeshObstacle);
 		REG_CMD(RollCredits);
+		REG_CMD(GetFactionFlags);
+		REG_CMD(SetFactionFlags);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
