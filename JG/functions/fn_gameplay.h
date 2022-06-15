@@ -48,7 +48,7 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* cell = thisObj->GetParentCell();
-	if (cell->IsInterior()) return true;
+	if (!cell || cell->IsInterior()) return true;
 	NiPoint3* pos = thisObj->GetPos();
 	COORD_DATA coordData;
 	TESObjectLAND* landscape = ThisStdCall<TESObjectLAND*>(0x546FB0, cell); // TESObjectCELL::GetLand
