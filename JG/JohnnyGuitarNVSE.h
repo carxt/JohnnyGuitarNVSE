@@ -519,6 +519,18 @@ void __fastcall MenuSetFlagHook(StartMenu* menu, UInt32 flags, bool doSet) {
 		}
 	}
 }
+
+
+__declspec (naked) void FixStimpakHotkeyPipboyCrash() {
+	__asm {
+		xor eax, eax
+		test ecx, ecx
+		jz doneLabel
+		mov eax, dword ptr ds : [ecx+0x8]
+		doneLabel:
+		ret
+	}
+}
 void HandleGameHooks() {
 	// FIXES
 
@@ -635,4 +647,6 @@ void HandleGameHooks() {
 	// for SetCustomReputationChangeIcon
 	WriteRelCall(0x6156A2, UInt32(GetReputationIconHook));
 	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
+	// to fix the stupid stimpak crash
+	WriteRelCall(0x7DB525, (uintptr_t)FixStimpakHotkeyPipboyCrash);
 }
