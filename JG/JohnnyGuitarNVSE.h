@@ -530,9 +530,7 @@ __declspec (naked) void StimpakHotkeyHook() {
 		ret
 	}
 }
-void HandleGameHooks() {
-	// FIXES
-
+void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
 
@@ -577,9 +575,9 @@ void HandleGameHooks() {
 
 	// fix for the stimpak crash
 	WriteRelCall(0x7DB525, (uintptr_t)StimpakHotkeyHook);
+}
 
-	// INI OPTIONS
-
+void HandleIniOptions() {
 	// for bReset3rdPersonCamera
 	if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)VanityModeHook);
 
@@ -615,9 +613,9 @@ void HandleGameHooks() {
 
 	// for bRemoveMainMenuMusic
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
+}
 
-	// FUNCTION PATCHES
-
+void HandleFunctionPatches() {
 	// WorldToScreen
 	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
 
@@ -649,4 +647,10 @@ void HandleGameHooks() {
 	// for SetCustomReputationChangeIcon
 	WriteRelCall(0x6156A2, UInt32(GetReputationIconHook));
 	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
+}
+
+void HandleGameHooks() {
+	HandleFixes();
+	HandleIniOptions();
+	HandleFunctionPatches();
 }
