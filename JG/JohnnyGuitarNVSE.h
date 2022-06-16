@@ -575,6 +575,8 @@ void HandleFixes() {
 
 	// fix for the stimpak crash
 	WriteRelCall(0x7DB525, (uintptr_t)StimpakHotkeyHook);
+	// Fix crash caused by wrong check inside AddSequence (thanks Stewie!)
+	SafeWrite8(0xA2F0CB, 0x3A);
 }
 
 void HandleIniOptions() {
