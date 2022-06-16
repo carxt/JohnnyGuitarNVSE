@@ -577,6 +577,8 @@ void HandleFixes() {
 	WriteRelCall(0x7DB525, (uintptr_t)StimpakHotkeyHook);
 	// Fix crash caused by wrong check inside AddSequence (thanks Stewie!)
 	SafeWrite8(0xA2F0CB, 0x3A);
+	//And also fix ANOTHER crash nearby caused by ANOTHER faulty nullptr check... this removes a DebugLog, but i don't care.
+	WriteRelJump((uintptr_t)0x0490B10, (uintptr_t)0x0490B41);
 }
 
 void HandleIniOptions() {
