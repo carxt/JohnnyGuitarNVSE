@@ -465,7 +465,7 @@ float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) {
 	bool isTalking = !(actor->unk80 & 1) || ThisStdCall<bool>(0x8A67F0, actor);
 	if (isTalking) {
 		if (dyingTimer <= dyingTimerMin) { dyingTimer = dyingTimerMin; }
-		else { actor->unk80 = 0; actor->unk7C = 0; actor->unk7D = 1; }
+		else { actor->unk7C = 0; actor->unk7D = 1; }
 	}
 	return dyingTimer;
 }
