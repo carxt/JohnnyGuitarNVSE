@@ -460,9 +460,13 @@ void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, UIn
 }
 
 float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) {
+	constexpr float dyingTimerMin = 0.05; //50 ms tolerance, should be fiiine.
 	float dyingTimer = thisObj->dyingTimer;
-	bool isTalking = !(actor->unk80 & 1);
-	if (isTalking && (dyingTimer <= FLT_EPSILON)) { dyingTimer = FLT_EPSILON; }
+	bool isTalking = !(actor->unk80 & 1) || ThisStdCall<bool>(0x8A67F0, actor);
+	if (isTalking) {
+		if (dyingTimer <= dyingTimerMin) { dyingTimer = dyingTimerMin; }
+		else { actor->unk80 = 0; actor->unk7C = 0; actor->unk7D = 1; }
+	}
 	return dyingTimer;
 }
 __declspec (naked) void FixDeathSoundsHook() {
