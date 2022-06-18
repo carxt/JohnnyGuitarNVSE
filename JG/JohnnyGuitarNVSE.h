@@ -462,8 +462,8 @@ void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, UIn
 float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) {
 	constexpr float dyingTimerMin = FLT_EPSILON * 10; //Establish low tolerance, this should be ideal. Unless someone sets fDyingTimer to 0 or something, but that's their problem.
 	float dyingTimer = thisObj->dyingTimer;
-	bool isTalking = (ThisStdCall<bool>(0x8A67F0, actor) && dyingTimer > dyingTimerMin) || !(actor->unk80 & 1);
-	if (isTalking) {
+	bool isTalkingDe = (ThisStdCall<bool>(0x8A67F0, actor) && (actor->lifeState == 1)) || !(actor->unk80 & 1); //lifeState 1 is dying, just in case
+	if (isTalkingDe) {
 		if (dyingTimer <= dyingTimerMin) { dyingTimer = dyingTimerMin; }
 		else { actor->unk80 = 0; }
 	}
