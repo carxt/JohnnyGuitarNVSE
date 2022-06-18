@@ -530,6 +530,26 @@ __declspec (naked) void StimpakHotkeyHook() {
 		ret
 	}
 }
+
+__declspec (naked) void SimpleDecalHook() {
+	__asm {
+		test eax, eax
+		jz done
+		mov dword ptr[ebp - 0x128], eax
+		mov dword ptr[ebp - 0x130], 0
+		mov eax, 0x68D30C
+		jmp eax
+		done :
+		mov eax, 0x68D64B
+			jmp eax
+	}
+}
+
+bool __fastcall SaveINIHook(IniSettingCollection* a1, void* edx, char* a2) {
+	ThisStdCall<void>(0x5E01B0, a1, a2);
+	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
+	return ThisStdCall_B(0x5E01B0, rendererSettings, rendererSettings->iniPath);
+}
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
@@ -559,8 +579,10 @@ void HandleFixes() {
 	// missing nullcheck in NiMultiTargetTransformController::RemoveNodeRecurse
 	SafeWrite8(0x4F064E, 0x7A);
 
-	// fix for GetINISetting not reading renderer INI setting list
+	// fix for Get/Set/SaveINISetting not reading renderer INI setting list
 	WriteRelCall(0x5BED66, (UInt32)GetINISettingHook);
+	WriteRelCall(0x5BEF13, (UInt32)GetINISettingHook);
+	WriteRelCall(0x5B6C80, (UInt32)SaveINIHook);
 
 	// fixes for null pointers when showing credits outside of start menu
 	WriteRelCall(0x75F770, (UInt32)MenuGetFlagHook);
@@ -579,6 +601,9 @@ void HandleFixes() {
 	SafeWrite8(0xA2F0CB, 0x3A);
 	//And also fix ANOTHER crash nearby caused by ANOTHER faulty nullptr check... this removes a DebugLog, but i don't care.
 	WriteRelJump((uintptr_t)0x0490B10, (uintptr_t)0x0490B41);
+
+	// fix NPE in BSTempEffectSimpleDecal
+	WriteRelJump(0x68D2EB, (UInt32)SimpleDecalHook);
 }
 
 void HandleIniOptions() {
