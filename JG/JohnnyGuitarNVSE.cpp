@@ -145,6 +145,7 @@ extern "C" {
 		enableRadioSubtitles = GetPrivateProfileInt("MAIN", "bEnableRadioSubtitles", 0, filename);
 		removeMainMenuMusic = GetPrivateProfileInt("MAIN", "bRemoveMainMenuMusic", 0, filename);
 		fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 0, filename);
+		fDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "fDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);

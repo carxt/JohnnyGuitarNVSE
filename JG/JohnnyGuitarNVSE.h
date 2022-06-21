@@ -32,7 +32,8 @@ bool fixNPCShootingAngle = 0;
 bool noMuzzleFlashCooldown = 0;
 bool enableRadioSubtitles = 0;
 bool removeMainMenuMusic = 0;
-bool fixDeathSounds = 0;
+bool fixDeathSounds = 10;
+float fDeathSoundMAXTimer = 14;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -459,18 +460,30 @@ void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, UIn
 	}
 }
 
-float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) {
+
+
+float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh. 
+
+	return thisObj->dyingTimer + fDeathSoundMAXTimer;
+}
+
+
+
+
+float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alternate complex, confusing, potentially buggy fix. 
+
 	constexpr float dyingTimerMin = FLT_EPSILON * 10; //Establish low tolerance, this should be ideal. Unless someone sets fDyingTimer to 0 or something, but that's their problem.
 	float dyingTimer = thisObj->dyingTimer;
-	bool isTalkingDe = (ThisStdCall<bool>(0x8A67F0, actor)) || !(actor->unk80 & 1); 
-	if (isTalkingDe) {
+	bool keepTalkingDe = false;
+	keepTalkingDe = (ThisStdCall<bool>(0x8A67F0, actor)) || !(actor->unk80 & 1);
+	if (keepTalkingDe) {
 		if (dyingTimer <= dyingTimerMin) { dyingTimer = dyingTimerMin; }
 	}
 	return dyingTimer;
 }
 __declspec (naked) void FixDeathSoundsHook() {
 	__asm {
-		mov edx, dword ptr[ebp + 8]
+		mov edx, dword ptr [ebp + 8]
 		jmp FixDeathSounds
 	}
 }
@@ -523,6 +536,11 @@ void __fastcall MenuSetFlagHook(StartMenu* menu, UInt32 flags, bool doSet) {
 	}
 }
 
+bool __fastcall CanSpeakThroughHead(Actor *actor) {
+	return !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head1)) && !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head2));
+}
+
+
 __declspec (naked) void StimpakHotkeyHook() {
 	__asm {
 		xor eax, eax
@@ -545,6 +563,25 @@ __declspec (naked) void SimpleDecalHook() {
 		done :
 		mov eax, 0x68D64B
 			jmp eax
+	}
+}
+
+__declspec (naked) void NoHeadlessTalkingHook() {
+
+	__asm {
+		mov eax, dword ptr ds : [ecx + 0x68] //The original call, GetBaseProcess
+		test eax, eax
+		jz done
+		push eax
+		mov ecx, dword ptr ds : [ebp + 8]
+		call CanSpeakThroughHead
+		test al, al
+		pop eax
+		jnz done
+		xor eax, eax
+		align 0x10
+		done:
+		retn
 	}
 }
 
@@ -645,6 +682,9 @@ void HandleIniOptions() {
 
 	// for bRemoveMainMenuMusic
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
+	//Patch the game so the dialog subroutine stops if the actor's head is blown off, I'll add it as an ini setting later. 
+	WriteRelCall(0x8EC54D, (uintptr_t) NoHeadlessTalkingHook);
+
 }
 
 void HandleFunctionPatches() {
