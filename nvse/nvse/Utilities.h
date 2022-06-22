@@ -2,8 +2,8 @@
 
 class Script;
 
-void DumpClass(void * theClassPtr, UInt32 nIntsToDump = 512);
-const char * GetObjectClassName(void * obj);
+void DumpClass(void* theClassPtr, UInt32 nIntsToDump = 512);
+const char* GetObjectClassName(void* obj);
 //const std::string & GetFalloutDirectory(void);
 //std::string GetNVSEConfigOption(const char * section, const char * key);
 //bool GetNVSEConfigOption_UInt32(const char * section, const char * key, UInt32 * dataOut);
@@ -36,7 +36,6 @@ const char * GetObjectClassName(void * obj);
 #define CALL_MEMBER_FN(obj, fn)	\
 	((*(obj)).*(*((obj)->_##fn##_GetPtr())))
 
-
 // ConsolePrint() limited to 512 chars; use this to print longer strings to console
 //void Console_Print_Long(const std::string& str);
 
@@ -61,15 +60,12 @@ const char * GetObjectClassName(void * obj);
 
 class TESForm;
 
-class FormMatcher
-{
+class FormMatcher {
 public:
 	virtual bool Matches(TESForm* pForm) const = 0;
 };
 
-namespace MersenneTwister
-{
-
+namespace MersenneTwister {
 	/* initializes mt[N] with a seed */
 	void init_genrand(unsigned long s);
 
@@ -93,7 +89,6 @@ namespace MersenneTwister
 
 	/* generates a random number on [0,1) with 53-bit resolution*/
 	double genrand_res53(void);
-
 };
 
 // alternative to strtok; doesn't modify src string, supports forward/backward iteration
@@ -115,12 +110,12 @@ namespace MersenneTwister
 
 #if RUNTIME
 
-const char GetSeparatorChar(Script * script);
-const char * GetSeparatorChars(Script * script);
+const char GetSeparatorChar(Script* script);
+const char* GetSeparatorChars(Script* script);
 
 #endif
 
-const char * GetDXDescription(UInt32 keycode);
+const char* GetDXDescription(UInt32 keycode);
 
 //bool ci_equal(char ch1, char ch2);
 //bool ci_less(const char* lh, const char* rh);
@@ -134,19 +129,17 @@ char* CopyCString(const char* src);
 
 // Generic error/warning output
 // provides a common way to output errors and warnings
-class ErrOutput
-{
-	typedef void (* _ShowError)(const char* msg);
-	typedef bool (* _ShowWarning)(const char* msg);		// returns true if user requests to disable warning
+class ErrOutput {
+	typedef void (*_ShowError)(const char* msg);
+	typedef bool (*_ShowWarning)(const char* msg);		// returns true if user requests to disable warning
 
 	_ShowError		ShowError;
 	_ShowWarning	ShowWarning;
 public:
 	ErrOutput(_ShowError errorFunc, _ShowWarning warningFunc);
 
-	struct Message
-	{
-		const char*		fmt;
+	struct Message {
+		const char* fmt;
 		bool			bCanDisable;
 		bool			bDisabled;
 	};
@@ -160,8 +153,7 @@ public:
 // thread-safe template versions of ThisStdCall()
 
 template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret ThisStdCall(UInt32 _addr, void* _this, Args ...args)
-{
+__forceinline T_Ret ThisStdCall(UInt32 _addr, void* _this, Args ...args) {
 	class T {};
 	union {
 		UInt32  addr;
@@ -170,56 +162,48 @@ __forceinline T_Ret ThisStdCall(UInt32 _addr, void* _this, Args ...args)
 	return ((T*)_this->*u.func)(std::forward<Args>(args)...);
 }
 template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret StdCall(UInt32 _addr, Args ...args)
-{
+__forceinline T_Ret StdCall(UInt32 _addr, Args ...args) {
 	return ((T_Ret(__stdcall*)(Args...))_addr)(std::forward<Args>(args)...);
 }
 
 template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret CdeclCall(UInt32 _addr, Args ...args)
-{
+__forceinline T_Ret CdeclCall(UInt32 _addr, Args ...args) {
 	return ((T_Ret(__cdecl*)(Args...))_addr)(std::forward<Args>(args)...);
 }
 //	Templates for UInt8 return.
 
-__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t)
-{
-	class T {}; union { UInt32 x; UInt8 (T::*m)(); } u = { _f };
+__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t) {
+	class T {}; union { UInt32 x; UInt8(T::* m)(); } u = { _f };
 	return ((T*)_t->*u.m)();
 }
 
 template <typename T1>
-__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1)
-{
-	class T {}; union { UInt32 x; UInt8 (T::*m)(T1); } u = { _f };
+__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1) {
+	class T {}; union { UInt32 x; UInt8(T::* m)(T1); } u = { _f };
 	return ((T*)_t->*u.m)(a1);
 }
 
 template <typename T1, typename T2>
-__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1, T2 a2)
-{
-	class T {}; union { UInt32 x; UInt8 (T::*m)(T1, T2); } u = { _f };
+__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1, T2 a2) {
+	class T {}; union { UInt32 x; UInt8(T::* m)(T1, T2); } u = { _f };
 	return ((T*)_t->*u.m)(a1, a2);
 }
 
 template <typename T1, typename T2, typename T3>
-__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1, T2 a2, T3 a3)
-{
-	class T {}; union { UInt32 x; UInt8 (T::*m)(T1, T2, T3); } u = { _f };
+__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1, T2 a2, T3 a3) {
+	class T {}; union { UInt32 x; UInt8(T::* m)(T1, T2, T3); } u = { _f };
 	return ((T*)_t->*u.m)(a1, a2, a3);
 }
 
 //	Templates for float return.
 
-__forceinline float ThisStdCall_F(UInt32 _f, void* _t)
-{
-	class T {}; union { UInt32 x; float (T::*m)(); } u = { _f };
+__forceinline float ThisStdCall_F(UInt32 _f, void* _t) {
+	class T {}; union { UInt32 x; float (T::* m)(); } u = { _f };
 	return ((T*)_t->*u.m)();
 }
 
 template <typename T1>
-__forceinline float ThisStdCall_F(UInt32 _f, void* _t, T1 a1)
-{
-	class T {}; union { UInt32 x; float (T::*m)(T1); } u = { _f };
+__forceinline float ThisStdCall_F(UInt32 _f, void* _t, T1 a1) {
+	class T {}; union { UInt32 x; float (T::* m)(T1); } u = { _f };
 	return ((T*)_t->*u.m)(a1);
 }

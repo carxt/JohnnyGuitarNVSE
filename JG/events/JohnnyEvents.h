@@ -12,7 +12,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, SetOnSettingsUp
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnAddPerkEventHandler, SetOnAddPerkEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , 0, 4, kParams_Event_OptionalFlag);
-DEFINE_COMMAND_PLUGIN(SetOnActorValueChangeEventHandler, , 0, 4, kParams_Event_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetOnActorValueChangeEventHandler, SetJohnnyOnActorValueChangeEventHandler, , 0, 4, kParams_Event_OneInt);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
@@ -32,33 +32,25 @@ EventInformation* OnAVChangeHandler;
 
 UInt32 handlePreRenderEvent() {
 	for (auto const& callback : OnRenderGamePreUpdateHandler->EventCallbacks) {
-
 		CallUDF(callback.ScriptForEvent, NULL, OnRenderGamePreUpdateHandler->numMaxArgs);
-
 	}
 	return CdeclCall<bool>(0x7050D0);
 }
 
-void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool isTeammatePerk)
-{
+void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool isTeammatePerk) {
 	if (!actor->GetPerkRank(perk, isTeammatePerk))
 		return;
-	for (auto const& callback : OnRemovePerkHandler->EventCallbacks)
-	{
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) 
-		{
+	for (auto const& callback : OnRemovePerkHandler->EventCallbacks) {
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) {
 			CallUDF(callback.ScriptForEvent, actor, OnRemovePerkHandler->numMaxArgs, perk);
 		}
 	}
 	actor->RemovePerk(perk, isTeammatePerk);
 }
 
-void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, UInt8 newRank, bool isTeammatePerk)
-{
-	for (auto const& callback : OnAddPerkHandler->EventCallbacks)
-	{
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) 
-		{
+void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, UInt8 newRank, bool isTeammatePerk) {
+	for (auto const& callback : OnAddPerkHandler->EventCallbacks) {
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) {
 			CallUDF(callback.ScriptForEvent, actor, OnAddPerkHandler->numMaxArgs, perk, newRank - 1, newRank);
 		}
 	}
@@ -68,8 +60,7 @@ void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, UInt8 n
 void __stdcall handleDyingEvent(Actor* thisObj) {
 	if (thisObj->IsActor() && thisObj->lifeState == 1 && (*thisObj->GetTheName() || thisObj == g_thePlayer)) {
 		for (auto const& callback : OnDyingHandler->EventCallbacks) {
-			if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) 
-			{
+			if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) {
 				CallUDF(callback.ScriptForEvent, NULL, OnDyingHandler->numMaxArgs, thisObj);
 			}
 		}
@@ -79,8 +70,7 @@ UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 	if (crosshairRef) {
 		for (auto const& callback : OnCrosshairHandler->EventCallbacks) {
 			JohnnyEventFiltersOneFormOneInt* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter);
-			if ((filter->IsInFilter(0, crosshairRef->refID) || filter->IsInFilter(0, crosshairRef->baseForm->refID)) && filter->IsInFilter(1, crosshairRef->baseForm->typeID))
-			{
+			if ((filter->IsInFilter(0, crosshairRef->refID) || filter->IsInFilter(0, crosshairRef->baseForm->refID)) && filter->IsInFilter(1, crosshairRef->baseForm->typeID)) {
 				CallUDF(callback.ScriptForEvent, NULL, OnCrosshairHandler->numMaxArgs, crosshairRef);
 			}
 		}
@@ -90,8 +80,7 @@ UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, byte dummy, int limb, byte isExplode) {
 	for (auto const& callback : OnLimbGoneHandler->EventCallbacks) {
 		if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(0, actor->refID) &&
-			reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, limb)) 
-		{
+			reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, limb)) {
 			CallUDF(callback.ScriptForEvent, NULL, OnLimbGoneHandler->numMaxArgs, actor, limb);
 		}
 	}
@@ -99,18 +88,16 @@ bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, 
 }
 void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
 	EventInformation* thisEvent = IsStarted ? OnStartQuestHandler : OnStopQuestHandler;
-		for (auto const& callback : thisEvent->EventCallbacks) {
-			if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest))
-			{
-				CallUDF(callback.ScriptForEvent, NULL, thisEvent->numMaxArgs, Quest);
-			}
+	for (auto const& callback : thisEvent->EventCallbacks) {
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) {
+			CallUDF(callback.ScriptForEvent, NULL, thisEvent->numMaxArgs, Quest);
 		}
+	}
 }
 
 void __cdecl handleQuestComplete(TESQuest* Quest) {
 	for (auto const& callback : OnCompleteQuestHandler->EventCallbacks) {
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest))
-		{
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) {
 			CallUDF(callback.ScriptForEvent, NULL, OnCompleteQuestHandler->numMaxArgs, Quest);
 		}
 	}
@@ -119,8 +106,7 @@ void __cdecl handleQuestComplete(TESQuest* Quest) {
 
 void __cdecl handleQuestFail(TESQuest* Quest) {
 	for (auto const& callback : OnFailQuestHandler->EventCallbacks) {
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) 
-		{
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) {
 			CallUDF(callback.ScriptForEvent, NULL, OnFailQuestHandler->numMaxArgs, Quest);
 		}
 	}
@@ -135,8 +121,7 @@ void __cdecl handleSettingsUpdate() {
 }
 ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
 	for (auto const& callback : OnSeenDataUpdateHandler->EventCallbacks) {
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, cell)) 
-		{
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, cell)) {
 			CallUDF(callback.ScriptForEvent, NULL, OnSeenDataUpdateHandler->numMaxArgs, cell);
 		}
 	}
@@ -144,35 +129,28 @@ ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
 }
 UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 	for (auto const& callback : OnChallengeCompleteHandler->EventCallbacks) {
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, challenge)) 
-		{
+		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, challenge)) {
 			CallUDF(callback.ScriptForEvent, NULL, OnChallengeCompleteHandler->numMaxArgs, challenge);
 		}
 	}
 	return challenge->data.type;
 }
 
-
 UInt32 __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
 	for (auto const& callback : OnRenderGameModeUpdateHandler->EventCallbacks) {
-
-			CallUDF(callback.ScriptForEvent, NULL, OnRenderGameModeUpdateHandler->numMaxArgs);
-
+		CallUDF(callback.ScriptForEvent, NULL, OnRenderGameModeUpdateHandler->numMaxArgs);
 	}
 	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
 }
 
 UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
 	for (auto const& callback : OnRenderRenderedMenuUpdateHandler->EventCallbacks) {
-
 		CallUDF(callback.ScriptForEvent, NULL, OnRenderRenderedMenuUpdateHandler->numMaxArgs);
-
 	}
 	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
 }
 
-void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal)
-{
+void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal) {
 	if (previousVal = 0.0) previousVal = g_thePlayer->avOwner.GetActorValue(avCode);
 	float newVal = previousVal + modVal;
 	for (auto const& callback : OnAVChangeHandler->EventCallbacks) {
@@ -182,8 +160,7 @@ void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal)
 	}
 }
 
-__declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32 avCode, float prevVal, float newVal, ActorValueOwner* attacker)
-{
+__declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32 avCode, float prevVal, float newVal, ActorValueOwner* attacker) {
 	__asm
 	{
 		push    ebp
@@ -223,8 +200,7 @@ __declspec(naked) void OnCrosshairEventAsm() {
 		jmp retnAddr
 	}
 }
-__declspec (naked) void OnDyingEventAsm()
-{
+__declspec (naked) void OnDyingEventAsm() {
 	static const UInt32 checkProtect = 0xEC408C;
 	__asm
 	{
@@ -245,8 +221,7 @@ __declspec (naked) void OnDyingEventAsm()
 	}
 }
 
-__declspec (naked) void OnQuestStartStopEventAsm()
-{
+__declspec (naked) void OnQuestStartStopEventAsm() {
 	__asm
 	{
 		mov ecx, dword ptr[ebp - 4]
@@ -257,251 +232,196 @@ __declspec (naked) void OnQuestStartStopEventAsm()
 		ret 4
 	}
 }
-bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	EventFilterStructOneFormOneInt filter = { NULL, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script))
-	{
-		if (OnLimbGoneHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script)) {
+		if (OnLimbGoneHandler) {
 			if (setOrRemove)
 				OnLimbGoneHandler->RegisterEvent(script, (void**)&filter);
 			else OnLimbGoneHandler->RemoveEvent(script, (void**)&filter);
-
 		}
 	}
 	return true;
 }
-bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) && IS_TYPE(script, Script))
-	{
-		if (OnSettingsUpdateHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) && IS_TYPE(script, Script)) {
+		if (OnSettingsUpdateHandler) {
 			if (setOrRemove)
 				OnSettingsUpdateHandler->RegisterEvent(script, NULL);
 			else OnSettingsUpdateHandler->RemoveEvent(script, NULL);
-
 		}
 	}
 	return true;
 }
-bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	EventFilterStructOneFormOneInt filter = { NULL, -1 };
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script))
-	{
-		if (OnCrosshairHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script)) {
+		if (OnCrosshairHandler) {
 			if (setOrRemove)
 				OnCrosshairHandler->RegisterEvent(script, (void**)&filter);
 			else OnCrosshairHandler->RemoveEvent(script, (void**)&filter);
-
 		}
 	}
 	return true;
 }
 
-bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	EventFilterStructOneFormOneInt filter = { g_thePlayer, -1 };
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold)
-	{
-		if (OnAVChangeHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
+		if (OnAVChangeHandler) {
 			if (setOrRemove)
 				OnAVChangeHandler->RegisterEvent(script, (void**)&filter);
 			else OnAVChangeHandler->RemoveEvent(script, (void**)&filter);
-
 		}
 	}
 	return true;
 }
-bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
-	{
-		if (OnRemovePerkHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+		if (OnRemovePerkHandler) {
 			if (setOrRemove)
 				OnRemovePerkHandler->RegisterEvent(script, (void**)filter);
 			else OnRemovePerkHandler->RemoveEvent(script, (void**)filter);
-
 		}
 	}
 	return true;
 }
-bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
-	{
-		if (OnAddPerkHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+		if (OnAddPerkHandler) {
 			if (setOrRemove)
 				OnAddPerkHandler->RegisterEvent(script, (void**)filter);
 			else OnAddPerkHandler->RemoveEvent(script, (void**)filter);
-
 		}
 	}
 	return true;
 }
-bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
-	{
-		if (OnChallengeCompleteHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+		if (OnChallengeCompleteHandler) {
 			if (setOrRemove)
 				OnChallengeCompleteHandler->RegisterEvent(script, (void**)filter);
 			else OnChallengeCompleteHandler->RemoveEvent(script, (void**)filter);
-
 		}
 	}
 	return true;
 }
-bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL }; 
+	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
-	{
-		if (OnSeenDataUpdateHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+		if (OnSeenDataUpdateHandler) {
 			if (setOrRemove)
 				OnSeenDataUpdateHandler->RegisterEvent(script, (void**)filter);
 			else OnSeenDataUpdateHandler->RemoveEvent(script, (void**)filter);
-
 		}
-		
 	}
 	return true;
 }
-bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL }; 
+	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
-	{
-		if (OnDyingHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+		if (OnDyingHandler) {
 			if (setOrRemove)
 				OnDyingHandler->RegisterEvent(script, (void**)filter);
 			else OnDyingHandler->RemoveEvent(script, (void**)filter);
-
 		}
 	}
 	return true;
 }
 
-bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL }; 
+	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
-	{
-		if (OnStartQuestHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+		if (OnStartQuestHandler) {
 			if (setOrRemove)
 				OnStartQuestHandler->RegisterEvent(script, (void**)filter);
 			else OnStartQuestHandler->RemoveEvent(script, (void**)filter);
-
 		}
 	}
 
 	return true;
 }
 
-
-bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
-	TESForm* filter[1] = { NULL }; 
+	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
-	{
-		if (OnStopQuestHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+		if (OnStopQuestHandler) {
 			if (setOrRemove)
 				OnStopQuestHandler->RegisterEvent(script, (void**)filter);
 			else OnStopQuestHandler->RemoveEvent(script, (void**)filter);
-
 		}
 	}
 
 	return true;
 }
 
-bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
-	{
-		if (OnCompleteQuestHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+		if (OnCompleteQuestHandler) {
 			if (setOrRemove)
 				OnCompleteQuestHandler->RegisterEvent(script, (void**)filter);
 			else OnCompleteQuestHandler->RemoveEvent(script, (void**)filter);
-
 		}
 	}
 	return true;
 }
 
-bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL };
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script))
-	{
-		if (OnFailQuestHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+		if (OnFailQuestHandler) {
 			if (setOrRemove)
 				OnFailQuestHandler->RegisterEvent(script, (void**)filter);
 			else OnFailQuestHandler->RemoveEvent(script, (void**)filter);
-				
 		}
 	}
 	return true;
 }
 
-bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	UInt32 flags = 0;
@@ -512,38 +432,31 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS)
 		kDoNotFireInGameMode = 1 << 1,
 		kUseGamePreEvent = 1 << 2,
 	};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &optionalFlags) && IS_TYPE(script, Script))
-	{
-		if (!(optionalFlags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &optionalFlags) && IS_TYPE(script, Script)) {
+		if (!(optionalFlags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler) {
 			if (!(optionalFlags & kUseGamePreEvent)) {
 				if (setOrRemove)
 					OnRenderGameModeUpdateHandler->RegisterEvent(script, NULL);
 				else OnRenderGameModeUpdateHandler->RemoveEvent(script, NULL);
 			}
-			else if (OnRenderGamePreUpdateHandler)
-			{
+			else if (OnRenderGamePreUpdateHandler) {
 				if (setOrRemove)
 					OnRenderGamePreUpdateHandler->RegisterEvent(script, NULL);
 				else OnRenderGamePreUpdateHandler->RemoveEvent(script, NULL);
 			}
-
 		}
 
-		if (!(optionalFlags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler)
-		{
+		if (!(optionalFlags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler) {
 			if (setOrRemove)
 				OnRenderRenderedMenuUpdateHandler->RegisterEvent(script, NULL);
 			else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script, NULL);
-
 		}
 	}
 
 	return true;
 }
 
-void HandleEventHooks()
-{
+void HandleEventHooks() {
 	OnDyingHandler = JGCreateEvent("OnDying", 1, 1, NULL);
 	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1, NULL);
 	OnStopQuestHandler = JGCreateEvent("OnStopQuest", 1, 1, NULL);
@@ -581,7 +494,6 @@ void HandleEventHooks()
 	SafeWrite8(0x60CA29, 0xCC);
 	WriteRelJump(0x66EE50, (UINT)AVChangeEventAsm);
 
-
 	//testing
 	OnRenderGamePreUpdateHandler = JGCreateEvent("OnRenderGamePreUpdateHandler", 0, 0, NULL);
 	WriteRelCall(0x943748, (uintptr_t)handlePreRenderEvent);
@@ -589,5 +501,4 @@ void HandleEventHooks()
 	WriteRelCall(0x870244, (uintptr_t)handlerRenderGameEvent);
 	OnRenderRenderedMenuUpdateHandler = JGCreateEvent("OnRenderRenderedMenuUpdateHandler", 0, 0, NULL);
 	WriteRelCall(0x8702A9, (uintptr_t)handlerRenderMenuEvent);
-
 }

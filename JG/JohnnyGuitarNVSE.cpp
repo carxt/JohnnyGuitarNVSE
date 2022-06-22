@@ -43,61 +43,53 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 460
-void MessageHandler(NVSEMessagingInterface::Message* msg)
-{
-
-	switch (msg->type)
-	{
-
-	case NVSEMessagingInterface::kMessage_NewGame:
-	case NVSEMessagingInterface::kMessage_PreLoadGame:
-	{
-		disableMuzzleLights = 0; //reset the muzzle hook every time
-		bArrowKeysDisabled = false;
-		isShowLevelUp = true;
-		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
-		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
-
-		OnDyingHandler->FlushEventCallbacks();
-		OnLimbGoneHandler->FlushEventCallbacks();
-		OnCrosshairHandler->FlushEventCallbacks();
-		RestoreDisabledPlayerControlsHUDFlags();
-		SaveGameUMap.clear();
-		break;
-	}
-	case NVSEMessagingInterface::kMessage_MainGameLoop:
-		for (const auto& EventInfo : EventsArray)
+#define JG_VERSION 470
+void MessageHandler(NVSEMessagingInterface::Message* msg) {
+	switch (msg->type) {
+		case NVSEMessagingInterface::kMessage_NewGame:
+		case NVSEMessagingInterface::kMessage_PreLoadGame:
 		{
-			EventInfo->AddQueuedEvents();
-			EventInfo->DeleteEvents();
-		}
-		break;
-	case NVSEMessagingInterface::kMessage_DeferredInit:
-	{
-		g_thePlayer = PlayerCharacter::GetSingleton();
-		g_processManager = (ProcessManager*)0x11E0E80;
-		g_interfaceManager = InterfaceManager::GetSingleton();
-		g_bsWin32Audio = BSWin32Audio::GetSingleton();
-		g_dataHandler = DataHandler::Get();
-		g_audioManager = (BSAudioManager*)0x11F6EF0;
-		g_currentSky = (Sky**)0x11DEA20;
-		g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
-		g_VATSCameraData = (VATSCameraData*)0x11F2250;
-		g_initialTickCount = GetTickCount();
-		Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
-		break;
-	}
-	default:
-		break;
-	}
+			disableMuzzleLights = 0; //reset the muzzle hook every time
+			bArrowKeysDisabled = false;
+			isShowLevelUp = true;
+			ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
+			ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 
+			OnDyingHandler->FlushEventCallbacks();
+			OnLimbGoneHandler->FlushEventCallbacks();
+			OnCrosshairHandler->FlushEventCallbacks();
+			RestoreDisabledPlayerControlsHUDFlags();
+			SaveGameUMap.clear();
+			break;
+		}
+		case NVSEMessagingInterface::kMessage_MainGameLoop:
+			for (const auto& EventInfo : EventsArray) {
+				EventInfo->AddQueuedEvents();
+				EventInfo->DeleteEvents();
+			}
+			break;
+		case NVSEMessagingInterface::kMessage_DeferredInit:
+		{
+			g_thePlayer = PlayerCharacter::GetSingleton();
+			g_processManager = (ProcessManager*)0x11E0E80;
+			g_interfaceManager = InterfaceManager::GetSingleton();
+			g_bsWin32Audio = BSWin32Audio::GetSingleton();
+			g_dataHandler = DataHandler::Get();
+			g_audioManager = (BSAudioManager*)0x11F6EF0;
+			g_currentSky = (Sky**)0x11DEA20;
+			g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
+			g_VATSCameraData = (VATSCameraData*)0x11F2250;
+			g_initialTickCount = GetTickCount();
+			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
+			break;
+		}
+		default:
+			break;
+	}
 }
 
 extern "C" {
-
-	bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info)
-	{
+	bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {
 		// fill out the info structure
 		gLog.Create("JohnnyGuitarNVSE.log");
 #if _DEBUG
@@ -107,30 +99,24 @@ extern "C" {
 		info->name = "JohnnyGuitarNVSE";
 		info->version = JG_VERSION;
 
-		if (nvse->isNogore)
-		{
+		if (nvse->isNogore) {
 			PrintLog("German NoGore release of the game is not supported");
 			return false;
 		}
 
-		if (nvse->nvseVersion < 0x6020030)
-		{
+		if (nvse->nvseVersion < 0x6020030) {
 			PrintLog("NVSE version is outdated. This plugin requires v6.2.3 minimum.");
 			return false;
 		}
 
-		if (!nvse->isEditor)
-		{
-			if (nvse->runtimeVersion < RUNTIME_VERSION_1_4_0_525)
-			{
+		if (!nvse->isEditor) {
+			if (nvse->runtimeVersion < RUNTIME_VERSION_1_4_0_525) {
 				PrintLog("incorrect New Vegas version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
 				return false;
 			}
 		}
-		else
-		{
-			if (nvse->editorVersion < CS_VERSION_1_4_0_518)
-			{
+		else {
+			if (nvse->editorVersion < CS_VERSION_1_4_0_518) {
 				PrintLog("incorrect GECK version (got %08X need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
 				return false;
 			}
@@ -143,9 +129,7 @@ extern "C" {
 		return true;
 	}
 
-
-	bool NVSEPlugin_Load(const NVSEInterface* nvse)
-	{
+	bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
@@ -160,6 +144,8 @@ extern "C" {
 		resetVanityCam = GetPrivateProfileInt("MAIN", "bReset3rdPersonCamera", 0, filename);
 		enableRadioSubtitles = GetPrivateProfileInt("MAIN", "bEnableRadioSubtitles", 0, filename);
 		removeMainMenuMusic = GetPrivateProfileInt("MAIN", "bRemoveMainMenuMusic", 0, filename);
+		fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 0, filename);
+		fDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "fDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);
@@ -380,7 +366,18 @@ extern "C" {
 		REG_CMD(PlaySoundFile);
 		REG_CMD(StopSoundFile);
 		REG_CMD(StopSoundLooping);
-		REG_TYPED_CMD(GetCompassTargets, Array);
+		REG_CMD(GetSystemColorAlt);
+		REG_CMD(SetCustomReputationChangeIcon);
+		REG_CMD(SetArmorAltTexture);
+		REG_CMD(SetWeaponAltTexture);
+		REG_CMD(ClearWeaponAltTexture);
+		REG_CMD(ClearArmorAltTexture);
+		REG_CMD(AddNavmeshObstacle);
+		REG_CMD(RemoveNavmeshObstacle);
+		REG_CMD(RollCredits);
+		REG_CMD(GetFactionFlags);
+		REG_CMD(SetFactionFlags);
+		REG_TYPED_CMD(GetLandTextureUnderFeet, Form);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
@@ -402,14 +399,12 @@ extern "C" {
 		HANDLE  hDllHandle,
 		DWORD   dwReason,
 		LPVOID  lpreserved
-	)
-	{
-		switch (dwReason)
-		{
-		case (DLL_PROCESS_ATTACH):
-			JohnnyHandle = (HMODULE)hDllHandle;
-			DisableThreadLibraryCalls((HMODULE)hDllHandle);
-			break;
+	) {
+		switch (dwReason) {
+			case (DLL_PROCESS_ATTACH):
+				JohnnyHandle = (HMODULE)hDllHandle;
+				DisableThreadLibraryCalls((HMODULE)hDllHandle);
+				break;
 		}
 		return TRUE;
 	}

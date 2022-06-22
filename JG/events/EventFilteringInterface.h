@@ -1,46 +1,36 @@
 #pragma once
 
-union GenericFilters
-{
+union GenericFilters {
 	void* ptr;
 	TESForm* form;
 	UInt32        refID;
 	int            intVal;
 	float        fltVal;
 	char* str;
-	GenericFilters()
-	{
+	GenericFilters() {
 		this->ptr = NULL;
 	}
-	GenericFilters(void* ptr)
-	{
+	GenericFilters(void* ptr) {
 		this->ptr = ptr;
 	}
-	GenericFilters(TESForm* form)
-	{
+	GenericFilters(TESForm* form) {
 		this->form = form;
 	}
-	GenericFilters(UInt32 refID)
-	{
+	GenericFilters(UInt32 refID) {
 		this->refID = refID;
 	}
-	GenericFilters(int intVal)
-	{
+	GenericFilters(int intVal) {
 		this->intVal = intVal;
 	}
-	GenericFilters(float fltVal)
-	{
+	GenericFilters(float fltVal) {
 		this->fltVal = fltVal;
 	}
-	GenericFilters(char* str)
-	{
+	GenericFilters(char* str) {
 		this->str = str;
 	}
-
 };
 
-class EventHandlerInterface
-{
+class EventHandlerInterface {
 public:
 	//Framework passes the objects to add to filter here
 	GenericFilters* GenFilters = 0;
@@ -65,43 +55,34 @@ public:
 	//Function used by the filter to check if the object passed is an accepted parameter
 	virtual bool IsAcceptedParameter(GenericFilters toCheck) = 0;
 	virtual UInt32 GetNumFilters() { return numFilters; }
-
 };
 
-
-class EventContainerInterface
-{
+class EventContainerInterface {
 public:
 	void virtual RegisterEvent(Script* script, void** filters);
 	void virtual RemoveEvent(Script* script, void** filters);
 };
 
-
 EventContainerInterface* (_cdecl* CreateScriptEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CustomConstructor)(void**, UInt32));
 void(__cdecl* FreeScriptEvent)(EventContainerInterface*& toRemove);
 
-class BaseEventClass
-{
+class BaseEventClass {
 public:
 	ULONG_PTR Flags = 0;
 	Script* ScriptForEvent = NULL;
 	EventHandlerInterface* eventFilter = NULL;
 	LambdaVariableContext capturedLambdaVars;
 
-	BaseEventClass() : capturedLambdaVars(nullptr){}
+	BaseEventClass() : capturedLambdaVars(nullptr) {}
 
-	enum GlobalEventFlags
-	{
+	enum GlobalEventFlags {
 		kEventFlag_Deleted = 1 << 0,
 	};
 
-	bool GetDeleted()
-	{
+	bool GetDeleted() {
 		return Flags & kEventFlag_Deleted;
 	}
-	void SetDeleted(bool doSet)
-	{
-
+	void SetDeleted(bool doSet) {
 		doSet ? Flags |= kEventFlag_Deleted : Flags &= ~kEventFlag_Deleted;
 	}
 };

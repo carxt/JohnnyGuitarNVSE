@@ -7,8 +7,7 @@ extern _CaptureLambdaVars CaptureLambdaVars;
 typedef void (*_UncaptureLambdaVars)(Script* scriptLambda);
 extern _UncaptureLambdaVars UncaptureLambdaVars;
 
-class LambdaVariableContext
-{
+class LambdaVariableContext {
 	Script* scriptLambda;
 public:
 	LambdaVariableContext(const LambdaVariableContext& other) = delete;

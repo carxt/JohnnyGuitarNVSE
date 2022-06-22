@@ -41,8 +41,7 @@ bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
 		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
 		FileStream sourceFile;
-		if (sourceFile.OpenAt(filepath, 0x1C))
-		{
+		if (sourceFile.OpenAt(filepath, 0x1C)) {
 			DWORD mipMapCount;
 			sourceFile.ReadBuf(&mipMapCount, 4);
 			*result = mipMapCount;
@@ -62,8 +61,7 @@ bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
 		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
 		FileStream sourceFile;
-		if (sourceFile.OpenAt(filepath, 0x57))
-		{
+		if (sourceFile.OpenAt(filepath, 0x57)) {
 			char format;
 			sourceFile.ReadBuf(&format, 1);
 			*result = format - '0';
@@ -83,8 +81,7 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
 		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
 		FileStream sourceFile;
-		if (sourceFile.OpenAt(filepath, 0x10))
-		{
+		if (sourceFile.OpenAt(filepath, 0x10)) {
 			DWORD width;
 			sourceFile.ReadBuf(&width, 4);
 			*result = width;
@@ -105,8 +102,7 @@ bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
 		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
 		FileStream sourceFile;
-		if (sourceFile.OpenAt(filepath, 0x0C))
-		{
+		if (sourceFile.OpenAt(filepath, 0x0C)) {
 			DWORD height;
 			sourceFile.ReadBuf(&height, 4);
 			*result = height;

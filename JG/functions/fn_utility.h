@@ -24,15 +24,29 @@ DEFINE_COMMAND_PLUGIN(DumpINI, , 0, 0, NULL);
 DEFINE_CMD_NO_ARGS(UpdateCrosshairPrompt);
 DEFINE_COMMAND_PLUGIN(SetOptionalBone, , 1, 2, kParams_OneInt_OneString);
 DEFINE_COMMAND_PLUGIN(GetOptionalBone, , 1, 2, kParams_OneInt);
+DEFINE_CMD_NO_ARGS(DumpIconMap);
+DEFINE_CMD_NO_ARGS(RollCredits);
 
+bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
+	*result = 0;
+	ThisStdCall<void>(0x75F2A0, nullptr);
+	return true;
+}
+
+bool Cmd_DumpIconMap_Execute(COMMAND_ARGS) {
+	auto it = factionRepIcons.begin();
+	for (auto const& it : factionRepIcons) {
+		Console_Print("0x%X - %s %s %s %s", it.first, it.second[0], it.second[1], it.second[2], it.second[3]);
+	}
+	return true;
+}
 
 bool Cmd_UpdateCrosshairPrompt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ThisStdCall<void>(0x778B10, NULL);
 	return true;
 }
-enum EType
-{
+enum EType {
 	kSetting_Bool = 0,
 	kSetting_c,
 	kSetting_h,
@@ -52,13 +66,9 @@ bool Cmd_DumpINI_Execute(COMMAND_ARGS) {
 	std::ofstream csv;
 	csv.open("settings.csv");
 	Setting* setting;
-	int value;
-	float fvalue;
-	const char* cvalue;
 	csv << "fallout.ini" << std::endl;
 	ListNode<Setting>* istIter = ini->settings.Head();
-	do
-	{
+	do {
 		setting = istIter->data;
 		if (setting && setting->ValidType()) {
 			std::string name = setting->name;
@@ -66,27 +76,26 @@ bool Cmd_DumpINI_Execute(COMMAND_ARGS) {
 				std::string sname = name.substr(0, name.find(":"));
 				std::string cat = name.substr(name.find(":") + 1);
 				switch (setting->GetType()) {
-				case kSetting_Bool:
-				case kSetting_Integer:
-					csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
-					break;
-				case kSetting_Unsigned:
-					csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
-					break;
-				case kSetting_String:
-					csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
-					break;
-				case kSetting_Float:
-					csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
-					break;
+					case kSetting_Bool:
+					case kSetting_Integer:
+						csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
+						break;
+					case kSetting_Unsigned:
+						csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
+						break;
+					case kSetting_String:
+						csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
+						break;
+					case kSetting_Float:
+						csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
+						break;
 				}
 			}
 		}
 	} while (istIter = istIter->next);
 	csv << "falloutprefs.ini" << std::endl;
 	istIter = prefs->settings.Head();
-	do
-	{
+	do {
 		setting = istIter->data;
 		if (setting && setting->ValidType()) {
 			std::string name = setting->name;
@@ -94,26 +103,25 @@ bool Cmd_DumpINI_Execute(COMMAND_ARGS) {
 				std::string sname = name.substr(0, name.find(":"));
 				std::string cat = name.substr(name.find(":") + 1);
 				switch (setting->GetType()) {
-				case kSetting_Bool:
-				case kSetting_Integer:
-					csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
-					break;
-				case kSetting_Unsigned:
-					csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
-					break;
-				case kSetting_String:
-					csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
-					break;
-				case kSetting_Float:
-					csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
-					break;
+					case kSetting_Bool:
+					case kSetting_Integer:
+						csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
+						break;
+					case kSetting_Unsigned:
+						csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
+						break;
+					case kSetting_String:
+						csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
+						break;
+					case kSetting_Float:
+						csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
+						break;
 				}
 			}
 		}
 	} while (istIter = istIter->next);
 	istIter = renderer->settings.Head();
-	do
-	{
+	do {
 		setting = istIter->data;
 		if (setting && setting->ValidType()) {
 			std::string name = setting->name;
@@ -121,26 +129,25 @@ bool Cmd_DumpINI_Execute(COMMAND_ARGS) {
 				std::string sname = name.substr(0, name.find(":"));
 				std::string cat = name.substr(name.find(":") + 1);
 				switch (setting->GetType()) {
-				case kSetting_Bool:
-				case kSetting_Integer:
-					csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
-					break;
-				case kSetting_Unsigned:
-					csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
-					break;
-				case kSetting_String:
-					csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
-					break;
-				case kSetting_Float:
-					csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
-					break;
+					case kSetting_Bool:
+					case kSetting_Integer:
+						csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
+						break;
+					case kSetting_Unsigned:
+						csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
+						break;
+					case kSetting_String:
+						csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
+						break;
+					case kSetting_Float:
+						csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
+						break;
 				}
 			}
 		}
 	} while (istIter = istIter->next);
 	istIter = blend->settings.Head();
-	do
-	{
+	do {
 		setting = istIter->data;
 		if (setting && setting->ValidType()) {
 			std::string name = setting->name;
@@ -148,19 +155,19 @@ bool Cmd_DumpINI_Execute(COMMAND_ARGS) {
 				std::string sname = name.substr(0, name.find(":"));
 				std::string cat = name.substr(name.find(":") + 1);
 				switch (setting->GetType()) {
-				case kSetting_Bool:
-				case kSetting_Integer:
-					csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
-					break;
-				case kSetting_Unsigned:
-					csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
-					break;
-				case kSetting_String:
-					csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
-					break;
-				case kSetting_Float:
-					csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
-					break;
+					case kSetting_Bool:
+					case kSetting_Integer:
+						csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
+						break;
+					case kSetting_Unsigned:
+						csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
+						break;
+					case kSetting_String:
+						csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
+						break;
+					case kSetting_Float:
+						csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
+						break;
 				}
 			}
 		}
@@ -220,8 +227,7 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 		for (int i = 0; i < size; i++) {
 			if (elements[i].Form() == NULL) return true;
 			ListNode<TESForm>* listIter = formList->list.Head();
-			do
-			{
+			do {
 				if (elements[i].Form() == listIter->data) {
 					*result = 1;
 					delete[] elements;
@@ -235,8 +241,7 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 			if (elements[i].Form() == NULL) return true;
 			int elementFound = 0;
 			ListNode<TESForm>* listIter = formList->list.Head();
-			do
-			{
+			do {
 				if (elements[i].Form() == listIter->data) {
 					elementFound = 1;
 					break;
@@ -260,31 +265,29 @@ bool Cmd_SetUIUpdateSound_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &type) && IS_TYPE(sound, TESSound)) {
 		*result = 1;
 		switch (type) {
-		case 1:
-			questFailSound = sound;
-			break;
-		case 2:
-			questNewSound = sound;
-			break;
-		case 3:
-			questCompeteSound = sound;
-			break;
-		case 4:
-			locationDiscoverSound = sound;
-			break;
-		default:
-			*result = 0;
-			break;
+			case 1:
+				questFailSound = sound;
+				break;
+			case 2:
+				questNewSound = sound;
+				break;
+			case 3:
+				questCompeteSound = sound;
+				break;
+			case 4:
+				locationDiscoverSound = sound;
+				break;
+			default:
+				*result = 0;
+				break;
 		}
 	}
 	return true;
 }
-struct cmp_str
-{
+struct cmp_str {
 public:
 	cmp_str(bool s_) : s(s_) {};
-	bool operator()(char const* a, char const* b) const
-	{
+	bool operator()(char const* a, char const* b) const {
 		return s ? std::strcmp(a, b) > 0 : std::strcmp(a, b) < 0;
 	}
 private:
@@ -315,16 +318,12 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	delete[] elements;
 	return true;
 }
-bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
 	*result = -1;
 	UInt32 sequenceID;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sequenceID) && sequenceID < 8)
-	{
-		if (auto animData = thisObj->GetAnimData())
-		{
-			if (auto sequence = animData->animSequence[sequenceID])
-			{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sequenceID) && sequenceID < 8) {
+		if (auto animData = thisObj->GetAnimData()) {
+			if (auto sequence = animData->animSequence[sequenceID]) {
 				UInt16 groupID = animData->groupIDs[sequenceID] & 0xFF;
 				*result = groupID;
 			}
@@ -333,12 +332,10 @@ bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS)
 
 	return true;
 }
-bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESForm* form;
-	if (scriptObj && ExtractArgsEx(EXTRACT_ARGS_EX, &form))
-	{
+	if (scriptObj && ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
 		UInt8 overriding = form->GetOverridingModIdx();
 		*result = ((overriding > scriptObj->modIndex) ? overriding : 0);
 		if (IsConsoleMode()) Console_Print("GetFormOverrideIndex >> %.f", *result);
@@ -355,11 +352,9 @@ bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
 bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
 	char nodeName[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nodeName, &X_outS, &Y_outS, &Z_outS))
-	{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nodeName, &X_outS, &Y_outS, &Z_outS)) {
 		hkpRigidBody* rigidBody = thisObj->GetRigidBody(nodeName);
-		if (rigidBody)
-		{
+		if (rigidBody) {
 			NiVector4 linVelocity = rigidBody->motion.linVelocity;
 			setVarByName(PASS_VARARGS, X_outS, linVelocity.x);
 			setVarByName(PASS_VARARGS, Y_outS, linVelocity.y);
@@ -411,15 +406,15 @@ bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	tickCount = GetTickCount();
 	double timePlayed = tickCount - g_initialTickCount;
 	switch (type) {
-	case 0:
-		*result = timePlayed;
-		break;
-	case 1:
-		*result = timePlayed / 1000;
-		break;
-	case 2:
-		*result = timePlayed / 60000;
-		break;
+		case 0:
+			*result = timePlayed;
+			break;
+		case 1:
+			*result = timePlayed / 1000;
+			break;
+		case 2:
+			*result = timePlayed / 60000;
+			break;
 	}
 	if (IsConsoleMode()) {
 		Console_Print("%f", *result);
@@ -427,12 +422,10 @@ bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
 	int patch = 0;
 	bool enabled = false;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &patch))
-	{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &patch)) {
 		switch (patch) {
 			case 1:
 				enabled = loadEditorIDs;
@@ -476,24 +469,19 @@ bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS)
-{
+bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS) {
 	*result = isShowLevelUp;
 	if (IsConsoleMode()) Console_Print("IsLevelUpMenuEnabled >> %.f", *result);
 	return true;
 }
 
-bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS)
-{
-
+bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS) {
 	ThisStdCall(0x0703DA0, nullptr);
 	ThisStdCall(0x07D0A70, nullptr);
 	return true;
 }
 
-
-bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS) {
 	uintptr_t optIdx = -1;
 	*result = 0;
 	char boneName[MAX_PATH] = { 0 };
@@ -501,8 +489,7 @@ bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS)
 		if (optIdx > 4) return true;
 		auto doUpdateBone = [optIdx, &boneName, &result](ValidBip01Names* BipedAnim) {
 			if (BipedAnim) {
-				if (BipedAnim->bip01 && BipedAnim->bip01->GetNiNode())
-				{
+				if (BipedAnim->bip01 && BipedAnim->bip01->GetNiNode()) {
 					auto vb = CdeclCall<NiNode*>(0x04AAE30, BipedAnim->bip01, boneName);
 					if (vb && vb->GetNiNode()) {
 						BipedAnim->bones[optIdx].bone = vb;
@@ -521,21 +508,18 @@ bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
 bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 	uintptr_t optIdx = -1;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &optIdx)) {
 		if (thisObj && thisObj->IsCharacter() && optIdx <= 4)
-		if (auto BipedAnim = ((Character*)thisObj)->validBip01Names) {
-			if (BipedAnim->bones[optIdx].bone && BipedAnim->bones[optIdx].bone->GetNiNode())
-			{
-				g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->bones[optIdx].bone->m_blockName);
-				if (IsConsoleMode())
-					Console_Print("GetOptionalBone >> %s", BipedAnim->bones[optIdx].bone->m_blockName);
+			if (auto BipedAnim = ((Character*)thisObj)->validBip01Names) {
+				if (BipedAnim->bones[optIdx].bone && BipedAnim->bones[optIdx].bone->GetNiNode()) {
+					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->bones[optIdx].bone->m_blockName);
+					if (IsConsoleMode())
+						Console_Print("GetOptionalBone >> %s", BipedAnim->bones[optIdx].bone->m_blockName);
+				}
 			}
-		}
-		
 	}
 	return true;
 }

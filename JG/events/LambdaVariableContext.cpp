@@ -1,18 +1,15 @@
 ﻿#include "LambdaVariableContext.h"
 
-LambdaVariableContext::LambdaVariableContext(Script* scriptLambda) : scriptLambda(scriptLambda)
-{
+LambdaVariableContext::LambdaVariableContext(Script* scriptLambda) : scriptLambda(scriptLambda) {
 	if (scriptLambda)
 		CaptureLambdaVars(scriptLambda);
 }
 
-LambdaVariableContext::LambdaVariableContext(LambdaVariableContext&& other) noexcept : scriptLambda(other.scriptLambda)
-{
+LambdaVariableContext::LambdaVariableContext(LambdaVariableContext&& other) noexcept : scriptLambda(other.scriptLambda) {
 	other.scriptLambda = nullptr;
 }
 
-LambdaVariableContext& LambdaVariableContext::operator=(LambdaVariableContext&& other) noexcept
-{
+LambdaVariableContext& LambdaVariableContext::operator=(LambdaVariableContext&& other) noexcept {
 	if (this == &other)
 		return *this;
 	if (this->scriptLambda)
@@ -22,8 +19,7 @@ LambdaVariableContext& LambdaVariableContext::operator=(LambdaVariableContext&& 
 	return *this;
 }
 
-LambdaVariableContext::~LambdaVariableContext()
-{
+LambdaVariableContext::~LambdaVariableContext() {
 	if (this->scriptLambda)
 		UncaptureLambdaVars(this->scriptLambda);
 }

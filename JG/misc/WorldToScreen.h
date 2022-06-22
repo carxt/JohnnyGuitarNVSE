@@ -21,8 +21,7 @@
 		return *this = NiPoint3(x op v.x, y op v.y, z op v.z); \
 	}
 
-struct NiPoint3
-{
+struct NiPoint3 {
 	float x, y, z;
 
 	void Scale(float scale) {
@@ -31,21 +30,15 @@ struct NiPoint3
 		z *= scale;
 	};
 
-	void Init(NiPoint3* point)
-	{
+	void Init(NiPoint3* point) {
 		x = point->x;
 		y = point->y;
 		z = point->z;
 	};
 
-	NiPoint3() : x(0.f), y(0.f), z(0.f)
-	{
-	};
+	NiPoint3() : x(0.f), y(0.f), z(0.f) {};
 
-	NiPoint3(const float x, const float y, const float z) : x(x), y(y), z(z)
-	{
-	};
-
+	NiPoint3(const float x, const float y, const float z) : x(x), y(y), z(z) {};
 
 	DECL_FLOAT_OP(*);
 	DECL_FLOAT_OP(/ );
@@ -55,53 +48,45 @@ struct NiPoint3
 	DECL_VEC_OP(*);
 	DECL_VEC_OP(/ );
 
-	float length() const
-	{
+	float length() const {
 		return sqrtf(x * x + y * y + z * z);
 	}
 
-	float length_sqr() const
-	{
+	float length_sqr() const {
 		return x * x + y * y + z * z;
 	}
 
-	NiPoint3 normal() const
-	{
+	NiPoint3 normal() const {
 		const auto len = length();
 		return len == 0.F ? NiPoint3() : NiPoint3(x / len, y / len, z / len);
 	}
 
-	static float dot(const NiPoint3& v1, const NiPoint3& v2)
-	{
+	static float dot(const NiPoint3& v1, const NiPoint3& v2) {
 		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 	}
 
-	static NiPoint3 cross(const NiPoint3& v1, const NiPoint3& v2)
-	{
+	static NiPoint3 cross(const NiPoint3& v1, const NiPoint3& v2) {
 		return NiPoint3(
 			v1.y * v2.z - v1.z * v2.y,
 			v1.z * v2.x - v1.x * v2.z,
 			v1.x * v2.y - v1.y * v2.x);
 	}
 
-	NiPoint3* Add(NiPoint3* toAdd)
-	{
+	NiPoint3* Add(NiPoint3* toAdd) {
 		this->x += toAdd->x;
 		this->y += toAdd->y;
 		this->z += toAdd->z;
 		return this;
 	}
 
-	NiPoint3* Subtract(NiPoint3* point)
-	{
+	NiPoint3* Subtract(NiPoint3* point) {
 		this->x -= point->x;
 		this->y -= point->y;
 		this->z -= point->z;
 		return this;
 	}
 
-	float CalculateDistSquared(NiPoint3* to)
-	{
+	float CalculateDistSquared(NiPoint3* to) {
 		float deltaX = (x - to->x);
 		float deltaY = (y - to->y);
 		float deltaZ = (z - to->z);
@@ -121,32 +106,25 @@ struct NiCameraAlt //Defined here because the one in NVSE is wrong.
 	float			LODAdjust;			// 110
 };
 
-
-struct JGWorldToScreenMatrix
-{
-
+struct JGWorldToScreenMatrix {
 	float			m_aafWorldToCam[4][4];	// 09C
 	NiFrustum		frustum;			// 0DC
 	float			minNearPlaneDist;	// 0F8
 	float			maxFarNearRatio;	// 0FC
 	NiViewport		m_kPort;			// 100
 	float			LODAdjust;			// 110
-
 };
 
-struct JGCameraPosition
-{
+struct JGCameraPosition {
 	NiMatrix33				m_localRotate;			// 34
 	NiVector3				m_localTranslate;		// 58
 	float					m_localScale;			// 64
 	NiMatrix33				m_worldRotate;			// 68
 	NiVector3				m_worldTranslate;		// 8C
 	float					m_worldScale;			// 98
-
 };
 
-struct JGCameraParams
-{
+struct JGCameraParams {
 	JGCameraPosition* CamPos = NULL;
 	JGWorldToScreenMatrix* WorldMatrx = NULL;
 };
@@ -155,8 +133,7 @@ JGCameraParams JGGameCamera;
 extern float __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2);
 
 bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, float& fBx, float& fBy,
-	float& fBz, float fZeroTolerance, float HandleType)
-{
+	float& fBz, float fZeroTolerance, float HandleType) {
 	bool st = false;
 	// project a world space point to screen space
 	float fW = kPt->x * cam->m_aafWorldToCam[3][0] +
@@ -176,8 +153,7 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 		cam->m_aafWorldToCam[2][3];
 	fBz = fBz * fInvW;
 
-	if (!(fW > fZeroTolerance))
-	{
+	if (!(fW > fZeroTolerance)) {
 		st = true;
 		fInvW *= -1.0f;
 	}
@@ -193,14 +169,11 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 
 	fBy = cam->m_kPort.t - fBy;
 	if (fBx >= cam->m_kPort.l && fBx <= cam->m_kPort.r &&
-		fBy >= cam->m_kPort.b && fBy <= cam->m_kPort.t && st == 0)
-	{
+		fBy >= cam->m_kPort.b && fBy <= cam->m_kPort.t && st == 0) {
 		return true;
 	}
-	else
-	{
-		if (HandleType < 2)
-		{
+	else {
+		if (HandleType < 2) {
 			float x2 = cam->m_kPort.r / 2, y2 = cam->m_kPort.t / 2;
 			float d = sqrt((((fBx - x2) * (fBx - x2))) + ((fBy - y2) * (fBy - y2))); //Distance
 			float r = y2 / d; //Segment ratio
@@ -222,16 +195,13 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 	fBz = NiNodeComputeDistance(&(((NiAVObject*)cam)->m_worldTranslate), (NiVector3*)kPt);
 }
 
-
 //NiPoint3* NiPointBuffer = NULL;
 
 bool __cdecl JG_WorldToScreen(NiPoint3* posXYZ, NiPoint3& posOut, float offscreenHandling) {
 	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, posXYZ, posOut.x, posOut.y, posOut.z, 0.0000099999997, offscreenHandling);
 }
-__forceinline bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, float HandleType, float zeroTolerance = 0.0000099999997)
-{
+__forceinline bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, float HandleType, float zeroTolerance = 0.0000099999997) {
 	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, p_in, x_out, y_out, z_out, zeroTolerance, HandleType);
-
 }
 
 ParamInfo kParamsProjectionArgsLegacy[8] =
@@ -244,9 +214,7 @@ ParamInfo kParamsProjectionArgsLegacy[8] =
 	{ "Float", kParamType_Float, 0 },
 	{ "HandleMode", kParamType_Integer, 0 },
 	{ "Object Ref", kParamType_ObjectRef, 1 }
-
 };
-
 
 ParamInfo kParamsProjectionArgs[8] =
 {
@@ -258,12 +226,9 @@ ParamInfo kParamsProjectionArgs[8] =
 	{ "Float", kParamType_Float, 0 },
 	{ "HandleMode", kParamType_Integer, 0 },
 	{ "Object Ref", kParamType_ObjectRef, 1 }
-
 };
 
-
-void __stdcall CopyNiCamera(NiCameraAlt* MemoryAddressToCopy, float fov)
-{
+void __stdcall CopyNiCamera(NiCameraAlt* MemoryAddressToCopy, float fov) {
 	SceneGraph* sing_SceneGraph = *(SceneGraph**)0x11DEB7C;
 	PlayerCharacter* g_ThePlayer = *(PlayerCharacter**)0x11DEA3C;
 	if (!sing_SceneGraph || !g_ThePlayer) return;
@@ -272,9 +237,7 @@ void __stdcall CopyNiCamera(NiCameraAlt* MemoryAddressToCopy, float fov)
 	memcpy(JGGameCamera.WorldMatrx, &(MemoryAddressToCopy->m_aafWorldToCam[0][0]), sizeof(JGWorldToScreenMatrix));
 }
 
-
-__declspec(naked) void NiCameraGetAltHook()
-{
+__declspec(naked) void NiCameraGetAltHook() {
 	__asm
 	{
 		push dword ptr ss : [ebp + 8]

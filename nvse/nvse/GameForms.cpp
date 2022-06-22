@@ -7,31 +7,27 @@
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo
 static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x00066E920;	// See GetActorValueName
-BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
+BGSDefaultObjectManager** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
 #else
 static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0;
 static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0;
-BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x0;
+BGSDefaultObjectManager** g_defaultObjectManager = (BGSDefaultObjectManager**)0x0;
 #endif
 
-TESForm *TESForm::TryGetREFRParent()
-{
+TESForm* TESForm::TryGetREFRParent() {
 	if (!this) return NULL;
-	if (GetIsReference())
-	{
-		TESObjectREFR *refr = (TESObjectREFR*)this;
+	if (GetIsReference()) {
+		TESObjectREFR* refr = (TESObjectREFR*)this;
 		if (refr->baseForm) return refr->baseForm;
 	}
 	return this;
 }
 
-UInt8 TESForm::GetModIndex() const
-{
+UInt8 TESForm::GetModIndex() const {
 	return modIndex;
 }
 
-TESFullName* TESForm::GetFullName() 
-{
+TESFullName* TESForm::GetFullName() {
 	if (typeID == kFormType_TESObjectCELL) // some exterior cells inherit name of parent worldspace
 	{
 		TESObjectCELL* cell = (TESObjectCELL*)this;
@@ -44,18 +40,15 @@ TESFullName* TESForm::GetFullName()
 	return DYNAMIC_CAST(baseForm, TESForm, TESFullName);
 }
 
-const char *TESForm::GetTheName()
-{
-	TESFullName *fullName = GetFullName();
+const char* TESForm::GetTheName() {
+	TESFullName* fullName = GetFullName();
 	return fullName ? fullName->name.CStr() : "";
 }
 
-void TESForm::DoAddForm(TESForm* newForm, bool persist, bool record) const
-{
+void TESForm::DoAddForm(TESForm* newForm, bool persist, bool record) const {
 	CALL_MEMBER_FN(DataHandler::Get(), DoAddForm)(newForm);
 
-	if(persist)
-	{
+	if (persist) {
 		// Only some forms can be safely saved as SaveForm. ie TESPackage at the moment.
 		bool canSave = false;
 		TESPackage* package = DYNAMIC_CAST(newForm, TESForm, TESPackage);
@@ -68,20 +61,16 @@ void TESForm::DoAddForm(TESForm* newForm, bool persist, bool record) const
 	}
 }
 
-TESForm * TESForm::CloneForm(bool persist) const
-{
-	TESForm	* result = CreateFormInstance(typeID);
-	if(result)
-	{
+TESForm* TESForm::CloneForm(bool persist) const {
+	TESForm* result = CreateFormInstance(typeID);
+	if (result) {
 		result->CopyFrom(this);
 		// it looks like some fields are not copied, case in point: TESObjectCONT does not copy BoundObject information.
 		TESBoundObject* boundObject = DYNAMIC_CAST(result, TESForm, TESBoundObject);
-		if (boundObject)
-		{
+		if (boundObject) {
 			TESBoundObject* boundSource = DYNAMIC_CAST(this, TESForm, TESBoundObject);
-			if (boundSource)
-			{
-				for (UInt8 i=0; i<6; i++)
+			if (boundSource) {
+				for (UInt8 i = 0; i < 6; i++)
 					boundObject->bounds[i] = boundSource->bounds[i];
 			}
 		}
@@ -91,15 +80,13 @@ TESForm * TESForm::CloneForm(bool persist) const
 	return result;
 }
 
-bool TESForm::IsCloned() const
-{
+bool TESForm::IsCloned() const {
 	return GetModIndex() == 0xff;
 }
 
 // static
-UInt32 TESBipedModelForm::MaskForSlot(UInt32 slot)
-{
-	switch(slot) {
+UInt32 TESBipedModelForm::MaskForSlot(UInt32 slot) {
+	switch (slot) {
 		case ePart_Head:		return eSlot_Head;
 		case ePart_Hair:		return eSlot_Hair;
 		case ePart_UpperBody:	return eSlot_UpperBody;
@@ -128,8 +115,7 @@ UInt32 TESBipedModelForm::GetSlotsMask() const {
 	return partMask;
 }
 
-void TESBipedModelForm::SetSlotsMask(UInt32 mask)
-{
+void TESBipedModelForm::SetSlotsMask(UInt32 mask) {
 	partMask = (mask & ePartBitMask_Full);
 }
 
@@ -137,47 +123,42 @@ UInt32 TESBipedModelForm::GetBipedMask() const {
 	return bipedFlags;
 }
 
-void TESBipedModelForm::SetBipedMask(UInt32 mask)
-{
+void TESBipedModelForm::SetBipedMask(UInt32 mask) {
 	bipedFlags = mask & 0xFF;
 }
 
-void  TESBipedModelForm::SetPath(const char* newPath, UInt32 whichPath, bool bFemalePath)
-{
+void  TESBipedModelForm::SetPath(const char* newPath, UInt32 whichPath, bool bFemalePath) {
 	String* toSet = NULL;
 
-	switch (whichPath)
-	{
-	case ePath_Biped:
-		toSet = &bipedModel[bFemalePath ? 1 : 0].nifPath;
-		break;
-	case ePath_Ground:
-		toSet = &groundModel[bFemalePath ? 1 : 0].nifPath;
-		break;
-	case ePath_Icon:
-		toSet = &icon[bFemalePath ? 1 : 0].ddsPath;
-		break;
+	switch (whichPath) {
+		case ePath_Biped:
+			toSet = &bipedModel[bFemalePath ? 1 : 0].nifPath;
+			break;
+		case ePath_Ground:
+			toSet = &groundModel[bFemalePath ? 1 : 0].nifPath;
+			break;
+		case ePath_Icon:
+			toSet = &icon[bFemalePath ? 1 : 0].ddsPath;
+			break;
 	}
 
 	if (toSet)
 		toSet->Set(newPath);
 }
 
-const char* TESBipedModelForm::GetPath(UInt32 whichPath, bool bFemalePath)
-{
+const char* TESBipedModelForm::GetPath(UInt32 whichPath, bool bFemalePath) {
 	String* pathStr = NULL;
 
-	switch (whichPath)
-	{
-	case ePath_Biped:
-		pathStr = &bipedModel[bFemalePath ? 1 : 0].nifPath;
-		break;
-	case ePath_Ground:
-		pathStr = &groundModel[bFemalePath ? 1 : 0].nifPath;
-		break;
-	case ePath_Icon:
-		pathStr = &icon[bFemalePath ? 1 : 0].ddsPath;
-		break;
+	switch (whichPath) {
+		case ePath_Biped:
+			pathStr = &bipedModel[bFemalePath ? 1 : 0].nifPath;
+			break;
+		case ePath_Ground:
+			pathStr = &groundModel[bFemalePath ? 1 : 0].nifPath;
+			break;
+		case ePath_Icon:
+			pathStr = &icon[bFemalePath ? 1 : 0].ddsPath;
+			break;
 	}
 
 	if (pathStr)
@@ -186,17 +167,14 @@ const char* TESBipedModelForm::GetPath(UInt32 whichPath, bool bFemalePath)
 		return "";
 }
 
-char TESActorBaseData::GetFactionRank(TESFaction *faction)
-{
-	ListNode<FactionListData> *facIter = factionList.Head();
-	FactionListData	*data;
-	do
-	{
+char TESActorBaseData::GetFactionRank(TESFaction* faction) {
+	ListNode<FactionListData>* facIter = factionList.Head();
+	FactionListData* data;
+	do {
 		data = facIter->data;
 		if (data && (data->faction == faction))
 			return data->rank;
-	}
-	while (facIter = facIter->next);
+	} while (facIter = facIter->next);
 	return -1;
 }
 
@@ -211,25 +189,21 @@ static const UInt8 kHandGripTable[] =
 	TESObjectWEAP::eHandGrip_6,
 };
 
-UInt8 TESObjectWEAP::HandGrip() const
-{
-	for(UInt32 i = 0; i < sizeof(kHandGripTable) / sizeof(kHandGripTable[0]); i++)
-		if(handGrip == kHandGripTable[i])
+UInt8 TESObjectWEAP::HandGrip() const {
+	for (UInt32 i = 0; i < sizeof(kHandGripTable) / sizeof(kHandGripTable[0]); i++)
+		if (handGrip == kHandGripTable[i])
 			return i;
 
 	return 0;
 }
 
-void TESObjectWEAP::SetHandGrip(UInt8 _handGrip)
-{
-	if(_handGrip < sizeof(kHandGripTable) / sizeof(kHandGripTable[0]))
+void TESObjectWEAP::SetHandGrip(UInt8 _handGrip) {
+	if (_handGrip < sizeof(kHandGripTable) / sizeof(kHandGripTable[0]))
 		handGrip = kHandGripTable[_handGrip];
 }
 
-UInt8 TESObjectWEAP::AttackAnimation() const
-{
-	switch(attackAnim)
-	{
+UInt8 TESObjectWEAP::AttackAnimation() const {
+	switch (attackAnim) {
 		case eAttackAnim_Default:		return 0;
 		case eAttackAnim_Attack3:		return 1;
 		case eAttackAnim_Attack4:		return 2;
@@ -257,21 +231,18 @@ UInt8 TESObjectWEAP::AttackAnimation() const
 	}
 }
 
-const UInt8 kAttackAnims[] = {255, 38, 44, 50, 56, 62, 68, 26, 74, 32, 80, 86, 114, 120, 126, 132, 138, 102, 108, 144, 150, 156, 162};
+const UInt8 kAttackAnims[] = { 255, 38, 44, 50, 56, 62, 68, 26, 74, 32, 80, 86, 114, 120, 126, 132, 138, 102, 108, 144, 150, 156, 162 };
 
-void TESObjectWEAP::SetAttackAnimation(UInt32 _attackAnim)
-{
+void TESObjectWEAP::SetAttackAnimation(UInt32 _attackAnim) {
 	attackAnim = kAttackAnims[_attackAnim];
 }
 
-TESObjectIMOD* TESObjectWEAP::GetItemMod(UInt8 which)
-{
+TESObjectIMOD* TESObjectWEAP::GetItemMod(UInt8 which) {
 	if ((which < 1) || (which > 3)) return NULL;
 	return itemMod[which - 1];
 }
 
-TESAmmo *TESObjectWEAP::GetAmmo()
-{
+TESAmmo* TESObjectWEAP::GetAmmo() {
 	if (!ammo.ammo) return NULL;
 	if IS_ID(ammo.ammo, BGSListForm)
 		return (TESAmmo*)((BGSListForm*)ammo.ammo)->list.GetFirstItem();
@@ -287,13 +258,11 @@ public:
 	}
 };
 
-SInt32 BGSListForm::GetIndexOf(TESForm* pForm)
-{
+SInt32 BGSListForm::GetIndexOf(TESForm* pForm) {
 	return list.GetIndexOf(FindByForm(pForm));
 }
 
-SInt32 BGSListForm::RemoveForm(TESForm* pForm)
-{
+SInt32 BGSListForm::RemoveForm(TESForm* pForm) {
 	SInt32 index = GetIndexOf(pForm);
 	if (index >= 0) {
 		RemoveNthForm(index);
@@ -301,8 +270,7 @@ SInt32 BGSListForm::RemoveForm(TESForm* pForm)
 	return index;
 }
 
-SInt32 BGSListForm::ReplaceForm(TESForm* pForm, TESForm* pReplaceWith)
-{
+SInt32 BGSListForm::ReplaceForm(TESForm* pForm, TESForm* pReplaceWith) {
 	SInt32 index = GetIndexOf(pForm);
 	if (index >= 0) {
 		list.ReplaceNth(index, pReplaceWith);
@@ -310,8 +278,7 @@ SInt32 BGSListForm::ReplaceForm(TESForm* pForm, TESForm* pReplaceWith)
 	return index;
 }
 
-bool TESForm::IsInventoryObject() const
-{
+bool TESForm::IsInventoryObject() const {
 	typedef bool (*_IsInventoryObjectType)(UInt32 formType);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x481F30;
@@ -323,8 +290,7 @@ bool TESForm::IsInventoryObject() const
 	return IsInventoryObjectType(typeID);
 }
 
-const char* TESPackage::TargetData::StringForTargetCode(UInt8 targetCode)
-{
+const char* TESPackage::TargetData::StringForTargetCode(UInt8 targetCode) {
 	switch (targetCode) {
 		case TESPackage::kTargetType_Refr:
 			return "Reference";
@@ -337,8 +303,7 @@ const char* TESPackage::TargetData::StringForTargetCode(UInt8 targetCode)
 	}
 }
 
-UInt8 TESPackage::TargetData::TargetCodeForString(const char* targetStr)
-{
+UInt8 TESPackage::TargetData::TargetCodeForString(const char* targetStr) {
 	if (!_stricmp(targetStr, "REFERENCE"))
 		return TESPackage::kTargetType_Refr;
 	else if (!_stricmp(targetStr, "OBJECT"))
@@ -349,8 +314,7 @@ UInt8 TESPackage::TargetData::TargetCodeForString(const char* targetStr)
 		return 0xFF;
 }
 
-TESPackage::TargetData* TESPackage::TargetData::Create()
-{
+TESPackage::TargetData* TESPackage::TargetData::Create() {
 	TargetData* data = (TargetData*)GameHeapAlloc(sizeof(TargetData));
 
 	// fill out with same defaults as editor uses
@@ -361,51 +325,44 @@ TESPackage::TargetData* TESPackage::TargetData::Create()
 	return data;
 }
 
-TESPackage::TargetData* TESPackage::GetTargetData()
-{
+TESPackage::TargetData* TESPackage::GetTargetData() {
 	if (!target)
 		target = TargetData::Create();
 
 	return target;
 }
 
-void TESPackage::SetTarget(TESObjectREFR* refr)
-{
+void TESPackage::SetTarget(TESObjectREFR* refr) {
 	TargetData* tdata = GetTargetData();
 	tdata->targetType = kTargetType_Refr;
 	tdata->target.refr = refr;
 	tdata->count = 150;	//DefaultDistance
 }
 
-void TESPackage::SetCount(UInt32 aCount)
-{
+void TESPackage::SetCount(UInt32 aCount) {
 	if (target) {
 		TargetData* tdata = GetTargetData();
 		tdata->count = aCount;
 	}
 }
 
-void TESPackage::SetTarget(TESForm* baseForm, UInt32 count)
-{
+void TESPackage::SetTarget(TESForm* baseForm, UInt32 count) {
 	TargetData* tdata = GetTargetData();
 	tdata->targetType = kTargetType_BaseObject;
 	tdata->count = count;
 	tdata->target.form = baseForm;
 }
 
-void TESPackage::SetTarget(UInt8 typeCode, UInt32 count)
-{
-	if (typeCode > 0 && typeCode < kObjectType_Max)
-	{
+void TESPackage::SetTarget(UInt8 typeCode, UInt32 count) {
+	if (typeCode > 0 && typeCode < kObjectType_Max) {
 		TargetData* tdata = GetTargetData();
 		tdata->targetType = kTargetType_TypeCode;
 		tdata->target.objectCode = typeCode;
-		tdata->count= count;
+		tdata->count = count;
 	}
 }
 
-TESPackage::LocationData* TESPackage::LocationData::Create()
-{
+TESPackage::LocationData* TESPackage::LocationData::Create() {
 	LocationData* data = (LocationData*)GameHeapAlloc(sizeof(LocationData));
 
 	data->locationType = kPackLocation_CurrentLocation;
@@ -415,53 +372,49 @@ TESPackage::LocationData* TESPackage::LocationData::Create()
 	return data;
 }
 
-TESPackage::LocationData* TESPackage::GetLocationData()
-{
+TESPackage::LocationData* TESPackage::GetLocationData() {
 	if (!location)
 		location = LocationData::Create();
 
 	return location;
 }
 
-bool TESPackage::IsFlagSet(UInt32 flag)
-{
+bool TESPackage::IsFlagSet(UInt32 flag) {
 	return (packageFlags & flag) == flag;
 }
 
-void TESPackage::SetFlag(UInt32 flag, bool bSet)
-{
+void TESPackage::SetFlag(UInt32 flag, bool bSet) {
 	if (bSet)
 		packageFlags |= flag;
 	else
 		packageFlags &= ~flag;
 
 	// handle either-or flags
-	switch (flag)
-	{
-	case kPackageFlag_LockDoorsAtStart:
-		if (IsFlagSet(kPackageFlag_UnlockDoorsAtStart) == bSet)
-			SetFlag(kPackageFlag_UnlockDoorsAtStart, !bSet);
-		break;
-	case kPackageFlag_UnlockDoorsAtStart:
-		if (IsFlagSet(kPackageFlag_LockDoorsAtStart) == bSet)
-			SetFlag(kPackageFlag_LockDoorsAtStart, !bSet);
-		break;
-	case kPackageFlag_LockDoorsAtEnd:
-		if (IsFlagSet(kPackageFlag_UnlockDoorsAtEnd) == bSet)
-			SetFlag(kPackageFlag_UnlockDoorsAtEnd, !bSet);
-		break;
-	case kPackageFlag_UnlockDoorsAtEnd:
-		if (IsFlagSet(kPackageFlag_LockDoorsAtEnd) == bSet)
-			SetFlag(kPackageFlag_LockDoorsAtEnd, !bSet);
-		break;
-	case kPackageFlag_LockDoorsAtLocation:
-		if (IsFlagSet(kPackageFlag_UnlockDoorsAtLocation) == bSet)
-			SetFlag(kPackageFlag_UnlockDoorsAtLocation, !bSet);
-		break;
-	case kPackageFlag_UnlockDoorsAtLocation:
-		if (IsFlagSet(kPackageFlag_LockDoorsAtLocation) == bSet)
-			SetFlag(kPackageFlag_LockDoorsAtLocation, !bSet);
-		break;
+	switch (flag) {
+		case kPackageFlag_LockDoorsAtStart:
+			if (IsFlagSet(kPackageFlag_UnlockDoorsAtStart) == bSet)
+				SetFlag(kPackageFlag_UnlockDoorsAtStart, !bSet);
+			break;
+		case kPackageFlag_UnlockDoorsAtStart:
+			if (IsFlagSet(kPackageFlag_LockDoorsAtStart) == bSet)
+				SetFlag(kPackageFlag_LockDoorsAtStart, !bSet);
+			break;
+		case kPackageFlag_LockDoorsAtEnd:
+			if (IsFlagSet(kPackageFlag_UnlockDoorsAtEnd) == bSet)
+				SetFlag(kPackageFlag_UnlockDoorsAtEnd, !bSet);
+			break;
+		case kPackageFlag_UnlockDoorsAtEnd:
+			if (IsFlagSet(kPackageFlag_LockDoorsAtEnd) == bSet)
+				SetFlag(kPackageFlag_LockDoorsAtEnd, !bSet);
+			break;
+		case kPackageFlag_LockDoorsAtLocation:
+			if (IsFlagSet(kPackageFlag_UnlockDoorsAtLocation) == bSet)
+				SetFlag(kPackageFlag_UnlockDoorsAtLocation, !bSet);
+			break;
+		case kPackageFlag_UnlockDoorsAtLocation:
+			if (IsFlagSet(kPackageFlag_LockDoorsAtLocation) == bSet)
+				SetFlag(kPackageFlag_LockDoorsAtLocation, !bSet);
+			break;
 	}
 }
 
@@ -493,17 +446,16 @@ static const char* TESPackage_TypeStrings[] = {
 };
 
 static const char* TESPackage_ProcedureStrings[] = {
-	"TRAVEL", "ACTIVATE", "ACQUIRE", "WAIT", "DIALOGUE", "GREET", "GREET DEAD", "WANDER", "SLEEP", 
-	"OBSERVE COMBAT", "EAT", "FOLLOW", "ESCORT", "COMBAT", "ALARM", "PURSUE", "FLEE", "DONE", "YELD", 
+	"TRAVEL", "ACTIVATE", "ACQUIRE", "WAIT", "DIALOGUE", "GREET", "GREET DEAD", "WANDER", "SLEEP",
+	"OBSERVE COMBAT", "EAT", "FOLLOW", "ESCORT", "COMBAT", "ALARM", "PURSUE", "FLEE", "DONE", "YELD",
 	"TRAVEL TARGET", "CREATE FOLLOW", "GET UP", "MOUNT HORSE", "DISMOUNT HORSE", "DO NOTHING", "UNKNOWN 019", "UNKNOWN 01B",
-	"ACCOMPANY", "USE ITEM AT", "AIM", "NOTIFY", "SANDMAN", "WAIT AMBUSH", "SURFACE", "WAIT FOR SPELL", "CHOOSE CAST", 
-	"FLEE NON COMBAT", "REMOVE WORN ITEMS", "SEARCH", "CLEAR MOUNT POSITION", "SUMMON CREATURE DEFEND", "AVOID AREA", 
-	"UNEQUIP ARMOR", "PATROL", "USE WEAPON", "DIALOGUE ACTIVATE", "GUARD", "SANDBOX", "USE IDLE MARKER", "TAKE BACK ITEM", 
-	"SITTING", "MOVEMENT BLOCKED", "CANIBAL FEED", 
+	"ACCOMPANY", "USE ITEM AT", "AIM", "NOTIFY", "SANDMAN", "WAIT AMBUSH", "SURFACE", "WAIT FOR SPELL", "CHOOSE CAST",
+	"FLEE NON COMBAT", "REMOVE WORN ITEMS", "SEARCH", "CLEAR MOUNT POSITION", "SUMMON CREATURE DEFEND", "AVOID AREA",
+	"UNEQUIP ARMOR", "PATROL", "USE WEAPON", "DIALOGUE ACTIVATE", "GUARD", "SANDBOX", "USE IDLE MARKER", "TAKE BACK ITEM",
+	"SITTING", "MOVEMENT BLOCKED", "CANIBAL FEED",
 };
 
-const char* TESPackage::StringForPackageType(UInt32 pkgType)
-{
+const char* TESPackage::StringForPackageType(UInt32 pkgType) {
 	if (pkgType < kPackType_MAX) {
 		return TESPackage_TypeStrings[pkgType];
 	}
@@ -512,16 +464,14 @@ const char* TESPackage::StringForPackageType(UInt32 pkgType)
 	}
 }
 
-const char* TESPackage::StringForObjectCode(UInt8 objCode)
-{
+const char* TESPackage::StringForObjectCode(UInt8 objCode) {
 	if (objCode < kObjectType_Max)
 		return TESPackage_ObjectTypeStrings[objCode];
 
 	return "";
 }
 
-UInt8 TESPackage::ObjectCodeForString(const char* objString)
-{
+UInt8 TESPackage::ObjectCodeForString(const char* objString) {
 	for (UInt32 i = 0; i < kObjectType_Max; i++) {
 		if (!_stricmp(objString, TESPackage_ObjectTypeStrings[i]))
 			return i;
@@ -531,14 +481,13 @@ UInt8 TESPackage::ObjectCodeForString(const char* objString)
 }
 
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	static const char** s_procNames = (const char**)0x011A3CC0;
+static const char** s_procNames = (const char**)0x011A3CC0;
 #elif EDITOR
 #else
 #error unsupported Fallout version
 #endif
 
-const char* TESPackage::StringForProcedureCode(eProcedure proc)
-{
+const char* TESPackage::StringForProcedureCode(eProcedure proc) {
 	if (proc < kProcedure_MAX)
 		return TESPackage_ProcedureStrings[proc];
 
@@ -565,62 +514,56 @@ const char* TESPackage::StringForProcedureCode(eProcedure proc)
 //	return name;
 //}
 
-const char* TESPackage::PackageTime::DayForCode(UInt8 dayCode)
-{
+const char* TESPackage::PackageTime::DayForCode(UInt8 dayCode) {
 	dayCode += 1;
 	if (dayCode >= sizeof(TESPackage_DayStrings))
 		return "";
 	return TESPackage_DayStrings[dayCode];
 }
 
-const char* TESPackage::PackageTime::MonthForCode(UInt8 monthCode)
-{
+const char* TESPackage::PackageTime::MonthForCode(UInt8 monthCode) {
 	monthCode += 1;
 	if (monthCode >= sizeof(TESPackage_MonthString))
 		return "";
 	return TESPackage_MonthString[monthCode];
 }
 
-UInt8 TESPackage::PackageTime::CodeForDay(const char* dayStr)
-{
+UInt8 TESPackage::PackageTime::CodeForDay(const char* dayStr) {
 	for (UInt8 i = 0; i < sizeof(TESPackage_DayStrings); i++) {
 		if (!_stricmp(dayStr, TESPackage_DayStrings[i])) {
-			return i-1;
+			return i - 1;
 		}
 	}
 
 	return kWeekday_Any;
 }
 
-UInt8 TESPackage::PackageTime::CodeForMonth(const char* monthStr)
-{
+UInt8 TESPackage::PackageTime::CodeForMonth(const char* monthStr) {
 	for (UInt8 i = 0; i < sizeof(TESPackage_MonthString); i++) {
 		if (!_stricmp(monthStr, TESPackage_MonthString[i])) {
-			return i-1;
+			return i - 1;
 		}
 	}
 
 	return kMonth_Any;
 }
 
-const char* TESPackage::LocationData::StringForLocationCode(UInt8 locCode)
-{
+const char* TESPackage::LocationData::StringForLocationCode(UInt8 locCode) {
 	if (locCode < kPackLocation_Max)
 		return TESPackage_LocationStrings[locCode];
 	return "";
 }
 
-const char* TESPackage::LocationData::StringForLocationCodeAndData(void)
-{
+const char* TESPackage::LocationData::StringForLocationCodeAndData(void) {
 #define resultSize 256
 	static char result[resultSize];
 	if (locationType < kPackLocation_Max) {
-		switch (locationType) { 
+		switch (locationType) {
 			case kPackLocation_NearReference:
 			case kPackLocation_InCell:
 			case kPackLocation_ObjectID:
 				if (object.form)
-					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], object.form->GetTheName(), 
+					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], object.form->GetTheName(),
 						object.form->refID, radius);
 				else
 					sprintf_s(result, resultSize, "%s \"\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], 0, radius);
@@ -638,12 +581,11 @@ const char* TESPackage::LocationData::StringForLocationCodeAndData(void)
 	return "";
 }
 
-const char* TESPackage::TargetData::StringForTargetCodeAndData(void)
-{
+const char* TESPackage::TargetData::StringForTargetCodeAndData(void) {
 #define resultSize 256
 	static char result[resultSize];
 	if (targetType < kTargetType_Max) {
-		switch (targetType) { 
+		switch (targetType) {
 			case kTargetType_Refr:
 				if (target.refr)
 					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a distance of %u", StringForTargetCode(targetType), target.refr->GetTheName(),
@@ -659,7 +601,7 @@ const char* TESPackage::TargetData::StringForTargetCodeAndData(void)
 				break;
 			case kTargetType_TypeCode:
 				sprintf_s(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", StringForTargetCode(targetType), StringForObjectCode(target.objectCode),
-						target.objectCode, count);
+					target.objectCode, count);
 				break;
 			default:
 				sprintf_s(result, resultSize, "%s with a radius of %u", StringForTargetCode(targetType), count);
@@ -670,16 +612,14 @@ const char* TESPackage::TargetData::StringForTargetCodeAndData(void)
 	return "";
 }
 
-UInt8 TESPackage::LocationData::LocationCodeForString(const char* locStr)
-{
+UInt8 TESPackage::LocationData::LocationCodeForString(const char* locStr) {
 	for (UInt32 i = 0; i < kPackLocation_Max; i++)
 		if (!_stricmp(locStr, TESPackage_LocationStrings[i]))
 			return i;
 	return kPackLocation_Max;
 }
 
-const char* TESFaction::GetNthRankName(UInt32 whichRank, bool bFemale)
-{
+const char* TESFaction::GetNthRankName(UInt32 whichRank, bool bFemale) {
 	TESFaction::Rank* rank = ranks.GetNthItem(whichRank);
 	if (!rank)
 		return NULL;
@@ -687,11 +627,9 @@ const char* TESFaction::GetNthRankName(UInt32 whichRank, bool bFemale)
 		return bFemale ? rank->femaleName.CStr() : rank->name.CStr();
 }
 
-void TESFaction::SetNthRankName(const char* newName, UInt32 whichRank, bool bFemale)
-{
+void TESFaction::SetNthRankName(const char* newName, UInt32 whichRank, bool bFemale) {
 	TESFaction::Rank* rank = ranks.GetNthItem(whichRank);
-	if (rank)
-	{
+	if (rank) {
 		if (bFemale)
 			rank->femaleName.Set(newName);
 		else
@@ -700,18 +638,15 @@ void TESFaction::SetNthRankName(const char* newName, UInt32 whichRank, bool bFem
 }
 
 #if 0
-UInt32 EffectItemList::CountItems() const
-{
+UInt32 EffectItemList::CountItems() const {
 	return list.Count();
 }
 
-EffectItem* EffectItemList::ItemAt(UInt32 whichItem)
-{
+EffectItem* EffectItemList::ItemAt(UInt32 whichItem) {
 	return list.GetNthItem(whichItem);
 }
 
-const char* EffectItemList::GetNthEIName(UInt32 whichEffect) const
-{
+const char* EffectItemList::GetNthEIName(UInt32 whichEffect) const {
 	EffectItem* effItem = list.GetNthItem(whichEffect);
 	if (effItem->setting)
 		return GetFullName(effItem->setting);
@@ -720,18 +655,15 @@ const char* EffectItemList::GetNthEIName(UInt32 whichEffect) const
 }
 #endif
 
-BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton()
-{
+BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton() {
 	return *g_defaultObjectManager;
 }
 
-bool AlchemyItem::IsPoison()
-{
+bool AlchemyItem::IsPoison() {
 	EffectItem* effItem;
 	EffectSetting* effSetting = NULL;
 	ListNode<EffectItem>* iter = magicItem.list.list.Head();
-	do
-	{
+	do {
 		if (!(effItem = iter->data)) continue;
 		effSetting = effItem->setting;
 		if (effSetting && !(effSetting->effectFlags & 4)) return false;

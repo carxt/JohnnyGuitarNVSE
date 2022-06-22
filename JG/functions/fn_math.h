@@ -18,7 +18,7 @@ DEFINE_COMMAND_PLUGIN(GetRGBColor, , 0, 3, kParams_ThreeInts);
 bool Cmd_GetRGBColor_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 r, g, b;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &r, &g, &b) && r <= 255 && g <= 255 & b <= 255) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &r, &g, &b) && r <= 255 && g <= 255 && b <= 255) {
 		*result = ((r & 0xFF) << 16) + ((g & 0xFF) << 8) + (b & 0xFF);
 		if (IsConsoleMode()) Console_Print("0x%X", (UInt32)*result);
 	}
@@ -28,9 +28,8 @@ bool Cmd_GetRGBColor_Execute(COMMAND_ARGS) {
 bool Cmd_HSVtoRGB_Execute(COMMAND_ARGS) {
 	*result = 0;
 	double r = 0, g = 0, b = 0, h = 0, s = 0, v = 0;
-	ScriptVar *rOut, *gOut, *bOut, *hIn, *sIn, *vIn;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &hIn, &sIn, &vIn, &rOut, &gOut, &bOut))
-	{
+	ScriptVar* rOut, * gOut, * bOut, * hIn, * sIn, * vIn;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &hIn, &sIn, &vIn, &rOut, &gOut, &bOut)) {
 		double      hh, p, q, t, ff;
 		long        i;
 		h = hIn->data;
@@ -82,8 +81,7 @@ bool Cmd_HSVtoRGB_Execute(COMMAND_ARGS) {
 					g = p;
 					b = q;
 					break;
-				}
-
+			}
 		}
 		rOut->data = round(r * 255);
 		gOut->data = round(g * 255);
@@ -95,61 +93,59 @@ bool Cmd_HSVtoRGB_Execute(COMMAND_ARGS) {
 bool Cmd_RGBtoHSV_Execute(COMMAND_ARGS) {
 	*result = 0;
 	double r = 0, g = 0, b = 0, h = 0, s = 0, v = 0;
-	ScriptVar *rIn, *gIn, *bIn, *hOut, *sOut, *vOut;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &rIn, &gIn, &bIn, &hOut, &sOut, &vOut))
-	{
-			r = (rIn->data) / 255;
-			g = (gIn->data) / 255;
-			b = (bIn->data) / 255;
-			double min, max, delta;
+	ScriptVar* rIn, * gIn, * bIn, * hOut, * sOut, * vOut;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &rIn, &gIn, &bIn, &hOut, &sOut, &vOut)) {
+		r = (rIn->data) / 255;
+		g = (gIn->data) / 255;
+		b = (bIn->data) / 255;
+		double min, max, delta;
 
-			min = r < g ? r : g;
-			min = min < b ? min : b;
+		min = r < g ? r : g;
+		min = min < b ? min : b;
 
-			max = r > g ? r : g;
-			max = max > b ? max : b;
+		max = r > g ? r : g;
+		max = max > b ? max : b;
 
-			v = max;   
-			delta = max - min;
-			if (delta < 0.00001)
-			{
-				s = 0;
-				h = 0; 
-				hOut->data = h;
-				sOut->data = s;
-				vOut->data = v;
-				return true;
-			}
-			if (max > 0.0) { 
-				s = (delta / max);              
-			}
-			else {
-				s = 0.0;
-				h = 0;                            
-				hOut->data = h;
-				sOut->data = s;
-				vOut->data = v;
-				return true;
-			}
-			if (r >= max) {                     
-				h = (g - b) / delta;      
-			}
-			else {
-				if (g >= max) {
-					h = 2.0 + (b - r) / delta;  
-				}
-				else {
-					h = 4.0 + (r - g) / delta; 
-				}
-			}
-
-			h *= 60.0; 
-			if (h < 0.0) h += 360.0;
-
+		v = max;
+		delta = max - min;
+		if (delta < 0.00001) {
+			s = 0;
+			h = 0;
 			hOut->data = h;
 			sOut->data = s;
 			vOut->data = v;
-			return true;	
+			return true;
+		}
+		if (max > 0.0) {
+			s = (delta / max);
+		}
+		else {
+			s = 0.0;
+			h = 0;
+			hOut->data = h;
+			sOut->data = s;
+			vOut->data = v;
+			return true;
+		}
+		if (r >= max) {
+			h = (g - b) / delta;
+		}
+		else {
+			if (g >= max) {
+				h = 2.0 + (b - r) / delta;
+			}
+			else {
+				h = 4.0 + (r - g) / delta;
+			}
+		}
+
+		h *= 60.0;
+		if (h < 0.0) h += 360.0;
+
+		hOut->data = h;
+		sOut->data = s;
+		vOut->data = v;
+		return true;
 	}
 	return true;
 }
@@ -185,10 +181,8 @@ bool Cmd_Clamp_Execute(COMMAND_ARGS) {
 		else if (value > max) {
 			*result = max;
 		}
-
 	}
 	return true;
-
 }
 
 bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
@@ -202,17 +196,14 @@ bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS)
-{
+bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 	Actor* actor = (Actor*)thisObj;
 	char NiName[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &NiName) && actor->IsActor() && actor->baseProcess)
-	{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &NiName) && actor->IsActor() && actor->baseProcess) {
 		NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
 		ActorHitData* hitData = actor->baseProcess->GetHitData();
 		if (!hitData || !t_Node) return true;
 		*result = NiNodeComputeDistance(&(t_Node->m_worldTranslate), &(hitData->impactPos));
-
 	}
 
 	return true;
@@ -232,7 +223,7 @@ bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char NiName1[MAX_PATH], NiName2[MAX_PATH];
-	TESObjectREFR *ref1, *ref2;
+	TESObjectREFR* ref1, * ref2;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &ref1, &ref2, &NiName1, &NiName2))) return true;
 	NiAVObject* Node1 = ref1->GetNiBlock(NiName1);
 	NiAVObject* Node2 = ref2->GetNiBlock(NiName2);
@@ -242,19 +233,15 @@ bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS)
-{
-
+bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float xIn = 0, yIn = 0, zIn = 0;
 	UInt32 HandleType = 0;
 	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
 	TESObjectREFR* refr = NULL;
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &xIn, &yIn, &zIn, &HandleType, &refr))
-	{
-		if (refr)
-		{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &xIn, &yIn, &zIn, &HandleType, &refr)) {
+		if (refr) {
 			xIn += refr->posX; yIn += refr->posY; zIn += refr->posZ;
 		}
 		NiPoint3 NiPointBuffer = { 0,0,0 };
@@ -268,19 +255,15 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
-{
-
+bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float xIn = 0, yIn = 0, zIn = 0;
 	UInt32 HandleType = 0;
 	NiPoint3 NiPosIn = { 0,0,0 };
 	TESObjectREFR* refr = NULL;
-	ScriptVar* X_outS, *Y_outS, *Z_outS;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &NiPosIn.x, &NiPosIn.y, &NiPosIn.z, &HandleType, &refr))
-	{
-		if (refr)
-		{
+	ScriptVar* X_outS, * Y_outS, * Z_outS;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &NiPosIn.x, &NiPosIn.y, &NiPosIn.z, &HandleType, &refr)) {
+		if (refr) {
 			NiPosIn.x += refr->posX; NiPosIn.y += refr->posY; NiPosIn.z += refr->posZ;
 		}
 		NiPoint3 NiPosOut = { 0, 0, 0 };
@@ -292,33 +275,26 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS)
-{
-
+bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float xIn = 0, yIn = 0, zIn = 0;
 	UInt32 doGetLocal = 0;
 	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
 	TESObjectREFR* refr = NULL;
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &doGetLocal))
-	{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &doGetLocal)) {
 		if (auto m_GameCameraPos = JGGameCamera.CamPos) {
-			if (doGetLocal)
-			{
+			if (doGetLocal) {
 				setVarByName(PASS_VARARGS, X_outS, m_GameCameraPos->m_localTranslate.x);
 				setVarByName(PASS_VARARGS, Y_outS, m_GameCameraPos->m_localTranslate.y);
 				setVarByName(PASS_VARARGS, Z_outS, m_GameCameraPos->m_localTranslate.z);
 			}
-			else
-			{
+			else {
 				setVarByName(PASS_VARARGS, X_outS, m_GameCameraPos->m_worldTranslate.x);
 				setVarByName(PASS_VARARGS, Y_outS, m_GameCameraPos->m_worldTranslate.y);
 				setVarByName(PASS_VARARGS, Z_outS, m_GameCameraPos->m_worldTranslate.z);
 			}
 		}
-
-
 	}
 	return true;
 }

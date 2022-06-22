@@ -1,6 +1,8 @@
 // all credits to JazzisParis
 #pragma once
 
+#include <intrin.h>
+
 const double
 kDblZero = 0,
 kDblPI = 3.141592653589793,
@@ -33,9 +35,8 @@ kFlt40000 = 40000.0F,
 kFltMax = FLT_MAX;
 
 #define GameHeapAlloc(size) ThisStdCall<void*>(0xAA3E40, (void*)0x11F6238, size)
-#define GameHeapFree(ptr) ThisStdCall<void*>(0xAA4060, (void*)0x11F6238, ptr)   
-class CriticalSection
-{
+#define GameHeapFree(ptr) ThisStdCall<void*>(0xAA4060, (void*)0x11F6238, ptr)
+class CriticalSection {
 	CRITICAL_SECTION	critSection;
 
 public:
@@ -47,8 +48,7 @@ public:
 	bool TryEnter() { return TryEnterCriticalSection(&critSection) != 0; }
 };
 
-class LightCS
-{
+class LightCS {
 	UInt32	owningThread;
 	UInt32	enterCount;
 
@@ -59,11 +59,9 @@ public:
 	void EnterSleep();
 	void Leave();
 };
-union Coordinate
-{
+union Coordinate {
 	UInt32		xy;
-	struct
-	{
+	struct {
 		SInt16	y;
 		SInt16	x;
 	};
@@ -71,13 +69,11 @@ union Coordinate
 	Coordinate() {}
 	Coordinate(SInt16 _x, SInt16 _y) : x(_x), y(_y) {}
 
-	inline Coordinate& operator =(const Coordinate& rhs)
-	{
+	inline Coordinate& operator =(const Coordinate& rhs) {
 		xy = rhs.xy;
 		return *this;
 	}
-	inline Coordinate& operator =(const UInt32& rhs)
-	{
+	inline Coordinate& operator =(const UInt32& rhs) {
 		xy = rhs;
 		return *this;
 	}
@@ -85,24 +81,20 @@ union Coordinate
 	inline bool operator ==(const Coordinate& rhs) { return xy == rhs.xy; }
 	inline bool operator !=(const Coordinate& rhs) { return xy != rhs.xy; }
 
-	inline Coordinate operator +(const char* rhs)
-	{
+	inline Coordinate operator +(const char* rhs) {
 		return Coordinate(x + rhs[0], y + rhs[1]);
 	}
 };
 
-template <typename T1, typename T2> inline T1 GetMin(T1 value1, T2 value2)
-{
+template <typename T1, typename T2> inline T1 GetMin(T1 value1, T2 value2) {
 	return (value1 < value2) ? value1 : value2;
 }
 
-template <typename T1, typename T2> inline T1 GetMax(T1 value1, T2 value2)
-{
+template <typename T1, typename T2> inline T1 GetMax(T1 value1, T2 value2) {
 	return (value1 > value2) ? value1 : value2;
 }
 
-template <typename T> inline T sqr(T value)
-{
+template <typename T> inline T sqr(T value) {
 	return value * value;
 }
 
@@ -193,8 +185,7 @@ UInt32 __fastcall HexToUInt(const char* str);
 
 bool __fastcall FileExists(const char* path);
 
-class FileStream
-{
+class FileStream {
 protected:
 	HANDLE		theFile;
 	UInt32		streamLength;
@@ -217,8 +208,7 @@ public:
 	bool OpenWriteEx(char* filePath, bool append);
 	void SetOffset(UInt32 inOffset);
 
-	void Close()
-	{
+	void Close() {
 		CloseHandle(theFile);
 		theFile = INVALID_HANDLE_VALUE;
 	}
@@ -229,8 +219,7 @@ public:
 	static void MakeAllDirs(char* fullPath);
 };
 
-class DebugLog
-{
+class DebugLog {
 	FILE* theFile;
 	UInt32			indent;
 
@@ -250,8 +239,7 @@ extern DebugLog gLog, s_debug;
 void PrintLog(const char* fmt, ...);
 void PrintDebug(const char* fmt, ...);
 
-class LineIterator
-{
+class LineIterator {
 protected:
 	char* dataPtr;
 
@@ -263,8 +251,7 @@ public:
 	char* Get() { return dataPtr; }
 };
 
-class DirectoryIterator
-{
+class DirectoryIterator {
 	HANDLE				handle;
 	WIN32_FIND_DATA		fndData;
 
@@ -275,18 +262,15 @@ public:
 	bool End() const { return handle == INVALID_HANDLE_VALUE; }
 	void Next() { if (!FindNextFile(handle, &fndData)) Close(); }
 	bool IsFile() const { return !(fndData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY); }
-	bool IsFolder() const
-	{
+	bool IsFolder() const {
 		if (IsFile()) return false;
 		if (fndData.cFileName[0] != '.') return true;
 		if (fndData.cFileName[1] != '.') return fndData.cFileName[1] != 0;
 		return fndData.cFileName[2] != 0;
 	}
 	const char* Get() const { return fndData.cFileName; }
-	void Close()
-	{
-		if (handle != INVALID_HANDLE_VALUE)
-		{
+	void Close() {
+		if (handle != INVALID_HANDLE_VALUE) {
 			FindClose(handle);
 			handle = INVALID_HANDLE_VALUE;
 		}
@@ -304,3 +288,7 @@ void DumpMemImg(void* data, UInt32 size, UInt8 extra = 0);
 void GetMD5File(const char* filePath, char* outHash);
 
 void GetSHA1File(const char* filePath, char* outHash);
+
+// Taken from xNVSE
+// Pair this with _AddressOfReturnAddress()
+UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda = false);

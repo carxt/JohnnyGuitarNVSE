@@ -93,8 +93,7 @@ static BYTE PADDING[64] =
 }
 
 //	MD5 initialization. Begins an MD5 operation, writing a new context.
-void MD5::MD5Init()
-{
+void MD5::MD5Init() {
 	context.count[0] = context.count[1] = 0;
 	context.state[0] = 0x67452301;
 	context.state[1] = 0xEFCDAB89;
@@ -107,8 +106,7 @@ void MD5::MD5Init()
 	 operation, processing another message block, and updating the
 	 context.
 */
-void MD5::MD5Update(BYTE* input, DWORD inputLen)
-{
+void MD5::MD5Update(BYTE* input, DWORD inputLen) {
 	// Compute number of bytes mod 64
 	DWORD index = (DWORD)((context.count[0] >> 3) & 0x3F);
 
@@ -121,8 +119,7 @@ void MD5::MD5Update(BYTE* input, DWORD inputLen)
 
 	// Transform as many times as possible
 	DWORD i = 0;
-	if (inputLen >= partLen)
-	{
+	if (inputLen >= partLen) {
 		MD5_memcpy((BYTE*)&context.buffer[index], (BYTE*)input, partLen);
 		MD5Transform(context.state, context.buffer);
 		for (i = partLen; i + 63 < inputLen; i += 64)
@@ -135,8 +132,7 @@ void MD5::MD5Update(BYTE* input, DWORD inputLen)
 }
 
 //	MD5 finalization. Ends an MD5 message-digest operation, writing the the message digest and zeroizing the context.
-void MD5::MD5Final(BYTE digest[16])
-{
+void MD5::MD5Final(BYTE digest[16]) {
 	BYTE bits[8];
 
 	// Save number of bits
@@ -155,8 +151,7 @@ void MD5::MD5Final(BYTE digest[16])
 }
 
 //	MD5 basic transformation. Transforms state based on block.
-void MD5::MD5Transform(DWORD state[4], BYTE block[64])
-{
+void MD5::MD5Transform(DWORD state[4], BYTE block[64]) {
 	DWORD A = state[0], B = state[1], C = state[2], D = state[3], x[16];
 
 	Decode(x, block, 64);
@@ -240,10 +235,8 @@ void MD5::MD5Transform(DWORD state[4], BYTE block[64])
 }
 
 //	Encodes input (unsigned long int) into output (unsigned char). Assumes len is a multiple of 4.
-void MD5::Encode(BYTE* output, DWORD* input, DWORD len)
-{
-	for (DWORD i = 0, j = 0; j < len; i++, j += 4)
-	{
+void MD5::Encode(BYTE* output, DWORD* input, DWORD len) {
+	for (DWORD i = 0, j = 0; j < len; i++, j += 4) {
 		output[j] = (BYTE)(input[i] & 0xff);
 		output[j + 1] = (BYTE)((input[i] >> 8) & 0xFF);
 		output[j + 2] = (BYTE)((input[i] >> 16) & 0xFF);
@@ -252,15 +245,13 @@ void MD5::Encode(BYTE* output, DWORD* input, DWORD len)
 }
 
 //	Decodes input (unsigned char) into output (unsigned long int). Assumes len is a multiple of 4.
-void MD5::Decode(DWORD* output, BYTE* input, DWORD len)
-{
+void MD5::Decode(DWORD* output, BYTE* input, DWORD len) {
 	for (DWORD i = 0, j = 0; j < len; i++, j += 4)
 		output[i] = ((DWORD)input[j]) | (((DWORD)input[j + 1]) << 8) | (((DWORD)input[j + 2]) << 16) | (((DWORD)input[j + 3]) << 24);
 }
 
 //	Note: Replace "for loop" with standard memcpy if possible.
-void MD5::MD5_memcpy(BYTE* output, BYTE* input, DWORD len)
-{
+void MD5::MD5_memcpy(BYTE* output, BYTE* input, DWORD len) {
 	for (DWORD i = 0; i < len; i++)
 		output[i] = input[i];
 }

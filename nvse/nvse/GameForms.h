@@ -7,8 +7,7 @@
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
 #include "stdint.h"
-enum FormType
-{
+enum FormType {
 	kFormType_None = 0,
 	kFormType_TES4,
 	kFormType_Group,
@@ -133,230 +132,229 @@ enum FormType
 	kFormType_Max,
 };
 
-enum ObjectVtbl
-{
-	kVtbl_BGSTextureSet =							0x1033D1C,
-	kVtbl_BGSMenuIcon =								0x1033654,
-	kVtbl_TESGlobal =								0x1036524,
-	kVtbl_TESClass =								0x1048BB4,
-	kVtbl_TESFaction =								0x10498DC,
-	kVtbl_BGSHeadPart =								0x10464B4,
-	kVtbl_TESHair =									0x1049B9C,
-	kVtbl_TESEyes =									0x104973C,
-	kVtbl_TESRace =									0x104B4BC,
-	kVtbl_TESSound =								0x1044FFC,
-	kVtbl_BGSAcousticSpace =						0x10320FC,
-	kVtbl_TESSkill =								0x104CC0C,
-	kVtbl_EffectSetting =							0x1012834,
-	kVtbl_Script =									0x1037094,
-	kVtbl_TESLandTexture =							0x102E6C4,
-	kVtbl_EnchantmentItem =							0x1012EA4,
-	kVtbl_SpellItem =								0x1013F8C,
-	kVtbl_TESObjectACTI =							0x1029D5C,
-	kVtbl_BGSTalkingActivator =						0x1025594,
-	kVtbl_BGSTerminal =								0x1025914,
-	kVtbl_TESObjectARMO =							0x102A62C,
-	kVtbl_TESObjectBOOK =							0x102A9C4,
-	kVtbl_TESObjectCLOT =							0x102AC0C,
-	kVtbl_TESObjectCONT =							0x102AEB4,
-	kVtbl_TESObjectDOOR =							0x102B1FC,
-	kVtbl_IngredientItem =							0x1013284,
-	kVtbl_TESObjectLIGH =							0x1028EE4,
-	kVtbl_TESObjectMISC =							0x102B844,
-	kVtbl_TESObjectSTAT =							0x102BA2C,
-	kVtbl_BGSStaticCollection =						0x102535C,
-	kVtbl_BGSMovableStatic =						0x1024E84,
-	kVtbl_BGSPlaceableWater =						0x1024F4C,
-	kVtbl_TESGrass =								0x102814C,
-	kVtbl_TESObjectTREE =							0x102BC94,
-	kVtbl_TESFlora =								0x1026BD0,
-	kVtbl_TESFurniture =							0x1026D0C,
-	kVtbl_TESObjectWEAP =							0x102C51C,
-	kVtbl_TESAmmo =									0x1026064,
-	kVtbl_TESNPC =									0x104A2F4,
-	kVtbl_TESCreature =								0x1048F5C,
-	kVtbl_TESLevCreature =							0x102886C,
-	kVtbl_TESLevCharacter =							0x102864C,
-	kVtbl_TESKey =									0x1028444,
-	kVtbl_AlchemyItem =								0x1011964,
-	kVtbl_BGSIdleMarker =							0x104664C,
-	kVtbl_BGSNote =									0x1046874,
-	kVtbl_BGSConstructibleObject =					0x10245A4,
-	kVtbl_BGSProjectile =							0x10251AC,
-	kVtbl_TESLevItem =								0x1028A64,
-	kVtbl_TESWeather =								0x103168C,
-	kVtbl_TESClimate =								0x102D5C4,
-	kVtbl_TESRegion =								0x102397C,
-	kVtbl_NavMeshInfoMap =							0x106BB8C,
-	kVtbl_TESObjectCELL =							0x102E9B4,
-	kVtbl_TESObjectREFR =							0x102F55C,
-	kVtbl_Character =								0x1086A6C,
-	kVtbl_Creature =								0x10870AC,
-	kVtbl_MissileProjectile =						0x108FA44,
-	kVtbl_GrenadeProjectile =						0x108F674,
-	kVtbl_BeamProjectile =							0x108C3C4,
-	kVtbl_FlameProjectile =							0x108F2F4,
-	kVtbl_Explosion =								0x108EE04,
-	kVtbl_TESWorldSpace =							0x103195C,
-	kVtbl_TESObjectLAND =							0x102DCD4,
-	kVtbl_NavMesh =									0x106A0B4,
-	kVtbl_TESTopic =								0x104D19C,
-	kVtbl_TESTopicInfo =							0x104D5B4,
-	kVtbl_TESQuest =								0x104AC44,
-	kVtbl_TESIdleForm =								0x1049D0C,
-	kVtbl_TESPackage =								0x106847C,
-	kVtbl_TESCombatStyle =							0x10266E4,
-	kVtbl_TESLoadScreen =							0x10366CC,
-	kVtbl_TESLevSpell =								0x1028C5C,
-	kVtbl_TESObjectANIO =							0x102A0A4,
-	kVtbl_TESWaterForm =							0x103140C,
-	kVtbl_TESEffectShader =							0x102685C,
-	kVtbl_BGSExplosion =							0x1024A94,
-	kVtbl_BGSDebris =								0x1024834,
-	kVtbl_TESImageSpace =							0x102D7F4,
-	kVtbl_TESImageSpaceModifier =					0x102D97C,
-	kVtbl_BGSListForm =								0x10334B4,
-	kVtbl_BGSPerk =									0x1046EC4,
-	kVtbl_BGSBodyPartData =							0x1045504,
-	kVtbl_BGSAddonNode =							0x1024214,
-	kVtbl_ActorValueInfo =							0x1067A2C,
-	kVtbl_BGSRadiationStage =						0x1033B34,
-	kVtbl_BGSCameraShot =							0x10327F4,
-	kVtbl_BGSCameraPath =							0x103245C,
-	kVtbl_BGSVoiceType =							0x104733C,
-	kVtbl_BGSImpactData =							0x1032F6C,
-	kVtbl_BGSImpactDataSet =						0x103323C,
-	kVtbl_TESObjectARMA =							0x102A31C,
-	kVtbl_BGSEncounterZone =						0x102CBBC,
-	kVtbl_BGSMessage =								0x10337C4,
-	kVtbl_BGSRagdoll =								0x10470EC,
-	kVtbl_BGSLightingTemplate =						0x102CD94,
-	kVtbl_BGSMusicType =							0x103397C,
-	kVtbl_TESObjectIMOD =							0x102B5AC,
-	kVtbl_TESReputation =							0x104BA24,
-	kVtbl_ContinuousBeamProjectile =				0x108EA64,
-	kVtbl_TESRecipe =								0x1036B2C,
-	kVtbl_TESRecipeCategory =						0x10369DC,
-	kVtbl_TESCasinoChips =							0x10263DC,
-	kVtbl_TESCasino =								0x1026574,
-	kVtbl_TESLoadScreenType =						0x1036854,
-	kVtbl_MediaSet =								0x10342EC,
-	kVtbl_MediaLocationController =					0x10340C4,
-	kVtbl_TESChallenge =							0x104891C,
-	kVtbl_TESAmmoEffect =							0x103449C,
-	kVtbl_TESCaravanCard =							0x103478C,
-	kVtbl_TESCaravanMoney =							0x10349B4,
-	kVtbl_TESCaravanDeck =							0x1034B4C,
-	kVtbl_BGSDehydrationStage =						0x101144C,
-	kVtbl_BGSHungerStage =							0x10115B4,
-	kVtbl_BGSSleepDeprevationStage =				0x10116FC,
-	kVtbl_PlayerCharacter =							0x108AA3C,
+enum ObjectVtbl {
+	kVtbl_BGSTextureSet = 0x1033D1C,
+	kVtbl_BGSMenuIcon = 0x1033654,
+	kVtbl_TESGlobal = 0x1036524,
+	kVtbl_TESClass = 0x1048BB4,
+	kVtbl_TESFaction = 0x10498DC,
+	kVtbl_BGSHeadPart = 0x10464B4,
+	kVtbl_TESHair = 0x1049B9C,
+	kVtbl_TESEyes = 0x104973C,
+	kVtbl_TESRace = 0x104B4BC,
+	kVtbl_TESSound = 0x1044FFC,
+	kVtbl_BGSAcousticSpace = 0x10320FC,
+	kVtbl_TESSkill = 0x104CC0C,
+	kVtbl_EffectSetting = 0x1012834,
+	kVtbl_Script = 0x1037094,
+	kVtbl_TESLandTexture = 0x102E6C4,
+	kVtbl_EnchantmentItem = 0x1012EA4,
+	kVtbl_SpellItem = 0x1013F8C,
+	kVtbl_TESObjectACTI = 0x1029D5C,
+	kVtbl_BGSTalkingActivator = 0x1025594,
+	kVtbl_BGSTerminal = 0x1025914,
+	kVtbl_TESObjectARMO = 0x102A62C,
+	kVtbl_TESObjectBOOK = 0x102A9C4,
+	kVtbl_TESObjectCLOT = 0x102AC0C,
+	kVtbl_TESObjectCONT = 0x102AEB4,
+	kVtbl_TESObjectDOOR = 0x102B1FC,
+	kVtbl_IngredientItem = 0x1013284,
+	kVtbl_TESObjectLIGH = 0x1028EE4,
+	kVtbl_TESObjectMISC = 0x102B844,
+	kVtbl_TESObjectSTAT = 0x102BA2C,
+	kVtbl_BGSStaticCollection = 0x102535C,
+	kVtbl_BGSMovableStatic = 0x1024E84,
+	kVtbl_BGSPlaceableWater = 0x1024F4C,
+	kVtbl_TESGrass = 0x102814C,
+	kVtbl_TESObjectTREE = 0x102BC94,
+	kVtbl_TESFlora = 0x1026BD0,
+	kVtbl_TESFurniture = 0x1026D0C,
+	kVtbl_TESObjectWEAP = 0x102C51C,
+	kVtbl_TESAmmo = 0x1026064,
+	kVtbl_TESNPC = 0x104A2F4,
+	kVtbl_TESCreature = 0x1048F5C,
+	kVtbl_TESLevCreature = 0x102886C,
+	kVtbl_TESLevCharacter = 0x102864C,
+	kVtbl_TESKey = 0x1028444,
+	kVtbl_AlchemyItem = 0x1011964,
+	kVtbl_BGSIdleMarker = 0x104664C,
+	kVtbl_BGSNote = 0x1046874,
+	kVtbl_BGSConstructibleObject = 0x10245A4,
+	kVtbl_BGSProjectile = 0x10251AC,
+	kVtbl_TESLevItem = 0x1028A64,
+	kVtbl_TESWeather = 0x103168C,
+	kVtbl_TESClimate = 0x102D5C4,
+	kVtbl_TESRegion = 0x102397C,
+	kVtbl_NavMeshInfoMap = 0x106BB8C,
+	kVtbl_TESObjectCELL = 0x102E9B4,
+	kVtbl_TESObjectREFR = 0x102F55C,
+	kVtbl_Character = 0x1086A6C,
+	kVtbl_Creature = 0x10870AC,
+	kVtbl_MissileProjectile = 0x108FA44,
+	kVtbl_GrenadeProjectile = 0x108F674,
+	kVtbl_BeamProjectile = 0x108C3C4,
+	kVtbl_FlameProjectile = 0x108F2F4,
+	kVtbl_Explosion = 0x108EE04,
+	kVtbl_TESWorldSpace = 0x103195C,
+	kVtbl_TESObjectLAND = 0x102DCD4,
+	kVtbl_NavMesh = 0x106A0B4,
+	kVtbl_TESTopic = 0x104D19C,
+	kVtbl_TESTopicInfo = 0x104D5B4,
+	kVtbl_TESQuest = 0x104AC44,
+	kVtbl_TESIdleForm = 0x1049D0C,
+	kVtbl_TESPackage = 0x106847C,
+	kVtbl_TESCombatStyle = 0x10266E4,
+	kVtbl_TESLoadScreen = 0x10366CC,
+	kVtbl_TESLevSpell = 0x1028C5C,
+	kVtbl_TESObjectANIO = 0x102A0A4,
+	kVtbl_TESWaterForm = 0x103140C,
+	kVtbl_TESEffectShader = 0x102685C,
+	kVtbl_BGSExplosion = 0x1024A94,
+	kVtbl_BGSDebris = 0x1024834,
+	kVtbl_TESImageSpace = 0x102D7F4,
+	kVtbl_TESImageSpaceModifier = 0x102D97C,
+	kVtbl_BGSListForm = 0x10334B4,
+	kVtbl_BGSPerk = 0x1046EC4,
+	kVtbl_BGSBodyPartData = 0x1045504,
+	kVtbl_BGSAddonNode = 0x1024214,
+	kVtbl_ActorValueInfo = 0x1067A2C,
+	kVtbl_BGSRadiationStage = 0x1033B34,
+	kVtbl_BGSCameraShot = 0x10327F4,
+	kVtbl_BGSCameraPath = 0x103245C,
+	kVtbl_BGSVoiceType = 0x104733C,
+	kVtbl_BGSImpactData = 0x1032F6C,
+	kVtbl_BGSImpactDataSet = 0x103323C,
+	kVtbl_TESObjectARMA = 0x102A31C,
+	kVtbl_BGSEncounterZone = 0x102CBBC,
+	kVtbl_BGSMessage = 0x10337C4,
+	kVtbl_BGSRagdoll = 0x10470EC,
+	kVtbl_BGSLightingTemplate = 0x102CD94,
+	kVtbl_BGSMusicType = 0x103397C,
+	kVtbl_TESObjectIMOD = 0x102B5AC,
+	kVtbl_TESReputation = 0x104BA24,
+	kVtbl_ContinuousBeamProjectile = 0x108EA64,
+	kVtbl_TESRecipe = 0x1036B2C,
+	kVtbl_TESRecipeCategory = 0x10369DC,
+	kVtbl_TESCasinoChips = 0x10263DC,
+	kVtbl_TESCasino = 0x1026574,
+	kVtbl_TESLoadScreenType = 0x1036854,
+	kVtbl_MediaSet = 0x10342EC,
+	kVtbl_MediaLocationController = 0x10340C4,
+	kVtbl_TESChallenge = 0x104891C,
+	kVtbl_TESAmmoEffect = 0x103449C,
+	kVtbl_TESCaravanCard = 0x103478C,
+	kVtbl_TESCaravanMoney = 0x10349B4,
+	kVtbl_TESCaravanDeck = 0x1034B4C,
+	kVtbl_BGSDehydrationStage = 0x101144C,
+	kVtbl_BGSHungerStage = 0x10115B4,
+	kVtbl_BGSSleepDeprevationStage = 0x10116FC,
+	kVtbl_PlayerCharacter = 0x108AA3C,
 
-	kVtbl_BGSQuestObjective =						0x1047088,
-	kVtbl_TESModelTextureSwap =						0x101D124,
-	kVtbl_BGSPrimitiveBox =							0x101E8C4,
-	kVtbl_BGSPrimitiveSphere =						0x101EA64,
-	kVtbl_BGSPrimitivePlane =						0x101E75C,
-	kVtbl_MagicShaderHitEffect =					0x107B70C,
+	kVtbl_BGSQuestObjective = 0x1047088,
+	kVtbl_TESModelTextureSwap = 0x101D124,
+	kVtbl_BGSPrimitiveBox = 0x101E8C4,
+	kVtbl_BGSPrimitiveSphere = 0x101EA64,
+	kVtbl_BGSPrimitivePlane = 0x101E75C,
+	kVtbl_MagicShaderHitEffect = 0x107B70C,
 
-	kVtbl_BGSQuestPerkEntry =						0x1046B84,
-	kVtbl_BGSAbilityPerkEntry =						0x1046C44,
-	kVtbl_BGSEntryPointPerkEntry =					0x1046D0C,
-	kVtbl_BGSEntryPointFunctionDataOneValue =		0x10462C0,
-	kVtbl_BGSEntryPointFunctionDataTwoValue =		0x1046300,
-	kVtbl_BGSEntryPointFunctionDataLeveledList =	0x1046320,
-	kVtbl_BGSEntryPointFunctionDataActivateChoice =	0x1046340,
+	kVtbl_BGSQuestPerkEntry = 0x1046B84,
+	kVtbl_BGSAbilityPerkEntry = 0x1046C44,
+	kVtbl_BGSEntryPointPerkEntry = 0x1046D0C,
+	kVtbl_BGSEntryPointFunctionDataOneValue = 0x10462C0,
+	kVtbl_BGSEntryPointFunctionDataTwoValue = 0x1046300,
+	kVtbl_BGSEntryPointFunctionDataLeveledList = 0x1046320,
+	kVtbl_BGSEntryPointFunctionDataActivateChoice = 0x1046340,
 
-	kVtbl_ExtraSeenData =							0x1014294,
-	kVtbl_ExtraSpecialRenderFlags =					0x1014458,
-	kVtbl_ExtraPrimitive =							0x10151B4,
-	kVtbl_ExtraLinkedRef =							0x1015CC0,
-	kVtbl_ExtraRadius =								0x1015208,
-	kVtbl_ExtraCellWaterType =						0x1014270,
-	kVtbl_ExtraCellImageSpace =						0x1014258,
-	kVtbl_ExtraCellMusicType =						0x1014234,
-	kVtbl_ExtraCellClimate =						0x101424C,
-	kVtbl_ExtraTerminalState =						0x1015190,
-	kVtbl_ExtraCellAcousticSpace =					0x1014240,
-	kVtbl_ExtraOriginalReference =					0x1015BC4,
-	kVtbl_ExtraContainerChanges =					0x1015BB8,
-	kVtbl_ExtraWorn =								0x1015BDC,
-	kVtbl_ExtraHealth =								0x10158E4,
-	kVtbl_ExtraLock =								0x101589C,
-	kVtbl_ExtraCount =								0x10158D8,
-	kVtbl_ExtraTeleport =							0x10158A8,
-	kVtbl_ExtraWeaponModFlags =						0x10159A4,
-	kVtbl_ExtraHotkey =								0x101592C,
-	kVtbl_ExtraCannotWear =							0x1015BF4,
-	kVtbl_ExtraOwnership =							0x10158B4,
-	kVtbl_ExtraRank =								0x10158CC,
-	kVtbl_ExtraAction =								0x1015BAC,
-	kVtbl_ExtraFactionChanges =						0x1015F30,
-	kVtbl_ExtraScript =								0x1015914,
-	kVtbl_ExtraObjectHealth =						0x1015184,
+	kVtbl_ExtraSeenData = 0x1014294,
+	kVtbl_ExtraSpecialRenderFlags = 0x1014458,
+	kVtbl_ExtraPrimitive = 0x10151B4,
+	kVtbl_ExtraLinkedRef = 0x1015CC0,
+	kVtbl_ExtraRadius = 0x1015208,
+	kVtbl_ExtraCellWaterType = 0x1014270,
+	kVtbl_ExtraCellImageSpace = 0x1014258,
+	kVtbl_ExtraCellMusicType = 0x1014234,
+	kVtbl_ExtraCellClimate = 0x101424C,
+	kVtbl_ExtraTerminalState = 0x1015190,
+	kVtbl_ExtraCellAcousticSpace = 0x1014240,
+	kVtbl_ExtraOriginalReference = 0x1015BC4,
+	kVtbl_ExtraContainerChanges = 0x1015BB8,
+	kVtbl_ExtraWorn = 0x1015BDC,
+	kVtbl_ExtraHealth = 0x10158E4,
+	kVtbl_ExtraLock = 0x101589C,
+	kVtbl_ExtraCount = 0x10158D8,
+	kVtbl_ExtraTeleport = 0x10158A8,
+	kVtbl_ExtraWeaponModFlags = 0x10159A4,
+	kVtbl_ExtraHotkey = 0x101592C,
+	kVtbl_ExtraCannotWear = 0x1015BF4,
+	kVtbl_ExtraOwnership = 0x10158B4,
+	kVtbl_ExtraRank = 0x10158CC,
+	kVtbl_ExtraAction = 0x1015BAC,
+	kVtbl_ExtraFactionChanges = 0x1015F30,
+	kVtbl_ExtraScript = 0x1015914,
+	kVtbl_ExtraObjectHealth = 0x1015184,
 
-	kVtbl_SeenData =								0x1083FC4,
-	kVtbl_IntSeenData =								0x1083FE4,
+	kVtbl_SeenData = 0x1083FC4,
+	kVtbl_IntSeenData = 0x1083FE4,
 
-	kVtbl_TileMenu =								0x106ED44,
+	kVtbl_TileMenu = 0x106ED44,
 
-	kVtbl_MessageMenu =								0x107566C,
-	kVtbl_InventoryMenu =							0x10739B4,
-	kVtbl_StatsMenu =								0x106FFD4,
-	kVtbl_HUDMainMenu =								0x1072DF4,
-	kVtbl_LoadingMenu =								0x1073EBC,
-	kVtbl_ContainerMenu =							0x10721AC,
-	kVtbl_DialogMenu =								0x107257C,
-	kVtbl_SleepWaitMenu =							0x10763AC,
-	kVtbl_StartMenu =								0x1076D1C,
-	kVtbl_LockpickMenu =							0x107439C,
-	kVtbl_QuantityMenu =							0x10701C4,
-	kVtbl_MapMenu =									0x1074D44,
-	kVtbl_LevelUpMenu =								0x1073CDC,
-	kVtbl_RepairMenu =								0x1075C5C,
-	kVtbl_RaceSexMenu =								0x1075974,
-	kVtbl_CharGenMenu =								0x1071BB4,
-	kVtbl_TextEditMenu =							0x1070034,
-	kVtbl_BarterMenu =								0x10706EC,
-	kVtbl_SurgeryMenu =								0x1070084,
-	kVtbl_HackingMenu =								0x10728F4,
-	kVtbl_VATSMenu =								0x10700D4,
-	kVtbl_ComputersMenu =							0x1072004,
-	kVtbl_RepairServicesMenu =						0x1075DB4,
-	kVtbl_TutorialMenu =							0x106FF84,
-	kVtbl_SpecialBookMenu =							0x1070124,
-	kVtbl_ItemModMenu =								0x1073B7C,
-	kVtbl_LoveTesterMenu =							0x1070174,
-	kVtbl_CompanionWheelMenu =						0x1071D0C,
-	kVtbl_TraitSelectMenu =							0x1077ABC,
-	kVtbl_RecipeMenu =								0x107048C,
-	kVtbl_SlotMachineMenu =							0x10764DC,
-	kVtbl_BlackjackMenu =							0x10708FC,
-	kVtbl_RouletteMenu =							0x1075F7C,
-	kVtbl_CaravanMenu =								0x107108C,
-	kVtbl_TraitMenu =								0x10779BC,
+	kVtbl_MessageMenu = 0x107566C,
+	kVtbl_InventoryMenu = 0x10739B4,
+	kVtbl_StatsMenu = 0x106FFD4,
+	kVtbl_HUDMainMenu = 0x1072DF4,
+	kVtbl_LoadingMenu = 0x1073EBC,
+	kVtbl_ContainerMenu = 0x10721AC,
+	kVtbl_DialogMenu = 0x107257C,
+	kVtbl_SleepWaitMenu = 0x10763AC,
+	kVtbl_StartMenu = 0x1076D1C,
+	kVtbl_LockpickMenu = 0x107439C,
+	kVtbl_QuantityMenu = 0x10701C4,
+	kVtbl_MapMenu = 0x1074D44,
+	kVtbl_LevelUpMenu = 0x1073CDC,
+	kVtbl_RepairMenu = 0x1075C5C,
+	kVtbl_RaceSexMenu = 0x1075974,
+	kVtbl_CharGenMenu = 0x1071BB4,
+	kVtbl_TextEditMenu = 0x1070034,
+	kVtbl_BarterMenu = 0x10706EC,
+	kVtbl_SurgeryMenu = 0x1070084,
+	kVtbl_HackingMenu = 0x10728F4,
+	kVtbl_VATSMenu = 0x10700D4,
+	kVtbl_ComputersMenu = 0x1072004,
+	kVtbl_RepairServicesMenu = 0x1075DB4,
+	kVtbl_TutorialMenu = 0x106FF84,
+	kVtbl_SpecialBookMenu = 0x1070124,
+	kVtbl_ItemModMenu = 0x1073B7C,
+	kVtbl_LoveTesterMenu = 0x1070174,
+	kVtbl_CompanionWheelMenu = 0x1071D0C,
+	kVtbl_TraitSelectMenu = 0x1077ABC,
+	kVtbl_RecipeMenu = 0x107048C,
+	kVtbl_SlotMachineMenu = 0x10764DC,
+	kVtbl_BlackjackMenu = 0x10708FC,
+	kVtbl_RouletteMenu = 0x1075F7C,
+	kVtbl_CaravanMenu = 0x107108C,
+	kVtbl_TraitMenu = 0x10779BC,
 
-	kVtbl_NiNode =									0x109B5AC,
-	kVtbl_BSFadeNode =								0x10A8F90,
-	kVtbl_NiControllerManager =						0x109619C,
-	kVtbl_BSScissorTriShape =						0x10C2E7C,
-	kVtbl_NiPointLight =							0x109DD0C,
-	kVtbl_NiAlphaProperty =							0x10162DC,
-	kVtbl_NiMaterialProperty =						0x109D6C4,
-	kVtbl_NiStencilProperty =						0x101E07C,
-	kVtbl_TileShaderProperty =						0x10B9D28,
-	kVtbl_WaterShaderProperty =						0x10AE438,
+	kVtbl_NiNode = 0x109B5AC,
+	kVtbl_BSFadeNode = 0x10A8F90,
+	kVtbl_NiControllerManager = 0x109619C,
+	kVtbl_BSScissorTriShape = 0x10C2E7C,
+	kVtbl_NiPointLight = 0x109DD0C,
+	kVtbl_NiAlphaProperty = 0x10162DC,
+	kVtbl_NiMaterialProperty = 0x109D6C4,
+	kVtbl_NiStencilProperty = 0x101E07C,
+	kVtbl_TileShaderProperty = 0x10B9D28,
+	kVtbl_WaterShaderProperty = 0x10AE438,
 
-	kVtbl_ImageSpaceModifierInstanceForm =			0x102D12C,
+	kVtbl_ImageSpaceModifierInstanceForm = 0x102D12C,
 
-	kVtbl_hkpAabbPhantom =							0x10CC004,
-	kVtbl_hkpSimpleShapePhantom =					0x10CE15C,
-	kVtbl_hkpCachingShapePhantom =					0x10D087C,
-	kVtbl_hkpRigidBody =							0x10C7888,
-	kVtbl_hkpSphereMotion =							0x10C6D54,
-	kVtbl_hkpBoxMotion =							0x10C6DC4,
-	kVtbl_hkpThinBoxMotion =						0x10C6E34,
-	kVtbl_ahkpCharacterProxy =						0x10C83E8,
+	kVtbl_hkpAabbPhantom = 0x10CC004,
+	kVtbl_hkpSimpleShapePhantom = 0x10CE15C,
+	kVtbl_hkpCachingShapePhantom = 0x10D087C,
+	kVtbl_hkpRigidBody = 0x10C7888,
+	kVtbl_hkpSphereMotion = 0x10C6D54,
+	kVtbl_hkpBoxMotion = 0x10C6DC4,
+	kVtbl_hkpThinBoxMotion = 0x10C6E34,
+	kVtbl_ahkpCharacterProxy = 0x10C83E8,
 };
 
 #define IS_TYPE(form, type) (*(UInt32*)form == kVtbl_##type)
@@ -365,7 +363,7 @@ enum ObjectVtbl
 #define IS_ID(form, type) (form->typeID == kFormType_##type)
 #define NOT_ID(form, type) (form->typeID != kFormType_##type)
 
-struct ModInfo;		// in GameData.h 
+struct ModInfo;		// in GameData.h
 class TESFullName;
 class EnchantmentItem;
 class TESSound;
@@ -418,69 +416,66 @@ class QueuedFile;
 
 /**** bases ****/
 
-class BaseFormComponent
-{
+class BaseFormComponent {
 public:
 	BaseFormComponent();
 	~BaseFormComponent();
 
 	virtual void	Init(void);
 	virtual void	Free(void);
-	virtual void	CopyFromBase(BaseFormComponent * component);
-	virtual bool	CompareWithBase(BaseFormComponent * src);
+	virtual void	CopyFromBase(BaseFormComponent* component);
+	virtual bool	CompareWithBase(BaseFormComponent* src);
 
-//	void		** _vtbl;	// 000
+	//	void		** _vtbl;	// 000
 };
 
-struct PermanentClonedForm
-{
+struct PermanentClonedForm {
 	UInt32 orgRefID;
 	UInt32 cloneRefID;
 };
 
 // 018
-class TESForm : public BaseFormComponent
-{
+class TESForm : public BaseFormComponent {
 public:
 	TESForm();
 	~TESForm();
 
-	virtual void *		Destroy(bool noDealloc);			// func_00C in GECK ?? I think ??
+	virtual void* Destroy(bool noDealloc);			// func_00C in GECK ?? I think ??
 	virtual void		Unk_05(void);						// Might be set default value (called from constructor)
 	virtual UInt32		Unk_06(void);
 	virtual bool		Unk_07(void);
-	virtual bool		LoadForm(ModInfo * modInfo);		// func_010 in GECK
-	virtual bool		Unk_09(void * arg);					// points to LoadForm on TESForm
+	virtual bool		LoadForm(ModInfo* modInfo);		// func_010 in GECK
+	virtual bool		Unk_09(void* arg);					// points to LoadForm on TESForm
 	virtual bool		AppendForm(ModInfo* modInfo);		// (ie SaveForm + append to modInfo)
 	virtual void		SaveForm(void);						// saves in same format as in .esp	//	func_013 in GECK
 															// data buffer and buffer size stored in globals when done, doesn't return anything
-	virtual bool		LoadForm2(ModInfo * modInfo);		// just calls LoadForm
+	virtual bool		LoadForm2(ModInfo* modInfo);		// just calls LoadForm
 	virtual void		WriteFormInfo(ModInfo* modInfo);	// does some saving stuff, then calls Fn0A
-	virtual bool		Unk_0E(void * arg);					// prapares a GRUP formInfo
-	virtual bool		Sort(TESForm * form);				// returns if the argument is "greater or equal" to this form
-	virtual TESForm *	CreateForm(void * arg0, void * mapToAddTo);	// makes a new form, 
-	virtual void		Unk_11(void * arg);
+	virtual bool		Unk_0E(void* arg);					// prapares a GRUP formInfo
+	virtual bool		Sort(TESForm* form);				// returns if the argument is "greater or equal" to this form
+	virtual TESForm* CreateForm(void* arg0, void* mapToAddTo);	// makes a new form,
+	virtual void		Unk_11(void* arg);
 	virtual void		MarkAsModified(UInt32 changedFlags);		// enable changed flag?
 	virtual void		MarkAsUnmodified(UInt32 changedFlags);		// disable changed flag?
 	virtual UInt32		GetSaveSize(UInt32 changedFlags);	// bytes taken by the delta flags for this form, UNRELIABLE, not (always) overriden
-	virtual void		Unk_15(void * arg);					// collect referenced forms?
+	virtual void		Unk_15(void* arg);					// collect referenced forms?
 	virtual void		SaveGame(UInt32 changedFlags);		// Used as part of CopyFromBase with LoadGame.
-	virtual void		LoadGame(void * arg);				// load from BGSLoadFormBuffer arg
+	virtual void		LoadGame(void* arg);				// load from BGSLoadFormBuffer arg
 	virtual void		LoadGame2(UInt32 changedFlags);		// load from TESSaveLoadGame
-	virtual void		Unk_19(void * arg);
-	virtual void		Unk_1A(void * arg0, void * arg1);
-	virtual void		Unk_1B(void * arg0, void * arg1);
+	virtual void		Unk_19(void* arg);
+	virtual void		Unk_1A(void* arg0, void* arg1);
+	virtual void		Unk_1B(void* arg0, void* arg1);
 	virtual void		Revert(UInt32 changedFlags);		// reset changes in form
-	virtual void		Unk_1D(void * arg);
-	virtual void		Unk_1E(void * arg);
-	virtual bool		Unk_1F(void * arg);
-	virtual void		Unk_20(void * arg);
-	virtual void		Unk_21(void * arg);
+	virtual void		Unk_1D(void* arg);
+	virtual void		Unk_1E(void* arg);
+	virtual bool		Unk_1F(void* arg);
+	virtual void		Unk_20(void* arg);
+	virtual void		Unk_21(void* arg);
 	virtual void		InitItem(void);
 	virtual UInt32		GetTypeID(void);
-	virtual void		GetDebugName(String * dst);
+	virtual void		GetDebugName(String* dst);
 	virtual bool		IsQuestItem(void);
-										// Unk_26 though Unk_36 get or set flag bits
+	// Unk_26 though Unk_36 get or set flag bits
 	virtual bool		Unk_26(void);		// 00000040
 	virtual bool		Unk_27(void);		// 00010000
 	virtual bool		Unk_28(void);		// 00010000
@@ -499,7 +494,7 @@ public:
 	virtual void		Unk_35(bool set);	// 00010000 then calls Fn12 MarkAsModified
 	virtual void		Unk_36(bool set);	// 00020000
 	virtual void		Unk_37(void);		// write esp format
-	virtual void		readOBNDSubRecord(ModInfo * modInfo);	// read esp format
+	virtual void		readOBNDSubRecord(ModInfo* modInfo);	// read esp format
 	virtual bool		Unk_39(void);
 	virtual bool		Unk_3A(void);
 	virtual bool		Unk_3B(void);
@@ -509,31 +504,29 @@ public:
 	virtual bool		Unk_3F(void);	// returnTrue for refr whose baseForm is a TESActorBase
 	virtual bool		IsActor(void);
 	virtual UInt32		Unk_41(void);
-	virtual void		CopyFrom(const TESForm * form);
-	virtual bool		Compare(TESForm * form);
-	virtual bool		CheckFormGRUP(void * arg);	// Checks the group is valid for the form
-	virtual void		InitFormGRUP(void * dst, void * arg1);	// Fills the groupInfo with info valid for the form
+	virtual void		CopyFrom(const TESForm* form);
+	virtual bool		Compare(TESForm* form);
+	virtual bool		CheckFormGRUP(void* arg);	// Checks the group is valid for the form
+	virtual void		InitFormGRUP(void* dst, void* arg1);	// Fills the groupInfo with info valid for the form
 	virtual bool		Unk_46(void);
 	virtual bool		Unk_47(void);
 	virtual bool		Unk_48(UInt32 formType);	// returns if the same FormType is passed in
-	virtual bool		Unk_49(void * arg0, void * arg1, void * arg2, void * arg3, void * arg4);	// looks to be func33 in Oblivion
+	virtual bool		Unk_49(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4);	// looks to be func33 in Oblivion
 	virtual void		SetRefID(UInt32 refID, bool generateID);
-	virtual char *		GetName2(void);
-	virtual char *		GetName(void);
-	virtual bool		SetEditorID(const char * edid);		// simply returns true at run-time
+	virtual char* GetName2(void);
+	virtual char* GetName(void);
+	virtual bool		SetEditorID(const char* edid);		// simply returns true at run-time
 	// 4E
-	uint32_t GetId() const
-	{
-		return *(uint32_t *)((uintptr_t)this + 0xC);
+	uint32_t GetId() const {
+		return *(uint32_t*)((uintptr_t)this + 0xC);
 	}
 
-	uint8_t GetType() const
-	{
-		return *(uint8_t *)((uintptr_t)this + 0x4);
+	uint8_t GetType() const {
+		return *(uint8_t*)((uintptr_t)this + 0x4);
 	}
 
-	const char *hk_GetName();
-	bool hk_SetEditorId(const char *Name);
+	const char* hk_GetName();
+	bool hk_SetEditorId(const char* Name);
 	bool hk_REFRSetEditorID(const char* Name);
 	struct EditorData {
 		String		editorID;			// 00
@@ -542,19 +535,17 @@ public:
 	};
 	// 10
 
-	enum
-	{
-		kFormFlags_Initialized =	0x00000008,	// set by TESForm::InitItem()
-		kFormFlags_CastShadows =	0x00000200,
-		kFormFlags_QuestItem =		0x00000400,
-		kFormFlags_IsPermanent =	0x00000800,
-		kFormFlags_DontSaveForm =	0x00004000,	// TODO: investigate
-		kFormFlags_Compressed =		0x00040000,
+	enum {
+		kFormFlags_Initialized = 0x00000008,	// set by TESForm::InitItem()
+		kFormFlags_CastShadows = 0x00000200,
+		kFormFlags_QuestItem = 0x00000400,
+		kFormFlags_IsPermanent = 0x00000800,
+		kFormFlags_DontSaveForm = 0x00004000,	// TODO: investigate
+		kFormFlags_Compressed = 0x00040000,
 	};
 
-	enum
-	{
-		kModified_Flags =	0x00000001
+	enum {
+		kModified_Flags = 0x00000001
 		//	UInt32	flags;
 	};
 
@@ -563,11 +554,9 @@ public:
 	UInt8		jipFormFlags2;		// 006
 	UInt8		jipFormFlags3;		// 007
 	UInt32		flags;				// 008
-	union
-	{
+	union {
 		UInt32		refID;
-		struct
-		{
+		struct {
 			UInt8	id[3];
 			UInt8	modIndex;
 		};
@@ -576,30 +565,30 @@ public:
 #ifdef EDITOR
 	EditorData	editorData;			// +10
 #endif
-	tList<ModInfo> mods;			// 010 ModReferenceList in Oblivion	
+	tList<ModInfo> mods;			// 010 ModReferenceList in Oblivion
 	// 018 / 028
 
-	TESForm *TryGetREFRParent();
+	TESForm* TryGetREFRParent();
 	UInt8 GetModIndex() const;
-	TESFullName *GetFullName();
-	const char *GetTheName();
+	TESFullName* GetFullName();
+	const char* GetTheName();
 	bool IsCloned() const;
 
 	// adds a new form to the game (from CloneForm or LoadForm)
 	void DoAddForm(TESForm* newForm, bool bPersist = true, bool record = true) const;
 	// return a new base form which is the clone of this form
-	TESForm *CloneForm(bool bPersist = true) const;
+	TESForm* CloneForm(bool bPersist = true) const;
 	bool IsInventoryObject() const;
 	bool IsReference();
 
 	bool HasScript();
-	bool GetScriptAndEventList(Script *&script, ScriptEventList *&eventList);
+	bool GetScriptAndEventList(Script*& script, ScriptEventList*& eventList);
 	bool IsItemPlayable();
 	UInt32 GetItemValue();
 	UInt8 GetOverridingModIdx();
-	const char *GetDescriptionText();
-	const char *RefToString();
-	TESLeveledList *GetLvlList();
+	const char* GetDescriptionText();
+	const char* RefToString();
+	TESLeveledList* GetLvlList();
 	void SetJIPFlag(UInt8 jipFlag, bool bSet);
 
 	MEMBER_FN_PREFIX(TESForm);
@@ -609,44 +598,37 @@ public:
 #else
 #error
 #endif
-
 };
 STATIC_ASSERT(sizeof(TESForm) == 0x18);
 
-struct Condition
-{
+struct Condition {
 	UInt8			type;				// 00
 	UInt8			pad01[3];			// 01
-	union
-	{
+	union {
 		float		value;
 		UInt32		global;
 	}				comparisonValue;	// 04
 	UInt32			opcode;				// 08
-	union
-	{
+	union {
 		float		value;
 		UInt32		number;
-		TESForm		*form;
+		TESForm* form;
 	}				parameter1;			// 0C
-	union
-	{
+	union {
 		float		value;
 		UInt32		number;
-		TESForm		*form;
+		TESForm* form;
 	}				parameter2;			// 10
 	UInt32			runOnType;			// 14	Subject, Target, Reference, CombatTarget, LinkedReference
-	TESObjectREFR	*reference;			// 18 
+	TESObjectREFR* reference;			// 18
 
 	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result) { return ThisStdCall_B(0x681600, this, runOnRef, arg2, result); }
 };
 
-struct ConditionList : tList<Condition>
-{
+struct ConditionList : tList<Condition> {
 	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result, bool arg4) { return ThisStdCall<bool>(0x680C60, this, runOnRef, arg2, result, arg4); }
 };
-class TESObject : public TESForm
-{
+class TESObject : public TESForm {
 public:
 	TESObject();
 	~TESObject();
@@ -655,39 +637,37 @@ public:
 	virtual bool	Unk_4F(void);
 	virtual UInt32	Unk_50(void);
 	virtual bool	Unk_51(void);
-	virtual void	Unk_52(void * arg);
-	virtual NiNode	* Unk_53(TESObjectREFR * refr, void * arg1);
-	virtual void	Unk_54(void * arg);
+	virtual void	Unk_52(void* arg);
+	virtual NiNode* Unk_53(TESObjectREFR* refr, void* arg1);
+	virtual void	Unk_54(void* arg);
 	virtual bool	IsInternal(void);
 	virtual bool	IsInternalMarker(void);
 	virtual void	Unk_57(void);
 	virtual bool	Unk_58(void);	// BoundObject: Calls Unk_5F on the object model
-	virtual bool	Unk_59(void * arg);
-	virtual void	Unk_5A(void * arg0, void * arg1);
+	virtual bool	Unk_59(void* arg);
+	virtual void	Unk_5A(void* arg0, void* arg1);
 	virtual UInt32	Unk_5B(void);
 	virtual UInt32	Unk_5C(void);
-	virtual bool	Unk_5D(TESObjectREFR * refr);	// if false, no NiNode gets returned by Unk_53, true for NPC
+	virtual bool	Unk_5D(TESObjectREFR* refr);	// if false, no NiNode gets returned by Unk_53, true for NPC
 };
 
 // 30
-class TESBoundObject : public TESObject
-{
+class TESBoundObject : public TESObject {
 public:
 	TESBoundObject();
 	~TESBoundObject();
 
-	virtual NiNode	*CreateNiNode(TESObjectREFR * refr);	// calls Fn53, for NPC calls ReadBones, for LevelledActor level them if necessary
+	virtual NiNode* CreateNiNode(TESObjectREFR* refr);	// calls Fn53, for NPC calls ReadBones, for LevelledActor level them if necessary
 	virtual bool	Unk_5F(void);
 
-	BoundObjectListHead		*head;		// 018
-	TESBoundObject			*prev;		// 01C
-	TESBoundObject			*next;		// 020
+	BoundObjectListHead* head;		// 018
+	TESBoundObject* prev;		// 01C
+	TESBoundObject* next;		// 020
 	SInt16					bounds[6];	// 024
 };
 
 // C
-class TESFullName : public BaseFormComponent
-{
+class TESFullName : public BaseFormComponent {
 public:
 	TESFullName();
 	~TESFullName();
@@ -696,53 +676,47 @@ public:
 };
 
 // 0C
-class TESTexture : public BaseFormComponent
-{
+class TESTexture : public BaseFormComponent {
 public:
 	TESTexture();
 	~TESTexture();
 
 	virtual UInt32	Unk_04(void);
-	virtual void	GetNormalMap(String *str);
-	virtual char	*GetPathRoot(void);
+	virtual void	GetNormalMap(String* str);
+	virtual char* GetPathRoot(void);
 
 	String		ddsPath;	// 04
 };
 
 // 0C
-class TESTexture1024 : public TESTexture
-{
+class TESTexture1024 : public TESTexture {
 public:
 	TESTexture1024();
 	~TESTexture1024();
 };
 
 // 00C
-class TESIcon : public TESTexture
-{
+class TESIcon : public TESTexture {
 public:
 	TESIcon();
 	~TESIcon();
 
-	void SetPath(const char* newPath)	{ ddsPath.Set(newPath); }
+	void SetPath(const char* newPath) { ddsPath.Set(newPath); }
 };
 
-
 // C
-class TESScriptableForm : public BaseFormComponent
-{
+class TESScriptableForm : public BaseFormComponent {
 public:
 	TESScriptableForm();
 	~TESScriptableForm();
 
-	Script	* script;	// 004
+	Script* script;	// 004
 	bool	resolved;	// 008	called during LoadForm, so scripts do not wait for TESForm_InitItem to be resolved
 	UInt8	pad[3];		// 009
 };
 
 // 010
-class BGSMessageIcon : public BaseFormComponent
-{
+class BGSMessageIcon : public BaseFormComponent {
 public:
 	BGSMessageIcon();
 	~BGSMessageIcon();
@@ -750,14 +724,11 @@ public:
 	TESIcon	icon;		// 004
 };
 
-
 // 008
-class TESValueForm : public BaseFormComponent
-{
+class TESValueForm : public BaseFormComponent {
 public:
-	enum
-	{
-		kModified_GoldValue =	0x00000008,
+	enum {
+		kModified_GoldValue = 0x00000008,
 		// UInt32	value
 	};
 
@@ -768,15 +739,14 @@ public:
 	virtual void	Save(UInt32 changedFlags);
 	virtual void	Load(UInt32 changedFlags);
 
-//	DEFINE_MEMBER_FN_LONG(TESValueForm, SetValue, void, _TESValueForm_SetValue, UInt32 newVal);
+	//	DEFINE_MEMBER_FN_LONG(TESValueForm, SetValue, void, _TESValueForm_SetValue, UInt32 newVal);
 
 	UInt32	value;
 	// 008
 };
 
 // 10
-class TESEnchantableForm : public BaseFormComponent
-{
+class TESEnchantableForm : public BaseFormComponent {
 public:
 	TESEnchantableForm();
 	~TESEnchantableForm();
@@ -791,8 +761,7 @@ public:
 };
 
 // 08
-class TESImageSpaceModifiableForm : public BaseFormComponent
-{
+class TESImageSpaceModifiableForm : public BaseFormComponent {
 public:
 	TESImageSpaceModifiableForm();
 	~TESImageSpaceModifiableForm();
@@ -801,8 +770,7 @@ public:
 };
 
 // 008
-class TESWeightForm : public BaseFormComponent
-{
+class TESWeightForm : public BaseFormComponent {
 public:
 	TESWeightForm();
 	~TESWeightForm();
@@ -812,8 +780,7 @@ public:
 };
 
 // 008
-class TESHealthForm : public BaseFormComponent
-{
+class TESHealthForm : public BaseFormComponent {
 public:
 	TESHealthForm();
 	~TESHealthForm();
@@ -824,8 +791,7 @@ public:
 };
 
 // 008
-class TESAttackDamageForm : public BaseFormComponent
-{
+class TESAttackDamageForm : public BaseFormComponent {
 public:
 	TESAttackDamageForm();
 	~TESAttackDamageForm();
@@ -838,21 +804,18 @@ public:
 };
 
 // 24
-class EffectItem
-{
+class EffectItem {
 public:
 	EffectItem();
 	~EffectItem();
 
-	enum
-	{
+	enum {
 		kRange_Self = 0,
 		kRange_Touch,
 		kRange_Target,
 	};
 
-	struct ScriptEffectInfo
-	{
+	struct ScriptEffectInfo {
 		UInt32 scriptRefID;
 		UInt32 school;
 		String effectName;
@@ -877,7 +840,7 @@ public:
 	UInt32				duration;			// 08
 	UInt32				range;				// 0C
 	UInt32				actorValueOrOther;	// 10
-	EffectSetting		*setting;			// 14
+	EffectSetting* setting;			// 14
 	float				cost;				// 18 on autocalc items this seems to be the cost
 	ConditionList		conditions;			// 1C
 
@@ -913,8 +876,7 @@ public:
 };
 
 // 10
-class EffectItemList : public BSSimpleList<EffectItem>
-{
+class EffectItemList : public BSSimpleList<EffectItem> {
 public:
 	EffectItemList();
 	~EffectItemList();
@@ -927,8 +889,7 @@ public:
 STATIC_ASSERT(sizeof(EffectItemList) == 0x10);
 
 // 1C
-class MagicItem : public TESFullName
-{
+class MagicItem : public TESFullName {
 public:
 	MagicItem();
 	~MagicItem();
@@ -949,7 +910,7 @@ public:
 	EffectItemList	list;	// 00C
 //	UInt32	unk018;			// 018
 	// perhaps types are no longer correct!
-	enum EType{
+	enum EType {
 		kType_None = 0,
 		kType_Spell = 1,
 		kType_Enchantment = 2,
@@ -962,8 +923,7 @@ public:
 STATIC_ASSERT(sizeof(MagicItem) == 0x1C);
 
 // 034
-class MagicItemForm : public TESForm
-{
+class MagicItemForm : public TESForm {
 public:
 	MagicItemForm();
 	~MagicItemForm();
@@ -977,37 +937,33 @@ public:
 STATIC_ASSERT(sizeof(MagicItemForm) == 0x34);
 
 // 18
-class TESModel : public BaseFormComponent
-{
+class TESModel : public BaseFormComponent {
 public:
 	TESModel();
 	~TESModel();
 
-	enum
-	{
-		kFacegenFlag_Head =			0x01,
-		kFacegenFlag_Torso =		0x02,
-		kFacegenFlag_RightHand =	0x04,
-		kFacegenFlag_LeftHand =		0x08,
+	enum {
+		kFacegenFlag_Head = 0x01,
+		kFacegenFlag_Torso = 0x02,
+		kFacegenFlag_RightHand = 0x04,
+		kFacegenFlag_LeftHand = 0x08,
 	};
 
-	virtual void *	Destroy(bool noDealloc);	// 04
-	virtual char *	GetModelPath(void);
-	virtual void	SetModelPath(char * path);	// 06
+	virtual void* Destroy(bool noDealloc);	// 04
+	virtual char* GetModelPath(void);
+	virtual void	SetModelPath(char* path);	// 06
 
 	String	nifPath;		// 04
 	UInt32	unk0C;			// 0C	referenced when saving Texture Hashes, init'd as a byte or is it a pointer to a structure starting with a byte followed by a pointer to some allocated data ?
-	void	* unk10;		// 10
+	void* unk10;		// 10
 	UInt8	facegenFlags;	// 14
 	UInt8	pad15[3];		// 15
 
-	void SetPath(const char* newPath)	{ nifPath.Set(newPath); }
-
+	void SetPath(const char* newPath) { nifPath.Set(newPath); }
 };
 
 // 18
-class BGSTextureModel : public TESModel
-{
+class BGSTextureModel : public TESModel {
 public:
 	BGSTextureModel();
 	~BGSTextureModel();
@@ -1015,30 +971,27 @@ public:
 
 // 020
 class BGSTextureSet;
-class TESModelTextureSwap : public TESModel
-{
+class TESModelTextureSwap : public TESModel {
 public:
 	TESModelTextureSwap();
 	~TESModelTextureSwap();
 
-	struct Texture 
-	{
-		BGSTextureSet*	textureID;	// 00
+	struct Texture {
+		BGSTextureSet* textureID;	// 00
 		UInt32	index3D;			// 04
 		char	textureName[0x80];	// 08
 	};	// there seem to be an array (length 6) post 0x88
 
-	virtual void *	Destroy(bool noDealloc);
-	virtual char *	GetPath(void);
-	virtual void	SetPath(char * path);
-	virtual void *	Unk_07(void);
+	virtual void* Destroy(bool noDealloc);
+	virtual char* GetPath(void);
+	virtual void	SetPath(char* path);
+	virtual void* Unk_07(void);
 
 	tList<Texture> textureList;	// 018
 };
 
 // 008
-class BGSClipRoundsForm : public BaseFormComponent
-{
+class BGSClipRoundsForm : public BaseFormComponent {
 public:
 	BGSClipRoundsForm();
 	~BGSClipRoundsForm();
@@ -1049,63 +1002,57 @@ public:
 };
 
 // 18
-struct DestructionStage
-{
-	enum
-	{
-		kFlags_CapDamage =		1,
-		kFlags_DisableObject =	2,
-		kFlags_DestroyObject =	4,
+struct DestructionStage {
+	enum {
+		kFlags_CapDamage = 1,
+		kFlags_DisableObject = 2,
+		kFlags_DestroyObject = 4,
 	};
 
 	UInt8				dmgStage;		// 00
 	UInt8				healthPrc;		// 01
 	UInt16				flags;			// 02
 	UInt32				selfDmgSec;		// 04
-	BGSExplosion		*explosion;		// 08
-	BGSDebris			*debris;		// 0C
+	BGSExplosion* explosion;		// 08
+	BGSDebris* debris;		// 0C
 	UInt32				debrisCount;	// 10
-	TESModelTextureSwap	*replacement;	// 14
+	TESModelTextureSwap* replacement;	// 14
 };
 
 // 14
-struct DestructibleData
-{
+struct DestructibleData {
 	UInt32				health;		// 00
 	UInt8				stageCount;	// 04
 	bool				targetable;	// 05
 	UInt8				unk06[2];	// 06
-	DestructionStage	**stages;	// 08
+	DestructionStage** stages;	// 08
 	UInt32				unk0C;		// 0C
 	UInt32				unk10;		// 10
 };
 
 // 08
-class BGSDestructibleObjectForm : public BaseFormComponent
-{
+class BGSDestructibleObjectForm : public BaseFormComponent {
 public:
 	BGSDestructibleObjectForm();
 	~BGSDestructibleObjectForm();
 
-	DestructibleData	*data;			// 04
+	DestructibleData* data;			// 04
 };
 
 STATIC_ASSERT(sizeof(BGSDestructibleObjectForm) == 0x8);
 
 // 00C
-class BGSPickupPutdownSounds : public BaseFormComponent
-{
+class BGSPickupPutdownSounds : public BaseFormComponent {
 public:
 	BGSPickupPutdownSounds();
 	~BGSPickupPutdownSounds();
 
-	TESSound	* pickupSound;		// 004
-	TESSound	* putdownSound;		// 008
+	TESSound* pickupSound;		// 004
+	TESSound* putdownSound;		// 008
 };
 
 // 008
-class BGSAmmoForm : public BaseFormComponent
-{
+class BGSAmmoForm : public BaseFormComponent {
 public:
 	BGSAmmoForm();
 	~BGSAmmoForm();
@@ -1114,18 +1061,16 @@ public:
 };
 
 // 008
-class BGSRepairItemList : public BaseFormComponent
-{
+class BGSRepairItemList : public BaseFormComponent {
 public:
 	BGSRepairItemList();
 	~BGSRepairItemList();
 
-	BGSListForm	* listForm;	// 04
+	BGSListForm* listForm;	// 04
 };
 
 // 008
-class BGSEquipType : public BaseFormComponent
-{
+class BGSEquipType : public BaseFormComponent {
 public:
 	BGSEquipType();
 	~BGSEquipType();
@@ -1134,8 +1079,7 @@ public:
 };
 
 // 004
-class BGSPreloadable : public BaseFormComponent
-{
+class BGSPreloadable : public BaseFormComponent {
 public:
 	BGSPreloadable();
 	~BGSPreloadable();
@@ -1144,19 +1088,17 @@ public:
 };
 
 // 008
-class BGSBipedModelList : public BaseFormComponent
-{
+class BGSBipedModelList : public BaseFormComponent {
 public:
 	BGSBipedModelList();
 	~BGSBipedModelList();
-	
-	BGSListForm*    models;		// 004
+
+	BGSListForm* models;		// 004
 	// 008
 };
 
 // 018
-class TESModelRDT : public TESModel
-{
+class TESModelRDT : public TESModel {
 public:
 	TESModelRDT();
 	~TESModelRDT();
@@ -1165,8 +1107,7 @@ public:
 };
 
 // 0DC
-class TESBipedModelForm : public BaseFormComponent
-{
+class TESBipedModelForm : public BaseFormComponent {
 public:
 	TESBipedModelForm();
 	~TESBipedModelForm();
@@ -1200,34 +1141,34 @@ public:
 	};
 
 	enum ESlot {
-		eSlot_Head =		0x1 << ePart_Head,
-		eSlot_Hair =		0x1 << ePart_Hair,
-		eSlot_UpperBody =	0x1 << ePart_UpperBody,
-		eSlot_LeftHand =	0x1 << ePart_LeftHand,
-		eSlot_RightHand =	0x1 << ePart_RightHand,
-		eSlot_Weapon =		0x1 << ePart_Weapon,
-		eSlot_PipBoy =		0x1 << ePart_PipBoy,
-		eSlot_Backpack =	0x1 << ePart_Backpack,
-		eSlot_Necklace =	0x1 << ePart_Necklace,
-		eSlot_Headband =	0x1 << ePart_Headband,
-		eSlot_Hat =			0x1 << ePart_Hat,
-		eSlot_Eyeglasses =	0x1 << ePart_Eyeglasses,
-		eSlot_Nosering =	0x1 << ePart_Nosering,
-		eSlot_Earrings =	0x1 << ePart_Earrings,
-		eSlot_Mask =		0x1 << ePart_Mask,
-		eSlot_Choker =		0x1 << ePart_Choker,
-		eSlot_MouthObject=	0x1 << ePart_MouthObject,
-		eSlot_BodyAddon1 =	0x1 << ePart_BodyAddon1,
-		eSlot_BodyAddon2 =	0x1 << ePart_BodyAddon2,
-		eSlot_BodyAddon3 =	0x1 << ePart_BodyAddon3
+		eSlot_Head = 0x1 << ePart_Head,
+		eSlot_Hair = 0x1 << ePart_Hair,
+		eSlot_UpperBody = 0x1 << ePart_UpperBody,
+		eSlot_LeftHand = 0x1 << ePart_LeftHand,
+		eSlot_RightHand = 0x1 << ePart_RightHand,
+		eSlot_Weapon = 0x1 << ePart_Weapon,
+		eSlot_PipBoy = 0x1 << ePart_PipBoy,
+		eSlot_Backpack = 0x1 << ePart_Backpack,
+		eSlot_Necklace = 0x1 << ePart_Necklace,
+		eSlot_Headband = 0x1 << ePart_Headband,
+		eSlot_Hat = 0x1 << ePart_Hat,
+		eSlot_Eyeglasses = 0x1 << ePart_Eyeglasses,
+		eSlot_Nosering = 0x1 << ePart_Nosering,
+		eSlot_Earrings = 0x1 << ePart_Earrings,
+		eSlot_Mask = 0x1 << ePart_Mask,
+		eSlot_Choker = 0x1 << ePart_Choker,
+		eSlot_MouthObject = 0x1 << ePart_MouthObject,
+		eSlot_BodyAddon1 = 0x1 << ePart_BodyAddon1,
+		eSlot_BodyAddon2 = 0x1 << ePart_BodyAddon2,
+		eSlot_BodyAddon3 = 0x1 << ePart_BodyAddon3
 	};
 
 	enum EBipedFlags {
-		eBipedFlag_HasBackPack	= 0x4,
-		eBipedFlag_MediumArmor	= 0x8,
-		eBipedFlag_PowerArmor	= 0x20,
-		eBipedFlag_NonPlayable	= 0x40,
-		eBipedFlag_HeavyArmor	= 0x80,
+		eBipedFlag_HasBackPack = 0x4,
+		eBipedFlag_MediumArmor = 0x8,
+		eBipedFlag_PowerArmor = 0x20,
+		eBipedFlag_NonPlayable = 0x40,
+		eBipedFlag_HeavyArmor = 0x80,
 	};
 
 	enum EBipedPath {
@@ -1256,14 +1197,16 @@ public:
 	void SetPowerArmor(bool bPA) {
 		if (bPA) {
 			bipedFlags |= eBipedFlag_PowerArmor;
-		} else {
+		}
+		else {
 			bipedFlags &= ~eBipedFlag_PowerArmor;
 		}
 	}
 	void SetNonPlayable(bool bNP) {
 		if (bNP) {
 			bipedFlags |= eBipedFlag_NonPlayable;
-		} else {
+		}
+		else {
 			bipedFlags &= ~eBipedFlag_NonPlayable;
 		}
 	}
@@ -1280,41 +1223,37 @@ public:
 STATIC_ASSERT(sizeof(TESBipedModelForm) == 0x0DC);
 
 // 30
-class TESBoundAnimObject : public TESBoundObject
-{
+class TESBoundAnimObject : public TESBoundObject {
 public:
 	TESBoundAnimObject();
 	~TESBoundAnimObject();
 };
 
 // 0C
-struct LvlListExtra
-{
+struct LvlListExtra {
 	union						// 00
 	{
-		TESFaction	*ownerFaction;
-		TESNPC		*ownerNPC;
+		TESFaction* ownerFaction;
+		TESNPC* ownerNPC;
 	};
 	union						// 04
 	{
 		UInt32		requiredRank;
-		TESGlobal	*globalVar;
+		TESGlobal* globalVar;
 	};
 	float			health;		// 08
 };
 
 // 0C
-class TESContainer : public BaseFormComponent
-{
+class TESContainer : public BaseFormComponent {
 public:
 	TESContainer();
 	~TESContainer();
 
-	struct FormCount
-	{
+	struct FormCount {
 		SInt32				count;			//	00
-		TESForm				*form;			//	04
-		LvlListExtra		*contExtraData;	//	08
+		TESForm* form;			//	04
+		LvlListExtra* contExtraData;	//	08
 	};
 	typedef tList<FormCount> FormCountList;
 
@@ -1322,32 +1261,29 @@ public:
 };
 
 // 00C
-class BGSTouchSpellForm : public BaseFormComponent
-{
+class BGSTouchSpellForm : public BaseFormComponent {
 public:
 	BGSTouchSpellForm();
 	~BGSTouchSpellForm();
 
-	TESForm	*unarmedEffect;	// 04
+	TESForm* unarmedEffect;	// 04
 	UInt16	unarmedAnim;	// 08
 	UInt16	pad0A;			// 0A
 };
 
-struct FactionListData
-{
-	TESFaction	*faction;
+struct FactionListData {
+	TESFaction* faction;
 	SInt8		rank;
 	UInt8		pad[3];
 };
 
 // 034
-class TESActorBaseData : public BaseFormComponent
-{
+class TESActorBaseData : public BaseFormComponent {
 public:
 	TESActorBaseData();
 	~TESActorBaseData();
 
-	virtual void			Fn_04(TESForm * selectedForm);	// Called during form initialization after LoadForm and InitForm
+	virtual void			Fn_04(TESForm* selectedForm);	// Called during form initialization after LoadForm and InitForm
 	// flags access
 	virtual bool			Fn_05(void);	// 00100000
 	virtual bool			Fn_06(void);	// 00200000
@@ -1363,30 +1299,29 @@ public:
 	virtual bool			Fn_10(void);
 	virtual bool			Fn_11(void);
 	virtual bool			Fn_12(void);
-	virtual void			Fn_13(void * arg);
+	virtual void			Fn_13(void* arg);
 	virtual bool			Fn_14(void);
-	virtual void			Fn_15(void * arg);
+	virtual void			Fn_15(void* arg);
 	virtual UInt32			Fn_16(void);
-	virtual void			Fn_17(void * arg);
+	virtual void			Fn_17(void* arg);
 	virtual UInt32			Fn_18(void);	// return unk08
 	virtual float			Fn_19(void);	// return unk14
-	virtual BGSVoiceType *	GetVoiceType(void);
+	virtual BGSVoiceType* GetVoiceType(void);
 
-	enum
-	{
-		kFlags_Female =					1 << 0,
-		kFlags_Essential =				1 << 1,
-		kFlags_HasCharGenFace =			1 << 2,
-		kFlags_Respawn =				1 << 3,
-		kFlags_AutoCalcStats =			1 << 4,
+	enum {
+		kFlags_Female = 1 << 0,
+		kFlags_Essential = 1 << 1,
+		kFlags_HasCharGenFace = 1 << 2,
+		kFlags_Respawn = 1 << 3,
+		kFlags_AutoCalcStats = 1 << 4,
 		//								1 << 5,
 		//								1 << 6,
-		kFlags_PCLevelMult =			1 << 7,
-		kFlags_UseTemplate =			1 << 8,
-		kFlags_NoLowLevelProcessing =	1 << 9,
+		kFlags_PCLevelMult = 1 << 7,
+		kFlags_UseTemplate = 1 << 8,
+		kFlags_NoLowLevelProcessing = 1 << 9,
 		//								1 << 10,
-		kFlags_NoBloodSpray =			1 << 11,
-		kFlags_NoBloodDecal =			1 << 12,
+		kFlags_NoBloodSpray = 1 << 11,
+		kFlags_NoBloodDecal = 1 << 12,
 		//								1 << 13,
 		//								1 << 14,
 		//								1 << 15,
@@ -1394,17 +1329,17 @@ public:
 		//								1 << 17,
 		//								1 << 18,
 		//								1 << 19,
-		kFlags_NoVATSMelee =			1 << 20,
+		kFlags_NoVATSMelee = 1 << 20,
 		//								1 << 21,
-		kFlags_CanBeAllRaces =			1 << 22,
+		kFlags_CanBeAllRaces = 1 << 22,
 		//								1 << 23,
 		//								1 << 24,
 		//								1 << 25,
-		kFlags_NoKnockdowns =			1 << 26,
-		kFlags_NotPushable =			1 << 27,
+		kFlags_NoKnockdowns = 1 << 26,
+		kFlags_NotPushable = 1 << 27,
 		//								1 << 28,
 		//								1 << 29,
-		kFlags_NoRotateToHeadTrack =	1 << 30,
+		kFlags_NoRotateToHeadTrack = 1 << 30,
 		//								1 << 31,
 	};
 
@@ -1418,9 +1353,9 @@ public:
 	float			karma;				// 14	Karma
 	UInt16			dispositionBase;	// 18	Disposition Base
 	UInt16			templateFlags;		// 1A	Template Flags
-	TESForm			* deathItem;		// 1C	Death Item: object or FormList
-	BGSVoiceType	* voiceType;		// 20
-	TESForm*		templateActor;		// 24	Points toward Template
+	TESForm* deathItem;		// 1C	Death Item: object or FormList
+	BGSVoiceType* voiceType;		// 20
+	TESForm* templateActor;		// 24	Points toward Template
 #ifdef RUNTIME
 	UInt32			changedFlags;		// 28/000	Absent in Editor
 #endif
@@ -1429,16 +1364,14 @@ public:
 	char GetFactionRank(TESFaction* faction);
 	void SetFactionRank(TESFaction* faction, char rank);
 
-	bool IsFemale() { return flags & kFlags_Female ? true : false; }	// place holder until GECK 
+	bool IsFemale() { return flags & kFlags_Female ? true : false; }	// place holder until GECK
 };
 
 // 14
-class TESSpellList : public BaseFormComponent
-{
+class TESSpellList : public BaseFormComponent {
 public:
-	enum
-	{
-		kModified_BaseSpellList =	0x00000020,
+	enum {
+		kModified_BaseSpellList = 0x00000020,
 		// CHANGE_ACTOR_BASE_SPELLLIST
 		//	UInt16	numSpells;
 		//	UInt32	spells[numSpells];
@@ -1459,8 +1392,7 @@ public:
 	}
 
 	// return the nth spell
-	SpellItem* GetNthSpell(SInt32 whichSpell) const
-	{
+	SpellItem* GetNthSpell(SInt32 whichSpell) const {
 		return spellList.GetNthItem(whichSpell);
 	}
 
@@ -1469,8 +1401,7 @@ public:
 };
 
 // 020
-class TESAIForm : public BaseFormComponent
-{
+class TESAIForm : public BaseFormComponent {
 public:
 	TESAIForm();
 	~TESAIForm();
@@ -1482,7 +1413,7 @@ public:
 	virtual void	Load(UInt32 changedFlags);
 
 	UInt8	agression;				// 04
-	UInt8	confidence;				// 05 
+	UInt8	confidence;				// 05
 	UInt8	energyLevel;			// 06
 	UInt8	responsibility;			// 07
 	UInt8	mood;					// 08
@@ -1502,31 +1433,26 @@ public:
 	}
 
 	// return the nth package
-	TESPackage* GetNthPackage(SInt32 anIndex) const
-	{
+	TESPackage* GetNthPackage(SInt32 anIndex) const {
 		return packageList.GetNthItem(anIndex);
 	}
 
 	// replace the nth package
-	TESPackage* SetNthPackage(TESPackage* pPackage, SInt32 anIndex)
-	{
+	TESPackage* SetNthPackage(TESPackage* pPackage, SInt32 anIndex) {
 		return packageList.ReplaceNth(anIndex == -1 ? eListEnd : anIndex, pPackage);
 	}
 
 	// return the nth package
-	SInt32 AddPackageAt(TESPackage* pPackage, SInt32 anIndex)
-	{
+	SInt32 AddPackageAt(TESPackage* pPackage, SInt32 anIndex) {
 		return packageList.AddAt(pPackage, anIndex == -1 ? eListEnd : anIndex);
 	}
 
-	TESPackage* RemovePackageAt(SInt32 anIndex)
-	{
+	TESPackage* RemovePackageAt(SInt32 anIndex) {
 		return packageList.RemoveNth(anIndex == -1 ? eListEnd : anIndex);
 	}
 
 	// removes all packages and returns how many were removed
-	UInt32 RemoveAllPackages() const
-	{
+	UInt32 RemoveAllPackages() const {
 		UInt32 cCount = GetPackageCount();
 		packageList.RemoveAll();
 		return cCount - GetPackageCount();
@@ -1534,14 +1460,12 @@ public:
 };
 
 // 00C
-class TESAttributes : public BaseFormComponent
-{
+class TESAttributes : public BaseFormComponent {
 public:
 	TESAttributes();
 	~TESAttributes();
 
-	enum
-	{
+	enum {
 		kStrength = 0,
 		kPerception,
 		kEndurance,
@@ -1556,8 +1480,7 @@ public:
 };
 
 // 00C
-class TESAnimation : public BaseFormComponent
-{
+class TESAnimation : public BaseFormComponent {
 public:
 	TESAnimation();
 	~TESAnimation();
@@ -1568,8 +1491,7 @@ public:
 	// 00C
 };
 
-class ActorValueOwner
-{
+class ActorValueOwner {
 public:
 	ActorValueOwner();
 	~ActorValueOwner();
@@ -1583,7 +1505,7 @@ public:
 	virtual float	Fn_06(UInt32 avCode);					// GetDamageActorValue or GetModifiedActorValue		called from Fn_08, result in st, added to Fn_01
 	virtual UInt32	Fn_07(UInt32 avCode);					// Manipulate GetPermanentActorValue, maybe convert to integer.
 	virtual float	GetPermanentActorValue(UInt32 avCode);	// GetPermanentActorValue (used from Eval) result in EAX
-	virtual Actor*	Fn_09(void);							// GetActorBase (= this - 0x100) or GetActorBase (= this - 0x0A4)
+	virtual Actor* Fn_09(void);							// GetActorBase (= this - 0x100) or GetActorBase (= this - 0x0A4)
 	virtual UInt16	GetLevel();								// GetLevel (from ActorBase)
 
 	// SkillsCurrentValue[14] at index 20
@@ -1591,8 +1513,7 @@ public:
 
 STATIC_ASSERT(sizeof(ActorValueOwner) == 0x004);
 
-class CachedValuesOwner
-{
+class CachedValuesOwner {
 public:
 	CachedValuesOwner();
 	~CachedValuesOwner();
@@ -1618,16 +1539,15 @@ public:
 STATIC_ASSERT(sizeof(CachedValuesOwner) == 0x004);
 
 // 10C
-class TESActorBase : public TESBoundAnimObject
-{
+class TESActorBase : public TESBoundAnimObject {
 public:
 	TESActorBase();
 	~TESActorBase();
 
-	virtual BGSBodyPartData *	GetBodyPartData(void);
-	virtual void				Fn_61(void * arg);
-	virtual TESCombatStyle *	GetCombatStyle(void);	// Result saved as ZNAM GetCombatStyle
-	virtual void				SetCombatStyle(TESCombatStyle * combatStyle);
+	virtual BGSBodyPartData* GetBodyPartData(void);
+	virtual void				Fn_61(void* arg);
+	virtual TESCombatStyle* GetCombatStyle(void);	// Result saved as ZNAM GetCombatStyle
+	virtual void				SetCombatStyle(TESCombatStyle* combatStyle);
 	virtual void				SetAttr(UInt32 idx, float value);	// calls Fn65
 	virtual void				SetAttr(UInt32 idx, UInt32 value);
 	virtual void				ModActorValue(UInt32 actorValueCode, float value);
@@ -1653,8 +1573,7 @@ public:
 STATIC_ASSERT(sizeof(TESActorBase) == 0x10C);
 
 // 14
-class TESModelList : public BaseFormComponent
-{
+class TESModelList : public BaseFormComponent {
 public:
 	TESModelList();
 	~TESModelList();
@@ -1663,41 +1582,37 @@ public:
 	UInt32			count;		// 0C
 	UInt32			unk10;		// 10
 
-	bool ModelListAction(char *path, char action);
-	void CopyFrom(TESModelList *source);
+	bool ModelListAction(char* path, char action);
+	void CopyFrom(TESModelList* source);
 };
 
 // 008
-class TESDescription : public BaseFormComponent
-{
+class TESDescription : public BaseFormComponent {
 public:
 	TESDescription();
 	~TESDescription();
 
-	virtual const char *Get(TESForm * overrideForm, UInt32 chunkID);
+	virtual const char* Get(TESForm* overrideForm, UInt32 chunkID);
 
 	UInt32	formDiskOffset;	// 4 - how does this work for descriptions in mods?
 	// maybe extracts the mod ID then uses that to find the src file?
 };
 
 // 10
-class TESReactionForm : public BaseFormComponent
-{
+class TESReactionForm : public BaseFormComponent {
 public:
 	TESReactionForm();
 	~TESReactionForm();
 
-	struct Reaction
-	{
-		enum
-		{
+	struct Reaction {
+		enum {
 			kNeutral = 0,
 			kEnemy,
 			kAlly,
 			kFriend
 		};
 
-		TESFaction	* faction;
+		TESFaction* faction;
 		SInt32		modifier;
 		UInt32		reaction;
 	};
@@ -1708,73 +1623,64 @@ public:
 };
 
 // 08
-class TESRaceForm : public BaseFormComponent
-{
+class TESRaceForm : public BaseFormComponent {
 public:
 	TESRaceForm();
 	~TESRaceForm();
 
-	TESRace	* race;	// 04
+	TESRace* race;	// 04
 };
 
 // 8
 // ### derives from NiObject
-class BSTextureSet
-{
+class BSTextureSet {
 public:
 	BSTextureSet();
 	~BSTextureSet();
 
-	void	* _vtbl;	// 0
+	void* _vtbl;	// 0
 	UInt32	unk04;		// 4
 };
 
 // 0C
-class TESSoundFile : public BaseFormComponent
-{
+class TESSoundFile : public BaseFormComponent {
 public:
 	TESSoundFile();
 	~TESSoundFile();
 
-	virtual void	Set(const char * str);
+	virtual void	Set(const char* str);
 
 	String			path;	// 04
 };
 
 // 24
-class BGSQuestObjective
-{
+class BGSQuestObjective {
 public:
 	BGSQuestObjective();
 	~BGSQuestObjective();
 
-	virtual void *Destroy(bool noDealloc);
+	virtual void* Destroy(bool noDealloc);
 
-	enum
-	{
+	enum {
 		eQObjStatus_displayed = 1,
 		eQObjStatus_completed = 2,
 	};
 
-	struct TargetData 
-	{
-		TESObjectREFR*	target;
+	struct TargetData {
+		TESObjectREFR* target;
 		UInt8			flags;
 		UInt8			filler[3];
 	};
 
 	struct ParentSpaceNode {};
 
-	struct TeleportLink
-	{
-		TESObjectREFR*	door;
+	struct TeleportLink {
+		TESObjectREFR* door;
 		UInt32			unk04[3];
 	};
 
-	struct Target
-	{
-		struct Data
-		{
+	struct Target {
+		struct Data {
 			BSSimpleArray<ParentSpaceNode>	parentSpaceNodes;	// 00
 			BSSimpleArray<TeleportLink>		teleportLinks;		// 10
 			UInt32							unk20[6];			// 20
@@ -1783,22 +1689,21 @@ public:
 		UInt8							byte00;			// 00
 		UInt8							pad01[3];		// 01
 		ConditionList					conditions;		// 04
-		TESObjectREFR					*target;		// 0C
+		TESObjectREFR* target;		// 0C
 		Data							data;			// 10
 	};
 
 	UInt32			objectiveId;	// 004 Objective Index in the GECK
 	String			displayText;	// 008
-	TESQuest		*quest;			// 010
+	TESQuest* quest;			// 010
 	tList<Target>	targets;		// 014
 	UInt32			unk01C;			// 01C
 	UInt32			status;			// 020	bit0 = displayed, bit 1 = completed. 1 and 3 significant. If setting it to 3, quest flags bit1 will be set also.
 
-	SInt32 GetTargetIndex(TESObjectREFR *refr);
+	SInt32 GetTargetIndex(TESObjectREFR* refr);
 };
 
-class BGSOpenCloseForm
-{
+class BGSOpenCloseForm {
 public:
 	virtual void	Unk_00(UInt32 arg0, UInt32 arg1);
 	virtual void	Unk_01(UInt32 arg0, UInt32 arg1);
@@ -1811,17 +1716,14 @@ public:
 /**** forms ****/
 
 class TESTopic;
-class TESModelAnim : public TESModel
-{
+class TESModelAnim : public TESModel {
 public:
 	TESModelAnim();		// Identical to TESModel with a different vTable
 	~TESModelAnim();
-
 };	// 018
 
 // 54
-class TESIdleForm : public TESForm
-{
+class TESIdleForm : public TESForm {
 public:
 	TESIdleForm();
 	~TESIdleForm();
@@ -1842,8 +1744,7 @@ public:
 		eIFgf_flagUnknown = 64,
 	};
 
-	struct Data
-	{
+	struct Data {
 		UInt8			groupFlags;		// 000	animation group and other flags
 		UInt8			loopMin;		// 001
 		UInt8			loopMax;		// 002
@@ -1856,23 +1757,21 @@ public:
 	TESModelAnim				anim;			// 018
 	ConditionList				conditions;		// 030
 	Data						data;			// 038
-	BSSimpleArray<TESIdleForm*>	*children;		// 040	NiFormArray, contains all idle anims in path if eIFgf_flagUnknown is set
-	TESIdleForm					*parent;		// 044
-	TESIdleForm					*previous;		// 048
+	BSSimpleArray<TESIdleForm*>* children;		// 040	NiFormArray, contains all idle anims in path if eIFgf_flagUnknown is set
+	TESIdleForm* parent;		// 044
+	TESIdleForm* previous;		// 048
 	String						editorID;		// 04C
 
-	TESIdleForm *FindIdle(Actor *animActor);
+	TESIdleForm* FindIdle(Actor* animActor);
 };
 
-struct TESTopicInfoResponse
-{
-	struct Data
-	{
+struct TESTopicInfoResponse {
+	struct Data {
 		UInt32	emotionType;	//	00
 		UInt32	emotionValue;	//	04	Init'd to 0x32
 		UInt32	unused;			//	08
 		UInt8	responseNumber;	//	0C
-		UInt8	pad00D[3];		
+		UInt8	pad00D[3];
 		UInt32	sound;			//	10
 		UInt8	flags;			//	14	Init'd to 1
 		UInt8	pad015[3];
@@ -1880,20 +1779,18 @@ struct TESTopicInfoResponse
 
 	Data			data;					//	000
 	String			responseText;			//	018
-	TESIdleForm	*	spkeakerAnimation;		//	020
-	TESIdleForm	*	listenerAnimation;		//	024
-	TESTopicInfoResponse	* next;			//	028
+	TESIdleForm* spkeakerAnimation;		//	020
+	TESIdleForm* listenerAnimation;		//	024
+	TESTopicInfoResponse* next;			//	028
 };
 
 // 50
-class TESTopicInfo : public TESForm
-{
+class TESTopicInfo : public TESForm {
 public:
 	TESTopicInfo();
 	~TESTopicInfo();
 
-	struct RelatedTopics
-	{
+	struct RelatedTopics {
 		tList<TESTopic>		linkFrom;
 		tList<TESTopic>		choices;
 		tList<TESTopic>		unknown;
@@ -1909,32 +1806,31 @@ public:
 	UInt8				pad27;				// 27
 	String				prompt;				// 28
 	tList<TESTopic>		addTopics;			// 30
-	RelatedTopics		*relatedTopics;		// 38
+	RelatedTopics* relatedTopics;		// 38
 	UInt32				speaker;			// 3C
 	UInt32				actorValueOrPerk;	// 40
 	UInt32				speechChallenge;	// 44
-	TESQuest			*quest;				// 48
+	TESQuest* quest;				// 48
 	UInt32				modInfoFileOffset;	// 4C	during LoadForm
 
-	void RunResultScript(bool onEnd, Actor *actor);
+	void RunResultScript(bool onEnd, Actor* actor);
 };
 
 typedef NiTArray<TESTopicInfo*> TopicInfoArray;
 typedef void* INFO_LINK_ELEMENT;
 
 // 48
-class TESTopic : public TESForm
-{
+class TESTopic : public TESForm {
 public:
 	TESTopic();
 	~TESTopic();
 
 	struct Info	//	34
 	{
-		TESQuest		*quest;		//	00
+		TESQuest* quest;		//	00
 		TopicInfoArray	infoArray;	//	04
 		BSSimpleArray<INFO_LINK_ELEMENT>		unk01C;
-		TESQuest		*quest2;	//	2C
+		TESQuest* quest2;	//	2C
 		UInt8			unk030;
 		UInt8			pad031[3];
 	};
@@ -1954,8 +1850,7 @@ public:
 };
 
 // A0
-class BGSTextureSet : public TESBoundObject
-{
+class BGSTextureSet : public TESBoundObject {
 public:
 	BGSTextureSet();
 	~BGSTextureSet();
@@ -1970,19 +1865,16 @@ public:
 		kEnv
 	};
 
-	enum
-	{
+	enum {
 		kTexFlag_NoSpecMap = 0x0001,
 	};
 
 	// 24
-	struct DecalInfo
-	{
-		enum
-		{
-			kFlag_Parallax =	0x01,
-			kFlag_AlphaBlend =	0x02,
-			kFlag_AlphaTest =	0x04,
+	struct DecalInfo {
+		enum {
+			kFlag_Parallax = 0x01,
+			kFlag_AlphaBlend = 0x02,
+			kFlag_AlphaTest = 0x04,
 		};
 
 		float	minWidth;		// 00
@@ -2001,7 +1893,7 @@ public:
 	BSTextureSet	bsTexSet;		// 30
 
 	TESTexture		textures[6];	// 38
-	DecalInfo		* decalInfo;	// 80
+	DecalInfo* decalInfo;	// 80
 	UInt16			texFlags;		// 84
 	UInt8			pad86[2];		// 86
 	UInt32			unk88;			// 88
@@ -2015,8 +1907,7 @@ public:
 STATIC_ASSERT(sizeof(BGSTextureSet) == 0xA0);
 
 // 24
-class BGSMenuIcon : public TESForm
-{
+class BGSMenuIcon : public TESForm {
 public:
 	BGSMenuIcon();
 	~BGSMenuIcon();
@@ -2027,24 +1918,21 @@ public:
 STATIC_ASSERT(sizeof(BGSMenuIcon) == 0x24);
 
 // 28
-class TESGlobal : public TESForm
-{
+class TESGlobal : public TESForm {
 public:
 	TESGlobal();
 	~TESGlobal();
 
-	enum
-	{
-		kType_Float =		'f',
-		kType_Long =		'l',
-		kType_Short =		's'
+	enum {
+		kType_Float = 'f',
+		kType_Long = 'l',
+		kType_Short = 's'
 	};
 
 	String			name;		// 18
 	UInt8			type;		// 20
 	UInt8			pad21[3];	// 21
-	union
-	{
+	union {
 		float		data;
 		UInt32		uRefID;
 	};
@@ -2055,33 +1943,30 @@ public:
 STATIC_ASSERT(sizeof(TESGlobal) == 0x28);
 
 // 60
-class TESClass : public TESForm
-{
+class TESClass : public TESForm {
 public:
 	TESClass();
 	~TESClass();
 
-	enum
-	{
-		kFlag_Playable =	0x00000001,
-		kFlag_Guard =		0x00000002,
+	enum {
+		kFlag_Playable = 0x00000001,
+		kFlag_Guard = 0x00000002,
 	};
 
-	enum
-	{
-		kService_Weapons =		0x00000001,
-		kService_Armor =		0x00000002,
-		kService_Clothing =		0x00000004,
-		kService_Books =		0x00000008,
-		kService_Food =			0x00000010,
-		kService_Chems =		0x00000020,
-		kService_Stimpacks =	0x00000040,
-		kService_Lights =		0x00000080,	// ??
-		kService_Misc =			0x00000400,
-		kService_Potions =		0x00002000,	// probably deprecated
-		kService_Training =		0x00004000,
-		kService_Recharge =		0x00010000,
-		kService_Repair =		0x00020000,
+	enum {
+		kService_Weapons = 0x00000001,
+		kService_Armor = 0x00000002,
+		kService_Clothing = 0x00000004,
+		kService_Books = 0x00000008,
+		kService_Food = 0x00000010,
+		kService_Chems = 0x00000020,
+		kService_Stimpacks = 0x00000040,
+		kService_Lights = 0x00000080,	// ??
+		kService_Misc = 0x00000400,
+		kService_Potions = 0x00002000,	// probably deprecated
+		kService_Training = 0x00004000,
+		kService_Recharge = 0x00010000,
+		kService_Repair = 0x00020000,
 	};
 
 	TESFullName		fullName;		// 18
@@ -2100,43 +1985,38 @@ public:
 
 STATIC_ASSERT(sizeof(TESClass) == 0x60);
 
-class TESReputation : public TESForm
-{
+class TESReputation : public TESForm {
 public:
 	TESReputation();
 	~TESReputation();
 };
 
 // 4C
-class TESFaction : public TESForm
-{
+class TESFaction : public TESForm {
 public:
 	TESFaction();
 	~TESFaction();
-	enum
-	{
+	enum {
 		// TESForm flags
 
 		// TESReactionForm flags
 
-		kModified_FactionFlags =	0x00000004
+		kModified_FactionFlags = 0x00000004
 		// CHANGE_FACTION_FLAGS
 		// UInt8	flags;
 	};
 
-	enum
-	{
-		kFlag_HiddenFromPC =	0x00000001,
-		kFlag_Evil =			0x00000002,
-		kFlag_SpecialCombat =	0x00000004,
+	enum {
+		kFlag_HiddenFromPC = 0x00000001,
+		kFlag_Evil = 0x00000002,
+		kFlag_SpecialCombat = 0x00000004,
 
-		kFlag_TrackCrime =		0x00000100,
-		kFlag_AllowSell =		0x00000200,
+		kFlag_TrackCrime = 0x00000100,
+		kFlag_AllowSell = 0x00000200,
 	};
 
 	// 1C
-	struct Rank
-	{
+	struct Rank {
 		String		name;		// 00
 		String		femaleName;	// 08
 		TESTexture	insignia;	// 10 - effectively unused, can be set but there is no faction UI
@@ -2146,33 +2026,37 @@ public:
 	TESReactionForm	reaction;	// 24
 
 	UInt32			factionFlags;	// 34
-	TESReputation	*reputation;	// 38
+	TESReputation* reputation;	// 38
 	tList<Rank>		ranks;			// 3C
 	UInt32			crimeCount44;	// 44
 	UInt32			crimeCount48;	// 48
 
-	bool IsFlagSet(UInt32 flag)
-	{
+	bool IsFlagSet(UInt32 flag) {
 		return (factionFlags & flag) != 0;
 	}
-	void SetFlag(UInt32 pFlag, bool bEnable)
-	{
+	void SetFlag(UInt32 pFlag, bool bEnable) {
 		if (bEnable) factionFlags |= pFlag;
 		else factionFlags &= ~pFlag;
 		MarkAsModified(kModified_FactionFlags);
 	}
-	bool IsHidden()
-	{	return IsFlagSet(kFlag_HiddenFromPC);	}
-	bool IsEvil()
-	{	return IsFlagSet(kFlag_Evil);	}
-	bool HasSpecialCombat()
-	{	return IsFlagSet(kFlag_SpecialCombat);	}
-	void SetHidden(bool bHidden)
-	{	SetFlag(kFlag_HiddenFromPC, bHidden);	}
-	void SetEvil(bool bEvil)
-	{	SetFlag(kFlag_Evil, bEvil);	}
-	void SetSpecialCombat(bool bSpec)
-	{	SetFlag(kFlag_SpecialCombat, bSpec);	}
+	bool IsHidden() {
+		return IsFlagSet(kFlag_HiddenFromPC);
+	}
+	bool IsEvil() {
+		return IsFlagSet(kFlag_Evil);
+	}
+	bool HasSpecialCombat() {
+		return IsFlagSet(kFlag_SpecialCombat);
+	}
+	void SetHidden(bool bHidden) {
+		SetFlag(kFlag_HiddenFromPC, bHidden);
+	}
+	void SetEvil(bool bEvil) {
+		SetFlag(kFlag_Evil, bEvil);
+	}
+	void SetSpecialCombat(bool bSpec) {
+		SetFlag(kFlag_SpecialCombat, bSpec);
+	}
 	const char* GetNthRankName(UInt32 whichRank, bool bFemale = false);
 	void SetNthRankName(const char* newName, UInt32 whichRank, bool bFemale);
 };
@@ -2180,15 +2064,13 @@ public:
 STATIC_ASSERT(sizeof(TESFaction) == 0x4C);
 
 // 50
-class BGSHeadPart : public TESForm
-{
+class BGSHeadPart : public TESForm {
 public:
 	BGSHeadPart();
 	~BGSHeadPart();
 
-	enum
-	{
-		kFlag_Playable =	0x01,
+	enum {
+		kFlag_Playable = 0x01,
 	};
 
 	TESFullName			fullName;	// 18
@@ -2203,18 +2085,16 @@ public:
 STATIC_ASSERT(sizeof(BGSHeadPart) == 0x50);
 
 // 4C
-class TESHair : public TESForm
-{
+class TESHair : public TESForm {
 public:
 	TESHair();
 	~TESHair();
 
-	enum
-	{
-		kFlag_Playable =	0x01,
-		kFlag_NotMale =		0x02,
-		kFlag_NotFemale =	0x04,
-		kFlag_Fixed =		0x08,
+	enum {
+		kFlag_Playable = 0x01,
+		kFlag_NotMale = 0x02,
+		kFlag_NotFemale = 0x04,
+		kFlag_Fixed = 0x08,
 	};
 
 	TESFullName		fullName;	// 18
@@ -2224,24 +2104,22 @@ public:
 	UInt8			hairFlags;	// 48	Playable, not Male, not Female, Fixed
 	UInt8			pad49[3];	// 49
 
-	bool IsPlayable() {return (hairFlags & kFlag_Playable) == kFlag_Playable;}
-	void SetPlayable(bool doset) {if (doset) hairFlags |= kFlag_Playable; else hairFlags &= ~kFlag_Playable;}
+	bool IsPlayable() { return (hairFlags & kFlag_Playable) == kFlag_Playable; }
+	void SetPlayable(bool doset) { if (doset) hairFlags |= kFlag_Playable; else hairFlags &= ~kFlag_Playable; }
 };
 
 STATIC_ASSERT(sizeof(TESHair) == 0x4C);
 
 // 34
-class TESEyes : public TESForm
-{
+class TESEyes : public TESForm {
 public:
 	TESEyes();
 	~TESEyes();
 
-	enum
-	{
-		kFlag_Playable =	0x01,
-		kFlag_NotMale =		0x02,
-		kFlag_NotFemale =	0x04,
+	enum {
+		kFlag_Playable = 0x01,
+		kFlag_NotMale = 0x02,
+		kFlag_NotFemale = 0x04,
 	};
 
 	TESFullName		fullName;	// 18
@@ -2250,19 +2128,17 @@ public:
 	UInt8			eyeFlags;	// 30
 	UInt8			pad31[3];	// 31
 
-	bool IsPlayable() {return (eyeFlags & kFlag_Playable) == kFlag_Playable;}
-	void SetPlayable(bool doset) {if (doset) eyeFlags |= kFlag_Playable; else eyeFlags &= ~kFlag_Playable;}
+	bool IsPlayable() { return (eyeFlags & kFlag_Playable) == kFlag_Playable; }
+	void SetPlayable(bool doset) { if (doset) eyeFlags |= kFlag_Playable; else eyeFlags &= ~kFlag_Playable; }
 };
 
 STATIC_ASSERT(sizeof(TESEyes) == 0x34);
 
 // 4E4 - incomplete
-class TESRace : public TESForm
-{
+class TESRace : public TESForm {
 public:
 	// 18
-	struct FaceGenData
-	{
+	struct FaceGenData {
 		UInt32	unk00;
 		UInt32	unk04;
 		UInt32	unk08;
@@ -2272,16 +2148,14 @@ public:
 	};
 
 	// 2
-	struct SkillMod
-	{
+	struct SkillMod {
 		UInt8	actorValue;
 		char	mod;
 	};
 
-	enum
-	{
-		kFlag_Playable =	0x00000001,
-		kFlag_Child =		0x00000004,
+	enum {
+		kFlag_Playable = 0x00000001,
+		kFlag_Child = 0x00000004,
 	};
 
 	TESRace();
@@ -2300,7 +2174,7 @@ public:
 
 	TESAttributes	baseAttributes[2];		// 074 male/female
 	tList<TESHair>	hairs;					// 08C
-	TESHair *		defaultHair[2];			// 094 male/female
+	TESHair* defaultHair[2];			// 094 male/female
 	UInt8			defaultHairColor[2];	// 09C male/female
 	UInt8			fill09E[2];				// 09E
 
@@ -2318,38 +2192,36 @@ public:
 	UInt32			unk4B8[(0x4CC - 0x4B8) >> 2]; // 4B8
 
 	String				name;				// 4CC
-	NiTArray <void *>	faceGenUndo;		// 4D4 - NiTPrimitiveArray<FaceGenUndo *>
+	NiTArray <void*>	faceGenUndo;		// 4D4 - NiTPrimitiveArray<FaceGenUndo *>
 	UInt32				unk4E4[6];			// 4E4
-	BGSVoiceType*		voiceTypes[2];		// 4FC // VTCK male/female
-	TESRace*			ageRace[2];			// 504 // ONAM/YNAM
+	BGSVoiceType* voiceTypes[2];		// 4FC // VTCK male/female
+	TESRace* ageRace[2];			// 504 // ONAM/YNAM
 
-	bool IsPlayable() const {return (raceFlags & kFlag_Playable) == kFlag_Playable;}
-	void SetPlayable(bool doset) {if (doset) raceFlags |= kFlag_Playable; else raceFlags &= ~kFlag_Playable;}
+	bool IsPlayable() const { return (raceFlags & kFlag_Playable) == kFlag_Playable; }
+	void SetPlayable(bool doset) { if (doset) raceFlags |= kFlag_Playable; else raceFlags &= ~kFlag_Playable; }
 };
 
 // 68
-class TESSound : public TESBoundAnimObject
-{
+class TESSound : public TESBoundAnimObject {
 public:
 	TESSound();
 	~TESSound();
 
-	enum
-	{
-		kFlag_RandomFrequencyShift =	1,
-		kFlag_PlayAtRandom =			2,
-		kFlag_EnvironmentIgnored =		4,
-		kFlag_RandomLocation =			8,
-		kFlag_Loop =					16,
-		kFlag_MenuSound =				32,
-		kFlag_2D =						64,
-		kFlag_360LFE =					128,
-		kFlag_DialogueSound =			256,
-		kFlag_EnvelopeFast =			512,
-		kFlag_EnvelopeSlow =			1024,
-		kFlag_2DRadius =				2048,
-		kFlag_MuteWhenSubmerged =		4096,
-		kFlag_StartAtRandomPosition =	8192,
+	enum {
+		kFlag_RandomFrequencyShift = 1,
+		kFlag_PlayAtRandom = 2,
+		kFlag_EnvironmentIgnored = 4,
+		kFlag_RandomLocation = 8,
+		kFlag_Loop = 16,
+		kFlag_MenuSound = 32,
+		kFlag_2D = 64,
+		kFlag_360LFE = 128,
+		kFlag_DialogueSound = 256,
+		kFlag_EnvelopeFast = 512,
+		kFlag_EnvelopeSlow = 1024,
+		kFlag_2DRadius = 2048,
+		kFlag_MuteWhenSubmerged = 4096,
+		kFlag_StartAtRandomPosition = 8192,
 	};
 
 	TESSoundFile	soundFile;				// 30
@@ -2370,8 +2242,7 @@ public:
 	UInt32			unk60;					// 60
 	UInt32			unk64;					// 64
 
-	void SetFlag(UInt32 pFlag, bool bEnable)
-	{
+	void SetFlag(UInt32 pFlag, bool bEnable) {
 		if (bEnable) soundFlags |= pFlag;
 		else soundFlags &= ~pFlag;
 	}
@@ -2379,8 +2250,7 @@ public:
 STATIC_ASSERT(sizeof(TESSound) == 0x68);
 
 // 3C
-class BGSAcousticSpace : public TESBoundObject
-{
+class BGSAcousticSpace : public TESBoundObject {
 public:
 	BGSAcousticSpace();
 	~BGSAcousticSpace();
@@ -2393,8 +2263,7 @@ public:
 STATIC_ASSERT(sizeof(BGSAcousticSpace) == 0x3C);
 
 // 60
-class TESSkill : public TESForm
-{
+class TESSkill : public TESForm {
 public:
 	TESSkill();
 	~TESSkill();
@@ -2414,14 +2283,12 @@ public:
 STATIC_ASSERT(sizeof(TESSkill) == 0x60);
 
 // B0
-class EffectSetting : public TESForm
-{
+class EffectSetting : public TESForm {
 public:
 	EffectSetting();
 	~EffectSetting();
 
-	enum
-	{
+	enum {
 		kArchType_ValueModifier = 0,
 		kArchType_Script,
 		kArchType_Dispel,
@@ -2469,14 +2336,14 @@ public:
 	UInt32			unk54;			// 54
 	UInt32			effectFlags;	// 58
 	float			unk5C;			// 5C
-	TESForm			*associatedItem;// 60	// Script* for ScriptEffects
+	TESForm* associatedItem;// 60	// Script* for ScriptEffects
 	UInt32			unk64;			// 64
 	UInt32			resistVal;		// 68 - actor value for resistance
 	UInt16			unk6C;			// 6C
 	UInt8			pad6E[2];		// 6E
-	TESObjectLIGH	*light;			// 70
+	TESObjectLIGH* light;			// 70
 	float			projectileSpeed;// 74
-	TESEffectShader	*effectShader;	// 78 - effect shader
+	TESEffectShader* effectShader;	// 78 - effect shader
 	UInt32			unk7C;			// 7C
 	UInt32			unk80;			// 80
 	UInt32			unk84;			// 84
@@ -2497,8 +2364,7 @@ public:
 STATIC_ASSERT(sizeof(EffectSetting) == 0xB0);
 
 // 68
-class TESGrass : public TESBoundObject
-{
+class TESGrass : public TESBoundObject {
 public:
 	TESGrass();
 	~TESGrass();
@@ -2524,13 +2390,12 @@ public:
 STATIC_ASSERT(sizeof(TESGrass) == 0x68);
 
 // 28
-class TESLandTexture : public TESForm
-{
+class TESLandTexture : public TESForm {
 public:
 	TESLandTexture();
 	~TESLandTexture();
 
-	BGSTextureSet	*textureSet;		// 18
+	BGSTextureSet* textureSet;		// 18
 	UInt8			materialType;		// 1C
 	UInt8			friction;			// 1D
 	UInt8			restitution;		// 1E
@@ -2541,16 +2406,14 @@ public:
 STATIC_ASSERT(sizeof(TESLandTexture) == 0x28);
 
 // 44
-class EnchantmentItem : public MagicItemForm
-{
+class EnchantmentItem : public MagicItemForm {
 public:
 	EnchantmentItem();
 	~EnchantmentItem();
 
 	virtual void	ByteSwap(void);
 
-	enum
-	{
+	enum {
 		kType_Weapon = 2,
 		kType_Apparel,
 	};
@@ -2565,23 +2428,21 @@ public:
 STATIC_ASSERT(sizeof(EnchantmentItem) == 0x44);
 
 // 44
-class SpellItem : public MagicItemForm
-{
+class SpellItem : public MagicItemForm {
 public:
 	SpellItem();
 	~SpellItem();
 
 	virtual void	ByteSwap(void);
 
-	enum
-	{
-		kType_ActorEffect	= 0,
+	enum {
+		kType_ActorEffect = 0,
 		kType_Disease,
 		kType_Power,
 		kType_LesserPower,
 		kType_Ability,
 		kType_Poison,
-		kType_Addiction		= 10,
+		kType_Addiction = 10,
 	};
 
 	UInt32		type;		// 34
@@ -2596,8 +2457,7 @@ STATIC_ASSERT(sizeof(SpellItem) == 0x44);
 class BGSTalkingActivator;
 
 // 90
-class TESObjectACTI : public TESBoundAnimObject
-{
+class TESObjectACTI : public TESBoundAnimObject {
 public:
 	TESObjectACTI();
 	~TESObjectACTI();
@@ -2608,83 +2468,75 @@ public:
 	BGSDestructibleObjectForm	destructible;		// 68
 	BGSOpenCloseForm			openClose;			// 70
 
-	TESSound					*loopingSound;		// 74
-	TESSound					*activationSound;	// 78
-	TESSound					*radioTemplate;		// 7C
-	TESWaterForm				*waterType;			// 80
-	BGSTalkingActivator			*radioStation;		// 84
+	TESSound* loopingSound;		// 74
+	TESSound* activationSound;	// 78
+	TESSound* radioTemplate;		// 7C
+	TESWaterForm* waterType;			// 80
+	BGSTalkingActivator* radioStation;		// 84
 	String						activationPrompt;	// 88
 };
 
 STATIC_ASSERT(sizeof(TESObjectACTI) == 0x90);
 
 // 98
-class BGSTalkingActivator : public TESObjectACTI
-{
+class BGSTalkingActivator : public TESObjectACTI {
 public:
 	BGSTalkingActivator();
 	~BGSTalkingActivator();
 
-	Actor				*talkingActor;		// 90
-	BGSVoiceType		*voiceType;	// 94
+	Actor* talkingActor;		// 90
+	BGSVoiceType* voiceType;	// 94
 };
 STATIC_ASSERT(sizeof(BGSTalkingActivator) == 0x98);
 
 // BGSTerminal (9C)
-class BGSTerminal : public TESObjectACTI
-{
+class BGSTerminal : public TESObjectACTI {
 public:
 	BGSTerminal();
 	~BGSTerminal();
 
-	enum
-	{
+	enum {
 		kTerminalFlagLeveled = 1 << 0,
 		kTerminalFlagUnlocked = 1 << 1,
 		kTerminalFlagAltColors = 1 << 2,
 		kTerminalFlagHideWelcome = 1 << 3,
 	};
 
-	enum
-	{
+	enum {
 		kEntryFlagAddNote = 1 << 0,
 		kEntryFlagForceRedraw = 1 << 1,
 	};
 
-	struct TermData
-	{
+	struct TermData {
 		UInt8 difficulty;       // 0: very easy, 1: easy, 2: average, 3: hard, 4: very hard, 5: requires key
 		UInt8 terminalFlags;
 		UInt8 type;             // 0-9, corresponds to GECK types 1-10
 	};
 
-	struct MenuEntry
-	{
+	struct MenuEntry {
 		String				entryText;
 		String				resultText;
-		Script*				resultScript;
+		Script* resultScript;
 		UInt8				pad[78];
 		tList<Condition>	conditions;
-		BGSNote				*displayNote;
-		BGSTerminal			*subMenu;
+		BGSNote* displayNote;
+		BGSTerminal* subMenu;
 		UInt8				entryFlags;
 	};
 
 	String				desc;			// 090	DESC
 	tList<MenuEntry>	menuEntries;	// 098
-	BGSNote				*password;		// 0A0	PNAM
+	BGSNote* password;		// 0A0	PNAM
 	TermData			data;			// 0A4	DNAM
 };
 // 190
-class TESObjectARMO : public TESBoundObject
-{
+class TESObjectARMO : public TESBoundObject {
 public:
 	TESObjectARMO();
 	~TESObjectARMO();
 
-	struct MovementSound
-	{
-		TESSound		*sound;
+	struct MovementSound {
+		TESSound* sound;
 		UInt8			unk04[3];
 		UInt8			chance;
 		UInt32			type;
@@ -2716,13 +2568,12 @@ public:
 	UInt32						unk184;					// 184
 	union												// 188
 	{
-		TESObjectARMO			*audioTemplate;
-		tList<MovementSound>	*movementSounds;
+		TESObjectARMO* audioTemplate;
+		tList<MovementSound>* movementSounds;
 	};
 	UInt8						overrideSounds;			// 18C
 	UInt8						pad18D[3];				// 18D
-	void SetFacegenFlag(UInt32 pFlag, UInt32 bFemale, bool bEnable)
-	{
+	void SetFacegenFlag(UInt32 pFlag, UInt32 bFemale, bool bEnable) {
 		if (bEnable) bipedModel.bipedModel[bFemale].facegenFlags |= pFlag;
 		else bipedModel.bipedModel[bFemale].facegenFlags &= ~pFlag;
 	}
@@ -2730,8 +2581,7 @@ public:
 STATIC_ASSERT(sizeof(TESObjectARMO) == 0x190);
 
 // C4
-class TESObjectBOOK : public TESBoundObject
-{
+class TESObjectBOOK : public TESBoundObject {
 public:
 	TESObjectBOOK();
 	~TESObjectBOOK();
@@ -2755,8 +2605,7 @@ public:
 STATIC_ASSERT(sizeof(TESObjectBOOK) == 0xC4);
 
 // 154
-class TESObjectCLOT : public TESBoundObject
-{
+class TESObjectCLOT : public TESBoundObject {
 public:
 	TESObjectCLOT();
 	~TESObjectCLOT();
@@ -2774,8 +2623,7 @@ public:
 };
 
 // 9C
-class TESObjectCONT : public TESBoundAnimObject
-{
+class TESObjectCONT : public TESBoundAnimObject {
 public:
 	TESObjectCONT();
 	~TESObjectCONT();
@@ -2789,16 +2637,15 @@ public:
 	BGSOpenCloseForm			openCloseForm;			// 84
 
 	UInt32						unk88;					// 88
-	TESSound					*openSound;				// 8C
-	TESSound					*closeSound;			// 90
-	TESSound					*randomLoopingSound;	// 94
+	TESSound* openSound;				// 8C
+	TESSound* closeSound;			// 90
+	TESSound* randomLoopingSound;	// 94
 	UInt8						flags;					// 98
 	UInt8						pad99[3];				// 99
 };
 
 // 90
-class TESObjectDOOR : public TESBoundAnimObject
-{
+class TESObjectDOOR : public TESBoundAnimObject {
 public:
 	TESObjectDOOR();
 	~TESObjectDOOR();
@@ -2810,9 +2657,9 @@ public:
 	BGSOpenCloseForm			openCloseForm;			// 70
 
 	UInt32						unk74;					// 74
-	TESSound					*openSound;				// 78
-	TESSound					*closeSound;			// 7C
-	TESSound					*randomLoopingSound;	// 80
+	TESSound* openSound;				// 78
+	TESSound* closeSound;			// 7C
+	TESSound* randomLoopingSound;	// 80
 	UInt32						unk84;					// 84
 	tList<void>					list88;					// 88
 };
@@ -2823,25 +2670,23 @@ class IngredientItem;
 class NiPointLight;
 
 // TESObjectLIGH (C8)
-class TESObjectLIGH : public TESBoundAnimObject
-{
+class TESObjectLIGH : public TESBoundAnimObject {
 public:
 	TESObjectLIGH();
 	~TESObjectLIGH();
 
-	enum
-	{
-		kFlag_Dynamic =			1,
-		kFlag_CanBeCarried =	2,
-		kFlag_Negative =		4,
-		kFlag_Flicker =			8,
-		kFlag_Unused =			16,
-		kFlag_OffByDefault =	32,
-		kFlag_FlickerSlow =		64,
-		kFlag_Pulse =			128,
-		kFlag_PulseSlow =		256,
-		kFlag_SpotLight =		512,
-		kFlag_SpotShadow =		1024,
+	enum {
+		kFlag_Dynamic = 1,
+		kFlag_CanBeCarried = 2,
+		kFlag_Negative = 4,
+		kFlag_Flicker = 8,
+		kFlag_Unused = 16,
+		kFlag_OffByDefault = 32,
+		kFlag_FlickerSlow = 64,
+		kFlag_Pulse = 128,
+		kFlag_PulseSlow = 256,
+		kFlag_SpotLight = 512,
+		kFlag_SpotShadow = 1024,
 	};
 
 	TESFullName					fullName;		// 030
@@ -2863,22 +2708,20 @@ public:
 	float						falloffExp;		// 0AC
 	float						FOV;			// 0B0
 	float						fadeValue;		// 0B4
-	TESSound					*sound;			// 0B8
+	TESSound* sound;			// 0B8
 	UInt32						padBC[3];		// 0BC
 
-	void SetFlag(UInt32 pFlag, bool bEnable)
-	{
+	void SetFlag(UInt32 pFlag, bool bEnable) {
 		if (bEnable) lightFlags |= pFlag;
 		else lightFlags &= ~pFlag;
 	}
 
-	NiPointLight *CreatePointLight(TESObjectREFR *targetRef, NiNode *targetNode, bool arg3);
+	NiPointLight* CreatePointLight(TESObjectREFR* targetRef, NiNode* targetNode, bool arg3);
 };
 STATIC_ASSERT(sizeof(TESObjectLIGH) == 0x0C8);
 
 // AC
-class TESObjectMISC : public TESBoundObject
-{
+class TESObjectMISC : public TESBoundObject {
 public:
 	TESObjectMISC();
 	~TESObjectMISC();
@@ -2898,8 +2741,7 @@ public:
 STATIC_ASSERT(sizeof(TESObjectMISC) == 0xAC);
 
 // 9C
-class TESCasinoChips : public TESBoundObject
-{
+class TESCasinoChips : public TESBoundObject {
 public:
 	TESCasinoChips();
 	~TESCasinoChips();
@@ -2917,8 +2759,7 @@ public:
 STATIC_ASSERT(sizeof(TESCasinoChips) == 0x9C);
 
 // CC
-class TESCaravanMoney : public TESBoundObject
-{
+class TESCaravanMoney : public TESBoundObject {
 public:
 	TESCaravanMoney();
 	~TESCaravanMoney();
@@ -2935,8 +2776,7 @@ public:
 STATIC_ASSERT(sizeof(TESCaravanMoney) == 0xCC);
 
 // 58
-class TESObjectSTAT : public TESBoundObject
-{
+class TESObjectSTAT : public TESBoundObject {
 public:
 	TESObjectSTAT();
 	~TESObjectSTAT();
@@ -2952,15 +2792,14 @@ class BGSStaticCollection;
 class BGSMovableStatic;
 
 // BGSPlaceableWater (50)
-class BGSPlaceableWater : public TESBoundObject
-{
+class BGSPlaceableWater : public TESBoundObject {
 public:
 	BGSPlaceableWater();
 	~BGSPlaceableWater();
 
 	TESModel			model;	// 030
 	UInt32				flags;	// 048
-	TESWaterForm*		water;	// 04C
+	TESWaterForm* water;	// 04C
 };
 
 // TESObjectTREE (94)
@@ -2972,8 +2811,7 @@ class TESFlora;
 // TESFurniture (88)
 class TESFurniture;
 
-class TESObjectIMOD : public TESBoundObject
-{
+class TESObjectIMOD : public TESBoundObject {
 public:
 	TESObjectIMOD();
 	~TESObjectIMOD();
@@ -2992,8 +2830,7 @@ public:
 };
 
 // 388
-class TESObjectWEAP : public TESBoundObject
-{
+class TESObjectWEAP : public TESBoundObject {
 public:
 	TESObjectWEAP();
 	~TESObjectWEAP();
@@ -3029,41 +2866,41 @@ public:
 	};
 
 	enum EHandGrip {
-		eHandGrip_Default	= 0xFF,
-		eHandGrip_1			= 0xE6,
-		eHandGrip_2			= 0xE7,
-		eHandGrip_3			= 0xE8,
-		eHandGrip_4			= 0xE9,
-		eHandGrip_5			= 0xEA,
-		eHandGrip_6			= 0xEB,
-		eHandGrip_Count		= 7,
+		eHandGrip_Default = 0xFF,
+		eHandGrip_1 = 0xE6,
+		eHandGrip_2 = 0xE7,
+		eHandGrip_3 = 0xE8,
+		eHandGrip_4 = 0xE9,
+		eHandGrip_5 = 0xEA,
+		eHandGrip_6 = 0xEB,
+		eHandGrip_Count = 7,
 	};
 
 	enum EAttackAnimations {
-		eAttackAnim_Default =		255,
-		eAttackAnim_Attack3 =		38,
-		eAttackAnim_Attack4 =		44,
-		eAttackAnim_Attack5 =		50,
-		eAttackAnim_Attack6 =		56,
-		eAttackAnim_Attack7 =		62,
-		eAttackAnim_Attack8 =		68,
-		eAttackAnim_Attack9 =		144,
-		eAttackAnim_AttackLeft =	26,
-		eAttackAnim_AttackLoop =	74,
-		eAttackAnim_AttackRight =	32,
-		eAttackAnim_AttackSpin =	80,
-		eAttackAnim_AttackSpin2 =	86,
-		eAttackAnim_AttackThrow =	114,
-		eAttackAnim_AttackThrow2 =	120,
-		eAttackAnim_AttackThrow3 =	126,
-		eAttackAnim_AttackThrow4 =	132,
-		eAttackAnim_AttackThrow5 =	138,
-		eAttackAnim_AttackThrow6 =	150,
-		eAttackAnim_AttackThrow7 =	156,
-		eAttackAnim_AttackThrow8 =	162,
-		eAttackAnim_PlaceMine =		102,
-		eAttackAnim_PlaceMine2 =	108,
-		eAttackAnim_Count =			23,
+		eAttackAnim_Default = 255,
+		eAttackAnim_Attack3 = 38,
+		eAttackAnim_Attack4 = 44,
+		eAttackAnim_Attack5 = 50,
+		eAttackAnim_Attack6 = 56,
+		eAttackAnim_Attack7 = 62,
+		eAttackAnim_Attack8 = 68,
+		eAttackAnim_Attack9 = 144,
+		eAttackAnim_AttackLeft = 26,
+		eAttackAnim_AttackLoop = 74,
+		eAttackAnim_AttackRight = 32,
+		eAttackAnim_AttackSpin = 80,
+		eAttackAnim_AttackSpin2 = 86,
+		eAttackAnim_AttackThrow = 114,
+		eAttackAnim_AttackThrow2 = 120,
+		eAttackAnim_AttackThrow3 = 126,
+		eAttackAnim_AttackThrow4 = 132,
+		eAttackAnim_AttackThrow5 = 138,
+		eAttackAnim_AttackThrow6 = 150,
+		eAttackAnim_AttackThrow7 = 156,
+		eAttackAnim_AttackThrow8 = 162,
+		eAttackAnim_PlaceMine = 102,
+		eAttackAnim_PlaceMine2 = 108,
+		eAttackAnim_Count = 23,
 	};
 
 	enum ReloadAnim {
@@ -3123,7 +2960,7 @@ public:
 	};
 
 	enum EEmbedWeapAV {
-		eEmbedAV_Perception				= 0,
+		eEmbedAV_Perception = 0,
 		eEmbedAV_Endurance,
 		eEmbedAV_LeftAttack,
 		eEmbedAV_RightAttack,
@@ -3133,25 +2970,24 @@ public:
 	};
 
 	enum EOnHit {
-		eOnHit_Normal					= 0,
+		eOnHit_Normal = 0,
 		eOnHit_DismemberOnly,
 		eOnHit_ExplodeOnly,
 		eOnHit_NoDismemberOrExplode,
 	};
 
 	enum ERumblePattern {
-		eRumblePattern_Constant			= 0,
+		eRumblePattern_Constant = 0,
 		eRumblePattern_Square,
 		eRumblePattern_Triangle,
 		eRumblePattern_Sawtooth
 	};
 
 	enum ECritDamageFlags {
-		eCritDamage_OnDeath				= 0x1
+		eCritDamage_OnDeath = 0x1
 	};
 
-	enum
-	{
+	enum {
 		kWeaponModEffect_None = 0,
 		kWeaponModEffect_IncreaseDamage,
 		kWeaponModEffect_IncreaseClipCapacity,
@@ -3202,7 +3038,7 @@ public:
 	UInt32				unk10C;				// 10C
 	float				sightFOV;			// 110
 	UInt32				unk114;				// 114
-	BGSProjectile		*projectile;		// 118
+	BGSProjectile* projectile;		// 118
 	UInt8				baseVATSChance;		// 11C
 	UInt8				attackAnim;			// 11D
 	UInt8				numProjectiles;		// 11E
@@ -3220,7 +3056,7 @@ public:
 	float				damageToWeaponMult;	// 148
 	float				animShotsPerSec;	// 14C
 	float				animReloadTime;		// 150
-	float				animJamTime;		// 154		
+	float				animJamTime;		// 154
 	float				aimArc;				// 158
 	UInt32				weaponSkill;		// 15C - actor value
 	UInt32				rumblePattern;		// 160 - reload anim?
@@ -3229,7 +3065,7 @@ public:
 	SInt32				resistType;			// 16c - actor value
 	float				sightUsage;			// 170
 	float				semiAutoFireDelay[2];	// 174
-	UInt32				unk17C;				// 17C - 0-0x10: 0x8:str req 0x10: - skill req  - 0xb:kill impulse B158 - mod 1 val B15C - Mod 2 val Effects: 0x1: e(zoom) 0x2: a 0x3:0 0x4-6: Values c-e Mod Effects Val2:1-3 
+	UInt32				unk17C;				// 17C - 0-0x10: 0x8:str req 0x10: - skill req  - 0xb:kill impulse B158 - mod 1 val B15C - Mod 2 val Effects: 0x1: e(zoom) 0x2: a 0x3:0 0x4-6: Values c-e Mod Effects Val2:1-3
 	UInt32				effectMods[3];		// 180
 	float				value1Mod[3];		// 18C
 	UInt32				powerAttackAnimOverride;	// 198
@@ -3247,22 +3083,22 @@ public:
 	float				criticalPercent;	// 1C4
 	UInt8				critDamageFlags;	// 1C8
 	UInt8				pad1C9[3];			// 1C9
-	SpellItem			*criticalEffect;	// 1CC
+	SpellItem* criticalEffect;	// 1CC
 	TESModel			shellCasingModel;	// 1DO
 	TESModel			targetNIF;			// 1E8 - target NIF
 	TESModel			model200;			// 200 - could be a texture swap
 	UInt32				unk218;				// 218
-	TESSound			*sounds[12];		// 21C
-	BGSImpactDataSet	*impactDataSet;		// 24C
-	TESObjectSTAT		*worldStatic;		// 250
-	TESObjectSTAT		*modStatics[7];		// 254
+	TESSound* sounds[12];		// 21C
+	BGSImpactDataSet* impactDataSet;		// 24C
+	TESObjectSTAT* worldStatic;		// 250
+	TESObjectSTAT* modStatics[7];		// 254
 	TESModelTextureSwap	modModels[7];		// 270
-	TESObjectIMOD		*itemMod[3];		// 350
+	TESObjectIMOD* itemMod[3];		// 350
 	String				embeddedNodeName;	// 35C
 	UInt32				soundLevel;			// 364
 	UInt32				unk368;				// 368
 	UInt32				unk36C;				// 36C
-	SpellItem			*VATSEffect;			// 370
+	SpellItem* VATSEffect;			// 370
 	float				vatsSkill;				// 374
 	float				vatsDamMult;			// 378
 	float				vatsAP;					// 37C
@@ -3271,16 +3107,14 @@ public:
 	byte				pad382[3];
 
 	bool IsAutomatic() const { return (weaponFlags1 & eFlag_IsAutomatic) != 0; }
-	void SetIsAutomatic(bool bAuto)
-	{
+	void SetIsAutomatic(bool bAuto) {
 		if (bAuto) weaponFlags1 |= eFlag_IsAutomatic;
 		else weaponFlags1 &= ~eFlag_IsAutomatic;
 	}
 	bool HasScope() const { return (weaponFlags1 & eFlag_HasScope) != 0; }
 	bool IsNonPlayable() { return (weaponFlags1 & eflag_NonPlayable) != 0; }
 	bool IsPlayable() { return !IsNonPlayable(); }
-	void SetPlayable(bool doset)
-	{
+	void SetPlayable(bool doset) {
 		if (doset) weaponFlags1 &= ~eflag_NonPlayable;
 		else weaponFlags1 |= eflag_NonPlayable;
 	}
@@ -3289,7 +3123,7 @@ public:
 	UInt8 AttackAnimation() const;
 	void SetAttackAnimation(UInt32 attackAnim);
 	TESObjectIMOD* GetItemMod(UInt8 which);
-	TESAmmo *GetAmmo();
+	TESAmmo* GetAmmo();
 	float GetModBonuses(UInt8 modFlags, UInt32 effectID);
 	UInt32 GetItemModEffect(UInt8 which) { which -= 1; return (which < 3) ? effectMods[which] : 0; }
 	float GetItemModValue1(UInt8 which) { which -= 1; return (which < 3) ? value1Mod[which] : 0; }
@@ -3297,28 +3131,25 @@ public:
 };
 STATIC_ASSERT(sizeof(TESObjectWEAP) == 0x388);
 
-enum AmmoEffectID
-{
-	kAmmoEffect_DamageMod =		0,
-	kAmmoEffect_DRMod =			1,
-	kAmmoEffect_DTMod =			2,
-	kAmmoEffect_SpreadMod =		3,
-	kAmmoEffect_ConditionMod =	4,
-	kAmmoEffect_FatigueMod =	5,
+enum AmmoEffectID {
+	kAmmoEffect_DamageMod = 0,
+	kAmmoEffect_DRMod = 1,
+	kAmmoEffect_DTMod = 2,
+	kAmmoEffect_SpreadMod = 3,
+	kAmmoEffect_ConditionMod = 4,
+	kAmmoEffect_FatigueMod = 5,
 };
 
 // 30
-class TESAmmoEffect : public TESForm
-{
+class TESAmmoEffect : public TESForm {
 public:
 	TESAmmoEffect();
 	~TESAmmoEffect();
 
-	enum
-	{
-		kOperation_Add =		0,
-		kOperation_Multiply =	1,
-		kOperation_Subtract =	2,
+	enum {
+		kOperation_Add = 0,
+		kOperation_Multiply = 1,
+		kOperation_Subtract = 2,
 	};
 
 	TESFullName		fullName;		// 18
@@ -3330,23 +3161,21 @@ public:
 STATIC_ASSERT(sizeof(TESAmmoEffect) == 0x30);
 
 // DC
-class TESAmmo : public TESBoundObject
-{
+class TESAmmo : public TESBoundObject {
 public:
 	TESAmmo();
 	~TESAmmo();
 
-	enum eAmmoFlags
-	{
-		kFlags_IgnoreWeapResistance =	1,
-		kFlags_NonPlayable =			2,
+	enum eAmmoFlags {
+		kFlags_IgnoreWeapResistance = 1,
+		kFlags_NonPlayable = 2,
 	};
 
 	// bases
 	TESFullName					fullName;				// 030
 	TESModelTextureSwap			model;					// 03C
 	TESIcon						icon;					// 05C
-	BGSMessageIcon				messageIcon;			// 068	
+	BGSMessageIcon				messageIcon;			// 068
 	TESValueForm				value;					// 078
 	BGSClipRoundsForm			clipRounds;				// 080
 	BGSDestructibleObjectForm	destructible;			// 088
@@ -3356,17 +3185,17 @@ public:
 	float						speed;					// 0A8
 	UInt32						flags;					// 0AC
 	UInt32						projPerShot;			// 0B0
-	BGSProjectile				*projectile;			// 0B4
+	BGSProjectile* projectile;			// 0B4
 	float						weight;					// 0B8
-	TESObjectMISC				*casing;				// 0BC
+	TESObjectMISC* casing;				// 0BC
 	float						ammoPercentConsumed;	// 0C0
 	String						shortName;				// 0C4
 	String						abbreviation;			// 0CC
 	tList<TESAmmoEffect>		effectList;				// 0D4
 
-	bool IsNonPlayable() {return (flags & kFlags_NonPlayable) == kFlags_NonPlayable;}
-	bool IsPlayable() {return !IsNonPlayable();}
-	void SetPlayable(bool doset) {if (doset) flags &= ~kFlags_NonPlayable; else flags |= kFlags_NonPlayable;}
+	bool IsNonPlayable() { return (flags & kFlags_NonPlayable) == kFlags_NonPlayable; }
+	bool IsPlayable() { return !IsNonPlayable(); }
+	void SetPlayable(bool doset) { if (doset) flags &= ~kFlags_NonPlayable; else flags |= kFlags_NonPlayable; }
 };
 
 STATIC_ASSERT(sizeof(TESAmmo) == 0xDC);
@@ -3394,8 +3223,7 @@ enum CardValues {
 	kKing,
 	kJokerCard
 };
-class TESCaravanCard : public TESBoundObject
-{
+class TESCaravanCard : public TESBoundObject {
 public:
 	TESCaravanCard();
 	~TESCaravanCard();
@@ -3418,54 +3246,49 @@ STATIC_ASSERT(sizeof(TESCaravanCard) == 0xBC);
 class BSFaceGenNiNode;
 
 // 2B0
-struct ValidBip01Names
-{
-	enum eOptionalBoneType
-	{
-		kOptionalBone_Bip01Head			= 0,
-		kOptionalBone_Weapon			= 1,
-		kOptionalBone_Bip01LForeTwist	= 2,
-		kOptionalBone_Bip01Spine2		= 3,
-		kOptionalBone_Bip01Neck1		= 4,
+struct ValidBip01Names {
+	enum eOptionalBoneType {
+		kOptionalBone_Bip01Head = 0,
+		kOptionalBone_Weapon = 1,
+		kOptionalBone_Bip01LForeTwist = 2,
+		kOptionalBone_Bip01Spine2 = 3,
+		kOptionalBone_Bip01Neck1 = 4,
 	};
 
 	// 08
-	struct OptionalBone	
-	{
+	struct OptionalBone {
 		bool		exists;
-		NiNode		*bone;
+		NiNode* bone;
 	};
 
 	// 10
-	struct Data
-	{
+	struct Data {
 		union									// 00 can be a modelled form (Armor or Weapon) or a Race if not equipped
 		{
-			TESForm				*item;
-			TESObjectARMO		*armor;
-			TESObjectWEAP		*weapon;
-			TESRace				*race;
+			TESForm* item;
+			TESObjectARMO* armor;
+			TESObjectWEAP* weapon;
+			TESRace* race;
 		};
-		TESModelTextureSwap		*modelTexture;	// 04 texture or model for said form
-		NiNode					*boneNode;		// 08 NiNode for the modelled form
+		TESModelTextureSwap* modelTexture;	// 04 texture or model for said form
+		NiNode* boneNode;		// 08 NiNode for the modelled form
 		UInt32					unk00C;			// 0C Number, bool or flag
 	};
 
-	NiNode				*bip01;			// 000 receive Bip01 node, then optionally Bip01Head, Weapon, Bip01LForeTwist, Bip01Spine2, Bip01Neck1
+	NiNode* bip01;			// 000 receive Bip01 node, then optionally Bip01Head, Weapon, Bip01LForeTwist, Bip01Spine2, Bip01Neck1
 	OptionalBone		bones[5];		// 004
 	Data				slotData[20];	// 02C indexed by the EquipSlot
 	Data				unk016C[20];	// 16C indexed by the EquipSlot
-	Character			*character;		// 2AC
+	Character* character;		// 2AC
 };
 STATIC_ASSERT(sizeof(ValidBip01Names) == 0x2B0);
 
 // 20
-struct FaceGenData
-{
+struct FaceGenData {
 	UInt32		unk00;		// 00
-	void		*unk04;		// 04
+	void* unk04;		// 04
 	UInt32		unk08;		// 08
-	float		**values;	// 0C
+	float** values;	// 0C
 	UInt32		useOffset;	// 10
 	UInt32		maxOffset;	// 14
 	UInt32		count;		// 18
@@ -3473,8 +3296,7 @@ struct FaceGenData
 };
 
 // 1EC
-class TESNPC : public TESActorBase
-{
+class TESNPC : public TESActorBase {
 public:
 	TESNPC();
 	~TESNPC();
@@ -3482,39 +3304,38 @@ public:
 	TESRaceForm				race;				// 10C
 	UInt8					skillValues[14];	// 114
 	UInt8					skillOffsets[14];	// 122
-	TESClass				*classID;			// 130
+	TESClass* classID;			// 130
 	FaceGenData				faceGenData[3];		// 134
 	UInt32					unk194[8];			// 194
-	FaceGenData				*faceGenDataPtr;	// 1B4
-	TESHair					*hair;				// 1B8
+	FaceGenData* faceGenDataPtr;	// 1B4
+	TESHair* hair;				// 1B8
 	float					hairLength;			// 1BC
-	TESEyes					*eyes;				// 1C0
-	BSFaceGenNiNode			*unk1C4;			// 1C4
-	BSFaceGenNiNode			*unk1C8;			// 1C8
+	TESEyes* eyes;				// 1C0
+	BSFaceGenNiNode* unk1C4;			// 1C4
+	BSFaceGenNiNode* unk1C8;			// 1C8
 	UInt32					unk1CC;				// 1CC
 	UInt16					unk1D0;				// 1D0
 	UInt16					unk1D2;				// 1D2
-	TESCombatStyle			*combatStyle;		// 1D4
+	TESCombatStyle* combatStyle;		// 1D4
 	UInt32					hairColor;			// 1D8
 	tList<BGSHeadPart>		headPart;			// 1DC
 	UInt32					impactMaterialType;	// 1E4
 	UInt32					unk01E8;			// 1E8
-	TESRace					*race1EC;			// 1EC
-	TESNPC					*copyFrom;			// 1F0	Not set once PlayerRef exists and the target is the Player
+	TESRace* race1EC;			// 1EC
+	TESNPC* copyFrom;			// 1F0	Not set once PlayerRef exists and the target is the Player
 	float					height;				// 1F4
 	float					weight;				// 1F8	Aparently, getWeight purposly returns height except for the player.
 	NiTArray<FaceGenUndo*>	faceGenUndo;		// 1FC
 
 	void SetSex(UInt32 flags);
-	void SetRace(TESRace *pRace);
-	void CopyAppearance(TESNPC *srcNPC);
+	void SetRace(TESRace* pRace);
+	void CopyAppearance(TESNPC* srcNPC);
 };
 
 STATIC_ASSERT(sizeof(TESNPC) == 0x20C);
 
 // 160
-class TESCreature : public TESActorBase
-{
+class TESCreature : public TESActorBase {
 public:
 	TESCreature();
 	~TESCreature();
@@ -3522,7 +3343,7 @@ public:
 	TESAttackDamageForm			attackDmg;			// 10C
 	TESModelList				modelList;			// 114
 
-	TESCreature					*audioTemplate;		// 128
+	TESCreature* audioTemplate;		// 128
 	UInt8						type;				// 12C
 	UInt8						combatSkill;		// 12D
 	UInt8						magicSkill;			// 12E
@@ -3532,63 +3353,59 @@ public:
 	float						turningSpeed;		// 134
 	float						footWeight;			// 138
 	float						baseScale;			// 13C
-	TESCombatStyle				*combatStyle;		// 140
-	BGSBodyPartData				*bodyPartData;		// 144
+	TESCombatStyle* combatStyle;		// 140
+	BGSBodyPartData* bodyPartData;		// 144
 	UInt32						materialType;		// 148
-	BGSImpactDataSet			*impactDataSet;		// 14C
+	BGSImpactDataSet* impactDataSet;		// 14C
 	UInt32						unk0150;			// 150
 	UInt32						soundLevel;			// 154
-	BGSListForm					*weaponList;		// 158
+	BGSListForm* weaponList;		// 158
 	UInt8						byt015C;			// 15C
 	UInt8						pad015D[3];			// 15D
 };
 
 // 34
-class TESLeveledList : public BaseFormComponent
-{
+class TESLeveledList : public BaseFormComponent {
 public:
 	struct LoadBaseData	// as used by LoadForm
 	{
 		SInt16			level;		// 00
 		UInt16			fill002;	// 02
-		TESObjectREFR	*refr;		// 04
+		TESObjectREFR* refr;		// 04
 		SInt16			count;		// 08
 		UInt16			fill00A;	// 0A
 	};	// 0C
 
-	struct ListData
-	{
-		TESForm			*form;		// 00
+	struct ListData {
+		TESForm* form;		// 00
 		SInt16			count;		// 04
 		SInt16			level;		// 06
-		LvlListExtra	*extra;		// 08
+		LvlListExtra* extra;		// 08
 	}; // 0C
 
-	enum
-	{
-		kFlags_CalcAllLevels =		1 << 0,
-		kFlags_CalcEachInCount =	1 << 1,
-		kFlags_UseAll =				1 << 2,
+	enum {
+		kFlags_CalcAllLevels = 1 << 0,
+		kFlags_CalcEachInCount = 1 << 1,
+		kFlags_UseAll = 1 << 2,
 	};
 
 	tList<ListData>		list;			// 04
 	UInt8				chanceNone;		// 0C
 	UInt8				flags;			// 0D
 	UInt16				pad00E;			// 0E
-	TESGlobal			*global;		// 10 use global value for chance none?
+	TESGlobal* global;		// 10 use global value for chance none?
 	ExtraDataList		extraDatas;		// 14 ??? BaseExtraList::DebugDump() shows no data
 
-	void AddItem(TESForm *form, UInt16 level, UInt16 count, float health);
-	UInt32 RemoveItem(TESForm *form);
+	void AddItem(TESForm* form, UInt16 level, UInt16 count, float health);
+	UInt32 RemoveItem(TESForm* form);
 	void Dump();
 	bool RemoveNthItem(UInt32 itemIndex);
-	SInt32 GetItemIndexByForm(TESForm *form);
+	SInt32 GetItemIndexByForm(TESForm* form);
 	SInt32 GetItemIndexByLevel(UInt32 level);
 };
 
 // TESLevCreature (68)
-class TESLevCreature : public TESBoundObject
-{
+class TESLevCreature : public TESBoundObject {
 public:
 	TESLevCreature();
 	~TESLevCreature();
@@ -3598,8 +3415,7 @@ public:
 };
 
 // TESLevCharacter (68)
-class TESLevCharacter : public TESBoundObject
-{
+class TESLevCharacter : public TESBoundObject {
 public:
 	TESLevCharacter();
 	~TESLevCharacter();
@@ -3609,16 +3425,14 @@ public:
 };
 
 // TESKey (A8)
-class TESKey : public TESObjectMISC
-{
+class TESKey : public TESObjectMISC {
 public:
 	TESKey();
 	~TESKey();
 };
 
 // D8
-class AlchemyItem : public TESBoundObject
-{
+class AlchemyItem : public TESBoundObject {
 public:
 	AlchemyItem();
 	~AlchemyItem();
@@ -3635,9 +3449,9 @@ public:
 	UInt32						value;					// B8
 	UInt8						alchFlags;				// BC
 	UInt8						padBD[3];				// BD
-	SpellItem					*withdrawalEffect;		// C0
+	SpellItem* withdrawalEffect;		// C0
 	float						addictionChance;		// C4
-	TESSound					*consumeSound;			// C8
+	TESSound* consumeSound;			// C8
 	TESIcon						iconCC;					// CC
 
 	bool IsPoison();
@@ -3645,22 +3459,18 @@ public:
 
 STATIC_ASSERT(sizeof(AlchemyItem) == 0xD8);
 
-
-class BGSIdleCollection : public BaseFormComponent
-{
+class BGSIdleCollection : public BaseFormComponent {
 public:
 	BGSIdleCollection();
 	~BGSIdleCollection();
 
 	UInt8 flags;
 	UInt8 animCount;
-	TESIdleForm **idleList;
+	TESIdleForm** idleList;
 	float idleTimer;
 };
 
 STATIC_ASSERT(sizeof(BGSIdleCollection) == 0x10);
-
-
 
 class BGSIdleMarker : public TESBoundObject {
 public:
@@ -3671,10 +3481,8 @@ public:
 
 STATIC_ASSERT(sizeof(BGSIdleMarker) == 0x40);
 
-
 // BGSNote (80)
-class BGSNote : public TESBoundObject
-{
+class BGSNote : public TESBoundObject {
 public:
 	BGSNote();
 	~BGSNote();
@@ -3686,9 +3494,9 @@ public:
 	BGSPickupPutdownSounds		pickupPutdownSounds;	// 60
 	union												// 6C
 	{
-		TESDescription			*noteText;
-		TESTexture				*picture;
-		TESTopic				*voice;
+		TESDescription* noteText;
+		TESTexture* picture;
+		TESTopic* voice;
 	};
 	UInt32						unk70;					// 70
 	UInt32						unk74;					// 74
@@ -3704,26 +3512,24 @@ STATIC_ASSERT(sizeof(BGSNote) == 0x80);
 class BGSConstructibleObject;
 
 // C0
-class BGSProjectile : public TESBoundObject
-{
+class BGSProjectile : public TESBoundObject {
 public:
 	BGSProjectile();
 	~BGSProjectile();
 
-	enum
-	{
-		kFlags_Hitscan =				0x1,
-		kFlags_Explosion =				0x2,
-		kFlags_AltTrigger =				0x4,
-		kFlags_MuzzleFlash =			0x8,
+	enum {
+		kFlags_Hitscan = 0x1,
+		kFlags_Explosion = 0x2,
+		kFlags_AltTrigger = 0x4,
+		kFlags_MuzzleFlash = 0x8,
 		//								0x10,
-		kFlags_CanBeDisabled =			0x20,
-		kFlags_CanBePicked =			0x40,
-		kFlags_Supersonic =				0x80,
-		kFlags_PinsLimbs =				0x100,
-		kFlags_PassSmallTransparent =	0x200,
-		kFlags_Detonates =				0x400,
-		kFlags_Rotation =				0x800,
+		kFlags_CanBeDisabled = 0x20,
+		kFlags_CanBePicked = 0x40,
+		kFlags_Supersonic = 0x80,
+		kFlags_PinsLimbs = 0x100,
+		kFlags_PassSmallTransparent = 0x200,
+		kFlags_Detonates = 0x400,
+		kFlags_Rotation = 0x800,
 	};
 
 	TESFullName						fullName;			// 30
@@ -3736,19 +3542,19 @@ public:
 	float							gravity;			// 64
 	float							speed;				// 68
 	float							range;				// 6C
-	TESObjectLIGH					*lightProjectile;	// 70
-	TESObjectLIGH					*lightMuzzleFlash;	// 74
+	TESObjectLIGH* lightProjectile;	// 70
+	TESObjectLIGH* lightMuzzleFlash;	// 74
 	float							tracerChance;		// 78
 	float							altProximity;		// 7C
 	float							altTimer;			// 80
-	BGSExplosion					*explosion;			// 84
-	TESSound						*soundProjectile;	// 88
+	BGSExplosion* explosion;			// 84
+	TESSound* soundProjectile;	// 88
 	float							flashDuration;		// 8C
 	float							fadeDuration;		// 90
 	float							impactForce;		// 94
-	TESSound						*soundCountDown;	// 98
-	TESSound						*soundDisable;		// 9C
-	TESObjectWEAP					*defaultWeapSrc;	// A0
+	TESSound* soundCountDown;	// 98
+	TESSound* soundDisable;		// 9C
+	TESObjectWEAP* defaultWeapSrc;	// A0
 	float							rotationX;			// A4
 	float							rotationY;			// A8
 	float							rotationZ;			// AC
@@ -3756,16 +3562,14 @@ public:
 	TESModel						muzzleFlash;		// B4
 	UInt8							soundLevel;			// CC
 
-	void SetFlag(UInt32 pFlag, bool bEnable)
-	{
+	void SetFlag(UInt32 pFlag, bool bEnable) {
 		if (bEnable) projFlags |= pFlag;
 		else projFlags &= ~pFlag;
 	}
 };
 
 // TESLevItem (44)
-class TESLevItem : public TESBoundObject
-{
+class TESLevItem : public TESBoundObject {
 public:
 	TESLevItem();
 	~TESLevItem();
@@ -3774,20 +3578,18 @@ public:
 };
 
 // 36C
-class TESWeather : public TESForm
-{
+class TESWeather : public TESForm {
 public:
 	TESWeather();
 	~TESWeather();
 
-	struct WeatherSound
-	{
+	struct WeatherSound {
 		UInt32		soundID;	// refID of TESSound
 		UInt32		type;		// 0 - Default; 1 - Precip; 2 - Wind; 3 - Thunder
 	};
 
 	UInt32					unk018;						// 018	TESImageSpaceModifiableCountForm<6>
-	TESImageSpaceModifier	*imageSpaceMods[6];			// 01C
+	TESImageSpaceModifier* imageSpaceMods[6];			// 01C
 	TESTexture1024			layerTextures[4];			// 034
 	UInt8					cloudSpeed[4];				// 064
 	UInt32					cloudColor[4][6];			// 068
@@ -3812,17 +3614,15 @@ public:
 };
 STATIC_ASSERT(sizeof(TESWeather) == 0x36C);
 
-struct WeatherEntry
-{
-	TESWeather		*weather;
+struct WeatherEntry {
+	TESWeather* weather;
 	UInt32			chance;
-	TESGlobal		*global;
+	TESGlobal* global;
 };
 typedef tList<WeatherEntry> WeatherTypes;
 
 // 58
-class TESClimate : public TESForm
-{
+class TESClimate : public TESForm {
 public:
 	TESClimate();
 	~TESClimate();
@@ -3839,20 +3639,18 @@ public:
 	UInt8				phaseLength;		// 55
 	UInt8				pad56[2];			// 56
 
-	WeatherEntry *GetWeatherEntry(TESWeather *weather, bool remove);
+	WeatherEntry* GetWeatherEntry(TESWeather* weather, bool remove);
 };
 
 STATIC_ASSERT(sizeof(TESClimate) == 0x58);
 
 // 08
-class TESRegionData
-{
+class TESRegionData {
 public:
 	TESRegionData();
 	~TESRegionData();
 
-	enum
-	{
+	enum {
 		kRegionData_Weather = 3,
 		kRegionData_Map,
 		kRegionData_Landscape,
@@ -3861,7 +3659,7 @@ public:
 		kRegionData_Imposter
 	};
 
-	virtual TESRegionData	*Destroy(bool doFree);
+	virtual TESRegionData* Destroy(bool doFree);
 	virtual void	Unk_01(void);
 	virtual void	Unk_02(void);
 	virtual void	Unk_03(void);
@@ -3879,8 +3677,7 @@ public:
 };
 typedef tList<TESRegionData> RegionDataEntryList;
 
-class TESRegionDataGrass : public TESRegionData
-{
+class TESRegionDataGrass : public TESRegionData {
 public:
 	TESRegionDataGrass();
 	~TESRegionDataGrass();
@@ -3889,8 +3686,7 @@ public:
 };
 
 // 10
-class TESRegionDataImposter : public TESRegionData
-{
+class TESRegionDataImposter : public TESRegionData {
 public:
 	TESRegionDataImposter();
 	~TESRegionDataImposter();
@@ -3898,8 +3694,7 @@ public:
 	tList<TESObjectREFR>	imposters;	// 08
 };
 
-class TESRegionDataLandscape : public TESRegionData
-{
+class TESRegionDataLandscape : public TESRegionData {
 public:
 	TESRegionDataLandscape();
 	~TESRegionDataLandscape();
@@ -3908,8 +3703,7 @@ public:
 	virtual void	Unk_0B(void);
 };
 
-class TESRegionDataMap : public TESRegionData
-{
+class TESRegionDataMap : public TESRegionData {
 public:
 	TESRegionDataMap();
 	~TESRegionDataMap();
@@ -3922,16 +3716,14 @@ public:
 	String	mapName;
 };
 
-struct SoundType
-{
-	TESSound		*sound;
+struct SoundType {
+	TESSound* sound;
 	UInt32			flags;
 	UInt32			chance;
 };
 typedef tList<SoundType> SoundTypeList;
 
-class TESRegionDataSound : public TESRegionData
-{
+class TESRegionDataSound : public TESRegionData {
 public:
 	TESRegionDataSound();
 	~TESRegionDataSound();
@@ -3948,8 +3740,7 @@ public:
 	tList<UInt32>	mediaSetEntries;
 };
 
-class TESRegionDataWeather : public TESRegionData
-{
+class TESRegionDataWeather : public TESRegionData {
 public:
 	TESRegionDataWeather();
 	~TESRegionDataWeather();
@@ -3957,15 +3748,13 @@ public:
 	WeatherTypes	weatherTypes;
 };
 
-struct AreaPointEntry
-{
+struct AreaPointEntry {
 	float	x;
 	float	y;
 };
 typedef tList<AreaPointEntry> AreaPointEntryList;
 
-struct RegionAreaEntry
-{
+struct RegionAreaEntry {
 	AreaPointEntryList	points;
 	UInt32				unk08[2];
 	float				unk10[4];
@@ -3975,24 +3764,22 @@ struct RegionAreaEntry
 typedef tList<RegionAreaEntry> RegionAreaEntryList;
 
 // 38
-class TESRegion : public TESForm
-{
+class TESRegion : public TESForm {
 public:
 	TESRegion();
 	~TESRegion();
 
-	RegionDataEntryList	*dataEntries;	// 18
-	RegionAreaEntryList	*areaEntries;	// 1C
-	TESWorldSpace		*worldSpace;	// 20
-	TESWeather			*weather;		// 24
+	RegionDataEntryList* dataEntries;	// 18
+	RegionAreaEntryList* areaEntries;	// 1C
+	TESWorldSpace* worldSpace;	// 20
+	TESWeather* weather;		// 24
 	UInt32				unk28[4];		// 28
 };
 
 STATIC_ASSERT(sizeof(TESRegion) == 0x38);
 
 // 10
-class TESRegionList : public BSSimpleList<TESRegion>
-{
+class TESRegionList : public BSSimpleList<TESRegion> {
 public:
 	TESRegionList();
 	~TESRegionList();
@@ -4007,30 +3794,26 @@ class NavMeshInfoMap;
 class NavMesh;
 
 // E0
-class TESObjectCELL : public TESForm
-{
+class TESObjectCELL : public TESForm {
 public:
 	TESObjectCELL();
 	~TESObjectCELL();
 
 	typedef tList<TESObjectREFR> RefList;
-	
-	struct ExteriorCoords
-	{
+
+	struct ExteriorCoords {
 		SInt32		x;			// 00
 		SInt32		y;			// 04
 		UInt8		byte08;		// 08
 		UInt8		pad09[3];	// 09
 	};
-	struct Color
-	{
+	struct Color {
 		UInt8 r;
 		UInt8 g;
 		UInt8 b;
 		UInt8 alpha;
 	};
-	struct LightingData
-	{
+	struct LightingData {
 		Color		ambientRGB;		// 00
 		Color		directionalRGB;		// 04
 		Color		fogRGB;		// 08
@@ -4041,19 +3824,17 @@ public:
 		float		directionalFade;		// 1C
 		float		fogClipDist;		// 20
 		float		fogPower;		// 24
-		UInt32*		getValuesFrom;		// 28
+		UInt32* getValuesFrom;		// 28
 	};
 
-	union CellCoordinates
-	{
-		ExteriorCoords	*exterior;
-		LightingData	*interior;
+	union CellCoordinates {
+		ExteriorCoords* exterior;
+		LightingData* interior;
 	};
 
 	// 64
-	struct CellRenderData
-	{
-		NiNode									*masterNode;	// 00
+	struct CellRenderData {
+		NiNode* masterNode;	// 00
 		tList<TESObjectREFR>					list04;			// 04
 		NiTMapBase<TESObjectREFR*, NiNode*>		map0C;			// 0C
 		NiTMapBase<TESForm*, TESObjectREFR*>	map1C;			// 1C
@@ -4064,15 +3845,14 @@ public:
 		tList<TESObjectREFR>					list5C;			// 5C
 	};
 
-	enum
-	{
-		kCellFlag_IsInterior =					1 << 0,
-		kCellFlag_HasWater =					1 << 1,
-		kCellFlag_InvertFastTravelBehavior =	1 << 2,
-		kCellFlag_ForceHideLand =				1 << 3,
-		kCellFlag_PublicPlace =					1 << 5,
-		kCellFlag_HandChanged =					1 << 6,
-		kCellFlag_BehaveLikeExterior =			1 << 7,
+	enum {
+		kCellFlag_IsInterior = 1 << 0,
+		kCellFlag_HasWater = 1 << 1,
+		kCellFlag_InvertFastTravelBehavior = 1 << 2,
+		kCellFlag_ForceHideLand = 1 << 3,
+		kCellFlag_PublicPlace = 1 << 5,
+		kCellFlag_HandChanged = 1 << 6,
+		kCellFlag_BehaveLikeExterior = 1 << 7,
 	};
 
 	TESFullName				fullName;				// 18
@@ -4082,23 +3862,23 @@ public:
 	UInt8					byte27;					// 27
 	ExtraDataList			extraDataList;			// 28
 	CellCoordinates			coords;					// 48
-	TESObjectLAND			*land;					// 4C
+	TESObjectLAND* land;					// 4C
 	float					waterHeight;			// 50
 	UInt32					unk54;					// 54
 	TESTexture				noiseTexture;			// 58
-	BSSimpleArray<NavMesh>	*navMeshArray;			// 64
+	BSSimpleArray<NavMesh>* navMeshArray;			// 64
 	UInt32					unk68[6];				// 68
-	void					*refLockSemaphore;		// 80
+	void* refLockSemaphore;		// 80
 	UInt32					unk84[8];				// 84
 	UInt32					actorCount;				// A4
 	UInt16					countVisibleDistant;	// A8
 	UInt16					unkAA;					// AA
 	RefList					objectList;				// AC
-	NiNode					*niNodeB4;				// B4
-	NiNode					*niNodeB8;				// B8
+	NiNode* niNodeB4;				// B4
+	NiNode* niNodeB8;				// B8
 	UInt32					unkBC;					// BC
-	TESWorldSpace			*worldSpace;			// C0
-	CellRenderData			*renderData;			// C4
+	TESWorldSpace* worldSpace;			// C0
+	CellRenderData* renderData;			// C4
 	float					fltC8;					// C8
 	UInt8					byteCC;					// CC
 	UInt8					byteCD;					// CD
@@ -4108,24 +3888,22 @@ public:
 	UInt8					byteD1;					// D1
 	UInt8					byteD2;					// D2
 	UInt8					byteD3;					// D3
-	BSPortalGraph			*portalGraph;			// D4
-	BGSLightingTemplate		*lightingTemplate;		// D8
+	BSPortalGraph* portalGraph;			// D4
+	BGSLightingTemplate* lightingTemplate;		// D8
 	UInt32					inheritFlags;			// DC
 
 	bool IsInterior() { return worldSpace == NULL; }
-	NiNode *Get3DNode(UInt32 index);
+	NiNode* Get3DNode(UInt32 index);
 	void ToggleNodes(UInt32 nodeBits, UInt8 doHide);
-	void GenerateRenderedTexture(NiCamera *camera, NiRenderedTexture **outTexture);
+	void GenerateRenderedTexture(NiCamera* camera, NiRenderedTexture** outTexture);
 };
 STATIC_ASSERT(sizeof(TESObjectCELL) == 0xE0);
 
 // 3C	Init proc: 0x6FC490
-struct LODdata
-{
+struct LODdata {
 	// 60
-	struct LODNode
-	{
-		LODdata			*parent;		// 00
+	struct LODNode {
+		LODdata* parent;		// 00
 		UInt32			lodLevel;		// 04
 		Coordinate		cellXY;			// 08
 		UInt8			byte0C;			// 0C
@@ -4133,10 +3911,10 @@ struct LODdata
 		UInt8			byte0E;			// 0E
 		UInt8			byte0F;			// 0F
 		UInt32			ukn10;			// 10
-		void			*object;		// 14
+		void* object;		// 14
 		UInt32			ukn18;			// 18
 		UInt32			ukn1C;			// 1C
-		LODNode			*linked[4];		// 20
+		LODNode* linked[4];		// 20
 		UInt32			unk30;			// 30
 		float			flt34;			// 34
 		float			flt38;			// 38
@@ -4153,14 +3931,14 @@ struct LODdata
 		UInt8			byte5E;			// 5E
 		UInt8			byte5F;			// 5F
 
-		LODNode *GetNodeByCoord(UInt32 coord);
+		LODNode* GetNodeByCoord(UInt32 coord);
 	};
 	STATIC_ASSERT(sizeof(LODNode) == 0x60);
 
-	TESWorldSpace					*world;		// 00
-	LODNode							*lodNode;	// 04
-	NiNode							*node08;	// 08
-	NiNode							*node0C;	// 0C
+	TESWorldSpace* world;		// 00
+	LODNode* lodNode;	// 04
+	NiNode* node08;	// 08
+	NiNode* node0C;	// 0C
 	Coordinate						coordNW;	// 10
 	Coordinate						coordSE;	// 14
 	UInt32							ukn18;		// 18
@@ -4179,8 +3957,7 @@ typedef NiTPointerMap<TESObjectCELL> CellPointerMap;
 
 // EC
 struct NiPoint3;
-class TESWorldSpace : public TESForm
-{
+class TESWorldSpace : public TESForm {
 public:
 	TESWorldSpace();
 	~TESWorldSpace();
@@ -4188,38 +3965,32 @@ public:
 	virtual bool	Unk_4E(String* arg1, float x, float y, float z);
 	virtual void	Unk_4F(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5, UInt32 arg6);
 
-	struct DCoordXY
-	{
+	struct DCoordXY {
 		SInt32	X;
 		SInt32	Y;
 	};
 
-	struct WCoordXY
-	{
+	struct WCoordXY {
 		SInt16	X;
 		SInt16	Y;
 	};
 
-	struct Offset_Data
-	{
-		UInt32		**unk00;	// 00 array of UInt32 stored in OFST record.
+	struct Offset_Data {
+		UInt32** unk00;	// 00 array of UInt32 stored in OFST record.
 		CoordXY		min;		// 04 NAM0
 		CoordXY		max;		// 0C NAM9
 		UInt32		fileOffset;	// 14 TESWorldspace file offset in modInfo
 	};	// 014
 
-	struct MapData
-	{
+	struct MapData {
 		DCoordXY	usableDimensions;	// 00
 		WCoordXY	cellNWCoordinates;	// 08
 		WCoordXY	cellSECoordinates;	// 0C
 	};	// 010
 
-	struct ImpactData
-	{
+	struct ImpactData {
 		typedef NiTMapBase<BGSImpactData*, BGSImpactData*> ImpactImpactMap;
-		enum MaterialType
-		{
+		enum MaterialType {
 			eMT_Stone,
 			eMT_Dirt,
 			eMT_Grass,
@@ -4235,120 +4006,111 @@ public:
 			eMT_Max
 		};
 
-		ImpactImpactMap		*impactImpactMap[eMT_Max];	// 000
+		ImpactImpactMap* impactImpactMap[eMT_Max];	// 000
 		char				footstepMaterials[0x12C];	// 030
 	};
 
 	typedef NiTPointerMap<BSSimpleList<TESObjectREFR> > RefListPointerMap;
 	typedef NiTMapBase<ModInfo*, TESWorldSpace::Offset_Data*> OffsetDataMap;
 
-	enum
-	{
-		kWorldFlag_SmallWorld =			1 << 0,
-		kWorldFlag_NoFastTravel =		1 << 1,
-		kWorldFlag_NoLODWater =			1 << 4,
-		kWorldFlag_NoLODNoise =			1 << 5,
-		kWorldFlag_NoFallDamage =		1 << 6,
-		kWorldFlag_WaterAdjustment =	1 << 7,
+	enum {
+		kWorldFlag_SmallWorld = 1 << 0,
+		kWorldFlag_NoFastTravel = 1 << 1,
+		kWorldFlag_NoLODWater = 1 << 4,
+		kWorldFlag_NoLODNoise = 1 << 5,
+		kWorldFlag_NoFallDamage = 1 << 6,
+		kWorldFlag_WaterAdjustment = 1 << 7,
 
-		kParentFlag_UseLandData =		1 << 0,
-		kParentFlag_UseLODData =		1 << 1,
-		kParentFlag_UseMapData =		1 << 2,
-		kParentFlag_UseWaterData =		1 << 3,
-		kParentFlag_UseClimateData =	1 << 4,
-		kParentFlag_UseISData =			1 << 5,
+		kParentFlag_UseLandData = 1 << 0,
+		kParentFlag_UseLODData = 1 << 1,
+		kParentFlag_UseMapData = 1 << 2,
+		kParentFlag_UseWaterData = 1 << 3,
+		kParentFlag_UseClimateData = 1 << 4,
+		kParentFlag_UseISData = 1 << 5,
 	};
 
 	TESFullName			fullName;			// 18
 	TESTexture			texture;			// 24
-	CellPointerMap		*cellMap;			// 30
-	TESObjectCELL		*cell;				// 34
+	CellPointerMap* cellMap;			// 30
+	TESObjectCELL* cell;				// 34
 	UInt32				unk38;				// 38
-	LODdata				*lodData;			// 3C
-	TESClimate			*climate;			// 40
-	TESImageSpace		*imageSpace;		// 44
-	ImpactData			*impacts;			// 48
+	LODdata* lodData;			// 3C
+	TESClimate* climate;			// 40
+	TESImageSpace* imageSpace;		// 44
+	ImpactData* impacts;			// 48
 	UInt8				flags;				// 4C
 	UInt8				unk4D;				// 4D
 	UInt16				parentFlags;		// 4E
 	RefListPointerMap	pointerMap;			// 50
 	tList<void>			lst60;				// 60
 	tList<void>			lst68;				// 68
-	TESWorldSpace		*parent;			// 70
-	TESWaterForm		*waterFormFirst;	// 74
-	TESWaterForm		*waterFormLast;		// 78
+	TESWorldSpace* parent;			// 70
+	TESWaterForm* waterFormFirst;	// 74
+	TESWaterForm* waterFormLast;		// 78
 	float				waterLODHeight;		// 7C
 	MapData				mapData;			// 80
 	float				worldMapScale;		// 90
 	float				worldMapCellX;		// 94
 	float				worldMapCellY;		// 98
-	BGSMusicType		*musicType;			// 9C
+	BGSMusicType* musicType;			// 9C
 	CoordXY				min;				// A0
 	CoordXY				max;				// A8
 	OffsetDataMap		offsetMap;			// B0
 	String				strC0;				// C0
 	float				defaultLandHeight;	// C8
 	float				defaultWaterHeight;	// CC
-	BGSEncounterZone	*encounterZone;		// D0
+	BGSEncounterZone* encounterZone;		// D0
 	TESTexture			canopyShadow;		// D4
 	TESTexture			waterNoiseTexture;	// E0
 
-	TESWorldSpace *GetRootMapWorld();
+	TESWorldSpace* GetRootMapWorld();
 };
 STATIC_ASSERT(sizeof(TESWorldSpace) == 0xEC);
 
 // 04
-class TESChildCell
-{
+class TESChildCell {
 public:
-	virtual TESObjectCELL	*GetPersistentCell();
+	virtual TESObjectCELL* GetPersistentCell();
 };
 
 // 2C
-class TESObjectLAND : public TESForm
-{
+class TESObjectLAND : public TESForm {
 public:
 	TESObjectLAND();
 	~TESObjectLAND();
 
 	// A4
-	struct LandData
-	{
+	struct LandData {
 		//	Note: All arrays in the structs are of 289 elements.
-		struct Geometry
-		{
-			NiVector3		*quad0Vertices;
-			NiVector3		*quad1Vertices;
-			NiVector3		*quad2Vertices;
-			NiVector3		*quad3Vertices;
+		struct Geometry {
+			NiVector3* quad0Vertices;
+			NiVector3* quad1Vertices;
+			NiVector3* quad2Vertices;
+			NiVector3* quad3Vertices;
 		};
 
-		struct Struct08
-		{
-			NiVector3		*quad0Unk;
-			NiVector3		*quad1Unk;
-			NiVector3		*quad2Unk;
-			NiVector3		*quad3Unk;
+		struct Struct08 {
+			NiVector3* quad0Unk;
+			NiVector3* quad1Unk;
+			NiVector3* quad2Unk;
+			NiVector3* quad3Unk;
 		};
 
-		struct Struct0C
-		{
-			NiVector4		*quad0Unk;
-			NiVector4		*quad1Unk;
-			NiVector4		*quad2Unk;
-			NiVector4		*quad3Unk;
+		struct Struct0C {
+			NiVector4* quad0Unk;
+			NiVector4* quad1Unk;
+			NiVector4* quad2Unk;
+			NiVector4* quad3Unk;
 		};
 
-		struct Struct10
-		{
-			UInt8			*quad0Unk;
-			UInt8			*quad1Unk;
-			UInt8			*quad2Unk;
-			UInt8			*quad3Unk;
+		struct Struct10 {
+			UInt8* quad0Unk;
+			UInt8* quad1Unk;
+			UInt8* quad2Unk;
+			UInt8* quad3Unk;
 		};
 
-		struct Struct30
-		{
+		struct Struct30 {
 			UInt32			unk00;
 			UInt32			unk04;
 			UInt32			unk08;
@@ -4360,23 +4122,23 @@ public:
 		struct GrassAreaParam;
 		typedef NiTPointerMap<GrassAreaParam*> GrassAreaParamMap;
 
-		void					*ptr00;			// 00
-		Geometry				*geometry;		// 04
-		Struct08				*ptr08;			// 08
-		Struct0C				*ptr0C;			// 0C
-		void					*ptr10;			// 10
-		NiObject				*object14;		// 14
+		void* ptr00;			// 00
+		Geometry* geometry;		// 04
+		Struct08* ptr08;			// 08
+		Struct0C* ptr0C;			// 0C
+		void* ptr10;			// 10
+		NiObject* object14;		// 14
 		float					minHeight;		// 18
 		float					maxHeight;		// 1C
-		TESLandTexture			*textures20[4];	// 20
-		Struct30				*ptrs30[4];		// 30
-		void					**ptrs40[4];	// 40
+		TESLandTexture* textures20[4];	// 20
+		Struct30* ptrs30[4];		// 30
+		void** ptrs40[4];	// 40
 		UInt32					unk50;			// 50
 		GrassAreaParamMap		grassParams54;	// 54
 		GrassAreaParamMap		grassParams64;	// 64
 		GrassAreaParamMap		grassParams74;	// 74
 		GrassAreaParamMap		grassParams84;	// 84
-		NiObject				*object94;		// 94
+		NiObject* object94;		// 94
 		SInt32					cellCoordX;		// 98
 		SInt32					cellCoordY;		// 9C
 		float					meanHeight;		// A0
@@ -4384,14 +4146,13 @@ public:
 
 	TESChildCell		childCell;		// 18
 	UInt32				landFlags;		// 1C
-	TESObjectCELL		*cell;			// 20
-	QueuedFile			*queuedFile;	// 24
-	LandData			*landData;		// 28
+	TESObjectCELL* cell;			// 20
+	QueuedFile* queuedFile;	// 24
+	LandData* landData;		// 28
 };
 STATIC_ASSERT(sizeof(TESObjectLAND) == 0x2C);
 
-struct VariableInfo
-{
+struct VariableInfo {
 	UInt32			idx;		// 00
 	UInt32			pad04;		// 04
 	double			data;		// 08
@@ -4402,20 +4163,18 @@ struct VariableInfo
 };
 
 // TESQuest (6C)
-class TESQuest : public TESForm
-{
+class TESQuest : public TESForm {
 public:
 	TESQuest();
 	~TESQuest();
 
-	virtual char *GetEditorName() const;
+	virtual char* GetEditorName() const;
 
 	TESScriptableForm		scriptable;			// 18
 	TESIcon					icon;				// 24
 	TESFullName				fullName;			// 30
 
-	struct StageInfo
-	{
+	struct StageInfo {
 		UInt8			stage;		// 00 stageID
 		UInt8			unk001;		// 01 status ?
 		UInt8			pad[2];		// 02
@@ -4431,13 +4190,13 @@ public:
 		// So: this list would contain both Objectives and LocalVariables !
 		// That seems very strange but still, looking at Get/SetObjective... and ShowQuestVars there's no doubt.
 	ConditionList			conditions;			// 54
-	ScriptEventList			*scriptEventList;	// 5C
+	ScriptEventList* scriptEventList;	// 5C
 	UInt8					currentStage;		// 60
 	UInt8					pad61[3];			// 61
 	String					editorName;			// 64
 
 	bool SetStage(UInt8 stageID);
-	BGSQuestObjective *GetObjective(UInt32 objectiveID);
+	BGSQuestObjective* GetObjective(UInt32 objectiveID);
 };
 
 STATIC_ASSERT(sizeof(TESQuest) == 0x6C);
@@ -4445,13 +4204,12 @@ STATIC_ASSERT(sizeof(TESQuest) == 0x6C);
 // TESIdleForm (54)
 class TESIdleForm;
 
-class TESPackageData
-{
+class TESPackageData {
 public:
 	TESPackageData();
 	~TESPackageData();
 	virtual void	Destroy(bool free);
-	virtual void	CopyFrom(TESPackageData * packageData);
+	virtual void	CopyFrom(TESPackageData* packageData);
 	virtual void	Unk_02(void);
 	virtual void	Save(ModInfo* modInfo);
 	virtual void	Unk_04(void);
@@ -4460,8 +4218,7 @@ public:
 	virtual void	Unk_07(void);
 };
 
-class TESPatrolPackageData : public TESPackageData
-{
+class TESPatrolPackageData : public TESPackageData {
 public:
 	TESPatrolPackageData();
 	~TESPatrolPackageData();
@@ -4469,45 +4226,43 @@ public:
 	UInt8	patrolFlags;
 };
 
-enum
-{
-	kPackageFlag_OffersServices =			1 << 0,
-	kPackageFlag_MustReachLocation =		1 << 1,
-	kPackageFlag_MustComplete =				1 << 2,
-	kPackageFlag_LockDoorsAtStart =			1 << 3,
-	kPackageFlag_LockDoorsAtEnd =			1 << 4,
-	kPackageFlag_LockDoorsAtLocation =		1 << 5,
-	kPackageFlag_UnlockDoorsAtStart =		1 << 6,
-	kPackageFlag_UnlockDoorsAtEnd =			1 << 7,
-	kPackageFlag_UnlockDoorsAtLocation =	1 << 8,
-	kPackageFlag_ContinueIfPCNear =			1 << 9,
-	kPackageFlag_OncePerDay =				1 << 10,
-	kPackageFlag_Unk11 =					1 << 11,
-	kPackageFlag_SkipFalloutBehavior =		1 << 12,
-	kPackageFlag_AlwaysRun =				1 << 13,
-	kPackageFlag_Unk14 =					1 << 14,
-	kPackageFlag_NeverRun =					1 << 15,
-	kPackageFlag_Unk16 =					1 << 16,
-	kPackageFlag_AlwaysSneak =				1 << 17,
-	kPackageFlag_AllowSwimming =			1 << 18,
-	kPackageFlag_AllowFalls =				1 << 19,
-	kPackageFlag_ArmorUnequipped =			1 << 20,
-	kPackageFlag_WeaponsUnequipped =		1 << 21,
-	kPackageFlag_DefensiveCombat =			1 << 22,
-	kPackageFlag_WeaponsDrawn =				1 << 23,
-	kPackageFlag_NoIdleAnims =				1 << 24,
-	kPackageFlag_PretendInCombat =			1 << 25,
-	kPackageFlag_ContinueDuringCombat =		1 << 26,
-	kPackageFlag_NoCombatAlert =			1 << 27,
-	kPackageFlag_NoWarnAttackBehavior =		1 << 28,
-	kPackageFlag_AlwaysWalk =				1 << 29,	//	JIP LN
-	kPackageFlag_Unk30 =					1 << 30,
-	kPackageFlag_Unk31 =					1 << 31
+enum {
+	kPackageFlag_OffersServices = 1 << 0,
+	kPackageFlag_MustReachLocation = 1 << 1,
+	kPackageFlag_MustComplete = 1 << 2,
+	kPackageFlag_LockDoorsAtStart = 1 << 3,
+	kPackageFlag_LockDoorsAtEnd = 1 << 4,
+	kPackageFlag_LockDoorsAtLocation = 1 << 5,
+	kPackageFlag_UnlockDoorsAtStart = 1 << 6,
+	kPackageFlag_UnlockDoorsAtEnd = 1 << 7,
+	kPackageFlag_UnlockDoorsAtLocation = 1 << 8,
+	kPackageFlag_ContinueIfPCNear = 1 << 9,
+	kPackageFlag_OncePerDay = 1 << 10,
+	kPackageFlag_Unk11 = 1 << 11,
+	kPackageFlag_SkipFalloutBehavior = 1 << 12,
+	kPackageFlag_AlwaysRun = 1 << 13,
+	kPackageFlag_Unk14 = 1 << 14,
+	kPackageFlag_NeverRun = 1 << 15,
+	kPackageFlag_Unk16 = 1 << 16,
+	kPackageFlag_AlwaysSneak = 1 << 17,
+	kPackageFlag_AllowSwimming = 1 << 18,
+	kPackageFlag_AllowFalls = 1 << 19,
+	kPackageFlag_ArmorUnequipped = 1 << 20,
+	kPackageFlag_WeaponsUnequipped = 1 << 21,
+	kPackageFlag_DefensiveCombat = 1 << 22,
+	kPackageFlag_WeaponsDrawn = 1 << 23,
+	kPackageFlag_NoIdleAnims = 1 << 24,
+	kPackageFlag_PretendInCombat = 1 << 25,
+	kPackageFlag_ContinueDuringCombat = 1 << 26,
+	kPackageFlag_NoCombatAlert = 1 << 27,
+	kPackageFlag_NoWarnAttackBehavior = 1 << 28,
+	kPackageFlag_AlwaysWalk = 1 << 29,	//	JIP LN
+	kPackageFlag_Unk30 = 1 << 30,
+	kPackageFlag_Unk31 = 1 << 31
 };
 
 // TESPackage (80) class definition duplicated from Oblivion. Enum not updated
-class TESPackage : public TESForm
-{
+class TESPackage : public TESForm {
 public:
 	TESPackage();
 	~TESPackage();
@@ -4525,7 +4280,7 @@ public:
 
 	enum	// From OBSE and FNVEdit. Runtimes has 0x24 types!
 	{
-		kPackageType_Find =	0,		// 00
+		kPackageType_Find = 0,		// 00
 		kPackageType_Follow,
 		kPackageType_Escort,
 		kPackageType_Eat,
@@ -4550,16 +4305,13 @@ public:
 	};
 
 	// 8
-	struct PackageTime
-	{
-		enum
-		{
+	struct PackageTime {
+		enum {
 			kDay_Any = 0,
 			kTime_Any = 0xFF,
 		};
 
-		enum
-		{
+		enum {
 			kMonth_January = 0,
 			kMonth_February,
 			kMonth_March,
@@ -4580,8 +4332,7 @@ public:
 			kMonth_Any = 0xFF,
 		};
 
-		enum
-		{
+		enum {
 			kWeekday_Sundays = 0,
 			kWeekday_Morndays,
 			kWeekday_Tuesdays,
@@ -4607,23 +4358,22 @@ public:
 		static const char* DayForCode(UInt8 dayCode);
 		static UInt8 CodeForMonth(const char* monthStr);
 		static UInt8 CodeForDay(const char* dayStr);
-		static bool IsValidMonth(UInt8 m) { return (m+1) <= kMonth_Winter; }
-		static bool IsValidTime(UInt8 t) { return (t+1) <= 24; }
-		static bool IsValidDay(UInt8 d) { return (d+1) <= kWeekday_TT; }
+		static bool IsValidMonth(UInt8 m) { return (m + 1) <= kMonth_Winter; }
+		static bool IsValidTime(UInt8 t) { return (t + 1) <= 24; }
+		static bool IsValidDay(UInt8 d) { return (d + 1) <= kWeekday_TT; }
 		static bool IsValidDate(UInt8 d) { return d <= 31; }
 	};
 
-	union ObjectType
-	{
-		TESForm			* form;
-		TESObjectREFR	* refr;
+	union ObjectType {
+		TESForm* form;
+		TESObjectREFR* refr;
 		UInt32			objectCode;
 	};
 
 	// order only somewhat related to kFormType_XXX (values off by 17, 20, or 21)
 	enum	// From OBSE and FNVEdit
-	{	
-		kObjectType_None	=	0,
+	{
+		kObjectType_None = 0,
 		kObjectType_Activators,
 		kObjectType_Armor,
 		kObjectType_Books,
@@ -4656,21 +4406,20 @@ public:
 		kObjectType_Max,						//	1E
 	};
 
-	struct LocationData
-	{
+	struct LocationData {
 		enum {
-			kPackLocation_NearReference		= 0,
-			kPackLocation_InCell			= 1,
-			kPackLocation_CurrentLocation	= 2,
-			kPackLocation_EditorLocation	= 3,
-			kPackLocation_ObjectID			= 4,
-			kPackLocation_ObjectType		= 5,
-			kPackLocation_LinkedReference	= 6,
+			kPackLocation_NearReference = 0,
+			kPackLocation_InCell = 1,
+			kPackLocation_CurrentLocation = 2,
+			kPackLocation_EditorLocation = 3,
+			kPackLocation_ObjectID = 4,
+			kPackLocation_ObjectType = 5,
+			kPackLocation_LinkedReference = 6,
 
 			kPackLocation_Max,
 		};
 
-		UInt8		locationType;	
+		UInt8		locationType;
 		UInt8		pad[3];
 		UInt32		radius;
 		ObjectType  object;
@@ -4682,17 +4431,15 @@ public:
 		static bool IsValidLocationType(UInt8 locCode) { return locCode < kPackLocation_Max; }
 	};
 
-	enum
-	{
-		kTargetType_Refr		= 0,
-		kTargetType_BaseObject	= 1,
-		kTargetType_TypeCode	= 2,
-		
-		kTargetType_Max	= 3,
+	enum {
+		kTargetType_Refr = 0,
+		kTargetType_BaseObject = 1,
+		kTargetType_TypeCode = 2,
+
+		kTargetType_Max = 3,
 	};
 
-	struct TargetData 
-	{
+	struct TargetData {
 		UInt8		targetType;	// 00
 		UInt8		pad[3];		// 01
 		ObjectType	target;		// 04
@@ -4705,7 +4452,6 @@ public:
 		static UInt8 TargetCodeForString(const char* targetStr);
 		static bool IsValidTargetCode(UInt8 c) { return c < TESPackage::kTargetType_Max; }
 	};
-
 
 	enum eProcedure {			// UInt32	// Checked the Geck Wiki. Not consistent with s_procNames (which has a diffferent order and 0x37 procedures)
 		kProcedure_TRAVEL = 0,
@@ -4765,20 +4511,20 @@ public:
 
 	// In DialoguePackage, there are 0x58 virtual functions (including 0x4E from TESForm)
 
-	UInt32			procedureArrayIndex;	// 018 index into array of array of eProcedure terminated by 0x2C. 
+	UInt32			procedureArrayIndex;	// 018 index into array of array of eProcedure terminated by 0x2C.
 											//	   -1 if no procedure array exists for package type.
 	UInt32				packageFlags;		// 01C
 	char				type;				// 020
 	UInt8				pad021[1];			// 021
 	UInt16				behaviorFlags;		// O22
 	UInt32				specificFlags;		// 024
-	TESPackageData	*	packageData;		// 028
-	LocationData	*	location;			// 02C
-	TargetData		*	target;				// 030	target ?
+	TESPackageData* packageData;		// 028
+	LocationData* location;			// 02C
+	TargetData* target;				// 030	target ?
 	UInt32				unk034;				// 034	idles
 	PackageTime			time;				// 038
 	UInt32 unk040[(0x80 - 0x40) >> 2];		// 040	040 is a tList of Condition, 7C is an Interlocked counter
-		//	048 is a DWord CombatStyle, 
+		//	048 is a DWord CombatStyle,
 		//	04C, 05C and 06C are the same 4 DWord struct onBegin onEnd onChange, { TESIdle* idle; EmbeddedScript* script; Topic* topic; UInt32 unk0C; }
 		//	07C is a DWord
 
@@ -4805,28 +4551,27 @@ public:
 STATIC_ASSERT(sizeof(TESPackage) == 0x80);
 
 // DialoguePackage : Only package tested and verified effectivly
-class DialoguePackage : public TESPackage
-{
+class DialoguePackage : public TESPackage {
 public:
 	DialoguePackage();
 	~DialoguePackage();
 
 	UInt32 unk080[(0x8C - 0x80) >> 2];	// 080
-	TESTopic	* topic;		// 08C
+	TESTopic* topic;		// 08C
 	UInt32		unk090;			// 090
-	Character	* speaker;		// 094
+	Character* speaker;		// 094
 	UInt8		unk098;			// 098
 	UInt8		unk099;			// 098
 	UInt8		unk09A;			// 098
 	UInt8		unk09B;			// 098
-	TESForm		* unk09C;		// 09C
+	TESForm* unk09C;		// 09C
 	UInt32		unk0A0;			// 0A0
-	void *		unk0A4;			// 0A4	list of Dialogue Item and Dialogue Response, plus current item and current response
+	void* unk0A4;			// 0A4	list of Dialogue Item and Dialogue Response, plus current item and current response
 	UInt32		unk0A8;			// 0A8
 	UInt32		unk0AC;			// 0AC
-	Character	* subject;		// 0B0
-	Character	* target;		// 0B4
-	TESForm		* unk0B8;		// 0B8
+	Character* subject;		// 0B0
+	Character* target;		// 0B4
+	TESForm* unk0B8;		// 0B8
 	UInt8		unk0BC;			// 0BC
 	UInt8		unk0BD;			// 0BD
 	UInt8		unk0BE;			// 0BE
@@ -4845,8 +4590,7 @@ typedef struct {
 	float vector[3];
 } ThreeFloatArray;
 
-class FleePackage : public TESPackage
-{
+class FleePackage : public TESPackage {
 public:
 	FleePackage();
 	~FleePackage();
@@ -4859,32 +4603,30 @@ public:
 	UInt8			unk094;		// 094
 	UInt8			pad095[3];	// 095
 	tList<TESForm*>	list098;	// 098
-	TESForm			* unk0A0;	// 0A0
-	TESForm			* unk0A4;	// 0A4
+	TESForm* unk0A0;	// 0A0
+	TESForm* unk0A4;	// 0A4
 	UInt8			unk0A8;		// 0A8
 	UInt8			unk0A9;		// 0A9
 	UInt8			pad0AA[2];	// 0AA
 };	// 0AC
 
-class TressPassPackage : public TESPackage
-{
+class TressPassPackage : public TESPackage {
 public:
 	TressPassPackage();
 	~TressPassPackage();
 
 	float		warningTimer;		// 080
 	UInt32		warningLevel;		// 084
-	TESForm		* unk088;	// 088
-	TESForm		* unk08C;	// 08C
+	TESForm* unk088;	// 088
+	TESForm* unk08C;	// 08C
 	UInt32		crimeNumber;		// 090
 	UInt32		warning;		// 094
 	UInt32		unk098;		// 098
 };	// 09C
 
-struct SpectatorThreatInfo
-{
-	TESForm			* unk000;	// 000
-	TESForm			* unk004;	// 004
+struct SpectatorThreatInfo {
+	TESForm* unk000;	// 000
+	TESForm* unk004;	// 004
 	UInt32			unk008;		// 008
 	UInt32			unk00C;		// 00C	elapsed tick count
 	UInt32			unk010;		// 010
@@ -4895,8 +4637,7 @@ struct SpectatorThreatInfo
 	UInt8			pad[2];		// 02E
 };	// 030
 
-class SpectatorPackage : public TESPackage
-{
+class SpectatorPackage : public TESPackage {
 public:
 	SpectatorPackage();
 	~SpectatorPackage();
@@ -4912,8 +4653,7 @@ public:
 	// There is an object containing a semaphore at B0/B4
 };	// 0B4
 
-class TESFollowPackageData : public TESPackageData
-{
+class TESFollowPackageData : public TESPackageData {
 public:
 	TESFollowPackageData();
 	~TESFollowPackageData();
@@ -4922,22 +4662,20 @@ public:
 };
 
 // 108
-class TESCombatStyle : public TESForm
-{
+class TESCombatStyle : public TESForm {
 public:
 	TESCombatStyle();
 	~TESCombatStyle();
 
-	enum
-	{
-		kFlag_ChooseAttackUsingChance		= 1,
-		kFlag_MeleeAlertOK					= 2,
-		kFlag_FleeBasedOnPersonalSurvival	= 4,
-		kFlag_IgnoreThreats					= 16,
-		kFlag_IgnoreDamagingSelf			= 32,
-		kFlag_IgnoreDamagingGroup			= 64,
-		kFlag_IgnoreDamagingSpectators		= 128,
-		kFlag_CannotUseStealthboy			= 256,
+	enum {
+		kFlag_ChooseAttackUsingChance = 1,
+		kFlag_MeleeAlertOK = 2,
+		kFlag_FleeBasedOnPersonalSurvival = 4,
+		kFlag_IgnoreThreats = 16,
+		kFlag_IgnoreDamagingSelf = 32,
+		kFlag_IgnoreDamagingGroup = 64,
+		kFlag_IgnoreDamagingSpectators = 128,
+		kFlag_CannotUseStealthboy = 256,
 	};
 
 	float	coverSearchRadius;				// 018
@@ -5014,8 +4752,7 @@ public:
 	float	powerAttackFatigueModBase;		// 100
 	float	powerAttackFatigueModMult;		// 104
 
-	void SetFlag(UInt32 pFlag, bool bEnable)
-	{
+	void SetFlag(UInt32 pFlag, bool bEnable) {
 		if (bEnable) csFlags |= pFlag;
 		else csFlags &= ~pFlag;
 	}
@@ -5024,8 +4761,7 @@ public:
 STATIC_ASSERT(sizeof(TESCombatStyle) == 0x108);
 
 // 2C
-class TESRecipeCategory : public TESForm
-{
+class TESRecipeCategory : public TESForm {
 public:
 	TESRecipeCategory();
 	~TESRecipeCategory();
@@ -5037,27 +4773,24 @@ public:
 
 STATIC_ASSERT(sizeof(TESRecipeCategory) == 0x28);
 
-struct RecipeComponent
-{
+struct RecipeComponent {
 	UInt32		quantity;
-	TESForm		*item;
+	TESForm* item;
 };
 
 // 5C
-class TESRecipe : public TESForm
-{
+class TESRecipe : public TESForm {
 public:
 	TESRecipe();
 	~TESRecipe();
 
-	struct ComponentList : tList<RecipeComponent>
-	{
-		void *GetComponents(Script *scriptObj);
-		void AddComponent(TESForm *form, UInt32 quantity);
-		UInt32 RemoveComponent(TESForm *form);
-		void ReplaceComponent(TESForm *form, TESForm *replace);
-		UInt32 GetQuantity(TESForm *form);
-		void SetQuantity(TESForm *form, UInt32 quantity);
+	struct ComponentList : tList<RecipeComponent> {
+		void* GetComponents(Script* scriptObj);
+		void AddComponent(TESForm* form, UInt32 quantity);
+		UInt32 RemoveComponent(TESForm* form);
+		void ReplaceComponent(TESForm* form, TESForm* replace);
+		UInt32 GetQuantity(TESForm* form);
+		void SetQuantity(TESForm* form, UInt32 quantity);
 	};
 
 	TESFullName				fullName;		// 18
@@ -5071,20 +4804,18 @@ public:
 	ComponentList			outputs;		// 44
 	UInt32					unk4C;			// 4C
 	UInt32					unk50;			// 50
-	TESRecipeCategory		*category;		// 54
-	TESRecipeCategory		*subCategory;	// 58
+	TESRecipeCategory* category;		// 54
+	TESRecipeCategory* subCategory;	// 58
 };
 
 STATIC_ASSERT(sizeof(TESRecipe) == 0x5C);
 
-class TESLoadScreenType : public TESForm
-{
+class TESLoadScreenType : public TESForm {
 public:
 	TESLoadScreenType();
 	~TESLoadScreenType();
 
-	struct floatRGB
-	{
+	struct floatRGB {
 		float R, G, B;
 	};
 
@@ -5107,8 +4838,7 @@ public:
 };
 
 // TESLoadScreen (3C)
-class TESLoadScreen : public TESForm
-{
+class TESLoadScreen : public TESForm {
 public:
 	TESLoadScreen();
 	~TESLoadScreen();
@@ -5116,26 +4846,24 @@ public:
 	TESTexture			texture;		// 018
 	TESDescription		description;	// 024
 	UInt32				unk2C[2];		// 02C
-	TESLoadScreenType	*type;			// 034
+	TESLoadScreenType* type;			// 034
 };
 
 // TESLevSpell (44)
 class TESLevSpell;
 
 // TESObjectANIO (3C)
-class TESObjectANIO : public TESForm
-{
+class TESObjectANIO : public TESForm {
 public:
 	TESObjectANIO();
 	~TESObjectANIO();
 
 	TESModelTextureSwap	modelSwap;		// 18
-	TESIdleForm			*idleForm;		// 38
+	TESIdleForm* idleForm;		// 38
 };
 
 // 194
-class TESWaterForm : public TESForm
-{
+class TESWaterForm : public TESForm {
 public:
 	TESWaterForm();
 	~TESWaterForm();
@@ -5148,35 +4876,31 @@ public:
 	UInt8					flags;			// 071 FNAM (0x01: causes damage, 0x02: reflective)
 	UInt8					unk072[2];		// 072
 	UInt32					unk074[2];		// 074
-	TESSound				*sound;			// 07C
-	TESWaterForm			*waterForm;		// 080
+	TESSound* sound;			// 07C
+	TESWaterForm* waterForm;		// 080
 	float					visData[49];	// 084
 	UInt32					unk148[12];		// 148
-	SpellItem				*drinkEffect;	// 178
+	SpellItem* drinkEffect;	// 178
 	UInt32					unk17C[3];		// 17C
 	UInt8					radiation;		// 188
 	UInt8					pad189[3];		// 189
 	UInt32					unk18C[2];		// 18C
 };
 
-
-
 // A8
-class BGSExplosion : public TESBoundObject
-{
+class BGSExplosion : public TESBoundObject {
 public:
 	BGSExplosion();
 	~BGSExplosion();
 
-	enum
-	{
-		kFlags_Unknown =					1,
-		kFlags_AlwaysUseWorldOrientation =	2,
-		kFlags_KnockDownAlways =			4,
-		kFlags_KnockDownByFormula =			8,
-		kFlags_IgnoreLOSCheck =				16,
-		kFlags_PushSourceRefOnly =			32,
-		kFlags_IgnoreImageSpaceSwap =		64,
+	enum {
+		kFlags_Unknown = 1,
+		kFlags_AlwaysUseWorldOrientation = 2,
+		kFlags_KnockDownAlways = 4,
+		kFlags_KnockDownByFormula = 8,
+		kFlags_IgnoreLOSCheck = 16,
+		kFlags_PushSourceRefOnly = 32,
+		kFlags_IgnoreImageSpaceSwap = 64,
 	};
 
 	TESFullName					fullName;			// 30
@@ -5185,24 +4909,23 @@ public:
 	BGSPreloadable				preloadable;		// 64
 	TESImageSpaceModifiableForm	imageSpaceModForm;	// 68
 
-	TESForm						*placedObj;			// 70
+	TESForm* placedObj;			// 70
 	float						force;				// 74
 	float						damage;				// 78
 	float						radius;				// 7C
-	TESObjectLIGH				*light;				// 80
-	TESSound					*sound1;			// 84
+	TESObjectLIGH* light;				// 80
+	TESSound* sound1;			// 84
 	UInt32						explFlags;			// 88
 	float						ISradius;			// 8C
-	BGSImpactDataSet			*impactDataSet;		// 90
-	TESSound					*sound2;			// 94
+	BGSImpactDataSet* impactDataSet;		// 90
+	TESSound* sound2;			// 94
 	float						RADlevel;			// 98
 	float						dissipationTime;	// 9C
 	float						RADradius;			// A0
 	UInt8						soundLevel;			// A4	0 - Loud, 1 - Normal, 2 - Silent
 	UInt8						padA5[3];			// A5
 
-	void SetFlag(UInt32 pFlag, bool bEnable)
-	{
+	void SetFlag(UInt32 pFlag, bool bEnable) {
 		if (bEnable) explFlags |= pFlag;
 		else explFlags &= ~pFlag;
 	}
@@ -5211,8 +4934,7 @@ public:
 STATIC_ASSERT(sizeof(BGSExplosion) == 0xA8);
 
 // BGSDebris (24)
-class BGSDebris : public TESForm
-{
+class BGSDebris : public TESForm {
 	BGSDebris();
 	~BGSDebris();
 
@@ -5222,8 +4944,7 @@ class BGSDebris : public TESForm
 };
 
 // B0
-class TESImageSpace : public TESForm
-{
+class TESImageSpace : public TESForm {
 public:
 	TESImageSpace();
 	~TESImageSpace();
@@ -5267,14 +4988,13 @@ public:
 STATIC_ASSERT(sizeof(TESImageSpace) == 0xB0);
 
 // 730
-class TESImageSpaceModifier : public TESForm
-{
+class TESImageSpaceModifier : public TESForm {
 public:
 	TESImageSpaceModifier();
 	~TESImageSpaceModifier();
 
-	TESSound				*outroSound;		// 018
-	TESSound				*introSound;		// 01C
+	TESSound* outroSound;		// 018
+	TESSound* introSound;		// 01C
 	UInt8					animable;			// 020
 	UInt8					pad021[3];			// 021
 	float					duration;			// 024
@@ -5288,7 +5008,7 @@ public:
 	NiFloatInterpolator		fltIntrpl1[44];		// 114
 	NiColorInterpolator		clrIntrpl[2];		// 534
 	NiFloatInterpolator		fltIntrpl2[9];		// 57C
-	FloatData				*data654[44];		// 654
+	FloatData* data654[44];		// 654
 	// 00:	HDR: Eye Adapt Speed (Multiply)
 	// 01:	HDR: Eye Adapt Speed (Add)
 	// 02:	HDR: Blur Radius (Multiply)
@@ -5333,8 +5053,8 @@ public:
 	// 41:	Cinematic: Brightness (Add)
 	// 42:	Blur: Blur Radius
 	// 43:	Double Vision: Strength
-	ColorData				*data704[2];		// 704
-	FloatData				*data70C[9];		// 70C
+	ColorData* data704[2];		// 704
+	FloatData* data70C[9];		// 70C
 	// 00:	Radial Blur: Strength
 	// 01:	Radial Blur: Rampup
 	// 02:	Radial Blur: Up Start
@@ -5348,8 +5068,7 @@ public:
 STATIC_ASSERT(sizeof(TESImageSpaceModifier) == 0x730);
 
 // 24
-class BGSListForm : public TESForm
-{
+class BGSListForm : public TESForm {
 public:
 	BGSListForm();
 	~BGSListForm();
@@ -5369,7 +5088,7 @@ public:
 	UInt32 AddAt(TESForm* pForm, SInt32 n) {
 		SInt32	result = list.AddAt(pForm, n);
 
-		if(result >= 0 && IsAddedObject(n))
+		if (result >= 0 && IsAddedObject(n))
 			numAddedObjects++;
 
 		return result;
@@ -5378,16 +5097,13 @@ public:
 	SInt32 GetIndexOf(TESForm* pForm);
 
 	TESForm* RemoveNthForm(SInt32 n) {
-		TESForm	* form = list.RemoveNth(n);
+		TESForm* form = list.RemoveNth(n);
 
-		if(form && IsAddedObject(n))
-		{
-			if(numAddedObjects == 0)
-			{
+		if (form && IsAddedObject(n)) {
+			if (numAddedObjects == 0) {
 				PrintDebug("BGSListForm::RemoveNthForm: numAddedObjects = 0");
 			}
-			else
-			{
+			else {
 				numAddedObjects--;
 			}
 		}
@@ -5402,13 +5118,11 @@ public:
 	SInt32 RemoveForm(TESForm* pForm);
 	SInt32 ReplaceForm(TESForm* pForm, TESForm* pReplaceWith);
 
-	bool IsAddedObject(SInt32 idx)
-	{
+	bool IsAddedObject(SInt32 idx) {
 		return (idx >= 0) && (idx < numAddedObjects);
 	}
 
-	void RemoveAll()
-	{
+	void RemoveAll() {
 		list.RemoveAll();
 		numAddedObjects = 0;
 	}
@@ -5417,8 +5131,7 @@ public:
 STATIC_ASSERT(sizeof(BGSListForm) == 0x024);
 
 // 08
-class BGSPerkEntry
-{
+class BGSPerkEntry {
 public:
 	BGSPerkEntry();
 	~BGSPerkEntry();
@@ -5444,33 +5157,30 @@ public:
 };
 
 // 10
-class BGSQuestPerkEntry : public BGSPerkEntry
-{
+class BGSQuestPerkEntry : public BGSPerkEntry {
 public:
 	BGSQuestPerkEntry();
 	~BGSQuestPerkEntry();
 
 	virtual void	Fn_0E(void);
 
-	TESQuest			*quest;				// 08
+	TESQuest* quest;				// 08
 	UInt8				stage;				// 0C
 	UInt8				pad[3];				// 0D
 };
 
 // 0C
-class BGSAbilityPerkEntry : public BGSPerkEntry
-{
+class BGSAbilityPerkEntry : public BGSPerkEntry {
 public:
 	BGSAbilityPerkEntry();
 	~BGSAbilityPerkEntry();
 
 	virtual void	Fn_0E(void);
 
-	SpellItem			*ability;			// 08
+	SpellItem* ability;			// 08
 };
 
-class BGSEntryPointFunctionData
-{
+class BGSEntryPointFunctionData {
 public:
 	BGSEntryPointFunctionData();
 	~BGSEntryPointFunctionData();
@@ -5485,8 +5195,7 @@ public:
 };
 
 // 08
-class BGSEntryPointFunctionDataOneValue : public BGSEntryPointFunctionData
-{
+class BGSEntryPointFunctionDataOneValue : public BGSEntryPointFunctionData {
 public:
 	BGSEntryPointFunctionDataOneValue();
 	~BGSEntryPointFunctionDataOneValue();
@@ -5495,8 +5204,7 @@ public:
 };
 
 // 0C
-class BGSEntryPointFunctionDataTwoValue : public BGSEntryPointFunctionData
-{
+class BGSEntryPointFunctionDataTwoValue : public BGSEntryPointFunctionData {
 public:
 	BGSEntryPointFunctionDataTwoValue();
 	~BGSEntryPointFunctionDataTwoValue();
@@ -5504,17 +5212,15 @@ public:
 	float				value[2];			// 04
 };
 
-class BGSEntryPointFunctionDataLeveledList : public BGSEntryPointFunctionData
-{
+class BGSEntryPointFunctionDataLeveledList : public BGSEntryPointFunctionData {
 public:
 	BGSEntryPointFunctionDataLeveledList();
 	~BGSEntryPointFunctionDataLeveledList();
 
-	TESLevItem			*leveledList;		// 04
+	TESLevItem* leveledList;		// 04
 };
 
-class BGSEntryPointFunctionDataActivateChoice : public BGSEntryPointFunctionData
-{
+class BGSEntryPointFunctionDataActivateChoice : public BGSEntryPointFunctionData {
 public:
 	BGSEntryPointFunctionDataActivateChoice();
 	~BGSEntryPointFunctionDataActivateChoice();
@@ -5522,20 +5228,18 @@ public:
 	virtual void		Fn_07(void);
 
 	String				label;				// 04
-	Script				*script;			// 0C
+	Script* script;			// 0C
 	UInt32				flags;				// 10
 };
 
-struct EntryPointConditions
-{
+struct EntryPointConditions {
 	ConditionList		tab1;
 	ConditionList		tab2;
 	ConditionList		tab3;
 };
 
 // 14
-class BGSEntryPointPerkEntry : public BGSPerkEntry
-{
+class BGSEntryPointPerkEntry : public BGSPerkEntry {
 public:
 	BGSEntryPointPerkEntry();
 	~BGSEntryPointPerkEntry();
@@ -5546,19 +5250,17 @@ public:
 	UInt8						function;		// 09
 	UInt8						conditionTabs;	// 0A
 	UInt8						pad0B;			// 0B
-	BGSEntryPointFunctionData	*data;			// 0C
-	EntryPointConditions		*conditions;	// 10
+	BGSEntryPointFunctionData* data;			// 0C
+	EntryPointConditions* conditions;	// 10
 };
 
 // 50
-class BGSPerk : public TESForm
-{
+class BGSPerk : public TESForm {
 public:
 	BGSPerk();
 	~BGSPerk();
 
-	struct PerkData
-	{
+	struct PerkData {
 		bool				isTrait;	// 00
 		UInt8				minLevel;	// 01
 		UInt8				numRanks;	// 02
@@ -5577,8 +5279,7 @@ public:
 	tList<BGSPerkEntry>		entries;			// 48
 };
 
-class TESCasino : public TESForm
-{
+class TESCasino : public TESForm {
 public:
 	TESCasino();
 	~TESCasino();
@@ -5608,14 +5309,12 @@ public:
 };
 
 // 7C
-class TESChallenge : public TESForm
-{
+class TESChallenge : public TESForm {
 public:
 	TESChallenge();
 	~TESChallenge();
 
-	enum
-	{
+	enum {
 		kFlag_StartDisabled = 1 << 0,
 		kFlag_Recurring = 1 << 1,
 		kFlag_ShowZeroProgress = 1 << 2
@@ -5637,31 +5336,29 @@ public:
 	TESScriptableForm		scriptable;		// 2C
 	TESIcon					icon;			// 38
 	BGSMessageIcon			msgIcon;		// 44
-	
+
 	ChallengeData			data;			// 54
 	UInt32					unk6C;			// 6C
 	UInt32					unk70;			// 70
-	TESForm					*SNAM;			// 74
-	TESForm					*XNAM;			// 78
+	TESForm* SNAM;			// 74
+	TESForm* XNAM;			// 78
 };
 STATIC_ASSERT(sizeof(TESChallenge) == 0x7C);
 
 // B0
-class BGSBodyPart : public BaseFormComponent
-{
+class BGSBodyPart : public BaseFormComponent {
 public:
 	BGSBodyPart();
 	~BGSBodyPart();
 
-	enum
-	{
-		kFlags_Severable =		1,
-		kFlags_IKData =			2,
-		kFlags_BipedData =		4,
-		kFlags_Explodable =		8,
-		kFlags_IsHead =			16,
-		kFlags_Headtracking =	32,
-		kFlags_Absolute =		64,
+	enum {
+		kFlags_Severable = 1,
+		kFlags_IKData = 2,
+		kFlags_BipedData = 4,
+		kFlags_Explodable = 8,
+		kFlags_IsHead = 16,
+		kFlags_Headtracking = 32,
+		kFlags_Absolute = 64,
 	};
 
 	String				partNode;				// 04
@@ -5680,26 +5377,25 @@ public:
 	UInt8				explChance;				// 65
 	UInt8				explDebrisCount;		// 66
 	UInt8				pad67;					// 67
-	BGSDebris			*explDebris;			// 68
-	BGSExplosion		*explExplosion;			// 6C
+	BGSDebris* explDebris;			// 68
+	BGSExplosion* explExplosion;			// 6C
 	float				trackingMaxAngle;		// 70
 	float				explDebrisScale;		// 74
 	UInt8				sevrDebrisCount;		// 78
 	UInt8				pad79[3];				// 79
-	BGSDebris			*sevrDebris;			// 7C
-	BGSExplosion		*sevrExplosion;			// 80
+	BGSDebris* sevrDebris;			// 7C
+	BGSExplosion* sevrExplosion;			// 80
 	float				sevrDebrisScale;		// 84
 	float				goreEffTranslate[3];	// 88
 	float				goreEffRotation[3];		// 94
-	BGSImpactDataSet	*sevrImpactDS;			// A0
-	BGSImpactDataSet	*explImpactDS;			// A4
+	BGSImpactDataSet* sevrImpactDS;			// A0
+	BGSImpactDataSet* explImpactDS;			// A4
 	UInt8				sevrDecalCount;			// A8
 	UInt8				explDecalCount;			// A9
 	UInt8				padAA[2];				// AA
 	float				limbRepScale;			// AC
 
-	void SetFlag(UInt32 pFlag, bool bEnable)
-	{
+	void SetFlag(UInt32 pFlag, bool bEnable) {
 		if (bEnable) flags |= pFlag;
 		else flags &= ~pFlag;
 	}
@@ -5708,14 +5404,12 @@ public:
 STATIC_ASSERT(sizeof(BGSBodyPart) == 0xB0);
 
 // 74
-class BGSBodyPartData : public TESForm
-{
+class BGSBodyPartData : public TESForm {
 public:
 	BGSBodyPartData();
 	~BGSBodyPartData();
 
-	enum
-	{
+	enum {
 		eBodyPart_Torso = 0,
 		eBodyPart_Head1,
 		eBodyPart_Head2,
@@ -5735,14 +5429,13 @@ public:
 
 	TESModel		model;				// 018
 	BGSPreloadable	preloadable;		// 030
-	BGSBodyPart		*bodyParts[15];		// 034
-	BGSRagdoll		*ragDoll;			// 070
+	BGSBodyPart* bodyParts[15];		// 034
+	BGSRagdoll* ragDoll;			// 070
 };
 STATIC_ASSERT(sizeof(BGSBodyPartData) == 0x74);
 
 // B8
-class MediaLocationController : public TESForm
-{
+class MediaLocationController : public TESForm {
 public:
 	MediaLocationController();
 	~MediaLocationController();
@@ -5763,8 +5456,7 @@ public:
 STATIC_ASSERT(sizeof(MediaLocationController) == 0xB8);
 
 // BGSAddonNode (60)
-class BGSAddonNode : public TESBoundObject
-{
+class BGSAddonNode : public TESBoundObject {
 public:
 	BGSAddonNode();
 	~BGSAddonNode();
@@ -5780,8 +5472,7 @@ public:
 STATIC_ASSERT(sizeof(BGSAddonNode) == 0x60);
 
 // C4
-class ActorValueInfo : public TESForm
-{
+class ActorValueInfo : public TESForm {
 public:
 	ActorValueInfo();
 	~ActorValueInfo();
@@ -5790,7 +5481,7 @@ public:
 	TESDescription		description;
 	TESIcon				icon;
 
-	char				*infoName;		// 38
+	char* infoName;		// 38
 	String				avName;			// 3C
 	UInt32				avFlags;		// 44
 		//		bit 0x01	used in list of modified ActorValue for Player and others. Either can damage or "special damage", see 0x00937280
@@ -5812,71 +5503,65 @@ STATIC_ASSERT(sizeof(ActorValueInfo) == 0xC4);
 
 extern const ActorValueInfo** ActorValueInfoPointerArray;
 
-typedef ActorValueInfo* (* _GetActorValueInfo)(UInt32 actorValueCode);
+typedef ActorValueInfo* (*_GetActorValueInfo)(UInt32 actorValueCode);
 extern const _GetActorValueInfo GetActorValueInfo;
 
 // 20
-class BGSRadiationStage : public TESForm
-{
+class BGSRadiationStage : public TESForm {
 public:
 	BGSRadiationStage();
 	~BGSRadiationStage();
 
 	UInt32		threshold;	// 18
-	SpellItem	*effect;	// 1C
+	SpellItem* effect;	// 1C
 };
 
 // 20
-class BGSDehydrationStage : public TESForm
-{
+class BGSDehydrationStage : public TESForm {
 public:
 	BGSDehydrationStage();
 	~BGSDehydrationStage();
 
 	UInt32		threshold;	// 18
-	SpellItem	*effect;	// 1C
+	SpellItem* effect;	// 1C
 };
 
 // 20
-class BGSHungerStage : public TESForm
-{
+class BGSHungerStage : public TESForm {
 public:
 	BGSHungerStage();
 	~BGSHungerStage();
 
 	UInt32		threshold;	// 18
-	SpellItem	*effect;	// 1C
+	SpellItem* effect;	// 1C
 };
 
 // 20
-class BGSSleepDeprevationStage : public TESForm
-{
+class BGSSleepDeprevationStage : public TESForm {
 public:
 	BGSSleepDeprevationStage();
 	~BGSSleepDeprevationStage();
 
 	UInt32		threshold;	// 18
-	SpellItem	*effect;	// 1C
+	SpellItem* effect;	// 1C
 };
 
 // BGSCameraShot (78)
-class BGSCameraShot : public TESForm
-{
+class BGSCameraShot : public TESForm {
 	BGSCameraShot();
 	~BGSCameraShot();
 
 	TESModel	model;								// 018
 	//	TESImageSpaceModifiableForm imageSpaceModForm;	// 024
 
-	UInt32 unk024[(0x78-0x24) >> 2];	// 024
+	UInt32 unk024[(0x78 - 0x24) >> 2];	// 024
 };
 
 // BGSCameraPath (38)
 class BGSCameraPath;
 
 // BGSVoiceType (24)
-class BGSVoiceType : public TESForm
-{
+class BGSVoiceType : public TESForm {
 public:
 	BGSVoiceType();
 	~BGSVoiceType();
@@ -5886,16 +5571,14 @@ public:
 	UInt32		unk020;		// 020
 };
 
-struct ColorRGB
-{
+struct ColorRGB {
 	UInt8	red;	// 000
 	UInt8	green;	// 001
 	UInt8	blue;	// 002
 	UInt8	alpha;	// 003 or unused if no alpha
 };	// 004 looks to be endian swapped !
 
-struct DecalData
-{
+struct DecalData {
 	float		minWidth;		// 000
 	float		maxWidth;		// 004
 	float		minHeight;		// 008
@@ -5912,8 +5595,7 @@ struct DecalData
 STATIC_ASSERT(sizeof(DecalData) == 0x024);
 
 // 78
-class BGSImpactData : public TESForm
-{
+class BGSImpactData : public TESForm {
 public:
 	BGSImpactData();
 	~BGSImpactData();
@@ -5930,9 +5612,9 @@ public:
 	UInt8			noDecalData;		// 44
 	UInt8			pad45[3];			// 45
 
-	BGSTextureSet	*textureSet;		// 48
-	TESSound		*sound1;			// 4C
-	TESSound		*sound2;			// 50
+	BGSTextureSet* textureSet;		// 48
+	TESSound* sound1;			// 4C
+	TESSound* sound2;			// 50
 
 	float			decalMinWidth;		// 54
 	float			decalMaxWidth;		// 58
@@ -5950,36 +5632,33 @@ public:
 STATIC_ASSERT(sizeof(BGSImpactData) == 0x78);
 
 // 4C
-class BGSImpactDataSet : public TESForm
-{
+class BGSImpactDataSet : public TESForm {
 public:
 	BGSImpactDataSet();
 	~BGSImpactDataSet();
 
 	BGSPreloadable	preloadable;		// 18
-	BGSImpactData	*impactDatas[12];	// 1C
+	BGSImpactData* impactDatas[12];	// 1C
 };
 
 STATIC_ASSERT(sizeof(BGSImpactDataSet) == 0x4C);
 
 // 190
-class TESObjectARMA : public TESObjectARMO
-{
+class TESObjectARMA : public TESObjectARMO {
 public:
 	TESObjectARMA();
-	~TESObjectARMA();		
+	~TESObjectARMA();
 };
 
 STATIC_ASSERT(sizeof(TESObjectARMA) == 0x190);
 
 // BGSEncounterZone (30)
-class BGSEncounterZone : public TESForm
-{
+class BGSEncounterZone : public TESForm {
 public:
 	BGSEncounterZone();
 	~BGSEncounterZone();
 
-	TESForm*	owner;						// 018
+	TESForm* owner;						// 018
 	UInt8		rank;						// 01C
 	UInt8		minLevel;					// 01D
 	UInt8		zoneFlags;					// 01E
@@ -5988,14 +5667,12 @@ public:
 };
 
 // 40
-class BGSMessage : public TESForm
-{
+class BGSMessage : public TESForm {
 public:
 	BGSMessage();
 	~BGSMessage();
 
-	struct Button
-	{
+	struct Button {
 		String			label;
 		ConditionList	conditions;
 	};
@@ -6003,7 +5680,7 @@ public:
 	TESFullName		fullName;		// 18
 	TESDescription	description;	// 24
 
-	BGSMenuIcon		*menuIcon;		// 2C
+	BGSMenuIcon* menuIcon;		// 2C
 	tList<Button>	buttons;		// 30
 	UInt8			msgFlags;		// 38	1 - Message Box, 2 - Auto-display
 	UInt8			pad39[3];		// 39
@@ -6013,21 +5690,19 @@ public:
 STATIC_ASSERT(sizeof(BGSMessage) == 0x40);
 
 // BGSRagdoll (148)
-class BGSRagdoll : public TESForm
-{
+class BGSRagdoll : public TESForm {
 public:
 	BGSRagdoll();
 	~BGSRagdoll();
 
 	TESModel	model;					// 018
-	UInt32	unk030[(0x148-0x30) >> 2];	// 030
+	UInt32	unk030[(0x148 - 0x30) >> 2];	// 030
 };
 
 STATIC_ASSERT(sizeof(BGSRagdoll) == 0x148);
 
 // 44
-class BGSLightingTemplate : public TESForm
-{
+class BGSLightingTemplate : public TESForm {
 public:
 	BGSLightingTemplate();
 	~BGSLightingTemplate();
@@ -6042,21 +5717,20 @@ public:
 	float			directionalFade;	// 34
 	float			fogClipDist;		// 38
 	float			fogPower;			// 3C
-	TESObjectCELL	*getValuesFrom;		// 40
+	TESObjectCELL* getValuesFrom;		// 40
 };
 
 STATIC_ASSERT(sizeof(BGSLightingTemplate) == 0x44);
 
 // BGSMusicType (30)
-class BGSMusicType : public TESForm
-{
+class BGSMusicType : public TESForm {
 public:
 	BGSMusicType();
 	~BGSMusicType();
 
 	TESSoundFile	soundFile;	// 18
 	float			dB;		// 24
-	tList<char*>	*filesInFolder;		// 28
+	tList<char*>* filesInFolder;		// 28
 	UInt32			randomFile;		// 2C
 };
 
@@ -6065,45 +5739,44 @@ public:
 STATIC_ASSERT(sizeof(BGSMusicType) == 0x30);
 
 const char kDefaultObjectNames[34][28] = {	// 0x0118C360 is an array of struct: { char * Name, UInt8 kFormType , UInt8 pad[3] }
-      "Stimpack",
-      "SuperStimpack",
-      "RadX",
-      "RadAway",
-      "Morphine",
-      "Perk Paralysis",
-      "Player Faction",
-      "Mysterious Stranger NPC",
-      "Mysterious Stranger Faction",
-      "Default Music",
-      "Battle Music",
-      "Death Music",
-      "Success Music",
-      "Level Up Music",
-      "Player Voice (Male)",
-      "Player Voice (Male Child)",
-      "Player Voice (Female)",
-      "Player Voice (Female Child)",
-      "Eat Package Default Food",
-      "Every Actor Ability",
-      "Drug Wears Off Image Space",
-      "Doctor's Bag",
-      "Miss Fortune NPC",
-      "Miss Fortune Faction",
-      "Meltdown Explosion",
-      "Unarmed Forward PA",
-      "Unarmed Backward PA",
-      "Unarmed Left PA",
-      "Unarmed Right PA",
-      "Unarmed Crouch PA",
-      "Unarmed Counter PA",
-      "Spotter Effect",
-      "Item Detected Effect",
-      "Cateye Mobile Effect (NYI)"
+	  "Stimpack",
+	  "SuperStimpack",
+	  "RadX",
+	  "RadAway",
+	  "Morphine",
+	  "Perk Paralysis",
+	  "Player Faction",
+	  "Mysterious Stranger NPC",
+	  "Mysterious Stranger Faction",
+	  "Default Music",
+	  "Battle Music",
+	  "Death Music",
+	  "Success Music",
+	  "Level Up Music",
+	  "Player Voice (Male)",
+	  "Player Voice (Male Child)",
+	  "Player Voice (Female)",
+	  "Player Voice (Female Child)",
+	  "Eat Package Default Food",
+	  "Every Actor Ability",
+	  "Drug Wears Off Image Space",
+	  "Doctor's Bag",
+	  "Miss Fortune NPC",
+	  "Miss Fortune Faction",
+	  "Meltdown Explosion",
+	  "Unarmed Forward PA",
+	  "Unarmed Backward PA",
+	  "Unarmed Left PA",
+	  "Unarmed Right PA",
+	  "Unarmed Crouch PA",
+	  "Unarmed Counter PA",
+	  "Spotter Effect",
+	  "Item Detected Effect",
+	  "Cateye Mobile Effect (NYI)"
 };
 
 // BGSDefaultObjectManager (A0)
-class BGSDefaultObjectManager : public TESForm
-{
+class BGSDefaultObjectManager : public TESForm {
 public:
 	BGSDefaultObjectManager();
 	~BGSDefaultObjectManager();
@@ -6114,44 +5787,44 @@ public:
 		kDefaultObject_Max = 34,
 	};
 
-	typedef TESForm *	FormArray[kDefaultObject_Max];
+	typedef TESForm* FormArray[kDefaultObject_Max];
 
 	struct FormStruct {
-		TESForm*    Stimpak;
-		TESForm*    SuperStimpak;
-		TESForm*    RadX;
-		TESForm*    RadAway;
-		TESForm*    Morphine;
-		TESForm*    PerkParalysis;
-		TESForm*    PlayerFaction;
-		TESForm*    MysteriousStranger;
-		TESForm*    MysteriousStrangerFaction;
-		TESForm*    DefaultMusic;
-		TESForm*    BattleMusic;
-		TESForm*    DefaultDeath;
-		TESForm*    SuccessMusic;
-		TESForm*    LevelUpMusic;
-		TESForm*    PlayerVoiceMale;
-		TESForm*    PlayerVoiceMaleChild;
-		TESForm*    PlayerVoiceFemale;
-		TESForm*    PlayerVoiceFemaleChild;
-		TESForm*    EatPackageDefaultFood;
-		TESForm*    EveryActorAbility;
-		TESForm*    DrugWearOffImageSpace;
+		TESForm* Stimpak;
+		TESForm* SuperStimpak;
+		TESForm* RadX;
+		TESForm* RadAway;
+		TESForm* Morphine;
+		TESForm* PerkParalysis;
+		TESForm* PlayerFaction;
+		TESForm* MysteriousStranger;
+		TESForm* MysteriousStrangerFaction;
+		TESForm* DefaultMusic;
+		TESForm* BattleMusic;
+		TESForm* DefaultDeath;
+		TESForm* SuccessMusic;
+		TESForm* LevelUpMusic;
+		TESForm* PlayerVoiceMale;
+		TESForm* PlayerVoiceMaleChild;
+		TESForm* PlayerVoiceFemale;
+		TESForm* PlayerVoiceFemaleChild;
+		TESForm* EatPackageDefaultFood;
+		TESForm* EveryActorAbility;
+		TESForm* DrugWearOffImageSpace;
 		// FNV
-		TESForm*    DoctorsBag;
-		TESForm*    MissFortuneNPC;
-		TESForm*    MissFortuneFaction;
-		TESForm*    MeltdownExplosion;
-		TESForm*    UnarmedForwardPA;
-		TESForm*    UnarmedBackwardPA;
-		TESForm*    UnarmedLeftPA;
-		TESForm*    UnarmedRightPA;
-		TESForm*    UnarmedCrouchPA;
-		TESForm*    UnarmedCounterPA;
-		TESForm*    SpotterEffect;
-		TESForm*    ItemDetectedEffect;
-		TESForm*    CateyeMobileEffectNYI;
+		TESForm* DoctorsBag;
+		TESForm* MissFortuneNPC;
+		TESForm* MissFortuneFaction;
+		TESForm* MeltdownExplosion;
+		TESForm* UnarmedForwardPA;
+		TESForm* UnarmedBackwardPA;
+		TESForm* UnarmedLeftPA;
+		TESForm* UnarmedRightPA;
+		TESForm* UnarmedCrouchPA;
+		TESForm* UnarmedCounterPA;
+		TESForm* SpotterEffect;
+		TESForm* ItemDetectedEffect;
+		TESForm* CateyeMobileEffectNYI;
 	};
 
 	union DefaultObjects {
@@ -6164,18 +5837,16 @@ public:
 
 STATIC_ASSERT(sizeof(BGSDefaultObjectManager) == 0xA0);
 
-enum EActionListForm
-{
-	eActionListForm_AddAt	= 00,
+enum EActionListForm {
+	eActionListForm_AddAt = 00,
 	eActionListForm_DelAt,
 	eActionListForm_ChgAt,
 	eActionListForm_GetAt,
 	eActionListForm_Max,
 };
 
-enum EWhichListForm
-{
-	eWhichListForm_RaceHair					= 00,
+enum EWhichListForm {
+	eWhichListForm_RaceHair = 00,
 	eWhichListForm_RaceEyes,
 	eWhichListForm_RaceHeadPart,			// ? //
 	eWhichListForm_BaseFaction,
@@ -6191,4 +5862,3 @@ enum EWhichListForm
 	eWhichListForm_FormList,
 	eWhichListForm_Max,
 };
-

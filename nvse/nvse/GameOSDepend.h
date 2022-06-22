@@ -7,13 +7,11 @@
 #include <dinput.h>
 //#include <dsound.h>
 
-enum
-{
-	kMaxControlBinds =	0x1C,
+enum {
+	kMaxControlBinds = 0x1C,
 };
 
-enum XboxControlCode
-{
+enum XboxControlCode {
 	kXboxCtrl_DPAD_UP = 1,
 	kXboxCtrl_DPAD_DOWN,
 	kXboxCtrl_DPAD_RIGHT = 4,
@@ -35,16 +33,14 @@ enum XboxControlCode
 	kXboxCtrl_LS_RIGHT = 0x16,
 	kXboxCtrl_LS_LEFT,
 };
-enum KeyState
-{
+enum KeyState {
 	isHeld = 0x0,
 	isPressed = 0x1,
 	isDepressed = 0x2,
 	isChanged = 0x3,
 };
 
-enum ControlCode
-{
+enum ControlCode {
 	Forward = 0x0,
 	Backward = 0x1,
 	Left = 0x2,
@@ -78,21 +74,18 @@ enum ControlCode
 	Screenshot = 0x1E,
 };
 // 1C04
-class OSInputGlobals
-{
+class OSInputGlobals {
 public:
-	enum
-	{
-		kFlag_HasJoysticks =	1 << 0,
-		kFlag_HasMouse =		1 << 1,
-		kFlag_HasKeyboard =		1 << 2,
-		kFlag_BackgroundMouse =	1 << 3,
+	enum {
+		kFlag_HasJoysticks = 1 << 0,
+		kFlag_HasMouse = 1 << 1,
+		kFlag_HasKeyboard = 1 << 2,
+		kFlag_BackgroundMouse = 1 << 3,
 	};
 
 	// Have not verified nothing has changed here so commenting out (no controllers to test with currently)
 #if 0
-	enum
-	{
+	enum {
 		kMaxDevices = 8,
 	};
 
@@ -100,8 +93,7 @@ public:
 	~OSInputGlobals();
 
 	// 244
-	class Joystick
-	{
+	class Joystick {
 	public:
 		Joystick();
 		~Joystick();
@@ -109,16 +101,14 @@ public:
 		UInt32	unk000[0x244 >> 2];
 	};
 
-	struct JoystickObjectsInfo
-	{
-		enum
-		{
-			kHasXAxis =		1 << 0,
-			kHasYAxis =		1 << 1,
-			kHasZAxis =		1 << 2,
-			kHasXRotAxis =	1 << 3,
-			kHasYRotAxis =	1 << 4,
-			kHasZRotAxis =	1 << 5
+	struct JoystickObjectsInfo {
+		enum {
+			kHasXAxis = 1 << 0,
+			kHasYAxis = 1 << 1,
+			kHasZAxis = 1 << 2,
+			kHasXRotAxis = 1 << 3,
+			kHasYRotAxis = 1 << 4,
+			kHasZRotAxis = 1 << 5
 		};
 
 		UInt32	axis;
@@ -126,15 +116,13 @@ public:
 	};
 
 	// 2C
-	struct Unk1AF4
-	{
+	struct Unk1AF4 {
 		UInt32	bufLen;
 		UInt8	unk04[0x2C - 4];
 	};
 
 	// 28
-	struct Unk1B20
-	{
+	struct Unk1B20 {
 		UInt32	unk00;
 		UInt32	unk04;
 		UInt32	unk08;
@@ -150,7 +138,7 @@ public:
 
 	UInt32			unk0000;				// 0000
 	UInt32			flags;					// 0004
-	IDirectInput8	*directInput;			// 0008
+	IDirectInput8* directInput;			// 0008
 	UInt32			unk000C;				// 000C
 	UInt32			unk0010;				// 0010
 	UInt32			unk0014;				// 0014
@@ -159,8 +147,8 @@ public:
 	UInt32			unk0020;				// 0020
 	UInt32			unk0024;				// 0024
 	UInt32			unk0028;				// 0028
-	void			*unk002C;				// 002C
-	void			*unk0030;				// 0030
+	void* unk002C;				// 002C
+	void* unk0030;				// 0030
 	UInt32			unk0034[1584];			// 0034
 	UInt32			unk18F4;				// 18F4
 	UInt8			currKeyStates[256];		// 18F8
@@ -176,7 +164,7 @@ public:
 	UInt32			unk1B50[2];				// 1B50
 	UInt8			buttonStates1B58[8];	// 1B58
 	UInt32			unk1B60[8];				// 1B60
-	UInt32			*controllerVibration;	// 1B80
+	UInt32* controllerVibration;	// 1B80
 	UInt32			unk1B84[4];				// 1B84
 	UInt8			keyBinds[28];			// 1B94
 	UInt8			mouseBinds[28];			// 1BB0
@@ -187,11 +175,11 @@ public:
 	bool GetMouseState(int buttonID, KeyState state) { return ((bool(__thiscall*)(OSInputGlobals*, int, KeyState))(0xA23A50))(this, buttonID, state); };
 
 	bool GetKeyState(int key, KeyState state) { return 	((bool(__thiscall*)(OSInputGlobals*, int, KeyState))(0xA24180))(this, key, state); };
-	static OSInputGlobals* GetSingleton() { return *(OSInputGlobals * *)(0x11F35CC); }
+	static OSInputGlobals* GetSingleton() { return *(OSInputGlobals**)(0x11F35CC); }
 };
 STATIC_ASSERT(sizeof(OSInputGlobals) == 0x1C04);
 
-extern OSInputGlobals **g_OSInputGlobals;
+extern OSInputGlobals** g_OSInputGlobals;
 
 #if 0
 #include "GameTypes.h"
@@ -200,8 +188,7 @@ class TESGameSound;
 class NiAVObject;
 
 // 58
-class TESGameSound
-{
+class TESGameSound {
 public:
 	TESGameSound();
 	~TESGameSound();
@@ -215,36 +202,34 @@ public:
 	UInt32			unk2C[4];	// 2C
 	float			unk3C;		// 3C
 	UInt32			unk40[3];	// 40
-	const char *	name;		// 4C
+	const char* name;		// 4C
 	UInt32			unk50;		// 50
 	UInt32			unk54;		// 54
 };
 
 // 328
-class OSSoundGlobals
-{
+class OSSoundGlobals {
 public:
 	OSSoundGlobals();
 	~OSSoundGlobals();
 
-	enum
-	{
-		kFlags_HasDSound =		1 << 0,
-		kFlags_HasHardware3D =	1 << 2,
+	enum {
+		kFlags_HasDSound = 1 << 0,
+		kFlags_HasHardware3D = 1 << 2,
 	};
-	
+
 	typedef NiTPointerMap <TESGameSound>	TESGameSoundMap;
 	typedef NiTPointerMap <NiAVObject>		NiAVObjectMap;
 
 	UInt32					unk000;						// 000
 	UInt32					unk004;						// 004
-	IDirectSound8			* dsoundInterface;			// 008
-	IDirectSoundBuffer8		* primaryBufferInterface;	// 00C
+	IDirectSound8* dsoundInterface;			// 008
+	IDirectSoundBuffer8* primaryBufferInterface;	// 00C
 	DSCAPS					soundCaps;					// 010
 	UInt32					unk070;						// 070
 	UInt32					unk074;						// 074
-	IDirectSound3DListener	* listenerInterface;		// 078
-	UInt32					unk07C[(0x0A4-0x07C) >> 2];	// 07C
+	IDirectSound3DListener* listenerInterface;		// 078
+	UInt32					unk07C[(0x0A4 - 0x07C) >> 2];	// 07C
 	UInt8					unk0A4;						// 0A4
 	UInt8					unk0A5;						// 0A5
 	UInt8					unk0A6;						// 0A6
@@ -260,30 +245,28 @@ public:
 	UInt32					unk0C8;						// 0C8 - time
 	UInt32					unk0CC;						// 0CC - time
 	UInt32					unk0D0;						// 0D0 - time
-	UInt32					unk0D4[(0x0DC-0x0D4) >> 2];	// 0D4
+	UInt32					unk0D4[(0x0DC - 0x0D4) >> 2];	// 0D4
 	UInt32					unk0DC;						// 0DC
-	UInt32					unk0E0[(0x2F0-0x0E0) >> 2];	// 0E0
+	UInt32					unk0E0[(0x2F0 - 0x0E0) >> 2];	// 0E0
 	float					musicVolume;				// 2F0
 	UInt32					unk2F4;						// 2F4
 	float					musicVolume2;				// 2F8
 	UInt32					unk2FC;						// 2FC
-	TESGameSoundMap			* gameSoundMap;				// 300
-	NiAVObjectMap			* niObjectMap;				// 304
-	NiTPointerList <void>	* soundMessageMap;			// 308 - AudioManager::SoundMessage *
-	UInt32					unk30C[(0x320-0x30C) >> 2];	// 30C
-	void					* soundMessageList;			// 320
+	TESGameSoundMap* gameSoundMap;				// 300
+	NiAVObjectMap* niObjectMap;				// 304
+	NiTPointerList <void>* soundMessageMap;			// 308 - AudioManager::SoundMessage *
+	UInt32					unk30C[(0x320 - 0x30C) >> 2];	// 30C
+	void* soundMessageList;			// 320
 	UInt32					unk324;						// 324
 };
 
 STATIC_ASSERT(sizeof(OSSoundGlobals) == 0x328);
 #endif
 
-class OSSoundGlobals {
-};
+class OSSoundGlobals {};
 
 // A4
-class OSGlobals
-{
+class OSGlobals {
 public:
 	OSGlobals();
 	~OSGlobals();
@@ -300,17 +283,17 @@ public:
 	HINSTANCE		procInstance;		// 0C
 	UInt32			mainThreadID;		// 10
 	HANDLE			mainThreadHandle;	// 14
-	UInt32			*unk18;				// 18	ScrapHeapManager::Buffer*
+	UInt32* unk18;				// 18	ScrapHeapManager::Buffer*
 	UInt32			unk1C;				// 1C
-	OSInputGlobals	*input;				// 20
-	OSSoundGlobals	*sound;				// 24
+	OSInputGlobals* input;				// 20
+	OSSoundGlobals* sound;				// 24
 	UInt32			unk28;				// 28	relates to unk18
 	//...
-	UInt32			*unk50;				// 50	same object as unk18
+	UInt32* unk50;				// 50	same object as unk18
 	//..
 	UInt32			unk60;				// 60	relates to unk50
 };
 
 //STATIC_ASSERT(sizeof(OSGlobals) == 0x0A4);	// found in oldWinMain 0x0086AF4B
 
-extern OSGlobals ** g_osGlobals;
+extern OSGlobals** g_osGlobals;
