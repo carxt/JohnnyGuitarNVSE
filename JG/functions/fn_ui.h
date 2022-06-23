@@ -8,7 +8,7 @@ DEFINE_COMMAND_PLUGIN(QueueCinematicText, , 0, 7, kParams_TwoStrings_OneOptional
 DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , 0, 3, kParams_OneString_TwoOptionalInts);
 DEFINE_COMMAND_PLUGIN(GetSystemColor, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetSystemColorAlt, , 0, 4, kParams_OneInt_ThreeScriptVars);
-DEFINE_COMMAND_ALT_PLUGIN(SetCustomReputationChangeIcon, scrci, , 0, 4, kParams_OneForm_OneInt_OneString);
+DEFINE_COMMAND_ALT_PLUGIN(SetCustomReputationChangeIcon, scrci, , 0, 3, kParams_OneForm_OneInt_OneString);
 
 bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	*result = 0;
