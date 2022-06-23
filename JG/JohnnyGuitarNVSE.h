@@ -460,18 +460,11 @@ void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, UIn
 	}
 }
 
-
-
-float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh. 
-
+float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
 	return thisObj->dyingTimer + fDeathSoundMAXTimer;
 }
 
-
-
-
-float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alternate complex, confusing, potentially buggy fix. 
-
+float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alternate complex, confusing, potentially buggy fix.
 	constexpr float dyingTimerMin = FLT_EPSILON * 10; //Establish low tolerance, this should be ideal. Unless someone sets fDyingTimer to 0 or something, but that's their problem.
 	float dyingTimer = thisObj->dyingTimer;
 	bool keepTalkingDe = false;
@@ -483,7 +476,7 @@ float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alter
 }
 __declspec (naked) void FixDeathSoundsHook() {
 	__asm {
-		mov edx, dword ptr [ebp + 8]
+		mov edx, dword ptr[ebp + 8]
 		jmp FixDeathSounds
 	}
 }
@@ -509,6 +502,42 @@ char* __fastcall GetReputationIconHook(TESReputation* rep) {
 		if (*it->second[tierID]) return it->second[tierID];
 	}
 	return ThisStdCall<char*>(0x6167D0, rep);
+}
+
+char* __fastcall GetReputationMessageIconHook(UInt32 a1) {
+	UInt32 addr = (UInt32)_ReturnAddress();
+	auto* _ebp = GetParentBasePtr(_AddressOfReturnAddress(), false);
+	TESReputation* rep = nullptr;
+	switch (addr) {
+		case 0x615951:
+		case 0x61585A:
+		case 0x615B1E:
+		case 0x615C09:
+			rep = *reinterpret_cast<TESReputation**>(_ebp - 0x110);
+			break;
+		case 0x615E0B:
+		case 0x615F10:
+		case 0x61610F:
+		case 0x616208:
+			rep = *reinterpret_cast<TESReputation**>(_ebp - 0x128);
+			break;
+		default:
+			break;
+	}
+	if (rep && rep->refID) {
+		auto it = factionRepIcons.find(rep->refID);
+		if (it != factionRepIcons.end()) {
+			UInt8 tierID = 0;
+			if (a1 == 0x11CBAD0 || a1 == 0x11CBC34) {
+				tierID = 1;
+			}
+			else if (a1 == 0x11CBA00 || a1 == 0x11CBD5C) {
+				tierID = 3;
+			}
+			if (*it->second[tierID]) return it->second[tierID];
+		}
+	}
+	return a1 ? ((Setting*)a1)->data.str : "\0";
 }
 Setting* __fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char* name) {
 	Setting* result = ThisStdCall<Setting*>(0x5E02B0, ini, name);
@@ -536,10 +565,9 @@ void __fastcall MenuSetFlagHook(StartMenu* menu, UInt32 flags, bool doSet) {
 	}
 }
 
-bool __fastcall CanSpeakThroughHead(Actor *actor) {
+bool __fastcall CanSpeakThroughHead(Actor* actor) {
 	return !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head1)) && !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head2));
 }
-
 
 __declspec (naked) void StimpakHotkeyHook() {
 	__asm {
@@ -567,7 +595,6 @@ __declspec (naked) void SimpleDecalHook() {
 }
 
 __declspec (naked) void NoHeadlessTalkingHook() {
-
 	__asm {
 		mov eax, dword ptr ds : [ecx + 0x68] //The original call, GetBaseProcess
 		test eax, eax
@@ -682,9 +709,8 @@ void HandleIniOptions() {
 
 	// for bRemoveMainMenuMusic
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
-	//Patch the game so the dialog subroutine stops if the actor's head is blown off, I'll add it as an ini setting later. 
-	WriteRelCall(0x8EC54D, (uintptr_t) NoHeadlessTalkingHook);
-
+	//Patch the game so the dialog subroutine stops if the actor's head is blown off, I'll add it as an ini setting later.
+	WriteRelCall(0x8EC54D, (uintptr_t)NoHeadlessTalkingHook);
 }
 
 void HandleFunctionPatches() {
@@ -719,6 +745,14 @@ void HandleFunctionPatches() {
 	// for SetCustomReputationChangeIcon
 	WriteRelCall(0x6156A2, UInt32(GetReputationIconHook));
 	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
+	WriteRelCall(0x615B19, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x615C04, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x61610A, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x616203, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x615855, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x61594C, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x615F0B, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x615E06, UInt32(GetReputationMessageIconHook));
 }
 
 void HandleGameHooks() {
