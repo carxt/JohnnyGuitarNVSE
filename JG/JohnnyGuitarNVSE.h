@@ -33,7 +33,7 @@ bool noMuzzleFlashCooldown = 0;
 bool enableRadioSubtitles = 0;
 bool removeMainMenuMusic = 0;
 bool fixDeathSounds = 10;
-float fDeathSoundMAXTimer = 14;
+float iDeathSoundMAXTimer = 10;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -461,7 +461,7 @@ void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, UIn
 }
 
 float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
-	return thisObj->dyingTimer + fDeathSoundMAXTimer;
+	return thisObj->dyingTimer + iDeathSoundMAXTimer;
 }
 
 float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alternate complex, confusing, potentially buggy fix.
