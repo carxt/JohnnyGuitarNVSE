@@ -254,7 +254,8 @@ _declspec(naked) void LevelUpHook() {
 	static const UInt32 showAddr = 0x77D618;
 	_asm {
 		jne noLevelUp
-		cmp dword ptr ds : [isShowLevelUp] , 0
+		mov al, isShowLevelUp
+		test al, al
 		je noLevelUp
 		jmp showAddr
 		noLevelUp :
