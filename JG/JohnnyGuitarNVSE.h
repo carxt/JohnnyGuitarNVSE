@@ -618,6 +618,22 @@ bool __fastcall SaveINIHook(IniSettingCollection* a1, void* edx, char* a2) {
 	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
 	return ThisStdCall_B(0x5E01B0, rendererSettings, rendererSettings->iniPath);
 }
+
+bool __fastcall WantsToFleeHook(CombatState* state) {
+	if (!state->cmbtCtrl->packageOwner) return false;
+	float avCharisma = state->cmbtCtrl->packageOwner->avOwner.GetActorValue(kAVCode_Charisma);
+	if (state->currentConfidence > 0 && avCharisma <= 5) {
+		Console_Print("0x%X confidence %d charisma %.f modified -1", state->cmbtCtrl->packageOwner->refID, state->currentConfidence, avCharisma);
+		return (state->currentConfidence - 1) > state->fleeThreshold008;
+	}
+	else if (state->currentConfidence < 4 && avCharisma > 5) {
+		Console_Print("0x%X confidence %d charisma %.f modified +1", state->cmbtCtrl->packageOwner->refID, state->currentConfidence, avCharisma);
+		return (state->currentConfidence + 1) > state->fleeThreshold008;
+	}
+	else {
+		return state->currentConfidence > state->fleeThreshold008;
+	}
+}
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
@@ -760,4 +776,8 @@ void HandleGameHooks() {
 	HandleFixes();
 	HandleIniOptions();
 	HandleFunctionPatches();
+	//  wip shit for void
+	//	WriteRelCall(0x97E745, (UInt32)WantsToFleeHook);
+	//	WriteRelCall(0x999082, (UInt32)WantsToFleeHook);
+	//	WriteRelCall(0x9AAC17, (UInt32)WantsToFleeHook);
 }
