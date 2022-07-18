@@ -166,8 +166,9 @@ void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal) 
 void __fastcall HandleProcessLevelChange(Actor* actor, int desiredLevel, int oldLevel) {
 	if (actor && actor->refID) {
 		for (auto const& callback : OnPLChangeHandler->EventCallbacks) {
-			if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(0, actor->refID) &&
-				reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, desiredLevel)) {
+			JohnnyEventFiltersOneFormOneInt* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter);
+			if ((filter->IsInFilter(0, actor->refID) || filter->IsInFilter(0, actor->baseForm->refID)) &&
+				filter->IsInFilter(1, desiredLevel)) {
 				CallUDF(callback.ScriptForEvent, NULL, OnPLChangeHandler->numMaxArgs, actor, oldLevel, desiredLevel);
 			}
 		}
