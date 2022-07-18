@@ -58,6 +58,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			OnDyingHandler->FlushEventCallbacks();
 			OnLimbGoneHandler->FlushEventCallbacks();
 			OnCrosshairHandler->FlushEventCallbacks();
+			OnPLChangeHandler->FlushEventCallbacks();
 			RestoreDisabledPlayerControlsHUDFlags();
 			SaveGameUMap.clear();
 			break;
@@ -378,6 +379,7 @@ extern "C" {
 		REG_CMD(GetFactionFlags);
 		REG_CMD(SetFactionFlags);
 		REG_TYPED_CMD(GetLandTextureUnderFeet, Form);
+		REG_CMD(SetOnProcessLevelChangeEventHandler);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
