@@ -167,13 +167,15 @@ bool __fastcall HandlePLChangeEvent(Actor* actor) {
 	int oldLevel = actor->baseProcess->processLevel;
 	bool result = ThisStdCall_B(originalCall, actor);
 	int newLevel = actor->baseProcess->processLevel;
+	if (oldLevel != newLevel) {
 		for (auto const& callback : OnPLChangeHandler->EventCallbacks) {
 			JohnnyEventFiltersOneFormOneInt* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter);
-			if ((filter->IsInFilter(0, actor->refID) || filter->IsInFilter(0, actor->baseForm->refID)) &&
+			if ((filter->IsInFilter(0, actor->refID) || filter->IsInFilter(0, actor->GetBaseForm()->refID)) &&
 				filter->IsInFilter(1, newLevel)) {
 				CallUDF(callback.ScriptForEvent, NULL, OnPLChangeHandler->numMaxArgs, actor, oldLevel, newLevel);
 			}
 		}
+	}
 		return result;
 }
 
