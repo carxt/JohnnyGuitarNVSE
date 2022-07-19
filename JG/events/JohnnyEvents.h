@@ -162,17 +162,19 @@ void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal) 
 		}
 	}
 }
-
-void __fastcall HandleProcessLevelChange(Actor* actor, int desiredLevel, int oldLevel) {
-	if (actor && actor->refID) {
+template <UInt32 originalCall>
+bool __fastcall HandlePLChangeEvent(Actor* actor) {
+	int oldLevel = actor->baseProcess->processLevel;
+	bool result = ThisStdCall_B(originalCall, actor);
+	int newLevel = actor->baseProcess->processLevel;
 		for (auto const& callback : OnPLChangeHandler->EventCallbacks) {
 			JohnnyEventFiltersOneFormOneInt* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter);
 			if ((filter->IsInFilter(0, actor->refID) || filter->IsInFilter(0, actor->baseForm->refID)) &&
-				filter->IsInFilter(1, desiredLevel)) {
-				CallUDF(callback.ScriptForEvent, NULL, OnPLChangeHandler->numMaxArgs, actor, oldLevel, desiredLevel);
+				filter->IsInFilter(1, newLevel)) {
+				CallUDF(callback.ScriptForEvent, NULL, OnPLChangeHandler->numMaxArgs, actor, oldLevel, newLevel);
 			}
 		}
-	}
+		return result;
 }
 
 __declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32 avCode, float prevVal, float newVal, ActorValueOwner* attacker) {
@@ -248,23 +250,7 @@ __declspec (naked) void OnQuestStartStopEventAsm() {
 	}
 }
 
-__declspec (naked) void HandlePLChangeEvent() {
-	__asm {
-		mov eax, dword ptr[ebp - 0x4]; // old level
-		push eax
-		mov edx, dword ptr[ebp - 0x8]; // desired level
-		mov ecx, dword ptr[ebp - 0x28]; // actor
-		call HandleProcessLevelChange
-		movzx ecx, dword ptr[ebp-0x9] // check doDestroy
-		test ecx, ecx
-		jz DESTROY
-		mov eax, 0x8862BA 
-		jmp eax
-		DESTROY:
-		mov eax, 0x886346
-		jmp eax
-	}
-}
+
 bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
@@ -544,7 +530,28 @@ void HandleEventHooks() {
 	SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00", 3);
 	SafeWrite8(0x60CA29, 0xCC);
 	WriteRelJump(0x66EE50, (UINT)AVChangeEventAsm);
-	WriteRelJump(0x8862AE, (UINT)HandlePLChangeEvent);
+	// Process Level change: MoveToHigh
+	SafeWrite32(0x108AC7C, (UINT)HandlePLChangeEvent<0x881D30>);
+	SafeWrite32(0x10872EC, (UINT)HandlePLChangeEvent<0x881D30>);
+	SafeWrite32(0x1086CAC, (UINT)HandlePLChangeEvent<0x881D30>);
+	SafeWrite32(0x1084494, (UINT)HandlePLChangeEvent<0x881D30>);
+	// MoveToLow
+	SafeWrite32(0x108AC80, (UINT)HandlePLChangeEvent<0x882B90>);
+	SafeWrite32(0x10872F0, (UINT)HandlePLChangeEvent<0x882B90>);
+	SafeWrite32(0x1086CB0, (UINT)HandlePLChangeEvent<0x882B90>);
+	SafeWrite32(0x1084498, (UINT)HandlePLChangeEvent<0x882B90>);
+	// MoveToMiddleLow
+	SafeWrite32(0x108AC84, (UINT)HandlePLChangeEvent<0x883240>);
+	SafeWrite32(0x10872F4, (UINT)HandlePLChangeEvent<0x883240>);
+	SafeWrite32(0x1086CB4, (UINT)HandlePLChangeEvent<0x883240>);
+	SafeWrite32(0x108449C, (UINT)HandlePLChangeEvent<0x883240>);
+	// MoveToMiddleHigh
+	SafeWrite32(0x108AC88, (UINT)HandlePLChangeEvent<0x883800>);
+	SafeWrite32(0x10872F8, (UINT)HandlePLChangeEvent<0x883800>);
+	SafeWrite32(0x1086CB8, (UINT)HandlePLChangeEvent<0x883800>);
+	SafeWrite32(0x10844A0, (UINT)HandlePLChangeEvent<0x883800>);
+
+
 	//testing
 	OnRenderGamePreUpdateHandler = JGCreateEvent("OnRenderGamePreUpdateHandler", 0, 0, NULL);
 	WriteRelCall(0x943748, (uintptr_t)handlePreRenderEvent);
