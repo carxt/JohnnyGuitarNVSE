@@ -43,7 +43,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 475
+#define JG_VERSION 480
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_NewGame:
