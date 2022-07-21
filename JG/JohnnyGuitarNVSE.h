@@ -40,6 +40,7 @@ TESSound* questCompeteSound = 0;
 TESSound* locationDiscoverSound = 0;
 std::unordered_map<UInt32, char*> markerIconMap;
 std::unordered_map <UInt32, std::vector<char*>> factionRepIcons;
+std::unordered_map<std::string, int> miscStatMap;
 UInt32 disableMuzzleLights = -1;
 static float vatsSpreadMultValue = 15.0;
 UInt32 g_initialTickCount = 0;
@@ -51,13 +52,14 @@ BSWin32Audio* g_bsWin32Audio = nullptr;
 DataHandler* g_dataHandler = nullptr;
 BSAudioManager* g_audioManager = nullptr;
 GameTimeGlobals* g_gameTimeGlobals = nullptr;
+StatsMenu* g_statsMenu = nullptr;
 Sky** g_currentSky = nullptr;
 void(__thiscall* OriginalBipedModelUpdateWeapon)(ValidBip01Names*, TESObjectWEAP*, int) = (void(__thiscall*)(ValidBip01Names*, TESObjectWEAP*, int)) 0x4AB400;
 UInt8(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (UInt8(__thiscall*)(ContChangesEntry*)) 0x4BD820;
 std::unordered_set<BYTE> SaveGameUMap;
 uintptr_t g_canSaveNowAddr = 0;
 uintptr_t g_canSaveNowMenuAddr = 0;
-
+Setting** g_miscStatData = (Setting**)0x11C6D50;
 TESObjectCELL* TESObjectREFR::GetParentCell() {
 	if (this->parentCell) return parentCell;
 	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
@@ -634,6 +636,47 @@ bool __fastcall WantsToFleeHook(CombatState* state) {
 		return state->currentConfidence > state->fleeThreshold008;
 	}
 }
+void __cdecl MiscStatRefreshHook(Tile* tile, int id) {
+	int value = 0;
+	if (id < 43) {
+		value = g_miscStatData[id]->data.i;
+	}
+	else {
+		std::string sName = tile->name.m_data;
+		auto it = miscStatMap.find(sName);
+		if (it != miscStatMap.end()) {
+			value = it->second;
+		}
+	}
+
+	tile->SetFloat(kTileValue_user1, (float)value, 1);
+}
+bool __cdecl ShouldHideStat(UInt32* id) {
+	if ((UInt32)id >= 43) {
+		Tile* tile = g_statsMenu->miscStatIDList.GetTileFromItem(&id);
+		std::string sName = tile->name.CStr();
+		if (miscStatMap.find(sName) == miscStatMap.end()) return true;
+	}
+	return false;
+}
+void UpdateMiscStatList(char* name, int value) {
+	Tile* tile = nullptr;
+	auto iter = g_statsMenu->miscStatIDList.list.Head();
+	do
+	{
+		if (iter->data && iter->data->tile && !strcmp(iter->data->tile->name.CStr(), name)) {
+			tile = iter->data->tile;
+			break;
+		}
+	} while (iter = iter->next);
+	if (!tile) {
+		tile = ThisStdCall<Tile*>(0x7E1190, &g_statsMenu->miscStatIDList, g_statsMenu->miscStatIDList.itemCount, 0, 0, 0);
+		tile->SetString(kTileValue_string, name, 1);
+		tile->name.Set(name);
+	}
+	tile->SetFloat(kTileValue_user1, (float)value, 1);
+
+}
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
@@ -759,7 +802,7 @@ void HandleFunctionPatches() {
 	g_canSaveNowMenuAddr = (*(UInt32*)0x07CBDC8) + 5 + 0x07CBDC7;
 	WriteRelCall(0x07CBDC7, (uintptr_t)CanSaveNowMenuHook);
 
-	// for SetCustomReputationChangeIcon
+	// SetCustomReputationChangeIcon
 	WriteRelCall(0x6156A2, UInt32(GetReputationIconHook));
 	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
 	WriteRelCall(0x615B19, UInt32(GetReputationMessageIconHook));
@@ -770,6 +813,9 @@ void HandleFunctionPatches() {
 	WriteRelCall(0x61594C, UInt32(GetReputationMessageIconHook));
 	WriteRelCall(0x615F0B, UInt32(GetReputationMessageIconHook));
 	WriteRelCall(0x615E06, UInt32(GetReputationMessageIconHook));
+
+	// Get/ModExtraMiscStat
+	SafeWrite32(0x7DDAB1, UInt32(MiscStatRefreshHook));
 }
 
 void HandleGameHooks() {

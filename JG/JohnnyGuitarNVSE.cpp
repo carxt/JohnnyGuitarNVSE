@@ -38,7 +38,7 @@
 #include "functions/fn_book.h"
 #include "events/CustomEventFilters.h"
 #include "events/JohnnyEvents.h"
-
+#include "internal/serialization.h"
 HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
@@ -61,6 +61,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			OnPLChangeHandler->FlushEventCallbacks();
 			RestoreDisabledPlayerControlsHUDFlags();
 			SaveGameUMap.clear();
+			miscStatMap.clear();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_MainGameLoop:
@@ -68,6 +69,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 				EventInfo->AddQueuedEvents();
 				EventInfo->DeleteEvents();
 			}
+			if (!g_statsMenu) g_statsMenu = StatsMenu::Get();
 			break;
 		case NVSEMessagingInterface::kMessage_DeferredInit:
 		{
@@ -80,7 +82,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_currentSky = (Sky**)0x11DEA20;
 			g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 			g_VATSCameraData = (VATSCameraData*)0x11F2250;
-			g_initialTickCount = GetTickCount();
+			g_initialTickCount = GetTickCount();			
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			break;
 		}
@@ -380,12 +382,13 @@ extern "C" {
 		REG_CMD(SetFactionFlags);
 		REG_TYPED_CMD(GetLandTextureUnderFeet, Form);
 		REG_CMD(SetOnProcessLevelChangeEventHandler);
+		REG_CMD(GetExtraMiscStat);
+		REG_CMD(ModExtraMiscStat);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
 		g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 		g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
-
 		if (!nvse->isEditor) {
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
@@ -394,6 +397,7 @@ extern "C" {
 			HandleGameHooks();
 			HandleEventHooks();
 			ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
+			SerializationInit(nvse);
 		}
 		return true;
 	}

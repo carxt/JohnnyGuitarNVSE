@@ -170,6 +170,7 @@
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\md5\md5.h" />
     <ClInclude Include="internal\netimmerse.h" />
+    <ClInclude Include="internal\serialization.h" />
     <ClInclude Include="internal\sha1\sha1.h" />
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="JohnnyGuitarNVSE.h" />

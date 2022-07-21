@@ -266,3 +266,240 @@ public:
 	UInt32 listBoxPerk[12];
 	UInt32 unkC4[2];
 };
+
+template <typename Item> struct ListBoxItem
+{
+	Tile* tile;
+	Item* object;
+	UInt8 byte08;
+	UInt8 pad09[3];
+};
+
+// 30
+template <typename Item> class ListBox : public BSSimpleList<ListBoxItem<Item>>
+{
+public:
+	enum
+	{
+		kFlag_RecalculateHeightsOnInsert = 1,
+		kFlag_FreeContChangeOnListItemDestruction = 2, // assumes the object is a ContChangesEntry - do not set this if the object isn't one...
+	};
+
+	Tile* parentTile;	// 0C
+	Tile* selected;		// 10
+	Tile* scrollBar;		// 14
+	const char* templateName;	// 18
+	UInt16			itemCount;		// 1C
+	UInt16			pad1E;			// 1E
+	float			unk20;			// 20
+	float			storedListIndex;// 24
+	float			storedScrollbarPos;	// 28
+	UInt16			flags;			// 2C
+	UInt16			pad2E;			// 2E
+
+	Item* GetSelected()
+	{
+		ListNode<ListBoxItem<Item>>* iter = list.Head();
+		ListBoxItem<Item>* item;
+		do
+		{
+			item = iter->data;
+			if (item && (item->tile == selected))
+				return item->object;
+		} while (iter = iter->next);
+		return NULL;
+	}
+
+	Tile* GetNthTile(SInt32 index)
+	{
+		if (index >= 0)
+		{
+			ListNode<ListBoxItem<Item>>* iter = list.Head();
+			do
+			{
+				if (!index)
+				{
+					return iter->data ? iter->data->tile : NULL;
+				}
+				index--;
+			} while (iter = iter->next);
+		}
+		return NULL;
+	}
+
+	void Clear()
+	{
+		ListNode<ListBoxItem<Item>>* iter = list.Head();
+		ListBoxItem<Item>* item;
+		do
+		{
+			item = iter->data;
+			if (!item) continue;
+			if (item->tile)
+				item->tile->Destroy(true);
+			GameHeapFree(item);
+		} while (iter = iter->next);
+		list.RemoveAll();
+		selected = NULL;
+		itemCount = 0;
+	}
+
+	typedef bool(__cdecl* FilterFunction)(Item* form);
+	void Filter(FilterFunction callback)
+	{
+		ThisStdCall<void>(0x729FE0, this, callback);
+	}
+
+	// identical to Filter, but hooked by InventorySortButton for filtering contchanges
+	void FilterAlt(FilterFunction callback)
+	{
+		ThisStdCall<void>(0x730BB0, this, callback);
+	}
+
+	// Identical to Filter, but passing a value instead of a pointer
+	void FilterVal(bool(__cdecl* callback)(Item))
+	{
+		ThisStdCall<void>(0x730BB0, this, callback);
+	}
+
+	typedef void(__cdecl* ForEachFunc)(Tile*, Item*);
+	void ForEach(ForEachFunc func, int maxIndex1 = -1, int maxIndex2 = 0x7FFFFFFF)
+	{
+		ThisStdCall<void>(0x7314C0, this, func, maxIndex1, maxIndex2);
+	}
+
+	Tile* GetTileFromItem(Item** item)
+	{
+		return ThisStdCall<Tile*>(0x7A22D0, this, item);
+	}
+
+	Item* GetItemForTile(Tile* tile)
+	{
+		ListNode<ListBoxItem<Item>>* iter = list.Head();
+		ListBoxItem<Item>* item;
+		do
+		{
+			item = iter->data;
+			if (item && (item->tile == tile))
+				return item->object;
+		} while (iter = iter->next);
+		return NULL;
+	}
+
+	void SaveScrollPosition()
+	{
+		ThisStdCall<void>(0x7312E0, this);
+	}
+
+	int GetNumVisibleItems()
+	{
+		return ThisStdCall<int>(0x71AE60, this);
+	}
+
+	void RestorePosition(bool playSound = false)
+	{
+		ThisStdCall<void>(0x731360, this, playSound);
+	}
+
+	Tile* Insert(Item* item, const char* text, signed int (*sortingFunction)(ListBoxItem<Item>* a1, ListBoxItem<Item>* a2) = nullptr, const char* _templateName = nullptr)
+	{
+		if (!this->parentTile) return nullptr;
+		auto _template = _templateName ? _templateName : this->templateName;
+		if (!_template) return nullptr;
+
+		auto menu = ThisCall<Menu*>(0xA03C90, this->parentTile);
+		Tile* newTile = ThisCall<Tile*>(0xA1DDB0, menu, this->parentTile, _template, nullptr);
+		if (!newTile->GetValue(kTileValue_id))
+		{
+			newTile->SetFloat(kTileValue_id, -1);
+		}
+		if (text)
+		{
+			newTile->SetString(kTileValue_string, text);
+		}
+
+		auto listItem = (ListBoxItem<Item>*)GameHeapAlloc(sizeof(ListBoxItem<Item*>));
+		listItem->tile = newTile;
+		listItem->object = item;
+		listItem->byte08 = 0;
+		if (sortingFunction)
+		{
+			ThisStdCall<void>(0x7A7EB0, &this->list, listItem, sortingFunction); // InsertSorted
+			if (this->flags & kFlag_RecalculateHeightsOnInsert)
+			{
+				ThisStdCall<void>(0x71A670, this);
+			}
+		}
+		else
+		{
+			this->list.Append(listItem);
+			if (this->flags & kFlag_RecalculateHeightsOnInsert)
+			{
+				ThisStdCall<void>(0x7269D0, this, newTile);
+				ThisStdCall<void>(0x71AD30, this);
+			}
+			newTile->SetFloat(kTileValue_listindex, this->itemCount++);
+		}
+
+		if (this->itemCount == 1)
+		{
+			auto numVisibleItemsTrait = TraitNameToID("_number_of_visible_items");
+			if (this->parentTile->GetValueFloat(numVisibleItemsTrait) > 0)
+			{
+				auto valPtr = ThisCall<Tile::Value*>(0xA00E90, this->parentTile, kTileValue_height);
+				ThisStdCall<void>(0xA09200, valPtr);
+				ThisStdCall<void>(0xA09130, valPtr, kTileValue_Copy, newTile, kTileValue_height);
+
+				auto numVisible = this->parentTile->GetValueFloat(numVisibleItemsTrait);
+				ThisStdCall<void>(0xA09080, valPtr, kTileValue_Mul, numVisible);
+				ThisStdCall<void>(0xA09410, valPtr, 0);
+			}
+		}
+
+		return newTile;
+	}
+
+	Tile* InsertVal(Item item, const char* text, signed int (*sortingFunction)(ListBoxItem<Item>* a1, ListBoxItem<Item>* a2) = nullptr, const char* _templateName = nullptr)
+	{
+		return ThisStdCall<Tile*>(0x754690, this, item, text, sortingFunction, _templateName);
+	}
+
+	void HighlightLastItem()
+	{
+		int lastIndex = this->itemCount - 1;
+		Tile* tile = this->GetNthTile(lastIndex);
+
+		this->SetSelectedTile(tile);
+		this->ScrollToHighlight();
+	}
+
+	void ScrollToTop()
+	{
+		this->storedScrollbarPos = 0;
+		this->storedListIndex = 0;
+		this->RestorePosition();
+	}
+
+	void SetParentEnabled(bool isEnabled)
+	{
+		static UInt32 enabledTrait = TraitNameToID("_enabled");
+		parentTile->SetFloat(enabledTrait, isEnabled);
+	}
+
+	bool IsEnabled()
+	{
+		static UInt32 enabledTrait = TraitNameToID("_enabled");
+		return parentTile && parentTile->GetValueFloat(enabledTrait);
+	}
+
+	void Init()
+	{
+		// initialises the fields and appends the menu list to the global listbox array
+		ThisStdCall<void>(0x723750, this);
+	}
+
+	void Destroy()
+	{
+		ThisStdCall<void>(0x723820, this);
+	}
+};

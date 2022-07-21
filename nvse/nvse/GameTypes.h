@@ -461,23 +461,22 @@ public:
 	Node* Tail() { return last; }
 	UInt32 Size() const { return count; }
 };
-
+class Tile;
 // 010
-template <class T>
-class BSSimpleList {
+template <class T> class BSSimpleList {
 public:
 	BSSimpleList<T>();
 	~BSSimpleList<T>();
 
-	virtual void	Unk_00(UInt32 arg);
-	virtual void	Unk_01(void);
-	virtual void	Unk_02(UInt32 arg);
-	virtual void	Unk_03(UInt32 arg);
-	virtual void	Unk_04(void);
-	virtual UInt32	Unk_05(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_06(UInt32 arg);
-	virtual void	Unk_07(void);
-	virtual void	Unk_08(UInt32 arg);
+	virtual bool	SetSelectedTile(Tile* tile) { return false; };
+	virtual Tile* GetSelectedTile(void) { return nullptr; };
+	virtual Tile* HandleKeyboardInput(int code) { return nullptr; };
+	virtual bool	IsMenuEqual(void* that) { return false; };
+	virtual void	ScrollToHighlight(void) {};
+	virtual Tile* GetTileByIndex(int index, char isNotTileListIndex) { return nullptr; };
+	virtual void	Destructor(bool doFree) {};
+	virtual void	FreeAllTiles(void) {};
+	virtual void	Sort(signed int(__cdecl*)(T*, T*)) {};
 
 	tList<T>	list;
 };

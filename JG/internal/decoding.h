@@ -495,50 +495,7 @@ public:
 };
 STATIC_ASSERT(sizeof(Explosion) == 0x104);
 
-template <typename Item> struct ListBoxItem {
-	Tile* tile;
-	Item* object;
-};
 
-// 30
-template <typename Item> class ListBox : public BSSimpleList<ListBoxItem<Item>> {
-public:
-	Tile* parentTile;	// 0C
-	Tile* selected;		// 10
-	Tile* scrollBar;		// 14
-	const char* templateName;	// 18
-	UInt16			itemCount;		// 1C
-	UInt16			pad1E;			// 1E
-	float			unk20[3];		// 20
-	UInt16			unk2C;			// 2C
-	UInt16			pad2E;			// 2E
-
-	Item* GetSelected() {
-		ListNode<ListBoxItem<Item>>* iter = list.Head();
-		ListBoxItem<Item>* item;
-		do {
-			item = iter->data;
-			if (item && (item->tile == selected))
-				return item->object;
-		} while (iter = iter->next);
-		return NULL;
-	}
-
-	void Clear() {
-		ListNode<ListBoxItem<Item>>* iter = list.Head();
-		ListBoxItem<Item>* item;
-		do {
-			item = iter->data;
-			if (!item) continue;
-			if (item->tile)
-				item->tile->Destroy(true);
-			GameHeapFree(item);
-		} while (iter = iter->next);
-		list.RemoveAll();
-		selected = NULL;
-		itemCount = 0;
-	}
-};
 
 // 94
 class MessageMenu : public Menu			// 1001
@@ -699,6 +656,8 @@ public:
 	ListBox<StatusEffect>			statusEffListBox;	// 240
 	ListBox<TESReputation>			reputationList;		// 270
 	UInt32							unk2A0;				// 2A0
+
+	__forceinline static StatsMenu* Get() { return *(StatsMenu**)0x11DACE0; }
 };
 
 // 50
