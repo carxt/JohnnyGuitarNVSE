@@ -53,6 +53,7 @@ DataHandler* g_dataHandler = nullptr;
 BSAudioManager* g_audioManager = nullptr;
 GameTimeGlobals* g_gameTimeGlobals = nullptr;
 StatsMenu* g_statsMenu = nullptr;
+UInt8 recalculateStatFilters = 0;
 Sky** g_currentSky = nullptr;
 void(__thiscall* OriginalBipedModelUpdateWeapon)(ValidBip01Names*, TESObjectWEAP*, int) = (void(__thiscall*)(ValidBip01Names*, TESObjectWEAP*, int)) 0x4AB400;
 UInt8(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (UInt8(__thiscall*)(ContChangesEntry*)) 0x4BD820;
@@ -673,9 +674,14 @@ void UpdateMiscStatList(char* name, int value) {
 		tile = ThisStdCall<Tile*>(0x7E1190, &g_statsMenu->miscStatIDList, g_statsMenu->miscStatIDList.itemCount, 0, 0, 0);
 		tile->SetString(kTileValue_string, name, 1);
 		tile->name.Set(name);
+		recalculateStatFilters = true;
+	}
+	else if (auto listIdxTileVal = tile->GetValue(kTileValue_listindex)){
+		if (listIdxTileVal && listIdxTileVal->num < 0) {
+			recalculateStatFilters = true;
+		}
 	}
 	tile->SetFloat(kTileValue_user1, (float)value, 1);
-
 }
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present

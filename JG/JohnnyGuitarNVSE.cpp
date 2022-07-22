@@ -70,6 +70,11 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 				EventInfo->DeleteEvents();
 			}
 			if (!g_statsMenu) g_statsMenu = StatsMenu::Get();
+			if (g_statsMenu && g_interfaceManager && g_interfaceManager->IsMenuVisible(kMenuType_Stats) && recalculateStatFilters) {
+				recalculateStatFilters = 0;
+				g_statsMenu->miscStatIDList.Filter(ShouldHideStat);
+
+			}
 			break;
 		case NVSEMessagingInterface::kMessage_DeferredInit:
 		{
