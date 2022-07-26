@@ -1606,7 +1606,7 @@ public:
 	virtual void		Fn_02(NiNode* niNode);
 	virtual void		Update(Sky* sky, float value);
 
-	NiNode* node04;	// 04
+	NiNode* rootNode;	// 04
 };
 
 // 1C
@@ -1680,7 +1680,12 @@ public:
 	float				flt54;		// 54
 	UInt32				numLayers;	// 58
 };
-
+enum MoonUpdateStatus : __int32
+{
+	US_NOT_REQUIRED = 0x0,
+	US_WHEN_CULLED = 0x1,
+	US_INITIALIZE = 0x2,
+};
 // 7C
 class Moon : public SkyObject {
 public:
@@ -1689,28 +1694,36 @@ public:
 
 	virtual void	Refresh(NiNode* niNode, const char* moonStr);
 
-	NiNode* node08;			// 08
-	NiNode* node0C;			// 0C
-	NiTriShape* shape10;			// 10
-	NiTriShape* shape14;			// 14
-	String			moonTexture[8];		// 18
-					//	0	Full Moon
-					//	1	Three Wan
-					//	2	Half Wan
-					//	3	One Wan
-					//	4	No Moon
-					//	5	One Wax
-					//	6	Half Wax
-					//	7	Three Wax
-	float			flt58;				// 58
-	float			flt5C;				// 5C
-	float			flt60;				// 60
-	float			flt64;				// 64
-	float			flt68;				// 68
-	UInt32			unk6C;				// 6C
-	UInt32			unk70;				// 70
-	float			flt74;				// 74
-	float			flt78;				// 78
+
+	NiRefObject* spMoonNode;
+	NiRefObject* spShadowNode;
+	NiRefObject* spMoonMesh;
+	NiRefObject* spShadowMesh;
+	UInt32 fullMoonPath;
+	UInt32 unk01C;
+	UInt32 threeWanPath;
+	UInt32 unk024;
+	UInt32 halfWanPath;
+	UInt32 unk02C;
+	UInt32 oneWanPath;
+	UInt32 unk034;
+	UInt32 unk038;
+	UInt32 unk03C;
+	UInt32 oneWaxPath;
+	UInt32 unk044;
+	UInt32 halfWaxPath;
+	UInt32 unk04C;
+	UInt32 threeWaxPath;
+	UInt32 unk054;
+	float angleFadeStart;
+	float angleFadeEnd;
+	float shadowEarlyFade;
+	float speed;
+	float zOffset;
+	UInt32 size;
+	MoonUpdateStatus eUpdateMoonTexture;
+	float unk074;
+	float lastUpdateHour;
 };
 
 // 18
@@ -1851,6 +1864,7 @@ public:
 	void RefreshMoon();
 	void RefreshClimate(TESClimate* climate, bool immediate = true);
 	bool GetIsRaining();
+	__forceinline static Sky* Get() { return *(Sky**)0x11DEA20; }
 };
 STATIC_ASSERT(sizeof(Sky) == 0x138);
 

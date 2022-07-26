@@ -389,6 +389,7 @@ extern "C" {
 		REG_CMD(SetOnProcessLevelChangeEventHandler);
 		REG_CMD(GetExtraMiscStat);
 		REG_CMD(ModExtraMiscStat);
+		REG_CMD(GetMoonPhase);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
