@@ -38,12 +38,12 @@
 #include "functions/fn_book.h"
 #include "events/CustomEventFilters.h"
 #include "events/JohnnyEvents.h"
-
+#include "internal/serialization.h"
 HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 470
+#define JG_VERSION 481
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_NewGame:
@@ -58,14 +58,22 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			OnDyingHandler->FlushEventCallbacks();
 			OnLimbGoneHandler->FlushEventCallbacks();
 			OnCrosshairHandler->FlushEventCallbacks();
+			OnPLChangeHandler->FlushEventCallbacks();
 			RestoreDisabledPlayerControlsHUDFlags();
 			SaveGameUMap.clear();
+			miscStatMap.clear();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_MainGameLoop:
 			for (const auto& EventInfo : EventsArray) {
 				EventInfo->AddQueuedEvents();
 				EventInfo->DeleteEvents();
+			}
+			if (!g_statsMenu) g_statsMenu = StatsMenu::Get();
+			if (g_statsMenu && g_interfaceManager && g_interfaceManager->IsMenuVisible(kMenuType_Stats) && recalculateStatFilters) {
+				recalculateStatFilters = 0;
+				g_statsMenu->miscStatIDList.Filter(ShouldHideStat);
+
 			}
 			break;
 		case NVSEMessagingInterface::kMessage_DeferredInit:
@@ -79,7 +87,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_currentSky = (Sky**)0x11DEA20;
 			g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 			g_VATSCameraData = (VATSCameraData*)0x11F2250;
-			g_initialTickCount = GetTickCount();
+			g_initialTickCount = GetTickCount();			
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			break;
 		}
@@ -144,8 +152,8 @@ extern "C" {
 		resetVanityCam = GetPrivateProfileInt("MAIN", "bReset3rdPersonCamera", 0, filename);
 		enableRadioSubtitles = GetPrivateProfileInt("MAIN", "bEnableRadioSubtitles", 0, filename);
 		removeMainMenuMusic = GetPrivateProfileInt("MAIN", "bRemoveMainMenuMusic", 0, filename);
-		fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 0, filename);
-		fDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "fDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
+		fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 1, filename);
+		iDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);
@@ -378,12 +386,15 @@ extern "C" {
 		REG_CMD(GetFactionFlags);
 		REG_CMD(SetFactionFlags);
 		REG_TYPED_CMD(GetLandTextureUnderFeet, Form);
+		REG_CMD(SetOnProcessLevelChangeEventHandler);
+		REG_CMD(GetExtraMiscStat);
+		REG_CMD(ModExtraMiscStat);
+		REG_CMD(GetMoonPhase);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
 		g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 		g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
-
 		if (!nvse->isEditor) {
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
@@ -392,6 +403,7 @@ extern "C" {
 			HandleGameHooks();
 			HandleEventHooks();
 			ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
+			SerializationInit(nvse);
 		}
 		return true;
 	}

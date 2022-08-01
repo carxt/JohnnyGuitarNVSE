@@ -133,7 +133,7 @@ JGCameraParams JGGameCamera;
 extern float __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2);
 
 bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, float& fBx, float& fBy,
-	float& fBz, float fZeroTolerance, float HandleType) {
+	float& fBz, float fZeroTolerance, int bOffscreenHandleType) {
 	bool st = false;
 	// project a world space point to screen space
 	float fW = kPt->x * cam->m_aafWorldToCam[3][0] +
@@ -173,13 +173,13 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 		return true;
 	}
 	else {
-		if (HandleType < 2) {
+		if (bOffscreenHandleType < 2) {
 			float x2 = cam->m_kPort.r / 2, y2 = cam->m_kPort.t / 2;
 			float d = sqrt((((fBx - x2) * (fBx - x2))) + ((fBy - y2) * (fBy - y2))); //Distance
 			float r = y2 / d; //Segment ratio
 			fBx = (((r * fBx + (1 - r) * x2)));//find point that divides the segment
 			fBy = (((r * fBy + (1 - r) * y2)));//into the ratio (1-r):r, this yields circle coordinates
-			if (!(HandleType)) //We get square coordinates, since the circle we got is actually a circle inside the square.
+			if (!(bOffscreenHandleType)) //We get square coordinates, since the circle we got is actually a circle inside the square.
 			{
 				x2 = fBx - 0.5; y2 = fBy - 0.5;
 				float Divider = (((y2) * (y2)) > 0.125) ? fabs(y2) : fabs(x2);
@@ -197,11 +197,11 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 
 //NiPoint3* NiPointBuffer = NULL;
 
-bool __cdecl JG_WorldToScreen(NiPoint3* posXYZ, NiPoint3& posOut, float offscreenHandling) {
-	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, posXYZ, posOut.x, posOut.y, posOut.z, 0.0000099999997, offscreenHandling);
+bool __cdecl JG_WorldToScreen(NiPoint3* posXYZ, NiPoint3& posOut, int iOffscreenHandling) {
+	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, posXYZ, posOut.x, posOut.y, posOut.z, 0.0000099999997, iOffscreenHandling);
 }
-__forceinline bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, float HandleType, float zeroTolerance = 0.0000099999997) {
-	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, p_in, x_out, y_out, z_out, zeroTolerance, HandleType);
+__forceinline bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, int bHandleType, float zeroTolerance = 0.0000099999997) {
+	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, p_in, x_out, y_out, z_out, zeroTolerance, bHandleType);
 }
 
 ParamInfo kParamsProjectionArgsLegacy[8] =

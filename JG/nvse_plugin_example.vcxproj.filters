@@ -226,6 +226,9 @@
     <ClInclude Include="functions\fn_book.h">
       <Filter>functions</Filter>
     </ClInclude>
+    <ClInclude Include="internal\serialization.h">
+      <Filter>internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

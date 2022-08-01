@@ -38,6 +38,7 @@ DEFINE_COMMAND_PLUGIN(StopSoundLooping, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(AddNavmeshObstacle, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(RemoveNavmeshObstacle, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLandTextureUnderFeet, , 1, 0, NULL);
+DEFINE_CMD_NO_ARGS(GetMoonPhase);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -45,6 +46,10 @@ bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5B
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
+bool Cmd_GetMoonPhase_Execute(COMMAND_ARGS) {
+	*result = *(int*)0x11CCA80;
+	return true;
+}
 bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* cell = thisObj->GetParentCell();

@@ -80,13 +80,13 @@ bool TESForm::hk_REFRSetEditorID(const char* Name) {
 	return true;
 }
 const char* __fastcall ConsoleNameHook(TESObjectREFR* ref) {
-	try {
+	__try {
 		const char* name = ref->baseForm->GetTheName();
 		if (!strlen(name)) name = ref->baseForm->GetName();
 		return name;
 	}
-	catch (...) {
-		Console_Print("Couldn't retrieve EDID for selected console ref");
+	__except (EXCEPTION_ACCESS_VIOLATION) {
+		return "";
 	}
 	return "";
 }

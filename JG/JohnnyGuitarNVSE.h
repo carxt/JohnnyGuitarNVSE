@@ -33,13 +33,14 @@ bool noMuzzleFlashCooldown = 0;
 bool enableRadioSubtitles = 0;
 bool removeMainMenuMusic = 0;
 bool fixDeathSounds = 10;
-float fDeathSoundMAXTimer = 14;
+float iDeathSoundMAXTimer = 10;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
 TESSound* locationDiscoverSound = 0;
 std::unordered_map<UInt32, char*> markerIconMap;
 std::unordered_map <UInt32, std::vector<char*>> factionRepIcons;
+std::unordered_map<std::string, int> miscStatMap;
 UInt32 disableMuzzleLights = -1;
 static float vatsSpreadMultValue = 15.0;
 UInt32 g_initialTickCount = 0;
@@ -51,13 +52,15 @@ BSWin32Audio* g_bsWin32Audio = nullptr;
 DataHandler* g_dataHandler = nullptr;
 BSAudioManager* g_audioManager = nullptr;
 GameTimeGlobals* g_gameTimeGlobals = nullptr;
+StatsMenu* g_statsMenu = nullptr;
+UInt8 recalculateStatFilters = 0;
 Sky** g_currentSky = nullptr;
 void(__thiscall* OriginalBipedModelUpdateWeapon)(ValidBip01Names*, TESObjectWEAP*, int) = (void(__thiscall*)(ValidBip01Names*, TESObjectWEAP*, int)) 0x4AB400;
 UInt8(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (UInt8(__thiscall*)(ContChangesEntry*)) 0x4BD820;
 std::unordered_set<BYTE> SaveGameUMap;
 uintptr_t g_canSaveNowAddr = 0;
 uintptr_t g_canSaveNowMenuAddr = 0;
-
+Setting** g_miscStatData = (Setting**)0x11C6D50;
 TESObjectCELL* TESObjectREFR::GetParentCell() {
 	if (this->parentCell) return parentCell;
 	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
@@ -254,7 +257,8 @@ _declspec(naked) void LevelUpHook() {
 	static const UInt32 showAddr = 0x77D618;
 	_asm {
 		jne noLevelUp
-		cmp dword ptr ds : [isShowLevelUp] , 0
+		mov al, isShowLevelUp
+		test al, al
 		je noLevelUp
 		jmp showAddr
 		noLevelUp :
@@ -460,18 +464,11 @@ void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, UIn
 	}
 }
 
-
-
-float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh. 
-
-	return thisObj->dyingTimer + fDeathSoundMAXTimer;
+float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
+	return thisObj->dyingTimer + iDeathSoundMAXTimer;
 }
 
-
-
-
-float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alternate complex, confusing, potentially buggy fix. 
-
+float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alternate complex, confusing, potentially buggy fix.
 	constexpr float dyingTimerMin = FLT_EPSILON * 10; //Establish low tolerance, this should be ideal. Unless someone sets fDyingTimer to 0 or something, but that's their problem.
 	float dyingTimer = thisObj->dyingTimer;
 	bool keepTalkingDe = false;
@@ -483,7 +480,7 @@ float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alter
 }
 __declspec (naked) void FixDeathSoundsHook() {
 	__asm {
-		mov edx, dword ptr [ebp + 8]
+		mov edx, dword ptr[ebp + 8]
 		jmp FixDeathSounds
 	}
 }
@@ -509,6 +506,42 @@ char* __fastcall GetReputationIconHook(TESReputation* rep) {
 		if (*it->second[tierID]) return it->second[tierID];
 	}
 	return ThisStdCall<char*>(0x6167D0, rep);
+}
+
+char* __fastcall GetReputationMessageIconHook(UInt32 a1) {
+	UInt32 addr = (UInt32)_ReturnAddress();
+	auto* _ebp = GetParentBasePtr(_AddressOfReturnAddress(), false);
+	TESReputation* rep = nullptr;
+	switch (addr) {
+		case 0x615951:
+		case 0x61585A:
+		case 0x615B1E:
+		case 0x615C09:
+			rep = *reinterpret_cast<TESReputation**>(_ebp - 0x110);
+			break;
+		case 0x615E0B:
+		case 0x615F10:
+		case 0x61610F:
+		case 0x616208:
+			rep = *reinterpret_cast<TESReputation**>(_ebp - 0x128);
+			break;
+		default:
+			break;
+	}
+	if (rep && rep->refID) {
+		auto it = factionRepIcons.find(rep->refID);
+		if (it != factionRepIcons.end()) {
+			UInt8 tierID = 0;
+			if (a1 == 0x11CBAD0 || a1 == 0x11CBC34) {
+				tierID = 1;
+			}
+			else if (a1 == 0x11CBA00 || a1 == 0x11CBD5C) {
+				tierID = 3;
+			}
+			if (*it->second[tierID]) return it->second[tierID];
+		}
+	}
+	return a1 ? ((Setting*)a1)->data.str : "\0";
 }
 Setting* __fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char* name) {
 	Setting* result = ThisStdCall<Setting*>(0x5E02B0, ini, name);
@@ -536,10 +569,9 @@ void __fastcall MenuSetFlagHook(StartMenu* menu, UInt32 flags, bool doSet) {
 	}
 }
 
-bool __fastcall CanSpeakThroughHead(Actor *actor) {
+bool __fastcall CanSpeakThroughHead(Actor* actor) {
 	return !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head1)) && !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head2));
 }
-
 
 __declspec (naked) void StimpakHotkeyHook() {
 	__asm {
@@ -567,7 +599,6 @@ __declspec (naked) void SimpleDecalHook() {
 }
 
 __declspec (naked) void NoHeadlessTalkingHook() {
-
 	__asm {
 		mov eax, dword ptr ds : [ecx + 0x68] //The original call, GetBaseProcess
 		test eax, eax
@@ -589,6 +620,68 @@ bool __fastcall SaveINIHook(IniSettingCollection* a1, void* edx, char* a2) {
 	ThisStdCall<void>(0x5E01B0, a1, a2);
 	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
 	return ThisStdCall_B(0x5E01B0, rendererSettings, rendererSettings->iniPath);
+}
+
+bool __fastcall WantsToFleeHook(CombatState* state) {
+	if (!state->cmbtCtrl->packageOwner) return false;
+	float avCharisma = state->cmbtCtrl->packageOwner->avOwner.GetActorValue(kAVCode_Charisma);
+	if (state->currentConfidence > 0 && avCharisma <= 5) {
+		Console_Print("0x%X confidence %d charisma %.f modified -1", state->cmbtCtrl->packageOwner->refID, state->currentConfidence, avCharisma);
+		return (state->currentConfidence - 1) > state->fleeThreshold008;
+	}
+	else if (state->currentConfidence < 4 && avCharisma > 5) {
+		Console_Print("0x%X confidence %d charisma %.f modified +1", state->cmbtCtrl->packageOwner->refID, state->currentConfidence, avCharisma);
+		return (state->currentConfidence + 1) > state->fleeThreshold008;
+	}
+	else {
+		return state->currentConfidence > state->fleeThreshold008;
+	}
+}
+void __cdecl MiscStatRefreshHook(Tile* tile, int id) {
+	int value = 0;
+	if (id < 43) {
+		value = g_miscStatData[id]->data.i;
+	}
+	else {
+		std::string sName = tile->name.m_data;
+		auto it = miscStatMap.find(sName);
+		if (it != miscStatMap.end()) {
+			value = it->second;
+		}
+	}
+
+	tile->SetFloat(kTileValue_user1, (float)value, 1);
+}
+bool __cdecl ShouldHideStat(UInt32* id) {
+	if ((UInt32)id >= 43) {
+		Tile* tile = g_statsMenu->miscStatIDList.GetTileFromItem(&id);
+		std::string sName = tile->name.CStr();
+		if (miscStatMap.find(sName) == miscStatMap.end()) return true;
+	}
+	return false;
+}
+void UpdateMiscStatList(char* name, int value) {
+	Tile* tile = nullptr;
+	auto iter = g_statsMenu->miscStatIDList.list.Head();
+	do
+	{
+		if (iter->data && iter->data->tile && !strcmp(iter->data->tile->name.CStr(), name)) {
+			tile = iter->data->tile;
+			break;
+		}
+	} while (iter = iter->next);
+	if (!tile) {
+		tile = ThisStdCall<Tile*>(0x7E1190, &g_statsMenu->miscStatIDList, g_statsMenu->miscStatIDList.itemCount, 0, 0, 0);
+		tile->SetString(kTileValue_string, name, 1);
+		tile->name.Set(name);
+		recalculateStatFilters = true;
+	}
+	else if (auto listIdxTileVal = tile->GetValue(kTileValue_listindex)){
+		if (listIdxTileVal && listIdxTileVal->num < 0) {
+			recalculateStatFilters = true;
+		}
+	}
+	tile->SetFloat(kTileValue_user1, (float)value, 1);
 }
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
@@ -682,9 +775,8 @@ void HandleIniOptions() {
 
 	// for bRemoveMainMenuMusic
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
-	//Patch the game so the dialog subroutine stops if the actor's head is blown off, I'll add it as an ini setting later. 
-	WriteRelCall(0x8EC54D, (uintptr_t) NoHeadlessTalkingHook);
-
+	//Patch the game so the dialog subroutine stops if the actor's head is blown off, I'll add it as an ini setting later.
+	WriteRelCall(0x8EC54D, (uintptr_t)NoHeadlessTalkingHook);
 }
 
 void HandleFunctionPatches() {
@@ -716,13 +808,28 @@ void HandleFunctionPatches() {
 	g_canSaveNowMenuAddr = (*(UInt32*)0x07CBDC8) + 5 + 0x07CBDC7;
 	WriteRelCall(0x07CBDC7, (uintptr_t)CanSaveNowMenuHook);
 
-	// for SetCustomReputationChangeIcon
+	// SetCustomReputationChangeIcon
 	WriteRelCall(0x6156A2, UInt32(GetReputationIconHook));
 	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
+	WriteRelCall(0x615B19, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x615C04, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x61610A, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x616203, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x615855, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x61594C, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x615F0B, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x615E06, UInt32(GetReputationMessageIconHook));
+
+	// Get/ModExtraMiscStat
+	SafeWrite32(0x7DDAB1, UInt32(MiscStatRefreshHook));
 }
 
 void HandleGameHooks() {
 	HandleFixes();
 	HandleIniOptions();
 	HandleFunctionPatches();
+	//  wip shit for void
+	//	WriteRelCall(0x97E745, (UInt32)WantsToFleeHook);
+	//	WriteRelCall(0x999082, (UInt32)WantsToFleeHook);
+	//	WriteRelCall(0x9AAC17, (UInt32)WantsToFleeHook);
 }

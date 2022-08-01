@@ -263,7 +263,7 @@ public:
 	Tile* ReadXML(const char* xmlPath);
 	char* GetComponentFullName(char* resStr);
 	void			SetFloat(UInt32 id, float fltVal, bool bPropagate = true) { ThisStdCall<void>(0xA012D0, this, id, fltVal, bPropagate); }
-	void			SetString(UInt32 id, const char* strVal, bool bPropagate = true);
+	void			SetString(UInt32 id, const char* strVal, bool bPropagate = true) { ThisStdCall<void>(0xA01350, this, id, strVal, bPropagate); }
 	Menu* GetParentMenu();
 	void			DestroyAllChildren();
 	void			PokeValue(UInt32 valueID);

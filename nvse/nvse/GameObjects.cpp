@@ -4,6 +4,23 @@
 #include "GameTasks.h"
 #include "GameUI.h"
 
+TESForm* TESObjectREFR::GetBaseForm()
+{
+	TESForm* baseform = nullptr;
+	if (this->baseForm) {
+		baseform = this->baseForm;
+		if (baseform->modIndex == 0xFF) {
+			if (IS_TYPE(baseform, BGSPlaceableWater)) {
+				return ((BGSPlaceableWater*)baseform)->water;
+			}
+			ExtraLeveledCreature* xLvlCrea = (ExtraLeveledCreature*)this->extraDataList.GetByType(kExtraData_LeveledCreature);
+			if (xLvlCrea && xLvlCrea->baseForm) {
+				return xLvlCrea->baseForm;
+			}
+		}
+	}
+	return baseform;
+}
 ScriptEventList* TESObjectREFR::GetEventList() const {
 	ExtraScript* xScript = (ExtraScript*)extraDataList.GetByType(kExtraData_Script);
 	return xScript ? xScript->eventList : NULL;

@@ -495,50 +495,7 @@ public:
 };
 STATIC_ASSERT(sizeof(Explosion) == 0x104);
 
-template <typename Item> struct ListBoxItem {
-	Tile* tile;
-	Item* object;
-};
 
-// 30
-template <typename Item> class ListBox : public BSSimpleList<ListBoxItem<Item>> {
-public:
-	Tile* parentTile;	// 0C
-	Tile* selected;		// 10
-	Tile* scrollBar;		// 14
-	const char* templateName;	// 18
-	UInt16			itemCount;		// 1C
-	UInt16			pad1E;			// 1E
-	float			unk20[3];		// 20
-	UInt16			unk2C;			// 2C
-	UInt16			pad2E;			// 2E
-
-	Item* GetSelected() {
-		ListNode<ListBoxItem<Item>>* iter = list.Head();
-		ListBoxItem<Item>* item;
-		do {
-			item = iter->data;
-			if (item && (item->tile == selected))
-				return item->object;
-		} while (iter = iter->next);
-		return NULL;
-	}
-
-	void Clear() {
-		ListNode<ListBoxItem<Item>>* iter = list.Head();
-		ListBoxItem<Item>* item;
-		do {
-			item = iter->data;
-			if (!item) continue;
-			if (item->tile)
-				item->tile->Destroy(true);
-			GameHeapFree(item);
-		} while (iter = iter->next);
-		list.RemoveAll();
-		selected = NULL;
-		itemCount = 0;
-	}
-};
 
 // 94
 class MessageMenu : public Menu			// 1001
@@ -699,6 +656,8 @@ public:
 	ListBox<StatusEffect>			statusEffListBox;	// 240
 	ListBox<TESReputation>			reputationList;		// 270
 	UInt32							unk2A0;				// 2A0
+
+	__forceinline static StatsMenu* Get() { return *(StatsMenu**)0x11DACE0; }
 };
 
 // 50
@@ -1647,7 +1606,7 @@ public:
 	virtual void		Fn_02(NiNode* niNode);
 	virtual void		Update(Sky* sky, float value);
 
-	NiNode* node04;	// 04
+	NiNode* rootNode;	// 04
 };
 
 // 1C
@@ -1721,7 +1680,12 @@ public:
 	float				flt54;		// 54
 	UInt32				numLayers;	// 58
 };
-
+enum MoonUpdateStatus : __int32
+{
+	US_NOT_REQUIRED = 0x0,
+	US_WHEN_CULLED = 0x1,
+	US_INITIALIZE = 0x2,
+};
 // 7C
 class Moon : public SkyObject {
 public:
@@ -1730,28 +1694,36 @@ public:
 
 	virtual void	Refresh(NiNode* niNode, const char* moonStr);
 
-	NiNode* node08;			// 08
-	NiNode* node0C;			// 0C
-	NiTriShape* shape10;			// 10
-	NiTriShape* shape14;			// 14
-	String			moonTexture[8];		// 18
-					//	0	Full Moon
-					//	1	Three Wan
-					//	2	Half Wan
-					//	3	One Wan
-					//	4	No Moon
-					//	5	One Wax
-					//	6	Half Wax
-					//	7	Three Wax
-	float			flt58;				// 58
-	float			flt5C;				// 5C
-	float			flt60;				// 60
-	float			flt64;				// 64
-	float			flt68;				// 68
-	UInt32			unk6C;				// 6C
-	UInt32			unk70;				// 70
-	float			flt74;				// 74
-	float			flt78;				// 78
+
+	NiRefObject* spMoonNode;
+	NiRefObject* spShadowNode;
+	NiRefObject* spMoonMesh;
+	NiRefObject* spShadowMesh;
+	UInt32 fullMoonPath;
+	UInt32 unk01C;
+	UInt32 threeWanPath;
+	UInt32 unk024;
+	UInt32 halfWanPath;
+	UInt32 unk02C;
+	UInt32 oneWanPath;
+	UInt32 unk034;
+	UInt32 unk038;
+	UInt32 unk03C;
+	UInt32 oneWaxPath;
+	UInt32 unk044;
+	UInt32 halfWaxPath;
+	UInt32 unk04C;
+	UInt32 threeWaxPath;
+	UInt32 unk054;
+	float angleFadeStart;
+	float angleFadeEnd;
+	float shadowEarlyFade;
+	float speed;
+	float zOffset;
+	UInt32 size;
+	MoonUpdateStatus eUpdateMoonTexture;
+	float unk074;
+	float lastUpdateHour;
 };
 
 // 18
@@ -1892,6 +1864,7 @@ public:
 	void RefreshMoon();
 	void RefreshClimate(TESClimate* climate, bool immediate = true);
 	bool GetIsRaining();
+	__forceinline static Sky* Get() { return *(Sky**)0x11DEA20; }
 };
 STATIC_ASSERT(sizeof(Sky) == 0x138);
 
@@ -4058,3 +4031,119 @@ struct COORD_DATA {
 	bool bTriright;
 	bool bTriupper;
 };
+struct SingleTimer {
+	float startTime;
+};
+
+struct TimePair : SingleTimer {
+	float cooldownTime;
+};
+
+struct CombatState {
+	UInt8 byte000;
+	UInt8 gap001[3];
+	UInt32 flags;
+	float fleeThreshold008;
+	TESObjectWEAP* weaponsByCombatWeaponType[6];
+	BSSimpleArray<void*> weapons_Array024;
+	TESObjectWEAP* weap034;
+	UInt32 availableCombatWeaponTypesFlags;
+	float maxDPSPerWeaponType[7];
+	float meleeDPS_58;
+	float rangedDPS_5C;
+	float unk060;
+	float unk064;
+	float distance068;
+	UInt32 unk06C;
+	UInt8 isInLineOfSight;
+	UInt8 forceResetCombatLOSBufferTimer;
+	UInt8 isTargetBlocked_dontIgnoreBlockedTarget072;
+	UInt8 isTargetFlushed;
+	UInt8 isTargetSpaceDifferent;
+	UInt8 byte075;
+	UInt8 byte076;
+	UInt8 forceInventoryUpdate;
+	BGSExplosion* dangerousExplosiveToThrow;
+	UInt32 unk07C;
+	float combatThreatScore;
+	NiPoint3 pt084;
+	UInt32 executionFlags090;
+	float combatDetectionBufferTimer;
+	float combatLOSBufferTimer;
+	float timerLastFiredProjectile;
+	float timer_maybeFlee0A0;
+	float timerProjectile0A4;
+	TimePair timer0A8;
+	TimePair timer0B0;
+	TimePair timer0B8;
+	float timer0C0;
+	void* ptr0C4;
+	UInt8 initialConfidence;
+	UInt8 currentConfidence;
+	UInt8 gap0CA[2];
+	float combatConfidenceModifier;
+	float ownerThreatLevel;
+	float ownerDPS;
+	UInt8 byte0D8;
+	UInt8 gap0D9[3];
+	UInt32 doorFleeRefID;
+	UInt32 lastDoorFleeTime;
+	void* ptr0E4[2];
+	void* ptr0EC;
+	UInt32 unk0F0;
+	UInt32 unk0F4;
+	UInt32 unk0F8;
+	UInt32 unk0FC;
+	UInt32 unk100;
+	UInt32 unk104;
+	float unk108;
+	BSSimpleArray<void*> PathingCoverLocation_Array10C;
+	UInt32 unk11C;
+	UInt32 unk120;
+	UInt32 unk124;
+	void* ptr128;
+	UInt32 unk12C;
+	UInt32 unk130;
+	UInt32 unk134;
+	UInt32 unk138;
+	UInt32 unk13C;
+	UInt32 unk140;
+	float unk144;
+	BSSimpleArray<void*> PathingCoverLocation_Array148;
+	UInt32 unk158;
+	UInt32 unk15C;
+	UInt32 unk160;
+	BSSimpleArray<void*> UnreachableCoverLocation_Array164;
+	BSSimpleArray<void*> UnreachableLocation_Array174;
+	float timer184;
+	UInt8 byte188;
+	UInt8 gap189[3];
+	void* ptr18C;
+	tList<void*>* restoreItemsList;
+	tList<void*>* buffItemsList;
+	tList<void*>* targetObjectItemsList;
+	tList<void*>* ammoItemsList;
+	tList<void*>* weaponItemsList;
+	TESBoundObject* ingestiblesRestoreAndBuff[2];
+	TimePair combatRestoreAndBuffItemTimers[2];
+	TESForm* combatItem1BC;
+	Actor* actor1C0;
+	CombatController* cmbtCtrl;
+	UInt8 byte1C8_maybeInitializing;
+	UInt8 byte1C9;
+	UInt8 gap1CA[2];
+	TimePair timer1CC;
+	TimePair findBetterWeaponTimer;
+	TimePair explosiveProjectileBlockedResetTimer;
+	TimePair avoidThreatsTimer;
+	TimePair takeCoverTimer;
+	TimePair timer1F4;
+	TimePair timer1FC;
+	TimePair strengthUpdateTimer;
+	TimePair combatThreatRatioTimer;
+	TimePair embeddedWeaponSwitchTimer;
+	TimePair inventoryUpdateTimer;
+	UInt32 ptr224;
+	SInt32 unk228;
+};
+STATIC_ASSERT(sizeof(CombatState) == 0x22C);

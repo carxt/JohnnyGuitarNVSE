@@ -13,6 +13,8 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnAddPerkEventHandler, SetOnAddPerkEventHandl
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , 0, 4, kParams_Event_OptionalFlag);
 DEFINE_COMMAND_ALT_PLUGIN(SetOnActorValueChangeEventHandler, SetJohnnyOnActorValueChangeEventHandler, , 0, 4, kParams_Event_OneInt);
+DEFINE_COMMAND_PLUGIN(SetOnProcessLevelChangeEventHandler, , 0, 5, kParams_Event_OneForm_OneInt);
+
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
@@ -29,6 +31,7 @@ EventInformation* OnRenderGamePreUpdateHandler;
 EventInformation* OnRenderGameModeUpdateHandler;
 EventInformation* OnRenderRenderedMenuUpdateHandler;
 EventInformation* OnAVChangeHandler;
+EventInformation* OnPLChangeHandler;
 
 UInt32 handlePreRenderEvent() {
 	for (auto const& callback : OnRenderGamePreUpdateHandler->EventCallbacks) {
@@ -159,6 +162,22 @@ void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal) 
 		}
 	}
 }
+template <UInt32 originalCall>
+bool __fastcall HandlePLChangeEvent(Actor* actor) {
+	int oldLevel = actor->baseProcess->processLevel;
+	bool result = ThisStdCall_B(originalCall, actor);
+	int newLevel = actor->baseProcess->processLevel;
+	if (oldLevel != newLevel) {
+		for (auto const& callback : OnPLChangeHandler->EventCallbacks) {
+			JohnnyEventFiltersOneFormOneInt* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter);
+			if ((filter->IsInFilter(0, actor->refID) || filter->IsInFilter(0, actor->GetBaseForm()->refID)) &&
+				filter->IsInFilter(1, newLevel)) {
+				CallUDF(callback.ScriptForEvent, NULL, OnPLChangeHandler->numMaxArgs, actor, oldLevel, newLevel);
+			}
+		}
+	}
+		return result;
+}
 
 __declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32 avCode, float prevVal, float newVal, ActorValueOwner* attacker) {
 	__asm
@@ -232,6 +251,8 @@ __declspec (naked) void OnQuestStartStopEventAsm() {
 		ret 4
 	}
 }
+
+
 bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
@@ -456,6 +477,22 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+bool Cmd_SetOnProcessLevelChangeEventHandler_Execute(COMMAND_ARGS) {
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	EventFilterStructOneFormOneInt filter = { NULL, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
+	UInt32 flags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script)) {
+		if (OnPLChangeHandler) {
+			if (setOrRemove)
+				OnPLChangeHandler->RegisterEvent(script, (void**)&filter);
+			else OnPLChangeHandler->RemoveEvent(script, (void**)&filter);
+		}
+	}
+	return true;
+}
+
+
 void HandleEventHooks() {
 	OnDyingHandler = JGCreateEvent("OnDying", 1, 1, NULL);
 	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1, NULL);
@@ -470,6 +507,8 @@ void HandleEventHooks() {
 	OnAddPerkHandler = JGCreateEvent("OnAddPerk", 3, 1, NULL);
 	OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1, 1, NULL);
 	OnAVChangeHandler = JGCreateEvent("OnActorValueChange", 3, 2, CreateOneFormOneIntFilter);
+	OnPLChangeHandler = JGCreateEvent("OnProcessLevelChange", 3, 2, CreateOneFormOneIntFilter);
+
 	CallUDF = g_scriptInterface->CallFunctionAlt;
 	WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 	WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
@@ -493,6 +532,27 @@ void HandleEventHooks() {
 	SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00", 3);
 	SafeWrite8(0x60CA29, 0xCC);
 	WriteRelJump(0x66EE50, (UINT)AVChangeEventAsm);
+	// Process Level change: MoveToHigh
+	SafeWrite32(0x108AC7C, (UINT)HandlePLChangeEvent<0x881D30>);
+	SafeWrite32(0x10872EC, (UINT)HandlePLChangeEvent<0x881D30>);
+	SafeWrite32(0x1086CAC, (UINT)HandlePLChangeEvent<0x881D30>);
+	SafeWrite32(0x1084494, (UINT)HandlePLChangeEvent<0x881D30>);
+	// MoveToLow
+	SafeWrite32(0x108AC80, (UINT)HandlePLChangeEvent<0x882B90>);
+	SafeWrite32(0x10872F0, (UINT)HandlePLChangeEvent<0x882B90>);
+	SafeWrite32(0x1086CB0, (UINT)HandlePLChangeEvent<0x882B90>);
+	SafeWrite32(0x1084498, (UINT)HandlePLChangeEvent<0x882B90>);
+	// MoveToMiddleLow
+	SafeWrite32(0x108AC84, (UINT)HandlePLChangeEvent<0x883240>);
+	SafeWrite32(0x10872F4, (UINT)HandlePLChangeEvent<0x883240>);
+	SafeWrite32(0x1086CB4, (UINT)HandlePLChangeEvent<0x883240>);
+	SafeWrite32(0x108449C, (UINT)HandlePLChangeEvent<0x883240>);
+	// MoveToMiddleHigh
+	SafeWrite32(0x108AC88, (UINT)HandlePLChangeEvent<0x883800>);
+	SafeWrite32(0x10872F8, (UINT)HandlePLChangeEvent<0x883800>);
+	SafeWrite32(0x1086CB8, (UINT)HandlePLChangeEvent<0x883800>);
+	SafeWrite32(0x10844A0, (UINT)HandlePLChangeEvent<0x883800>);
+
 
 	//testing
 	OnRenderGamePreUpdateHandler = JGCreateEvent("OnRenderGamePreUpdateHandler", 0, 0, NULL);
