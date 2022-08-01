@@ -840,10 +840,10 @@ bool Cmd_GetBodyPartTraitString_Execute(COMMAND_ARGS) {
 	UInt32 partID;
 	UInt32 traitID;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bpData, &partID, &traitID) && IS_ID(bpData, BGSBodyPartData) && (partID <= 14) && (traitID <= 5)) {
-		BGSBodyPart* bodyPart = bpData->bodyParts[partID];
-		if (bodyPart) {
-			switch (traitID) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bpData, &partID, &traitID)) {
+		if (IS_ID(bpData, BGSBodyPartData) && (partID <= 14) && (traitID <= 5)) {
+			if (const BGSBodyPart* bodyPart = bpData->bodyParts[partID]) {
+				switch (traitID) {
 				case 1:
 					if (bodyPart->partNode.m_dataLen) resStr = bodyPart->partNode.m_data;
 					break;
@@ -861,9 +861,10 @@ bool Cmd_GetBodyPartTraitString_Execute(COMMAND_ARGS) {
 					break;
 				default:
 					break;
+				}
 			}
-			g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
 		}
+		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
 	}
 	return true;
 }
