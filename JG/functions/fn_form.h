@@ -80,9 +80,35 @@ DEFINE_COMMAND_PLUGIN(ClearArmorAltTexture, , 0, 3, kParams_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(ClearWeaponAltTexture, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFactionFlags, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetFactionFlags, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetFormRecipesAlt, , 0, 1, kParams_OneForm);
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+bool Cmd_GetFormRecipesAlt_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* form = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
+		auto it = g_dataHandler->recipeList.Head();
+		NVSEArrayVar* rcpArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+		do {
+			if (it->data && !it->data->outputs.Empty()) {
+				TESRecipe::ComponentList* outputs = &it->data->outputs;
+				auto it2 = outputs->Head();
+				do {
+					if (it2->data && it2->data->item && (it2->data->item->refID == form->refID)) {
+						g_arrInterface->AppendElement(rcpArr, NVSEArrayElement(it->data));
+						break;
+					}
+				} while (it2 = it2->next);
+			} 
+		} while (it = it->next);
+
+		if (g_arrInterface->GetArraySize(rcpArr)) g_arrInterface->AssignCommandResult(rcpArr, result); 
+		
+	}
+	return true;
+}
 
 bool Cmd_SetFactionFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
