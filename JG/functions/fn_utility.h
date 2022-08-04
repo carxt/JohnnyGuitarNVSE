@@ -2,7 +2,7 @@
 // Utility or miscellaneous functions
 #include <iostream>
 #include <fstream>
-DEFINE_COMMAND_PLUGIN(GetEditorID, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(GetEditorID, GetEdID, , 0, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetJohnnyPatch, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, NULL);
@@ -459,10 +459,13 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
-	TESForm* form;
-	const char* edid;
+	TESForm* form = nullptr;
+	const char* edid = "";
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
-		edid = form->GetName();
+		if (!form)
+			form = thisObj;
+		if (form)
+			edid = form->GetName();
 		g_strInterface->Assign(PASS_COMMAND_ARGS, edid);
 		if (IsConsoleMode())
 			Console_Print("GetEditorID >> %s", edid);
