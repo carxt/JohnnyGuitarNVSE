@@ -1,3 +1,6 @@
+#include <windows.h>
+#include <tchar.h>
+#include <psapi.h>
 #include <mutex>
 #include <shared_mutex>
 #include "nvse/PluginAPI.h"
@@ -87,7 +90,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_currentSky = (Sky**)0x11DEA20;
 			g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 			g_VATSCameraData = (VATSCameraData*)0x11F2250;
-			g_initialTickCount = GetTickCount();			
+			g_initialTickCount = GetTickCount();
+			DumpModules();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			break;
 		}
@@ -141,6 +145,7 @@ extern "C" {
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
+		strncpy(g_workingDir, filename, (strlen(filename)-13));
 		strcpy((char*)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 		loadEditorIDs = 1;
 		fixHighNoon = 0;
@@ -422,3 +427,4 @@ extern "C" {
 		return TRUE;
 	}
 };
+

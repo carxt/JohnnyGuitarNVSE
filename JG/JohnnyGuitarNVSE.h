@@ -61,6 +61,7 @@ std::unordered_set<BYTE> SaveGameUMap;
 uintptr_t g_canSaveNowAddr = 0;
 uintptr_t g_canSaveNowMenuAddr = 0;
 Setting** g_miscStatData = (Setting**)0x11C6D50;
+char g_workingDir[MAX_PATH];
 TESObjectCELL* TESObjectREFR::GetParentCell() {
 	if (this->parentCell) return parentCell;
 	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
@@ -683,6 +684,40 @@ void UpdateMiscStatList(char* name, int value) {
 	}
 	tile->SetFloat(kTileValue_user1, (float)value, 1);
 }
+
+void DumpModules() {
+	HMODULE hMods[1024];
+	HANDLE hProcess = INVALID_HANDLE_VALUE;
+	DWORD cbNeeded;
+	if (EnumProcessModules(GetCurrentProcess(), hMods, sizeof(hMods), &cbNeeded))
+	{
+		PrintLog("\n===== DUMPING LOADED MODULES =====\n");
+		std::string userStr = "=== USER MODULES ===\n";
+		std::string systemStr = "=== SYSTEM MODULES ===\n";
+		for (int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++)
+		{
+			TCHAR szModName[MAX_PATH];
+
+
+			if (GetModuleFileNameEx(hProcess, hMods[i], szModName,
+				sizeof(szModName) / sizeof(TCHAR)))
+			{
+				char* trimName = (char*)(strrchr(szModName, '\\') + 1);
+				if (strstr(szModName, g_workingDir)) {
+					userStr += trimName;
+					userStr += "\n";
+				}
+				else {
+					systemStr += trimName;
+					systemStr += "\n";
+				}
+			}
+		}
+		PrintLog("%s", userStr.c_str());
+		PrintLog("%s", systemStr.c_str());
+	}
+}
+
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
