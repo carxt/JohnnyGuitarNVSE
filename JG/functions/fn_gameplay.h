@@ -110,7 +110,7 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 		}
 	} while (iter = iter->next);
 
-	if (g_arrInterface->GetArraySize(effArr)) g_arrInterface->AssignCommandResult(effArr, result);
+	g_arrInterface->AssignCommandResult(effArr, result);
 	return true;
 }
 
@@ -222,7 +222,7 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
 		}
 	}
-	if (g_arrInterface->GetArraySize(hostileArr)) g_arrInterface->AssignCommandResult(hostileArr, result);
+	g_arrInterface->AssignCommandResult(hostileArr, result);
 	return true;
 }
 
