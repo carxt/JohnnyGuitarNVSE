@@ -179,7 +179,8 @@ bool __fastcall HandlePLChangeEvent(Actor* actor) {
 		return result;
 }
 
-__declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32 avCode, float prevVal, float newVal, ActorValueOwner* attacker) {
+__declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32 avCode, float prevVal, float newVal, ActorValueOwner* attacker)
+{
 	__asm
 	{
 		push    ebp
@@ -190,8 +191,6 @@ __declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32
 		mov     ecx, ds:0x11D61C8[eax * 4]
 		test    ecx, ecx
 		jz      done
-		cmp     dword ptr[ecx + 0x54], 0
-		jz      done
 		push    ecx
 		mov     ecx, [ebp + 8]
 		cmp     dword ptr[ecx - 0x98], 0x14
@@ -201,10 +200,13 @@ __declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32
 		push    eax
 		call    HandleAVChangeEvent
 		skipHandler :
-		mov     eax, 0x66EE72
+			mov     ecx, [ebp - 4]
+			cmp     dword ptr[ecx + 0x54], 0
+			jz      done
+			mov     eax, 0x66EE72
 			jmp     eax
-			done :
-		leave
+		done :
+			leave
 			retn
 	}
 }
