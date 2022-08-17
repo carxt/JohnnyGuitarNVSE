@@ -39,6 +39,7 @@ DEFINE_COMMAND_PLUGIN(AddNavmeshObstacle, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(RemoveNavmeshObstacle, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLandTextureUnderFeet, , 1, 0, NULL);
 DEFINE_CMD_NO_ARGS(GetMoonPhase);
+DEFINE_COMMAND_PLUGIN(RewardKarmaAlt, , 0, 1, kParams_OneInt);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -46,6 +47,25 @@ bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5B
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
+bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
+	*result = 0;
+	int delta = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &delta);
+	int karmaBefore = g_thePlayer->avOwner.GetActorValueInt(kAVCode_Karma);
+	int ikarmaMax = (*(Setting*)0x11CD644).data.i;
+	int iKarmaMin = (*(Setting*)0x11CDD6C).data.i;
+	if (delta >= 0 && ((delta + karmaBefore) > ikarmaMax)) {
+		delta = ikarmaMax - karmaBefore;
+	}
+	else if (delta < 0 && ((delta + karmaBefore) < iKarmaMin)) {
+		delta = iKarmaMin - karmaBefore;
+	}
+	if (delta != 0) {
+		g_thePlayer->ModActorValue(kAVCode_Karma, delta, 0);
+		*result = 1;
+	}
+	return true;
+}
 bool Cmd_GetMoonPhase_Execute(COMMAND_ARGS) {
 	*result = *(int*)0x11CCA80;
 	return true;
@@ -215,8 +235,8 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0
-				|| target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.GetActorValueInt(kAVCode_Invisibility) > 0
+				|| target->target->avOwner.GetActorValueInt(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
@@ -396,7 +416,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueInt(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueInt(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
@@ -427,7 +447,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueInt(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueInt(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);

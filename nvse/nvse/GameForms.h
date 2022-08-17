@@ -1498,7 +1498,7 @@ public:
 
 	virtual UInt32	GetBaseActorValue(UInt32 avCode);		// GetBaseActorValue (used from Eval) result in EAX
 	virtual float	GetBaseAVFloat(UInt32 avCode);			// GetBaseActorValue internal, result in st
-	virtual float	Fn_02(UInt32 avCode);					// GetActorValue internal, result in EAX
+	virtual int		GetActorValueInt(UInt32 avCode);					// GetActorValue internal, result in EAX
 	virtual float	GetActorValue(UInt32 avCode);			// GetActorValue (used from Eval) result in EAX
 	virtual float	Fn_04(UInt32 avCode);					// GetBaseActorValue04 (internal) result in st
 	virtual float	GetActorValueDamage(UInt32 avCode);
