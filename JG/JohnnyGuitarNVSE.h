@@ -867,5 +867,5 @@ void HandleGameHooks() {
 	//	WriteRelCall(0x97E745, (UInt32)WantsToFleeHook);
 	//	WriteRelCall(0x999082, (UInt32)WantsToFleeHook);
 	//	WriteRelCall(0x9AAC17, (UInt32)WantsToFleeHook);
-	//SafeWrite32(0x8868CF, (UInt32)&timer22);
+	//  SafeWrite32(0x8868CF, (UInt32)&timer22);
 }

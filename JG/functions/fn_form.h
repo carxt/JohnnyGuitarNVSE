@@ -893,7 +893,7 @@ bool Cmd_GetBodyPartTraitString_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
-	UInt32 isFemale;
+	UInt32 isFemale = 0;
 	TESForm* form = nullptr;
 	const char* path = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &isFemale)) {
@@ -915,7 +915,7 @@ bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char path[MAX_PATH];
-	UInt32 isFemale;
+	UInt32 isFemale = 0;
 	TESForm* form = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &form, &isFemale)) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
