@@ -166,6 +166,7 @@ void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal) 
 }
 template <UInt32 originalCall>
 bool __fastcall HandlePLChangeEvent(Actor* actor) {
+	if (actor == NULL || actor->baseProcess == NULL) return true; //early exit, no need to handle error states because there's no baseProcess.
 	int oldLevel = actor->baseProcess->processLevel;
 	bool result = ThisStdCall_B(originalCall, actor);
 	int newLevel = actor->baseProcess->processLevel;
