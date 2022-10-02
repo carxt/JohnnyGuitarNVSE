@@ -32,7 +32,8 @@ bool fixNPCShootingAngle = 0;
 bool noMuzzleFlashCooldown = 0;
 bool enableRadioSubtitles = 0;
 bool removeMainMenuMusic = 0;
-bool fixDeathSounds = 10;
+bool fixDeathSounds = 1;
+bool patchPainedPlayer = 0;
 float iDeathSoundMAXTimer = 10;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
@@ -485,6 +486,18 @@ __declspec (naked) void FixDeathSoundsHook() {
 		jmp FixDeathSounds
 	}
 }
+__declspec (naked) void PatchPlayerPainHook(){
+	_asm {
+		xor eax, eax
+		mov ecx, dword ptr [ebp-0x180]
+		mov edx, dword ptr [0x11DEA3C]
+		cmp ecx, eax
+		setnz al
+		and al, byte ptr [0x119B4E0]
+		ret
+	}
+}
+
 
 char* __fastcall GetReputationIconHook(TESReputation* rep) {
 	auto it = factionRepIcons.find(rep->refID);
@@ -807,7 +820,10 @@ void HandleIniOptions() {
 		SafeWrite16(0x8EC5C6, 0xBA90);
 		SafeWrite32(0x8EC5C8, (uintptr_t)FixDeathSoundsHook);
 	}
-
+	if (patchPainedPlayer) {
+		WriteRelCall(0x936394, (uintptr_t)PatchPlayerPainHook);
+		WriteRelCall(0x936703, (uintptr_t)PatchPlayerPainHook);
+	}
 	// for bRemoveMainMenuMusic
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
 	//Patch the game so the dialog subroutine stops if the actor's head is blown off, I'll add it as an ini setting later.
