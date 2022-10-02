@@ -490,11 +490,9 @@ __declspec (naked) void PatchPlayerPainHook(){
 	_asm {
 		xor eax, eax
 		mov ecx, dword ptr ss: [ebp-0x180]
-		mov edx, dword ptr ds: [0x11DEA3C]
-		cmp ecx, edx
-		setnz al
-		and al, byte ptr ds: [0x119B4E0]
-		ret
+		cmp ecx, dword ptr ds: [0x11DEA3C]
+		cmovnz al, byte ptr ds: [0x119B4E0]
+		retn
 	}
 }
 
