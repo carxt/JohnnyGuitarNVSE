@@ -277,8 +277,10 @@ TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
 			if (ammoList && xChanges && xChanges->data) {
 				for (int i = 0; i < ammoList->Count(); i++) {
 					ammo = ammoList->GetNthForm(i);
-					UInt32 count = ThisStdCall<UInt32>(0x4C8F30, xChanges->data, ammo);
-					if (count > 0) return ammo;
+					if (IS_TYPE(ammo, TESAmmo)) {
+						UInt32 count = ThisStdCall<UInt32>(0x4C8F30, xChanges->data, ammo);
+						if (count > 0) return ammo;
+					}
 				}
 			}
 		}
