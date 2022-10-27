@@ -160,6 +160,7 @@ extern "C" {
 		fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 1, filename);
 		patchPainedPlayer = GetPrivateProfileInt("MAIN", "bRemovePlayerPainExpression", 0, filename);
 		iDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
+		bDisableDeathResponses = GetPrivateProfileInt("DeathResponses", "bDisableDeathResponses", 0, filename);
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);

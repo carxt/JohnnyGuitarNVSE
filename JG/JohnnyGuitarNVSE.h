@@ -34,6 +34,7 @@ bool enableRadioSubtitles = 0;
 bool removeMainMenuMusic = 0;
 bool fixDeathSounds = 1;
 bool patchPainedPlayer = 0;
+bool bDisableDeathResponses = 0;
 float iDeathSoundMAXTimer = 10;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
@@ -630,6 +631,22 @@ __declspec (naked) void NoHeadlessTalkingHook() {
 	}
 }
 
+
+__declspec (naked) void DisableDeathResponsesHook() {
+	__asm {
+		movzx eax, byte ptr ss : [ebp-0x10]
+		test eax, eax
+		jz retExit
+		pop eax
+		add eax, 0x6F
+		push eax
+		mov al, 1
+		retExit:
+		ret
+
+	}
+}
+
 bool __fastcall SaveINIHook(IniSettingCollection* a1, void* edx, char* a2) {
 	ThisStdCall<void>(0x5E01B0, a1, a2);
 	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
@@ -828,6 +845,10 @@ void HandleIniOptions() {
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
 	//Patch the game so the dialog subroutine stops if the actor's head is blown off, I'll add it as an ini setting later.
 	WriteRelCall(0x8EC54D, (uintptr_t)NoHeadlessTalkingHook);
+	if (bDisableDeathResponses) {
+		SafeWrite8(0x098414C, 0x90);
+		WriteRelCall(0x098414D, (uintptr_t)DisableDeathResponsesHook);
+	}
 }
 
 void HandleFunctionPatches() {
