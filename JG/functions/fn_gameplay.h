@@ -5,7 +5,7 @@ DEFINE_COMMAND_PLUGIN(TogglePipBoy, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(Jump, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(StopVATSCam, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCameraShake, , 0, 2, kParams_TwoFloats);
-DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 1, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 1, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(SetVelEx, , 1, 3, kParams_ThreeFloats);
 DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
@@ -608,40 +608,42 @@ bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
-	AlchemyItem* poison;
-	TESObjectWEAP* weapon = nullptr;
-	ExtraDataList* xData;
+bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS)
+{
+	//removal support by jazzisparis
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {
-		if (!thisObj->IsActor()) {
+	AlchemyItem* poison = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &poison) && (!poison || (IS_TYPE(poison, AlchemyItem) && poison->IsPoison())))
+	{
+		TESObjectWEAP* weapon = nullptr;
+		ExtraDataList* xData = nullptr;
+		if (!thisObj->IsActor())
+		{
 			InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
 			if (!invRef) return true;
 			weapon = (TESObjectWEAP*)(invRef->data.type);
 			xData = invRef->data.xData;
 		}
-		else {
+		else
+		{
 			ContChangesEntry* wpnInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo();
-			if (wpnInfo && wpnInfo->extendData) {
+			if (wpnInfo && wpnInfo->extendData)
+			{
 				weapon = ((TESObjectWEAP*)wpnInfo->type);
 				xData = wpnInfo->extendData->GetFirstItem();
 			}
 		}
-		if (weapon) {
-			UInt32 weaponSkill = weapon->weaponSkill;
-			if (weaponSkill != kAVCode_Unarmed && weaponSkill != kAVCode_MeleeWeapons) return true;
-			if (xData) {
-				ExtraPoison* xPoison = GetExtraType((*xData), Poison);
-				if (!xPoison) {
-					ThisStdCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
-					*result = 1;
-				}
-			}
+		if (weapon && xData && (weapon->weaponSkill == kAVCode_Unarmed) || (weapon->weaponSkill == kAVCode_MeleeWeapons))
+		{
+			if (poison)
+				ThisStdCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
+			else
+				ThisStdCall(0x410140, xData, kExtraData_Poison); // ExtraDataList::RemoveByType
+			*result = 1;
 		}
 	}
 	return true;
 }
-
 bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	int pipboyTab = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pipboyTab);
