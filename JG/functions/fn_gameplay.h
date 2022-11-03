@@ -5,7 +5,7 @@ DEFINE_COMMAND_PLUGIN(TogglePipBoy, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(Jump, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(StopVATSCam, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCameraShake, , 0, 2, kParams_TwoFloats);
-DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 1, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 1, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(SetVelEx, , 1, 3, kParams_ThreeFloats);
 DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
@@ -39,6 +39,7 @@ DEFINE_COMMAND_PLUGIN(AddNavmeshObstacle, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(RemoveNavmeshObstacle, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLandTextureUnderFeet, , 1, 0, NULL);
 DEFINE_CMD_NO_ARGS(GetMoonPhase);
+DEFINE_COMMAND_PLUGIN(RewardKarmaAlt, , 0, 1, kParams_OneInt);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -46,6 +47,25 @@ bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5B
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
+bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
+	*result = 0;
+	int delta = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &delta);
+	int karmaBefore = g_thePlayer->avOwner.GetActorValueInt(kAVCode_Karma);
+	int ikarmaMax = (*(Setting*)0x11CD644).data.i;
+	int iKarmaMin = (*(Setting*)0x11CDD6C).data.i;
+	if (delta >= 0 && ((delta + karmaBefore) > ikarmaMax)) {
+		delta = ikarmaMax - karmaBefore;
+	}
+	else if (delta < 0 && ((delta + karmaBefore) < iKarmaMin)) {
+		delta = iKarmaMin - karmaBefore;
+	}
+	if (delta != 0) {
+		g_thePlayer->ModActorValue(kAVCode_Karma, delta, 0);
+		*result = 1;
+	}
+	return true;
+}
 bool Cmd_GetMoonPhase_Execute(COMMAND_ARGS) {
 	*result = *(int*)0x11CCA80;
 	return true;
@@ -110,7 +130,7 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 		}
 	} while (iter = iter->next);
 
-	if (g_arrInterface->GetArraySize(effArr)) g_arrInterface->AssignCommandResult(effArr, result);
+	g_arrInterface->AssignCommandResult(effArr, result);
 	return true;
 }
 
@@ -215,14 +235,14 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0
-				|| target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.GetActorValueInt(kAVCode_Invisibility) > 0
+				|| target->target->avOwner.GetActorValueInt(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
 		}
 	}
-	if (g_arrInterface->GetArraySize(hostileArr)) g_arrInterface->AssignCommandResult(hostileArr, result);
+	g_arrInterface->AssignCommandResult(hostileArr, result);
 	return true;
 }
 
@@ -396,7 +416,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueInt(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueInt(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
@@ -427,7 +447,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueInt(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueInt(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
@@ -588,40 +608,42 @@ bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
-	AlchemyItem* poison;
-	TESObjectWEAP* weapon = nullptr;
-	ExtraDataList* xData;
+bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS)
+{
+	//removal support by jazzisparis
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &poison) && IS_TYPE(poison, AlchemyItem) && poison->IsPoison()) {
-		if (!thisObj->IsActor()) {
+	AlchemyItem* poison = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &poison) && (!poison || (IS_TYPE(poison, AlchemyItem) && poison->IsPoison())))
+	{
+		TESObjectWEAP* weapon = nullptr;
+		ExtraDataList* xData = nullptr;
+		if (!thisObj->IsActor())
+		{
 			InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
 			if (!invRef) return true;
 			weapon = (TESObjectWEAP*)(invRef->data.type);
 			xData = invRef->data.xData;
 		}
-		else {
+		else
+		{
 			ContChangesEntry* wpnInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo();
-			if (wpnInfo && wpnInfo->extendData) {
+			if (wpnInfo && wpnInfo->extendData)
+			{
 				weapon = ((TESObjectWEAP*)wpnInfo->type);
 				xData = wpnInfo->extendData->GetFirstItem();
 			}
 		}
-		if (weapon) {
-			UInt32 weaponSkill = weapon->weaponSkill;
-			if (weaponSkill != kAVCode_Unarmed && weaponSkill != kAVCode_MeleeWeapons) return true;
-			if (xData) {
-				ExtraPoison* xPoison = GetExtraType((*xData), Poison);
-				if (!xPoison) {
-					ThisStdCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
-					*result = 1;
-				}
-			}
+		if (weapon && xData && (weapon->weaponSkill == kAVCode_Unarmed) || (weapon->weaponSkill == kAVCode_MeleeWeapons))
+		{
+			if (poison)
+				ThisStdCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
+			else
+				ThisStdCall(0x410140, xData, kExtraData_Poison); // ExtraDataList::RemoveByType
+			*result = 1;
 		}
 	}
 	return true;
 }
-
 bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	int pipboyTab = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pipboyTab);

@@ -32,7 +32,9 @@ bool fixNPCShootingAngle = 0;
 bool noMuzzleFlashCooldown = 0;
 bool enableRadioSubtitles = 0;
 bool removeMainMenuMusic = 0;
-bool fixDeathSounds = 10;
+bool fixDeathSounds = 1;
+bool patchPainedPlayer = 0;
+bool bDisableDeathResponses = 0;
 float iDeathSoundMAXTimer = 10;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
@@ -61,6 +63,7 @@ std::unordered_set<BYTE> SaveGameUMap;
 uintptr_t g_canSaveNowAddr = 0;
 uintptr_t g_canSaveNowMenuAddr = 0;
 Setting** g_miscStatData = (Setting**)0x11C6D50;
+char g_workingDir[MAX_PATH];
 TESObjectCELL* TESObjectREFR::GetParentCell() {
 	if (this->parentCell) return parentCell;
 	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
@@ -275,8 +278,10 @@ TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
 			if (ammoList && xChanges && xChanges->data) {
 				for (int i = 0; i < ammoList->Count(); i++) {
 					ammo = ammoList->GetNthForm(i);
-					UInt32 count = ThisStdCall<UInt32>(0x4C8F30, xChanges->data, ammo);
-					if (count > 0) return ammo;
+					if (IS_TYPE(ammo, TESAmmo)) {
+						UInt32 count = ThisStdCall<UInt32>(0x4C8F30, xChanges->data, ammo);
+						if (count > 0) return ammo;
+					}
 				}
 			}
 		}
@@ -484,6 +489,16 @@ __declspec (naked) void FixDeathSoundsHook() {
 		jmp FixDeathSounds
 	}
 }
+__declspec (naked) void PatchPlayerPainHook(){
+	_asm {
+		xor eax, eax
+		mov ecx, dword ptr ss: [ebp-0x180]
+		cmp ecx, dword ptr ds: [0x11DEA3C]
+		cmovnz al, byte ptr ds: [0x119B4E0]
+		retn
+	}
+}
+
 
 char* __fastcall GetReputationIconHook(TESReputation* rep) {
 	auto it = factionRepIcons.find(rep->refID);
@@ -616,6 +631,22 @@ __declspec (naked) void NoHeadlessTalkingHook() {
 	}
 }
 
+
+__declspec (naked) void DisableDeathResponsesHook() {
+	__asm {
+		movzx eax, byte ptr ss : [ebp-0x10]
+		test eax, eax
+		jz retExit
+		pop eax
+		add eax, 0x6F
+		push eax
+		mov al, 1
+		retExit:
+		ret
+
+	}
+}
+
 bool __fastcall SaveINIHook(IniSettingCollection* a1, void* edx, char* a2) {
 	ThisStdCall<void>(0x5E01B0, a1, a2);
 	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
@@ -683,6 +714,40 @@ void UpdateMiscStatList(char* name, int value) {
 	}
 	tile->SetFloat(kTileValue_user1, (float)value, 1);
 }
+
+void DumpModules() {
+	HMODULE hMods[1024];
+	HANDLE hProcess = INVALID_HANDLE_VALUE;
+	DWORD cbNeeded;
+	if (EnumProcessModules(GetCurrentProcess(), hMods, sizeof(hMods), &cbNeeded))
+	{
+		PrintLog("\n===== DUMPING LOADED MODULES =====\n");
+		std::string userStr = "=== USER MODULES ===\n";
+		std::string systemStr = "=== SYSTEM MODULES ===\n";
+		for (int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++)
+		{
+			TCHAR szModName[MAX_PATH];
+
+
+			if (GetModuleFileNameEx(hProcess, hMods[i], szModName,
+				sizeof(szModName) / sizeof(TCHAR)))
+			{
+				char* trimName = (char*)(strrchr(szModName, '\\') + 1);
+				if (strstr(szModName, g_workingDir)) {
+					userStr += trimName;
+					userStr += "\n";
+				}
+				else {
+					systemStr += trimName;
+					systemStr += "\n";
+				}
+			}
+		}
+		PrintLog("%s", userStr.c_str());
+		PrintLog("%s", systemStr.c_str());
+	}
+}
+
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
@@ -772,11 +837,18 @@ void HandleIniOptions() {
 		SafeWrite16(0x8EC5C6, 0xBA90);
 		SafeWrite32(0x8EC5C8, (uintptr_t)FixDeathSoundsHook);
 	}
-
+	if (patchPainedPlayer) {
+		WriteRelCall(0x936394, (uintptr_t)PatchPlayerPainHook);
+		WriteRelCall(0x936703, (uintptr_t)PatchPlayerPainHook);
+	}
 	// for bRemoveMainMenuMusic
 	if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
 	//Patch the game so the dialog subroutine stops if the actor's head is blown off, I'll add it as an ini setting later.
 	WriteRelCall(0x8EC54D, (uintptr_t)NoHeadlessTalkingHook);
+	if (bDisableDeathResponses) {
+		SafeWrite8(0x098414C, 0x90);
+		WriteRelCall(0x098414D, (uintptr_t)DisableDeathResponsesHook);
+	}
 }
 
 void HandleFunctionPatches() {
@@ -823,7 +895,7 @@ void HandleFunctionPatches() {
 	// Get/ModExtraMiscStat
 	SafeWrite32(0x7DDAB1, UInt32(MiscStatRefreshHook));
 }
-
+float timer22 = 30.0;
 void HandleGameHooks() {
 	HandleFixes();
 	HandleIniOptions();
@@ -832,4 +904,5 @@ void HandleGameHooks() {
 	//	WriteRelCall(0x97E745, (UInt32)WantsToFleeHook);
 	//	WriteRelCall(0x999082, (UInt32)WantsToFleeHook);
 	//	WriteRelCall(0x9AAC17, (UInt32)WantsToFleeHook);
+	//  SafeWrite32(0x8868CF, (UInt32)&timer22);
 }

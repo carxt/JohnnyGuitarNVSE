@@ -1,3 +1,6 @@
+#include <windows.h>
+#include <tchar.h>
+#include <psapi.h>
 #include <mutex>
 #include <shared_mutex>
 #include "nvse/PluginAPI.h"
@@ -43,7 +46,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 481
+#define JG_VERSION 490
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_NewGame:
@@ -87,7 +90,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_currentSky = (Sky**)0x11DEA20;
 			g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 			g_VATSCameraData = (VATSCameraData*)0x11F2250;
-			g_initialTickCount = GetTickCount();			
+			g_initialTickCount = GetTickCount();
+			DumpModules();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			break;
 		}
@@ -141,6 +145,7 @@ extern "C" {
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
+		strncpy(g_workingDir, filename, (strlen(filename)-13));
 		strcpy((char*)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 		loadEditorIDs = 1;
 		fixHighNoon = 0;
@@ -153,7 +158,9 @@ extern "C" {
 		enableRadioSubtitles = GetPrivateProfileInt("MAIN", "bEnableRadioSubtitles", 0, filename);
 		removeMainMenuMusic = GetPrivateProfileInt("MAIN", "bRemoveMainMenuMusic", 0, filename);
 		fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 1, filename);
+		patchPainedPlayer = GetPrivateProfileInt("MAIN", "bRemovePlayerPainExpression", 0, filename);
 		iDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
+		//bDisableDeathResponses = GetPrivateProfileInt("DeathResponses", "bDisableDeathResponses", 0, filename);
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);
@@ -390,6 +397,8 @@ extern "C" {
 		REG_CMD(GetExtraMiscStat);
 		REG_CMD(ModExtraMiscStat);
 		REG_CMD(GetMoonPhase);
+		REG_TYPED_CMD(GetFormRecipesAlt, Array);
+		REG_CMD(RewardKarmaAlt);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

@@ -80,9 +80,35 @@ DEFINE_COMMAND_PLUGIN(ClearArmorAltTexture, , 0, 3, kParams_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(ClearWeaponAltTexture, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFactionFlags, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetFactionFlags, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetFormRecipesAlt, , 0, 1, kParams_OneForm);
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+bool Cmd_GetFormRecipesAlt_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* form = nullptr;
+	NVSEArrayVar* rcpArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
+		auto it = g_dataHandler->recipeList.Head();
+		do {
+			if (it->data && !it->data->outputs.Empty()) {
+				TESRecipe::ComponentList* outputs = &it->data->outputs;
+				auto it2 = outputs->Head();
+				do {
+					if (it2->data && it2->data->item && (it2->data->item->refID == form->refID)) {
+						g_arrInterface->AppendElement(rcpArr, NVSEArrayElement(it->data));
+						break;
+					}
+				} while (it2 = it2->next);
+			} 
+		} while (it = it->next);
+
+		
+	}
+	g_arrInterface->AssignCommandResult(rcpArr, result);
+	return true;
+}
 
 bool Cmd_SetFactionFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -341,32 +367,30 @@ bool Cmd_GetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 bool Cmd_GetWeaponAltTextures_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectWEAP* weapon;
+	NVSEArrayVar* txstArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && IS_TYPE(weapon, TESObjectWEAP)) {
 		TESModelTextureSwap* model = &weapon->textureSwap;
 		if (!model) return true;
-		NVSEArrayVar* txstArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
 
 		do {
 			if (iter->data && iter->data->textureID) g_arrInterface->AppendElement(txstArr, NVSEArrayElement(iter->data->textureID));
 		} while (iter = iter->next);
-
-		if (g_arrInterface->GetArraySize(txstArr)) g_arrInterface->AssignCommandResult(txstArr, result);
 	}
+	g_arrInterface->AssignCommandResult(txstArr, result);
 	return true;
 }
 
 bool Cmd_GetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSIdleMarker* marker;
+	NVSEArrayVar* idleArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker) && marker->idleCollection.animCount > 0) {
-		NVSEArrayVar* idleArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 		for (int i = 0; i < marker->idleCollection.animCount; i++) {
 			g_arrInterface->AppendElement(idleArr, NVSEArrayElement(marker->idleCollection.idleList[i]));
 		}
-		if (g_arrInterface->GetArraySize(idleArr)) g_arrInterface->AssignCommandResult(idleArr, result);
 	}
-
+	g_arrInterface->AssignCommandResult(idleArr, result);
 	return true;
 }
 
@@ -468,19 +492,18 @@ bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectARMO* armor;
 	UInt32 whichModel;
-
+	NVSEArrayVar* txstArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &whichModel) && IS_TYPE(armor, TESObjectARMO)) {
 		TESModelTextureSwap* model = GetArmorModel(armor, whichModel);
 		if (!model) return true;
-		NVSEArrayVar* txstArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
 
 		do {
 			if (iter->data && iter->data->textureID) g_arrInterface->AppendElement(txstArr, NVSEArrayElement(iter->data->textureID));
 		} while (iter = iter->next);
 
-		if (g_arrInterface->GetArraySize(txstArr)) g_arrInterface->AssignCommandResult(txstArr, result);
 	}
+	g_arrInterface->AssignCommandResult(txstArr, result);
 	return true;
 }
 bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
@@ -735,7 +758,7 @@ bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 			}
 		}
 	} while (perkIter = perkIter->next);
-	if (g_arrInterface->GetArraySize(perkArr)) g_arrInterface->AssignCommandResult(perkArr, result);
+	g_arrInterface->AssignCommandResult(perkArr, result);
 	return true;
 }
 bool Cmd_FaceGenRefreshAppearance_Execute(COMMAND_ARGS) {
@@ -870,7 +893,7 @@ bool Cmd_GetBodyPartTraitString_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
-	UInt32 isFemale;
+	UInt32 isFemale = 0;
 	TESForm* form = nullptr;
 	const char* path = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &isFemale)) {
@@ -892,7 +915,7 @@ bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char path[MAX_PATH];
-	UInt32 isFemale;
+	UInt32 isFemale = 0;
 	TESForm* form = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &form, &isFemale)) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
@@ -1149,9 +1172,9 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESFaction* faction;
 	SInt32 rank = -1;
+	NVSEArrayVar* factionMemberArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	ExtractArgsEx(EXTRACT_ARGS_EX, &faction, &rank);
 	if (faction) {
-		NVSEArrayVar* factionMemberArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 		for (TESBoundObject* object = g_dataHandler->boundObjectList->first; object; object = object->next) {
 			TESActorBase* actorBase = DYNAMIC_CAST(object, TESBoundObject, TESActorBase);
 			if (actorBase && actorBase->baseData.factionList.Count() != 0) {
@@ -1167,8 +1190,8 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 				} while (fctIter = fctIter->next);
 			}
 		}
-		if (g_arrInterface->GetArraySize(factionMemberArr)) g_arrInterface->AssignCommandResult(factionMemberArr, result);
 	}
+	g_arrInterface->AssignCommandResult(factionMemberArr, result);
 	return true;
 }
 bool Cmd_SetEquipType_Execute(COMMAND_ARGS) {

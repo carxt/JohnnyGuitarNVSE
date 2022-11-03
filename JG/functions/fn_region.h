@@ -82,10 +82,10 @@ bool Cmd_GetRegionMapName_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 	TESRegion* region = NULL;
+	NVSEArrayVar* weatherArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && IS_TYPE(region, TESRegion)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
-			NVSEArrayVar* weatherArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 			ListNode<WeatherEntry>* iter = weatherData->weatherTypes.Head();
 			do {
 				if (iter->data) {
@@ -94,9 +94,9 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 						Console_Print(iter->data->weather->GetName());
 				}
 			} while (iter = iter->next);
-			if (g_arrInterface->GetArraySize(weatherArr)) g_arrInterface->AssignCommandResult(weatherArr, result);
 		}
 	}
+	g_arrInterface->AssignCommandResult(weatherArr, result);
 	return true;
 }
 bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
