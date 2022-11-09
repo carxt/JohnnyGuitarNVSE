@@ -288,6 +288,7 @@ TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
 	}
 	return 0;
 }
+
 __declspec(naked) void InventoryAmmoHook() {
 	static const UInt32 retnAddr = 0x7080A8;
 	__asm {
@@ -296,6 +297,15 @@ __declspec(naked) void InventoryAmmoHook() {
 		mov dword ptr[ebp - 0x2C8], eax
 		jmp retnAddr
 	}
+}
+
+tList<TESAmmoEffect>* __fastcall GetAmmoEffectsCheckType(TESForm* form)
+{
+	if (IS_TYPE(form, TESAmmo))
+	{
+		return &((TESAmmo*)form)->effectList;
+	}
+	return nullptr;
 }
 
 __declspec(naked) void OnCloseContainerHook() {
@@ -751,6 +761,12 @@ void DumpModules() {
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
+
+	// fix ammo effects list being checked for non-TESAmmo's when the Rock-It-Launcher is equipped
+	for (auto addr : { 0x523AD8, 0x64529D, 0x64553B, 0x6462C5 })
+	{
+		WriteRelCall(addr, UInt32(GetAmmoEffectsCheckType));
+	}
 
 	// fix for companions not saying the next topic after opening ContainerMenu through dialog
 	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
