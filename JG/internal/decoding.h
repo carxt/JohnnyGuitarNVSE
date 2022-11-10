@@ -2482,7 +2482,7 @@ public:
 	~BSWin32Audio();
 
 	virtual void	Destroy(bool doFree);
-	virtual void	CreateAudioListener(HWND window);
+	virtual void	Unk_01(void);
 	virtual void	Unk_02(void);
 	virtual void	Unk_03(void);
 	virtual void	Unk_04(void);
@@ -2490,12 +2490,7 @@ public:
 	virtual void	Unk_06(void);
 	virtual void	Unk_07(void);
 
-	UInt8 byte004;
-	UInt8 isInitDone;
-	UInt8 byte006;
-	UInt8 gap007;
-	UInt32 unk008;
-	UInt32 unk00C;
+	UInt32					unk004[3];		// 004
 	BSWin32AudioListener* listener;		// 010
 	UInt32					unk014[3];		// 014
 	bool(*sub_82D150)(UInt32*, UInt32*, UInt32*, UInt32*);	// 020

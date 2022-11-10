@@ -42,7 +42,6 @@
 #include "events/CustomEventFilters.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
-#include "misc/AudioDeviceHandling.h"
 HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
@@ -94,7 +93,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_initialTickCount = GetTickCount();
 			DumpModules();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
-			//RegisterForNotification();
 			break;
 		}
 		default:
