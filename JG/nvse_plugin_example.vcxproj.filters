@@ -229,6 +229,9 @@
     <ClInclude Include="internal\serialization.h">
       <Filter>internal</Filter>
     </ClInclude>
+    <ClInclude Include="misc\AudioDeviceHandling.h">
+      <Filter>misc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

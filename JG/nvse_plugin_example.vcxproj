@@ -176,6 +176,7 @@
     <ClInclude Include="internal\sha1\sha1.h" />
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="JohnnyGuitarNVSE.h" />
+    <ClInclude Include="misc\AudioDeviceHandling.h" />
     <ClInclude Include="misc\EditorIDs.h" />
     <ClInclude Include="misc\misc.h" />
     <ClInclude Include="misc\WorldToScreen.h" />
