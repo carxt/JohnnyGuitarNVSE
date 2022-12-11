@@ -23,10 +23,9 @@ DEFINE_COMMAND_PLUGIN(ExitGameAlt, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(DumpINI, , 0, 0, NULL);
 DEFINE_CMD_NO_ARGS(UpdateCrosshairPrompt);
 DEFINE_COMMAND_PLUGIN(SetOptionalBone, , 1, 2, kParams_OneInt_OneString);
-DEFINE_COMMAND_PLUGIN(GetOptionalBone, , 1, 2, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(GetOptionalBone, , 1, 1, kParams_OneInt);
 DEFINE_CMD_NO_ARGS(DumpIconMap);
 DEFINE_CMD_NO_ARGS(RollCredits);
-
 bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ThisStdCall<void>(0x75F2A0, nullptr);

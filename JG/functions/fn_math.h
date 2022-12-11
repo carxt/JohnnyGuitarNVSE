@@ -14,6 +14,28 @@ DEFINE_COMMAND_PLUGIN(WorldToScreen, , 0, 8, kParamsProjectionArgs);
 DEFINE_COMMAND_PLUGIN(RGBtoHSV, , 0, 6, kParams_SixScriptVars);
 DEFINE_COMMAND_PLUGIN(HSVtoRGB, , 0, 6, kParams_SixScriptVars);
 DEFINE_COMMAND_PLUGIN(GetRGBColor, , 0, 3, kParams_ThreeInts);
+DEFINE_COMMAND_PLUGIN(GetPackedPlayerFOV, , 0, 3, kParams_TwoScriptVars_OneOptionalScriptVar);
+
+
+
+bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	ScriptVar *worldOut, *firstPersonOut, *scenegraphOut = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &worldOut, &firstPersonOut, &scenegraphOut) || !g_thePlayer) return true;
+	*result = 1;
+	worldOut->data = g_thePlayer->firstPersonFOV;
+	firstPersonOut->data = g_thePlayer->worldFOV;
+	if (scenegraphOut) {
+		auto g_sceneGraph = *(SceneGraph**)0x11DEB7C;
+		scenegraphOut->data = g_sceneGraph ? g_sceneGraph->cameraFOV : 0;
+		
+	}
+	return true;
+}
+
+
+
 
 bool Cmd_GetRGBColor_Execute(COMMAND_ARGS) {
 	*result = 0;
