@@ -609,6 +609,23 @@ __declspec (naked) void StimpakHotkeyHook() {
 	}
 }
 
+
+__declspec (naked) void AnimDataNullCheck() {
+	__asm {
+		push 0x0490BD8
+		mov eax, dword ptr [ebp-0xA4]
+		test eax, eax
+		jz retNoData
+		push dword ptr [ebp-0xAC]
+		mov ecx, eax
+		mov eax, dword ptr [eax]
+		mov eax, dword ptr [eax+0x9C]
+		call eax
+		retNoData:
+		ret
+	}
+}
+
 __declspec (naked) void SimpleDecalHook() {
 	__asm {
 		test eax, eax
@@ -818,6 +835,11 @@ void HandleFixes() {
 
 	// fix NPE in BSTempEffectSimpleDecal
 	WriteRelJump(0x68D2EB, (UInt32)SimpleDecalHook);
+
+	//fix NPE in AnimData freeing
+	WriteRelJump(0x0490BBB, (uintptr_t)AnimDataNullCheck);
+
+
 }
 
 void HandleIniOptions() {
