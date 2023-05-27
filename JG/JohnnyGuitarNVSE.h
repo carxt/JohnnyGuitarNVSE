@@ -854,7 +854,7 @@ void HandleFixes() {
 	//AnimData NPEs
 	//fix NPE in AnimData freeing
 	WriteRelJump(0x0490BBB, (uintptr_t)AnimDataNullCheck);
-	WriteRelJump(0x0A2EC64, (uintptr_t)NiContManNullCheck2);
+	WriteRelCall(0x0A2EC64, (uintptr_t)NiContManNullCheck2);
 
 }
 
