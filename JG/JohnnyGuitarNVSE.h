@@ -626,6 +626,19 @@ __declspec (naked) void AnimDataNullCheck() {
 	}
 }
 
+__declspec (naked) void NiContManNullCheck2() {
+	__asm {
+		test ecx, ecx
+		jnz continueFunc
+		xor eax, eax
+		ret 8
+		continueFunc:
+		mov eax, 0xA2E7D0
+		jmp eax
+	}
+}
+
+
 __declspec (naked) void SimpleDecalHook() {
 	__asm {
 		test eax, eax
@@ -836,9 +849,12 @@ void HandleFixes() {
 	// fix NPE in BSTempEffectSimpleDecal
 	WriteRelJump(0x68D2EB, (UInt32)SimpleDecalHook);
 
+
+
+	//AnimData NPEs
 	//fix NPE in AnimData freeing
 	WriteRelJump(0x0490BBB, (uintptr_t)AnimDataNullCheck);
-
+	WriteRelJump(0x0A2EC64, (uintptr_t)NiContManNullCheck2);
 
 }
 
