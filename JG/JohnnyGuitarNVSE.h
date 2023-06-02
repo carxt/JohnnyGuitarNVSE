@@ -484,7 +484,7 @@ float __fastcall FixDeathSoundsTopic(HighProcess* thisObj, Actor* actor) { //Sim
 		//all the checks can be skipped because they were done above already
 	if (actor->GetDead()) {
 		if (DialoguePackage* pPackage = (DialoguePackage*)thisObj->GetCurrentPackage()) {
-			if ((actor == pPackage->target) && (actor == pPackage->speaker)) {
+			if ((actor != pPackage->subject) && (actor == pPackage->speaker)) { //check for subject because in some cases, subject == target
 				return -1.0f;
 			}
 		}
