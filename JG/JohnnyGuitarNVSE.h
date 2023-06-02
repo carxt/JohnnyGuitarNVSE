@@ -479,9 +479,23 @@ void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, UIn
 	}
 }
 
+
+float __fastcall FixDeathSoundsTopic(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
+		//all the checks can be skipped because they were done above already
+	if (actor->GetDead()) {
+		if (DialoguePackage* pPackage = (DialoguePackage*)thisObj->GetCurrentPackage()) {
+			if ((actor == pPackage->target) && (actor == pPackage->speaker)) {
+				return -1.0f;
+			}
+		}
+	}
+	return thisObj->dyingTimer + iDeathSoundMAXTimer;
+}
 float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
 	return thisObj->dyingTimer + iDeathSoundMAXTimer;
 }
+
+
 
 float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alternate complex, confusing, potentially buggy fix.
 	constexpr float dyingTimerMin = FLT_EPSILON * 10; //Establish low tolerance, this should be ideal. Unless someone sets fDyingTimer to 0 or something, but that's their problem.
@@ -496,7 +510,7 @@ float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alter
 __declspec (naked) void FixDeathSoundsHook() {
 	__asm {
 		mov edx, dword ptr[ebp + 8]
-		jmp FixDeathSounds
+		jmp FixDeathSoundsTopic
 	}
 }
 __declspec (naked) void PatchPlayerPainHook(){
