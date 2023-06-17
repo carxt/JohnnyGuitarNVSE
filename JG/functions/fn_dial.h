@@ -36,6 +36,10 @@ bool Cmd_DialogResponseAddRelatedTopic_Execute(COMMAND_ARGS) {
 	UInt32 responseType = -1;
 	SInt32 addPosition = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &topic, &responseType, &addPosition) && IS_TYPE(dialogResponse, TESTopicInfo)) {
+		if (!dialogResponse->relatedTopics) {
+			//initializer for the relatedTopics structure.
+			dialogResponse->relatedTopics = ThisStdCall<TESTopicInfo::RelatedTopics*>(0x061CE40, GameHeapAlloc(sizeof(TESTopicInfo::RelatedTopics)));
+		}
 		TESTopicInfo::RelatedTopics* relTopics = dialogResponse->relatedTopics;
 		switch (responseType) {
 		case kRelatedTopicType_LinkFrom:
@@ -59,22 +63,23 @@ bool Cmd_DialogResponseRelatedGetAll_Execute(COMMAND_ARGS) {
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseType) && IS_TYPE(dialogResponse, TESTopicInfo)) {
 		TESTopicInfo::RelatedTopics* relTopics = dialogResponse->relatedTopics;
-		auto addToArray = [topicArr](tList<TESTopic>::Iterator iter) -> void {
-			for (; !iter.End(); iter.Next()) {
-				g_arrInterface->AppendElement(topicArr, NVSEArrayElement(*iter));
+		if (relTopics) {
+			auto addToArray = [topicArr](tList<TESTopic>::Iterator iter) -> void {
+				for (; !iter.End(); iter.Next()) {
+					g_arrInterface->AppendElement(topicArr, NVSEArrayElement(*iter));
+				}
+			};
+			switch (responseType) {
+			case kRelatedTopicType_LinkFrom:
+				addToArray(relTopics->linkFrom.Begin());
+				break;
+			case kRelatedTopicType_Choice:
+				addToArray(relTopics->choices.Begin());
+				break;
+			case kRelatedTopicType_FollowUp:
+				addToArray(relTopics->followUps.Begin());
+				break;
 			}
-		};
-
-		switch (responseType) {
-		case kRelatedTopicType_LinkFrom:
-			addToArray(relTopics->linkFrom.Begin());
-			break;
-		case kRelatedTopicType_Choice:
-			addToArray(relTopics->choices.Begin());
-			break;
-		case kRelatedTopicType_FollowUp:
-			addToArray(relTopics->followUps.Begin());
-			break;
 		}
 	}
 	g_arrInterface->AssignCommandResult(topicArr, result);
