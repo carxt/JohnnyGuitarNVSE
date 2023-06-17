@@ -35,7 +35,7 @@ bool Cmd_DialogResponseAddRelatedTopic_Execute(COMMAND_ARGS) {
 	TESTopic* topic = NULL;
 	UInt32 responseType = -1;
 	SInt32 addPosition = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &topic, &responseType, &addPosition) && IS_TYPE(dialogResponse, TESTopicInfo)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &topic, &responseType, &addPosition) && IS_TYPE(dialogResponse, TESTopicInfo) && responseType >= ResponseRelatedTopicType::kRelatedTopicType_LinkFrom && responseType <= ResponseRelatedTopicType::kRelatedTopicType_FollowUp) {
 		if (!dialogResponse->relatedTopics) {
 			//initializer for the relatedTopics structure.
 			dialogResponse->relatedTopics = ThisStdCall<TESTopicInfo::RelatedTopics*>(0x061CE40, GameHeapAlloc(sizeof(TESTopicInfo::RelatedTopics)));
@@ -61,7 +61,7 @@ bool Cmd_DialogResponseRelatedGetAll_Execute(COMMAND_ARGS) {
 	UInt32 responseType = -1;
 	NVSEArrayVar* topicArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseType) && IS_TYPE(dialogResponse, TESTopicInfo)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseType) && IS_TYPE(dialogResponse, TESTopicInfo)&&responseType >= ResponseRelatedTopicType::kRelatedTopicType_LinkFrom && responseType <= ResponseRelatedTopicType::kRelatedTopicType_FollowUp) {
 		TESTopicInfo::RelatedTopics* relTopics = dialogResponse->relatedTopics;
 		if (relTopics) {
 			auto addToArray = [topicArr](tList<TESTopic>::Iterator iter) -> void {
