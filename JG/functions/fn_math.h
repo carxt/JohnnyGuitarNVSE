@@ -15,6 +15,39 @@ DEFINE_COMMAND_PLUGIN(RGBtoHSV, , 0, 6, kParams_SixScriptVars);
 DEFINE_COMMAND_PLUGIN(HSVtoRGB, , 0, 6, kParams_SixScriptVars);
 DEFINE_COMMAND_PLUGIN(GetRGBColor, , 0, 3, kParams_ThreeInts);
 DEFINE_COMMAND_PLUGIN(GetPackedPlayerFOV, , 0, 3, kParams_TwoScriptVars_OneOptionalScriptVar);
+DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCamFOV, , 0, 1, kParams_OneInt);
+
+
+
+
+
+
+void Cmd_GetPlayerCamFOV(UInt32 worldOr1stOrScene, double* result) {
+	if (!g_thePlayer) return;
+	*result = worldOr1stOrScene ? g_thePlayer->firstPersonFOV : g_thePlayer->worldFOV;
+	if (worldOr1stOrScene > 1) {
+		auto g_sceneGraph = *(SceneGraph**)0x11DEB7C;
+		*result = g_sceneGraph ? g_sceneGraph->cameraFOV : 0;
+	}
+}
+
+
+bool Cmd_GetPlayerCamFOV_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 worldOr1stOrScene = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &worldOr1stOrScene)) return true;
+	Cmd_GetPlayerCamFOV(worldOr1stOrScene, result);
+	return true;
+}
+
+
+bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	Cmd_GetPlayerCamFOV((UInt32) arg1, result);
+	return true;
+}
 
 
 

@@ -39,6 +39,7 @@
 #include "functions/fn_terminal.h"
 #include "functions/fn_ui.h"
 #include "functions/fn_book.h"
+#include "functions/fn_dial.h"
 #include "events/CustomEventFilters.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
@@ -400,6 +401,11 @@ extern "C" {
 		REG_TYPED_CMD(GetFormRecipesAlt, Array);
 		REG_CMD(RewardKarmaAlt);
 		REG_CMD(GetPackedPlayerFOV);
+		REG_CMD(DialogResponseAddRelatedTopic);
+		REG_TYPED_CMD(DialogResponseRelatedGetAll, Array);
+		REG_CMD(GetPlayerCamFOV);
+
+		
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

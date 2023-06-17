@@ -716,3 +716,15 @@ static ParamInfo kParams_ThreeInts[3] =
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Integer", kParamType_Integer, 0 }
 };
+
+
+static ParamInfo kParams_OneDialogRes_OneTopic_OneInt_OneOptionalInt[4] =
+{
+	{ "Dialog Response",	kParamType_AnyForm,		0},
+	{ "Dialog Topic",		kParamType_Topic,		0},
+	{ "Integer",			kParamType_Integer,			0},
+	{ "Integer",			kParamType_Integer,		1}
+
+};
+
+

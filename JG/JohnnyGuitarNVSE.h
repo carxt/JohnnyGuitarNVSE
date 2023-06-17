@@ -870,6 +870,7 @@ void HandleFixes() {
 	WriteRelJump(0x0490BBB, (uintptr_t)AnimDataNullCheck);
 	WriteRelCall(0x0A2EC64, (uintptr_t)NiContManNullCheck2);
 
+
 }
 
 void HandleIniOptions() {
