@@ -1793,7 +1793,7 @@ public:
 	struct RelatedTopics {
 		tList<TESTopic>		linkFrom;
 		tList<TESTopic>		choices;
-		tList<TESTopic>		unknown;
+		tList<TESTopic>		followUps;
 	};
 
 	ConditionList		conditions;			// 18
@@ -1848,6 +1848,11 @@ public:
 	UInt16			unk3E;			// 3E
 	String			editorIDstr;	// 40
 };
+
+
+
+
+
 
 // A0
 class BGSTextureSet : public TESBoundObject {

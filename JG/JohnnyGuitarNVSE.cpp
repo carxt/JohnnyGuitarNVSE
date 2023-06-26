@@ -39,6 +39,7 @@
 #include "functions/fn_terminal.h"
 #include "functions/fn_ui.h"
 #include "functions/fn_book.h"
+#include "functions/fn_dial.h"
 #include "events/CustomEventFilters.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
@@ -46,7 +47,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 490
+#define JG_VERSION 496
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_NewGame:
@@ -399,6 +400,12 @@ extern "C" {
 		REG_CMD(GetMoonPhase);
 		REG_TYPED_CMD(GetFormRecipesAlt, Array);
 		REG_CMD(RewardKarmaAlt);
+		REG_CMD(GetPackedPlayerFOV);
+		REG_CMD(DialogResponseAddRelatedTopic);
+		REG_TYPED_CMD(DialogResponseRelatedGetAll, Array);
+		REG_CMD(GetPlayerCamFOV);
+
+		
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

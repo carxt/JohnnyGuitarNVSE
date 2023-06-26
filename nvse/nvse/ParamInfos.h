@@ -696,6 +696,13 @@ static ParamInfo kParams_SixScriptVars[6] =
 	{ "Script Var", kParamType_ScriptVariable , 0 },
 };
 
+static ParamInfo kParams_TwoScriptVars_OneOptionalScriptVar[3] =
+{
+	{ "Script Var", kParamType_ScriptVariable , 0 },
+	{ "Script Var", kParamType_ScriptVariable , 0 },
+	{ "Script Var", kParamType_ScriptVariable , 1 },
+};
+
 static ParamInfo kParams_OneForm_OneInt_OneOptionalForm[3] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
@@ -709,3 +716,15 @@ static ParamInfo kParams_ThreeInts[3] =
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Integer", kParamType_Integer, 0 }
 };
+
+
+static ParamInfo kParams_OneDialogRes_OneTopic_OneInt_OneOptionalInt[4] =
+{
+	{ "Dialog Response",	kParamType_AnyForm,		0},
+	{ "Dialog Topic",		kParamType_Topic,		0},
+	{ "Integer",			kParamType_Integer,			0},
+	{ "Integer",			kParamType_Integer,		1}
+
+};
+
+

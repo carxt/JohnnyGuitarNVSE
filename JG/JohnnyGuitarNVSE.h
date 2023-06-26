@@ -288,6 +288,7 @@ TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
 	}
 	return 0;
 }
+
 __declspec(naked) void InventoryAmmoHook() {
 	static const UInt32 retnAddr = 0x7080A8;
 	__asm {
@@ -296,6 +297,15 @@ __declspec(naked) void InventoryAmmoHook() {
 		mov dword ptr[ebp - 0x2C8], eax
 		jmp retnAddr
 	}
+}
+
+tList<TESAmmoEffect>* __fastcall GetAmmoEffectsCheckType(TESForm* form)
+{
+	if (IS_TYPE(form, TESAmmo))
+	{
+		return &((TESAmmo*)form)->effectList;
+	}
+	return nullptr;
 }
 
 __declspec(naked) void OnCloseContainerHook() {
@@ -469,9 +479,23 @@ void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, UIn
 	}
 }
 
+
+float __fastcall FixDeathSoundsTopic(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
+		//all the checks can be skipped because they were done above already
+	if (actor->GetDead()) {
+		if (DialoguePackage* pPackage = (DialoguePackage*)thisObj->GetCurrentPackage()) {
+			if ((actor != pPackage->subject) && (actor == pPackage->speaker)) { //check for subject because in some cases, subject == target
+				return -1.0f;
+			}
+		}
+	}
+	return thisObj->dyingTimer + iDeathSoundMAXTimer;
+}
 float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
 	return thisObj->dyingTimer + iDeathSoundMAXTimer;
 }
+
+
 
 float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alternate complex, confusing, potentially buggy fix.
 	constexpr float dyingTimerMin = FLT_EPSILON * 10; //Establish low tolerance, this should be ideal. Unless someone sets fDyingTimer to 0 or something, but that's their problem.
@@ -486,7 +510,7 @@ float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alter
 __declspec (naked) void FixDeathSoundsHook() {
 	__asm {
 		mov edx, dword ptr[ebp + 8]
-		jmp FixDeathSounds
+		jmp FixDeathSoundsTopic
 	}
 }
 __declspec (naked) void PatchPlayerPainHook(){
@@ -598,6 +622,36 @@ __declspec (naked) void StimpakHotkeyHook() {
 		ret
 	}
 }
+
+
+__declspec (naked) void AnimDataNullCheck() {
+	__asm {
+		push 0x0490BD8
+		mov eax, dword ptr [ebp-0xA4]
+		test eax, eax
+		jz retNoData
+		push dword ptr [ebp-0xAC]
+		mov ecx, eax
+		mov eax, dword ptr [eax]
+		mov eax, dword ptr [eax+0x9C]
+		call eax
+		retNoData:
+		ret
+	}
+}
+
+__declspec (naked) void NiContManNullCheck2() {
+	__asm {
+		test ecx, ecx
+		jnz continueFunc
+		xor eax, eax
+		ret 8
+		continueFunc:
+		mov eax, 0xA2E7D0
+		jmp eax
+	}
+}
+
 
 __declspec (naked) void SimpleDecalHook() {
 	__asm {
@@ -752,6 +806,12 @@ void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
 
+	// fix ammo effects list being checked for non-TESAmmo's when the Rock-It-Launcher is equipped
+	for (auto addr : { 0x523AD8, 0x64529D, 0x64553B, 0x6462C5 })
+	{
+		WriteRelCall(addr, UInt32(GetAmmoEffectsCheckType));
+	}
+
 	// fix for companions not saying the next topic after opening ContainerMenu through dialog
 	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
 
@@ -802,6 +862,15 @@ void HandleFixes() {
 
 	// fix NPE in BSTempEffectSimpleDecal
 	WriteRelJump(0x68D2EB, (UInt32)SimpleDecalHook);
+
+
+
+	//AnimData NPEs
+	//fix NPE in AnimData freeing
+	WriteRelJump(0x0490BBB, (uintptr_t)AnimDataNullCheck);
+	WriteRelCall(0x0A2EC64, (uintptr_t)NiContManNullCheck2);
+
+
 }
 
 void HandleIniOptions() {
