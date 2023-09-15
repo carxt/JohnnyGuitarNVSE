@@ -116,11 +116,11 @@ void __cdecl handleQuestFail(TESQuest* Quest) {
 	CdeclCall(0x77A480, Quest);
 }
 
-void __cdecl handleSettingsUpdate() {
-	CdeclCall(0x7D6D70);
+void* __cdecl handleSettingsUpdate() {
 	for (auto const& callback : OnSettingsUpdateHandler->EventCallbacks) {
 		CallUDF(callback.ScriptForEvent, NULL, OnSettingsUpdateHandler->numMaxArgs);
 	}
+	return CdeclCall<void*>(0x45D180);
 }
 ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
 	for (auto const& callback : OnSeenDataUpdateHandler->EventCallbacks) {
@@ -526,8 +526,7 @@ void HandleEventHooks() {
 	WriteRelCall(0x776010, (UINT)handleCrosshairEvent);
 	WriteRelCall(0x60CB5A, (UINT)handleQuestFail);
 	WriteRelCall(0x60CA78, (UINT)handleQuestComplete);
-	WriteRelCall(0x7CEC93, (UINT)handleSettingsUpdate);
-	WriteRelCall(0x7D11AD, (UINT)handleSettingsUpdate);
+	WriteRelCall(0x7D6D73, (UINT)handleSettingsUpdate);
 	WriteRelCall(0x5D4E5B, (UINT)handleAddPerkEvent);
 	WriteRelCall(0x7865BD, (UINT)handleAddPerkEvent);
 	WriteRelCall(0x7E772D, (UINT)handleAddPerkEvent);
