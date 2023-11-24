@@ -64,6 +64,61 @@ uintptr_t g_canSaveNowAddr = 0;
 uintptr_t g_canSaveNowMenuAddr = 0;
 Setting** g_miscStatData = (Setting**)0x11C6D50;
 char g_workingDir[MAX_PATH];
+
+
+template <class T>
+struct JGSetList {
+	bool isWhiteList = false;
+	std::unordered_set<T> set;
+	void dFlush() {
+		isWhiteList = false;
+		set.clear();
+	};
+	bool Allow(T obj) {
+		return bool(set.count(obj)) == isWhiteList;
+	}
+	void Add(T obj) {
+		set.insert(obj);
+	}
+	void Remove(T obj) {
+		set.erase(T);
+	}
+};
+
+JGSetList<DWORD> haircutSetList;
+JGSetList<DWORD> beardSetList;
+
+namespace hk_RSMBarberHook {
+	uintptr_t RSMDestructorOriginal = (uintptr_t)0x07AC530;
+	bool __fastcall hk_TESHair_IsPlayable(TESHair* ptr_hair) {
+		return (ptr_hair->IsPlayable()) && (haircutSetList.Allow(ptr_hair->refID));
+
+	}
+
+	bool __fastcall hk_BGSHeadPart_IsPlayable(BGSHeadPart* ptr_hdpt) {
+		return (ptr_hdpt->flags & 0x1) && (beardSetList.Allow(ptr_hdpt->refID));
+	}
+	DWORD __fastcall hk_RSMDestroy(void* thisObj, void* EDX, BOOL heapFree) {
+		auto ret = ThisStdCall<DWORD>(RSMDestructorOriginal, thisObj, heapFree);
+		haircutSetList.dFlush();
+		beardSetList.dFlush();
+		return ret;
+	}
+	void Hook() {
+		RSMDestructorOriginal = *((uintptr_t*) 0x1075974);
+		SafeWrite32(0x1075974, (uintptr_t)hk_RSMDestroy);
+		WriteRelCall(0x07AD35C, (uintptr_t)hk_BGSHeadPart_IsPlayable);
+		WriteRelCall(0x07AF35B, (uintptr_t)hk_TESHair_IsPlayable);
+		WriteRelCall(0x07B1D4A, (uintptr_t)hk_TESHair_IsPlayable);
+
+	}
+};
+
+
+
+
+
+
 TESObjectCELL* TESObjectREFR::GetParentCell() {
 	if (this->parentCell) return parentCell;
 	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
@@ -963,12 +1018,16 @@ void HandleFunctionPatches() {
 
 	// Get/ModExtraMiscStat
 	SafeWrite32(0x7DDAB1, UInt32(MiscStatRefreshHook));
+
+	//Hairstyle handlers
+	hk_RSMBarberHook::Hook();
 }
 float timer22 = 30.0;
 void HandleGameHooks() {
 	HandleFixes();
 	HandleIniOptions();
 	HandleFunctionPatches();
+
 	//  wip shit for void
 	//	WriteRelCall(0x97E745, (UInt32)WantsToFleeHook);
 	//	WriteRelCall(0x999082, (UInt32)WantsToFleeHook);

@@ -47,7 +47,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 496
+#define JG_VERSION 497
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_NewGame:
@@ -66,6 +66,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			RestoreDisabledPlayerControlsHUDFlags();
 			SaveGameUMap.clear();
 			miscStatMap.clear();
+			haircutSetList.dFlush();
+			beardSetList.dFlush();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_MainGameLoop:
@@ -404,7 +406,7 @@ extern "C" {
 		REG_CMD(DialogResponseAddRelatedTopic);
 		REG_TYPED_CMD(DialogResponseRelatedGetAll, Array);
 		REG_CMD(GetPlayerCamFOV);
-
+		REG_CMD(ShowBarberMenuEx);
 		
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
