@@ -81,7 +81,7 @@ struct JGSetList {
 		set.insert(obj);
 	}
 	void Remove(T obj) {
-		set.erase(T);
+		set.erase(obj);
 	}
 };
 
