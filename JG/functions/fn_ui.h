@@ -80,7 +80,6 @@ bool Cmd_InitExtraMiscStat_Execute(COMMAND_ARGS) {
 		miscStatMap[sName] = mod;
 		value = mod;
 		// creating/updating menu entry
-		UpdateMiscStatList(name, value);
 		*result = 1;
 	}
 	return true;

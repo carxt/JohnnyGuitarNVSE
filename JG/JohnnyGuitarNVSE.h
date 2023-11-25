@@ -120,6 +120,7 @@ namespace hk_RSMBarberHook {
 
 
 
+
 TESObjectCELL* TESObjectREFR::GetParentCell() {
 	if (this->parentCell) return parentCell;
 	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
@@ -801,7 +802,7 @@ bool __cdecl ShouldHideStat(UInt32* id) {
 	}
 	return false;
 }
-void UpdateMiscStatList(char* name, int value) {
+void UpdateMiscStatList(const char* name, int value) {
 	Tile* tile = nullptr;
 	auto iter = g_statsMenu->miscStatIDList.list.Head();
 	do
@@ -825,6 +826,14 @@ void UpdateMiscStatList(char* name, int value) {
 	tile->SetFloat(kTileValue_user1, (float)value, 1);
 }
 
+void ResetMiscStatMap() {
+	miscStatMap.clear();
+	for (auto element : availableMiscStats) {
+		miscStatMap[element] = 0;
+		UpdateMiscStatList(element.c_str(), 0);
+	}
+
+}
 void DumpModules() {
 	HMODULE hMods[1024];
 	HANDLE hProcess = INVALID_HANDLE_VALUE;

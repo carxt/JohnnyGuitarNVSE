@@ -30,17 +30,12 @@ void SaveGameCallback(void*)
 	
 }
 
-void SetupLoadStructs() {
-	for (auto element : availableMiscStats) {
-		miscStatMap[element] = 0;
-	}
-}
+
 
 void LoadGameCallback(void*)
 {
 
 	UInt32 type, version, length;
-	SetupLoadStructs();
 	while (_GetNextRecordInfo(&type, &version, &length))
 	{
 		switch (type)

@@ -65,7 +65,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			OnPLChangeHandler->FlushEventCallbacks();
 			RestoreDisabledPlayerControlsHUDFlags();
 			SaveGameUMap.clear();
-			miscStatMap.clear();
+			ResetMiscStatMap();
 			haircutSetList.dFlush();
 			beardSetList.dFlush();
 			break;
