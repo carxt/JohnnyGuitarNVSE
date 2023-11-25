@@ -51,8 +51,10 @@ void LoadGameCallback(void*)
 					std::string sName = std::string(buffer);
 					int value = 0;
 					_ReadRecordData(&value, sizeof(int));
-					miscStatMap[sName] = value;
-					UpdateMiscStatList(buffer, value);
+					if (availableMiscStats.count(sName)) {
+						miscStatMap[sName] = value;
+						UpdateMiscStatList(buffer, value);
+					}
 				}
 			}
 		}

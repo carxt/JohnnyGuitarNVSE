@@ -43,6 +43,7 @@ TESSound* locationDiscoverSound = 0;
 std::unordered_map<UInt32, char*> markerIconMap;
 std::unordered_map <UInt32, std::vector<char*>> factionRepIcons;
 std::unordered_map<std::string, int> miscStatMap;
+std::unordered_set<std::string> availableMiscStats;
 UInt32 disableMuzzleLights = -1;
 static float vatsSpreadMultValue = 15.0;
 UInt32 g_initialTickCount = 0;
