@@ -30,10 +30,17 @@ void SaveGameCallback(void*)
 	
 }
 
+void SetupLoadStructs() {
+	for (auto element : availableMiscStats) {
+		miscStatMap[element] = 0;
+	}
+}
+
 void LoadGameCallback(void*)
 {
 
 	UInt32 type, version, length;
+	SetupLoadStructs();
 	while (_GetNextRecordInfo(&type, &version, &length))
 	{
 		switch (type)
@@ -51,10 +58,11 @@ void LoadGameCallback(void*)
 					std::string sName = std::string(buffer);
 					int value = 0;
 					_ReadRecordData(&value, sizeof(int));
-					if (availableMiscStats.count(sName)) {
-						miscStatMap[sName] = value;
-						UpdateMiscStatList(buffer, value);
-					}
+					auto statIter = miscStatMap.find(sName);
+					if (statIter == miscStatMap.end()) { continue; }
+					miscStatMap[sName] = value;
+					UpdateMiscStatList(buffer, value);
+					
 				}
 			}
 		}

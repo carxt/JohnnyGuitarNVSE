@@ -11,7 +11,7 @@ DEFINE_COMMAND_PLUGIN(GetSystemColorAlt, , 0, 4, kParams_OneInt_ThreeScriptVars)
 DEFINE_COMMAND_ALT_PLUGIN(SetCustomReputationChangeIcon, scrci, , 0, 3, kParams_OneForm_OneInt_OneString);
 DEFINE_COMMAND_PLUGIN(GetExtraMiscStat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ModExtraMiscStat, , 0, 2, kParams_OneString_OneInt);
-DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , 0, 2, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , 0, 2, kParams_OneInt_OneOptionalForm);
 
 
@@ -68,10 +68,11 @@ bool Cmd_InitExtraMiscStat_Execute(COMMAND_ARGS) {
 	char name[MAX_PATH];
 	int mod = 0;
 	int value;
+	constexpr size_t maxMiscStatCount = UINT16_MAX;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
 		std::string sName = name;
-		if (availableMiscStats.size() > UINT16_MAX) {
+		if (availableMiscStats.size() > maxMiscStatCount) {
 			TerminateProcess(GetCurrentProcess(), 0xE);
 		}
 		if (bool(availableMiscStats.count(sName))) return true;
