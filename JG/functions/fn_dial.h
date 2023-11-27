@@ -52,9 +52,8 @@ bool Cmd_DialogResponseAddRelatedTopic_Execute(COMMAND_ARGS) {
 			relTopics->followUps.AddAt(topic, addPosition);
 			break;
 		}
-		return true;
-
 	}
+	return true;
 }
 bool Cmd_DialogResponseRelatedGetAll_Execute(COMMAND_ARGS) {
 	TESTopicInfo* dialogResponse = NULL;

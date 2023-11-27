@@ -439,4 +439,3 @@ extern "C" {
 		return TRUE;
 	}
 };
-
