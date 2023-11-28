@@ -97,7 +97,7 @@ namespace hk_RSMBarberHook {
 	}
 
 	bool __fastcall hk_BGSHeadPart_IsPlayable(BGSHeadPart* ptr_hdpt) {
-		return (ptr_hdpt->flags & 0x1) && (beardSetList.Allow(ptr_hdpt->refID));
+		return (ptr_hdpt->headFlags & 0x1) && (beardSetList.Allow(ptr_hdpt->refID));
 	}
 	DWORD __fastcall hk_RSMDestroy(void* thisObj, void* EDX, BOOL heapFree) {
 		auto ret = ThisStdCall<DWORD>(RSMDestructorOriginal, thisObj, heapFree);
