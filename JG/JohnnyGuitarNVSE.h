@@ -27,7 +27,6 @@ bool fixHighNoon = 0;
 bool fixFleeing = 0;
 bool fixItemStacks = 0;
 bool resetVanityCam = 0;
-bool capLoadScreensTo60 = 0;
 bool fixNPCShootingAngle = 0;
 bool noMuzzleFlashCooldown = 0;
 bool enableRadioSubtitles = 0;
@@ -35,6 +34,7 @@ bool removeMainMenuMusic = 0;
 bool fixDeathSounds = 1;
 bool patchPainedPlayer = 0;
 bool bDisableDeathResponses = 0;
+unsigned int capLoadScreensToFrametime = 0;
 float iDeathSoundMAXTimer = 10;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
@@ -955,8 +955,9 @@ void HandleIniOptions() {
 	if (loadEditorIDs) LoadEditorIDs();
 
 	// for b60FPSDuringLoading
-	if (capLoadScreensTo60)SafeWrite8(0x78D4A4, 0x10);
-
+	if (capLoadScreensToFrametime) {
+		SafeWrite8(0x78D4A4, (capLoadScreensToFrametime < 2) ? 0x10 : 0x20 );
+	}
 	// for bFixNPCShootingAngle
 	if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
 
