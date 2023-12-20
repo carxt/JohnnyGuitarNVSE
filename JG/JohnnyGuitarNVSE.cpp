@@ -47,7 +47,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 496
+#define JG_VERSION 498
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_NewGame:
@@ -65,7 +65,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			OnPLChangeHandler->FlushEventCallbacks();
 			RestoreDisabledPlayerControlsHUDFlags();
 			SaveGameUMap.clear();
-			miscStatMap.clear();
+			ResetMiscStatMap();
+			haircutSetList.dFlush();
+			beardSetList.dFlush();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_MainGameLoop:
@@ -153,7 +155,7 @@ extern "C" {
 		fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 		fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
 		fixNPCShootingAngle = GetPrivateProfileInt("MAIN", "bFixNPCShootingAngle", 1, filename);
-		capLoadScreensTo60 = GetPrivateProfileInt("MAIN", "b60FPSDuringLoading", 0, filename);
+		capLoadScreensToFrametime = GetPrivateProfileInt("MAIN", "iIncreaseFPSLimitLoadScreen", 0, filename);
 		noMuzzleFlashCooldown = GetPrivateProfileInt("MAIN", "bNoMuzzleFlashCooldown", 0, filename);
 		resetVanityCam = GetPrivateProfileInt("MAIN", "bReset3rdPersonCamera", 0, filename);
 		enableRadioSubtitles = GetPrivateProfileInt("MAIN", "bEnableRadioSubtitles", 0, filename);
@@ -404,8 +406,8 @@ extern "C" {
 		REG_CMD(DialogResponseAddRelatedTopic);
 		REG_TYPED_CMD(DialogResponseRelatedGetAll, Array);
 		REG_CMD(GetPlayerCamFOV);
-
-		
+		REG_CMD(ShowBarberMenuEx);
+		REG_CMD(InitExtraMiscStat);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
@@ -437,4 +439,3 @@ extern "C" {
 		return TRUE;
 	}
 };
-

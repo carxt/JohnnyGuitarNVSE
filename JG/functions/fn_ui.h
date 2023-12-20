@@ -11,6 +11,79 @@ DEFINE_COMMAND_PLUGIN(GetSystemColorAlt, , 0, 4, kParams_OneInt_ThreeScriptVars)
 DEFINE_COMMAND_ALT_PLUGIN(SetCustomReputationChangeIcon, scrci, , 0, 3, kParams_OneForm_OneInt_OneString);
 DEFINE_COMMAND_PLUGIN(GetExtraMiscStat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ModExtraMiscStat, , 0, 2, kParams_OneString_OneInt);
+DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , 0, 2, kParams_OneInt_OneOptionalForm);
+
+
+
+bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
+	enum {
+		kFlag_WhiteListHair = 1 << 0,
+		kFlag_WhiteListBeard,
+	};
+	BGSListForm* formList = NULL;
+	UInt32 flags = 0;
+	if (!g_thePlayer) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &formList)) {
+		if (IS_TYPE(formList, BGSListForm)) {
+			ListNode<TESForm>* iter = formList->list.Head();
+
+			do {
+				TESForm* currData = iter->data;
+				if (!currData) continue;
+				if (IS_TYPE(currData, TESHair)) {
+					haircutSetList.Add(currData->refID);
+					continue;
+				}
+				if (IS_TYPE(currData, BGSHeadPart)) {
+					beardSetList.Add(currData->refID);
+				}
+			} while (iter = iter->next);
+		}
+		auto playerBase =	reinterpret_cast<TESNPC*>(g_thePlayer->GetActorBase());
+		haircutSetList.isWhiteList = bool(flags & kFlag_WhiteListHair);
+		if (haircutSetList.isWhiteList) {
+			haircutSetList.Add(playerBase->hair->refID);
+		}
+		else {
+			haircutSetList.Remove(playerBase->hair->refID);
+
+		}
+		beardSetList.isWhiteList = bool(flags & kFlag_WhiteListBeard);
+		if (beardSetList.isWhiteList) {
+			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
+				if (*iter) { beardSetList.Add((*iter)->refID);};
+			}
+		} else{
+			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
+				if (*iter) { beardSetList.Remove((*iter)->refID); };
+			}
+		}
+		CdeclCall<void>(0x705870, 2);
+	}
+	return true;
+}
+
+bool Cmd_InitExtraMiscStat_Execute(COMMAND_ARGS) {
+	char name[MAX_PATH];
+	int mod = 0;
+	int value;
+	constexpr size_t maxMiscStatCount = UINT16_MAX;
+	*result = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
+		std::string sName = name;
+		if (availableMiscStats.size() > maxMiscStatCount) {
+			TerminateProcess(GetCurrentProcess(), 0xE);
+		}
+		if (bool(availableMiscStats.count(sName))) return true;
+		availableMiscStats.emplace(sName);
+		miscStatMap[sName] = mod;
+		value = mod;
+		// creating/updating menu entry
+		*result = 1;
+	}
+	return true;
+}
 
 bool Cmd_ModExtraMiscStat_Execute(COMMAND_ARGS) {
 	char name[MAX_PATH];
@@ -19,6 +92,7 @@ bool Cmd_ModExtraMiscStat_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name, &mod)) {
 		std::string sName = name;
+		if (!bool(availableMiscStats.count(sName))) return true;
 		auto it = miscStatMap.find(sName);
 		if (it != miscStatMap.end()) {
 			it->second += mod;
@@ -41,6 +115,7 @@ bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
 		std::string sName = name;
+		if (!availableMiscStats.count(sName)) return true;
 		auto it = miscStatMap.find(sName);
 		if (it != miscStatMap.end()) *result = it->second;
 		if (IsConsoleMode()) Console_Print("GetExtraMiscStat \"%s\": %.f", name, *result);

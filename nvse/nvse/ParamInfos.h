@@ -728,3 +728,8 @@ static ParamInfo kParams_OneDialogRes_OneTopic_OneInt_OneOptionalInt[4] =
 };
 
 
+static ParamInfo kParams_OneInt_OneOptionalForm[2] =
+{
+	{	"index",	kParamType_Integer, 0	},
+	{	"form",		kParamType_AnyForm,	1	},
+};

@@ -30,6 +30,8 @@ void SaveGameCallback(void*)
 	
 }
 
+
+
 void LoadGameCallback(void*)
 {
 
@@ -51,8 +53,11 @@ void LoadGameCallback(void*)
 					std::string sName = std::string(buffer);
 					int value = 0;
 					_ReadRecordData(&value, sizeof(int));
+					auto statIter = miscStatMap.find(sName);
+					if (statIter == miscStatMap.end()) { continue; }
 					miscStatMap[sName] = value;
 					UpdateMiscStatList(buffer, value);
+					
 				}
 			}
 		}

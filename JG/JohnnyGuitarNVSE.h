@@ -27,7 +27,6 @@ bool fixHighNoon = 0;
 bool fixFleeing = 0;
 bool fixItemStacks = 0;
 bool resetVanityCam = 0;
-bool capLoadScreensTo60 = 0;
 bool fixNPCShootingAngle = 0;
 bool noMuzzleFlashCooldown = 0;
 bool enableRadioSubtitles = 0;
@@ -35,6 +34,7 @@ bool removeMainMenuMusic = 0;
 bool fixDeathSounds = 1;
 bool patchPainedPlayer = 0;
 bool bDisableDeathResponses = 0;
+unsigned int capLoadScreensToFrametime = 0;
 float iDeathSoundMAXTimer = 10;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
@@ -43,6 +43,7 @@ TESSound* locationDiscoverSound = 0;
 std::unordered_map<UInt32, char*> markerIconMap;
 std::unordered_map <UInt32, std::vector<char*>> factionRepIcons;
 std::unordered_map<std::string, int> miscStatMap;
+std::unordered_set<std::string> availableMiscStats;
 UInt32 disableMuzzleLights = -1;
 static float vatsSpreadMultValue = 15.0;
 UInt32 g_initialTickCount = 0;
@@ -64,6 +65,62 @@ uintptr_t g_canSaveNowAddr = 0;
 uintptr_t g_canSaveNowMenuAddr = 0;
 Setting** g_miscStatData = (Setting**)0x11C6D50;
 char g_workingDir[MAX_PATH];
+
+
+template <class T>
+struct JGSetList {
+	bool isWhiteList = false;
+	std::unordered_set<T> set;
+	void dFlush() {
+		isWhiteList = false;
+		set.clear();
+	};
+	bool Allow(T obj) {
+		return bool(set.count(obj)) == isWhiteList;
+	}
+	void Add(T obj) {
+		set.insert(obj);
+	}
+	void Remove(T obj) {
+		set.erase(obj);
+	}
+};
+
+JGSetList<DWORD> haircutSetList;
+JGSetList<DWORD> beardSetList;
+
+namespace hk_RSMBarberHook {
+	uintptr_t RSMDestructorOriginal = (uintptr_t)0x07AC530;
+	bool __fastcall hk_TESHair_IsPlayable(TESHair* ptr_hair) {
+		return (ptr_hair->IsPlayable()) && (haircutSetList.Allow(ptr_hair->refID));
+
+	}
+
+	bool __fastcall hk_BGSHeadPart_IsPlayable(BGSHeadPart* ptr_hdpt) {
+		return (ptr_hdpt->headFlags & 0x1) && (beardSetList.Allow(ptr_hdpt->refID));
+	}
+	DWORD __fastcall hk_RSMDestroy(void* thisObj, void* EDX, BOOL heapFree) {
+		auto ret = ThisStdCall<DWORD>(RSMDestructorOriginal, thisObj, heapFree);
+		haircutSetList.dFlush();
+		beardSetList.dFlush();
+		return ret;
+	}
+	void Hook() {
+		RSMDestructorOriginal = *((uintptr_t*) 0x1075974);
+		SafeWrite32(0x1075974, (uintptr_t)hk_RSMDestroy);
+		WriteRelCall(0x07AD35C, (uintptr_t)hk_BGSHeadPart_IsPlayable);
+		WriteRelCall(0x07AF35B, (uintptr_t)hk_TESHair_IsPlayable);
+		WriteRelCall(0x07B1D4A, (uintptr_t)hk_TESHair_IsPlayable);
+
+	}
+};
+
+
+
+
+
+
+
 TESObjectCELL* TESObjectREFR::GetParentCell() {
 	if (this->parentCell) return parentCell;
 	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
@@ -745,7 +802,7 @@ bool __cdecl ShouldHideStat(UInt32* id) {
 	}
 	return false;
 }
-void UpdateMiscStatList(char* name, int value) {
+void UpdateMiscStatList(const char* name, int value) {
 	Tile* tile = nullptr;
 	auto iter = g_statsMenu->miscStatIDList.list.Head();
 	do
@@ -769,6 +826,14 @@ void UpdateMiscStatList(char* name, int value) {
 	tile->SetFloat(kTileValue_user1, (float)value, 1);
 }
 
+void ResetMiscStatMap() {
+	miscStatMap.clear();
+	for (auto element : availableMiscStats) {
+		miscStatMap[element] = 0;
+		UpdateMiscStatList(element.c_str(), 0);
+	}
+
+}
 void DumpModules() {
 	HMODULE hMods[1024];
 	HANDLE hProcess = INVALID_HANDLE_VALUE;
@@ -890,8 +955,9 @@ void HandleIniOptions() {
 	if (loadEditorIDs) LoadEditorIDs();
 
 	// for b60FPSDuringLoading
-	if (capLoadScreensTo60)SafeWrite8(0x78D4A4, 0x10);
-
+	if (capLoadScreensToFrametime) {
+		SafeWrite8(0x78D4A4, (capLoadScreensToFrametime < 2) ? 0x10 : 0x20 );
+	}
 	// for bFixNPCShootingAngle
 	if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
 
@@ -963,12 +1029,16 @@ void HandleFunctionPatches() {
 
 	// Get/ModExtraMiscStat
 	SafeWrite32(0x7DDAB1, UInt32(MiscStatRefreshHook));
+
+	//Hairstyle handlers
+	hk_RSMBarberHook::Hook();
 }
 float timer22 = 30.0;
 void HandleGameHooks() {
 	HandleFixes();
 	HandleIniOptions();
 	HandleFunctionPatches();
+
 	//  wip shit for void
 	//	WriteRelCall(0x97E745, (UInt32)WantsToFleeHook);
 	//	WriteRelCall(0x999082, (UInt32)WantsToFleeHook);
