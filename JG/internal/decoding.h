@@ -2013,6 +2013,14 @@ public:
 	LoadedAreaBound* areaBound;			// C0
 
 	bool GetTerrainHeight(float* posXY, float* result);
+
+	static TES* TES::GetSingleton() {
+		return *(TES**)0x11DEA10;
+	}
+
+	void TES::CreateTextureImage(const char* apPath, NiSourceTexture*& aspTexture, bool abNoFileOK, bool abArchiveOnly) {
+		ThisStdCall(0x4568C0, this, apPath, &aspTexture, abNoFileOK, abArchiveOnly);
+	}
 };
 STATIC_ASSERT(sizeof(TES) == 0xC4);
 
@@ -4147,3 +4155,113 @@ struct CombatState {
 	SInt32 unk228;
 };
 STATIC_ASSERT(sizeof(CombatState) == 0x22C);
+
+class BSShaderBloodSplatterProperty : public BSShaderProperty {
+public:
+	NiPointer<NiTexture>		spTexture[2];
+	DWORD						dword68;
+	float*						pfFadeAlpha;
+
+	static __forceinline UInt32 GetShapeCount() { return *(UInt32*)0x11FF0F0; };
+	static __forceinline void SetShapeCount(UInt32 uiCount) { *(UInt32*)0x11FF0F0 = uiCount; };
+	static void SetFadeSourceRecurse(NiAVObject* apObject, float* apfFadeAlpha) {
+		CdeclCall(0xB81420, apObject, apfFadeAlpha);
+	}
+	void SetTexture(UInt32 auiIndex, NiTexture* apTexture) {
+		if (spTexture[auiIndex].data != apTexture) {
+			if (spTexture[auiIndex].data)
+				spTexture[auiIndex].data->DecRefCount();
+			spTexture[auiIndex].data = apTexture;
+			if (spTexture[auiIndex].data)
+				spTexture[auiIndex].data->IncRefCount();
+		}
+	}
+};
+STATIC_ASSERT(sizeof(BSShaderBloodSplatterProperty) == 0x70);
+
+struct BSSplatterData {
+	float	fAge;
+	float	fDuration;
+	float	fAlpha;
+	UInt32	uiCount;
+};
+
+class BSCustomSplatterExtraData : public NiExtraData {
+public:
+	BSCustomSplatterExtraData();
+	virtual ~BSCustomSplatterExtraData();
+
+	static BSCustomSplatterExtraData* Create(BSSplatterData& arData) {
+		BSCustomSplatterExtraData* pExtraData = CdeclCall<BSCustomSplatterExtraData*>(0xAA13E0, sizeof(BSCustomSplatterExtraData)); // NiNew
+		return ThisStdCall<BSCustomSplatterExtraData*>(0x4DEA80, pExtraData, &arData);
+	}
+
+	BSSplatterData kData;
+};
+
+class NiTreeCtrl {
+public:
+
+	static NiTreeCtrl* Create(NiNode* apNode) {
+		NiTreeCtrl* pAlloc = CdeclCall<NiTreeCtrl*>(0x401000, 0x30U);
+
+		DWORD* pTESMain = *(DWORD**)0x11DEA0C;
+		return ThisStdCall<NiTreeCtrl*>(0x4D61B0, pAlloc, pTESMain[3], pTESMain[2], apNode, "Test", 0x80000000, 0x80000000, 800, 600);
+	}
+
+	void CreateTree(NiNode* apNode, const char* apName) {
+		ThisStdCall(0x4D64C0, this, apNode, apName);
+	}
+};
+
+class ScreenCustomSplatter {
+public:
+	static __forceinline NiNode* GetRootNode() { return *(NiNode**)0x11C7810; };
+	static __forceinline bool IsEnabled() { return *(bool*)0x11C77E8; };
+
+	static __forceinline NiNode* CreateGeometry(UInt32 auiCount, float afSizeMult, float afOpacityMult) {
+		return CdeclCall<NiNode*>(0x4DF040, auiCount, afSizeMult, afOpacityMult);
+	}
+
+	static void ActivateAlt(UInt32 auiCount, float afDuration, float afSizeMult, float afOpacityMult, NiTexture* apAlphaTex, NiTexture* apColorTex, NiTexture* apFlareTex) {
+#if 0
+		CdeclCall(0x4DE8E0, auiCount, afDuration, 0, afSizeMult, afOpacityMult);
+#else
+		if (!IsEnabled() || auiCount == 0)
+			return;
+
+		NiNode* pNewNode = CreateGeometry(auiCount, afSizeMult, afOpacityMult);
+		(*(UInt32*)0x11C77DC) += auiCount;
+
+		BSSplatterData kSplatterData{};
+		kSplatterData.fAge = 0.f;
+		kSplatterData.fDuration = afDuration;
+		kSplatterData.fAlpha = 1.f;
+		kSplatterData.uiCount = auiCount;
+
+		BSCustomSplatterExtraData* pExtraData = BSCustomSplatterExtraData::Create(kSplatterData);
+		pNewNode->AddExtraData(pExtraData);
+
+		NiTriShape* pShape = static_cast<NiTriShape*>(pNewNode->GetAt(0));
+		BSShaderBloodSplatterProperty* pShaderProp = static_cast<BSShaderBloodSplatterProperty*>(pShape->shaderProp);
+
+		if (apAlphaTex)
+			pShaderProp->SetTexture(0, apAlphaTex);
+
+		if (apColorTex)
+			pShaderProp->SetTexture(1, apColorTex);
+
+		// IsHDR
+		if (*(bool*)0x11F941E && apFlareTex) {
+			NiTriShape* pHDRShape = static_cast<NiTriShape*>(pNewNode->GetAt(1));
+			pShaderProp = static_cast<BSShaderBloodSplatterProperty*>(pHDRShape->shaderProp);
+			pShaderProp->SetTexture(0, apFlareTex);
+		}
+
+		GetRootNode()->AttachChild(pNewNode, true);
+		BSShaderBloodSplatterProperty::SetFadeSourceRecurse(pNewNode, &pExtraData->kData.fAlpha);
+		NiUpdateData kUpdateData = NiUpdateData();
+		GetRootNode()->Update(kUpdateData);
+#endif
+	};
+};
