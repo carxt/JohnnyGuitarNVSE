@@ -57,7 +57,7 @@ public:
 			ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
 			do {
 				TESForm* it = iterator->data;
-				if (IsAcceptedParameter(it))
+				if (it && IsAcceptedParameter(it))
 					InsertToFilter(0, it->refID);
 			} while (iterator = iterator->next);
 		}
