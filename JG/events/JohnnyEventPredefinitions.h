@@ -72,7 +72,7 @@ public:
 				ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
 				do {
 					TESForm* it = iterator->data;
-					if (it->GetIsReference()) continue;
+					if (!it || it->GetIsReference()) continue;
 					if (IsAcceptedParameter(it))
 						InsertToFilter(i, it->refID);
 				} while (iterator = iterator->next);

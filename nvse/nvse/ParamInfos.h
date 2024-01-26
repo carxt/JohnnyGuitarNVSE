@@ -733,3 +733,14 @@ static ParamInfo kParams_OneInt_OneOptionalForm[2] =
 	{	"index",	kParamType_Integer, 0	},
 	{	"form",		kParamType_AnyForm,	1	},
 };
+
+static ParamInfo kSplatterParams[8] = {
+	{ "Count",			kParamType_Integer, 0 },
+	{ "Duration",		kParamType_Float,	0 },
+	{ "Size mult",		kParamType_Float,	0 },
+	{ "Opacity mult",	kParamType_Float,	0 },
+	{ "Alpha Texture",	kParamType_String,	0 },
+	{ "Color Texture",	kParamType_String,	0 },
+	{ "Flare Texture",	kParamType_String,	0 },
+	{ "No fade",		kParamType_Integer,	1 }
+};

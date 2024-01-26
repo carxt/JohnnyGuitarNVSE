@@ -214,14 +214,14 @@ UInt8 TESForm::GetOverridingModIdx() {
 }
 
 NiAVObject* NiNode::GetBlock(const char* blockName) {
-	if (StrEqualCI(m_blockName, blockName))
+	if (StrEqualCI(m_blockName.handle, blockName))
 		return this;
 	NiAVObject* found = NULL;
 	for (NiTArray<NiAVObject*>::Iterator iter(m_children); !iter.End(); ++iter) {
 		if (!*iter) continue;
 		if (iter->GetNiNode())
 			found = ((NiNode*)*iter)->GetBlock(blockName);
-		else if (StrEqualCI(iter->m_blockName, blockName))
+		else if (StrEqualCI(iter->m_blockName.handle, blockName))
 			found = *iter;
 		else continue;
 		if (found) break;

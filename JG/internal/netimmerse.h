@@ -33,8 +33,39 @@ class TESObjectREFR;
 class Tile;
 class BSPortalGraph;
 class NiTriShape;
+class NiPropertyState;
+class NiDX9Renderer;
 
 typedef FixedTypeArray<hkpWorldObject*, 0x40> ContactObjects;
+
+struct NiUpdateData {
+	NiUpdateData(float afTime = 0.f, bool abUpdateControllers = false, bool abIsMultiThreaded = false, bool abMTParticles = false, bool abUpdateGeomorphs = false, bool abUpdateShadowSceneNode = false)
+		: fTime(afTime), bUpdateControllers(abUpdateControllers), bIsMultiThreaded(abIsMultiThreaded), bMTParticles(abMTParticles), bUpdateGeomorphs(abUpdateGeomorphs), bUpdateShadowSceneNode(abUpdateShadowSceneNode)
+	{}
+	~NiUpdateData() {};
+
+	float	fTime;
+	bool	bUpdateControllers;
+	bool	bIsMultiThreaded;
+	bool	bMTParticles;
+	bool	bUpdateGeomorphs;
+	bool	bUpdateShadowSceneNode;
+};
+
+class NiFixedString {
+public:
+	const char* handle;
+
+	NiFixedString(const char* pcString) {
+		if (pcString)
+			handle = CdeclCall<const char*>(0xA5B690, pcString);
+		else
+			handle = nullptr;
+	};
+	~NiFixedString() {
+		CdeclCall(0x4381D0, this);
+	};
+};
 
 class NiMemObject {
 	NiMemObject();
@@ -51,6 +82,15 @@ public:
 	virtual void	Free(void);
 
 	UInt32		m_uiRefCount;	// 04
+
+	inline void IncRefCount() {
+		InterlockedIncrement(&m_uiRefCount);
+	}
+
+	inline void DecRefCount() {
+		if (!InterlockedDecrement(&m_uiRefCount))
+			Free();
+	}
 };
 
 // 08
@@ -456,13 +496,20 @@ public:
 	NiObjectNET();
 	~NiObjectNET();
 
-	const char* m_blockName;				// 08
-	NiTimeController* m_controller;				// 0C
-	NiExtraData** m_extraDataList;			// 10
+	NiFixedString		m_blockName;				// 08
+	NiTimeController*	m_controller;				// 0C
+	NiExtraData**		m_extraDataList;			// 10
 	UInt16				m_extraDataListLen;			// 14
 	UInt16				m_extraDataListCapacity;	// 16
 
 	void DumpExtraData();
+	bool AddExtraData(NiExtraData* extraData) {
+		return ThisStdCall<bool>(0xA5BCA0, this, extraData);
+	}
+
+	void SetName(NiFixedString& arString) {
+		ThisStdCall(0xA5B950, this, &arString);
+	}
 };
 
 // 18
@@ -638,30 +685,30 @@ public:
 	NiAVObject();
 	~NiAVObject();
 
-	virtual void	Unk_23(UInt32 arg1);
-	virtual void	Unk_24(NiMatrix33* arg1, NiVector3* arg2, bool arg3);
-	virtual void	Unk_25(UInt32 arg1);
-	virtual void	Unk_26(UInt32 arg1);
-	virtual void	Unk_27(UInt32 arg1);
-	virtual void	Unk_28(UInt32 arg1, UInt32 arg2, UInt32 arg3);
-	virtual void	Unk_29(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2A(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2B(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2C(UInt32 arg1);
-	virtual void	Unk_2D(UInt32 arg1);
-	virtual void	UpdateTransform(UInt32 arg1);
-	virtual void	Unk_2F(void);
-	virtual void	UpdateBounds(UInt32 arg1);
-	virtual void	Unk_31(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_32(UInt32 arg1);
-	virtual void	Unk_33(UInt32 arg1);
-	virtual void	Unk_34(void);
-	virtual void	Unk_35(void);
-	virtual void	Unk_36(UInt32 arg1);
+	virtual void			UpdateControllers(NiUpdateData& arData);
+	virtual void			ApplyTransform(NiMatrix33& arMat, NiVector3& arTrn, bool abOnLeft);
+	virtual void			Unk_39();
+	virtual NiAVObject*		GetObject_(const NiFixedString& arName);
+	virtual NiAVObject*		GetObjectByName(const NiFixedString& arName);
+	virtual void			SetSelectiveUpdateFlags(bool* abSelectiveUpdate, BOOL abSelectiveUpdateTransforms, bool* abRigid);
+	virtual void			UpdateDownwardPass(const NiUpdateData& arData, UInt32 auiFlags);
+	virtual void			UpdateSelectedDownwardPass(const NiUpdateData& arData, UInt32 auiFlags);
+	virtual void			UpdateRigidDownwardPass(const NiUpdateData& arData, UInt32 auiFlags);
+	virtual void			UpdatePropertiesDownward(NiPropertyState* apParentState);
+	virtual void			UpdateTransform();
+	virtual void			UpdateWorldData(const NiUpdateData& arData);
+	virtual void			UpdateWorldBound();
+	virtual void			UpdateTransformAndBounds(const NiUpdateData& arData);
+	virtual void			PreAttachUpdate(NiNode* apEventualParent, const NiUpdateData& arData);
+	virtual void			PreAttachUpdateProperties(NiNode* apEventualParent);
+	virtual void			DetachParent();
+	virtual void			UpdateUpwardPassParent(void* arg);
+	virtual void			OnVisible(NiCullingProcess* apCuller);
+	virtual void			PurgeRendererData(NiDX9Renderer* apRenderer);
 
-	NiAVObject* m_parent;				// 18
-	bhkNiCollisionObject* m_collisionObject;		// 1C
-	NiSphere* m_kWorldBound;			// 20
+	NiNode*					m_parent;				// 18
+	bhkNiCollisionObject*	m_collisionObject;		// 1C
+	NiSphere*				m_kWorldBound;			// 20
 	DList<NiProperty>		m_propertyList;			// 24
 	UInt32					m_flags;				// 30
 	NiMatrix33				m_localRotate;			// 34
@@ -675,6 +722,10 @@ public:
 
 	void DumpProperties();
 	void DumpParents();
+
+	void Update(NiUpdateData& arData) {
+		ThisStdCall(0xA59C60, this, &arData);
+	}
 };
 
 // AC
@@ -683,15 +734,15 @@ public:
 	NiNode();
 	~NiNode();
 
-	virtual void	AddObject(NiAVObject* object, bool arg2);
-	virtual void	Unk_38(void);
-	virtual void	RemoveObject(NiAVObject* toRemove, NiAVObject** out);
-	virtual void	Unk_3A(void);
-	virtual void	Unk_3B(void);
-	virtual void	Unk_3C(void);
-	virtual void	Unk_3D(void);
-	virtual void	Unk_3E(void);
-	virtual void	Unk_3F(void);
+	virtual void			AttachChild(NiAVObject* apChild, bool abFirstAvail);
+	virtual void			InsertChildAt(UInt32 i, NiAVObject* apChild);
+	virtual void			DetachChild(NiAVObject* apChild, NiAVObject*& aspAVObject);
+	virtual void			DetachChildAlt(NiAVObject* apChild);
+	virtual void			DetachChildAt(UInt32 i, NiAVObject*& aspAVObject);
+	virtual NiAVObject*		DetachChildAtAlt(UInt32 i);
+	virtual void			SetAt(UInt32 i, NiAVObject* apChild, NiAVObject*& aspAVObject);
+	virtual void			SetAtAlt(UInt32 i, NiAVObject* apChild);
+	virtual void			UpdateUpwardPass();
 
 	NiTArray<NiAVObject*>	m_children;		// 9C
 
@@ -708,6 +759,10 @@ public:
 	void GetBodyMass(float* totalMass);
 	void ApplyForce(hkVector4* forceVector);
 	void Dump();
+
+	NiAVObject* GetAt(UInt32 index) {
+		return m_children.Get(index);
+	}
 };
 STATIC_ASSERT(sizeof(NiNode) == 0xAC);
 
@@ -1693,16 +1748,16 @@ public:
 	virtual void	Unk_3A(void);
 	virtual void	Unk_3B(UInt32 arg1);
 
-	NiAlphaProperty* alphaProp;		// 9C	Seen NiAlphaProperty
-	NiProperty* niPropA0;		// A0	Seen NiCullingProperty
-	NiProperty* niPropA4;		// A4	Seen NiMaterialProperty
-	NiProperty* niPropA8;		// A8	Seen TileShaderProperty
-	NiProperty* niPropAC;		// AC	Seen NiStencilProperty
-	NiProperty* niPropB0;		// B0	Seen NiTexturingProperty
-	UInt32				unkB4;			// B4
-	NiGeometryData* geometryData;	// B8	Seen NiTriShapeData
-	UInt32				unkBC;			// BC
-	NiShader* shader;		// C0
+	NiAlphaProperty*		alphaProp;		// 9C	Seen NiAlphaProperty
+	NiProperty*				niPropA0;		// A0	Seen NiCullingProperty
+	NiMaterialProperty*		materialProp;		// A4	Seen NiMaterialProperty
+	BSShaderProperty*		shaderProp;		// A8	Seen TileShaderProperty
+	NiStencilProperty*		stencilProp;		// AC	Seen NiStencilProperty
+	NiTexturingProperty*	texturingProp;		// B0	Seen NiTexturingProperty
+	UInt32					unkB4;			// B4
+	NiGeometryData*			geometryData;	// B8	Seen NiTriShapeData
+	UInt32					unkBC;			// BC
+	NiShader*				shader;		// C0
 };
 STATIC_ASSERT(sizeof(NiGeometry) == 0xC4);
 

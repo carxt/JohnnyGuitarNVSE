@@ -24,6 +24,7 @@ DEFINE_COMMAND_PLUGIN(DumpINI, , 0, 0, NULL);
 DEFINE_CMD_NO_ARGS(UpdateCrosshairPrompt);
 DEFINE_COMMAND_PLUGIN(SetOptionalBone, , 1, 2, kParams_OneInt_OneString);
 DEFINE_COMMAND_PLUGIN(GetOptionalBone, , 1, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(TriggerScreenSplatterEx, , 0, 8, kSplatterParams);
 DEFINE_CMD_NO_ARGS(DumpIconMap);
 DEFINE_CMD_NO_ARGS(RollCredits);
 bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
@@ -517,11 +518,42 @@ bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 		if (thisObj && thisObj->IsCharacter() && optIdx <= 4)
 			if (auto BipedAnim = ((Character*)thisObj)->validBip01Names) {
 				if (BipedAnim->bones[optIdx].bone && BipedAnim->bones[optIdx].bone->GetNiNode()) {
-					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->bones[optIdx].bone->m_blockName);
+					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->bones[optIdx].bone->m_blockName.handle);
 					if (IsConsoleMode())
-						Console_Print("GetOptionalBone >> %s", BipedAnim->bones[optIdx].bone->m_blockName);
+						Console_Print("GetOptionalBone >> %s", BipedAnim->bones[optIdx].bone->m_blockName.handle);
 				}
 			}
 	}
 	return true;
+}
+
+bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
+	UInt32 uiCount = 0;
+	UInt32 uiNoFade = 0;
+	float fDuration = 0.f;
+	float fSizeMult = 0.f;
+	float fOpacityMult = 0.f;
+
+
+	char cTexturePath0[MAX_PATH] = {};
+	char cTexturePath1[MAX_PATH] = {};
+	char cTexturePath2[MAX_PATH] = {};
+
+	NiSourceTexture* pAlphaTex = nullptr;
+	NiSourceTexture* pColorTex = nullptr;
+	NiSourceTexture* pFlareTex = nullptr;
+
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiCount, &fDuration, &fSizeMult, &fOpacityMult, &cTexturePath0, &cTexturePath1, &cTexturePath2, &uiNoFade)) {
+		TES* pTES = TES::GetSingleton();
+		pTES->CreateTextureImage(cTexturePath0, pAlphaTex, false, false);
+		pTES->CreateTextureImage(cTexturePath1, pColorTex, false, false);
+		pTES->CreateTextureImage(cTexturePath2, pFlareTex, false, false);
+		*(bool*)0x11C77E9 = uiNoFade;
+
+		ScreenCustomSplatter::ActivateAlt(uiCount, fDuration, fSizeMult, fOpacityMult, pAlphaTex, pColorTex, pFlareTex);
+		* result = 1;
+		return true;
+	}
+	*result = 0;
+	return false;
 }
