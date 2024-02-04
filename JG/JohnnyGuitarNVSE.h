@@ -66,6 +66,7 @@ uintptr_t g_canSaveNowMenuAddr = 0;
 Setting** g_miscStatData = (Setting**)0x11C6D50;
 char g_workingDir[MAX_PATH];
 
+static float g_viewmodel_near = 0.f;
 
 template <class T>
 struct JGSetList {
@@ -867,6 +868,33 @@ void DumpModules() {
 	}
 }
 
+void __fastcall SetViewmodelFrustumHook(NiCameraAlt* camera, void*, NiFrustum* frustum) {
+	bool overrideActive = false;
+	if (camera->frustum.n <= 0.f)
+		camera->frustum.n = 1.f;
+
+	float nearDist = camera->frustum.n;
+	float maxRatio = camera->maxFarNearRatio;
+	if (g_viewmodel_near > 0.f) {
+		nearDist = g_viewmodel_near;
+		//maxRatio = frustum->f / nearDist;
+		overrideActive = true;
+	}
+
+	camera->frustum.n = nearDist;
+	float fMinNear = frustum->f / maxRatio;
+	if (fMinNear > nearDist)
+		camera->frustum.n = fMinNear;
+	if (camera->minNearPlaneDist > camera->frustum.n && !overrideActive)
+		camera->frustum.n = camera->minNearPlaneDist;
+	camera->frustum.l = frustum->l;
+	camera->frustum.r = frustum->r;
+	camera->frustum.t = frustum->t;
+	camera->frustum.b = frustum->b;
+	camera->frustum.f = frustum->f;
+	camera->frustum.o = frustum->o;
+}
+
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
@@ -1032,6 +1060,8 @@ void HandleFunctionPatches() {
 
 	//Hairstyle handlers
 	hk_RSMBarberHook::Hook();
+
+	WriteRelCall(0x8752F2, UInt32(SetViewmodelFrustumHook));
 }
 float timer22 = 30.0;
 void HandleGameHooks() {
