@@ -460,16 +460,28 @@ void __fastcall UIUpdateSoundHook(Sound* sound, int dummy) {
 		do {
 			switch (iter->data->updateType) {
 				case QuestAdded:
-					if (questNewSound != nullptr) sound = &Sound(questNewSound->refID, 0x121);
+					if (questNewSound != nullptr) {
+						auto newSound = Sound(questNewSound->refID, 0x121);
+						sound = &newSound;
+					}
 					break;
 				case QuestCompleted:
-					if (questCompeteSound != nullptr) sound = &Sound(questCompeteSound->refID, 0x121);
+					if (questCompeteSound != nullptr) {
+						auto newSound = Sound(questCompeteSound->refID, 0x121);
+						sound = &newSound;
+					}
 					break;
 				case QuestFailed:
-					if (questFailSound != nullptr) sound = &Sound(questFailSound->refID, 0x121);
+					if (questFailSound != nullptr) {
+						auto newSound = Sound(questFailSound->refID, 0x121);
+						sound = &newSound;
+					}
 					break;
 				case LocationDiscovered:
-					if (locationDiscoverSound != nullptr) sound = &Sound(locationDiscoverSound->refID, 0x121);
+					if (locationDiscoverSound != nullptr) {
+						auto newSound = Sound(locationDiscoverSound->refID, 0x121);
+						sound = &newSound;
+					}
 					break;
 			}
 			sound->Play();
@@ -605,7 +617,7 @@ char* __fastcall GetReputationIconHook(TESReputation* rep) {
 	return ThisStdCall<char*>(0x6167D0, rep);
 }
 
-char* __fastcall GetReputationMessageIconHook(UInt32 a1) {
+const char* __fastcall GetReputationMessageIconHook(UInt32 a1) {
 	UInt32 addr = (UInt32)_ReturnAddress();
 	auto* _ebp = GetParentBasePtr(_AddressOfReturnAddress(), false);
 	TESReputation* rep = nullptr;

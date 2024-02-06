@@ -94,7 +94,7 @@ public:
 	UInt8		unk11C;							// 11C
 	UInt8		pad11D[3];
 
-	bool GetGameSetting(char* settingName, Setting** out);
+	bool GetGameSetting(const char* settingName, Setting** out);
 	static GameSettingCollection* GetSingleton();
 };
 

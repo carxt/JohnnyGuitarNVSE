@@ -259,7 +259,8 @@ public:
 };
 
 SInt32 BGSListForm::GetIndexOf(TESForm* pForm) {
-	return list.GetIndexOf(FindByForm(pForm));
+	auto finder = FindByForm(pForm);
+	return list.GetIndexOf(finder);
 }
 
 SInt32 BGSListForm::RemoveForm(TESForm* pForm) {

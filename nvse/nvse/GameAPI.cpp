@@ -851,7 +851,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 
 // g_baseActorValueNames is only filled in after oblivion's global initializers run
 const char* GetActorValueString(UInt32 actorValue) {
-	char* name = 0;
+	const char* name = 0;
 	if (actorValue <= eActorVal_FalloutMax)
 		name = GetActorValueName(actorValue);
 	if (!name)

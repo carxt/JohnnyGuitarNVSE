@@ -137,7 +137,7 @@ bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 		pos->second[tierID - 1] = pathCopy;
 	}
 	else {
-		std::vector<char*> v{ "", "", "", "" };
+		std::vector<char*> v{ (char*)"", (char*)"", (char*)"", (char*)"" };
 		v[tierID - 1] = pathCopy;
 		factionRepIcons.insert(std::pair<UInt32, std::vector<char*>>(rep->refID, v));
 	}

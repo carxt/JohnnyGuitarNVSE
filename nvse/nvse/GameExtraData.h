@@ -407,8 +407,10 @@ public:
 	ExtraDataListInEntryDataListMatcher(ExtraDataList* match) : m_toMatch(match) {}
 
 	bool Accept(ExtraContainerChanges::EntryData* match) {
-		if (match && match->extendData)
-			return match->extendData->GetIndexOf(ExtraDataListInExtendDataListMatcher(m_toMatch)) >= 0;
+		if (match && match->extendData) {
+			auto finder = ExtraDataListInExtendDataListMatcher(m_toMatch);
+			return match->extendData->GetIndexOf(finder) >= 0;
+		}
 		else
 			return false;
 	}

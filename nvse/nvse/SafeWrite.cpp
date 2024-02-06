@@ -28,6 +28,10 @@ void __stdcall SafeWriteBuf(UInt32 addr, void* data, UInt32 len) {
 	VirtualProtect((void*)addr, len, oldProtect, &oldProtect);
 }
 
+void __stdcall SafeWriteBuf(UInt32 addr, const char* data, UInt32 len) {
+	SafeWriteBuf(addr, (void*)data, len);
+}
+
 void __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt) {
 	UInt32 oldProtect;
 	VirtualProtect((void*)jumpSrc, 5, PAGE_EXECUTE_READWRITE, &oldProtect);

@@ -198,44 +198,44 @@ public:
 		Map* Table() const { return table; }
 
 		void Remove(bool frwrd = true) {
-			entry->Clear();
-			Entry* pEntry = entry;
+			this->entry->Clear();
+			Entry* pEntry = this->entry;
 			UInt32 index;
 			if (frwrd) {
-				index = count - 1;
-				entry--;
+				index = this->count - 1;
+				this->entry--;
 			}
-			else index = table->numEntries - count;
+			else index = table->numEntries - this->count;
 			if (index) memmove(pEntry, pEntry + 1, sizeof(Entry) * index);
 			table->numEntries--;
 		}
 
 		OpIterator(Map& source) : table(&source) {
-			entry = source.entries;
-			count = source.numEntries;
+			this->entry = source.entries;
+			this->count = source.numEntries;
 		}
 		OpIterator(Map& source, T_Key key) : table(&source) {
 			UInt32 index;
 			if (source.GetIndex(key, index)) {
-				entry = source.entries + index;
-				count = source.numEntries - index;
+				this->entry = source.entries + index;
+				this->count = source.numEntries - index;
 			}
-			else count = 0;
+			else this->count = 0;
 		}
 		OpIterator(Map& source, T_Key key, bool frwrd) : table(&source) {
 			if (!source.numEntries) {
-				count = 0;
+				this->count = 0;
 				return;
 			}
 			UInt32 index;
 			bool match = source.GetIndex(key, index);
 			if (frwrd) {
-				entry = source.entries + index;
-				count = source.numEntries - index;
+				this->entry = source.entries + index;
+				this->count = source.numEntries - index;
 			}
 			else {
-				entry = source.entries + (index - !match);
-				count = index + match;
+				this->entry = source.entries + (index - !match);
+				this->count = index + match;
 			}
 		}
 	};
@@ -374,17 +374,17 @@ public:
 		Set* Table() const { return table; }
 
 		void Remove() {
-			pKey->Clear();
-			M_Key* _key = pKey;
-			UInt32 index = count - 1;
-			pKey--;
+			this->pKey->Clear();
+			M_Key* _key = this->pKey;
+			UInt32 index = this->count - 1;
+			this->pKey--;
 			if (index) memmove(_key, _key + 1, sizeof(M_Key) * index);
-			table->numKeys--;
+			this->table->numKeys--;
 		}
 
 		OpIterator(Set& source) : table(&source) {
-			pKey = source.keys;
-			count = source.numKeys;
+			this->pKey = source.keys;
+			this->count = source.numKeys;
 		}
 	};
 };
@@ -1104,20 +1104,20 @@ public:
 		Vector* Container() const { return contObj; }
 
 		void operator--() {
-			count--;
-			pData--;
+			this->count--;
+			this->pData--;
 		}
 
 		void Remove() {
-			pData->~T_Data();
-			UInt32 size = contObj->numItems - count;
-			if (size) memmove(pData, pData + 1, sizeof(T_Data) * size);
+			this->pData->~T_Data();
+			UInt32 size = contObj->numItems - this->count;
+			if (size) memmove(this->pData, this->pData + 1, sizeof(T_Data) * size);
 			contObj->numItems--;
 		}
 
 		RvIterator(Vector& source) : contObj(&source) {
-			count = source.numItems;
-			if (count) pData = source.data + (count - 1);
+			this->count = source.numItems;
+			if (this->count) this->pData = source.data + (this->count - 1);
 		}
 	};
 };

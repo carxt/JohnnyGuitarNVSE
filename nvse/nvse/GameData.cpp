@@ -17,7 +17,8 @@ public:
 };
 
 const ModInfo* DataHandler::LookupModByName(const char* modName) {
-	return modList.modInfoList.Find(LoadedModFinder(modName));
+	auto finder = LoadedModFinder(modName);
+	return modList.modInfoList.Find(finder);
 }
 
 const ModInfo** DataHandler::GetActiveModList() {

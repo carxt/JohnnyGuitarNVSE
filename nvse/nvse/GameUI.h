@@ -285,10 +285,10 @@ public:
 		kFlag_FreeContChangeOnListItemDestruction = 2, // assumes the object is a ContChangesEntry - do not set this if the object isn't one...
 	};
 
-	Tile* parentTile;	// 0C
-	Tile* selected;		// 10
-	Tile* scrollBar;		// 14
-	const char* templateName;	// 18
+	Tile*			parentTile;	// 0C
+	Tile*			selected;		// 10
+	Tile*			scrollBar;		// 14
+	const char*		templateName;	// 18
 	UInt16			itemCount;		// 1C
 	UInt16			pad1E;			// 1E
 	float			unk20;			// 20
@@ -299,7 +299,7 @@ public:
 
 	Item* GetSelected()
 	{
-		ListNode<ListBoxItem<Item>>* iter = list.Head();
+		ListNode<ListBoxItem<Item>>* iter = this->list.Head();
 		ListBoxItem<Item>* item;
 		do
 		{
@@ -314,7 +314,7 @@ public:
 	{
 		if (index >= 0)
 		{
-			ListNode<ListBoxItem<Item>>* iter = list.Head();
+			ListNode<ListBoxItem<Item>>* iter = this->list.Head();
 			do
 			{
 				if (!index)
@@ -329,7 +329,7 @@ public:
 
 	void Clear()
 	{
-		ListNode<ListBoxItem<Item>>* iter = list.Head();
+		ListNode<ListBoxItem<Item>>* iter = this->list.Head();
 		ListBoxItem<Item>* item;
 		do
 		{
@@ -339,7 +339,7 @@ public:
 				item->tile->Destroy(true);
 			GameHeapFree(item);
 		} while (iter = iter->next);
-		list.RemoveAll();
+		this->list.RemoveAll();
 		selected = NULL;
 		itemCount = 0;
 	}
@@ -375,7 +375,7 @@ public:
 
 	Item* GetItemForTile(Tile* tile)
 	{
-		ListNode<ListBoxItem<Item>>* iter = list.Head();
+		ListNode<ListBoxItem<Item>>* iter = this->list.Head();
 		ListBoxItem<Item>* item;
 		do
 		{
