@@ -5,14 +5,14 @@
 #include "internal/utility.h"
 
 // 8
-class String {
+class BSString {
 public:
-	String();
-	~String();
+	BSString();
+	~BSString();
 
-	char* m_data;
-	UInt16		m_dataLen;
-	UInt16		m_bufLen;
+	char*	m_data;
+	UInt16	m_dataLen;
+	UInt16	m_bufLen;
 
 	void Init(UInt32 bufSize);
 	bool Set(const char* src);

@@ -150,7 +150,7 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	else {
 		TESWorldSpace* wspc = GetWorldspace(thisObj);
 		if (wspc) {
-			String str;
+			BSString str;
 			NiPoint3* pos = thisObj->GetPos();
 			wspc->GetMapNameForLocation(str, pos->x, pos->y, pos->z);
 			locationName = str.CStr();
