@@ -3967,7 +3967,8 @@ public:
 	TESWorldSpace();
 	~TESWorldSpace();
 
-	virtual bool	Unk_4E(String* arg1, float x, float y, float z);
+	// Returns true if name has changed
+	virtual bool	GetMapNameForLocation(String& name, float x, float y, float z);
 	virtual void	Unk_4F(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5, UInt32 arg6);
 
 	struct DCoordXY {
