@@ -410,6 +410,7 @@ extern "C" {
 		REG_CMD(InitExtraMiscStat);
 		REG_CMD(TriggerScreenSplatterEx);
 		REG_CMD(SetViewmodelClipDistance);
+		REG_CMD(GetViewmodelClipDistance);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
