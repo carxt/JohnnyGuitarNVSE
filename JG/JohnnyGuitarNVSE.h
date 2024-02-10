@@ -883,7 +883,7 @@ void __fastcall SetViewmodelFrustumHook(NiCameraAlt* camera, void*, NiFrustum* f
 
 	camera->frustum.n = nearDist;
 	float fMinNear = frustum->f / maxRatio;
-	if (fMinNear > nearDist)
+	if (fMinNear > nearDist && !overrideActive)
 		camera->frustum.n = fMinNear;
 	if (camera->minNearPlaneDist > camera->frustum.n && !overrideActive)
 		camera->frustum.n = camera->minNearPlaneDist;

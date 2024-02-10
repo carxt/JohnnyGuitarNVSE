@@ -562,7 +562,7 @@ bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	float fDistance = 0.f;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fDistance)) {
-		g_viewmodel_near = fDistance;
+		g_viewmodel_near = max(fDistance, 0.001);
 		*result = 1;
 	}
 	return true;
