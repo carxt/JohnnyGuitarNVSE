@@ -869,23 +869,18 @@ void DumpModules() {
 }
 
 void __fastcall SetViewmodelFrustumHook(NiCameraAlt* camera, void*, NiFrustum* frustum) {
-	bool overrideActive = false;
-	if (camera->frustum.n <= 0.f)
-		camera->frustum.n = 1.f;
-
-	float nearDist = camera->frustum.n;
-	float maxRatio = camera->maxFarNearRatio;
+	float nearDistance = frustum->n;
+	float ratio = camera->maxFarNearRatio;
 	if (g_viewmodel_near > 0.f) {
-		nearDist = g_viewmodel_near;
-		//maxRatio = frustum->f / nearDist;
-		overrideActive = true;
+		nearDistance = max(g_viewmodel_near, 0.001);
+		ratio = frustum->f / nearDistance;
 	}
 
-	camera->frustum.n = nearDist;
-	float fMinNear = frustum->f / maxRatio;
-	if (fMinNear > nearDist && !overrideActive)
+	camera->frustum.n = nearDistance;
+	float fMinNear = frustum->f / ratio;
+	if (fMinNear > camera->frustum.n)
 		camera->frustum.n = fMinNear;
-	if (camera->minNearPlaneDist > camera->frustum.n && !overrideActive)
+	if (camera->minNearPlaneDist > camera->frustum.n)
 		camera->frustum.n = camera->minNearPlaneDist;
 	camera->frustum.l = frustum->l;
 	camera->frustum.r = frustum->r;
