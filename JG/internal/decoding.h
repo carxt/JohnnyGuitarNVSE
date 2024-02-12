@@ -1213,7 +1213,7 @@ public:
 	UInt8							pad081[3];		// 081
 	TileImage* tile084;		// 084
 	UInt32							unk088[8];		// 088
-	BSSimpleArray<String>			arr0A8;			// 0A8
+	BSSimpleArray<BSString>			arr0A8;			// 0A8
 	UInt32							unk0B8[7];		// 0B8
 	TileImage* mapMarker;		// 0D4
 	tList<TESObjectREFR>			mapMarkerList;	// 0D8
@@ -1277,8 +1277,8 @@ public:
 	TileText* currTextTile;			// 28
 	TileImage* okButton;				// 2C
 	TileText* messageTitle;			// 30
-	String				currentText;			// 34
-	String				displayedText;			// 3C	Copy of currentText + cursor
+	BSString				currentText;			// 34
+	BSString				displayedText;			// 3C	Copy of currentText + cursor
 	UInt32				cursorIndex;			// 44
 	union {
 		UInt32			maxPixelLength;			// 48
@@ -2208,7 +2208,7 @@ public:
 		float			offsetY;	// 04
 		UInt32			isVisible;	// 08
 		NiNode* node;		// 0C
-		String			text;		// 10
+		BSString			text;		// 10
 		float			flt18;		// 18	Always -1.0
 		NiColorAlpha	color;		// 1C
 	};
@@ -2538,10 +2538,10 @@ struct Sound {
 	}
 };
 struct ExtraInfoGeneralTopicDataElement {
-	String responseText;
+	BSString responseText;
 	UInt32 emotionType;
 	UInt32 emotionValue;
-	String voiceFilePath;
+	BSString voiceFilePath;
 	TESIdleForm* speakerAnimation;
 	TESIdleForm* listenerAnimation;
 	UInt32 sound;
@@ -3071,7 +3071,7 @@ public:
 	};
 	tList<parentRef>	parentRefs;
 	UInt8				flags;
-	String				activationPromptOverride;
+	BSString				activationPromptOverride;
 };
 
 // 10
@@ -3319,7 +3319,7 @@ struct SystemColorManager {
 		virtual bool	IsHard();
 		virtual bool	IsSoft();
 
-		String		traitName;
+		BSString		traitName;
 
 		void SetColorRGB(UInt32 r, UInt32 g, UInt32 b) { this->SetColor(((r & 0xFF) << 16) + ((g & 0xFF) << 8) + (b & 0xFF)); }
 	};
@@ -3943,7 +3943,7 @@ struct QuestUpdateManager {
 };
 
 struct MediaSetData {
-	String filepath; // NAM2 NAM3 NAM4 NAM5 NAM6 NAM7
+	BSString filepath; // NAM2 NAM3 NAM4 NAM5 NAM6 NAM7
 	float dB; // NAM8 NAM9 NAM0 ANAM BNAM CNAM
 	float boundary; // JNAM KNAM LNAM MNAM NNAM ONAM
 };

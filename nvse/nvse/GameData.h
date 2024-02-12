@@ -149,8 +149,8 @@ struct ModInfo		// referred to by game as TESFile
 	UInt32								unk408;				// 408
 	UInt8								modIndex;			// 40C init to 0xFF
 	UInt8								pad40D[3];
-	String								author;				// 410
-	String								description;		// 418
+	BSString								author;				// 410
+	BSString								description;		// 418
 	void* dataBuf;			// 420
 	UInt32								dataBufSize;		// 424 looks like size of entire record
 	UInt8								unk428;				// 428 decide if forms needs to be reloaded on LoadFiles

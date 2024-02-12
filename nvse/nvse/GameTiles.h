@@ -242,7 +242,7 @@ public:
 
 	DList<Tile>					children;		// 04
 	BSSimpleArray<Value*>		values;			// 10
-	String						name;			// 20
+	BSString						name;			// 20
 	Tile* parent;		// 28
 	NiNode* node;			// 2C
 	UInt32						flags;			// 30

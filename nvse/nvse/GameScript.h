@@ -31,7 +31,7 @@ public:
 
 	struct RefVariable
 	{
-		String		name;		// 00 variable name/editorID (not used at run-time)
+		BSString		name;		// 00 variable name/editorID (not used at run-time)
 		TESForm		*form;		// 08
 		UInt32		varIdx;		// 0C always zero in editor
 
@@ -238,7 +238,7 @@ struct ScriptBuffer
 	char					*scriptText;		// 000
 	UInt32					textOffset;			// 004 
 	UInt32					unk008;				// 008
-	String					scriptName;			// 00C
+	BSString					scriptName;			// 00C
 	UInt32					unk014;				// 014
 	UInt16					unk018;				// 018
 	UInt16					unk01A;				// 01A

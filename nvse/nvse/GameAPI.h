@@ -320,7 +320,7 @@ public:
 	struct TextNode {
 		TextNode* next;
 		TextNode* prev;
-		String		text;
+		BSString		text;
 	};
 
 	struct TextList {
@@ -430,7 +430,7 @@ public:
 	virtual bool	Reset(bool arg1, bool arg2);	// 20
 	virtual bool	Unk_09(UInt32 arg1);	// 24
 	virtual UInt32	Unk_0A();	// 28
-	virtual UInt32	Unk_0B(String* string, UInt32 arg2);	// 2C
+	virtual UInt32	Unk_0B(BSString* string, UInt32 arg2);	// 2C
 	virtual UInt32	Unk_0C(void* ptr, UInt32 arg2);	// 30
 	virtual UInt32	ReadBufDelim(void* bufferPtr, UInt32 bufferSize, short delim);		// 34
 	virtual UInt32	Unk_0E(void* ptr, UInt8 arg2);	// 38

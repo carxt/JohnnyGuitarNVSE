@@ -128,7 +128,7 @@ void TESBipedModelForm::SetBipedMask(UInt32 mask) {
 }
 
 void  TESBipedModelForm::SetPath(const char* newPath, UInt32 whichPath, bool bFemalePath) {
-	String* toSet = NULL;
+	BSString* toSet = NULL;
 
 	switch (whichPath) {
 		case ePath_Biped:
@@ -147,7 +147,7 @@ void  TESBipedModelForm::SetPath(const char* newPath, UInt32 whichPath, bool bFe
 }
 
 const char* TESBipedModelForm::GetPath(UInt32 whichPath, bool bFemalePath) {
-	String* pathStr = NULL;
+	BSString* pathStr = NULL;
 
 	switch (whichPath) {
 		case ePath_Biped:

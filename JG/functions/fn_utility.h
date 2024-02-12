@@ -26,6 +26,7 @@ DEFINE_COMMAND_PLUGIN(SetOptionalBone, , 1, 2, kParams_OneInt_OneString);
 DEFINE_COMMAND_PLUGIN(GetOptionalBone, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(TriggerScreenSplatterEx, , 0, 8, kSplatterParams);
 DEFINE_COMMAND_PLUGIN(SetViewmodelClipDistance, , 0, 1, kParams_OneFloat);
+DEFINE_COMMAND_PLUGIN(GetViewmodelClipDistance, , 0, 0, NULL);
 DEFINE_CMD_NO_ARGS(DumpIconMap);
 DEFINE_CMD_NO_ARGS(RollCredits);
 bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
@@ -562,8 +563,14 @@ bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	float fDistance = 0.f;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fDistance)) {
-		g_viewmodel_near = fDistance;
+		g_viewmodel_near = max(fDistance, 0.001);
 		*result = 1;
 	}
+	return true;
+}
+
+bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
+	*result = g_viewmodel_near;
+	if (IsConsoleMode()) Console_Print("GetViewmodelClipDistance >> %.3f", *result);
 	return true;
 }
