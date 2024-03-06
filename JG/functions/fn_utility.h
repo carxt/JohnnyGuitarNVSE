@@ -27,6 +27,7 @@ DEFINE_COMMAND_PLUGIN(GetOptionalBone, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(TriggerScreenSplatterEx, , 0, 8, kSplatterParams);
 DEFINE_COMMAND_PLUGIN(SetViewmodelClipDistance, , 0, 1, kParams_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetViewmodelClipDistance, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(SetBlockTransform, , 1, 8, kTransformParams);
 DEFINE_CMD_NO_ARGS(DumpIconMap);
 DEFINE_CMD_NO_ARGS(RollCredits);
 bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
@@ -572,5 +573,70 @@ bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	*result = g_viewmodel_near;
 	if (IsConsoleMode()) Console_Print("GetViewmodelClipDistance >> %.3f", *result);
+	return true;
+}
+
+static NiPointer<NiAVObject> lastBlock = nullptr;
+static TESForm* lastForm = nullptr;
+
+bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
+	float x, y, z, w;
+	bool rotate = false;
+	bool update = false;
+	bool world = false;
+	bool local = false;
+	char blockName[128];
+
+	*result = false;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &blockName, &x, &y, &z, &w, &rotate, &world, &update)) {
+		NiAVObject* object = nullptr;
+		if (lastForm == thisObj && !strcmp(lastBlock.data->m_blockName.handle, blockName)) {
+			object = lastBlock;
+		}
+		else {
+			lastForm = thisObj;
+			NiNode* refNode = thisObj->GetRefNiNode();
+			if (!refNode)
+				return true;
+
+			object = refNode->GetObjectByName(blockName);
+			if (!object)
+				return true;
+
+			lastBlock = object;
+		}
+		if (world) {
+			if (rotate) {
+				// NiMatrix3::FromEulerAnglesXYZ
+				ThisStdCall(0xA59540, &object->m_worldRotate, x, y, z);
+			}
+			else {
+				object->m_worldTranslate.x = x;
+				object->m_worldTranslate.y = y;
+				object->m_worldTranslate.z = z;
+			}
+
+			object->m_worldScale = w;
+		}
+		else {
+			if (rotate) {
+				// NiMatrix3::FromEulerAnglesXYZ
+				ThisStdCall(0xA59540, &object->m_localRotate, x, y, z);
+			}
+			else {
+				object->m_localTranslate.x = x;
+				object->m_localTranslate.y = y;
+				object->m_localTranslate.z = z;
+			}
+
+			object->m_localScale = w;
+		}
+
+		if (update) {
+			NiUpdateData updateData;
+			object->Update(updateData);
+		}
+		*result = true;
+	}
 	return true;
 }
