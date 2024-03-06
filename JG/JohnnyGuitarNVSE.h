@@ -118,7 +118,32 @@ namespace hk_RSMBarberHook {
 
 
 
+namespace SkyCloudHook {
+	bool pendingFirstUpdate = true;
+	bool __fastcall hk_han_SkipCloudCheck(TESWeather* a_wea) {
+		if (pendingFirstUpdate || !a_wea) { 
+			pendingFirstUpdate = false; 
+			return false; 
+		}
+		return true;
 
+	}
+	__declspec(naked) void asm_HookCloudCheck() {
+		static uintptr_t jmpRet = 0x06346F9;
+		static uintptr_t jneRet = 0x0634740;
+		__asm {
+			mov ecx, dword ptr [ebp-0x14]
+			call hk_han_SkipCloudCheck
+			test al, al
+			jne skip
+			jmp jmpRet
+			ALIGN 16
+			skip:
+			jmp jneRet
+		}
+	}
+
+}
 
 
 
@@ -957,6 +982,10 @@ void HandleFixes() {
 	//fix NPE in AnimData freeing
 	WriteRelJump(0x0490BBB, (uintptr_t)AnimDataNullCheck);
 	WriteRelCall(0x0A2EC64, (uintptr_t)NiContManNullCheck2);
+
+	//fix the clouds
+	SafeWrite8(0x06346F3, 0x90);
+	WriteRelJump(0x06346F4, (uintptr_t)SkyCloudHook::asm_HookCloudCheck);
 
 
 }
