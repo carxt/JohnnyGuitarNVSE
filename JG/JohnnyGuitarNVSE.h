@@ -986,7 +986,7 @@ void HandleFixes() {
 	//fix the clouds
 	SafeWrite8(0x06346F3, 0x90);
 	WriteRelJump(0x06346F4, (uintptr_t)SkyCloudHook::asm_HookCloudCheck);
-
+	SafeWrite8(0x63AD66, 0xEB);
 
 }
 
