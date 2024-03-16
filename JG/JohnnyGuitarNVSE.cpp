@@ -411,6 +411,12 @@ extern "C" {
 		REG_CMD(TriggerScreenSplatterEx);
 		REG_CMD(SetViewmodelClipDistance);
 		REG_CMD(GetViewmodelClipDistance);
+		REG_CMD(SetBlockTransform);
+		REG_CMD(RefAddrxData);
+		REG_CMD(AudioMarkerGetController);
+		REG_CMD(AudioMarkerSetController);
+		REG_CMD(AudioMarkerGetProperty);
+		REG_CMD(AudioMarkerSetProperty);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

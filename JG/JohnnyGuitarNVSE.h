@@ -118,7 +118,32 @@ namespace hk_RSMBarberHook {
 
 
 
+namespace SkyCloudHook {
+	bool pendingFirstUpdate = true;
+	bool __fastcall hk_han_SkipCloudCheck(TESWeather* a_wea) {
+		if (pendingFirstUpdate || !a_wea) { 
+			pendingFirstUpdate = false; 
+			return false; 
+		}
+		return true;
 
+	}
+	__declspec(naked) void asm_HookCloudCheck() {
+		static uintptr_t jmpRet = 0x06346F9;
+		static uintptr_t jneRet = 0x0634740;
+		__asm {
+			mov ecx, dword ptr [ebp-0x14]
+			call hk_han_SkipCloudCheck
+			test al, al
+			jne skip
+			jmp jmpRet
+			ALIGN 16
+			skip:
+			jmp jneRet
+		}
+	}
+
+}
 
 
 
@@ -869,23 +894,18 @@ void DumpModules() {
 }
 
 void __fastcall SetViewmodelFrustumHook(NiCameraAlt* camera, void*, NiFrustum* frustum) {
-	bool overrideActive = false;
-	if (camera->frustum.n <= 0.f)
-		camera->frustum.n = 1.f;
-
-	float nearDist = camera->frustum.n;
-	float maxRatio = camera->maxFarNearRatio;
+	float nearDistance = frustum->n;
+	float ratio = camera->maxFarNearRatio;
 	if (g_viewmodel_near > 0.f) {
-		nearDist = g_viewmodel_near;
-		//maxRatio = frustum->f / nearDist;
-		overrideActive = true;
+		nearDistance = max(g_viewmodel_near, 0.001);
+		ratio = frustum->f / nearDistance;
 	}
 
-	camera->frustum.n = nearDist;
-	float fMinNear = frustum->f / maxRatio;
-	if (fMinNear > nearDist && !overrideActive)
+	camera->frustum.n = nearDistance;
+	float fMinNear = frustum->f / ratio;
+	if (fMinNear > camera->frustum.n)
 		camera->frustum.n = fMinNear;
-	if (camera->minNearPlaneDist > camera->frustum.n && !overrideActive)
+	if (camera->minNearPlaneDist > camera->frustum.n)
 		camera->frustum.n = camera->minNearPlaneDist;
 	camera->frustum.l = frustum->l;
 	camera->frustum.r = frustum->r;
@@ -963,6 +983,10 @@ void HandleFixes() {
 	WriteRelJump(0x0490BBB, (uintptr_t)AnimDataNullCheck);
 	WriteRelCall(0x0A2EC64, (uintptr_t)NiContManNullCheck2);
 
+	//fix the clouds
+	SafeWrite8(0x06346F3, 0x90);
+	WriteRelJump(0x06346F4, (uintptr_t)SkyCloudHook::asm_HookCloudCheck);
+	SafeWrite8(0x63AD66, 0xEB);
 
 }
 

@@ -744,3 +744,15 @@ static ParamInfo kSplatterParams[8] = {
 	{ "Flare Texture",	kParamType_String,	0 },
 	{ "No fade",		kParamType_Integer,	1 }
 };
+
+static ParamInfo kTransformParams[] =
+{
+	{	"Block name",	kParamType_String, 0	},
+	{	"X",			kParamType_Float, 0	},
+	{	"Y",			kParamType_Float, 0	},
+	{	"Z",			kParamType_Float, 0	},
+	{	"W",			kParamType_Float, 0	},
+	{	"Is Rotation",	kNVSEParamType_Boolean, 0	},
+	{	"World Data",	kNVSEParamType_Boolean, 0	},
+	{	"Update",		kNVSEParamType_Boolean, 0	},
+};
