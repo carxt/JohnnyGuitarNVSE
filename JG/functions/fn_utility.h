@@ -7,6 +7,7 @@ DEFINE_COMMAND_PLUGIN(GetJohnnyPatch, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(RefAddr, , 0, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(RefAddrxData, , 0, 1, NULL);
 DEFINE_COMMAND_PLUGIN(EditorIDToFormID, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParams_FourStrings);
@@ -397,6 +398,23 @@ bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
 	else if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) Console_Print("0x%08X", form);
 	return true;
 }
+
+bool Cmd_RefAddrxData_Execute(COMMAND_ARGS) {
+	TESForm* form = NULL;
+	DWORD type;
+	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) { 
+		if (type < kExtraData_Max) {
+			void* res = thisObj->extraDataList.GetByType(type);
+			if (res) {
+				Console_Print("0x%08X", res);
+				return true;
+			}
+		}
+		Console_Print("Not found");
+	}
+	return true;
+}
+
 bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 	__asm int 3
 	return true;
