@@ -271,7 +271,7 @@ bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 bool Cmd_SetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
-	const char* newStr = NULL;
+	char newStr[MAX_PATH];
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newStr) && IS_TYPE(mediaset, MediaSet)) {
 		if (traitID >= 0 && traitID <= 5) {
