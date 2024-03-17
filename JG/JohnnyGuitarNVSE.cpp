@@ -70,6 +70,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			beardSetList.dFlush();
 			break;
 		}
+		case NVSEMessagingInterface::kMessage_PostLoadGame:
+			break;
+
 		case NVSEMessagingInterface::kMessage_MainGameLoop:
 			for (const auto& EventInfo : EventsArray) {
 				EventInfo->AddQueuedEvents();
