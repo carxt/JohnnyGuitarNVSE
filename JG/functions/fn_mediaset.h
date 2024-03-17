@@ -6,10 +6,10 @@ DEFINE_COMMAND_PLUGIN(GetMediaSetTraitString, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitSound, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitString, , 0, 3, kParams_OneForm_OneInt_OneString);
-DEFINE_COMMAND_PLUGIN(AudioMarkerSetController, AMSetCtrl , 1, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(AudioMarkerGetController, AMGetCtrl, 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(AudioMarkerSetProperty, AMSetProp, 1, 2, kParams_OneInt_OneFloat);
-DEFINE_COMMAND_PLUGIN(AudioMarkerGetProperty, AMGetProp, 1, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(AudioMarkerSetController, AMKSetCtrl , 1, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(AudioMarkerGetController, AMKGetCtrl, 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(AudioMarkerSetProperty, AMKSetProp, 1, 2, kParams_OneInt_OneFloat);
+DEFINE_COMMAND_PLUGIN(AudioMarkerGetProperty, AMKGetProp, 1, 1, kParams_OneInt);
 
 
 bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
