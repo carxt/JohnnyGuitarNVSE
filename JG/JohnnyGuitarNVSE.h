@@ -505,11 +505,17 @@ void __fastcall UIUpdateSoundHook(Sound* sound, int dummy) {
 void ResetVanityWheel() {
 	float* VanityWheel = (float*)0x11E0B5C;
 	float* MaxChaseCam = (ThisStdCall<float*>((uintptr_t)0x0403E20, (void*)0x11CD568));
-	if (*MaxChaseCam < *VanityWheel)
-		*VanityWheel = *MaxChaseCam;
+	static float f_VanityWheelcState = *MaxChaseCam;
+
+	if (*MaxChaseCam < *VanityWheel) {
+		*VanityWheel = f_VanityWheelcState;
+	}
+	else {
+		f_VanityWheelcState = *VanityWheel;
+	}
 }
 
-__declspec (naked) void VanityModeHook() {
+__declspec (naked) void VanityModeHook_DEPRECATED() {
 	static uintptr_t jmpDest = 0x942D43;
 	static uintptr_t getGS = 0x403E20;
 	__asm
@@ -992,7 +998,7 @@ void HandleFixes() {
 
 void HandleIniOptions() {
 	// for bReset3rdPersonCamera
-	if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)VanityModeHook);
+	//if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)VanityModeHook);
 
 	// for bFixFleeing
 	if (fixFleeing) WriteRelCall(0x8F5FE2, (UInt32)FleeFixHook);

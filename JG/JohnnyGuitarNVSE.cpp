@@ -84,6 +84,16 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 				g_statsMenu->miscStatIDList.Filter(ShouldHideStat);
 
 			}
+			if (resetVanityCam) {
+				if (g_thePlayer) {
+					WORD bIsInVanityMode = (*(WORD*)0x11E07B8) || g_thePlayer->byte64D; //64d = autovanity mode.
+					if (!bIsInVanityMode) {
+						ResetVanityWheel();
+					}
+				}
+	
+			}
+
 			break;
 		case NVSEMessagingInterface::kMessage_DeferredInit:
 		{
