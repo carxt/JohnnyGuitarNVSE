@@ -119,20 +119,29 @@ namespace hk_RSMBarberHook {
 
 
 namespace SkyCloudHook {
-	bool pendingFirstUpdate = true;
+	static DWORD completedFirstUpdate = 0;
 	bool __fastcall hk_han_SkipCloudCheck(TESWeather* a_wea) {
-		if (pendingFirstUpdate || !a_wea) { 
-			pendingFirstUpdate = false; 
+		if (completedFirstUpdate < 2 || !a_wea ) {
+			completedFirstUpdate = 1;
 			return false; 
 		}
 		return true;
 
 	}
+
+	static uintptr_t fn_Clouds_Update = 0;
+	DWORD __fastcall hk_Clouds_Upd (void* a_cloud, void* edx, void* Sky, float timePassed) {
+		auto ret = ThisStdCall<DWORD>(fn_Clouds_Update, a_cloud, Sky, timePassed);
+		if (completedFirstUpdate == 1) {
+			completedFirstUpdate = 2;
+		}
+		return ret;
+	}
 	__declspec(naked) void asm_HookCloudCheck() {
 		static uintptr_t jmpRet = 0x06346F9;
 		static uintptr_t jneRet = 0x0634740;
 		__asm {
-			mov ecx, dword ptr [ebp-0x14]
+			mov ecx, dword ptr[ebp - 0x14]
 			call hk_han_SkipCloudCheck
 			test al, al
 			jne skip
@@ -142,6 +151,19 @@ namespace SkyCloudHook {
 			jmp jneRet
 		}
 	}
+	void InstallCloudUpdHook() {
+		SafeWrite8(0x06346F3, 0x90);
+		WriteRelJump(0x06346F4, (uintptr_t)SkyCloudHook::asm_HookCloudCheck);
+		SkyCloudHook::fn_Clouds_Update = *(uintptr_t*)0x104EC14;
+		SafeWrite32(0x104EC14, (uintptr_t)SkyCloudHook::hk_Clouds_Upd);
+	}
+
+	DWORD __fastcall hk_han_NewGameCloudUpdate(BGSSaveLoadGame* a_obj) {
+		return ThisStdCall<bool>(0x42CE10, a_obj) || (*(bool*)0x11D8907);
+	
+	}
+	
+
 
 }
 
@@ -990,9 +1012,12 @@ void HandleFixes() {
 	WriteRelCall(0x0A2EC64, (uintptr_t)NiContManNullCheck2);
 
 	//fix the clouds
-	SafeWrite8(0x06346F3, 0x90);
-	WriteRelJump(0x06346F4, (uintptr_t)SkyCloudHook::asm_HookCloudCheck);
+	SkyCloudHook::InstallCloudUpdHook();
+	//Cloud int update
 	SafeWrite8(0x63AD66, 0xEB);
+	WriteRelCall(0x063ADAB, (uintptr_t)SkyCloudHook::hk_han_NewGameCloudUpdate);
+	
+
 
 }
 
