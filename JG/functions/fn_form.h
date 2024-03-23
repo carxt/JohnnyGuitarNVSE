@@ -47,9 +47,9 @@ DEFINE_COMMAND_PLUGIN(GetBodyPartTraitString, , 0, 3, kParams_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetActorEffectType, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetTalkingActivatorActor, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetPlayerKarmaTitle, , 0, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetFaceGenNthProperty, , 0, 3, kParams_OneActorBase_TwoInts);
-DEFINE_COMMAND_PLUGIN(SetFaceGenNthProperty, , 0, 4, kParams_OneActorBase_TwoInts_OneFloat);
-DEFINE_COMMAND_PLUGIN(FaceGenRefreshAppearance, , 1, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(FaceGenGetNthProperty, FaceGGetNth , , 0, 3, kParams_OneActorBase_TwoInts);
+DEFINE_COMMAND_ALT_PLUGIN(FaceGenSetNthProperty, FaceGSetNth , , 0, 4, kParams_OneActorBase_TwoInts_OneFloat);
+DEFINE_COMMAND_ALT_PLUGIN(FaceGenRefreshAppearance, FaceGRefresh , , 1, 0, NULL);
 DEFINE_CMD_NO_ARGS(GetAvailablePerks);
 DEFINE_COMMAND_PLUGIN(GetEffectShaderTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetEffectShaderTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
@@ -772,7 +772,7 @@ bool Cmd_FaceGenRefreshAppearance_Execute(COMMAND_ARGS) {
 
 
 
-bool Cmd_GetFaceGenNthProperty_Execute(COMMAND_ARGS) {
+bool Cmd_FaceGenGetNthProperty_Execute(COMMAND_ARGS) {
 	TESNPC* npc = NULL;
 	UInt32 PropertyListIndex = 0;
 	UInt32 PropertyIndex = 0;
@@ -790,7 +790,7 @@ bool Cmd_GetFaceGenNthProperty_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_SetFaceGenNthProperty_Execute(COMMAND_ARGS) {
+bool Cmd_FaceGenSetNthProperty_Execute(COMMAND_ARGS) {
 	TESNPC* npc = NULL;
 	UInt32 PropertyListIndex = 0;
 	UInt32 PropertyIndex = 0;

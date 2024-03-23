@@ -343,8 +343,8 @@ extern "C" {
 		REG_CMD(ToggleDisableSaves);
 		REG_CMD(SetJohnnyOnRenderUpdateEventHandler);
 		REG_CMD(WorldToScreen);
-		REG_CMD(GetFaceGenNthProperty);
-		REG_CMD(SetFaceGenNthProperty);
+		REG_CMD(FaceGenGetNthProperty);
+		REG_CMD(FaceGenSetNthProperty);
 		REG_CMD(FaceGenRefreshAppearance);
 		REG_CMD(SendTrespassAlarmAlt);
 		REG_CMD(IsCrimeOrEnemy);
