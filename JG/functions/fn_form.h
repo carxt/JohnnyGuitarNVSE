@@ -769,14 +769,20 @@ bool Cmd_FaceGenRefreshAppearance_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
+
+
 bool Cmd_GetFaceGenNthProperty_Execute(COMMAND_ARGS) {
 	TESNPC* npc = NULL;
 	UInt32 PropertyListIndex = 0;
 	UInt32 PropertyIndex = 0;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &npc, &PropertyListIndex, &PropertyIndex) && npc && IS_TYPE(npc, TESNPC) && PropertyListIndex < 3) {
+		
+		uintptr_t propertyListMinorIdx = PropertyListIndex % 2;
+		uintptr_t propertyListMajorIdx = (PropertyIndex - propertyListMinorIdx) / 2;
 		if (auto FaceGenPTR = TESNPC_GetFaceGenData(npc)) {
-			*result = CdeclCall<float>(0x652230, FaceGenPTR, UInt32(PropertyListIndex < 1), UInt32(PropertyListIndex > 1), PropertyIndex);
+			*result = CdeclCall<float>(0x652230, FaceGenPTR, propertyListMajorIdx, propertyListMinorIdx, PropertyIndex);
 			if (IsConsoleMode())
 				Console_Print("GetFaceGenNthProperty %.2f", *result);
 		}
@@ -791,8 +797,11 @@ bool Cmd_SetFaceGenNthProperty_Execute(COMMAND_ARGS) {
 	float val = 0;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &npc, &PropertyListIndex, &PropertyIndex, &val) && npc && IS_TYPE(npc, TESNPC) && PropertyListIndex < 3) {
+		uintptr_t propertyListMinorIdx = PropertyListIndex % 2;
+		uintptr_t propertyListMajorIdx = (PropertyIndex - propertyListMinorIdx) / 2;
+
 		if (auto FaceGenPTR = TESNPC_GetFaceGenData(npc)) {
-			CdeclCall<void>(0x652320, FaceGenPTR, (PropertyListIndex < 1), (PropertyListIndex > 1), PropertyIndex, val);
+			CdeclCall<void>(0x652320, FaceGenPTR, propertyListMajorIdx, PropertyListIndex, PropertyIndex, val);
 			*result = 1;
 			if (IsConsoleMode()) {
 				Console_Print("SetFaceGenNthProperty called");

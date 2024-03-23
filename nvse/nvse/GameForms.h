@@ -3290,6 +3290,92 @@ STATIC_ASSERT(sizeof(ValidBip01Names) == 0x2B0);
 
 // 20
 struct FaceGenData {
+	enum FGGeoSymmetry {
+		kBrow_HighLow,
+		kBrowInner_HighLow,
+		kBrowOuter_HighLow,
+		kCheekbone_LowHigh,
+		kCheekbone_ShallowPronounced,
+		kCheekbone_ThinWide,
+		kCheek_ConcaveConvex,
+		kCheek_RoundGaunt,
+		kChin_ForwardBackward,
+		kChin_PronouncedRecessed,
+		kChin_RetractedJutting,
+		kChin_ShallowDeep,
+		kChin_SmallLarge,
+		kChin_TallShort,
+		kChin_WideThin,
+		kEyes_DownUp,
+		kEyes_SmallLarge,
+		kEyes_TiltInwardOutward,
+		kEyes_TogetherApart,
+		kFace_BrowNoseChinRatio,
+		kFace_ForeheadSellionNoseRatio,
+		kFace_HeavyLight,
+		kFace_RoundGaunt,
+		kFace_ThinWide,
+		kForehead_SmallLarge,
+		kForehead_TallShort,
+		kForehead_TiltForwardBackward,
+		kJaw_RetractedJutting,
+		kJaw_WideThin,
+		kJawNeck_SlopeHighLow,
+		kJawline_ConcaveConvex,
+		kMouth_DrawnPursed,
+		kMouth_HappySad,
+		kMouth_HighLow,
+		kMouth_Lips_DeflatedInflated,
+		kMouth_Lips_LargeSmall,
+		kMouth_Lips_PuckeredRetracted,
+		kMouth_ProtrudingRetracted,
+		kMouth_TiltUpDown,
+		kMouth_UnderbiteOverbite,
+		kMouthChin_DistanceShortLong,
+		kNose_BridgeShallowDeep,
+		kNose_BridgeShortLong,
+		kNose_DownUp,
+		kNose_FlatPointed,
+		kNose_NostrilTiltUpDown,
+		kNose_NostrilSmallLarge,
+		kNose_NostrilWideThin,
+		kNose_RegionConcaveConvex,
+		kNose_SellionDownUp,
+		kNose_SellionShallowDeep,
+		kNose_SellionShallowDeep2, //This one also seems to control the brow ridge
+		kNose_SellionThinWide,
+		kNose_ShortLong,
+		kNose_TiltDownUp,
+		kMaxSize //This is actually a valid property but it's not exposed normally. Seems to control upper cranial width.
+	};
+	enum FGGeoAsym {
+		kBrowRidge_ForwardAxisTwist, //VERY noticeable
+		kCheekbone_ProtrusionAsymmetry, //Somewhat noticeable
+		kChin_ChinAxisTwist, //Somewhat noticeable
+		kChin_ForwardAxisTwist, //Average
+		kChin_TransverseShift, //Noticeable
+		kEyes_HeightDisparity, //Noticeable
+		kEyes_TransverseShift, //VERY noticeable
+		kFace_CoronalBend, //Noticeable
+		kFace_CoronalShear, //VERY noticeable
+		kFace_VerticalAxisTwist, //Noticeable
+		kForehead_ForwardAxisTwist, //Noticeable
+		kMouth_CornersTransverseShift, //Somewhat subtle
+		kMouth_ForwardAxisTwist, //Noticeable
+		kMouth_TransverseShift, //Somewhat subtle
+		kMouth_TwistAndShift, //Average
+		kMouthNose_CoronalShear, //Noticeable
+		kMouthNose_TransverseShift, //Somewhat noticeable
+		kNose_BridgeTransverseShift, //Noticeable
+		kNose_FrontalAxisTwist, //Somewhat noticeable
+		kNose_SellionTransverseShift, //Somewhat noticeable
+		kNose_TipTransverseShift, //Noticeable
+		kNose_TransverseShift, //Noticeable
+		kNose_VerticalAxisTwist, //Noticeable
+		kNoseRegion_FrontalAxisTwist, //Average
+		kNostrils_FrontalAxisTwist, //Average
+		kMax, ////Seems to control face assymetry, but it's not exposed to GECK, either. Noticeable
+	};
 	UInt32		unk00;		// 00
 	void* unk04;		// 04
 	UInt32		unk08;		// 08
