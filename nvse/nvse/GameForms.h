@@ -3349,33 +3349,34 @@ struct FaceGenData {
 		kMaxSize //This is actually a valid property but it's not exposed normally. Seems to control upper cranial width.
 	};
 	enum FGGeoAsym {
-		kBrowRidge_ForwardAxisTwist, //VERY noticeable
-		kCheekbone_ProtrusionAsymmetry, //Somewhat noticeable
-		kChin_ChinAxisTwist, //Somewhat noticeable
-		kChin_ForwardAxisTwist, //Average
-		kChin_TransverseShift, //Noticeable
-		kEyes_HeightDisparity, //Noticeable
-		kEyes_TransverseShift, //VERY noticeable
-		kFace_CoronalBend, //Noticeable
-		kFace_CoronalShear, //VERY noticeable
-		kFace_VerticalAxisTwist, //Noticeable
-		kForehead_ForwardAxisTwist, //Noticeable
-		kMouth_CornersTransverseShift, //Somewhat subtle
-		kMouth_ForwardAxisTwist, //Noticeable
-		kMouth_TransverseShift, //Somewhat subtle
-		kMouth_TwistAndShift, //Average
-		kMouthNose_CoronalShear, //Noticeable
-		kMouthNose_TransverseShift, //Somewhat noticeable
-		kNose_BridgeTransverseShift, //Noticeable
-		kNose_FrontalAxisTwist, //Somewhat noticeable
-		kNose_SellionTransverseShift, //Somewhat noticeable
-		kNose_TipTransverseShift, //Noticeable
-		kNose_TransverseShift, //Noticeable
-		kNose_VerticalAxisTwist, //Noticeable
-		kNoseRegion_FrontalAxisTwist, //Average
-		kNostrils_FrontalAxisTwist, //Average
-		kMax, ////Seems to control face assymetry, but it's not exposed to GECK, either. Noticeable
+		kBrowRidge_ForwardAxisTwist,
+		kCheekbone_ProtrusionAsymmetry,
+		kChin_ChinAxisTwist,
+		kChin_ForwardAxisTwist,
+		kChin_TransverseShift,
+		kEyes_HeightDisparity,
+		kEyes_TransverseShift,
+		kFace_CoronalBend,
+		kFace_CoronalShear,
+		kFace_VerticalAxisTwist,
+		kForehead_ForwardAxisTwist,
+		kMouth_CornersTransverseShift,
+		kMouth_ForwardAxisTwist,
+		kMouth_TransverseShift,
+		kMouth_TwistAndShift,
+		kMouthNose_CoronalShear,
+		kMouthNose_TransverseShift,
+		kNose_BridgeTransverseShift,
+		kNose_FrontalAxisTwist,
+		kNose_SellionTransverseShift,
+		kNose_TipTransverseShift,
+		kNose_TransverseShift,
+		kNose_VerticalAxisTwist,
+		kNoseRegion_FrontalAxisTwist,
+		kNostrils_FrontalAxisTwist,
+		kMax, ////Seems to control face assymetry, but it's not exposed to GECK, either.
 	};
+
 	UInt32		unk00;		// 00
 	void* unk04;		// 04
 	UInt32		unk08;		// 08
