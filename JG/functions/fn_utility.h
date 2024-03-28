@@ -7,7 +7,7 @@ DEFINE_COMMAND_PLUGIN(GetJohnnyPatch, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(RefAddr, , 0, 1, kParams_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(RefAddrxData, , 0, 1, NULL);
+DEFINE_COMMAND_PLUGIN(RefAddrxData, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(EditorIDToFormID, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParams_FourStrings);

@@ -430,6 +430,8 @@ extern "C" {
 		REG_CMD(AudioMarkerSetController);
 		REG_CMD(AudioMarkerGetProperty);
 		REG_CMD(AudioMarkerSetProperty);
+		REG_CMD(IsRadioRefPlaying);
+		REG_CMD(TuneRadioRef);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

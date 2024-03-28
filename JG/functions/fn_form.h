@@ -47,9 +47,9 @@ DEFINE_COMMAND_PLUGIN(GetBodyPartTraitString, , 0, 3, kParams_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetActorEffectType, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetTalkingActivatorActor, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetPlayerKarmaTitle, , 0, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(FaceGenGetNthProperty, FaceGGetNth , , 0, 3, kParams_OneActorBase_TwoInts);
-DEFINE_COMMAND_ALT_PLUGIN(FaceGenSetNthProperty, FaceGSetNth , , 0, 4, kParams_OneActorBase_TwoInts_OneFloat);
-DEFINE_COMMAND_ALT_PLUGIN(FaceGenRefreshAppearance, FaceGRefresh , , 1, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(FaceGenGetNthProperty, FaceGGetNth, , 0, 3, kParams_OneActorBase_TwoInts);
+DEFINE_COMMAND_ALT_PLUGIN(FaceGenSetNthProperty, FaceGSetNth, , 0, 4, kParams_OneActorBase_TwoInts_OneFloat);
+DEFINE_COMMAND_ALT_PLUGIN(FaceGenRefreshAppearance, FaceGRefresh, , 1, 0, NULL);
 DEFINE_CMD_NO_ARGS(GetAvailablePerks);
 DEFINE_COMMAND_PLUGIN(GetEffectShaderTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetEffectShaderTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
@@ -81,9 +81,50 @@ DEFINE_COMMAND_PLUGIN(ClearWeaponAltTexture, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFactionFlags, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetFactionFlags, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFormRecipesAlt, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(IsRadioRefPlaying, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(TuneRadioRef, , 1, 1, kParams_OneOptionalForm);
+
+
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+
+bool Cmd_IsRadioRefPlaying_Execute(COMMAND_ARGS) {
+	*result = 2;
+	if (thisObj && thisObj->baseForm && IS_TYPE(thisObj->baseForm, TESObjectACTI)) {
+		TESObjectACTI* baseActi = (TESObjectACTI*)thisObj->baseForm;
+		if (baseActi->radioStation) {
+			*result = (CdeclCall<void*>(0x0832930, thisObj) != NULL);
+		}
+	}
+	return true;
+}
+
+bool Cmd_TuneRadioRef_Execute(COMMAND_ARGS) {
+	BGSTalkingActivator* actiDst = NULL;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &actiDst) && thisObj && thisObj->baseForm && IS_TYPE(thisObj->baseForm, TESObjectACTI) ) {
+		if (TESObjectACTI* actiBase = (TESObjectACTI*)thisObj->baseForm) {
+			BGSTalkingActivator* originalTK = actiBase->radioStation;
+			if (actiDst == NULL) {
+				actiDst = originalTK;
+			}
+			if (IS_TYPE(actiDst, BGSTalkingActivator) && (CdeclCall<void*>(0x0832930, thisObj) != NULL)) {
+				CdeclCall<void*>(0x08325B0, thisObj, 0);
+				actiBase->radioStation = actiDst;
+				CdeclCall<void*>(0x08325B0, thisObj, 1);
+				actiBase->radioStation = originalTK;
+			}
+		}
+	}
+	return true;
+}
+
+
+
+
+
+
 
 bool Cmd_GetFormRecipesAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
