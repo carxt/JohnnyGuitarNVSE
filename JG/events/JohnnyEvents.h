@@ -285,9 +285,9 @@ class hk_RadioTuneOnEvent {
 private:
 	static inline uintptr_t hookCall = a_addr;
 public:
-	 static  DWORD __cdecl hk_RadHook(void* ref, DWORD mode) {
-		auto res = ThisStdCall<DWORD>(hookCall, ref, mode);
-
+	 static  DWORD __cdecl hk_RadHook(TESObjectACTI* ref, DWORD mode) {
+		auto res = CdeclCall<DWORD>(hookCall, ref, mode);
+		HandleOnRadioPostSoundAttach(ref, mode);
 		return res;
 	}
 
