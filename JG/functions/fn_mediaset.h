@@ -6,11 +6,30 @@ DEFINE_COMMAND_PLUGIN(GetMediaSetTraitString, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitSound, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitString, , 0, 3, kParams_OneForm_OneInt_OneString);
-DEFINE_COMMAND_PLUGIN(AudioMarkerSetController, , 1, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(AudioMarkerGetController, , 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(AudioMarkerSetProperty, , 1, 2, kParams_OneInt_OneFloat);
-DEFINE_COMMAND_PLUGIN(AudioMarkerGetProperty, , 1, 1, kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerSetController, AMKSetCtrl, , 1, 1, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerGetController, AMKGetCtrl, , 1, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerSetProperty, AMKSetProp, , 1, 2, kParams_OneInt_OneFloat);
+DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerGetProperty, AMKGetProp, ,1, 1, kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerGetCurrent, AMKGetCur, , 1, 0, NULL);
 
+
+
+
+
+
+
+
+
+
+bool Cmd_AudioMarkerGetCurrent_Execute(COMMAND_ARGS){
+	*result = 0;
+	if (g_thePlayer && g_thePlayer->currMusicMarker) {
+		if (auto mMarker = g_thePlayer->currMusicMarker->markerRef) {
+			*(DWORD*)result = mMarker->refID;
+		}
+	}
+	return true;
+}
 
 bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
 	MediaLocationController* locationController;
@@ -271,7 +290,7 @@ bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 bool Cmd_SetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
-	const char* newStr = NULL;
+	char newStr[MAX_PATH];
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newStr) && IS_TYPE(mediaset, MediaSet)) {
 		if (traitID >= 0 && traitID <= 5) {

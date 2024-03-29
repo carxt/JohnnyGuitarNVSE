@@ -65,7 +65,7 @@ uintptr_t g_canSaveNowAddr = 0;
 uintptr_t g_canSaveNowMenuAddr = 0;
 Setting** g_miscStatData = (Setting**)0x11C6D50;
 char g_workingDir[MAX_PATH];
-
+std::unordered_set<DWORD> jg_gameRadioSet;
 static float g_viewmodel_near = 0.f;
 
 template <class T>
@@ -119,20 +119,29 @@ namespace hk_RSMBarberHook {
 
 
 namespace SkyCloudHook {
-	bool pendingFirstUpdate = true;
+	static DWORD completedFirstUpdate = 0;
 	bool __fastcall hk_han_SkipCloudCheck(TESWeather* a_wea) {
-		if (pendingFirstUpdate || !a_wea) { 
-			pendingFirstUpdate = false; 
+		if (completedFirstUpdate < 2 || !a_wea ) {
+			completedFirstUpdate = 1;
 			return false; 
 		}
 		return true;
 
 	}
+
+	static uintptr_t fn_Clouds_Update = 0;
+	DWORD __fastcall hk_Clouds_Upd (void* a_cloud, void* edx, void* Sky, float timePassed) {
+		auto ret = ThisStdCall<DWORD>(fn_Clouds_Update, a_cloud, Sky, timePassed);
+		if (completedFirstUpdate == 1) {
+			completedFirstUpdate = 2;
+		}
+		return ret;
+	}
 	__declspec(naked) void asm_HookCloudCheck() {
 		static uintptr_t jmpRet = 0x06346F9;
 		static uintptr_t jneRet = 0x0634740;
 		__asm {
-			mov ecx, dword ptr [ebp-0x14]
+			mov ecx, dword ptr[ebp - 0x14]
 			call hk_han_SkipCloudCheck
 			test al, al
 			jne skip
@@ -142,6 +151,19 @@ namespace SkyCloudHook {
 			jmp jneRet
 		}
 	}
+	void InstallCloudUpdHook() {
+		SafeWrite8(0x06346F3, 0x90);
+		WriteRelJump(0x06346F4, (uintptr_t)SkyCloudHook::asm_HookCloudCheck);
+		SkyCloudHook::fn_Clouds_Update = *(uintptr_t*)0x104EC14;
+		SafeWrite32(0x104EC14, (uintptr_t)SkyCloudHook::hk_Clouds_Upd);
+	}
+
+	DWORD __fastcall hk_han_NewGameCloudUpdate(BGSSaveLoadGame* a_obj) {
+		return ThisStdCall<bool>(0x42CE10, a_obj) || (*(bool*)0x11D8907);
+	
+	}
+	
+
 
 }
 
@@ -505,11 +527,17 @@ void __fastcall UIUpdateSoundHook(Sound* sound, int dummy) {
 void ResetVanityWheel() {
 	float* VanityWheel = (float*)0x11E0B5C;
 	float* MaxChaseCam = (ThisStdCall<float*>((uintptr_t)0x0403E20, (void*)0x11CD568));
-	if (*MaxChaseCam < *VanityWheel)
-		*VanityWheel = *MaxChaseCam;
+	static float f_VanityWheelcState = *MaxChaseCam;
+
+	if (*MaxChaseCam < *VanityWheel) {
+		*VanityWheel = f_VanityWheelcState;
+	}
+	else {
+		f_VanityWheelcState = *VanityWheel;
+	}
 }
 
-__declspec (naked) void VanityModeHook() {
+__declspec (naked) void VanityModeHook_DEPRECATED() {
 	static uintptr_t jmpDest = 0x942D43;
 	static uintptr_t getGS = 0x403E20;
 	__asm
@@ -665,6 +693,39 @@ char* __fastcall GetReputationMessageIconHook(UInt32 a1) {
 	}
 	return a1 ? ((Setting*)a1)->data.str : "\0";
 }
+
+
+void ComputeDiscoveredRadioDirectory() {
+	static ULONGLONG timer = GetTickCount64();
+	if (((GetTickCount64() - timer) > 1000) || jg_gameRadioSet.empty()) {
+		timer = GetTickCount64();
+		jg_gameRadioSet.clear();
+		jg_gameRadioSet.insert(0);
+		tList<TESObjectACTI>* discoveredRadios = CdeclCall<tList<TESObjectACTI>*>(0x79C080);
+		for (auto radioIter = discoveredRadios->Begin(); !radioIter.End(); radioIter.Next()) {
+			if (*radioIter) {
+				jg_gameRadioSet.insert((*radioIter)->refID);
+			}
+		}
+	}
+	
+}
+
+char* __cdecl fixAudioMonoLookupOverflow(char* Dst, const char* suffix){
+	char subBuf[MAX_PATH] = {};
+	if (!strstr(Dst, suffix)) {
+		if (auto subchr = strrchr(Dst, '.')) {
+			strcpy_s(subBuf, MAX_PATH, subchr + 1);
+			*subchr = '\0';
+			strcat_s(Dst, MAX_PATH, suffix);
+			strcat_s(Dst, MAX_PATH, subBuf);
+		}
+	}
+	return Dst;
+}
+
+
+
 Setting* __fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char* name) {
 	Setting* result = ThisStdCall<Setting*>(0x5E02B0, ini, name);
 	if (result) return result;
@@ -984,15 +1045,19 @@ void HandleFixes() {
 	WriteRelCall(0x0A2EC64, (uintptr_t)NiContManNullCheck2);
 
 	//fix the clouds
-	SafeWrite8(0x06346F3, 0x90);
-	WriteRelJump(0x06346F4, (uintptr_t)SkyCloudHook::asm_HookCloudCheck);
+	SkyCloudHook::InstallCloudUpdHook();
+	//Cloud int update
 	SafeWrite8(0x63AD66, 0xEB);
+	WriteRelCall(0x063ADAB, (uintptr_t)SkyCloudHook::hk_han_NewGameCloudUpdate);
+	//Stop game from crashing on extensions reeeeeeeeeee
+	WriteRelCall(0x83509D, (uintptr_t)fixAudioMonoLookupOverflow);
+
 
 }
 
 void HandleIniOptions() {
 	// for bReset3rdPersonCamera
-	if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)VanityModeHook);
+	//if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)VanityModeHook);
 
 	// for bFixFleeing
 	if (fixFleeing) WriteRelCall(0x8F5FE2, (UInt32)FleeFixHook);

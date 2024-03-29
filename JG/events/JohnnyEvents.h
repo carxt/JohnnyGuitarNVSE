@@ -14,7 +14,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEven
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , 0, 4, kParams_Event_OptionalFlag);
 DEFINE_COMMAND_ALT_PLUGIN(SetOnActorValueChangeEventHandler, SetJohnnyOnActorValueChangeEventHandler, , 0, 4, kParams_Event_OneInt);
 DEFINE_COMMAND_PLUGIN(SetOnProcessLevelChangeEventHandler, , 0, 5, kParams_Event_OneForm_OneInt);
-
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRadioPostSoundAttachEventHandler, SetOnRadioPostSoundHandler, , 0, 4, kParams_Event_OneForm);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
@@ -32,6 +32,8 @@ EventInformation* OnRenderGameModeUpdateHandler;
 EventInformation* OnRenderRenderedMenuUpdateHandler;
 EventInformation* OnAVChangeHandler;
 EventInformation* OnPLChangeHandler;
+EventInformation* OnRadioPostSoundAttachHandler;
+
 
 UInt32 handlePreRenderEvent() {
 	for (auto const& callback : OnRenderGamePreUpdateHandler->EventCallbacks) {
@@ -183,6 +185,18 @@ bool __fastcall HandlePLChangeEvent(Actor* actor) {
 		return result;
 }
 
+void __fastcall HandleOnRadioPostSoundAttach(TESObjectACTI* a_radioActi, unsigned int mode){
+	if (a_radioActi == NULL) return;
+	for (auto const& callback : OnRadioPostSoundAttachHandler->EventCallbacks) {
+		JohnnyEventFiltersForm* filter = reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter);
+		if (filter->IsBaseInFilter(0, a_radioActi)) {
+			CallUDF(callback.ScriptForEvent, NULL, OnSeenDataUpdateHandler->numMaxArgs, a_radioActi, (mode > 0) ? 1 : 0);
+		}
+	}
+}
+
+
+
 __declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32 avCode, float prevVal, float newVal, ActorValueOwner* attacker)
 {
 	__asm
@@ -257,6 +271,37 @@ __declspec (naked) void OnQuestStartStopEventAsm() {
 		ret 4
 	}
 }
+
+
+
+inline uintptr_t GetRelJumpAddr(uintptr_t address)
+{
+	return *(uintptr_t*)(address + 1) + address + 5;
+}
+
+
+template <uintptr_t a_addr>
+class hk_RadioTuneOnEvent {
+private:
+	static inline uintptr_t hookCall = a_addr;
+public:
+	 static  DWORD __cdecl hk_RadHook(TESObjectACTI* ref, DWORD mode) {
+		auto res = CdeclCall<DWORD>(hookCall, ref, mode);
+		HandleOnRadioPostSoundAttach(ref, mode);
+		return res;
+	}
+
+	hk_RadioTuneOnEvent() {
+		uintptr_t hk_hookPoint = hookCall;
+		hookCall = GetRelJumpAddr(hookCall);
+		WriteRelCall(hk_hookPoint, (uintptr_t)hk_RadHook);
+	}
+};
+
+
+
+
+
 
 
 bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
@@ -499,6 +544,22 @@ bool Cmd_SetOnProcessLevelChangeEventHandler_Execute(COMMAND_ARGS) {
 }
 
 
+bool Cmd_SetJohnnyOnRadioPostSoundAttachEventHandler_Execute(COMMAND_ARGS) {
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	TESForm* filter[1] = { NULL };
+	UInt32 flags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+		if (OnRadioPostSoundAttachHandler) {
+			if (setOrRemove)
+				OnRadioPostSoundAttachHandler->RegisterEvent(script, (void**)&filter);
+			else OnRadioPostSoundAttachHandler->RemoveEvent(script, (void**)&filter);
+		}
+	}
+	return true;
+}
+
+
 void HandleEventHooks() {
 	OnDyingHandler = JGCreateEvent("OnDying", 1, 1, NULL);
 	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1, NULL);
@@ -514,7 +575,7 @@ void HandleEventHooks() {
 	OnRemovePerkHandler = JGCreateEvent("OnRemovePerk", 1, 1, NULL);
 	OnAVChangeHandler = JGCreateEvent("OnActorValueChange", 3, 2, CreateOneFormOneIntFilter);
 	OnPLChangeHandler = JGCreateEvent("OnProcessLevelChange", 3, 2, CreateOneFormOneIntFilter);
-
+	OnRadioPostSoundAttachHandler = JGCreateEvent("OnRadioPostSoundAttach", 2, 1, NULL);
 	CallUDF = g_scriptInterface->CallFunctionAlt;
 	WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 	WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
@@ -557,6 +618,13 @@ void HandleEventHooks() {
 	SafeWrite32(0x10872F8, (UINT)HandlePLChangeEvent<0x883800>);
 	SafeWrite32(0x1086CB8, (UINT)HandlePLChangeEvent<0x883800>);
 	SafeWrite32(0x10844A0, (UINT)HandlePLChangeEvent<0x883800>);
+
+
+	hk_RadioTuneOnEvent<0x511816>();
+	hk_RadioTuneOnEvent<0x579C64>();
+	hk_RadioTuneOnEvent<0x57A23A>();
+
+
 
 
 	//testing
