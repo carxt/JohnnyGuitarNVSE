@@ -68,12 +68,14 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			ResetMiscStatMap();
 			haircutSetList.dFlush();
 			beardSetList.dFlush();
+			jg_gameRadioSet.clear();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_PostLoadGame:
 			break;
 
 		case NVSEMessagingInterface::kMessage_MainGameLoop:
+			ComputeDiscoveredRadioDirectory();
 			for (const auto& EventInfo : EventsArray) {
 				EventInfo->AddQueuedEvents();
 				EventInfo->DeleteEvents();
@@ -432,6 +434,9 @@ extern "C" {
 		REG_CMD(AudioMarkerSetProperty);
 		REG_CMD(IsRadioRefPlaying);
 		REG_CMD(TuneRadioRef);
+		REG_TYPED_CMD(GetAllGameRadios, Array);
+		REG_TYPED_CMD(GetAvailableRadios, Array);
+		REG_CMD(SetJohnnyOnRadioPostSoundAttachEventHandler);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

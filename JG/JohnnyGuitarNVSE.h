@@ -65,7 +65,7 @@ uintptr_t g_canSaveNowAddr = 0;
 uintptr_t g_canSaveNowMenuAddr = 0;
 Setting** g_miscStatData = (Setting**)0x11C6D50;
 char g_workingDir[MAX_PATH];
-
+std::unordered_set<DWORD> jg_gameRadioSet;
 static float g_viewmodel_near = 0.f;
 
 template <class T>
@@ -693,6 +693,39 @@ char* __fastcall GetReputationMessageIconHook(UInt32 a1) {
 	}
 	return a1 ? ((Setting*)a1)->data.str : "\0";
 }
+
+
+void ComputeDiscoveredRadioDirectory() {
+	static ULONGLONG timer = GetTickCount64();
+	if (((GetTickCount64() - timer) > 1000) || jg_gameRadioSet.empty()) {
+		timer = GetTickCount64();
+		jg_gameRadioSet.clear();
+		jg_gameRadioSet.insert(0);
+		tList<TESObjectACTI>* discoveredRadios = CdeclCall<tList<TESObjectACTI>*>(0x79C080);
+		for (auto radioIter = discoveredRadios->Begin(); !radioIter.End(); radioIter.Next()) {
+			if (*radioIter) {
+				jg_gameRadioSet.insert((*radioIter)->refID);
+			}
+		}
+	}
+	
+}
+
+char* __cdecl fixAudioMonoLookupOverflow(char* Dst, const char* suffix){
+	char subBuf[MAX_PATH] = {};
+	if (!strstr(Dst, suffix)) {
+		if (auto subchr = strrchr(Dst, '.')) {
+			strcpy_s(subBuf, MAX_PATH, subchr + 1);
+			*subchr = '\0';
+			strcat_s(Dst, MAX_PATH, suffix);
+			strcat_s(Dst, MAX_PATH, subBuf);
+		}
+	}
+	return Dst;
+}
+
+
+
 Setting* __fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char* name) {
 	Setting* result = ThisStdCall<Setting*>(0x5E02B0, ini, name);
 	if (result) return result;
@@ -1016,7 +1049,8 @@ void HandleFixes() {
 	//Cloud int update
 	SafeWrite8(0x63AD66, 0xEB);
 	WriteRelCall(0x063ADAB, (uintptr_t)SkyCloudHook::hk_han_NewGameCloudUpdate);
-	
+	//Stop game from crashing on extensions reeeeeeeeeee
+	WriteRelCall(0x83509D, (uintptr_t)fixAudioMonoLookupOverflow);
 
 
 }

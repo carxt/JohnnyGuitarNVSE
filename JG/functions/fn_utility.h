@@ -31,6 +31,50 @@ DEFINE_COMMAND_PLUGIN(GetViewmodelClipDistance, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetBlockTransform, , 1, 8, kTransformParams);
 DEFINE_CMD_NO_ARGS(DumpIconMap);
 DEFINE_CMD_NO_ARGS(RollCredits);
+DEFINE_CMD_NO_ARGS(GetAllGameRadios);
+DEFINE_COMMAND_PLUGIN(GetAvailableRadios, , 1, 0, NULL);
+
+
+
+
+bool Cmd_GetAllGameRadios_Execute(COMMAND_ARGS) {
+	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	tList<TESObjectACTI>* g_gameRadios = (tList<TESObjectACTI>*)0x11C8264;
+	for (auto radioIter = g_gameRadios->Begin(); !radioIter.End(); radioIter.Next()) {
+		if (*radioIter) {
+			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
+		}
+	}
+	g_arrInterface->AssignCommandResult(radioArr, result);
+	return true;
+}
+
+
+bool Cmd_GetAvailableRadios_Execute(COMMAND_ARGS) {
+	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	tList<TESObjectACTI> availableRadios = {};
+	CdeclCall<void>(0x04FF1A0, thisObj, &availableRadios, NULL);
+	for (auto radioIter = availableRadios.Begin(); !radioIter.End(); radioIter.Next()) {
+		if (*radioIter && !CdeclCall<bool>(0x0079BE30, *radioIter) && (jg_gameRadioSet.count((*radioIter)->refID) > 0)) {
+			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
+		}
+	}
+	g_arrInterface->AssignCommandResult(radioArr, result);
+	return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ThisStdCall<void>(0x75F2A0, nullptr);

@@ -14,7 +14,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEven
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , 0, 4, kParams_Event_OptionalFlag);
 DEFINE_COMMAND_ALT_PLUGIN(SetOnActorValueChangeEventHandler, SetJohnnyOnActorValueChangeEventHandler, , 0, 4, kParams_Event_OneInt);
 DEFINE_COMMAND_PLUGIN(SetOnProcessLevelChangeEventHandler, , 0, 5, kParams_Event_OneForm_OneInt);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRadioPostSoundAttach, SetOnRadioPostSound, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRadioPostSoundAttachEventHandler, SetOnRadioPostSoundHandler, , 0, 4, kParams_Event_OneForm);
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
@@ -188,8 +188,8 @@ bool __fastcall HandlePLChangeEvent(Actor* actor) {
 void __fastcall HandleOnRadioPostSoundAttach(TESObjectACTI* a_radioActi, unsigned int mode){
 	if (a_radioActi == NULL) return;
 	for (auto const& callback : OnRadioPostSoundAttachHandler->EventCallbacks) {
-		JohnnyEventFiltersOneFormOneInt* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter);
-		if (reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter)->IsBaseInFilter(0, a_radioActi)) {
+		JohnnyEventFiltersForm* filter = reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter);
+		if (filter->IsBaseInFilter(0, a_radioActi)) {
 			CallUDF(callback.ScriptForEvent, NULL, OnSeenDataUpdateHandler->numMaxArgs, a_radioActi, (mode > 0) ? 1 : 0);
 		}
 	}
@@ -544,7 +544,7 @@ bool Cmd_SetOnProcessLevelChangeEventHandler_Execute(COMMAND_ARGS) {
 }
 
 
-bool Cmd_SetJohnnyOnRadioPostSoundAttach_Execute(COMMAND_ARGS) {
+bool Cmd_SetJohnnyOnRadioPostSoundAttachEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
 	Script* script = NULL;
 	TESForm* filter[1] = { NULL };
