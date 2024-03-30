@@ -91,7 +91,7 @@ void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC
 
 
 bool Cmd_IsRadioRefPlaying_Execute(COMMAND_ARGS) {
-	*result = 2;
+	*result = 0;
 	if (thisObj && thisObj->baseForm && IS_TYPE(thisObj->baseForm, TESObjectACTI)) {
 		TESObjectACTI* baseActi = (TESObjectACTI*)thisObj->baseForm;
 		if (baseActi->radioStation) {
@@ -109,11 +109,13 @@ bool Cmd_TuneRadioRef_Execute(COMMAND_ARGS) {
 			if (actiDst == NULL) {
 				actiDst = originalTK;
 			}
-			if (IS_TYPE(actiDst, BGSTalkingActivator) && (CdeclCall<void*>(0x0832930, thisObj) != NULL)) {
-				CdeclCall<void*>(0x08325B0, thisObj, 0);
-				actiBase->radioStation = actiDst;
-				CdeclCall<void*>(0x08325B0, thisObj, 1);
-				actiBase->radioStation = originalTK;
+			if (IS_TYPE(actiDst, BGSTalkingActivator)) {
+				if ((CdeclCall<void*>(0x0832930, thisObj) != NULL) || CdeclCall<unsigned int>(0x047B250, thisObj) == 1) {
+					CdeclCall<void*>(0x08325B0, thisObj, 0);
+					actiBase->radioStation = actiDst;
+					CdeclCall<void*>(0x08325B0, thisObj, 1);
+					actiBase->radioStation = originalTK;
+				}
 			}
 		}
 	}
