@@ -47,7 +47,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 500
+#define JG_VERSION 501
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_NewGame:
@@ -68,9 +68,14 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			ResetMiscStatMap();
 			haircutSetList.dFlush();
 			beardSetList.dFlush();
+			jg_gameRadioSet.clear();
 			break;
 		}
+		case NVSEMessagingInterface::kMessage_PostLoadGame:
+			break;
+
 		case NVSEMessagingInterface::kMessage_MainGameLoop:
+			ComputeDiscoveredRadioDirectory();
 			for (const auto& EventInfo : EventsArray) {
 				EventInfo->AddQueuedEvents();
 				EventInfo->DeleteEvents();
@@ -81,6 +86,16 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 				g_statsMenu->miscStatIDList.Filter(ShouldHideStat);
 
 			}
+			if (resetVanityCam) {
+				if (g_thePlayer) {
+					WORD bIsInVanityMode = (*(WORD*)0x11E07B8) || g_thePlayer->byte64D; //64d = autovanity mode.
+					if (!bIsInVanityMode) {
+						ResetVanityWheel();
+					}
+				}
+	
+			}
+
 			break;
 		case NVSEMessagingInterface::kMessage_DeferredInit:
 		{
@@ -330,8 +345,8 @@ extern "C" {
 		REG_CMD(ToggleDisableSaves);
 		REG_CMD(SetJohnnyOnRenderUpdateEventHandler);
 		REG_CMD(WorldToScreen);
-		REG_CMD(GetFaceGenNthProperty);
-		REG_CMD(SetFaceGenNthProperty);
+		REG_CMD(FaceGenGetNthProperty);
+		REG_CMD(FaceGenSetNthProperty);
 		REG_CMD(FaceGenRefreshAppearance);
 		REG_CMD(SendTrespassAlarmAlt);
 		REG_CMD(IsCrimeOrEnemy);
@@ -411,6 +426,17 @@ extern "C" {
 		REG_CMD(TriggerScreenSplatterEx);
 		REG_CMD(SetViewmodelClipDistance);
 		REG_CMD(GetViewmodelClipDistance);
+		REG_CMD(SetBlockTransform);
+		REG_CMD(RefAddrxData);
+		REG_CMD(AudioMarkerGetController);
+		REG_CMD(AudioMarkerSetController);
+		REG_CMD(AudioMarkerGetProperty);
+		REG_CMD(AudioMarkerSetProperty);
+		REG_CMD(IsRadioRefPlaying);
+		REG_CMD(TuneRadioRef);
+		REG_TYPED_CMD(GetAllGameRadios, Array);
+		REG_TYPED_CMD(GetAvailableRadios, Array);
+		REG_CMD(SetJohnnyOnRadioPostSoundAttachEventHandler);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

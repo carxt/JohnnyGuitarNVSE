@@ -6,7 +6,145 @@ DEFINE_COMMAND_PLUGIN(GetMediaSetTraitString, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitSound, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitString, , 0, 3, kParams_OneForm_OneInt_OneString);
+DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerSetController, AMKSetCtrl, , 1, 1, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerGetController, AMKGetCtrl, , 1, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerSetProperty, AMKSetProp, , 1, 2, kParams_OneInt_OneFloat);
+DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerGetProperty, AMKGetProp, ,1, 1, kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerGetCurrent, AMKGetCur, , 1, 0, NULL);
 
+
+
+
+
+
+
+
+
+
+bool Cmd_AudioMarkerGetCurrent_Execute(COMMAND_ARGS){
+	*result = 0;
+	if (g_thePlayer && g_thePlayer->currMusicMarker) {
+		if (auto mMarker = g_thePlayer->currMusicMarker->markerRef) {
+			*(DWORD*)result = mMarker->refID;
+		}
+	}
+	return true;
+}
+
+bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
+	MediaLocationController* locationController;
+	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &locationController) && IS_TYPE(locationController, MediaLocationController)) {
+		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*) thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
+		if (audioMrkr && audioMrkr->data) {
+			audioMrkr->data->mediaLocCtrlID = locationController->refID;
+			Console_Print("AudioMarkerSetController >> 0x%lx, %s", locationController->refID, locationController->GetName());
+
+		}
+		else if (IsConsoleMode()) {
+			Console_Print("Calling reference is not an AudioMarker");
+		}
+	}
+	return true;
+}
+
+bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
+	MediaLocationController* locationController = NULL;
+	*result = 0;
+	if (thisObj ) {
+		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
+		if (audioMrkr && audioMrkr->data) {
+			uintptr_t locController = audioMrkr->data->mediaLocCtrlID;
+			locationController = (MediaLocationController*) LookupFormByID(locController);
+			*(DWORD*)result = locationController->refID;
+			if (IsConsoleMode()) {
+				Console_Print("AudioMarkerGetController >> 0x%lx, %s", locationController->refID, locationController->GetName());
+
+			}
+		}
+		else if (IsConsoleMode()) {
+			Console_Print("Calling reference is not an AudioMarker");
+		}
+	}
+	return true;
+}
+
+bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
+	DWORD type;
+	float newVal;
+	enum kAMType {
+		kRadius,
+		kLayer2,
+		kLayer3,
+		kFlags
+	};
+	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type, &newVal)) {
+		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
+		ExtraRadius* rad = (ExtraRadius*)thisObj->extraDataList.GetByType(kExtraData_Radius);
+		if (audioMrkr && audioMrkr->data) {
+			switch (type) {
+			case kRadius:
+				if (rad) {
+					rad->radius = newVal;
+				}
+				break;
+			case kLayer2:
+				audioMrkr->data->layer2TriggerPerc = newVal;
+				break;
+			case kLayer3:
+				audioMrkr->data->layer3TriggerPerc = newVal;
+				break;
+			case kFlags:
+				audioMrkr->data->flags = UInt32(newVal);
+				break;
+
+			}
+			Console_Print("AudioMarkerSetProperty >> %s, %d, %.2f", thisObj->GetName(), type, newVal);
+		}
+		else if (IsConsoleMode()) {
+			Console_Print("Calling reference is not an AudioMarker");
+		}
+	}
+	return true;
+}
+
+bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
+	DWORD type;
+	enum kAMType {
+		kRadius,
+		kLayer2,
+		kLayer3,
+		kFlags
+	};
+	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
+		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
+		ExtraRadius* rad = (ExtraRadius*)thisObj->extraDataList.GetByType(kExtraData_Radius);
+		if (audioMrkr && audioMrkr->data) {
+			switch (type) {
+			case kRadius:
+				if (rad) {
+					*result = rad->radius;
+				}
+				break;
+			case kLayer2:
+				*result = audioMrkr->data->layer2TriggerPerc;
+				break;
+			case kLayer3:
+				*result = audioMrkr->data->layer3TriggerPerc;
+				break;
+			case kFlags:
+				*result =  audioMrkr->data->flags;
+				break;
+
+			}
+
+			Console_Print("AudioMarkerGetProperty >> %s, %d, %.2f", thisObj->GetName(), type, *result);
+		}
+		else if (IsConsoleMode()) {
+			Console_Print("Calling reference is not an AudioMarker");
+		}
+	}
+	return true;
+}
 bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
@@ -152,7 +290,7 @@ bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 bool Cmd_SetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset;
 	int traitID = -1;
-	const char* newStr = NULL;
+	char newStr[MAX_PATH];
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newStr) && IS_TYPE(mediaset, MediaSet)) {
 		if (traitID >= 0 && traitID <= 5) {

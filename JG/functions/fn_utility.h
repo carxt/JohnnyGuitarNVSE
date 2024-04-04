@@ -7,6 +7,7 @@ DEFINE_COMMAND_PLUGIN(GetJohnnyPatch, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(RefAddr, , 0, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(RefAddrxData, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(EditorIDToFormID, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParams_FourStrings);
@@ -27,8 +28,53 @@ DEFINE_COMMAND_PLUGIN(GetOptionalBone, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(TriggerScreenSplatterEx, , 0, 8, kSplatterParams);
 DEFINE_COMMAND_PLUGIN(SetViewmodelClipDistance, , 0, 1, kParams_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetViewmodelClipDistance, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(SetBlockTransform, , 1, 8, kTransformParams);
 DEFINE_CMD_NO_ARGS(DumpIconMap);
 DEFINE_CMD_NO_ARGS(RollCredits);
+DEFINE_CMD_NO_ARGS(GetAllGameRadios);
+DEFINE_COMMAND_PLUGIN(GetAvailableRadios, , 1, 0, NULL);
+
+
+
+
+bool Cmd_GetAllGameRadios_Execute(COMMAND_ARGS) {
+	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	tList<TESObjectACTI>* g_gameRadios = (tList<TESObjectACTI>*)0x11C8264;
+	for (auto radioIter = g_gameRadios->Begin(); !radioIter.End(); radioIter.Next()) {
+		if (*radioIter) {
+			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
+		}
+	}
+	g_arrInterface->AssignCommandResult(radioArr, result);
+	return true;
+}
+
+
+bool Cmd_GetAvailableRadios_Execute(COMMAND_ARGS) {
+	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	tList<TESObjectACTI> availableRadios = {};
+	CdeclCall<void>(0x04FF1A0, thisObj, &availableRadios, NULL);
+	for (auto radioIter = availableRadios.Begin(); !radioIter.End(); radioIter.Next()) {
+		if (*radioIter && !CdeclCall<bool>(0x0079BE30, *radioIter) && (jg_gameRadioSet.count((*radioIter)->refID) > 0)) {
+			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
+		}
+	}
+	g_arrInterface->AssignCommandResult(radioArr, result);
+	return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ThisStdCall<void>(0x75F2A0, nullptr);
@@ -396,6 +442,23 @@ bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
 	else if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) Console_Print("0x%08X", form);
 	return true;
 }
+
+bool Cmd_RefAddrxData_Execute(COMMAND_ARGS) {
+	TESForm* form = NULL;
+	DWORD type;
+	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) { 
+		if (type < kExtraData_Max) {
+			void* res = thisObj->extraDataList.GetByType(type);
+			if (res) {
+				Console_Print("0x%08X", res);
+				return true;
+			}
+		}
+		Console_Print("Not found");
+	}
+	return true;
+}
+
 bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 	__asm int 3
 	return true;
@@ -563,7 +626,7 @@ bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	float fDistance = 0.f;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fDistance)) {
-		g_viewmodel_near = max(fDistance, 0.001);
+		g_viewmodel_near = fDistance;
 		*result = 1;
 	}
 	return true;
@@ -572,5 +635,70 @@ bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	*result = g_viewmodel_near;
 	if (IsConsoleMode()) Console_Print("GetViewmodelClipDistance >> %.3f", *result);
+	return true;
+}
+
+static NiPointer<NiAVObject> lastBlock = nullptr;
+static TESForm* lastForm = nullptr;
+
+bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
+	float x, y, z, w;
+	bool rotate = false;
+	bool update = false;
+	bool world = false;
+	bool local = false;
+	char blockName[128];
+
+	*result = false;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &blockName, &x, &y, &z, &w, &rotate, &world, &update)) {
+		NiAVObject* object = nullptr;
+		if (lastForm == thisObj && !strcmp(lastBlock.data->m_blockName.handle, blockName)) {
+			object = lastBlock;
+		}
+		else {
+			lastForm = thisObj;
+			NiNode* refNode = thisObj->GetRefNiNode();
+			if (!refNode)
+				return true;
+
+			object = refNode->GetObjectByName(blockName);
+			if (!object)
+				return true;
+
+			lastBlock = object;
+		}
+		if (world) {
+			if (rotate) {
+				// NiMatrix3::FromEulerAnglesXYZ
+				ThisStdCall(0xA59540, &object->m_worldRotate, x, y, z);
+			}
+			else {
+				object->m_worldTranslate.x = x;
+				object->m_worldTranslate.y = y;
+				object->m_worldTranslate.z = z;
+			}
+
+			object->m_worldScale = w;
+		}
+		else {
+			if (rotate) {
+				// NiMatrix3::FromEulerAnglesXYZ
+				ThisStdCall(0xA59540, &object->m_localRotate, x, y, z);
+			}
+			else {
+				object->m_localTranslate.x = x;
+				object->m_localTranslate.y = y;
+				object->m_localTranslate.z = z;
+			}
+
+			object->m_localScale = w;
+		}
+
+		if (update) {
+			NiUpdateData updateData;
+			object->Update(updateData);
+		}
+		*result = true;
+	}
 	return true;
 }
