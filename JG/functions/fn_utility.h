@@ -33,8 +33,19 @@ DEFINE_CMD_NO_ARGS(DumpIconMap);
 DEFINE_CMD_NO_ARGS(RollCredits);
 DEFINE_CMD_NO_ARGS(GetAllGameRadios);
 DEFINE_COMMAND_PLUGIN(GetAvailableRadios, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(NullArgs, , 0, 1, kParams_OneOptionalInt);
+DEFINE_CMD_NO_ARGS(NullNoArgs);
 
 
+bool Cmd_NullNoArgs_Execute(COMMAND_ARGS) {
+	*result = 0;
+	return true;
+}
+
+bool Cmd_NullArgs_Execute(COMMAND_ARGS) {
+	*result = 0;
+	return true;
+}
 
 
 bool Cmd_GetAllGameRadios_Execute(COMMAND_ARGS) {

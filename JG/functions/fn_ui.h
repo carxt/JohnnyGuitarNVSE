@@ -32,31 +32,31 @@ bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
 				TESForm* currData = iter->data;
 				if (!currData) continue;
 				if (IS_TYPE(currData, TESHair)) {
-					haircutSetList.Add(currData->refID);
+					hk_RSMBarberHook::haircutSetList.Add(currData->refID);
 					continue;
 				}
 				if (IS_TYPE(currData, BGSHeadPart)) {
-					beardSetList.Add(currData->refID);
+					hk_RSMBarberHook::beardSetList.Add(currData->refID);
 				}
 			} while (iter = iter->next);
 		}
 		auto playerBase =	reinterpret_cast<TESNPC*>(g_thePlayer->GetActorBase());
-		haircutSetList.isWhiteList = bool(flags & kFlag_WhiteListHair);
-		if (haircutSetList.isWhiteList) {
-			haircutSetList.Add(playerBase->hair->refID);
+		hk_RSMBarberHook::haircutSetList.isWhiteList = bool(flags & kFlag_WhiteListHair);
+		if (hk_RSMBarberHook::haircutSetList.isWhiteList) {
+			hk_RSMBarberHook::haircutSetList.Add(playerBase->hair->refID);
 		}
 		else {
-			haircutSetList.Remove(playerBase->hair->refID);
+			hk_RSMBarberHook::haircutSetList.Remove(playerBase->hair->refID);
 
 		}
-		beardSetList.isWhiteList = bool(flags & kFlag_WhiteListBeard);
-		if (beardSetList.isWhiteList) {
+		hk_RSMBarberHook::beardSetList.isWhiteList = bool(flags & kFlag_WhiteListBeard);
+		if (hk_RSMBarberHook::beardSetList.isWhiteList) {
 			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
-				if (*iter) { beardSetList.Add((*iter)->refID);};
+				if (*iter) { hk_RSMBarberHook::beardSetList.Add((*iter)->refID);};
 			}
 		} else{
 			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
-				if (*iter) { beardSetList.Remove((*iter)->refID); };
+				if (*iter) { hk_RSMBarberHook::beardSetList.Remove((*iter)->refID); };
 			}
 		}
 		CdeclCall<void>(0x705870, 2);

@@ -66,9 +66,10 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			RestoreDisabledPlayerControlsHUDFlags();
 			SaveGameUMap.clear();
 			ResetMiscStatMap();
-			haircutSetList.dFlush();
-			beardSetList.dFlush();
+			hk_RSMBarberHook::haircutSetList.dFlush();
+			hk_RSMBarberHook::beardSetList.dFlush();
 			jg_gameRadioSet.clear();
+			hk_BarterHook::barterFilterList.clear();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_PostLoadGame:
@@ -207,7 +208,7 @@ extern "C" {
 		REG_TYPED_CMD(GetEditorID, String);
 		REG_CMD(GetJohnnyPatch);
 		REG_CMD(SetVelEx);
-		REG_CMD(UwUDelete);
+		REG_CMD(NullArgs); //formerly UwUDelete.
 		REG_CMD(GetMediaSetTraitNumeric);
 		REG_CMD(SetMediaSetTraitNumeric);
 		REG_TYPED_CMD(GetMediaSetTraitString, String);
@@ -437,6 +438,10 @@ extern "C" {
 		REG_TYPED_CMD(GetAllGameRadios, Array);
 		REG_TYPED_CMD(GetAvailableRadios, Array);
 		REG_CMD(SetJohnnyOnRadioPostSoundAttachEventHandler);
+		REG_CMD(AudioMarkerGetCurrent);
+		REG_CMD(HideItemBarterEx);
+		REG_CMD(IsItemBarterHiddenEx);
+		REG_CMD(GetCurrentFurnitureRef);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

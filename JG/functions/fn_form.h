@@ -83,11 +83,88 @@ DEFINE_COMMAND_PLUGIN(SetFactionFlags, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFormRecipesAlt, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(IsRadioRefPlaying, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(TuneRadioRef, , 1, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(HideItemBarterEx, , 0, 2, kParams_OneForm_OneInt_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(IsItemBarterHiddenEx, , 0, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(GetCurrentFurnitureRef, , 1, 0, NULL);
+
+
+
+
+bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
+	if (!thisObj) {return true;}
+	*result = 0;
+	if (thisObj->IsActor()) {
+		auto actorProcess  = ((Actor*)thisObj)->baseProcess;
+		if (actorProcess) {
+			auto furniRef = actorProcess->GetCurrentFurnitureRef();
+			if (furniRef) {
+				*(UInt32*)result = furniRef->refID;
+			}
+		}
+
+	}
+	return true;
+}
+
 
 
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
+
+bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
+	TESForm *itemFilter = NULL, *filterArg = NULL;
+	UInt32 unhideOrHide = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &unhideOrHide, &filterArg)) {
+		DWORD idToHandle = 0;
+		if (filterArg) {
+			idToHandle = filterArg != g_thePlayer ? filterArg->refID : UINT32_MAX;
+		}
+		else if (thisObj && (thisObj == g_thePlayer)) {
+			idToHandle = thisObj->refID;
+		}
+
+		if (unhideOrHide) {
+			hk_BarterHook::barterFilterList[itemFilter->refID].Add(idToHandle);
+			hk_BarterHook::barterFilterList[itemFilter->refID].isWhiteList = true;
+		}
+		else {
+			if (idToHandle)
+			{
+				auto it = hk_BarterHook::barterFilterList.find(itemFilter->refID);
+				if (it != hk_BarterHook::barterFilterList.end()) {
+					it->second.Remove(idToHandle);
+				}
+			}
+			else {
+				auto it = hk_BarterHook::barterFilterList.find(itemFilter->refID);
+				if (it != hk_BarterHook::barterFilterList.end()) {
+					it->second.dFlush();
+					hk_BarterHook::barterFilterList.erase(it);
+				}
+			}
+
+		}
+	}
+	return true;
+}
+
+bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
+	TESForm* itemFilter, * filterArg = NULL;
+	*result = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &filterArg)) {
+		DWORD outflags = 0;
+		auto it = hk_BarterHook::barterFilterList.find(itemFilter->refID);
+		if (it != hk_BarterHook::barterFilterList.end()) {
+			if ((filterArg && it->second.Allow(filterArg->refID)) || ( it->second.Allow(UINT32_MAX)) ) { outflags |= 1 << 0; }
+			if (g_thePlayer && it->second.Allow(g_thePlayer->refID)) { outflags |= 1 << 1; };
+			if (it->second.Allow(0)) { outflags |= 1 << 2; };
+
+		}
+		*result = outflags;
+	}
+	return true;
+}
 
 
 bool Cmd_IsRadioRefPlaying_Execute(COMMAND_ARGS) {

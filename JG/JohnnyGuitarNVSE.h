@@ -87,10 +87,86 @@ struct JGSetList {
 	}
 };
 
-JGSetList<DWORD> haircutSetList;
-JGSetList<DWORD> beardSetList;
+
+
+namespace hk_BarterHook {
+	std::unordered_map<DWORD, JGSetList<DWORD>> barterFilterList;
+	template <uintptr_t a_addr>
+	class hk_BarterFilterHookClassLeft {
+	private:
+		static inline uintptr_t hookCall = a_addr;
+	public:
+		static  DWORD __cdecl hk_BarterFilterHook(ContChangesEntry* ref) {
+			auto shouldHide = CdeclCall<bool>(hookCall, ref);
+			if (shouldHide){ return shouldHide; }
+			auto barterMenu = *(BarterMenu**)0x11D8FA4;
+			if (!barterMenu) return shouldHide;
+			auto merchantRef = barterMenu->merchantRef;
+			if (!merchantRef) return shouldHide;
+			auto originalForm = ref->type;
+			if (!g_thePlayer) return shouldHide;
+			auto it = barterFilterList.find(originalForm->refID);
+			if (it != barterFilterList.end()) {
+				auto &barterSet = it->second;
+				shouldHide = barterSet.Allow(g_thePlayer->refID) || barterSet.Allow(0);
+
+			}
+			return shouldHide;
+		}
+		hk_BarterFilterHookClassLeft() {
+			uintptr_t hk_hookPoint = hookCall;
+			hookCall = *(uintptr_t*)(hk_hookPoint + 1);
+			SafeWrite32((hk_hookPoint + 1) , (uintptr_t) hk_BarterFilterHook);
+
+		}
+
+	};
+
+	template <uintptr_t a_addr>
+	class hk_BarterFilterHookClassRight {
+	private:
+		static inline uintptr_t hookCall = a_addr;
+	public:
+		static  DWORD __cdecl hk_BarterFilterHook(ContChangesEntry* ref) {
+			auto shouldHide = CdeclCall<bool>(hookCall, ref);
+			if (shouldHide) { return shouldHide; }
+			auto barterMenu = *(BarterMenu**)0x11D8FA4;
+			if (!barterMenu) return shouldHide;
+			auto merchantRef = barterMenu->merchantRef;
+			if (!merchantRef) return shouldHide;
+			auto originalForm = ref->type;
+			auto it = barterFilterList.find(originalForm->refID);
+			if (it != barterFilterList.end()) {
+				auto& barterSet = it->second;
+				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0);
+
+			}
+			return shouldHide;
+		}
+		hk_BarterFilterHookClassRight() {
+			uintptr_t hk_hookPoint = hookCall;
+			hookCall = *(uintptr_t*)(hk_hookPoint + 1);
+			SafeWrite32((hk_hookPoint + 1), (uintptr_t)hk_BarterFilterHook);
+
+		}
+
+	};
+
+
+	void CreateHook() {
+		hk_BarterFilterHookClassLeft<0x72DA1C>();
+		hk_BarterFilterHookClassLeft<0x72E1BE>();
+
+		hk_BarterFilterHookClassRight<0x72DACA>();
+		hk_BarterFilterHookClassRight<0x72E207>();
+
+	}
+};
+
 
 namespace hk_RSMBarberHook {
+	JGSetList<DWORD> haircutSetList;
+	JGSetList<DWORD> beardSetList;
 	uintptr_t RSMDestructorOriginal = (uintptr_t)0x07AC530;
 	bool __fastcall hk_TESHair_IsPlayable(TESHair* ptr_hair) {
 		return (ptr_hair->IsPlayable()) && (haircutSetList.Allow(ptr_hair->refID));
@@ -1149,6 +1225,7 @@ void HandleFunctionPatches() {
 
 	//Hairstyle handlers
 	hk_RSMBarberHook::Hook();
+	hk_BarterHook::CreateHook();
 
 	WriteRelCall(0x8752F2, UInt32(SetViewmodelFrustumHook));
 }
