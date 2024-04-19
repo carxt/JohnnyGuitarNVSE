@@ -35,7 +35,7 @@ DEFINE_CMD_NO_ARGS(GetAllGameRadios);
 DEFINE_COMMAND_PLUGIN(GetAvailableRadios, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(NullArgs, , 0, 1, kParams_OneOptionalInt);
 DEFINE_CMD_NO_ARGS(NullNoArgs);
-DEFINE_CMD_ALT_COND_PLUGIN(GameGetSecondsPassed, GGetSecPass, , 0, 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GameGetSecondsPassed, GGetSecPass, , 0, NULL);
 
 
 

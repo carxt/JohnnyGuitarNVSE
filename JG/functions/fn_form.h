@@ -83,8 +83,8 @@ DEFINE_COMMAND_PLUGIN(SetFactionFlags, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFormRecipesAlt, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(IsRadioRefPlaying, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(TuneRadioRef, , 1, 1, kParams_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(HideItemBarterEx, , 0, 2, kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(IsItemBarterHiddenEx, , 0, 4, kParams_OneForm_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(HideItemBarterEx, , 0, 4, kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(IsItemBarterHiddenEx, , 0, 2, kParams_OneForm_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetCurrentFurnitureRef, , 1, 0, NULL);
 
 
