@@ -69,7 +69,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			hk_RSMBarberHook::haircutSetList.dFlush();
 			hk_RSMBarberHook::beardSetList.dFlush();
 			jg_gameRadioSet.clear();
-			hk_BarterHook::barterFilterList.clear();
+			hk_BarterHook::barterFilterListLeft.clear();
+			hk_BarterHook::barterFilterListRight.clear();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_PostLoadGame:
@@ -442,6 +443,8 @@ extern "C" {
 		REG_CMD(HideItemBarterEx);
 		REG_CMD(IsItemBarterHiddenEx);
 		REG_CMD(GetCurrentFurnitureRef);
+		REG_CMD(SetCameraShakeNoHUDShudder);
+		REG_CMD(GameGetSecondsPassed);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

@@ -87,10 +87,68 @@ struct JGSetList {
 	}
 };
 
+namespace hk_CameraShakeHook {
+	float camShakeMinAlt = 0, camShakeTimeAlt = 0;
+	bool __fastcall fn_camAltShakeHook(Actor* a_refr, void* edx, NiMatrix33* outMatrix) {
+		NiMatrix33 shakeMatrix = {};
+		AnimData* anData = ThisStdCall<AnimData*>(0x08B70D0, a_refr);
+		if (!anData) return true;
+		float timePassed = anData->flt0D0;
+		auto originalShakeMult = *(float*)(0x11DFED4), originalShakeTime = *(float*)(0x11DFED8);
+		*(float*)(0x11DFED4) = camShakeMinAlt;
+		*(float*)(0x11DFED8) = camShakeTimeAlt;
+		float remainTime = CdeclCall<double>(0x8D1B30, timePassed, &shakeMatrix);
+		camShakeMinAlt = *(float*)(0x11DFED4);
+		camShakeTimeAlt = *(float*)(0x11DFED8);
+		*(float*)(0x11DFED4) = originalShakeMult;
+		*(float*)(0x11DFED8) = originalShakeTime;
+		if (remainTime > 0.0f) {
+			float euX = 0, euY= 0, euZ = 0;
+			ThisStdCall<void>(0x0A592C0, &shakeMatrix, &euX, &euY, &euZ);
+			euX *= remainTime;
+			euY *= remainTime;
+			euZ *= remainTime;
+			ThisStdCall<void>(0x0A59540, &shakeMatrix, euX, euY, euZ);
+			ThisStdCall<void*>(0x43F8D0, outMatrix, outMatrix, &shakeMatrix);
 
+		}
+		return true;
+
+	}
+	__declspec(naked) void asm_CameraShakeHook() {
+		__asm {
+			fnstsw ax
+			test ah, 0x41
+			jz retAbort
+			lea edx, dword ptr ss: [ebp-0x34]
+			push edx
+			mov ecx, dword ptr ss: [ebp-0x414]
+			call fn_camAltShakeHook
+			ALIGN 16
+			test al, al
+			jmp retEnd
+			retAbort:
+			fldz
+			fst camShakeMinAlt
+			fstp camShakeTimeAlt
+			retEnd:
+			setnz al
+			ret
+		}
+	}
+	void CreateHook() {
+		WriteRelCall(0x94BCF6, (uintptr_t)asm_CameraShakeHook);
+	}
+
+}
 
 namespace hk_BarterHook {
-	std::unordered_map<DWORD, JGSetList<DWORD>> barterFilterList;
+	std::unordered_map<DWORD, JGSetList<DWORD>> barterFilterListLeft;
+	std::unordered_map<DWORD, JGSetList<DWORD>> barterFilterListRight;
+	enum barterHideFlags {
+		kBarterDoNotHideLeft = 1 << 0,
+		kBarterDoNotHideRight
+	};
 	template <uintptr_t a_addr>
 	class hk_BarterFilterHookClassLeft {
 	private:
@@ -105,11 +163,10 @@ namespace hk_BarterHook {
 			if (!merchantRef) return shouldHide;
 			auto originalForm = ref->type;
 			if (!g_thePlayer) return shouldHide;
-			auto it = barterFilterList.find(originalForm->refID);
-			if (it != barterFilterList.end()) {
+			auto it = barterFilterListLeft.find(originalForm->refID);
+			if (it != barterFilterListLeft.end()) {
 				auto &barterSet = it->second;
-				shouldHide = barterSet.Allow(g_thePlayer->refID) || barterSet.Allow(0);
-
+				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0) || barterSet.Allow(g_thePlayer->refID);
 			}
 			return shouldHide;
 		}
@@ -135,10 +192,10 @@ namespace hk_BarterHook {
 			auto merchantRef = barterMenu->merchantRef;
 			if (!merchantRef) return shouldHide;
 			auto originalForm = ref->type;
-			auto it = barterFilterList.find(originalForm->refID);
-			if (it != barterFilterList.end()) {
+			auto it = barterFilterListRight.find(originalForm->refID);
+			if (it != barterFilterListRight.end()) {
 				auto& barterSet = it->second;
-				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0);
+				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0) || barterSet.Allow(g_thePlayer->refID);
 
 			}
 			return shouldHide;
@@ -1127,7 +1184,8 @@ void HandleFixes() {
 	WriteRelCall(0x063ADAB, (uintptr_t)SkyCloudHook::hk_han_NewGameCloudUpdate);
 	//Stop game from crashing on extensions reeeeeeeeeee
 	WriteRelCall(0x83509D, (uintptr_t)fixAudioMonoLookupOverflow);
-
+	//CamShakeHook
+	hk_CameraShakeHook::CreateHook();
 
 }
 

@@ -756,3 +756,11 @@ static ParamInfo kTransformParams[] =
 	{	"World Data",	kNVSEParamType_Boolean, 0	},
 	{	"Update",		kNVSEParamType_Boolean, 0	},
 };
+static ParamInfo kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm[4] =
+{
+	{	"form",	kParamType_AnyForm,	0	},
+	{	"int",	kParamType_Integer, 0	},
+	{	"int",	kParamType_Integer, 1	},
+	{	"form",	kParamType_AnyForm,	1	},
+
+};

@@ -35,6 +35,29 @@ DEFINE_CMD_NO_ARGS(GetAllGameRadios);
 DEFINE_COMMAND_PLUGIN(GetAvailableRadios, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(NullArgs, , 0, 1, kParams_OneOptionalInt);
 DEFINE_CMD_NO_ARGS(NullNoArgs);
+DEFINE_CMD_ALT_COND_PLUGIN(GameGetSecondsPassed, GGetSecPass, , 0, 0, NULL);
+
+
+
+
+bool Cmd_GameGetSecondsPassed_Eval(COMMAND_ARGS_EVAL) {
+	*result = ThisStdCall<float>(0x084D030, (void*)0x11F6394);
+	return true;
+}
+
+
+
+bool Cmd_GameGetSecondsPassed_Execute(COMMAND_ARGS) {
+	Cmd_GameGetSecondsPassed_Eval(thisObj, 0, 0, result);
+	if (IsConsoleMode()) {
+		Console_Print("GameGetSecondsPassed >> %0.2f", *result);
+	}
+	return true;
+}
+
+
+
+
 
 
 bool Cmd_NullNoArgs_Execute(COMMAND_ARGS) {

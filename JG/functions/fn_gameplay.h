@@ -40,6 +40,37 @@ DEFINE_COMMAND_PLUGIN(RemoveNavmeshObstacle, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetLandTextureUnderFeet, , 1, 0, NULL);
 DEFINE_CMD_NO_ARGS(GetMoonPhase);
 DEFINE_COMMAND_PLUGIN(RewardKarmaAlt, , 0, 1, kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetCameraShakeNoHUDShudder, CamShakeNHUD , , 0, 2, kParams_TwoFloats);
+
+
+
+
+
+
+
+
+
+bool Cmd_SetCameraShakeNoHUDShudder_Execute(COMMAND_ARGS) {
+	float shakeMult, time;
+	*result = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shakeMult, &time)) {
+		hk_CameraShakeHook::camShakeMinAlt = shakeMult;
+		hk_CameraShakeHook::camShakeTimeAlt = time;
+		*result = 1;
+	}
+	return true;
+}
+
+
+
+
+
+
+
+
+
+
+
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;

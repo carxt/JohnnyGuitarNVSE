@@ -83,8 +83,8 @@ DEFINE_COMMAND_PLUGIN(SetFactionFlags, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFormRecipesAlt, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(IsRadioRefPlaying, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(TuneRadioRef, , 1, 1, kParams_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(HideItemBarterEx, , 0, 2, kParams_OneForm_OneInt_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(IsItemBarterHiddenEx, , 0, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(HideItemBarterEx, , 0, 2, kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(IsItemBarterHiddenEx, , 0, 4, kParams_OneForm_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetCurrentFurnitureRef, , 1, 0, NULL);
 
 
@@ -113,53 +113,72 @@ float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectR
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
 
 bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
-	TESForm *itemFilter = NULL, *filterArg = NULL;
-	UInt32 unhideOrHide = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &unhideOrHide, &filterArg)) {
-		DWORD idToHandle = 0;
-		if (filterArg) {
-			idToHandle = filterArg != g_thePlayer ? filterArg->refID : UINT32_MAX;
-		}
-		else if (thisObj && (thisObj == g_thePlayer)) {
-			idToHandle = thisObj->refID;
-		}
+	TESForm* itemFilter = NULL, * filterArg = NULL;
+	UInt32 unhideOrHide = 0, flags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &unhideOrHide, &flags, &filterArg)) {
+		auto addToBarterFilter = [itemFilter](std::unordered_map<DWORD, JGSetList<DWORD>>& st_Filter, DWORD r_id) -> void {
+			st_Filter[itemFilter->refID].Add(r_id);
+			st_Filter[itemFilter->refID].isWhiteList = true;
+		};
 
-		if (unhideOrHide) {
-			hk_BarterHook::barterFilterList[itemFilter->refID].Add(idToHandle);
-			hk_BarterHook::barterFilterList[itemFilter->refID].isWhiteList = true;
-		}
-		else {
-			if (idToHandle)
+		auto removeFromBarterFilter = [itemFilter](std::unordered_map<DWORD, JGSetList<DWORD>>& st_Filter, DWORD r_id) -> void {
+			if (r_id)
 			{
-				auto it = hk_BarterHook::barterFilterList.find(itemFilter->refID);
-				if (it != hk_BarterHook::barterFilterList.end()) {
-					it->second.Remove(idToHandle);
+				auto it = st_Filter.find(itemFilter->refID);
+				if (it != st_Filter.end()) {
+					it->second.Remove(r_id);
 				}
 			}
 			else {
-				auto it = hk_BarterHook::barterFilterList.find(itemFilter->refID);
-				if (it != hk_BarterHook::barterFilterList.end()) {
+				auto it = st_Filter.find(itemFilter->refID);
+				if (it != st_Filter.end()) {
 					it->second.dFlush();
-					hk_BarterHook::barterFilterList.erase(it);
+					st_Filter.erase(it);
 				}
 			}
-
+		};
+		DWORD idToHandle = 0;
+		if (filterArg) {
+			idToHandle = filterArg->refID;
 		}
+		if (unhideOrHide) {
+			if ((flags & hk_BarterHook::barterHideFlags::kBarterDoNotHideLeft) == 0) {
+				addToBarterFilter(hk_BarterHook::barterFilterListLeft, idToHandle);
+			}
+			if ((flags & hk_BarterHook::barterHideFlags::kBarterDoNotHideRight) == 0) {
+				addToBarterFilter(hk_BarterHook::barterFilterListRight, idToHandle);
+			}
+		}
+		else {
+			if ((flags & hk_BarterHook::barterHideFlags::kBarterDoNotHideLeft) == 0) {
+				removeFromBarterFilter(hk_BarterHook::barterFilterListLeft, idToHandle);
+			}
+			if ((flags & hk_BarterHook::barterHideFlags::kBarterDoNotHideRight) == 0) {
+				removeFromBarterFilter(hk_BarterHook::barterFilterListRight, idToHandle);
+			}
+		}
+
+		return true;
 	}
-	return true;
 }
 
 bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
-	TESForm* itemFilter, * filterArg = NULL;
+	TESForm *itemFilter, *filterArg = NULL;
+	DWORD flags = 0;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &filterArg)) {
 		DWORD outflags = 0;
-		auto it = hk_BarterHook::barterFilterList.find(itemFilter->refID);
-		if (it != hk_BarterHook::barterFilterList.end()) {
-			if ((filterArg && it->second.Allow(filterArg->refID)) || ( it->second.Allow(UINT32_MAX)) ) { outflags |= 1 << 0; }
-			if (g_thePlayer && it->second.Allow(g_thePlayer->refID)) { outflags |= 1 << 1; };
-			if (it->second.Allow(0)) { outflags |= 1 << 2; };
-
+		DWORD idToHandle = 0;
+		if (filterArg) {
+			idToHandle = filterArg->refID;
+		}
+		auto it = hk_BarterHook::barterFilterListLeft.find(itemFilter->refID);
+		if (it != hk_BarterHook::barterFilterListLeft.end()) {
+			outflags |= 1 << 0;
+		}
+		it = hk_BarterHook::barterFilterListRight.find(itemFilter->refID);
+		if (it != hk_BarterHook::barterFilterListRight.end()) {
+			outflags |= 1 << 1;
 		}
 		*result = outflags;
 	}
