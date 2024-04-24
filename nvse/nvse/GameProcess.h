@@ -370,7 +370,7 @@ public:
 	virtual void	Unk_12F();
 	virtual void	Unk_130();
 	virtual void	Unk_131();
-	virtual void	Unk_132();
+	virtual TESObjectREFR*	GetCurrentFurnitureRef();
 	virtual void	Unk_133();
 	virtual void	Unk_134();
 	virtual void	Unk_135();

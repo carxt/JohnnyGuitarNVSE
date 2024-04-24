@@ -47,7 +47,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 501
+#define JG_VERSION 504
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_NewGame:
@@ -66,9 +66,11 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			RestoreDisabledPlayerControlsHUDFlags();
 			SaveGameUMap.clear();
 			ResetMiscStatMap();
-			haircutSetList.dFlush();
-			beardSetList.dFlush();
+			hk_RSMBarberHook::haircutSetList.dFlush();
+			hk_RSMBarberHook::beardSetList.dFlush();
 			jg_gameRadioSet.clear();
+			hk_BarterHook::barterFilterListLeft.clear();
+			hk_BarterHook::barterFilterListRight.clear();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_PostLoadGame:
@@ -170,7 +172,7 @@ extern "C" {
 		fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 		fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
 		fixNPCShootingAngle = GetPrivateProfileInt("MAIN", "bFixNPCShootingAngle", 1, filename);
-		capLoadScreensToFrametime = GetPrivateProfileInt("MAIN", "iIncreaseFPSLimitLoadScreen", 0, filename);
+		iFPSCapLoadScreen = GetPrivateProfileInt("MAIN", "iFPSLimitLoadScreen", 0, filename);
 		noMuzzleFlashCooldown = GetPrivateProfileInt("MAIN", "bNoMuzzleFlashCooldown", 0, filename);
 		resetVanityCam = GetPrivateProfileInt("MAIN", "bReset3rdPersonCamera", 0, filename);
 		enableRadioSubtitles = GetPrivateProfileInt("MAIN", "bEnableRadioSubtitles", 0, filename);
@@ -207,7 +209,7 @@ extern "C" {
 		REG_TYPED_CMD(GetEditorID, String);
 		REG_CMD(GetJohnnyPatch);
 		REG_CMD(SetVelEx);
-		REG_CMD(UwUDelete);
+		REG_CMD(NullArgs); //formerly UwUDelete.
 		REG_CMD(GetMediaSetTraitNumeric);
 		REG_CMD(SetMediaSetTraitNumeric);
 		REG_TYPED_CMD(GetMediaSetTraitString, String);
@@ -437,6 +439,12 @@ extern "C" {
 		REG_TYPED_CMD(GetAllGameRadios, Array);
 		REG_TYPED_CMD(GetAvailableRadios, Array);
 		REG_CMD(SetJohnnyOnRadioPostSoundAttachEventHandler);
+		REG_CMD(AudioMarkerGetCurrent);
+		REG_CMD(HideItemBarterEx);
+		REG_CMD(IsItemBarterHiddenEx);
+		REG_CMD(GetCurrentFurnitureRef);
+		REG_CMD(SetCameraShakeNoHUDShudder);
+		REG_CMD(GameGetSecondsPassed);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

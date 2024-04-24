@@ -34,7 +34,7 @@ bool removeMainMenuMusic = 0;
 bool fixDeathSounds = 1;
 bool patchPainedPlayer = 0;
 bool bDisableDeathResponses = 0;
-unsigned int capLoadScreensToFrametime = 0;
+unsigned int iFPSCapLoadScreen = 0;
 float iDeathSoundMAXTimer = 10;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
@@ -87,10 +87,143 @@ struct JGSetList {
 	}
 };
 
-JGSetList<DWORD> haircutSetList;
-JGSetList<DWORD> beardSetList;
+namespace hk_CameraShakeHook {
+	float camShakeMinAlt = 0, camShakeTimeAlt = 0;
+	bool __fastcall fn_camAltShakeHook(Actor* a_refr, void* edx, NiMatrix33* outMatrix) {
+		NiMatrix33 shakeMatrix = {};
+		AnimData* anData = ThisStdCall<AnimData*>(0x08B70D0, a_refr);
+		if (!anData) return true;
+		float timePassed = anData->flt0D0;
+		auto originalShakeMult = *(float*)(0x11DFED4), originalShakeTime = *(float*)(0x11DFED8);
+		*(float*)(0x11DFED4) = camShakeMinAlt;
+		*(float*)(0x11DFED8) = camShakeTimeAlt;
+		float remainTime = CdeclCall<double>(0x8D1B30, timePassed, &shakeMatrix);
+		camShakeMinAlt = *(float*)(0x11DFED4);
+		camShakeTimeAlt = *(float*)(0x11DFED8);
+		*(float*)(0x11DFED4) = originalShakeMult;
+		*(float*)(0x11DFED8) = originalShakeTime;
+		if (remainTime > 0.0f) {
+			float euX = 0, euY= 0, euZ = 0;
+			ThisStdCall<void>(0x0A592C0, &shakeMatrix, &euX, &euY, &euZ);
+			euX *= remainTime;
+			euY *= remainTime;
+			euZ *= remainTime;
+			ThisStdCall<void>(0x0A59540, &shakeMatrix, euX, euY, euZ);
+			ThisStdCall<void*>(0x43F8D0, outMatrix, outMatrix, &shakeMatrix);
+
+		}
+		return true;
+
+	}
+	__declspec(naked) void asm_CameraShakeHook() {
+		__asm {
+			fnstsw ax
+			test ah, 0x41
+			jz retAbort
+			lea edx, dword ptr ss: [ebp-0x34]
+			push edx
+			mov ecx, dword ptr ss: [ebp-0x414]
+			call fn_camAltShakeHook
+			ALIGN 16
+			test al, al
+			jmp retEnd
+			retAbort:
+			fldz
+			fst camShakeMinAlt
+			fstp camShakeTimeAlt
+			retEnd:
+			setnz al
+			ret
+		}
+	}
+	void CreateHook() {
+		WriteRelCall(0x94BCF6, (uintptr_t)asm_CameraShakeHook);
+	}
+
+}
+
+namespace hk_BarterHook {
+	std::unordered_map<DWORD, JGSetList<DWORD>> barterFilterListLeft;
+	std::unordered_map<DWORD, JGSetList<DWORD>> barterFilterListRight;
+	enum barterHideFlags {
+		kBarterDoNotHideLeft = 1 << 0,
+		kBarterDoNotHideRight
+	};
+	template <uintptr_t a_addr>
+	class hk_BarterFilterHookClassLeft {
+	private:
+		static inline uintptr_t hookCall = a_addr;
+	public:
+		static  DWORD __cdecl hk_BarterFilterHook(ContChangesEntry* ref) {
+			auto shouldHide = CdeclCall<bool>(hookCall, ref);
+			if (shouldHide){ return shouldHide; }
+			auto barterMenu = *(BarterMenu**)0x11D8FA4;
+			if (!barterMenu) return shouldHide;
+			auto merchantRef = barterMenu->merchantRef;
+			if (!merchantRef) return shouldHide;
+			auto originalForm = ref->type;
+			if (!g_thePlayer) return shouldHide;
+			auto it = barterFilterListLeft.find(originalForm->refID);
+			if (it != barterFilterListLeft.end()) {
+				auto &barterSet = it->second;
+				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0) || barterSet.Allow(g_thePlayer->refID);
+			}
+			return shouldHide;
+		}
+		hk_BarterFilterHookClassLeft() {
+			uintptr_t hk_hookPoint = hookCall;
+			hookCall = *(uintptr_t*)(hk_hookPoint + 1);
+			SafeWrite32((hk_hookPoint + 1) , (uintptr_t) hk_BarterFilterHook);
+
+		}
+
+	};
+
+	template <uintptr_t a_addr>
+	class hk_BarterFilterHookClassRight {
+	private:
+		static inline uintptr_t hookCall = a_addr;
+	public:
+		static  DWORD __cdecl hk_BarterFilterHook(ContChangesEntry* ref) {
+			auto shouldHide = CdeclCall<bool>(hookCall, ref);
+			if (shouldHide) { return shouldHide; }
+			auto barterMenu = *(BarterMenu**)0x11D8FA4;
+			if (!barterMenu) return shouldHide;
+			auto merchantRef = barterMenu->merchantRef;
+			if (!merchantRef) return shouldHide;
+			auto originalForm = ref->type;
+			auto it = barterFilterListRight.find(originalForm->refID);
+			if (it != barterFilterListRight.end()) {
+				auto& barterSet = it->second;
+				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0) || barterSet.Allow(g_thePlayer->refID);
+
+			}
+			return shouldHide;
+		}
+		hk_BarterFilterHookClassRight() {
+			uintptr_t hk_hookPoint = hookCall;
+			hookCall = *(uintptr_t*)(hk_hookPoint + 1);
+			SafeWrite32((hk_hookPoint + 1), (uintptr_t)hk_BarterFilterHook);
+
+		}
+
+	};
+
+
+	void CreateHook() {
+		hk_BarterFilterHookClassLeft<0x72DA1C>();
+		hk_BarterFilterHookClassLeft<0x72E1BE>();
+
+		hk_BarterFilterHookClassRight<0x72DACA>();
+		hk_BarterFilterHookClassRight<0x72E207>();
+
+	}
+};
+
 
 namespace hk_RSMBarberHook {
+	JGSetList<DWORD> haircutSetList;
+	JGSetList<DWORD> beardSetList;
 	uintptr_t RSMDestructorOriginal = (uintptr_t)0x07AC530;
 	bool __fastcall hk_TESHair_IsPlayable(TESHair* ptr_hair) {
 		return (ptr_hair->IsPlayable()) && (haircutSetList.Allow(ptr_hair->refID));
@@ -1051,7 +1184,8 @@ void HandleFixes() {
 	WriteRelCall(0x063ADAB, (uintptr_t)SkyCloudHook::hk_han_NewGameCloudUpdate);
 	//Stop game from crashing on extensions reeeeeeeeeee
 	WriteRelCall(0x83509D, (uintptr_t)fixAudioMonoLookupOverflow);
-
+	//CamShakeHook
+	hk_CameraShakeHook::CreateHook();
 
 }
 
@@ -1072,8 +1206,13 @@ void HandleIniOptions() {
 	if (loadEditorIDs) LoadEditorIDs();
 
 	// for b60FPSDuringLoading
-	if (capLoadScreensToFrametime) {
-		SafeWrite8(0x78D4A4, (capLoadScreensToFrametime < 2) ? 0x10 : 0x20 );
+	if (iFPSCapLoadScreen > 0) {
+		unsigned int fpsLoadScreenPatch = 1;
+		fpsLoadScreenPatch = floor(1000.0f / float(iFPSCapLoadScreen));
+		if (fpsLoadScreenPatch <= 0) { fpsLoadScreenPatch = 1; }
+		if (fpsLoadScreenPatch >= 1000) { fpsLoadScreenPatch = 1000; }
+
+		SafeWrite32(0x78D4A4, fpsLoadScreenPatch);
 	}
 	// for bFixNPCShootingAngle
 	if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
@@ -1149,6 +1288,7 @@ void HandleFunctionPatches() {
 
 	//Hairstyle handlers
 	hk_RSMBarberHook::Hook();
+	hk_BarterHook::CreateHook();
 
 	WriteRelCall(0x8752F2, UInt32(SetViewmodelFrustumHook));
 }

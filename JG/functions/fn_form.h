@@ -83,15 +83,111 @@ DEFINE_COMMAND_PLUGIN(SetFactionFlags, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetFormRecipesAlt, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(IsRadioRefPlaying, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(TuneRadioRef, , 1, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(HideItemBarterEx, , 0, 4, kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(IsItemBarterHiddenEx, , 0, 2, kParams_OneForm_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(GetCurrentFurnitureRef, , 1, 0, NULL);
+
+
+
+
+bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
+	if (!thisObj) {return true;}
+	*result = 0;
+	if (thisObj->IsActor()) {
+		auto actorProcess  = ((Actor*)thisObj)->baseProcess;
+		if (actorProcess) {
+			auto furniRef = actorProcess->GetCurrentFurnitureRef();
+			if (furniRef) {
+				*(UInt32*)result = furniRef->refID;
+			}
+		}
+
+	}
+	return true;
+}
+
 
 
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
 
+bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
+	TESForm* itemFilter = NULL, * filterArg = NULL;
+	UInt32 unhideOrHide = 0, flags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &unhideOrHide, &flags, &filterArg)) {
+		auto addToBarterFilter = [itemFilter](std::unordered_map<DWORD, JGSetList<DWORD>>& st_Filter, DWORD r_id) -> void {
+			st_Filter[itemFilter->refID].Add(r_id);
+			st_Filter[itemFilter->refID].isWhiteList = true;
+		};
+
+		auto removeFromBarterFilter = [itemFilter](std::unordered_map<DWORD, JGSetList<DWORD>>& st_Filter, DWORD r_id) -> void {
+			if (r_id)
+			{
+				auto it = st_Filter.find(itemFilter->refID);
+				if (it != st_Filter.end()) {
+					it->second.Remove(r_id);
+				}
+			}
+			else {
+				auto it = st_Filter.find(itemFilter->refID);
+				if (it != st_Filter.end()) {
+					it->second.dFlush();
+					st_Filter.erase(it);
+				}
+			}
+		};
+		DWORD idToHandle = 0;
+		if (filterArg) {
+			idToHandle = filterArg->refID;
+		}
+		if (unhideOrHide) {
+			if ((flags & hk_BarterHook::barterHideFlags::kBarterDoNotHideLeft) == 0) {
+				addToBarterFilter(hk_BarterHook::barterFilterListLeft, idToHandle);
+			}
+			if ((flags & hk_BarterHook::barterHideFlags::kBarterDoNotHideRight) == 0) {
+				addToBarterFilter(hk_BarterHook::barterFilterListRight, idToHandle);
+			}
+		}
+		else {
+			if ((flags & hk_BarterHook::barterHideFlags::kBarterDoNotHideLeft) == 0) {
+				removeFromBarterFilter(hk_BarterHook::barterFilterListLeft, idToHandle);
+			}
+			if ((flags & hk_BarterHook::barterHideFlags::kBarterDoNotHideRight) == 0) {
+				removeFromBarterFilter(hk_BarterHook::barterFilterListRight, idToHandle);
+			}
+		}
+
+		return true;
+	}
+}
+
+bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
+	TESForm *itemFilter, *filterArg = NULL;
+	DWORD flags = 0;
+	*result = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &filterArg)) {
+		DWORD outflags = 0;
+		DWORD idToHandle = 0;
+		if (filterArg) {
+			idToHandle = filterArg->refID;
+		}
+		auto it = hk_BarterHook::barterFilterListLeft.find(itemFilter->refID);
+		if (it != hk_BarterHook::barterFilterListLeft.end()) {
+			outflags |= 1 << 0;
+		}
+		it = hk_BarterHook::barterFilterListRight.find(itemFilter->refID);
+		if (it != hk_BarterHook::barterFilterListRight.end()) {
+			outflags |= 1 << 1;
+		}
+		*result = outflags;
+	}
+	return true;
+}
+
 
 bool Cmd_IsRadioRefPlaying_Execute(COMMAND_ARGS) {
-	*result = 2;
+	*result = 0;
 	if (thisObj && thisObj->baseForm && IS_TYPE(thisObj->baseForm, TESObjectACTI)) {
 		TESObjectACTI* baseActi = (TESObjectACTI*)thisObj->baseForm;
 		if (baseActi->radioStation) {
@@ -109,11 +205,14 @@ bool Cmd_TuneRadioRef_Execute(COMMAND_ARGS) {
 			if (actiDst == NULL) {
 				actiDst = originalTK;
 			}
-			if (IS_TYPE(actiDst, BGSTalkingActivator) && (CdeclCall<void*>(0x0832930, thisObj) != NULL)) {
-				CdeclCall<void*>(0x08325B0, thisObj, 0);
-				actiBase->radioStation = actiDst;
-				CdeclCall<void*>(0x08325B0, thisObj, 1);
-				actiBase->radioStation = originalTK;
+			if (IS_TYPE(actiDst, BGSTalkingActivator)) {
+				auto activateState = CdeclCall<unsigned int>(0x047B250, thisObj);
+				if ((CdeclCall<void*>(0x0832930, thisObj) != NULL) || (activateState == 1) || (activateState == 2)) { //the exact same logic the game uses
+					CdeclCall<void*>(0x08325B0, thisObj, 0);
+					actiBase->radioStation = actiDst;
+					CdeclCall<void*>(0x08325B0, thisObj, 1);
+					actiBase->radioStation = originalTK;
+				}
 			}
 		}
 	}
