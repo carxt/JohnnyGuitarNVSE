@@ -34,7 +34,7 @@ bool removeMainMenuMusic = 0;
 bool fixDeathSounds = 1;
 bool patchPainedPlayer = 0;
 bool bDisableDeathResponses = 0;
-unsigned int capLoadScreensToFrametime = 0;
+unsigned int iFPSCapLoadScreen = 0;
 float iDeathSoundMAXTimer = 10;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
@@ -1206,8 +1206,13 @@ void HandleIniOptions() {
 	if (loadEditorIDs) LoadEditorIDs();
 
 	// for b60FPSDuringLoading
-	if (capLoadScreensToFrametime) {
-		SafeWrite8(0x78D4A4, (capLoadScreensToFrametime < 2) ? 0x10 : 0x20 );
+	if (iFPSCapLoadScreen > 0) {
+		unsigned int fpsLoadScreenPatch = 1;
+		fpsLoadScreenPatch = floor(1000.0f / float(iFPSCapLoadScreen));
+		if (fpsLoadScreenPatch <= 0) { fpsLoadScreenPatch = 1; }
+		if (fpsLoadScreenPatch >= 1000) { fpsLoadScreenPatch = 1000; }
+
+		SafeWrite32(0x78D4A4, fpsLoadScreenPatch);
 	}
 	// for bFixNPCShootingAngle
 	if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
