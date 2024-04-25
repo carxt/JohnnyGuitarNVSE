@@ -7,24 +7,28 @@ NVSEArrayElement EventResultPtr;
 class EventInformation;
 void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
 
-class JohnnyEventFiltersForm : EventHandlerInterface {
+
+
+
+class JohnnyEventFiltersBase : protected EventHandlerInterface {
+
+protected:
 	typedef  std::unordered_set<unsigned int> RefUnorderedSet;
-
-private:
-	RefUnorderedSet* Filters = 0;
-
 	RefUnorderedSet* GetFilter(UInt32 filter) {
 		if (filter >= numFilters) return NULL;
 		return &(Filters[filter]);
 	}
+private:
+	JohnnyEventFiltersBase() = delete;
+	RefUnorderedSet* Filters = 0;
 public:
-	JohnnyEventFiltersForm(void** filters, UInt32 nuFilters) {
+	JohnnyEventFiltersBase(void** filters, UInt32 nuFilters) {
 		numFilters = nuFilters;
 		Filters = new RefUnorderedSet[numFilters];
 		GenFilters = new GenericFilters[numFilters];
 		for (int i = 0; i < nuFilters; i++) GenFilters[i].ptr = filters[i];
 	}
-	virtual ~JohnnyEventFiltersForm() {
+	virtual ~JohnnyEventFiltersBase() {
 		delete[] Filters;
 		delete[] GenFilters;
 	}
@@ -35,24 +39,57 @@ public:
 		//RefUnorderedSet::const_iterator got = FilterSet->find(toSearch);
 		return  FilterSet->empty() || (FilterSet->find(toSearch.refID) != FilterSet->end());
 	}
-
+	virtual bool IsFilterEmpty(UInt32 filterNum) {
+		RefUnorderedSet* FilterSet = GetFilter(filterNum);
+		if (!FilterSet) return true;
+		return FilterSet->empty();
+	}
 	virtual void InsertToFilter(UInt32 filterNum, GenericFilters toInsert) {
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return;
 		FilterSet->insert(toInsert.refID);
-	}
+
+	};
 	virtual void DeleteFromFilter(UInt32 filterNum, GenericFilters toDelete) {
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return;
 		FilterSet->erase(toDelete.refID);
+	};
+	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 nuFilter) {
+		return (Filter.ptr == GenFilters[nuFilter].ptr);
+	}
+	virtual bool IsAcceptedParameter(GenericFilters parameter) = 0;
+	virtual void SetUpFiltering() = 0;
+};
+
+
+
+class JohnnyEventFiltersNull : protected JohnnyEventFiltersBase {
+public:
+	JohnnyEventFiltersNull(void** filters, UInt32 nuFilters) : JohnnyEventFiltersBase(filters, nuFilters) {}
+	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch) {
+		return true;
 	}
 	virtual bool IsFilterEmpty(UInt32 filterNum) {
 		RefUnorderedSet* FilterSet = GetFilter(filterNum);
 		if (!FilterSet) return true;
 		return FilterSet->empty();
 	}
-	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 nuFilter) {
-		return (Filter.ptr == GenFilters[nuFilter].ptr);
+	virtual void InsertToFilter(UInt32 filterNum, GenericFilters toInsert) { };
+	virtual void DeleteFromFilter(UInt32 filterNum, GenericFilters toDelete) { };
+	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 nuFilter) { return true; };
+	virtual bool IsAcceptedParameter(GenericFilters parameter) { return true; }
+	virtual void SetUpFiltering() {};
+};
+
+class JohnnyEventFiltersForm : public JohnnyEventFiltersBase {
+
+public:
+	JohnnyEventFiltersForm(void** filters, UInt32 nuFilters) : JohnnyEventFiltersBase(filters, nuFilters) {}
+	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch) {
+		RefUnorderedSet* FilterSet;
+		if (!(FilterSet = GetFilter(filterNum))) return false;
+		return  FilterSet->empty() || (FilterSet->find(toSearch.refID) != FilterSet->end());
 	}
 	virtual bool IsAcceptedParameter(GenericFilters parameter) {
 		return parameter.form->typeID != kFormType_TESObjectSTAT;
@@ -94,6 +131,12 @@ public:
 		} while (iterator = iterator->next);
 	}
 };
+
+
+
+
+
+
 
 class EventInformation {
 private:
@@ -220,6 +263,7 @@ EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxF
 	EventsArray.push_back(eventinfo);
 	return eventinfo;
 }
+
 
 void __cdecl JGFreeEvent(EventInfo& toRemove) {
 	std::lock_guard<std::mutex> lock(EventsArrayMutex);

@@ -15,6 +15,13 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdate
 DEFINE_COMMAND_ALT_PLUGIN(SetOnActorValueChangeEventHandler, SetJohnnyOnActorValueChangeEventHandler, , 0, 4, kParams_Event_OneInt);
 DEFINE_COMMAND_PLUGIN(SetOnProcessLevelChangeEventHandler, , 0, 5, kParams_Event_OneForm_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRadioPostSoundAttachEventHandler, SetOnRadioPostSoundHandler, , 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnKeyboardControllerSelectionChangeEventHandler, SetOnKBCTrlUIDeltaHandler, , 0, 4, kParams_Event_OneInt);
+
+
+
+
+
+
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
 EventInformation* OnStopQuestHandler;
@@ -33,6 +40,8 @@ EventInformation* OnRenderRenderedMenuUpdateHandler;
 EventInformation* OnAVChangeHandler;
 EventInformation* OnPLChangeHandler;
 EventInformation* OnRadioPostSoundAttachHandler;
+EventInformation* OnKeyboardControllerSelectionChangeHandler;
+
 
 
 UInt32 handlePreRenderEvent() {
@@ -190,10 +199,31 @@ void __fastcall HandleOnRadioPostSoundAttach(TESObjectACTI* a_radioActi, unsigne
 	for (auto const& callback : OnRadioPostSoundAttachHandler->EventCallbacks) {
 		JohnnyEventFiltersForm* filter = reinterpret_cast<JohnnyEventFiltersForm*>(callback.eventFilter);
 		if (filter->IsBaseInFilter(0, a_radioActi)) {
-			CallUDF(callback.ScriptForEvent, NULL, OnSeenDataUpdateHandler->numMaxArgs, a_radioActi, (mode > 0) ? 1 : 0);
+			CallUDF(callback.ScriptForEvent, NULL, OnRadioPostSoundAttachHandler->numMaxArgs, a_radioActi, (mode > 0) ? 1 : 0);
 		}
 	}
 }
+
+
+
+
+
+
+
+
+void __fastcall HandleOnKeyboardControllerUIChange(InterfaceManager* a_man, Menu* a_menu) {
+	int menuId = 0;
+	if (a_menu) {
+		menuId = a_menu->GetID();
+	}
+	for (auto const& callback : OnKeyboardControllerSelectionChangeHandler->EventCallbacks) {
+		auto filter = reinterpret_cast<JohnnyEventFiltersInt*>(callback.eventFilter);
+		if (filter->IsInFilter(0, menuId)) {
+			CallUDF(callback.ScriptForEvent, NULL, OnKeyboardControllerSelectionChangeHandler->numMaxArgs, menuId);
+		}
+	}
+}
+
 
 
 
@@ -274,6 +304,23 @@ __declspec (naked) void OnQuestStartStopEventAsm() {
 
 
 
+
+
+
+
+
+__declspec (naked) void OnKeyboardControllerSelectionChangeAsm() {
+	__asm
+	{
+		ret 4
+	}
+}
+
+
+
+
+
+
 inline uintptr_t GetRelJumpAddr(uintptr_t address)
 {
 	return *(uintptr_t*)(address + 1) + address + 5;
@@ -297,6 +344,42 @@ public:
 		WriteRelCall(hk_hookPoint, (uintptr_t)hk_RadHook);
 	}
 };
+
+
+
+
+
+
+template <uintptr_t a_addr>
+class hk_KeyboardControllerUIPositionEvent {
+private:
+	static inline uintptr_t hookCall = a_addr;
+public:
+	static  DWORD __fastcall hk_kbCHook(InterfaceManager* r_man, Menu* menu, Tile* newTile, DWORD tileVal, DWORD doPlaySound) {
+		auto res = ThisStdCall<DWORD>(hookCall, r_man, newTile, tileVal, doPlaySound);
+		if (r_man->activeTileAlt != newTile) {
+			HandleOnKeyboardControllerUIChange(r_man, menu);
+		}
+		return res;
+	}
+	static DWORD __fastcall hk_kbCAsm() {
+		__asm {
+			mov edx, dword ptr [ebp+8]
+			jmp hk_kbCHook
+		}
+	}
+
+	hk_KeyboardControllerUIPositionEvent() {
+		uintptr_t hk_hookPoint = hookCall;
+		hookCall = GetRelJumpAddr(hookCall);
+		WriteRelCall(hk_hookPoint, (uintptr_t)hk_kbCAsm);
+	}
+};
+
+
+
+
+
 
 
 
@@ -560,6 +643,30 @@ bool Cmd_SetJohnnyOnRadioPostSoundAttachEventHandler_Execute(COMMAND_ARGS) {
 }
 
 
+
+
+
+
+
+
+
+
+bool Cmd_SetJohnnyOnKeyboardControllerSelectionChangeEventHandler_Execute(COMMAND_ARGS) {
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	EventFilterStructOneInt filter {};
+	UInt32 flags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script)) {
+		if (OnRadioPostSoundAttachHandler) {
+			if (setOrRemove)
+				OnRadioPostSoundAttachHandler->RegisterEvent(script, (void**)&filter);
+			else OnRadioPostSoundAttachHandler->RemoveEvent(script, (void**)&filter);
+		}
+	}
+}
+
+
+
 void HandleEventHooks() {
 	OnDyingHandler = JGCreateEvent("OnDying", 1, 1, NULL);
 	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1, NULL);
@@ -576,6 +683,19 @@ void HandleEventHooks() {
 	OnAVChangeHandler = JGCreateEvent("OnActorValueChange", 3, 2, CreateOneFormOneIntFilter);
 	OnPLChangeHandler = JGCreateEvent("OnProcessLevelChange", 3, 2, CreateOneFormOneIntFilter);
 	OnRadioPostSoundAttachHandler = JGCreateEvent("OnRadioPostSoundAttach", 2, 1, NULL);
+	OnKeyboardControllerSelectionChangeHandler = JGCreateEvent("OnKeyboardControllerSelectionChange", 1, 1, CreateOneIntFilter);
+
+
+
+
+
+
+
+
+
+
+
+
 	CallUDF = g_scriptInterface->CallFunctionAlt;
 	WriteRelCall(0x55678A, (UINT)HandleSeenDataUpdateEvent);
 	WriteRelCall(0x557053, (UINT)HandleSeenDataUpdateEvent);
@@ -618,8 +738,9 @@ void HandleEventHooks() {
 	SafeWrite32(0x10872F8, (UINT)HandlePLChangeEvent<0x883800>);
 	SafeWrite32(0x1086CB8, (UINT)HandlePLChangeEvent<0x883800>);
 	SafeWrite32(0x10844A0, (UINT)HandlePLChangeEvent<0x883800>);
-
-
+	// Selection Change
+	hk_KeyboardControllerUIPositionEvent<0x0718059>();
+	//Radio
 	hk_RadioTuneOnEvent<0x511816>();
 	hk_RadioTuneOnEvent<0x579C64>();
 	hk_RadioTuneOnEvent<0x57A23A>();

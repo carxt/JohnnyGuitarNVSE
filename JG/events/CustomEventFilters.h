@@ -72,3 +72,42 @@ struct EventFilterStructOneFormOneInt {
 	TESForm* form;
 	int intID;
 };
+
+
+
+
+
+
+
+
+
+class JohnnyEventFiltersInt : public JohnnyEventFiltersBase {
+
+public:
+	JohnnyEventFiltersInt(void** filters, UInt32 nuFilters) : JohnnyEventFiltersBase(filters, nuFilters) {}
+	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch) {
+		RefUnorderedSet* FilterSet;
+		if (!(FilterSet = GetFilter(filterNum))) return false;
+		return  FilterSet->empty() || (FilterSet->find(toSearch.refID) != FilterSet->end());
+	}
+	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 nuFilter) {
+		return (Filter.intVal == GenFilters[nuFilter].intVal);
+	}
+	virtual bool IsAcceptedParameter(GenericFilters parameter) {
+		return true;
+	}
+
+	virtual void SetUpFiltering() {
+		for (int i = 0; i < numFilters; i++) {
+			if (GenFilters[1].intVal != -1) InsertToFilter(0, GenFilters[0].intVal);
+		}
+	}
+};
+void* __fastcall CreateOneIntFilter(void** Filters, UInt32 numFilters) {
+	return new JohnnyEventFiltersOneFormOneInt(Filters, numFilters);
+}
+struct EventFilterStructOneInt {
+	int intID;
+};
+
+
