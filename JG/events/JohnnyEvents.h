@@ -212,13 +212,13 @@ void __fastcall HandleOnRadioPostSoundAttach(TESObjectACTI* a_radioActi, unsigne
 
 
 void __fastcall HandleOnKeyboardControllerUIChange(InterfaceManager* a_man, Menu* a_menu) {
-	int menuId = 0;
+	int menuId = -1;
 	if (a_menu) {
 		menuId = a_menu->GetID();
 	}
 	for (auto const& callback : OnKeyboardControllerSelectionChangeHandler->EventCallbacks) {
 		auto filter = reinterpret_cast<JohnnyEventFiltersInt*>(callback.eventFilter);
-		if (filter->IsInFilter(0, menuId)) {
+		if (filter->IsInFilter(0, menuId) || filter->IsInFilter(0, 0)) {
 			CallUDF(callback.ScriptForEvent, NULL, OnKeyboardControllerSelectionChangeHandler->numMaxArgs, menuId);
 		}
 	}
@@ -355,24 +355,18 @@ class hk_KeyboardControllerUIPositionEvent {
 private:
 	static inline uintptr_t hookCall = a_addr;
 public:
-	static  DWORD __fastcall hk_kbCHook(InterfaceManager* r_man, Menu* menu, Tile* newTile, DWORD tileVal, DWORD doPlaySound) {
-		auto res = ThisStdCall<DWORD>(hookCall, r_man, newTile, tileVal, doPlaySound);
+	static  DWORD __fastcall hk_kbCHook(InterfaceManager* r_man, void* edx, Tile* newTile, DWORD tileVal, DWORD doPlaySound) {
+		Menu* curMen = ThisStdCall<Menu*>(0x720E60, r_man);
 		if (r_man->activeTileAlt != newTile) {
-			HandleOnKeyboardControllerUIChange(r_man, menu);
+			HandleOnKeyboardControllerUIChange(r_man, curMen);
 		}
+		auto res = ThisStdCall<DWORD>(hookCall, r_man, newTile, tileVal, doPlaySound);
 		return res;
 	}
-	static DWORD __fastcall hk_kbCAsm() {
-		__asm {
-			mov edx, dword ptr [ebp+8]
-			jmp hk_kbCHook
-		}
-	}
-
 	hk_KeyboardControllerUIPositionEvent() {
 		uintptr_t hk_hookPoint = hookCall;
 		hookCall = GetRelJumpAddr(hookCall);
-		WriteRelCall(hk_hookPoint, (uintptr_t)hk_kbCAsm);
+		WriteRelCall(hk_hookPoint, (uintptr_t)hk_kbCHook);
 	}
 };
 
@@ -657,12 +651,13 @@ bool Cmd_SetJohnnyOnKeyboardControllerSelectionChangeEventHandler_Execute(COMMAN
 	EventFilterStructOneInt filter {};
 	UInt32 flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script)) {
-		if (OnRadioPostSoundAttachHandler) {
+		if (OnKeyboardControllerSelectionChangeHandler) {
 			if (setOrRemove)
-				OnRadioPostSoundAttachHandler->RegisterEvent(script, (void**)&filter);
-			else OnRadioPostSoundAttachHandler->RemoveEvent(script, (void**)&filter);
+				OnKeyboardControllerSelectionChangeHandler->RegisterEvent(script, (void**)&filter);
+			else OnKeyboardControllerSelectionChangeHandler->RemoveEvent(script, (void**)&filter);
 		}
 	}
+	return true;
 }
 
 
@@ -740,6 +735,9 @@ void HandleEventHooks() {
 	SafeWrite32(0x10844A0, (UINT)HandlePLChangeEvent<0x883800>);
 	// Selection Change
 	hk_KeyboardControllerUIPositionEvent<0x0718059>();
+	hk_KeyboardControllerUIPositionEvent<0x0715CD5>();
+
+	
 	//Radio
 	hk_RadioTuneOnEvent<0x511816>();
 	hk_RadioTuneOnEvent<0x579C64>();

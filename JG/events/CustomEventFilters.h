@@ -85,26 +85,28 @@ class JohnnyEventFiltersInt : public JohnnyEventFiltersBase {
 
 public:
 	JohnnyEventFiltersInt(void** filters, UInt32 nuFilters) : JohnnyEventFiltersBase(filters, nuFilters) {}
-	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch) {
+	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch) override {
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return false;
 		return  FilterSet->empty() || (FilterSet->find(toSearch.refID) != FilterSet->end());
 	}
-	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 nuFilter) {
+	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 nuFilter) override {
 		return (Filter.intVal == GenFilters[nuFilter].intVal);
 	}
-	virtual bool IsAcceptedParameter(GenericFilters parameter) {
+	virtual bool IsAcceptedParameter(GenericFilters parameter) override {
 		return true;
 	}
 
-	virtual void SetUpFiltering() {
+	virtual void SetUpFiltering() override {
 		for (int i = 0; i < numFilters; i++) {
 			if (GenFilters[1].intVal != -1) InsertToFilter(0, GenFilters[0].intVal);
 		}
 	}
 };
-void* __fastcall CreateOneIntFilter(void** Filters, UInt32 numFilters) {
-	return new JohnnyEventFiltersOneFormOneInt(Filters, numFilters);
+
+
+void* __fastcall CreateOneIntFilter(void** Filters, UInt32 numFilters){
+	return new JohnnyEventFiltersInt(Filters, numFilters);
 }
 struct EventFilterStructOneInt {
 	int intID;
