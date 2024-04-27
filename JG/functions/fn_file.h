@@ -3,11 +3,11 @@
 DEFINE_COMMAND_PLUGIN(MD5File, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(SHA1File, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetPixelFromBMP, , 0, 6, kParams_BMP);
-DEFINE_COMMAND_PLUGIN(UwUDelete, , 0, 2, kParams_OneString_OneInt);
+DEFINE_COMMAND_PLUGIN(UwUDelete, , 0, 2, kParams_OneString_OneInt); 
 DEFINE_COMMAND_PLUGIN(GetTextureWidth, , 0, 2, kParams_OneString_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetTextureHeight, , 0, 1, kParams_OneString_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParams_OneString_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParams_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetTextureHeight, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(PlaySoundFile, , 0, 3, kParams_OneString_TwoOptionalInts);
 DEFINE_COMMAND_PLUGIN(StopSoundFile, , 0, 0, NULL);
 #include <filesystem>
@@ -44,8 +44,7 @@ void resolveTexturePath(char* path) {
 bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char path[MAX_PATH];
-	UInt32 useDataTextures = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
 		resolveTexturePath(path);
 		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
 		if (file != nullptr) {
@@ -62,8 +61,7 @@ bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char path[MAX_PATH];
-	UInt32 useDataTextures = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
 		resolveTexturePath(path);
 		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
 		if (file != nullptr) {
@@ -100,8 +98,7 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char path[MAX_PATH];
-	UInt32 useDataTextures = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
 		resolveTexturePath(path);
 		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
 		if (file != nullptr) {
