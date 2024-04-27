@@ -48,7 +48,7 @@ bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 		resolveTexturePath(path);
 		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
 		if (file != nullptr) {
-			DWORD mipMapCount;
+			DWORD mipMapCount = 0;
 			file->Seek(0x1C, 1);
 			file->DoRead(&mipMapCount, sizeof(mipMapCount));
 			*result = mipMapCount;
@@ -65,7 +65,7 @@ bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 		resolveTexturePath(path);
 		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
 		if (file != nullptr) {
-			char format;
+			char format = 0;
 			file->Seek(0x57, 1);
 			file->DoRead(&format, 1);
 			*result = format - '0';
@@ -102,7 +102,7 @@ bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 		resolveTexturePath(path);
 		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
 		if (file != nullptr) {
-			DWORD height;
+			DWORD height = 0;
 			file->Seek(0x0C, 1);
 			file->DoRead(&height, sizeof(height));
 			*result = height;
