@@ -19,6 +19,7 @@
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
 #include "nvse/ScriptUtils.h"
+#include "nvse/FileFinder.h"
 #include "misc/WorldToScreen.h"
 #include "events/LambdaVariableContext.h"
 #include "events/JohnnyEventPredefinitions.h"

@@ -78,7 +78,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
-      <Command>copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\Plugins\$(TargetFileName)"</Command>
+      <Command>copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -110,6 +110,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\nvse\nvse\FileFinder.cpp" />
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp" />
     <ClCompile Include="..\nvse\nvse\GameBSExtraData.cpp" />
     <ClCompile Include="..\nvse\nvse\GameData.cpp" />
@@ -134,6 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\CommandTable.h" />
+    <ClInclude Include="..\nvse\nvse\FileFinder.h" />
     <ClInclude Include="..\nvse\nvse\GameAPI.h" />
     <ClInclude Include="..\nvse\nvse\GameBSExtraData.h" />
     <ClInclude Include="..\nvse\nvse\GameData.h" />
