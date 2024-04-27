@@ -409,18 +409,21 @@ public:
 	NiFile();
 	~NiFile();
 
-	virtual UInt32	SetOffset(UInt32 newOffset, UInt32 arg2);	// 14
-	virtual UInt32	GetFilename(void);	// 18
-	virtual UInt32	GetSize();			// 1C
+	virtual void		Seek(SInt32 aiOffset, SInt32 aiWhence);
+	virtual const char* GetFilename() const;
+	virtual UInt32		GetFileSize();
 
 	UInt32	m_bufSize;	// 010
-	UInt32	m_unk014;	// 014 - Total read in buffer
-	UInt32	m_unk018;	// 018 - Consumed from buffer
-	UInt32	m_unk01C;	// 01C
-	void* m_buffer;	// 020
-	FILE* m_File;		// 024
+	UInt32	m_uiBufferReadSize;	// 014 - Total read in buffer
+	UInt32	m_uiPos;	// 018 - Consumed from buffer
+	UInt32	m_uiAbsolutePos;	// 01C
+	void*	m_buffer;	// 020
+	FILE*	m_File;		// 024
+	UInt32	m_eMode;
+	bool	m_bGood;
 };
 
+STATIC_ASSERT(sizeof(NiFile) == 0x30);
 // 158
 class BSFile : public NiFile {
 public:
@@ -428,32 +431,30 @@ public:
 	~BSFile();
 
 	virtual bool	Reset(bool arg1, bool arg2);	// 20
-	virtual bool	Unk_09(UInt32 arg1);	// 24
-	virtual UInt32	Unk_0A();	// 28
-	virtual UInt32	Unk_0B(BSString* string, UInt32 arg2);	// 2C
-	virtual UInt32	Unk_0C(void* ptr, UInt32 arg2);	// 30
-	virtual UInt32	ReadBufDelim(void* bufferPtr, UInt32 bufferSize, short delim);		// 34
-	virtual UInt32	Unk_0E(void* ptr, UInt8 arg2);	// 38
-	virtual UInt32	Unk_0F(void* ptr, UInt8 arg2);	// 3C
-	virtual bool	IsReadable();	// 40
-	virtual UInt32	ReadBuf(void* bufferPtr, UInt32 numBytes);	// 44
-	virtual UInt32	WriteBuf(void* bufferPtr, UInt32 numBytes);	// 48
+	virtual bool	OpenByFilePointer(FILE* apFile);
+	virtual UInt32	GetSize();
+	virtual UInt32	ReadString(BSString& arString, UInt32 auiMaxLength);
+	virtual UInt32	ReadStringAlt(BSString& arString, UInt32 auiMaxLength);
+	virtual UInt32	GetLine(char* apBuffer, UInt32 auiMaxBytes, UInt8 aucMark);
+	virtual UInt32	WriteString(BSString& arString, bool abBinary);
+	virtual UInt32	WriteStringAlt(BSString& arString, bool abBinary);
+	virtual bool	IsReadable();
+	virtual UInt32	DoRead(void* apBuffer, UInt32 auiBytes);
+	virtual UInt32	DoWrite(const void* apBuffer, UInt32 auiBytes);
 
-	UInt32		m_modeReadWriteAppend;	// 028
-	UInt8		m_good;					// 02C
-	UInt8		pad02D[3];				// 02D
-	UInt8		m_unk030;				// 030
-	UInt8		pad031[3];				// 031
-	UInt32		m_unk034;				// 034
-	UInt32		m_unk038;				// 038 - init'd to FFFFFFFF
-	UInt32		m_unk03C;				// 038
-	UInt32		m_unk040;				// 038
-	char		m_path[0x104];			// 044
-	UInt32		m_unk148;				// 148
-	UInt32		m_unk14C;				// 14C
-	UInt32		m_fileSize;				// 150
-	UInt32		m_unk154;				// 154
+	bool		bUseAuxBuffer;				// 02D
+	void*		pAuxBuffer;
+	SInt32		iAuxTrueFilePos;
+	DWORD		dword3C;
+	DWORD		dword40;
+	char		cFileName[260];
+	UInt32		uiResult;
+	UInt32		uiIOSize;
+	UInt32		uiTrueFilePos;
+	UInt32		uiFileSize;
 };
+
+STATIC_ASSERT(sizeof(BSFile) == 0x158);
 
 //
 struct ToBeNamed {

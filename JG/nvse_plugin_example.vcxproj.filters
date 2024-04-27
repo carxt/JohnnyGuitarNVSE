@@ -85,6 +85,9 @@
     <ClCompile Include="..\nvse\nvse\GameUI.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
+    <ClCompile Include="..\nvse\nvse\FileFinder.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -228,6 +231,9 @@
     </ClInclude>
     <ClInclude Include="internal\serialization.h">
       <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\FileFinder.h">
+      <Filter>nvse</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

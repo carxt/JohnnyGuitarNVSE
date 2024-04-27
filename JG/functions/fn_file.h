@@ -29,84 +29,88 @@ bool Cmd_PlaySoundFile_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+void resolveTexturePath(char* path) {
+	if (StrBeginsCI(path, "data\\")) {
+		strcpy(path, path + 5);
+
+	}
+	if (StrBeginsCI(path, "textures\\") == 0) {
+		char fixPath[MAX_PATH];
+		strcpy(fixPath, path);
+		sprintf(path, "textures\\%s", fixPath);
+	}
+}
 
 bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
-	char filepath[MAX_PATH];
 	*result = 0;
-	GetModuleFileNameA(NULL, filepath, MAX_PATH);
 	char path[MAX_PATH];
 	UInt32 useDataTextures = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
-		if (strstr(path, "..\\")) return true;
-		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
-		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
-		FileStream sourceFile;
-		if (sourceFile.OpenAt(filepath, 0x1C)) {
+		resolveTexturePath(path);
+		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
+		if (file != nullptr) {
 			DWORD mipMapCount;
-			sourceFile.ReadBuf(&mipMapCount, 4);
+			file->Seek(0x1C, 1);
+			file->DoRead(&mipMapCount, sizeof(mipMapCount));
 			*result = mipMapCount;
 			if (IsConsoleMode()) Console_Print("GetTextureMipMapCount >> %.f", *result);
+			file->Destructor(true);
 		}
 	}
 	return true;
 }
 bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
-	char filepath[MAX_PATH];
 	*result = 0;
-	GetModuleFileNameA(NULL, filepath, MAX_PATH);
 	char path[MAX_PATH];
 	UInt32 useDataTextures = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
-		if (strstr(path, "..\\")) return true;
-		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
-		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
-		FileStream sourceFile;
-		if (sourceFile.OpenAt(filepath, 0x57)) {
+		resolveTexturePath(path);
+		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
+		if (file != nullptr) {
 			char format;
-			sourceFile.ReadBuf(&format, 1);
+			file->Seek(0x57, 1);
+			file->DoRead(&format, 1);
 			*result = format - '0';
 			if (IsConsoleMode()) Console_Print("GetTextureFormat >> %.f", *result);
+			file->Destructor(true);
 		}
 	}
 	return true;
 }
 bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
-	char filepath[MAX_PATH];
 	*result = 0;
-	GetModuleFileNameA(NULL, filepath, MAX_PATH);
 	char path[MAX_PATH];
+	char fixPath[MAX_PATH];
 	UInt32 useDataTextures = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
-		if (strstr(path, "..\\")) return true;
-		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
-		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
-		FileStream sourceFile;
-		if (sourceFile.OpenAt(filepath, 0x10)) {
-			DWORD width;
-			sourceFile.ReadBuf(&width, 4);
+		resolveTexturePath(path);
+		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
+		if (file != nullptr) {
+			DWORD width = 0;
+			file->Seek(0x10, 1);
+			file->DoRead(&width, sizeof(width));
 			*result = width;
 			if (IsConsoleMode()) Console_Print("GetTextureWidth >> %.f", *result);
+			file->Destructor(true);
 		}
 	}
 	return true;
 }
 
 bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
-	char filepath[MAX_PATH];
 	*result = 0;
-	GetModuleFileNameA(NULL, filepath, MAX_PATH);
 	char path[MAX_PATH];
 	UInt32 useDataTextures = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
-		if (strstr(path, "..\\")) return true;
-		if (useDataTextures) strcpy((char*)(strrchr(filepath, '\\') + 1), "Data\\Textures\\");
-		strcpy((char*)(strrchr(filepath, '\\') + 1), path);
-		FileStream sourceFile;
-		if (sourceFile.OpenAt(filepath, 0x0C)) {
+		resolveTexturePath(path);
+		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
+		if (file != nullptr) {
 			DWORD height;
-			sourceFile.ReadBuf(&height, 4);
+			file->Seek(0x0C, 1);
+			file->DoRead(&height, sizeof(height));
 			*result = height;
 			if (IsConsoleMode()) Console_Print("GetTextureHeight >> %.f", *result);
+			file->Destructor(true);
 		}
 	}
 	return true;
