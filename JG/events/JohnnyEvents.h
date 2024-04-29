@@ -357,10 +357,11 @@ private:
 public:
 	static  DWORD __fastcall hk_kbCHook(InterfaceManager* r_man, void* edx, Tile* newTile, DWORD tileVal, DWORD doPlaySound) {
 		Menu* curMen = ThisStdCall<Menu*>(0x720E60, r_man);
-		if (r_man->activeTileAlt != newTile) {
+		bool fireEvent = r_man->activeTileAlt != newTile;
+		auto res = ThisStdCall<DWORD>(hookCall, r_man, newTile, tileVal, doPlaySound);
+		if (fireEvent) {
 			HandleOnKeyboardControllerUIChange(r_man, curMen);
 		}
-		auto res = ThisStdCall<DWORD>(hookCall, r_man, newTile, tileVal, doPlaySound);
 		return res;
 	}
 	hk_KeyboardControllerUIPositionEvent() {
@@ -369,6 +370,8 @@ public:
 		WriteRelCall(hk_hookPoint, (uintptr_t)hk_kbCHook);
 	}
 };
+
+
 
 
 
