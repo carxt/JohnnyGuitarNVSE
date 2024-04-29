@@ -158,8 +158,8 @@ bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
 			}
 		}
 
-		return true;
 	}
+	return true;
 }
 
 bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {

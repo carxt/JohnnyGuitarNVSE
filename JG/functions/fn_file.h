@@ -78,7 +78,7 @@ bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char path[MAX_PATH];
-	char fixPath[MAX_PATH];
+	//char fixPath[MAX_PATH];
 	UInt32 useDataTextures = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
 		resolveTexturePath(path);

@@ -221,6 +221,33 @@ namespace hk_BarterHook {
 };
 
 
+
+
+template <uintptr_t a_addr>
+class hk_SleepOneInterCall {
+private:
+	static inline uintptr_t hookCall = a_addr;
+public:
+	static  uintptr_t __cdecl hk_SleepOneInterCallHook() {
+		auto res = CdeclCall<uintptr_t>(hookCall);
+		Sleep(1);
+		return res;
+	}
+	hk_SleepOneInterCall() {
+		uintptr_t hk_hookPoint = hookCall;
+		hookCall = *(uintptr_t*)(hk_hookPoint + 1);
+		SafeWrite32((hk_hookPoint + 1), (uintptr_t)hk_SleepOneInterCallHook);
+
+	}
+
+};
+
+
+
+
+
+
+
 namespace hk_RSMBarberHook {
 	JGSetList<DWORD> haircutSetList;
 	JGSetList<DWORD> beardSetList;
@@ -1213,6 +1240,7 @@ void HandleIniOptions() {
 		if (fpsLoadScreenPatch >= 1000) { fpsLoadScreenPatch = 1000; }
 
 		SafeWrite32(0x78D4A4, fpsLoadScreenPatch);
+		//hk_SleepOneInterCall<0x078D557>();
 	}
 	// for bFixNPCShootingAngle
 	if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
