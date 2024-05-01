@@ -41,7 +41,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GameGetSecondsPassed, GGetSecPass, , 0, NULL);
 
 
 bool Cmd_GameGetSecondsPassed_Eval(COMMAND_ARGS_EVAL) {
-	*result = ThisStdCall<float>(0x084D030, (void*)0x11F6394);
+	*result = ThisStdCall<float>(0x07013E0, (void*)0x11F6394);
 	return true;
 }
 
