@@ -10,7 +10,22 @@ DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(PlaySoundFile, , 0, 3, kParams_OneString_TwoOptionalInts);
 DEFINE_COMMAND_PLUGIN(StopSoundFile, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(IsBSALoaded, , 0, 1, kParams_OneString);
 #include <filesystem>
+
+bool Cmd_IsBSALoaded_Execute(COMMAND_ARGS) {
+	char path[MAX_PATH];
+	char fixPath[260];
+	*result = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+		sprintf(fixPath, "DATA\\%s", path);
+		DWORD* archive = CdeclCall<DWORD*>(0xAF5320, fixPath); // ArchiveManager::GetArchiveByName
+		if (archive != nullptr) {
+			*result = 1;
+		}
+	}
+	return true;
+}
 
 bool Cmd_StopSoundFile_Execute(COMMAND_ARGS) {
 	*result = 0;
