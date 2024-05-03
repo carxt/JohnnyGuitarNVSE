@@ -15,10 +15,10 @@ DEFINE_COMMAND_PLUGIN(IsBSALoaded, , 0, 1, kParams_OneString);
 
 bool Cmd_IsBSALoaded_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH];
-	char fixPath[260];
+	char fixPath[MAX_PATH];
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
-		sprintf(fixPath, "DATA\\%s", path);
+		snprintf(fixPath, MAX_PATH, "DATA\\%s", path);
 		DWORD* archive = CdeclCall<DWORD*>(0xAF5320, fixPath); // ArchiveManager::GetArchiveByName
 		if (archive != nullptr) {
 			*result = 1;
