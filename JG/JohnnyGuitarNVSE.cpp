@@ -447,6 +447,7 @@ extern "C" {
 		REG_CMD(SetCameraShakeNoHUDShudder);
 		REG_CMD(GameGetSecondsPassed);
 		REG_CMD(SetJohnnyOnKeyboardControllerSelectionChangeEventHandler);
+		REG_CMD(IsBSALoaded);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
