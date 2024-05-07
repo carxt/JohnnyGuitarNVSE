@@ -77,7 +77,7 @@ namespace GMSTJG {
 	private:
 		static inline uintptr_t hookCall = a_addr;
 	public:
-		static  uintptr_t __cdecl hk_CLCHook(float m1, float m2) {
+		static  float __cdecl hk_CLCHook(float m1, float m2) {
 			auto res = CdeclCall<float>(hookCall, m1, m2);
 			return fmax(res, fCombatLocationTargetRadiusMaxBase.data.f);
 		}
