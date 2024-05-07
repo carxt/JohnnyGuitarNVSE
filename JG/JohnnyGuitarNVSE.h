@@ -89,7 +89,7 @@ namespace GMSTJG {
 		}
 
 	};
-	void CombatLocationMaxRadiusBaseInitHook() {
+	void CombatLocationMaxRadiusBaseInitHook() { //Thanks lStewieAl
 		hk_CombatLocationMaxCall<0x09A089F>();
 		hk_CombatLocationMaxCall<0x09A0A0C>();
 		ThisStdCall<void>(func_AddGameSetting, &fCombatLocationTargetRadiusMaxBase, "fCombatLocationTargetRadiusMaxBase", 10.0f);
