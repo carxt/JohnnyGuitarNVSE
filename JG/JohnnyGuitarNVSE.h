@@ -77,17 +77,16 @@ namespace GMSTJG {
 	private:
 		static inline uintptr_t hookCall = a_addr;
 	public:
-		static  float __cdecl hk_CLCHook(float m1, float m2) {
-			auto res = CdeclCall<float>(hookCall, m1, m2);
+		static  double __cdecl hk_CLCHook(float m_a1, float m_a2) {
+			auto res = CdeclCall<double>(hookCall, m_a1, m_a2);
 			return fmax(res, fCombatLocationTargetRadiusMaxBase.data.f);
 		}
+
 		hk_CombatLocationMaxCall() {
 			uintptr_t hk_hookPoint = hookCall;
-			hookCall = *(uintptr_t*)(hk_hookPoint + 1);
-			SafeWrite32((hk_hookPoint + 1), (uintptr_t)hk_CLCHook);
-
+			hookCall = GetRelJumpAddr(hookCall);
+			WriteRelCall(hk_hookPoint, (uintptr_t)hk_CLCHook);
 		}
-
 	};
 	void CombatLocationMaxRadiusBaseInitHook() { //Thanks lStewieAl
 		hk_CombatLocationMaxCall<0x09A089F>();
