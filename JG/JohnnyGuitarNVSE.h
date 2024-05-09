@@ -68,6 +68,36 @@ char g_workingDir[MAX_PATH];
 std::unordered_set<DWORD> jg_gameRadioSet;
 static float g_viewmodel_near = 0.f;
 
+
+namespace GMSTJG {
+	static uintptr_t func_AddGameSetting = 0x040E0B0;
+	Setting fCombatLocationTargetRadiusMaxBase;
+	template <uintptr_t a_addr>
+	class hk_CombatLocationMaxCall {
+	private:
+		static inline uintptr_t hookCall = a_addr;
+	public:
+		static  double __cdecl hk_CLCHook(float m_a1, float m_a2) {
+			auto res = CdeclCall<double>(hookCall, m_a1, m_a2);
+			return fmax(res, fCombatLocationTargetRadiusMaxBase.data.f);
+		}
+
+		hk_CombatLocationMaxCall() {
+			uintptr_t hk_hookPoint = hookCall;
+			hookCall = GetRelJumpAddr(hookCall);
+			WriteRelCall(hk_hookPoint, (uintptr_t)hk_CLCHook);
+		}
+	};
+	void CombatLocationMaxRadiusBaseInitHook() { //Thanks lStewieAl
+		hk_CombatLocationMaxCall<0x09A089F>();
+		hk_CombatLocationMaxCall<0x09A0A0C>();
+		ThisStdCall<void>(func_AddGameSetting, &fCombatLocationTargetRadiusMaxBase, "fCombatLocationTargetRadiusMaxBase", 10.0f);
+
+	}
+
+
+}
+
 template <class T>
 struct JGSetList {
 	bool isWhiteList = false;
@@ -1214,6 +1244,7 @@ void HandleFixes() {
 	//CamShakeHook
 	hk_CameraShakeHook::CreateHook();
 
+
 }
 
 void HandleIniOptions() {
@@ -1270,6 +1301,19 @@ void HandleIniOptions() {
 	}
 }
 
+
+
+
+
+
+
+
+void HandleGameSettingsJG(){
+
+	GMSTJG::CombatLocationMaxRadiusBaseInitHook();
+
+}
+
 void HandleFunctionPatches() {
 	// WorldToScreen
 	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
@@ -1319,13 +1363,14 @@ void HandleFunctionPatches() {
 	hk_BarterHook::CreateHook();
 
 	WriteRelCall(0x8752F2, UInt32(SetViewmodelFrustumHook));
+
 }
 float timer22 = 30.0;
 void HandleGameHooks() {
 	HandleFixes();
 	HandleIniOptions();
 	HandleFunctionPatches();
-
+	HandleGameSettingsJG();
 	//  wip shit for void
 	//	WriteRelCall(0x97E745, (UInt32)WantsToFleeHook);
 	//	WriteRelCall(0x999082, (UInt32)WantsToFleeHook);

@@ -5,10 +5,10 @@
 // 0C
 class Setting {
 public:
-	Setting();
-	virtual ~Setting();
+	Setting() {};
+	virtual ~Setting() {};
 
-	virtual void Unk_01(void);
+	virtual void Unk_01(void) {};
 
 	enum EType {
 		kSetting_Bool = 0,
