@@ -41,13 +41,64 @@ DEFINE_COMMAND_PLUGIN(GetLandTextureUnderFeet, , 1, 0, NULL);
 DEFINE_CMD_NO_ARGS(GetMoonPhase);
 DEFINE_COMMAND_PLUGIN(RewardKarmaAlt, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetCameraShakeNoHUDShudder, CamShakeNHUD , , 0, 2, kParams_TwoFloats);
+DEFINE_CMD_NO_ARGS(GetTempIngestibleEffects)
+
+void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
+(void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
+bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
+bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
+void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
+#define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+
+std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
+
+bool __fastcall ValidTempEffect(EffectItem* effectItem) {
+	if (!effectItem || (effectItem->duration <= 0) || !effectItem->setting) return false;
+	UInt8 archtype = effectItem->setting->archtype;
+	return !archtype || ((archtype == 1) && (effectItem->setting->effectFlags & 0x2000)) || ((archtype > 10) && (archtype < 14)) || (archtype == 24) || (archtype > 33);
+}
 
 
-
-
-
-
-
+bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
+	*result = 0;
+	NVSEArrayVar* effArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	tempEffectMap.clear();
+	if (auto iter = ((Actor*)g_thePlayer)->magicTarget.GetEffectList()->Head())
+	{
+		do
+		{
+			if (ActiveEffect* activeEff = iter->data; activeEff && activeEff->bActive && !activeEff->bTerminated &&
+				activeEff->magicItem && ValidTempEffect(activeEff->effectItem))
+				if (TESForm* form = DYNAMIC_CAST(activeEff->magicItem, MagicItem, TESForm))
+				{ 
+					if (form->typeID == kFormType_AlchemyItem) {
+						float timeLeft = activeEff->duration - activeEff->timeElapsed;
+						auto it = tempEffectMap.find(form);
+						if (it != tempEffectMap.end() && it->second.second < activeEff->duration) {
+							it->second.first = timeLeft;
+							it->second.second = activeEff->duration;
+						}
+						else {
+							tempEffectMap.insert({form, {timeLeft, activeEff->duration}});
+						}
+					}
+				}
+		} while (iter = iter->next);
+		
+	}
+	if (!tempEffectMap.empty()) {
+		for (auto effect : tempEffectMap) {
+			NVSEArrayVar* effArrInner = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+			g_arrInterface->AppendElement(effArrInner, NVSEArrayElement(effect.first));
+			g_arrInterface->AppendElement(effArrInner, NVSEArrayElement(effect.second.first));
+			g_arrInterface->AppendElement(effArrInner, NVSEArrayElement(effect.second.second));
+			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effArrInner));
+		}
+		tempEffectMap.clear();
+	}
+	g_arrInterface->AssignCommandResult(effArr, result);
+	return true;
+}
 
 
 bool Cmd_SetCameraShakeNoHUDShudder_Execute(COMMAND_ARGS) {
@@ -60,23 +111,6 @@ bool Cmd_SetCameraShakeNoHUDShudder_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-
-
-
-
-
-
-
-
-
-
-
-void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
-(void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
-bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
-bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
-void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
-#define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
 bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -351,11 +385,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool __fastcall ValidTempEffect(EffectItem* effectItem) {
-	if (!effectItem || (effectItem->duration <= 0) || !effectItem->setting) return false;
-	UInt8 archtype = effectItem->setting->archtype;
-	return !archtype || ((archtype == 1) && (effectItem->setting->effectFlags & 0x2000)) || ((archtype > 10) && (archtype < 14)) || (archtype == 24) || (archtype > 33);
-}
+
 
 bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 	*result = 0;

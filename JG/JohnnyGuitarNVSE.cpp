@@ -448,6 +448,7 @@ extern "C" {
 		REG_CMD(GameGetSecondsPassed);
 		REG_CMD(SetJohnnyOnKeyboardControllerSelectionChangeEventHandler);
 		REG_CMD(IsBSALoaded);
+		REG_TYPED_CMD(GetTempIngestibleEffects, Array);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
