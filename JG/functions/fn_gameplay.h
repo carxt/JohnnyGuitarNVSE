@@ -7,7 +7,7 @@ DEFINE_COMMAND_PLUGIN(StopVATSCam, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCameraShake, , 0, 2, kParams_TwoFloats);
 DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 1, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(SetVelEx, , 1, 3, kParams_ThreeFloats);
-DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 2, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 3, kParams_TwoForms_OneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(UnsetAV, , 1, 1, kParams_OneActorValue);
 DEFINE_COMMAND_PLUGIN(UnforceAV, , 1, 1, kParams_OneActorValue);
@@ -42,7 +42,7 @@ DEFINE_CMD_NO_ARGS(GetMoonPhase);
 DEFINE_COMMAND_PLUGIN(RewardKarmaAlt, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetCameraShakeNoHUDShudder, CamShakeNHUD , , 0, 2, kParams_TwoFloats);
 DEFINE_CMD_NO_ARGS(GetTempIngestibleEffects)
-
+DEFINE_COMMAND_PLUGIN(PlaySoundFade, , 0, 2, kParams_OneForm_OneFloat);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -58,6 +58,30 @@ bool __fastcall ValidTempEffect(EffectItem* effectItem) {
 	return !archtype || ((archtype == 1) && (effectItem->setting->effectFlags & 0x2000)) || ((archtype > 10) && (archtype < 14)) || (archtype == 24) || (archtype > 33);
 }
 
+
+bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
+	*result = 0;
+	float fTime = 0;
+	TESSound* sound;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &fTime) && IS_TYPE(sound, TESSound)) {
+		TESObjectREFR* ref = thisObj;
+		if (ref == nullptr) {
+			ref = (TESObjectREFR*)g_thePlayer;
+		}
+		if (ref->GetNiNode()) {
+			BSSoundHandle handle;
+			ThisStdCall<BSSoundHandle*>(0xAE5870, BSAudioManager::Get(), &handle, sound->refID, 0x102); // BSAudioManager::GetSoundHandleByFormID
+			NiPoint3* refPos = ref->GetPos();
+			NiPoint3 pos = { refPos->x, refPos->y, refPos->z };
+			ThisStdCall<void>(0xAD8B60, &handle, pos); // BSSoundHandle::SetPosition
+			ThisStdCall<void>(0xAD8F20, &handle, ref->GetNiNode()); // BSSoundHandle::SetObjectToFollow
+			UInt32 time = fTime * 1000.0;
+			ThisStdCall<void>(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
+			*result = 1;
+		}
+	}
+	return true;
+}
 
 bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -635,8 +659,9 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 	TESSound* soundForm;
 	TESObjectREFR* source;
 	BSFadeNode* fadeNode;
+	float fadeOutTime = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source, &fadeOutTime)) {
 		if (soundForm->soundFile.path.m_dataLen) {
 			const char* soundPath = soundForm->soundFile.path.m_data;
 			BSGameSound* gameSound;
@@ -645,8 +670,14 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 				if (gameSound && StrBeginsCI(gameSound->filePath + 0xB, soundPath)) {
 					fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
 					if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == source) {
-						gameSound->stateFlags &= 0xFFFFFF0F;
-						gameSound->stateFlags |= 0x10;
+						if (fadeOutTime == -1) {
+							gameSound->stateFlags &= 0xFFFFFF0F;
+							gameSound->stateFlags |= 0x10;
+						}
+						else {
+							int time = fadeOutTime * 1000.0;
+							ThisStdCall<void>(0xADC560, BSAudioManager::Get(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
+						}
 						*result = 1;
 						break;
 					}

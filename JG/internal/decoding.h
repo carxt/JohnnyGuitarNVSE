@@ -2240,13 +2240,47 @@ DebugText::DebugLine* DebugText::GetDebugInput() {
 // 254
 class BSSoundInfo {
 public:
-	BSSoundInfo();
-	~BSSoundInfo();
+	struct Data {
+		const char* dword0;
+		char		cPath04[260];
+		const char* pFilePath;
+		char		cFilePath[260];
+		float		float210;
+		float		float214;
+		NiPoint3	kPosition;
+		DWORD		dword224;
+		float		float228;
+		float		float22C;
+		UInt32		uiStaticAttenuation;
+		UInt32		uiDistanceAttenuation;
+		UInt32		uiFaderAttenuation;
+	};
 
-	UInt32			unk000[72];		// 000
-	const char* filePath;		// 120
-	UInt32			unk124[76];		// 124
+
+	UInt32		uiID;
+	float		fFrequency;
+	float		fVolume;
+	UInt32		uiAudioFlags;
+	UInt32		uiDuration;
+	bool		bIsPlaying;
+	Data		kData;
 };
+STATIC_ASSERT(sizeof(BSSoundInfo) == 0x254);
+
+
+class BSSoundHandle {
+public:
+	UInt32	uiSoundID;
+	bool	bAssumeSuccess;
+	UInt32	uiState;
+
+	BSSoundHandle() : uiSoundID(-1), bAssumeSuccess(false), uiState(0) {}
+	~BSSoundHandle() {}
+
+};
+
+STATIC_ASSERT(sizeof(BSSoundHandle) == 0xC);
+
 
 // 230
 class BSGameSound {
