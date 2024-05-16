@@ -654,14 +654,27 @@ bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &id, &txst) && IS_TYPE(weapon, TESObjectWEAP) && IS_TYPE(txst, BGSTextureSet)) {
 		TESModelTextureSwap* model = &weapon->textureSwap;
 		if (!model) return true;
-		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
-		do {
-			if (iter->data && iter->data->index3D == id) {
-				iter->data->textureID = txst;
+		if (model->textureList.Empty()) {
+			TESModelTextureSwap::Texture* texture = (TESModelTextureSwap::Texture*)GameHeapAlloc(0x88);
+			if (texture != nullptr) {
+				texture->index3D = id;
+				texture->textureID = txst;
+				*(texture->textureName) = '\0';
+				model->textureList.Append(texture);
 				*result = 1;
-				break;
+
 			}
-		} while (iter = iter->next);
+		}
+		else {
+			ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+			do {
+				if (iter->data && iter->data->index3D == id) {
+					iter->data->textureID = txst;
+					*result = 1;
+					break;
+				}
+			} while (iter = iter->next);
+		}
 	}
 	return true;
 }
@@ -674,14 +687,27 @@ bool Cmd_SetArmorAltTexture_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &whichModel, &id, &txst) && IS_TYPE(txst, BGSTextureSet) && IS_TYPE(armor, TESObjectARMO)) {
 		TESModelTextureSwap* model = GetArmorModel(armor, whichModel);
 		if (!model) return true;
-		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
-		do {
-			if (iter->data && iter->data->index3D == id) {
-				iter->data->textureID = txst;
+		if (model->textureList.Empty()) {
+			TESModelTextureSwap::Texture* texture = (TESModelTextureSwap::Texture*)GameHeapAlloc(0x88);
+			if (texture != nullptr) {
+				texture->index3D = id;
+				texture->textureID = txst;
+				*(texture->textureName) = '\0';
+				model->textureList.Append(texture);
 				*result = 1;
-				break;
+
 			}
-		} while (iter = iter->next);
+		}
+		else {
+			ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+			do {
+				if (iter->data && iter->data->index3D == id) {
+					iter->data->textureID = txst;
+					*result = 1;
+					break;
+				}
+			} while (iter = iter->next);
+		}
 	}
 	return true;
 }
