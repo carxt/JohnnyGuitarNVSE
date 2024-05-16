@@ -535,6 +535,15 @@ static ParamInfo kParams_ThreeFloats[3] =
 	{ "Float", kParamType_Float, 0 },
 };
 
+static ParamInfo kParams_ThreeFloats_OneInt_OneOptionalFloat[5] =
+{
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Float", kParamType_Float, 1 }
+};
+
 static ParamInfo kParams_FiveFloats[5] =
 {
 	{ "Float", kParamType_Float, 0 },

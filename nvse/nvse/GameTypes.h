@@ -483,160 +483,31 @@ public:
 STATIC_ASSERT(sizeof(BSSimpleList<void*>) == 0xC);
 
 template <typename T_Data>
-struct BSSimpleArray {
-	virtual void	Destroy(bool doFree);
+class BSSimpleArray {
+public:
 
-	T_Data* data;			// 04
-	UInt32		size;			// 08
-	UInt32		alloc;			// 0C
+	virtual			~BSSimpleArray();
+	virtual T_Data* Allocate(UInt32 auiCount);
+	virtual void    Deallocate(T_Data* apData);
+	virtual T_Data* Reallocate(T_Data* apData, UInt32 auiCount);
 
-	T_Data operator[](UInt32 idx) {
-		return (idx < size) ? data[idx] : NULL;
-	}
+	T_Data* pBuffer;
+	UInt32	uiSize;
+	UInt32	uiAllocSize;
 
-	class Iterator {
-	protected:
-		friend BSSimpleArray;
+	
 
-		T_Data* pData;
-		UInt32		count;
+	UInt32 GetSize() { return uiSize; }
+	UInt32 GetAllocSize() { return uiAllocSize; }
+	bool IsEmpty() { return uiSize == 0; }
+	bool IsFull() { return uiSize == uiAllocSize; }
+	T_Data* GetAt(UInt32 idx) { return &pBuffer[idx]; }
+	T_Data* GetLast() { return &pBuffer[uiSize - 1]; }
 
-	public:
-		bool End() const { return !count; }
-		void operator++() {
-			count--;
-			pData++;
-		}
-
-		T_Data& operator*() const { return *pData; }
-		T_Data& operator->() const { return *pData; }
-		T_Data& Get() const { return *pData; }
-
-		Iterator() {}
-		Iterator(BSSimpleArray& source) : pData(source.data), count(source.size) {}
-	};
+	
 };
 
-//// this is a NiTPointerMap <UInt32, T_Data>
-//// todo: generalize key
-//template <typename T_Data>
-//class NiTPointerMap
-//{
-//public:
-//	NiTPointerMap();
-//	virtual ~NiTPointerMap();
-//
-//	struct Entry
-//	{
-//		Entry	* next;
-//		UInt32	key;
-//		T_Data	* data;
-//	};
-//
-//	// note: traverses in non-numerical order
-//	class Iterator
-//	{
-//		friend NiTPointerMap;
-//
-//	public:
-//		Iterator(NiTPointerMap * table, Entry * entry = NULL, UInt32 bucket = 0)
-//			:m_table(table), m_entry(entry), m_bucket(bucket) { FindValid(); }
-//		~Iterator() { }
-//
-//		T_Data *	Get(void);
-//		UInt32		GetKey(void);
-//		bool		Next(void);
-//		bool		Done(void);
-//
-//	private:
-//		void		FindValid(void);
-//
-//		NiTPointerMap	* m_table;
-//		Entry		* m_entry;
-//		UInt32		m_bucket;
-//	};
-//
-//	virtual UInt32	CalculateBucket(UInt32 key);
-//	virtual bool	CompareKey(UInt32 lhs, UInt32 rhs);
-//	virtual void	Fn_03(void);
-//	virtual void	Fn_04(void);
-//	virtual void	Fn_05(void);
-//	virtual void	Fn_06(void);
-//
-//	T_Data *	Lookup(UInt32 key);
-//
-//	UInt32	m_numBuckets;
-//	Entry	** m_buckets;
-//	UInt32	m_numItems;
-//};
-
-//template <typename T_Data>
-//T_Data * NiTPointerMap <T_Data>::Lookup(UInt32 key)
-//{
-//	for(Entry * traverse = m_buckets[key % m_numBuckets]; traverse; traverse = traverse->next)
-//		if(traverse->key == key)
-//			return traverse->data;
-//
-//	return NULL;
-//}
-//
-//template <typename T_Data>
-//T_Data * NiTPointerMap <T_Data>::Iterator::Get(void)
-//{
-//	if(m_entry)
-//		return m_entry->data;
-//
-//	return NULL;
-//}
-//
-//template <typename T_Data>
-//UInt32 NiTPointerMap <T_Data>::Iterator::GetKey(void)
-//{
-//	if(m_entry)
-//		return m_entry->key;
-//
-//	return 0;
-//}
-//
-//template <typename T_Data>
-//bool NiTPointerMap <T_Data>::Iterator::Next(void)
-//{
-//	if(m_entry)
-//		m_entry = m_entry->next;
-//
-//	while(!m_entry && (m_bucket < (m_table->m_numBuckets - 1)))
-//	{
-//		m_bucket++;
-//
-//		m_entry = m_table->m_buckets[m_bucket];
-//	}
-//
-//	return m_entry != NULL;
-//}
-//
-//template <typename T_Data>
-//bool NiTPointerMap <T_Data>::Iterator::Done(void)
-//{
-//	return m_entry == NULL;
-//}
-//
-//template <typename T_Data>
-//void NiTPointerMap <T_Data>::Iterator::FindValid(void)
-//{
-//	// validate bucket
-//	if(m_bucket >= m_table->m_numBuckets) return;
-//
-//	// get bucket
-//	m_entry = m_table->m_buckets[m_bucket];
-//
-//	// find non-empty bucket
-//	while(!m_entry && (m_bucket < (m_table->m_numBuckets - 1)))
-//	{
-//		m_bucket++;
-//
-//		m_entry = m_table->m_buckets[m_bucket];
-//	}
-//}
+STATIC_ASSERT(sizeof(BSSimpleArray<UInt32>)	== 0x10);
 
 template <class Node, class Info>
 class Visitor {

@@ -43,6 +43,8 @@ DEFINE_COMMAND_PLUGIN(RewardKarmaAlt, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetCameraShakeNoHUDShudder, CamShakeNHUD , , 0, 2, kParams_TwoFloats);
 DEFINE_CMD_NO_ARGS(GetTempIngestibleEffects)
 DEFINE_COMMAND_PLUGIN(PlaySoundFade, , 0, 2, kParams_OneForm_OneFloat);
+DEFINE_COMMAND_PLUGIN(GetPointInNavMesh, , 0, 5, kParams_ThreeFloats_OneInt_OneOptionalFloat);
+DEFINE_COMMAND_PLUGIN(GetNearestNavMeshTriangle, , 0, 5, kParams_ThreeFloats_OneInt_OneOptionalFloat);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -51,6 +53,203 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
 std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
+
+void GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
+	NavMeshArray* pNavMeshArray = apCell->pNavMeshes;
+	if (!pNavMeshArray)
+		return;
+
+	for (UInt32 i = 0; i < pNavMeshArray->GetSize(); i++) {
+
+		NavMeshPtr spNavMesh = pNavMeshArray->GetAt(i);
+		if (!spNavMesh)
+			continue;
+
+		NavMeshInfo* pInfo = spNavMesh->pNavMeshInfo;
+		if (!pInfo)
+			continue;
+
+		for (UInt32 j = 0; j < spNavMesh->kTriangles.GetSize(); j++) {
+			NavMeshTriangle* pNavMeshTriangle = spNavMesh->kTriangles.GetAt(j);
+			if (!pNavMeshTriangle)
+				continue;
+
+			if (checkDisabled && ((pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0))
+				continue;
+
+			// Get triangle vertices
+			NiPoint3 kVerts[3];
+			for (UInt32 k = 0; k < 3; k++) {
+				NiPoint3* pVertex = spNavMesh->kVertices.GetAt(pNavMeshTriangle->sVertices[k]);
+				if (!pVertex)
+					continue;
+
+				kVerts[k] = *pVertex;
+			}
+
+
+			NiPoint3 kTriCenter = NiPoint3::GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
+
+			if (zLimit > 0 && fabs(kTriCenter.z - arPointToTest.z) > zLimit) continue;
+
+			// Get distance to triangle center
+			float fDist = arPointToTest.Distance(kTriCenter);
+
+			if (fDist < arOut.w) {
+				arOut.w = fDist;
+				arOut.x = kTriCenter.x;
+				arOut.y = kTriCenter.y;
+				arOut.z = kTriCenter.z;
+			}
+		}
+	}
+}
+bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
+	NavMeshArray* pNavMeshArray = apCell->pNavMeshes;
+	if (!pNavMeshArray)
+		return false;
+
+	for (UInt32 i = 0; i < pNavMeshArray->GetSize(); i++) {
+
+		NavMeshPtr spNavMesh = pNavMeshArray->GetAt(i);
+		if (!spNavMesh)
+			continue;
+
+		NavMeshInfo* pInfo = spNavMesh->pNavMeshInfo;
+		if (!pInfo)
+			continue;
+
+		for (UInt32 j = 0; j < spNavMesh->kTriangles.GetSize(); j++) {
+			NavMeshTriangle* pNavMeshTriangle = spNavMesh->kTriangles.GetAt(j);
+			if (!pNavMeshTriangle)
+				continue;
+			if (checkDisabled && (pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0) 
+				continue;
+			
+			// Get triangle vertices
+			NiPoint3 kVerts[3];
+			for (UInt32 k = 0; k < 3; k++) {
+				NiPoint3* pVertex = spNavMesh->kVertices.GetAt(pNavMeshTriangle->sVertices[k]);
+				if (!pVertex)
+					continue;
+
+				kVerts[k] = *pVertex;
+			}
+
+
+			// Check if player is inside the triangle
+			if (NiPoint3::PointInTriangle(arPointToTest, kVerts[0], kVerts[1], kVerts[2])) {
+				// Get triangle center
+				NiPoint3 kTriCenter = NiPoint3::GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
+
+				if (zLimit > 0 && fabs(kTriCenter.z - arPointToTest.z) > zLimit) continue;
+				
+
+				// Get distance to triangle center
+				float fDist = arPointToTest.Distance(kTriCenter);
+
+				arOut.x = kTriCenter.x;
+				arOut.y = kTriCenter.y;
+				arOut.z = kTriCenter.z;
+				arOut.w = fDist;
+
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
+	*result = 0;
+
+	NiPoint3 kPointToTest;
+	UInt32 checkDisabled = 0;
+	float zLimit = 0;
+	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &kPointToTest.x, &kPointToTest.y, &kPointToTest.z, &checkDisabled, &zLimit)) return true;
+
+	NiPoint4 kResult = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
+
+	TESObjectCELL* pInterior = TES::GetSingleton()->currentInterior;
+	UInt32 uiGridSize = (*(Setting*)0x11C63CC).data.uint;
+
+	if (pInterior) {
+		GetClosestNavMeshTriangle(pInterior, kPointToTest, (checkDisabled > 0), zLimit, kResult);
+	}
+	else {
+		for (UInt32 x = 0; x < uiGridSize; x++) {
+			for (UInt32 y = 0; y < uiGridSize; y++) {
+				TESObjectCELL* pCell = TES::GetSingleton()->gridCellArray->GetCell(x, y)->pCell;
+				if (!pCell)
+					continue;
+
+				GetClosestNavMeshTriangle(pCell, kPointToTest, (checkDisabled > 0), zLimit, kResult);
+			}
+		}
+	}
+	g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.x));
+	g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.y));
+	g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.z));
+	g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.w));
+	if (IsConsoleMode()) {
+		Console_Print("GetClosestNavMeshTriangle >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
+	}
+
+	g_arrInterface->AssignCommandResult(pointArr, result);
+
+	return true;
+}
+
+bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
+	*result = 0;
+	NiPoint4 kResult;
+	TESObjectCELL* pInterior = TES::GetSingleton()->currentInterior;
+
+	UInt32 uiGridSize = (*(Setting*)0x11C63CC).data.uint;
+
+	NiPoint3 kPointToTest;
+	UInt32 checkDisabled = 0;
+	float zLimit = 0;
+	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &kPointToTest.x, &kPointToTest.y, &kPointToTest.z, &checkDisabled, &zLimit))	return true;
+
+	bool bResult = false;
+	if (pInterior) {
+		bResult = GetPointNavMesh(pInterior, kPointToTest, (checkDisabled > 0), zLimit, kResult);
+	}
+	else {
+		for (UInt32 x = 0; x < uiGridSize && !bResult; x++) {
+			for (UInt32 y = 0; y < uiGridSize && !bResult; y++) {
+				TESObjectCELL* pCell = TES::GetSingleton()->gridCellArray->GetCell(x, y)->pCell;
+				if (!pCell)
+					continue;
+
+				bResult = GetPointNavMesh(pCell, kPointToTest, (checkDisabled > 0), zLimit, kResult);
+			}
+		}
+	}
+
+	if (bResult) {
+		g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.x));
+		g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.y));
+		g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.z));
+		g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.w));
+		if (IsConsoleMode()) {
+			Console_Print("GetPointInNavMesh >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
+		}
+	}
+	else if (IsConsoleMode()) {
+			Console_Print("GetPointInNavMesh >> Point not found.");
+		
+	}
+	
+	g_arrInterface->AssignCommandResult(pointArr, result);
+	return bResult;
+}
+
+
 
 bool __fastcall ValidTempEffect(EffectItem* effectItem) {
 	if (!effectItem || (effectItem->duration <= 0) || !effectItem->setting) return false;
@@ -262,8 +461,8 @@ bool Cmd_GetLocationSpecificLoadScreensOnly_Eval(COMMAND_ARGS_EVAL) {
 
 bool IsCombatTarget(Actor* source, Actor* toSearch) {
 	if (source->isInCombat && source->combatTargets) {
-		Actor** actorsArr = source->combatTargets->data;
-		UInt32 count = source->combatTargets->size;
+		Actor** actorsArr = source->combatTargets->pBuffer;
+		UInt32 count = source->combatTargets->uiSize;
 		if (!actorsArr) return false;
 		for (; count; count--, actorsArr++) {
 			if (*actorsArr == toSearch) return true;

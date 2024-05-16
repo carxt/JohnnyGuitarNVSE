@@ -18,14 +18,39 @@ UInt32 Tile::TraitNameToIDAdd(const char* traitName) {
 	return ::TraitNameToIDAdd(traitName, 0xFFFFFFFF);
 }
 
-Tile::Value* Tile::GetValue(UInt32 typeID) {
-	Value* value;
-	for (BSSimpleArray<Value*>::Iterator iter(values); !iter.End(); ++iter) {
-		value = *iter;
-		if (!value || (value->id > typeID)) break;
-		if (value->id == typeID) return value;
+__declspec(naked) Tile::Value* Tile::GetValue(UInt32 typeID)
+{
+	__asm
+	{
+		push	ebx
+		push	esi
+		push	edi
+		mov		ebx, [ecx + 0x14]
+		xor esi, esi
+		mov		edi, [ecx + 0x18]
+		mov		edx, [esp + 0x10]
+		iterHead:
+		cmp		esi, edi
+			jz		iterEnd
+			lea		ecx, [esi + edi]
+			shr		ecx, 1
+			mov		eax, [ebx + ecx * 4]
+			cmp[eax], edx
+			jz		done
+			jb		isLT
+			mov		edi, ecx
+			jmp		iterHead
+			isLT :
+		lea		esi, [ecx + 1]
+			jmp		iterHead
+			iterEnd :
+		xor eax, eax
+			done :
+		pop		edi
+			pop		esi
+			pop		ebx
+			retn	4
 	}
-	return NULL;
 }
 
 Tile::Value* Tile::GetValueName(const char* valueName) {
@@ -167,7 +192,7 @@ Tile* Tile::GetComponentTile(const char* componentPath) {
 }
 
 void Tile::Dump() {
-	PrintDebug("%08X\t%s", this, name.m_data);
+	/*PrintDebug("%08X\t%s", this, name.m_data);
 	s_debug.Indent();
 
 	PrintDebug("Values:");
@@ -188,7 +213,7 @@ void Tile::Dump() {
 		if (value->str)
 			PrintDebug("%d  %s: %s", value->id, traitName, value->str);
 		/*else if (value->action)
-			PrintDebug("%d  %s: Action %08X", value->id, traitName, value->action);*/
+			PrintDebug("%d  %s: Action %08X", value->id, traitName, value->action);
 		else
 			PrintDebug("%d  %s: %.4f", value->id, traitName, value->num);
 	}
@@ -198,7 +223,7 @@ void Tile::Dump() {
 	for (DListNode<Tile>* traverse = children.Tail(); traverse; traverse = traverse->prev)
 		if (traverse->data) traverse->data->Dump();
 
-	s_debug.Outdent();
+	s_debug.Outdent();*/
 }
 
 void Debug_DumpTraits(void) {

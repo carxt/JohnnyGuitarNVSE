@@ -1874,36 +1874,41 @@ public:
 	GridArray();
 	~GridArray();
 
-	virtual void* Destroy(bool doFree);
-	virtual void	Fn_01(void);
-	virtual void	Fn_02(void);
-	virtual void	Fn_03(void);
-	virtual bool	Fn_04(UInt32 arg1, UInt32 arg2);
-	virtual void	Fn_05(UInt32 arg1, UInt32 arg2);
+	virtual void Init();
+	virtual void DetachAll();
+	virtual void KillAll();
+	virtual void SetCenter(UInt32 aiX, UInt32 aiY);
+	virtual void Shift(int aiCols, int aiRows);
+	virtual void Detach(UInt32 aiX, UInt32 aiY);
+	virtual void ClearItem(UInt32 aiX, UInt32 aiY);
+	virtual void MoveItem(UInt32 aiX1, UInt32 aiY1, UInt32 aiX2, UInt32 aiY2);
+	virtual void SwapItem(UInt32 aiX1, UInt32 aiY1, UInt32 aiX2, UInt32 aiY2);
+	SInt32 iWorldX;
+	SInt32 iWorldY;
 };
-
+struct GridCell {
+	TESObjectCELL* pCell;
+};
 // 28
 class GridCellArray : public GridArray {
 public:
 	GridCellArray();
 	~GridCellArray();
 
-	virtual void	UnloadCellAtGridXY(UInt32 gridX, UInt32 gridY);
-	virtual void	SetGridAtXYToNull(UInt32 gridX, UInt32 gridY);
-	virtual void	CopyCellAtGridXYTo(UInt32 gridX1, UInt32 gridY1, UInt32 gridX2, UInt32 gridY2);
-	virtual void	SwapCellsAtGridXYs(UInt32 gridX1, UInt32 gridY1, UInt32 gridX2, UInt32 gridY2);
+	SInt32							iDimension;
+	GridCell*						pGridCells;
+	NiPoint3						kWorldCenter;
+	bool							bLandAttached;
+	NiPointer<void*>				spShadowMask;
 
-	SInt32			worldX;			// 04	X coord of current cell within worldspace
-	SInt32			worldY;			// 08	Y coord "
-	UInt32			gridSize;		// 0C	Init'd to uGridsToLoad
-	TESObjectCELL** gridCells;	// 10	Size is gridSize^2
-	float			posX;			// 14	worldX * 4096
-	float			posY;			// 18	worldY * 4096
-	UInt32			unk1C;			// 1C
-	UInt8			byte20;			// 20
-	UInt8			pad21[3];		// 21
-	UInt32			unk24;			// 24
+	GridCell* GetCell(SInt32 aX, SInt32 aY) {
+		UInt32 uiGridSize = iDimension;
+		if (aX < iDimension && aY < iDimension)
+			return &pGridCells[aX + aY * uiGridSize];
+		return nullptr;
+	}
 };
+STATIC_ASSERT(sizeof(GridCellArray) == 0x28);
 
 // 44
 class LoadedAreaBound : public NiRefObject {
@@ -3398,35 +3403,42 @@ public:
 	NiRefObject* object88;		// 88
 };
 
-// 108
-class NavMesh : public TESForm {
+class NavMesh : public TESForm, public TESChildCell, public NiRefObject {
 public:
-	NavMesh();
-	~NavMesh();
+	TESObjectCELL* pParentCell;
+	BSSimpleArray<NiPoint3>						kVertices;
+	BSSimpleArray<NavMeshTriangle>				kTriangles;
+	BSSimpleArray<EdgeExtraInfo>				kEdgeInfos;
+	BSSimpleArray<NavMeshTriangleDoorPortal>	kDoorPortals;
+	BSSimpleArray<NavMeshClosedDoorInfo>		kClosedDoorInfos;
+	BSSimpleArray<UInt16>						unk078Arr;
+	NiTMap<UInt16, NavMeshPOVData*>				kPOVDatas;
+	BSSimpleArray<UInt16>						unk098Arr;
+	UInt32										unk0A8;
+	float										unk0AC[8];
+	BSSimpleArray<UInt16>* pArray0CC;
+	BSSimpleArray<ObstacleUndoData*>			kObstacleUndos;
+	NiTMap<UInt16, NiPointer<ObstacleData>>* pObstacleDataMap;
+	BSSimpleArray<UInt16>						unk0E4Arr;
+	BSSimpleArray<NavMeshStaticAvoidNode>		kAvoidNodes;
+	NavMeshInfo* pNavMeshInfo;
+}; 
 
-	virtual void		Unk_4E(void);
-
-	TESChildCell								childCell;			// 018
-	NiRefObject									refObject;			// 01C
-	TESObjectCELL* parentCell;		// 024
-	BSSimpleArray<NavMeshVertex>				vertexArr;			// 028
-	BSSimpleArray<NavMeshTriangle>				triangleArr;		// 038
-	BSSimpleArray<EdgeExtraInfo>				edgeInfoArr;		// 048
-	BSSimpleArray<NavMeshTriangleDoorPortal>	doorPortalArr;		// 058
-	BSSimpleArray<NavMeshClosedDoorInfo>		closedDorrArr;		// 068
-	BSSimpleArray<UInt16>						unk078Arr;			// 078
-	NiTMapBase<UInt16, NavMeshPOVData*>			povDataMap;			// 088
-	BSSimpleArray<UInt16>						unk098Arr;			// 098
-	UInt32										unk0A8;				// 0A8
-	float										unk0AC[8];			// 0AC
-	BSSimpleArray<UInt16>* arrPtr0CC;			// 0CC
-	BSSimpleArray<ObstacleUndoData>				obstacleUndoArr;	// 0D0
-	NiTMapBase<UInt16, ObstacleData*>* obstacleDataMap;	// 0E0
-	BSSimpleArray<UInt16>						unk0E4Arr;			// 0E4
-	BSSimpleArray<NavMeshStaticAvoidNode>		avoidNodeArr;		// 0F4
-	UInt32* ptr104;			// 104
-};
 STATIC_ASSERT(sizeof(NavMesh) == 0x108);
+
+typedef NiPointer<NavMesh> NavMeshPtr;
+
+
+class NavMeshArray : public BSSimpleArray<NavMeshPtr> {
+public:
+	inline NavMeshPtr& GetAt(UInt32 auiIndex) {
+		NavMeshPtr kPtr;
+		if (auiIndex >= uiSize)
+			return kPtr;
+		else
+			return pBuffer[auiIndex];
+	}
+};
 
 class NavMeshObstacleManager {
 	enum OBSTACLE_MANAGER_BACKGROUND_STATE : __int32 {
@@ -4202,12 +4214,12 @@ public:
 		CdeclCall(0xB81420, apObject, apfFadeAlpha);
 	}
 	void SetTexture(UInt32 auiIndex, NiTexture* apTexture) {
-		if (spTexture[auiIndex].data != apTexture) {
-			if (spTexture[auiIndex].data)
-				spTexture[auiIndex].data->DecRefCount();
-			spTexture[auiIndex].data = apTexture;
-			if (spTexture[auiIndex].data)
-				spTexture[auiIndex].data->IncRefCount();
+		if (spTexture[auiIndex].m_pObject != apTexture) {
+			if (spTexture[auiIndex].m_pObject)
+				spTexture[auiIndex].m_pObject->DecRefCount();
+			spTexture[auiIndex].m_pObject = apTexture;
+			if (spTexture[auiIndex].m_pObject)
+				spTexture[auiIndex].m_pObject->IncRefCount();
 		}
 	}
 };

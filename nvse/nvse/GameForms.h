@@ -3909,7 +3909,7 @@ STATIC_ASSERT(sizeof(TESRegionList) == 0x10);
 class NavMeshInfoMap;
 
 class NavMesh;
-
+class NavMeshArray;
 // E0
 class TESObjectCELL : public TESForm {
 public:
@@ -3983,7 +3983,7 @@ public:
 	float					waterHeight;			// 50
 	UInt32					unk54;					// 54
 	TESTexture				noiseTexture;			// 58
-	BSSimpleArray<NavMesh>* navMeshArray;			// 64
+	NavMeshArray*			pNavMeshes;
 	UInt32					unk68[6];				// 68
 	void* refLockSemaphore;		// 80
 	UInt32					unk84[8];				// 84

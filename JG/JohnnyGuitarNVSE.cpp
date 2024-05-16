@@ -450,6 +450,8 @@ extern "C" {
 		REG_CMD(IsBSALoaded);
 		REG_TYPED_CMD(GetTempIngestibleEffects, Array);
 		REG_CMD(PlaySoundFade);
+		REG_TYPED_CMD(GetPointInNavMesh, Array);
+		REG_TYPED_CMD(GetNearestNavMeshTriangle, Array);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
