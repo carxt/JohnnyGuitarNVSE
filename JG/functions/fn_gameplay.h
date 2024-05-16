@@ -262,13 +262,13 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 		if (ref == nullptr) {
 			ref = (TESObjectREFR*)g_thePlayer;
 		}
-		if (ref->GetNiNode()) {
+		if (ref->GetRefNiNode()) {
 			BSSoundHandle handle;
 			ThisStdCall<BSSoundHandle*>(0xAE5870, BSAudioManager::Get(), &handle, sound->refID, 0x102); // BSAudioManager::GetSoundHandleByFormID
 			NiPoint3* refPos = ref->GetPos();
 			NiPoint3 pos = { refPos->x, refPos->y, refPos->z };
 			ThisStdCall<void>(0xAD8B60, &handle, pos); // BSSoundHandle::SetPosition
-			ThisStdCall<void>(0xAD8F20, &handle, ref->GetNiNode()); // BSSoundHandle::SetObjectToFollow
+			ThisStdCall<void>(0xAD8F20, &handle, ref->GetRefNiNode()); // BSSoundHandle::SetObjectToFollow
 			UInt32 time = fTime * 1000.0;
 			ThisStdCall<void>(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
 			*result = 1;
