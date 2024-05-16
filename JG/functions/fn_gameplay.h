@@ -188,10 +188,8 @@ bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 			}
 		}
 	}
-	g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.x));
-	g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.y));
-	g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.z));
-	g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.w));
+	g_arrInterface->AppendElements(pointArr, kResult.x, kResult.y, kResult.z, kResult.w);
+
 	if (IsConsoleMode()) {
 		Console_Print("GetClosestNavMeshTriangle >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
 	}
@@ -232,10 +230,7 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 	}
 
 	if (bResult) {
-		g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.x));
-		g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.y));
-		g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.z));
-		g_arrInterface->AppendElement(pointArr, NVSEArrayElement(kResult.w));
+		g_arrInterface->AppendElements(pointArr, kResult.x, kResult.y, kResult.z, kResult.w);
 		if (IsConsoleMode()) {
 			Console_Print("GetPointInNavMesh >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
 		}
@@ -312,9 +307,7 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 	if (!tempEffectMap.empty()) {
 		for (auto effect : tempEffectMap) {
 			NVSEArrayVar* effArrInner = g_arrInterface->CreateArray(NULL, 0, scriptObj);
-			g_arrInterface->AppendElement(effArrInner, NVSEArrayElement(effect.first));
-			g_arrInterface->AppendElement(effArrInner, NVSEArrayElement(effect.second.first));
-			g_arrInterface->AppendElement(effArrInner, NVSEArrayElement(effect.second.second));
+			g_arrInterface->AppendElements(effArrInner, effect.first, effect.second.first, effect.second.second);
 			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effArrInner));
 		}
 		tempEffectMap.clear();

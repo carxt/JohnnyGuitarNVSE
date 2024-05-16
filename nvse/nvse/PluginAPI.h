@@ -373,6 +373,12 @@ struct NVSEArrayVarInterface {
 
 	// version 2
 	UInt32(*GetArrayPacked)(Array* arr);
+	template<typename... T>
+	void AppendElements(Array* arr, T const&... values)
+	{
+		(AppendElement(arr, NVSEArrayElement(values)),...);
+	}
+
 };
 typedef NVSEArrayVarInterface::Array NVSEArrayVar;
 typedef NVSEArrayVarInterface::Element NVSEArrayElement;
