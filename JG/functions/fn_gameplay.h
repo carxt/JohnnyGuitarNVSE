@@ -52,6 +52,7 @@ DEFINE_COMMAND_PLUGIN(SetPlayerMovementFlags, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SetExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(RemoveExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
 
+std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -62,6 +63,9 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 
 std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
 
+		NavMeshPtr spNavMesh = pNavMeshArray->GetAt(i);
+		if (!spNavMesh)
+			continue;
 
 bool Cmd_SetPlayerMovementFlags_Execute(COMMAND_ARGS)
 {
@@ -250,6 +254,14 @@ bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 		NPCAccuracy::tables.ACTREF[thisObj->refID] = mul;
 
 	}
+	g_arrInterface->AppendElements(pointArr, kResult.x, kResult.y, kResult.z, kResult.w);
+
+	if (IsConsoleMode()) {
+		Console_Print("GetClosestNavMeshTriangle >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
+	}
+
+	g_arrInterface->AssignCommandResult(pointArr, result);
+
 	return true;
 
 
@@ -281,12 +293,54 @@ bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 	}
 	return true;
 
+	if (bResult) {
+		g_arrInterface->AppendElements(pointArr, kResult.x, kResult.y, kResult.z, kResult.w);
+		if (IsConsoleMode()) {
+			Console_Print("GetPointInNavMesh >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
+		}
+	}
+	else if (IsConsoleMode()) {
+			Console_Print("GetPointInNavMesh >> Point not found.");
+		
+	}
+	
+	g_arrInterface->AssignCommandResult(pointArr, result);
+	return bResult;
+}
 
 }
 
 
+bool __fastcall ValidTempEffect(EffectItem* effectItem) {
+	if (!effectItem || (effectItem->duration <= 0) || !effectItem->setting) return false;
+	UInt8 archtype = effectItem->setting->archtype;
+	return !archtype || ((archtype == 1) && (effectItem->setting->effectFlags & 0x2000)) || ((archtype > 10) && (archtype < 14)) || (archtype == 24) || (archtype > 33);
+}
 
 
+bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
+	*result = 0;
+	float fTime = 0;
+	TESSound* sound;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &fTime) && IS_TYPE(sound, TESSound)) {
+		TESObjectREFR* ref = thisObj;
+		if (ref == nullptr) {
+			ref = (TESObjectREFR*)g_thePlayer;
+		}
+		if (ref->GetRefNiNode()) {
+			BSSoundHandle handle;
+			ThisStdCall<BSSoundHandle*>(0xAE5870, BSAudioManager::Get(), &handle, sound->refID, 0x102); // BSAudioManager::GetSoundHandleByFormID
+			NiPoint3* refPos = ref->GetPos();
+			NiPoint3 pos = { refPos->x, refPos->y, refPos->z };
+			ThisStdCall<void>(0xAD8B60, &handle, pos); // BSSoundHandle::SetPosition
+			ThisStdCall<void>(0xAD8F20, &handle, ref->GetRefNiNode()); // BSSoundHandle::SetObjectToFollow
+			UInt32 time = fTime * 1000.0;
+			ThisStdCall<void>(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
+			*result = 1;
+		}
+	}
+	return true;
+}
 
 
 
