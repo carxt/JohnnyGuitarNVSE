@@ -86,7 +86,7 @@ DEFINE_COMMAND_PLUGIN(TuneRadioRef, , 1, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(HideItemBarterEx, , 0, 4, kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(IsItemBarterHiddenEx, , 0, 2, kParams_OneForm_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetCurrentFurnitureRef, , 1, 0, NULL);
-
+DEFINE_COMMAND_PLUGIN(GetAltTexturesEx, , 0, 2, kParams_OneForm_OneOptionalInt);
 
 
 
@@ -628,6 +628,34 @@ TESModelTextureSwap* GetArmorModel(TESObjectARMO* armor, UInt32 id) {
 			return nullptr;
 	}
 }
+
+bool Cmd_GetAltTexturesEx_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* form;
+	UInt32 whichModel;
+	NVSEArrayVar* txstArr = g_arrInterface->CreateMap(NULL, NULL, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &whichModel) && (IS_TYPE(form, TESObjectARMO) || IS_TYPE(form, TESObjectWEAP))) {
+		TESModelTextureSwap* model;
+		if (IS_TYPE(form, TESObjectARMO)) {
+			TESObjectARMO* armor = DYNAMIC_CAST(form, TESForm, TESObjectARMO);
+			model = GetArmorModel(armor, whichModel);
+		}
+		else {
+			TESObjectWEAP* weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
+			model = &weapon->textureSwap;
+		}
+		if (!model) return true;
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+
+		do {
+			if (iter->data && iter->data->textureID) g_arrInterface->SetElement(txstArr, NVSEArrayElement(iter->data->index3D), NVSEArrayElement(iter->data->textureID));
+		} while (iter = iter->next);
+
+	}
+	g_arrInterface->AssignCommandResult(txstArr, result);
+	return true;
+}
+
 bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectARMO* armor;
@@ -654,7 +682,24 @@ bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &id, &txst) && IS_TYPE(weapon, TESObjectWEAP) && IS_TYPE(txst, BGSTextureSet)) {
 		TESModelTextureSwap* model = &weapon->textureSwap;
 		if (!model) return true;
-		if (model->textureList.Empty()) {
+		 
+		TESModelTextureSwap::Texture* texture = nullptr;
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+
+		do {
+			if (iter->data && iter->data->index3D == id) {
+				texture = iter->data;
+				break;
+			}
+		} while (iter = iter->next);
+
+		if (texture) {
+
+			texture->textureID = txst;
+			*result = 1;
+
+		}
+		else {
 			TESModelTextureSwap::Texture* texture = (TESModelTextureSwap::Texture*)GameHeapAlloc(0x88);
 			if (texture != nullptr) {
 				texture->index3D = id;
@@ -664,16 +709,6 @@ bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 				*result = 1;
 
 			}
-		}
-		else {
-			ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
-			do {
-				if (iter->data && iter->data->index3D == id) {
-					iter->data->textureID = txst;
-					*result = 1;
-					break;
-				}
-			} while (iter = iter->next);
 		}
 	}
 	return true;
@@ -687,7 +722,23 @@ bool Cmd_SetArmorAltTexture_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &whichModel, &id, &txst) && IS_TYPE(txst, BGSTextureSet) && IS_TYPE(armor, TESObjectARMO)) {
 		TESModelTextureSwap* model = GetArmorModel(armor, whichModel);
 		if (!model) return true;
-		if (model->textureList.Empty()) {
+
+		TESModelTextureSwap::Texture* texture = nullptr;
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+
+		do {
+			if (iter->data && iter->data->index3D == id) {
+				texture = iter->data;
+				break;
+			}
+		} while (iter = iter->next);
+
+		if (texture) {
+
+			texture->textureID = txst;
+			*result = 1;
+
+		} else {
 			TESModelTextureSwap::Texture* texture = (TESModelTextureSwap::Texture*)GameHeapAlloc(0x88);
 			if (texture != nullptr) {
 				texture->index3D = id;
@@ -698,16 +749,7 @@ bool Cmd_SetArmorAltTexture_Execute(COMMAND_ARGS) {
 
 			}
 		}
-		else {
-			ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
-			do {
-				if (iter->data && iter->data->index3D == id) {
-					iter->data->textureID = txst;
-					*result = 1;
-					break;
-				}
-			} while (iter = iter->next);
-		}
+		
 	}
 	return true;
 }
