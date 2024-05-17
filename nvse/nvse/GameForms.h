@@ -2333,6 +2333,31 @@ public:
 		kArchType_Turbo,
 	};
 
+	enum EffectFlags {
+		kEffectFlag_HOSTILE = 0x1,
+		kEffectFlag_RECOVER = 0x2,
+		kEffectFlag_DETRIMENTAL = 0x4,
+		kEffectFlag_UNK_8 = 0x8, 
+		kEffectFlag_SELF = 0x10,
+		kEffectFlag_TOUCH = 0x20,
+		kEffectFlag_TARGET = 0x40, 
+		kEffectFlag_NO_DURATION = 0x80,
+		kEffectFlag_NO_MAGNITUDE = 0x100,
+		kEffectFlag_NO_AREA = 0x200,
+		kEffectFlag_PERSIST = 0x400,
+		kEffectFlag_CREATE_SPELLMAKING = 0x800,
+		kEffectFlag_GORY_VISUALS = 0x1000,
+		kEffectFlag_kDisplayNameOnly = 0x2000,
+		kEffectFlag_kRadioBroadcastSomething = 0x8000,
+		kEffectFlag_kUseSkill = 0x80000,
+		kEffectFlag_kUseAttribute = 0x100000,
+		kEffectFlag_PAINLESS = 0x1000000,
+		kEffectFlag_kSprayProjectileType = 0x2000000,
+		kEffectFlag_kBoltProjectileType = 0x4000000,
+		kEffectFlag_NO_HIT_EFFECT = 0x8000000,
+		kEffectFlag_NO_DEATH_DISPEL = 0x10000000,
+	};
+
 	TESModel		model;			// 18
 	TESDescription	description;	// 30
 	TESFullName		fullName;		// 38
@@ -3884,7 +3909,7 @@ STATIC_ASSERT(sizeof(TESRegionList) == 0x10);
 class NavMeshInfoMap;
 
 class NavMesh;
-
+class NavMeshArray;
 // E0
 class TESObjectCELL : public TESForm {
 public:
@@ -3958,7 +3983,7 @@ public:
 	float					waterHeight;			// 50
 	UInt32					unk54;					// 54
 	TESTexture				noiseTexture;			// 58
-	BSSimpleArray<NavMesh>* navMeshArray;			// 64
+	NavMeshArray*			pNavMeshes;
 	UInt32					unk68[6];				// 68
 	void* refLockSemaphore;		// 80
 	UInt32					unk84[8];				// 84

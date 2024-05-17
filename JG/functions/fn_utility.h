@@ -686,7 +686,7 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 	*result = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &blockName, &x, &y, &z, &w, &rotate, &world, &update)) {
 		NiAVObject* object = nullptr;
-		if (lastForm == thisObj && !strcmp(lastBlock.data->m_blockName.handle, blockName)) {
+		if (lastForm == thisObj && !strcmp(lastBlock.m_pObject->m_blockName.handle, blockName)) {
 			object = lastBlock;
 		}
 		else {

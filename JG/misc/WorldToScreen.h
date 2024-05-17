@@ -64,6 +64,9 @@ struct NiPoint3 {
 	static float dot(const NiPoint3& v1, const NiPoint3& v2) {
 		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 	}
+	inline float Distance(const NiPoint3& pt) const {
+		return (*this - pt).length();
+	}
 
 	static NiPoint3 cross(const NiPoint3& v1, const NiPoint3& v2) {
 		return NiPoint3(
@@ -93,7 +96,99 @@ struct NiPoint3 {
 
 		return deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
 	}
+	static float Sign(NiPoint3 p1, NiPoint3 p2, NiPoint3 p3) {
+		return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+	}
+
+	static bool PointInTriangle(NiPoint3 pt, NiPoint3 v1, NiPoint3 v2, NiPoint3 v3) {
+		bool b1 = Sign(pt, v1, v2) < 0.0;
+		bool b2 = Sign(pt, v2, v3) < 0.0;
+		bool b3 = Sign(pt, v3, v1) < 0.0;
+
+		return (b1 == b2) && (b2 == b3);
+	}
+
+	static NiPoint3 GetTriangleCenter(NiPoint3 v1, NiPoint3 v2, NiPoint3 v3) {
+		return NiPoint3((v1.x + v2.x + v3.x) / 3.0f, (v1.y + v2.y + v3.y) / 3.0f, (v1.z + v2.z + v3.z) / 3.0f);
+	}
+
 };
+
+class NiPoint4 {
+public:
+	float x;
+	float y;
+	float z;
+	float w;
+
+	NiPoint4() : x(0.f), y(0.f), z(0.f), w(0.f) {};
+	NiPoint4(const float x, const float y, const float z, const float w) : x(x), y(y), z(z), w(w) {};
+	NiPoint4(const NiPoint3& src) : x(src.x), y(src.y), z(src.z), w(0.f) {};
+
+	inline const float operator[] (UInt32 i) const { return ((float*)&x)[i]; };
+	inline float operator[] (UInt32 i) { return ((float*)&x)[i]; };
+
+	operator float* () const { return (float*)this; };
+
+
+	NiPoint4 operator=(NiPoint3 pt) const {
+		return NiPoint4(pt.x, pt.y, pt.z, w);
+	};
+
+	void operator=(NiPoint3* pt) {
+		x = pt->x;
+		y = pt->y;
+		z = pt->z;
+	};
+
+	void operator=(const NiPoint3& pt) {
+		x = pt.x;
+		y = pt.y;
+		z = pt.z;
+	};
+
+	NiPoint4 operator-(NiPoint3& pt) const {
+		return NiPoint4(x - pt.x, y - pt.y, z - pt.z, w);
+	};
+
+	NiPoint4 operator-(NiPoint3* pt) const {
+		return NiPoint4(x - pt->x, y - pt->y, z - pt->z, w);
+	};
+
+	NiPoint4* operator-(const NiPoint3& pt) const {
+		return new NiPoint4(x - pt.x, y - pt.y, z - pt.z, w);
+	};
+
+	NiPoint4* operator-(const NiPoint3* pt) const {
+		return new NiPoint4(x - pt->x, y - pt->y, z - pt->z, w);
+	};
+
+	NiPoint4 operator+ (const NiPoint4& pt) const { return NiPoint4(x + pt.x, y + pt.y, z + pt.z, w + pt.w); };
+	NiPoint4& operator+= (const NiPoint4& pt) {
+		x += pt.x;
+		y += pt.y;
+		z += pt.z;
+		w += pt.w;
+		return *this;
+	};
+
+	NiPoint4 operator*(const float afScalar) {
+		return NiPoint4(x * afScalar, y * afScalar, z * afScalar, w * afScalar);
+	}
+
+	NiPoint4& operator*= (float afScalar) {
+		x *= afScalar;
+		y *= afScalar;
+		z *= afScalar;
+		w *= afScalar;
+		return *this;
+	};
+};
+
+STATIC_ASSERT(sizeof(NiPoint4) == 0x10);
+
+
+
 
 struct NiCameraAlt //Defined here because the one in NVSE is wrong.
 {
