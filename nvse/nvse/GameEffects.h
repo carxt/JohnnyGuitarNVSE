@@ -30,18 +30,18 @@ public:
 	virtual void			Unk_16(void);
 
 	float			timeElapsed;		// 04
-	MagicItem* magicItem;			// 08
-	EffectItem* effectItem;		// 0C
-	bool			bApplied;			// 10
-	bool			bTerminated;		// 11 set to 1 when effect is to be removed
-	UInt8			flags12;			// 12
-	UInt8			pad13;				// 13
+	MagicItem*		magicItem;			// 08
+	EffectItem*		effectItem;		// 0C
+	bool			bActive;			// 10
+	bool			bApplied;		// 11 set to 1 when effect is to be removed
+	bool			byte12;			// 12
+	bool			bTerminated;				// 13
 	UInt32			unk14;				// 14
 	UInt32			unk18;				// 18
 	float			magnitude;			// 1C - adjusted based on target?
 	float			duration;			// 20 - adjusted based on target?
-	MagicTarget* target;			// 24
-	MagicCaster* caster;			// 28
+	MagicTarget*	target;			// 24
+	MagicCaster*	caster;			// 28
 	UInt32			spellType;			// 2C e.g. SpellItem::kType_Ability
 	UInt32			unk30;				// 30
 	UInt32			unk34;				// 34

@@ -833,21 +833,25 @@ enum Sides {
 };
 
 struct NavMeshTriangle {
-	SInt16	verticesIndex[kVertices_Max];	// 000
-	SInt16	sides[kSides_Max];				// 006
-	UInt32	flags;							// 00C
+	enum Flags {
+		DISABLED = 0x20,
+	};
+
+	SInt16		sVertices[3];
+	SInt16		sSides[3];
+	UInt32	uiFlags;
 };	// Alloc'd by 0x10
 
 struct NavMeshInfo;
 
 struct EdgeExtraInfo {
 	struct Connection {
-		NavMeshInfo* navMeshInfo;
-		SInt16			triangle;
+		NavMeshInfo* pNavMeshInfo;
+		SInt16			sTriangle;
 	};
 
-	UInt32	unk000;			// 00
-	Connection connectTo;	// 04
+	SInt32		unk000;
+	Connection	kConnectTo;
 };	// Alloc'd by 0x0C
 
 struct NavMeshTriangleDoorPortal {
