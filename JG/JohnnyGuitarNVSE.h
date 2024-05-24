@@ -1166,6 +1166,15 @@ void __fastcall SetViewmodelFrustumHook(NiCameraAlt* camera, void*, NiFrustum* f
 	camera->frustum.o = frustum->o;
 }
 
+bool __cdecl JGSetViewmodelClipDistance(float value) {
+	g_viewmodel_near = value;
+	return true;
+}
+
+float __cdecl JGGetViewmodelClipDistance() {
+	return g_viewmodel_near;
+}
+
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);

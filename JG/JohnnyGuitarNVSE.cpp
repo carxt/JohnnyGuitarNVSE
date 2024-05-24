@@ -48,7 +48,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 506
+#define JG_VERSION 507
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_NewGame:
@@ -448,6 +448,11 @@ extern "C" {
 		REG_CMD(GameGetSecondsPassed);
 		REG_CMD(SetJohnnyOnKeyboardControllerSelectionChangeEventHandler);
 		REG_CMD(IsBSALoaded);
+		REG_TYPED_CMD(GetTempIngestibleEffects, Array);
+		REG_CMD(PlaySoundFade);
+		REG_TYPED_CMD(GetPointInNavMesh, Array);
+		REG_TYPED_CMD(GetNearestNavMeshTriangle, Array);
+		REG_TYPED_CMD(GetAltTexturesEx, Array);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

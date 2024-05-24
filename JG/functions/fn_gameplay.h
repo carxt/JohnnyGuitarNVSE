@@ -7,7 +7,7 @@ DEFINE_COMMAND_PLUGIN(StopVATSCam, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCameraShake, , 0, 2, kParams_TwoFloats);
 DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 1, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(SetVelEx, , 1, 3, kParams_ThreeFloats);
-DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 2, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(StopSoundAlt, , 0, 3, kParams_TwoForms_OneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(UnsetAV, , 1, 1, kParams_OneActorValue);
 DEFINE_COMMAND_PLUGIN(UnforceAV, , 1, 1, kParams_OneActorValue);
@@ -41,13 +41,280 @@ DEFINE_COMMAND_PLUGIN(GetLandTextureUnderFeet, , 1, 0, NULL);
 DEFINE_CMD_NO_ARGS(GetMoonPhase);
 DEFINE_COMMAND_PLUGIN(RewardKarmaAlt, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetCameraShakeNoHUDShudder, CamShakeNHUD , , 0, 2, kParams_TwoFloats);
+DEFINE_CMD_NO_ARGS(GetTempIngestibleEffects)
+DEFINE_COMMAND_PLUGIN(PlaySoundFade, , 0, 2, kParams_OneForm_OneFloat);
+DEFINE_COMMAND_PLUGIN(GetPointInNavMesh, , 0, 5, kParams_ThreeFloats_OneInt_OneOptionalFloat);
+DEFINE_COMMAND_PLUGIN(GetNearestNavMeshTriangle, , 0, 5, kParams_ThreeFloats_OneInt_OneOptionalFloat);
+void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
+(void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
+bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
+bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
+void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
+#define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+
+std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
+
+void GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
+	NavMeshArray* pNavMeshArray = apCell->pNavMeshes;
+	if (!pNavMeshArray)
+		return;
+
+	for (UInt32 i = 0; i < pNavMeshArray->GetSize(); i++) {
+
+		NavMeshPtr spNavMesh = pNavMeshArray->GetAt(i);
+		if (!spNavMesh)
+			continue;
+
+		NavMeshInfo* pInfo = spNavMesh->pNavMeshInfo;
+		if (!pInfo)
+			continue;
+
+		for (UInt32 j = 0; j < spNavMesh->kTriangles.GetSize(); j++) {
+			NavMeshTriangle* pNavMeshTriangle = spNavMesh->kTriangles.GetAt(j);
+			if (!pNavMeshTriangle)
+				continue;
+
+			if (checkDisabled && ((pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0))
+				continue;
+
+			// Get triangle vertices
+			NiPoint3 kVerts[3];
+			for (UInt32 k = 0; k < 3; k++) {
+				NiPoint3* pVertex = spNavMesh->kVertices.GetAt(pNavMeshTriangle->sVertices[k]);
+				if (!pVertex)
+					continue;
+
+				kVerts[k] = *pVertex;
+			}
+
+
+			NiPoint3 kTriCenter = NiPoint3::GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
+
+			if (zLimit > 0 && fabs(kTriCenter.z - arPointToTest.z) > zLimit) continue;
+
+			// Get distance to triangle center
+			float fDist = arPointToTest.Distance(kTriCenter);
+
+			if (fDist < arOut.w) {
+				arOut.w = fDist;
+				arOut.x = kTriCenter.x;
+				arOut.y = kTriCenter.y;
+				arOut.z = kTriCenter.z;
+			}
+		}
+	}
+}
+bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
+	NavMeshArray* pNavMeshArray = apCell->pNavMeshes;
+	if (!pNavMeshArray)
+		return false;
+
+	for (UInt32 i = 0; i < pNavMeshArray->GetSize(); i++) {
+
+		NavMeshPtr spNavMesh = pNavMeshArray->GetAt(i);
+		if (!spNavMesh)
+			continue;
+
+		NavMeshInfo* pInfo = spNavMesh->pNavMeshInfo;
+		if (!pInfo)
+			continue;
+
+		for (UInt32 j = 0; j < spNavMesh->kTriangles.GetSize(); j++) {
+			NavMeshTriangle* pNavMeshTriangle = spNavMesh->kTriangles.GetAt(j);
+			if (!pNavMeshTriangle)
+				continue;
+			if (checkDisabled && (pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0) 
+				continue;
+			
+			// Get triangle vertices
+			NiPoint3 kVerts[3];
+			for (UInt32 k = 0; k < 3; k++) {
+				NiPoint3* pVertex = spNavMesh->kVertices.GetAt(pNavMeshTriangle->sVertices[k]);
+				if (!pVertex)
+					continue;
+
+				kVerts[k] = *pVertex;
+			}
+
+
+			// Check if player is inside the triangle
+			if (NiPoint3::PointInTriangle(arPointToTest, kVerts[0], kVerts[1], kVerts[2])) {
+				// Get triangle center
+				NiPoint3 kTriCenter = NiPoint3::GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
+
+				if (zLimit > 0 && fabs(kTriCenter.z - arPointToTest.z) > zLimit) continue;
+				
+
+				// Get distance to triangle center
+				float fDist = arPointToTest.Distance(kTriCenter);
+
+				arOut.x = kTriCenter.x;
+				arOut.y = kTriCenter.y;
+				arOut.z = kTriCenter.z;
+				arOut.w = fDist;
+
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
+	*result = 0;
+
+	NiPoint3 kPointToTest;
+	UInt32 checkDisabled = 0;
+	float zLimit = 0;
+	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &kPointToTest.x, &kPointToTest.y, &kPointToTest.z, &checkDisabled, &zLimit)) return true;
+
+	NiPoint4 kResult = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
+
+	TESObjectCELL* pInterior = TES::GetSingleton()->currentInterior;
+	UInt32 uiGridSize = (*(Setting*)0x11C63CC).data.uint;
+
+	if (pInterior) {
+		GetClosestNavMeshTriangle(pInterior, kPointToTest, (checkDisabled > 0), zLimit, kResult);
+	}
+	else {
+		for (UInt32 x = 0; x < uiGridSize; x++) {
+			for (UInt32 y = 0; y < uiGridSize; y++) {
+				TESObjectCELL* pCell = TES::GetSingleton()->gridCellArray->GetCell(x, y)->pCell;
+				if (!pCell)
+					continue;
+
+				GetClosestNavMeshTriangle(pCell, kPointToTest, (checkDisabled > 0), zLimit, kResult);
+			}
+		}
+	}
+	g_arrInterface->AppendElements(pointArr, kResult.x, kResult.y, kResult.z, kResult.w);
+
+	if (IsConsoleMode()) {
+		Console_Print("GetClosestNavMeshTriangle >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
+	}
+
+	g_arrInterface->AssignCommandResult(pointArr, result);
+
+	return true;
+}
+
+bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
+	*result = 0;
+	NiPoint4 kResult;
+	TESObjectCELL* pInterior = TES::GetSingleton()->currentInterior;
+
+	UInt32 uiGridSize = (*(Setting*)0x11C63CC).data.uint;
+
+	NiPoint3 kPointToTest;
+	UInt32 checkDisabled = 0;
+	float zLimit = 0;
+	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &kPointToTest.x, &kPointToTest.y, &kPointToTest.z, &checkDisabled, &zLimit))	return true;
+
+	bool bResult = false;
+	if (pInterior) {
+		bResult = GetPointNavMesh(pInterior, kPointToTest, (checkDisabled > 0), zLimit, kResult);
+	}
+	else {
+		for (UInt32 x = 0; x < uiGridSize && !bResult; x++) {
+			for (UInt32 y = 0; y < uiGridSize && !bResult; y++) {
+				TESObjectCELL* pCell = TES::GetSingleton()->gridCellArray->GetCell(x, y)->pCell;
+				if (!pCell)
+					continue;
+
+				bResult = GetPointNavMesh(pCell, kPointToTest, (checkDisabled > 0), zLimit, kResult);
+			}
+		}
+	}
+
+	if (bResult) {
+		g_arrInterface->AppendElements(pointArr, kResult.x, kResult.y, kResult.z, kResult.w);
+		if (IsConsoleMode()) {
+			Console_Print("GetPointInNavMesh >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
+		}
+	}
+	else if (IsConsoleMode()) {
+			Console_Print("GetPointInNavMesh >> Point not found.");
+		
+	}
+	
+	g_arrInterface->AssignCommandResult(pointArr, result);
+	return bResult;
+}
 
 
 
+bool __fastcall ValidTempEffect(EffectItem* effectItem) {
+	if (!effectItem || (effectItem->duration <= 0) || !effectItem->setting) return false;
+	UInt8 archtype = effectItem->setting->archtype;
+	return !archtype || ((archtype == 1) && (effectItem->setting->effectFlags & 0x2000)) || ((archtype > 10) && (archtype < 14)) || (archtype == 24) || (archtype > 33);
+}
 
 
+bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
+	*result = 0;
+	float fTime = 0;
+	TESSound* sound;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &fTime) && IS_TYPE(sound, TESSound)) {
+		TESObjectREFR* ref = thisObj;
+		if (ref == nullptr) {
+			ref = (TESObjectREFR*)g_thePlayer;
+		}
+		if (ref->GetRefNiNode()) {
+			BSSoundHandle handle;
+			ThisStdCall<BSSoundHandle*>(0xAE5870, BSAudioManager::Get(), &handle, sound->refID, 0x102); // BSAudioManager::GetSoundHandleByFormID
+			NiPoint3* refPos = ref->GetPos();
+			NiPoint3 pos = { refPos->x, refPos->y, refPos->z };
+			ThisStdCall<void>(0xAD8B60, &handle, pos); // BSSoundHandle::SetPosition
+			ThisStdCall<void>(0xAD8F20, &handle, ref->GetRefNiNode()); // BSSoundHandle::SetObjectToFollow
+			UInt32 time = fTime * 1000.0;
+			ThisStdCall<void>(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
+			*result = 1;
+		}
+	}
+	return true;
+}
 
-
+bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
+	*result = 0;
+	NVSEArrayVar* effArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	tempEffectMap.clear();
+	if (auto iter = ((Actor*)g_thePlayer)->magicTarget.GetEffectList()->Head())
+	{
+		do
+		{
+			if (ActiveEffect* activeEff = iter->data; activeEff && activeEff->bActive && !activeEff->bTerminated &&
+				activeEff->magicItem && ValidTempEffect(activeEff->effectItem))
+				if (TESForm* form = DYNAMIC_CAST(activeEff->magicItem, MagicItem, TESForm))
+				{ 
+					if (form->typeID == kFormType_AlchemyItem) {
+						float timeLeft = activeEff->duration - activeEff->timeElapsed;
+						auto it = tempEffectMap.find(form);
+						if (it != tempEffectMap.end() && it->second.second < activeEff->duration) {
+							it->second.first = timeLeft;
+							it->second.second = activeEff->duration;
+						}
+						else {
+							tempEffectMap.insert({form, {timeLeft, activeEff->duration}});
+						}
+					}
+				}
+		} while (iter = iter->next);
+		
+	}
+	if (!tempEffectMap.empty()) {
+		for (auto effect : tempEffectMap) {
+			NVSEArrayVar* effArrInner = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+			g_arrInterface->AppendElements(effArrInner, effect.first, effect.second.first, effect.second.second);
+			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effArrInner));
+		}
+		tempEffectMap.clear();
+	}
+	g_arrInterface->AssignCommandResult(effArr, result);
+	return true;
+}
 
 
 bool Cmd_SetCameraShakeNoHUDShudder_Execute(COMMAND_ARGS) {
@@ -60,23 +327,6 @@ bool Cmd_SetCameraShakeNoHUDShudder_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-
-
-
-
-
-
-
-
-
-
-
-void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
-(void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
-bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
-bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
-void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
-#define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
 bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -204,8 +454,8 @@ bool Cmd_GetLocationSpecificLoadScreensOnly_Eval(COMMAND_ARGS_EVAL) {
 
 bool IsCombatTarget(Actor* source, Actor* toSearch) {
 	if (source->isInCombat && source->combatTargets) {
-		Actor** actorsArr = source->combatTargets->data;
-		UInt32 count = source->combatTargets->size;
+		Actor** actorsArr = source->combatTargets->pBuffer;
+		UInt32 count = source->combatTargets->uiSize;
 		if (!actorsArr) return false;
 		for (; count; count--, actorsArr++) {
 			if (*actorsArr == toSearch) return true;
@@ -351,11 +601,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool __fastcall ValidTempEffect(EffectItem* effectItem) {
-	if (!effectItem || (effectItem->duration <= 0) || !effectItem->setting) return false;
-	UInt8 archtype = effectItem->setting->archtype;
-	return !archtype || ((archtype == 1) && (effectItem->setting->effectFlags & 0x2000)) || ((archtype > 10) && (archtype < 14)) || (archtype == 24) || (archtype > 33);
-}
+
 
 bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -605,8 +851,9 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 	TESSound* soundForm;
 	TESObjectREFR* source;
 	BSFadeNode* fadeNode;
+	float fadeOutTime = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source, &fadeOutTime)) {
 		if (soundForm->soundFile.path.m_dataLen) {
 			const char* soundPath = soundForm->soundFile.path.m_data;
 			BSGameSound* gameSound;
@@ -615,8 +862,14 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 				if (gameSound && StrBeginsCI(gameSound->filePath + 0xB, soundPath)) {
 					fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
 					if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == source) {
-						gameSound->stateFlags &= 0xFFFFFF0F;
-						gameSound->stateFlags |= 0x10;
+						if (fadeOutTime == -1) {
+							gameSound->stateFlags &= 0xFFFFFF0F;
+							gameSound->stateFlags |= 0x10;
+						}
+						else {
+							int time = fadeOutTime * 1000.0;
+							ThisStdCall<void>(0xADC560, BSAudioManager::Get(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
+						}
 						*result = 1;
 						break;
 					}

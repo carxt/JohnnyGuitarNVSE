@@ -257,7 +257,12 @@ static ParamInfo kParams_TwoForms_OneInt[3] =
 	{	"form",	kParamType_AnyForm,	0	},
 	{	"int",	kParamType_Integer, 0	},
 };
-
+static ParamInfo kParams_TwoForms_OneOptionalFloat[3] =
+{
+	{	"form",	kParamType_AnyForm,	0	},
+	{	"form",	kParamType_AnyForm,	0	},
+	{	"float",	kParamType_Float, 1	},
+};
 static ParamInfo kParams_OneForm[1] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
@@ -528,6 +533,15 @@ static ParamInfo kParams_ThreeFloats[3] =
 	{ "Float", kParamType_Float, 0 },
 	{ "Float", kParamType_Float, 0 },
 	{ "Float", kParamType_Float, 0 },
+};
+
+static ParamInfo kParams_ThreeFloats_OneInt_OneOptionalFloat[5] =
+{
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Float", kParamType_Float, 1 }
 };
 
 static ParamInfo kParams_FiveFloats[5] =
