@@ -68,6 +68,11 @@ char g_workingDir[MAX_PATH];
 std::unordered_set<DWORD> jg_gameRadioSet;
 static float g_viewmodel_near = 0.f;
 
+extern "C" {
+	bool __cdecl JGSetViewmodelClipDistance(float value);
+	float __cdecl JGGetViewmodelClipDistance();
+}
+
 
 namespace GMSTJG {
 	static uintptr_t func_AddGameSetting = 0x040E0B0;
@@ -1165,6 +1170,7 @@ void __fastcall SetViewmodelFrustumHook(NiCameraAlt* camera, void*, NiFrustum* f
 	camera->frustum.f = frustum->f;
 	camera->frustum.o = frustum->o;
 }
+
 
 bool __cdecl JGSetViewmodelClipDistance(float value) {
 	g_viewmodel_near = value;
