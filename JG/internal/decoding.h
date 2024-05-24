@@ -1029,7 +1029,10 @@ public:
 	TileImage* tile38;		// 38
 	TileImage* tile3C;		// 3C
 	UInt32				unk40;			// 40
-	float				flt44;			// 44
+	UInt8				isStarted;      //44
+	bool				isRest;         //45
+	UInt8				restKeyDebounce; //46
+	UInt8				pad47;           //47
 	float				selectedHours;	// 48
 };
 STATIC_ASSERT(sizeof(SleepWaitMenu) == 0x4C);
