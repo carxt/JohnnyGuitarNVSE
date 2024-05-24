@@ -763,4 +763,10 @@ static ParamInfo kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm[4] =
 	{	"int",	kParamType_Integer, 1	},
 	{	"form",	kParamType_AnyForm,	1	},
 
+}; 
+static ParamInfo kParams_OneActorRef_OneInt[2] =
+{
+	{	"actor reference",	kParamType_Actor,	0	},
+	{	"int",	kParamType_Integer,				0	},
+
 };
