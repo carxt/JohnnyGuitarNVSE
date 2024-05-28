@@ -165,11 +165,14 @@ UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg
 	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
 }
 
-void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal) {
-	if (previousVal == 0.0) previousVal = g_thePlayer->avOwner.GetActorValue(avCode);
+void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal, void* onChangeCallback) {
+	if (onChangeCallback == nullptr) {
+		previousVal = g_thePlayer->avOwner.GetActorValue(avCode) - modVal;
+	}
 	float newVal = previousVal + modVal;
 	float floorPrev(floor(previousVal)), floorNew(floor(newVal));
 	if (floorPrev != floorNew) {
+		// Console_Print("av %d prev %.2f mod %.2f new %.2f callback 0x%X", avCode, previousVal, modVal, newVal, onChangeCallback);
 		for (auto const& callback : OnAVChangeHandler->EventCallbacks) {
 			if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
 				CallUDF(callback.ScriptForEvent, NULL, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&floorPrev, *(UInt32*)&floorNew);
@@ -250,6 +253,8 @@ __declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32
 		test    ecx, ecx
 		jz      done
 		push    ecx
+		mov		ecx, dword ptr[ecx + 0x54]
+		push	ecx
 		mov     ecx, [ebp + 8]
 		cmp     dword ptr[ecx - 0x98], 0x14
 		jnz     skipHandler
