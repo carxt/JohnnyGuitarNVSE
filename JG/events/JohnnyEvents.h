@@ -799,7 +799,7 @@ void HandleEventHooks() {
 	hk_RadioTuneOnEvent<0x579C64>();
 	hk_RadioTuneOnEvent<0x57A23A>();
 
-	hk_SleepWaitEventHandler<0x10763B8>();
+	//hk_SleepWaitEventHandler<0x10763B8>();
 
 	//testing
 	OnRenderGamePreUpdateHandler = JGCreateEvent("OnRenderGamePreUpdateHandler", 0, 0, NULL);
