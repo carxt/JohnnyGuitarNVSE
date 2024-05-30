@@ -180,6 +180,9 @@ const UInt32 TESForm_Vtables[] =
 	0x1011964,	//	AlchemyItem
 	0x1024CEC,  //  BGSMovableStatic
 	0x1067A2C,  //  ActorValueInfo
+	0x10115B4,  //	BGSHungerStage
+	0x101144C,	//	BGSDehydrationStage
+	0x1033B34,	//	BGSRadiationStage
 };
 
 //special for references, so it only uses persistent ones
