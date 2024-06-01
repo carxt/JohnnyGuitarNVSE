@@ -3,4 +3,8 @@ EXPORTS
 NVSEPlugin_Query
 NVSEPlugin_Load
 JGNVSE_GetFormIDFromEDID
+JGCreateEvent
+JGFreeEvent
 JG_WorldToScreen
+JGSetViewmodelClipDistance
+JGGetViewmodelClipDistance

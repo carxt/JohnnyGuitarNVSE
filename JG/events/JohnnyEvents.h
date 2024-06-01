@@ -41,6 +41,7 @@ EventInformation* OnAVChangeHandler;
 EventInformation* OnPLChangeHandler;
 EventInformation* OnRadioPostSoundAttachHandler;
 EventInformation* OnKeyboardControllerSelectionChangeHandler;
+EventInformation* OnSleepWaitEventHandler;
 
 
 
@@ -164,14 +165,17 @@ UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg
 	return ThisStdCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
 }
 
-void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal) {
-	if (previousVal == 0.0) previousVal = g_thePlayer->avOwner.GetActorValue(avCode);
+void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal, void* onChangeCallback) {
+	if (onChangeCallback == nullptr) {
+		previousVal = g_thePlayer->avOwner.GetActorValue(avCode) - modVal;
+	}
 	float newVal = previousVal + modVal;
-	float roundPrev(round(previousVal)), roundNew(round(newVal));
-	if (roundPrev != roundNew) {
+	float floorPrev(floor(previousVal)), floorNew(floor(newVal));
+	if (floorPrev != floorNew) {
+		// Console_Print("av %d prev %.2f mod %.2f new %.2f callback 0x%X", avCode, previousVal, modVal, newVal, onChangeCallback);
 		for (auto const& callback : OnAVChangeHandler->EventCallbacks) {
 			if (reinterpret_cast<JohnnyEventFiltersOneFormOneInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
-				CallUDF(callback.ScriptForEvent, NULL, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&roundPrev, *(UInt32*)&roundNew);
+				CallUDF(callback.ScriptForEvent, NULL, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&floorPrev, *(UInt32*)&floorNew);
 			}
 		}
 	}
@@ -225,6 +229,15 @@ void __fastcall HandleOnKeyboardControllerUIChange(InterfaceManager* a_man, Menu
 }
 
 
+void __fastcall HandleOnSleepWait(SleepWaitMenu* a_man, DWORD clickMode) {
+	for (auto const& callback : OnKeyboardControllerSelectionChangeHandler->EventCallbacks) {
+		auto filter = reinterpret_cast<JohnnyEventFiltersInt*>(callback.eventFilter);
+		if (filter->IsInFilter(0, DWORD(a_man->isRest) + 1) || filter->IsInFilter(0, 0)) {
+			CallUDF(callback.ScriptForEvent, NULL, OnKeyboardControllerSelectionChangeHandler->numMaxArgs, DWORD(a_man->isRest));
+		}
+	}
+}
+
 
 
 __declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32 avCode, float prevVal, float newVal, ActorValueOwner* attacker)
@@ -240,6 +253,8 @@ __declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32
 		test    ecx, ecx
 		jz      done
 		push    ecx
+		mov		ecx, dword ptr[ecx + 0x54]
+		push	ecx
 		mov     ecx, [ebp + 8]
 		cmp     dword ptr[ecx - 0x98], 0x14
 		jnz     skipHandler
@@ -373,6 +388,25 @@ public:
 
 
 
+template <uintptr_t a_addr>
+class hk_SleepWaitEventHandler {
+private:
+	static inline uintptr_t hookCall = a_addr;
+public:
+	static  DWORD __thiscall hk_SleepWaitHandleClick(SleepWaitMenu* pSWMenu, DWORD mode) {
+		auto res = ThisStdCall<DWORD>(hookCall, pSWMenu, mode);
+		if (mode == 4) {
+			HandleOnSleepWait(pSWMenu, mode);
+		}
+		return res;
+	}
+
+	hk_SleepWaitEventHandler() {
+		uintptr_t hk_hookPoint = hookCall;
+		hookCall = *(uintptr_t*)(hookCall);
+		SafeWrite32(hk_hookPoint, (uintptr_t)hk_SleepWaitHandleClick);
+	}
+};
 
 
 
@@ -665,6 +699,25 @@ bool Cmd_SetJohnnyOnKeyboardControllerSelectionChangeEventHandler_Execute(COMMAN
 
 
 
+
+bool Cmd_SetJohnnyOnSleepWaitEventHandler_Execute(COMMAND_ARGS) {
+	UInt32 setOrRemove = 0;
+	Script* script = NULL;
+	EventFilterStructOneInt filter{};
+	UInt32 flags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script)) {
+		if (OnSleepWaitEventHandler) {
+			if (setOrRemove)
+				OnSleepWaitEventHandler->RegisterEvent(script, (void**)&filter);
+			else OnSleepWaitEventHandler->RemoveEvent(script, (void**)&filter);
+		}
+	}
+	return true;
+}
+
+
+
+
 void HandleEventHooks() {
 	OnDyingHandler = JGCreateEvent("OnDying", 1, 1, NULL);
 	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1, NULL);
@@ -682,7 +735,7 @@ void HandleEventHooks() {
 	OnPLChangeHandler = JGCreateEvent("OnProcessLevelChange", 3, 2, CreateOneFormOneIntFilter);
 	OnRadioPostSoundAttachHandler = JGCreateEvent("OnRadioPostSoundAttach", 2, 1, NULL);
 	OnKeyboardControllerSelectionChangeHandler = JGCreateEvent("OnKeyboardControllerSelectionChange", 1, 1, CreateOneIntFilter);
-
+	OnSleepWaitEventHandler = JGCreateEvent("OnSleepWaitEventHandler", 1, 1, NULL);
 
 
 
@@ -746,8 +799,7 @@ void HandleEventHooks() {
 	hk_RadioTuneOnEvent<0x579C64>();
 	hk_RadioTuneOnEvent<0x57A23A>();
 
-
-
+	//hk_SleepWaitEventHandler<0x10763B8>();
 
 	//testing
 	OnRenderGamePreUpdateHandler = JGCreateEvent("OnRenderGamePreUpdateHandler", 0, 0, NULL);

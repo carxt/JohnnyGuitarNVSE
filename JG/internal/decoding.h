@@ -160,14 +160,13 @@ struct DetectionData {
 	UInt8		byte06;			// 06
 	UInt8		byte07;			// 07
 	SInt32		detectionValue;	// 08
-	UInt32		unk0C;			// 0C
-	UInt32		unk10;			// 10
-	UInt32		unk14;			// 14
-	UInt32		unk18;			// 18
-	UInt8		byte1C;			// 1C
+	NiPoint3	detectionLocation;			// 0C
+	float		fDetectionTimestamp;			// 18
+	UInt8		bForceResetLOSBuffer;			// 1C
 	UInt8		byte1D;			// 1D
 	bool		inLOS;			// 1E
 	UInt8		byte1F;			// 1F
+	SInt32		detectionModSneak;
 };
 
 // 46C
@@ -1030,7 +1029,10 @@ public:
 	TileImage* tile38;		// 38
 	TileImage* tile3C;		// 3C
 	UInt32				unk40;			// 40
-	float				flt44;			// 44
+	UInt8				isStarted;      //44
+	bool				isRest;         //45
+	UInt8				restKeyDebounce; //46
+	UInt8				pad47;           //47
 	float				selectedHours;	// 48
 };
 STATIC_ASSERT(sizeof(SleepWaitMenu) == 0x4C);

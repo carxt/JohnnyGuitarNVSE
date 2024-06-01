@@ -417,9 +417,8 @@ bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
 bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESForm* form;
-	if (scriptObj && ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
-		UInt8 overriding = form->GetOverridingModIdx();
-		*result = ((overriding > scriptObj->modIndex) ? overriding : 0);
+	if ( ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
+		*result = form->GetOverridingModIdx();
 		if (IsConsoleMode()) Console_Print("GetFormOverrideIndex >> %.f", *result);
 	}
 	return true;
