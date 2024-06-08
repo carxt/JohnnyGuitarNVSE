@@ -393,7 +393,7 @@ class hk_SleepWaitEventHandler {
 private:
 	static inline uintptr_t hookCall = a_addr;
 public:
-	static  DWORD __thiscall hk_SleepWaitHandleClick(SleepWaitMenu* pSWMenu, DWORD mode) {
+	static  DWORD __fastcall hk_SleepWaitHandleClick(SleepWaitMenu* pSWMenu, void* edx, DWORD mode) {
 		auto res = ThisStdCall<DWORD>(hookCall, pSWMenu, mode);
 		if (mode == 4) {
 			HandleOnSleepWait(pSWMenu, mode);
@@ -799,7 +799,7 @@ void HandleEventHooks() {
 	hk_RadioTuneOnEvent<0x579C64>();
 	hk_RadioTuneOnEvent<0x57A23A>();
 
-	//hk_SleepWaitEventHandler<0x10763B8>();
+	hk_SleepWaitEventHandler<0x10763B8>();
 
 	//testing
 	OnRenderGamePreUpdateHandler = JGCreateEvent("OnRenderGamePreUpdateHandler", 0, 0, NULL);
