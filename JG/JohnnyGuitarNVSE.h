@@ -36,6 +36,9 @@ bool patchPainedPlayer = 0;
 bool bDisableDeathResponses = 0;
 unsigned int iFPSCapLoadScreen = 0;
 float iDeathSoundMAXTimer = 10;
+
+bool bDisableDLLCompatibilityRoutines = 0;
+
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -72,8 +75,7 @@ extern "C" {
 	bool __cdecl JGSetViewmodelClipDistance(float value);
 	float __cdecl JGGetViewmodelClipDistance();
 }
-
-
+extern uintptr_t GetRelJumpAddr(uintptr_t address);
 
 
 
@@ -148,6 +150,7 @@ namespace NPCAccuracy {
 	public:
 		static  double __fastcall hk_AccHook(Actor* a_refr, void* edx, int mode) {
 			auto res = ThisStdCall<double>(hookCall,a_refr, mode);
+			res *= returnActorMult(a_refr);
 			return res;
 		}
 
@@ -1446,7 +1449,19 @@ void HandleIniOptions() {
 
 
 
-
+__declspec (noinline) void HandleDLLInterop() {
+	if (GetModuleHandle("jip_nvse.dll") != NULL) { //JIP is on.
+		uint8_t* fnPtr = (uint8_t*) GetRelJumpAddr(0x0524014);
+		while ((fnPtr[0] != 0xCC) && fnPtr[1] != 0xCC) {
+			if ((*(uint32_t*)(fnPtr) == 0x8B0DD0B8) && fnPtr[4] == 0) {
+				//found
+				uintptr_t dest = GetRelJumpAddr(0x0524019);
+				SafeWrite32((uintptr_t)(fnPtr + 1), dest);
+			}
+			fnPtr++;
+		}
+	}
+}
 
 void HandleGameSettingsJG(){
 
