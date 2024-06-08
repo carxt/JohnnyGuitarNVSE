@@ -72,6 +72,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			jg_gameRadioSet.clear();
 			hk_BarterHook::barterFilterListLeft.clear();
 			hk_BarterHook::barterFilterListRight.clear();
+			NPCAccuracy::FlushMapRefs();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_PostLoadGame:
@@ -453,7 +454,8 @@ extern "C" {
 		REG_TYPED_CMD(GetPointInNavMesh, Array);
 		REG_TYPED_CMD(GetNearestNavMeshTriangle, Array);
 		REG_TYPED_CMD(GetAltTexturesEx, Array);
-
+		REG_CMD(SetNPCWobbleAngleMult);
+		REG_CMD(RemoveNPCWobbleAngleMult);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

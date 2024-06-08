@@ -784,3 +784,10 @@ static ParamInfo kParams_OneActorRef_OneInt[2] =
 	{	"int",	kParamType_Integer,				0	},
 
 };
+
+
+static ParamInfo kParams_OneFloat_OneOptionalForm[2] =
+{
+	{	"float", kParamType_Float,	0 },
+	{   "form", kParamType_AnyForm, 1 }
+};

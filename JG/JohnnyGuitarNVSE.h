@@ -74,6 +74,91 @@ extern "C" {
 }
 
 
+
+
+
+std::vector<uintptr_t> GetFactionsInList(ExtraFactionChanges::FactionListEntry* pFactList) {
+	std::vector<uintptr_t> retObj{};
+		auto factHead = pFactList->Head();
+		while (factHead) {
+			if (factHead->data && factHead->data->rank >= 0) {
+				retObj.push_back(factHead->data->faction->refID);
+			}
+			factHead = factHead->next;
+		}
+		return retObj;
+}
+
+std::vector<uintptr_t> GetFactionsForActor(Actor* r_act) {
+
+	auto actBase = (TESActorBase*)r_act->baseForm;
+	auto retVec = GetFactionsInList(&(actBase->baseData.factionList));
+
+	ExtraFactionChanges* fRanks = (ExtraFactionChanges*)r_act->extraDataList.GetByType(kExtraData_FactionChanges);
+	if (fRanks) {
+		if (auto factionDataList = fRanks->data) {
+			auto vec2 = GetFactionsInList(factionDataList);
+			retVec.insert(retVec.end(), vec2.begin(), vec2.end());
+		}
+	}
+	return retVec;
+}
+
+
+
+
+
+namespace NPCAccuracy {
+	struct {
+		std::unordered_map<uintptr_t, float> ACTREF;
+
+		std::unordered_map<uintptr_t, float> ACTBAS;
+		std::unordered_map<uintptr_t, float> CSTY;
+		std::unordered_map<uintptr_t, float> FACT;
+	} tables;
+
+	void FlushMapRefs() {
+		tables.ACTREF.clear();
+	}
+	double __fastcall returnActorMult(Actor* a_refr) {
+
+		auto findValInTable = [](uintptr_t dRefId, std::unordered_map<uintptr_t, float>& pMap) -> float {
+			auto it = pMap.find(dRefId);
+			if (it != pMap.end()) {
+				return it->second;
+			}
+			return 1.0f;
+		};
+		double retMul = 1.0;
+		retMul *= findValInTable(a_refr->refID, tables.ACTREF);
+		retMul *= findValInTable(a_refr->baseForm->refID, tables.ACTBAS);
+		if (auto pCStyle = a_refr->GetCombatStyle()) {
+			retMul *= findValInTable(pCStyle->refID, tables.CSTY);
+		}
+		auto factionsForAct = GetFactionsForActor(a_refr);
+		for (auto factRefId : factionsForAct) {
+			retMul *= findValInTable(factRefId, tables.FACT);
+		}
+
+	}
+	template <uintptr_t a_addr>
+	class hk_NPCWobble {
+	private:
+		static inline uintptr_t hookCall = a_addr;
+	public:
+		static  double __fastcall hk_AccHook(Actor* a_refr, void* edx, int mode) {
+			auto res = ThisStdCall<double>(hookCall,a_refr, mode);
+			return res;
+		}
+
+		hk_NPCWobble() {
+			uintptr_t hk_hookPoint = hookCall;
+			hookCall = GetRelJumpAddr(hookCall);
+			WriteRelCall(hk_hookPoint, (uintptr_t)hk_AccHook);
+		}
+	};
+};
+
 namespace GMSTJG {
 	static uintptr_t func_AddGameSetting = 0x040E0B0;
 	Setting fCombatLocationTargetRadiusMaxBase;
@@ -1258,8 +1343,7 @@ void HandleFixes() {
 	WriteRelCall(0x83509D, (uintptr_t)fixAudioMonoLookupOverflow);
 	//CamShakeHook
 	hk_CameraShakeHook::CreateHook();
-
-
+	NPCAccuracy::hk_NPCWobble<0x0524019>();
 }
 
 void HandleIniOptions() {
