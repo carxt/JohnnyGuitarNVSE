@@ -49,6 +49,9 @@ DEFINE_COMMAND_PLUGIN(HasHealthDamageEffect, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetAlwaysRun, , 0, 2, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetAutoMove, , 0, 1, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetPlayerMovementFlags, , 0, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(SetExtraWobbleAngleMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(RemoveExtraWobbleAngleMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
+
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -211,6 +214,75 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 	}
 	return false;
 }
+
+
+
+
+
+
+bool Cmd_SetExtraWobbleAngleMult_Execute(COMMAND_ARGS) {
+
+	*result = 0;
+	float mul = 0.0f;
+	TESForm* a_form = NULL;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
+		switch (a_form->typeID) {
+		case kFormType_TESNPC:
+		case kFormType_TESCreature:
+			NPCAccuracy::tables.ACTBAS[a_form->refID] = mul;
+			break;
+		case kFormType_TESCombatStyle:
+			NPCAccuracy::tables.CSTY[a_form->refID] = mul;
+			break;
+		case kFormType_TESFaction:
+			NPCAccuracy::tables.FACT[a_form->refID] = mul;
+			break;
+
+		}
+	}
+	else if (thisObj) {
+		NPCAccuracy::tables.ACTREF[thisObj->refID] = mul;
+
+	}
+	return true;
+
+
+}
+
+bool Cmd_RemoveExtraWobbleAngleMult_Execute(COMMAND_ARGS) {
+
+	*result = 0;
+	float mul = 0.0f;
+	TESForm* a_form = NULL;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
+		switch (a_form->typeID) {
+		case kFormType_TESNPC:
+		case kFormType_TESCreature:
+			NPCAccuracy::tables.ACTBAS.erase(a_form->refID);
+			break;
+		case kFormType_TESCombatStyle:
+			NPCAccuracy::tables.CSTY.erase(a_form->refID);
+			break;
+		case kFormType_TESFaction:
+			NPCAccuracy::tables.FACT.erase(a_form->refID);
+			break;
+
+		}
+	}
+	else if (thisObj) {
+		NPCAccuracy::tables.ACTREF.erase(thisObj->refID);
+
+	}
+	return true;
+
+
+}
+
+
+
+
+
+
 
 bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 	*result = 0;
