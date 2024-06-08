@@ -46,8 +46,8 @@ DEFINE_COMMAND_PLUGIN(PlaySoundFade, , 0, 2, kParams_OneForm_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetPointInNavMesh, , 0, 5, kParams_ThreeFloats_OneInt_OneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(GetNearestNavMeshTriangle, , 0, 5, kParams_ThreeFloats_OneInt_OneOptionalFloat);
 
-DEFINE_COMMAND_PLUGIN(SetExtraWobbleAngleMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(RemoveExtraWobbleAngleMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(SetExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(RemoveExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
 
 
 
@@ -175,7 +175,7 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 
 
 
-bool Cmd_SetExtraWobbleAngleMult_Execute(COMMAND_ARGS) {
+bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 
 	*result = 0;
 	float mul = 0.0f;
@@ -204,7 +204,7 @@ bool Cmd_SetExtraWobbleAngleMult_Execute(COMMAND_ARGS) {
 
 }
 
-bool Cmd_RemoveExtraWobbleAngleMult_Execute(COMMAND_ARGS) {
+bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 
 	*result = 0;
 	float mul = 0.0f;
