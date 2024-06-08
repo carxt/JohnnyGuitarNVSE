@@ -72,6 +72,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			jg_gameRadioSet.clear();
 			hk_BarterHook::barterFilterListLeft.clear();
 			hk_BarterHook::barterFilterListRight.clear();
+			NPCAccuracy::FlushMapRefs();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_PostLoadGame:
@@ -458,7 +459,9 @@ extern "C" {
 		REG_CMD(SetAutoMove);
 		REG_CMD(SetPlayerMovementFlags);
 		REG_CMD(PushUIQuestToTop);
-		
+		REG_CMD(SetNPCWobbleAngleMult);
+		REG_CMD(RemoveNPCWobbleAngleMult);
+
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

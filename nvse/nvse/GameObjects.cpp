@@ -72,6 +72,15 @@ TESObjectREFR* TESObjectREFR::Create(bool bTemp) {
 	return refr;
 }
 
+
+
+TESCombatStyle* Actor::GetCombatStyle() 
+{
+	ExtraCombatStyle* xCmbStyle = GetExtraType(extraDataList, CombatStyle);
+	if (xCmbStyle && xCmbStyle->combatStyle) return xCmbStyle->combatStyle;
+	return ((TESActorBase*)baseForm)->GetCombatStyle();
+}
+
 TESActorBase* Actor::GetActorBase() {
 	ExtraLeveledCreature* xLvlCre = GetExtraType(extraDataList, LeveledCreature);
 	return (xLvlCre && xLvlCre->form) ? (TESActorBase*)xLvlCre->form : (TESActorBase*)baseForm;
