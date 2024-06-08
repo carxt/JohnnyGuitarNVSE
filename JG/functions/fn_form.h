@@ -87,68 +87,7 @@ DEFINE_COMMAND_PLUGIN(HideItemBarterEx, , 0, 4, kParams_OneForm_OneInt_OneOption
 DEFINE_COMMAND_PLUGIN(IsItemBarterHiddenEx, , 0, 2, kParams_OneForm_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetCurrentFurnitureRef, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetAltTexturesEx, , 0, 2, kParams_OneForm_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(SetNPCWobbleAngleMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(RemoveNPCWobbleAngleMult , , 0, 2, kParams_OneFloat_OneOptionalForm);
 
-
-
-bool Cmd_SetNPCWobbleAngleMult_Execute(COMMAND_ARGS){
-
-	*result = 0;
-	float mul = 0.0f;
-	TESForm* a_form = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
-		switch (a_form->typeID) {
-		case kFormType_TESNPC:
-		case kFormType_TESCreature:
-			NPCAccuracy::tables.ACTBAS[a_form->refID] = mul;
-			break;
-		case kFormType_TESCombatStyle:
-			NPCAccuracy::tables.CSTY[a_form->refID] = mul;
-			break;
-		case kFormType_TESFaction:
-			NPCAccuracy::tables.FACT[a_form->refID] = mul;
-			break;
-
-		}
-	}
-	else if (thisObj) {
-		NPCAccuracy::tables.ACTREF[thisObj->refID] = mul;
-
-	}
-	return true;
-
-
-}
-
-bool Cmd_RemoveNPCWobbleAngleMult_Execute(COMMAND_ARGS) {
-
-	*result = 0;
-	float mul = 0.0f;
-	TESForm* a_form = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
-		switch (a_form->typeID) {
-		case kFormType_TESNPC:
-		case kFormType_TESCreature:
-			NPCAccuracy::tables.ACTBAS.erase(a_form->refID);
-			break;
-		case kFormType_TESCombatStyle:
-			NPCAccuracy::tables.CSTY.erase(a_form->refID);
-			break;
-		case kFormType_TESFaction:
-			NPCAccuracy::tables.FACT.erase(a_form->refID);
-			break;
-
-		}
-	}
-	else if (thisObj) {
-		NPCAccuracy::tables.ACTREF.erase(thisObj->refID);
-
-	}
-	return true;
-
-
-}
 
 
 
