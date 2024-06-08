@@ -13,17 +13,27 @@ DEFINE_COMMAND_PLUGIN(GetExtraMiscStat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ModExtraMiscStat, , 0, 2, kParams_OneString_OneInt);
 DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , 0, 2, kParams_OneInt_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(PushUIQuestToTop, , 0, 1, kParams_OneQuest);
+DEFINE_COMMAND_PLUGIN(PushUIQuestToTop, , 0, 1, kParams_OneQuest); //DO NOT REGISTER YET.
+DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , 0, 0, NULL); //DO NOT REGISTER YET.
+
+
+bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
+		if (g_thePlayer) {
+			auto headNode = g_thePlayer->questObjectiveList.Head();
+			while (headNode) {
+				Console_Print("objective %s from quest %s", headNode->data->displayText.CStr(), headNode->data->quest->GetEditorName());
+				headNode = headNode->next;
+			}			
+		}
+	
+	return true;
+}
 
 
 
 
 
-
-
-
-
-bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
+bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 	TESQuest* inQuest;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &inQuest)) {
@@ -31,9 +41,10 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 			auto headNode = g_thePlayer->questObjectiveList.Head();
 			if (!(headNode->next)) { return true; } //literally nothing to do here.
 			auto lastNode = headNode;
-			ListNode<BGSQuestObjective> newBuf;
+			ListNode<BGSQuestObjective> newBuf = {};
 			auto lastTmpNode = &newBuf;
 			lastTmpNode->data = NULL;
+			lastTmpNode->next = NULL;
 			while (headNode) {
 				auto elem = headNode->data;
 				if (elem->quest == inQuest) {
@@ -45,22 +56,30 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 						pNext->next = NULL;
 						lastTmpNode->next = pNext;
 						lastTmpNode = pNext;
+						continue;
 					}
 					else {
 						lastNode->next = NULL;
 						lastTmpNode->next = headNode;
 						lastTmpNode = headNode;
+						break;
 					}
 				}
 				lastNode = headNode;
 				headNode = headNode->next;
 			}
-			auto headNodeTmp = &newBuf;
-			//this is intentional, newBuf is a stack var, so it cannot be transfered.
-			while (headNodeTmp = headNodeTmp->next) {
-				lastNode->next = headNodeTmp;
-				lastNode = lastNode->next;
+			auto headNodeTmp = newBuf.next;
+			headNode = g_thePlayer->questObjectiveList.Head();
+			newBuf.data = headNode->data;
+			newBuf.next = headNode->next;
+			headNode->next = headNodeTmp;
+			while (headNode && headNode->next) {
+				headNode->data = headNode->next->data;
+				headNode = headNode->next;
 			}
+			headNode->next = newBuf.next;
+			headNode->data = newBuf.data;
+
 		}
 	}
 	return true;
