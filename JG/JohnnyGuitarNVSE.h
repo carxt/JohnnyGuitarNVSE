@@ -91,7 +91,7 @@ std::vector<uintptr_t> GetFactionsInList(ExtraFactionChanges::FactionListEntry* 
 		return retObj;
 }
 
-std::vector<uintptr_t> GetFactionsForActor(Actor* r_act) {
+__declspec (noinline) std::vector<uintptr_t> GetFactionsForActor(Actor* r_act) {
 
 	auto actBase = (TESActorBase*)r_act->baseForm;
 	auto retVec = GetFactionsInList(&(actBase->baseData.factionList));
@@ -122,7 +122,7 @@ namespace NPCAccuracy {
 	void FlushMapRefs() {
 		tables.ACTREF.clear();
 	}
-	double __fastcall returnActorMult(Actor* a_refr) {
+	__declspec (noinline) double __fastcall returnActorMult(Actor* a_refr) {
 
 		auto findValInTable = [](uintptr_t dRefId, std::unordered_map<uintptr_t, float>& pMap) -> float {
 			auto it = pMap.find(dRefId);
@@ -131,7 +131,7 @@ namespace NPCAccuracy {
 			}
 			return 1.0f;
 		};
-		double retMul = 1.0;
+		double retMul = 1.0f;
 		retMul *= findValInTable(a_refr->refID, tables.ACTREF);
 		retMul *= findValInTable(a_refr->baseForm->refID, tables.ACTBAS);
 		if (auto pCStyle = a_refr->GetCombatStyle()) {
@@ -141,6 +141,7 @@ namespace NPCAccuracy {
 		for (auto factRefId : factionsForAct) {
 			retMul *= findValInTable(factRefId, tables.FACT);
 		}
+		return retMul;
 
 	}
 	template <uintptr_t a_addr>
@@ -148,7 +149,7 @@ namespace NPCAccuracy {
 	private:
 		static inline uintptr_t hookCall = a_addr;
 	public:
-		static  double __fastcall hk_AccHook(Actor* a_refr, void* edx, int mode) {
+		static  float __fastcall hk_AccHook(Actor* a_refr, void* edx, int mode) {
 			auto res = ThisStdCall<double>(hookCall,a_refr, mode);
 			res *= returnActorMult(a_refr);
 			return res;
@@ -1453,10 +1454,13 @@ __declspec (noinline) void HandleDLLInterop() {
 	if (GetModuleHandle("jip_nvse.dll") != NULL) { //JIP is on.
 		uint8_t* fnPtr = (uint8_t*) GetRelJumpAddr(0x0524014);
 		while ((fnPtr[0] != 0xCC) && fnPtr[1] != 0xCC) {
-			if ((*(uint32_t*)(fnPtr) == 0x8B0DD0B8) && fnPtr[4] == 0) {
-				//found
-				uintptr_t dest = GetRelJumpAddr(0x0524019);
-				SafeWrite32((uintptr_t)(fnPtr + 1), dest);
+			if ((fnPtr[0] == 0x75) && (fnPtr[2] == 0x6A) && (fnPtr[3] == 0x2) && (fnPtr[9] == 0xFF) && (fnPtr[10] == 0xD0)) {
+				fnPtr += 4;
+				if ((*(uint32_t*)(fnPtr) == 0x8B0DD0B8) && fnPtr[4] == 0) {
+					//found
+					uintptr_t dest = GetRelJumpAddr(0x0524019);
+					SafeWrite32((uintptr_t)(fnPtr + 1), dest);
+				}
 			}
 			fnPtr++;
 		}
