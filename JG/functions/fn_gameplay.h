@@ -49,8 +49,9 @@ DEFINE_COMMAND_PLUGIN(HasHealthDamageEffect, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetAlwaysRun, , 0, 2, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetAutoMove, , 0, 1, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetPlayerMovementFlags, , 0, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(SetExtraWobbleAngleMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(RemoveExtraWobbleAngleMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(SetExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(RemoveExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
+
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -220,7 +221,7 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 
 
 
-bool Cmd_SetExtraWobbleAngleMult_Execute(COMMAND_ARGS) {
+bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 
 	*result = 0;
 	float mul = 0.0f;
@@ -249,7 +250,7 @@ bool Cmd_SetExtraWobbleAngleMult_Execute(COMMAND_ARGS) {
 
 }
 
-bool Cmd_RemoveExtraWobbleAngleMult_Execute(COMMAND_ARGS) {
+bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 
 	*result = 0;
 	float mul = 0.0f;
