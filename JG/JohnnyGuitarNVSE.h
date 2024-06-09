@@ -202,7 +202,7 @@ namespace GMSTJG {
 		static inline uintptr_t hookCall = a_addr;
 	public:
 		static  double __fastcall hk_Hook(TESObjectWEAP* r_weap) {
-			auto res = ThisCall<double>(hookCall, r_weap);
+			auto res = ThisStdCall<double>(hookCall, r_weap);
 			if (!ThisStdCall<bool>(0x0647790, r_weap) && ThisStdCall<bool>(0x04C0C30, r_weap)) {
 				res *= fCombatRangedWeaponRangeBaseMult.data.f;
 			}
