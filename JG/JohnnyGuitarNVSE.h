@@ -1025,7 +1025,7 @@ Setting* __fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char
 	if (rendererSettings && !rendererSettings->settings.Empty()) {
 		ListNode<Setting>* iter = rendererSettings->settings.Head();
 		do {
-			if (iter->data && !stricmp(iter->data->name, name)) return iter->data;
+			if (iter->data && !_stricmp(iter->data->name, name)) return iter->data;
 		} while (iter = iter->next);
 	}
 	return nullptr;
