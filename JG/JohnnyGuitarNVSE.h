@@ -93,7 +93,7 @@ std::vector<uintptr_t> GetFactionsInList(ExtraFactionChanges::FactionListEntry* 
 
 __declspec (noinline) std::vector<uintptr_t> GetFactionsForActor(Actor* r_act) {
 
-	auto actBase = (TESActorBase*)r_act->baseForm;
+	auto actBase = (TESActorBase*) GetPermanentBaseForm(r_act);
 	auto retVec = GetFactionsInList(&(actBase->baseData.factionList));
 
 	ExtraFactionChanges* fRanks = (ExtraFactionChanges*)r_act->extraDataList.GetByType(kExtraData_FactionChanges);
