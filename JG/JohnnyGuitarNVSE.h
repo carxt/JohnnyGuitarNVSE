@@ -133,7 +133,7 @@ namespace NPCAccuracy {
 		};
 		double retMul = 1.0f;
 		retMul *= findValInTable(a_refr->refID, tables.ACTREF);
-		retMul *= findValInTable(a_refr->baseForm->refID, tables.ACTBAS);
+		retMul *= findValInTable(GetPermanentBaseForm(a_refr)->refID, tables.ACTBAS);
 		if (auto pCStyle = a_refr->GetCombatStyle()) {
 			retMul *= findValInTable(pCStyle->refID, tables.CSTY);
 		}

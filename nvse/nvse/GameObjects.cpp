@@ -72,6 +72,19 @@ TESObjectREFR* TESObjectREFR::Create(bool bTemp) {
 	return refr;
 }
 
+TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj)	// For LevelledForm, find real baseForm, not temporary one.
+{
+	ExtraLeveledCreature* pXCreatureData = NULL;
+
+	if (thisObj) {
+		pXCreatureData = (ExtraLeveledCreature*) thisObj->extraDataList.GetByType(kExtraData_LeveledCreature);
+		if (pXCreatureData && pXCreatureData->baseForm) {
+			return pXCreatureData->baseForm;
+		}
+		return thisObj->baseForm;
+	}
+	return NULL;
+}
 
 
 TESCombatStyle* Actor::GetCombatStyle() 
