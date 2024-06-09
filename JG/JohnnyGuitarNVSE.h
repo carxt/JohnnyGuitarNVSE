@@ -156,11 +156,19 @@ namespace NPCAccuracy {
 		}
 
 		hk_NPCWobble() {
+
 			uintptr_t hk_hookPoint = hookCall;
 			hookCall = GetRelJumpAddr(hookCall);
 			WriteRelCall(hk_hookPoint, (uintptr_t)hk_AccHook);
 		}
 	};
+	void CreateHook() {
+		tables.ACTREF.max_load_factor(0.75);
+		tables.FACT.max_load_factor(0.75);
+		tables.CSTY.max_load_factor(0.75);
+		tables.ACTBAS.max_load_factor(0.75);
+		hk_NPCWobble<0x0524019>();
+	}
 };
 
 namespace GMSTJG {
@@ -1347,7 +1355,7 @@ void HandleFixes() {
 	WriteRelCall(0x83509D, (uintptr_t)fixAudioMonoLookupOverflow);
 	//CamShakeHook
 	hk_CameraShakeHook::CreateHook();
-	NPCAccuracy::hk_NPCWobble<0x0524019>();
+	NPCAccuracy::CreateHook();
 }
 
 void HandleIniOptions() {
