@@ -172,8 +172,13 @@ namespace NPCAccuracy {
 };
 
 namespace GMSTJG {
-	static uintptr_t func_AddGameSetting = 0x040E0B0;
 	Setting fCombatLocationTargetRadiusMaxBase;
+	Setting fCombatRangedWeaponRangeBaseMult;
+
+
+
+
+	static uintptr_t func_AddGameSetting = 0x040E0B0;
 	template <uintptr_t a_addr>
 	class hk_CombatLocationMaxCall {
 	private:
@@ -190,10 +195,39 @@ namespace GMSTJG {
 			WriteRelCall(hk_hookPoint, (uintptr_t)hk_CLCHook);
 		}
 	};
+
+	template <uintptr_t a_addr>
+	class hk_CombatRangedRangeMult {
+	private:
+		static inline uintptr_t hookCall = a_addr;
+	public:
+		static  double __fastcall hk_Hook(TESObjectWEAP* r_weap) {
+			auto res = ThisCall<double>(hookCall, r_weap);
+			if (!ThisStdCall<bool>(0x0647790, r_weap) && ThisStdCall<bool>(0x04C0C30, r_weap)) {
+				res *= fCombatRangedWeaponRangeBaseMult.data.f;
+			}
+			return res;
+		}
+
+		hk_CombatRangedRangeMult() {
+			uintptr_t hk_hookPoint = hookCall;
+			hookCall = GetRelJumpAddr(hookCall);
+			WriteRelCall(hk_hookPoint, (uintptr_t)hk_Hook);
+		}
+	};
+
+
+
+
+
+
+
 	void CombatLocationMaxRadiusBaseInitHook() { //Thanks lStewieAl
 		hk_CombatLocationMaxCall<0x09A089F>();
 		hk_CombatLocationMaxCall<0x09A0A0C>();
+		hk_CombatRangedRangeMult<0x09A91C1>();
 		ThisStdCall<void>(func_AddGameSetting, &fCombatLocationTargetRadiusMaxBase, "fCombatLocationTargetRadiusMaxBase", 10.0f);
+		ThisStdCall<void>(func_AddGameSetting, &fCombatRangedWeaponRangeBaseMult, "fCombatRangedWeaponRangeBaseMult", 1.0f);
 
 	}
 
