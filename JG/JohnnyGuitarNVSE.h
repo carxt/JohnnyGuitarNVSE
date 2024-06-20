@@ -1180,6 +1180,45 @@ bool __cdecl JGSetViewmodelClipDistance(float value) {
 float __cdecl JGGetViewmodelClipDistance() {
 	return g_viewmodel_near;
 }
+void __stdcall HandleSettingType(Setting* setting, Setting::EType type) {
+	switch (type) {
+	case Setting::EType::kSetting_Bool:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> %i", setting->name, setting->data.b);
+		break;
+	case Setting::EType::kSetting_Integer:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> %d", setting->name, setting->data.i);
+		break;
+	case Setting::EType::kSetting_Unsigned:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> %X", setting->name, setting->data.uint);
+		break;
+	case Setting::EType::kSetting_Float:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> %.2f", setting->name, setting->data.f);
+		break;
+	case Setting::EType::kSetting_String:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> '%s'", setting->name, setting->data.str);
+		break;
+	case Setting::EType::kSetting_r:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> R: %d G: %d B: %d", setting->name, setting->data.rgb[3], setting->data.rgb[2], setting->data.rgb[1]);
+		break;
+	case Setting::EType::kSetting_a:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> R: %d G: %d B: %d alpha: %d", setting->name, setting->data.rgb[3], setting->data.rgb[2], setting->data.rgb[1], setting->data.rgb[0]);
+		break;
+	default:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> UNKNOWN TYPE", setting->name);
+		break;
+	}
+}
+
+__declspec(naked) void GetINISettingTypeHook() {
+	__asm {
+		push eax
+		mov eax, dword ptr ds:[ebp-4]
+		push eax
+		call HandleSettingType
+		mov eax, 0x5BEE5D
+		jmp eax
+	}
+}
 
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
@@ -1220,6 +1259,8 @@ void HandleFixes() {
 	WriteRelCall(0x5BED66, (UInt32)GetINISettingHook);
 	WriteRelCall(0x5BEF13, (UInt32)GetINISettingHook);
 	WriteRelCall(0x5B6C80, (UInt32)SaveINIHook);
+
+	WriteRelJump(0x5BED86, (UInt32)GetINISettingTypeHook);
 
 	// fixes for null pointers when showing credits outside of start menu
 	WriteRelCall(0x75F770, (UInt32)MenuGetFlagHook);

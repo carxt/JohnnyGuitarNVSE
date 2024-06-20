@@ -453,6 +453,10 @@ extern "C" {
 		REG_TYPED_CMD(GetPointInNavMesh, Array);
 		REG_TYPED_CMD(GetNearestNavMeshTriangle, Array);
 		REG_TYPED_CMD(GetAltTexturesEx, Array);
+		REG_CMD(HasHealthDamageEffect);
+		REG_CMD(SetAlwaysRun);
+		REG_CMD(SetAutoMove);
+		REG_CMD(SetPlayerMovementFlags);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
