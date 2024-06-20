@@ -48,7 +48,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 508
+#define JG_VERSION 510
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_NewGame:
@@ -72,6 +72,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			jg_gameRadioSet.clear();
 			hk_BarterHook::barterFilterListLeft.clear();
 			hk_BarterHook::barterFilterListRight.clear();
+			NPCAccuracy::FlushMapRefs();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_PostLoadGame:
@@ -115,6 +116,11 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			DumpModules();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			break;
+		}
+		case NVSEMessagingInterface::kMessage_PostLoad: {
+			if (!bDisableDLLCompatibilityRoutines) {
+				HandleDLLInterop();
+			}
 		}
 		default:
 			break;
@@ -181,6 +187,7 @@ extern "C" {
 		fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 1, filename);
 		patchPainedPlayer = GetPrivateProfileInt("MAIN", "bRemovePlayerPainExpression", 0, filename);
 		iDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
+		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
 		//bDisableDeathResponses = GetPrivateProfileInt("DeathResponses", "bDisableDeathResponses", 0, filename);
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
@@ -457,6 +464,10 @@ extern "C" {
 		REG_CMD(SetAlwaysRun);
 		REG_CMD(SetAutoMove);
 		REG_CMD(SetPlayerMovementFlags);
+		REG_CMD(PushUIQuestToTop);
+		REG_CMD(SetExtraAccuracyPenaltyMult);
+		REG_CMD(RemoveExtraAccuracyPenaltyMult);
+
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

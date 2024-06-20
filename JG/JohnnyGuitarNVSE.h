@@ -36,6 +36,9 @@ bool patchPainedPlayer = 0;
 bool bDisableDeathResponses = 0;
 unsigned int iFPSCapLoadScreen = 0;
 float iDeathSoundMAXTimer = 10;
+
+bool bDisableDLLCompatibilityRoutines = 0;
+
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -72,11 +75,110 @@ extern "C" {
 	bool __cdecl JGSetViewmodelClipDistance(float value);
 	float __cdecl JGGetViewmodelClipDistance();
 }
+extern uintptr_t GetRelJumpAddr(uintptr_t address);
 
+
+
+std::vector<uintptr_t> GetFactionsInList(ExtraFactionChanges::FactionListEntry* pFactList) {
+	std::vector<uintptr_t> retObj{};
+		auto factHead = pFactList->Head();
+		while (factHead) {
+			if (factHead->data && factHead->data->rank >= 0) {
+				retObj.push_back(factHead->data->faction->refID);
+			}
+			factHead = factHead->next;
+		}
+		return retObj;
+}
+
+__declspec (noinline) std::vector<uintptr_t> GetFactionsForActor(Actor* r_act) {
+
+	auto actBase = (TESActorBase*) GetPermanentBaseForm(r_act);
+	auto retVec = GetFactionsInList(&(actBase->baseData.factionList));
+
+	ExtraFactionChanges* fRanks = (ExtraFactionChanges*)r_act->extraDataList.GetByType(kExtraData_FactionChanges);
+	if (fRanks) {
+		if (auto factionDataList = fRanks->data) {
+			auto vec2 = GetFactionsInList(factionDataList);
+			retVec.insert(retVec.end(), vec2.begin(), vec2.end());
+		}
+	}
+	return retVec;
+}
+
+
+
+
+
+namespace NPCAccuracy {
+	struct {
+		std::unordered_map<uintptr_t, float> ACTREF;
+
+		std::unordered_map<uintptr_t, float> ACTBAS;
+		std::unordered_map<uintptr_t, float> CSTY;
+		std::unordered_map<uintptr_t, float> FACT;
+	} tables;
+
+	void FlushMapRefs() {
+		tables.ACTREF.clear();
+	}
+	__declspec (noinline) double __fastcall returnActorMult(Actor* a_refr) {
+
+		auto findValInTable = [](uintptr_t dRefId, std::unordered_map<uintptr_t, float>& pMap) -> float {
+			auto it = pMap.find(dRefId);
+			if (it != pMap.end()) {
+				return it->second;
+			}
+			return 1.0f;
+		};
+		double retMul = 1.0f;
+		retMul *= findValInTable(a_refr->refID, tables.ACTREF);
+		retMul *= findValInTable(GetPermanentBaseForm(a_refr)->refID, tables.ACTBAS);
+		if (auto pCStyle = a_refr->GetCombatStyle()) {
+			retMul *= findValInTable(pCStyle->refID, tables.CSTY);
+		}
+		auto factionsForAct = GetFactionsForActor(a_refr);
+		for (auto factRefId : factionsForAct) {
+			retMul *= findValInTable(factRefId, tables.FACT);
+		}
+		return retMul;
+
+	}
+	template <uintptr_t a_addr>
+	class hk_NPCWobble {
+	private:
+		static inline uintptr_t hookCall = a_addr;
+	public:
+		static  float __fastcall hk_AccHook(Actor* a_refr, void* edx, int mode) {
+			auto res = ThisStdCall<double>(hookCall,a_refr, mode);
+			res *= returnActorMult(a_refr);
+			return res;
+		}
+
+		hk_NPCWobble() {
+
+			uintptr_t hk_hookPoint = hookCall;
+			hookCall = GetRelJumpAddr(hookCall);
+			WriteRelCall(hk_hookPoint, (uintptr_t)hk_AccHook);
+		}
+	};
+	void CreateHook() {
+		tables.ACTREF.max_load_factor(0.75);
+		tables.FACT.max_load_factor(0.75);
+		tables.CSTY.max_load_factor(0.75);
+		tables.ACTBAS.max_load_factor(0.75);
+		hk_NPCWobble<0x0524019>();
+	}
+};
 
 namespace GMSTJG {
-	static uintptr_t func_AddGameSetting = 0x040E0B0;
 	Setting fCombatLocationTargetRadiusMaxBase;
+	Setting fCombatRangedWeaponRangeBaseMult;
+
+
+
+
+	static uintptr_t func_AddGameSetting = 0x040E0B0;
 	template <uintptr_t a_addr>
 	class hk_CombatLocationMaxCall {
 	private:
@@ -93,10 +195,39 @@ namespace GMSTJG {
 			WriteRelCall(hk_hookPoint, (uintptr_t)hk_CLCHook);
 		}
 	};
+
+	template <uintptr_t a_addr>
+	class hk_CombatRangedRangeMult {
+	private:
+		static inline uintptr_t hookCall = a_addr;
+	public:
+		static  double __fastcall hk_Hook(TESObjectWEAP* r_weap) {
+			auto res = ThisStdCall<double>(hookCall, r_weap);
+			if (!ThisStdCall<bool>(0x0647790, r_weap) && ThisStdCall<bool>(0x04C0C30, r_weap)) {
+				res *= fCombatRangedWeaponRangeBaseMult.data.f;
+			}
+			return res;
+		}
+
+		hk_CombatRangedRangeMult() {
+			uintptr_t hk_hookPoint = hookCall;
+			hookCall = GetRelJumpAddr(hookCall);
+			WriteRelCall(hk_hookPoint, (uintptr_t)hk_Hook);
+		}
+	};
+
+
+
+
+
+
+
 	void CombatLocationMaxRadiusBaseInitHook() { //Thanks lStewieAl
 		hk_CombatLocationMaxCall<0x09A089F>();
 		hk_CombatLocationMaxCall<0x09A0A0C>();
+		hk_CombatRangedRangeMult<0x09A91C1>();
 		ThisStdCall<void>(func_AddGameSetting, &fCombatLocationTargetRadiusMaxBase, "fCombatLocationTargetRadiusMaxBase", 10.0f);
+		ThisStdCall<void>(func_AddGameSetting, &fCombatRangedWeaponRangeBaseMult, "fCombatRangedWeaponRangeBaseMult", 1.0f);
 
 	}
 
@@ -928,7 +1059,7 @@ Setting* __fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char
 	if (rendererSettings && !rendererSettings->settings.Empty()) {
 		ListNode<Setting>* iter = rendererSettings->settings.Head();
 		do {
-			if (iter->data && !stricmp(iter->data->name, name)) return iter->data;
+			if (iter->data && !_stricmp(iter->data->name, name)) return iter->data;
 		} while (iter = iter->next);
 	}
 	return nullptr;
@@ -1299,8 +1430,7 @@ void HandleFixes() {
 	WriteRelCall(0x83509D, (uintptr_t)fixAudioMonoLookupOverflow);
 	//CamShakeHook
 	hk_CameraShakeHook::CreateHook();
-
-
+	NPCAccuracy::CreateHook();
 }
 
 void HandleIniOptions() {
@@ -1362,7 +1492,22 @@ void HandleIniOptions() {
 
 
 
-
+__declspec (noinline) void HandleDLLInterop() {
+	if (GetModuleHandle("jip_nvse.dll") != NULL) { //JIP is on.
+		uint8_t* fnPtr = (uint8_t*) GetRelJumpAddr(0x0524014);
+		while ((fnPtr[0] != 0xCC) && fnPtr[1] != 0xCC) {
+			if ((fnPtr[0] == 0x75) && (fnPtr[2] == 0x6A) && (fnPtr[3] == 0x2) && (fnPtr[9] == 0xFF) && (fnPtr[10] == 0xD0)) {
+				fnPtr += 4;
+				if ((*(uint32_t*)(fnPtr) == 0x8B0DD0B8) && fnPtr[4] == 0) {
+					//found
+					uintptr_t dest = GetRelJumpAddr(0x0524019);
+					SafeWrite32((uintptr_t)(fnPtr + 1), dest);
+				}
+			}
+			fnPtr++;
+		}
+	}
+}
 
 void HandleGameSettingsJG(){
 

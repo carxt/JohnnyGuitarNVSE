@@ -90,6 +90,17 @@ DEFINE_COMMAND_PLUGIN(GetAltTexturesEx, , 0, 2, kParams_OneForm_OneOptionalInt);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 	if (!thisObj) {return true;}
 	*result = 0;
