@@ -80,14 +80,19 @@ bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 	ExtractArgsEx(EXTRACT_ARGS_EX, &alwaysRun, &updateMovementFlags);
 	if (alwaysRun > -1) {
 		bool bAlwaysRun = (alwaysRun > 0);
-		if (g_thePlayer->alwaysRun != bAlwaysRun) {
-			g_thePlayer->alwaysRun = bAlwaysRun;
-			if (updateMovementFlags) {
-				PlayerMover* playerMover = (PlayerMover*)g_thePlayer->actorMover;
-				playerMover->pcMovementFlags ^= 0x200;
+		g_thePlayer->alwaysRun = bAlwaysRun;
+		if (updateMovementFlags) {
+			PlayerMover* playerMover = (PlayerMover*)g_thePlayer->actorMover;
+			UInt32 flags = playerMover->pcMovementFlags;
+			if (bAlwaysRun) {
+				flags |= 0x200;
 			}
+			else {
+				flags &= ~0x200;
+			}
+			g_thePlayer->actorMover->Unk_03(flags);
+		}
 		*result = 1;
-	}
 	}
 	return true;
 }
