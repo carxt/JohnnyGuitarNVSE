@@ -49,8 +49,10 @@ DEFINE_COMMAND_PLUGIN(HasHealthDamageEffect, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetAlwaysRun, , 0, 2, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetAutoMove, , 0, 1, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetPlayerMovementFlags, , 0, 1, kParams_OneInt);
+
 DEFINE_COMMAND_PLUGIN(SetExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(RemoveExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(GetExtraAccuracyPenaltyMult, , 0, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(RemoveExtraAccuracyPenaltyMult, , 0, 1, kParams_OneOptionalForm);
 
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
@@ -232,6 +234,7 @@ bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 	float mul = 0.0f;
 	TESForm* a_form = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
+		if (fabs(mul) < FLT_EPSILON) { mul = FLT_EPSILON + DBL_EPSILON; }
 		switch (a_form->typeID) {
 		case kFormType_TESNPC:
 		case kFormType_TESCreature:
@@ -255,12 +258,57 @@ bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 
 }
 
+
+
+bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
+
+	*result = 1;
+	TESForm* a_form = NULL;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
+		switch (a_form->typeID) {
+		case kFormType_TESNPC:
+		case kFormType_TESCreature:
+			if (auto it = NPCAccuracy::tables.ACTBAS.find(a_form->refID); it != NPCAccuracy::tables.ACTBAS.end()) {
+				*result = it->second;
+			}
+			break;
+		case kFormType_TESCombatStyle:
+			if (auto it = NPCAccuracy::tables.CSTY.find(a_form->refID); it != NPCAccuracy::tables.CSTY.end()) {
+				*result = it->second;
+			}
+			break;
+		case kFormType_TESFaction:
+			if (auto it = NPCAccuracy::tables.FACT.find(a_form->refID); it != NPCAccuracy::tables.FACT.end()) {
+				*result = it->second;
+			}
+			break;
+
+		}
+	}
+	else if (thisObj) {
+		if (auto it = NPCAccuracy::tables.ACTREF.find(thisObj->refID); it != NPCAccuracy::tables.ACTREF.end()) {
+			*result = it->second;
+		}
+	}
+	return true;
+
+
+}
+
+
+
+
+
+
+
+
+
+
 bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 
 	*result = 0;
-	float mul = 0.0f;
 	TESForm* a_form = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
 		switch (a_form->typeID) {
 		case kFormType_TESNPC:
 		case kFormType_TESCreature:
