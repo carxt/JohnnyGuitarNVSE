@@ -229,7 +229,7 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 
 	*result = 0;
-	float mul = 0.0f;
+	float mul = 1.0f;
 	TESForm* a_form = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
 		switch (a_form->typeID) {
