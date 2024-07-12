@@ -424,6 +424,13 @@ static ParamInfo kParams_OneString_OneOptionalInt[2] =
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 1 },
 };
+static ParamInfo kParams_OneString_ThreeOptionalInts[4] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "Integer", kParamType_Integer, 1 },
+	{ "Integer", kParamType_Integer, 1 },
+	{ "Integer", kParamType_Integer, 1 },
+};
 static ParamInfo kParams_OneString_TwoOptionalInts_OneOptionalFloat[4] =
 {
 	{ "string",	kParamType_String,	0 },

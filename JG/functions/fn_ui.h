@@ -341,13 +341,13 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 		while (iterator) {
 			TESObjectREFR* ref = (TESObjectREFR*)(iterator->data);
 			if (ref->GetIsReference() && ref->IsMapMarker() && GetExtraType(ref->extraDataList, MapMarker)) {
-				SetCustomMapMarker(ref, iconPath);
+				SetMapMarkerIcon(ref, iconPath);
 			}
 			iterator = iterator->next;
 		}
 	}
 	else {
-		SetCustomMapMarker(form, iconPath);
+		SetMapMarkerIcon(form, iconPath);
 	}
 	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->refID, iconPath);
 	return true;

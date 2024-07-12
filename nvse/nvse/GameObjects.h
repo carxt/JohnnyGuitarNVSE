@@ -182,7 +182,7 @@ public:
 	NiNode* GetNode(const char* nodeName);
 	hkpRigidBody* GetRigidBody(const char* nodeName);
 	bool RunScriptSource(const char* sourceStr);
-
+	bool IsInInterior() { return ThisStdCall_B(0x575D10, this); }
 	static TESObjectREFR* __stdcall Create(bool bTemp = false);
 
 	MEMBER_FN_PREFIX(TESObjectREFR);

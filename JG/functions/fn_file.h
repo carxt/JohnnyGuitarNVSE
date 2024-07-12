@@ -8,7 +8,7 @@ DEFINE_COMMAND_PLUGIN(GetTextureWidth, , 0, 2, kParams_OneString_OneOptionalInt)
 DEFINE_COMMAND_PLUGIN(GetTextureHeight, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(PlaySoundFile, , 0, 3, kParams_OneString_TwoOptionalInts);
+DEFINE_COMMAND_PLUGIN(PlaySoundFile, , 0, 4, kParams_OneString_ThreeOptionalInts);
 DEFINE_COMMAND_PLUGIN(StopSoundFile, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsBSALoaded, , 0, 1, kParams_OneString);
 #include <filesystem>
@@ -38,8 +38,10 @@ bool Cmd_PlaySoundFile_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 forcePlay = 0;
 	UInt32 shouldLoop = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &forcePlay, &shouldLoop)) {
-		CdeclCall<void>(0x8300C0, 6, path, 1000, shouldLoop, forcePlay, 0.0, 0);
+	UInt32 playInMainMenu = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &forcePlay, &shouldLoop, &playInMainMenu)) {
+		int type = playInMainMenu > 0 ? 8 : 6;
+		CdeclCall<void>(0x8300C0, type, path, 1000, shouldLoop, forcePlay, 0.0, 0);
 		*result = 1;
 	}
 	return true;
