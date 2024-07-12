@@ -1079,7 +1079,22 @@ void __fastcall MenuSetFlagHook(StartMenu* menu, UInt32 flags, bool doSet) {
 }
 
 bool __fastcall CanSpeakThroughHead(Actor* actor) {
-	return !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head1)) && !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head2));
+	bool res = !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head1)) && !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head2));
+	if (res) {
+		res = [](Actor* actor) -> bool {
+			if (auto thisObj = actor->baseProcess; thisObj->processLevel <= 0) {
+				if (actor->GetDead()) {
+					if (DialoguePackage* pPackage = (DialoguePackage*)thisObj->GetCurrentPackage()) {
+						if ((actor != pPackage->subject) && (actor == pPackage->speaker)) { //check for subject because in some cases, subject == target
+							return false;
+						}
+					}
+				}
+			}
+			return true;
+		}(actor);
+	}
+	return res;
 }
 
 __declspec (naked) void StimpakHotkeyHook() {
