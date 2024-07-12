@@ -672,7 +672,7 @@ void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1) {
 		}
 	}
 }
-void SetCustomMapMarker(TESObjectREFR* marker, char* iconPath) {
+void SetMapMarkerIcon(TESObjectREFR* marker, char* iconPath) {
 	auto pos = markerIconMap.find(marker->refID);
 	char* pathCopy = new char[strlen(iconPath) + 1];
 	strcpy(pathCopy, iconPath);

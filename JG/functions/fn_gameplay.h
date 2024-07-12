@@ -53,6 +53,8 @@ DEFINE_COMMAND_PLUGIN(SetPlayerMovementFlags, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SetExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetExtraAccuracyPenaltyMult, , 0, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(RemoveExtraAccuracyPenaltyMult, , 0, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(SetCustomMapMarker, , 0, 3, kParams_ThreeFloats);
+DEFINE_COMMAND_PLUGIN(ClearCustomMapMarker, , 0, 0, NULL);
 
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
@@ -64,7 +66,33 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 
 std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
 
+bool Cmd_ClearCustomMapMarker_Execute(COMMAND_ARGS) {
+	*result = 0;
+	ThisStdCall<void>(0x952F90, g_thePlayer);
+	*result = 1;
+	return true;
+}
 
+bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
+	*result = 0;
+	NiPoint3 pos;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pos.x, &pos.y, &pos.z)) {
+		TESForm* cellOrWorld = nullptr;
+		if (g_thePlayer->parentCell && ((g_thePlayer->parentCell->flags & 1) != 0)) {
+			cellOrWorld = g_thePlayer->parentCell;
+		}
+		else {
+			TESObjectCELL* cell = g_thePlayer->parentCell;
+			if (!cell) cell = g_thePlayer->childCell.GetPersistentCell();
+			if (cell && (cell->cellFlags & 1) == 0) cellOrWorld = cell->worldSpace;
+		}
+		if (cellOrWorld) {
+			ThisStdCall<void>(0x952E60, g_thePlayer, pos.x, pos.y, pos.z, cellOrWorld);
+			*result = 1;
+		}
+	}
+	return true;
+}
 bool Cmd_SetPlayerMovementFlags_Execute(COMMAND_ARGS)
 {
 	UInt32 flags;
