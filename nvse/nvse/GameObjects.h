@@ -367,7 +367,7 @@ public:
 	virtual void		Unk_00(void);
 	virtual void		Unk_01(void);
 	virtual void		Unk_02(void);
-	virtual void		Unk_03(void);
+	virtual void		Unk_03(UInt32 flags);
 	virtual void		Unk_04(void);
 	virtual void		Unk_05(void);
 	virtual void		Unk_06(void);

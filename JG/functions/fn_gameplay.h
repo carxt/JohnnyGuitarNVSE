@@ -45,14 +45,12 @@ DEFINE_CMD_NO_ARGS(GetTempIngestibleEffects)
 DEFINE_COMMAND_PLUGIN(PlaySoundFade, , 0, 2, kParams_OneForm_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetPointInNavMesh, , 0, 5, kParams_ThreeFloats_OneInt_OneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(GetNearestNavMeshTriangle, , 0, 5, kParams_ThreeFloats_OneInt_OneOptionalFloat);
-
+DEFINE_COMMAND_PLUGIN(HasHealthDamageEffect, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(SetAlwaysRun, , 0, 2, kParams_OneInt_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(SetAutoMove, , 0, 1, kParams_OneInt_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(SetPlayerMovementFlags, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SetExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(RemoveExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneOptionalForm);
-
-
-
-
-
 
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
@@ -63,6 +61,59 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
 std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
+
+
+bool Cmd_SetPlayerMovementFlags_Execute(COMMAND_ARGS)
+{
+	UInt32 flags;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags)) {
+		g_thePlayer->actorMover->Unk_03(flags);
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
+	*result = 0;
+	int alwaysRun = -1;
+	int updateMovementFlags = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &alwaysRun, &updateMovementFlags);
+	if (alwaysRun > -1) {
+		bool bAlwaysRun = (alwaysRun > 0);
+		g_thePlayer->alwaysRun = bAlwaysRun;
+		if (updateMovementFlags) {
+			PlayerMover* playerMover = (PlayerMover*)g_thePlayer->actorMover;
+			UInt32 flags = playerMover->pcMovementFlags;
+			if (bAlwaysRun) {
+				flags |= 0x200;
+			}
+			else {
+				flags &= ~0x200;
+			}
+			g_thePlayer->actorMover->Unk_03(flags);
+		}
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
+	*result = 0;
+	int autoMove = -1;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &autoMove);
+	if (autoMove > -1) {
+		g_thePlayer->autoMove = (autoMove > 0);
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_HasHealthDamageEffect_Execute(COMMAND_ARGS) {
+	Actor* actor = (Actor*)thisObj;
+	*result = ThisStdCall_B(0x822E00, &actor->magicTarget);
+	return true;
+}
+
 
 void GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
 	NavMeshArray* pNavMeshArray = apCell->pNavMeshes;

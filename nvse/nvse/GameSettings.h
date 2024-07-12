@@ -28,6 +28,9 @@ public:
 		int			i;
 		float		f;
 		char* str;
+		bool b;
+		UInt16 us;
+		UInt8 rgb[4];
 	};
 
 	Info		data;	// 04
