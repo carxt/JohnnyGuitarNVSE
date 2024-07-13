@@ -231,10 +231,10 @@ void __fastcall HandleOnKeyboardControllerUIChange(InterfaceManager* a_man, Menu
 
 
 void __fastcall HandleOnSleepWait(SleepWaitMenu* a_man, DWORD clickMode) {
-	for (auto const& callback : OnKeyboardControllerSelectionChangeHandler->EventCallbacks) {
+	for (auto const& callback : OnSleepWaitEventHandler->EventCallbacks) {
 		auto filter = reinterpret_cast<JohnnyEventFiltersInt*>(callback.eventFilter);
 		if (filter->IsInFilter(0, DWORD(a_man->isRest) + 1) || filter->IsInFilter(0, 0)) {
-			CallUDF(callback.ScriptForEvent, NULL, OnKeyboardControllerSelectionChangeHandler->numMaxArgs, DWORD(a_man->isRest));
+			CallUDF(callback.ScriptForEvent, NULL, OnKeyboardControllerSelectionChangeHandler->numMaxArgs, (DWORD(a_man->isRest) + 1) );
 		}
 	}
 }
@@ -736,7 +736,7 @@ void HandleEventHooks() {
 	OnPLChangeHandler = JGCreateEvent("OnProcessLevelChange", 3, 2, CreateOneFormOneIntFilter);
 	OnRadioPostSoundAttachHandler = JGCreateEvent("OnRadioPostSoundAttach", 2, 1, NULL);
 	OnKeyboardControllerSelectionChangeHandler = JGCreateEvent("OnKeyboardControllerSelectionChange", 1, 1, CreateOneIntFilter);
-	OnSleepWaitEventHandler = JGCreateEvent("OnSleepWaitEventHandler", 1, 1, NULL);
+	OnSleepWaitEventHandler = JGCreateEvent("OnSleepWaitEventHandler", 1, 1, CreateOneIntFilter);
 
 
 
