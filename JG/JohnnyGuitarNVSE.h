@@ -1366,6 +1366,27 @@ __declspec(naked) void GetINISettingTypeHook() {
 	}
 }
 
+bool __cdecl IsCurrentFurnitureRefHook(TESObjectREFR* apRef, void* apComparedRef, int, double& arResult) {
+	arResult = 0;
+	Actor* pActor = nullptr;
+	
+	if (apRef && apRef->IsActor()) {
+		pActor = static_cast<Actor*>(apRef);
+	}
+
+	// Game does not null check the base process
+	if (pActor && pActor->baseProcess && pActor->baseProcess->GetCurrentFurnitureRef() == apComparedRef) {
+		arResult = 1;
+	}
+
+	if (IsConsoleMode()){
+		// Reuse the original string, no need to duplicate *all* data
+		Console_Print(((const char*)0x10350A8), arResult);
+	}
+
+	return true;
+}
+
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
@@ -1430,6 +1451,8 @@ void HandleFixes() {
 	WriteRelJump(0x68D2EB, (UInt32)SimpleDecalHook);
 
 
+	// Fix for missing baseprocess null check
+	WriteRelJump(0x59DF40, (UInt32)IsCurrentFurnitureRefHook);
 
 	//AnimData NPEs
 	//fix NPE in AnimData freeing
