@@ -928,8 +928,11 @@ float __fastcall FixDeathSoundsTopic(HighProcess* thisObj, Actor* actor) { //Sim
 			return thisObj->dyingTimer + +iDeathSoundMAXTimer;
 		}
 	}
+
 	return thisObj->dyingTimer;
 }
+
+
 
 __declspec (naked) void FixDeathSoundsHook() {
 	__asm {
@@ -1067,20 +1070,6 @@ void __fastcall MenuSetFlagHook(StartMenu* menu, UInt32 flags, bool doSet) {
 
 bool __fastcall CanSpeakThroughHead(Actor* actor) {
 	bool res = !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head1)) && !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head2));
-	if (res) {
-		res = [](Actor* actor) -> bool {
-			if (auto thisObj = actor->baseProcess; thisObj->processLevel <= 0) {
-				if (actor->GetDead()) {
-					if (DialoguePackage* pPackage = (DialoguePackage*)thisObj->GetCurrentPackage()) {
-						if ((actor != pPackage->subject) && (actor == pPackage->speaker)) { //check for subject because in some cases, subject == target
-							return false;
-						}
-					}
-				}
-			}
-			return true;
-		}(actor);
-	}
 	return res;
 }
 
