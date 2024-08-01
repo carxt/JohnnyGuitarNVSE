@@ -921,29 +921,16 @@ float __fastcall FixDeathSoundsTopic(HighProcess* thisObj, Actor* actor) { //Sim
 		//all the checks can be skipped because they were done above already
 	if (actor->GetDead()) {
 		if (DialoguePackage* pPackage = (DialoguePackage*)thisObj->GetCurrentPackage()) {
-			if ((actor != pPackage->subject) && (actor == pPackage->speaker)) { //check for subject because in some cases, subject == target
+			if (bool(actor == pPackage->speaker) ^ bool(actor == pPackage->subject)) //check for subject because in some cases, subject == target
+			{
 				return -1.0f;
 			}
+			return thisObj->dyingTimer + +iDeathSoundMAXTimer;
 		}
 	}
-	return thisObj->dyingTimer + iDeathSoundMAXTimer;
-}
-float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
-	return thisObj->dyingTimer + iDeathSoundMAXTimer;
+	return thisObj->dyingTimer;
 }
 
-
-
-float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alternate complex, confusing, potentially buggy fix.
-	constexpr float dyingTimerMin = FLT_EPSILON * 10; //Establish low tolerance, this should be ideal. Unless someone sets fDyingTimer to 0 or something, but that's their problem.
-	float dyingTimer = thisObj->dyingTimer;
-	bool keepTalkingDe = false;
-	keepTalkingDe = (ThisStdCall<bool>(0x8A67F0, actor)) || !(actor->unk80 & 1);
-	if (keepTalkingDe) {
-		if (dyingTimer <= dyingTimerMin) { dyingTimer = dyingTimerMin; }
-	}
-	return dyingTimer;
-}
 __declspec (naked) void FixDeathSoundsHook() {
 	__asm {
 		mov edx, dword ptr[ebp + 8]
