@@ -55,6 +55,7 @@ DEFINE_COMMAND_PLUGIN(GetExtraAccuracyPenaltyMult, , 0, 1, kParams_OneOptionalFo
 DEFINE_COMMAND_PLUGIN(RemoveExtraAccuracyPenaltyMult, , 0, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(SetCustomMapMarker, , 0, 3, kParams_ThreeFloats);
 DEFINE_COMMAND_PLUGIN(ClearCustomMapMarker, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(EjectCasing, , 0, 2, kParams_EjectCasing);
 
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
@@ -1200,4 +1201,68 @@ bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 		*result = 1;
 	}
 	return true;
+}
+
+
+bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
+	*result = false;
+	const char cNodeName[64] = {};
+	char cNewCasingPath[MAX_PATH] = {};
+	const char* pOrgCasingPath;
+	ConsoleManager* pConsole = ConsoleManager::GetSingleton();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cNodeName, &cNewCasingPath)) {
+		if (!thisObj || !thisObj->IsActor())
+			return false;
+
+		Actor* pActor = (Actor*)thisObj;
+
+		TESObjectWEAP* pWeapon = pActor->GetEquippedWeapon();
+		if (!pWeapon || pWeapon->IsMelee())
+			return false;
+
+		NiNode* pActorNode = nullptr;
+		if (cNodeName[0] != 0) {
+			PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
+			if (thisObj == pPlayer) {
+				pActorNode = pPlayer->GetNode(!pPlayer->is3rdPerson);
+			}
+			else
+				pActorNode = thisObj->GetRefNiNode();
+		}
+		
+		bool bChangedPos = false;
+		NiAVObject* pCasingNode = nullptr;
+		NiTransform kOrgTrans;
+		if (pActorNode) {
+			NiAVObject* pNewCasingNode = pActorNode->GetObjectByName(cNodeName);
+			pCasingNode = pActorNode->GetObjectByName("ShellCasingNode");
+			if (pCasingNode && pNewCasingNode) {
+				kOrgTrans = pCasingNode->m_world;
+
+				pCasingNode->m_world = pNewCasingNode->m_world;
+
+				bChangedPos = true;
+			}
+		}
+
+		bool bHasCasingPath = false;
+		if (cNewCasingPath[0] != 0) {
+			bHasCasingPath = true;
+			pOrgCasingPath = pWeapon->shellCasingModel.nifPath.CStr();
+			pWeapon->shellCasingModel.nifPath.m_data = cNewCasingPath;
+		}
+
+		pWeapon->EjectShellCasing(pActor);
+
+
+		if (bChangedPos)
+			pCasingNode->m_world = kOrgTrans;
+
+		if (bHasCasingPath)
+			pWeapon->shellCasingModel.nifPath.m_data = (char*)pOrgCasingPath;
+
+		*result = true;
+		return true;
+	}
+	return false;
 }

@@ -703,28 +703,28 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 		if (world) {
 			if (rotate) {
 				// NiMatrix3::FromEulerAnglesXYZ
-				ThisStdCall(0xA59540, &object->m_worldRotate, x, y, z);
+				ThisStdCall(0xA59540, &object->m_world.rotate, x, y, z);
 			}
 			else {
-				object->m_worldTranslate.x = x;
-				object->m_worldTranslate.y = y;
-				object->m_worldTranslate.z = z;
+				object->m_world.translate.x = x;
+				object->m_world.translate.y = y;
+				object->m_world.translate.z = z;
 			}
 
-			object->m_worldScale = w;
+			object->m_world.scale = w;
 		}
 		else {
 			if (rotate) {
 				// NiMatrix3::FromEulerAnglesXYZ
-				ThisStdCall(0xA59540, &object->m_localRotate, x, y, z);
+				ThisStdCall(0xA59540, &object->m_local.rotate, x, y, z);
 			}
 			else {
-				object->m_localTranslate.x = x;
-				object->m_localTranslate.y = y;
-				object->m_localTranslate.z = z;
+				object->m_local.translate.x = x;
+				object->m_local.translate.y = y;
+				object->m_local.translate.z = z;
 			}
 
-			object->m_localScale = w;
+			object->m_local.scale = w;
 		}
 
 		if (update) {

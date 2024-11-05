@@ -110,13 +110,13 @@ public:
 	};
 
 	struct RenderState {
-		TESObjectREFR* waterRef;		// 00
+		TESObjectREFR*	waterRef;		// 00
 		UInt32			unk04;			// 04	0-0x13 when fully-underwater; exterior only
 		float			waterLevel;		// 08
 		float			unk0C;			// 0C
 		UInt32			unk10;			// 10
-		NiNode* niNode14;		// 14
-		NiNode* niNode18;		// 18
+		NiNode*			rootNode;		// 14
+		NiNode*			niNode18;		// 18
 	};
 
 	struct EditorData {
@@ -149,7 +149,7 @@ public:
 	bool IsTemporary() { return (flags & kFlags_Temporary) ? true : false; }
 	bool IsDeleted() { return (flags & kFlags_Deleted) ? true : false; }
 	bool IsDestroyed() { return (flags & kFlags_Destroyed) ? true : false; }
-	__forceinline NiNode* GetRefNiNode() { return renderState ? renderState->niNode14 : nullptr; }
+	__forceinline NiNode* GetRefNiNode() { return renderState ? renderState->rootNode : nullptr; }
 	const char* hk_GetName();
 	NiVector3* PosVector() { return (NiVector3*)&posX; }
 	CoordXY* PosXY() { return (CoordXY*)&posX; }
@@ -956,5 +956,7 @@ public:
 
 	bool ToggleFirstPerson(bool toggleON);
 	char GetDetectionState();
+
+	NiNode* GetNode(const bool abFirstPerson) const;
 };
 STATIC_ASSERT(sizeof(PlayerCharacter) == 0xE50);

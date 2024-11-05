@@ -258,7 +258,7 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 		NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
 		ActorHitData* hitData = actor->baseProcess->GetHitData();
 		if (!hitData || !t_Node) return true;
-		*result = NiNodeComputeDistance(&(t_Node->m_worldTranslate), &(hitData->impactPos));
+		*result = NiNodeComputeDistance(&(t_Node->m_world.translate), &(hitData->impactPos));
 	}
 
 	return true;
@@ -270,7 +270,7 @@ bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	if (!thisObj || !(ExtractArgsEx(EXTRACT_ARGS_EX, &NiName, &(Coord.x), &(Coord.y), &(Coord.z)))) return true;
 	NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
 	if (!t_Node) return true;
-	*result = NiNodeComputeDistance(&(t_Node->m_worldTranslate), &Coord);
+	*result = NiNodeComputeDistance(&(t_Node->m_world.translate), &Coord);
 	if (IsConsoleMode()) Console_Print("Get3DDistanceToNiNode >> %f", *result);
 	return true;
 }
@@ -283,7 +283,7 @@ bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	NiAVObject* Node1 = ref1->GetNiBlock(NiName1);
 	NiAVObject* Node2 = ref2->GetNiBlock(NiName2);
 	if (!Node1 || !Node2) return true;
-	*result = NiNodeComputeDistance(&(Node1->m_worldTranslate), &(Node2->m_worldTranslate));
+	*result = NiNodeComputeDistance(&(Node1->m_world.translate), &(Node2->m_world.translate));
 	if (IsConsoleMode()) Console_Print("Get3DDistanceBetweenNiNodes >> %f", *result);
 	return true;
 }

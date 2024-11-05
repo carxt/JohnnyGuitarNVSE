@@ -1989,7 +1989,7 @@ public:
 	GridCellArray* gridCellArray;		// 08
 	NiNode* niNode0C;			// 0C
 	NiNode* niNode10;			// 10
-	NiNode* niNode14;			// 14
+	NiNode* rootNode;			// 14
 	BSTempNodeManager* tempNodeMgr;		// 18
 	NiDirectionalLight* directionalLight;	// 1C
 	void* ptr20;				// 20

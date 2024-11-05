@@ -798,3 +798,9 @@ static ParamInfo kParams_OneFloat_OneOptionalForm[2] =
 	{	"float", kParamType_Float,	0 },
 	{   "form", kParamType_AnyForm, 1 }
 };
+
+static ParamInfo kParams_EjectCasing[2] =
+{
+	{	"Target Node",			kParamType_String,	1	},
+	{	"Custom Casing Path",	kParamType_String,  1	},
+};
