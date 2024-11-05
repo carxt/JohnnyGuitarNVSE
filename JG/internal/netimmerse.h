@@ -711,12 +711,8 @@ public:
 	NiSphere*				m_kWorldBound;			// 20
 	DList<NiProperty>		m_propertyList;			// 24
 	UInt32					m_flags;				// 30
-	NiMatrix33				m_localRotate;			// 34
-	NiVector3				m_localTranslate;		// 58
-	float					m_localScale;			// 64
-	NiMatrix33				m_worldRotate;			// 68
-	NiVector3				m_worldTranslate;		// 8C
-	float					m_worldScale;			// 98
+	NiTransform				m_local;
+	NiTransform				m_world;
 
 	NiProperty* GetProperty(UInt32 propID);
 

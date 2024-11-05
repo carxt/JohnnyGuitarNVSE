@@ -30,6 +30,15 @@ PlayerCharacter* PlayerCharacter::GetSingleton() {
 	return *(PlayerCharacter**)0x11DEA3C;
 }
 
+NiNode* PlayerCharacter::GetNode(const bool abFirstPerson) const {
+	if (abFirstPerson)
+		return playerNode;
+	else if (renderState)
+		return renderState->rootNode;
+	else
+		return nullptr;
+}
+
 __declspec(naked) TESContainer* TESObjectREFR::GetContainer() {
 	__asm
 	{
@@ -123,4 +132,8 @@ hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) {
 NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName) {
 	NiNode* rootNode = GetNiNode();
 	return rootNode ? rootNode->GetBlock(blockName) : NULL;
+}
+
+TESObjectWEAP* Actor::GetEquippedWeapon() {
+	return ThisStdCall<TESObjectWEAP*>(0x8A1710, this);
 }

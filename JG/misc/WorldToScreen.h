@@ -287,7 +287,7 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 		}
 		return false;
 	}
-	fBz = NiNodeComputeDistance(&(((NiAVObject*)cam)->m_worldTranslate), (NiVector3*)kPt);
+	fBz = NiNodeComputeDistance(&(((NiAVObject*)cam)->m_world.translate), (NiVector3*)kPt);
 }
 
 //NiPoint3* NiPointBuffer = NULL;
@@ -328,7 +328,7 @@ void __stdcall CopyNiCamera(NiCameraAlt* MemoryAddressToCopy, float fov) {
 	PlayerCharacter* g_ThePlayer = *(PlayerCharacter**)0x11DEA3C;
 	if (!sing_SceneGraph || !g_ThePlayer) return;
 	if ((NiCamera*)MemoryAddressToCopy != sing_SceneGraph->camera || fabs(fov - g_ThePlayer->worldFOV) > 0.0000099999997) return;
-	memcpy(JGGameCamera.CamPos, &(((NiAVObject*)MemoryAddressToCopy)->m_localRotate), sizeof(JGCameraPosition));
+	memcpy(JGGameCamera.CamPos, &(((NiAVObject*)MemoryAddressToCopy)->m_local.rotate), sizeof(JGCameraPosition));
 	memcpy(JGGameCamera.WorldMatrx, &(MemoryAddressToCopy->m_aafWorldToCam[0][0]), sizeof(JGWorldToScreenMatrix));
 }
 

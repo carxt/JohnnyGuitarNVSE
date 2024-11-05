@@ -3148,6 +3148,7 @@ public:
 		if (doset) weaponFlags1 &= ~eflag_NonPlayable;
 		else weaponFlags1 |= eflag_NonPlayable;
 	}
+	bool IsMelee() const { return eWeaponType <= kWeapType_TwoHandMelee; }
 	UInt8 HandGrip() const;
 	void SetHandGrip(UInt8 handGrip);
 	UInt8 AttackAnimation() const;
@@ -3158,6 +3159,10 @@ public:
 	UInt32 GetItemModEffect(UInt8 which) { which -= 1; return (which < 3) ? effectMods[which] : 0; }
 	float GetItemModValue1(UInt8 which) { which -= 1; return (which < 3) ? value1Mod[which] : 0; }
 	float GetItemModValue2(UInt8 which) { which -= 1; return (which < 3) ? value2Mod[which] : 0; }
+
+	void EjectShellCasing(TESObjectREFR* apReference) {
+		ThisStdCall(0x524DB0, this, apReference);
+	}
 };
 STATIC_ASSERT(sizeof(TESObjectWEAP) == 0x388);
 
