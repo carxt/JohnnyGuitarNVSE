@@ -4206,24 +4206,24 @@ public:
 	struct LandData {
 		//	Note: All arrays in the structs are of 289 elements.
 		struct Geometry {
-			NiVector3* quad0Vertices;
-			NiVector3* quad1Vertices;
-			NiVector3* quad2Vertices;
-			NiVector3* quad3Vertices;
+			NiPoint3* quad0Vertices;
+			NiPoint3* quad1Vertices;
+			NiPoint3* quad2Vertices;
+			NiPoint3* quad3Vertices;
 		};
 
 		struct Struct08 {
-			NiVector3* quad0Unk;
-			NiVector3* quad1Unk;
-			NiVector3* quad2Unk;
-			NiVector3* quad3Unk;
+			NiPoint3* quad0Unk;
+			NiPoint3* quad1Unk;
+			NiPoint3* quad2Unk;
+			NiPoint3* quad3Unk;
 		};
 
 		struct Struct0C {
-			NiVector4* quad0Unk;
-			NiVector4* quad1Unk;
-			NiVector4* quad2Unk;
-			NiVector4* quad3Unk;
+			NiPoint4* quad0Unk;
+			NiPoint4* quad1Unk;
+			NiPoint4* quad2Unk;
+			NiPoint4* quad3Unk;
 		};
 
 		struct Struct10 {

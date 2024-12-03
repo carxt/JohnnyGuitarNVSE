@@ -242,8 +242,8 @@ bool Cmd_Clamp_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NiVector3 pos1;
-	NiVector3 pos2;
+	NiPoint3 pos1;
+	NiPoint3 pos2;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &(pos1.x), &(pos1.y), &(pos1.z), &(pos2.x), &(pos2.y), &(pos2.z))) {
 		*result = NiNodeComputeDistance(&pos1, &pos2);
 		if (IsConsoleMode()) Console_Print("Get3DDistance >> %f", *result);
@@ -266,7 +266,7 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char NiName[MAX_PATH];
-	NiVector3 Coord;
+	NiPoint3 Coord;
 	if (!thisObj || !(ExtractArgsEx(EXTRACT_ARGS_EX, &NiName, &(Coord.x), &(Coord.y), &(Coord.z)))) return true;
 	NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
 	if (!t_Node) return true;
@@ -297,7 +297,7 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &xIn, &yIn, &zIn, &HandleType, &refr)) {
 		if (refr) {
-			xIn += refr->posX; yIn += refr->posY; zIn += refr->posZ;
+			xIn += refr->position.x; yIn += refr->position.y; zIn += refr->position.z;
 		}
 		NiPoint3 NiPointBuffer = { 0,0,0 };
 		NiPointAssign(&NiPointBuffer, xIn, yIn, zIn);
@@ -319,7 +319,7 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 	ScriptVar* X_outS, * Y_outS, * Z_outS;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &NiPosIn.x, &NiPosIn.y, &NiPosIn.z, &HandleType, &refr)) {
 		if (refr) {
-			NiPosIn.x += refr->posX; NiPosIn.y += refr->posY; NiPosIn.z += refr->posZ;
+			NiPosIn.x += refr->position.x; NiPosIn.y += refr->position.y += refr->position.z;
 		}
 		NiPoint3 NiPosOut = { 0, 0, 0 };
 		*result = (WorldToScreen(&NiPosIn, NiPosOut.x, NiPosOut.y, NiPosOut.z, HandleType) ? 1 : 0);

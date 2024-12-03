@@ -138,7 +138,7 @@ public:
 struct QuaternionKey {
 	float			time;			// 00
 	NiQuaternion	value;			// 04
-	NiVector3		TBC;			// 14
+	NiPoint3		TBC;			// 14
 	NiQuaternion	quaternion20;	// 20
 	NiQuaternion	quaternion30;	// 30
 };
@@ -686,7 +686,7 @@ public:
 	~NiAVObject();
 
 	virtual void			UpdateControllers(NiUpdateData& arData);
-	virtual void			ApplyTransform(NiMatrix33& arMat, NiVector3& arTrn, bool abOnLeft);
+	virtual void			ApplyTransform(NiMatrix33& arMat, NiPoint3& arTrn, bool abOnLeft);
 	virtual void			Unk_39();
 	virtual NiAVObject*		GetObject_(const NiFixedString& arName);
 	virtual NiAVObject*		GetObjectByName(const NiFixedString& arName);
@@ -708,7 +708,7 @@ public:
 
 	NiNode*					m_parent;				// 18
 	bhkNiCollisionObject*	m_collisionObject;		// 1C
-	NiSphere*				m_kWorldBound;			// 20
+	NiBound*				m_kWorldBound;			// 20
 	DList<NiProperty>		m_propertyList;			// 24
 	UInt32					m_flags;				// 30
 	NiTransform				m_local;
@@ -923,12 +923,12 @@ public:
 	BSSimpleArray<NiFrustumPlanes>	array13C;		// 13C
 	BSSimpleArray<void>				array14C;		// 14C	010C1E9C
 	UInt32							unk15C[3];		// 15C
-	NiVector4						unk168;			// 168
-	NiVector4						unk178;			// 178
-	NiVector4						unk188;			// 188
-	NiVector4						unk198;			// 198
-	NiVector4						unk1A8;			// 1A8
-	NiVector4						unk1B8;			// 1B8
+	NiPoint4						unk168;			// 168
+	NiPoint4						unk178;			// 178
+	NiPoint4						unk188;			// 188
+	NiPoint4						unk198;			// 198
+	NiPoint4						unk1A8;			// 1A8
+	NiPoint4						unk1B8;			// 1B8
 	UInt32							lightingPasses;	// 1C8
 	float							flt1CC[3];		// 1CC
 	UInt32							unk1D8;			// 1D8
@@ -1012,7 +1012,7 @@ public:
 
 	NiColor			fogColor;			// E0
 	UInt32			unkEC;				// EC
-	NiVector3		direction;			// F0
+	NiPoint3		direction;			// F0
 };
 
 class BSSceneGraph : public NiNode {
@@ -1095,9 +1095,9 @@ public:
 	virtual void		Unk_28(void);
 	virtual void		Unk_29(void);
 	virtual void		Unk_2A(void);
-	virtual void		SetBackgroundColor(NiVector4* inARGB);
+	virtual void		SetBackgroundColor(NiPoint4* inARGB);
 	virtual void		Unk_2C(void);
-	virtual void		GetBackgroundColor(NiVector4* outARGB);
+	virtual void		GetBackgroundColor(NiPoint4* outARGB);
 	virtual void		Unk_2E(void);
 	virtual void		Unk_2F(void);
 	virtual void		Unk_30(void);
@@ -1151,7 +1151,7 @@ public:
 	virtual bool		EndScene();
 	virtual void		DisplayScene();
 	virtual void		Clear(float* rect, UInt32 flags);
-	virtual void		SetupCamera(NiVector3* pos, NiVector3* at, NiVector3* up, NiVector3* right, NiFrustum* frustum, float* viewport);
+	virtual void		SetupCamera(NiPoint3* pos, NiPoint3* at, NiPoint3* up, NiPoint3* right, NiFrustum* frustum, float* viewport);
 	virtual void		SetupScreenSpaceCamera(float* viewport);
 	virtual bool		BeginUsingRenderTargetGroup(NiRenderTargetGroup* renderTarget, ClearFlags clearFlags);
 	virtual bool		EndUsingRenderTargetGroup();
@@ -1583,9 +1583,9 @@ public:
 	UInt16			word0A;			// 0A
 	UInt16			word0C;			// 0C
 	UInt16			word0E;			// 0E
-	NiSphere		bounds;			// 10
-	NiVector3* vertices;		// 20
-	NiVector3* normals;		// 24
+	NiBound		bounds;			// 10
+	NiPoint3* vertices;		// 20
+	NiPoint3* normals;		// 24
 	NiColorAlpha* vertexColors;	// 28
 	UVCoord* uvCoords;		// 2C
 	UInt32			unk30;			// 30

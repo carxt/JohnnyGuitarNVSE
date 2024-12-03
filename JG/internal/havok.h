@@ -536,7 +536,7 @@ public:
 	UInt32				unk44;		// 44
 	void* unk48;		// 48 - 0x2EE0 byte buffer
 	UInt32				unk4C;		// 4C
-	NiVector4			unk50;		// 50
+	NiPoint4			unk50;		// 50
 	NiRefObject** unk60;	// 60 - simple array
 	UInt32				unk64;		// 64 - num elements in 060
 	UInt32				unk68;		// 68
@@ -554,9 +554,9 @@ public:
 	float			unk94;			// 94
 	float			unk98;			// 98
 	float			unk9C;			// 9C
-	NiVector4		borderSize;		// A0
-	NiVector4		worldTotalSize;	// B0
-	NiVector4		vectorC0;		// C0
+	NiPoint4		borderSize;		// A0
+	NiPoint4		worldTotalSize;	// B0
+	NiPoint4		vectorC0;		// C0
 	UInt32			unkD0[4];		// D0
 };
 STATIC_ASSERT(sizeof(bhkWorldM) == 0xE0);
@@ -846,9 +846,9 @@ public:
 STATIC_ASSERT(sizeof(hkpBoxShape) == 0x30);
 
 struct VerticesBlock {
-	NiVector4	rowX;
-	NiVector4	rowY;
-	NiVector4	rowZ;
+	NiPoint4	rowX;
+	NiPoint4	rowY;
+	NiPoint4	rowZ;
 };
 
 // 70
@@ -881,7 +881,7 @@ public:
 	UInt32			unk48;			// 48
 	UInt32			numVertices;	// 4C
 	UInt32			unk50;			// 50
-	NiVector4* normalsArray;	// 54
+	NiPoint4* normalsArray;	// 54
 	UInt32			numNormals;		// 58
 	UInt32			unk5C;			// 5C
 	UInt32			unk60;			// 60
@@ -1078,8 +1078,8 @@ public:
 	virtual void	Unk_0D(void);
 	virtual void	Unk_0E(void);
 	virtual void	Unk_0F(void);
-	virtual void	SetLinearVelocity(NiVector4* velocity);
-	virtual void	SetAngularVelocity(NiVector4* velocity);
+	virtual void	SetLinearVelocity(NiPoint4* velocity);
+	virtual void	SetAngularVelocity(NiPoint4* velocity);
 	virtual void	Unk_12(void);
 	virtual void	Unk_13(void);
 	virtual void	Unk_14(void);
@@ -1103,16 +1103,16 @@ public:
 	UInt16			word00A;		// 00A
 	UInt16			word00C;		// 00C
 	UInt8			pad00E[2];		// 00E
-	NiVector4		vector010;		// 010
-	NiVector4		vector020;		// 020
-	NiVector4		vector030;		// 030
-	NiVector4		vector040;		// 040
-	NiVector4		vector050;		// 050
-	NiVector4		vector060;		// 060
-	NiVector4		quaternion070;	// 070
-	NiVector4		quaternion080;	// 080
-	NiVector4		vector090;		// 090
-	NiVector4		vector0A0;		// 0A0
+	NiPoint4		vector010;		// 010
+	NiPoint4		vector020;		// 020
+	NiPoint4		vector030;		// 030
+	NiPoint4		vector040;		// 040
+	NiPoint4		vector050;		// 050
+	NiPoint4		vector060;		// 060
+	NiPoint4		quaternion070;	// 070
+	NiPoint4		quaternion080;	// 080
+	NiPoint4		vector090;		// 090
+	NiPoint4		vector0A0;		// 0A0
 	float			flt0B0;			// 0B0
 	float			linDamping;		// 0B4
 	float			angDamping;		// 0B8
@@ -1124,10 +1124,10 @@ public:
 	float			inertiaY;		// 0C4
 	float			inertiaZ;		// 0C8
 	float			bodyMass;		// 0CC
-	NiVector4		linVelocity;	// 0D0
-	NiVector4		angVelocity;	// 0E0
-	NiVector4		vector0F0;		// 0F0
-	NiVector4		vector100;		// 100
+	NiPoint4		linVelocity;	// 0D0
+	NiPoint4		angVelocity;	// 0E0
+	NiPoint4		vector0F0;		// 0F0
+	NiPoint4		vector100;		// 100
 	UInt32			unk110[12];		// 110
 
 	float GetBodyMass();

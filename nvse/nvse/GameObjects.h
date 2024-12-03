@@ -19,7 +19,7 @@ static const UInt32 s_TESObjectREFR_Set3D = 0x5702E0;			// void : (const char*)
 #error
 #endif
 const UInt32 kUpdateAppearanceAddr = 0x8D3FA0;
-struct NiPoint3;
+
 // 68
 class TESObjectREFR : public TESForm {
 public:
@@ -95,7 +95,6 @@ public:
 	virtual bool		Unk_8D(void);
 	virtual void		Unk_8E(void);
 	virtual void		Unk_8F(void);
-	virtual void		Unk_90(void);
 
 	enum {
 		kFlags_Unk00000002 = 0x00000002,
@@ -134,8 +133,8 @@ public:
 
 	TESForm* baseForm;				// 020
 
-	float			rotX, rotY, rotZ;		// 024 - either public or accessed via simple inline accessor common to all child classes
-	float			posX, posY, posZ;		// 030 - seems to be private
+	NiPoint3		rotation;		// 024 - either public or accessed via simple inline accessor common to all child classes
+	NiPoint3		position;		// 030 - seems to be private
 	float			scale;					// 03C
 
 	TESObjectCELL* parentCell;			// 040
@@ -151,8 +150,8 @@ public:
 	bool IsDestroyed() { return (flags & kFlags_Destroyed) ? true : false; }
 	__forceinline NiNode* GetRefNiNode() { return renderState ? renderState->rootNode : nullptr; }
 	const char* hk_GetName();
-	NiVector3* PosVector() { return (NiVector3*)&posX; }
-	CoordXY* PosXY() { return (CoordXY*)&posX; }
+	NiPoint3* PosVector() { return (NiPoint3*)&position; }
+	CoordXY* PosXY() { return (CoordXY*)&position; }
 
 	void Update3D();
 	TESContainer* GetContainer();
@@ -168,9 +167,9 @@ public:
 	TESObjectCELL* GetParentCell();
 	TESWorldSpace* GetParentWorld();
 	float GetDistance(TESObjectREFR* target);
-	void SetPos(NiVector3& posVector);
-	void SetAngle(NiVector3& rotVector);
-	bool MoveToCell(TESForm* worldOrCell, NiVector3& posVector);
+	void SetPos(NiPoint3& posVector);
+	void SetAngle(NiPoint3& rotVector);
+	bool MoveToCell(TESForm* worldOrCell, NiPoint3& posVector);
 	void DeleteReference();
 	TESObjectREFR* GetMerchantContainer();
 	float GetWaterImmersionPerc();
@@ -198,7 +197,6 @@ STATIC_ASSERT(sizeof(TESObjectREFR) == 0x068);
 
 
 
-
 TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj);	// For LevelledForm, find real baseForm, not temporary one.
 
 class BaseProcess;
@@ -209,6 +207,7 @@ public:
 	MobileObject();
 	~MobileObject();
 
+	virtual void		Unk_90(void);
 	virtual void		Unk_91(void);
 	virtual void		Unk_92(void);
 	virtual void		Unk_93(void);
@@ -234,7 +233,7 @@ public:
 	virtual void		Unk_A7(void);
 	virtual void		Unk_A8(void);
 	virtual void		Unk_A9(void);
-	virtual void		Unk_AA(void);
+	virtual void		SetPosition(NiPoint3& arPosition);
 	virtual void		Unk_AB(void);
 	virtual void		Unk_AC(void);
 	virtual void		Unk_AD(void);
@@ -634,7 +633,7 @@ public:
 	UInt8								byte15C;					// 15C-
 	UInt8								byte15D;					// 15D-
 	UInt16								jip15E;						// 15E+
-	NiVector3							startingPos;				// 160
+	NiPoint3							startingPos;				// 160
 	float								flt16C;						// 16C
 	TESForm* startingWorldOrCell;		// 170
 	UInt8								byte174;					// 174-
@@ -874,7 +873,8 @@ public:
 	UInt8								byte75F;				// 75F
 	TESRegion* currentRegion;			// 760
 	TESRegionList						regionsList;			// 764
-	UInt32								unk774[14];				// 774
+	UInt32								unk774[11];				// 7
+	NiPoint3							kLastBorderRegionPosition;
 	TESForm* pcWorldOrCell;			// 7AC
 	UInt32								unk7B0;					// 7B0
 	BGSMusicType* musicType;				// 7B4
@@ -913,8 +913,8 @@ public:
 	UInt32								unkD84[12];				// D84
 	NiNode* niNodeDB4;				// DB4
 	UInt32								unkDB8[7];				// DB8
-	NiVector3							vectorDD4;				// DD4
-	NiVector3							cameraPos;				// DE0
+	NiPoint3							vectorDD4;				// DD4
+	NiPoint3							cameraPos;				// DE0
 	bhkRigidBody* rigidBody;				// DEC
 	bool								pcInCombat;				// DF0
 	bool								pcUnseen;				// DF1
@@ -959,4 +959,5 @@ public:
 
 	NiNode* GetNode(const bool abFirstPerson) const;
 };
+STATIC_ASSERT(offsetof(PlayerCharacter, pcWorldOrCell) == 0x7AC);
 STATIC_ASSERT(sizeof(PlayerCharacter) == 0xE50);

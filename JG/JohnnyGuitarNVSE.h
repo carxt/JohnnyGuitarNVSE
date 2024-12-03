@@ -550,7 +550,7 @@ ContChangesEntry* ExtraContainerChanges::EntryDataList::FindForItem(TESForm* ite
 	return nullptr;
 }
 
-float __declspec(naked) __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2) {
+float __declspec(naked) __fastcall NiNodeComputeDistance(NiPoint3* Vector1, NiPoint3* Vector2) {
 	__asm
 	{
 		movd xmm0, [ecx]

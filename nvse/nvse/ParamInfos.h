@@ -804,3 +804,11 @@ static ParamInfo kParams_EjectCasing[2] =
 	{	"Target Node",			kParamType_String,	1	},
 	{	"Custom Casing Path",	kParamType_String,  1	},
 };
+
+static ParamInfo kParams_Bound[4] =
+{
+	{ "X", kParamType_Float, 0 },
+	{ "Y", kParamType_Float, 0 },
+	{ "Z", kParamType_Float, 0 },
+	{ "Radius", kParamType_Float, 0 }
+};

@@ -1,195 +1,5 @@
 #pragma once
 
-//Ni BULLSHIT
-#define DECL_FLOAT_OP(op) \
-	NiPoint3 operator op(const float n) const \
-	{ \
-		return NiPoint3(x op n, y op n, z op n); \
-	} \
-	NiPoint3 operator op##=(const float n) \
-	{ \
-		return *this = NiPoint3(x op n, y op n, z op n); \
-	} \
-
-#define DECL_VEC_OP(op) \
-	NiPoint3 operator op(const NiPoint3 v) const \
-	{ \
-		return NiPoint3(x op v.x, y op v.y, z op v.z); \
-	} \
-	NiPoint3 operator op##=(const NiPoint3 v) \
-	{ \
-		return *this = NiPoint3(x op v.x, y op v.y, z op v.z); \
-	}
-
-struct NiPoint3 {
-	float x, y, z;
-
-	void Scale(float scale) {
-		x *= scale;
-		y *= scale;
-		z *= scale;
-	};
-
-	void Init(NiPoint3* point) {
-		x = point->x;
-		y = point->y;
-		z = point->z;
-	};
-
-	NiPoint3() : x(0.f), y(0.f), z(0.f) {};
-
-	NiPoint3(const float x, const float y, const float z) : x(x), y(y), z(z) {};
-
-	DECL_FLOAT_OP(*);
-	DECL_FLOAT_OP(/ );
-
-	DECL_VEC_OP(+);
-	DECL_VEC_OP(-);
-	DECL_VEC_OP(*);
-	DECL_VEC_OP(/ );
-
-	float length() const {
-		return sqrtf(x * x + y * y + z * z);
-	}
-
-	float length_sqr() const {
-		return x * x + y * y + z * z;
-	}
-
-	NiPoint3 normal() const {
-		const auto len = length();
-		return len == 0.F ? NiPoint3() : NiPoint3(x / len, y / len, z / len);
-	}
-
-	static float dot(const NiPoint3& v1, const NiPoint3& v2) {
-		return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
-	}
-	inline float Distance(const NiPoint3& pt) const {
-		return (*this - pt).length();
-	}
-
-	static NiPoint3 cross(const NiPoint3& v1, const NiPoint3& v2) {
-		return NiPoint3(
-			v1.y * v2.z - v1.z * v2.y,
-			v1.z * v2.x - v1.x * v2.z,
-			v1.x * v2.y - v1.y * v2.x);
-	}
-
-	NiPoint3* Add(NiPoint3* toAdd) {
-		this->x += toAdd->x;
-		this->y += toAdd->y;
-		this->z += toAdd->z;
-		return this;
-	}
-
-	NiPoint3* Subtract(NiPoint3* point) {
-		this->x -= point->x;
-		this->y -= point->y;
-		this->z -= point->z;
-		return this;
-	}
-
-	float CalculateDistSquared(NiPoint3* to) {
-		float deltaX = (x - to->x);
-		float deltaY = (y - to->y);
-		float deltaZ = (z - to->z);
-
-		return deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
-	}
-	static float Sign(NiPoint3 p1, NiPoint3 p2, NiPoint3 p3) {
-		return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
-	}
-
-	static bool PointInTriangle(NiPoint3 pt, NiPoint3 v1, NiPoint3 v2, NiPoint3 v3) {
-		bool b1 = Sign(pt, v1, v2) < 0.0;
-		bool b2 = Sign(pt, v2, v3) < 0.0;
-		bool b3 = Sign(pt, v3, v1) < 0.0;
-
-		return (b1 == b2) && (b2 == b3);
-	}
-
-	static NiPoint3 GetTriangleCenter(NiPoint3 v1, NiPoint3 v2, NiPoint3 v3) {
-		return NiPoint3((v1.x + v2.x + v3.x) / 3.0f, (v1.y + v2.y + v3.y) / 3.0f, (v1.z + v2.z + v3.z) / 3.0f);
-	}
-
-};
-
-class NiPoint4 {
-public:
-	float x;
-	float y;
-	float z;
-	float w;
-
-	NiPoint4() : x(0.f), y(0.f), z(0.f), w(0.f) {};
-	NiPoint4(const float x, const float y, const float z, const float w) : x(x), y(y), z(z), w(w) {};
-	NiPoint4(const NiPoint3& src) : x(src.x), y(src.y), z(src.z), w(0.f) {};
-
-	inline const float operator[] (UInt32 i) const { return ((float*)&x)[i]; };
-	inline float operator[] (UInt32 i) { return ((float*)&x)[i]; };
-
-	operator float* () const { return (float*)this; };
-
-
-	NiPoint4 operator=(NiPoint3 pt) const {
-		return NiPoint4(pt.x, pt.y, pt.z, w);
-	};
-
-	void operator=(NiPoint3* pt) {
-		x = pt->x;
-		y = pt->y;
-		z = pt->z;
-	};
-
-	void operator=(const NiPoint3& pt) {
-		x = pt.x;
-		y = pt.y;
-		z = pt.z;
-	};
-
-	NiPoint4 operator-(NiPoint3& pt) const {
-		return NiPoint4(x - pt.x, y - pt.y, z - pt.z, w);
-	};
-
-	NiPoint4 operator-(NiPoint3* pt) const {
-		return NiPoint4(x - pt->x, y - pt->y, z - pt->z, w);
-	};
-
-	NiPoint4* operator-(const NiPoint3& pt) const {
-		return new NiPoint4(x - pt.x, y - pt.y, z - pt.z, w);
-	};
-
-	NiPoint4* operator-(const NiPoint3* pt) const {
-		return new NiPoint4(x - pt->x, y - pt->y, z - pt->z, w);
-	};
-
-	NiPoint4 operator+ (const NiPoint4& pt) const { return NiPoint4(x + pt.x, y + pt.y, z + pt.z, w + pt.w); };
-	NiPoint4& operator+= (const NiPoint4& pt) {
-		x += pt.x;
-		y += pt.y;
-		z += pt.z;
-		w += pt.w;
-		return *this;
-	};
-
-	NiPoint4 operator*(const float afScalar) {
-		return NiPoint4(x * afScalar, y * afScalar, z * afScalar, w * afScalar);
-	}
-
-	NiPoint4& operator*= (float afScalar) {
-		x *= afScalar;
-		y *= afScalar;
-		z *= afScalar;
-		w *= afScalar;
-		return *this;
-	};
-};
-
-STATIC_ASSERT(sizeof(NiPoint4) == 0x10);
-
-
-
-
 struct NiCameraAlt //Defined here because the one in NVSE is wrong.
 {
 	UInt8			undefinedDataStruct[156];
@@ -212,10 +22,10 @@ struct JGWorldToScreenMatrix {
 
 struct JGCameraPosition {
 	NiMatrix33				m_localRotate;			// 34
-	NiVector3				m_localTranslate;		// 58
+	NiPoint3				m_localTranslate;		// 58
 	float					m_localScale;			// 64
 	NiMatrix33				m_worldRotate;			// 68
-	NiVector3				m_worldTranslate;		// 8C
+	NiPoint3				m_worldTranslate;		// 8C
 	float					m_worldScale;			// 98
 };
 
@@ -225,7 +35,7 @@ struct JGCameraParams {
 };
 JGCameraParams JGGameCamera;
 
-extern float __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2);
+extern float __fastcall NiNodeComputeDistance(NiPoint3* Vector1, NiPoint3* Vector2);
 
 bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, float& fBx, float& fBy,
 	float& fBz, float fZeroTolerance, int bOffscreenHandleType) {
@@ -287,7 +97,7 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 		}
 		return false;
 	}
-	fBz = NiNodeComputeDistance(&(((NiAVObject*)cam)->m_world.translate), (NiVector3*)kPt);
+	fBz = NiNodeComputeDistance(&(((NiAVObject*)cam)->m_world.translate), (NiPoint3*)kPt);
 }
 
 //NiPoint3* NiPointBuffer = NULL;

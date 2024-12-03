@@ -1828,17 +1828,17 @@ public:
 	Moon* masserMoon;		// 030
 	Moon* secundaMoon;		// 034
 	Precipitation* precipitation;		// 038
-	NiVector3						vector03C;			// 03C
+	NiPoint3						vector03C;			// 03C
 	NiColor							waterReflection;	// 048
-	NiVector3						vector054;			// 054
+	NiPoint3						vector054;			// 054
 	NiColor							sunAmbient;			// 060
 	NiColor							sunDirectional;		// 06C
-	NiVector3						vector078;			// 078
-	NiVector3						vector084;			// 084
-	NiVector3						vector090;			// 090
-	NiVector3						vector09C;			// 09C
-	NiVector3						vector0A8;			// 0A8
-	NiVector3						vector0B4;			// 0B4
+	NiPoint3						vector078;			// 078
+	NiPoint3						vector084;			// 084
+	NiPoint3						vector090;			// 090
+	NiPoint3						vector09C;			// 09C
+	NiPoint3						vector0A8;			// 0A8
+	NiPoint3						vector0B4;			// 0B4
 	NiColor							sunFog;				// 0C0
 	float							windSpeed;			// 0CC
 	float							windDirection;		// 0D0
@@ -2162,10 +2162,10 @@ public:
 	FontInfo* extraFonts[80];	// 24
 
 	//	outDims.x := width (pxl); outDims.y := height (pxl); outDims.z := numLines
-	NiVector3* GetStringDimensions(NiVector3* outDims, const char* srcString, UInt32 fontID, UInt32 maxFlt = 0x7F7FFFFF, UInt32 startIdx = 0);
+	NiPoint3* GetStringDimensions(NiPoint3* outDims, const char* srcString, UInt32 fontID, UInt32 maxFlt = 0x7F7FFFFF, UInt32 startIdx = 0);
 };
 
-__declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims, const char* srcString, UInt32 fontID, UInt32 maxFlt, UInt32 startIdx) {
+__declspec(naked) NiPoint3* FontManager::GetStringDimensions(NiPoint3* outDims, const char* srcString, UInt32 fontID, UInt32 maxFlt, UInt32 startIdx) {
 	static const UInt32 procAddr = 0xA1B020;
 	__asm	jmp		procAddr
 }
@@ -2188,7 +2188,7 @@ public:
 
 	virtual void	Unk_58(void);
 
-	NiVector3		destPos;	// 80
+	NiPoint3		destPos;	// 80
 };
 
 // 229C
@@ -2316,7 +2316,7 @@ public:
 	virtual void	Unk_12(void);
 	virtual void	Unk_13(float arg1, float arg2, float arg3);
 	virtual void	Unk_14(float arg1, float arg2, float arg3);
-	virtual void	Unk_15(NiVector3& arg1);
+	virtual void	Unk_15(NiPoint3& arg1);
 	virtual void	Unk_16(void);
 	virtual void	Unk_17(float arg1, float arg2);
 	virtual void	Unk_18(UInt16 arg1, UInt16 arg2, UInt16 arg3, UInt16 arg4, UInt16 arg5);
@@ -2428,7 +2428,7 @@ struct AudioRequestData {
 	FunctionArg			value1;		// 08
 	FunctionArg			value2;		// 0C
 	NiNode* niNode;	// 10
-	NiVector3			pos;		// 14
+	NiPoint3			pos;		// 14
 };
 // 188
 class BSAudioManager {
@@ -2571,7 +2571,7 @@ struct Sound {
 	void Play() {
 		ThisStdCall(0xAD8830, this, 0);
 	}
-	__forceinline void SetPos(const NiVector3& posVec) {
+	__forceinline void SetPos(const NiPoint3& posVec) {
 		ThisStdCall<void>(0xAD8B60, this, posVec.x, posVec.y, posVec.z);
 	}
 	__forceinline void SetNiNode(NiNode* node) {
@@ -2694,7 +2694,7 @@ public:
 	FORenderedTerminal();
 	~FORenderedTerminal();
 
-	NiVector3 localTranslate;
+	NiPoint3 localTranslate;
 	NiAVObject* powerButton;
 	float fltE8;
 	UInt8 bytEC;
@@ -2938,8 +2938,8 @@ public:
 	ExtraStartingPosition();
 	virtual ~ExtraStartingPosition();
 
-	NiVector3	posVector;	// 0C
-	NiVector3	rotVector;	// 18
+	NiPoint3	posVector;	// 0C
+	NiPoint3	rotVector;	// 18
 };
 
 // 10

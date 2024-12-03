@@ -38,8 +38,8 @@ struct ActorHitData
 	float				flt2C;			// 2C
 	TESObjectWEAP		*weapon;		// 30
 	float				healthPerc;		// 34
-	NiVector3			impactPos;		// 38
-	NiVector3			impactAngle;	// 44
+	NiPoint3			impactPos;		// 38
+	NiPoint3			impactAngle;	// 44
 	UInt32				unk50;			// 50
 	UInt32				unk54;			// 54
 	UInt32				flags;			// 58

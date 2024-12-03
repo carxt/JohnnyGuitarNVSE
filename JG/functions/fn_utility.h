@@ -436,7 +436,7 @@ bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nodeName, &X_outS, &Y_outS, &Z_outS)) {
 		hkpRigidBody* rigidBody = thisObj->GetRigidBody(nodeName);
 		if (rigidBody) {
-			NiVector4 linVelocity = rigidBody->motion.linVelocity;
+			NiPoint4 linVelocity = rigidBody->motion.linVelocity;
 			setVarByName(PASS_VARARGS, X_outS, linVelocity.x);
 			setVarByName(PASS_VARARGS, Y_outS, linVelocity.y);
 			setVarByName(PASS_VARARGS, Z_outS, linVelocity.z);

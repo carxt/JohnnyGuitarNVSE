@@ -56,6 +56,7 @@ DEFINE_COMMAND_PLUGIN(RemoveExtraAccuracyPenaltyMult, , 0, 1, kParams_OneOptiona
 DEFINE_COMMAND_PLUGIN(SetCustomMapMarker, , 0, 3, kParams_ThreeFloats);
 DEFINE_COMMAND_PLUGIN(ClearCustomMapMarker, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(EjectCasing, , 0, 2, kParams_EjectCasing);
+DEFINE_COMMAND_PLUGIN(SetPlayerBubble, , 0, 4, kParams_Bound);
 
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
@@ -1265,4 +1266,24 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 		return true;
 	}
 	return false;
+}
+
+static NiBound kBubble;
+
+bool Cmd_SetPlayerBubble_Execute(COMMAND_ARGS) {
+	ExtractArgsEx(EXTRACT_ARGS_EX, &kBubble.center.x, &kBubble.center.y, &kBubble.center.z, &kBubble.radius);
+	return true;
+}
+
+void HandlePlayerBubble() {
+	PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
+	if (!pPlayer || kBubble.radius <= 0.f)
+		return;
+
+	if (kBubble.IsPointWithin(pPlayer->position))
+		ThisStdCall(0x947C90, pPlayer);
+	else {
+		ThisStdCall(0x94DBE0, pPlayer, false);
+		pPlayer->SetPosition(pPlayer->kLastBorderRegionPosition);
+	}
 }
