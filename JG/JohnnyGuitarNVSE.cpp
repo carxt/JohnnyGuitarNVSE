@@ -48,7 +48,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 513
+#define JG_VERSION 514
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_NewGame:
@@ -472,6 +472,19 @@ extern "C" {
 		REG_CMD(SetCustomMapMarker);
 		REG_CMD(ClearCustomMapMarker);
 		REG_CMD(EjectCasing);
+		REG_TYPED_CMD(GetNoteSpeaker, Form);
+		REG_CMD(SetNoteSpeaker);
+		REG_CMD(GetNoteType);
+		REG_CMD(SetNoteType);
+		REG_TYPED_CMD(GetNoteSound, Form);
+		REG_CMD(SetNoteSound);
+		REG_TYPED_CMD(GetNoteTopic, Form);
+		REG_CMD(SetNoteTopic);
+		REG_TYPED_CMD(GetNoteImage, String);
+		REG_CMD(SetNoteImage);
+		REG_TYPED_CMD(GetNoteQuestList, Array);
+		REG_CMD(AddNoteQuest);
+		REG_CMD(RemoveNoteQuest);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

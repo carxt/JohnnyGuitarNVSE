@@ -3609,6 +3609,13 @@ public:
 	BGSNote();
 	~BGSNote();
 
+	enum Type : UInt8
+	{
+		kSound = 0,
+		kText = 1,
+		kImage = 2,
+		kVoice = 3,
+	};
 	// bases
 	TESModel					model;					// 30
 	TESFullName					fullName;				// 48
@@ -3619,14 +3626,12 @@ public:
 		TESDescription* noteText;
 		TESTexture* picture;
 		TESTopic* voice;
+		TESSound* sound;
 	};
-	UInt32						unk70;					// 70
-	UInt32						unk74;					// 74
-	UInt32						unk78;					// 78
-	UInt8                       noteType;				// 7C
-	UInt8                       read;					// 7D
-	UInt8                       byte7E;					// 7E
-	UInt8                       byte7F;					// 7F
+	TESNPC*						speaker;
+	tList<TESQuest>				questList;
+	Type						type;
+	bool						read;
 };
 STATIC_ASSERT(sizeof(BGSNote) == 0x80);
 

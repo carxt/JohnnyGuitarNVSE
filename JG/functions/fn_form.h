@@ -87,19 +87,154 @@ DEFINE_COMMAND_PLUGIN(HideItemBarterEx, , 0, 4, kParams_OneForm_OneInt_OneOption
 DEFINE_COMMAND_PLUGIN(IsItemBarterHiddenEx, , 0, 2, kParams_OneForm_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetCurrentFurnitureRef, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetAltTexturesEx, , 0, 2, kParams_OneForm_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetNoteSpeaker, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetNoteSpeaker, , 0, 2, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(GetNoteType, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetNoteType, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetNoteSound, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetNoteSound, , 0, 2, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(GetNoteTopic, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetNoteTopic, , 0, 2, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(GetNoteImage, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetNoteImage, , 0, 2, kParams_OneForm_OneString);
+DEFINE_COMMAND_PLUGIN(GetNoteQuestList, , 0, 1, kParams_OneForm);	
+DEFINE_COMMAND_PLUGIN(AddNoteQuest, , 0, 2, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(RemoveNoteQuest, , 0, 2, kParams_TwoForms);
 
+bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	TESQuest* quest = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &quest) && IS_TYPE(note, BGSNote) && IS_TYPE(quest, TESQuest)) {
+		note->questList.Remove(quest);
+		*result = 1;
+	}
+	return true;
+}
 
+bool Cmd_AddNoteQuest_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	TESQuest* quest = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &quest) && IS_TYPE(note, BGSNote) && IS_TYPE(quest, TESQuest)) {
+		note->questList.Append(quest);
+		*result = 1;
+	}
+	return true;
+}
+bool Cmd_GetNoteQuestList_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	NVSEArrayVar* quests = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && IS_TYPE(note, BGSNote)  && !note->questList.Empty()) {
+		ListNode<TESQuest>* iter = note->questList.Head();
+		do {
+			if (iter->data) {
+				g_arrInterface->AppendElement(quests, NVSEArrayElement(iter->data->refID));
+			}
+		} while (iter = iter->next);
+	}
+	g_arrInterface->AssignCommandResult(quests, result);
+	return true;
+}
 
+bool Cmd_SetNoteImage_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	char path[MAX_PATH];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &path) && IS_TYPE(note, BGSNote) && note->type == BGSNote::kImage) {
+		note->picture->ddsPath.Set(path);
+		*result = 1;
+	}
+	return true;
+}
 
+bool Cmd_GetNoteImage_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && IS_TYPE(note, BGSNote) && note->type == BGSNote::kImage) {
+		g_strInterface->Assign(PASS_COMMAND_ARGS, note->picture->ddsPath.CStr());
+	}
+	return true;
+}
+bool Cmd_SetNoteTopic_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	TESTopic* topic = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &topic) && IS_TYPE(note, BGSNote) && IS_TYPE(topic, TESTopic) && note->type == BGSNote::kVoice) {
+		note->voice = topic;
+		*result = 1;
+	}
+	return true;
+}
 
+bool Cmd_GetNoteTopic_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice) {
+		*(UInt32*)result = note->voice->refID;
+	}
+	return true;
+}
 
+bool Cmd_SetNoteSound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	TESSound* sound = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &sound) && IS_TYPE(note, BGSNote) && note->type == BGSNote::kSound) {
+		note->sound = sound;
+		*result = 1;
+	}
+	return true;
+}
 
+bool Cmd_GetNoteSound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && IS_TYPE(note, BGSNote) && note->type == BGSNote::kSound) {
+		*(UInt32*)result = note->sound->refID;
+	}
+	return true;
+}
 
+bool Cmd_SetNoteType_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	int type = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &type) && IS_TYPE(note, BGSNote) && type >= 0 && type <= 3) {
+		note->type = (BGSNote::Type)type;
+		*result = 1;
+	}
+	return true;
+}
 
+bool Cmd_GetNoteType_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && IS_TYPE(note, BGSNote)) {
+		*result = note->type;
+	}
+	return true;
+}
 
-
-
-
+bool Cmd_SetNoteSpeaker_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	TESNPC* npc = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &npc) && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice) {
+		note->speaker = npc;
+		*result = 1;
+	}
+	return true;
+}
+bool Cmd_GetNoteSpeaker_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSNote* note = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice) {
+		*(UInt32*)result = note->speaker->refID;
+	}
+	return true;
+}
 
 bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 	if (!thisObj) {return true;}
@@ -116,9 +251,6 @@ bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-
-
-
 
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
