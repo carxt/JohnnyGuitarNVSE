@@ -199,6 +199,7 @@ extern "C" {
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);
+		shakeRequests.reserve(0xFF);
 		nvse->SetOpcodeBase(0x3100);
 
 		REG_CMD(JGLegacyWorldToScreen);
