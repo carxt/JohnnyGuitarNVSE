@@ -36,6 +36,7 @@ bool patchPainedPlayer = 0;
 bool bDisableDeathResponses = 0;
 unsigned int iFPSCapLoadScreen = 0;
 float iDeathSoundMAXTimer = 10;
+bool bDisableDLLCompatibilityRoutines = 0;
 std::unordered_map<UInt8, float> shakeRequests;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
