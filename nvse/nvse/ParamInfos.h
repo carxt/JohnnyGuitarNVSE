@@ -390,6 +390,12 @@ static ParamInfo kParams_ThreeOptionalInts[3] =
 	{"Integer", kParamType_Integer, 1},
 	{"Integer", kParamType_Integer, 1},
 };
+static ParamInfo kParams_ThreeOptionalFloats[3] =
+{
+	{"Float", kParamType_Float, 1},
+	{"Float", kParamType_Float, 1},
+	{"Float", kParamType_Float, 1},
+};
 static ParamInfo kParams_ar_SortEditor[] =
 {
 	{	"array",		kNVSEParamType_Array,	0	},

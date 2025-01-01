@@ -4069,6 +4069,7 @@ struct NiPoint2 {
 	float x;
 	float y;
 	NiPoint2() : x(0.f), y(0.f) {};
+	NiPoint2(float _x, float _y) : x(_x), y(_y) {};
 };
 
 struct COORD_DATA {

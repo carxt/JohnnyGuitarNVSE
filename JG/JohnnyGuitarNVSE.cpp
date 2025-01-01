@@ -51,34 +51,41 @@ NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap
 #define JG_VERSION 514
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
-		case NVSEMessagingInterface::kMessage_NewGame:
-		case NVSEMessagingInterface::kMessage_PreLoadGame:
-		{
-			disableMuzzleLights = 0; //reset the muzzle hook every time
-			bArrowKeysDisabled = false;
-			isShowLevelUp = true;
-			ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
-			ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
+	case NVSEMessagingInterface::kMessage_NewGame:
+	case NVSEMessagingInterface::kMessage_PreLoadGame:
+	{
+		disableMuzzleLights = 0; //reset the muzzle hook every time
+		bArrowKeysDisabled = false;
+		isShowLevelUp = true;
+		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
+		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 
-			OnDyingHandler->FlushEventCallbacks();
-			OnLimbGoneHandler->FlushEventCallbacks();
-			OnCrosshairHandler->FlushEventCallbacks();
-			OnPLChangeHandler->FlushEventCallbacks();
-			RestoreDisabledPlayerControlsHUDFlags();
-			SaveGameUMap.clear();
-			ResetMiscStatMap();
-			hk_RSMBarberHook::haircutSetList.dFlush();
-			hk_RSMBarberHook::beardSetList.dFlush();
-			jg_gameRadioSet.clear();
-			hk_BarterHook::barterFilterListLeft.clear();
-			hk_BarterHook::barterFilterListRight.clear();
-			NPCAccuracy::FlushMapRefs();
-			break;
-		}
-		case NVSEMessagingInterface::kMessage_PostLoadGame:
-			break;
+		OnDyingHandler->FlushEventCallbacks();
+		OnLimbGoneHandler->FlushEventCallbacks();
+		OnCrosshairHandler->FlushEventCallbacks();
+		OnPLChangeHandler->FlushEventCallbacks();
+		RestoreDisabledPlayerControlsHUDFlags();
+		SaveGameUMap.clear();
+		ResetMiscStatMap();
+		hk_RSMBarberHook::haircutSetList.dFlush();
+		hk_RSMBarberHook::beardSetList.dFlush();
+		jg_gameRadioSet.clear();
+		hk_BarterHook::barterFilterListLeft.clear();
+		hk_BarterHook::barterFilterListRight.clear();
+		NPCAccuracy::FlushMapRefs();
+		shakeRequests.clear();
+		break;
+	}
+	case NVSEMessagingInterface::kMessage_PostLoadGame:
+		break;
 
-		case NVSEMessagingInterface::kMessage_MainGameLoop:
+	case NVSEMessagingInterface::kMessage_MainGameLoop:
+			if (g_interfaceManager->currentMode == 1) {
+				float power = getHUDShakePower();
+				if (power > 0.0f) {
+					CdeclCall<void>(0x94C3A0, power);
+				}
+			}
 			ComputeDiscoveredRadioDirectory();
 			for (const auto& EventInfo : EventsArray) {
 				EventInfo->AddQueuedEvents();
@@ -485,6 +492,8 @@ extern "C" {
 		REG_TYPED_CMD(GetNoteQuestList, Array);
 		REG_CMD(AddNoteQuest);
 		REG_CMD(RemoveNoteQuest);
+		REG_CMD(SetHUDShudderPower);
+		REG_CMD(GetHUDShudderPower);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
