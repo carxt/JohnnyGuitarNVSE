@@ -36,9 +36,8 @@ bool patchPainedPlayer = 0;
 bool bDisableDeathResponses = 0;
 unsigned int iFPSCapLoadScreen = 0;
 float iDeathSoundMAXTimer = 10;
-
 bool bDisableDLLCompatibilityRoutines = 0;
-
+std::unordered_map<UInt8, float> shakeRequests;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
@@ -1687,10 +1686,6 @@ void HandleIniOptions() {
 }
 
 
-
-
-
-
 __declspec (noinline) void HandleDLLInterop() {
 	if (GetModuleHandle("jip_nvse.dll") != NULL) { //JIP is on.
 		uint8_t* fnPtr = (uint8_t*) GetRelJumpAddr(0x0524014);
@@ -1706,6 +1701,18 @@ __declspec (noinline) void HandleDLLInterop() {
 			fnPtr++;
 		}
 	}
+}
+
+float getHUDShakePower() {
+	if (shakeRequests.empty()) {
+		return 0.0f;
+	}
+	auto maxElement = std::max_element(
+		shakeRequests.begin(), shakeRequests.end(),
+		[](const auto& a, const auto& b) {
+			return a.second < b.second;
+		});
+	return maxElement->second;
 }
 
 void HandleGameSettingsJG(){

@@ -56,8 +56,8 @@ DEFINE_COMMAND_PLUGIN(RemoveExtraAccuracyPenaltyMult, , 0, 1, kParams_OneOptiona
 DEFINE_COMMAND_PLUGIN(SetCustomMapMarker, , 0, 3, kParams_ThreeFloats);
 DEFINE_COMMAND_PLUGIN(ClearCustomMapMarker, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(EjectCasing, , 0, 2, kParams_EjectCasing);
-
-
+DEFINE_COMMAND_PLUGIN(SetHUDShudderPower, , 0, 1, kParams_OneFloat);
+DEFINE_COMMAND_PLUGIN(GetHUDShudderPower, , 0, 0, NULL);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -66,6 +66,32 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
 std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
+
+bool Cmd_GetHUDShudderPower_Execute(COMMAND_ARGS) {
+	*result = 0;
+	UInt8 modId = scriptObj->GetModIndex();
+	if (modId < 0xFF && shakeRequests.find(modId) != shakeRequests.end()) {
+		*result = shakeRequests[modId];
+	}
+	return true;
+}
+
+bool Cmd_SetHUDShudderPower_Execute(COMMAND_ARGS) {
+	*result = 0;
+	float power = -1.f;
+	UInt8 modId = scriptObj->GetModIndex();
+	if (modId < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &power)) {
+		if (power == 0.0f) {
+			shakeRequests.erase(modId);
+		}
+		else {
+			shakeRequests[modId] = power;
+		}
+		*result = 1;
+	}
+	return true;
+}
+
 
 bool Cmd_ClearCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
