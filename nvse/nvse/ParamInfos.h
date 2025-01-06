@@ -611,6 +611,15 @@ static ParamInfo kParams_OneForm_ThreeInts[4] =
 	{ "int",	kParamType_Integer, 0 },
 };
 
+static ParamInfo kParams_OneForm_FourInts[5] =
+{
+	{ "form",	kParamType_AnyForm,	0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+};
+
 static ParamInfo kParams_TwoForms[2] =
 {
 	{ "form",	kParamType_AnyForm,	0 },

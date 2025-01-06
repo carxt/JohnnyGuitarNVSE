@@ -234,6 +234,31 @@ namespace GMSTJG {
 
 }
 
+
+
+class DialogueEmotionOverride
+{
+
+public:
+	unsigned int m_emotionType;
+	int m_emotionValue;
+	DialogueEmotionOverride() {};
+	DialogueEmotionOverride(int emotionType, int emotionValue) : m_emotionType(emotionType), m_emotionValue(emotionValue)
+	{
+
+	}
+	virtual ~DialogueEmotionOverride()
+	{
+
+	}
+
+};
+
+std::unordered_map<UInt32, std::map<UInt32, DialogueEmotionOverride>> dialogResponseOverrideMap;
+
+
+
+
 template <class T>
 struct JGSetList {
 	bool isWhiteList = false;
@@ -409,6 +434,123 @@ public:
 };
 
 
+
+
+
+
+namespace hk_DialogueTopicResponseManageHook {
+
+
+	enum kDialogEmotionType
+	{
+		kEmotionNeutral,
+		kEmotionAnger,
+		kEmotionDisgust,
+		kEmotionFear,
+		kEmotionSad,
+		kEmotionHappy,
+		kEmotionSurprise,
+		kEmotionPained,
+		kEmotionMax
+	};
+	struct DialogueResponse
+	{
+		BSString responseText;
+		UInt32 emotionType;
+		UInt32 emotionValue;
+		BSString voiceFilePath;
+		TESIdleForm* speakerAnimation;
+		TESIdleForm* listenerAnimation;
+		UInt32 sound;
+		UInt8 flags;
+		UInt8 pad25[3];
+		UInt32 responseNumber;
+	};
+
+	struct DialogueCache
+	{
+		UInt32 emotionType;
+		UInt32 emotionValue;
+		UInt32 responseNumber;
+	};
+	std::unordered_map<UInt32, std::map<UInt32, DialogueCache>> cachedDialogueInfo;
+
+
+	static uintptr_t originalTopicInfoLoad = 0x104D5D4;
+	DWORD __fastcall hk_TESTopicInfo_Load(TESTopicInfo* topicInfo, void* edx, ModInfo* modInfo)
+	{
+		DWORD retVal = ThisStdCall<DWORD>(originalTopicInfoLoad, topicInfo, modInfo);
+		if (retVal)
+		{
+			auto responseList = ThisStdCall<TESTopicInfoResponse**>(0x061E780, topicInfo, NULL);
+			if (auto responseItem = *responseList)
+			{
+				do
+				{
+					DialogueCache diaCache = {};
+					diaCache.emotionType = responseItem->data.emotionType;
+					diaCache.emotionValue = responseItem->data.emotionValue;
+					diaCache.responseNumber = responseItem->data.responseNumber;
+					cachedDialogueInfo[topicInfo->refID][responseItem->data.responseNumber] = diaCache;
+				} while (responseItem = responseItem->next);
+			}
+		}
+		return retVal;
+	}
+
+
+	static  DialogueResponse* __fastcall DialogueResponse_Init(DialogueResponse* responseCol,
+		void* edx, TESQuest* quest, TESTopic* topic, TESTopicInfo* topicInfo, Actor* speaker, TESTopicInfoResponse* topicInfoResponse) 
+	{
+		if (auto diaCont = dialogResponseOverrideMap.find(topicInfo->refID); diaCont != dialogResponseOverrideMap.end())
+		{
+
+			if (auto diaItem = diaCont->second.find(topicInfoResponse->data.responseNumber); diaItem != diaCont->second.end())
+			{
+				if (diaItem->second.m_emotionType < kEmotionMax)
+				{
+					responseCol->emotionType = diaItem->second.m_emotionType;
+				}
+				if (diaItem->second.m_emotionValue > -1)
+				{
+					responseCol->emotionValue = diaItem->second.m_emotionValue;
+
+				}
+			}
+		
+		}
+
+
+		return responseCol;
+	}
+
+
+
+
+
+	static  __declspec(naked) void  asm_jumpManHook()
+	{
+		__asm
+		{
+			mov ecx, eax
+			jmp DialogueResponse_Init
+		}
+
+	}
+
+	void InitHooks() {
+		WriteRelJump(0x083D413, (uintptr_t) asm_jumpManHook);
+		{
+			//hook is fully functional, but disabled since we dont have a need for it just yet
+
+			//uintptr_t originalAddr = originalTopicInfoLoad;
+			//originalTopicInfoLoad = *(uintptr_t*)originalTopicInfoLoad;
+			//SafeWrite32((uintptr_t)originalAddr, (uintptr_t)hk_TESTopicInfo_Load);
+
+		}
+	}
+
+};
 
 
 
@@ -1469,6 +1611,7 @@ void HandleFixes() {
 	//CamShakeHook
 	hk_CameraShakeHook::CreateHook();
 	NPCAccuracy::CreateHook();
+	hk_DialogueTopicResponseManageHook::InitHooks();
 }
 
 void HandleIniOptions() {
