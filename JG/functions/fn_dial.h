@@ -2,7 +2,7 @@
 // Functions that operate on dialog
 DEFINE_COMMAND_PLUGIN(DialogResponseAddRelatedTopic, , 0, 4, kParams_OneDialogRes_OneTopic_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(DialogResponseRelatedGetAll, , 0, 4, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(DialogResponseOverrideEmotion, , 0, 5, kParams_OneForm_FourInts);
+DEFINE_COMMAND_PLUGIN(SetDialogResponseOverrideValues, , 0, 5, kParams_OneForm_FourInts);
 
 
 /*DEFINE_CMD_ALT_COND_PLUGIN(DialogResponseHasChoice, , 0, 2, kParams_OneForm_OneTopic);
@@ -55,19 +55,23 @@ bool Cmd_DialogResponseGetResponseAmount_Execute(COMMAND_ARGS)
 
 
 
-bool Cmd_DialogResponseOverrideEmotion_Execute(COMMAND_ARGS) {
+bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
 	TESTopicInfo* dialogResponse = NULL;
 	UInt32 responseNumber = 0;
 	SInt32 setOrRemove = 0;
 	UInt32 responseEmotion = 0;
-	UInt32 responseEmotionValue = 0;
+	SInt32 responseEmotionValue = 0;
+	//Init to xMarker
+	TESIdleForm* speakerAnim = *(TESIdleForm**)0x11CA244;
+	TESIdleForm* listenerAnim = *(TESIdleForm**)0x11CA244;
+
 	//Unlike 99.9% of functions in this game, dialog responses use a 1-based index, not a 0-based index.
 	//This means the first element will be 1, not 0.
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseNumber, &setOrRemove, &responseEmotion, &responseEmotionValue) && IS_TYPE(dialogResponse, TESTopicInfo))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseNumber, &setOrRemove, &responseEmotion, &responseEmotionValue, &speakerAnim, &listenerAnim) && IS_TYPE(dialogResponse, TESTopicInfo))
 	{
 		if (setOrRemove > 0)
 		{
-			dialogResponseOverrideMap[dialogResponse->refID][responseNumber] = DialogueEmotionOverride((int) responseEmotion, (int)responseEmotionValue);
+			dialogResponseOverrideMap[dialogResponse->refID][responseNumber] = DialogueEmotionOverride((int) responseEmotion, (int)responseEmotionValue, speakerAnim, listenerAnim);
 		}
 
 		else
