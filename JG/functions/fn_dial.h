@@ -59,19 +59,21 @@ bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
 	TESTopicInfo* dialogResponse = NULL;
 	UInt32 responseNumber = 0;
 	SInt32 setOrRemove = 0;
+
 	UInt32 responseEmotion = 0;
 	SInt32 responseEmotionValue = 0;
+	UInt32 flags = -1;
 	//Init to xMarker
 	TESIdleForm* speakerAnim = *(TESIdleForm**)0x11CA244;
 	TESIdleForm* listenerAnim = *(TESIdleForm**)0x11CA244;
 
 	//Unlike 99.9% of functions in this game, dialog responses use a 1-based index, not a 0-based index.
 	//This means the first element will be 1, not 0.
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseNumber, &setOrRemove, &responseEmotion, &responseEmotionValue, &speakerAnim, &listenerAnim) && IS_TYPE(dialogResponse, TESTopicInfo))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseNumber, &setOrRemove, &responseEmotion, &responseEmotionValue, &speakerAnim, &listenerAnim, &flags) && IS_TYPE(dialogResponse, TESTopicInfo))
 	{
 		if (setOrRemove > 0)
 		{
-			dialogResponseOverrideMap[dialogResponse->refID][responseNumber] = DialogueEmotionOverride((int) responseEmotion, (int)responseEmotionValue, speakerAnim, listenerAnim);
+			dialogResponseOverrideMap[dialogResponse->refID][responseNumber] = DialogueEmotionOverride((int) responseEmotion, (int)responseEmotionValue, speakerAnim, listenerAnim, flags);
 		}
 
 		else

@@ -244,9 +244,10 @@ public:
 	int m_emotionValue;
 	TESIdleForm* m_speakerAnimation;
 	TESIdleForm* m_listenerAnimation;
+	unsigned int m_flags;
 	DialogueEmotionOverride() {};
-	DialogueEmotionOverride(int emotionType, int emotionValue, TESIdleForm* speakerAnim, TESIdleForm* listenAnim) :
-		m_emotionType(emotionType), m_emotionValue(emotionValue), m_speakerAnimation(speakerAnim), m_listenerAnimation(listenAnim)
+	DialogueEmotionOverride(int emotionType, int emotionValue, TESIdleForm* speakerAnim, TESIdleForm* listenAnim, unsigned int flags) :
+		m_emotionType(emotionType), m_emotionValue(emotionValue), m_speakerAnimation(speakerAnim), m_listenerAnimation(listenAnim), m_flags(flags)
 	{
 
 	}
@@ -527,6 +528,11 @@ namespace hk_DialogueTopicResponseManageHook {
 				if (IS_TYPE(diaItem->second.m_listenerAnimation, TESIdleForm) || (diaItem->second.m_listenerAnimation == NULL))
 				{
 					responseCol->listenerAnimation = diaItem->second.m_listenerAnimation;
+				}
+				if (diaItem->second.m_flags != -1)
+				{
+					responseCol->flags = diaItem->second.m_flags;
+
 				}
 			}
 		
