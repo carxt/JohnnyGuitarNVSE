@@ -3,6 +3,7 @@
 #include <psapi.h>
 #include <mutex>
 #include <shared_mutex>
+#include <algorithm>
 #include "nvse/PluginAPI.h"
 #include "nvse/GameAPI.h"
 #include "nvse/CommandTable.h"

@@ -2,7 +2,7 @@
 // Functions that operate on dialog
 DEFINE_COMMAND_PLUGIN(DialogResponseAddRelatedTopic, , 0, 4, kParams_OneDialogRes_OneTopic_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(DialogResponseRelatedGetAll, , 0, 4, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetDialogResponseOverrideValues, , 0, 7, kParams_OneForm_FourInts_TwoOptionalForms);
+DEFINE_COMMAND_PLUGIN(SetDialogResponseOverrideValues, , 0, 8, kParams_OneForm_FourInts_TwoOptionalForms_OneOptionalInt);
 
 
 /*DEFINE_CMD_ALT_COND_PLUGIN(DialogResponseHasChoice, , 0, 2, kParams_OneForm_OneTopic);
