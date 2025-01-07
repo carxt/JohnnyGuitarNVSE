@@ -496,7 +496,7 @@ extern "C" {
 		REG_CMD(RemoveNoteQuest);
 		REG_CMD(SetHUDShudderPower);
 		REG_CMD(GetHUDShudderPower);
-		REG_CMD(SetDialogResponseOverrideValues);
+		REG_CMD(SetDialogResponseOverrideValues); // Function is subject to overrides at random and therefore not eligible for documentation. Can be removed at any time, so mod breakage due to using it will not be considered.
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
