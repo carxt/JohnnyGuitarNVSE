@@ -75,7 +75,26 @@ extern "C" {
 }
 extern uintptr_t GetRelJumpAddr(uintptr_t address);
 
+namespace hk_GMSTJG {
+	static uintptr_t func_AddGameSetting_Float = 0x040E0B0;
+	static uintptr_t func_AddGameSetting_IntOrStaticStr = 0x40C150;
+	namespace gmst
+	{
+		Setting fCombatLocationTargetRadiusMaxBase;
+		Setting fCombatRangedWeaponRangeBaseMult;
+		Setting iOverrideStandardEmotions;
 
+	};
+	void ExtraGMSTInit()
+	{
+		using namespace gmst;
+		ThisStdCall<void>(func_AddGameSetting_Float, &fCombatLocationTargetRadiusMaxBase, "fCombatLocationTargetRadiusMaxBase", 10.0f);
+		ThisStdCall<void>(func_AddGameSetting_Float, &fCombatRangedWeaponRangeBaseMult, "fCombatRangedWeaponRangeBaseMult", 1.0f);
+		ThisStdCall<void>(func_AddGameSetting_IntOrStaticStr, &iOverrideStandardEmotions, "iOverrideStandardEmotions", 1);
+
+
+	}
+}
 
 std::vector<uintptr_t> GetFactionsInList(ExtraFactionChanges::FactionListEntry* pFactList) {
 	std::vector<uintptr_t> retObj{};
@@ -169,14 +188,11 @@ namespace NPCAccuracy {
 	}
 };
 
-namespace GMSTJG {
-	Setting fCombatLocationTargetRadiusMaxBase;
-	Setting fCombatRangedWeaponRangeBaseMult;
 
 
+namespace hk_CombatLocation
+{
 
-
-	static uintptr_t func_AddGameSetting = 0x040E0B0;
 	template <uintptr_t a_addr>
 	class hk_CombatLocationMaxCall {
 	private:
@@ -184,7 +200,7 @@ namespace GMSTJG {
 	public:
 		static  double __cdecl hk_CLCHook(float m_a1, float m_a2) {
 			auto res = CdeclCall<double>(hookCall, m_a1, m_a2);
-			return fmax(res, fCombatLocationTargetRadiusMaxBase.data.f);
+			return fmax(res, hk_GMSTJG::gmst::fCombatLocationTargetRadiusMaxBase.data.f);
 		}
 
 		hk_CombatLocationMaxCall() {
@@ -202,7 +218,7 @@ namespace GMSTJG {
 		static  double __fastcall hk_Hook(TESObjectWEAP* r_weap) {
 			auto res = ThisStdCall<double>(hookCall, r_weap);
 			if (!ThisStdCall<bool>(0x0647790, r_weap) && ThisStdCall<bool>(0x04C0C30, r_weap)) {
-				res *= fCombatRangedWeaponRangeBaseMult.data.f;
+				res *= hk_GMSTJG::gmst::fCombatRangedWeaponRangeBaseMult.data.f;
 			}
 			return res;
 		}
@@ -224,15 +240,11 @@ namespace GMSTJG {
 		hk_CombatLocationMaxCall<0x09A089F>();
 		hk_CombatLocationMaxCall<0x09A0A0C>();
 		hk_CombatRangedRangeMult<0x09A91C1>();
-		ThisStdCall<void>(func_AddGameSetting, &fCombatLocationTargetRadiusMaxBase, "fCombatLocationTargetRadiusMaxBase", 10.0f);
-		ThisStdCall<void>(func_AddGameSetting, &fCombatRangedWeaponRangeBaseMult, "fCombatRangedWeaponRangeBaseMult", 1.0f);
+
 
 	}
 
-
 }
-
-
 
 class DialogueEmotionOverride
 {
@@ -442,9 +454,9 @@ class hk_EmotionOverrideUndo
 {
 	static void* __fastcall hk_UndoEmotionOverride(void** ptr)
 	{
-		Setting* iSTDEmotionVal = (Setting*) 0x11CBDF4;
+		Setting* iSTDEmotionVal = &hk_GMSTJG::gmst::iOverrideStandardEmotions;
 		auto retVal = ThisStdCall<void*>(hookCall, ptr);
-		if (iSTDEmotionVal->data.i < 0)
+		if (iSTDEmotionVal->data.i <= 0)
 		{
 			retVal = nullptr;
 		}
@@ -527,7 +539,54 @@ namespace hk_DialogueTopicResponseManageHook {
 		return retVal;
 	}
 
+	DWORD __fastcall TESTopicInfo_DumpAllDialogue()
+	{
+		PrintLog("Start Dialogue Dump");
+		for (auto i : cachedDialogueInfo)
+		{
+			if (auto dialogForm = LookupFormByID(i.first))
+			{
 
+
+				std::string dumpStringL;
+				dumpStringL += DataHandler::Get()->GetNthModName(dialogForm->GetOverridingModIdx());
+				dumpStringL += "/@/";
+				dumpStringL += DataHandler::Get()->GetNthModName(dialogForm->modIndex);
+				dumpStringL += "/&/";
+				char hexBuf[256] = {};
+				memset(hexBuf, 0, _countof(hexBuf));
+				sprintf_s(hexBuf, "0x%lx", dialogForm->refID & 0xFFFFFF);
+				dumpStringL += std::string(hexBuf);
+				bool addSplit = false;
+				dumpStringL += "=";
+				for (auto j : i.second)
+				{
+
+					if (addSplit)
+					{
+						dumpStringL += "|";
+					}
+					dumpStringL += std::to_string(j.first);
+					dumpStringL += "," + std::to_string(j.second.emotionType);
+					dumpStringL += "," + std::to_string(j.second.emotionValue);
+					if (auto speakAnim = LookupFormByID(j.second.speakerAnimation))
+					{
+						dumpStringL += ",";
+						dumpStringL += std::string(speakAnim->GetName());
+					}
+					if (auto speakAnim = LookupFormByID(j.second.listenerAnimation))
+					{
+						dumpStringL += ",";
+						dumpStringL += std::string(speakAnim->GetName());
+					}
+					addSplit = true;
+				}
+				PrintLog(dumpStringL.c_str());
+			}
+		}
+		PrintLog("End Dialogue Dump");
+
+	}
 
 	static  DialogueResponse* __fastcall DialogueResponse_Init(DialogueResponse* responseCol,
 		void* edx, TESQuest* quest, TESTopic* topic, TESTopicInfo* topicInfo, Actor* speaker, TESTopicInfoResponse* topicInfoResponse) 
@@ -1744,8 +1803,8 @@ float getHUDShakePower() {
 }
 
 void HandleGameSettingsJG(){
-
-	GMSTJG::CombatLocationMaxRadiusBaseInitHook();
+	hk_GMSTJG::ExtraGMSTInit();
+	hk_CombatLocation::CombatLocationMaxRadiusBaseInitHook();
 
 }
 
