@@ -440,10 +440,10 @@ public:
 template <uintptr_t a_addr>
 class hk_EmotionOverrideUndo
 {
-	void* __fastcall EmotionOverride(void** ptr)
+	static void* __fastcall hk_UndoEmotionOverride(void** ptr)
 	{
-		Setting* iSTDEmotionVal = 0x11CBDF4;
-		retVal = ThisStdCall<void*>(hookCall, ptr);
+		Setting* iSTDEmotionVal = (Setting*) 0x11CBDF4;
+		auto retVal = ThisStdCall<void*>(hookCall, ptr);
 		if (iSTDEmotionVal->data.i < 0)
 		{
 			retVal = nullptr;
@@ -451,10 +451,11 @@ class hk_EmotionOverrideUndo
 		return retVal;
 	}
 	static inline uintptr_t hookCall = a_addr;
-	hk_SleepOneInterCall() {
+public:
+	hk_EmotionOverrideUndo() {
 		uintptr_t hk_hookPoint = hookCall;
 		hookCall = GetRelJumpAddr(hookCall);
-		WriteRelCall(hk_hookPoint, ())
+		WriteRelCall(hk_hookPoint,(uintptr_t) (hk_UndoEmotionOverride));
 	}
 };
 
