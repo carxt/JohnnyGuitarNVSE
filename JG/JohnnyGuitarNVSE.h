@@ -82,7 +82,7 @@ namespace hk_GMSTJG {
 	{
 		Setting fCombatLocationTargetRadiusMaxBase;
 		Setting fCombatRangedWeaponRangeBaseMult;
-		Setting iOverrideStandardEmotions;
+		Setting iOverrideDialogueEmotionValues;
 
 	};
 	void ExtraGMSTInit()
@@ -90,7 +90,7 @@ namespace hk_GMSTJG {
 		using namespace gmst;
 		ThisStdCall<void>(func_AddGameSetting_Float, &fCombatLocationTargetRadiusMaxBase, "fCombatLocationTargetRadiusMaxBase", 10.0f);
 		ThisStdCall<void>(func_AddGameSetting_Float, &fCombatRangedWeaponRangeBaseMult, "fCombatRangedWeaponRangeBaseMult", 1.0f);
-		ThisStdCall<void>(func_AddGameSetting_IntOrStaticStr, &iOverrideStandardEmotions, "iOverrideStandardEmotions", 1);
+		ThisStdCall<void>(func_AddGameSetting_IntOrStaticStr, &iOverrideDialogueEmotionValues, "iOverrideDialogueEmotionValues", 0);
 
 
 	}
@@ -454,7 +454,7 @@ class hk_EmotionOverrideUndo
 {
 	static void* __fastcall hk_UndoEmotionOverride(void** ptr)
 	{
-		Setting* iSTDEmotionVal = &hk_GMSTJG::gmst::iOverrideStandardEmotions;
+		Setting* iSTDEmotionVal = &hk_GMSTJG::gmst::iOverrideDialogueEmotionValues;
 		auto retVal = ThisStdCall<void*>(hookCall, ptr);
 		if (iSTDEmotionVal->data.i <= 0)
 		{
@@ -606,7 +606,7 @@ namespace hk_DialogueTopicResponseManageHook {
 					responseCol->emotionValue = diaItem->second.m_emotionValue;
 
 				}
-				if ((responseCol->emotionType > 0) && hk_GMSTJG::gmst::iOverrideStandardEmotions.data.i >= 1)
+				if ((responseCol->emotionType > 0) && hk_GMSTJG::gmst::iOverrideDialogueEmotionValues.data.i >= 1)
 				{
 					responseCol->emotionValue = iSTDEmotionVal->data.i;
 				}
