@@ -437,6 +437,28 @@ public:
 
 
 
+template <uintptr_t a_addr>
+class hk_EmotionOverrideUndo
+{
+	void* __fastcall EmotionOverride(void** ptr)
+	{
+		Setting* iSTDEmotionVal = 0x11CBDF4;
+		retVal = ThisStdCall<void*>(hookCall, ptr);
+		if (iSTDEmotionVal->data.i < 0)
+		{
+			retVal = nullptr;
+		}
+		return retVal;
+	}
+	static inline uintptr_t hookCall = a_addr;
+	hk_SleepOneInterCall() {
+		uintptr_t hk_hookPoint = hookCall;
+		hookCall = GetRelJumpAddr(hookCall);
+		WriteRelCall(hk_hookPoint, ())
+	}
+};
+
+
 
 
 
@@ -474,6 +496,8 @@ namespace hk_DialogueTopicResponseManageHook {
 		UInt32 emotionType;
 		UInt32 emotionValue;
 		UInt32 responseNumber;
+		UInt32 speakerAnimation;
+		UInt32 listenerAnimation;
 	};
 	std::unordered_map<UInt32, std::map<UInt32, DialogueCache>> cachedDialogueInfo;
 
@@ -493,12 +517,15 @@ namespace hk_DialogueTopicResponseManageHook {
 					diaCache.emotionType = responseItem->data.emotionType;
 					diaCache.emotionValue = responseItem->data.emotionValue;
 					diaCache.responseNumber = responseItem->data.responseNumber;
+					diaCache.speakerAnimation = (responseItem->spkeakerAnimation) ? responseItem->spkeakerAnimation->refID : 0;
+					diaCache.listenerAnimation = (responseItem->listenerAnimation) ? responseItem->listenerAnimation->refID : 0;
 					cachedDialogueInfo[topicInfo->refID][responseItem->data.responseNumber] = diaCache;
 				} while (responseItem = responseItem->next);
 			}
 		}
 		return retVal;
 	}
+
 
 
 	static  DialogueResponse* __fastcall DialogueResponse_Init(DialogueResponse* responseCol,
@@ -1628,6 +1655,7 @@ void HandleFixes() {
 	hk_CameraShakeHook::CreateHook();
 	NPCAccuracy::CreateHook();
 	hk_DialogueTopicResponseManageHook::InitHooks();
+	hk_EmotionOverrideUndo< 0x0617D59>();
 }
 
 void HandleIniOptions() {
