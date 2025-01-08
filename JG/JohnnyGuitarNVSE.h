@@ -594,6 +594,7 @@ namespace hk_DialogueTopicResponseManageHook {
 		if (auto diaCont = dialogResponseOverrideMap.find(topicInfo->refID); diaCont != dialogResponseOverrideMap.end())
 		{
 
+			Setting* iSTDEmotionVal = (Setting*) 0x11CBDF4;
 			if (auto diaItem = diaCont->second.find(topicInfoResponse->data.responseNumber); diaItem != diaCont->second.end())
 			{
 				if (diaItem->second.m_emotionType < kEmotionMax)
@@ -604,6 +605,10 @@ namespace hk_DialogueTopicResponseManageHook {
 				{
 					responseCol->emotionValue = diaItem->second.m_emotionValue;
 
+				}
+				if ((responseCol->emotionType > 0) && hk_GMSTJG::gmst::iOverrideStandardEmotions.data.i >= 1)
+				{
+					responseCol->emotionValue = iSTDEmotionVal->data.i;
 				}
 
 				if (IS_TYPE(diaItem->second.m_speakerAnimation, TESIdleForm) || (diaItem->second.m_speakerAnimation == NULL))
