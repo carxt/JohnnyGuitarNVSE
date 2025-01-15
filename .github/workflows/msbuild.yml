@@ -35,25 +35,23 @@ jobs:
         echo "artifact_timestamp=$timestamp" >> $GITHUB_ENV
       shell: bash
 
-    - name: Publish Release
-      uses: actions/upload-artifact@v4
-      with:
-        name: JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}
-        path: |
-          JG\Release\johnnyguitar.dll
+    - name: Package Artifacts
+      run: |
+        mkdir -p artifacts
+        zip -j artifacts/JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip JG/Release/johnnyguitar.dll
+        zip -j artifacts/JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip JG/Debug/johnnyguitar.dll
 
-    - name: Publish Debug
+    - name: Publish Zipped Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}
-        path: |
-          JG\Debug\johnnyguitar.dll
+        name: Zipped-Artifacts-${{ env.artifact_timestamp }}
+        path: artifacts/
 
     - name: Create or Update Release
       id: create_release
       uses: actions/create-release@v1
       with:
-        tag_name: continuous-${{ env.artifact_timestamp }}
+        tag_name: continuous
         release_name: "Continuous release"
         draft: false
         prerelease: true  
@@ -62,22 +60,22 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload Release Artifact (Release)
+    - name: Upload Artifact (Release)
       uses: actions/upload-release-asset@v1
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: JG/Release/johnnyguitar.dll
-        asset_name: johnnyguitar-Release-${{ env.artifact_timestamp }}
+        asset_path: artifacts/JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip
+        asset_name: JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip
         asset_content_type: application/zip
 
-    - name: Upload Release Artifact (Debug)
+    - name: Upload Artifact (Debug)
       uses: actions/upload-release-asset@v1
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: JG/Debug/johnnyguitar.dll
-        asset_name: JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}
+        asset_path: artifacts/JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip
+        asset_name: JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip
         asset_content_type: application/zip
