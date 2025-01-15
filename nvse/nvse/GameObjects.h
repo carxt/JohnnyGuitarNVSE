@@ -811,7 +811,7 @@ public:
 	TESObjectREFR* lastExteriorDoor;		// 604
 	void* unk608;				// 608
 	void* unk60C;				// 60C
-	void* unk610;				// 610
+	tList<CasinoStats>* casinoDataList;				// 610
 	tList<TESCaravanCard>* caravanCards1;			// 614
 	tList<TESCaravanCard>* caravanCards2;			// 618
 	UInt32								unk61C[7];				// 61C

@@ -832,3 +832,14 @@ static ParamInfo kParams_EjectCasing[2] =
 	{	"Target Node",			kParamType_String,	1	},
 	{	"Custom Casing Path",	kParamType_String,  1	},
 };
+
+static ParamInfo kParams_OneCasino[1] =
+{
+	{    "Casino",    kParamType_Casino,    1    },
+};
+
+static ParamInfo kParams_OneCasinoOneInt[2] =
+{
+	{    "Casino",    kParamType_Casino,    1    },
+	{    "Earnings",    kParamType_Integer,    1    },
+};
