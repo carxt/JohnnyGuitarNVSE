@@ -9,8 +9,7 @@ on:
 env:
   SOLUTION_FILE_PATH: JG/johnnyguitar.sln
 
-permissions:
-  contents: read
+permissions: write-all
 
 jobs:
   build:
@@ -41,14 +40,14 @@ jobs:
       with:
         name: JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}
         path: |
-          Release\johnnyguitar.dll
+          JG\Release\johnnyguitar.dll
 
     - name: Publish Debug
       uses: actions/upload-artifact@v4
       with:
         name: JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}
         path: |
-          Debug\johnnyguitar.dll
+          JG\Debug\johnnyguitar.dll
 
     - name: Create or Update Release
       id: create_release
@@ -67,7 +66,7 @@ jobs:
       uses: actions/upload-release-asset@v1
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: Release/johnnyguitar.dll
+        asset_path: JG/Release/johnnyguitar.dll
         asset_name: johnnyguitar-Release-${{ env.artifact_timestamp }}.dll
         asset_content_type: application/octet-stream
 
@@ -75,6 +74,6 @@ jobs:
       uses: actions/upload-release-asset@v1
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: Debug/johnnyguitar.dll
+        asset_path: JG/Debug/johnnyguitar.dll
         asset_name: johnnyguitar-Debug-${{ env.artifact_timestamp }}.dll
         asset_content_type: application/octet-stream
