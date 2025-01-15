@@ -49,3 +49,32 @@ jobs:
         name: JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}
         path: |
           Debug\johnnyguitar.dll
+
+    - name: Create or Update Release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: continuous-${{ env.artifact_timestamp }}
+        release_name: "Continuous release"
+        draft: false
+        prerelease: true  
+        body: |
+          Continuous build generated from the latest push to development branch.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload Release Artifact (Release)
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: Release/johnnyguitar.dll
+        asset_name: johnnyguitar-Release-${{ env.artifact_timestamp }}.dll
+        asset_content_type: application/octet-stream
+
+    - name: Upload Release Artifact (Debug)
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: Debug/johnnyguitar.dll
+        asset_name: johnnyguitar-Debug-${{ env.artifact_timestamp }}.dll
+        asset_content_type: application/octet-stream
