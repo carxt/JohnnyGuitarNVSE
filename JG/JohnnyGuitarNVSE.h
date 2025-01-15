@@ -68,7 +68,8 @@ Setting** g_miscStatData = (Setting**)0x11C6D50;
 char g_workingDir[MAX_PATH];
 std::unordered_set<DWORD> jg_gameRadioSet;
 static float g_viewmodel_near = 0.f;
-
+bool mlcOverridden = false;
+MediaLocationController* mlcOverride = nullptr;
 extern "C" {
 	bool __cdecl JGSetViewmodelClipDistance(float value);
 	float __cdecl JGGetViewmodelClipDistance();
@@ -585,6 +586,7 @@ namespace hk_DialogueTopicResponseManageHook {
 			}
 		}
 		PrintLog("End Dialogue Dump");
+		return NULL;
 
 	}
 
@@ -1795,6 +1797,17 @@ __declspec (noinline) void HandleDLLInterop() {
 	}
 }
 
+
+MediaLocationController* __fastcall MLCOverrideHook(PlayerCharacter* player)
+{
+	if (mlcOverridden)
+	{
+		return mlcOverride;
+	}
+	return ThisStdCall<MediaLocationController*>(0x9698A0, player);
+
+}
+
 float getHUDShakePower() {
 	if (shakeRequests.empty()) {
 		return 0.0f;
@@ -1862,6 +1875,8 @@ void HandleFunctionPatches() {
 	hk_BarterHook::CreateHook();
 
 	WriteRelCall(0x8752F2, UInt32(SetViewmodelFrustumHook));
+
+	WriteRelCall(0x82FC95, (UInt32)MLCOverrideHook);
 
 }
 float timer22 = 30.0;
