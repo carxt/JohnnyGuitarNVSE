@@ -48,19 +48,34 @@ jobs:
         name: Zipped-Artifacts-${{ env.artifact_timestamp }}
         path: artifacts/
 
-    - name: Create or Update Release
+    - name: Get Release
+      id: get_release
+      uses: cardinalby/git-get-release-action@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag: 'continuous'
+        doNotFailIfNotFound: true
+    - name: Delete old release if exists
+      if: steps.get_release.outputs.id != ''
+      uses: dev-drprasad/delete-tag-and-release@v1.0
+      with:
+        tag_name: continuous
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        delete_release: true
+    - name: Create Release
       id: create_release
       uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: continuous
         release_name: "Continuous release"
         draft: false
-        prerelease: true  
+        prerelease: true
         body: |
           Continuous release generated from the latest push to development branch.
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          Last updated: ${{ env.artifact_timestamp }}
     - name: Upload Artifact (Release)
       uses: actions/upload-release-asset@v1
       env:
@@ -70,7 +85,6 @@ jobs:
         asset_path: artifacts/JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip
         asset_name: JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip
         asset_content_type: application/zip
-
     - name: Upload Artifact (Debug)
       uses: actions/upload-release-asset@v1
       env:
