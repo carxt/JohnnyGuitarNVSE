@@ -58,22 +58,26 @@ jobs:
         draft: false
         prerelease: true  
         body: |
-          Continuous build generated from the latest push to development branch.
+          Continuous release generated from the latest push to development branch.
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload Release Artifact (Release)
       uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: JG/Release/johnnyguitar.dll
-        asset_name: johnnyguitar-Release-${{ env.artifact_timestamp }}.dll
-        asset_content_type: application/octet-stream
+        asset_name: johnnyguitar-Release-${{ env.artifact_timestamp }}
+        asset_content_type: application/zip
 
     - name: Upload Release Artifact (Debug)
       uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: JG/Debug/johnnyguitar.dll
-        asset_name: johnnyguitar-Debug-${{ env.artifact_timestamp }}.dll
-        asset_content_type: application/octet-stream
+        asset_name: JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}
+        asset_content_type: application/zip
