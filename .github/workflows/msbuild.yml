@@ -38,8 +38,9 @@ jobs:
     - name: Package Artifacts
       run: |
         mkdir -p artifacts
-        zip -j artifacts/JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip JG/Release/johnnyguitar.dll
-        zip -j artifacts/JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip JG/Debug/johnnyguitar.dll
+        Compress-Archive -Path JG\Release\johnnyguitar.dll -DestinationPath artifacts\JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip
+        Compress-Archive -Path JG\Debug\johnnyguitar.dll -DestinationPath artifacts\JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip
+      shell: pwsh
 
     - name: Publish Zipped Artifacts
       uses: actions/upload-artifact@v4
