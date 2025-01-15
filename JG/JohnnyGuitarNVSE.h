@@ -586,6 +586,7 @@ namespace hk_DialogueTopicResponseManageHook {
 			}
 		}
 		PrintLog("End Dialogue Dump");
+		return NULL;
 
 	}
 
