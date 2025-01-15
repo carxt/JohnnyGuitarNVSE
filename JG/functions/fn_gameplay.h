@@ -79,19 +79,22 @@ bool __cdecl Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS)
 	SInt32 earnings;
 	if (ExtractArgs(EXTRACT_ARGS, &casino, &earnings) && casino)
 	{
+
 		auto casinoRefId = casino->refID;
 		auto iter = PlayerCharacter::GetSingleton()->casinoDataList->Head();
-		do
-		{
-			if (auto casinoData = iter->data)
+		if (iter) {
+			do
 			{
-				if (casinoData->casinoRefID == casinoRefId)
+				if (auto casinoData = iter->data)
 				{
-					casinoData->earnings = earnings;
-					return true;
+					if (casinoData->casinoRefID == casinoRefId)
+					{
+						casinoData->earnings = earnings;
+						return true;
+					}
 				}
-			}
-		} while (iter = iter->next);
+			} while (iter = iter->next);
+		}
 
 		auto casinoStats = (CasinoStats*)GameHeapAlloc(sizeof(CasinoStats));
 		casinoStats->earningStage = 0;
@@ -111,6 +114,7 @@ bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS)
 	{
 		auto casinoRefId = casino->refID;
 		auto iter = PlayerCharacter::GetSingleton()->casinoDataList->Head();
+		if (!iter) return true;
 		do
 		{ 
 			if (auto casinoData = iter->data)
