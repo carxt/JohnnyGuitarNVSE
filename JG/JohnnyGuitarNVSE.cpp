@@ -49,7 +49,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 514
+#define JG_VERSION 515
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 	case NVSEMessagingInterface::kMessage_NewGame:
@@ -75,6 +75,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		hk_BarterHook::barterFilterListRight.clear();
 		NPCAccuracy::FlushMapRefs();
 		shakeRequests.clear();
+		mlcOverridden = false;
+		mlcOverride = nullptr;
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_PostLoadGame:
@@ -496,8 +498,11 @@ extern "C" {
 		REG_CMD(RemoveNoteQuest);
 		REG_CMD(SetHUDShudderPower);
 		REG_CMD(GetHUDShudderPower);
-		REG_CMD(SetDialogResponseOverrideValues); // Function is subject to overrides at random and therefore not eligible for documentation. Can be removed at any time, so mod breakage due to using it will not be considered.
-
+		REG_CMD(SetDialogResponseOverrideValues); // do not document
+		REG_CMD(SetMediaLocationControllerOverride); // do not document
+		REG_CMD(ClearMediaLocationControllerOverride); // do not document
+		REG_CMD(GetCasinoWinnings);
+		REG_CMD(SetCasinoWinnings);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

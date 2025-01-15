@@ -5990,3 +5990,11 @@ enum EWhichListForm {
 	eWhichListForm_FormList,
 	eWhichListForm_Max,
 };
+
+struct CasinoStats
+{
+	UInt32 casinoRefID;
+	SInt32 earnings;
+	UInt16 earningStage;
+	UInt8 gap0A[2];
+};
