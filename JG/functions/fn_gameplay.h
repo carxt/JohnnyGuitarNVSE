@@ -1,4 +1,5 @@
 #pragma once
+#include "ParamInfos.h"
 // Functions affecting gameplay
 DEFINE_COMMAND_PLUGIN(ToggleLevelUpMenu, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(TogglePipBoy, , 0, 1, kParams_OneOptionalInt);
@@ -58,6 +59,11 @@ DEFINE_COMMAND_PLUGIN(ClearCustomMapMarker, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(EjectCasing, , 0, 2, kParams_EjectCasing);
 DEFINE_COMMAND_PLUGIN(SetHUDShudderPower, , 0, 1, kParams_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetHUDShudderPower, , 0, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(SetMediaLocationControllerOverride, SetMLCOverride, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(ClearMediaLocationControllerOverride, ClearMLCOverride, , 0, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(GetCasinoWinnings, , , 0, 1, kParams_OneCasino);
+DEFINE_COMMAND_ALT_PLUGIN(SetCasinoWinnings, , , 0, 2, kParams_OneCasinoOneInt);
+
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -66,6 +72,84 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
 std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
+
+bool __cdecl Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS)
+{
+	TESCasino* casino;
+	SInt32 earnings;
+	if (ExtractArgs(EXTRACT_ARGS, &casino, &earnings) && casino)
+	{
+
+		auto casinoRefId = casino->refID;
+		auto iter = PlayerCharacter::GetSingleton()->casinoDataList->Head();
+		if (iter) {
+			do
+			{
+				if (auto casinoData = iter->data)
+				{
+					if (casinoData->casinoRefID == casinoRefId)
+					{
+						casinoData->earnings = earnings;
+						return true;
+					}
+				}
+			} while (iter = iter->next);
+		}
+
+		auto casinoStats = (CasinoStats*)GameHeapAlloc(sizeof(CasinoStats));
+		casinoStats->earningStage = 0;
+		casinoStats->earnings = earnings;
+		casinoStats->casinoRefID = casinoRefId;
+		PlayerCharacter::GetSingleton()->casinoDataList->Insert(casinoStats);
+	}
+
+	return true;
+}
+
+bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCasino* casino = nullptr;
+	if (ExtractArgs(EXTRACT_ARGS, &casino) && casino)
+	{
+		auto casinoRefId = casino->refID;
+		auto iter = PlayerCharacter::GetSingleton()->casinoDataList->Head();
+		if (!iter) return true;
+		do
+		{ 
+			if (auto casinoData = iter->data)
+			{
+				if (casinoData->casinoRefID == casinoRefId)
+				{
+					*result = casinoData->earnings;
+					break;
+				}
+			}
+		} while (iter = iter->next);
+	}
+
+	return true;
+}
+
+bool Cmd_ClearMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
+	*result = 0;
+	mlcOverridden = false;
+	mlcOverride = nullptr;
+	*result = 1;
+	
+	return true;
+}
+
+bool Cmd_SetMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
+	*result = 0;
+	MediaLocationController* ctrl = NULL;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &ctrl) && IS_TYPE(ctrl, MediaLocationController)) {
+		mlcOverridden = true;
+		mlcOverride = ctrl;
+		*result = 1;
+	}
+	return true;
+}
 
 bool Cmd_GetHUDShudderPower_Execute(COMMAND_ARGS) {
 	*result = 0;

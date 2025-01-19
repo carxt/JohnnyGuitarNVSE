@@ -75,6 +75,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		hk_BarterHook::barterFilterListRight.clear();
 		NPCAccuracy::FlushMapRefs();
 		shakeRequests.clear();
+		mlcOverridden = false;
+		mlcOverride = nullptr;
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_PostLoadGame:
@@ -496,8 +498,11 @@ extern "C" {
 		REG_CMD(RemoveNoteQuest);
 		REG_CMD(SetHUDShudderPower);
 		REG_CMD(GetHUDShudderPower);
-		REG_CMD(SetDialogResponseOverrideValues); // Function is subject to overrides at random and therefore not eligible for documentation. Can be removed at any time, so mod breakage due to using it will not be considered.
-
+		REG_CMD(SetDialogResponseOverrideValues); // do not document
+		REG_CMD(SetMediaLocationControllerOverride); // do not document
+		REG_CMD(ClearMediaLocationControllerOverride); // do not document
+		REG_CMD(GetCasinoWinnings);
+		REG_CMD(SetCasinoWinnings);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
