@@ -436,7 +436,7 @@ private:
 	static inline uintptr_t hPreviousAddressHook = 0;
 public:
 	static  uintptr_t __thiscall hookObjectiveDisplayed(BGSQuestObjective* pObjective) {
-		DWORD result = 0;
+		DWORD result = 1;
 		if (hPreviousAddressHook)
 		{
 			result = ThisStdCall<uintptr_t>(hPreviousAddressHook, pObjective);
