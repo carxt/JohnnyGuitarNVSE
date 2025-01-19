@@ -49,7 +49,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 514
+#define JG_VERSION 515
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 	case NVSEMessagingInterface::kMessage_NewGame:
@@ -105,7 +105,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 						ResetVanityWheel();
 					}
 				}
-	
 			}
 
 			break;
@@ -120,6 +119,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_currentSky = (Sky**)0x11DEA20;
 			g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 			g_VATSCameraData = (VATSCameraData*)0x11F2250;
+			g_mapAllForms = *(NiTPointerMap<TESForm>**)0x11C54C0;
 			g_initialTickCount = GetTickCount();
 			DumpModules();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));

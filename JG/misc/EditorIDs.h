@@ -74,7 +74,7 @@ const char* TESForm::hk_GetName() {
 	std::lock_guard<std::mutex> lock(g_NameMapLock);
 	auto itr = g_EditorNameMap.find(GetId());
 
-	if (itr != g_EditorNameMap.end())
+	if (itr != g_EditorNameMap.end() && *itr->second) //add failsafe
 		return *itr->second;
 
 	// By default the game returns an empty string

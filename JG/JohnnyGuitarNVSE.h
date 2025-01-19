@@ -57,6 +57,7 @@ DataHandler* g_dataHandler = nullptr;
 BSAudioManager* g_audioManager = nullptr;
 GameTimeGlobals* g_gameTimeGlobals = nullptr;
 StatsMenu* g_statsMenu = nullptr;
+NiTPointerMap<TESForm>* g_mapAllForms = nullptr;
 UInt8 recalculateStatFilters = 0;
 Sky** g_currentSky = nullptr;
 void(__thiscall* OriginalBipedModelUpdateWeapon)(ValidBip01Names*, TESObjectWEAP*, int) = (void(__thiscall*)(ValidBip01Names*, TESObjectWEAP*, int)) 0x4AB400;
@@ -429,20 +430,35 @@ namespace hk_BarterHook {
 
 
 template <uintptr_t a_addr>
-class hk_SleepOneInterCall {
+class hk_QuestObjectiveIsDisplayedCall {
 private:
-	static inline uintptr_t hookCall = a_addr;
+	static inline uintptr_t hPreviousAddressHook = 0;
 public:
-	static  uintptr_t __cdecl hk_SleepOneInterCallHook() {
-		auto res = CdeclCall<uintptr_t>(hookCall);
-		Sleep(1);
-		return res;
-	}
-	hk_SleepOneInterCall() {
-		uintptr_t hk_hookPoint = hookCall;
-		hookCall = *(uintptr_t*)(hk_hookPoint + 1);
-		SafeWrite32((hk_hookPoint + 1), (uintptr_t)hk_SleepOneInterCallHook);
+	static  uintptr_t __thiscall hookObjectiveDisplayed(BGSQuestObjective* pObjective) {
+		DWORD result = 0;
+		if (hPreviousAddressHook)
+		{
+			result = ThisStdCall<uintptr_t>(hPreviousAddressHook, pObjective);
+		}
+		if (result)
+		{
+			result = pObjective->status & BGSQuestObjective::eQObjStatus_displayed;
+			auto questObjectiveDisplayStr = pObjective->displayText.CStr();
+			auto questDisplayStr = pObjective->quest->GetFullName()->name.CStr();
+			if (!(questObjectiveDisplayStr && questDisplayStr && *questObjectiveDisplayStr && *questDisplayStr))
+			{
+				result = 0;
+			}
+		}
 
+		return result;
+	}
+	hk_QuestObjectiveIsDisplayedCall() {
+		if (*(char*)a_addr == 0xE9) //there's a jump here, so detour it
+		{
+			hPreviousAddressHook = GetRelJumpAddr(a_addr);
+		}
+		WriteRelJump((a_addr), (uintptr_t)hookObjectiveDisplayed);
 	}
 
 };
@@ -1637,6 +1653,11 @@ bool __cdecl IsCurrentFurnitureRefHook(TESObjectREFR* apRef, void* apComparedRef
 	return true;
 }
 
+
+
+
+
+
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
@@ -1721,6 +1742,7 @@ void HandleFixes() {
 	NPCAccuracy::CreateHook();
 	hk_DialogueTopicResponseManageHook::InitHooks();
 	hk_EmotionOverrideUndo< 0x0617D59>();
+	hk_QuestObjectiveIsDisplayedCall<0x05A5E70>();
 }
 
 void HandleIniOptions() {
