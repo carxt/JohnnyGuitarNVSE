@@ -446,7 +446,7 @@ public:
 			result = pObjective->status & BGSQuestObjective::eQObjStatus_displayed;
 			auto questObjectiveDisplayStr = pObjective->displayText.CStr();
 			auto questDisplayStr = pObjective->quest->GetFullName()->name.CStr();
-			if (!(questObjectiveDisplayStr && questDisplayStr && *questObjectiveDisplayStr && *questDisplayStr))
+			if (!((questObjectiveDisplayStr && *questObjectiveDisplayStr) || (questDisplayStr && *questDisplayStr)))
 			{
 				result = 0;
 			}
