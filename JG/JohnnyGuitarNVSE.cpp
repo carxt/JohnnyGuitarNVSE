@@ -77,6 +77,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		shakeRequests.clear();
 		mlcOverridden = false;
 		mlcOverride = nullptr;
+		ClearPlayerFurniture(); //fix furniture crash on reload
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_PostLoadGame:

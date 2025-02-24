@@ -1530,6 +1530,15 @@ void ResetMiscStatMap() {
 	}
 
 }
+
+void ClearPlayerFurniture()
+{
+	if (auto playerProcess = g_thePlayer->baseProcess)
+	{
+		playerProcess->SetFurnitureRef(g_thePlayer, 0, NULL, 0x7F);
+		
+	}
+}
 void DumpModules() {
 	HMODULE hMods[1024];
 	HANDLE hProcess = INVALID_HANDLE_VALUE;

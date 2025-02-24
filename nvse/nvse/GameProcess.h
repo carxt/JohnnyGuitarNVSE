@@ -367,11 +367,11 @@ public:
 	virtual void	Unk_12C();
 	virtual void	Unk_12D();
 	virtual void	Unk_12E();
-	virtual void	Unk_12F();
-	virtual void	Unk_130();
+	virtual DWORD	GetSitSleepState();
+	virtual void	SetFurnitureRef(Actor* actorFromProcess, DWORD sitSleepState, TESObjectREFR* pFurniture, uint8_t idx);
 	virtual void	Unk_131();
 	virtual TESObjectREFR*	GetCurrentFurnitureRef();
-	virtual void	Unk_133();
+	virtual void	RemoveFurnitureRef(TESObjectREFR*);
 	virtual void	Unk_134();
 	virtual void	Unk_135();
 	virtual void	Unk_136();
