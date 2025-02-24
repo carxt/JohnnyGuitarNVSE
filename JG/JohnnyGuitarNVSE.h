@@ -85,6 +85,7 @@ namespace hk_GMSTJG {
 		Setting fCombatLocationTargetRadiusMaxBase;
 		Setting fCombatRangedWeaponRangeBaseMult;
 		Setting iOverrideDialogueEmotionValues;
+		Setting iFixAudioMarkerLookupAlgo;
 
 	};
 	void ExtraGMSTInit()
@@ -93,6 +94,7 @@ namespace hk_GMSTJG {
 		ThisStdCall<void>(func_AddGameSetting_Float, &fCombatLocationTargetRadiusMaxBase, "fCombatLocationTargetRadiusMaxBase", 10.0f);
 		ThisStdCall<void>(func_AddGameSetting_Float, &fCombatRangedWeaponRangeBaseMult, "fCombatRangedWeaponRangeBaseMult", 1.0f);
 		ThisStdCall<void>(func_AddGameSetting_IntOrStaticStr, &iOverrideDialogueEmotionValues, "iOverrideDialogueEmotionValues", 0);
+		ThisStdCall<void>(func_AddGameSetting_IntOrStaticStr, &iFixAudioMarkerLookupAlgo, "iFixAudioMarkerLookupAlgo", 1);
 
 
 	}
@@ -840,6 +842,30 @@ float __declspec(naked) __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiV
 		ret
 	}
 }
+
+
+float __declspec(naked) __fastcall NiNodeComputeDistance2DSquared(NiVector3* Vector1, NiVector3* Vector2) {
+	__asm
+	{
+		movd xmm0, [ecx]
+		subss xmm0, [edx]
+		mulss xmm0, xmm0
+		movd xmm1, [ecx + 4]
+		subss xmm1, [edx + 4]
+		mulss xmm1, xmm1
+		addss xmm0, xmm1
+		movd eax, xmm0
+		push eax
+		fld dword ptr[esp]
+		add esp, 4
+		ret
+	}
+}
+
+
+
+
+
 NiNode* NiNode::GetNode(const char* nodeName) {
 	NiAVObject* found = GetBlock(nodeName);
 	return found ? found->GetNiNode() : NULL;
@@ -1665,6 +1691,66 @@ bool __cdecl IsCurrentFurnitureRefHook(TESObjectREFR* apRef, void* apComparedRef
 }
 
 
+template <uintptr_t a_addr>
+class hk_AudioMarkerLookup
+{
+private:
+	static MusicMarker* __fastcall LookupAudioMarkerFix(PlayerCharacter* pPlayer) {
+		MusicMarker* returnMarker = pPlayer->currMusicMarker;
+		if (returnMarker || pPlayer->musicMarkers.Empty()) return returnMarker;
+		auto iter = pPlayer->musicMarkers.Head();
+		bool playerIsInsideReturnMarkerRadius = true;
+		double returnMarkerDistance = FLT_MAX;
+		auto g_audioMarker = *(TESForm**)0x11CA228;
+		uintptr_t func_GetMarkerRadius = 0x0568CB0; //not inlined here in case someone changes the default ret the function has
+		do
+		{
+			bool currentMarkerRadiusContainsPlayer = false;
+			if (!iter->data) break;
+			TESObjectREFR* pMarker = iter->data->markerRef;
+			if (!pMarker || (pMarker->baseForm != g_audioMarker)) continue;
+			float pMarkerRadius = ThisStdCall<float>(func_GetMarkerRadius, pMarker);
+			pMarkerRadius *= pMarkerRadius;
+			float distToCurrentMarkerSquared = NiNodeComputeDistance2DSquared((NiVector3*)pMarker->GetPos(), (NiVector3*)pPlayer->GetPos());
+			currentMarkerRadiusContainsPlayer = distToCurrentMarkerSquared < pMarkerRadius;
+			
+			if (!playerIsInsideReturnMarkerRadius || currentMarkerRadiusContainsPlayer)
+			{
+				if (!playerIsInsideReturnMarkerRadius && currentMarkerRadiusContainsPlayer) [[unlikely]]
+				{
+					returnMarkerDistance = FLT_MAX;
+					playerIsInsideReturnMarkerRadius = true;
+				}
+				if ((returnMarkerDistance > distToCurrentMarkerSquared))
+				{
+					returnMarker = iter->data;
+					returnMarkerDistance = distToCurrentMarkerSquared;
+				}
+			}
+
+
+		} while (iter = iter->next);
+		pPlayer->currMusicMarker = returnMarker;
+		return returnMarker;
+	}
+protected:
+	static inline uintptr_t originalCall = a_addr;
+	static MusicMarker* __fastcall hookAudioMarkerLookup(PlayerCharacter* pPlayer)
+	{
+		using namespace hk_GMSTJG::gmst;
+		return iFixAudioMarkerLookupAlgo.data.i > 0 ? LookupAudioMarkerFix(pPlayer) : ThisStdCall<MusicMarker*>(originalCall, pPlayer);
+
+	}
+	
+public:
+	hk_AudioMarkerLookup() {
+		uintptr_t hk_hookPoint = originalCall;
+		originalCall = GetRelJumpAddr(originalCall);
+		WriteRelCall(hk_hookPoint, (uintptr_t)hookAudioMarkerLookup );
+	}
+
+
+};
 
 
 
@@ -1754,6 +1840,10 @@ void HandleFixes() {
 	hk_DialogueTopicResponseManageHook::InitHooks();
 	hk_EmotionOverrideUndo< 0x0617D59>();
 	hk_QuestObjectiveIsDisplayedCall<0x05A5E70>();
+	hk_AudioMarkerLookup<0x09698DC>();
+	hk_AudioMarkerLookup<0x05956D9>();
+
+
 }
 
 void HandleIniOptions() {
