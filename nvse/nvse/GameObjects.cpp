@@ -137,3 +137,15 @@ NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName) {
 TESObjectWEAP* Actor::GetEquippedWeapon() {
 	return ThisStdCall<TESObjectWEAP*>(0x8A1710, this);
 }
+
+
+bool TESObjectREFR::GetDisabled(bool checkQueue) const
+{
+	bool ((__fastcall * fn_GetDisabled)) (const TESObjectREFR*) = decltype(fn_GetDisabled)( 0x0440DA0);
+	if (!checkQueue) return fn_GetDisabled(this);
+	bool((__cdecl * fn_InEnableRefs)) (const TESObjectREFR*) = decltype(fn_InEnableRefs)(0x05AA680);
+	bool((__cdecl * fn_InPendingDisableRefs)) (const TESObjectREFR*) = decltype(fn_InPendingDisableRefs)(0x05AA630);
+	return (fn_GetDisabled(this) && !fn_InEnableRefs(this) ) || fn_InPendingDisableRefs(this);
+}
+
+

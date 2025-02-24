@@ -1708,7 +1708,7 @@ private:
 			bool currentMarkerRadiusContainsPlayer = false;
 			if (!iter->data) break;
 			TESObjectREFR* pMarker = iter->data->markerRef;
-			if (!pMarker || (pMarker->baseForm != g_audioMarker)) continue;
+			if (!pMarker || (pMarker->baseForm != g_audioMarker) || pMarker->GetDisabled(0)) continue;
 			float pMarkerRadius = ThisStdCall<float>(func_GetMarkerRadius, pMarker);
 			pMarkerRadius *= pMarkerRadius;
 			float distToCurrentMarkerSquared = NiNodeComputeDistance2DSquared((NiVector3*)pMarker->GetPos(), (NiVector3*)pPlayer->GetPos());

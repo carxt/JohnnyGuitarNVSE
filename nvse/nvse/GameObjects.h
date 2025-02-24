@@ -159,7 +159,7 @@ public:
 	bool IsMapMarker();
 
 	TESForm* GetBaseForm();
-	bool GetDisabled();
+	bool GetDisabled(bool checkQueue = true) const;
 	ExtraContainerChanges* GetOrCreateContainerChanges();
 	ExtraContainerChanges::EntryDataList* GetContainerChangesList();
 	SInt32 GetItemCount(TESForm* form);
