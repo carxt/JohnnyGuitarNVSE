@@ -46,7 +46,7 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
 	*result = 0;
 	TESObjectCELL* pCell = NULL;
 	BGSAcousticSpace* pAcousticSpace = NULL;
-	uintptr_t ExtraCellAcousticSpace_Init = 0x041C10B;
+	uintptr_t ExtraCellAcousticSpace_Update = 0x041C090;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, pAcousticSpace) )
 	{
 		if (pAcousticSpace && !IS_TYPE(pAcousticSpace, BGSAcousticSpace) ) [[unlikely]]
@@ -57,17 +57,7 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
 			}
 			return true;
 		}
-		ExtraCellAcousticSpace* pXAcousticSpace = (ExtraCellAcousticSpace*)pCell->extraDataList.GetByType(kExtraData_CellAcousticSpace);
-		if (pAcousticSpace)
-		{
-			if (!pXAcousticSpace)
-			{
-				ExtraCellAcousticSpace* pXAcousticSpace = (ExtraCellAcousticSpace*)FormHeap_Allocate(sizeof(ExtraCellAcousticSpace));
-				ThisStdCall<void>(ExtraCellAcousticSpace_Init, pXAcousticSpace);
-				pCell->extraDataList.Add(pXAcousticSpace);
-			}
-			pXAcousticSpace->acousticSpace = pAcousticSpace;
-		}
+		ThisStdCall<void>(ExtraCellAcousticSpace_Update, &pCell->extraDataList, pAcousticSpace);
 	}
 	return true;
 }
