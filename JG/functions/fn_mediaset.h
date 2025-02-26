@@ -12,6 +12,66 @@ DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerGetProperty, AMKGetProp, , 1, 1, kParams_On
 DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerSetProperty, AMKSetProp, , 1, 2, kParams_OneInt_OneFloat);
 DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerSetController, AMKSetCtrl, , 1, 1, kParams_OneForm);
 
+DEFINE_COMMAND_PLUGIN(GetAcousticSpace, , 1, 1, kParams_OneCell);
+DEFINE_COMMAND_PLUGIN(SetAcousticSpace, , 1, 2, kParams_OneCell_OneOptionalForm);
+
+
+
+
+bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS) 
+{
+	*result = 0;
+	TESObjectCELL* pCell = NULL;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell)) 
+	{
+		ExtraCellAcousticSpace* pXAcousticSpace = (ExtraCellAcousticSpace*)pCell->extraDataList.GetByType(kExtraData_CellAcousticSpace);
+		if (pXAcousticSpace && pXAcousticSpace->acousticSpace)
+		{
+			*(DWORD*) result = pXAcousticSpace->acousticSpace->refID;
+		}
+		if (IsConsoleMode())
+		{
+			Console_Print("GetAcousticSpace  >> 0x%lx", *(DWORD*)result);
+		}
+	}
+	return true;
+}
+
+
+
+
+
+bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESObjectCELL* pCell = NULL;
+	BGSAcousticSpace* pAcousticSpace = NULL;
+	uintptr_t ExtraCellAcousticSpace_Init = 0x041C10B;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, pAcousticSpace) )
+	{
+		if (pAcousticSpace && !IS_TYPE(pAcousticSpace, BGSAcousticSpace) ) [[unlikely]]
+		{
+			if (IsConsoleMode())
+			{
+				Console_Print("SetAcousticSpace >> Passed an invalid acoustic space");
+			}
+			return true;
+		}
+		ExtraCellAcousticSpace* pXAcousticSpace = (ExtraCellAcousticSpace*)pCell->extraDataList.GetByType(kExtraData_CellAcousticSpace);
+		if (pAcousticSpace)
+		{
+			if (!pXAcousticSpace)
+			{
+				ExtraCellAcousticSpace* pXAcousticSpace = (ExtraCellAcousticSpace*)FormHeap_Allocate(sizeof(ExtraCellAcousticSpace));
+				ThisStdCall<void>(ExtraCellAcousticSpace_Init, pXAcousticSpace);
+				pCell->extraDataList.Add(pXAcousticSpace);
+			}
+			pXAcousticSpace->acousticSpace = pAcousticSpace;
+		}
+	}
+	return true;
+}
+
 
 
 
