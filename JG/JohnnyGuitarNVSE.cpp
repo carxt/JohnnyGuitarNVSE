@@ -49,7 +49,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 515
+#define JG_VERSION 516
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 	case NVSEMessagingInterface::kMessage_NewGame:
@@ -504,6 +504,9 @@ extern "C" {
 		REG_CMD(ClearMediaLocationControllerOverride); // do not document
 		REG_CMD(GetCasinoWinnings);
 		REG_CMD(SetCasinoWinnings);
+		REG_CMD(GetAcousticSpace);
+		REG_CMD(SetAcousticSpace);
+
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

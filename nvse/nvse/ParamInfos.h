@@ -843,3 +843,16 @@ static ParamInfo kParams_OneCasinoOneInt[2] =
 	{    "Casino",    kParamType_Casino,    1    },
 	{    "Earnings",    kParamType_Integer,    1    },
 };
+
+
+
+static ParamInfo kParams_OneCell[1] =
+{
+	{	"cell",	kParamType_Cell,	0	},
+};
+
+static ParamInfo kParams_OneCell_OneOptionalForm[2] =
+{
+	{	"cell",	kParamType_Cell,	0	},
+	{	"form",	kParamType_AnyForm,	1	}
+};

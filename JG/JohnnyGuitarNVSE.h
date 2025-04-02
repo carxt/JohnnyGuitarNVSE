@@ -1691,67 +1691,6 @@ bool __cdecl IsCurrentFurnitureRefHook(TESObjectREFR* apRef, void* apComparedRef
 }
 
 
-template <uintptr_t a_addr>
-class hk_AudioMarkerLookup
-{
-private:
-	static MusicMarker* __fastcall LookupAudioMarkerFix(PlayerCharacter* pPlayer) {
-		MusicMarker* returnMarker = pPlayer->currMusicMarker;
-		if (returnMarker || pPlayer->musicMarkers.Empty()) return returnMarker;
-		auto iter = pPlayer->musicMarkers.Head();
-		bool playerIsInsideReturnMarkerRadius = true;
-		double returnMarkerDistance = FLT_MAX;
-		auto g_audioMarker = *(TESForm**)0x11CA228;
-		uintptr_t func_GetMarkerRadius = 0x0568CB0; //not inlined here in case someone changes the default ret the function has
-		do
-		{
-			bool currentMarkerRadiusContainsPlayer = false;
-			if (!iter->data) break;
-			TESObjectREFR* pMarker = iter->data->markerRef;
-			if (!pMarker || (pMarker->baseForm != g_audioMarker) || pMarker->GetDisabled(0)) continue;
-			float pMarkerRadius = ThisStdCall<float>(func_GetMarkerRadius, pMarker);
-			pMarkerRadius *= pMarkerRadius;
-			float distToCurrentMarkerSquared = NiNodeComputeDistance2DSquared((NiVector3*)pMarker->GetPos(), (NiVector3*)pPlayer->GetPos());
-			currentMarkerRadiusContainsPlayer = distToCurrentMarkerSquared < pMarkerRadius;
-			
-			if (!playerIsInsideReturnMarkerRadius || currentMarkerRadiusContainsPlayer)
-			{
-				if (!playerIsInsideReturnMarkerRadius && currentMarkerRadiusContainsPlayer) [[unlikely]]
-				{
-					returnMarkerDistance = FLT_MAX;
-					playerIsInsideReturnMarkerRadius = true;
-				}
-				if ((returnMarkerDistance > distToCurrentMarkerSquared))
-				{
-					returnMarker = iter->data;
-					returnMarkerDistance = distToCurrentMarkerSquared;
-				}
-			}
-
-
-		} while (iter = iter->next);
-		pPlayer->currMusicMarker = returnMarker;
-		return returnMarker;
-	}
-protected:
-	static inline uintptr_t originalCall = a_addr;
-	static MusicMarker* __fastcall hookAudioMarkerLookup(PlayerCharacter* pPlayer)
-	{
-		using namespace hk_GMSTJG::gmst;
-		return iFixAudioMarkerLookupAlgo.data.i > 0 ? LookupAudioMarkerFix(pPlayer) : ThisStdCall<MusicMarker*>(originalCall, pPlayer);
-
-	}
-	
-public:
-	hk_AudioMarkerLookup() {
-		uintptr_t hk_hookPoint = originalCall;
-		originalCall = GetRelJumpAddr(originalCall);
-		WriteRelCall(hk_hookPoint, (uintptr_t)hookAudioMarkerLookup );
-	}
-
-
-};
-
 
 
 
@@ -1840,10 +1779,6 @@ void HandleFixes() {
 	hk_DialogueTopicResponseManageHook::InitHooks();
 	hk_EmotionOverrideUndo< 0x0617D59>();
 	hk_QuestObjectiveIsDisplayedCall<0x05A5E70>();
-	hk_AudioMarkerLookup<0x09698DC>();
-	hk_AudioMarkerLookup<0x05956D9>();
-
-
 }
 
 void HandleIniOptions() {
