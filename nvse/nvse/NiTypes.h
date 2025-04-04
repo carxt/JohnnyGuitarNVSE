@@ -22,15 +22,39 @@ struct NiRTTI
 };
 
 // 24
-struct NiMatrix33
+struct NiMatrix3
 {
 	float	cr[3][3];
+
+	NiMatrix3() {}
+	NiMatrix3(float m00, float m10, float m20, float m01, float m11, float m21, float m02, float m12, float m22)
+	{
+		cr[0][0] = m00;
+		cr[0][1] = m10;
+		cr[0][2] = m20;
+		cr[1][0] = m01;
+		cr[1][1] = m11;
+		cr[1][2] = m21;
+		cr[2][0] = m02;
+		cr[2][1] = m12;
+		cr[2][2] = m22;
+	}
 
 	void ExtractAngles(float &rotX, float &rotY, float &rotZ);
 	void RotationMatrix(float rotX, float rotY, float rotZ);
 	void Rotate(float rotX, float rotY, float rotZ);
-	void MultiplyMatrices(NiMatrix33 &matA, NiMatrix33 &matB);
+	void MultiplyMatrices(NiMatrix3 &matA, NiMatrix3 &matB);
 	void Dump(const char *title = NULL);
+
+	void MakeXRotation(float fAngle);
+
+	void MakeYRotation(float fAngle);
+
+	void MakeZRotation(float fAngle);
+
+	NiMatrix3 operator*(const NiMatrix3& mat) const;
+
+	static const NiMatrix3 IDENTITY;
 };
 
 struct NiQuaternion;
@@ -57,8 +81,8 @@ struct NiVector3
 	}
 
 	void ToQuaternion(NiQuaternion &quaternion);
-	void MultiplyMatrixVector(NiMatrix33 &mat, NiVector3 &vec);
-	bool RayCastCoords(NiVector3 &maxRange, NiVector3 &posVector, NiMatrix33 &rotMatrix);
+	void MultiplyMatrixVector(NiMatrix3 &mat, NiVector3 &vec);
+	bool RayCastCoords(NiVector3 &maxRange, NiVector3 &posVector, NiMatrix3 &rotMatrix);
 };
 
 // 10 - always aligned?
@@ -79,22 +103,26 @@ struct NiQuaternion
 	NiQuaternion(float _w, float _x, float _y, float _z) : w(_w), x(_x), y(_y), z(_z) {}
 
 	void EulerYPR(NiVector3 &ypr);
-	void RotationMatrix(NiMatrix33 &rotMatrix);
+	void RotationMatrix(NiMatrix3 &rotMatrix);
 	void Dump();
 };
 
 // 34
 struct NiTransform
 {
-	NiMatrix33	rotate;		// 00
+	NiMatrix3	rotate;		// 00
 	NiVector3	translate;	// 24
 	float		scale;		// 30
 };
 
 // 10
-struct NiSphere
+struct NIBound
 {
-	float	x, y, z, radius;
+	NiVector3	kCenter;
+	union {
+		float	fRadius;
+		int		iRadius;
+	};
 };
 
 // 1C

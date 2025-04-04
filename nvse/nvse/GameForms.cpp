@@ -670,3 +670,7 @@ bool AlchemyItem::IsPoison() {
 	} while (iter = iter->next);
 	return effSetting != NULL;
 }
+
+TESForm* TESForm::GetFormByNumericID(UInt32 formID) {
+	return CdeclCall<TESForm*>(0x4839C0, formID);
+}

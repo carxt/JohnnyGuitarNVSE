@@ -126,6 +126,7 @@
     <ClCompile Include="..\nvse\nvse\GameTiles.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTypes.cpp" />
     <ClCompile Include="..\nvse\nvse\GameUI.cpp" />
+    <ClCompile Include="..\nvse\nvse\NiTypes.cpp" />
     <ClCompile Include="..\nvse\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\nvse\Utilities.cpp" />
     <ClCompile Include="events\LambdaVariableContext.cpp" />

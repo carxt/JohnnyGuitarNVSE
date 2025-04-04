@@ -686,7 +686,7 @@ public:
 	~NiAVObject();
 
 	virtual void			UpdateControllers(NiUpdateData& arData);
-	virtual void			ApplyTransform(NiMatrix33& arMat, NiVector3& arTrn, bool abOnLeft);
+	virtual void			ApplyTransform(NiMatrix3& arMat, NiVector3& arTrn, bool abOnLeft);
 	virtual void			Unk_39();
 	virtual NiAVObject*		GetObject_(const NiFixedString& arName);
 	virtual NiAVObject*		GetObjectByName(const NiFixedString& arName);
@@ -708,7 +708,7 @@ public:
 
 	NiNode*					m_parent;				// 18
 	bhkNiCollisionObject*	m_collisionObject;		// 1C
-	NiSphere*				m_kWorldBound;			// 20
+	NIBound*				m_pWorldBound;			// 20
 	DList<NiProperty>		m_propertyList;			// 24
 	UInt32					m_flags;				// 30
 	NiTransform				m_local;
@@ -721,6 +721,18 @@ public:
 
 	void Update(NiUpdateData& arData) {
 		ThisStdCall(0xA59C60, this, &arData);
+	}
+
+	void SetLocalRotate(const NiMatrix3& arMat) {
+		m_local.rotate = arMat;
+	}
+
+	void SetLocalTranslate(const NiVector3& arTrn) {
+		m_local.translate = arTrn;
+	}
+
+	void SetLocalScale(float afScale) {
+		m_local.scale = afScale;
 	}
 };
 
@@ -954,6 +966,10 @@ public:
 	float			maxFarNearRatio;	// 0FC
 	NiViewport		viewPort;			// 100
 	float			LODAdjust;			// 110
+
+	bool LookAtWorldPoint(const NiVector3& kWorldPt, const NiVector3& kWorldUp) {
+		return ThisStdCall<bool>(0xA701B0, this, &kWorldPt, &kWorldUp);
+	}
 };
 STATIC_ASSERT(sizeof(NiCamera) == 0x114);
 
@@ -1583,7 +1599,7 @@ public:
 	UInt16			word0A;			// 0A
 	UInt16			word0C;			// 0C
 	UInt16			word0E;			// 0E
-	NiSphere		bounds;			// 10
+	NIBound		bounds;			// 10
 	NiVector3* vertices;		// 20
 	NiVector3* normals;		// 24
 	NiColorAlpha* vertexColors;	// 28
