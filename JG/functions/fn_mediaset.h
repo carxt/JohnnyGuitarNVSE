@@ -66,7 +66,7 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
 			}
 			return true;
 		}
-		ThisStdCall<void>(ExtraCellAcousticSpace_Update, &pCell->extraDataList, pAcousticSpace);
+		ThisCall(ExtraCellAcousticSpace_Update, &pCell->extraDataList, pAcousticSpace);
 	}
 	return true;
 }

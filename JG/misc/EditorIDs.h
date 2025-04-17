@@ -37,7 +37,7 @@ void __fastcall AVInfoSetEditorIDHook(TESForm* form, UInt32 EDX, char* name) {
 }
 
 const char** AddToGameMap(const char* name, TESForm* form) {
-	ThisStdCall<NiTMap<const char*, TESForm*>::Entry*>(0x470200, *g_gameFormEditorIDsMap, name, form); // adds it to the game map
+	ThisCall<NiTMap<const char*, TESForm*>::Entry*>(0x470200, *g_gameFormEditorIDsMap, name, form); // adds it to the game map
 	auto* entry = (*g_gameFormEditorIDsMap)->LookupEntry(name);
 	if (!entry) // shouldn't happen
 		return nullptr;
@@ -128,7 +128,7 @@ void RemoveEDID(uint32_t id, bool removeFromGame) {
 #if _DEBUG
 			PrintDebug("%08X - Completely Removed EDID \"%s\"", id, *itr->second);
 #endif
-			ThisStdCall(0xE91FD0, *g_gameFormEditorIDsMap, itr->second);
+			ThisCall(0xE91FD0, *g_gameFormEditorIDsMap, itr->second);
 		}
 #if _DEBUG
 		else {
@@ -140,14 +140,14 @@ void RemoveEDID(uint32_t id, bool removeFromGame) {
 }
 
 void __fastcall TESDataHandler__RemoveIDFromDataHandler(void* apThis, void*, unsigned int aiID) {
-	ThisStdCall(0x4696F0, apThis, aiID);
+	ThisCall(0x4696F0, apThis, aiID);
 
 	std::lock_guard<std::mutex> lock(g_NameMapLock);
 	RemoveEDID(aiID, true);
 }
 
 void __fastcall NiTMapBase_DWORD_DWORD___SetAt(void* apThis, void*, UInt32 key, TESForm* val) {
-	ThisStdCall(0x844700, apThis, key, val);
+	ThisCall(0x844700, apThis, key, val);
 	UInt32 newID = key;
 	UInt32 oldID = val->GetId();
 	std::lock_guard<std::mutex> lock(g_NameMapLock);

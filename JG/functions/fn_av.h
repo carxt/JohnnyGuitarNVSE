@@ -22,7 +22,7 @@ bool Cmd_GetThresholdedActorValue_Execute(COMMAND_ARGS) {
 	UInt32 avCode;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &avCode) && thisObj->IsActor()) {
 		Actor* actor = (Actor*)thisObj;
-		*result = ThisStdCall<double>(0x66EF50, &actor->avOwner, avCode);
+		*result = ThisCall<double>(0x66EF50, &actor->avOwner, avCode);
 		if (IsConsoleMode()) Console_Print("GetThresholdAV %d >> %.2f", avCode, *result);
 	}
 	return true;

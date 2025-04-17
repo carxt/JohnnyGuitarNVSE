@@ -63,7 +63,7 @@ bool Cmd_SetRegionMapName_Execute(COMMAND_ARGS) {
 		}
 		else {
 			mapData = (TESRegionDataMap*)GameHeapAlloc(0x10);
-			ThisStdCall(0x4F3CA0, mapData);
+			ThisCall(0x4F3CA0, mapData);
 			mapData->mapName.Set(newName);
 			region->dataEntries->Append(mapData);
 		}

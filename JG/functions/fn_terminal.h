@@ -16,7 +16,7 @@ bool Cmd_RefreshTerminalMenu_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ComputersMenu* g_computersMenu = *(ComputersMenu**)0x11D9334;
 	if (g_computersMenu) {
-		ThisStdCall(0x7586E0, g_computersMenu, 0);
+		ThisCall(0x7586E0, g_computersMenu, 0);
 		*result = 1;
 	}
 	return true;
@@ -57,7 +57,7 @@ bool Cmd_RemoveTerminalMenuItem_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (entry) {
-			ThisStdCall(0x5010F0, entry);
+			ThisCall(0x5010F0, entry);
 			terminal->menuEntries.RemoveNth(menuEntryID);
 			GameHeapFree(entry);
 			*result = 1;
@@ -165,7 +165,7 @@ bool Cmd_AddTerminalMenuItem_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal) && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = (BGSTerminal::MenuEntry*)GameHeapAlloc(sizeof(BGSTerminal::MenuEntry));
 		if (entry) {
-			ThisStdCall(0x500960, entry);
+			ThisCall(0x500960, entry);
 			terminal->menuEntries.Append(entry);
 			*result = 1;
 		}

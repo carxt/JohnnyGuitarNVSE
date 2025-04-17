@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_set>
 NVSEArrayVarInterface* g_arrInterface = NULL;
 NVSEStringVarInterface* g_strInterface = NULL;
 NVSEMessagingInterface* g_msg = NULL;
@@ -71,6 +72,9 @@ std::unordered_set<DWORD> jg_gameRadioSet;
 static float g_viewmodel_near = 0.f;
 bool mlcOverridden = false;
 MediaLocationController* mlcOverride = nullptr;
+
+
+
 extern "C" {
 	bool __cdecl JGSetViewmodelClipDistance(float value);
 	float __cdecl JGGetViewmodelClipDistance();
@@ -91,10 +95,10 @@ namespace hk_GMSTJG {
 	void ExtraGMSTInit()
 	{
 		using namespace gmst;
-		ThisStdCall<void>(func_AddGameSetting_Float, &fCombatLocationTargetRadiusMaxBase, "fCombatLocationTargetRadiusMaxBase", 10.0f);
-		ThisStdCall<void>(func_AddGameSetting_Float, &fCombatRangedWeaponRangeBaseMult, "fCombatRangedWeaponRangeBaseMult", 1.0f);
-		ThisStdCall<void>(func_AddGameSetting_IntOrStaticStr, &iOverrideDialogueEmotionValues, "iOverrideDialogueEmotionValues", 0);
-		ThisStdCall<void>(func_AddGameSetting_IntOrStaticStr, &iFixAudioMarkerLookupAlgo, "iFixAudioMarkerLookupAlgo", 1);
+		ThisCall(func_AddGameSetting_Float, &fCombatLocationTargetRadiusMaxBase, "fCombatLocationTargetRadiusMaxBase", 10.0f);
+		ThisCall(func_AddGameSetting_Float, &fCombatRangedWeaponRangeBaseMult, "fCombatRangedWeaponRangeBaseMult", 1.0f);
+		ThisCall(func_AddGameSetting_IntOrStaticStr, &iOverrideDialogueEmotionValues, "iOverrideDialogueEmotionValues", 0);
+		ThisCall(func_AddGameSetting_IntOrStaticStr, &iFixAudioMarkerLookupAlgo, "iFixAudioMarkerLookupAlgo", 1);
 
 
 	}
@@ -233,7 +237,7 @@ namespace NPCAccuracy {
 		static inline uintptr_t hookCall = a_addr;
 	public:
 		static  float __fastcall hk_AccHook(Actor* a_refr, void* edx, int mode) {
-			auto res = ThisStdCall<double>(hookCall,a_refr, mode);
+			auto res = ThisCall<double>(hookCall,a_refr, mode);
 			res *= returnActorMult(a_refr);
 			return res;
 		}
@@ -282,8 +286,8 @@ namespace hk_CombatLocation
 		static inline uintptr_t hookCall = a_addr;
 	public:
 		static  double __fastcall hk_Hook(TESObjectWEAP* r_weap) {
-			auto res = ThisStdCall<double>(hookCall, r_weap);
-			if (!ThisStdCall<bool>(0x0647790, r_weap) && ThisStdCall<bool>(0x04C0C30, r_weap)) {
+			auto res = ThisCall<double>(hookCall, r_weap);
+			if (!ThisCall<bool>(0x0647790, r_weap) && ThisCall<bool>(0x04C0C30, r_weap)) {
 				res *= hk_GMSTJG::gmst::fCombatRangedWeaponRangeBaseMult.data.f;
 			}
 			return res;
@@ -362,7 +366,7 @@ namespace hk_CameraShakeHook {
 	float camShakeMinAlt = 0, camShakeTimeAlt = 0;
 	bool __fastcall fn_camAltShakeHook(Actor* a_refr, void* edx, NiMatrix3* outMatrix) {
 		NiMatrix3 shakeMatrix = {};
-		AnimData* anData = ThisStdCall<AnimData*>(0x08B70D0, a_refr);
+		AnimData* anData = ThisCall<AnimData*>(0x08B70D0, a_refr);
 		if (!anData) return true;
 		float timePassed = anData->flt0D0;
 		auto originalShakeMult = *(float*)(0x11DFED4), originalShakeTime = *(float*)(0x11DFED8);
@@ -375,12 +379,12 @@ namespace hk_CameraShakeHook {
 		*(float*)(0x11DFED8) = originalShakeTime;
 		if (remainTime > 0.0f) {
 			float euX = 0, euY= 0, euZ = 0;
-			ThisStdCall<void>(0x0A592C0, &shakeMatrix, &euX, &euY, &euZ);
+			ThisCall(0x0A592C0, &shakeMatrix, &euX, &euY, &euZ);
 			euX *= remainTime;
 			euY *= remainTime;
 			euZ *= remainTime;
-			ThisStdCall<void>(0x0A59540, &shakeMatrix, euX, euY, euZ);
-			ThisStdCall<void*>(0x43F8D0, outMatrix, outMatrix, &shakeMatrix);
+			ThisCall(0x0A59540, &shakeMatrix, euX, euY, euZ);
+			ThisCall<void*>(0x43F8D0, outMatrix, outMatrix, &shakeMatrix);
 
 		}
 		return true;
@@ -503,7 +507,7 @@ public:
 		DWORD result = 1;
 		if (hPreviousAddressHook)
 		{
-			result = ThisStdCall<uintptr_t>(hPreviousAddressHook, pObjective);
+			result = ThisCall<uintptr_t>(hPreviousAddressHook, pObjective);
 		}
 		if (result)
 		{
@@ -536,7 +540,7 @@ class hk_EmotionOverrideUndo
 	static void* __fastcall hk_UndoEmotionOverride(void** ptr)
 	{
 		Setting* iSTDEmotionVal = &hk_GMSTJG::gmst::iOverrideDialogueEmotionValues;
-		auto retVal = ThisStdCall<void*>(hookCall, ptr);
+		auto retVal = ThisCall<void*>(hookCall, ptr);
 		if (iSTDEmotionVal->data.i <= 0)
 		{
 			retVal = nullptr;
@@ -571,19 +575,7 @@ namespace hk_DialogueTopicResponseManageHook {
 		kEmotionPained,
 		kEmotionMax
 	};
-	struct DialogueResponse
-	{
-		BSString responseText;
-		UInt32 emotionType;
-		UInt32 emotionValue;
-		BSString voiceFilePath;
-		TESIdleForm* speakerAnimation;
-		TESIdleForm* listenerAnimation;
-		UInt32 sound;
-		UInt8 flags;
-		UInt8 pad25[3];
-		UInt32 responseNumber;
-	};
+	
 
 	struct DialogueCache
 	{
@@ -599,10 +591,10 @@ namespace hk_DialogueTopicResponseManageHook {
 	static uintptr_t originalTopicInfoLoad = 0x104D5D4;
 	DWORD __fastcall hk_TESTopicInfo_Load(TESTopicInfo* topicInfo, void* edx, ModInfo* modInfo)
 	{
-		DWORD retVal = ThisStdCall<DWORD>(originalTopicInfoLoad, topicInfo, modInfo);
+		DWORD retVal = ThisCall<DWORD>(originalTopicInfoLoad, topicInfo, modInfo);
 		if (retVal)
 		{
-			auto responseList = ThisStdCall<TESTopicInfoResponse**>(0x061E780, topicInfo, NULL);
+			auto responseList = ThisCall<TESTopicInfoResponse**>(0x061E780, topicInfo, NULL);
 			if (auto responseItem = *responseList)
 			{
 				do
@@ -759,7 +751,7 @@ namespace hk_RSMBarberHook {
 		return (ptr_hdpt->headFlags & 0x1) && (beardSetList.Allow(ptr_hdpt->refID));
 	}
 	DWORD __fastcall hk_RSMDestroy(void* thisObj, void* EDX, BOOL heapFree) {
-		auto ret = ThisStdCall<DWORD>(RSMDestructorOriginal, thisObj, heapFree);
+		auto ret = ThisCall<DWORD>(RSMDestructorOriginal, thisObj, heapFree);
 		haircutSetList.dFlush();
 		beardSetList.dFlush();
 		return ret;
@@ -789,7 +781,7 @@ namespace SkyCloudHook {
 
 	static uintptr_t fn_Clouds_Update = 0;
 	DWORD __fastcall hk_Clouds_Upd (void* a_cloud, void* edx, void* Sky, float timePassed) {
-		auto ret = ThisStdCall<DWORD>(fn_Clouds_Update, a_cloud, Sky, timePassed);
+		auto ret = ThisCall<DWORD>(fn_Clouds_Update, a_cloud, Sky, timePassed);
 		if (completedFirstUpdate == 1) {
 			completedFirstUpdate = 2;
 		}
@@ -817,7 +809,7 @@ namespace SkyCloudHook {
 	}
 
 	DWORD __fastcall hk_han_NewGameCloudUpdate(BGSSaveLoadGame* a_obj) {
-		return ThisStdCall<bool>(0x42CE10, a_obj) || (*(bool*)0x11D8907);
+		return ThisCall<bool>(0x42CE10, a_obj) || (*(bool*)0x11D8907);
 	
 	}
 	
@@ -1023,8 +1015,8 @@ __declspec (naked) void GetMapMarkerHook() {
 void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1) {
 	if (*&a1->muzzleFlash && a1->projectile->lightMuzzleFlash) {
 		if (!disableMuzzleLights || (disableMuzzleLights == 2 && a1->sourceActor != (Actor*)g_thePlayer) || (disableMuzzleLights == 3 && a1->sourceActor == (Actor*)g_thePlayer)) {
-			NiNode* niNode = ThisStdCall<NiNode*>(0x50D810, a1->projectile->lightMuzzleFlash, 0, *&a1->muzzleFlash, 1);
-			ThisStdCall(0x66B0D0, &a1->flashLight, niNode);
+			NiNode* niNode = ThisCall<NiNode*>(0x50D810, a1->projectile->lightMuzzleFlash, 0, *&a1->muzzleFlash, 1);
+			ThisCall(0x66B0D0, &a1->flashLight, niNode);
 		}
 	}
 }
@@ -1066,7 +1058,7 @@ TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
 				for (int i = 0; i < ammoList->Count(); i++) {
 					ammo = ammoList->GetNthForm(i);
 					if (IS_TYPE(ammo, TESAmmo)) {
-						UInt32 count = ThisStdCall<UInt32>(0x4C8F30, xChanges->data, ammo);
+						UInt32 count = ThisCall<UInt32>(0x4C8F30, xChanges->data, ammo);
 						if (count > 0) return ammo;
 					}
 				}
@@ -1208,7 +1200,7 @@ void __fastcall UIUpdateSoundHook(Sound* sound, int dummy) {
 
 void ResetVanityWheel() {
 	float* VanityWheel = (float*)0x11E0B5C;
-	float* MaxChaseCam = (ThisStdCall<float*>((uintptr_t)0x0403E20, (void*)0x11CD568));
+	float* MaxChaseCam = (ThisCall<float*>((uintptr_t)0x0403E20, (void*)0x11CD568));
 	static float f_VanityWheelcState = *MaxChaseCam;
 
 	if (*MaxChaseCam < *VanityWheel) {
@@ -1259,14 +1251,14 @@ TESRegionDataWeather* GetWeatherData(TESRegion* region) {
 void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseExtraList* a3, UInt32 itemCount, NiPoint3* a5, void* a6) {
 	if (itemCount > 10000) {
 		for (itemCount; itemCount > 10000; itemCount -= 10000) {
-			ThisStdCall(0x954610, a1, a2, a3, 10000, a5, a6);
+			ThisCall(0x954610, a1, a2, a3, 10000, a5, a6);
 		}
 	}
-	ThisStdCall(0x954610, a1, a2, a3, itemCount, a5, a6);
+	ThisCall(0x954610, a1, a2, a3, itemCount, a5, a6);
 }
 
 void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, UInt32* refID) {
-	ThisStdCall(0x4727F0, info, refID);
+	ThisCall(0x4727F0, info, refID);
 	if (*refID) {
 		CdeclCall(0x485D50, refID, info);
 	}
@@ -1294,7 +1286,7 @@ float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alter
 	constexpr float dyingTimerMin = FLT_EPSILON * 10; //Establish low tolerance, this should be ideal. Unless someone sets fDyingTimer to 0 or something, but that's their problem.
 	float dyingTimer = thisObj->dyingTimer;
 	bool keepTalkingDe = false;
-	keepTalkingDe = (ThisStdCall<bool>(0x8A67F0, actor)) || !(actor->unk80 & 1);
+	keepTalkingDe = (ThisCall<bool>(0x8A67F0, actor)) || !(actor->unk80 & 1);
 	if (keepTalkingDe) {
 		if (dyingTimer <= dyingTimerMin) { dyingTimer = dyingTimerMin; }
 	}
@@ -1321,8 +1313,8 @@ char* __fastcall GetReputationIconHook(TESReputation* rep) {
 	auto it = factionRepIcons.find(rep->refID);
 	if (it != factionRepIcons.end()) {
 		UInt8 tierID = 0;
-		UInt8 pos = ThisStdCall<UInt8>(0x616950, rep, 1);
-		UInt8 neg = ThisStdCall<UInt8>(0x616950, rep, 0);
+		UInt8 pos = ThisCall<UInt8>(0x616950, rep, 1);
+		UInt8 neg = ThisCall<UInt8>(0x616950, rep, 0);
 		if ((pos == 0 && neg == 1) || (pos == 2 && (neg == 2 || neg == 3)) || (pos == 3 && neg == 3)) {
 			tierID = 0; // in pain
 		}
@@ -1337,7 +1329,7 @@ char* __fastcall GetReputationIconHook(TESReputation* rep) {
 		}
 		if (*it->second[tierID]) return it->second[tierID];
 	}
-	return ThisStdCall<char*>(0x6167D0, rep);
+	return ThisCall<char*>(0x6167D0, rep);
 }
 
 char* __fastcall GetReputationMessageIconHook(UInt32 a1) {
@@ -1409,7 +1401,7 @@ char* __cdecl fixAudioMonoLookupOverflow(char* Dst, const char* suffix){
 
 
 Setting* __fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char* name) {
-	Setting* result = ThisStdCall<Setting*>(0x5E02B0, ini, name);
+	Setting* result = ThisCall<Setting*>(0x5E02B0, ini, name);
 	if (result) return result;
 	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
 	if (rendererSettings && !rendererSettings->settings.Empty()) {
@@ -1435,7 +1427,7 @@ void __fastcall MenuSetFlagHook(StartMenu* menu, UInt32 flags, bool doSet) {
 }
 
 bool __fastcall CanSpeakThroughHead(Actor* actor) {
-	bool res = !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head1)) && !(ThisStdCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head2));
+	bool res = !(ThisCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head1)) && !(ThisCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head2));
 	if (res) {
 		res = [](Actor* actor) -> bool {
 			if (auto thisObj = actor->baseProcess; thisObj->processLevel <= 0) {
@@ -1543,7 +1535,7 @@ __declspec (naked) void DisableDeathResponsesHook() {
 }
 
 bool __fastcall SaveINIHook(IniSettingCollection* a1, void* edx, char* a2) {
-	ThisStdCall<void>(0x5E01B0, a1, a2);
+	ThisCall(0x5E01B0, a1, a2);
 	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
 	return ThisStdCall_B(0x5E01B0, rendererSettings, rendererSettings->iniPath);
 }
@@ -1597,7 +1589,7 @@ void UpdateMiscStatList(const char* name, int value) {
 		}
 	} while (iter = iter->next);
 	if (!tile) {
-		tile = ThisStdCall<Tile*>(0x7E1190, &g_statsMenu->miscStatIDList, g_statsMenu->miscStatIDList.itemCount, 0, 0, 0);
+		tile = ThisCall<Tile*>(0x7E1190, &g_statsMenu->miscStatIDList, g_statsMenu->miscStatIDList.itemCount, 0, 0, 0);
 		tile->SetString(kTileValue_string, name, 1);
 		tile->name.Set(name);
 		recalculateStatFilters = true;
@@ -1922,7 +1914,7 @@ MediaLocationController* __fastcall MLCOverrideHook(PlayerCharacter* player)
 	{
 		return mlcOverride;
 	}
-	return ThisStdCall<MediaLocationController*>(0x9698A0, player);
+	return ThisCall<MediaLocationController*>(0x9698A0, player);
 
 }
 
