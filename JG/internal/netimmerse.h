@@ -995,7 +995,7 @@ public:
 	float			LODAdjust;			// 110
 
 	bool LookAtWorldPoint(const NiVector3& kWorldPt, const NiVector3& kWorldUp) {
-		return ThisStdCall<bool>(0xA701B0, this, &kWorldPt, &kWorldUp);
+		return ThisCall<bool>(0xA701B0, this, &kWorldPt, &kWorldUp);
 	}
 };
 STATIC_ASSERT(sizeof(NiCamera) == 0x114);
