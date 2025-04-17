@@ -856,3 +856,19 @@ static ParamInfo kParams_OneCell_OneOptionalForm[2] =
 	{	"cell",	kParamType_Cell,	0	},
 	{	"form",	kParamType_AnyForm,	1	}
 };
+
+static ParamInfo kParams_OneBoolThreeFloats[] =
+{
+	{	"Enable",		kParamType_Integer, 0	},
+	{	"X",			kParamType_Float, 0	},
+	{	"Y",			kParamType_Float, 0	},
+	{	"Z",			kParamType_Float, 0	},
+};
+
+static ParamInfo kParams_OneBoolOneIntOneFloat[] =
+{
+	{	"Enable",		kParamType_Integer, 0	},
+	{	"Axis/Mode",	kParamType_Integer, 0	},
+	{	"Angle",		kParamType_Float, 0	},
+	{	"Ref To Track",	kParamType_ObjectRef, 1 },
+};

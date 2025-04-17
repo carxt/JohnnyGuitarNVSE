@@ -28,7 +28,9 @@ DEFINE_COMMAND_PLUGIN(GetOptionalBone, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(TriggerScreenSplatterEx, , 0, 8, kSplatterParams);
 DEFINE_COMMAND_PLUGIN(SetViewmodelClipDistance, , 0, 1, kParams_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetViewmodelClipDistance, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(SetBlockTransform, , 1, 8, kTransformParams);
+DEFINE_COMMAND_PLUGIN(SetBlockTransform, , 1, ARRAYSIZE(kTransformParams), kTransformParams);
+DEFINE_COMMAND_PLUGIN(SetCameraTranslate, , 0, ARRAYSIZE(kParams_OneBoolThreeFloats), kParams_OneBoolThreeFloats);
+DEFINE_COMMAND_PLUGIN(SetCameraRotate, , 0, ARRAYSIZE(kParams_OneBoolOneIntOneFloat), kParams_OneBoolOneIntOneFloat);
 DEFINE_CMD_NO_ARGS(DumpIconMap);
 DEFINE_CMD_NO_ARGS(RollCredits);
 DEFINE_CMD_NO_ARGS(GetAllGameRadios);
@@ -732,6 +734,55 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 			object->Update(updateData);
 		}
 		*result = true;
+	}
+	return true;
+}
+
+extern NiVector3 kCameraPos;
+extern NiMatrix3 kCameraRot;
+extern UInt32 uiReferenceToTrack;
+extern bool bOverrideCameraPos;
+extern bool bOverrideCameraRot;
+extern int eAxis;
+
+bool Cmd_SetCameraTranslate_Execute(COMMAND_ARGS) {
+	int override = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &kCameraPos.x, &kCameraPos.y, &kCameraPos.z)) {
+		bOverrideCameraPos = override > 0;
+	}
+	return true;
+}
+
+bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
+	float fAngle = 0.f;
+	TESObjectREFR* pRef = nullptr;
+	int override = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &eAxis, &fAngle, &pRef)) {
+		bOverrideCameraRot = override > 0;
+		fAngle = fAngle * 0.01745329252; // PI / 180
+		NiMatrix3 kNewRot;
+		switch (eAxis) {
+		case kCameraRotationType_None:
+			kCameraRot = NiMatrix3::IDENTITY;
+			break;
+		case kCameraRotationType_X:
+			kNewRot.MakeXRotation(fAngle);
+			break;
+		case kCameraRotationType_Y:
+			kNewRot.MakeYRotation(fAngle);
+			break;
+		case kCameraRotationType_Z:
+			kNewRot.MakeZRotation(fAngle);
+			break;
+		}
+
+		if (eAxis > kCameraRotationType_None) {
+			kCameraRot = kCameraRot * kNewRot;
+		}
+
+		if (pRef) {
+			uiReferenceToTrack = pRef->refID;
+		}
 	}
 	return true;
 }

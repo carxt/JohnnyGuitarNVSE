@@ -1051,7 +1051,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	}
 
 	if (closestHostile) {
-		auto playerRotation = g_thePlayer->AdjustRot(0);
+		auto playerRotation = g_thePlayer->GetZRotation(0);
 		double headingAngle = GetAngleBetweenPoints(closestHostile->GetPos(), playerPos, playerRotation);
 
 		// shift the coordinates from -180:180 to 0:360 and offset them (360 / 8 quadrants / 2) degrees

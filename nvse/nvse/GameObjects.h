@@ -67,7 +67,7 @@ public:
 	virtual void		AnimateNiNode();
 	virtual void		GenerateNiNode(bool arg1);
 	virtual void		Set3D(NiNode* niNode, bool unloadArt);
-	virtual NiNode* GetNiNode();
+	virtual NiNode*		GetNiNode();
 	virtual void		Unk_75(void);
 	virtual void		Unk_76(void);
 	virtual void		Unk_77(void);
@@ -239,7 +239,7 @@ public:
 	virtual void		Unk_AC(void);
 	virtual void		Unk_AD(void);
 	virtual void		Unk_AE(void);
-	virtual float		AdjustRot(UInt32 arg1);
+	virtual float		GetZRotation(bool arg1);
 	virtual void		Unk_B0(void);
 	virtual void		Unk_B1(void);
 	virtual void		Unk_B2(void);
@@ -819,7 +819,7 @@ public:
 	UInt32								unk63C[3];				// 63C
 	UInt8								byte648;				// 648
 	UInt8								byte649;				// 649
-	bool								byte64A;				// 64A	= not FirstPerson
+	bool								bIs3rdPersonVisible;				// 64A	= not FirstPerson
 	bool								is3rdPerson;			// 64B
 	bool								bThirdPerson;			// 64C
 	UInt8								byte64D;				// 64D
@@ -946,7 +946,8 @@ public:
 		// tList at 6C4 is cleared when there is no current quest. There is another NiNode at 069C
 		// 086C is cleared after equipement change.
 
-	bool IsThirdPerson() { return bThirdPerson ? true : false; }
+	bool IsThirdPerson() const { return bThirdPerson; }
+	bool Is3rdPersonVisible() const { return bIs3rdPersonVisible; }
 	UInt32 GetMovementFlags() { return actorMover->GetMovementFlags(); }	// 11: IsSwimming, 9: IsSneaking, 8: IsRunning, 7: IsWalking, 0: keep moving
 	bool IsPlayerSwimming() { return (GetMovementFlags() >> 11) & 1; }
 

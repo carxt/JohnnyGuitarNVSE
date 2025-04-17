@@ -211,10 +211,10 @@ struct JGWorldToScreenMatrix {
 };
 
 struct JGCameraPosition {
-	NiMatrix33				m_localRotate;			// 34
+	NiMatrix3				m_localRotate;			// 34
 	NiVector3				m_localTranslate;		// 58
 	float					m_localScale;			// 64
-	NiMatrix33				m_worldRotate;			// 68
+	NiMatrix3				m_worldRotate;			// 68
 	NiVector3				m_worldTranslate;		// 8C
 	float					m_worldScale;			// 98
 };

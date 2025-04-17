@@ -78,6 +78,12 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		mlcOverridden = false;
 		mlcOverride = nullptr;
 		ClearPlayerFurniture(); //fix furniture crash on reload
+
+		bOverrideCameraPos = false;
+		bOverrideCameraRot = false;
+		kCameraPos = NiVector3(0,0,0);
+		kCameraRot = NiMatrix3::IDENTITY;
+
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_PostLoadGame:
@@ -506,6 +512,8 @@ extern "C" {
 		REG_CMD(SetCasinoWinnings);
 		REG_CMD(GetAcousticSpace);
 		REG_CMD(SetAcousticSpace);
+		REG_CMD(SetCameraTranslate);
+		REG_CMD(SetCameraRotate);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);

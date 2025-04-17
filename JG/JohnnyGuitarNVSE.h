@@ -127,9 +127,71 @@ __declspec (noinline) std::vector<uintptr_t> GetFactionsForActor(Actor* r_act) {
 	return retVec;
 }
 
+NiVector3 kCameraPos;
+NiMatrix3 kCameraRot = NiMatrix3::IDENTITY;
+NiMatrix3 kCameraIdentity = NiMatrix3(0, 0, 1,
+									  1, 0, 0,
+									  0, 1, 0);
+UInt32 uiReferenceToTrack = 0;
+bool bOverrideCameraPos = false;
+bool bOverrideCameraRot = false;
+int eAxis = -3;
 
+enum CameraRotationType {
+	kCameraRotationType_TrackTarget = -2,
+	kCameraRotationType_Reset	= -1,
+	kCameraRotationType_None		= 0,
+	kCameraRotationType_X			= 1,
+	kCameraRotationType_Y			= 2,
+	kCameraRotationType_Z			= 3,
+};
 
+void __fastcall SetCameraTranslateHook(NiNode* apThis, void*, NiVector3& arPos) {
+	PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
+	if (bOverrideCameraPos && pPlayer->IsThirdPerson())
+		arPos = kCameraPos;
 
+	apThis->SetLocalTranslate(arPos);
+}
+
+void __fastcall SetCameraRotateHook(NiNode* apThis, void*, NiMatrix3& arRot) {
+	PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
+	NiCamera* pCamera = (NiCamera*)apThis->GetAt(0);
+	if (eAxis == kCameraRotationType_Reset) {
+		kCameraRot = arRot;
+	}
+	else if (bOverrideCameraRot && pPlayer->IsThirdPerson()) {
+		if (eAxis == kCameraRotationType_TrackTarget) {
+			TESForm* pForm = TESForm::GetFormByNumericID(uiReferenceToTrack);
+			if (pForm->GetIsReference() && pCamera) {
+				TESObjectREFR* pTrackRef = (TESObjectREFR*)pForm;
+				NiNode* pRootNode = pTrackRef->GetNiNode();
+				NiVector3 kPos;
+				if (pRootNode && pRootNode->m_pWorldBound && pRootNode->m_pWorldBound->iRadius) {
+					kPos = pRootNode->m_pWorldBound->kCenter;
+				}
+				else {
+					kPos = *(NiVector3*)pTrackRef->GetPos();
+				}
+
+				pCamera->m_parent = nullptr;
+				pCamera->LookAtWorldPoint(kPos, NiVector3(0, 0, 1));
+				pCamera->m_parent = apThis;
+				apThis->SetLocalRotate(pCamera->m_local.rotate);
+				pCamera->SetLocalRotate(NiMatrix3::IDENTITY);
+			}
+		}
+		else {
+			apThis->SetLocalRotate(kCameraRot);
+		}
+		return;
+	}
+	else {
+		pCamera->SetLocalRotate(kCameraIdentity);
+	}
+
+	apThis->SetLocalRotate(arRot);
+}
 
 namespace NPCAccuracy {
 	struct {
@@ -298,8 +360,8 @@ struct JGSetList {
 
 namespace hk_CameraShakeHook {
 	float camShakeMinAlt = 0, camShakeTimeAlt = 0;
-	bool __fastcall fn_camAltShakeHook(Actor* a_refr, void* edx, NiMatrix33* outMatrix) {
-		NiMatrix33 shakeMatrix = {};
+	bool __fastcall fn_camAltShakeHook(Actor* a_refr, void* edx, NiMatrix3* outMatrix) {
+		NiMatrix3 shakeMatrix = {};
 		AnimData* anData = ThisStdCall<AnimData*>(0x08B70D0, a_refr);
 		if (!anData) return true;
 		float timePassed = anData->flt0D0;
@@ -1934,6 +1996,11 @@ void HandleFunctionPatches() {
 
 	WriteRelCall(0x82FC95, (UInt32)MLCOverrideHook);
 
+	WriteRelCall(0x94AD8A, UInt32(SetCameraTranslateHook));
+	WriteRelCall(0x94AD9D, UInt32(SetCameraRotateHook));
+
+	WriteRelCall(0x94BDC2, UInt32(SetCameraTranslateHook));
+	WriteRelCall(0x94BDD5, UInt32(SetCameraRotateHook));
 }
 float timer22 = 30.0;
 void HandleGameHooks() {
