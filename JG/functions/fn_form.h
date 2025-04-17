@@ -1,6 +1,7 @@
 #pragma once
 // Get/Set/Boolean functions for various form types
 #include "GameSettings.h"
+#include "ParamInfos.h"
 DEFINE_COMMAND_PLUGIN(GetBaseEffectAV, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetBaseEffectArchetype, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetInteriorLightingTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
@@ -38,9 +39,9 @@ DEFINE_COMMAND_PLUGIN(GetPrimitiveType, , 1, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetBaseScale, GetBasedScale, , 1, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetQuestFailed, GetQF, "", false, kParams_OneQuest);
 DEFINE_COMMAND_PLUGIN(GetWeaponVATSTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetWeaponVATSTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
+DEFINE_COMMAND_PLUGIN(SetWeaponVATSTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat); 
 DEFINE_COMMAND_PLUGIN(GetQuestDelay, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(SetNoteRead, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetNoteRead, , 0, 3, kParams_OneForm_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetMessageIconPath, , 0, 3, kParams_OneString_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetMessageIconPath, , 0, 2, kParams_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetBodyPartTraitString, , 0, 3, kParams_OneForm_TwoInts);
@@ -561,7 +562,7 @@ BGSEncounterZone* GetEncounterZone(ExtraDataList* list) {
 }
 
 void SetEncounterZone(ExtraDataList* list, BGSEncounterZone* zone) {
-	ThisStdCall(0x421C60, list, zone);
+	ThisCall(0x421C60, list, zone);
 }
 
 bool Cmd_SetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
@@ -628,7 +629,7 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 		}
 		else {
 			xActivateRef = (ExtraActivateRef*)GameHeapAlloc(0x20);
-			ThisStdCall(0x4338B0, xActivateRef);
+			ThisCall(0x4338B0, xActivateRef);
 			xActivateRef->activationPromptOverride.Set(newPrompt);
 			thisObj->extraDataList.Add(xActivateRef);
 		}
@@ -1115,7 +1116,7 @@ bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 bool Cmd_FaceGenRefreshAppearance_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (thisObj && thisObj->IsCharacter()) {
-		ThisStdCall(0x08D3FA0, thisObj);
+		ThisCall(0x08D3FA0, thisObj);
 		*result = 1;
 	}
 	return true;
@@ -1297,8 +1298,15 @@ bool Cmd_SetNoteRead_Execute(COMMAND_ARGS) {
 	UInt32 isRead = 0;
 	*result = 0;
 	BGSNote* note;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &isRead)) {
-		note->read = isRead > 0 ? 1 : 0;
+	UInt32 serialize = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &isRead, &serialize)) {
+		if (serialize)
+		{
+			ThisCall(0x5E9300, note, isRead > 0);
+		}
+		else {
+			note->read = isRead > 0;
+		}
 		*result = 1;
 	}
 	return true;
