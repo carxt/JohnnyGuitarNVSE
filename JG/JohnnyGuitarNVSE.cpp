@@ -15,7 +15,6 @@
 #include "nvse/GameTasks.h"
 #include "nvse/GameProcess.h"
 #include "nvse/GameRTTI.h"
-#include "nvse/GameOSDepend.h"
 #include "nvse/GameUI.h"
 #include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
@@ -23,7 +22,6 @@
 #include "nvse/FileFinder.h"
 #include "misc/WorldToScreen.h"
 #include "events/LambdaVariableContext.h"
-#include "events/JohnnyEventPredefinitions.h"
 #include "misc/misc.h"
 #include "misc/EditorIDs.h"
 #include "internal/decoding.h"
@@ -42,7 +40,6 @@
 #include "functions/fn_ui.h"
 #include "functions/fn_book.h"
 #include "functions/fn_dial.h"
-#include "events/CustomEventFilters.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
 HMODULE JohnnyHandle;
@@ -58,8 +55,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		disableMuzzleLights = 0; //reset the muzzle hook every time
 		bArrowKeysDisabled = false;
 		isShowLevelUp = true;
-		ThisStdCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
-		ThisStdCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
+		ThisCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
+		ThisCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 
 		OnDyingHandler->FlushEventCallbacks();
 		OnLimbGoneHandler->FlushEventCallbacks();
@@ -97,7 +94,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 				}
 			}
 			ComputeDiscoveredRadioDirectory();
-			for (const auto& EventInfo : EventsArray) {
+			for (const auto& EventInfo : EventInfos) {
 				EventInfo->AddQueuedEvents();
 				EventInfo->DeleteEvents();
 			}
@@ -514,6 +511,9 @@ extern "C" {
 		REG_CMD(SetAcousticSpace);
 		REG_CMD(SetCameraTranslate);
 		REG_CMD(SetCameraRotate);
+		REG_CMD(PlayHolotape);
+		REG_CMD(StopHolotape);
+		REG_CMD(SetOnTakeBackItemEventHandler);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);

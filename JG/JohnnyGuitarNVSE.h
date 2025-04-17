@@ -575,7 +575,19 @@ namespace hk_DialogueTopicResponseManageHook {
 		kEmotionPained,
 		kEmotionMax
 	};
-	
+	struct DialogueResponse
+	{
+		BSString responseText;
+		UInt32 emotionType;
+		UInt32 emotionValue;
+		BSString voiceFilePath;
+		TESIdleForm* speakerAnimation;
+		TESIdleForm* listenerAnimation;
+		UInt32 sound;
+		UInt8 flags;
+		UInt8 pad25[3];
+		UInt32 responseNumber;
+	};
 
 	struct DialogueCache
 	{
