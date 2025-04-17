@@ -1,8 +1,13 @@
 #pragma once
 
+#include "GameExtraData.h"
+#include "GameForms.h"
 #include "GameTiles.h"
 #include "GameTypes.h"
+#include "GameSound.h"
 
+struct BGSSaveLoadFileEntry;
+struct PerkRank;
 class Menu;
 class SceneGraph;
 class FOPipboyManager;
@@ -347,30 +352,30 @@ public:
 	typedef bool(__cdecl* FilterFunction)(Item* form);
 	void Filter(FilterFunction callback)
 	{
-		ThisStdCall<void>(0x729FE0, this, callback);
+		ThisCall(0x729FE0, this, callback);
 	}
 
 	// identical to Filter, but hooked by InventorySortButton for filtering contchanges
 	void FilterAlt(FilterFunction callback)
 	{
-		ThisStdCall<void>(0x730BB0, this, callback);
+		ThisCall(0x730BB0, this, callback);
 	}
 
 	// Identical to Filter, but passing a value instead of a pointer
 	void FilterVal(bool(__cdecl* callback)(Item))
 	{
-		ThisStdCall<void>(0x730BB0, this, callback);
+		ThisCall(0x730BB0, this, callback);
 	}
 
 	typedef void(__cdecl* ForEachFunc)(Tile*, Item*);
 	void ForEach(ForEachFunc func, int maxIndex1 = -1, int maxIndex2 = 0x7FFFFFFF)
 	{
-		ThisStdCall<void>(0x7314C0, this, func, maxIndex1, maxIndex2);
+		ThisCall(0x7314C0, this, func, maxIndex1, maxIndex2);
 	}
 
 	Tile* GetTileFromItem(Item** item)
 	{
-		return ThisStdCall<Tile*>(0x7A22D0, this, item);
+		return ThisCall<Tile*>(0x7A22D0, this, item);
 	}
 
 	Item* GetItemForTile(Tile* tile)
@@ -388,17 +393,17 @@ public:
 
 	void SaveScrollPosition()
 	{
-		ThisStdCall<void>(0x7312E0, this);
+		ThisCall(0x7312E0, this);
 	}
 
 	int GetNumVisibleItems()
 	{
-		return ThisStdCall<int>(0x71AE60, this);
+		return ThisCall<int>(0x71AE60, this);
 	}
 
 	void RestorePosition(bool playSound = false)
 	{
-		ThisStdCall<void>(0x731360, this, playSound);
+		ThisCall(0x731360, this, playSound);
 	}
 
 	Tile* Insert(Item* item, const char* text, signed int (*sortingFunction)(ListBoxItem<Item>* a1, ListBoxItem<Item>* a2) = nullptr, const char* _templateName = nullptr)
@@ -424,10 +429,10 @@ public:
 		listItem->byte08 = 0;
 		if (sortingFunction)
 		{
-			ThisStdCall<void>(0x7A7EB0, &this->list, listItem, sortingFunction); // InsertSorted
+			ThisCall(0x7A7EB0, &this->list, listItem, sortingFunction); // InsertSorted
 			if (this->flags & kFlag_RecalculateHeightsOnInsert)
 			{
-				ThisStdCall<void>(0x71A670, this);
+				ThisCall(0x71A670, this);
 			}
 		}
 		else
@@ -435,8 +440,8 @@ public:
 			this->list.Append(listItem);
 			if (this->flags & kFlag_RecalculateHeightsOnInsert)
 			{
-				ThisStdCall<void>(0x7269D0, this, newTile);
-				ThisStdCall<void>(0x71AD30, this);
+				ThisCall(0x7269D0, this, newTile);
+				ThisCall(0x71AD30, this);
 			}
 			newTile->SetFloat(kTileValue_listindex, this->itemCount++);
 		}
@@ -447,12 +452,12 @@ public:
 			if (this->parentTile->GetValueFloat(numVisibleItemsTrait) > 0)
 			{
 				auto valPtr = ThisCall<Tile::Value*>(0xA00E90, this->parentTile, kTileValue_height);
-				ThisStdCall<void>(0xA09200, valPtr);
-				ThisStdCall<void>(0xA09130, valPtr, kTileValue_Copy, newTile, kTileValue_height);
+				ThisCall(0xA09200, valPtr);
+				ThisCall(0xA09130, valPtr, kTileValue_Copy, newTile, kTileValue_height);
 
 				auto numVisible = this->parentTile->GetValueFloat(numVisibleItemsTrait);
-				ThisStdCall<void>(0xA09080, valPtr, kTileValue_Mul, numVisible);
-				ThisStdCall<void>(0xA09410, valPtr, 0);
+				ThisCall(0xA09080, valPtr, kTileValue_Mul, numVisible);
+				ThisCall(0xA09410, valPtr, 0);
 			}
 		}
 
@@ -461,7 +466,7 @@ public:
 
 	Tile* InsertVal(Item item, const char* text, signed int (*sortingFunction)(ListBoxItem<Item>* a1, ListBoxItem<Item>* a2) = nullptr, const char* _templateName = nullptr)
 	{
-		return ThisStdCall<Tile*>(0x754690, this, item, text, sortingFunction, _templateName);
+		return ThisCall<Tile*>(0x754690, this, item, text, sortingFunction, _templateName);
 	}
 
 	void HighlightLastItem()
@@ -495,11 +500,1353 @@ public:
 	void Init()
 	{
 		// initialises the fields and appends the menu list to the global listbox array
-		ThisStdCall<void>(0x723750, this);
+		ThisCall(0x723750, this);
 	}
 
 	void Destroy()
 	{
-		ThisStdCall<void>(0x723820, this);
+		ThisCall(0x723820, this);
 	}
 };
+
+// 230
+class MapMenu : public Menu
+{
+public:
+	MapMenu();
+	~MapMenu();
+
+	enum MapMenuTabs
+	{
+		kLocalMap = 0x20,
+		kWorldMap = 0x21,
+		kQuests = 0x22,
+		kMisc = 0x23,
+		kRadio = 0x24,
+	};
+
+	enum TileIDs
+	{
+		kTile_MM_Headline_LocationInfo = 0x0,
+		kTile_MM_Headline_TimeDateInfo = 0x1,
+		kTile_MM_LocalMap_ParentImage = 0x2,
+		kTile_MM_LocalMapCursor = 0x3,
+		kTile_MM_WorldMap_ParentImage = 0x4,
+		kTile_MM_WorldMapCursor = 0x5,
+		kTile_MM_MapHighlightBox = 0x6,
+		kTile_MM_QuestsList = 0x7,
+		kTile_MM_NotesList = 0x8,
+		kTile_MM_Notes_SelectedNoteHighlight = 0x9,
+		kTile_MM_RadioStationList = 0xA,
+		kTile_MM_Headline_ChallengeType = 0x15,
+		kTile_MM_ChallengeList = 0x13,
+		kTile_MM_Challenge_SelectedHighlight = 0x14,
+		kTile_MM_ButtonA = 0xB,
+		kTile_MM_ButtonX = 0xC,
+		kTile_MM_ButtonY = 0x12,
+		kTile_MM_DataRect = 0xD,
+		kTile_MM_DataTextRect = 0xE,
+		kTile_MM_QuestObjectivesList = 0xF,
+		kTile_MM_Waveform = 0x10,
+		kTile_MM_Tabline = 0x11,
+		kTile_MM_LocationMarker = 0x1A,
+		kTile_MM_PlayerPlacedMarker = 0x1C,
+	};
+
+	union
+	{
+		Tile* tiles[21];
+		struct
+		{
+			TileText* MM_Headline_LocationInfo;			// 028	MM_MainRect\MM_HeadlineRect\MM_Headline_LocationInfo
+			TileText* MM_Headline_TimeDateInfo;			// 02C	MM_MainRect\MM_HeadlineRect\MM_Headline_TimeDateInfo
+			TileImage* MM_LocalMap_ParentImage;			// 030	MM_MainRect\MM_LocalMap_ClipWindow\MM_LocalMap_ParentImage
+			TileImage* MM_LocalMapCursor;				// 034	MM_MainRect\MM_LocalMap_ClipWindow\MM_LocalMapCursor
+			TileImage* MM_WorldMap_ParentImage;			// 038	MM_MainRect\MM_WorldMap_ClipWindow\MM_WorldMap_ParentImage
+			TileImage* MM_WorldMapCursor;				// 03C	MM_MainRect\MM_WorldMap_ClipWindow\MM_WorldMapCursor
+			TileRect* MM_MapHighlightBox;				// 040	MM_MainRect\MM_Highlight_ClipWindow\MM_MapHighlightBox
+			TileImage* MM_QuestsList;					// 044	MM_MainRect\MM_QuestsList
+			TileImage* MM_NotesList;					// 048	MM_MainRect\MM_NotesList
+			TileImage* MM_Notes_SelectedNoteHighlight;	// 04C	MM_MainRect\MM_NotesList\MM_Notes_SelectedNoteHighlight
+			TileImage* MM_RadioStationList;				// 050	MM_MainRect\MM_RadioStationList
+			TileImage* MM_ButtonA;						// 054	MM_MainRect\MM_ButtonRect\MM_ButtonA
+			TileImage* MM_ButtonX;						// 058	MM_MainRect\MM_ButtonRect\MM_ButtonX
+			TileRect* MM_DataRect;						// 05C	MM_MainRect\MM_DataRect
+			TileImage* MM_DataTextRect;					// 060	MM_MainRect\MM_DataRect\MM_DataTextRect
+			TileImage* MM_QuestObjectivesList;			// 064	MM_MainRect\MM_DataRect\MM_QuestObjectivesList
+			TileImage* MM_Waveform;						// 068	MM_MainRect\MM_WaveformRect\MM_Waveform
+			TileRect* MM_Tabline;						// 06C	MM_Tabline
+			TileImage* MM_ButtonY;						// 070	MM_MainRect\MM_ButtonRect\MM_ButtonY
+			TileImage* MM_ChallengeList;				// 074	MM_MainRect\MM_ChallengeList
+			TileImage* MM_Challenge_SelectedHighlight;	// 078	MM_MainRect\MM_ChallengeList\MM_Challenge_SelectedHighlight
+			TileText* MM_Headline_ChallengeType;		// 07C	MM_MainRect\MM_Headline_ChallengeType
+		};
+	};
+
+	UInt8							currentTab;		// 080
+	UInt8							pad081[3];		// 081
+	TileImage* tileWorldMap;	// 084
+	float							lastRadioAnimationUpdateTime;// 088
+	UInt8							isShowAllNotes;	// 08C
+	UInt8							gap08D[3];
+	BGSNote* currentNote;
+	UInt32							timeNoteViewed;
+	SoundList						holotapeDialogues;
+	BSSimpleArray<char>				holotapeSubtitles;	// 0A8
+	SoundList*				currentHolotapeDialogueSound;
+	UInt8							isHolotapeVoicePlaying;
+	UInt8							pad0BD[3];
+	float							holotapeTotalTime;
+	UInt32							holotapePlayStartTime;
+	float							radioVolume;
+	TESQuest* selectedQuest;
+	BGSQuestObjective* currentObjective;
+	TileImage* mapMarker;		// 0D4
+	tList<TESObjectREFR>			mapMarkerList;	// 0D8
+	tList<TESObjectREFR>			doorList;		// 0E0
+	float						CornerNWPos[2];	// 0E8
+	float						CornerSEPos[2];	// 0F0
+	TESForm* markerForm;	// 0F8
+	float						markerPos[3];		// 0FC
+	TESObjectCELL* currentCellOrWorldspace;// 108
+	TESWorldSpace* parentmostLastExtDoorWorldspace;// 10C
+	UInt8							currentWorldspaceHasNoParent;// 110
+	UInt8							gap111[3];
+	TESObjectREFR* lastExtDoor;	// 114
+	TESObjectREFR* selectedMarker;// 118
+	TESObjectCELL* localMapInteriorCell;		// 11C
+	float						clickStartPos[2];	// 120
+	UInt32							unk128;			// 128
+	bool							fogOfWar;		// 12C
+	UInt8							pad12D[3];		// 12D
+	ListBox<TESQuest>				questList;		// 130
+	ListBox<BGSNote>				noteList;		// 160
+	ListBox<TESObjectREFR>			radioRefList;	// 190
+	ListBox<BGSQuestObjective>		objectiveList;	// 1C0
+	ListBox<TESChallenge>			challengeList;	// 1F0
+	BSSimpleArray<Tile>				arr220;			// 220
+
+	static MapMenu* GetSingleton() { return *(MapMenu**)0x11DA368; };
+
+	void PlayHolotape(BGSNote* note, bool playStartSound);
+
+	void StopHolotape(bool playStopSound);
+};
+STATIC_ASSERT(sizeof(MapMenu) == 0x230);
+
+// 0C
+struct DialogueResponseList
+{
+	ListNode<DialogueResponse> list;
+	ListNode<DialogueResponse>* current;
+
+	bool Next()
+	{
+		if (current)
+		{
+			current = current->next;
+		}
+		return current != nullptr;
+	}
+};
+STATIC_ASSERT(sizeof(DialogueResponseList) == 0xC);
+// 1C
+struct DialogueItem
+{
+	DialogueResponseList responses; // 00
+	TESTopicInfo* topicInfo;// 0C
+	TESTopic* topic;		// 10
+	TESQuest* quest;		// 14
+	Actor* speaker;			// 18
+};
+STATIC_ASSERT(sizeof(DialogueItem) == 0x1C);
+struct DialogueItemList
+{
+	ListNode<DialogueItem> list;
+	ListNode<DialogueItem>* current;
+
+	void Destroy(bool doFree)
+	{
+		ThisCall(0x798450, this, doFree);
+	}
+
+	DialogueItem* GetCurrentItem()
+	{
+		return current ? current->data : nullptr;
+	}
+
+	DialogueResponse* GetCurrentResponse()
+	{
+		if (current && current->data)
+		{
+			if (current->data->responses.current)
+			{
+				return current->data->responses.current->data;
+			}
+			return current->data->responses.list.data;
+		}
+		return nullptr;
+	}
+
+	bool Next()
+	{
+		if (current)
+		{
+			current = current->next;
+		}
+		return current != nullptr;
+	}
+
+	bool HasResponse()
+	{
+		return GetCurrentResponse() != nullptr;
+	}
+};
+
+STATIC_ASSERT(sizeof(DialogueItemList) == 0xC);
+
+
+// 94
+class MessageMenu : public Menu			// 1001
+{
+public:
+	MessageMenu();
+	~MessageMenu();
+
+	TileRect* tile28;		// 28
+	TileText* tile2C;		// 2C
+	TileImage* tile30;		// 30
+	TileText* tile34;		// 34
+	TileImage* tile38;		// 38
+	TileImage* tile3C;		// 3C
+	ListBox<int>		buttonList;		// 40
+	UInt8				unk70;			// 70
+	UInt8				pad71[3];		// 71
+	float				unk74[3];		// 74
+	UInt32				unk80[2];		// 80
+	UInt32				tickCount;		// 88
+	UInt8				unk8C;			// 8C
+	UInt8				unk8D;			// 8D
+	UInt8				pad8E[2];		// 8E
+	UInt32				unk90;			// 90
+};
+
+typedef ListBox<ContChangesEntry> MenuItemEntryList;
+
+// 124
+class InventoryMenu : public Menu		// 1002
+{
+public:
+	InventoryMenu();
+	~InventoryMenu();
+
+	TileRect* tile028;		// 028	IM_Headline_PlayerCapsInfo
+	TileRect* tile02C;		// 02C	IM_Headline_PlayerHPInfo
+	TileRect* tile030;		// 030	IM_Headline_PlayerDRInfo
+	TileRect* tile034;		// 034	IM_Headline_PlayerWGInfo
+	TileImage* tile038;		// 038	IM_InventoryList
+	TileRect* tile03C;		// 03C	IM_HotKeyWheel
+	TileImage* tile040;		// 040	IM_EquipButton
+	TileImage* tile044;		// 044	IM_DropButton
+	TileImage* tile048;		// 048	IM_RepairButton
+	TileImage* tile04C;		// 04C	IM_HotkeyButton
+	TileImage* tile050;		// 050	IM_CancelButton
+	TileImage* tile054;		// 054	IM_ItemIcon
+	TileRect* tile058;		// 058	IM_ItemInfoRect
+	TileRect* tile05C;		// 05C	IM_Tabline
+	TileRect* tile060;		// 060	DAMInfo
+	TileRect* tile064;		// 064	DPSInfo
+	TileRect* tile068;		// 068	StrengthReqInfo
+	TileRect* tile06C;		// 06C	DamageResistInfo
+	TileRect* tile070;		// 070	DamageThresholdInfo
+	TileImage* tile074;		// 074	IM_ModButton
+	TileImage* tile078;		// 078	IM_ItemIconBadge
+	TileRect* tile07C;		// 07C	IM_Headline_PlayerDTInfo
+	TileText* tile080;		// 080	IM_StrReq
+	UInt32				filter;			// 084
+	UInt32				unk088[12];		// 088
+	MenuItemEntryList	itemList;		// 0B8
+	TileRect* tile0E8;		// 0E8
+	TileRect* tile0EC;		// 0EC
+	TileRect* tile0F0;		// 0F0
+	TileRect* tile0F4;		// 0F4
+	TileRect* tile0F8;		// 0F8
+	TileRect* tile0FC;		// 0FC
+	TileRect* tile100;		// 100
+	TileRect* tile104;		// 104
+	TileRect* tile108;		// 108
+	UInt32				unk10C[6];		// 10C
+};
+
+// 2A4
+class StatsMenu : public Menu			// 1003
+{
+public:
+	StatsMenu();
+	~StatsMenu();
+
+	struct AlchItemData {
+		AlchemyItem* alchItem;
+		TileImage* tileImg;
+		void* dataPtr;
+		bool			(*callback)(void* arg);
+	};
+
+	struct StatusEffect;
+
+	AlchItemData					alchItemData[4];	// 028	0: Stimpak, 1: Rad-X, 2: RadAway, 3: Doctor's Bag
+	BSSimpleList<EffectSetting>		effectList;			// 068
+	UInt32							unk074[4];			// 074
+	BSSimpleList<StatusEffect>		statusEffList;		// 084
+	TileImage* tile090;			// 090
+	TileImage* tile094;			// 094
+	TileImage* tile098;			// 098
+	TileImage* tile09C;			// 09C
+	TileImage* tile0A0;			// 0A0
+	TileImage* tile0A4;			// 0A4
+	TileImage* tile0A8;			// 0A8
+	TileImage* tile0AC;			// 0AC
+	TileImage* tile0B0;			// 0B0
+	TileImage* tile0B4;			// 0B4
+	TileImage* tile0B8;			// 0B8
+	TileImage* tile0BC;			// 0BC
+	TileImage* tile0C0;			// 0C0
+	TileRect* tile0C4;			// 0C4
+	TileImage* tile0C8;			// 0C8
+	TileRect* tile0CC;			// 0CC
+	TileImage* tile0D0;			// 0D0
+	TileRect* tile0D4;			// 0D4
+	TileImage* tile0D8;			// 0D8
+	TileRect* tile0DC;			// 0DC
+	TileImage* tile0E0;			// 0E0
+	TileRect* tile0E4;			// 0E4
+	TileImage* tile0E8;			// 0E8
+	TileRect* tile0EC;			// 0EC
+	TileImage* tile0F0;			// 0F0
+	TileImage* tile0F4;			// 0F4
+	TileImage* tile0F8;			// 0F8
+	TileText* tile0FC;			// 0FC
+	TileImage* tile100;			// 100
+	TileImage* tile104;			// 104
+	TileImage* tile108;			// 108
+	TileImage* tile10C;			// 10C
+	TileImage* tile110;			// 110
+	TileImage* tile114;			// 114
+	TileImage* tile118;			// 118
+	TileText* tile11C;			// 11C
+	TileImage* tile120;			// 120
+	TileText* tile124;			// 124
+	TileText* tile128;			// 128
+	TileText* tile12C;			// 12C
+	TileRect* tile130;			// 130
+	TileRect* tile134;			// 134
+	TileRect* tile138;			// 138
+	TileRect* tile13C;			// 13C
+	TileText* tile140;			// 140
+	TileText* tile144;			// 144
+	TileImage* tile148;			// 148
+	TileImage* tile14C;			// 14C
+	TileText* tile150;			// 150
+	TileImage* tile154;			// 154
+	TileImage* tile158;			// 158
+	TileText* tile15C;			// 15C
+	TileImage* tile160;			// 160
+	TileImage* tile164;			// 164
+	TileImage* tile168;			// 168
+	TileImage* tile16C;			// 16C
+	TileImage* tile170;			// 170
+	TileImage* tile174;			// 174
+	TileImage* tile178;			// 178
+	TileImage* tile17C;			// 17C
+	ListBox<UInt32>					avIndexList180;		// 180
+	ListBox<UInt32>					avIndxeList1B0;		// 1B0
+	ListBox<PerkRank>				perkRankList;		// 1E0
+	ListBox<UInt32>					miscStatIDList;		// 210
+	ListBox<StatusEffect>			statusEffListBox;	// 240
+	ListBox<TESReputation>			reputationList;		// 270
+	UInt32							unk2A0;				// 2A0
+
+	__forceinline static StatsMenu* Get() { return *(StatsMenu**)0x11DACE0; }
+};
+
+// 50
+class Tile3D : public Tile {
+public:
+	Tile3D();
+	~Tile3D();
+
+	UInt32			unk38[6];
+};
+
+// 278
+class HUDMainMenu : public Menu			// 1004
+{
+public:
+	HUDMainMenu();
+	~HUDMainMenu();
+
+	struct QueuedMessage {
+		char	msgText[0x204];			// 000
+		char	iconPate[MAX_PATH];		// 204
+		char	soundPath[MAX_PATH];	// 308
+		float	displayTime;			// 40C
+	};
+
+	struct SubtitleData;
+
+	struct Struct224 {
+		UInt8		byte00;		// 00
+		UInt8		pad01[3];	// 01
+		float		flt04;		// 04
+		float		flt08;		// 08
+		float		flt0C;		// 0C
+		float		flt10;		// 10
+		UInt32		unk14;		// 14
+		UInt32		tickCount;	// 18
+		UInt8		byte1C;		// 1C
+		UInt8		byte1D;		// 1D
+		UInt8		pad1E[2];	// 1E
+	};
+	enum VisibilityFlags {
+		kActionPoints = 0x1,
+		kHitPoints = 0x2,
+		kRadiationMeter = 0x4,
+		kEnemyHealth = 0x8,
+		kQuestReminder = 0x10,
+		kRegionLocation = 0x20,
+		kReticleCenter = 0x40,
+		kSneakMeter = 0x80,
+		kMessages = 0x100,
+		kInfo = 0x200,
+		kSubtitles = 0x400,
+		kHotkeys = 0x800,
+		kXpMeter = 0x1000,
+		kBreathMeter = 0x2000,
+		kExplosivePositioning = 0x4000,
+		kCrippledLimbIndicator = 0x8000,
+		kHardcoreMode = 0x10000,
+	};
+	enum HUDStates {
+		kHUDState_RECALCULATE = 0x1,
+		kHUDState_Normal = 0x2,
+		kHUDState_PipBoy = 0x3,
+		kHUDState_Pause = 0x4,
+		kHUDState_Loading = 0x5,
+		kHUDState_Dialog = 0x6,
+		kHUDState_VATSMenu = 0x7,
+		kHUDState_VATSPlayback = 0x8,
+		kHUDState_Container = 0x9,
+		kHUDState_BeginSit = 0xA,
+		kHUDState_SleepWait = 0xB,
+		kHUDState_PlayerDisabledControls = 0xC,
+		kHUDState_D = 0xD,
+		kHUDState_LevelUpMenu = 0xE,
+		kHUDState_Hacking = 0xF,
+		kHUDState_Computers = 0x10,
+		kHUDState_Message = 0x11,
+		kHUDState_SpecialBook = 0x12,
+		kHUDState_LoveTester = 0x13,
+		kHUDState_VanityCam = 0x14,
+		kHUDState_15 = 0x15,
+		kHUDState_Aiming = 0x16,
+		kHUDState_AimingScope = 0x17,
+		kHUDState_IntroMovie = 0x18,
+		kHUDState_Gambling = 0x19,
+	};
+
+	UInt32							unk028;			// 028
+	TileImage* tile02C;		// 02C	HitPoints\meter
+	TileText* tile030;		// 030	HitPoints\justify_right_text
+	TileRect* tile034;		// 034	HitPoints\compass_window\compass_icon_group
+	TileRect* tile038;		// 038	HitPoints\compass_window\compass_icon_group
+	TileRect* tile03C;		// 03C	HitPoints\compass_window\compass_icon_group
+	TileImage* tile040;		// 040	HitPoints\compass_window
+	TileImage* tile044;		// 044	ActionPoints\meter
+	TileText* tile048;		// 048	ActionPoints\justify_right_text
+	TileText* tile04C;		// 04C	ActionPoints\justify_right_text
+	TileImage* tile050;		// 050	ActionPoints\meter
+	TileImage* tile054;		// 054	ActionPoints\MeterBackground
+	TileText* tile058;		// 058	ActionPoints\justify_right_text
+	TileRect* tile05C;		// 05C	QuestReminder\QuestStages
+	TileRect* tile060;		// 060	QuestReminder\QuestAdded
+	TileText* tile064;		// 064	Region_Location\justify_left_text
+	TileText* tile068;		// 068	Region_Location\justify_left_text
+	TileImage* tile06C;		// 06C	RadiationMeter\radiation_bracket
+	TileImage* tile070;		// 070	RadiationMeter\radiation_pointer
+	TileText* tile074;		// 074	RadiationMeter\radiation_text_value
+	TileText* tile078;		// 078	RadiationMeter\radiation_text
+	TileImage* tile07C;		// 07C	EnemyHealth\enemy_health_bracket
+	TileImage* tile080;		// 080	EnemyHealth\meter
+	TileText* tile084;		// 084	EnemyHealth\justify_center_text
+	TileText* sneakLabel;	// 088	SneakMeter\sneak_nif
+	TileImage* tile08C;		// 08C	Messages\message_icon
+	TileText* tile090;		// 090	Messages\justify_left_text
+	TileImage* tile094;		// 094	Messages\message_bracket
+	TileText* tile098;		// 098	Subtitles\justify_center_text
+	TileRect* tile09C;		// 09C	Info\justify_center_hotrect
+	TileText* tile0A0;		// 0A0	Info\justify_center_hotrect\PCShortcutLabel
+	TileImage* tile0A4;		// 0A4	Info\justify_center_hotrect\xbox_button
+	TileText* tile0A8;		// 0A8	Info\justify_center_text
+	TileText* tile0AC;		// 0AC	Info\justify_center_text
+	TileText* tile0B0;		// 0B0	Info\justify_center_text
+	TileText* tile0B4;		// 0B4	Info\justify_right_text
+	TileText* tile0B8;		// 0B8	Info\justify_left_text
+	TileText* tile0BC;		// 0BC	Info\justify_right_text
+	TileText* tile0C0;		// 0C0	Info\justify_left_text
+	TileImage* tile0C4;		// 0C4	Info\info_seperator
+	TileRect* tile0C8;		// 0C8	Hokeys\hotkey_selector
+	TileText* tile0CC;		// 0CC	Hokeys\justify_center_text
+	TileImage* tile0D0;		// 0D0	HitPoints\left_bracket
+	TileImage* tile0D4;		// 0D4	ActionPoints\right_bracket
+	TileImage* tile0D8;		// 0D8	XPMeter\XPBracket
+	TileText* tile0DC;		// 0DC	XPMeter\XPAmount
+	TileText* tile0E0;		// 0E0	XPMeter\XPLabel
+	TileImage* tile0E4;		// 0E4	XPMeter\XPPointer
+	TileText* tile0E8;		// 0E8	XPMeter\XPLastLevel
+	TileText* tile0EC;		// 0EC	XPMeter\XPNextLevel
+	TileText* tile0F0;		// 0F0	XPMeter\XPLevelUp
+	TileImage* tile0F4;		// 0F4	ReticleCenter\reticle_center
+	TileImage* tile0F8;		// 0F8	crippled_limb_indicator\Face
+	TileImage* tile0FC;		// 0FC	crippled_limb_indicator\Head
+	TileImage* tile100;		// 100	crippled_limb_indicator\Torso
+	TileImage* tile104;		// 104	crippled_limb_indicator\Left_Arm
+	TileImage* tile108;		// 108	crippled_limb_indicator\Right_Arm
+	TileImage* tile10C;		// 10C	crippled_limb_indicator\Left_Leg
+	TileImage* tile110;		// 110	crippled_limb_indicator\Right_Leg
+	TileRect* tile114;		// 114	ActionPoints
+	TileRect* tile118;		// 118	HitPoints
+	TileRect* tile11C;		// 11C	RadiationMeter
+	TileRect* tile120;		// 120	EnemyHealth
+	TileRect* tile124;		// 124	QuestReminder
+	TileRect* tile128;		// 128	Region_Location
+	TileRect* tile12C;		// 12C	ReticleCenter
+	TileRect* tile130;		// 130	SneakMeter
+	TileRect* tile134;		// 134	Messages
+	TileRect* tile138;		// 138	Info
+	TileRect* tile13C;		// 13C	Subtitles
+	TileRect* tile140;		// 140	Hokeys
+	TileRect* tile144;		// 144	XPMeter
+	Tile3D* tile148;		// 148	BreathMeter
+	TileRect* tile14C;		// 14C	Explosive_positioning_rect
+	TileRect* tile150;		// 150	crippled_limb_indicator
+	TileImage* tile154;		// 154	DDTIcon
+	TileImage* tile158;		// 158	DDTIconEnemy
+	TileText* tile15C;		// 15C	AmmoTypeLabel
+	TileRect* tile160;		// 160	HardcoreMode
+	TileText* tile164;		// 164	HardcoreMode\Dehydration
+	TileText* tile168;		// 168	HardcoreMode\Sleep
+	TileText* tile16C;		// 16C	HardcoreMode\Hunger
+	TileImage* tile170;		// 170	DDTIcon
+	TileImage* tile174;		// 174	DDTIconEnemyAP
+	TileText* tile178;		// 178	HardcoreMode\Rads
+	TileText* tile17C;		// 17C	HardcoreMode\LMBs
+	TileImage* tile180;		// 180	CNDArrows
+	UInt32							unk184;			// 184
+	float							flt188;			// 188
+	tList<QueuedMessage>			queuedMessages;	// 18C
+	UInt32							currMsgKey;		// 194
+	BSSimpleArray<SubtitleData>		subtitlesArr;	// 198
+	UInt32							unk1A8[4];		// 1A8
+	TESObjectREFR* crosshairRef;	// 1B8
+	UInt32							unk1BC;			// 1BC
+	UInt32							unk1C0;			// 1C0	Crosshair flags?
+	UInt32							unk1C4;			// 1C4
+	TileRect* tile1C8;		// 1C8	Hokeys\hotkey_selector
+	TileRect* tile1CC;		// 1CC	Hokeys\hotkey_selector\HK_Item_0
+	UInt32							unk1D0;			// 1D0
+	TileRect* tile1D4;		// 1D4	Hokeys\hotkey_selector\HK_Item_2
+	TileRect* tile1D8;		// 1D8	Hokeys\hotkey_selector\HK_Item_3
+	TileRect* tile1DC;		// 1DC	Hokeys\hotkey_selector\HK_Item_4
+	TileRect* tile1E0;		// 1E0	Hokeys\hotkey_selector\HK_Item_5
+	TileRect* tile1E4;		// 1E4	Hokeys\hotkey_selector\HK_Item_6
+	TileRect* tile1E8;		// 1E8	Hokeys\hotkey_selector\HK_Item_7
+	UInt32							unk1EC[5];		// 1EC
+	NiControllerSequence* niContSeq;		// 200
+	UInt8							byte204;		// 204
+	UInt8							byte205;		// 205
+	UInt8							pad206[2];		// 206
+	UInt32							unk208[5];		// 208
+	Actor* healthTarget;	// 21C
+	UInt32							unk220;			// 220
+	Struct224						unk224;			// 224
+	UInt32							unk244;			// 244
+	UInt32							unk248[4];		// 248
+	tList<UInt32>					list258;		// 258
+	UInt8							byte260;		// 260
+	UInt8							byte261;		// 261
+	UInt8							pad262[2];		// 262
+	tList<UInt32>					list264;		// 264
+	tList<UInt32>					list26C;		// 26C
+	float							flt274;			// 274
+
+	static HUDMainMenu* GetSingleton() { return *(HUDMainMenu**)0x11D96C0; }
+};
+STATIC_ASSERT(sizeof(HUDMainMenu) == 0x278);
+
+// 5C0
+class LoadingMenu : public Menu			// 1007
+{
+public:
+	LoadingMenu();
+	~LoadingMenu();
+
+	Tile3D* tile028;		// 028
+	TileText* tile02C;		// 02C
+	TileText* tile030;		// 030
+	TileText* tile034;		// 034
+	TileText* tile038;		// 038
+	TileText* tile03C;		// 03C
+	TileText* tile040;		// 040
+	TileText* tile044;		// 044
+	TileText* tile048;		// 048
+	TileText* tile04C;		// 04C
+	TileImage* tile050;		// 050
+	Tile3D* tile054;		// 054
+	TileImage* tile058;		// 058
+	TileText* tile05C;		// 05C
+	TileText* tile060;		// 060
+	TileText* tile064;		// 064
+	TileRect* tile068;		// 068
+	TileText* tile06C;		// 06C
+	TileRect* tile070;		// 070
+	TileText* tile074;		// 074
+	TileText* tile078;		// 078
+	TileText* tile07C;		// 07C
+	TileText* tile080;		// 080
+	TileText* tile084;		// 084
+	TileText* tile088;		// 088
+	TileText* tile08C;		// 08C
+	TileText* tile090;		// 090
+	TileRect* tile094;		// 094
+	TileText* tile098;		// 098
+	TileText* tile09C;		// 09C
+	TileText* tile0A0;		// 0A0
+	TileRect* tile0A4;		// 0A4
+	TileImage* tile0A8;		// 0A8
+	TileImage* tile0AC;		// 0AC
+	TileText* tile0B0;		// 0B0
+	TileText* tile0B4;		// 0B4
+	TileImage* tile0B8;		// 0B8
+	TileImage* tile0BC;		// 0BC
+	UInt32				unk0C0;			// 0C0
+	UInt32				unk0C4;			// 0C4
+	UInt32				unk0C8;			// 0C8
+	UInt32				unk0CC;			// 0CC
+	DList<Tile>			list0D0;		// 0D0
+	DList<Tile>			list0DC;		// 0DC
+	DList<Tile>			list0E8;		// 0E8
+	DList<Tile>			list0F4;		// 0F4
+	DList<Tile>			list100;		// 100
+	UInt32				unk10C[49];		// 10C
+	TESLoadScreen* loadScr1D0;	// 1D0
+	void* ptr1D4;		// 1D4
+	void* ptr1D8;		// 1D8
+	TESLoadScreen* loadScr1DC;	// 1DC
+	UInt32				unk1E0;			// 1E0
+	UInt32				unk1E4;			// 1E4
+	TESWorldSpace* worldspace;	// 1E8
+	UInt32				unk1EC[8];		// 1EC
+	NiSourceTexture* srcTexture[4];	// 20C
+	UInt32				unk21C;			// 21C
+	UInt8				byte220[2];		// 220
+	UInt16				flags;			// 222
+	UInt32				unk224[231];	// 224
+};
+STATIC_ASSERT(sizeof(LoadingMenu) == 0x5C0);
+
+// 10C
+class ContainerMenu : public Menu		// 1008
+{
+public:
+	ContainerMenu();
+	~ContainerMenu();
+
+	TileImage* tile028;		// 028
+	TileText* tile02C;		// 02C
+	TileImage* tile030;		// 030
+	TileText* tile034;		// 034
+	TileImage* tile038;		// 038
+	TileImage* tile03C;		// 03C
+	TileText* tile040;		// 040
+	TileImage* tile044;		// 044
+	TileImage* tile048;		// 048
+	TileImage* tile04C;		// 04C
+	TileImage* tile050;		// 050
+	TileImage* tile054;		// 054
+	TileImage* tile058;		// 058
+	TileRect* tile05C;		// 05C
+	TileRect* tile060;		// 060
+	TileRect* tile064;		// 064
+	TileRect* tile068;		// 068
+	TileRect* tile06C;		// 06C
+	TileRect* tile070;		// 070
+	TESObjectREFR* containerRef;	// 074
+	tList<void>			list078;		// 078
+	UInt32				unk080;			// 080
+	UInt32				unk084;			// 084
+	UInt32				unk088;			// 088
+	UInt32				leftFilter;		// 08C
+	UInt32				rightFilter;	// 090
+	UInt32				unk094;			// 094
+	MenuItemEntryList	leftItems;		// 098
+	MenuItemEntryList	rightItems;		// 0C8
+	MenuItemEntryList* currentItems;	// 0F8
+	UInt32				unk0FC[4];		// 0FC
+};
+STATIC_ASSERT(sizeof(ContainerMenu) == 0x10C);
+
+// 13C
+class DialogMenu : public Menu			// 1009
+{
+public:
+	DialogMenu();
+	~DialogMenu();
+
+	UInt32				unk028[2];		// 028
+	TileImage* tile030;		// 030
+	TileText* tile034;		// 034
+	TileText* tile038;		// 038
+	TileImage* tile03C;		// 03C
+	ListBox<int>		topicList;		// 040
+	void* unk070;		// 070
+	UInt32				unk074;			// 074
+	TESTopicInfo* info078;		// 078
+	UInt32				unk07C;			// 07C
+	TESObjectREFR* partnerRef;	// 080
+	float				unk084[2];		// 084
+	void* unk08C;		// 08C
+	void* unk090;		// 090
+	TESTopicInfo* infos094[16];	// 094
+	void* unk0D4;		// 0D4
+	UInt32				unk0D8[3];		// 0D8
+	TESTopicInfo* infos0E4[8];	// 0E4
+	UInt32				unk104[3];		// 104
+	TESTopicInfo* infos110[6];	// 110
+	float				unk128;			// 128
+	void* unk12C;		// 12C	ImageSpaceModifierInstanceDOF
+	UInt32				unk130[3];		// 130
+};
+
+// 4C
+class SleepWaitMenu : public Menu		// 1012
+{
+public:
+	SleepWaitMenu();
+	~SleepWaitMenu();
+
+	TileText* tile28;		// 28
+	TileImage* tile2C;		// 2C
+	TileText* tile30;		// 30
+	TileText* tile34;		// 34
+	TileImage* tile38;		// 38
+	TileImage* tile3C;		// 3C
+	UInt32				unk40;			// 40
+	UInt8				isStarted;      //44
+	bool				isRest;         //45
+	UInt8				restKeyDebounce; //46
+	UInt8				pad47;           //47
+	float				selectedHours;	// 48
+};
+STATIC_ASSERT(sizeof(SleepWaitMenu) == 0x4C);
+
+// 1D4
+class StartMenu : public Menu			// 1013
+{
+public:
+	StartMenu();
+	~StartMenu();
+
+	// 10
+	class Option {
+	public:
+		Option();
+		~Option();
+
+		virtual void	Destructor(bool doFree);
+
+		const char* optionName;				// 04
+		void			(*followupOption)(void);	// 08
+		UInt32			unk0C;						// 0C
+	};
+
+	// 30
+	class UserOption : public Option {
+	public:
+		UserOption();
+		~UserOption();
+
+		const char* templateName;					// 10
+		UInt32			currValue;						// 14
+		UInt32			unk18[4];						// 18
+		const char** currValueName;				// 28
+		void			(*onSelection)(UserOption*);	// 2C
+	};
+
+	TileImage* tile028;		// 028
+	TileImage* tile02C;		// 02C
+	TileImage* tile030;		// 030
+	TileImage* tile034;		// 034
+	TileImage* tile038;		// 038
+	TileImage* tile03C;		// 03C
+	TileImage* tile040;		// 040
+	TileImage* tile044;		// 044
+	TileText* tile048;		// 048
+	TileText* tile04C;		// 04C
+	TileText* tile050;		// 050
+	TileImage* tile054;		// 054
+	TileText* tile058;		// 058
+	Tile3D* tile05C;		// 05C
+	TileImage* tile060;		// 060
+	TileImage* tile064;		// 064
+	TileText* tile068;		// 068
+	TileImage* tile06C;		// 06C
+	TileText* tile070;		// 070
+	TileText* tile074;		// 074
+	TileText* tile078;		// 078
+	TileImage* tile07C;		// 07C
+	TileText* tile080;		// 080
+	ListBox<Option>					options084;		// 084
+	ListBox<Option>					options0B4;		// 0B4
+	ListBox<Option>					options0E4;		// 0E4
+	ListBox<Option>					options114;		// 114
+	ListBox<int>					listBox144;		// 144
+	ListBox<BGSSaveLoadFileEntry>	listBox174;		// 174
+	UInt32							unk1A4;			// 1A4
+	UInt32							flags;			// 1A8
+	UInt32							unk1AC;			// 1AC
+	UInt32							unk1B0;			// 1B0
+	Option* option1B4;		// 1B4
+	NiSourceTexture* texture1B8;	// 1B8
+	UInt32							unk1BC;			// 1BC
+	TileImage* tile1C0;		// 1C0
+	TileImage* tile1C4;		// 1C4
+	UInt32							unk1C8;			// 1C8
+	UInt32							unk1CC;			// 1CC
+	UInt32							unk1D0;			// 1D0
+};
+STATIC_ASSERT(sizeof(StartMenu) == 0x1D4);
+
+// E4
+class LockPickMenu : public Menu		// 1014
+{
+public:
+	LockPickMenu();
+	~LockPickMenu();
+
+	UInt32					unk28;			// 28
+	TileRect* tile2C;		// 2C
+	TileRect* tile30;		// 30
+	TileRect* tile34;		// 34
+	TileImage* tile38;		// 38
+	TileText* tile3C;		// 3C
+	TileImage* tile40;		// 40
+	TileImage* tile44;		// 44
+	TileText* tile48;		// 48
+	TileImage* tile4C;		// 4C
+	TileImage* tile50;		// 50
+	TileImage* tile54;		// 54
+	TileText* tile58;		// 58
+	TileText* tile5C;		// 5C
+	TileImage* tile60;		// 60
+	TileImage* tile64;		// 64
+	TileImage* tile68;		// 68
+	TESObjectREFR* targetRef;		// 6C
+	UInt32					lockLevel;		// 70
+	UInt32					skillLevel;		// 74
+	float					fSkillLevel;	// 78
+	UInt32					unk7C;			// 7C
+	UInt32					unk80;			// 80
+	float					flt84;			// 84
+	UInt32					sweetSpotLen;	// 88
+	float					cylinderAngle;	// 8C
+	float					pickAngle;		// 90
+	float					pickHealth;		// 94
+	UInt8					byte98;			// 98
+	UInt8					byte99;			// 99
+	UInt8					pad9A[2];		// 99
+	NiControllerSequence* ctrlSeq9C;		// 9C
+	NiControllerSequence* ctrlSeqA0;		// A0
+	NiControllerManager* ctrlManager;	// A4
+	NiControllerSequence* ctrlSeqA8;		// A8
+	NiControllerSequence* ctrlSeqAC;		// AC
+	NiControllerSequence* ctrlSeqB0;		// B0
+	NiQuaternion			quaternionB4;	// B4
+	NiQuaternion			quaternionC4;	// C4
+	NiQuaternion			quaternionD4;	// D4
+};
+STATIC_ASSERT(sizeof(LockPickMenu) == 0xE4);
+
+// 44
+class QuantityMenu : public Menu		// 1016
+{
+public:
+	QuantityMenu();
+	~QuantityMenu();
+
+	virtual void		Unk_12(void);
+
+	TileRect* tile28;		// 28
+	TileImage* tile2C;		// 2C	QM_DecreaseArrow
+	TileImage* tile30;		// 30	QM_IncreaseArrow
+	TileText* tile34;		// 34
+	TileImage* tile38;		// 38
+	TileImage* tile3C;		// 3C
+	float				currentQtt;		// 40
+};
+
+
+// 8C
+class RepairMenu : public Menu			// 1035
+{
+public:
+	RepairMenu();
+	~RepairMenu();
+
+	TileRect* tile28;		// 28
+	TileImage* tile2C;		// 2C
+	TileRect* tile30;		// 30
+	TileImage* tile34;		// 34
+	TileRect* tile38;		// 38
+	TileRect* tile3C;		// 3C
+	TileText* tile40;		// 40
+	TileText* tile44;		// 44
+	TileText* tile48;		// 48
+	TileRect* tile4C;		// 4C
+	TileRect* tile50;		// 50
+	TileImage* tile54;		// 54
+	TileImage* tile58;		// 58
+	MenuItemEntryList		repairItems;	// 5C
+};
+
+// 5C
+class TextEditMenu : public Menu		// 1051
+{
+public:
+	TextEditMenu();
+	~TextEditMenu();
+
+	virtual void		Unk_12(void);
+
+	TileText* currTextTile;			// 28
+	TileImage* okButton;				// 2C
+	TileText* messageTitle;			// 30
+	BSString				currentText;			// 34
+	BSString				displayedText;			// 3C	Copy of currentText + cursor
+	UInt32				cursorIndex;			// 44
+	union {
+		UInt32			maxPixelLength;			// 48
+		struct {
+			UInt16		minLength;				// 48
+			UInt16		maxLength;				// 4A
+		};
+	};
+	union {
+		UInt32			fontID;					// 4C
+		TileRect* inputRect;				// 4C
+	};
+	UInt32				cursorBlink;			// 50	Value used for the cursor blink cycles (every 500ms)
+	UInt8				cursorVisible;			// 54
+	UInt8				isActive;				// 55
+	UInt8				byte56;					// 56
+	UInt8				miscFlags;				// 57
+	union {
+		bool			(*menuCallback)(char*);	// 58
+		Script* scriptCallback;		// 58
+	};
+};
+STATIC_ASSERT(sizeof(TextEditMenu) == 0x5C);
+
+typedef tList<ContChangesEntry> BarterItemList;
+
+// 120
+class BarterMenu : public Menu			// 1053
+{
+public:
+	BarterMenu();
+	~BarterMenu();
+
+	TileImage* tile028;		// 028
+	TileImage* tile02C;		// 02C
+	TileImage* tile030;		// 030
+	TileText* tile034;		// 034
+	TileImage* tile038;		// 038
+	TileText* tile03C;		// 03C
+	TileImage* tile040;		// 040
+	TileImage* tile044;		// 044
+	TileText* tile048;		// 048
+	TileImage* tile04C;		// 04C
+	TileText* tile050;		// 050
+	TileImage* tile054;		// 054
+	TileRect* tile058;		// 058
+	TileImage* tile05C;		// 05C
+	TileRect* tile060;		// 060
+	TileRect* tile064;		// 064
+	TileRect* tile068;		// 068
+	TileRect* tile06C;		// 06C
+	TileRect* tile070;		// 070
+	TileImage* tile074;		// 074
+	TileImage* tile078;		// 078
+	TileRect* tile07C;		// 07C
+	TESObjectREFR* merchantRef;	// 080
+	float				barterTotalSum;	// 084
+	UInt32				unk088;			// 088
+	UInt32				playerGold;		// 08C
+	UInt32				merchantGold;	// 090
+	float				buyValueMult;	// 094
+	float				sellValueMult;	// 098
+	UInt32				leftFilter;		// 09C
+	UInt32				rightFilter;	// 0A0
+	UInt32				unk0A4;			// 0A4
+	MenuItemEntryList	leftItems;		// 0A8
+	MenuItemEntryList	rightItems;		// 0D8
+	MenuItemEntryList* currentItems;	// 108
+	BarterItemList		leftBarter;		// 10C
+	BarterItemList		rightBarter;	// 114
+	UInt32				unk11C;			// 11C
+};
+
+// 1DC
+class HackingMenu : public Menu			// 1055
+{
+public:
+	HackingMenu();
+	~HackingMenu();
+
+	UInt32				unk028[85];		// 028
+	UInt32				attemptsLeft;	// 17C
+	UInt32				unk180[6];		// 180
+	TESObjectREFR* targetRef;		// 198
+	UInt32				unk19C[16];		// 19C
+};
+STATIC_ASSERT(sizeof(HackingMenu) == 0x1DC);
+
+struct ActorHitData;
+struct VATSTargetInfo {
+	UInt32 actionType;
+	UInt8 isSuccess;
+	UInt8 byte05;
+	UInt8 isMysteriousStrangerVisit;
+	UInt8 byte07;
+	UInt8 remainingShotsToFire_Burst;
+	UInt8 count09;
+	UInt8 gap0A[2];
+	TESObjectREFR* ref;
+	UInt32 avCode;
+	ActorHitData* hitData;
+	float unk18;
+	float unk1C;
+	float apCost;
+	UInt8 isMissFortuneVisit;
+	UInt8 gap25[3];
+};
+STATIC_ASSERT(sizeof(VATSTargetInfo) == 0x28);
+// 144
+class VATSMenu : public Menu			// 1056
+{
+public:
+	VATSMenu();
+	~VATSMenu();
+
+	virtual void		Unk_12(void);
+
+	UInt32				unk028;			// 028
+	TileImage* tile02C;		// 02C
+	TileImage* tile030;		// 030
+	TileImage* tile034;		// 034
+	TileImage* tile038;		// 038
+	TileImage* tile03C;		// 03C
+	TileImage* tile040;		// 040
+	TileImage* tile044;		// 044
+	TileImage* tile048;		// 048
+	TileImage* tile04C;		// 04C
+	TileImage* tile050;		// 050
+	TileText* tile054;		// 054
+	TileText* tile058;		// 058
+	TileText* tile05C;		// 05C
+	TileText* tile060;		// 060
+	TileImage* tile064;		// 064
+	TileImage* tile068;		// 068
+	TileImage* tile06C;		// 06C
+	TileImage* tile070;		// 070
+	TileText* tile074;		// 074
+	TileRect* tile078;		// 078
+	TileRect* tile07C;		// 07C
+	TileRect* tile080;		// 080
+	TileImage* tile084;		// 084
+	TileRect* tile088;		// 088
+	TileImage* tile08C;		// 08C
+	TileImage* tile090;		// 090
+	TileImage* tile094;		// 094
+	TileImage* tile098;		// 098
+	TileText* tile09C;		// 09C
+	TileImage* tile0A0;		// 0A0
+	TileImage* tile0A4;		// 0A4
+	UInt32				unk0A8[2];		// 0A8
+	ListBox<UInt32>		queuedActions;	// 0B0
+	UInt32				unk0E0[18];		// 0E0
+	TESObjectREFR* targetRef;		// 128
+	UInt32				unk12C;			// 12C
+	void* ptr130;		// 130
+	float				unk134[3];		// 134
+	UInt8				unk140;			// 140
+	UInt8				pad141[3];		// 141
+};
+
+// FC
+class ComputersMenu : public Menu		// 1057
+{
+public:
+	ComputersMenu();
+	~ComputersMenu();
+
+	UInt32				unk28[33];		// 28
+	TESObjectREFR* targetRef;		// AC
+	UInt32				unkB0[19];		// B0
+};
+
+// A0
+class RepairServicesMenu : public Menu	// 1058
+{
+public:
+	RepairServicesMenu();
+	~RepairServicesMenu();
+
+	TileText* tile28;		// 28
+	TileText* tile2C;		// 2C
+	TileImage* tile30;		// 30
+	TileImage* tile34;		// 34
+	TileRect* tile38;		// 38
+	TileRect* tile3C;		// 3C
+	TileRect* tile40;		// 40
+	TileText* tile44;		// 44
+	TileText* tile48;		// 48
+	TileText* tile4C;		// 4C
+	TileRect* tile50;		// 50
+	TileRect* tile54;		// 54
+	TileText* tile58;		// 58
+	TileImage* tile5C;		// 5C
+	TileImage* tile60;		// 60
+	TileImage* tile64;		// 64
+	MenuItemEntryList	itemList;		// 68
+	UInt32				unk98;			// 98
+	UInt8				skill;			// 9C
+	UInt8				pad9D[3];		// 9D
+};
+
+// 90
+class ItemModMenu : public Menu			// 1061
+{
+public:
+	ItemModMenu();
+	~ItemModMenu();
+
+	TileRect* tile28;		// 28
+	TileImage* tile2C;		// 2C
+	TileRect* tile30;		// 30
+	TileImage* tile34;		// 34
+	TileRect* tile38;		// 38
+	TileRect* tile3C;		// 3C
+	TileText* tile40;		// 40
+	TileText* tile44;		// 44
+	TileText* tile48;		// 48
+	TileRect* tile4C;		// 4C
+	TileRect* tile50;		// 50
+	TileImage* tile54;		// 54
+	TileImage* tile58;		// 58
+	TileText* tile5C;		// 5C
+	MenuItemEntryList	itemModList;	// 60
+};
+
+// 88
+class CompanionWheelMenu : public Menu	// 1075
+{
+public:
+	CompanionWheelMenu();
+	~CompanionWheelMenu();
+
+	virtual void		Unk_12(void);
+
+	UInt32				unk28[16];		// 28
+	Actor* companionRef;	// 68
+	UInt32				unk6C[7];		// 6C
+};
+
+// 88
+class TraitSelectMenu : public Menu		// 1076
+{
+public:
+	TraitSelectMenu();
+	~TraitSelectMenu();
+
+	UInt32				unk28[24];		// 28
+};
+
+// 104
+class RecipeMenu : public Menu			// 1077
+{
+public:
+	RecipeMenu();
+	~RecipeMenu();
+
+	TileImage* tile028;		// 028	RM_Items_LeftFilterArrow
+	TileText* tile02C;		// 02C	RM_ItemsTitle
+	TileImage* tile030;		// 030	RM_Items_RightFilterArrow
+	TileImage* tile034;		// 034	RM_Items_InventoryList
+	TileText* tile038;		// 038	RM_MadeAtVariable
+	TileText* tile03C;		// 03C	RM_SkillRequirement
+	TileImage* tile040;		// 040	RM_Items_IngredientList
+	TileImage* tile044;		// 044	RM_ButtonX
+	TileImage* tile048;		// 048	RM_ButtonB
+	TileImage* tile04C;		// 04C	RM_ItemIcon
+	TileRect* tile050;		// 050	RM_ItemData
+	TileText* tile054;		// 054	RM_Items_IngredientList
+	TileText* tile058;		// 058	RM_ContainerTitle
+	TileText* tile05C;		// 05C	RM_SkillRequirementHeader
+	TESObjectREFR* sourceRef;		// 060
+	TESRecipeCategory* category;		// 064
+	UInt32						unk068;			// 068
+	ListBox<TESRecipe>			recipeList;		// 06C
+	ListBox<TESRecipe>* unk09C;		// 09C
+	ListBox<RecipeComponent>	componentList;	// 0A0
+	ListBox<Condition>			conditionList;	// 0D0
+	UInt32						unk100;			// 100
+};
+
+// E88
+class CaravanMenu : public Menu			// 1083
+{
+public:
+	CaravanMenu();
+	~CaravanMenu();
+
+	UInt32					unk028[54];		// 028
+	TESObjectREFR* opponentRef;	// 100
+	UInt32					unk104[865];	// 104
+};
+
+// 8C
+class TraitMenu : public Menu			// 1084
+{
+public:
+	TraitMenu();
+	~TraitMenu();
+
+	virtual void		Unk_12(void);
+
+	TileText* tile28;		// 28	LUM_Headline_Title
+	TileImage* tile2C;		// 2C	LUM_PerkList
+	TileImage* tile30;		// 30	LUM_SelectionIcon
+	TileText* tile34;		// 34	TM_DescriptionText
+	TileText* tile38;		// 38	LUM_PointCounter
+	TileImage* tile3C;		// 3C	LUM_ResetButton
+	TileImage* tile40;		// 40	LUM_ContinueButton
+	TileImage* tile44;		// 44	stats_icon_badge
+	TileImage* tile48;		// 48	TM_DescriptionScrollbar
+	UInt32				numSelected;	// 4C
+	UInt32				maxSelect;		// 50
+	ListBox<BGSPerk>	perkListBox;	// 54
+	tList<BGSPerk>		perkList;		// 84
+};
+
+
+// D8
+class FORenderedMenu {
+public:
+	FORenderedMenu();
+	~FORenderedMenu();
+
+	virtual void    Destructor(bool doFree);
+	virtual void    Unk_01(void);
+	virtual void    Unk_02(void);
+	virtual void    Unk_03(void);
+	virtual void    Unk_04(void);
+	virtual void    Unk_05(void);
+	virtual void    Unk_06(void);
+	virtual void    Unk_07(void);
+	virtual void    Unk_08(void);
+	virtual void    Unk_09(void);
+	virtual void    Unk_0A(void);
+	virtual void    Unk_0B(void);
+	virtual void    Unk_0C(void);
+	virtual void    Unk_0D(void);
+	virtual void    Unk_0E(void);
+	virtual void    Unk_0F(void);
+	virtual void    Unk_10(void);
+	virtual void    Unk_11(void);
+	virtual void    Unk_12(void);
+	virtual void    Unk_13(void);
+	virtual void    Unk_14(void);
+
+	NiAVObject* unk04;
+	BSFadeNode* node08;
+	UInt32 unk0C;
+	NiSourceTexture* srcTexture;
+	NiNode* node14;
+	TileMenu* tileMenu;
+	UInt32 unk1C[2];
+	NiCamera* camera;
+	UInt8 byte028;
+	UInt8 gap028[3];
+	UInt32 unk02C[5];
+	UInt32 blurRadius;
+	UInt32 blurIntensity;
+	UInt32 unk048;
+	UInt8 byte04C;
+	UInt8 byte04D;
+	UInt8 gap04E[2];
+	float time050;
+	float burstDuration;
+	float burstIntensity2;
+	float burstIntensity;
+	UInt32 unk060[30];
+};
+
+// 70
+class FORenderedTerminal : public FORenderedMenu {
+public:
+	FORenderedTerminal();
+	~FORenderedTerminal();
+
+	NiVector3 localTranslate;
+	NiAVObject* powerButton;
+	float fltE8;
+	UInt8 bytEC;
+};
+//STATIC_ASSERT(sizeof(FORenderedTerminal) == 0x70); FIXME
+
+class FOPipboyManager : public FORenderedMenu {
+public:
+	FOPipboyManager();
+	~FOPipboyManager();
+
+	NiNode* pipboyScreenNode0D8;
+	NiNode* unk0DC;
+	NiTriStrips* unk0C0;
+	NiRefObject* unk0C4;
+	NiTriStrips* pipboyLightButton[3];
+	NiNode* pipboyLightGlow[3];
+	NiTriStrips* scrollKnobs[3];
+	float unk10C[3];
+	float pipboyKnobScrollPositions[3];
+	float pipboyKnobScrollRates[3];
+	float tabKnobMinPosition;
+	UInt32 unk134;
+	UInt32 unk138;
+	UInt32 unk13C;
+	float tabKnobMaxPosition;
+	UInt8 byte144;
+	UInt8 gap145[3];
+	UInt32 unk148;
+	UInt32 unk14C;
+	UInt8 byte150;
+	UInt8 gap151[3];
+	Sound sound154;
+	UInt8 byte160;
+	UInt8 byte161;
+	UInt8 byte162;
+	UInt8 gap163;
+	float time164;
+	float lightEffectFadeDuration;
+	UInt32 unk16C;
+};
+STATIC_ASSERT(sizeof(FOPipboyManager) == 0x170);

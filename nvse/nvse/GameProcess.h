@@ -1,6 +1,10 @@
 #pragma once
-
 #include "GameForms.h"
+
+class BSTempEffect;
+class NiBSBoneLODController;
+struct CombatTarget;
+class NiBSplineCompTransformInterpolator;
 
 struct PackageInfo
 {
@@ -829,3 +833,135 @@ public:
 	UInt32								unk258;				// 258
 };
 STATIC_ASSERT(sizeof(MiddleHighProcess) == 0x25C);
+
+class HighProcess : public MiddleHighProcess {
+public:
+	HighProcess();
+	~HighProcess();
+
+	enum {
+		kAnimAction_None = -1,
+		kAnimAction_Equip_Weapon,
+		kAnimAction_Unequip_Weapon,
+		kAnimAction_Attack,
+		kAnimAction_Attack_Follow_Through,
+		kAnimAction_Attack_Latency,
+		kAnimAction_Attack_Throw_Attach,
+		kAnimAction_Attack_Throw_Release,
+		kAnimAction_Block,
+		kAnimAction_Stagger,
+		kAnimAction_Reload,
+		kAnimAction_Dodge,
+		kAnimAction_Wait_For_Lower_Body_Anim,
+		kAnimAction_Wait_For_Special_Idle,
+		kAnimAction_Force_Script_Anim
+	};
+
+	tList<DetectionData>* detectedActors;	// 25C
+	tList<DetectionData>* detectingActors;	// 260
+	void* ptr264;			// 264
+	void* ptr268;			// 268
+	void* ptr26C;			// 26C
+	UInt32								unk270;				// 270
+	tList<CombatTarget>					list274;			// 274
+	tList<void>							list27C;			// 27C
+	tList<void>							list284;			// 284
+	tList<void>							list28C;			// 28C
+	float								flt294;				// 294
+	float								flt298;				// 298
+	UInt32								unk29C;				// 29C
+	float								flt2A0;				// 2A0
+	UInt32								unk2A4;				// 2A4
+	float								flt2A8;				// 2A8
+	UInt32								unk2AC;				// 2AC
+	float								flt2B0;				// 2B0
+	float								flt2B4;				// 2B4
+	float								flt2B8;				// 2B8
+	float								flt2BC;				// 2BC
+	UInt32								unk2C0;				// 2C0
+	UInt32								unk2C4;				// 2C4
+	float								flt2C8;				// 2C8
+	UInt32								unk2CC;				// 2CC
+	float								flt2D0;				// 2D0
+	float								flt2D4;				// 2D4
+	float								flt2D8;				// 2D8
+	UInt32								unk2DC;				// 2DC
+	float								flt2E0;				// 2E0
+	NiBSBoneLODController* ptr2E4;			// 2E4
+	UInt32								unk2E8;				// 2E8
+	SInt16								currentAction;		// 2EC
+	UInt8								pad2EE[2];			// 2EE
+	BSAnimGroupSequence* currentSequence;	// 2F0
+	UInt32								unk2F4;				// 2F4
+	float								flt2F8;				// 2F8
+	UInt32								unk2FC[5];			// 2FC
+	float								flt310;				// 310
+	UInt32								unk314[7];			// 314
+	float								dyingTimer;				// 330
+	float								flt334;				// 334
+	float								flt338;				// 338
+	float								diveBreath;			// 33C
+	UInt32								unk340;				// 340
+	float								flt344;				// 344
+	UInt32								unk348;				// 348
+	float								flt34C;				// 34C
+	TESIdleForm* idleForm350;		// 350
+	UInt32								unk354[4];			// 354
+	NiBSplineCompTransformInterpolator** ptr364;			// 364
+	UInt32								unk368[4];			// 368
+	float								flt378;				// 378
+	float								flt37C;				// 37C
+	UInt32								unk380;				// 380
+	float								flt384;				// 384
+	float								flt388;				// 388
+	tList<void>							list38C;			// 38C
+	tList<void>							list394;			// 394
+	UInt32								unk39C;				// 39C
+	UInt32								unk3A0;				// 3A0
+	float								flt3A4;				// 3A4
+	UInt32								unk3A8[5];			// 3A8
+	float								flt3BC;				// 3BC
+	float								flt3C0;				// 3C0
+	float								lightAmount;		// 3C4
+	float								flt3C8;				// 3C8
+	UInt32								unk3CC[7];			// 3CC
+	UInt32								fadeType;			// 3E8
+	float								delayTime;			// 3EC
+	UInt32								unk3F0;				// 3F0
+	UInt32								unk3F4;				// 3F4
+	UInt32								unk3F8[3];			// 3F8
+	Actor* combatTarget;		// 404
+	UInt32								unk408[4];			// 408
+	float								flt418;				// 418
+	TESObjectREFR* packageTarget;		// 41C
+	UInt32								unk420;				// 420
+	UInt32								queuedIdleFlags;	// 424
+	UInt32								unk428;				// 428
+	float								flt42C;				// 42C
+	UInt32								unk430;				// 430
+	bhkShapePhantom* ptr434;			// 434
+	UInt32								unk438;				// 438
+	float								unk43C;				// 43C
+	float								radsSec440;			// 440
+	UInt8								plantedExplosive;	// 444
+	UInt8								pad445[3];			// 445
+	float								flt448;				// 448
+	UInt32								unk44C;				// 44C
+	float								flt450;				// 450
+	UInt32								unk454[6];			// 454
+};
+STATIC_ASSERT(sizeof(HighProcess) == 0x46C);
+
+// 160
+struct ProcessManager {
+	UInt32					unk000;				// 000
+	NiTArray<MobileObject*>	objects;			// 004
+	UInt32					beginOffsets[4];	// 014	0: High, 1: Mid-High, 2: Mid-Low, 3: Low
+	UInt32					endOffsets[4];		// 024
+	UInt32					unk034[11];			// 034
+	tList<BSTempEffect>		tempEffects;		// 060
+	UInt32					unk068[6];			// 068
+	tList<Actor>			highActors;			// 080
+	UInt32					unk088[54];			// 088
+
+};

@@ -3,10 +3,18 @@
 #include "Utilities.h"
 #include "GameTypes.h"
 #include "GameBSExtraData.h"
-#include "internal/containers.h"
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
 #include "stdint.h"
+
+class PathingLocation;
+class PathingCoverLocation;
+struct UnreachableLocation;
+struct UnreachableCoverLocation;
+class CombatProcedure;
+class CombatAction;
+class CombatGoal;
+
 enum FormType {
 	kFormType_None = 0,
 	kFormType_TES4,
@@ -628,7 +636,7 @@ struct Condition {
 };
 
 struct ConditionList : tList<Condition> {
-	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result, bool arg4) { return ThisStdCall<bool>(0x680C60, this, runOnRef, arg2, result, arg4); }
+	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result, bool arg4) { return ThisCall<bool>(0x680C60, this, runOnRef, arg2, result, arg4); }
 };
 class TESObject : public TESForm {
 public:
@@ -3163,7 +3171,7 @@ public:
 	float GetItemModValue2(UInt8 which) { which -= 1; return (which < 3) ? value2Mod[which] : 0; }
 
 	void EjectShellCasing(TESObjectREFR* apReference) {
-		ThisStdCall(0x524DB0, this, apReference);
+		ThisCall(0x524DB0, this, apReference);
 	}
 };
 STATIC_ASSERT(sizeof(TESObjectWEAP) == 0x388);
@@ -4783,6 +4791,96 @@ public:
 	// There is an object containing a semaphore at B0/B4
 };	// 0B4
 
+// 68
+struct CombatTarget
+{
+	Actor* target;
+	UInt32 unk04[25];
+};
+
+// 14
+struct CombatAlly
+{
+	Actor* ally;
+	UInt32 unk04[4];
+};
+
+// 28
+struct CombatActors
+{
+	UInt32 unk00[2]; // 00
+	BSSimpleArray<CombatTarget> targets; // 08
+	BSSimpleArray<CombatAlly> allies; // 18
+};
+// 188
+class CombatController : public TESPackage
+{
+public:
+	CombatController();
+	~CombatController();
+
+	struct Unk09C
+	{
+		UInt32 unk000[4]; // 000
+		TESObjectWEAP* weapon1; // 010
+		TESObjectWEAP* weapon2; // 014
+		TESObjectWEAP* weapon3; // 018
+		TESObjectWEAP* weapon4; // 01C
+		UInt32 unk020; // 020
+		BSSimpleArray<TESObjectWEAP> arr024; // 024
+		UInt32 unk034[36]; // 034
+		void* ptr0C4; // 0C4
+		UInt32 unk0C8[17]; // 0C8
+		BSSimpleArray<PathingCoverLocation> arr10C; // 10C
+		UInt32 unk11C[11]; // 11C
+		BSSimpleArray<PathingCoverLocation> arr148; // 148
+		UInt32 unk158[3]; // 158
+		BSSimpleArray<UnreachableCoverLocation> arr164; // 164
+		BSSimpleArray<UnreachableLocation> arr174; // 174
+		UInt32 unk184[15]; // 184
+		Actor* actor1C0; // 1C0
+		CombatController* cmbtCtrl; // 1C4
+		UInt32 unk1C8[22]; // 1C8
+	};
+
+	CombatActors* combatActors; // 080
+	CombatProcedure* combatProcedure1; // 084
+	CombatProcedure* combatProcedure2; // 088
+	BSSimpleArray<CombatProcedure> combatProcedures; // 08C
+	Unk09C* struct09C; // 09C
+	void* ptr0A0; // 0A0
+	UInt32 unk0A4; // 0A4
+	CombatAction* combatAction; // 0A8
+	CombatGoal* combatGoal; // 0AC
+	UInt32 unk0B0; // 0B0
+	float flt0B4[2]; // 0B4
+	Actor* packageOwner; // 0BC
+	Actor* packageTarget; // 0C0
+	UInt32 unk0C4[2]; // 0C4
+	float flt0CC; // 0CC
+	float flt0D0; // 0D0
+	UInt8 byte0D4; // 0D4
+	UInt8 byte0D5; // 0D5
+	UInt8 pad0D6[2]; // 0D6
+	float flt0D8; // 0D8
+	float flt0DC; // 0DC
+	float flt0E0; // 0E0
+	UInt32 unk0E4[3]; // 0E4
+	TESObjectWEAP* weapon; // 0F0
+	TESCombatStyle* combatStyle; // 0F4
+	UInt32 unk0F8[11]; // 0F8
+	UInt8 byte124; // 124
+	bool stopCombat; // 125
+	UInt8 byte126; // 126
+	UInt8 byte127; // 127
+	UInt32 unk128[8]; // 128
+	float flt148; // 148
+	UInt32 unk14C[15]; // 14C
+};
+
+STATIC_ASSERT(sizeof(CombatController) == 0x188);
+
+
 class TESFollowPackageData : public TESPackageData {
 public:
 	TESFollowPackageData();
@@ -6000,3 +6098,138 @@ struct CasinoStats
 	UInt16 earningStage;
 	UInt8 gap0A[2];
 };
+
+struct DialogueResponse
+{
+	BSString responseText;
+	UInt32 emotionType;
+	UInt32 emotionValue;
+	BSString voiceFilePath;
+	TESIdleForm* speakerAnimation;
+	TESIdleForm* listenerAnimation;
+	UInt32 sound;
+	UInt8 flags;
+	UInt8 pad25[3];
+	UInt32 responseNumber;
+};
+STATIC_ASSERT(sizeof(DialogueResponse) == 0x2C);
+
+// 170
+class TESEffectShader : public TESForm {
+public:
+	TESEffectShader();
+	~TESEffectShader();
+
+	struct EffectShaderData {
+		UInt8 flags;
+		UInt32 membraneSourceBlendMode;
+		UInt32 membraneBlendOp;
+		UInt32 membraneZTestFunc;
+		UInt32 fillTextureRGB;
+		float fillTextureAlphaFadeInTime;
+		float fillTextureFullAlphaTime;
+		float fillTextureAlphaFadeOutTime;
+		float fillTexturePersistentAlphaRatio;
+		float fillTextureAlphaPulseAmpl;
+		float fillTextureAlphaPulseFreq;
+		float fillTextureAnimSpeedU;
+		float fillTextureAnimSpeedV;
+		float edgeFallOff;
+		UInt32 edgeColor;
+		float edgeAlphaFadeInTime;
+		float edgeFullAlphaTime;
+		float edgeAlphaFadeOutTime;
+		float edgePersistentAlphaRatio;
+		float edgeAlphaPulseAmpl;
+		float edgeAlphaPulseFreq;
+		float fillTextureFullAlphaRatio;
+		float edgeFullAlphaRatio;
+		UInt32 membraneDestBlendMode;
+		UInt32 particleSourceBlendMode;
+		UInt32 particleBlendOp;
+		UInt32 particleZTestFunc;
+		UInt32 particleDestBlendMode;
+		float particleBirthRampUpTime;
+		float particleBirthFullTime;
+		float particleBirthRampDownTime;
+		float particleBirthFullRatio;
+		float particleBirthPersistRatio;
+		float particleLifetime;
+		float particleLifetimeVar;
+		float particleInitSpeedAlongNormal;
+		float particleAccelAlongNormal;
+		NiPoint3 initialVelocity;
+		NiPoint3 acceleration;
+		float scaleKey1;
+		float scaleKey2;
+		float scaleKey1Time;
+		float scaleKey2Time;
+		UInt32 colorKey1RGB;
+		UInt32 colorKey2RGB;
+		UInt32 colorKey3RGB;
+		float colorKey1Alpha;
+		float colorKey2Alpha;
+		float colorKey3Alpha;
+		float colorKey1Time;
+		float colorKey2Time;
+		float colorKey3Time;
+		float particleInitSpeedAlongNormalVar;
+		float particleInitRotDeg;
+		float particleInitRotDegVar;
+		float particleRotSpeedDegPerSec;
+		float particleRotSpeedDegPerSecVar;
+		BGSDebris* addonModels;
+		float holesStartTime;
+		float holesEndTime;
+		float holesStartVal;
+		float holesEndVal;
+		float edgeWidthAlphaUnits;
+		UInt32 edgeColorRGB;
+		float explosionWindSpeed;
+		UInt32 textureCountU;
+		UInt32 textureCountV;
+		float addonFadeInTime;
+		float addonFadeOutTime;
+		float addonScaleStart;
+		float addonScaleEnd;
+		float addonScaleInTime;
+		float addonScaleOutTime;
+	} shaderData;
+	TESTexture fillTexture;
+	TESTexture particleShaderTexture;
+	TESTexture holesTexture;
+};
+STATIC_ASSERT(sizeof(TESEffectShader) == 0x170);
+
+class MediaSet : public TESForm {
+public:
+	MediaSet();
+	~MediaSet();
+	struct MediaSetData {
+		BSString filepath; // NAM2 NAM3 NAM4 NAM5 NAM6 NAM7
+		float dB; // NAM8 NAM9 NAM0 ANAM BNAM CNAM
+		float boundary; // JNAM KNAM LNAM MNAM NNAM ONAM
+	};
+	TESFullName	fullName;
+	UInt32 unk24[8];
+	UInt32 type; // NAM1
+	MediaSetData data[6];
+	UInt32 flags; //PNAM
+	float DNAM;
+	float ENAM;
+	float FNAM;
+	float GNAM;
+	TESSound* HNAM;
+	TESSound* INAM;
+};
+STATIC_ASSERT(sizeof(MediaSet) == 0xC4);
+
+class TESCaravanDeck : public TESForm {
+public:
+	TESCaravanDeck();
+	~TESCaravanDeck();
+	TESFullName name;
+	tList<TESCaravanCard>* cards;
+	UInt32 count;
+};
+STATIC_ASSERT(sizeof(TESCaravanDeck) == 0x2C);
