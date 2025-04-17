@@ -80,7 +80,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		bOverrideCameraRot = false;
 		kCameraPos = NiVector3(0,0,0);
 		kCameraRot = NiMatrix3::IDENTITY;
-
+		noHolotapeStopSound = false;
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_PostLoadGame:

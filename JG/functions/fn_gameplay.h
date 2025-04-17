@@ -78,10 +78,11 @@ std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
 bool Cmd_StopHolotape_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	int playStopSound = 1;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &playStopSound);
+	int playStopSound = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &playStopSound); 
+	noHolotapeStopSound = playStopSound == 0;
 	MapMenu* mapMenu = MapMenu::GetSingleton();
-	mapMenu->StopHolotape(playStopSound > 0);
+	mapMenu->StopHolotape(); 
 	*result = 1;
 	return true;
 
@@ -90,11 +91,11 @@ bool Cmd_PlayHolotape_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	BGSNote* note;
-	int playStartSound = 1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &playStartSound) && note->type == BGSNote::kVoice || note->type == BGSNote::kSound)
+	int playStartStopSound = 1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &playStartStopSound) && note->type == BGSNote::kVoice || note->type == BGSNote::kSound)
 	{
 		MapMenu* mapMenu = MapMenu::GetSingleton();
-		mapMenu->PlayHolotape(note, playStartSound > 0);
+		mapMenu->PlayHolotape(note, playStartStopSound > 0);
 		*result = 1;
 	}
 	return true;

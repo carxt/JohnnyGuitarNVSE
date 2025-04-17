@@ -1,5 +1,7 @@
 #pragma once
 #include <unordered_set>
+
+#include "GameUI.h"
 NVSEArrayVarInterface* g_arrInterface = NULL;
 NVSEStringVarInterface* g_strInterface = NULL;
 NVSEMessagingInterface* g_msg = NULL;
@@ -1948,6 +1950,15 @@ void HandleGameSettingsJG(){
 
 }
 
+void __fastcall StopHolotapeSoundHook(BSSoundHandle* handle, void* edx, bool a2)
+{
+	if (!noHolotapeStopSound)
+	{
+		ThisCall(0xAD8830, handle, a2);
+	}
+	noHolotapeStopSound = false;
+}
+
 void HandleFunctionPatches() {
 	// WorldToScreen
 	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
@@ -2005,6 +2016,8 @@ void HandleFunctionPatches() {
 
 	WriteRelCall(0x94BDC2, UInt32(SetCameraTranslateHook));
 	WriteRelCall(0x94BDD5, UInt32(SetCameraRotateHook));
+
+	WriteRelCall(0x798BB1, (UInt32)StopHolotapeSoundHook);
 }
 float timer22 = 30.0;
 void HandleGameHooks() {

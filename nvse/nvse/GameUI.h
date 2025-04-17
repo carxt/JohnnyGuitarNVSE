@@ -630,10 +630,12 @@ public:
 
 	void PlayHolotape(BGSNote* note, bool playStartSound);
 
-	void StopHolotape(bool playStopSound);
+	void StopHolotape();
+
+	
 };
 STATIC_ASSERT(sizeof(MapMenu) == 0x230);
-
+extern bool noHolotapeStopSound;
 // 0C
 struct DialogueResponseList
 {
