@@ -1,4 +1,5 @@
 #pragma once
+#include "GameForms.h"
 #include "ParamInfos.h"
 // Functions affecting gameplay
 DEFINE_COMMAND_PLUGIN(ToggleLevelUpMenu, , 0, 1, kParams_OneInt);
@@ -63,7 +64,8 @@ DEFINE_COMMAND_ALT_PLUGIN(SetMediaLocationControllerOverride, SetMLCOverride, , 
 DEFINE_COMMAND_ALT_PLUGIN(ClearMediaLocationControllerOverride, ClearMLCOverride, , 0, 0, NULL);
 DEFINE_COMMAND_ALT_PLUGIN(GetCasinoWinnings, , , 0, 1, kParams_OneCasino);
 DEFINE_COMMAND_ALT_PLUGIN(SetCasinoWinnings, , , 0, 2, kParams_OneCasinoOneInt);
-
+DEFINE_COMMAND_PLUGIN(PlayHolotape, , 0, 2, kParams_OneForm_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(StopHolotape, , 0, 1, kParams_OneOptionalInt);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -73,11 +75,37 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 
 std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
 
+bool Cmd_StopHolotape_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	int playStopSound = 1;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &playStopSound);
+	MapMenu* mapMenu = MapMenu::GetSingleton();
+	mapMenu->StopHolotape(playStopSound > 0);
+	*result = 1;
+	return true;
+
+}
+bool Cmd_PlayHolotape_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	BGSNote* note;
+	int playStartSound = 1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &playStartSound) && note->type == BGSNote::kVoice || note->type == BGSNote::kSound)
+	{
+		MapMenu* mapMenu = MapMenu::GetSingleton();
+		mapMenu->PlayHolotape(note, playStartSound > 0);
+		*result = 1;
+	}
+	return true;
+	
+}
+
 bool __cdecl Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS)
 {
 	TESCasino* casino;
 	SInt32 earnings;
-	if (ExtractArgs(EXTRACT_ARGS, &casino, &earnings) && casino)
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &earnings) && casino)
 	{
 
 		auto casinoRefId = casino->refID;
@@ -110,7 +138,7 @@ bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESCasino* casino = nullptr;
-	if (ExtractArgs(EXTRACT_ARGS, &casino) && casino)
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino) && casino)
 	{
 		auto casinoRefId = casino->refID;
 		auto iter = PlayerCharacter::GetSingleton()->casinoDataList->Head();
@@ -179,7 +207,7 @@ bool Cmd_SetHUDShudderPower_Execute(COMMAND_ARGS) {
 
 bool Cmd_ClearCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ThisStdCall<void>(0x952F90, g_thePlayer);
+	ThisCall(0x952F90, g_thePlayer);
 	*result = 1;
 	return true;
 }
@@ -198,7 +226,7 @@ bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 			if (cell && (cell->cellFlags & 1) == 0) cellOrWorld = cell->worldSpace;
 		}
 		if (cellOrWorld) {
-			ThisStdCall<void>(0x952E60, g_thePlayer, pos.x, pos.y, pos.z, cellOrWorld);
+			ThisCall(0x952E60, g_thePlayer, pos.x, pos.y, pos.z, cellOrWorld);
 			*result = 1;
 		}
 	}
@@ -581,13 +609,13 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 		}
 		if (ref->GetRefNiNode()) {
 			BSSoundHandle handle;
-			ThisStdCall<BSSoundHandle*>(0xAE5870, BSAudioManager::Get(), &handle, sound->refID, 0x102); // BSAudioManager::GetSoundHandleByFormID
+			ThisCall<BSSoundHandle*>(0xAE5870, BSAudioManager::Get(), &handle, sound->refID, 0x102); // BSAudioManager::GetSoundHandleByFormID
 			NiPoint3* refPos = ref->GetPos();
 			NiPoint3 pos = { refPos->x, refPos->y, refPos->z };
-			ThisStdCall<void>(0xAD8B60, &handle, pos); // BSSoundHandle::SetPosition
-			ThisStdCall<void>(0xAD8F20, &handle, ref->GetRefNiNode()); // BSSoundHandle::SetObjectToFollow
+			ThisCall(0xAD8B60, &handle, pos); // BSSoundHandle::SetPosition
+			ThisCall(0xAD8F20, &handle, ref->GetRefNiNode()); // BSSoundHandle::SetObjectToFollow
 			UInt32 time = fTime * 1000.0;
-			ThisStdCall<void>(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
+			ThisCall(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
 			*result = 1;
 		}
 	}
@@ -674,26 +702,26 @@ bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	if (!cell || cell->IsInterior()) return true;
 	NiPoint3* pos = thisObj->GetPos();
 	COORD_DATA coordData;
-	TESObjectLAND* landscape = ThisStdCall<TESObjectLAND*>(0x546FB0, cell); // TESObjectCELL::GetLand
+	TESObjectLAND* landscape = ThisCall<TESObjectLAND*>(0x546FB0, cell); // TESObjectCELL::GetLand
 	if (!landscape) return true;
-	ThisStdCall<void>(0x53B550, landscape, &coordData, pos, 1); // TESObjectLAND::GetCoordData
-	TESLandTexture* txt = ThisStdCall<TESLandTexture*>(0x53A630, landscape, coordData.iBlock, coordData.iVertidx); // TESObjectLAND::GetMainTexture
+	ThisCall(0x53B550, landscape, &coordData, pos, 1); // TESObjectLAND::GetCoordData
+	TESLandTexture* txt = ThisCall<TESLandTexture*>(0x53A630, landscape, coordData.iBlock, coordData.iVertidx); // TESObjectLAND::GetMainTexture
 	if (txt) *(UInt32*)result = txt->refID;
 	return true;
 }
 
 bool Cmd_RemoveNavmeshObstacle_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NavMeshObstacleManager* g_nomgr = ThisStdCall<NavMeshObstacleManager*>(0x6C0720, nullptr);
-	ThisStdCall<void>(0x6C0C80, g_nomgr, thisObj);
+	NavMeshObstacleManager* g_nomgr = ThisCall<NavMeshObstacleManager*>(0x6C0720, nullptr);
+	ThisCall(0x6C0C80, g_nomgr, thisObj);
 	*result = 1;
 	return true;
 }
 
 bool Cmd_AddNavmeshObstacle_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NavMeshObstacleManager* g_nomgr = ThisStdCall<NavMeshObstacleManager*>(0x6C0720, nullptr);
-	ThisStdCall<void>(0x6C0C30, g_nomgr, thisObj);
+	NavMeshObstacleManager* g_nomgr = ThisCall<NavMeshObstacleManager*>(0x6C0720, nullptr);
+	ThisCall(0x6C0C30, g_nomgr, thisObj);
 	*result = 1;
 	return true;
 }
@@ -707,7 +735,7 @@ bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 			if (!gameSound || (gameSound->sourceSound != sound))
 				continue;
 			gameSound->Unk_0E();
-			ThisStdCall<void>(0xADA5D0, BSAudioManager::Get(), gameSound->mapKey, gameSound);
+			ThisCall(0xADA5D0, BSAudioManager::Get(), gameSound->mapKey, gameSound);
 			*result = 1;
 		}
 	}
@@ -802,9 +830,9 @@ bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 
 bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ExtraOwnership* xOwn = ThisStdCall<ExtraOwnership*>(0x567790, thisObj); // TESObjectREFR::ResolveOwnership
+	ExtraOwnership* xOwn = ThisCall<ExtraOwnership*>(0x567790, thisObj); // TESObjectREFR::ResolveOwnership
 	if (xOwn) {
-		ThisStdCall(0x8C0EC0, g_thePlayer, thisObj, xOwn, 0xFFFFFFFF); //TESObjectREFR::HandleMinorCrime
+		ThisCall(0x8C0EC0, g_thePlayer, thisObj, xOwn, 0xFFFFFFFF); //TESObjectREFR::HandleMinorCrime
 		*result = 1;
 	}
 	return true;
@@ -848,7 +876,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems)) {
 		if (checkItems) {
-			TESForm* containerOwner = ThisStdCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
+			TESForm* containerOwner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
 			if (!containerOwner) return true;
 			ExtraContainerChanges* xChanges = (ExtraContainerChanges*)((Actor*)thisObj)->extraDataList.GetByType(kExtraData_ContainerChanges);
 			if (!xChanges || !xChanges->data || !xChanges->data->objList)
@@ -865,7 +893,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 						ExtraOwnership* xOwn = (ExtraOwnership*)xData->GetByType(kExtraData_Ownership);
 						if (xOwn->owner) {
 							if (xOwn->owner->refID == containerOwner->refID) {
-								ThisStdCall(0x8BFA40, thisObj, container, NULL, NULL, 1, containerOwner); // Actor::HandleStealing
+								ThisCall(0x8BFA40, thisObj, container, NULL, NULL, 1, containerOwner); // Actor::HandleStealing
 								*result = 1;
 								return true;
 							}
@@ -875,8 +903,8 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 			} while (contChangesIter = contChangesIter->next);
 		}
 		else {
-			TESForm* owner = ThisStdCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
-			ThisStdCall(0x8BFA40, thisObj, container, NULL, NULL, 1, owner); // Actor::HandleStealing,
+			TESForm* owner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
+			ThisCall(0x8BFA40, thisObj, container, NULL, NULL, 1, owner); // Actor::HandleStealing,
 			*result = 1;
 		}
 	}
@@ -888,29 +916,29 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	Actor* actor = static_cast<Actor*>(thisObj);
 	ContChangesEntry* weapInfo = actor->baseProcess->GetWeaponInfo();
 	if (weapInfo && weapInfo->type) {
-		bool hasDecreaseSpreadEffect = ThisStdCall<bool>(0x4BDA70, weapInfo, 3);
-		double minSpread = ThisStdCall<double>(0x524B80, weapInfo->type, hasDecreaseSpreadEffect);
-		double weapSpread = ThisStdCall<float>(0x524BE0, weapInfo->type, hasDecreaseSpreadEffect);
-		double spread = ThisStdCall<double>(0x8B0DD0, actor, 1);
+		bool hasDecreaseSpreadEffect = ThisCall<bool>(0x4BDA70, weapInfo, 3);
+		double minSpread = ThisCall<double>(0x524B80, weapInfo->type, hasDecreaseSpreadEffect);
+		double weapSpread = ThisCall<float>(0x524BE0, weapInfo->type, hasDecreaseSpreadEffect);
+		double spread = ThisCall<double>(0x8B0DD0, actor, 1);
 
 		float totalSpread = (weapSpread * spread + minSpread) * 0.01745329238474369;
 
-		TESAmmo* eqAmmo = ThisStdCall<TESAmmo*>(0x525980, weapInfo->type, static_cast<MobileObject*>(actor));
+		TESAmmo* eqAmmo = ThisCall<TESAmmo*>(0x525980, weapInfo->type, static_cast<MobileObject*>(actor));
 		totalSpread = CdeclCall<float>(0x59A030, 3, (eqAmmo ? &eqAmmo->effectList : nullptr), totalSpread);
 
-		double spreadPenalty = ThisStdCall<double>(0x8B0DD0, actor, 2);
+		double spreadPenalty = ThisCall<double>(0x8B0DD0, actor, 2);
 
 		Setting* fNPCMaxGunWobbleAngle;
 		GameSettingCollection::GetSingleton()->GetGameSetting("fNPCMaxGunWobbleAngle", &fNPCMaxGunWobbleAngle);
 
 		totalSpread += spreadPenalty * fNPCMaxGunWobbleAngle->data.f * 0.01745329238474369;
 
-		float noIdea = ThisStdCall<HighProcess*>(0x8D8520, actor)->angle1D0;
+		float noIdea = ThisCall<HighProcess*>(0x8D8520, actor)->angle1D0;
 		totalSpread = totalSpread + noIdea;
 
-		bool hasSplitBeamEffect = ThisStdCall<bool>(0x4BDA70, weapInfo, 0xC);
+		bool hasSplitBeamEffect = ThisCall<bool>(0x4BDA70, weapInfo, 0xC);
 		if (hasSplitBeamEffect) {
-			totalSpread *= ThisStdCall<float>(0x4BCF60, weapInfo->type, 0xC, 1);
+			totalSpread *= ThisCall<float>(0x4BCF60, weapInfo->type, 0xC, 1);
 		}
 		*result = totalSpread;
 	}
@@ -1117,8 +1145,8 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 		float oldVal = avOwner->GetActorValue(avCode);
 
 		tList<void>* actorPermSetAVList = &actor->list0E0;
-		void* avEntry = ThisStdCall<void*>(0x937760, actorPermSetAVList, avCode);
-		ThisStdCall(0x937400, actorPermSetAVList, avEntry);
+		void* avEntry = ThisCall<void*>(0x937760, actorPermSetAVList, avCode);
+		ThisCall(0x937400, actorPermSetAVList, avEntry);
 		thisObj->MarkAsModified(0x400000);
 
 		if (!actor->IsPlayerRef()) {
@@ -1145,8 +1173,8 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 		float oldVal = avOwner->GetActorValue(avCode);
 
 		tList<void>* actorPermForceAVList = &actor->list0D0;
-		void* avEntry = ThisStdCall<void*>(0x937760, actorPermForceAVList, avCode);
-		ThisStdCall(0x937400, actorPermForceAVList, avEntry);
+		void* avEntry = ThisCall<void*>(0x937760, actorPermForceAVList, avCode);
+		ThisCall(0x937400, actorPermForceAVList, avEntry);
 		thisObj->MarkAsModified(0x800000);
 
 		if (!actor->IsPlayerRef()) {
@@ -1185,7 +1213,7 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 						}
 						else {
 							int time = fadeOutTime * 1000.0;
-							ThisStdCall<void>(0xADC560, BSAudioManager::Get(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
+							ThisCall(0xADC560, BSAudioManager::Get(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
 						}
 						*result = 1;
 						break;
@@ -1235,9 +1263,9 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS)
 		if (weapon && xData && (weapon->weaponSkill == kAVCode_Unarmed) || (weapon->weaponSkill == kAVCode_MeleeWeapons))
 		{
 			if (poison)
-				ThisStdCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
+				ThisCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
 			else
-				ThisStdCall(0x410140, xData, kExtraData_Poison); // ExtraDataList::RemoveByType
+				ThisCall(0x410140, xData, kExtraData_Poison); // ExtraDataList::RemoveByType
 			*result = 1;
 		}
 	}
@@ -1250,10 +1278,10 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	if (pipboyTab == 0 || pipboyTab == 1002 || pipboyTab == 1003 || pipboyTab == 1023) {
 		if (g_interfaceManager) {
 			if (!g_interfaceManager->pipBoyMode) {
-				ThisStdCall(0x70F4E0, g_interfaceManager, 0, pipboyTab);
+				ThisCall(0x70F4E0, g_interfaceManager, 0, pipboyTab);
 			}
 			else if (g_interfaceManager->pipBoyMode == 3) {
-				ThisStdCall(0x70F690, g_interfaceManager, 0);
+				ThisCall(0x70F690, g_interfaceManager, 0);
 			}
 			*result = 1;
 		}
@@ -1274,7 +1302,7 @@ bool Cmd_Jump_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_StopVATSCam_Execute(COMMAND_ARGS) {
-	ThisStdCall(0x93E770, g_thePlayer, 2, 0);
+	ThisCall(0x93E770, g_thePlayer, 2, 0);
 	return true;
 }
 
