@@ -362,6 +362,7 @@ public:
 				if (i >= maxFilters) return;
 			}
 		}
+		rLock.unlock();
 		EventBase event;
 		event.script = script;
 		event.capturedLambdaVars = LambdaVariableContext(script);
