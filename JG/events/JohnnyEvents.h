@@ -319,14 +319,24 @@ __declspec (naked) void OnKeyboardControllerSelectionChangeAsm() {
 	}
 }
 
-void __fastcall HandleTakeBackItem(void* contChanges, void* edx, PlayerCharacter* player, TESForm* item, bool keepOwner, SInt32 quantity, void* xList, Actor* target, int a9, int a10, bool a11, bool a12, void* cEntry)
+TESObjectREFR* hkOwner = nullptr;
+
+ExtraDataList* __fastcall GetExtraDataListHook(TESObjectREFR* owner)
+{
+	hkOwner = owner;
+	return &owner->extraDataList;
+}
+
+void __fastcall HandleTakeBackItem(void* contChanges, void* edx, PlayerCharacter* player, TESForm* item, bool keepOwner, SInt32 quantity, void* xList, bool a9, Actor* target, int a10, int a11, bool a12, bool a13, void* cEntry)
 {
 	for (auto const& callback : OnTakeBackItemHandler->callbacks) {
 		auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
-		if (filter->IsBaseInFilter(0, item) && filter->IsInFilter(1, target->refID)) {
-			CallUDF(callback.script, nullptr, OnTakeBackItemHandler->numMaxArgs, target->refID, item, quantity);
+		TESObjectREFR* owner = target->IsActor() ? target : hkOwner;
+		if (filter->IsBaseInFilter(0, item) && (filter->IsInFilter(1, owner->refID) || filter->IsInFilter(1, owner->baseForm->refID))) {
+			CallUDF(callback.script, nullptr, OnTakeBackItemHandler->numMaxArgs, owner, item, quantity);
 		}
 	}
+	ThisCall<TESObjectREFR*>(0x4C37D0, contChanges, player, item, keepOwner, quantity, xList, a9, target, a10, a11, a12, a13, cEntry);
 }
 
 
@@ -382,12 +392,11 @@ class hk_SleepWaitEventHandler {
 private:
 	static inline uintptr_t hookCall = a_addr;
 public:
-	static  DWORD __fastcall hk_SleepWaitHandleClick(SleepWaitMenu* pSWMenu, void* edx, DWORD mode) {
-		auto res = ThisCall<DWORD>(hookCall, pSWMenu, mode);
+	static  void __fastcall hk_SleepWaitHandleClick(SleepWaitMenu* pSWMenu, void* edx, UInt64 mode) {
+		ThisCall(hookCall, pSWMenu, mode);
 		if (mode == 4) {
 			HandleOnSleepWait(pSWMenu, mode);
 		}
-		return res;
 	}
 
 	hk_SleepWaitEventHandler() {
@@ -785,4 +794,5 @@ void HandleEventHooks() {
 	WriteRelCall(0x8702A9, (uintptr_t)handlerRenderMenuEvent);
 
 	WriteRelCall(0x4CB976, (UInt32)HandleTakeBackItem);
+	WriteRelCall(0x8F24A1, (UInt32)GetExtraDataListHook);
 }
