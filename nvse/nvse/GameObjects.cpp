@@ -67,7 +67,7 @@ bool TESObjectREFR::IsMapMarker() {
 
 void TESObjectREFR::Update3D() {
 	if (this == PlayerCharacter::GetSingleton())
-		ThisStdCall(kUpdateAppearanceAddr, this);
+		ThisCall(kUpdateAppearanceAddr, this);
 	else {
 		Set3D(NULL, true);
 		ModelLoader::GetSingleton()->QueueReference(this, 1, 0);
@@ -76,8 +76,8 @@ void TESObjectREFR::Update3D() {
 
 TESObjectREFR* TESObjectREFR::Create(bool bTemp) {
 	TESObjectREFR* refr = (TESObjectREFR*)GameHeapAlloc(sizeof(TESObjectREFR));
-	ThisStdCall(s_TESObject_REFR_init, refr);
-	if (bTemp) ThisStdCall(0x484490, refr);
+	ThisCall(s_TESObject_REFR_init, refr);
+	if (bTemp) ThisCall(0x484490, refr);
 	return refr;
 }
 
@@ -135,7 +135,7 @@ NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName) {
 }
 
 TESObjectWEAP* Actor::GetEquippedWeapon() {
-	return ThisStdCall<TESObjectWEAP*>(0x8A1710, this);
+	return ThisCall<TESObjectWEAP*>(0x8A1710, this);
 }
 
 

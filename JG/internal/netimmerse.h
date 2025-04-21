@@ -1,5 +1,9 @@
 #pragma once
 
+struct NavMeshInfo;
+class bhkRigidBody;
+class TESObjectCELL;
+class bhkPhantom;
 class BSFadeNode;
 class NiMultiTargetTransformController;
 class NiTextKeyExtraData;
@@ -36,7 +40,6 @@ class NiTriShape;
 class NiPropertyState;
 class NiDX9Renderer;
 
-typedef FixedTypeArray<hkpWorldObject*, 0x40> ContactObjects;
 
 struct NiUpdateData {
 	NiUpdateData(float afTime = 0.f, bool abUpdateControllers = false, bool abIsMultiThreaded = false, bool abMTParticles = false, bool abUpdateGeomorphs = false, bool abUpdateShadowSceneNode = false)
@@ -91,6 +94,40 @@ public:
 		if (!InterlockedDecrement(&m_uiRefCount))
 			Free();
 	}
+};
+
+// 44
+class LoadedAreaBound : public NiRefObject
+{
+public:
+	LoadedAreaBound();
+	~LoadedAreaBound();
+
+	bhkPhantom* phantoms[6]; // 08	Seen bhkAabbPhantom
+	TESObjectCELL* cell; // 20
+	NiTMapBase<bhkRigidBody*, UInt32> boundsMap; // 24
+	float flt34; // 34
+	float flt38; // 38
+	float flt3C; // 3C
+	float flt40; // 40
+};
+
+STATIC_ASSERT(sizeof(LoadedAreaBound) == 0x44);
+
+// 8C
+class ObstacleData : public NiRefObject
+{
+public:
+	ObstacleData();
+	~ObstacleData();
+
+	UInt32 unk08; // 08
+	NiRefObject* object0C; // 0C
+	UInt32 unk10[25]; // 10
+	UInt8 byte74; // 74
+	UInt8 byte75[3]; // 75
+	BSSimpleArray<NavMeshInfo> navMeshInfos; // 78
+	NiRefObject* object88; // 88
 };
 
 // 08
@@ -504,11 +541,11 @@ public:
 
 	void DumpExtraData();
 	bool AddExtraData(NiExtraData* extraData) {
-		return ThisStdCall<bool>(0xA5BCA0, this, extraData);
+		return ThisCall<bool>(0xA5BCA0, this, extraData);
 	}
 
 	void SetName(NiFixedString& arString) {
-		ThisStdCall(0xA5B950, this, &arString);
+		ThisCall(0xA5B950, this, &arString);
 	}
 };
 
@@ -720,7 +757,7 @@ public:
 	void DumpParents();
 
 	void Update(NiUpdateData& arData) {
-		ThisStdCall(0xA59C60, this, &arData);
+		ThisCall(0xA59C60, this, &arData);
 	}
 
 	void SetLocalRotate(const NiMatrix3& arMat) {
@@ -757,16 +794,6 @@ public:
 	static NiNode* __stdcall Create(const char* nodeName);
 	NiAVObject* GetBlock(const char* blockName);
 	NiNode* GetNode(const char* nodeName);
-	NiNode** GetNodeOffset(const char* nodeName);
-	bool IsMovable();
-	void ToggleCollision(bool enable);
-	void RemoveCollision();
-	void BulkSetMaterialPropertyTraitValue(UInt32 traitID, float value);
-	void GetContactObjects(ContactObjects* contactObjs);
-	bool HasPhantom();
-	void GetBodyMass(float* totalMass);
-	void ApplyForce(hkVector4* forceVector);
-	void Dump();
 
 	NiAVObject* GetAt(UInt32 index) {
 		return m_children.Get(index);
@@ -968,7 +995,7 @@ public:
 	float			LODAdjust;			// 110
 
 	bool LookAtWorldPoint(const NiVector3& kWorldPt, const NiVector3& kWorldUp) {
-		return ThisStdCall<bool>(0xA701B0, this, &kWorldPt, &kWorldUp);
+		return ThisCall<bool>(0xA701B0, this, &kWorldPt, &kWorldUp);
 	}
 };
 STATIC_ASSERT(sizeof(NiCamera) == 0x114);
@@ -1867,3 +1894,21 @@ public:
 	UInt32					unkC8;			// C8
 };
 STATIC_ASSERT(sizeof(BSCullingProcess) == 0xCC);
+
+class NiTreeCtrl
+{
+public:
+	static NiTreeCtrl* Create(NiNode* apNode)
+	{
+		NiTreeCtrl* pAlloc = CdeclCall<NiTreeCtrl*>(0x401000, 0x30U);
+
+		DWORD* pTESMain = *(DWORD**)0x11DEA0C;
+		return ThisCall<NiTreeCtrl*>(0x4D61B0, pAlloc, pTESMain[3], pTESMain[2], apNode, "Test", 0x80000000,
+			0x80000000, 800, 600);
+	}
+
+	void CreateTree(NiNode* apNode, const char* apName)
+	{
+		ThisCall(0x4D64C0, this, apNode, apName);
+	}
+};

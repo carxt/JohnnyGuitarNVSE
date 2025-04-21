@@ -82,7 +82,7 @@ void Script::RefVariable::Resolve(ScriptEventList* eventList) {
 
 ScriptEventList* Script::CreateEventList(void) {
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	return ThisStdCall<ScriptEventList*>(0x005ABF60, this);	// 4th sub above Script::Execute (was 1st above in Oblivion) Execute is the second to last call in Run
+	return ThisCall<ScriptEventList*>(0x005ABF60, this);	// 4th sub above Script::Execute (was 1st above in Oblivion) Execute is the second to last call in Run
 #else
 #error
 #endif

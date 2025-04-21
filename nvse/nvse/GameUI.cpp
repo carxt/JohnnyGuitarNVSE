@@ -1,4 +1,5 @@
 #include "nvse/GameUI.h"
+#include "GameObjects.h"
 
 UInt8* g_MenuVisibilityArray = (UInt8*)0x011F308F;
 NiTArray <TileMenu*>* g_TileMenuArray = (NiTArray <TileMenu*> *)0x011F3508;
@@ -41,75 +42,108 @@ Menu* InterfaceManager::TempMenuByType(UInt32 menuType) {
 	return NULL;
 }
 
-// Split component path into "top-level menu name" and "everything else".
-// Path is of format "MenuType/tile/tile/..." following hierarchy defined in menu's xml.
-// Returns pointer to top-level menu or NULL.
-// pSlashPos is set to the slash character after the top-level menu name.
-/*
-TileMenu* InterfaceManager::GetMenuByPath(const char * componentPath, const char ** pSlashPos)
-{
-	// get menu name - stored by game as "&MENUNAME;" so need to fix it up
-	const char* slashPos = strpbrk(componentPath, "\\/");
-	if(slashPos)
-	{
-		std::string menuName("&");
-		menuName.append(componentPath, (slashPos - componentPath));
-		menuName.append(";");
-
-		UInt32 menuType = Tile::TraitNameToID(menuName.c_str());
-		if((menuType >= kMenuType_Min) && (menuType <= kMenuType_Max))
-		{
-			TileMenu * tileMenu = g_TileMenuArray->Get(menuType - kMenuType_Min);
-			if(tileMenu)
-			{
-				*pSlashPos = slashPos;
-				return tileMenu;
-			}
-		}
-	}
-
-	return NULL;
-}
-
-Tile::Value* InterfaceManager::GetMenuComponentValue(const char * componentPath)
-{
-	// path is of format "MenuType/tile/tile/.../traitName" following hierarchy defined in menu's xml
-	const char* slashPos = NULL;
-	TileMenu * tileMenu = GetMenuByPath(componentPath, &slashPos);
-	if(tileMenu && slashPos)
-	{
-		return tileMenu->GetComponentValue(slashPos + 1);
-	}
-	return NULL;
-}
-
-Tile* InterfaceManager::GetMenuComponentTile(const char * componentPath)
-{
-	// path is of format "MenuType/tile/tile/.../tile" following hierarchy defined in menu's xml
-	const char* slashPos = NULL;
-	TileMenu * tileMenu = GetMenuByPath(componentPath, &slashPos);
-	if(tileMenu && slashPos)
-	{
-		return tileMenu->GetComponentTile(slashPos + 1);
-	}
-	return NULL;
-}
-*/
-void Debug_DumpMenus(void) {
-	for (UInt32 i = 0; i < g_TileMenuArray->Length(); i++) {
-		TileMenu* tileMenu = g_TileMenuArray->Get(i);
-
-		if (tileMenu) {
-			PrintDebug("menu %d:");
-			s_debug.Indent();
-
-			tileMenu->Dump();
-
-			s_debug.Outdent();
-		}
-	}
-}
 
 void RaceSexMenu::UpdatePlayerHead(void) {
-	ThisStdCall(s_RaceSexMenu__UpdatePlayerHead, this);
+	ThisCall(s_RaceSexMenu__UpdatePlayerHead, this);
+}
+// reimplementation by lStewieAl
+bool noHolotapeStopSound = false;
+void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
+{
+	if (isHolotapeVoicePlaying)
+	{
+		StopHolotape();
+	}
+	if (note->type == BGSNote::kSound)
+	{
+		Sound sound = Sound();
+		sound.InitRefID(note->voice->refID);
+
+		holotapeDialogues.Append(&sound);
+		isHolotapeVoicePlaying = true;
+	}
+	else if (note->type == BGSNote::kVoice)
+	{
+		auto character = (Character*)GameHeapAlloc(sizeof(Character));
+		ThisCall(0x8D1F40, character, false);
+		character->flags |= TESForm::kFormFlags_DontSaveForm;
+		ThisCall(0x575690, character, note->speaker);
+
+		auto dialogueItems = (DialogueItemList*)GameHeapAlloc(sizeof(DialogueItemList));
+		ThisCall(0x83B850, dialogueItems, character, PlayerCharacter::GetSingleton(), note->voice);
+
+		// use the audio flags from the original function to be compatible with JIP's VoiceModulation hook
+		UInt32 audioFlags = *(UInt32*)0x7974CA;
+
+		dialogueItems->current = &dialogueItems->list;
+		if (auto currentItem = dialogueItems->GetCurrentItem())
+		{
+			if (currentItem->responses.list.data)
+			{
+				currentItem->responses.current = &currentItem->responses.list;
+				isHolotapeVoicePlaying = true;
+				do
+				{
+					// append subtitle
+					currentItem = dialogueItems->GetCurrentItem();
+					auto currentResponse = dialogueItems->GetCurrentResponse();
+					if (!currentResponse) break;
+
+					auto voiceLineStr = &currentResponse->responseText;
+					ThisCall(0x7A1AC0, &holotapeSubtitles, voiceLineStr);
+
+					auto topicInfo = currentItem->topicInfo;
+					ThisCall(0x61F170, topicInfo, 0, character);
+
+					// append sound
+					Sound toPlay = Sound();
+					ThisCall(0xAD7480, BSWin32Audio::GetSingleton(), &toPlay, currentResponse->voiceFilePath.CStr(), audioFlags, nullptr);
+					toPlay.SetVolume(0.9f);
+					holotapeDialogues.Append(&toPlay);
+
+					ThisCall(0x61F170, topicInfo, 1, character);
+				} while (currentItem->responses.Next());
+			}
+		}
+
+		dialogueItems->Destroy(true);
+		character->Destroy(true);
+	}
+
+	if (isHolotapeVoicePlaying)
+	{
+		if (playStartStopSound)
+		{
+			Sound::PlayEDID("UIPipBoyHolotapeStart", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D, PlayerCharacter::GetSingleton());
+		}
+		else
+		{
+			noHolotapeStopSound = true;
+		}
+		*(UInt8*)0x11DCFA4 = true;
+		ThisCall(0xAD85A0, BSWin32Audio::GetSingleton()); // FadeInDialogueSound
+	}
+}
+
+void MapMenu::StopHolotape()
+{
+
+	if (currentHolotapeDialogueSound && currentHolotapeDialogueSound->data.IsPlaying())
+	{
+		currentHolotapeDialogueSound->data.Stop();
+	}
+	holotapeDialogues.FreeAll();
+	ThisCall(0x7A1C30, &holotapeSubtitles, 1);
+	currentHolotapeDialogueSound = nullptr;
+	holotapeTotalTime = 0.0f;
+	holotapePlayStartTime = 0;
+	isHolotapeVoicePlaying = 0;
+	if (!noHolotapeStopSound)
+	{
+		Sound::PlayEDID("UIPipBoyHolotapeStop", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D, PlayerCharacter::GetSingleton());
+	}
+	noHolotapeStopSound = false;
+	ThisCall(0xAD8650, BSWin32Audio::GetSingleton()); // FadeOutDialogueSound
+	*(UInt8*)0x11DCFA4 = false;
+	ThisCall(0x775670, HUDMainMenu::GetSingleton()); // ClearSubtitlesString
 }

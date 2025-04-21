@@ -162,26 +162,11 @@ public:
 	bool GetDisabled(bool checkQueue = true) const;
 	ExtraContainerChanges* GetOrCreateContainerChanges();
 	ExtraContainerChanges::EntryDataList* GetContainerChangesList();
-	SInt32 GetItemCount(TESForm* form);
-	void AddItemAlt(TESForm* item, UInt32 count, float condition, bool doEquip);
-	bool GetInventoryItems(UInt8 typeID);
+	
 	TESObjectCELL* GetParentCell();
-	TESWorldSpace* GetParentWorld();
-	float GetDistance(TESObjectREFR* target);
-	void SetPos(NiVector3& posVector);
-	void SetAngle(NiVector3& rotVector);
-	bool MoveToCell(TESForm* worldOrCell, NiVector3& posVector);
-	void DeleteReference();
-	TESObjectREFR* GetMerchantContainer();
-	float GetWaterImmersionPerc();
-	bool IsMobile();
-	bool IsGrabbable();
-	bool SetLinkedRef(TESObjectREFR* linkObj, UInt8 modIdx);
-	bool ValidForHooks();
 	NiAVObject* GetNiBlock(const char* blockName);
 	NiNode* GetNode(const char* nodeName);
 	hkpRigidBody* GetRigidBody(const char* nodeName);
-	bool RunScriptSource(const char* sourceStr);
 	bool IsInInterior() { return ThisStdCall_B(0x575D10, this); }
 	static TESObjectREFR* __stdcall Create(bool bTemp = false);
 
@@ -737,7 +722,7 @@ public:
 	UInt16			unk1C2;				// 1C2
 	float			unk1C4;				// 1C4
 };
-
+STATIC_ASSERT(sizeof(Character) == 0x1C8);
 class bhkRigidBody;
 struct ParentSpaceNode;
 struct TeleportLink;
@@ -961,3 +946,210 @@ public:
 	NiNode* GetNode(const bool abFirstPerson) const;
 };
 STATIC_ASSERT(sizeof(PlayerCharacter) == 0xE50);
+
+
+// 150
+class Projectile : public MobileObject {
+public:
+	Projectile();
+	~Projectile();
+
+	enum {
+		kProjType_Beam = 1,
+		kProjType_Flame,
+		kProjType_Grenade,
+		kProjType_Missile,
+		kProjType_ContinuousBeam
+	};
+
+	virtual UInt32	GetProjectileType();
+	virtual void	Unk_C2(void);
+	virtual void	Unk_C3(void);
+	virtual void	Unk_C4(void);
+	virtual bool	ProcessImpact();
+	virtual bool	IsProximityTriggered();
+	virtual void	Unk_C7(void);
+	virtual bool	DisarmPlacedExplosives(TESObjectREFR* refr, bool unk);
+	virtual void	Unk_C9(void);
+	virtual void	Unk_CA(void);
+	virtual void	Unk_CB(void);
+
+	enum {
+		kProjFlag_Bit00Unk = 0x1,
+		kProjFlag_Bit01Unk = 0x2,
+		kProjFlag_Bit02Unk = 0x4,
+		kProjFlag_Bit03Unk = 0x8,
+		kProjFlag_Bit04Unk = 0x10,
+		kProjFlag_Bit05Unk = 0x20,
+		kProjFlag_Bit06Unk = 0x40,
+		kProjFlag_Bit07Unk = 0x80,
+		kProjFlag_Bit08Unk = 0x100,
+		kProjFlag_MineDisarmed = 0x200,
+		kProjFlag_Bit0AUnk = 0x400,
+		kProjFlag_Bit0BUnk = 0x800,
+		kProjFlag_Bit0CUnk = 0x1000,
+		kProjFlag_Bit0DUnk = 0x2000,
+		kProjFlag_Bit0EUnk = 0x4000,
+		kProjFlag_Bit0FUnk = 0x8000,		// Don't apply source-weapon's damage upon impact
+		kProjFlag_Bit10Unk = 0x10000,
+		kProjFlag_Bit11Unk = 0x20000,
+		kProjFlag_Bit12Unk = 0x40000,
+		kProjFlag_Bit13Unk = 0x80000,
+		kProjFlag_Bit14Unk = 0x100000,
+	};
+
+	struct ImpactData {
+		TESObjectREFR* refr;			// 00
+		UInt32			unk04[2];		// 04
+		float			unk0C;			// 0C
+		UInt32			unk10[2];		// 10
+		float			unk18;			// 18
+		hkpRigidBody* rigidBody;		// 1C
+		UInt32			unk20;			// 20
+		SInt32			hitLocation;	// 24
+		UInt32			unk28;			// 28
+		UInt32			unk2C;			// 2C
+	};
+
+	struct Struct128 {
+		UInt32			unk00;
+		UInt8			byte04;
+		UInt8			pad05[3];
+		UInt32			status;		//	0 - Not triggered, 1 - Triggered, 2 - Disarmed
+	};
+
+	tList<ImpactData>	impactDataList;	// 088
+	UInt8				hasImpacted;	// 090
+	UInt8				pad091[3];		// 091
+	float				unk094[13];		// 094
+	UInt32				projFlags;		// 0C8
+	float				speedMult1;		// 0CC
+	float				speedMult2;		// 0D0
+	float				flt0D4;			// 0D4
+	float				elapsedTime;	// 0D8
+	float				hitDamage;		// 0DC
+	float				flt0E0;			// 0E0
+	float				detonationTime;	// 0E4
+	float				flt0E8;			// 0E8
+	float				flt0EC;			// 0EC
+	float				flt0F0;			// 0F0
+	float				wpnHealthPerc;	// 0F4
+	TESObjectWEAP* sourceWeap;	// 0F8
+	TESObjectREFR* sourceRef;		// 0FC
+	UInt32				unk100;			// 100
+	float				flt104;			// 104
+	float				flt108;			// 108
+	float				flt10C;			// 10C
+	float				distTravelled;	// 110
+	NiRefObject* object114;		// 114
+	UInt8				byte118;		// 118
+	UInt8				pad119[3];		// 119
+	NiNode* node11C;		// 11C
+	UInt32				unk120;			// 120
+	float				flt124;			// 124
+	Struct128			unk128;			// 128
+	Struct128			unk134;			// 134
+	UInt32				unk140;			// 140
+	UInt32				unk144;			// 144
+	UInt8				byte148;		// 148
+	UInt8				pad149[3];		// 149
+	float				range;			// 14C
+};
+STATIC_ASSERT(sizeof(Projectile) == 0x150);
+
+struct ProjectileData {
+	UInt8 byte00;
+	UInt8 byte01;
+	UInt8 byte02;
+	UInt8 gap03;
+	float unk04;
+	float flashDuration;
+	NiNode* muzzleFlash;
+	NiPointLight* flashLight;
+	BGSProjectile* projectile;
+	TESObjectWEAP* sourceWeap;
+	Actor* sourceActor;
+};
+
+// 154
+class BeamProjectile : public Projectile {
+public:
+	BeamProjectile();
+	~BeamProjectile();
+
+	NiRefObject* object150;		// 150
+};
+
+// 158
+class ContinuousBeamProjectile : public Projectile {
+public:
+	ContinuousBeamProjectile();
+	~ContinuousBeamProjectile();
+
+	NiRefObject* object150;		// 150
+	UInt32			unk154;			// 154
+};
+
+// 158
+class FlameProjectile : public Projectile {
+public:
+	FlameProjectile();
+	~FlameProjectile();
+
+	virtual void	Unk_CC(void);
+
+	float		fExpirationTimer;		// 150
+	float		fConeAngle;		// 154
+};
+
+// 154
+class GrenadeProjectile : public Projectile {
+public:
+	GrenadeProjectile();
+	~GrenadeProjectile();
+
+	virtual void	Unk_CC(void);
+
+	UInt8		byte150;		// 150
+	UInt8		pad151[3];		// 151
+};
+
+// 160
+class MissileProjectile : public Projectile {
+public:
+	MissileProjectile();
+	~MissileProjectile();
+
+	virtual void	Unk_CC(void);
+
+	UInt32		unk150;			// 150
+	UInt8		byte154;		// 154
+	UInt8		pad155[3];		// 155
+	float		flt158;			// 158
+	float		flt15C;			// 15C
+};
+
+// 104
+class Explosion : public MobileObject {
+public:
+	Explosion();
+	~Explosion();
+
+	virtual void	Unk_C1(void);
+
+	float			unk088;			// 088
+	float			unk08C;			// 08C
+	float			unk090;			// 090
+	float			unk094;			// 094
+	float			unk098;			// 098
+	float			unk09C;			// 09C
+	NiRefObject* object0A0;		// 0A0
+	tList<void>		list0A4;		// 0A4
+	UInt32			unk0AC[6];		// 0AC
+	NiRefObject* object0C4;		// 0C4
+	UInt32			unk0C8[2];		// 0C8
+	NiRefObject* object0D0;		// 0D0
+	UInt32			unk0D4[11];		// 0D4
+	float			unk100;			// 100
+};
+STATIC_ASSERT(sizeof(Explosion) == 0x104);

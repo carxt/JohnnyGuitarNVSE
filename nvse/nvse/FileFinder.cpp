@@ -16,5 +16,5 @@ bool FileFinder::Locate(const char* apName, const char* apFilePath, UInt32 aiFla
 
 // 0xAFE0D0
 bool FileFinder::Exist(const char* apName, const char* apFilePath, UInt32 aiFlags, ARCHIVE_TYPE aiArchiveType) {
-    return ThisStdCall<bool>(0xAFE0D0, this, apName, apFilePath, aiFlags, aiArchiveType);
+    return ThisCall<bool>(0xAFE0D0, this, apName, apFilePath, aiFlags, aiArchiveType);
 }

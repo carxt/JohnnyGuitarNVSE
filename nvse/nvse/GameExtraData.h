@@ -142,6 +142,10 @@
 	 DuplicateExtraListForContainer	0x0041B090
  */
 
+class BGSPrimitive;
+struct AnimData;
+class SeenData;
+
 enum {
 	kExtraData_Unknown00,
 	kExtraData_Havok,
@@ -767,4 +771,463 @@ public:
 	void SetVisible(bool visible) { data->flags = (visible) ? (data->flags | kFlag_Visible) : (data->flags & ~kFlag_Visible); }
 	void SetCanTravel(bool travel) { data->flags = (travel) ? (data->flags | kFlag_CanTravel) : (data->flags & ~kFlag_CanTravel); }
 	void SetHidden(bool hidden) { data->flags = (hidden) ? (data->flags | kFlag_Hidden) : (data->flags & ~kFlag_Hidden); }
+};
+
+// 14
+class ExtraHavok : public BSExtraData {
+public:
+	ExtraHavok();
+	virtual ~ExtraHavok();
+
+	bhkWorld* world;			// 0C
+	UInt32			unk10;			// 10
+};
+
+// 10
+class ExtraRegionList : public BSExtraData {
+public:
+	ExtraRegionList();
+	virtual ~ExtraRegionList();
+
+	TESRegionList* regionList;	// 0C
+};
+
+
+class ExtraDetachTime : public BSExtraData {
+public:
+	ExtraDetachTime();
+	~ExtraDetachTime();
+
+	SInt32 time;
+};
+
+// 10
+class ExtraSeenData : public BSExtraData {
+public:
+	ExtraSeenData();
+	virtual ~ExtraSeenData();
+
+	SeenData* data;		// 0C
+};
+
+// 10
+class ExtraCellWaterType : public BSExtraData {
+public:
+	ExtraCellWaterType();
+	virtual ~ExtraCellWaterType();
+
+	TESWaterForm* waterForm;		// 0C
+
+	static ExtraCellWaterType* __stdcall Create(TESWaterForm* _waterForm);
+};
+
+// 10
+class ExtraCellMusicType : public BSExtraData {
+public:
+	ExtraCellMusicType();
+	virtual ~ExtraCellMusicType();
+
+	BGSMusicType* musicType;
+
+	static ExtraCellMusicType* __stdcall Create(BGSMusicType* _musicType);
+};
+
+// 10
+class ExtraCellClimate : public BSExtraData {
+public:
+	ExtraCellClimate();
+	virtual ~ExtraCellClimate();
+
+	TESClimate* climate;		// 0C
+
+	static ExtraCellClimate* __stdcall Create(TESClimate* _climate);
+};
+
+// 10
+class ExtraPersistentCell : public BSExtraData {
+public:
+	ExtraPersistentCell();
+	virtual ~ExtraPersistentCell();
+
+	TESObjectCELL* persistentCell;	// 0C
+};
+
+// 24
+class ExtraStartingPosition : public BSExtraData {
+public:
+	ExtraStartingPosition();
+	virtual ~ExtraStartingPosition();
+
+	NiVector3	posVector;	// 0C
+	NiVector3	rotVector;	// 18
+};
+
+// 10
+class ExtraAnim : public BSExtraData {
+public:
+	ExtraAnim();
+	virtual ~ExtraAnim();
+
+	AnimData* animData;	// 0C
+};
+
+// 1C
+class ExtraPackage : public BSExtraData {
+public:
+	ExtraPackage();
+	virtual ~ExtraPackage();
+
+	TESPackage* package;	// 0C
+	UInt32			unk10[3];	// 10
+};
+
+// 10
+class ExtraFollower : public BSExtraData {
+public:
+	ExtraFollower();
+	virtual ~ExtraFollower();
+
+	tList<Actor>* followers;		// 0C
+};
+
+// 10
+class ExtraOriginalReference : public BSExtraData {
+public:
+	ExtraOriginalReference();
+	virtual ~ExtraOriginalReference();
+
+	TESObjectREFR* originalRef;		// 0C
+
+	static ExtraOriginalReference* __stdcall Create(TESObjectREFR* _originalRef);
+};
+
+// 10
+class ExtraLight : public BSExtraData {
+public:
+	ExtraLight();
+	virtual ~ExtraLight();
+
+	struct Data {
+		NiPointLight* pointLight;
+		float			flt04;
+	};
+
+	Data* data;		// 0C
+};
+
+// 14
+class ExtraEnableStateChildren : public BSExtraData {
+public:
+	ExtraEnableStateChildren();
+	virtual ~ExtraEnableStateChildren();
+
+	tList<TESObjectREFR>	children;	// 0C
+};
+
+// 10
+class ExtraItemDropper : public BSExtraData {
+public:
+	ExtraItemDropper();
+	virtual ~ExtraItemDropper();
+
+	TESObjectREFR* dropper;	// 0C
+};
+
+// 14
+class ExtraDroppedItemList : public BSExtraData {
+public:
+	ExtraDroppedItemList();
+	virtual ~ExtraDroppedItemList();
+
+	tList<TESObjectREFR>	itemRefs;	// 0C
+};
+
+// 10
+class ExtraMerchantContainer : public BSExtraData {
+public:
+	ExtraMerchantContainer();
+	virtual ~ExtraMerchantContainer();
+
+	TESObjectREFR* containerRef;	// 0C
+};
+
+// 10
+class ExtraRefractionProperty : public BSExtraData {
+public:
+	ExtraRefractionProperty();
+	virtual ~ExtraRefractionProperty();
+
+	float			refraction;		// 0C
+};
+
+// 10
+class ExtraPoison : public BSExtraData {
+public:
+	ExtraPoison();
+	virtual ~ExtraPoison();
+
+	AlchemyItem* poisonEffect;	// 0C
+};
+
+// 10
+class ExtraNorthRotation : public BSExtraData {
+public:
+	ExtraNorthRotation();
+	virtual ~ExtraNorthRotation();
+
+	float		rotation;		// 0C
+};
+
+// 10
+class ExtraStartingWorldOrCell : public BSExtraData {
+public:
+	ExtraStartingWorldOrCell();
+	virtual ~ExtraStartingWorldOrCell();
+
+	TESForm* worldOrCell;	// 0C
+};
+
+// 10
+class ExtraTerminalState : public BSExtraData {
+public:
+	ExtraTerminalState();
+	~ExtraTerminalState();
+
+	UInt8			lockedOut;	// 0C
+	UInt8			lockLevel;	// 0D unlocked: 0xFE
+	UInt16			pad;
+
+	static ExtraTerminalState* Create();
+};
+
+// 10
+class ExtraLinkedRef : public BSExtraData {
+public:
+	ExtraLinkedRef();
+	virtual ~ExtraLinkedRef();
+
+	TESObjectREFR* linkedRef;		// 0C
+
+	static ExtraLinkedRef* __stdcall Create(TESObjectREFR* _linkedRef = NULL);
+};
+
+// 14
+class ExtraLinkedRefChildren : public BSExtraData {
+public:
+	ExtraLinkedRefChildren();
+	virtual ~ExtraLinkedRefChildren();
+
+	tList<TESObjectREFR>	children;	// 0C
+};
+
+// 20
+class ExtraActivateRef : public BSExtraData {
+public:
+	ExtraActivateRef();
+	virtual ~ExtraActivateRef();
+
+	struct parentRef {
+		TESObjectREFR* ref;
+		float			delay;
+	};
+	tList<parentRef>	parentRefs;
+	UInt8				flags;
+	BSString				activationPromptOverride;
+};
+
+// 10
+class ExtraTalkingActor : public BSExtraData {
+public:
+	ExtraTalkingActor();
+	virtual ~ExtraTalkingActor();
+
+	Actor* actor;		// 0C
+};
+
+// 10
+class ExtraObjectHealth : public BSExtraData {
+public:
+	ExtraObjectHealth();
+	virtual ~ExtraObjectHealth();
+
+	float			health;		// 0C
+
+	static ExtraObjectHealth* __stdcall Create(float _health);
+};
+
+// 10
+class ExtraCellImageSpace : public BSExtraData {
+public:
+	ExtraCellImageSpace();
+	virtual ~ExtraCellImageSpace();
+
+	TESImageSpace* imageSpace;	// 0C
+
+	static ExtraCellImageSpace* __stdcall Create(TESImageSpace* _imgSpace);
+};
+
+// 10
+class ExtraRadius : public BSExtraData {
+public:
+	ExtraRadius();
+	virtual ~ExtraRadius();
+
+	float			radius;		// 0C
+
+	static ExtraRadius* __stdcall Create(float _radius);
+};
+
+// 10
+class ExtraRadiation : public BSExtraData {
+public:
+	ExtraRadiation();
+	virtual ~ExtraRadiation();
+
+	float			radiation;	// 0C
+};
+
+// 30
+class ExtraDismemberedLimbs : public BSExtraData {
+public:
+	ExtraDismemberedLimbs();
+	virtual ~ExtraDismemberedLimbs();
+
+	struct DismemberedLimb {
+		UInt8				bodyPartID;
+		UInt8				explodeChance;
+		bool				explodeOnly;
+		UInt8				byte03;
+		BSSimpleArray<void>* array04;
+	};
+
+	UInt16							dismemberedMask;	// 0C
+	UInt8							pad0E[2];			// 0E
+	int								unk10;				// 10
+	TESObjectWEAP* weapon;			// 14
+	int								unk18;				// 18
+	bool							wasEaten;			// 1C
+	UInt8							pad1D[3];			// 1D
+	BSSimpleArray<DismemberedLimb>	dismemberedLimbs;	// 20
+};
+
+// 1C
+class ExtraRadioData : public BSExtraData {
+public:
+	ExtraRadioData();
+	virtual ~ExtraRadioData();
+
+	float				radius;			// 0C
+	UInt32				rangeType;		// 10
+	float				staticPerc;		// 14
+	TESObjectREFR* positionRef;	// 18
+};
+
+// 10
+class ExtraPrimitive : public BSExtraData {
+public:
+	ExtraPrimitive();
+	virtual ~ExtraPrimitive();
+
+	BGSPrimitive* primitive;		// 0C
+
+	static ExtraPrimitive* __stdcall Create(BGSPrimitive* _primitive = NULL);
+};
+
+// 10
+class ExtraCollisionData : public BSExtraData {
+public:
+	ExtraCollisionData();
+	virtual ~ExtraCollisionData();
+
+	UInt32			layer;			// 0C
+};
+
+// 10
+class ExtraEncounterZone : public BSExtraData {
+public:
+	ExtraEncounterZone();
+	virtual ~ExtraEncounterZone();
+
+	BGSEncounterZone* zone;		// 0C
+};
+
+// 1C
+class ExtraSayToTopicInfo : public BSExtraData {
+public:
+	ExtraSayToTopicInfo();
+	virtual ~ExtraSayToTopicInfo();
+
+	TESTopicInfo* info;		// 0C
+	TESTopic* topic;		// 10
+	TESQuest* quest;		// 14
+	Actor* speaker;	// 18
+};
+
+// 10
+class ExtraCellAcousticSpace : public BSExtraData {
+public:
+	ExtraCellAcousticSpace();
+	virtual ~ExtraCellAcousticSpace();
+
+	BGSAcousticSpace* acousticSpace;		// 0C
+
+	static ExtraCellAcousticSpace* __stdcall Create(BGSAcousticSpace* _acousticSpace = NULL);
+};
+
+// 10
+class ExtraAshPileRef : public BSExtraData {
+public:
+	ExtraAshPileRef();
+	virtual ~ExtraAshPileRef();
+
+	Actor* sourceRef;		// 0C
+};
+
+// 28
+class ExtraFollowerSwimBreadcrumbs : public BSExtraData {
+public:
+	ExtraFollowerSwimBreadcrumbs();
+	virtual ~ExtraFollowerSwimBreadcrumbs();
+	struct ExtraFollowerSwimBreadcrumb {
+		NiPoint3 StartLocation;
+		UInt32 StartNavMeshID;
+		NiPoint3 EndLocation;
+		UInt32 EndNavMeshID;
+		bool bEnteringWater;
+	};
+	UInt32			leaderState;
+	NiPoint3		leaderLocation;
+	UInt32			leaderNavmeshID;
+	tList<ExtraFollowerSwimBreadcrumb*>		crumbList;
+};
+STATIC_ASSERT(sizeof(ExtraFollowerSwimBreadcrumbs) == 0x28);
+// 34
+struct ExtraAudioMarkerData {
+	TESFullName		fullName;
+	float			layer2TriggerPerc;
+	float			layer3TriggerPerc;
+	UInt32			unk14[4];
+	UInt32			mediaLocCtrlID;
+	UInt32			flags;
+	UInt32			unk2C[2];
+};
+// 10
+class ExtraAudioMarker : public BSExtraData {
+public:
+	ExtraAudioMarker();
+	virtual ~ExtraAudioMarker();
+
+	ExtraAudioMarkerData* data;
+};
+
+// 14
+class ExtraSpecialRenderFlags : public BSExtraData {
+public:
+	ExtraSpecialRenderFlags();
+	virtual ~ExtraSpecialRenderFlags();
+
+	UInt32		flags;		// 0C
+	UInt32		unk10;		// 10
+
+	static ExtraSpecialRenderFlags* __stdcall Create(UInt32 _flags = 0);
 };

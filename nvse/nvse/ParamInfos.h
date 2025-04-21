@@ -450,6 +450,15 @@ static ParamInfo kParams_Event_OneForm[4] =
 	{ "Script", kParamType_AnyForm, 0 },
 	{ "flags", kParamType_Integer, 1 },
 	{ "Form", kParamType_AnyForm, 1 }
+}; 
+
+static ParamInfo kParams_Event_TwoForms[5] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+	{ "Form", kParamType_AnyForm, 1 },
+	{ "Form", kParamType_AnyForm, 1 }
 };
 
 static ParamInfo kParams_Event[3] =
@@ -574,7 +583,14 @@ static ParamInfo kParams_OneInt_OneFloat[2] =
 
 static ParamInfo kParams_OneForm_OneOptionalInt[2] =
 {
+	{ "form",	kParamType_AnyForm,	0 }, 
+	{ "int",	kParamType_Integer, 1 },
+};
+
+static ParamInfo kParams_OneForm_OneInt_OneOptionalInt[3] =
+{
 	{ "form",	kParamType_AnyForm,	0 },
+	{ "int",	kParamType_Integer, 0 },
 	{ "int",	kParamType_Integer, 1 },
 };
 

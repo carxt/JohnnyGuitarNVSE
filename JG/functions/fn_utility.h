@@ -43,7 +43,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GameGetSecondsPassed, GGetSecPass, , 0, NULL);
 
 
 bool Cmd_GameGetSecondsPassed_Eval(COMMAND_ARGS_EVAL) {
-	*result = ThisStdCall<float>(0x07013E0, (void*)0x11F6394);
+	*result = ThisCall<float>(0x07013E0, (void*)0x11F6394);
 	return true;
 }
 
@@ -113,7 +113,7 @@ bool Cmd_GetAvailableRadios_Execute(COMMAND_ARGS) {
 
 bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ThisStdCall<void>(0x75F2A0, nullptr);
+	ThisCall(0x75F2A0, nullptr);
 	return true;
 }
 
@@ -127,7 +127,7 @@ bool Cmd_DumpIconMap_Execute(COMMAND_ARGS) {
 
 bool Cmd_UpdateCrosshairPrompt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ThisStdCall<void>(0x778B10, NULL);
+	ThisCall(0x778B10, NULL);
 	return true;
 }
 enum EType {
@@ -268,7 +268,7 @@ bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	if (actor->baseProcess->GetIdleForm350()) {
 		actor->baseProcess->ResetQueuedIdleFlags();
 		actor->baseProcess->SetIdleForm350(NULL);
-		if (stopAnim > 0) ThisStdCall(0x498910, actor->GetAnimData(), 1, 1); // SpecialIdleFree
+		if (stopAnim > 0) ThisCall(0x498910, actor->GetAnimData(), 1, 1); // SpecialIdleFree
 		*result = 1;
 	}
 	return true;
@@ -579,8 +579,8 @@ bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS) {
-	ThisStdCall(0x0703DA0, nullptr);
-	ThisStdCall(0x07D0A70, nullptr);
+	ThisCall(0x0703DA0, nullptr);
+	ThisCall(0x07D0A70, nullptr);
 	return true;
 }
 
@@ -705,7 +705,7 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 		if (world) {
 			if (rotate) {
 				// NiMatrix3::FromEulerAnglesXYZ
-				ThisStdCall(0xA59540, &object->m_world.rotate, x, y, z);
+				ThisCall(0xA59540, &object->m_world.rotate, x, y, z);
 			}
 			else {
 				object->m_world.translate.x = x;
@@ -718,7 +718,7 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 		else {
 			if (rotate) {
 				// NiMatrix3::FromEulerAnglesXYZ
-				ThisStdCall(0xA59540, &object->m_local.rotate, x, y, z);
+				ThisCall(0xA59540, &object->m_local.rotate, x, y, z);
 			}
 			else {
 				object->m_local.translate.x = x;

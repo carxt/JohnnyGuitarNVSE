@@ -63,7 +63,7 @@ class RefNiObject;
 
 class BSAnimGroupSequence;
 struct BSAData;
-
+class TESWorldSpace;
 // 18
 class BSTask {
 public:
@@ -201,6 +201,35 @@ class Model // NiObject
 	UInt32		counter;	// 008
 	NiNode* ninode;	// 00C
 };
+
+// 58
+class BGSDistantObjectBlockLoadTask : public QueuedFileEntry
+{
+public:
+	BGSDistantObjectBlockLoadTask();
+	~BGSDistantObjectBlockLoadTask();
+
+	virtual void Unk_0C(void);
+
+	UInt8 byte30; // 30
+	UInt8 byte31; // 31
+	UInt8 byte32; // 32
+	UInt8 byte33; // 33
+	int cellX; // 34
+	int cellY; // 38
+	UInt32 lodLevel; // 3C
+	void* lodNode14; // 40
+	TESWorldSpace* worldSpc; // 44
+	NiRefObject* object48; // 48
+	NiRefObject* object4C; // 4C
+	UInt8 byte50; // 50
+	UInt8 byte51; // 51
+	UInt8 byte52; // 52
+	UInt8 byte53; // 53
+	UInt32 unk54; // 54
+};
+
+STATIC_ASSERT(sizeof(BGSDistantObjectBlockLoadTask) == 0x58);
 
 // 44
 class QueuedModel : public QueuedFileEntry {

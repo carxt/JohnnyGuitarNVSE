@@ -138,9 +138,6 @@
     <ClInclude Include="..\nvse\nvse\Utilities.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="internal\containers.h">
-      <Filter>internal</Filter>
-    </ClInclude>
     <ClInclude Include="internal\decoding.h">
       <Filter>internal</Filter>
     </ClInclude>
@@ -169,13 +166,7 @@
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="JohnnyGuitarNVSE.h" />
-    <ClInclude Include="events\CustomEventFilters.h">
-      <Filter>events</Filter>
-    </ClInclude>
-    <ClInclude Include="events\EventFilteringInterface.h">
-      <Filter>events</Filter>
-    </ClInclude>
-    <ClInclude Include="events\JohnnyEventPredefinitions.h">
+    <ClInclude Include="events\EventFramework.h">
       <Filter>events</Filter>
     </ClInclude>
     <ClInclude Include="events\JohnnyEvents.h">
@@ -236,6 +227,12 @@
       <Filter>internal</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\FileFinder.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameSound.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\nvse\GameProcess.h">
       <Filter>nvse</Filter>
     </ClInclude>
   </ItemGroup>
