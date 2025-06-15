@@ -64,6 +64,10 @@ DEFINE_COMMAND_ALT_PLUGIN(SetMediaLocationControllerOverride, SetMLCOverride, , 
 DEFINE_COMMAND_ALT_PLUGIN(ClearMediaLocationControllerOverride, ClearMLCOverride, , 0, 0, NULL);
 DEFINE_COMMAND_ALT_PLUGIN(GetCasinoWinnings, , , 0, 1, kParams_OneCasino);
 DEFINE_COMMAND_ALT_PLUGIN(SetCasinoWinnings, , , 0, 2, kParams_OneCasinoOneInt);
+DEFINE_COMMAND_PLUGIN(GetCasinoDeckTexture, , 0, 2, kParams_OneCasinoOneInt);
+DEFINE_COMMAND_PLUGIN(SetCasinoDeckTexture, , 0, 3, kParams_OneCasinoOneIntOneString);
+DEFINE_COMMAND_PLUGIN(GetCasinoCurrency, , 0, 1, kParams_OneCasino);
+DEFINE_COMMAND_PLUGIN(SetCasinoCurrency, , 0, 2, kParams_OneCasinoOneForm);
 DEFINE_COMMAND_PLUGIN(PlayHolotape, , 0, 2, kParams_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(StopHolotape, , 0, 1, kParams_OneOptionalInt);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
@@ -157,6 +161,62 @@ bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS)
 		} while (iter = iter->next);
 	}
 
+	return true;
+}
+
+bool Cmd_GetCasinoDeckTexture_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCasino* casino = nullptr;
+	SInt32 deckIndex;
+	const char* resStr = NULL;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex) && casino && deckIndex >= 0 && deckIndex <= 3)
+	{
+		resStr = casino->blackjackDeck[deckIndex].ddsPath.m_data;
+		if (IsConsoleMode())
+			Console_Print("GetCasinoDeckTexture >> %s", resStr);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
+	}
+	return true;
+}
+
+bool Cmd_SetCasinoDeckTexture_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCasino* casino = nullptr;
+	SInt32 deckIndex;
+	char newPath[MAX_PATH];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex, &newPath) && casino && newPath && deckIndex >= 0 && deckIndex <= 3)
+	{
+		casino->blackjackDeck[deckIndex].ddsPath.Set(newPath);
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetCasinoCurrency_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCasino* casino = nullptr;
+	TESForm* chipForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino) && casino)
+	{
+		chipForm = TESForm::GetFormByNumericID(casino->currencyRefID);
+		*(UInt32*)result = chipForm->refID;
+	}
+	return true;
+}
+
+bool Cmd_SetCasinoCurrency_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCasino* casino = nullptr;
+	TESForm* chip = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &chip) && casino && chip && IS_TYPE(chip, TESCasinoChips))
+	{
+		casino->currencyRefID = chip->refID;
+		*result = 1;
+	}
 	return true;
 }
 

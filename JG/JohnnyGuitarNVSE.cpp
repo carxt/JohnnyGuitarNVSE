@@ -508,6 +508,10 @@ extern "C" {
 		REG_CMD(ClearMediaLocationControllerOverride); // do not document
 		REG_CMD(GetCasinoWinnings);
 		REG_CMD(SetCasinoWinnings);
+		REG_TYPED_CMD(GetCasinoDeckTexture, String);
+		REG_CMD(SetCasinoDeckTexture);
+		REG_TYPED_CMD(GetCasinoCurrency, Form);
+		REG_CMD(SetCasinoCurrency);
 		REG_CMD(GetAcousticSpace);
 		REG_CMD(SetAcousticSpace);
 		REG_CMD(SetCameraTranslate);
