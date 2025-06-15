@@ -66,8 +66,8 @@ DEFINE_COMMAND_ALT_PLUGIN(GetCasinoWinnings, , , 0, 1, kParams_OneCasino);
 DEFINE_COMMAND_ALT_PLUGIN(SetCasinoWinnings, , , 0, 2, kParams_OneCasinoOneInt);
 DEFINE_COMMAND_PLUGIN(GetCasinoDeckTexture, , 0, 2, kParams_OneCasinoOneInt);
 DEFINE_COMMAND_PLUGIN(SetCasinoDeckTexture, , 0, 3, kParams_OneCasinoOneIntOneString);
-DEFINE_COMMAND_PLUGIN(GetCasinoCurrency, , 0, 1, kParams_OneCasino);
-DEFINE_COMMAND_PLUGIN(SetCasinoCurrency, , 0, 2, kParams_OneCasinoOneForm);
+DEFINE_COMMAND_PLUGIN(GetCasinoChip, , 0, 1, kParams_OneCasino);
+DEFINE_COMMAND_PLUGIN(SetCasinoChip, , 0, 2, kParams_OneCasinoOneForm);
 DEFINE_COMMAND_PLUGIN(PlayHolotape, , 0, 2, kParams_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(StopHolotape, , 0, 1, kParams_OneOptionalInt);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
@@ -194,7 +194,7 @@ bool Cmd_SetCasinoDeckTexture_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_GetCasinoCurrency_Execute(COMMAND_ARGS)
+bool Cmd_GetCasinoChip_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESCasino* casino = nullptr;
@@ -207,7 +207,7 @@ bool Cmd_GetCasinoCurrency_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_SetCasinoCurrency_Execute(COMMAND_ARGS)
+bool Cmd_SetCasinoChip_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESCasino* casino = nullptr;

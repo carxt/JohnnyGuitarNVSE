@@ -870,7 +870,7 @@ static ParamInfo kParams_OneCasinoOneIntOneString[3] =
 static ParamInfo kParams_OneCasinoOneForm[2] =
 {
 	{	"Casino",	kParamType_Casino,	1	},
-	{	"Chip",		kParamType_AnyForm,	1	},
+	{	"form",		kParamType_AnyForm,	1	},
 };
 
 

@@ -510,8 +510,8 @@ extern "C" {
 		REG_CMD(SetCasinoWinnings);
 		REG_TYPED_CMD(GetCasinoDeckTexture, String);
 		REG_CMD(SetCasinoDeckTexture);
-		REG_TYPED_CMD(GetCasinoCurrency, Form);
-		REG_CMD(SetCasinoCurrency);
+		REG_TYPED_CMD(GetCasinoChip, Form);
+		REG_CMD(SetCasinoChip);
 		REG_CMD(GetAcousticSpace);
 		REG_CMD(SetAcousticSpace);
 		REG_CMD(SetCameraTranslate);
