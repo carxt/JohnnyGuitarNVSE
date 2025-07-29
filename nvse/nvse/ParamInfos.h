@@ -851,13 +851,26 @@ static ParamInfo kParams_EjectCasing[2] =
 
 static ParamInfo kParams_OneCasino[1] =
 {
-	{    "Casino",    kParamType_Casino,    1    },
+	{	"Casino",	kParamType_Casino,	1	},
 };
 
 static ParamInfo kParams_OneCasinoOneInt[2] =
 {
-	{    "Casino",    kParamType_Casino,    1    },
-	{    "Earnings",    kParamType_Integer,    1    },
+	{	"Casino",	kParamType_Casino,	1	},
+	{	"int",		kParamType_Integer,	1	},
+};
+
+static ParamInfo kParams_OneCasinoOneIntOneString[3] =
+{
+	{	"Casino",	kParamType_Casino,	1	},
+	{	"int",		kParamType_Integer,	1	},
+	{	"string",	kParamType_String,	1	},
+};
+
+static ParamInfo kParams_OneCasinoOneForm[2] =
+{
+	{	"Casino",	kParamType_Casino,	1	},
+	{	"form",		kParamType_AnyForm,	1	},
 };
 
 
