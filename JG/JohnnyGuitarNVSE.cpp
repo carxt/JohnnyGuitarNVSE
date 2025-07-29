@@ -508,10 +508,6 @@ extern "C" {
 		REG_CMD(ClearMediaLocationControllerOverride); // do not document
 		REG_CMD(GetCasinoWinnings);
 		REG_CMD(SetCasinoWinnings);
-		REG_TYPED_CMD(GetCasinoDeckTexture, String);
-		REG_CMD(SetCasinoDeckTexture);
-		REG_TYPED_CMD(GetCasinoChip, Form);
-		REG_CMD(SetCasinoChip);
 		REG_CMD(GetAcousticSpace);
 		REG_CMD(SetAcousticSpace);
 		REG_CMD(SetCameraTranslate);
@@ -519,6 +515,10 @@ extern "C" {
 		REG_CMD(PlayHolotape);
 		REG_CMD(StopHolotape);
 		REG_CMD(SetOnTakeBackItemEventHandler);
+		REG_TYPED_CMD(GetCasinoDeckTexture, String);
+		REG_CMD(SetCasinoDeckTexture);
+		REG_TYPED_CMD(GetCasinoChip, Form);
+		REG_CMD(SetCasinoChip);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
