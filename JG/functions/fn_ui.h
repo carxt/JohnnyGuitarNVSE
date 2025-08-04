@@ -3,6 +3,7 @@ DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , 0, 3, kParams_OneString_OneInt_OneF
 DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetWorldSpaceMapTexture, , 0, 2, kParams_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetCustomMapMarkerIcon, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParams_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(QueueCinematicText, , 0, 7, kParams_TwoStrings_OneOptionalString_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , 0, 3, kParams_OneString_TwoOptionalInts);
@@ -23,9 +24,9 @@ bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks
 			while (headNode) {
 				Console_Print("objective %s from quest %s", headNode->data->displayText.CStr(), headNode->data->quest->GetEditorName());
 				headNode = headNode->next;
-			}			
+			}
 		}
-	
+
 	return true;
 }
 
@@ -350,5 +351,16 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 		SetMapMarkerIcon(form, iconPath);
 	}
 	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->refID, iconPath);
+	return true;
+}
+
+bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
+	ExtraMapMarker* mapMarkerExtra;
+	if (!thisObj || (!thisObj->GetIsReference() || !thisObj->IsMapMarker())) return true;
+	mapMarkerExtra = GetExtraType(thisObj->extraDataList, MapMarker);
+	if (!mapMarkerExtra || !mapMarkerExtra->data)  return true;
+	const char* resStr = GetMapMarker(thisObj, mapMarkerExtra->data->type);
+	g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
+	if (IsConsoleMode()) Console_Print("GetCustomMapMarkerIcon >> %s", resStr);
 	return true;
 }

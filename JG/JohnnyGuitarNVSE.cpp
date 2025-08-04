@@ -519,6 +519,7 @@ extern "C" {
 		REG_CMD(SetCasinoDeckTexture);
 		REG_TYPED_CMD(GetCasinoChip, Form);
 		REG_CMD(SetCasinoChip);
+		REG_TYPED_CMD(GetCustomMapMarkerIcon, String);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
