@@ -632,7 +632,7 @@ public:
 
 	void StopHolotape();
 
-	
+
 };
 STATIC_ASSERT(sizeof(MapMenu) == 0x230);
 extern bool noHolotapeStopSound;
@@ -1248,6 +1248,9 @@ public:
 	UInt8				restKeyDebounce; //46
 	UInt8				pad47;           //47
 	float				selectedHours;	// 48
+
+	__forceinline static SleepWaitMenu *Get() {return *(SleepWaitMenu**)0x11DA920;}
+
 };
 STATIC_ASSERT(sizeof(SleepWaitMenu) == 0x4C);
 

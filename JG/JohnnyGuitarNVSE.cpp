@@ -520,6 +520,7 @@ extern "C" {
 		REG_TYPED_CMD(GetCasinoChip, Form);
 		REG_CMD(SetCasinoChip);
 		REG_TYPED_CMD(GetCustomMapMarkerIcon, String);
+		REG_CMD(GetSleepWaitMenuState);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);

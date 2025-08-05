@@ -16,7 +16,7 @@ DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , 0, 2, kParams_OneInt_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(PushUIQuestToTop, , 0, 1, kParams_OneQuest); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , 0, 0, NULL); //DO NOT REGISTER YET.
-
+DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , 0, 0, NULL);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 		if (g_thePlayer) {
@@ -362,5 +362,14 @@ bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	const char* resStr = GetMapMarker(thisObj, mapMarkerExtra->data->type);
 	g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
 	if (IsConsoleMode()) Console_Print("GetCustomMapMarkerIcon >> %s", resStr);
+	return true;
+}
+
+bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
+	*result = 0;
+	SleepWaitMenu* swMenu = SleepWaitMenu::Get();
+	if (!swMenu) return true;
+	*result = DWORD(swMenu->isRest) + 1;
+	if (IsConsoleMode()) Console_Print("GetSleepWaitMenuState >> %.f", *result);
 	return true;
 }
