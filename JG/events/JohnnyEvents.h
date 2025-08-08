@@ -20,6 +20,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRadioPostSoundAttachEventHandler, SetOnRadi
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnKeyboardControllerSelectionChangeEventHandler, SetOnKBCTrlUIDeltaHandler, , 0, 4, kParams_Event_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSleepWaitEventHandler, SetONSleepWEventHandler, , 0, 4, kParams_Event_OneInt);
 DEFINE_COMMAND_PLUGIN(SetOnTakeBackItemEventHandler, , 0, 5, kParams_Event_TwoForms);
+DEFINE_COMMAND_PLUGIN(SetOnNPCResponseEventHandler, , 0, 4, kParams_Event_OneInt);
 
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
@@ -42,6 +43,7 @@ EventInformation* OnRadioPostSoundAttachHandler;
 EventInformation* OnKeyboardControllerSelectionChangeHandler;
 EventInformation* OnSleepWaitEventHandler;
 EventInformation* OnTakeBackItemHandler;
+EventInformation* OnNPCResponseHandler;
 
 
 
@@ -406,6 +408,49 @@ public:
 	}
 };
 
+void __stdcall HandleOnNPCResponse(DialogueResponse* npcResponse)
+{
+    int emotionID = 0;
+    int emotionValue = 0;
+    int responseNumber = 0;
+    const char* responseString = "";
+    const char* voicePath = "";
+
+    if (npcResponse)
+    {
+        emotionID = npcResponse->emotionType;
+        emotionValue = npcResponse->emotionValue;
+        responseNumber = npcResponse->responseNumber;
+        responseString = npcResponse->responseText.CStr();
+        voicePath = npcResponse->voiceFilePath.CStr();
+    }
+
+    for (auto const& callback : OnNPCResponseHandler->callbacks) {
+        auto filter = reinterpret_cast<FilterInt*>(callback.eventFilter);
+        if (filter->IsInFilter(0, emotionID) || filter->IsInFilter(0, 0)) {
+            CallUDF(callback.script, nullptr, OnNPCResponseHandler->numMaxArgs, responseString, voicePath, emotionID, emotionValue, responseNumber);
+        }
+    }
+    return;
+}
+
+__declspec(naked) void OnNPCResponseEventAsm()
+{
+    static const UInt32 returnAddr = 0x763109;
+
+    __asm
+    {
+        mov        eax, [ebp - 0x10]
+        push       eax
+        call       HandleOnNPCResponse
+
+        mov        eax, [ebp - 0x10]
+        push       eax
+        push       ecx
+        jmp        returnAddr
+    }
+}
+
 
 bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
@@ -711,6 +756,21 @@ bool Cmd_SetOnTakeBackItemEventHandler_Execute(COMMAND_ARGS) {
 }
 
 
+bool Cmd_SetOnNPCResponseEventHandler_Execute(COMMAND_ARGS) {
+    UInt32 setOrRemove = 0;
+    Script* script = nullptr;
+    FilterInt::Data filter{};
+    UInt32 flags = 0;
+    if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script)) {
+        if (OnNPCResponseHandler) {
+            if (setOrRemove)
+                OnNPCResponseHandler->RegisterEvent(script, (void**)&filter);
+            else OnNPCResponseHandler->RemoveEvent(script, (void**)&filter);
+        }
+    }
+    return true;
+}
+
 void HandleEventHooks() {
 	OnDyingHandler = JGCreateEvent("OnDying", 1, 1);
 	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1);
@@ -730,6 +790,7 @@ void HandleEventHooks() {
 	OnKeyboardControllerSelectionChangeHandler = JGCreateEvent("OnKeyboardControllerSelectionChange", 1, 1, FilterInt::Create);
 	OnSleepWaitEventHandler = JGCreateEvent("OnSleepWaitEventHandler", 1, 1, FilterInt::Create);
 	OnTakeBackItemHandler = JGCreateEvent("OnTakeBackItem", 3, 2);
+	OnNPCResponseHandler = JGCreateEvent("OnNPCResponse", 5, 1, FilterInt::Create);
 
 	CallUDF = g_scriptInterface->CallFunctionAlt;
 	WriteRelCall(0x55678A, (UInt32)HandleSeenDataUpdateEvent);
@@ -777,7 +838,7 @@ void HandleEventHooks() {
 	hk_KeyboardControllerUIPositionEvent<0x0718059>();
 	hk_KeyboardControllerUIPositionEvent<0x0715CD5>();
 
-	
+
 	//Radio
 	hk_RadioTuneOnEvent<0x511816>();
 	hk_RadioTuneOnEvent<0x579C64>();
@@ -795,4 +856,8 @@ void HandleEventHooks() {
 
 	WriteRelCall(0x4CB976, (UInt32)HandleTakeBackItem);
 	WriteRelCall(0x8F24A1, (UInt32)GetExtraDataListHook);
+
+	WriteRelJump(0x763104, (UInt32)OnNPCResponseEventAsm);
+
+
 }
