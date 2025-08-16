@@ -249,16 +249,11 @@ public:
 	UInt32						unk0A0;				// 0A0
 	UInt32						unk0A4;				// 0A4
 	float						flt0A8;				// 0A8
-	LPCRITICAL_SECTION			cs0AC;				// 0AC
-	UInt32						unk0B0[5];			// 0B0
-	LPCRITICAL_SECTION			cs0C4;				// 0C4
-	UInt32						unk0C8[5];			// 0C8
-	LPCRITICAL_SECTION			cs0DC;				// 0DC
-	UInt32						unk0E0[5];			// 0E0
-	LPCRITICAL_SECTION			cs0F4;				// 0F4
-	UInt32						unk0F8[5];			// 0F8
-	LPCRITICAL_SECTION			cs10C;				// 10C
-	UInt32						unk110[5];			// 110
+	CRITICAL_SECTION			kMessageCS;
+	CRITICAL_SECTION			kDebugCS;
+	CRITICAL_SECTION			kCacheListCS;
+	CRITICAL_SECTION			kMessageProcessingCS;
+	CRITICAL_SECTION			kTaskCS;
 	DList<void>					list124;			// 124
 	UInt32						lastTickCount;		// 130
 	UInt8						byte134;			// 134

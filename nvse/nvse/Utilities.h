@@ -207,3 +207,20 @@ __forceinline float ThisStdCall_F(UInt32 _f, void* _t, T1 a1) {
 	class T {}; union { UInt32 x; float (T::* m)(T1); } u = { _f };
 	return ((T*)_t->*u.m)(a1);
 }
+
+struct CSLock {
+private:
+	CRITICAL_SECTION* cs;
+
+public:
+	CSLock(CRITICAL_SECTION& _cs) : cs(&_cs) {
+		EnterCriticalSection(cs);
+	}
+
+	CSLock(CRITICAL_SECTION* _cs) : cs(_cs) {
+		EnterCriticalSection(cs);
+	}
+	~CSLock() {
+		LeaveCriticalSection(cs);
+	}
+};

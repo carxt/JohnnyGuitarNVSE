@@ -3,7 +3,7 @@
 DEFINE_COMMAND_PLUGIN(MD5File, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(SHA1File, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetPixelFromBMP, , 0, 6, kParams_BMP);
-DEFINE_COMMAND_PLUGIN(UwUDelete, , 0, 2, kParams_OneString_OneInt); 
+DEFINE_COMMAND_PLUGIN(UwUDelete, , 0, 2, kParams_OneString_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTextureWidth, , 0, 2, kParams_OneString_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetTextureHeight, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParams_OneString);
@@ -11,7 +11,12 @@ DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(PlaySoundFile, , 0, 4, kParams_OneString_ThreeOptionalInts);
 DEFINE_COMMAND_PLUGIN(StopSoundFile, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsBSALoaded, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(PlaySoundFromPath, , 0, 5, kParams_OneString_OneOptionalFloat_ThreeOptionalInts);
+DEFINE_COMMAND_PLUGIN(PlaySound3DFromPath, , 1, 4, kParams_OneString_OneOptionalFloat_TwoOptionalInts);
+DEFINE_COMMAND_PLUGIN(StopSoundFromPath, , 0, 2, kParams_OneString_OneOptionalFloat);
+DEFINE_COMMAND_PLUGIN(StopSound3DFromPath, , 1, 2, kParams_OneString_OneOptionalFloat);
 #include <filesystem>
+#include "GameSound.h"
 
 bool Cmd_IsBSALoaded_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH];
@@ -201,6 +206,131 @@ bool Cmd_GetPixelFromBMP_Execute(COMMAND_ARGS) {
 			setVarByName(PASS_VARARGS, RED, R);
 			setVarByName(PASS_VARARGS, GREEN, G);
 			setVarByName(PASS_VARARGS, BLUE, B);
+		}
+	}
+	return true;
+}
+
+bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
+	char path[MAX_PATH];
+	int voiceFlag = 0;
+	int systemFlag = 0;
+	int loopFlag = 0;
+	float fadeInTime = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &systemFlag, &loopFlag) && path[0]) {
+		BSSoundHandle handle;
+		bool bVoiceFlag = (voiceFlag > 0);
+		bool bSystemFlag = (systemFlag > 0);
+		bool bLoopFlag = (loopFlag > 0);
+		UInt32 audioFlags = BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100;
+		if (bVoiceFlag) {
+			audioFlags |= BSAudioManager::kAudioFlags_IsVoice;
+		}
+		if (bSystemFlag) {
+			audioFlags |= BSAudioManager::kAudioFlags_SystemSound;
+		}
+		if (bLoopFlag) {
+			audioFlags |= BSAudioManager::kAudioFlags_Loop;
+		}
+		ThisCall(0xAD7480, BSWin32Audio::GetSingleton(), &handle, path, audioFlags, nullptr); // GetSoundHandleByFilePath
+		if (fadeInTime <= 0) {
+			ThisCall(0xAD8830, &handle, false); // BSSoundHandle::Play
+		}
+		else {
+			int time = fadeInTime * 1000.0;
+			ThisCall(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
+		}
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
+	char path[MAX_PATH];
+	int voiceFlag = 0;
+	int loopFlag = 0;
+	float fadeInTime = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &loopFlag) && path[0]) {
+		TESObjectREFR* ref = thisObj;
+		if (ref == nullptr) {
+			ref = (TESObjectREFR*)g_thePlayer;
+		}
+		if (ref->GetRefNiNode()) {
+			BSSoundHandle handle;
+			bool bVoiceFlag = (voiceFlag > 0);
+			bool bLoopFlag = (loopFlag > 0);
+			UInt32 audioFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
+			if (bVoiceFlag) {
+				audioFlags |= BSAudioManager::kAudioFlags_IsVoice;
+			}
+			if (bLoopFlag) {
+				audioFlags |= BSAudioManager::kAudioFlags_Loop;
+			}
+			ThisCall(0xAD7480, BSWin32Audio::GetSingleton(), &handle, path, audioFlags, nullptr); // GetSoundHandleByFilePath
+			NiPoint3* refPos = ref->GetPos();
+			NiPoint3 pos = { refPos->x, refPos->y, refPos->z };
+			ThisCall(0xAD8B60, &handle, pos); // BSSoundHandle::SetPosition
+			ThisCall(0xAD8F20, &handle, ref->GetRefNiNode()); // BSSoundHandle::SetObjectToFollow
+			if (fadeInTime <= 0) {
+				ThisCall(0xAD8830, &handle, false); // BSSoundHandle::Play
+			}
+			else {
+				int time = fadeInTime * 1000.0;
+				ThisCall(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
+			}
+			*result = 1;
+		}
+	}
+	return true;
+}
+
+bool Cmd_StopSoundFromPath_Execute(COMMAND_ARGS) {
+	char path[MAX_PATH];
+	float fadeOutTime = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeOutTime) && path[0]) {
+		CSLock lock(g_audioManager->kMessageProcessingCS);
+		BSGameSound *gameSound;
+		for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+			if (!(gameSound = sndIter.Get()) || strcmp(gameSound->filePath, path) != 0) continue;
+			if (fadeOutTime <= 0) {
+				gameSound->stateFlags &= 0xFFFFFF0F;
+				gameSound->stateFlags |= 0x10;
+			}
+			else {
+				int time = fadeOutTime * 1000.0;
+				ThisCall(0xADC560, BSAudioManager::Get(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
+			}
+			*result = 1;
+		}
+	}
+	return true;
+}
+
+bool Cmd_StopSound3DFromPath_Execute(COMMAND_ARGS) {
+	char path[MAX_PATH];
+	float fadeOutTime = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeOutTime) && path[0]) {
+		TESObjectREFR* ref = thisObj;
+		if (ref == nullptr) {
+			ref = (TESObjectREFR*)g_thePlayer;
+		}
+		CSLock lock(g_audioManager->kMessageProcessingCS);
+		BSGameSound *gameSound;
+		BSFadeNode* fadeNode;
+		for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+			if (!(gameSound = sndIter.Get()) || strcmp(gameSound->filePath, path) != 0) continue;
+			fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
+			if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == ref) {
+				if (fadeOutTime <= 0) {
+					gameSound->stateFlags &= 0xFFFFFF0F;
+					gameSound->stateFlags |= 0x10;
+				}
+				else {
+					int time = fadeOutTime * 1000.0;
+					ThisCall(0xADC560, BSAudioManager::Get(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
+				}
+			}
+			*result = 1;
 		}
 	}
 	return true;

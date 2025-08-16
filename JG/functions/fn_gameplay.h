@@ -83,10 +83,10 @@ bool Cmd_StopHolotape_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	int playStopSound = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &playStopSound); 
+	ExtractArgsEx(EXTRACT_ARGS_EX, &playStopSound);
 	noHolotapeStopSound = playStopSound == 0;
 	MapMenu* mapMenu = MapMenu::GetSingleton();
-	mapMenu->StopHolotape(); 
+	mapMenu->StopHolotape();
 	*result = 1;
 	return true;
 
@@ -103,7 +103,7 @@ bool Cmd_PlayHolotape_Execute(COMMAND_ARGS)
 		*result = 1;
 	}
 	return true;
-	
+
 }
 
 bool __cdecl Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS)
@@ -149,7 +149,7 @@ bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS)
 		auto iter = PlayerCharacter::GetSingleton()->casinoDataList->Head();
 		if (!iter) return true;
 		do
-		{ 
+		{
 			if (auto casinoData = iter->data)
 			{
 				if (casinoData->casinoRefID == casinoRefId)
@@ -225,7 +225,7 @@ bool Cmd_ClearMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 	mlcOverridden = false;
 	mlcOverride = nullptr;
 	*result = 1;
-	
+
 	return true;
 }
 
@@ -414,9 +414,9 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 			NavMeshTriangle* pNavMeshTriangle = spNavMesh->kTriangles.GetAt(j);
 			if (!pNavMeshTriangle)
 				continue;
-			if (checkDisabled && (pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0) 
+			if (checkDisabled && (pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0)
 				continue;
-			
+
 			// Get triangle vertices
 			NiPoint3 kVerts[3];
 			for (UInt32 k = 0; k < 3; k++) {
@@ -434,7 +434,7 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 				NiPoint3 kTriCenter = NiPoint3::GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
 
 				if (zLimit > 0 && fabs(kTriCenter.z - arPointToTest.z) > zLimit) continue;
-				
+
 
 				// Get distance to triangle center
 				float fDist = arPointToTest.Distance(kTriCenter);
@@ -643,9 +643,9 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 	}
 	else if (IsConsoleMode()) {
 			Console_Print("GetPointInNavMesh >> Point not found.");
-		
+
 	}
-	
+
 	g_arrInterface->AssignCommandResult(pointArr, result);
 	return bResult;
 }
@@ -694,7 +694,7 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 			if (ActiveEffect* activeEff = iter->data; activeEff && activeEff->bActive && !activeEff->bTerminated &&
 				activeEff->magicItem && ValidTempEffect(activeEff->effectItem))
 				if (TESForm* form = DYNAMIC_CAST(activeEff->magicItem, MagicItem, TESForm))
-				{ 
+				{
 					if (form->typeID == kFormType_AlchemyItem) {
 						float timeLeft = activeEff->duration - activeEff->timeElapsed;
 						auto it = tempEffectMap.find(form);
@@ -708,7 +708,7 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 					}
 				}
 		} while (iter = iter->next);
-		
+
 	}
 	if (!tempEffectMap.empty()) {
 		for (auto effect : tempEffectMap) {
@@ -1261,6 +1261,7 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source, &fadeOutTime)) {
 		if (soundForm->soundFile.path.m_dataLen) {
+			CSLock lock(g_audioManager->kMessageProcessingCS);
 			const char* soundPath = soundForm->soundFile.path.m_data;
 			BSGameSound* gameSound;
 			for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
@@ -1428,7 +1429,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 			else
 				pActorNode = thisObj->GetRefNiNode();
 		}
-		
+
 		bool bChangedPos = false;
 		NiAVObject* pCasingNode = nullptr;
 		NiTransform kOrgTrans;
