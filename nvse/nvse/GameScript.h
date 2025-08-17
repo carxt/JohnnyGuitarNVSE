@@ -139,7 +139,7 @@ public:
 	ScriptEventList	*CreateEventList();
 };
 
-STATIC_ASSERT(sizeof(Script) == SCRIPT_SIZE);
+static_assert(sizeof(Script) == SCRIPT_SIZE);
 
 struct ScriptRunner
 {
@@ -199,7 +199,7 @@ struct QuestStageItem
 };
 
 #if RUNTIME
-STATIC_ASSERT(sizeof(QuestStageItem) == (SCRIPT_SIZE + 0x1C));
+static_assert(sizeof(QuestStageItem) == (SCRIPT_SIZE + 0x1C));
 #endif
 
 // 41C

@@ -339,7 +339,7 @@ public:
 
 	static ConsoleManager* GetSingleton(void);
 };
-STATIC_ASSERT(sizeof(ConsoleManager) == 0x914);
+static_assert(sizeof(ConsoleManager) == 0x914);
 
 // A plugin author requested the ability to use OBSE format specifiers to format strings with the args
 // coming from a source other than script.
@@ -423,7 +423,7 @@ public:
 	bool	m_bGood;
 };
 
-STATIC_ASSERT(sizeof(NiFile) == 0x30);
+static_assert(sizeof(NiFile) == 0x30);
 // 158
 class BSFile : public NiFile {
 public:
@@ -454,7 +454,7 @@ public:
 	UInt32		uiFileSize;
 };
 
-STATIC_ASSERT(sizeof(BSFile) == 0x158);
+static_assert(sizeof(BSFile) == 0x158);
 
 //
 struct ToBeNamed {

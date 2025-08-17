@@ -177,7 +177,7 @@ public:
 	bool GetKeyState(int key, KeyState state) { return 	((bool(__thiscall*)(OSInputGlobals*, int, KeyState))(0xA24180))(this, key, state); };
 	static OSInputGlobals* GetSingleton() { return *(OSInputGlobals**)(0x11F35CC); }
 };
-STATIC_ASSERT(sizeof(OSInputGlobals) == 0x1C04);
+static_assert(sizeof(OSInputGlobals) == 0x1C04);
 
 extern OSInputGlobals** g_OSInputGlobals;
 
@@ -260,7 +260,7 @@ public:
 	UInt32					unk324;						// 324
 };
 
-STATIC_ASSERT(sizeof(OSSoundGlobals) == 0x328);
+static_assert(sizeof(OSSoundGlobals) == 0x328);
 #endif
 
 class OSSoundGlobals {};
@@ -294,6 +294,6 @@ public:
 	UInt32			unk60;				// 60	relates to unk50
 };
 
-//STATIC_ASSERT(sizeof(OSGlobals) == 0x0A4);	// found in oldWinMain 0x0086AF4B
+//static_assert(sizeof(OSGlobals) == 0x0A4);	// found in oldWinMain 0x0086AF4B
 
 extern OSGlobals** g_osGlobals;

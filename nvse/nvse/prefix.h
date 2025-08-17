@@ -33,4 +33,5 @@ template <bool x> struct StaticAssertFailure;
 template <> struct StaticAssertFailure <true> { enum { a = 1 }; };
 template <int x> struct static_assert_test {};
 
-#define STATIC_ASSERT(a)	typedef static_assert_test <sizeof(StaticAssertFailure<(bool)(a)>)> static_assert_typedef_ ## __COUNTER__
+#define ASSERT_SIZE(a, b) static_assert(sizeof(a) == b, "Wrong structure size!");
+#define ASSERT_OFFSET(a, b, c) static_assert(offsetof(a, b) == c, "Wrong member offset!");

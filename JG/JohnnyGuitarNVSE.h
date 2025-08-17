@@ -1599,14 +1599,14 @@ bool __cdecl ShouldHideStat(UInt32* id) {
 }
 void UpdateMiscStatList(const char* name, int value) {
 	Tile* tile = nullptr;
-	auto iter = g_statsMenu->miscStatIDList.list.Head();
+	auto iter = g_statsMenu->miscStatIDList.GetHead();
 	do
 	{
-		if (iter->data && iter->data->tile && !strcmp(iter->data->tile->name.CStr(), name)) {
-			tile = iter->data->tile;
+		if (iter->GetItem() && iter->GetItem()->tile && !strcmp(iter->GetItem()->tile->name.CStr(), name)) {
+			tile = iter->GetItem()->tile;
 			break;
 		}
-	} while (iter = iter->next);
+	} while (iter = iter->GetNext());
 	if (!tile) {
 		tile = ThisCall<Tile*>(0x7E1190, &g_statsMenu->miscStatIDList, g_statsMenu->miscStatIDList.itemCount, 0, 0, 0);
 		tile->SetString(kTileValue_string, name, 1);

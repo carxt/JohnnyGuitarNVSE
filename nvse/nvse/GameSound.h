@@ -35,7 +35,7 @@ public:
 	bool		bIsPlaying;
 	Data		kData;
 };
-STATIC_ASSERT(sizeof(BSSoundInfo) == 0x254);
+static_assert(sizeof(BSSoundInfo) == 0x254);
 
 
 class BSSoundHandle {
@@ -94,7 +94,7 @@ public:
 	}
 };
 
-STATIC_ASSERT(sizeof(BSSoundHandle) == 0xC);
+static_assert(sizeof(BSSoundHandle) == 0xC);
 
 
 // 230
@@ -171,7 +171,7 @@ public:
 	UInt32			priority;				// 188
 	UInt32			unk18C[3];				// 18C
 };
-STATIC_ASSERT(sizeof(BSGameSound) == 0x198);
+static_assert(sizeof(BSGameSound) == 0x198);
 
 enum AudioRequestTypes {
 	kRequestType_Stop = 3,
@@ -325,7 +325,7 @@ public:
 
 	__forceinline static BSAudioManager* Get() { return (BSAudioManager*)0x11F6EF0; }
 };
-STATIC_ASSERT(sizeof(BSAudioManager) == 0x188);
+static_assert(sizeof(BSAudioManager) == 0x188);
 
 class BSAudioListener {
 public:

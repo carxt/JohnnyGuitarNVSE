@@ -147,7 +147,7 @@ public:
 	UInt32					pipBoyMode;			// 4BC
 	UInt32					unk4C0[48];			// 4C0
 };
-STATIC_ASSERT(sizeof(InterfaceManager) == 0x580);
+static_assert(sizeof(InterfaceManager) == 0x580);
 
 void Debug_DumpMenus(void);
 
@@ -275,15 +275,25 @@ public:
 template <typename Item> struct ListBoxItem
 {
 	Tile* tile;
-	Item* object;
+	Item  object;
 	UInt8 byte08;
 	UInt8 pad09[3];
 };
 
 // 30
-template <typename Item> class ListBox : public BSSimpleList<ListBoxItem<Item>>
+template <typename Item> class ListBox : public BSSimpleList<ListBoxItem<Item*>*>
 {
 public:
+	virtual bool	SetSelectedTile(Tile* tile) { return false; };
+	virtual Tile*	GetSelectedTile(void) { return nullptr; };
+	virtual Tile*	HandleKeyboardInput(int code) { return nullptr; };
+	virtual bool	IsMenuEqual(void* that) { return false; };
+	virtual void	ScrollToHighlight(void) {};
+	virtual Tile*	GetTileByIndex(int index, char isNotTileListIndex) { return nullptr; };
+	virtual void	Destructor(bool doFree) {};
+	virtual void	FreeAllTiles(void) {};
+	virtual void	Sort(signed int(__cdecl*)(Item*, Item*)) {};
+
 	enum
 	{
 		kFlag_RecalculateHeightsOnInsert = 1,
@@ -304,14 +314,14 @@ public:
 
 	Item* GetSelected()
 	{
-		ListNode<ListBoxItem<Item>>* iter = list.Head();
-		ListBoxItem<Item>* item;
+		BSSimpleList<ListBoxItem<Item*>*>* iter = GetHead();
+		ListBoxItem<Item*>* item;
 		do
 		{
-			item = iter->data;
+			item = iter->GetItem();
 			if (item && (item->tile == selected))
 				return item->object;
-		} while (iter = iter->next);
+		} while (iter = iter->GetNext());
 		return NULL;
 	}
 
@@ -319,34 +329,17 @@ public:
 	{
 		if (index >= 0)
 		{
-			ListNode<ListBoxItem<Item>>* iter = list.Head();
+			BSSimpleList<ListBoxItem<Item*>*>* iter = GetHead();
 			do
 			{
 				if (!index)
 				{
-					return iter->data ? iter->data->tile : NULL;
+					return iter->GetItem() ? iter->GetItem()->tile : NULL;
 				}
 				index--;
-			} while (iter = iter->next);
+			} while (iter = iter->GetNext());
 		}
 		return NULL;
-	}
-
-	void Clear()
-	{
-		ListNode<ListBoxItem<Item>>* iter = list.Head();
-		ListBoxItem<Item>* item;
-		do
-		{
-			item = iter->data;
-			if (!item) continue;
-			if (item->tile)
-				item->tile->Destroy(true);
-			GameHeapFree(item);
-		} while (iter = iter->next);
-		list.RemoveAll();
-		selected = NULL;
-		itemCount = 0;
 	}
 
 	typedef bool(__cdecl* FilterFunction)(Item* form);
@@ -380,14 +373,14 @@ public:
 
 	Item* GetItemForTile(Tile* tile)
 	{
-		ListNode<ListBoxItem<Item>>* iter = list.Head();
-		ListBoxItem<Item>* item;
+		BSSimpleList<ListBoxItem<Item*>*>* iter = GetHead();
+		ListBoxItem<Item*>* item;
 		do
 		{
-			item = iter->data;
+			item = iter->GetItem();
 			if (item && (item->tile == tile))
 				return item->object;
-		} while (iter = iter->next);
+		} while (iter = iter->GetNext());
 		return NULL;
 	}
 
@@ -406,7 +399,8 @@ public:
 		ThisCall(0x731360, this, playSound);
 	}
 
-	Tile* Insert(Item* item, const char* text, signed int (*sortingFunction)(ListBoxItem<Item>* a1, ListBoxItem<Item>* a2) = nullptr, const char* _templateName = nullptr)
+	//int32_t(__cdecl* apCompare)(const T& aItem1, const T& aItem2)
+	Tile* Insert(Item* item, const char* text, int32_t(*sortingFunction)(const ListBoxItem<Item>*& aItem1, const ListBoxItem<Item>*& aItem2) = nullptr, const char* _templateName = nullptr)
 	{
 		if (!this->parentTile) return nullptr;
 		auto _template = _templateName ? _templateName : this->templateName;
@@ -423,13 +417,13 @@ public:
 			newTile->SetString(kTileValue_string, text);
 		}
 
-		auto listItem = (ListBoxItem<Item>*)GameHeapAlloc(sizeof(ListBoxItem<Item*>));
+		auto listItem = (ListBoxItem<Item*>*)GameHeapAlloc(sizeof(ListBoxItem<Item*>));
 		listItem->tile = newTile;
 		listItem->object = item;
 		listItem->byte08 = 0;
 		if (sortingFunction)
 		{
-			ThisCall(0x7A7EB0, &this->list, listItem, sortingFunction); // InsertSorted
+			this->InsertSorted(listItem, sortingFunction);
 			if (this->flags & kFlag_RecalculateHeightsOnInsert)
 			{
 				ThisCall(0x71A670, this);
@@ -437,7 +431,7 @@ public:
 		}
 		else
 		{
-			this->list.Append(listItem);
+			this->AddHead(listItem);
 			if (this->flags & kFlag_RecalculateHeightsOnInsert)
 			{
 				ThisCall(0x7269D0, this, newTile);
@@ -634,7 +628,7 @@ public:
 
 
 };
-STATIC_ASSERT(sizeof(MapMenu) == 0x230);
+static_assert(sizeof(MapMenu) == 0x230);
 extern bool noHolotapeStopSound;
 // 0C
 struct DialogueResponseList
@@ -651,7 +645,7 @@ struct DialogueResponseList
 		return current != nullptr;
 	}
 };
-STATIC_ASSERT(sizeof(DialogueResponseList) == 0xC);
+static_assert(sizeof(DialogueResponseList) == 0xC);
 // 1C
 struct DialogueItem
 {
@@ -661,7 +655,7 @@ struct DialogueItem
 	TESQuest* quest;		// 14
 	Actor* speaker;			// 18
 };
-STATIC_ASSERT(sizeof(DialogueItem) == 0x1C);
+static_assert(sizeof(DialogueItem) == 0x1C);
 struct DialogueItemList
 {
 	ListNode<DialogueItem> list;
@@ -705,7 +699,7 @@ struct DialogueItemList
 	}
 };
 
-STATIC_ASSERT(sizeof(DialogueItemList) == 0xC);
+static_assert(sizeof(DialogueItemList) == 0xC);
 
 
 // 94
@@ -796,10 +790,21 @@ public:
 
 	struct StatusEffect;
 
+	struct NamedEffectsList : BSSimpleList<EffectSetting*> {
+		virtual ~NamedEffectsList();
+	};
+
+	struct StatusEffectList : BSSimpleList<StatusEffect*> {
+		virtual ~StatusEffectList() {};
+	};
+
 	AlchItemData					alchItemData[4];	// 028	0: Stimpak, 1: Rad-X, 2: RadAway, 3: Doctor's Bag
-	BSSimpleList<EffectSetting>		effectList;			// 068
-	UInt32							unk074[4];			// 074
-	BSSimpleList<StatusEffect>		statusEffList;		// 084
+	NamedEffectsList				effectList;			// 068
+	StatusEffect*					pRadEffects;
+	StatusEffect*					pH20Effects;
+	StatusEffect*					pHungerEffects;
+	StatusEffect*					pSleepEffects;
+	StatusEffectList				statusEffList;		// 084
 	TileImage* tile090;			// 090
 	TileImage* tile094;			// 094
 	TileImage* tile098;			// 098
@@ -1083,7 +1088,7 @@ public:
 
 	static HUDMainMenu* GetSingleton() { return *(HUDMainMenu**)0x11D96C0; }
 };
-STATIC_ASSERT(sizeof(HUDMainMenu) == 0x278);
+static_assert(sizeof(HUDMainMenu) == 0x278);
 
 // 5C0
 class LoadingMenu : public Menu			// 1007
@@ -1154,7 +1159,7 @@ public:
 	UInt16				flags;			// 222
 	UInt32				unk224[231];	// 224
 };
-STATIC_ASSERT(sizeof(LoadingMenu) == 0x5C0);
+static_assert(sizeof(LoadingMenu) == 0x5C0);
 
 // 10C
 class ContainerMenu : public Menu		// 1008
@@ -1195,7 +1200,7 @@ public:
 	MenuItemEntryList* currentItems;	// 0F8
 	UInt32				unk0FC[4];		// 0FC
 };
-STATIC_ASSERT(sizeof(ContainerMenu) == 0x10C);
+static_assert(sizeof(ContainerMenu) == 0x10C);
 
 // 13C
 class DialogMenu : public Menu			// 1009
@@ -1252,7 +1257,7 @@ public:
 	__forceinline static SleepWaitMenu *Get() {return *(SleepWaitMenu**)0x11DA920;}
 
 };
-STATIC_ASSERT(sizeof(SleepWaitMenu) == 0x4C);
+static_assert(sizeof(SleepWaitMenu) == 0x4C);
 
 // 1D4
 class StartMenu : public Menu			// 1013
@@ -1329,7 +1334,7 @@ public:
 	UInt32							unk1CC;			// 1CC
 	UInt32							unk1D0;			// 1D0
 };
-STATIC_ASSERT(sizeof(StartMenu) == 0x1D4);
+static_assert(sizeof(StartMenu) == 0x1D4);
 
 // E4
 class LockPickMenu : public Menu		// 1014
@@ -1379,7 +1384,7 @@ public:
 	NiQuaternion			quaternionC4;	// C4
 	NiQuaternion			quaternionD4;	// D4
 };
-STATIC_ASSERT(sizeof(LockPickMenu) == 0xE4);
+static_assert(sizeof(LockPickMenu) == 0xE4);
 
 // 44
 class QuantityMenu : public Menu		// 1016
@@ -1459,7 +1464,7 @@ public:
 		Script* scriptCallback;		// 58
 	};
 };
-STATIC_ASSERT(sizeof(TextEditMenu) == 0x5C);
+static_assert(sizeof(TextEditMenu) == 0x5C);
 
 typedef tList<ContChangesEntry> BarterItemList;
 
@@ -1523,7 +1528,7 @@ public:
 	TESObjectREFR* targetRef;		// 198
 	UInt32				unk19C[16];		// 19C
 };
-STATIC_ASSERT(sizeof(HackingMenu) == 0x1DC);
+static_assert(sizeof(HackingMenu) == 0x1DC);
 
 struct ActorHitData;
 struct VATSTargetInfo {
@@ -1544,7 +1549,7 @@ struct VATSTargetInfo {
 	UInt8 isMissFortuneVisit;
 	UInt8 gap25[3];
 };
-STATIC_ASSERT(sizeof(VATSTargetInfo) == 0x28);
+static_assert(sizeof(VATSTargetInfo) == 0x28);
 // 144
 class VATSMenu : public Menu			// 1056
 {
@@ -1817,7 +1822,7 @@ public:
 	float fltE8;
 	UInt8 bytEC;
 };
-//STATIC_ASSERT(sizeof(FORenderedTerminal) == 0x70); FIXME
+//static_assert(sizeof(FORenderedTerminal) == 0x70); FIXME
 
 class FOPipboyManager : public FORenderedMenu {
 public:
@@ -1854,4 +1859,4 @@ public:
 	float lightEffectFadeDuration;
 	UInt32 unk16C;
 };
-STATIC_ASSERT(sizeof(FOPipboyManager) == 0x170);
+static_assert(sizeof(FOPipboyManager) == 0x170);

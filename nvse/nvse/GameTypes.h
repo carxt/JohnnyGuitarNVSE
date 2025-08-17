@@ -3,6 +3,7 @@
 #include "Utilities.h"
 #include "NiTypes.h"
 #include "internal/utility.h"
+#include "internal/Game/Bethesda/BSSimpleList.hpp"
 
 // 8
 class BSString {
@@ -420,7 +421,7 @@ public:
 		return -1;
 	}
 };
-STATIC_ASSERT(sizeof(tList<void*>) == 0x8);
+static_assert(sizeof(tList<void*>) == 0x8);
 
 template <typename T_Data> struct DListNode {
 	DListNode* next;
@@ -462,25 +463,6 @@ public:
 	UInt32 Size() const { return count; }
 };
 class Tile;
-// 010
-template <class T> class BSSimpleList {
-public:
-	BSSimpleList<T>();
-	~BSSimpleList<T>();
-
-	virtual bool	SetSelectedTile(Tile* tile) { return false; };
-	virtual Tile* GetSelectedTile(void) { return nullptr; };
-	virtual Tile* HandleKeyboardInput(int code) { return nullptr; };
-	virtual bool	IsMenuEqual(void* that) { return false; };
-	virtual void	ScrollToHighlight(void) {};
-	virtual Tile* GetTileByIndex(int index, char isNotTileListIndex) { return nullptr; };
-	virtual void	Destructor(bool doFree) {};
-	virtual void	FreeAllTiles(void) {};
-	virtual void	Sort(signed int(__cdecl*)(T*, T*)) {};
-
-	tList<T>	list;
-};
-STATIC_ASSERT(sizeof(BSSimpleList<void*>) == 0xC);
 
 template <typename T_Data>
 class BSSimpleArray {
@@ -507,7 +489,7 @@ public:
 	
 };
 
-STATIC_ASSERT(sizeof(BSSimpleArray<UInt32>)	== 0x10);
+static_assert(sizeof(BSSimpleArray<UInt32>)	== 0x10);
 
 template <class Node, class Info>
 class Visitor {

@@ -448,4 +448,4 @@ public:
 	float									flt64;			// 64
 	NiProperty* prop68;		// 68	Seen 0x10AE0C8
 };
-STATIC_ASSERT(sizeof(MagicShaderHitEffect) == 0x6C);
+static_assert(sizeof(MagicShaderHitEffect) == 0x6C);

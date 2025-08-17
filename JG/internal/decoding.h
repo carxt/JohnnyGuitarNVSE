@@ -361,7 +361,7 @@ public:
 	__forceinline static Sky* Get() { return *(Sky**)0x11DEA20; }
 };
 
-STATIC_ASSERT(sizeof(Sky) == 0x138);
+static_assert(sizeof(Sky) == 0x138);
 
 // 04
 class GridArray
@@ -411,7 +411,7 @@ public:
 	}
 };
 
-STATIC_ASSERT(sizeof(GridCellArray) == 0x28);
+static_assert(sizeof(GridCellArray) == 0x28);
 
 // A0
 struct WaterSurfaceManager
@@ -464,7 +464,7 @@ struct WaterSurfaceManager
 	UInt32 unk9C; // 9C
 };
 
-STATIC_ASSERT(sizeof(WaterSurfaceManager) == 0xA0);
+static_assert(sizeof(WaterSurfaceManager) == 0xA0);
 
 // C4
 class TES
@@ -522,7 +522,7 @@ public:
 	}
 };
 
-STATIC_ASSERT(sizeof(TES) == 0xC4);
+static_assert(sizeof(TES) == 0xC4);
 
 struct FontHeightData
 {
@@ -560,7 +560,7 @@ struct FontInfo
 	BSSimpleArray<ButtonIcon> arr44; // 44
 };
 
-STATIC_ASSERT(sizeof(FontInfo) == 0x54);
+static_assert(sizeof(FontInfo) == 0x54);
 
 // 164 (24)
 class FontManager
@@ -647,7 +647,7 @@ public:
 	DebugLine* GetDebugInput();
 };
 
-STATIC_ASSERT(sizeof(DebugText) == 0x229C);
+static_assert(sizeof(DebugText) == 0x229C);
 
 DebugText* DebugText::GetSingleton()
 {
@@ -775,7 +775,7 @@ struct PlayingMusic
 	MediaLocationController* medLocCtrl; // 284
 };
 
-STATIC_ASSERT(sizeof(PlayingMusic) == 0x288);
+static_assert(sizeof(PlayingMusic) == 0x288);
 
 // 34
 struct GameTimeGlobals
@@ -915,7 +915,7 @@ struct VATSCameraData
 	UInt32 unk44; // 44
 };
 
-STATIC_ASSERT(sizeof(VATSCameraData) == 0x48);
+static_assert(sizeof(VATSCameraData) == 0x48);
 
 // 10
 struct SystemColorManager
@@ -991,7 +991,7 @@ public:
 	NavMeshInfo* pNavMeshInfo;
 };
 
-STATIC_ASSERT(sizeof(NavMesh) == 0x108);
+static_assert(sizeof(NavMesh) == 0x108);
 
 typedef NiPointer<NavMesh> NavMeshPtr;
 
@@ -1109,7 +1109,7 @@ class NavMeshObstacleManager
 	UInt8 gap1A2[2];
 };
 
-STATIC_ASSERT(sizeof(NavMeshObstacleManager) == 0x1A4);
+static_assert(sizeof(NavMeshObstacleManager) == 0x1A4);
 
 class BSArchiveHeader
 {
@@ -1138,7 +1138,7 @@ public:
 	UInt32 unk24[19]; // 24	184
 };
 
-STATIC_ASSERT(sizeof(BSArchive) == 0x70);
+static_assert(sizeof(BSArchive) == 0x70);
 
 // 1D0
 class Archive : public BSFile
@@ -1151,7 +1151,7 @@ public:
 	BSArchive archive; // 160
 };
 
-STATIC_ASSERT(sizeof(Archive) == 0x1D0);
+static_assert(sizeof(Archive) == 0x1D0);
 
 // 160
 class ArchiveFile : public BSFile
@@ -1164,7 +1164,7 @@ public:
 	UInt32 unk15C; // 15C
 };
 
-STATIC_ASSERT(sizeof(ArchiveFile) == 0x160);
+static_assert(sizeof(ArchiveFile) == 0x160);
 
 // 178
 class CompressedArchiveFile : public ArchiveFile
@@ -1181,7 +1181,7 @@ public:
 	UInt32 unk174; // 174
 };
 
-STATIC_ASSERT(sizeof(CompressedArchiveFile) == 0x178);
+static_assert(sizeof(CompressedArchiveFile) == 0x178);
 
 
 struct AnimGroupClassify
@@ -1699,7 +1699,7 @@ struct CombatState
 	SInt32 unk228;
 };
 
-STATIC_ASSERT(sizeof(CombatState) == 0x22C);
+static_assert(sizeof(CombatState) == 0x22C);
 
 class BSShaderBloodSplatterProperty : public BSShaderProperty
 {
@@ -1729,7 +1729,7 @@ public:
 	}
 };
 
-STATIC_ASSERT(sizeof(BSShaderBloodSplatterProperty) == 0x70);
+static_assert(sizeof(BSShaderBloodSplatterProperty) == 0x70);
 
 struct BSSplatterData
 {

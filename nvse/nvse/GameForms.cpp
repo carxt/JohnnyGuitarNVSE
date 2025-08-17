@@ -662,12 +662,12 @@ BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton() {
 bool AlchemyItem::IsPoison() {
 	EffectItem* effItem;
 	EffectSetting* effSetting = NULL;
-	ListNode<EffectItem>* iter = magicItem.list.list.Head();
+	BSSimpleList<EffectItem*>* iter = magicItem.list.GetHead();
 	do {
-		if (!(effItem = iter->data)) continue;
+		if (!(effItem = iter->GetItem())) continue;
 		effSetting = effItem->setting;
 		if (effSetting && !(effSetting->effectFlags & 4)) return false;
-	} while (iter = iter->next);
+	} while (iter = iter->GetNext());
 	return effSetting != NULL;
 }
 
