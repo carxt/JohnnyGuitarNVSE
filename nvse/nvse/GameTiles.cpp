@@ -63,15 +63,15 @@ DListNode<Tile>* Tile::GetNthChild(UInt32 index) {
 
 char* Tile::GetComponentFullName(char* resStr) {
 	if IS_TYPE(this, TileMenu)
-		return StrCopy(resStr, name.m_data);
+		return StrCopy(resStr, name.pString);
 	char* fullName = parent->GetComponentFullName(resStr);
 	*fullName++ = '/';
-	fullName = StrCopy(fullName, name.m_data);
+	fullName = StrCopy(fullName, name.pString);
 	DListNode<Tile>* node = parent->children.Tail();
 	while (node->data != this)
 		node = node->prev;
 	int index = 0;
-	while ((node = node->prev) && StrEqualCS(name.m_data, node->data->name.m_data))
+	while ((node = node->prev) && StrEqualCS(name.pString, node->data->name.pString))
 		index++;
 	if (index) {
 		*fullName++ = ':';
@@ -153,7 +153,7 @@ Tile* Tile::GetChild(const char* childName) {
 	}
 	Tile* result = NULL;
 	for (DListNode<Tile>* node = children.Head(); node; node = node->next) {
-		if (node->data && ((*childName == '*') || StrEqualCI(node->data->name.m_data, childName)) && !childIndex--) {
+		if (node->data && ((*childName == '*') || StrEqualCI(node->data->name.pString, childName)) && !childIndex--) {
 			result = node->data;
 			break;
 		}

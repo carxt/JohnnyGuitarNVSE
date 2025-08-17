@@ -360,7 +360,7 @@ bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	const char* resStr = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && IS_TYPE(mediaset, MediaSet)) {
 		if (traitID >= 0 && traitID <= 5) {
-			resStr = mediaset->data[traitID].filepath.CStr();
+			resStr = mediaset->data[traitID].filepath.c_str();
 			g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
 			if (IsConsoleMode())
 				Console_Print("GetMediaSetTraitString %d >> %s", traitID, resStr);

@@ -12,6 +12,7 @@
 
 // vista and above
 #define _WIN32_WINNT	0x601
+#define NOMINMAX
 
 #include <map>
 #include <Windows.h>
@@ -28,9 +29,25 @@ typedef signed long long	SInt64;		//!< A signed 64-bit integer value
 typedef float				Float32;	//!< A 32-bit floating point value
 typedef double				Float64;	//!< A 64-bit floating point value
 
-// based on the boost implementation of static asserts
-template <bool x> struct StaticAssertFailure;
-template <> struct StaticAssertFailure <true> { enum { a = 1 }; };
-template <int x> struct static_assert_test {};
+template <typename T_Ret = uint32_t, typename ...Args>
+__forceinline T_Ret ThisCall(uint32_t _addr, const void* _this, Args ...args) {
+	return ((T_Ret(__thiscall*)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
+}
 
-#define STATIC_ASSERT(a)	typedef static_assert_test <sizeof(StaticAssertFailure<(bool)(a)>)> static_assert_typedef_ ## __COUNTER__
+template <typename T_Ret = void, typename ...Args>
+__forceinline T_Ret StdCall(uint32_t _addr, Args ...args) {
+	return ((T_Ret(__stdcall*)(Args...))_addr)(std::forward<Args>(args)...);
+}
+
+template <typename T_Ret = void, typename ...Args>
+__forceinline T_Ret CdeclCall(uint32_t _addr, Args ...args) {
+	return ((T_Ret(__cdecl*)(Args...))_addr)(std::forward<Args>(args)...);
+}
+
+template <typename T_Ret = void, typename ...Args>
+__forceinline T_Ret FastCall(uint32_t _addr, Args ...args) {
+	return ((T_Ret(__fastcall*)(Args...))_addr)(std::forward<Args>(args)...);
+}
+
+#define ASSERT_SIZE(a, b) static_assert(sizeof(a) == b, "Wrong structure size!");
+#define ASSERT_OFFSET(a, b, c) static_assert(offsetof(a, b) == c, "Wrong member offset!");

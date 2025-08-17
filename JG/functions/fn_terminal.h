@@ -149,10 +149,10 @@ bool Cmd_GetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &textID, &menuEntryID) && IS_TYPE(terminal, BGSTerminal) && textID > 0) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (textID == 1) {
-			text = entry->entryText.CStr();
+			text = entry->entryText.c_str();
 		}
 		else if (textID == 2) {
-			text = entry->resultText.CStr();
+			text = entry->resultText.c_str();
 		}
 		g_strInterface->Assign(PASS_COMMAND_ARGS, text);
 		if (IsConsoleMode()) Console_Print("GetTerminalMenuItemText >> %s", text);

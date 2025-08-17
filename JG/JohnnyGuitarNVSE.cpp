@@ -42,6 +42,11 @@
 #include "functions/fn_dial.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
+
+#include "internal/Game/Bethesda/BSMemory.hpp"
+
+BS_ALLOCATORS
+
 HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
@@ -519,6 +524,13 @@ extern "C" {
 		REG_CMD(SetCasinoDeckTexture);
 		REG_TYPED_CMD(GetCasinoChip, Form);
 		REG_CMD(SetCasinoChip);
+		REG_TYPED_CMD(GetCustomMapMarkerIcon, String);
+		REG_CMD(GetSleepWaitMenuState);
+		REG_CMD(SetOnNPCResponseEventHandler);
+		REG_CMD(PlaySoundFromPath);
+		REG_CMD(PlaySound3DFromPath);
+		REG_CMD(StopSoundFromPath);
+		REG_CMD(StopSound3DFromPath);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);

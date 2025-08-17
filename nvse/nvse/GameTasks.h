@@ -229,7 +229,7 @@ public:
 	UInt32 unk54; // 54
 };
 
-STATIC_ASSERT(sizeof(BGSDistantObjectBlockLoadTask) == 0x58);
+static_assert(sizeof(BGSDistantObjectBlockLoadTask) == 0x58);
 
 // 44
 class QueuedModel : public QueuedFileEntry {

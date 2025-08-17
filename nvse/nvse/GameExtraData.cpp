@@ -50,15 +50,15 @@ EquipData ExtraContainerChanges::FindEquipped(FormMatcher& matcher) const {
 	return equipData;
 };
 
-STATIC_ASSERT(sizeof(ExtraHealth) == 0x10);
-STATIC_ASSERT(sizeof(ExtraLock) == 0x10);
-STATIC_ASSERT(sizeof(ExtraCount) == 0x10);
-STATIC_ASSERT(sizeof(ExtraTeleport) == 0x10);
+static_assert(sizeof(ExtraHealth) == 0x10);
+static_assert(sizeof(ExtraLock) == 0x10);
+static_assert(sizeof(ExtraCount) == 0x10);
+static_assert(sizeof(ExtraTeleport) == 0x10);
 
-STATIC_ASSERT(sizeof(ExtraWorn) == 0x0C);
-STATIC_ASSERT(sizeof(ExtraWornLeft) == 0x0C);
-STATIC_ASSERT(sizeof(ExtraCannotWear) == 0x0C);
-STATIC_ASSERT(sizeof(ExtraContainerChanges::EntryData) == 0x0C);
+static_assert(sizeof(ExtraWorn) == 0x0C);
+static_assert(sizeof(ExtraWornLeft) == 0x0C);
+static_assert(sizeof(ExtraCannotWear) == 0x0C);
+static_assert(sizeof(ExtraContainerChanges::EntryData) == 0x0C);
 
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 static const UInt32 s_ExtraContainerChangesVtbl = 0x01015BB8;	//	0x0100fb78;

@@ -3,6 +3,7 @@ DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , 0, 3, kParams_OneString_OneInt_OneF
 DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetWorldSpaceMapTexture, , 0, 2, kParams_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetCustomMapMarkerIcon, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParams_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(QueueCinematicText, , 0, 7, kParams_TwoStrings_OneOptionalString_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , 0, 3, kParams_OneString_TwoOptionalInts);
@@ -15,17 +16,17 @@ DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , 0, 2, kParams_OneInt_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(PushUIQuestToTop, , 0, 1, kParams_OneQuest); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , 0, 0, NULL); //DO NOT REGISTER YET.
-
+DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , 0, 0, NULL);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 		if (g_thePlayer) {
 			auto headNode = g_thePlayer->questObjectiveList.Head();
 			while (headNode) {
-				Console_Print("objective %s from quest %s", headNode->data->displayText.CStr(), headNode->data->quest->GetEditorName());
+				Console_Print("objective %s from quest %s", headNode->data->displayText.c_str(), headNode->data->quest->GetEditorName());
 				headNode = headNode->next;
-			}			
+			}
 		}
-	
+
 	return true;
 }
 
@@ -323,8 +324,8 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESWorldSpace* worlspace = NULL;
 	char path[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace) && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.m_data)) {
-		strcpy(path, worlspace->texture.ddsPath.m_data);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace) && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.pString)) {
+		strcpy_s(path, worlspace->texture.ddsPath.pString);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 		if (IsConsoleMode())
 			Console_Print("GetWorldSpaceMapTexture >> %s", path);
@@ -350,5 +351,25 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 		SetMapMarkerIcon(form, iconPath);
 	}
 	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->refID, iconPath);
+	return true;
+}
+
+bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
+	ExtraMapMarker* mapMarkerExtra;
+	if (!thisObj || (!thisObj->GetIsReference() || !thisObj->IsMapMarker())) return true;
+	mapMarkerExtra = GetExtraType(thisObj->extraDataList, MapMarker);
+	if (!mapMarkerExtra || !mapMarkerExtra->data)  return true;
+	const char* resStr = GetMapMarker(thisObj, mapMarkerExtra->data->type);
+	g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
+	if (IsConsoleMode()) Console_Print("GetCustomMapMarkerIcon >> %s", resStr);
+	return true;
+}
+
+bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
+	*result = 0;
+	SleepWaitMenu* swMenu = SleepWaitMenu::Get();
+	if (!swMenu) return true;
+	*result = DWORD(swMenu->isRest) + 1;
+	if (IsConsoleMode()) Console_Print("GetSleepWaitMenuState >> %.f", *result);
 	return true;
 }

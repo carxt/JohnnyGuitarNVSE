@@ -2,6 +2,7 @@
 #include <unordered_set>
 
 #include "GameUI.h"
+#include <algorithm>
 NVSEArrayVarInterface* g_arrInterface = NULL;
 NVSEStringVarInterface* g_strInterface = NULL;
 NVSEMessagingInterface* g_msg = NULL;
@@ -514,8 +515,8 @@ public:
 		if (result)
 		{
 			result = pObjective->status & BGSQuestObjective::eQObjStatus_displayed;
-			auto questObjectiveDisplayStr = pObjective->displayText.CStr();
-			auto questDisplayStr = pObjective->quest->GetFullName()->name.CStr();
+			auto questObjectiveDisplayStr = pObjective->displayText.c_str();
+			auto questDisplayStr = pObjective->quest->GetFullName()->name.c_str();
 			if (!((questObjectiveDisplayStr && *questObjectiveDisplayStr) || (questDisplayStr && *questDisplayStr)))
 			{
 				result = 0;
@@ -978,11 +979,11 @@ static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size) {
 }
 
 bool __fastcall CanSaveNowHook(void* ThisObj, void* edx, int isAutoSave) {
-	return ThisStdCall_B(g_canSaveNowAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
+	return ThisCall<bool>(g_canSaveNowAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
 }
 
 bool __fastcall CanSaveNowMenuHook(void* ThisObj, void* edx, int isAutoSave) {
-	return ThisStdCall_B(g_canSaveNowMenuAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
+	return ThisCall<bool>(g_canSaveNowMenuAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
 }
 
 void __fastcall BipedModelUpdateWeapon(ValidBip01Names* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods) {
@@ -1188,26 +1189,31 @@ __declspec(naked) void NPCIncrementingChallengesHook() {
 			jmp retnAddr
 	}
 }
-void __fastcall UIUpdateSoundHook(Sound* sound, int dummy) {
+void __fastcall UIUpdateSoundHook(BSSoundHandle* sound, int dummy) {
 	tList<QuestUpdateManager>* g_questUpdateManager = (tList <QuestUpdateManager>*)0x11D970C;
 	if (g_questUpdateManager) {
 		ListNode<QuestUpdateManager>* iter = g_questUpdateManager->Head();
 		do {
+			BSSoundHandle handle;
 			switch (iter->data->updateType) {
 				case QuestAdded:
-					if (questNewSound != nullptr) sound = &Sound(questNewSound->refID, 0x121);
+					if (questNewSound != nullptr) 
+						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questNewSound->refID, 0x121);
 					break;
 				case QuestCompleted:
-					if (questCompeteSound != nullptr) sound = &Sound(questCompeteSound->refID, 0x121);
+					if (questCompeteSound != nullptr)
+						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questCompeteSound->refID, 0x121);
 					break;
 				case QuestFailed:
-					if (questFailSound != nullptr) sound = &Sound(questFailSound->refID, 0x121);
+					if (questFailSound != nullptr)
+						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questFailSound->refID, 0x121);
 					break;
 				case LocationDiscovered:
-					if (locationDiscoverSound != nullptr) sound = &Sound(locationDiscoverSound->refID, 0x121);
+					if (locationDiscoverSound != nullptr) 
+						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(locationDiscoverSound->refID, 0x121);
 					break;
 			}
-			sound->Play();
+			handle.Play(false);
 		} while (iter = iter->next);
 	}
 }
@@ -1237,7 +1243,7 @@ __declspec (naked) void VanityModeHook_DEPRECATED() {
 }
 bool __fastcall CombatMusicHook(UInt32* a1) {
 	if (bCombatMusicDisabled) return false;
-	return ThisStdCall_B(0x992D90, a1);
+	return ThisCall<bool>(0x992D90, a1);
 }
 TESRegionDataMap* GetMapData(TESRegion* region) {
 	if (region->dataEntries->Empty()) return nullptr;
@@ -1551,7 +1557,7 @@ __declspec (naked) void DisableDeathResponsesHook() {
 bool __fastcall SaveINIHook(IniSettingCollection* a1, void* edx, char* a2) {
 	ThisCall(0x5E01B0, a1, a2);
 	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
-	return ThisStdCall_B(0x5E01B0, rendererSettings, rendererSettings->iniPath);
+	return ThisCall<bool>(0x5E01B0, rendererSettings, rendererSettings->iniPath);
 }
 
 bool __fastcall WantsToFleeHook(CombatState* state) {
@@ -1575,7 +1581,7 @@ void __cdecl MiscStatRefreshHook(Tile* tile, int id) {
 		value = g_miscStatData[id]->data.i;
 	}
 	else {
-		std::string sName = tile->name.m_data;
+		std::string sName = tile->name.pString;
 		auto it = miscStatMap.find(sName);
 		if (it != miscStatMap.end()) {
 			value = it->second;
@@ -1587,21 +1593,21 @@ void __cdecl MiscStatRefreshHook(Tile* tile, int id) {
 bool __cdecl ShouldHideStat(UInt32* id) {
 	if ((UInt32)id >= 43) {
 		Tile* tile = g_statsMenu->miscStatIDList.GetTileFromItem(&id);
-		std::string sName = tile->name.CStr();
+		std::string sName = tile->name.c_str();
 		if (miscStatMap.find(sName) == miscStatMap.end()) return true;
 	}
 	return false;
 }
 void UpdateMiscStatList(const char* name, int value) {
 	Tile* tile = nullptr;
-	auto iter = g_statsMenu->miscStatIDList.list.Head();
+	auto iter = g_statsMenu->miscStatIDList.GetHead();
 	do
 	{
-		if (iter->data && iter->data->tile && !strcmp(iter->data->tile->name.CStr(), name)) {
-			tile = iter->data->tile;
+		if (iter->GetItem() && iter->GetItem()->tile && !strcmp(iter->GetItem()->tile->name.c_str(), name)) {
+			tile = iter->GetItem()->tile;
 			break;
 		}
-	} while (iter = iter->next);
+	} while (iter = iter->GetNext());
 	if (!tile) {
 		tile = ThisCall<Tile*>(0x7E1190, &g_statsMenu->miscStatIDList, g_statsMenu->miscStatIDList.itemCount, 0, 0, 0);
 		tile->SetString(kTileValue_string, name, 1);
@@ -1670,7 +1676,7 @@ void __fastcall SetViewmodelFrustumHook(NiCameraAlt* camera, void*, NiFrustum* f
 	float nearDistance = frustum->n;
 	float ratio = camera->maxFarNearRatio;
 	if (g_viewmodel_near > 0.f) {
-		nearDistance = max(g_viewmodel_near, 0.001);
+		nearDistance = std::max(g_viewmodel_near, 0.001f);
 		ratio = frustum->f / nearDistance;
 	}
 

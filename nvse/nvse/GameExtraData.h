@@ -350,7 +350,7 @@ public:
 
 		void Cleanup();
 		void RemoveCannotWear();
-		float GetItemHealthPerc(bool arg1 = true) { return ThisStdCall_F(0x4BCDB0, this, arg1); }
+		float GetItemHealthPerc(bool arg1 = true) { return ThisCall<float>(0x4BCDB0, this, arg1); }
 		ExtraDataList* GetEquippedExtra();
 		float CalculateWeaponDamage(float condition, TESForm* ammo);
 	};
@@ -683,7 +683,7 @@ public:
 	static ExtraFactionChanges* Create();
 };
 
-STATIC_ASSERT(sizeof(ExtraFactionChanges) == 0x10);
+static_assert(sizeof(ExtraFactionChanges) == 0x10);
 
 class ExtraFactionChangesMatcher {
 	TESFaction* pFaction;
@@ -707,7 +707,7 @@ public:
 	TESForm* form;		// 010
 };
 
-STATIC_ASSERT(sizeof(ExtraLeveledCreature) == 0x14);
+static_assert(sizeof(ExtraLeveledCreature) == 0x14);
 
 // PackageStartLocation = Worldspace or Cell / PosX / PosY / PosZ / and 4 bytes
 
@@ -1200,7 +1200,7 @@ public:
 	UInt32			leaderNavmeshID;
 	tList<ExtraFollowerSwimBreadcrumb*>		crumbList;
 };
-STATIC_ASSERT(sizeof(ExtraFollowerSwimBreadcrumbs) == 0x28);
+static_assert(sizeof(ExtraFollowerSwimBreadcrumbs) == 0x28);
 // 34
 struct ExtraAudioMarkerData {
 	TESFullName		fullName;

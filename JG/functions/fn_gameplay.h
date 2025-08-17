@@ -83,10 +83,10 @@ bool Cmd_StopHolotape_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	int playStopSound = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &playStopSound); 
+	ExtractArgsEx(EXTRACT_ARGS_EX, &playStopSound);
 	noHolotapeStopSound = playStopSound == 0;
 	MapMenu* mapMenu = MapMenu::GetSingleton();
-	mapMenu->StopHolotape(); 
+	mapMenu->StopHolotape();
 	*result = 1;
 	return true;
 
@@ -103,7 +103,7 @@ bool Cmd_PlayHolotape_Execute(COMMAND_ARGS)
 		*result = 1;
 	}
 	return true;
-	
+
 }
 
 bool __cdecl Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS)
@@ -149,7 +149,7 @@ bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS)
 		auto iter = PlayerCharacter::GetSingleton()->casinoDataList->Head();
 		if (!iter) return true;
 		do
-		{ 
+		{
 			if (auto casinoData = iter->data)
 			{
 				if (casinoData->casinoRefID == casinoRefId)
@@ -172,7 +172,7 @@ bool Cmd_GetCasinoDeckTexture_Execute(COMMAND_ARGS)
 	const char* resStr = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex) && casino && deckIndex >= 0 && deckIndex <= 3)
 	{
-		resStr = casino->blackjackDeck[deckIndex].ddsPath.m_data;
+		resStr = casino->blackjackDeck[deckIndex].ddsPath.pString;
 		if (IsConsoleMode())
 			Console_Print("GetCasinoDeckTexture >> %s", resStr);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
@@ -225,7 +225,7 @@ bool Cmd_ClearMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 	mlcOverridden = false;
 	mlcOverride = nullptr;
 	*result = 1;
-	
+
 	return true;
 }
 
@@ -340,7 +340,7 @@ bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 
 bool Cmd_HasHealthDamageEffect_Execute(COMMAND_ARGS) {
 	Actor* actor = (Actor*)thisObj;
-	*result = ThisStdCall_B(0x822E00, &actor->magicTarget);
+	*result = ThisCall<bool>(0x822E00, &actor->magicTarget);
 	return true;
 }
 
@@ -414,9 +414,9 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 			NavMeshTriangle* pNavMeshTriangle = spNavMesh->kTriangles.GetAt(j);
 			if (!pNavMeshTriangle)
 				continue;
-			if (checkDisabled && (pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0) 
+			if (checkDisabled && (pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0)
 				continue;
-			
+
 			// Get triangle vertices
 			NiPoint3 kVerts[3];
 			for (UInt32 k = 0; k < 3; k++) {
@@ -434,7 +434,7 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 				NiPoint3 kTriCenter = NiPoint3::GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
 
 				if (zLimit > 0 && fabs(kTriCenter.z - arPointToTest.z) > zLimit) continue;
-				
+
 
 				// Get distance to triangle center
 				float fDist = arPointToTest.Distance(kTriCenter);
@@ -643,9 +643,9 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 	}
 	else if (IsConsoleMode()) {
 			Console_Print("GetPointInNavMesh >> Point not found.");
-		
+
 	}
-	
+
 	g_arrInterface->AssignCommandResult(pointArr, result);
 	return bResult;
 }
@@ -669,14 +669,12 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 			ref = (TESObjectREFR*)g_thePlayer;
 		}
 		if (ref->GetRefNiNode()) {
-			BSSoundHandle handle;
-			ThisCall<BSSoundHandle*>(0xAE5870, BSAudioManager::Get(), &handle, sound->refID, 0x102); // BSAudioManager::GetSoundHandleByFormID
-			NiPoint3* refPos = ref->GetPos();
-			NiPoint3 pos = { refPos->x, refPos->y, refPos->z };
-			ThisCall(0xAD8B60, &handle, pos); // BSSoundHandle::SetPosition
-			ThisCall(0xAD8F20, &handle, ref->GetRefNiNode()); // BSSoundHandle::SetObjectToFollow
+			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
+			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(sound->refID, uiFlags);
+			handle.SetPosition(*ref->GetPos());
+			handle.SetObjectToFollow(ref->GetRefNiNode());
 			UInt32 time = fTime * 1000.0;
-			ThisCall(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
+			handle.FadeInPlay(time);
 			*result = 1;
 		}
 	}
@@ -694,7 +692,7 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 			if (ActiveEffect* activeEff = iter->data; activeEff && activeEff->bActive && !activeEff->bTerminated &&
 				activeEff->magicItem && ValidTempEffect(activeEff->effectItem))
 				if (TESForm* form = DYNAMIC_CAST(activeEff->magicItem, MagicItem, TESForm))
-				{ 
+				{
 					if (form->typeID == kFormType_AlchemyItem) {
 						float timeLeft = activeEff->duration - activeEff->timeElapsed;
 						auto it = tempEffectMap.find(form);
@@ -708,7 +706,7 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 					}
 				}
 		} while (iter = iter->next);
-		
+
 	}
 	if (!tempEffectMap.empty()) {
 		for (auto effect : tempEffectMap) {
@@ -789,14 +787,17 @@ bool Cmd_AddNavmeshObstacle_Execute(COMMAND_ARGS) {
 bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESSound* sound = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound) && IS_TYPE(sound, TESSound)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound) && sound && IS_TYPE(sound, TESSound)) {
+		CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
 		BSGameSound* gameSound;
 		for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 			gameSound = sndIter.Get();
 			if (!gameSound || (gameSound->sourceSound != sound))
 				continue;
-			gameSound->Unk_0E();
-			ThisCall(0xADA5D0, BSAudioManager::Get(), gameSound->mapKey, gameSound);
+
+			BSSoundHandle handle;
+			handle.uiSoundID = gameSound->mapKey;
+			handle.Stop();
 			*result = 1;
 		}
 	}
@@ -832,7 +833,7 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	*result = 0;
 	std::string locationName;
 	if (thisObj->parentCell && (thisObj->parentCell->cellFlags & 1) != 0) {
-		locationName = thisObj->parentCell->fullName.name.CStr();
+		locationName = thisObj->parentCell->fullName.name.c_str();
 	}
 	else {
 		TESWorldSpace* wspc = GetWorldspace(thisObj);
@@ -840,7 +841,7 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 			BSString str;
 			NiPoint3* pos = thisObj->GetPos();
 			wspc->GetMapNameForLocation(str, pos->x, pos->y, pos->z);
-			locationName = str.CStr();
+			locationName = str.c_str();
 		}
 	}
 	if (!locationName.empty())
@@ -881,7 +882,7 @@ bool IsHostileCompassTarget(Actor* toSearch) {
 bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* actor = (Actor*)thisObj;
-	if (ThisStdCall_B(0x579690, thisObj) && (!thisObj->IsActor() || !actor->isTeammate) ||
+	if (ThisCall<bool>(0x579690, thisObj) && (!thisObj->IsActor() || !actor->isTeammate) ||
 		thisObj->IsActor() && (IsCombatTarget(actor, g_thePlayer) || IsHostileCompassTarget(actor))) {
 		*result = 1;
 	}
@@ -1035,7 +1036,7 @@ bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* actorCell = g_thePlayer->parentCell;
 	if (actorCell)
-		*result = ThisStdCall_B(0x9764A0, g_processManager, actorCell->IsInterior());
+		*result = ThisCall<bool>(0x9764A0, g_processManager, actorCell->IsInterior());
 	return true;
 }
 bool Cmd_ToggleCombatMusic_Execute(COMMAND_ARGS) {
@@ -1176,7 +1177,7 @@ bool Cmd_EnableMenuArrowKeys_Execute(COMMAND_ARGS) {
 bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* actor = (Actor*)thisObj;
-	*result = ThisStdCall_F(0x884EB0, actor);
+	*result = ThisCall<float>(0x884EB0, actor);
 	if (IsConsoleMode()) Console_Print("GetRunSpeed >> %.2f", *result);
 	return true;
 }
@@ -1260,21 +1261,24 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 	float fadeOutTime = -1;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source, &fadeOutTime)) {
-		if (soundForm->soundFile.path.m_dataLen) {
-			const char* soundPath = soundForm->soundFile.path.m_data;
+		if (soundForm->soundFile.path.GetLength()) {
+			CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
+			const char* soundPath = soundForm->soundFile.path.pString;
 			BSGameSound* gameSound;
-			for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+			for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 				gameSound = sndIter.Get();
 				if (gameSound && StrBeginsCI(gameSound->filePath + 0xB, soundPath)) {
-					fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
+					fadeNode = (BSFadeNode*)BSAudioManager::Get()->soundPlayingObjects.Lookup(gameSound->mapKey);
 					if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == source) {
+						BSSoundHandle handle;
+						handle.uiSoundID = gameSound->mapKey;
+
 						if (fadeOutTime == -1) {
-							gameSound->stateFlags &= 0xFFFFFF0F;
-							gameSound->stateFlags |= 0x10;
+							handle.Stop();
 						}
 						else {
 							int time = fadeOutTime * 1000.0;
-							ThisCall(0xADC560, BSAudioManager::Get(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
+							handle.FadeOutAndRelease(time);
 						}
 						*result = 1;
 						break;
@@ -1428,7 +1432,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 			else
 				pActorNode = thisObj->GetRefNiNode();
 		}
-		
+
 		bool bChangedPos = false;
 		NiAVObject* pCasingNode = nullptr;
 		NiTransform kOrgTrans;
@@ -1447,8 +1451,8 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 		bool bHasCasingPath = false;
 		if (cNewCasingPath[0] != 0) {
 			bHasCasingPath = true;
-			pOrgCasingPath = pWeapon->shellCasingModel.nifPath.CStr();
-			pWeapon->shellCasingModel.nifPath.m_data = cNewCasingPath;
+			pOrgCasingPath = pWeapon->shellCasingModel.nifPath.c_str();
+			pWeapon->shellCasingModel.nifPath.pString = cNewCasingPath;
 		}
 
 		pWeapon->EjectShellCasing(pActor);
@@ -1458,7 +1462,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 			pCasingNode->m_world = kOrgTrans;
 
 		if (bHasCasingPath)
-			pWeapon->shellCasingModel.nifPath.m_data = (char*)pOrgCasingPath;
+			pWeapon->shellCasingModel.nifPath.pString = (char*)pOrgCasingPath;
 
 		*result = true;
 		return true;

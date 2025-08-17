@@ -74,7 +74,7 @@ public:
 	};
 };
 
-STATIC_ASSERT(sizeof(NiPoint4) == 0x10);
+static_assert(sizeof(NiPoint4) == 0x10);
 
 
 

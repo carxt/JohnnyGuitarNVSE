@@ -22,6 +22,12 @@
     <Filter Include="misc">
       <UniqueIdentifier>{4714bb52-e742-43b4-9391-6acc122a3c7b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="internal\Game">
+      <UniqueIdentifier>{7c8611b0-0cea-47ab-90d0-9c60d03eab90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="internal\Game\Bethesda">
+      <UniqueIdentifier>{97974e1d-e11d-4288-8ba1-4f4c84de7771}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
@@ -60,9 +66,6 @@
     <ClCompile Include="..\nvse\nvse\GameTiles.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameTypes.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="..\nvse\nvse\SafeWrite.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
@@ -90,6 +93,18 @@
     </ClCompile>
     <ClCompile Include="..\nvse\nvse\NiTypes.cpp">
       <Filter>nvse</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSMemory.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Conversation.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -235,8 +250,29 @@
     <ClInclude Include="..\nvse\nvse\GameProcess.h">
       <Filter>nvse</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSStringT.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSMemory.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\DialogueResponse.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Conversation.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
+    <None Include="internal\Game\Bethesda\BSStringT.inl">
+      <Filter>internal\Game\Bethesda</Filter>
+    </None>
   </ItemGroup>
 </Project>

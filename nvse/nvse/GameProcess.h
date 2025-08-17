@@ -730,7 +730,7 @@ struct AnimData
 	Unk124							*unk124;			// 124
 	Unk128							*unk128;			// 128
 };
-STATIC_ASSERT(sizeof(AnimData) == 0x12C);
+static_assert(sizeof(AnimData) == 0x12C);
 
 class QueuedFile;
 class BSFaceGenAnimationData;
@@ -832,7 +832,7 @@ public:
 	ActorHitData						*hitData254;		// 254
 	UInt32								unk258;				// 258
 };
-STATIC_ASSERT(sizeof(MiddleHighProcess) == 0x25C);
+static_assert(sizeof(MiddleHighProcess) == 0x25C);
 
 class HighProcess : public MiddleHighProcess {
 public:
@@ -950,7 +950,7 @@ public:
 	float								flt450;				// 450
 	UInt32								unk454[6];			// 454
 };
-STATIC_ASSERT(sizeof(HighProcess) == 0x46C);
+static_assert(sizeof(HighProcess) == 0x46C);
 
 // 160
 struct ProcessManager {

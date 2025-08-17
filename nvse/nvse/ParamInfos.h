@@ -50,6 +50,26 @@ static ParamInfo kParams_OneString_OneFloat[] =
 	{	"string",	kParamType_String,	0 },
 	{	"float",	kParamType_Float,	0 },
 };
+static ParamInfo kParams_OneString_OneOptionalFloat[2] =
+{
+	{	"string",	kParamType_String,	0 },
+	{	"float",	kParamType_Float,	1 },
+};
+static ParamInfo kParams_OneString_OneOptionalFloat_TwoOptionalInts[4] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "float", kParamType_Float, 1 },
+	{ "integer", kParamType_Integer, 1 },
+	{ "integer", kParamType_Integer, 1 },
+};
+static ParamInfo kParams_OneString_OneOptionalFloat_ThreeOptionalInts[5] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "float", kParamType_Float, 1 },
+	{ "integer", kParamType_Integer, 1 },
+	{ "integer", kParamType_Integer, 1 },
+	{ "integer", kParamType_Integer, 1 },
+};
 
 static ParamInfo kParams_TwoFloats[2] =
 {
@@ -450,7 +470,7 @@ static ParamInfo kParams_Event_OneForm[4] =
 	{ "Script", kParamType_AnyForm, 0 },
 	{ "flags", kParamType_Integer, 1 },
 	{ "Form", kParamType_AnyForm, 1 }
-}; 
+};
 
 static ParamInfo kParams_Event_TwoForms[5] =
 {
@@ -583,7 +603,7 @@ static ParamInfo kParams_OneInt_OneFloat[2] =
 
 static ParamInfo kParams_OneForm_OneOptionalInt[2] =
 {
-	{ "form",	kParamType_AnyForm,	0 }, 
+	{ "form",	kParamType_AnyForm,	0 },
 	{ "int",	kParamType_Integer, 1 },
 };
 
@@ -828,7 +848,7 @@ static ParamInfo kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm[4] =
 	{	"int",	kParamType_Integer, 1	},
 	{	"form",	kParamType_AnyForm,	1	},
 
-}; 
+};
 static ParamInfo kParams_OneActorRef_OneInt[2] =
 {
 	{	"actor reference",	kParamType_Actor,	0	},

@@ -167,7 +167,7 @@ public:
 	NiAVObject* GetNiBlock(const char* blockName);
 	NiNode* GetNode(const char* nodeName);
 	hkpRigidBody* GetRigidBody(const char* nodeName);
-	bool IsInInterior() { return ThisStdCall_B(0x575D10, this); }
+	bool IsInInterior() { return ThisCall<bool>(0x575D10, this); }
 	static TESObjectREFR* __stdcall Create(bool bTemp = false);
 
 	MEMBER_FN_PREFIX(TESObjectREFR);
@@ -179,7 +179,7 @@ public:
 #endif
 };
 
-STATIC_ASSERT(sizeof(TESObjectREFR) == 0x068);
+static_assert(sizeof(TESObjectREFR) == 0x068);
 
 
 
@@ -262,7 +262,7 @@ public:
 	UInt8			unk87;			// 87	Init'd to the inverse of NoLowLevelProcessing
 };
 
-STATIC_ASSERT(sizeof(MobileObject) == 0x88);
+static_assert(sizeof(MobileObject) == 0x88);
 
 class MagicTarget;
 typedef tList<ActiveEffect> ActiveEffectList;
@@ -296,7 +296,7 @@ public:
 
 	UInt32	unk04[2];	// 04
 };
-STATIC_ASSERT(sizeof(MagicCaster) == 0xC);
+static_assert(sizeof(MagicCaster) == 0xC);
 
 // 10
 class MagicTarget {
@@ -321,7 +321,7 @@ public:
 
 	void RemoveEffect(EffectItem* effItem);
 };
-STATIC_ASSERT(sizeof(MagicTarget) == 0x10);
+static_assert(sizeof(MagicTarget) == 0x10);
 
 class bhkRagdollController;
 class bhkRagdollPenetrationUtil;
@@ -722,7 +722,7 @@ public:
 	UInt16			unk1C2;				// 1C2
 	float			unk1C4;				// 1C4
 };
-STATIC_ASSERT(sizeof(Character) == 0x1C8);
+static_assert(sizeof(Character) == 0x1C8);
 class bhkRigidBody;
 struct ParentSpaceNode;
 struct TeleportLink;
@@ -945,7 +945,7 @@ public:
 
 	NiNode* GetNode(const bool abFirstPerson) const;
 };
-STATIC_ASSERT(sizeof(PlayerCharacter) == 0xE50);
+static_assert(sizeof(PlayerCharacter) == 0xE50);
 
 
 // 150
@@ -1055,7 +1055,7 @@ public:
 	UInt8				pad149[3];		// 149
 	float				range;			// 14C
 };
-STATIC_ASSERT(sizeof(Projectile) == 0x150);
+static_assert(sizeof(Projectile) == 0x150);
 
 struct ProjectileData {
 	UInt8 byte00;
@@ -1152,4 +1152,4 @@ public:
 	UInt32			unk0D4[11];		// 0D4
 	float			unk100;			// 100
 };
-STATIC_ASSERT(sizeof(Explosion) == 0x104);
+static_assert(sizeof(Explosion) == 0x104);
