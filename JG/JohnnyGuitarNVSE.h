@@ -978,11 +978,11 @@ static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size) {
 }
 
 bool __fastcall CanSaveNowHook(void* ThisObj, void* edx, int isAutoSave) {
-	return ThisStdCall_B(g_canSaveNowAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
+	return ThisCall<bool>(g_canSaveNowAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
 }
 
 bool __fastcall CanSaveNowMenuHook(void* ThisObj, void* edx, int isAutoSave) {
-	return ThisStdCall_B(g_canSaveNowMenuAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
+	return ThisCall<bool>(g_canSaveNowMenuAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
 }
 
 void __fastcall BipedModelUpdateWeapon(ValidBip01Names* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods) {
@@ -1188,26 +1188,31 @@ __declspec(naked) void NPCIncrementingChallengesHook() {
 			jmp retnAddr
 	}
 }
-void __fastcall UIUpdateSoundHook(Sound* sound, int dummy) {
+void __fastcall UIUpdateSoundHook(BSSoundHandle* sound, int dummy) {
 	tList<QuestUpdateManager>* g_questUpdateManager = (tList <QuestUpdateManager>*)0x11D970C;
 	if (g_questUpdateManager) {
 		ListNode<QuestUpdateManager>* iter = g_questUpdateManager->Head();
 		do {
+			BSSoundHandle handle;
 			switch (iter->data->updateType) {
 				case QuestAdded:
-					if (questNewSound != nullptr) sound = &Sound(questNewSound->refID, 0x121);
+					if (questNewSound != nullptr) 
+						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questNewSound->refID, 0x121);
 					break;
 				case QuestCompleted:
-					if (questCompeteSound != nullptr) sound = &Sound(questCompeteSound->refID, 0x121);
+					if (questCompeteSound != nullptr)
+						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questCompeteSound->refID, 0x121);
 					break;
 				case QuestFailed:
-					if (questFailSound != nullptr) sound = &Sound(questFailSound->refID, 0x121);
+					if (questFailSound != nullptr)
+						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questFailSound->refID, 0x121);
 					break;
 				case LocationDiscovered:
-					if (locationDiscoverSound != nullptr) sound = &Sound(locationDiscoverSound->refID, 0x121);
+					if (locationDiscoverSound != nullptr) 
+						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(locationDiscoverSound->refID, 0x121);
 					break;
 			}
-			sound->Play();
+			handle.Play(false);
 		} while (iter = iter->next);
 	}
 }
@@ -1237,7 +1242,7 @@ __declspec (naked) void VanityModeHook_DEPRECATED() {
 }
 bool __fastcall CombatMusicHook(UInt32* a1) {
 	if (bCombatMusicDisabled) return false;
-	return ThisStdCall_B(0x992D90, a1);
+	return ThisCall<bool>(0x992D90, a1);
 }
 TESRegionDataMap* GetMapData(TESRegion* region) {
 	if (region->dataEntries->Empty()) return nullptr;
@@ -1551,7 +1556,7 @@ __declspec (naked) void DisableDeathResponsesHook() {
 bool __fastcall SaveINIHook(IniSettingCollection* a1, void* edx, char* a2) {
 	ThisCall(0x5E01B0, a1, a2);
 	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
-	return ThisStdCall_B(0x5E01B0, rendererSettings, rendererSettings->iniPath);
+	return ThisCall<bool>(0x5E01B0, rendererSettings, rendererSettings->iniPath);
 }
 
 bool __fastcall WantsToFleeHook(CombatState* state) {

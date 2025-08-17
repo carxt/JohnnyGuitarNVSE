@@ -167,7 +167,7 @@ public:
 	NiAVObject* GetNiBlock(const char* blockName);
 	NiNode* GetNode(const char* nodeName);
 	hkpRigidBody* GetRigidBody(const char* nodeName);
-	bool IsInInterior() { return ThisStdCall_B(0x575D10, this); }
+	bool IsInInterior() { return ThisCall<bool>(0x575D10, this); }
 	static TESObjectREFR* __stdcall Create(bool bTemp = false);
 
 	MEMBER_FN_PREFIX(TESObjectREFR);

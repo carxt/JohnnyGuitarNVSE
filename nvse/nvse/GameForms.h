@@ -632,7 +632,7 @@ struct Condition {
 	UInt32			runOnType;			// 14	Subject, Target, Reference, CombatTarget, LinkedReference
 	TESObjectREFR* reference;			// 18
 
-	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result) { return ThisStdCall_B(0x681600, this, runOnRef, arg2, result); }
+	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result) { return ThisCall<bool>(0x681600, this, runOnRef, arg2, result); }
 };
 
 struct ConditionList : tList<Condition> {

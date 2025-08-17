@@ -47,6 +47,51 @@ public:
 	BSSoundHandle() : uiSoundID(-1), bAssumeSuccess(false), uiState(0) {}
 	~BSSoundHandle() {}
 
+	BSSoundHandle operator=(const BSSoundHandle& arHandle) {
+		uiSoundID = arHandle.uiSoundID;
+		bAssumeSuccess = arHandle.bAssumeSuccess;
+		uiState = arHandle.uiState;
+		return *this;
+	}
+
+	BSSoundHandle operator=(const BSSoundHandle* apHandle) {
+		uiSoundID = apHandle->uiSoundID;
+		bAssumeSuccess = apHandle->bAssumeSuccess;
+		uiState = apHandle->uiState;
+		return *this;
+	}
+
+	bool IsPlaying() const {
+		return ThisCall<bool>(0xAD8930, this);
+	}
+
+	bool Play(bool abUnk) {
+		return ThisCall<bool>(0xAD8830, this, abUnk);
+	}
+
+	bool FadeInPlay(uint32_t auiMilliseconds) {
+		return ThisCall<bool>(0xAD8D60, this, auiMilliseconds);
+	}
+
+	bool Stop() {
+		return ThisCall<bool>(0xAD88F0, this);
+	}
+
+	bool FadeOutAndRelease(uint32_t auiMilliseconds) {
+		return ThisCall<bool>(0xAD8DA0, this, auiMilliseconds);
+	}
+
+	bool SetPosition(NiPoint3 akPosition) {
+		return ThisCall<bool>(0xAD8B60, this, akPosition);
+	}
+
+	void SetObjectToFollow(NiAVObject* apObject) {
+		ThisCall(0xAD8F20, this, apObject);
+	}
+
+	bool SetVolume(float afVolume) {
+		return ThisCall<bool>(0xAD89E0, this, afVolume);
+	}
 };
 
 STATIC_ASSERT(sizeof(BSSoundHandle) == 0xC);
@@ -70,10 +115,10 @@ public:
 	virtual void	Unk_09(void);
 	virtual void	Unk_0A(void);
 	virtual void	Unk_0B(void);
-	virtual void	Unk_0C(void);
-	virtual bool	Unk_0D(void);
-	virtual bool	Unk_0E(void);
-	virtual bool	Unk_0F(float arg1);
+	virtual bool	Play(bool abLoop);
+	virtual bool	Pause();
+	virtual bool	Stop();
+	virtual bool	SetVolume(float afVolume);
 	virtual void	Unk_10(void);
 	virtual bool	Unk_11(void);
 	virtual void	Unk_12(void);
@@ -218,8 +263,8 @@ public:
 		kAudioFlags_IsMusic = 0x800,
 		kAudioFlags_RegionSound_MuteWhenSubmerged = 0x1000,
 		kAudioFlags_MaybeUnderwater = 0x2000,
-		kAudioFlags_4000 = 0x4000,
-		kAudioFlags_IsTemporary8000 = 0x8000,
+		kAudioFlags_Impact = 0x4000,
+		kAudioFlags_Cached = 0x8000,
 		kAudioFlags_DontCache = 0x10000,
 		kAudioFlags_20000 = 0x20000,
 		kAudioFlags_FirstPerson = 0x40000,
@@ -250,7 +295,7 @@ public:
 	UInt32						unk0A4;				// 0A4
 	float						flt0A8;				// 0A8
 	CRITICAL_SECTION			kMessageCS;
-	CRITICAL_SECTION			kDebugCS;
+	CRITICAL_SECTION			kSoundInfosCS;
 	CRITICAL_SECTION			kCacheListCS;
 	CRITICAL_SECTION			kMessageProcessingCS;
 	CRITICAL_SECTION			kTaskCS;
@@ -338,79 +383,33 @@ public:
 	void(*sub_832C80)(void);	// 034
 
 	static BSWin32Audio* GetSingleton() { return *(BSWin32Audio**)0x11F6D98; };
-};
-struct Sound {
-	UInt32 soundKey;
-	UInt8 byte04;
-	UInt8 pad05;
-	UInt8 pad06;
-	UInt8 pad07;
-	UInt32 unk08;
 
-	Sound() : soundKey(0xFFFFFFFF), byte04(0), unk08(0) {}
-
-	Sound(const char* soundPath, UInt32 flags) {
-		ThisCall(0xAD7550, BSWin32Audio::GetSingleton(), this, soundPath, flags);
-	}
-	Sound(UInt32 refId, UInt32 flags) {
-		ThisCall(0xAD73B0, BSWin32Audio::GetSingleton(), this, refId, flags);
+	BSSoundHandle GetSoundHandleByFilePath(const char* apFileName, uint32_t aeAudioFlags, TESSound* apSound) {
+		BSSoundHandle kHandle;
+		ThisCall(0xAD7480, this, &kHandle, apFileName, aeAudioFlags, apSound);
+		return kHandle;
 	}
 
-	Sound(const char* soundPath, UInt32 flags, TESSound* tesSound) {
-		ThisCall(0xAE5A50, BSWin32Audio::GetSingleton(), this, soundPath, flags, tesSound);
+	BSSoundHandle GetSoundHandleByFormID(UInt32 auiFormID, uint32_t aeAudioFlags) {
+		BSSoundHandle kHandle;
+		ThisCall(0xAD73B0, this, &kHandle, auiFormID, aeAudioFlags);
+		return kHandle;
 	}
 
-	void InitRefID(UInt32 refID, UInt32 flags = BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100)
-	{
-		ThisCall(0xAD73B0, BSWin32Audio::GetSingleton(), this, refID, flags);
+	BSSoundHandle BSWin32Audio::GetSoundHandleByEditorName(const char* apEditorID, uint32_t aeAudioFlags) {
+		BSSoundHandle kHandle;
+		ThisCall(0xAD7550, this, &kHandle, apEditorID, aeAudioFlags);
+		return kHandle;
 	}
 
-	void Play() {
-		ThisCall(0xAD8830, this, 0);
-	}
-
-	void SetPos(const NiVector3* posVec) {
-		ThisCall(0xAD8B60, this, posVec->x, posVec->y, posVec->z);
-	}
-	__forceinline void SetNiNode(NiNode* node) {
-		ThisCall(0xAD8F20, this, node);
-	}
-
-	__forceinline void SetVolume(float volume) {
-		ThisCall(0xAD89E0, this, volume);
-	}
-
-	bool IsPlaying() {
-		return ThisCall<bool>(0xAD8930, this);
-	}
-
-	void Stop()
-	{
-		ThisCall(0xAD88F0, this);
-	}
-
-	static void PlayEDID(const char* soundEDID, UInt32 flags, TESObjectREFR* refr, float volume = 1.0F)
-	{
-		Sound sound(soundEDID, flags);
-		if (sound.soundKey != 0xFFFFFFFF)
-		{
-			sound.SetPos(refr->PosVector());
-
-			if (volume != 1.0F)
-			{
-				sound.SetVolume(volume);
-			}
-			sound.Play();
-		}
-	}
 };
 
 struct SoundList
 {
-	Sound data;
+	BSSoundHandle data;
 	SoundList* next;
 
-	void Append(Sound* sound)
+	void Append(BSSoundHandle* sound)
 	{
 		ThisCall(0x7A19A0, this, sound);
 	}

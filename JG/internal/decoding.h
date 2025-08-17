@@ -687,8 +687,8 @@ struct ExtraInfoGeneralTopicDataElement
 struct List11DD58CItem
 {
 	TESObjectREFR* ref;
-	Sound sound04;
-	Sound sound10;
+	BSSoundHandle sound04;
+	BSSoundHandle sound10;
 	UInt8 byte1C;
 	UInt8 byte1D;
 	UInt8 byte1E;

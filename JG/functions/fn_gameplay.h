@@ -340,7 +340,7 @@ bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 
 bool Cmd_HasHealthDamageEffect_Execute(COMMAND_ARGS) {
 	Actor* actor = (Actor*)thisObj;
-	*result = ThisStdCall_B(0x822E00, &actor->magicTarget);
+	*result = ThisCall<bool>(0x822E00, &actor->magicTarget);
 	return true;
 }
 
@@ -669,14 +669,12 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 			ref = (TESObjectREFR*)g_thePlayer;
 		}
 		if (ref->GetRefNiNode()) {
-			BSSoundHandle handle;
-			ThisCall<BSSoundHandle*>(0xAE5870, BSAudioManager::Get(), &handle, sound->refID, 0x102); // BSAudioManager::GetSoundHandleByFormID
-			NiPoint3* refPos = ref->GetPos();
-			NiPoint3 pos = { refPos->x, refPos->y, refPos->z };
-			ThisCall(0xAD8B60, &handle, pos); // BSSoundHandle::SetPosition
-			ThisCall(0xAD8F20, &handle, ref->GetRefNiNode()); // BSSoundHandle::SetObjectToFollow
+			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
+			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(sound->refID, uiFlags);
+			handle.SetPosition(*ref->GetPos());
+			handle.SetObjectToFollow(ref->GetRefNiNode());
 			UInt32 time = fTime * 1000.0;
-			ThisCall(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
+			handle.FadeInPlay(time);
 			*result = 1;
 		}
 	}
@@ -789,14 +787,17 @@ bool Cmd_AddNavmeshObstacle_Execute(COMMAND_ARGS) {
 bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESSound* sound = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound) && IS_TYPE(sound, TESSound)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound) && sound && IS_TYPE(sound, TESSound)) {
+		CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
 		BSGameSound* gameSound;
 		for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 			gameSound = sndIter.Get();
 			if (!gameSound || (gameSound->sourceSound != sound))
 				continue;
-			gameSound->Unk_0E();
-			ThisCall(0xADA5D0, BSAudioManager::Get(), gameSound->mapKey, gameSound);
+
+			BSSoundHandle handle;
+			handle.uiSoundID = gameSound->mapKey;
+			handle.Stop();
 			*result = 1;
 		}
 	}
@@ -881,7 +882,7 @@ bool IsHostileCompassTarget(Actor* toSearch) {
 bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* actor = (Actor*)thisObj;
-	if (ThisStdCall_B(0x579690, thisObj) && (!thisObj->IsActor() || !actor->isTeammate) ||
+	if (ThisCall<bool>(0x579690, thisObj) && (!thisObj->IsActor() || !actor->isTeammate) ||
 		thisObj->IsActor() && (IsCombatTarget(actor, g_thePlayer) || IsHostileCompassTarget(actor))) {
 		*result = 1;
 	}
@@ -1035,7 +1036,7 @@ bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* actorCell = g_thePlayer->parentCell;
 	if (actorCell)
-		*result = ThisStdCall_B(0x9764A0, g_processManager, actorCell->IsInterior());
+		*result = ThisCall<bool>(0x9764A0, g_processManager, actorCell->IsInterior());
 	return true;
 }
 bool Cmd_ToggleCombatMusic_Execute(COMMAND_ARGS) {
@@ -1176,7 +1177,7 @@ bool Cmd_EnableMenuArrowKeys_Execute(COMMAND_ARGS) {
 bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* actor = (Actor*)thisObj;
-	*result = ThisStdCall_F(0x884EB0, actor);
+	*result = ThisCall<float>(0x884EB0, actor);
 	if (IsConsoleMode()) Console_Print("GetRunSpeed >> %.2f", *result);
 	return true;
 }
@@ -1261,21 +1262,23 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source, &fadeOutTime)) {
 		if (soundForm->soundFile.path.m_dataLen) {
-			CSLock lock(g_audioManager->kMessageProcessingCS);
+			CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
 			const char* soundPath = soundForm->soundFile.path.m_data;
 			BSGameSound* gameSound;
-			for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+			for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 				gameSound = sndIter.Get();
 				if (gameSound && StrBeginsCI(gameSound->filePath + 0xB, soundPath)) {
-					fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
+					fadeNode = (BSFadeNode*)BSAudioManager::Get()->soundPlayingObjects.Lookup(gameSound->mapKey);
 					if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == source) {
+						BSSoundHandle handle;
+						handle.uiSoundID = gameSound->mapKey;
+
 						if (fadeOutTime == -1) {
-							gameSound->stateFlags &= 0xFFFFFF0F;
-							gameSound->stateFlags |= 0x10;
+							handle.Stop();
 						}
 						else {
 							int time = fadeOutTime * 1000.0;
-							ThisCall(0xADC560, BSAudioManager::Get(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
+							handle.FadeOutAndRelease(time);
 						}
 						*result = 1;
 						break;

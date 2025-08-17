@@ -218,7 +218,6 @@ bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
 	int loopFlag = 0;
 	float fadeInTime = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &systemFlag, &loopFlag) && path[0]) {
-		BSSoundHandle handle;
 		bool bVoiceFlag = (voiceFlag > 0);
 		bool bSystemFlag = (systemFlag > 0);
 		bool bLoopFlag = (loopFlag > 0);
@@ -232,13 +231,13 @@ bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
 		if (bLoopFlag) {
 			audioFlags |= BSAudioManager::kAudioFlags_Loop;
 		}
-		ThisCall(0xAD7480, BSWin32Audio::GetSingleton(), &handle, path, audioFlags, nullptr); // GetSoundHandleByFilePath
+		BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(path, BSAudioManager::AudioFlags(audioFlags), nullptr);
 		if (fadeInTime <= 0) {
-			ThisCall(0xAD8830, &handle, false); // BSSoundHandle::Play
+			handle.Play(false);
 		}
 		else {
 			int time = fadeInTime * 1000.0;
-			ThisCall(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
+			handle.FadeInPlay(time);
 		}
 		*result = 1;
 	}
@@ -256,7 +255,6 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 			ref = (TESObjectREFR*)g_thePlayer;
 		}
 		if (ref->GetRefNiNode()) {
-			BSSoundHandle handle;
 			bool bVoiceFlag = (voiceFlag > 0);
 			bool bLoopFlag = (loopFlag > 0);
 			UInt32 audioFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
@@ -266,17 +264,15 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 			if (bLoopFlag) {
 				audioFlags |= BSAudioManager::kAudioFlags_Loop;
 			}
-			ThisCall(0xAD7480, BSWin32Audio::GetSingleton(), &handle, path, audioFlags, nullptr); // GetSoundHandleByFilePath
-			NiPoint3* refPos = ref->GetPos();
-			NiPoint3 pos = { refPos->x, refPos->y, refPos->z };
-			ThisCall(0xAD8B60, &handle, pos); // BSSoundHandle::SetPosition
-			ThisCall(0xAD8F20, &handle, ref->GetRefNiNode()); // BSSoundHandle::SetObjectToFollow
+			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(path, BSAudioManager::AudioFlags(audioFlags), nullptr);
+			handle.SetPosition(*ref->GetPos());
+			handle.SetObjectToFollow(ref->GetRefNiNode());
 			if (fadeInTime <= 0) {
-				ThisCall(0xAD8830, &handle, false); // BSSoundHandle::Play
+				handle.Play(false);
 			}
 			else {
 				int time = fadeInTime * 1000.0;
-				ThisCall(0xAD8D60, &handle, time); // BSSoundHandle::Play_FadeInTime
+				handle.FadeInPlay(time);
 			}
 			*result = 1;
 		}
@@ -292,13 +288,16 @@ bool Cmd_StopSoundFromPath_Execute(COMMAND_ARGS) {
 		BSGameSound *gameSound;
 		for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 			if (!(gameSound = sndIter.Get()) || strcmp(gameSound->filePath, path) != 0) continue;
+
+			BSSoundHandle handle;
+			handle.uiSoundID = gameSound->mapKey;
+
 			if (fadeOutTime <= 0) {
-				gameSound->stateFlags &= 0xFFFFFF0F;
-				gameSound->stateFlags |= 0x10;
+				handle.Stop();
 			}
 			else {
 				int time = fadeOutTime * 1000.0;
-				ThisCall(0xADC560, BSAudioManager::Get(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
+				handle.FadeOutAndRelease(time);
 			}
 			*result = 1;
 		}
@@ -321,13 +320,15 @@ bool Cmd_StopSound3DFromPath_Execute(COMMAND_ARGS) {
 			if (!(gameSound = sndIter.Get()) || strcmp(gameSound->filePath, path) != 0) continue;
 			fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
 			if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == ref) {
+				BSSoundHandle handle;
+				handle.uiSoundID = gameSound->mapKey;
+
 				if (fadeOutTime <= 0) {
-					gameSound->stateFlags &= 0xFFFFFF0F;
-					gameSound->stateFlags |= 0x10;
+					handle.Stop();
 				}
 				else {
 					int time = fadeOutTime * 1000.0;
-					ThisCall(0xADC560, BSAudioManager::Get(), gameSound->mapKey, time, 0x26); // BSAudioManager::StopSound_FadeOutTime
+					handle.FadeOutAndRelease(time);
 				}
 			}
 			*result = 1;

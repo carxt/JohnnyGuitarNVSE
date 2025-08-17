@@ -1845,7 +1845,7 @@ public:
 	UInt32 unk14C;
 	UInt8 byte150;
 	UInt8 gap151[3];
-	Sound sound154;
+	BSSoundHandle sound154;
 	UInt8 byte160;
 	UInt8 byte161;
 	UInt8 byte162;

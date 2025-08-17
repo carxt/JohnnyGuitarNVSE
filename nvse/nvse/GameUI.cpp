@@ -56,8 +56,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 	}
 	if (note->type == BGSNote::kSound)
 	{
-		Sound sound = Sound();
-		sound.InitRefID(note->voice->refID);
+		BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(note->voice->refID, BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100);
 
 		holotapeDialogues.Append(&sound);
 		isHolotapeVoicePlaying = true;
@@ -96,8 +95,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 					ThisCall(0x61F170, topicInfo, 0, character);
 
 					// append sound
-					Sound toPlay = Sound();
-					ThisCall(0xAD7480, BSWin32Audio::GetSingleton(), &toPlay, currentResponse->voiceFilePath.CStr(), audioFlags, nullptr);
+					BSSoundHandle toPlay = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(currentResponse->voiceFilePath.CStr(), audioFlags, nullptr);
 					toPlay.SetVolume(0.9f);
 					holotapeDialogues.Append(&toPlay);
 
@@ -114,7 +112,9 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 	{
 		if (playStartStopSound)
 		{
-			Sound::PlayEDID("UIPipBoyHolotapeStart", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D, PlayerCharacter::GetSingleton());
+			BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStart", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
+			sound.SetPosition(*PlayerCharacter::GetSingleton()->GetPos());
+			sound.Play(false);
 		}
 		else
 		{
@@ -140,7 +140,9 @@ void MapMenu::StopHolotape()
 	isHolotapeVoicePlaying = 0;
 	if (!noHolotapeStopSound)
 	{
-		Sound::PlayEDID("UIPipBoyHolotapeStop", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D, PlayerCharacter::GetSingleton());
+		BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStop", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
+		handle.SetPosition(*PlayerCharacter::GetSingleton()->GetPos());
+		handle.Play(false);
 	}
 	noHolotapeStopSound = false;
 	ThisCall(0xAD8650, BSWin32Audio::GetSingleton()); // FadeOutDialogueSound

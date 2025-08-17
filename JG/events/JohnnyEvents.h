@@ -101,7 +101,7 @@ bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, 
 			CallUDF(callback.script, nullptr, OnLimbGoneHandler->numMaxArgs, actor, limb);
 		}
 	}
-	return ThisStdCall_B(0x430410, xData, actor, limb, isExplode);
+	return ThisCall<bool>(0x430410, xData, actor, limb, isExplode);
 }
 void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
 	EventInformation* thisEvent = IsStarted ? OnStartQuestHandler : OnStopQuestHandler;
@@ -186,7 +186,7 @@ template <UInt32 originalCall>
 bool __fastcall HandlePLChangeEvent(Actor* actor) {
 	if (actor == nullptr || actor->baseProcess == nullptr) return true; //early exit, no need to handle error states because there's no baseProcess.
 	int oldLevel = actor->baseProcess->processLevel;
-	bool result = ThisStdCall_B(originalCall, actor);
+	bool result = ThisCall<bool>(originalCall, actor);
 	int newLevel = actor->baseProcess->processLevel;
 	if (oldLevel != newLevel) {
 		for (auto const& callback : OnPLChangeHandler->callbacks) {
