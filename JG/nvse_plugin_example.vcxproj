@@ -124,12 +124,15 @@
     <ClCompile Include="..\nvse\nvse\GameSettings.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTiles.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameTypes.cpp" />
     <ClCompile Include="..\nvse\nvse\GameUI.cpp" />
     <ClCompile Include="..\nvse\nvse\NiTypes.cpp" />
     <ClCompile Include="..\nvse\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\nvse\Utilities.cpp" />
     <ClCompile Include="events\LambdaVariableContext.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSMemory.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\Conversation.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
     <ClCompile Include="internal\sha1\sha1.cpp" />
     <ClCompile Include="internal\utility.cpp" />
@@ -173,6 +176,12 @@
     <ClInclude Include="functions\fn_ui.h" />
     <ClInclude Include="functions\fn_utility.h" />
     <ClInclude Include="internal\decoding.h" />
+    <ClInclude Include="internal\Game\Bethesda\BSMemory.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSStringT.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\Conversation.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\DialogueResponse.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\md5\md5.h" />
     <ClInclude Include="internal\netimmerse.h" />
@@ -187,6 +196,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
+    <None Include="internal\Game\Bethesda\BSStringT.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

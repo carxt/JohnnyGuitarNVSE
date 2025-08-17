@@ -6105,21 +6105,6 @@ struct CasinoStats
 	UInt8 gap0A[2];
 };
 
-struct DialogueResponse
-{
-	BSString responseText;
-	UInt32 emotionType;
-	UInt32 emotionValue;
-	BSString voiceFilePath;
-	TESIdleForm* speakerAnimation;
-	TESIdleForm* listenerAnimation;
-	UInt32 sound;
-	UInt8 flags;
-	UInt8 pad25[3];
-	UInt32 responseNumber;
-};
-static_assert(sizeof(DialogueResponse) == 0x2C);
-
 // 170
 class TESEffectShader : public TESForm {
 public:

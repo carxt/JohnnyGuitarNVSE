@@ -103,9 +103,9 @@ void SetConsoleEcho(bool doEcho) {
 const char* GetFullName(TESForm* baseForm) {
 	if (baseForm) {
 		TESFullName* fullName = baseForm->GetFullName();
-		if (fullName && fullName->name.m_data) {
-			if (fullName->name.m_dataLen)
-				return fullName->name.m_data;
+		if (fullName && fullName->name.pString) {
+			if (fullName->name.GetLength())
+				return fullName->name.pString;
 		}
 		return "<no name>";
 	}
@@ -536,11 +536,11 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 										break;
 
 									case 1:	// short name
-										strName = ammo->shortName.CStr();
+										strName = ammo->shortName.c_str();
 										break;
 
 									case 2:	// abbrev
-										strName = ammo->abbreviation.CStr();
+										strName = ammo->abbreviation.c_str();
 										break;
 								}
 							}

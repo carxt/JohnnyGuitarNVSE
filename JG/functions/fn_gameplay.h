@@ -172,7 +172,7 @@ bool Cmd_GetCasinoDeckTexture_Execute(COMMAND_ARGS)
 	const char* resStr = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex) && casino && deckIndex >= 0 && deckIndex <= 3)
 	{
-		resStr = casino->blackjackDeck[deckIndex].ddsPath.m_data;
+		resStr = casino->blackjackDeck[deckIndex].ddsPath.pString;
 		if (IsConsoleMode())
 			Console_Print("GetCasinoDeckTexture >> %s", resStr);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
@@ -833,7 +833,7 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	*result = 0;
 	std::string locationName;
 	if (thisObj->parentCell && (thisObj->parentCell->cellFlags & 1) != 0) {
-		locationName = thisObj->parentCell->fullName.name.CStr();
+		locationName = thisObj->parentCell->fullName.name.c_str();
 	}
 	else {
 		TESWorldSpace* wspc = GetWorldspace(thisObj);
@@ -841,7 +841,7 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 			BSString str;
 			NiPoint3* pos = thisObj->GetPos();
 			wspc->GetMapNameForLocation(str, pos->x, pos->y, pos->z);
-			locationName = str.CStr();
+			locationName = str.c_str();
 		}
 	}
 	if (!locationName.empty())
@@ -1261,9 +1261,9 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 	float fadeOutTime = -1;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source, &fadeOutTime)) {
-		if (soundForm->soundFile.path.m_dataLen) {
+		if (soundForm->soundFile.path.GetLength()) {
 			CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
-			const char* soundPath = soundForm->soundFile.path.m_data;
+			const char* soundPath = soundForm->soundFile.path.pString;
 			BSGameSound* gameSound;
 			for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 				gameSound = sndIter.Get();
@@ -1451,8 +1451,8 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 		bool bHasCasingPath = false;
 		if (cNewCasingPath[0] != 0) {
 			bHasCasingPath = true;
-			pOrgCasingPath = pWeapon->shellCasingModel.nifPath.CStr();
-			pWeapon->shellCasingModel.nifPath.m_data = cNewCasingPath;
+			pOrgCasingPath = pWeapon->shellCasingModel.nifPath.c_str();
+			pWeapon->shellCasingModel.nifPath.pString = cNewCasingPath;
 		}
 
 		pWeapon->EjectShellCasing(pActor);
@@ -1462,7 +1462,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 			pCasingNode->m_world = kOrgTrans;
 
 		if (bHasCasingPath)
-			pWeapon->shellCasingModel.nifPath.m_data = (char*)pOrgCasingPath;
+			pWeapon->shellCasingModel.nifPath.pString = (char*)pOrgCasingPath;
 
 		*result = true;
 		return true;

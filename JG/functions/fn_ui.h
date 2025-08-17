@@ -22,7 +22,7 @@ bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks
 		if (g_thePlayer) {
 			auto headNode = g_thePlayer->questObjectiveList.Head();
 			while (headNode) {
-				Console_Print("objective %s from quest %s", headNode->data->displayText.CStr(), headNode->data->quest->GetEditorName());
+				Console_Print("objective %s from quest %s", headNode->data->displayText.c_str(), headNode->data->quest->GetEditorName());
 				headNode = headNode->next;
 			}
 		}
@@ -324,8 +324,8 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESWorldSpace* worlspace = NULL;
 	char path[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace) && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.m_data)) {
-		strcpy(path, worlspace->texture.ddsPath.m_data);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace) && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.pString)) {
+		strcpy_s(path, worlspace->texture.ddsPath.pString);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 		if (IsConsoleMode())
 			Console_Print("GetWorldSpaceMapTexture >> %s", path);

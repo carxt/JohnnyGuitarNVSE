@@ -2,6 +2,7 @@
 #include <unordered_set>
 
 #include "GameUI.h"
+#include <algorithm>
 NVSEArrayVarInterface* g_arrInterface = NULL;
 NVSEStringVarInterface* g_strInterface = NULL;
 NVSEMessagingInterface* g_msg = NULL;
@@ -514,8 +515,8 @@ public:
 		if (result)
 		{
 			result = pObjective->status & BGSQuestObjective::eQObjStatus_displayed;
-			auto questObjectiveDisplayStr = pObjective->displayText.CStr();
-			auto questDisplayStr = pObjective->quest->GetFullName()->name.CStr();
+			auto questObjectiveDisplayStr = pObjective->displayText.c_str();
+			auto questDisplayStr = pObjective->quest->GetFullName()->name.c_str();
 			if (!((questObjectiveDisplayStr && *questObjectiveDisplayStr) || (questDisplayStr && *questDisplayStr)))
 			{
 				result = 0;
@@ -1580,7 +1581,7 @@ void __cdecl MiscStatRefreshHook(Tile* tile, int id) {
 		value = g_miscStatData[id]->data.i;
 	}
 	else {
-		std::string sName = tile->name.m_data;
+		std::string sName = tile->name.pString;
 		auto it = miscStatMap.find(sName);
 		if (it != miscStatMap.end()) {
 			value = it->second;
@@ -1592,7 +1593,7 @@ void __cdecl MiscStatRefreshHook(Tile* tile, int id) {
 bool __cdecl ShouldHideStat(UInt32* id) {
 	if ((UInt32)id >= 43) {
 		Tile* tile = g_statsMenu->miscStatIDList.GetTileFromItem(&id);
-		std::string sName = tile->name.CStr();
+		std::string sName = tile->name.c_str();
 		if (miscStatMap.find(sName) == miscStatMap.end()) return true;
 	}
 	return false;
@@ -1602,7 +1603,7 @@ void UpdateMiscStatList(const char* name, int value) {
 	auto iter = g_statsMenu->miscStatIDList.GetHead();
 	do
 	{
-		if (iter->GetItem() && iter->GetItem()->tile && !strcmp(iter->GetItem()->tile->name.CStr(), name)) {
+		if (iter->GetItem() && iter->GetItem()->tile && !strcmp(iter->GetItem()->tile->name.c_str(), name)) {
 			tile = iter->GetItem()->tile;
 			break;
 		}
@@ -1675,7 +1676,7 @@ void __fastcall SetViewmodelFrustumHook(NiCameraAlt* camera, void*, NiFrustum* f
 	float nearDistance = frustum->n;
 	float ratio = camera->maxFarNearRatio;
 	if (g_viewmodel_near > 0.f) {
-		nearDistance = max(g_viewmodel_near, 0.001);
+		nearDistance = std::max(g_viewmodel_near, 0.001f);
 		ratio = frustum->f / nearDistance;
 	}
 

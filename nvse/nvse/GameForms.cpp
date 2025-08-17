@@ -32,7 +32,7 @@ TESFullName* TESForm::GetFullName() {
 	{
 		TESObjectCELL* cell = (TESObjectCELL*)this;
 		TESFullName* fullName = &cell->fullName;
-		if ((!fullName->name.m_data || !fullName->name.m_dataLen) && cell->worldSpace)
+		if ((!fullName->name.pString || !fullName->name.GetLength()) && cell->worldSpace)
 			return &cell->worldSpace->fullName;
 		return fullName;
 	}
@@ -42,7 +42,7 @@ TESFullName* TESForm::GetFullName() {
 
 const char* TESForm::GetTheName() {
 	TESFullName* fullName = GetFullName();
-	return fullName ? fullName->name.CStr() : "";
+	return fullName ? fullName->name.c_str() : "";
 }
 
 void TESForm::DoAddForm(TESForm* newForm, bool persist, bool record) const {
@@ -162,7 +162,7 @@ const char* TESBipedModelForm::GetPath(UInt32 whichPath, bool bFemalePath) {
 	}
 
 	if (pathStr)
-		return pathStr->m_data;
+		return pathStr->pString;
 	else
 		return "";
 }
@@ -624,7 +624,7 @@ const char* TESFaction::GetNthRankName(UInt32 whichRank, bool bFemale) {
 	if (!rank)
 		return NULL;
 	else
-		return bFemale ? rank->femaleName.CStr() : rank->name.CStr();
+		return bFemale ? rank->femaleName.c_str() : rank->name.c_str();
 }
 
 void TESFaction::SetNthRankName(const char* newName, UInt32 whichRank, bool bFemale) {

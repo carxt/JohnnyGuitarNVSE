@@ -4,25 +4,7 @@
 #include "NiTypes.h"
 #include "internal/utility.h"
 #include "internal/Game/Bethesda/BSSimpleList.hpp"
-
-// 8
-class BSString {
-public:
-	BSString();
-	~BSString();
-
-	char*	m_data;
-	UInt16	m_dataLen;
-	UInt16	m_bufLen;
-
-	void Init(UInt32 bufSize);
-	bool Set(const char* src);
-	bool Append(const char* toAppend);
-	void AppendChar(char toAppend);
-	void InsertChar(char toInsert, UInt32 index);
-	void EraseAt(UInt32 index);
-	const char* CStr();
-};
+#include "internal/Game/Bethesda/BSStringT.hpp"
 
 enum {
 	eListInvalid = -1,

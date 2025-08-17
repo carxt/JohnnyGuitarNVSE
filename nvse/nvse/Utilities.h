@@ -150,28 +150,6 @@ public:
 	void vShow(const char* msg, va_list args);
 };
 
-// thread-safe template versions of ThisStdCall()
-
-template <typename T_Ret = uint32_t, typename ...Args>
-__forceinline T_Ret ThisCall(uint32_t _addr, const void* _this, Args ...args) {
-	return ((T_Ret(__thiscall*)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
-}
-
-template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret StdCall(uint32_t _addr, Args ...args) {
-	return ((T_Ret(__stdcall*)(Args...))_addr)(std::forward<Args>(args)...);
-}
-
-template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret CdeclCall(uint32_t _addr, Args ...args) {
-	return ((T_Ret(__cdecl*)(Args...))_addr)(std::forward<Args>(args)...);
-}
-
-template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret FastCall(uint32_t _addr, Args ...args) {
-	return ((T_Ret(__fastcall*)(Args...))_addr)(std::forward<Args>(args)...);
-}
-
 struct CSLock {
 private:
 	CRITICAL_SECTION* cs;

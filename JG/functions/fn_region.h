@@ -75,7 +75,7 @@ bool Cmd_GetRegionMapName_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && IS_TYPE(region, TESRegion)) {
 		TESRegionDataMap* mapData = GetMapData(region);
-		if (mapData) g_strInterface->Assign(PASS_COMMAND_ARGS, mapData->mapName.CStr());
+		if (mapData) g_strInterface->Assign(PASS_COMMAND_ARGS, mapData->mapName.c_str());
 	}
 	return true;
 }

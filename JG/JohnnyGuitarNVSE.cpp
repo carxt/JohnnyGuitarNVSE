@@ -42,6 +42,11 @@
 #include "functions/fn_dial.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
+
+#include "internal/Game/Bethesda/BSMemory.hpp"
+
+BS_ALLOCATORS
+
 HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;

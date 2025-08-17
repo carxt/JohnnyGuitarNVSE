@@ -154,7 +154,7 @@ bool Cmd_GetNoteImage_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* note = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && IS_TYPE(note, BGSNote) && note->type == BGSNote::kImage) {
-		g_strInterface->Assign(PASS_COMMAND_ARGS, note->picture->ddsPath.CStr());
+		g_strInterface->Assign(PASS_COMMAND_ARGS, note->picture->ddsPath.c_str());
 	}
 	return true;
 }
@@ -642,8 +642,8 @@ bool Cmd_GetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ExtraActivateRef* xActivateRef = (ExtraActivateRef*)thisObj->extraDataList.GetByType(kExtraData_ActivateRef);
 	if (xActivateRef) {
-		g_strInterface->Assign(PASS_COMMAND_ARGS, xActivateRef->activationPromptOverride.CStr());
-		if (IsConsoleMode()) Console_Print("GetRefActivationPromptOverride >> %s", xActivateRef->activationPromptOverride.CStr());
+		g_strInterface->Assign(PASS_COMMAND_ARGS, xActivateRef->activationPromptOverride.c_str());
+		if (IsConsoleMode()) Console_Print("GetRefActivationPromptOverride >> %s", xActivateRef->activationPromptOverride.c_str());
 	}
 	return true;
 }
@@ -978,13 +978,13 @@ bool Cmd_GetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID) && traitID >= 0 && traitID <= 2) {
 		switch (traitID) {
 			case 0:
-				resStr = shader->fillTexture.ddsPath.m_data;
+				resStr = shader->fillTexture.ddsPath.c_str();
 				break;
 			case 1:
-				resStr = shader->particleShaderTexture.ddsPath.m_data;
+				resStr = shader->particleShaderTexture.ddsPath.c_str();
 				break;
 			case 2:
-				resStr = shader->holesTexture.ddsPath.m_data;
+				resStr = shader->holesTexture.ddsPath.c_str();
 				break;
 		}
 		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
@@ -1229,19 +1229,19 @@ bool Cmd_GetBodyPartTraitString_Execute(COMMAND_ARGS) {
 			if (const BGSBodyPart* bodyPart = bpData->bodyParts[partID]) {
 				switch (traitID) {
 				case 1:
-					if (bodyPart->partNode.m_dataLen) resStr = bodyPart->partNode.m_data;
+					if (bodyPart->partNode.GetLength()) resStr = bodyPart->partNode.c_str();
 					break;
 				case 2:
-					if (bodyPart->VATSTarget.m_dataLen) resStr = bodyPart->VATSTarget.m_data;
+					if (bodyPart->VATSTarget.GetLength()) resStr = bodyPart->VATSTarget.c_str();
 					break;
 				case 3:
-					if (bodyPart->startNode.m_dataLen) resStr = bodyPart->startNode.m_data;
+					if (bodyPart->startNode.GetLength()) resStr = bodyPart->startNode.c_str();
 					break;
 				case 4:
-					if (bodyPart->partName.m_dataLen) resStr = bodyPart->partName.m_data;
+					if (bodyPart->partName.GetLength()) resStr = bodyPart->partName.c_str();
 					break;
 				case 5:
-					if (bodyPart->targetBone.m_dataLen) resStr = bodyPart->targetBone.m_data;
+					if (bodyPart->targetBone.GetLength()) resStr = bodyPart->targetBone.c_str();
 					break;
 				default:
 					break;
@@ -1260,12 +1260,12 @@ bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &isFemale)) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			path = bipedModel->messageIcon[isFemale].icon.ddsPath.CStr();
+			path = bipedModel->messageIcon[isFemale].icon.ddsPath.c_str();
 		}
 		else {
 			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
 			if (icon) {
-				path = icon->icon.ddsPath.CStr();
+				path = icon->icon.ddsPath.c_str();
 			}
 		}
 		if (IsConsoleMode()) Console_Print("GetMessageIconPath >> %s", path);
@@ -1582,7 +1582,7 @@ bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
 	const char* path = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &race, &modelID, &isFemale)) {
 		if (isFemale <= 1 && modelID <= 7) {
-			path = race->faceModels[isFemale][modelID].nifPath.CStr();
+			path = race->faceModels[isFemale][modelID].nifPath.c_str();
 			if (path) {
 				g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 				if (IsConsoleMode()) {
@@ -1599,7 +1599,7 @@ bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
 	const char* path = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &race, &modelID, &isFemale)) {
 		if (isFemale <= 1 && modelID <= 2) {
-			path = race->bodyModels[isFemale][modelID].nifPath.CStr();
+			path = race->bodyModels[isFemale][modelID].nifPath.c_str();
 			if (path) {
 				g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 				if (IsConsoleMode()) {
@@ -1671,7 +1671,7 @@ bool Cmd_GetMusicTypePath_Execute(COMMAND_ARGS) {
 	BGSMusicType* mtype;
 	const char* path = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype) && IS_TYPE(mtype, BGSMusicType)) {
-		path = mtype->soundFile.path.CStr();
+		path = mtype->soundFile.path.c_str();
 		g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 		if (IsConsoleMode()) {
 			Console_Print("GetMusicTypePath >> %s", path);

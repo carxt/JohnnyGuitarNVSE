@@ -222,7 +222,7 @@ public:
 	ScriptVarFinder(const char* varName) : m_varName(varName) {}
 
 	bool Accept(VariableInfo* varInfo) {
-		return StrEqualCI(varInfo->name.m_data, m_varName);
+		return StrEqualCI(varInfo->name.pString, m_varName);
 	}
 };
 
@@ -231,7 +231,7 @@ VariableInfo* Script::GetVariableByName(const char* varName) {
 	VariableInfo* varInfo;
 	do {
 		varInfo = varIter->data;
-		if (varInfo && StrEqualCI(varName, varInfo->name.m_data))
+		if (varInfo && StrEqualCI(varName, varInfo->name.pString))
 			return varInfo;
 	} while (varIter = varIter->next);
 	return NULL;

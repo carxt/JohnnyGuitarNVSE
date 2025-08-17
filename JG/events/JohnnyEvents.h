@@ -1,6 +1,8 @@
 #pragma once
 #include "EventFramework.h"
 #include "ParamInfos.h"
+#include <internal/Game/Bethesda/DialogueResponse.hpp>
+#include <internal/Game/Bethesda/MenuTopic.hpp>
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnDyingEventHandler, SetOnDyingEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnStartQuestEventHandler, SetOnStartQuestEventHandler, , 0, 4, kParams_Event_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnStopQuestEventHandler, SetOnStopQuestEventHandler, , 0, 4, kParams_Event_OneForm);
@@ -418,11 +420,11 @@ void __stdcall HandleOnNPCResponse(DialogueResponse* npcResponse)
 
     if (npcResponse)
     {
-        emotionID = npcResponse->emotionType;
-        emotionValue = npcResponse->emotionValue;
-        responseNumber = npcResponse->responseNumber;
-        responseString = npcResponse->responseText.CStr();
-        voicePath = npcResponse->voiceFilePath.CStr();
+        emotionID = npcResponse->uiEmotionType;
+        emotionValue = npcResponse->uiEmotionValue;
+        responseNumber = npcResponse->uiResponseNumber;
+        responseString = npcResponse->strResponseText.c_str();
+        voicePath = npcResponse->strVoiceFilePath.c_str();
     }
 
     for (auto const& callback : OnNPCResponseHandler->callbacks) {
@@ -434,23 +436,13 @@ void __stdcall HandleOnNPCResponse(DialogueResponse* npcResponse)
     return;
 }
 
-__declspec(naked) void OnNPCResponseEventAsm()
-{
-    static const UInt32 returnAddr = 0x763109;
-
-    __asm
-    {
-        mov        eax, [ebp - 0x10]
-        push       eax
-        call       HandleOnNPCResponse
-
-        mov        eax, [ebp - 0x10]
-        push       eax
-        push       ecx
-        jmp        returnAddr
-    }
+bool __fastcall HandleOnNPCResponseEvent(MenuTopic* apThis) {
+	if (apThis->pFirstResponse) {
+		HandleOnNPCResponse(apThis->pFirstResponse->GetItem());
+		apThis->pFirstResponse = apThis->pFirstResponse->GetNext();
+	}
+	return apThis->pFirstResponse && apThis->pFirstResponse->GetItem();
 }
-
 
 bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
 	UInt32 setOrRemove = 0;
@@ -857,7 +849,5 @@ void HandleEventHooks() {
 	WriteRelCall(0x4CB976, (UInt32)HandleTakeBackItem);
 	WriteRelCall(0x8F24A1, (UInt32)GetExtraDataListHook);
 
-	WriteRelJump(0x763104, (UInt32)OnNPCResponseEventAsm);
-
-
+	WriteRelCall(0x7630FD, (uint32_t)HandleOnNPCResponseEvent);
 }
