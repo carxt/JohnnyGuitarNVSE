@@ -25,8 +25,8 @@ public:
 	void addBytes(const char* data, int num);
 	unsigned char* getDigest();
 	// utility methods
-	static Uint32 SHA1::lrot(Uint32 x, int bits);
-	static void SHA1::storeBigEndianUint32(unsigned char* byte, Uint32 num);
+	static Uint32 lrot(Uint32 x, int bits);
+	static void storeBigEndianUint32(unsigned char* byte, Uint32 num);
 };
 
 #define SHA1_HEADER

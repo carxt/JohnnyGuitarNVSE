@@ -18,6 +18,14 @@ class NiNode;
 class Menu;
 
 enum {
+	kTileValue_Copy = 0x7D0,
+	kTileValue_Add = 0x7D1,
+	kTileValue_Sub = 0x7D2,
+	kTileValue_Mul = 0x7D3,
+	kTileValue_Div = 0x7D4,
+	kTileValue_Min = 0x7D5,
+	kTileValue_Max = 0x7D6,
+	kTileValue_Mod = 0x7D7,
 	kTileValue_x = 0xFA1,
 	kTileValue_y,
 	kTileValue_visible,

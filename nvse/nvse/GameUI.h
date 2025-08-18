@@ -314,7 +314,7 @@ public:
 
 	Item* GetSelected()
 	{
-		BSSimpleList<ListBoxItem<Item*>*>* iter = GetHead();
+		BSSimpleList<ListBoxItem<Item*>*>* iter = this->GetHead();
 		ListBoxItem<Item*>* item;
 		do
 		{
@@ -329,7 +329,7 @@ public:
 	{
 		if (index >= 0)
 		{
-			BSSimpleList<ListBoxItem<Item*>*>* iter = GetHead();
+			BSSimpleList<ListBoxItem<Item*>*>* iter = this->GetHead();
 			do
 			{
 				if (!index)
@@ -373,7 +373,7 @@ public:
 
 	Item* GetItemForTile(Tile* tile)
 	{
-		BSSimpleList<ListBoxItem<Item*>*>* iter = GetHead();
+		BSSimpleList<ListBoxItem<Item*>*>* iter = this->GetHead();
 		ListBoxItem<Item*>* item;
 		do
 		{

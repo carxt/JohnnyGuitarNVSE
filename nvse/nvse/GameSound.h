@@ -396,7 +396,7 @@ public:
 		return kHandle;
 	}
 
-	BSSoundHandle BSWin32Audio::GetSoundHandleByEditorName(const char* apEditorID, uint32_t aeAudioFlags) {
+	BSSoundHandle GetSoundHandleByEditorName(const char* apEditorID, uint32_t aeAudioFlags) {
 		BSSoundHandle kHandle;
 		ThisCall(0xAD7550, this, &kHandle, apEditorID, aeAudioFlags);
 		return kHandle;
