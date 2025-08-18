@@ -1325,7 +1325,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS)
 				xData = wpnInfo->extendData->GetFirstItem();
 			}
 		}
-		if (weapon && xData && (weapon->weaponSkill == kAVCode_Unarmed) || (weapon->weaponSkill == kAVCode_MeleeWeapons))
+		if (weapon && xData && (weapon->weaponSkill == kAVCode_Unarmed || weapon->weaponSkill == kAVCode_MeleeWeapons))
 		{
 			if (poison)
 				ThisCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
