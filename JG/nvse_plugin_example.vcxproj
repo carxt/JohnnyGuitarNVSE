@@ -79,7 +79,9 @@
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
-      <Command>copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"</Command>
+      <Command>if exist "$(FalloutNVPathD)\Data\NVSE\plugins\" (
+copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -107,7 +109,9 @@
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
-      <Command>copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"</Command>
+      <Command>if exist "$(FalloutNVPathD)\Data\NVSE\plugins\" (
+copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
