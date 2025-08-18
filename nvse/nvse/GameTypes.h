@@ -238,38 +238,34 @@ public:
 	}
 
 	template <class Op>
-	void Visit(Op& op, Node* prev = NULL) const {
+	void Visit(const Op& op, Node* prev = NULL) const {
 		Node* curr = prev ? prev->next : Head();
 		while (curr) {
-			if (!curr->data || !op.Accept(curr->data)) break;
+			if (!curr->data || !const_cast<Op&>(op).Accept(curr->data)) break;
 			curr = curr->next;
 		}
 	}
 
 	template <class Op>
-	Item* Find(Op& op) const {
+	Item* Find(const Op& op) const {
 		Node* curr = Head();
 		Item* pItem;
 		do {
 			pItem = curr->data;
-			if (pItem && op.Accept(pItem)) return pItem;
+			if (pItem && const_cast<Op&>(op).Accept(pItem)) return pItem;
 			curr = curr->next;
 		} while (curr);
 		return NULL;
 	}
 
 	template <class Op>
-	Iterator Find(Op& op, Iterator& prev) const {
+	Iterator Find(const Op& op, Iterator& prev) const {
 		Iterator curIt = prev.End() ? Begin() : ++prev;
 		while (!curIt.End()) {
-			if (*curIt && op.Accept(*curIt)) break;
+			if (*curIt && const_cast<Op&>(op).Accept(*curIt)) break;
 			++curIt;
 		}
 		return curIt;
-	}
-
-	const Node* FindString(char* str, Iterator prev) const {
-		return Find(StringFinder_CI(str), prev);
 	}
 
 	template <class Op>
@@ -392,11 +388,11 @@ public:
 	}
 
 	template <class Op>
-	SInt32 GetIndexOf(Op& op) {
+	SInt32 GetIndexOf(const Op& op) {
 		SInt32 idx = 0;
 		Node* curr = Head();
 		do {
-			if (curr->data && op.Accept(curr->data)) return idx;
+			if (curr->data && const_cast<Op&>(op).Accept(curr->data)) return idx;
 			idx++;
 			curr = curr->next;
 		} while (curr);
@@ -603,10 +599,6 @@ public:
 
 	Node* FindInfo(const Info* toMatch) {
 		return Find(AcceptEqual(toMatch));
-	}
-
-	const Node* FindString(char* str, const Node* prev = NULL) const {
-		return Find(StringFinder_CI(str), prev);
 	}
 
 	template <class Op>

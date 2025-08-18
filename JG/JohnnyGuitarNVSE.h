@@ -46,7 +46,7 @@ TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
 TESSound* locationDiscoverSound = 0;
 std::unordered_map<UInt32, char*> markerIconMap;
-std::unordered_map <UInt32, std::vector<char*>> factionRepIcons;
+std::unordered_map <UInt32, std::vector<const char*>> factionRepIcons;
 std::unordered_map<std::string, int> miscStatMap;
 std::unordered_set<std::string> availableMiscStats;
 UInt32 disableMuzzleLights = -1;
@@ -506,7 +506,7 @@ class hk_QuestObjectiveIsDisplayedCall {
 private:
 	static inline uintptr_t hPreviousAddressHook = 0;
 public:
-	static  uintptr_t __thiscall hookObjectiveDisplayed(BGSQuestObjective* pObjective) {
+	static  uintptr_t __fastcall hookObjectiveDisplayed(BGSQuestObjective* pObjective) {
 		DWORD result = 1;
 		if (hPreviousAddressHook)
 		{
@@ -1329,7 +1329,7 @@ __declspec (naked) void PatchPlayerPainHook(){
 }
 
 
-char* __fastcall GetReputationIconHook(TESReputation* rep) {
+const char* __fastcall GetReputationIconHook(TESReputation* rep) {
 	auto it = factionRepIcons.find(rep->refID);
 	if (it != factionRepIcons.end()) {
 		UInt8 tierID = 0;
@@ -1352,7 +1352,7 @@ char* __fastcall GetReputationIconHook(TESReputation* rep) {
 	return ThisCall<char*>(0x6167D0, rep);
 }
 
-char* __fastcall GetReputationMessageIconHook(UInt32 a1) {
+const char* __fastcall GetReputationMessageIconHook(UInt32 a1) {
 	UInt32 addr = (UInt32)_ReturnAddress();
 	auto* _ebp = GetParentBasePtr(_AddressOfReturnAddress(), false);
 	TESReputation* rep = nullptr;

@@ -376,7 +376,7 @@ struct NVSEArrayVarInterface {
 	template<typename... T>
 	void AppendElements(Array* arr, T const&... values)
 	{
-		(AppendElement(arr, NVSEArrayElement(values)),...);
+		(AppendElement(arr, NVSEArrayVarInterface::Element(values)),...);
 	}
 
 };

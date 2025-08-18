@@ -511,12 +511,12 @@ public:
 
 	bool GetTerrainHeight(float* posXY, float* result);
 
-	static TES* TES::GetSingleton()
+	static TES* GetSingleton()
 	{
 		return *(TES**)0x11DEA10;
 	}
 
-	void TES::CreateTextureImage(const char* apPath, NiSourceTexture*& aspTexture, bool abNoFileOK, bool abArchiveOnly)
+	void CreateTextureImage(const char* apPath, NiSourceTexture*& aspTexture, bool abNoFileOK, bool abArchiveOnly)
 	{
 		ThisCall(0x4568C0, this, apPath, &aspTexture, abNoFileOK, abArchiveOnly);
 	}

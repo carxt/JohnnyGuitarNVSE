@@ -89,7 +89,7 @@ void Setting::Set(const char* strVal, bool doFree) {
 	StrCopy(data.str, strVal);
 }
 
-__declspec(naked) bool GameSettingCollection::GetGameSetting(char* settingName, Setting** out) {
+__declspec(naked) bool GameSettingCollection::GetGameSetting(const char* settingName, Setting** out) {
 	__asm
 	{
 		add		ecx, 0x10C
