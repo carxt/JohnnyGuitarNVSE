@@ -23,7 +23,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnKeyboardControllerSelectionChangeEventHandl
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSleepWaitEventHandler, SetONSleepWEventHandler, , 0, 4, kParams_Event_OneInt);
 DEFINE_COMMAND_PLUGIN(SetOnTakeBackItemEventHandler, , 0, 5, kParams_Event_TwoForms);
 DEFINE_COMMAND_PLUGIN(SetOnNPCResponseEventHandler, , 0, 4, kParams_Event_OneInt);
-DEFINE_COMMAND_PLUGIN(SetOnGeneralSubtitleEventHandler, "Fires upon the display of a general subtitle via NPC", 0, 4, kParams_Event_OneInt);
+DEFINE_COMMAND_PLUGIN(SetOnGeneralSubtitleEventHandler, "Fires upon the display of a General Subtitle", 0, 4, kParams_Event_OneInt);
 
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
@@ -436,26 +436,30 @@ void __stdcall HandleOnNPCResponse(DialogueResponse* npcResponse)
     return;
 }
 
-void __stdcall HandleOnGeneralSubtitle(char* apText, TESObjectREFR* apSpeaker)
+//Currently Displayed Text, Source Position, Target Reference (Usually Player)
+void __stdcall HandleOnGeneralSubtitle(char* apText, NiPoint3 akPos, TESObjectREFR*  apTarget)
 {
 	const char* subtitleString = apText ? apText : "";
-	TESObjectREFR* speakerRef = apSpeaker ? apSpeaker : nullptr;
+	int x = akPos.x ? akPos.x : 0;
+	int y = akPos.y ? akPos.y : 0;
+	int z = akPos.z ? akPos.z : 0;
+	TESObjectREFR* player = apTarget ? apTarget : nullptr;
 
 	for (auto const& callback : OnGeneralSubtitleHandler->callbacks) {
 		auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
-		if (filter->IsInFilter(0, speakerRef) || filter->IsInFilter(0, 0)) {
-			CallUDF(callback.script, nullptr, OnGeneralSubtitleHandler->numMaxArgs, subtitleString, speakerRef);
+		if (filter->IsInFilter(0, player) || filter->IsInFilter(0, 0)) {
+			CallUDF(callback.script, nullptr, OnGeneralSubtitleHandler->numMaxArgs, subtitleString, player, x, y, z);
 		}
 	}
 	return;
 }
 
-char __fastcall HandleOnGeneralSubtitleEvent(HUDMainMenu* thisPtr, void* edx, char* apText, BSSoundHandle akSound, NiPoint3 kSpeakerPos, TESObjectREFR* apSpeaker, bool abInstant)
+//Fires when general subtitles are sent to the HUD.
+char __fastcall HandleOnGeneralSubtitleEvent(HUDMainMenu* thisPtr, void* edx, char* apText, BSSoundHandle akSound, NiPoint3 akPos, TESObjectREFR* apTarget, bool abInstant)
 {
-	if (apText && apSpeaker)
-		HandleOnGeneralSubtitle(apText, apSpeaker);
+	if (apText) HandleOnGeneralSubtitle(apText, akPos, apTarget);
 
-	return ThisCall(0x774FD0, thisPtr, apText, akSound, kSpeakerPos, apSpeaker, abInstant);
+	return ThisCall(0x774FD0, thisPtr, apText, akSound, akPos, apTarget, abInstant);
 }
 
 bool __fastcall HandleOnNPCResponseEvent(MenuTopic* apThis) {
@@ -820,7 +824,7 @@ void HandleEventHooks() {
 	OnSleepWaitEventHandler = JGCreateEvent("OnSleepWaitEventHandler", 1, 1, FilterInt::Create);
 	OnTakeBackItemHandler = JGCreateEvent("OnTakeBackItem", 3, 2);
 	OnNPCResponseHandler = JGCreateEvent("OnNPCResponse", 5, 1, FilterInt::Create);
-	OnGeneralSubtitleHandler = JGCreateEvent("OnGeneralSubtitle", 2, 1, FilterFormInt::Create);
+	OnGeneralSubtitleHandler = JGCreateEvent("OnGeneralSubtitle", 5, 1, FilterFormInt::Create);
 
 	CallUDF = g_scriptInterface->CallFunctionAlt;
 	WriteRelCall(0x55678A, (UInt32)HandleSeenDataUpdateEvent);
