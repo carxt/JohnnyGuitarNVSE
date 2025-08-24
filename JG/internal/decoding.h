@@ -999,11 +999,10 @@ typedef NiPointer<NavMesh> NavMeshPtr;
 class NavMeshArray : public BSSimpleArray<NavMeshPtr>
 {
 public:
-	inline NavMeshPtr& GetAt(UInt32 auiIndex)
+	inline NavMeshPtr GetAt(UInt32 auiIndex)
 	{
-		NavMeshPtr kPtr;
 		if (auiIndex >= uiSize)
-			return kPtr;
+			return nullptr;
 		else
 			return pBuffer[auiIndex];
 	}

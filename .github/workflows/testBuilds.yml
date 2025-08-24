@@ -1,0 +1,47 @@
+name: MSBuild
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  SOLUTION_FILE_PATH: JG/johnnyguitar.sln
+
+permissions: write-all
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build Release
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild /m /p:Configuration=Release ${{env.SOLUTION_FILE_PATH}} /p:PostBuildEventUseInBuild=false
+
+    - name: Build Debug
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild /m /p:Configuration=Debug ${{env.SOLUTION_FILE_PATH}} /p:PostBuildEventUseInBuild=false
+
+    - name: Generate Timestamp
+      run: |
+        timestamp=$(date +"%Y%m%d%H%M%S")
+        echo "artifact_timestamp=$timestamp" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Package Artifacts
+      run: |
+        mkdir -p artifacts
+        Compress-Archive -Path JG\Release\johnnyguitar.dll, JG\Release\johnnyguitar.pdb -DestinationPath artifacts\JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip
+        Compress-Archive -Path JG\Debug\johnnyguitar.dll, JG\Debug\johnnyguitar.pdb -DestinationPath artifacts\JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip
+      shell: pwsh
+
+    - name: Publish Zipped Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Zipped-Artifacts-${{ env.artifact_timestamp }}
+        path: artifacts/
