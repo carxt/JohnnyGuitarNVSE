@@ -4,8 +4,6 @@ on:
   push:
     branches-ignore:
       - dev
-  pull_request:
-      types: [opened, synchronize]
 
 env:
   SOLUTION_FILE_PATH: JG/johnnyguitar.sln
