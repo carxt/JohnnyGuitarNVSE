@@ -531,6 +531,7 @@ extern "C" {
 		REG_CMD(PlaySound3DFromPath);
 		REG_CMD(StopSoundFromPath);
 		REG_CMD(StopSound3DFromPath);
+		REG_CMD(SetOnGeneralSubtitleEventHandler);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
