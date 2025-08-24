@@ -1,9 +1,8 @@
 name: MSBuild
 
 on:
-  push:
-    branches-ignore:
-      - dev
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 env:
   SOLUTION_FILE_PATH: JG/johnnyguitar.sln
