@@ -439,16 +439,18 @@ void __stdcall HandleOnNPCResponse(DialogueResponse* npcResponse)
 //Currently Displayed Text, Source Position, Target Reference (Usually Player)
 void __stdcall HandleOnGeneralSubtitle(char* apText, NiPoint3 akPos, TESObjectREFR*  apTarget)
 {
+	NiPoint3 pos = akPos;
 	const char* subtitleString = apText ? apText : "";
-	int x = akPos.x ? akPos.x : 0;
-	int y = akPos.y ? akPos.y : 0;
-	int z = akPos.z ? akPos.z : 0;
+	float x = pos.x;
+	float y = pos.y;
+	float z = pos.z;
+
 	TESObjectREFR* player = apTarget ? apTarget : nullptr;
 
 	for (auto const& callback : OnGeneralSubtitleHandler->callbacks) {
 		auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
 		if (filter->IsInFilter(0, player) || filter->IsInFilter(0, 0)) {
-			CallUDF(callback.script, nullptr, OnGeneralSubtitleHandler->numMaxArgs, subtitleString, player, x, y, z);
+			CallUDF(callback.script, nullptr, OnGeneralSubtitleHandler->numMaxArgs, subtitleString, player, *(UInt32*)&x, *(UInt32*)&y, *(UInt32*)&z);
 		}
 	}
 	return;
