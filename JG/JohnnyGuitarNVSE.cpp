@@ -59,7 +59,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	{
 		disableMuzzleLights = 0; //reset the muzzle hook every time
 		bArrowKeysDisabled = false;
-		isShowLevelUp = true;
+		isShowLevelUp = true
 		ThisCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
 		ThisCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 
