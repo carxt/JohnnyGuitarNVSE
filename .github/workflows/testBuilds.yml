@@ -2,7 +2,7 @@ name: MSBuild
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
 
 env:
   SOLUTION_FILE_PATH: JG/johnnyguitar.sln
