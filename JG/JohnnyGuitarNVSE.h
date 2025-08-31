@@ -1194,26 +1194,25 @@ void __fastcall UIUpdateSoundHook(BSSoundHandle* sound, int dummy) {
 	if (g_questUpdateManager) {
 		ListNode<QuestUpdateManager>* iter = g_questUpdateManager->Head();
 		do {
-			BSSoundHandle handle;
 			switch (iter->data->updateType) {
 				case QuestAdded:
 					if (questNewSound != nullptr) 
-						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questNewSound->refID, 0x121);
+						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questNewSound->refID, 0x121);
 					break;
 				case QuestCompleted:
 					if (questCompeteSound != nullptr)
-						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questCompeteSound->refID, 0x121);
+						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questCompeteSound->refID, 0x121);
 					break;
 				case QuestFailed:
 					if (questFailSound != nullptr)
-						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questFailSound->refID, 0x121);
+						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questFailSound->refID, 0x121);
 					break;
 				case LocationDiscovered:
 					if (locationDiscoverSound != nullptr) 
-						handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(locationDiscoverSound->refID, 0x121);
+						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(locationDiscoverSound->refID, 0x121);
 					break;
 			}
-			handle.Play(false);
+			sound->Play(false);
 		} while (iter = iter->next);
 	}
 }
