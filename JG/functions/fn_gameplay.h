@@ -70,6 +70,7 @@ DEFINE_COMMAND_PLUGIN(GetCasinoChip, , 0, 1, kParams_OneCasino);
 DEFINE_COMMAND_PLUGIN(SetCasinoChip, , 0, 2, kParams_OneCasinoOneForm);
 DEFINE_COMMAND_PLUGIN(PlayHolotape, , 0, 2, kParams_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(StopHolotape, , 0, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(PathToRef, , 1, 2, kParams_OneRefOneFloat);
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -1468,4 +1469,21 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 		return true;
 	}
 	return false;
+}
+
+bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectREFR* pTarget = nullptr;
+	float fRadius = -1.f;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTarget, &fRadius) && pTarget && thisObj->IsActor()) {
+		Actor* pActor = static_cast<Actor*>(thisObj);
+		if (pTarget)
+			pActor->SetPathfindingGoal(pTarget, fRadius);
+		else
+			pActor->StopMoving();
+
+		*result = 1;
+	}
+
+	return true;
 }
