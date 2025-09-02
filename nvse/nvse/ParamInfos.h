@@ -921,3 +921,9 @@ static ParamInfo kParams_OneBoolOneIntOneFloat[] =
 	{	"Angle",		kParamType_Float, 0	},
 	{	"Ref To Track",	kParamType_ObjectRef, 1 },
 };
+
+static ParamInfo kParams_OneRefOneFloat[] =
+{
+	{	"Target Reference",		kParamType_ObjectRef, 0 },
+	{	"Target Radius",		kParamType_Float, 1	}
+};

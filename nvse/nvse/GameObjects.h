@@ -414,6 +414,7 @@ struct CombatActors;
 struct ItemEntryData;
 class BSAnimGroupSequence;
 class BackUpPackage;
+class PathingAvoidNodeArray;
 
 typedef ActiveEffect* (*ActiveEffectCreate)(MagicCaster* magCaster, MagicItem* magItem, EffectItem* effItem);
 
@@ -692,6 +693,10 @@ public:
 	void EquipItemAlt(ExtraContainerChanges::EntryData* itemEntry, bool noUnequip, bool noMessage);
 	void EquipContainer(TESContainer* container);
 	bool HasNoPath();
+
+	bool SetPathfindingGoal(const TESObjectREFR* apTargetRef, float afTargetRadius = -1.f, PathingAvoidNodeArray* apAvoidNodes = nullptr);
+
+	void StopMoving();
 };
 
 // 1C0

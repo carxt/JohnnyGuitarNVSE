@@ -148,4 +148,10 @@ bool TESObjectREFR::GetDisabled(bool checkQueue) const
 	return (fn_GetDisabled(this) && !fn_InEnableRefs(this) ) || fn_InPendingDisableRefs(this);
 }
 
+bool Actor::SetPathfindingGoal(const TESObjectREFR* apTargetRef, float afTargetRadius, PathingAvoidNodeArray* apAvoidNodes) {
+	return ThisCall<bool>(0x8B36F0, this, apTargetRef, afTargetRadius, apAvoidNodes);
+}
 
+void Actor::StopMoving() {
+	ThisCall(0x8B3AB0, this);
+}
