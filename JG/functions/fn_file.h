@@ -288,7 +288,7 @@ bool Cmd_StopSoundFromPath_Execute(COMMAND_ARGS) {
 		CSLock lock(g_audioManager->kMessageProcessingCS);
 		BSGameSound *gameSound;
 		for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
-			if (!(gameSound = sndIter.Get()) || strcmp(gameSound->filePath, path) != 0) continue;
+			if (!(gameSound = sndIter.Get()) || _stricmp(gameSound->filePath, path) != 0) continue;
 
 			BSSoundHandle handle;
 			handle.uiSoundID = gameSound->mapKey;
@@ -318,7 +318,7 @@ bool Cmd_StopSound3DFromPath_Execute(COMMAND_ARGS) {
 		BSGameSound *gameSound;
 		BSFadeNode* fadeNode;
 		for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
-			if (!(gameSound = sndIter.Get()) || strcmp(gameSound->filePath, path) != 0) continue;
+			if (!(gameSound = sndIter.Get()) || _stricmp(gameSound->filePath, path) != 0) continue;
 			fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
 			if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == ref) {
 				BSSoundHandle handle;
