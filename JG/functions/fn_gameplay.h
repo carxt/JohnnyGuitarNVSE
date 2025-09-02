@@ -832,9 +832,9 @@ TESWorldSpace* GetWorldspace(TESObjectREFR* ref) {
 
 bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	*result = 0;
-	std::string locationName;
+	char locationName[256] = {};
 	if (thisObj->parentCell && (thisObj->parentCell->cellFlags & 1) != 0) {
-		locationName = thisObj->parentCell->fullName.name.c_str();
+		strcpy_s(locationName, thisObj->parentCell->fullName.name.c_str());
 	}
 	else {
 		TESWorldSpace* wspc = GetWorldspace(thisObj);
@@ -842,11 +842,10 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 			BSString str;
 			NiPoint3* pos = thisObj->GetPos();
 			wspc->GetMapNameForLocation(str, pos->x, pos->y, pos->z);
-			locationName = str.c_str();
+			strcpy_s(locationName, str.c_str());
 		}
 	}
-	if (!locationName.empty())
-		g_strInterface->Assign(PASS_COMMAND_ARGS, locationName.data());
+	g_strInterface->Assign(PASS_COMMAND_ARGS, locationName);
 	return true;
 }
 
