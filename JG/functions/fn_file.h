@@ -15,6 +15,7 @@ DEFINE_COMMAND_PLUGIN(PlaySoundFromPath, , 0, 5, kParams_OneString_OneOptionalFl
 DEFINE_COMMAND_PLUGIN(PlaySound3DFromPath, , 1, 4, kParams_OneString_OneOptionalFloat_TwoOptionalInts);
 DEFINE_COMMAND_PLUGIN(StopSoundFromPath, , 0, 2, kParams_OneString_OneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(StopSound3DFromPath, , 1, 2, kParams_OneString_OneOptionalFloat);
+DEFINE_COMMAND_PLUGIN(IsSoundPlayingFromPath, , 0, 2, kParams_OneString_OneOptionalObjectRef);
 #include <filesystem>
 #include "GameSound.h"
 
@@ -332,6 +333,34 @@ bool Cmd_StopSound3DFromPath_Execute(COMMAND_ARGS) {
 				}
 			}
 			*result = 1;
+		}
+	}
+	return true;
+}
+
+bool Cmd_IsSoundPlayingFromPath_Execute(COMMAND_ARGS) {
+	char path[MAX_PATH];
+	TESObjectREFR* ref = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &ref) && path[0]) {
+		CSLock lock(g_audioManager->kMessageProcessingCS);
+		BSGameSound* gameSound;
+		if (ref == nullptr) {
+			for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+				if (!(gameSound = sndIter.Get()) || _stricmp(gameSound->filePath, path) != 0) continue;
+				*result = 1;
+				return true;
+			}
+		}
+		else {
+			BSFadeNode* fadeNode;
+			for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+				if (!(gameSound = sndIter.Get()) || _stricmp(gameSound->filePath, path) != 0) continue;
+				fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
+				if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == ref) {
+					*result = 1;
+					return true;
+				}
+			}
 		}
 	}
 	return true;

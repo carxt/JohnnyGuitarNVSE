@@ -531,6 +531,7 @@ extern "C" {
 		REG_CMD(PlaySound3DFromPath);
 		REG_CMD(StopSoundFromPath);
 		REG_CMD(StopSound3DFromPath);
+		REG_CMD(IsSoundPlayingFromPath);
 		REG_CMD(SetOnGeneralSubtitleEventHandler);
 		REG_CMD(PathToRef);
 
