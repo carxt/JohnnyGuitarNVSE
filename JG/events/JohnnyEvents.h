@@ -345,13 +345,6 @@ void __fastcall HandleTakeBackItem(void* contChanges, void* edx, PlayerCharacter
 	ThisCall<TESObjectREFR*>(0x4C37D0, contChanges, player, item, keepOwner, quantity, xList, a9, target, a10, a11, a12, a13, cEntry);
 }
 
-
-inline uintptr_t GetRelJumpAddr(uintptr_t address)
-{
-	return *(uintptr_t*)(address + 1) + address + 5;
-}
-
-
 template <uintptr_t a_addr>
 class hk_RadioTuneOnEvent {
 private:

@@ -106,6 +106,9 @@
     <ClCompile Include="internal\Game\Bethesda\Conversation.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JIPFixes.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -267,6 +270,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\Conversation.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JIPFixes.hpp">
+      <Filter>internal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
