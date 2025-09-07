@@ -24,6 +24,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSleepWaitEventHandler, SetONSleepWEventHand
 DEFINE_COMMAND_PLUGIN(SetOnTakeBackItemEventHandler, , 0, 5, kParams_Event_TwoForms);
 DEFINE_COMMAND_PLUGIN(SetOnNPCResponseEventHandler, , 0, 4, kParams_Event_OneInt);
 DEFINE_COMMAND_PLUGIN(SetOnGeneralSubtitleEventHandler, "Fires upon the display of a General Subtitle", 0, 4, kParams_Event_OneInt);
+DEFINE_COMMAND_PLUGIN(SetOnReputationChangeEventHandler, "Fires upon the change of a reputation", 0, 4, kParams_Event_OneInt);
 
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
@@ -48,6 +49,7 @@ EventInformation* OnSleepWaitEventHandler;
 EventInformation* OnTakeBackItemHandler;
 EventInformation* OnNPCResponseHandler;
 EventInformation* OnGeneralSubtitleHandler;
+EventInformation* OnReputationChangeHandler;
 
 UInt32 handlePreRenderEvent() {
 	for (auto const& callback : OnRenderGamePreUpdateHandler->callbacks) {
@@ -456,6 +458,17 @@ void __stdcall HandleOnGeneralSubtitle(char* apText, NiPoint3 akPos, TESObjectRE
 	return;
 }
 
+void __fastcall HandleOnReputationChange(TESReputation* apRep) {
+	for (auto const& callback : OnReputationChangeHandler->callbacks) {
+		float fPos = apRep->fPositiveReputation;
+		float fNeg = apRep->fNegativeReputation;
+		auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
+		if (filter->IsInFilter(0, apRep) || filter->IsInFilter(0, 0)) {
+			CallUDF(callback.script, nullptr, OnReputationChangeHandler->numMaxArgs, apRep, *(UInt32*)&fPos, *(UInt32*)&fNeg);
+		}
+	}
+}
+
 //Fires when general subtitles are sent to the HUD.
 char __fastcall HandleOnGeneralSubtitleEvent(HUDMainMenu* thisPtr, void* edx, char* apText, BSSoundHandle akSound, NiPoint3 akPos, TESObjectREFR* apTarget, bool abInstant)
 {
@@ -470,6 +483,14 @@ bool __fastcall HandleOnNPCResponseEvent(MenuTopic* apThis) {
 		apThis->pFirstResponse = apThis->pFirstResponse->GetNext();
 	}
 	return apThis->pFirstResponse && apThis->pFirstResponse->GetItem();
+}
+
+void __fastcall HandleOnReputationChangeEvent(TESReputation* apThis, void* edx, uint32_t auiChangeFlag)
+{
+	if (auiChangeFlag & 2)
+		HandleOnReputationChange(apThis);
+
+	ThisCall(0x484B60, apThis, auiChangeFlag);
 }
 
 bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
@@ -806,6 +827,21 @@ bool Cmd_SetOnGeneralSubtitleEventHandler_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+bool Cmd_SetOnReputationChangeEventHandler_Execute(COMMAND_ARGS) {
+	UInt32 setOrRemove = 0;
+	Script* script = nullptr;
+	TESForm* filter[1] = { nullptr };
+	UInt32 flags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+		if (OnReputationChangeHandler) {
+			if (setOrRemove)
+				OnReputationChangeHandler->RegisterEvent(script, (void**)&filter);
+			else OnReputationChangeHandler->RemoveEvent(script, (void**)&filter);
+		}
+	}
+	return true;
+}
+
 void HandleEventHooks() {
 	OnDyingHandler = JGCreateEvent("OnDying", 1, 1);
 	OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1);
@@ -827,6 +863,7 @@ void HandleEventHooks() {
 	OnTakeBackItemHandler = JGCreateEvent("OnTakeBackItem", 3, 2);
 	OnNPCResponseHandler = JGCreateEvent("OnNPCResponse", 5, 1, FilterInt::Create);
 	OnGeneralSubtitleHandler = JGCreateEvent("OnGeneralSubtitle", 5, 1, FilterFormInt::Create);
+	OnReputationChangeHandler = JGCreateEvent("OnReputationChangeHandler", 3, 1, FilterFormInt::Create);
 
 	CallUDF = g_scriptInterface->CallFunctionAlt;
 	WriteRelCall(0x55678A, (UInt32)HandleSeenDataUpdateEvent);
@@ -897,4 +934,6 @@ void HandleEventHooks() {
 
 	//HUDMainMenu::AppendSubtitleData() called by Interface::ShowText()
 	WriteRelCall(0x7052B8, (uint32_t)HandleOnGeneralSubtitleEvent);
+
+	SafeWrite32(0x104BA6C, (uint32_t)HandleOnReputationChangeEvent);
 }

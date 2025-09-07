@@ -2006,11 +2006,15 @@ public:
 
 static_assert(sizeof(TESClass) == 0x60);
 
-class TESReputation : public TESForm {
+class TESReputation : public TESForm, public TESFullName, public TESIcon, public BGSMessageIcon {
 public:
-	TESReputation();
-	~TESReputation();
+	float		fMaxReputation;
+	float		fPositiveReputation;
+	float		fNegativeReputation;
+	uint32_t	uiReputationChangedWasPositive;
 };
+
+static_assert(sizeof(TESReputation) == 0x50);
 
 // 4C
 class TESFaction : public TESForm {

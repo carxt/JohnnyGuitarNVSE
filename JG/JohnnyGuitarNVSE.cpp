@@ -534,6 +534,7 @@ extern "C" {
 		REG_CMD(IsSoundPlayingFromPath);
 		REG_CMD(SetOnGeneralSubtitleEventHandler);
 		REG_CMD(PathToRef);
+		REG_CMD(SetOnReputationChangeEventHandler);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
