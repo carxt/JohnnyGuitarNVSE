@@ -42,6 +42,7 @@
 #include "functions/fn_dial.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
+#include "internal/JIPFixes.hpp"
 
 #include "internal/Game/Bethesda/BSMemory.hpp"
 
@@ -54,8 +55,14 @@ NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap
 #define JG_VERSION 517
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
-	case NVSEMessagingInterface::kMessage_NewGame:
-	case NVSEMessagingInterface::kMessage_PreLoadGame:
+		case NVSEMessagingInterface::kMessage_PostPostLoad:
+		{
+			if (bFixJIP)
+				JIPFixes::InitHooks();
+			break;
+		}
+		case NVSEMessagingInterface::kMessage_NewGame:
+		case NVSEMessagingInterface::kMessage_PreLoadGame:
 	{
 		disableMuzzleLights = 0; //reset the muzzle hook every time
 		bArrowKeysDisabled = false;
@@ -89,16 +96,16 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		hkOwner = nullptr;
 		break;
 	}
-	case NVSEMessagingInterface::kMessage_PostLoadGame:
-		break;
-
-	case NVSEMessagingInterface::kMessage_MainGameLoop:
+		case NVSEMessagingInterface::kMessage_PostLoadGame:
+			break;
+		case NVSEMessagingInterface::kMessage_MainGameLoop:
+		{
 			if (g_interfaceManager->currentMode == 1) {
-				float power = getHUDShakePower();
-				if (power > 0.0f) {
-					CdeclCall<void>(0x94C3A0, power);
-				}
+			float power = getHUDShakePower();
+			if (power > 0.0f) {
+				CdeclCall<void>(0x94C3A0, power);
 			}
+		}
 			ComputeDiscoveredRadioDirectory();
 			for (const auto& EventInfo : EventInfos) {
 				EventInfo->AddQueuedEvents();
@@ -120,6 +127,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			}
 
 			break;
+		}
 		case NVSEMessagingInterface::kMessage_DeferredInit:
 		{
 			g_thePlayer = PlayerCharacter::GetSingleton();
@@ -133,6 +141,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_VATSCameraData = (VATSCameraData*)0x11F2250;
 			g_mapAllForms = *(NiTPointerMap<TESForm>**)0x11C54C0;
 			g_initialTickCount = GetTickCount();
+			if (bFixJIP)
+				JIPFixes::InitDeferredHooks();
 			DumpModules();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			break;
@@ -206,6 +216,7 @@ extern "C" {
 		removeMainMenuMusic = GetPrivateProfileInt("MAIN", "bRemoveMainMenuMusic", 0, filename);
 		fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 1, filename);
 		patchPainedPlayer = GetPrivateProfileInt("MAIN", "bRemovePlayerPainExpression", 0, filename);
+		bFixJIP = GetPrivateProfileInt("MAIN", "bJIPFixes", 1, filename);
 		iDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
 		//bDisableDeathResponses = GetPrivateProfileInt("DeathResponses", "bDisableDeathResponses", 0, filename);

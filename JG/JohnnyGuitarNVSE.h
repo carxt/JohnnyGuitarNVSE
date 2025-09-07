@@ -37,6 +37,7 @@ bool removeMainMenuMusic = 0;
 bool fixDeathSounds = 1;
 bool patchPainedPlayer = 0;
 bool bDisableDeathResponses = 0;
+bool bFixJIP = true;
 unsigned int iFPSCapLoadScreen = 0;
 float iDeathSoundMAXTimer = 10;
 bool bDisableDLLCompatibilityRoutines = 0;
@@ -82,7 +83,6 @@ extern "C" {
 	bool __cdecl JGSetViewmodelClipDistance(float value);
 	float __cdecl JGGetViewmodelClipDistance();
 }
-extern uintptr_t GetRelJumpAddr(uintptr_t address);
 
 namespace hk_GMSTJG {
 	static uintptr_t func_AddGameSetting_Float = 0x040E0B0;
@@ -964,18 +964,6 @@ NiAVObject* NiNode::GetBlock(const char* blockName) {
 		if (found) break;
 	}
 	return found;
-}
-
-static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size) {
-	DWORD d = 0;
-	VirtualProtect((LPVOID)Address, Size, PAGE_EXECUTE_READWRITE, &d);
-
-	for (SIZE_T i = 0; i < Size; i++)
-		*(volatile BYTE*)(Address + i) = 0x90; //0x90 == opcode for NOP
-
-	VirtualProtect((LPVOID)Address, Size, d, &d);
-
-	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
 }
 
 bool __fastcall CanSaveNowHook(void* ThisObj, void* edx, int isAutoSave) {
