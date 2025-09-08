@@ -24,7 +24,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSleepWaitEventHandler, SetONSleepWEventHand
 DEFINE_COMMAND_PLUGIN(SetOnTakeBackItemEventHandler, , 0, 5, kParams_Event_TwoForms);
 DEFINE_COMMAND_PLUGIN(SetOnNPCResponseEventHandler, , 0, 4, kParams_Event_OneInt);
 DEFINE_COMMAND_PLUGIN(SetOnGeneralSubtitleEventHandler, "Fires upon the display of a General Subtitle", 0, 4, kParams_Event_OneInt);
-DEFINE_COMMAND_PLUGIN(SetOnReputationChangeEventHandler, "Fires upon the change of a reputation", 0, 4, kParams_Event_OneInt);
+DEFINE_COMMAND_PLUGIN(SetOnReputationChangeEventHandler, "Fires upon the change of a reputation", 0, 4, kParams_Event_OneForm);
 
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
@@ -456,7 +456,7 @@ void __fastcall HandleOnReputationChange(TESReputation* apRep) {
 		float fPos = apRep->fPositiveReputation;
 		float fNeg = apRep->fNegativeReputation;
 		auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
-		if (filter->IsInFilter(0, apRep) || filter->IsInFilter(0, 0)) {
+		if (filter->IsBaseInFilter(0, apRep)) {
 			CallUDF(callback.script, nullptr, OnReputationChangeHandler->numMaxArgs, apRep, *(UInt32*)&fPos, *(UInt32*)&fNeg);
 		}
 	}
@@ -856,7 +856,7 @@ void HandleEventHooks() {
 	OnTakeBackItemHandler = JGCreateEvent("OnTakeBackItem", 3, 2);
 	OnNPCResponseHandler = JGCreateEvent("OnNPCResponse", 5, 1, FilterInt::Create);
 	OnGeneralSubtitleHandler = JGCreateEvent("OnGeneralSubtitle", 5, 1, FilterFormInt::Create);
-	OnReputationChangeHandler = JGCreateEvent("OnReputationChangeHandler", 3, 1, FilterFormInt::Create);
+	OnReputationChangeHandler = JGCreateEvent("OnReputationChangeHandler", 3, 1);
 
 	CallUDF = g_scriptInterface->CallFunctionAlt;
 	WriteRelCall(0x55678A, (UInt32)HandleSeenDataUpdateEvent);
