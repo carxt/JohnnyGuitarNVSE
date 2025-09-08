@@ -91,7 +91,7 @@ namespace JIPFixes {
 	void InitHooks() {
 		hJIP = GetModuleHandle("jip_nvse.dll");
 		if (!hJIP) {
-			ShowErrorMessage("Failed to find JIP LN!");
+			PrintLog("Failed to find JIP LN!");
 			return;
 		}
 
