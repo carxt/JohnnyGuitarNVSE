@@ -73,6 +73,13 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace NotifyDurationFix {
+		void InitHooks() {
+			SafeWrite16(GetJIPAddress(0x100107A0), 0x450F);
+			SafeWrite32(GetJIPAddress(0x1001079C), 0x5B4917);
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -109,6 +116,7 @@ namespace JIPFixes {
 
 		ConsoleCmdFix::InitHooks();
 		PaletteCorruptionFix::InitHooks();
+		NotifyDurationFix::InitHooks();
 	}
 
 	void InitDeferredHooks() {
