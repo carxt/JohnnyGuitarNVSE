@@ -303,8 +303,8 @@ namespace JIPFixes {
 				SafeWrite32(uiAddress + 2, uiJIPMessageDurationAddr);
 
 			SafeWriteBuf(0x70535C, "\x51\xD9\x45\x18\xD9\x1C\x24", 7);
-    }
-  }
+		}
+	}
 
 	namespace CloseActiveMenuFix {
 		void InitHooks() {
