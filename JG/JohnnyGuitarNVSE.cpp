@@ -548,6 +548,7 @@ extern "C" {
 		REG_CMD(SetOnGeneralSubtitleEventHandler);
 		REG_CMD(PathToRef);
 		REG_CMD(SetOnReputationChangeEventHandler);
+		REG_CMD(IsNiSequenceActive);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);

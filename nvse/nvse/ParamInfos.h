@@ -934,3 +934,9 @@ static ParamInfo kParams_OneRefOneFloat[] =
 	{	"Target Reference",		kParamType_ObjectRef, 0 },
 	{	"Target Radius",		kParamType_Float, 1	}
 };
+
+static ParamInfo kParams_IsNiSequenceActive[2] =
+{
+	{ "Sequence Name",	kParamType_String,	0 },
+	{ "Block Name", kParamType_String, 1 },
+};
