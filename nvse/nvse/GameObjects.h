@@ -170,6 +170,8 @@ public:
 	bool IsInInterior() { return ThisCall<bool>(0x575D10, this); }
 	static TESObjectREFR* __stdcall Create(bool bTemp = false);
 
+	float GetHealth() { return ThisCall<float>(0x568AD0, this); }
+
 	MEMBER_FN_PREFIX(TESObjectREFR);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(Activate, bool, 0x00573170, TESObjectREFR*, UInt32, UInt32, UInt32);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute as the last call (190 bytes)
