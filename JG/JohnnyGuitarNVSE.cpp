@@ -48,6 +48,7 @@
 
 BS_ALLOCATORS
 
+bool bIsGECK = false;
 HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
@@ -57,7 +58,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_PostPostLoad:
 		{
-			if (bFixJIP)
+			if (!bIsGECK && bFixJIP)
 				JIPFixes::InitHooks();
 			break;
 		}
@@ -141,7 +142,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_VATSCameraData = (VATSCameraData*)0x11F2250;
 			g_mapAllForms = *(NiTPointerMap<TESForm>**)0x11C54C0;
 			g_initialTickCount = GetTickCount();
-			if (bFixJIP)
+			if (!bIsGECK && bFixJIP)
 				JIPFixes::InitDeferredHooks();
 			DumpModules();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
@@ -199,6 +200,7 @@ extern "C" {
 	}
 
 	bool NVSEPlugin_Load(const NVSEInterface* nvse) {
+		bIsGECK = nvse->isEditor != 0;
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
