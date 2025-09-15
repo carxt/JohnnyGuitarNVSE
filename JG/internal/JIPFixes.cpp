@@ -100,7 +100,13 @@ namespace JIPFixes {
 		}
 	}
 
-	void ShowErrorMessage(const char* fmt, ...) { 
+	namespace CloseActiveMenuFix {
+		void InitHooks() {
+			SafeWrite8(GetJIPAddress(0x1003B87B + 1), 0x7A);
+		}
+	}
+
+	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
 		const char* pSuffix = "\n\nJIP LN Fixes will be disabled.\nTo disable this message, set bJIPFixes to 0 in JohnnyGuitar.ini or use the latest supported JIP LN 57.30";
@@ -158,6 +164,7 @@ namespace JIPFixes {
 
 		ConsoleCmdFix::InitHooks();
 		PaletteCorruptionFix::InitHooks();
+		CloseActiveMenuFix::InitHooks();
 	}
 
 	void InitDeferredHooks() {
