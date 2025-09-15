@@ -386,24 +386,13 @@ public:
 };
 
 
-template <uintptr_t a_addr>
-class hk_SleepWaitEventHandler {
-private:
-	static inline uintptr_t hookCall = a_addr;
-public:
-	static  void __fastcall hk_SleepWaitHandleClick(SleepWaitMenu* pSWMenu, void* edx, UInt64 mode) {
-		ThisCall(hookCall, pSWMenu, mode);
-		if (mode == 4) {
-			HandleOnSleepWait(pSWMenu, mode);
-		}
+void __fastcall handleSleepWaitClick(SleepWaitMenu* menu, void* edx, int mode, void* tile)
+{
+	ThisCall(0x7C0220, menu, mode, tile);
+	if (mode == 4) {
+		HandleOnSleepWait(menu, mode);
 	}
-
-	hk_SleepWaitEventHandler() {
-		uintptr_t hk_hookPoint = hookCall;
-		hookCall = *(uintptr_t*)(hookCall);
-		SafeWrite32(hk_hookPoint, (uintptr_t)hk_SleepWaitHandleClick);
-	}
-};
+}
 
 void __stdcall HandleOnNPCResponse(DialogueResponse* npcResponse)
 {
@@ -910,7 +899,7 @@ void HandleEventHooks() {
 	hk_RadioTuneOnEvent<0x579C64>();
 	hk_RadioTuneOnEvent<0x57A23A>();
 
-	hk_SleepWaitEventHandler<0x10763B8>();
+	SafeWrite32(0x10763B8, (UInt32)handleSleepWaitClick);
 
 	//testing
 	OnRenderGamePreUpdateHandler = JGCreateEvent("OnRenderGamePreUpdateHandler", 0, 0, nullptr);
