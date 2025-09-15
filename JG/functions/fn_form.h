@@ -1816,13 +1816,23 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	if (!weapon) {
 		if (!thisObj) return true;
 		InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
-		if (!invRef) return true;
-		weapon = (TESObjectWEAP*)invRef->data.type;
-		if NOT_ID(weapon, TESObjectWEAP) return true;
-		if (invRef->data.xData) {
-			condition = invRef->data.entry->GetItemHealthPerc() / 100.0F;
-			ListNode<ExtraDataList> tempExtend(invRef->data.xData);
-			extendPtr = &tempExtend;
+		if (!invRef) {
+			TESForm* base = thisObj->baseForm;
+			if (IS_ID(base, TESObjectWEAP)) 
+				weapon = (TESObjectWEAP*)base;
+			else 
+				return true;
+
+			condition = thisObj->GetHealth();
+		}
+		else {
+			weapon = (TESObjectWEAP*)invRef->data.type;
+			if NOT_ID(weapon, TESObjectWEAP) return true;
+			if (invRef->data.xData) {
+				condition = invRef->data.entry->GetItemHealthPerc() / 100.0F;
+				ListNode<ExtraDataList> tempExtend(invRef->data.xData);
+				extendPtr = &tempExtend;
+			}
 		}
 	}
 	else if NOT_ID(weapon, TESObjectWEAP) return true;
