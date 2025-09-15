@@ -283,9 +283,9 @@ public:
 template <typename T>
 struct NiTSet
 {
-	T		* data;		// 00
-	UInt16	capacity;	// 04
-	UInt16	length;		// 06
+	T		*	data;		// 00
+	uint32_t	capacity;	// 04
+	uint32_t	length;		// 08
 };
 
 // 10

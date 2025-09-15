@@ -68,6 +68,30 @@ public:
 	~NiFixedString() {
 		CdeclCall(0x4381D0, this);
 	};
+
+	friend bool operator==(const NiFixedString& arString1, const NiFixedString& arString2) {
+		return arString1.handle == arString2.handle;
+	};
+
+	friend bool operator==(const NiFixedString& arString, const char* apcString) {
+		if (arString.handle == apcString)
+			return true;
+
+		if (!arString.handle || !apcString)
+			return false;
+
+		return !strcmp(arString.handle, apcString);
+	};
+
+	friend bool operator==(const char* apcString, const NiFixedString& arString) {
+		if (arString.handle == apcString)
+			return true;
+
+		if (!arString.handle || !apcString)
+			return false;
+
+		return !strcmp(arString.handle, apcString);
+	};
 };
 
 class NiMemObject {
@@ -427,9 +451,7 @@ public:
 	virtual void	Unk_2D(void);
 
 	NiTArray<NiControllerSequence*>					sequences;		// 34
-	void* ptr44;			// 44
-	UInt32											unk48;			// 48
-	UInt32											unk4C;			// 4C
+	NiTSet<NiControllerSequence*>					activeSequences; // 44
 	NiTMapBase<const char*, NiControllerSequence*>	seqStrMap;		// 50
 	UInt32											unk60;			// 60
 	NiTArray<void*>* arr64;			// 64
@@ -438,6 +460,21 @@ public:
 	UInt32											unk70;			// 70
 	UInt32											unk74;			// 74
 	NiDefaultAVObjectPalette* defObjPlt;		// 78
+
+	NiControllerSequence* GetSequenceByName(const NiFixedString& arName) const {
+		return ThisCall<NiControllerSequence*>(0xA5C4B0, this, &arName);
+	}
+
+	bool IsSequenceActive(const NiFixedString& arName) const {
+		if (activeSequences.length) {
+			for (uint32_t i = 0; i < activeSequences.length; i++) {
+				if (activeSequences.data[i]->sequenceName == arName) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 };
 static_assert(sizeof(NiControllerManager) == 0x7C);
 
@@ -770,6 +807,10 @@ public:
 
 	void SetLocalScale(float afScale) {
 		m_local.scale = afScale;
+	}
+
+	NiTimeController* GetController(const NiRTTI* apRTTI) const {
+		return ThisCall<NiTimeController*>(0xA5C570, this, apRTTI);
 	}
 };
 

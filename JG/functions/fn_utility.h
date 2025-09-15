@@ -38,7 +38,7 @@ DEFINE_COMMAND_PLUGIN(GetAvailableRadios, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(NullArgs, , 0, 1, kParams_OneOptionalInt);
 DEFINE_CMD_NO_ARGS(NullNoArgs);
 DEFINE_CMD_ALT_COND_PLUGIN(GameGetSecondsPassed, GGetSecPass, , 0, NULL);
-
+DEFINE_COMMAND_PLUGIN(IsNiSequenceActive, , 1, ARRAYSIZE(kParams_IsNiSequenceActive), kParams_IsNiSequenceActive);
 
 
 
@@ -782,6 +782,39 @@ bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
 
 		if (pRef) {
 			uiReferenceToTrack = pRef->refID;
+		}
+	}
+	return true;
+}
+
+bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
+	char sequenceName[MAX_PATH] = { 0 };
+	char blockName[MAX_PATH] = { 0 };
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sequenceName, &blockName)) {
+		NiNode* root = thisObj->GetNiNode();
+		if (root) {
+			NiAVObject* target = root;
+			if (blockName[0])
+				target = CdeclCall<NiAVObject*>(0x4AAE30, root, blockName); // BSUtilities::GetObjectByName
+
+			if (target) {
+				const NiRTTI* NiControllerManager_ms_RTTI = reinterpret_cast<NiRTTI*>(0x11F36AC);
+				NiControllerManager* controller = static_cast<NiControllerManager*>(target->GetController(NiControllerManager_ms_RTTI));
+				if (controller) {
+					*result = controller->IsSequenceActive(sequenceName);
+					if (IsConsoleMode())
+						Console_Print("IsNiSequenceActive >> %s: %s", sequenceName, *result ? "true" : "false");
+				}
+				else if (IsConsoleMode()) {
+					Console_Print("Controller not found");
+				}
+			}
+			else if (IsConsoleMode()) {
+				Console_Print("Block not found: %s", blockName);
+			}
+		}
+		else if (IsConsoleMode()) {
+			Console_Print("Root node not found");
 		}
 	}
 	return true;
