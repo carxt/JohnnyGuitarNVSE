@@ -56,7 +56,11 @@ _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
 #define JG_VERSION 519
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
-	MEMORY_CONTEXT(MC_DEFAULT);
+	MEM_CONTEXT eOrgContext;
+	if (!bIsGECK) {
+		eOrgContext = GetMemContext();
+		SetMemContext(MC_DEFAULT);
+	}
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_PostPostLoad:
 		{
@@ -158,6 +162,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		default:
 			break;
 	}
+	if (!bIsGECK) {
+		SetMemContext(eOrgContext);
+	}
 }
 
 extern "C" {
@@ -202,8 +209,12 @@ extern "C" {
 	}
 
 	bool NVSEPlugin_Load(const NVSEInterface* nvse) {
-		MEMORY_CONTEXT(MC_DEFAULT);
 		bIsGECK = nvse->isEditor != 0;
+		MEM_CONTEXT eOrgContext;
+		if (!bIsGECK) {
+			eOrgContext = GetMemContext();
+			SetMemContext(MC_DEFAULT);
+		}
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
@@ -568,6 +579,9 @@ extern "C" {
 			HandleEventHooks();
 			ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
 			SerializationInit(nvse);
+		}
+		if (!bIsGECK) {
+			SetMemContext(eOrgContext);
 		}
 		return true;
 	}

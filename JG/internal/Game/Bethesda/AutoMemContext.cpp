@@ -12,10 +12,21 @@ AutoMemContext::~AutoMemContext() {
 
 // GAME - 0x404F00
 void AutoMemContext::Enter(MEM_CONTEXT aeMemContext, bool abOverridable, const char* apFile, uint32_t auiLine) {
-	ThisCall(0x404F00, this, aeMemContext, abOverridable, apFile, auiLine);
+	eOldMemContext = GetMemContext();
+	SetMemContext(aeMemContext);
 }
 
 // GAME - 0x404F70
 void AutoMemContext::Leave() const {
-	ThisCall(0x404F70, this);
+	SetMemContext(eOldMemContext);
+}
+
+// GAME - 0x404F50
+MEM_CONTEXT GetMemContext() {
+	return CdeclCall<MEM_CONTEXT>(0x404F50);
+}
+
+// GAME - 0x404F30
+void SetMemContext(MEM_CONTEXT aeMemContext) {
+	return CdeclCall(0x404F30, aeMemContext);
 }
