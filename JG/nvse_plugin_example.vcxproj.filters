@@ -109,6 +109,9 @@
     <ClCompile Include="internal\JIPFixes.cpp">
       <Filter>internal</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -273,6 +276,12 @@
     </ClInclude>
     <ClInclude Include="internal\JIPFixes.hpp">
       <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MemoryContexts.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

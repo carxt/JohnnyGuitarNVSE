@@ -45,6 +45,7 @@
 #include "internal/JIPFixes.hpp"
 
 #include "internal/Game/Bethesda/BSMemory.hpp"
+#include "internal/Game/Bethesda/AutoMemContext.hpp"
 
 BS_ALLOCATORS
 
@@ -55,6 +56,7 @@ _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
 #define JG_VERSION 519
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
+	MEMORY_CONTEXT(MC_DEFAULT);
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_PostPostLoad:
 		{
@@ -200,6 +202,7 @@ extern "C" {
 	}
 
 	bool NVSEPlugin_Load(const NVSEInterface* nvse) {
+		MEMORY_CONTEXT(MC_DEFAULT);
 		bIsGECK = nvse->isEditor != 0;
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
 		char filename[MAX_PATH];
