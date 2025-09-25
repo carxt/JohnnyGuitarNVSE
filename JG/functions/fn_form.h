@@ -39,7 +39,7 @@ DEFINE_COMMAND_PLUGIN(GetPrimitiveType, , 1, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetBaseScale, GetBasedScale, , 1, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetQuestFailed, GetQF, "", false, kParams_OneQuest);
 DEFINE_COMMAND_PLUGIN(GetWeaponVATSTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetWeaponVATSTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat); 
+DEFINE_COMMAND_PLUGIN(SetWeaponVATSTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetQuestDelay, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetNoteRead, , 0, 3, kParams_OneForm_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetMessageIconPath, , 0, 3, kParams_OneString_OneForm_OneOptionalInt);
@@ -98,9 +98,10 @@ DEFINE_COMMAND_PLUGIN(GetNoteTopic, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetNoteTopic, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(GetNoteImage, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetNoteImage, , 0, 2, kParams_OneForm_OneString);
-DEFINE_COMMAND_PLUGIN(GetNoteQuestList, , 0, 1, kParams_OneForm);	
+DEFINE_COMMAND_PLUGIN(GetNoteQuestList, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(AddNoteQuest, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(RemoveNoteQuest, , 0, 2, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(GetHotkeySlot, , 1, 0, NULL);
 
 bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -385,10 +386,10 @@ bool Cmd_GetFormRecipesAlt_Execute(COMMAND_ARGS) {
 						break;
 					}
 				} while (it2 = it2->next);
-			} 
+			}
 		} while (it = it->next);
 
-		
+
 	}
 	g_arrInterface->AssignCommandResult(rcpArr, result);
 	return true;
@@ -826,7 +827,7 @@ bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &id, &txst) && IS_TYPE(weapon, TESObjectWEAP) && IS_TYPE(txst, BGSTextureSet)) {
 		TESModelTextureSwap* model = &weapon->textureSwap;
 		if (!model) return true;
-		 
+
 		TESModelTextureSwap::Texture* texture = nullptr;
 		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
 
@@ -893,7 +894,7 @@ bool Cmd_SetArmorAltTexture_Execute(COMMAND_ARGS) {
 
 			}
 		}
-		
+
 	}
 	return true;
 }
@@ -1130,7 +1131,7 @@ bool Cmd_FaceGenGetNthProperty_Execute(COMMAND_ARGS) {
 	UInt32 PropertyIndex = 0;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &npc, &PropertyListIndex, &PropertyIndex) && npc && IS_TYPE(npc, TESNPC) && PropertyListIndex < 3) {
-		
+
 		uintptr_t propertyListMinorIdx = PropertyListIndex % 2;
 		uintptr_t propertyListMajorIdx = (PropertyIndex - propertyListMinorIdx) / 2;
 		if (auto FaceGenPTR = TESNPC_GetFaceGenData(npc)) {
@@ -1818,9 +1819,9 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 		InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
 		if (!invRef) {
 			TESForm* base = thisObj->baseForm;
-			if (IS_ID(base, TESObjectWEAP)) 
+			if (IS_ID(base, TESObjectWEAP))
 				weapon = (TESObjectWEAP*)base;
-			else 
+			else
 				return true;
 
 			condition = thisObj->GetHealth();
@@ -2033,5 +2034,28 @@ bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 		if (IsConsoleMode())
 			Console_Print("SetInteriorLightingTraitNumeric %d >> %.2f", traitID, value);
 	}
+	return true;
+}
+
+bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+
+	if (!thisObj) return true;
+	InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
+	if (!invRef || (invRef->containerRef != g_thePlayer)) return true;
+	UInt8 type = invRef->data.type->typeID;
+	if ((type != kFormType_TESObjectARMO) && (type != kFormType_TESObjectWEAP) && (type != kFormType_AlchemyItem)) return true;
+
+	ExtraDataList* xData = invRef->data.xData;
+	if (xData && xData->HasType(kExtraData_Hotkey))
+	{
+		ExtraHotkey* xHotkey = (ExtraHotkey*)xData->GetByType(kExtraData_Hotkey);
+		if (xHotkey)
+		{
+			*result = xHotkey->index + 1;
+		}
+	}
+
 	return true;
 }

@@ -552,6 +552,7 @@ extern "C" {
 		REG_CMD(PathToRef);
 		REG_CMD(SetOnReputationChangeEventHandler);
 		REG_CMD(IsNiSequenceActive);
+		REG_CMD(GetHotkeySlot);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
