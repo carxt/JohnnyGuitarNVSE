@@ -133,6 +133,7 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClCompile Include="..\nvse\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\nvse\Utilities.cpp" />
     <ClCompile Include="events\LambdaVariableContext.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSMemory.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Conversation.cpp" />
     <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp" />
@@ -181,11 +182,13 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClInclude Include="functions\fn_ui.h" />
     <ClInclude Include="functions\fn_utility.h" />
     <ClInclude Include="internal\decoding.h" />
+    <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSMemory.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSStringT.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Conversation.hpp" />
     <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\DialogueResponse.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\MemoryContexts.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\JIPFixes.hpp" />
