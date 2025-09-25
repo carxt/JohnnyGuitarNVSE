@@ -18,3 +18,6 @@ private:
 ASSERT_SIZE(AutoMemContext, 0x4);
 
 #define MEMORY_CONTEXT(aeMemContext) AutoMemContext context(static_cast<MEM_CONTEXT>(aeMemContext), true, __FILE__, __LINE__);
+
+MEM_CONTEXT GetMemContext();
+void SetMemContext(MEM_CONTEXT aeMemContext);
