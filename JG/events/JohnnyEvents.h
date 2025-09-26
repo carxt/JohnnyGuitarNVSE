@@ -173,15 +173,15 @@ UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg
 	return ThisCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
 }
 
-void __stdcall HandleAVChangeEvent(ActorValueOwner *avOwner, int avCode, float previousVal, float modVal, void* onChangeCallback) {
+void __stdcall HandleAVChangeEvent(ActorValueOwner* avOwner, int avCode, float previousVal, float modVal, void* onChangeCallback) {
 	if (onChangeCallback == nullptr) {
 		previousVal = avOwner->GetActorValue(avCode) - modVal;
 	}
 	float newVal = previousVal + modVal;
 	float floorPrev(floor(previousVal)), floorNew(floor(newVal));
 	if (floorPrev != floorNew) {
-		 //Console_Print("owner 0x%X av %d prev %.2f mod %.2f new %.2f callback 0x%X", avOwner, avCode, previousVal, modVal, newVal, onChangeCallback);
-		if (avOwner == &g_thePlayer->avOwner) {
+		 //Console_Print("actor 0x%X av %d prev %.2f mod %.2f new %.2f callback 0x%X", avOwner->Fn_09()->refID, avCode, previousVal, modVal, newVal, onChangeCallback);
+		if (avOwner->Fn_09()->IsPlayerRef()) {
 			for (auto const& callback : OnAVChangeHandler->callbacks) {
 				if (reinterpret_cast<FilterFormInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
 					CallUDF(callback.script, nullptr, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&floorPrev, *(UInt32*)&floorNew);
@@ -189,8 +189,11 @@ void __stdcall HandleAVChangeEvent(ActorValueOwner *avOwner, int avCode, float p
 			}
 		} else {
 			for (auto const& callback : OnNPCAVChangeHandler->callbacks) {
-				if (reinterpret_cast<FilterFormInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
-					CallUDF(callback.script, nullptr, OnNPCAVChangeHandler->numMaxArgs, avOwner, avCode, *(UInt32*)&floorPrev, *(UInt32*)&floorNew);
+				FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
+				if ((filter->IsInFilter(0, avOwner->Fn_09()->refID) || filter->IsInFilter(0, avOwner->Fn_09()->GetBaseForm()->refID)) &&
+					filter->IsInFilter(1, avCode)) {
+
+					CallUDF(callback.script, nullptr, OnNPCAVChangeHandler->numMaxArgs, avOwner->Fn_09(), avCode, *(UInt32*)&floorPrev, *(UInt32*)&floorNew);
 				}
 			}
 		}
