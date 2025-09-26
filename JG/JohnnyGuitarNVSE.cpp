@@ -564,6 +564,7 @@ extern "C" {
 		REG_CMD(SetOnReputationChangeEventHandler);
 		REG_CMD(IsNiSequenceActive);
 		REG_CMD(GetHotkeySlot);
+		REG_CMD(SetOnNPCActorValueChangeEventHandler);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);

@@ -25,6 +25,7 @@ DEFINE_COMMAND_PLUGIN(SetOnTakeBackItemEventHandler, , 0, 5, kParams_Event_TwoFo
 DEFINE_COMMAND_PLUGIN(SetOnNPCResponseEventHandler, , 0, 4, kParams_Event_OneInt);
 DEFINE_COMMAND_PLUGIN(SetOnGeneralSubtitleEventHandler, "Fires upon the display of a General Subtitle", 0, 4, kParams_Event_OneInt);
 DEFINE_COMMAND_PLUGIN(SetOnReputationChangeEventHandler, "Fires upon the change of a reputation", 0, 4, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetOnNPCActorValueChangeEventHandler, SetJohnnyOnNPCActorValueEventHandler, , 0, 5, kParams_Event_OneForm_OneInt)
 
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;
@@ -50,6 +51,7 @@ EventInformation* OnTakeBackItemHandler;
 EventInformation* OnNPCResponseHandler;
 EventInformation* OnGeneralSubtitleHandler;
 EventInformation* OnReputationChangeHandler;
+EventInformation* OnNPCAVChangeHandler;
 
 UInt32 handlePreRenderEvent() {
 	for (auto const& callback : OnRenderGamePreUpdateHandler->callbacks) {
@@ -171,17 +173,25 @@ UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg
 	return ThisCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
 }
 
-void __stdcall HandleAVChangeEvent(int avCode, float previousVal, float modVal, void* onChangeCallback) {
+void __stdcall HandleAVChangeEvent(ActorValueOwner *avOwner, int avCode, float previousVal, float modVal, void* onChangeCallback) {
 	if (onChangeCallback == nullptr) {
-		previousVal = g_thePlayer->avOwner.GetActorValue(avCode) - modVal;
+		previousVal = avOwner->GetActorValue(avCode) - modVal;
 	}
 	float newVal = previousVal + modVal;
 	float floorPrev(floor(previousVal)), floorNew(floor(newVal));
 	if (floorPrev != floorNew) {
-		// Console_Print("av %d prev %.2f mod %.2f new %.2f callback 0x%X", avCode, previousVal, modVal, newVal, onChangeCallback);
-		for (auto const& callback : OnAVChangeHandler->callbacks) {
-			if (reinterpret_cast<FilterFormInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
-				CallUDF(callback.script, nullptr, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&floorPrev, *(UInt32*)&floorNew);
+		 //Console_Print("owner 0x%X av %d prev %.2f mod %.2f new %.2f callback 0x%X", avOwner, avCode, previousVal, modVal, newVal, onChangeCallback);
+		if (avOwner == &g_thePlayer->avOwner) {
+			for (auto const& callback : OnAVChangeHandler->callbacks) {
+				if (reinterpret_cast<FilterFormInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
+					CallUDF(callback.script, nullptr, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&floorPrev, *(UInt32*)&floorNew);
+				}
+			}
+		} else {
+			for (auto const& callback : OnNPCAVChangeHandler->callbacks) {
+				if (reinterpret_cast<FilterFormInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
+					CallUDF(callback.script, nullptr, OnNPCAVChangeHandler->numMaxArgs, avOwner, avCode, *(UInt32*)&floorPrev, *(UInt32*)&floorNew);
+				}
 			}
 		}
 	}
@@ -256,11 +266,12 @@ __declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32
 		mov		ecx, dword ptr[ecx + 0x54]
 		push	ecx
 		mov     ecx, [ebp + 8]
-		cmp     dword ptr[ecx - 0x98], 0x14
-		jnz     skipHandler
+		//cmp     dword ptr[ecx - 0x98], 0x14 // Check for PlayerREF
+		//jnz     skipHandler
 		push    dword ptr[ebp + 0x14]
 		push    dword ptr[ebp + 0x10]
 		push    eax
+		push    dword ptr[ebp + 0x08]
 		call    HandleAVChangeEvent
 		skipHandler :
 			mov     ecx, [ebp - 4]
@@ -527,6 +538,21 @@ bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 			if (setOrRemove)
 				OnAVChangeHandler->RegisterEvent(script, (void**)&filter);
 			else OnAVChangeHandler->RemoveEvent(script, (void**)&filter);
+		}
+	}
+	return true;
+}
+
+bool Cmd_SetOnNPCActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
+	UInt32 setOrRemove = 0;
+	Script* script = nullptr;
+	FilterFormInt::Data filter = { nullptr, -1 };
+	UInt32 flags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
+		if (OnNPCAVChangeHandler) {
+			if (setOrRemove)
+				OnNPCAVChangeHandler->RegisterEvent(script, (void**)&filter);
+			else OnNPCAVChangeHandler->RemoveEvent(script, (void**)&filter);
 		}
 	}
 	return true;
@@ -846,6 +872,7 @@ void HandleEventHooks() {
 	OnNPCResponseHandler = JGCreateEvent("OnNPCResponse", 5, 1, FilterInt::Create);
 	OnGeneralSubtitleHandler = JGCreateEvent("OnGeneralSubtitle", 5, 1, FilterFormInt::Create);
 	OnReputationChangeHandler = JGCreateEvent("OnReputationChangeHandler", 3, 1);
+	OnNPCAVChangeHandler = JGCreateEvent("OnNPCActorValueChangeHandler", 3, 2, FilterFormInt::Create);
 
 	CallUDF = g_scriptInterface->CallFunctionAlt;
 	WriteRelCall(0x55678A, (UInt32)HandleSeenDataUpdateEvent);
