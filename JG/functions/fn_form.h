@@ -103,6 +103,14 @@ DEFINE_COMMAND_PLUGIN(AddNoteQuest, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(RemoveNoteQuest, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(GetHotkeySlot, , 1, 0, NULL);
 
+DEFINE_COMMAND_PLUGIN(GetSaidOnce, , 0, 1, kParams_OneForm);
+
+DEFINE_COMMAND_PLUGIN(SetSaidOnce, , 0, 3, kParams_OneForm_TwoInts);
+
+DEFINE_COMMAND_PLUGIN(GetTopicInfo, , 0, 3, kParams_TwoForms_OneInt);
+
+
+
 bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* note = nullptr;
@@ -2061,7 +2069,7 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 }
 
 bool Cmd_GetSaidOnce_Execute(COMMAND_ARGS) {
-	*result = 0;
+	*result = -1;
 	TESTopicInfo* pInfo = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo)) {
 		if (!IS_TYPE(pInfo, TESTopicInfo))
