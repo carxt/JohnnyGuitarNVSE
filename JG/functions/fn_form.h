@@ -2059,3 +2059,85 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 
 	return true;
 }
+
+bool Cmd_GetSaidOnce_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESTopicInfo* pInfo = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo)) {
+		if (!IS_TYPE(pInfo, TESTopicInfo))
+			return true;
+
+		*result = pInfo->saidOnce;
+		return true;
+	}
+}
+
+bool Cmd_SetSaidOnce_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESTopicInfo* pInfo = nullptr;
+	bool bSaidOnce = false;
+	bool bSave = true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo, &bSaidOnce, &bSave)) {
+		if (!IS_TYPE(pInfo, TESTopicInfo))
+			return true;
+
+		if (bSave) {
+			if (bSaidOnce)
+				pInfo->SetSaidOnce();
+			else
+				pInfo->ResetSaidOnceFlags();
+		}
+		else {
+			pInfo->saidOnce = bSaidOnce;
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESQuest* pQuest = nullptr;
+	TESTopic* pTargetTopic = nullptr;
+	int32_t iIndex = -1;
+
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest, &pTargetTopic, &iIndex)) {
+		if (!IS_TYPE(pQuest, TESQuest))
+			return true;
+
+		if (pTargetTopic && !IS_TYPE(pTargetTopic, TESTopic))
+			return true;
+
+		NVSEArrayVar* pStoredInfos = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+
+		if (pTargetTopic) {
+			auto pTopicInfos = pTargetTopic->GetTopicInfosForQuest(pQuest);
+			if (pTopicInfos) {
+				if (iIndex >= 0 && iIndex < pTopicInfos->Length()) {
+					g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfos->Get(iIndex)));
+				}
+				else {
+					for (uint32_t i = 0; i < pTopicInfos->Length(); i++) {
+						g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfos->Get(i)));
+					}
+				}
+			}
+		}
+		else {
+			auto pTopic = &DataHandler::Get()->topicList;
+			for (auto kIter = pTopic->Begin(); !kIter.End(); kIter.Next()) {
+				if (*kIter) {
+					TESTopic* pTopic = kIter.Get();
+					auto pTopicInfos = pTopic->GetTopicInfosForQuest(pQuest);
+					if (pTopicInfos) {
+						for (uint32_t i = 0; i < pTopicInfos->Length(); i++) {
+							g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfos->Get(i)));
+						}
+					}
+				}
+			}
+		}
+
+		g_arrInterface->AssignCommandResult(pStoredInfos, result);
+	}
+	return true;
+}
