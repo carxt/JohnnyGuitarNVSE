@@ -93,6 +93,7 @@ namespace hk_GMSTJG {
 		Setting fCombatRangedWeaponRangeBaseMult;
 		Setting iOverrideDialogueEmotionValues;
 		Setting iFixAudioMarkerLookupAlgo;
+		Setting sNewline;
 
 	};
 	void ExtraGMSTInit()
@@ -102,7 +103,7 @@ namespace hk_GMSTJG {
 		ThisCall(func_AddGameSetting_Float, &fCombatRangedWeaponRangeBaseMult, "fCombatRangedWeaponRangeBaseMult", 1.0f);
 		ThisCall(func_AddGameSetting_IntOrStaticStr, &iOverrideDialogueEmotionValues, "iOverrideDialogueEmotionValues", 0);
 		ThisCall(func_AddGameSetting_IntOrStaticStr, &iFixAudioMarkerLookupAlgo, "iFixAudioMarkerLookupAlgo", 1);
-
+		ThisCall(func_AddGameSetting_IntOrStaticStr, &sNewline, "sNewline", "\n");
 
 	}
 }
@@ -678,7 +679,7 @@ namespace hk_DialogueTopicResponseManageHook {
 	}
 
 	static  DialogueResponse* __fastcall DialogueResponse_Init(DialogueResponse* responseCol,
-		void* edx, TESQuest* quest, TESTopic* topic, TESTopicInfo* topicInfo, Actor* speaker, TESTopicInfoResponse* topicInfoResponse) 
+		void* edx, TESQuest* quest, TESTopic* topic, TESTopicInfo* topicInfo, Actor* speaker, TESTopicInfoResponse* topicInfoResponse)
 	{
 		if (auto diaCont = dialogResponseOverrideMap.find(topicInfo->refID); diaCont != dialogResponseOverrideMap.end())
 		{
@@ -714,7 +715,7 @@ namespace hk_DialogueTopicResponseManageHook {
 
 				}
 			}
-		
+
 		}
 
 
@@ -788,7 +789,7 @@ namespace SkyCloudHook {
 	bool __fastcall hk_han_SkipCloudCheck(TESWeather* a_wea) {
 		if (completedFirstUpdate < 2 || !a_wea ) {
 			completedFirstUpdate = 1;
-			return false; 
+			return false;
 		}
 		return true;
 
@@ -825,9 +826,9 @@ namespace SkyCloudHook {
 
 	DWORD __fastcall hk_han_NewGameCloudUpdate(BGSSaveLoadGame* a_obj) {
 		return ThisCall<bool>(0x42CE10, a_obj) || (*(bool*)0x11D8907);
-	
+
 	}
-	
+
 
 
 }
@@ -1184,7 +1185,7 @@ void __fastcall UIUpdateSoundHook(BSSoundHandle* sound, int dummy) {
 		do {
 			switch (iter->data->updateType) {
 				case QuestAdded:
-					if (questNewSound != nullptr) 
+					if (questNewSound != nullptr)
 						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questNewSound->refID, 0x121);
 					break;
 				case QuestCompleted:
@@ -1196,7 +1197,7 @@ void __fastcall UIUpdateSoundHook(BSSoundHandle* sound, int dummy) {
 						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questFailSound->refID, 0x121);
 					break;
 				case LocationDiscovered:
-					if (locationDiscoverSound != nullptr) 
+					if (locationDiscoverSound != nullptr)
 						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(locationDiscoverSound->refID, 0x121);
 					break;
 			}
@@ -1389,7 +1390,7 @@ void ComputeDiscoveredRadioDirectory() {
 			}
 		}
 	}
-	
+
 }
 
 char* __cdecl fixAudioMonoLookupOverflow(char* Dst, const char* suffix){
@@ -1623,7 +1624,7 @@ void ClearPlayerFurniture()
 	if (auto playerProcess = g_thePlayer->baseProcess)
 	{
 		playerProcess->SetFurnitureRef(g_thePlayer, 0, NULL, 0x7F);
-		
+
 	}
 }
 void DumpModules() {
@@ -1733,7 +1734,7 @@ __declspec(naked) void GetINISettingTypeHook() {
 bool __cdecl IsCurrentFurnitureRefHook(TESObjectREFR* apRef, void* apComparedRef, int, double& arResult) {
 	arResult = 0;
 	Actor* pActor = nullptr;
-	
+
 	if (apRef && apRef->IsActor()) {
 		pActor = static_cast<Actor*>(apRef);
 	}
