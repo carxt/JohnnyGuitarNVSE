@@ -107,8 +107,7 @@ DEFINE_COMMAND_PLUGIN(GetSaidOnce, , 0, 1, kParams_OneForm);
 
 DEFINE_COMMAND_PLUGIN(SetSaidOnce, , 0, 3, kParams_OneForm_TwoInts);
 
-DEFINE_COMMAND_PLUGIN(GetTopicInfo, , 0, 3, kParams_TwoForms_OneInt);
-
+DEFINE_COMMAND_PLUGIN(GetTopicInfo, , 0, 2, kParams_GetTopicInfo);
 
 
 bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
@@ -2083,8 +2082,8 @@ bool Cmd_GetSaidOnce_Execute(COMMAND_ARGS) {
 bool Cmd_SetSaidOnce_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESTopicInfo* pInfo = nullptr;
-	bool bSaidOnce = false;
-	bool bSave = true;
+	UInt32 bSaidOnce = false;
+	UInt32 bSave = true;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo, &bSaidOnce, &bSave)) {
 		if (!IS_TYPE(pInfo, TESTopicInfo))
 			return true;
@@ -2104,48 +2103,76 @@ bool Cmd_SetSaidOnce_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESQuest* pQuest = nullptr;
 	TESTopic* pTargetTopic = nullptr;
 	int32_t iIndex = -1;
+	TESQuest* pQuest = nullptr;
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest, &pTargetTopic, &iIndex)) {
-		if (!IS_TYPE(pQuest, TESQuest))
+	NVSEArrayVar* pStoredInfos = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetTopic, &pQuest)) {
+
+		if (pQuest && !IS_TYPE(pQuest, TESQuest)) //exclude xMarker 
+		{
+
 			return true;
+		}
+
 
 		if (pTargetTopic && !IS_TYPE(pTargetTopic, TESTopic))
-			return true;
+		{
+			if (!pQuest) 
+			{
+				return true;
+			}
+			else 
+			{
+				pTargetTopic = nullptr;
+			}
 
-		NVSEArrayVar* pStoredInfos = g_arrInterface->CreateArray(NULL, 0, scriptObj);
-
+		}
 		if (pTargetTopic) {
-			auto pTopicInfos = pTargetTopic->GetTopicInfosForQuest(pQuest);
-			if (pTopicInfos) {
-				if (iIndex >= 0 && iIndex < pTopicInfos->Length()) {
-					g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfos->Get(iIndex)));
-				}
-				else {
+			if (pQuest) 
+			{
+				auto pTopicInfos = pTargetTopic->GetTopicInfosForQuest(pQuest);
+				if (pTopicInfos) {
 					for (uint32_t i = 0; i < pTopicInfos->Length(); i++) {
-						g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfos->Get(i)));
+						auto pTopicInfo = pTopicInfos->Get(i);
+						g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
 					}
 				}
 			}
+			else 
+			{
+				auto pTargetTopicInfoList = &pTargetTopic->infos;
+				for (auto kIter = pTargetTopicInfoList->Begin(); !kIter.End(); kIter.Next()) {
+					if (*kIter) {
+						auto pTopicInfos = &(*kIter)->infoArray;
+						for (uint32_t i = 0; i < pTopicInfos->Length(); i++) {
+							auto pTopicInfo = pTopicInfos->Get(i);
+							g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
+						}
+					}
+				}
+			}
+
 		}
 		else {
-			auto pTopic = &DataHandler::Get()->topicList;
-			for (auto kIter = pTopic->Begin(); !kIter.End(); kIter.Next()) {
+			auto pTopicHandler = &DataHandler::Get()->topicList;
+			for (auto kIter = pTopicHandler->Begin(); !kIter.End(); kIter.Next()) {
 				if (*kIter) {
 					TESTopic* pTopic = kIter.Get();
 					auto pTopicInfos = pTopic->GetTopicInfosForQuest(pQuest);
 					if (pTopicInfos) {
 						for (uint32_t i = 0; i < pTopicInfos->Length(); i++) {
-							g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfos->Get(i)));
+							auto pTopicInfo = pTopicInfos->Get(i);
+							g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
 						}
 					}
 				}
 			}
 		}
 
-		g_arrInterface->AssignCommandResult(pStoredInfos, result);
 	}
+	g_arrInterface->AssignCommandResult(pStoredInfos, result);
+
 	return true;
 }
