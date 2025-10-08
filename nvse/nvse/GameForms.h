@@ -1840,7 +1840,7 @@ public:
 	}
 };
 
-typedef NiTArray<TESTopicInfo*> TopicInfoArray;
+typedef NiTLargeArray<TESTopicInfo*> TopicInfoArray;
 typedef void* INFO_LINK_ELEMENT;
 
 // 48
