@@ -71,6 +71,8 @@ DEFINE_COMMAND_PLUGIN(SetCasinoChip, , 0, 2, kParams_OneCasinoOneForm);
 DEFINE_COMMAND_PLUGIN(PlayHolotape, , 0, 2, kParams_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(StopHolotape, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(PathToRef, , 1, 2, kParams_OneRefOneFloat);
+DEFINE_CMD_NO_ARGS(GetGrenadeHoldTime);
+
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -1484,5 +1486,10 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 		*result = 1;
 	}
 
+	return true;
+}
+
+bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
+	*result = g_thePlayer->timeGrenadeHeld;
 	return true;
 }
