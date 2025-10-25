@@ -19,6 +19,7 @@ DEFINE_COMMAND_PLUGIN(DisableMenuArrowKeys, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(EnableMenuArrowKeys, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(HighlightBodyPartAlt, , 1, 1, kParams_OneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(DeactivateAllHighlightsAlt, , 1, 1, kParams_OneOptionalFloat);
+DEFINE_COMMAND_PLUGIN(RemoveHighlightedRef, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetNearestCompassHostileDirection, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetNearestCompassHostile, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetDisablePlayerControlsHUDVisibilityFlags, SetDPCHUDFlags, , 0, 1, kParams_OneOptionalInt);
@@ -76,6 +77,20 @@ void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, floa
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
+
+struct HighlightedRef {
+	TESObjectREFR* refr;
+	NiNode* node;
+};
+
+struct VATSHighlightData {
+	UInt32 highlightState;
+	HighlightedRef highlightMain;
+	UInt32 numHighlighted;
+	SInt32 flashingRefIndex;
+	HighlightedRef highlightedRefs[32];
+};
+
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
 std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
@@ -1160,6 +1175,45 @@ bool Cmd_HighlightBodyPartAlt_Execute(COMMAND_ARGS) {
 
 bool Cmd_DeactivateAllHighlightsAlt_Execute(COMMAND_ARGS) {
 	return Cmd_DeactivateAllHighlights(PASS_COMMAND_ARGS);
+}
+
+bool Cmd_RemoveHighlightedRef_Execute(COMMAND_ARGS) {
+	*result = 0;
+
+	if (!thisObj) return true;
+
+	InterfaceManager* interfaceMgr = InterfaceManager::GetSingleton();
+	if (!interfaceMgr) return true;
+
+	VATSHighlightData* vatsData = (VATSHighlightData*)((UInt32)interfaceMgr + 0x1DC);
+
+	for (UInt32 index = vatsData->numHighlighted; index;) {
+		if (vatsData->highlightedRefs[--index].refr != thisObj)
+			continue;
+
+		if (--vatsData->numHighlighted) {
+			if (index == vatsData->numHighlighted) {
+				vatsData->highlightedRefs[index].refr = nullptr;
+				vatsData->highlightedRefs[index].node = nullptr;
+			} else {
+				vatsData->highlightedRefs[index] = vatsData->highlightedRefs[vatsData->numHighlighted];
+			}
+			if (vatsData->highlightMain.refr == thisObj) {
+				vatsData->highlightMain = vatsData->highlightedRefs[0];
+			}
+		} else {
+			vatsData->highlightedRefs[0].refr = nullptr;
+			vatsData->highlightedRefs[0].node = nullptr;
+			vatsData->highlightMain.refr = nullptr;
+			vatsData->highlightMain.node = nullptr;
+			vatsData->highlightState = 0;
+		}
+
+		*result = 1;
+		break;
+	}
+
+	return true;
 }
 
 bool Cmd_DisableMenuArrowKeys_Execute(COMMAND_ARGS) {
