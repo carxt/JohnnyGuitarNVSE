@@ -1185,7 +1185,7 @@ bool Cmd_RemoveHighlightedRef_Execute(COMMAND_ARGS) {
 	InterfaceManager* interfaceMgr = InterfaceManager::GetSingleton();
 	if (!interfaceMgr) return true;
 
-	VATSHighlightData* vatsData = (VATSHighlightData*)((UInt32)interfaceMgr + 0x1DC);
+	VATSHighlightData* vatsData = interfaceMgr->GetVATSHighlightData();
 
 	for (UInt32 index = vatsData->numHighlighted; index;) {
 		if (vatsData->highlightedRefs[--index].refr != thisObj)
