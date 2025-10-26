@@ -78,19 +78,6 @@ bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 
-struct HighlightedRef {
-	TESObjectREFR* refr;
-	NiNode* node;
-};
-
-struct VATSHighlightData {
-	UInt32 highlightState;
-	HighlightedRef highlightMain;
-	UInt32 numHighlighted;
-	SInt32 flashingRefIndex;
-	HighlightedRef highlightedRefs[32];
-};
-
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
 
 std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
@@ -1185,7 +1172,7 @@ bool Cmd_RemoveHighlightedRef_Execute(COMMAND_ARGS) {
 	InterfaceManager* interfaceMgr = InterfaceManager::GetSingleton();
 	if (!interfaceMgr) return true;
 
-	VATSHighlightData* vatsData = (VATSHighlightData*)((UInt32)interfaceMgr + 0x1DC);
+	VATSHighlightData* vatsData = interfaceMgr->GetVATSHighlightData();
 
 	for (UInt32 index = vatsData->numHighlighted; index;) {
 		if (vatsData->highlightedRefs[--index].refr != thisObj)

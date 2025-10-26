@@ -8,6 +8,7 @@
 
 struct BGSSaveLoadFileEntry;
 struct PerkRank;
+struct VATSHighlightData;
 class Menu;
 class SceneGraph;
 class FOPipboyManager;
@@ -37,6 +38,9 @@ public:
 
 	UInt32 GetTopVisibleMenuID();
 	Tile* GetActiveTile();
+	VATSHighlightData* GetVATSHighlightData() {
+		return ThisCall<VATSHighlightData*>(0x602170, this);
+	}
 
 	UInt32					flags;				// 000
 	SceneGraph* sceneGraph004;		// 004
@@ -148,6 +152,19 @@ public:
 	UInt32					unk4C0[48];			// 4C0
 };
 static_assert(sizeof(InterfaceManager) == 0x580);
+
+struct HighlightedRef {
+	TESObjectREFR* refr;
+	NiNode* node;
+};
+
+struct VATSHighlightData {
+	UInt32 highlightState;
+	HighlightedRef highlightMain;
+	UInt32 numHighlighted;
+	SInt32 flashingRefIndex;
+	HighlightedRef highlightedRefs[32];
+};
 
 void Debug_DumpMenus(void);
 
