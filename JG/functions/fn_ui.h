@@ -373,3 +373,33 @@ bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
 	if (IsConsoleMode()) Console_Print("GetSleepWaitMenuState >> %.f", *result);
 	return true;
 }
+
+// HUD Visibility Override Functions
+DEFINE_COMMAND_PLUGIN(SetHUDVisibilityOverride, "Sets HUD element visibility override flags", 0, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", 0, 0, NULL);
+
+bool Cmd_SetHUDVisibilityOverride_Execute(COMMAND_ARGS)
+{
+	UInt32 visFlags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &visFlags))
+	{
+		HUDMainMenu* hud = HUDMainMenu::GetSingleton();
+		if (hud)
+		{
+			hud->visibilityOverrides = visFlags;
+			HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetHUDVisibilityOverride_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	HUDMainMenu* hud = HUDMainMenu::GetSingleton();
+	if (hud)
+	{
+		*result = hud->visibilityOverrides;
+	}
+	return true;
+}
