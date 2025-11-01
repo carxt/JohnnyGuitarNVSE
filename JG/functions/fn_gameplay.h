@@ -1539,7 +1539,7 @@ bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
 bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectIMOD* targetMod = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &targetMod) || NOT_ID(targetMod, TESObjectIMOD))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &targetMod) || !targetMod || NOT_ID(targetMod, TESObjectIMOD))
 		return true;
 
 	DataHandler* dataHandler = DataHandler::Get();
