@@ -11,8 +11,8 @@ DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(PlaySoundFile, , 0, 4, kParams_OneString_ThreeOptionalInts);
 DEFINE_COMMAND_PLUGIN(StopSoundFile, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(IsBSALoaded, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(PlaySoundFromPath, , 0, 5, kParams_OneString_OneOptionalFloat_ThreeOptionalInts);
-DEFINE_COMMAND_PLUGIN(PlaySound3DFromPath, , 1, 4, kParams_OneString_OneOptionalFloat_TwoOptionalInts);
+DEFINE_COMMAND_PLUGIN(PlaySoundFromPath, , 0, 6, kParams_OneString_OneOptionalFloat_FourOptionalInts);
+DEFINE_COMMAND_PLUGIN(PlaySound3DFromPath, , 1, 5, kParams_OneString_OneOptionalFloat_ThreeOptionalInts);
 DEFINE_COMMAND_PLUGIN(StopSoundFromPath, , 0, 2, kParams_OneString_OneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(StopSound3DFromPath, , 1, 2, kParams_OneString_OneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(IsSoundPlayingFromPath, , 0, 2, kParams_OneString_OneOptionalObjectRef);
@@ -217,8 +217,9 @@ bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
 	int voiceFlag = 0;
 	int systemFlag = 0;
 	int loopFlag = 0;
+	int bDontCacheFlag = 0;
 	float fadeInTime = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &systemFlag, &loopFlag) && path[0]) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &systemFlag, &loopFlag, &bDontCacheFlag) && path[0]) {
 		bool bVoiceFlag = (voiceFlag > 0);
 		bool bSystemFlag = (systemFlag > 0);
 		bool bLoopFlag = (loopFlag > 0);
@@ -231,6 +232,9 @@ bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
 		}
 		if (bLoopFlag) {
 			audioFlags |= BSAudioManager::kAudioFlags_Loop;
+		}
+		if (bDontCacheFlag) {
+			audioFlags |= BSAudioManager::kAudioFlags_DontCache;
 		}
 		BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(path, BSAudioManager::AudioFlags(audioFlags), nullptr);
 		if (fadeInTime <= 0) {
@@ -249,8 +253,9 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH];
 	int voiceFlag = 0;
 	int loopFlag = 0;
+	int bDontCacheFlag = 0;
 	float fadeInTime = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &loopFlag) && path[0]) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &loopFlag, &bDontCacheFlag) && path[0]) {
 		TESObjectREFR* ref = thisObj;
 		if (ref == nullptr) {
 			ref = (TESObjectREFR*)g_thePlayer;
@@ -264,6 +269,9 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 			}
 			if (bLoopFlag) {
 				audioFlags |= BSAudioManager::kAudioFlags_Loop;
+			}
+			if (bDontCacheFlag) {
+				audioFlags |= BSAudioManager::kAudioFlags_DontCache;
 			}
 			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(path, BSAudioManager::AudioFlags(audioFlags), nullptr);
 			handle.SetPosition(*ref->GetPos());
