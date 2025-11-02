@@ -1814,7 +1814,7 @@ public:
 
 	ConditionList		conditions;			// 18
 	UInt16				unk20;				// 20
-	UInt8				saidOnce;			// 22
+	bool				saidOnce;			// 22
 	UInt8				type;				// 23
 	UInt8				nextSpeaker;		// 24
 	UInt8				flags1;				// 25
@@ -1830,9 +1830,17 @@ public:
 	UInt32				modInfoFileOffset;	// 4C	during LoadForm
 
 	void RunResultScript(bool onEnd, Actor* actor);
+
+	void SetSaidOnce() {
+		ThisCall(0x61F220, this);
+	}
+
+	void ResetSaidOnceFlags() {
+		ThisCall(0x61F280, this);
+	}
 };
 
-typedef NiTArray<TESTopicInfo*> TopicInfoArray;
+typedef NiTLargeArray<TESTopicInfo*> TopicInfoArray;
 typedef void* INFO_LINK_ELEMENT;
 
 // 48
@@ -1863,6 +1871,10 @@ public:
 	UInt16			unk3C;			// 3C
 	UInt16			unk3E;			// 3E
 	BSString		editorIDstr;	// 40
+
+	TopicInfoArray* GetTopicInfosForQuest(TESQuest* apQuest) {
+		return ThisCall<TopicInfoArray*>(0x619F70, this, apQuest);
+	}
 };
 
 
