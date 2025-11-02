@@ -1,15 +1,11 @@
 #pragma once
 // Functions that operate on dialog
 DEFINE_COMMAND_PLUGIN(DialogResponseAddRelatedTopic, , 0, 4, kParams_OneDialogRes_OneTopic_OneInt_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(DialogResponseRelatedGetAll, , 0, 4, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(DialogResponseRelatedGetAll, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetDialogResponseOverrideValues, , 0, 8, kParams_OneForm_FourInts_TwoOptionalForms_OneOptionalInt);
-
-
-/*DEFINE_CMD_ALT_COND_PLUGIN(DialogResponseHasChoice, , 0, 2, kParams_OneForm_OneTopic);
-DEFINE_CMD_ALT_COND_PLUGIN(DialogResponseHasLinkFrom, , 0, 2, kParams_OneForm_OneTopic);
-DEFINE_CMD_ALT_COND_PLUGIN(DialogResponseHasFollowUp, , 0, 2, kParams_OneForm_OneTopic);
-*/
-
+DEFINE_COMMAND_PLUGIN(GetSaidOnce, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetSaidOnce, , 0, 3, kParams_OneForm_TwoInts);
+DEFINE_COMMAND_PLUGIN(GetTopicInfo, , 0, 2, kParams_GetTopicInfo);
 
 
 enum ResponseRelatedTopicType {
@@ -115,146 +111,6 @@ bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
 }
 
 
-/*
-bool Cmd_SetDialogResponseOverrideEmotions_Execute(COMMAND_ARGS) {
-	TESTopicInfo* dialogResponse = NULL;
-	UInt32 responseNumber = 0;
-	SInt32 setOrRemove = 0;
-
-	UInt32 responseEmotion = 0;
-	SInt32 responseEmotionValue = 0;
-	UInt32 flags = -1;
-	//Init to xMarker
-	TESIdleForm* speakerAnim = *(TESIdleForm**)0x11CA244;
-	TESIdleForm* listenerAnim = *(TESIdleForm**)0x11CA244;
-
-	//Unlike 99.9% of functions in this game, dialog responses use a 1-based index, not a 0-based index.
-	//This means the first element will be 1, not 0.
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseNumber, &setOrRemove, &responseEmotion, &responseEmotionValue) && IS_TYPE(dialogResponse, TESTopicInfo))
-	{
-		if (setOrRemove > 0)
-		{
-			auto it = dialogResponseOverrideMap[dialogResponse->refID].find(responseNumber);
-			if (it != dialogResponseOverrideMap[dialogResponse->refID].end())
-			{
-				
-				it->second.m_emotionType = responseEmotion;
-				it->second.m_emotionValue = responseEmotionValue;
-			}
-			else
-			{
-				dialogResponseOverrideMap[dialogResponse->refID][responseNumber] = DialogueEmotionOverride(responseEmotion, responseEmotionValue, speakerAnim, listenerAnim, flags);
-			}
-		}
-
-		else
-		{
-			auto it = dialogResponseOverrideMap.find(dialogResponse->refID);
-			if (it != dialogResponseOverrideMap.end()) 
-			{
-				it->second.erase(responseNumber);
-				if (it->second.size() < 1)
-				{
-					dialogResponseOverrideMap.erase(dialogResponse->refID);
-				}
-			}
-		}
-
-	}
-	return true;
-}
-
-
-
-bool Cmd_SetDialogResponseOverrideEmotions_Execute(COMMAND_ARGS) {
-	TESTopicInfo* dialogResponse = NULL;
-	UInt32 responseNumber = 0;
-	SInt32 setOrRemove = 0;
-
-	UInt32 responseEmotion = 0;
-	SInt32 responseEmotionValue = 0;
-	UInt32 flags = -1;
-	//Init to xMarker
-	TESIdleForm* speakerAnim = *(TESIdleForm**)0x11CA244;
-	TESIdleForm* listenerAnim = *(TESIdleForm**)0x11CA244;
-
-	//Unlike 99.9% of functions in this game, dialog responses use a 1-based index, not a 0-based index.
-	//This means the first element will be 1, not 0.
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseNumber, &setOrRemove, &responseEmotion, &responseEmotionValue) && IS_TYPE(dialogResponse, TESTopicInfo))
-	{
-		if (setOrRemove > 0)
-		{
-			auto it = dialogResponseOverrideMap[dialogResponse->refID].find(responseNumber);
-			if (it != dialogResponseOverrideMap[dialogResponse->refID].end())
-			{
-
-				it->second.m_emotionType = responseEmotion;
-				it->second.m_emotionValue = responseEmotionValue;
-			}
-			else
-			{
-				dialogResponseOverrideMap[dialogResponse->refID][responseNumber] = DialogueEmotionOverride(responseEmotion, responseEmotionValue, speakerAnim, listenerAnim, flags);
-			}
-		}
-
-		else
-		{
-			auto it = dialogResponseOverrideMap.find(dialogResponse->refID);
-			if (it != dialogResponseOverrideMap.end())
-			{
-				it->second.erase(responseNumber);
-				if (it->second.size() < 1)
-				{
-					dialogResponseOverrideMap.erase(dialogResponse->refID);
-				}
-			}
-		}
-
-	}
-	return true;
-}
-
-
-
-
-
-bool Cmd_SetDialogResponseRemoveOverrides_Execute(COMMAND_ARGS) {
-	TESTopicInfo* dialogResponse = NULL;
-	UInt32 responseNumber = 0;
-
-
-	//Unlike 99.9% of functions in this game, dialog responses use a 1-based index, not a 0-based index.
-	//This means the first element will be 1, not 0.
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseNumber) && IS_TYPE(dialogResponse, TESTopicInfo))
-	{
-
-		if (responseNumber > 0)
-		{
-			auto it = dialogResponseOverrideMap.find(dialogResponse->refID);
-			if (it != dialogResponseOverrideMap.end())
-			{
-				it->second.erase(responseNumber);
-				if (it->second.size() < 1)
-				{
-					dialogResponseOverrideMap.erase(dialogResponse->refID);
-				}
-			}
-		}
-		else
-		{
-			dialogResponseOverrideMap.erase(dialogResponse->refID);
-		}
-
-
-	}
-	return true;
-}
-
-
-
-*/
-
-
 
 
 bool Cmd_DialogResponseAddRelatedTopic_Execute(COMMAND_ARGS) {
@@ -282,6 +138,7 @@ bool Cmd_DialogResponseAddRelatedTopic_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_DialogResponseRelatedGetAll_Execute(COMMAND_ARGS) {
 	TESTopicInfo* dialogResponse = NULL;
 	UInt32 responseType = -1;
@@ -314,3 +171,112 @@ bool Cmd_DialogResponseRelatedGetAll_Execute(COMMAND_ARGS) {
 }
 
 
+bool Cmd_GetSaidOnce_Execute(COMMAND_ARGS) {
+	*result = -1;
+	TESTopicInfo* pInfo = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo)) {
+		if (!IS_TYPE(pInfo, TESTopicInfo))
+			return true;
+
+		*result = pInfo->saidOnce;
+		return true;
+	}
+}
+
+bool Cmd_SetSaidOnce_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESTopicInfo* pInfo = nullptr;
+	UInt32 bSaidOnce = false;
+	UInt32 bSave = true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo, &bSaidOnce, &bSave)) {
+		if (!IS_TYPE(pInfo, TESTopicInfo))
+			return true;
+
+		if (bSave) {
+			if (bSaidOnce)
+				pInfo->SetSaidOnce();
+			else
+				pInfo->ResetSaidOnceFlags();
+		}
+		else {
+			pInfo->saidOnce = bSaidOnce;
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESTopic* pTargetTopic = nullptr;
+	int32_t iIndex = -1;
+	TESQuest* pQuest = nullptr;
+
+	NVSEArrayVar* pStoredInfos = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetTopic, &pQuest)) {
+
+		if (pQuest && !IS_TYPE(pQuest, TESQuest)) //exclude xMarker 
+		{
+
+			return true;
+		}
+
+
+		if (pTargetTopic && !IS_TYPE(pTargetTopic, TESTopic))
+		{
+			if (!pQuest)
+			{
+				return true;
+			}
+			else
+			{
+				pTargetTopic = nullptr;
+			}
+
+		}
+		if (pTargetTopic) {
+			if (pQuest)
+			{
+				auto pTopicInfos = pTargetTopic->GetTopicInfosForQuest(pQuest);
+				if (pTopicInfos) {
+					for (uint32_t i = 0; i < pTopicInfos->Length(); i++) {
+						auto pTopicInfo = pTopicInfos->Get(i);
+						g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
+					}
+				}
+			}
+			else
+			{
+				auto pTargetTopicInfoList = &pTargetTopic->infos;
+				for (auto kIter = pTargetTopicInfoList->Begin(); !kIter.End(); kIter.Next()) {
+					if (*kIter) {
+						auto pTopicInfos = &(*kIter)->infoArray;
+						for (uint32_t i = 0; i < pTopicInfos->Length(); i++) {
+							auto pTopicInfo = pTopicInfos->Get(i);
+							g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
+						}
+					}
+				}
+			}
+
+		}
+		else {
+			auto pTopicHandler = &DataHandler::Get()->topicList;
+			for (auto kIter = pTopicHandler->Begin(); !kIter.End(); kIter.Next()) {
+				if (*kIter) {
+					TESTopic* pTopic = kIter.Get();
+					auto pTopicInfos = pTopic->GetTopicInfosForQuest(pQuest);
+					if (pTopicInfos) {
+						for (uint32_t i = 0; i < pTopicInfos->Length(); i++) {
+							auto pTopicInfo = pTopicInfos->Get(i);
+							g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
+						}
+					}
+				}
+			}
+		}
+
+	}
+	g_arrInterface->AssignCommandResult(pStoredInfos, result);
+
+	return true;
+}
