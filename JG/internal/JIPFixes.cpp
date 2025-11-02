@@ -312,6 +312,37 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace FireWeaponFix {
+		thread_local bool bScriptedCall = false;
+		uint32_t uiDoFireWeaponAddr = 0;
+
+		void __fastcall DoFireWeaponExWrapper(Actor* apActor, void*, TESObjectWEAP* apWeapon) {
+			bScriptedCall = true;
+			FastCall(uiDoFireWeaponAddr, apActor, nullptr, apWeapon);
+			bScriptedCall = false;
+		}
+
+		class ActorEx : public Actor {
+		public:
+			CombatController* GetCombatControllerEx() {
+				CombatController* pController = GetCombatController();
+				if (bScriptedCall && pController && !pController->combatProcedure1)
+					return nullptr;
+
+				return pController;
+			}
+		};
+
+
+		void InitHooks() {
+			uiDoFireWeaponAddr = GetJIPAddress(0x1001B6F0);
+			SafeWrite32(GetJIPAddress(0x1001B827) + 4, uint32_t(DoFireWeaponExWrapper));
+
+			PatchMemoryNop(0x523B3F, 8);
+			WriteRelCallEx(0x523B3F, &ActorEx::GetCombatControllerEx);
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -372,6 +403,7 @@ namespace JIPFixes {
 		PaletteCorruptionFix::InitHooks();
 		NotifyDurationFix::InitHooks();
 		CloseActiveMenuFix::InitHooks();
+		FireWeaponFix::InitHooks();
 	}
 
 	void InitDeferredHooks() {
