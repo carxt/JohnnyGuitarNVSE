@@ -565,6 +565,7 @@ extern "C" {
 		REG_CMD(IsNiSequenceActive);
 		REG_CMD(GetHotkeySlot);
 		REG_CMD(SetOnNPCActorValueChangeEventHandler);
+		REG_CMD(GetGrenadeHoldTime);
 		REG_CMD(RemoveHighlightedRef);
 		REG_CMD(GetSaidOnce);
 		REG_CMD(SetSaidOnce);

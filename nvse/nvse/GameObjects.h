@@ -856,7 +856,9 @@ public:
 	UInt32								unk6F4;					// 6F4;
 	BSSimpleArray<ParentSpaceNode>		parentSpaceNodes;		// 6F8
 	BSSimpleArray<TeleportLink>			teleportLinks;			// 708
-	UInt32								unk718[9];				// 718
+	UInt32								unk718[6];				// 718
+	float								timeGrenadeHeld;		// 730
+	UInt32								unk734[2];				// 734
 	TESForm* form73C;				// 73C	TESTING
 	UInt32								unk740[6];				// 740
 	TESForm* tempWeaponPoisonRef;	// 758 TESTING
