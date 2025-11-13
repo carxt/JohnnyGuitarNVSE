@@ -17,6 +17,7 @@ DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , 0, 2, kParams_OneInt_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(PushUIQuestToTop, , 0, 1, kParams_OneQuest); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , 0, 0, NULL); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , 0, 0, NULL);
+DEFINE_CMD_COND(IsMenuPaused, 0, 0, kParams_OneOptionalInt);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 		if (g_thePlayer) {
@@ -371,5 +372,16 @@ bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
 	if (!swMenu) return true;
 	*result = DWORD(swMenu->isRest) + 1;
 	if (IsConsoleMode()) Console_Print("GetSleepWaitMenuState >> %.f", *result);
+	return true;
+}
+
+// To be hooked by RTM
+bool Cmd_IsMenuPaused_Eval(COMMAND_ARGS_EVAL) {
+	*result = InterfaceManager::GetSingleton()->currentMode != 1;
+	return true;
+}
+
+bool Cmd_IsMenuPaused_Execute(COMMAND_ARGS) {
+	*result = InterfaceManager::GetSingleton()->currentMode != 1;
 	return true;
 }
