@@ -699,6 +699,8 @@ public:
 	bool SetPathfindingGoal(const TESObjectREFR* apTargetRef, float afTargetRadius = -1.f, PathingAvoidNodeArray* apAvoidNodes = nullptr);
 
 	void StopMoving();
+
+	bool IsInDialogueWithPlayer() const;
 };
 
 // 1C0

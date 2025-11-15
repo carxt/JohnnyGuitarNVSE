@@ -73,6 +73,7 @@ DEFINE_COMMAND_PLUGIN(PlayHolotape, , 0, 2, kParams_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(StopHolotape, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(PathToRef, , 1, 2, kParams_OneRefOneFloat);
 DEFINE_CMD_NO_ARGS(GetGrenadeHoldTime);
+DEFINE_CMD_ALT_COND_PLUGIN(IsInDialogueWithPlayer, , "", 1, nullptr);
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -1532,5 +1533,20 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
 	*result = g_thePlayer->timeGrenadeHeld;
+	return true;
+}
+
+bool Cmd_IsInDialogueWithPlayer_Eval(COMMAND_ARGS_EVAL) {
+	*result = 0;
+	if (thisObj && thisObj->IsActor()) {
+		Actor* pActor = static_cast<Actor*>(thisObj);
+		*result = pActor->IsInDialogueWithPlayer();
+	}
+	return true;
+}
+
+bool Cmd_IsInDialogueWithPlayer_Execute(COMMAND_ARGS) {
+	*result = 0;
+	Cmd_IsInDialogueWithPlayer_Eval(thisObj, nullptr, nullptr, result);
 	return true;
 }
