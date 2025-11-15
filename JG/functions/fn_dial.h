@@ -175,12 +175,10 @@ bool Cmd_GetSaidOnce_Execute(COMMAND_ARGS) {
 	*result = -1;
 	TESTopicInfo* pInfo = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo)) {
-		if (!IS_TYPE(pInfo, TESTopicInfo))
-			return true;
-
-		*result = pInfo->saidOnce;
-		return true;
+		if (IS_TYPE(pInfo, TESTopicInfo))
+			*result = pInfo->saidOnce;
 	}
+	return true;
 }
 
 bool Cmd_SetSaidOnce_Execute(COMMAND_ARGS) {
