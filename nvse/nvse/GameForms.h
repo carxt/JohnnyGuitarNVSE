@@ -683,6 +683,8 @@ public:
 	~TESFullName();
 
 	BSString	name;		// 004
+
+	static const char* GetFullName(const TESForm* apForm);
 };
 
 // 0C

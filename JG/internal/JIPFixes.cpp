@@ -4,6 +4,7 @@
 #include "SafeWrite.h"
 #include "utility.h"
 #include <fstream>
+#include <GameRTTI.h>
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern bool bFixJIP;
@@ -343,6 +344,49 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace ItemDescriptionFixFix {
+		const char* __fastcall ConstructItemEntryNameHookFix(TESBoundObject* apObject, uint32_t* arLength) {
+			*arLength = 0;
+			TESFullName* pFullName = DYNAMIC_CAST(apObject, TESBoundObject, TESFullName);
+			if (!pFullName)
+				return nullptr;
+
+			const char* pString = pFullName->name.c_str();
+			if (!pString || pString[0] == '\0')
+				return nullptr;
+
+			*arLength = pFullName->name.GetLength();
+			return pString;
+		}
+
+		static uint32_t uiFailAddr = 0;
+		static uint32_t uiSuccessAddr = 0;
+
+		static void __declspec(naked) ConstructItemEntryNameHookFix_Asm() {
+			__asm {
+				sub esp, 4
+				mov edx, [esp]
+				mov ecx, eax
+				call ConstructItemEntryNameHookFix
+				mov edx, dword ptr[esp]
+				add esp, 4
+				test eax, eax
+				jz EXIT // If null, exit
+				mov ecx, edx
+				jmp uiSuccessAddr
+			EXIT:
+				jmp uiFailAddr
+			}
+		}
+
+		void InitHooks() {
+			uiFailAddr		= GetJIPAddress(0x1000DF10);
+			uiSuccessAddr	= GetJIPAddress(0x1000DECA);
+			WriteRelJump(GetJIPAddress(0x1000DEC2), ConstructItemEntryNameHookFix_Asm);
+			SafeWriteBuf(GetJIPAddress(0x1000DECC), "\x8D\x30\x90", 3); // Patch to use string from EAX instead of EAX+0x34
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -404,6 +448,7 @@ namespace JIPFixes {
 		NotifyDurationFix::InitHooks();
 		CloseActiveMenuFix::InitHooks();
 		FireWeaponFix::InitHooks();
+		ItemDescriptionFixFix::InitHooks();
 	}
 
 	void InitDeferredHooks() {
