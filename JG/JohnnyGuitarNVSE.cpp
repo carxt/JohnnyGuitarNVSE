@@ -218,8 +218,10 @@ extern "C" {
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
-		strncpy(g_workingDir, filename, (strlen(filename)-13));
-		strcpy((char*)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
+		strncpy_s(g_workingDir, filename, (strlen(filename)-13));
+		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
+		uint32_t length = filename - lastSlash;
+		strcpy_s(lastSlash, length, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 		loadEditorIDs = 1;
 		fixHighNoon = 0;
 		fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
