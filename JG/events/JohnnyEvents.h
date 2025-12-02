@@ -102,8 +102,8 @@ UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 }
 bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, byte dummy, int limb, byte isExplode) {
 	for (auto const& callback : OnLimbGoneHandler->callbacks) {
-		if (reinterpret_cast<FilterFormInt*>(callback.eventFilter)->IsInFilter(0, actor->refID) &&
-			reinterpret_cast<FilterFormInt*>(callback.eventFilter)->IsInFilter(1, limb)) {
+		FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
+		if ((filter->IsInFilter(0, actor->refID) || filter->IsInFilter(0, actor->baseForm->refID)) && filter->IsInFilter(1, limb)) {
 			CallUDF(callback.script, nullptr, OnLimbGoneHandler->numMaxArgs, actor, limb);
 		}
 	}

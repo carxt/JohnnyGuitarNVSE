@@ -155,3 +155,7 @@ bool Actor::SetPathfindingGoal(const TESObjectREFR* apTargetRef, float afTargetR
 void Actor::StopMoving() {
 	ThisCall(0x8B3AB0, this);
 }
+
+bool Actor::IsInDialogueWithPlayer() const {
+	return ThisCall<bool>(0x933840, this);
+}

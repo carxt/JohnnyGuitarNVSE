@@ -392,11 +392,11 @@ public:
 	NiBinaryStream();
 	~NiBinaryStream();
 
-	virtual void	Destructor(bool freeMemory);		// 00
-	virtual void	Unk_01(void);						// 04
-	virtual void	SeekCur(SInt32 delta);				// 08
-	virtual void	GetBufferSize(void);				// 0C
-	virtual void	InitReadWriteProcs(bool useAlt);	// 10
+	virtual void		Destructor(bool freeMemory);		// 00
+	virtual bool		FileIsGood(void);					// 04
+	virtual void		SeekCur(SInt32 delta);				// 08
+	virtual uint32_t	GetPosition() const;				// 0C
+	virtual void		SetEndianSwap(bool useAlt);			// 10
 
 //	void	** m_vtbl;		// 000
 	UInt32	m_offset;		// 004
@@ -430,7 +430,7 @@ public:
 	BSFile();
 	~BSFile();
 
-	virtual bool	Reset(bool arg1, bool arg2);	// 20
+	virtual bool	Open(bool arg1, bool arg2);	// 20
 	virtual bool	OpenByFilePointer(FILE* apFile);
 	virtual UInt32	GetSize();
 	virtual UInt32	ReadString(BSString& arString, UInt32 auiMaxLength);

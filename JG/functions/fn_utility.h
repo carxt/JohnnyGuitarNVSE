@@ -280,7 +280,7 @@ bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
 	char dllPath[MAX_PATH];
 	char fnvPath[MAX_PATH];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dllName, &checkOutsideOfGameFolder)) {
-		strncat(dllName, ".dll", 4);
+		strncat_s(dllName, ".dll", 4);
 		HMODULE module = GetModuleHandle(dllName);
 		if (module) {
 			if (!checkOutsideOfGameFolder) {

@@ -65,10 +65,11 @@ void setVarByName(VARARGS, const char* var_name, float value) {
 //Only ready for a 24-bit BMP, will check for non-24 bit later.
 //Also currently doesn't handle negative height/width BMPs, will fix later
 bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long& B, unsigned long PixelW, unsigned long PixelH) {
-	FILE* f = fopen(filename, "rb");
-
-	if (f == NULL)
+	
+	FILE* f = NULL;
+	if (fopen_s(&f, filename, "rb") != 0)
 		return false;
+
 	char info[54];
 	fread(info, sizeof(char), 54, f);
 	int width = *(int*)&info[18];
