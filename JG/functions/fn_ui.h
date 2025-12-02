@@ -204,8 +204,9 @@ bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH];
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &rep, &tierID, &path) && IS_TYPE(rep, TESReputation) && tierID >= 1 && tierID <= 4)) return true;
 	auto pos = factionRepIcons.find(rep->refID);
-	char* pathCopy = new char[strlen(path) + 1];
-	strcpy(pathCopy, path);
+	uint32_t bufferSize = strlen(path) + 1;
+	char* pathCopy = new char[bufferSize];
+	strcpy_s(pathCopy, bufferSize, path);
 
 	if (pos != factionRepIcons.end()) {
 		if (*pos->second[tierID - 1]) delete[] pos->second[tierID - 1];
