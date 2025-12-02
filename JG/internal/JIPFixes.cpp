@@ -8,6 +8,12 @@
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern bool bFixJIP;
 
+// Settings
+namespace JIPFixes {
+	bool bCapFatigue = true;
+}
+
+// Code
 namespace JIPFixes {
 
 	static HMODULE hJIP = 0;
@@ -404,6 +410,10 @@ namespace JIPFixes {
 		NotifyDurationFix::InitHooks();
 		CloseActiveMenuFix::InitHooks();
 		FireWeaponFix::InitHooks();
+
+		if (!bCapFatigue) {
+			SafeWriteBuf(0x93B87F, "\x8B\x55\x08\x52\x8B", 5);
+		}
 	}
 
 	void InitDeferredHooks() {

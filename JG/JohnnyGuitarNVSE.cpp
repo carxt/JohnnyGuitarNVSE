@@ -235,6 +235,7 @@ extern "C" {
 		bFixJIP = GetPrivateProfileInt("MAIN", "bJIPFixes", 1, filename);
 		iDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
+		JIPFixes::bCapFatigue = GetPrivateProfileInt("JIP", "bCapFatigue", 0, filename);
 		//bDisableDeathResponses = GetPrivateProfileInt("DeathResponses", "bDisableDeathResponses", 0, filename);
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
