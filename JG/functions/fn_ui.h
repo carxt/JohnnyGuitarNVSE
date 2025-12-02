@@ -18,6 +18,8 @@ DEFINE_COMMAND_PLUGIN(PushUIQuestToTop, , 0, 1, kParams_OneQuest); //DO NOT REGI
 DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , 0, 0, NULL); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , 0, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(IsMenuPaused, , "", 0, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(SetHUDVisibilityOverride, "Sets HUD element visibility override flags", 0, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", 0, 0, NULL);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 		if (g_thePlayer) {
@@ -376,6 +378,29 @@ bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+bool Cmd_SetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
+	UInt32 visFlags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &visFlags)) {
+		HUDMainMenu* hud = HUDMainMenu::GetSingleton();
+		if (hud) {
+			hud->visibilityOverrides = visFlags;
+			HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
+      *result = 1;
+		}
+  } 
+ 
+  return true;
+}
+
+bool Cmd_GetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
+	*result = 0;
+	HUDMainMenu* hud = HUDMainMenu::GetSingleton();
+	if (hud) {
+		*result = hud->visibilityOverrides;
+	}
+	return true;
+}
+
 // To be hooked by RTM
 bool Cmd_IsMenuPaused_Eval(COMMAND_ARGS_EVAL) {
 	uint32_t uiMenuID = reinterpret_cast<uint32_t>(arg1);
@@ -387,7 +412,7 @@ bool Cmd_IsMenuPaused_Eval(COMMAND_ARGS_EVAL) {
 	}
 	return true;
 }
-
+  
 bool Cmd_IsMenuPaused_Execute(COMMAND_ARGS) {
 	*result = 1;
 	uint32_t uiMenuID = 0;
