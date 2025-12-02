@@ -72,6 +72,10 @@ DEFINE_COMMAND_PLUGIN(SetCasinoChip, , 0, 2, kParams_OneCasinoOneForm);
 DEFINE_COMMAND_PLUGIN(PlayHolotape, , 0, 2, kParams_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(StopHolotape, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(PathToRef, , 1, 2, kParams_OneRefOneFloat);
+DEFINE_CMD_NO_ARGS(GetGrenadeHoldTime);
+DEFINE_COMMAND_PLUGIN(GetWeaponsForMod, , 0, 1, kParams_OneObjectID);
+DEFINE_CMD_ALT_COND_PLUGIN(IsInDialogueWithPlayer, , "", 1, nullptr);
+
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
@@ -1525,5 +1529,58 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 		*result = 1;
 	}
 
+	return true;
+}
+
+bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
+	*result = g_thePlayer->timeGrenadeHeld;
+	return true;
+}
+
+bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectIMOD* targetMod = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &targetMod) || !targetMod || NOT_ID(targetMod, TESObjectIMOD))
+		return true;
+
+	DataHandler* dataHandler = DataHandler::Get();
+	if (!dataHandler) 
+    return true;
+
+	NVSEArrayVarInterface::Array* weaponArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+
+	for (TESBoundObject* object = dataHandler->boundObjectList->first; object; object = object->next) {
+		if (object->typeID != kFormType_TESObjectWEAP) 
+      continue;
+    
+		TESObjectWEAP* weapon = (TESObjectWEAP*)object;
+
+		for (int slot = 0; slot < 3; slot++) {
+			if (weapon->itemMod[slot] == targetMod) {
+				g_arrInterface->AppendElement(weaponArray, NVSEArrayElement(weapon));
+				break;
+			}
+		}
+	}
+
+	g_arrInterface->AssignCommandResult(weaponArray, result);
+	if (IsConsoleMode())
+		Console_Print("GetWeaponsForMod >> Found %d weapon(s)", g_arrInterface->GetArraySize(weaponArray));
+  
+  return true;
+}
+
+bool Cmd_IsInDialogueWithPlayer_Eval(COMMAND_ARGS_EVAL) {
+	*result = 0;
+	if (thisObj && thisObj->IsActor()) {
+		Actor* pActor = static_cast<Actor*>(thisObj);
+		*result = pActor->IsInDialogueWithPlayer();
+	}
+	return true;
+}
+
+bool Cmd_IsInDialogueWithPlayer_Execute(COMMAND_ARGS) {
+	*result = 0;
+	Cmd_IsInDialogueWithPlayer_Eval(thisObj, nullptr, nullptr, result);
 	return true;
 }

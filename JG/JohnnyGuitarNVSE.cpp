@@ -218,8 +218,10 @@ extern "C" {
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
-		strncpy(g_workingDir, filename, (strlen(filename)-13));
-		strcpy((char*)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
+		strncpy_s(g_workingDir, filename, (strlen(filename)-13));
+		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
+		uint32_t length = filename - lastSlash;
+		strcpy_s(lastSlash, length, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 		loadEditorIDs = 1;
 		fixHighNoon = 0;
 		fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
@@ -561,10 +563,12 @@ extern "C" {
 		REG_CMD(IsSoundPlayingFromPath);
 		REG_CMD(SetOnGeneralSubtitleEventHandler);
 		REG_CMD(PathToRef);
+		REG_TYPED_CMD(GetWeaponsForMod, Array);
 		REG_CMD(SetOnReputationChangeEventHandler);
 		REG_CMD(IsNiSequenceActive);
 		REG_CMD(GetHotkeySlot);
 		REG_CMD(SetOnNPCActorValueChangeEventHandler);
+		REG_CMD(GetGrenadeHoldTime);
 		REG_CMD(RemoveHighlightedRef);
 		REG_CMD(GetSaidOnce);
 		REG_CMD(SetSaidOnce);
@@ -572,6 +576,9 @@ extern "C" {
 		REG_CMD(SetHUDVisibilityOverride);
 		REG_CMD(GetHUDVisibilityOverride);
 
+		REG_TYPED_CMD(GetTopicInfo, Array);
+		REG_CMD(IsMenuPaused);
+		REG_CMD(IsInDialogueWithPlayer);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);

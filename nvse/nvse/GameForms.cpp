@@ -674,3 +674,7 @@ bool AlchemyItem::IsPoison() {
 TESForm* TESForm::GetFormByNumericID(UInt32 formID) {
 	return CdeclCall<TESForm*>(0x4839C0, formID);
 }
+
+const char* TESFullName::GetFullName(const TESForm* apForm) {
+	return CdeclCall<const char*>(0x482720, apForm);
+}

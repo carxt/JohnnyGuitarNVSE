@@ -17,6 +17,9 @@ DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , 0, 2, kParams_OneInt_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(PushUIQuestToTop, , 0, 1, kParams_OneQuest); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , 0, 0, NULL); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , 0, 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(IsMenuPaused, , "", 0, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(SetHUDVisibilityOverride, "Sets HUD element visibility override flags", 0, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", 0, 0, NULL);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 		if (g_thePlayer) {
@@ -203,8 +206,9 @@ bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH];
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &rep, &tierID, &path) && IS_TYPE(rep, TESReputation) && tierID >= 1 && tierID <= 4)) return true;
 	auto pos = factionRepIcons.find(rep->refID);
-	char* pathCopy = new char[strlen(path) + 1];
-	strcpy(pathCopy, path);
+	uint32_t bufferSize = strlen(path) + 1;
+	char* pathCopy = new char[bufferSize];
+	strcpy_s(pathCopy, bufferSize, path);
 
 	if (pos != factionRepIcons.end()) {
 		if (*pos->second[tierID - 1]) delete[] pos->second[tierID - 1];
@@ -374,32 +378,46 @@ bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-// HUD Visibility Override Functions
-DEFINE_COMMAND_PLUGIN(SetHUDVisibilityOverride, "Sets HUD element visibility override flags", 0, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", 0, 0, NULL);
-
-bool Cmd_SetHUDVisibilityOverride_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
 	UInt32 visFlags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &visFlags))
-	{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &visFlags)) {
 		HUDMainMenu* hud = HUDMainMenu::GetSingleton();
-		if (hud)
-		{
+		if (hud) {
 			hud->visibilityOverrides = visFlags;
 			HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
+      *result = 1;
 		}
+  } 
+ 
+  return true;
+}
+
+bool Cmd_GetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
+	*result = 0;
+	HUDMainMenu* hud = HUDMainMenu::GetSingleton();
+	if (hud) {
+		*result = hud->visibilityOverrides;
 	}
 	return true;
 }
 
-bool Cmd_GetHUDVisibilityOverride_Execute(COMMAND_ARGS)
-{
-	*result = 0;
-	HUDMainMenu* hud = HUDMainMenu::GetSingleton();
-	if (hud)
-	{
-		*result = hud->visibilityOverrides;
+// To be hooked by RTM
+bool Cmd_IsMenuPaused_Eval(COMMAND_ARGS_EVAL) {
+	uint32_t uiMenuID = reinterpret_cast<uint32_t>(arg1);
+	if (uiMenuID == 0) {
+		*result = InterfaceManager::GetSingleton()->currentMode != 1;
+	}
+	else {
+		*result = 1.0;
+	}
+	return true;
+}
+  
+bool Cmd_IsMenuPaused_Execute(COMMAND_ARGS) {
+	*result = 1;
+	uint32_t uiMenuID = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiMenuID)) {
+		Cmd_IsMenuPaused_Eval(thisObj, reinterpret_cast<void*>(uiMenuID), nullptr, result);
 	}
 	return true;
 }
