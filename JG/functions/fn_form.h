@@ -707,7 +707,7 @@ bool Cmd_SetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 		g_arrInterface->GetElements(inArr, elements, NULL);
 		TESIdleForm** idleList = (TESIdleForm**)GameHeapAlloc(4 * size);
 		for (int i = 0; i < size; i++) {
-			idleList[i] = (TESIdleForm*)elements[i].Form();
+			idleList[i] = (TESIdleForm*)elements[i].GetTESForm();
 		}
 		if (marker->idleCollection.idleList) GameHeapFree(marker->idleCollection.idleList);
 		marker->idleCollection.idleList = idleList;

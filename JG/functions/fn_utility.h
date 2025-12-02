@@ -309,10 +309,10 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 	g_arrInterface->GetElements(inArr, elements, NULL);
 	if (!fullMatch) {
 		for (int i = 0; i < size; i++) {
-			if (elements[i].Form() == NULL) return true;
+			if (elements[i].GetTESForm() == NULL) return true;
 			ListNode<TESForm>* listIter = formList->list.Head();
 			do {
-				if (elements[i].Form() == listIter->data) {
+				if (elements[i].GetTESForm() == listIter->data) {
 					*result = 1;
 					delete[] elements;
 					return true;
@@ -322,11 +322,11 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 	}
 	else {
 		for (int i = 0; i < size; i++) {
-			if (elements[i].Form() == NULL) return true;
+			if (elements[i].GetTESForm() == NULL) return true;
 			int elementFound = 0;
 			ListNode<TESForm>* listIter = formList->list.Head();
 			do {
-				if (elements[i].Form() == listIter->data) {
+				if (elements[i].GetTESForm() == listIter->data) {
 					elementFound = 1;
 					break;
 				}
@@ -391,8 +391,8 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	g_arrInterface->GetElements(inArr, elements, NULL);
 	std::map<char*, TESForm*, cmp_str> smap(cmp_str(isReverse > 0));
 	for (int i = 0; i < size; i++) {
-		if (elements[i].Form() == NULL) return true;
-		smap.insert(std::pair<char*, TESForm*>(elements[i].Form()->GetName(), elements[i].Form()));
+		if (elements[i].GetTESForm() == NULL) return true;
+		smap.insert(std::pair<char*, TESForm*>(elements[i].GetTESForm()->GetName(), elements[i].GetTESForm()));
 	}
 	for (std::map<char*, TESForm*>::iterator it = smap.begin(); it != smap.end(); ++it) {
 		g_arrInterface->AppendElement(outArr, NVSEArrayElement(it->second));
