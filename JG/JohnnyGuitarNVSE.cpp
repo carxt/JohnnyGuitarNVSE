@@ -561,6 +561,7 @@ extern "C" {
 		REG_CMD(IsSoundPlayingFromPath);
 		REG_CMD(SetOnGeneralSubtitleEventHandler);
 		REG_CMD(PathToRef);
+		REG_TYPED_CMD(GetWeaponsForMod, Array);
 		REG_CMD(SetOnReputationChangeEventHandler);
 		REG_CMD(IsNiSequenceActive);
 		REG_CMD(GetHotkeySlot);
