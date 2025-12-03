@@ -365,7 +365,7 @@ namespace JIPFixes {
 		static void __declspec(naked) ConstructItemEntryNameHookFix_Asm() {
 			__asm {
 				sub esp, 4
-				mov edx, [esp]
+				mov edx, esp
 				mov ecx, eax
 				call ConstructItemEntryNameHookFix
 				mov edx, dword ptr[esp]
