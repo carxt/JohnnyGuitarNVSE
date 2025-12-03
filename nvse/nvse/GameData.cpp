@@ -11,7 +11,7 @@ class LoadedModFinder {
 public:
 	LoadedModFinder(const char* str) : m_stringToFind(str) {}
 
-	bool Accept(ModInfo* modInfo) {
+	bool Accept(const ModInfo* modInfo) const {
 		return _stricmp(modInfo->name, m_stringToFind) == 0;
 	}
 };

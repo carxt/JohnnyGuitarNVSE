@@ -399,7 +399,7 @@ class ExtraDataListInExtendDataListMatcher {
 public:
 	ExtraDataListInExtendDataListMatcher(ExtraDataList* match) : m_toMatch(match) {}
 
-	bool Accept(ExtraDataList* match) {
+	bool Accept(const ExtraDataList* match) const {
 		return (m_toMatch == match);
 	}
 };
@@ -410,7 +410,7 @@ class ExtraDataListInEntryDataListMatcher {
 public:
 	ExtraDataListInEntryDataListMatcher(ExtraDataList* match) : m_toMatch(match) {}
 
-	bool Accept(ExtraContainerChanges::EntryData* match) {
+	bool Accept(const ExtraContainerChanges::EntryData* match) const {
 		if (match && match->extendData)
 			return match->extendData->GetIndexOf(ExtraDataListInExtendDataListMatcher(m_toMatch)) >= 0;
 		else
@@ -424,7 +424,7 @@ class ExtendDataListInEntryDataListMatcher {
 public:
 	ExtendDataListInEntryDataListMatcher(ExtraContainerChanges::ExtendDataList* match) : m_toMatch(match) {}
 
-	bool Accept(ExtraContainerChanges::EntryData* match) {
+	bool Accept(const ExtraContainerChanges::EntryData* match) const {
 		if (match && match->extendData)
 			return (match->extendData == m_toMatch);
 		else
@@ -438,7 +438,7 @@ class EntryDataInEntryDataListMatcher {
 public:
 	EntryDataInEntryDataListMatcher(ExtraContainerChanges::EntryData* match) : m_toMatch(match) {}
 
-	bool Accept(ExtraContainerChanges::EntryData* match) {
+	bool Accept(const ExtraContainerChanges::EntryData* match) const {
 		return (m_toMatch == match);
 	}
 };
@@ -449,7 +449,7 @@ class ItemInEntryDataListMatcher {
 public:
 	ItemInEntryDataListMatcher(TESForm* match) : m_toMatch(match) {}
 
-	bool Accept(ExtraContainerChanges::EntryData* match) {
+	bool Accept(const ExtraContainerChanges::EntryData* match) const {
 		return (match && m_toMatch == match->type);
 	}
 };
@@ -460,7 +460,7 @@ class BaseInEntryDataLastMatcher {
 public:
 	BaseInEntryDataLastMatcher(TESForm* match) : m_toMatch(match) {}
 
-	bool Accept(ExtraContainerChanges::EntryData* match) {
+	bool Accept(const ExtraContainerChanges::EntryData* match) const {
 		return (match && match->type && m_toMatch == match->type->TryGetREFRParent());
 	}
 };
@@ -471,7 +471,7 @@ class RefIDInEntryDataListMatcher {
 public:
 	RefIDInEntryDataListMatcher(UInt32 match) : m_toMatch(match) {}
 
-	bool Accept(ExtraContainerChanges::EntryData* match) {
+	bool Accept(const ExtraContainerChanges::EntryData* match) const {
 		return (match && match->type && m_toMatch == match->type->refID);
 	}
 };
@@ -482,7 +482,7 @@ class BaseIDInEntryDataListMatcher {
 public:
 	BaseIDInEntryDataListMatcher(UInt32 match) : m_toMatch(match) {}
 
-	bool Accept(ExtraContainerChanges::EntryData* match) {
+	bool Accept(const ExtraContainerChanges::EntryData* match) const {
 		return (match && match->type && match->type->TryGetREFRParent() && m_toMatch == match->type->TryGetREFRParent()->refID);
 	}
 };
@@ -690,7 +690,7 @@ class ExtraFactionChangesMatcher {
 	ExtraFactionChanges* xFactionChanges;
 public:
 	ExtraFactionChangesMatcher(TESFaction* faction, ExtraFactionChanges* FactionChanges) : pFaction(faction), xFactionChanges(FactionChanges) {}
-	bool Accept(FactionListData* data) {
+	bool Accept(const FactionListData* data) const {
 		return (data->faction == pFaction) ? true : false;
 	}
 };
