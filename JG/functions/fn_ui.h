@@ -17,6 +17,7 @@ DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , 0, 2, kParams_OneInt_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(PushUIQuestToTop, , 0, 1, kParams_OneQuest); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , 0, 0, NULL); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(UpdateRepairMenu, , 0, 0, NULL);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 		if (g_thePlayer) {
@@ -371,5 +372,34 @@ bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
 	if (!swMenu) return true;
 	*result = DWORD(swMenu->isRest) + 1;
 	if (IsConsoleMode()) Console_Print("GetSleepWaitMenuState >> %.f", *result);
+	return true;
+}
+
+float CalculateRepairedHealth(ContChangesEntry* target, ContChangesEntry* repairItem) {
+	if (!target || !repairItem) return 0.0f;
+	double targetHealth = ThisCall<double>(0x4BCDB0, target, 1);
+	double repairItemHealth = ThisCall<double>(0x4BCDB0, repairItem, 1);
+	int repairSkill = (int)ThisCall<double>(0x66EF50, &g_thePlayer->avOwner, 39);
+	int outParam = -1;
+	double result = CdeclCall<double>(0x648090, repairSkill, (float)targetHealth, (float)repairItemHealth, &outParam);
+	return (float)(result / 100.0);
+}
+
+bool Cmd_UpdateRepairMenu_Execute(COMMAND_ARGS) {
+	*result = 0;
+	RepairMenu* rm = *(RepairMenu**)0x11DA75C;
+	if (!rm) return true;
+	ContChangesEntry* target = *(ContChangesEntry**)0x11DA760;
+	if (!target) return true;
+	auto iter = rm->repairItems.GetHead();
+	if (!iter) return true;
+	do {
+		auto listItem = iter->GetItem();
+		if (listItem && listItem->tile && listItem->object) {
+			float repairedHealth = CalculateRepairedHealth(target, listItem->object);
+			listItem->tile->SetFloat(kTileValue_user0, repairedHealth);
+		}
+	} while (iter = iter->GetNext());
+	*result = 1;
 	return true;
 }
