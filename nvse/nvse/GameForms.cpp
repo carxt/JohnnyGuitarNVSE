@@ -675,6 +675,21 @@ TESForm* TESForm::GetFormByNumericID(UInt32 formID) {
 	return CdeclCall<TESForm*>(0x4839C0, formID);
 }
 
+// GAME - 0x4077C0
+bool TESForm::GetTemporary() const {
+	return (flags & 0x4000) != 0;
+}
+
+// GAME - 0x484490
+// GECK - 0x4FBA50
+void TESForm::SetTemporary() {
+#ifdef GAME
+	ThisCall(0x484490, this);
+#else
+	ThisCall(0x4FBA50, this);
+#endif
+}
+
 const char* TESFullName::GetFullName(const TESForm* apForm) {
 	return CdeclCall<const char*>(0x482720, apForm);
 }

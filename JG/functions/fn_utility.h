@@ -389,12 +389,12 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	UInt32 size = g_arrInterface->GetArraySize(inArr);
 	NVSEArrayElement* elements = new NVSEArrayElement[size];
 	g_arrInterface->GetElements(inArr, elements, NULL);
-	std::map<char*, TESForm*, cmp_str> smap(cmp_str(isReverse > 0));
+	std::map<const char*, TESForm*, cmp_str> smap(cmp_str(isReverse > 0));
 	for (int i = 0; i < size; i++) {
 		if (elements[i].GetTESForm() == NULL) return true;
-		smap.insert(std::pair<char*, TESForm*>(elements[i].GetTESForm()->GetName(), elements[i].GetTESForm()));
+		smap.insert(std::pair<const char*, TESForm*>(elements[i].GetTESForm()->GetFormEditorID(), elements[i].GetTESForm()));
 	}
-	for (std::map<char*, TESForm*>::iterator it = smap.begin(); it != smap.end(); ++it) {
+	for (std::map<const char*, TESForm*>::iterator it = smap.begin(); it != smap.end(); ++it) {
 		g_arrInterface->AppendElement(outArr, NVSEArrayElement(it->second));
 	}
 
@@ -565,7 +565,7 @@ bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 		if (!form)
 			form = thisObj;
 		if (form)
-			edid = form->GetName();
+			edid = form->GetFormEditorID();
 		g_strInterface->Assign(PASS_COMMAND_ARGS, edid);
 		if (IsConsoleMode())
 			Console_Print("GetEditorID >> %s", edid);
@@ -618,9 +618,9 @@ bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 		if (thisObj && thisObj->IsCharacter() && optIdx <= 4)
 			if (auto BipedAnim = ((Character*)thisObj)->validBip01Names) {
 				if (BipedAnim->bones[optIdx].bone && BipedAnim->bones[optIdx].bone->GetNiNode()) {
-					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->bones[optIdx].bone->m_blockName.handle);
+					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->bones[optIdx].bone->m_blockName);
 					if (IsConsoleMode())
-						Console_Print("GetOptionalBone >> %s", BipedAnim->bones[optIdx].bone->m_blockName.handle);
+						Console_Print("GetOptionalBone >> %s", BipedAnim->bones[optIdx].bone->m_blockName);
 				}
 			}
 	}
@@ -687,7 +687,7 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 	*result = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &blockName, &x, &y, &z, &w, &rotate, &world, &update)) {
 		NiAVObject* object = nullptr;
-		if (lastForm == thisObj && !strcmp(lastBlock.m_pObject->m_blockName.handle, blockName)) {
+		if (lastForm == thisObj && !strcmp(lastBlock.m_pObject->m_blockName, blockName)) {
 			object = lastBlock;
 		}
 		else {

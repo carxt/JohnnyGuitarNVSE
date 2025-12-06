@@ -13,6 +13,7 @@
 // vista and above
 #define _WIN32_WINNT	0x601
 #define NOMINMAX
+#define JIP_CHANGES 1
 
 #include <map>
 #include <Windows.h>

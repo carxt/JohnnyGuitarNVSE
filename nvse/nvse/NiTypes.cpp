@@ -90,3 +90,5 @@ NiMatrix3 NiMatrix3::operator* (const NiMatrix3& mat) const {
 		cr[2][2] * mat.cr[2][2];
 	return result;
 }
+
+#include <Utilities.h>

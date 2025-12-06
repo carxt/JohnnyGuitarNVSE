@@ -57,7 +57,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;NVSE_PLUGIN_EXAMPLE_EXPORTS;RUNTIME_VERSION=0x040020D0;RUNTIME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;NVSE_PLUGIN_EXAMPLE_EXPORTS;RUNTIME_VERSION=0x040020D0;RUNTIME;GAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -87,7 +87,7 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)\..\internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_NO_VA_START_VALIDATION;WIN32;NDEBUG;_WINDOWS;_USRDLL;NVSE_PLUGIN_EXAMPLE_EXPORTS;RUNTIME_VERSION=0x040020D0;RUNTIME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_NO_VA_START_VALIDATION;WIN32;NDEBUG;_WINDOWS;_USRDLL;NVSE_PLUGIN_EXAMPLE_EXPORTS;RUNTIME_VERSION=0x040020D0;RUNTIME;GAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
@@ -95,6 +95,9 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
       <ForcedIncludeFiles>nvse/prefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -139,10 +142,17 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp" />
     <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp" />
     <ClCompile Include="internal\JIPFixes.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiFixedString.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiGlobalStringTable.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiMemObject.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiMemory.cpp" />
+    <ClCompile Include="internal\JohnnyExtraData.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
     <ClCompile Include="internal\sha1\sha1.cpp" />
     <ClCompile Include="internal\utility.cpp" />
     <ClCompile Include="JohnnyGuitarNVSE.cpp" />
+    <ClCompile Include="misc\EditorIDs.cpp" />
+    <ClCompile Include="misc\misc.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\CommandTable.h" />
@@ -190,8 +200,15 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClInclude Include="internal\Game\Bethesda\DialogueResponse.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MemoryContexts.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiCriticalSection.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiFixedString.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiGlobalStringTable.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiMemObject.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiMemory.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiSmartPointer.hpp" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\JIPFixes.hpp" />
+    <ClInclude Include="internal\JohnnyExtraData.hpp" />
     <ClInclude Include="internal\md5\md5.h" />
     <ClInclude Include="internal\netimmerse.h" />
     <ClInclude Include="internal\serialization.h" />

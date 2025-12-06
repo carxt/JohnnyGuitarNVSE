@@ -40,7 +40,6 @@ class NiTriShape;
 class NiPropertyState;
 class NiDX9Renderer;
 
-
 struct NiUpdateData {
 	NiUpdateData(float afTime = 0.f, bool abUpdateControllers = false, bool abIsMultiThreaded = false, bool abMTParticles = false, bool abUpdateGeomorphs = false, bool abUpdateShadowSceneNode = false)
 		: fTime(afTime), bUpdateControllers(abUpdateControllers), bIsMultiThreaded(abIsMultiThreaded), bMTParticles(abMTParticles), bUpdateGeomorphs(abUpdateGeomorphs), bUpdateShadowSceneNode(abUpdateShadowSceneNode)
@@ -53,50 +52,6 @@ struct NiUpdateData {
 	bool	bMTParticles;
 	bool	bUpdateGeomorphs;
 	bool	bUpdateShadowSceneNode;
-};
-
-class NiFixedString {
-public:
-	const char* handle;
-
-	NiFixedString(const char* pcString) {
-		if (pcString)
-			handle = CdeclCall<const char*>(0xA5B690, pcString);
-		else
-			handle = nullptr;
-	};
-	~NiFixedString() {
-		CdeclCall(0x4381D0, this);
-	};
-
-	friend bool operator==(const NiFixedString& arString1, const NiFixedString& arString2) {
-		return arString1.handle == arString2.handle;
-	};
-
-	friend bool operator==(const NiFixedString& arString, const char* apcString) {
-		if (arString.handle == apcString)
-			return true;
-
-		if (!arString.handle || !apcString)
-			return false;
-
-		return !strcmp(arString.handle, apcString);
-	};
-
-	friend bool operator==(const char* apcString, const NiFixedString& arString) {
-		if (arString.handle == apcString)
-			return true;
-
-		if (!arString.handle || !apcString)
-			return false;
-
-		return !strcmp(arString.handle, apcString);
-	};
-};
-
-class NiMemObject {
-	NiMemObject();
-	~NiMemObject();
 };
 
 // 08
@@ -385,7 +340,7 @@ public:
 		// More
 	};
 
-	const char* sequenceName;			// 08
+	NiFixedString	 sequenceName;			// 08
 	UInt32				numControlledBlocks;	// 0C
 	UInt32				arrayGrowBy;			// 10
 	ControlledBlock** controlledBlocks;		// 14
@@ -583,6 +538,10 @@ public:
 
 	void SetName(NiFixedString& arString) {
 		ThisCall(0xA5B950, this, &arString);
+	}
+
+	NiTimeController* GetController(const NiRTTI* apRTTI) const {
+		return ThisCall<NiTimeController*>(0xA5C570, this, apRTTI);
 	}
 };
 

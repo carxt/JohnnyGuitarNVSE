@@ -517,7 +517,7 @@ class Visitor {
 
 	class AcceptAll {
 	public:
-		bool Accept(Info* info) {
+		bool Accept(const Info* info) {
 			return true;
 		}
 	};

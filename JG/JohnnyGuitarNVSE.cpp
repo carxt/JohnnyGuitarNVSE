@@ -46,6 +46,7 @@
 
 #include "internal/Game/Bethesda/BSMemory.hpp"
 #include "internal/Game/Bethesda/AutoMemContext.hpp"
+#include <internal/JohnnyExtraData.hpp>
 
 BS_ALLOCATORS
 
@@ -71,6 +72,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		case NVSEMessagingInterface::kMessage_NewGame:
 		case NVSEMessagingInterface::kMessage_PreLoadGame:
 	{
+		JohnnyExtraDataArray::GetInstance().ResetScriptData();
 		disableMuzzleLights = 0; //reset the muzzle hook every time
 		bArrowKeysDisabled = false;
 		isShowLevelUp = true;
@@ -158,6 +160,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			if (!bDisableDLLCompatibilityRoutines) {
 				HandleDLLInterop();
 			}
+			JohnnyExtraData::InitName();
+			break;
 		}
 		default:
 			break;
@@ -183,8 +187,8 @@ extern "C" {
 			return false;
 		}
 
-		if (nvse->nvseVersion < 0x6020030) {
-			PrintLog("NVSE version is outdated. This plugin requires v6.2.3 minimum.");
+		if (nvse->nvseVersion < PACKED_NVSE_VERSION) {
+			PrintLog("NVSE version is outdated. This plugin requires v6.4.2 minimum.");
 			return false;
 		}
 
@@ -586,6 +590,7 @@ extern "C" {
 		g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 		if (!nvse->isEditor) {
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
+			JohnnyExtraData::Initialize(nvseData);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
 			CaptureLambdaVars = (_CaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList);
 			UncaptureLambdaVars = (_UncaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList);
