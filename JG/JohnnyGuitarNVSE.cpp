@@ -55,7 +55,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 519
+#define JG_VERSION 520
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	MEM_CONTEXT eOrgContext;
 	if (!bIsGECK) {
