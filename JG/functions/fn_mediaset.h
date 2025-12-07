@@ -137,7 +137,7 @@ bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
 		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*) thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
 		if (audioMrkr && audioMrkr->data) {
 			audioMrkr->data->mediaLocCtrlID = locationController->refID;
-			Console_Print("AudioMarkerSetController >> 0x%lx, %s", locationController->refID, locationController->GetName());
+			Console_Print("AudioMarkerSetController >> 0x%lx, %s", locationController->refID, locationController->GetFormEditorID());
 
 		}
 		else if (IsConsoleMode()) {
@@ -179,7 +179,7 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 				break;
 
 			}
-			Console_Print("AudioMarkerSetProperty >> %s, %d, %.2f", thisObj->GetName(), type, newVal);
+			Console_Print("AudioMarkerSetProperty >> %s, %d, %.2f", thisObj->GetFormEditorID(), type, newVal);
 		}
 		else if (IsConsoleMode()) {
 			Console_Print("Calling reference is not an AudioMarker");
@@ -218,7 +218,7 @@ bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
 
 			}
 
-			Console_Print("AudioMarkerGetProperty >> %s, %d, %.2f", thisObj->GetName(), type, *result);
+			Console_Print("AudioMarkerGetProperty >> %s, %d, %.2f", thisObj->GetFormEditorID(), type, *result);
 		}
 		else if (IsConsoleMode()) {
 			Console_Print("Calling reference is not an AudioMarker");

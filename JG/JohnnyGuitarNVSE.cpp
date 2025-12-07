@@ -46,6 +46,7 @@
 
 #include "internal/Game/Bethesda/BSMemory.hpp"
 #include "internal/Game/Bethesda/AutoMemContext.hpp"
+#include <internal/JohnnyExtraData.hpp>
 
 BS_ALLOCATORS
 
@@ -54,7 +55,7 @@ HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 519
+#define JG_VERSION 520
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	MEM_CONTEXT eOrgContext;
 	if (!bIsGECK) {
@@ -71,6 +72,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		case NVSEMessagingInterface::kMessage_NewGame:
 		case NVSEMessagingInterface::kMessage_PreLoadGame:
 	{
+		JohnnyExtraDataArray::GetInstance().ResetScriptData();
 		disableMuzzleLights = 0; //reset the muzzle hook every time
 		bArrowKeysDisabled = false;
 		isShowLevelUp = true;
@@ -158,6 +160,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			if (!bDisableDLLCompatibilityRoutines) {
 				HandleDLLInterop();
 			}
+			JohnnyExtraData::InitName();
+			break;
 		}
 		default:
 			break;
@@ -183,8 +187,8 @@ extern "C" {
 			return false;
 		}
 
-		if (nvse->nvseVersion < 0x6020030) {
-			PrintLog("NVSE version is outdated. This plugin requires v6.2.3 minimum.");
+		if (nvse->nvseVersion < PACKED_NVSE_VERSION) {
+			PrintLog("NVSE version is outdated. This plugin requires v6.4.2 minimum.");
 			return false;
 		}
 
@@ -218,8 +222,10 @@ extern "C" {
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
-		strncpy(g_workingDir, filename, (strlen(filename)-13));
-		strcpy((char*)(strrchr(filename, '\\') + 1), "Data\\nvse\\plugins\\JohnnyGuitar.ini");
+		strncpy_s(g_workingDir, filename, (strlen(filename)-13));
+		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
+		uint32_t length = filename - lastSlash;
+		strcpy_s(lastSlash, length, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 		loadEditorIDs = 1;
 		fixHighNoon = 0;
 		fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
@@ -561,14 +567,20 @@ extern "C" {
 		REG_CMD(IsSoundPlayingFromPath);
 		REG_CMD(SetOnGeneralSubtitleEventHandler);
 		REG_CMD(PathToRef);
+		REG_TYPED_CMD(GetWeaponsForMod, Array);
 		REG_CMD(SetOnReputationChangeEventHandler);
 		REG_CMD(IsNiSequenceActive);
 		REG_CMD(GetHotkeySlot);
 		REG_CMD(SetOnNPCActorValueChangeEventHandler);
+		REG_CMD(GetGrenadeHoldTime);
 		REG_CMD(RemoveHighlightedRef);
 		REG_CMD(GetSaidOnce);
 		REG_CMD(SetSaidOnce);
-		REG_TYPED_CMD(GetTopicInfo, Array)
+		REG_TYPED_CMD(GetTopicInfo, Array);
+		REG_CMD(IsMenuPaused);
+		REG_CMD(IsInDialogueWithPlayer);
+		REG_CMD(SetHUDVisibilityOverride);
+		REG_CMD(GetHUDVisibilityOverride);
 		REG_CMD(UpdateRepairMenu);
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
@@ -577,6 +589,7 @@ extern "C" {
 		g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 		if (!nvse->isEditor) {
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
+			JohnnyExtraData::Initialize(nvseData);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
 			CaptureLambdaVars = (_CaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList);
 			UncaptureLambdaVars = (_UncaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList);

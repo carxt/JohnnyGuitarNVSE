@@ -1,5 +1,6 @@
 #pragma once
 #include <unordered_set>
+#include <unordered_map>
 
 #include "GameUI.h"
 #include <algorithm>
@@ -661,12 +662,12 @@ namespace hk_DialogueTopicResponseManageHook {
 					if (auto speakAnim = LookupFormByID(j.second.speakerAnimation))
 					{
 						dumpStringL += ",";
-						dumpStringL += std::string(speakAnim->GetName());
+						dumpStringL += std::string_view(speakAnim->GetFormEditorID());
 					}
 					if (auto speakAnim = LookupFormByID(j.second.listenerAnimation))
 					{
 						dumpStringL += ",";
-						dumpStringL += std::string(speakAnim->GetName());
+						dumpStringL += std::string_view(speakAnim->GetFormEditorID());
 					}
 					addSplit = true;
 				}
@@ -952,19 +953,7 @@ UInt8 TESForm::GetOverridingModIdx() {
 }
 
 NiAVObject* NiNode::GetBlock(const char* blockName) {
-	if (StrEqualCI(m_blockName.handle, blockName))
-		return this;
-	NiAVObject* found = NULL;
-	for (NiTArray<NiAVObject*>::Iterator iter(m_children); !iter.End(); ++iter) {
-		if (!*iter) continue;
-		if (iter->GetNiNode())
-			found = ((NiNode*)*iter)->GetBlock(blockName);
-		else if (StrEqualCI(iter->m_blockName.handle, blockName))
-			found = *iter;
-		else continue;
-		if (found) break;
-	}
-	return found;
+	return GetObjectByName(blockName);
 }
 
 bool __fastcall CanSaveNowHook(void* ThisObj, void* edx, int isAutoSave) {
@@ -1026,8 +1015,9 @@ void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1) {
 }
 void SetMapMarkerIcon(TESObjectREFR* marker, char* iconPath) {
 	auto pos = markerIconMap.find(marker->refID);
-	char* pathCopy = new char[strlen(iconPath) + 1];
-	strcpy(pathCopy, iconPath);
+	uint32_t bufferSize = strlen(iconPath) + 1;
+	char* pathCopy = new char[bufferSize];
+	strcpy_s(pathCopy, bufferSize, iconPath);
 
 	if (pos != markerIconMap.end()) {
 		delete[] pos->second;
@@ -1867,7 +1857,8 @@ void HandleIniOptions() {
 	}
 
 	// for Runtime EDIDs
-	if (loadEditorIDs) LoadEditorIDs();
+	if (loadEditorIDs) 
+		EDIDRestoration::InitHooks();
 
 	// for b60FPSDuringLoading
 	if (iFPSCapLoadScreen > 0) {

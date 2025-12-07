@@ -91,7 +91,7 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 				if (iter->data) {
 					g_arrInterface->AppendElement(weatherArr, NVSEArrayElement(iter->data->weather));
 					if (IsConsoleMode())
-						Console_Print(iter->data->weather->GetName());
+						Console_Print(iter->data->weather->GetFormEditorID());
 				}
 			} while (iter = iter->next);
 		}

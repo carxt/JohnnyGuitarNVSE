@@ -1002,7 +1002,7 @@ public:
 	UInt32							unk1A8[4];		// 1A8
 	TESObjectREFR* crosshairRef;	// 1B8
 	UInt32							unk1BC;			// 1BC
-	UInt32							unk1C0;			// 1C0	Crosshair flags?
+	UInt32							visibilityOverrides;	// 1C0
 	UInt32							unk1C4;			// 1C4
 	TileRect* tile1C8;		// 1C8	Hokeys\hotkey_selector
 	TileRect* tile1CC;		// 1CC	Hokeys\hotkey_selector\HK_Item_0

@@ -520,10 +520,10 @@ public:
 	virtual bool		Unk_47(void);
 	virtual bool		Unk_48(UInt32 formType);	// returns if the same FormType is passed in
 	virtual bool		Unk_49(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4);	// looks to be func33 in Oblivion
-	virtual void		SetRefID(UInt32 refID, bool generateID);
-	virtual char* GetName2(void);
-	virtual char* GetName(void);
-	virtual bool		SetEditorID(const char* edid);		// simply returns true at run-time
+	virtual void		SetFormID(UInt32 refID, bool generateID);
+	virtual const char*	GetObjectTypeName(void) const;
+	virtual const char*	GetFormEditorID(void) const;
+	virtual bool		SetFormEditorID(const char* edid);		// simply returns true at run-time
 	// 4E
 	uint32_t GetId() const {
 		return *(uint32_t*)((uintptr_t)this + 0xC);
@@ -533,9 +533,6 @@ public:
 		return *(uint8_t*)((uintptr_t)this + 0x4);
 	}
 
-	const char* hk_GetName();
-	bool hk_SetEditorId(const char* Name);
-	bool hk_REFRSetEditorID(const char* Name);
 	struct EditorData {
 		BSString	editorID;			// 00
 		UInt32		vcMasterFormID;		// 08 - Version control 1 (looks to be a refID inside the Version Control master)
@@ -600,6 +597,9 @@ public:
 	void SetJIPFlag(UInt8 jipFlag, bool bSet);
 
 	static TESForm* GetFormByNumericID(UInt32 formID);
+
+	bool GetTemporary() const;
+	void SetTemporary();
 
 	MEMBER_FN_PREFIX(TESForm);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
@@ -683,6 +683,8 @@ public:
 	~TESFullName();
 
 	BSString	name;		// 004
+
+	static const char* GetFullName(const TESForm* apForm);
 };
 
 // 0C
