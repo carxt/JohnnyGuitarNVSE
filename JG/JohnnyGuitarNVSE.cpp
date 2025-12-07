@@ -567,7 +567,6 @@ extern "C" {
 		REG_CMD(IsSoundPlayingFromPath);
 		REG_CMD(SetOnGeneralSubtitleEventHandler);
 		REG_CMD(PathToRef);
-		REG_TYPED_CMD(GetWeaponsForMod, Array);
 		REG_CMD(SetOnReputationChangeEventHandler);
 		REG_CMD(IsNiSequenceActive);
 		REG_CMD(GetHotkeySlot);
@@ -582,6 +581,8 @@ extern "C" {
 		REG_CMD(SetHUDVisibilityOverride);
 		REG_CMD(GetHUDVisibilityOverride);
 		REG_CMD(UpdateRepairMenu);
+		REG_TYPED_CMD(GetWeaponsForMod, Array);
+
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
