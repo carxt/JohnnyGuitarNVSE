@@ -20,6 +20,7 @@ DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , 0, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(IsMenuPaused, , "", 0, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetHUDVisibilityOverride, "Sets HUD element visibility override flags", 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(UpdateRepairMenu, , 0, 0, NULL);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 		if (g_thePlayer) {
@@ -387,8 +388,8 @@ bool Cmd_SetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
 			HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
       *result = 1;
 		}
-  } 
- 
+  }
+
   return true;
 }
 
@@ -412,12 +413,41 @@ bool Cmd_IsMenuPaused_Eval(COMMAND_ARGS_EVAL) {
 	}
 	return true;
 }
-  
+
 bool Cmd_IsMenuPaused_Execute(COMMAND_ARGS) {
 	*result = 1;
 	uint32_t uiMenuID = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiMenuID)) {
 		Cmd_IsMenuPaused_Eval(thisObj, reinterpret_cast<void*>(uiMenuID), nullptr, result);
 	}
+	return true;
+}
+
+float CalculateRepairedHealth(ContChangesEntry* target, ContChangesEntry* repairItem) {
+	if (!target || !repairItem) return 0.0f;
+	float targetHealth = target->GetItemHealthPerc(true);
+	float repairItemHealth = repairItem->GetItemHealthPerc(true);
+	int repairSkill = g_thePlayer->avOwner.GetActorValueInt(kAVCode_Repair);
+	int outParam = -1;
+	double result = CdeclCall<double>(0x648090, repairSkill, targetHealth, repairItemHealth, &outParam);
+	return (float)(result / 100.0);
+}
+
+bool Cmd_UpdateRepairMenu_Execute(COMMAND_ARGS) {
+	*result = 0;
+	RepairMenu* rm = *(RepairMenu**)0x11DA75C;
+	if (!rm) return true;
+	ContChangesEntry* target = *(ContChangesEntry**)0x11DA760;
+	if (!target) return true;
+	auto iter = rm->repairItems.GetHead();
+	if (!iter) return true;
+	do {
+		auto listItem = iter->GetItem();
+		if (listItem && listItem->tile && listItem->object) {
+			float repairedHealth = CalculateRepairedHealth(target, listItem->object);
+			listItem->tile->SetFloat(kTileValue_user0, repairedHealth);
+		}
+	} while (iter = iter->GetNext());
+	*result = 1;
 	return true;
 }
