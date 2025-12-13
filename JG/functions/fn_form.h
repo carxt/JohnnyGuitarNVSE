@@ -1759,30 +1759,30 @@ bool Cmd_GetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 	int id = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &id) && IS_TYPE(weap, TESObjectWEAP) && id <= 7) {
 		switch (id) {
-			case 0:
-				*(UInt32*)result = weap->worldStatic->refID;
-				break;
-			case 1:
-				*(UInt32*)result = weap->modStatics[0]->refID;
-				break;
-			case 2:
-				*(UInt32*)result = weap->modStatics[1]->refID;
-				break;
-			case 3:
-				*(UInt32*)result = weap->modStatics[3]->refID;
-				break;
-			case 4:
-				*(UInt32*)result = weap->modStatics[2]->refID;
-				break;
-			case 5:
-				*(UInt32*)result = weap->modStatics[5]->refID;
-				break;
-			case 6:
-				*(UInt32*)result = weap->modStatics[4]->refID;
-				break;
-			case 7:
-				*(UInt32*)result = weap->modStatics[6]->refID;
-				break;
+		case 0:
+			*(UInt32*)result = weap->worldStatic != nullptr ? weap->worldStatic->refID : 0;
+			break;
+		case 1:
+			*(UInt32*)result = weap->modStatics[0] != nullptr ? weap->modStatics[0]->refID : 0;
+			break;
+		case 2:
+			*(UInt32*)result = weap->modStatics[1] != nullptr ? weap->modStatics[1]->refID : 0;
+			break;
+		case 3:
+			*(UInt32*)result = weap->modStatics[3] != nullptr ? weap->modStatics[3]->refID : 0;
+			break;
+		case 4:
+			*(UInt32*)result = weap->modStatics[2] != nullptr ? weap->modStatics[2]->refID : 0;
+			break;
+		case 5:
+			*(UInt32*)result = weap->modStatics[5] != nullptr ? weap->modStatics[5]->refID : 0;
+			break;
+		case 6:
+			*(UInt32*)result = weap->modStatics[4] != nullptr ? weap->modStatics[4]->refID : 0;
+			break;
+		case 7:
+			*(UInt32*)result = weap->modStatics[6] != nullptr ? weap->modStatics[6]->refID : 0;
+			break;
 		}
 	}
 	return true;
