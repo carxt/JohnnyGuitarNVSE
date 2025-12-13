@@ -875,7 +875,7 @@ void HandleEventHooks() {
 	OnNPCResponseHandler = JGCreateEvent("OnNPCResponse", 5, 1, FilterInt::Create);
 	OnGeneralSubtitleHandler = JGCreateEvent("OnGeneralSubtitle", 5, 1, FilterFormInt::Create);
 	OnReputationChangeHandler = JGCreateEvent("OnReputationChangeHandler", 3, 1);
-	OnNPCAVChangeHandler = JGCreateEvent("OnNPCActorValueChangeHandler", 3, 2, FilterFormInt::Create);
+	OnNPCAVChangeHandler = JGCreateEvent("OnNPCActorValueChangeHandler", 4, 2, FilterFormInt::Create);
 
 	CallUDF = g_scriptInterface->CallFunctionAlt;
 	WriteRelCall(0x55678A, (UInt32)HandleSeenDataUpdateEvent);
