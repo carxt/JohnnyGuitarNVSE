@@ -102,6 +102,7 @@ DEFINE_COMMAND_PLUGIN(GetNoteQuestList, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(AddNoteQuest, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(RemoveNoteQuest, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(GetHotkeySlot, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetMineArmedEx, , 1, 0, NULL);
 
 
 
@@ -2060,6 +2061,14 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 		}
 	}
 
+	return true;
+}
+
+bool Cmd_GetMineArmedEx_Execute(COMMAND_ARGS)
+{
+	if (GrenadeProjectile* projectile = (GrenadeProjectile*)thisObj; IS_ID(projectile, GrenadeProjectile) && !(projectile->projFlags & 0x200) &&
+		((((BGSProjectile*)thisObj->baseForm)->projFlags & 0x426) == 0x26))
+		*result = 1;
 	return true;
 }
 
