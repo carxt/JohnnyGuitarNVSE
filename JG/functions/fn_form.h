@@ -13,6 +13,7 @@ DEFINE_COMMAND_PLUGIN(GetWeapon1stPersonModel, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetMusicTypePath, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetMusicTypeDB, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetMusicTypeDB, , 0, 2, kParams_OneForm_OneFloat);
+DEFINE_COMMAND_PLUGIN(SetMusicTypePath, , 0, 2, kParams_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(SetExplosionSound, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(SetProjectileSound, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetWeaponWorldModelPath, , 0, 1, kParams_OneForm);
@@ -1699,6 +1700,16 @@ bool Cmd_SetMusicTypeDB_Execute(COMMAND_ARGS) {
 	float newVal = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype, &newVal) && IS_TYPE(mtype, BGSMusicType)) {
 		mtype->dB = newVal;
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_SetMusicTypePath_Execute(COMMAND_ARGS) {
+	BGSMusicType* mtype;
+	char newPath[MAX_PATH];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype, &newPath) && IS_TYPE(mtype, BGSMusicType)) {
+		mtype->soundFile.path.Set(newPath);
 		*result = 1;
 	}
 	return true;

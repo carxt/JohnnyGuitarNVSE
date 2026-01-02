@@ -583,6 +583,7 @@ extern "C" {
 		REG_CMD(UpdateRepairMenu);
 		REG_TYPED_CMD(GetWeaponsForMod, Array);
 		REG_CMD(GetMineArmedEx);
+		REG_CMD(SetMusicTypePath);
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
