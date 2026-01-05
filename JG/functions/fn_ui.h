@@ -14,7 +14,7 @@ DEFINE_COMMAND_PLUGIN(GetExtraMiscStat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ModExtraMiscStat, , 0, 2, kParams_OneString_OneInt);
 DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , 0, 2, kParams_OneInt_OneOptionalForm);
-DEFINE_COMMAND_PLUGIN(PushUIQuestToTop, , 0, 1, kParams_OneQuest); //DO NOT REGISTER YET.
+DEFINE_COMMAND_ALT_PLUGIN(PushUIQuestToTop, PushSelectedQuestInterfaceListEntryToTheTopOfThePipBoyQuestLogInterfaceImmediately, , 0, 1, kParams_OneQuest);
 DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , 0, 0, NULL); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , 0, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(IsMenuPaused, , "", 0, kParams_OneOptionalInt);
@@ -38,55 +38,53 @@ bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks
 
 
 
-bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) { //Does not update Tweaks.
-	TESQuest* inQuest;
+bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
+	TESQuest* quest;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &inQuest)) {
-		if (g_thePlayer) {
-			auto headNode = g_thePlayer->questObjectiveList.Head();
-			if (!(headNode->next)) { return true; } //literally nothing to do here.
-			auto lastNode = headNode;
-			ListNode<BGSQuestObjective> newBuf = {};
-			auto lastTmpNode = &newBuf;
-			lastTmpNode->data = NULL;
-			lastTmpNode->next = NULL;
-			while (headNode) {
-				auto elem = headNode->data;
-				if (elem->quest == inQuest) {
-					auto pNext = headNode->next;
-					if (pNext) {
-						headNode->data = pNext->data;
-						headNode->next = pNext->next;
-						pNext->data = elem;
-						pNext->next = NULL;
-						lastTmpNode->next = pNext;
-						lastTmpNode = pNext;
-						continue;
-					}
-					else {
-						lastNode->next = NULL;
-						lastTmpNode->next = headNode;
-						lastTmpNode = headNode;
-						break;
-					}
-				}
-				lastNode = headNode;
-				headNode = headNode->next;
-			}
-			auto headNodeTmp = newBuf.next;
-			headNode = g_thePlayer->questObjectiveList.Head();
-			newBuf.data = headNode->data;
-			newBuf.next = headNode->next;
-			headNode->next = headNodeTmp;
-			while (headNode && headNode->next) {
-				headNode->data = headNode->next->data;
-				headNode = headNode->next;
-			}
-			headNode->next = newBuf.next;
-			headNode->data = newBuf.data;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &quest) || !g_thePlayer)
+		return true;
 
+	auto& list = g_thePlayer->questObjectiveList;
+	if (list.Empty())
+		return true;
+
+	std::vector<BGSQuestObjective*> matching;
+	std::vector<BGSQuestObjective*> others;
+
+	auto node = list.Head();
+	while (node) {
+		if (node->data) {
+			if (node->data->quest == quest)
+				matching.push_back(node->data);
+			else
+				others.push_back(node->data);
 		}
+		node = node->next;
 	}
+
+	if (matching.empty())
+		return true;
+
+	node = list.Head();
+	while (node->next) {
+		auto next = node->next;
+		node->next = next->next;
+		GameHeapFree(next);
+	}
+
+	node->data = matching[0];
+	for (size_t i = 1; i < matching.size(); i++)
+		list.Append(matching[i]);
+	for (auto obj : others)
+		list.Append(obj);
+
+	MapMenu* mapMenu = MapMenu::GetSingleton();
+	if (mapMenu) {
+		mapMenu->questList.FreeAllTiles();
+		mapMenu->questList.itemCount = 0;
+	}
+
+	*result = 1;
 	return true;
 }
 
