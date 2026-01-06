@@ -1535,7 +1535,7 @@ bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 bool Cmd_GetLifeState_Execute(COMMAND_ARGS) {
 	Actor* actor = (Actor*)thisObj;
 	*result = -1;
-	if (actor) {
+	if (actor && actor->IsActor()) {
 		*result = actor->lifeState;
 		if (IsConsoleMode()) Console_Print("GetLifeState >> %.f", *result);
 	}
