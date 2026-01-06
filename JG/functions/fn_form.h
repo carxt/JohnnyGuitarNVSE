@@ -1322,7 +1322,7 @@ bool Cmd_GetQuestDelay_Execute(COMMAND_ARGS) {
 	TESQuest* quest;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &quest) && IS_TYPE(quest, TESQuest)) {
 		*result = quest->questDelayTime;
-		if (IsConsoleMode()) Console_Print("GetQuestDelay >> *.3f", *result);
+		if (IsConsoleMode()) Console_Print("GetQuestDelay >> %.3f", *result);
 	}
 	return true;
 }
