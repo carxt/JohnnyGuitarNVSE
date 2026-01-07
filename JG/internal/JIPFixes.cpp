@@ -3,7 +3,9 @@
 #include "fstream"
 #include "Game/Bethesda/BSStringT.hpp"
 #include "GameObjects.h"
+#include "GameProcess.h"
 #include "GameRTTI.h"
+#include "ParamInfos.h"
 #include "PluginAPI.h"
 #include "SafeWrite.h"
 #include "utility.h"
@@ -456,6 +458,44 @@ namespace JIPFixes {
 		}
 
 	}
+	namespace RespawnDisableFix {
+
+		bool(__cdecl* ClearDeadActors)(COMMAND_ARGS) = nullptr;
+
+		thread_local BOOL bSkipRespawning = FALSE;
+
+		class HighProcessEx : public HighProcess {
+		public:
+			void FadeAndDisable(Actor* apActor) {
+				if (bSkipRespawning && apActor->GetRespawn())
+					return;
+
+				ThisCall(0x8FEB60, this, apActor);
+			}
+		};
+
+		bool Cmd_ClearDeadActors_Execute(COMMAND_ARGS) {
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &bSkipRespawning)) {
+				ClearDeadActors(PASS_COMMAND_ARGS);
+				bSkipRespawning = FALSE;
+			}
+			return true;
+		}
+
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x28EF));
+			if (pInfo) {
+				pInfo->params = kParams_OneOptionalInt;
+				pInfo->numParams = 1;
+				ClearDeadActors = pInfo->execute;
+				pInfo->execute = Cmd_ClearDeadActors_Execute;
+				WriteRelCallEx(GetJIPAddress(0x10030C38), &HighProcessEx::FadeAndDisable);
+				PatchMemoryNop(GetJIPAddress(0x10030C3D), 2);
+			}
+		}
+
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -519,6 +559,7 @@ namespace JIPFixes {
 		FireWeaponFix::InitHooks();
 		ItemDescriptionFixFix::InitHooks();
 		SetOnDialogTopicEventHandlerEx::InitHooks();
+		RespawnDisableFix::InitHooks();
 	}
 
 	void InitDeferredHooks() {
