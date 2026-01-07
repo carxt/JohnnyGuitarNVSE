@@ -159,3 +159,7 @@ void Actor::StopMoving() {
 bool Actor::IsInDialogueWithPlayer() const {
 	return ThisCall<bool>(0x933840, this);
 }
+
+bool Actor::GetRespawn() const {
+	return ThisCall<bool>(0x87F4A0, this);
+}

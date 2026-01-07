@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CommandTable.h"
+#include <ScriptUtils.h>
 static ParamInfo kParams_OneInt_ThreeScriptVars[4] =
 {
 	{	"int", kParamType_Integer, 0 },
