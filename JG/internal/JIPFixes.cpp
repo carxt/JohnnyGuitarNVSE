@@ -1,15 +1,14 @@
 #include "JIPFixes.hpp"
+#include "events/EventFramework.h"
 #include "fstream"
 #include "Game/Bethesda/BSStringT.hpp"
 #include "GameObjects.h"
 #include "GameProcess.h"
 #include "GameRTTI.h"
+#include "ParamInfos.h"
 #include "PluginAPI.h"
 #include "SafeWrite.h"
 #include "utility.h"
-#include <fstream>
-#include <GameRTTI.h>
-#include <ParamInfos.h>
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern bool bFixJIP;
@@ -393,6 +392,72 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace SetOnDialogTopicEventHandlerEx {
+
+		EventInformation* OnDialogTopicHandler = nullptr;
+
+		bool Cmd_SetOnDialogTopicEventHandler_JG_Execute(COMMAND_ARGS) {
+			BOOL setOrRemove = FALSE;
+			Script* script = nullptr;
+			TESForm* filter[1] = { nullptr };
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &script, &setOrRemove, &filter[0]) && IS_TYPE(script, Script)) {
+				TESForm* pFilterForm = filter[0];
+		
+				if (!pFilterForm || IS_TYPE(pFilterForm, TESTopic) || IS_TYPE(pFilterForm, TESTopicInfo)) {
+					if (OnDialogTopicHandler) {
+						if (setOrRemove)
+							OnDialogTopicHandler->RegisterEvent(script, (void**)&filter);
+						else
+							OnDialogTopicHandler->RemoveEvent(script, (void**)&filter);
+					}
+				}
+			}
+			return true;
+		}
+
+		CallDetour kGetResultScript;
+		class TESTopicInfoEx : public TESTopicInfo {
+		public:
+			enum ResultScriptType : uint32_t {
+				BEGIN	= 0,
+				END		= 1,
+				COUNT	= 2,
+			};
+
+			Script* GetResultScript(ResultScriptType aeScript) {
+				if (aeScript == ResultScriptType::BEGIN) {
+					uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+					TESObjectREFR* pOwner = *reinterpret_cast<TESObjectREFR**>(pEBP + 0xC);
+					if (pOwner) {
+						for (auto const& callback : OnDialogTopicHandler->callbacks) {
+							auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
+							if (filter->IsBaseInFilter(0, pParentTopic))
+								CallUDF(callback.script, pOwner, OnDialogTopicHandler->numMaxArgs, pParentTopic);
+							else if (filter->IsBaseInFilter(0, this) || filter->IsInFilter(0, 0))
+								CallUDF(callback.script, pOwner, OnDialogTopicHandler->numMaxArgs, this);
+						}
+					}
+				}
+
+				return ThisCall<Script*>(kGetResultScript.GetOverwrittenAddr(), this, aeScript);
+			}
+		};
+
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x27FC));
+			if (pInfo) {
+				OnDialogTopicHandler = JGCreateEvent("OnDialogTopicHandler", 1, 1);
+
+				pInfo->execute = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
+				SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
+
+				kGetResultScript.ReplaceCallEx(0x61F18B, &TESTopicInfoEx::GetResultScript);
+
+				SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8", 8);
+			}
+		}
+
+	}
 	namespace RespawnDisableFix {
 
 		bool(__cdecl* ClearDeadActors)(COMMAND_ARGS) = nullptr;
@@ -493,6 +558,7 @@ namespace JIPFixes {
 		CloseActiveMenuFix::InitHooks();
 		FireWeaponFix::InitHooks();
 		ItemDescriptionFixFix::InitHooks();
+		SetOnDialogTopicEventHandlerEx::InitHooks();
 		RespawnDisableFix::InitHooks();
 	}
 

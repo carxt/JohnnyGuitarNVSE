@@ -1830,6 +1830,9 @@ public:
 	UInt32				speechChallenge;	// 44
 	TESQuest*			quest;				// 48
 	UInt32				modInfoFileOffset;	// 4C	during LoadForm
+#if JIP_CHANGES
+	TESTopic*			pParentTopic;
+#endif
 
 	void RunResultScript(bool onEnd, Actor* actor);
 

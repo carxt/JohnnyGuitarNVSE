@@ -135,6 +135,7 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClCompile Include="..\nvse\nvse\NiTypes.cpp" />
     <ClCompile Include="..\nvse\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\nvse\Utilities.cpp" />
+    <ClCompile Include="events\EventFramework.cpp" />
     <ClCompile Include="events\LambdaVariableContext.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSMemory.cpp" />
