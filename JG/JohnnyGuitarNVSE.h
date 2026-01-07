@@ -1298,10 +1298,13 @@ __declspec (naked) void FixDeathSoundsHook() {
 }
 __declspec (naked) void PatchPlayerPainHook(){
 	_asm {
-		xor eax, eax
-		mov ecx, dword ptr ss: [ebp-0x180]
-		cmp ecx, dword ptr ds: [0x11DEA3C]
-		cmovnz al, byte ptr ds: [0x119B4E0]
+		mov ecx, dword ptr[ebp - 0x180]
+		cmp ecx, dword ptr ds : [0x11DEA3C]
+		jz PLAYER
+		mov al, byte ptr ds : [0x119B4E0]
+		retn
+		PLAYER:
+		mov al, 0
 		retn
 	}
 }
