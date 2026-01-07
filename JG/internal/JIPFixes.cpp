@@ -393,14 +393,13 @@ namespace JIPFixes {
 	}
 
 	namespace EarlyFixedStrings {
-
 		void InitHooks() {
-			SafeWrite8(0xA5B630u, 0xC3u);
-			WriteRelJump(0xA5B690u, GetJIPAddress(0x1000CE20));
-			WriteRelCall(0x878203u, GetJIPAddress(0x1000CEA0));
+			SafeWrite8(0xA5B630, 0xC3);
+			WriteRelJump(0xA5B690, GetJIPAddress(0x1000CE20));
+			WriteRelJump(0xA5B460, GetJIPAddress(0x1000CEA0));
 			PatchMemoryNopRange(GetJIPAddress(0x10012260), GetJIPAddress(0x1001228D));  
-    }
-  }
+		}
+	}
   
 	namespace SetOnDialogTopicEventHandlerEx {
 
