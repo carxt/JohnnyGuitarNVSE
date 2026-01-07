@@ -701,6 +701,8 @@ public:
 	void StopMoving();
 
 	bool IsInDialogueWithPlayer() const;
+
+	bool GetRespawn() const;
 };
 
 // 1C0
