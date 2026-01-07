@@ -1,10 +1,10 @@
 #include "Game/Bethesda/BSStringT.hpp"
 #include "GameObjects.h"
+#include "GameRTTI.h"
 #include "PluginAPI.h"
 #include "SafeWrite.h"
 #include "utility.h"
-#include <fstream>
-#include <GameRTTI.h>
+#include "fstream"
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern bool bFixJIP;
@@ -387,6 +387,17 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace EarlyFixedStrings {
+
+		void InitHooks() {
+			SafeWrite8(0xA5B630u, 0xC3u);
+			WriteRelJump(0xA5B690u, GetJIPAddress(0x1000CE20));
+			WriteRelCall(0x878203u, GetJIPAddress(0x1000CEA0));
+			PatchMemoryNopRange(GetJIPAddress(0x10012260), GetJIPAddress(0x1001228D));
+		}
+
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -402,9 +413,9 @@ namespace JIPFixes {
 		hJIP = nullptr;
 	}
 
-	void InitHooks() {
-		hJIP = GetModuleHandle("jip_nvse.dll");
-		if (!hJIP) {
+	void InitData() {
+		HMODULE hJIPModule = GetModuleHandle("jip_nvse.dll");
+		if (!hJIPModule) {
 			PrintLog("Failed to find JIP LN!");
 			return;
 		}
@@ -427,8 +438,8 @@ namespace JIPFixes {
 			PrintLog("Failed to find JIP LN!");
 			return;
 		}
-		
-		std::vector<UInt8> buffer((std::istreambuf_iterator<char>(file)),std::istreambuf_iterator<char>());
+
+		std::vector<UInt8> buffer((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
 		if (buffer.size() != 502272) {
 			ShowErrorMessage("Incompatible JIP LN version!");
@@ -437,11 +448,25 @@ namespace JIPFixes {
 
 		initCRC32Table();
 		UInt32 hash = crc32(buffer.data(), buffer.size());
-		if (hash != uiJipHash)
-		{
+		if (hash != uiJipHash) {
 			ShowErrorMessage("Incompatible JIP LN version!");
 			return;
 		}
+
+		hJIP = hJIPModule;
+		PrintLog("JIP LN detected and verified.");
+	}
+
+	void InitEarlyHooks() {
+		if (!hJIP)
+			return;
+
+		EarlyFixedStrings::InitHooks();
+	}
+
+	void InitHooks() {
+		if (!hJIP)
+			return;
 
 		ConsoleCmdFix::InitHooks();
 		PaletteCorruptionFix::InitHooks();
