@@ -1,6 +1,5 @@
 #include "JIPFixes.hpp"
 #include "events/EventFramework.h"
-#include "fstream"
 #include "Game/Bethesda/BSStringT.hpp"
 #include "GameObjects.h"
 #include "GameProcess.h"
@@ -541,25 +540,38 @@ namespace JIPFixes {
 			return;
 		}
 
-		std::ifstream file("Data\\NVSE\\Plugins\\jip_nvse.dll", std::ios::binary);
+		HANDLE hJIPFile = CreateFile("Data\\NVSE\\Plugins\\jip_nvse.dll", GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
 
-		if (!file) {
+		if (!hJIPFile || hJIPFile == INVALID_HANDLE_VALUE) {
 			PrintLog("Failed to find JIP LN!");
 			return;
 		}
 
-		std::vector<UInt8> buffer((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+		DWORD dwFileSize = GetFileSize(hJIPFile, nullptr);
 
-		if (buffer.size() != 502272) {
+		if (dwFileSize != 502272) {
 			ShowErrorMessage("Incompatible JIP LN version!");
 			return;
 		}
 
-		initCRC32Table();
-		UInt32 hash = crc32(buffer.data(), buffer.size());
-		if (hash != uiJipHash) {
-			ShowErrorMessage("Incompatible JIP LN version!");
-			return;
+		{
+			std::vector<uint8_t> kBuffer(dwFileSize);
+			DWORD dwBytesRead = 0;
+			BOOL bRead = ReadFile(hJIPFile, kBuffer.data(), dwFileSize, &dwBytesRead, nullptr);
+			CloseHandle(hJIPFile);
+
+			if (bRead) {
+				initCRC32Table();
+				uint32_t uiHash = crc32(kBuffer.data(), kBuffer.size());
+				if (uiHash != uiJipHash) {
+					ShowErrorMessage("Incompatible JIP LN binary!");
+					return;
+				}
+			}
+			else {
+				ShowErrorMessage("Failed to read JIP LN!");
+				return;
+			}
 		}
 
 		hJIP = hJIPModule;
