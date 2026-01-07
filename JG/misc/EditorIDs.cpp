@@ -20,6 +20,12 @@ namespace EDIDRestoration {
 
 	void __fastcall AddEDIDToExtraData(TESForm* apForm, const char* apEDID) {
 		JohnnyExtraData* data = JohnnyExtraData::GetOrCreate(apForm);
+		if (!data) {
+			char cText[256];
+			sprintf_s(cText, "Failed to create JohnnyExtraData for form %08X (%s)!\nSomething is very wrong!", apForm->refID, apEDID);
+			MessageBoxA(nullptr, cText, "JohnnyGuitar", MB_OK | MB_ICONERROR);
+			return;
+		}
 
 		if (!data->kFormData.strEditorID) [[likely]] {
 			DEBUG_MSG("%08X -> %s", apForm->refID, apEDID);
