@@ -83,6 +83,11 @@ bool __fastcall JohnnyExtraData::Add(TESForm* apForm, JohnnyExtraData* apExtraDa
 
 JohnnyExtraData* __fastcall JohnnyExtraData::Add(TESForm* apForm) {
 	JohnnyExtraData* pExtraData = new JohnnyExtraData();
+	if (!pExtraData) {
+		DEBUG_MSG("Failed to allocate JohnnyExtraData for %08X", apForm->refID);
+		return nullptr;
+	}
+
 	if (Add(apForm, pExtraData))
 		return pExtraData;
 

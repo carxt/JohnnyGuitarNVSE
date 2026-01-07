@@ -136,6 +136,9 @@
     <ClCompile Include="misc\misc.cpp">
       <Filter>misc</Filter>
     </ClCompile>
+    <ClCompile Include="events\EventFramework.cpp">
+      <Filter>events</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
