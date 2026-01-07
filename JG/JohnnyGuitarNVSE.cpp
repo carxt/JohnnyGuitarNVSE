@@ -65,8 +65,10 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_PostPostLoad:
 		{
-			if (!bIsGECK && bFixJIP)
-				JIPFixes::InitHooks();
+			if (!bIsGECK) {
+				if (bFixJIP)
+					JIPFixes::InitHooks();
+			}
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_NewGame:
@@ -160,7 +162,10 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			if (!bDisableDLLCompatibilityRoutines) {
 				HandleDLLInterop();
 			}
-			JohnnyExtraData::InitName();
+			
+			if (!bIsGECK && !bFixJIP)
+				JohnnyExtraData::InitName();
+
 			break;
 		}
 		default:
@@ -247,6 +252,18 @@ extern "C" {
 		SaveGameUMap.reserve(0xFF);
 		shakeRequests.reserve(0xFF);
 		nvse->SetOpcodeBase(0x3100);
+
+		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
+		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
+		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
+		g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
+		g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
+
+		if (!bIsGECK && bFixJIP) {
+			JIPFixes::InitData();
+			JIPFixes::InitEarlyHooks();
+			JohnnyExtraData::InitName();
+		}
 
 		REG_CMD(JGLegacyWorldToScreen);
 		REG_CMD(ToggleLevelUpMenu);
@@ -585,11 +602,6 @@ extern "C" {
 		REG_CMD(GetMineArmedEx);
 		REG_CMD(SetMusicTypePath);
 
-		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
-		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
-		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
-		g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
-		g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 		if (!nvse->isEditor) {
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			JohnnyExtraData::Initialize(nvseData);
