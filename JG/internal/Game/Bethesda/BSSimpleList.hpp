@@ -12,8 +12,8 @@ public:
 	T					m_item;
 	BSSimpleList<T>*	m_pkNext;
 
-	const T GetItem() const;
-	T GetItem();
+	const T& GetItem() const;
+	T& GetItem();
 	void SetItem(const T& aItem);
 
 	const BSSimpleList<T>* GetNext() const;

@@ -24,12 +24,12 @@ inline BSSimpleList<T>::~BSSimpleList() {
 }
 
 template<class T>
-inline const T BSSimpleList<T>::GetItem() const {
+inline const T& BSSimpleList<T>::GetItem() const {
 	return m_item;
 }
 
 template<class T>
-inline T BSSimpleList<T>::GetItem() {
+inline T& BSSimpleList<T>::GetItem() {
 	return m_item;
 }
 
