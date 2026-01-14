@@ -31,6 +31,12 @@
     <Filter Include="internal\Game\Gamebryo">
       <UniqueIdentifier>{af07fc3e-f778-43b2-bd18-486725510352}</UniqueIdentifier>
     </Filter>
+    <Filter Include="internal\JG">
+      <UniqueIdentifier>{476c4296-1ba1-40eb-a500-61342e9d4777}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="internal\JIP">
+      <UniqueIdentifier>{49555d54-368f-4267-a3a7-3ef5112a8cee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
@@ -109,9 +115,6 @@
     <ClCompile Include="internal\Game\Bethesda\Conversation.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JIPFixes.cpp">
-      <Filter>internal</Filter>
-    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
@@ -127,17 +130,20 @@
     <ClCompile Include="internal\Game\Gamebryo\NiMemory.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JohnnyExtraData.cpp">
-      <Filter>internal</Filter>
-    </ClCompile>
-    <ClCompile Include="misc\EditorIDs.cpp">
-      <Filter>misc</Filter>
-    </ClCompile>
     <ClCompile Include="misc\misc.cpp">
       <Filter>misc</Filter>
     </ClCompile>
     <ClCompile Include="events\EventFramework.cpp">
       <Filter>events</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\EditorIDRestoration.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\JohnnyExtraData.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JIP\JIPFixes.cpp">
+      <Filter>internal\JIP</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -250,9 +256,6 @@
     <ClInclude Include="functions\fn_utility.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="misc\EditorIDs.h">
-      <Filter>misc</Filter>
-    </ClInclude>
     <ClInclude Include="misc\misc.h">
       <Filter>misc</Filter>
     </ClInclude>
@@ -301,9 +304,6 @@
     <ClInclude Include="internal\Game\Bethesda\Conversation.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JIPFixes.hpp">
-      <Filter>internal</Filter>
-    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
@@ -328,8 +328,14 @@
     <ClInclude Include="internal\Game\Gamebryo\NiCriticalSection.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JohnnyExtraData.hpp">
-      <Filter>internal</Filter>
+    <ClInclude Include="internal\JG\EditorIDRestoration.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyExtraData.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JIP\JIPFixes.hpp">
+      <Filter>internal\JIP</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

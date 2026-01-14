@@ -9,7 +9,7 @@ extern NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap;
 #if DEBUG_PRINTS
 #define DEBUG_MSG(...) PrintLog(__VA_ARGS__)
 #else
-#define DEBUG_MSG(...)
+#define DEBUG_MSG(...) __noop(__VA_ARGS__)
 #endif
 
 namespace JohnnyExtraDataGlobals {
@@ -26,18 +26,47 @@ JohnnyExtraData::JohnnyExtraData() : PluginFormExtraData(GetName()) {
 	uiFormID	= 0;
 	ZeroMemory(&kFormData, sizeof(kFormData));
 	ZeroMemory(&kScriptData, sizeof(kScriptData));
-	JohnnyExtraDataArray::GetInstance().Add(this);
+	// Commented out because we don't actually need it yet, so it's just wasting memory
+	//JohnnyExtraDataArray::GetInstance().Add(this);
 }
 
 JohnnyExtraData::~JohnnyExtraData() {
-	DEBUG_MSG("Deleting JohnnyExtraData for %08X (%s)", pOwner ? pOwner->refID : 0, kFormData.strEditorID.c_str());
-	if (pOwner && kFormData.strEditorID) {
-		ThisCall(0xE91FD0, *g_gameFormEditorIDsMap, pOwner); // NiTMapBase<DWORD,DWORD>::RemoveAt
-	}
+	DEBUG_MSG("Deleting JohnnyExtraData for %08X (\"%s\")", pOwner ? pOwner->GetFormID() : 0, GetEditorID());
+	ClearEditorIDs();
 	pOwner = nullptr;
 	uiFormID = 0xDEADDEAD;
-	kFormData.strEditorID = nullptr;
-	JohnnyExtraDataArray::GetInstance().Remove(this);
+	//JohnnyExtraDataArray::GetInstance().Remove(this);
+}
+
+const NiFixedString& JohnnyExtraData::GetEditorID() const {
+	return kFormData.kEditorIDs.GetItem();
+}
+
+bool JohnnyExtraData::SetEditorID(const NiFixedString& arEDID) {
+	if (!arEDID.GetLength())
+		return false;
+
+	if (!GetEditorID()) {
+		DEBUG_MSG("%08X Adding EDID \"%s\"", pOwner->GetFormID(), arEDID);
+		kFormData.kEditorIDs.SetItem(arEDID);
+		return true;
+	}
+	else if (GetEditorID() != arEDID) {
+		if (kFormData.kEditorIDs.IsInList(arEDID)) {
+			DEBUG_MSG("%08X EDID alias \"%s\" already exists", pOwner->GetFormID(), arEDID);
+			return false;
+		}
+
+		kFormData.kEditorIDs.AddTail(arEDID);
+		DEBUG_MSG("%08X Adding EDID alias \"%s\"", pOwner->GetFormID(), arEDID);
+		return true;
+	}
+	return false;
+}
+
+bool JohnnyExtraData::RemoveEditorID(const NiFixedString& arEDID) {
+	kFormData.kEditorIDs.Remove(arEDID);
+	return true;
 }
 
 const NiFixedString& JohnnyExtraData::GetName() {
@@ -73,18 +102,19 @@ bool __fastcall JohnnyExtraData::Add(TESForm* apForm, JohnnyExtraData* apExtraDa
 	if (JohnnyExtraDataGlobals::pfAdd(apForm, apExtraData)) {
 		apExtraData->pOwner = apForm;
 		if (!apForm->GetTemporary())
-			apExtraData->uiFormID = apForm->refID;
-		DEBUG_MSG("Adding JohnnyExtraData for %08X (%s)", apForm->refID, apExtraData->kFormData.strEditorID.c_str());
+			apExtraData->uiFormID = apForm->GetFormID();
+
+		DEBUG_MSG("Adding JohnnyExtraData for %08X (\"%s\")", apForm->GetFormID(), apExtraData->GetEditorID());
 		return true;
 	}
-	DEBUG_MSG("Failed to add JohnnyExtraData for %08X (%s)", apForm->refID, apExtraData->kFormData.strEditorID.c_str());
+	DEBUG_MSG("Failed to add JohnnyExtraData for %08X (\"%s\")", apForm->GetFormID(), apExtraData->GetEditorID());
 	return false;
 }
 
 JohnnyExtraData* __fastcall JohnnyExtraData::Add(TESForm* apForm) {
 	JohnnyExtraData* pExtraData = new JohnnyExtraData();
 	if (!pExtraData) {
-		DEBUG_MSG("Failed to allocate JohnnyExtraData for %08X", apForm->refID);
+		DEBUG_MSG("Failed to allocate JohnnyExtraData for %08X", apForm->GetFormID());
 		return nullptr;
 	}
 
@@ -95,17 +125,32 @@ JohnnyExtraData* __fastcall JohnnyExtraData::Add(TESForm* apForm) {
 	return nullptr;
 }
 
+void JohnnyExtraData::ClearEditorIDs() {
+	if (pOwner && !pOwner->GetTemporary() && GetEditorID()) {
+		auto pIter = kFormData.kEditorIDs.GetHead();
+		while (pIter) {
+			DEBUG_MSG("%08X Removing EDID \"%s\"", pOwner->GetFormID(), pIter->GetItem());
+			ThisCall(0xE91FD0, *g_gameFormEditorIDsMap, pIter->GetItem()); // NiTMapBase<DWORD,DWORD>::RemoveAt
+			pIter = pIter->GetNext();
+		}
+	}
+
+	kFormData.kEditorIDs.RemoveAll();
+}
+
 void __fastcall JohnnyExtraDataArray::Add(JohnnyExtraData* apExtraData) {
 	if (apExtraData) {
 		std::lock_guard<std::mutex> kLock(kMutex);
 		kExtraDatas.push_back(apExtraData);
+		bChanged = true;
 	}
 }
 
 void __fastcall JohnnyExtraDataArray::Remove(JohnnyExtraData* apExtraData) {
 	if (apExtraData) {
 		std::lock_guard<std::mutex> kLock(kMutex);
-		std::erase(kExtraDatas, apExtraData);
+		if (std::erase(kExtraDatas, apExtraData))
+			bChanged = true;
 	}
 }
 

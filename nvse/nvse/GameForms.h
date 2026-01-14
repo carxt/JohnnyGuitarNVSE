@@ -573,11 +573,18 @@ public:
 	tList<ModInfo> mods;			// 010 ModReferenceList in Oblivion
 	// 018 / 028
 
+	UInt32 GetFormID() const {
+		return refID;
+	}
+
 	TESForm* TryGetREFRParent();
 	UInt8 GetModIndex() const;
 	TESFullName* GetFullName();
 	const char* GetTheName();
 	bool IsCloned() const;
+
+	static const char* GetFormTypeName(uint32_t auiFormType);
+	const char* GetFormTypeName() const;
 
 	// adds a new form to the game (from CloneForm or LoadForm)
 	void DoAddForm(TESForm* newForm, bool bPersist = true, bool record = true) const;

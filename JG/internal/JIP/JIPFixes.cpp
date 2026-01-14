@@ -92,11 +92,7 @@ namespace JIPFixes {
 			if (pForm && pForm->GetIsReference())
 				pRoot = static_cast<TESObjectREFR*>(pForm)->GetRefNiNode();
 
-			if (pRoot) {
-				NiControllerManager* pControllerManager = ThisCall<NiControllerManager*>(0xA5C570, pRoot, 0x11F36AC);
-				if (pControllerManager && pControllerManager->defObjPlt)
-					ThisCall(0xA6E960, pControllerManager->defObjPlt);
-			}
+			InvalidateObjPalette(pRoot);
 
 			FastCall(kMemPoolFree.GetOverwrittenAddr(), pBlock, size);
 		}
@@ -393,11 +389,42 @@ namespace JIPFixes {
 	}
 
 	namespace EarlyFixedStrings {
+
+		static uint32_t uiExitAddr = 0x1000CE06;
+		static uint32_t uiContinueAddr = 0x1000CDD5;
+
+		bool __fastcall StrCmp(const char* a, const char* b) {
+			if (a == b)
+				return true;
+
+			return strcmp(a, b) == 0;
+		}
+
+		void __declspec(naked) CompareFix_Asm() {
+			__asm {
+				cmp		[eax + 4], esi
+				jnz		CONTINUE
+				push	eax
+				mov		edx, [ebp + 8]
+				mov		ecx, [eax + 8]
+				call	StrCmp
+				test	al, al
+				pop		eax
+				jz		CONTINUE
+				jmp		uiExitAddr
+				CONTINUE:
+				jmp		uiContinueAddr
+			}
+		}
+
 		void InitHooks() {
+			uiExitAddr = GetJIPAddress(0x1000CE06);
+			uiContinueAddr = GetJIPAddress(0x1000CDD5);
+			WriteRelJump(GetJIPAddress(0x1000CDD0), CompareFix_Asm);
 			SafeWrite8(0xA5B630, 0xC3);
 			WriteRelJump(0xA5B690, GetJIPAddress(0x1000CE20));
 			WriteRelJump(0xA5B460, GetJIPAddress(0x1000CEA0));
-			PatchMemoryNopRange(GetJIPAddress(0x10012260), GetJIPAddress(0x1001228D));
+			PatchMemoryNopRange(GetJIPAddress(0x10012260), GetJIPAddress(0x1001228D));  
 		}
 	}
   

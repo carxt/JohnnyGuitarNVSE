@@ -2,4 +2,5 @@
 
 namespace EDIDRestoration {
 	void InitHooks();
+	void PrintErrors();
 }

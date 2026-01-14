@@ -3,15 +3,19 @@
 #include <nvse/PluginAPI.h>
 #include <nvse/NiTypes.h>
 #include <mutex>
+#include <vector>
+#include "Bethesda/BSSimpleList.hpp"
 
 class JohnnyExtraData : public PluginFormExtraData, public BSMemObject {
 public:
 	JohnnyExtraData();
 	virtual ~JohnnyExtraData() override;
 
+	using EDIDList = BSSimpleList<NiFixedString>;
+
 	// Persistent
 	struct FormData {
-		NiFixedString			strEditorID;
+		EDIDList	kEditorIDs;
 	};
 
 	// Temporary
@@ -22,6 +26,10 @@ public:
 	TESForm*	pOwner;
 	FormData	kFormData;
 	ScriptData	kScriptData;
+
+	const NiFixedString& GetEditorID() const;
+	bool SetEditorID(const NiFixedString& arEDID);
+	bool RemoveEditorID(const NiFixedString& arEDID);
 
 	static const NiFixedString& GetName();
 
@@ -36,6 +44,9 @@ public:
 	static [[nodiscard]] bool __fastcall Add(TESForm* apForm, JohnnyExtraData* apExtraData);
 
 	static [[nodiscard]] JohnnyExtraData* __fastcall Add(TESForm* apForm);
+
+private:
+	void ClearEditorIDs();
 };
 
 class JohnnyExtraDataArray {
@@ -46,6 +57,7 @@ private:
 	
 	std::mutex						kMutex;
 	std::vector<JohnnyExtraData*>	kExtraDatas;
+	bool							bChanged = false;
 
 	friend class JohnnyExtraData;
 
@@ -53,7 +65,7 @@ private:
 	void __fastcall Remove(JohnnyExtraData* apExtraData);
 
 public:
-	static JohnnyExtraDataArray& GetInstance();
+	static DECLSPEC_NOINLINE JohnnyExtraDataArray& GetInstance();
 
 	void ResetScriptData();
 };

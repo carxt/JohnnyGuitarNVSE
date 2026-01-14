@@ -160,6 +160,8 @@ struct ModInfo		// referred to by game as TESFile
 
 	bool IsLoaded() const { return true; }
 
+	const char* GetName() const { return name; }
+
 #if !EDITOR
 	/*** used by TESForm::LoadForm() among others ***/
 	MEMBER_FN_PREFIX(ModInfo);
