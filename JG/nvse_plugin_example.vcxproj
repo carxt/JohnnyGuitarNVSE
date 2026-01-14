@@ -56,7 +56,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;NVSE_PLUGIN_EXAMPLE_EXPORTS;RUNTIME_VERSION=0x040020D0;RUNTIME;GAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -86,7 +86,7 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)\..\internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_NO_VA_START_VALIDATION;WIN32;NDEBUG;_WINDOWS;_USRDLL;NVSE_PLUGIN_EXAMPLE_EXPORTS;RUNTIME_VERSION=0x040020D0;RUNTIME;GAME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -142,17 +142,17 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClCompile Include="internal\Game\Bethesda\Conversation.cpp" />
     <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp" />
     <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp" />
-    <ClCompile Include="internal\JIPFixes.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFixedString.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiGlobalStringTable.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMemObject.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMemory.cpp" />
-    <ClCompile Include="internal\JohnnyExtraData.cpp" />
+    <ClCompile Include="internal\JG\EditorIDRestoration.cpp" />
+    <ClCompile Include="internal\JG\JohnnyExtraData.cpp" />
+    <ClCompile Include="internal\JIP\JIPFixes.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
     <ClCompile Include="internal\sha1\sha1.cpp" />
     <ClCompile Include="internal\utility.cpp" />
     <ClCompile Include="JohnnyGuitarNVSE.cpp" />
-    <ClCompile Include="misc\EditorIDs.cpp" />
     <ClCompile Include="misc\misc.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -208,15 +208,15 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClInclude Include="internal\Game\Gamebryo\NiMemory.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSmartPointer.hpp" />
     <ClInclude Include="internal\havok.h" />
-    <ClInclude Include="internal\JIPFixes.hpp" />
-    <ClInclude Include="internal\JohnnyExtraData.hpp" />
+    <ClInclude Include="internal\JG\EditorIDRestoration.hpp" />
+    <ClInclude Include="internal\JG\JohnnyExtraData.hpp" />
+    <ClInclude Include="internal\JIP\JIPFixes.hpp" />
     <ClInclude Include="internal\md5\md5.h" />
     <ClInclude Include="internal\netimmerse.h" />
     <ClInclude Include="internal\serialization.h" />
     <ClInclude Include="internal\sha1\sha1.h" />
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="JohnnyGuitarNVSE.h" />
-    <ClInclude Include="misc\EditorIDs.h" />
     <ClInclude Include="misc\misc.h" />
     <ClInclude Include="misc\WorldToScreen.h" />
     <ClInclude Include="..\nvse\nvse\PluginAPI.h" />

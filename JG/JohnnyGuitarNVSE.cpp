@@ -8,7 +8,7 @@
 #include "nvse/FileFinder.h"
 #include "misc/WorldToScreen.h"
 #include "misc/misc.h"
-#include "misc/EditorIDs.h"
+#include "JG/EditorIDRestoration.hpp"
 #include "internal/decoding.h"
 #include "nvse/GameSettings.h"
 #include "JohnnyGuitarNVSE.h"
@@ -27,10 +27,10 @@
 #include "functions/fn_dial.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
-#include "internal/JIPFixes.hpp"
 
-#include "Internal/Game/Bethesda/AutoMemContext.hpp"
-#include "Internal/JohnnyExtraData.hpp"
+#include "Bethesda/AutoMemContext.hpp"
+#include "JIP/JIPFixes.hpp"
+#include "JG/JohnnyExtraData.hpp"
 
 BS_ALLOCATORS
 
@@ -215,8 +215,6 @@ extern "C" {
 		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
 		uint32_t length = filename - lastSlash;
 		strcpy_s(lastSlash, length, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
-		loadEditorIDs = 1;
-		fixHighNoon = 0;
 		fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 		fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
 		fixNPCShootingAngle = GetPrivateProfileInt("MAIN", "bFixNPCShootingAngle", 1, filename);

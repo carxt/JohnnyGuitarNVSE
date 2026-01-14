@@ -1,8 +1,8 @@
-#include <unordered_map>
-#include <GameObjects.h>
-#include <SafeWrite.h>
-#include "misc.h"
-#include <internal/JohnnyExtraData.hpp>
+#include "GameObjects.h"
+#include "JohnnyExtraData.hpp"
+#include "misc/misc.h"
+#include "SafeWrite.h"
+#include "unordered_map"
 
 extern NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap;
 
