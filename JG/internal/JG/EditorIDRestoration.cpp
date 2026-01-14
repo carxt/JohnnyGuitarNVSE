@@ -182,7 +182,7 @@ namespace EDIDRestoration {
 							pExistingForm->GetFormID(), pFileB ? pFileB->GetName() : "");
 					}
 					else {
-						sprintf_s(cText, "%08X (\"%s\")'s steals EDID \"%s\" from %08X (\"%s\") + using changing type from %s to %s",
+						sprintf_s(cText, "%08X (\"%s\") steals EDID \"%s\" from %08X (\"%s\") + changes type from %s to %s",
 							apForm->GetFormID(), pFileA ? pFileA->GetName() : "", apEDID,
 							pExistingForm->GetFormID(), pFileB ? pFileB->GetName() : "",
 							pExistingForm->GetFormTypeName(), apForm->GetFormTypeName());
