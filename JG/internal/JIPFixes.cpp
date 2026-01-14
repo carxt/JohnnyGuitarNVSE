@@ -11,6 +11,7 @@
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern bool bFixJIP;
+extern bool bIsGECK;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);;
 
 namespace JIPFixes {
@@ -454,14 +455,14 @@ namespace JIPFixes {
 		void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x27FC));
 			if (pInfo) {
-				OnDialogTopicHandler = JGCreateEvent("OnDialogTopicHandler", 1, 1);
-
 				pInfo->execute = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
 				SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
 
-				kGetResultScript.ReplaceCallEx(0x61F18B, &TESTopicInfoEx::GetResultScript);
-
-				SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8", 8);
+				if (!bIsGECK) {
+					OnDialogTopicHandler = JGCreateEvent("OnDialogTopicHandler", 1, 1);
+					kGetResultScript.ReplaceCallEx(0x61F18B, &TESTopicInfoEx::GetResultScript);
+					SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8", 8);
+				}
 			}
 		}
 
@@ -498,8 +499,11 @@ namespace JIPFixes {
 				pInfo->numParams = 1;
 				ClearDeadActors = pInfo->execute;
 				pInfo->execute = Cmd_ClearDeadActors_Execute;
-				WriteRelCallEx(GetJIPAddress(0x10030C38), &HighProcessEx::FadeAndDisable);
-				PatchMemoryNop(GetJIPAddress(0x10030C3D), 2);
+
+				if (!bIsGECK) {
+					WriteRelCallEx(GetJIPAddress(0x10030C38), &HighProcessEx::FadeAndDisable);
+					PatchMemoryNop(GetJIPAddress(0x10030C3D), 2);
+				}
 			}
 		}
 
@@ -581,19 +585,35 @@ namespace JIPFixes {
 		if (!hJIP)
 			return;
 
-		EarlyFixedStrings::InitHooks();
+		if (bIsGECK) {
+
+		}
+		else {
+			EarlyFixedStrings::InitHooks();
+		}
 	}
 
 	void InitHooks() {
 		if (!hJIP)
 			return;
 
-		ConsoleCmdFix::InitHooks();
-		PaletteCorruptionFix::InitHooks();
-		NotifyDurationFix::InitHooks();
-		CloseActiveMenuFix::InitHooks();
-		FireWeaponFix::InitHooks();
-		ItemDescriptionFixFix::InitHooks();
+		if (bIsGECK) {
+
+		}
+		else {
+			ConsoleCmdFix::InitHooks();
+			PaletteCorruptionFix::InitHooks();
+			NotifyDurationFix::InitHooks();
+			CloseActiveMenuFix::InitHooks();
+			FireWeaponFix::InitHooks();
+			ItemDescriptionFixFix::InitHooks();
+		}
+	}
+
+	void InitCommandHooks() {
+		if (!hJIP)
+			return;
+
 		SetOnDialogTopicEventHandlerEx::InitHooks();
 		RespawnDisableFix::InitHooks();
 	}
@@ -601,5 +621,10 @@ namespace JIPFixes {
 	void InitDeferredHooks() {
 		if (!hJIP)
 			return;
+
+		if (bIsGECK) {
+		}
+		else {
+		}
 	}
 }

@@ -63,60 +63,58 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		SetMemContext(MC_DEFAULT);
 	}
 	switch (msg->type) {
-		case NVSEMessagingInterface::kMessage_PostPostLoad:
+		case NVSEMessagingInterface::kMessage_PostPostLoad: // GAME + GECK 
 		{
-			if (!bIsGECK) {
-				if (bFixJIP)
-					JIPFixes::InitHooks();
+			if (bFixJIP) {
+				JIPFixes::InitCommandHooks();
+				JIPFixes::InitHooks();
 			}
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_NewGame:
-		case NVSEMessagingInterface::kMessage_PreLoadGame:
-	{
-		JohnnyExtraDataArray::GetInstance().ResetScriptData();
-		disableMuzzleLights = 0; //reset the muzzle hook every time
-		bArrowKeysDisabled = false;
-		isShowLevelUp = true;
-		ThisCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
-		ThisCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
+		case NVSEMessagingInterface::kMessage_PreLoadGame: // GAME
+		{
+			JohnnyExtraDataArray::GetInstance().ResetScriptData();
+			disableMuzzleLights = 0; //reset the muzzle hook every time
+			bArrowKeysDisabled = false;
+			isShowLevelUp = true;
+			ThisCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
+			ThisCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
 
-		OnDyingHandler->FlushEventCallbacks();
-		OnLimbGoneHandler->FlushEventCallbacks();
-		OnCrosshairHandler->FlushEventCallbacks();
-		OnPLChangeHandler->FlushEventCallbacks();
-		RestoreDisabledPlayerControlsHUDFlags();
-		SaveGameUMap.clear();
-		ResetMiscStatMap();
-		hk_RSMBarberHook::haircutSetList.dFlush();
-		hk_RSMBarberHook::beardSetList.dFlush();
-		jg_gameRadioSet.clear();
-		hk_BarterHook::barterFilterListLeft.clear();
-		hk_BarterHook::barterFilterListRight.clear();
-		NPCAccuracy::FlushMapRefs();
-		shakeRequests.clear();
-		mlcOverridden = false;
-		mlcOverride = nullptr;
-		ClearPlayerFurniture(); //fix furniture crash on reload
+			OnDyingHandler->FlushEventCallbacks();
+			OnLimbGoneHandler->FlushEventCallbacks();
+			OnCrosshairHandler->FlushEventCallbacks();
+			OnPLChangeHandler->FlushEventCallbacks();
+			RestoreDisabledPlayerControlsHUDFlags();
+			SaveGameUMap.clear();
+			ResetMiscStatMap();
+			hk_RSMBarberHook::haircutSetList.dFlush();
+			hk_RSMBarberHook::beardSetList.dFlush();
+			jg_gameRadioSet.clear();
+			hk_BarterHook::barterFilterListLeft.clear();
+			hk_BarterHook::barterFilterListRight.clear();
+			NPCAccuracy::FlushMapRefs();
+			shakeRequests.clear();
+			mlcOverridden = false;
+			mlcOverride = nullptr;
+			ClearPlayerFurniture(); //fix furniture crash on reload
 
-		bOverrideCameraPos = false;
-		bOverrideCameraRot = false;
-		kCameraPos = NiVector3(0,0,0);
-		kCameraRot = NiMatrix3::IDENTITY;
-		noHolotapeStopSound = false;
-		hkOwner = nullptr;
-		break;
-	}
-		case NVSEMessagingInterface::kMessage_PostLoadGame:
+			bOverrideCameraPos = false;
+			bOverrideCameraRot = false;
+			kCameraPos = NiVector3(0,0,0);
+			kCameraRot = NiMatrix3::IDENTITY;
+			noHolotapeStopSound = false;
+			hkOwner = nullptr;
 			break;
-		case NVSEMessagingInterface::kMessage_MainGameLoop:
+		}
+		case NVSEMessagingInterface::kMessage_MainGameLoop: // GAME
 		{
 			if (g_interfaceManager->currentMode == 1) {
-			float power = getHUDShakePower();
-			if (power > 0.0f) {
-				CdeclCall<void>(0x94C3A0, power);
+				float power = getHUDShakePower();
+				if (power > 0.0f) {
+					CdeclCall<void>(0x94C3A0, power);
+				}
 			}
-		}
 			ComputeDiscoveredRadioDirectory();
 			for (const auto& EventInfo : EventInfos) {
 				EventInfo->AddQueuedEvents();
@@ -139,7 +137,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 
 			break;
 		}
-		case NVSEMessagingInterface::kMessage_DeferredInit:
+		case NVSEMessagingInterface::kMessage_DeferredInit: // GAME
 		{
 			g_thePlayer = PlayerCharacter::GetSingleton();
 			g_processManager = (ProcessManager*)0x11E0E80;
@@ -152,19 +150,23 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_VATSCameraData = (VATSCameraData*)0x11F2250;
 			g_mapAllForms = *(NiTPointerMap<TESForm>**)0x11C54C0;
 			g_initialTickCount = GetTickCount();
-			if (!bIsGECK && bFixJIP)
-				JIPFixes::InitDeferredHooks();
 			DumpModules();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
+			if (bFixJIP)
+				JIPFixes::InitDeferredHooks();
+			
 			break;
 		}
-		case NVSEMessagingInterface::kMessage_PostLoad: {
-			if (!bDisableDLLCompatibilityRoutines) {
-				HandleDLLInterop();
+		case NVSEMessagingInterface::kMessage_PostLoad: // GAME + GECK 
+		{
+			if (!bIsGECK) {
+				if (!bDisableDLLCompatibilityRoutines) {
+					HandleDLLInterop();
+				}
+
+				if (!bFixJIP)
+					JohnnyExtraData::InitName();
 			}
-			
-			if (!bIsGECK && !bFixJIP)
-				JohnnyExtraData::InitName();
 
 			break;
 		}
@@ -214,11 +216,13 @@ extern "C" {
 		PrintLog("JohnnyGuitarNVSE %u Loaded succesfully.", info->version);
 		char filename[MAX_PATH];
 		GetModuleFileNameA(JohnnyHandle, filename, MAX_PATH);
+
+		bIsGECK = nvse->isEditor != 0;
+
 		return true;
 	}
 
 	bool NVSEPlugin_Load(const NVSEInterface* nvse) {
-		bIsGECK = nvse->isEditor != 0;
 		MEM_CONTEXT eOrgContext;
 		if (!bIsGECK) {
 			eOrgContext = GetMemContext();
@@ -259,10 +263,12 @@ extern "C" {
 		g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 		g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 
-		if (!bIsGECK && bFixJIP) {
+		if (bFixJIP) {
 			JIPFixes::InitData();
 			JIPFixes::InitEarlyHooks();
-			JohnnyExtraData::InitName();
+			if (!bIsGECK) {
+				JohnnyExtraData::InitName();
+			}
 		}
 
 		REG_CMD(JGLegacyWorldToScreen);
@@ -602,7 +608,7 @@ extern "C" {
 		REG_CMD(GetMineArmedEx);
 		REG_CMD(SetMusicTypePath);
 
-		if (!nvse->isEditor) {
+		if (!bIsGECK) {
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			JohnnyExtraData::Initialize(nvseData);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
@@ -613,6 +619,7 @@ extern "C" {
 			ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
 			SerializationInit(nvse);
 		}
+
 		if (!bIsGECK) {
 			SetMemContext(eOrgContext);
 		}
