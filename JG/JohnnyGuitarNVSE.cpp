@@ -1,27 +1,12 @@
-#include <windows.h>
-#include <tchar.h>
-#include <psapi.h>
-#include <mutex>
-#include <shared_mutex>
-#include <algorithm>
-#include "nvse/PluginAPI.h"
-#include "nvse/GameAPI.h"
-#include "nvse/CommandTable.h"
-#include "nvse/GameForms.h"
-#include "nvse/GameObjects.h"
 #include "nvse/GameEffects.h"
 #include "nvse/GameData.h"
-#include "nvse/GameExtraData.h"
-#include "nvse/GameTasks.h"
 #include "nvse/GameProcess.h"
 #include "nvse/GameRTTI.h"
 #include "nvse/GameUI.h"
-#include "nvse/GameScript.h"
 #include "nvse/SafeWrite.h"
 #include "nvse/ScriptUtils.h"
 #include "nvse/FileFinder.h"
 #include "misc/WorldToScreen.h"
-#include "events/LambdaVariableContext.h"
 #include "misc/misc.h"
 #include "misc/EditorIDs.h"
 #include "internal/decoding.h"
@@ -44,14 +29,12 @@
 #include "internal/serialization.h"
 #include "internal/JIPFixes.hpp"
 
-#include "internal/Game/Bethesda/BSMemory.hpp"
-#include "internal/Game/Bethesda/AutoMemContext.hpp"
-#include <internal/JohnnyExtraData.hpp>
+#include "Internal/Game/Bethesda/AutoMemContext.hpp"
+#include "Internal/JohnnyExtraData.hpp"
 
 BS_ALLOCATORS
 
 bool bIsGECK = false;
-HMODULE JohnnyHandle;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
@@ -150,7 +133,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_VATSCameraData = (VATSCameraData*)0x11F2250;
 			g_mapAllForms = *(NiTPointerMap<TESForm>**)0x11C54C0;
 			g_initialTickCount = GetTickCount();
-			DumpModules();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			if (bFixJIP)
 				JIPFixes::InitDeferredHooks();
@@ -214,8 +196,6 @@ extern "C" {
 
 		// version checks pass
 		PrintLog("JohnnyGuitarNVSE %u Loaded succesfully.", info->version);
-		char filename[MAX_PATH];
-		GetModuleFileNameA(JohnnyHandle, filename, MAX_PATH);
 
 		bIsGECK = nvse->isEditor != 0;
 
@@ -259,7 +239,6 @@ extern "C" {
 
 		g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 		g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
-		s_strArgBuf = (char*)malloc((sizeof(char)) * 1024);
 		g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 		g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 
@@ -625,6 +604,7 @@ extern "C" {
 		}
 		return true;
 	}
+
 	BOOL WINAPI DllMain(
 		HANDLE  hDllHandle,
 		DWORD   dwReason,
@@ -632,7 +612,6 @@ extern "C" {
 	) {
 		switch (dwReason) {
 			case (DLL_PROCESS_ATTACH):
-				JohnnyHandle = (HMODULE)hDllHandle;
 				DisableThreadLibraryCalls((HMODULE)hDllHandle);
 				break;
 		}

@@ -17,7 +17,6 @@ void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwn
 bool isShowLevelUp = true;
 bool bArrowKeysDisabled = false;
 bool bCombatMusicDisabled = false;
-char* s_strArgBuf;
 #define ExtractFormatStringArgs(...) g_scriptInterface->ExtractFormatStringArgs(__VA_ARGS__)
 #define IS_TYPE(form, type) (*(UInt32*)form == kVtbl_##type)
 #define NOT_ID(form, type) (form->typeID != kFormType_##type)
@@ -1618,38 +1617,6 @@ void ClearPlayerFurniture()
 	{
 		playerProcess->SetFurnitureRef(g_thePlayer, 0, NULL, 0x7F);
 
-	}
-}
-void DumpModules() {
-	HMODULE hMods[1024];
-	HANDLE hProcess = INVALID_HANDLE_VALUE;
-	DWORD cbNeeded;
-	if (EnumProcessModules(GetCurrentProcess(), hMods, sizeof(hMods), &cbNeeded))
-	{
-		PrintLog("\n===== DUMPING LOADED MODULES =====\n");
-		std::string userStr = "=== USER MODULES ===\n";
-		std::string systemStr = "=== SYSTEM MODULES ===\n";
-		for (int i = 0; i < (cbNeeded / sizeof(HMODULE)); i++)
-		{
-			TCHAR szModName[MAX_PATH];
-
-
-			if (GetModuleFileNameEx(hProcess, hMods[i], szModName,
-				sizeof(szModName) / sizeof(TCHAR)))
-			{
-				char* trimName = (char*)(strrchr(szModName, '\\') + 1);
-				if (strstr(szModName, g_workingDir)) {
-					userStr += trimName;
-					userStr += "\n";
-				}
-				else {
-					systemStr += trimName;
-					systemStr += "\n";
-				}
-			}
-		}
-		PrintLog("%s", userStr.c_str());
-		PrintLog("%s", systemStr.c_str());
 	}
 }
 
