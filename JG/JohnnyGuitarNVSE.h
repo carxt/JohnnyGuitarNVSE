@@ -25,8 +25,6 @@ bool bCombatMusicDisabled = false;
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 #define VarNameSize 64
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
-bool loadEditorIDs = 0;
-bool fixHighNoon = 0;
 bool fixFleeing = 0;
 bool fixItemStacks = 0;
 bool resetVanityCam = 0;
@@ -1827,8 +1825,7 @@ void HandleIniOptions() {
 	}
 
 	// for Runtime EDIDs
-	if (loadEditorIDs) 
-		EDIDRestoration::InitHooks();
+	EDIDRestoration::InitHooks();
 
 	// for b60FPSDuringLoading
 	if (iFPSCapLoadScreen > 0) {

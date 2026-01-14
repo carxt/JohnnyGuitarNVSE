@@ -1,6 +1,6 @@
 #include "JIPFixes.hpp"
+#include "Bethesda/BSStringT.hpp"
 #include "events/EventFramework.h"
-#include "Game/Bethesda/BSStringT.hpp"
 #include "GameObjects.h"
 #include "GameProcess.h"
 #include "GameRTTI.h"
@@ -397,7 +397,7 @@ namespace JIPFixes {
 			SafeWrite8(0xA5B630, 0xC3);
 			WriteRelJump(0xA5B690, GetJIPAddress(0x1000CE20));
 			WriteRelJump(0xA5B460, GetJIPAddress(0x1000CEA0));
-			PatchMemoryNopRange(GetJIPAddress(0x10012260), GetJIPAddress(0x1001228D));  
+			PatchMemoryNopRange(GetJIPAddress(0x10012260), GetJIPAddress(0x1001228D));
 		}
 	}
   

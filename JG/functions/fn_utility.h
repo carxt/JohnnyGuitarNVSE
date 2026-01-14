@@ -382,7 +382,6 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	UInt32 arrID;
 	UInt32 isReverse = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &isReverse)) return true;
-	if (!loadEditorIDs) return true;
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!inArr) return true;
 	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
@@ -528,10 +527,7 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &patch)) {
 		switch (patch) {
 			case 1:
-				enabled = loadEditorIDs;
-				break;
-			case 2:
-				enabled = fixHighNoon;
+				enabled = true;
 				break;
 			case 3:
 				enabled = fixFleeing;
