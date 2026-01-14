@@ -134,6 +134,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_mapAllForms = *(NiTPointerMap<TESForm>**)0x11C54C0;
 			g_initialTickCount = GetTickCount();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
+			EDIDRestoration::PrintErrors();
 			if (bFixJIP)
 				JIPFixes::InitDeferredHooks();
 			

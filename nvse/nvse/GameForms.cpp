@@ -84,6 +84,20 @@ bool TESForm::IsCloned() const {
 	return GetModIndex() == 0xff;
 }
 
+// GAME - 0x4B1B60
+// GECK - 0x523860
+const char* TESForm::GetFormTypeName(uint32_t auiFormType) {
+#ifdef GAME
+	return CdeclCall<const char*>(0x4B1B60, auiFormType);
+#else
+	return CdeclCall<const char*>(0x523860, auiFormType);
+#endif
+}
+
+const char* TESForm::GetFormTypeName() const {
+	return GetFormTypeName(typeID);
+}
+
 // static
 UInt32 TESBipedModelForm::MaskForSlot(UInt32 slot) {
 	switch (slot) {
