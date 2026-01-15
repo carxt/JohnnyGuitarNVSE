@@ -45,8 +45,8 @@ public:
 
 	static [[nodiscard]] JohnnyExtraData* __fastcall Add(TESForm* apForm);
 
-private:
-	void ClearEditorIDs();
+	// Used only by EDIDRestoration
+	void DetachEditorIDs();
 };
 
 class JohnnyExtraDataArray {

@@ -32,7 +32,7 @@ JohnnyExtraData::JohnnyExtraData() : PluginFormExtraData(GetName()) {
 
 JohnnyExtraData::~JohnnyExtraData() {
 	DEBUG_MSG("Deleting JohnnyExtraData for %08X (\"%s\")", pOwner ? pOwner->GetFormID() : 0, GetEditorID());
-	ClearEditorIDs();
+	DetachEditorIDs();
 	pOwner = nullptr;
 	uiFormID = 0xDEADDEAD;
 	//JohnnyExtraDataArray::GetInstance().Remove(this);
@@ -125,8 +125,8 @@ JohnnyExtraData* __fastcall JohnnyExtraData::Add(TESForm* apForm) {
 	return nullptr;
 }
 
-void JohnnyExtraData::ClearEditorIDs() {
-	if (pOwner && !pOwner->GetTemporary() && GetEditorID()) {
+void JohnnyExtraData::DetachEditorIDs() {
+	if (pOwner && !pOwner->GetTemporary() && !kFormData.kEditorIDs.IsEmpty()) {
 		auto pIter = kFormData.kEditorIDs.GetHead();
 		while (pIter) {
 			DEBUG_MSG("%08X Removing EDID \"%s\"", pOwner->GetFormID(), pIter->GetItem());
@@ -134,8 +134,6 @@ void JohnnyExtraData::ClearEditorIDs() {
 			pIter = pIter->GetNext();
 		}
 	}
-
-	kFormData.kEditorIDs.RemoveAll();
 }
 
 void __fastcall JohnnyExtraDataArray::Add(JohnnyExtraData* apExtraData) {

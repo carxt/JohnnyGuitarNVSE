@@ -18,6 +18,7 @@ namespace EDIDRestoration {
 #define DEBUG_MSG(...) __noop(__VA_ARGS__)
 #endif
 
+	bool bCanUseConsole = false;
 	std::mutex kEDIDMapLock;
 	std::list<std::string> kErrors;
 
@@ -187,7 +188,10 @@ namespace EDIDRestoration {
 							pExistingForm->GetFormID(), pFileB ? pFileB->GetName() : "",
 							pExistingForm->GetFormTypeName(), apForm->GetFormTypeName());
 					}
-					kErrors.push_back(cText);
+					if (!bCanUseConsole)
+						kErrors.push_back(cText);
+					else
+						Console_Print(cText);
 					PrintLog(cText);
 					RemoveEDIDFromExtraData(pExistingForm, apEDID);
 				}
@@ -211,6 +215,7 @@ namespace EDIDRestoration {
 		return 0;
 	}
 
+	CallDetour kRemoveFromDataStructures;
 	class TESFormEx : public TESForm {
 	public:
 		// vftable + 0x130
@@ -228,7 +233,7 @@ namespace EDIDRestoration {
 				if (strcmp(apEDID, "SysWindowCompileAndRun") == 0)
 					apEDID = "Console Command";
 
-				if (GetTemporary()) {
+				if (GetTemporary() || GetFormID() == 0) {
 					return AddEDIDToExtraData(this, apEDID);
 				}
 				else {
@@ -242,6 +247,13 @@ namespace EDIDRestoration {
 				}
 			}
 			return false;
+		}
+
+		void Hk_RemoveFormEditorID() {
+			ThisCall(kRemoveFromDataStructures.GetOverwrittenAddr(), this);
+			JohnnyExtraData* pData = JohnnyExtraData::Find(this);
+			if (pData)
+				pData->DetachEditorIDs();
 		}
 	};
 
@@ -285,6 +297,8 @@ namespace EDIDRestoration {
 	};
 
 	void InitHooks() {
+		kRemoveFromDataStructures.ReplaceCallEx(0x48449A, &TESFormEx::Hk_RemoveFormEditorID); // TESForm::RemoveFromDataStructures
+
 		ReplaceCallEx(0x486903, &TESFormEx::hk_GetFormEditorID); // TESForm::GetFormDetailedString
 		ReplaceCallEx(0x451CBA, &TESFormEx::hk_GetFormEditorID); // TESObjectCELL::GetCellName
 		ReplaceCallEx(0x55D498, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::GetFormEditorID
@@ -322,5 +336,6 @@ namespace EDIDRestoration {
 			Console_Print(err.c_str());
 		}
 		kErrors.clear();
+		bCanUseConsole = true;
 	}
 }
