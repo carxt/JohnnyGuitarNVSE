@@ -173,12 +173,12 @@ extern "C" {
 		info->version = JG_VERSION;
 
 		if (nvse->isNogore) {
-			PrintLog("German NoGore release of the game is not supported");
+			MessageBoxA(nullptr, "German NoGore release of the game is not supported", "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
 			return false;
 		}
 
 		if (nvse->nvseVersion < PACKED_NVSE_VERSION) {
-			PrintLog("NVSE version is outdated. This plugin requires v6.4.2 minimum.");
+			MessageBoxA(nullptr, "NVSE version is outdated. This plugin requires v6.4.2 minimum.", "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
 			return false;
 		}
 
