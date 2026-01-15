@@ -467,10 +467,12 @@ namespace JIPFixes {
 					if (pOwner) {
 						for (auto const& callback : OnDialogTopicHandler->callbacks) {
 							auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
-							if (filter->IsBaseInFilter(0, pParentTopic))
-								CallUDF(callback.script, pOwner, OnDialogTopicHandler->numMaxArgs, pParentTopic);
-							else if (filter->IsBaseInFilter(0, this) || filter->IsInFilter(0, 0))
+							if (filter->IsFilterEmpty(0) || filter->IsBaseInFilter(0, this)) {
 								CallUDF(callback.script, pOwner, OnDialogTopicHandler->numMaxArgs, this);
+							}
+							else if (pParentTopic && filter->IsBaseInFilter(0, pParentTopic)) {
+								CallUDF(callback.script, pOwner, OnDialogTopicHandler->numMaxArgs, pParentTopic);
+							}
 						}
 					}
 				}
