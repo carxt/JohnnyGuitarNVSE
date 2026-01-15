@@ -1015,7 +1015,11 @@ bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 				shader->shaderData.flags = (UInt8)value;
 				break;
 			case 61:
-				shader->shaderData.addonModels->refID = (UInt32)value;
+				{
+					TESForm* pFoundForm = TESForm::GetFormByNumericID(value);
+					if (pFoundForm && IS_TYPE(pFoundForm, BGSDebris))
+						shader->shaderData.addonModels = static_cast<BGSDebris*>(pFoundForm);
+				}
 				break;
 			case 4:
 			case 14:
