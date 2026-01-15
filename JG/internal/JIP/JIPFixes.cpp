@@ -427,6 +427,26 @@ namespace JIPFixes {
 			PatchMemoryNopRange(GetJIPAddress(0x10012260), GetJIPAddress(0x1001228D));  
 		}
 	}
+
+	namespace CopyFaceGenFromFix {
+
+		bool(__cdecl* CopyFaceGenFrom)(COMMAND_ARGS) = nullptr;
+
+		bool Cmd_CopyFaceGenFrom_Execute(COMMAND_ARGS) {
+			bool bLoadFaceGenHeadEGTFilesOrg = *reinterpret_cast<bool*>(0x11D5AE0);
+			bool bResult = CopyFaceGenFrom(PASS_COMMAND_ARGS);
+			*reinterpret_cast<bool*>(0x11D5AE0) = bLoadFaceGenHeadEGTFilesOrg;
+			return bResult;
+		}
+
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x22A1));
+			if (pInfo) {
+				CopyFaceGenFrom = pInfo->execute;
+				pInfo->execute = Cmd_CopyFaceGenFrom_Execute;
+			}
+		}
+	}
   
 	namespace SetOnDialogTopicEventHandlerEx {
 
@@ -645,6 +665,7 @@ namespace JIPFixes {
 
 		SetOnDialogTopicEventHandlerEx::InitHooks();
 		RespawnDisableFix::InitHooks();
+		CopyFaceGenFromFix::InitHooks();
 	}
 
 	void InitDeferredHooks() {
