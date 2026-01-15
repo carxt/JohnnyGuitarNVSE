@@ -337,6 +337,9 @@
     <ClInclude Include="internal\JIP\JIPFixes.hpp">
       <Filter>internal\JIP</Filter>
     </ClInclude>
+    <ClInclude Include="functions\fn_dial.h">
+      <Filter>functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

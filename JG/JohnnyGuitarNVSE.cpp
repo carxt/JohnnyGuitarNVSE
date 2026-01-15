@@ -585,6 +585,7 @@ extern "C" {
 		REG_TYPED_CMD(GetWeaponsForMod, Array);
 		REG_CMD(GetMineArmedEx);
 		REG_CMD(SetMusicTypePath);
+		REG_TYPED_CMD(GetParentTopic, Form);
 
 		if (!bIsGECK) {
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);

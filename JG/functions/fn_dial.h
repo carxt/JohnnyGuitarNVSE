@@ -6,6 +6,7 @@ DEFINE_COMMAND_PLUGIN(SetDialogResponseOverrideValues, , 0, 8, kParams_OneForm_F
 DEFINE_COMMAND_PLUGIN(GetSaidOnce, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetSaidOnce, , 0, 3, kParams_OneForm_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetTopicInfo, , 0, 2, kParams_GetTopicInfo);
+DEFINE_COMMAND_PLUGIN(GetParentTopic, , 0, 1, kParams_OneForm);
 
 
 enum ResponseRelatedTopicType {
@@ -276,5 +277,17 @@ bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
 	}
 	g_arrInterface->AssignCommandResult(pStoredInfos, result);
 
+	return true;
+}
+
+bool Cmd_GetParentTopic_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESTopicInfo* pTopicInfo = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTopicInfo) && IS_TYPE(pTopicInfo, TESTopicInfo)) {
+		TESTopic* pParentTopic = pTopicInfo->pParentTopic;
+		if (pParentTopic) {
+			*reinterpret_cast<uint32_t*>(result) = pParentTopic->GetFormID();
+		}
+	}
 	return true;
 }
