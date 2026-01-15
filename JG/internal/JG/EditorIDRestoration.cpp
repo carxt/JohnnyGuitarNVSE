@@ -18,9 +18,8 @@ namespace EDIDRestoration {
 #define DEBUG_MSG(...) __noop(__VA_ARGS__)
 #endif
 
-	bool bCanUseConsole = false;
+	bool bHadEDIDConflicts = false;
 	std::mutex kEDIDMapLock;
-	std::list<std::string> kErrors;
 
 	static constexpr UInt32 TESForm_Vtables[] = {
 		0x101144C,	//	BGSDehydrationStage
@@ -188,10 +187,7 @@ namespace EDIDRestoration {
 							pExistingForm->GetFormID(), pFileB ? pFileB->GetName() : "",
 							pExistingForm->GetFormTypeName(), apForm->GetFormTypeName());
 					}
-					if (!bCanUseConsole)
-						kErrors.push_back(cText);
-					else
-						Console_Print(cText);
+					bHadEDIDConflicts = true;
 					PrintLog(cText);
 					RemoveEDIDFromExtraData(pExistingForm, apEDID);
 				}
@@ -332,10 +328,7 @@ namespace EDIDRestoration {
 	}
 
 	void PrintErrors() {
-		for (const auto& err : kErrors) {
-			Console_Print(err.c_str());
-		}
-		kErrors.clear();
-		bCanUseConsole = true;
+		if (bHadEDIDConflicts)
+			Console_Print("Some EDIDs are conflicting! Check JohnnyGuitarNVSE.log for details.");
 	}
 }
