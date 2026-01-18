@@ -54,7 +54,7 @@ bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	ScriptVar *worldOut, *firstPersonOut, *scenegraphOut = NULL;
+	ScriptVar *worldOut, *firstPersonOut, *scenegraphOut = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &worldOut, &firstPersonOut, &scenegraphOut) || !g_thePlayer) return true;
 	*result = 1;
 	worldOut->data = g_thePlayer->firstPersonFOV;
@@ -253,7 +253,7 @@ bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
 
 bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 	Actor* actor = (Actor*)thisObj;
-	char NiName[MAX_PATH];
+	char NiName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &NiName) && actor->IsActor() && actor->baseProcess) {
 		NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
 		ActorHitData* hitData = actor->baseProcess->GetHitData();
@@ -265,7 +265,7 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 }
 bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char NiName[MAX_PATH];
+	char NiName[MAX_PATH] = {};
 	NiVector3 Coord;
 	if (!thisObj || !(ExtractArgsEx(EXTRACT_ARGS_EX, &NiName, &(Coord.x), &(Coord.y), &(Coord.z)))) return true;
 	NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
@@ -277,7 +277,7 @@ bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 
 bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char NiName1[MAX_PATH], NiName2[MAX_PATH];
+	char NiName1[MAX_PATH], NiName2[MAX_PATH] = {};
 	TESObjectREFR* ref1, * ref2;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &ref1, &ref2, &NiName1, &NiName2))) return true;
 	NiAVObject* Node1 = ref1->GetNiBlock(NiName1);
@@ -293,7 +293,7 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 	float xIn = 0, yIn = 0, zIn = 0;
 	UInt32 HandleType = 0;
 	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
-	TESObjectREFR* refr = NULL;
+	TESObjectREFR* refr = nullptr;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &xIn, &yIn, &zIn, &HandleType, &refr)) {
 		if (refr) {
@@ -315,7 +315,7 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 	float xIn = 0, yIn = 0, zIn = 0;
 	UInt32 HandleType = 0;
 	NiPoint3 NiPosIn = { 0,0,0 };
-	TESObjectREFR* refr = NULL;
+	TESObjectREFR* refr = nullptr;
 	ScriptVar* X_outS, * Y_outS, * Z_outS;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &NiPosIn.x, &NiPosIn.y, &NiPosIn.z, &HandleType, &refr)) {
 		if (refr) {
@@ -335,7 +335,7 @@ bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS) {
 	float xIn = 0, yIn = 0, zIn = 0;
 	UInt32 doGetLocal = 0;
 	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
-	TESObjectREFR* refr = NULL;
+	TESObjectREFR* refr = nullptr;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &doGetLocal)) {
 		if (auto m_GameCameraPos = JGGameCamera.CamPos) {

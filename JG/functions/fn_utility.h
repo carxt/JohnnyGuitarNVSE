@@ -5,14 +5,14 @@
 DEFINE_COMMAND_ALT_PLUGIN(GetEditorID, GetEdID, , 0, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetJohnnyPatch, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTimePlayed, , 0, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(AsmBreak, , 0, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(RefAddr, , 0, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(RefAddrxData, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(EditorIDToFormID, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , 0, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , 1, 4, kParams_FourStrings);
-DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(GetPipBoyMode, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , 0, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(GetPipBoyMode, , 0, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(GetFormOverrideIndex, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetSequenceAnimGroup, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(ar_SortEditor, , 0, 2, kParams_OneInt_OneOptionalInt)
@@ -20,24 +20,24 @@ DEFINE_COMMAND_PLUGIN(SetUIUpdateSound, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , 0, 3, kParams_OneInt_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(IsDLLLoaded, , 0, 2, kParams_OneString_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(RefreshIdle, , 1, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(ExitGameAlt, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(DumpINI, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(ExitGameAlt, , 0, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(DumpINI, , 0, 0, nullptr);
 DEFINE_CMD_NO_ARGS(UpdateCrosshairPrompt);
 DEFINE_COMMAND_PLUGIN(SetOptionalBone, , 1, 2, kParams_OneInt_OneString);
 DEFINE_COMMAND_PLUGIN(GetOptionalBone, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(TriggerScreenSplatterEx, , 0, 8, kSplatterParams);
 DEFINE_COMMAND_PLUGIN(SetViewmodelClipDistance, , 0, 1, kParams_OneFloat);
-DEFINE_COMMAND_PLUGIN(GetViewmodelClipDistance, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetViewmodelClipDistance, , 0, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(SetBlockTransform, , 1, ARRAYSIZE(kTransformParams), kTransformParams);
 DEFINE_COMMAND_PLUGIN(SetCameraTranslate, , 0, ARRAYSIZE(kParams_OneBoolThreeFloats), kParams_OneBoolThreeFloats);
 DEFINE_COMMAND_PLUGIN(SetCameraRotate, , 0, ARRAYSIZE(kParams_OneBoolOneIntOneFloat), kParams_OneBoolOneIntOneFloat);
 DEFINE_CMD_NO_ARGS(DumpIconMap);
 DEFINE_CMD_NO_ARGS(RollCredits);
 DEFINE_CMD_NO_ARGS(GetAllGameRadios);
-DEFINE_COMMAND_PLUGIN(GetAvailableRadios, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetAvailableRadios, , 1, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(NullArgs, , 0, 1, kParams_OneOptionalInt);
 DEFINE_CMD_NO_ARGS(NullNoArgs);
-DEFINE_CMD_ALT_COND_PLUGIN(GameGetSecondsPassed, GGetSecPass, , 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GameGetSecondsPassed, GGetSecPass, , 0, nullptr);
 DEFINE_COMMAND_PLUGIN(IsNiSequenceActive, , 1, ARRAYSIZE(kParams_IsNiSequenceActive), kParams_IsNiSequenceActive);
 
 
@@ -74,7 +74,7 @@ bool Cmd_NullArgs_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_GetAllGameRadios_Execute(COMMAND_ARGS) {
-	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	tList<TESObjectACTI>* g_gameRadios = (tList<TESObjectACTI>*)0x11C8264;
 	for (auto radioIter = g_gameRadios->Begin(); !radioIter.End(); radioIter.Next()) {
 		if (*radioIter) {
@@ -87,9 +87,9 @@ bool Cmd_GetAllGameRadios_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_GetAvailableRadios_Execute(COMMAND_ARGS) {
-	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	tList<TESObjectACTI> availableRadios = {};
-	CdeclCall<void>(0x04FF1A0, thisObj, &availableRadios, NULL);
+	CdeclCall<void>(0x04FF1A0, thisObj, &availableRadios, nullptr);
 	for (auto radioIter = availableRadios.Begin(); !radioIter.End(); radioIter.Next()) {
 		if (*radioIter && !CdeclCall<bool>(0x0079BE30, *radioIter) && (jg_gameRadioSet.count((*radioIter)->refID) > 0)) {
 			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
@@ -127,7 +127,7 @@ bool Cmd_DumpIconMap_Execute(COMMAND_ARGS) {
 
 bool Cmd_UpdateCrosshairPrompt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ThisCall(0x778B10, NULL);
+	ThisCall(0x778B10, nullptr);
 	return true;
 }
 enum EType {
@@ -265,9 +265,9 @@ bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	UInt32 stopAnim = 0;
 	Actor* actor = (Actor*)thisObj;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &stopAnim);
-	if (actor->baseProcess->GetIdleForm350()) {
+	if (actor && actor->IsActor() && actor->baseProcess->GetIdleForm350()) {
 		actor->baseProcess->ResetQueuedIdleFlags();
-		actor->baseProcess->SetIdleForm350(NULL);
+		actor->baseProcess->SetIdleForm350(nullptr);
 		if (stopAnim > 0) ThisCall(0x498910, actor->GetAnimData(), 1, 1); // SpecialIdleFree
 		*result = 1;
 	}
@@ -276,18 +276,18 @@ bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
 	*result = 0;
 	int checkOutsideOfGameFolder = 0;
-	char dllName[MAX_PATH];
-	char dllPath[MAX_PATH];
-	char fnvPath[MAX_PATH];
+	char dllName[MAX_PATH] = {};
+	char dllPath[MAX_PATH] = {};
+	char fnvPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dllName, &checkOutsideOfGameFolder)) {
 		strncat_s(dllName, ".dll", 4);
 		HMODULE module = GetModuleHandle(dllName);
 		if (module) {
 			if (!checkOutsideOfGameFolder) {
 				GetModuleFileNameA(module, dllPath, MAX_PATH);
-				GetModuleFileNameA(NULL, fnvPath, MAX_PATH);
+				GetModuleFileNameA(nullptr, fnvPath, MAX_PATH);
 				fnvPath[strlen(fnvPath) - 13] = '\0';
-				if (strstr(dllPath, fnvPath) != NULL) *result = 1;
+				if (strstr(dllPath, fnvPath) != nullptr) *result = 1;
 			}
 			else {
 				*result = 1;
@@ -300,16 +300,19 @@ bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
 bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 arrID, fullMatch;
-	BGSListForm* formList;
+	BGSListForm* formList = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &formList, &fullMatch)) return true;
+
+	if (!formList || !IS_TYPE(formList, BGSListForm)) return true;
+
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!inArr) return true;
 	UInt32 size = g_arrInterface->GetArraySize(inArr);
 	NVSEArrayElement* elements = new NVSEArrayElement[size];
-	g_arrInterface->GetElements(inArr, elements, NULL);
+	g_arrInterface->GetElements(inArr, elements, nullptr);
 	if (!fullMatch) {
 		for (int i = 0; i < size; i++) {
-			if (elements[i].GetTESForm() == NULL) return true;
+			if (elements[i].GetTESForm() == nullptr) return true;
 			ListNode<TESForm>* listIter = formList->list.Head();
 			do {
 				if (elements[i].GetTESForm() == listIter->data) {
@@ -322,7 +325,7 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 	}
 	else {
 		for (int i = 0; i < size; i++) {
-			if (elements[i].GetTESForm() == NULL) return true;
+			if (elements[i].GetTESForm() == nullptr) return true;
 			int elementFound = 0;
 			ListNode<TESForm>* listIter = formList->list.Head();
 			do {
@@ -344,9 +347,9 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 }
 bool Cmd_SetUIUpdateSound_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESSound* sound;
+	TESSound* sound = nullptr;
 	UInt32 type = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &type) && IS_TYPE(sound, TESSound)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &type) && sound && IS_TYPE(sound, TESSound)) {
 		*result = 1;
 		switch (type) {
 			case 1:
@@ -384,13 +387,13 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &isReverse)) return true;
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!inArr) return true;
-	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* outArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	UInt32 size = g_arrInterface->GetArraySize(inArr);
 	NVSEArrayElement* elements = new NVSEArrayElement[size];
-	g_arrInterface->GetElements(inArr, elements, NULL);
+	g_arrInterface->GetElements(inArr, elements, nullptr);
 	std::map<const char*, TESForm*, cmp_str> smap(cmp_str(isReverse > 0));
 	for (int i = 0; i < size; i++) {
-		if (elements[i].GetTESForm() == NULL) return true;
+		if (elements[i].GetTESForm() == nullptr) return true;
 		smap.insert(std::pair<const char*, TESForm*>(elements[i].GetTESForm()->GetFormEditorID(), elements[i].GetTESForm()));
 	}
 	for (std::map<const char*, TESForm*>::iterator it = smap.begin(); it != smap.end(); ++it) {
@@ -417,8 +420,8 @@ bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESForm* form;
-	if ( ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
+	TESForm* form = nullptr;
+	if ( ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) {
 		*result = form->GetOverridingModIdx();
 		if (IsConsoleMode()) Console_Print("GetFormOverrideIndex >> %.f", *result);
 	}
@@ -432,8 +435,8 @@ bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
-	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
-	char nodeName[MAX_PATH];
+	char X_outS[VarNameSize] = {}, Y_outS[VarNameSize] = {}, Z_outS[VarNameSize] = {};
+	char nodeName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nodeName, &X_outS, &Y_outS, &Z_outS)) {
 		hkpRigidBody* rigidBody = thisObj->GetRigidBody(nodeName);
 		if (rigidBody) {
@@ -455,10 +458,10 @@ bool Cmd_GetDefaultHeapSize_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
-	char edid[MAX_PATH];
-	TESForm* form = NULL;
+	char edid[MAX_PATH] = {};
+	TESForm* form = nullptr;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &edid)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &edid) && edid[0]) {
 		form = ((TESForm * (__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
 		if (form) {
 			*(UInt32*)result = form->refID;
@@ -471,14 +474,14 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
-	TESForm* form = NULL;
+	TESForm* form = nullptr;
 	if (thisObj) Console_Print("0x%08X", thisObj);
 	else if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) Console_Print("0x%08X", form);
 	return true;
 }
 
 bool Cmd_RefAddrxData_Execute(COMMAND_ARGS) {
-	TESForm* form = NULL;
+	TESForm* form = nullptr;
 	DWORD type;
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) { 
 		if (type < kExtraData_Max) {
@@ -678,7 +681,7 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 	bool update = false;
 	bool world = false;
 	bool local = false;
-	char blockName[128];
+	char blockName[128] = {};
 
 	*result = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &blockName, &x, &y, &z, &w, &rotate, &world, &update)) {

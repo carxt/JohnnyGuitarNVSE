@@ -2,8 +2,8 @@
 DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , 0, 3, kParams_OneString_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetWorldSpaceMapTexture, , 0, 2, kParams_OneForm_OneString);
-DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(GetCustomMapMarkerIcon, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(GetCustomMapMarkerIcon, , 1, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParams_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(QueueCinematicText, , 0, 7, kParams_TwoStrings_OneOptionalString_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , 0, 3, kParams_OneString_TwoOptionalInts);
@@ -15,12 +15,12 @@ DEFINE_COMMAND_PLUGIN(ModExtraMiscStat, , 0, 2, kParams_OneString_OneInt);
 DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , 0, 2, kParams_OneInt_OneOptionalForm);
 DEFINE_COMMAND_ALT_PLUGIN(PushUIQuestToTop, PushSelectedQuestInterfaceListEntryToTheTopOfThePipBoyQuestLogInterfaceImmediately, , 0, 1, kParams_OneQuest);
-DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , 0, 0, NULL); //DO NOT REGISTER YET.
-DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , 0, 0, nullptr); //DO NOT REGISTER YET.
+DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , 0, 0, nullptr);
 DEFINE_CMD_ALT_COND_PLUGIN(IsMenuPaused, , "", 0, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetHUDVisibilityOverride, "Sets HUD element visibility override flags", 0, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(UpdateRepairMenu, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", 0, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(UpdateRepairMenu, , 0, 0, nullptr);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 		if (g_thePlayer) {
@@ -39,7 +39,7 @@ bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks
 
 
 bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
-	TESQuest* quest;
+	TESQuest* quest = nullptr;
 	*result = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &quest) || !g_thePlayer)
 		return true;
@@ -97,11 +97,11 @@ bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
 		kFlag_WhiteListHair = 1 << 0,
 		kFlag_WhiteListBeard,
 	};
-	BGSListForm* formList = NULL;
+	BGSListForm* formList = nullptr;
 	UInt32 flags = 0;
 	if (!g_thePlayer) return true;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &formList)) {
-		if (IS_TYPE(formList, BGSListForm)) {
+		if (formList && IS_TYPE(formList, BGSListForm)) {
 			ListNode<TESForm>* iter = formList->list.Head();
 
 			do {
@@ -141,7 +141,7 @@ bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_InitExtraMiscStat_Execute(COMMAND_ARGS) {
-	char name[MAX_PATH];
+	char name[MAX_PATH] = {};
 	int mod = 0;
 	int value;
 	constexpr size_t maxMiscStatCount = UINT16_MAX;
@@ -162,7 +162,7 @@ bool Cmd_InitExtraMiscStat_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ModExtraMiscStat_Execute(COMMAND_ARGS) {
-	char name[MAX_PATH];
+	char name[MAX_PATH] = {};
 	int mod;
 	int value;
 	*result = 0;
@@ -187,7 +187,7 @@ bool Cmd_ModExtraMiscStat_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
-	char name[MAX_PATH];
+	char name[MAX_PATH] = {};
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
 		std::string sName = name;
@@ -200,10 +200,10 @@ bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
 }
 bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESReputation* rep;
+	TESReputation* rep = nullptr;
 	UInt32 tierID = 0;
-	char path[MAX_PATH];
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &rep, &tierID, &path) && IS_TYPE(rep, TESReputation) && tierID >= 1 && tierID <= 4)) return true;
+	char path[MAX_PATH] = {};
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &rep, &tierID, &path) && rep && IS_TYPE(rep, TESReputation) && tierID >= 1 && tierID <= 4)) return true;
 	auto pos = factionRepIcons.find(rep->refID);
 	uint32_t bufferSize = strlen(path) + 1;
 	char* pathCopy = new char[bufferSize];
@@ -249,7 +249,7 @@ bool Cmd_GetSystemColor_Execute(COMMAND_ARGS) {
 };
 
 bool Cmd_QueueObjectiveText_Execute(COMMAND_ARGS) {
-	char text[MAX_PATH];
+	char text[MAX_PATH] = {};
 	UInt32 isCompleted, allowDisplayMultiple;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &text, &isCompleted, &allowDisplayMultiple)) {
@@ -271,7 +271,7 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS) {
 		kJustifyRight
 	};
 
-	char title[MAX_PATH], subtitle[MAX_PATH], soundEdid[MAX_PATH];
+	char title[MAX_PATH], subtitle[MAX_PATH], soundEdid[MAX_PATH] = {};
 	*soundEdid = '\0';
 	UInt32 queuePriority = kPriorityAppend;
 	UInt32 justification = kJustifyLeft;
@@ -290,10 +290,10 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 	UInt32 isFemale = 0;
-	TESForm* form = NULL;
-	char newPath[MAX_PATH];
+	TESForm* form = nullptr;
+	char newPath[MAX_PATH] = {};
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPath, &isFemale, &form)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPath, &isFemale, &form) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
 			bipedModel->icon[isFemale].ddsPath.Set(newPath);
@@ -315,9 +315,9 @@ bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESWorldSpace* worlspace = NULL;
-	char path[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace, &path) && IS_TYPE(worlspace, TESWorldSpace)) {
+	TESWorldSpace* worlspace = nullptr;
+	char path[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace, &path) && worlspace && IS_TYPE(worlspace, TESWorldSpace)) {
 		worlspace->texture.ddsPath.Set(path);
 		*result = 1;
 	}
@@ -325,9 +325,9 @@ bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESWorldSpace* worlspace = NULL;
-	char path[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace) && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.pString)) {
+	TESWorldSpace* worlspace = nullptr;
+	char path[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace) && worlspace && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.pString)) {
 		strcpy_s(path, worlspace->texture.ddsPath.pString);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 		if (IsConsoleMode())
@@ -338,8 +338,9 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	TESObjectREFR* form;
-	char iconPath[MAX_PATH];
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || (!IS_TYPE(form, BGSListForm) && (!form->GetIsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)))) return true;
+	char iconPath[MAX_PATH] = {};
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || !form || (!IS_TYPE(form, BGSListForm) && (!form->GetIsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)))) 
+		return true;
 	if (IS_TYPE(form, BGSListForm)) {
 		ListNode<TESForm>* iterator = ((BGSListForm*)form)->list.Head();
 		while (iterator) {

@@ -23,7 +23,7 @@ bool Cmd_IsBSALoaded_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};
 	char fixPath[MAX_PATH];
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		snprintf(fixPath, MAX_PATH, "DATA\\%s", path);
 		DWORD* archive = CdeclCall<DWORD*>(0xAF5320, fixPath); // ArchiveManager::GetArchiveByName
 		if (archive != nullptr) {
@@ -45,7 +45,7 @@ bool Cmd_PlaySoundFile_Execute(COMMAND_ARGS) {
 	UInt32 forcePlay = 0;
 	UInt32 shouldLoop = 0;
 	UInt32 playInMainMenu = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &forcePlay, &shouldLoop, &playInMainMenu)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &forcePlay, &shouldLoop, &playInMainMenu) && path[0]) {
 		int type = playInMainMenu > 0 ? 8 : 6;
 		CdeclCall<void>(0x8300C0, type, path, 1000, shouldLoop, forcePlay, 0.0, 0);
 		*result = 1;
@@ -67,7 +67,7 @@ void resolveTexturePath(char* path, uint32_t bufferSize) {
 bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
 		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
 		if (file != nullptr) {
@@ -84,7 +84,7 @@ bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
 		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
 		if (file != nullptr) {
@@ -103,7 +103,7 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};
 	//char fixPath[MAX_PATH];
 	UInt32 useDataTextures = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
 		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
 		if (file != nullptr) {
@@ -121,7 +121,7 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
 		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
 		if (file != nullptr) {
@@ -138,12 +138,13 @@ bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 	*result = 0;
 	int fileOrFolder = 0;
-	char filename[MAX_PATH];
+	char filename[MAX_PATH] = {};
 	UInt8 modIdx = scriptObj->GetOverridingModIdx();
 	if (modIdx == 0xFF) return true;
 	if (strcmp("UwU.esp", g_dataHandler->GetNthModName(modIdx))) return true;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &filename, &fileOrFolder)) {
-		if (strstr(filename, "..\\")) return true;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &filename, &fileOrFolder) && filename[0]) {
+		if (strstr(filename, "..\\")) 
+			return true;
 		char filepath[MAX_PATH];
 		GetModuleFileNameA(NULL, filepath, MAX_PATH);
 		char* lastSlash = (char*)(strrchr(filepath, '\\') + 1);
@@ -168,7 +169,7 @@ bool Cmd_MD5File_Execute(COMMAND_ARGS) {
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	char path[MAX_PATH] = {};
 	char outHash[0x21] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		if (strstr(path, "..\\")) return true;
 		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
 		uint32_t length = filename - lastSlash;
@@ -186,7 +187,7 @@ bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	char path[MAX_PATH] = {};
 	char outHash[0x29] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		if (strstr(path, "..\\")) return true;
 		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
 		uint32_t length = filename - lastSlash;
@@ -206,7 +207,7 @@ bool Cmd_GetPixelFromBMP_Execute(COMMAND_ARGS) {
 	char RED[VarNameSize], GREEN[VarNameSize], BLUE[VarNameSize];
 	UInt32 width = 0, height = 0;
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &RED, &GREEN, &BLUE, &width, &height)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &RED, &GREEN, &BLUE, &width, &height) && path[0]) {
 		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
 		uint32_t length = filename - lastSlash;
 		strcpy_s(lastSlash, length, path);

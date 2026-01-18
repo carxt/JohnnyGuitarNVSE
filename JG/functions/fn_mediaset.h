@@ -6,8 +6,8 @@ DEFINE_COMMAND_PLUGIN(GetMediaSetTraitString, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitSound, , 0, 3, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(SetMediaSetTraitString, , 0, 3, kParams_OneForm_OneInt_OneString);
-DEFINE_CMD_ALT_COND_PLUGIN(AudioMarkerGetController, AMKGetCtrl, , 1, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(AudioMarkerGetCurrent, AMKGetCur, , 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(AudioMarkerGetController, AMKGetCtrl, , 1, nullptr);
+DEFINE_CMD_ALT_COND_PLUGIN(AudioMarkerGetCurrent, AMKGetCur, , 0, nullptr);
 DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerGetProperty, AMKGetProp, , 1, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerSetProperty, AMKSetProp, , 1, 2, kParams_OneInt_OneFloat);
 DEFINE_COMMAND_ALT_PLUGIN(AudioMarkerSetController, AMKSetCtrl, , 1, 1, kParams_OneForm);
@@ -21,8 +21,8 @@ DEFINE_COMMAND_PLUGIN(SetAcousticSpace, , 1, 2, kParams_OneForm_OneOptionalForm)
 bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS) 
 {
 	*result = 0;
-	TESObjectCELL* pCell = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && IS_TYPE(pCell, TESObjectCELL)) 
+	TESObjectCELL* pCell = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL))
 	{
 		ExtraCellAcousticSpace* pXAcousticSpace = (ExtraCellAcousticSpace*)pCell->extraDataList.GetByType(kExtraData_CellAcousticSpace);
 		if (pXAcousticSpace && pXAcousticSpace->acousticSpace)
@@ -44,10 +44,10 @@ bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS)
 bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	TESObjectCELL* pCell = NULL;
-	BGSAcousticSpace* pAcousticSpace = NULL;
+	TESObjectCELL* pCell = nullptr;
+	BGSAcousticSpace* pAcousticSpace = nullptr;
 	uintptr_t ExtraCellAcousticSpace_Update = 0x041C090;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, pAcousticSpace) )
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, pAcousticSpace) && pCell)
 	{
 		if (!IS_TYPE(pCell, TESObjectCELL)) [[unlikely]]
 		{
@@ -90,13 +90,13 @@ bool Cmd_AudioMarkerGetCurrent_Eval(COMMAND_ARGS_EVAL) {
 
 
 bool Cmd_AudioMarkerGetCurrent_Execute(COMMAND_ARGS){
-	Cmd_AudioMarkerGetCurrent_Eval(thisObj, NULL, NULL, result);
+	Cmd_AudioMarkerGetCurrent_Eval(thisObj, nullptr, nullptr, result);
 	return true;
 }
 
 
 bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
-	MediaLocationController* locationController = NULL;
+	MediaLocationController* locationController = nullptr;
 	*result = 0;
 	if (thisObj) {
 		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
@@ -115,7 +115,7 @@ bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
 }
 
 bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
-	Cmd_AudioMarkerGetController_Eval(thisObj, NULL, NULL, result);
+	Cmd_AudioMarkerGetController_Eval(thisObj, nullptr, nullptr, result);
 	if (IsConsoleMode()) {
 		if (thisObj) {
 			if (*result) {
@@ -133,7 +133,7 @@ bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
 
 bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
 	MediaLocationController* locationController;
-	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &locationController) && IS_TYPE(locationController, MediaLocationController)) {
+	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &locationController) && locationController && IS_TYPE(locationController, MediaLocationController)) {
 		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*) thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
 		if (audioMrkr && audioMrkr->data) {
 			audioMrkr->data->mediaLocCtrlID = locationController->refID;
@@ -227,9 +227,9 @@ bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset;
+	MediaSet* mediaset = nullptr;
 	int traitID = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && IS_TYPE(mediaset, MediaSet)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && mediaset && IS_TYPE(mediaset, MediaSet)) {
 		switch (traitID) {
 			case 0:
 				*result = mediaset->type;
@@ -272,11 +272,11 @@ bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset;
+	MediaSet* mediaset = nullptr;
 	int traitID = -1;
 	float newVal = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newVal) && IS_TYPE(mediaset, MediaSet)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newVal) && mediaset && IS_TYPE(mediaset, MediaSet)) {
 		*result = 1;
 		switch (traitID) {
 			case 0:
@@ -321,9 +321,9 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_GetMediaSetTraitSound_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset;
+	MediaSet* mediaset = nullptr;
 	int traitID = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && IS_TYPE(mediaset, MediaSet)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && mediaset && IS_TYPE(mediaset, MediaSet)) {
 		switch (traitID) {
 			case 0:
 				*(UInt32*)result = mediaset->HNAM->refID;
@@ -336,11 +336,14 @@ bool Cmd_GetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset;
-	TESSound* soundForm;
+	MediaSet* mediaset = nullptr;
+	TESSound* soundForm = nullptr;
 	int traitID = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &soundForm) && IS_TYPE(mediaset, MediaSet) && IS_TYPE(soundForm, TESSound)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &soundForm) && mediaset && IS_TYPE(mediaset, MediaSet)) {
+		if (soundForm && !IS_TYPE(soundForm, TESSound))
+			return true;
+
 		switch (traitID) {
 			case 0:
 				mediaset->HNAM = soundForm;
@@ -355,10 +358,10 @@ bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset;
+	MediaSet* mediaset = nullptr;
 	int traitID = -1;
-	const char* resStr = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && IS_TYPE(mediaset, MediaSet)) {
+	const char* resStr = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && mediaset && IS_TYPE(mediaset, MediaSet)) {
 		if (traitID >= 0 && traitID <= 5) {
 			resStr = mediaset->data[traitID].filepath.c_str();
 			g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
@@ -369,11 +372,11 @@ bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetMediaSetTraitString_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset;
+	MediaSet* mediaset = nullptr ;
 	int traitID = -1;
-	char newStr[MAX_PATH];
+	char newStr[MAX_PATH] = {};
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newStr) && IS_TYPE(mediaset, MediaSet)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newStr) && mediaset && IS_TYPE(mediaset, MediaSet)) {
 		if (traitID >= 0 && traitID <= 5) {
 			mediaset->data[traitID].filepath.Set(newStr);
 			*result = 1;

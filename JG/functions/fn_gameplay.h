@@ -4,8 +4,8 @@
 // Functions affecting gameplay
 DEFINE_COMMAND_PLUGIN(ToggleLevelUpMenu, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(TogglePipBoy, , 0, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(Jump, , 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(StopVATSCam, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(Jump, , 1, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(StopVATSCam, , 0, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(SetCameraShake, , 0, 2, kParams_TwoFloats);
 DEFINE_COMMAND_PLUGIN(ApplyWeaponPoison, , 1, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(SetVelEx, , 1, 3, kParams_ThreeFloats);
@@ -14,33 +14,33 @@ DEFINE_COMMAND_PLUGIN(DisableMuzzleFlashLights, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(UnsetAV, , 1, 1, kParams_OneActorValue);
 DEFINE_COMMAND_PLUGIN(UnforceAV, , 1, 1, kParams_OneActorValue);
 DEFINE_COMMAND_PLUGIN(ToggleNthPipboyLight, , 0, 2, kParams_TwoInts);
-DEFINE_COMMAND_PLUGIN(GetRunSpeed, , 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(DisableMenuArrowKeys, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(EnableMenuArrowKeys, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetRunSpeed, , 1, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(DisableMenuArrowKeys, , 0, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(EnableMenuArrowKeys, , 0, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(HighlightBodyPartAlt, , 1, 1, kParams_OneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(DeactivateAllHighlightsAlt, , 1, 1, kParams_OneOptionalFloat);
-DEFINE_COMMAND_PLUGIN(RemoveHighlightedRef, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(RemoveHighlightedRef, , 1, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(GetNearestCompassHostileDirection, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetNearestCompassHostile, , 0, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetDisablePlayerControlsHUDVisibilityFlags, SetDPCHUDFlags, , 0, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(IsCompassHostile, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(IsCompassHostile, , 1, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(ToggleCombatMusic, , 0, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(IsCombatMusicEnabled, , 0, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(IsHostilesNearby, , 0, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , 1, 2, kParams_OneInt_OneFloat);
-DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , 1, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , 1, 2, kParams_OneRef_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , 0, 2, kParams_TwoOptionalInts);
 DEFINE_COMMAND_PLUGIN(ToggleDisableSaves, , 0, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(IsCrimeOrEnemy, , 1, 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(GetLocationSpecificLoadScreensOnly, , , 0, NULL);
-DEFINE_COMMAND_PLUGIN(GetLocationName, , 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(GetPlayingEffectShaders, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , 1, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(IsCrimeOrEnemy, , 1, 0, nullptr);
+DEFINE_CMD_ALT_COND_PLUGIN(GetLocationSpecificLoadScreensOnly, , , 0, nullptr);
+DEFINE_COMMAND_PLUGIN(GetLocationName, , 1, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(GetPlayingEffectShaders, , 1, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(StopSoundLooping, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(AddNavmeshObstacle, , 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(RemoveNavmeshObstacle, , 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(GetLandTextureUnderFeet, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(AddNavmeshObstacle, , 1, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(RemoveNavmeshObstacle, , 1, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(GetLandTextureUnderFeet, , 1, 0, nullptr);
 DEFINE_CMD_NO_ARGS(GetMoonPhase);
 DEFINE_COMMAND_PLUGIN(RewardKarmaAlt, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetCameraShakeNoHUDShudder, CamShakeNHUD , , 0, 2, kParams_TwoFloats);
@@ -48,7 +48,7 @@ DEFINE_CMD_NO_ARGS(GetTempIngestibleEffects)
 DEFINE_COMMAND_PLUGIN(PlaySoundFade, , 0, 2, kParams_OneForm_OneFloat);
 DEFINE_COMMAND_PLUGIN(GetPointInNavMesh, , 0, 5, kParams_ThreeFloats_OneInt_OneOptionalFloat);
 DEFINE_COMMAND_PLUGIN(GetNearestNavMeshTriangle, , 0, 5, kParams_ThreeFloats_OneInt_OneOptionalFloat);
-DEFINE_COMMAND_PLUGIN(HasHealthDamageEffect, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(HasHealthDamageEffect, , 1, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(SetAlwaysRun, , 0, 2, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetAutoMove, , 0, 1, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetPlayerMovementFlags, , 0, 1, kParams_OneInt);
@@ -57,12 +57,12 @@ DEFINE_COMMAND_PLUGIN(SetExtraAccuracyPenaltyMult, , 0, 2, kParams_OneFloat_OneO
 DEFINE_COMMAND_PLUGIN(GetExtraAccuracyPenaltyMult, , 0, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(RemoveExtraAccuracyPenaltyMult, , 0, 1, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(SetCustomMapMarker, , 0, 3, kParams_ThreeFloats);
-DEFINE_COMMAND_PLUGIN(ClearCustomMapMarker, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(ClearCustomMapMarker, , 0, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(EjectCasing, , 0, 2, kParams_EjectCasing);
 DEFINE_COMMAND_PLUGIN(SetHUDShudderPower, , 0, 1, kParams_OneFloat);
-DEFINE_COMMAND_PLUGIN(GetHUDShudderPower, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetHUDShudderPower, , 0, 0, nullptr);
 DEFINE_COMMAND_ALT_PLUGIN(SetMediaLocationControllerOverride, SetMLCOverride, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(ClearMediaLocationControllerOverride, ClearMLCOverride, , 0, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(ClearMediaLocationControllerOverride, ClearMLCOverride, , 0, 0, nullptr);
 DEFINE_COMMAND_ALT_PLUGIN(GetCasinoWinnings, , , 0, 1, kParams_OneCasino);
 DEFINE_COMMAND_ALT_PLUGIN(SetCasinoWinnings, , , 0, 2, kParams_OneCasinoOneInt);
 DEFINE_COMMAND_PLUGIN(GetCasinoDeckTexture, , 0, 2, kParams_OneCasinoOneInt);
@@ -101,9 +101,9 @@ bool Cmd_StopHolotape_Execute(COMMAND_ARGS)
 bool Cmd_PlayHolotape_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	BGSNote* note;
+	BGSNote* note = nullptr;
 	int playStartStopSound = 1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &playStartStopSound) && note->type == BGSNote::kVoice || note->type == BGSNote::kSound)
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &playStartStopSound) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice || note->type == BGSNote::kSound)
 	{
 		MapMenu* mapMenu = MapMenu::GetSingleton();
 		mapMenu->PlayHolotape(note, playStartStopSound > 0);
@@ -115,9 +115,9 @@ bool Cmd_PlayHolotape_Execute(COMMAND_ARGS)
 
 bool __cdecl Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS)
 {
-	TESCasino* casino;
+	TESCasino* casino = nullptr;
 	SInt32 earnings;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &earnings) && casino)
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &earnings) && casino && IS_TYPE(casino, TESCasino))
 	{
 
 		auto casinoRefId = casino->refID;
@@ -150,7 +150,7 @@ bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESCasino* casino = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino) && casino)
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino) && casino && IS_TYPE(casino, TESCasino))
 	{
 		auto casinoRefId = casino->refID;
 		auto iter = PlayerCharacter::GetSingleton()->casinoDataList->Head();
@@ -176,8 +176,8 @@ bool Cmd_GetCasinoDeckTexture_Execute(COMMAND_ARGS)
 	*result = 0;
 	TESCasino* casino = nullptr;
 	SInt32 deckIndex;
-	const char* resStr = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex) && casino && deckIndex >= 0 && deckIndex <= 3)
+	const char* resStr = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex) && casino && IS_TYPE(casino, TESCasino) && deckIndex >= 0 && deckIndex <= 3)
 	{
 		resStr = casino->blackjackDeck[deckIndex].ddsPath.pString;
 		if (IsConsoleMode())
@@ -192,8 +192,8 @@ bool Cmd_SetCasinoDeckTexture_Execute(COMMAND_ARGS)
 	*result = 0;
 	TESCasino* casino = nullptr;
 	SInt32 deckIndex;
-	char newPath[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex, &newPath) && casino && newPath && deckIndex >= 0 && deckIndex <= 3)
+	char newPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex, &newPath) && casino && IS_TYPE(casino, TESCasino) && newPath && deckIndex >= 0 && deckIndex <= 3)
 	{
 		casino->blackjackDeck[deckIndex].ddsPath.Set(newPath);
 		*result = 1;
@@ -219,7 +219,7 @@ bool Cmd_SetCasinoChip_Execute(COMMAND_ARGS)
 	*result = 0;
 	TESCasino* casino = nullptr;
 	TESForm* chip = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &chip) && casino && chip && IS_TYPE(chip, TESCasinoChips))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &chip) && casino && IS_TYPE(casino, TESCasino) && chip && IS_TYPE(chip, TESCasinoChips))
 	{
 		casino->currencyRefID = chip->refID;
 		*result = 1;
@@ -238,8 +238,8 @@ bool Cmd_ClearMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	MediaLocationController* ctrl = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &ctrl) && IS_TYPE(ctrl, MediaLocationController)) {
+	MediaLocationController* ctrl = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &ctrl) && ctrl && IS_TYPE(ctrl, MediaLocationController)) {
 		mlcOverridden = true;
 		mlcOverride = ctrl;
 		*result = 1;
@@ -467,7 +467,7 @@ bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 
 	*result = 0;
 	float mul = 1.0f;
-	TESForm* a_form = NULL;
+	TESForm* a_form = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
 		if (fabs(mul) < FLT_EPSILON) { mul = FLT_EPSILON + DBL_EPSILON; }
 		switch (a_form->typeID) {
@@ -498,7 +498,7 @@ bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 
 	*result = 1;
-	TESForm* a_form = NULL;
+	TESForm* a_form = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
 		switch (a_form->typeID) {
 		case kFormType_TESNPC:
@@ -542,7 +542,7 @@ bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 
 	*result = 0;
-	TESForm* a_form = NULL;
+	TESForm* a_form = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
 		switch (a_form->typeID) {
 		case kFormType_TESNPC:
@@ -579,7 +579,7 @@ bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 	NiPoint3 kPointToTest;
 	UInt32 checkDisabled = 0;
 	float zLimit = 0;
-	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &kPointToTest.x, &kPointToTest.y, &kPointToTest.z, &checkDisabled, &zLimit)) return true;
 
 	NiPoint4 kResult = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
@@ -622,7 +622,7 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 	NiPoint3 kPointToTest;
 	UInt32 checkDisabled = 0;
 	float zLimit = 0;
-	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &kPointToTest.x, &kPointToTest.y, &kPointToTest.z, &checkDisabled, &zLimit))	return true;
 
@@ -670,7 +670,7 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float fTime = 0;
 	TESSound* sound;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &fTime) && IS_TYPE(sound, TESSound)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &fTime) && sound && IS_TYPE(sound, TESSound)) {
 		TESObjectREFR* ref = thisObj;
 		if (ref == nullptr) {
 			ref = (TESObjectREFR*)g_thePlayer;
@@ -690,7 +690,7 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NVSEArrayVar* effArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* effArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	tempEffectMap.clear();
 	if (auto iter = ((Actor*)g_thePlayer)->magicTarget.GetEffectList()->Head())
 	{
@@ -716,8 +716,8 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 
 	}
 	if (!tempEffectMap.empty()) {
-		for (auto effect : tempEffectMap) {
-			NVSEArrayVar* effArrInner = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+		for (auto& effect : tempEffectMap) {
+			NVSEArrayVar* effArrInner = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 			g_arrInterface->AppendElements(effArrInner, effect.first, effect.second.first, effect.second.second);
 			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effArrInner));
 		}
@@ -729,7 +729,7 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_SetCameraShakeNoHUDShudder_Execute(COMMAND_ARGS) {
-	float shakeMult, time;
+	float shakeMult, time = 0.f;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shakeMult, &time)) {
 		hk_CameraShakeHook::camShakeMinAlt = shakeMult;
@@ -816,7 +816,7 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ListNode<BSTempEffect>* iter = g_processManager->tempEffects.Head();
 	MagicShaderHitEffect* effect;
-	NVSEArrayVar* effArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* effArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 
 	do {
 		effect = (MagicShaderHitEffect*)iter->data;
@@ -922,7 +922,7 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 			hasImprovedDetection = true;
 	}
 
-	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	auto iter = g_thePlayer->compassTargets->Begin();
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
@@ -942,7 +942,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 	TESObjectREFR* container;
 	int checkItems = 0;
 	*result = 0;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems)) {
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems) && container) {
 		if (checkItems) {
 			TESForm* containerOwner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
 			if (!containerOwner) return true;
@@ -961,7 +961,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 						ExtraOwnership* xOwn = (ExtraOwnership*)xData->GetByType(kExtraData_Ownership);
 						if (xOwn->owner) {
 							if (xOwn->owner->refID == containerOwner->refID) {
-								ThisCall(0x8BFA40, thisObj, container, NULL, NULL, 1, containerOwner); // Actor::HandleStealing
+								ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, containerOwner); // Actor::HandleStealing
 								*result = 1;
 								return true;
 							}
@@ -972,7 +972,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 		}
 		else {
 			TESForm* owner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
-			ThisCall(0x8BFA40, thisObj, container, NULL, NULL, 1, owner); // Actor::HandleStealing,
+			ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, owner); // Actor::HandleStealing,
 			*result = 1;
 		}
 	}
@@ -1265,7 +1265,7 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 
 		// call handle change with new value
 		float newVal = avOwner->GetActorValue(avCode);
-		HandleActorValueChange(avOwner, avCode, oldVal, newVal, NULL);
+		HandleActorValueChange(avOwner, avCode, oldVal, newVal, nullptr);
 		*result = 1;
 	}
 	return true;
@@ -1293,19 +1293,19 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 
 		// call handle change with new value
 		float newVal = avOwner->GetActorValue(avCode);
-		HandleActorValueChange(avOwner, avCode, oldVal, newVal, NULL);
+		HandleActorValueChange(avOwner, avCode, oldVal, newVal, nullptr);
 		*result = 1;
 	}
 	return true;
 }
 
 bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
-	TESSound* soundForm;
-	TESObjectREFR* source;
-	BSFadeNode* fadeNode;
+	TESSound* soundForm = nullptr;
+	TESObjectREFR* source = nullptr;
+	BSFadeNode* fadeNode = nullptr;
 	float fadeOutTime = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source, &fadeOutTime)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source, &fadeOutTime) && soundForm && IS_TYPE(soundForm, TESSound) && source) {
 		if (soundForm->soundFile.path.GetLength()) {
 			CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
 			const char* soundPath = soundForm->soundFile.path.pString;
@@ -1454,7 +1454,7 @@ bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 
 bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 	*result = false;
-	const char cNodeName[64] = {};
+	const char cNodeName[128] = {};
 	char cNewCasingPath[MAX_PATH] = {};
 	const char* pOrgCasingPath;
 	ConsoleManager* pConsole = ConsoleManager::GetSingleton();
@@ -1519,7 +1519,7 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectREFR* pTarget = nullptr;
 	float fRadius = -1.f;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTarget, &fRadius) && pTarget && thisObj->IsActor()) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTarget, &fRadius) && pTarget && pTarget->GetIsReference() && thisObj->IsActor()) {
 		Actor* pActor = static_cast<Actor*>(thisObj);
 		if (pTarget)
 			pActor->SetPathfindingGoal(pTarget, fRadius);

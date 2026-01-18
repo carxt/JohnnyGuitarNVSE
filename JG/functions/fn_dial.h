@@ -34,9 +34,9 @@ public:
 bool Cmd_DialogResponseGetResponseAmount_Execute(COMMAND_ARGS) 
 {
 
-	TESTopicInfo* dialogResponse = NULL;
+	TESTopicInfo* dialogResponse = nullptr;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse) && IS_TYPE(dialogResponse, TESTopicInfo))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo))
 	{
 		auto it = hk_DialogueTopicResponseManageHook::cachedDialogueInfo.find(dialogResponse->refID);
 		if (it != hk_DialogueTopicResponseManageHook::cachedDialogueInfo.end()) 
@@ -63,7 +63,7 @@ DialogueEmotionOverride GetDialogueResponse(UInt32 refId, UInt32 responseNumber,
 }
 
 bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
-	TESTopicInfo* dialogResponse = NULL;
+	TESTopicInfo* dialogResponse = nullptr;
 	UInt32 responseNumber = 0;
 	SInt32 setOrRemove = 0;
 
@@ -76,7 +76,7 @@ bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
 
 	//Unlike 99.9% of functions in this game, dialog responses use a 1-based index, not a 0-based index.
 	//This means the first element will be 1, not 0.
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseNumber, &setOrRemove, &responseEmotion, &responseEmotionValue, &speakerAnim, &listenerAnim, &flags) && IS_TYPE(dialogResponse, TESTopicInfo))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseNumber, &setOrRemove, &responseEmotion, &responseEmotionValue, &speakerAnim, &listenerAnim, &flags) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo))
 	{
 		if (setOrRemove > 0)
 		{
@@ -115,11 +115,11 @@ bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_DialogResponseAddRelatedTopic_Execute(COMMAND_ARGS) {
-	TESTopicInfo* dialogResponse = NULL;
-	TESTopic* topic = NULL;
+	TESTopicInfo* dialogResponse = nullptr;
+	TESTopic* topic = nullptr;
 	UInt32 responseType = -1;
 	SInt32 addPosition = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &topic, &responseType, &addPosition) && IS_TYPE(dialogResponse, TESTopicInfo) && responseType >= ResponseRelatedTopicType::kRelatedTopicType_LinkFrom && responseType <= ResponseRelatedTopicType::kRelatedTopicType_FollowUp) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &topic, &responseType, &addPosition) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo) && responseType >= ResponseRelatedTopicType::kRelatedTopicType_LinkFrom && responseType <= ResponseRelatedTopicType::kRelatedTopicType_FollowUp) {
 		if (!dialogResponse->relatedTopics) {
 			//initializer for the relatedTopics structure.
 			dialogResponse->relatedTopics = ThisCall<TESTopicInfo::RelatedTopics*>(0x061CE40, GameHeapAlloc(sizeof(TESTopicInfo::RelatedTopics)));
@@ -141,11 +141,11 @@ bool Cmd_DialogResponseAddRelatedTopic_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_DialogResponseRelatedGetAll_Execute(COMMAND_ARGS) {
-	TESTopicInfo* dialogResponse = NULL;
+	TESTopicInfo* dialogResponse = nullptr;
 	UInt32 responseType = -1;
-	NVSEArrayVar* topicArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* topicArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseType) && IS_TYPE(dialogResponse, TESTopicInfo) && responseType >= ResponseRelatedTopicType::kRelatedTopicType_LinkFrom && responseType <= ResponseRelatedTopicType::kRelatedTopicType_FollowUp) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseType) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo) && responseType >= ResponseRelatedTopicType::kRelatedTopicType_LinkFrom && responseType <= ResponseRelatedTopicType::kRelatedTopicType_FollowUp) {
 		TESTopicInfo::RelatedTopics* relTopics = dialogResponse->relatedTopics;
 		if (relTopics) {
 			auto addToArray = [topicArr](tList<TESTopic>::Iterator iter) -> void {
@@ -175,9 +175,8 @@ bool Cmd_DialogResponseRelatedGetAll_Execute(COMMAND_ARGS) {
 bool Cmd_GetSaidOnce_Execute(COMMAND_ARGS) {
 	*result = -1;
 	TESTopicInfo* pInfo = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo)) {
-		if (IS_TYPE(pInfo, TESTopicInfo))
-			*result = pInfo->saidOnce;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo) && pInfo && IS_TYPE(pInfo, TESTopicInfo)) {
+		*result = pInfo->saidOnce;
 	}
 	return true;
 }
@@ -187,10 +186,7 @@ bool Cmd_SetSaidOnce_Execute(COMMAND_ARGS) {
 	TESTopicInfo* pInfo = nullptr;
 	UInt32 bSaidOnce = false;
 	UInt32 bSave = true;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo, &bSaidOnce, &bSave)) {
-		if (!IS_TYPE(pInfo, TESTopicInfo))
-			return true;
-
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo, &bSaidOnce, &bSave) && pInfo && IS_TYPE(pInfo, TESTopicInfo)) {
 		if (bSave) {
 			if (bSaidOnce)
 				pInfo->SetSaidOnce();
@@ -210,7 +206,7 @@ bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
 	int32_t iIndex = -1;
 	TESQuest* pQuest = nullptr;
 
-	NVSEArrayVar* pStoredInfos = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* pStoredInfos = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetTopic, &pQuest)) {
 
 		if (pQuest && !IS_TYPE(pQuest, TESQuest)) //exclude xMarker 
@@ -283,7 +279,7 @@ bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
 bool Cmd_GetParentTopic_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESTopicInfo* pTopicInfo = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTopicInfo) && IS_TYPE(pTopicInfo, TESTopicInfo)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTopicInfo) && pTopicInfo && IS_TYPE(pTopicInfo, TESTopicInfo)) {
 		TESTopic* pParentTopic = pTopicInfo->pParentTopic;
 		if (pParentTopic) {
 			*reinterpret_cast<uint32_t*>(result) = pParentTopic->GetFormID();

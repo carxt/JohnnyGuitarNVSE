@@ -6,8 +6,8 @@ DEFINE_COMMAND_PLUGIN(SetBookSkill, , 0, 2, kParams_OneForm_OneInt);
 
 bool Cmd_GetBookFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectBOOK* book;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book) && IS_TYPE(book, TESObjectBOOK)) {
+	TESObjectBOOK* book = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book) && book && IS_TYPE(book, TESObjectBOOK)) {
 		*result = book->flags;
 		if (IsConsoleMode()) Console_Print("GetBookFlags >> %.f", *result);
 	}
@@ -17,8 +17,8 @@ bool Cmd_GetBookFlags_Execute(COMMAND_ARGS) {
 bool Cmd_SetBookFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
 	UInt32 flags;
-	TESObjectBOOK* book;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book, &flags) && IS_TYPE(book, TESObjectBOOK)) {
+	TESObjectBOOK* book = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book, &flags) && book && IS_TYPE(book, TESObjectBOOK)) {
 		book->flags = flags;
 		*result = 1;
 	}
@@ -27,8 +27,8 @@ bool Cmd_SetBookFlags_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetBookSkill_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectBOOK* book;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book) && IS_TYPE(book, TESObjectBOOK)) {
+	TESObjectBOOK* book = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book) && book && IS_TYPE(book, TESObjectBOOK)) {
 		*result = (book->skillCode == 255 ? -1 : book->skillCode + 32);
 		if (IsConsoleMode()) Console_Print("GetBookSkill >> %.f", *result);
 	}
@@ -37,9 +37,9 @@ bool Cmd_GetBookSkill_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetBookSkill_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectBOOK* book;
+	TESObjectBOOK* book = nullptr;
 	UInt32 skill;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book, &skill) && IS_TYPE(book, TESObjectBOOK)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book, &skill) && book && IS_TYPE(book, TESObjectBOOK)) {
 		if (skill == -1) {
 			book->skillCode = -1;
 		}

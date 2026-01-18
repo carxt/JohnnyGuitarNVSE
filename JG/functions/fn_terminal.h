@@ -10,7 +10,7 @@ DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemCount, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(RemoveTerminalMenuItem, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemFlags, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemFlags, , 0, 3, kParams_OneForm_TwoInts);
-DEFINE_COMMAND_ALT_PLUGIN(RefreshTerminalMenu, rtm, , 0, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(RefreshTerminalMenu, rtm, , 0, 0, nullptr);
 
 bool Cmd_RefreshTerminalMenu_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -24,10 +24,10 @@ bool Cmd_RefreshTerminalMenu_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTerminal* terminal;
+	BGSTerminal* terminal = nullptr;
 	int menuEntryID = 0;
 	UInt32 flags;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &flags) && IS_TYPE(terminal, BGSTerminal)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &flags) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (entry) {
 			entry->entryFlags = flags;
@@ -38,9 +38,9 @@ bool Cmd_SetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTerminal* terminal;
+	BGSTerminal* terminal = nullptr;
 	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && IS_TYPE(terminal, BGSTerminal)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (entry) {
 			*result = entry->entryFlags;
@@ -52,9 +52,9 @@ bool Cmd_GetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
 
 bool Cmd_RemoveTerminalMenuItem_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTerminal* terminal;
+	BGSTerminal* terminal = nullptr;
 	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && IS_TYPE(terminal, BGSTerminal)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (entry) {
 			ThisCall(0x5010F0, entry);
@@ -67,8 +67,8 @@ bool Cmd_RemoveTerminalMenuItem_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetTerminalMenuItemCount_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTerminal* terminal;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal) && IS_TYPE(terminal, BGSTerminal)) {
+	BGSTerminal* terminal = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		*result = terminal->menuEntries.Count();
 		if (IsConsoleMode()) Console_Print("GetTerminalMenuItemCount >> %.f", *result);
 	}
@@ -76,9 +76,9 @@ bool Cmd_GetTerminalMenuItemCount_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTerminal* terminal;
+	BGSTerminal* terminal = nullptr;
 	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && IS_TYPE(terminal, BGSTerminal)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (entry && entry->subMenu) *(UInt32*)result = entry->subMenu->refID;
 	}
@@ -86,10 +86,10 @@ bool Cmd_GetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 }
 bool Cmd_SetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTerminal* terminal;
-	BGSTerminal* submenu;
+	BGSTerminal* terminal = nullptr;
+	BGSTerminal* submenu = nullptr;
 	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &submenu) && IS_TYPE(terminal, BGSTerminal) && IS_TYPE(submenu, BGSTerminal)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &submenu) && terminal && IS_TYPE(terminal, BGSTerminal) && submenu && IS_TYPE(submenu, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (entry) {
 			entry->subMenu = submenu;
@@ -100,10 +100,10 @@ bool Cmd_SetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 }
 bool Cmd_SetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTerminal* terminal;
-	BGSNote* note;
+	BGSTerminal* terminal = nullptr;
+	BGSNote* note = nullptr;
 	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &note) && IS_TYPE(terminal, BGSTerminal) && IS_TYPE(note, BGSNote)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &note) && terminal && IS_TYPE(terminal, BGSTerminal) && note && IS_TYPE(note, BGSNote)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (entry) {
 			entry->displayNote = note;
@@ -115,9 +115,9 @@ bool Cmd_SetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTerminal* terminal;
+	BGSTerminal* terminal = nullptr;
 	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && IS_TYPE(terminal, BGSTerminal)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (entry && entry->displayNote) *(UInt32*)result = entry->displayNote->refID;
 	}
@@ -125,10 +125,10 @@ bool Cmd_GetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 }
 bool Cmd_SetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTerminal* terminal;
+	BGSTerminal* terminal = nullptr;
 	int textID = 0, menuEntryID = 0;
 	char text[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &textID, &menuEntryID, &text) && IS_TYPE(terminal, BGSTerminal) && textID > 0) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &textID, &menuEntryID, &text) && terminal && IS_TYPE(terminal, BGSTerminal) && textID > 0) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (textID == 1) {
 			entry->entryText.Set(text);
@@ -143,10 +143,10 @@ bool Cmd_SetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTerminal* terminal;
+	BGSTerminal* terminal = nullptr;
 	int textID = 0, menuEntryID = 0;
-	const char* text = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &textID, &menuEntryID) && IS_TYPE(terminal, BGSTerminal) && textID > 0) {
+	const char* text = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &textID, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal) && textID > 0) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (textID == 1) {
 			text = entry->entryText.c_str();
@@ -161,8 +161,8 @@ bool Cmd_GetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 }
 bool Cmd_AddTerminalMenuItem_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTerminal* terminal;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal) && IS_TYPE(terminal, BGSTerminal)) {
+	BGSTerminal* terminal = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = (BGSTerminal::MenuEntry*)GameHeapAlloc(sizeof(BGSTerminal::MenuEntry));
 		if (entry) {
 			ThisCall(0x500960, entry);
