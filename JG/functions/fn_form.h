@@ -439,21 +439,11 @@ bool Cmd_RemoveScopeModelPath_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetLightingTemplateCell_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSLightingTemplate* tmpl = nullptr;
-	TESObjectCELL* cell = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tmpl, &cell) && IS_TYPE(tmpl, BGSLightingTemplate) && IS_TYPE(cell, TESObjectCELL)) {
-		tmpl->getValuesFrom = cell;
-	}
 	return true;
 }
 
 bool Cmd_GetLightingTemplateCell_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSLightingTemplate* tmpl = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tmpl) && IS_TYPE(tmpl, BGSLightingTemplate)) {
-		*(UInt32*)result = tmpl->getValuesFrom != nullptr ? tmpl->getValuesFrom->refID : 0;
-		if (IsConsoleMode()) Console_Print("GetLightingTemplateCell >> 0x%X", *result);
-	}
 	return true;
 }
 bool Cmd_SetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
