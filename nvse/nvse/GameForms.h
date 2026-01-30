@@ -1175,7 +1175,7 @@ public:
 	virtual bool			Fn_06(void);	// 00200000
 	virtual bool			Fn_07(void);	// 10000000
 	virtual bool			Fn_08(void);	// 20000000
-	virtual bool			Fn_09(void);	// 80000000
+	virtual bool			GetAsForm(void);	// 80000000
 	virtual bool			Fn_0A(void);	// 00400000
 	virtual bool			Fn_0B(void);	// 00400000
 	virtual bool			Fn_0C(void);	// 00800000
@@ -1382,16 +1382,16 @@ public:
 	ActorValueOwner();
 	~ActorValueOwner();
 
-	virtual uint32_t	GetBaseActorValue(uint32_t avCode);		// GetBaseActorValue (used from Eval) result in EAX
-	virtual float	GetBaseAVFloat(uint32_t avCode);			// GetBaseActorValue internal, result in st
-	virtual int		GetActorValueInt(uint32_t avCode);					// GetActorValue internal, result in EAX
-	virtual float	GetActorValue(uint32_t avCode);			// GetActorValue (used from Eval) result in EAX
-	virtual float	Fn_04(uint32_t avCode);					// GetBaseActorValue04 (internal) result in st
-	virtual float	GetActorValueDamage(uint32_t avCode);
-	virtual float	Fn_06(uint32_t avCode);					// GetDamageActorValue or GetModifiedActorValue		called from Fn_08, result in st, added to Fn_01
-	virtual uint32_t	Fn_07(uint32_t avCode);					// Manipulate GetPermanentActorValue, maybe convert to integer.
-	virtual float	GetPermanentActorValue(uint32_t avCode);	// GetPermanentActorValue (used from Eval) result in EAX
-	virtual Actor* Fn_09(void);							// GetActorBase (= this - 0x100) or GetActorBase (= this - 0x0A4)
+	virtual uint32_t	GetBaseActorValueI(uint32_t avCode);		// GetBaseActorValue (used from Eval) result in EAX
+	virtual float	GetBaseActorValueF(uint32_t avCode);			// GetBaseActorValue internal, result in st
+	virtual int		GetActorValueI(uint32_t avCode);					// GetActorValue internal, result in EAX
+	virtual float	GetActorValueF(uint32_t avCode);			// GetActorValue (used from Eval) result in EAX
+	virtual float	GetTemporaryModifier(uint32_t avCode);					// GetBaseActorValue04 (internal) result in st
+	virtual float	GetDamageModifier(uint32_t avCode);
+	virtual float	GetPermanentModifier(uint32_t avCode);					// GetDamageActorValue or GetModifiedActorValue		called from Fn_08, result in st, added to Fn_01
+	virtual uint32_t	GetPermanentActorValueI(uint32_t avCode);					// Manipulate GetPermanentActorValueF, maybe convert to integer.
+	virtual float	GetPermanentActorValueF(uint32_t avCode);	// GetPermanentActorValueF (used from Eval) result in EAX
+	virtual TESForm* GetAsForm(void);							// GetActorBase (= this - 0x100) or GetActorBase (= this - 0x0A4)
 	virtual uint16_t	GetLevel();								// GetLevel (from ActorBase)
 
 	// SkillsCurrentValue[14] at index 20
@@ -1413,7 +1413,7 @@ public:
 	virtual float	Fn_06(void);
 	virtual float	Fn_07(void);
 	virtual float	Fn_08(void);
-	virtual float	Fn_09(void);
+	virtual float	GetAsForm(void);
 	virtual float	Fn_0A(void);
 	virtual uint32_t	Fn_0B(void);
 	virtual uint32_t	Fn_0C(void);
@@ -5281,7 +5281,7 @@ public:
 	virtual void	Fn_06(void);
 	virtual void	Fn_07(void);
 	virtual void	Fn_08(void);
-	virtual void	Fn_09(void);
+	virtual void	GetAsForm(void);
 	virtual void	Fn_0A(void);
 	virtual void	Fn_0B(void);
 	virtual void	Fn_0C(void);

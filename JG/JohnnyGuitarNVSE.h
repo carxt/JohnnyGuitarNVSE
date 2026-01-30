@@ -1540,7 +1540,7 @@ bool __fastcall SaveINIHook(IniSettingCollection* a1, void* edx, char* a2) {
 
 bool __fastcall WantsToFleeHook(CombatState* state) {
 	if (!state->cmbtCtrl->packageOwner) return false;
-	float avCharisma = state->cmbtCtrl->packageOwner->avOwner.GetActorValue(kAVCode_Charisma);
+	float avCharisma = state->cmbtCtrl->packageOwner->avOwner.GetActorValueF(kAVCode_Charisma);
 	if (state->currentConfidence > 0 && avCharisma <= 5) {
 		Console_Print("0x%X confidence %d charisma %.f modified -1", state->cmbtCtrl->packageOwner->refID, state->currentConfidence, avCharisma);
 		return (state->currentConfidence - 1) > state->fleeThreshold008;

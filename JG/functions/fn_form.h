@@ -1177,7 +1177,7 @@ bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 	uint32_t titleOrTier = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &titleOrTier);
 	if (titleOrTier == 1) {
-		int karmaTier = CdeclCall<int>(0x47E040, g_thePlayer->avOwner.GetActorValue(kAVCode_Karma)); // GetKarmaTier
+		int karmaTier = CdeclCall<int>(0x47E040, g_thePlayer->avOwner.GetActorValueF(kAVCode_Karma)); // GetKarmaTier
 		switch (karmaTier) {
 			case 0:
 				title = *(char**)0x11D41B4; // sAlignGood

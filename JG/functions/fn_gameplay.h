@@ -743,7 +743,7 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	int delta = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &delta);
-	int karmaBefore = g_thePlayer->avOwner.GetActorValueInt(kAVCode_Karma);
+	int karmaBefore = g_thePlayer->avOwner.GetActorValueI(kAVCode_Karma);
 	int ikarmaMax = (*(Setting*)0x11CD644).data.i;
 	int iKarmaMin = (*(Setting*)0x11CDD6C).data.i;
 	if (delta >= 0 && ((delta + karmaBefore) > ikarmaMax)) {
@@ -927,8 +927,8 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.GetActorValueInt(kAVCode_Invisibility) > 0
-				|| target->target->avOwner.GetActorValueInt(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0
+				|| target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
@@ -1104,7 +1104,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueInt(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueInt(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
@@ -1135,7 +1135,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueInt(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueInt(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
@@ -1249,7 +1249,7 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode)) {
 		Actor* actor = (Actor*)thisObj;
 		ActorValueOwner* avOwner = &actor->avOwner;
-		float oldVal = avOwner->GetActorValue(avCode);
+		float oldVal = avOwner->GetActorValueF(avCode);
 
 		tList<void>* actorPermSetAVList = &actor->list0E0;
 		void* avEntry = ThisCall<void*>(0x937760, actorPermSetAVList, avCode);
@@ -1264,7 +1264,7 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 		}
 
 		// call handle change with new value
-		float newVal = avOwner->GetActorValue(avCode);
+		float newVal = avOwner->GetActorValueF(avCode);
 		HandleActorValueChange(avOwner, avCode, oldVal, newVal, nullptr);
 		*result = 1;
 	}
@@ -1277,7 +1277,7 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode)) {
 		Actor* actor = (Actor*)thisObj;
 		ActorValueOwner* avOwner = &actor->avOwner;
-		float oldVal = avOwner->GetActorValue(avCode);
+		float oldVal = avOwner->GetActorValueF(avCode);
 
 		tList<void>* actorPermForceAVList = &actor->list0D0;
 		void* avEntry = ThisCall<void*>(0x937760, actorPermForceAVList, avCode);
@@ -1292,7 +1292,7 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 		}
 
 		// call handle change with new value
-		float newVal = avOwner->GetActorValue(avCode);
+		float newVal = avOwner->GetActorValueF(avCode);
 		HandleActorValueChange(avOwner, avCode, oldVal, newVal, nullptr);
 		*result = 1;
 	}

@@ -426,7 +426,7 @@ float CalculateRepairedHealth(ContChangesEntry* target, ContChangesEntry* repair
 	if (!target || !repairItem) return 0.0f;
 	float targetHealth = target->GetItemHealthPerc(true);
 	float repairItemHealth = repairItem->GetItemHealthPerc(true);
-	int repairSkill = g_thePlayer->avOwner.GetActorValueInt(kAVCode_Repair);
+	int repairSkill = g_thePlayer->avOwner.GetActorValueI(kAVCode_Repair);
 	int outParam = -1;
 	double result = CdeclCall<double>(0x648090, repairSkill, targetHealth, repairItemHealth, &outParam);
 	return (float)(result / 100.0);

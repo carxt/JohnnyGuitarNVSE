@@ -158,7 +158,7 @@ void EventInformation::FlushEventCallbacks() {
 	callbacks.clear();
 }
 
-void EventInformation::RegisterEvent(Script* script, void** filters) {
+void EventInformation::RegisterEvent(Script* script, void** filters, uint32_t userFlags) {
 	uint32_t maxFilters = this->numMaxFilters;
 	for (auto& event : this->callbacks) {
 		if (script == event.script) {
@@ -185,6 +185,7 @@ void EventInformation::RegisterEvent(Script* script, void** filters) {
 	}
 	rLock.unlock();
 	EventBase event;
+	event.UserFlags = userFlags;
 	event.script = script;
 	event.capturedLambdaVars = LambdaVariableContext(script);
 	if (maxFilters) {

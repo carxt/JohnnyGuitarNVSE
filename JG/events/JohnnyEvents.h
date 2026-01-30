@@ -173,27 +173,54 @@ uint32_t __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int a
 	return ThisCall<uint32_t>(0x08706B0, ECX, arg1, arg2, arg3);
 }
 
+bool CompareFloats(float a, float b) {
+	const float epsilon = 0.0001f;
+	return fabs(a - b) < epsilon;
+}
+
 void __stdcall HandleAVChangeEvent(ActorValueOwner* avOwner, int avCode, float previousVal, float modVal, void* onChangeCallback) {
-	if (onChangeCallback == nullptr) {
-		previousVal = avOwner->GetActorValue(avCode) - modVal;
-	}
-	float newVal = previousVal + modVal;
-	float floorPrev(floor(previousVal)), floorNew(floor(newVal));
-	if (floorPrev != floorNew) {
-		 //Console_Print("actor 0x%X av %d prev %.2f mod %.2f new %.2f callback 0x%X", avOwner->Fn_09()->refID, avCode, previousVal, modVal, newVal, onChangeCallback);
-		if (avOwner->Fn_09()->IsPlayerRef()) {
+	if (onChangeCallback == nullptr)
+		previousVal = avOwner->GetActorValueF(avCode) - modVal;
+
+	const float fNewValue = previousVal + modVal;
+	const float fPreviousValue = previousVal;
+
+	const float fNewValueFloor = floor(fNewValue);
+	const float fPreviousValueFloor = floor(fPreviousValue);
+
+	TESForm* pForm = avOwner->GetAsForm();
+	Actor* pActor = nullptr;
+	if (pForm->IsActor())
+		pActor = static_cast<Actor*>(pForm);
+
+	if (!CompareFloats(fNewValueFloor, fPreviousValueFloor)) {
+		 //Console_Print("actor 0x%X av %d prev %.2f mod %.2f new %.2f callback 0x%X", avOwner->GetAsForm()->refID, avCode, previousVal, modVal, newVal, onChangeCallback);
+		
+		if (pActor && pActor->IsPlayerRef()) {
 			for (auto const& callback : OnAVChangeHandler->callbacks) {
-				if (reinterpret_cast<FilterFormInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
-					CallUDF(callback.script, nullptr, OnAVChangeHandler->numMaxArgs, avCode, *(uint32_t*)&floorPrev, *(uint32_t*)&floorNew);
+				FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
+				if (filter->IsInFilter(1, avCode)) {
+
+					bool bFullValues = callback.UserFlags.Get(1);
+
+					const float& fNewVal = bFullValues ? fNewValue : fNewValueFloor;
+					const float& fPrevVal = bFullValues ? fPreviousValue : fPreviousValueFloor;
+
+					CallUDF(callback.script, nullptr, OnAVChangeHandler->numMaxArgs, avCode, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
 				}
 			}
-		} else {
+		} 
+		else {
 			for (auto const& callback : OnNPCAVChangeHandler->callbacks) {
 				FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
-				if ((filter->IsInFilter(0, avOwner->Fn_09()->refID) || filter->IsInFilter(0, avOwner->Fn_09()->GetBaseForm()->refID)) &&
-					filter->IsInFilter(1, avCode)) {
+				if (filter->IsInFilter(1, avCode) && (filter->IsInFilter(0, pForm->refID) || (pActor && filter->IsInFilter(0, pActor->GetBaseForm()->refID)))) {
 
-					CallUDF(callback.script, nullptr, OnNPCAVChangeHandler->numMaxArgs, avOwner->Fn_09(), avCode, *(uint32_t*)&floorPrev, *(uint32_t*)&floorNew);
+					bool bFullValues = callback.UserFlags.Get(1);
+
+					const float& fNewVal = bFullValues ? fNewValue : fNewValueFloor;
+					const float& fPrevVal = bFullValues ? fPreviousValue : fPreviousValueFloor;
+
+					CallUDF(callback.script, nullptr, OnNPCAVChangeHandler->numMaxArgs, pForm, avCode, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
 				}
 			}
 		}
@@ -539,7 +566,7 @@ bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
 		if (OnAVChangeHandler) {
 			if (setOrRemove)
-				OnAVChangeHandler->RegisterEvent(script, (void**)&filter);
+				OnAVChangeHandler->RegisterEvent(script, (void**)&filter, flags);
 			else OnAVChangeHandler->RemoveEvent(script, (void**)&filter);
 		}
 	}
@@ -554,7 +581,7 @@ bool Cmd_SetOnNPCActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
 		if (OnNPCAVChangeHandler) {
 			if (setOrRemove)
-				OnNPCAVChangeHandler->RegisterEvent(script, (void**)&filter);
+				OnNPCAVChangeHandler->RegisterEvent(script, (void**)&filter, flags);
 			else OnNPCAVChangeHandler->RemoveEvent(script, (void**)&filter);
 		}
 	}

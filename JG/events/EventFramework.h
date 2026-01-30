@@ -168,6 +168,7 @@ class EventBase
 {
 public:
 	uint32_t Flags = 0;
+	Bitfield32 UserFlags;
 	Script* script = nullptr;
 	IFilter* eventFilter = nullptr;
 	LambdaVariableContext capturedLambdaVars;
@@ -209,7 +210,7 @@ public:
 
 	void FlushEventCallbacks();
 
-	void virtual RegisterEvent(Script* script, void** filters);
+	void virtual RegisterEvent(Script* script, void** filters, uint32_t userFlags = 0);
 
 	void virtual RemoveEvent(Script* script, void** filters);
 
