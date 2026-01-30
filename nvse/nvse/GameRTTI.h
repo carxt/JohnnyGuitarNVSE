@@ -1,6 +1,6 @@
 #pragma once
 
-typedef void* (*_Fallout_DynamicCast)(void* srcObj, UInt32 arg1, const void* fromType, const void* toType, UInt32 arg4);
+typedef void* (*_Fallout_DynamicCast)(void* srcObj, uint32_t arg1, const void* fromType, const void* toType, uint32_t arg4);
 extern const _Fallout_DynamicCast Fallout_DynamicCast;
 
 #define DYNAMIC_CAST(obj, from, to) ( ## to *) Fallout_DynamicCast((void*)(obj), 0, RTTI_ ## from, RTTI_ ## to, 0)

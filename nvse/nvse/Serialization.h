@@ -26,14 +26,14 @@ void	SetLoadCallback(PluginHandle plugin, NVSESerializationInterface::EventCallb
 void	SetNewGameCallback(PluginHandle plugin, NVSESerializationInterface::EventCallback callback);
 void	SetPreLoadCallback(PluginHandle plugin, NVSESerializationInterface::EventCallback callback);
 
-bool	WriteRecord(UInt32 type, UInt32 version, const void * buf, UInt32 length);
-bool	OpenRecord(UInt32 type, UInt32 version);
-bool	WriteRecordData(const void * buf, UInt32 length);
+bool	WriteRecord(uint32_t type, uint32_t version, const void * buf, uint32_t length);
+bool	OpenRecord(uint32_t type, uint32_t version);
+bool	WriteRecordData(const void * buf, uint32_t length);
 
-bool	GetNextRecordInfo(UInt32 * type, UInt32 * version, UInt32 * length);
-UInt32	ReadRecordData(void * buf, UInt32 length);
+bool	GetNextRecordInfo(uint32_t * type, uint32_t * version, uint32_t * length);
+uint32_t	ReadRecordData(void * buf, uint32_t length);
 
-bool	ResolveRefID(UInt32 refID, UInt32 * outRefID);
+bool	ResolveRefID(uint32_t refID, uint32_t * outRefID);
 
 // internal event handlers
 void	HandleSaveGame(const char * path);

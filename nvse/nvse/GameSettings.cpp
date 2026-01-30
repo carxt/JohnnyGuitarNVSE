@@ -8,7 +8,7 @@ IniSettingCollection** g_INIPrefCollection = (IniSettingCollection**)0x11F35A0;
 IniSettingCollection** g_INIBlendSettingCollection = (IniSettingCollection**)0x11CC694;
 IniSettingCollection** g_INIRendererSettingCollection = (IniSettingCollection**)0x11F35A4;
 
-UInt32 Setting::GetType() {
+uint32_t Setting::GetType() {
 	if (name) {
 		switch (*name | 0x20) {
 			case 'b':
@@ -76,7 +76,7 @@ void Setting::Set(float newVal) {
 			data.i = (int)newVal;
 			break;
 		case 'u':
-			data.uint = (UInt32)newVal;
+			data.uint = (uint32_t)newVal;
 			break;
 		default:
 			break;

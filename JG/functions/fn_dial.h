@@ -47,7 +47,7 @@ bool Cmd_DialogResponseGetResponseAmount_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DialogueEmotionOverride GetDialogueResponse(UInt32 refId, UInt32 responseNumber, DialogueEmotionOverride& newOverride)
+DialogueEmotionOverride GetDialogueResponse(uint32_t refId, uint32_t responseNumber, DialogueEmotionOverride& newOverride)
 {
 	TESIdleForm* speakerAnim = *(TESIdleForm**)0x11CA244;
 	TESIdleForm* listenerAnim = *(TESIdleForm**)0x11CA244;
@@ -64,12 +64,12 @@ DialogueEmotionOverride GetDialogueResponse(UInt32 refId, UInt32 responseNumber,
 
 bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
 	TESTopicInfo* dialogResponse = nullptr;
-	UInt32 responseNumber = 0;
-	SInt32 setOrRemove = 0;
+	uint32_t responseNumber = 0;
+	int32_t setOrRemove = 0;
 
-	UInt32 responseEmotion = 0;
-	SInt32 responseEmotionValue = 0;
-	UInt32 flags = -1;
+	uint32_t responseEmotion = 0;
+	int32_t responseEmotionValue = 0;
+	uint32_t flags = -1;
 	//Init to xMarker
 	TESIdleForm* speakerAnim = *(TESIdleForm**)0x11CA244;
 	TESIdleForm* listenerAnim = *(TESIdleForm**)0x11CA244;
@@ -117,8 +117,8 @@ bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
 bool Cmd_DialogResponseAddRelatedTopic_Execute(COMMAND_ARGS) {
 	TESTopicInfo* dialogResponse = nullptr;
 	TESTopic* topic = nullptr;
-	UInt32 responseType = -1;
-	SInt32 addPosition = 0;
+	uint32_t responseType = -1;
+	int32_t addPosition = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &topic, &responseType, &addPosition) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo) && responseType >= ResponseRelatedTopicType::kRelatedTopicType_LinkFrom && responseType <= ResponseRelatedTopicType::kRelatedTopicType_FollowUp) {
 		if (!dialogResponse->relatedTopics) {
 			//initializer for the relatedTopics structure.
@@ -142,7 +142,7 @@ bool Cmd_DialogResponseAddRelatedTopic_Execute(COMMAND_ARGS) {
 
 bool Cmd_DialogResponseRelatedGetAll_Execute(COMMAND_ARGS) {
 	TESTopicInfo* dialogResponse = nullptr;
-	UInt32 responseType = -1;
+	uint32_t responseType = -1;
 	NVSEArrayVar* topicArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseType) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo) && responseType >= ResponseRelatedTopicType::kRelatedTopicType_LinkFrom && responseType <= ResponseRelatedTopicType::kRelatedTopicType_FollowUp) {
@@ -184,8 +184,8 @@ bool Cmd_GetSaidOnce_Execute(COMMAND_ARGS) {
 bool Cmd_SetSaidOnce_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESTopicInfo* pInfo = nullptr;
-	UInt32 bSaidOnce = false;
-	UInt32 bSave = true;
+	uint32_t bSaidOnce = false;
+	uint32_t bSave = true;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo, &bSaidOnce, &bSave) && pInfo && IS_TYPE(pInfo, TESTopicInfo)) {
 		if (bSave) {
 			if (bSaidOnce)

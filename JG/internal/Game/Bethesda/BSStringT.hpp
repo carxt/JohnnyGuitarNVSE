@@ -1,37 +1,46 @@
 #pragma once
 
 #include "BSMemObject.hpp"
-#include <string_view>
 
 template <typename T>
 class BSStringT : public BSMemObject {
 public:
-	BSStringT() {};
-	BSStringT(const T* apText) { Set(apText); }
-	BSStringT(const BSStringT& aSrc) { Set(aSrc.c_str()); }
+	BSStringT();
+	BSStringT(const T* apText);
+	BSStringT(const BSStringT& arSrc);
 	~BSStringT();
 
-	T*			pString = nullptr;
-	uint16_t	sLen = 0;
-	uint16_t	sMaxLen = 0;
+	T*			pString		= nullptr;
+	uint16_t	usLength	= 0;
+	uint16_t	usMaxLength = 0;
 
-	inline uint32_t			GetLength()		const;
-	inline void				SetLength(uint32_t auiLen);
-	inline uint16_t			GetMaxLength()	const { return sMaxLen; }
-	inline void				SetMaxLength(uint16_t auiLen) { sMaxLen = auiLen; }
+	void				Init();
 
-	inline bool				Set(const T* apText, uint32_t auiLength = 0);
-	inline BSStringT<T>* operator+=(const T* apText);
+	const T*			GetString() const;
+	uint32_t			GetLength() const;
+	void				SetLength(uint32_t auiLength);
+	uint16_t			GetMaxLength() const;
+	void				SetMaxLength(uint32_t auiLength);
 
-	inline void				Format(const T* fmt, ...);
-	inline void				ApplyFormat(const T* fmt, va_list args);
+	bool				Set(const T* apText, uint32_t auiLength = 0);
 
-	inline bool				Includes(const char* toFind) const;
-	inline bool				Replace(const char* toReplace, const char* replaceWith); // replaces instance of toReplace with replaceWith
+	int32_t				StrCmp(const T* apText, bool abNotCaseSensitive) const;
+	int32_t				StrCmp(const BSStringT<T>& arOther, bool abNotCaseSensitive) const;
 
-	inline const T* c_str() const;
+	void				operator=(const T* apText);
+	bool				operator==(const BSStringT<T>& arOther) const;
+	BSStringT<T>*		operator+=(const T* apText);
+	BSStringT<T>*		operator+=(const BSStringT<T>& arOther);
+	const T*			operator[](uint32_t auiIndex);
+						operator const T* ();
 
-	operator std::basic_string_view<T>() const noexcept;
+	void				SPrintF(const T* apFmt, ...);
+	void				VSPrintF(const T* apFmt, va_list args);
+
+	void				ToLower();
+	void				ToUpper();
+
+	const T*			c_str() const;
 };
 
 #include "BSStringT.inl"

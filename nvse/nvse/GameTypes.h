@@ -12,13 +12,13 @@ enum {
 	eListCount = -3,
 };
 
-typedef void* (*_FormHeap_Allocate)(UInt32 size);
+typedef void* (*_FormHeap_Allocate)(uint32_t size);
 extern const _FormHeap_Allocate FormHeap_Allocate;
 
 typedef void (*_FormHeap_Free)(void* ptr);
 extern const _FormHeap_Free FormHeap_Free;
 
-typedef TESForm* (*_LookupFormByID)(UInt32 id);
+typedef TESForm* (*_LookupFormByID)(uint32_t id);
 extern const _LookupFormByID LookupFormByID;
 
 template <typename T_Data> struct ListNode {
@@ -76,8 +76,8 @@ private:
 	Node	m_listHead;
 
 	template <class Op>
-	UInt32 FreeNodes(Node* node, Op& compareOp) const {
-		static UInt32 nodeCount = 0, numFreed = 0, lastNumFreed = 0;
+	uint32_t FreeNodes(Node* node, Op& compareOp) const {
+		static uint32_t nodeCount = 0, numFreed = 0, lastNumFreed = 0;
 		if (node->next) {
 			nodeCount++;
 			FreeNodes(node->next, compareOp);
@@ -94,8 +94,8 @@ private:
 		return lastNumFreed;
 	}
 
-	Node* GetLastNode(SInt32* outIdx = NULL) const {
-		SInt32 index = 0;
+	Node* GetLastNode(int32_t* outIdx = NULL) const {
+		int32_t index = 0;
 		Node* node = Head();
 		while (node->next) {
 			node = node->next;
@@ -105,7 +105,7 @@ private:
 		return node;
 	}
 
-	Node* GetNthNode(SInt32 index) const {
+	Node* GetNthNode(int32_t index) const {
 		if (index >= 0) {
 			Node* node = Head();
 			do {
@@ -159,10 +159,10 @@ public:
 
 	const Iterator Begin() const { return Iterator(Head()); }
 
-	UInt32 Count() const {
+	uint32_t Count() const {
 		if (!m_listHead.data) return 0;
 		Node* node = Head();
-		UInt32 count = 1;
+		uint32_t count = 1;
 		while (node = node->next) count++;
 		return count;
 	};
@@ -184,14 +184,14 @@ public:
 		return GetLastNode()->data;
 	}
 
-	Item* GetNthItem(SInt32 index) const {
+	Item* GetNthItem(int32_t index) const {
 		if (eListEnd == index)
 			return GetLastNode()->data;
 		Node* node = GetNthNode(index);
 		return node ? node->data : NULL;
 	}
 
-	SInt32 AddAt(Item* item, SInt32 index) {
+	int32_t AddAt(Item* item, int32_t index) {
 		if (!item) return eListInvalid;
 		Node* node;
 		if (!index) {
@@ -211,8 +211,8 @@ public:
 		return index;
 	}
 
-	SInt32 Append(Item* item) {
-		SInt32 index = eListInvalid;
+	int32_t Append(Item* item) {
+		int32_t index = eListInvalid;
 		if (item) {
 			Node* node = GetLastNode(&index);
 			if (node->data) node->Append(item);
@@ -269,8 +269,8 @@ public:
 	}
 
 	template <class Op>
-	UInt32 CountIf(Op& op) const {
-		UInt32 count = 0;
+	uint32_t CountIf(Op& op) const {
+		uint32_t count = 0;
 		Node* curr = Head();
 		do {
 			if (curr->data && op.Accept(curr->data)) count++;
@@ -308,7 +308,7 @@ public:
 		}
 	}
 
-	Item* RemoveNth(SInt32 idx) {
+	Item* RemoveNth(int32_t idx) {
 		Item* removed = NULL;
 		if (idx <= 0) {
 			removed = m_listHead.data;
@@ -326,8 +326,8 @@ public:
 		return removed;
 	};
 
-	UInt32 Remove(Item* item) {
-		UInt32 removed = 0;
+	uint32_t Remove(Item* item) {
+		uint32_t removed = 0;
 		Node* curr = Head(), * prev = NULL;
 		do {
 			if (curr->data == item) {
@@ -342,7 +342,7 @@ public:
 		return removed;
 	}
 
-	Item* ReplaceNth(SInt32 index, Item* item) {
+	Item* ReplaceNth(int32_t index, Item* item) {
 		Item* replaced = NULL;
 		if (item) {
 			Node* node;
@@ -358,8 +358,8 @@ public:
 		return replaced;
 	}
 
-	UInt32 Replace(Item* item, Item* replace) {
-		UInt32 replaced = 0;
+	uint32_t Replace(Item* item, Item* replace) {
+		uint32_t replaced = 0;
 		Node* curr = Head();
 		do {
 			if (curr->data == item) {
@@ -372,12 +372,12 @@ public:
 	}
 
 	template <class Op>
-	UInt32 RemoveIf(Op& op) {
+	uint32_t RemoveIf(Op& op) {
 		return FreeNodes(Head(), op);
 	}
 
-	SInt32 GetIndexOf(Item* item) {
-		SInt32 idx = 0;
+	int32_t GetIndexOf(Item* item) {
+		int32_t idx = 0;
 		Node* curr = Head();
 		do {
 			if (curr->data == item) return idx;
@@ -388,8 +388,8 @@ public:
 	}
 
 	template <class Op>
-	SInt32 GetIndexOf(const Op& op) {
-		SInt32 idx = 0;
+	int32_t GetIndexOf(const Op& op) {
+		int32_t idx = 0;
 		Node* curr = Head();
 		do {
 			if (curr->data && const_cast<Op&>(op).Accept(curr->data)) return idx;
@@ -406,7 +406,7 @@ template <typename T_Data> struct DListNode {
 	DListNode* prev;
 	T_Data* data;
 
-	DListNode* Advance(UInt32 times) {
+	DListNode* Advance(uint32_t times) {
 		DListNode* result = this;
 		while (result && times) {
 			times--;
@@ -415,7 +415,7 @@ template <typename T_Data> struct DListNode {
 		return result;
 	}
 
-	DListNode* Regress(UInt32 times) {
+	DListNode* Regress(uint32_t times) {
 		DListNode* result = this;
 		while (result && times) {
 			times--;
@@ -432,13 +432,13 @@ public:
 private:
 	Node* first;
 	Node* last;
-	UInt32		count;
+	uint32_t		count;
 
 public:
 	bool Empty() const { return !first; }
 	Node* Head() { return first; }
 	Node* Tail() { return last; }
-	UInt32 Size() const { return count; }
+	uint32_t Size() const { return count; }
 };
 class Tile;
 
@@ -447,40 +447,40 @@ class BSSimpleArray {
 public:
 
 	virtual			~BSSimpleArray();
-	virtual T_Data* Allocate(UInt32 auiCount);
+	virtual T_Data* Allocate(uint32_t auiCount);
 	virtual void    Deallocate(T_Data* apData);
-	virtual T_Data* Reallocate(T_Data* apData, UInt32 auiCount);
+	virtual T_Data* Reallocate(T_Data* apData, uint32_t auiCount);
 
 	T_Data* pBuffer;
-	UInt32	uiSize;
-	UInt32	uiAllocSize;
+	uint32_t	uiSize;
+	uint32_t	uiAllocSize;
 
 	
 
-	UInt32 GetSize() { return uiSize; }
-	UInt32 GetAllocSize() { return uiAllocSize; }
+	uint32_t GetSize() { return uiSize; }
+	uint32_t GetAllocSize() { return uiAllocSize; }
 	bool IsEmpty() { return uiSize == 0; }
 	bool IsFull() { return uiSize == uiAllocSize; }
-	T_Data* GetAt(UInt32 idx) { return &pBuffer[idx]; }
+	T_Data* GetAt(uint32_t idx) { return &pBuffer[idx]; }
 	T_Data* GetLast() { return &pBuffer[uiSize - 1]; }
 
 	
 };
 
-static_assert(sizeof(BSSimpleArray<UInt32>)	== 0x10);
+static_assert(sizeof(BSSimpleArray<uint32_t>)	== 0x10);
 
 template <class Node, class Info>
 class Visitor {
 	const Node* m_pHead;
 
 	template <class Op>
-	UInt32 FreeNodes(Node* node, Op& compareOp) const {
-		static UInt32 nodeCount = 0;
-		static UInt32 numFreed = 0;
+	uint32_t FreeNodes(Node* node, Op& compareOp) const {
+		static uint32_t nodeCount = 0;
+		static uint32_t numFreed = 0;
 		static Node* lastNode = NULL;
 		static bool bRemovedNext = false;
 
-		UInt32 returnCount;
+		uint32_t returnCount;
 
 		if (node->Next()) {
 			nodeCount++;
@@ -544,8 +544,8 @@ class Visitor {
 public:
 	Visitor(const Node* pHead) : m_pHead(pHead) {}
 
-	UInt32 Count() const {
-		UInt32 count = 0;
+	uint32_t Count() const {
+		uint32_t count = 0;
 		const Node* pCur = m_pHead;
 		while (pCur && pCur->Info() != NULL) {
 			++count;
@@ -554,8 +554,8 @@ public:
 		return count;
 	}
 
-	Info* GetNthInfo(UInt32 n) const {
-		UInt32 count = 0;
+	Info* GetNthInfo(uint32_t n) const {
+		uint32_t count = 0;
 		const Node* pCur = m_pHead;
 		while (pCur && count < n && pCur->Info() != NULL) {
 			++count;
@@ -602,8 +602,8 @@ public:
 	}
 
 	template <class Op>
-	UInt32 CountIf(Op& op) const {
-		UInt32 count = 0;
+	uint32_t CountIf(Op& op) const {
+		uint32_t count = 0;
 		const Node* pCur = m_pHead;
 		while (pCur) {
 			if (pCur->Info() && op.Accept(pCur->Info()))
@@ -625,7 +625,7 @@ public:
 	}
 
 	template <class Op>
-	UInt32 RemoveIf(Op& op) {
+	uint32_t RemoveIf(Op& op) {
 		return FreeNodes(const_cast<Node*>(m_pHead), op);
 	}
 
@@ -646,8 +646,8 @@ public:
 	}
 
 	template <class Op>
-	UInt32 GetIndexOf(Op& op) {
-		UInt32 idx = 0;
+	uint32_t GetIndexOf(Op& op) {
+		uint32_t idx = 0;
 		const Node* pCur = m_pHead;
 		while (pCur && pCur->Info() && !op.Accept(pCur->Info())) {
 			idx++;

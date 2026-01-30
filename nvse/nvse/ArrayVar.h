@@ -1,6 +1,6 @@
 #pragma once
 
-typedef UInt32 ArrayID;
+typedef uint32_t ArrayID;
 class ArrayVar;
 class ArrayVarMap;
 struct Slice;
@@ -16,7 +16,7 @@ struct ScriptToken;
 #include <map>
 
 // NVSE array datatype, represented by std::map<ArrayKey, ArrayElement>
-// Data elements can be of mixed types (string, UInt32/formID, float)
+// Data elements can be of mixed types (string, uint32_t/formID, float)
 // Keys can be doubles or strings
 // Can optionally be treated as vector (i.e. removal of an element shifts upper elements down)
 // Commands such as GetEquippedItems can return arrays
@@ -25,23 +25,23 @@ struct ScriptToken;
 // All array variable operations go through ArrayVarMap interface
 
 /* Serialization layout
-String	::= { UInt16 dataLen; char data[dataLen]; }
-Element ::= { double num || string str || UInt32 arrayID || UInt32 formID }
+String	::= { uint16_t dataLen; char data[dataLen]; }
+Element ::= { double num || string str || uint32_t arrayID || uint32_t formID }
 Key		::= { string || double }
 
 	ARVS - empty chunk indicating start of array variables
 		ARVR
-			UInt8	modIndex
-			UInt32	ID
-			UInt8	keyType
+			uint8_t	modIndex
+			uint32_t	ID
+			uint8_t	keyType
 			bool	packed
-** v1 **	UInt32  numRefs       <- references to this array (by variables or array element)
-** v1 **	UInt8   refs[numRefs] <- mod indexes of each reference to array; on load, fix up, discard those from unloaded mods
-			UInt32	numElements
+** v1 **	uint32_t  numRefs       <- references to this array (by variables or array element)
+** v1 **	uint8_t   refs[numRefs] <- mod indexes of each reference to array; on load, fix up, discard those from unloaded mods
+			uint32_t	numElements
 			
 			//for each element
 			Key			key
-			UInt8		elementType
+			uint8_t		elementType
 			Element		data
 		[ARVR]
 			...
@@ -66,7 +66,7 @@ enum
 struct ArrayType {
 	union {
 		double		num;
-		UInt32		formID;
+		uint32_t		formID;
 	};
 
 	std::string		str;
@@ -81,23 +81,23 @@ struct ArrayElement
 	friend class ArrayVarMap;
 
 	ArrayType	m_data;
-	UInt8		m_dataType;
+	uint8_t		m_dataType;
 	ArrayID		m_owningArray;
 
 	void  Unset();
 	std::string ToString() const;
 public:
-	UInt8 DataType() const { return m_dataType; }
+	uint8_t DataType() const { return m_dataType; }
 
 	bool GetAsNumber(double* out) const;
 	bool GetAsString(std::string& out) const;
-	bool GetAsFormID(UInt32* out) const;
+	bool GetAsFormID(uint32_t* out) const;
 	bool GetAsArray(ArrayID* out) const;
 
 	bool SetForm(const TESForm* form);
-	bool SetFormID(UInt32 refID);
+	bool SetFormID(uint32_t refID);
 	bool SetString(const std::string& str);
-	bool SetArray(ArrayID arr, UInt8 modIndex);	
+	bool SetArray(ArrayID arr, uint8_t modIndex);	
 	bool SetNumber(double num);
 	bool Set(const ArrayElement& elem);
 
@@ -115,7 +115,7 @@ struct ArrayKey
 {
 private:
 	ArrayType	key;
-	UInt8		keyType;
+	uint8_t		keyType;
 public:
 	ArrayKey();
 	ArrayKey(const std::string& _key);
@@ -123,7 +123,7 @@ public:
 	ArrayKey(const char* _key);
 
 	ArrayType	Key() const	{	return key;	}
-	UInt8		KeyType() const { return keyType; }
+	uint8_t		KeyType() const { return keyType; }
 	void		SetNumericKey(double newVal)	{	keyType = kDataType_Numeric; key.num = newVal;	}
 	bool		IsValid() const { return keyType != kDataType_Invalid;	}
 
@@ -145,19 +145,19 @@ class ArrayVar
 	typedef std::map<ArrayKey, ArrayElement> _ElementMap;
 	_ElementMap m_elements;
 	ArrayID				m_ID;
-	UInt8				m_owningModIndex;
-	UInt8				m_keyType;
+	uint8_t				m_owningModIndex;
+	uint8_t				m_keyType;
 	bool				m_bPacked;
-	std::vector<UInt8>	m_refs;		// data is modIndex of referring object; size() is number of references
+	std::vector<uint8_t>	m_refs;		// data is modIndex of referring object; size() is number of references
 
-	UInt32 GetUnusedIndex();
+	uint32_t GetUnusedIndex();
 
-	explicit ArrayVar(UInt8 modIndex);
-	ArrayVar(UInt32 keyType, bool packed, UInt8 modIndex);
+	explicit ArrayVar(uint8_t modIndex);
+	ArrayVar(uint32_t keyType, bool packed, uint8_t modIndex);
 
 	ArrayElement* Get(ArrayKey key, bool bCanCreateNew);
 
-	UInt32 ID()		{ return m_ID;	}
+	uint32_t ID()		{ return m_ID;	}
 	void Pack();
 
 	void Dump();
@@ -165,17 +165,17 @@ class ArrayVar
 public:
 	~ArrayVar();
 
-	UInt8 KeyType() const	{ return m_keyType; }
+	uint8_t KeyType() const	{ return m_keyType; }
 	bool IsPacked() const	{ return m_bPacked; }
-	UInt32 Size() const		{ return m_elements.size(); }
+	uint32_t Size() const		{ return m_elements.size(); }
 };
 
 class ArrayVarMap : public VarMap<ArrayVar>
 {
 	// this gets incremented whenever serialization format changes
-	static const UInt32 kVersion = 1;
+	static const uint32_t kVersion = 1;
 
-	void Add(ArrayVar* var, UInt32 varID, UInt32 numRefs, UInt8* refs);
+	void Add(ArrayVar* var, uint32_t varID, uint32_t numRefs, uint8_t* refs);
 public:
 	enum SortOrder
 	{
@@ -194,47 +194,47 @@ public:
 	void Load(NVSESerializationInterface* intfc);
 	void Clean();
 
-	ArrayID	Create(UInt32 keyType, bool bPacked, UInt8 modIndex);
-	ArrayID CreateArray(UInt8 modIndex) { return Create(kDataType_Numeric, true, modIndex); }
-	ArrayID CreateMap(UInt8 modIndex)	{ return Create(kDataType_Numeric, false, modIndex); }
-	ArrayID CreateStringMap(UInt8 modIndex)	{ return Create(kDataType_String, false, modIndex); }
+	ArrayID	Create(uint32_t keyType, bool bPacked, uint8_t modIndex);
+	ArrayID CreateArray(uint8_t modIndex) { return Create(kDataType_Numeric, true, modIndex); }
+	ArrayID CreateMap(uint8_t modIndex)	{ return Create(kDataType_Numeric, false, modIndex); }
+	ArrayID CreateStringMap(uint8_t modIndex)	{ return Create(kDataType_String, false, modIndex); }
 	
 	// operations on ArrayVars
-	void    AddReference(ArrayID* ref, ArrayID toRef, UInt8 referringModIndex);
-	void    RemoveReference(ArrayID* ref, UInt8 referringModIndex);
-	void    AddReference(double* ref, ArrayID toRef, UInt8 referringModIndex);
-	void	RemoveReference(double* ref, UInt8 referringModIndex);
-	ArrayID Copy(ArrayID from, UInt8 modIndex, bool bDeepCopy);
-	ArrayID MakeSlice(ArrayID src, const Slice* slice, UInt8 modIndex);
-	UInt32	GetKeyType(ArrayID id);
+	void    AddReference(ArrayID* ref, ArrayID toRef, uint8_t referringModIndex);
+	void    RemoveReference(ArrayID* ref, uint8_t referringModIndex);
+	void    AddReference(double* ref, ArrayID toRef, uint8_t referringModIndex);
+	void	RemoveReference(double* ref, uint8_t referringModIndex);
+	ArrayID Copy(ArrayID from, uint8_t modIndex, bool bDeepCopy);
+	ArrayID MakeSlice(ArrayID src, const Slice* slice, uint8_t modIndex);
+	uint32_t	GetKeyType(ArrayID id);
 	bool	Exists(ArrayID id);
 	void	Erase(ArrayID toErase);
 	void	DumpArray(ArrayID toDump);
-	UInt32	SizeOf(ArrayID id);
-	UInt32  EraseElements(ArrayID id, const ArrayKey& lo, const ArrayKey& hi);	// returns num erased
-	UInt32	EraseAllElements(ArrayID id);
-	ArrayID Sort(ArrayID src, SortOrder order, SortType type, UInt8 modIndex, Script* comparator=NULL);
+	uint32_t	SizeOf(ArrayID id);
+	uint32_t  EraseElements(ArrayID id, const ArrayKey& lo, const ArrayKey& hi);	// returns num erased
+	uint32_t	EraseAllElements(ArrayID id);
+	ArrayID Sort(ArrayID src, SortOrder order, SortType type, uint8_t modIndex, Script* comparator=NULL);
 	ArrayKey Find(ArrayID toSearch, const ArrayElement& toFind, const Slice* range = NULL);
 	std::string GetTypeString(ArrayID arr);
-	UInt8	GetOwningModIndex(ArrayID id);
-	ArrayID GetKeys(ArrayID id, UInt8 modIndex);
+	uint8_t	GetOwningModIndex(ArrayID id);
+	ArrayID GetKeys(ArrayID id, uint8_t modIndex);
 	bool	HasKey(ArrayID id, const ArrayKey& key);
 	bool	AsVector(ArrayID id, std::vector<const ArrayElement*> &vecOut);
-	bool	SetSize(ArrayID id, UInt32 newSize, const ArrayElement& padWith);
-	bool	Insert(ArrayID id, UInt32 atIndex, const ArrayElement& toInsert);
-	bool	Insert(ArrayID id, UInt32 atIndex, ArrayID rangeID);
+	bool	SetSize(ArrayID id, uint32_t newSize, const ArrayElement& padWith);
+	bool	Insert(ArrayID id, uint32_t atIndex, const ArrayElement& toInsert);
+	bool	Insert(ArrayID id, uint32_t atIndex, ArrayID rangeID);
 	bool	Merge(ArrayID dest, ArrayID toMerge);
 
 	// operations on ArrayElements
 	bool SetElementNumber(ArrayID id, const ArrayKey& key, double num);
 	bool SetElementString(ArrayID id, const ArrayKey& key, const std::string& str);
-	bool SetElementFormID(ArrayID id, const ArrayKey& key, UInt32 refID);
+	bool SetElementFormID(ArrayID id, const ArrayKey& key, uint32_t refID);
 	bool SetElementArray(ArrayID id, const ArrayKey& key, ArrayID srcID);
 	bool SetElement(ArrayID id, const ArrayKey& key, const ArrayElement& val);
 
 	bool GetElementNumber(ArrayID id, const ArrayKey& key, double* out);
 	bool GetElementString(ArrayID id, const ArrayKey& key, std::string& out);
-	bool GetElementFormID(ArrayID id, const ArrayKey& key, UInt32* out);
+	bool GetElementFormID(ArrayID id, const ArrayKey& key, uint32_t* out);
 	bool GetElementForm(ArrayID id, const ArrayKey& key, TESForm** out);
 	bool GetElementArray(ArrayID id, const ArrayKey& key, ArrayID* out);
 	bool GetElementAsBool(ArrayID id, const ArrayKey& key, bool* out);
@@ -245,7 +245,7 @@ public:
 	bool GetNextElement(ArrayID id, ArrayKey* prevKey, ArrayElement* outElem, ArrayKey* outKey);
 	bool GetPrevElement(ArrayID id, ArrayKey* prevKey, ArrayElement* outElem, ArrayKey* outKey);
 
-	UInt8 GetElementType(ArrayID id, const ArrayKey& key);
+	uint8_t GetElementType(ArrayID id, const ArrayKey& key);
 };
 
 extern ArrayVarMap g_ArrayMap;
@@ -255,19 +255,19 @@ namespace PluginAPI
 	class ArrayAPI 
 	{
 	private:
-		static bool SetElementFromAPI(UInt32 id, ArrayKey& key, const NVSEArrayVarInterface::Element& elem);
+		static bool SetElementFromAPI(uint32_t id, ArrayKey& key, const NVSEArrayVarInterface::Element& elem);
 
 	public:
-		static NVSEArrayVarInterface::Array* CreateArray(const NVSEArrayVarInterface::Element* data, UInt32 size, Script* callingScript);
-		static NVSEArrayVarInterface::Array* CreateStringMap(const char** keys, const NVSEArrayVarInterface::Element* values, UInt32 size, Script* callingScript);
-		static NVSEArrayVarInterface::Array* CreateMap(const double* keys, const NVSEArrayVarInterface::Element* values, UInt32 size, Script* callingScript);
+		static NVSEArrayVarInterface::Array* CreateArray(const NVSEArrayVarInterface::Element* data, uint32_t size, Script* callingScript);
+		static NVSEArrayVarInterface::Array* CreateStringMap(const char** keys, const NVSEArrayVarInterface::Element* values, uint32_t size, Script* callingScript);
+		static NVSEArrayVarInterface::Array* CreateMap(const double* keys, const NVSEArrayVarInterface::Element* values, uint32_t size, Script* callingScript);
 
 		static bool AssignArrayCommandResult(NVSEArrayVarInterface::Array* arr, double* dest);
 		static void SetElement(NVSEArrayVarInterface::Array* arr, const NVSEArrayVarInterface::Element& key, const NVSEArrayVarInterface::Element& value);
 		static void AppendElement(NVSEArrayVarInterface::Array* arr, const NVSEArrayVarInterface::Element& value);
 
-		static UInt32 GetArraySize(NVSEArrayVarInterface::Array* arr);
-		static NVSEArrayVarInterface::Array* LookupArrayByID(UInt32 id);
+		static uint32_t GetArraySize(NVSEArrayVarInterface::Array* arr);
+		static NVSEArrayVarInterface::Array* LookupArrayByID(uint32_t id);
 		static bool GetElement(NVSEArrayVarInterface::Array* arr, const NVSEArrayVarInterface::Element& key,
 			NVSEArrayVarInterface::Element& out);
 		static bool GetElements(NVSEArrayVarInterface::Array* arr, NVSEArrayVarInterface::Element* elements,

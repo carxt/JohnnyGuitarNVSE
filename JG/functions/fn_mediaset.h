@@ -175,7 +175,7 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 				audioMrkr->data->layer3TriggerPerc = newVal;
 				break;
 			case kFlags:
-				audioMrkr->data->flags = UInt32(newVal);
+				audioMrkr->data->flags = uint32_t(newVal);
 				break;
 
 			}
@@ -326,10 +326,10 @@ bool Cmd_GetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && mediaset && IS_TYPE(mediaset, MediaSet)) {
 		switch (traitID) {
 			case 0:
-				*(UInt32*)result = mediaset->HNAM->refID;
+				*(uint32_t*)result = mediaset->HNAM->refID;
 				break;
 			case 1:
-				*(UInt32*)result = mediaset->INAM->refID;
+				*(uint32_t*)result = mediaset->INAM->refID;
 				break;
 		}
 	}

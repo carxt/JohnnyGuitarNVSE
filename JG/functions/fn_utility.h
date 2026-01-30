@@ -262,7 +262,7 @@ bool Cmd_DumpINI_Execute(COMMAND_ARGS) {
 
 bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt32 stopAnim = 0;
+	uint32_t stopAnim = 0;
 	Actor* actor = (Actor*)thisObj;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &stopAnim);
 	if (actor && actor->IsActor() && actor->baseProcess->GetIdleForm350()) {
@@ -299,7 +299,7 @@ bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
 }
 bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt32 arrID, fullMatch;
+	uint32_t arrID, fullMatch;
 	BGSListForm* formList = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &formList, &fullMatch)) return true;
 
@@ -307,11 +307,11 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!inArr) return true;
-	UInt32 size = g_arrInterface->GetArraySize(inArr);
+	uint32_t size = g_arrInterface->GetArraySize(inArr);
 	NVSEArrayElement* elements = new NVSEArrayElement[size];
 	g_arrInterface->GetElements(inArr, elements, nullptr);
 	if (!fullMatch) {
-		for (int i = 0; i < size; i++) {
+		for (uint32_t i = 0; i < size; i++) {
 			if (elements[i].GetTESForm() == nullptr) return true;
 			ListNode<TESForm>* listIter = formList->list.Head();
 			do {
@@ -348,7 +348,7 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 bool Cmd_SetUIUpdateSound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESSound* sound = nullptr;
-	UInt32 type = 0;
+	uint32_t type = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &type) && sound && IS_TYPE(sound, TESSound)) {
 		*result = 1;
 		switch (type) {
@@ -382,13 +382,13 @@ private:
 };
 bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt32 arrID;
-	UInt32 isReverse = 0;
+	uint32_t arrID;
+	uint32_t isReverse = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &isReverse)) return true;
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!inArr) return true;
 	NVSEArrayVar* outArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	UInt32 size = g_arrInterface->GetArraySize(inArr);
+	uint32_t size = g_arrInterface->GetArraySize(inArr);
 	NVSEArrayElement* elements = new NVSEArrayElement[size];
 	g_arrInterface->GetElements(inArr, elements, nullptr);
 	std::map<const char*, TESForm*, cmp_str> smap(cmp_str(isReverse > 0));
@@ -406,11 +406,11 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
 	*result = -1;
-	UInt32 sequenceID;
+	uint32_t sequenceID;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sequenceID) && sequenceID < 8) {
 		if (auto animData = thisObj->GetAnimData()) {
 			if (auto sequence = animData->animSequence[sequenceID]) {
-				UInt16 groupID = animData->groupIDs[sequenceID] & 0xFF;
+				uint16_t groupID = animData->groupIDs[sequenceID] & 0xFF;
 				*result = groupID;
 			}
 		}
@@ -450,7 +450,7 @@ bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetDefaultHeapSize_Execute(COMMAND_ARGS) {
-	UInt32 heapSize = *(reinterpret_cast<UInt32*>(0x866E9F + 1));
+	uint32_t heapSize = *(reinterpret_cast<uint32_t*>(0x866E9F + 1));
 	*result = heapSize / 1024 / 1024;
 	if (IsConsoleMode())
 		Console_Print("DefaultHeapInitialAllocMB >> `%f", *result);
@@ -464,7 +464,7 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &edid) && edid[0]) {
 		form = ((TESForm * (__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
 		if (form) {
-			*(UInt32*)result = form->refID;
+			*(uint32_t*)result = form->refID;
 		}
 		if (IsConsoleMode()) {
 			Console_Print("EditorIDToFormID >> 0x%X", *result);
@@ -503,7 +503,7 @@ bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	int type = 0;
-	UInt32 tickCount;
+	uint32_t tickCount;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &type);
 	tickCount = GetTickCount();
 	double timePlayed = tickCount - g_initialTickCount;
@@ -627,8 +627,8 @@ bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
-	UInt32 uiCount = 0;
-	UInt32 uiNoFade = 0;
+	uint32_t uiCount = 0;
+	uint32_t uiNoFade = 0;
 	float fDuration = 0.f;
 	float fSizeMult = 0.f;
 	float fOpacityMult = 0.f;
@@ -739,7 +739,7 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 
 extern NiVector3 kCameraPos;
 extern NiMatrix3 kCameraRot;
-extern UInt32 uiReferenceToTrack;
+extern uint32_t uiReferenceToTrack;
 extern bool bOverrideCameraPos;
 extern bool bOverrideCameraRot;
 extern int eAxis;

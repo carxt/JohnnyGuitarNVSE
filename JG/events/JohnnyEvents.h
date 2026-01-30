@@ -53,7 +53,7 @@ EventInformation* OnGeneralSubtitleHandler;
 EventInformation* OnReputationChangeHandler;
 EventInformation* OnNPCAVChangeHandler;
 
-UInt32 handlePreRenderEvent() {
+uint32_t handlePreRenderEvent() {
 	for (auto const& callback : OnRenderGamePreUpdateHandler->callbacks) {
 		CallUDF(callback.script, nullptr, OnRenderGamePreUpdateHandler->numMaxArgs);
 	}
@@ -71,7 +71,7 @@ void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool
 	actor->RemovePerk(perk, isTeammatePerk);
 }
 
-void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, UInt8 newRank, bool isTeammatePerk) {
+void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, uint8_t newRank, bool isTeammatePerk) {
 	for (auto const& callback : OnAddPerkHandler->callbacks) {
 		if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) {
 			CallUDF(callback.script, actor, OnAddPerkHandler->numMaxArgs, perk, newRank - 1, newRank);
@@ -89,7 +89,7 @@ void __stdcall handleDyingEvent(Actor* thisObj) {
 		}
 	}
 }
-UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
+uint32_t __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 	if (crosshairRef) {
 		for (auto const& callback : OnCrosshairHandler->callbacks) {
 			FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
@@ -98,7 +98,7 @@ UInt32 __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 			}
 		}
 	}
-	return ThisCall<UInt32>(0x579280, crosshairRef);
+	return ThisCall<uint32_t>(0x579280, crosshairRef);
 }
 bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, byte dummy, int limb, byte isExplode) {
 	for (auto const& callback : OnLimbGoneHandler->callbacks) {
@@ -150,7 +150,7 @@ ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
 	}
 	return &cell->extraDataList;
 }
-UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
+uint32_t __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 	for (auto const& callback : OnChallengeCompleteHandler->callbacks) {
 		if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, challenge)) {
 			CallUDF(callback.script, nullptr, OnChallengeCompleteHandler->numMaxArgs, challenge);
@@ -159,18 +159,18 @@ UInt32 __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
 	return challenge->data.type;
 }
 
-UInt32 __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
+uint32_t __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
 	for (auto const& callback : OnRenderGameModeUpdateHandler->callbacks) {
 		CallUDF(callback.script, nullptr, OnRenderGameModeUpdateHandler->numMaxArgs);
 	}
-	return ThisCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
+	return ThisCall<uint32_t>(0x08706B0, ECX, arg1, arg2, arg3);
 }
 
-UInt32 __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
+uint32_t __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
 	for (auto const& callback : OnRenderRenderedMenuUpdateHandler->callbacks) {
 		CallUDF(callback.script, nullptr, OnRenderRenderedMenuUpdateHandler->numMaxArgs);
 	}
-	return ThisCall<UInt32>(0x08706B0, ECX, arg1, arg2, arg3);
+	return ThisCall<uint32_t>(0x08706B0, ECX, arg1, arg2, arg3);
 }
 
 void __stdcall HandleAVChangeEvent(ActorValueOwner* avOwner, int avCode, float previousVal, float modVal, void* onChangeCallback) {
@@ -184,7 +184,7 @@ void __stdcall HandleAVChangeEvent(ActorValueOwner* avOwner, int avCode, float p
 		if (avOwner->Fn_09()->IsPlayerRef()) {
 			for (auto const& callback : OnAVChangeHandler->callbacks) {
 				if (reinterpret_cast<FilterFormInt*>(callback.eventFilter)->IsInFilter(1, avCode)) {
-					CallUDF(callback.script, nullptr, OnAVChangeHandler->numMaxArgs, avCode, *(UInt32*)&floorPrev, *(UInt32*)&floorNew);
+					CallUDF(callback.script, nullptr, OnAVChangeHandler->numMaxArgs, avCode, *(uint32_t*)&floorPrev, *(uint32_t*)&floorNew);
 				}
 			}
 		} else {
@@ -193,13 +193,13 @@ void __stdcall HandleAVChangeEvent(ActorValueOwner* avOwner, int avCode, float p
 				if ((filter->IsInFilter(0, avOwner->Fn_09()->refID) || filter->IsInFilter(0, avOwner->Fn_09()->GetBaseForm()->refID)) &&
 					filter->IsInFilter(1, avCode)) {
 
-					CallUDF(callback.script, nullptr, OnNPCAVChangeHandler->numMaxArgs, avOwner->Fn_09(), avCode, *(UInt32*)&floorPrev, *(UInt32*)&floorNew);
+					CallUDF(callback.script, nullptr, OnNPCAVChangeHandler->numMaxArgs, avOwner->Fn_09(), avCode, *(uint32_t*)&floorPrev, *(uint32_t*)&floorNew);
 				}
 			}
 		}
 	}
 }
-template <UInt32 originalCall>
+template <uint32_t originalCall>
 bool __fastcall HandlePLChangeEvent(Actor* actor) {
 	if (actor == nullptr || actor->baseProcess == nullptr) return true; //early exit, no need to handle error states because there's no baseProcess.
 	int oldLevel = actor->baseProcess->processLevel;
@@ -242,18 +242,18 @@ void __fastcall HandleOnKeyboardControllerUIChange(InterfaceManager* a_man, Menu
 }
 
 
-void __fastcall HandleOnSleepWait(SleepWaitMenu* a_man, DWORD clickMode) {
+void __fastcall HandleOnSleepWait(SleepWaitMenu* a_man, uint32_t clickMode) {
 	for (auto const& callback : OnSleepWaitEventHandler->callbacks) {
 		auto filter = reinterpret_cast<FilterInt*>(callback.eventFilter);
-		if (filter->IsInFilter(0, DWORD(a_man->isRest) + 1) || filter->IsInFilter(0, 0)) {
-			CallUDF(callback.script, nullptr, OnKeyboardControllerSelectionChangeHandler->numMaxArgs, (DWORD(a_man->isRest) + 1) );
+		if (filter->IsInFilter(0, int(a_man->isRest) + 1) || filter->IsInFilter(0, 0)) {
+			CallUDF(callback.script, nullptr, OnKeyboardControllerSelectionChangeHandler->numMaxArgs, (int(a_man->isRest) + 1) );
 		}
 	}
 }
 
 
 
-__declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32 avCode, float prevVal, float newVal, ActorValueOwner* attacker)
+__declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, uint32_t avCode, float prevVal, float newVal, ActorValueOwner* attacker)
 {
 	__asm
 	{
@@ -289,7 +289,7 @@ __declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, UInt32
 }
 
 __declspec(naked) void OnCrosshairEventAsm() {
-	static const UInt32 retnAddr = 0x775A69;
+	static const uint32_t retnAddr = 0x775A69;
 	__asm {
 		mov ecx, [ebp + 0x8]
 		call handleCrosshairEvent
@@ -299,7 +299,7 @@ __declspec(naked) void OnCrosshairEventAsm() {
 	}
 }
 __declspec (naked) void OnDyingEventAsm() {
-	static const UInt32 checkProtect = 0xEC408C;
+	static const uint32_t checkProtect = 0xEC408C;
 	__asm
 	{
 		push dword ptr[ebp - 0x18]
@@ -347,7 +347,7 @@ ExtraDataList* __fastcall GetExtraDataListHook(TESObjectREFR* owner)
 	return &owner->extraDataList;
 }
 
-void __fastcall HandleTakeBackItem(void* contChanges, void* edx, PlayerCharacter* player, TESForm* item, bool keepOwner, SInt32 quantity, void* xList, bool a9, Actor* target, int a10, int a11, bool a12, bool a13, void* cEntry)
+void __fastcall HandleTakeBackItem(void* contChanges, void* edx, PlayerCharacter* player, TESForm* item, bool keepOwner, int32_t quantity, void* xList, bool a9, Actor* target, int a10, int a11, bool a12, bool a13, void* cEntry)
 {
 	for (auto const& callback : OnTakeBackItemHandler->callbacks) {
 		auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
@@ -448,7 +448,7 @@ void __stdcall HandleOnGeneralSubtitle(char* apText, NiPoint3 akPos, TESObjectRE
 	for (auto const& callback : OnGeneralSubtitleHandler->callbacks) {
 		auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
 		if (filter->IsInFilter(0, player) || filter->IsInFilter(0, 0)) {
-			CallUDF(callback.script, nullptr, OnGeneralSubtitleHandler->numMaxArgs, subtitleString, player, *(UInt32*)&x, *(UInt32*)&y, *(UInt32*)&z);
+			CallUDF(callback.script, nullptr, OnGeneralSubtitleHandler->numMaxArgs, subtitleString, player, *(uint32_t*)&x, *(uint32_t*)&y, *(uint32_t*)&z);
 		}
 	}
 	return;
@@ -460,7 +460,7 @@ void __fastcall HandleOnReputationChange(TESReputation* apRep) {
 		float fNeg = apRep->fNegativeReputation;
 		auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
 		if (filter->IsBaseInFilter(0, apRep)) {
-			CallUDF(callback.script, nullptr, OnReputationChangeHandler->numMaxArgs, apRep, *(UInt32*)&fPos, *(UInt32*)&fNeg);
+			CallUDF(callback.script, nullptr, OnReputationChangeHandler->numMaxArgs, apRep, *(uint32_t*)&fPos, *(uint32_t*)&fNeg);
 		}
 	}
 }
@@ -490,10 +490,10 @@ void __fastcall HandleOnReputationChangeEvent(TESReputation* apThis, void* edx, 
 }
 
 bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script)) {
 		if (OnLimbGoneHandler) {
 			if (setOrRemove)
@@ -504,9 +504,9 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) && IS_TYPE(script, Script)) {
 		if (OnSettingsUpdateHandler) {
 			if (setOrRemove)
@@ -517,10 +517,10 @@ bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script)) {
 		if (OnCrosshairHandler) {
 			if (setOrRemove)
@@ -532,10 +532,10 @@ bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { g_thePlayer, -1 };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
 		if (OnAVChangeHandler) {
 			if (setOrRemove)
@@ -547,10 +547,10 @@ bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetOnNPCActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
 		if (OnNPCAVChangeHandler) {
 			if (setOrRemove)
@@ -561,10 +561,10 @@ bool Cmd_SetOnNPCActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnRemovePerkHandler) {
 			if (setOrRemove)
@@ -575,10 +575,10 @@ bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnAddPerkHandler) {
 			if (setOrRemove)
@@ -589,10 +589,10 @@ bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnChallengeCompleteHandler) {
 			if (setOrRemove)
@@ -603,10 +603,10 @@ bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnSeenDataUpdateHandler) {
 			if (setOrRemove)
@@ -617,10 +617,10 @@ bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnDyingHandler) {
 			if (setOrRemove)
@@ -632,10 +632,10 @@ bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnStartQuestHandler) {
 			if (setOrRemove)
@@ -648,10 +648,10 @@ bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnStopQuestHandler) {
 			if (setOrRemove)
@@ -664,10 +664,10 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnCompleteQuestHandler) {
 			if (setOrRemove)
@@ -679,10 +679,10 @@ bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnFailQuestHandler) {
 			if (setOrRemove)
@@ -694,10 +694,10 @@ bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
-	UInt32 flags = 0;
-	UInt32 optionalFlags = 0;
+	uint32_t flags = 0;
+	uint32_t optionalFlags = 0;
 
 	enum EnumFlags {
 		kDoNotFireInRenderMenu = 1 << 0,
@@ -729,10 +729,10 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetOnProcessLevelChangeEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script)) {
 		if (OnPLChangeHandler) {
 			if (setOrRemove)
@@ -745,10 +745,10 @@ bool Cmd_SetOnProcessLevelChangeEventHandler_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_SetJohnnyOnRadioPostSoundAttachEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnRadioPostSoundAttachHandler) {
 			if (setOrRemove)
@@ -760,10 +760,10 @@ bool Cmd_SetJohnnyOnRadioPostSoundAttachEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetJohnnyOnKeyboardControllerSelectionChangeEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	FilterInt::Data filter {};
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script)) {
 		if (OnKeyboardControllerSelectionChangeHandler) {
 			if (setOrRemove)
@@ -778,10 +778,10 @@ bool Cmd_SetJohnnyOnKeyboardControllerSelectionChangeEventHandler_Execute(COMMAN
 
 
 bool Cmd_SetJohnnyOnSleepWaitEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	FilterInt::Data filter{};
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script)) {
 		if (OnSleepWaitEventHandler) {
 			if (setOrRemove)
@@ -793,10 +793,10 @@ bool Cmd_SetJohnnyOnSleepWaitEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetOnTakeBackItemEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[2] = { nullptr, nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0], &filter[1]) && IS_TYPE(script, Script)) {
 		if (OnTakeBackItemHandler) {
 			if (setOrRemove)
@@ -809,10 +809,10 @@ bool Cmd_SetOnTakeBackItemEventHandler_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_SetOnNPCResponseEventHandler_Execute(COMMAND_ARGS) {
-    UInt32 setOrRemove = 0;
+    uint32_t setOrRemove = 0;
     Script* script = nullptr;
     FilterInt::Data filter{};
-    UInt32 flags = 0;
+    uint32_t flags = 0;
     if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script)) {
         if (OnNPCResponseHandler) {
             if (setOrRemove)
@@ -824,10 +824,10 @@ bool Cmd_SetOnNPCResponseEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetOnGeneralSubtitleEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnGeneralSubtitleHandler) {
 			if (setOrRemove)
@@ -839,10 +839,10 @@ bool Cmd_SetOnGeneralSubtitleEventHandler_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetOnReputationChangeEventHandler_Execute(COMMAND_ARGS) {
-	UInt32 setOrRemove = 0;
+	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
 		if (OnReputationChangeHandler) {
 			if (setOrRemove)
@@ -878,47 +878,47 @@ void HandleEventHooks() {
 	OnNPCAVChangeHandler = JGCreateEvent("OnNPCActorValueChangeHandler", 4, 2, FilterFormInt::Create);
 
 	CallUDF = g_scriptInterface->CallFunctionAlt;
-	WriteRelCall(0x55678A, (UInt32)HandleSeenDataUpdateEvent);
-	WriteRelCall(0x557053, (UInt32)HandleSeenDataUpdateEvent);
-	WriteRelJump(0x89F4A4, (UInt32)OnDyingEventAsm);
-	WriteRelJump(0x60CA24, (UInt32)OnQuestStartStopEventAsm);
-	WriteRelCall(0x572FF1, (UInt32)HandleLimbGoneEvent);
-	WriteRelCall(0x5F5C78, (UInt32)HandleChallengeCompleteEvent);
-	WriteRelCall(0x5F6222, (UInt32)HandleChallengeCompleteEvent);
-	WriteRelCall(0x776010, (UInt32)handleCrosshairEvent);
-	WriteRelCall(0x60CB5A, (UInt32)handleQuestFail);
-	WriteRelCall(0x60CA78, (UInt32)handleQuestComplete);
-	WriteRelCall(0x7D6D73, (UInt32)handleSettingsUpdate);
-	WriteRelCall(0x5D4E5B, (UInt32)handleAddPerkEvent);
-	WriteRelCall(0x7865BD, (UInt32)handleAddPerkEvent);
-	WriteRelCall(0x7E772D, (UInt32)handleAddPerkEvent);
+	WriteRelCall(0x55678A, (uint32_t)HandleSeenDataUpdateEvent);
+	WriteRelCall(0x557053, (uint32_t)HandleSeenDataUpdateEvent);
+	WriteRelJump(0x89F4A4, (uint32_t)OnDyingEventAsm);
+	WriteRelJump(0x60CA24, (uint32_t)OnQuestStartStopEventAsm);
+	WriteRelCall(0x572FF1, (uint32_t)HandleLimbGoneEvent);
+	WriteRelCall(0x5F5C78, (uint32_t)HandleChallengeCompleteEvent);
+	WriteRelCall(0x5F6222, (uint32_t)HandleChallengeCompleteEvent);
+	WriteRelCall(0x776010, (uint32_t)handleCrosshairEvent);
+	WriteRelCall(0x60CB5A, (uint32_t)handleQuestFail);
+	WriteRelCall(0x60CA78, (uint32_t)handleQuestComplete);
+	WriteRelCall(0x7D6D73, (uint32_t)handleSettingsUpdate);
+	WriteRelCall(0x5D4E5B, (uint32_t)handleAddPerkEvent);
+	WriteRelCall(0x7865BD, (uint32_t)handleAddPerkEvent);
+	WriteRelCall(0x7E772D, (uint32_t)handleAddPerkEvent);
 	SafeWriteBuf(0x7E7732, "\x0F\x1F\x00", 3);
 	SafeWriteBuf(0x7865C2, "\x0F\x1F\x00", 3);
 	SafeWriteBuf(0x5D4E60, "\x0F\x1F\x00", 3);
-	WriteRelCall(0x5D4F89, (UInt32)handleRemovePerkEvent);
+	WriteRelCall(0x5D4F89, (uint32_t)handleRemovePerkEvent);
 	SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00", 3);
 	SafeWrite8(0x60CA29, 0xCC);
-	WriteRelJump(0x66EE50, (UInt32)AVChangeEventAsm);
+	WriteRelJump(0x66EE50, (uint32_t)AVChangeEventAsm);
 	// Process Level change: MoveToHigh
-	SafeWrite32(0x108AC7C, (UInt32)HandlePLChangeEvent<0x881D30>);
-	SafeWrite32(0x10872EC, (UInt32)HandlePLChangeEvent<0x881D30>);
-	SafeWrite32(0x1086CAC, (UInt32)HandlePLChangeEvent<0x881D30>);
-	SafeWrite32(0x1084494, (UInt32)HandlePLChangeEvent<0x881D30>);
+	SafeWrite32(0x108AC7C, (uint32_t)HandlePLChangeEvent<0x881D30>);
+	SafeWrite32(0x10872EC, (uint32_t)HandlePLChangeEvent<0x881D30>);
+	SafeWrite32(0x1086CAC, (uint32_t)HandlePLChangeEvent<0x881D30>);
+	SafeWrite32(0x1084494, (uint32_t)HandlePLChangeEvent<0x881D30>);
 	// MoveToLow
-	SafeWrite32(0x108AC80, (UInt32)HandlePLChangeEvent<0x882B90>);
-	SafeWrite32(0x10872F0, (UInt32)HandlePLChangeEvent<0x882B90>);
-	SafeWrite32(0x1086CB0, (UInt32)HandlePLChangeEvent<0x882B90>);
-	SafeWrite32(0x1084498, (UInt32)HandlePLChangeEvent<0x882B90>);
+	SafeWrite32(0x108AC80, (uint32_t)HandlePLChangeEvent<0x882B90>);
+	SafeWrite32(0x10872F0, (uint32_t)HandlePLChangeEvent<0x882B90>);
+	SafeWrite32(0x1086CB0, (uint32_t)HandlePLChangeEvent<0x882B90>);
+	SafeWrite32(0x1084498, (uint32_t)HandlePLChangeEvent<0x882B90>);
 	// MoveToMiddleLow
-	SafeWrite32(0x108AC84, (UInt32)HandlePLChangeEvent<0x883240>);
-	SafeWrite32(0x10872F4, (UInt32)HandlePLChangeEvent<0x883240>);
-	SafeWrite32(0x1086CB4, (UInt32)HandlePLChangeEvent<0x883240>);
-	SafeWrite32(0x108449C, (UInt32)HandlePLChangeEvent<0x883240>);
+	SafeWrite32(0x108AC84, (uint32_t)HandlePLChangeEvent<0x883240>);
+	SafeWrite32(0x10872F4, (uint32_t)HandlePLChangeEvent<0x883240>);
+	SafeWrite32(0x1086CB4, (uint32_t)HandlePLChangeEvent<0x883240>);
+	SafeWrite32(0x108449C, (uint32_t)HandlePLChangeEvent<0x883240>);
 	// MoveToMiddleHigh
-	SafeWrite32(0x108AC88, (UInt32)HandlePLChangeEvent<0x883800>);
-	SafeWrite32(0x10872F8, (UInt32)HandlePLChangeEvent<0x883800>);
-	SafeWrite32(0x1086CB8, (UInt32)HandlePLChangeEvent<0x883800>);
-	SafeWrite32(0x10844A0, (UInt32)HandlePLChangeEvent<0x883800>);
+	SafeWrite32(0x108AC88, (uint32_t)HandlePLChangeEvent<0x883800>);
+	SafeWrite32(0x10872F8, (uint32_t)HandlePLChangeEvent<0x883800>);
+	SafeWrite32(0x1086CB8, (uint32_t)HandlePLChangeEvent<0x883800>);
+	SafeWrite32(0x10844A0, (uint32_t)HandlePLChangeEvent<0x883800>);
 	// Selection Change
 	hk_KeyboardControllerUIPositionEvent<0x0718059>();
 	hk_KeyboardControllerUIPositionEvent<0x0715CD5>();
@@ -929,7 +929,7 @@ void HandleEventHooks() {
 	hk_RadioTuneOnEvent<0x579C64>();
 	hk_RadioTuneOnEvent<0x57A23A>();
 
-	SafeWrite32(0x10763B8, (UInt32)handleSleepWaitClick);
+	SafeWrite32(0x10763B8, (uint32_t)handleSleepWaitClick);
 
 	//testing
 	OnRenderGamePreUpdateHandler = JGCreateEvent("OnRenderGamePreUpdateHandler", 0, 0, nullptr);
@@ -939,8 +939,8 @@ void HandleEventHooks() {
 	OnRenderRenderedMenuUpdateHandler = JGCreateEvent("OnRenderRenderedMenuUpdateHandler", 0, 0, nullptr);
 	WriteRelCall(0x8702A9, (uintptr_t)handlerRenderMenuEvent);
 
-	WriteRelCall(0x4CB976, (UInt32)HandleTakeBackItem);
-	WriteRelCall(0x8F24A1, (UInt32)GetExtraDataListHook);
+	WriteRelCall(0x4CB976, (uint32_t)HandleTakeBackItem);
+	WriteRelCall(0x8F24A1, (uint32_t)GetExtraDataListHook);
 
 	WriteRelCall(0x7630FD, (uint32_t)HandleOnNPCResponseEvent);
 

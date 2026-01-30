@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BSMemory.hpp"
+#include "shared/BSMemory/BSMemory.hpp"
 
 class BSMemObject {
 public:

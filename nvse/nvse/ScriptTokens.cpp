@@ -3,8 +3,8 @@
 #include "GameRTTI.h"
 
 #ifdef DBG_EXPR_LEAKS
-	SInt32 TOKEN_COUNT = 0;
-	SInt32 EXPECTED_TOKEN_COUNT = 0;
+	int32_t TOKEN_COUNT = 0;
+	int32_t EXPECTED_TOKEN_COUNT = 0;
 #define INC_TOKEN_COUNT TOKEN_COUNT++;
 #else
 #define INC_TOKEN_COUNT
@@ -30,7 +30,7 @@ ScriptToken::ScriptToken() : type(kTokenType_Invalid), refIdx(0), variableType(S
 	value.num = 0;
 }
 
-ScriptToken::ScriptToken(Token_Type _type, UInt8 _varType, UInt16 _refIdx) : type(_type), variableType(_varType), refIdx(_refIdx) 
+ScriptToken::ScriptToken(Token_Type _type, uint8_t _varType, uint16_t _refIdx) : type(_type), variableType(_varType), refIdx(_refIdx) 
 { 
 	INC_TOKEN_COUNT
 }
@@ -46,7 +46,7 @@ ScriptToken::ScriptToken(double num) : type(kTokenType_Number), refIdx(0), varia
 	value.num = num;
 }
 
-ScriptToken::ScriptToken(Script::RefVariable* refVar, UInt16 refIdx) : type(kTokenType_Ref), refIdx(refIdx), variableType(Script::eVarType_Invalid)
+ScriptToken::ScriptToken(Script::RefVariable* refVar, uint16_t refIdx) : type(kTokenType_Ref), refIdx(refIdx), variableType(Script::eVarType_Invalid)
 {
 	INC_TOKEN_COUNT
 	value.refVar = refVar;
@@ -64,13 +64,13 @@ ScriptToken::ScriptToken(const char* str) : type(kTokenType_String), refIdx(0), 
 	value.str = str;
 }
 
-ScriptToken::ScriptToken(TESGlobal* global, UInt16 refIdx) : type(kTokenType_Global), refIdx(refIdx), variableType(Script::eVarType_Invalid)
+ScriptToken::ScriptToken(TESGlobal* global, uint16_t refIdx) : type(kTokenType_Global), refIdx(refIdx), variableType(Script::eVarType_Invalid)
 {
 	INC_TOKEN_COUNT
 	value.global = global;
 }
 
-ScriptToken::ScriptToken(UInt32 id, Token_Type asType) : refIdx(0), type(asType), variableType(Script::eVarType_Invalid)
+ScriptToken::ScriptToken(uint32_t id, Token_Type asType) : refIdx(0), type(asType), variableType(Script::eVarType_Invalid)
 {
 	INC_TOKEN_COUNT
 	switch (asType)
@@ -95,7 +95,7 @@ ScriptToken::ScriptToken(Operator* op) : type(kTokenType_Operator), refIdx(0), v
 	value.op = op;
 }
 
-ScriptToken::ScriptToken(VariableInfo* varInfo, UInt16 refIdx, UInt32 varType) : refIdx(refIdx), variableType(varType)
+ScriptToken::ScriptToken(VariableInfo* varInfo, uint16_t refIdx, uint32_t varType) : refIdx(refIdx), variableType(varType)
 {
 	INC_TOKEN_COUNT
 	value.varInfo = varInfo;
@@ -119,7 +119,7 @@ ScriptToken::ScriptToken(VariableInfo* varInfo, UInt16 refIdx, UInt32 varType) :
 	}
 }
 
-ScriptToken::ScriptToken(CommandInfo* cmdInfo, UInt16 refIdx) : type(kTokenType_Command), refIdx(refIdx), variableType(Script::eVarType_Invalid)
+ScriptToken::ScriptToken(CommandInfo* cmdInfo, uint16_t refIdx) : type(kTokenType_Command), refIdx(refIdx), variableType(Script::eVarType_Invalid)
 {
 	INC_TOKEN_COUNT
 	value.cmd = cmdInfo;
@@ -171,7 +171,7 @@ ScriptToken::ScriptToken(ScriptEventList::Var* var) : refIdx(0), type(kTokenType
 	value.var = var;
 }
 
-ForEachContextToken::ForEachContextToken(UInt32 srcID, UInt32 iterID, UInt32 varType, ScriptEventList::Var* var)
+ForEachContextToken::ForEachContextToken(uint32_t srcID, uint32_t iterID, uint32_t varType, ScriptEventList::Var* var)
 : ScriptToken(kTokenType_ForEachContext, Script::eVarType_Invalid, 0), context(srcID, iterID, varType, var)
 {
 	value.formID = 0;
@@ -219,12 +219,12 @@ ScriptToken* ScriptToken::Create(ScriptToken* l, ScriptToken* r)
 	return new PairToken(l, r);
 }
 
-ScriptToken* ScriptToken::Create(UInt32 varID, UInt32 lbound, UInt32 ubound)
+ScriptToken* ScriptToken::Create(uint32_t varID, uint32_t lbound, uint32_t ubound)
 {
 	return new AssignableStringVarToken(varID, lbound, ubound);
 }
 
-ScriptToken* ScriptToken::Create(ArrayElementToken* elem, UInt32 lbound, UInt32 ubound)
+ScriptToken* ScriptToken::Create(ArrayElementToken* elem, uint32_t lbound, uint32_t ubound)
 {
 	if (elem && elem->GetString()) {
 		return new AssignableStringArrayElementToken(elem->GetOwningArrayID(), *elem->GetArrayKey(), lbound, ubound);
@@ -266,7 +266,7 @@ PairToken::PairToken(ScriptToken* l, ScriptToken* r) : ScriptToken(kTokenType_Pa
 		type = kTokenType_Invalid;
 }
 
-AssignableStringToken::AssignableStringToken(UInt32 _id, UInt32 lbound, UInt32 ubound) 
+AssignableStringToken::AssignableStringToken(uint32_t _id, uint32_t lbound, uint32_t ubound) 
 	:  ScriptToken(kTokenType_AssignableString, Script::eVarType_Invalid, 0), lower(lbound), upper(ubound), substring()
 {
 	value.arrID = _id;
@@ -275,7 +275,7 @@ AssignableStringToken::AssignableStringToken(UInt32 _id, UInt32 lbound, UInt32 u
 	}
 }
 
-AssignableStringVarToken::AssignableStringVarToken(UInt32 _id, UInt32 lbound, UInt32 ubound) : AssignableStringToken(_id, lbound, ubound)
+AssignableStringVarToken::AssignableStringVarToken(uint32_t _id, uint32_t lbound, uint32_t ubound) : AssignableStringToken(_id, lbound, ubound)
 {
 	StringVar* strVar = g_StringMap.Get(value.arrID);
 	if (strVar) {
@@ -284,7 +284,7 @@ AssignableStringVarToken::AssignableStringVarToken(UInt32 _id, UInt32 lbound, UI
 	}
 }
 
-AssignableStringArrayElementToken::AssignableStringArrayElementToken(UInt32 _id, const ArrayKey& _key, UInt32 lbound, UInt32 ubound)
+AssignableStringArrayElementToken::AssignableStringArrayElementToken(uint32_t _id, const ArrayKey& _key, uint32_t lbound, uint32_t ubound)
 	: AssignableStringToken(_id, lbound, ubound), key(_key)
 {
 	std::string elemStr;
@@ -298,7 +298,7 @@ bool AssignableStringVarToken::Assign(const char* str)
 {
 	StringVar* strVar = g_StringMap.Get(value.arrID);
 	if (strVar) {
-		UInt32 len = strVar->GetLength();
+		uint32_t len = strVar->GetLength();
 		if (lower <= upper && upper < len) {
 			strVar->Erase(lower, upper-lower + 1);
 			if (str) {
@@ -375,13 +375,13 @@ const char* ScriptToken::GetString() const
 	return result ? result : empty;
 }
 
-UInt32 ScriptToken::GetFormID() const
+uint32_t ScriptToken::GetFormID() const
 {
 	if (type == kTokenType_Form)
 		return value.formID;
 #if RUNTIME
 	else if (type == kTokenType_RefVar && value.var)
-		return *(UInt64*)(&value.var->data);
+		return *(uint64_t*)(&value.var->data);
 #endif
 	else if (type == kTokenType_Number)
 		return value.formID;
@@ -398,7 +398,7 @@ TESForm* ScriptToken::GetTESForm() const
 	if (type == kTokenType_Form)
 		return LookupFormByID(value.formID);
 	else if (type == kTokenType_RefVar && value.var)
-		return LookupFormByID(*((UInt64*)(&value.var->data)));
+		return LookupFormByID(*((uint64_t*)(&value.var->data)));
 #endif
 
 	if (type == kTokenType_Ref && value.refVar)
@@ -496,9 +496,9 @@ CommandInfo* ScriptToken::GetCommandInfo() const
 #if RUNTIME
 
 
-UInt32 ScriptToken::GetActorValue() const
+uint32_t ScriptToken::GetActorValue() const
 {
-	UInt32 actorVal = eActorVal_NoActorValue;
+	uint32_t actorVal = eActorVal_NoActorValue;
 	if (CanConvertTo(kTokenType_Number)) {
 		int num = GetNumber();
 		if (num >= 0 && num <= eActorVal_FalloutMax) {
@@ -539,9 +539,9 @@ char ScriptToken::GetAxis() const
 	return axis;
 }
 
-UInt32 ScriptToken::GetSex() const
+uint32_t ScriptToken::GetSex() const
 {
-	UInt32 sex = -1;
+	uint32_t sex = -1;
 	const char* str = GetString();
 	if (str) {
 		if (!_stricmp(str, "male")) {
@@ -565,7 +565,7 @@ EffectSetting* ScriptToken::GetEffectSetting() const
 	//	const char* str = GetString();
 	//	if (str) {
 	//		if (strlen(str) == 4) {
-	//			UInt32 code = *((UInt32*)str);
+	//			uint32_t code = *((uint32_t*)str);
 	//			eff = EffectSetting::EffectSettingForC(code);
 	//		}
 	//	}
@@ -577,10 +577,10 @@ EffectSetting* ScriptToken::GetEffectSetting() const
 	return eff;
 }
 
-UInt32 ScriptToken::GetAnimGroup() const
+uint32_t ScriptToken::GetAnimGroup() const
 {
-	UInt32 group = 0xFF;
-	//UInt32 group = TESAnimGroup::kAnimGroup_Max;
+	uint32_t group = 0xFF;
+	//uint32_t group = TESAnimGroup::kAnimGroup_Max;
 	//const char* str = GetString();
 	//if (str) {
 	//	group = TESAnimGroup::AnimGroupForString(str);
@@ -616,7 +616,7 @@ ScriptToken* ScriptToken::Read(ExpressionEvaluator* context)
 
 Token_Type ScriptToken::ReadFrom(ExpressionEvaluator* context)
 {
-	UInt8 typeCode = context->ReadByte();
+	uint8_t typeCode = context->ReadByte();
 
 	switch (typeCode)
 	{
@@ -678,7 +678,7 @@ Token_Type ScriptToken::ReadFrom(ExpressionEvaluator* context)
 		{
 			type = kTokenType_Command;
 			refIdx = context->Read16();
-			UInt16 opcode = context->Read16();
+			uint16_t opcode = context->Read16();
 			value.cmd = g_scriptCommands.GetByOpcode(opcode);
 			if (!value.cmd)
 				type = kTokenType_Invalid;
@@ -720,7 +720,7 @@ Token_Type ScriptToken::ReadFrom(ExpressionEvaluator* context)
 				}
 			}
 
-			UInt16 varIdx = context->Read16();
+			uint16_t varIdx = context->Read16();
 			value.var = NULL;
 			if (eventList)
 				value.var = eventList->GetVariable(varIdx);
@@ -776,16 +776,16 @@ bool ScriptToken::Write(ScriptLineBuffer* buf)
 			}
 			else		// unary- compiled as operator. all numeric values in scripts are positive.
 			{
-				UInt32 val = value.num;
+				uint32_t val = value.num;
 				if (val < 0x100)
 				{
 					buf->WriteByte(TokenTypeToCode(kTokenType_Byte));
-					return buf->WriteByte((UInt8)val);
+					return buf->WriteByte((uint8_t)val);
 				}
 				else if (val < 0x10000)
 				{
 					buf->WriteByte(TokenTypeToCode(kTokenType_Short));
-					return buf->Write16((UInt16)val);
+					return buf->Write16((uint16_t)val);
 				}
 				else
 				{
@@ -856,7 +856,7 @@ double ScriptToken::GetNumericRepresentation(bool bFromHex)
 			result = strtod(str, NULL);
 		else
 		{
-			UInt32 hexInt = 0;
+			uint32_t hexInt = 0;
 			sscanf_s(str, "%x", &hexInt);
 			result = (double)hexInt;
 		}
@@ -882,7 +882,7 @@ bool ArrayElementToken::CanConvertTo(Token_Type to) const
 	else if (to == kTokenType_ArrayElement)
 		return true;
 
-	UInt8 elemType = g_ArrayMap.GetElementType(GetOwningArrayID(), key);
+	uint8_t elemType = g_ArrayMap.GetElementType(GetOwningArrayID(), key);
 	if (elemType == kDataType_Invalid)
 		return false;
 
@@ -918,9 +918,9 @@ const char* ArrayElementToken::GetString() const
 	return out ? out : empty;
 }
 
-UInt32 ArrayElementToken::GetFormID() const
+uint32_t ArrayElementToken::GetFormID() const
 {
-	UInt32 out = 0;
+	uint32_t out = 0;
 	g_ArrayMap.GetElementFormID(GetOwningArrayID(), key, &out);
 	return out;
 }
@@ -934,7 +934,7 @@ TESForm* ArrayElementToken::GetTESForm() const
 
 bool ArrayElementToken::GetBool() const
 {
-	UInt8 elemType = g_ArrayMap.GetElementType(GetOwningArrayID(), key);
+	uint8_t elemType = g_ArrayMap.GetElementType(GetOwningArrayID(), key);
 	if (elemType == kDataType_Numeric)
 	{
 		double out = 0.0;
@@ -943,7 +943,7 @@ bool ArrayElementToken::GetBool() const
 	}
 	else if (elemType == kDataType_Form)
 	{
-		UInt32 out = 0;
+		uint32_t out = 0;
 		g_ArrayMap.GetElementFormID(GetOwningArrayID(), key, &out);
 		return out ? true : false;
 	}
@@ -1054,7 +1054,7 @@ Token_Type kConversions_AssignableString[] =
 struct Operand
 {
 	Token_Type	* rules;
-	UInt8		numRules;
+	uint8_t		numRules;
 };
 
 // Operand definitions
@@ -1097,7 +1097,7 @@ bool CanConvertOperand(Token_Type from, Token_Type to)
 		return false;
 
 	Operand* op = &s_operands[from];
-	for (UInt32 i = 0; i < op->numRules; i++)
+	for (uint32_t i = 0; i < op->numRules; i++)
 	{
 		if (op->rules[i] == to)
 			return true;
@@ -1109,7 +1109,7 @@ bool CanConvertOperand(Token_Type from, Token_Type to)
 // Operator
 Token_Type Operator::GetResult(Token_Type lhs, Token_Type rhs)
 {
-	for (UInt32 i = 0; i < numRules; i++)
+	for (uint32_t i = 0; i < numRules; i++)
 	{
 		OperationRule* rule = &rules[i];
 		if (CanConvertOperand(lhs, rule->lhs) && CanConvertOperand(rhs, rule->rhs))

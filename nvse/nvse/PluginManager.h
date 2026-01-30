@@ -16,23 +16,23 @@ public:
 
 	PluginInfo *	GetInfoByName(const char * name);
 	PluginInfo *	GetInfoFromHandle(PluginHandle handle);
-	PluginInfo *	GetInfoFromBase(UInt32 baseOpcode);
+	PluginInfo *	GetInfoFromBase(uint32_t baseOpcode);
 	const char *	GetPluginNameFromHandle(PluginHandle handle);
 
-	UInt32			GetNumPlugins(void);
-	UInt32			GetBaseOpcode(UInt32 idx);
-	PluginHandle	LookupHandleFromBaseOpcode(UInt32 baseOpcode);
+	uint32_t			GetNumPlugins(void);
+	uint32_t			GetBaseOpcode(uint32_t idx);
+	PluginHandle	LookupHandleFromBaseOpcode(uint32_t baseOpcode);
 	PluginHandle	LookupHandleFromName(const char* pluginName);
 	PluginHandle	LookupHandleFromPath(const char* pluginPath);
 
 	static bool			RegisterCommand(CommandInfo * _info);
 	static bool			RegisterTypedCommand(CommandInfo * _info, CommandReturnType retnType);
-	static void			SetOpcodeBase(UInt32 opcode);
-	static void *		QueryInterface(UInt32 id);
+	static void			SetOpcodeBase(uint32_t opcode);
+	static void *		QueryInterface(uint32_t id);
 	static PluginHandle	GetPluginHandle(void);
 	static const char *	GetFalloutDir();
 
-	static bool Dispatch_Message(PluginHandle sender, UInt32 messageType, void * data, UInt32 dataLen, const char* receiver);
+	static bool Dispatch_Message(PluginHandle sender, uint32_t messageType, void * data, uint32_t dataLen, const char* receiver);
 	static bool	RegisterListener(PluginHandle listener, const char* sender, NVSEMessagingInterface::EventCallback handler);
 
 private:
@@ -40,7 +40,7 @@ private:
 	{
 		HMODULE		handle;
 		PluginInfo	info;
-		UInt32		baseOpcode;
+		uint32_t		baseOpcode;
 
 		_NVSEPlugin_Query	query;
 		_NVSEPlugin_Load	load;

@@ -20,7 +20,7 @@ struct ScriptLocal;
 struct ItemEntryData;
 class InventoryRef;
 
-typedef UInt32	PluginHandle;	// treat this as an opaque type
+typedef uint32_t	PluginHandle;	// treat this as an opaque type
 
 enum
 {
@@ -60,13 +60,13 @@ struct ExpressionEvaluatorUtils;
 
 struct NVSEInterface
 {
-	UInt32	nvseVersion;
-	UInt32	runtimeVersion;
-	UInt32	editorVersion;
-	UInt32	isEditor;
+	uint32_t	nvseVersion;
+	uint32_t	runtimeVersion;
+	uint32_t	editorVersion;
+	uint32_t	isEditor;
 	bool	(* RegisterCommand)(CommandInfo * info);	// returns true for success, false for failure
-	void	(* SetOpcodeBase)(UInt32 opcode);
-	void *	(* QueryInterface)(UInt32 id);
+	void	(* SetOpcodeBase)(uint32_t opcode);
+	void *	(* QueryInterface)(uint32_t id);
 
 	// call during your Query or Load functions to get a PluginHandle uniquely identifying your plugin
 	// invalid if called at any other time, so call it once and save the result
@@ -79,7 +79,7 @@ struct NVSEInterface
 	const char* (* GetRuntimeDirectory)();
 
 	// Allows checking for nogore edition
-	UInt32	isNogore;
+	uint32_t	isNogore;
 
 	void		(*InitExpressionEvaluatorUtils)(ExpressionEvaluatorUtils *utils);
 
@@ -89,7 +89,7 @@ struct NVSEInterface
 	// Essentially, allows having multiple different versions of commands that scripts can opt into by specifying a plugin version to compile with.
 	// Notably useful to not break JIP ScriptRunner (SR) scripts when replacing the interface of an existing function, 
 	// ..since SR will assume to compile the oldest version of a func unless a more recent plugin version is specified.
-	bool	(*RegisterTypedCommandVersion)(CommandInfo* info, CommandReturnType retnType, UInt32 requiredPluginVersion);
+	bool	(*RegisterTypedCommandVersion)(CommandInfo* info, CommandReturnType retnType, uint32_t requiredPluginVersion);
 };
 
 struct NVSEConsoleInterface
@@ -99,7 +99,7 @@ struct NVSEConsoleInterface
 		kVersion = 3
 	};
 
-	UInt32	version;
+	uint32_t	version;
 
 	// return type changed from void to bool in kVersion == 2
 	bool	(* RunScriptLine)(const char * buf, TESObjectREFR * object);	// NULL acceptable for object parameter
@@ -136,18 +136,18 @@ struct NVSEStringVarInterface
 		kVersion = 1
 	};
 
-	UInt32		version;
+	uint32_t		version;
 
 	// The returned C-string is valid for as long as the string_var indicated by stringID remains unchanged.
 	// For example, the returned string pointer may become invalid if the string_var has to re-allocate when being set to another string value.
 	// To be safe, copy the returned C-string if you intend to keep it for some time.
-	const char* (* GetString)(UInt32 stringID);
+	const char* (* GetString)(uint32_t stringID);
 
 	// Passed C-string will be copied, so it is safe to delete it afterwards.
-	void		(* SetString)(UInt32 stringID, const char* newValue);
+	void		(* SetString)(uint32_t stringID, const char* newValue);
 
 	// Passed C-string will be copied, so it is safe to delete it afterwards.
-	UInt32		(* CreateString)(const char* value, void* owningScript);
+	uint32_t		(* CreateString)(const char* value, void* owningScript);
 
 	// (is RegisterStringVarInterface() in GameAPI.h)
 	void		(* Register)(NVSEStringVarInterface* intfc);
@@ -164,8 +164,8 @@ struct NVSEIOInterface
 		kVersion = 1
 	};
 
-	UInt32		version;
-	bool		(* IsKeyPressed)(UInt32 scancode);
+	uint32_t		version;
+	bool		(* IsKeyPressed)(uint32_t scancode);
 };
 
 /**** Messaging API docs ********************************************************************
@@ -200,8 +200,8 @@ struct NVSEMessagingInterface
 {
 	struct Message {
 		const char	* sender;
-		UInt32		type;
-		UInt32		dataLen;
+		uint32_t		type;
+		uint32_t		dataLen;
 		void		* data;
 	};
 
@@ -276,9 +276,9 @@ struct NVSEMessagingInterface
 		kMessage_OnFramePresent, // called when the game is about to present a frame
 	};
 
-	UInt32	version;
+	uint32_t	version;
 	bool	(* RegisterListener)(PluginHandle listener, const char* sender, EventCallback handler);
-	bool	(* Dispatch)(PluginHandle sender, UInt32 messageType, void * data, UInt32 dataLen, const char* receiver);
+	bool	(* Dispatch)(PluginHandle sender, uint32_t messageType, void * data, uint32_t dataLen, const char* receiver);
 };
 
 /**** array_var API **************************************************************************
@@ -371,7 +371,7 @@ struct NVSEArrayVarInterface
 			TESForm		* form;
 			double		num;
 		};
-		UInt8		type;
+		uint8_t		type;
 
 		friend class PluginAPI::ArrayAPI;
 		friend class ArrayVar;
@@ -405,13 +405,13 @@ struct NVSEArrayVarInterface
 			return *this;
 		}
 		bool IsValid() const { return type != kType_Invalid; }
-		UInt8 GetType() const { return type; }
+		uint8_t GetType() const { return type; }
 
 		const char* GetString() const  { return type == kType_String ? str : NULL; }
 		Array* GetArray() const  { return type == kType_Array ? arr : NULL; }
-		UInt32 GetArrayID() const { return type == kType_Array ? reinterpret_cast<UInt32>(arr) : 0; }
+		uint32_t GetArrayID() const { return type == kType_Array ? reinterpret_cast<uint32_t>(arr) : 0; }
 		TESForm * GetTESForm() const  { return type == kType_Form ? form : NULL; }
-		UInt32 GetFormID() const { return type == kType_Form ? (form ? form->refID : 0) : 0; }
+		uint32_t GetFormID() const { return type == kType_Form ? (form ? form->refID : 0) : 0; }
 		double GetNumber() const  { return type == kType_Numeric ? num : 0.0; }
 		bool Bool() const
 		{
@@ -448,9 +448,9 @@ struct NVSEArrayVarInterface
 		}
 	};
 
-	Array* (* CreateArray)(const Element* data, UInt32 size, Script* callingScript);
-	Array* (* CreateStringMap)(const char** keys, const NVSEArrayVarInterface::Element* values, UInt32 size, Script* callingScript);
-	Array* (* CreateMap)(const double* keys, const NVSEArrayVarInterface::Element* values, UInt32 size, Script* callingScript);
+	Array* (* CreateArray)(const Element* data, uint32_t size, Script* callingScript);
+	Array* (* CreateStringMap)(const char** keys, const NVSEArrayVarInterface::Element* values, uint32_t size, Script* callingScript);
+	Array* (* CreateMap)(const double* keys, const NVSEArrayVarInterface::Element* values, uint32_t size, Script* callingScript);
 
 	bool	(* AssignCommandResult)(Array* arr, double* dest);
 	void	(* SetElement)(Array* arr, const Element& key, const Element& value);
@@ -461,13 +461,13 @@ struct NVSEArrayVarInterface
 		(AppendElement(arr, Element(values)), ...);
 	}
 
-	UInt32	(* GetArraySize)(Array* arr);
-	Array*	(* LookupArrayByID)(UInt32 id);
+	uint32_t	(* GetArraySize)(Array* arr);
+	Array*	(* LookupArrayByID)(uint32_t id);
 	bool	(* GetElement)(Array* arr, const Element& key, Element& outElement);
 	bool	(* GetElements)(Array* arr, Element* elements, Element* keys);
 
 	// version 2
-	UInt32	(* GetArrayPacked)(Array* arr);
+	uint32_t	(* GetArrayPacked)(Array* arr);
 
 	enum ContainerTypes
 	{
@@ -504,13 +504,13 @@ struct NVSECommandTableInterface
 		kVersion = 2
 	};
 
-	UInt32	version;
+	uint32_t	version;
 	const CommandInfo*	(* Start)(void);
 	const CommandInfo*	(* End)(void);
-	const CommandInfo*	(* GetByOpcode)(UInt32 opcode);
+	const CommandInfo*	(* GetByOpcode)(uint32_t opcode);
 	const CommandInfo*	(* GetByName)(const char* name);
-	UInt32				(* GetReturnType)(const CommandInfo* cmd);		// return type enum defined in CommandTable.h
-	UInt32				(* GetRequiredNVSEVersion)(const CommandInfo* cmd);
+	uint32_t				(* GetReturnType)(const CommandInfo* cmd);		// return type enum defined in CommandTable.h
+	uint32_t				(* GetRequiredNVSEVersion)(const CommandInfo* cmd);
 	const PluginInfo*	(* GetParentPlugin)(const CommandInfo* cmd);	// returns a pointer to the PluginInfo of the NVSE plugin that adds the command, if any. returns NULL otherwise
 	const PluginInfo*	(* GetPluginInfoByName)(const char *pluginName);	// Returns a pointer to the PluginInfo of the NVSE plugin of the specified name; returns NULL is the plugin is not loaded.
 	const PluginInfo*	(* GetPluginInfoByDLLName)(const char* dllName);	// Returns a pointer to the PluginInfo of the NVSE plugin with the specified DLL name; returns NULL if the plugin is not loaded.
@@ -528,7 +528,7 @@ struct NVSECommandTableInterface
  *
  *	Up to 15 arguments can be passed in, of type
  *	int, float, or char*; support for passing arrays will be implemented later.
- *	To pass a float, it must be cast like so: *(UInt32*)&myFloat.
+ *	To pass a float, it must be cast like so: *(uint32_t*)&myFloat.
  *	(xNVSE 6.1.2 raised the max args from 5 -> 10)
  *	(xNVSE 6.1.6 raised the max args from 10 -> 15)
  *
@@ -570,15 +570,15 @@ struct NVSEScriptInterface
 	};
 
 	bool	(* CallFunction)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container,
-		NVSEArrayVarInterface::Element * result, UInt8 numArgs, ...);
+		NVSEArrayVarInterface::Element * result, uint8_t numArgs, ...);
 
-	UInt32	(* GetFunctionParams)(Script* funcScript, UInt8* paramTypesOut);
-	bool	(* ExtractArgsEx)(ParamInfo * paramInfo, void * scriptDataIn, UInt32 * scriptDataOffset, Script * scriptObj,
+	uint32_t	(* GetFunctionParams)(Script* funcScript, uint8_t* paramTypesOut);
+	bool	(* ExtractArgsEx)(ParamInfo * paramInfo, void * scriptDataIn, uint32_t * scriptDataOffset, Script * scriptObj,
 		ScriptEventList * eventList, ...);
-	bool	(* ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, ParamInfo * paramInfo, void * scriptDataIn, 
-		UInt32 * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, UInt32 maxParams, ...);
+	bool	(* ExtractFormatStringArgs)(uint32_t fmtStringPos, char* buffer, ParamInfo * paramInfo, void * scriptDataIn, 
+		uint32_t * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, uint32_t maxParams, ...);
 
-	bool	(*CallFunctionAlt)(Script *funcScript, TESObjectREFR *callingObj, UInt8 numArgs, ...);
+	bool	(*CallFunctionAlt)(Script *funcScript, TESObjectREFR *callingObj, uint8_t numArgs, ...);
 
 	// Compile a partial script without a script name
 	// Example:
@@ -613,7 +613,7 @@ struct NVSEDataInterface
 		kVersion = 3
 	};
 
-	UInt32		version;
+	uint32_t		version;
 	enum {
 		kNVSEData_DIHookControl = 1,
 		kNVSEData_ArrayMap,
@@ -622,7 +622,7 @@ struct NVSEDataInterface
 
 		kNVSEData_SingletonMax,
 	};
-	void * (* GetSingleton)(UInt32 singletonID);
+	void * (* GetSingleton)(uint32_t singletonID);
 	enum  {
 		kNVSEData_InventoryReferenceCreate = 1,
 		kNVSEData_InventoryReferenceGetForRefID,
@@ -651,13 +651,13 @@ struct NVSEDataInterface
 		
 		kNVSEData_FuncMax,
 	};
-	void * (* GetFunc)(UInt32 funcID);
+	void * (* GetFunc)(uint32_t funcID);
 	enum  {
 		kNVSEData_NumPreloadMods = 1,
 
 		kNVSEData_DataMax,
 	};
-	void * (* GetData)(UInt32 dataID);
+	void * (* GetData)(uint32_t dataID);
 	// v2: xNVSE caches script data for additional performance and short circuit evaluation, if you are manipulating script data then you can clear the cache 
 	void (*ClearScriptDataCache)();
 	// v3
@@ -693,7 +693,7 @@ struct NVSEDataInterface
 // PluginFormExtraData::Remove(s_nvseDataApi, actor, MyFormExtraData::GetName());
 //
 // Example enumeration:
-// UInt32 count = PluginFormExtraData::GetAllExtraData(s_nvseDataApi, actor, nullptr); // get the count first
+// uint32_t count = PluginFormExtraData::GetAllExtraData(s_nvseDataApi, actor, nullptr); // get the count first
 // PluginFormExtraData** data = new PluginFormExtraData*[count]; // allocate an array of pointers
 // PluginFormExtraData::GetAllExtraData(s_nvseDataApi, actor, data); // retrieve the data
 // delete[] data; // clean up the array
@@ -701,7 +701,7 @@ class PluginFormExtraData
 {
 public:
 	NiFixedString	name;
-	UInt32			refCount = 0;
+	uint32_t			refCount = 0;
 
 	PluginFormExtraData(const NiFixedString& aName) : name(aName), refCount(0) {}
 	virtual ~PluginFormExtraData() {};
@@ -751,8 +751,8 @@ public:
 
 	// Retrieves all extra data from a form.
 	// First query the data count with an empty outData pointer, then call again with an appropriately sized outData array.
-	static inline UInt32 GetAllExtraData(NVSEDataInterface* dataApi, const TESForm* form, PluginFormExtraData** outData) {
-		static auto* getAll = (UInt32(*)(const TESForm*, PluginFormExtraData**)) dataApi->GetFunc(NVSEDataInterface::kNVSEData_FormExtraDataGetAll);
+	static inline uint32_t GetAllExtraData(NVSEDataInterface* dataApi, const TESForm* form, PluginFormExtraData** outData) {
+		static auto* getAll = (uint32_t(*)(const TESForm*, PluginFormExtraData**)) dataApi->GetFunc(NVSEDataInterface::kNVSEData_FormExtraDataGetAll);
 		return getAll(form, outData);
 	}
 };
@@ -761,9 +761,9 @@ public:
 
 // Inventory Reference function pointer typedefs:
 typedef InventoryRef* (__stdcall* _InventoryReferenceCreate)(TESObjectREFR* container, const ItemEntryData& data, bool bValidate);
-typedef InventoryRef* (*_InventoryReferenceGetForRefID)(UInt32 refID);
+typedef InventoryRef* (*_InventoryReferenceGetForRefID)(uint32_t refID);
 typedef InventoryRef* (*_InventoryReferenceGetRefBySelf)(InventoryRef* self);
-typedef TESObjectREFR* (__stdcall* _InventoryReferenceCreateEntry)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
+typedef TESObjectREFR* (__stdcall* _InventoryReferenceCreateEntry)(TESObjectREFR* container, TESForm* itemForm, int32_t countDelta, ExtraDataList* xData);
 
 // Lambda function pointer typedefs:
 typedef void (*_LambdaDeleteAllForScript)(Script* parentScript);
@@ -773,7 +773,7 @@ typedef bool (*_IsScriptLambda)(Script* parentScript);
 
 // Script-related function pointer typedefs:
 typedef bool (*_HasScriptCommand)(Script* script, CommandInfo* info, CommandInfo* eventBlock);
-typedef bool (*_DecompileScript)(Script* script, SInt32 lineNumber, char* buffer, UInt32 bufferSize);
+typedef bool (*_DecompileScript)(Script* script, int32_t lineNumber, char* buffer, uint32_t bufferSize);
 
 #endif
 
@@ -858,23 +858,23 @@ struct NVSESerializationInterface
 
 	typedef void (* EventCallback)(void * reserved);
 
-	UInt32	version;
+	uint32_t	version;
 	void	(* SetSaveCallback)(PluginHandle plugin, EventCallback callback);
 	void	(* SetLoadCallback)(PluginHandle plugin, EventCallback callback);
 	void	(* SetNewGameCallback)(PluginHandle plugin, EventCallback callback);
 
-	bool	(* WriteRecord)(UInt32 type, UInt32 version, const void * buf, UInt32 length);
-	bool	(* OpenRecord)(UInt32 type, UInt32 version);
-	bool	(* WriteRecordData)(const void * buf, UInt32 length);
+	bool	(* WriteRecord)(uint32_t type, uint32_t version, const void * buf, uint32_t length);
+	bool	(* OpenRecord)(uint32_t type, uint32_t version);
+	bool	(* WriteRecordData)(const void * buf, uint32_t length);
 
-	bool	(* GetNextRecordInfo)(UInt32 * type, UInt32 * version, UInt32 * length);
-	UInt32	(* ReadRecordData)(void * buf, UInt32 length);
+	bool	(* GetNextRecordInfo)(uint32_t * type, uint32_t * version, uint32_t * length);
+	uint32_t	(* ReadRecordData)(void * buf, uint32_t length);
 
 	// take a refid as stored in the loaded save file and resolve it using the currently
 	// loaded list of mods. All refids stored in a save file must be run through this
 	// function to account for changing mod lists. This returns true on success, and false
 	// if the mod owning the RefID was unloaded.
-	bool	(* ResolveRefID)(UInt32 refID, UInt32 * outRefID);
+	bool	(* ResolveRefID)(uint32_t refID, uint32_t * outRefID);
 
 	void	(* SetPreLoadCallback)(PluginHandle plugin, EventCallback callback);
 
@@ -882,19 +882,19 @@ struct NVSESerializationInterface
 	const char* (* GetSavePath)();
 
 	// Peeks at the data without interfiring with the current position
-	UInt32	(* PeekRecordData)(void * buf, UInt32 length);
+	uint32_t	(* PeekRecordData)(void * buf, uint32_t length);
 
-	void	(*WriteRecord8)(UInt8 inData);
-	void	(*WriteRecord16)(UInt16 inData);
-	void	(*WriteRecord32)(UInt32 inData);
+	void	(*WriteRecord8)(uint8_t inData);
+	void	(*WriteRecord16)(uint16_t inData);
+	void	(*WriteRecord32)(uint32_t inData);
 	void	(*WriteRecord64)(const void *inData);
 
-	UInt8	(*ReadRecord8)();
-	UInt16	(*ReadRecord16)();
-	UInt32	(*ReadRecord32)();
+	uint8_t	(*ReadRecord8)();
+	uint16_t	(*ReadRecord16)();
+	uint32_t	(*ReadRecord32)();
 	void	(*ReadRecord64)(void *outData);
 
-	void	(*SkipNBytes)(UInt32 byteNum);
+	void	(*SkipNBytes)(uint32_t byteNum);
 };
 
 #ifdef RUNTIME
@@ -934,7 +934,7 @@ struct NVSEEventManagerInterface
 	typedef void (*NativeEventHandler)(TESObjectREFR* thisObj, void* parameters);
 
 	// Mostly used for filtering information.
-	enum ParamType : UInt8
+	enum ParamType : uint8_t
 	{
 		eParamType_Float = 0,
 		eParamType_Int,
@@ -990,7 +990,7 @@ struct NVSEEventManagerInterface
 		return pType;
 	}
 
-	enum EventFlags : UInt32
+	enum EventFlags : uint32_t
 	{
 		kFlags_None = 0,
 
@@ -1020,7 +1020,7 @@ struct NVSEEventManagerInterface
 
 	// Registers a new event which can be dispatched to scripts and plugins.
 	// Returns false if event with name already exists.
-	bool (*RegisterEvent)(const char* name, UInt8 numParams, ParamType* paramTypes, EventFlags flags);
+	bool (*RegisterEvent)(const char* name, uint8_t numParams, ParamType* paramTypes, EventFlags flags);
 
 	// Dispatch an event that has been registered with RegisterEvent.
 	// Variadic arguments are passed as parameters to script / function.
@@ -1068,7 +1068,7 @@ struct NVSEEventManagerInterface
 	// Invalid priority (0) is implicitly passed, so that all handlers for the event, regardless of priority, will be removed.
 	bool (*RemoveNativeEventHandler)(const char* eventName, NativeEventHandler func);
 
-	bool (*RegisterEventWithAlias)(const char* name, const char* alias, UInt8 numParams, ParamType* paramTypes, EventFlags flags);
+	bool (*RegisterEventWithAlias)(const char* name, const char* alias, uint8_t numParams, ParamType* paramTypes, EventFlags flags);
 
 	// If passed as non-null, will be called after all handlers have been dispatched.
 	// The "ThreadSafe" dispatch functions can delay the dispatch by a frame, hence why this callback is needed.
@@ -1107,14 +1107,14 @@ struct NVSEEventManagerInterface
 	// All '...ToIgnore' parameters are optional, i.e they can be nullptr and the 'num...' args can be set to 0.
 	// 'scriptsToIgnore' can be nullptr, a Script*, or a formlist.
 	bool (*IsEventHandlerFirst)(const char* eventName, NativeEventHandler func, int startPriority,
-		TESForm** scriptsToIgnore, UInt32 numScriptsToIgnore,
-		const char** pluginsToIgnore, UInt32 numPluginsToIgnore,
-		const char** pluginHandlersToIgnore, UInt32 numPluginHandlersToIgnore);
+		TESForm** scriptsToIgnore, uint32_t numScriptsToIgnore,
+		const char** pluginsToIgnore, uint32_t numPluginsToIgnore,
+		const char** pluginHandlersToIgnore, uint32_t numPluginHandlersToIgnore);
 
 	bool (*IsEventHandlerLast)(const char* eventName, NativeEventHandler func, int startPriority,
-		TESForm** scriptsToIgnore, UInt32 numScriptsToIgnore,
-		const char** pluginsToIgnore, UInt32 numPluginsToIgnore,
-		const char** pluginHandlersToIgnore, UInt32 numPluginHandlersToIgnore);
+		TESForm** scriptsToIgnore, uint32_t numScriptsToIgnore,
+		const char** pluginsToIgnore, uint32_t numPluginsToIgnore,
+		const char** pluginHandlersToIgnore, uint32_t numPluginHandlersToIgnore);
 
 	// Returns a Map-type array with all the priority-conflicting event handlers, i.e the events that will run before the 'func' handler. 
 	// Each key in the map is a priority, and each value is a 2-element array containing:
@@ -1125,14 +1125,14 @@ struct NVSEEventManagerInterface
 	// All '...ToIgnore' parameters are optional, i.e they can be nullptr and the 'num...' args can be set to 0.
 	// Returns nullptr if 'func' is not found at 'priority'. It can appear elsewhere and will be ignored.
 	NVSEArrayVarInterface::Array* (*GetHigherPriorityEventHandlers)(const char* eventName, NativeEventHandler func, int priority,
-		TESForm** scriptsToIgnore, UInt32 numScriptsToIgnore,
-		const char** pluginsToIgnore, UInt32 numPluginsToIgnore,
-		const char** pluginHandlersToIgnore, UInt32 numPluginHandlersToIgnore);
+		TESForm** scriptsToIgnore, uint32_t numScriptsToIgnore,
+		const char** pluginsToIgnore, uint32_t numPluginsToIgnore,
+		const char** pluginHandlersToIgnore, uint32_t numPluginHandlersToIgnore);
 
 	NVSEArrayVarInterface::Array* (*GetLowerPriorityEventHandlers)(const char* eventName, NativeEventHandler func, int priority,
-		TESForm** scriptsToIgnore, UInt32 numScriptsToIgnore,
-		const char** pluginsToIgnore, UInt32 numPluginsToIgnore,
-		const char** pluginHandlersToIgnore, UInt32 numPluginHandlersToIgnore);
+		TESForm** scriptsToIgnore, uint32_t numScriptsToIgnore,
+		const char** pluginsToIgnore, uint32_t numPluginsToIgnore,
+		const char** pluginHandlersToIgnore, uint32_t numPluginHandlersToIgnore);
 };
 #endif
 
@@ -1200,9 +1200,9 @@ struct PluginInfo
 		kInfoVersion = 1
 	};
 
-	UInt32			infoVersion;
+	uint32_t			infoVersion;
 	const char *	name;
-	UInt32			version;
+	uint32_t			version;
 };
 
 typedef bool (* _NVSEPlugin_Query)(const NVSEInterface * nvse, PluginInfo * info);
@@ -1237,26 +1237,26 @@ struct ExpressionEvaluatorUtils
 	void*					(__stdcall	*CreateExpressionEvaluator)(COMMAND_ARGS);
 	void					(__fastcall *DestroyExpressionEvaluator)(void *expEval);
 	bool					(__fastcall *ExtractArgsEval)(void *expEval);
-	UInt8					(__fastcall *GetNumArgs)(void *expEval);
-	PluginScriptToken*		(__fastcall *GetNthArg)(void *expEval, UInt32 argIdx);
+	uint8_t					(__fastcall *GetNumArgs)(void *expEval);
+	PluginScriptToken*		(__fastcall *GetNthArg)(void *expEval, uint32_t argIdx);
 
-	UInt8					(__fastcall *ScriptTokenGetType)(PluginScriptToken *scrToken);
+	uint8_t					(__fastcall *ScriptTokenGetType)(PluginScriptToken *scrToken);
 	double					(__fastcall *ScriptTokenGetFloat)(PluginScriptToken *scrToken);
 	bool					(__fastcall *ScriptTokenGetBool)(PluginScriptToken *scrToken);
-	UInt32					(__fastcall *ScriptTokenGetFormID)(PluginScriptToken *scrToken);
+	uint32_t					(__fastcall *ScriptTokenGetFormID)(PluginScriptToken *scrToken);
 	TESForm*				(__fastcall *ScriptTokenGetTESForm)(PluginScriptToken *scrToken);
 	const char*				(__fastcall *ScriptTokenGetString)(PluginScriptToken *scrToken);
-	UInt32					(__fastcall *ScriptTokenGetArrayID)(PluginScriptToken *scrToken);
-	UInt32					(__fastcall *ScriptTokenGetActorValue)(PluginScriptToken *scrToken);
+	uint32_t					(__fastcall *ScriptTokenGetArrayID)(PluginScriptToken *scrToken);
+	uint32_t					(__fastcall *ScriptTokenGetActorValue)(PluginScriptToken *scrToken);
 	ScriptLocal*			(__fastcall *ScriptTokenGetScriptVar)(PluginScriptToken *scrToken);
 	const PluginTokenPair*	(__fastcall *ScriptTokenGetPair)(PluginScriptToken *scrToken);
 	const PluginTokenSlice*	(__fastcall *ScriptTokenGetSlice)(PluginScriptToken *scrToken);
-	UInt32                  (__fastcall *ScriptTokenGetAnimationGroup)(PluginScriptToken* scrToken);
+	uint32_t                  (__fastcall *ScriptTokenGetAnimationGroup)(PluginScriptToken* scrToken);
 
-	void					(__fastcall *SetExpectedReturnType)(void* expEval, UInt8 type);
+	void					(__fastcall *SetExpectedReturnType)(void* expEval, uint8_t type);
 	void					(__fastcall *AssignCommandResultFromElement)(void* expEval, NVSEArrayVarInterface::Element &result);
 	void					(__fastcall *ScriptTokenGetElement)(PluginScriptToken* scrToken, NVSEArrayVarInterface::Element &outElem);
-	bool					(__fastcall *ScriptTokenCanConvertTo)(PluginScriptToken* scrToken, UInt8 toType);
+	bool					(__fastcall *ScriptTokenCanConvertTo)(PluginScriptToken* scrToken, uint8_t toType);
 
 	bool					(__fastcall *ExtractArgsV)(void* expEval, va_list list);
 
@@ -1287,12 +1287,12 @@ public:
 		return expEval && s_expEvalUtils.ExtractArgsEval(expEval);
 	}
 
-	UInt8 NumArgs()
+	uint8_t NumArgs()
 	{
 		return s_expEvalUtils.GetNumArgs(expEval);
 	}
 
-	PluginScriptToken *GetNthArg(UInt32 argIdx)
+	PluginScriptToken *GetNthArg(uint32_t argIdx)
 	{
 		return s_expEvalUtils.GetNthArg(expEval, argIdx);
 	}
@@ -1331,12 +1331,12 @@ public:
 struct PluginScriptToken
 {
 #if RUNTIME
-	UInt8 GetType()
+	uint8_t GetType()
 	{
 		return s_expEvalUtils.ScriptTokenGetType(this);
 	}
 
-	bool CanConvertTo(UInt8 toType)
+	bool CanConvertTo(uint8_t toType)
 	{
 		return s_expEvalUtils.ScriptTokenCanConvertTo(this, toType);
 	}
@@ -1356,7 +1356,7 @@ struct PluginScriptToken
 		return s_expEvalUtils.ScriptTokenGetBool(this);
 	}
 
-	UInt32 GetFormID()
+	uint32_t GetFormID()
 	{
 		return s_expEvalUtils.ScriptTokenGetFormID(this);
 	}
@@ -1376,12 +1376,12 @@ struct PluginScriptToken
 		return reinterpret_cast<NVSEArrayVarInterface::Array*>(s_expEvalUtils.ScriptTokenGetArrayID(this));
 	}
 
-	UInt32 GetActorValue()
+	uint32_t GetActorValue()
 	{
 		return s_expEvalUtils.ScriptTokenGetActorValue(this);
 	}
 
-	UInt32 GetAnimationGroup()
+	uint32_t GetAnimationGroup()
 	{
 		return s_expEvalUtils.ScriptTokenGetAnimationGroup(this);
 	}
@@ -1474,14 +1474,14 @@ public:
 		}
 
 		auto commandInfo = CommandInfo{
-			name, altName, 0, "", refRequired, static_cast<UInt16>(params.size()), paramCopy, fn, parse, nullptr, 0
+			name, altName, 0, "", refRequired, static_cast<uint16_t>(params.size()), paramCopy, fn, parse, nullptr, 0
 		};
 		scriptInterface->RegisterTypedCommand(&commandInfo, returnType);
 	}
 };
 
 namespace TogglePlayerControlsAlt {
-	enum DisabledControlsFlags : UInt32
+	enum DisabledControlsFlags : uint32_t
 	{
 		//== Vanilla flags
 		// Order is different than the order which vanilla DisablePlayerControls receives its args
@@ -1516,7 +1516,7 @@ namespace TogglePlayerControlsAlt {
 		kAllFlags = kVanillaFlags | kNewFlags
 	};
 
-	enum CheckDisabledHow : UInt8
+	enum CheckDisabledHow : uint8_t
 	{
 		ByCallingMod = 0,
 		ByAnyMod,
@@ -1537,12 +1537,12 @@ struct NVSETogglePlayerControlsInterface
 	 *
 	 * @param modName	Identifies the mod disabling a control. This pointer is assumed to never go invalid.
 	 */
-	void (__fastcall* DisablePlayerControlsAlt)(UInt32 flagsToAdd, const char* modName);
-	void (__fastcall* EnablePlayerControlsAlt)(UInt32 flagsToRemove, const char* modName);
+	void (__fastcall* DisablePlayerControlsAlt)(uint32_t flagsToAdd, const char* modName);
+	void (__fastcall* EnablePlayerControlsAlt)(uint32_t flagsToRemove, const char* modName);
 	// @param modName	Can be nullptr if `disabledHow` != CheckDisabledHow::ByCallingMod
 	bool (__cdecl* GetPlayerControlsDisabledAlt)(TogglePlayerControlsAlt::CheckDisabledHow disabledHow,
-		UInt32 flagsToCheck, const char* modName);
+		uint32_t flagsToCheck, const char* modName);
 	// Instead of checking if specific flags are checked, returns the flags directly.
-	UInt32 (__fastcall* GetDisabledPlayerControls)(TogglePlayerControlsAlt::CheckDisabledHow disabledHow,
+	uint32_t (__fastcall* GetDisabledPlayerControls)(TogglePlayerControlsAlt::CheckDisabledHow disabledHow,
 		const char* modName);
 };

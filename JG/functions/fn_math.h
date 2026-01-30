@@ -22,7 +22,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCamFOV, , 0, 1, kParams_OneInt);
 
 
 
-void Cmd_GetPlayerCamFOV(UInt32 worldOr1stOrScene, double* result) {
+void Cmd_GetPlayerCamFOV(uint32_t worldOr1stOrScene, double* result) {
 	if (!g_thePlayer) return;
 	*result = worldOr1stOrScene ? g_thePlayer->firstPersonFOV : g_thePlayer->worldFOV;
 	if (worldOr1stOrScene > 1) {
@@ -35,7 +35,7 @@ void Cmd_GetPlayerCamFOV(UInt32 worldOr1stOrScene, double* result) {
 bool Cmd_GetPlayerCamFOV_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 worldOr1stOrScene = 0;
+	uint32_t worldOr1stOrScene = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &worldOr1stOrScene)) return true;
 	Cmd_GetPlayerCamFOV(worldOr1stOrScene, result);
 	return true;
@@ -45,7 +45,7 @@ bool Cmd_GetPlayerCamFOV_Execute(COMMAND_ARGS)
 bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	Cmd_GetPlayerCamFOV((UInt32) arg1, result);
+	Cmd_GetPlayerCamFOV((uint32_t) arg1, result);
 	return true;
 }
 
@@ -72,10 +72,10 @@ bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS)
 
 bool Cmd_GetRGBColor_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt32 r, g, b;
+	uint32_t r, g, b;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &r, &g, &b) && r <= 255 && g <= 255 && b <= 255) {
 		*result = ((r & 0xFF) << 16) + ((g & 0xFF) << 8) + (b & 0xFF);
-		if (IsConsoleMode()) Console_Print("0x%X", (UInt32)*result);
+		if (IsConsoleMode()) Console_Print("0x%X", (uint32_t)*result);
 	}
 	return true;
 }
@@ -291,7 +291,7 @@ bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float xIn = 0, yIn = 0, zIn = 0;
-	UInt32 HandleType = 0;
+	uint32_t HandleType = 0;
 	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
 	TESObjectREFR* refr = nullptr;
 
@@ -313,7 +313,7 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float xIn = 0, yIn = 0, zIn = 0;
-	UInt32 HandleType = 0;
+	uint32_t HandleType = 0;
 	NiPoint3 NiPosIn = { 0,0,0 };
 	TESObjectREFR* refr = nullptr;
 	ScriptVar* X_outS, * Y_outS, * Z_outS;
@@ -333,7 +333,7 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float xIn = 0, yIn = 0, zIn = 0;
-	UInt32 doGetLocal = 0;
+	uint32_t doGetLocal = 0;
 	char X_outS[VarNameSize], Y_outS[VarNameSize], Z_outS[VarNameSize];
 	TESObjectREFR* refr = nullptr;
 

@@ -12,14 +12,14 @@
 // Introduced to be available to plugin that needs to manipulate inventory
 
 typedef std::vector<ExtraContainerChanges::EntryData*> ExtraDataVec;
-typedef std::map<TESForm*, UInt32> ExtraContainerMap;
+typedef std::map<TESForm*, uint32_t> ExtraContainerMap;
 
 void PrintItemType(TESForm * form);
-TESForm* GetItemByIdx(TESObjectREFR* thisObj, UInt32 objIdx, SInt32* outNumItems);
-TESForm* GetItemByRefID(TESObjectREFR* thisObj, UInt32 refID, SInt32* outNumItems = NULL);
-TESForm* GetItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, UInt32 refID, float* outHealth, TESForm** outOwner, UInt32* outRank, SInt32* inOutIndex = NULL,
-	SInt32* outNumItems = NULL);	// returns the inOutIndex stack, or the first if it is NULL
-TESForm * SetFirstItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, UInt32 refID, SInt32 NumItems = 1, float Health = -1.0, TESForm* pOwner = NULL, UInt32 Rank = 0);
+TESForm* GetItemByIdx(TESObjectREFR* thisObj, uint32_t objIdx, int32_t* outNumItems);
+TESForm* GetItemByRefID(TESObjectREFR* thisObj, uint32_t refID, int32_t* outNumItems = NULL);
+TESForm* GetItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, uint32_t refID, float* outHealth, TESForm** outOwner, uint32_t* outRank, int32_t* inOutIndex = NULL,
+	int32_t* outNumItems = NULL);	// returns the inOutIndex stack, or the first if it is NULL
+TESForm * SetFirstItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, uint32_t refID, int32_t NumItems = 1, float Health = -1.0, TESForm* pOwner = NULL, uint32_t Rank = 0);
 
 class ExtraContainerInfo
 {
@@ -43,7 +43,7 @@ public:
 		return true;
 	}
 
-	bool IsValidFormCount(TESContainer::FormCount* formCount, SInt32& numObjects)
+	bool IsValidFormCount(TESContainer::FormCount* formCount, int32_t& numObjects)
 	{
 		if (formCount) {
 			numObjects = formCount->count;
@@ -55,7 +55,7 @@ public:
 			ExtraContainerMap::iterator it = m_map.find(pForm);
 			ExtraContainerMap::iterator itEnd = m_map.end();
 			if (it != itEnd) {
-				UInt32 index = it->second;
+				uint32_t index = it->second;
 				ExtraContainerChanges::EntryData* pXData = m_vec[index];
 				if (pXData) {
 					numObjects += pXData->countDelta;
@@ -76,8 +76,8 @@ public:
 	}
 
 	// returns the count of items left in the vector
-	UInt32 CountItems() {
-		UInt32 count = 0;
+	uint32_t CountItems() {
+		uint32_t count = 0;
 		ExtraDataVec::iterator itEnd = m_vec.end();
 		ExtraDataVec::iterator it = m_vec.begin();
 		while (it != itEnd) {
@@ -93,7 +93,7 @@ public:
 		return count;
 	}
 
-	ExtraContainerChanges::EntryData* GetNth(UInt32 n, UInt32 count) {
+	ExtraContainerChanges::EntryData* GetNth(uint32_t n, uint32_t count) {
 		ExtraDataVec::iterator itEnd = m_vec.end();
 		ExtraDataVec::iterator it = m_vec.begin();
 		while (it != itEnd) {
@@ -110,7 +110,7 @@ public:
 		return NULL;
 	}
 
-	ExtraContainerChanges::EntryData* GetRefID(SInt32 refID) {
+	ExtraContainerChanges::EntryData* GetRefID(int32_t refID) {
 		ExtraDataVec::iterator itEnd = m_vec.end();
 		ExtraDataVec::iterator it = m_vec.begin();
 		while (it != itEnd) {
@@ -135,7 +135,7 @@ public:
 
 	bool Accept(TESContainer::FormCount* formCount) const
 	{
-		SInt32 numObjects = 0; // not needed in this count
+		int32_t numObjects = 0; // not needed in this count
 		return m_info.IsValidFormCount(formCount, numObjects);
 	}
 };
@@ -143,14 +143,14 @@ public:
 class ContainerFindNth
 {
 	ExtraContainerInfo& m_info;
-	UInt32 m_findIndex;
-	UInt32 m_curIndex;
+	uint32_t m_findIndex;
+	uint32_t m_curIndex;
 public:
-	ContainerFindNth(ExtraContainerInfo& info, UInt32 findIndex) : m_info(info), m_findIndex(findIndex), m_curIndex(0) { }
+	ContainerFindNth(ExtraContainerInfo& info, uint32_t findIndex) : m_info(info), m_findIndex(findIndex), m_curIndex(0) { }
 
 	bool Accept(TESContainer::FormCount* formCount)
 	{
-		SInt32 numObjects = 0;
+		int32_t numObjects = 0;
 		if (m_info.IsValidFormCount(formCount, numObjects)) {
 			if (m_curIndex == m_findIndex) {
 				return true;
@@ -160,7 +160,7 @@ public:
 		return false;
 	}
 
-	UInt32 GetCurIdx() { return m_curIndex; }
+	uint32_t GetCurIdx() { return m_curIndex; }
 };
 
 class ContainerFindType
@@ -179,14 +179,14 @@ public:
 class ContainerFindRefId
 {
 	ExtraContainerInfo& m_info;
-	UInt32 m_findRefId;
-	UInt32 m_curIndex;
+	uint32_t m_findRefId;
+	uint32_t m_curIndex;
 public:
-	ContainerFindRefId(ExtraContainerInfo& info, SInt32 findRefId) : m_info(info), m_findRefId(findRefId), m_curIndex(0) { }
+	ContainerFindRefId(ExtraContainerInfo& info, int32_t findRefId) : m_info(info), m_findRefId(findRefId), m_curIndex(0) { }
 
 	bool Accept(TESContainer::FormCount* formCount)
 	{
-		SInt32 numObjects = 0;
+		int32_t numObjects = 0;
 		if (m_info.IsValidFormCount(formCount, numObjects)) {
 			if (formCount->form->refID == m_findRefId) {
 				return true;
@@ -196,10 +196,10 @@ public:
 		return false;
 	}
 
-	UInt32 GetCurIdx() { return m_curIndex; }
+	uint32_t GetCurIdx() { return m_curIndex; }
 };
 
 bool SameHealth(ExtraHealth* pXHealth, TESHealthForm* pHealth, float Health);
-bool SameOwner(ExtraOwnership* pXOwner, ExtraRank* pXRank, TESForm* pOwner, UInt32 Rank);
+bool SameOwner(ExtraOwnership* pXOwner, ExtraRank* pXRank, TESForm* pOwner, uint32_t Rank);
 
-TESForm * AddItemHealthPercentOwner(TESObjectREFR* thisObj, UInt32 refID, SInt32 NumItems = 1, float Health = 100.0, TESForm* pOwner = NULL, UInt32 Rank = 0);
+TESForm * AddItemHealthPercentOwner(TESObjectREFR* thisObj, uint32_t refID, int32_t NumItems = 1, float Health = 100.0, TESForm* pOwner = NULL, uint32_t Rank = 0);

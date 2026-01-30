@@ -22,13 +22,13 @@ public:
 	virtual void Unk_04(void);
 	virtual void Unk_05(void);
 
-	UInt32 type; // 04
+	uint32_t type; // 04
 	float unk08[4]; // 08
 	float bounds[3]; // 18
 	NiRefObject* unk24; // 24
 	NiRefObject* unk28; // 28
 	NiRefObject* unk2C; // 2C
-	UInt32 unk30; // 30
+	uint32_t unk30; // 30
 };
 
 // 34
@@ -46,7 +46,7 @@ public:
 	BGSPrimitiveBox();
 	~BGSPrimitiveBox();
 
-	UInt32 unk34[6]; // 34
+	uint32_t unk34[6]; // 34
 };
 
 // 34
@@ -60,18 +60,18 @@ public:
 struct DetectionData
 {
 	Actor* actor; // 00
-	UInt8 detectionLevel; // 04
-	UInt8 byte05; // 05
-	UInt8 byte06; // 06
-	UInt8 byte07; // 07
-	SInt32 detectionValue; // 08
+	uint8_t detectionLevel; // 04
+	uint8_t byte05; // 05
+	uint8_t byte06; // 06
+	uint8_t byte07; // 07
+	int32_t detectionValue; // 08
 	NiPoint3 detectionLocation; // 0C
 	float fDetectionTimestamp; // 18
-	UInt8 bForceResetLOSBuffer; // 1C
-	UInt8 byte1D; // 1D
+	uint8_t bForceResetLOSBuffer; // 1C
+	uint8_t byte1D; // 1D
 	bool inLOS; // 1E
-	UInt8 byte1F; // 1F
-	SInt32 detectionModSneak;
+	uint8_t byte1F; // 1F
+	int32_t detectionModSneak;
 };
 
 
@@ -80,12 +80,11 @@ class SkyObject
 {
 public:
 	SkyObject();
-	~SkyObject();
 
-	virtual SkyObject* Destroy(bool doFree);
-	virtual void Fn_01(void);
-	virtual void Fn_02(NiNode* niNode);
-	virtual void Update(Sky* sky, float value);
+	virtual				~SkyObject();
+	virtual NiNode*		GetRoot() const;
+	virtual void		Initialize(NiNode* apRoot);
+	virtual void		Update(Sky* apSky, float afValue);
 
 	NiNode* rootNode; // 04
 };
@@ -103,8 +102,8 @@ public:
 	BSFogProperty* fogProp; // 0C	Same as *0x11DEB00
 	NiRefObject* object10; // 10
 	NiRefObject* object14; // 14
-	UInt8 byte18; // 18
-	UInt8 pad19[3]; // 19
+	uint8_t byte18; // 18
+	uint8_t pad19[3]; // 19
 };
 
 // 10
@@ -129,13 +128,13 @@ public:
 	NiBillboardNode* node0C; // 0C
 	NiTriShape* shape10; // 10
 	NiTriShape* shape14; // 14
-	UInt32 unk18; // 18
+	uint32_t unk18; // 18
 	NiDirectionalLight* sunLight; // 1C	Same as g_TES->directionalLight
 	float flt20; // 20
-	UInt8 byte24; // 24
-	UInt8 byte25; // 25
-	UInt8 byte26; // 26
-	UInt8 byte27; // 27
+	uint8_t byte24; // 24
+	uint8_t byte25; // 25
+	uint8_t byte26; // 26
+	uint8_t byte27; // 27
 	BSShaderAccumulator* shaderAccum; // 28
 };
 
@@ -150,7 +149,7 @@ public:
 	NiAVObject* layer1; // 0C		"
 	NiAVObject* layer2; // 10		"
 	NiAVObject* layer3; // 14		"
-	UInt32 unk18[4]; // 18
+	uint32_t unk18[4]; // 18
 	float flt28; // 28
 	float flt2C; // 2C
 	float flt30; // 30
@@ -163,7 +162,7 @@ public:
 	float flt4C; // 4C
 	float flt50; // 50
 	float flt54; // 54
-	UInt32 numLayers; // 58
+	uint32_t numLayers; // 58
 };
 
 enum MoonUpdateStatus : __int32
@@ -187,28 +186,28 @@ public:
 	NiRefObject* spShadowNode;
 	NiRefObject* spMoonMesh;
 	NiRefObject* spShadowMesh;
-	UInt32 fullMoonPath;
-	UInt32 unk01C;
-	UInt32 threeWanPath;
-	UInt32 unk024;
-	UInt32 halfWanPath;
-	UInt32 unk02C;
-	UInt32 oneWanPath;
-	UInt32 unk034;
-	UInt32 unk038;
-	UInt32 unk03C;
-	UInt32 oneWaxPath;
-	UInt32 unk044;
-	UInt32 halfWaxPath;
-	UInt32 unk04C;
-	UInt32 threeWaxPath;
-	UInt32 unk054;
+	uint32_t fullMoonPath;
+	uint32_t unk01C;
+	uint32_t threeWanPath;
+	uint32_t unk024;
+	uint32_t halfWanPath;
+	uint32_t unk02C;
+	uint32_t oneWanPath;
+	uint32_t unk034;
+	uint32_t unk038;
+	uint32_t unk03C;
+	uint32_t oneWaxPath;
+	uint32_t unk044;
+	uint32_t halfWaxPath;
+	uint32_t unk04C;
+	uint32_t threeWaxPath;
+	uint32_t unk054;
 	float angleFadeStart;
 	float angleFadeEnd;
 	float shadowEarlyFade;
 	float speed;
 	float zOffset;
-	UInt32 size;
+	uint32_t size;
 	MoonUpdateStatus eUpdateMoonTexture;
 	float unk074;
 	float lastUpdateHour;
@@ -219,15 +218,13 @@ class Precipitation
 {
 public:
 	Precipitation();
-	~Precipitation();
-
-	virtual Precipitation* Destroy(bool doFree);
+	virtual ~Precipitation();
 
 	NiNode* node04; // 04
 	NiNode* node08; // 08
-	UInt32 unk0C; // 0C
+	uint32_t unk0C; // 0C
 	float unk10; // 10
-	UInt32 unk14; // 14
+	uint32_t unk14; // 14
 };
 
 // 1C
@@ -240,14 +237,14 @@ public:
 	virtual void Unk_23(void);
 	virtual void Unk_24(void);
 	virtual void Unk_25(void);
-	virtual void Unk_26(UInt32 arg);
+	virtual void Unk_26(uint32_t arg);
 
-	UInt8 hidden; // 08
-	UInt8 pad09[3]; // 09
+	uint8_t hidden; // 08
+	uint8_t pad09[3]; // 09
 	float percent; // 0C
 	NiObject* obj10; // 10
 	float flt14; // 14
-	UInt32 unk18; // 18
+	uint32_t unk18; // 18
 };
 
 // 30
@@ -275,7 +272,7 @@ public:
 	float flt20; // 20
 	float flt24; // 24
 	float flt28; // 28
-	UInt32 unk2C; // 2C
+	uint32_t unk2C; // 2C
 };
 
 // 44
@@ -290,11 +287,11 @@ public:
 	float flt24; // 24
 	float flt28; // 28
 	float flt2C; // 2C
-	UInt32 unk30; // 30
-	UInt32 unk34; // 34
+	uint32_t unk30; // 30
+	uint32_t unk34; // 34
 	float flt38; // 38
 	float flt3C; // 3C
-	UInt32 unk40; // 40
+	uint32_t unk40; // 40
 };
 
 // 138
@@ -334,19 +331,19 @@ public:
 	NiColor sunFog; // 0C0
 	float windSpeed; // 0CC
 	float windDirection; // 0D0
-	UInt32 unk0D4[6]; // 0D4
+	uint32_t unk0D4[6]; // 0D4
 	float gameHour; // 0EC
 	float lastUpdateHour; // 0F0
 	float weatherPercent; // 0F4
-	UInt32 unk0F8; // 0F8
-	UInt32 unk0FC; // 0FC
+	uint32_t unk0F8; // 0F8
+	uint32_t unk0FC; // 0FC
 	float lightningFxPerc; // 100
-	UInt32 unk104; // 104
+	uint32_t unk104; // 104
 	float flt108; // 108
 	float flt10C; // 10C
 	float flt110; // 110
-	UInt32 unk114; // 114
-	UInt32 flags; // 118
+	uint32_t unk114; // 114
+	uint32_t flags; // 118
 	ImageSpaceModifierInstanceForm* pCurrentWeatherImageSpaceMod; // 11C
 	ImageSpaceModifierInstanceForm* pCurrentWeatherImageSpaceMod2; // 120
 	ImageSpaceModifierInstanceForm* pLastWeatherImageSpaceMod; // 124
@@ -373,14 +370,14 @@ public:
 	virtual void Init();
 	virtual void DetachAll();
 	virtual void KillAll();
-	virtual void SetCenter(UInt32 aiX, UInt32 aiY);
+	virtual void SetCenter(uint32_t aiX, uint32_t aiY);
 	virtual void Shift(int aiCols, int aiRows);
-	virtual void Detach(UInt32 aiX, UInt32 aiY);
-	virtual void ClearItem(UInt32 aiX, UInt32 aiY);
-	virtual void MoveItem(UInt32 aiX1, UInt32 aiY1, UInt32 aiX2, UInt32 aiY2);
-	virtual void SwapItem(UInt32 aiX1, UInt32 aiY1, UInt32 aiX2, UInt32 aiY2);
-	SInt32 iWorldX;
-	SInt32 iWorldY;
+	virtual void Detach(uint32_t aiX, uint32_t aiY);
+	virtual void ClearItem(uint32_t aiX, uint32_t aiY);
+	virtual void MoveItem(uint32_t aiX1, uint32_t aiY1, uint32_t aiX2, uint32_t aiY2);
+	virtual void SwapItem(uint32_t aiX1, uint32_t aiY1, uint32_t aiX2, uint32_t aiY2);
+	int32_t iWorldX;
+	int32_t iWorldY;
 };
 
 struct GridCell
@@ -396,15 +393,15 @@ public:
 	GridCellArray();
 	~GridCellArray();
 
-	SInt32 iDimension;
+	int32_t iDimension;
 	GridCell* pGridCells;
 	NiPoint3 kWorldCenter;
 	bool bLandAttached;
 	NiPointer<void*> spShadowMask;
 
-	GridCell* GetCell(SInt32 aX, SInt32 aY)
+	GridCell* GetCell(int32_t aX, int32_t aY)
 	{
-		UInt32 uiGridSize = iDimension;
+		uint32_t uiGridSize = iDimension;
 		if (aX < iDimension && aY < iDimension)
 			return &pGridCells[aX + aY * uiGridSize];
 		return nullptr;
@@ -420,12 +417,12 @@ struct WaterSurfaceManager
 	struct WaterGroup
 	{
 		TESWaterForm* waterForm; // 00
-		UInt32 unk04; // 04
-		UInt32 unk08; // 08
+		uint32_t unk04; // 04
+		uint32_t unk08; // 08
 		float flt0C; // 0C	Always 1.0 ?
 		float waterHeight; // 10
-		UInt32 unk14; // 14
-		UInt32 unk18; // 18
+		uint32_t unk14; // 14
+		uint32_t unk18; // 18
 		float flt1C; // 1C	-flt0C
 		float flt20; // 20	-waterHeight
 		DList<TESObjectREFR> waterPlanes; // 24
@@ -433,13 +430,13 @@ struct WaterSurfaceManager
 
 	struct Struct8C
 	{
-		UInt32 unk00;
-		UInt32 unk04;
-		UInt32 unk08;
+		uint32_t unk00;
+		uint32_t unk04;
+		uint32_t unk08;
 	};
 
-	UInt32 unk00; // 00
-	UInt32 unk04; // 04
+	uint32_t unk00; // 00
+	uint32_t unk04; // 04
 	NiObject* object08; // 08
 	NiObject* object0C; // 0C
 	NiObject* object10; // 10
@@ -447,12 +444,12 @@ struct WaterSurfaceManager
 	NiObject* object18; // 18
 	NiObject* object1C; // 1C	Seen NiSourceTexture
 	NiObject* object20; // 20
-	UInt32 unk24; // 24
-	UInt32 unk28; // 28
-	UInt32 unk2C; // 2C
-	UInt32 unk30; // 30
-	UInt32 unk34; // 34
-	UInt32 unk38; // 38
+	uint32_t unk24; // 24
+	uint32_t unk28; // 28
+	uint32_t unk2C; // 2C
+	uint32_t unk30; // 30
+	uint32_t unk34; // 34
+	uint32_t unk38; // 38
 	DList<WaterGroup> waterGroups; // 3C
 	WaterGroup* waterLOD; // 48	(Assumed)
 	NiTPointerMap<TESObjectREFR> map4C; // 4C
@@ -461,7 +458,7 @@ struct WaterSurfaceManager
 	NiTMapBase<TESObjectREFR*, void*> map7C; // 7C
 	Struct8C unk8C; // 8C
 	float flt98; // 98
-	UInt32 unk9C; // 9C
+	uint32_t unk9C; // 9C
 };
 
 static_assert(sizeof(WaterSurfaceManager) == 0xA0);
@@ -473,9 +470,9 @@ public:
 	TES();
 	~TES();
 
-	virtual void Fn_00(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5);
+	virtual void Fn_00(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5);
 
-	UInt32 unk04; // 04
+	uint32_t unk04; // 04
 	GridCellArray* gridCellArray; // 08
 	NiNode* niNode0C; // 0C
 	NiNode* niNode10; // 10
@@ -483,29 +480,29 @@ public:
 	BSTempNodeManager* tempNodeMgr; // 18
 	NiDirectionalLight* directionalLight; // 1C
 	void* ptr20; // 20
-	SInt32 extGridX; // 24
-	SInt32 extGridY; // 28
-	SInt32 extCoordX; // 2C
-	SInt32 extCoordY; // 30
+	int32_t extGridX; // 24
+	int32_t extGridY; // 28
+	int32_t extCoordX; // 2C
+	int32_t extCoordY; // 30
 	TESObjectCELL* currentInterior; // 34
 	TESObjectCELL** interiorsBuffer; // 38
 	TESObjectCELL** exteriorsBuffer; // 3C
-	UInt32 unk40[9]; // 40
+	uint32_t unk40[9]; // 40
 	WaterSurfaceManager* waterManager; // 64
 	Sky* sky; // 68
 	tList<ImageSpaceModifierInstance> activeIMODs; // 6C
-	UInt32 unk74[3]; // 74
+	uint32_t unk74[3]; // 74
 	float flt80; // 80	Abs X distance from centre of grid.
 	float flt84; // 84	Abs Y distance from centre of grid.
 	TESWorldSpace* currentWrldspc; // 88
-	tList<UInt32> list8C; // 8C
-	tList<UInt32> list94; // 94
-	tList<UInt32> list9C; // 9C
+	tList<uint32_t> list8C; // 8C
+	tList<uint32_t> list94; // 94
+	tList<uint32_t> list9C; // 9C
 	QueuedFile* unkA4; // A4
 	NiSourceTexture* unkA8; // A8
 	QueuedFile* unkAC; // AC
 	void* ptrB0; // B0
-	UInt32 unkB4[2]; // B4
+	uint32_t unkB4[2]; // B4
 	NavMeshInfoMap* navMeshInfoMap; // BC
 	LoadedAreaBound* areaBound; // C0
 
@@ -536,8 +533,8 @@ struct FontInfo
 	struct BufferData
 	{
 		float lineHeight; // 0000
-		UInt32 unk0004[73]; // 0004
-		UInt32 unk0128[458]; // 0128
+		uint32_t unk0004[73]; // 0004
+		uint32_t unk0128[458]; // 0128
 		float baseHeight; // 0850
 		float flt0854; // 0854
 		float flt0858; // 0858
@@ -545,18 +542,18 @@ struct FontInfo
 
 	struct ButtonIcon;
 
-	UInt8 isLoaded; // 00
-	UInt8 pad01[3]; // 01
+	uint8_t isLoaded; // 00
+	uint8_t pad01[3]; // 01
 	char* filePath; // 04
-	UInt8 fontID; // 08
-	UInt8 pad09[3]; // 09
+	uint8_t fontID; // 08
+	uint8_t pad09[3]; // 09
 	NiTexturingProperty* texProp; // 0C
-	UInt32 unk10[7]; // 10
+	uint32_t unk10[7]; // 10
 	float flt2C; // 2C
 	float flt30; // 30
-	UInt32 unk34; // 34
+	uint32_t unk34; // 34
 	BufferData* bufferData; // 38
-	UInt32 unk3C[2]; // 3C
+	uint32_t unk3C[2]; // 3C
 	BSSimpleArray<ButtonIcon> arr44; // 44
 };
 
@@ -570,19 +567,19 @@ public:
 	~FontManager();
 
 	FontInfo* fontInfos[8]; // 00
-	UInt8 byte20; // 20
-	UInt8 pad21[3]; // 21
+	uint8_t byte20; // 20
+	uint8_t pad21[3]; // 21
 	FontInfo* extraFonts[80]; // 24
 
 	//	outDims.x := width (pxl); outDims.y := height (pxl); outDims.z := numLines
-	NiVector3* GetStringDimensions(NiVector3* outDims, const char* srcString, UInt32 fontID, UInt32 maxFlt = 0x7F7FFFFF,
-	                               UInt32 startIdx = 0);
+	NiVector3* GetStringDimensions(NiVector3* outDims, const char* srcString, uint32_t fontID, uint32_t maxFlt = 0x7F7FFFFF,
+	                               uint32_t startIdx = 0);
 };
 
-__declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims, const char* srcString, UInt32 fontID,
-                                                              UInt32 maxFlt, UInt32 startIdx)
+__declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims, const char* srcString, uint32_t fontID,
+                                                              uint32_t maxFlt, uint32_t startIdx)
 {
-	static const UInt32 procAddr = 0xA1B020;
+	static const uint32_t procAddr = 0xA1B020;
 	__asm jmp procAddr
 }
 
@@ -593,8 +590,8 @@ public:
 	LoadedReferenceMap();
 	~LoadedReferenceMap();
 
-	UInt32 unk10; // 10
-	UInt32 unk14; // 14
+	uint32_t unk10; // 10
+	uint32_t unk14; // 14
 };
 
 // 8C
@@ -617,23 +614,23 @@ public:
 	~DebugText();
 
 	virtual void Unk_00(void);
-	virtual void Unk_01(UInt32 arg1, UInt32 arg2);
-	virtual UInt32 Unk_02(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5, UInt32 arg6);
-	virtual UInt32 Unk_03(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4);
-	virtual void Unk_04(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5, UInt32 arg6);
-	virtual UInt32 Unk_05(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5);
-	virtual void Unk_06(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5);
-	virtual UInt32 Unk_07(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5, UInt32 arg6, UInt32 arg7);
-	virtual UInt32 Unk_08(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5);
-	virtual UInt32 Unk_09(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5, UInt32 arg6);
-	virtual UInt32 Unk_0A(UInt32 arg1);
-	virtual void Unk_0B(UInt32 arg1, UInt32 arg2);
+	virtual void Unk_01(uint32_t arg1, uint32_t arg2);
+	virtual uint32_t Unk_02(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6);
+	virtual uint32_t Unk_03(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
+	virtual void Unk_04(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6);
+	virtual uint32_t Unk_05(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5);
+	virtual void Unk_06(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5);
+	virtual uint32_t Unk_07(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6, uint32_t arg7);
+	virtual uint32_t Unk_08(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5);
+	virtual uint32_t Unk_09(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6);
+	virtual uint32_t Unk_0A(uint32_t arg1);
+	virtual void Unk_0B(uint32_t arg1, uint32_t arg2);
 
 	struct DebugLine
 	{
 		float offsetX; // 00
 		float offsetY; // 04
-		UInt32 isVisible; // 08
+		uint32_t isVisible; // 08
 		NiNode* node; // 0C
 		BSString text; // 10
 		float flt18; // 18	Always -1.0
@@ -641,7 +638,7 @@ public:
 	};
 
 	DebugLine lines[200]; // 0004
-	UInt32 unk2264[14]; // 2264
+	uint32_t unk2264[14]; // 2264
 
 	static DebugText* GetSingleton();
 	DebugLine* GetDebugInput();
@@ -657,7 +654,7 @@ DebugText* DebugText::GetSingleton()
 DebugText::DebugLine* DebugText::GetDebugInput()
 {
 	DebugLine *linesPtr = lines, *result = lines;
-	UInt32 counter = 200;
+	uint32_t counter = 200;
 	do
 	{
 		linesPtr++;
@@ -673,15 +670,15 @@ DebugText::DebugLine* DebugText::GetDebugInput()
 struct ExtraInfoGeneralTopicDataElement
 {
 	BSString responseText;
-	UInt32 emotionType;
-	UInt32 emotionValue;
+	uint32_t emotionType;
+	uint32_t emotionValue;
 	BSString voiceFilePath;
 	TESIdleForm* speakerAnimation;
 	TESIdleForm* listenerAnimation;
-	UInt32 sound;
-	UInt8 flags;
-	UInt8 gap25[3];
-	UInt32 responseNumber;
+	uint32_t sound;
+	uint8_t flags;
+	uint8_t gap25[3];
+	uint32_t responseNumber;
 };
 
 struct List11DD58CItem
@@ -689,10 +686,10 @@ struct List11DD58CItem
 	TESObjectREFR* ref;
 	BSSoundHandle sound04;
 	BSSoundHandle sound10;
-	UInt8 byte1C;
-	UInt8 byte1D;
-	UInt8 byte1E;
-	UInt8 byte1F;
+	uint8_t byte1C;
+	uint8_t byte1D;
+	uint8_t byte1E;
+	uint8_t byte1F;
 };
 
 struct VoiceEntry
@@ -708,7 +705,7 @@ struct VoiceEntry
 struct VoiceEntryList
 {
 	tList<VoiceEntry> list00;
-	UInt32 unk08;
+	uint32_t unk08;
 };
 
 enum RadioEntryDataFlags
@@ -723,11 +720,11 @@ struct RadioEntryData
 {
 	VoiceEntryList* voiceEntry;
 	VoiceEntryList* voiceEntry04;
-	UInt32 offset;
-	UInt32 soundTimeRemaining0C;
-	UInt8 lastSignalToNoiseRatioPct;
-	UInt8 signalToNoiseRatioPct;
-	UInt8 gap12[2];
+	uint32_t offset;
+	uint32_t soundTimeRemaining0C;
+	uint8_t lastSignalToNoiseRatioPct;
+	uint8_t signalToNoiseRatioPct;
+	uint8_t gap12[2];
 	RadioEntryDataFlags flags;
 	tList<List11DD58CItem> list18;
 };
@@ -754,24 +751,24 @@ struct PlayingMusic
 	char track1Path[MAX_PATH]; // 000
 	void* ptr104; // 104
 	char track2Path[MAX_PATH]; // 108
-	UInt32 unk20C; // 20C
+	uint32_t unk20C; // 20C
 	float flt210; // 210
 	float flt214; // 214
 	float flt218; // 218
 	float flt21C; // 21C
-	UInt8 track1Flags; // 220
-	UInt8 track2Flags; // 221
-	UInt8 pad222[2]; // 222
-	UInt32 unk224; // 224
-	UInt32 unk228[8]; // 228
+	uint8_t track1Flags; // 220
+	uint8_t track2Flags; // 221
+	uint8_t pad222[2]; // 222
+	uint32_t unk224; // 224
+	uint32_t unk228[8]; // 228
 	float flt248; // 248
 	float flt24C; // 24C
 	float flt250; // 250
 	float flt254; // 254
-	UInt32 unk258; // 258
-	UInt32 unk25C[8]; // 25C
-	UInt32 track1Active; // 27C
-	UInt32 unk280; // 280
+	uint32_t unk258; // 258
+	uint32_t unk25C[8]; // 25C
+	uint32_t track1Active; // 27C
+	uint32_t unk280; // 280
 	MediaLocationController* medLocCtrl; // 284
 };
 
@@ -786,14 +783,14 @@ struct GameTimeGlobals
 	TESGlobal* hour; // 0C
 	TESGlobal* daysPassed; // 10
 	TESGlobal* timeScale; // 14
-	UInt32 unk18; // 18
+	uint32_t unk18; // 18
 	bool gameLoaded; // 1C
-	UInt8 pad1D[3]; // 1D
-	UInt32 unk20; // 20
-	UInt32 unk24; // 24
-	UInt32 unk28; // 28
+	uint8_t pad1D[3]; // 1D
+	uint32_t unk20; // 20
+	uint32_t unk24; // 24
+	uint32_t unk28; // 28
 	float lastUpdHour; // 2C
-	UInt32 initialized; // 30
+	uint32_t initialized; // 30
 
 	float GetDaysPassed(int bgnYear = 2281, int bgnMonth = 9, int bgnDay = 13);
 };
@@ -803,35 +800,35 @@ struct EffectArchTypeEntry
 {
 	const char* name;
 	ActiveEffectCreate callback;
-	UInt32 unk08[2];
+	uint32_t unk08[2];
 };
 
 // 10
 struct EntryPointConditionInfo
 {
 	const char* entryPoint;
-	UInt8 numTabs;
-	UInt8 pad01[3];
+	uint8_t numTabs;
+	uint8_t pad01[3];
 	const char** runOn;
-	UInt8 byte08;
-	UInt8 pad09[3];
+	uint8_t byte08;
+	uint8_t pad09[3];
 };
 
 // 24
 struct AnimGroupInfo
 {
 	const char* name; // 00
-	UInt32 unk04; // 04
-	UInt32 sequenceType; // 08
-	UInt32 unk0C; // 0C
-	UInt32 unk10; // 10
-	UInt32 unk14[4]; // 14
+	uint32_t unk04; // 04
+	uint32_t sequenceType; // 08
+	uint32_t unk0C; // 0C
+	uint32_t unk10; // 10
+	uint32_t unk14[4]; // 14
 };
 
 struct PCMiscStat
 {
 	const char* name;
-	UInt32 level;
+	uint32_t level;
 };
 
 // 08
@@ -846,19 +843,17 @@ class SeenData
 {
 public:
 	SeenData();
-	~SeenData();
+	virtual ~SeenData();
+	virtual void		DrawSeenData(NiNode* apDrawNode, const NiPoint3& arSeenStart, int) const;
+	virtual uint32_t	GetSaveSize() const;
+	virtual void		SaveGameBGS(BGSSaveFormBuffer* apBuffer) const;
+	virtual void		SaveGameTES(uint32_t) const;
+	virtual void		LoadGameBGS(BGSLoadGameBuffer* apBuffer);
+	virtual void		LoadGameTES(uint32_t);
 
-	virtual void* Destroy(bool doFree);
-	virtual void Unk_01(void);
-	virtual void Unk_02(void);
-	virtual void Unk_03(void);
-	virtual void Unk_04(void);
-	virtual void Unk_05(void);
-	virtual void Unk_06(void);
+	uint32_t alphaLevels[8]; // 04
 
-	UInt32 alphaLevels[8]; // 04
-
-	bool GetBitSeen(UInt32 row, UInt32 column);
+	bool GetBitSeen(uint32_t row, uint32_t column);
 };
 
 // 2C
@@ -868,9 +863,9 @@ public:
 	IntSeenData();
 	~IntSeenData();
 
-	SInt8 segmentX; // 24
-	SInt8 segmentY; // 25
-	UInt8 pad26[2]; // 26
+	int8_t segmentX; // 24
+	int8_t segmentY; // 25
+	uint8_t pad26[2]; // 26
 	IntSeenData* nextSegment; // 28
 
 	IntSeenData* GetSectionSeenData(int sectionX, int sectionY);
@@ -896,23 +891,23 @@ struct MusicMarker
 struct VATSCameraData
 {
 	tList<VATSTargetInfo> targetsList; // 00
-	UInt32 mode; // 08
-	UInt32 cameraShots; // 0C
+	uint32_t mode; // 08
+	uint32_t cameraShots; // 0C
 	BGSCameraShot* camShot; // 10
 	float flt14; // 14
 	float flt18; // 18
-	UInt32 unk1C; // 1C
-	UInt32 unk20; // 20
+	uint32_t unk1C; // 1C
+	uint32_t unk20; // 20
 	TESIdleForm* attackAnim; // 24
 	ImageSpaceModifierInstanceForm* isModInstForm; // 28
 	ImageSpaceModifierInstanceRB* isModInstRB; // 2C
-	UInt32 unk30; // 30
+	uint32_t unk30; // 30
 	NiPointLight* niPointLight; // 34
-	UInt8 byte38; // 38
-	UInt8 pad39[3]; // 39
-	UInt32 numKills; // 3C
-	UInt32 unk40; // 40
-	UInt32 unk44; // 44
+	uint8_t byte38; // 38
+	uint8_t pad39[3]; // 39
+	uint32_t numKills; // 3C
+	uint32_t unk40; // 40
+	uint32_t unk44; // 44
 };
 
 static_assert(sizeof(VATSCameraData) == 0x48);
@@ -928,14 +923,14 @@ struct SystemColorManager
 		~SystemColor();
 
 		virtual void Destructor(bool doFree);
-		virtual UInt32 GetColor();
-		virtual void SetColor(UInt32 newColor);
+		virtual uint32_t GetColor();
+		virtual void SetColor(uint32_t newColor);
 		virtual bool IsHard();
 		virtual bool IsSoft();
 
 		BSString traitName;
 
-		void SetColorRGB(UInt32 r, UInt32 g, UInt32 b)
+		void SetColorRGB(uint32_t r, uint32_t g, uint32_t b)
 		{
 			this->SetColor(((r & 0xFF) << 16) + ((g & 0xFF) << 8) + (b & 0xFF));
 		}
@@ -948,7 +943,7 @@ struct SystemColorManager
 		HardSystemColor();
 		~HardSystemColor();
 
-		UInt32 color; // 0C
+		uint32_t color; // 0C
 	};
 
 	// 10
@@ -958,14 +953,14 @@ struct SystemColorManager
 		SoftSystemColor();
 		~SoftSystemColor();
 
-		UInt32* setting; // 0C
+		uint32_t* setting; // 0C
 	};
 
 	DList<SystemColor> sysColors;
-	UInt32 unk0C;
+	uint32_t unk0C;
 
 	static SystemColorManager* GetSingleton() { return ThisCall<SystemColorManager*>(0x718B60, nullptr); }
-	UInt32 GetColor(UInt32 type) { return ThisCall<UInt32>(0x7190A0, this, type); }
+	uint32_t GetColor(uint32_t type) { return ThisCall<uint32_t>(0x7190A0, this, type); }
 };
 
 
@@ -978,15 +973,15 @@ public:
 	BSSimpleArray<EdgeExtraInfo> kEdgeInfos;
 	BSSimpleArray<NavMeshTriangleDoorPortal> kDoorPortals;
 	BSSimpleArray<NavMeshClosedDoorInfo> kClosedDoorInfos;
-	BSSimpleArray<UInt16> unk078Arr;
-	NiTMap<UInt16, NavMeshPOVData*> kPOVDatas;
-	BSSimpleArray<UInt16> unk098Arr;
-	UInt32 unk0A8;
+	BSSimpleArray<uint16_t> unk078Arr;
+	NiTMap<uint16_t, NavMeshPOVData*> kPOVDatas;
+	BSSimpleArray<uint16_t> unk098Arr;
+	uint32_t unk0A8;
 	float unk0AC[8];
-	BSSimpleArray<UInt16>* pArray0CC;
+	BSSimpleArray<uint16_t>* pArray0CC;
 	BSSimpleArray<ObstacleUndoData*> kObstacleUndos;
-	NiTMap<UInt16, NiPointer<ObstacleData>>* pObstacleDataMap;
-	BSSimpleArray<UInt16> unk0E4Arr;
+	NiTMap<uint16_t, NiPointer<ObstacleData>>* pObstacleDataMap;
+	BSSimpleArray<uint16_t> unk0E4Arr;
 	BSSimpleArray<NavMeshStaticAvoidNode> kAvoidNodes;
 	NavMeshInfo* pNavMeshInfo;
 };
@@ -999,7 +994,7 @@ typedef NiPointer<NavMesh> NavMeshPtr;
 class NavMeshArray : public BSSimpleArray<NavMeshPtr>
 {
 public:
-	inline NavMeshPtr GetAt(UInt32 auiIndex)
+	inline NavMeshPtr GetAt(uint32_t auiIndex)
 	{
 		if (auiIndex >= uiSize)
 			return nullptr;
@@ -1019,93 +1014,93 @@ class NavMeshObstacleManager
 	};
 
 	_RTL_CRITICAL_SECTION criticalSection;
-	UInt8 byte018;
-	UInt8 gap019[3];
-	UInt32 formIDMap;
-	UInt32 unk020;
-	UInt32 unk024;
-	UInt32 unk028;
+	uint8_t byte018;
+	uint8_t gap019[3];
+	uint32_t formIDMap;
+	uint32_t unk020;
+	uint32_t unk024;
+	uint32_t unk028;
 	tList<TESObjectREFR> queuedRefsToAdd;
 	tList<TESObjectREFR> queuedRefsToRemove;
-	UInt32 unk03C;
-	UInt32 unk040;
-	UInt32 unk044;
-	UInt32 unk048;
-	UInt32 unk04C;
-	UInt32 unk050;
-	UInt32 unk054;
-	UInt32 unk058;
-	UInt32 unk05C;
-	UInt32 unk060;
-	UInt32 unk064;
-	UInt32 unk068;
-	UInt32 unk06C;
-	UInt32 unk070;
-	UInt32 unk074;
-	UInt32 unk078;
-	UInt32 unk07C;
-	UInt32 unk080;
-	UInt32 unk084;
-	UInt32 unk088;
-	UInt32 unk08C;
-	UInt32 unk090;
-	UInt32 unk094;
-	UInt32 unk098;
-	UInt32 unk09C;
-	UInt32 unk0A0;
-	UInt32 unk0A4;
-	UInt32 unk0A8;
-	UInt32 unk0AC;
-	UInt32 unk0B0;
-	UInt32 unk0B4;
-	UInt32 unk0B8;
-	UInt32 unk0BC;
-	UInt32 unk0C0;
-	UInt32 unk0C4;
-	UInt32 unk0C8;
-	UInt32 unk0CC;
-	UInt32 unk0D0;
-	UInt32 unk0D4;
-	UInt32 unk0D8;
-	UInt32 unk0DC;
-	UInt32 unk0E0;
-	UInt32 unk0E4;
-	UInt32 unk0E8;
-	UInt32 unk0EC;
+	uint32_t unk03C;
+	uint32_t unk040;
+	uint32_t unk044;
+	uint32_t unk048;
+	uint32_t unk04C;
+	uint32_t unk050;
+	uint32_t unk054;
+	uint32_t unk058;
+	uint32_t unk05C;
+	uint32_t unk060;
+	uint32_t unk064;
+	uint32_t unk068;
+	uint32_t unk06C;
+	uint32_t unk070;
+	uint32_t unk074;
+	uint32_t unk078;
+	uint32_t unk07C;
+	uint32_t unk080;
+	uint32_t unk084;
+	uint32_t unk088;
+	uint32_t unk08C;
+	uint32_t unk090;
+	uint32_t unk094;
+	uint32_t unk098;
+	uint32_t unk09C;
+	uint32_t unk0A0;
+	uint32_t unk0A4;
+	uint32_t unk0A8;
+	uint32_t unk0AC;
+	uint32_t unk0B0;
+	uint32_t unk0B4;
+	uint32_t unk0B8;
+	uint32_t unk0BC;
+	uint32_t unk0C0;
+	uint32_t unk0C4;
+	uint32_t unk0C8;
+	uint32_t unk0CC;
+	uint32_t unk0D0;
+	uint32_t unk0D4;
+	uint32_t unk0D8;
+	uint32_t unk0DC;
+	uint32_t unk0E0;
+	uint32_t unk0E4;
+	uint32_t unk0E8;
+	uint32_t unk0EC;
 	tList<void> queuedClosedDoors;
 	tList<void> queuedOpenDoors;
-	UInt32 openDoorMap;
-	UInt32 unk104;
-	UInt32 unk108;
-	UInt32 unk10C;
-	UInt32 closedDoorMap;
-	UInt32 unk114;
-	UInt32 unk118;
-	UInt32 unk11C;
-	UInt32 unk120;
-	UInt32 unk124;
-	UInt32 unk128;
-	UInt32 unk12C;
-	UInt32 unk130;
-	UInt32 unk134;
-	UInt32 unk138;
+	uint32_t openDoorMap;
+	uint32_t unk104;
+	uint32_t unk108;
+	uint32_t unk10C;
+	uint32_t closedDoorMap;
+	uint32_t unk114;
+	uint32_t unk118;
+	uint32_t unk11C;
+	uint32_t unk120;
+	uint32_t unk124;
+	uint32_t unk128;
+	uint32_t unk12C;
+	uint32_t unk130;
+	uint32_t unk134;
+	uint32_t unk138;
 	BSSimpleArray<void> backgroundTasks;
 	BSSimpleArray<void> processedTasks;
-	UInt32 unk15C;
+	uint32_t unk15C;
 	RTL_CRITICAL_SECTION taskCS160;
-	UInt32 unk178;
-	UInt32 unk17C;
-	UInt32 unk180;
-	UInt32 unk184;
-	UInt32 unk188;
-	UInt32 unk18C;
+	uint32_t unk178;
+	uint32_t unk17C;
+	uint32_t unk180;
+	uint32_t unk184;
+	uint32_t unk188;
+	uint32_t unk18C;
 	NavMeshObstacleManager::OBSTACLE_MANAGER_BACKGROUND_STATE eState;
 	float fTimeToNextSwap;
-	UInt8 byte198[4];
-	UInt32 obstacleRootNode;
-	UInt8 mainThreadPerformaceTimer;
-	UInt8 backgroundThreadPerformanceTimer;
-	UInt8 gap1A2[2];
+	uint8_t byte198[4];
+	uint32_t obstacleRootNode;
+	uint8_t mainThreadPerformaceTimer;
+	uint8_t backgroundThreadPerformanceTimer;
+	uint8_t gap1A2[2];
 };
 
 static_assert(sizeof(NavMeshObstacleManager) == 0x1A4);
@@ -1124,17 +1119,17 @@ public:
 	BSArchive();
 	~BSArchive();
 
-	UInt32 unk00; // 00	160
-	UInt32 unk04; // 04	164
-	UInt32 unk08; // 08	168
-	UInt32 unk0C; // 0C	16C
-	UInt32 unk10; // 10	170
-	UInt32 unk14; // 14	174
-	UInt32 unk18; // 18	178
-	UInt32 unk1C; // 1C	17C
-	UInt16 fileTypesMask; // 20	180
-	UInt16 word22; // 22	182
-	UInt32 unk24[19]; // 24	184
+	uint32_t unk00; // 00	160
+	uint32_t unk04; // 04	164
+	uint32_t unk08; // 08	168
+	uint32_t unk0C; // 0C	16C
+	uint32_t unk10; // 10	170
+	uint32_t unk14; // 14	174
+	uint32_t unk18; // 18	178
+	uint32_t unk1C; // 1C	17C
+	uint16_t fileTypesMask; // 20	180
+	uint16_t word22; // 22	182
+	uint32_t unk24[19]; // 24	184
 };
 
 static_assert(sizeof(BSArchive) == 0x70);
@@ -1159,8 +1154,8 @@ public:
 	ArchiveFile();
 	~ArchiveFile();
 
-	UInt32 unk158; // 158
-	UInt32 unk15C; // 15C
+	uint32_t unk158; // 158
+	uint32_t unk15C; // 15C
 };
 
 static_assert(sizeof(ArchiveFile) == 0x160);
@@ -1174,10 +1169,10 @@ public:
 
 	void* ptr160; // 160
 	void* ptr164; // 164
-	UInt32 streamLength; // 168
-	UInt32 unk16C; // 16C
-	UInt32 streamOffset; // 170
-	UInt32 unk174; // 174
+	uint32_t streamLength; // 168
+	uint32_t unk16C; // 16C
+	uint32_t streamOffset; // 170
+	uint32_t unk174; // 174
 };
 
 static_assert(sizeof(CompressedArchiveFile) == 0x178);
@@ -1185,10 +1180,10 @@ static_assert(sizeof(CompressedArchiveFile) == 0x178);
 
 struct AnimGroupClassify
 {
-	UInt8 category; // 00
-	UInt8 subType; // 01
-	UInt8 flags; // 02
-	UInt8 byte03; // 03
+	uint8_t category; // 00
+	uint8_t subType; // 01
+	uint8_t flags; // 02
+	uint8_t byte03; // 03
 }
 s_animGroupClassify[] =
 {
@@ -1375,7 +1370,7 @@ enum MiscStatCode
 	kMiscStat_SlotsGamesPlayed,
 };
 
-enum PerkEntryPointID : UInt32
+enum PerkEntryPointID : uint32_t
 {
 	kPerkEntry_CalculateWeaponDamage,
 	kPerkEntry_CalculateMyCriticalHitChance,
@@ -1482,10 +1477,10 @@ struct QuestUpdateManager
 	UpdateType updateType;
 	char title[260];
 	char subtitle[260];
-	UInt32 unk210;
-	UInt32 queuePriority;
-	UInt32 titleFont;
-	UInt32 subtitleFont;
+	uint32_t unk210;
+	uint32_t queuePriority;
+	uint32_t titleFont;
+	uint32_t subtitleFont;
 	char sound[260];
 };
 
@@ -1511,7 +1506,7 @@ public:
 	ItemEntryData data;
 	TESObjectREFR* containerRef;
 	TESObjectREFR* tempRef;
-	UInt32 deferredActions[6];
+	uint32_t deferredActions[6];
 	bool doValidation;
 	bool removed;
 
@@ -1591,34 +1586,34 @@ struct TimePair : SingleTimer
 
 struct CombatState
 {
-	UInt8 byte000;
-	UInt8 gap001[3];
-	UInt32 flags;
+	uint8_t byte000;
+	uint8_t gap001[3];
+	uint32_t flags;
 	float fleeThreshold008;
 	TESObjectWEAP* weaponsByCombatWeaponType[6];
 	BSSimpleArray<void*> weapons_Array024;
 	TESObjectWEAP* weap034;
-	UInt32 availableCombatWeaponTypesFlags;
+	uint32_t availableCombatWeaponTypesFlags;
 	float maxDPSPerWeaponType[7];
 	float meleeDPS_58;
 	float rangedDPS_5C;
 	float unk060;
 	float unk064;
 	float distance068;
-	UInt32 unk06C;
-	UInt8 isInLineOfSight;
-	UInt8 forceResetCombatLOSBufferTimer;
-	UInt8 isTargetBlocked_dontIgnoreBlockedTarget072;
-	UInt8 isTargetFlushed;
-	UInt8 isTargetSpaceDifferent;
-	UInt8 byte075;
-	UInt8 byte076;
-	UInt8 forceInventoryUpdate;
+	uint32_t unk06C;
+	uint8_t isInLineOfSight;
+	uint8_t forceResetCombatLOSBufferTimer;
+	uint8_t isTargetBlocked_dontIgnoreBlockedTarget072;
+	uint8_t isTargetFlushed;
+	uint8_t isTargetSpaceDifferent;
+	uint8_t byte075;
+	uint8_t byte076;
+	uint8_t forceInventoryUpdate;
 	BGSExplosion* dangerousExplosiveToThrow;
-	UInt32 unk07C;
+	uint32_t unk07C;
 	float combatThreatScore;
 	NiPoint3 pt084;
-	UInt32 executionFlags090;
+	uint32_t executionFlags090;
 	float combatDetectionBufferTimer;
 	float combatLOSBufferTimer;
 	float timerLastFiredProjectile;
@@ -1629,46 +1624,46 @@ struct CombatState
 	TimePair timer0B8;
 	float timer0C0;
 	void* ptr0C4;
-	UInt8 initialConfidence;
-	UInt8 currentConfidence;
-	UInt8 gap0CA[2];
+	uint8_t initialConfidence;
+	uint8_t currentConfidence;
+	uint8_t gap0CA[2];
 	float combatConfidenceModifier;
 	float ownerThreatLevel;
 	float ownerDPS;
-	UInt8 byte0D8;
-	UInt8 gap0D9[3];
-	UInt32 doorFleeRefID;
-	UInt32 lastDoorFleeTime;
+	uint8_t byte0D8;
+	uint8_t gap0D9[3];
+	uint32_t doorFleeRefID;
+	uint32_t lastDoorFleeTime;
 	void* ptr0E4[2];
 	void* ptr0EC;
-	UInt32 unk0F0;
-	UInt32 unk0F4;
-	UInt32 unk0F8;
-	UInt32 unk0FC;
-	UInt32 unk100;
-	UInt32 unk104;
+	uint32_t unk0F0;
+	uint32_t unk0F4;
+	uint32_t unk0F8;
+	uint32_t unk0FC;
+	uint32_t unk100;
+	uint32_t unk104;
 	float unk108;
 	BSSimpleArray<void*> PathingCoverLocation_Array10C;
-	UInt32 unk11C;
-	UInt32 unk120;
-	UInt32 unk124;
+	uint32_t unk11C;
+	uint32_t unk120;
+	uint32_t unk124;
 	void* ptr128;
-	UInt32 unk12C;
-	UInt32 unk130;
-	UInt32 unk134;
-	UInt32 unk138;
-	UInt32 unk13C;
-	UInt32 unk140;
+	uint32_t unk12C;
+	uint32_t unk130;
+	uint32_t unk134;
+	uint32_t unk138;
+	uint32_t unk13C;
+	uint32_t unk140;
 	float unk144;
 	BSSimpleArray<void*> PathingCoverLocation_Array148;
-	UInt32 unk158;
-	UInt32 unk15C;
-	UInt32 unk160;
+	uint32_t unk158;
+	uint32_t unk15C;
+	uint32_t unk160;
 	BSSimpleArray<void*> UnreachableCoverLocation_Array164;
 	BSSimpleArray<void*> UnreachableLocation_Array174;
 	float timer184;
-	UInt8 byte188;
-	UInt8 gap189[3];
+	uint8_t byte188;
+	uint8_t gap189[3];
 	void* ptr18C;
 	tList<void*>* restoreItemsList;
 	tList<void*>* buffItemsList;
@@ -1680,9 +1675,9 @@ struct CombatState
 	TESForm* combatItem1BC;
 	Actor* actor1C0;
 	CombatController* cmbtCtrl;
-	UInt8 byte1C8_maybeInitializing;
-	UInt8 byte1C9;
-	UInt8 gap1CA[2];
+	uint8_t byte1C8_maybeInitializing;
+	uint8_t byte1C9;
+	uint8_t gap1CA[2];
 	TimePair timer1CC;
 	TimePair findBetterWeaponTimer;
 	TimePair explosiveProjectileBlockedResetTimer;
@@ -1694,8 +1689,8 @@ struct CombatState
 	TimePair combatThreatRatioTimer;
 	TimePair embeddedWeaponSwitchTimer;
 	TimePair inventoryUpdateTimer;
-	UInt32 ptr224;
-	SInt32 unk228;
+	uint32_t ptr224;
+	int32_t unk228;
 };
 
 static_assert(sizeof(CombatState) == 0x22C);
@@ -1707,15 +1702,15 @@ public:
 	DWORD dword68;
 	float* pfFadeAlpha;
 
-	static __forceinline UInt32 GetShapeCount() { return *(UInt32*)0x11FF0F0; };
-	static __forceinline void SetShapeCount(UInt32 uiCount) { *(UInt32*)0x11FF0F0 = uiCount; };
+	static __forceinline uint32_t GetShapeCount() { return *(uint32_t*)0x11FF0F0; };
+	static __forceinline void SetShapeCount(uint32_t uiCount) { *(uint32_t*)0x11FF0F0 = uiCount; };
 
 	static void SetFadeSourceRecurse(NiAVObject* apObject, float* apfFadeAlpha)
 	{
 		CdeclCall(0xB81420, apObject, apfFadeAlpha);
 	}
 
-	void SetTexture(UInt32 auiIndex, NiTexture* apTexture)
+	void SetTexture(uint32_t auiIndex, NiTexture* apTexture)
 	{
 		if (spTexture[auiIndex].m_pObject != apTexture)
 		{
@@ -1735,7 +1730,7 @@ struct BSSplatterData
 	float fAge;
 	float fDuration;
 	float fAlpha;
-	UInt32 uiCount;
+	uint32_t uiCount;
 };
 
 class BSCustomSplatterExtraData : public NiExtraData
@@ -1760,12 +1755,12 @@ public:
 	static __forceinline NiNode* GetRootNode() { return *(NiNode**)0x11C7810; };
 	static __forceinline bool IsEnabled() { return *(bool*)0x11C77E8; };
 
-	static __forceinline NiNode* CreateGeometry(UInt32 auiCount, float afSizeMult, float afOpacityMult)
+	static __forceinline NiNode* CreateGeometry(uint32_t auiCount, float afSizeMult, float afOpacityMult)
 	{
 		return CdeclCall<NiNode*>(0x4DF040, auiCount, afSizeMult, afOpacityMult);
 	}
 
-	static void ActivateAlt(UInt32 auiCount, float afDuration, float afSizeMult, float afOpacityMult,
+	static void ActivateAlt(uint32_t auiCount, float afDuration, float afSizeMult, float afOpacityMult,
 	                        NiTexture* apAlphaTex, NiTexture* apColorTex, NiTexture* apFlareTex)
 	{
 #if 0
@@ -1775,7 +1770,7 @@ public:
 			return;
 
 		NiNode* pNewNode = CreateGeometry(auiCount, afSizeMult, afOpacityMult);
-		(*(UInt32*)0x11C77DC) += auiCount;
+		(*(uint32_t*)0x11C77DC) += auiCount;
 
 		BSSplatterData kSplatterData{};
 		kSplatterData.fAge = 0.f;

@@ -24,19 +24,19 @@ public:
 	};
 
 	union Info {
-		UInt32		uint;
+		uint32_t		uint;
 		int			i;
 		float		f;
 		char* str;
 		bool b;
-		UInt16 us;
-		UInt8 rgb[4];
+		uint16_t us;
+		uint8_t rgb[4];
 	};
 
 	Info		data;	// 04
 	const char* name;	// 08
 
-	UInt32 GetType();
+	uint32_t GetType();
 	bool ValidType();
 	void Get(double* out);
 	void Set(float newVal);
@@ -44,16 +44,16 @@ public:
 };
 
 template<class T> class SettingCollection {
-	UInt8	byt0004;
-	UInt8	fil0005[3];
-	UInt32	arr0008[0x0100];
-	UInt32	unk0108;
+	uint8_t	byt0004;
+	uint8_t	fil0005[3];
+	uint32_t	arr0008[0x0100];
+	uint32_t	unk0108;
 };
 
 // 0014
 template<class M, class T> class NiTStringTemplateMap : M {
-	UInt8	byt0010;	// 0010
-	UInt8	fil0011[3];	// 0011
+	uint8_t	byt0010;	// 0010
+	uint8_t	fil0011[3];	// 0011
 };
 
 template<class T> class NiTStringMap : NiTStringTemplateMap<NiTMap<char const*, T>, T> {};
@@ -67,7 +67,7 @@ template<class T> class SettingCollectionMap {
 
 template<class T> class SettingCollectionList {
 	SettingCollection<T>	coll000;
-	tList<UInt32>			lst010C;
+	tList<uint32_t>			lst010C;
 };
 
 // 120
@@ -92,10 +92,10 @@ public:
 	typedef NiTMapBase <const char*, Setting*>	SettingMap;
 
 	// void		** vtbl							// 000
-	UInt32		unk004[(0x10C - 0x004) >> 2];	// 004
+	uint32_t		unk004[(0x10C - 0x004) >> 2];	// 004
 	SettingMap	settingMap;						// 10C BSTCaseInsensitiveStringMap
-	UInt8		unk11C;							// 11C
-	UInt8		pad11D[3];
+	uint8_t		unk11C;							// 11C
+	uint8_t		pad11D[3];
 
 	bool GetGameSetting(const char* settingName, Setting** out);
 	static GameSettingCollection* GetSingleton();
@@ -108,22 +108,21 @@ static_assert(sizeof(GameSettingCollection) == 0x120);
 class IniSettingCollection {
 public:
 	IniSettingCollection();
-	~IniSettingCollection();
-
-	virtual IniSettingCollection* Destroy(bool doFree);
-	virtual void	Unk_01(UInt32 arg);
-	virtual void	Unk_02(UInt32 arg);
-	virtual void	Unk_03(UInt32 arg);
-	virtual void	Unk_04(UInt32 arg);
+	
+	virtual ~IniSettingCollection();
+	virtual void	Unk_01(uint32_t arg);
+	virtual void	Unk_02(uint32_t arg);
+	virtual void	Unk_03(uint32_t arg);
+	virtual void	Unk_04(uint32_t arg);
 	virtual void	Unk_05(Setting* setting);
-	virtual void	Unk_06(UInt32 arg);
+	virtual void	Unk_06(uint32_t arg);
 	virtual void	Unk_07(void);
 	virtual void	Unk_08(void);
 	virtual void	Unk_09(void);
 
 	char				iniPath[0x100];		// 004
-	UInt32				unk104;				// 104
-	UInt32				unk108;				// 108
+	uint32_t				unk104;				// 104
+	uint32_t				unk108;				// 108
 	tList<Setting>		settings;			// 10C;
 
 	static IniSettingCollection* GetIniSettings();

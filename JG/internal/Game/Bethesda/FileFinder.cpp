@@ -1,7 +1,7 @@
-#include "FileFinder.h"
+#include "FileFinder.hpp"
 
 FileFinder* FileFinder::GetSingleton() {
-    return *(FileFinder**)0x11F81DC;
+    return *reinterpret_cast<FileFinder**>(0x11F81DC);
 }
 
 // 0xAFDF20
@@ -10,11 +10,11 @@ BSFile* FileFinder::GetFile(const char* apName, OpenMode aeMode, int aiSize, ARC
 }
 
 // 0x456A20
-bool FileFinder::Locate(const char* apName, const char* apFilePath, UInt32 aiFlags, ARCHIVE_TYPE aiArchiveType) {
+bool FileFinder::Locate(const char* apName, const char* apFilePath, uint32_t aiFlags, ARCHIVE_TYPE aiArchiveType) {
     return FileFinder::GetSingleton() && FileFinder::GetSingleton()->Exist(apName, apFilePath, aiFlags, aiArchiveType);
 }
 
 // 0xAFE0D0
-bool FileFinder::Exist(const char* apName, const char* apFilePath, UInt32 aiFlags, ARCHIVE_TYPE aiArchiveType) {
+bool FileFinder::Exist(const char* apName, const char* apFilePath, uint32_t aiFlags, ARCHIVE_TYPE aiArchiveType) {
     return ThisCall<bool>(0xAFE0D0, this, apName, apFilePath, aiFlags, aiArchiveType);
 }

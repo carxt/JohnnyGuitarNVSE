@@ -21,7 +21,7 @@ public:
 		Data(const Data& rhs) : type(rhs.type), entry(rhs.entry), xData(rhs.xData) { }
 		Data() : type(NULL), entry(NULL), xData(NULL) { }
 
-		static void CreateForUnextendedEntry(ExtraContainerChanges::EntryData* entry, SInt32 totalCount, std::vector<Data> &dataOut);
+		static void CreateForUnextendedEntry(ExtraContainerChanges::EntryData* entry, int32_t totalCount, std::vector<Data> &dataOut);
 	};
 
 	static InventoryReference* Create(TESObjectREFR* container, const Data &data, bool bValidate) { return new InventoryReference(container, data, bValidate); }
@@ -42,7 +42,7 @@ public:
 	void SetRemoved() { m_bRemoved = true; }
 	void Release();
 
-	static InventoryReference* GetForRefID(UInt32 refID);
+	static InventoryReference* GetForRefID(uint32_t refID);
 	static void Clean();									// called from main loop to destroy any temp refs
 	static bool HasData() { return s_refmap.size() > 0; }	// provides a quick check from main loop to avoid unnecessary calls to Clean()
 
@@ -87,6 +87,6 @@ private:
 	bool Validate();
 	void QueueAction(DeferredAction* action);
 	void DoDeferredActions();
-	SInt16 GetCount();
-	static std::map<UInt32, InventoryReference*>	s_refmap;	// maps refIDs of temp refs to InventoryReferences
+	int16_t GetCount();
+	static std::map<uint32_t, InventoryReference*>	s_refmap;	// maps refIDs of temp refs to InventoryReferences
 };

@@ -2,13 +2,13 @@
 #include "GameAPI.h"
 #include "GameExtraData.h"
 
-bool BaseExtraList::HasType(UInt32 type) const {
-	UInt32 index = (type >> 3);
-	UInt8 bitMask = 1 << (type % 8);
+bool BaseExtraList::HasType(uint32_t type) const {
+	uint32_t index = (type >> 3);
+	uint8_t bitMask = 1 << (type % 8);
 	return (m_presenceBitfield[index] & bitMask) != 0;
 }
 
-__declspec(naked) BSExtraData* BaseExtraList::GetByType(UInt32 type) const {
+__declspec(naked) BSExtraData* BaseExtraList::GetByType(uint32_t type) const {
 	__asm
 	{
 		cmp		dword ptr[ecx + 4], 0
@@ -46,44 +46,44 @@ __declspec(naked) BSExtraData* BaseExtraList::GetByType(UInt32 type) const {
 	}
 }
 
-void BaseExtraList::MarkType(UInt32 type, bool bCleared) {
-	UInt32 index = (type >> 3);
-	UInt8 bitMask = 1 << (type % 8);
-	UInt8& flag = m_presenceBitfield[index];
+void BaseExtraList::MarkType(uint32_t type, bool bCleared) {
+	uint32_t index = (type >> 3);
+	uint8_t bitMask = 1 << (type % 8);
+	uint8_t& flag = m_presenceBitfield[index];
 	if (bCleared) flag &= ~bitMask;
 	else flag |= bitMask;
 }
 
 __declspec(naked) void BaseExtraList::Remove(BSExtraData* toRemove, bool doFree) {
-	static const UInt32 procAddr = 0x410020;
+	static const uint32_t procAddr = 0x410020;
 	__asm	jmp		procAddr
 }
 
 __declspec(naked) BSExtraData* BaseExtraList::Add(BSExtraData* xData) {
-	static const UInt32 procAddr = 0x40FF60;
+	static const uint32_t procAddr = 0x40FF60;
 	__asm	jmp		procAddr
 }
 
 ExtraDataList* ExtraDataList::Create(BSExtraData* xBSData) {
 	ExtraDataList* xData = (ExtraDataList*)GameHeapAlloc(sizeof(ExtraDataList));
 	MemZero(xData, sizeof(ExtraDataList));
-	*(UInt32*)xData = 0x10143E8;
+	*(uint32_t*)xData = 0x10143E8;
 	if (xBSData) xData->Add(xBSData);
 	return xData;
 }
 
-__declspec(naked) void BaseExtraList::RemoveByType(UInt32 type) {
-	static const UInt32 procAddr = 0x410140;
+__declspec(naked) void BaseExtraList::RemoveByType(uint32_t type) {
+	static const uint32_t procAddr = 0x410140;
 	__asm	jmp		procAddr
 }
 
 __declspec(naked) void BaseExtraList::RemoveAll(bool doFree) {
-	static const UInt32 procAddr = 0x411FD0;
+	static const uint32_t procAddr = 0x411FD0;
 	__asm	jmp		procAddr
 }
 
 __declspec(naked) void BaseExtraList::Copy(BaseExtraList* sourceList) {
-	static const UInt32 procAddr = 0x411EC0;
+	static const uint32_t procAddr = 0x411EC0;
 	__asm	jmp		procAddr
 }
 
@@ -105,6 +105,6 @@ char BaseExtraList::GetExtraFactionRank(TESFaction* faction) {
 	return -1;
 }
 
-bool BaseExtraList::MarkScriptEvent(UInt32 eventMask, TESForm* eventTarget) {
+bool BaseExtraList::MarkScriptEvent(uint32_t eventMask, TESForm* eventTarget) {
 	return MarkBaseExtraListScriptEvent(eventTarget, this, eventMask);
 }

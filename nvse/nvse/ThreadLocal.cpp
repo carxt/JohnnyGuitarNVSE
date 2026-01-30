@@ -3,7 +3,7 @@
 #include "FunctionScripts.h"
 #include "Loops.h"
 
-static const UInt32 kBackgroundLoaderThreadHookAddr = 0x0047CF3E;
+static const uint32_t kBackgroundLoaderThreadHookAddr = 0x0047CF3E;
 
 void __stdcall HandleThreadExit()
 {
@@ -46,7 +46,7 @@ void ThreadLocalData::Init()
 	ASSERT_STR(s_tlsIndex != 0xFFFFFFFF, "TlsAlloc() failed in ThreadLocalData::Init()");
 
 	// hook BackgroundLoaderThread threadProc retn
-//	WriteRelJump(kBackgroundLoaderThreadHookAddr, (UInt32)&BackgroundLoaderThreadHook);
+//	WriteRelJump(kBackgroundLoaderThreadHookAddr, (uint32_t)&BackgroundLoaderThreadHook);
 }
 
 void ThreadLocalData::DeInit()

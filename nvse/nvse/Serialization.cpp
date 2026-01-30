@@ -11,7 +11,7 @@
 namespace Serialization
 {
 
-static UInt32	kNvseOpcodeBase = 0x1400;
+static uint32_t	kNvseOpcodeBase = 0x1400;
 static std::string	g_savePath;
 
 // file format internals
@@ -20,7 +20,7 @@ static std::string	g_savePath;
 //	Header			header
 //		PluginHeader	plugin[header.numPlugins]
 //			ChunkHeader		chunk[plugin.numChunks]
-//				UInt8			data[chunk.length]
+//				uint8_t			data[chunk.length]
 
 struct Header
 {
@@ -32,26 +32,26 @@ struct Header
 		kVersion_Invalid =	0
 	};
 
-	UInt32	signature;
-	UInt32	formatVersion;
-	UInt16	nvseVersion;
-	UInt16	nvseMinorVersion;
-	UInt32	falloutVersion;
-	UInt32	numPlugins;
+	uint32_t	signature;
+	uint32_t	formatVersion;
+	uint16_t	nvseVersion;
+	uint16_t	nvseMinorVersion;
+	uint32_t	falloutVersion;
+	uint32_t	numPlugins;
 };
 
 struct PluginHeader
 {
-	UInt32	opcodeBase;
-	UInt32	numChunks;
-	UInt32	length;		// length of following data including ChunkHeader
+	uint32_t	opcodeBase;
+	uint32_t	numChunks;
+	uint32_t	length;		// length of following data including ChunkHeader
 };
 
 struct ChunkHeader
 {
-	UInt32	type;
-	UInt32	version;
-	UInt32	length;
+	uint32_t	type;
+	uint32_t	version;
+	uint32_t	length;
 };
 
 // locals
@@ -65,12 +65,12 @@ PluginHandle	s_currentPlugin = 0;
 
 Header			s_fileHeader = { 0 };
 
-UInt64			s_pluginHeaderOffset = 0;
+uint64_t			s_pluginHeaderOffset = 0;
 PluginHeader	s_pluginHeader = { 0 };
 
 bool			s_chunkOpen = false;
 bool			ignoreNextChunk = false;	// if true do not complain the plugin left data behind (it ws preloaded)
-UInt64			s_chunkHeaderOffset = 0;
+uint64_t			s_chunkHeaderOffset = 0;
 ChunkHeader		s_chunkHeader = { 0 };
 
 bool			s_preloading = false;		// if true, we are reading co-save *before* savegame begins to load
@@ -179,7 +179,7 @@ void InternalSetPreLoadCallback(PluginHandle plugin, NVSESerializationInterface:
 	s_pluginCallbacks[plugin].preLoad = callback;
 }
 
-bool WriteRecord(UInt32 type, UInt32 version, const void * buf, UInt32 length)
+bool WriteRecord(uint32_t type, uint32_t version, const void * buf, uint32_t length)
 {
 	if(!OpenRecord(type, version)) return false;
 
@@ -192,12 +192,12 @@ static void FlushWriteChunk(void)
 	if(!s_chunkOpen)
 		return;
 
-	UInt64	curOffset = s_currentFile.GetOffset();
-	UInt64	chunkSize = curOffset - s_chunkHeaderOffset - sizeof(s_chunkHeader);
+	uint64_t	curOffset = s_currentFile.GetOffset();
+	uint64_t	chunkSize = curOffset - s_chunkHeaderOffset - sizeof(s_chunkHeader);
 
 	ASSERT(chunkSize < 0x80000000);	// stupidity check
 
-	s_chunkHeader.length = (UInt32)chunkSize;
+	s_chunkHeader.length = (uint32_t)chunkSize;
 
 	s_currentFile.SetOffset(s_chunkHeaderOffset);
 	s_currentFile.WriteBuf(&s_chunkHeader, sizeof(s_chunkHeader));
@@ -209,7 +209,7 @@ static void FlushWriteChunk(void)
 	s_chunkOpen = false;
 }
 
-bool OpenRecord(UInt32 type, UInt32 version)
+bool OpenRecord(uint32_t type, uint32_t version)
 {
 	if(!s_pluginHeader.numChunks)
 	{
@@ -235,7 +235,7 @@ bool OpenRecord(UInt32 type, UInt32 version)
 	return true;
 }
 
-bool WriteRecordData(const void * buf, UInt32 length)
+bool WriteRecordData(const void * buf, uint32_t length)
 {
 	s_currentFile.WriteBuf(buf, length);
 
@@ -257,7 +257,7 @@ static void FlushReadRecord(void)
 	}
 }
 
-bool GetNextRecordInfo(UInt32 * type, UInt32 * version, UInt32 * length)
+bool GetNextRecordInfo(uint32_t * type, uint32_t * version, uint32_t * length)
 {
 	FlushReadRecord();
 
@@ -277,7 +277,7 @@ bool GetNextRecordInfo(UInt32 * type, UInt32 * version, UInt32 * length)
 	return true;
 }
 
-UInt32 ReadRecordData(void * buf, UInt32 length)
+uint32_t ReadRecordData(void * buf, uint32_t length)
 {
 	ASSERT(s_chunkOpen);
 
@@ -291,7 +291,7 @@ UInt32 ReadRecordData(void * buf, UInt32 length)
 	return length;
 }
 
-UInt32 PeekRecordData(void * buf, UInt32 length)
+uint32_t PeekRecordData(void * buf, uint32_t length)
 {
 	ASSERT(s_chunkOpen);
 
@@ -303,9 +303,9 @@ UInt32 PeekRecordData(void * buf, UInt32 length)
 	return length;
 }
 
-bool ResolveRefID(UInt32 refID, UInt32 * outRefID)
+bool ResolveRefID(uint32_t refID, uint32_t * outRefID)
 {
-	UInt8	modID = refID >> 24;
+	uint8_t	modID = refID >> 24;
 
 	// pass dynamic ids straight through
 	if(modID == 0xFF)
@@ -314,7 +314,7 @@ bool ResolveRefID(UInt32 refID, UInt32 * outRefID)
 		return true;
 	}
 
-	UInt8	loadedModID = 0xFF;
+	uint8_t	loadedModID = 0xFF;
 	if(modID >= s_numPreloadMods)
 	{
 		_MESSAGE("ResolveRefID: requested ID for a mod idx higher than referenced in savegame (%02X, max %02X)",
@@ -377,7 +377,7 @@ void HandleSaveGame(const char * path)
 
 			// iterate through plugins
 			_MESSAGE("saving %d plugins to %s", s_pluginCallbacks.size(), g_savePath.c_str());
-			for(UInt32 i = 0; i < s_pluginCallbacks.size(); i++)
+			for(uint32_t i = 0; i < s_pluginCallbacks.size(); i++)
 			{
 				if(s_pluginCallbacks[i].save)
 				{
@@ -404,7 +404,7 @@ void HandleSaveGame(const char * path)
 
 					if(s_pluginHeader.numChunks)
 					{
-						UInt64	curOffset = s_currentFile.GetOffset();
+						uint64_t	curOffset = s_currentFile.GetOffset();
 
 						s_currentFile.SetOffset(s_pluginHeaderOffset);
 						s_currentFile.WriteBuf(&s_pluginHeader, sizeof(s_pluginHeader));
@@ -513,10 +513,10 @@ void HandleLoadGame(const char * path, NVSESerializationInterface::EventCallback
 			{
 				s_currentFile.ReadBuf(&s_pluginHeader, sizeof(s_pluginHeader));
 
-				UInt64	pluginChunkStart = s_currentFile.GetOffset();
+				uint64_t	pluginChunkStart = s_currentFile.GetOffset();
 
 				// find the corresponding plugin
-				UInt32	pluginIdx = (s_pluginHeader.opcodeBase == kNvseOpcodeBase) ? 0 : g_pluginManager.LookupHandleFromBaseOpcode(s_pluginHeader.opcodeBase);
+				uint32_t	pluginIdx = (s_pluginHeader.opcodeBase == kNvseOpcodeBase) ? 0 : g_pluginManager.LookupHandleFromBaseOpcode(s_pluginHeader.opcodeBase);
 				if(pluginIdx != kPluginHandle_Invalid)
 				{
 					s_pluginCallbacks[pluginIdx].hadData = true;
@@ -543,7 +543,7 @@ void HandleLoadGame(const char * path, NVSESerializationInterface::EventCallback
 					s_currentFile.Skip(s_pluginHeader.length);
 				}
 
-				UInt64	expectedOffset = pluginChunkStart + s_pluginHeader.length;
+				uint64_t	expectedOffset = pluginChunkStart + s_pluginHeader.length;
 				if(s_currentFile.GetOffset() != expectedOffset)
 				{
 					_WARNING("plugin did not read all of its data (at %016I64X expected %016I64X)", s_currentFile.GetOffset(), expectedOffset);
@@ -625,7 +625,7 @@ void HandleNewGame(void)
 {
 	PluginManager::Dispatch_Message(0, NVSEMessagingInterface::kMessage_NewGame, NULL, 0, NULL);
 	// iterate through plugins
-	for(UInt32 i = 0; i < s_pluginCallbacks.size(); i++)
+	for(uint32_t i = 0; i < s_pluginCallbacks.size(); i++)
 	{
 		if(s_pluginCallbacks[i].newGame)
 		{

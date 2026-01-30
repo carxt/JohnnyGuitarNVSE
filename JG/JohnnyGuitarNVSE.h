@@ -10,17 +10,17 @@ NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_scriptInterface = NULL;
 NVSECommandTableInterface* g_cmdTableInterface = NULL;
 VATSCameraData* g_VATSCameraData = NULL;
-InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
-float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, UInt8 arg4, ContChangesEntry* entry, UInt8 arg6, UInt8 arg7, int arg8, float arg9, float arg10, UInt8 arg11, UInt8 arg12, TESForm* ammo) =
-(float(*)(ActorValueOwner*, TESObjectWEAP*, float, UInt8, ContChangesEntry*, UInt8, UInt8, int, float, float, UInt8, UInt8, TESForm*))0x645380;
+InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ContChangesEntry* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
+(float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ContChangesEntry*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
 void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
 bool isShowLevelUp = true;
 bool bArrowKeysDisabled = false;
 bool bCombatMusicDisabled = false;
 #define ExtractFormatStringArgs(...) g_scriptInterface->ExtractFormatStringArgs(__VA_ARGS__)
-#define IS_TYPE(form, type) (*(UInt32*)form == kVtbl_##type)
-#define NOT_ID(form, type) (form->typeID != kFormType_##type)
-#define IS_ID(form, type) (form->typeID == kFormType_##type)
+#define IS_TYPE(form, type) (*(uint32_t*)form == kVtbl_##type)
+#define NOT_ID(form, type) (form->typeID != FORM_TYPE::##type)
+#define IS_ID(form, type) (form->typeID == FORM_TYPE::##type)
 #define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 #define VarNameSize 64
@@ -39,18 +39,18 @@ bool bFixJIP = true;
 unsigned int iFPSCapLoadScreen = 0;
 float iDeathSoundMAXTimer = 10;
 bool bDisableDLLCompatibilityRoutines = 0;
-std::unordered_map<UInt8, float> shakeRequests;
+std::unordered_map<uint8_t, float> shakeRequests;
 TESSound* questFailSound = 0;
 TESSound* questNewSound = 0;
 TESSound* questCompeteSound = 0;
 TESSound* locationDiscoverSound = 0;
-std::unordered_map<UInt32, char*> markerIconMap;
-std::unordered_map <UInt32, std::vector<const char*>> factionRepIcons;
+std::unordered_map<uint32_t, char*> markerIconMap;
+std::unordered_map <uint32_t, std::vector<const char*>> factionRepIcons;
 std::unordered_map<std::string, int> miscStatMap;
 std::unordered_set<std::string> availableMiscStats;
-UInt32 disableMuzzleLights = -1;
+uint32_t disableMuzzleLights = -1;
 static float vatsSpreadMultValue = 15.0;
-UInt32 g_initialTickCount = 0;
+uint32_t g_initialTickCount = 0;
 // Singletons
 PlayerCharacter* g_thePlayer = nullptr;
 ProcessManager* g_processManager = nullptr;
@@ -61,10 +61,10 @@ BSAudioManager* g_audioManager = nullptr;
 GameTimeGlobals* g_gameTimeGlobals = nullptr;
 StatsMenu* g_statsMenu = nullptr;
 NiTPointerMap<TESForm>* g_mapAllForms = nullptr;
-UInt8 recalculateStatFilters = 0;
+uint8_t recalculateStatFilters = 0;
 Sky** g_currentSky = nullptr;
 void(__thiscall* OriginalBipedModelUpdateWeapon)(ValidBip01Names*, TESObjectWEAP*, int) = (void(__thiscall*)(ValidBip01Names*, TESObjectWEAP*, int)) 0x4AB400;
-UInt8(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (UInt8(__thiscall*)(ContChangesEntry*)) 0x4BD820;
+uint8_t(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (uint8_t(__thiscall*)(ContChangesEntry*)) 0x4BD820;
 std::unordered_set<BYTE> SaveGameUMap;
 uintptr_t g_canSaveNowAddr = 0;
 uintptr_t g_canSaveNowMenuAddr = 0;
@@ -138,7 +138,7 @@ NiMatrix3 kCameraRot = NiMatrix3::IDENTITY;
 NiMatrix3 kCameraIdentity = NiMatrix3(0, 0, 1,
 									  1, 0, 0,
 									  0, 1, 0);
-UInt32 uiReferenceToTrack = 0;
+uint32_t uiReferenceToTrack = 0;
 bool bOverrideCameraPos = false;
 bool bOverrideCameraRot = false;
 int eAxis = -3;
@@ -340,7 +340,7 @@ public:
 
 };
 
-std::unordered_map<UInt32, std::map<UInt32, DialogueEmotionOverride>> dialogResponseOverrideMap;
+std::unordered_map<uint32_t, std::map<uint32_t, DialogueEmotionOverride>> dialogResponseOverrideMap;
 
 
 
@@ -580,26 +580,26 @@ namespace hk_DialogueTopicResponseManageHook {
 	struct DialogueResponse
 	{
 		BSString responseText;
-		UInt32 emotionType;
-		UInt32 emotionValue;
+		uint32_t emotionType;
+		uint32_t emotionValue;
 		BSString voiceFilePath;
 		TESIdleForm* speakerAnimation;
 		TESIdleForm* listenerAnimation;
-		UInt32 sound;
-		UInt8 flags;
-		UInt8 pad25[3];
-		UInt32 responseNumber;
+		uint32_t sound;
+		uint8_t flags;
+		uint8_t pad25[3];
+		uint32_t responseNumber;
 	};
 
 	struct DialogueCache
 	{
-		UInt32 emotionType;
-		UInt32 emotionValue;
-		UInt32 responseNumber;
-		UInt32 speakerAnimation;
-		UInt32 listenerAnimation;
+		uint32_t emotionType;
+		uint32_t emotionValue;
+		uint32_t responseNumber;
+		uint32_t speakerAnimation;
+		uint32_t listenerAnimation;
 	};
-	std::unordered_map<UInt32, std::map<UInt32, DialogueCache>> cachedDialogueInfo;
+	std::unordered_map<uint32_t, std::map<uint32_t, DialogueCache>> cachedDialogueInfo;
 
 
 	static uintptr_t originalTopicInfoLoad = 0x104D5D4;
@@ -945,7 +945,7 @@ __forceinline void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn
 	NiPointBuffer->z = zIn;
 }
 
-UInt8 TESForm::GetOverridingModIdx() {
+uint8_t TESForm::GetOverridingModIdx() {
 	return mods.GetLastItem() ? mods.GetLastItem()->modIndex : 0xFF;
 }
 
@@ -986,14 +986,14 @@ bool __fastcall FleeFixHook(PlayerCharacter* Player, void* unused, bool& IsHidde
 
 char** defaultMarkerList = (char**)0x11A0404;
 
-char* __fastcall GetMapMarker(TESObjectREFR* thisObj, UInt16 mapMarkerType) {
+char* __fastcall GetMapMarker(TESObjectREFR* thisObj, uint16_t mapMarkerType) {
 	auto it = markerIconMap.find(thisObj->refID);
 	if (it != markerIconMap.end()) return it->second;
 	return defaultMarkerList[mapMarkerType];
 }
 
 __declspec (naked) void GetMapMarkerHook() {
-	//UInt32 static const retAddr = 0x079D337;
+	//uint32_t static const retAddr = 0x079D337;
 	__asm
 	{
 		mov edx, eax
@@ -1026,8 +1026,8 @@ void SetMapMarkerIcon(TESObjectREFR* marker, char* iconPath) {
 }
 
 _declspec(naked) void LevelUpHook() {
-	static const UInt32 noShowAddr = 0x77D903;
-	static const UInt32 showAddr = 0x77D618;
+	static const uint32_t noShowAddr = 0x77D903;
+	static const uint32_t showAddr = 0x77D618;
 	_asm {
 		jne noLevelUp
 		mov al, isShowLevelUp
@@ -1046,10 +1046,10 @@ TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
 			ExtraContainerChanges* xChanges = GetExtraType(g_thePlayer->extraDataList, ContainerChanges);
 			TESForm* ammo = nullptr;
 			if (ammoList && xChanges && xChanges->data) {
-				for (int i = 0; i < ammoList->Count(); i++) {
+				for (uint32_t i = 0; i < ammoList->Count(); i++) {
 					ammo = ammoList->GetNthForm(i);
 					if (IS_TYPE(ammo, TESAmmo)) {
-						UInt32 count = ThisCall<UInt32>(0x4C8F30, xChanges->data, ammo);
+						uint32_t count = ThisCall<uint32_t>(0x4C8F30, xChanges->data, ammo);
 						if (count > 0) return ammo;
 					}
 				}
@@ -1060,7 +1060,7 @@ TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
 }
 
 __declspec(naked) void InventoryAmmoHook() {
-	static const UInt32 retnAddr = 0x7080A8;
+	static const uint32_t retnAddr = 0x7080A8;
 	__asm {
 		mov ecx, dword ptr[ebp - 0x2D4]
 		call GetAmmoInInventory
@@ -1079,7 +1079,7 @@ tList<TESAmmoEffect>* __fastcall GetAmmoEffectsCheckType(TESForm* form)
 }
 
 __declspec(naked) void OnCloseContainerHook() {
-	static const UInt32 retnAddr = 0x75B240;
+	static const uint32_t retnAddr = 0x75B240;
 	__asm
 	{
 		push    ecx
@@ -1099,7 +1099,7 @@ __declspec(naked) void OnCloseContainerHook() {
 
 void patchFixDisintegrationsStat() {
 	// check if user has Unnecessary Tweaks or lStewieAl's Tweaks installed
-	if (*(UInt8*)0x8A1B4D == 0xE9 || *(UInt8*)0x8A1B51 == 0x26) return;
+	if (*(uint8_t*)0x8A1B4D == 0xE9 || *(uint8_t*)0x8A1B51 == 0x26) return;
 	// critical stage 1, jump to checks for IncPCMiscStat
 	SafeWrite8(0x8A1B51, 0x26); // change JE offset
 
@@ -1115,8 +1115,8 @@ float* __fastcall VATSSpreadMultHook(void* ecx) {
 }
 
 __declspec(naked) void DialogueAnimHook() {
-	static const UInt32 jumpAddr = 0x8A56DF;
-	static const UInt32 retnAddr = 0x8A566B;
+	static const uint32_t jumpAddr = 0x8A56DF;
+	static const uint32_t retnAddr = 0x8A566B;
 	__asm {
 		movzx eax, byte ptr ss : [ebp + 0x10]
 		test eax, eax
@@ -1128,7 +1128,7 @@ __declspec(naked) void DialogueAnimHook() {
 	}
 }
 __declspec(naked) void DisableArrowKeysHook() {
-	static const UInt32 retnAddr = 0x70F711;
+	static const uint32_t retnAddr = 0x70F711;
 	__asm {
 		cmp byte ptr[bArrowKeysDisabled], 1
 		jnz DONE
@@ -1150,8 +1150,8 @@ __declspec(naked) void DisableArrowKeysHook() {
 	}
 }
 __declspec(naked) void NPCIncrementingChallengesHook() {
-	static const UInt32 retnAddr = 0x88D0D8;
-	static const UInt32 noIncrementAddr = 0x88D100;
+	static const uint32_t retnAddr = 0x88D0D8;
+	static const uint32_t noIncrementAddr = 0x88D100;
 	__asm {
 		mov eax, [ebp - 0x80]
 		cmp eax, dword ptr ds : [0x11DEA3C]
@@ -1216,7 +1216,7 @@ __declspec (naked) void VanityModeHook_DEPRECATED() {
 		jmp jmpDest
 	}
 }
-bool __fastcall CombatMusicHook(UInt32* a1) {
+bool __fastcall CombatMusicHook(uint32_t* a1) {
 	if (bCombatMusicDisabled) return false;
 	return ThisCall<bool>(0x992D90, a1);
 }
@@ -1226,7 +1226,7 @@ TESRegionDataMap* GetMapData(TESRegion* region) {
 	TESRegionData* regData;
 	do {
 		regData = iter->data;
-		if ((*(UInt32*)regData == 0x1023D28))
+		if ((*(uint32_t*)regData == 0x1023D28))
 			return (TESRegionDataMap*)regData;
 	} while (iter = iter->next);
 	return nullptr;;
@@ -1238,12 +1238,12 @@ TESRegionDataWeather* GetWeatherData(TESRegion* region) {
 	TESRegionData* regData;
 	do {
 		regData = iter->data;
-		if ((*(UInt32*)regData == 0x1023E18))
+		if ((*(uint32_t*)regData == 0x1023E18))
 			return (TESRegionDataWeather*)regData;
 	} while (iter = iter->next);
 	return nullptr;
 }
-void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseExtraList* a3, UInt32 itemCount, NiPoint3* a5, void* a6) {
+void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseExtraList* a3, uint32_t itemCount, NiPoint3* a5, void* a6) {
 	if (itemCount > 10000) {
 		for (itemCount; itemCount > 10000; itemCount -= 10000) {
 			ThisCall(0x954610, a1, a2, a3, 10000, a5, a6);
@@ -1252,7 +1252,7 @@ void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseEx
 	ThisCall(0x954610, a1, a2, a3, itemCount, a5, a6);
 }
 
-void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, UInt32* refID) {
+void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, uint32_t* refID) {
 	ThisCall(0x4727F0, info, refID);
 	if (*refID) {
 		CdeclCall(0x485D50, refID, info);
@@ -1310,9 +1310,9 @@ __declspec (naked) void PatchPlayerPainHook(){
 const char* __fastcall GetReputationIconHook(TESReputation* rep) {
 	auto it = factionRepIcons.find(rep->refID);
 	if (it != factionRepIcons.end()) {
-		UInt8 tierID = 0;
-		UInt8 pos = ThisCall<UInt8>(0x616950, rep, 1);
-		UInt8 neg = ThisCall<UInt8>(0x616950, rep, 0);
+		uint8_t tierID = 0;
+		uint8_t pos = ThisCall<uint8_t>(0x616950, rep, 1);
+		uint8_t neg = ThisCall<uint8_t>(0x616950, rep, 0);
 		if ((pos == 0 && neg == 1) || (pos == 2 && (neg == 2 || neg == 3)) || (pos == 3 && neg == 3)) {
 			tierID = 0; // in pain
 		}
@@ -1330,8 +1330,8 @@ const char* __fastcall GetReputationIconHook(TESReputation* rep) {
 	return ThisCall<char*>(0x6167D0, rep);
 }
 
-const char* __fastcall GetReputationMessageIconHook(UInt32 a1) {
-	UInt32 addr = (UInt32)_ReturnAddress();
+const char* __fastcall GetReputationMessageIconHook(uint32_t a1) {
+	uint32_t addr = (uint32_t)_ReturnAddress();
 	auto* _ebp = GetParentBasePtr(_AddressOfReturnAddress(), false);
 	TESReputation* rep = nullptr;
 	switch (addr) {
@@ -1353,7 +1353,7 @@ const char* __fastcall GetReputationMessageIconHook(UInt32 a1) {
 	if (rep && rep->refID) {
 		auto it = factionRepIcons.find(rep->refID);
 		if (it != factionRepIcons.end()) {
-			UInt8 tierID = 0;
+			uint8_t tierID = 0;
 			if (a1 == 0x11CBAD0 || a1 == 0x11CBC34) {
 				tierID = 1;
 			}
@@ -1410,10 +1410,10 @@ Setting* __fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char
 	}
 	return nullptr;
 }
-bool __fastcall MenuGetFlagHook(StartMenu* menu, UInt32 flags) {
+bool __fastcall MenuGetFlagHook(StartMenu* menu, uint32_t flags) {
 	return menu != nullptr ? ((flags & menu->flags) != 0) : false;
 }
-void __fastcall MenuSetFlagHook(StartMenu* menu, UInt32 flags, bool doSet) {
+void __fastcall MenuSetFlagHook(StartMenu* menu, uint32_t flags, bool doSet) {
 	if (menu != nullptr) {
 		if (doSet) {
 			menu->flags |= flags;
@@ -1568,8 +1568,8 @@ void __cdecl MiscStatRefreshHook(Tile* tile, int id) {
 
 	tile->SetFloat(kTileValue_user1, (float)value, 1);
 }
-bool __cdecl ShouldHideStat(UInt32* id) {
-	if ((UInt32)id >= 43) {
+bool __cdecl ShouldHideStat(uint32_t* id) {
+	if ((uint32_t)id >= 43) {
 		Tile* tile = g_statsMenu->miscStatIDList.GetTileFromItem(&id);
 		std::string sName = tile->name.c_str();
 		if (miscStatMap.find(sName) == miscStatMap.end()) return true;
@@ -1724,19 +1724,19 @@ void __fastcall SetCellImageSpaceHook(TESObjectCELL* cell, void* edx, TESImageSp
 
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
-	WriteRelJump(0x70809E, (UInt32)InventoryAmmoHook);
+	WriteRelJump(0x70809E, (uint32_t)InventoryAmmoHook);
 
 	// fix ammo effects list being checked for non-TESAmmo's when the Rock-It-Launcher is equipped
 	for (auto addr : { 0x523AD8, 0x64529D, 0x64553B, 0x6462C5 })
 	{
-		WriteRelCall(addr, UInt32(GetAmmoEffectsCheckType));
+		WriteRelCall(addr, uint32_t(GetAmmoEffectsCheckType));
 	}
 
 	// fix for companions not saying the next topic after opening ContainerMenu through dialog
-	SafeWrite32(0x10721AC, (UInt32)OnCloseContainerHook);
+	SafeWrite32(0x10721AC, (uint32_t)OnCloseContainerHook);
 
 	// replace fNPCMaxWobbleAngle with 15.0 for VATS
-	WriteRelCall(0x8B102B, (UInt32)VATSSpreadMultHook);
+	WriteRelCall(0x8B102B, (uint32_t)VATSSpreadMultHook);
 
 	// Fix for animations not working in dialog topics with sound
 	PatchMemoryNop(0x8A56C4, 4);
@@ -1746,7 +1746,7 @@ void HandleFixes() {
 	patchFixDisintegrationsStat();
 
 	// fix NPCs incrementing player challenges
-	WriteRelJump(0x88D0D0, (UInt32)NPCIncrementingChallengesHook);
+	WriteRelJump(0x88D0D0, (uint32_t)NPCIncrementingChallengesHook);
 
 	// use correct weapon skill req penalty setting in weapon spread calculation
 	SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01", 4);
@@ -1758,22 +1758,22 @@ void HandleFixes() {
 	SafeWrite8(0x4F064E, 0x7A);
 
 	// fix for Get/Set/SaveINISetting not reading renderer INI setting list
-	WriteRelCall(0x5BED66, (UInt32)GetINISettingHook);
-	WriteRelCall(0x5BEF13, (UInt32)GetINISettingHook);
-	WriteRelCall(0x5B6C80, (UInt32)SaveINIHook);
+	WriteRelCall(0x5BED66, (uint32_t)GetINISettingHook);
+	WriteRelCall(0x5BEF13, (uint32_t)GetINISettingHook);
+	WriteRelCall(0x5B6C80, (uint32_t)SaveINIHook);
 
-	WriteRelJump(0x5BED86, (UInt32)GetINISettingTypeHook);
+	WriteRelJump(0x5BED86, (uint32_t)GetINISettingTypeHook);
 
 	// fixes for null pointers when showing credits outside of start menu
-	WriteRelCall(0x75F770, (UInt32)MenuGetFlagHook);
-	WriteRelCall(0x75F8AE, (UInt32)MenuSetFlagHook);
-	WriteRelCall(0x75F6DA, (UInt32)MenuSetFlagHook);
+	WriteRelCall(0x75F770, (uint32_t)MenuGetFlagHook);
+	WriteRelCall(0x75F8AE, (uint32_t)MenuSetFlagHook);
+	WriteRelCall(0x75F6DA, (uint32_t)MenuSetFlagHook);
 
 	// missing nullcheck in HandleStealing
 	SafeWriteBuf(0x8BFBC1, "\x85\xC9\x74\x36\x80\x79\x04", 7);
 
 	// fix for incidental sounds not working in regions
-	WriteRelCall(0x4F49AB, UInt32(TESRegionDataSoundIncidentalIDHook));
+	WriteRelCall(0x4F49AB, uint32_t(TESRegionDataSoundIncidentalIDHook));
 
 	// fix for the stimpak crash
 	WriteRelCall(0x7DB525, (uintptr_t)StimpakHotkeyHook);
@@ -1783,11 +1783,11 @@ void HandleFixes() {
 	WriteRelJump((uintptr_t)0x0490B10, (uintptr_t)0x0490B41);
 
 	// fix NPE in BSTempEffectSimpleDecal
-	WriteRelJump(0x68D2EB, (UInt32)SimpleDecalHook);
+	WriteRelJump(0x68D2EB, (uint32_t)SimpleDecalHook);
 
 
 	// Fix for missing baseprocess null check
-	WriteRelJump(0x59DF40, (UInt32)IsCurrentFurnitureRefHook);
+	WriteRelJump(0x59DF40, (uint32_t)IsCurrentFurnitureRefHook);
 
 	//AnimData NPEs
 	//fix NPE in AnimData freeing
@@ -1808,7 +1808,7 @@ void HandleFixes() {
 	hk_EmotionOverrideUndo< 0x0617D59>();
 	hk_QuestObjectiveIsDisplayedCall<0x05A5E70>();
 
-	WriteRelCall(0x5B7812, (UInt32)SetCellImageSpaceHook);
+	WriteRelCall(0x5B7812, (uint32_t)SetCellImageSpaceHook);
 }
 
 void HandleIniOptions() {
@@ -1816,11 +1816,11 @@ void HandleIniOptions() {
 	//if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)VanityModeHook);
 
 	// for bFixFleeing
-	if (fixFleeing) WriteRelCall(0x8F5FE2, (UInt32)FleeFixHook);
+	if (fixFleeing) WriteRelCall(0x8F5FE2, (uint32_t)FleeFixHook);
 
 	// for bFixItemStackCount
 	if (fixItemStacks) {
-		WriteRelCall(0x780D11, (UInt32)DropItemHook);
+		WriteRelCall(0x780D11, (uint32_t)DropItemHook);
 		SafeWriteBuf(0x780D11 + 5, "\x90\x90\x90", 3);
 	}
 
@@ -1923,63 +1923,63 @@ void __fastcall StopHolotapeSoundHook(BSSoundHandle* handle, void* edx, bool a2)
 
 void HandleFunctionPatches() {
 	// WorldToScreen
-	WriteRelJump(0xC5244A, (UInt32)NiCameraGetAltHook);
+	WriteRelJump(0xC5244A, (uint32_t)NiCameraGetAltHook);
 
 	// ToggleLevelUpMenu
-	WriteRelJump(0x77D612, UInt32(LevelUpHook));
+	WriteRelJump(0x77D612, uint32_t(LevelUpHook));
 
 	// DisableMuzzleFlashLights
-	WriteRelCall(0x9BAFED, (UInt32)DisableMuzzleFlashLightsHook);
+	WriteRelCall(0x9BAFED, (uint32_t)DisableMuzzleFlashLightsHook);
 
 	// SetCustomMapMarkerIcon
 	SafeWrite16(0x79D330, 0x9090);
-	WriteRelCall(0x79D332, (UInt32)GetMapMarkerHook);
+	WriteRelCall(0x79D332, (uint32_t)GetMapMarkerHook);
 
 	// DisableMenuArrowKeys
-	WriteRelJump(0x70F708, (UInt32)DisableArrowKeysHook);
+	WriteRelJump(0x70F708, (uint32_t)DisableArrowKeysHook);
 
 	// SetUIUpdateSound
-	WriteRelCall(0x77A8E9, (UInt32)UIUpdateSoundHook);
+	WriteRelCall(0x77A8E9, (uint32_t)UIUpdateSoundHook);
 
 	// DisableCombatMusic
-	WriteRelCall(0x82FC0B, (UInt32)CombatMusicHook);
+	WriteRelCall(0x82FC0B, (uint32_t)CombatMusicHook);
 
 	// ToggleDisableSaves
-	g_canSaveNowAddr = (*(UInt32*)0x0850443) + 5 + 0x0850442;
+	g_canSaveNowAddr = (*(uint32_t*)0x0850443) + 5 + 0x0850442;
 	WriteRelCall(0x0850442, (uintptr_t)CanSaveNowHook);
-	g_canSaveNowMenuAddr = (*(UInt32*)0x07CBDC8) + 5 + 0x07CBDC7;
+	g_canSaveNowMenuAddr = (*(uint32_t*)0x07CBDC8) + 5 + 0x07CBDC7;
 	WriteRelCall(0x07CBDC7, (uintptr_t)CanSaveNowMenuHook);
 
 	// SetCustomReputationChangeIcon
-	WriteRelCall(0x6156A2, UInt32(GetReputationIconHook));
-	WriteRelCall(0x6156FB, UInt32(GetReputationIconHook));
-	WriteRelCall(0x615B19, UInt32(GetReputationMessageIconHook));
-	WriteRelCall(0x615C04, UInt32(GetReputationMessageIconHook));
-	WriteRelCall(0x61610A, UInt32(GetReputationMessageIconHook));
-	WriteRelCall(0x616203, UInt32(GetReputationMessageIconHook));
-	WriteRelCall(0x615855, UInt32(GetReputationMessageIconHook));
-	WriteRelCall(0x61594C, UInt32(GetReputationMessageIconHook));
-	WriteRelCall(0x615F0B, UInt32(GetReputationMessageIconHook));
-	WriteRelCall(0x615E06, UInt32(GetReputationMessageIconHook));
+	WriteRelCall(0x6156A2, uint32_t(GetReputationIconHook));
+	WriteRelCall(0x6156FB, uint32_t(GetReputationIconHook));
+	WriteRelCall(0x615B19, uint32_t(GetReputationMessageIconHook));
+	WriteRelCall(0x615C04, uint32_t(GetReputationMessageIconHook));
+	WriteRelCall(0x61610A, uint32_t(GetReputationMessageIconHook));
+	WriteRelCall(0x616203, uint32_t(GetReputationMessageIconHook));
+	WriteRelCall(0x615855, uint32_t(GetReputationMessageIconHook));
+	WriteRelCall(0x61594C, uint32_t(GetReputationMessageIconHook));
+	WriteRelCall(0x615F0B, uint32_t(GetReputationMessageIconHook));
+	WriteRelCall(0x615E06, uint32_t(GetReputationMessageIconHook));
 
 	// Get/ModExtraMiscStat
-	SafeWrite32(0x7DDAB1, UInt32(MiscStatRefreshHook));
+	SafeWrite32(0x7DDAB1, uint32_t(MiscStatRefreshHook));
 
 	//Hairstyle handlers
 	hk_RSMBarberHook::Hook();
 	hk_BarterHook::CreateHook();
 
-	WriteRelCall(0x8752F2, UInt32(SetViewmodelFrustumHook));
+	WriteRelCall(0x8752F2, uint32_t(SetViewmodelFrustumHook));
 
-	WriteRelCall(0x82FC95, (UInt32)MLCOverrideHook);
+	WriteRelCall(0x82FC95, (uint32_t)MLCOverrideHook);
 
-	WriteRelCall(0x94AD8A, UInt32(SetCameraTranslateHook));
-	WriteRelCall(0x94AD9D, UInt32(SetCameraRotateHook));
+	WriteRelCall(0x94AD8A, uint32_t(SetCameraTranslateHook));
+	WriteRelCall(0x94AD9D, uint32_t(SetCameraRotateHook));
 
-	WriteRelCall(0x94BDC2, UInt32(SetCameraTranslateHook));
-	WriteRelCall(0x94BDD5, UInt32(SetCameraRotateHook));
+	WriteRelCall(0x94BDC2, uint32_t(SetCameraTranslateHook));
+	WriteRelCall(0x94BDD5, uint32_t(SetCameraRotateHook));
 
-	WriteRelCall(0x798BB1, (UInt32)StopHolotapeSoundHook);
+	WriteRelCall(0x798BB1, (uint32_t)StopHolotapeSoundHook);
 }
 float timer22 = 30.0;
 void HandleGameHooks() {

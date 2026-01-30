@@ -37,6 +37,18 @@
     <Filter Include="internal\JIP">
       <UniqueIdentifier>{49555d54-368f-4267-a3a7-3ef5112a8cee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="shared">
+      <UniqueIdentifier>{4d26ed72-ff83-447d-8598-3f487d8c9768}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shared\BSMemory">
+      <UniqueIdentifier>{f6ec4eb0-f573-4196-aa5e-7451278d62d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shared\Utils">
+      <UniqueIdentifier>{13a267fa-4af1-40d0-92cb-27aa8c7de76f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shared\SafeWrite">
+      <UniqueIdentifier>{3c90c5fc-b2e8-4943-944a-731e488f1447}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
@@ -75,9 +87,6 @@
     <ClCompile Include="..\nvse\nvse\GameTiles.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\SafeWrite.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="..\nvse\nvse\Utilities.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
@@ -97,16 +106,10 @@
     <ClCompile Include="..\nvse\nvse\GameUI.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\FileFinder.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="..\nvse\nvse\NiTypes.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSMemory.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp">
@@ -144,6 +147,15 @@
     </ClCompile>
     <ClCompile Include="internal\JIP\JIPFixes.cpp">
       <Filter>internal\JIP</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\BSMemory\BSMemory.cpp">
+      <Filter>shared\BSMemory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\shared\SafeWrite\SafeWrite.cpp">
+      <Filter>shared\SafeWrite</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -184,9 +196,6 @@
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameTypes.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="..\nvse\nvse\SafeWrite.h">
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\Utilities.h">
@@ -268,17 +277,11 @@
     <ClInclude Include="events\LambdaVariableContext.h">
       <Filter>events</Filter>
     </ClInclude>
-    <ClInclude Include="..\nvse\nvse\prefix.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
     <ClInclude Include="functions\fn_book.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="internal\serialization.h">
       <Filter>internal</Filter>
-    </ClInclude>
-    <ClInclude Include="..\nvse\nvse\FileFinder.h">
-      <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameSound.h">
       <Filter>nvse</Filter>
@@ -290,9 +293,6 @@
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BSStringT.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSMemory.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp">
@@ -340,10 +340,40 @@
     <ClInclude Include="functions\fn_dial.h">
       <Filter>functions</Filter>
     </ClInclude>
+    <ClInclude Include="..\shared\BSMemory\BSMemory.hpp">
+      <Filter>shared\BSMemory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\Utils\Bitfield.hpp">
+      <Filter>shared\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\Defines.hpp">
+      <Filter>shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\SafeWrite\SafeWrite.hpp">
+      <Filter>shared\SafeWrite</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BaseFormComponent.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSSimpleList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\FileFinder.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
     <None Include="internal\Game\Bethesda\BSStringT.inl">
+      <Filter>internal\Game\Bethesda</Filter>
+    </None>
+    <None Include="internal\Game\Bethesda\BSSimpleList.inl">
       <Filter>internal\Game\Bethesda</Filter>
     </None>
   </ItemGroup>

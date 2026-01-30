@@ -11,9 +11,9 @@ struct PackageInfo
 	TESPackage		*package;		// 00
 	TESPackageData	*packageData;	// 04
 	TESObjectREFR	*targetRef;		// 08
-	UInt32			unk0C;			// 0C	Initialized to 0FFFFFFFFh, set to 0 on start
+	uint32_t			unk0C;			// 0C	Initialized to 0FFFFFFFFh, set to 0 on start
 	float			unk10;			// 10	Initialized to -1.0	. Set to GameHour on start so some time
-	UInt32			flags;			// 14	Flags, bit0 would be not created and initialized
+	uint32_t			flags;			// 14	Flags, bit0 would be not created and initialized
 };
 
 class Projectile;
@@ -31,8 +31,8 @@ struct ActorHitData
 		Projectile		*projectile;
 		Explosion		*explosion;
 	};
-	UInt32				unk0C;			// 0C
-	SInt32				hitLocation;	// 10
+	uint32_t				unk0C;			// 0C
+	int32_t				hitLocation;	// 10
 	float				healthDmg;		// 14
 	float				wpnBaseDmg;		// 18	Skill and weapon condition modifiers included
 	float				fatigueDmg;		// 1C
@@ -44,11 +44,11 @@ struct ActorHitData
 	float				healthPerc;		// 34
 	NiVector3			impactPos;		// 38
 	NiVector3			impactAngle;	// 44
-	UInt32				unk50;			// 50
-	UInt32				unk54;			// 54
-	UInt32				flags;			// 58
+	uint32_t				unk50;			// 50
+	uint32_t				unk54;			// 54
+	uint32_t				flags;			// 58
 	float				dmgMult;		// 5C
-	UInt32				unk60;			// 60	Unused
+	uint32_t				unk60;			// 60	Unused
 };
 
 // 30
@@ -56,19 +56,18 @@ class BaseProcess
 {
 public:
 	BaseProcess();
-	~BaseProcess();
 
 	struct Data2C
 	{
 		float	unk00[12];
-		UInt32	unk30[2];
+		uint32_t	unk30[2];
 		float	unk38[2];
-		UInt8	unk40;
-		UInt8	pad41[3];
-		UInt32	flags;		// 44	flags, bit28 = IsGhost
+		uint8_t	unk40;
+		uint8_t	pad41[3];
+		uint32_t	flags;		// 44	flags, bit28 = IsGhost
 	};
 
-	virtual void	Destroy(bool noDealloc);
+	virtual			~BaseProcess();
 	virtual void	Unk_01(void);
 	virtual void	Unk_02(void);
 	virtual void	Unk_03(void);
@@ -228,7 +227,7 @@ public:
 	virtual TESPackageData	*GetPackageData();
 	virtual void	Unk_9E(void);
 	virtual TESPackage	*GetCurrentPackage();
-	virtual UInt32	GetPackageInfo0C();
+	virtual uint32_t	GetPackageInfo0C();
 	virtual void	Unk_A1();
 	virtual void	Unk_A2();
 	virtual bhkCharacterController	*GetCharacterController();
@@ -304,7 +303,7 @@ public:
 	virtual void	Unk_E9();
 	virtual void	Unk_EA();
 	virtual void	Unk_EB();
-	virtual void	Unk_EC(UInt32 avCode);
+	virtual void	Unk_EC(uint32_t avCode);
 	virtual void	Unk_ED();
 	virtual void	Unk_EE();
 	virtual void	Unk_EF();
@@ -317,7 +316,7 @@ public:
 	virtual void	Unk_F6();
 	virtual void	Unk_F7();
 	virtual void	Unk_F8();
-	virtual SInt16	GetCurrentAction();
+	virtual int16_t	GetCurrentAction();
 	virtual void	Unk_FA();
 	virtual void	Unk_FB();
 	virtual void	Unk_FC();
@@ -327,7 +326,7 @@ public:
 	virtual void	Unk_100();
 	virtual bool	IsAiming();
 	virtual void	Unk_102();
-	virtual SInt32	GetKnockedState();
+	virtual int32_t	GetKnockedState();
 	virtual void	SetKnockedState(char state);
 	virtual void	Unk_105();
 	virtual void	PushActorAway(Actor *pushed, float posX, float posY, float posZ, float force);
@@ -350,10 +349,10 @@ public:
 	virtual void	Unk_117();
 	virtual void	Unk_118();
 	virtual void	Unk_119(Actor *actor);
-	virtual void	Unk_11A(UInt32 unk);
+	virtual void	Unk_11A(uint32_t unk);
 	virtual void	Unk_11B();
 	virtual void	Unk_11C();
-	virtual bool	Unk_11D(UInt32 arg);
+	virtual bool	Unk_11D(uint32_t arg);
 	virtual void	Unk_11E();
 	virtual void	Unk_11F();
 	virtual void	Unk_120();
@@ -387,9 +386,9 @@ public:
 	virtual void	Unk_13C();
 	virtual void	Unk_13D();
 	virtual void	Unk_13E();
-	virtual void	Unk_13F(UInt32 unk);
+	virtual void	Unk_13F(uint32_t unk);
 	virtual void	Unk_140();
-	virtual DetectionData *GetDetectionData(Actor *target, UInt32 detecting);
+	virtual DetectionData *GetDetectionData(Actor *target, uint32_t detecting);
 	virtual void	Unk_142();
 	virtual void	Unk_143();
 	virtual void	Unk_144();
@@ -457,8 +456,8 @@ public:
 	virtual void	Unk_182();
 	virtual void	Unk_183();
 	virtual void	Unk_184();
-	virtual void	SetQueuedIdleFlags(UInt32 flags);
-	virtual UInt32	GetQueuedIdleFlags();
+	virtual void	SetQueuedIdleFlags(uint32_t flags);
+	virtual uint32_t	GetQueuedIdleFlags();
 	virtual void	ResetQueuedIdleFlags();
 	virtual void	Unk_188();
 	virtual void	Unk_189();
@@ -470,7 +469,7 @@ public:
 	virtual void	Unk_18F();
 	virtual void	Unk_190();
 	virtual void	Unk_191();
-	virtual void	Unk_192(UInt8 unk);
+	virtual void	Unk_192(uint8_t unk);
 	virtual void	Unk_193();
 	virtual void	Unk_194();
 	virtual void	Unk_195();
@@ -566,8 +565,8 @@ public:
 	PackageInfo		currentPackage;	// 04
 	float			unk1C;			// 1C	not initialized, only by descendant!
 	float			unk20;			// 20	not initialized, only by descendant to -1.0! flt020 gets set to GameHour minus one on package evaluation
-	UInt32			unk24;			// 24	not initialized, only by descendant!
-	UInt32			processLevel;	// 28	not initialized, only by descendant to 3 for Low, 2 for MidlleLow, 1 MiddleHighProcess and 0 for HigProcess
+	uint32_t			unk24;			// 24	not initialized, only by descendant!
+	uint32_t			processLevel;	// 28	not initialized, only by descendant to 3 for Low, 2 for MidlleLow, 1 MiddleHighProcess and 0 for HigProcess
 	Data2C			*unk2C;			// 2C
 };
 
@@ -586,16 +585,16 @@ public:
 
 	struct ActorValueModifier
 	{
-		UInt8	actorValue;	// 00 Might allow for other values
-		UInt8	pad[3];		// 01
+		uint8_t	actorValue;	// 00 Might allow for other values
+		uint8_t	pad[3];		// 01
 		float	damage;		// 04
 	};
 
 	struct ActorValueModifiers
 	{
 		tList<ActorValueModifier>	avModifierList;	// 00
-		UInt8						unk008;			// 08
-		UInt8						pad009[3];		// 09
+		uint8_t						unk008;			// 08
+		uint8_t						pad009[3];		// 09
 		void						**modifiedAV;	// 0C	array of damaged actorValue
 	};	// 10
 
@@ -625,32 +624,32 @@ public:
 	virtual void	Unk_205();
 	virtual void	Unk_206();
 
-	UInt8				byte30;		// 8 = IsAlerted
-	UInt8				pad31[3];
-	UInt32				unk34;
+	uint8_t				byte30;		// 8 = IsAlerted
+	uint8_t				pad31[3];
+	uint32_t				unk34;
 	FloatPair			unk38;
 	TESForm				*unk40;		// Used when picking idle anims.
-	UInt32				unk44;		// not initialized!	refr, expected actor, might be CombatTarget
-	UInt32				unk48;
-	UInt32				unk4C;
-	UInt32				unk50;
-	UInt32				unk54;		// not initialized!
-	UInt32				unk58;
-	UInt32				unk5C;
-	tList<UInt32>		unk60;		// List
-	UInt32				unk68;
-	UInt32				unk6C;
+	uint32_t				unk44;		// not initialized!	refr, expected actor, might be CombatTarget
+	uint32_t				unk48;
+	uint32_t				unk4C;
+	uint32_t				unk50;
+	uint32_t				unk54;		// not initialized!
+	uint32_t				unk58;
+	uint32_t				unk5C;
+	tList<uint32_t>		unk60;		// List
+	uint32_t				unk68;
+	uint32_t				unk6C;
 	tList<TESForm>		unk70;
-	tList<UInt32>		unk78;
-	tList<UInt32>		unk80;
-	UInt32				unk88;
-	UInt32				unk8C;
-	UInt32				unk90;
-	UInt32				unk94;
+	tList<uint32_t>		unk78;
+	tList<uint32_t>		unk80;
+	uint32_t				unk88;
+	uint32_t				unk8C;
+	uint32_t				unk90;
+	uint32_t				unk94;
 	ActorValueModifiers	damageModifiers;
 	float				gameDayDied;
-	UInt32				unkAC;		// not initialized!
-	UInt32				unkB0;		// not initialized!
+	uint32_t				unkAC;		// not initialized!
+	uint32_t				unkB0;		// not initialized!
 };
 
 // C8
@@ -662,7 +661,7 @@ public:
 
 	virtual void		Unk_207();
 
-	UInt32				unk0B4;			// B4
+	uint32_t				unk0B4;			// B4
 	ActorValueModifiers	tempModifiers;	// B8
 };
 
@@ -676,57 +675,57 @@ struct AnimData
 	{
 		struct Unk18
 		{
-			UInt32			unk00[9];
-			UInt32			unk24;
+			uint32_t			unk00[9];
+			uint32_t			unk24;
 		};
 
-		UInt32			unk00[6];
+		uint32_t			unk00[6];
 		Unk18			*unk18;
 	};
 
 	struct Unk128
 	{
-		UInt32			unk00[11];
+		uint32_t			unk00[11];
 		TESIdleForm		*idle2C;
 	};
 
-	UInt32							unk000;				// 000
+	uint32_t							unk000;				// 000
 	Actor							*actor;				// 004
 	NiNode							*nSceneRoot;		// 008
 	NiNode							*nBip01;			// 00C
-	UInt32							unk010;				// 010
+	uint32_t							unk010;				// 010
 	float							flt014;				// 014
 	float							flt018;				// 018
-	UInt32							unk01C;				// 01C
+	uint32_t							unk01C;				// 01C
 	float							flt020;				// 020
-	UInt32							unk024;				// 024
+	uint32_t							unk024;				// 024
 	NiNode							*nPelvis;			// 028
 	NiNode							*nBip01Copy;		// 02C
 	NiNode							*nLForearm;			// 030
 	NiNode							*nHead;				// 034
 	NiNode							*nWeapon;			// 038
-	UInt32							unk03C[2];			// 03C
+	uint32_t							unk03C[2];			// 03C
 	NiNode							*nNeck1;			// 044
 	float							unk048;				// 048
-	UInt16							groupIDs[8];		// 04C
-	SInt32							sequenceState1[8];	// 05C
-	SInt32							sequenceState2[8];	// 07C
-	UInt32							unk09C[12];			// 09C
+	uint16_t							groupIDs[8];		// 04C
+	int32_t							sequenceState1[8];	// 05C
+	int32_t							sequenceState2[8];	// 07C
+	uint32_t							unk09C[12];			// 09C
 	float							flt0CC;				// 0CC
 	float							flt0D0;				// 0D0
-	UInt32							unk0D4;				// 0D4
+	uint32_t							unk0D4;				// 0D4
 	NiControllerManager				*unk0D8;			// 0D8
 	NiTPointerMap<AnimSequenceBase>	*unk0DC;			// 0DC
 	BSAnimGroupSequence				*animSequence[8];	// 0E0
 	BSAnimGroupSequence				*animSeq100;		// 100
-	UInt32							unk104;				// 104
-	UInt32							unk108;				// 108
+	uint32_t							unk104;				// 104
+	uint32_t							unk108;				// 108
 	float							flt10C;				// 10C
 	float							flt110;				// 110
 	float							flt114;				// 114
 	float							flt118;				// 118
 	float							flt11C;				// 11C
-	UInt32							unk120;				// 120
+	uint32_t							unk120;				// 120
 	Unk124							*unk124;			// 124
 	Unk128							*unk128;			// 128
 };
@@ -744,7 +743,7 @@ public:
 	MiddleHighProcess();
 	~MiddleHighProcess();
 
-	virtual void	SetAnimation(UInt32 newAnimation);
+	virtual void	SetAnimation(uint32_t newAnimation);
 	virtual void	Unk_209();
 	virtual void	Unk_20A();
 	virtual void	Unk_20B();
@@ -766,71 +765,71 @@ public:
 	virtual void	Unk_21B();
 
 	tList<TESForm>						unk0C8;				// 0C8
-	tList<UInt32>						unk0D0;				// 0D0
-	UInt32								unk0D8[3];			// 0D8
+	tList<uint32_t>						unk0D0;				// 0D0
+	uint32_t								unk0D8[3];			// 0D8
 	PackageInfo							interruptPackage;	// 0E4
-	UInt8								unk0FC[12];			// 0FC	Saved as one, might be Pos/Rot given size
-	UInt32								unk108;				// 108
+	uint8_t								unk0FC[12];			// 0FC	Saved as one, might be Pos/Rot given size
+	uint32_t								unk108;				// 108
 	TESIdleForm							*idleForm10C;		// 10C
-	UInt32								unk110;				// 110  EntryData, also handled as part of weapon code. AmmoInfo.
+	uint32_t								unk110;				// 110  EntryData, also handled as part of weapon code. AmmoInfo.
 	ExtraContainerChanges::EntryData	*weaponInfo;		// 114
 	ExtraContainerChanges::EntryData	*ammoInfo;			// 118
 	QueuedFile							*unk11C;			// 11C
-	UInt8								byt120;				// 120
-	UInt8								byt121;				// 121
-	UInt8								byt122;				// 122
-	UInt8								fil123;				// 123
-	UInt32								unk124;				// 124
-	UInt32								unk128;				// 128 Gets copied over during TESNPC.CopyFromBase
-	UInt8								byt12C;				// 12C
-	UInt8								byt12D;				// 12D
-	UInt8								byt12E;				// 12E
-	UInt8								byt12F;				// 12F
+	uint8_t								byt120;				// 120
+	uint8_t								byt121;				// 121
+	uint8_t								byt122;				// 122
+	uint8_t								fil123;				// 123
+	uint32_t								unk124;				// 124
+	uint32_t								unk128;				// 128 Gets copied over during TESNPC.CopyFromBase
+	uint8_t								byt12C;				// 12C
+	uint8_t								byt12D;				// 12D
+	uint8_t								byt12E;				// 12E
+	uint8_t								byt12F;				// 12F
 	void								*ptr130;			// 130	its an animation. Current Animation?
-	UInt8								byt134;				// 134
+	uint8_t								byt134;				// 134
 	bool								isWeaponOut;		// 135
-	UInt8								byt136;				// 136
-	UInt8								byt137;				// 137
+	uint8_t								byt136;				// 136
+	uint8_t								byt137;				// 137
 	bhkCharacterController				*charCtrl;			// 138
-	UInt8								knockedState;		// 13C
-	UInt8								unk13D[3];			// 13D
-	UInt32								unk140[8];			// 140
+	uint8_t								knockedState;		// 13C
+	uint8_t								unk13D[3];			// 13D
+	uint32_t								unk140[8];			// 140
 	MagicItem							*magicItem160;		// 160
-	UInt32								unk164[3];			// 164
+	uint32_t								unk164[3];			// 164
 	float								actorAlpha;			// 170
-	UInt32								unk174;				// 174
+	uint32_t								unk174;				// 174
 	BSFaceGenAnimationData				*unk178;			// 178
-	UInt8								byte17C;			// 17C
-	UInt8								byte17D;			// 17D
-	UInt8								byte17E;			// 17E
-	UInt8								byte17F;			// 17F
-	UInt32								unk180[3];			// 180
-	UInt8								byte18C;			// 18C
-	UInt8								byte18D[3];			// 18D
-	UInt32								unk190[10];			// 190
+	uint8_t								byte17C;			// 17C
+	uint8_t								byte17D;			// 17D
+	uint8_t								byte17E;			// 17E
+	uint8_t								byte17F;			// 17F
+	uint32_t								unk180[3];			// 180
+	uint8_t								byte18C;			// 18C
+	uint8_t								byte18D[3];			// 18D
+	uint32_t								unk190[10];			// 190
 	void								*unk1B8;			// 1B8
 	MagicTarget							*magicTarget1BC;	// 1BC
 	AnimData							*animData;			// 1C0
 	BSAnimGroupSequence					*animSequence[3];	// 1C4
 	float								angle1D0;			// 1D0
 	float								time1D4;			// 1D4
-	UInt32								byte1D8;			// 1D8
+	uint32_t								byte1D8;			// 1D8
 	NiNode								*limbNodes[15];		// 1DC
 	NiNode								*unk218;			// 218
 	NiNode								*unk21C;			// 21C
 	void								*ptr220;			// 220
 	BSBound								*boundingBox;		// 224
-	UInt32								unk228[3];			// 228
+	uint32_t								unk228[3];			// 228
 	float								radsSec234;			// 234
 	float								rads238;			// 238
 	float								waterRadsSec;		// 23C
 	ActorHitData						*hitData240;		// 240
-	UInt32								unk244;				// 244
+	uint32_t								unk244;				// 244
 	BSFaceGenNiNode						*unk248;			// 248
 	BSFaceGenNiNode						*unk24C;			// 24C
 	NiTriShape							*unk250;			// 250
 	ActorHitData						*hitData254;		// 254
-	UInt32								unk258;				// 258
+	uint32_t								unk258;				// 258
 };
 static_assert(sizeof(MiddleHighProcess) == 0x25C);
 
@@ -862,106 +861,106 @@ public:
 	void* ptr264;			// 264
 	void* ptr268;			// 268
 	void* ptr26C;			// 26C
-	UInt32								unk270;				// 270
+	uint32_t								unk270;				// 270
 	tList<CombatTarget>					list274;			// 274
 	tList<void>							list27C;			// 27C
 	tList<void>							list284;			// 284
 	tList<void>							list28C;			// 28C
 	float								flt294;				// 294
 	float								flt298;				// 298
-	UInt32								unk29C;				// 29C
+	uint32_t								unk29C;				// 29C
 	float								flt2A0;				// 2A0
-	UInt32								unk2A4;				// 2A4
+	uint32_t								unk2A4;				// 2A4
 	float								flt2A8;				// 2A8
-	UInt32								unk2AC;				// 2AC
+	uint32_t								unk2AC;				// 2AC
 	float								flt2B0;				// 2B0
 	float								flt2B4;				// 2B4
 	float								flt2B8;				// 2B8
 	float								flt2BC;				// 2BC
-	UInt32								unk2C0;				// 2C0
-	UInt32								unk2C4;				// 2C4
+	uint32_t								unk2C0;				// 2C0
+	uint32_t								unk2C4;				// 2C4
 	float								flt2C8;				// 2C8
-	UInt32								unk2CC;				// 2CC
+	uint32_t								unk2CC;				// 2CC
 	float								flt2D0;				// 2D0
 	float								flt2D4;				// 2D4
 	float								flt2D8;				// 2D8
-	UInt32								unk2DC;				// 2DC
+	uint32_t								unk2DC;				// 2DC
 	float								flt2E0;				// 2E0
 	NiBSBoneLODController* ptr2E4;			// 2E4
-	UInt32								unk2E8;				// 2E8
-	SInt16								currentAction;		// 2EC
-	UInt8								pad2EE[2];			// 2EE
+	uint32_t								unk2E8;				// 2E8
+	int16_t								currentAction;		// 2EC
+	uint8_t								pad2EE[2];			// 2EE
 	BSAnimGroupSequence* currentSequence;	// 2F0
-	UInt32								unk2F4;				// 2F4
+	uint32_t								unk2F4;				// 2F4
 	float								flt2F8;				// 2F8
-	UInt32								unk2FC[5];			// 2FC
+	uint32_t								unk2FC[5];			// 2FC
 	float								flt310;				// 310
-	UInt32								unk314[7];			// 314
+	uint32_t								unk314[7];			// 314
 	float								dyingTimer;				// 330
 	float								flt334;				// 334
 	float								flt338;				// 338
 	float								diveBreath;			// 33C
-	UInt32								unk340;				// 340
+	uint32_t								unk340;				// 340
 	float								flt344;				// 344
-	UInt32								unk348;				// 348
+	uint32_t								unk348;				// 348
 	float								flt34C;				// 34C
 	TESIdleForm* idleForm350;		// 350
-	UInt32								unk354[4];			// 354
+	uint32_t								unk354[4];			// 354
 	NiBSplineCompTransformInterpolator** ptr364;			// 364
-	UInt32								unk368[4];			// 368
+	uint32_t								unk368[4];			// 368
 	float								flt378;				// 378
 	float								flt37C;				// 37C
-	UInt32								unk380;				// 380
+	uint32_t								unk380;				// 380
 	float								flt384;				// 384
 	float								flt388;				// 388
 	tList<void>							list38C;			// 38C
 	tList<void>							list394;			// 394
-	UInt32								unk39C;				// 39C
-	UInt32								unk3A0;				// 3A0
+	uint32_t								unk39C;				// 39C
+	uint32_t								unk3A0;				// 3A0
 	float								flt3A4;				// 3A4
-	UInt32								unk3A8[5];			// 3A8
+	uint32_t								unk3A8[5];			// 3A8
 	float								flt3BC;				// 3BC
 	float								flt3C0;				// 3C0
 	float								lightAmount;		// 3C4
 	float								flt3C8;				// 3C8
-	UInt32								unk3CC[7];			// 3CC
-	UInt32								fadeType;			// 3E8
+	uint32_t								unk3CC[7];			// 3CC
+	uint32_t								fadeType;			// 3E8
 	float								delayTime;			// 3EC
-	UInt32								unk3F0;				// 3F0
-	UInt32								unk3F4;				// 3F4
-	UInt32								unk3F8[3];			// 3F8
+	uint32_t								unk3F0;				// 3F0
+	uint32_t								unk3F4;				// 3F4
+	uint32_t								unk3F8[3];			// 3F8
 	Actor* combatTarget;		// 404
-	UInt32								unk408[4];			// 408
+	uint32_t								unk408[4];			// 408
 	float								flt418;				// 418
 	TESObjectREFR* packageTarget;		// 41C
-	UInt32								unk420;				// 420
-	UInt32								queuedIdleFlags;	// 424
-	UInt32								unk428;				// 428
+	uint32_t								unk420;				// 420
+	uint32_t								queuedIdleFlags;	// 424
+	uint32_t								unk428;				// 428
 	float								flt42C;				// 42C
-	UInt32								unk430;				// 430
+	uint32_t								unk430;				// 430
 	bhkShapePhantom* ptr434;			// 434
-	UInt32								unk438;				// 438
+	uint32_t								unk438;				// 438
 	float								unk43C;				// 43C
 	float								radsSec440;			// 440
-	UInt8								plantedExplosive;	// 444
-	UInt8								pad445[3];			// 445
+	uint8_t								plantedExplosive;	// 444
+	uint8_t								pad445[3];			// 445
 	float								flt448;				// 448
-	UInt32								unk44C;				// 44C
+	uint32_t								unk44C;				// 44C
 	float								flt450;				// 450
-	UInt32								unk454[6];			// 454
+	uint32_t								unk454[6];			// 454
 };
 static_assert(sizeof(HighProcess) == 0x46C);
 
 // 160
 struct ProcessManager {
-	UInt32					unk000;				// 000
+	uint32_t					unk000;				// 000
 	NiTArray<MobileObject*>	objects;			// 004
-	UInt32					beginOffsets[4];	// 014	0: High, 1: Mid-High, 2: Mid-Low, 3: Low
-	UInt32					endOffsets[4];		// 024
-	UInt32					unk034[11];			// 034
+	uint32_t					beginOffsets[4];	// 014	0: High, 1: Mid-High, 2: Mid-Low, 3: Low
+	uint32_t					endOffsets[4];		// 024
+	uint32_t					unk034[11];			// 034
 	tList<BSTempEffect>		tempEffects;		// 060
-	UInt32					unk068[6];			// 068
+	uint32_t					unk068[6];			// 068
 	tList<Actor>			highActors;			// 080
-	UInt32					unk088[54];			// 088
+	uint32_t					unk088[54];			// 088
 
 };

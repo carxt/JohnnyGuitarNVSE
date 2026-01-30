@@ -8,17 +8,17 @@
 typedef NiTMapBase<const char*, int> TraitNameMap;
 TraitNameMap* g_traitNameMap = (TraitNameMap*)0x11F32F4;
 const _TraitNameToID TraitNameToID = (_TraitNameToID)0xA01860;
-UInt32(*TraitNameToIDAdd)(const char*, UInt32) = (UInt32(*)(const char*, UInt32))0xA00940;
+uint32_t(*TraitNameToIDAdd)(const char*, uint32_t) = (uint32_t(*)(const char*, uint32_t))0xA00940;
 
-UInt32 Tile::TraitNameToID(const char* traitName) {
+uint32_t Tile::TraitNameToID(const char* traitName) {
 	return ::TraitNameToID(traitName);
 }
 
-UInt32 Tile::TraitNameToIDAdd(const char* traitName) {
+uint32_t Tile::TraitNameToIDAdd(const char* traitName) {
 	return ::TraitNameToIDAdd(traitName, 0xFFFFFFFF);
 }
 
-__declspec(naked) Tile::Value* Tile::GetValue(UInt32 typeID)
+__declspec(naked) Tile::Value* Tile::GetValue(uint32_t typeID)
 {
 	__asm
 	{
@@ -57,7 +57,7 @@ Tile::Value* Tile::GetValueName(const char* valueName) {
 	return GetValue(TraitNameToID(valueName));
 }
 
-DListNode<Tile>* Tile::GetNthChild(UInt32 index) {
+DListNode<Tile>* Tile::GetNthChild(uint32_t index) {
 	return children.Tail()->Regress(index);
 }
 
@@ -89,7 +89,7 @@ Menu* Tile::GetParentMenu() {
 	return NULL;
 }
 
-__declspec(naked) void Tile::PokeValue(UInt32 valueID) {
+__declspec(naked) void Tile::PokeValue(uint32_t valueID) {
 	__asm
 	{
 		push	esi
@@ -139,7 +139,8 @@ void Tile::DestroyAllChildren() {
 	while (node) {
 		child = node->data;
 		node = node->prev;
-		if (child) child->Destroy(true);
+		if (child) 
+			delete child;
 	}
 }
 
@@ -227,7 +228,7 @@ void Tile::Dump() {
 }
 
 void Debug_DumpTraits(void) {
-	for (UInt32 i = 0; i < g_traitNameMap->numBuckets; i++) {
+	for (uint32_t i = 0; i < g_traitNameMap->numBuckets; i++) {
 		for (TraitNameMap::Entry* bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next) {
 			PrintDebug("%s %d", bucket->key, bucket->data);
 		}
@@ -237,7 +238,7 @@ void Debug_DumpTraits(void) {
 // not a one-way mapping, so we just return the first
 // also this is slow and sucks
 const char* TraitIDToName(int id) {
-	for (UInt32 i = 0; i < g_traitNameMap->numBuckets; i++)
+	for (uint32_t i = 0; i < g_traitNameMap->numBuckets; i++)
 		for (TraitNameMap::Entry* bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next)
 			if (bucket->data == id)
 				return bucket->key;

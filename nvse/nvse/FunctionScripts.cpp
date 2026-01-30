@@ -73,7 +73,7 @@ public:
 		{ }
 	virtual ~ScriptFunctionCaller() { }
 
-	virtual UInt8 ReadCallerVersion() {
+	virtual uint8_t ReadCallerVersion() {
 		m_callerVersion = m_eval.ReadByte();
 		return m_callerVersion;
 	}
@@ -110,7 +110,7 @@ public:
 			return false;
 
 		// populate event list variables
-		for (UInt32 i = 0; i < m_eval.NumArgs(); i++)
+		for (uint32_t i = 0; i < m_eval.NumArgs(); i++)
 		{
 			ScriptToken* arg = m_eval.Arg(i);
 
@@ -140,7 +140,7 @@ public:
 				break;
 			case Script::eVarType_Ref:
 				if (arg->CanConvertTo(kTokenType_Form))
-					*((UInt32*)&var->data) = arg->GetFormID();
+					*((uint32_t*)&var->data) = arg->GetFormID();
 				break;
 			case Script::eVarType_Integer:
 			case Script::eVarType_Float:
@@ -161,7 +161,7 @@ public:
 	virtual Script* GetInvokingScript() { return m_eval.script; }
 private:
 	ExpressionEvaluator&	m_eval;
-	UInt8					m_callerVersion;
+	uint8_t					m_callerVersion;
 	Script					* m_funcScript;
 };
 
@@ -181,7 +181,7 @@ ScriptToken* UserFunctionManager::Call(FunctionCaller & caller)
 	}
 
 	// extract version and script
-	UInt8 callerVersion = caller.ReadCallerVersion();
+	uint8_t callerVersion = caller.ReadCallerVersion();
 	Script* funcScript = caller.ReadScript();
 
 	if (!funcScript)
@@ -255,10 +255,10 @@ FunctionInfo* UserFunctionManager::GetFunctionInfo(Script* funcScript)
 	return (funcInfo->IsGood()) ? funcInfo : NULL;
 }
 	
-UInt32 UserFunctionManager::GetFunctionParamTypes(Script* fnScript, UInt8* typesOut)
+uint32_t UserFunctionManager::GetFunctionParamTypes(Script* fnScript, uint8_t* typesOut)
 {
 	FunctionInfo* info = GetSingleton()->GetFunctionInfo(fnScript);
-	UInt32 numParams = -1;
+	uint32_t numParams = -1;
 	if (info) {
 		numParams = info->GetParamVarTypes(typesOut);
 	}
@@ -289,7 +289,7 @@ FunctionInfo::FunctionInfo(Script* script)
 	if (script->info.dataLength < 15)
 		return;
 
-	UInt8* data = (UInt8*)script->data;
+	uint8_t* data = (uint8_t*)script->data;
 	if (*(data + 8) != 0x0D)		// not a 'Begin Function' block
 	{
 		ShowRuntimeError(script, "Begin Function block not found in compiled script data");
@@ -314,14 +314,14 @@ FunctionInfo::FunctionInfo(Script* script)
 	// **************************
 
 	// read params and construct ParamInfo
-	UInt8 numParams = *data++;
+	uint8_t numParams = *data++;
 	std::vector<UserFunctionParam> params(numParams);
 
-	for (UInt32 i = 0; i < numParams; i++)
+	for (uint32_t i = 0; i < numParams; i++)
 	{
-		UInt16 idx = *((UInt16*)data);
+		uint16_t idx = *((uint16_t*)data);
 		data += 2;
-		UInt8 type = *data++;
+		uint8_t type = *data++;
 		params[i] = UserFunctionParam(idx, type);
 	}
 
@@ -332,10 +332,10 @@ FunctionInfo::FunctionInfo(Script* script)
 	m_numDestructibles = *data++;
 	if (m_numDestructibles)
 	{
-		m_destructibles = new UInt16[m_numDestructibles];
-		for (UInt32 i = 0; i < m_numDestructibles; i++)
+		m_destructibles = new uint16_t[m_numDestructibles];
+		for (uint32_t i = 0; i < m_numDestructibles; i++)
 		{
-			m_destructibles[i] = *((UInt16*)data);
+			m_destructibles[i] = *((uint16_t*)data);
 			data += 2;
 		}
 	}
@@ -357,7 +357,7 @@ FunctionInfo::~FunctionInfo()
 	}
 }
 
-FunctionContext* FunctionInfo::CreateContext(UInt8 version, Script* invokingScript)
+FunctionContext* FunctionInfo::CreateContext(uint8_t version, Script* invokingScript)
 {
 	if (!IsGood())
 		return NULL;
@@ -372,7 +372,7 @@ FunctionContext* FunctionInfo::CreateContext(UInt8 version, Script* invokingScri
 	return context;
 }
 
-UserFunctionParam* FunctionInfo::GetParam(UInt32 paramIndex)
+UserFunctionParam* FunctionInfo::GetParam(uint32_t paramIndex)
 {
 	if (paramIndex >= m_userFunctionParams.size())
 		return NULL;
@@ -380,11 +380,11 @@ UserFunctionParam* FunctionInfo::GetParam(UInt32 paramIndex)
 	return &m_userFunctionParams[paramIndex];
 }
 
-UInt32 FunctionInfo::GetParamVarTypes(UInt8* out) const
+uint32_t FunctionInfo::GetParamVarTypes(uint8_t* out) const
 {
-	UInt32 count = m_userFunctionParams.size();
+	uint32_t count = m_userFunctionParams.size();
 	if (count) {
-		for (UInt32 i = 0; i < count; i++) {
+		for (uint32_t i = 0; i < count; i++) {
 			out[i] = m_userFunctionParams[i].varType;
 		}
 	}
@@ -394,7 +394,7 @@ UInt32 FunctionInfo::GetParamVarTypes(UInt8* out) const
 
 bool FunctionInfo::CleanEventList(ScriptEventList* eventList)
 {
-	for (UInt32 i = 0; i < m_numDestructibles; i++)
+	for (uint32_t i = 0; i < m_numDestructibles; i++)
 	{
 		ScriptEventList::Var* var = eventList->GetVariable(m_destructibles[i]);
 		if (!var)
@@ -421,7 +421,7 @@ bool FunctionInfo::Execute(FunctionCaller& caller, FunctionContext* context)
 	FunctionContext
 ******************************/
 
-FunctionContext::FunctionContext(FunctionInfo* info, UInt8 version, Script* invokingScript) : m_info(info), m_eventList(NULL),
+FunctionContext::FunctionContext(FunctionInfo* info, uint8_t version, Script* invokingScript) : m_info(info), m_eventList(NULL),
 m_invokingScript(invokingScript), m_callerVersion(version), m_bad(true), m_result(NULL)
 {
 #ifdef DBG_EXPR_LEAKS
@@ -523,7 +523,7 @@ bool InternalFunctionCaller::PopulateArgs(ScriptEventList* eventList, FunctionIn
 	}
 
 	// populate the args in the event list
-	for (UInt32 i = 0; i < m_numArgs; i++) {
+	for (uint32_t i = 0; i < m_numArgs; i++) {
 		UserFunctionParam* param = info->GetParam(i);
 		if (!ValidateParam(param, i)) {
 			return false;
@@ -537,7 +537,7 @@ bool InternalFunctionCaller::PopulateArgs(ScriptEventList* eventList, FunctionIn
 
 		switch (param->varType) {
 			case Script::eVarType_Integer:
-				var->data = (SInt32)m_args[i];
+				var->data = (int32_t)m_args[i];
 				break;
 			case Script::eVarType_Float:
 				var->data = *((float*)&m_args[i]);
@@ -545,7 +545,7 @@ bool InternalFunctionCaller::PopulateArgs(ScriptEventList* eventList, FunctionIn
 			case Script::eVarType_Ref:
 				{
 					TESForm* form = (TESForm*)m_args[i];
-					*((UInt32*)&var->data) = form ? form->refID : 0;
+					*((uint32_t*)&var->data) = form ? form->refID : 0;
 				}
 				break;
 			case Script::eVarType_String:
@@ -565,7 +565,7 @@ bool InternalFunctionCaller::PopulateArgs(ScriptEventList* eventList, FunctionIn
 	return true;
 }
 
-bool InternalFunctionCaller::SetArgs(UInt8 numArgs, ...)
+bool InternalFunctionCaller::SetArgs(uint8_t numArgs, ...)
 {
 	va_list args;
 	va_start(args, numArgs);
@@ -574,14 +574,14 @@ bool InternalFunctionCaller::SetArgs(UInt8 numArgs, ...)
 	return result;
 }
 
-bool InternalFunctionCaller::vSetArgs(UInt8 numArgs, va_list args)
+bool InternalFunctionCaller::vSetArgs(uint8_t numArgs, va_list args)
 {
 	if (numArgs >= kMaxArgs) {
 		return false;
 	}
 
 	m_numArgs = numArgs;
-	for (UInt8 i = 0; i < numArgs; i++) {
+	for (uint8_t i = 0; i < numArgs; i++) {
 		m_args[i] = va_arg(args, void*);
 	}
 
@@ -590,7 +590,7 @@ bool InternalFunctionCaller::vSetArgs(UInt8 numArgs, va_list args)
 
 namespace PluginAPI {
 	bool CallFunctionScript(Script* fnScript, TESObjectREFR* callingObj, TESObjectREFR* container, 
-		NVSEArrayVarInterface::Element* result, UInt8 numArgs, ...)
+		NVSEArrayVarInterface::Element* result, uint8_t numArgs, ...)
 	{
 		InternalFunctionCaller caller(fnScript, callingObj, container);
 		va_list args;

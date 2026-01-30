@@ -2,9 +2,9 @@
 
 #if _DEBUG
 #define DBG_EXPR_LEAKS 1
-extern SInt32 TOKEN_COUNT;
-extern SInt32 EXPECTED_TOKEN_COUNT;
-extern SInt32 FUNCTION_CONTEXT_COUNT;
+extern int32_t TOKEN_COUNT;
+extern int32_t EXPECTED_TOKEN_COUNT;
+extern int32_t FUNCTION_CONTEXT_COUNT;
 #endif
 
 #include "GameScript.h"
@@ -25,7 +25,7 @@ struct ForEachContext;
 class ExpressionEvaluator;
 struct ScriptToken;
 
-enum OperatorType : UInt8
+enum OperatorType : uint8_t
 {
 	kOpType_Min		= 0,
 
@@ -74,7 +74,7 @@ enum OperatorType : UInt8
 	kOpType_Max
 };
 
-enum Token_Type : UInt8
+enum Token_Type : uint8_t
 {
 	kTokenType_Number	= 0,
 	kTokenType_Boolean,
@@ -139,12 +139,12 @@ struct TokenPair	// a pair of tokens, specified as 'a::b'
 
 struct ForEachContext
 {
-	UInt32				sourceID;
-	UInt32				iteratorID;
-	UInt32				variableType;
+	uint32_t				sourceID;
+	uint32_t				iteratorID;
+	uint32_t				variableType;
 	ScriptEventList::VarList * var;
 
-	ForEachContext(UInt32 src, UInt32 iter, UInt32 varType, ScriptEventList::VarList * _var) : sourceID(src), iteratorID(iter), variableType(varType), var(_var) { }
+	ForEachContext(uint32_t src, uint32_t iter, uint32_t varType, ScriptEventList::VarList * _var) : sourceID(src), iteratorID(iter), variableType(varType), var(_var) { }
 };
 
 #endif
@@ -154,14 +154,14 @@ struct ScriptToken
 {
 protected:
 	Token_Type	type;
-	UInt8		variableType;
-	UInt16		refIdx;
+	uint8_t		variableType;
+	uint16_t		refIdx;
 
 	struct Value {
 		std::string					str;
 		union {
 			Script::RefVariable		* refVar;
-			UInt32					formID;
+			uint32_t					formID;
 			double					num;
 			TESGlobal				* global;
 			Operator				* op;
@@ -177,17 +177,17 @@ protected:
 	} value;
 
 	ScriptToken();
-	ScriptToken(Token_Type _type, UInt8 _varType, UInt16 _refIdx);
+	ScriptToken(Token_Type _type, uint8_t _varType, uint16_t _refIdx);
 	ScriptToken(bool boolean);
 	ScriptToken(double num);
-	ScriptToken(Script::RefVariable* refVar, UInt16 refIdx);
-	ScriptToken(VariableInfo* varInfo, UInt16 refIdx, UInt32 varType);
-	ScriptToken(CommandInfo* cmdInfo, UInt16 refIdx);
+	ScriptToken(Script::RefVariable* refVar, uint16_t refIdx);
+	ScriptToken(VariableInfo* varInfo, uint16_t refIdx, uint32_t varType);
+	ScriptToken(CommandInfo* cmdInfo, uint16_t refIdx);
 	ScriptToken(const std::string& str);
 	ScriptToken(const char* str);
-	ScriptToken(TESGlobal* global, UInt16 refIdx);
+	ScriptToken(TESGlobal* global, uint16_t refIdx);
 	ScriptToken(Operator* op);
-	ScriptToken(UInt32 data, Token_Type asType);		// ArrayID or FormID
+	ScriptToken(uint32_t data, Token_Type asType);		// ArrayID or FormID
 
 	ScriptToken(const ScriptToken& rhs);	// unimplemented, don't want copy constructor called
 #if RUNTIME
@@ -199,7 +199,7 @@ public:
 	virtual	~ScriptToken();
 
 	virtual const char	*			GetString() const;
-	virtual UInt32					GetFormID() const;
+	virtual uint32_t					GetFormID() const;
 	virtual TESForm*				GetTESForm() const;
 	virtual double					GetNumber() const;
 	virtual const ArrayKey *		GetArrayKey() const { return NULL; }
@@ -222,13 +222,13 @@ public:
 	VariableInfo *			GetVarInfo() const;
 	CommandInfo *			GetCommandInfo() const;
 	Script::RefVariable*	GetRefVariable() const;
-	UInt16					GetRefIndex() const { return IsGood() ? refIdx : 0; }
-	UInt8					GetVariableType() const { return IsVariable() ? variableType : Script::eVarType_Invalid; }
+	uint16_t					GetRefIndex() const { return IsGood() ? refIdx : 0; }
+	uint8_t					GetVariableType() const { return IsVariable() ? variableType : Script::eVarType_Invalid; }
 
-	UInt32					GetActorValue() const;		// kActorVal_XXX or kActorVal_NoActorValue if none
+	uint32_t					GetActorValue() const;		// kActorVal_XXX or kActorVal_NoActorValue if none
 	char					GetAxis() const;			// 'X', 'Y', 'Z', or otherwise -1
-	UInt32					GetSex() const;				// 0=male, 1=female, otherwise -1
-	UInt32					GetAnimGroup() const;		// TESAnimGroup::kAnimGroup_XXX (kAnimGroup_Max if none)
+	uint32_t					GetSex() const;				// 0=male, 1=female, otherwise -1
+	uint32_t					GetAnimGroup() const;		// TESAnimGroup::kAnimGroup_XXX (kAnimGroup_Max if none)
 	EffectSetting *			GetEffectSetting() const;	// from string, effect code, or TESForm*
 
 	bool					Write(ScriptLineBuffer* buf);
@@ -244,23 +244,23 @@ public:
 
 	static ScriptToken* Create(bool boolean)													{ return new ScriptToken(boolean); }
 	static ScriptToken* Create(double num)														{ return new ScriptToken(num);	}
-	static ScriptToken* Create(Script::RefVariable* refVar, UInt16 refIdx)						{ return refVar ? new ScriptToken(refVar, refIdx) : NULL; }
-	static ScriptToken* Create(VariableInfo* varInfo, UInt16 refIdx, UInt32 varType)			{ return varInfo ? new ScriptToken(varInfo, refIdx, varType) : NULL; }
-	static ScriptToken* Create(CommandInfo* cmdInfo, UInt16 refIdx)								{ return cmdInfo ? new ScriptToken(cmdInfo, refIdx) : NULL;	}
+	static ScriptToken* Create(Script::RefVariable* refVar, uint16_t refIdx)						{ return refVar ? new ScriptToken(refVar, refIdx) : NULL; }
+	static ScriptToken* Create(VariableInfo* varInfo, uint16_t refIdx, uint32_t varType)			{ return varInfo ? new ScriptToken(varInfo, refIdx, varType) : NULL; }
+	static ScriptToken* Create(CommandInfo* cmdInfo, uint16_t refIdx)								{ return cmdInfo ? new ScriptToken(cmdInfo, refIdx) : NULL;	}
 	static ScriptToken* Create(const std::string& str)											{ return new ScriptToken(str);	}
 	static ScriptToken* Create(const char* str)													{ return new ScriptToken(str);	}
-	static ScriptToken* Create(TESGlobal* global, UInt16 refIdx)								{ return global ? new ScriptToken(global, refIdx) : NULL; }
+	static ScriptToken* Create(TESGlobal* global, uint16_t refIdx)								{ return global ? new ScriptToken(global, refIdx) : NULL; }
 	static ScriptToken* Create(Operator* op)													{ return op ? new ScriptToken(op) : NULL;	}
 	static ScriptToken* Create(TESForm* form)													{ return new ScriptToken(form ? form->refID : 0, kTokenType_Form); }
-	static ScriptToken* CreateForm(UInt32 formID)												{ return new ScriptToken(formID, kTokenType_Form); }
+	static ScriptToken* CreateForm(uint32_t formID)												{ return new ScriptToken(formID, kTokenType_Form); }
 	static ScriptToken* CreateArray(ArrayID arrID)												{ return new ScriptToken(arrID, kTokenType_Array); }
 	static ScriptToken* Create(ForEachContext* forEach);
 	static ScriptToken* Create(ArrayID arrID, ArrayKey* key);
 	static ScriptToken* Create(Slice* slice);
 	static ScriptToken* Create(ScriptToken* l, ScriptToken* r);
-	static ScriptToken* Create(UInt32 varID, UInt32 lbound, UInt32 ubound);
-	static ScriptToken* Create(ArrayElementToken* elem, UInt32 lbound, UInt32 ubound);
-	static ScriptToken* Create(UInt32 bogus);	// unimplemented, to block implicit conversion to double
+	static ScriptToken* Create(uint32_t varID, uint32_t lbound, uint32_t ubound);
+	static ScriptToken* Create(ArrayElementToken* elem, uint32_t lbound, uint32_t ubound);
+	static ScriptToken* Create(uint32_t bogus);	// unimplemented, to block implicit conversion to double
 };
 
 struct SliceToken : public ScriptToken
@@ -289,7 +289,7 @@ struct ArrayElementToken : public ScriptToken
 	virtual const ArrayKey*	GetArrayKey() const { return type == kTokenType_ArrayElement ? &key : NULL; }
 	virtual const char*		GetString() const;
 	virtual double			GetNumber() const;
-	virtual UInt32			GetFormID() const;
+	virtual uint32_t			GetFormID() const;
 	virtual ArrayID			GetArray() const;
 	virtual TESForm*		GetTESForm() const;
 	virtual bool			GetBool() const;
@@ -302,24 +302,24 @@ struct ForEachContextToken : public ScriptToken
 {
 	ForEachContext		context;
 
-	ForEachContextToken(UInt32 srcID, UInt32 iterID, UInt32 varType, ScriptEventList::VarList* var);
+	ForEachContextToken(uint32_t srcID, uint32_t iterID, uint32_t varType, ScriptEventList::VarList* var);
 	virtual const ForEachContext* GetForEachContext() const { return Type() == kTokenType_ForEachContext ? &context : NULL; }
 };
 
 struct AssignableStringToken : public ScriptToken
 {
-	UInt32		lower;
-	UInt32		upper;
+	uint32_t		lower;
+	uint32_t		upper;
 	std::string	substring;
 
-	AssignableStringToken(UInt32 _id, UInt32 lbound, UInt32 ubound);
+	AssignableStringToken(uint32_t _id, uint32_t lbound, uint32_t ubound);
 	virtual const char* GetString() const { return substring.c_str(); }
 	virtual bool Assign(const char* str) = 0;
 };
 
 struct AssignableStringVarToken : public AssignableStringToken
 {
-	AssignableStringVarToken(UInt32 _id, UInt32 lbound, UInt32 ubound);
+	AssignableStringVarToken(uint32_t _id, uint32_t lbound, uint32_t ubound);
 	virtual bool Assign(const char* str);
 };
 
@@ -327,7 +327,7 @@ struct AssignableStringArrayElementToken : public AssignableStringToken
 {
 	ArrayKey	key;
 
-	AssignableStringArrayElementToken(UInt32 _id, const ArrayKey& _key, UInt32 lbound, UInt32 ubound);
+	AssignableStringArrayElementToken(uint32_t _id, const ArrayKey& _key, uint32_t lbound, uint32_t ubound);
 	virtual ArrayID		GetArray() const { return value.arrID; }
 	virtual bool Assign(const char* str);
 };
@@ -347,11 +347,11 @@ struct OperationRule
 
 struct Operator
 {
-	UInt8			precedence;
+	uint8_t			precedence;
 	char			symbol[3];
-	UInt8			numOperands;
+	uint8_t			numOperands;
 	OperatorType	type;
-	UInt8			numRules;
+	uint8_t			numRules;
 	OperationRule	* rules;
 
 	bool Precedes(Operator* op) {

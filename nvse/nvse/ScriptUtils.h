@@ -60,17 +60,17 @@ enum {
 struct DynamicParamInfo
 {
 private:
-	static const UInt32 kMaxParams = 15;	// Should be linked to NVSE_EXPR_MAX_ARGS ?
+	static const uint32_t kMaxParams = 15;	// Should be linked to NVSE_EXPR_MAX_ARGS ?
 
 	ParamInfo	m_paramInfo[kMaxParams];
-	UInt32		m_numParams;
+	uint32_t		m_numParams;
 
 public:
 	DynamicParamInfo(std::vector<UserFunctionParam> &params);
 	DynamicParamInfo() : m_numParams(0) { }
 
 	ParamInfo* Params()	{	return m_paramInfo;	}
-	UInt32 NumParams()	{ return m_numParams;	}
+	uint32_t NumParams()	{ return m_numParams;	}
 };
 
 class ExpressionEvaluator
@@ -83,21 +83,21 @@ class ExpressionEvaluator
 		kFlag_StackTraceOnError		= 1 << 2,
 	};
 
-	UInt32				m_flags;
-	UInt8				* m_scriptData;
-	UInt32				* m_opcodeOffsetPtr;
+	uint32_t				m_flags;
+	uint8_t				* m_scriptData;
+	uint32_t				* m_opcodeOffsetPtr;
 	double				* m_result;
 	TESObjectREFR		* m_thisObj;
 	TESObjectREFR		* m_containingObj;
-	UInt8				* m_data;
+	uint8_t				* m_data;
 	ScriptToken			* m_args[kMaxArgs];
 	ParamInfo			* m_params;
-	UInt8				m_numArgsExtracted;
+	uint8_t				m_numArgsExtracted;
 	CommandReturnType	m_expectedReturnType;
-	UInt16				m_baseOffset;
+	uint16_t				m_baseOffset;
 	ExpressionEvaluator	* m_parent;
 
-	UInt8*			&Data()	{ return m_data;	}
+	uint8_t*			&Data()	{ return m_data;	}
 	CommandReturnType GetExpectedReturnType() { CommandReturnType type = m_expectedReturnType; m_expectedReturnType = kRetnType_Default; return type; }
 
 	void PushOnStack();
@@ -125,12 +125,12 @@ public:
 	bool			ConvertDefaultArg(ScriptToken* arg, ParamInfo* info, bool bConvertTESForms, va_list& varArgs);
 
 	// extract formatted string args compiled with compiler override
-	bool ExtractFormatStringArgs(va_list varArgs, UInt32 fmtStringPos, char* fmtStringOut, UInt32 maxParams);
+	bool ExtractFormatStringArgs(va_list varArgs, uint32_t fmtStringPos, char* fmtStringOut, uint32_t maxParams);
 
 	ScriptToken*	Evaluate();			// evaluates a single argument/token
 
-	ScriptToken*	Arg(UInt32 idx) { return idx < kMaxArgs ? m_args[idx] : NULL; }
-	UInt8			NumArgs() { return m_numArgsExtracted; }
+	ScriptToken*	Arg(uint32_t idx) { return idx < kMaxArgs ? m_args[idx] : NULL; }
+	uint8_t			NumArgs() { return m_numArgsExtracted; }
 	void			SetParams(ParamInfo* newParams)	{	m_params = newParams;	}
 	void			ExpectReturnType(CommandReturnType type) { m_expectedReturnType = type; }
 	void			ToggleErrorSuppression(bool bSuppress);
@@ -139,14 +139,14 @@ public:
 	TESObjectREFR*	ThisObj() { return m_thisObj; }
 	TESObjectREFR*	ContainingObj() { return m_containingObj; }
 
-	UInt8		ReadByte();
-	UInt16		Read16();
+	uint8_t		ReadByte();
+	uint16_t		Read16();
 	double		ReadFloat();
 	std::string	ReadString();
-	SInt8		ReadSignedByte();
-	SInt16		ReadSigned16();
-	UInt32		Read32();
-	SInt32		ReadSigned32();
+	int8_t		ReadSignedByte();
+	int16_t		ReadSigned16();
+	uint32_t		Read32();
+	int32_t		ReadSigned32();
 };
 
 bool BasicTokenToElem(ScriptToken* token, ArrayElement& elem, ExpressionEvaluator* context);
@@ -157,9 +157,9 @@ class ExpressionParser
 
 	ScriptBuffer		* m_scriptBuf;
 	ScriptLineBuffer	* m_lineBuf;
-	UInt32				m_len;
+	uint32_t				m_len;
 	Token_Type			m_argTypes[kMaxArgs];
-	UInt8				m_numArgsParsed;
+	uint8_t				m_numArgsParsed;
 
 	enum {								// varargs
 		kError_CantParse,
@@ -190,25 +190,25 @@ class ExpressionParser
 
 	static ErrOutput::Message	* s_Messages;
 
-	char	Peek(UInt32 idx = -1) {
+	char	Peek(uint32_t idx = -1) {
 		if (idx == -1)	idx = m_lineBuf->lineOffset;
 		return (idx < m_len) ? m_lineBuf->paramText[idx] : 0;
 	}
-	UInt32&	Offset()	{ return m_lineBuf->lineOffset; }
+	uint32_t&	Offset()	{ return m_lineBuf->lineOffset; }
 	const char * Text()	{ return m_lineBuf->paramText; }
 	const char * CurText() { return Text() + Offset(); }
 
-	void	Message(UInt32 errorCode, ...);
+	void	Message(uint32_t errorCode, ...);
 
 	Token_Type		Parse();
-	Token_Type		ParseSubExpression(UInt32 exprLen);
+	Token_Type		ParseSubExpression(uint32_t exprLen);
 	Operator *		ParseOperator(bool bExpectBinaryOperator, bool bConsumeIfFound = true);
 	ScriptToken	*	ParseOperand(Operator* curOp = NULL);
-	ScriptToken *	PeekOperand(UInt32& outReadLen);
+	ScriptToken *	PeekOperand(uint32_t& outReadLen);
 	bool			ParseFunctionCall(CommandInfo* cmdInfo);
 	Token_Type		PopOperator(std::stack<Operator*> & ops, std::stack<Token_Type> & operands);
 
-	UInt32	MatchOpenBracket(Operator* openBracOp);
+	uint32_t	MatchOpenBracket(Operator* openBracOp);
 	std::string GetCurToken();
 	VariableInfo* LookupVariable(const char* varName, Script::RefVariable* refVar = NULL);
 
@@ -216,19 +216,19 @@ public:
 	ExpressionParser(ScriptBuffer* scriptBuf, ScriptLineBuffer* lineBuf);
 	~ExpressionParser();
 
-	bool			ParseArgs(ParamInfo* params, UInt32 numParams, bool bUsesNVSEParamTypes = true);
-	bool			ValidateArgType(UInt32 paramType, Token_Type argType, bool bIsNVSEParam);
+	bool			ParseArgs(ParamInfo* params, uint32_t numParams, bool bUsesNVSEParamTypes = true);
+	bool			ValidateArgType(uint32_t paramType, Token_Type argType, bool bIsNVSEParam);
 	bool			ParseUserFunctionCall();
 	bool			ParseUserFunctionDefinition();
 	ScriptToken	*	ParseOperand(bool (* pred)(ScriptToken* operand));
-	Token_Type		ArgType(UInt32 idx) { return idx < kMaxArgs ? m_argTypes[idx] : kTokenType_Invalid; }
+	Token_Type		ArgType(uint32_t idx) { return idx < kMaxArgs ? m_argTypes[idx] : kTokenType_Invalid; }
 };
 
 void ShowRuntimeError(Script* script, const char* fmt, ...);
 bool PrecompileScript(ScriptBuffer* buf);
 
 // NVSE analogue for Cmd_Default_Parse, accepts expressions as args
-bool Cmd_Expression_Parse(UInt32 numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf);
+bool Cmd_Expression_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf);
 
 extern Operator s_operators[];
 

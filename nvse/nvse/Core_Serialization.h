@@ -1,8 +1,8 @@
 #pragma once
 
-extern UInt8 s_preloadModRefIDs[0xFF];
-extern UInt8 s_numPreloadMods;
+extern uint8_t s_preloadModRefIDs[0xFF];
+extern uint8_t s_numPreloadMods;
 
 void Core_PostLoadCallback(bool bLoadSucceeded);
-UInt8 ResolveModIndexForPreload(UInt8 modIndexIn);
+uint8_t ResolveModIndexForPreload(uint8_t modIndexIn);
 void Init_CoreSerialization_Callbacks();

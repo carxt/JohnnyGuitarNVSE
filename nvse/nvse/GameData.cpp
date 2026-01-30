@@ -24,7 +24,7 @@ const ModInfo** DataHandler::GetActiveModList() {
 	static const ModInfo* activeModList[0x100] = { 0 };
 
 	if (!(*activeModList)) {
-		UInt16 index = 0;
+		uint16_t index = 0;
 		for (index = 0; index < DataHandler::Get()->modList.modInfoList.Count(); index++) {
 			ModInfo* entry = DataHandler::Get()->modList.modInfoList.GetNthItem(index);
 			if (entry->IsLoaded())
@@ -35,7 +35,7 @@ const ModInfo** DataHandler::GetActiveModList() {
 	return activeModList;
 }
 
-UInt8 DataHandler::GetModIndex(const char* modName) {
+uint8_t DataHandler::GetModIndex(const char* modName) {
 	ListNode<ModInfo>* iter = modList.modInfoList.Head();
 	ModInfo* modInfo;
 	do {
@@ -46,7 +46,7 @@ UInt8 DataHandler::GetModIndex(const char* modName) {
 	return 0xFF;
 }
 
-const char* DataHandler::GetNthModName(UInt32 modIndex) {
+const char* DataHandler::GetNthModName(uint32_t modIndex) {
 	const ModInfo** activeModList = GetActiveModList();
 	if (modIndex < GetActiveModCount() && activeModList[modIndex])
 		return activeModList[modIndex]->name;
@@ -60,7 +60,7 @@ struct IsModLoaded {
 	}
 };
 
-UInt8 DataHandler::GetActiveModCount() const {
+uint8_t DataHandler::GetActiveModCount() const {
 	return modList.modInfoList.Count();
 }
 

@@ -16,7 +16,7 @@ bool Cmd_GetBookFlags_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetBookFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt32 flags;
+	uint32_t flags;
 	TESObjectBOOK* book = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book, &flags) && book && IS_TYPE(book, TESObjectBOOK)) {
 		book->flags = flags;
@@ -38,7 +38,7 @@ bool Cmd_GetBookSkill_Execute(COMMAND_ARGS) {
 bool Cmd_SetBookSkill_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectBOOK* book = nullptr;
-	UInt32 skill;
+	uint32_t skill;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book, &skill) && book && IS_TYPE(book, TESObjectBOOK)) {
 		if (skill == -1) {
 			book->skillCode = -1;

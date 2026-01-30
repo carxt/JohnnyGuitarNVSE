@@ -8,17 +8,17 @@ struct ScriptEventList;
 class ActiveEffect;
 struct AnimData;
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-static const UInt32 s_TESObject_REFR_init = 0x55A2F0;			// TESObject_REFR initialization routine (first reference to s_TESObject_REFR_vtbl)
-static const UInt32	s_Actor_EquipItem = 0x88C650;				// maybe, also, would be: 007198E0 for FOSE	4th call from the end of TESObjectREFR::RemoveItem (func5F)
-static const UInt32	s_Actor_UnequipItem = 0x88C790;				// maybe, also, would be: 007133E0 for FOSE next sub after EquipItem
-static const UInt32 s_TESObjectREFR__GetContainer = 0x55D310;	// First call in REFR::RemoveItem
-static const UInt32 s_TESObjectREFR_Set3D = 0x5702E0;			// void : (const char*)
+#if 1
+static const uint32_t s_TESObject_REFR_init = 0x55A2F0;			// TESObject_REFR initialization routine (first reference to s_TESObject_REFR_vtbl)
+static const uint32_t	s_Actor_EquipItem = 0x88C650;				// maybe, also, would be: 007198E0 for FOSE	4th call from the end of TESObjectREFR::RemoveItem (func5F)
+static const uint32_t	s_Actor_UnequipItem = 0x88C790;				// maybe, also, would be: 007133E0 for FOSE next sub after EquipItem
+static const uint32_t s_TESObjectREFR__GetContainer = 0x55D310;	// First call in REFR::RemoveItem
+static const uint32_t s_TESObjectREFR_Set3D = 0x5702E0;			// void : (const char*)
 #elif EDITOR
 #else
 #error
 #endif
-const UInt32 kUpdateAppearanceAddr = 0x8D3FA0;
+const uint32_t kUpdateAppearanceAddr = 0x8D3FA0;
 struct NiPoint3;
 // 68
 class TESObjectREFR : public TESForm {
@@ -45,19 +45,19 @@ public:
 	virtual void		Unk_5C(void);
 	virtual void		Unk_5D(void);
 	virtual void		Unk_5E(void);
-	virtual TESObjectREFR* RemoveItem(TESForm* toRemove, BaseExtraList* extraList, UInt32 quantity, bool keepOwner, bool drop, TESObjectREFR* destRef,
-		UInt32 unk6, UInt32 unk7, bool unk8, bool unk9);
+	virtual TESObjectREFR* RemoveItem(TESForm* toRemove, BaseExtraList* extraList, uint32_t quantity, bool keepOwner, bool drop, TESObjectREFR* destRef,
+		uint32_t unk6, uint32_t unk7, bool unk8, bool unk9);
 	virtual void		Unk_60(void);
-	virtual bool		EquipObject(TESForm* item, UInt32 count, ExtraDataList* xData, bool lockEquip);
+	virtual bool		EquipObject(TESForm* item, uint32_t count, ExtraDataList* xData, bool lockEquip);
 	virtual void		Unk_62(void);
 	virtual void		Unk_63(void);
-	virtual void		AddItem(TESForm* item, ExtraDataList* xDataList, UInt32 quantity);
+	virtual void		AddItem(TESForm* item, ExtraDataList* xDataList, uint32_t quantity);
 	virtual void		Unk_65(void);
 	virtual void		Unk_66(void);
 	virtual void		Unk_67(void);					// Actor: GetMagicEffectList
 	virtual bool		GetIsChildSize(bool checkHeight);		// 068 Actor: GetIsChildSize
-	virtual UInt32		GetActorUnk0148();			// result can be interchanged with baseForm, so TESForm* ?
-	virtual void		SetActorUnk0148(UInt32 arg0);
+	virtual uint32_t		GetActorUnk0148();			// result can be interchanged with baseForm, so TESForm* ?
+	virtual void		SetActorUnk0148(uint32_t arg0);
 	virtual void		Unk_6B(void);
 	virtual void		Unk_6C(void);	// REFR: GetBSFaceGenNiNodeSkinned
 	virtual void		Unk_6D(void);	// REFR: calls 006C
@@ -77,14 +77,14 @@ public:
 	virtual ValidBip01Names* CallGetValidBip01Names(void);
 	virtual void		SetValidBip01Names(ValidBip01Names* validBip01Names);
 	virtual NiPoint3* GetPos();				// GetPos or GetDistance
-	virtual void		Unk_7E(UInt32 arg0);
+	virtual void		Unk_7E(uint32_t arg0);
 	virtual void		Unk_7F(void);
-	virtual void		Unk_80(UInt32 arg0);
-	virtual void		Unk_81(UInt32 arg0);
+	virtual void		Unk_80(uint32_t arg0);
+	virtual void		Unk_81(uint32_t arg0);
 	virtual void		Unk_82(void);
-	virtual UInt32		Unk_83(void);
-	virtual void		Unk_84(UInt32 arg0);
-	virtual UInt32		Unk_85(void);
+	virtual uint32_t		Unk_83(void);
+	virtual void		Unk_84(uint32_t arg0);
+	virtual uint32_t		Unk_85(void);
 	virtual bool		IsCharacter();			// return false for Actor and Creature, true for character and PlayerCharacter
 	virtual bool		IsCreature();
 	virtual bool		IsExplosion();
@@ -111,16 +111,16 @@ public:
 
 	struct RenderState {
 		TESObjectREFR*	waterRef;		// 00
-		UInt32			unk04;			// 04	0-0x13 when fully-underwater; exterior only
+		uint32_t			unk04;			// 04	0-0x13 when fully-underwater; exterior only
 		float			waterLevel;		// 08
 		float			unk0C;			// 0C
-		UInt32			unk10;			// 10
+		uint32_t			unk10;			// 10
 		NiNode*			rootNode;		// 14
 		NiNode*			niNode18;		// 18
 	};
 
 	struct EditorData {
-		UInt32	unk00;	// 00
+		uint32_t	unk00;	// 00
 	};
 	// 0C
 
@@ -173,8 +173,8 @@ public:
 	float GetHealth() { return ThisCall<float>(0x568AD0, this); }
 
 	MEMBER_FN_PREFIX(TESObjectREFR);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	DEFINE_MEMBER_FN(Activate, bool, 0x00573170, TESObjectREFR*, UInt32, UInt32, UInt32);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute as the last call (190 bytes)
+#if 1
+	DEFINE_MEMBER_FN(Activate, bool, 0x00573170, TESObjectREFR*, uint32_t, uint32_t, uint32_t);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute as the last call (190 bytes)
 #elif EDITOR
 #else
 #error
@@ -246,22 +246,22 @@ public:
 	virtual void		Unk_C0(void);
 
 	BaseProcess* baseProcess;	// 68
-	UInt32			unk6C;			// 6C - loaded
+	uint32_t			unk6C;			// 6C - loaded
 	TESObjectREFR* unk70;			// 70 - loaded
-	UInt32			unk74;			// 74 - loaded
-	UInt32			unk78;			// 78 - loaded
-	UInt8			unk7C;			// 7C - loaded
-	UInt8			unk7D;			// 7D - loaded
-	UInt8			unk7E;			// 7E - loaded
-	UInt8			unk7F;			// 7F - loaded
-	UInt8			unk80;			// 80 - loaded
-	UInt8			unk81;			// 81 - loaded
-	UInt8			unk82;			// 82
-	UInt8			unk83;			// 83 - loaded
-	UInt8			unk84;			// 84 - loaded
-	UInt8			unk85;			// 85 - loaded
-	UInt8			unk86;			// 86 - loaded
-	UInt8			unk87;			// 87	Init'd to the inverse of NoLowLevelProcessing
+	uint32_t			unk74;			// 74 - loaded
+	uint32_t			unk78;			// 78 - loaded
+	uint8_t			unk7C;			// 7C - loaded
+	uint8_t			unk7D;			// 7D - loaded
+	uint8_t			unk7E;			// 7E - loaded
+	uint8_t			unk7F;			// 7F - loaded
+	uint8_t			unk80;			// 80 - loaded
+	uint8_t			unk81;			// 81 - loaded
+	uint8_t			unk82;			// 82
+	uint8_t			unk83;			// 83 - loaded
+	uint8_t			unk84;			// 84 - loaded
+	uint8_t			unk85;			// 85 - loaded
+	uint8_t			unk86;			// 86 - loaded
+	uint8_t			unk87;			// 87	Init'd to the inverse of NoLowLevelProcessing
 };
 
 static_assert(sizeof(MobileObject) == 0x88);
@@ -296,7 +296,7 @@ public:
 	virtual void	Unk_12(MagicTarget* magicTarget);
 	virtual void	Unk_13(void);
 
-	UInt32	unk04[2];	// 04
+	uint32_t	unk04[2];	// 04
 };
 static_assert(sizeof(MagicCaster) == 0xC);
 
@@ -319,7 +319,7 @@ public:
 	virtual void	Unk_0A(void);
 	virtual void	Unk_0B(void);
 
-	UInt32	unk04[3];	// 04
+	uint32_t	unk04[3];	// 04
 
 	void RemoveEffect(EffectItem* effItem);
 };
@@ -342,7 +342,7 @@ public:
 	virtual void	Unk_01(void);
 	virtual void	Unk_02(void);
 
-	UInt32			unk04[9];	// 04
+	uint32_t			unk04[9];	// 04
 };
 
 // 88
@@ -354,12 +354,12 @@ public:
 	virtual void		Unk_00(void);
 	virtual void		Unk_01(void);
 	virtual void		Unk_02(void);
-	virtual void		Unk_03(UInt32 flags);
+	virtual void		Unk_03(uint32_t flags);
 	virtual void		Unk_04(void);
 	virtual void		Unk_05(void);
 	virtual void		Unk_06(void);
 	virtual void		Unk_07(void);
-	virtual UInt32		GetMovementFlags();
+	virtual uint32_t		GetMovementFlags();
 	//	Running		0x200
 	//	Sneaking	0x400
 
@@ -375,25 +375,25 @@ public:
 	virtual void		Unk_0D(void);
 	virtual void		Unk_0E(void);
 
-	UInt32						unk04[6];			// 04
+	uint32_t						unk04[6];			// 04
 	PathingRequest* pathingRequest;	// 1C
 	PathingSolution* pathingSolution;	// 20
 	DetailedActorPathHandler* pathHandler;		// 24
 	Actor* actor;				// 28
-	UInt32						unk2C;				// 2C
+	uint32_t						unk2C;				// 2C
 	ActorPathingMessageQueue* pathingMsgQueue;	// 30
-	UInt32						movementFlags1;		// 34
-	UInt32						unk38;				// 38
-	UInt32						movementFlags2;		// 3C
-	UInt32						unk40;				// 40
+	uint32_t						movementFlags1;		// 34
+	uint32_t						unk38;				// 38
+	uint32_t						movementFlags2;		// 3C
+	uint32_t						unk40;				// 40
 	PathingLocation				pathingLocation;	// 44
-	UInt32						unk6C;				// 6C
-	UInt8						unk70[4];			// 70
-	UInt32						unk74;				// 74
-	UInt32						unk78;				// 78
-	UInt32						unk7C;				// 7C
-	UInt32						unk80;				// 80
-	UInt32						unk84;				// 84
+	uint32_t						unk6C;				// 6C
+	uint8_t						unk70[4];			// 70
+	uint32_t						unk74;				// 74
+	uint32_t						unk78;				// 78
+	uint32_t						unk7C;				// 7C
+	uint32_t						unk80;				// 80
+	uint32_t						unk84;				// 84
 };
 
 // A0
@@ -402,12 +402,12 @@ public:
 	PlayerMover();
 	~PlayerMover();
 
-	UInt32			unk88;				// 88
-	UInt32			unk8C;				// 8C
-	UInt32			unk90;				// 90
-	UInt32			pcMovementFlags;	// 94
-	UInt32			unk98;				// 98
-	UInt32			unk9C;				// 9C
+	uint32_t			unk88;				// 88
+	uint32_t			unk8C;				// 8C
+	uint32_t			unk90;				// 90
+	uint32_t			pcMovementFlags;	// 94
+	uint32_t			unk98;				// 98
+	uint32_t			unk9C;				// 9C
 };
 
 class CombatController;
@@ -460,18 +460,18 @@ public:
 	virtual void		Unk_E1(void);
 	virtual void		Unk_E2(void);
 	virtual void		Unk_E3(void);
-	virtual UInt32		GetActorType(void);	// Creature = 0, Character = 1, PlayerCharacter = 2
-	virtual void		SetActorValue(UInt32 avCode, float value);
-	virtual void		SetActorValueInt(UInt32 avCode, UInt32 value);
+	virtual uint32_t		GetActorType(void);	// Creature = 0, Character = 1, PlayerCharacter = 2
+	virtual void		SetActorValue(uint32_t avCode, float value);
+	virtual void		SetActorValueInt(uint32_t avCode, uint32_t value);
 	virtual void		Unk_E7(void);
 	virtual void		Unk_E8(void);
 	virtual void		Unk_E9(void);
-	virtual void		ModActorValue(UInt32 avCode, int modifier, UInt32 arg3);
-	virtual void		DamageActorValue(UInt32 avCode, float damage, Actor* attacker);
+	virtual void		ModActorValue(uint32_t avCode, int modifier, uint32_t arg3);
+	virtual void		DamageActorValue(uint32_t avCode, float damage, Actor* attacker);
 	virtual void		Unk_EC(void);
 	virtual void		Unk_ED(void);
 	virtual void		Unk_EE(void);
-	virtual ExtraContainerChanges::EntryData* GetPreferedWeapon(UInt32 unk);
+	virtual ExtraContainerChanges::EntryData* GetPreferedWeapon(uint32_t unk);
 	virtual void		Unk_F0(void);
 	virtual void		Unk_F1(void);
 	virtual void		Unk_F2(void);
@@ -483,7 +483,7 @@ public:
 	virtual void		Unk_F8(void);
 	virtual void		Unk_F9(void);
 	virtual void		Unk_FA(void);
-	virtual void		Unk_FB(TESForm* form, UInt32 arg2, UInt8 arg3, UInt8 arg4);
+	virtual void		Unk_FB(TESForm* form, uint32_t arg2, uint8_t arg3, uint8_t arg4);
 	virtual void		Unk_FC(void);
 	virtual void		Unk_FD(void);
 	virtual void		Unk_FE(void);
@@ -505,7 +505,7 @@ public:
 	virtual void		Unk_10E(void);
 	virtual float		GetTotalArmorDR(void);
 	virtual float		GetTotalArmorDT(void);
-	virtual UInt32		Unk_111(void);
+	virtual uint32_t		Unk_111(void);
 	virtual void		Unk_112(void);
 	virtual void		Unk_113(void);
 	virtual void		Unk_114(void);
@@ -522,13 +522,13 @@ public:
 	virtual void		Unk_11F(void);
 	virtual void		Unk_120(void);
 	virtual void		Unk_121(void);
-	virtual void		RewardXP(UInt32 amount);
+	virtual void		RewardXP(uint32_t amount);
 	virtual void		Unk_123(void);
 	virtual void		Unk_124(void);
 	virtual void		Unk_125(void);
-	virtual void		SetPerkRank(BGSPerk* perk, UInt8 rank, bool alt);
+	virtual void		SetPerkRank(BGSPerk* perk, uint8_t rank, bool alt);
 	virtual void		RemovePerk(BGSPerk* perk, bool alt);
-	virtual UInt8		GetPerkRank(BGSPerk* perk, bool alt);
+	virtual uint8_t		GetPerkRank(BGSPerk* perk, bool alt);
 	virtual void		Unk_129(void);
 	virtual void		Unk_12A(void);
 	virtual void		Unk_12B(void);
@@ -551,110 +551,110 @@ public:
 
 	bhkRagdollController* ragDollController;			// 0AC
 	bhkRagdollPenetrationUtil* ragDollPentrationUtil;		// 0B0
-	UInt32								unk0B4;						// 0B4-
+	uint32_t								unk0B4;						// 0B4-
 	float								flt0B8;						// 0B8
-	UInt8								byte0BC;					// 0BC-
-	UInt8								byte0BD;					// 0BD
-	UInt8								byte0BE;					// 0BE
-	UInt8								byte0BF;					// 0BF
+	uint8_t								byte0BC;					// 0BC-
+	uint8_t								byte0BD;					// 0BD
+	uint8_t								byte0BE;					// 0BE
+	uint8_t								byte0BF;					// 0BF
 	Actor* killer;					// 0C0
-	UInt8								byte0C4;					// 0C4-
-	UInt8								byte0C5;					// 0C5
-	UInt8								byte0C6;					// 0C6
-	UInt8								byte0C7;					// 0C7
+	uint8_t								byte0C4;					// 0C4-
+	uint8_t								byte0C5;					// 0C5
+	uint8_t								byte0C6;					// 0C6
+	uint8_t								byte0C7;					// 0C7
 	float								flt0C8;						// 0C8
 	float								flt0CC;						// 0CC
 	tList<void>							list0D0;					// 0D0
-	UInt8								byte0D8;					// 0D8
-	UInt8								byte0D9;					// 0D9
-	UInt8								byte0DA;					// 0DA
-	UInt8								byte0DB;					// 0DB
-	UInt32								unk0DC;						// 0DC
+	uint8_t								byte0D8;					// 0D8
+	uint8_t								byte0D9;					// 0D9
+	uint8_t								byte0DA;					// 0DA
+	uint8_t								byte0DB;					// 0DB
+	uint32_t								unk0DC;						// 0DC
 	tList<void>							list0E0;					// 0E0
-	UInt8								byte0E8;					// 0E8	const 1
-	UInt8								byte0E9;					// 0E9
-	UInt8								byte0EA;					// 0EA
-	UInt8								byte0EB;					// 0EB
-	UInt32								unk0EC;						// 0EC
-	UInt8								byte0F0;					// 0F0-
-	UInt8								byte0F1;					// 0F1-
-	UInt8								byte0F2;					// 0F2
-	UInt8								byte0F3;					// 0F3
+	uint8_t								byte0E8;					// 0E8	const 1
+	uint8_t								byte0E9;					// 0E9
+	uint8_t								byte0EA;					// 0EA
+	uint8_t								byte0EB;					// 0EB
+	uint32_t								unk0EC;						// 0EC
+	uint8_t								byte0F0;					// 0F0-
+	uint8_t								byte0F1;					// 0F1-
+	uint8_t								byte0F2;					// 0F2
+	uint8_t								byte0F3;					// 0F3
 	tList<void>							list0F4;					// 0F4
 	tList<void>							list0FC;					// 0FC
 	bool								isInCombat;					// 104
-	UInt8								jipActorFlags1;				// 105
-	UInt8								jipActorFlags2;				// 106
-	UInt8								jipActorFlags3;				// 107
-	UInt32								lifeState;					// 108	saved as byte HasHealth = 1 or 2, optionally 6, 5 = IsRestrained
-	UInt32								criticalStage;				// 10C
-	UInt32								unk110;						// 110-
+	uint8_t								jipActorFlags1;				// 105
+	uint8_t								jipActorFlags2;				// 106
+	uint8_t								jipActorFlags3;				// 107
+	uint32_t								lifeState;					// 108	saved as byte HasHealth = 1 or 2, optionally 6, 5 = IsRestrained
+	uint32_t								criticalStage;				// 10C
+	uint32_t								unk110;						// 110-
 	float								flt114;						// 114
-	UInt8								byte118;					// 118-
-	UInt8								byte119;					// 119+
-	UInt16								jip11A;						// 11A+
-	UInt32								unk11C;						// 11C-
-	UInt32								unk120;						// 120-
+	uint8_t								byte118;					// 118-
+	uint8_t								byte119;					// 119+
+	uint16_t								jip11A;						// 11A+
+	uint32_t								unk11C;						// 11C-
+	uint32_t								unk120;						// 120-
 	bool								forceRun;					// 124
 	bool								forceSneak;					// 125
-	UInt8								byte126;					// 126-
-	UInt8								byte127;					// 127-
+	uint8_t								byte126;					// 126-
+	uint8_t								byte127;					// 127-
 	Actor* combatTarget;				// 128
 	BSSimpleArray<Actor*>* combatTargets;				// 12C
 	BSSimpleArray<Actor*>* combatAllies;				// 130
-	UInt8								byte134;					// 134-
-	UInt8								byte135;					// 135+
-	UInt16								jip136;						// 136+
-	UInt32								unk138;						// 138-
-	UInt32								unk13C;						// 13C-
-	UInt32								actorFlags;					// 140	0x80000000 - IsEssential
+	uint8_t								byte134;					// 134-
+	uint8_t								byte135;					// 135+
+	uint16_t								jip136;						// 136+
+	uint32_t								unk138;						// 138-
+	uint32_t								unk13C;						// 13C-
+	uint32_t								actorFlags;					// 140	0x80000000 - IsEssential
 	bool								ignoreCrime;				// 144
-	UInt8								byte145;					// 145	Has to do with package evaluation
-	UInt8								byte146;					// 146	Has to do with package evaluation
-	UInt8								byte147;					// 147
-	UInt32								unk148;						// 148-
-	UInt8								inWater;					// 14C
-	UInt8								isSwimming;					// 14D
-	UInt16								jip14E;						// 14E+
-	UInt32								unk150;						// 150-
+	uint8_t								byte145;					// 145	Has to do with package evaluation
+	uint8_t								byte146;					// 146	Has to do with package evaluation
+	uint8_t								byte147;					// 147
+	uint32_t								unk148;						// 148-
+	uint8_t								inWater;					// 14C
+	uint8_t								isSwimming;					// 14D
+	uint16_t								jip14E;						// 14E+
+	uint32_t								unk150;						// 150-
 	float								flt154;						// 154
 	float								flt158;						// 158
-	UInt8								byte15C;					// 15C-
-	UInt8								byte15D;					// 15D-
-	UInt16								jip15E;						// 15E+
+	uint8_t								byte15C;					// 15C-
+	uint8_t								byte15D;					// 15D-
+	uint16_t								jip15E;						// 15E+
 	NiVector3							startingPos;				// 160
 	float								flt16C;						// 16C
 	TESForm* startingWorldOrCell;		// 170
-	UInt8								byte174;					// 174-
-	UInt8								byte175;					// 175-
-	UInt16								jip176;						// 176+
+	uint8_t								byte174;					// 174-
+	uint8_t								byte175;					// 175-
+	uint16_t								jip176;						// 176+
 	float								flt178;						// 178
 	float								flt17C;						// 17C
 	float								flt180;						// 180
 	float								flt184;						// 184
 	float								flt188;						// 188
-	UInt8								byte18C;					// 18C-
+	uint8_t								byte18C;					// 18C-
 	bool								isTeammate;					// 18D
-	UInt8								byte18E;					// 18E-
-	UInt8								byte18F;					// 18F
+	uint8_t								byte18E;					// 18E-
+	uint8_t								byte18F;					// 18F
 	ActorMover* actorMover;				// 190
-	UInt32								unk194;						// 194-
-	UInt32								unk198;						// 198-
+	uint32_t								unk194;						// 194-
+	uint32_t								unk198;						// 198-
 	float								flt19C;						// 19C
-	UInt32								unk1A0;						// 1A0-
-	UInt32								unk1A4;						// 1A4-
-	UInt32								unk1A8;						// 1A8-
-	UInt32								unk1AC;						// 1AC-
-	UInt8								byte1B0;					// 1B0-
+	uint32_t								unk1A0;						// 1A0-
+	uint32_t								unk1A4;						// 1A4-
+	uint32_t								unk1A8;						// 1A8-
+	uint32_t								unk1AC;						// 1AC-
+	uint8_t								byte1B0;					// 1B0-
 	bool								forceHit;					// 1B1-
-	UInt8								byte1B2;					// 1B2
-	UInt8								byte1B3;					// 1B3
+	uint8_t								byte1B2;					// 1B2
+	uint8_t								byte1B3;					// 1B3
 
 	// OBSE: unk1 looks like quantity, usu. 1; ignored for ammo (equips entire stack). In NVSE, pretty much always forced internally to 1
 	// OBSE: itemExtraList is NULL as the container changes entry is not resolved before the call
 	// NVSE: Default values are those used by the vanilla script functions.
-	void EquipItem(TESForm* objType, UInt32 equipCount = 1, ExtraDataList* itemExtraList = NULL, UInt32 unk3 = 1, bool lockEquip = false, UInt32 unk5 = 1);	// unk3 apply enchantment on player differently
-	void UnequipItem(TESForm* objType, UInt32 unequipCount = 1, ExtraDataList* itemExtraList = NULL, UInt32 unk3 = 1, bool lockEquip = false, UInt32 unk5 = 1);
+	void EquipItem(TESForm* objType, uint32_t equipCount = 1, ExtraDataList* itemExtraList = NULL, uint32_t unk3 = 1, bool lockEquip = false, uint32_t unk5 = 1);	// unk3 apply enchantment on player differently
+	void UnequipItem(TESForm* objType, uint32_t unequipCount = 1, ExtraDataList* itemExtraList = NULL, uint32_t unk3 = 1, bool lockEquip = false, uint32_t unk5 = 1);
 
 	//EquippedItemsList GetEquippedItems();
 	//ExtraContainerDataArray GetEquippedEntryDataList();
@@ -670,8 +670,8 @@ public:
 	bool IsFleeing();
 	TESObjectWEAP* GetEquippedWeapon();
 	bool IsItemEquipped(TESForm* item);
-	bool GetEquippedItemData(UInt32 slotIndex, ItemEntryData& itemData);
-	UInt8 EquippedWeaponHasMod(UInt8 modID);
+	bool GetEquippedItemData(uint32_t slotIndex, ItemEntryData& itemData);
+	uint8_t EquippedWeaponHasMod(uint8_t modID);
 	bool IsSneaking();
 	void StopCombat();
 	bool IsInCombatWith(Actor* target);
@@ -685,13 +685,13 @@ public:
 	void UpdateActiveEffects(MagicItem* magicItem, EffectItem* effItem, ActiveEffectCreate callback, bool addNew);
 	bool GetIsGhost();
 	float GetRadiationLevel();
-	BackUpPackage* AddBackUpPackage(TESObjectREFR* targetRef, TESObjectCELL* targetCell, UInt32 flags);
+	BackUpPackage* AddBackUpPackage(TESObjectREFR* targetRef, TESObjectCELL* targetCell, uint32_t flags);
 	void TurnToFaceObject(TESObjectREFR* target);
 	void TurnAngle(float angle);
-	void HandleSetAnimSequence(SInt32 animAction, BSAnimGroupSequence* animGroupSeq);
+	void HandleSetAnimSequence(int32_t animAction, BSAnimGroupSequence* animGroupSeq);
 	void PlayIdle(TESIdleForm* idleAnim);
 	float GetKillXP();
-	void DismemberLimb(UInt32 bodyPartID, bool explode);
+	void DismemberLimb(uint32_t bodyPartID, bool explode);
 	void EquipItemAlt(ExtraContainerChanges::EntryData* itemEntry, bool noUnequip, bool noMessage);
 	void EquipContainer(TESContainer* container);
 	bool HasNoPath();
@@ -713,7 +713,7 @@ public:
 
 	virtual void	Unk_137(void);
 
-	UInt32			unk1B4[3];			// 1B4
+	uint32_t			unk1B4[3];			// 1B4
 };
 
 // 1C8
@@ -728,9 +728,9 @@ public:
 	ValidBip01Names* validBip01Names;	// 1B4
 	float			totalArmorDR;		// 1B8
 	float			totalArmorDT;		// 1BC
-	UInt8			isTrespassing;		// 1C0
-	UInt8			byt1C1;				// 1C1
-	UInt16			unk1C2;				// 1C2
+	uint8_t			isTrespassing;		// 1C0
+	uint8_t			byt1C1;				// 1C1
+	uint16_t			unk1C2;				// 1C2
 	float			unk1C4;				// 1C4
 };
 static_assert(sizeof(Character) == 0x1C8);
@@ -743,8 +743,8 @@ struct MusicMarker;
 
 struct PerkRank {
 	BGSPerk* perk;
-	UInt8		rank;
-	UInt8		pad05[3];
+	uint8_t		rank;
+	uint8_t		pad05[3];
 };
 
 // E50
@@ -774,23 +774,23 @@ public:
 
 	struct CompassTarget {
 		Actor* target;
-		UInt8		isHostile;
-		UInt8		isDetected;
-		UInt8		pad06[2];
+		uint8_t		isHostile;
+		uint8_t		isDetected;
+		uint8_t		pad06[2];
 	};
 
-	UInt32								unk1C8[16];				// 1C8	208 could be a DialogPackage
+	uint32_t								unk1C8[16];				// 1C8	208 could be a DialogPackage
 	TESForm* form208;				// 208 TESTING
 	void* unk20C;				// 20C
 	tList<ActiveEffect>* activeEffects;			// 210
 	TESForm* form214;				// 214 TESTING
 	TESForm* form218;				// 218 TESTING
 	void* unk21C;				// 21C
-	UInt32								unk220[8];				// 220	224 is a package of type 1C
+	uint32_t								unk220[8];				// 220	224 is a package of type 1C
 	bool								showQuestItems;			// 240
-	UInt8								byte241;				// 241
-	UInt8								byte242;				// 242
-	UInt8								byte243;				// 243
+	uint8_t								byte241;				// 241
+	uint8_t								byte242;				// 242
+	uint8_t								byte243;				// 243
 	float								unk244[77];				// 244	have to be a set of ActorValue
 	float								permAVMods[77];			// 378	have to be a set of ActorValue
 	float								flt4AC;					// 4AC
@@ -799,10 +799,10 @@ public:
 	ImageSpaceModifierInstanceDOF* unk5EC;				// 5EC
 	ImageSpaceModifierInstanceDOF* unk5F0;				// 5F0
 	ImageSpaceModifierInstanceDRB* unk5F4;				// 5F4
-	UInt8								byte5F8;				// 5F8
-	UInt8								byte5F9;				// 5F9
-	UInt8								byte5FA;				// 5FA
-	UInt8								byte5FB;				// 5FB
+	uint8_t								byte5F8;				// 5F8
+	uint8_t								byte5F9;				// 5F9
+	uint8_t								byte5FA;				// 5FA
+	uint8_t								byte5FB;				// 5FB
 	tList<TESObjectREFR>				teammates;				// 5FC
 	TESObjectREFR* lastExteriorDoor;		// 604
 	void* unk608;				// 608
@@ -810,133 +810,133 @@ public:
 	tList<CasinoStats>* casinoDataList;				// 610
 	tList<TESCaravanCard>* caravanCards1;			// 614
 	tList<TESCaravanCard>* caravanCards2;			// 618
-	UInt32								unk61C[7];				// 61C
+	uint32_t								unk61C[7];				// 61C
 	TESObjectREFR* grabbedRef;			// 638
-	UInt32								unk63C[3];				// 63C
-	UInt8								byte648;				// 648
-	UInt8								byte649;				// 649
+	uint32_t								unk63C[3];				// 63C
+	uint8_t								byte648;				// 648
+	uint8_t								byte649;				// 649
 	bool								bIs3rdPersonVisible;				// 64A	= not FirstPerson
 	bool								is3rdPerson;			// 64B
 	bool								bThirdPerson;			// 64C
-	UInt8								byte64D;				// 64D
-	UInt8								byte64E;				// 64E
+	uint8_t								byte64D;				// 64D
+	uint8_t								byte64E;				// 64E
 	bool								isUsingScope;			// 64F
-	UInt8								byte650;				// 650
+	uint8_t								byte650;				// 650
 	bool								alwaysRun;				// 651
 	bool								autoMove;				// 652
-	UInt8								byte653;				// 653
-	UInt32								sleepHours;				// 654
-	UInt8								byte658;				// 658	Something to do with SleepDeprivation; see 0x969DCF
-	UInt8								byte659;				// 659
-	UInt8								byte65A;				// 65A
-	UInt8								byte65B;				// 65B
-	UInt32								unk65C[4];				// 65C
-	UInt8								byte66C;				// 66C
-	UInt8								byte66D;				// 66D
-	UInt8								byte66E;				// 66E
-	UInt8								byte66F;				// 66F
-	//UInt32								unk670[4];				// 670
+	uint8_t								byte653;				// 653
+	uint32_t								sleepHours;				// 654
+	uint8_t								byte658;				// 658	Something to do with SleepDeprivation; see 0x969DCF
+	uint8_t								byte659;				// 659
+	uint8_t								byte65A;				// 65A
+	uint8_t								byte65B;				// 65B
+	uint32_t								unk65C[4];				// 65C
+	uint8_t								byte66C;				// 66C
+	uint8_t								byte66D;				// 66D
+	uint8_t								byte66E;				// 66E
+	uint8_t								byte66F;				// 66F
+	//uint32_t								unk670[4];				// 670
 	float                               worldFOV;				//670
 	float								firstPersonFOV;
 	float								unk678;
 	float								unk67C;
-	UInt8								pcControlFlags;			// 680
-	UInt8								byte681;				// 681
-	UInt8								byte682;				// 682
-	UInt8								byte683;				// 683
-	UInt32								unk684[2];				// 684
+	uint8_t								pcControlFlags;			// 680
+	uint8_t								byte681;				// 681
+	uint8_t								byte682;				// 682
+	uint8_t								byte683;				// 683
+	uint32_t								unk684[2];				// 684
 	ValidBip01Names* VB01N1stPerson;		// 68C
 	void* unk690;				// 690
 	NiNode* playerNode;			// 694 used as node if unk64A is true
-	UInt32								unk698[4];				// 698
+	uint32_t								unk698[4];				// 698
 	tList<TESTopic>						topicList;				// 6A8
-	UInt32								unk6B0[2];				// 6B0
+	uint32_t								unk6B0[2];				// 6B0
 	TESQuest* activeQuest;			// 6B8
 	tList<BGSQuestObjective>			questObjectiveList;		// 6BC
 	tList<BGSQuestObjective::Target>	questTargetList;		// 6C4
-	UInt32								unk6CC[8];				// 6CC
+	uint32_t								unk6CC[8];				// 6CC
 	TESForm* form6EC;				// 6EC TESTING
 	TESForm* form6F0;				// 6F0 TESTING
-	UInt32								unk6F4;					// 6F4;
+	uint32_t								unk6F4;					// 6F4;
 	BSSimpleArray<ParentSpaceNode>		parentSpaceNodes;		// 6F8
 	BSSimpleArray<TeleportLink>			teleportLinks;			// 708
-	UInt32								unk718[6];				// 718
+	uint32_t								unk718[6];				// 718
 	float								timeGrenadeHeld;		// 730
-	UInt32								unk734[2];				// 734
+	uint32_t								unk734[2];				// 734
 	TESForm* form73C;				// 73C	TESTING
-	UInt32								unk740[6];				// 740
+	uint32_t								unk740[6];				// 740
 	TESForm* tempWeaponPoisonRef;	// 758 TESTING
 	bool								inCharGen;				// 75C
-	UInt8								byte75D;				// 75D
-	UInt8								byte75E;				// 75E
-	UInt8								byte75F;				// 75F
+	uint8_t								byte75D;				// 75D
+	uint8_t								byte75E;				// 75E
+	uint8_t								byte75F;				// 75F
 	TESRegion* currentRegion;			// 760
 	TESRegionList						regionsList;			// 764
-	UInt32								unk774[14];				// 774
+	uint32_t								unk774[14];				// 774
 	TESForm* pcWorldOrCell;			// 7AC
-	UInt32								unk7B0;					// 7B0
+	uint32_t								unk7B0;					// 7B0
 	BGSMusicType* musicType;				// 7B4
-	UInt8								gameDifficulty;			// 7B8
-	UInt8								byte7B9;				// 7B9
-	UInt8								byte7BA;				// 7BA
-	UInt8								byte7BB;				// 7BB
+	uint8_t								gameDifficulty;			// 7B8
+	uint8_t								byte7B9;				// 7B9
+	uint8_t								byte7BA;				// 7BA
+	uint8_t								byte7BB;				// 7BB
 	bool								isHardcore;				// 7BC
-	UInt8								byte7BD;				// 7BD
-	UInt8								byte7BE;				// 7BE
-	UInt8								byte7BF;				// 7BF
-	UInt32								killCamMode;			// 7C0
-	UInt8								byte7C4;				// 7C4
-	UInt8								byte7C5;				// 7C5
+	uint8_t								byte7BD;				// 7BD
+	uint8_t								byte7BE;				// 7BE
+	uint8_t								byte7BF;				// 7BF
+	uint32_t								killCamMode;			// 7C0
+	uint8_t								byte7C4;				// 7C4
+	uint8_t								byte7C5;				// 7C5
 	bool								isToddler;				// 7C6
 	bool								canUsePA;				// 7C7
 	tList<MapMarkerInfo>				mapMarkers;				// 7C8
 	TESWorldSpace* worldSpc7D0;			// 7D0
 	tList<MusicMarker>					musicMarkers;			// 7D4
 	MusicMarker* currMusicMarker;		// 7DC
-	UInt32								unk7E0[39];				// 7E0
+	uint32_t								unk7E0[39];				// 7E0
 	tList<PerkRank>						perkRanksPC;			// 87C
 	tList<BGSEntryPointPerkEntry>		perkEntriesPC[74];		// 884
 	tList<PerkRank>						perkRanksTM;			// AD4
 	tList<BGSEntryPointPerkEntry>		perkEntriesTM[74];		// ADC
-	UInt32								unkD2C[4];				// D2C
+	uint32_t								unkD2C[4];				// D2C
 	NiObject* unkD3C;				// D3C
-	UInt32								unkD40;					// D40
+	uint32_t								unkD40;					// D40
 	Actor* reticleActor;			// D44
 	tList<CompassTarget>* compassTargets;				// D48
-	UInt32								unkD4C[6];				// D4C
+	uint32_t								unkD4C[6];				// D4C
 	CombatActors* combatActors;			// D64
-	UInt32								teammateCount;			// D68
-	UInt32								unkD6C[5];				// D6C
+	uint32_t								teammateCount;			// D68
+	uint32_t								unkD6C[5];				// D6C
 	NiNode* niNodeD80;				// D80
-	UInt32								unkD84[12];				// D84
+	uint32_t								unkD84[12];				// D84
 	NiNode* niNodeDB4;				// DB4
-	UInt32								unkDB8[7];				// DB8
+	uint32_t								unkDB8[7];				// DB8
 	NiVector3							vectorDD4;				// DD4
 	NiVector3							cameraPos;				// DE0
 	bhkRigidBody* rigidBody;				// DEC
 	bool								pcInCombat;				// DF0
 	bool								pcUnseen;				// DF1
-	UInt8								byteDF2;				// DF2
-	UInt8								byteDF3;				// DF3
+	uint8_t								byteDF2;				// DF2
+	uint8_t								byteDF3;				// DF3
 	BSSimpleArray<ItemChange>			itemChanges;			// DF4
-	UInt32								unkE04[5];				// E04
+	uint32_t								unkE04[5];				// E04
 	float								killCamTimer;			// E18
 	float								killCamCooldown;		// E1C
-	UInt8								byteE20;				// E20
-	UInt8								byteE21;				// E21
-	UInt8								byteE22;				// E22
-	UInt8								byteE23;				// E23
+	uint8_t								byteE20;				// E20
+	uint8_t								byteE21;				// E21
+	uint8_t								byteE22;				// E22
+	uint8_t								byteE23;				// E23
 	float								fltE24;					// E24
 	float								counterAttackTimer;		// E28
-	UInt32								unkE2C;					// E2C
-	UInt32								unkE30;					// E30
+	uint32_t								unkE2C;					// E2C
+	uint32_t								unkE30;					// E30
 	NiNode* ironSightNode;			// E34
 	bool								noHardcoreTracking;		// E38	Appears to be unused
 	bool								skipHCNeedsUpdate;		// E39
-	UInt8								byteE3A;				// E3A
-	UInt8								byteE3B;				// E3B
+	uint8_t								byteE3A;				// E3A
+	uint8_t								byteE3B;				// E3B
 	BSSimpleArray<TESAmmo*>				pcAmmo;					// E3C
-	UInt32								unkE4C;					// E4C
+	uint32_t								unkE4C;					// E4C
 		// 7C6 is a boolean meaning toddler,
 		// 7C7 byte bool PCCanUsePowerArmor, Byt0E39 referenced during LoadGame
 		// Used by TFC : 7E8/EC/F0 stores Pos, 7F0 adjusted by scaledHeight , 7E0 stores RotZ, 7E4 RotX
@@ -946,7 +946,7 @@ public:
 
 	bool IsThirdPerson() const { return bThirdPerson; }
 	bool Is3rdPersonVisible() const { return bIs3rdPersonVisible; }
-	UInt32 GetMovementFlags() { return actorMover->GetMovementFlags(); }	// 11: IsSwimming, 9: IsSneaking, 8: IsRunning, 7: IsWalking, 0: keep moving
+	uint32_t GetMovementFlags() { return actorMover->GetMovementFlags(); }	// 11: IsSwimming, 9: IsSneaking, 8: IsRunning, 7: IsWalking, 0: keep moving
 	bool IsPlayerSwimming() { return (GetMovementFlags() >> 11) & 1; }
 
 	static PlayerCharacter* GetSingleton();
@@ -975,7 +975,7 @@ public:
 		kProjType_ContinuousBeam
 	};
 
-	virtual UInt32	GetProjectileType();
+	virtual uint32_t	GetProjectileType();
 	virtual void	Unk_C2(void);
 	virtual void	Unk_C3(void);
 	virtual void	Unk_C4(void);
@@ -1013,29 +1013,29 @@ public:
 
 	struct ImpactData {
 		TESObjectREFR* refr;			// 00
-		UInt32			unk04[2];		// 04
+		uint32_t			unk04[2];		// 04
 		float			unk0C;			// 0C
-		UInt32			unk10[2];		// 10
+		uint32_t			unk10[2];		// 10
 		float			unk18;			// 18
 		hkpRigidBody* rigidBody;		// 1C
-		UInt32			unk20;			// 20
-		SInt32			hitLocation;	// 24
-		UInt32			unk28;			// 28
-		UInt32			unk2C;			// 2C
+		uint32_t			unk20;			// 20
+		int32_t			hitLocation;	// 24
+		uint32_t			unk28;			// 28
+		uint32_t			unk2C;			// 2C
 	};
 
 	struct Struct128 {
-		UInt32			unk00;
-		UInt8			byte04;
-		UInt8			pad05[3];
-		UInt32			status;		//	0 - Not triggered, 1 - Triggered, 2 - Disarmed
+		uint32_t			unk00;
+		uint8_t			byte04;
+		uint8_t			pad05[3];
+		uint32_t			status;		//	0 - Not triggered, 1 - Triggered, 2 - Disarmed
 	};
 
 	tList<ImpactData>	impactDataList;	// 088
-	UInt8				hasImpacted;	// 090
-	UInt8				pad091[3];		// 091
+	uint8_t				hasImpacted;	// 090
+	uint8_t				pad091[3];		// 091
 	float				unk094[13];		// 094
-	UInt32				projFlags;		// 0C8
+	uint32_t				projFlags;		// 0C8
 	float				speedMult1;		// 0CC
 	float				speedMult2;		// 0D0
 	float				flt0D4;			// 0D4
@@ -1049,32 +1049,32 @@ public:
 	float				wpnHealthPerc;	// 0F4
 	TESObjectWEAP* sourceWeap;	// 0F8
 	TESObjectREFR* sourceRef;		// 0FC
-	UInt32				unk100;			// 100
+	uint32_t				unk100;			// 100
 	float				flt104;			// 104
 	float				flt108;			// 108
 	float				flt10C;			// 10C
 	float				distTravelled;	// 110
 	NiRefObject* object114;		// 114
-	UInt8				byte118;		// 118
-	UInt8				pad119[3];		// 119
+	uint8_t				byte118;		// 118
+	uint8_t				pad119[3];		// 119
 	NiNode* node11C;		// 11C
-	UInt32				unk120;			// 120
+	uint32_t				unk120;			// 120
 	float				flt124;			// 124
 	Struct128			unk128;			// 128
 	Struct128			unk134;			// 134
-	UInt32				unk140;			// 140
-	UInt32				unk144;			// 144
-	UInt8				byte148;		// 148
-	UInt8				pad149[3];		// 149
+	uint32_t				unk140;			// 140
+	uint32_t				unk144;			// 144
+	uint8_t				byte148;		// 148
+	uint8_t				pad149[3];		// 149
 	float				range;			// 14C
 };
 static_assert(sizeof(Projectile) == 0x150);
 
 struct ProjectileData {
-	UInt8 byte00;
-	UInt8 byte01;
-	UInt8 byte02;
-	UInt8 gap03;
+	uint8_t byte00;
+	uint8_t byte01;
+	uint8_t byte02;
+	uint8_t gap03;
 	float unk04;
 	float flashDuration;
 	NiNode* muzzleFlash;
@@ -1100,7 +1100,7 @@ public:
 	~ContinuousBeamProjectile();
 
 	NiRefObject* object150;		// 150
-	UInt32			unk154;			// 154
+	uint32_t			unk154;			// 154
 };
 
 // 158
@@ -1123,8 +1123,8 @@ public:
 
 	virtual void	Unk_CC(void);
 
-	UInt8		byte150;		// 150
-	UInt8		pad151[3];		// 151
+	uint8_t		byte150;		// 150
+	uint8_t		pad151[3];		// 151
 };
 
 // 160
@@ -1135,9 +1135,9 @@ public:
 
 	virtual void	Unk_CC(void);
 
-	UInt32		unk150;			// 150
-	UInt8		byte154;		// 154
-	UInt8		pad155[3];		// 155
+	uint32_t		unk150;			// 150
+	uint8_t		byte154;		// 154
+	uint8_t		pad155[3];		// 155
 	float		flt158;			// 158
 	float		flt15C;			// 15C
 };
@@ -1158,11 +1158,11 @@ public:
 	float			unk09C;			// 09C
 	NiRefObject* object0A0;		// 0A0
 	tList<void>		list0A4;		// 0A4
-	UInt32			unk0AC[6];		// 0AC
+	uint32_t			unk0AC[6];		// 0AC
 	NiRefObject* object0C4;		// 0C4
-	UInt32			unk0C8[2];		// 0C8
+	uint32_t			unk0C8[2];		// 0C8
 	NiRefObject* object0D0;		// 0D0
-	UInt32			unk0D4[11];		// 0D4
+	uint32_t			unk0D4[11];		// 0D4
 	float			unk100;			// 100
 };
 static_assert(sizeof(Explosion) == 0x104);

@@ -7,24 +7,24 @@ public:
 	virtual ~ActiveEffect();
 
 	virtual ActiveEffect* Clone(void);
-	virtual void			Unk_02(UInt32 arg);
-	virtual void			Unk_03(UInt32 arg);
-	virtual void			SaveGame(UInt32 arg);
-	virtual void			LoadGame(UInt32 arg);
-	virtual void			Unk_06(UInt32 arg);
-	virtual void			Unk_07(UInt32 arg);
-	virtual void			Unk_08(UInt32 arg);
+	virtual void			Unk_02(uint32_t arg);
+	virtual void			Unk_03(uint32_t arg);
+	virtual void			SaveGame(uint32_t arg);
+	virtual void			LoadGame(uint32_t arg);
+	virtual void			Unk_06(uint32_t arg);
+	virtual void			Unk_07(uint32_t arg);
+	virtual void			Unk_08(uint32_t arg);
 	virtual bool			UnregisterCaster(MagicCaster* _caster);	// returns 1 and clears caster if it matches the parameter, else returns 0
 	virtual bool			Unk_0A(void);
 	virtual void			CopyTo(ActiveEffect* _target);
-	virtual bool			Unk_0C(UInt32 arg);
-	virtual bool			Unk_0D(UInt32 arg);
-	virtual void			Unk_0E(UInt32 arg);		// update/add effect?
+	virtual bool			Unk_0C(uint32_t arg);
+	virtual bool			Unk_0D(uint32_t arg);
+	virtual void			Unk_0E(uint32_t arg);		// update/add effect?
 	virtual void			Terminate(void);	// update/add effect?
-	virtual void			Unk_10(UInt32 arg);
-	virtual void			Unk_11(UInt32 arg);
-	virtual void			Unk_12(UInt32 arg);
-	virtual void			Unk_13(UInt32 arg);
+	virtual void			Unk_10(uint32_t arg);
+	virtual void			Unk_11(uint32_t arg);
+	virtual void			Unk_12(uint32_t arg);
+	virtual void			Unk_13(uint32_t arg);
 	virtual void			Unk_14(void);
 	virtual void			Unk_15(void);
 	virtual void			Unk_16(void);
@@ -36,19 +36,19 @@ public:
 	bool			bApplied;		// 11 set to 1 when effect is to be removed
 	bool			byte12;			// 12
 	bool			bTerminated;				// 13
-	UInt32			unk14;				// 14
-	UInt32			unk18;				// 18
+	uint32_t			unk14;				// 14
+	uint32_t			unk18;				// 18
 	float			magnitude;			// 1C - adjusted based on target?
 	float			duration;			// 20 - adjusted based on target?
 	MagicTarget*	target;			// 24
 	MagicCaster*	caster;			// 28
-	UInt32			spellType;			// 2C e.g. SpellItem::kType_Ability
-	UInt32			unk30;				// 30
-	UInt32			unk34;				// 34
-	UInt32			unk38;				// 38
+	uint32_t			spellType;			// 2C e.g. SpellItem::kType_Ability
+	uint32_t			unk30;				// 30
+	uint32_t			unk34;				// 34
+	uint32_t			unk38;				// 38
 	TESForm* enchantObject;		// 3C enchanted obj responsible for effect
 	TESForm* data;				// 40 - in ScriptEffect this is a Script *
-	UInt32			unk44;				// 44
+	uint32_t			unk44;				// 44
 
 	__forceinline void Remove(bool immediate) {
 		ThisCall(0x804210, this, immediate);
@@ -65,7 +65,7 @@ public:
 	virtual void	Unk_18(void);
 	virtual void	Unk_19(void);
 
-	UInt32		actorVal;
+	uint32_t		actorVal;
 };
 
 // 50
@@ -74,7 +74,7 @@ public:
 	ScriptEffect();
 	~ScriptEffect();
 
-	UInt32		unk48[2];	// 48
+	uint32_t		unk48[2];	// 48
 };
 
 // 48
@@ -94,7 +94,7 @@ public:
 
 	virtual void	Unk_17(void);
 
-	UInt32		unk48[2];	// 48
+	uint32_t		unk48[2];	// 48
 };
 
 // 5C
@@ -105,7 +105,7 @@ public:
 
 	virtual void	Unk_1A(void);
 
-	UInt32		unk4C[4];	// 4C
+	uint32_t		unk4C[4];	// 4C
 };
 
 // 50
@@ -116,7 +116,7 @@ public:
 
 	virtual void	Unk_1A(void);
 
-	UInt32		unk4C;	// 4C
+	uint32_t		unk4C;	// 4C
 };
 
 // 4C
@@ -136,7 +136,7 @@ public:
 
 	virtual void	Unk_17(void);
 
-	UInt32		unk48;	// 48
+	uint32_t		unk48;	// 48
 };
 
 // 50
@@ -147,7 +147,7 @@ public:
 
 	virtual void	Unk_1A(void);
 
-	UInt32		unk4C;	// 4C
+	uint32_t		unk4C;	// 4C
 };
 
 // 48
@@ -197,7 +197,7 @@ public:
 	LightEffect();
 	~LightEffect();
 
-	UInt32		unk48;	// 48
+	uint32_t		unk48;	// 48
 };
 
 // 4C
@@ -253,7 +253,7 @@ public:
 	BoundItemEffect();
 	~BoundItemEffect();
 
-	UInt32		unk48[24];	// 4C
+	uint32_t		unk48[24];	// 4C
 };
 
 // 74
@@ -262,7 +262,7 @@ public:
 	SummonCreatureEffect();
 	~SummonCreatureEffect();
 
-	UInt32		unk48[10];	// 4C
+	uint32_t		unk48[10];	// 4C
 };
 
 // 4C
@@ -282,7 +282,7 @@ public:
 
 	virtual void	Unk_1A(void);
 
-	UInt32		unk4C[5];	// 4C
+	uint32_t		unk4C[5];	// 4C
 };
 
 // 4C
@@ -291,7 +291,7 @@ public:
 	DisintegrateArmorEffect();
 	~DisintegrateArmorEffect();
 
-	UInt32		unk48;	// 48
+	uint32_t		unk48;	// 48
 };
 
 // 48
@@ -316,7 +316,7 @@ public:
 	ReanimateEffect();
 	~ReanimateEffect();
 
-	UInt32		unk48[10];	// 48
+	uint32_t		unk48[10];	// 48
 };
 
 // 4C
@@ -327,7 +327,7 @@ public:
 
 	virtual void	Unk_17(void);
 
-	UInt32		unk48;	// 48
+	uint32_t		unk48;	// 48
 };
 
 // 50
@@ -338,7 +338,7 @@ public:
 
 	virtual void	Unk_17(void);
 
-	UInt32		unk48[2];	// 48
+	uint32_t		unk48[2];	// 48
 };
 
 // 48
@@ -367,7 +367,7 @@ public:
 
 	virtual void	Unk_1A(void);
 
-	UInt32		unk4C;	// 4C
+	uint32_t		unk4C;	// 4C
 };
 
 // 50
@@ -378,7 +378,7 @@ public:
 
 	virtual void	Unk_1A(void);
 
-	UInt32		unk4C;	// 4C
+	uint32_t		unk4C;	// 4C
 };
 
 // 18
@@ -406,7 +406,7 @@ public:
 	TESObjectCELL* cell;		// 0C
 	float			age;		// 10
 	bool			initialized;// 14
-	UInt8			pad15[3];	// 15
+	uint8_t			pad15[3];	// 15
 };
 
 // 28
@@ -427,8 +427,8 @@ public:
 	ActiveEffect* activeEffect;	// 18
 	TESObjectREFR* target;		// 1C
 	float			timeElapsed;			// 20
-	UInt8			flags;			// 24	1 - Stop
-	UInt8			pad25[3];		// 25
+	uint8_t			flags;			// 24	1 - Stop
+	uint8_t			pad25[3];		// 25
 };
 
 // 6C
@@ -437,12 +437,12 @@ public:
 	MagicShaderHitEffect();
 	~MagicShaderHitEffect();
 
-	UInt32									unk28[2];		// 28
+	uint32_t									unk28[2];		// 28
 	TESEffectShader* effectShader;	// 30
 	float									timeElapsed;	// 34
 	BSSimpleArray<ParticleShaderProperty>	shaderProps;	// 38
 	NiNode* shaderNode;	// 48
-	UInt32									unk4C;			// 4C
+	uint32_t									unk4C;			// 4C
 	BSSimpleArray<NiAVObject>				objects;		// 50	Seen BSFadeNode
 	float									flt60;			// 60
 	float									flt64;			// 64

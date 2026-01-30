@@ -2,11 +2,11 @@
 
 class Script;
 
-void DumpClass(void* theClassPtr, UInt32 nIntsToDump = 512);
+void DumpClass(void* theClassPtr, uint32_t nIntsToDump = 512);
 const char* GetObjectClassName(void* obj);
 //const std::string & GetFalloutDirectory(void);
 //std::string GetNVSEConfigOption(const char * section, const char * key);
-//bool GetNVSEConfigOption_UInt32(const char * section, const char * key, UInt32 * dataOut);
+//bool GetNVSEConfigOption_UInt32(const char * section, const char * key, uint32_t * dataOut);
 
 // this has been tested to work for non-varargs functions
 // varargs functions end up with 'this' passed as the last parameter (ie. probably broken)
@@ -26,7 +26,7 @@ const char* GetObjectClassName(void* obj);
 																					\
 	inline _##functionName##_type * _##functionName##_GetPtr(void)					\
 	{																				\
-		static const UInt32 _address = address;										\
+		static const uint32_t _address = address;										\
 		return (_##functionName##_type *)&_address;									\
 	}
 
@@ -99,8 +99,8 @@ namespace MersenneTwister {
 //	~Tokenizer();
 //
 //	// these return the offset of token in src, or -1 if no token
-//	UInt32 NextToken(std::string& outStr);
-//	UInt32 PrevToken(std::string& outStr);
+//	uint32_t NextToken(std::string& outStr);
+//	uint32_t PrevToken(std::string& outStr);
 //
 //private:
 //	std::string m_delims;
@@ -115,7 +115,7 @@ const char* GetSeparatorChars(Script* script);
 
 #endif
 
-const char* GetDXDescription(UInt32 keycode);
+const char* GetDXDescription(uint32_t keycode);
 
 //bool ci_equal(char ch1, char ch2);
 //bool ci_less(const char* lh, const char* rh);

@@ -5,7 +5,7 @@
 #include "internal/sha1/sha1.h"
 #include <time.h>
 void LightCS::Enter() {
-	UInt32 threadID = GetCurrentThreadId();
+	uint32_t threadID = GetCurrentThreadId();
 	if (owningThread == threadID) {
 		enterCount++;
 		return;
@@ -17,12 +17,12 @@ void LightCS::Enter() {
 #define FAST_SLEEP_COUNT 10000UL
 
 void LightCS::EnterSleep() {
-	UInt32 threadID = GetCurrentThreadId();
+	uint32_t threadID = GetCurrentThreadId();
 	if (owningThread == threadID) {
 		enterCount++;
 		return;
 	}
-	UInt32 fastIdx = FAST_SLEEP_COUNT;
+	uint32_t fastIdx = FAST_SLEEP_COUNT;
 	while (InterlockedCompareExchange(&owningThread, threadID, 0)) {
 		if (fastIdx) {
 			fastIdx--;
@@ -206,10 +206,10 @@ double dAtan2(double y, double x) {
 	return 0;
 }
 
-UInt32 __fastcall GetNextPrime(UInt32 num) {
+uint32_t __fastcall GetNextPrime(uint32_t num) {
 	if (num <= 2) return 2;
 	else if (num == 3) return 3;
-	UInt32 a = num / 6, b = num - (6 * a), c = (b < 2) ? 1 : 5, d;
+	uint32_t a = num / 6, b = num - (6 * a), c = (b < 2) ? 1 : 5, d;
 	num = (6 * a) + c;
 	a = (3 + c) / 2;
 	do {
@@ -226,7 +226,7 @@ UInt32 __fastcall GetNextPrime(UInt32 num) {
 	return num;
 }
 
-__declspec(naked) UInt32 __fastcall RGBHexToDec(UInt32 rgb) {
+__declspec(naked) uint32_t __fastcall RGBHexToDec(uint32_t rgb) {
 	__asm
 	{
 		movzx	eax, cl
@@ -240,7 +240,7 @@ __declspec(naked) UInt32 __fastcall RGBHexToDec(UInt32 rgb) {
 	}
 }
 
-__declspec(naked) UInt32 __fastcall RGBDecToHex(UInt32 rgb) {
+__declspec(naked) uint32_t __fastcall RGBDecToHex(uint32_t rgb) {
 	__asm
 	{
 		push	ebx
@@ -262,7 +262,7 @@ __declspec(naked) UInt32 __fastcall RGBDecToHex(UInt32 rgb) {
 	}
 }
 
-__declspec(naked) UInt32 __fastcall StrLen(const char* str) {
+__declspec(naked) uint32_t __fastcall StrLen(const char* str) {
 	__asm
 	{
 		mov		eax, ecx
@@ -295,7 +295,7 @@ __declspec(naked) char* __fastcall StrEnd(const char* str) {
 	}
 }
 
-__declspec(naked) bool __fastcall MemCmp(const void* ptr1, const void* ptr2, UInt32 bsize) {
+__declspec(naked) bool __fastcall MemCmp(const void* ptr1, const void* ptr2, uint32_t bsize) {
 	__asm
 	{
 		push	ebx
@@ -318,7 +318,7 @@ __declspec(naked) bool __fastcall MemCmp(const void* ptr1, const void* ptr2, UIn
 	}
 }
 
-__declspec(naked) void __fastcall MemZero(void* dest, UInt32 bsize) {
+__declspec(naked) void __fastcall MemZero(void* dest, uint32_t bsize) {
 	__asm
 	{
 		test	ecx, ecx
@@ -380,7 +380,7 @@ __declspec(naked) char* __fastcall StrCopy(char* dest, const char* src) {
 	}
 }
 
-__declspec(naked) char* __fastcall StrNCopy(char* dest, const char* src, UInt32 length) {
+__declspec(naked) char* __fastcall StrNCopy(char* dest, const char* src, uint32_t length) {
 	__asm
 	{
 		push	ebx
@@ -422,7 +422,7 @@ __declspec(naked) char* __fastcall StrCat(char* dest, const char* src) {
 	}
 }
 
-__declspec(naked) UInt32 __fastcall StrHash(const char* inKey) {
+__declspec(naked) uint32_t __fastcall StrHash(const char* inKey) {
 	__asm
 	{
 		xor eax, eax
@@ -780,7 +780,7 @@ __declspec(naked) char* __fastcall FindChr(const char* str, char chr) {
 	}
 }
 
-__declspec(naked) char* __fastcall FindChrR(const char* str, UInt32 length, char chr) {
+__declspec(naked) char* __fastcall FindChrR(const char* str, uint32_t length, char chr) {
 	__asm
 	{
 		test	ecx, ecx
@@ -1032,7 +1032,7 @@ int __fastcall StrToInt(const char* str) {
 double __fastcall StrToDbl(const char* str) {
 	if (!str) return 0;
 	double result = 0;
-	UInt32 intPart = 0, divisor = 1;
+	uint32_t intPart = 0, divisor = 1;
 	bool neg = *str == '-', point = false;
 	if (neg) str++;
 	char chr;
@@ -1054,9 +1054,9 @@ double __fastcall StrToDbl(const char* str) {
 	return neg ? -result : result;
 }
 
-char* __fastcall UIntToHex(UInt32 num, char* str) {
+char* __fastcall UIntToHex(uint32_t num, char* str) {
 	char res[8];
-	UInt8 size = 0, temp;
+	uint8_t size = 0, temp;
 	do {
 		temp = num % 0x10;
 		res[size++] = temp + ((temp < 10) ? '0' : '7');
@@ -1068,10 +1068,10 @@ char* __fastcall UIntToHex(UInt32 num, char* str) {
 	return str;
 }
 
-UInt32 __fastcall HexToUInt(const char* str) {
+uint32_t __fastcall HexToUInt(const char* str) {
 	if (!str || !*str) return 0;
 	char size = 0, chr;
-	UInt32 result = 0, mult = 1;
+	uint32_t result = 0, mult = 1;
 	do {
 		str++;
 		size++;
@@ -1102,7 +1102,7 @@ bool FileStream::Open(const char* filePath) {
 	return true;
 }
 
-bool FileStream::OpenAt(const char* filePath, UInt32 inOffset) {
+bool FileStream::OpenAt(const char* filePath, uint32_t inOffset) {
 	theFile = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (theFile == INVALID_HANDLE_VALUE)
 		return false;
@@ -1146,23 +1146,23 @@ bool FileStream::OpenWriteEx(char* filePath, bool append) {
 	return true;
 }
 
-void FileStream::SetOffset(UInt32 inOffset) {
+void FileStream::SetOffset(uint32_t inOffset) {
 	if (inOffset > streamLength)
 		streamOffset = streamLength;
 	else streamOffset = inOffset;
 	SetFilePointer(theFile, streamOffset, NULL, FILE_BEGIN);
 }
 
-void FileStream::ReadBuf(void* outData, UInt32 inLength) {
-	UInt32 bytesRead;
+void FileStream::ReadBuf(void* outData, uint32_t inLength) {
+	DWORD bytesRead;
 	ReadFile(theFile, outData, inLength, &bytesRead, NULL);
 	streamOffset += bytesRead;
 }
 
-void FileStream::WriteBuf(const void* inData, UInt32 inLength) {
+void FileStream::WriteBuf(const void* inData, uint32_t inLength) {
 	if (streamOffset > streamLength)
 		SetEndOfFile(theFile);
-	UInt32 bytesWritten;
+	DWORD bytesWritten;
 	WriteFile(theFile, inData, inLength, &bytesWritten, NULL);
 	streamOffset += bytesWritten;
 	if (streamLength < streamOffset)
@@ -1227,10 +1227,10 @@ LineIterator::LineIterator(const char* filePath, char* buffer) {
 		*dataPtr = 3;
 		return;
 	}
-	UInt32 length = sourceFile.GetLength();
+	uint32_t length = sourceFile.GetLength();
 	sourceFile.ReadBuf(dataPtr, length);
-	*(UInt16*)(dataPtr + length) = 0x300;
-	UInt8 data;
+	*(uint16_t*)(dataPtr + length) = 0x300;
+	uint8_t data;
 	while (data = *buffer) {
 		if ((data == '\n') || (data == '\r'))
 			*buffer = 0;
@@ -1250,7 +1250,7 @@ void LineIterator::Next() {
 bool FileToBuffer(const char* filePath, char* buffer) {
 	FileStream srcFile;
 	if (!srcFile.Open(filePath)) return false;
-	UInt32 length = srcFile.GetLength();
+	uint32_t length = srcFile.GetLength();
 	if (!length) return false;
 	if (length > kMaxMessageLength)
 		length = kMaxMessageLength;
@@ -1266,7 +1266,7 @@ void __fastcall GetTimeStamp(char* buffer) {
 	sprintf_s(buffer, 0x10, "%02d:%02d:%02d", timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec);
 }
 
-__declspec(naked) UInt32 __fastcall ByteSwap(UInt32 dword) {
+__declspec(naked) uint32_t __fastcall ByteSwap(uint32_t dword) {
 	__asm
 	{
 		mov		eax, ecx
@@ -1283,8 +1283,8 @@ void GetMD5File(const char* filePath, char* outHash) {
 
 	HANDLE handle = sourceFile.GetHandle();
 
-	UInt8 buffer[0x400], digest[0x10];
-	UInt32 offset = 0, length;
+	uint8_t buffer[0x400], digest[0x10];
+	DWORD offset = 0, length;
 
 	while (!sourceFile.HitEOF()) {
 		ReadFile(handle, buffer, 0x400, &length, NULL);
@@ -1294,7 +1294,7 @@ void GetMD5File(const char* filePath, char* outHash) {
 	}
 	md5.MD5Final(digest);
 
-	for (UInt8 idx = 0; idx < 0x10; idx++, outHash += 2)
+	for (uint8_t idx = 0; idx < 0x10; idx++, outHash += 2)
 		sprintf_s(outHash, 3, "%02X", digest[idx]);
 }
 
@@ -1307,7 +1307,7 @@ void GetSHA1File(const char* filePath, char* outHash) {
 	HANDLE handle = sourceFile.GetHandle();
 
 	char buffer[0x400];
-	UInt32 offset = 0, length;
+	DWORD offset = 0, length;
 
 	while (!sourceFile.HitEOF()) {
 		ReadFile(handle, buffer, 0x400, &length, NULL);
@@ -1317,16 +1317,16 @@ void GetSHA1File(const char* filePath, char* outHash) {
 	}
 	unsigned char* digest = sha.getDigest();
 
-	for (UInt8 idx = 0; idx < 0x14; idx++, outHash += 2)
+	for (uint8_t idx = 0; idx < 0x14; idx++, outHash += 2)
 		sprintf_s(outHash, 3, "%02X", digest[idx]);
 }
 
 // Taken from xNVSE
-UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda) {
-	auto* basePtr = static_cast<UInt8*>(addressOfReturnAddress) - 4;
+uint8_t* GetParentBasePtr(void* addressOfReturnAddress, bool lambda) {
+	auto* basePtr = static_cast<uint8_t*>(addressOfReturnAddress) - 4;
 #if _DEBUG
 	if (lambda) // in debug mode, lambdas are wrapped inside a closure wrapper function, so one more step needed
-		basePtr = *reinterpret_cast<UInt8**>(basePtr);
+		basePtr = *reinterpret_cast<uint8_t**>(basePtr);
 #endif
-	return *reinterpret_cast<UInt8**>(basePtr);
+	return *reinterpret_cast<uint8_t**>(basePtr);
 }

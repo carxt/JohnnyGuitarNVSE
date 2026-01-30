@@ -19,7 +19,7 @@ void WriteToExtraDataList(BaseExtraList* from, BaseExtraList* to)
 	}
 }
 
-std::map<UInt32, InventoryReference*> InventoryReference::s_refmap;
+std::map<uint32_t, InventoryReference*> InventoryReference::s_refmap;
 
 InventoryReference::InventoryReference(TESObjectREFR* container, const Data &data, bool bValidate) : 
 	m_containerRef(container), m_bDoValidation(bValidate), m_bRemoved(false)
@@ -90,9 +90,9 @@ bool InventoryReference::WriteRefDataToContainer()
 	return true;
 }
 
-SInt16 InventoryReference::GetCount()
+int16_t InventoryReference::GetCount()
 {
-	SInt16 count = 0;
+	int16_t count = 0;
 	if (Validate()) {
 		count = 1;
 		if (m_data.xData) {
@@ -136,9 +136,9 @@ bool InventoryReference::Validate()
 	return false;
 }
 
-InventoryReference* InventoryReference::GetForRefID(UInt32 refID)
+InventoryReference* InventoryReference::GetForRefID(uint32_t refID)
 {
-	std::map<UInt32, InventoryReference*>::iterator found = s_refmap.find(refID);
+	std::map<uint32_t, InventoryReference*>::iterator found = s_refmap.find(refID);
 	if (found != s_refmap.end() && found->second->Validate()) {
 		return found->second;
 	}
@@ -148,10 +148,10 @@ InventoryReference* InventoryReference::GetForRefID(UInt32 refID)
 
 void InventoryReference::Clean()
 {
-	std::map<UInt32, InventoryReference*>::iterator iter = s_refmap.begin();
+	std::map<uint32_t, InventoryReference*>::iterator iter = s_refmap.begin();
 	while (iter != s_refmap.end()) {
 		InventoryReference* refr = iter->second;
-		UInt32 refid = iter->first;
+		uint32_t refid = iter->first;
 		s_refmap.erase(refid);
 		delete refr;		
 		iter = s_refmap.begin();
@@ -266,7 +266,7 @@ bool InventoryReference::DeferredEquipAction::Execute(InventoryReference* iref)
 			actor->UnequipItem(data.type, 1, data.xData, 0, false, 0);
 		}
 		else {
-			UInt16 count = 1;
+			uint16_t count = 1;
 			if (data.type->typeID == kFormType_Ammo) {
 				// equip a *stack* of arrows
 				count = iref->GetCount();
@@ -291,7 +291,7 @@ bool InventoryReference::DeferredRemoveAction::Execute(InventoryReference* iref)
 	return false;
 }
 
-void InventoryReference::Data::CreateForUnextendedEntry(ExtraContainerChanges::EntryData* entry, SInt32 totalCount, std::vector<Data> &dataOut)
+void InventoryReference::Data::CreateForUnextendedEntry(ExtraContainerChanges::EntryData* entry, int32_t totalCount, std::vector<Data> &dataOut)
 {
 	if (totalCount < 1) {
 		return;

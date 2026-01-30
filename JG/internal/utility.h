@@ -49,8 +49,8 @@ public:
 };
 
 class LightCS {
-	UInt32	owningThread;
-	UInt32	enterCount;
+	uint32_t	owningThread;
+	uint32_t	enterCount;
 
 public:
 	LightCS() : owningThread(0), enterCount(0) {}
@@ -60,20 +60,20 @@ public:
 	void Leave();
 };
 union Coordinate {
-	UInt32		xy;
+	uint32_t		xy;
 	struct {
-		SInt16	y;
-		SInt16	x;
+		int16_t	y;
+		int16_t	x;
 	};
 
 	Coordinate() {}
-	Coordinate(SInt16 _x, SInt16 _y) : x(_x), y(_y) {}
+	Coordinate(int16_t _x, int16_t _y) : x(_x), y(_y) {}
 
 	inline Coordinate& operator =(const Coordinate& rhs) {
 		xy = rhs.xy;
 		return *this;
 	}
-	inline Coordinate& operator =(const UInt32& rhs) {
+	inline Coordinate& operator =(const uint32_t& rhs) {
 		xy = rhs;
 		return *this;
 	}
@@ -115,27 +115,27 @@ double dAsin(double value);
 double dAcos(double value);
 double dAtan2(double y, double x);
 
-UInt32 __fastcall GetNextPrime(UInt32 num);
+uint32_t __fastcall GetNextPrime(uint32_t num);
 
-UInt32 __fastcall RGBHexToDec(UInt32 rgb);
+uint32_t __fastcall RGBHexToDec(uint32_t rgb);
 
-UInt32 __fastcall RGBDecToHex(UInt32 rgb);
+uint32_t __fastcall RGBDecToHex(uint32_t rgb);
 
-UInt32 __fastcall StrLen(const char* str);
+uint32_t __fastcall StrLen(const char* str);
 
 char* __fastcall StrEnd(const char* str);
 
-bool __fastcall MemCmp(const void* ptr1, const void* ptr2, UInt32 bsize);
+bool __fastcall MemCmp(const void* ptr1, const void* ptr2, uint32_t bsize);
 
-void __fastcall MemZero(void* dest, UInt32 bsize);
+void __fastcall MemZero(void* dest, uint32_t bsize);
 
 char* __fastcall StrCopy(char* dest, const char* src);
 
-char* __fastcall StrNCopy(char* dest, const char* src, UInt32 length);
+char* __fastcall StrNCopy(char* dest, const char* src, uint32_t length);
 
 char* __fastcall StrCat(char* dest, const char* src);
 
-UInt32 __fastcall StrHash(const char* inKey);
+uint32_t __fastcall StrHash(const char* inKey);
 
 bool __fastcall CmprLetters(const char* lstr, const char* rstr);
 
@@ -157,7 +157,7 @@ void __fastcall ReplaceChr(char* str, char from, char to);
 
 char* __fastcall FindChr(const char* str, char chr);
 
-char* __fastcall FindChrR(const char* str, UInt32 length, char chr);
+char* __fastcall FindChrR(const char* str, uint32_t length, char chr);
 
 char* __fastcall SubStr(const char* srcStr, const char* subStr);
 
@@ -179,17 +179,17 @@ int __fastcall StrToInt(const char* str);
 
 double __fastcall StrToDbl(const char* str);
 
-char* __fastcall UIntToHex(UInt32 num, char* str);
+char* __fastcall UIntToHex(uint32_t num, char* str);
 
-UInt32 __fastcall HexToUInt(const char* str);
+uint32_t __fastcall HexToUInt(const char* str);
 
 bool __fastcall FileExists(const char* path);
 
 class FileStream {
 protected:
 	HANDLE		theFile;
-	UInt32		streamLength;
-	UInt32		streamOffset;
+	uint32_t		streamLength;
+	uint32_t		streamOffset;
 
 public:
 	FileStream() : theFile(INVALID_HANDLE_VALUE), streamLength(0), streamOffset(0) {}
@@ -197,31 +197,31 @@ public:
 
 	bool Good() const { return theFile != INVALID_HANDLE_VALUE; }
 	HANDLE GetHandle() const { return theFile; }
-	UInt32 GetLength() const { return streamLength; }
-	UInt32 GetOffset() const { return streamOffset; }
+	uint32_t GetLength() const { return streamLength; }
+	uint32_t GetOffset() const { return streamOffset; }
 	bool HitEOF() const { return streamOffset >= streamLength; }
 
 	bool Open(const char* filePath);
-	bool OpenAt(const char* filePath, UInt32 inOffset);
+	bool OpenAt(const char* filePath, uint32_t inOffset);
 	bool OpenWrite(const char* filePath);
 	bool Create(const char* filePath);
 	bool OpenWriteEx(char* filePath, bool append);
-	void SetOffset(UInt32 inOffset);
+	void SetOffset(uint32_t inOffset);
 
 	void Close() {
 		CloseHandle(theFile);
 		theFile = INVALID_HANDLE_VALUE;
 	}
 
-	void ReadBuf(void* outData, UInt32 inLength);
-	void WriteBuf(const void* inData, UInt32 inLength);
+	void ReadBuf(void* outData, uint32_t inLength);
+	void WriteBuf(const void* inData, uint32_t inLength);
 
 	static void MakeAllDirs(char* fullPath);
 };
 
 class DebugLog {
 	FILE* theFile;
-	UInt32			indent;
+	uint32_t			indent;
 
 public:
 	DebugLog() : theFile(NULL), indent(40) {}
@@ -281,9 +281,9 @@ bool FileToBuffer(const char* filePath, char* buffer);
 
 void __fastcall GetTimeStamp(char* buffer);
 
-UInt32 __fastcall ByteSwap(UInt32 dword);
+uint32_t __fastcall ByteSwap(uint32_t dword);
 
-void DumpMemImg(void* data, UInt32 size, UInt8 extra = 0);
+void DumpMemImg(void* data, uint32_t size, uint8_t extra = 0);
 
 void GetMD5File(const char* filePath, char* outHash);
 
@@ -291,4 +291,4 @@ void GetSHA1File(const char* filePath, char* outHash);
 
 // Taken from xNVSE
 // Pair this with _AddressOfReturnAddress()
-UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda = false);
+uint8_t* GetParentBasePtr(void* addressOfReturnAddress, bool lambda = false);

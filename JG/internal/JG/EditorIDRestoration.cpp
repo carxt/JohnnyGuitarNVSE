@@ -2,7 +2,6 @@
 #include "GameData.h"
 #include "JohnnyExtraData.hpp"
 #include "misc/misc.h"
-#include "SafeWrite.h"
 #include "unordered_map"
 #include "list"
 
@@ -21,7 +20,7 @@ namespace EDIDRestoration {
 	bool bHadEDIDConflicts = false;
 	std::mutex kEDIDMapLock;
 
-	static constexpr UInt32 TESForm_Vtables[] = {
+	static constexpr uint32_t TESForm_Vtables[] = {
 		0x101144C,	//	BGSDehydrationStage
 		0x10115B4,  //	BGSHungerStage
 		0x10116FC,	//	BGSSleepDeprevationStage
@@ -203,7 +202,7 @@ namespace EDIDRestoration {
 	}
 
 	// exported
-	UInt32 __cdecl JGNVSE_GetFormIDFromEDID(char* apEDID) {
+	uint32_t __cdecl JGNVSE_GetFormIDFromEDID(char* apEDID) {
 		std::lock_guard<std::mutex> kLock(kEDIDMapLock);
 		TESForm* pForm = CdeclCall<TESForm*>(0x483A00, apEDID); // TESForm::GetFormByEditorID
 		if (pForm)

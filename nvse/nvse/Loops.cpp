@@ -17,7 +17,7 @@ LoopManager* LoopManager::GetSingleton()
 	return localData.loopManager;
 }
 
-ArrayIterLoop::ArrayIterLoop(const ForEachContext* context, UInt8 modIndex)
+ArrayIterLoop::ArrayIterLoop(const ForEachContext* context, uint8_t modIndex)
 {
 	m_srcID = context->sourceID;
 	m_iterID = context->iteratorID;
@@ -136,7 +136,7 @@ ContainerIterLoop::ContainerIterLoop(const ForEachContext* context)
 	m_invRef = InventoryReference::Create(contRef, IRefData(NULL, NULL, NULL), false);	
 
 	// first: figure out what items exist by default
-	std::map<TESForm*, SInt32> baseObjectCounts;
+	std::map<TESForm*, int32_t> baseObjectCounts;
 	TESContainer* cont = DYNAMIC_CAST(contRef->baseForm, TESForm, TESContainer);
 	if (cont) {
 		for (TESContainer::FormCountList::Iterator cur = cont->formCountList.Begin(); !cur.End(); ++cur) {
@@ -153,8 +153,8 @@ ContainerIterLoop::ContainerIterLoop(const ForEachContext* context)
 				if (entry.Get()) {
 					TESForm* baseObj = entry.Get()->type;
 
-					SInt32 countDelta = entry.Get()->countDelta;
-					SInt32 actualCount = countDelta;
+					int32_t countDelta = entry.Get()->countDelta;
+					int32_t actualCount = countDelta;
 					bool isInBaseContainer = baseObjectCounts.find(baseObj) != baseObjectCounts.end();
 					if (isInBaseContainer) {
 						baseObjectCounts[baseObj] += countDelta;
@@ -162,7 +162,7 @@ ContainerIterLoop::ContainerIterLoop(const ForEachContext* context)
 					}
 
 					if (entry.Get()->extendData) {
-						UInt32 total = 0;
+						uint32_t total = 0;
 						for (ExtraContainerChanges::ExtendDataList::Iterator extend = entry.Get()->extendData->Begin(); !extend.End(); ++extend) {
 							if (total >= actualCount) {
 								break;
@@ -172,14 +172,14 @@ ContainerIterLoop::ContainerIterLoop(const ForEachContext* context)
 							m_elements.push_back(IRefData(baseObj, entry.Get(), extend.Get()));
 						}
 
-						SInt32 remainder = isInBaseContainer ? baseObjectCounts[baseObj] : countDelta;
+						int32_t remainder = isInBaseContainer ? baseObjectCounts[baseObj] : countDelta;
 						remainder -= total;
 						if (remainder > 0) {
 							InventoryReference::Data::CreateForUnextendedEntry(entry.Get(), remainder, m_elements);
 						}
 					}
 					else {
-						SInt32 actualCount = countDelta;
+						int32_t actualCount = countDelta;
 						if (isInBaseContainer) {
 							actualCount += baseObjectCounts[baseObj];
 						}
@@ -206,7 +206,7 @@ ContainerIterLoop::ContainerIterLoop(const ForEachContext* context)
 			xChanges->data = ExtraContainerChanges::Data::Create(contRef);
 			xChanges->data->objList = (ExtraContainerChanges::EntryDataList*)FormHeap_Allocate(sizeof(ExtraContainerChanges::EntryDataList));
 
-			std::map<TESForm*, SInt32>::iterator first = baseObjectCounts.begin();
+			std::map<TESForm*, int32_t>::iterator first = baseObjectCounts.begin();
 			xChanges->data->objList->AddAt(ExtraContainerChanges::EntryData::Create(first->first, first->second), eListEnd);
 			baseObjectCounts.erase(first);
 		}
@@ -214,7 +214,7 @@ ContainerIterLoop::ContainerIterLoop(const ForEachContext* context)
 		// now add entries for objects in base but without associated ExtraContainerChanges
 		// these extra entries will be removed when we're done with the loop
 		if (baseObjectCounts.size()) {
-			for (std::map<TESForm*, SInt32>::iterator iter = baseObjectCounts.begin(); iter != baseObjectCounts.end(); ++iter) {
+			for (std::map<TESForm*, int32_t>::iterator iter = baseObjectCounts.begin(); iter != baseObjectCounts.end(); ++iter) {
 				if (iter->second > 0) {
 					ExtraContainerChanges::EntryData* ed = ExtraContainerChanges::EntryData::Create(iter->first, iter->second);
 					ExtraDataList* xData = NULL;
@@ -262,7 +262,7 @@ bool ContainerIterLoop::SetIterator()
 	TESObjectREFR* refr = m_invRef->GetRef();
 	if (m_iterIndex < m_elements.size() && refr) {
 		m_invRef->SetData(m_elements[m_iterIndex]);
-		*((UInt64*)&m_refVar->data) = refr->refID;
+		*((uint64_t*)&m_refVar->data) = refr->refID;
 		return true;
 	}
 	else {
@@ -286,7 +286,7 @@ ContainerIterLoop::~ContainerIterLoop()
 	m_refVar->data = 0;
 }
 
-void LoopManager::Add(Loop* loop, ScriptRunner* state, UInt32 startOffset, UInt32 endOffset, COMMAND_ARGS)
+void LoopManager::Add(Loop* loop, ScriptRunner* state, uint32_t startOffset, uint32_t endOffset, COMMAND_ARGS)
 {
 	// save the instruction offsets
 	LoopInfo loopInfo;
@@ -297,7 +297,7 @@ void LoopManager::Add(Loop* loop, ScriptRunner* state, UInt32 startOffset, UInt3
 	SavedIPInfo* savedInfo = &loopInfo.ipInfo;
 	savedInfo->ip = startOffset;
 	savedInfo->stackDepth = state->stackDepth;
-	memcpy(savedInfo->stack, state->stack, (savedInfo->stackDepth + 1) * sizeof(UInt32));
+	memcpy(savedInfo->stack, state->stack, (savedInfo->stackDepth + 1) * sizeof(uint32_t));
 
 	m_loops.push(loopInfo);
 }
@@ -305,7 +305,7 @@ void LoopManager::Add(Loop* loop, ScriptRunner* state, UInt32 startOffset, UInt3
 void LoopManager::RestoreStack(ScriptRunner* state, SavedIPInfo* info)
 {
 	state->stackDepth = info->stackDepth;
-	memcpy(state->stack, info->stack, (info->stackDepth + 1) * sizeof(UInt32));
+	memcpy(state->stack, info->stack, (info->stackDepth + 1) * sizeof(uint32_t));
 }
 
 bool LoopManager::Break(ScriptRunner* state, COMMAND_ARGS)
@@ -318,7 +318,7 @@ bool LoopManager::Break(ScriptRunner* state, COMMAND_ARGS)
 	RestoreStack(state, &loopInfo->ipInfo);
 
 	ScriptRunner	* scriptRunner = GetScriptRunner(opcodeOffsetPtr);
-	SInt32			* calculatedOpLength = GetCalculatedOpLength(opcodeOffsetPtr);
+	int32_t			* calculatedOpLength = GetCalculatedOpLength(opcodeOffsetPtr);
 
 	// restore ip
 	*calculatedOpLength += loopInfo->endIP - *opcodeOffsetPtr;
@@ -346,7 +346,7 @@ bool LoopManager::Continue(ScriptRunner* state, COMMAND_ARGS)
 	RestoreStack(state, &loopInfo->ipInfo);
 
 	ScriptRunner	* scriptRunner = GetScriptRunner(opcodeOffsetPtr);
-	SInt32			* calculatedOpLength = GetCalculatedOpLength(opcodeOffsetPtr);
+	int32_t			* calculatedOpLength = GetCalculatedOpLength(opcodeOffsetPtr);
 
 	// restore ip
 	*calculatedOpLength += loopInfo->ipInfo.ip - *opcodeOffsetPtr;
@@ -358,7 +358,7 @@ bool LoopManager::Continue(ScriptRunner* state, COMMAND_ARGS)
 bool WhileLoop::Update(COMMAND_ARGS)
 {
 	// save *opcodeOffsetPtr so we can calc IP to branch to after evaluating loop condition
-	UInt32 originalOffset = *opcodeOffsetPtr;
+	uint32_t originalOffset = *opcodeOffsetPtr;
 
 	// update offset to point to loop condition, evaluate
 	*opcodeOffsetPtr = m_exprOffset;

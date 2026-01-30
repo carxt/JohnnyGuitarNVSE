@@ -3,9 +3,8 @@
 #include "nvse/GameProcess.h"
 #include "nvse/GameRTTI.h"
 #include "nvse/GameUI.h"
-#include "nvse/SafeWrite.h"
 #include "nvse/ScriptUtils.h"
-#include "nvse/FileFinder.h"
+#include "Bethesda/FileFinder.hpp"
 #include "misc/WorldToScreen.h"
 #include "misc/misc.h"
 #include "JG/EditorIDRestoration.hpp"
@@ -27,6 +26,7 @@
 #include "functions/fn_dial.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
+#include "nvse_version.h"
 
 #include "Bethesda/AutoMemContext.hpp"
 #include "JIP/JIPFixes.hpp"
@@ -590,7 +590,7 @@ extern "C" {
 		if (!bIsGECK) {
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			JohnnyExtraData::Initialize(nvseData);
-			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
+			InventoryRefGetForID = (InventoryRef * (*)(uint32_t))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
 			CaptureLambdaVars = (_CaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList);
 			UncaptureLambdaVars = (_UncaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList);
 			HandleGameHooks();

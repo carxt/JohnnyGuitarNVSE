@@ -21,17 +21,17 @@ public:
 		DWORD		dword224;
 		float		float228;
 		float		float22C;
-		UInt32		uiStaticAttenuation;
-		UInt32		uiDistanceAttenuation;
-		UInt32		uiFaderAttenuation;
+		uint32_t		uiStaticAttenuation;
+		uint32_t		uiDistanceAttenuation;
+		uint32_t		uiFaderAttenuation;
 	};
 
 
-	UInt32		uiID;
+	uint32_t		uiID;
 	float		fFrequency;
 	float		fVolume;
-	UInt32		uiAudioFlags;
-	UInt32		uiDuration;
+	uint32_t		uiAudioFlags;
+	uint32_t		uiDuration;
 	bool		bIsPlaying;
 	Data		kData;
 };
@@ -40,9 +40,9 @@ static_assert(sizeof(BSSoundInfo) == 0x254);
 
 class BSSoundHandle {
 public:
-	UInt32	uiSoundID;
+	uint32_t	uiSoundID;
 	bool	bAssumeSuccess;
-	UInt32	uiState;
+	uint32_t	uiState;
 
 	BSSoundHandle() : uiSoundID(-1), bAssumeSuccess(false), uiState(0) {}
 	~BSSoundHandle() {}
@@ -101,9 +101,8 @@ static_assert(sizeof(BSSoundHandle) == 0xC);
 class BSGameSound {
 public:
 	BSGameSound();
-	~BSGameSound();
 
-	virtual BSGameSound* Destroy(bool doFree);
+	virtual ~BSGameSound();
 	virtual void	Unk_01(void);
 	virtual void	Unk_02(void);
 	virtual void	Unk_03(void);
@@ -127,49 +126,49 @@ public:
 	virtual void	Unk_15(NiVector3& arg1);
 	virtual void	Unk_16(void);
 	virtual void	Unk_17(float arg1, float arg2);
-	virtual void	Unk_18(UInt16 arg1, UInt16 arg2, UInt16 arg3, UInt16 arg4, UInt16 arg5);
+	virtual void	Unk_18(uint16_t arg1, uint16_t arg2, uint16_t arg3, uint16_t arg4, uint16_t arg5);
 	virtual bool	Unk_19(float arg1);
 	virtual float	Unk_1A(void);
-	virtual void	Seek(UInt32 timePoint);
+	virtual void	Seek(uint32_t timePoint);
 
-	UInt32			mapKey;					// 004
-	UInt32			soundFlags;				// 008
-	UInt32			flags00C;				// 00C
-	UInt32			stateFlags;				// 010
-	UInt32			duration;				// 014
-	UInt16			staticAttenuation;		// 018	dB * -1000
-	UInt16			unk01A;					// 01A
-	UInt16			unk01C;					// 01C
-	UInt16			unk01E;					// 01E
-	UInt16			unk020;					// 020
-	UInt16			unk022;					// 022
+	uint32_t			mapKey;					// 004
+	uint32_t			soundFlags;				// 008
+	uint32_t			flags00C;				// 00C
+	uint32_t			stateFlags;				// 010
+	uint32_t			duration;				// 014
+	uint16_t			staticAttenuation;		// 018	dB * -1000
+	uint16_t			unk01A;					// 01A
+	uint16_t			unk01C;					// 01C
+	uint16_t			unk01E;					// 01E
+	uint16_t			unk020;					// 020
+	uint16_t			unk022;					// 022
 	float			volume;					// 024	0.0 to 1.0
 	float			flt028;					// 028
 	float			flt02C;					// 02C
-	UInt32			unk030;					// 030
-	UInt16			baseSamplingFreq;		// 034
+	uint32_t			unk030;					// 030
+	uint16_t			baseSamplingFreq;		// 034
 	char			filePath[254];			// 036	Originally: filePath[260]
 	TESSound* sourceSound;			// 134	"Stolen" from filePath
 	float			frequencyMod;			// 138	^
 	float			maxAttenuationDist;		// 13C
 	float			minAttenuationDist;		// 140
-	UInt32			pathHashFile;			// 144
-	UInt32			pathHashFolder;			// 148
-	UInt32			unk14C;					// 14C
+	uint32_t			pathHashFile;			// 144
+	uint32_t			pathHashFolder;			// 148
+	uint32_t			unk14C;					// 14C
 	float			flt150;					// 150
-	UInt32			unk154;					// 154
-	SInt8			randFrequencyShift;		// 158
-	UInt8			byte159;				// 159
-	UInt16			samplingFreq;			// 15A
-	UInt32			unk15C;					// 15C
-	UInt32			unk160;					// 160
-	UInt32			unk164;					// 164
-	UInt32			unk168;					// 168
-	UInt32			unk16C;					// 16C
-	UInt32			unk170;					// 170
-	UInt32			unk174[5];				// 174
-	UInt32			priority;				// 188
-	UInt32			unk18C[3];				// 18C
+	uint32_t			unk154;					// 154
+	int8_t			randFrequencyShift;		// 158
+	uint8_t			byte159;				// 159
+	uint16_t			samplingFreq;			// 15A
+	uint32_t			unk15C;					// 15C
+	uint32_t			unk160;					// 160
+	uint32_t			unk164;					// 164
+	uint32_t			unk168;					// 168
+	uint32_t			unk16C;					// 16C
+	uint32_t			unk170;					// 170
+	uint32_t			unk174[5];				// 174
+	uint32_t			priority;				// 188
+	uint32_t			unk18C[3];				// 18C
 };
 static_assert(sizeof(BSGameSound) == 0x198);
 
@@ -207,8 +206,8 @@ enum AudioRequestTypes {
 union FunctionArg {
 	void* pVal;
 	float		fVal;
-	UInt32		uVal;
-	SInt32		iVal;
+	uint32_t		uVal;
+	int32_t		iVal;
 
 	FunctionArg& operator=(void* other) {
 		pVal = other;
@@ -218,19 +217,19 @@ union FunctionArg {
 		fVal = other;
 		return *this;
 	}
-	FunctionArg& operator=(UInt32 other) {
+	FunctionArg& operator=(uint32_t other) {
 		uVal = other;
 		return *this;
 	}
-	FunctionArg& operator=(SInt32 other) {
+	FunctionArg& operator=(int32_t other) {
 		iVal = other;
 		return *this;
 	}
 };
 // 20
 struct AudioRequestData {
-	UInt32				type;		// 00
-	UInt32				soundKey;	// 04
+	uint32_t				type;		// 00
+	uint32_t				soundKey;	// 04
 	FunctionArg			value1;		// 08
 	FunctionArg			value2;		// 0C
 	NiNode*				niNode;	// 10
@@ -239,17 +238,17 @@ struct AudioRequestData {
 // 188
 class BSAudioManager {
 public:
-	virtual void				Destroy(bool doFree);
+	virtual ~BSAudioManager();
 
 	// 10
 	struct AudioRequest {
-		UInt32				count;			// 00
-		UInt8				byte04;			// 04
-		UInt8				pad05[3];		// 05
+		uint32_t				count;			// 00
+		uint8_t				byte04;			// 04
+		uint8_t				pad05[3];		// 05
 		AudioRequestData*	requestData;	// 08
-		UInt32				tickCount;		// 0C
+		uint32_t				tickCount;		// 0C
 	};
-	enum AudioFlags : UInt32
+	enum AudioFlags : uint32_t
 	{
 		kAudioFlags_2D = 0x1,
 		kAudioFlags_3D = 0x2,
@@ -282,7 +281,7 @@ public:
 		kAudioFlags_AnimationDriven = 0x40000000,
 	};
 
-	UInt32						unk004[8];			// 004
+	uint32_t						unk004[8];			// 004
 	AudioRequest				request024;			// 024
 	AudioRequest				request034;			// 034
 	AudioRequest				request044;			// 044
@@ -291,8 +290,8 @@ public:
 	NiTPointerMap<BSSoundInfo>	playingSoundInfos2;	// 074
 	NiTPointerMap<NiAVObject>	soundPlayingObjects;// 084
 	DList<BSGameSound>			cachedSounds;		// 094
-	UInt32						unk0A0;				// 0A0
-	UInt32						unk0A4;				// 0A4
+	uint32_t						unk0A0;				// 0A0
+	uint32_t						unk0A4;				// 0A4
 	float						flt0A8;				// 0A8
 	CRITICAL_SECTION			kMessageCS;
 	CRITICAL_SECTION			kSoundInfosCS;
@@ -300,11 +299,11 @@ public:
 	CRITICAL_SECTION			kMessageProcessingCS;
 	CRITICAL_SECTION			kTaskCS;
 	DList<void>					list124;			// 124
-	UInt32						lastTickCount;		// 130
-	UInt8						byte134;			// 134
-	UInt8						byte135;			// 135
-	UInt8						pad136[2];			// 136
-	UInt32						unk138;				// 138
+	uint32_t						lastTickCount;		// 130
+	uint8_t						byte134;			// 134
+	uint8_t						byte135;			// 135
+	uint8_t						pad136[2];			// 136
+	uint32_t						unk138;				// 138
 	BSAudioManagerThread* audioMgrThread;	// 13C
 	float						volumes[12];		// 140
 	//	0	Master
@@ -313,15 +312,15 @@ public:
 	//	3	Effects
 	//	4	Music
 	//	5	Radio
-	UInt32						unk170;				// 170
-	UInt8						byte174;			// 174
-	UInt8						byte175;			// 175
-	UInt8						pad176[2];			// 176
-	UInt32						unk178;				// 178
-	UInt32						unk17C;				// 17C
-	UInt32						nextMapKey;			// 180
-	UInt8						byte184;			// 184
-	UInt8						pad185[3];			// 185
+	uint32_t						unk170;				// 170
+	uint8_t						byte174;			// 174
+	uint8_t						byte175;			// 175
+	uint8_t						pad176[2];			// 176
+	uint32_t						unk178;				// 178
+	uint32_t						unk17C;				// 17C
+	uint32_t						nextMapKey;			// 180
+	uint8_t						byte184;			// 184
+	uint8_t						pad185[3];			// 185
 
 	__forceinline static BSAudioManager* Get() { return (BSAudioManager*)0x11F6EF0; }
 };
@@ -330,9 +329,7 @@ static_assert(sizeof(BSAudioManager) == 0x188);
 class BSAudioListener {
 public:
 	BSAudioListener();
-	~BSAudioListener();
-
-	virtual BSAudioListener* Destroy(bool doFree);
+	virtual ~BSAudioListener();
 	virtual void	Unk_01(void);
 	virtual void	Unk_02(void);
 	virtual void	Unk_03(void);
@@ -353,17 +350,16 @@ public:
 	BSWin32AudioListener();
 	~BSWin32AudioListener();
 
-	UInt32			unk04[14];		// 04
+	uint32_t			unk04[14];		// 04
 	float			flt3C;			// 3C
-	UInt32			unk40[9];		// 40
+	uint32_t			unk40[9];		// 40
 };
 
 class BSWin32Audio {
 public:
 	BSWin32Audio();
-	~BSWin32Audio();
 
-	virtual void	Destroy(bool doFree);
+	virtual ~BSWin32Audio();
 	virtual void	Unk_01(void);
 	virtual void	Unk_02(void);
 	virtual void	Unk_03(void);
@@ -372,13 +368,13 @@ public:
 	virtual void	Unk_06(void);
 	virtual void	Unk_07(void);
 
-	UInt32					unk004[3];		// 004
+	uint32_t					unk004[3];		// 004
 	BSWin32AudioListener* listener;		// 010
-	UInt32					unk014[3];		// 014
-	bool(*sub_82D150)(UInt32*, UInt32*, UInt32*, UInt32*);	// 020
-	bool(*sub_82D280)(UInt32*, UInt32*, UInt32*, UInt32*);	// 024
-	bool(*sub_5E3630)(UInt32*);	// 028
-	UInt32(*sub_82D400)(UInt32*, TESSound*, UInt32*);	// 02C
+	uint32_t					unk014[3];		// 014
+	bool(*sub_82D150)(uint32_t*, uint32_t*, uint32_t*, uint32_t*);	// 020
+	bool(*sub_82D280)(uint32_t*, uint32_t*, uint32_t*, uint32_t*);	// 024
+	bool(*sub_5E3630)(uint32_t*);	// 028
+	uint32_t(*sub_82D400)(uint32_t*, TESSound*, uint32_t*);	// 02C
 	void(*sub_832C40)(void);	// 030
 	void(*sub_832C80)(void);	// 034
 
@@ -390,7 +386,7 @@ public:
 		return kHandle;
 	}
 
-	BSSoundHandle GetSoundHandleByFormID(UInt32 auiFormID, uint32_t aeAudioFlags) {
+	BSSoundHandle GetSoundHandleByFormID(uint32_t auiFormID, uint32_t aeAudioFlags) {
 		BSSoundHandle kHandle;
 		ThisCall(0xAD73B0, this, &kHandle, auiFormID, aeAudioFlags);
 		return kHandle;

@@ -82,7 +82,7 @@ bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 
-#define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
+#define NUM_ARGS *((uint8_t*)scriptData + *opcodeOffsetPtr)
 
 std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
 
@@ -116,7 +116,7 @@ bool Cmd_PlayHolotape_Execute(COMMAND_ARGS)
 bool __cdecl Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS)
 {
 	TESCasino* casino = nullptr;
-	SInt32 earnings;
+	int32_t earnings;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &earnings) && casino && IS_TYPE(casino, TESCasino))
 	{
 
@@ -175,7 +175,7 @@ bool Cmd_GetCasinoDeckTexture_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESCasino* casino = nullptr;
-	SInt32 deckIndex;
+	int32_t deckIndex;
 	const char* resStr = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex) && casino && IS_TYPE(casino, TESCasino) && deckIndex >= 0 && deckIndex <= 3)
 	{
@@ -191,7 +191,7 @@ bool Cmd_SetCasinoDeckTexture_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESCasino* casino = nullptr;
-	SInt32 deckIndex;
+	int32_t deckIndex;
 	char newPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex, &newPath) && casino && IS_TYPE(casino, TESCasino) && newPath && deckIndex >= 0 && deckIndex <= 3)
 	{
@@ -209,7 +209,7 @@ bool Cmd_GetCasinoChip_Execute(COMMAND_ARGS)
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino) && casino)
 	{
 		chipForm = TESForm::GetFormByNumericID(casino->currencyRefID);
-		*(UInt32*)result = chipForm->refID;
+		*(uint32_t*)result = chipForm->refID;
 	}
 	return true;
 }
@@ -249,7 +249,7 @@ bool Cmd_SetMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetHUDShudderPower_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt8 modId = scriptObj->GetModIndex();
+	uint8_t modId = scriptObj->GetModIndex();
 	if (modId < 0xFF && shakeRequests.find(modId) != shakeRequests.end()) {
 		*result = shakeRequests[modId];
 	}
@@ -259,7 +259,7 @@ bool Cmd_GetHUDShudderPower_Execute(COMMAND_ARGS) {
 bool Cmd_SetHUDShudderPower_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float power = -1.f;
-	UInt8 modId = scriptObj->GetModIndex();
+	uint8_t modId = scriptObj->GetModIndex();
 	if (modId < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &power)) {
 		if (power == 0.0f) {
 			shakeRequests.erase(modId);
@@ -302,7 +302,7 @@ bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 }
 bool Cmd_SetPlayerMovementFlags_Execute(COMMAND_ARGS)
 {
-	UInt32 flags;
+	uint32_t flags;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags)) {
 		g_thePlayer->actorMover->Unk_03(flags);
 		*result = 1;
@@ -320,7 +320,7 @@ bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 		g_thePlayer->alwaysRun = bAlwaysRun;
 		if (updateMovementFlags) {
 			PlayerMover* playerMover = (PlayerMover*)g_thePlayer->actorMover;
-			UInt32 flags = playerMover->pcMovementFlags;
+			uint32_t flags = playerMover->pcMovementFlags;
 			if (bAlwaysRun) {
 				flags |= 0x200;
 			}
@@ -357,7 +357,7 @@ void GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPo
 	if (!pNavMeshArray)
 		return;
 
-	for (UInt32 i = 0; i < pNavMeshArray->GetSize(); i++) {
+	for (uint32_t i = 0; i < pNavMeshArray->GetSize(); i++) {
 
 		NavMeshPtr spNavMesh = pNavMeshArray->GetAt(i);
 		if (!spNavMesh)
@@ -367,7 +367,7 @@ void GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPo
 		if (!pInfo)
 			continue;
 
-		for (UInt32 j = 0; j < spNavMesh->kTriangles.GetSize(); j++) {
+		for (uint32_t j = 0; j < spNavMesh->kTriangles.GetSize(); j++) {
 			NavMeshTriangle* pNavMeshTriangle = spNavMesh->kTriangles.GetAt(j);
 			if (!pNavMeshTriangle)
 				continue;
@@ -377,7 +377,7 @@ void GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPo
 
 			// Get triangle vertices
 			NiPoint3 kVerts[3];
-			for (UInt32 k = 0; k < 3; k++) {
+			for (uint32_t k = 0; k < 3; k++) {
 				NiPoint3* pVertex = spNavMesh->kVertices.GetAt(pNavMeshTriangle->sVertices[k]);
 				if (!pVertex)
 					continue;
@@ -407,7 +407,7 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 	if (!pNavMeshArray)
 		return false;
 
-	for (UInt32 i = 0; i < pNavMeshArray->GetSize(); i++) {
+	for (uint32_t i = 0; i < pNavMeshArray->GetSize(); i++) {
 
 		NavMeshPtr spNavMesh = pNavMeshArray->GetAt(i);
 		if (!spNavMesh)
@@ -417,7 +417,7 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 		if (!pInfo)
 			continue;
 
-		for (UInt32 j = 0; j < spNavMesh->kTriangles.GetSize(); j++) {
+		for (uint32_t j = 0; j < spNavMesh->kTriangles.GetSize(); j++) {
 			NavMeshTriangle* pNavMeshTriangle = spNavMesh->kTriangles.GetAt(j);
 			if (!pNavMeshTriangle)
 				continue;
@@ -426,7 +426,7 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 
 			// Get triangle vertices
 			NiPoint3 kVerts[3];
-			for (UInt32 k = 0; k < 3; k++) {
+			for (uint32_t k = 0; k < 3; k++) {
 				NiPoint3* pVertex = spNavMesh->kVertices.GetAt(pNavMeshTriangle->sVertices[k]);
 				if (!pVertex)
 					continue;
@@ -471,14 +471,14 @@ bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
 		if (fabs(mul) < FLT_EPSILON) { mul = FLT_EPSILON + DBL_EPSILON; }
 		switch (a_form->typeID) {
-		case kFormType_TESNPC:
-		case kFormType_TESCreature:
+		case FORM_TYPE::TESNPC:
+		case FORM_TYPE::TESCreature:
 			NPCAccuracy::tables.ACTBAS[a_form->refID] = mul;
 			break;
-		case kFormType_TESCombatStyle:
+		case FORM_TYPE::TESCombatStyle:
 			NPCAccuracy::tables.CSTY[a_form->refID] = mul;
 			break;
-		case kFormType_TESFaction:
+		case FORM_TYPE::TESFaction:
 			NPCAccuracy::tables.FACT[a_form->refID] = mul;
 			break;
 
@@ -501,18 +501,18 @@ bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 	TESForm* a_form = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
 		switch (a_form->typeID) {
-		case kFormType_TESNPC:
-		case kFormType_TESCreature:
+		case FORM_TYPE::TESNPC:
+		case FORM_TYPE::TESCreature:
 			if (auto it = NPCAccuracy::tables.ACTBAS.find(a_form->refID); it != NPCAccuracy::tables.ACTBAS.end()) {
 				*result = it->second;
 			}
 			break;
-		case kFormType_TESCombatStyle:
+		case FORM_TYPE::TESCombatStyle:
 			if (auto it = NPCAccuracy::tables.CSTY.find(a_form->refID); it != NPCAccuracy::tables.CSTY.end()) {
 				*result = it->second;
 			}
 			break;
-		case kFormType_TESFaction:
+		case FORM_TYPE::TESFaction:
 			if (auto it = NPCAccuracy::tables.FACT.find(a_form->refID); it != NPCAccuracy::tables.FACT.end()) {
 				*result = it->second;
 			}
@@ -545,14 +545,14 @@ bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 	TESForm* a_form = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
 		switch (a_form->typeID) {
-		case kFormType_TESNPC:
-		case kFormType_TESCreature:
+		case FORM_TYPE::TESNPC:
+		case FORM_TYPE::TESCreature:
 			NPCAccuracy::tables.ACTBAS.erase(a_form->refID);
 			break;
-		case kFormType_TESCombatStyle:
+		case FORM_TYPE::TESCombatStyle:
 			NPCAccuracy::tables.CSTY.erase(a_form->refID);
 			break;
-		case kFormType_TESFaction:
+		case FORM_TYPE::TESFaction:
 			NPCAccuracy::tables.FACT.erase(a_form->refID);
 			break;
 
@@ -577,7 +577,7 @@ bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 	*result = 0;
 
 	NiPoint3 kPointToTest;
-	UInt32 checkDisabled = 0;
+	uint32_t checkDisabled = 0;
 	float zLimit = 0;
 	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &kPointToTest.x, &kPointToTest.y, &kPointToTest.z, &checkDisabled, &zLimit)) return true;
@@ -585,14 +585,14 @@ bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 	NiPoint4 kResult = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
 
 	TESObjectCELL* pInterior = TES::GetSingleton()->currentInterior;
-	UInt32 uiGridSize = (*(Setting*)0x11C63CC).data.uint;
+	uint32_t uiGridSize = (*(Setting*)0x11C63CC).data.uint;
 
 	if (pInterior) {
 		GetClosestNavMeshTriangle(pInterior, kPointToTest, (checkDisabled > 0), zLimit, kResult);
 	}
 	else {
-		for (UInt32 x = 0; x < uiGridSize; x++) {
-			for (UInt32 y = 0; y < uiGridSize; y++) {
+		for (uint32_t x = 0; x < uiGridSize; x++) {
+			for (uint32_t y = 0; y < uiGridSize; y++) {
 				TESObjectCELL* pCell = TES::GetSingleton()->gridCellArray->GetCell(x, y)->pCell;
 				if (!pCell)
 					continue;
@@ -617,10 +617,10 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 	NiPoint4 kResult;
 	TESObjectCELL* pInterior = TES::GetSingleton()->currentInterior;
 
-	UInt32 uiGridSize = (*(Setting*)0x11C63CC).data.uint;
+	uint32_t uiGridSize = (*(Setting*)0x11C63CC).data.uint;
 
 	NiPoint3 kPointToTest;
-	UInt32 checkDisabled = 0;
+	uint32_t checkDisabled = 0;
 	float zLimit = 0;
 	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 
@@ -631,8 +631,8 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 		bResult = GetPointNavMesh(pInterior, kPointToTest, (checkDisabled > 0), zLimit, kResult);
 	}
 	else {
-		for (UInt32 x = 0; x < uiGridSize && !bResult; x++) {
-			for (UInt32 y = 0; y < uiGridSize && !bResult; y++) {
+		for (uint32_t x = 0; x < uiGridSize && !bResult; x++) {
+			for (uint32_t y = 0; y < uiGridSize && !bResult; y++) {
 				TESObjectCELL* pCell = TES::GetSingleton()->gridCellArray->GetCell(x, y)->pCell;
 				if (!pCell)
 					continue;
@@ -661,7 +661,7 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 
 bool __fastcall ValidTempEffect(EffectItem* effectItem) {
 	if (!effectItem || (effectItem->duration <= 0) || !effectItem->setting) return false;
-	UInt8 archtype = effectItem->setting->archtype;
+	uint8_t archtype = effectItem->setting->archtype;
 	return !archtype || ((archtype == 1) && (effectItem->setting->effectFlags & 0x2000)) || ((archtype > 10) && (archtype < 14)) || (archtype == 24) || (archtype > 33);
 }
 
@@ -680,7 +680,7 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(sound->refID, uiFlags);
 			handle.SetPosition(*ref->GetPos());
 			handle.SetObjectToFollow(ref->GetRefNiNode());
-			UInt32 time = fTime * 1000.0;
+			uint32_t time = fTime * 1000.0;
 			handle.FadeInPlay(time);
 			*result = 1;
 		}
@@ -700,7 +700,7 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 				activeEff->magicItem && ValidTempEffect(activeEff->effectItem))
 				if (TESForm* form = DYNAMIC_CAST(activeEff->magicItem, MagicItem, TESForm))
 				{
-					if (form->typeID == kFormType_AlchemyItem) {
+					if (form->typeID == FORM_TYPE::AlchemyItem) {
 						float timeLeft = activeEff->duration - activeEff->timeElapsed;
 						auto it = tempEffectMap.find(form);
 						if (it != tempEffectMap.end() && it->second.second < activeEff->duration) {
@@ -772,7 +772,7 @@ bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	if (!landscape) return true;
 	ThisCall(0x53B550, landscape, &coordData, pos, 1); // TESObjectLAND::GetCoordData
 	TESLandTexture* txt = ThisCall<TESLandTexture*>(0x53A630, landscape, coordData.iBlock, coordData.iVertidx); // TESObjectLAND::GetMainTexture
-	if (txt) *(UInt32*)result = txt->refID;
+	if (txt) *(uint32_t*)result = txt->refID;
 	return true;
 }
 
@@ -856,19 +856,19 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetLocationSpecificLoadScreensOnly_Execute(COMMAND_ARGS) {
-	*result = (float)(*(UInt8*)0x11CABB8);
+	*result = (float)(*(uint8_t*)0x11CABB8);
 	return true;
 }
 
 bool Cmd_GetLocationSpecificLoadScreensOnly_Eval(COMMAND_ARGS_EVAL) {
-	*result = (float)(*(UInt8*)0x11CABB8);
+	*result = (float)(*(uint8_t*)0x11CABB8);
 	return true;
 }
 
 bool IsCombatTarget(Actor* source, Actor* toSearch) {
 	if (source->isInCombat && source->combatTargets) {
 		Actor** actorsArr = source->combatTargets->pBuffer;
-		UInt32 count = source->combatTargets->uiSize;
+		uint32_t count = source->combatTargets->uiSize;
 		if (!actorsArr) return false;
 		for (; count; count--, actorsArr++) {
 			if (*actorsArr == toSearch) return true;
@@ -907,10 +907,10 @@ bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt32 skipInvisible = 0;
+	uint32_t skipInvisible = 0;
 
 	//If player has ImprovedDetection perk effect, then they'll see invisible actors in compass.
-	UInt32 accountForImprovedDetection = 0;
+	uint32_t accountForImprovedDetection = 0;
 
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible, &accountForImprovedDetection);
 
@@ -1018,7 +1018,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 
 bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt32 index;
+	uint32_t index;
 	float modTimeLeft;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &index, &modTimeLeft) || !thisObj->IsActor()) return true;
 	ActiveEffectList* effList = ((Actor*)thisObj)->magicTarget.GetEffectList();
@@ -1046,7 +1046,7 @@ bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_ToggleCombatMusic_Execute(COMMAND_ARGS) {
-	UInt32 toggle = 1;
+	uint32_t toggle = 1;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &toggle);
 	bCombatMusicDisabled = (toggle == 0);
 	return true;
@@ -1075,7 +1075,7 @@ void RestoreDisabledPlayerControlsHUDFlags() {
 }
 
 bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
-	UInt32 flags;
+	uint32_t flags;
 	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &flags)) {
 		SafeWrite32(0x771A53, flags);
 		HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
@@ -1098,7 +1098,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	float exteriorDistanceSquared = (fSneakMaxDistance * fSneakExteriorDistanceMult) * (fSneakMaxDistance * fSneakExteriorDistanceMult);
 	float maxDist = isInterior ? interiorDistanceSquared : exteriorDistanceSquared;
 	Actor* closestHostile = nullptr;
-	UInt32 skipInvisible = 0;
+	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
 	auto iter = g_thePlayer->compassTargets->Begin();
 	for (; !iter.End(); ++iter) {
@@ -1115,7 +1115,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 		}
 	}
 
-	if (closestHostile)	*(UInt32*)result = closestHostile->refID;
+	if (closestHostile)	*(uint32_t*)result = closestHostile->refID;
 
 	return true;
 }
@@ -1129,7 +1129,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();
 	float maxDist = isInterior ? powf(fSneakMaxDistance, 2) : powf((fSneakMaxDistance * fSneakExteriorDistanceMult), 2);
 	Actor* closestHostile = nullptr;
-	UInt32 skipInvisible = 0;
+	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
 	auto iter = g_thePlayer->compassTargets->Begin();
 	for (; !iter.End(); ++iter) {
@@ -1178,7 +1178,7 @@ bool Cmd_RemoveHighlightedRef_Execute(COMMAND_ARGS) {
 
 	VATSHighlightData* vatsData = interfaceMgr->GetVATSHighlightData();
 
-	for (UInt32 index = vatsData->numHighlighted; index;) {
+	for (uint32_t index = vatsData->numHighlighted; index;) {
 		if (vatsData->highlightedRefs[--index].refr != thisObj)
 			continue;
 
@@ -1227,7 +1227,7 @@ bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
-	UInt32 index, isVisible;
+	uint32_t index, isVisible;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &index, &isVisible) && index < 3) {
 		FOPipboyManager* pipboyManager = g_interfaceManager->pipboyManager;
@@ -1245,7 +1245,7 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
 }
 bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 	*result = 0;
-	UInt32 avCode;
+	uint32_t avCode;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode)) {
 		Actor* actor = (Actor*)thisObj;
 		ActorValueOwner* avOwner = &actor->avOwner;
@@ -1272,7 +1272,7 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
-	UInt32 avCode;
+	uint32_t avCode;
 	*result = 0;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode)) {
 		Actor* actor = (Actor*)thisObj;
@@ -1400,7 +1400,7 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS) {
-	UInt32 ToExtract;
+	uint32_t ToExtract;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &ToExtract)) isShowLevelUp = ToExtract;
 	return true;
 }
@@ -1550,7 +1550,7 @@ bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
 	NVSEArrayVarInterface::Array* weaponArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 
 	for (TESBoundObject* object = dataHandler->boundObjectList->first; object; object = object->next) {
-		if (object->typeID != kFormType_TESObjectWEAP) 
+		if (object->typeID != FORM_TYPE::TESObjectWEAP) 
       continue;
     
 		TESObjectWEAP* weapon = (TESObjectWEAP*)object;

@@ -7,9 +7,9 @@
 //
 //	STVS - empty chunk indicating start of strings block
 //		STVR
-//			UInt8 modIndex
-//			UInt32 stringID
-//			UInt16 length
+//			uint8_t modIndex
+//			uint32_t stringID
+//			uint16_t length
 //			char data[length]
 //		[STVR]
 //		...
@@ -20,26 +20,26 @@
 class StringVar
 {
 	std::string data;
-	UInt8		owningModIndex;
+	uint8_t		owningModIndex;
 public:
-	StringVar(const char* in_data, UInt32 in_refID);
+	StringVar(const char* in_data, uint32_t in_refID);
 
 	void		Set(const char* newString);
-	SInt32		Compare(char* rhs, bool caseSensitive);
-	void		Insert(const char* subString, UInt32 insertionPos);
-	UInt32		Find(char* subString, UInt32 startPos, UInt32 numChars, bool bCaseSensitive = false);	//returns position of substring
-	UInt32		Count(char* subString, UInt32 startPos, UInt32 numChars, bool bCaseSensitive = false);
-	UInt32		Replace(char* toReplace, char* replaceWith, UInt32 startPos, UInt32 numChars, bool bCaseSensitive, UInt32 numToReplace = -1);	//returns num replaced
-	void		Erase(UInt32 startPos, UInt32 numChars);
-	std::string	SubString(UInt32 startPos, UInt32 numChars);
-	double*		ToFloat(UInt32 startPos, UInt32 numChars);
-	char		At(UInt32 charPos);
-	static UInt32	GetCharType(char ch);
+	int32_t		Compare(char* rhs, bool caseSensitive);
+	void		Insert(const char* subString, uint32_t insertionPos);
+	uint32_t		Find(char* subString, uint32_t startPos, uint32_t numChars, bool bCaseSensitive = false);	//returns position of substring
+	uint32_t		Count(char* subString, uint32_t startPos, uint32_t numChars, bool bCaseSensitive = false);
+	uint32_t		Replace(char* toReplace, char* replaceWith, uint32_t startPos, uint32_t numChars, bool bCaseSensitive, uint32_t numToReplace = -1);	//returns num replaced
+	void		Erase(uint32_t startPos, uint32_t numChars);
+	std::string	SubString(uint32_t startPos, uint32_t numChars);
+	double*		ToFloat(uint32_t startPos, uint32_t numChars);
+	char		At(uint32_t charPos);
+	static uint32_t	GetCharType(char ch);
 
 	std::string String()					{	return data;	}
 	const char*	GetCString();
-	UInt32		GetLength();
-	UInt8		GetOwningModIndex();	
+	uint32_t		GetLength();
+	uint8_t		GetOwningModIndex();	
 };
 
 enum {
@@ -57,7 +57,7 @@ public:
 	void Load(NVSESerializationInterface* intfc);
 	void Clean();
 
-	UInt32 Add(UInt8 varModIndex, const char* data, bool bTemp = false);
+	uint32_t Add(uint8_t varModIndex, const char* data, bool bTemp = false);
 };
 
 extern StringVarMap g_StringMap;
@@ -67,7 +67,7 @@ bool AssignToStringVarLong(COMMAND_ARGS, const char* newValue);	// Increase the 
 
 namespace PluginAPI
 {
-	const char* GetString(UInt32 stringID);
-	void SetString(UInt32 stringID, const char* newVal);
-	UInt32 CreateString(const char* strVal, void* owningScript);
+	const char* GetString(uint32_t stringID);
+	void SetString(uint32_t stringID, const char* newVal);
+	uint32_t CreateString(const char* strVal, void* owningScript);
 }

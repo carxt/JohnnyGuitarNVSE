@@ -22,7 +22,7 @@ bool Cmd_GetNthRegionWeatherGlobal_Execute(COMMAND_ARGS) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData && !weatherData->weatherTypes.Empty()) {
 			WeatherEntry* entry = weatherData->weatherTypes.GetNthItem(id);
-			if (entry && entry->chance) *(UInt32*)result = entry->global->refID;
+			if (entry && entry->chance) *(uint32_t*)result = entry->global->refID;
 		}
 	}
 	return true;
@@ -47,7 +47,7 @@ bool Cmd_GetNthRegionWeatherType_Execute(COMMAND_ARGS) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData && !weatherData->weatherTypes.Empty()) {
 			WeatherEntry* entry = weatherData->weatherTypes.GetNthItem(id);
-			if (entry && entry->weather) *(UInt32*)result = entry->weather->refID;
+			if (entry && entry->weather) *(uint32_t*)result = entry->weather->refID;
 		}
 	}
 	return true;
@@ -153,7 +153,7 @@ bool Cmd_GetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && region && IS_TYPE(region, TESRegion)) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
-			*result = weatherData->priority;
+			*result = weatherData->cPriority;
 			if (IsConsoleMode()) {
 				Console_Print("GetRegionWeatherPriority >> %.f", *result);
 			}
@@ -168,7 +168,7 @@ bool Cmd_SetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &priority) && region && IS_TYPE(region, TESRegion) && priority >= 0 && priority <= 100) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData) {
-			weatherData->priority = priority;
+			weatherData->cPriority = priority;
 			*result = 1;
 		}
 	}
@@ -226,7 +226,7 @@ bool Cmd_RemoveRegionWeather_Execute(COMMAND_ARGS) {
 bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	TESWeather* weather = nullptr;
-	UInt32 chance = 0;
+	uint32_t chance = 0;
 	TESGlobal* global = nullptr;
 	WeatherEntry* entry;
 	*result = 0;

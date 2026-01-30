@@ -305,8 +305,8 @@ public:
 	ExtraAction();
 	virtual ~ExtraAction();
 
-	UInt8			byte0C;		// 00C	some kind of status or flags
-	UInt8			fill0D[3];	// 00D
+	uint8_t			byte0C;		// 00C	some kind of status or flags
+	uint8_t			fill0D[3];	// 00D
 	TESObjectREFR* actionRef;	// 010
 
 	static ExtraAction* __stdcall Create(TESObjectREFR* _actionRef = NULL);
@@ -324,7 +324,7 @@ public:
 	static ExtraScript* __stdcall Create(TESForm* baseForm = NULL, bool create = true, TESObjectREFR* container = NULL);
 };
 
-UInt32 GetCountForExtraDataList(ExtraDataList* list);
+uint32_t GetCountForExtraDataList(ExtraDataList* list);
 
 // 010
 class ExtraContainerChanges : public BSExtraData {
@@ -336,16 +336,16 @@ public:
 	public:
 		void Clear();
 		ExtraDataList* RemoveExtra(ExtraDataList* xDataList, BSExtraData* xData);
-		ExtraDataList* RemoveByType(ExtraDataList* xDataList, UInt32 type);
+		ExtraDataList* RemoveByType(ExtraDataList* xDataList, uint32_t type);
 		void CleanEmpty();
 	};
 
 	struct EntryData {
 		ExtendDataList* extendData;
-		SInt32			countDelta;
+		int32_t			countDelta;
 		TESForm* type;
 
-		EntryData(ListNode<ExtraDataList>* extend, SInt32 count, TESForm* item) :
+		EntryData(ListNode<ExtraDataList>* extend, int32_t count, TESForm* item) :
 			extendData((ExtendDataList*)extend), countDelta(count), type(item) {}
 
 		void Cleanup();
@@ -364,8 +364,8 @@ public:
 		TESObjectREFR* owner;
 		float			totalWgCurrent;
 		float			totalWgLast;
-		UInt8			byte10;	// referenced in relation to scripts in container
-		UInt8			pad[3];
+		uint8_t			byte10;	// referenced in relation to scripts in container
+		uint8_t			pad[3];
 
 		static Data* Create(TESObjectREFR* owner);
 		float GetInventoryWeight();
@@ -467,9 +467,9 @@ public:
 
 // Finds an item by refID in an EntryDataList
 class RefIDInEntryDataListMatcher {
-	UInt32 m_toMatch;
+	uint32_t m_toMatch;
 public:
-	RefIDInEntryDataListMatcher(UInt32 match) : m_toMatch(match) {}
+	RefIDInEntryDataListMatcher(uint32_t match) : m_toMatch(match) {}
 
 	bool Accept(const ExtraContainerChanges::EntryData* match) const {
 		return (match && match->type && m_toMatch == match->type->refID);
@@ -478,9 +478,9 @@ public:
 
 // Finds an item by the refID of its base form in an EntryDataList
 class BaseIDInEntryDataListMatcher {
-	UInt32 m_toMatch;
+	uint32_t m_toMatch;
 public:
-	BaseIDInEntryDataListMatcher(UInt32 match) : m_toMatch(match) {}
+	BaseIDInEntryDataListMatcher(uint32_t match) : m_toMatch(match) {}
 
 	bool Accept(const ExtraContainerChanges::EntryData* match) const {
 		return (match && match->type && match->type->TryGetREFRParent() && m_toMatch == match->type->TryGetREFRParent()->refID);
@@ -538,9 +538,9 @@ public:
 	ExtraHotkey();
 	virtual ~ExtraHotkey();
 
-	UInt8	index;		// 00C (is 0-7)
+	uint8_t	index;		// 00C (is 0-7)
 
-	static ExtraHotkey* __stdcall Create(UInt8 _index = 0);
+	static ExtraHotkey* __stdcall Create(uint8_t _index = 0);
 };
 
 // 010
@@ -549,10 +549,10 @@ public:
 	ExtraCount();
 	virtual ~ExtraCount();
 
-	SInt16	count;	// 00C
-	UInt8	pad[2];	// 00E
+	int16_t	count;	// 00C
+	uint8_t	pad[2];	// 00E
 
-	static ExtraCount* __stdcall Create(UInt32 count = 0);
+	static ExtraCount* __stdcall Create(uint32_t count = 0);
 };
 
 // 010
@@ -562,12 +562,12 @@ public:
 	virtual ~ExtraLock();
 
 	struct Data {
-		UInt32	lockLevel;	// 00
+		uint32_t	lockLevel;	// 00
 		TESKey* key;		// 04
-		UInt8	flags;		// 08
-		UInt8	pad[3];
-		UInt32  unk0C;		// 0C introduced since form version 0x10
-		UInt32	unk10;		// 10
+		uint8_t	flags;		// 08
+		uint8_t	pad[3];
+		uint32_t  unk0C;		// 0C introduced since form version 0x10
+		uint32_t	unk10;		// 10
 	};
 
 	Data* data;		// 00C
@@ -581,7 +581,7 @@ public:
 	ExtraUses();
 	~ExtraUses();
 
-	UInt32 unk0;
+	uint32_t unk0;
 
 	static ExtraUses* Create();
 };
@@ -600,8 +600,8 @@ public:
 		float			xRot;		// 10 angles in radians. x generally 0
 		float			yRot;		// 14 y generally -0.0, no reason to modify
 		float			zRot;		// 18
-		UInt8			unk01C;		// 1C
-		UInt8			pad01D[3];	// 1D
+		uint8_t			unk01C;		// 1C
+		uint8_t			pad01D[3];	// 1D
 	};
 
 	Data* data;
@@ -625,7 +625,7 @@ public:
 	~ExtraAmmo();
 
 	TESAmmo* ammo;
-	UInt32 unk4;
+	uint32_t unk4;
 };
 
 // 010
@@ -645,9 +645,9 @@ public:
 	ExtraRank();
 	virtual ~ExtraRank();
 
-	SInt32	rank; // 00C
+	int32_t	rank; // 00C
 
-	static ExtraRank* __stdcall Create(UInt32 _rank);
+	static ExtraRank* __stdcall Create(uint32_t _rank);
 };
 
 // 010
@@ -665,9 +665,9 @@ public:
 	ExtraWeaponModFlags();
 	~ExtraWeaponModFlags();
 
-	UInt8	flags; // 00C
+	uint8_t	flags; // 00C
 
-	static ExtraWeaponModFlags* __stdcall Create(UInt8 _flags = 0);
+	static ExtraWeaponModFlags* __stdcall Create(uint8_t _flags = 0);
 };
 
 class ExtraFactionChanges : public BSExtraData {
@@ -758,8 +758,8 @@ public:
 
 	struct MarkerData {
 		TESFullName fullName;            // not all markers have this
-		UInt16 flags;
-		UInt16 type;
+		uint16_t flags;
+		uint16_t type;
 		TESForm* reputation;            // not all markers have this
 	};
 	MarkerData* data;
@@ -780,7 +780,7 @@ public:
 	virtual ~ExtraHavok();
 
 	bhkWorld* world;			// 0C
-	UInt32			unk10;			// 10
+	uint32_t			unk10;			// 10
 };
 
 // 10
@@ -798,7 +798,7 @@ public:
 	ExtraDetachTime();
 	~ExtraDetachTime();
 
-	SInt32 time;
+	int32_t time;
 };
 
 // 10
@@ -878,7 +878,7 @@ public:
 	virtual ~ExtraPackage();
 
 	TESPackage* package;	// 0C
-	UInt32			unk10[3];	// 10
+	uint32_t			unk10[3];	// 10
 };
 
 // 10
@@ -993,9 +993,9 @@ public:
 	ExtraTerminalState();
 	~ExtraTerminalState();
 
-	UInt8			lockedOut;	// 0C
-	UInt8			lockLevel;	// 0D unlocked: 0xFE
-	UInt16			pad;
+	uint8_t			lockedOut;	// 0C
+	uint8_t			lockLevel;	// 0D unlocked: 0xFE
+	uint16_t			pad;
 
 	static ExtraTerminalState* Create();
 };
@@ -1031,7 +1031,7 @@ public:
 		float			delay;
 	};
 	tList<parentRef>	parentRefs;
-	UInt8				flags;
+	uint8_t				flags;
 	BSString				activationPromptOverride;
 };
 
@@ -1093,20 +1093,20 @@ public:
 	virtual ~ExtraDismemberedLimbs();
 
 	struct DismemberedLimb {
-		UInt8				bodyPartID;
-		UInt8				explodeChance;
+		uint8_t				bodyPartID;
+		uint8_t				explodeChance;
 		bool				explodeOnly;
-		UInt8				byte03;
+		uint8_t				byte03;
 		BSSimpleArray<void>* array04;
 	};
 
-	UInt16							dismemberedMask;	// 0C
-	UInt8							pad0E[2];			// 0E
+	uint16_t							dismemberedMask;	// 0C
+	uint8_t							pad0E[2];			// 0E
 	int								unk10;				// 10
 	TESObjectWEAP* weapon;			// 14
 	int								unk18;				// 18
 	bool							wasEaten;			// 1C
-	UInt8							pad1D[3];			// 1D
+	uint8_t							pad1D[3];			// 1D
 	BSSimpleArray<DismemberedLimb>	dismemberedLimbs;	// 20
 };
 
@@ -1117,7 +1117,7 @@ public:
 	virtual ~ExtraRadioData();
 
 	float				radius;			// 0C
-	UInt32				rangeType;		// 10
+	uint32_t				rangeType;		// 10
 	float				staticPerc;		// 14
 	TESObjectREFR* positionRef;	// 18
 };
@@ -1139,7 +1139,7 @@ public:
 	ExtraCollisionData();
 	virtual ~ExtraCollisionData();
 
-	UInt32			layer;			// 0C
+	uint32_t			layer;			// 0C
 };
 
 // 10
@@ -1190,14 +1190,14 @@ public:
 	virtual ~ExtraFollowerSwimBreadcrumbs();
 	struct ExtraFollowerSwimBreadcrumb {
 		NiPoint3 StartLocation;
-		UInt32 StartNavMeshID;
+		uint32_t StartNavMeshID;
 		NiPoint3 EndLocation;
-		UInt32 EndNavMeshID;
+		uint32_t EndNavMeshID;
 		bool bEnteringWater;
 	};
-	UInt32			leaderState;
+	uint32_t			leaderState;
 	NiPoint3		leaderLocation;
-	UInt32			leaderNavmeshID;
+	uint32_t			leaderNavmeshID;
 	tList<ExtraFollowerSwimBreadcrumb*>		crumbList;
 };
 static_assert(sizeof(ExtraFollowerSwimBreadcrumbs) == 0x28);
@@ -1206,10 +1206,10 @@ struct ExtraAudioMarkerData {
 	TESFullName		fullName;
 	float			layer2TriggerPerc;
 	float			layer3TriggerPerc;
-	UInt32			unk14[4];
-	UInt32			mediaLocCtrlID;
-	UInt32			flags;
-	UInt32			unk2C[2];
+	uint32_t			unk14[4];
+	uint32_t			mediaLocCtrlID;
+	uint32_t			flags;
+	uint32_t			unk2C[2];
 };
 // 10
 class ExtraAudioMarker : public BSExtraData {
@@ -1226,8 +1226,8 @@ public:
 	ExtraSpecialRenderFlags();
 	virtual ~ExtraSpecialRenderFlags();
 
-	UInt32		flags;		// 0C
-	UInt32		unk10;		// 10
+	uint32_t		flags;		// 0C
+	uint32_t		unk10;		// 10
 
-	static ExtraSpecialRenderFlags* __stdcall Create(UInt32 _flags = 0);
+	static ExtraSpecialRenderFlags* __stdcall Create(uint32_t _flags = 0);
 };

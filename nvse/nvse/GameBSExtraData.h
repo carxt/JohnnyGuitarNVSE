@@ -13,11 +13,11 @@ public:
 
 	virtual void	Fn_01(void);
 
-	static BSExtraData* Create(UInt8 xType, UInt32 size, UInt32 vtbl);
+	static BSExtraData* Create(uint8_t xType, uint32_t size, uint32_t vtbl);
 
 	//	void		** _vtbl;	// 000
-	UInt8		type;		// 004
-	UInt8		pad[3];		// 005
+	uint8_t		type;		// 004
+	uint8_t		pad[3];		// 005
 	BSExtraData* next;		// 008
 };
 
@@ -26,17 +26,17 @@ struct BaseExtraList {
 	virtual void	Unk_00(void);
 
 	BSExtraData* m_data;					// 004
-	UInt8			m_presenceBitfield[0x15];	// 008 - if a bit is set, then the extralist should contain that extradata
-	UInt8			pad1D[3];					// 01D
+	uint8_t			m_presenceBitfield[0x15];	// 008 - if a bit is set, then the extralist should contain that extradata
+	uint8_t			pad1D[3];					// 01D
 
-	bool HasType(UInt32 type) const;
-	BSExtraData* GetByType(UInt32 type) const;
-	void MarkType(UInt32 type, bool bCleared);
+	bool HasType(uint32_t type) const;
+	BSExtraData* GetByType(uint32_t type) const;
+	void MarkType(uint32_t type, bool bCleared);
 	void Remove(BSExtraData* toRemove, bool doFree = false);
-	void RemoveByType(UInt32 type);
+	void RemoveByType(uint32_t type);
 	BSExtraData* Add(BSExtraData* xData);
 	void RemoveAll(bool doFree = true);
-	bool MarkScriptEvent(UInt32 eventMask, TESForm* eventTarget);
+	bool MarkScriptEvent(uint32_t eventMask, TESForm* eventTarget);
 	void Copy(BaseExtraList* sourceList);
 	bool IsWorn();
 	char GetExtraFactionRank(TESFaction* faction);

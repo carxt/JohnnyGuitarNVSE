@@ -10,12 +10,12 @@ template <class Var>
 class VarMap
 {
 protected:
-	typedef std::map<UInt32, Var*>	_VarMap;
-	typedef std::set<UInt32>		_VarIDs;
+	typedef std::map<uint32_t, Var*>	_VarMap;
+	typedef std::set<uint32_t>		_VarIDs;
 
 	class VarCache {
 		// if desired this can be replaced with an impl that caches more than one var without changing client code
-		UInt32		varID;
+		uint32_t		varID;
 		Var			* var;
 
 	public:
@@ -25,7 +25,7 @@ protected:
 			Reset(); 
 		}
 
-		void Insert(UInt32 id, Var* v) {
+		void Insert(uint32_t id, Var* v) {
 			varID = id;
 			var = v;
 		}
@@ -36,13 +36,13 @@ protected:
 			var = NULL;
 		}
 
-		void Remove(UInt32 id) {
+		void Remove(uint32_t id) {
 			if (id == varID) {
 				Reset();
 			}
 		}
 
-		Var* Get(UInt32 id) {
+		Var* Get(uint32_t id) {
 			return (varID == id) ? var : NULL;
 		}
 	};
@@ -62,9 +62,9 @@ protected:
 			Reset();
 		}
 
-		UInt32	GetUnusedID()
+		uint32_t	GetUnusedID()
 		{
-			UInt32 id = 1;
+			uint32_t id = 1;
 
 			::EnterCriticalSection(&cs);
 
@@ -88,7 +88,7 @@ protected:
 			return id;
 		}
 
-		Var*	Get(UInt32 varID)
+		Var*	Get(uint32_t varID)
 		{
 			if (varID != 0) {
 				Var* var = cache.Get(varID);
@@ -106,12 +106,12 @@ protected:
 			return NULL;
 		}
 
-		bool	VarExists(UInt32 varID)
+		bool	VarExists(uint32_t varID)
 		{
 			return Get(varID) ? true : false;
 		}
 
-		void Insert(UInt32 varID, Var* var)
+		void Insert(uint32_t varID, Var* var)
 		{
 			::EnterCriticalSection(&cs);
 
@@ -124,7 +124,7 @@ protected:
 
 		}
 
-		void	Delete(UInt32 varID)
+		void	Delete(uint32_t varID)
 		{
 			::EnterCriticalSection(&cs);
 
@@ -175,7 +175,7 @@ protected:
 			::DeleteCriticalSection(&cs);
 		}
 
-		void	MarkTemporary(UInt32 varID, bool bTemporary)
+		void	MarkTemporary(uint32_t varID, bool bTemporary)
 		{
 			if (bTemporary)
 				tempVars.insert(varID);
@@ -183,12 +183,12 @@ protected:
 				tempVars.erase(varID);
 		}
 
-		bool IsTemporary(UInt32 varID)
+		bool IsTemporary(uint32_t varID)
 		{
 			return (tempVars.find(varID) != tempVars.end()) ? true : false;
 		}
 
-		void SetIDAvailable(UInt32 id) {
+		void SetIDAvailable(uint32_t id) {
 			if (id) {
 				availableVars.insert(id);
 			}
@@ -198,12 +198,12 @@ protected:
 	State	* m_state;				// currently loaded vars
 	State	* m_backupState;		// previously loaded vars, used as restore point in the event a saved game fails to load
 
-	UInt32	GetUnusedID()
+	uint32_t	GetUnusedID()
 	{
 		return m_state->GetUnusedID();
 	}
 
-	void SetIDAvailable(UInt32 id)
+	void SetIDAvailable(uint32_t id)
 	{
 		m_state->SetIDAvailable(id);
 	}
@@ -221,22 +221,22 @@ public:
 		delete m_backupState;
 	}
 
-	Var*	Get(UInt32 varID)
+	Var*	Get(uint32_t varID)
 	{
 		return m_state->Get(varID);
 	}
 
-	bool VarExists(UInt32 varID)
+	bool VarExists(uint32_t varID)
 	{
 		return m_state->VarExists(varID);
 	}
 
-	void Insert(UInt32 varID, Var* var)
+	void Insert(uint32_t varID, Var* var)
 	{
 		m_state->Insert(varID, var);
 	}
 
-	void Delete(UInt32 varID)
+	void Delete(uint32_t varID)
 	{
 		m_state->Delete(varID);
 	}
@@ -275,12 +275,12 @@ public:
 		}
 	}
 
-	void	MarkTemporary(UInt32 varID, bool bTemporary)
+	void	MarkTemporary(uint32_t varID, bool bTemporary)
 	{
 		m_state->MarkTemporary(varID, bTemporary);
 	}
 
-	bool IsTemporary(UInt32 varID)
+	bool IsTemporary(uint32_t varID)
 	{
 		return m_state->IsTemporary(varID);
 	}

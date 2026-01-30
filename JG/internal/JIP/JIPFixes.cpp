@@ -6,7 +6,6 @@
 #include "GameRTTI.h"
 #include "ParamInfos.h"
 #include "PluginAPI.h"
-#include "SafeWrite.h"
 #include "utility.h"
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
@@ -17,18 +16,18 @@ extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);;
 namespace JIPFixes {
 
 	static HMODULE hJIP = 0;
-	static UInt32 uiCrc32Table[256];
-	static UInt32 uiJipHash = 0x9DF36B6;
+	static uint32_t uiCrc32Table[256];
+	static uint32_t uiJipHash = 0x9DF36B6;
 
 	static size_t __fastcall GetJIPAddress(size_t aiAddress) {
 		return reinterpret_cast<size_t>(hJIP) + aiAddress - 0x10000000;
 	}
 
 	static void initCRC32Table() {
-		UInt32 polynomial = 0xEDB88320;
-		for (UInt32 i = 0; i < 256; i++) {
-			UInt32 crc = i;
-			for (UInt32 j = 0; j < 8; j++) {
+		uint32_t polynomial = 0xEDB88320;
+		for (uint32_t i = 0; i < 256; i++) {
+			uint32_t crc = i;
+			for (uint32_t j = 0; j < 8; j++) {
 				if (crc & 1)
 					crc = (crc >> 1) ^ polynomial;
 				else
@@ -39,10 +38,10 @@ namespace JIPFixes {
 	}
 
 
-	static UInt32 crc32(const UInt8* data, size_t length) {
-		UInt32 crc = 0xFFFFFFFF;
+	static uint32_t crc32(const uint8_t* data, size_t length) {
+		uint32_t crc = 0xFFFFFFFF;
 		for (size_t i = 0; i < length; i++) {
-			UInt8 byte = data[i];
+			uint8_t byte = data[i];
 			crc = (crc >> 8) ^ uiCrc32Table[(crc ^ byte) & 0xFF];
 		}
 		return crc ^ 0xFFFFFFFF;

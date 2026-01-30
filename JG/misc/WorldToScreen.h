@@ -14,8 +14,8 @@ public:
 	NiPoint4(const float x, const float y, const float z, const float w) : x(x), y(y), z(z), w(w) {};
 	NiPoint4(const NiPoint3& src) : x(src.x), y(src.y), z(src.z), w(0.f) {};
 
-	inline const float operator[] (UInt32 i) const { return ((float*)&x)[i]; };
-	inline float operator[] (UInt32 i) { return ((float*)&x)[i]; };
+	inline const float operator[] (uint32_t i) const { return ((float*)&x)[i]; };
+	inline float operator[] (uint32_t i) { return ((float*)&x)[i]; };
 
 	operator float* () const { return (float*)this; };
 
@@ -81,7 +81,7 @@ static_assert(sizeof(NiPoint4) == 0x10);
 
 struct NiCameraAlt //Defined here because the one in NVSE is wrong.
 {
-	UInt8			undefinedDataStruct[156];
+	uint8_t			undefinedDataStruct[156];
 	float			m_aafWorldToCam[4][4];	// 09C
 	NiFrustum		frustum;			// 0DC
 	float			minNearPlaneDist;	// 0F8
@@ -182,9 +182,9 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 //NiPoint3* NiPointBuffer = NULL;
 
 bool __cdecl JG_WorldToScreen(NiPoint3* posXYZ, NiPoint3& posOut, int iOffscreenHandling) {
-	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, posXYZ, posOut.x, posOut.y, posOut.z, 0.0000099999997, iOffscreenHandling);
+	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, posXYZ, posOut.x, posOut.y, posOut.z, 0.0000099999997f, iOffscreenHandling);
 }
-__forceinline bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, int bHandleType, float zeroTolerance = 0.0000099999997) {
+__forceinline bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, int bHandleType, float zeroTolerance = 0.0000099999997f) {
 	return WorldToScreenPoint3(JGGameCamera.WorldMatrx, p_in, x_out, y_out, z_out, zeroTolerance, bHandleType);
 }
 

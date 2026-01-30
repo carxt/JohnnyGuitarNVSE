@@ -42,9 +42,9 @@ bool Cmd_StopSoundFile_Execute(COMMAND_ARGS) {
 bool Cmd_PlaySoundFile_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};
 	*result = 0;
-	UInt32 forcePlay = 0;
-	UInt32 shouldLoop = 0;
-	UInt32 playInMainMenu = 0;
+	uint32_t forcePlay = 0;
+	uint32_t shouldLoop = 0;
+	uint32_t playInMainMenu = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &forcePlay, &shouldLoop, &playInMainMenu) && path[0]) {
 		int type = playInMainMenu > 0 ? 8 : 6;
 		CdeclCall<void>(0x8300C0, type, path, 1000, shouldLoop, forcePlay, 0.0, 0);
@@ -102,7 +102,7 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char path[MAX_PATH] = {};
 	//char fixPath[MAX_PATH];
-	UInt32 useDataTextures = 0;
+	uint32_t useDataTextures = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
 		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
@@ -139,7 +139,7 @@ bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 	*result = 0;
 	int fileOrFolder = 0;
 	char filename[MAX_PATH] = {};
-	UInt8 modIdx = scriptObj->GetOverridingModIdx();
+	uint8_t modIdx = scriptObj->GetOverridingModIdx();
 	if (modIdx == 0xFF) return true;
 	if (strcmp("UwU.esp", g_dataHandler->GetNthModName(modIdx))) return true;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &filename, &fileOrFolder) && filename[0]) {
@@ -205,13 +205,13 @@ bool Cmd_GetPixelFromBMP_Execute(COMMAND_ARGS) {
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	char path[MAX_PATH] = {};
 	char RED[VarNameSize], GREEN[VarNameSize], BLUE[VarNameSize];
-	UInt32 width = 0, height = 0;
+	uint32_t width = 0, height = 0;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &RED, &GREEN, &BLUE, &width, &height) && path[0]) {
 		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
 		uint32_t length = filename - lastSlash;
 		strcpy_s(lastSlash, length, path);
-		UInt32 R = 0, G = 0, B = 0;
+		DWORD R = 0, G = 0, B = 0;
 		if (ReadBMP24(filename, R, G, B, width, height)) {
 			setVarByName(PASS_VARARGS, RED, R);
 			setVarByName(PASS_VARARGS, GREEN, G);
@@ -232,7 +232,7 @@ bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
 		bool bVoiceFlag = (voiceFlag > 0);
 		bool bSystemFlag = (systemFlag > 0);
 		bool bLoopFlag = (loopFlag > 0);
-		UInt32 audioFlags = BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100;
+		uint32_t audioFlags = BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100;
 		if (bVoiceFlag) {
 			audioFlags |= BSAudioManager::kAudioFlags_IsVoice;
 		}
@@ -272,7 +272,7 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 		if (ref->GetRefNiNode()) {
 			bool bVoiceFlag = (voiceFlag > 0);
 			bool bLoopFlag = (loopFlag > 0);
-			UInt32 audioFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
+			uint32_t audioFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
 			if (bVoiceFlag) {
 				audioFlags |= BSAudioManager::kAudioFlags_IsVoice;
 			}

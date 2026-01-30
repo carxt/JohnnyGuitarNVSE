@@ -7,16 +7,16 @@
 #include "nvse/nvse/PluginAPI.h"
 #include "LambdaVariableContext.h"
 
-extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, UInt8 numArgs, ...);
+extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, uint8_t numArgs, ...);
 
 class EventInformation;
-extern void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
+extern void* __fastcall GenericCreateFilter(void** maxFilters, uint32_t numFilters);
 
 union FilterType
 {
 	void* ptr;
 	TESForm* form;
-	UInt32 refID;
+	uint32_t refID;
 	int intVal;
 	float fltVal;
 	char* str;
@@ -27,7 +27,7 @@ union FilterType
 
 	FilterType(TESForm* form) : form(form) {}
 
-	FilterType(UInt32 refID) : refID(refID) {}
+	FilterType(uint32_t refID) : refID(refID) {}
 
 	FilterType(int intVal) : intVal(intVal) {}
 
@@ -42,7 +42,7 @@ public:
 	//Framework passes the objects to add to filter here
 	FilterType* genFilters = 0;
 	//Used to know how many filterSet in total (aka the size of the FilterType array) the filter uses
-	UInt32 numFilters = 0;
+	uint32_t numFilters = 0;
 	//Default destructor
 	virtual ~IFilter() = default;
 	//When the framework passes filterSet, it passes them to the genFilters array pointer, specifying the number of filterSet in the numFilters member
@@ -50,18 +50,18 @@ public:
 	virtual void SetUpFiltering() = 0;
 
 	//Checks if an object is in the filter, recommended to use a fast lookup data structure
-	virtual bool IsInFilter(UInt32 filterNum, FilterType toSearch) = 0;
+	virtual bool IsInFilter(uint32_t filterNum, FilterType toSearch) = 0;
 	//Inserts the desired element to the Nth filter.
-	virtual void InsertToFilter(UInt32 filterNum, FilterType toInsert) = 0;
+	virtual void InsertToFilter(uint32_t filterNum, FilterType toInsert) = 0;
 	//Deletes an object from the Nth filter
-	virtual void DeleteFromFilter(UInt32 filterNum, FilterType toDelete) = 0;
+	virtual void DeleteFromFilter(uint32_t filterNum, FilterType toDelete) = 0;
 	//Returns if the filter is empty
-	virtual bool IsFilterEmpty(UInt32 filterNum) = 0;
+	virtual bool IsFilterEmpty(uint32_t filterNum) = 0;
 	//Used by the framework to check if the Nth filter equals the passed value. Useful to avoid adding the same event repeatedly
-	virtual bool IsFilterEqual(FilterType Filter, UInt32 filterNum) = 0;
+	virtual bool IsFilterEqual(FilterType Filter, uint32_t filterNum) = 0;
 	//Function used by the filter to check if the object passed is an accepted parameter
 	virtual bool IsAcceptedParameter(FilterType toCheck) = 0;
-	virtual UInt32 GetNumFilters() { return numFilters; }
+	virtual uint32_t GetNumFilters() { return numFilters; }
 };
 
 
@@ -72,22 +72,22 @@ protected:
 
 	FilterSet* filterSet = nullptr;
 
-	FilterSet* GetFilter(UInt32 index);
+	FilterSet* GetFilter(uint32_t index);
 
 public:
-	FilterBase(void** filters, UInt32 nuFilters);
+	FilterBase(void** filters, uint32_t nuFilters);
 
 	virtual ~FilterBase();
 
-	bool IsInFilter(UInt32 filterNum, FilterType toSearch) override;
+	bool IsInFilter(uint32_t filterNum, FilterType toSearch) override;
 
-	bool IsFilterEmpty(UInt32 num) override;
+	bool IsFilterEmpty(uint32_t num) override;
 
-	void InsertToFilter(UInt32 num, FilterType toInsert) override;
+	void InsertToFilter(uint32_t num, FilterType toInsert) override;
 
-	void DeleteFromFilter(UInt32 num, FilterType toDelete) override;
+	void DeleteFromFilter(uint32_t num, FilterType toDelete) override;
 
-	bool IsFilterEqual(FilterType filter, UInt32 num) override;
+	bool IsFilterEqual(FilterType filter, uint32_t num) override;
 
 };
 
@@ -95,12 +95,12 @@ public:
 class FilterNull : public FilterBase
 {
 public:
-	FilterNull(void** filters, UInt32 nuFilters) : FilterBase(filters, nuFilters){}
+	FilterNull(void** filters, uint32_t nuFilters) : FilterBase(filters, nuFilters){}
 
-	virtual bool IsInFilter(UInt32 filterNum, FilterType toSearch) override { return true; }
-	virtual void InsertToFilter(UInt32 filterNum, FilterType toInsert) override {}
-	virtual void DeleteFromFilter(UInt32 filterNum, FilterType toDelete) override {}
-	virtual bool IsFilterEqual(FilterType Filter, UInt32 nuFilter) override { return true; }
+	virtual bool IsInFilter(uint32_t filterNum, FilterType toSearch) override { return true; }
+	virtual void InsertToFilter(uint32_t filterNum, FilterType toInsert) override {}
+	virtual void DeleteFromFilter(uint32_t filterNum, FilterType toDelete) override {}
+	virtual bool IsFilterEqual(FilterType Filter, uint32_t nuFilter) override { return true; }
 	virtual bool IsAcceptedParameter(FilterType parameter) override { return true; }
 	virtual void SetUpFiltering() override {}
 };
@@ -108,23 +108,23 @@ public:
 class FilterForm : public FilterBase
 {
 public:
-	FilterForm(void** filters, UInt32 nuFilters) : FilterBase(filters, nuFilters){}
+	FilterForm(void** filters, uint32_t nuFilters) : FilterBase(filters, nuFilters){}
 
 	bool IsAcceptedParameter(FilterType parameter) override;
 
 	void SetUpFiltering() override;
 
-	bool IsBaseInFilter(UInt32 filterNum, TESForm* form);
+	bool IsBaseInFilter(uint32_t filterNum, TESForm* form);
 
-	void insertFormList(BGSListForm* formlist, UInt32 filter);
+	void insertFormList(BGSListForm* formlist, uint32_t filter);
 };
 
 class FilterInt : public FilterBase
 {
 public:
-	FilterInt(void** filters, UInt32 nuFilters) : FilterBase(filters, nuFilters){}
+	FilterInt(void** filters, uint32_t nuFilters) : FilterBase(filters, nuFilters){}
 
-	bool IsFilterEqual(FilterType Filter, UInt32 nuFilter) override;
+	bool IsFilterEqual(FilterType Filter, uint32_t nuFilter) override;
 
 	bool IsAcceptedParameter(FilterType parameter) override
 	{
@@ -138,7 +138,7 @@ public:
 		int intID;
 	};
 
-	static void* __fastcall Create(void** filters, UInt32 nuFilters);
+	static void* __fastcall Create(void** filters, uint32_t nuFilters);
 };
 
 
@@ -146,7 +146,7 @@ class FilterFormInt : public FilterBase
 {
 
 public:
-	FilterFormInt(void** filters, UInt32 nuFilters) : FilterBase(filters, nuFilters) {}
+	FilterFormInt(void** filters, uint32_t nuFilters) : FilterBase(filters, nuFilters) {}
 
 	bool IsAcceptedParameter(FilterType parameter) override
 	{
@@ -161,13 +161,13 @@ public:
 		int intID;
 	};
 
-	static void* __fastcall Create(void** filters, UInt32 nuFilters);
+	static void* __fastcall Create(void** filters, uint32_t nuFilters);
 };
 
 class EventBase
 {
 public:
-	UInt32 Flags = 0;
+	uint32_t Flags = 0;
 	Script* script = nullptr;
 	IFilter* eventFilter = nullptr;
 	LambdaVariableContext capturedLambdaVars;
@@ -193,17 +193,17 @@ public:
 class EventInformation
 {
 private:
-	void* (__fastcall*CreateFilter)(void**, UInt32); // supposed to be passing itself
+	void* (__fastcall*CreateFilter)(void**, uint32_t); // supposed to be passing itself
 	std::vector<EventBase> eventAddQueue;
 	std::shared_mutex queueLock;
 	//need a readers writer lock to protect from multiple users registering an event in the same frame (very rare, but can happen)
 public:
 	const char* name;
-	UInt8 numMaxArgs;
-	UInt8 numMaxFilters;
+	uint8_t numMaxArgs;
+	uint8_t numMaxFilters;
 	std::vector<EventBase> callbacks;
 
-	EventInformation(const char* EventName, UInt8& numMaxArgs, UInt8& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32));
+	EventInformation(const char* EventName, uint8_t& numMaxArgs, uint8_t& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t));
 
 	virtual ~EventInformation();
 
@@ -222,8 +222,8 @@ typedef EventInformation* EventInfo;
 extern std::mutex eventInfosMutex;
 extern std::vector<EventInfo> EventInfos;
 
-extern void* __fastcall GenericCreateFilter(void** Filters, UInt32 numFilters);
+extern void* __fastcall GenericCreateFilter(void** Filters, uint32_t numFilters);
 
-extern EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32) = nullptr);
+extern EventInfo __cdecl JGCreateEvent(const char* EventName, uint8_t maxArgs, uint8_t maxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t) = nullptr);
 
 extern void __cdecl JGFreeEvent(EventInfo& toRemove);

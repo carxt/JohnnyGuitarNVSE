@@ -1,10 +1,11 @@
 #include "GameTypes.h"
 #include "GameAPI.h"
 #include "Utilities.h"
+
 struct FileFinder {
 	BSSimpleArray<const char*> Paths;
 
-	enum LOOKIN_FLAGS : UInt8 {
+	enum LOOKIN_FLAGS : uint8_t {
 		SKIP_NONE = 0x0,
 		SKIP_ARCHIVE = 0x1,
 		SKIP_CWD = 0x2,
@@ -32,6 +33,6 @@ struct FileFinder {
 
 	static FileFinder* GetSingleton();
 	static BSFile* GetFile(const char* apName, OpenMode aeMode, int aiSize, ARCHIVE_TYPE aeArchiveType);
-	static bool Locate(const char* apName, const char* apFilePath, UInt32 aiFlags, ARCHIVE_TYPE aiArchiveType);
-	bool Exist(const char* apName, const char* apFilePath, UInt32 aiFlags, ARCHIVE_TYPE aiArchiveType);
+	static bool Locate(const char* apName, const char* apFilePath, uint32_t aiFlags, ARCHIVE_TYPE aiArchiveType);
+	bool Exist(const char* apName, const char* apFilePath, uint32_t aiFlags, ARCHIVE_TYPE aiArchiveType);
 };

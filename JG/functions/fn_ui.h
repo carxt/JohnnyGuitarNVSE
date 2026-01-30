@@ -98,7 +98,7 @@ bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
 		kFlag_WhiteListBeard,
 	};
 	BGSListForm* formList = nullptr;
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (!g_thePlayer) return true;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &formList)) {
 		if (formList && IS_TYPE(formList, BGSListForm)) {
@@ -201,7 +201,7 @@ bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
 bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESReputation* rep = nullptr;
-	UInt32 tierID = 0;
+	uint32_t tierID = 0;
 	char path[MAX_PATH] = {};
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &rep, &tierID, &path) && rep && IS_TYPE(rep, TESReputation) && tierID >= 1 && tierID <= 4)) return true;
 	auto pos = factionRepIcons.find(rep->refID);
@@ -216,7 +216,7 @@ bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	else {
 		std::vector<const char*> v{ "", "", "", "" };
 		v[tierID - 1] = pathCopy;
-		factionRepIcons.insert(std::pair<UInt32, std::vector<const char*>>(rep->refID, v));
+		factionRepIcons.insert(std::pair<uint32_t, std::vector<const char*>>(rep->refID, v));
 	}
 	*result = 1;
 	return true;
@@ -225,11 +225,11 @@ bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 bool Cmd_GetSystemColorAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ScriptVar* rOut, * gOut, * bOut;
-	UInt32 type;
-	UInt8 color[3] = { 0, 0, 0 };
+	uint32_t type;
+	uint8_t color[3] = { 0, 0, 0 };
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &type, &rOut, &gOut, &bOut) && type > 0 && type <= 5) {
 		SystemColorManager* colorMgr = SystemColorManager::GetSingleton();
-		UInt32 color = (colorMgr->GetColor(type) >> 0x8);
+		uint32_t color = (colorMgr->GetColor(type) >> 0x8);
 		bOut->data = color & 0xFF;
 		gOut->data = (color >> 8) & 0xFF;
 		rOut->data = (color >> 16) & 0xFF;
@@ -238,10 +238,10 @@ bool Cmd_GetSystemColorAlt_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_GetSystemColor_Execute(COMMAND_ARGS) {
-	UInt32 type;
+	uint32_t type;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &type) && type > 0 && type <= 5) {
 		SystemColorManager* colorMgr = SystemColorManager::GetSingleton();
-		UInt32 color = (colorMgr->GetColor(type) >> 0x8);
+		uint32_t color = (colorMgr->GetColor(type) >> 0x8);
 		*result = color;
 		if (IsConsoleMode()) Console_Print("GetSystemColor %d >> 0x%X", type, color);
 	}
@@ -250,7 +250,7 @@ bool Cmd_GetSystemColor_Execute(COMMAND_ARGS) {
 
 bool Cmd_QueueObjectiveText_Execute(COMMAND_ARGS) {
 	char text[MAX_PATH] = {};
-	UInt32 isCompleted, allowDisplayMultiple;
+	uint32_t isCompleted, allowDisplayMultiple;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &text, &isCompleted, &allowDisplayMultiple)) {
 		CdeclCall(0x77A5B0, text, isCompleted, allowDisplayMultiple == 0);
@@ -273,8 +273,8 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS) {
 
 	char title[MAX_PATH], subtitle[MAX_PATH], soundEdid[MAX_PATH] = {};
 	*soundEdid = '\0';
-	UInt32 queuePriority = kPriorityAppend;
-	UInt32 justification = kJustifyLeft;
+	uint32_t queuePriority = kPriorityAppend;
+	uint32_t justification = kJustifyLeft;
 	int titleFont = -1, subTitleFont = -1;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &title, &subtitle, &soundEdid, &queuePriority, &justification, &titleFont, &subTitleFont)) {
@@ -289,7 +289,7 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS) {
 };
 
 bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
-	UInt32 isFemale = 0;
+	uint32_t isFemale = 0;
 	TESForm* form = nullptr;
 	char newPath[MAX_PATH] = {};
 	*result = 0;
@@ -308,7 +308,7 @@ bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectREFR* markerRef = ThisCall<TESObjectREFR*>(0x77A400, g_thePlayer);
 	if (markerRef) {
-		*(UInt32*)result = markerRef->refID;
+		*(uint32_t*)result = markerRef->refID;
 	}
 	return true;
 }
@@ -379,7 +379,7 @@ bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
-	UInt32 visFlags = 0;
+	uint32_t visFlags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &visFlags)) {
 		HUDMainMenu* hud = HUDMainMenu::GetSingleton();
 		if (hud) {

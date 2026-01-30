@@ -170,9 +170,9 @@ void PluginManager::DeInit(void)
 	m_plugins.clear();
 }
 
-UInt32 PluginManager::GetNumPlugins(void)
+uint32_t PluginManager::GetNumPlugins(void)
 {
-	UInt32	numPlugins = m_plugins.size();
+	uint32_t	numPlugins = m_plugins.size();
 
 	// is one currently loading?
 	if(s_currentLoadingPlugin) numPlugins++;
@@ -180,14 +180,14 @@ UInt32 PluginManager::GetNumPlugins(void)
 	return numPlugins;
 }
 
-UInt32 PluginManager::GetBaseOpcode(UInt32 idx)
+uint32_t PluginManager::GetBaseOpcode(uint32_t idx)
 {
 	return m_plugins[idx].baseOpcode;
 }
 
-PluginHandle PluginManager::LookupHandleFromBaseOpcode(UInt32 baseOpcode)
+PluginHandle PluginManager::LookupHandleFromBaseOpcode(uint32_t baseOpcode)
 {
-	UInt32	idx = 1;
+	uint32_t	idx = 1;
 
 	for(LoadedPluginList::iterator iter = m_plugins.begin(); iter != m_plugins.end(); ++iter)
 	{
@@ -223,7 +223,7 @@ PluginInfo * PluginManager::GetInfoFromHandle(PluginHandle handle)
 	return NULL;
 }
 
-PluginInfo * PluginManager::GetInfoFromBase(UInt32 baseOpcode)
+PluginInfo * PluginManager::GetInfoFromBase(uint32_t baseOpcode)
 {
 	PluginHandle	handle = LookupHandleFromBaseOpcode(baseOpcode);
 
@@ -301,7 +301,7 @@ bool PluginManager::RegisterTypedCommand(CommandInfo * _info, CommandReturnType 
 	return true;
 }
 
-void PluginManager::SetOpcodeBase(UInt32 opcode)
+void PluginManager::SetOpcodeBase(uint32_t opcode)
 {
 	_MESSAGE("SetOpcodeBase %08X", opcode);
 
@@ -338,7 +338,7 @@ void PluginManager::SetOpcodeBase(UInt32 opcode)
 	g_scriptCommands.SetCurID(opcode);
 }
 
-void * PluginManager::QueryInterface(UInt32 id)
+void * PluginManager::QueryInterface(uint32_t id)
 {
 	void	* result = NULL;
 
@@ -491,7 +491,7 @@ bool PluginManager::InstallPlugin(std::string pluginPath)
 
 void PluginManager::InstallPlugins(void)
 {
-	UInt32 nFound;
+	uint32_t nFound;
 
 	// avoid realloc
 	m_plugins.reserve(5);
@@ -564,9 +564,9 @@ enum
 struct MinVersionEntry
 {
 	const char	* name;
-	UInt32		minVersion;
+	uint32_t		minVersion;
 	const char	* reason;
-	UInt32		compatFlags;
+	uint32_t		compatFlags;
 };
 
 static const MinVersionEntry	kMinVersionList[] =
@@ -632,7 +632,7 @@ static PluginListeners s_pluginListeners;
 bool PluginManager::RegisterListener(PluginHandle listener, const char* sender, NVSEMessagingInterface::EventCallback handler)
 {
 	// because this can be called while plugins are loading, gotta make sure number of plugins hasn't increased
-	UInt32 numPlugins = g_pluginManager.GetNumPlugins() + 1;
+	uint32_t numPlugins = g_pluginManager.GetNumPlugins() + 1;
 	if (s_pluginListeners.size() < numPlugins)
 	{
 		s_pluginListeners.resize(numPlugins + 5);	// add some extra room to avoid unnecessary re-alloc
@@ -673,7 +673,7 @@ bool PluginManager::RegisterListener(PluginHandle listener, const char* sender, 
 	else
 	{
 		// register listener to every loaded plugin
-		UInt32 idx = 0;
+		uint32_t idx = 0;
 		for(PluginListeners::iterator iter = s_pluginListeners.begin(); iter != s_pluginListeners.end(); ++iter)
 		{
 			// don't add the listener to its own list
@@ -706,10 +706,10 @@ bool PluginManager::RegisterListener(PluginHandle listener, const char* sender, 
 	return true;
 }
 
-bool PluginManager::Dispatch_Message(PluginHandle sender, UInt32 messageType, void * data, UInt32 dataLen, const char* receiver)
+bool PluginManager::Dispatch_Message(PluginHandle sender, uint32_t messageType, void * data, uint32_t dataLen, const char* receiver)
 {
 	_DMESSAGE("dispatch message to plugin listeners");
-	UInt32 numRespondents = 0;
+	uint32_t numRespondents = 0;
 	PluginHandle target = kPluginHandle_Invalid;
 
 	if (!s_pluginListeners.size())	// no listeners yet registered
@@ -766,7 +766,7 @@ PluginHandle PluginManager::LookupHandleFromName(const char* pluginName)
 	if (!_stricmp("NVSE", pluginName))
 		return 0;
 
-	UInt32	idx = 1;
+	uint32_t	idx = 1;
 
 	for(LoadedPluginList::iterator iter = m_plugins.begin(); iter != m_plugins.end(); ++iter)
 	{
@@ -786,7 +786,7 @@ PluginHandle PluginManager::LookupHandleFromPath(const char* pluginPath)
 	if (!_stricmp("", pluginPath))
 		return 0;
 
-	UInt32	idx = 1;
+	uint32_t	idx = 1;
 
 	for(LoadedPluginList::iterator iter = m_plugins.begin(); iter != m_plugins.end(); ++iter)
 	{

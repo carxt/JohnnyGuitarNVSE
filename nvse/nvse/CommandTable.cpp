@@ -37,22 +37,22 @@ CommandTable g_scriptCommands;
 
 #if RUNTIME
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+#if 1
 
 // 1.4.0.525 runtime
-UInt32 g_offsetConsoleCommandsStart = 0x0118E8E0;
-UInt32 g_offsetConsoleCommandsLast = 0x011908C0;
-UInt32 g_offsetScriptCommandsStart = 0x01190910;
-UInt32 g_offsetScriptCommandsLast = 0x01196D10;
+uint32_t g_offsetConsoleCommandsStart = 0x0118E8E0;
+uint32_t g_offsetConsoleCommandsLast = 0x011908C0;
+uint32_t g_offsetScriptCommandsStart = 0x01190910;
+uint32_t g_offsetScriptCommandsLast = 0x01196D10;
 static const Cmd_Parse g_defaultParseCommand = (Cmd_Parse)0x005B1BA0;
 
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
 
 // 1.4.0.525 nogore runtime
-UInt32 g_offsetConsoleCommandsStart = 0x0118E8E0;
-UInt32 g_offsetConsoleCommandsLast = 0x011908C0;
-UInt32 g_offsetScriptCommandsStart = 0x01190910;
-UInt32 g_offsetScriptCommandsLast = 0x01196D10;
+uint32_t g_offsetConsoleCommandsStart = 0x0118E8E0;
+uint32_t g_offsetConsoleCommandsLast = 0x011908C0;
+uint32_t g_offsetScriptCommandsStart = 0x01190910;
+uint32_t g_offsetScriptCommandsLast = 0x01196D10;
 static const Cmd_Parse g_defaultParseCommand = (Cmd_Parse)0x005B1C40;
 
 #else
@@ -62,24 +62,24 @@ static const Cmd_Parse g_defaultParseCommand = (Cmd_Parse)0x005B1C40;
 #else
 
 // 1.4.0.518 editor
-UInt32 g_offsetConsoleCommandsStart = 0x00E9DB88;
-UInt32 g_offsetConsoleCommandsLast = 0x00E9FB90;
-UInt32 g_offsetScriptCommandsStart = 0x00E9FBB8;
-UInt32 g_offsetScriptCommandsLast = 0x00EA5FB8;
+uint32_t g_offsetConsoleCommandsStart = 0x00E9DB88;
+uint32_t g_offsetConsoleCommandsLast = 0x00E9FB90;
+uint32_t g_offsetScriptCommandsStart = 0x00E9FBB8;
+uint32_t g_offsetScriptCommandsLast = 0x00EA5FB8;
 static const Cmd_Parse g_defaultParseCommand = (Cmd_Parse)0x005C67E0;
 
 #endif
 
 struct PatchLocation
 {
-	UInt32	ptr;
-	UInt32	offset;
-	UInt32	type;
+	uint32_t	ptr;
+	uint32_t	offset;
+	uint32_t	type;
 };
 
 #if RUNTIME
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+#if 1
 
 static const PatchLocation kPatch_ScriptCommands_Start[] =
 {
@@ -132,14 +132,14 @@ static const PatchLocation kPatch_ScriptCommands_MaxIdx[] =
 	{	0x00593909 + 1, 0 },
 	{	0x005AEA57 + 6, 0 },
 	{	0x005B115B + 3, 0 },
-	{	0x005B19A0 + 3, (UInt32)(-0x1000) },
-	{	0x005BCBDD + 6, (UInt32)(-0x1000) },
+	{	0x005B19A0 + 3, (uint32_t)(-0x1000) },
+	{	0x005BCBDD + 6, (uint32_t)(-0x1000) },
 
 #if 0
 	// ### investigate this function
 	{	0x0067F0B8 + 3,	0 },
-	{	0x0067F0D5 + 3, (UInt32)(-0x1000) },
-	{	0x0067F0F4 + 3, (UInt32)(-0x1000) },
+	{	0x0067F0D5 + 3, (uint32_t)(-0x1000) },
+	{	0x0067F0F4 + 3, (uint32_t)(-0x1000) },
 #endif
 
 	{	0 },
@@ -198,8 +198,8 @@ static const PatchLocation kPatch_ScriptCommands_MaxIdx[] =
 	{	0x00593AF9 + 1, 0 },
 	{	0x005AEAF7 + 6, 0 },
 	{	0x005B11FB + 3, 0 },
-	{	0x005B1A40 + 3, (UInt32)(-0x1000) },
-	{	0x005BCC4D + 6, (UInt32)(-0x1000) },
+	{	0x005B1A40 + 3, (uint32_t)(-0x1000) },
+	{	0x005BCC4D + 6, (uint32_t)(-0x1000) },
 
 	{	0 },
 };
@@ -280,17 +280,17 @@ static const PatchLocation kPatch_ScriptCommands_End[] =
 // 280 / 1280 / 27F
 static const PatchLocation kPatch_ScriptCommands_MaxIdx[] =
 {
-	{	0x004A2B87 + 2,	(UInt32)(-0x1000) },
-	{	0x0059C576 + 2,	(UInt32)(-0x1000) },
+	{	0x004A2B87 + 2,	(uint32_t)(-0x1000) },
+	{	0x0059C576 + 2,	(uint32_t)(-0x1000) },
 	{	0x005B1817 + 1,	0 },
 	{	0x005C5370 + 6,	0 },
 
-	{	0x004A439D + 2, (UInt32)(-0x1000) - 1 },
-	{	0x004A43AD + 1, (UInt32)(-0x1000) - 1 },
-	{	0x004A43B9 + 2, (UInt32)(-0x1000) - 1 },
+	{	0x004A439D + 2, (uint32_t)(-0x1000) - 1 },
+	{	0x004A43AD + 1, (uint32_t)(-0x1000) - 1 },
+	{	0x004A43B9 + 2, (uint32_t)(-0x1000) - 1 },
 
-	{	0x005C6625 + 1,	(UInt32)(-0x1000) - 1 },
-	{	0x005C948B + 2,	(UInt32)(-0x1000) - 1 },
+	{	0x005C6625 + 1,	(uint32_t)(-0x1000) - 1 },
+	{	0x005C948B + 2,	(uint32_t)(-0x1000) - 1 },
 
 	{	0 },
 };
@@ -300,7 +300,7 @@ static const PatchLocation kPatch_ScriptCommands_MaxIdx[] =
 
 static void* OpCodeDataListFunc = (void*)OpCodeDataListAddress;
 
-int __fastcall hookOpCodeDataList(UInt32 ECX, UInt32 EDX, UInt32 opCode) {  // Replacement for the vanilla version that truncate opCode by 1000
+int __fastcall hookOpCodeDataList(uint32_t ECX, uint32_t EDX, uint32_t opCode) {  // Replacement for the vanilla version that truncate opCode by 1000
 	_asm {
 		mov eax, opCode
 		add eax, 0x01000
@@ -310,13 +310,13 @@ int __fastcall hookOpCodeDataList(UInt32 ECX, UInt32 EDX, UInt32 opCode) {  // R
 }
 
 void ApplyPatchEditorOpCodeDataList(void) {
-	SInt32 RelativeAddress = (UInt32)(&hookOpCodeDataList) - hookOpCodeDataListAddress - 5 /* EIP after instruction that we modify*/;
-	SafeWrite32(hookOpCodeDataListAddress+1, (UInt32)RelativeAddress);
+	int32_t RelativeAddress = (uint32_t)(&hookOpCodeDataList) - hookOpCodeDataListAddress - 5 /* EIP after instruction that we modify*/;
+	SafeWrite32(hookOpCodeDataListAddress+1, (uint32_t)RelativeAddress);
 }
 
 #endif
 
-static void ApplyPatch(const PatchLocation * patch, UInt32 newData)
+static void ApplyPatch(const PatchLocation * patch, uint32_t newData)
 {
 	for(; patch->ptr; ++patch)
 	{
@@ -343,7 +343,7 @@ bool Cmd_Default_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
-bool Cmd_Default_Parse(UInt32 numParams, ParamInfo * paramInfo, ScriptLineBuffer * lineBuf, ScriptBuffer * scriptBuf)
+bool Cmd_Default_Parse(uint32_t numParams, ParamInfo * paramInfo, ScriptLineBuffer * lineBuf, ScriptBuffer * scriptBuf)
 {
 	return g_defaultParseCommand(numParams, paramInfo, lineBuf, scriptBuf);
 }
@@ -420,7 +420,7 @@ bool Cmd_tcmd_Execute(COMMAND_ARGS)
 
 bool Cmd_tcmd2_Execute(COMMAND_ARGS)
 {
-	UInt32	arg;
+	uint32_t	arg;
 
 	_MESSAGE("tcmd2");
 
@@ -439,9 +439,9 @@ bool Cmd_tcmd2_Execute(COMMAND_ARGS)
 }
 
 class Dumper {
-	UInt32 m_sizeToDump;
+	uint32_t m_sizeToDump;
 public:
-	Dumper(UInt32 sizeToDump = 512) : m_sizeToDump(sizeToDump) {}
+	Dumper(uint32_t sizeToDump = 512) : m_sizeToDump(sizeToDump) {}
 	bool Accept(void *addr) {
 		if (addr) {
 			DumpClass(addr, m_sizeToDump);
@@ -473,10 +473,10 @@ bool Cmd_tcmd3_Execute(COMMAND_ARGS)
 	InterfaceManager* pIM = InterfaceManager::GetSingleton();
 //	DumpClass(pIM);
 
-//	UInt32 formID = 0x105228;
+//	uint32_t formID = 0x105228;
 //	TESForm* pLookedUp = LookupFormByID(formID);
 //	if(pLookedUp) {
-//		UInt32 addr = 0x011B9C2C;
+//		uint32_t addr = 0x011B9C2C;
 //		DumpClass((void*)pForm);
 //	}
 
@@ -497,9 +497,9 @@ bool Cmd_tcmd3_Execute(COMMAND_ARGS)
 //	MagicTarget* pTarget = DYNAMIC_CAST(pPC, PlayerCharacter, MagicTarget);
 //	if(pTarget) {
 //		EffectNode* pEffects = pTarget->GetEffectList();
-//		UInt32 cnt = pEffects->Count();
+//		uint32_t cnt = pEffects->Count();
 //		ActiveEffect* pEffect = pEffects->GetNthItem(1);
-//		UInt32 formID = 0x5C6C1;
+//		uint32_t formID = 0x5C6C1;
 //		TESForm* pForm = LookupFormByID(formID);
 //		EffectSetting* pSetting = DYNAMIC_CAST(pForm, TESForm, EffectSetting);
 //
@@ -544,7 +544,7 @@ void CommandTable::Init(void)
 {
 	static CommandInfo* kCmdInfo_Unused_1;
 #if RUNTIME
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+#if 1
 	kCmdInfo_Unused_1 = (CommandInfo*)0x0118E4F8;
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
 	kCmdInfo_Unused_1 = (CommandInfo*)0x0118E4F8;
@@ -564,7 +564,7 @@ void CommandTable::Init(void)
 	g_scriptCommands.Read((CommandInfo *)g_offsetScriptCommandsStart, (CommandInfo *)g_offsetScriptCommandsLast);
 
 	// blocktype "Unused_1" becomes "Function"
-	UInt16 onUnused_1Opcode = kCmdInfo_Unused_1->opcode;
+	uint16_t onUnused_1Opcode = kCmdInfo_Unused_1->opcode;
 	*kCmdInfo_Unused_1 = kCommandInfo_Function;
 	kCmdInfo_Unused_1->opcode = onUnused_1Opcode;
 
@@ -583,8 +583,8 @@ void CommandTable::Init(void)
 	// register plugins
 	g_pluginManager.Init();
 
-	ApplyPatch(kPatch_ScriptCommands_Start, (UInt32)g_scriptCommands.GetStart());
-	ApplyPatch(kPatch_ScriptCommands_End, (UInt32)g_scriptCommands.GetEnd());
+	ApplyPatch(kPatch_ScriptCommands_Start, (uint32_t)g_scriptCommands.GetStart());
+	ApplyPatch(kPatch_ScriptCommands_End, (uint32_t)g_scriptCommands.GetEnd());
 	ApplyPatch(kPatch_ScriptCommands_MaxIdx, g_scriptCommands.GetMaxID());
 
 	ApplyPatchEditorOpCodeDataList();
@@ -598,16 +598,16 @@ void CommandTable::Init(void)
 
 void CommandTable::Read(CommandInfo * start, CommandInfo * end)
 {
-	UInt32	numCommands = end - start;
+	uint32_t	numCommands = end - start;
 	m_commands.reserve(m_commands.size() + numCommands);
 
 	for(; start != end; ++start)
 		Add(start);
 }
 
-void CommandTable::Add(CommandInfo * info, CommandReturnType retnType, UInt32 parentPluginOpcodeBase)
+void CommandTable::Add(CommandInfo * info, CommandReturnType retnType, uint32_t parentPluginOpcodeBase)
 {
-	UInt32	backCommandID = m_baseID + m_commands.size();	// opcode of the next command to add
+	uint32_t	backCommandID = m_baseID + m_commands.size();	// opcode of the next command to add
 
 	info->opcode = m_curID;
 
@@ -636,7 +636,7 @@ void CommandTable::Add(CommandInfo * info, CommandReturnType retnType, UInt32 pa
 	metadata->returnType = retnType;
 }
 
-bool CommandTable::Replace(UInt32 opcodeToReplace, CommandInfo* replaceWith)
+bool CommandTable::Replace(uint32_t opcodeToReplace, CommandInfo* replaceWith)
 {
 	for (CommandList::iterator iter = m_commands.begin(); iter != m_commands.end(); ++iter)
 	{
@@ -666,7 +666,7 @@ static CommandInfo kPaddingCommand =
 	NULL
 };
 
-void CommandTable::PadTo(UInt32 id, CommandInfo * info)
+void CommandTable::PadTo(uint32_t id, CommandInfo * info)
 {
 	if(!info) info = &kPaddingCommand;
 
@@ -687,7 +687,7 @@ void CommandTable::Dump(void)
 		gLog.Indent();
 
 #if 0
-		for(UInt32 i = 0; i < iter->numParams; i++)
+		for(uint32_t i = 0; i < iter->numParams; i++)
 		{
 			ParamInfo	* param = &iter->params[i];
 			_DMESSAGE("%08X %08X %s", param->typeID, param->isOptional, param->typeStr);
@@ -708,7 +708,7 @@ void CommandTable::DumpAlternateCommandNames(void)
 	}
 }
 
-const char* SimpleStringForParamType(UInt32 paramType)
+const char* SimpleStringForParamType(uint32_t paramType)
 {
 	switch(paramType) {
 		case kParamType_String: return "string";
@@ -786,7 +786,7 @@ const char* SimpleStringForParamType(UInt32 paramType)
 	}
 }
 
-const char* StringForParamType(UInt32 paramType)
+const char* StringForParamType(uint32_t paramType)
 {
 	switch(paramType) {
 		case kParamType_String:				return "String";
@@ -868,7 +868,7 @@ const char* StringForParamType(UInt32 paramType)
 	}
 }
 
-void CommandTable::DumpCommandDocumentation(UInt32 startWithID)
+void CommandTable::DumpCommandDocumentation(uint32_t startWithID)
 {
 	_MESSAGE("NVSE Commands from: %#x", startWithID);
 
@@ -893,7 +893,7 @@ void CommandInfo::DumpDocs() const
 	_MESSAGE("<p><a name=\"%s\"></a><b>%s</b> ", longName, longName);
 	_MESSAGE("<br><b>Alias:</b> %s<br><b>Parameters:</b>%d", (strlen(shortName) != 0) ? shortName : "none", numParams);
 	if (numParams > 0) {
-		for(UInt32 i = 0; i < numParams; i++)
+		for(uint32_t i = 0; i < numParams; i++)
 		{
 			ParamInfo	* param = &params[i];
 			const char* paramTypeName = StringForParamType(param->typeID);
@@ -911,7 +911,7 @@ void CommandInfo::DumpFunctionDef() const
 {
 	_MESSAGE("<br>(FixMe) %s<a href=\"#%s\">%s</a> ", needsParent > 0 ? "reference." : "", longName, longName);
 	if (numParams > 0) {
-		for(UInt32 i = 0; i < numParams; i++)
+		for(uint32_t i = 0; i < numParams; i++)
 		{
 			ParamInfo	* param = &params[i];
 			const char* paramTypeName = StringForParamType(param->typeID);
@@ -935,7 +935,7 @@ CommandInfo * CommandTable::GetByName(const char * name)
 }
 
 
-CommandInfo* CommandTable::GetByOpcode(UInt32 opcode)
+CommandInfo* CommandTable::GetByOpcode(uint32_t opcode)
 {
 	// could do binary search here but padding command has opcode 0
 	for (CommandList::iterator iter = m_commands.begin(); iter != m_commands.end(); ++iter)
@@ -955,7 +955,7 @@ CommandReturnType CommandTable::GetReturnType(const CommandInfo* cmd)
 	return kRetnType_Default;
 }
 
-void CommandTable::SetReturnType(UInt32 opcode, CommandReturnType retnType)
+void CommandTable::SetReturnType(uint32_t opcode, CommandReturnType retnType)
 {
 	CommandInfo* cmdInfo = GetByOpcode(opcode);
 	if (!cmdInfo)
@@ -972,16 +972,16 @@ void CommandTable::RecordReleaseVersion(void)
 	m_opcodesByRelease.push_back(GetCurID());
 }
 
-UInt32 CommandTable::GetRequiredNVSEVersion(const CommandInfo* cmd)
+uint32_t CommandTable::GetRequiredNVSEVersion(const CommandInfo* cmd)
 {
-	UInt32  ver = 0;
+	uint32_t  ver = 0;
 	if (cmd) {
 		if (cmd->opcode < m_opcodesByRelease[0])	// vanilla cmd
 			ver = 0;
 		else if (cmd->opcode >= kNVSEOpcodeTest)	// plugin cmd, we have no way of knowing
 			ver = -1;
 		else {
-			for (UInt32 i = 0; i < m_opcodesByRelease.size(); i++) {
+			for (uint32_t i = 0; i < m_opcodesByRelease.size(); i++) {
 				if (cmd->opcode >= m_opcodesByRelease[i]) {
 					ver = i;
 				}
@@ -1625,7 +1625,7 @@ void CommandTable::AddCommandsV4()
 	ADD_CMD_RET(GetScopeModelPath, kRetnType_String);
 	ADD_CMD(SetScopeModelPath);
 
-	// 4.3 and 4.4 skîpped
+	// 4.3 and 4.4 skï¿½pped
 
 	// 4.5 beta 01 none added
 
@@ -1700,9 +1700,9 @@ void CommandTable::AddCommandsV4()
 namespace PluginAPI {
 	const CommandInfo* GetCmdTblStart() { return g_scriptCommands.GetStart(); }
 	const CommandInfo* GetCmdTblEnd() { return g_scriptCommands.GetEnd(); }
-	const CommandInfo* GetCmdByOpcode(UInt32 opcode) { return g_scriptCommands.GetByOpcode(opcode); }
+	const CommandInfo* GetCmdByOpcode(uint32_t opcode) { return g_scriptCommands.GetByOpcode(opcode); }
 	const CommandInfo* GetCmdByName(const char* name) { return g_scriptCommands.GetByName(name); }
-	UInt32 GetCmdRetnType(const CommandInfo* cmd) { return g_scriptCommands.GetReturnType(cmd); }
-	UInt32 GetReqVersion(const CommandInfo* cmd) { return g_scriptCommands.GetRequiredNVSEVersion(cmd); }
+	uint32_t GetCmdRetnType(const CommandInfo* cmd) { return g_scriptCommands.GetReturnType(cmd); }
+	uint32_t GetReqVersion(const CommandInfo* cmd) { return g_scriptCommands.GetRequiredNVSEVersion(cmd); }
 	const PluginInfo* GetCmdParentPlugin(const CommandInfo* cmd) { return g_scriptCommands.GetParentPlugin(cmd); }
 }

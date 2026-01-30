@@ -11,7 +11,7 @@
 #if RUNTIME
 
 #ifdef DBG_EXPR_LEAKS
-	SInt32 FUNCTION_CONTEXT_COUNT = 0;
+	int32_t FUNCTION_CONTEXT_COUNT = 0;
 #endif
 
 #include "GameData.h"
@@ -258,8 +258,8 @@ ScriptToken* Eval_Arithmetic(OperatorType op, ScriptToken* lh, ScriptToken* rh, 
 
 ScriptToken* Eval_Integer(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
-	SInt64 l = lh->GetNumber();
-	SInt64 r = rh->GetNumber();
+	int64_t l = lh->GetNumber();
+	int64_t r = rh->GetNumber();
 
 	switch (op)
 	{
@@ -296,7 +296,7 @@ ScriptToken* Eval_Assign_Numeric(OperatorType op, ScriptToken* lh, ScriptToken* 
 
 ScriptToken* Eval_Assign_String(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
-	UInt32 strID = lh->GetVar()->data;
+	uint32_t strID = lh->GetVar()->data;
 	StringVar* strVar = g_StringMap.Get(strID);
 	if (!strVar)
 	{
@@ -317,14 +317,14 @@ ScriptToken* Eval_Assign_AssignableString(OperatorType op, ScriptToken* lh, Scri
 
 ScriptToken* Eval_Assign_Form(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
-	UInt64* outRefID = (UInt64*)&(lh->GetVar()->data);
+	uint64_t* outRefID = (uint64_t*)&(lh->GetVar()->data);
 	*outRefID = rh->GetFormID();
 	return ScriptToken::CreateForm(rh->GetFormID());
 }
 
 ScriptToken* Eval_Assign_Form_Number(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
-	UInt64* outRefID = (UInt64*)&(lh->GetVar()->data);
+	uint64_t* outRefID = (uint64_t*)&(lh->GetVar()->data);
 	*outRefID = rh->GetFormID();
 	return ScriptToken::CreateForm(rh->GetFormID());
 }
@@ -466,7 +466,7 @@ ScriptToken* Eval_ExponentEquals_Global(OperatorType op, ScriptToken* lh, Script
 
 ScriptToken* Eval_PlusEquals_String(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
-	UInt32 strID = lh->GetVar()->data;
+	uint32_t strID = lh->GetVar()->data;
 	StringVar* strVar = g_StringMap.Get(strID);
 	if (!strVar)
 	{
@@ -481,7 +481,7 @@ ScriptToken* Eval_PlusEquals_String(OperatorType op, ScriptToken* lh, ScriptToke
 
 ScriptToken* Eval_TimesEquals_String(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
-	UInt32 strID = lh->GetVar()->data;
+	uint32_t strID = lh->GetVar()->data;
 	StringVar* strVar = g_StringMap.Get(strID);
 	if (!strVar)
 	{
@@ -494,8 +494,8 @@ ScriptToken* Eval_TimesEquals_String(OperatorType op, ScriptToken* lh, ScriptTok
 	std::string result = "";
 	if (rh->GetNumber() > 0)
 	{
-		UInt32 rhNum = rh->GetNumber();
-		for (UInt32 i = 0; i < rhNum; i++)
+		uint32_t rhNum = rh->GetNumber();
+		for (uint32_t i = 0; i < rhNum; i++)
 			result += str;
 	}
 
@@ -511,8 +511,8 @@ ScriptToken* Eval_Multiply_String_Number(OperatorType op, ScriptToken* lh, Scrip
 
 	if (rhNum > 0)
 	{
-		UInt32 times = rhNum;
-		for (UInt32 i =0; i < times; i++)
+		uint32_t times = rhNum;
+		for (uint32_t i =0; i < times; i++)
 			result += str;
 	}
 
@@ -619,7 +619,7 @@ ScriptToken* Eval_Subscript_Array_Number(OperatorType op, ScriptToken* lh, Scrip
 
 ScriptToken* Eval_Subscript_Elem_Number(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
-	UInt32 idx = rh->GetNumber();
+	uint32_t idx = rh->GetNumber();
 	return ScriptToken::Create(dynamic_cast<ArrayElementToken*>(lh), idx, idx);
 }
 
@@ -648,7 +648,7 @@ ScriptToken* Eval_Subscript_Array_String(OperatorType op, ScriptToken* lh, Scrip
 
 ScriptToken* Eval_Subscript_Array_Slice(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
-	UInt32 slicedID = g_ArrayMap.MakeSlice(lh->GetArray(), rh->GetSlice(), context->script->GetModIndex());
+	uint32_t slicedID = g_ArrayMap.MakeSlice(lh->GetArray(), rh->GetSlice(), context->script->GetModIndex());
 	if (!slicedID)
 	{
 		context->Error("Invalid array slice operation - array is uninitialized or supplied index does not match key type");
@@ -661,7 +661,7 @@ ScriptToken* Eval_Subscript_Array_Slice(OperatorType op, ScriptToken* lh, Script
 ScriptToken* Eval_Subscript_StringVar_Number(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
 	ScriptEventList::Var* var = lh->GetVar();
-	SInt32 idx = rh->GetNumber();
+	int32_t idx = rh->GetNumber();
 	if (var) {
 		StringVar* strVar = g_StringMap.Get(var->data);
 		if (!strVar) {
@@ -688,7 +688,7 @@ ScriptToken* Eval_Subscript_StringVar_Slice(OperatorType op, ScriptToken* lh, Sc
 		return NULL;
 	}
 
-	UInt32 len = strVar->GetLength();
+	uint32_t len = strVar->GetLength();
 	if (upper < 0) {
 		upper += len;
 	}
@@ -705,7 +705,7 @@ ScriptToken* Eval_Subscript_StringVar_Slice(OperatorType op, ScriptToken* lh, Sc
 
 ScriptToken* Eval_Subscript_String(OperatorType op, ScriptToken* lh, ScriptToken* rh, ExpressionEvaluator* context)
 {
-	UInt32 idx = (rh->GetNumber() < 0) ? strlen(lh->GetString()) + rh->GetNumber() : rh->GetNumber();
+	uint32_t idx = (rh->GetNumber() < 0) ? strlen(lh->GetString()) + rh->GetNumber() : rh->GetNumber();
 	if (idx < strlen(lh->GetString()))
 		return ScriptToken::Create(std::string(lh->GetString()).substr(idx, 1));
 	else
@@ -798,7 +798,7 @@ ScriptToken* Eval_In(OperatorType op, ScriptToken* lh, ScriptToken* rh, Expressi
 	{
 	case Script::eVarType_Array:
 		{
-			UInt32 iterID = g_ArrayMap.Create(kDataType_String, false, context->script->GetModIndex());
+			uint32_t iterID = g_ArrayMap.Create(kDataType_String, false, context->script->GetModIndex());
 			//g_ArrayMap.AddReference(&lh->GetVar()->data, iterID, context->script->GetModIndex());
 
 			ForEachContext con(rh->GetArray(), iterID, Script::eVarType_Array, lh->GetVar());
@@ -810,7 +810,7 @@ ScriptToken* Eval_In(OperatorType op, ScriptToken* lh, ScriptToken* rh, Expressi
 		}
 	case Script::eVarType_String:
 		{
-			UInt32 iterID = lh->GetVar()->data;
+			uint32_t iterID = lh->GetVar()->data;
 			StringVar* sv = g_StringMap.Get(iterID);
 			if (!sv)
 			{
@@ -818,7 +818,7 @@ ScriptToken* Eval_In(OperatorType op, ScriptToken* lh, ScriptToken* rh, Expressi
 				lh->GetVar()->data = iterID;
 			}
 
-			UInt32 srcID = g_StringMap.Add(context->script->GetModIndex(), rh->GetString(), true);
+			uint32_t srcID = g_StringMap.Add(context->script->GetModIndex(), rh->GetString(), true);
 			ForEachContext con(srcID, iterID, Script::eVarType_String, lh->GetVar());
 			ScriptToken* forEach = ScriptToken::Create(&con);
 			return forEach;
@@ -829,7 +829,7 @@ ScriptToken* Eval_In(OperatorType op, ScriptToken* lh, ScriptToken* rh, Expressi
 			if (!src && rh->GetTESForm() && (rh->GetTESForm()->refID == playerID) )
 				src = (TESObjectREFR*)LookupFormByID(playerRefID);
 			if (src) {
-				ForEachContext con((UInt32)src, 0, Script::eVarType_Ref, lh->GetVar());
+				ForEachContext con((uint32_t)src, 0, Script::eVarType_Ref, lh->GetVar());
 				ScriptToken* forEach = ScriptToken::Create(&con);
 				return forEach;
 			}
@@ -858,7 +858,7 @@ ScriptToken* Eval_Dereference(OperatorType op, ScriptToken* lh, ScriptToken* rh,
 		return NULL;
 	}
 
-	UInt32 size = g_ArrayMap.SizeOf(arrID);
+	uint32_t size = g_ArrayMap.SizeOf(arrID);
 	ArrayKey valueKey("value");
 	// is this a foreach iterator?
 	if (size == 2 && g_ArrayMap.HasKey(arrID, valueKey) && g_ArrayMap.HasKey(arrID, "key") && g_ArrayMap.HasKey(arrID, "value"))
@@ -1323,7 +1323,7 @@ ScriptToken Cmd_To_Number(ScriptToken* token, ExpressionEvaluator* context)
 
 ScriptToken Cmd_To_Form(ScriptToken* token, ExpressionEvaluator* context)
 {
-	return ScriptToken(*((UInt64*)(&token->value.num)), kTokenType_Form);
+	return ScriptToken(*((uint64_t*)(&token->value.num)), kTokenType_Form);
 }
 
 ScriptToken Cmd_To_Bool(ScriptToken* token, ExpressionEvaluator* context)
@@ -1429,7 +1429,7 @@ ScriptToken Elem_To_Number(ScriptToken* token, ExpressionEvaluator* context)
 
 ScriptToken Elem_To_Form(ScriptToken* token, ExpressionEvaluator* context)
 {
-	UInt32 formID;
+	uint32_t formID;
 	ArrayKey* key = token->Key();
 	if (!key || !g_ArrayMap.GetElementFormID(token->value.arrID, *key, &formID))
 		return ScriptToken::Bad();
@@ -1469,7 +1469,7 @@ ScriptToken Elem_To_Bool(ScriptToken* token, ExpressionEvaluator* context)
 
 ScriptToken RefVar_To_Form(ScriptToken* token, ExpressionEvaluator* context)
 {
-	return ScriptToken(*((UInt64*)(&token->value.var->data)), kTokenType_Form);
+	return ScriptToken(*((uint64_t*)(&token->value.var->data)), kTokenType_Form);
 }
 
 ScriptToken RefVar_To_Bool(ScriptToken* token, ExpressionEvaluator* context)
@@ -1516,7 +1516,7 @@ void ExpressionEvaluator::Error(const char* fmt, ...)
 	vsprintf_s(errorMsg, 0x400, fmt, args);
 
 	// include script data offset and command name/opcode
-	UInt16* opcodePtr = (UInt16*)((UInt8*)script->data + m_baseOffset);
+	uint16_t* opcodePtr = (uint16_t*)((uint8_t*)script->data + m_baseOffset);
 	CommandInfo* cmd = g_scriptCommands.GetByOpcode(*opcodePtr);
 
 	// include mod filename, save having to ask users to figure it out themselves
@@ -1539,7 +1539,7 @@ void ExpressionEvaluator::PrintStackTrace() {
 
 	ExpressionEvaluator* eval = this;
 	while (eval) {
-		CommandInfo* cmd = g_scriptCommands.GetByOpcode(*((UInt16*)((UInt8*)eval->script->data + eval->m_baseOffset)));
+		CommandInfo* cmd = g_scriptCommands.GetByOpcode(*((uint16_t*)((uint8_t*)eval->script->data + eval->m_baseOffset)));
 		sprintf_s(output, sizeof(output), "  %s @%04X script %08X", cmd ? cmd->longName : "<unknown>", eval->m_baseOffset, eval->script->refID);
 		_MESSAGE(output);
 		Console_Print(output);
@@ -1561,7 +1561,7 @@ void PrintCompiledCode(ScriptLineBuffer* buf)
 	std::string bytes;
 	char byte[5];
 
-	for (UInt32 i = 0; i < buf->dataOffset; i++)
+	for (uint32_t i = 0; i < buf->dataOffset; i++)
 	{
 		if (isprint(buf->dataBuf[i]))
 			sprintf_s(byte, 4, "%c", buf->dataBuf[i]);
@@ -1579,7 +1579,7 @@ void PrintCompiledCode(ScriptLineBuffer* buf)
 // Not particularly fond of this but it's become necessary to distinguish between a parser which is parsing part of a larger
 // expression and one parsing an entire script line.
 // Threading not a concern in script editor; ExpressionParser not used at run-time.
-static SInt32 s_parserDepth = 0;
+static int32_t s_parserDepth = 0;
 
 ExpressionParser::ExpressionParser(ScriptBuffer* scriptBuf, ScriptLineBuffer* lineBuf) 
 	: m_scriptBuf(scriptBuf), m_lineBuf(lineBuf), m_len(strlen(m_lineBuf->paramText)), m_numArgsParsed(0)
@@ -1595,16 +1595,16 @@ ExpressionParser::~ExpressionParser()
 	s_parserDepth--;
 }
 
-bool ExpressionParser::ParseArgs(ParamInfo* params, UInt32 numParams, bool bUsesNVSEParamTypes)
+bool ExpressionParser::ParseArgs(ParamInfo* params, uint32_t numParams, bool bUsesNVSEParamTypes)
 {
-	// reserve space for UInt8 numargs at beginning of compiled code
-	UInt8* numArgsPtr = m_lineBuf->dataBuf + m_lineBuf->dataOffset;
+	// reserve space for uint8_t numargs at beginning of compiled code
+	uint8_t* numArgsPtr = m_lineBuf->dataBuf + m_lineBuf->dataOffset;
 	m_lineBuf->dataOffset += 1;
 
 	// see if args are enclosed in {braces}, if so don't parse beyond closing brace
-	UInt32 argsEndPos = m_len;
+	uint32_t argsEndPos = m_len;
 	char ch = 0;
-	UInt32 i = 0;
+	uint32_t i = 0;
 
 	while ((ch = Peek(Offset())))
 	{
@@ -1613,8 +1613,8 @@ bool ExpressionParser::ParseArgs(ParamInfo* params, UInt32 numParams, bool bUses
 
 		Offset()++;		
 	}
-	UInt32 offset = Offset();
-	UInt32 endOffset = argsEndPos;
+	uint32_t offset = Offset();
+	uint32_t endOffset = argsEndPos;
 
 	if ('{' == Peek(Offset())) // restrict parsing to the enclosed text
 		while ((ch = Peek(Offset())))
@@ -1624,7 +1624,7 @@ bool ExpressionParser::ParseArgs(ParamInfo* params, UInt32 numParams, bool bUses
 				offset++;
 				Offset()++;
 
-				UInt32 bracketEndPos = MatchOpenBracket(&s_operators[kOpType_LeftBrace]);
+				uint32_t bracketEndPos = MatchOpenBracket(&s_operators[kOpType_LeftBrace]);
 				if (bracketEndPos == -1)
 				{
 					Message(kError_MismatchedBrackets);
@@ -1652,7 +1652,7 @@ bool ExpressionParser::ParseArgs(ParamInfo* params, UInt32 numParams, bool bUses
 		Offset()++;		
 	}
 
-	UInt8* dataStart = m_lineBuf->dataBuf + m_lineBuf->dataOffset;
+	uint8_t* dataStart = m_lineBuf->dataBuf + m_lineBuf->dataOffset;
 
 	while (m_numArgsParsed < numParams && Offset() < argsEndPos)
 	{
@@ -1682,7 +1682,7 @@ bool ExpressionParser::ParseArgs(ParamInfo* params, UInt32 numParams, bool bUses
 		m_argTypes[m_numArgsParsed++] = argType;
 
 		// store expr length for this arg
-		*((UInt16*)dataStart) = (m_lineBuf->dataBuf + m_lineBuf->dataOffset) - dataStart;
+		*((uint16_t*)dataStart) = (m_lineBuf->dataBuf + m_lineBuf->dataOffset) - dataStart;
 		dataStart = m_lineBuf->dataBuf + m_lineBuf->dataOffset;
 	}
 
@@ -1696,8 +1696,8 @@ bool ExpressionParser::ParseArgs(ParamInfo* params, UInt32 numParams, bool bUses
 		Offset() = endOffset + 1;
 
 	// did we get all required args?
-	UInt32 numExpectedArgs = 0;
-	for (UInt32 i = 0; i < numParams && !params[i].isOptional; i++)
+	uint32_t numExpectedArgs = 0;
+	for (uint32_t i = 0; i < numParams && !params[i].isOptional; i++)
 		numExpectedArgs++;
 
 	if (numExpectedArgs > m_numArgsParsed)
@@ -1712,7 +1712,7 @@ bool ExpressionParser::ParseArgs(ParamInfo* params, UInt32 numParams, bool bUses
 	return true;
 }
 
-bool ExpressionParser::ValidateArgType(UInt32 paramType, Token_Type argType, bool bIsNVSEParam)
+bool ExpressionParser::ValidateArgType(uint32_t paramType, Token_Type argType, bool bIsNVSEParam)
 {
 	if (bIsNVSEParam) {
 		bool bTypesMatch = false;
@@ -1720,7 +1720,7 @@ bool ExpressionParser::ValidateArgType(UInt32 paramType, Token_Type argType, boo
 			bTypesMatch = true;
 		else		// ###TODO: this could probably done with bitwise AND much more efficiently
 		{
-			for (UInt32 i = 0; i < kTokenType_Max; i++)
+			for (uint32_t i = 0; i < kTokenType_Max; i++)
 			{
 				if (paramType & (1 << i))
 				{
@@ -1795,7 +1795,7 @@ static ParamInfo kParams_DefaultUserFunctionParams[] =
 };
 
 // records version of bytecode representation to avoid problems if representation changes later
-static const UInt8 kUserFunction_Version = 1;
+static const uint8_t kUserFunction_Version = 1;
 
 bool GetUserFunctionParams(const std::string& scriptText, std::vector<UserFunctionParam> &outParams, Script::VarInfoEntry* varList)
 {
@@ -1810,8 +1810,8 @@ bool GetUserFunctionParams(const std::string& scriptText, std::vector<UserFuncti
 		{
 			if (!_stricmp(token.c_str(), "begin"))
 			{
-				UInt32 argStartPos = lineText.find("{");
-				UInt32 argEndPos = lineText.find("}");
+				uint32_t argStartPos = lineText.find("{");
+				uint32_t argEndPos = lineText.find("}");
 				if (argStartPos == -1 || argEndPos == -1 || (argStartPos > argEndPos))
 					return false;
 
@@ -1823,12 +1823,12 @@ bool GetUserFunctionParams(const std::string& scriptText, std::vector<UserFuncti
 					if (!varInfo)
 						return false;
 
-					UInt32 varType = GetDeclaredVariableType(token.c_str(), scriptText.c_str());
+					uint32_t varType = GetDeclaredVariableType(token.c_str(), scriptText.c_str());
 					if (varType == Script::eVarType_Invalid)
 						return false;
 
 					// make sure user isn't trying to use a var more than once as a param
-					for (UInt32 i = 0; i < outParams.size(); i++)
+					for (uint32_t i = 0; i < outParams.size(); i++)
 						if (outParams[i].varIdx == varInfo->idx)
 							return false;
 
@@ -1856,28 +1856,28 @@ static ParamInfo kDynamicParams[] =
 DynamicParamInfo::DynamicParamInfo(std::vector<UserFunctionParam> &params)
 {
 	m_numParams = params.size() > kMaxParams ? kMaxParams : params.size();
-	for (UInt32 i = 0; i < m_numParams && i < kMaxParams; i++)
+	for (uint32_t i = 0; i < m_numParams && i < kMaxParams; i++)
 		m_paramInfo[i] = kDynamicParams[params[i].varType];
 }
 
 bool ExpressionParser::ParseUserFunctionCall()
 {
 	// bytecode (version 0):
-	//	UInt8		version
+	//	uint8_t		version
 	//	RefToken	function script
-	//	UInt8		numArgs			<- written by ParseArgs()
+	//	uint8_t		numArgs			<- written by ParseArgs()
 	//	ScriptToken	args[numArgs]	<- as above
 
 	// bytecode (version 1, 0019 beta 1):
-	//	UInt8		version
+	//	uint8_t		version
 	//	Expression	function script	<- modified to accept e.g. scripts stored in arrays
-	//	UInt8		numArgs
+	//	uint8_t		numArgs
 	//	ScriptToken args[numArgs]
 
 	// write version
 	m_lineBuf->WriteByte(kUserFunction_Version);
 
-	UInt32 paramLen = strlen(m_lineBuf->paramText);
+	uint32_t paramLen = strlen(m_lineBuf->paramText);
 
 	// parse function object
 	while (isspace(Peek()))
@@ -1890,12 +1890,12 @@ bool ExpressionParser::ParseUserFunctionCall()
 		}
 	}
 
-	UInt32 peekLen = 0;
+	uint32_t peekLen = 0;
 	bool foundFunc = false;
 	Script* funcScript = NULL;
 	ScriptToken* funcForm = PeekOperand(peekLen);
-	UInt16* savedLenPtr = (UInt16*)(m_lineBuf->dataBuf + m_lineBuf->dataOffset);
-	UInt16 startingOffset = m_lineBuf->dataOffset;
+	uint16_t* savedLenPtr = (uint16_t*)(m_lineBuf->dataBuf + m_lineBuf->dataOffset);
+	uint16_t startingOffset = m_lineBuf->dataOffset;
 	m_lineBuf->dataOffset += 2;
 
 	if (!funcForm)
@@ -1959,7 +1959,7 @@ bool ExpressionParser::ParseUserFunctionCall()
 	else	// using refVar as function pointer, use default params
 	{
 		ParamInfo* params = kParams_DefaultUserFunctionParams;
-		UInt32 numParams = NUM_PARAMS(kParams_DefaultUserFunctionParams);
+		uint32_t numParams = NUM_PARAMS(kParams_DefaultUserFunctionParams);
 
 		bParsed = ParseArgs(params, numParams);
 	}
@@ -1975,11 +1975,11 @@ bool ExpressionParser::ParseUserFunctionDefinition()
 	//	-only one script block (function definition) in script
 
 	// bytecode (versions 0 and 1):
-	//	UInt8				version
-	//	UInt8				numParams
-	//	UserFunctionParam	params[numParams]			{ UInt16 varIdx; UInt8 varType }
-	//	UInt8				numLocalArrayVars
-	//	UInt16				localArrayVarIndexes[numLocalArrayVars]
+	//	uint8_t				version
+	//	uint8_t				numParams
+	//	UserFunctionParam	params[numParams]			{ uint16_t varIdx; uint8_t varType }
+	//	uint8_t				numLocalArrayVars
+	//	uint16_t				localArrayVarIndexes[numLocalArrayVars]
 
 	// write version
 	m_lineBuf->WriteByte(kUserFunction_Version);
@@ -2003,12 +2003,12 @@ bool ExpressionParser::ParseUserFunctionDefinition()
 	// determine which if any local variables must be destroyed on function exit (string and array vars)
 	// ensure no variables declared after function definition
 	// ensure only one Begin block in script
-	UInt32 offset = 0;
+	uint32_t offset = 0;
 	bool bFoundBegin = false;
-	UInt32 endPos = 0;
+	uint32_t endPos = 0;
 	std::string scrText = m_scriptBuf->scriptText;
 
-	std::vector<UInt16> arrayVarIndexes;
+	std::vector<uint16_t> arrayVarIndexes;
 
 	std::string lineText;
 	Tokenizer lines(scrText.c_str(), "\r\n");
@@ -2061,7 +2061,7 @@ bool ExpressionParser::ParseUserFunctionDefinition()
 	
 	// write destructible var info
 	m_lineBuf->WriteByte(arrayVarIndexes.size());
-	for (UInt32 i = 0; i < arrayVarIndexes.size(); i++)
+	for (uint32_t i = 0; i < arrayVarIndexes.size(); i++)
 	{
 		m_lineBuf->Write16(arrayVarIndexes[i]);
 	}
@@ -2075,12 +2075,12 @@ bool ExpressionParser::ParseUserFunctionDefinition()
 
 Token_Type ExpressionParser::Parse()
 {
-	UInt8* dataStart = m_lineBuf->dataBuf + m_lineBuf->dataOffset;
+	uint8_t* dataStart = m_lineBuf->dataBuf + m_lineBuf->dataOffset;
 	m_lineBuf->dataOffset += 2;
 
 	Token_Type result = ParseSubExpression(m_len);
 
-	*((UInt16*)dataStart) = (m_lineBuf->dataBuf + m_lineBuf->dataOffset) - dataStart;
+	*((uint16_t*)dataStart) = (m_lineBuf->dataBuf + m_lineBuf->dataOffset) - dataStart;
 
 	//PrintCompiledCode(m_lineBuf);
 	return result;
@@ -2119,7 +2119,7 @@ static ErrOutput::Message s_expressionErrors[] =
 
 ErrOutput::Message * ExpressionParser::s_Messages = s_expressionErrors;
 
-void ExpressionParser::Message(UInt32 errorCode, ...)
+void ExpressionParser::Message(uint32_t errorCode, ...)
 {
 	errorCode = errorCode > kError_Max ? kError_Max : errorCode;
 	va_list args;
@@ -2142,13 +2142,13 @@ void ExpressionParser::Message(UInt32 errorCode, ...)
 	va_end(args);
 }
 
-UInt32	ExpressionParser::MatchOpenBracket(Operator* openBracOp)
+uint32_t	ExpressionParser::MatchOpenBracket(Operator* openBracOp)
 {
 	char closingBrac = openBracOp->GetMatchedBracket();
 	char openBrac = openBracOp->symbol[0];
-	UInt32 openBracCount = 1;
+	uint32_t openBracCount = 1;
 	const char* text = Text();
-	UInt32 i;
+	uint32_t i;
 	for (i = Offset(); i < m_len && text[i]; i++)
 	{
 		if (text[i] == openBrac)
@@ -2163,12 +2163,12 @@ UInt32	ExpressionParser::MatchOpenBracket(Operator* openBracOp)
 	return openBracCount ? -1 : i;
 }
 
-Token_Type ExpressionParser::ParseSubExpression(UInt32 exprLen)
+Token_Type ExpressionParser::ParseSubExpression(uint32_t exprLen)
 {
 	std::stack<Operator*> ops;
 	std::stack<Token_Type> operands;
 
-	UInt32 exprEnd = Offset() + exprLen;
+	uint32_t exprEnd = Offset() + exprLen;
 	bool bLastTokenWasOperand = false;	// if this is true, we expect binary operator, else unary operator or an operand
 
 	char ch;
@@ -2199,7 +2199,7 @@ Token_Type ExpressionParser::ParseSubExpression(UInt32 exprLen)
 					ops.push(op);
 				}
 
-				UInt32 endBracPos = MatchOpenBracket(op);
+				uint32_t endBracPos = MatchOpenBracket(op);
 				if (endBracPos == -1)
 				{
 					Message(kError_MismatchedBrackets);
@@ -2394,7 +2394,7 @@ Operator* ExpressionParser::ParseOperator(bool bExpectBinaryOperator, bool bCons
 		return NULL;
 	}
 
-	for (UInt32 i = 0; i < kOpType_Max; i++)
+	for (uint32_t i = 0; i < kOpType_Max; i++)
 	{
 		Operator* curOp = &s_operators[i];
 		if (bExpectBinaryOperator)
@@ -2428,7 +2428,7 @@ Operator* ExpressionParser::ParseOperator(bool bExpectBinaryOperator, bool bCons
 	}
 	else			// definitely single-character
 	{
-		for (UInt32 i = 0; i < ops.size(); i++)
+		for (uint32_t i = 0; i < ops.size(); i++)
 		{
 			if (ops[i]->symbol[1] == 0)
 			{
@@ -2450,7 +2450,7 @@ Operator* ExpressionParser::ParseOperator(bool bExpectBinaryOperator, bool bCons
 // format a string argument
 static void FormatString(std::string& str)
 {
-	UInt32 pos = 0;
+	uint32_t pos = 0;
 
 	while (((pos = str.find('%', pos)) != -1) && pos < str.length() - 1)
 	{
@@ -2479,9 +2479,9 @@ static void FormatString(std::string& str)
 	}
 }
 
-ScriptToken* ExpressionParser::PeekOperand(UInt32& outReadLen)
+ScriptToken* ExpressionParser::PeekOperand(uint32_t& outReadLen)
 {
-	UInt32 curOffset = Offset();
+	uint32_t curOffset = Offset();
 	ScriptToken* operand = ParseOperand();
 	outReadLen = Offset() - curOffset;
 	Offset() = curOffset;
@@ -2543,8 +2543,8 @@ ScriptToken* ExpressionParser::ParseOperand(Operator* curOp)
 
 	// check for a calling object
 	Script::RefVariable* callingObj = NULL;
-	UInt16 refIdx = 0;
-	UInt32 dotPos = token.find('.');
+	uint16_t refIdx = 0;
+	uint32_t dotPos = token.find('.');
 	if (dotPos != -1)
 	{
 		refToken = token.substr(0, dotPos);
@@ -2618,7 +2618,7 @@ ScriptToken* ExpressionParser::ParseOperand(Operator* curOp)
 	}
 	else if (varInfo)
 	{
-		UInt8 theVarType = m_scriptBuf->GetVariableType(varInfo, refVar);
+		uint8_t theVarType = m_scriptBuf->GetVariableType(varInfo, refVar);
 		if (bExpectStringVar && theVarType != Script::eVarType_String)
 		{
 			Message(kError_ExpectedStringVariable);
@@ -2652,17 +2652,17 @@ ScriptToken* ExpressionParser::ParseOperand(Operator* curOp)
 bool ExpressionParser::ParseFunctionCall(CommandInfo* cmdInfo)
 {
 	// trick Cmd_Parse into thinking it is parsing the only command on this line
-	UInt32 oldOffset = Offset();
-	UInt32 oldOpcode = m_lineBuf->cmdOpcode;
-	UInt16 oldCallingRefIdx = m_lineBuf->callingRefIndex;
+	uint32_t oldOffset = Offset();
+	uint32_t oldOpcode = m_lineBuf->cmdOpcode;
+	uint16_t oldCallingRefIdx = m_lineBuf->callingRefIndex;
 
 	// reserve space to record total # of bytes used for cmd args
-	UInt16 oldDataOffset = m_lineBuf->dataOffset;
-	UInt16* argsLenPtr = (UInt16*)(m_lineBuf->dataBuf + m_lineBuf->dataOffset);
+	uint16_t oldDataOffset = m_lineBuf->dataOffset;
+	uint16_t* argsLenPtr = (uint16_t*)(m_lineBuf->dataBuf + m_lineBuf->dataOffset);
 	m_lineBuf->dataOffset += 2;
 
 	// save the original paramText, overwrite with params following this function call
-	UInt32 oldLineLength = m_lineBuf->paramTextLen;
+	uint32_t oldLineLength = m_lineBuf->paramTextLen;
 	char oldLineText[0x200];
 	memcpy(oldLineText, m_lineBuf->paramText, 0x200);
 	memset(m_lineBuf->paramText, 0, 0x200);
@@ -2753,44 +2753,44 @@ void ShowRuntimeError(Script* script, const char* fmt, ...)
 	ExpressionEvaluator
 **********************************/
 
-UInt8 ExpressionEvaluator::ReadByte()
+uint8_t ExpressionEvaluator::ReadByte()
 {
-	UInt8 byte = *Data();
+	uint8_t byte = *Data();
 	Data()++;
 	return byte;
 }
 
-SInt8 ExpressionEvaluator::ReadSignedByte()
+int8_t ExpressionEvaluator::ReadSignedByte()
 {
-	SInt8 byte = *((SInt8*)Data());
+	int8_t byte = *((int8_t*)Data());
 	Data()++;
 	return byte;
 }
 
-UInt16 ExpressionEvaluator::Read16()
+uint16_t ExpressionEvaluator::Read16()
 {
-	UInt16 data = *((UInt16*)Data());
+	uint16_t data = *((uint16_t*)Data());
 	Data() += 2;
 	return data;
 }
 
-SInt16 ExpressionEvaluator::ReadSigned16()
+int16_t ExpressionEvaluator::ReadSigned16()
 {
-	SInt16 data = *((SInt16*)Data());
+	int16_t data = *((int16_t*)Data());
 	Data() += 2;
 	return data;
 }
 
-UInt32 ExpressionEvaluator::Read32()
+uint32_t ExpressionEvaluator::Read32()
 {
-	UInt32 data = *((UInt32*)Data());
+	uint32_t data = *((uint32_t*)Data());
 	Data() += 4;
 	return data;
 }
 
-SInt32 ExpressionEvaluator::ReadSigned32()
+int32_t ExpressionEvaluator::ReadSigned32()
 {
-	SInt32 data = *((SInt32*)Data());
+	int32_t data = *((int32_t*)Data());
 	Data() += 4;
 	return data;
 }
@@ -2804,7 +2804,7 @@ double ExpressionEvaluator::ReadFloat()
 
 std::string ExpressionEvaluator::ReadString()
 {
-	UInt16 len = Read16();
+	uint16_t len = Read16();
 	char* buf = new char[len + 1];
 	memcpy(buf, Data(), len);
 	buf[len] = 0;
@@ -2825,10 +2825,10 @@ void ExpressionEvaluator::PushOnStack()
 	if (top) {
 		// figure out base offset into script data
 		if (top->script == script) {
-			m_baseOffset = top->m_data - (UInt8*)script->data - 4;
+			m_baseOffset = top->m_data - (uint8_t*)script->data - 4;
 		}
 		else {	// non-recursive user-defined function call
-			m_baseOffset = m_data - (UInt8*)script->data - 4;
+			m_baseOffset = m_data - (uint8_t*)script->data - 4;
 		}
 
 		// inherit flags
@@ -2855,7 +2855,7 @@ ExpressionEvaluator::ExpressionEvaluator(COMMAND_ARGS) : m_opcodeOffsetPtr(opcod
 	m_thisObj(thisObj), script(scriptObj), eventList(eventList), m_params(paramInfo), m_numArgsExtracted(0), m_baseOffset(0),
 	m_expectedReturnType(kRetnType_Default)
 {
-	m_scriptData = (UInt8*)scriptData;
+	m_scriptData = (uint8_t*)scriptData;
 	m_data = m_scriptData + *m_opcodeOffsetPtr;
 
 	memset(m_args, 0, sizeof(m_args));
@@ -2872,14 +2872,14 @@ ExpressionEvaluator::~ExpressionEvaluator()
 {
 	PopFromStack();
 
-	for (UInt32 i = 0; i < kMaxArgs; i++)
+	for (uint32_t i = 0; i < kMaxArgs; i++)
 		delete m_args[i];
 }
 
 bool ExpressionEvaluator::ExtractArgs()
 {
-	UInt32 numArgs = ReadByte();
-	UInt32 curArg = 0;
+	uint32_t numArgs = ReadByte();
+	uint32_t curArg = 0;
 
 	if (extraTraces)
 		gLog.Indent();
@@ -2911,7 +2911,7 @@ bool ExpressionEvaluator::ExtractArgs()
 bool ExpressionEvaluator::ExtractDefaultArgs(va_list varArgs, bool bConvertTESForms)
 {
 	if (ExtractArgs()) {
-		for (UInt32 i = 0; i < NumArgs(); i++) {
+		for (uint32_t i = 0; i < NumArgs(); i++) {
 			ScriptToken* arg = Arg(i);
 			ParamInfo* info = &m_params[i];
 			if (!ConvertDefaultArg(arg, info, bConvertTESForms, varArgs)) {
@@ -2930,7 +2930,7 @@ bool ExpressionEvaluator::ExtractDefaultArgs(va_list varArgs, bool bConvertTESFo
 class OverriddenScriptFormatStringArgs : public FormatStringArgs
 {
 public:
-	OverriddenScriptFormatStringArgs(ExpressionEvaluator* eval, UInt32 fmtStringPos) : m_eval(eval), m_curArgIndex(fmtStringPos+1) { 
+	OverriddenScriptFormatStringArgs(ExpressionEvaluator* eval, uint32_t fmtStringPos) : m_eval(eval), m_curArgIndex(fmtStringPos+1) { 
 		m_fmtString = m_eval->Arg(fmtStringPos)->GetString();
 	}
 
@@ -2956,18 +2956,18 @@ public:
 		}
 	}
 			
-	virtual bool SkipArgs(UInt32 numToSkip) { m_curArgIndex += numToSkip; return m_curArgIndex <= m_eval->NumArgs(); }
+	virtual bool SkipArgs(uint32_t numToSkip) { m_curArgIndex += numToSkip; return m_curArgIndex <= m_eval->NumArgs(); }
 	virtual bool HasMoreArgs() { return m_curArgIndex < m_eval->NumArgs(); }
 	virtual std::string GetFormatString() { return m_fmtString; }
 
-	UInt32 GetCurArgIndex() const { return m_curArgIndex; }
+	uint32_t GetCurArgIndex() const { return m_curArgIndex; }
 private:
 	ExpressionEvaluator		* m_eval;
-	UInt32					m_curArgIndex;
+	uint32_t					m_curArgIndex;
 	const char*				m_fmtString;
 };
 
-bool ExpressionEvaluator::ExtractFormatStringArgs(va_list varArgs, UInt32 fmtStringPos, char* fmtStringOut, UInt32 maxParams)
+bool ExpressionEvaluator::ExtractFormatStringArgs(va_list varArgs, uint32_t fmtStringPos, char* fmtStringOut, uint32_t maxParams)
 {
 	// first simply evaluate all arguments, whether intended for fmt string or cmd args
 	if (ExtractArgs()) {
@@ -2977,7 +2977,7 @@ bool ExpressionEvaluator::ExtractFormatStringArgs(va_list varArgs, UInt32 fmtStr
 		}
 
 		// convert and store any cmd args preceding fmt string
-		for (UInt32 i = 0; i < fmtStringPos; i++) {
+		for (uint32_t i = 0; i < fmtStringPos; i++) {
 			if (!ConvertDefaultArg(Arg(i), &m_params[i], false, varArgs)) {
 				return false;
 			}
@@ -2993,9 +2993,9 @@ bool ExpressionEvaluator::ExtractFormatStringArgs(va_list varArgs, UInt32 fmtStr
 		OverriddenScriptFormatStringArgs fmtArgs(this, fmtStringPos);
 		if (ExtractFormattedString(fmtArgs, fmtStringOut)) {
 			// convert and store any remaining cmd args
-			UInt32 trailingArgsOffset = fmtArgs.GetCurArgIndex();
+			uint32_t trailingArgsOffset = fmtArgs.GetCurArgIndex();
 			if (trailingArgsOffset < NumArgs()) {
-				for (UInt32 i = trailingArgsOffset; i < NumArgs(); i++) {
+				for (uint32_t i = trailingArgsOffset; i < NumArgs(); i++) {
 					// adjust index into params to account for 20 'variable' args to format string.
 					if (!ConvertDefaultArg(Arg(i), &m_params[fmtStringPos+SIZEOF_FMT_STRING_PARAMS+(i-trailingArgsOffset)], false, varArgs)) {
 						return false;
@@ -3018,7 +3018,7 @@ bool ExpressionEvaluator::ConvertDefaultArg(ScriptToken* arg, ParamInfo* info, b
 	{
 		case kParamType_Array: 
 			{
-				UInt32* out = va_arg(varArgs, UInt32*);
+				uint32_t* out = va_arg(varArgs, uint32_t*);
 				*out = arg->GetArray();
 			}
 
@@ -3026,7 +3026,7 @@ bool ExpressionEvaluator::ConvertDefaultArg(ScriptToken* arg, ParamInfo* info, b
 		case kParamType_Integer:
 			// handle string_var passed as integer to sv_* cmds
 			if (arg->CanConvertTo(kTokenType_StringVar) && arg->GetVar()) {
-				UInt32* out = va_arg(varArgs, UInt32*);
+				uint32_t* out = va_arg(varArgs, uint32_t*);
 				*out = arg->GetVar()->data;
 				break;
 			}
@@ -3040,7 +3040,7 @@ bool ExpressionEvaluator::ConvertDefaultArg(ScriptToken* arg, ParamInfo* info, b
 		case kParamType_EquipType:
 		case kParamType_CriticalStage:
 			if (arg->CanConvertTo(kTokenType_Number)) {
-				UInt32* out = va_arg(varArgs, UInt32*);
+				uint32_t* out = va_arg(varArgs, uint32_t*);
 				*out = arg->GetNumber();
 			}
 			else {
@@ -3086,9 +3086,9 @@ bool ExpressionEvaluator::ConvertDefaultArg(ScriptToken* arg, ParamInfo* info, b
 			break;
 		case kParamType_ActorValue:
 			{
-				UInt32 actorVal = arg->GetActorValue();
+				uint32_t actorVal = arg->GetActorValue();
 				if (actorVal != eActorVal_NoActorValue) {
-					UInt32* out = va_arg(varArgs, UInt32*);
+					uint32_t* out = va_arg(varArgs, uint32_t*);
 					*out = actorVal;
 				}
 				else {
@@ -3098,9 +3098,9 @@ bool ExpressionEvaluator::ConvertDefaultArg(ScriptToken* arg, ParamInfo* info, b
 			break;
 		//case kParamType_AnimationGroup:
 		//	{
-		//		UInt32 animGroup = arg->GetAnimGroup();
+		//		uint32_t animGroup = arg->GetAnimGroup();
 		//		if (animGroup != TESAnimGroup::kAnimGroup_Max) {
-		//			UInt32* out = va_arg(varArgs, UInt32*);
+		//			uint32_t* out = va_arg(varArgs, uint32_t*);
 		//			*out = animGroup;
 		//		}
 		//		else {
@@ -3110,9 +3110,9 @@ bool ExpressionEvaluator::ConvertDefaultArg(ScriptToken* arg, ParamInfo* info, b
 		//	break;
 		case kParamType_Sex:
 			{
-				UInt32 sex = arg->GetSex();
+				uint32_t sex = arg->GetSex();
 				if (sex != -1) {
-					UInt32* out = va_arg(varArgs, UInt32*);
+					uint32_t* out = va_arg(varArgs, uint32_t*);
 					*out = sex;
 				}
 				else {
@@ -3362,7 +3362,7 @@ bool ExpressionEvaluator::ConvertDefaultArg(ScriptToken* arg, ParamInfo* info, b
 							default:
 								// these all check against a particular formtype, return TESForm*
 								{
-									UInt32 typeToMatch = -1;
+									uint32_t typeToMatch = -1;
 									switch (info->typeID) {
 										case kParamType_Sound:
 											typeToMatch = kFormType_Sound; break;
@@ -3455,8 +3455,8 @@ ScriptToken* ExpressionEvaluator::Evaluate()
 {
 	std::stack<ScriptToken*> operands;
 	
-	UInt16 argLen = Read16();
-	UInt8* endData = Data() + argLen - sizeof(UInt16);
+	uint16_t argLen = Read16();
+	uint8_t* endData = Data() + argLen - sizeof(uint16_t);
 	while (Data() < endData)
 	{
 		ScriptToken* curToken = ScriptToken::Read(this);
@@ -3493,9 +3493,9 @@ ScriptToken* ExpressionEvaluator::Evaluate()
 			TESObjectREFR* contObj = callingRef ? NULL : m_containingObj;
 			double cmdResult = 0;
 
-			UInt16 argsLen = Read16();
-			UInt32 numBytesRead = 0;
-			UInt8* scrData = Data();
+			uint16_t argsLen = Read16();
+			uint32_t numBytesRead = 0;
+			uint8_t* scrData = Data();
 
 			ExpectReturnType(kRetnType_Default);	// expect default return type unless called command specifies otherwise
 			bool bExecuted = cmdInfo->execute(cmdInfo->params, scrData, callingObj, contObj, script, eventList, &cmdResult, &numBytesRead);
@@ -3546,7 +3546,7 @@ ScriptToken* ExpressionEvaluator::Evaluate()
 				case kRetnType_Form:
 				{
 					delete curToken;
-					curToken = ScriptToken::CreateForm(*((UInt64*)&cmdResult));
+					curToken = ScriptToken::CreateForm(*((uint64_t*)&cmdResult));
 					break;
 				}
 				case kRetnType_Default:
@@ -3634,7 +3634,7 @@ ScriptToken* Operator::Evaluate(ScriptToken* lhs, ScriptToken* rhs, ExpressionEv
 		return NULL;
 	}
 
-	for (UInt32 i = 0; i < numRules; i++)
+	for (uint32_t i = 0; i < numRules; i++)
 	{
 		bool bRuleMatches = false;
 		bool bSwapOrder = false;
@@ -3708,7 +3708,7 @@ struct Block
 
 	const char	* keyword;
 	BlockType	type;
-	UInt8		function;
+	uint8_t		function;
 
 	bool IsOpener() { return (function & kFunction_Open) == kFunction_Open; }
 	bool IsTerminator() { return (function & kFunction_Terminate) == kFunction_Terminate; }
@@ -3717,7 +3717,7 @@ struct Block
 struct BlockInfo
 {
 	BlockType	type;
-	UInt32		scriptLine;
+	uint32_t		scriptLine;
 };
 
 static Block s_blocks[] =
@@ -3733,7 +3733,7 @@ static Block s_blocks[] =
 	{	"endif",	kBlockType_If,			Block::kFunction_Terminate	},
 };
 
-static UInt32 s_numBlocks = SIZEOF_ARRAY(s_blocks, Block);
+static uint32_t s_numBlocks = SIZEOF_ARRAY(s_blocks, Block);
 
 // Preprocessor
 //	is used to check loop integrity, syntax before script is compiled
@@ -3743,12 +3743,12 @@ private:
 	static std::string	s_delims;
 
 	ScriptBuffer		* m_buf;
-	UInt32				m_loopDepth;
+	uint32_t				m_loopDepth;
 	std::string			m_curLineText;
-	UInt32				m_curLineNo;
-	UInt32				m_curBlockStartingLineNo;
+	uint32_t				m_curLineNo;
+	uint32_t				m_curBlockStartingLineNo;
 	std::string			m_scriptText;
-	UInt32				m_scriptTextOffset;
+	uint32_t				m_scriptTextOffset;
 
 	bool		HandleDirectives();		// compiler directives at top of script prefixed with '@'
 	bool		ProcessBlock(BlockType blockType);
@@ -3790,7 +3790,7 @@ bool Preprocessor::AdvanceLine()
 
 	m_curLineNo++;
 
-	UInt32 endPos = m_scriptText.find("\r\n", m_scriptTextOffset);
+	uint32_t endPos = m_scriptText.find("\r\n", m_scriptTextOffset);
 	if (endPos == -1)						// last line, no CRLF
 	{
 		m_curLineText = m_scriptText.substr(m_scriptTextOffset, m_scriptText.length() - m_scriptTextOffset);
@@ -3807,7 +3807,7 @@ bool Preprocessor::AdvanceLine()
 		m_curLineText = m_scriptText.substr(m_scriptTextOffset, endPos - m_scriptTextOffset);
 
 		// strip comments
-		for (UInt32 i = 0; i < m_curLineText.length(); i++)
+		for (uint32_t i = 0; i < m_curLineText.length(); i++)
 		{
 			if (m_curLineText[i] == '"')
 			{
@@ -3859,7 +3859,7 @@ bool Preprocessor::Process()
 		
 		const char* tok = token.c_str();
 		bool bIsBlockKeyword = false;
-		for (UInt32 i = 0; i < s_numBlocks; i++)
+		for (uint32_t i = 0; i < s_numBlocks; i++)
 		{
 			Block* cur = &s_blocks[i];
 			if (!_stricmp(tok, cur->keyword))
@@ -3906,7 +3906,7 @@ bool Preprocessor::Process()
 					std::string varName = varToken;
 					const char* scriptText = m_buf->scriptText;
 
-					UInt32 dotPos = varToken.find('.');
+					uint32_t dotPos = varToken.find('.');
 					if (dotPos != -1)
 					{
 						scriptText = NULL;
@@ -3925,7 +3925,7 @@ bool Preprocessor::Process()
 
 					if (scriptText)
 					{
-						UInt32 varType = GetDeclaredVariableType(varName.c_str(), scriptText);
+						uint32_t varType = GetDeclaredVariableType(varName.c_str(), scriptText);
 						if (varType == Script::eVarType_Array)
 						{
 							g_ErrOut.Show("Error line %d:\nSet may not be used to assign to an array variable", m_curLineNo);
@@ -3970,7 +3970,7 @@ bool PrecompileScript(ScriptBuffer* buf)
 
 #endif
 
-bool Cmd_Expression_Parse(UInt32 numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf)
+bool Cmd_Expression_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf)
 {
 #if RUNTIME
 	Console_Print("This command cannot be called from the console.");

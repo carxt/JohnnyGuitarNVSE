@@ -26,7 +26,7 @@ bool Cmd_SetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* terminal = nullptr;
 	int menuEntryID = 0;
-	UInt32 flags;
+	uint32_t flags;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &flags) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
 		if (entry) {
@@ -80,7 +80,7 @@ bool Cmd_GetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	int menuEntryID = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry && entry->subMenu) *(UInt32*)result = entry->subMenu->refID;
+		if (entry && entry->subMenu) *(uint32_t*)result = entry->subMenu->refID;
 	}
 	return true;
 }
@@ -119,7 +119,7 @@ bool Cmd_GetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 	int menuEntryID = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry && entry->displayNote) *(UInt32*)result = entry->displayNote->refID;
+		if (entry && entry->displayNote) *(uint32_t*)result = entry->displayNote->refID;
 	}
 	return true;
 }

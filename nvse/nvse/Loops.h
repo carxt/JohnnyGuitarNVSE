@@ -26,9 +26,9 @@ public:
 // continues until test expression evaluates false
 class WhileLoop : public Loop
 {
-	UInt32		m_exprOffset;		// offset of test expression in script data
+	uint32_t		m_exprOffset;		// offset of test expression in script data
 public:
-	WhileLoop(UInt32 exprOffset) : m_exprOffset(exprOffset) { }
+	WhileLoop(uint32_t exprOffset) : m_exprOffset(exprOffset) { }
 	virtual ~WhileLoop() { }
 
 	virtual bool Update(COMMAND_ARGS);
@@ -52,7 +52,7 @@ class ArrayIterLoop : public ForEachLoop
 
 	void UpdateIterator(const ArrayElement* elem);
 public:
-	ArrayIterLoop(const ForEachContext* context, UInt8 modIndex);
+	ArrayIterLoop(const ForEachContext* context, uint8_t modIndex);
 	virtual ~ArrayIterLoop();
 
 	virtual bool Update(COMMAND_ARGS);
@@ -63,8 +63,8 @@ public:
 class StringIterLoop : public ForEachLoop
 {
 	std::string		m_src;
-	UInt32			m_curIndex;
-	UInt32			m_iterID;
+	uint32_t			m_curIndex;
+	uint32_t			m_iterID;
 
 public:
 	StringIterLoop(const ForEachContext* context);
@@ -81,7 +81,7 @@ class ContainerIterLoop : public ForEachLoop
 
 	InventoryReference			* m_invRef;
 	ScriptEventList::Var		* m_refVar;
-	UInt32						m_iterIndex;
+	uint32_t						m_iterIndex;
 	std::vector<IRefData>		m_elements;
 
 	bool SetIterator();
@@ -102,7 +102,7 @@ class LoopManager
 	{
 		Loop*		loop;
 		SavedIPInfo	ipInfo;		// stack depth, ip of loop start
-		UInt32		endIP;		// ip of instruction following loop end
+		uint32_t		endIP;		// ip of instruction following loop end
 	};
 
 	std::stack<LoopInfo>	m_loops;
@@ -112,7 +112,7 @@ class LoopManager
 public:
 	static LoopManager* GetSingleton();
 
-	void Add(Loop* loop, ScriptRunner* state, UInt32 startOffset, UInt32 endOffset, COMMAND_ARGS);
+	void Add(Loop* loop, ScriptRunner* state, uint32_t startOffset, uint32_t endOffset, COMMAND_ARGS);
 	bool Break(ScriptRunner* state, COMMAND_ARGS);
 	bool Continue(ScriptRunner* state, COMMAND_ARGS);
 };

@@ -120,7 +120,7 @@ hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) {
 			bhkWorldObject* hWorldObj = targetNode->m_collisionObject->worldObj;
 			if (hWorldObj) {
 				hkpRigidBody* rigidBody = (hkpRigidBody*)hWorldObj->refObject;
-				UInt8 motionType = rigidBody->motion.type;
+				uint8_t motionType = rigidBody->motion.type;
 				if ((motionType == 2) || (motionType == 3) || (motionType == 6))
 					return rigidBody;
 			}

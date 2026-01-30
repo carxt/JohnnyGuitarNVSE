@@ -1,11 +1,11 @@
 #pragma once
 
-bool (*_WriteRecord)(UInt32 type, UInt32 version, const void* buffer, UInt32 length);
-bool (*_WriteRecordData)(const void* buffer, UInt32 length);
-bool (*_GetNextRecordInfo)(UInt32* type, UInt32* version, UInt32* length);
-UInt32(*_ReadRecordData)(void* buffer, UInt32 length);
-bool (*_ResolveRefID)(UInt32 refID, UInt32* outRefID);
-bool (*_OpenRecord)(UInt32 type, UInt32 version);
+bool (*_WriteRecord)(uint32_t type, uint32_t version, const void* buffer, uint32_t length);
+bool (*_WriteRecordData)(const void* buffer, uint32_t length);
+bool (*_GetNextRecordInfo)(uint32_t* type, uint32_t* version, uint32_t* length);
+uint32_t(*_ReadRecordData)(void* buffer, uint32_t length);
+bool (*_ResolveRefID)(uint32_t refID, uint32_t* outRefID);
+bool (*_OpenRecord)(uint32_t type, uint32_t version);
 #define SERIALIZATION_VERSION 1
 enum RecordIDs
 {
@@ -17,11 +17,11 @@ void SaveGameCallback(void*)
 	if (!miscStatMap.empty())
 		{
 		_OpenRecord(kRecordID_MiscStats, SERIALIZATION_VERSION);
-		UInt16 mapLen = miscStatMap.size();
-		_WriteRecordData(&mapLen, sizeof(UInt16));
-		for (auto it : miscStatMap) {
-			UInt16 len = it.first.length();
-			_WriteRecordData(&len, sizeof(UInt16));
+		uint16_t mapLen = static_cast<uint16_t>(miscStatMap.size());
+		_WriteRecordData(&mapLen, sizeof(uint16_t));
+		for (auto& it : miscStatMap) {
+			uint16_t len = static_cast<uint16_t>(it.first.length());
+			_WriteRecordData(&len, sizeof(uint16_t));
 			_WriteRecordData(it.first.c_str(), it.first.length());
 			_WriteRecordData(&it.second, sizeof(int));
 		}
@@ -35,19 +35,19 @@ void SaveGameCallback(void*)
 void LoadGameCallback(void*)
 {
 
-	UInt32 type, version, length;
+	uint32_t type, version, length;
 	while (_GetNextRecordInfo(&type, &version, &length))
 	{
 		switch (type)
 		{
 		case kRecordID_MiscStats: {
-			UInt16 mapLen = 0;
-			_ReadRecordData(&mapLen, sizeof(UInt16));
+			uint16_t mapLen = 0;
+			_ReadRecordData(&mapLen, sizeof(uint16_t));
 			if (mapLen > 0) {
 				char buffer[MAX_PATH] = { 0 };
 				for (int i = 0; i < mapLen; i++) {
-					UInt16 len = 0;
-					_ReadRecordData(&len, sizeof(UInt16));
+					uint16_t len = 0;
+					_ReadRecordData(&len, sizeof(uint16_t));
 					_ReadRecordData(buffer, len);
 					buffer[len] = 0;
 					std::string sName = std::string(buffer);

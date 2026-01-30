@@ -2,7 +2,7 @@
 
 #include "nvse/GameTypes.h"
 
-typedef UInt32(*_TraitNameToID)(const char* traitName);
+typedef uint32_t(*_TraitNameToID)(const char* traitName);
 extern const _TraitNameToID TraitNameToID;
 
 const char* TraitIDToName(int id);	// slow
@@ -135,7 +135,6 @@ enum {
 class Tile {
 public:
 	Tile();
-	~Tile();
 
 	enum eTileID {
 		kTileID_rect = 0x0385,
@@ -155,24 +154,24 @@ public:
 	};
 
 	MEMBER_FN_PREFIX(Tile);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	DEFINE_MEMBER_FN(SetStringValue, void, 0x00A01350, UInt32 valueID, const char* str, bool bPropagate);
-	DEFINE_MEMBER_FN(SetFloatValue, void, 0x00A012D0, UInt32 valueID, float num, bool bPropagate);
+#if 1
+	DEFINE_MEMBER_FN(SetStringValue, void, 0x00A01350, uint32_t valueID, const char* str, bool bPropagate);
+	DEFINE_MEMBER_FN(SetFloatValue, void, 0x00A012D0, uint32_t valueID, float num, bool bPropagate);
 #elif EDITOR
 #else
 #error
 #endif
 
-	virtual Tile* Destroy(bool doFree);
+	virtual ~Tile();
 	virtual void		Init(Tile* parent, const char* name, Tile* replacedChild);
 	virtual NiNode* CalcNode(void);
-	virtual UInt32		GetType(void);		// returns one of kTileValue_XXX
+	virtual uint32_t		GetType(void);		// returns one of kTileValue_XXX
 	virtual const char* GetTypeStr(void);	// 4-byte id
-	virtual bool		Unk_05(UInt32 arg0, UInt32 arg1);
-	virtual UInt32		UpdateField(UInt32 valueID, float floatValue, const char* strValue);
+	virtual bool		Unk_05(uint32_t arg0, uint32_t arg1);
+	virtual uint32_t		UpdateField(uint32_t valueID, float floatValue, const char* strValue);
 	virtual void		Unk_07(void);
-	virtual UInt32		Unk_08(void);
-	virtual void		Unk_09(UInt32 arg0, UInt32 arg1, UInt32 arg2);
+	virtual uint32_t		Unk_08(void);
+	virtual void		Unk_09(uint32_t arg0, uint32_t arg1, uint32_t arg2);
 
 	struct Value;
 
@@ -214,7 +213,7 @@ public:
 		virtual float	GetFloat();
 		virtual Value* GetValue();
 
-		UInt32		type;		// 04
+		uint32_t		type;		// 04
 		Action* next;		// 08
 	};
 
@@ -238,7 +237,7 @@ public:
 
 	// 14
 	struct Value {
-		UInt32		id;			// 00
+		uint32_t		id;			// 00
 		Tile* parent;	// 04
 		float		num;		// 08
 		char* str;		// 0C
@@ -253,28 +252,28 @@ public:
 	BSString						name;			// 20
 	Tile* parent;		// 28
 	NiNode* node;			// 2C
-	UInt32						flags;			// 30
-	UInt8						unk34;			// 34
-	UInt8						unk35;			// 35
-	UInt8						pad35[2];		// 36
+	uint32_t						flags;			// 30
+	uint8_t						unk34;			// 34
+	uint8_t						unk35;			// 35
+	uint8_t						pad35[2];		// 36
 
-	static UInt32	TraitNameToID(const char* traitName);
-	static UInt32	TraitNameToIDAdd(const char* traitName);
-	Value* GetValue(UInt32 typeID);
+	static uint32_t	TraitNameToID(const char* traitName);
+	static uint32_t	TraitNameToIDAdd(const char* traitName);
+	Value* GetValue(uint32_t typeID);
 	Value* GetValueName(const char* valueName);
-	float			GetValueFloat(UInt32 id);
-	DListNode<Tile>* GetNthChild(UInt32 index);
+	float			GetValueFloat(uint32_t id);
+	DListNode<Tile>* GetNthChild(uint32_t index);
 	Tile* GetChild(const char* childName);
 	Tile* GetComponent(const char* componentTile, const char*& trait);
 	Tile* GetComponentTile(const char* componentTile);
 	Value* GetComponentValue(const char* componentPath);
 	Tile* ReadXML(const char* xmlPath);
 	char* GetComponentFullName(char* resStr);
-	void			SetFloat(UInt32 id, float fltVal, bool bPropagate = true) { ThisCall(0xA012D0, this, id, fltVal, bPropagate); }
-	void			SetString(UInt32 id, const char* strVal, bool bPropagate = true) { ThisCall(0xA01350, this, id, strVal, bPropagate); }
+	void			SetFloat(uint32_t id, float fltVal, bool bPropagate = true) { ThisCall(0xA012D0, this, id, fltVal, bPropagate); }
+	void			SetString(uint32_t id, const char* strVal, bool bPropagate = true) { ThisCall(0xA01350, this, id, strVal, bPropagate); }
 	Menu* GetParentMenu();
 	void			DestroyAllChildren();
-	void			PokeValue(UInt32 valueID);
+	void			PokeValue(uint32_t valueID);
 	void			FakeClick();
 
 	void			Dump();
@@ -283,7 +282,7 @@ public:
 // 3C
 class TileRect : public Tile {
 public:
-	UInt32	unk38;	// 38
+	uint32_t	unk38;	// 38
 };
 
 // 40
@@ -298,10 +297,10 @@ class TileShaderProperty;
 class TileImage : public Tile {
 public:
 	float				flt038;			// 38
-	UInt32				unk03C;			// 3C
+	uint32_t				unk03C;			// 3C
 	TileShaderProperty* shaderProp;	// 40
-	UInt8				byt044;			// 44
-	UInt8				fill[3];		// 45-47
+	uint8_t				byt044;			// 44
+	uint8_t				fill[3];		// 45-47
 };
 
 class TileText : public Tile {

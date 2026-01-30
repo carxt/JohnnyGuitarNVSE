@@ -13,7 +13,7 @@ bool extraTraces = false;
 // arg1 = 1, ignored if canCreateNew is false, passed to 'init' function if a new object is created
 typedef void* (*_GetSingleton)(bool canCreateNew);
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+#if 1
 
 const _ExtractArgs ExtractArgs = (_ExtractArgs)0x005ACCB0;
 
@@ -34,7 +34,7 @@ const _ShowMessageBox_pScriptRefID ShowMessageBox_pScriptRefID = (_ShowMessageBo
 const _ShowMessageBox_button ShowMessageBox_button = (_ShowMessageBox_button)0x0118C684;
 
 const _GetActorValueName GetActorValueName = (_GetActorValueName)0x00066EAC0;	// See Cmd_GetActorValue_Eval
-const UInt32* g_TlsIndexPtr = (UInt32*)0x0126FD98;
+const uint32_t* g_TlsIndexPtr = (uint32_t*)0x0126FD98;
 const _MarkBaseExtraListScriptEvent MarkBaseExtraListScriptEvent = (_MarkBaseExtraListScriptEvent)0x005AC790;
 
 SaveGameManager** g_saveGameManager = (SaveGameManager**)0x011DE134;
@@ -61,16 +61,16 @@ const _ShowCompilerError ShowCompilerError = (_ShowCompilerError)0x005C5730;	// 
 struct TLSData {
 	// thread local storage
 
-	UInt32	pad000[(0x260 - 0x000) >> 2];	// 000
+	uint32_t	pad000[(0x260 - 0x000) >> 2];	// 000
 	NiNode* lastNiNode;			// 260
 	TESObjectREFR* lastNiNodeREFR;		// 264
-	UInt8			consoleMode;			// 268
-	UInt8			pad269[3];				// 269
+	uint8_t			consoleMode;			// 268
+	uint8_t			pad269[3];				// 269
 	// 25C is used as do not head track the player , 2B8 is used to init QueudFile::unk0018
 };
 
 static TLSData* GetTLSData() {
-	UInt32 TlsIndex = *g_TlsIndexPtr;
+	uint32_t TlsIndex = *g_TlsIndexPtr;
 	TLSData* data = NULL;
 
 	__asm {
@@ -144,9 +144,9 @@ std::string GetSavegamePath() {
 }
 
 // ExtractArgsEx code
-ScriptEventList* ResolveExternalVar(ScriptEventList* in_EventList, Script* in_Script, UInt8*& scriptData) {
+ScriptEventList* ResolveExternalVar(ScriptEventList* in_EventList, Script* in_Script, uint8_t*& scriptData) {
 	ScriptEventList* refEventList = NULL;
-	UInt16 varIdx = *((UInt16*)++scriptData);
+	uint16_t varIdx = *((uint16_t*)++scriptData);
 	scriptData += 2;
 
 	Script::RefVariable* refVar = in_Script->GetVariable(varIdx);
@@ -154,12 +154,12 @@ ScriptEventList* ResolveExternalVar(ScriptEventList* in_EventList, Script* in_Sc
 		refVar->Resolve(in_EventList);
 		TESForm* refObj = refVar->form;
 		if (refObj) {
-			if (refObj->typeID == kFormType_TESObjectREFR) {
+			if (refObj->typeID == FORM_TYPE::TESObjectREFR) {
 				TESObjectREFR* refr = DYNAMIC_CAST(refObj, TESForm, TESObjectREFR);
 				if (refr)
 					refEventList = refr->GetEventList();
 			}
-			else if (refObj->typeID == kFormType_TESQuest) {
+			else if (refObj->typeID == FORM_TYPE::TESQuest) {
 				TESQuest* quest = DYNAMIC_CAST(refObj, TESForm, TESQuest);
 				if (quest)
 					refEventList = quest->scriptEventList;
@@ -170,9 +170,9 @@ ScriptEventList* ResolveExternalVar(ScriptEventList* in_EventList, Script* in_Sc
 	return refEventList;
 }
 
-TESGlobal* ResolveGlobalVar(ScriptEventList* in_EventList, Script* in_Script, UInt8*& scriptData) {
+TESGlobal* ResolveGlobalVar(ScriptEventList* in_EventList, Script* in_Script, uint8_t*& scriptData) {
 	TESGlobal* global = NULL;
-	UInt16 varIdx = *((UInt16*)++scriptData);
+	uint16_t varIdx = *((uint16_t*)++scriptData);
 	scriptData += 2;
 
 	Script::RefVariable* globalRef = in_Script->GetVariable(varIdx);
@@ -182,7 +182,7 @@ TESGlobal* ResolveGlobalVar(ScriptEventList* in_EventList, Script* in_Script, UI
 	return global;
 }
 
-static bool ExtractFloat(double& out, UInt8*& scriptData, Script* scriptObj, ScriptEventList* eventList) {
+static bool ExtractFloat(double& out, uint8_t*& scriptData, Script* scriptObj, ScriptEventList* eventList) {
 	//extracts one float arg
 
 	bool ret = false;
@@ -213,7 +213,7 @@ static bool ExtractFloat(double& out, UInt8*& scriptData, Script* scriptObj, Scr
 		case 'f':
 		case 's':		//local var
 		{
-			UInt16 varIdx = *((UInt16*)++scriptData);
+			uint16_t varIdx = *((uint16_t*)++scriptData);
 			scriptData += 2;
 			ScriptVar* var = eventList->GetVariable(varIdx);
 			if (var) {
@@ -226,7 +226,7 @@ static bool ExtractFloat(double& out, UInt8*& scriptData, Script* scriptObj, Scr
 	return ret;
 }
 
-TESForm* ExtractFormFromFloat(UInt8*& scriptData, Script* scriptObj, ScriptEventList* eventList) {
+TESForm* ExtractFormFromFloat(uint8_t*& scriptData, Script* scriptObj, ScriptEventList* eventList) {
 	TESForm* outForm = NULL;
 	if (*scriptData == 'r')		//doesn't work as intended yet so refs must be local vars
 	{
@@ -235,20 +235,20 @@ TESForm* ExtractFormFromFloat(UInt8*& scriptData, Script* scriptObj, ScriptEvent
 			return NULL;
 	}
 
-	UInt16 varIdx = *(UInt16*)++scriptData;
+	uint16_t varIdx = *(uint16_t*)++scriptData;
 	scriptData += 2;
 
 	ScriptVar* var = eventList->GetVariable(varIdx);
 	if (var)
-		outForm = LookupFormByID(*((UInt64*)&var->data));
+		outForm = LookupFormByID(*((uint64_t*)&var->data));
 
 	return outForm;
 }
 
-TESForm* ResolveForm(UInt8*& scriptData, Script* scriptObj, ScriptEventList* eventList) {
+TESForm* ResolveForm(uint8_t*& scriptData, Script* scriptObj, ScriptEventList* eventList) {
 	TESForm* outForm = NULL;
 	char argType = *scriptData;
-	UInt16	varIdx = *((UInt16*)(scriptData + 1));
+	uint16_t	varIdx = *((uint16_t*)(scriptData + 1));
 	//	scriptData += 2;
 
 	switch (argType) {
@@ -269,7 +269,7 @@ TESForm* ResolveForm(UInt8*& scriptData, Script* scriptObj, ScriptEventList* eve
 	return outForm;
 }
 
-static const char* StringFromStringVar(UInt32 strID) {
+static const char* StringFromStringVar(uint32_t strID) {
 	if (s_StringVarInterface)
 		return s_StringVarInterface->GetString(strID);
 	else
@@ -292,9 +292,9 @@ static const char* ResolveStringArgument(ScriptEventList* eventList, const char*
 }
 
 void ScriptEventList::Dump(void) {
-	UInt32 nEvents = m_eventList->Count();
+	uint32_t nEvents = m_eventList->Count();
 
-	for (SInt32 n = 0; n < nEvents; ++n) {
+	for (uint32_t n = 0; n < nEvents; ++n) {
 		Event* pEvent = m_eventList->GetNthItem(n);
 		if (pEvent) {
 			Console_Print("%08X (%s) %08X", pEvent->object, GetObjectClassName(pEvent->object), pEvent->eventMask);
@@ -302,11 +302,11 @@ void ScriptEventList::Dump(void) {
 	}
 }
 
-UInt32 ScriptEventList::ResetAllVariables() {
+uint32_t ScriptEventList::ResetAllVariables() {
 	if (!m_vars) return 0;
 	ListNode<ScriptVar>* varIter = m_vars->Head();
 	ScriptVar* scriptVar;
-	UInt32 numVars = 0;
+	uint32_t numVars = 0;
 	do {
 		scriptVar = varIter->data;
 		if (scriptVar) {
@@ -317,7 +317,7 @@ UInt32 ScriptEventList::ResetAllVariables() {
 	return numVars;
 }
 
-ScriptVar* ScriptEventList::GetVariable(UInt32 id) {
+ScriptVar* ScriptEventList::GetVariable(uint32_t id) {
 	if (m_vars) {
 		ListNode<ScriptVar>* varIter = m_vars->Head();
 		ScriptVar* scriptVar;
@@ -345,14 +345,14 @@ ScriptEventList* EventListFromForm(TESForm* form) {
 }
 
 static void ConvertLiteralPercents(std::string* str) {
-	UInt32 idx = 0;
+	uint32_t idx = 0;
 	while ((idx = str->find('%', idx)) != -1) {
 		str->insert(idx, "%");
 		idx += 2;
 	}
 }
 
-static void SkipArgs(UInt8*& scriptData) {
+static void SkipArgs(uint8_t*& scriptData) {
 	switch (*scriptData) {
 		case 'z':
 			scriptData += sizeof(double) + 1;
@@ -368,7 +368,7 @@ static void SkipArgs(UInt8*& scriptData) {
 
 static void OmitFormatStringArgs(std::string str, FormatStringArgs& args) {
 	//skip any args omitted by the %{ specifier
-	UInt32 strIdx = 0;
+	uint32_t strIdx = 0;
 	while ((strIdx = str.find('%', strIdx)) != -1 && args.HasMoreArgs()) {
 		switch (str[++strIdx]) {
 			case '%':
@@ -388,15 +388,15 @@ static void OmitFormatStringArgs(std::string str, FormatStringArgs& args) {
 	}
 }
 
-//static bool ExtractFormattedString(UInt32 &numArgs, char* buffer, UInt8* &scriptData, Script* scriptObj, ScriptEventList* eventList)
+//static bool ExtractFormattedString(uint32_t &numArgs, char* buffer, uint8_t* &scriptData, Script* scriptObj, ScriptEventList* eventList)
 bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 	//extracts args based on format string, prints formatted string to buffer
 	static const int maxArgs = 20;
 	double f[maxArgs] = { 0.0 };
-	UInt32 argIdx = 0;
+	uint32_t argIdx = 0;
 
 	std::string fmtString = args.GetFormatString();
-	UInt32 strIdx = 0;
+	uint32_t strIdx = 0;
 
 	//extract args
 	while ((strIdx = fmtString.find('%', strIdx)) != -1) {
@@ -500,10 +500,10 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 
 						switch (form->typeID) {
 #if 0
-							case kFormType_SpellItem:
-							case kFormType_EnchantmentItem:
-							case kFormType_IngredientItem:
-							case kFormType_AlchemyItem:
+							case FORM_TYPE::SpellItem:
+							case FORM_TYPE::EnchantmentItem:
+							case FORM_TYPE::IngredientItem:
+							case FORM_TYPE::AlchemyItem:
 							{
 								MagicItem* magItm = DYNAMIC_CAST(form, TESForm, MagicItem);
 								if (!magItm)
@@ -512,7 +512,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 									strName = magItm->list.GetNthEIName(objIdx);
 									EffectItem* effItem = magItm->list.ItemAt(objIdx);
 									if (effItem && effItem->HasActorValue()) {
-										UInt32 valIdx = strName.find(' ');
+										uint32_t valIdx = strName.find(' ');
 										if (valIdx != -1) {
 											strName.erase(valIdx + 1, strName.length() - valIdx);
 											strName.insert(valIdx + 1, std::string(GetActorValueString(effItem->actorValueOrOther)));
@@ -523,7 +523,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 							break;
 #endif
 
-							case kFormType_TESAmmo:
+							case FORM_TYPE::TESAmmo:
 							{
 								TESAmmo* ammo = DYNAMIC_CAST(form, TESForm, TESAmmo);
 
@@ -547,7 +547,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 							break;
 
 #if 1	// to be tested
-							case kFormType_TESFaction:
+							case FORM_TYPE::TESFaction:
 							{
 								TESFaction* fact = DYNAMIC_CAST(form, TESForm, TESFaction);
 								if (!fact)
@@ -594,7 +594,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 
 				std::string valStr(GetActorValueString(actorVal));
 				if (valStr.length()) {
-					for (UInt32 idx = 1; idx < valStr.length(); idx++)
+					for (uint32_t idx = 1; idx < valStr.length(); idx++)
 						if (isupper(valStr[idx])) {								//insert spaces to make names more presentable
 							valStr.insert(idx, " ");
 							idx += 2;
@@ -621,7 +621,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 						form = refr->baseForm;
 
 					short objType = 0;
-					if (form->typeID == kFormType_TESNPC) {
+					if (form->typeID == FORM_TYPE::TESNPC) {
 						TESActorBaseData* actorBase = DYNAMIC_CAST(form, TESForm, TESActorBaseData);
 						objType = (actorBase->IsFemale()) ? 2 : 1;
 					}
@@ -672,7 +672,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 				if (!args.Arg(args.kArgType_Float, &flag))
 					return false;
 
-				UInt32 omitEnd = fmtString.find("%}", strIdx);
+				uint32_t omitEnd = fmtString.find("%}", strIdx);
 				if (omitEnd == -1)
 					omitEnd = fmtString.length();
 
@@ -694,7 +694,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 				if (!args.Arg(args.kArgType_Float, &data))
 					return false;
 
-				UInt64* hexArg = (UInt64*)(&f[argIdx++]);
+				uint64_t* hexArg = (uint64_t*)(&f[argIdx++]);
 				*hexArg = data;
 				fmtString.erase(strIdx, 2);
 				char width = 0;
@@ -740,12 +740,12 @@ void RegisterStringVarInterface(NVSEStringVarInterface* intfc) {
 	s_StringVarInterface = intfc;
 }
 
-bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* scriptDataIn, double* outVarData, UInt8* outModIndex, bool shortPath) {
+bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* scriptDataIn, double* outVarData, uint8_t* outModIndex, bool shortPath) {
 	/*	DOES NOT WORK WITH FalloutNV, we are going to abuse the stack instead:
 	//when script command called as righthand side of a set statement, the script data containing the variable
 	//to assign to remains on the stack as arg to a previous function. We can get to it through scriptData in COMMAND_ARGS
 	*/
-	UInt8* dataStart = (UInt8*)scriptDataIn;	// should be 0x58 (or 0x72 if called with dot syntax)
+	uint8_t* dataStart = (uint8_t*)scriptDataIn;	// should be 0x58 (or 0x72 if called with dot syntax)
 
 	if (!((*dataStart == 0x58 || *dataStart == 0x72))) {
 		return false;
@@ -757,17 +757,17 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 		mov callerFramePointer, ebp
 	}
 	for (int i = 0; i < 3; i++)
-		callerFramePointer = (void*)(*(UInt32*)callerFramePointer);
+		callerFramePointer = (void*)(*(uint32_t*)callerFramePointer);
 	if (!shortPath) {
-		callerFramePointer = (void*)(*(UInt32*)callerFramePointer);	// sv_Destruct calls us directly, others goes through AssignToStringVar
-		callerFramePointer = (void*)(*(UInt32*)callerFramePointer);	// one more added for when multiple commands are grouped (like GetBipedModelPath)
+		callerFramePointer = (void*)(*(uint32_t*)callerFramePointer);	// sv_Destruct calls us directly, others goes through AssignToStringVar
+		callerFramePointer = (void*)(*(uint32_t*)callerFramePointer);	// one more added for when multiple commands are grouped (like GetBipedModelPath)
 	}
 
-	UInt32 scriptDataPtrAddr = (UInt32)(callerFramePointer)+0x08;
-	UInt32* scriptDataAddr = (UInt32*)scriptDataPtrAddr;
-	UInt8* scriptData = (UInt8*)(*scriptDataAddr);
+	uint32_t scriptDataPtrAddr = (uint32_t)(callerFramePointer)+0x08;
+	uint32_t* scriptDataAddr = (uint32_t*)scriptDataPtrAddr;
+	uint8_t* scriptData = (uint8_t*)(*scriptDataAddr);
 
-	SInt32 scriptDataOffset = (UInt32)scriptData - (UInt32)(script->data);
+	int32_t scriptDataOffset = (uint32_t)scriptData - (uint32_t)(script->data);
 	if (scriptDataOffset < 5)
 		return false;
 
@@ -778,7 +778,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 	{
 		case 'G':						//global
 		{
-			UInt16 refIdx = *(UInt16*)(scriptData + 1);
+			uint16_t refIdx = *(uint16_t*)(scriptData + 1);
 			Script::RefVariable* refVar = script->GetVariable(refIdx);
 			if (!refVar)
 				break;
@@ -798,7 +798,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 		{
 			if (scriptDataOffset >= 8 && *(scriptData - 3) == 'r')	//external var
 			{
-				UInt16 refIdx = *(UInt16*)(scriptData - 2);
+				uint16_t refIdx = *(uint16_t*)(scriptData - 2);
 				Script::RefVariable* refVar = script->GetVariable(refIdx);
 				if (!refVar)
 					break;
@@ -808,7 +808,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 				if (!refForm)
 					break;
 
-				if (refForm->typeID == kFormType_TESObjectREFR) {
+				if (refForm->typeID == FORM_TYPE::TESObjectREFR) {
 					TESObjectREFR* refr = DYNAMIC_CAST(refForm, TESForm, TESObjectREFR);
 					TESScriptableForm* scriptable = DYNAMIC_CAST(refr->baseForm, TESForm, TESScriptableForm);
 					if (scriptable) {
@@ -818,7 +818,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 					else
 						break;
 				}
-				else if (refForm->typeID == kFormType_TESQuest) {
+				else if (refForm->typeID == FORM_TYPE::TESQuest) {
 					TESScriptableForm* scriptable = DYNAMIC_CAST(refForm, TESForm, TESScriptableForm);
 					if (scriptable) {
 						script = scriptable->script;
@@ -832,7 +832,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 					break;
 			}
 
-			UInt16 varIdx = *(UInt16*)(scriptData + 1);
+			uint16_t varIdx = *(uint16_t*)(scriptData + 1);
 			ScriptVar* var = eventList->GetVariable(varIdx);
 			if (var) {
 				*outVarData = var->data;
@@ -850,7 +850,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 }
 
 // g_baseActorValueNames is only filled in after oblivion's global initializers run
-const char* GetActorValueString(UInt32 actorValue) {
+const char* GetActorValueString(uint32_t actorValue) {
 	const char* name = 0;
 	if (actorValue <= eActorVal_FalloutMax)
 		name = GetActorValueName(actorValue);
@@ -860,8 +860,8 @@ const char* GetActorValueString(UInt32 actorValue) {
 	return name;
 }
 
-UInt32 GetActorValueForScript(const char* avStr) {
-	for (UInt32 i = 0; i <= eActorVal_FalloutMax; i++) {
+uint32_t GetActorValueForScript(const char* avStr) {
+	for (uint32_t i = 0; i <= eActorVal_FalloutMax; i++) {
 		char* name = GetActorValueName(i);
 		if (_stricmp(avStr, name) == 0)
 			return i;
@@ -870,11 +870,11 @@ UInt32 GetActorValueForScript(const char* avStr) {
 	return eActorVal_NoActorValue;
 }
 
-UInt32 GetActorValueForString(const char* strActorVal, bool bForScript) {
+uint32_t GetActorValueForString(const char* strActorVal, bool bForScript) {
 	if (bForScript)
 		return GetActorValueForScript(strActorVal);
 
-	for (UInt32 n = 0; n <= eActorVal_FalloutMax; n++) {
+	for (uint32_t n = 0; n <= eActorVal_FalloutMax; n++) {
 		char* name = GetActorValueName(n);
 		if (_stricmp(strActorVal, name) == 0)
 			return n;
@@ -882,10 +882,10 @@ UInt32 GetActorValueForString(const char* strActorVal, bool bForScript) {
 	return eActorVal_NoActorValue;
 }
 
-ScriptFormatStringArgs::ScriptFormatStringArgs(UInt32 _numArgs, UInt8* _scriptData, Script* _scriptObj, ScriptEventList* _eventList)
+ScriptFormatStringArgs::ScriptFormatStringArgs(uint32_t _numArgs, uint8_t* _scriptData, Script* _scriptObj, ScriptEventList* _eventList)
 	: numArgs(_numArgs), scriptData(_scriptData), scriptObj(_scriptObj), eventList(_eventList) {
 	//extract format string
-	UInt16 len = *((UInt16*)scriptData);
+	uint16_t len = *((uint16_t*)scriptData);
 	char* szFmt = new char[len + 1];
 	scriptData += 2;
 	memcpy(szFmt, scriptData, len);
@@ -904,15 +904,15 @@ bool ScriptFormatStringArgs::HasMoreArgs() {
 	return (numArgs > 0);
 }
 
-UInt32 ScriptFormatStringArgs::GetNumArgs() {
+uint32_t ScriptFormatStringArgs::GetNumArgs() {
 	return numArgs;
 }
 
-UInt8* ScriptFormatStringArgs::GetScriptData() {
+uint8_t* ScriptFormatStringArgs::GetScriptData() {
 	return scriptData;
 }
 
-bool ScriptFormatStringArgs::SkipArgs(UInt32 numToSkip) {
+bool ScriptFormatStringArgs::SkipArgs(uint32_t numToSkip) {
 	while (numToSkip--) {
 		switch (*scriptData) {
 			case 'z':
@@ -935,12 +935,12 @@ bool ScriptFormatStringArgs::SkipArgs(UInt32 numToSkip) {
 //Log error if expression evaluates to false
 bool SCRIPT_ASSERT(bool expr, Script* script, const char* errorMsg, ...) {
 	//	static bool bAlerted = false;			//only alert user on first error
-	//	static std::set<UInt32> naughtyScripts;	//one error per script to avoid thrashing
+	//	static std::set<uint32_t> naughtyScripts;	//one error per script to avoid thrashing
 	//
 	//	if (!expr && naughtyScripts.find(script->refID) == naughtyScripts.end())
 	//	{
 	//		const ModEntry ** activeMods = (*g_dataHandler)->GetActiveModList();
-	//		UInt8 modIndex = script->GetModIndex();
+	//		uint8_t modIndex = script->GetModIndex();
 	//		const ModEntry * modEntry = activeMods[modIndex];
 	//
 	//		const char * modName;
@@ -1002,7 +1002,7 @@ bool ScriptFormatStringArgs::Arg(FormatStringArgs::argType asType, void* outResu
 	return false;
 }
 
-UInt32 GetActorValueMax(UInt32 actorValueCode) {
+uint32_t GetActorValueMax(uint32_t actorValueCode) {
 	switch (actorValueCode) {
 		case eActorVal_Aggression:			return   3; break;
 		case eActorVal_Confidence:			return   4; break;

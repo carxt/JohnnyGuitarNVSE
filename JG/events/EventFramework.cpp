@@ -1,15 +1,15 @@
 #include "EventFramework.h"
 #include "GameObjects.h"
 
-bool (*CallUDF)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
+bool (*CallUDF)(Script* funcScript, TESObjectREFR* callingObj, uint8_t numArgs, ...);
 std::mutex eventInfosMutex;
 std::vector<EventInfo> EventInfos;
 
-void* __fastcall GenericCreateFilter(void** Filters, UInt32 numFilters) {
+void* __fastcall GenericCreateFilter(void** Filters, uint32_t numFilters) {
 	return new FilterForm(Filters, numFilters);
 }
 
-EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32)) {
+EventInfo __cdecl JGCreateEvent(const char* EventName, uint8_t maxArgs, uint8_t maxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t)) {
 	std::lock_guard<std::mutex> lock(eventInfosMutex);
 	EventInfo eventinfo = new EventInformation(EventName, maxArgs, maxFilters, CreatorFunction);
 	EventInfos.push_back(eventinfo);
@@ -27,16 +27,16 @@ void __cdecl JGFreeEvent(EventInfo& toRemove) {
 	toRemove = nullptr;
 }
 
-FilterBase::FilterSet* FilterBase::GetFilter(UInt32 index) {
+FilterBase::FilterSet* FilterBase::GetFilter(uint32_t index) {
 	if (index >= numFilters) return nullptr;
 	return &(filterSet[index]);
 }
 
-FilterBase::FilterBase(void** filters, UInt32 nuFilters) {
+FilterBase::FilterBase(void** filters, uint32_t nuFilters) {
 	numFilters = nuFilters;
 	filterSet = new FilterSet[numFilters];
 	genFilters = new FilterType[numFilters];
-	for (int i = 0; i < nuFilters; i++) genFilters[i].ptr = filters[i];
+	for (uint32_t i = 0; i < nuFilters; i++) genFilters[i].ptr = filters[i];
 }
 
 FilterBase::~FilterBase() {
@@ -44,36 +44,36 @@ FilterBase::~FilterBase() {
 	delete[] genFilters;
 }
 
-bool FilterBase::IsInFilter(UInt32 filterNum, FilterType toSearch) {
+bool FilterBase::IsInFilter(uint32_t filterNum, FilterType toSearch) {
 	FilterSet* FilterSet = GetFilter(filterNum);
 	return FilterSet && (FilterSet->empty() || FilterSet->find(toSearch.refID) != FilterSet->end());
 }
 
-bool FilterBase::IsFilterEmpty(UInt32 num) {
+bool FilterBase::IsFilterEmpty(uint32_t num) {
 	FilterSet* filters = GetFilter(num);
 	return !filters || filters->empty();
 }
 
-void FilterBase::InsertToFilter(UInt32 num, FilterType toInsert) {
+void FilterBase::InsertToFilter(uint32_t num, FilterType toInsert) {
 	FilterSet* filters = GetFilter(num);
 	if (filters) filters->insert(toInsert.refID);
 }
 
-void FilterBase::DeleteFromFilter(UInt32 num, FilterType toDelete) {
+void FilterBase::DeleteFromFilter(uint32_t num, FilterType toDelete) {
 	FilterSet* filters = GetFilter(num);
 	if (filters) filters->erase(toDelete.refID);
 }
 
-bool FilterBase::IsFilterEqual(FilterType filter, UInt32 num) {
+bool FilterBase::IsFilterEqual(FilterType filter, uint32_t num) {
 	return (filter.ptr == genFilters[num].ptr);
 }
 
 bool FilterForm::IsAcceptedParameter(FilterType parameter) {
-	return parameter.form->typeID != kFormType_TESObjectSTAT;
+	return parameter.form->typeID != FORM_TYPE::TESObjectSTAT;
 }
 
 void FilterForm::SetUpFiltering() {
-	for (int i = 0; i < numFilters; i++) {
+	for (uint32_t i = 0; i < numFilters; i++) {
 		TESForm* currentFilter = genFilters[i].form;
 		if (!currentFilter) continue;
 		if (!(IsAcceptedParameter(currentFilter))) continue;
@@ -93,30 +93,30 @@ void FilterForm::SetUpFiltering() {
 	}
 }
 
-bool FilterForm::IsBaseInFilter(UInt32 filterNum, TESForm* form) {
+bool FilterForm::IsBaseInFilter(uint32_t filterNum, TESForm* form) {
 	if (!form) return false;
 	if (form->GetIsReference()) return IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->refID);
 	return IsInFilter(filterNum, form->refID);
 }
 
-void FilterForm::insertFormList(BGSListForm* formlist, UInt32 filter) {
+void FilterForm::insertFormList(BGSListForm* formlist, uint32_t filter) {
 	ListNode<TESForm>* iterator = formlist->list.Head();
 	do {
 		InsertToFilter(filter, iterator->data->refID);
 	} while (iterator = iterator->next);
 }
 
-bool FilterInt::IsFilterEqual(FilterType Filter, UInt32 nuFilter) {
+bool FilterInt::IsFilterEqual(FilterType Filter, uint32_t nuFilter) {
 	return Filter.intVal == genFilters[nuFilter].intVal;
 }
 
 void FilterInt::SetUpFiltering() {
-	for (int i = 0; i < numFilters; i++) {
+	for (uint32_t i = 0; i < numFilters; i++) {
 		if (genFilters[i].intVal != -1) InsertToFilter(i, genFilters[i].intVal);
 	}
 }
 
-void* __fastcall FilterInt::Create(void** filters, UInt32 nuFilters) {
+void* __fastcall FilterInt::Create(void** filters, uint32_t nuFilters) {
 	return new FilterInt(filters, nuFilters);
 }
 
@@ -135,11 +135,11 @@ void FilterFormInt::SetUpFiltering() {
 	else if (IsAcceptedParameter(currentFilter)) InsertToFilter(0, currentFilter->refID);
 }
 
-void* __fastcall FilterFormInt::Create(void** filters, UInt32 nuFilters) {
+void* __fastcall FilterFormInt::Create(void** filters, uint32_t nuFilters) {
 	return new FilterFormInt(filters, nuFilters);
 }
 
-EventInformation::EventInformation(const char* EventName, UInt8& numMaxArgs, UInt8& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32)) {
+EventInformation::EventInformation(const char* EventName, uint8_t& numMaxArgs, uint8_t& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t)) {
 	this->name = EventName;
 	this->numMaxArgs = numMaxArgs;
 	this->numMaxFilters = numMaxFilters;
@@ -159,12 +159,12 @@ void EventInformation::FlushEventCallbacks() {
 }
 
 void EventInformation::RegisterEvent(Script* script, void** filters) {
-	UInt32 maxFilters = this->numMaxFilters;
+	uint32_t maxFilters = this->numMaxFilters;
 	for (auto& event : this->callbacks) {
 		if (script == event.script) {
 			if (!maxFilters) return;
 			if (!event.eventFilter->GetNumFilters()) continue;
-			UInt32 i = 0; // filter iterator
+			uint32_t i = 0; // filter iterator
 			for (; i < maxFilters; i++) {
 				if (!(event.eventFilter->IsFilterEqual(filters[i], i))) break;
 			}
@@ -176,7 +176,7 @@ void EventInformation::RegisterEvent(Script* script, void** filters) {
 		if (script == event.script) {
 			if (!maxFilters) return;
 			if (!event.eventFilter->GetNumFilters()) continue;
-			UInt32 i = 0; // filter iterator
+			uint32_t i = 0; // filter iterator
 			for (; i < maxFilters; i++) {
 				if (!(event.eventFilter->IsFilterEqual(filters[i], i))) break;
 			}
@@ -202,8 +202,8 @@ void EventInformation::RemoveEvent(Script* script, void** filters) {
 		bool skip = false;
 
 		if (auto eventFilters = event.eventFilter) {
-			UInt32 maxFilters = eventFilters->GetNumFilters();
-			for (UInt32 i = 0; i < maxFilters; i++) {
+			uint32_t maxFilters = eventFilters->GetNumFilters();
+			for (uint32_t i = 0; i < maxFilters; i++) {
 				if (!(event.eventFilter->IsFilterEqual(filters[i], i))) {
 					skip = true;
 					break;

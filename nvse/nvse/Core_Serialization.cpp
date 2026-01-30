@@ -10,8 +10,8 @@
 Save file format:
 	Header
 		MODS				// stored in order of modIndex when game was saved
-			UInt8 numMods
-				UInt16	nameLen
+			uint8_t numMods
+				uint16_t	nameLen
 				char	modName[nameLen]
 		CROB				// a created base object
 			void * objectData		// recorded by TESForm::SaveForm() in mod file format
@@ -31,14 +31,14 @@ void Core_SaveCallback(void * reserved)
 	NVSESerializationInterface* intfc = &g_NVSESerializationInterface;
 	DataHandler* dhand = DataHandler::Get();
 	ModInfo** mods = dhand->modList.loadedMods;
-	UInt8 modCount = dhand->modList.loadedModCount;
+	uint8_t modCount = dhand->modList.loadedModCount;
 
 	// save the mod list
 	intfc->OpenRecord('MODS', 0);
 	intfc->WriteRecordData(&modCount, sizeof(modCount));
-	for (UInt32 i = 0; i < modCount; i++)
+	for (uint32_t i = 0; i < modCount; i++)
 	{
-		UInt16 nameLen = strlen(mods[i]->name);
+		uint16_t nameLen = strlen(mods[i]->name);
 		intfc->WriteRecordData(&nameLen, sizeof(nameLen));
 		intfc->WriteRecordData(mods[i]->name, nameLen);
 	}
@@ -53,7 +53,7 @@ void Core_SaveCallback(void * reserved)
 void Core_LoadCallback(void * reserved)
 {
 	NVSESerializationInterface* intfc = &g_NVSESerializationInterface;
-	UInt32 type, version, length;
+	uint32_t type, version, length;
 
 	while (intfc->GetNextRecordInfo(&type, &version, &length))
 	{
@@ -87,11 +87,11 @@ void Core_NewGameCallback(void * reserved)
 	}
 
 	DataHandler* dhand = DataHandler::Get();
-	UInt8 modCount = dhand->modList.loadedModCount;
+	uint8_t modCount = dhand->modList.loadedModCount;
 	ModInfo** mods = dhand->modList.loadedMods;
 
 	s_ModFixupTable = new ModInfo*[modCount];
-	for (UInt32 i = 0; i < modCount; i++)
+	for (uint32_t i = 0; i < modCount; i++)
 		s_ModFixupTable[i] = mods[i];
 
 	g_ArrayMap.Clean();
@@ -116,7 +116,7 @@ void Core_PreLoadCallback(void * reserved)
 	g_ArrayMap.Preload();
 	g_StringMap.Preload();
 
-	UInt32 type, version, length;
+	uint32_t type, version, length;
 
 	while (intfc->GetNextRecordInfo(&type, &version, &length)) {
 		switch (type) {
@@ -153,18 +153,18 @@ void Init_CoreSerialization_Callbacks()
 	Serialization::InternalSetPreLoadCallback(0, Core_PreLoadCallback);
 }
 
-UInt8	s_preloadModRefIDs[0xFF];
-UInt8	s_numPreloadMods = 0;
+uint8_t	s_preloadModRefIDs[0xFF];
+uint8_t	s_numPreloadMods = 0;
 
 bool ReadModListFromCoSave(NVSESerializationInterface * intfc)
 {
 	_MESSAGE("Reading mod list from co-save");
 
 	char name[0x104] = { 0 };
-	UInt16 nameLen = 0;
+	uint16_t nameLen = 0;
 
 	intfc->ReadRecordData(&s_numPreloadMods, sizeof(s_numPreloadMods));
-	for (UInt32 i = 0; i < s_numPreloadMods; i++) {
+	for (uint32_t i = 0; i < s_numPreloadMods; i++) {
 		intfc->ReadRecordData(&nameLen, sizeof(nameLen));
 		intfc->ReadRecordData(&name, nameLen);
 		name[nameLen] = 0;
@@ -186,7 +186,7 @@ bool BuildFixedModIndexTable()
 	return true;
 }
 
-UInt8 ResolveModIndexForPreload(UInt8 modIndexIn)
+uint8_t ResolveModIndexForPreload(uint8_t modIndexIn)
 {
 	return (modIndexIn < s_numPreloadMods) ? s_preloadModRefIDs[modIndexIn] : 0xFF;
 }

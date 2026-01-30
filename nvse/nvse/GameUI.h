@@ -19,7 +19,7 @@ class BSShaderAccumulator;
 class ShadowSceneNode;
 class NiSourceTexture;
 class FORenderedMenu;
-typedef Menu* (*_TempMenuByType)(UInt32 menuType);
+typedef Menu* (*_TempMenuByType)(uint32_t menuType);
 extern const _TempMenuByType TempMenuByType;
 
 // 584
@@ -29,32 +29,32 @@ public:
 	~InterfaceManager();
 
 	static InterfaceManager* GetSingleton(void);
-	static bool					IsMenuVisible(UInt32 menuType);
-	static Menu* GetMenuByType(UInt32 menuType);
-	static Menu* TempMenuByType(UInt32 menuType);
+	static bool					IsMenuVisible(uint32_t menuType);
+	static Menu* GetMenuByType(uint32_t menuType);
+	static Menu* TempMenuByType(uint32_t menuType);
 	//static TileMenu *			GetMenuByPath(const char * componentPath, const char ** slashPos);
 	//static Tile::Value *		GetMenuComponentValue(const char * componentPath);
 	//static Tile *				GetMenuComponentTile(const char * componentPath);
 
-	UInt32 GetTopVisibleMenuID();
+	uint32_t GetTopVisibleMenuID();
 	Tile* GetActiveTile();
 	VATSHighlightData* GetVATSHighlightData() {
 		return ThisCall<VATSHighlightData*>(0x602170, this);
 	}
 
-	UInt32					flags;				// 000
+	uint32_t					flags;				// 000
 	SceneGraph* sceneGraph004;		// 004
 	SceneGraph* sceneGraph008;		// 008
-	UInt32					currentMode;		// 00C	1 = GameMode; 2 = MenuMode
-	UInt32					unk010;				// 010
-	UInt32					unk014;				// 014
-	UInt32					pickLength;			// 018
-	UInt32					unk01C;				// 01C
-	UInt8					byte020;			// 020
-	UInt8					byte021;			// 021
-	UInt8					byte022;			// 022
-	UInt8					byte023;			// 023
-	UInt32					unk024;				// 024
+	uint32_t					currentMode;		// 00C	1 = GameMode; 2 = MenuMode
+	uint32_t					unk010;				// 010
+	uint32_t					unk014;				// 014
+	uint32_t					pickLength;			// 018
+	uint32_t					unk01C;				// 01C
+	uint8_t					byte020;			// 020
+	uint8_t					byte021;			// 021
+	uint8_t					byte022;			// 022
+	uint8_t					byte023;			// 023
+	uint32_t					unk024;				// 024
 	TileImage* cursor;			// 028
 	float					flt02C;				// 02C
 	float					flt030;				// 030
@@ -71,16 +71,16 @@ public:
 	int						unk05C;				// 05C
 	int						unk060;				// 060
 	int						unk064;				// 064
-	UInt32					unk068[2];			// 068
+	uint32_t					unk068[2];			// 068
 	tList<TESObjectREFR>	selectableRefs;		// 070
-	UInt32					unk078;				// 078
+	uint32_t					unk078;				// 078
 	bool					debugText;			// 07C
-	UInt8					byte07D;			// 07D
-	UInt8					byte07E;			// 07E
-	UInt8					byte07F;			// 07F
+	uint8_t					byte07D;			// 07D
+	uint8_t					byte07E;			// 07E
+	uint8_t					byte07F;			// 07F
 	NiNode* niNode080;			// 080
 	NiNode* niNode084;			// 084
-	UInt32					unk088;				// 088
+	uint32_t					unk088;				// 088
 	BSShaderAccumulator* shaderAccum08C;	// 08C
 	BSShaderAccumulator* shaderAccum090;	// 090
 	ShadowSceneNode* shadowScene094;	// 094
@@ -88,68 +88,68 @@ public:
 	Tile* menuRoot;			// 09C
 	Tile* globalsTile;		// 0A0	globals.xml
 	NiNode* unk0A4;			// 0A4 saw Tile? seen NiNode
-	UInt32					unk0A8;				// 0A8
+	uint32_t					unk0A8;				// 0A8
 	NiObject* unk0AC;			// 0AC seen NiAlphaProperty
-	UInt32					unk0B0[3];			// 0B0
+	uint32_t					unk0B0[3];			// 0B0
 	Tile* activeTileAlt;		// 0BC
-	UInt32					unk0C0;				// 0C0
-	UInt32					unk0C4;				// 0C4
-	UInt8					byte0C8;			// 0C8
-	UInt8					byte0C9;			// 0C9
-	UInt8					byte0CA;			// 0CA
-	UInt8					byte0CB;			// 0CB
+	uint32_t					unk0C0;				// 0C0
+	uint32_t					unk0C4;				// 0C4
+	uint8_t					byte0C8;			// 0C8
+	uint8_t					byte0C9;			// 0C9
+	uint8_t					byte0CA;			// 0CA
+	uint8_t					byte0CB;			// 0CB
 	Tile* activeTile;		// 0CC
 	Menu* activeMenu;		// 0D0
 	Tile* tile0D4;			// 0D4
 	Menu* menu0D8;			// 0D8
-	UInt32					unk0DC[2];			// 0DC
-	UInt8					msgBoxButton;		// 0E4 -1 if no button pressed
-	UInt8					byte0E5;			// 0E5
-	UInt8					byte0E6;			// 0E6
-	UInt8					byte0E7;			// 0E7
-	UInt32					unk0E8;				// 0E8
-	UInt8					byte0EC;			// 0EC
-	UInt8					byte0ED;			// 0ED
-	UInt8					byte0EE;			// 0EE
-	UInt8					byte0EF;			// 0EF
+	uint32_t					unk0DC[2];			// 0DC
+	uint8_t					msgBoxButton;		// 0E4 -1 if no button pressed
+	uint8_t					byte0E5;			// 0E5
+	uint8_t					byte0E6;			// 0E6
+	uint8_t					byte0E7;			// 0E7
+	uint32_t					unk0E8;				// 0E8
+	uint8_t					byte0EC;			// 0EC
+	uint8_t					byte0ED;			// 0ED
+	uint8_t					byte0EE;			// 0EE
+	uint8_t					byte0EF;			// 0EF
 	TESObjectREFR* debugSelection;	// 0F0	compared to activated object during Activate
-	UInt32					unk0F4;				// 0F4
-	UInt32					unk0F8;				// 0F8
+	uint32_t					unk0F4;				// 0F4
+	uint32_t					unk0F8;				// 0F8
 	TESObjectREFR* crosshairRef;		// 0FC
-	UInt32					unk100[4];			// 100
-	UInt8					byte110;			// 110
-	UInt8					pad111[3];			// 111
-	UInt32					menuStack[10];		// 114
+	uint32_t					unk100[4];			// 100
+	uint8_t					byte110;			// 110
+	uint8_t					pad111[3];			// 111
+	uint32_t					menuStack[10];		// 114
 	void* ptr13C;			// 13C	Points to a struct, possibly. First member is *bhkSimpleShapePhantom
-	UInt32					unk140[5];			// 140
-	UInt32					unk154;				// 154
-	UInt32					unk158;				// 158
-	UInt32					unk15C;
-	UInt32					time160;
-	UInt32					ptr164;
-	UInt8					isRenderedMenuSet;
-	UInt8					gap169[3];
+	uint32_t					unk140[5];			// 140
+	uint32_t					unk154;				// 154
+	uint32_t					unk158;				// 158
+	uint32_t					unk15C;
+	uint32_t					time160;
+	uint32_t					ptr164;
+	uint8_t					isRenderedMenuSet;
+	uint8_t					gap169[3];
 	FORenderedMenu* renderedMenu;
-	UInt8					isMovedMouseInRenderedMenu;
-	UInt8					byte171;			// 171
-	UInt8					byte172;			// 172
-	UInt8					byte173;			// 173
+	uint8_t					isMovedMouseInRenderedMenu;
+	uint8_t					byte171;			// 171
+	uint8_t					byte172;			// 172
+	uint8_t					byte173;			// 173
 	FOPipboyManager* pipboyManager;		// 174
-	UInt32* unk178;				// 178
-	NiTArray<UInt32>		array17C;			// 17C NiTPrimitiveArray@PackedMenu@BGSMenuPacker
-	UInt32					unk18C[130];		// 18C
+	uint32_t* unk178;				// 178
+	NiTArray<uint32_t>		array17C;			// 17C NiTPrimitiveArray@PackedMenu@BGSMenuPacker
+	uint32_t					unk18C[130];		// 18C
 	NiObject* unk394;			// 394 seen NiSourceTexture
-	UInt32					unk398[47];			// 398
-	NiTArray<UInt32>		array454;			// 454 NiTPrimitiveArray@TextureType@BSTextureManager
-	NiTArray<UInt32>		array464;			// 464 NiTPrimitiveArray@FilterMode@NiTexturingProperty
-	UInt32					unk474[16];			// 474
-	UInt8					byte4B4;			// 4B4
-	UInt8					byte4B5;			// 4B5
-	UInt8					byte4B6;			// 4B6
-	UInt8					byte4B7;			// 4B7
-	UInt32					unk4B8;				// 4B8
-	UInt32					pipBoyMode;			// 4BC
-	UInt32					unk4C0[48];			// 4C0
+	uint32_t					unk398[47];			// 398
+	NiTArray<uint32_t>		array454;			// 454 NiTPrimitiveArray@TextureType@BSTextureManager
+	NiTArray<uint32_t>		array464;			// 464 NiTPrimitiveArray@FilterMode@NiTexturingProperty
+	uint32_t					unk474[16];			// 474
+	uint8_t					byte4B4;			// 4B4
+	uint8_t					byte4B5;			// 4B5
+	uint8_t					byte4B6;			// 4B6
+	uint8_t					byte4B7;			// 4B7
+	uint32_t					unk4B8;				// 4B8
+	uint32_t					pipBoyMode;			// 4BC
+	uint32_t					unk4C0[48];			// 4C0
 };
 static_assert(sizeof(InterfaceManager) == 0x580);
 
@@ -159,10 +159,10 @@ struct HighlightedRef {
 };
 
 struct VATSHighlightData {
-	UInt32 highlightState;
+	uint32_t highlightState;
 	HighlightedRef highlightMain;
-	UInt32 numHighlighted;
-	SInt32 flashingRefIndex;
+	uint32_t numHighlighted;
+	int32_t flashingRefIndex;
 	HighlightedRef highlightedRefs[32];
 };
 
@@ -218,36 +218,36 @@ public:
 	~Menu();
 
 	virtual Menu* Destructor(bool doFree);
-	virtual void	SetField(UInt32 idx, Tile* value);
-	virtual void	Unk_02(UInt32 arg0, UInt32 arg1);
-	virtual void	HandleClick(SInt32 tileID, Tile* clickedTile);
-	virtual void	HandleMouseover(UInt32 arg0, Tile* activeTile);	//	Called on mouseover, activeTile is moused-over Tile
-	virtual void	Unk_05(UInt32 arg0, UInt32 arg1);
-	virtual void	Unk_06(UInt32 arg0, UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_07(UInt32 arg0, UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_08(UInt32 arg0, UInt32 arg1);
-	virtual void	Unk_09(UInt32 arg0, UInt32 arg1);
-	virtual void	Unk_0A(UInt32 arg0, UInt32 arg1);
+	virtual void	SetField(uint32_t idx, Tile* value);
+	virtual void	Unk_02(uint32_t arg0, uint32_t arg1);
+	virtual void	HandleClick(int32_t tileID, Tile* clickedTile);
+	virtual void	HandleMouseover(uint32_t arg0, Tile* activeTile);	//	Called on mouseover, activeTile is moused-over Tile
+	virtual void	Unk_05(uint32_t arg0, uint32_t arg1);
+	virtual void	Unk_06(uint32_t arg0, uint32_t arg1, uint32_t arg2);
+	virtual void	Unk_07(uint32_t arg0, uint32_t arg1, uint32_t arg2);
+	virtual void	Unk_08(uint32_t arg0, uint32_t arg1);
+	virtual void	Unk_09(uint32_t arg0, uint32_t arg1);
+	virtual void	Unk_0A(uint32_t arg0, uint32_t arg1);
 	virtual void	Unk_0B(void);	// Called every frame while the menu is active
-	virtual bool	HandleKeyboardInput(UInt32 inputChar);	// Return false for handling keyboard shortcuts
-	virtual UInt32	GetID(void);
-	virtual bool	Unk_0E(UInt32 arg0, UInt32 arg1);
+	virtual bool	HandleKeyboardInput(uint32_t inputChar);	// Return false for handling keyboard shortcuts
+	virtual uint32_t	GetID(void);
+	virtual bool	Unk_0E(uint32_t arg0, uint32_t arg1);
 	virtual void	Unk_0F(void);
 	virtual void	Unk_10(void);
 	virtual void	Unk_11(void);
 
 	TileMenu* tile;		// 04
-	UInt32			unk08;		// 08
-	UInt32			unk0C;		// 0C
-	UInt32			unk10;		// 10
-	UInt32			unk14;		// 14
-	UInt32			unk18;		// 18
-	UInt32			unk1C;		// 1C
-	UInt32			id;			// 20
-	UInt32			unk24;		// 24
+	uint32_t			unk08;		// 08
+	uint32_t			unk0C;		// 0C
+	uint32_t			unk10;		// 10
+	uint32_t			unk14;		// 14
+	uint32_t			unk18;		// 18
+	uint32_t			unk1C;		// 1C
+	uint32_t			id;			// 20
+	uint32_t			unk24;		// 24
 
 	Menu* HandleMenuInput(int tileID, Tile* clickedTile);
-	Tile* AddTileFromTemplate(Tile* destTile, const char* templateName, UInt32 arg3);
+	Tile* AddTileFromTemplate(Tile* destTile, const char* templateName, uint32_t arg3);
 };
 
 // 170
@@ -258,9 +258,9 @@ public:
 	RaceSexMenu();
 	~RaceSexMenu();
 
-	UInt32				unk028[44];		// 028
+	uint32_t				unk028[44];		// 028
 	TESNPC* npc;			// 0D8
-	UInt32				unk0DC[37];		// 0DC
+	uint32_t				unk0DC[37];		// 0DC
 
 	void UpdatePlayerHead(void);
 };
@@ -269,7 +269,7 @@ class LevelUpMenu : public Menu {
 public:
 	LevelUpMenu();
 	~LevelUpMenu();
-	UInt32 isPerkMenu;
+	uint32_t isPerkMenu;
 	TileText* tile2C;
 	TileImage* tile30;
 	TileImage* tile34;
@@ -280,21 +280,21 @@ public:
 	TileImage* tile48;
 	TileImage* tileBackBtn;
 	TileImage* tile50;
-	UInt32 unk54;
-	UInt32 unk58;
-	UInt32 unk5C;
-	UInt32 unk60;
-	UInt32 listBoxActorValue[12];
-	UInt32 listBoxPerk[12];
-	UInt32 unkC4[2];
+	uint32_t unk54;
+	uint32_t unk58;
+	uint32_t unk5C;
+	uint32_t unk60;
+	uint32_t listBoxActorValue[12];
+	uint32_t listBoxPerk[12];
+	uint32_t unkC4[2];
 };
 
 template <typename Item> struct ListBoxItem
 {
 	Tile* tile;
 	Item  object;
-	UInt8 byte08;
-	UInt8 pad09[3];
+	uint8_t byte08;
+	uint8_t pad09[3];
 };
 
 // 30
@@ -321,13 +321,13 @@ public:
 	Tile* selected;		// 10
 	Tile* scrollBar;		// 14
 	const char* templateName;	// 18
-	UInt16			itemCount;		// 1C
-	UInt16			pad1E;			// 1E
+	uint16_t			itemCount;		// 1C
+	uint16_t			pad1E;			// 1E
 	float			unk20;			// 20
 	float			storedListIndex;// 24
 	float			storedScrollbarPos;	// 28
-	UInt16			flags;			// 2C
-	UInt16			pad2E;			// 2E
+	uint16_t			flags;			// 2C
+	uint16_t			pad2E;			// 2E
 
 	Item* GetSelected()
 	{
@@ -342,7 +342,7 @@ public:
 		return NULL;
 	}
 
-	Tile* GetNthTile(SInt32 index)
+	Tile* GetNthTile(int32_t index)
 	{
 		if (index >= 0)
 		{
@@ -498,13 +498,13 @@ public:
 
 	void SetParentEnabled(bool isEnabled)
 	{
-		static UInt32 enabledTrait = TraitNameToID("_enabled");
+		static uint32_t enabledTrait = TraitNameToID("_enabled");
 		parentTile->SetFloat(enabledTrait, isEnabled);
 	}
 
 	bool IsEnabled()
 	{
-		static UInt32 enabledTrait = TraitNameToID("_enabled");
+		static uint32_t enabledTrait = TraitNameToID("_enabled");
 		return parentTile && parentTile->GetValueFloat(enabledTrait);
 	}
 
@@ -594,21 +594,21 @@ public:
 		};
 	};
 
-	UInt8							currentTab;		// 080
-	UInt8							pad081[3];		// 081
+	uint8_t							currentTab;		// 080
+	uint8_t							pad081[3];		// 081
 	TileImage* tileWorldMap;	// 084
 	float							lastRadioAnimationUpdateTime;// 088
-	UInt8							isShowAllNotes;	// 08C
-	UInt8							gap08D[3];
+	uint8_t							isShowAllNotes;	// 08C
+	uint8_t							gap08D[3];
 	BGSNote* currentNote;
-	UInt32							timeNoteViewed;
+	uint32_t							timeNoteViewed;
 	SoundList						holotapeDialogues;
 	BSSimpleArray<char>				holotapeSubtitles;	// 0A8
 	SoundList*				currentHolotapeDialogueSound;
-	UInt8							isHolotapeVoicePlaying;
-	UInt8							pad0BD[3];
+	uint8_t							isHolotapeVoicePlaying;
+	uint8_t							pad0BD[3];
 	float							holotapeTotalTime;
-	UInt32							holotapePlayStartTime;
+	uint32_t							holotapePlayStartTime;
 	float							radioVolume;
 	TESQuest* selectedQuest;
 	BGSQuestObjective* currentObjective;
@@ -621,15 +621,15 @@ public:
 	float						markerPos[3];		// 0FC
 	TESObjectCELL* currentCellOrWorldspace;// 108
 	TESWorldSpace* parentmostLastExtDoorWorldspace;// 10C
-	UInt8							currentWorldspaceHasNoParent;// 110
-	UInt8							gap111[3];
+	uint8_t							currentWorldspaceHasNoParent;// 110
+	uint8_t							gap111[3];
 	TESObjectREFR* lastExtDoor;	// 114
 	TESObjectREFR* selectedMarker;// 118
 	TESObjectCELL* localMapInteriorCell;		// 11C
 	float						clickStartPos[2];	// 120
-	UInt32							unk128;			// 128
+	uint32_t							unk128;			// 128
 	bool							fogOfWar;		// 12C
-	UInt8							pad12D[3];		// 12D
+	uint8_t							pad12D[3];		// 12D
 	ListBox<TESQuest>				questList;		// 130
 	ListBox<BGSNote>				noteList;		// 160
 	ListBox<TESObjectREFR>			radioRefList;	// 190
@@ -662,15 +662,15 @@ public:
 	TileImage* tile38;		// 38
 	TileImage* tile3C;		// 3C
 	ListBox<int>		buttonList;		// 40
-	UInt8				unk70;			// 70
-	UInt8				pad71[3];		// 71
+	uint8_t				unk70;			// 70
+	uint8_t				pad71[3];		// 71
 	float				unk74[3];		// 74
-	UInt32				unk80[2];		// 80
-	UInt32				tickCount;		// 88
-	UInt8				unk8C;			// 8C
-	UInt8				unk8D;			// 8D
-	UInt8				pad8E[2];		// 8E
-	UInt32				unk90;			// 90
+	uint32_t				unk80[2];		// 80
+	uint32_t				tickCount;		// 88
+	uint8_t				unk8C;			// 8C
+	uint8_t				unk8D;			// 8D
+	uint8_t				pad8E[2];		// 8E
+	uint32_t				unk90;			// 90
 };
 
 typedef ListBox<ContChangesEntry> MenuItemEntryList;
@@ -705,8 +705,8 @@ public:
 	TileImage* tile078;		// 078	IM_ItemIconBadge
 	TileRect* tile07C;		// 07C	IM_Headline_PlayerDTInfo
 	TileText* tile080;		// 080	IM_StrReq
-	UInt32				filter;			// 084
-	UInt32				unk088[12];		// 088
+	uint32_t				filter;			// 084
+	uint32_t				unk088[12];		// 088
 	MenuItemEntryList	itemList;		// 0B8
 	TileRect* tile0E8;		// 0E8
 	TileRect* tile0EC;		// 0EC
@@ -717,7 +717,7 @@ public:
 	TileRect* tile100;		// 100
 	TileRect* tile104;		// 104
 	TileRect* tile108;		// 108
-	UInt32				unk10C[6];		// 10C
+	uint32_t				unk10C[6];		// 10C
 };
 
 // 2A4
@@ -811,13 +811,13 @@ public:
 	TileImage* tile174;			// 174
 	TileImage* tile178;			// 178
 	TileImage* tile17C;			// 17C
-	ListBox<UInt32>					avIndexList180;		// 180
-	ListBox<UInt32>					avIndxeList1B0;		// 1B0
+	ListBox<uint32_t>					avIndexList180;		// 180
+	ListBox<uint32_t>					avIndxeList1B0;		// 1B0
 	ListBox<PerkRank>				perkRankList;		// 1E0
-	ListBox<UInt32>					miscStatIDList;		// 210
+	ListBox<uint32_t>					miscStatIDList;		// 210
 	ListBox<StatusEffect>			statusEffListBox;	// 240
 	ListBox<TESReputation>			reputationList;		// 270
-	UInt32							unk2A0;				// 2A0
+	uint32_t							unk2A0;				// 2A0
 
 	__forceinline static StatsMenu* Get() { return *(StatsMenu**)0x11DACE0; }
 };
@@ -828,7 +828,7 @@ public:
 	Tile3D();
 	~Tile3D();
 
-	UInt32			unk38[6];
+	uint32_t			unk38[6];
 };
 
 // 278
@@ -848,17 +848,17 @@ public:
 	struct SubtitleData;
 
 	struct Struct224 {
-		UInt8		byte00;		// 00
-		UInt8		pad01[3];	// 01
+		uint8_t		byte00;		// 00
+		uint8_t		pad01[3];	// 01
 		float		flt04;		// 04
 		float		flt08;		// 08
 		float		flt0C;		// 0C
 		float		flt10;		// 10
-		UInt32		unk14;		// 14
-		UInt32		tickCount;	// 18
-		UInt8		byte1C;		// 1C
-		UInt8		byte1D;		// 1D
-		UInt8		pad1E[2];	// 1E
+		uint32_t		unk14;		// 14
+		uint32_t		tickCount;	// 18
+		uint8_t		byte1C;		// 1C
+		uint8_t		byte1D;		// 1D
+		uint8_t		pad1E[2];	// 1E
 	};
 	enum VisibilityFlags {
 		kActionPoints = 0x1,
@@ -907,7 +907,7 @@ public:
 		kHUDState_Gambling = 0x19,
 	};
 
-	UInt32							unk028;			// 028
+	uint32_t							unk028;			// 028
 	TileImage* tile02C;		// 02C	HitPoints\meter
 	TileText* tile030;		// 030	HitPoints\justify_right_text
 	TileRect* tile034;		// 034	HitPoints\compass_window\compass_icon_group
@@ -994,42 +994,42 @@ public:
 	TileText* tile178;		// 178	HardcoreMode\Rads
 	TileText* tile17C;		// 17C	HardcoreMode\LMBs
 	TileImage* tile180;		// 180	CNDArrows
-	UInt32							unk184;			// 184
+	uint32_t							unk184;			// 184
 	float							flt188;			// 188
 	tList<QueuedMessage>			queuedMessages;	// 18C
-	UInt32							currMsgKey;		// 194
+	uint32_t							currMsgKey;		// 194
 	BSSimpleArray<SubtitleData>		subtitlesArr;	// 198
-	UInt32							unk1A8[4];		// 1A8
+	uint32_t							unk1A8[4];		// 1A8
 	TESObjectREFR* crosshairRef;	// 1B8
-	UInt32							unk1BC;			// 1BC
-	UInt32							visibilityOverrides;	// 1C0
-	UInt32							unk1C4;			// 1C4
+	uint32_t							unk1BC;			// 1BC
+	uint32_t							visibilityOverrides;	// 1C0
+	uint32_t							unk1C4;			// 1C4
 	TileRect* tile1C8;		// 1C8	Hokeys\hotkey_selector
 	TileRect* tile1CC;		// 1CC	Hokeys\hotkey_selector\HK_Item_0
-	UInt32							unk1D0;			// 1D0
+	uint32_t							unk1D0;			// 1D0
 	TileRect* tile1D4;		// 1D4	Hokeys\hotkey_selector\HK_Item_2
 	TileRect* tile1D8;		// 1D8	Hokeys\hotkey_selector\HK_Item_3
 	TileRect* tile1DC;		// 1DC	Hokeys\hotkey_selector\HK_Item_4
 	TileRect* tile1E0;		// 1E0	Hokeys\hotkey_selector\HK_Item_5
 	TileRect* tile1E4;		// 1E4	Hokeys\hotkey_selector\HK_Item_6
 	TileRect* tile1E8;		// 1E8	Hokeys\hotkey_selector\HK_Item_7
-	UInt32							unk1EC[5];		// 1EC
+	uint32_t							unk1EC[5];		// 1EC
 	NiControllerSequence* niContSeq;		// 200
-	UInt8							byte204;		// 204
-	UInt8							byte205;		// 205
-	UInt8							pad206[2];		// 206
-	UInt32							unk208[5];		// 208
+	uint8_t							byte204;		// 204
+	uint8_t							byte205;		// 205
+	uint8_t							pad206[2];		// 206
+	uint32_t							unk208[5];		// 208
 	Actor* healthTarget;	// 21C
-	UInt32							unk220;			// 220
+	uint32_t							unk220;			// 220
 	Struct224						unk224;			// 224
-	UInt32							unk244;			// 244
-	UInt32							unk248[4];		// 248
-	tList<UInt32>					list258;		// 258
-	UInt8							byte260;		// 260
-	UInt8							byte261;		// 261
-	UInt8							pad262[2];		// 262
-	tList<UInt32>					list264;		// 264
-	tList<UInt32>					list26C;		// 26C
+	uint32_t							unk244;			// 244
+	uint32_t							unk248[4];		// 248
+	tList<uint32_t>					list258;		// 258
+	uint8_t							byte260;		// 260
+	uint8_t							byte261;		// 261
+	uint8_t							pad262[2];		// 262
+	tList<uint32_t>					list264;		// 264
+	tList<uint32_t>					list26C;		// 26C
 	float							flt274;			// 274
 
 	static HUDMainMenu* GetSingleton() { return *(HUDMainMenu**)0x11D96C0; }
@@ -1081,29 +1081,29 @@ public:
 	TileText* tile0B4;		// 0B4
 	TileImage* tile0B8;		// 0B8
 	TileImage* tile0BC;		// 0BC
-	UInt32				unk0C0;			// 0C0
-	UInt32				unk0C4;			// 0C4
-	UInt32				unk0C8;			// 0C8
-	UInt32				unk0CC;			// 0CC
+	uint32_t				unk0C0;			// 0C0
+	uint32_t				unk0C4;			// 0C4
+	uint32_t				unk0C8;			// 0C8
+	uint32_t				unk0CC;			// 0CC
 	DList<Tile>			list0D0;		// 0D0
 	DList<Tile>			list0DC;		// 0DC
 	DList<Tile>			list0E8;		// 0E8
 	DList<Tile>			list0F4;		// 0F4
 	DList<Tile>			list100;		// 100
-	UInt32				unk10C[49];		// 10C
+	uint32_t				unk10C[49];		// 10C
 	TESLoadScreen* loadScr1D0;	// 1D0
 	void* ptr1D4;		// 1D4
 	void* ptr1D8;		// 1D8
 	TESLoadScreen* loadScr1DC;	// 1DC
-	UInt32				unk1E0;			// 1E0
-	UInt32				unk1E4;			// 1E4
+	uint32_t				unk1E0;			// 1E0
+	uint32_t				unk1E4;			// 1E4
 	TESWorldSpace* worldspace;	// 1E8
-	UInt32				unk1EC[8];		// 1EC
+	uint32_t				unk1EC[8];		// 1EC
 	NiSourceTexture* srcTexture[4];	// 20C
-	UInt32				unk21C;			// 21C
-	UInt8				byte220[2];		// 220
-	UInt16				flags;			// 222
-	UInt32				unk224[231];	// 224
+	uint32_t				unk21C;			// 21C
+	uint8_t				byte220[2];		// 220
+	uint16_t				flags;			// 222
+	uint32_t				unk224[231];	// 224
 };
 static_assert(sizeof(LoadingMenu) == 0x5C0);
 
@@ -1135,16 +1135,16 @@ public:
 	TileRect* tile070;		// 070
 	TESObjectREFR* containerRef;	// 074
 	tList<void>			list078;		// 078
-	UInt32				unk080;			// 080
-	UInt32				unk084;			// 084
-	UInt32				unk088;			// 088
-	UInt32				leftFilter;		// 08C
-	UInt32				rightFilter;	// 090
-	UInt32				unk094;			// 094
+	uint32_t				unk080;			// 080
+	uint32_t				unk084;			// 084
+	uint32_t				unk088;			// 088
+	uint32_t				leftFilter;		// 08C
+	uint32_t				rightFilter;	// 090
+	uint32_t				unk094;			// 094
 	MenuItemEntryList	leftItems;		// 098
 	MenuItemEntryList	rightItems;		// 0C8
 	MenuItemEntryList* currentItems;	// 0F8
-	UInt32				unk0FC[4];		// 0FC
+	uint32_t				unk0FC[4];		// 0FC
 };
 static_assert(sizeof(ContainerMenu) == 0x10C);
 
@@ -1155,29 +1155,29 @@ public:
 	DialogMenu();
 	~DialogMenu();
 
-	UInt32				unk028[2];		// 028
+	uint32_t				unk028[2];		// 028
 	TileImage* tile030;		// 030
 	TileText* tile034;		// 034
 	TileText* tile038;		// 038
 	TileImage* tile03C;		// 03C
 	ListBox<int>		topicList;		// 040
 	void* unk070;		// 070
-	UInt32				unk074;			// 074
+	uint32_t				unk074;			// 074
 	TESTopicInfo* info078;		// 078
-	UInt32				unk07C;			// 07C
+	uint32_t				unk07C;			// 07C
 	TESObjectREFR* partnerRef;	// 080
 	float				unk084[2];		// 084
 	void* unk08C;		// 08C
 	void* unk090;		// 090
 	TESTopicInfo* infos094[16];	// 094
 	void* unk0D4;		// 0D4
-	UInt32				unk0D8[3];		// 0D8
+	uint32_t				unk0D8[3];		// 0D8
 	TESTopicInfo* infos0E4[8];	// 0E4
-	UInt32				unk104[3];		// 104
+	uint32_t				unk104[3];		// 104
 	TESTopicInfo* infos110[6];	// 110
 	float				unk128;			// 128
 	void* unk12C;		// 12C	ImageSpaceModifierInstanceDOF
-	UInt32				unk130[3];		// 130
+	uint32_t				unk130[3];		// 130
 };
 
 // 4C
@@ -1193,11 +1193,11 @@ public:
 	TileText* tile34;		// 34
 	TileImage* tile38;		// 38
 	TileImage* tile3C;		// 3C
-	UInt32				unk40;			// 40
-	UInt8				isStarted;      //44
+	uint32_t				unk40;			// 40
+	uint8_t				isStarted;      //44
 	bool				isRest;         //45
-	UInt8				restKeyDebounce; //46
-	UInt8				pad47;           //47
+	uint8_t				restKeyDebounce; //46
+	uint8_t				pad47;           //47
 	float				selectedHours;	// 48
 
 	__forceinline static SleepWaitMenu *Get() {return *(SleepWaitMenu**)0x11DA920;}
@@ -1222,7 +1222,7 @@ public:
 
 		const char* optionName;				// 04
 		void			(*followupOption)(void);	// 08
-		UInt32			unk0C;						// 0C
+		uint32_t			unk0C;						// 0C
 	};
 
 	// 30
@@ -1232,8 +1232,8 @@ public:
 		~UserOption();
 
 		const char* templateName;					// 10
-		UInt32			currValue;						// 14
-		UInt32			unk18[4];						// 18
+		uint32_t			currValue;						// 14
+		uint32_t			unk18[4];						// 18
 		const char** currValueName;				// 28
 		void			(*onSelection)(UserOption*);	// 2C
 	};
@@ -1267,18 +1267,18 @@ public:
 	ListBox<Option>					options114;		// 114
 	ListBox<int>					listBox144;		// 144
 	ListBox<BGSSaveLoadFileEntry>	listBox174;		// 174
-	UInt32							unk1A4;			// 1A4
-	UInt32							flags;			// 1A8
-	UInt32							unk1AC;			// 1AC
-	UInt32							unk1B0;			// 1B0
+	uint32_t							unk1A4;			// 1A4
+	uint32_t							flags;			// 1A8
+	uint32_t							unk1AC;			// 1AC
+	uint32_t							unk1B0;			// 1B0
 	Option* option1B4;		// 1B4
 	NiSourceTexture* texture1B8;	// 1B8
-	UInt32							unk1BC;			// 1BC
+	uint32_t							unk1BC;			// 1BC
 	TileImage* tile1C0;		// 1C0
 	TileImage* tile1C4;		// 1C4
-	UInt32							unk1C8;			// 1C8
-	UInt32							unk1CC;			// 1CC
-	UInt32							unk1D0;			// 1D0
+	uint32_t							unk1C8;			// 1C8
+	uint32_t							unk1CC;			// 1CC
+	uint32_t							unk1D0;			// 1D0
 };
 static_assert(sizeof(StartMenu) == 0x1D4);
 
@@ -1289,7 +1289,7 @@ public:
 	LockPickMenu();
 	~LockPickMenu();
 
-	UInt32					unk28;			// 28
+	uint32_t					unk28;			// 28
 	TileRect* tile2C;		// 2C
 	TileRect* tile30;		// 30
 	TileRect* tile34;		// 34
@@ -1307,19 +1307,19 @@ public:
 	TileImage* tile64;		// 64
 	TileImage* tile68;		// 68
 	TESObjectREFR* targetRef;		// 6C
-	UInt32					lockLevel;		// 70
-	UInt32					skillLevel;		// 74
+	uint32_t					lockLevel;		// 70
+	uint32_t					skillLevel;		// 74
 	float					fSkillLevel;	// 78
-	UInt32					unk7C;			// 7C
-	UInt32					unk80;			// 80
+	uint32_t					unk7C;			// 7C
+	uint32_t					unk80;			// 80
 	float					flt84;			// 84
-	UInt32					sweetSpotLen;	// 88
+	uint32_t					sweetSpotLen;	// 88
 	float					cylinderAngle;	// 8C
 	float					pickAngle;		// 90
 	float					pickHealth;		// 94
-	UInt8					byte98;			// 98
-	UInt8					byte99;			// 99
-	UInt8					pad9A[2];		// 99
+	uint8_t					byte98;			// 98
+	uint8_t					byte99;			// 99
+	uint8_t					pad9A[2];		// 99
 	NiControllerSequence* ctrlSeq9C;		// 9C
 	NiControllerSequence* ctrlSeqA0;		// A0
 	NiControllerManager* ctrlManager;	// A4
@@ -1388,23 +1388,23 @@ public:
 	TileText* messageTitle;			// 30
 	BSString				currentText;			// 34
 	BSString				displayedText;			// 3C	Copy of currentText + cursor
-	UInt32				cursorIndex;			// 44
+	uint32_t				cursorIndex;			// 44
 	union {
-		UInt32			maxPixelLength;			// 48
+		uint32_t			maxPixelLength;			// 48
 		struct {
-			UInt16		minLength;				// 48
-			UInt16		maxLength;				// 4A
+			uint16_t		minLength;				// 48
+			uint16_t		maxLength;				// 4A
 		};
 	};
 	union {
-		UInt32			fontID;					// 4C
+		uint32_t			fontID;					// 4C
 		TileRect* inputRect;				// 4C
 	};
-	UInt32				cursorBlink;			// 50	Value used for the cursor blink cycles (every 500ms)
-	UInt8				cursorVisible;			// 54
-	UInt8				isActive;				// 55
-	UInt8				byte56;					// 56
-	UInt8				miscFlags;				// 57
+	uint32_t				cursorBlink;			// 50	Value used for the cursor blink cycles (every 500ms)
+	uint8_t				cursorVisible;			// 54
+	uint8_t				isActive;				// 55
+	uint8_t				byte56;					// 56
+	uint8_t				miscFlags;				// 57
 	union {
 		bool			(*menuCallback)(char*);	// 58
 		Script* scriptCallback;		// 58
@@ -1445,20 +1445,20 @@ public:
 	TileRect* tile07C;		// 07C
 	TESObjectREFR* merchantRef;	// 080
 	float				barterTotalSum;	// 084
-	UInt32				unk088;			// 088
-	UInt32				playerGold;		// 08C
-	UInt32				merchantGold;	// 090
+	uint32_t				unk088;			// 088
+	uint32_t				playerGold;		// 08C
+	uint32_t				merchantGold;	// 090
 	float				buyValueMult;	// 094
 	float				sellValueMult;	// 098
-	UInt32				leftFilter;		// 09C
-	UInt32				rightFilter;	// 0A0
-	UInt32				unk0A4;			// 0A4
+	uint32_t				leftFilter;		// 09C
+	uint32_t				rightFilter;	// 0A0
+	uint32_t				unk0A4;			// 0A4
 	MenuItemEntryList	leftItems;		// 0A8
 	MenuItemEntryList	rightItems;		// 0D8
 	MenuItemEntryList* currentItems;	// 108
 	BarterItemList		leftBarter;		// 10C
 	BarterItemList		rightBarter;	// 114
-	UInt32				unk11C;			// 11C
+	uint32_t				unk11C;			// 11C
 };
 
 // 1DC
@@ -1468,32 +1468,32 @@ public:
 	HackingMenu();
 	~HackingMenu();
 
-	UInt32				unk028[85];		// 028
-	UInt32				attemptsLeft;	// 17C
-	UInt32				unk180[6];		// 180
+	uint32_t				unk028[85];		// 028
+	uint32_t				attemptsLeft;	// 17C
+	uint32_t				unk180[6];		// 180
 	TESObjectREFR* targetRef;		// 198
-	UInt32				unk19C[16];		// 19C
+	uint32_t				unk19C[16];		// 19C
 };
 static_assert(sizeof(HackingMenu) == 0x1DC);
 
 struct ActorHitData;
 struct VATSTargetInfo {
-	UInt32 actionType;
-	UInt8 isSuccess;
-	UInt8 byte05;
-	UInt8 isMysteriousStrangerVisit;
-	UInt8 byte07;
-	UInt8 remainingShotsToFire_Burst;
-	UInt8 count09;
-	UInt8 gap0A[2];
+	uint32_t actionType;
+	uint8_t isSuccess;
+	uint8_t byte05;
+	uint8_t isMysteriousStrangerVisit;
+	uint8_t byte07;
+	uint8_t remainingShotsToFire_Burst;
+	uint8_t count09;
+	uint8_t gap0A[2];
 	TESObjectREFR* ref;
-	UInt32 avCode;
+	uint32_t avCode;
 	ActorHitData* hitData;
 	float unk18;
 	float unk1C;
 	float apCost;
-	UInt8 isMissFortuneVisit;
-	UInt8 gap25[3];
+	uint8_t isMissFortuneVisit;
+	uint8_t gap25[3];
 };
 static_assert(sizeof(VATSTargetInfo) == 0x28);
 // 144
@@ -1505,7 +1505,7 @@ public:
 
 	virtual void		Unk_12(void);
 
-	UInt32				unk028;			// 028
+	uint32_t				unk028;			// 028
 	TileImage* tile02C;		// 02C
 	TileImage* tile030;		// 030
 	TileImage* tile034;		// 034
@@ -1537,15 +1537,15 @@ public:
 	TileText* tile09C;		// 09C
 	TileImage* tile0A0;		// 0A0
 	TileImage* tile0A4;		// 0A4
-	UInt32				unk0A8[2];		// 0A8
-	ListBox<UInt32>		queuedActions;	// 0B0
-	UInt32				unk0E0[18];		// 0E0
+	uint32_t				unk0A8[2];		// 0A8
+	ListBox<uint32_t>		queuedActions;	// 0B0
+	uint32_t				unk0E0[18];		// 0E0
 	TESObjectREFR* targetRef;		// 128
-	UInt32				unk12C;			// 12C
+	uint32_t				unk12C;			// 12C
 	void* ptr130;		// 130
 	float				unk134[3];		// 134
-	UInt8				unk140;			// 140
-	UInt8				pad141[3];		// 141
+	uint8_t				unk140;			// 140
+	uint8_t				pad141[3];		// 141
 };
 
 // FC
@@ -1555,9 +1555,9 @@ public:
 	ComputersMenu();
 	~ComputersMenu();
 
-	UInt32				unk28[33];		// 28
+	uint32_t				unk28[33];		// 28
 	TESObjectREFR* targetRef;		// AC
-	UInt32				unkB0[19];		// B0
+	uint32_t				unkB0[19];		// B0
 };
 
 // A0
@@ -1584,9 +1584,9 @@ public:
 	TileImage* tile60;		// 60
 	TileImage* tile64;		// 64
 	MenuItemEntryList	itemList;		// 68
-	UInt32				unk98;			// 98
-	UInt8				skill;			// 9C
-	UInt8				pad9D[3];		// 9D
+	uint32_t				unk98;			// 98
+	uint8_t				skill;			// 9C
+	uint8_t				pad9D[3];		// 9D
 };
 
 // 90
@@ -1622,9 +1622,9 @@ public:
 
 	virtual void		Unk_12(void);
 
-	UInt32				unk28[16];		// 28
+	uint32_t				unk28[16];		// 28
 	Actor* companionRef;	// 68
-	UInt32				unk6C[7];		// 6C
+	uint32_t				unk6C[7];		// 6C
 };
 
 // 88
@@ -1634,7 +1634,7 @@ public:
 	TraitSelectMenu();
 	~TraitSelectMenu();
 
-	UInt32				unk28[24];		// 28
+	uint32_t				unk28[24];		// 28
 };
 
 // 104
@@ -1660,12 +1660,12 @@ public:
 	TileText* tile05C;		// 05C	RM_SkillRequirementHeader
 	TESObjectREFR* sourceRef;		// 060
 	TESRecipeCategory* category;		// 064
-	UInt32						unk068;			// 068
+	uint32_t						unk068;			// 068
 	ListBox<TESRecipe>			recipeList;		// 06C
 	ListBox<TESRecipe>* unk09C;		// 09C
 	ListBox<RecipeComponent>	componentList;	// 0A0
 	ListBox<Condition>			conditionList;	// 0D0
-	UInt32						unk100;			// 100
+	uint32_t						unk100;			// 100
 };
 
 // E88
@@ -1675,9 +1675,9 @@ public:
 	CaravanMenu();
 	~CaravanMenu();
 
-	UInt32					unk028[54];		// 028
+	uint32_t					unk028[54];		// 028
 	TESObjectREFR* opponentRef;	// 100
-	UInt32					unk104[865];	// 104
+	uint32_t					unk104[865];	// 104
 };
 
 // 8C
@@ -1698,8 +1698,8 @@ public:
 	TileImage* tile40;		// 40	LUM_ContinueButton
 	TileImage* tile44;		// 44	stats_icon_badge
 	TileImage* tile48;		// 48	TM_DescriptionScrollbar
-	UInt32				numSelected;	// 4C
-	UInt32				maxSelect;		// 50
+	uint32_t				numSelected;	// 4C
+	uint32_t				maxSelect;		// 50
 	ListBox<BGSPerk>	perkListBox;	// 54
 	tList<BGSPerk>		perkList;		// 84
 };
@@ -1735,26 +1735,26 @@ public:
 
 	NiAVObject* unk04;
 	BSFadeNode* node08;
-	UInt32 unk0C;
+	uint32_t unk0C;
 	NiSourceTexture* srcTexture;
 	NiNode* node14;
 	TileMenu* tileMenu;
-	UInt32 unk1C[2];
+	uint32_t unk1C[2];
 	NiCamera* camera;
-	UInt8 byte028;
-	UInt8 gap028[3];
-	UInt32 unk02C[5];
-	UInt32 blurRadius;
-	UInt32 blurIntensity;
-	UInt32 unk048;
-	UInt8 byte04C;
-	UInt8 byte04D;
-	UInt8 gap04E[2];
+	uint8_t byte028;
+	uint8_t gap028[3];
+	uint32_t unk02C[5];
+	uint32_t blurRadius;
+	uint32_t blurIntensity;
+	uint32_t unk048;
+	uint8_t byte04C;
+	uint8_t byte04D;
+	uint8_t gap04E[2];
 	float time050;
 	float burstDuration;
 	float burstIntensity2;
 	float burstIntensity;
-	UInt32 unk060[30];
+	uint32_t unk060[30];
 };
 
 // 70
@@ -1766,7 +1766,7 @@ public:
 	NiVector3 localTranslate;
 	NiAVObject* powerButton;
 	float fltE8;
-	UInt8 bytEC;
+	uint8_t bytEC;
 };
 //static_assert(sizeof(FORenderedTerminal) == 0x70); FIXME
 
@@ -1786,23 +1786,23 @@ public:
 	float pipboyKnobScrollPositions[3];
 	float pipboyKnobScrollRates[3];
 	float tabKnobMinPosition;
-	UInt32 unk134;
-	UInt32 unk138;
-	UInt32 unk13C;
+	uint32_t unk134;
+	uint32_t unk138;
+	uint32_t unk13C;
 	float tabKnobMaxPosition;
-	UInt8 byte144;
-	UInt8 gap145[3];
-	UInt32 unk148;
-	UInt32 unk14C;
-	UInt8 byte150;
-	UInt8 gap151[3];
+	uint8_t byte144;
+	uint8_t gap145[3];
+	uint32_t unk148;
+	uint32_t unk14C;
+	uint8_t byte150;
+	uint8_t gap151[3];
 	BSSoundHandle sound154;
-	UInt8 byte160;
-	UInt8 byte161;
-	UInt8 byte162;
-	UInt8 gap163;
+	uint8_t byte160;
+	uint8_t byte161;
+	uint8_t byte162;
+	uint8_t gap163;
 	float time164;
 	float lightEffectFadeDuration;
-	UInt32 unk16C;
+	uint32_t unk16C;
 };
 static_assert(sizeof(FOPipboyManager) == 0x170);

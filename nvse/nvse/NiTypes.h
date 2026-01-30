@@ -6,14 +6,14 @@
 
 #if RUNTIME
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-const UInt32 kNiTMapLookupAddr = 0x853130;
+#if 1
+const uint32_t kNiTMapLookupAddr = 0x853130;
 #else
 #error
 #endif
 
 #else
-const UInt32 _NiTMap_Lookup = 0;
+const uint32_t _NiTMap_Lookup = 0;
 #endif
 
 // 08
@@ -136,8 +136,8 @@ struct NiFrustum
 	float	b;			// 0C
 	float	n;			// 10
 	float	f;			// 14
-	UInt8	o;			// 18
-	UInt8	pad19[3];	// 19
+	uint8_t	o;			// 18
+	uint8_t	pad19[3];	// 19
 };
 
 // 10
@@ -182,33 +182,33 @@ struct NiPlane
 template <typename T_Data>
 struct NiTArray
 {
-	virtual void* Destroy(UInt32 doFree);
+	virtual void* Destroy(uint32_t doFree);
 
 	T_Data* data;			// 04
-	UInt16		capacity;		// 08 - init'd to size of preallocation
-	UInt16		firstFreeEntry;	// 0A - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
-	UInt16		numObjs;		// 0C - init'd to 0
-	UInt16		growSize;		// 0E - init'd to size of preallocation
+	uint16_t		capacity;		// 08 - init'd to size of preallocation
+	uint16_t		firstFreeEntry;	// 0A - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
+	uint16_t		numObjs;		// 0C - init'd to 0
+	uint16_t		growSize;		// 0E - init'd to size of preallocation
 
-	T_Data operator[](UInt32 idx)
+	T_Data operator[](uint32_t idx)
 	{
 		if (idx < firstFreeEntry)
 			return data[idx];
 		return NULL;
 	}
 
-	T_Data Get(UInt32 idx) { return data[idx]; }
+	T_Data Get(uint32_t idx) { return data[idx]; }
 
-	UInt16 Length() { return firstFreeEntry; }
-	void AddAtIndex(UInt32 index, T_Data* item);	// no bounds checking
-	void SetCapacity(UInt16 newCapacity);	// grow and copy data if needed
+	uint16_t Length() { return firstFreeEntry; }
+	void AddAtIndex(uint32_t index, T_Data* item);	// no bounds checking
+	void SetCapacity(uint16_t newCapacity);	// grow and copy data if needed
 
 	class Iterator
 	{
 		friend NiTArray;
 
 		T_Data* pData;
-		UInt16		count;
+		uint16_t		count;
 
 	public:
 		bool End() const { return !count; }
@@ -230,9 +230,9 @@ struct NiTArray
 
 #if RUNTIME
 
-template <typename T> void NiTArray<T>::AddAtIndex(UInt32 index, T* item)
+template <typename T> void NiTArray<T>::AddAtIndex(uint32_t index, T* item)
 {
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+#if 1
 	ThisStdCall(0x00869640, this, index, item);
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
 	ThisStdCall(0x00869110, this, index, item);
@@ -241,9 +241,9 @@ template <typename T> void NiTArray<T>::AddAtIndex(UInt32 index, T* item)
 #endif
 }
 
-template <typename T> void NiTArray<T>::SetCapacity(UInt16 newCapacity)
+template <typename T> void NiTArray<T>::SetCapacity(uint16_t newCapacity)
 {
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+#if 1
 	ThisStdCall(0x008696E0, this, newCapacity);
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
 	ThisStdCall(0x00869190, this, newCapacity);
@@ -266,20 +266,20 @@ public:
 
 	void	** _vtbl;		// 00
 	T		* data;			// 04
-	UInt32	capacity;		// 08 - init'd to size of preallocation
-	UInt32	firstFreeEntry;	// 0C - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
-	UInt32	numObjs;		// 10 - init'd to 0
-	UInt32	growSize;		// 14 - init'd to size of preallocation
+	uint32_t	capacity;		// 08 - init'd to size of preallocation
+	uint32_t	firstFreeEntry;	// 0C - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
+	uint32_t	numObjs;		// 10 - init'd to 0
+	uint32_t	growSize;		// 14 - init'd to size of preallocation
 
-	T operator[](UInt32 idx) {
+	T operator[](uint32_t idx) {
 		if (idx < firstFreeEntry)
 			return data[idx];
 		return NULL;
 	}
 
-	T Get(UInt32 idx) { return (*this)[idx]; }
+	T Get(uint32_t idx) { return (*this)[idx]; }
 
-	UInt32 Length(void) { return firstFreeEntry; }
+	uint32_t Length(void) { return firstFreeEntry; }
 };
 
 // 8
@@ -292,7 +292,7 @@ struct NiTSet
 };
 
 // 10
-// this is a NiTPointerMap <UInt32, T_Data>
+// this is a NiTPointerMap <uint32_t, T_Data>
 // todo: generalize key
 template <typename T_Data>
 class NiTPointerMap
@@ -301,25 +301,25 @@ public:
 	NiTPointerMap();
 	virtual ~NiTPointerMap();
 
-	virtual UInt32	CalculateBucket(UInt32 key);
-	virtual bool	CompareKey(UInt32 lhs, UInt32 rhs);
-	virtual void	Fn_03(UInt32 arg0, UInt32 arg1, UInt32 arg2);	// assign to entry
-	virtual void	Fn_04(UInt32 arg);
+	virtual uint32_t	CalculateBucket(uint32_t key);
+	virtual bool	CompareKey(uint32_t lhs, uint32_t rhs);
+	virtual void	Fn_03(uint32_t arg0, uint32_t arg1, uint32_t arg2);	// assign to entry
+	virtual void	Fn_04(uint32_t arg);
 	virtual void	Fn_05(void);	// locked operations
 	virtual void	Fn_06(void);	// locked operations
 
 	struct Entry
 	{
 		Entry		*next;
-		UInt32		key;
+		uint32_t		key;
 		T_Data		*data;
 	};
 
-	UInt32		m_numBuckets;	// 04
+	uint32_t		m_numBuckets;	// 04
 	Entry		**m_buckets;	// 08
-	UInt32		m_numItems;		// 0C
+	uint32_t		m_numItems;		// 0C
 
-	T_Data *Lookup(UInt32 key) const
+	T_Data *Lookup(uint32_t key) const
 	{
 		for (Entry *traverse = m_buckets[key % m_numBuckets]; traverse; traverse = traverse->next)
 			if (traverse->key == key) return traverse->data;
@@ -328,7 +328,7 @@ public:
 
 	bool Insert(Entry *newEntry)
 	{
-		UInt32 bucket = newEntry->key % m_numBuckets;
+		uint32_t bucket = newEntry->key % m_numBuckets;
 		Entry *entry = m_buckets[bucket], *prev;
 		if (entry)
 		{
@@ -373,7 +373,7 @@ public:
 			}
 		}
 		T_Data* Get() const { return entry->data; }
-		UInt32 Key() const { return entry->key; }
+		uint32_t Key() const { return entry->key; }
 	};
 
 	Iterator Begin() { return Iterator(*this); }
@@ -407,16 +407,16 @@ public:
 	}
 
 	virtual NiTMapBase	*Destructor(bool doFree);
-	virtual UInt32		Hash(T_Key key);
+	virtual uint32_t		Hash(T_Key key);
 	virtual void		Equal(T_Key key1, T_Key key2);
 	virtual void		FillEntry(Entry entry, T_Key key, T_Data data);
 	virtual	void		Unk_004(void *arg0);
 	virtual	void		Unk_005();
 	virtual	void		Unk_006();
 
-	UInt32		numBuckets;	// 04
+	uint32_t		numBuckets;	// 04
 	Entry		**buckets;	// 08
-	UInt32		numItems;	// 0C
+	uint32_t		numItems;	// 0C
 
 	class Iterator
 	{
@@ -424,7 +424,7 @@ public:
 
 		NiTMapBase		*m_table;
 		Entry			*m_entry;
-		UInt32			m_bucket;
+		uint32_t			m_bucket;
 
 		void FindValid()
 		{
@@ -469,7 +469,7 @@ public:
 	NiTStringPointerMap();
 	~NiTStringPointerMap();
 
-	UInt32	unk010;
+	uint32_t	unk010;
 };
 
 // not sure how much of this is in NiTListBase and how much is in NiTPointerListBase
@@ -495,7 +495,7 @@ public:
 //	void	** _vtbl;	// 000
 	Node	* start;	// 004
 	Node	* end;		// 008
-	UInt32	numItems;	// 00C
+	uint32_t	numItems;	// 00C
 };
 
 // 10
@@ -527,8 +527,8 @@ public:
 	virtual void	Destroy(bool destroy);
 
 //	void	** _vtbl;	// 00
-	UInt32	unk04;		// 04
-	UInt32	unk08;		// 08
-	UInt32	unk0C;		// 0C
-	UInt32	unk10;		// 10
+	uint32_t	unk04;		// 04
+	uint32_t	unk08;		// 08
+	uint32_t	unk0C;		// 0C
+	uint32_t	unk10;		// 10
 };

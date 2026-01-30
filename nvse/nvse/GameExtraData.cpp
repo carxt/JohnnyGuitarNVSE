@@ -19,7 +19,7 @@ struct GetMatchingEquipped {
 			// quick check - needs an extendData or can't be equipped
 			ExtraContainerChanges::ExtendDataList* pExtendList = pEntryData->extendData;
 			if (pExtendList && m_matcher.Matches(pEntryData->type)) {
-				SInt32 n = 0;
+				int32_t n = 0;
 				ExtraDataList* pExtraDataList = pExtendList->GetNthItem(n);
 				while (pExtraDataList) {
 					if (pExtraDataList->HasType(kExtraData_Worn) || pExtraDataList->HasType(kExtraData_WornLeft)) {
@@ -60,31 +60,31 @@ static_assert(sizeof(ExtraWornLeft) == 0x0C);
 static_assert(sizeof(ExtraCannotWear) == 0x0C);
 static_assert(sizeof(ExtraContainerChanges::EntryData) == 0x0C);
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-static const UInt32 s_ExtraContainerChangesVtbl = 0x01015BB8;	//	0x0100fb78;
-static const UInt32 s_ExtraWornVtbl = 0x01015BDC;
-//static const UInt32 s_ExtraWornLeftVtbl							= 0x01015BE8;
-static const UInt32 s_ExtraCannotWearVtbl = 0x01015BF4;
+#if 1
+static const uint32_t s_ExtraContainerChangesVtbl = 0x01015BB8;	//	0x0100fb78;
+static const uint32_t s_ExtraWornVtbl = 0x01015BDC;
+//static const uint32_t s_ExtraWornLeftVtbl							= 0x01015BE8;
+static const uint32_t s_ExtraCannotWearVtbl = 0x01015BF4;
 
-static const UInt32 s_ExtraOwnershipVtbl = 0x010158B4;	//	0x0100f874;
-static const UInt32 s_ExtraRankVtbl = 0x010158CC;	//	0x0100f88c;
-static const UInt32 s_ExtraActionVtbl = 0x01015BAC;
-static const UInt32 s_ExtraFactionChangesVtbl = 0x01015F30;
-static const UInt32 s_ExtraScriptVtbl = 0X1015914;
+static const uint32_t s_ExtraOwnershipVtbl = 0x010158B4;	//	0x0100f874;
+static const uint32_t s_ExtraRankVtbl = 0x010158CC;	//	0x0100f88c;
+static const uint32_t s_ExtraActionVtbl = 0x01015BAC;
+static const uint32_t s_ExtraFactionChangesVtbl = 0x01015F30;
+static const uint32_t s_ExtraScriptVtbl = 0X1015914;
 
-//static const UInt32 s_ExtraScript_init							= 0x0042C760;
+//static const uint32_t s_ExtraScript_init							= 0x0042C760;
 
-static const UInt32 s_ExtraHealthVtbl = 0x010158E4;
-static const UInt32 s_ExtraLockVtbl = 0x0101589C;
-static const UInt32 s_ExtraCountVtbl = 0x010158D8;
-static const UInt32 s_ExtraTeleportVtbl = 0x010158A8;
-static const UInt32 s_ExtraWeaponModFlagsVtbl = 0x010159A4;
+static const uint32_t s_ExtraHealthVtbl = 0x010158E4;
+static const uint32_t s_ExtraLockVtbl = 0x0101589C;
+static const uint32_t s_ExtraCountVtbl = 0x010158D8;
+static const uint32_t s_ExtraTeleportVtbl = 0x010158A8;
+static const uint32_t s_ExtraWeaponModFlagsVtbl = 0x010159A4;
 
-static const UInt32 s_ExtraHotkeyVtbl = 0x0101592C;
+static const uint32_t s_ExtraHotkeyVtbl = 0x0101592C;
 
-static const UInt32 s_ExtraSemaphore = 0x011C3920;
-static const UInt32 s_SemaphoreWait = 0x0040FBF0;
-static const UInt32 s_SemaphoreLeave = 0x0040FBA0;
+static const uint32_t s_ExtraSemaphore = 0x011C3920;
+static const uint32_t s_SemaphoreWait = 0x0040FBF0;
+static const uint32_t s_SemaphoreLeave = 0x0040FBA0;
 
 #else
 #error
@@ -96,14 +96,14 @@ void* GetExtraSemaphore() {
 	return *g_ExtraSemaphore;
 };
 
-void CallSemaphore(void* Semaphore, UInt32 SemaphoreFunc) {
+void CallSemaphore(void* Semaphore, uint32_t SemaphoreFunc) {
 	_asm pushad
 	_asm mov ecx, Semaphore
 	_asm call SemaphoreFunc
 	_asm popad
 };
 
-void CallSemaphore4(void* Semaphore, UInt32 SemaphoreFunc) {
+void CallSemaphore4(void* Semaphore, uint32_t SemaphoreFunc) {
 	_asm pushad
 	_asm push ecx;	does not seem to be used at all
 	_asm mov ecx, Semaphore
@@ -147,7 +147,7 @@ void ExtraContainerChanges::EntryData::Cleanup() {
 }
 
 ExtraContainerChanges* ExtraContainerChanges::Create() {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraContainerChanges));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraContainerChanges));
 	dataPtr[0] = kVtbl_ExtraContainerChanges;
 	dataPtr[1] = kExtraData_ContainerChanges;
 	dataPtr[2] = 0;
@@ -174,16 +174,16 @@ void ExtraContainerChanges::Cleanup() {
 	}
 }
 
-BSExtraData* BSExtraData::Create(UInt8 xType, UInt32 size, UInt32 vtbl) {
+BSExtraData* BSExtraData::Create(uint8_t xType, uint32_t size, uint32_t vtbl) {
 	BSExtraData* xData = (BSExtraData*)GameHeapAlloc(size);
 	MemZero(xData, size);
-	*(UInt32*)xData = vtbl;
+	*(uint32_t*)xData = vtbl;
 	xData->type = xType;
 	return xData;
 }
 
 ExtraHealth* ExtraHealth::Create(float _health) {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraHealth));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraHealth));
 	dataPtr[0] = kVtbl_ExtraHealth;
 	dataPtr[1] = kExtraData_Health;
 	dataPtr[2] = 0;
@@ -193,7 +193,7 @@ ExtraHealth* ExtraHealth::Create(float _health) {
 }
 
 ExtraWorn* ExtraWorn::Create() {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraWorn));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraWorn));
 	dataPtr[0] = kVtbl_ExtraWorn;
 	dataPtr[1] = kExtraData_Worn;
 	dataPtr[2] = 0;
@@ -201,7 +201,7 @@ ExtraWorn* ExtraWorn::Create() {
 }
 
 ExtraCannotWear* ExtraCannotWear::Create() {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraCannotWear));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraCannotWear));
 	dataPtr[0] = kVtbl_ExtraCannotWear;
 	dataPtr[1] = kExtraData_CannotWear;
 	dataPtr[2] = 0;
@@ -209,18 +209,18 @@ ExtraCannotWear* ExtraCannotWear::Create() {
 }
 
 ExtraLock* ExtraLock::Create() {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraLock));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraLock));
 	dataPtr[0] = kVtbl_ExtraLock;
 	dataPtr[1] = kExtraData_Lock;
 	dataPtr[2] = 0;
-	UInt32* lockData = (UInt32*)GameHeapAlloc(sizeof(Data));
+	uint32_t* lockData = (uint32_t*)GameHeapAlloc(sizeof(Data));
 	MemZero(lockData, sizeof(Data));
-	dataPtr[3] = (UInt32)lockData;
+	dataPtr[3] = (uint32_t)lockData;
 	return (ExtraLock*)dataPtr;
 }
 
-ExtraCount* ExtraCount::Create(UInt32 count) {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraCount));
+ExtraCount* ExtraCount::Create(uint32_t count) {
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraCount));
 	dataPtr[0] = kVtbl_ExtraCount;
 	dataPtr[1] = kExtraData_Count;
 	dataPtr[2] = 0;
@@ -229,18 +229,18 @@ ExtraCount* ExtraCount::Create(UInt32 count) {
 }
 
 ExtraTeleport* ExtraTeleport::Create() {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraTeleport));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraTeleport));
 	dataPtr[0] = kVtbl_ExtraTeleport;
 	dataPtr[1] = kExtraData_Teleport;
 	dataPtr[2] = 0;
-	UInt32* teleData = (UInt32*)GameHeapAlloc(sizeof(Data));
+	uint32_t* teleData = (uint32_t*)GameHeapAlloc(sizeof(Data));
 	MemZero(teleData, sizeof(Data));
-	dataPtr[3] = (UInt32)teleData;
+	dataPtr[3] = (uint32_t)teleData;
 	return (ExtraTeleport*)dataPtr;
 }
 
-ExtraWeaponModFlags* ExtraWeaponModFlags::Create(UInt8 _flags) {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraWeaponModFlags));
+ExtraWeaponModFlags* ExtraWeaponModFlags::Create(uint8_t _flags) {
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraWeaponModFlags));
 	dataPtr[0] = kVtbl_ExtraWeaponModFlags;
 	dataPtr[1] = kExtraData_WeaponModFlags;
 	dataPtr[2] = 0;
@@ -248,7 +248,7 @@ ExtraWeaponModFlags* ExtraWeaponModFlags::Create(UInt8 _flags) {
 	return (ExtraWeaponModFlags*)dataPtr;
 }
 
-UInt32 GetCountForExtraDataList(ExtraDataList* list) {
+uint32_t GetCountForExtraDataList(ExtraDataList* list) {
 	if (!list)
 		return 1;
 
@@ -257,16 +257,16 @@ UInt32 GetCountForExtraDataList(ExtraDataList* list) {
 }
 
 ExtraOwnership* ExtraOwnership::Create(TESForm* _owner) {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraOwnership));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraOwnership));
 	dataPtr[0] = kVtbl_ExtraOwnership;
 	dataPtr[1] = kExtraData_Ownership;
 	dataPtr[2] = 0;
-	dataPtr[3] = (UInt32)_owner;
+	dataPtr[3] = (uint32_t)_owner;
 	return (ExtraOwnership*)dataPtr;
 }
 
-ExtraRank* ExtraRank::Create(UInt32 _rank) {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraRank));
+ExtraRank* ExtraRank::Create(uint32_t _rank) {
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraRank));
 	dataPtr[0] = kVtbl_ExtraRank;
 	dataPtr[1] = kExtraData_Rank;
 	dataPtr[2] = 0;
@@ -275,12 +275,12 @@ ExtraRank* ExtraRank::Create(UInt32 _rank) {
 }
 
 ExtraAction* ExtraAction::Create(TESObjectREFR* _actionRef) {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraAction));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraAction));
 	dataPtr[0] = kVtbl_ExtraAction;
 	dataPtr[1] = kExtraData_Action;
 	dataPtr[2] = 0;
 	dataPtr[3] = 0;
-	dataPtr[4] = (UInt32)_actionRef;
+	dataPtr[4] = (uint32_t)_actionRef;
 	return (ExtraAction*)dataPtr;
 }
 
@@ -288,7 +288,7 @@ class TESScript;
 class TESScriptableForm;
 
 ExtraScript* ExtraScript::Create(TESForm* baseForm, bool create, TESObjectREFR* container) {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraScript));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraScript));
 	dataPtr[0] = kVtbl_ExtraScript;
 	dataPtr[1] = kExtraData_Script;
 	dataPtr[2] = 0;
@@ -319,14 +319,14 @@ ExtraScript* ExtraScript::Create(TESForm* baseForm, bool create, TESObjectREFR* 
 }
 
 ExtraFactionChanges* ExtraFactionChanges::Create() {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraFactionChanges));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraFactionChanges));
 	dataPtr[0] = kVtbl_ExtraFactionChanges;
 	dataPtr[1] = kExtraData_FactionChanges;
 	dataPtr[2] = 0;
-	UInt32* listData = (UInt32*)GameHeapAlloc(sizeof(FactionListEntry));
+	uint32_t* listData = (uint32_t*)GameHeapAlloc(sizeof(FactionListEntry));
 	listData[0] = 0;
 	listData[1] = 0;
-	dataPtr[3] = (UInt32)listData;
+	dataPtr[3] = (uint32_t)listData;
 	return (ExtraFactionChanges*)dataPtr;
 }
 
@@ -360,8 +360,8 @@ void SetExtraFactionRank(BaseExtraList& xDataList, TESFaction* faction, char ran
 	}
 }
 
-ExtraHotkey* ExtraHotkey::Create(UInt8 _index) {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraHotkey));
+ExtraHotkey* ExtraHotkey::Create(uint8_t _index) {
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraHotkey));
 	dataPtr[0] = kVtbl_ExtraHotkey;
 	dataPtr[1] = kExtraData_Hotkey;
 	dataPtr[2] = 0;

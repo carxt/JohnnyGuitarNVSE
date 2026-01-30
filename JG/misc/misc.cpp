@@ -75,7 +75,7 @@ bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long
 	PixelH = height - (PixelH + 1);
 	fseek(f, XPadding * PixelH, SEEK_CUR);
 	fread(data, sizeof(BYTE), XPadding, f);
-	UInt32 PosX = PixelW * 3;
+	uint32_t PosX = PixelW * 3;
 	B = data[PosX];
 	G = data[PosX + 1];
 	R = data[PosX + 2];

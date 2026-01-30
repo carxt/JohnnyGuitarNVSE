@@ -7,15 +7,15 @@ struct ScriptEventList;
 struct ScriptVar;
 struct ScriptBuffer;
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+#if 1
 #define SCRIPT_SIZE 0x54
-static const UInt32 kScript_ExecuteFnAddr = 0x005AC1E0;
+static const uint32_t kScript_ExecuteFnAddr = 0x005AC1E0;
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
 #define SCRIPT_SIZE 0x54
-static const UInt32 kScript_ExecuteFnAddr = 0x005AC390;
+static const uint32_t kScript_ExecuteFnAddr = 0x005AC390;
 #elif EDITOR
 #define SCRIPT_SIZE 0x48
-static const UInt32 kScript_SetTextFnAddr = 0x005C27B0;
+static const uint32_t kScript_SetTextFnAddr = 0x005C27B0;
 #else
 #error
 #endif
@@ -33,7 +33,7 @@ public:
 	{
 		BSString		name;		// 00 variable name/editorID (not used at run-time)
 		TESForm		*form;		// 08
-		UInt32		varIdx;		// 0C always zero in editor
+		uint32_t		varIdx;		// 0C always zero in editor
 
 		void	Resolve(ScriptEventList * eventList);
 	};
@@ -41,7 +41,7 @@ public:
 	struct RefVarList : tList<RefVariable>
 	{
 		RefVariable *GetRefVariableByName(const char *name);
-		UInt32 GetIndex(RefVariable *refVar);
+		uint32_t GetIndex(RefVariable *refVar);
 	};
 
 	enum
@@ -62,12 +62,12 @@ public:
 	// 14
 	struct ScriptInfo
 	{
-		UInt32	unk0;			// 00 (18)
-		UInt32	numRefs;		// 04 (1C)
-		UInt32	dataLength;		// 08 (20)
-		UInt32	varCount;		// 0C (24)
-		UInt16	type;			// 10 (28)
-		UInt16	unk12;			// 12 (2A)
+		uint32_t	unk0;			// 00 (18)
+		uint32_t	numRefs;		// 04 (1C)
+		uint32_t	dataLength;		// 08 (20)
+		uint32_t	varCount;		// 0C (24)
+		uint16_t	type;			// 10 (28)
+		uint16_t	unk12;			// 12 (2A)
 	};
 
 	enum
@@ -78,11 +78,11 @@ public:
 		eType_Unk =		0x10000,
 	};
 #if !RUNTIME
-	UInt32			unk028;					//     /     / 028
+	uint32_t			unk028;					//     /     / 028
 #endif
 	ScriptInfo		info;					// 018 / 018 / 02C
 	char			*text;					// 02C / 02C / 040
-	UInt8			*data;					// 030 / 030 / 044
+	uint8_t			*data;					// 030 / 030 / 044
 #if RUNTIME
 	float			unk34;					// 034
 	float			questDelayTimeCounter;	// 038      - init'd to fQuestDelayTime, decremented by frametime each frame
@@ -93,33 +93,33 @@ public:
 	VarInfoList		varList;				// 04C / 03C / 050 - local variable list
 #if !RUNTIME
 	void			*unk050;				//     /     / 050
-	UInt8			unk054;					//	   /     / 054
-	UInt8			pad055[3];
+	uint8_t			unk054;					//	   /     / 054
+	uint8_t			pad055[3];
 #endif
 
-	RefVariable		*GetVariable(UInt32 reqIdx);
-	VariableInfo	*GetVariableInfo(UInt32 idx);
+	RefVariable		*GetVariable(uint32_t reqIdx);
+	VariableInfo	*GetVariableInfo(uint32_t idx);
 
-	UInt32			AddVariable(TESForm *form);
+	uint32_t			AddVariable(TESForm *form);
 	void			CleanupVariables(void);
 
-	UInt32			Type() const {return info.type;}
+	uint32_t			Type() const {return info.type;}
 	bool			IsObjectScript() const {return info.type == eType_Object;}
 	bool			IsQuestScript() const {return info.type == eType_Quest;}
 	bool			IsMagicScript() const {return info.type == eType_Magic;}
 	bool			IsUnkScript() const {return info.type == eType_Unk;}
 
 	VariableInfo	*GetVariableByName(const char *varName);
-	//UInt32			GetVariableType(VariableInfo *var);
-	ScriptVar		*AddVariable(ScriptEventList *eventList, UInt32 ownerID, UInt8 modIdx);
-	UInt32			GetDataLength();
+	//uint32_t			GetVariableType(VariableInfo *var);
+	ScriptVar		*AddVariable(ScriptEventList *eventList, uint32_t ownerID, uint8_t modIdx);
+	uint32_t			GetDataLength();
 
 	static bool	RunScriptLine(const char *text, TESObjectREFR *object = NULL);
 	static bool	RunScriptLine2(const char *text, TESObjectREFR *object = NULL, bool bSuppressOutput = true);
 
 	// no changed flags (TESForm flags)
 	MEMBER_FN_PREFIX(Script);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+#if 1
 	// arg3 appears to be true for result scripts (runs script even if dataLength <= 4)
 	DEFINE_MEMBER_FN(Execute, bool, kScript_ExecuteFnAddr, TESObjectREFR* thisObj, ScriptEventList* eventList, TESObjectREFR* containingObj, bool arg3);
 	DEFINE_MEMBER_FN(Constructor, Script *, 0x005AA0F0);
@@ -143,21 +143,21 @@ static_assert(sizeof(Script) == SCRIPT_SIZE);
 
 struct ScriptRunner
 {
-	UInt32				unk00;			// 00
+	uint32_t				unk00;			// 00
 	TESForm				*baseForm;		// 04
 	ScriptEventList		*eventList;		// 08
-	UInt32				unk10;			// 10
+	uint32_t				unk10;			// 10
 	Script				*script;		// 14
-	UInt32				unk18;			// 18	= 6 after failed to evaluate expression
-	UInt32				unk1C;			// 1C
-	UInt32				stackDepth;		// 20
-	UInt32				stack[10];		// 24
-	UInt32				stack2Depth;	// 4C
-	UInt32				stack2[10];		// 50
-	UInt32				stack3[10];		// 78
-	UInt8				unkA0;			// A0
-	UInt8				unkA1;			// A1	is set during runLine if CmdExecute.byt025 is not NULL
-	UInt8				padA2[2];		// A2
+	uint32_t				unk18;			// 18	= 6 after failed to evaluate expression
+	uint32_t				unk1C;			// 1C
+	uint32_t				stackDepth;		// 20
+	uint32_t				stack[10];		// 24
+	uint32_t				stack2Depth;	// 4C
+	uint32_t				stack2[10];		// 50
+	uint32_t				stack3[10];		// 78
+	uint8_t				unkA0;			// A0
+	uint8_t				unkA1;			// A1	is set during runLine if CmdExecute.byt025 is not NULL
+	uint8_t				padA2[2];		// A2
 };
 
 struct ConditionEntry
@@ -171,13 +171,13 @@ struct ConditionEntry
 		};
 
 		// ### TODO: this
-		UInt32		operatorAndFlags;	// 00
+		uint32_t		operatorAndFlags;	// 00
 		float		comparisonValue;	// 04
-		UInt16		functionIndex;		// 08 is opcode & 0x0FFF
-		UInt16		unk0A;
+		uint16_t		functionIndex;		// 08 is opcode & 0x0FFF
+		uint16_t		unk0A;
 		Param		param1;				// 0C
 		Param		param2;				// 10
-		UInt32		unk14;
+		uint32_t		unk14;
 	};
 
 	Data			* data;
@@ -187,14 +187,14 @@ struct ConditionEntry
 // 6C
 struct QuestStageItem
 {
-	UInt32			unk00;			// 00
+	uint32_t			unk00;			// 00
 	ConditionEntry	conditionList;	// 04
 	Script			resultScript;	// 0C
-	UInt32			unk5C;			// 5C disk offset to log text records? consistent within a single quest
-	UInt8			index;			// 60 sequential
+	uint32_t			unk5C;			// 5C disk offset to log text records? consistent within a single quest
+	uint8_t			index;			// 60 sequential
 	bool			hasLogText;		// 61
-	UInt8			unk62[2];		// 62 pad?
-	UInt32			logDate;		// 64
+	uint8_t			unk62[2];		// 62 pad?
+	uint32_t			logDate;		// 64
 	TESQuest		* owningQuest;	// 68;
 };
 
@@ -205,25 +205,25 @@ static_assert(sizeof(QuestStageItem) == (SCRIPT_SIZE + 0x1C));
 // 41C
 struct ScriptLineBuffer
 {
-	static const UInt32	kBufferSize = 0x200;
+	static const uint32_t	kBufferSize = 0x200;
 
-	UInt32				lineNumber;			// 000 counts blank lines too
+	uint32_t				lineNumber;			// 000 counts blank lines too
 	char				paramText[0x200];	// 004 portion of line text following command
-	UInt32				paramTextLen;		// 204
-	UInt32				lineOffset;			// 208
-	UInt8				dataBuf[0x200];		// 20C
-	UInt32				dataOffset;			// 40C
-	UInt32				cmdOpcode;			// 410 not initialized. Opcode of command being parsed
-	UInt32				callingRefIndex;	// 414 not initialized. Zero if cmd not invoked with dot syntax
-	UInt32				unk418;				// 418
+	uint32_t				paramTextLen;		// 204
+	uint32_t				lineOffset;			// 208
+	uint8_t				dataBuf[0x200];		// 20C
+	uint32_t				dataOffset;			// 40C
+	uint32_t				cmdOpcode;			// 410 not initialized. Opcode of command being parsed
+	uint32_t				callingRefIndex;	// 414 not initialized. Zero if cmd not invoked with dot syntax
+	uint32_t				unk418;				// 418
 
 	// these write data and update dataOffset
-	bool Write(const void* buf, UInt32 bufsize);
+	bool Write(const void* buf, uint32_t bufsize);
 	bool WriteFloat(double buf);
 	bool WriteString(const char* buf);
-	bool Write32(UInt32 buf);
-	bool Write16(UInt16 buf);
-	bool WriteByte(UInt8 buf);
+	bool Write32(uint32_t buf);
+	bool Write16(uint16_t buf);
+	bool WriteByte(uint8_t buf);
 };
 
 // size 0x58? Nothing initialized beyond 0x50.
@@ -236,34 +236,34 @@ struct ScriptBuffer
 	};
 
 	char					*scriptText;		// 000
-	UInt32					textOffset;			// 004 
-	UInt32					unk008;				// 008
+	uint32_t					textOffset;			// 004 
+	uint32_t					unk008;				// 008
 	BSString					scriptName;			// 00C
-	UInt32					unk014;				// 014
-	UInt16					unk018;				// 018
-	UInt16					unk01A;				// 01A
-	UInt32					curLineNumber;		// 01C 
-	UInt8					*scriptData;		// 020 pointer to 0x4000-byte array
-	UInt32					dataOffset;			// 024
-	UInt32					unk028;				// 028
-	UInt32					numRefs;			// 02C
-	UInt32					unk030;				// 030
-	UInt32					varCount;			// 034 script->varCount
-	UInt8					scriptType;			// 038 script->type
-	UInt8					unk039;				// 039 script->unk35
-	UInt8					unk03A[2];
+	uint32_t					unk014;				// 014
+	uint16_t					unk018;				// 018
+	uint16_t					unk01A;				// 01A
+	uint32_t					curLineNumber;		// 01C 
+	uint8_t					*scriptData;		// 020 pointer to 0x4000-byte array
+	uint32_t					dataOffset;			// 024
+	uint32_t					unk028;				// 028
+	uint32_t					numRefs;			// 02C
+	uint32_t					unk030;				// 030
+	uint32_t					varCount;			// 034 script->varCount
+	uint8_t					scriptType;			// 038 script->type
+	uint8_t					unk039;				// 039 script->unk35
+	uint8_t					unk03A[2];
 	Script::VarInfoList		vars;				// 03C
 	Script::RefVarList		refVars;			// 044 probably ref vars
-	UInt32					unk04C;				// 04C num lines?
+	uint32_t					unk04C;				// 04C num lines?
 	Node<ScriptLineBuffer>	lines;				// 050
 	// nothing else initialized
 
 	// convert a variable or form to a RefVar, add to refList if necessary
 	Script::RefVariable* ResolveRef(const char* refName);
-	UInt32 GetRefIdx(Script::RefVariable *refVar);
-	//UInt32 GetVariableType(VariableInfo *varInfo, Script::RefVariable *refVar);
+	uint32_t GetRefIdx(Script::RefVariable *refVar);
+	//uint32_t GetVariableType(VariableInfo *varInfo, Script::RefVariable *refVar);
 };
 
-//UInt32 GetDeclaredVariableType(const char* varName, const char* scriptText);	// parses scriptText to determine var type
+//uint32_t GetDeclaredVariableType(const char* varName, const char* scriptText);	// parses scriptText to determine var type
 //Script* GetScriptFromForm(TESForm* form);
 
