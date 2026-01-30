@@ -5683,6 +5683,7 @@ public:
 };
 
 class BGSCameraShot : public TESForm, public TESModel, public TESImageSpaceModifiableForm {
+public:
 	BGSCameraShot();
 	~BGSCameraShot();
 

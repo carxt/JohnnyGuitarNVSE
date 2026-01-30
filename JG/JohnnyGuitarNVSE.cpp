@@ -586,6 +586,14 @@ extern "C" {
 		REG_CMD(GetMineArmedEx);
 		REG_CMD(SetMusicTypePath);
 		REG_TYPED_CMD(GetParentTopic, Form);
+		REG_CMD(GetCameraShotTraitNumeric);
+		REG_CMD(SetCameraShotTraitNumeric);
+		REG_CMD(GetCameraShotFlags);
+		REG_CMD(SetCameraShotFlags);
+		REG_CMD(GetCameraShotPath);
+		REG_CMD(SetCameraShotPath);
+		REG_TYPED_CMD(GetCameraShotImageSpaceModifier, Form);
+		REG_CMD(SetCameraShotImageSpaceModifier);
 
 		if (!bIsGECK) {
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);

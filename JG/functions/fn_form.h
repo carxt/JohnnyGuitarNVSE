@@ -104,9 +104,14 @@ DEFINE_COMMAND_PLUGIN(AddNoteQuest, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(RemoveNoteQuest, , 0, 2, kParams_TwoForms);
 DEFINE_COMMAND_PLUGIN(GetHotkeySlot, , 1, 0, nullptr);
 DEFINE_COMMAND_PLUGIN(GetMineArmedEx, , 1, 0, nullptr);
-
-
-
+DEFINE_COMMAND_PLUGIN(GetCameraShotTraitNumeric, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetCameraShotTraitNumeric, , 0, 3, kParams_OneForm_OneInt_OneFloat);
+DEFINE_COMMAND_PLUGIN(GetCameraShotFlags, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetCameraShotFlags, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetCameraShotPath, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetCameraShotPath, , 0, 2, kParams_OneForm_OneString);
+DEFINE_COMMAND_PLUGIN(GetCameraShotImageSpaceModifier, , 0, 1, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetCameraShotImageSpaceModifier, , 0, 2, kParams_TwoForms);
 
 bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -2081,3 +2086,177 @@ bool Cmd_GetMineArmedEx_Execute(COMMAND_ARGS)
 	return true;
 }
 
+namespace {
+	enum CameraShotTrait : int32_t {
+		INVALID						= -1,
+		ACTION						= 0,
+		LOCATION					= 1,
+		TARGET						= 2,
+		PLAYER_TIME_MULT			= 3,
+		TARGET_TIME_MULT			= 4,
+		GLOBAL_TIME_MULT			= 5,
+		MAX_TIME					= 6,
+		MIN_TIME					= 7,
+		TARGET_PCT_BETWEEN_ACTORS	= 8,
+	};
+}
+
+bool Cmd_GetCameraShotTraitNumeric_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSCameraShot* pCameraShot = nullptr;
+	CameraShotTrait eTraitID = CameraShotTrait::INVALID;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot, &eTraitID) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
+		BGSCameraShot::Data& rData = pCameraShot->kData;
+		switch (eTraitID) {
+			case CameraShotTrait::ACTION:
+				*result = rData.eAction;
+				break;
+			case CameraShotTrait::LOCATION:
+				*result = rData.eLocation;
+				break;
+			case CameraShotTrait::TARGET:
+				*result = rData.eTarget;
+				break;
+			case CameraShotTrait::PLAYER_TIME_MULT:
+				*result = rData.fPlayerTimeMult;
+				break;
+			case CameraShotTrait::TARGET_TIME_MULT:
+				*result = rData.fTargetTimeMult;
+				break;
+			case CameraShotTrait::GLOBAL_TIME_MULT:
+				*result = rData.fGlobalTimeMult;
+				break;
+			case CameraShotTrait::MAX_TIME:
+				*result = rData.fMaxTime;
+				break;
+			case CameraShotTrait::MIN_TIME:
+				*result = rData.fMinTime;
+				break;
+			case CameraShotTrait::TARGET_PCT_BETWEEN_ACTORS:
+				*result = rData.fTargetPercentBetweenActors;
+				break;
+			default:
+				return true;
+		}
+
+		if (IsConsoleMode())
+			Console_Print("GetCameraShotTraitNumeric %d >> %.2f", eTraitID, *result);
+	}
+	return true;
+}
+
+bool Cmd_SetCameraShotTraitNumeric_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSCameraShot* pCameraShot = nullptr;
+	CameraShotTrait eTraitID = CameraShotTrait::INVALID;
+	float fValue = 0.0f;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot, &eTraitID, &fValue) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
+		BGSCameraShot::Data& rData = pCameraShot->kData;
+		*result = 1;
+		switch (eTraitID) {
+			case CameraShotTrait::ACTION:
+				rData.eAction = static_cast<BGSCameraShot::Action>(fValue);
+				break;
+			case CameraShotTrait::LOCATION:
+				rData.eLocation = static_cast<BGSCameraShot::Object>(fValue);
+				break;
+			case CameraShotTrait::TARGET:
+				rData.eTarget = static_cast<BGSCameraShot::Object>(fValue);
+				break;
+			case CameraShotTrait::PLAYER_TIME_MULT:
+				rData.fPlayerTimeMult = fValue;
+				break;
+			case CameraShotTrait::TARGET_TIME_MULT:
+				rData.fTargetTimeMult = fValue;
+				break;
+			case CameraShotTrait::GLOBAL_TIME_MULT:
+				rData.fGlobalTimeMult = fValue;
+				break;
+			case CameraShotTrait::MAX_TIME:
+				rData.fMaxTime = fValue;
+				break;
+			case CameraShotTrait::MIN_TIME:
+				rData.fMinTime = fValue;
+				break;
+			case CameraShotTrait::TARGET_PCT_BETWEEN_ACTORS:
+				rData.fTargetPercentBetweenActors = fValue;
+				break;
+			default:
+				break;
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetCameraShotFlags_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSCameraShot* pCameraShot = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
+		*result = pCameraShot->kData.uiFlags;
+		if (IsConsoleMode())
+			Console_Print("GetCameraShotFlags >> %08X", pCameraShot->kData.uiFlags);
+	}
+	return true;
+}
+
+bool Cmd_SetCameraShotFlags_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSCameraShot* pCameraShot = nullptr;
+	uint32_t uiFlags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot, &uiFlags) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
+		pCameraShot->kData.uiFlags = uiFlags;
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetCameraShotPath_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSCameraShot* pCameraShot = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
+		const char* pModel = pCameraShot->GetModel();
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pModel);
+		if (IsConsoleMode())
+			Console_Print("GetCameraShotPath >> %s", pModel);
+	}
+	return true;
+}
+
+bool Cmd_SetCameraShotPath_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSCameraShot* pCameraShot = nullptr;
+	char cNewPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot, &cNewPath) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot) && cNewPath[0]) {
+		pCameraShot->SetModel(cNewPath);
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetCameraShotImageSpaceModifier_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSCameraShot* pCameraShot = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
+		TESImageSpaceModifier* pIMOD = pCameraShot->pModifier;
+		if (pIMOD) {
+			*reinterpret_cast<uint32_t*>(result) = pIMOD->refID;
+		}
+		if (IsConsoleMode())
+			Console_Print("GetCameraShotImageSpaceModifier >> %s", pIMOD ? pIMOD->GetFormEditorID() : "None");
+	}
+	return true;
+}
+
+bool Cmd_SetCameraShotImageSpaceModifier_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSCameraShot* pCameraShot = nullptr;
+	TESImageSpaceModifier* pIMOD = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot, &pIMOD) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
+		if (pIMOD && !IS_TYPE(pIMOD, TESImageSpaceModifier))
+			return true;
+
+		pCameraShot->pModifier = pIMOD;
+		*result = 1;
+	}
+	return true;
+}
