@@ -494,7 +494,7 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script)) {
 		if (OnLimbGoneHandler) {
 			if (setOrRemove)
 				OnLimbGoneHandler->RegisterEvent(script, (void**)&filter);
@@ -507,7 +507,7 @@ bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS) {
 	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) && script && IS_TYPE(script, Script)) {
 		if (OnSettingsUpdateHandler) {
 			if (setOrRemove)
 				OnSettingsUpdateHandler->RegisterEvent(script, nullptr);
@@ -521,7 +521,7 @@ bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script)) {
 		if (OnCrosshairHandler) {
 			if (setOrRemove)
 				OnCrosshairHandler->RegisterEvent(script, (void**)&filter);
@@ -536,7 +536,7 @@ bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { g_thePlayer, -1 };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
 		if (OnAVChangeHandler) {
 			if (setOrRemove)
 				OnAVChangeHandler->RegisterEvent(script, (void**)&filter);
@@ -551,7 +551,7 @@ bool Cmd_SetOnNPCActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
 		if (OnNPCAVChangeHandler) {
 			if (setOrRemove)
 				OnNPCAVChangeHandler->RegisterEvent(script, (void**)&filter);
@@ -565,7 +565,7 @@ bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnRemovePerkHandler) {
 			if (setOrRemove)
 				OnRemovePerkHandler->RegisterEvent(script, (void**)filter);
@@ -579,7 +579,7 @@ bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnAddPerkHandler) {
 			if (setOrRemove)
 				OnAddPerkHandler->RegisterEvent(script, (void**)filter);
@@ -593,7 +593,7 @@ bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnChallengeCompleteHandler) {
 			if (setOrRemove)
 				OnChallengeCompleteHandler->RegisterEvent(script, (void**)filter);
@@ -607,7 +607,7 @@ bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnSeenDataUpdateHandler) {
 			if (setOrRemove)
 				OnSeenDataUpdateHandler->RegisterEvent(script, (void**)filter);
@@ -621,7 +621,7 @@ bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnDyingHandler) {
 			if (setOrRemove)
 				OnDyingHandler->RegisterEvent(script, (void**)filter);
@@ -636,7 +636,7 @@ bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnStartQuestHandler) {
 			if (setOrRemove)
 				OnStartQuestHandler->RegisterEvent(script, (void**)filter);
@@ -652,7 +652,7 @@ bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnStopQuestHandler) {
 			if (setOrRemove)
 				OnStopQuestHandler->RegisterEvent(script, (void**)filter);
@@ -668,7 +668,7 @@ bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnCompleteQuestHandler) {
 			if (setOrRemove)
 				OnCompleteQuestHandler->RegisterEvent(script, (void**)filter);
@@ -683,7 +683,7 @@ bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnFailQuestHandler) {
 			if (setOrRemove)
 				OnFailQuestHandler->RegisterEvent(script, (void**)filter);
@@ -704,7 +704,7 @@ bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS) {
 		kDoNotFireInGameMode = 1 << 1,
 		kUseGamePreEvent = 1 << 2,
 	};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &optionalFlags) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &optionalFlags) && script && IS_TYPE(script, Script)) {
 		if (!(optionalFlags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler) {
 			if (!(optionalFlags & kUseGamePreEvent)) {
 				if (setOrRemove)
@@ -733,7 +733,7 @@ bool Cmd_SetOnProcessLevelChangeEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script)) {
 		if (OnPLChangeHandler) {
 			if (setOrRemove)
 				OnPLChangeHandler->RegisterEvent(script, (void**)&filter);
@@ -749,7 +749,7 @@ bool Cmd_SetJohnnyOnRadioPostSoundAttachEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnRadioPostSoundAttachHandler) {
 			if (setOrRemove)
 				OnRadioPostSoundAttachHandler->RegisterEvent(script, (void**)&filter);
@@ -764,7 +764,7 @@ bool Cmd_SetJohnnyOnKeyboardControllerSelectionChangeEventHandler_Execute(COMMAN
 	Script* script = nullptr;
 	FilterInt::Data filter {};
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script)) {
 		if (OnKeyboardControllerSelectionChangeHandler) {
 			if (setOrRemove)
 				OnKeyboardControllerSelectionChangeHandler->RegisterEvent(script, (void**)&filter);
@@ -782,7 +782,7 @@ bool Cmd_SetJohnnyOnSleepWaitEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterInt::Data filter{};
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script)) {
 		if (OnSleepWaitEventHandler) {
 			if (setOrRemove)
 				OnSleepWaitEventHandler->RegisterEvent(script, (void**)&filter);
@@ -797,7 +797,7 @@ bool Cmd_SetOnTakeBackItemEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[2] = { nullptr, nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0], &filter[1]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0], &filter[1]) && script && IS_TYPE(script, Script)) {
 		if (OnTakeBackItemHandler) {
 			if (setOrRemove)
 				OnTakeBackItemHandler->RegisterEvent(script, (void**)&filter);
@@ -813,7 +813,7 @@ bool Cmd_SetOnNPCResponseEventHandler_Execute(COMMAND_ARGS) {
     Script* script = nullptr;
     FilterInt::Data filter{};
     uint32_t flags = 0;
-    if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && IS_TYPE(script, Script)) {
+    if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script)) {
         if (OnNPCResponseHandler) {
             if (setOrRemove)
                 OnNPCResponseHandler->RegisterEvent(script, (void**)&filter);
@@ -828,7 +828,7 @@ bool Cmd_SetOnGeneralSubtitleEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnGeneralSubtitleHandler) {
 			if (setOrRemove)
 				OnGeneralSubtitleHandler->RegisterEvent(script, (void**)&filter);
@@ -843,7 +843,7 @@ bool Cmd_SetOnReputationChangeEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	TESForm* filter[1] = { nullptr };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
 		if (OnReputationChangeHandler) {
 			if (setOrRemove)
 				OnReputationChangeHandler->RegisterEvent(script, (void**)&filter);
