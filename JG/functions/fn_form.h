@@ -111,7 +111,7 @@ DEFINE_COMMAND_PLUGIN(SetCameraShotFlags, , 0, 2, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetCameraShotPath, , 0, 1, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetCameraShotPath, , 0, 2, kParams_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(GetCameraShotImageSpaceModifier, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(SetCameraShotImageSpaceModifier, , 0, 2, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(SetCameraShotImageSpaceModifier, , 0, 2, kParams_OneForm_OneOptionalForm);
 
 bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
 	*result = 0;
