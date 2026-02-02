@@ -172,7 +172,7 @@ bool Cmd_MD5File_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		if (strstr(path, "..\\")) return true;
 		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
-		uint32_t length = filename - lastSlash;
+		uint32_t length = MAX_PATH - (lastSlash - filename);
 		strcpy_s(lastSlash, length, path);
 		GetMD5File(filename, outHash);
 		if (IsConsoleMode())
@@ -190,7 +190,7 @@ bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		if (strstr(path, "..\\")) return true;
 		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
-		uint32_t length = filename - lastSlash;
+		uint32_t length = MAX_PATH - (lastSlash - filename);
 		strcpy_s(lastSlash, length, path);
 		GetSHA1File(filename, outHash);
 		if (IsConsoleMode())
@@ -209,7 +209,7 @@ bool Cmd_GetPixelFromBMP_Execute(COMMAND_ARGS) {
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &RED, &GREEN, &BLUE, &width, &height) && path[0]) {
 		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
-		uint32_t length = filename - lastSlash;
+		uint32_t length = MAX_PATH - (lastSlash - filename);
 		strcpy_s(lastSlash, length, path);
 		DWORD R = 0, G = 0, B = 0;
 		if (ReadBMP24(filename, R, G, B, width, height)) {
