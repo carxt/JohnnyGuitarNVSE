@@ -545,7 +545,7 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* i
 	}
 
 	if (nvse->nvseVersion < PACKED_NVSE_VERSION) {
-		MessageBoxA(nullptr, "NVSE version is outdated. This plugin requires v6.4.2 minimum.", "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
+		MessageBoxA(nullptr, "NVSE version is outdated. This plugin requires v6.4.4 minimum.", "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
 		return false;
 	}
 
