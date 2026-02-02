@@ -502,7 +502,7 @@ void ReadINI() {
 	char filename[MAX_PATH];
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	char* lastSlash = strrchr(filename, '\\') + 1;
-	uint32_t length = filename - lastSlash;
+	uint32_t length = MAX_PATH - (lastSlash - filename);;
 	strcpy_s(lastSlash, length, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 	fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 	fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
