@@ -229,7 +229,7 @@ namespace NPCAccuracy {
 		static inline uintptr_t hookCall = a_addr;
 	public:
 		static  float __fastcall hk_AccHook(Actor* a_refr, void* edx, int mode) {
-			auto res = ThisCall<double>(hookCall,a_refr, mode);
+			auto res = ThisCall<float>(hookCall,a_refr, mode);
 			res *= returnActorMult(a_refr);
 			return res;
 		}
@@ -260,8 +260,8 @@ namespace hk_CombatLocation
 	private:
 		static inline uintptr_t hookCall = a_addr;
 	public:
-		static  double __cdecl hk_CLCHook(float m_a1, float m_a2) {
-			auto res = CdeclCall<double>(hookCall, m_a1, m_a2);
+		static  float __cdecl hk_CLCHook(float m_a1, float m_a2) {
+			auto res = CdeclCall<float>(hookCall, m_a1, m_a2);
 			return fmax(res, hk_GMSTJG::gmst::fCombatLocationTargetRadiusMaxBase.data.f);
 		}
 
@@ -277,8 +277,8 @@ namespace hk_CombatLocation
 	private:
 		static inline uintptr_t hookCall = a_addr;
 	public:
-		static  double __fastcall hk_Hook(TESObjectWEAP* r_weap) {
-			auto res = ThisCall<double>(hookCall, r_weap);
+		static  float __fastcall hk_Hook(TESObjectWEAP* r_weap) {
+			auto res = ThisCall<float>(hookCall, r_weap);
 			if (!ThisCall<bool>(0x0647790, r_weap) && ThisCall<bool>(0x04C0C30, r_weap)) {
 				res *= hk_GMSTJG::gmst::fCombatRangedWeaponRangeBaseMult.data.f;
 			}
