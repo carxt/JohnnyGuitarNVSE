@@ -1,26 +1,26 @@
 #pragma once
-DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , 0, 3, kParams_OneString_OneInt_OneForm);
-DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(SetWorldSpaceMapTexture, , 0, 2, kParams_OneForm_OneString);
-DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , 0, 0, nullptr);
-DEFINE_COMMAND_PLUGIN(GetCustomMapMarkerIcon, , 1, 0, nullptr);
-DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , 0, 2, kParams_OneForm_OneString);
-DEFINE_COMMAND_PLUGIN(QueueCinematicText, , 0, 7, kParams_TwoStrings_OneOptionalString_FourOptionalInts);
-DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , 0, 3, kParams_OneString_TwoOptionalInts);
-DEFINE_COMMAND_PLUGIN(GetSystemColor, , 0, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(GetSystemColorAlt, , 0, 4, kParams_OneInt_ThreeScriptVars);
-DEFINE_COMMAND_ALT_PLUGIN(SetCustomReputationChangeIcon, scrci, , 0, 3, kParams_OneForm_OneInt_OneString);
-DEFINE_COMMAND_PLUGIN(GetExtraMiscStat, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(ModExtraMiscStat, , 0, 2, kParams_OneString_OneInt);
-DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , 0, 2, kParams_OneInt_OneOptionalForm);
-DEFINE_COMMAND_ALT_PLUGIN(PushUIQuestToTop, PushSelectedQuestInterfaceListEntryToTheTopOfThePipBoyQuestLogInterfaceImmediately, , 0, 1, kParams_OneQuest);
-DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , 0, 0, nullptr); //DO NOT REGISTER YET.
-DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , 0, 0, nullptr);
-DEFINE_CMD_ALT_COND_PLUGIN(IsMenuPaused, , "", 0, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(SetHUDVisibilityOverride, "Sets HUD element visibility override flags", 0, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", 0, 0, nullptr);
-DEFINE_COMMAND_PLUGIN(UpdateRepairMenu, , 0, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , false, kParams_OneString_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , false, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetWorldSpaceMapTexture, , false, kParams_OneForm_OneString);
+DEFINE_COMMAND_PLUGIN(GetCustomMapMarker, , false, nullptr);
+DEFINE_COMMAND_PLUGIN(GetCustomMapMarkerIcon, , true, nullptr);
+DEFINE_COMMAND_PLUGIN(SetCustomMapMarkerIcon, , false, kParams_OneForm_OneString);
+DEFINE_COMMAND_PLUGIN(QueueCinematicText, , false, kParams_TwoStrings_OneOptionalString_FourOptionalInts);
+DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , false, kParams_OneString_TwoOptionalInts);
+DEFINE_COMMAND_PLUGIN(GetSystemColor, , false, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(GetSystemColorAlt, , false, kParams_OneInt_ThreeScriptVars);
+DEFINE_COMMAND_ALT_PLUGIN(SetCustomReputationChangeIcon, scrci, , false, kParams_OneForm_OneInt_OneString);
+DEFINE_COMMAND_PLUGIN(GetExtraMiscStat, , false, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(ModExtraMiscStat, , false, kParams_OneString_OneInt);
+DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , false, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , false, kParams_OneInt_OneOptionalForm);
+DEFINE_COMMAND_ALT_PLUGIN(PushUIQuestToTop, PushSelectedQuestInterfaceListEntryToTheTopOfThePipBoyQuestLogInterfaceImmediately, , false, kParams_OneQuest);
+DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , false, nullptr); //DO NOT REGISTER YET.
+DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , false, nullptr);
+DEFINE_CMD_ALT_COND_PLUGIN(IsMenuPaused, , "", false, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(SetHUDVisibilityOverride, "Sets HUD element visibility override flags", false, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", false, nullptr);
+DEFINE_COMMAND_PLUGIN(UpdateRepairMenu, , false, nullptr);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 		if (g_thePlayer) {

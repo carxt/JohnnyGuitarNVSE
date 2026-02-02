@@ -1,7 +1,7 @@
 #pragma once
 
+#include <unordered_map>
 #include <vector>
-#include <map>
 
 class TESObjectREFR;
 class Script;
@@ -12,88 +12,90 @@ struct PluginInfo;
 
 // for IsInventoryObjectType list, see GameForms.h
 
-enum ParamType {
-	kParamType_String = 0x00,
-	kParamType_Integer = 0x01,
-	kParamType_Float = 0x02,
-	kParamType_ObjectID = 0x03,	// GetItemCount				TESForm *, must pass IsInventoryObjectType and TESForm::Unk_3A
-	kParamType_ObjectRef = 0x04,	// Activate					TESObjectREFR *, REFR-PFLA
-	kParamType_ActorValue = 0x05,	// ModActorValue			uint32_t *, immediate uint16_t
-	kParamType_Actor = 0x06,	// ToggleAI					TESObjectREFR *, must pass IsActor (ACHR-ACRE)
-	kParamType_SpellItem = 0x07,	// AddSpell					TESForm *, must be either SpellItem or book
-	kParamType_Axis = 0x08,	// Rotate					char *, immediate char, X Y Z
-	kParamType_Cell = 0x09,	// GetInCell				TESObjectCELL *, must be cell
-	kParamType_AnimationGroup = 0x0A,	// PlayGroup				uint32_t *, immediate uint16_t
-	kParamType_MagicItem = 0x0B,	// Cast						MagicItem *
-	kParamType_Sound = 0x0C,	// Sound					TESForm *, kFormType_Sound
-	kParamType_Topic = 0x0D,	// Say						TESForm *, kFormType_Dialog
-	kParamType_Quest = 0x0E,	// ShowQuestVars			TESForm *, kFormType_Quest
-	kParamType_Race = 0x0F,	// GetIsRace				TESForm *, kFormType_Race
-	kParamType_Class = 0x10,	// GetIsClass				TESForm *, kFormType_Class
-	kParamType_Faction = 0x11,	// Faction					TESForm *, kFormType_Faction
-	kParamType_Sex = 0x12,	// GetIsSex					uint32_t *, immediate uint16_t
-	kParamType_Global = 0x13,	// GetGlobalValue			TESForm *, kFormType_Global
-	kParamType_Furniture = 0x14,	// IsCurrentFurnitureObj	TESForm *, kFormType_Furniture or kFormType_ListForm
-	kParamType_TESObject = 0x15,	// PlaceAtMe				TESObject *, must pass TESForm::Unk_3A
-	kParamType_VariableName = 0x16,	// GetQuestVariable			only works in conditionals
-	kParamType_QuestStage = 0x17,	// SetStage					handled like integer
-	kParamType_MapMarker = 0x18,	// ShowMap					TESObjectREFR *, see ObjectRef
-	kParamType_ActorBase = 0x19,	// SetEssential				TESActorBase * (NPC / creature)
-	kParamType_Container = 0x1A,	// RemoveMe					TESObjectREFR *, see ObjectRef
-	kParamType_WorldSpace = 0x1B,	// CenterOnWorld			TESWorldSpace *, kFormType_WorldSpace
-	kParamType_CrimeType = 0x1C,	// GetCrimeKnown			uint32_t *, immediate uint16_t
-	kParamType_AIPackage = 0x1D,	// GetIsCurrentPackage		TESPackage *, kFormType_Package
-	kParamType_CombatStyle = 0x1E,	// SetCombatStyle			TESCombatStyle *, kFormType_CombatStyle
-	kParamType_MagicEffect = 0x1F,	// HasMagicEffect			EffectSetting *
-	kParamType_FormType = 0x20,	// GetIsUsedItemType		uint8_t *, immediate uint16_t
-	kParamType_WeatherID = 0x21,	// GetIsCurrentWeather		TESForm *, kFormType_Weather
-	kParamType_NPC = 0x22,	// unused					TESNPC *, kFormType_NPC
-	kParamType_Owner = 0x23,	// IsOwner					TESForm *, kFormType_NPC or kFormType_Faction
-	kParamType_EffectShader = 0x24,	// PlayMagicShaderVisuals	TESForm *, kFormType_EffectShader
-	kParamType_FormList = 0x25,	// IsInList					kFormType_ListForm
-	kParamType_MenuIcon = 0x26,	// unused					kFormType_MenuIcon
-	kParamType_Perk = 0x27,	// Add Perk					kFormType_Perk
-	kParamType_Note = 0x28,	// Add Note					kFormType_Note
-	kParamType_MiscellaneousStat = 0x29,	// ModPCMiscStat			uint32_t *, immediate uint16_t
-	kParamType_ImageSpaceModifier = 0x2A,	//							kFormType_ImageSpaceModifier
-	kParamType_ImageSpace = 0x2B,	//							kFormType_ImageSpace
-	kParamType_Double = 0x2C,	//
-	kParamType_ScriptVariable = 0x2D,	//
-	kParamType_Unhandled2E = 0x2E,	//
-	kParamType_EncounterZone = 0x2F,	//							kFormType_EncounterZone
-	kParamType_Unhandled30 = 0x30,	//
-	kParamType_Message = 0x31,	//							kFormType_Message
-	kParamType_InvObjOrFormList = 0x32,	// AddItem					IsInventoryObjectType or kFormType_ListForm
-	kParamType_Alignment = 0x33,	// GetIsAlignment			uint32_t *, immediate uint16_t
-	kParamType_EquipType = 0x34,	// GetIsUsedEquipType		uint32_t *, immediate uint16_t
-	kParamType_NonFormList = 0x35,	// GetIsUsedItem			TESForm::Unk_3A and not kFormType_ListForm
-	kParamType_SoundFile = 0x36,	// PlayMusic				kFormType_SoundFile
-	kParamType_CriticalStage = 0x37,	// SetCriticalStage			uint32_t *, immediate uint16_t
+enum ParamType
+{
+	kParamType_String =					0x00,
+	kParamType_Integer =				0x01,
+	kParamType_Float =					0x02,
+	kParamType_ObjectID =				0x03,	// GetItemCount				TESForm *, must pass IsInventoryObjectType and TESForm::Unk_3A
+	kParamType_ObjectRef =				0x04,	// Activate					TESObjectREFR *, REFR-PFLA
+	kParamType_ActorValue =				0x05,	// ModActorValue			uint32_t *, immediate uint16_t
+	kParamType_Actor =					0x06,	// ToggleAI					TESObjectREFR *, must pass IsActor (ACHR-ACRE)
+	kParamType_SpellItem =				0x07,	// AddSpell					TESForm *, must be either SpellItem or book
+	kParamType_Axis =					0x08,	// Rotate					char *, immediate char, X Y Z
+	kParamType_Cell =					0x09,	// GetInCell				TESObjectCELL *, must be cell
+	kParamType_AnimationGroup =			0x0A,	// PlayGroup				uint32_t *, immediate uint16_t
+	kParamType_MagicItem =				0x0B,	// Cast						MagicItem *
+	kParamType_Sound =					0x0C,	// Sound					TESForm *, kFormType_TESSound
+	kParamType_Topic =					0x0D,	// Say						TESForm *, kFormType_TESTopicog
+	kParamType_Quest =					0x0E,	// ShowQuestVars			TESForm *, kFormType_TESQuest
+	kParamType_Race =					0x0F,	// GetIsRace				TESForm *, kFormType_TESRace
+	kParamType_Class =					0x10,	// GetIsClass				TESForm *, kFormType_TESClass
+	kParamType_Faction =				0x11,	// Faction					TESForm *, kFormType_TESFaction
+	kParamType_Sex =					0x12,	// GetIsSex					uint32_t *, immediate uint16_t
+	kParamType_Global =					0x13,	// GetGlobalValue			TESForm *, kFormType_TESGlobal
+	kParamType_Furniture =				0x14,	// IsCurrentFurnitureObj	TESForm *, kFormType_TESFurniture or kFormType_BGSListForm
+	kParamType_TESObject =				0x15,	// PlaceAtMe				TESObject *, must pass TESForm::Unk_3A
+	kParamType_VariableName =			0x16,	// GetQuestVariable			only works in conditionals
+	kParamType_QuestStage =				0x17,	// SetStage					handled like integer
+	kParamType_MapMarker =				0x18,	// ShowMap					TESObjectREFR *, see ObjectRef
+	kParamType_ActorBase =				0x19,	// SetEssential				TESActorBase * (NPC / creature)
+	kParamType_Container =				0x1A,	// RemoveMe					TESObjectREFR *, see ObjectRef
+	kParamType_WorldSpace =				0x1B,	// CenterOnWorld			TESWorldSpace *, kFormType_TESWorldSpace
+	kParamType_CrimeType =				0x1C,	// GetCrimeKnown			uint32_t *, immediate uint16_t
+	kParamType_AIPackage =				0x1D,	// GetIsCurrentPackage		TESPackage *, kFormType_TESPackage
+	kParamType_CombatStyle =			0x1E,	// SetCombatStyle			TESCombatStyle *, kFormType_TESCombatStyle
+	kParamType_MagicEffect =			0x1F,	// HasMagicEffect			EffectSetting *
+	kParamType_FormType =				0x20,	// GetIsUsedItemType		uint8_t *, immediate uint16_t
+	kParamType_WeatherID =				0x21,	// GetIsCurrentWeather		TESForm *, kFormType_TESWeather
+	kParamType_NPC =					0x22,	// unused					TESNPC *, kFormType_TESNPC
+	kParamType_Owner =					0x23,	// IsOwner					TESForm *, kFormType_TESNPC or kFormType_TESFaction
+	kParamType_EffectShader =			0x24,	// PlayMagicShaderVisuals	TESForm *, kFormType_TESEffectShader
+	kParamType_FormList	=				0x25,	// IsInList					kFormType_BGSListForm
+	kParamType_MenuIcon =				0x26,	// unused					kFormType_BGSMenuIcon
+	kParamType_Perk =					0x27,	// Add Perk					kFormType_BGSPerk
+	kParamType_Note =					0x28,	// Add Note					kFormType_BGSNote
+	kParamType_MiscellaneousStat =		0x29,	// ModPCMiscStat			uint32_t *, immediate uint16_t
+	kParamType_ImageSpaceModifier =		0x2A,	//							kFormType_TESImageSpaceModifier
+	kParamType_ImageSpace =				0x2B,	//							kFormType_TESImageSpace
+	kParamType_Double =					0x2C,	// 
+	kParamType_ScriptVariable =			0x2D,	// 
+	kParamType_Unhandled2E =			0x2E,	// 
+	kParamType_EncounterZone =			0x2F,	//							kFormType_BGSEncounterZone
+	kParamType_IdleForm =				0x30,	// 
+	kParamType_Message =				0x31,	//							kFormType_BGSMessage
+	kParamType_InvObjOrFormList =		0x32,	// AddItem					IsInventoryObjectType or kFormType_BGSListForm
+	kParamType_Alignment =				0x33,	// GetIsAlignment			uint32_t *, immediate uint16_t
+	kParamType_EquipType =				0x34,	// GetIsUsedEquipType		uint32_t *, immediate uint16_t
+	kParamType_NonFormList =			0x35,	// GetIsUsedItem			TESForm::Unk_3A and not kFormType_BGSListForm
+	kParamType_SoundFile =				0x36,	// PlayMusic				kFormType_BGSMusicType
+	kParamType_CriticalStage =			0x37,	// SetCriticalStage			uint32_t *, immediate uint16_t
 
 	// added for dlc (1.1)
-	kParamType_LeveledOrBaseChar = 0x38,	// AddNPCToLeveledList		NPC / LeveledCharacter
-	kParamType_LeveledOrBaseCreature = 0x39,	// AddCreatureToLeveledList	Creature / LeveledCreature
-	kParamType_LeveledChar = 0x3A,	// AddNPCToLeveledList		kFormType_LeveledCharacter
-	kParamType_LeveledCreature = 0x3B,	// AddCreatureToLeveledList	kFormType_LeveledCreature
-	kParamType_LeveledItem = 0x3C,	// AddItemToLeveledList		kFormType_LeveledItem
-	kParamType_AnyForm = 0x3D,	// AddFormToFormList		any form
+	kParamType_LeveledOrBaseChar =		0x38,	// AddNPCToLeveledList		NPC / LeveledCharacter
+	kParamType_LeveledOrBaseCreature =	0x39,	// AddCreatureToLeveledList	Creature / LeveledCreature
+	kParamType_LeveledChar =			0x3A,	// AddNPCToLeveledList		kFormType_TESLevCharacter
+	kParamType_LeveledCreature =		0x3B,	// AddCreatureToLeveledList	kFormType_TESLevCreature
+	kParamType_LeveledItem =			0x3C,	// AddItemToLeveledList		kFormType_TESLevItem
+	kParamType_AnyForm =				0x3D,	// AddFormToFormList		any form
 
 	// new vegas
-	kParamType_Reputation = 0x3E,	//							kFormType_Reputation
-	kParamType_Casino = 0x3F,	//							kFormType_Casino
-	kParamType_CasinoChip = 0x40,	//							kFormType_CasinoChip
-	kParamType_Challenge = 0x41,	//							kFormType_Challenge
-	kParamType_CaravanMoney = 0x42,	//							kFormType_CaravanMoney
-	kParamType_CaravanCard = 0x43,	//							kFormType_CaravanCard
-	kParamType_CaravanDeck = 0x44,	//							kFormType_CaravanDeck
-	kParamType_Region = 0x45,	//							kFormType_Region
+	kParamType_Reputation =				0x3E,	//							kFormType_TESReputation
+	kParamType_Casino =					0x3F,	//							kFormType_TESCasino
+	kParamType_CasinoChip =				0x40,	//							kFormType_TESCasinoChips
+	kParamType_Challenge =				0x41,	//							kFormType_TESChallenge
+	kParamType_CaravanMoney =			0x42,	//							kFormType_TESCaravanMoney
+	kParamType_CaravanCard =			0x43,	//							kFormType_TESCaravanCard
+	kParamType_CaravanDeck =			0x44,	//							kFormType_TESCaravanDeck
+	kParamType_Region =					0x45,	//							kFormType_TESRegion
 
 	// custom NVSE types
-	kParamType_StringVar = 0x01,
-	kParamType_Array = 0x100,	// only usable with compiler override; StandardCompile() will report unrecognized param type
+	kParamType_StringVar =			0x01,
+	kParamType_Array =				0x100,	// only usable with compiler override; StandardCompile() will report unrecognized param type
 };
 
-enum CommandReturnType : uint8_t {
+enum CommandReturnType : uint8_t
+{
 	kRetnType_Default,
 	kRetnType_Form,
 	kRetnType_String,
@@ -104,19 +106,34 @@ enum CommandReturnType : uint8_t {
 	kRetnType_Max
 };
 
-struct ParamInfo {
-	const char* typeStr;
+const char* CommandReturnTypeToString(CommandReturnType in);
+
+struct CommandInfo;
+
+struct ParamInfo
+{
+	const char	* typeStr;	// can also be used to name the arg
 	uint32_t		typeID;		// ParamType
 	uint32_t		isOptional;	// do other bits do things?
+
+	std::string GetAsString(const CommandInfo& info) const;
+	const char* GetArgTypeAsString(const CommandInfo& info) const;
 };
 
-#define COMMAND_ARGS		ParamInfo *paramInfo, void *scriptData, TESObjectREFR *thisObj, TESObjectREFR *containingObj, Script *scriptObj, ScriptEventList *eventList, double *result, uint32_t *opcodeOffsetPtr
-#define PASS_COMMAND_ARGS	paramInfo, scriptData, thisObj, containingObj, scriptObj, eventList, result, opcodeOffsetPtr
-#define EXTRACT_ARGS		paramInfo, scriptData, opcodeOffsetPtr, thisObj, containingObj, scriptObj, eventList
-#define COMMAND_ARGS_EVAL	TESObjectREFR *thisObj, void *arg1, void *arg2, double *result
-#define PASS_CMD_ARGS_EVAL	thisObj, arg1, arg2, result
+#define USE_EXTRACT_ARGS_EX NVSE_CORE
+
+#define COMMAND_ARGS		ParamInfo * paramInfo, void * scriptData, TESObjectREFR * thisObj, TESObjectREFR * containingObj, Script * scriptObj, ScriptEventList * eventList, double * result, uint32_t * opcodeOffsetPtr
 #define COMMAND_ARGS_EX		ParamInfo *paramInfo, void *scriptData, uint32_t *opcodeOffsetPtr, Script *scriptObj, ScriptEventList *eventList
+#define PASS_COMMAND_ARGS	paramInfo, scriptData, thisObj, containingObj, scriptObj, eventList, result, opcodeOffsetPtr
+#define COMMAND_ARGS_EVAL	TESObjectREFR * thisObj, void * arg1, void * arg2, double * result
+#define PASS_CMD_ARGS_EVAL	thisObj, arg1, arg2, result
 #define EXTRACT_ARGS_EX		paramInfo, scriptData, opcodeOffsetPtr, scriptObj, eventList
+#define PASS_FMTSTR_ARGS	paramInfo, scriptData, opcodeOffsetPtr, scriptObj, eventList
+#if USE_EXTRACT_ARGS_EX
+#define EXTRACT_ARGS		EXTRACT_ARGS_EX
+#else
+#define EXTRACT_ARGS		paramInfo, scriptData, opcodeOffsetPtr, thisObj, containingObj, scriptObj, eventList
+#endif
 
 //Macro to make CommandInfo definitions a bit less tedious
 
@@ -136,26 +153,48 @@ struct ParamInfo {
 	0 \
 	};
 
-#define DEFINE_CMD_ALT(name, altName, description, refRequired, numParams, paramInfo) \
-	DEFINE_CMD_FULL(name, altName, description, refRequired, numParams, paramInfo, Cmd_Default_Parse)
+#define DEFINE_CMD_FULL_VER(name, altName, description, refRequired, numParams, paramInfo, parser, major, minor, beta) \
+	extern bool Cmd_ ## name ## _ ## major ## _ ## minor ## _ ## beta ## _Execute(COMMAND_ARGS); \
+	static CommandInfo (kCommandInfo_ ## name ## _ ## major ## _ ## minor ## _ ## beta) = { \
+	#name, \
+	#altName, \
+	0, \
+	#description, \
+	refRequired, \
+	numParams, \
+	paramInfo, \
+	HANDLER(Cmd_ ## name ## _ ## major ## _ ## minor ## _ ## beta ## _Execute), \
+	parser, \
+	NULL, \
+	0 \
+	};
+
+#define DEFINE_CMD_ALIAS(name, altName, description, refRequired, paramInfo) \
+	DEFINE_CMD_FULL(name, altName, description, refRequired, (paramInfo) ? (sizeof(paramInfo) / sizeof(ParamInfo)) : 0, paramInfo, Cmd_Default_Parse)	
 
 #define DEFINE_CMD_ALT_EXP(name, altName, description, refRequired, paramInfo) \
-	DEFINE_CMD_FULL(name, altName, description, refRequired, (sizeof(paramInfo) / sizeof(ParamInfo)), paramInfo, Cmd_Expression_Parse)
-
-#define DEFINE_COMMAND(name, description, refRequired, numParams, paramInfo) \
-	DEFINE_CMD_FULL(name, , description, refRequired, numParams, paramInfo, Cmd_Default_Parse)
+	DEFINE_CMD_FULL(name, altName, description, refRequired, (paramInfo) ? (sizeof(paramInfo) / sizeof(ParamInfo)) : 0, paramInfo, Cmd_Expression_Parse)	
 
 #define DEFINE_CMD(name, description, refRequired, paramInfo) \
-	DEFINE_COMMAND(name, description, refRequired, (sizeof(paramInfo) / sizeof(ParamInfo)), paramInfo)
+	DEFINE_CMD_FULL(name, , description, refRequired, (paramInfo) ? (sizeof(paramInfo) / sizeof(ParamInfo)) : 0, paramInfo, Cmd_Default_Parse)
 
 #define DEFINE_COMMAND_EXP(name, description, refRequired, paramInfo) \
 	DEFINE_CMD_ALT_EXP(name, , description, refRequired, paramInfo)
 
-#define DEFINE_COMMAND_PLUGIN(name, description, refRequired, numParams, paramInfo) \
-	DEFINE_CMD_FULL(name, , description, refRequired, numParams, paramInfo, NULL)
+#define DEFINE_CMD_VER_EXP(name, description, refRequired, paramInfo, major, minor, beta) \
+	DEFINE_CMD_FULL_VER(name, , description, refRequired, (paramInfo) ? (sizeof(paramInfo) / sizeof(ParamInfo)) : 0, paramInfo, Cmd_Expression_Parse, major, minor, beta)
 
-#define DEFINE_COMMAND_ALT_PLUGIN(name, altName, description, refRequired, numParams, paramInfo) \
-	DEFINE_CMD_FULL(name, altName, description, refRequired, numParams, paramInfo, NULL)
+#define DEFINE_COMMAND_PLUGIN(name, description, refRequired, paramInfo) \
+	DEFINE_CMD_FULL(name, , description, refRequired, (paramInfo) ? (sizeof(paramInfo) / sizeof(ParamInfo)) : 0, paramInfo, NULL)
+
+#define DEFINE_COMMAND_ALT_PLUGIN(name, altName, description, refRequired, paramInfo) \
+	DEFINE_CMD_FULL(name, altName, description, refRequired, (paramInfo) ? (sizeof(paramInfo) / sizeof(ParamInfo)) : 0, paramInfo, NULL)
+
+#define DEFINE_COMMAND_PLUGIN_EXP(name, description, refRequired, paramInfo) \
+	DEFINE_CMD_FULL(name, , description, refRequired, (paramInfo) ? (sizeof(paramInfo) / sizeof(ParamInfo)) : 0, paramInfo, Cmd_Expression_Plugin_Parse)
+
+#define DEFINE_COMMAND_ALT_PLUGIN_EXP(name, altName, description, refRequired, paramInfo) \
+	DEFINE_CMD_FULL(name, altName, description, refRequired, (paramInfo) ? (sizeof(paramInfo) / sizeof(ParamInfo)) : 0, paramInfo, Cmd_Expression_Plugin_Parse)
 
 // for commands which can be used as conditionals
 #define DEFINE_CMD_ALT_COND_ANY(name, altName, description, refRequired, paramInfo, parser) \
@@ -167,7 +206,7 @@ struct ParamInfo {
 	0,		\
 	#description,	\
 	refRequired,	\
-	(sizeof(paramInfo) / sizeof(ParamInfo)),	\
+	(paramInfo) ? (sizeof(paramInfo) / sizeof(ParamInfo)) : 0,	\
 	paramInfo,	\
 	HANDLER(Cmd_ ## name ## _Execute),	\
 	parser,	\
@@ -183,16 +222,20 @@ struct ParamInfo {
 
 #define DEFINE_CMD_COND(name, description, refRequired, paramInfo) \
 	DEFINE_CMD_ALT_COND(name, , description, refRequired, paramInfo)
-#define DEFINE_CMD_NO_ARGS(name) \
-	DEFINE_COMMAND_PLUGIN(name, , 0, 0, NULL)
-typedef bool (*Cmd_Execute)(COMMAND_ARGS);
+
+#define DEFINE_CMD_COND_PLUGIN(name, description, refRequired, paramInfo) \
+	DEFINE_CMD_ALT_COND_ANY(name, , description, refRequired, paramInfo, NULL)
+
+typedef bool (* Cmd_Execute)(COMMAND_ARGS);
 bool Cmd_Default_Execute(COMMAND_ARGS);
 
-typedef bool (*Cmd_Parse)(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf);
-bool Cmd_Default_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf);
+typedef bool (* Cmd_Parse)(uint32_t numParams, ParamInfo * paramInfo, ScriptLineBuffer * lineBuf, ScriptBuffer * scriptBuf);
+bool Cmd_Default_Parse(uint32_t numParams, ParamInfo * paramInfo, ScriptLineBuffer * lineBuf, ScriptBuffer * scriptBuf);
+const Cmd_Parse Cmd_Expression_Plugin_Parse = (Cmd_Parse)0x08000000;
 
-typedef bool (*Cmd_Eval)(COMMAND_ARGS_EVAL);
+typedef bool (* Cmd_Eval)(COMMAND_ARGS_EVAL);
 bool Cmd_Default_Eval(COMMAND_ARGS_EVAL);
+
 
 #ifdef RUNTIME
 #define HANDLER(x)	x
@@ -202,14 +245,26 @@ bool Cmd_Default_Eval(COMMAND_ARGS_EVAL);
 #define HANDLER_EVAL(x)	Cmd_Default_Eval
 #endif
 
-struct CommandInfo {
-	const char* longName;		// 00
-	const char* shortName;	// 04
+const uint32_t kNVSEOpcodeStart = 0x1400;
+const uint32_t kNVSEOpcodeTest = 0x2000;
+
+struct CommandMetadata
+{
+	CommandMetadata() :parentPlugin(kNVSEOpcodeStart), returnType(kRetnType_Default) { }
+
+	uint32_t				parentPlugin;
+	CommandReturnType	returnType;
+};
+
+struct CommandInfo
+{
+	const char	* longName;		// 00
+	const char	* shortName;	// 04
 	uint32_t		opcode;			// 08
-	const char* helpText;		// 0C
+	const char	* helpText;		// 0C
 	uint16_t		needsParent;	// 10
 	uint16_t		numParams;		// 12
-	ParamInfo* params;		// 14
+	ParamInfo	* params;		// 14
 
 	// handlers
 	Cmd_Execute	execute;		// 18
@@ -218,89 +273,17 @@ struct CommandInfo {
 
 	uint32_t		flags;			// 24		might be more than one field (reference to 25 as a byte)
 
-	void	DumpFunctionDef() const;
-	void	DumpDocs() const;
+	bool	IsDeprecated() const;
+	const char* GetOriginName(CommandMetadata* metadata = nullptr) const;
+
+	// Wiki has different styles of using the origin name, hence "originOrCategory" arg.
+	// For example, for Function template, origin can look like: "JohnnyGuitar".
+	// For function categories, it can look like: "Functions (JohnnyGuitar NVSE)".
+	// Plus some inconsistencies, so it'll have to be hardcoded for certain plugins for convenience.
+	std::string GetWikiStyleOriginName(bool originOrCategory, CommandMetadata* metadata = nullptr) const;
+
+	void	DumpFunctionDef(CommandMetadata* metadata = nullptr) const;
+	void	DumpDocs(CommandMetadata* metadata = nullptr) const;
+	void	DumpWikiDocs(const char* versionNumberStr = nullptr) const;
+	std::string GetDescription(const bool forWiki) const;
 };
-
-const uint32_t kNVSEOpcodeStart = 0x1400;
-const uint32_t kNVSEOpcodeTest = 0x2000;
-
-struct CommandMetadata {
-	CommandMetadata() :parentPlugin(kNVSEOpcodeStart), returnType(kRetnType_Default) {}
-
-	uint32_t				parentPlugin;
-	CommandReturnType	returnType;
-};
-
-class CommandTable {
-public:
-	CommandTable();
-	~CommandTable();
-
-	static void	Init(void);
-
-	void	Read(CommandInfo* start, CommandInfo* end);
-	void	Add(CommandInfo* info, CommandReturnType retnType = kRetnType_Default, uint32_t parentPluginOpcodeBase = 0);
-	void	PadTo(uint32_t id, CommandInfo* info = NULL);
-	bool	Replace(uint32_t opcodeToReplace, CommandInfo* replaceWith);
-
-	CommandInfo* GetStart(void) { return &m_commands[0]; }
-	CommandInfo* GetEnd(void) { return GetStart() + m_commands.size(); }
-	CommandInfo* GetByName(const char* name);
-	CommandInfo* GetByOpcode(uint32_t opcode);
-
-	void	SetBaseID(uint32_t id) { m_baseID = id; m_curID = id; }
-	uint32_t	GetMaxID(void) { return m_baseID + m_commands.size(); }
-	void	SetCurID(uint32_t id) { m_curID = id; }
-	uint32_t	GetCurID(void) { return m_curID; }
-
-	void	Dump(void);
-	void	DumpAlternateCommandNames(void);
-	void	DumpCommandDocumentation(uint32_t startWithID = kNVSEOpcodeStart);
-
-	CommandReturnType	GetReturnType(const CommandInfo* cmd);
-	void				SetReturnType(uint32_t opcode, CommandReturnType retnType);
-
-	uint32_t				GetRequiredNVSEVersion(const CommandInfo* cmd);
-	PluginInfo* GetParentPlugin(const CommandInfo* cmd);
-
-private:
-	// add commands for each release (will help keep track of commands)
-	void AddCommandsV1();
-	void AddCommandsV3s();
-	void AddCommandsV4();
-	void AddDebugCommands();
-
-	typedef std::vector <CommandInfo>				CommandList;
-	typedef std::map <uint32_t, CommandMetadata>		CmdMetadataList;
-	typedef std::map <uint32_t, CommandReturnType>	OpcodeReturnTypeMap;
-	typedef std::map <uint32_t, uint32_t>				OpcodeToPluginMap;
-
-	CommandList		m_commands;
-	CmdMetadataList	m_metadata;
-
-	uint32_t		m_baseID;
-	uint32_t		m_curID;
-
-	// todo: combine these in to a single struct
-	//OpcodeReturnTypeMap	m_returnTypes;		// maps opcode to return type, only string/array-returning cmds included
-	//OpcodeToPluginMap	m_opcodesByPlugin;	// maps opcode to owning plugin opcode base
-
-	std::vector<uint32_t>	m_opcodesByRelease;	// maps an NVSE major version # to opcode of first command added to that release, beginning with v0008
-
-	void	RecordReleaseVersion(void);
-	void	RemoveDisabledPlugins(void);
-};
-
-extern CommandTable	g_consoleCommands;
-extern CommandTable g_scriptCommands;
-
-namespace PluginAPI {
-	const CommandInfo* GetCmdTblStart();
-	const CommandInfo* GetCmdTblEnd();
-	const CommandInfo* GetCmdByOpcode(uint32_t opcode);
-	const CommandInfo* GetCmdByName(const char* name);
-	uint32_t GetCmdRetnType(const CommandInfo* cmd);
-	uint32_t GetReqVersion(const CommandInfo* cmd);
-	const PluginInfo* GetCmdParentPlugin(const CommandInfo* cmd);
-}

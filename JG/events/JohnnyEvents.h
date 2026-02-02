@@ -3,29 +3,29 @@
 #include "ParamInfos.h"
 #include <internal/Game/Bethesda/DialogueResponse.hpp>
 #include <internal/Game/Bethesda/MenuTopic.hpp>
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnDyingEventHandler, SetOnDyingEventHandler, , 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnStartQuestEventHandler, SetOnStartQuestEventHandler, , 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnStopQuestEventHandler, SetOnStopQuestEventHandler, , 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnySeenDataEventHandler, SetSeenDataEventHandler, , 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnLimbGoneEventHandler, SetOnLimbGoneEventHandler, , 0, 5, kParams_Event_OneForm_OneInt);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, SetOnChallengeCompleteEventHandler, , 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnCrosshairEventHandler, SetOnCrosshairEventHandler, , 0, 5, kParams_Event_OneForm_OneInt);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnFailQuestEventHandler, SetOnFailQuestEventHandler, , 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, SetOnCompleteQuestEventHandler, , 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, SetOnSettingsUpdateEventHandler, , 0, 3, kParams_Event);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnAddPerkEventHandler, SetOnAddPerkEventHandler, , 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEventHandler, , 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , 0, 4, kParams_Event_OptionalFlag);
-DEFINE_COMMAND_ALT_PLUGIN(SetOnActorValueChangeEventHandler, SetJohnnyOnActorValueChangeEventHandler, , 0, 4, kParams_Event_OneInt);
-DEFINE_COMMAND_PLUGIN(SetOnProcessLevelChangeEventHandler, , 0, 5, kParams_Event_OneForm_OneInt);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRadioPostSoundAttachEventHandler, SetOnRadioPostSoundHandler, , 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnKeyboardControllerSelectionChangeEventHandler, SetOnKBCTrlUIDeltaHandler, , 0, 4, kParams_Event_OneInt);
-DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSleepWaitEventHandler, SetONSleepWEventHandler, , 0, 4, kParams_Event_OneInt);
-DEFINE_COMMAND_PLUGIN(SetOnTakeBackItemEventHandler, , 0, 5, kParams_Event_TwoForms);
-DEFINE_COMMAND_PLUGIN(SetOnNPCResponseEventHandler, , 0, 4, kParams_Event_OneInt);
-DEFINE_COMMAND_PLUGIN(SetOnGeneralSubtitleEventHandler, "Fires upon the display of a General Subtitle", 0, 4, kParams_Event_OneInt);
-DEFINE_COMMAND_PLUGIN(SetOnReputationChangeEventHandler, "Fires upon the change of a reputation", 0, 4, kParams_Event_OneForm);
-DEFINE_COMMAND_ALT_PLUGIN(SetOnNPCActorValueChangeEventHandler, SetJohnnyOnNPCActorValueEventHandler, , 0, 5, kParams_Event_OneForm_OneInt)
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnDyingEventHandler, SetOnDyingEventHandler, , false, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnStartQuestEventHandler, SetOnStartQuestEventHandler, , false, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnStopQuestEventHandler, SetOnStopQuestEventHandler, , false, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnySeenDataEventHandler, SetSeenDataEventHandler, , false, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnLimbGoneEventHandler, SetOnLimbGoneEventHandler, , false, kParams_Event_OneForm_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnChallengeCompleteEventHandler, SetOnChallengeCompleteEventHandler, , false, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnCrosshairEventHandler, SetOnCrosshairEventHandler, , false, kParams_Event_OneForm_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnFailQuestEventHandler, SetOnFailQuestEventHandler, , false, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnCompleteQuestEventHandler, SetOnCompleteQuestEventHandler, , false, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSettingsUpdateEventHandler, SetOnSettingsUpdateEventHandler, , false, kParams_Event);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnAddPerkEventHandler, SetOnAddPerkEventHandler, , false, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRemovePerkEventHandler, SetOnRemovePerkEventHandler, , false, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRenderUpdateEventHandler, SetOnRenderUpdateEventHandler, , false, kParams_Event_OptionalFlag);
+DEFINE_COMMAND_ALT_PLUGIN(SetOnActorValueChangeEventHandler, SetJohnnyOnActorValueChangeEventHandler, , false, kParams_Event_OneInt);
+DEFINE_COMMAND_PLUGIN(SetOnProcessLevelChangeEventHandler, , false, kParams_Event_OneForm_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnRadioPostSoundAttachEventHandler, SetOnRadioPostSoundHandler, , false, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnKeyboardControllerSelectionChangeEventHandler, SetOnKBCTrlUIDeltaHandler, , false, kParams_Event_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnSleepWaitEventHandler, SetONSleepWEventHandler, , false, kParams_Event_OneInt);
+DEFINE_COMMAND_PLUGIN(SetOnTakeBackItemEventHandler, , false, kParams_Event_TwoForms);
+DEFINE_COMMAND_PLUGIN(SetOnNPCResponseEventHandler, , false, kParams_Event_OneInt);
+DEFINE_COMMAND_PLUGIN(SetOnGeneralSubtitleEventHandler, "Fires upon the display of a General Subtitle", false, kParams_Event_OneInt);
+DEFINE_COMMAND_PLUGIN(SetOnReputationChangeEventHandler, "Fires upon the change of a reputation", false, kParams_Event_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetOnNPCActorValueChangeEventHandler, SetJohnnyOnNPCActorValueEventHandler, , false, kParams_Event_OneForm_OneInt)
 
 EventInformation* OnDyingHandler;
 EventInformation* OnStartQuestHandler;

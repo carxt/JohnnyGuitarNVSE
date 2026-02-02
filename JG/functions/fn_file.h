@@ -1,21 +1,21 @@
 #pragma once
 // Functions that operate on files
-DEFINE_COMMAND_PLUGIN(MD5File, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(SHA1File, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(GetPixelFromBMP, , 0, 6, kParams_BMP);
-DEFINE_COMMAND_PLUGIN(UwUDelete, , 0, 2, kParams_OneString_OneInt);
-DEFINE_COMMAND_PLUGIN(GetTextureWidth, , 0, 2, kParams_OneString_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetTextureHeight, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(GetTextureFormat, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(PlaySoundFile, , 0, 4, kParams_OneString_ThreeOptionalInts);
-DEFINE_COMMAND_PLUGIN(StopSoundFile, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(IsBSALoaded, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(PlaySoundFromPath, , 0, 6, kParams_OneString_OneOptionalFloat_FourOptionalInts);
-DEFINE_COMMAND_PLUGIN(PlaySound3DFromPath, , 1, 5, kParams_OneString_OneOptionalFloat_ThreeOptionalInts);
-DEFINE_COMMAND_PLUGIN(StopSoundFromPath, , 0, 2, kParams_OneString_OneOptionalFloat);
-DEFINE_COMMAND_PLUGIN(StopSound3DFromPath, , 1, 2, kParams_OneString_OneOptionalFloat);
-DEFINE_COMMAND_PLUGIN(IsSoundPlayingFromPath, , 0, 2, kParams_OneString_OneOptionalObjectRef);
+DEFINE_COMMAND_PLUGIN(MD5File, , false, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(SHA1File, , false, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetPixelFromBMP, , false, kParams_BMP);
+DEFINE_COMMAND_PLUGIN(UwUDelete, , false, kParams_OneString_OneInt);
+DEFINE_COMMAND_PLUGIN(GetTextureWidth, , false, kParams_OneString_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetTextureHeight, , false, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetTextureFormat, , false, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetTextureMipMapCount, , false, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(PlaySoundFile, , false, kParams_OneString_ThreeOptionalInts);
+DEFINE_COMMAND_PLUGIN(StopSoundFile, , false, nullptr);
+DEFINE_COMMAND_PLUGIN(IsBSALoaded, , false, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(PlaySoundFromPath, , false, kParams_OneString_OneOptionalFloat_FourOptionalInts);
+DEFINE_COMMAND_PLUGIN(PlaySound3DFromPath, , true, kParams_OneString_OneOptionalFloat_ThreeOptionalInts);
+DEFINE_COMMAND_PLUGIN(StopSoundFromPath, , false, kParams_OneString_OneOptionalFloat);
+DEFINE_COMMAND_PLUGIN(StopSound3DFromPath, , true, kParams_OneString_OneOptionalFloat);
+DEFINE_COMMAND_PLUGIN(IsSoundPlayingFromPath, , false, kParams_OneString_OneOptionalObjectRef);
 #include <filesystem>
 #include "GameSound.h"
 

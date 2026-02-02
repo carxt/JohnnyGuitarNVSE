@@ -1,21 +1,21 @@
 #pragma once
 // Functions that perform mathematical calculations
-DEFINE_COMMAND_PLUGIN(JGLegacyWorldToScreen, , 0, 8, kParamsProjectionArgsLegacy);
-DEFINE_COMMAND_PLUGIN(Get3DDistanceBetweenNiNodes, , 0, 4, kParams_TwoRefs_TwoStrings);
-DEFINE_COMMAND_PLUGIN(Get3DDistanceToNiNode, , 1, 4, kParams_OneString_ThreeFloats);
-DEFINE_COMMAND_PLUGIN(Get3DDistanceFromHitToNiNode, , 1, 1, kParams_OneString);
-DEFINE_COMMAND_PLUGIN(GetVector3DDistance, , 0, 6, kParams_SixFloats);
-DEFINE_COMMAND_PLUGIN(Clamp, , 0, 3, kParams_ThreeFloats);
-DEFINE_COMMAND_PLUGIN(Remap, , 0, 5, kParams_FiveFloats);
-DEFINE_COMMAND_PLUGIN(Lerp, , 0, 3, kParams_ThreeFloats);
-DEFINE_COMMAND_PLUGIN(Sign, , 0, 1, kParams_OneFloat);
-DEFINE_COMMAND_PLUGIN(GetCameraTranslation, , FALSE, 4, kParams_ThreeStrings_OneInt);
-DEFINE_COMMAND_PLUGIN(WorldToScreen, , 0, 8, kParamsProjectionArgs);
-DEFINE_COMMAND_PLUGIN(RGBtoHSV, , 0, 6, kParams_SixScriptVars);
-DEFINE_COMMAND_PLUGIN(HSVtoRGB, , 0, 6, kParams_SixScriptVars);
-DEFINE_COMMAND_PLUGIN(GetRGBColor, , 0, 3, kParams_ThreeInts);
-DEFINE_COMMAND_PLUGIN(GetPackedPlayerFOV, , 0, 3, kParams_TwoScriptVars_OneOptionalScriptVar);
-DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCamFOV, , 0, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(JGLegacyWorldToScreen, , false, kParamsProjectionArgsLegacy);
+DEFINE_COMMAND_PLUGIN(Get3DDistanceBetweenNiNodes, , false, kParams_TwoRefs_TwoStrings);
+DEFINE_COMMAND_PLUGIN(Get3DDistanceToNiNode, , true, kParams_OneString_ThreeFloats);
+DEFINE_COMMAND_PLUGIN(Get3DDistanceFromHitToNiNode, , true, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(GetVector3DDistance, , false, kParams_SixFloats);
+DEFINE_COMMAND_PLUGIN(Clamp, , false, kParams_ThreeFloats);
+DEFINE_COMMAND_PLUGIN(Remap, , false, kParams_FiveFloats);
+DEFINE_COMMAND_PLUGIN(Lerp, , false, kParams_ThreeFloats);
+DEFINE_COMMAND_PLUGIN(Sign, , false, kParams_OneFloat);
+DEFINE_COMMAND_PLUGIN(GetCameraTranslation, , FALSE, kParams_ThreeStrings_OneInt);
+DEFINE_COMMAND_PLUGIN(WorldToScreen, , false, kParamsProjectionArgs);
+DEFINE_COMMAND_PLUGIN(RGBtoHSV, , false, kParams_SixScriptVars);
+DEFINE_COMMAND_PLUGIN(HSVtoRGB, , false, kParams_SixScriptVars);
+DEFINE_COMMAND_PLUGIN(GetRGBColor, , false, kParams_ThreeInts);
+DEFINE_COMMAND_PLUGIN(GetPackedPlayerFOV, , false, kParams_TwoScriptVars_OneOptionalScriptVar);
+DEFINE_COMMAND_PLUGIN(GetPlayerCamFOV, , false, kParams_OneInt);
 
 
 

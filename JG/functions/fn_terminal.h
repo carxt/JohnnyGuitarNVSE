@@ -1,16 +1,16 @@
 #pragma once
-DEFINE_COMMAND_PLUGIN(AddTerminalMenuItem, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemText, , 0, 3, kParams_OneForm_TwoInts);
-DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemText, , 0, 4, kParams_OneForm_TwoInts_OneString);
-DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemNote, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemNote, , 0, 3, kParams_OneForm_OneInt_OneForm);
-DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemSubmenu, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemSubmenu, , 0, 3, kParams_OneForm_OneInt_OneForm);
-DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemCount, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(RemoveTerminalMenuItem, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemFlags, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemFlags, , 0, 3, kParams_OneForm_TwoInts);
-DEFINE_COMMAND_ALT_PLUGIN(RefreshTerminalMenu, rtm, , 0, 0, nullptr);
+DEFINE_COMMAND_PLUGIN(AddTerminalMenuItem, , false, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemText, , false, kParams_OneForm_TwoInts);
+DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemText, , false, kParams_OneForm_TwoInts_OneString);
+DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemNote, , false, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemNote, , false, kParams_OneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemSubmenu, , false, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemSubmenu, , false, kParams_OneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemCount, , false, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(RemoveTerminalMenuItem, , false, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetTerminalMenuItemFlags, , false, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetTerminalMenuItemFlags, , false, kParams_OneForm_TwoInts);
+DEFINE_COMMAND_ALT_PLUGIN(RefreshTerminalMenu, rtm, , false, nullptr);
 
 bool Cmd_RefreshTerminalMenu_Execute(COMMAND_ARGS) {
 	*result = 0;

@@ -1,14 +1,14 @@
 #pragma once
 // Alternative actor value functions to allow using numeric AV IDs
 // Deprecated, xNVSE allows using AV codes with regular functions in parentheses
-DEFINE_COMMAND_ALT_PLUGIN(GetActorValueAlt, GetAVAlt, , 1, 1, kParams_OneInt);
-DEFINE_COMMAND_ALT_PLUGIN(SetActorValueAlt, SetAVAlt, , 1, 2, kParams_TwoInts);
-DEFINE_COMMAND_ALT_PLUGIN(GetBaseActorValueAlt, GetBaseAVAlt, , 1, 1, kParams_OneInt);
-DEFINE_COMMAND_ALT_PLUGIN(ForceActorValueAlt, ForceAVAlt, , 1, 2, kParams_TwoInts);
-DEFINE_COMMAND_ALT_PLUGIN(DamageActorValueAlt, DamageAVAlt, , 1, 2, kParams_OneInt_OneFloat);
-DEFINE_COMMAND_ALT_PLUGIN(RestoreActorValueAlt, RestoreAVAlt, , 1, 2, kParams_OneInt_OneFloat);
-DEFINE_COMMAND_ALT_PLUGIN(ModActorValueAlt, ModAVAlt, , 1, 2, kParams_TwoInts);
-DEFINE_COMMAND_ALT_PLUGIN(GetThresholdedActorValue, GetThresholdAV, , 1, 1, kParams_OneActorValue);
+DEFINE_COMMAND_ALT_PLUGIN(GetActorValueAlt, GetAVAlt, , true, kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetActorValueAlt, SetAVAlt, , true, kParams_TwoInts);
+DEFINE_COMMAND_ALT_PLUGIN(GetBaseActorValueAlt, GetBaseAVAlt, , true, kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(ForceActorValueAlt, ForceAVAlt, , true, kParams_TwoInts);
+DEFINE_COMMAND_ALT_PLUGIN(DamageActorValueAlt, DamageAVAlt, , true, kParams_OneInt_OneFloat);
+DEFINE_COMMAND_ALT_PLUGIN(RestoreActorValueAlt, RestoreAVAlt, , true, kParams_OneInt_OneFloat);
+DEFINE_COMMAND_ALT_PLUGIN(ModActorValueAlt, ModAVAlt, , true, kParams_TwoInts);
+DEFINE_COMMAND_ALT_PLUGIN(GetThresholdedActorValue, GetThresholdAV, , true, kParams_OneActorValue);
 bool(__cdecl* Cmd_GetAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BD8A0;
 bool(__cdecl* Cmd_SetAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BDCD0;
 bool(__cdecl* Cmd_ForceAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BE190;

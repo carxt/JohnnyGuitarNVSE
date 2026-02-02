@@ -1,8 +1,8 @@
 #pragma once
-DEFINE_COMMAND_PLUGIN(GetBookFlags, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(SetBookFlags, , 0, 2, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(GetBookSkill, , 0, 1, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(SetBookSkill, , 0, 2, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetBookFlags, , false, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetBookFlags, , false, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(GetBookSkill, , false, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetBookSkill, , false, kParams_OneForm_OneInt);
 
 bool Cmd_GetBookFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
