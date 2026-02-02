@@ -557,6 +557,33 @@ namespace JIPFixes {
 
 	}
 
+	namespace ModelReloadFix {
+		uint32_t uiReturnAddr = 0;
+		void __declspec(naked) QueueItem_Asm() {
+			__asm {
+				push    0
+				push    0
+				push    0
+				push    1
+				push    0
+				push    1
+				push    eax
+				push    1
+				push    edi
+				push    1
+				push    esi
+				mov     ecx, edx
+				call    ebx
+				jmp     uiReturnAddr
+			}
+		}
+
+		void InitHooks() {
+			WriteRelJump(GetJIPAddress(0x10019E38), QueueItem_Asm);
+			uiReturnAddr = GetJIPAddress(0x10019E4D);
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -655,6 +682,7 @@ namespace JIPFixes {
 			CloseActiveMenuFix::InitHooks();
 			FireWeaponFix::InitHooks();
 			ItemDescriptionFixFix::InitHooks();
+			ModelReloadFix::InitHooks();
 		}
 	}
 
