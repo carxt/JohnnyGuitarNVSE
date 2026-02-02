@@ -308,8 +308,8 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!inArr) return true;
 	uint32_t size = g_arrInterface->GetArraySize(inArr);
-	NVSEArrayElement* elements = new NVSEArrayElement[size];
-	g_arrInterface->GetElements(inArr, elements, nullptr);
+	BSScrapBuffer<NVSEArrayElement> elements(size);
+	g_arrInterface->GetElements(inArr, elements.get(), nullptr);
 	if (!fullMatch) {
 		for (uint32_t i = 0; i < size; i++) {
 			if (elements[i].GetTESForm() == nullptr) return true;
@@ -317,7 +317,6 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 			do {
 				if (elements[i].GetTESForm() == listIter->data) {
 					*result = 1;
-					delete[] elements;
 					return true;
 				}
 			} while (listIter = listIter->next);
@@ -335,14 +334,12 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 				}
 			} while (listIter = listIter->next);
 			if (elementFound == 0) {
-				delete[] elements;
 				return true;
 			}
 		}
 		*result = 1;
 	}
 
-	delete[] elements;
 	return true;
 }
 bool Cmd_SetUIUpdateSound_Execute(COMMAND_ARGS) {
@@ -389,8 +386,8 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	if (!inArr) return true;
 	NVSEArrayVar* outArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	uint32_t size = g_arrInterface->GetArraySize(inArr);
-	NVSEArrayElement* elements = new NVSEArrayElement[size];
-	g_arrInterface->GetElements(inArr, elements, nullptr);
+	BSScrapBuffer<NVSEArrayElement> elements(size);
+	g_arrInterface->GetElements(inArr, elements.get(), nullptr);
 	std::map<const char*, TESForm*, cmp_str> smap(cmp_str(isReverse > 0));
 	for (uint32_t i = 0; i < size; i++) {
 		if (elements[i].GetTESForm() == nullptr) return true;
@@ -401,7 +398,6 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	}
 
 	g_arrInterface->AssignCommandResult(outArr, result);
-	delete[] elements;
 	return true;
 }
 bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {

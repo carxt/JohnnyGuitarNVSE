@@ -157,6 +157,9 @@
     <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="..\shared\BSMemory\BSScrapMemory.cpp">
+      <Filter>shared\BSMemory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -366,6 +369,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\FileFinder.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\BSMemory\BSScrapMemory.hpp">
+      <Filter>shared\BSMemory</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

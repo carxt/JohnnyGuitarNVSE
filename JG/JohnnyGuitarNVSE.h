@@ -1013,7 +1013,7 @@ void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1) {
 void SetMapMarkerIcon(TESObjectREFR* marker, char* iconPath) {
 	auto pos = markerIconMap.find(marker->refID);
 	uint32_t bufferSize = strlen(iconPath) + 1;
-	char* pathCopy = new char[bufferSize];
+	char* pathCopy = BSMemory::malloc<char>(bufferSize);
 	strcpy_s(pathCopy, bufferSize, iconPath);
 
 	if (pos != markerIconMap.end()) {

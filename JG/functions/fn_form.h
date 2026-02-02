@@ -2,6 +2,7 @@
 // Get/Set/Boolean functions for various form types
 #include "GameSettings.h"
 #include "ParamInfos.h"
+#include "Shared/BSMemory/BSScrapMemory.hpp"
 DEFINE_COMMAND_PLUGIN(GetBaseEffectAV, , false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetBaseEffectArchetype, , false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetInteriorLightingTraitNumeric, , false, kParams_OneForm_OneInt);
@@ -703,8 +704,9 @@ bool Cmd_SetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 		if (!inArr) return true;
 		uint32_t size = g_arrInterface->GetArraySize(inArr);
 		if (!size) return true;
-		NVSEArrayElement* elements = new NVSEArrayElement[size];
-		g_arrInterface->GetElements(inArr, elements, nullptr);
+
+		BSScrapBuffer<NVSEArrayElement> elements(size);
+		g_arrInterface->GetElements(inArr, elements.get(), nullptr);
 		TESIdleForm** idleList = BSMemory::malloc<TESIdleForm*>(size);
 		for (uint32_t i = 0; i < size; i++) {
 			idleList[i] = (TESIdleForm*)elements[i].GetTESForm();
@@ -712,7 +714,6 @@ bool Cmd_SetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 		if (marker->idleCollection.idleList) BSMemory::free(marker->idleCollection.idleList);
 		marker->idleCollection.idleList = idleList;
 		marker->idleCollection.animCount = size;
-		delete[] elements;
 		*result = 1;
 	}
 

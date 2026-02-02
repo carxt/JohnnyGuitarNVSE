@@ -134,6 +134,7 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClCompile Include="..\nvse\nvse\NiTypes.cpp" />
     <ClCompile Include="..\nvse\nvse\Utilities.cpp" />
     <ClCompile Include="..\shared\BSMemory\BSMemory.cpp" />
+    <ClCompile Include="..\shared\BSMemory\BSScrapMemory.cpp" />
     <ClCompile Include="..\shared\SafeWrite\SafeWrite.cpp" />
     <ClCompile Include="events\EventFramework.cpp" />
     <ClCompile Include="events\LambdaVariableContext.cpp" />
@@ -176,6 +177,7 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClInclude Include="..\nvse\nvse\ParamInfos.h" />
     <ClInclude Include="..\nvse\nvse\Utilities.h" />
     <ClInclude Include="..\shared\BSMemory\BSMemory.hpp" />
+    <ClInclude Include="..\shared\BSMemory\BSScrapMemory.hpp" />
     <ClInclude Include="..\shared\Defines.hpp" />
     <ClInclude Include="..\shared\SafeWrite\SafeWrite.hpp" />
     <ClInclude Include="..\shared\Utils\Bitfield.hpp" />

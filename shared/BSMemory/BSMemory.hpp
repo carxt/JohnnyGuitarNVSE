@@ -13,17 +13,17 @@ namespace BSMemory {
 	extern __declspec(noalias) std::size_t msize(void* ptr);
 
 	template <typename T>
-	[[nodiscard]] __declspec(allocator) __declspec(restrict) T* malloc() {
+	[[nodiscard]] inline __declspec(allocator) __declspec(restrict) T* malloc() {
 		return static_cast<T*>(BSMemory::malloc(sizeof(T)));
 	};
 
 	template <typename T>
-	[[nodiscard]] __declspec(allocator) __declspec(restrict) T* malloc(std::size_t count) {
+	[[nodiscard]] inline __declspec(allocator) __declspec(restrict) T* malloc(std::size_t count) {
 		return static_cast<T*>(BSMemory::malloc(sizeof(T) * count));
 	};
 
 	template <typename T, const uint32_t ConstructorPtr = 0, typename... Args>
-	[[nodiscard]] __declspec(restrict) T* create(Args &&... args) {
+	[[nodiscard]] inline __declspec(restrict) T* create(Args &&... args) {
 		auto* ptr = BSMemory::malloc<T>();
 		if constexpr (ConstructorPtr) {
 			ThisCall(ConstructorPtr, ptr, std::forward<Args>(args)...);
@@ -35,7 +35,7 @@ namespace BSMemory {
 	}
 
 	template <typename T, const uint32_t DestructorPtr = 0, typename... Args>
-	void destroy(T* ptr, Args &&... args) {
+	inline void destroy(T* ptr, Args &&... args) {
 		if constexpr (DestructorPtr) {
 			ThisCall(DestructorPtr, ptr, std::forward<Args>(args)...);
 		}
@@ -50,10 +50,11 @@ public:
 	BSMemoryAllocator() = default;
 	template<typename U>
 	BSMemoryAllocator(const BSMemoryAllocator<U>&) {}
-	[[nodiscard]] T* allocate(std::size_t n) {
+
+	[[nodiscard]] inline T* allocate(std::size_t n) {
 		return BSMemory::malloc<T>(n);
 	}
-	void deallocate(T* p, std::size_t) noexcept {
+	inline void deallocate(T* p, std::size_t) noexcept {
 		BSMemory::free(p);
 	}
 };

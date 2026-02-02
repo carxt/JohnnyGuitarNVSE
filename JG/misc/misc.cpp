@@ -1,6 +1,7 @@
 #include "misc.h"
 #include <internal\utility.h>
 #include <GameAPI.h>
+#include "Shared/BSMemory/BSScrapMemory.hpp"
 
 float tan_p(float angle) {
 	angle *= kDbl4dPI;
@@ -71,15 +72,14 @@ bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long
 	int height = *(int*)&info[22];
 	if (width < PixelW || height < PixelH) return false;
 	int XPadding = (width * 3 + 3) & (~3);
-	BYTE* data = new BYTE[XPadding];
+	BSScrapBuffer<BYTE> data(XPadding);
 	PixelH = height - (PixelH + 1);
 	fseek(f, XPadding * PixelH, SEEK_CUR);
-	fread(data, sizeof(BYTE), XPadding, f);
+	fread(data.get(), sizeof(BYTE), XPadding, f);
 	uint32_t PosX = PixelW * 3;
 	B = data[PosX];
 	G = data[PosX + 1];
 	R = data[PosX + 2];
 	fclose(f);
-	delete data;
 	return true;
 }
