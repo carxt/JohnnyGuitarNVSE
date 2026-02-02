@@ -84,8 +84,8 @@ void Setting::Set(float newVal) {
 }
 
 void Setting::Set(const char* strVal, bool doFree) {
-	if (doFree) GameHeapFree(data.str);
-	data.str = (char*)GameHeapAlloc(StrLen(strVal) + 1);
+	if (doFree) BSMemory::free(data.str);
+	data.str = (char*)BSMemory::malloc<char>(StrLen(strVal) + 1);
 	StrCopy(data.str, strVal);
 }
 

@@ -59,7 +59,7 @@ bool Cmd_RemoveTerminalMenuItem_Execute(COMMAND_ARGS) {
 		if (entry) {
 			ThisCall(0x5010F0, entry);
 			terminal->menuEntries.RemoveNth(menuEntryID);
-			GameHeapFree(entry);
+			BSMemory::free(entry);
 			*result = 1;
 		}
 	}
@@ -163,7 +163,7 @@ bool Cmd_AddTerminalMenuItem_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* terminal = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal) && terminal && IS_TYPE(terminal, BGSTerminal)) {
-		BGSTerminal::MenuEntry* entry = (BGSTerminal::MenuEntry*)GameHeapAlloc(sizeof(BGSTerminal::MenuEntry));
+		BGSTerminal::MenuEntry* entry = BSMemory::malloc<BGSTerminal::MenuEntry>();
 		if (entry) {
 			ThisCall(0x500960, entry);
 			terminal->menuEntries.Append(entry);

@@ -136,7 +136,7 @@ bool __cdecl Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS)
 			} while (iter = iter->next);
 		}
 
-		auto casinoStats = (CasinoStats*)GameHeapAlloc(sizeof(CasinoStats));
+		auto casinoStats = BSMemory::malloc<CasinoStats>();
 		casinoStats->earningStage = 0;
 		casinoStats->earnings = earnings;
 		casinoStats->casinoRefID = casinoRefId;

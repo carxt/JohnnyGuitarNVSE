@@ -122,7 +122,7 @@ bool Cmd_DialogResponseAddRelatedTopic_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &topic, &responseType, &addPosition) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo) && responseType >= ResponseRelatedTopicType::kRelatedTopicType_LinkFrom && responseType <= ResponseRelatedTopicType::kRelatedTopicType_FollowUp) {
 		if (!dialogResponse->relatedTopics) {
 			//initializer for the relatedTopics structure.
-			dialogResponse->relatedTopics = ThisCall<TESTopicInfo::RelatedTopics*>(0x061CE40, GameHeapAlloc(sizeof(TESTopicInfo::RelatedTopics)));
+			dialogResponse->relatedTopics = ThisCall<TESTopicInfo::RelatedTopics*>(0x061CE40, BSMemory::malloc<TESTopicInfo::RelatedTopics>());
 		}
 		TESTopicInfo::RelatedTopics* relTopics = dialogResponse->relatedTopics;
 		switch (responseType) {

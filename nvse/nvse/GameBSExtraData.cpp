@@ -65,7 +65,7 @@ __declspec(naked) BSExtraData* BaseExtraList::Add(BSExtraData* xData) {
 }
 
 ExtraDataList* ExtraDataList::Create(BSExtraData* xBSData) {
-	ExtraDataList* xData = (ExtraDataList*)GameHeapAlloc(sizeof(ExtraDataList));
+	ExtraDataList* xData = BSMemory::malloc<ExtraDataList>();
 	MemZero(xData, sizeof(ExtraDataList));
 	*(uint32_t*)xData = 0x10143E8;
 	if (xBSData) xData->Add(xBSData);

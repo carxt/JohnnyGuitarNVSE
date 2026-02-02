@@ -488,7 +488,7 @@ const char* GetDXDescription(uint32_t keycode) {
 char* CopyCString(const char* src) {
 	uint32_t length = StrLen(src);
 	if (!length) return NULL;
-	char* result = (char*)GameHeapAlloc(length + 1);
+	char* result = BSMemory::malloc<char>(length + 1);
 	StrCopy(result, src);
 	return result;
 }

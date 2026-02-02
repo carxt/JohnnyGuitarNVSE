@@ -1530,7 +1530,7 @@ bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
 	data.xData = ExtraDataList::Create(xBSData);
 	if (!entry->extendData)
 	{
-		entry->extendData = (ExtraContainerChanges::ExtendDataList*)GameHeapAlloc(8);
+		entry->extendData = BSMemory::malloc<ExtraContainerChanges::ExtendDataList>();
 		entry->extendData->Init();
 	}
 	entry->extendData->Insert(data.xData);

@@ -632,7 +632,7 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 			xActivateRef->activationPromptOverride.Set(newPrompt);
 		}
 		else {
-			xActivateRef = (ExtraActivateRef*)GameHeapAlloc(0x20);
+			xActivateRef = BSMemory::malloc<ExtraActivateRef>();
 			ThisCall(0x4338B0, xActivateRef);
 			xActivateRef->activationPromptOverride.Set(newPrompt);
 			thisObj->extraDataList.Add(xActivateRef);
@@ -705,11 +705,11 @@ bool Cmd_SetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 		if (!size) return true;
 		NVSEArrayElement* elements = new NVSEArrayElement[size];
 		g_arrInterface->GetElements(inArr, elements, nullptr);
-		TESIdleForm** idleList = (TESIdleForm**)GameHeapAlloc(4 * size);
+		TESIdleForm** idleList = BSMemory::malloc<TESIdleForm*>(size);
 		for (uint32_t i = 0; i < size; i++) {
 			idleList[i] = (TESIdleForm*)elements[i].GetTESForm();
 		}
-		if (marker->idleCollection.idleList) GameHeapFree(marker->idleCollection.idleList);
+		if (marker->idleCollection.idleList) BSMemory::free(marker->idleCollection.idleList);
 		marker->idleCollection.idleList = idleList;
 		marker->idleCollection.animCount = size;
 		delete[] elements;
@@ -848,7 +848,7 @@ bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 
 		}
 		else {
-			TESModelTextureSwap::Texture* texture = (TESModelTextureSwap::Texture*)GameHeapAlloc(0x88);
+			TESModelTextureSwap::Texture* texture = BSMemory::malloc<TESModelTextureSwap::Texture>();
 			if (texture != nullptr) {
 				texture->index3D = id;
 				texture->textureID = txst;
@@ -887,7 +887,7 @@ bool Cmd_SetArmorAltTexture_Execute(COMMAND_ARGS) {
 			*result = 1;
 
 		} else {
-			TESModelTextureSwap::Texture* texture = (TESModelTextureSwap::Texture*)GameHeapAlloc(0x88);
+			TESModelTextureSwap::Texture* texture = BSMemory::malloc<TESModelTextureSwap::Texture>();
 			if (texture != nullptr) {
 				texture->index3D = id;
 				texture->textureID = txst;

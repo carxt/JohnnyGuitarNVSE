@@ -112,7 +112,7 @@ void CallSemaphore4(void* Semaphore, uint32_t SemaphoreFunc) {
 };
 
 ExtraContainerChanges::ExtendDataList* ExtraContainerChangesExtendDataListCreate(ExtraDataList* pExtraDataList) {
-	ExtraContainerChanges::ExtendDataList* xData = (ExtraContainerChanges::ExtendDataList*)GameHeapAlloc(sizeof(ExtraContainerChanges::ExtendDataList));
+	ExtraContainerChanges::ExtendDataList* xData = BSMemory::malloc<ExtraContainerChanges::ExtendDataList>();
 	xData->Init();
 	if (pExtraDataList) xData->Append(pExtraDataList);
 	return xData;
@@ -121,7 +121,7 @@ ExtraContainerChanges::ExtendDataList* ExtraContainerChangesExtendDataListCreate
 static void ExtraContainerChangesExtendDataListFree(ExtraContainerChanges::ExtendDataList* xData, bool bFreeList) {
 	if (xData) {
 		if (bFreeList) xData->Clear();
-		GameHeapFree(xData);
+		BSMemory::free(xData);
 	}
 }
 
@@ -141,13 +141,13 @@ void ExtraContainerChanges::EntryData::Cleanup() {
 				continue;
 			}
 		}
-		GameHeapFree(xData);
+		BSMemory::free(xData);
 		xdlIter = prev ? prev->RemoveNext() : xdlIter->RemoveMe();
 	} while (xdlIter);
 }
 
 ExtraContainerChanges* ExtraContainerChanges::Create() {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraContainerChanges));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraContainerChanges>();
 	dataPtr[0] = kVtbl_ExtraContainerChanges;
 	dataPtr[1] = kExtraData_ContainerChanges;
 	dataPtr[2] = 0;
@@ -156,10 +156,10 @@ ExtraContainerChanges* ExtraContainerChanges::Create() {
 }
 
 ExtraContainerChanges::Data* ExtraContainerChanges::Data::Create(TESObjectREFR* owner) {
-	Data* data = (Data*)GameHeapAlloc(sizeof(Data));
+	Data* data = BSMemory::malloc<Data>();
 	MemZero(data, sizeof(Data));
 	data->owner = owner;
-	data->objList = (EntryDataList*)GameHeapAlloc(sizeof(EntryDataList));
+	data->objList = (EntryDataList*)BSMemory::malloc<EntryDataList>();
 	data->objList->Init();
 	return data;
 }
@@ -175,7 +175,7 @@ void ExtraContainerChanges::Cleanup() {
 }
 
 BSExtraData* BSExtraData::Create(uint8_t xType, uint32_t size, uint32_t vtbl) {
-	BSExtraData* xData = (BSExtraData*)GameHeapAlloc(size);
+	BSExtraData* xData = (BSExtraData*)BSMemory::malloc(size);
 	MemZero(xData, size);
 	*(uint32_t*)xData = vtbl;
 	xData->type = xType;
@@ -183,7 +183,7 @@ BSExtraData* BSExtraData::Create(uint8_t xType, uint32_t size, uint32_t vtbl) {
 }
 
 ExtraHealth* ExtraHealth::Create(float _health) {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraHealth));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraHealth>();
 	dataPtr[0] = kVtbl_ExtraHealth;
 	dataPtr[1] = kExtraData_Health;
 	dataPtr[2] = 0;
@@ -193,7 +193,7 @@ ExtraHealth* ExtraHealth::Create(float _health) {
 }
 
 ExtraWorn* ExtraWorn::Create() {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraWorn));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraWorn>();
 	dataPtr[0] = kVtbl_ExtraWorn;
 	dataPtr[1] = kExtraData_Worn;
 	dataPtr[2] = 0;
@@ -201,7 +201,7 @@ ExtraWorn* ExtraWorn::Create() {
 }
 
 ExtraCannotWear* ExtraCannotWear::Create() {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraCannotWear));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraCannotWear>();
 	dataPtr[0] = kVtbl_ExtraCannotWear;
 	dataPtr[1] = kExtraData_CannotWear;
 	dataPtr[2] = 0;
@@ -209,18 +209,18 @@ ExtraCannotWear* ExtraCannotWear::Create() {
 }
 
 ExtraLock* ExtraLock::Create() {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraLock));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraLock>();
 	dataPtr[0] = kVtbl_ExtraLock;
 	dataPtr[1] = kExtraData_Lock;
 	dataPtr[2] = 0;
-	uint32_t* lockData = (uint32_t*)GameHeapAlloc(sizeof(Data));
+	uint32_t* lockData = (uint32_t*)BSMemory::malloc<Data>();
 	MemZero(lockData, sizeof(Data));
 	dataPtr[3] = (uint32_t)lockData;
 	return (ExtraLock*)dataPtr;
 }
 
 ExtraCount* ExtraCount::Create(uint32_t count) {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraCount));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraCount>();
 	dataPtr[0] = kVtbl_ExtraCount;
 	dataPtr[1] = kExtraData_Count;
 	dataPtr[2] = 0;
@@ -229,18 +229,18 @@ ExtraCount* ExtraCount::Create(uint32_t count) {
 }
 
 ExtraTeleport* ExtraTeleport::Create() {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraTeleport));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraTeleport>();
 	dataPtr[0] = kVtbl_ExtraTeleport;
 	dataPtr[1] = kExtraData_Teleport;
 	dataPtr[2] = 0;
-	uint32_t* teleData = (uint32_t*)GameHeapAlloc(sizeof(Data));
+	uint32_t* teleData = (uint32_t*)BSMemory::malloc<Data>();
 	MemZero(teleData, sizeof(Data));
 	dataPtr[3] = (uint32_t)teleData;
 	return (ExtraTeleport*)dataPtr;
 }
 
 ExtraWeaponModFlags* ExtraWeaponModFlags::Create(uint8_t _flags) {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraWeaponModFlags));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraWeaponModFlags>();
 	dataPtr[0] = kVtbl_ExtraWeaponModFlags;
 	dataPtr[1] = kExtraData_WeaponModFlags;
 	dataPtr[2] = 0;
@@ -257,7 +257,7 @@ uint32_t GetCountForExtraDataList(ExtraDataList* list) {
 }
 
 ExtraOwnership* ExtraOwnership::Create(TESForm* _owner) {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraOwnership));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraOwnership>();
 	dataPtr[0] = kVtbl_ExtraOwnership;
 	dataPtr[1] = kExtraData_Ownership;
 	dataPtr[2] = 0;
@@ -266,7 +266,7 @@ ExtraOwnership* ExtraOwnership::Create(TESForm* _owner) {
 }
 
 ExtraRank* ExtraRank::Create(uint32_t _rank) {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraRank));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraRank>();
 	dataPtr[0] = kVtbl_ExtraRank;
 	dataPtr[1] = kExtraData_Rank;
 	dataPtr[2] = 0;
@@ -275,7 +275,7 @@ ExtraRank* ExtraRank::Create(uint32_t _rank) {
 }
 
 ExtraAction* ExtraAction::Create(TESObjectREFR* _actionRef) {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraAction));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraAction>();
 	dataPtr[0] = kVtbl_ExtraAction;
 	dataPtr[1] = kExtraData_Action;
 	dataPtr[2] = 0;
@@ -288,7 +288,7 @@ class TESScript;
 class TESScriptableForm;
 
 ExtraScript* ExtraScript::Create(TESForm* baseForm, bool create, TESObjectREFR* container) {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraScript));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraScript>();
 	dataPtr[0] = kVtbl_ExtraScript;
 	dataPtr[1] = kExtraData_Script;
 	dataPtr[2] = 0;
@@ -300,14 +300,14 @@ ExtraScript* ExtraScript::Create(TESForm* baseForm, bool create, TESObjectREFR* 
 		if (scriptable && scriptable->script) {
 			xScript->script = scriptable->script;
 			if (create) {
-				ScriptEventList::Event* pEvent = (ScriptEventList::Event*)GameHeapAlloc(sizeof(ScriptEventList));
+				ScriptEventList::Event* pEvent = (ScriptEventList::Event*)BSMemory::malloc<ScriptEventList>();
 				pEvent->eventMask = ScriptEventList::kEvent_OnAdd;
 				pEvent->object = container;
 				ScriptEventList* pEventList = xScript->script->CreateEventList();
 				if (pEventList) {
 					xScript->eventList = pEventList;
 					if (!pEventList->m_eventList) {
-						pEventList->m_eventList = (ScriptEventList::EventList*)GameHeapAlloc(sizeof(ScriptEventList::EventList));
+						pEventList->m_eventList = (ScriptEventList::EventList*)BSMemory::malloc<ScriptEventList::EventList>();
 						pEventList->m_eventList->Init();
 						pEventList->m_eventList->Insert(pEvent);
 					}
@@ -319,11 +319,11 @@ ExtraScript* ExtraScript::Create(TESForm* baseForm, bool create, TESObjectREFR* 
 }
 
 ExtraFactionChanges* ExtraFactionChanges::Create() {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraFactionChanges));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraFactionChanges>();
 	dataPtr[0] = kVtbl_ExtraFactionChanges;
 	dataPtr[1] = kExtraData_FactionChanges;
 	dataPtr[2] = 0;
-	uint32_t* listData = (uint32_t*)GameHeapAlloc(sizeof(FactionListEntry));
+	uint32_t* listData = (uint32_t*)BSMemory::malloc<FactionListEntry>();
 	listData[0] = 0;
 	listData[1] = 0;
 	dataPtr[3] = (uint32_t)listData;
@@ -351,7 +351,7 @@ void SetExtraFactionRank(BaseExtraList& xDataList, TESFaction* faction, char ran
 			xFactionChanges = ExtraFactionChanges::Create();
 			xDataList.Add(xFactionChanges);
 		}
-		pData = (FactionListData*)GameHeapAlloc(sizeof(FactionListData));
+		pData = BSMemory::malloc<FactionListData>();
 		if (pData) {
 			pData->faction = faction;
 			pData->rank = rank;
@@ -361,7 +361,7 @@ void SetExtraFactionRank(BaseExtraList& xDataList, TESFaction* faction, char ran
 }
 
 ExtraHotkey* ExtraHotkey::Create(uint8_t _index) {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraHotkey));
+	uint32_t* dataPtr = (uint32_t*)BSMemory::malloc<ExtraHotkey>();
 	dataPtr[0] = kVtbl_ExtraHotkey;
 	dataPtr[1] = kExtraData_Hotkey;
 	dataPtr[2] = 0;

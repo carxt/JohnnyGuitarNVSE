@@ -329,7 +329,7 @@ uint8_t TESPackage::TargetData::TargetCodeForString(const char* targetStr) {
 }
 
 TESPackage::TargetData* TESPackage::TargetData::Create() {
-	TargetData* data = (TargetData*)GameHeapAlloc(sizeof(TargetData));
+	TargetData* data = BSMemory::malloc<TargetData>();
 
 	// fill out with same defaults as editor uses
 	data->count = 0;
@@ -377,7 +377,7 @@ void TESPackage::SetTarget(uint8_t typeCode, uint32_t count) {
 }
 
 TESPackage::LocationData* TESPackage::LocationData::Create() {
-	LocationData* data = (LocationData*)GameHeapAlloc(sizeof(LocationData));
+	LocationData* data = BSMemory::malloc<LocationData>();
 
 	data->locationType = kPackLocation_CurrentLocation;
 	data->object.form = NULL;

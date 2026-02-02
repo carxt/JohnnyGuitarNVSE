@@ -62,7 +62,7 @@ bool Cmd_SetRegionMapName_Execute(COMMAND_ARGS) {
 			mapData->mapName.Set(newName);
 		}
 		else {
-			mapData = (TESRegionDataMap*)GameHeapAlloc(0x10);
+			mapData = BSMemory::malloc<TESRegionDataMap>();
 			ThisCall(0x4F3CA0, mapData);
 			mapData->mapName.Set(newName);
 			region->dataEntries->Append(mapData);
@@ -107,14 +107,14 @@ bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 		if (weatherData) {
 			ListNode<WeatherEntry>* headNode = weatherData->weatherTypes.Head(), * iter = headNode->next;
 			while (iter) {
-				GameHeapFree(iter->data);
+				BSMemory::free(iter->data);
 				iter = iter->RemoveMe();
 			}
 			if (headNode->next) {
 				headNode->RemoveNext();
 			}
 			else {
-				GameHeapFree(headNode->data);
+				BSMemory::free(headNode->data);
 				headNode->RemoveMe();
 			}
 			*result = 1;
@@ -237,7 +237,7 @@ bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
 			do {
 				if (iter->data && iter->data->weather == weather) return true;
 			} while (iter = iter->next);
-			entry = (WeatherEntry*)GameHeapAlloc(sizeof(WeatherEntry));
+			entry = BSMemory::malloc<WeatherEntry>();
 			entry->chance = chance;
 			entry->global = global;
 			entry->weather = weather;

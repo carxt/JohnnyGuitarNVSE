@@ -262,7 +262,7 @@ VariableInfo* Script::GetVariableInfo(uint32_t idx) {
 }
 
 uint32_t Script::AddVariable(TESForm* form) {
-	RefVariable* refVar = (RefVariable*)GameHeapAlloc(sizeof(RefVariable));
+	RefVariable* refVar = BSMemory::malloc<RefVariable>();
 	refVar->name.Set("");
 	refVar->form = form;
 	refVar->varIdx = 0;

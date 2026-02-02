@@ -75,7 +75,7 @@ void TESObjectREFR::Update3D() {
 }
 
 TESObjectREFR* TESObjectREFR::Create(bool bTemp) {
-	TESObjectREFR* refr = (TESObjectREFR*)GameHeapAlloc(sizeof(TESObjectREFR));
+	TESObjectREFR* refr = BSMemory::malloc<TESObjectREFR>();
 	ThisCall(s_TESObject_REFR_init, refr);
 	if (bTemp) ThisCall(0x484490, refr);
 	return refr;

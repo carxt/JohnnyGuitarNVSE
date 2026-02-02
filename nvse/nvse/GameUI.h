@@ -434,7 +434,7 @@ public:
 			newTile->SetString(kTileValue_string, text);
 		}
 
-		auto listItem = (ListBoxItem<Item*>*)GameHeapAlloc(sizeof(ListBoxItem<Item*>));
+		auto listItem = BSMemory::malloc<ListBoxItem<Item*>>();
 		listItem->tile = newTile;
 		listItem->object = item;
 		listItem->byte08 = 0;

@@ -36,7 +36,7 @@ template <typename T_Data> struct ListNode {
 			ListNode* pNext = next;
 			data = next->data;
 			next = next->next;
-			GameHeapFree(pNext);
+			BSMemory::free(pNext);
 			return this;
 		}
 		data = NULL;
@@ -46,12 +46,12 @@ template <typename T_Data> struct ListNode {
 	ListNode* RemoveNext() {
 		ListNode* pNext = next;
 		next = next->next;
-		GameHeapFree(pNext);
+		BSMemory::free(pNext);
 		return next;
 	}
 
 	ListNode* Append(T_Data* _data) {
-		ListNode* newNode = (ListNode*)GameHeapAlloc(sizeof(ListNode));
+		ListNode* newNode = BSMemory::malloc<ListNode>();
 		newNode->data = _data;
 		newNode->next = next;
 		next = newNode;
@@ -59,7 +59,7 @@ template <typename T_Data> struct ListNode {
 	}
 
 	ListNode* Insert(T_Data* _data) {
-		ListNode* newNode = (ListNode*)GameHeapAlloc(sizeof(ListNode));
+		ListNode* newNode = BSMemory::malloc<ListNode>();
 		newNode->data = data;
 		data = _data;
 		newNode->next = next;
@@ -290,20 +290,20 @@ public:
 		nextNode->next = NULL;
 		while (currNode) {
 			nextNode = currNode->next;
-			GameHeapFree(currNode);
+			BSMemory::free(currNode);
 			currNode = nextNode;
 		}
 	}
 
 	void DeleteAll() const {
 		Node* nextNode = Head(), * currNode = nextNode->next;
-		GameHeapFree(nextNode->data);
+		BSMemory::free(nextNode->data);
 		nextNode->data = NULL;
 		nextNode->next = NULL;
 		while (currNode) {
 			nextNode = currNode->next;
-			GameHeapFree(currNode->data);
-			GameHeapFree(currNode);
+			BSMemory::free(currNode->data);
+			BSMemory::free(currNode);
 			currNode = nextNode;
 		}
 	}

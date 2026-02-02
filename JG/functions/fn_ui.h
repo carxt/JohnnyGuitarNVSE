@@ -69,7 +69,7 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 	while (node->next) {
 		auto next = node->next;
 		node->next = next->next;
-		GameHeapFree(next);
+		BSMemory::free(next);
 	}
 
 	node->data = matching[0];
