@@ -619,7 +619,7 @@ namespace hk_DialogueTopicResponseManageHook {
 	DWORD __fastcall TESTopicInfo_DumpAllDialogue()
 	{
 		PrintLog("Start Dialogue Dump");
-		for (auto i : cachedDialogueInfo)
+		for (auto& i : cachedDialogueInfo)
 		{
 			if (auto dialogForm = LookupFormByID(i.first))
 			{
@@ -636,7 +636,7 @@ namespace hk_DialogueTopicResponseManageHook {
 				dumpStringL += std::string(hexBuf);
 				bool addSplit = false;
 				dumpStringL += "=";
-				for (auto j : i.second)
+				for (auto& j : i.second)
 				{
 
 					if (addSplit)
@@ -1592,7 +1592,7 @@ void UpdateMiscStatList(const char* name, int value) {
 
 void ResetMiscStatMap() {
 	miscStatMap.clear();
-	for (auto element : availableMiscStats) {
+	for (auto& element : availableMiscStats) {
 		miscStatMap[element] = 0;
 		UpdateMiscStatList(element.c_str(), 0);
 	}
