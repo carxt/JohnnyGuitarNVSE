@@ -3184,7 +3184,7 @@ static_assert(sizeof(TESCaravanCard) == 0xBC);
 class BSFaceGenNiNode;
 
 // 2B0
-struct ValidBip01Names {
+struct BipedAnim {
 	enum eOptionalBoneType {
 		kOptionalBone_Bip01Head = 0,
 		kOptionalBone_Weapon = 1,
@@ -3195,31 +3195,32 @@ struct ValidBip01Names {
 
 	// 08
 	struct OptionalBone {
-		bool		exists;
-		NiNode* bone;
+		bool	bExists;
+		NiNode* pParent;
 	};
 
 	// 10
 	struct Data {
 		union									// 00 can be a modelled form (Armor or Weapon) or a Race if not equipped
 		{
-			TESForm* item;
-			TESObjectARMO* armor;
-			TESObjectWEAP* weapon;
-			TESRace* race;
+			TESForm*		pItem;
+			TESObjectARMO*	pArmor;
+			TESObjectWEAP*	pWeapon;
+			TESRace*		pRace;
 		};
-		TESModelTextureSwap* modelTexture;	// 04 texture or model for said form
-		NiNode* boneNode;		// 08 NiNode for the modelled form
-		uint32_t					unk00C;			// 0C Number, bool or flag
+		TESModel*	pPartModel;
+		NiNode*		pPartObject;
+		bool		bSkinned;
 	};
 
-	NiNode* bip01;			// 000 receive Bip01 node, then optionally Bip01Head, Weapon, Bip01LForeTwist, Bip01Spine2, Bip01Neck1
-	OptionalBone		bones[5];		// 004
-	Data				slotData[20];	// 02C indexed by the EquipSlot
-	Data				unk016C[20];	// 16C indexed by the EquipSlot
-	Character* character;		// 2AC
+	NiNode*				pRoot;			// 000 receive Bip01 node, then optionally Bip01Head, Weapon, Bip01LForeTwist, Bip01Spine2, Bip01Neck1
+	OptionalBone		kBones[5];		// 004
+	Data				kObjects[20];	// 02C indexed by the EquipSlot
+	Data				kBufferedObjects[20];	// 16C indexed by the EquipSlot
+	float				fWeaponOffset;
+	TESObjectREFR*		pRequester;
 };
-static_assert(sizeof(ValidBip01Names) == 0x2B0);
+static_assert(sizeof(BipedAnim) == 0x2B4);
 
 // 20
 struct FaceGenData {

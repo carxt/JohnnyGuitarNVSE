@@ -589,12 +589,12 @@ bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS) {
 	char boneName[MAX_PATH] = { 0 };
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, optIdx, &boneName)) {
 		if (optIdx > 4) return true;
-		auto doUpdateBone = [optIdx, &boneName, &result](ValidBip01Names* BipedAnim) {
+		auto doUpdateBone = [optIdx, &boneName, &result](BipedAnim* BipedAnim) {
 			if (BipedAnim) {
-				if (BipedAnim->bip01 && BipedAnim->bip01->GetNiNode()) {
-					auto vb = CdeclCall<NiNode*>(0x04AAE30, BipedAnim->bip01, boneName);
+				if (BipedAnim->pRoot && BipedAnim->pRoot->GetNiNode()) {
+					auto vb = CdeclCall<NiNode*>(0x04AAE30, BipedAnim->pRoot, boneName);
 					if (vb && vb->GetNiNode()) {
-						BipedAnim->bones[optIdx].bone = vb;
+						BipedAnim->kBones[optIdx].pParent = vb;
 						*result = 1;
 					}
 				}
@@ -616,10 +616,10 @@ bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &optIdx)) {
 		if (thisObj && thisObj->IsCharacter() && optIdx <= 4)
 			if (auto BipedAnim = ((Character*)thisObj)->validBip01Names) {
-				if (BipedAnim->bones[optIdx].bone && BipedAnim->bones[optIdx].bone->GetNiNode()) {
-					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->bones[optIdx].bone->m_blockName);
+				if (BipedAnim->kBones[optIdx].pParent && BipedAnim->kBones[optIdx].pParent->GetNiNode()) {
+					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->kBones[optIdx].pParent->m_blockName);
 					if (IsConsoleMode())
-						Console_Print("GetOptionalBone >> %s", BipedAnim->bones[optIdx].bone->m_blockName);
+						Console_Print("GetOptionalBone >> %s", BipedAnim->kBones[optIdx].pParent->m_blockName);
 				}
 			}
 	}

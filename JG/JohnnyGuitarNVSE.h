@@ -63,7 +63,7 @@ StatsMenu* g_statsMenu = nullptr;
 NiTPointerMap<TESForm>* g_mapAllForms = nullptr;
 uint8_t recalculateStatFilters = 0;
 Sky** g_currentSky = nullptr;
-void(__thiscall* OriginalBipedModelUpdateWeapon)(ValidBip01Names*, TESObjectWEAP*, int) = (void(__thiscall*)(ValidBip01Names*, TESObjectWEAP*, int)) 0x4AB400;
+void(__thiscall* OriginalBipedModelUpdateWeapon)(BipedAnim*, TESObjectWEAP*, int) = (void(__thiscall*)(BipedAnim*, TESObjectWEAP*, int)) 0x4AB400;
 uint8_t(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (uint8_t(__thiscall*)(ContChangesEntry*)) 0x4BD820;
 std::unordered_set<BYTE> SaveGameUMap;
 uintptr_t g_canSaveNowAddr = 0;
@@ -961,7 +961,7 @@ bool __fastcall CanSaveNowMenuHook(void* ThisObj, void* edx, int isAutoSave) {
 	return ThisCall<bool>(g_canSaveNowMenuAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
 }
 
-void __fastcall BipedModelUpdateWeapon(ValidBip01Names* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods) {
+void __fastcall BipedModelUpdateWeapon(BipedAnim* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods) {
 	if (fnCharacter && fnCharacter->baseProcess) {
 		if (auto weapInfo = fnCharacter->baseProcess->GetWeaponInfo()) {
 			weapMods = ContChangesEntry_GetWeaponModFlags(weapInfo);

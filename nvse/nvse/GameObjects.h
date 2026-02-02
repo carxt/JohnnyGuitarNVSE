@@ -73,9 +73,9 @@ public:
 	virtual void		Unk_77(void);
 	virtual void		Unk_78(void);
 	virtual AnimData* GetAnimData();			// 0079
-	virtual ValidBip01Names* GetValidBip01Names(void);	// 007A	Character only
-	virtual ValidBip01Names* CallGetValidBip01Names(void);
-	virtual void		SetValidBip01Names(ValidBip01Names* validBip01Names);
+	virtual BipedAnim* GetValidBip01Names(void);	// 007A	Character only
+	virtual BipedAnim* CallGetValidBip01Names(void);
+	virtual void		SetValidBip01Names(BipedAnim* validBip01Names);
 	virtual NiPoint3* GetPos();				// GetPos or GetDistance
 	virtual void		Unk_7E(uint32_t arg0);
 	virtual void		Unk_7F(void);
@@ -725,7 +725,7 @@ public:
 	virtual void	Unk_137(void);
 	virtual void	Unk_138(void);
 
-	ValidBip01Names* validBip01Names;	// 1B4
+	BipedAnim* validBip01Names;	// 1B4
 	float			totalArmorDR;		// 1B8
 	float			totalArmorDT;		// 1BC
 	uint8_t			isTrespassing;		// 1C0
@@ -845,7 +845,7 @@ public:
 	uint8_t								byte682;				// 682
 	uint8_t								byte683;				// 683
 	uint32_t								unk684[2];				// 684
-	ValidBip01Names* VB01N1stPerson;		// 68C
+	BipedAnim* VB01N1stPerson;		// 68C
 	void* unk690;				// 690
 	NiNode* playerNode;			// 694 used as node if unk64A is true
 	uint32_t								unk698[4];				// 698
