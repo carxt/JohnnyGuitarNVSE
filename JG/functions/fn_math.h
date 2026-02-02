@@ -23,8 +23,8 @@ DEFINE_COMMAND_PLUGIN(GetPlayerCamFOV, , false, kParams_OneInt);
 
 
 void Cmd_GetPlayerCamFOV(uint32_t worldOr1stOrScene, double* result) {
-	if (!g_thePlayer) return;
-	*result = worldOr1stOrScene ? g_thePlayer->firstPersonFOV : g_thePlayer->worldFOV;
+	if (!PlayerCharacter::GetSingleton()) return;
+	*result = worldOr1stOrScene ? PlayerCharacter::GetSingleton()->firstPersonFOV : PlayerCharacter::GetSingleton()->worldFOV;
 	if (worldOr1stOrScene > 1) {
 		auto g_sceneGraph = *(SceneGraph**)0x11DEB7C;
 		*result = g_sceneGraph ? g_sceneGraph->cameraFOV : 0;
@@ -55,10 +55,10 @@ bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	ScriptVar *worldOut, *firstPersonOut, *scenegraphOut = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &worldOut, &firstPersonOut, &scenegraphOut) || !g_thePlayer) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &worldOut, &firstPersonOut, &scenegraphOut) || !PlayerCharacter::GetSingleton()) return true;
 	*result = 1;
-	worldOut->data = g_thePlayer->firstPersonFOV;
-	firstPersonOut->data = g_thePlayer->worldFOV;
+	worldOut->data = PlayerCharacter::GetSingleton()->firstPersonFOV;
+	firstPersonOut->data = PlayerCharacter::GetSingleton()->worldFOV;
 	if (scenegraphOut) {
 		auto g_sceneGraph = *(SceneGraph**)0x11DEB7C;
 		scenegraphOut->data = g_sceneGraph ? g_sceneGraph->cameraFOV : 0;

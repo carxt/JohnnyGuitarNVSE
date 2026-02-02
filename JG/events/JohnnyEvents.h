@@ -81,7 +81,7 @@ void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, uint8_t
 }
 
 void __stdcall handleDyingEvent(Actor* thisObj) {
-	if (thisObj->IsActor() && thisObj->lifeState == 1 && (*thisObj->GetTheName() || thisObj == g_thePlayer)) {
+	if (thisObj->IsActor() && thisObj->lifeState == 1 && (*thisObj->GetTheName() || thisObj == PlayerCharacter::GetSingleton())) {
 		for (auto const& callback : OnDyingHandler->callbacks) {
 			if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) {
 				CallUDF(callback.script, nullptr, OnDyingHandler->numMaxArgs, thisObj);
@@ -561,7 +561,7 @@ bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS) {
 bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 	uint32_t setOrRemove = 0;
 	Script* script = nullptr;
-	FilterFormInt::Data filter = { g_thePlayer, -1 };
+	FilterFormInt::Data filter = { PlayerCharacter::GetSingleton(), -1 };
 	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
 		if (OnAVChangeHandler) {

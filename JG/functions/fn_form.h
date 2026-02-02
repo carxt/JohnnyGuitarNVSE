@@ -386,7 +386,7 @@ bool Cmd_GetFormRecipesAlt_Execute(COMMAND_ARGS) {
 	TESForm* form = nullptr;
 	NVSEArrayVar* rcpArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) {
-		auto it = g_dataHandler->recipeList.Head();
+		auto it = DataHandler::Get()->recipeList.Head();
 		do {
 			if (it->data && !it->data->outputs.Empty()) {
 				TESRecipe::ComponentList* outputs = &it->data->outputs;
@@ -1097,7 +1097,7 @@ bool IsApplicable(BGSPerk* perk) {
 	for (uint32_t i = 0; i < perk->conditions.Count(); i++) {
 		Condition* condition = perk->conditions.GetNthItem(i);
 		bool result = false;
-		if (condition->opcode == 0x46 && !condition->Evaluate(g_thePlayer, 0, &result)) return false;
+		if (condition->opcode == 0x46 && !condition->Evaluate(PlayerCharacter::GetSingleton(), 0, &result)) return false;
 	}
 	return true;
 }
@@ -1105,16 +1105,16 @@ bool IsApplicable(BGSPerk* perk) {
 bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NVSEArrayVar* perkArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	ListNode<BGSPerk>* perkIter = g_dataHandler->perkList.Head();
+	ListNode<BGSPerk>* perkIter = DataHandler::Get()->perkList.Head();
 	BGSPerk* perk;
 	int perkRank;
 	do {
 		perk = perkIter->data;
-		if (perk->data.isPlayable && perk->data.minLevel > 0 && perk->data.minLevel <= g_thePlayer->avOwner.GetLevel()) {
-			perkRank = g_thePlayer->GetPerkRank(perk, 0);
+		if (perk->data.isPlayable && perk->data.minLevel > 0 && perk->data.minLevel <= PlayerCharacter::GetSingleton()->avOwner.GetLevel()) {
+			perkRank = PlayerCharacter::GetSingleton()->GetPerkRank(perk, 0);
 			bool result = false;
 			if (perkRank < perk->data.numRanks && !perk->data.isTrait && IsApplicable(perk)
-				&& perk->conditions.Evaluate(g_thePlayer, 0, &result, 0)) {
+				&& perk->conditions.Evaluate(PlayerCharacter::GetSingleton(), 0, &result, 0)) {
 				g_arrInterface->AppendElement(perkArr, NVSEArrayElement(perk));
 			}
 		}
@@ -1178,7 +1178,7 @@ bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 	uint32_t titleOrTier = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &titleOrTier);
 	if (titleOrTier == 1) {
-		int karmaTier = CdeclCall<int>(0x47E040, g_thePlayer->avOwner.GetActorValueF(kAVCode_Karma)); // GetKarmaTier
+		int karmaTier = CdeclCall<int>(0x47E040, PlayerCharacter::GetSingleton()->avOwner.GetActorValueF(kAVCode_Karma)); // GetKarmaTier
 		switch (karmaTier) {
 			case 0:
 				title = *(char**)0x11D41B4; // sAlignGood
@@ -1198,7 +1198,7 @@ bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 		}
 	}
 	else {
-		title = CdeclCall<char*>(0x47E0E0, g_thePlayer); // Actor::GetKarmaTitle
+		title = CdeclCall<char*>(0x47E0E0, PlayerCharacter::GetSingleton()); // Actor::GetKarmaTitle
 	}
 	if (IsConsoleMode()) Console_Print("GetPlayerKarmaTitle >> %s", title);
 	g_strInterface->Assign(PASS_COMMAND_ARGS, title);
@@ -1553,7 +1553,7 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 	int32_t rank = -1;
 	NVSEArrayVar* factionMemberArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction, &rank) && faction) {
-		for (TESBoundObject* object = g_dataHandler->boundObjectList->first; object; object = object->next) {
+		for (TESBoundObject* object = DataHandler::Get()->boundObjectList->first; object; object = object->next) {
 			TESActorBase* actorBase = DYNAMIC_CAST(object, TESBoundObject, TESActorBase);
 			if (actorBase && actorBase->baseData.factionList.Count() != 0) {
 				ListNode<FactionListData>* fctIter = actorBase->baseData.factionList.Head();
@@ -1856,7 +1856,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 		}
 	}
 	else if NOT_ID(weapon, TESObjectWEAP) return true;
-	MiddleHighProcess* midHiProc = (MiddleHighProcess*)g_thePlayer->baseProcess;
+	MiddleHighProcess* midHiProc = (MiddleHighProcess*)PlayerCharacter::GetSingleton()->baseProcess;
 	ContChangesEntry* weaponInfo = midHiProc->weaponInfo;
 	TESForm* ammo = nullptr;
 	if (extendPtr && weaponInfo && (weaponInfo->type == weapon) && midHiProc->ammoInfo)
@@ -1864,7 +1864,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	if (!ammo) ammo = weapon->GetAmmo();
 	ContChangesEntry tempEntry(extendPtr, 1, weapon);
 	midHiProc->weaponInfo = nullptr;
-	*result = GetWeaponDPS(&(g_thePlayer->avOwner), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
+	*result = GetWeaponDPS(&(PlayerCharacter::GetSingleton()->avOwner), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
 	midHiProc->weaponInfo = weaponInfo;
 	if (IsConsoleMode())
 		Console_Print("GetCalculatedWeaponDPS >> %f", *result);
@@ -2062,7 +2062,7 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 
 	if (!thisObj) return true;
 	InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
-	if (!invRef || (invRef->containerRef != g_thePlayer)) return true;
+	if (!invRef || (invRef->containerRef != PlayerCharacter::GetSingleton())) return true;
 	uint8_t type = invRef->data.type->typeID;
 	if ((type != FORM_TYPE::TESObjectARMO) && (type != FORM_TYPE::TESObjectWEAP) && (type != FORM_TYPE::AlchemyItem)) return true;
 

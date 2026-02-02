@@ -1,8 +1,7 @@
 #include "GameData.h"
 
 DataHandler* DataHandler::Get() {
-	DataHandler** g_dataHandler = (DataHandler**)0x011C3F2C;
-	return *g_dataHandler;
+	return *reinterpret_cast<DataHandler**>(0x011C3F2C);
 }
 
 class LoadedModFinder {

@@ -275,7 +275,7 @@ bool Cmd_SetHUDShudderPower_Execute(COMMAND_ARGS) {
 
 bool Cmd_ClearCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ThisCall(0x952F90, g_thePlayer);
+	ThisCall(0x952F90, PlayerCharacter::GetSingleton());
 	*result = 1;
 	return true;
 }
@@ -285,16 +285,16 @@ bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 	NiPoint3 pos;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pos.x, &pos.y, &pos.z)) {
 		TESForm* cellOrWorld = nullptr;
-		if (g_thePlayer->parentCell && ((g_thePlayer->parentCell->flags & 1) != 0)) {
-			cellOrWorld = g_thePlayer->parentCell;
+		if (PlayerCharacter::GetSingleton()->parentCell && ((PlayerCharacter::GetSingleton()->parentCell->flags & 1) != 0)) {
+			cellOrWorld = PlayerCharacter::GetSingleton()->parentCell;
 		}
 		else {
-			TESObjectCELL* cell = g_thePlayer->parentCell;
-			if (!cell) cell = g_thePlayer->childCell.GetPersistentCell();
+			TESObjectCELL* cell = PlayerCharacter::GetSingleton()->parentCell;
+			if (!cell) cell = PlayerCharacter::GetSingleton()->childCell.GetPersistentCell();
 			if (cell && (cell->cellFlags & 1) == 0) cellOrWorld = cell->worldSpace;
 		}
 		if (cellOrWorld) {
-			ThisCall(0x952E60, g_thePlayer, pos.x, pos.y, pos.z, cellOrWorld);
+			ThisCall(0x952E60, PlayerCharacter::GetSingleton(), pos.x, pos.y, pos.z, cellOrWorld);
 			*result = 1;
 		}
 	}
@@ -304,7 +304,7 @@ bool Cmd_SetPlayerMovementFlags_Execute(COMMAND_ARGS)
 {
 	uint32_t flags;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags)) {
-		g_thePlayer->actorMover->Unk_03(flags);
+		PlayerCharacter::GetSingleton()->actorMover->Unk_03(flags);
 		*result = 1;
 	}
 	return true;
@@ -317,9 +317,9 @@ bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 	ExtractArgsEx(EXTRACT_ARGS_EX, &alwaysRun, &updateMovementFlags);
 	if (alwaysRun > -1) {
 		bool bAlwaysRun = (alwaysRun > 0);
-		g_thePlayer->alwaysRun = bAlwaysRun;
+		PlayerCharacter::GetSingleton()->alwaysRun = bAlwaysRun;
 		if (updateMovementFlags) {
-			PlayerMover* playerMover = (PlayerMover*)g_thePlayer->actorMover;
+			PlayerMover* playerMover = (PlayerMover*)PlayerCharacter::GetSingleton()->actorMover;
 			uint32_t flags = playerMover->pcMovementFlags;
 			if (bAlwaysRun) {
 				flags |= 0x200;
@@ -327,7 +327,7 @@ bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 			else {
 				flags &= ~0x200;
 			}
-			g_thePlayer->actorMover->Unk_03(flags);
+			PlayerCharacter::GetSingleton()->actorMover->Unk_03(flags);
 		}
 		*result = 1;
 	}
@@ -339,7 +339,7 @@ bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 	int autoMove = -1;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &autoMove);
 	if (autoMove > -1) {
-		g_thePlayer->autoMove = (autoMove > 0);
+		PlayerCharacter::GetSingleton()->autoMove = (autoMove > 0);
 		*result = 1;
 	}
 	return true;
@@ -673,7 +673,7 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &fTime) && sound && IS_TYPE(sound, TESSound)) {
 		TESObjectREFR* ref = thisObj;
 		if (ref == nullptr) {
-			ref = (TESObjectREFR*)g_thePlayer;
+			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
 		}
 		if (ref->GetRefNiNode()) {
 			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
@@ -692,7 +692,7 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NVSEArrayVar* effArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	tempEffectMap.clear();
-	if (auto iter = ((Actor*)g_thePlayer)->magicTarget.GetEffectList()->Head())
+	if (auto iter = ((Actor*)PlayerCharacter::GetSingleton())->magicTarget.GetEffectList()->Head())
 	{
 		do
 		{
@@ -743,7 +743,7 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	int delta = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &delta);
-	int karmaBefore = g_thePlayer->avOwner.GetActorValueI(kAVCode_Karma);
+	int karmaBefore = PlayerCharacter::GetSingleton()->avOwner.GetActorValueI(kAVCode_Karma);
 	int ikarmaMax = (*(Setting*)0x11CD644).data.i;
 	int iKarmaMin = (*(Setting*)0x11CDD6C).data.i;
 	if (delta >= 0 && ((delta + karmaBefore) > ikarmaMax)) {
@@ -753,7 +753,7 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 		delta = iKarmaMin - karmaBefore;
 	}
 	if (delta != 0) {
-		g_thePlayer->ModActorValue(kAVCode_Karma, delta, 0);
+		PlayerCharacter::GetSingleton()->ModActorValue(kAVCode_Karma, delta, 0);
 		*result = 1;
 	}
 	return true;
@@ -814,7 +814,7 @@ bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ListNode<BSTempEffect>* iter = g_processManager->tempEffects.Head();
+	ListNode<BSTempEffect>* iter = ProcessManager::GetSingleton()->tempEffects.Head();
 	MagicShaderHitEffect* effect;
 	NVSEArrayVar* effArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 
@@ -878,7 +878,7 @@ bool IsCombatTarget(Actor* source, Actor* toSearch) {
 }
 
 bool IsHostileCompassTarget(Actor* toSearch) {
-	auto iter = g_thePlayer->compassTargets->Begin();
+	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile && target->target == toSearch) return true;
@@ -889,7 +889,7 @@ bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* actor = (Actor*)thisObj;
 	if (ThisCall<bool>(0x579690, thisObj) && (!thisObj->IsActor() || !actor->isTeammate) ||
-		thisObj->IsActor() && (IsCombatTarget(actor, g_thePlayer) || IsHostileCompassTarget(actor))) {
+		thisObj->IsActor() && (IsCombatTarget(actor, PlayerCharacter::GetSingleton()) || IsHostileCompassTarget(actor))) {
 		*result = 1;
 	}
 	if (IsConsoleMode()) Console_Print("IsCrimeOrEnemy >> %.f", *result);
@@ -900,7 +900,7 @@ bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ExtraOwnership* xOwn = ThisCall<ExtraOwnership*>(0x567790, thisObj); // TESObjectREFR::ResolveOwnership
 	if (xOwn) {
-		ThisCall(0x8C0EC0, g_thePlayer, thisObj, xOwn, 0xFFFFFFFF); //TESObjectREFR::HandleMinorCrime
+		ThisCall(0x8C0EC0, PlayerCharacter::GetSingleton(), thisObj, xOwn, 0xFFFFFFFF); //TESObjectREFR::HandleMinorCrime
 		*result = 1;
 	}
 	return true;
@@ -917,13 +917,13 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	bool hasImprovedDetection = false;
 	if (accountForImprovedDetection) {
 		float hasPerk = 0.0; //copying code at 0x77A0C4
-		ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, g_thePlayer, &hasPerk);
+		ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, PlayerCharacter::GetSingleton(), &hasPerk);
 		if (hasPerk > 0.0)
 			hasImprovedDetection = true;
 	}
 
 	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	auto iter = g_thePlayer->compassTargets->Begin();
+	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
@@ -1040,9 +1040,9 @@ bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 }
 bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL* actorCell = g_thePlayer->parentCell;
+	TESObjectCELL* actorCell = PlayerCharacter::GetSingleton()->parentCell;
 	if (actorCell)
-		*result = ThisCall<bool>(0x9764A0, g_processManager, actorCell->IsInterior());
+		*result = ThisCall<bool>(0x9764A0, ProcessManager::GetSingleton(), actorCell->IsInterior());
 	return true;
 }
 bool Cmd_ToggleCombatMusic_Execute(COMMAND_ARGS) {
@@ -1059,7 +1059,7 @@ bool Cmd_IsCombatMusicEnabled_Execute(COMMAND_ARGS) {
 bool Cmd_IsCompassHostile_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* toCheck = (Actor*)thisObj;
-	auto iter = g_thePlayer->compassTargets->Begin();
+	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile && target->target == toCheck) {
@@ -1089,18 +1089,18 @@ bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
 bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	*result = -1;
 
-	NiPoint3* playerPos = g_thePlayer->GetPos();
+	NiPoint3* playerPos = PlayerCharacter::GetSingleton()->GetPos();
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
-	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();
+	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->IsInterior();
 	float interiorDistanceSquared = fSneakMaxDistance * fSneakMaxDistance;
 	float exteriorDistanceSquared = (fSneakMaxDistance * fSneakExteriorDistanceMult) * (fSneakMaxDistance * fSneakExteriorDistanceMult);
 	float maxDist = isInterior ? interiorDistanceSquared : exteriorDistanceSquared;
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto iter = g_thePlayer->compassTargets->Begin();
+	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
@@ -1122,16 +1122,16 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	*result = -1;
 
-	NiPoint3* playerPos = g_thePlayer->GetPos();
+	NiPoint3* playerPos = PlayerCharacter::GetSingleton()->GetPos();
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
-	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();
+	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->IsInterior();
 	float maxDist = isInterior ? powf(fSneakMaxDistance, 2) : powf((fSneakMaxDistance * fSneakExteriorDistanceMult), 2);
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto iter = g_thePlayer->compassTargets->Begin();
+	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
@@ -1147,7 +1147,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	}
 
 	if (closestHostile) {
-		auto playerRotation = g_thePlayer->GetZRotation(0);
+		auto playerRotation = PlayerCharacter::GetSingleton()->GetZRotation(0);
 		double headingAngle = GetAngleBetweenPoints(closestHostile->GetPos(), playerPos, playerRotation);
 
 		// shift the coordinates from -180:180 to 0:360 and offset them (360 / 8 quadrants / 2) degrees
@@ -1230,7 +1230,7 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
 	uint32_t index, isVisible;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &index, &isVisible) && index < 3) {
-		FOPipboyManager* pipboyManager = g_interfaceManager->pipboyManager;
+		FOPipboyManager* pipboyManager = InterfaceManager::GetSingleton()->pipboyManager;
 		if (pipboyManager->byte028) {
 			if (isVisible) {
 				pipboyManager->pipboyLightGlow[index]->m_flags &= ~1;
@@ -1386,12 +1386,12 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pipboyTab);
 	*result = 0;
 	if (pipboyTab == 0 || pipboyTab == 1002 || pipboyTab == 1003 || pipboyTab == 1023) {
-		if (g_interfaceManager) {
-			if (!g_interfaceManager->pipBoyMode) {
-				ThisCall(0x70F4E0, g_interfaceManager, 0, pipboyTab);
+		if (InterfaceManager::GetSingleton()) {
+			if (!InterfaceManager::GetSingleton()->pipBoyMode) {
+				ThisCall(0x70F4E0, InterfaceManager::GetSingleton(), 0, pipboyTab);
 			}
-			else if (g_interfaceManager->pipBoyMode == 3) {
-				ThisCall(0x70F690, g_interfaceManager, 0);
+			else if (InterfaceManager::GetSingleton()->pipBoyMode == 3) {
+				ThisCall(0x70F690, InterfaceManager::GetSingleton(), 0);
 			}
 			*result = 1;
 		}
@@ -1412,7 +1412,7 @@ bool Cmd_Jump_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_StopVATSCam_Execute(COMMAND_ARGS) {
-	ThisCall(0x93E770, g_thePlayer, 2, 0);
+	ThisCall(0x93E770, PlayerCharacter::GetSingleton(), 2, 0);
 	return true;
 }
 
@@ -1533,7 +1533,7 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
-	*result = g_thePlayer->timeGrenadeHeld;
+	*result = PlayerCharacter::GetSingleton()->timeGrenadeHeld;
 	return true;
 }
 

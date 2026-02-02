@@ -23,8 +23,8 @@ DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility ove
 DEFINE_COMMAND_PLUGIN(UpdateRepairMenu, , false, nullptr);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
-		if (g_thePlayer) {
-			auto headNode = g_thePlayer->questObjectiveList.Head();
+		if (PlayerCharacter::GetSingleton()) {
+			auto headNode = PlayerCharacter::GetSingleton()->questObjectiveList.Head();
 			while (headNode) {
 				Console_Print("objective %s from quest %s", headNode->data->displayText.c_str(), headNode->data->quest->GetEditorName());
 				headNode = headNode->next;
@@ -41,10 +41,10 @@ bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks
 bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 	TESQuest* quest = nullptr;
 	*result = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &quest) || !g_thePlayer)
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &quest) || !PlayerCharacter::GetSingleton())
 		return true;
 
-	auto& list = g_thePlayer->questObjectiveList;
+	auto& list = PlayerCharacter::GetSingleton()->questObjectiveList;
 	if (list.Empty())
 		return true;
 
@@ -99,7 +99,7 @@ bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
 	};
 	BGSListForm* formList = nullptr;
 	uint32_t flags = 0;
-	if (!g_thePlayer) return true;
+	if (!PlayerCharacter::GetSingleton()) return true;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &formList)) {
 		if (formList && IS_TYPE(formList, BGSListForm)) {
 			ListNode<TESForm>* iter = formList->list.Head();
@@ -116,7 +116,7 @@ bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
 				}
 			} while (iter = iter->next);
 		}
-		auto playerBase =	reinterpret_cast<TESNPC*>(g_thePlayer->GetActorBase());
+		auto playerBase =	reinterpret_cast<TESNPC*>(PlayerCharacter::GetSingleton()->GetActorBase());
 		hk_RSMBarberHook::haircutSetList.isWhiteList = bool(flags & kFlag_WhiteListHair);
 		if (hk_RSMBarberHook::haircutSetList.isWhiteList) {
 			hk_RSMBarberHook::haircutSetList.Add(playerBase->hair->refID);
@@ -306,7 +306,7 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectREFR* markerRef = ThisCall<TESObjectREFR*>(0x77A400, g_thePlayer);
+	TESObjectREFR* markerRef = ThisCall<TESObjectREFR*>(0x77A400, PlayerCharacter::GetSingleton());
 	if (markerRef) {
 		*(uint32_t*)result = markerRef->refID;
 	}
@@ -426,7 +426,7 @@ float CalculateRepairedHealth(ContChangesEntry* target, ContChangesEntry* repair
 	if (!target || !repairItem) return 0.0f;
 	float targetHealth = target->GetItemHealthPerc(true);
 	float repairItemHealth = repairItem->GetItemHealthPerc(true);
-	int repairSkill = g_thePlayer->avOwner.GetActorValueI(kAVCode_Repair);
+	int repairSkill = PlayerCharacter::GetSingleton()->avOwner.GetActorValueI(kAVCode_Repair);
 	int outParam = -1;
 	double result = CdeclCall<double>(0x648090, repairSkill, targetHealth, repairItemHealth, &outParam);
 	return (float)(result / 100.0);

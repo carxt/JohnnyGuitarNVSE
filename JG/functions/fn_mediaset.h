@@ -78,8 +78,8 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
 
 bool Cmd_AudioMarkerGetCurrent_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	if (g_thePlayer && g_thePlayer->currMusicMarker) {
-		if (auto mMarker = g_thePlayer->currMusicMarker->markerRef) {
+	if (PlayerCharacter::GetSingleton() && PlayerCharacter::GetSingleton()->currMusicMarker) {
+		if (auto mMarker = PlayerCharacter::GetSingleton()->currMusicMarker->markerRef) {
 			*(DWORD*)result = mMarker->refID;
 		}
 	}

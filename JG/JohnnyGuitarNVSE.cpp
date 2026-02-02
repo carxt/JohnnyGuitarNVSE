@@ -61,8 +61,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			disableMuzzleLights = 0; //reset the muzzle hook every time
 			bArrowKeysDisabled = false;
 			isShowLevelUp = true;
-			ThisCall(0x8C17C0, g_thePlayer); // reevaluate reload speed modifiers
-			ThisCall(0x8C1940, g_thePlayer); // reevaluate equip speed modifiers
+			ThisCall(0x8C17C0, PlayerCharacter::GetSingleton()); // reevaluate reload speed modifiers
+			ThisCall(0x8C1940, PlayerCharacter::GetSingleton()); // reevaluate equip speed modifiers
 
 			OnDyingHandler->FlushEventCallbacks();
 			OnLimbGoneHandler->FlushEventCallbacks();
@@ -92,7 +92,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		}
 		case NVSEMessagingInterface::kMessage_MainGameLoop: // GAME
 		{
-			if (g_interfaceManager->currentMode == 1) {
+			if (InterfaceManager::GetSingleton()->currentMode == 1) {
 				float power = getHUDShakePower();
 				if (power > 0.0f) {
 					CdeclCall<void>(0x94C3A0, power);
@@ -104,14 +104,14 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 				EventInfo->DeleteEvents();
 			}
 			if (!g_statsMenu) g_statsMenu = StatsMenu::Get();
-			if (g_statsMenu && g_interfaceManager && g_interfaceManager->IsMenuVisible(kMenuType_Stats) && recalculateStatFilters) {
+			if (g_statsMenu && InterfaceManager::GetSingleton() && InterfaceManager::GetSingleton()->IsMenuVisible(kMenuType_Stats) && recalculateStatFilters) {
 				recalculateStatFilters = 0;
 				g_statsMenu->miscStatIDList.Filter(ShouldHideStat);
 
 			}
 			if (resetVanityCam) {
-				if (g_thePlayer) {
-					WORD bIsInVanityMode = (*(WORD*)0x11E07B8) || g_thePlayer->byte64D; //64d = autovanity mode.
+				if (PlayerCharacter::GetSingleton()) {
+					WORD bIsInVanityMode = (*(WORD*)0x11E07B8) || PlayerCharacter::GetSingleton()->byte64D; //64d = autovanity mode.
 					if (!bIsInVanityMode) {
 						ResetVanityWheel();
 					}
@@ -122,16 +122,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		}
 		case NVSEMessagingInterface::kMessage_DeferredInit: // GAME
 		{
-			g_thePlayer = PlayerCharacter::GetSingleton();
-			g_processManager = (ProcessManager*)0x11E0E80;
-			g_interfaceManager = InterfaceManager::GetSingleton();
-			g_bsWin32Audio = BSWin32Audio::GetSingleton();
-			g_dataHandler = DataHandler::Get();
-			g_audioManager = (BSAudioManager*)0x11F6EF0;
-			g_currentSky = (Sky**)0x11DEA20;
 			g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
-			g_VATSCameraData = (VATSCameraData*)0x11F2250;
-			g_mapAllForms = *(NiTPointerMap<TESForm>**)0x11C54C0;
 			g_initialTickCount = GetTickCount();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			EDIDRestoration::PrintErrors();
@@ -510,8 +501,7 @@ void RegisterCommands(const NVSEInterface* nvse) {
 void ReadINI() {
 	char filename[MAX_PATH];
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
-	strncpy_s(g_workingDir, filename, (strlen(filename) - 13));
-	char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
+	char* lastSlash = strrchr(filename, '\\') + 1;
 	uint32_t length = filename - lastSlash;
 	strcpy_s(lastSlash, length, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 	fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
@@ -574,10 +564,10 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 	nvse->SetOpcodeBase(0x3100);
 	RegisterCommands(nvse);
 
-	g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
-	g_cmdTableInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
-	g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
-	g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
+	g_scriptInterface = static_cast<NVSEScriptInterface*>(nvse->QueryInterface(kInterface_Script));
+	g_cmdTableInterface = static_cast<NVSECommandTableInterface*>(nvse->QueryInterface(kInterface_CommandTable));
+	g_arrInterface = static_cast<NVSEArrayVarInterface*>(nvse->QueryInterface(kInterface_ArrayVar));
+	g_strInterface = static_cast<NVSEStringVarInterface*>(nvse->QueryInterface(kInterface_StringVar));
 
 	if (!bIsGECK) {
 		ReadINI();
@@ -597,9 +587,9 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 
 		NVSEDataInterface* nvseData = static_cast<NVSEDataInterface*>(nvse->QueryInterface(kInterface_Data));
 		JohnnyExtraData::Initialize(nvseData);
-		InventoryRefGetForID = (InventoryRef * (*)(uint32_t))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
-		CaptureLambdaVars = (_CaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList);
-		UncaptureLambdaVars = (_UncaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList);
+		InventoryRefGetForID = static_cast<InventoryRef * (*)(uint32_t)>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
+		CaptureLambdaVars = static_cast<_CaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
+		UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
 		HandleGameHooks();
 		HandleEventHooks();
 		ExtractArgsEx = g_scriptInterface->ExtractArgsEx;

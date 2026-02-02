@@ -141,7 +141,7 @@ bool Cmd_UwUDelete_Execute(COMMAND_ARGS) {
 	char filename[MAX_PATH] = {};
 	uint8_t modIdx = scriptObj->GetOverridingModIdx();
 	if (modIdx == 0xFF) return true;
-	if (strcmp("UwU.esp", g_dataHandler->GetNthModName(modIdx))) return true;
+	if (strcmp("UwU.esp", DataHandler::Get()->GetNthModName(modIdx))) return true;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &filename, &fileOrFolder) && filename[0]) {
 		if (strstr(filename, "..\\")) 
 			return true;
@@ -267,7 +267,7 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &loopFlag, &bDontCacheFlag) && path[0]) {
 		TESObjectREFR* ref = thisObj;
 		if (ref == nullptr) {
-			ref = (TESObjectREFR*)g_thePlayer;
+			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
 		}
 		if (ref->GetRefNiNode()) {
 			bool bVoiceFlag = (voiceFlag > 0);
@@ -302,9 +302,9 @@ bool Cmd_StopSoundFromPath_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};
 	float fadeOutTime = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeOutTime) && path[0]) {
-		CSLock lock(g_audioManager->kMessageProcessingCS);
+		CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
 		BSGameSound *gameSound;
-		for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+		for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 			if (!(gameSound = sndIter.Get()) || _stricmp(gameSound->filePath, path) != 0) continue;
 
 			BSSoundHandle handle;
@@ -329,14 +329,14 @@ bool Cmd_StopSound3DFromPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeOutTime) && path[0]) {
 		TESObjectREFR* ref = thisObj;
 		if (ref == nullptr) {
-			ref = (TESObjectREFR*)g_thePlayer;
+			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
 		}
-		CSLock lock(g_audioManager->kMessageProcessingCS);
+		CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
 		BSGameSound *gameSound;
 		BSFadeNode* fadeNode;
-		for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+		for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 			if (!(gameSound = sndIter.Get()) || _stricmp(gameSound->filePath, path) != 0) continue;
-			fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
+			fadeNode = (BSFadeNode*)BSAudioManager::Get()->soundPlayingObjects.Lookup(gameSound->mapKey);
 			if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == ref) {
 				BSSoundHandle handle;
 				handle.uiSoundID = gameSound->mapKey;
@@ -359,10 +359,10 @@ bool Cmd_IsSoundPlayingFromPath_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};
 	TESObjectREFR* ref = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &ref) && path[0]) {
-		CSLock lock(g_audioManager->kMessageProcessingCS);
+		CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
 		BSGameSound* gameSound;
 		if (ref == nullptr) {
-			for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+			for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 				if (!(gameSound = sndIter.Get()) || _stricmp(gameSound->filePath, path) != 0) continue;
 				*result = 1;
 				return true;
@@ -370,9 +370,9 @@ bool Cmd_IsSoundPlayingFromPath_Execute(COMMAND_ARGS) {
 		}
 		else {
 			BSFadeNode* fadeNode;
-			for (auto sndIter = g_audioManager->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
+			for (auto sndIter = BSAudioManager::Get()->playingSounds.Begin(); !sndIter.End(); ++sndIter) {
 				if (!(gameSound = sndIter.Get()) || _stricmp(gameSound->filePath, path) != 0) continue;
-				fadeNode = (BSFadeNode*)g_audioManager->soundPlayingObjects.Lookup(gameSound->mapKey);
+				fadeNode = (BSFadeNode*)BSAudioManager::Get()->soundPlayingObjects.Lookup(gameSound->mapKey);
 				if (fadeNode && fadeNode->GetFadeNode() && fadeNode->linkedObj && fadeNode->linkedObj == ref) {
 					*result = 1;
 					return true;

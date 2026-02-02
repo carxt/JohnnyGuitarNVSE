@@ -9,7 +9,6 @@ NVSEStringVarInterface* g_strInterface = NULL;
 NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_scriptInterface = NULL;
 NVSECommandTableInterface* g_cmdTableInterface = NULL;
-VATSCameraData* g_VATSCameraData = NULL;
 InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ContChangesEntry* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ContChangesEntry*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
@@ -52,24 +51,15 @@ uint32_t disableMuzzleLights = -1;
 static float vatsSpreadMultValue = 15.0;
 uint32_t g_initialTickCount = 0;
 // Singletons
-PlayerCharacter* g_thePlayer = nullptr;
-ProcessManager* g_processManager = nullptr;
-InterfaceManager* g_interfaceManager = nullptr;
-BSWin32Audio* g_bsWin32Audio = nullptr;
-DataHandler* g_dataHandler = nullptr;
-BSAudioManager* g_audioManager = nullptr;
 GameTimeGlobals* g_gameTimeGlobals = nullptr;
 StatsMenu* g_statsMenu = nullptr;
-NiTPointerMap<TESForm>* g_mapAllForms = nullptr;
 uint8_t recalculateStatFilters = 0;
-Sky** g_currentSky = nullptr;
 void(__thiscall* OriginalBipedModelUpdateWeapon)(BipedAnim*, TESObjectWEAP*, int) = (void(__thiscall*)(BipedAnim*, TESObjectWEAP*, int)) 0x4AB400;
 uint8_t(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (uint8_t(__thiscall*)(ContChangesEntry*)) 0x4BD820;
 std::unordered_set<BYTE> SaveGameUMap;
 uintptr_t g_canSaveNowAddr = 0;
 uintptr_t g_canSaveNowMenuAddr = 0;
 Setting** g_miscStatData = (Setting**)0x11C6D50;
-char g_workingDir[MAX_PATH];
 std::unordered_set<DWORD> jg_gameRadioSet;
 static float g_viewmodel_near = 0.f;
 bool mlcOverridden = false;
@@ -439,11 +429,11 @@ namespace hk_BarterHook {
 			auto merchantRef = barterMenu->merchantRef;
 			if (!merchantRef) return shouldHide;
 			auto originalForm = ref->type;
-			if (!g_thePlayer) return shouldHide;
+			if (!PlayerCharacter::GetSingleton()) return shouldHide;
 			auto it = barterFilterListLeft.find(originalForm->refID);
 			if (it != barterFilterListLeft.end()) {
 				auto &barterSet = it->second;
-				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0) || barterSet.Allow(g_thePlayer->refID);
+				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0) || barterSet.Allow(PlayerCharacter::GetSingleton()->refID);
 			}
 			return shouldHide;
 		}
@@ -472,7 +462,7 @@ namespace hk_BarterHook {
 			auto it = barterFilterListRight.find(originalForm->refID);
 			if (it != barterFilterListRight.end()) {
 				auto& barterSet = it->second;
-				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0) || barterSet.Allow(g_thePlayer->refID);
+				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0) || barterSet.Allow(PlayerCharacter::GetSingleton()->refID);
 
 			}
 			return shouldHide;
@@ -1004,7 +994,7 @@ __declspec (naked) void GetMapMarkerHook() {
 
 void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1) {
 	if (*&a1->muzzleFlash && a1->projectile->lightMuzzleFlash) {
-		if (!disableMuzzleLights || (disableMuzzleLights == 2 && a1->sourceActor != (Actor*)g_thePlayer) || (disableMuzzleLights == 3 && a1->sourceActor == (Actor*)g_thePlayer)) {
+		if (!disableMuzzleLights || (disableMuzzleLights == 2 && a1->sourceActor != (Actor*)PlayerCharacter::GetSingleton()) || (disableMuzzleLights == 3 && a1->sourceActor == (Actor*)PlayerCharacter::GetSingleton())) {
 			NiNode* niNode = ThisCall<NiNode*>(0x50D810, a1->projectile->lightMuzzleFlash, 0, *&a1->muzzleFlash, 1);
 			ThisCall(0x66B0D0, &a1->flashLight, niNode);
 		}
@@ -1043,7 +1033,7 @@ TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* weap) {
 	if (weap->ammo.ammo) {
 		if (IS_TYPE(weap->ammo.ammo, BGSListForm)) {
 			BGSListForm* ammoList = (BGSListForm*)weap->ammo.ammo;
-			ExtraContainerChanges* xChanges = GetExtraType(g_thePlayer->extraDataList, ContainerChanges);
+			ExtraContainerChanges* xChanges = GetExtraType(PlayerCharacter::GetSingleton()->extraDataList, ContainerChanges);
 			TESForm* ammo = nullptr;
 			if (ammoList && xChanges && xChanges->data) {
 				for (uint32_t i = 0; i < ammoList->Count(); i++) {
@@ -1611,9 +1601,9 @@ void ResetMiscStatMap() {
 
 void ClearPlayerFurniture()
 {
-	if (auto playerProcess = g_thePlayer->baseProcess)
+	if (auto playerProcess = PlayerCharacter::GetSingleton()->baseProcess)
 	{
-		playerProcess->SetFurnitureRef(g_thePlayer, 0, NULL, 0x7F);
+		playerProcess->SetFurnitureRef(PlayerCharacter::GetSingleton(), 0, NULL, 0x7F);
 
 	}
 }

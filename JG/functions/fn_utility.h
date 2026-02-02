@@ -425,7 +425,7 @@ bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
 	*result = 0;
-	if (g_interfaceManager) *result = g_interfaceManager->pipBoyMode;
+	if (InterfaceManager::GetSingleton()) *result = InterfaceManager::GetSingleton()->pipBoyMode;
 	if (IsConsoleMode()) Console_Print("GetPipBoyMode >> %.2f", *result);
 	return true;
 }
