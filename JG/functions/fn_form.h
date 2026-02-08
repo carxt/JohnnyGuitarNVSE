@@ -825,10 +825,10 @@ bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {
 }
 bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* weapon;
+	TESObjectWEAP* weapon = nullptr;
 	BGSTextureSet* txst = nullptr;
 	int id = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &id, &txst) && IS_TYPE(weapon, TESObjectWEAP) && IS_TYPE(txst, BGSTextureSet)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &id, &txst) && weapon && IS_TYPE(weapon, TESObjectWEAP) && txst && IS_TYPE(txst, BGSTextureSet)) {
 		TESModelTextureSwap* model = &weapon->textureSwap;
 		if (!model) return true;
 
