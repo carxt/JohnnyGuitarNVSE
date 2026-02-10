@@ -24,6 +24,7 @@
 #include "functions/fn_ui.h"
 #include "functions/fn_book.h"
 #include "functions/fn_dial.h"
+#include "functions/fn_gamebryo.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
 #include "nvse_version.h"
@@ -496,6 +497,10 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(SetCameraShotPath);
 	REG_TYPED_CMD(GetCameraShotImageSpaceModifier, Form);
 	REG_CMD(SetCameraShotImageSpaceModifier);
+	REG_CMD(SetAlphaPropertyValue);
+	REG_CMD(GetAlphaPropertyValue);
+	REG_CMD(SetStencilPropertyValue);
+	REG_CMD(GetStencilPropertyValue);
 }
 
 void ReadINI() {

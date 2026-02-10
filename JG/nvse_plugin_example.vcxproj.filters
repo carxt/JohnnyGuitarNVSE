@@ -160,6 +160,12 @@
     <ClCompile Include="..\shared\BSMemory\BSScrapMemory.cpp">
       <Filter>shared\BSMemory</Filter>
     </ClCompile>
+    <ClCompile Include="internal\netimmerse.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -372,6 +378,12 @@
     </ClInclude>
     <ClInclude Include="..\shared\BSMemory\BSScrapMemory.hpp">
       <Filter>shared\BSMemory</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\fn_gamebryo.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSUtilities.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

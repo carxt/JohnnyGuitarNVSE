@@ -46,6 +46,13 @@ static ParamInfo kParams_OneString[1] =
 	{	"string",	kParamType_String,	0 },
 };
 
+static ParamInfo kParams_OneString_TwoInts[] =
+{
+	{	"string",	kParamType_String,	0 },
+	{	"int", kParamType_Integer, 0 },
+	{	"int", kParamType_Integer, 0 },
+};
+
 static ParamInfo kParams_OneString_OneFloat[] =
 {
 	{	"string",	kParamType_String,	0 },
