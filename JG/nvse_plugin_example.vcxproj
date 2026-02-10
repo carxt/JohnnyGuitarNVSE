@@ -139,6 +139,7 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClCompile Include="events\EventFramework.cpp" />
     <ClCompile Include="events\LambdaVariableContext.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Conversation.cpp" />
     <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp" />
     <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp" />
@@ -151,6 +152,7 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClCompile Include="internal\JG\JohnnyExtraData.cpp" />
     <ClCompile Include="internal\JIP\JIPFixes.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
+    <ClCompile Include="internal\netimmerse.cpp" />
     <ClCompile Include="internal\sha1\sha1.cpp" />
     <ClCompile Include="internal\utility.cpp" />
     <ClCompile Include="JohnnyGuitarNVSE.cpp" />
@@ -189,6 +191,7 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClInclude Include="functions\fn_dial.h" />
     <ClInclude Include="functions\fn_file.h" />
     <ClInclude Include="functions\fn_form.h" />
+    <ClInclude Include="functions\fn_gamebryo.h" />
     <ClInclude Include="functions\fn_gameplay.h" />
     <ClInclude Include="functions\fn_math.h" />
     <ClInclude Include="functions\fn_mediaset.h" />
@@ -203,6 +206,7 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSStringT.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSUtilities.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Conversation.hpp" />
     <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\DialogueResponse.hpp" />

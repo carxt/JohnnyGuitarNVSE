@@ -1,5 +1,8 @@
 #pragma once
 
+#include "NiTypes.h"
+#include "GameTypes.h"
+
 struct NavMeshInfo;
 class bhkRigidBody;
 class TESObjectCELL;
@@ -57,10 +60,8 @@ struct NiUpdateData {
 class NiRefObject : public NiMemObject {
 public:
 	NiRefObject();
-	~NiRefObject();
-
-	virtual void	Destructor(bool freeThis);
-	virtual void	Free(void);
+	virtual			~NiRefObject();
+	virtual void	DeleteThis();
 
 	uint32_t		m_uiRefCount;	// 04
 
@@ -70,7 +71,7 @@ public:
 
 	inline void DecRefCount() {
 		if (!InterlockedDecrement(&m_uiRefCount))
-			Free();
+			DeleteThis();
 	}
 };
 
@@ -104,7 +105,7 @@ public:
 	uint32_t unk10[25]; // 10
 	uint8_t byte74; // 74
 	uint8_t byte75[3]; // 75
-	BSSimpleArray<NavMeshInfo> navMeshInfos; // 78
+	BSSimpleArray<NavMeshInfo*> navMeshInfos; // 78
 	NiRefObject* object88; // 88
 };
 
@@ -575,14 +576,55 @@ public:
 	NiMaterialProperty();
 	~NiMaterialProperty();
 
-	uint32_t				unk18;			// 18
-	float				specularRGB[3];	// 1C
-	float				emissiveRGB[3];	// 28
-	uint32_t				unk34;			// 34
-	float				glossiness;		// 38
-	float				alpha;			// 3C
-	float				emitMult;		// 40
-	uint32_t				unk44[2];		// 44
+	int32_t		m_iIndex;
+	NiColor		m_kSpec;
+	NiColor		m_kEmit;
+	NiColor*	m_pExternalEmittance;
+	float		m_fShine;
+	float		m_fAlpha;
+	float		m_fEmitMult;
+	uint32_t	m_uiRevID;
+	void*		m_pvRendererData;
+
+	const NiColor& GetSpecularColor() const {
+		return m_kSpec;
+	}
+
+	void SetSpecularColor(const NiColor& arSpecular) {
+		m_kSpec = arSpecular;
+	}
+
+	const NiColor& GetEmittanceColor() const {
+		return m_kEmit;
+	}
+
+	void SetEmittanceColor(const NiColor& arEmittance) {
+		m_kEmit = arEmittance;
+	}
+
+	float GetShineness() const {
+		return m_fShine;
+	}
+
+	void SetShineness(float afShine) {
+		m_fShine = afShine;
+	}
+
+	float GetAlpha() const {
+		return m_fAlpha;
+	}
+
+	void SetAlpha(float afAlpha) {
+		m_fAlpha = afAlpha;
+	}
+
+	float GetEmittanceMult() const {
+		return m_fEmitMult;
+	}
+
+	void SetEmittanceMult(float afEmitMult) {
+		m_fEmitMult = afEmitMult;
+	}
 };
 
 // 1C
@@ -591,13 +633,108 @@ public:
 	NiAlphaProperty();
 	~NiAlphaProperty();
 
-	enum {
-		kFlag_EnableBlending = 1 << 0,
+	struct ALIGN2 _Flags {
+		bool	bAlphaBlending	: 1;
+		uint8_t ucSrcBlend		: 4;
+		uint8_t					: 3; // Dest blend is split due to padding issues
+		uint8_t					: 1; 
+		bool	bAlphaTesting	: 1;
+		uint8_t ucTestFunc		: 3;
+		bool	bNoSorter		: 1;
+	};
+	using Flags = _Flags;
+
+	enum AlphaFlags {
+		ALPHA_BLEND_MASK	= 0x0001,
+		SRC_BLEND_MASK		= 0x001E,
+		SRC_BLEND_POS		= 1,
+		DEST_BLEND_MASK		= 0x01E0,
+		DEST_BLEND_POS		= 5,
+
+		TEST_ENABLE_MASK	= 0x0200,
+		TEST_FUNC_MASK		= 0x1C00,
+		TEST_FUNC_POS		= 10,
+		ALPHA_NOSORTER_MASK = 0x2000
 	};
 
-	uint16_t				flags;		// 18
-	uint8_t				threshold;	// 1A
-	uint8_t				byte1B;		// 1B
+	enum AlphaFunction {
+		ALPHA_ONE			= 0,
+		ALPHA_ZERO			= 1,
+		ALPHA_SRCCOLOR		= 2,
+		ALPHA_INVSRCCOLOR	= 3,
+		ALPHA_DESTCOLOR		= 4,
+		ALPHA_INVDESTCOLOR	= 5,
+		ALPHA_SRCALPHA		= 6,
+		ALPHA_INVSRCALPHA	= 7,
+		ALPHA_DESTALPHA		= 8,
+		ALPHA_INVDESTALPHA	= 9,
+		ALPHA_SRCALPHASAT	= 10,
+		ALPHA_MAX_MODES
+	};
+
+	enum TestFunction {
+		TEST_ALWAYS			= 0,
+		TEST_LESS			= 1,
+		TEST_EQUAL			= 2,
+		TEST_LESSEQUAL		= 3,
+		TEST_GREATER		= 4,
+		TEST_NOTEQUAL		= 5,
+		TEST_GREATEREQUAL	= 6,
+		TEST_NEVER			= 7,
+		TEST_MAX_MODES
+	};
+
+
+	Bitfield<_Flags>	m_usFlags;
+	uint8_t				m_ucAlphaTestRef;
+
+	bool GetAlphaBlending() const {
+		return m_usFlags.bAlphaBlending;
+	}
+
+	void SetAlphaBlending(bool abBlend) {
+		m_usFlags.bAlphaBlending = abBlend;
+	}
+
+	bool GetAlphaTesting() const {
+		return m_usFlags.bAlphaTesting;
+	}
+
+	void SetAlphaTesting(bool abTest) {
+		m_usFlags.bAlphaTesting = abTest;
+	}
+
+	uint8_t GetTestRef() const {
+		return m_ucAlphaTestRef;
+	}
+
+	void SetTestRef(uint8_t aucRef) {
+		m_ucAlphaTestRef = aucRef;
+	}
+
+	AlphaFunction GetSrcBlendMode() const {
+		return static_cast<AlphaFunction>(m_usFlags.ucSrcBlend);
+	}
+
+	void SetSrcBlendMode(AlphaFunction aeSrcBlend) {
+		m_usFlags.ucSrcBlend = aeSrcBlend;
+	}
+
+	AlphaFunction GetDestBlendMode() const {
+		return static_cast<AlphaFunction>(m_usFlags.Get(DEST_BLEND_MASK, DEST_BLEND_POS));
+	}
+
+	void SetDestBlendMode(AlphaFunction aeDestBlend) {
+		m_usFlags.Set(aeDestBlend, DEST_BLEND_MASK, DEST_BLEND_POS);
+	}
+
+	TestFunction GetTestMode() const {
+		return static_cast<TestFunction>(m_usFlags.ucTestFunc);
+	}
+
+	void SetTestMode(TestFunction aeTestFunc) {
+		m_usFlags.ucTestFunc = aeTestFunc;
+	}
 };
 
 // 30
@@ -615,10 +752,128 @@ public:
 	NiStencilProperty();
 	~NiStencilProperty();
 
-	uint16_t				flags;		// 18
-	uint16_t				word1A;		// 1A
-	uint32_t				unk1C;		// 1C
-	uint32_t				mask;		// 20
+	enum TestFunc {
+		TEST_NEVER,
+		TEST_LESS,
+		TEST_EQUAL,
+		TEST_LESSEQUAL,
+		TEST_GREATER,
+		TEST_NOTEQUAL,
+		TEST_GREATEREQUAL,
+		TEST_ALWAYS,
+		TEST_MAX
+	};
+
+	enum Action {
+		ACTION_KEEP,
+		ACTION_ZERO,
+		ACTION_REPLACE,
+		ACTION_INCREMENT,
+		ACTION_DECREMENT,
+		ACTION_INVERT,
+		ACTION_MAX
+	};
+
+	enum {
+		ENABLE_MASK			= 0x1,
+		FAILACTION_MASK		= 0xE,
+		FAILACTION_POS		= 0x1,
+		ZFAILACTION_MASK	= 0x70,
+		ZFAILACTION_POS		= 0x4,
+		PASSACTION_MASK		= 0x380,
+		PASSACTION_POS		= 0x7,
+		DRAWMODE_MASK		= 0xC00,
+		DRAWMODE_POS		= 0xA,
+		TESTFUNC_MASK		= 0xF000,
+		TESTFUNC_POS		= 0xC,
+	};
+
+	enum DrawMode {
+		DRAW_CCW_OR_BOTH	= 0,
+		DRAW_CCW			= 1,
+		DRAW_CW				= 2,
+		DRAW_BOTH			= 3,
+		DRAW_MAX,
+	};
+
+	struct ALIGN2 _Flags {
+		bool	bEnabled		: 1;
+		uint8_t ucFailAction	: 3;
+		uint8_t ucZFailAction	: 3;
+		uint8_t					: 1; // Pass action is split due to padding issues
+		uint8_t					: 2;
+		uint8_t ucDrawMode		: 2;
+		uint8_t ucTestFunc		: 4;
+	};
+	using Flags = _Flags;
+
+	Bitfield<_Flags>	m_usFlags;
+	uint32_t			m_uiRef;
+	uint32_t			m_uiMask;
+
+	bool GetStencilOn() const {
+		return m_usFlags.bEnabled;
+	}
+
+	void SetStencilOn(bool abEnabled) {
+		m_usFlags.bEnabled = abEnabled;
+	}
+
+	uint32_t GetStencilReference() const {
+		return m_uiRef;
+	}
+
+	void SetStencilReference(uint32_t auiRef) {
+		m_uiRef = auiRef;
+	}
+
+	uint32_t GetStencilMask() const {
+		return m_uiMask;
+	}
+
+	void SetStencilMask(uint32_t auiMask) {
+		m_uiMask = auiMask;
+	}
+
+	Action GetStencilFailAction() const {
+		return static_cast<Action>(m_usFlags.ucFailAction);
+	}
+
+	void SetStencilFailAction(Action aeAction) {
+		m_usFlags.ucFailAction = aeAction;
+	}
+
+	Action GetStencilZFailAction() const {
+		return static_cast<Action>(m_usFlags.ucZFailAction);
+	}
+
+	void SetStencilZFailAction(Action aeAction) {
+		m_usFlags.ucZFailAction = aeAction;
+	}
+
+	Action GetStencilPassAction() const {
+		return static_cast<Action>((m_usFlags.Get(PASSACTION_MASK, PASSACTION_POS)));
+	}
+
+	void SetStencilPassAction(Action aeAction) {
+		m_usFlags.Set(aeAction, PASSACTION_MASK, PASSACTION_POS);
+	}
+
+	void SetDrawMode(NiStencilProperty::DrawMode aeDraw) {
+		m_usFlags.ucDrawMode = aeDraw;
+	}
+
+	NiStencilProperty::DrawMode GetDrawMode() const {
+		return static_cast<NiStencilProperty::DrawMode>(m_usFlags.ucDrawMode);
+	}
+
+	void SetStencilFunction(NiStencilProperty::TestFunc aeFunc) {
+		m_usFlags.ucTestFunc = aeFunc;
+	}
+
+	NiStencilProperty::TestFunc GetStencilFunction() const {
+		return static_cast<NiStencilProperty::TestFunc>(m_usFlags.ucTestFunc);
+	}
 };
 static_assert(sizeof(NiStencilProperty) == 0x24);
 
@@ -746,7 +1001,7 @@ public:
 	NiTransform				m_local;
 	NiTransform				m_world;
 
-	NiProperty* GetProperty(uint32_t propID);
+	NiProperty* GetProperty(uint32_t auiType) const;
 
 	void DumpProperties();
 	void DumpParents();
