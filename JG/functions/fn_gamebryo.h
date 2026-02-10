@@ -8,18 +8,19 @@ DEFINE_COMMAND_PLUGIN(SetStencilPropertyValue, , true, kParams_OneString_TwoInts
 DEFINE_COMMAND_PLUGIN(GetStencilPropertyValue, , true, kParams_OneString_OneInt);
 
 namespace {
-	enum class AlphaPropertyItem  : uint32_t {
-		NONE				= 0,
+	enum class AlphaPropertyItem  : int32_t {
+		NONE				= -1,
 		BLEND_TOGGLE,		
 		SOURCE_BLEND_MODE,
 		DEST_BLEND_MODE,
 		TEST_TOGGLE,
 		TEST_FUNC,
 		TEST_REF,
+		COUNT
 	};
 
-	enum class StencilPropertyItem : uint32_t {
-		NONE				= 0,
+	enum class StencilPropertyItem : int32_t {
+		NONE				= -1,
 		ENABLED_TOGGLE,
 		DRAW_MODE,
 		REF_VALUE,
@@ -28,22 +29,19 @@ namespace {
 		ZFAIL_ACTION,
 		PASS_ACTION,
 		TEST_FUNC,
+		COUNT
 	};
 
-	enum class MaterialPropertyItem : uint32_t {
-		NONE = 0,
-		SPECULAR_COLOR,
-		EMISSIVE_COLOR,
-		SHINE_POWER,
-		ALPHA,
-		EMISSIVE_MULT,
-	};
+	template<typename T>
+	inline bool InRange(volatile T value) {
+		return value > T::NONE && value < T::COUNT;
+	}
 
-	NiProperty* __fastcall GetPropertyByName(NiAVObject* apRoot, const NiFixedString& apObjectName, uint32_t aeType) {
+	NiProperty* __fastcall GetPropertyByName(NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
 		if (!apRoot)
 			return nullptr;
 
-		NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, apObjectName);
+		NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
 		if (!pObject)
 			return nullptr;
 
@@ -56,7 +54,7 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	AlphaPropertyItem eItem = AlphaPropertyItem::NONE;
 	uint32_t uiValue = 0;
 	char cObjectName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue) && cObjectName[0] && InRange(eItem)) {
 		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(thisObj->GetNiNode(), cObjectName, NiProperty::kPropertyType_Alpha));
 		if (!pAlpha)
 			return true;
@@ -92,7 +90,7 @@ bool Cmd_GetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	*result = 0;
 	AlphaPropertyItem eItem = AlphaPropertyItem::NONE;
 	char cObjectName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem) && cObjectName[0] && InRange(eItem)) {
 		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(thisObj->GetNiNode(), cObjectName, NiProperty::kPropertyType_Alpha));
 		if (!pAlpha)
 			return true;
@@ -128,7 +126,7 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	StencilPropertyItem eItem = StencilPropertyItem::NONE;
 	uint32_t uiValue = 0;
 	char cObjectName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue) && cObjectName[0] && InRange(eItem)) {
 		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(thisObj->GetNiNode(), cObjectName, NiProperty::kPropertyType_Stencil));
 		if (!pStencil)
 			return true;
@@ -170,10 +168,11 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	*result = 0;
 	StencilPropertyItem eItem = StencilPropertyItem::NONE;
 	char cObjectName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem) && cObjectName[0] && InRange(eItem)) {
 		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(thisObj->GetNiNode(), cObjectName, NiProperty::kPropertyType_Stencil));
 		if (!pStencil)
 			return true;
+
 		switch (eItem) {
 			case StencilPropertyItem::ENABLED_TOGGLE:
 				*result = pStencil->GetStencilOn() ? 1 : 0;
@@ -202,7 +201,6 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 			default:
 				return true;
 		}
-		*result = 1;
 	}
 	return true;
 }
