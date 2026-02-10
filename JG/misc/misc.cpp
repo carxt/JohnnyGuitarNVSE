@@ -3,13 +3,13 @@
 #include <GameAPI.h>
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 
-float tan_p(float angle) {
+float __fastcall tan_p(float angle) {
 	angle *= kDbl4dPI;
 	double ang2 = angle * angle;
 	return angle * (211.849369664121 - 12.5288887278448 * ang2) / (269.7350131214121 + ang2 * (ang2 - 71.4145309347748));
 }
 
-float dTan(float angle) {
+float __fastcall dTan(float angle) {
 	while (angle > kDblPIx2)
 		angle -= kDblPIx2;
 
@@ -34,14 +34,14 @@ float dTan(float angle) {
 	}
 }
 
-float fastDTan(float value) {
+float __fastcall fastDTan(float value) {
 	bool sign = (value < 0);
 	if (sign) value = -value;
 	float tempRes = dTan(value * kDblPId180);
 	return (sign ? -tempRes : tempRes);
 }
 
-void setVarByName(VARARGS, const char* var_name, float value) {
+void __fastcall setVarByName(VARARGS, const char* var_name, float value) {
 	ListNode<VariableInfo>* traverse = scriptObj->varList.Head();
 	VariableInfo* varInfo;
 	const std::string_view strName(var_name);
@@ -62,7 +62,7 @@ void setVarByName(VARARGS, const char* var_name, float value) {
 
 //Only ready for a 24-bit BMP, will check for non-24 bit later.
 //Also currently doesn't handle negative height/width BMPs, will fix later
-bool ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long& B, unsigned long PixelW, unsigned long PixelH) {
+bool __fastcall ReadBMP24(char* filename, unsigned long& R, unsigned long& G, unsigned long& B, unsigned long PixelW, unsigned long PixelH) {
 
 	FILE* f = NULL;
 	if (fopen_s(&f, filename, "rb") != 0)
