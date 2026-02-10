@@ -4,6 +4,8 @@
 #include "GameTasks.h"
 #include "GameUI.h"
 
+#include "Bethesda/BSUtilities.hpp"
+
 TESForm* TESObjectREFR::GetBaseForm()
 {
 	TESForm* baseform = nullptr;
@@ -131,7 +133,7 @@ hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) {
 
 NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName) {
 	NiNode* rootNode = GetNiNode();
-	return rootNode ? rootNode->GetBlock(blockName) : NULL;
+	return BSUtilities::GetObjectByName(rootNode,  blockName);
 }
 
 TESObjectWEAP* Actor::GetEquippedWeapon() {

@@ -2,6 +2,9 @@
 // Utility or miscellaneous functions
 #include <iostream>
 #include <fstream>
+
+#include "Bethesda/BSUtilities.hpp"
+
 DEFINE_COMMAND_ALT_PLUGIN(GetEditorID, GetEdID, , false, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetJohnnyPatch, , false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetTimePlayed, , false, kParams_OneOptionalInt);
@@ -691,7 +694,7 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 			if (!refNode)
 				return true;
 
-			object = refNode->GetObjectByName(blockName);
+			object = BSUtilities::GetObjectByName(refNode, blockName);
 			if (!object)
 				return true;
 
@@ -790,7 +793,7 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 		if (root) {
 			NiAVObject* target = root;
 			if (blockName[0])
-				target = CdeclCall<NiAVObject*>(0x4AAE30, root, blockName); // BSUtilities::GetObjectByName
+				target = BSUtilities::GetObjectByName(root, blockName);
 
 			if (target) {
 				const NiRTTI* NiControllerManager_ms_RTTI = reinterpret_cast<NiRTTI*>(0x11F36AC);

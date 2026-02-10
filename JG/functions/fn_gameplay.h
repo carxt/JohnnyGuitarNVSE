@@ -1,6 +1,9 @@
 #pragma once
 #include "GameForms.h"
 #include "ParamInfos.h"
+
+#include "Bethesda/BSUtilities.hpp"
+
 // Functions affecting gameplay
 DEFINE_COMMAND_PLUGIN(ToggleLevelUpMenu, , false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(TogglePipBoy, , false, kParams_OneOptionalInt);
@@ -1482,8 +1485,8 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 		NiAVObject* pCasingNode = nullptr;
 		NiTransform kOrgTrans;
 		if (pActorNode) {
-			NiAVObject* pNewCasingNode = pActorNode->GetObjectByName(cNodeName);
-			pCasingNode = pActorNode->GetObjectByName("ShellCasingNode");
+			NiAVObject* pNewCasingNode = BSUtilities::GetObjectByName(pActorNode, cNodeName);
+			pCasingNode = BSUtilities::GetObjectByName(pActorNode, "ShellCasingNode");
 			if (pCasingNode && pNewCasingNode) {
 				kOrgTrans = pCasingNode->m_world;
 
