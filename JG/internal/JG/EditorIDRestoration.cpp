@@ -224,8 +224,9 @@ namespace EDIDRestoration {
 
 		// vftable + 0x134
 		bool hk_SetFormEditorID(const char* apEDID) {
-			if (apEDID && strlen(apEDID)) {
-				if (strcmp(apEDID, "SysWindowCompileAndRun") == 0)
+			const std::string_view strEDID(apEDID);
+			if (!strEDID.empty()) {
+				if (strEDID == "SysWindowCompileAndRun")
 					apEDID = "Console Command";
 
 				if (GetTemporary() || GetFormID() == 0) {

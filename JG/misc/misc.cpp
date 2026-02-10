@@ -44,10 +44,12 @@ float fastDTan(float value) {
 void setVarByName(VARARGS, const char* var_name, float value) {
 	ListNode<VariableInfo>* traverse = scriptObj->varList.Head();
 	VariableInfo* varInfo;
+	const std::string_view strName(var_name);
 	do {
 		varInfo = traverse->data;
 		if (varInfo) {
-			if (!strcmp(((char*)varInfo->name.c_str()), var_name)) {
+			const std::string_view strVariableName(varInfo->name.pString, varInfo->name.GetLength());
+			if (strVariableName == strName) {
 				ScriptVar* scv = eventList->GetVariable(varInfo->idx);
 				if (scv) {
 					scv->data = value;
