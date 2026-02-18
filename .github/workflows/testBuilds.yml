@@ -14,7 +14,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Add MSBuild to PATH
       uses: microsoft/setup-msbuild@v2
@@ -35,13 +35,19 @@ jobs:
 
     - name: Package Artifacts
       run: |
-        mkdir -p artifacts
-        Compress-Archive -Path JG\Release\johnnyguitar.dll, JG\Release\johnnyguitar.pdb -DestinationPath artifacts\JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip
-        Compress-Archive -Path JG\Debug\johnnyguitar.dll, JG\Debug\johnnyguitar.pdb -DestinationPath artifacts\JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip
+        $releaseDir = "JG\Release"
+        $debugDir = "JG\Debug"
+        New-Item -ItemType Directory -Name artifacts -Force | Out-Null
+        New-Item -ItemType Directory -Name "nvse\plugins" -path $releaseDir -Force | Out-Null
+        New-Item -ItemType Directory -Name "nvse\plugins" -path $debugDir -Force | Out-Null
+        Copy-Item -Path "$releaseDir\johnnyguitar.dll", "$releaseDir\johnnyguitar.pdb" -Destination "$releaseDir\nvse\plugins"
+        Copy-Item -Path "$debugDir\johnnyguitar.dll", "$debugDir\johnnyguitar.pdb" -Destination "$debugDir\nvse\plugins"
+        Compress-Archive -Path "$releaseDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip"
+        Compress-Archive -Path "$debugDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip"
       shell: pwsh
 
     - name: Publish Zipped Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: Zipped-Artifacts-${{ env.artifact_timestamp }}
         path: artifacts/
