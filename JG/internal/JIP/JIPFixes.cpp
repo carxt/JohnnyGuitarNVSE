@@ -594,6 +594,267 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace BetterSearch {
+
+		static ParamInfo kSearchParams[] =
+		{
+			{ "Query", kParamType_String, false },
+			{ "Form Type", kParamType_String, true },
+			{ "Plugin Name", kParamType_String, true },
+			{ "Runtime Form Handling (0 - none, 1 - skip, 2 - only)", kParamType_Integer, true }
+		};
+
+		class AutoLineWidth {
+			static constexpr uint32_t LINE_WIDTH_ADDR = 0x71D122 + 6;
+
+			uint32_t uiOriginalWidth;
+		public:
+			AutoLineWidth(uint32_t auiNewWidth) {
+				uiOriginalWidth = *reinterpret_cast<uint32_t*>(LINE_WIDTH_ADDR);
+				SafeWrite32(LINE_WIDTH_ADDR, auiNewWidth);
+			}
+			~AutoLineWidth() {
+				SafeWrite32(LINE_WIDTH_ADDR, uiOriginalWidth);
+			}
+		};
+
+		enum RuntimeFormHandling {
+			NONE = 0,
+			SKIP = 1,
+			ONLY = 2
+		};
+
+		void __fastcall StringToLower(std::string_view& arString) {
+			std::transform(arString.begin(), arString.end(), const_cast<char*>(arString.data()), [](unsigned char c) { return std::tolower(c); });
+		}
+
+		bool __fastcall CaseInsensitiveSubStr(const std::string_view& arString, const std::string_view& arSubString, size_t aStartPos = 0) {
+			auto it = std::search(
+				arString.begin() + aStartPos, arString.end(),
+				arSubString.begin(), arSubString.end(),
+				[](char ch1, char ch2) { return std::tolower(ch1) == ch2; }
+			);
+			return (it != arString.end());
+		}
+
+		bool __fastcall CaseInsensitiveStrCmp(const std::string_view& arString, const std::string_view& arSubString) {
+			if (arString.length() != arSubString.length())
+				return false;
+
+			// Substring is assumed to be already lowercased
+			for (size_t i = 0; i < arString.length(); ++i) {
+				if (std::tolower(arString[i]) != arSubString[i])
+					return false;
+			}
+			return true;
+		}
+
+		bool __fastcall FindSubstring(const std::string_view& arString, const std::string_view& arSubString, bool abExact = true) {
+			if (arSubString.empty())
+				return false;
+
+			if (arSubString.front() == '*' && arSubString.length() == 1)
+				return true;
+
+			if (arSubString.front() == '*' && arSubString.back() == '*') {
+				uint32_t uiCount = arSubString.length() >= 2 ? arSubString.length() - 2 : 0;
+				uiCount = std::clamp(uiCount, 0u, arString.length());
+				const std::string_view svSubStr = arSubString.substr(1, uiCount);
+				return CaseInsensitiveSubStr(arString, svSubStr);
+			}
+			else if (arSubString.front() == '*') {
+				const std::string_view svSubStr = arSubString.substr(1);
+				uint32_t uiStartPos = arString.length() >= svSubStr.length() ? arString.length() - svSubStr.length() : 0;
+				uiStartPos = std::clamp(uiStartPos, 0u, arString.length());
+				return CaseInsensitiveStrCmp(arString.substr(uiStartPos), svSubStr);
+			}
+			else if (arSubString.back() == '*') {
+				uint32_t uiCount = arString.length() >= arSubString.length() - 1 ? arSubString.length() - 1 : arString.length();
+				uiCount = std::clamp(uiCount, 0u, arString.length());
+				const std::string_view svSubStr = arSubString.substr(0, uiCount);
+				return CaseInsensitiveStrCmp(arString.substr(0, svSubStr.length()), svSubStr);
+			}
+			else if (abExact)
+				return CaseInsensitiveStrCmp(arString, arSubString);
+			else
+				return CaseInsensitiveSubStr(arString, arSubString);
+		}
+
+		void __fastcall DisplayForm(const TESForm* apForm, const char* apEDID) {
+			const TESFile* pFile = apForm->GetFile(0);
+			const char* pFullName = TESFullName::GetFullName(apForm);
+			const char* pFileName = pFile ? pFile->GetName() : "Runtime";
+			const char* pType = apForm->GetFormTypeName();
+			if (pFullName && pFullName[0])
+				Console_Print("%08X | %s | %s (%s) | %s", apForm->GetFormID(), pType, apEDID, pFullName, pFileName);
+			else
+				Console_Print("%08X | %s | %s | %s", apForm->GetFormID(), pType, apEDID, pFileName);
+		}
+
+		bool __fastcall SearchEDID(const TESForm* apForm, const std::string_view& arSearch) {
+			JohnnyExtraData* pJGE = JohnnyExtraData::Find(apForm);
+			if (!pJGE)
+				return false;
+
+			auto pEDIDIter = pJGE->kFormData.kEditorIDs.GetHead();
+			while (pEDIDIter && !pEDIDIter->IsEmpty()) {
+				const NiFixedString& rEDID = pEDIDIter->GetItem();
+				pEDIDIter = pEDIDIter->GetNext();
+
+				std::string_view svEDID(rEDID.c_str(), rEDID.GetLength());
+				if (FindSubstring(svEDID, arSearch, false)) {
+					DisplayForm(apForm, rEDID.c_str());
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		bool __fastcall SearchFullName(const TESForm* apForm, const std::string_view& arSearch) {
+			const char* pFullName = TESFullName::GetFullName(apForm);
+			if (pFullName && pFullName[0]) {
+				if (FindSubstring(pFullName, arSearch, false)) {
+					DisplayForm(apForm, apForm->GetFormEditorID());
+					return true;
+				}
+			}
+			return false;
+		}
+
+		bool __fastcall GetFiles(std::vector<TESFile*, BSScrapAllocator<TESFile*>>& arFiles, const std::string_view& arSearch) {
+			auto pIter = TESDataHandler::GetSingleton()->kFiles.GetHead();
+			while (pIter && !pIter->IsEmpty()) {
+				TESFile* pFile = pIter->GetItem();
+				pIter = pIter->GetNext();
+				if (pFile && FindSubstring(pFile->GetName(), arSearch))
+					arFiles.push_back(pFile);
+			}
+			return !arFiles.empty();
+		}
+
+		bool __fastcall SearchFiles(const TESForm* apForm, const std::vector<TESFile*, BSScrapAllocator<TESFile*>>& arFiles) {
+			const TESFile* pFile = apForm->GetFile(0);
+			if (!pFile)
+				return false;
+			
+			return std::find(arFiles.begin(), arFiles.end(), pFile) != arFiles.end();
+		}
+
+		bool __fastcall SearchType(const TESForm* apForm, const std::vector<FORM_TYPE, BSScrapAllocator<FORM_TYPE>>& arTypes) {
+			const FORM_TYPE eFormType = apForm->GetFormType();
+			return std::find(arTypes.begin(), arTypes.end(), eFormType) != arTypes.end();
+		}
+
+		bool Cmd_Search_JG_Execute(COMMAND_ARGS) {
+			char cSearchBuffer[256] = { 0 };
+			char cTypeBufer[128] = { 0 };
+			char cPluginBuffer[MAX_PATH] = { 0 };
+			RuntimeFormHandling eRuntimeHandling = RuntimeFormHandling::SKIP;
+			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &cSearchBuffer, &cTypeBufer, &cPluginBuffer, &eRuntimeHandling))
+				return true;
+
+			if (!cSearchBuffer[0])
+				return true;
+
+			bool bSearchFiles = false;
+			bool bSearchType = false;
+
+			std::string_view svSearch(cSearchBuffer);
+			StringToLower(svSearch);
+
+			std::vector<TESFile*, BSScrapAllocator<TESFile*>> kFiles;
+			if (cPluginBuffer[0] && cPluginBuffer[0] != ' ') {
+				std::string_view svPlugin(cPluginBuffer);
+				if (svPlugin.front() != '*' || svPlugin.length() > 1) {
+					StringToLower(svPlugin);
+					GetFiles(kFiles, svPlugin);
+					bSearchFiles = true;
+				}
+			}
+
+			std::vector<FORM_TYPE, BSScrapAllocator<FORM_TYPE>> kFormTypes;
+			if (cTypeBufer[0] && cTypeBufer[0] != ' ') {
+				if (cTypeBufer[0] >= '0' && cTypeBufer[0] <= '9') {
+					FORM_TYPE eFormType = static_cast<FORM_TYPE>(atoi(cTypeBufer));
+					if (eFormType > FORM_TYPE::None || eFormType < FORM_TYPE::Count)
+						kFormTypes.push_back(eFormType);
+					bSearchType = true;
+				}
+				else {
+					std::string_view svType(cTypeBufer);
+					if (svType.front() != '*' || svType.length() > 1) {
+						StringToLower(svType);
+						for (uint32_t i = FORM_TYPE::None; i < FORM_TYPE::Count; i++) {
+							if (FindSubstring(TESForm::GetFormTypeString(i), svType) || FindSubstring(TESForm::GetFormTypeName(i), svType))
+								kFormTypes.push_back(static_cast<FORM_TYPE>(i));
+						}
+						bSearchType = true;
+					}
+				}
+			}
+
+			AutoLineWidth kLineWidthFix(2400);
+			auto kIter = TESForm::pAllForms->GetFirstPos();
+			while (kIter) {
+				uint32_t uiID = 0;
+				TESForm* pForm = nullptr;
+				TESForm::pAllForms->GetNext(kIter, uiID, pForm);
+
+				if (pForm && !pForm->GetDeleted()) {
+					if (eRuntimeHandling != RuntimeFormHandling::NONE) {
+						bool bRuntime = pForm->kFiles.IsEmpty();
+						if (eRuntimeHandling == RuntimeFormHandling::SKIP && bRuntime)
+							continue;
+						else if (eRuntimeHandling == RuntimeFormHandling::ONLY && !bRuntime)
+							continue;
+					}
+
+					if (bSearchType && (kFormTypes.empty() || !SearchType(pForm, kFormTypes)))
+						continue;
+
+					if (bSearchFiles && (kFiles.empty() || !SearchFiles(pForm, kFiles)))
+						continue;
+
+					if (!SearchEDID(pForm, svSearch))
+						SearchFullName(pForm, svSearch);
+				}
+			}
+
+			return true;
+		}
+
+		bool(__cdecl* Cmd_Search_Org_Parse)(uint32_t, ParamInfo*, ScriptLineBuffer*, ScriptBuffer*) = nullptr;
+		bool Cmd_Search_JG_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf) {
+			// Replace "" with " " because obsnig is stupid and doesn't allow empty strings as params
+			const char* pText = lineBuf->paramText;
+			char cNewText[512] = { 0 };
+			uint32_t uiNewTextLen = 0;
+			for (uint32_t i = 0; i < lineBuf->paramTextLen; i++) {
+				cNewText[uiNewTextLen++] = pText[i];
+				if (pText[i] == '"' && pText[i + 1] == '"') {
+					cNewText[uiNewTextLen] = ' ';
+					uiNewTextLen++;
+				}
+			}
+			strcpy_s(lineBuf->paramText, cNewText);
+			lineBuf->paramTextLen = uiNewTextLen;
+			return Cmd_Search_Org_Parse(numParams, paramInfo, lineBuf, scriptBuf);
+		}
+
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2246));
+			if (pInfo) {
+				Cmd_Search_Org_Parse = pInfo->parse;
+				pInfo->execute		= Cmd_Search_JG_Execute;
+				pInfo->parse		= Cmd_Search_JG_Parse;
+				pInfo->params		= kSearchParams;
+				pInfo->numParams	= ARRAYSIZE(kSearchParams);
+			}
+		}
+
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -702,6 +963,7 @@ namespace JIPFixes {
 		SetOnDialogTopicEventHandlerEx::InitHooks();
 		RespawnDisableFix::InitHooks();
 		CopyFaceGenFromFix::InitHooks();
+		BetterSearch::InitHooks();
 	}
 
 	void InitDeferredHooks() {
