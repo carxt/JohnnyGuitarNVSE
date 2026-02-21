@@ -801,7 +801,9 @@ namespace JIPFixes {
 				TESForm* pForm = nullptr;
 				TESForm::pAllForms->GetNext(kIter, uiID, pForm);
 
-				if (pForm && !pForm->GetDeleted()) {
+				constexpr uint32_t uiRequiredFlags = TESForm::FormFlags::INITIALIZED;
+				constexpr uint32_t uiDisallowedFlags = TESForm::FormFlags::DELETED | TESForm::FormFlags::STILL_LOADING;
+				if (pForm && pForm->uiFormFlags.IsSet(uiRequiredFlags) && pForm->uiFormFlags.IsClear(uiDisallowedFlags)) {
 					if (eRuntimeHandling != RuntimeFormHandling::NONE) {
 						bool bRuntime = pForm->kFiles.IsEmpty();
 						if (eRuntimeHandling == RuntimeFormHandling::SKIP && bRuntime)
