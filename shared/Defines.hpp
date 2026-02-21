@@ -20,7 +20,9 @@ static const auto our_sprintf	= sprintf;
 static const auto our_vsprintf	= vsprintf;
 static const auto our_vsnprintf = vsnprintf;
 
+#include "Utils/DebugLog.hpp"
 #include "Utils/Bitfield.hpp"
+#include "Utils/AddressPtr.hpp"
 
 #include "SafeWrite/SafeWrite.hpp"
 
@@ -39,7 +41,7 @@ constexpr double dNI2MM = 1.0 / dMM2NI;			// 1 Ni to Millimeter
 constexpr float fHK2NI = static_cast<float>(dDM2NI); // 1 Havok to Ni
 constexpr float fNI2HK = static_cast<float>(dNI2DM); // 1 Ni to Havok
 
-template <typename T_Ret = uint32_t, typename ...Args>
+template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret ThisCall(uint32_t _addr, const void* _this, Args ...args) {
 	return ((T_Ret(__thiscall*)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
 }

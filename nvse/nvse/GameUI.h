@@ -22,6 +22,8 @@ class FORenderedMenu;
 typedef Menu* (*_TempMenuByType)(uint32_t menuType);
 extern const _TempMenuByType TempMenuByType;
 
+struct PackedMenu;
+
 // 584
 class InterfaceManager {
 public:
@@ -136,12 +138,12 @@ public:
 	uint8_t					byte173;			// 173
 	FOPipboyManager* pipboyManager;		// 174
 	uint32_t* unk178;				// 178
-	NiTArray<uint32_t>		array17C;			// 17C NiTPrimitiveArray@PackedMenu@BGSMenuPacker
+	NiTPrimitiveArray<PackedMenu*>		array17C;			// 17C NiTPrimitiveArray@PackedMenu@BGSMenuPacker
 	uint32_t					unk18C[130];		// 18C
 	NiObject* unk394;			// 394 seen NiSourceTexture
 	uint32_t					unk398[47];			// 398
-	NiTArray<uint32_t>		array454;			// 454 NiTPrimitiveArray@TextureType@BSTextureManager
-	NiTArray<uint32_t>		array464;			// 464 NiTPrimitiveArray@FilterMode@NiTexturingProperty
+	NiTPrimitiveArray<uint32_t>		array454;			// 454 NiTPrimitiveArray@TextureType@BSTextureManager
+	NiTPrimitiveArray<uint32_t>		array464;			// 464 NiTPrimitiveArray@FilterMode@NiTexturingProperty
 	uint32_t					unk474[16];			// 474
 	uint8_t					byte4B4;			// 4B4
 	uint8_t					byte4B5;			// 4B5
@@ -998,7 +1000,7 @@ public:
 	float							flt188;			// 188
 	tList<QueuedMessage>			queuedMessages;	// 18C
 	uint32_t							currMsgKey;		// 194
-	BSSimpleArray<SubtitleData>		subtitlesArr;	// 198
+	BSSimpleArray<SubtitleData*>		subtitlesArr;	// 198
 	uint32_t							unk1A8[4];		// 1A8
 	TESObjectREFR* crosshairRef;	// 1B8
 	uint32_t							unk1BC;			// 1BC

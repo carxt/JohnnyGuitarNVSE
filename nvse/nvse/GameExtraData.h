@@ -461,7 +461,7 @@ public:
 	BaseInEntryDataLastMatcher(TESForm* match) : m_toMatch(match) {}
 
 	bool Accept(const ExtraContainerChanges::EntryData* match) const {
-		return (match && match->type && m_toMatch == match->type->TryGetREFRParent());
+		return (match && match->type && m_toMatch == GetTESForm(match->type));
 	}
 };
 
@@ -472,7 +472,7 @@ public:
 	RefIDInEntryDataListMatcher(uint32_t match) : m_toMatch(match) {}
 
 	bool Accept(const ExtraContainerChanges::EntryData* match) const {
-		return (match && match->type && m_toMatch == match->type->refID);
+		return (match && match->type && m_toMatch == match->type->GetFormID());
 	}
 };
 
@@ -483,7 +483,7 @@ public:
 	BaseIDInEntryDataListMatcher(uint32_t match) : m_toMatch(match) {}
 
 	bool Accept(const ExtraContainerChanges::EntryData* match) const {
-		return (match && match->type && match->type->TryGetREFRParent() && m_toMatch == match->type->TryGetREFRParent()->refID);
+		return (match && match->type && GetTESForm(match->type) && m_toMatch == GetTESForm(match->type)->GetFormID());
 	}
 };
 
@@ -1097,7 +1097,7 @@ public:
 		uint8_t				explodeChance;
 		bool				explodeOnly;
 		uint8_t				byte03;
-		BSSimpleArray<void>* array04;
+		BSSimpleArray<void*>* array04;
 	};
 
 	uint16_t							dismemberedMask;	// 0C
@@ -1107,7 +1107,7 @@ public:
 	int								unk18;				// 18
 	bool							wasEaten;			// 1C
 	uint8_t							pad1D[3];			// 1D
-	BSSimpleArray<DismemberedLimb>	dismemberedLimbs;	// 20
+	BSSimpleArray<DismemberedLimb*>	dismemberedLimbs;	// 20
 };
 
 // 1C

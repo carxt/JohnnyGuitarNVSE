@@ -11,7 +11,7 @@ TESForm* TESObjectREFR::GetBaseForm()
 	TESForm* baseform = nullptr;
 	if (this->baseForm) {
 		baseform = this->baseForm;
-		if (baseform->modIndex == 0xFF) {
+		if (baseform->GetCompileIndex() == 0xFF) {
 			if (IS_TYPE(baseform, BGSPlaceableWater)) {
 				return ((BGSPlaceableWater*)baseform)->water;
 			}
@@ -64,7 +64,12 @@ __declspec(naked) TESContainer* TESObjectREFR::GetContainer() {
 }
 
 bool TESObjectREFR::IsMapMarker() {
-	return baseForm->refID == 0x10;
+	return baseForm->GetFormID() == 0x10;
+}
+
+// GAME - 0x55D520
+const char* TESObjectREFR::GetFullName() const {
+	return ThisCall<const char*>(0x55D520, this);
 }
 
 void TESObjectREFR::Update3D() {

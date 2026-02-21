@@ -5,7 +5,7 @@
 #include "nvse/GameAPI.h"
 #include "internal/utility.h"
 
-typedef NiTMapBase<const char*, int> TraitNameMap;
+typedef NiTStringPointerMap<int> TraitNameMap;
 TraitNameMap* g_traitNameMap = (TraitNameMap*)0x11F32F4;
 const _TraitNameToID TraitNameToID = (_TraitNameToID)0xA01860;
 uint32_t(*TraitNameToIDAdd)(const char*, uint32_t) = (uint32_t(*)(const char*, uint32_t))0xA00940;
@@ -227,21 +227,8 @@ void Tile::Dump() {
 	s_debug.Outdent();*/
 }
 
-void Debug_DumpTraits(void) {
-	for (uint32_t i = 0; i < g_traitNameMap->numBuckets; i++) {
-		for (TraitNameMap::Entry* bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next) {
-			PrintDebug("%s %d", bucket->key, bucket->data);
-		}
-	}
-}
-
 // not a one-way mapping, so we just return the first
 // also this is slow and sucks
 const char* TraitIDToName(int id) {
-	for (uint32_t i = 0; i < g_traitNameMap->numBuckets; i++)
-		for (TraitNameMap::Entry* bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next)
-			if (bucket->data == id)
-				return bucket->key;
-
-	return NULL;
+	return CdeclCall<const char*>(0xA01A70, id);
 }

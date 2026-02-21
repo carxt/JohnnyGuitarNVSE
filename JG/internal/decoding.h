@@ -6,7 +6,8 @@ struct BGSSaveLoadFileEntry;
 class Sky;
 class BSTempNodeManager;
 class ImageSpaceModifierInstanceRB;
-struct NavMeshClosedDoorInfo;
+class NiRefObject;
+struct NavMeshClosedDoorInfo {};
 
 // 34
 class BGSPrimitive
@@ -452,10 +453,10 @@ struct WaterSurfaceManager
 	uint32_t unk38; // 38
 	DList<WaterGroup> waterGroups; // 3C
 	WaterGroup* waterLOD; // 48	(Assumed)
-	NiTPointerMap<TESObjectREFR> map4C; // 4C
-	NiTPointerMap<TESObjectREFR> map5C; // 5C
-	NiTPointerMap<TESWaterForm> map6C; // 6C
-	NiTMapBase<TESObjectREFR*, void*> map7C; // 7C
+	NiTPointerMap<TESObjectREFR*, TESObjectREFR*>	 map4C; // 4C
+	NiTPointerMap<TESObjectREFR*, TESObjectREFR*>	 map5C; // 5C
+	NiTPointerMap<TESWaterForm*, bool>				map6C; // 6C
+	NiTPointerMap<TESObjectREFR*, void*> map7C; // 7C
 	Struct8C unk8C; // 8C
 	float flt98; // 98
 	uint32_t unk9C; // 9C
@@ -554,7 +555,7 @@ struct FontInfo
 	uint32_t unk34; // 34
 	BufferData* bufferData; // 38
 	uint32_t unk3C[2]; // 3C
-	BSSimpleArray<ButtonIcon> arr44; // 44
+	BSSimpleArray<ButtonIcon*> arr44; // 44
 };
 
 static_assert(sizeof(FontInfo) == 0x54);
@@ -584,7 +585,7 @@ __declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims
 }
 
 // 18
-class LoadedReferenceMap : public NiTPointerMap<TESObjectREFR>
+class LoadedReferenceMap : public NiTMap<uint32_t, TESObjectREFR*>
 {
 public:
 	LoadedReferenceMap();
@@ -634,7 +635,7 @@ public:
 		NiNode* node; // 0C
 		BSString text; // 10
 		float flt18; // 18	Always -1.0
-		NiColorAlpha color; // 1C
+		NiColorA color; // 1C
 	};
 
 	DebugLine lines[200]; // 0004
@@ -984,6 +985,25 @@ public:
 	BSSimpleArray<uint16_t> unk0E4Arr;
 	BSSimpleArray<NavMeshStaticAvoidNode> kAvoidNodes;
 	NavMeshInfo* pNavMeshInfo;
+
+	// GAME - 0x5582F0
+	NavMeshTriangle* GetTriangle(uint16_t ausTriangle) const {
+		return &kTriangles.GetAt(ausTriangle);
+	}
+
+	// GAME - 0x558200
+	uint32_t GetTriangleCount() const {
+		return kTriangles.GetSize();
+	}
+
+	// GAME - 0x68F0A0
+	NiPoint3* GetVertex(uint16_t ausVertex) const {
+		return &kVertices.GetAt(ausVertex);
+	}
+
+	uint32_t GetVertexCount() const {
+		return kVertices.GetSize();
+	}
 };
 
 static_assert(sizeof(NavMesh) == 0x108);
@@ -1084,8 +1104,8 @@ class NavMeshObstacleManager
 	uint32_t unk130;
 	uint32_t unk134;
 	uint32_t unk138;
-	BSSimpleArray<void> backgroundTasks;
-	BSSimpleArray<void> processedTasks;
+	BSSimpleArray<void*> backgroundTasks;
+	BSSimpleArray<void*> processedTasks;
 	uint32_t unk15C;
 	RTL_CRITICAL_SECTION taskCS160;
 	uint32_t unk178;
@@ -1538,21 +1558,6 @@ bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
 }
 
 InventoryRef* (*InventoryRefCreate)(TESObjectREFR* container, const ItemEntryData& data, bool bValidate);
-
-
-struct NiPoint2
-{
-	float x;
-	float y;
-
-	NiPoint2() : x(0.f), y(0.f)
-	{
-	};
-
-	NiPoint2(float _x, float _y) : x(_x), y(_y)
-	{
-	};
-};
 
 struct COORD_DATA
 {

@@ -22,7 +22,7 @@ bool Cmd_GetNthRegionWeatherGlobal_Execute(COMMAND_ARGS) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData && !weatherData->weatherTypes.Empty()) {
 			WeatherEntry* entry = weatherData->weatherTypes.GetNthItem(id);
-			if (entry && entry->chance) *(uint32_t*)result = entry->global->refID;
+			if (entry && entry->chance) *(uint32_t*)result = entry->global->GetFormID();
 		}
 	}
 	return true;
@@ -47,7 +47,7 @@ bool Cmd_GetNthRegionWeatherType_Execute(COMMAND_ARGS) {
 		TESRegionDataWeather* weatherData = GetWeatherData(region);
 		if (weatherData && !weatherData->weatherTypes.Empty()) {
 			WeatherEntry* entry = weatherData->weatherTypes.GetNthItem(id);
-			if (entry && entry->weather) *(uint32_t*)result = entry->weather->refID;
+			if (entry && entry->weather) *(uint32_t*)result = entry->weather->GetFormID();
 		}
 	}
 	return true;

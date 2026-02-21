@@ -48,12 +48,18 @@ class BSMemoryAllocator : public std::allocator<T> {
 public:
 	using value_type = T;
 	BSMemoryAllocator() = default;
+
 	template<typename U>
 	BSMemoryAllocator(const BSMemoryAllocator<U>&) {}
 
-	[[nodiscard]] inline T* allocate(std::size_t n) {
+	[[nodiscard]] __declspec(allocator) inline T* allocate(std::size_t n) {
 		return BSMemory::malloc<T>(n);
 	}
+
+	[[nodiscard]] constexpr std::allocation_result<T*> allocate_at_least(const std::size_t n) {
+		return { allocate(n), n };
+	}
+
 	inline void deallocate(T* p, std::size_t) noexcept {
 		BSMemory::free(p);
 	}

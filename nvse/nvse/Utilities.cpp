@@ -11,7 +11,7 @@
 #include "internal/utility.h"
 
 void DumpClass(void* theClassPtr, uint32_t nIntsToDump) {
-	PrintDebug("DumpClass:");
+	_MESSAGE("DumpClass:");
 	uint32_t* basePtr = (uint32_t*)theClassPtr;
 
 	gLog.Indent();
@@ -39,7 +39,7 @@ void DumpClass(void* theClassPtr, uint32_t nIntsToDump) {
 			}
 		}
 
-		PrintDebug("%3d +%03X ptr: 0x%08X: %32s *ptr: 0x%08x | %f: %32s", ix, ix * 4, curPtr, curPtrName, otherPtr, otherFloat, otherPtrName);
+		_MESSAGE("%3d +%03X ptr: 0x%08X: %32s *ptr: 0x%08x | %f: %32s", ix, ix * 4, curPtr, curPtrName, otherPtr, otherFloat, otherPtrName);
 	}
 
 	gLog.Outdent();
@@ -387,7 +387,7 @@ namespace MersenneTwister {
 
 const char GetSeparatorChar(Script* script) {
 	if (IsConsoleMode()) {
-		if (script && script->GetModIndex() != 0xFF)
+		if (script && script->GetCompileIndex() != 0xFF)
 			return '|';
 		else
 			return '@';
@@ -398,7 +398,7 @@ const char GetSeparatorChar(Script* script) {
 
 const char* GetSeparatorChars(Script* script) {
 	if (IsConsoleMode()) {
-		if (script && script->GetModIndex() != 0xFF)
+		if (script && script->GetCompileIndex() != 0xFF)
 			return "|";
 		else
 			return "@";

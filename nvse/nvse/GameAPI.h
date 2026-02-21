@@ -63,7 +63,7 @@ extern const _ShowMessageBox_Callback ShowMessageBox_Callback;
 typedef bool (*_ShowMessageBox)(const char* message, uint32_t unk1, uint32_t unk2, _ShowMessageBox_Callback callback, uint32_t unk4, uint32_t unk5, float unk6, float unk7, ...);
 extern const _ShowMessageBox ShowMessageBox;
 
-// set to scriptObj->refID after calling ShowMessageBox()
+// set to scriptObj->GetFormID() after calling ShowMessageBox()
 // GetButtonPressed checks this before returning a value, if it doesn't match it returns -1
 typedef uint32_t* _ShowMessageBox_pScriptRefID;
 extern const _ShowMessageBox_pScriptRefID ShowMessageBox_pScriptRefID;
@@ -590,14 +590,13 @@ public:
 	uint32_t	chunkConsumed;	// 00C
 };
 
-struct BGSFormChange {
+struct BGSFormChanges {
 	uint32_t	changeFlags;
 	uint32_t	unk004;			// Pointer to the changed record or the save record ?
 };
 
 struct	BGSSaveLoadChangesMap {
-	NiTPointerMap<BGSFormChange> BGSFormChangeMap;
-	// most likely more
+	NiTPointerMap<uint32_t, BGSFormChanges*> kChangeMap;
 };
 
 // 030
@@ -621,72 +620,13 @@ public:
 	uint32_t			bufferSize;			// 020
 	TESForm* form;				// 024
 	uint32_t			flg028;				// 028	bit1 form invalid
-	BGSFormChange* currentFormChange;	// 02C
+	BGSFormChanges* currentFormChange;	// 02C
 };
 
 class BGSSaveFormBuffer : public BGSLoadGameBuffer {
 	BGSSaveFormBuffer();
 	~BGSSaveFormBuffer();
 };	// in BGSSaveGameBuffer there is a 010, which look like a counter (ChunkCount ?), then the Header
-
-// 1C8 - only explicitly marked things are verified
-class TESSaveLoadGame {
-public:
-	TESSaveLoadGame();
-	~TESSaveLoadGame();
-
-	struct CreatedObject {
-		uint32_t			refID;
-		CreatedObject* next;
-	};
-
-	ChangesMap* changesMap;		// 000
-	uint32_t						unk004;				// 004
-	InteriorCellNewReferencesMap* intRefMap;	// 008
-	ExteriorCellNewReferencesMap* extRefMap00C;	// 00C
-	ExteriorCellNewReferencesMap* extRefMap010;	// 010
-	void* saveLoadBuffer;	// 014
-	uint32_t						unk018;				// 018
-	uint8_t						unk01C;				// 01C
-	uint8_t						pad01D[3];
-	NiTArray<TESObjectREFR*>* arr020;			// 020
-	uint32_t						unk024;				// 024
-	uint32_t						unk028;				// 028
-	CreatedObject				createdObjectList;	// 02C data is formID - verified
-	NiTPointerMap<void*>* map034;			// 034
-	uint32_t				unk034[(0x58 - 0x44) >> 2];	// 044
-	NumericIDBufferMap* idMap058;			// 058
-	NumericIDBufferMap* idMap05C;			// 05C
-	NumericIDBufferMap* idMap060;			// 060
-	NumericIDBufferMap* idMap064;			// 064
-	uint32_t						unk068;				// 068
-	uint32_t						unk06C;				// 06C
-	uint32_t						unk070;				// 070
-	uint8_t						unk074;				// 074
-	uint8_t						unk075;				//     init to 0x7D
-	uint8_t						pad076[2];
-	NiTArray<uint32_t>* array078;			// 078 NiTLargePrimitiveArray<?>
-	NiTArray<uint32_t>* array07C;			// 07C NiTLargePrimitiveArray<?>
-	uint8_t						unk080;				// 080 version of save?
-	uint8_t						unk081;
-	uint8_t						pad082[2];
-	uint32_t				unk084[(0xAC - 0x84) >> 2];	// 084
-	uint8_t						unk0AC;				// 0AC
-	uint8_t						unk0AD;				// 0AD
-	uint8_t						unk0AE;				// 0AE
-	uint8_t						unk0AF;				// 0AF
-	uint32_t				unk0B0[(0x1C8 - 0x0B0) >> 2];	// 0B0
-
-	static TESSaveLoadGame* Get();
-
-	MEMBER_FN_PREFIX(TESSaveLoadGame);
-#if 1
-	DEFINE_MEMBER_FN(AddCreatedForm, uint32_t, 0x00861780, TESForm* pForm);
-#elif EDITOR
-#else
-#error
-#endif
-};
 
 #if 1
 const uint32_t _SaveGameManager_ConstructSavegameFilename = 0x0084FF90;
@@ -696,14 +636,10 @@ const uint32_t _SaveGameManager_ConstructSavegamePath = 0x0084FF30;
 #error
 #endif
 
-template <typename T_Key, typename T_Data>
-class NiTMap : public NiTMapBase<T_Key, T_Data> {
+class BGSCellNumericIDArrayMap : public NiTMap<uint32_t, BSSimpleArray<uint32_t>*> {
 public:
-	NiTMap();
-	~NiTMap();
 };
 
-class BGSCellNumericIDArrayMap;
 class BGSLoadGameSubBuffer;
 class BGSReconstructFormsInFileMap;
 class BGSReconstructFormsInAllFilesMap;
@@ -735,23 +671,23 @@ public:
 		RefIDArray* arr004;	// 004
 	};
 
-	struct Struct010 {
-		NiTPointerMap<uint32_t>* map000;	// 000
-		BGSCellNumericIDArrayMap* map010;	// 010
-		NiTPointerMap<BGSCellNumericIDArrayMap*>* map020;	// 020
+	struct BGSSaveLoadReferencesMap {
+		NiTPointerMap<uint32_t, uint32_t>					kMovedReferencesMap;
+		BGSCellNumericIDArrayMap							kInteriorReferencesMap;
+		NiTPointerMap<uint32_t, BGSCellNumericIDArrayMap*>	kWorldspaceReferencesMap;
 	};
 
 	BGSSaveLoadChangesMap* changesMap;			// 000
 	BGSSaveLoadChangesMap* previousChangeMap;	// 004
 	RefIDIndexMapping* refIDmapping;			// 008
 	RefIDIndexMapping* visitedWorldspaces;	// 00C
-	Struct010* sct010;				// 010
+	BGSSaveLoadReferencesMap* sct010;				// 010
 	NiTMap<TESForm*, BGSLoadGameSubBuffer>* maps014[3];			// 014	0 = changed Animations, 2 = changed Havok Move
 	NiTMap<uint32_t, uint32_t>* map018;				// 018
 	BSSimpleArray<char*>* strings;				// 01C
 	BGSReconstructFormsInAllFilesMap* rfiafMap;				// 020
 	BSSimpleArray<BGSLoadFormBuffer*>		changedForms;			// 024
-	NiTPointerMap<Actor*>					map0034;				// 034 Either dead or not dead actors
+	NiTMap<uint32_t, Actor*>					map0034;				// 034 Either dead or not dead actors
 	uint8_t									saveMods[255];			// 044
 	uint8_t									loadedMods[255];		// 143
 

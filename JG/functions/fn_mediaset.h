@@ -27,7 +27,7 @@ bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS)
 		ExtraCellAcousticSpace* pXAcousticSpace = (ExtraCellAcousticSpace*)pCell->extraDataList.GetByType(kExtraData_CellAcousticSpace);
 		if (pXAcousticSpace && pXAcousticSpace->acousticSpace)
 		{
-			*(DWORD*) result = pXAcousticSpace->acousticSpace->refID;
+			*(DWORD*) result = pXAcousticSpace->acousticSpace->GetFormID();
 		}
 		if (IsConsoleMode())
 		{
@@ -80,7 +80,7 @@ bool Cmd_AudioMarkerGetCurrent_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (PlayerCharacter::GetSingleton() && PlayerCharacter::GetSingleton()->currMusicMarker) {
 		if (auto mMarker = PlayerCharacter::GetSingleton()->currMusicMarker->markerRef) {
-			*(DWORD*)result = mMarker->refID;
+			*(DWORD*)result = mMarker->GetFormID();
 		}
 	}
 	return true;
@@ -103,7 +103,7 @@ bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
 		if (audioMrkr && audioMrkr->data) {
 			uintptr_t locController = audioMrkr->data->mediaLocCtrlID;
 			locationController = (MediaLocationController*)LookupFormByID(locController);
-			*(DWORD*)result = locationController->refID;
+			*(DWORD*)result = locationController->GetFormID();
 			if (IsConsoleMode()) {
 
 			}
@@ -136,8 +136,8 @@ bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &locationController) && locationController && IS_TYPE(locationController, MediaLocationController)) {
 		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*) thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
 		if (audioMrkr && audioMrkr->data) {
-			audioMrkr->data->mediaLocCtrlID = locationController->refID;
-			Console_Print("AudioMarkerSetController >> 0x%lx, %s", locationController->refID, locationController->GetFormEditorID());
+			audioMrkr->data->mediaLocCtrlID = locationController->GetFormID();
+			Console_Print("AudioMarkerSetController >> 0x%lx, %s", locationController->GetFormID(), locationController->GetFormEditorID());
 
 		}
 		else if (IsConsoleMode()) {
@@ -326,10 +326,10 @@ bool Cmd_GetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && mediaset && IS_TYPE(mediaset, MediaSet)) {
 		switch (traitID) {
 			case 0:
-				*(uint32_t*)result = mediaset->HNAM->refID;
+				*(uint32_t*)result = mediaset->HNAM->GetFormID();
 				break;
 			case 1:
-				*(uint32_t*)result = mediaset->INAM->refID;
+				*(uint32_t*)result = mediaset->INAM->GetFormID();
 				break;
 		}
 	}

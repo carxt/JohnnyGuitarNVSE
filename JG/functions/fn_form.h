@@ -2,6 +2,7 @@
 // Get/Set/Boolean functions for various form types
 #include "GameSettings.h"
 #include "ParamInfos.h"
+#include "Bethesda/TESObjectList.hpp"
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 DEFINE_COMMAND_PLUGIN(GetBaseEffectAV, , false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(GetBaseEffectArchetype, , false, kParams_OneForm);
@@ -143,7 +144,7 @@ bool Cmd_GetNoteQuestList_Execute(COMMAND_ARGS) {
 		ListNode<TESQuest>* iter = note->questList.Head();
 		do {
 			if (iter->data) {
-				g_arrInterface->AppendElement(quests, NVSEArrayElement(iter->data->refID));
+				g_arrInterface->AppendElement(quests, NVSEArrayElement(iter->data->GetFormID()));
 			}
 		} while (iter = iter->next);
 	}
@@ -185,7 +186,7 @@ bool Cmd_GetNoteTopic_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* note = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice) {
-		*(uint32_t*)result = note->voice->refID;
+		*(uint32_t*)result = note->voice->GetFormID();
 	}
 	return true;
 }
@@ -205,7 +206,7 @@ bool Cmd_GetNoteSound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* note = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kSound) {
-		*(uint32_t*)result = note->sound->refID;
+		*(uint32_t*)result = note->sound->GetFormID();
 	}
 	return true;
 }
@@ -244,7 +245,7 @@ bool Cmd_GetNoteSpeaker_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* note = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice) {
-		*(uint32_t*)result = note->speaker->refID;
+		*(uint32_t*)result = note->speaker->GetFormID();
 	}
 	return true;
 }
@@ -257,7 +258,7 @@ bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 		if (actorProcess) {
 			auto furniRef = actorProcess->GetCurrentFurnitureRef();
 			if (furniRef) {
-				*(uint32_t*)result = furniRef->refID;
+				*(uint32_t*)result = furniRef->GetFormID();
 			}
 		}
 
@@ -273,20 +274,20 @@ bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
 	uint32_t unhideOrHide = 0, flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &unhideOrHide, &flags, &filterArg) && itemFilter) {
 		auto addToBarterFilter = [itemFilter](std::unordered_map<DWORD, JGSetList<DWORD>>& st_Filter, DWORD r_id) -> void {
-			st_Filter[itemFilter->refID].Add(r_id);
-			st_Filter[itemFilter->refID].isWhiteList = true;
+			st_Filter[itemFilter->GetFormID()].Add(r_id);
+			st_Filter[itemFilter->GetFormID()].isWhiteList = true;
 		};
 
 		auto removeFromBarterFilter = [itemFilter](std::unordered_map<DWORD, JGSetList<DWORD>>& st_Filter, DWORD r_id) -> void {
 			if (r_id)
 			{
-				auto it = st_Filter.find(itemFilter->refID);
+				auto it = st_Filter.find(itemFilter->GetFormID());
 				if (it != st_Filter.end()) {
 					it->second.Remove(r_id);
 				}
 			}
 			else {
-				auto it = st_Filter.find(itemFilter->refID);
+				auto it = st_Filter.find(itemFilter->GetFormID());
 				if (it != st_Filter.end()) {
 					it->second.dFlush();
 					st_Filter.erase(it);
@@ -295,7 +296,7 @@ bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
 		};
 		DWORD idToHandle = 0;
 		if (filterArg) {
-			idToHandle = filterArg->refID;
+			idToHandle = filterArg->GetFormID();
 		}
 		if (unhideOrHide) {
 			if ((flags & hk_BarterHook::barterHideFlags::kBarterDoNotHideLeft) == 0) {
@@ -326,13 +327,13 @@ bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
 		DWORD outflags = 0;
 		DWORD idToHandle = 0;
 		if (filterArg) {
-			idToHandle = filterArg->refID;
+			idToHandle = filterArg->GetFormID();
 		}
-		auto it = hk_BarterHook::barterFilterListLeft.find(itemFilter->refID);
+		auto it = hk_BarterHook::barterFilterListLeft.find(itemFilter->GetFormID());
 		if (it != hk_BarterHook::barterFilterListLeft.end()) {
 			outflags |= 1 << 0;
 		}
-		it = hk_BarterHook::barterFilterListRight.find(itemFilter->refID);
+		it = hk_BarterHook::barterFilterListRight.find(itemFilter->GetFormID());
 		if (it != hk_BarterHook::barterFilterListRight.end()) {
 			outflags |= 1 << 1;
 		}
@@ -386,21 +387,21 @@ bool Cmd_GetFormRecipesAlt_Execute(COMMAND_ARGS) {
 	TESForm* form = nullptr;
 	NVSEArrayVar* rcpArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) {
-		auto it = DataHandler::Get()->recipeList.Head();
-		do {
-			if (it->data && !it->data->outputs.Empty()) {
-				TESRecipe::ComponentList* outputs = &it->data->outputs;
+		auto pIter = TESDataHandler::GetSingleton()->kRecipes.GetHead();
+		while (pIter && !pIter->IsEmpty()) {
+			TESRecipe* pRecipe = pIter->GetItem();
+			pIter = pIter->GetNext();
+			if (pRecipe && !pRecipe->outputs.Empty()) {
+				TESRecipe::ComponentList* outputs = &pRecipe->outputs;
 				auto it2 = outputs->Head();
 				do {
-					if (it2->data && it2->data->item && (it2->data->item->refID == form->refID)) {
-						g_arrInterface->AppendElement(rcpArr, NVSEArrayElement(it->data));
+					if (it2->data && it2->data->item && (it2->data->item->GetFormID() == form->GetFormID())) {
+						g_arrInterface->AppendElement(rcpArr, NVSEArrayElement(pRecipe));
 						break;
 					}
 				} while (it2 = it2->next);
 			}
-		} while (it = it->next);
-
-
+		}
 	}
 	g_arrInterface->AssignCommandResult(rcpArr, result);
 	return true;
@@ -586,7 +587,7 @@ bool Cmd_GetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	TESWorldSpace* world = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &world) && world && IS_TYPE(world, TESWorldSpace)) {
 		BGSEncounterZone* zone = world->encounterZone;
-		if (zone) *(uint32_t*)result = zone->refID;
+		if (zone) *(uint32_t*)result = zone->GetFormID();
 	}
 	return true;
 }
@@ -620,7 +621,7 @@ bool Cmd_GetRefEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSEncounterZone* zone = GetEncounterZone(&thisObj->extraDataList);
 	if (zone)
-		*(uint32_t*)result = zone->refID;
+		*(uint32_t*)result = zone->GetFormID();
 	return true;
 }
 
@@ -1059,7 +1060,7 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 				*result = shader->shaderData.flags;
 				break;
 			case 61:
-				*result = shader->shaderData.addonModels->refID;
+				*result = shader->shaderData.addonModels->GetFormID();
 				break;
 			case 4:
 			case 14:
@@ -1105,11 +1106,12 @@ bool IsApplicable(BGSPerk* perk) {
 bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NVSEArrayVar* perkArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	ListNode<BGSPerk>* perkIter = DataHandler::Get()->perkList.Head();
+	auto pIter = TESDataHandler::GetSingleton()->kPerks.GetHead();
 	BGSPerk* perk;
 	int perkRank;
-	do {
-		perk = perkIter->data;
+	while (pIter && !pIter->IsEmpty()) {
+		perk = pIter->GetItem();
+		pIter = pIter->GetNext();
 		if (perk->data.isPlayable && perk->data.minLevel > 0 && perk->data.minLevel <= PlayerCharacter::GetSingleton()->avOwner.GetLevel()) {
 			perkRank = PlayerCharacter::GetSingleton()->GetPerkRank(perk, 0);
 			bool result = false;
@@ -1118,7 +1120,7 @@ bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 				g_arrInterface->AppendElement(perkArr, NVSEArrayElement(perk));
 			}
 		}
-	} while (perkIter = perkIter->next);
+	}
 	g_arrInterface->AssignCommandResult(perkArr, result);
 	return true;
 }
@@ -1209,7 +1211,7 @@ bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
 	BGSTalkingActivator* activator = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &activator) && activator && IS_TYPE(activator, BGSTalkingActivator)) {
 		if (activator->talkingActor) {
-			*(uint32_t*)result = activator->talkingActor->refID;
+			*(uint32_t*)result = activator->talkingActor->GetFormID();
 		}
 		if (IsConsoleMode()) Console_Print("GetTalkingActivatorActor >> 0x%X", *result);
 	}
@@ -1502,13 +1504,13 @@ bool Cmd_GetContainerSound_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &container, &whichSound) && container && IS_TYPE(container, TESObjectCONT)) {
 		switch (whichSound) {
 			case 0:
-				if (container->openSound) *(uint32_t*)result = container->openSound->refID;
+				if (container->openSound) *(uint32_t*)result = container->openSound->GetFormID();
 				break;
 			case 1:
-				if (container->closeSound) *(uint32_t*)result = container->closeSound->refID;
+				if (container->closeSound) *(uint32_t*)result = container->closeSound->GetFormID();
 				break;
 			case 2:
-				if (container->randomLoopingSound) *(uint32_t*)result = container->randomLoopingSound->refID;
+				if (container->randomLoopingSound) *(uint32_t*)result = container->randomLoopingSound->GetFormID();
 				break;
 		}
 	}
@@ -1553,8 +1555,8 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 	int32_t rank = -1;
 	NVSEArrayVar* factionMemberArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction, &rank) && faction) {
-		for (TESBoundObject* object = DataHandler::Get()->boundObjectList->first; object; object = object->next) {
-			TESActorBase* actorBase = DYNAMIC_CAST(object, TESBoundObject, TESActorBase);
+		TESDataHandler::GetSingleton()->pObjects->ForEach([&](TESObject* apObject) {
+			TESActorBase* actorBase = DYNAMIC_CAST(apObject, TESBoundObject, TESActorBase);
 			if (actorBase && actorBase->baseData.factionList.Count() != 0) {
 				ListNode<FactionListData>* fctIter = actorBase->baseData.factionList.Head();
 				FactionListData* factionData;
@@ -1567,7 +1569,7 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 					}
 				} while (fctIter = fctIter->next);
 			}
-		}
+		});
 	}
 	g_arrInterface->AssignCommandResult(factionMemberArr, result);
 	return true;
@@ -1577,7 +1579,7 @@ bool Cmd_SetEquipType_Execute(COMMAND_ARGS) {
 	TESForm* pForm = nullptr;
 	uint32_t newEquipType;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &newEquipType) && pForm && newEquipType <= 13) {
-		pForm = pForm->TryGetREFRParent();
+		pForm = GetTESForm(pForm);
 		BGSEquipType* pEquipType = DYNAMIC_CAST(pForm, TESForm, BGSEquipType);
 		if (pEquipType) {
 			pEquipType->equipType = newEquipType;
@@ -1776,28 +1778,28 @@ bool Cmd_GetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &id) && weap && IS_TYPE(weap, TESObjectWEAP) && id <= 7) {
 		switch (id) {
 		case 0:
-			*(uint32_t*)result = weap->worldStatic != nullptr ? weap->worldStatic->refID : 0;
+			*(uint32_t*)result = weap->worldStatic != nullptr ? weap->worldStatic->GetFormID() : 0;
 			break;
 		case 1:
-			*(uint32_t*)result = weap->modStatics[0] != nullptr ? weap->modStatics[0]->refID : 0;
+			*(uint32_t*)result = weap->modStatics[0] != nullptr ? weap->modStatics[0]->GetFormID() : 0;
 			break;
 		case 2:
-			*(uint32_t*)result = weap->modStatics[1] != nullptr ? weap->modStatics[1]->refID : 0;
+			*(uint32_t*)result = weap->modStatics[1] != nullptr ? weap->modStatics[1]->GetFormID() : 0;
 			break;
 		case 3:
-			*(uint32_t*)result = weap->modStatics[3] != nullptr ? weap->modStatics[3]->refID : 0;
+			*(uint32_t*)result = weap->modStatics[3] != nullptr ? weap->modStatics[3]->GetFormID() : 0;
 			break;
 		case 4:
-			*(uint32_t*)result = weap->modStatics[2] != nullptr ? weap->modStatics[2]->refID : 0;
+			*(uint32_t*)result = weap->modStatics[2] != nullptr ? weap->modStatics[2]->GetFormID() : 0;
 			break;
 		case 5:
-			*(uint32_t*)result = weap->modStatics[5] != nullptr ? weap->modStatics[5]->refID : 0;
+			*(uint32_t*)result = weap->modStatics[5] != nullptr ? weap->modStatics[5]->GetFormID() : 0;
 			break;
 		case 6:
-			*(uint32_t*)result = weap->modStatics[4] != nullptr ? weap->modStatics[4]->refID : 0;
+			*(uint32_t*)result = weap->modStatics[4] != nullptr ? weap->modStatics[4]->GetFormID() : 0;
 			break;
 		case 7:
-			*(uint32_t*)result = weap->modStatics[6] != nullptr ? weap->modStatics[6]->refID : 0;
+			*(uint32_t*)result = weap->modStatics[6] != nullptr ? weap->modStatics[6]->GetFormID() : 0;
 			break;
 		}
 	}
@@ -1835,7 +1837,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	ListNode<ExtraDataList>* extendPtr = nullptr;
 	if (!weapon) {
 		if (!thisObj) return true;
-		InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
+		InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
 		if (!invRef) {
 			TESForm* base = thisObj->baseForm;
 			if (IS_ID(base, TESObjectWEAP))
@@ -2061,9 +2063,9 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 	*result = 0;
 
 	if (!thisObj) return true;
-	InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
+	InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
 	if (!invRef || (invRef->containerRef != PlayerCharacter::GetSingleton())) return true;
-	uint8_t type = invRef->data.type->typeID;
+	uint8_t type = invRef->data.type->GetFormType();
 	if ((type != FORM_TYPE::TESObjectARMO) && (type != FORM_TYPE::TESObjectWEAP) && (type != FORM_TYPE::AlchemyItem)) return true;
 
 	ExtraDataList* xData = invRef->data.xData;
@@ -2240,7 +2242,7 @@ bool Cmd_GetCameraShotImageSpaceModifier_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
 		TESImageSpaceModifier* pIMOD = pCameraShot->pModifier;
 		if (pIMOD) {
-			*reinterpret_cast<uint32_t*>(result) = pIMOD->refID;
+			*reinterpret_cast<uint32_t*>(result) = pIMOD->GetFormID();
 		}
 		if (IsConsoleMode())
 			Console_Print("GetCameraShotImageSpaceModifier >> %s", pIMOD ? pIMOD->GetFormEditorID() : "None");

@@ -14,19 +14,20 @@ static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0;
 BGSDefaultObjectManager** g_defaultObjectManager = (BGSDefaultObjectManager**)0x0;
 #endif
 
-TESForm* TESForm::TryGetREFRParent() {
-	if (!this) return NULL;
-	if (GetIsReference()) {
-		TESObjectREFR* refr = (TESObjectREFR*)this;
-		if (refr->baseForm) return refr->baseForm;
+TESForm* __fastcall GetTESForm(const TESForm* apForm) {
+	if (!apForm) 
+		return nullptr;
+
+	if (apForm->IsReference()) {
+		const TESObjectREFR* refr = static_cast<const TESObjectREFR*>(apForm);
+		if (refr->baseForm) 
+			return refr->baseForm;
 	}
-	return this;
+
+	return const_cast<TESForm*>(apForm);
 }
 
-uint8_t TESForm::GetModIndex() const {
-	return modIndex;
-}
-
+#if 0
 TESFullName* TESForm::GetFullName() {
 	if (typeID == FORM_TYPE::TESObjectCELL) // some exterior cells inherit name of parent worldspace
 	{
@@ -36,29 +37,13 @@ TESFullName* TESForm::GetFullName() {
 			return &cell->worldSpace->fullName;
 		return fullName;
 	}
-	const TESForm* baseForm = GetIsReference() ? ((TESObjectREFR*)this)->baseForm : this;
+	const TESForm* baseForm = IsReference() ? ((TESObjectREFR*)this)->baseForm : this;
 	return DYNAMIC_CAST(baseForm, TESForm, TESFullName);
 }
 
 const char* TESForm::GetTheName() {
 	TESFullName* fullName = GetFullName();
 	return fullName ? fullName->name.c_str() : "";
-}
-
-void TESForm::DoAddForm(TESForm* newForm, bool persist, bool record) const {
-	CALL_MEMBER_FN(DataHandler::Get(), DoAddForm)(newForm);
-
-	if (persist) {
-		// Only some forms can be safely saved as SaveForm. ie TESPackage at the moment.
-		bool canSave = false;
-		TESPackage* package = DYNAMIC_CAST(newForm, TESForm, TESPackage);
-		if (package)
-			canSave = true;
-		// ... more ?
-
-		if (canSave)
-			CALL_MEMBER_FN(TESSaveLoadGame::Get(), AddCreatedForm)(newForm);
-	}
 }
 
 TESForm* TESForm::CloneForm(bool persist) const {
@@ -79,24 +64,7 @@ TESForm* TESForm::CloneForm(bool persist) const {
 
 	return result;
 }
-
-bool TESForm::IsCloned() const {
-	return GetModIndex() == 0xff;
-}
-
-// GAME - 0x4B1B60
-// GECK - 0x523860
-const char* TESForm::GetFormTypeName(uint32_t auiFormType) {
-#ifdef GAME
-	return CdeclCall<const char*>(0x4B1B60, auiFormType);
-#else
-	return CdeclCall<const char*>(0x523860, auiFormType);
 #endif
-}
-
-const char* TESForm::GetFormTypeName() const {
-	return GetFormTypeName(typeID);
-}
 
 // static
 uint32_t TESBipedModelForm::MaskForSlot(uint32_t slot) {
@@ -268,7 +236,7 @@ class FindByForm {
 public:
 	FindByForm(TESForm* pForm) : m_pForm(pForm) {}
 	bool Accept(TESForm* pForm) const {
-		return pForm && (pForm->refID == m_pForm->refID) ? true : false;
+		return pForm && (pForm->GetFormID() == m_pForm->GetFormID()) ? true : false;
 	}
 };
 
@@ -290,107 +258,6 @@ int32_t BGSListForm::ReplaceForm(TESForm* pForm, TESForm* pReplaceWith) {
 		list.ReplaceNth(index, pReplaceWith);
 	}
 	return index;
-}
-
-bool TESForm::IsInventoryObject() const {
-	typedef bool (*_IsInventoryObjectType)(uint32_t formType);
-#if 1
-	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x481F30;
-#elif EDITOR
-	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x4F4100;
-#else
-#error
-#endif
-	return IsInventoryObjectType(typeID);
-}
-
-const char* TESPackage::TargetData::StringForTargetCode(uint8_t targetCode) {
-	switch (targetCode) {
-		case TESPackage::kTargetType_Refr:
-			return "Reference";
-		case TESPackage::kTargetType_BaseObject:
-			return "Object";
-		case TESPackage::kTargetType_TypeCode:
-			return "ObjectType";
-		default:
-			return NULL;
-	}
-}
-
-uint8_t TESPackage::TargetData::TargetCodeForString(const char* targetStr) {
-	if (!_stricmp(targetStr, "REFERENCE"))
-		return TESPackage::kTargetType_Refr;
-	else if (!_stricmp(targetStr, "OBJECT"))
-		return TESPackage::kTargetType_BaseObject;
-	else if (!_stricmp(targetStr, "OBJECTTYPE"))
-		return TESPackage::kTargetType_TypeCode;
-	else
-		return 0xFF;
-}
-
-TESPackage::TargetData* TESPackage::TargetData::Create() {
-	TargetData* data = BSMemory::malloc<TargetData>();
-
-	// fill out with same defaults as editor uses
-	data->count = 0;
-	data->target.objectCode = TESPackage::kObjectType_Activators;
-	data->targetType = TESPackage::kTargetType_TypeCode;
-
-	return data;
-}
-
-TESPackage::TargetData* TESPackage::GetTargetData() {
-	if (!target)
-		target = TargetData::Create();
-
-	return target;
-}
-
-void TESPackage::SetTarget(TESObjectREFR* refr) {
-	TargetData* tdata = GetTargetData();
-	tdata->targetType = kTargetType_Refr;
-	tdata->target.refr = refr;
-	tdata->count = 150;	//DefaultDistance
-}
-
-void TESPackage::SetCount(uint32_t aCount) {
-	if (target) {
-		TargetData* tdata = GetTargetData();
-		tdata->count = aCount;
-	}
-}
-
-void TESPackage::SetTarget(TESForm* baseForm, uint32_t count) {
-	TargetData* tdata = GetTargetData();
-	tdata->targetType = kTargetType_BaseObject;
-	tdata->count = count;
-	tdata->target.form = baseForm;
-}
-
-void TESPackage::SetTarget(uint8_t typeCode, uint32_t count) {
-	if (typeCode > 0 && typeCode < kObjectType_Max) {
-		TargetData* tdata = GetTargetData();
-		tdata->targetType = kTargetType_TypeCode;
-		tdata->target.objectCode = typeCode;
-		tdata->count = count;
-	}
-}
-
-TESPackage::LocationData* TESPackage::LocationData::Create() {
-	LocationData* data = BSMemory::malloc<LocationData>();
-
-	data->locationType = kPackLocation_CurrentLocation;
-	data->object.form = NULL;
-	data->radius = 0;
-
-	return data;
-}
-
-TESPackage::LocationData* TESPackage::GetLocationData() {
-	if (!location)
-		location = LocationData::Create();
-
-	return location;
 }
 
 bool TESPackage::IsFlagSet(uint32_t flag) {
@@ -501,138 +368,6 @@ static const char** s_procNames = (const char**)0x011A3CC0;
 #error unsupported Fallout version
 #endif
 
-const char* TESPackage::StringForProcedureCode(eProcedure proc) {
-	if (proc < kProcedure_MAX)
-		return TESPackage_ProcedureStrings[proc];
-
-	return "";
-}
-
-//const char* TESPackage::StringForProcedureCode(eProcedure proc, bool bRemovePrefix)
-//{
-//	static size_t prefixLen = strlen("PROCEDURE_");
-//
-//	const char* name = NULL;
-//	// special-case "AQUIRE" (sic) to fix typo in game executable
-//	if (proc == TESPackage::kProcedure_ACQUIRE) {
-//		name = "PROCEDURE_ACQUIRE";
-//	}
-//	else {
-//		name = (proc <= TESPackage::kProcedure_MAX) ? s_procNames[proc] : NULL;
-//	}
-//
-//	if (name && bRemovePrefix) {
-//		name += prefixLen;
-//	}
-//
-//	return name;
-//}
-
-const char* TESPackage::PackageTime::DayForCode(uint8_t dayCode) {
-	dayCode += 1;
-	if (dayCode >= sizeof(TESPackage_DayStrings))
-		return "";
-	return TESPackage_DayStrings[dayCode];
-}
-
-const char* TESPackage::PackageTime::MonthForCode(uint8_t monthCode) {
-	monthCode += 1;
-	if (monthCode >= sizeof(TESPackage_MonthString))
-		return "";
-	return TESPackage_MonthString[monthCode];
-}
-
-uint8_t TESPackage::PackageTime::CodeForDay(const char* dayStr) {
-	for (uint8_t i = 0; i < sizeof(TESPackage_DayStrings); i++) {
-		if (!_stricmp(dayStr, TESPackage_DayStrings[i])) {
-			return i - 1;
-		}
-	}
-
-	return kWeekday_Any;
-}
-
-uint8_t TESPackage::PackageTime::CodeForMonth(const char* monthStr) {
-	for (uint8_t i = 0; i < sizeof(TESPackage_MonthString); i++) {
-		if (!_stricmp(monthStr, TESPackage_MonthString[i])) {
-			return i - 1;
-		}
-	}
-
-	return kMonth_Any;
-}
-
-const char* TESPackage::LocationData::StringForLocationCode(uint8_t locCode) {
-	if (locCode < kPackLocation_Max)
-		return TESPackage_LocationStrings[locCode];
-	return "";
-}
-
-const char* TESPackage::LocationData::StringForLocationCodeAndData(void) {
-#define resultSize 256
-	static char result[resultSize];
-	if (locationType < kPackLocation_Max) {
-		switch (locationType) {
-			case kPackLocation_NearReference:
-			case kPackLocation_InCell:
-			case kPackLocation_ObjectID:
-				if (object.form)
-					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], object.form->GetTheName(),
-						object.form->refID, radius);
-				else
-					sprintf_s(result, resultSize, "%s \"\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], 0, radius);
-				break;
-			case kPackLocation_ObjectType:
-				sprintf_s(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", TESPackage_LocationStrings[locationType], StringForObjectCode(object.objectCode),
-					object.objectCode, radius);
-				break;
-			default:
-				sprintf_s(result, resultSize, "%s with a radius of %u", TESPackage_LocationStrings[locationType], radius);
-				break;
-		}
-		return result;
-	}
-	return "";
-}
-
-const char* TESPackage::TargetData::StringForTargetCodeAndData(void) {
-#define resultSize 256
-	static char result[resultSize];
-	if (targetType < kTargetType_Max) {
-		switch (targetType) {
-			case kTargetType_Refr:
-				if (target.refr)
-					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a distance of %u", StringForTargetCode(targetType), target.refr->GetTheName(),
-						target.refr->refID, count);
-				else
-					sprintf_s(result, resultSize, "%s [%08X] with a distance of %u", StringForTargetCode(targetType), 0, count);
-				break;
-			case kTargetType_BaseObject:
-				if (target.form)
-					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a count of %u", StringForTargetCode(targetType), target.form->GetTheName(), target.form->refID, count);
-				else
-					sprintf_s(result, resultSize, "%s [%08X] with a count of %u", StringForTargetCode(targetType), 0, count);
-				break;
-			case kTargetType_TypeCode:
-				sprintf_s(result, resultSize, "%s \"%s\" [%04X] with a radius of %u", StringForTargetCode(targetType), StringForObjectCode(target.objectCode),
-					target.objectCode, count);
-				break;
-			default:
-				sprintf_s(result, resultSize, "%s with a radius of %u", StringForTargetCode(targetType), count);
-				break;
-		}
-		return result;
-	}
-	return "";
-}
-
-uint8_t TESPackage::LocationData::LocationCodeForString(const char* locStr) {
-	for (uint32_t i = 0; i < kPackLocation_Max; i++)
-		if (!_stricmp(locStr, TESPackage_LocationStrings[i]))
-			return i;
-	return kPackLocation_Max;
-}
-
 const char* TESFaction::GetNthRankName(uint32_t whichRank, bool bFemale) {
 	TESFaction::Rank* rank = ranks.GetNthItem(whichRank);
 	if (!rank)
@@ -683,25 +418,6 @@ bool AlchemyItem::IsPoison() {
 		if (effSetting && !(effSetting->effectFlags & 4)) return false;
 	} while (iter = iter->GetNext());
 	return effSetting != NULL;
-}
-
-TESForm* TESForm::GetFormByNumericID(uint32_t formID) {
-	return CdeclCall<TESForm*>(0x4839C0, formID);
-}
-
-// GAME - 0x4077C0
-bool TESForm::GetTemporary() const {
-	return (flags & 0x4000) != 0;
-}
-
-// GAME - 0x484490
-// GECK - 0x4FBA50
-void TESForm::SetTemporary() {
-#ifdef GAME
-	ThisCall(0x484490, this);
-#else
-	ThisCall(0x4FBA50, this);
-#endif
 }
 
 const char* TESFullName::GetFullName(const TESForm* apForm) {

@@ -2,6 +2,7 @@
 
 #include "GameTypes.h"
 #include "NiTypes.h"
+#include "Bethesda/IOTask.hpp"
 //#include "NiNodes.h"
 
 /*******************************************************
@@ -64,36 +65,7 @@ class RefNiObject;
 class BSAnimGroupSequence;
 struct BSAData;
 class TESWorldSpace;
-// 18
-class BSTask {
-public:
-	virtual ~BSTask();
-	virtual void Run(void) = 0;
-	virtual void Unk_02(void) = 0;
-	virtual void Unk_03(uint32_t arg0, uint32_t arg1);						// doesNothing
-	virtual bool GetDebugDescription(char* outDesc, uint32_t* arg1) = 0;	// return 0
 
-	// void		** vtbl
-
-	BSTask* unk004;	// uninitialized OBSE, not confirmed, NiRefObject
-	uint32_t	refCounter; // Counter: NiRefObject RefCounter
-	uint32_t	unk00C;		// Semaphore/Status
-	uint32_t	unk010;		// Paired : 10 and 14 for a 64 bit integer
-	uint32_t	unk014;
-
-	static uint32_t* GetCounterSingleton();
-};
-
-// 18
-class IOTask : public BSTask {
-public:
-	virtual void Unk_05(void);			// doesNothing
-	virtual void Unk_06(void);
-	virtual void Unk_07(uint32_t arg0);	// most (all?) implementations appear to call IOManager::1202D98(this, arg0) eventually
-
-	IOTask();
-	~IOTask();
-};
 
 class QueuedFile;
 

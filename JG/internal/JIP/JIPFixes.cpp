@@ -3,10 +3,16 @@
 #include "events/EventFramework.h"
 #include "GameObjects.h"
 #include "GameProcess.h"
+#include "GameData.h"
 #include "GameRTTI.h"
+#include "JG/JohnnyExtraData.hpp"
 #include "ParamInfos.h"
 #include "PluginAPI.h"
 #include "utility.h"
+
+#include "Shared/BSMemory/BSScrapMemory.hpp"
+
+#include <array>
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern bool bFixJIP;
@@ -16,16 +22,18 @@ extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);;
 namespace JIPFixes {
 
 	static HMODULE hJIP = 0;
-	static uint32_t uiCrc32Table[256];
-	static uint32_t uiJipHash = 0x9DF36B6;
+	constexpr uint32_t CRC32_TABLE_SIZE = 256;
+	constexpr uint32_t JIP_TARGET_HASH = 0x9DF36B6;
+	constexpr uint32_t JIP_TARGET_SIZE = 502272;
 
 	static size_t __fastcall GetJIPAddress(size_t aiAddress) {
 		return reinterpret_cast<size_t>(hJIP) + aiAddress - 0x10000000;
 	}
 
-	static void initCRC32Table() {
-		uint32_t polynomial = 0xEDB88320;
-		for (uint32_t i = 0; i < 256; i++) {
+	static constexpr std::array<uint32_t, CRC32_TABLE_SIZE> initCRC32Table() {
+		constexpr uint32_t polynomial = 0xEDB88320;
+		std::array<uint32_t, CRC32_TABLE_SIZE> crc32table;
+		for (uint32_t i = 0; i < CRC32_TABLE_SIZE; i++) {
 			uint32_t crc = i;
 			for (uint32_t j = 0; j < 8; j++) {
 				if (crc & 1)
@@ -33,16 +41,18 @@ namespace JIPFixes {
 				else
 					crc >>= 1;
 			}
-			uiCrc32Table[i] = crc;
+			crc32table[i] = crc;
 		}
+		return crc32table;
 	}
 
 
 	static uint32_t crc32(const uint8_t* data, size_t length) {
+		constexpr std::array<uint32_t, CRC32_TABLE_SIZE> crc32table = initCRC32Table();
 		uint32_t crc = 0xFFFFFFFF;
 		for (size_t i = 0; i < length; i++) {
 			uint8_t byte = data[i];
-			crc = (crc >> 8) ^ uiCrc32Table[(crc ^ byte) & 0xFF];
+			crc = (crc >> 8) ^ crc32table[(crc ^ byte) & 0xFF];
 		}
 		return crc ^ 0xFFFFFFFF;
 	}
@@ -79,8 +89,8 @@ namespace JIPFixes {
 				return;
 
 			NiControllerManager* pControllerManager = ThisCall<NiControllerManager*>(0xA5C570, apObject, 0x11F36AC);
-			if (pControllerManager && pControllerManager->defObjPlt)
-				ThisCall(0xA6E960, pControllerManager->defObjPlt);
+			if (pControllerManager && pControllerManager->m_spObjectPalette)
+				ThisCall(0xA6E960, pControllerManager->m_spObjectPalette.m_pObject);
 		}
 
 		CallDetour kMemPoolFree;
@@ -88,7 +98,7 @@ namespace JIPFixes {
 			char* pData = static_cast<char*>(pBlock);
 			TESForm* pForm = *(TESForm**)pData;
 			NiAVObject* pRoot = nullptr;
-			if (pForm && pForm->GetIsReference())
+			if (pForm && pForm->IsReference())
 				pRoot = static_cast<TESObjectREFR*>(pForm)->GetRefNiNode();
 
 			InvalidateObjPalette(pRoot);
@@ -602,7 +612,7 @@ namespace JIPFixes {
 	void InitData() {
 		HMODULE hJIPModule = GetModuleHandle("jip_nvse.dll");
 		if (!hJIPModule) {
-			PrintLog("Failed to find JIP LN!");
+			_MESSAGE("Failed to find JIP LN!");
 			return;
 		}
 
@@ -621,27 +631,26 @@ namespace JIPFixes {
 		HANDLE hJIPFile = CreateFile("Data\\NVSE\\Plugins\\jip_nvse.dll", GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
 
 		if (!hJIPFile || hJIPFile == INVALID_HANDLE_VALUE) {
-			PrintLog("Failed to find JIP LN!");
+			_MESSAGE("Failed to find JIP LN!");
 			return;
 		}
 
 		DWORD dwFileSize = GetFileSize(hJIPFile, nullptr);
 
-		if (dwFileSize != 502272) {
+		if (dwFileSize != JIP_TARGET_SIZE) {
 			ShowErrorMessage("Incompatible JIP LN version!");
 			return;
 		}
 
 		{
-			std::vector<uint8_t> kBuffer(dwFileSize);
+			std::vector<uint8_t> kBuffer(JIP_TARGET_SIZE);
 			DWORD dwBytesRead = 0;
 			BOOL bRead = ReadFile(hJIPFile, kBuffer.data(), dwFileSize, &dwBytesRead, nullptr);
 			CloseHandle(hJIPFile);
 
 			if (bRead) {
-				initCRC32Table();
 				uint32_t uiHash = crc32(kBuffer.data(), kBuffer.size());
-				if (uiHash != uiJipHash) {
+				if (uiHash != JIP_TARGET_HASH) {
 					ShowErrorMessage("Incompatible JIP LN binary!");
 					return;
 				}
@@ -653,7 +662,7 @@ namespace JIPFixes {
 		}
 
 		hJIP = hJIPModule;
-		PrintLog("JIP LN detected and verified.");
+		_MESSAGE("JIP LN detected and verified.");
 	}
 
 	void InitEarlyHooks() {

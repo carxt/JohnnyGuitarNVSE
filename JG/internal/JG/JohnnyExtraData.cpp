@@ -1,13 +1,12 @@
 #include "JohnnyExtraData.hpp"
+#include "EditorIDRestoration.hpp"
 #include <atomic>
 #include <cassert>
-
-extern NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap;
 
 #define DEBUG_PRINTS 0
 
 #if DEBUG_PRINTS
-#define DEBUG_MSG(...) PrintLog(__VA_ARGS__)
+#define DEBUG_MSG(...) _MESSAGE(__VA_ARGS__)
 #else
 #define DEBUG_MSG(...) __noop(__VA_ARGS__)
 #endif
@@ -128,9 +127,10 @@ JohnnyExtraData* __fastcall JohnnyExtraData::Add(TESForm* apForm) {
 void JohnnyExtraData::DetachEditorIDs() {
 	if (pOwner && !pOwner->GetTemporary() && !kFormData.kEditorIDs.IsEmpty()) {
 		auto pIter = kFormData.kEditorIDs.GetHead();
+		SRWUniqueLock kLock(EDIDRestoration::kEDIDMapLock);
 		while (pIter) {
 			DEBUG_MSG("%08X Removing EDID \"%s\"", pOwner->GetFormID(), pIter->GetItem());
-			ThisCall(0xE91FD0, *g_gameFormEditorIDsMap, pIter->GetItem()); // NiTMapBase<DWORD,DWORD>::RemoveAt
+			TESForm::pAllFormsByEditorID->RemoveAt(pIter->GetItem());
 			pIter = pIter->GetNext();
 		}
 	}
@@ -138,7 +138,7 @@ void JohnnyExtraData::DetachEditorIDs() {
 
 void __fastcall JohnnyExtraDataArray::Add(JohnnyExtraData* apExtraData) {
 	if (apExtraData) {
-		std::lock_guard<std::mutex> kLock(kMutex);
+		SRWUniqueLock kLock(kDataLock);
 		kExtraDatas.push_back(apExtraData);
 		bChanged = true;
 	}
@@ -146,7 +146,7 @@ void __fastcall JohnnyExtraDataArray::Add(JohnnyExtraData* apExtraData) {
 
 void __fastcall JohnnyExtraDataArray::Remove(JohnnyExtraData* apExtraData) {
 	if (apExtraData) {
-		std::lock_guard<std::mutex> kLock(kMutex);
+		SRWUniqueLock kLock(kDataLock);
 		if (std::erase(kExtraDatas, apExtraData))
 			bChanged = true;
 	}
@@ -158,7 +158,7 @@ JohnnyExtraDataArray& JohnnyExtraDataArray::GetInstance() {
 }
 
 void JohnnyExtraDataArray::ResetScriptData() {
-	std::lock_guard<std::mutex> kLock(kMutex);
+	SRWSharedLock kLock(kDataLock);
 	for (NiPointer<JohnnyExtraData> spData : kExtraDatas) {
 		if (spData) {
 			ZeroMemory(&spData->kScriptData, sizeof(spData->kScriptData));

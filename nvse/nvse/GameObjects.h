@@ -144,13 +144,10 @@ public:
 
 	ScriptEventList* GetEventList() const;
 
-	bool IsTaken() const { return (flags & kFlags_Taken) == kFlags_Taken; } // Need to implement
-	bool IsPersistent() const { return (flags & kFlags_Persistent) != 0; }
-	bool IsTemporary() { return (flags & kFlags_Temporary) ? true : false; }
-	bool IsDeleted() { return (flags & kFlags_Deleted) ? true : false; }
-	bool IsDestroyed() { return (flags & kFlags_Destroyed) ? true : false; }
+	bool IsTaken() const { return uiFormFlags.Get(FormFlags::TAKEN); } // Need to implement
 	__forceinline NiNode* GetRefNiNode() { return renderState ? renderState->rootNode : nullptr; }
 	const char* hk_GetName();
+	const char* GetFullName() const;
 	NiVector3* PosVector() { return (NiVector3*)&posX; }
 	CoordXY* PosXY() { return (CoordXY*)&posX; }
 
@@ -858,8 +855,8 @@ public:
 	TESForm* form6EC;				// 6EC TESTING
 	TESForm* form6F0;				// 6F0 TESTING
 	uint32_t								unk6F4;					// 6F4;
-	BSSimpleArray<ParentSpaceNode>		parentSpaceNodes;		// 6F8
-	BSSimpleArray<TeleportLink>			teleportLinks;			// 708
+	BSSimpleArray<ParentSpaceNode*>		parentSpaceNodes;		// 6F8
+	BSSimpleArray<TeleportLink*>			teleportLinks;			// 708
 	uint32_t								unk718[6];				// 718
 	float								timeGrenadeHeld;		// 730
 	uint32_t								unk734[2];				// 734
@@ -918,7 +915,7 @@ public:
 	bool								pcUnseen;				// DF1
 	uint8_t								byteDF2;				// DF2
 	uint8_t								byteDF3;				// DF3
-	BSSimpleArray<ItemChange>			itemChanges;			// DF4
+	BSSimpleArray<ItemChange*>			itemChanges;			// DF4
 	uint32_t								unkE04[5];				// E04
 	float								killCamTimer;			// E18
 	float								killCamCooldown;		// E1C

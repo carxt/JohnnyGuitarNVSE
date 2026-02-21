@@ -102,7 +102,7 @@ bool Script::RunScriptLine2(const char* text, TESObjectREFR* object, bool bSuppr
 	Script* script = (Script*)scriptBuf;
 
 	CALL_MEMBER_FN(script, Constructor)();
-	CALL_MEMBER_FN(script, MarkAsTemporary)();
+	script->SetTemporary();
 	CALL_MEMBER_FN(script, SetText)(text);
 	bool bResult = CALL_MEMBER_FN(script, Run)(consoleManager->scriptContext, true, object);
 	CALL_MEMBER_FN(script, Destructor)();
@@ -184,7 +184,7 @@ uint32_t ScriptBuffer::GetRefIdx(Script::RefVariable* refVar) {
 //		if (refVar->form)
 //		{
 //			TESScriptableForm* scriptable = NULL;
-//			switch (refVar->form->typeID)
+//			switch (refVar->form->GetFormType())
 //			{
 //			case kFormType_TESObjectREFR:
 //				{

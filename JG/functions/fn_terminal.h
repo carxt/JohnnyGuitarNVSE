@@ -80,7 +80,7 @@ bool Cmd_GetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	int menuEntryID = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry && entry->subMenu) *(uint32_t*)result = entry->subMenu->refID;
+		if (entry && entry->subMenu) *(uint32_t*)result = entry->subMenu->GetFormID();
 	}
 	return true;
 }
@@ -119,7 +119,7 @@ bool Cmd_GetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 	int menuEntryID = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
 		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry && entry->displayNote) *(uint32_t*)result = entry->displayNote->refID;
+		if (entry && entry->displayNote) *(uint32_t*)result = entry->displayNote->GetFormID();
 	}
 	return true;
 }

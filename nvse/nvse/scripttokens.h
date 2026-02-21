@@ -251,7 +251,7 @@ public:
 	static ScriptToken* Create(const char* str)													{ return new ScriptToken(str);	}
 	static ScriptToken* Create(TESGlobal* global, uint16_t refIdx)								{ return global ? new ScriptToken(global, refIdx) : NULL; }
 	static ScriptToken* Create(Operator* op)													{ return op ? new ScriptToken(op) : NULL;	}
-	static ScriptToken* Create(TESForm* form)													{ return new ScriptToken(form ? form->refID : 0, kTokenType_Form); }
+	static ScriptToken* Create(TESForm* form)													{ return new ScriptToken(form ? form->GetFormID() : 0, kTokenType_Form); }
 	static ScriptToken* CreateForm(uint32_t formID)												{ return new ScriptToken(formID, kTokenType_Form); }
 	static ScriptToken* CreateArray(ArrayID arrID)												{ return new ScriptToken(arrID, kTokenType_Array); }
 	static ScriptToken* Create(ForEachContext* forEach);

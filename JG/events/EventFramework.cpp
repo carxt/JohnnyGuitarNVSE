@@ -69,7 +69,7 @@ bool FilterBase::IsFilterEqual(FilterType filter, uint32_t num) {
 }
 
 bool FilterForm::IsAcceptedParameter(FilterType parameter) {
-	return parameter.form->typeID != FORM_TYPE::TESObjectSTAT;
+	return parameter.form->GetFormType() != FORM_TYPE::TESObjectSTAT;
 }
 
 void FilterForm::SetUpFiltering() {
@@ -77,32 +77,32 @@ void FilterForm::SetUpFiltering() {
 		TESForm* currentFilter = genFilters[i].form;
 		if (!currentFilter) continue;
 		if (!(IsAcceptedParameter(currentFilter))) continue;
-		if (currentFilter->GetIsReference()) {
-			InsertToFilter(i, ((TESObjectREFR*)currentFilter)->baseForm->refID);
+		if (currentFilter->IsReference()) {
+			InsertToFilter(i, ((TESObjectREFR*)currentFilter)->baseForm->GetFormID());
 			continue;
 		}
 		if (IS_TYPE(currentFilter, BGSListForm)) {
 			ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
 			do {
 				TESForm* it = iterator->data;
-				if (it && !it->GetIsReference() && IsAcceptedParameter(it))
-					InsertToFilter(i, it->refID);
+				if (it && !it->IsReference() && IsAcceptedParameter(it))
+					InsertToFilter(i, it->GetFormID());
 			} while (iterator = iterator->next);
 		}
-		else InsertToFilter(i, currentFilter->refID);
+		else InsertToFilter(i, currentFilter->GetFormID());
 	}
 }
 
 bool FilterForm::IsBaseInFilter(uint32_t filterNum, TESForm* form) {
 	if (!form) return false;
-	if (form->GetIsReference()) return IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->refID);
-	return IsInFilter(filterNum, form->refID);
+	if (form->IsReference()) return IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->GetFormID());
+	return IsInFilter(filterNum, form->GetFormID());
 }
 
 void FilterForm::insertFormList(BGSListForm* formlist, uint32_t filter) {
 	ListNode<TESForm>* iterator = formlist->list.Head();
 	do {
-		InsertToFilter(filter, iterator->data->refID);
+		InsertToFilter(filter, iterator->data->GetFormID());
 	} while (iterator = iterator->next);
 }
 
@@ -129,10 +129,10 @@ void FilterFormInt::SetUpFiltering() {
 		do {
 			TESForm* it = iterator->data;
 			if (it && IsAcceptedParameter(it))
-				InsertToFilter(0, it->refID);
+				InsertToFilter(0, it->GetFormID());
 		} while (iterator = iterator->next);
 	}
-	else if (IsAcceptedParameter(currentFilter)) InsertToFilter(0, currentFilter->refID);
+	else if (IsAcceptedParameter(currentFilter)) InsertToFilter(0, currentFilter->GetFormID());
 }
 
 void* __fastcall FilterFormInt::Create(void** filters, uint32_t nuFilters) {

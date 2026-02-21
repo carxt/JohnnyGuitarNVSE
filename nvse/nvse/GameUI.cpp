@@ -3,7 +3,7 @@
 #include <internal/Game/Bethesda/Conversation.hpp>
 
 uint8_t* g_MenuVisibilityArray = (uint8_t*)0x011F308F;
-NiTArray <TileMenu*>* g_TileMenuArray = (NiTArray <TileMenu*> *)0x011F3508;
+NiTPrimitiveArray<Tile*>* g_TileMenuArray = (NiTPrimitiveArray<Tile*> *)0x011F3508;
 
 #if 1
 static const uint32_t s_RaceSexMenu__UpdatePlayerHead = 0x007B25A0;	// End of RaceSexMenu::Func003.case0, call containing QueuedHead::Init (3rd before jmp)
@@ -27,13 +27,7 @@ bool InterfaceManager::IsMenuVisible(uint32_t menuType) {
 }
 
 Menu* InterfaceManager::GetMenuByType(uint32_t menuType) {
-	if ((menuType >= kMenuType_Min) && (menuType <= kMenuType_Max)) {
-		TileMenu* tileMenu = g_TileMenuArray->Get(menuType - kMenuType_Min);
-		if (tileMenu)
-			return tileMenu->menu;
-	}
-
-	return NULL;
+	return CdeclCall<Menu*>(0xA09030, menuType);
 }
 
 Menu* InterfaceManager::TempMenuByType(uint32_t menuType) {
@@ -57,7 +51,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 	}
 	if (note->type == BGSNote::kSound)
 	{
-		BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(note->voice->refID, BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100);
+		BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(note->voice->GetFormID(), BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100);
 
 		holotapeDialogues.Append(&sound);
 		isHolotapeVoicePlaying = true;
@@ -65,7 +59,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 	else if (note->type == BGSNote::kVoice)
 	{
 		auto character = BSMemory::create<Character, 0x8D1F40>(false);
-		character->flags |= TESForm::kFormFlags_DontSaveForm;
+		character->SetTemporary();
 		ThisCall(0x575690, character, note->speaker);
 
 		auto pConversation = BSMemory::create<Conversation, 0x83B850>(character, PlayerCharacter::GetSingleton(), note->voice);

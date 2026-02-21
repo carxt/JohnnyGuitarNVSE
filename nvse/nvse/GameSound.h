@@ -285,11 +285,11 @@ public:
 	AudioRequest				request024;			// 024
 	AudioRequest				request034;			// 034
 	AudioRequest				request044;			// 044
-	NiTPointerMap<BSGameSound>	playingSounds;		// 054
-	NiTPointerMap<BSSoundInfo>	playingSoundInfos1;	// 064
-	NiTPointerMap<BSSoundInfo>	playingSoundInfos2;	// 074
-	NiTPointerMap<NiAVObject>	soundPlayingObjects;// 084
-	DList<BSGameSound>			cachedSounds;		// 094
+	NiTPointerMap<uint32_t, BSGameSound*>	playingSounds;		// 054
+	NiTPointerMap<uint32_t, BSSoundInfo*>	playingSoundInfos1;	// 064
+	NiTPointerMap<uint32_t, BSSoundInfo*>	playingSoundInfos2;	// 074
+	NiTPointerMap<uint32_t, NiPointer<NiAVObject>>	soundPlayingObjects;// 084
+	NiTPointerList<BSGameSound*>			cachedSounds;		// 094
 	uint32_t						unk0A0;				// 0A0
 	uint32_t						unk0A4;				// 0A4
 	float						flt0A8;				// 0A8

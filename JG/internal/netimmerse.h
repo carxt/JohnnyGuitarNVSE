@@ -84,7 +84,7 @@ public:
 
 	bhkPhantom* phantoms[6]; // 08	Seen bhkAabbPhantom
 	TESObjectCELL* cell; // 20
-	NiTMapBase<bhkRigidBody*, uint32_t> boundsMap; // 24
+	NiTMap<bhkRigidBody*, uint16_t> boundsMap; // 24
 	float flt34; // 34
 	float flt38; // 38
 	float flt3C; // 3C
@@ -366,22 +366,24 @@ public:
 };
 static_assert(sizeof(NiControllerSequence) == 0x74);
 
+class NiObjectNET;
+
 // 34
 class NiTimeController : public NiObject {
 public:
 	NiTimeController();
 	~NiTimeController();
 
-	virtual void	Unk_23(void);
-	virtual void	Unk_24(void);
-	virtual void	Unk_25(void);
-	virtual void	SetTarget(NiNode* pTarget);
-	virtual void	Unk_27(void);
-	virtual void	Unk_28(void);
-	virtual void	Unk_29(void);
-	virtual void	Unk_2A(void);
-	virtual void	Unk_2B(void);
-	virtual void	Unk_2C(void);
+	virtual void	Start(float afTime = INFINITY);			// 35
+	virtual void	Stop();									// 36
+	virtual void	Update(NiUpdateData& arUpdateData);		// 37
+	virtual void	SetTarget(NiObjectNET* apTarget);		// 38
+	virtual bool	IsTransformController() const;			// 39
+	virtual bool	IsVertexController() const;				// 40
+	virtual float	ComputeScaledTime(float fTime);			// 41
+	virtual void	OnPreDisplay() const;					// 42
+	virtual bool	IsStreamable() const;					// 43
+	virtual bool	TargetIsRequiredType() const;			// 44
 
 	uint16_t								flags;				// 08
 	uint16_t								unk0A;				// 0A
@@ -397,33 +399,31 @@ public:
 	NiMultiTargetTransformController* multiTargetCtrl;	// 30
 };
 
+class BSAnimNoteListener;
+
 // 7C
 class NiControllerManager : public NiTimeController {
 public:
 	NiControllerManager();
 	~NiControllerManager();
 
-	virtual void	Unk_2D(void);
-
-	NiTArray<NiControllerSequence*>					sequences;		// 34
-	NiTSet<NiControllerSequence*>					activeSequences; // 44
-	NiTMapBase<const char*, NiControllerSequence*>	seqStrMap;		// 50
-	uint32_t											unk60;			// 60
-	NiTArray<void*>* arr64;			// 64
-	uint32_t											unk68;			// 68
-	uint32_t											unk6C;			// 6C
-	uint32_t											unk70;			// 70
-	uint32_t											unk74;			// 74
-	NiDefaultAVObjectPalette* defObjPlt;		// 78
+	NiTObjectArray<NiPointer<NiControllerSequence>>		m_kSequenceArray;
+	NiTPrimitiveSet<NiControllerSequence*>				m_kActiveSequences;
+	NiTStringPointerMap<NiControllerSequence*>			m_kIndexMap;
+	BSAnimNoteListener*									pListener;
+	bool												m_bCumulative;
+	NiTObjectSet<NiPointer<NiControllerSequence> >		m_kTempBlendSeqs;
+	NiPointer<NiDefaultAVObjectPalette>					m_spObjectPalette;
 
 	NiControllerSequence* GetSequenceByName(const NiFixedString& arName) const {
 		return ThisCall<NiControllerSequence*>(0xA5C4B0, this, &arName);
 	}
 
 	bool IsSequenceActive(const NiFixedString& arName) const {
-		if (activeSequences.length) {
-			for (uint32_t i = 0; i < activeSequences.length; i++) {
-				if (activeSequences.data[i]->sequenceName == arName) {
+		const uint32_t uiSize = m_kActiveSequences.GetSize();
+		if (uiSize) {
+			for (uint32_t i = 0; i < uiSize; i++) {
+				if (m_kActiveSequences.GetAt(i)->sequenceName == arName) {
 					return true;
 				}
 			}
@@ -526,7 +526,7 @@ public:
 	~NiObjectNET();
 
 	NiFixedString		m_blockName;				// 08
-	NiTimeController*	m_controller;				// 0C
+	NiPointer<NiTimeController>	m_controller;				// 0C
 	NiExtraData**		m_extraDataList;			// 10
 	uint16_t				m_extraDataListLen;			// 14
 	uint16_t				m_extraDataListCapacity;	// 16
@@ -997,17 +997,26 @@ public:
 	bhkNiCollisionObject*	m_collisionObject;		// 1C
 	NIBound*				m_pWorldBound;			// 20
 	DList<NiProperty>		m_propertyList;			// 24
-	uint32_t					m_flags;				// 30
+	Bitfield32				m_flags;				// 30
 	NiTransform				m_local;
 	NiTransform				m_world;
 
 	NiProperty* GetProperty(uint32_t auiType) const;
+
+	void SetAppCulled(bool abCulled) {
+		m_flags.Set(1, abCulled);
+	}
 
 	void DumpProperties();
 	void DumpParents();
 
 	void Update(NiUpdateData& arData) {
 		ThisCall(0xA59C60, this, &arData);
+	}
+
+	void Update() {
+		NiUpdateData kData;
+		Update(kData);
 	}
 
 	void SetLocalRotate(const NiMatrix3& arMat) {
@@ -1043,14 +1052,14 @@ public:
 	virtual void			SetAtAlt(uint32_t i, NiAVObject* apChild);
 	virtual void			UpdateUpwardPass();
 
-	NiTArray<NiAVObject*>	m_children;		// 9C
+	NiTObjectArray<NiPointer<NiAVObject>>	m_children;		// 9C
 
 	static NiNode* __stdcall Create(const char* nodeName);
 	NiAVObject* GetBlock(const char* blockName);
 	NiNode* GetNode(const char* nodeName);
 
 	NiAVObject* GetAt(uint32_t index) {
-		return m_children.Get(index);
+		return m_children.GetAt(index);
 	}
 };
 static_assert(sizeof(NiNode) == 0xAC);
@@ -1133,29 +1142,37 @@ public:
 };
 static_assert(sizeof(BSFogProperty) == 0x64);
 
+
+class BSOcclusionPlane;
+class BSPortal;
+class BSMultiBoundRoom;
+class ShadowSceneLight;
+
 // 78
 class BSPortalGraph : public NiRefObject {
 public:
 	BSPortalGraph();
 	~BSPortalGraph();
 
-	uint32_t					unk08[10];	// 08
-	void* ptr30;		// 30
-	void* ptr34;		// 34
-	uint32_t					unk38;		// 38
-	NiTArray<NiAVObject*>	array3C;	// 3C
-	NiNode* node4C;	// 4C
-	uint32_t					unk50[6];	// 50
-	BSSimpleArray<NiNode>	array68;	// 68
+	NiTPointerList<BSOcclusionPlane*>			kOccluders;
+	NiTPointerList<BSPortal*>					kPortals;
+	NiTPointerList<NiPointer<BSMultiBoundRoom>>	kMultiBoundRooms;
+	NiPointer<BSMultiBoundRoom>					spRoomRoot;
+	NiTPointerList<NiPointer<BSMultiBoundRoom>>	kMultiBoundRoomAccumList;
+	NiTObjectArray<NiPointer<NiAVObject>>		kAlwaysRenderChildren;
+	NiPointer<NiNode>							spPortalNodeRoot;
+	NiTPointerList<ShadowSceneLight*>			kAttachAlwaysRenderQueue;
+	NiTPointerList<ShadowSceneLight*>			kDetachAlwaysRenderQueue;
+	BSSimpleArray<NiPointer<NiNode>>			kUnboundNodes;
 };
 static_assert(sizeof(BSPortalGraph) == 0x78);
 
 // 250
-class LightingData : public NiRefObject	//	010B7EB8
+class ShadowSceneLight : public NiRefObject	//	010B7EB8
 {
 public:
-	LightingData();
-	~LightingData();
+	ShadowSceneLight();
+	~ShadowSceneLight();
 
 	uint32_t					unk008;			// 008
 	float					flt00C[53];		// 00C
@@ -1179,7 +1196,7 @@ public:
 	BSPortalGraph* portalGraph;	// 240
 	uint32_t					unk244[3];		// 244
 };
-static_assert(sizeof(LightingData) == 0x250);
+static_assert(sizeof(ShadowSceneLight) == 0x250);
 
 // 200
 class ShadowSceneNode : public NiNode {
@@ -1188,14 +1205,14 @@ public:
 	~ShadowSceneNode();
 
 	uint32_t							unk0AC[2];		// 0AC
-	DList<LightingData>				lgtList0B4;		// 0B4
-	DList<LightingData>				lgtList0C0;		// 0C0
+	DList<ShadowSceneLight>				lgtList0B4;		// 0B4
+	DList<ShadowSceneLight>				lgtList0C0;		// 0C0
 	uint32_t							unk0CC;			// 0CC
-	DListNode<LightingData>* node0D0;		// 0D0
-	DListNode<LightingData>* node0D4;		// 0D4
-	LightingData* data0D8;		// 0D8
-	LightingData* data0DC;		// 0DC
-	LightingData* data0E0;		// 0E0
+	DListNode<ShadowSceneLight>* node0D0;		// 0D0
+	DListNode<ShadowSceneLight>* node0D4;		// 0D4
+	ShadowSceneLight* data0D8;		// 0D8
+	ShadowSceneLight* data0DC;		// 0DC
+	ShadowSceneLight* data0E0;		// 0E0
 	uint32_t							unk0E4[6];		// 0E4
 	void* ptr0FC;		// 0FC
 	void* ptr100;		// 100
@@ -1213,8 +1230,8 @@ public:
 	uint8_t							pad132[2];		// 132
 	BSFogProperty* fogProperty;	// 134
 	uint32_t							unk138;			// 138
-	BSSimpleArray<NiFrustumPlanes>	array13C;		// 13C
-	BSSimpleArray<void>				array14C;		// 14C	010C1E9C
+	BSSimpleArray<NiFrustumPlanes*>	array13C;		// 13C
+	BSSimpleArray<void*>				array14C;		// 14C	010C1E9C
 	uint32_t							unk15C[3];		// 15C
 	NiVector4						unk168;			// 168
 	NiVector4						unk178;			// 178
@@ -1371,6 +1388,9 @@ public:
 	uint32_t			unk20C;			// 20C
 };
 static_assert(sizeof(NiRenderer) == 0x210);
+
+class NiVBBlock;
+class NiDX9LightManager;
 
 class NiDX9Renderer : public NiRenderer {
 public:
@@ -1558,16 +1578,16 @@ public:
 	uint32_t								unk5D4[3];					// 5D4
 	uint32_t								backgroundColor;			// 5E0	ARGB
 	uint32_t								unk5E4[11];					// 5E4
-	NiTPointerMap<PrePackObject*>		prePackObjects;				// 610 - NiTPointerMap <NiVBBlock *, NiDX9Renderer::PrePackObject *>
+	NiTPointerMap<NiVBBlock*, PrePackObject*>		prePackObjects;				// 610 - NiTPointerMap <NiVBBlock *, NiDX9Renderer::PrePackObject *>
 	uint32_t								unk620[153];				// 620
 	NiRenderTargetGroup* defaultRTGroup;			// 884 - back buffer
 	NiRenderTargetGroup* currentRTGroup;			// 888
 	NiRenderTargetGroup* currentscreenRTGroup;		// 88C
-	NiTPointerMap<NiRenderTargetGroup*>	screenRTGroups;				// 890 - NiTPointerMap <HWND *, NiPointer <NiRenderTargetGroup> >
+	NiTPointerMap<HWND, NiRenderTargetGroup*>	screenRTGroups;				// 890 - NiTPointerMap <HWND *, NiPointer <NiRenderTargetGroup> >
 	uint32_t								unk8A0[6];					// 8A0
 	NiDX9RenderState* renderState;				// 8B8
 	uint32_t								unk8BC[3];					// 8BC
-	NiTMapBase<NiLight*, void*>* lightsMap;					// 8C8
+	NiDX9LightManager* lightsMap;					// 8C8
 	uint32_t								unk8CC[115];				// 8CC
 	uint32_t								width;						// A98
 	uint32_t								height;						// A9C
@@ -1713,7 +1733,7 @@ public:
 
 	NiTexture* srcTexture;	// 60
 	uint32_t				unk64;			// 64
-	NiColorAlpha		overlayColor;	// 68
+	NiColorA		overlayColor;	// 68
 	float				alpha;			// 78
 	uint32_t				unk7C;			// 7C
 	uint32_t				unk80;			// 80
@@ -1883,7 +1903,7 @@ public:
 	NIBound		bounds;			// 10
 	NiVector3* vertices;		// 20
 	NiVector3* normals;		// 24
-	NiColorAlpha* vertexColors;	// 28
+	NiColorA* vertexColors;	// 28
 	UVCoord* uvCoords;		// 2C
 	uint32_t			unk30;			// 30
 	RendererData* rendererData;	// 34

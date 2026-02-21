@@ -42,7 +42,7 @@ SaveGameManager** g_saveGameManager = (SaveGameManager**)0x011DE134;
 #elif EDITOR
 
 //	FormMap* g_FormMap = (FormMap *)0x009EE18C;		// currently unused
-//	DataHandler ** g_dataHandler = (DataHandler **)0x00A0E064;
+//	TESDataHandler ** g_dataHandler = (TESDataHandler **)0x00A0E064;
 //	TES** g_TES = (TES**)0x00A0ABB0;
 const _LookupFormByID LookupFormByID = (_LookupFormByID)0x004F9620;	// Call between third reference to RTTI_TESWorldspace and RuntimeDynamicCast
 const _GetFormByID GetFormByID = (_GetFormByID)(0x004F9650); // Search for aNonPersistentR and aPlayer (third call below aPlayer, second is LookupFomrByID)
@@ -102,11 +102,9 @@ void SetConsoleEcho(bool doEcho) {
 
 const char* GetFullName(TESForm* baseForm) {
 	if (baseForm) {
-		TESFullName* fullName = baseForm->GetFullName();
-		if (fullName && fullName->name.pString) {
-			if (fullName->name.GetLength())
-				return fullName->name.pString;
-		}
+		const char* pName = TESFullName::GetFullName(baseForm);
+		if (pName && pName[0])
+			return pName;
 		return "<no name>";
 	}
 	return "<NULL>";
@@ -127,10 +125,6 @@ void Console_Print(const char* fmt, ...) {
 
 		va_end(args);
 	}
-}
-
-TESSaveLoadGame* TESSaveLoadGame::Get() {
-	return (TESSaveLoadGame*)0x011DE45C;
 }
 
 SaveGameManager* SaveGameManager::GetSingleton() {
@@ -154,12 +148,12 @@ ScriptEventList* ResolveExternalVar(ScriptEventList* in_EventList, Script* in_Sc
 		refVar->Resolve(in_EventList);
 		TESForm* refObj = refVar->form;
 		if (refObj) {
-			if (refObj->typeID == FORM_TYPE::TESObjectREFR) {
+			if (refObj->GetFormType() == FORM_TYPE::TESObjectREFR) {
 				TESObjectREFR* refr = DYNAMIC_CAST(refObj, TESForm, TESObjectREFR);
 				if (refr)
 					refEventList = refr->GetEventList();
 			}
-			else if (refObj->typeID == FORM_TYPE::TESQuest) {
+			else if (refObj->GetFormType() == FORM_TYPE::TESQuest) {
 				TESQuest* quest = DYNAMIC_CAST(refObj, TESForm, TESQuest);
 				if (quest)
 					refEventList = quest->scriptEventList;
@@ -475,7 +469,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 					fmtString.insert(strIdx, "00000000");
 				else {
 					char formID[9];
-					sprintf_s(formID, 9, "%08X", form->refID);
+					sprintf_s(formID, 9, "%08X", form->GetFormID());
 					fmtString.insert(strIdx, formID);
 				}
 			}
@@ -498,7 +492,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 					else {
 						std::string strName("");
 
-						switch (form->typeID) {
+						switch (form->GetFormType()) {
 #if 0
 							case FORM_TYPE::SpellItem:
 							case FORM_TYPE::EnchantmentItem:
@@ -621,7 +615,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 						form = refr->baseForm;
 
 					short objType = 0;
-					if (form->typeID == FORM_TYPE::TESNPC) {
+					if (form->GetFormType() == FORM_TYPE::TESNPC) {
 						TESActorBaseData* actorBase = DYNAMIC_CAST(form, TESForm, TESActorBaseData);
 						objType = (actorBase->IsFemale()) ? 2 : 1;
 					}
@@ -787,7 +781,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 			if (globalVar) {
 				*outVarData = globalVar->data;
 				if (outModIndex)
-					*outModIndex = (globalVar->refID >> 24);
+					*outModIndex = (globalVar->GetFormID() >> 24);
 				bExtracted = true;
 			}
 		}
@@ -808,7 +802,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 				if (!refForm)
 					break;
 
-				if (refForm->typeID == FORM_TYPE::TESObjectREFR) {
+				if (refForm->GetFormType() == FORM_TYPE::TESObjectREFR) {
 					TESObjectREFR* refr = DYNAMIC_CAST(refForm, TESForm, TESObjectREFR);
 					TESScriptableForm* scriptable = DYNAMIC_CAST(refr->baseForm, TESForm, TESScriptableForm);
 					if (scriptable) {
@@ -818,7 +812,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 					else
 						break;
 				}
-				else if (refForm->typeID == FORM_TYPE::TESQuest) {
+				else if (refForm->GetFormType() == FORM_TYPE::TESQuest) {
 					TESScriptableForm* scriptable = DYNAMIC_CAST(refForm, TESForm, TESScriptableForm);
 					if (scriptable) {
 						script = scriptable->script;
@@ -837,7 +831,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 			if (var) {
 				*outVarData = var->data;
 				if (outModIndex)
-					*outModIndex = (script->refID >> 24);
+					*outModIndex = (script->GetFormID() >> 24);
 				bExtracted = true;
 			}
 		}
@@ -937,7 +931,7 @@ bool SCRIPT_ASSERT(bool expr, Script* script, const char* errorMsg, ...) {
 	//	static bool bAlerted = false;			//only alert user on first error
 	//	static std::set<uint32_t> naughtyScripts;	//one error per script to avoid thrashing
 	//
-	//	if (!expr && naughtyScripts.find(script->refID) == naughtyScripts.end())
+	//	if (!expr && naughtyScripts.find(script->GetFormID()) == naughtyScripts.end())
 	//	{
 	//		const ModEntry ** activeMods = (*g_dataHandler)->GetActiveModList();
 	//		uint8_t modIndex = script->GetModIndex();
@@ -949,9 +943,9 @@ bool SCRIPT_ASSERT(bool expr, Script* script, const char* errorMsg, ...) {
 	//		else
 	//			modName = "Unknown";
 	//
-	////		sprintf_s(errorHeader, sizeof(errorHeader) - 1, "** Error: Script %08X in file \"%s\" **", script->refID, modName);
+	////		sprintf_s(errorHeader, sizeof(errorHeader) - 1, "** Error: Script %08X in file \"%s\" **", script->GetFormID(), modName);
 	////		_MESSAGE("%s", errorHeader);
-	//		_MESSAGE("** Script Error: Script %08x in file \"%s\" **", script->refID, modName);
+	//		_MESSAGE("** Script Error: Script %08x in file \"%s\" **", script->GetFormID(), modName);
 	//
 	//		va_list args;
 	//		va_start(args, errorMsg);
@@ -970,7 +964,7 @@ bool SCRIPT_ASSERT(bool expr, Script* script, const char* errorMsg, ...) {
 	//			bAlerted = true;
 	//		}
 	//
-	//		naughtyScripts.insert(script->refID);
+	//		naughtyScripts.insert(script->GetFormID());
 	//	}
 	return expr;
 }

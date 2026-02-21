@@ -715,7 +715,7 @@ struct AnimData
 	float							flt0D0;				// 0D0
 	uint32_t							unk0D4;				// 0D4
 	NiControllerManager				*unk0D8;			// 0D8
-	NiTPointerMap<AnimSequenceBase>	*unk0DC;			// 0DC
+	NiTPointerMap<uint16_t, AnimSequenceBase*>* unk0DC;			// 0DC
 	BSAnimGroupSequence				*animSequence[8];	// 0E0
 	BSAnimGroupSequence				*animSeq100;		// 100
 	uint32_t							unk104;				// 104
@@ -952,9 +952,9 @@ public:
 static_assert(sizeof(HighProcess) == 0x46C);
 
 // 160
-struct ProcessManager {
+struct ProcessLists {
 	uint32_t					unk000;				// 000
-	NiTArray<MobileObject*>	objects;			// 004
+	NiTPrimitiveArray<MobileObject*>	objects;			// 004
 	uint32_t					beginOffsets[4];	// 014	0: High, 1: Mid-High, 2: Mid-Low, 3: Low
 	uint32_t					endOffsets[4];		// 024
 	uint32_t					unk034[11];			// 034
@@ -963,7 +963,7 @@ struct ProcessManager {
 	tList<Actor>			highActors;			// 080
 	uint32_t					unk088[54];			// 088
 
-	static ProcessManager* GetSingleton() {
-		return reinterpret_cast<ProcessManager*>(0x11E0E80);
+	static ProcessLists* GetSingleton() {
+		return reinterpret_cast<ProcessLists*>(0x11E0E80);
 	};
 };

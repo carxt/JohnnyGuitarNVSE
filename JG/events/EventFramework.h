@@ -150,7 +150,7 @@ public:
 
 	bool IsAcceptedParameter(FilterType parameter) override
 	{
-		return parameter.form->refID != 0x3B; // xMarker
+		return parameter.form->GetFormID() != 0x3B; // xMarker
 	}
 
 	void SetUpFiltering() override;

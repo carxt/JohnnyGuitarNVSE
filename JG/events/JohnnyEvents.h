@@ -81,7 +81,7 @@ void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, uint8_t
 }
 
 void __stdcall handleDyingEvent(Actor* thisObj) {
-	if (thisObj->IsActor() && thisObj->lifeState == 1 && (*thisObj->GetTheName() || thisObj == PlayerCharacter::GetSingleton())) {
+	if (thisObj->IsActor() && thisObj->lifeState == 1 && (thisObj->GetFullName()[0] || thisObj == PlayerCharacter::GetSingleton())) {
 		for (auto const& callback : OnDyingHandler->callbacks) {
 			if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) {
 				CallUDF(callback.script, nullptr, OnDyingHandler->numMaxArgs, thisObj);
@@ -93,7 +93,7 @@ uint32_t __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 	if (crosshairRef) {
 		for (auto const& callback : OnCrosshairHandler->callbacks) {
 			FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
-			if ((filter->IsInFilter(0, crosshairRef->refID) || filter->IsInFilter(0, crosshairRef->baseForm->refID)) && filter->IsInFilter(1, crosshairRef->baseForm->typeID)) {
+			if ((filter->IsInFilter(0, crosshairRef->GetFormID()) || filter->IsInFilter(0, crosshairRef->baseForm->GetFormID())) && filter->IsInFilter(1, crosshairRef->baseForm->GetFormType())) {
 				CallUDF(callback.script, nullptr, OnCrosshairHandler->numMaxArgs, crosshairRef);
 			}
 		}
@@ -103,7 +103,7 @@ uint32_t __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
 bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, byte dummy, int limb, byte isExplode) {
 	for (auto const& callback : OnLimbGoneHandler->callbacks) {
 		FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
-		if ((filter->IsInFilter(0, actor->refID) || filter->IsInFilter(0, actor->baseForm->refID)) && filter->IsInFilter(1, limb)) {
+		if ((filter->IsInFilter(0, actor->GetFormID()) || filter->IsInFilter(0, actor->baseForm->GetFormID())) && filter->IsInFilter(1, limb)) {
 			CallUDF(callback.script, nullptr, OnLimbGoneHandler->numMaxArgs, actor, limb);
 		}
 	}
@@ -194,7 +194,7 @@ void __stdcall HandleAVChangeEvent(ActorValueOwner* avOwner, int avCode, float p
 		pActor = static_cast<Actor*>(pForm);
 
 	if (!CompareFloats(fNewValueFloor, fPreviousValueFloor)) {
-		 //Console_Print("actor 0x%X av %d prev %.2f mod %.2f new %.2f callback 0x%X", avOwner->GetAsForm()->refID, avCode, previousVal, modVal, newVal, onChangeCallback);
+		 //Console_Print("actor 0x%X av %d prev %.2f mod %.2f new %.2f callback 0x%X", avOwner->GetAsForm()->GetFormID(), avCode, previousVal, modVal, newVal, onChangeCallback);
 		
 		if (pActor && pActor->IsPlayerRef()) {
 			for (auto const& callback : OnAVChangeHandler->callbacks) {
@@ -213,7 +213,7 @@ void __stdcall HandleAVChangeEvent(ActorValueOwner* avOwner, int avCode, float p
 		else {
 			for (auto const& callback : OnNPCAVChangeHandler->callbacks) {
 				FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
-				if (filter->IsInFilter(1, avCode) && (filter->IsInFilter(0, pForm->refID) || (pActor && filter->IsInFilter(0, pActor->GetBaseForm()->refID)))) {
+				if (filter->IsInFilter(1, avCode) && (filter->IsInFilter(0, pForm->GetFormID()) || (pActor && filter->IsInFilter(0, pActor->GetBaseForm()->GetFormID())))) {
 
 					bool bFullValues = callback.UserFlags.Get(1);
 
@@ -235,7 +235,7 @@ bool __fastcall HandlePLChangeEvent(Actor* actor) {
 	if (oldLevel != newLevel) {
 		for (auto const& callback : OnPLChangeHandler->callbacks) {
 			FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
-			if ((filter->IsInFilter(0, actor->refID) || filter->IsInFilter(0, actor->GetBaseForm()->refID)) &&
+			if ((filter->IsInFilter(0, actor->GetFormID()) || filter->IsInFilter(0, actor->GetBaseForm()->GetFormID())) &&
 				filter->IsInFilter(1, newLevel)) {
 				CallUDF(callback.script, nullptr, OnPLChangeHandler->numMaxArgs, actor, oldLevel, newLevel);
 			}
@@ -379,7 +379,7 @@ void __fastcall HandleTakeBackItem(void* contChanges, void* edx, PlayerCharacter
 	for (auto const& callback : OnTakeBackItemHandler->callbacks) {
 		auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
 		TESObjectREFR* owner = target->IsActor() ? target : hkOwner;
-		if (filter->IsBaseInFilter(0, item) && (filter->IsInFilter(1, owner->refID) || filter->IsInFilter(1, owner->baseForm->refID))) {
+		if (filter->IsBaseInFilter(0, item) && (filter->IsInFilter(1, owner->GetFormID()) || filter->IsInFilter(1, owner->baseForm->GetFormID()))) {
 			CallUDF(callback.script, nullptr, OnTakeBackItemHandler->numMaxArgs, owner, item, quantity);
 		}
 	}
@@ -493,11 +493,11 @@ void __fastcall HandleOnReputationChange(TESReputation* apRep) {
 }
 
 //Fires when general subtitles are sent to the HUD.
-char __fastcall HandleOnGeneralSubtitleEvent(HUDMainMenu* thisPtr, void* edx, char* apText, BSSoundHandle akSound, NiPoint3 akPos, TESObjectREFR* apTarget, bool abInstant)
+bool __fastcall HandleOnGeneralSubtitleEvent(HUDMainMenu* thisPtr, void* edx, char* apText, BSSoundHandle akSound, NiPoint3 akPos, TESObjectREFR* apTarget, bool abInstant)
 {
 	if (apText) HandleOnGeneralSubtitle(apText, akPos, apTarget);
 
-	return ThisCall(0x774FD0, thisPtr, apText, akSound, akPos, apTarget, abInstant);
+	return ThisCall<bool>(0x774FD0, thisPtr, apText, akSound, akPos, apTarget, abInstant);
 }
 
 bool __fastcall HandleOnNPCResponseEvent(MenuTopic* apThis) {

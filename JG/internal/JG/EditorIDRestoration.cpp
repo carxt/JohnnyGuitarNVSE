@@ -5,20 +5,18 @@
 #include "unordered_map"
 #include "list"
 
-extern NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap;
-
 namespace EDIDRestoration {
 
 #define DEBUG_PRINTS 0
 
 #if DEBUG_PRINTS
-#define DEBUG_MSG(...) PrintLog(__VA_ARGS__)
+#define DEBUG_MSG(...) _MESSAGE(__VA_ARGS__)
 #else
 #define DEBUG_MSG(...) __noop(__VA_ARGS__)
 #endif
 
 	bool bHadEDIDConflicts = false;
-	std::mutex kEDIDMapLock;
+	SRWLOCK kEDIDMapLock = SRWLOCK_INIT;
 
 	static constexpr uint32_t TESForm_Vtables[] = {
 		0x101144C,	//	BGSDehydrationStage
@@ -166,16 +164,15 @@ namespace EDIDRestoration {
 	}
 
 	const char* __fastcall AddToGameMap(const char* apEDID, TESForm* apForm) {
-		std::lock_guard<std::mutex> kLock(kEDIDMapLock);
-		TESForm* pExistingForm = CdeclCall<TESForm*>(0x483A00, apEDID); // TESForm::GetFormByEditorID
+		TESForm* pExistingForm = TESForm::GetFormByEditorID(apEDID); 
 		if (pExistingForm) [[unlikely]] {
 			if (pExistingForm != apForm) {
 				// Ignore 0x18E because Obsidian had a skill issue
 				if (pExistingForm->GetFormID() != 0x18E) {
-					const ModInfo* pFileA = apForm->mods.GetFirstItem();
-					const ModInfo* pFileB = pExistingForm->mods.GetFirstItem();
+					const TESFile* pFileA = apForm->GetFile(0);
+					const TESFile* pFileB = pExistingForm->GetFile(0);
 					char cText[512];
-					if (pExistingForm->typeID == apForm->typeID) {
+					if (pExistingForm->GetFormType() == apForm->GetFormType()) {
 						sprintf_s(cText, "%08X (\"%s\") steals \"%s\" EDID from %08X (\"%s\")",
 							apForm->GetFormID(), pFileA ? pFileA->GetName() : "", apEDID,
 							pExistingForm->GetFormID(), pFileB ? pFileB->GetName() : "");
@@ -187,7 +184,7 @@ namespace EDIDRestoration {
 							pExistingForm->GetFormTypeName(), apForm->GetFormTypeName());
 					}
 					bHadEDIDConflicts = true;
-					PrintLog(cText);
+					_MESSAGE(cText);
 					RemoveEDIDFromExtraData(pExistingForm, apEDID);
 				}
 			}
@@ -197,20 +194,19 @@ namespace EDIDRestoration {
 			}
 		}
 
-		ThisCall(0x470200, *g_gameFormEditorIDsMap, apEDID, apForm);
+		TESForm::pAllFormsByEditorID->SetAt(apEDID, apForm);
 		return apEDID;
 	}
 
 	// exported
 	uint32_t __cdecl JGNVSE_GetFormIDFromEDID(char* apEDID) {
-		std::lock_guard<std::mutex> kLock(kEDIDMapLock);
-		TESForm* pForm = CdeclCall<TESForm*>(0x483A00, apEDID); // TESForm::GetFormByEditorID
+		TESForm* pForm = TESForm::GetFormByEditorID(apEDID); 
 		if (pForm)
 			return pForm->GetFormID();
 		return 0;
 	}
 
-	CallDetour kRemoveFromDataStructures;
+	CallDetour kRemoveFromDataStructures[2];
 	class TESFormEx : public TESForm {
 	public:
 		// vftable + 0x130
@@ -245,23 +241,36 @@ namespace EDIDRestoration {
 			return false;
 		}
 
+		template<uint32_t INDEX>
 		void Hk_RemoveFormEditorID() {
-			ThisCall(kRemoveFromDataStructures.GetOverwrittenAddr(), this);
+			ThisCall(kRemoveFromDataStructures[INDEX].GetOverwrittenAddr(), this);
 			JohnnyExtraData* pData = JohnnyExtraData::Find(this);
 			if (pData)
 				pData->DetachEditorIDs();
+		}
+
+		static TESForm* hk_GetFormByEditorID(const char* apEDID) {
+			if (!apEDID || !apEDID[0] || !pAllFormsByEditorID)
+				return nullptr;
+
+			SRWSharedLock kLock(kEDIDMapLock);
+			TESForm* pForm = nullptr;
+			if (pAllFormsByEditorID->GetAt(apEDID, pForm))
+				return pForm;
+			return nullptr;
 		}
 	};
 
 	class TESObjectREFREx : public TESObjectREFR {
 	public:
 		const char* GetNameForConsole() {
-			if (baseForm) [[likely]] {
+			const char* pName = GetFullName();
+			if (!strlen(pName) && baseForm) {
 				__try {
-					const char* name = baseForm->GetTheName();
-					if (!name || !strlen(name))
-						name = baseForm->GetFormEditorID();
-					return name;
+					pName = TESFullName::GetFullName(baseForm);
+					if (!strlen(pName))
+						pName = baseForm->GetFormEditorID();
+					return pName;
 				}
 				__except (EXCEPTION_ACCESS_VIOLATION) {
 					return "";
@@ -278,9 +287,8 @@ namespace EDIDRestoration {
 
 		bool SetFormEditorID(const char* apEDID) {
 			bool bResult = ThisCall<bool>(kDetour.GetOverwrittenAddr(), this, apEDID);
-			if (bResult) {
+			if (bResult)
 				return reinterpret_cast<TESFormEx*>(this)->hk_SetFormEditorID(apEDID);
-			}
 			return bResult;
 		}
 
@@ -293,7 +301,10 @@ namespace EDIDRestoration {
 	};
 
 	void InitHooks() {
-		kRemoveFromDataStructures.ReplaceCallEx(0x48449A, &TESFormEx::Hk_RemoveFormEditorID); // TESForm::RemoveFromDataStructures
+		WriteRelJump(0x483A00, TESFormEx::hk_GetFormByEditorID);
+
+		kRemoveFromDataStructures[0].ReplaceCallEx(0x48449A, &TESFormEx::Hk_RemoveFormEditorID<0>); // TESForm::SetTemporary
+		kRemoveFromDataStructures[1].ReplaceCallEx(0x8680A4, &TESFormEx::Hk_RemoveFormEditorID<1>); // GarbageCollector::Add(TESObjectREFR)
 
 		ReplaceCallEx(0x486903, &TESFormEx::hk_GetFormEditorID); // TESForm::GetFormDetailedString
 		ReplaceCallEx(0x451CBA, &TESFormEx::hk_GetFormEditorID); // TESObjectCELL::GetCellName

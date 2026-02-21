@@ -108,31 +108,31 @@ bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
 				TESForm* currData = iter->data;
 				if (!currData) continue;
 				if (IS_TYPE(currData, TESHair)) {
-					hk_RSMBarberHook::haircutSetList.Add(currData->refID);
+					hk_RSMBarberHook::haircutSetList.Add(currData->GetFormID());
 					continue;
 				}
 				if (IS_TYPE(currData, BGSHeadPart)) {
-					hk_RSMBarberHook::beardSetList.Add(currData->refID);
+					hk_RSMBarberHook::beardSetList.Add(currData->GetFormID());
 				}
 			} while (iter = iter->next);
 		}
 		auto playerBase =	reinterpret_cast<TESNPC*>(PlayerCharacter::GetSingleton()->GetActorBase());
 		hk_RSMBarberHook::haircutSetList.isWhiteList = bool(flags & kFlag_WhiteListHair);
 		if (hk_RSMBarberHook::haircutSetList.isWhiteList) {
-			hk_RSMBarberHook::haircutSetList.Add(playerBase->hair->refID);
+			hk_RSMBarberHook::haircutSetList.Add(playerBase->hair->GetFormID());
 		}
 		else {
-			hk_RSMBarberHook::haircutSetList.Remove(playerBase->hair->refID);
+			hk_RSMBarberHook::haircutSetList.Remove(playerBase->hair->GetFormID());
 
 		}
 		hk_RSMBarberHook::beardSetList.isWhiteList = bool(flags & kFlag_WhiteListBeard);
 		if (hk_RSMBarberHook::beardSetList.isWhiteList) {
 			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
-				if (*iter) { hk_RSMBarberHook::beardSetList.Add((*iter)->refID);};
+				if (*iter) { hk_RSMBarberHook::beardSetList.Add((*iter)->GetFormID());};
 			}
 		} else{
 			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
-				if (*iter) { hk_RSMBarberHook::beardSetList.Remove((*iter)->refID); };
+				if (*iter) { hk_RSMBarberHook::beardSetList.Remove((*iter)->GetFormID()); };
 			}
 		}
 		CdeclCall<void>(0x705870, 2);
@@ -204,7 +204,7 @@ bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	uint32_t tierID = 0;
 	char path[MAX_PATH] = {};
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &rep, &tierID, &path) && rep && IS_TYPE(rep, TESReputation) && tierID >= 1 && tierID <= 4)) return true;
-	auto pos = factionRepIcons.find(rep->refID);
+	auto pos = factionRepIcons.find(rep->GetFormID());
 	uint32_t bufferSize = strlen(path) + 1;
 	char* pathCopy = new char[bufferSize];
 	strcpy_s(pathCopy, bufferSize, path);
@@ -216,7 +216,7 @@ bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	else {
 		std::vector<const char*> v{ "", "", "", "" };
 		v[tierID - 1] = pathCopy;
-		factionRepIcons.insert(std::pair<uint32_t, std::vector<const char*>>(rep->refID, v));
+		factionRepIcons.insert(std::pair<uint32_t, std::vector<const char*>>(rep->GetFormID(), v));
 	}
 	*result = 1;
 	return true;
@@ -308,7 +308,7 @@ bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectREFR* markerRef = ThisCall<TESObjectREFR*>(0x77A400, PlayerCharacter::GetSingleton());
 	if (markerRef) {
-		*(uint32_t*)result = markerRef->refID;
+		*(uint32_t*)result = markerRef->GetFormID();
 	}
 	return true;
 }
@@ -339,13 +339,13 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	TESObjectREFR* form;
 	char iconPath[MAX_PATH] = {};
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || !form || (!IS_TYPE(form, BGSListForm) && (!form->GetIsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)))) 
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || !form || (!IS_TYPE(form, BGSListForm) && (!form->IsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker)))) 
 		return true;
 	if (IS_TYPE(form, BGSListForm)) {
 		ListNode<TESForm>* iterator = ((BGSListForm*)form)->list.Head();
 		while (iterator) {
 			TESObjectREFR* ref = (TESObjectREFR*)(iterator->data);
-			if (ref->GetIsReference() && ref->IsMapMarker() && GetExtraType(ref->extraDataList, MapMarker)) {
+			if (ref->IsReference() && ref->IsMapMarker() && GetExtraType(ref->extraDataList, MapMarker)) {
 				SetMapMarkerIcon(ref, iconPath);
 			}
 			iterator = iterator->next;
@@ -354,13 +354,13 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	else {
 		SetMapMarkerIcon(form, iconPath);
 	}
-	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->refID, iconPath);
+	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->GetFormID(), iconPath);
 	return true;
 }
 
 bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	ExtraMapMarker* mapMarkerExtra;
-	if (!thisObj || (!thisObj->GetIsReference() || !thisObj->IsMapMarker())) return true;
+	if (!thisObj || (!thisObj->IsReference() || !thisObj->IsMapMarker())) return true;
 	mapMarkerExtra = GetExtraType(thisObj->extraDataList, MapMarker);
 	if (!mapMarkerExtra || !mapMarkerExtra->data)  return true;
 	const char* resStr = GetMapMarker(thisObj, mapMarkerExtra->data->type);

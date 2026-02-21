@@ -5,7 +5,7 @@
 #include "GameBSExtraData.h"
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
-#include "Bethesda/BaseFormComponent.hpp"
+#include "Bethesda/TESBoundAnimObject.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -247,10 +247,7 @@ enum ObjectVtbl {
 #define IS_TYPE(form, type) (*(uint32_t*)form == kVtbl_##type)
 #define NOT_TYPE(form, type) (*(uint32_t*)form != kVtbl_##type)
 
-#define IS_ID(form, type) (form->typeID == FORM_TYPE::##type)
-#define NOT_ID(form, type) (form->typeID != FORM_TYPE::##type)
-
-struct ModInfo;		// in GameData.h
+class TESFile;
 class TESFullName;
 class EnchantmentItem;
 class TESSound;
@@ -306,181 +303,6 @@ struct PermanentClonedForm {
 	uint32_t cloneRefID;
 };
 
-// 018
-class TESForm : public BaseFormComponent {
-public:
-	TESForm();
-	virtual ~TESForm();
-
-	virtual void		Unk_05(void);						// Might be set default value (called from constructor)
-	virtual uint32_t		Unk_06(void);
-	virtual bool		Unk_07(void);
-	virtual bool		LoadForm(ModInfo* modInfo);		// func_010 in GECK
-	virtual bool		Unk_09(void* arg);					// points to LoadForm on TESForm
-	virtual bool		AppendForm(ModInfo* modInfo);		// (ie SaveForm + append to modInfo)
-	virtual void		SaveForm(void);						// saves in same format as in .esp	//	func_013 in GECK
-															// data buffer and buffer size stored in globals when done, doesn't return anything
-	virtual bool		LoadForm2(ModInfo* modInfo);		// just calls LoadForm
-	virtual void		WriteFormInfo(ModInfo* modInfo);	// does some saving stuff, then calls Fn0A
-	virtual bool		Unk_0E(void* arg);					// prapares a GRUP formInfo
-	virtual bool		Sort(TESForm* form);				// returns if the argument is "greater or equal" to this form
-	virtual TESForm* CreateForm(void* arg0, void* mapToAddTo);	// makes a new form,
-	virtual void		Unk_11(void* arg);
-	virtual void		MarkAsModified(uint32_t changedFlags);		// enable changed flag?
-	virtual void		MarkAsUnmodified(uint32_t changedFlags);		// disable changed flag?
-	virtual uint32_t		GetSaveSize(uint32_t changedFlags);	// bytes taken by the delta flags for this form, UNRELIABLE, not (always) overriden
-	virtual void		Unk_15(void* arg);					// collect referenced forms?
-	virtual void		SaveGame(uint32_t changedFlags);		// Used as part of CopyFromBase with LoadGame.
-	virtual void		LoadGame(void* arg);				// load from BGSLoadFormBuffer arg
-	virtual void		LoadGame2(uint32_t changedFlags);		// load from TESSaveLoadGame
-	virtual void		Unk_19(void* arg);
-	virtual void		Unk_1A(void* arg0, void* arg1);
-	virtual void		Unk_1B(void* arg0, void* arg1);
-	virtual void		Revert(uint32_t changedFlags);		// reset changes in form
-	virtual void		Unk_1D(void* arg);
-	virtual void		Unk_1E(void* arg);
-	virtual bool		Unk_1F(void* arg);
-	virtual void		Unk_20(void* arg);
-	virtual void		Unk_21(void* arg);
-	virtual void		InitItem(void);
-	virtual uint32_t		GetTypeID(void);
-	virtual void		GetDebugName(BSString* dst);
-	virtual bool		IsQuestItem(void);
-	// Unk_26 though Unk_36 get or set flag bits
-	virtual bool		Unk_26(void);		// 00000040
-	virtual bool		Unk_27(void);		// 00010000
-	virtual bool		Unk_28(void);		// 00010000
-	virtual bool		Unk_29(void);		// 00020000
-	virtual bool		Unk_2A(void);		// 00020000
-	virtual bool		Unk_2B(void);		// 00080000
-	virtual bool		Unk_2C(void);		// 02000000
-	virtual bool		Unk_2D(void);		// 40000000
-	virtual bool		Unk_2E(void);		// 00000200
-	virtual void		Unk_2F(bool set);	// 00000200
-	virtual bool		Unk_30(void);		// returns false
-	virtual void		Unk_31(bool set);	// 00000020 then calls Fn12 MarkAsModified
-	virtual void		Unk_32(bool set);	// 00000002 with a lot of housekeeping
-	virtual void		SetQuestItem(bool set);	// 00000400 then calls Fn12 MarkAsModified
-	virtual void		Unk_34(bool set);	// 00000040 then calls Fn12 MarkAsModified
-	virtual void		Unk_35(bool set);	// 00010000 then calls Fn12 MarkAsModified
-	virtual void		Unk_36(bool set);	// 00020000
-	virtual void		Unk_37(void);		// write esp format
-	virtual void		readOBNDSubRecord(ModInfo* modInfo);	// read esp format
-	virtual bool		Unk_39(void);
-	virtual bool		Unk_3A(void);
-	virtual bool		Unk_3B(void);
-	virtual bool		GetIsReference();
-	virtual bool		IsArmorAddon();
-	virtual bool		Unk_3E(void);
-	virtual bool		Unk_3F(void);	// returnTrue for refr whose baseForm is a TESActorBase
-	virtual bool		IsActor(void);
-	virtual uint32_t		Unk_41(void);
-	virtual void		CopyFrom(const TESForm* form);
-	virtual bool		Compare(TESForm* form);
-	virtual bool		CheckFormGRUP(void* arg);	// Checks the group is valid for the form
-	virtual void		InitFormGRUP(void* dst, void* arg1);	// Fills the groupInfo with info valid for the form
-	virtual bool		Unk_46(void);
-	virtual bool		Unk_47(void);
-	virtual bool		Unk_48(uint32_t formType);	// returns if the same FormType is passed in
-	virtual bool		Unk_49(void* arg0, void* arg1, void* arg2, void* arg3, void* arg4);	// looks to be func33 in Oblivion
-	virtual void		SetFormID(uint32_t refID, bool generateID);
-	virtual const char*	GetObjectTypeName(void) const;
-	virtual const char*	GetFormEditorID(void) const;
-	virtual bool		SetFormEditorID(const char* edid);		// simply returns true at run-time
-	// 4E
-	uint32_t GetId() const {
-		return *(uint32_t*)((uintptr_t)this + 0xC);
-	}
-
-	uint8_t GetType() const {
-		return *(uint8_t*)((uintptr_t)this + 0x4);
-	}
-
-	struct EditorData {
-		BSString	editorID;			// 00
-		uint32_t		vcMasterFormID;		// 08 - Version control 1 (looks to be a refID inside the Version Control master)
-		uint32_t		vcRevision;			// 0C
-	};
-	// 10
-
-	enum {
-		kFormFlags_Initialized = 0x00000008,	// set by TESForm::InitItem()
-		kFormFlags_CastShadows = 0x00000200,
-		kFormFlags_QuestItem = 0x00000400,
-		kFormFlags_IsPermanent = 0x00000800,
-		kFormFlags_DontSaveForm = 0x00004000,	// TODO: investigate
-		kFormFlags_Compressed = 0x00040000,
-	};
-
-	enum {
-		kModified_Flags = 0x00000001
-		//	uint32_t	flags;
-	};
-
-	uint8_t		typeID;				// 004
-	uint8_t		jipFormFlags1;		// 005
-	uint8_t		jipFormFlags2;		// 006
-	uint8_t		jipFormFlags3;		// 007
-	uint32_t		flags;				// 008
-	union {
-		uint32_t		refID;
-		struct {
-			uint8_t	id[3];
-			uint8_t	modIndex;
-		};
-	};
-
-#ifdef EDITOR
-	EditorData	editorData;			// +10
-#endif
-	tList<ModInfo> mods;			// 010 ModReferenceList in Oblivion
-	// 018 / 028
-
-	uint32_t GetFormID() const {
-		return refID;
-	}
-
-	TESForm* TryGetREFRParent();
-	uint8_t GetModIndex() const;
-	TESFullName* GetFullName();
-	const char* GetTheName();
-	bool IsCloned() const;
-
-	static const char* GetFormTypeName(uint32_t auiFormType);
-	const char* GetFormTypeName() const;
-
-	// adds a new form to the game (from CloneForm or LoadForm)
-	void DoAddForm(TESForm* newForm, bool bPersist = true, bool record = true) const;
-	// return a new base form which is the clone of this form
-	TESForm* CloneForm(bool bPersist = true) const;
-	bool IsInventoryObject() const;
-	bool IsReference();
-
-	bool HasScript();
-	bool GetScriptAndEventList(Script*& script, ScriptEventList*& eventList);
-	bool IsItemPlayable();
-	uint32_t GetItemValue();
-	uint8_t GetOverridingModIdx();
-	const char* GetDescriptionText();
-	const char* RefToString();
-	TESLeveledList* GetLvlList();
-	void SetJIPFlag(uint8_t jipFlag, bool bSet);
-
-	static TESForm* GetFormByNumericID(uint32_t formID);
-
-	bool GetTemporary() const;
-	void SetTemporary();
-
-	MEMBER_FN_PREFIX(TESForm);
-#if 1
-	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00484490);	// probably a member of TESForm
-#elif EDITOR
-#else
-#error
-#endif
-};
-static_assert(sizeof(TESForm) == 0x18);
-
 struct Condition {
 	uint8_t			type;				// 00
 	uint8_t			pad01[3];			// 01
@@ -507,43 +329,6 @@ struct Condition {
 
 struct ConditionList : tList<Condition> {
 	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result, bool arg4) { return ThisCall<bool>(0x680C60, this, runOnRef, arg2, result, arg4); }
-};
-class TESObject : public TESForm {
-public:
-	TESObject();
-	~TESObject();
-
-	virtual uint32_t	Unk_4E(void);
-	virtual bool	Unk_4F(void);
-	virtual uint32_t	Unk_50(void);
-	virtual bool	Unk_51(void);
-	virtual void	Unk_52(void* arg);
-	virtual NiNode* Unk_53(TESObjectREFR* refr, void* arg1);
-	virtual void	Unk_54(void* arg);
-	virtual bool	IsInternal(void);
-	virtual bool	IsInternalMarker(void);
-	virtual void	Unk_57(void);
-	virtual bool	Unk_58(void);	// BoundObject: Calls Unk_5F on the object model
-	virtual bool	Unk_59(void* arg);
-	virtual void	Unk_5A(void* arg0, void* arg1);
-	virtual uint32_t	Unk_5B(void);
-	virtual uint32_t	Unk_5C(void);
-	virtual bool	Unk_5D(TESObjectREFR* refr);	// if false, no NiNode gets returned by Unk_53, true for NPC
-};
-
-// 30
-class TESBoundObject : public TESObject {
-public:
-	TESBoundObject();
-	~TESBoundObject();
-
-	virtual NiNode* CreateNiNode(TESObjectREFR* refr);	// calls Fn53, for NPC calls ReadBones, for LevelledActor level them if necessary
-	virtual bool	Unk_5F(void);
-
-	BoundObjectListHead* head;		// 018
-	TESBoundObject* prev;		// 01C
-	TESBoundObject* next;		// 020
-	int16_t					bounds[6];	// 024
 };
 
 // C
@@ -1107,13 +892,6 @@ public:
 };
 
 static_assert(sizeof(TESBipedModelForm) == 0x0DC);
-
-// 30
-class TESBoundAnimObject : public TESBoundObject {
-public:
-	TESBoundAnimObject();
-	~TESBoundAnimObject();
-};
 
 // 0C
 struct LvlListExtra {
@@ -1697,7 +1475,7 @@ public:
 	TESQuest*			quest;				// 48
 	uint32_t				modInfoFileOffset;	// 4C	during LoadForm
 #if JIP_CHANGES
-	TESTopic*			pParentTopic;
+	TESTopic*				pParentTopic;
 #endif
 
 	void RunResultScript(bool onEnd, Actor* actor);
@@ -1711,7 +1489,9 @@ public:
 	}
 };
 
-typedef NiTLargeArray<TESTopicInfo*> TopicInfoArray;
+class TopicInfoArray : public NiTLargePrimitiveArray<TESTopicInfo*> {
+public:
+};
 typedef void* INFO_LINK_ELEMENT;
 
 // 48
@@ -1945,7 +1725,7 @@ public:
 	void SetFlag(uint32_t pFlag, bool bEnable) {
 		if (bEnable) factionFlags |= pFlag;
 		else factionFlags &= ~pFlag;
-		MarkAsModified(kModified_FactionFlags);
+		AddChange(kModified_FactionFlags);
 	}
 	bool IsHidden() {
 		return IsFlagSet(kFlag_HiddenFromPC);
@@ -2100,7 +1880,7 @@ public:
 	uint32_t			unk4B8[(0x4CC - 0x4B8) >> 2]; // 4B8
 
 	BSString			name;				// 4CC
-	NiTArray <void*>	faceGenUndo;		// 4D4 - NiTPrimitiveArray<FaceGenUndo *>
+	NiTPrimitiveArray <void*>	faceGenUndo;		// 4D4 - NiTPrimitiveArray<FaceGenUndo *>
 	uint32_t				unk4E4[6];			// 4E4
 	BGSVoiceType*		voiceTypes[2];		// 4FC // VTCK male/female
 	TESRace*			ageRace[2];			// 504 // ONAM/YNAM
@@ -3184,7 +2964,8 @@ static_assert(sizeof(TESCaravanCard) == 0xBC);
 class BSFaceGenNiNode;
 
 // 2B0
-struct BipedAnim {
+class BipedAnim {
+public:
 	enum eOptionalBoneType {
 		kOptionalBone_Bip01Head = 0,
 		kOptionalBone_Weapon = 1,
@@ -3351,7 +3132,7 @@ public:
 	TESNPC* copyFrom;			// 1F0	Not set once PlayerRef exists and the target is the Player
 	float					height;				// 1F4
 	float					weight;				// 1F8	Aparently, getWeight purposly returns height except for the player.
-	NiTArray<FaceGenUndo*>	faceGenUndo;		// 1FC
+	NiTPrimitiveArray<FaceGenUndo*>	faceGenUndo;		// 1FC
 
 	void SetSex(uint32_t flags);
 	void SetRace(TESRace* pRace);
@@ -3880,16 +3661,16 @@ public:
 	};
 
 	// 64
-	struct CellRenderData {
-		NiNode* masterNode;	// 00
-		tList<TESObjectREFR>					list04;			// 04
-		NiTMapBase<TESObjectREFR*, NiNode*>		map0C;			// 0C
-		NiTMapBase<TESForm*, TESObjectREFR*>	map1C;			// 1C
-		NiTMapBase<TESObjectREFR*, NiNode*>		map2C;			// 2C
-		NiTMapBase<TESObjectREFR*, NiNode*>		map3C;			// 3C
-		tList<TESObjectREFR>					list4C;			// 4C
-		tList<void>								list54;			// 54
-		tList<TESObjectREFR>					list5C;			// 5C
+	struct LoadedData {
+		NiPointer<NiNode>									spCell3D;
+		BSSimpleList<TESObjectREFR*>						kLargeAnimatedRefs;
+		NiTMap<TESObjectREFR*, NiNode*>						kAnimatedRefs;
+		NiTMap<TESForm*, TESObjectREFR*>					kEmittanceSourceRefMap; // Form can be either TESRegion or TESObjectLIGH
+		NiTMap<TESObjectREFR*, NiNode*>						kEmittanceLightRefMap;
+		NiTMap<TESObjectREFR*, NiPointer<BSMultiBoundNode>> kMultiboundRefMap;
+		BSSimpleList<TESObjectREFR*>						kScriptedRefs;
+		BSSimpleList<TESObjectREFR*>						kActivatingRefs;
+		BSSimpleList<TESObjectREFR*>						kWaterRefs;
 	};
 
 	enum {
@@ -3925,7 +3706,7 @@ public:
 	NiNode* niNodeB8;				// B8
 	uint32_t					unkBC;					// BC
 	TESWorldSpace* worldSpace;			// C0
-	CellRenderData* renderData;			// C4
+	LoadedData* renderData;			// C4
 	float					fltC8;					// C8
 	uint8_t					byteCC;					// CC
 	uint8_t					byteCD;					// CD
@@ -3996,11 +3777,11 @@ struct LODdata {
 	uint8_t							byte29;		// 29
 	uint8_t							byte2A;		// 2A
 	uint8_t							byte2B;		// 2B
-	BSSimpleArray<TESObjectREFR>	array2C;	// 2C
+	BSSimpleArray<TESObjectREFR*>	array2C;	// 2C
 };
 static_assert(sizeof(LODdata) == 0x3C);
 
-typedef NiTPointerMap<TESObjectCELL> CellPointerMap;
+typedef NiTPointerMap<int32_t, TESObjectCELL*> CellPointerMap;
 
 // EC
 struct NiPoint3;
@@ -4023,11 +3804,11 @@ public:
 		int16_t	Y;
 	};
 
-	struct Offset_Data {
-		uint32_t** unk00;	// 00 array of uint32_t stored in OFST record.
-		CoordXY		min;		// 04 NAM0
-		CoordXY		max;		// 0C NAM9
-		uint32_t		fileOffset;	// 14 TESWorldspace file offset in modInfo
+	struct OFFSET_DATA {
+		uint32_t*	pCellFileOffsets;
+		NiPoint2	kOffsetMinCoords;
+		NiPoint2	kOffsetMaxCoords;
+		uint32_t	uiFileOffset;
 	};	// 014
 
 	struct MapData {
@@ -4037,7 +3818,7 @@ public:
 	};	// 010
 
 	struct ImpactData {
-		typedef NiTMapBase<BGSImpactData*, BGSImpactData*> ImpactImpactMap;
+		typedef NiTMap<BGSImpactData*, BGSImpactData*> ImpactImpactMap;
 		enum MaterialType {
 			eMT_Stone,
 			eMT_Dirt,
@@ -4058,9 +3839,8 @@ public:
 		char				footstepMaterials[0x12C];	// 030
 	};
 
-	typedef NiTPointerMap<BSSimpleList<TESObjectREFR> > RefListPointerMap;
-	typedef NiTMapBase<ModInfo*, TESWorldSpace::Offset_Data*> OffsetDataMap;
-
+	typedef NiTPointerMap<uint32_t, BSSimpleList<TESObjectREFR*>*>	RefListPointerMap;
+	typedef NiTMap<TESFile*, TESWorldSpace::OFFSET_DATA*>			OffsetDataMap;
 	enum {
 		kWorldFlag_SmallWorld = 1 << 0,
 		kWorldFlag_NoFastTravel = 1 << 1,
@@ -4168,7 +3948,7 @@ public:
 		};
 
 		struct GrassAreaParam;
-		typedef NiTPointerMap<GrassAreaParam*> GrassAreaParamMap;
+		typedef NiTPointerMap<uint32_t, GrassAreaParam*> GrassAreaParamMap;
 
 		void*					ptr00;			// 00
 		Geometry*				geometry;		// 04
@@ -4400,15 +4180,6 @@ public:
 		uint8_t	date;
 		uint8_t	time;
 		uint32_t	duration;
-
-		static const char* MonthForCode(uint8_t monthCode);
-		static const char* DayForCode(uint8_t dayCode);
-		static uint8_t CodeForMonth(const char* monthStr);
-		static uint8_t CodeForDay(const char* dayStr);
-		static bool IsValidMonth(uint8_t m) { return (m + 1) <= kMonth_Winter; }
-		static bool IsValidTime(uint8_t t) { return (t + 1) <= 24; }
-		static bool IsValidDay(uint8_t d) { return (d + 1) <= kWeekday_TT; }
-		static bool IsValidDate(uint8_t d) { return d <= 31; }
 	};
 
 	union ObjectType {
@@ -4470,12 +4241,6 @@ public:
 		uint8_t		pad[3];
 		uint32_t		radius;
 		ObjectType  object;
-
-		static LocationData* Create();
-		static const char* StringForLocationCode(uint8_t locCode);
-		const char* StringForLocationCodeAndData(void);
-		static uint8_t LocationCodeForString(const char* locStr);
-		static bool IsValidLocationType(uint8_t locCode) { return locCode < kPackLocation_Max; }
 	};
 
 	enum {
@@ -4492,12 +4257,6 @@ public:
 		ObjectType	target;		// 04
 		uint32_t		count;		// 08 can be distance too
 		float		unk0C;		// 0C
-
-		static TargetData* Create();
-		static const char* StringForTargetCode(uint8_t targetCode);
-		const char* StringForTargetCodeAndData(void);
-		static uint8_t TargetCodeForString(const char* targetStr);
-		static bool IsValidTargetCode(uint8_t c) { return c < TESPackage::kTargetType_Max; }
 	};
 
 	enum eProcedure {			// uint32_t	// Checked the Geck Wiki. Not consistent with s_procNames (which has a diffferent order and 0x37 procedures)
@@ -4585,8 +4344,6 @@ public:
 
 	bool IsFlagSet(uint32_t flag);
 	void SetFlag(uint32_t flag, bool bSet);
-
-	bool GetFleeCombat();
 
 	static const char* StringForPackageType(uint32_t pkgType);
 	static const char* StringForObjectCode(uint8_t objCode);
@@ -4740,12 +4497,12 @@ public:
 		uint32_t unk034[36]; // 034
 		void* ptr0C4; // 0C4
 		uint32_t unk0C8[17]; // 0C8
-		BSSimpleArray<PathingCoverLocation> arr10C; // 10C
+		BSSimpleArray<PathingCoverLocation*> arr10C; // 10C
 		uint32_t unk11C[11]; // 11C
-		BSSimpleArray<PathingCoverLocation> arr148; // 148
+		BSSimpleArray<PathingCoverLocation*> arr148; // 148
 		uint32_t unk158[3]; // 158
-		BSSimpleArray<UnreachableCoverLocation> arr164; // 164
-		BSSimpleArray<UnreachableLocation> arr174; // 174
+		BSSimpleArray<UnreachableCoverLocation*> arr164; // 164
+		BSSimpleArray<UnreachableLocation*> arr174; // 174
 		uint32_t unk184[15]; // 184
 		Actor* actor1C0; // 1C0
 		CombatController* cmbtCtrl; // 1C4
@@ -4755,7 +4512,7 @@ public:
 	CombatActors* combatActors; // 080
 	CombatProcedure* combatProcedure1; // 084
 	CombatProcedure* combatProcedure2; // 088
-	BSSimpleArray<CombatProcedure> combatProcedures; // 08C
+	BSSimpleArray<CombatProcedure*> combatProcedures; // 08C
 	Unk09C* struct09C; // 09C
 	void* ptr0A0; // 0A0
 	uint32_t unk0A4; // 0A4
@@ -5238,7 +4995,7 @@ public:
 
 		if (form && IsAddedObject(n)) {
 			if (numAddedObjects == 0) {
-				PrintDebug("BGSListForm::RemoveNthForm: numAddedObjects = 0");
+				_MESSAGE("BGSListForm::RemoveNthForm: numAddedObjects = 0");
 			}
 			else {
 				numAddedObjects--;
@@ -6180,3 +5937,5 @@ public:
 	uint32_t count;
 };
 static_assert(sizeof(TESCaravanDeck) == 0x2C);
+
+extern TESForm* __fastcall GetTESForm(const TESForm* apForm);

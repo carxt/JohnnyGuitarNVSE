@@ -411,7 +411,7 @@ struct NVSEArrayVarInterface
 		Array* GetArray() const  { return type == kType_Array ? arr : NULL; }
 		uint32_t GetArrayID() const { return type == kType_Array ? reinterpret_cast<uint32_t>(arr) : 0; }
 		TESForm * GetTESForm() const  { return type == kType_Form ? form : NULL; }
-		uint32_t GetFormID() const { return type == kType_Form ? (form ? form->refID : 0) : 0; }
+		uint32_t GetFormID() const { return type == kType_Form ? (form ? form->GetFormID() : 0) : 0; }
 		double GetNumber() const  { return type == kType_Numeric ? num : 0.0; }
 		bool Bool() const
 		{

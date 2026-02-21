@@ -33,8 +33,8 @@ void IOManager::DumpQueuedTasks() {
 		if (!qr)
 			continue;
 		else if (qr->refr) {
-			Console_Print("\t%s (%08x)", GetFullName(qr->refr), qr->refr->refID);
-			_MESSAGE("\t%s (%08x)", GetFullName(qr->refr), qr->refr->refID);
+			Console_Print("\t%s (%08x)", GetFullName(qr->refr), qr->refr->GetFormID());
+			_MESSAGE("\t%s (%08x)", GetFullName(qr->refr), qr->refr->GetFormID());
 		}
 		else
 			_MESSAGE("NULL reference");
@@ -55,8 +55,4 @@ __declspec(naked) void ModelLoader::QueueReference(TESObjectREFR* refr, uint32_t
 // arg2 is encoded based on the parent cell and arg3 is most likely a boolean
 {
 	__asm	jmp		kModelLoader_QueueReference
-}
-
-uint32_t* BSTask::GetCounterSingleton() {
-	return kBSTaskCounter;
 }

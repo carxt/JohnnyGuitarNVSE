@@ -20,13 +20,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -51,22 +51,22 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GAME;WIN32;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;RUNTIME;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <ForcedIncludeFiles>shared/defines.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <LanguageStandard>stdcpp23</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -79,8 +79,10 @@
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
-      <Command>if exist "$(FalloutNVPathD)\Data\NVSE\plugins\" (
-copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
+      <Command>if exist "$(MO2)\JohnnyGuitar NVSE\nvse\plugins" (
+copy "$(TargetPath)" "$(MO2)\JohnnyGuitar NVSE\nvse\plugins\$(TargetFileName)"
+copy "$(TargetDir)$(TargetName).pdb" "$(MO2)\JohnnyGuitar NVSE\nvse\plugins\$(TargetName).pdb"
+copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
 )</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -93,11 +95,13 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ForcedIncludeFiles>shared/defines.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <LanguageStandard>stdcpp23</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <ExceptionHandling>false</ExceptionHandling>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -112,22 +116,22 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
-      <Command>if exist "$(FalloutNVPathD)\Data\NVSE\plugins\" (
-copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
+      <Command>if exist "$(MO2)\JohnnyGuitar NVSE\nvse\plugins" (
+copy "$(TargetPath)" "$(MO2)\JohnnyGuitar NVSE\nvse\plugins\$(TargetFileName)"
+copy "$(TargetDir)$(TargetName).pdb" "$(MO2)\JohnnyGuitar NVSE\nvse\plugins\$(TargetName).pdb"
+copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
 )</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp" />
     <ClCompile Include="..\nvse\nvse\GameBSExtraData.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameData.cpp" />
     <ClCompile Include="..\nvse\nvse\GameExtraData.cpp" />
     <ClCompile Include="..\nvse\nvse\GameForms.cpp" />
     <ClCompile Include="..\nvse\nvse\GameObjects.cpp" />
     <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp" />
     <ClCompile Include="..\nvse\nvse\GameRTTI.cpp" />
     <ClCompile Include="..\nvse\nvse\GameScript.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameSettings.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTiles.cpp" />
     <ClCompile Include="..\nvse\nvse\GameUI.cpp" />
@@ -136,14 +140,25 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClCompile Include="..\shared\BSMemory\BSMemory.cpp" />
     <ClCompile Include="..\shared\BSMemory\BSScrapMemory.cpp" />
     <ClCompile Include="..\shared\SafeWrite\SafeWrite.cpp" />
+    <ClCompile Include="..\shared\Utils\DebugLog.cpp" />
     <ClCompile Include="events\EventFramework.cpp" />
     <ClCompile Include="events\LambdaVariableContext.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSSpinLock.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Conversation.cpp" />
     <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp" />
     <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\GameSettingCollection.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\IOTask.cpp" />
     <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\Setting.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESBoundObject.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESDataHandler.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESFile.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESForm.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESObject.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESObjectList.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFixedString.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiGlobalStringTable.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMemObject.cpp" />
@@ -183,6 +198,7 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClInclude Include="..\shared\Defines.hpp" />
     <ClInclude Include="..\shared\SafeWrite\SafeWrite.hpp" />
     <ClInclude Include="..\shared\Utils\Bitfield.hpp" />
+    <ClInclude Include="..\shared\Utils\DebugLog.hpp" />
     <ClInclude Include="events\EventFramework.h" />
     <ClInclude Include="events\JohnnyEvents.h" />
     <ClInclude Include="events\LambdaVariableContext.h" />
@@ -204,21 +220,70 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
     <ClInclude Include="internal\Game\Bethesda\BaseFormComponent.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSSimpleArray.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSSimpleArrayRefCounted.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleList.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSSpinLock.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSStringT.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSTask.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSTCaseInsensitiveStringMap.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSUtilities.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Conversation.hpp" />
     <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\DialogueResponse.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FileFinder.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\FormID.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\GameSettingCollection.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\INIPrefSettingCollection.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\INISettingCollection.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\IOTask.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MemoryContexts.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\RendererSettingCollection.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\Setting.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\SettingCollection.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\SettingCollectionList.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\SettingCollectionMap.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\SettingT.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESBoundAnimObject.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESBoundObject.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESDataHandler.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESFile.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESForm.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESObject.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESObjectList.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiCriticalSection.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFixedString.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiGlobalStringTable.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemory.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSmartPointer.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTAbstractPoolAllocator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTArray.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTDefaultAllocator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTLargeArray.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTLargeObjectArray.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTLargePrimitiveArray.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTList.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTListBase.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTMallocInterface.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTMap.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTMapBase.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTNewInterface.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTObjectAllocator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTObjectArray.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTObjectList.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTObjectSet.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTPointerAllocator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTPointerList.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTPointerListBase.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTPointerMap.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTPrimitiveArray.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTPrimitiveSet.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTSet.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTStringMap.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTStringPointerMap.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTStringTemplateMap.hpp" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\JG\EditorIDRestoration.hpp" />
     <ClInclude Include="internal\JG\JohnnyExtraData.hpp" />
@@ -235,8 +300,19 @@ copy "$(TargetPath)" "$(FalloutNVPathD)\Data\NVSE\plugins\$(TargetFileName)"
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
+    <None Include="internal\Game\Bethesda\BSSimpleArray.inl" />
     <None Include="internal\Game\Bethesda\BSSimpleList.inl" />
     <None Include="internal\Game\Bethesda\BSStringT.inl" />
+    <None Include="internal\Game\Bethesda\BSTask.inl" />
+    <None Include="internal\Game\Bethesda\SettingT.inl" />
+    <None Include="internal\Game\Gamebryo\NiTArray.inl" />
+    <None Include="internal\Game\Gamebryo\NiTLargeArray.inl" />
+    <None Include="internal\Game\Gamebryo\NiTListBase.inl" />
+    <None Include="internal\Game\Gamebryo\NiTMap.inl" />
+    <None Include="internal\Game\Gamebryo\NiTMapBase.inl" />
+    <None Include="internal\Game\Gamebryo\NiTPointerListBase.inl" />
+    <None Include="internal\Game\Gamebryo\NiTPointerMap.inl" />
+    <None Include="internal\Game\Gamebryo\NiTStringTemplateMap.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

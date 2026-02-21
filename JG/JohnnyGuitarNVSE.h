@@ -18,8 +18,8 @@ bool bArrowKeysDisabled = false;
 bool bCombatMusicDisabled = false;
 #define ExtractFormatStringArgs(...) g_scriptInterface->ExtractFormatStringArgs(__VA_ARGS__)
 #define IS_TYPE(form, type) (*(uint32_t*)form == kVtbl_##type)
-#define NOT_ID(form, type) (form->typeID != FORM_TYPE::##type)
-#define IS_ID(form, type) (form->typeID == FORM_TYPE::##type)
+#define NOT_ID(form, type) (form->GetFormType() != FORM_TYPE::##type)
+#define IS_ID(form, type) (form->GetFormType() == FORM_TYPE::##type)
 #define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 #define VarNameSize 64
@@ -77,22 +77,21 @@ namespace hk_GMSTJG {
 	static uintptr_t func_AddGameSetting_IntOrStaticStr = 0x40C150;
 	namespace gmst
 	{
-		Setting fCombatLocationTargetRadiusMaxBase;
-		Setting fCombatRangedWeaponRangeBaseMult;
-		Setting iOverrideDialogueEmotionValues;
-		Setting iFixAudioMarkerLookupAlgo;
-		Setting sNewline;
+		CustomGameSetting fCombatLocationTargetRadiusMaxBase;
+		CustomGameSetting fCombatRangedWeaponRangeBaseMult;
+		CustomGameSetting iOverrideDialogueEmotionValues;
+		CustomGameSetting iFixAudioMarkerLookupAlgo;
+		CustomGameSetting sNewline;
 
 	};
 	void ExtraGMSTInit()
 	{
 		using namespace gmst;
-		ThisCall(func_AddGameSetting_Float, &fCombatLocationTargetRadiusMaxBase, "fCombatLocationTargetRadiusMaxBase", 10.0f);
-		ThisCall(func_AddGameSetting_Float, &fCombatRangedWeaponRangeBaseMult, "fCombatRangedWeaponRangeBaseMult", 1.0f);
-		ThisCall(func_AddGameSetting_IntOrStaticStr, &iOverrideDialogueEmotionValues, "iOverrideDialogueEmotionValues", 0);
-		ThisCall(func_AddGameSetting_IntOrStaticStr, &iFixAudioMarkerLookupAlgo, "iFixAudioMarkerLookupAlgo", 1);
-		ThisCall(func_AddGameSetting_IntOrStaticStr, &sNewline, "sNewline", "\n");
-
+		fCombatLocationTargetRadiusMaxBase.Initialize("fCombatLocationTargetRadiusMaxBase", 10.0f);
+		fCombatRangedWeaponRangeBaseMult.Initialize("fCombatRangedWeaponRangeBaseMult", 1.0f);
+		iOverrideDialogueEmotionValues.Initialize("iOverrideDialogueEmotionValues", 0);
+		iFixAudioMarkerLookupAlgo.Initialize("iFixAudioMarkerLookupAlgo", 1);
+		sNewline.Initialize("sNewline", "\n");
 	}
 }
 
@@ -101,7 +100,7 @@ std::vector<uintptr_t> GetFactionsInList(ExtraFactionChanges::FactionListEntry* 
 		auto factHead = pFactList->Head();
 		while (factHead) {
 			if (factHead->data && factHead->data->rank >= 0) {
-				retObj.push_back(factHead->data->faction->refID);
+				retObj.push_back(factHead->data->faction->GetFormID());
 			}
 			factHead = factHead->next;
 		}
@@ -159,7 +158,7 @@ void __fastcall SetCameraRotateHook(NiNode* apThis, void*, NiMatrix3& arRot) {
 	else if (bOverrideCameraRot && pPlayer->IsThirdPerson()) {
 		if (eAxis == kCameraRotationType_TrackTarget) {
 			TESForm* pForm = TESForm::GetFormByNumericID(uiReferenceToTrack);
-			if (pForm->GetIsReference() && pCamera) {
+			if (pForm->IsReference() && pCamera) {
 				TESObjectREFR* pTrackRef = (TESObjectREFR*)pForm;
 				NiNode* pRootNode = pTrackRef->GetNiNode();
 				NiVector3 kPos;
@@ -211,10 +210,10 @@ namespace NPCAccuracy {
 			return 1.0f;
 		};
 		double retMul = 1.0f;
-		retMul *= findValInTable(a_refr->refID, tables.ACTREF);
-		retMul *= findValInTable(GetPermanentBaseForm(a_refr)->refID, tables.ACTBAS);
+		retMul *= findValInTable(a_refr->GetFormID(), tables.ACTREF);
+		retMul *= findValInTable(GetPermanentBaseForm(a_refr)->GetFormID(), tables.ACTBAS);
 		if (auto pCStyle = a_refr->GetCombatStyle()) {
-			retMul *= findValInTable(pCStyle->refID, tables.CSTY);
+			retMul *= findValInTable(pCStyle->GetFormID(), tables.CSTY);
 		}
 		auto factionsForAct = GetFactionsForActor(a_refr);
 		for (auto factRefId : factionsForAct) {
@@ -262,7 +261,7 @@ namespace hk_CombatLocation
 	public:
 		static  float __cdecl hk_CLCHook(float m_a1, float m_a2) {
 			auto res = CdeclCall<float>(hookCall, m_a1, m_a2);
-			return fmax(res, hk_GMSTJG::gmst::fCombatLocationTargetRadiusMaxBase.data.f);
+			return fmax(res, hk_GMSTJG::gmst::fCombatLocationTargetRadiusMaxBase.Float());
 		}
 
 		hk_CombatLocationMaxCall() {
@@ -280,7 +279,7 @@ namespace hk_CombatLocation
 		static  float __fastcall hk_Hook(TESObjectWEAP* r_weap) {
 			auto res = ThisCall<float>(hookCall, r_weap);
 			if (!ThisCall<bool>(0x0647790, r_weap) && ThisCall<bool>(0x04C0C30, r_weap)) {
-				res *= hk_GMSTJG::gmst::fCombatRangedWeaponRangeBaseMult.data.f;
+				res *= hk_GMSTJG::gmst::fCombatRangedWeaponRangeBaseMult.Float();
 			}
 			return res;
 		}
@@ -430,10 +429,10 @@ namespace hk_BarterHook {
 			if (!merchantRef) return shouldHide;
 			auto originalForm = ref->type;
 			if (!PlayerCharacter::GetSingleton()) return shouldHide;
-			auto it = barterFilterListLeft.find(originalForm->refID);
+			auto it = barterFilterListLeft.find(originalForm->GetFormID());
 			if (it != barterFilterListLeft.end()) {
 				auto &barterSet = it->second;
-				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0) || barterSet.Allow(PlayerCharacter::GetSingleton()->refID);
+				shouldHide = barterSet.Allow(merchantRef->GetFormID()) || barterSet.Allow(merchantRef->baseForm->GetFormID()) || barterSet.Allow(0) || barterSet.Allow(PlayerCharacter::GetSingleton()->GetFormID());
 			}
 			return shouldHide;
 		}
@@ -459,10 +458,10 @@ namespace hk_BarterHook {
 			auto merchantRef = barterMenu->merchantRef;
 			if (!merchantRef) return shouldHide;
 			auto originalForm = ref->type;
-			auto it = barterFilterListRight.find(originalForm->refID);
+			auto it = barterFilterListRight.find(originalForm->GetFormID());
 			if (it != barterFilterListRight.end()) {
 				auto& barterSet = it->second;
-				shouldHide = barterSet.Allow(merchantRef->refID) || barterSet.Allow(merchantRef->baseForm->refID) || barterSet.Allow(0) || barterSet.Allow(PlayerCharacter::GetSingleton()->refID);
+				shouldHide = barterSet.Allow(merchantRef->GetFormID()) || barterSet.Allow(merchantRef->baseForm->GetFormID()) || barterSet.Allow(0) || barterSet.Allow(PlayerCharacter::GetSingleton()->GetFormID());
 
 			}
 			return shouldHide;
@@ -505,7 +504,7 @@ public:
 		{
 			result = pObjective->status & BGSQuestObjective::eQObjStatus_displayed;
 			auto questObjectiveDisplayStr = pObjective->displayText.c_str();
-			auto questDisplayStr = pObjective->quest->GetFullName()->name.c_str();
+			auto questDisplayStr = TESFullName::GetFullName(pObjective->quest);
 			if (!((questObjectiveDisplayStr && *questObjectiveDisplayStr) || (questDisplayStr && *questDisplayStr)))
 			{
 				result = 0;
@@ -531,9 +530,8 @@ class hk_EmotionOverrideUndo
 {
 	static void* __fastcall hk_UndoEmotionOverride(void** ptr)
 	{
-		Setting* iSTDEmotionVal = &hk_GMSTJG::gmst::iOverrideDialogueEmotionValues;
 		auto retVal = ThisCall<void*>(hookCall, ptr);
-		if (iSTDEmotionVal->data.i <= 0)
+		if (hk_GMSTJG::gmst::iOverrideDialogueEmotionValues.Int() <= 0)
 		{
 			retVal = nullptr;
 		}
@@ -593,7 +591,7 @@ namespace hk_DialogueTopicResponseManageHook {
 
 
 	static uintptr_t originalTopicInfoLoad = 0x104D5D4;
-	DWORD __fastcall hk_TESTopicInfo_Load(TESTopicInfo* topicInfo, void* edx, ModInfo* modInfo)
+	DWORD __fastcall hk_TESTopicInfo_Load(TESTopicInfo* topicInfo, void* edx, TESFile* modInfo)
 	{
 		DWORD retVal = ThisCall<DWORD>(originalTopicInfoLoad, topicInfo, modInfo);
 		if (retVal)
@@ -607,69 +605,19 @@ namespace hk_DialogueTopicResponseManageHook {
 					diaCache.emotionType = responseItem->data.emotionType;
 					diaCache.emotionValue = responseItem->data.emotionValue;
 					diaCache.responseNumber = responseItem->data.responseNumber;
-					diaCache.speakerAnimation = (responseItem->spkeakerAnimation) ? responseItem->spkeakerAnimation->refID : 0;
-					diaCache.listenerAnimation = (responseItem->listenerAnimation) ? responseItem->listenerAnimation->refID : 0;
-					cachedDialogueInfo[topicInfo->refID][responseItem->data.responseNumber] = diaCache;
+					diaCache.speakerAnimation = (responseItem->spkeakerAnimation) ? responseItem->spkeakerAnimation->GetFormID() : 0;
+					diaCache.listenerAnimation = (responseItem->listenerAnimation) ? responseItem->listenerAnimation->GetFormID() : 0;
+					cachedDialogueInfo[topicInfo->GetFormID()][responseItem->data.responseNumber] = diaCache;
 				} while (responseItem = responseItem->next);
 			}
 		}
 		return retVal;
 	}
 
-	DWORD __fastcall TESTopicInfo_DumpAllDialogue()
-	{
-		PrintLog("Start Dialogue Dump");
-		for (auto& i : cachedDialogueInfo)
-		{
-			if (auto dialogForm = LookupFormByID(i.first))
-			{
-
-
-				std::string dumpStringL;
-				dumpStringL += DataHandler::Get()->GetNthModName(dialogForm->GetOverridingModIdx());
-				dumpStringL += "/@/";
-				dumpStringL += DataHandler::Get()->GetNthModName(dialogForm->modIndex);
-				dumpStringL += "/&/";
-				char hexBuf[256] = {};
-				memset(hexBuf, 0, _countof(hexBuf));
-				sprintf_s(hexBuf, "0x%lx", dialogForm->refID & 0xFFFFFF);
-				dumpStringL += std::string(hexBuf);
-				bool addSplit = false;
-				dumpStringL += "=";
-				for (auto& j : i.second)
-				{
-
-					if (addSplit)
-					{
-						dumpStringL += "|";
-					}
-					dumpStringL += std::to_string(j.first);
-					dumpStringL += "," + std::to_string(j.second.emotionType);
-					dumpStringL += "," + std::to_string(j.second.emotionValue);
-					if (auto speakAnim = LookupFormByID(j.second.speakerAnimation))
-					{
-						dumpStringL += ",";
-						dumpStringL += std::string_view(speakAnim->GetFormEditorID());
-					}
-					if (auto speakAnim = LookupFormByID(j.second.listenerAnimation))
-					{
-						dumpStringL += ",";
-						dumpStringL += std::string_view(speakAnim->GetFormEditorID());
-					}
-					addSplit = true;
-				}
-				PrintLog(dumpStringL.c_str());
-			}
-		}
-		PrintLog("End Dialogue Dump");
-		return NULL;
-
-	}
-
 	static  DialogueResponse* __fastcall DialogueResponse_Init(DialogueResponse* responseCol,
 		void* edx, TESQuest* quest, TESTopic* topic, TESTopicInfo* topicInfo, Actor* speaker, TESTopicInfoResponse* topicInfoResponse)
 	{
-		if (auto diaCont = dialogResponseOverrideMap.find(topicInfo->refID); diaCont != dialogResponseOverrideMap.end())
+		if (auto diaCont = dialogResponseOverrideMap.find(topicInfo->GetFormID()); diaCont != dialogResponseOverrideMap.end())
 		{
 
 			Setting* iSTDEmotionVal = (Setting*) 0x11CBDF4;
@@ -684,9 +632,9 @@ namespace hk_DialogueTopicResponseManageHook {
 					responseCol->emotionValue = diaItem->second.m_emotionValue;
 
 				}
-				if ((responseCol->emotionType > 0) && hk_GMSTJG::gmst::iOverrideDialogueEmotionValues.data.i >= 1)
+				if ((responseCol->emotionType > 0) && hk_GMSTJG::gmst::iOverrideDialogueEmotionValues.Int() >= 1)
 				{
-					responseCol->emotionValue = iSTDEmotionVal->data.i;
+					responseCol->emotionValue = iSTDEmotionVal->Int();
 				}
 
 				if (IS_TYPE(diaItem->second.m_speakerAnimation, TESIdleForm) || (diaItem->second.m_speakerAnimation == NULL))
@@ -747,12 +695,12 @@ namespace hk_RSMBarberHook {
 	JGSetList<DWORD> beardSetList;
 	uintptr_t RSMDestructorOriginal = (uintptr_t)0x07AC530;
 	bool __fastcall hk_TESHair_IsPlayable(TESHair* ptr_hair) {
-		return (ptr_hair->IsPlayable()) && (haircutSetList.Allow(ptr_hair->refID));
+		return (ptr_hair->IsPlayable()) && (haircutSetList.Allow(ptr_hair->GetFormID()));
 
 	}
 
 	bool __fastcall hk_BGSHeadPart_IsPlayable(BGSHeadPart* ptr_hdpt) {
-		return (ptr_hdpt->headFlags & 0x1) && (beardSetList.Allow(ptr_hdpt->refID));
+		return (ptr_hdpt->headFlags & 0x1) && (beardSetList.Allow(ptr_hdpt->GetFormID()));
 	}
 	DWORD __fastcall hk_RSMDestroy(void* thisObj, void* EDX, BOOL heapFree) {
 		auto ret = ThisCall<DWORD>(RSMDestructorOriginal, thisObj, heapFree);
@@ -935,10 +883,6 @@ __forceinline void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn
 	NiPointBuffer->z = zIn;
 }
 
-uint8_t TESForm::GetOverridingModIdx() {
-	return mods.GetLastItem() ? mods.GetLastItem()->modIndex : 0xFF;
-}
-
 NiAVObject* NiNode::GetBlock(const char* blockName) {
 	return GetObjectByName(blockName);
 }
@@ -977,7 +921,7 @@ bool __fastcall FleeFixHook(PlayerCharacter* Player, void* unused, bool& IsHidde
 char** defaultMarkerList = (char**)0x11A0404;
 
 char* __fastcall GetMapMarker(TESObjectREFR* thisObj, uint16_t mapMarkerType) {
-	auto it = markerIconMap.find(thisObj->refID);
+	auto it = markerIconMap.find(thisObj->GetFormID());
 	if (it != markerIconMap.end()) return it->second;
 	return defaultMarkerList[mapMarkerType];
 }
@@ -1001,7 +945,7 @@ void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1) {
 	}
 }
 void SetMapMarkerIcon(TESObjectREFR* marker, char* iconPath) {
-	auto pos = markerIconMap.find(marker->refID);
+	auto pos = markerIconMap.find(marker->GetFormID());
 	uint32_t bufferSize = strlen(iconPath) + 1;
 	char* pathCopy = BSMemory::malloc<char>(bufferSize);
 	strcpy_s(pathCopy, bufferSize, iconPath);
@@ -1011,7 +955,7 @@ void SetMapMarkerIcon(TESObjectREFR* marker, char* iconPath) {
 		pos->second = pathCopy;
 	}
 	else {
-		markerIconMap.insert({ marker->refID, pathCopy });
+		markerIconMap.insert({ marker->GetFormID(), pathCopy });
 	}
 }
 
@@ -1163,19 +1107,19 @@ void __fastcall UIUpdateSoundHook(BSSoundHandle* sound, int dummy) {
 			switch (iter->data->updateType) {
 				case QuestAdded:
 					if (questNewSound != nullptr)
-						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questNewSound->refID, 0x121);
+						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questNewSound->GetFormID(), 0x121);
 					break;
 				case QuestCompleted:
 					if (questCompeteSound != nullptr)
-						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questCompeteSound->refID, 0x121);
+						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questCompeteSound->GetFormID(), 0x121);
 					break;
 				case QuestFailed:
 					if (questFailSound != nullptr)
-						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questFailSound->refID, 0x121);
+						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(questFailSound->GetFormID(), 0x121);
 					break;
 				case LocationDiscovered:
 					if (locationDiscoverSound != nullptr)
-						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(locationDiscoverSound->refID, 0x121);
+						*sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(locationDiscoverSound->GetFormID(), 0x121);
 					break;
 			}
 			sound->Play(false);
@@ -1242,7 +1186,7 @@ void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseEx
 	ThisCall(0x954610, a1, a2, a3, itemCount, a5, a6);
 }
 
-void __fastcall TESRegionDataSoundIncidentalIDHook(ModInfo* info, void* edx, uint32_t* refID) {
+void __fastcall TESRegionDataSoundIncidentalIDHook(TESFile* info, void* edx, uint32_t* refID) {
 	ThisCall(0x4727F0, info, refID);
 	if (*refID) {
 		CdeclCall(0x485D50, refID, info);
@@ -1298,7 +1242,7 @@ __declspec (naked) void PatchPlayerPainHook(){
 
 
 const char* __fastcall GetReputationIconHook(TESReputation* rep) {
-	auto it = factionRepIcons.find(rep->refID);
+	auto it = factionRepIcons.find(rep->GetFormID());
 	if (it != factionRepIcons.end()) {
 		uint8_t tierID = 0;
 		uint8_t pos = ThisCall<uint8_t>(0x616950, rep, 1);
@@ -1340,8 +1284,8 @@ const char* __fastcall GetReputationMessageIconHook(uint32_t a1) {
 		default:
 			break;
 	}
-	if (rep && rep->refID) {
-		auto it = factionRepIcons.find(rep->refID);
+	if (rep && rep->GetFormID()) {
+		auto it = factionRepIcons.find(rep->GetFormID());
 		if (it != factionRepIcons.end()) {
 			uint8_t tierID = 0;
 			if (a1 == 0x11CBAD0 || a1 == 0x11CBC34) {
@@ -1353,7 +1297,7 @@ const char* __fastcall GetReputationMessageIconHook(uint32_t a1) {
 			if (*it->second[tierID]) return it->second[tierID];
 		}
 	}
-	return a1 ? ((Setting*)a1)->data.str : "\0";
+	return a1 ? ((Setting*)a1)->String() : "\0";
 }
 
 
@@ -1366,7 +1310,7 @@ void ComputeDiscoveredRadioDirectory() {
 		tList<TESObjectACTI>* discoveredRadios = CdeclCall<tList<TESObjectACTI>*>(0x79C080);
 		for (auto radioIter = discoveredRadios->Begin(); !radioIter.End(); radioIter.Next()) {
 			if (*radioIter) {
-				jg_gameRadioSet.insert((*radioIter)->refID);
+				jg_gameRadioSet.insert((*radioIter)->GetFormID());
 			}
 		}
 	}
@@ -1388,15 +1332,19 @@ char* __cdecl fixAudioMonoLookupOverflow(char* Dst, const char* suffix){
 
 
 
-Setting* __fastcall GetINISettingHook(IniSettingCollection* ini, void* edx, char* name) {
+Setting* __fastcall GetINISettingHook(INISettingCollection* ini, void* edx, char* name) {
 	Setting* result = ThisCall<Setting*>(0x5E02B0, ini, name);
 	if (result) return result;
-	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
-	if (rendererSettings && !rendererSettings->settings.Empty()) {
-		ListNode<Setting>* iter = rendererSettings->settings.Head();
-		do {
-			if (iter->data && !_stricmp(iter->data->name, name)) return iter->data;
-		} while (iter = iter->next);
+	RendererSettingCollection* rendererSettings = SettingT<RendererSettingCollection>::GetCollection();
+	if (rendererSettings && !rendererSettings->kSettings.IsEmpty()) {
+		auto iter = rendererSettings->kSettings.GetHead();
+		while (iter && !iter->IsEmpty()) {
+			Setting* pSetting = iter->GetItem();
+			iter = iter->GetNext();
+			if (_stricmp(pSetting->pKey, name) == 0) {
+				return pSetting;
+			}
+		}
 	}
 	return nullptr;
 }
@@ -1522,21 +1470,21 @@ __declspec (naked) void DisableDeathResponsesHook() {
 	}
 }
 
-bool __fastcall SaveINIHook(IniSettingCollection* a1, void* edx, char* a2) {
+bool __fastcall SaveINIHook(INISettingCollection* a1, void* edx, char* a2) {
 	ThisCall(0x5E01B0, a1, a2);
-	IniSettingCollection* rendererSettings = *(IniSettingCollection**)0x11F35A4;
-	return ThisCall<bool>(0x5E01B0, rendererSettings, rendererSettings->iniPath);
+	RendererSettingCollection* rendererSettings = SettingT<RendererSettingCollection>::GetCollection();
+	return ThisCall<bool>(0x5E01B0, rendererSettings, rendererSettings->cSettingFile);
 }
 
 bool __fastcall WantsToFleeHook(CombatState* state) {
 	if (!state->cmbtCtrl->packageOwner) return false;
 	float avCharisma = state->cmbtCtrl->packageOwner->avOwner.GetActorValueF(kAVCode_Charisma);
 	if (state->currentConfidence > 0 && avCharisma <= 5) {
-		Console_Print("0x%X confidence %d charisma %.f modified -1", state->cmbtCtrl->packageOwner->refID, state->currentConfidence, avCharisma);
+		Console_Print("0x%X confidence %d charisma %.f modified -1", state->cmbtCtrl->packageOwner->GetFormID(), state->currentConfidence, avCharisma);
 		return (state->currentConfidence - 1) > state->fleeThreshold008;
 	}
 	else if (state->currentConfidence < 4 && avCharisma > 5) {
-		Console_Print("0x%X confidence %d charisma %.f modified +1", state->cmbtCtrl->packageOwner->refID, state->currentConfidence, avCharisma);
+		Console_Print("0x%X confidence %d charisma %.f modified +1", state->cmbtCtrl->packageOwner->GetFormID(), state->currentConfidence, avCharisma);
 		return (state->currentConfidence + 1) > state->fleeThreshold008;
 	}
 	else {
@@ -1546,7 +1494,7 @@ bool __fastcall WantsToFleeHook(CombatState* state) {
 void __cdecl MiscStatRefreshHook(Tile* tile, int id) {
 	int value = 0;
 	if (id < 43) {
-		value = g_miscStatData[id]->data.i;
+		value = g_miscStatData[id]->Int();
 	}
 	else {
 		std::string sName = tile->name.pString;
@@ -1639,31 +1587,31 @@ bool __cdecl JGSetViewmodelClipDistance(float value) {
 float __cdecl JGGetViewmodelClipDistance() {
 	return g_viewmodel_near;
 }
-void __stdcall HandleSettingType(Setting* setting, Setting::EType type) {
+void __stdcall HandleSettingType(Setting* setting, Setting::Type type) {
 	switch (type) {
-	case Setting::EType::kSetting_Bool:
-		if (IsConsoleMode()) Console_Print("INISetting %s >> %i", setting->name, setting->data.b);
+	case Setting::kSetting_Bool:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> %i", setting->pKey, setting->uValue.b);
 		break;
-	case Setting::EType::kSetting_Integer:
-		if (IsConsoleMode()) Console_Print("INISetting %s >> %d", setting->name, setting->data.i);
+	case Setting::kSetting_Integer:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> %d", setting->pKey, setting->uValue.i);
 		break;
-	case Setting::EType::kSetting_Unsigned:
-		if (IsConsoleMode()) Console_Print("INISetting %s >> %X", setting->name, setting->data.uint);
+	case Setting::kSetting_Unsigned:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> %X", setting->pKey, setting->uValue.u);
 		break;
-	case Setting::EType::kSetting_Float:
-		if (IsConsoleMode()) Console_Print("INISetting %s >> %.2f", setting->name, setting->data.f);
+	case Setting::kSetting_Float:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> %.2f", setting->pKey, setting->uValue.f);
 		break;
-	case Setting::EType::kSetting_String:
-		if (IsConsoleMode()) Console_Print("INISetting %s >> '%s'", setting->name, setting->data.str);
+	case Setting::kSetting_String:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> '%s'", setting->pKey, setting->uValue.str);
 		break;
-	case Setting::EType::kSetting_r:
-		if (IsConsoleMode()) Console_Print("INISetting %s >> R: %d G: %d B: %d", setting->name, setting->data.rgb[3], setting->data.rgb[2], setting->data.rgb[1]);
+	case Setting::kSetting_r:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> R: %d G: %d B: %d", setting->pKey, setting->uValue.rgb[3], setting->uValue.rgb[2], setting->uValue.rgb[1]);
 		break;
-	case Setting::EType::kSetting_a:
-		if (IsConsoleMode()) Console_Print("INISetting %s >> R: %d G: %d B: %d alpha: %d", setting->name, setting->data.rgb[3], setting->data.rgb[2], setting->data.rgb[1], setting->data.rgb[0]);
+	case Setting::kSetting_a:
+		if (IsConsoleMode()) Console_Print("INISetting %s >> R: %d G: %d B: %d alpha: %d", setting->pKey, setting->uValue.rgb[3], setting->uValue.rgb[2], setting->uValue.rgb[1], setting->uValue.rgb[0]);
 		break;
 	default:
-		if (IsConsoleMode()) Console_Print("INISetting %s >> UNKNOWN TYPE", setting->name);
+		if (IsConsoleMode()) Console_Print("INISetting %s >> UNKNOWN TYPE", setting->pKey);
 		break;
 	}
 }

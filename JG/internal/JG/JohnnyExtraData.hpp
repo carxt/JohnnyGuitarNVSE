@@ -55,7 +55,7 @@ private:
 	JohnnyExtraDataArray(const JohnnyExtraDataArray&) = delete;
 	JohnnyExtraDataArray& operator=(const JohnnyExtraDataArray&) = delete;
 	
-	std::mutex						kMutex;
+	SRWLOCK							kDataLock = SRWLOCK_INIT;
 	std::vector<JohnnyExtraData*>	kExtraDatas;
 	bool							bChanged = false;
 

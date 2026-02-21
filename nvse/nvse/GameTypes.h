@@ -4,6 +4,7 @@
 #include "NiTypes.h"
 #include "internal/utility.h"
 #include "internal/Game/Bethesda/BSSimpleList.hpp"
+#include "internal/Game/Bethesda/BSSimpleArray.hpp"
 #include "internal/Game/Bethesda/BSStringT.hpp"
 
 enum {
@@ -442,33 +443,6 @@ public:
 };
 class Tile;
 
-template <typename T_Data>
-class BSSimpleArray {
-public:
-
-	virtual			~BSSimpleArray();
-	virtual T_Data* Allocate(uint32_t auiCount);
-	virtual void    Deallocate(T_Data* apData);
-	virtual T_Data* Reallocate(T_Data* apData, uint32_t auiCount);
-
-	T_Data* pBuffer;
-	uint32_t	uiSize;
-	uint32_t	uiAllocSize;
-
-	
-
-	uint32_t GetSize() { return uiSize; }
-	uint32_t GetAllocSize() { return uiAllocSize; }
-	bool IsEmpty() { return uiSize == 0; }
-	bool IsFull() { return uiSize == uiAllocSize; }
-	T_Data* GetAt(uint32_t idx) { return &pBuffer[idx]; }
-	T_Data* GetLast() { return &pBuffer[uiSize - 1]; }
-
-	
-};
-
-static_assert(sizeof(BSSimpleArray<uint32_t>)	== 0x10);
-
 template <class Node, class Info>
 class Visitor {
 	const Node* m_pHead;
@@ -672,6 +646,15 @@ struct CoordXY {
 		*(double*)this = *(double*)&rhs;
 		return *this;
 	}
+};
+
+struct NiPoint2 {
+	float x;
+	float y;
+
+	NiPoint2() : x(0.f), y(0.f) {};
+
+	NiPoint2(float _x, float _y) : x(_x), y(_y) {};
 };
 
 #define DECL_FLOAT_OP(op) \

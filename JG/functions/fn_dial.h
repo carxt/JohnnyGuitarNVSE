@@ -38,7 +38,7 @@ bool Cmd_DialogResponseGetResponseAmount_Execute(COMMAND_ARGS)
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo))
 	{
-		auto it = hk_DialogueTopicResponseManageHook::cachedDialogueInfo.find(dialogResponse->refID);
+		auto it = hk_DialogueTopicResponseManageHook::cachedDialogueInfo.find(dialogResponse->GetFormID());
 		if (it != hk_DialogueTopicResponseManageHook::cachedDialogueInfo.end()) 
 		{
 			*result = it->second.size();
@@ -80,8 +80,8 @@ bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
 	{
 		if (setOrRemove > 0)
 		{
-			auto it = dialogResponseOverrideMap[dialogResponse->refID].find(responseNumber);
-			//if (it != dialogResponseOverrideMap[dialogResponse->refID].end())
+			auto it = dialogResponseOverrideMap[dialogResponse->GetFormID()].find(responseNumber);
+			//if (it != dialogResponseOverrideMap[dialogResponse->GetFormID()].end())
 			if (false)
 			{
 
@@ -90,19 +90,19 @@ bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
 			}
 			else
 			{
-				dialogResponseOverrideMap[dialogResponse->refID][responseNumber] = DialogueEmotionOverride(responseEmotion, responseEmotionValue, speakerAnim, listenerAnim, flags);
+				dialogResponseOverrideMap[dialogResponse->GetFormID()][responseNumber] = DialogueEmotionOverride(responseEmotion, responseEmotionValue, speakerAnim, listenerAnim, flags);
 			}
 		}
 
 		else
 		{
-			auto it = dialogResponseOverrideMap.find(dialogResponse->refID);
+			auto it = dialogResponseOverrideMap.find(dialogResponse->GetFormID());
 			if (it != dialogResponseOverrideMap.end())
 			{
 				it->second.erase(responseNumber);
 				if (it->second.size() < 1)
 				{
-					dialogResponseOverrideMap.erase(dialogResponse->refID);
+					dialogResponseOverrideMap.erase(dialogResponse->GetFormID());
 				}
 			}
 		}
@@ -233,9 +233,10 @@ bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
 			{
 				auto pTopicInfos = pTargetTopic->GetTopicInfosForQuest(pQuest);
 				if (pTopicInfos) {
-					for (uint32_t i = 0; i < pTopicInfos->Length(); i++) {
-						auto pTopicInfo = pTopicInfos->Get(i);
-						g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
+					for (uint32_t i = 0; i < pTopicInfos->GetSize(); i++) {
+						auto pTopicInfo = pTopicInfos->GetAt(i);
+						if (pTopicInfo)
+							g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
 					}
 				}
 			}
@@ -245,9 +246,10 @@ bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
 				for (auto kIter = pTargetTopicInfoList->Begin(); !kIter.End(); kIter.Next()) {
 					if (*kIter) {
 						auto pTopicInfos = &(*kIter)->infoArray;
-						for (uint32_t i = 0; i < pTopicInfos->Length(); i++) {
-							auto pTopicInfo = pTopicInfos->Get(i);
-							g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
+						for (uint32_t i = 0; i < pTopicInfos->GetSize(); i++) {
+							auto pTopicInfo = pTopicInfos->GetAt(i);
+							if (pTopicInfo)
+								g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
 						}
 					}
 				}
@@ -255,16 +257,16 @@ bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
 
 		}
 		else {
-			auto pTopicHandler = &DataHandler::Get()->topicList;
-			for (auto kIter = pTopicHandler->Begin(); !kIter.End(); kIter.Next()) {
-				if (*kIter) {
-					TESTopic* pTopic = kIter.Get();
-					auto pTopicInfos = pTopic->GetTopicInfosForQuest(pQuest);
-					if (pTopicInfos) {
-						for (uint32_t i = 0; i < pTopicInfos->Length(); i++) {
-							auto pTopicInfo = pTopicInfos->Get(i);
+			auto pIter = TESDataHandler::GetSingleton()->kTopics.GetHead();
+			while (pIter && !pIter->IsEmpty()) {
+				TESTopic* pTopic = pIter->GetItem();
+				pIter = pIter->GetNext();
+				auto pTopicInfos = pTopic->GetTopicInfosForQuest(pQuest);
+				if (pTopicInfos) {
+					for (uint32_t i = 0; i < pTopicInfos->GetSize(); i++) {
+						auto pTopicInfo = pTopicInfos->GetAt(i);
+						if (pTopicInfo)
 							g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
-						}
 					}
 				}
 			}

@@ -3,6 +3,14 @@
 #include "Utilities.h"
 #include "internal/Game/Gamebryo/NiFixedString.hpp"
 #include "internal/Game/Gamebryo/NiSmartPointer.hpp"
+#include "internal/Game/Gamebryo/NiTObjectArray.hpp"
+#include "internal/Game/Gamebryo/NiTPrimitiveArray.hpp"
+#include "internal/Game/Gamebryo/NiTLargePrimitiveArray.hpp"
+#include "internal/Game/Gamebryo/NiTPointerList.hpp"
+#include "internal/Game/Gamebryo/NiTPointerMap.hpp"
+#include "internal/Game/Gamebryo/NiTStringPointerMap.hpp"
+#include "internal/Game/Gamebryo/NiTPrimitiveSet.hpp"
+#include "internal/Game/Gamebryo/NiTObjectSet.hpp"
 
 #if RUNTIME
 
@@ -150,16 +158,18 @@ struct NiViewport
 };
 
 // C
-struct NiColor
+class NiColor
 {
+public:
 	float	r;
 	float	g;
 	float	b;
 };
 
 // 10
-struct NiColorAlpha
+class NiColorA
 {
+public:
 	float	r;
 	float	g;
 	float	b;
@@ -171,349 +181,6 @@ struct NiPlane
 {
 	NiVector3	nrm;
 	float		offset;
-};
-
-// 10
-// NiTArrays are slightly weird: they can be sparse
-// this implies that they can only be used with types that can be NULL?
-// not sure on the above, but some code only works if this is true
-// this can obviously lead to fragmentation, but the accessors don't seem to care
-// weird stuff
-template <typename T_Data>
-struct NiTArray
-{
-	virtual void* Destroy(uint32_t doFree);
-
-	T_Data* data;			// 04
-	uint16_t		capacity;		// 08 - init'd to size of preallocation
-	uint16_t		firstFreeEntry;	// 0A - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
-	uint16_t		numObjs;		// 0C - init'd to 0
-	uint16_t		growSize;		// 0E - init'd to size of preallocation
-
-	T_Data operator[](uint32_t idx)
-	{
-		if (idx < firstFreeEntry)
-			return data[idx];
-		return NULL;
-	}
-
-	T_Data Get(uint32_t idx) { return data[idx]; }
-
-	uint16_t Length() { return firstFreeEntry; }
-	void AddAtIndex(uint32_t index, T_Data* item);	// no bounds checking
-	void SetCapacity(uint16_t newCapacity);	// grow and copy data if needed
-
-	class Iterator
-	{
-		friend NiTArray;
-
-		T_Data* pData;
-		uint16_t		count;
-
-	public:
-		bool End() const { return !count; }
-		void operator++()
-		{
-			pData++;
-			count--;
-		}
-
-		T_Data& operator*() const { return *pData; }
-		T_Data& operator->() const { return *pData; }
-		T_Data& Get() const { return *pData; }
-
-		Iterator(NiTArray& source) : pData(source.data), count(source.firstFreeEntry) {}
-	};
-
-	Iterator Begin() { return Iterator(*this); }
-};
-
-#if RUNTIME
-
-template <typename T> void NiTArray<T>::AddAtIndex(uint32_t index, T* item)
-{
-#if 1
-	ThisStdCall(0x00869640, this, index, item);
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	ThisStdCall(0x00869110, this, index, item);
-#else
-#error unsupported Oblivion version
-#endif
-}
-
-template <typename T> void NiTArray<T>::SetCapacity(uint16_t newCapacity)
-{
-#if 1
-	ThisStdCall(0x008696E0, this, newCapacity);
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	ThisStdCall(0x00869190, this, newCapacity);
-#else
-#error unsupported Runtime version
-#endif
-}
-
-#endif
-
-// 18
-// an NiTArray that can go above 0xFFFF, probably with all the same weirdness
-// this implies that they make fragmentable arrays with 0x10000 elements, wtf
-template <typename T>
-class NiTLargeArray
-{
-public:
-	NiTLargeArray();
-	~NiTLargeArray();
-
-	void	** _vtbl;		// 00
-	T		* data;			// 04
-	uint32_t	capacity;		// 08 - init'd to size of preallocation
-	uint32_t	firstFreeEntry;	// 0C - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
-	uint32_t	numObjs;		// 10 - init'd to 0
-	uint32_t	growSize;		// 14 - init'd to size of preallocation
-
-	T operator[](uint32_t idx) {
-		if (idx < firstFreeEntry)
-			return data[idx];
-		return NULL;
-	}
-
-	T Get(uint32_t idx) { return (*this)[idx]; }
-
-	uint32_t Length(void) { return firstFreeEntry; }
-};
-
-// 8
-template <typename T>
-struct NiTSet
-{
-	T		*	data;		// 00
-	uint32_t	capacity;	// 04
-	uint32_t	length;		// 08
-};
-
-// 10
-// this is a NiTPointerMap <uint32_t, T_Data>
-// todo: generalize key
-template <typename T_Data>
-class NiTPointerMap
-{
-public:
-	NiTPointerMap();
-	virtual ~NiTPointerMap();
-
-	virtual uint32_t	CalculateBucket(uint32_t key);
-	virtual bool	CompareKey(uint32_t lhs, uint32_t rhs);
-	virtual void	Fn_03(uint32_t arg0, uint32_t arg1, uint32_t arg2);	// assign to entry
-	virtual void	Fn_04(uint32_t arg);
-	virtual void	Fn_05(void);	// locked operations
-	virtual void	Fn_06(void);	// locked operations
-
-	struct Entry
-	{
-		Entry		*next;
-		uint32_t		key;
-		T_Data		*data;
-	};
-
-	uint32_t		m_numBuckets;	// 04
-	Entry		**m_buckets;	// 08
-	uint32_t		m_numItems;		// 0C
-
-	T_Data *Lookup(uint32_t key) const
-	{
-		for (Entry *traverse = m_buckets[key % m_numBuckets]; traverse; traverse = traverse->next)
-			if (traverse->key == key) return traverse->data;
-		return NULL;
-	}
-
-	bool Insert(Entry *newEntry)
-	{
-		uint32_t bucket = newEntry->key % m_numBuckets;
-		Entry *entry = m_buckets[bucket], *prev;
-		if (entry)
-		{
-			do
-			{
-				if (entry->key == newEntry->key) return false;
-				prev = entry;
-			}
-			while (entry = entry->next);
-			prev->next = newEntry;
-		}
-		else m_buckets[bucket] = newEntry;
-		m_numItems++;
-		return true;
-	}
-
-	class Iterator
-	{
-		friend NiTPointerMap;
-
-		NiTPointerMap* table;
-		Entry** bucket;
-		Entry* entry;
-
-		void FindNonEmpty()
-		{
-			for (Entry** end = &table->m_buckets[table->m_numBuckets]; bucket != end; bucket++)
-				if (entry = *bucket) return;
-		}
-
-	public:
-		Iterator(NiTPointerMap& _table) : table(&_table), bucket(table->m_buckets), entry(NULL) { FindNonEmpty(); }
-
-		bool End() const { return !entry; }
-		void operator++()
-		{
-			entry = entry->next;
-			if (!entry)
-			{
-				bucket++;
-				FindNonEmpty();
-			}
-		}
-		T_Data* Get() const { return entry->data; }
-		uint32_t Key() const { return entry->key; }
-	};
-
-	Iterator Begin() { return Iterator(*this); }
-};
-
-// 10
-// todo: NiTPointerMap should derive from this
-// cleaning that up now could cause problems, so it will wait
-template <typename T_Key, typename T_Data>
-class NiTMapBase
-{
-public:
-	NiTMapBase();
-	~NiTMapBase();
-
-	struct Entry
-	{
-		Entry		*next;
-		T_Key		key;
-		T_Data		data;
-	};
-
-	Entry* LookupEntry(T_Key key)
-	{
-		for (Entry* traverse = buckets[Hash(key) % numBuckets]; traverse; traverse = traverse->next)
-			if constexpr (std::is_same<const char*, T_Key>::value)
-				if (_stricmp(traverse->key, key) == 0) return traverse;
-			else
-				if (traverse->key == key) return traverse;
-		return NULL;
-	}
-
-	virtual NiTMapBase	*Destructor(bool doFree);
-	virtual uint32_t		Hash(T_Key key);
-	virtual void		Equal(T_Key key1, T_Key key2);
-	virtual void		FillEntry(Entry entry, T_Key key, T_Data data);
-	virtual	void		Unk_004(void *arg0);
-	virtual	void		Unk_005();
-	virtual	void		Unk_006();
-
-	uint32_t		numBuckets;	// 04
-	Entry		**buckets;	// 08
-	uint32_t		numItems;	// 0C
-
-	class Iterator
-	{
-		friend NiTMapBase;
-
-		NiTMapBase		*m_table;
-		Entry			*m_entry;
-		uint32_t			m_bucket;
-
-		void FindValid()
-		{
-			for (; m_bucket < m_table->numBuckets; m_bucket++)
-			{
-				m_entry = m_table->buckets[m_bucket];
-				if (m_entry) break;
-			}
-		}
-
-	public:
-		Iterator(NiTMapBase *table) : m_table(table), m_entry(NULL), m_bucket(0) {FindValid();}
-
-		bool Done() const {return m_entry == NULL;}
-		void Next()
-		{
-			m_entry = m_entry->next;
-			if (!m_entry)
-			{
-				m_bucket++;
-				FindValid();
-			}
-		}
-		T_Data Get() const {return m_entry->data;}
-		T_Key Key() const {return m_entry->key;}
-	};
-
-	bool Lookup(T_Key key, T_Data *dataOut);
-};
-
-template <typename T_Key, typename T_Data>
-__declspec(naked) bool NiTMapBase<T_Key, T_Data>::Lookup(T_Key key, T_Data *dataOut)
-{
-	__asm	jmp		kNiTMapLookupAddr
-}
-
-// 14
-template <typename T_Data>
-class NiTStringPointerMap : public NiTPointerMap<T_Data>
-{
-public:
-	NiTStringPointerMap();
-	~NiTStringPointerMap();
-
-	uint32_t	unk010;
-};
-
-// not sure how much of this is in NiTListBase and how much is in NiTPointerListBase
-// 10
-template <typename T>
-class NiTListBase
-{
-public:
-	NiTListBase();
-	~NiTListBase();
-
-	struct Node
-	{
-		Node	* next;
-		Node	* prev;
-		T		* data;
-	};
-
-	virtual void	Destructor(void);
-	virtual Node *	AllocateNode(void);
-	virtual void	FreeNode(Node * node);
-
-//	void	** _vtbl;	// 000
-	Node	* start;	// 004
-	Node	* end;		// 008
-	uint32_t	numItems;	// 00C
-};
-
-// 10
-template <typename T>
-class NiTPointerListBase : public NiTListBase <T>
-{
-public:
-	NiTPointerListBase();
-	~NiTPointerListBase();
-};
-
-// 10
-template <typename T>
-class NiTPointerList : public NiTPointerListBase <T>
-{
-public:
-	NiTPointerList();
-	~NiTPointerList();
 };
 
 // 14

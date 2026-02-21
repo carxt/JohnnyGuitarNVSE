@@ -35,11 +35,13 @@
 
 BS_ALLOCATORS
 
+IDebugLog	   gLog("logs\\JohnnyGuitarNVSE.log");
+
 bool bIsGECK = false;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
-#define JG_VERSION 520
+#define JG_VERSION 521
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	MEM_CONTEXT eOrgContext;
 	if (!bIsGECK) {
@@ -526,10 +528,6 @@ void ReadINI() {
 
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {
 	// fill out the info structure
-	gLog.Create("JohnnyGuitarNVSE.log");
-#if _DEBUG
-	s_debug.Create("JohnnyGuitarNVSE_debug.log");
-#endif
 	info->infoVersion = PluginInfo::kInfoVersion;
 	info->name = "JohnnyGuitarNVSE";
 	info->version = JG_VERSION;
@@ -546,19 +544,19 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* i
 
 	if (!nvse->isEditor) {
 		if (nvse->runtimeVersion < RUNTIME_VERSION_1_4_0_525) {
-			PrintLog("incorrect New Vegas version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
+			_MESSAGE("incorrect New Vegas version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
 			return false;
 		}
 	}
 	else {
 		if (nvse->editorVersion < CS_VERSION_1_4_0_518) {
-			PrintLog("incorrect GECK version (got %08X need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
+			_MESSAGE("incorrect GECK version (got %08X need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
 			return false;
 		}
 	};
 
 	// version checks pass
-	PrintLog("JohnnyGuitarNVSE %u Loaded succesfully.", info->version);
+	_MESSAGE("JohnnyGuitarNVSE %u Loaded succesfully.", info->version);
 
 	bIsGECK = nvse->isEditor != 0;
 
@@ -609,10 +607,7 @@ BOOL WINAPI DllMain(
 	DWORD   dwReason,
 	LPVOID  lpreserved
 ) {
-	switch (dwReason) {
-		case (DLL_PROCESS_ATTACH):
-			DisableThreadLibraryCalls((HMODULE)hDllHandle);
-			break;
-	}
+	if (dwReason == DLL_PROCESS_ATTACH)
+		DisableThreadLibraryCalls((HMODULE)hDllHandle);
 	return TRUE;
 }

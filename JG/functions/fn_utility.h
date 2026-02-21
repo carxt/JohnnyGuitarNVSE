@@ -24,7 +24,6 @@ DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , false, kParams_OneInt_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(IsDLLLoaded, , false, kParams_OneString_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(RefreshIdle, , true, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(ExitGameAlt, , false, nullptr);
-DEFINE_COMMAND_PLUGIN(DumpINI, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(UpdateCrosshairPrompt, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(SetOptionalBone, , true, kParams_OneInt_OneString);
 DEFINE_COMMAND_PLUGIN(GetOptionalBone, , true, kParams_OneInt);
@@ -94,7 +93,7 @@ bool Cmd_GetAvailableRadios_Execute(COMMAND_ARGS) {
 	tList<TESObjectACTI> availableRadios = {};
 	CdeclCall<void>(0x04FF1A0, thisObj, &availableRadios, nullptr);
 	for (auto radioIter = availableRadios.Begin(); !radioIter.End(); radioIter.Next()) {
-		if (*radioIter && !CdeclCall<bool>(0x0079BE30, *radioIter) && (jg_gameRadioSet.count((*radioIter)->refID) > 0)) {
+		if (*radioIter && !CdeclCall<bool>(0x0079BE30, *radioIter) && (jg_gameRadioSet.count((*radioIter)->GetFormID()) > 0)) {
 			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
 		}
 	}
@@ -145,123 +144,6 @@ enum EType {
 	kSetting_a,
 	kSetting_Other
 };
-bool Cmd_DumpINI_Execute(COMMAND_ARGS) {
-	IniSettingCollection* ini = IniSettingCollection::GetIniSettings();
-	IniSettingCollection* prefs = IniSettingCollection::GetIniPrefs();
-	IniSettingCollection* renderer = *(IniSettingCollection**)0x11F35A4;
-	IniSettingCollection* blend = *(IniSettingCollection**)0x11CC694;
-	std::ofstream csv;
-	csv.open("settings.csv");
-	Setting* setting;
-	csv << "fallout.ini" << std::endl;
-	ListNode<Setting>* istIter = ini->settings.Head();
-	do {
-		setting = istIter->data;
-		if (setting && setting->ValidType()) {
-			std::string name = setting->name;
-			if (name.find("i") != std::string::npos) {
-				std::string sname = name.substr(0, name.find(":"));
-				std::string cat = name.substr(name.find(":") + 1);
-				switch (setting->GetType()) {
-					case kSetting_Bool:
-					case kSetting_Integer:
-						csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
-						break;
-					case kSetting_Unsigned:
-						csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
-						break;
-					case kSetting_String:
-						csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
-						break;
-					case kSetting_Float:
-						csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
-						break;
-				}
-			}
-		}
-	} while (istIter = istIter->next);
-	csv << "falloutprefs.ini" << std::endl;
-	istIter = prefs->settings.Head();
-	do {
-		setting = istIter->data;
-		if (setting && setting->ValidType()) {
-			std::string name = setting->name;
-			if (name.find("i") != std::string::npos) {
-				std::string sname = name.substr(0, name.find(":"));
-				std::string cat = name.substr(name.find(":") + 1);
-				switch (setting->GetType()) {
-					case kSetting_Bool:
-					case kSetting_Integer:
-						csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
-						break;
-					case kSetting_Unsigned:
-						csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
-						break;
-					case kSetting_String:
-						csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
-						break;
-					case kSetting_Float:
-						csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
-						break;
-				}
-			}
-		}
-	} while (istIter = istIter->next);
-	istIter = renderer->settings.Head();
-	do {
-		setting = istIter->data;
-		if (setting && setting->ValidType()) {
-			std::string name = setting->name;
-			if (name.find("i") != std::string::npos) {
-				std::string sname = name.substr(0, name.find(":"));
-				std::string cat = name.substr(name.find(":") + 1);
-				switch (setting->GetType()) {
-					case kSetting_Bool:
-					case kSetting_Integer:
-						csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
-						break;
-					case kSetting_Unsigned:
-						csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
-						break;
-					case kSetting_String:
-						csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
-						break;
-					case kSetting_Float:
-						csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
-						break;
-				}
-			}
-		}
-	} while (istIter = istIter->next);
-	istIter = blend->settings.Head();
-	do {
-		setting = istIter->data;
-		if (setting && setting->ValidType()) {
-			std::string name = setting->name;
-			if (name.find("i") != std::string::npos) {
-				std::string sname = name.substr(0, name.find(":"));
-				std::string cat = name.substr(name.find(":") + 1);
-				switch (setting->GetType()) {
-					case kSetting_Bool:
-					case kSetting_Integer:
-						csv << sname << ";" << cat << ";" << setting->data.i << std::endl;
-						break;
-					case kSetting_Unsigned:
-						csv << sname << ";" << cat << ";" << setting->data.uint << std::endl;
-						break;
-					case kSetting_String:
-						csv << sname << ";" << cat << ";" << setting->data.str << std::endl;
-						break;
-					case kSetting_Float:
-						csv << sname << ";" << cat << ";" << setting->data.f << std::endl;
-						break;
-				}
-			}
-		}
-	} while (istIter = istIter->next);
-	csv.close();
-	return true;
-}
 
 bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -421,7 +303,11 @@ bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESForm* form = nullptr;
 	if ( ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) {
-		*result = form->GetOverridingModIdx();
+		TESFile* pFile = form->GetFile(-1);
+		if (pFile)
+			*result = pFile->ucCompileIndex;
+		else
+			*result = 0xFF;
 		if (IsConsoleMode()) Console_Print("GetFormOverrideIndex >> %.f", *result);
 	}
 	return true;
@@ -463,7 +349,7 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &edid) && edid[0]) {
 		form = ((TESForm * (__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
 		if (form) {
-			*(uint32_t*)result = form->refID;
+			*(uint32_t*)result = form->GetFormID();
 		}
 		if (IsConsoleMode()) {
 			Console_Print("EditorIDToFormID >> 0x%X", *result);
@@ -779,7 +665,7 @@ bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
 		}
 
 		if (pRef) {
-			uiReferenceToTrack = pRef->refID;
+			uiReferenceToTrack = pRef->GetFormID();
 		}
 	}
 	return true;
