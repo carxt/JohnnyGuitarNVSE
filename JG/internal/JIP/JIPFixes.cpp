@@ -777,7 +777,7 @@ namespace JIPFixes {
 			if (cTypeBufer[0] && cTypeBufer[0] != ' ') {
 				if (cTypeBufer[0] >= '0' && cTypeBufer[0] <= '9') {
 					FORM_TYPE eFormType = static_cast<FORM_TYPE>(atoi(cTypeBufer));
-					if (eFormType > FORM_TYPE::None || eFormType < FORM_TYPE::Count)
+					if (eFormType > FORM_TYPE::None && eFormType < FORM_TYPE::Count)
 						kFormTypes.push_back(eFormType);
 					bSearchType = true;
 				}
