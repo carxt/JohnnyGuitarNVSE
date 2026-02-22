@@ -712,7 +712,7 @@ namespace JIPFixes {
 		}
 
 		bool __fastcall SearchFullName(const TESForm* apForm, const std::string_view& arSearch) {
-			const char* pFullName = TESFullName::GetFullName(apForm);
+			const char* pFullName = apForm->IsReference() ? static_cast<const TESObjectREFR*>(apForm)->GetFullName() : TESFullName::GetFullName(apForm);
 			if (pFullName && pFullName[0]) {
 				if (FindSubstring(pFullName, arSearch, false)) {
 					DisplayForm(apForm, apForm->GetFormEditorID());
