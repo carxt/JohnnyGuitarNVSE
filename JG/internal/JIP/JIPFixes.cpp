@@ -680,16 +680,31 @@ namespace JIPFixes {
 				return CaseInsensitiveSubStr(arString, arSubString);
 		}
 
+		void __fastcall TruncateString(const char* apString, char* apBuffer, size_t aBufferSize) {
+			constexpr const char SUFFIX[] = "...";
+			const uint32_t uiCopySize = aBufferSize - sizeof(SUFFIX) - 1;
+			memcpy(apBuffer, apString, uiCopySize);
+			memcpy(apBuffer + uiCopySize, SUFFIX, sizeof(SUFFIX));
+			apBuffer[aBufferSize - 1] = '\0';
+		}
+
 		void __fastcall DisplayForm(const TESForm* apForm, const char* apEDID) {
 			const TESFile* pFile = apForm->GetFile(0);
 			const char* pFullName = apForm->IsReference() ? static_cast<const TESObjectREFR*>(apForm)->GetFullName() : TESFullName::GetFullName(apForm);
 			const char* pFileName = pFile ? pFile->GetName() : "Runtime";
 			const char* pType = apForm->GetFormTypeName();
 			const char* pEDID = (apEDID && apEDID[0]) ? apEDID : "NO-EDID";
-			if (pFullName && pFullName[0])
+			if (pFullName && pFullName[0]) {
+				char cFullNameBuffer[48];
+				if (strlen(pFullName) > sizeof(cFullNameBuffer)) {
+					TruncateString(pFullName, cFullNameBuffer, sizeof(cFullNameBuffer));
+					pFullName = cFullNameBuffer;
+				}
 				Console_Print("%08X | %s | %s (%s) | %s", apForm->GetFormID(), pType, pEDID, pFullName, pFileName);
-			else
+			}
+			else {
 				Console_Print("%08X | %s | %s | %s", apForm->GetFormID(), pType, pEDID, pFileName);
+			}
 		}
 
 		bool __fastcall SearchEDID(const TESForm* apForm, const std::string_view& arSearch) {
