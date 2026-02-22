@@ -682,13 +682,14 @@ namespace JIPFixes {
 
 		void __fastcall DisplayForm(const TESForm* apForm, const char* apEDID) {
 			const TESFile* pFile = apForm->GetFile(0);
-			const char* pFullName = TESFullName::GetFullName(apForm);
+			const char* pFullName = apForm->IsReference() ? static_cast<const TESObjectREFR*>(apForm)->GetFullName() : TESFullName::GetFullName(apForm);
 			const char* pFileName = pFile ? pFile->GetName() : "Runtime";
 			const char* pType = apForm->GetFormTypeName();
+			const char* pEDID = (apEDID && apEDID[0]) ? apEDID : "NO-EDID";
 			if (pFullName && pFullName[0])
-				Console_Print("%08X | %s | %s (%s) | %s", apForm->GetFormID(), pType, apEDID, pFullName, pFileName);
+				Console_Print("%08X | %s | %s (%s) | %s", apForm->GetFormID(), pType, pEDID, pFullName, pFileName);
 			else
-				Console_Print("%08X | %s | %s | %s", apForm->GetFormID(), pType, apEDID, pFileName);
+				Console_Print("%08X | %s | %s | %s", apForm->GetFormID(), pType, pEDID, pFileName);
 		}
 
 		bool __fastcall SearchEDID(const TESForm* apForm, const std::string_view& arSearch) {
