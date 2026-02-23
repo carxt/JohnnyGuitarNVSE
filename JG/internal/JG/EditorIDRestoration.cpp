@@ -264,19 +264,15 @@ namespace EDIDRestoration {
 	class TESObjectREFREx : public TESObjectREFR {
 	public:
 		const char* GetNameForConsole() {
+			// TESObjectREFR::GetFullName calls TESFullName::GetFullName on baseform + JIP's ref name override
 			const char* pName = GetFullName();
-			if (!strlen(pName) && baseForm) {
-				__try {
-					pName = TESFullName::GetFullName(baseForm);
-					if (!strlen(pName))
-						pName = baseForm->GetFormEditorID();
-					return pName;
-				}
-				__except (EXCEPTION_ACCESS_VIOLATION) {
-					return "";
-				}
-			}
-			return "";
+			if (!pName || !pName[0])
+				pName = GetFormEditorID();
+
+			if (!pName || !pName[0])
+				pName = baseForm->GetFormEditorID();
+
+			return pName;
 		}
 	};
 
