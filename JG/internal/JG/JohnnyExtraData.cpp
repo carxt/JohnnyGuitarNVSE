@@ -41,31 +41,36 @@ const NiFixedString& JohnnyExtraData::GetEditorID() const {
 	return kFormData.kEditorIDs.GetItem();
 }
 
-bool JohnnyExtraData::SetEditorID(const NiFixedString& arEDID) {
-	if (!arEDID.GetLength())
-		return false;
+JohnnyExtraData::EDIDResult JohnnyExtraData::SetEditorID(const NiFixedString& arEDID) {
+	if (!arEDID.GetLength()) {
+		DEBUG_MSG("%08X Tried to set an empty EDID", pOwner->GetFormID());
+		return EDIDResult::FAILURE;
+	}
 
 	if (!GetEditorID()) {
 		DEBUG_MSG("%08X Adding EDID \"%s\"", pOwner->GetFormID(), arEDID);
 		kFormData.kEditorIDs.SetItem(arEDID);
-		return true;
+		return EDIDResult::SUCCESS;
 	}
 	else if (GetEditorID() != arEDID) {
 		if (kFormData.kEditorIDs.IsInList(arEDID)) {
 			DEBUG_MSG("%08X EDID alias \"%s\" already exists", pOwner->GetFormID(), arEDID);
-			return false;
+			return EDIDResult::ALREADY_EXISTS;
 		}
 
 		kFormData.kEditorIDs.AddTail(arEDID);
 		DEBUG_MSG("%08X Adding EDID alias \"%s\"", pOwner->GetFormID(), arEDID);
-		return true;
+		return EDIDResult::SUCCESS;
 	}
-	return false;
+	else {
+		DEBUG_MSG("%08X EDID \"%s\" is already set", pOwner->GetFormID(), arEDID);
+		return EDIDResult::ALREADY_EXISTS;
+	}
 }
 
-bool JohnnyExtraData::RemoveEditorID(const NiFixedString& arEDID) {
+JohnnyExtraData::EDIDResult JohnnyExtraData::RemoveEditorID(const NiFixedString& arEDID) {
 	kFormData.kEditorIDs.Remove(arEDID);
-	return true;
+	return EDIDResult::SUCCESS;
 }
 
 const NiFixedString& JohnnyExtraData::GetName() {

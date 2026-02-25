@@ -2,7 +2,6 @@
 
 #include <nvse/PluginAPI.h>
 #include <nvse/NiTypes.h>
-#include <mutex>
 #include <vector>
 #include "Bethesda/BSSimpleList.hpp"
 
@@ -10,6 +9,12 @@ class JohnnyExtraData : public PluginFormExtraData, public BSMemObject {
 public:
 	JohnnyExtraData();
 	virtual ~JohnnyExtraData() override;
+
+	enum EDIDResult : uint8_t {
+		FAILURE			= 0,
+		SUCCESS			= 1,
+		ALREADY_EXISTS	= 2,
+	};
 
 	using EDIDList = BSSimpleList<NiFixedString>;
 
@@ -28,8 +33,8 @@ public:
 	ScriptData	kScriptData;
 
 	const NiFixedString& GetEditorID() const;
-	bool SetEditorID(const NiFixedString& arEDID);
-	bool RemoveEditorID(const NiFixedString& arEDID);
+	EDIDResult SetEditorID(const NiFixedString& arEDID);
+	EDIDResult RemoveEditorID(const NiFixedString& arEDID);
 
 	static const NiFixedString& GetName();
 

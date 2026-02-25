@@ -2,8 +2,6 @@
 #include "GameData.h"
 #include "JohnnyExtraData.hpp"
 #include "misc/misc.h"
-#include "unordered_map"
-#include "list"
 
 namespace EDIDRestoration {
 
@@ -133,76 +131,95 @@ namespace EDIDRestoration {
 		0x10900DC,  //  Projectile
 	};
 
-	bool __fastcall AddEDIDToExtraData(TESForm* apForm, const char* apEDID) {
-		JohnnyExtraData* pData = JohnnyExtraData::GetOrCreate(apForm);
-		if (!pData) {
-			char cText[256];
-			sprintf_s(cText, "Failed to create JohnnyExtraData for form %08X (%s)!\nSomething is very wrong!", apForm->GetFormID(), apEDID);
-			MessageBoxA(nullptr, cText, "JohnnyGuitar", MB_OK | MB_ICONERROR);
-			return false;
+	namespace Map {
+		void __fastcall Set(const char* apEDID, TESForm* apForm) {
+			SRWUniqueLock kLock(kEDIDMapLock);
+			TESForm::pAllFormsByEditorID->SetAt(apEDID, apForm);
 		}
 
-		pData->SetEditorID(apEDID);
+		bool __fastcall Remove(const char* apEDID) {
+			SRWUniqueLock kLock(kEDIDMapLock);
+			return TESForm::pAllFormsByEditorID->RemoveAt(apEDID);
+		}
 
-		return false;
+		TESForm* __fastcall Get(const char* apEDID) {
+			SRWSharedLock kLock(kEDIDMapLock);
+			TESForm* pForm = nullptr;
+			TESForm::pAllFormsByEditorID->GetAt(apEDID, pForm);
+			return pForm;
+		}
 	}
 
-	bool __fastcall RemoveEDIDFromExtraData(TESForm* apForm, const char* apEDID) {
-		JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
-		if (pData) {
+	namespace ExtraData {
+		JohnnyExtraData::EDIDResult __fastcall AddEDID(const char* apEDID, TESForm* apForm) {
+			JohnnyExtraData* pData = JohnnyExtraData::GetOrCreate(apForm);
+			if (!pData) [[unlikely]] {
+				char cText[96];
+				sprintf_s(cText, "Failed to create JohnnyExtraData for form %08X (%s)!\nSomething is very wrong!", apForm->GetFormID(), apEDID);
+				MessageBoxA(nullptr, cText, "JohnnyGuitar", MB_OK | MB_ICONERROR);
+				return JohnnyExtraData::EDIDResult::FAILURE;
+			}
+
+			return pData->SetEditorID(apEDID);
+		}
+
+		JohnnyExtraData::EDIDResult __fastcall RemoveEDID(const char* apEDID, TESForm* apForm) {
+			JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			if (!pData) [[unlikely]]
+				return JohnnyExtraData::EDIDResult::FAILURE;
+
 			return pData->RemoveEditorID(apEDID);
 		}
-		return false;
-	}
 
-	const char* __fastcall GetEDIDFromExtraData(TESForm* apForm) {
-		JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
-		if (pData) [[likely]] {
+		const char* __fastcall GetEDID(TESForm* apForm) {
+			JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			if (!pData) [[unlikely]]
+				return nullptr;
+
 			return pData->GetEditorID().c_str();
 		}
-		return nullptr;
 	}
 
-	const char* __fastcall AddToGameMap(const char* apEDID, TESForm* apForm) {
-		TESForm* pExistingForm = TESForm::GetFormByEditorID(apEDID); 
+	void __fastcall AddToGameMap(TESForm* apForm, const char* apEDID) {
+		TESForm* pExistingForm = Map::Get(apEDID); 
 		if (pExistingForm) [[unlikely]] {
-			if (pExistingForm != apForm) {
-				// Ignore 0x18E because Obsidian had a skill issue
-				if (pExistingForm->GetFormID() != 0x18E) {
-					const TESFile* pFileA = apForm->GetFile(0);
-					const TESFile* pFileB = pExistingForm->GetFile(0);
-					char cText[512];
-					if (pExistingForm->GetFormType() == apForm->GetFormType()) {
-						sprintf_s(cText, "%08X (\"%s\") steals \"%s\" EDID from %08X (\"%s\")",
-							apForm->GetFormID(), pFileA ? pFileA->GetName() : "", apEDID,
-							pExistingForm->GetFormID(), pFileB ? pFileB->GetName() : "");
-					}
-					else {
-						sprintf_s(cText, "%08X (\"%s\") steals EDID \"%s\" from %08X (\"%s\") + changes type from %s to %s",
-							apForm->GetFormID(), pFileA ? pFileA->GetName() : "", apEDID,
-							pExistingForm->GetFormID(), pFileB ? pFileB->GetName() : "",
-							pExistingForm->GetFormTypeName(), apForm->GetFormTypeName());
-					}
-					bHadEDIDConflicts = true;
-					_MESSAGE(cText);
-					RemoveEDIDFromExtraData(pExistingForm, apEDID);
-				}
+			if (pExistingForm == apForm) [[likely]] {
+				DEBUG_MSG("Form %08X already has EDID \"%s\" in the map, skipping!", apForm->GetFormID(), apEDID);
+				return;
 			}
-			else {
-				// Already exists, nothing to do
-				return apEDID;
+			// Ignore 0x18E because Obsidian had a skill issue
+			else if (pExistingForm->GetFormID() != 0x18E) [[likely]] {
+				const TESFile* pFileA = apForm->GetFile(0);
+				const TESFile* pFileB = pExistingForm->GetFile(0);
+				char cText[512];
+				if (pExistingForm->GetFormType() == apForm->GetFormType()) {
+					sprintf_s(cText, "%08X (\"%s\") steals EDID \"%s\" from %08X (\"%s\")",
+						apForm->GetFormID(), pFileA ? pFileA->GetName() : "", apEDID,
+						pExistingForm->GetFormID(), pFileB ? pFileB->GetName() : "");
+				}
+				else {
+					sprintf_s(cText, "%08X (\"%s\") steals EDID \"%s\" from %08X (\"%s\") + changes type from %s to %s",
+						apForm->GetFormID(), pFileA ? pFileA->GetName() : "", apEDID,
+						pExistingForm->GetFormID(), pFileB ? pFileB->GetName() : "",
+						pExistingForm->GetFormTypeName(), apForm->GetFormTypeName());
+				}
+				bHadEDIDConflicts = true;
+				_MESSAGE(cText);
+				ExtraData::RemoveEDID(apEDID, pExistingForm);
 			}
 		}
 
-		TESForm::pAllFormsByEditorID->SetAt(apEDID, apForm);
-		return apEDID;
+		Map::Set(apEDID, apForm);
+		DEBUG_MSG("Added EDID \"%s\" for form %08X to map", apEDID, apForm->GetFormID());
 	}
 
 	// exported
 	uint32_t __cdecl JGNVSE_GetFormIDFromEDID(char* apEDID) {
-		TESForm* pForm = TESForm::GetFormByEditorID(apEDID); 
-		if (pForm)
-			return pForm->GetFormID();
+		if (apEDID && apEDID[0]) {
+			TESForm* pForm = Map::Get(apEDID);
+			if (pForm)
+				return pForm->GetFormID();
+		}
 		return 0;
 	}
 
@@ -211,52 +228,60 @@ namespace EDIDRestoration {
 	public:
 		// vftable + 0x130
 		const char* hk_GetFormEditorID() {
-			const char* pEDID = GetEDIDFromExtraData(this);
-			if (pEDID)
-				return pEDID;
-
-			return "";
+			const char* pEDID = ExtraData::GetEDID(this);
+			return pEDID ? pEDID : "";
 		}
 
 		// vftable + 0x134
 		bool hk_SetFormEditorID(const char* apEDID) {
-			const std::string_view strEDID(apEDID);
-			if (!strEDID.empty()) {
-				if (strEDID == "SysWindowCompileAndRun")
+			DEBUG_MSG("\nForm %08X: Attempting to set EDID to \"%s\"...", GetFormID(), apEDID ? apEDID : "!!NULL!!");
+			if (apEDID && apEDID[0]) [[likely]] {
+				if (apEDID[0] == 'S' && strcmp(apEDID + 1, "ysWindowCompileAndRun") == 0) [[unlikely]] {
 					apEDID = "Console Command";
-
-				if (GetTemporary() || GetFormID() == 0) {
-					return AddEDIDToExtraData(this, apEDID);
 				}
-				else {
-					const char* pEDID = AddToGameMap(apEDID, this);
-					if (pEDID)
-						return AddEDIDToExtraData(this, apEDID);
+
+				const JohnnyExtraData::EDIDResult eAdded = ExtraData::AddEDID(apEDID, this);
+				const bool bSuccess = eAdded == JohnnyExtraData::EDIDResult::SUCCESS;
+				if (bSuccess) [[likely]] {
+					DEBUG_MSG("Added EDID \"%s\" to form %08X", apEDID, GetFormID());
+					if (!GetTemporary() && GetFormID())
+						AddToGameMap(this, apEDID);
+				}
+#if DEBUG_PRINTS
+				else if (eAdded == JohnnyExtraData::EDIDResult::ALREADY_EXISTS) {
+					TESForm* pMapForm = Map::Get(apEDID);
+					if (pMapForm == this) [[unlikely]] {
+						DEBUG_MSG("EDID \"%s\" is already set for form %08X, skipping adding to game map!", apEDID, GetFormID());
+					}
+					else if (pMapForm) {
+						DEBUG_MSG("EDID \"%s\" is already set for form %08X, but map entry uses form %08X!", apEDID, GetFormID(), pMapForm->GetFormID());
+					}
 					else {
-						DEBUG_MSG("Failed to add EDID %s to game map!", apEDID);
-						return false;
+						DEBUG_MSG("EDID \"%s\" is already set for form %08X, but no map entry exists!", apEDID, GetFormID());
 					}
 				}
+				else if (eAdded == JohnnyExtraData::EDIDResult::FAILURE) {
+					DEBUG_MSG("Failed to add EDID \"%s\" to form %08X!", apEDID, GetFormID());
+				}
+#endif
+
+				return bSuccess;
 			}
 			return false;
 		}
 
+		// Removes EDIDs from the map when form is marked as temporary, or added to the garbage collector
 		template<uint32_t INDEX>
-		void Hk_RemoveFormEditorID() {
+		void hk_DetachEditorIDs() {
 			ThisCall(kRemoveFromDataStructures[INDEX].GetOverwrittenAddr(), this);
 			JohnnyExtraData* pData = JohnnyExtraData::Find(this);
-			if (pData)
+			if (pData) [[likely]]
 				pData->DetachEditorIDs();
 		}
 
 		static TESForm* hk_GetFormByEditorID(const char* apEDID) {
-			if (!apEDID || !apEDID[0] || !pAllFormsByEditorID)
-				return nullptr;
-
-			SRWSharedLock kLock(kEDIDMapLock);
-			TESForm* pForm = nullptr;
-			if (pAllFormsByEditorID->GetAt(apEDID, pForm))
-				return pForm;
+			if (apEDID && apEDID[0]) [[likely]]
+				return Map::Get(apEDID);
 			return nullptr;
 		}
 	};
@@ -299,8 +324,8 @@ namespace EDIDRestoration {
 	void InitHooks() {
 		WriteRelJump(0x483A00, TESFormEx::hk_GetFormByEditorID);
 
-		kRemoveFromDataStructures[0].ReplaceCallEx(0x48449A, &TESFormEx::Hk_RemoveFormEditorID<0>); // TESForm::SetTemporary
-		kRemoveFromDataStructures[1].ReplaceCallEx(0x8680A4, &TESFormEx::Hk_RemoveFormEditorID<1>); // GarbageCollector::Add(TESObjectREFR)
+		kRemoveFromDataStructures[0].ReplaceCallEx(0x48449A, &TESFormEx::hk_DetachEditorIDs<0>); // TESForm::SetTemporary
+		kRemoveFromDataStructures[1].ReplaceCallEx(0x8680A4, &TESFormEx::hk_DetachEditorIDs<1>); // GarbageCollector::Add(TESObjectREFR)
 
 		ReplaceCallEx(0x486903, &TESFormEx::hk_GetFormEditorID); // TESForm::GetFormDetailedString
 		ReplaceCallEx(0x451CBA, &TESFormEx::hk_GetFormEditorID); // TESObjectCELL::GetCellName

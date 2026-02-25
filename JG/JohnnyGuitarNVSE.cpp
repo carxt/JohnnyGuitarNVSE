@@ -40,7 +40,7 @@ IDebugLog	   gLog("logs\\JohnnyGuitarNVSE.log");
 bool bIsGECK = false;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
-NiTMap<const char*, TESForm*>** g_gameFormEditorIDsMap = reinterpret_cast<NiTMap<const char*, TESForm*>**>(0x11C54C8);
+
 #define JG_VERSION 521
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	MEM_CONTEXT eOrgContext;
