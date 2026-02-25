@@ -397,6 +397,58 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace UpdateDataFix {
+		// This one is personal - my mistake for making it a global... sorry Jazz
+
+		class Hook {
+		public:
+			void UpdateDownwardPass(NiUpdateData& arData, uint32_t auiFlags) {
+				NiUpdateData kData;
+				reinterpret_cast<NiAVObject*>(this)->UpdateDownwardPass(kData, auiFlags);
+			}
+
+			void UpdateTransformAndBounds(NiUpdateData& arData) {
+				NiUpdateData kData;
+				reinterpret_cast<NiAVObject*>(this)->UpdateTransformAndBounds(kData);
+			}
+
+			void Update(NiUpdateData& arUpdateData) {
+				NiUpdateData kData;
+				reinterpret_cast<NiTimeController*>(this)->Update(kData);
+			}
+
+		};
+
+		template <uint32_t NOP_SIZE = 1, typename C, typename Ret, typename... Args>
+		inline void __fastcall ReplaceVirtualCall(SIZE_T source, Ret(C::* const target)(Args...)) {
+			union {
+				Ret(C::* tgt)(Args...);
+				SIZE_T funcPtr;
+			} conversion;
+			conversion.tgt = target;
+
+			WriteRelCall(source, conversion.funcPtr);
+			PatchMemoryNop(source + 5, NOP_SIZE);
+		}
+
+		void InitHooks() {
+			ReplaceVirtualCall(GetJIPAddress(0x1000A09A), &Hook::UpdateTransformAndBounds);
+			ReplaceVirtualCall(GetJIPAddress(0x10019C7A), &Hook::UpdateDownwardPass);
+
+			ReplaceVirtualCall(GetJIPAddress(0x1002AE08), &Hook::UpdateDownwardPass);
+			ReplaceVirtualCall(GetJIPAddress(0x1002B07A), &Hook::UpdateDownwardPass);
+			ReplaceVirtualCall(GetJIPAddress(0x1002B18A), &Hook::UpdateDownwardPass);
+
+			ReplaceVirtualCall(GetJIPAddress(0x1002CE4D), &Hook::Update);
+
+			ReplaceVirtualCall<2>(GetJIPAddress(0x1005887C), &Hook::UpdateDownwardPass);
+			ReplaceVirtualCall<2>(GetJIPAddress(0x10058927), &Hook::UpdateDownwardPass);
+			ReplaceVirtualCall<2>(GetJIPAddress(0x10058A7E), &Hook::UpdateDownwardPass);
+
+			ReplaceVirtualFuncEx(GetJIPAddress(0x100280FE + 1), &Hook::UpdateDownwardPass);
+		}
+	}
+
 	namespace EarlyFixedStrings {
 
 		static uint32_t uiExitAddr = 0x1000CE06;
@@ -971,6 +1023,7 @@ namespace JIPFixes {
 			FireWeaponFix::InitHooks();
 			ItemDescriptionFixFix::InitHooks();
 			ModelReloadFix::InitHooks();
+			UpdateDataFix::InitHooks();
 		}
 	}
 
