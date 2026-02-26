@@ -54,7 +54,7 @@ DEFINE_COMMAND_PLUGIN(GetNearestNavMeshTriangle, , false, kParams_ThreeFloats_On
 DEFINE_COMMAND_PLUGIN(HasHealthDamageEffect, , true, nullptr);
 DEFINE_COMMAND_PLUGIN(SetAlwaysRun, , false, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetAutoMove, , false, kParams_OneInt_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(SetPlayerMovementFlags, , false, kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetActorMovementFlags, SetPlayerMovementFlags, , false, kParams_OneInt);
 
 DEFINE_COMMAND_PLUGIN(SetExtraAccuracyPenaltyMult, , false, kParams_OneFloat_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetExtraAccuracyPenaltyMult, , false, kParams_OneOptionalForm);
@@ -303,12 +303,22 @@ bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-bool Cmd_SetPlayerMovementFlags_Execute(COMMAND_ARGS)
+bool Cmd_SetActorMovementFlags_Execute(COMMAND_ARGS)
 {
-	uint32_t flags;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags)) {
-		PlayerCharacter::GetSingleton()->actorMover->Unk_03(flags);
-		*result = 1;
+	*result = 0;
+	uint32_t uiFlags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags)) {
+		Actor* pActor = PlayerCharacter::GetSingleton();
+		if (thisObj)
+			pActor = static_cast<Actor*>(thisObj);
+
+		if (pActor->IsActor() && pActor->actorMover) {
+			if (uiFlags)
+				pActor->actorMover->ForceMoveMode(uiFlags);
+			else
+				pActor->actorMover->ClearForcedMoveMode();
+			*result = 1;
+		}
 	}
 	return true;
 }
@@ -330,7 +340,7 @@ bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 			else {
 				flags &= ~0x200;
 			}
-			PlayerCharacter::GetSingleton()->actorMover->Unk_03(flags);
+			PlayerCharacter::GetSingleton()->actorMover->ForceMoveMode(flags);
 		}
 		*result = 1;
 	}

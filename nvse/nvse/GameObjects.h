@@ -346,31 +346,21 @@ public:
 class ActorMover {
 public:
 	ActorMover();
-	~ActorMover();
-
-	virtual void		Unk_00(void);
-	virtual void		Unk_01(void);
-	virtual void		Unk_02(void);
-	virtual void		Unk_03(uint32_t flags);
-	virtual void		Unk_04(void);
-	virtual void		Unk_05(void);
-	virtual void		Unk_06(void);
-	virtual void		Unk_07(void);
-	virtual uint32_t		GetMovementFlags();
-	//	Running		0x200
-	//	Sneaking	0x400
-
-	// bit 11 = swimming
-	// bit 9 = sneaking
-	// bit 8 = run
-	// bit 7 = walk
-	// bit 0 = keep moving (Q)
-	virtual void		Unk_09(void);
-	virtual void		Unk_0A(void);
-	virtual void		Unk_0B(void);
-	virtual void		Unk_0C(void);
-	virtual void		Unk_0D(void);
-	virtual void		Unk_0E(void);
+	virtual				~ActorMover();
+	virtual void		SetMoveModePreference(uint16_t ausFlag);
+	virtual void		ClearMoveModePreference(uint16_t ausFlag);
+	virtual void		ForceMoveMode(uint16_t ausFlag);
+	virtual void		ClearForcedMoveMode();
+	virtual void		Update(float afDelta);
+	virtual void		UpdateTurnTimer(float timePassed);
+	virtual uint32_t	GetPreferredMoveMode() const;
+	virtual uint32_t	GetMoveMode() const;
+	virtual bool		GetMoveDelta(NiPoint3& arDelta);
+	virtual void		SaveGame(BGSSaveFormBuffer* apBuffer);
+	virtual void		LoadGame(BGSLoadFormBuffer* apBuffer);
+	virtual void		InitLoadGame(BGSLoadFormBuffer* apBuffer);
+	virtual void		FinishLoadGame(BGSLoadFormBuffer* apBuffer);
+	virtual void		Revert(BGSLoadFormBuffer* apBuffer);
 
 	uint32_t						unk04[6];			// 04
 	PathingRequest* pathingRequest;	// 1C

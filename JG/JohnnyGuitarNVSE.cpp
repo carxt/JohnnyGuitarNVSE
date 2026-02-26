@@ -423,7 +423,7 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(HasHealthDamageEffect);
 	REG_CMD(SetAlwaysRun);
 	REG_CMD(SetAutoMove);
-	REG_CMD(SetPlayerMovementFlags);
+	REG_CMD(SetActorMovementFlags);
 	REG_CMD(PushUIQuestToTop);
 	REG_CMD(SetExtraAccuracyPenaltyMult);
 	REG_CMD(RemoveExtraAccuracyPenaltyMult);
