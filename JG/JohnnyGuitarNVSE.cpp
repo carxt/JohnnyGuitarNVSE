@@ -503,6 +503,7 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(GetAlphaPropertyValue);
 	REG_CMD(SetStencilPropertyValue);
 	REG_CMD(GetStencilPropertyValue);
+	REG_CMD(PathToPoint);
 }
 
 void ReadINI() {

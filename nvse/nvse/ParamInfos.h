@@ -946,10 +946,11 @@ static ParamInfo kParams_OneBoolOneIntOneFloat[] =
 	{	"Ref To Track",	kParamType_ObjectRef, 1 },
 };
 
-static ParamInfo kParams_OneRefOneFloat[] =
+static ParamInfo kParams_OneRefOneOptionalFloatOneOptionalInt[] =
 {
 	{	"Target Reference",		kParamType_ObjectRef, 0 },
-	{	"Target Radius",		kParamType_Float, 1	}
+	{	"Target Radius",		kParamType_Float, 1	},
+	{ 	"Face Target",			kParamType_Integer, 1 },
 };
 
 static ParamInfo kParams_IsNiSequenceActive[2] =
@@ -961,4 +962,13 @@ static ParamInfo kParams_GetTopicInfo[3] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
 	{	"int",	kParamType_Quest, 1	},
+};
+
+static ParamInfo kParams_ThreeFloatsTwoOptionalFloats[] =
+{
+	{ 	"X",				kParamType_Float, 0	},
+	{	"Y",				kParamType_Float, 0	},
+	{	"Z",				kParamType_Float, 0	},
+	{	"Target Radius",	kParamType_Float, 1	},
+	{	"Target Angle",		kParamType_Float, 1	},
 };

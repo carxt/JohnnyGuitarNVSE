@@ -693,7 +693,11 @@ public:
 	void EquipContainer(TESContainer* container);
 	bool HasNoPath();
 
-	bool SetPathfindingGoal(const TESObjectREFR* apTargetRef, float afTargetRadius = -1.f, PathingAvoidNodeArray* apAvoidNodes = nullptr);
+	bool SetPathfindingGoal(TESObjectREFR* apTargetRef, float afTargetRadius, PathingAvoidNodeArray* apAvoidNodes = nullptr);
+	bool SetPathfindingGoal(const NiPoint3& arGoalLocation, TESObjectCELL* apCell, TESWorldSpace* apWorldSpace, float afTargetRadius, PathingAvoidNodeArray* apAvoidNodes = nullptr);
+	bool SetPathfindingGoalAndAngle(TESObjectREFR* apTargetRef, float afTargetRadius, PathingAvoidNodeArray* apAvoidNodes = nullptr);
+	bool SetPathfindingGoalAndAngle(const NiPoint3& arGoalLocation, TESObjectCELL* apCell, TESWorldSpace* apWorldSpace, float afTargetRadius, float afTargetAngle, PathingAvoidNodeArray* apAvoidNodes = nullptr);
+
 
 	void StopMoving();
 
