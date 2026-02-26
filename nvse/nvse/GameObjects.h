@@ -937,8 +937,8 @@ public:
 
 	bool IsThirdPerson() const { return bThirdPerson; }
 	bool Is3rdPersonVisible() const { return bIs3rdPersonVisible; }
-	uint32_t GetMovementFlags() { return actorMover->GetMovementFlags(); }	// 11: IsSwimming, 9: IsSneaking, 8: IsRunning, 7: IsWalking, 0: keep moving
-	bool IsPlayerSwimming() { return (GetMovementFlags() >> 11) & 1; }
+	uint32_t GetMovementFlags() const { return actorMover->GetMoveMode(); }	// 11: IsSwimming, 9: IsSneaking, 8: IsRunning, 7: IsWalking, 0: keep moving
+	bool IsPlayerSwimming() const { return (GetMovementFlags() >> 11) & 1; }
 
 	static PlayerCharacter* GetSingleton();
 	bool SetSkeletonPath(const char* newPath);
