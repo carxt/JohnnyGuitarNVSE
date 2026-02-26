@@ -518,6 +518,10 @@ public:
 	{
 		ThisCall(0x4568C0, this, apPath, &aspTexture, abNoFileOK, abArchiveOnly);
 	}
+
+	TESObjectCELL* GetCellForPoint(NiPoint3 akPoint) const {
+		return ThisCall<TESObjectCELL*>(0x4519D0, this, akPoint);
+	}
 };
 
 static_assert(sizeof(TES) == 0xC4);

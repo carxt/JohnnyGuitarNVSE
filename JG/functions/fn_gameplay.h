@@ -74,10 +74,11 @@ DEFINE_COMMAND_PLUGIN(GetCasinoChip, , false, kParams_OneCasino);
 DEFINE_COMMAND_PLUGIN(SetCasinoChip, , false, kParams_OneCasinoOneForm);
 DEFINE_COMMAND_PLUGIN(PlayHolotape, , false, kParams_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(StopHolotape, , false, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(PathToRef, , true, kParams_OneRefOneFloat);
+DEFINE_COMMAND_PLUGIN(PathToRef, , true, kParams_OneRefOneOptionalFloatOneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetGrenadeHoldTime, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(GetWeaponsForMod, , false, kParams_OneObjectID);
 DEFINE_CMD_ALT_COND_PLUGIN(IsInDialogueWithPlayer, , "", true, nullptr);
+DEFINE_COMMAND_PLUGIN(PathToPoint, , true, kParams_ThreeFloatsTwoOptionalFloats);
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -1518,14 +1519,19 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectREFR* pTarget = nullptr;
 	float fRadius = -1.f;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTarget, &fRadius) && pTarget && pTarget->IsReference() && thisObj->IsActor()) {
+	BOOL bFaceTarget = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTarget, &fRadius, &bFaceTarget) && pTarget && pTarget->IsReference() && thisObj->IsActor()) {
 		Actor* pActor = static_cast<Actor*>(thisObj);
-		if (pTarget)
-			pActor->SetPathfindingGoal(pTarget, fRadius);
-		else
+		if (pTarget) {
+			if (bFaceTarget)
+				*result = pActor->SetPathfindingGoalAndAngle(pTarget, fRadius);
+			else
+				*result = pActor->SetPathfindingGoal(pTarget, fRadius);
+		}
+		else {
 			pActor->StopMoving();
-
-		*result = 1;
+			*result = 1;
+		}
 	}
 
 	return true;
@@ -1578,5 +1584,25 @@ bool Cmd_IsInDialogueWithPlayer_Eval(COMMAND_ARGS_EVAL) {
 bool Cmd_IsInDialogueWithPlayer_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Cmd_IsInDialogueWithPlayer_Eval(thisObj, nullptr, nullptr, result);
+	return true;
+}
+
+bool Cmd_PathToPoint_Execute(COMMAND_ARGS) {
+	*result = 0;
+	NiPoint3 kTarget;
+	float fFaceAngle = FLT_MAX;
+	float fRadius = -1.f;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kTarget.x, &kTarget.y, &kTarget.z, &fRadius, &fFaceAngle) && thisObj->IsActor()) {
+		Actor* pActor = static_cast<Actor*>(thisObj);
+		TESObjectCELL* pCell = TES::GetSingleton()->GetCellForPoint(kTarget);
+		if (pCell) {
+			TESWorldSpace* pWorld = pCell->GetWorldSpace();
+			if (fFaceAngle != FLT_MAX)
+				*result = pActor->SetPathfindingGoalAndAngle(kTarget, pCell, pWorld, fRadius, fFaceAngle);
+			else
+				*result = pActor->SetPathfindingGoal(kTarget, pCell, pWorld, fRadius);
+		}
+	}
+
 	return true;
 }

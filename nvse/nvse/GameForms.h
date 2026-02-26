@@ -3683,8 +3683,31 @@ public:
 		kCellFlag_BehaveLikeExterior = 1 << 7,
 	};
 
+	struct ALIGN1 _CellFlags {
+		enum Flags : uint8_t {
+			INTERIOR			= 1u << 0,
+			HAS_WATER			= 1u << 1,
+			CANT_FAST_TRAVEL	= 1u << 2,
+			NO_LOD_WATER		= 1u << 3,
+			HAS_TEMP_DATA		= 1u << 4,
+			PUBLIC				= 1u << 5,
+			TEMP_PUBLIC			= 1u << 6,
+			FAKE_EXTERIOR		= 1u << 7,
+		};
+
+		bool bInterior				: 1;
+		bool bHasWater				: 1;
+		bool bCantFastTravel		: 1;
+		bool bNoLODWater			: 1;
+		bool bHasTempData			: 1;
+		bool bPublic				: 1;
+		bool bTempPublic			: 1;
+		bool bBehaveLikeExterior	: 1;
+	};
+	using CellFlags = _CellFlags::Flags;
+
 	TESFullName				fullName;				// 18
-	uint8_t					cellFlags;				// 24
+	Bitfield<_CellFlags>	cellFlags;				// 24
 	uint8_t					byte25;					// 25
 	uint8_t					byte26;					// 26	5 or 6 would mean cell is loaded
 	uint8_t					byte27;					// 27
@@ -3720,10 +3743,11 @@ public:
 	BGSLightingTemplate* lightingTemplate;		// D8
 	uint32_t					inheritFlags;			// DC
 
-	bool IsInterior() { return worldSpace == NULL; }
+	bool IsInterior() const { return cellFlags.bInterior; }
 	NiNode* Get3DNode(uint32_t index);
 	void ToggleNodes(uint32_t nodeBits, uint8_t doHide);
 	void GenerateRenderedTexture(NiCamera* camera, NiRenderedTexture** outTexture);
+	TESWorldSpace* GetWorldSpace() const { return IsInterior() ? nullptr : worldSpace; }
 };
 static_assert(sizeof(TESObjectCELL) == 0xE0);
 
