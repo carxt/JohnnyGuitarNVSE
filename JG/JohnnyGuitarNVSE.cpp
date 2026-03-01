@@ -41,7 +41,7 @@ bool bIsGECK = false;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 
-#define JG_VERSION 521
+#define JG_VERSION 522
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	MEM_CONTEXT eOrgContext;
 	if (!bIsGECK) {
