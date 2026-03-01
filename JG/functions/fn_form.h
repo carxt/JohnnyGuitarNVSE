@@ -1431,7 +1431,7 @@ bool Cmd_SetProjectileSound_Execute(COMMAND_ARGS) {
 	BGSProjectile* projectile = nullptr;
 	TESSound* sound = nullptr;
 	int soundID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &projectile, &soundID, &sound) && projectile && IS_TYPE(projectile, BGSProjectile) && soundID && IS_TYPE(soundID, TESSound) && soundID <= 3) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &projectile, &soundID, &sound) && projectile && IS_TYPE(projectile, BGSProjectile) && sound && IS_TYPE(sound, TESSound) && soundID <= 3) {
 		*result = 1;
 		switch (soundID) {
 			case 1:
@@ -1456,7 +1456,7 @@ bool Cmd_SetExplosionSound_Execute(COMMAND_ARGS) {
 	BGSExplosion* explosion = nullptr;
 	TESSound* sound = nullptr;
 	int soundID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &explosion, &soundID, &sound) && explosion && IS_TYPE(explosion, BGSExplosion) && soundID && IS_TYPE(soundID, TESSound) && soundID <= 2) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &explosion, &soundID, &sound) && explosion && IS_TYPE(explosion, BGSExplosion) && sound && IS_TYPE(sound, TESSound) && soundID <= 2) {
 		soundID == 1 ? (explosion->sound1 = sound) : (explosion->sound2 = sound);
 		*result = 1;
 	}
