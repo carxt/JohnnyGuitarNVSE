@@ -34,6 +34,7 @@ IDebugLog::~IDebugLog()
 
 void IDebugLog::Open(const char* path)
 {
+	MakeAllDirs(path);
 	logFile = _fsopen(path, "w", _SH_DENYWR);
 
 	if (!logFile)
