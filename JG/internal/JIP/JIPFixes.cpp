@@ -491,6 +491,12 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace PerkEntryFix {
+		void InitHooks() {
+			PatchMemoryNop(GetJIPAddress(0x1000F3F3), 6);
+		}
+	}
+
 	namespace CopyFaceGenFromFix {
 
 		bool(__cdecl* CopyFaceGenFrom)(COMMAND_ARGS) = nullptr;
@@ -1026,6 +1032,7 @@ namespace JIPFixes {
 			ItemDescriptionFixFix::InitHooks();
 			ModelReloadFix::InitHooks();
 			UpdateDataFix::InitHooks();
+			PerkEntryFix::InitHooks();
 		}
 	}
 
