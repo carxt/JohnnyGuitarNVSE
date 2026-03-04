@@ -549,6 +549,7 @@ namespace JIPFixes {
 				COUNT	= 2,
 			};
 
+#pragma optimize("y", off)
 			Script* GetResultScript(ResultScriptType aeScript) {
 				if (aeScript == ResultScriptType::BEGIN) {
 					uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
@@ -568,6 +569,7 @@ namespace JIPFixes {
 
 				return ThisCall<Script*>(kGetResultScript.GetOverwrittenAddr(), this, aeScript);
 			}
+#pragma optimize("", on)
 		};
 
 		void InitHooks() {
