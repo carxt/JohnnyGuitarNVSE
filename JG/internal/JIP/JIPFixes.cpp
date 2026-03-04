@@ -933,6 +933,13 @@ namespace JIPFixes {
 
 	}
 
+	namespace WeaponModEffectsFix {
+		void InitHooks() {
+			PatchMemoryNop(GetJIPAddress(0x1003DA30), 5);
+			SafeWrite8(GetJIPAddress(0x1003DA2B + 2), 0xF);
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -1033,6 +1040,7 @@ namespace JIPFixes {
 			ModelReloadFix::InitHooks();
 			UpdateDataFix::InitHooks();
 			PerkEntryFix::InitHooks();
+			WeaponModEffectsFix::InitHooks();
 		}
 	}
 
