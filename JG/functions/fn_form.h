@@ -186,7 +186,8 @@ bool Cmd_GetNoteTopic_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* note = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice) {
-		*(uint32_t*)result = note->voice->GetFormID();
+		if (note->voice)
+			*(uint32_t*)result = note->voice->GetFormID();
 	}
 	return true;
 }
@@ -206,7 +207,8 @@ bool Cmd_GetNoteSound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* note = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kSound) {
-		*(uint32_t*)result = note->sound->GetFormID();
+		if (note->sound)
+			*(uint32_t*)result = note->sound->GetFormID();
 	}
 	return true;
 }
@@ -245,7 +247,8 @@ bool Cmd_GetNoteSpeaker_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* note = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice) {
-		*(uint32_t*)result = note->speaker->GetFormID();
+		if (note->speaker)
+			*(uint32_t*)result = note->speaker->GetFormID();
 	}
 	return true;
 }
