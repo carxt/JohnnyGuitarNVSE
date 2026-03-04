@@ -39,7 +39,7 @@ DEFINE_COMMAND_PLUGIN(GetBufferedCellsAlt, , false, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(GetActorValueModifierAlt, GetAVModAlt, , true, kParams_OneActorValue_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(RemovePrimitive, , true, nullptr);
 DEFINE_COMMAND_PLUGIN(GetPrimitiveType, , true, nullptr);
-DEFINE_CMD_ALT_COND_PLUGIN(GetBaseScale, GetBasedScale, , true, nullptr);
+DEFINE_CMD_ALT_COND_PLUGIN(GetBaseScale, GetBasedScale, , true, kParams_OneOptionalForm);
 DEFINE_CMD_ALT_COND_PLUGIN(GetQuestFailed, GetQF, "", false, kParams_OneQuest);
 DEFINE_COMMAND_PLUGIN(GetWeaponVATSTraitNumeric, , false, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetWeaponVATSTraitNumeric, , false, kParams_OneForm_OneInt_OneFloat);
@@ -1653,16 +1653,34 @@ bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL) {
-	if (thisObj) {
+	*result = 0;
+	TESActorBase* pBase = reinterpret_cast<TESActorBase*>(arg1);
+	if (pBase && pBase->IsBoundAnimObject()) {
+		switch (pBase->GetFormType()) {
+			case FORM_TYPE::TESNPC:
+				*result = static_cast<TESNPC*>(pBase)->height;
+				break;
+			case FORM_TYPE::Creature:
+				*result = static_cast<TESCreature*>(pBase)->baseScale;
+				break;
+			default:
+				break;
+		}
+	}
+	else if (thisObj) {
 		*result = GetBaseScale(thisObj);
-		if (IsConsoleMode())
-			Console_Print("GetBaseScale : %0.2f", *result);
 	}
 	return true;
 }
 
 bool Cmd_GetBaseScale_Execute(COMMAND_ARGS) {
-	return Cmd_GetBaseScale_Eval(thisObj, 0, 0, result);
+	TESActorBase* pBase = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBase)) {
+		Cmd_GetBaseScale_Eval(thisObj, pBase, 0, result);
+		if (IsConsoleMode())
+			Console_Print("GetBaseScale : %0.2f", *result);
+	}
+	return true;
 }
 
 bool Cmd_RemovePrimitive_Execute(COMMAND_ARGS) {
