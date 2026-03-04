@@ -525,7 +525,7 @@ namespace JIPFixes {
 			BOOL setOrRemove = FALSE;
 			Script* script = nullptr;
 			TESForm* filter[1] = { nullptr };
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &script, &setOrRemove, &filter[0]) && IS_TYPE(script, Script)) {
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &script, &setOrRemove, &filter[0]) && script && IS_TYPE(script, Script)) {
 				TESForm* pFilterForm = filter[0];
 		
 				if (!pFilterForm || IS_TYPE(pFilterForm, TESTopic) || IS_TYPE(pFilterForm, TESTopicInfo)) {
