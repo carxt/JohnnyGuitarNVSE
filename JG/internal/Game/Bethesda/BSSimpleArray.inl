@@ -146,11 +146,11 @@ SPEC_NOALIAS inline void BSSimpleArray<T, RESIZE_SIZE>::MoveItems(T* apNewBuffer
 
 	if (apNewBuffer < apOldBuffer) {
 		for (uint32_t i = 0; i < auiSize; ++i)
-			memcpy(&apNewBuffer[i], &apOldBuffer[i], sizeof(T));
+			memmove(&apNewBuffer[i], &apOldBuffer[i], sizeof(T));
 	}
 	else if (apNewBuffer > apOldBuffer) {
 		for (int32_t i = static_cast<int32_t>(auiSize) - 1; i >= 0; --i)
-			memcpy(&apNewBuffer[i], &apOldBuffer[i], sizeof(T));
+			memmove(&apNewBuffer[i], &apOldBuffer[i], sizeof(T));
 	}
 }
 
