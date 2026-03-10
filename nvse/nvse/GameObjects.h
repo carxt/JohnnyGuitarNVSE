@@ -897,11 +897,9 @@ public:
 	uint32_t								unkD4C[6];				// D4C
 	CombatActors* combatActors;			// D64
 	uint32_t								teammateCount;			// D68
-	uint32_t								unkD6C[5];				// D6C
-	NiNode* niNodeD80;				// D80
-	uint32_t								unkD84[12];				// D84
-	NiNode* niNodeDB4;				// DB4
-	uint32_t								unkDB8[7];				// DB8
+	float								fCombatTimer;
+	float								fYieldTimer;
+	NiAVObject*							pWobbleNodes[2][12];
 	NiVector3							vectorDD4;				// DD4
 	NiVector3							cameraPos;				// DE0
 	bhkRigidBody* rigidBody;				// DEC

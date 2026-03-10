@@ -79,6 +79,8 @@ DEFINE_COMMAND_PLUGIN(GetGrenadeHoldTime, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(GetWeaponsForMod, , false, kParams_OneObjectID);
 DEFINE_CMD_ALT_COND_PLUGIN(IsInDialogueWithPlayer, , "", true, nullptr);
 DEFINE_COMMAND_PLUGIN(PathToPoint, , true, kParams_ThreeFloatsTwoOptionalFloats);
+DEFINE_COMMAND_PLUGIN(SetYieldTimer, , false, kParams_OneFloat);
+DEFINE_COMMAND_PLUGIN(GetYieldTimer, , false, nullptr);
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -1614,5 +1616,20 @@ bool Cmd_PathToPoint_Execute(COMMAND_ARGS) {
 		}
 	}
 
+	return true;
+}
+
+bool Cmd_SetYieldTimer_Execute(COMMAND_ARGS) {
+	float fTime;
+	*result = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fTime)) {
+		PlayerCharacter::GetSingleton()->fYieldTimer = fTime;
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetYieldTimer_Execute(COMMAND_ARGS) {
+	*result = PlayerCharacter::GetSingleton()->fYieldTimer;
 	return true;
 }

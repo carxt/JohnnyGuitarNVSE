@@ -504,6 +504,8 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(SetStencilPropertyValue);
 	REG_CMD(GetStencilPropertyValue);
 	REG_CMD(PathToPoint);
+	REG_CMD(GetYieldTimer);
+	REG_CMD(SetYieldTimer);
 }
 
 void ReadINI() {
