@@ -79,6 +79,20 @@ jobs:
         prerelease: true
         body: |
           Continuous release generated from the latest push to development branch.
+
+    - name: Upload mod to NexusMods
+      id: upload
+      uses: Nexus-Mods/upload-action@main
+      with:
+        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+        file_id: ${{ vars.NEXUSMODS_FILE_ID }}
+        game_domain_name: ${{ vars.NEXUSMODS_GAME_DOMAIN }}
+        filename: "artifacts\\JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip"
+        display_name: "JohnnyGuitarNVSE - Continuous Release"
+        description: "Auto build from the latest GitHub commit. Use for testing only."
+        file_category: "miscellaneous"
+        version: ${{ env.artifact_timestamp }}
+        
     - name: Upload Artifact (Release)
       uses: actions/upload-release-asset@v1
       env:
