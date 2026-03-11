@@ -35,13 +35,14 @@ jobs:
 
     - name: Package Artifacts
       run: |
+        $iniDir = "JG\assets"
         $releaseDir = "JG\Release"
         $debugDir = "JG\Debug"
         New-Item -ItemType Directory -Name artifacts -Force | Out-Null
         New-Item -ItemType Directory -Name "nvse\plugins" -path $releaseDir -Force | Out-Null
         New-Item -ItemType Directory -Name "nvse\plugins" -path $debugDir -Force | Out-Null
-        Copy-Item -Path "$releaseDir\johnnyguitar.dll", "$releaseDir\johnnyguitar.pdb" -Destination "$releaseDir\nvse\plugins"
-        Copy-Item -Path "$debugDir\johnnyguitar.dll", "$debugDir\johnnyguitar.pdb" -Destination "$debugDir\nvse\plugins"
+        Copy-Item -Path "$releaseDir\johnnyguitar.dll", "$releaseDir\johnnyguitar.pdb, $iniDir\JohnnyGuitar.ini" -Destination "$releaseDir\nvse\plugins"
+        Copy-Item -Path "$debugDir\johnnyguitar.dll", "$debugDir\johnnyguitar.pdb, $iniDir\JohnnyGuitar.ini" -Destination "$debugDir\nvse\plugins"
         Compress-Archive -Path "$releaseDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip"
         Compress-Archive -Path "$debugDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip"
       shell: pwsh
