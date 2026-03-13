@@ -508,6 +508,8 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(SetYieldTimer);
 	REG_CMD(SetSwitchNodeIndex);
 	REG_CMD(GetSwitchNodeIndex);
+	REG_CMD(SetNiLODLevel);
+	REG_CMD(GetNiLODLevel);
 }
 
 void ReadINI() {

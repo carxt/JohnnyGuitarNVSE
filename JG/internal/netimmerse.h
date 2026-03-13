@@ -1040,6 +1040,39 @@ public:
 	}
 };
 
+class NiCamera;
+class NiLODNode;
+
+class NiLODData : public NiObject {
+public:
+	NiLODData();
+	virtual ~NiLODData();
+
+	virtual int32_t		GetLODLevel(const NiCamera* apCamera, NiLODNode* apLOD);
+	virtual void		UpdateWorldData(NiLODNode* apLOD);
+	virtual NiLODData*	Duplicate();
+	virtual int32_t		GetLODIndex(int32_t aiLODLevel);
+
+	NIRTTI_ADDRESS(0x11F6050);
+};
+
+class NiLODNode : public NiSwitchNode {
+public:
+	NiLODNode();
+	virtual ~NiLODNode();
+
+	NiPointer<NiLODData>	m_spLODData;
+	bool					m_bLODActive;
+
+	NIRTTI_ADDRESS(0x11F5F1C);
+
+#ifdef GAME
+	static constexpr AddressPtr<int32_t, 0x11ABDF4> ms_iGlobalLOD;
+#else
+	static constexpr AddressPtr<int32_t, 0xEB6E44> ms_iGlobalLOD;
+#endif
+};
+
 // E4
 class BSFadeNode : public NiNode {
 public:

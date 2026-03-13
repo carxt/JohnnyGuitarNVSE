@@ -8,6 +8,8 @@ DEFINE_COMMAND_PLUGIN(SetStencilPropertyValue, , true, kParams_OneString_TwoInts
 DEFINE_COMMAND_PLUGIN(GetStencilPropertyValue, , true, kParams_OneString_OneInt);
 DEFINE_COMMAND_PLUGIN(SetSwitchNodeIndex, , true, kParams_OneString_OneInt);
 DEFINE_COMMAND_PLUGIN(GetSwitchNodeIndex, , true, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(SetNiLODLevel, , false, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(GetNiLODLevel, , false, nullptr);
 
 namespace {
 	enum class AlphaPropertyItem  : int32_t {
@@ -229,5 +231,20 @@ bool Cmd_GetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 		if (pObject && pObject->IsExactKindOf<NiSwitchNode>())
 			*result = static_cast<NiSwitchNode*>(pObject)->GetIndex();
 	}
+	return true;
+}
+
+bool Cmd_SetNiLODLevel_Execute(COMMAND_ARGS) {
+	*result = 0;
+	int32_t iLevel = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &iLevel)) {
+		NiLODNode::ms_iGlobalLOD = iLevel;
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetNiLODLevel_Execute(COMMAND_ARGS) {
+	*result = NiLODNode::ms_iGlobalLOD;
 	return true;
 }
