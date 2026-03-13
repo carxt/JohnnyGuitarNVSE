@@ -4,7 +4,7 @@
 
 
 template <class T>
-class BSSimpleList : public BSMemObject {
+class SPEC_EMPTY_BASES BSSimpleList : public BSMemObject {
 public:
 	BSSimpleList();
 	BSSimpleList(const T& arItem);

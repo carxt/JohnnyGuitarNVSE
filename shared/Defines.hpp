@@ -103,6 +103,7 @@ __forceinline T_Ret FastCall(uint32_t _addr, Args ...args) {
 #define SPEC_INLINE			__forceinline
 #define SPEC_NORETURN		__declspec(noreturn)
 #define SPEC_NOALIAS		__declspec(noalias)
+#define SPEC_EMPTY_BASES	__declspec(empty_bases)
 
 #define _HELPER_COMBINE1(X,Y) X##Y
 #define _HELPER_COMBINE(X,Y) _HELPER_COMBINE1(X,Y)

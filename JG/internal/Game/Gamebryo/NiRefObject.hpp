@@ -5,7 +5,7 @@
 
 NiSmartPointer(NiRefObject);
 
-class NiRefObject : public NiMemObject {
+class SPEC_EMPTY_BASES NiRefObject : public NiMemObject {
 public:
 	NiRefObject();
 

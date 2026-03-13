@@ -3,7 +3,7 @@
 #include "NiMemObject.hpp"
 
 template <class T_Data, class Allocator>
-class NiTLargeArray : public NiMemObject {
+class SPEC_EMPTY_BASES NiTLargeArray : public NiMemObject {
 public:
 	NiTLargeArray(uint32_t auiMaxSize = 0, uint32_t auiGrowBy = 1);
 	virtual ~NiTLargeArray();

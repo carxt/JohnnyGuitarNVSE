@@ -5,7 +5,7 @@
 typedef void* NiTMapIterator;
 
 template <class T_Key, class T_Data> 
-class NiTMapItem : public NiMemObject {
+class SPEC_EMPTY_BASES NiTMapItem : public NiMemObject {
 public:
     NiTMapItem* m_pkNext;
     T_Key       m_key;
@@ -13,7 +13,7 @@ public:
 };
 
 template <class Allocator, class T_Key, class T_Data>
-class NiTMapBase : public NiMemObject {
+class SPEC_EMPTY_BASES NiTMapBase : public NiMemObject {
 public:
     struct AntiBloatAllocator : public Allocator {
         uint32_t m_uiCount;

@@ -3,7 +3,7 @@
 #include "NiMemObject.hpp"
 
 template <class T>
-class NiPointer : public NiMemObject {
+class SPEC_EMPTY_BASES NiPointer : public NiMemObject {
 public:
 	// GAME - 0x6694E0
 	__forceinline NiPointer() : m_pObject(nullptr) {}

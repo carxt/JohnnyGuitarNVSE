@@ -6,7 +6,7 @@
 template <class T_Data>
 class NiTAbstractPoolAllocator {
 public:
-    class AllocNode : public NiMemObject {
+    class SPEC_EMPTY_BASES AllocNode : public NiMemObject {
     public:
         AllocNode*  m_pkNext;
         void*       m_pkData;

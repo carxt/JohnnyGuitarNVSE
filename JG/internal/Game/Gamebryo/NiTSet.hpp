@@ -5,7 +5,7 @@
 #include "NiTNewInterface.hpp"
 
 template <class T_Data, class Allocator>
-class NiTSet : public NiMemObject {
+class SPEC_EMPTY_BASES NiTSet : public NiMemObject {
 public:
 	NiTSet(uint32_t auiInitialSize) {
 		if (auiInitialSize > 0) {

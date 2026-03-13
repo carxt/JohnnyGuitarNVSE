@@ -2,7 +2,7 @@
 
 #include "NiMemObject.hpp"
 
-class NiRTTI : public NiMemObject {
+class SPEC_EMPTY_BASES NiRTTI : public NiMemObject {
 public:
 	NiRTTI() { m_pcName = nullptr; m_pkBaseRTTI = nullptr; }
 	NiRTTI(const char* apName, const NiRTTI* const apBase) { m_pcName = apName; m_pkBaseRTTI = apBase; }

@@ -3,7 +3,7 @@
 #include "BSMemObject.hpp"
 
 template <typename T>
-class BSStringT : public BSMemObject {
+class SPEC_EMPTY_BASES BSStringT : public BSMemObject {
 public:
 	BSStringT();
 	BSStringT(const T* apText);

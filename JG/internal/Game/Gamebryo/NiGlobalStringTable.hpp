@@ -10,7 +10,7 @@
 class NiFixedString;
 
 // Replaced by JIP
-class NiGlobalStringTable : public NiMemObject {
+class SPEC_EMPTY_BASES NiGlobalStringTable : public NiMemObject {
 public:
 	typedef char* GlobalStringHandle;
 

@@ -5,7 +5,7 @@
 typedef void* NiTListIterator;
 
 template <class T_Data>
-class NiTListItem : public NiMemObject {
+class SPEC_EMPTY_BASES NiTListItem : public NiMemObject {
 public:
 	NiTListItem* m_pkNext;
 	NiTListItem* m_pkPrev;
@@ -13,7 +13,7 @@ public:
 };
 
 template <class Allocator, class T_Data>
-class NiTListBase : public NiMemObject {
+class SPEC_EMPTY_BASES NiTListBase : public NiMemObject {
 public:
     NiTListBase();
     ~NiTListBase();

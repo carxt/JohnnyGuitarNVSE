@@ -3,7 +3,7 @@
 #include "NiGlobalStringTable.hpp"
 #include <string_view>
 
-class NiFixedString : public NiMemObject {
+class SPEC_EMPTY_BASES NiFixedString : public NiMemObject {
 public:
 	NiFixedString();
 	NiFixedString(const char* apcString);

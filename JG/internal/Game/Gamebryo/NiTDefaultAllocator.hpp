@@ -7,7 +7,7 @@
 template <class T>
 class NiTDefaultAllocator {
 protected:
-    class AllocNode : public NiMemObject {
+    class SPEC_EMPTY_BASES AllocNode : public NiMemObject {
     public:
         AllocNode*  m_pkNext = nullptr;
         void*       m_pkData = nullptr;
