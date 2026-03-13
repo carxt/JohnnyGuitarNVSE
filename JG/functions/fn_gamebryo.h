@@ -6,6 +6,8 @@ DEFINE_COMMAND_PLUGIN(SetAlphaPropertyValue, , true, kParams_OneString_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetAlphaPropertyValue, , true, kParams_OneString_OneInt);
 DEFINE_COMMAND_PLUGIN(SetStencilPropertyValue, , true, kParams_OneString_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetStencilPropertyValue, , true, kParams_OneString_OneInt);
+DEFINE_COMMAND_PLUGIN(SetSwitchNodeIndex, , true, kParams_OneString_OneInt);
+DEFINE_COMMAND_PLUGIN(GetSwitchNodeIndex, , true, kParams_OneString);
 
 namespace {
 	enum class AlphaPropertyItem  : int32_t {
@@ -201,6 +203,31 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 			default:
 				return true;
 		}
+	}
+	return true;
+}
+
+bool Cmd_SetSwitchNodeIndex_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cObjectName[MAX_PATH] = {};
+	int32_t iIndex = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &iIndex) && cObjectName[0]) {
+		NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->GetNiNode(), cObjectName);
+		if (pObject && pObject->IsExactKindOf<NiSwitchNode>()) {
+			static_cast<NiSwitchNode*>(pObject)->SetIndex(iIndex);
+			*result = 1;
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetSwitchNodeIndex_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cObjectName[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName) && cObjectName[0]) {
+		NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->GetNiNode(), cObjectName);
+		if (pObject && pObject->IsExactKindOf<NiSwitchNode>())
+			*result = static_cast<NiSwitchNode*>(pObject)->GetIndex();
 	}
 	return true;
 }

@@ -163,6 +163,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiGlobalStringTable.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMemObject.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMemory.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiObject.cpp" />
     <ClCompile Include="internal\JG\EditorIDRestoration.cpp" />
     <ClCompile Include="internal\JG\JohnnyExtraData.cpp" />
     <ClCompile Include="internal\JIP\JIPFixes.cpp" />
@@ -257,6 +258,9 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiGlobalStringTable.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemory.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiObject.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiRefObject.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiRTTI.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSmartPointer.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTAbstractPoolAllocator.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTArray.hpp" />

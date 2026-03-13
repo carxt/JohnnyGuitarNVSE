@@ -11,25 +11,7 @@
 #include "internal/Game/Gamebryo/NiTStringPointerMap.hpp"
 #include "internal/Game/Gamebryo/NiTPrimitiveSet.hpp"
 #include "internal/Game/Gamebryo/NiTObjectSet.hpp"
-
-#if RUNTIME
-
-#if 1
-const uint32_t kNiTMapLookupAddr = 0x853130;
-#else
-#error
-#endif
-
-#else
-const uint32_t _NiTMap_Lookup = 0;
-#endif
-
-// 08
-struct NiRTTI
-{
-	const char		*name;
-	NiRTTI			*parent;
-};
+#include "internal/Game/Gamebryo/NiRTTI.hpp"
 
 // 24
 struct NiMatrix3

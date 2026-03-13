@@ -476,9 +476,9 @@ bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS) {
 		if (optIdx > 4) return true;
 		auto doUpdateBone = [optIdx, &boneName, &result](BipedAnim* BipedAnim) {
 			if (BipedAnim) {
-				if (BipedAnim->pRoot && BipedAnim->pRoot->GetNiNode()) {
+				if (BipedAnim->pRoot && BipedAnim->pRoot->IsNode()) {
 					auto vb = CdeclCall<NiNode*>(0x04AAE30, BipedAnim->pRoot, boneName);
-					if (vb && vb->GetNiNode()) {
+					if (vb && vb->IsNode()) {
 						BipedAnim->kBones[optIdx].pParent = vb;
 						*result = 1;
 					}
@@ -501,7 +501,7 @@ bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &optIdx)) {
 		if (thisObj && thisObj->IsCharacter() && optIdx <= 4)
 			if (auto BipedAnim = ((Character*)thisObj)->validBip01Names) {
-				if (BipedAnim->kBones[optIdx].pParent && BipedAnim->kBones[optIdx].pParent->GetNiNode()) {
+				if (BipedAnim->kBones[optIdx].pParent && BipedAnim->kBones[optIdx].pParent->IsNode()) {
 					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->kBones[optIdx].pParent->m_blockName);
 					if (IsConsoleMode())
 						Console_Print("GetOptionalBone >> %s", BipedAnim->kBones[optIdx].pParent->m_blockName);

@@ -3,6 +3,9 @@
 #include "NiTypes.h"
 #include "GameTypes.h"
 
+#include "Gamebryo/NiObject.hpp"
+#include "Gamebryo/NiRTTI.hpp"
+
 struct NavMeshInfo;
 class bhkRigidBody;
 class TESObjectCELL;
@@ -56,25 +59,6 @@ struct NiUpdateData {
 	bool	bUpdateShadowSceneNode;
 };
 
-// 08
-class NiRefObject : public NiMemObject {
-public:
-	NiRefObject();
-	virtual			~NiRefObject();
-	virtual void	DeleteThis();
-
-	uint32_t		m_uiRefCount;	// 04
-
-	inline void IncRefCount() {
-		InterlockedIncrement(&m_uiRefCount);
-	}
-
-	inline void DecRefCount() {
-		if (!InterlockedDecrement(&m_uiRefCount))
-			DeleteThis();
-	}
-};
-
 // 44
 class LoadedAreaBound : public NiRefObject
 {
@@ -107,47 +91,6 @@ public:
 	uint8_t byte75[3]; // 75
 	BSSimpleArray<NavMeshInfo*> navMeshInfos; // 78
 	NiRefObject* object88; // 88
-};
-
-// 08
-class NiObject : public NiRefObject {
-public:
-	NiObject();
-	~NiObject();
-
-	virtual NiRTTI* GetType();
-	virtual NiNode* GetNiNode();
-	virtual BSFadeNode* GetFadeNode();
-	virtual void	Unk_05(void);
-	virtual void	Unk_06(void);
-	virtual void	Unk_07(void);
-	virtual void	Unk_08(void);
-	virtual void	Unk_09(void);
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-	virtual void	Unk_0C(void);
-	virtual void	Unk_0D(void);
-	virtual void	Unk_0E(void);
-	virtual void	Unk_0F(void);
-	virtual void	Unk_10(void);
-	virtual void	Unk_11(void);
-	virtual void	Unk_12(uint32_t arg);
-	virtual void	Unk_13(uint32_t arg);
-	virtual void	Unk_14(uint32_t arg);
-	virtual void	Unk_15(uint32_t arg);
-	virtual void	Unk_16(uint32_t arg);
-	virtual void	Unk_17(uint32_t arg);
-	virtual void	Unk_18(uint32_t arg);
-	virtual void	Unk_19(uint32_t arg);
-	virtual void	Unk_1A(uint32_t arg);
-	virtual void	Unk_1B(uint32_t arg);
-	virtual void	Unk_1C(void);
-	virtual void	Unk_1D(void);
-	virtual void	Unk_1E(uint32_t arg);
-	virtual uint32_t	Unk_1F(void);
-	virtual void	Unk_20(void);
-	virtual void	Unk_21(uint32_t arg);
-	virtual void	Unk_22(void);
 };
 
 // 40
@@ -966,6 +909,8 @@ public:
 };
 static_assert(sizeof(WaterShaderProperty) == 0x150);
 
+class NiDynamicEffectState;
+
 // 9C
 class NiAVObject : public NiObjectNET {
 public:
@@ -973,23 +918,23 @@ public:
 	~NiAVObject();
 
 	virtual void			UpdateControllers(NiUpdateData& arData);
-	virtual void			ApplyTransform(NiMatrix3& arMat, NiVector3& arTrn, bool abOnLeft);
-	virtual void			Unk_39();
-	virtual NiAVObject*		GetObject_(const NiFixedString& arName);
-	virtual NiAVObject*		GetObjectByName(const NiFixedString& arName);
-	virtual void			SetSelectiveUpdateFlags(bool* abSelectiveUpdate, BOOL abSelectiveUpdateTransforms, bool* abRigid);
-	virtual void			UpdateDownwardPass(const NiUpdateData& arData, uint32_t auiFlags);
-	virtual void			UpdateSelectedDownwardPass(const NiUpdateData& arData, uint32_t auiFlags);
-	virtual void			UpdateRigidDownwardPass(const NiUpdateData& arData, uint32_t auiFlags);
+	virtual void			ApplyTransform(NiMatrix3& arMat, NiPoint3& arTrn, bool abOnLeft);
+	virtual void			SetMaterialNeedsUpdate(bool abNeedsUpdate);
+	virtual void			SetDefaultMaterialNeedsUpdateFlag(bool abNeedsUpdate);
+	virtual NiAVObject*		GetObjectByName(const NiFixedString& arName) const;
+	virtual void			SetSelectiveUpdateFlags(bool& arSelectiveUpdate, bool abSelectiveUpdateTransforms, bool& arRigid);
+	virtual void			UpdateDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
+	virtual void			UpdateSelectedDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
+	virtual void			UpdateRigidDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
 	virtual void			UpdatePropertiesDownward(NiPropertyState* apParentState);
-	virtual void			UpdateTransform();
-	virtual void			UpdateWorldData(const NiUpdateData& arData);
+	virtual void			UpdateEffectsDownward(NiDynamicEffectState* apEffectState);
+	virtual void			UpdateWorldData(NiUpdateData& arData);
 	virtual void			UpdateWorldBound();
-	virtual void			UpdateTransformAndBounds(const NiUpdateData& arData);
-	virtual void			PreAttachUpdate(NiNode* apEventualParent, const NiUpdateData& arData);
+	virtual void			UpdateTransformAndBounds(NiUpdateData& arData);
+	virtual void			PreAttachUpdate(NiNode* apEventualParent, NiUpdateData& arData);
 	virtual void			PreAttachUpdateProperties(NiNode* apEventualParent);
-	virtual void			DetachParent();
-	virtual void			UpdateUpwardPassParent(void* arg);
+	virtual void			PreAttachUpdateEffects(NiNode* apEventualParent);
+	virtual void			PostAttachUpdate();
 	virtual void			OnVisible(NiCullingProcess* apCuller);
 	virtual void			PurgeRendererData(NiDX9Renderer* apRenderer);
 
@@ -1063,6 +1008,37 @@ public:
 	}
 };
 static_assert(sizeof(NiNode) == 0xAC);
+
+class NiSwitchNode : public NiNode {
+public:
+	struct ALIGN2 _SwitchFlags {
+		enum Flags : uint16_t {
+			UPDATE_ONLY_ACTIVE_CHILD	= 1u << 0,
+			UPDATE_CONTROLLERS			= 1u << 1,
+		};
+
+		bool bUpdateOnlyActiveChild : 1;
+		bool bUpdateControllers		: 1;
+	};
+	using SwitchFlags = _SwitchFlags::Flags;
+
+	Bitfield<_SwitchFlags>		m_usFlags;
+	int32_t						m_iIndex;
+	float						m_fSavedTime;
+	uint32_t					m_uiRevID;
+	NiTPrimitiveArray<uint32_t>	m_kChildRevID;
+
+	NIRTTI_ADDRESS(0x11F5EB4);
+
+	void SetIndex(int32_t aiIndex) {
+		if (aiIndex >= -1 && aiIndex < static_cast<int32_t>(m_children.GetSize()))
+			m_iIndex = aiIndex;
+	}
+
+	int32_t GetIndex() const {
+		return m_iIndex;
+	}
+};
 
 // E4
 class BSFadeNode : public NiNode {

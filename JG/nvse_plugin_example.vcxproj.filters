@@ -193,6 +193,9 @@
     <ClCompile Include="..\shared\Utils\DebugLog.cpp">
       <Filter>shared\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiObject.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -561,6 +564,15 @@
     </ClInclude>
     <ClInclude Include="..\shared\Utils\DebugLog.hpp">
       <Filter>shared\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiObject.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiRefObject.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiRTTI.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

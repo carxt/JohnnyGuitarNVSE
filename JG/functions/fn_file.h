@@ -313,7 +313,7 @@ bool Cmd_StopSound3DFromPath_Execute(COMMAND_ARGS) {
 			BSAudioManager::Get()->playingSounds.GetNext(kIter, uiKey, pSound);
 			if (pSound && _stricmp(pSound->filePath, path) == 0) {
 				NiPointer<NiAVObject> spObj;
-				if (!BSAudioManager::Get()->soundPlayingObjects.GetAt(pSound->mapKey, spObj) || !spObj->GetFadeNode())
+				if (!BSAudioManager::Get()->soundPlayingObjects.GetAt(pSound->mapKey, spObj) || !spObj->IsFadeNode())
 					continue;
 
 				if (static_cast<BSFadeNode*>(spObj.m_pObject)->linkedObj == ref) {
@@ -356,7 +356,7 @@ bool Cmd_IsSoundPlayingFromPath_Execute(COMMAND_ARGS) {
 			auto kObjIter = BSAudioManager::Get()->soundPlayingObjects.GetFirstPos();
 			while (kObjIter) {
 				BSAudioManager::Get()->soundPlayingObjects.GetNext(kObjIter, uiKey, spObject);
-				if (!spObject || !spObject->GetFadeNode())
+				if (!spObject || !spObject->IsFadeNode())
 					continue;
 
 				BSFadeNode* fadeNode = static_cast<BSFadeNode*>(spObject.m_pObject);

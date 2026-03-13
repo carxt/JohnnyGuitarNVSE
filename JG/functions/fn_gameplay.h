@@ -1321,7 +1321,7 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 			while (kObjIter) {
 				NiPointer<NiAVObject> spObject;
 				BSAudioManager::Get()->soundPlayingObjects.GetNext(kObjIter, uiKey, spObject);
-				if (!spObject || !spObject->GetFadeNode())
+				if (!spObject || !spObject->IsFadeNode())
 					continue;
 
 				BSFadeNode* pFadeNode = static_cast<BSFadeNode*>(spObject.m_pObject);

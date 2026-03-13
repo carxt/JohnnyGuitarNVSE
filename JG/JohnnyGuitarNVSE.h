@@ -874,7 +874,7 @@ float __declspec(naked) __fastcall NiNodeComputeDistance2DSquared(NiVector3* Vec
 
 NiNode* NiNode::GetNode(const char* nodeName) {
 	NiAVObject* found = GetBlock(nodeName);
-	return found ? found->GetNiNode() : NULL;
+	return found ? found->IsNode() : NULL;
 }
 
 __forceinline void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn, float& zIn) {

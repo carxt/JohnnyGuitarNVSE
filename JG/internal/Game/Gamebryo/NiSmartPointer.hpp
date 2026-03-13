@@ -54,3 +54,7 @@ public:
 	// GAME - 0x52AA80
 	__forceinline operator bool() const { return m_pObject != nullptr; }
 };
+
+#define NiSmartPointer(className) \
+    class className; \
+    typedef NiPointer<className> className##Ptr;
