@@ -1,12 +1,14 @@
 #pragma once
 
+#include "BSMemObject.hpp"
+
+
 template <class T>
-class BSSimpleList {
+class BSSimpleList : public BSMemObject {
 public:
 	BSSimpleList();
-	BSSimpleList(const T& item);
-	BSSimpleList(const T& item, BSSimpleList<T>* apNext);
-	BSSimpleList(const BSSimpleList<T>& arEntry);
+	BSSimpleList(const T& arItem);
+	BSSimpleList(const T& arItem, BSSimpleList<T>* apNext);
 	~BSSimpleList();
 
 	T					m_item;
@@ -14,7 +16,7 @@ public:
 
 	const T& GetItem() const;
 	T& GetItem();
-	void SetItem(const T& aItem);
+	void SetItem(const T& arItem);
 
 	const BSSimpleList<T>* GetNext() const;
 	BSSimpleList<T>* GetNext();
@@ -22,13 +24,13 @@ public:
 
 	bool IsEmpty() const;
 
-	void AddHead(const T& aItem);
+	void AddHead(const T& arItem);
 
-	void AddTail(const T& aItem);
+	void AddTail(const T& arItem);
 
-	bool IsInList(const T& aItem) const;
+	bool IsInList(const T& arItem) const;
 
-	BSSimpleList<T>* GetPos(const T& aItem) const;
+	BSSimpleList<T>* GetPos(const T& arItem) const;
 
 	uint32_t ItemsInList() const;
 
@@ -38,9 +40,9 @@ public:
 
 	void RemoveTail();
 
-	void Remove(const T& aItem);
+	void Remove(const T& arItem);
 
-	void InsertSorted(const T& aItem, int32_t(__cdecl* apCompare)(const T& aItem1, const T& aItem2));
+	void Insert(const T& arItem, int32_t(__cdecl* apCompare)(const T& arItem1, const T& arItem2));
 
 	// Custom methods
 
@@ -48,9 +50,9 @@ public:
 	BSSimpleList<T>* GetHead() { return this; }
 
 	BSSimpleList<T>* GetTail() const {
-		BSSimpleList<T>* kIter;
-		for (kIter = const_cast<BSSimpleList<T>*>(this); kIter->GetNext(); kIter = kIter->GetNext()) {}
-		return kIter;
+		BSSimpleList<T>* pIter;
+		for (pIter = const_cast<BSSimpleList<T>*>(this); pIter->GetNext(); pIter = pIter->GetNext()) {}
+		return pIter;
 	}
 
 	class Iterator {
@@ -90,11 +92,11 @@ public:
 		return nullptr;
 	}
 
-	int32_t GetIndexOf(const T& aItem) const {
+	int32_t GetIndexOf(const T& arItem) const {
 		int32_t iIndex = 0;
 		const BSSimpleList<T>* pIter = this;
 		while (pIter) {
-			if (pIter->GetItem() == aItem)
+			if (pIter->GetItem() == arItem)
 				return iIndex;
 
 			pIter = pIter->GetNext();
@@ -117,10 +119,10 @@ public:
 		return -1;
 	}
 
-	BSSimpleList<T>* Find(const T& aItem) const {
+	BSSimpleList<T>* Find(const T& arItem) const {
 		BSSimpleList<T>* pIter = const_cast<BSSimpleList<T>*>(this);
 		while (pIter) {
-			if (pIter->GetItem() == aItem)
+			if (pIter->GetItem() == arItem)
 				return pIter;
 
 			pIter = pIter->GetNext();
@@ -154,39 +156,39 @@ public:
 		}
 	}
 
-	[[nodiscard]] BSSimpleList<T>* ReplaceAt(uint32_t auiIndex, const T& aItem) {
+	[[nodiscard]] BSSimpleList<T>* ReplaceAt(uint32_t auiIndex, const T& arItem) {
 		BSSimpleList<T>* pIter = GetAt(auiIndex);
 		BSSimpleList<T>* pReplaced = nullptr;
 		if (pIter) {
 			pReplaced = new BSSimpleList<T>(pIter->GetItem());
-			pIter->SetItem(aItem);
+			pIter->SetItem(arItem);
 		}
 		return pReplaced;
 	}
 
-	[[nodiscard]] BSSimpleList<T>* SetAt(uint32_t auiIndex, const T& aItem) {
+	[[nodiscard]] BSSimpleList<T>* SetAt(uint32_t auiIndex, const T& arItem) {
 		BSSimpleList<T>* pIter = GetAt(auiIndex);
 		if (pIter)
-			pIter->SetItem(aItem);
+			pIter->SetItem(arItem);
 		else
-			AddTail(aItem);
+			AddTail(arItem);
 		return pIter;
 	}
 
-	BSSimpleList<T>* AddAt(uint32_t auiIndex, const T& aItem) {
+	BSSimpleList<T>* AddAt(uint32_t auiIndex, const T& arItem) {
 		BSSimpleList<T>* pIter = GetAt(auiIndex);
 		if (pIter) {
 			if (pIter->GetItem()) {
-				BSSimpleList<T>* pNewNode = new BSSimpleList<T>(aItem);
+				BSSimpleList<T>* pNewNode = new BSSimpleList<T>(arItem);
 				pNewNode->SetNext(pIter->GetNext());
 				pIter->SetNext(pNewNode);
 			}
 			else {
-				pIter->SetItem(aItem);
+				pIter->SetItem(arItem);
 			}
 		}
 		else {
-			AddTail(aItem);
+			AddTail(arItem);
 		}
 		return pIter;
 	}
