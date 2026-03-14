@@ -666,6 +666,9 @@ namespace JIPFixes {
 			{ "Runtime Form Handling (0 - none, 1 - skip, 2 - only)", kParamType_Integer, true }
 		};
 
+		constexpr uint32_t MAX_LINE_WIDTH = 1700;
+		constexpr uint32_t MAX_LINE_LENGTH = 120;
+
 		class AutoLineWidth {
 			static constexpr uint32_t LINE_WIDTH_ADDR = 0x71D122 + 6;
 
@@ -757,10 +760,24 @@ namespace JIPFixes {
 			const char* pType = apForm->GetFormTypeName();
 			const char* pEDID = (apEDID && apEDID[0]) ? apEDID : "NO-EDID";
 			if (pFullName && pFullName[0]) {
-				char cFullNameBuffer[48];
-				if (strlen(pFullName) > sizeof(cFullNameBuffer)) {
-					TruncateString(pFullName, cFullNameBuffer, sizeof(cFullNameBuffer));
-					pFullName = cFullNameBuffer;
+				constexpr uint32_t FRONT_PADDING = 24; // Tweaks' time + FormID
+				constexpr uint32_t SEPARATOR_PADDING = 3 * 3; // " | "
+				constexpr uint32_t BRACKETS_PADDING = 2; // "()"
+				const uint32_t uiTypeLength = strlen(pType);
+				const uint32_t uiEDIDLength = strlen(pEDID);
+				const uint32_t uiFileNameLength = strlen(pFileName);
+				const uint32_t uiFullNameLength = strlen(pFullName);
+
+				const uint32_t uiTotalLength = FRONT_PADDING + uiTypeLength + uiEDIDLength + uiFullNameLength + uiFileNameLength + SEPARATOR_PADDING + BRACKETS_PADDING;
+
+				char cTruncatedFullName[32];
+				// TLDR: Console's line breaks suck ass, so let's try to avoid them as much as possible
+				if (uiTotalLength > MAX_LINE_LENGTH) {
+					const uint32_t uiExcessLength = uiTotalLength - MAX_LINE_LENGTH;
+					const uint32_t uiTruncatedLength = uiFullNameLength >= uiExcessLength ? (uiFullNameLength - uiExcessLength) : uiExcessLength;
+					// If we need to trim, truncate the full name and add "..." at the end
+					TruncateString(pFullName, cTruncatedFullName, std::clamp<uint32_t>(uiTruncatedLength, 8, sizeof(cTruncatedFullName)));
+					pFullName = cTruncatedFullName;
 				}
 				Console_Print("%08X | %s | %s (%s) | %s", apForm->GetFormID(), pType, pEDID, pFullName, pFileName);
 			}
@@ -872,7 +889,7 @@ namespace JIPFixes {
 				}
 			}
 
-			AutoLineWidth kLineWidthFix(2400);
+			AutoLineWidth kLineWidthFix(MAX_LINE_WIDTH);
 			auto kIter = TESForm::pAllForms->GetFirstPos();
 			while (kIter) {
 				uint32_t uiID = 0;
