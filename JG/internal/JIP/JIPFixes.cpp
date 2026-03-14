@@ -454,13 +454,11 @@ namespace JIPFixes {
 		static uint32_t uiExitAddr = 0x1000CE06;
 		static uint32_t uiContinueAddr = 0x1000CDD5;
 
-		bool __fastcall StrCmp(char* a, const char* b) {
+		bool __fastcall StrCmp(const char* a, const char* b) {
 			if (a == b)
 				return true;
 
-			const uint32_t uiLength = *reinterpret_cast<size_t*>(a - sizeof(size_t));
-			const std::string_view strA(a, uiLength);
-			return strA == b;
+			return strcmp(a, b) == 0;
 		}
 
 		void __declspec(naked) CompareFix_Asm() {
