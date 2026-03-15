@@ -439,7 +439,7 @@ bool Cmd_RemoveScopeModelPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && weapon && IS_TYPE(weapon, TESObjectWEAP)) {
 		if (weapon && weapon->HasScope()) model = &(weapon->targetNIF);
 		if (model) {
-			model->nifPath.Set("");
+			model->SetModel("");
 			*result = 1;
 		}
 	}
@@ -1597,7 +1597,7 @@ bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
 	const char* path = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &race, &modelID, &isFemale) && race && IS_TYPE(race, TESRace)) {
 		if (isFemale <= 1 && modelID <= 7) {
-			path = race->faceModels[isFemale][modelID].nifPath.c_str();
+			path = race->faceModels[isFemale][modelID].GetModel();
 			if (path) {
 				g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 				if (IsConsoleMode()) {
@@ -1614,7 +1614,7 @@ bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
 	const char* path = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &race, &modelID, &isFemale) && race && IS_TYPE(race, TESRace)) {
 		if (isFemale <= 1 && modelID <= 2) {
-			path = race->bodyModels[isFemale][modelID].nifPath.c_str();
+			path = race->bodyModels[isFemale][modelID].GetModel();
 			if (path) {
 				g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 				if (IsConsoleMode()) {
@@ -1631,7 +1631,7 @@ bool Cmd_GetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &flagID, &isFemale) && armor && IS_TYPE(armor, TESObjectARMO)) {
 		if (isFemale <= 1 && flagID <= 3) {
-			*result = (armor->bipedModel.bipedModel[isFemale].facegenFlags & (1 << flagID)) ? 1 : 0;
+			*result = armor->bipedModel.bipedModel[isFemale].ucFaceGenFlags.GetBit(flagID) ? 1 : 0;
 			if (IsConsoleMode()) {
 				Console_Print("GetFacegenModelFlag %i %i >> %.f", flagID, isFemale, *result);
 			}

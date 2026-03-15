@@ -5,6 +5,7 @@
 #include "GameBSExtraData.h"
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
+#include "Bethesda/TESModel.hpp"
 #include "Bethesda/TESBoundAnimObject.hpp"
 
 class PathingLocation;
@@ -610,33 +611,6 @@ public:
 };
 
 static_assert(sizeof(MagicItemForm) == 0x34);
-
-// 18
-class TESModel : public BaseFormComponent {
-public:
-	TESModel();
-	virtual ~TESModel();
-	virtual const char*				GetModel() const;
-	virtual void					SetModel(const char* apcPath);
-	virtual TESModelTextureSwap*	GetAsModelMaterialSwap() const;
-
-	enum {
-		kFacegenFlag_Head = 0x01,
-		kFacegenFlag_Torso = 0x02,
-		kFacegenFlag_RightHand = 0x04,
-		kFacegenFlag_LeftHand = 0x08,
-	};
-
-
-
-	BSString	nifPath;		// 04
-	uint32_t		unk0C;			// 0C	referenced when saving Texture Hashes, init'd as a byte or is it a pointer to a structure starting with a byte followed by a pointer to some allocated data ?
-	void*		unk10;		// 10
-	uint8_t		facegenFlags;	// 14
-	uint8_t		pad15[3];		// 15
-
-	void SetPath(const char* newPath) { nifPath.Set(newPath); }
-};
 
 // 18
 class BGSTextureModel : public TESModel {
@@ -2287,8 +2261,7 @@ public:
 	uint8_t						overrideSounds;			// 18C
 	uint8_t						pad18D[3];				// 18D
 	void SetFacegenFlag(uint32_t pFlag, uint32_t bFemale, bool bEnable) {
-		if (bEnable) bipedModel.bipedModel[bFemale].facegenFlags |= pFlag;
-		else bipedModel.bipedModel[bFemale].facegenFlags &= ~pFlag;
+		bipedModel.bipedModel[bFemale].ucFaceGenFlags.Set(pFlag, bEnable);
 	}
 };
 static_assert(sizeof(TESObjectARMO) == 0x190);

@@ -114,10 +114,10 @@ void  TESBipedModelForm::SetPath(const char* newPath, uint32_t whichPath, bool b
 
 	switch (whichPath) {
 		case ePath_Biped:
-			toSet = &bipedModel[bFemalePath ? 1 : 0].nifPath;
+			toSet = &bipedModel[bFemalePath ? 1 : 0].strModel;
 			break;
 		case ePath_Ground:
-			toSet = &groundModel[bFemalePath ? 1 : 0].nifPath;
+			toSet = &groundModel[bFemalePath ? 1 : 0].strModel;
 			break;
 		case ePath_Icon:
 			toSet = &icon[bFemalePath ? 1 : 0].ddsPath;
@@ -133,10 +133,10 @@ const char* TESBipedModelForm::GetPath(uint32_t whichPath, bool bFemalePath) {
 
 	switch (whichPath) {
 		case ePath_Biped:
-			pathStr = &bipedModel[bFemalePath ? 1 : 0].nifPath;
+			pathStr = &bipedModel[bFemalePath ? 1 : 0].strModel;
 			break;
 		case ePath_Ground:
-			pathStr = &groundModel[bFemalePath ? 1 : 0].nifPath;
+			pathStr = &groundModel[bFemalePath ? 1 : 0].strModel;
 			break;
 		case ePath_Icon:
 			pathStr = &icon[bFemalePath ? 1 : 0].ddsPath;

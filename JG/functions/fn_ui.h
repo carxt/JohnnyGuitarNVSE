@@ -1,4 +1,7 @@
 #pragma once
+
+#include "Shared/Utils/StackObject.hpp"
+
 DEFINE_COMMAND_PLUGIN(SetBipedIconPathAlt, , false, kParams_OneString_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetWorldSpaceMapTexture, , false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetWorldSpaceMapTexture, , false, kParams_OneForm_OneString);
@@ -21,6 +24,9 @@ DEFINE_CMD_ALT_COND_PLUGIN(IsMenuPaused, , "", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetHUDVisibilityOverride, "Sets HUD element visibility override flags", false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", false, nullptr);
 DEFINE_COMMAND_PLUGIN(UpdateRepairMenu, , false, nullptr);
+DEFINE_COMMAND_PLUGIN(SetWeaponScopeUIModel, , false, kParams_OneString_OneOptionalObject);
+DEFINE_COMMAND_PLUGIN(ToggleWeaponScopeUIModel, , false, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(ClearWeaponScopeUIModel, , false, nullptr);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 		if (PlayerCharacter::GetSingleton()) {
@@ -448,5 +454,40 @@ bool Cmd_UpdateRepairMenu_Execute(COMMAND_ARGS) {
 		}
 	} while (iter = iter->GetNext());
 	*result = 1;
+	return true;
+}
+
+
+bool Cmd_SetWeaponScopeUIModel_Execute(COMMAND_ARGS) {
+	TESForm* pScopeForm = nullptr;
+	char cScopePath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cScopePath, &pScopeForm)) {
+		if (pScopeForm && pScopeForm->GetFormType() == FORM_TYPE::TESObjectWEAP) {
+			TESModel* pModel = &static_cast<TESObjectWEAP*>(pScopeForm)->targetNIF;
+			Interface::InitGunScope(pModel);
+			
+		}
+		else if (cScopePath[0] && FileFinder::Locate(cScopePath, nullptr, FileFinder::SKIP_NONE, FileFinder::ARCHIVE_TYPE_MESHES)) {
+			StackObject<TESModel, 0x488F50, 0x489070> kScopeModel;
+			kScopeModel->SetModel(cScopePath);
+			Interface::InitGunScope(kScopeModel.GetPtr());
+			*result = 1;
+		}
+	}
+	return true;
+}
+
+bool Cmd_ToggleWeaponScopeUIModel_Execute(COMMAND_ARGS) {
+	BOOL bVisible = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bVisible)) {
+		Interface::SetGunScopeVisible(bVisible);
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_ClearWeaponScopeUIModel_Execute(COMMAND_ARGS) {
+	Interface::SetGunScopeVisible(false);
+	Interface::ClearGunScope();
 	return true;
 }

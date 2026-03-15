@@ -1508,8 +1508,8 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 		bool bHasCasingPath = false;
 		if (cNewCasingPath[0] != 0) {
 			bHasCasingPath = true;
-			pOrgCasingPath = pWeapon->shellCasingModel.nifPath.c_str();
-			pWeapon->shellCasingModel.nifPath.pString = cNewCasingPath;
+			pOrgCasingPath = pWeapon->shellCasingModel.strModel.c_str();
+			pWeapon->shellCasingModel.strModel.pString = cNewCasingPath;
 		}
 
 		pWeapon->EjectShellCasing(pActor);
@@ -1519,7 +1519,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 			pCasingNode->m_world = kOrgTrans;
 
 		if (bHasCasingPath)
-			pWeapon->shellCasingModel.nifPath.pString = (char*)pOrgCasingPath;
+			pWeapon->shellCasingModel.strModel.pString = (char*)pOrgCasingPath;
 
 		*result = true;
 		return true;

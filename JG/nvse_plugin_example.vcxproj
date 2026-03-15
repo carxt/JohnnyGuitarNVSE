@@ -251,8 +251,10 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESDataHandler.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESForm.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESModel.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectList.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESTextureList.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiCriticalSection.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFixedString.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiGlobalStringTable.hpp" />

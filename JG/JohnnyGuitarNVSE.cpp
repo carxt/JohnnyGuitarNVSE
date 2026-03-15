@@ -510,6 +510,9 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(GetSwitchNodeIndex);
 	REG_CMD(SetNiLODLevel);
 	REG_CMD(GetNiLODLevel);
+	REG_CMD(SetWeaponScopeUIModel);
+	REG_CMD(ToggleWeaponScopeUIModel);
+	REG_CMD(ClearWeaponScopeUIModel);
 }
 
 void ReadINI() {

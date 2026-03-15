@@ -574,6 +574,12 @@
     <ClInclude Include="internal\Game\Gamebryo\NiRTTI.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESModel.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESTextureList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

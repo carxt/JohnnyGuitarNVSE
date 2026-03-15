@@ -155,6 +155,21 @@ public:
 };
 static_assert(sizeof(InterfaceManager) == 0x580);
 
+class Interface {
+public:
+	static void InitGunScope(TESModel* apModel) {
+		CdeclCall(0x709C20, apModel);
+	}
+
+	static void SetGunScopeVisible(bool abVisible) {
+		CdeclCall(0x709C40, abVisible);
+	}
+
+	static void ClearGunScope() {
+		CdeclCall(0x709CA0);
+	}
+};
+
 struct HighlightedRef {
 	TESObjectREFR* refr;
 	NiNode* node;
