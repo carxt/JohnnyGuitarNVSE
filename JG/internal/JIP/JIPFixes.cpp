@@ -1,5 +1,6 @@
 #include "JIPFixes.hpp"
 #include "Bethesda/BSStringT.hpp"
+#include "Bethesda/AutoMemContext.hpp"
 #include "events/EventFramework.h"
 #include "GameObjects.h"
 #include "GameProcess.h"
@@ -13,6 +14,7 @@
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 
 #include <array>
+
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern bool bFixJIP;
@@ -478,6 +480,11 @@ namespace JIPFixes {
 			}
 		}
 
+		void* __fastcall StaticAlloc(size_t aSize) {
+			MEMORY_CONTEXT(MC_STATIC_VARS);
+			return BSMemory::malloc(aSize);
+		}
+
 		void InitHooks() {
 			uiExitAddr = GetJIPAddress(0x1000CE06);
 			uiContinueAddr = GetJIPAddress(0x1000CDD5);
@@ -485,7 +492,18 @@ namespace JIPFixes {
 			SafeWrite8(0xA5B630, 0xC3);
 			WriteRelJump(0xA5B690, GetJIPAddress(0x1000CE20));
 			WriteRelJump(0xA5B460, GetJIPAddress(0x1000CEA0));
-			PatchMemoryNopRange(GetJIPAddress(0x10012260), GetJIPAddress(0x1001228D));  
+			PatchMemoryNopRange(GetJIPAddress(0x10012260), GetJIPAddress(0x1001228D));
+
+			constexpr uint32_t BUCKET_SIZE = 4;
+			constexpr uint32_t NEW_BUCKET_COUNT = 8192;
+
+			SafeWrite32(GetJIPAddress(0x1000CD8E) + 1, NEW_BUCKET_COUNT * BUCKET_SIZE);
+			SafeWrite32(GetJIPAddress(0x1000CD9A) + 1, NEW_BUCKET_COUNT);
+			SafeWrite32(GetJIPAddress(0x1000CDBD) + 2, NEW_BUCKET_COUNT - 1);
+
+			SafeWrite32(GetJIPAddress(0x1000CEB4) + 2, NEW_BUCKET_COUNT * BUCKET_SIZE);
+
+			ReplaceCall(GetJIPAddress(0x1000CD93), StaticAlloc);
 		}
 	}
 
