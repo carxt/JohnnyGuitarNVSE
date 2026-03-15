@@ -4,6 +4,7 @@
 #include "events/EventFramework.h"
 #include "GameObjects.h"
 #include "GameProcess.h"
+#include "GameTiles.h"
 #include "GameData.h"
 #include "GameRTTI.h"
 #include "JG/JohnnyExtraData.hpp"
@@ -17,6 +18,7 @@
 
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
+extern NVSEScriptInterface* g_scriptInterface;
 extern bool bFixJIP;
 extern bool bIsGECK;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);;
@@ -974,6 +976,62 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace OnMenuClickFix {
+		Tile* pClickedTile = nullptr;
+		uint32_t uiMenuHandleClickHook = 0;
+
+		void __fastcall MenuHandleClickHookDetour(void* apMenu, void* edx, uint32_t auiTileID, Tile* apTile) {
+			pClickedTile = apTile;
+			FastCall(uiMenuHandleClickHook, apMenu, edx, auiTileID, apTile);
+		}
+
+#pragma optimize("y", off)
+		bool __cdecl CallFunctionAlt(Script* apScript, TESObjectREFR* apRef, uint8_t aucArgCount, uint32_t auiMenuID, uint32_t auiTileID, const char* apTileString) {
+			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+			const char* pTilePath = reinterpret_cast<const char*>(pEBP - 0x94);
+			bool bReturnVal = false;
+			if (pClickedTile) {
+				bReturnVal = g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, pClickedTile->name.c_str());
+			}
+			else {
+				char cErrorBuffer[512];
+				our_snprintf(cErrorBuffer, sizeof(cErrorBuffer), "Error! \"%s\" has been unloaded while being processed by OnClickMenuHandler. Do NOT do this!", pTilePath);
+				_MESSAGE(cErrorBuffer);
+				Console_Print(cErrorBuffer);
+				*reinterpret_cast<DWORD*>(pEBP + 0xC) = 0;
+			}
+			return bReturnVal;
+		}
+#pragma optimize("", on)
+
+		CallDetour kRemoveTileFromUpdateList;
+		class Hook {
+		public:
+			void CleanupTile(Tile* apTile) {
+				if (pClickedTile == apTile)
+					pClickedTile = nullptr;
+
+				ThisCall(kRemoveTileFromUpdateList.GetOverwrittenAddr(), this, apTile);
+			}
+		};
+
+		void InitHooks() {
+			uiMenuHandleClickHook = GetJIPAddress(0x10008570);
+			SafeWrite32(GetJIPAddress(0x10039C8A) + 1, uint32_t(MenuHandleClickHookDetour));
+			SafeWrite32(GetJIPAddress(0x1003A008) + 1, uint32_t(MenuHandleClickHookDetour));
+
+			SafeWriteBuf(GetJIPAddress(0x10008683), "\x6A\x00\x90");
+			PatchMemoryNop(GetJIPAddress(0x10008693), 6);
+			WriteRelCall(GetJIPAddress(0x10008693), CallFunctionAlt);
+
+			WriteRelJump(GetJIPAddress(0x1000872F), GetJIPAddress(0x1000873B));
+			PatchMemoryNop(GetJIPAddress(0x10008791), 6);
+			WriteRelCall(GetJIPAddress(0x10008791), CallFunctionAlt);
+
+			kRemoveTileFromUpdateList.ReplaceCallEx(0x706C98, &Hook::CleanupTile);
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -1075,6 +1133,7 @@ namespace JIPFixes {
 			UpdateDataFix::InitHooks();
 			PerkEntryFix::InitHooks();
 			WeaponModEffectsFix::InitHooks();
+			OnMenuClickFix::InitHooks();
 		}
 	}
 
