@@ -2771,7 +2771,7 @@ public:
 	uint8_t				pad1C9[3];					// 1C9
 	SpellItem*			criticalEffect;				// 1CC
 	TESModel			shellCasingModel;			// 1DO
-	TESModel			targetNIF;					// 1E8 - target NIF
+	TESModel			kScope;					// 1E8 - target NIF
 	TESModel			kWorldModel;					// 200 - could be a texture swap
 	uint32_t				unk218;						// 218
 	TESSound*			sounds[12];					// 21C
@@ -2973,6 +2973,14 @@ public:
 	Data				kBufferedObjects[20];	// 16C indexed by the EquipSlot
 	float				fWeaponOffset;
 	TESObjectREFR*		pRequester;
+
+	void RemoveBipedWeapon() {
+		ThisCall(0x4AB5B0, this);
+	}
+
+	void RemovePart(uint32_t aeObject, bool abClear, void* apClearValue = nullptr) {
+		ThisCall(0x4AAFF0, this, aeObject, abClear, apClearValue);
+	}
 };
 static_assert(sizeof(BipedAnim) == 0x2B4);
 

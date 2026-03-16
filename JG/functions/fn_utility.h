@@ -153,7 +153,7 @@ bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	if (actor && actor->IsActor() && actor->baseProcess->GetIdleForm350()) {
 		actor->baseProcess->ResetQueuedIdleFlags();
 		actor->baseProcess->SetIdleForm350(nullptr);
-		if (stopAnim > 0) ThisCall(0x498910, actor->GetAnimData(), 1, 1); // SpecialIdleFree
+		if (stopAnim > 0) ThisCall(0x498910, actor->GetAnimation(), 1, 1); // SpecialIdleFree
 		*result = 1;
 	}
 	return true;
@@ -289,7 +289,7 @@ bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
 	*result = -1;
 	uint32_t sequenceID;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sequenceID) && sequenceID < 8) {
-		if (auto animData = thisObj->GetAnimData()) {
+		if (auto animData = thisObj->GetAnimation()) {
 			if (auto sequence = animData->animSequence[sequenceID]) {
 				uint16_t groupID = animData->groupIDs[sequenceID] & 0xFF;
 				*result = groupID;
@@ -486,9 +486,9 @@ bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS) {
 			}
 		};
 		if (thisObj && thisObj->IsCharacter()) {
-			doUpdateBone(((Character*)thisObj)->validBip01Names);
+			doUpdateBone(((Character*)thisObj)->pBipedAnim);
 			if (thisObj == PlayerCharacter::GetSingleton()) {
-				doUpdateBone(((PlayerCharacter*)thisObj)->VB01N1stPerson);
+				doUpdateBone(((PlayerCharacter*)thisObj)->p1stPersonBipedAnim);
 			}
 		}
 	}
@@ -500,7 +500,7 @@ bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &optIdx)) {
 		if (thisObj && thisObj->IsCharacter() && optIdx <= 4)
-			if (auto BipedAnim = ((Character*)thisObj)->validBip01Names) {
+			if (auto BipedAnim = ((Character*)thisObj)->pBipedAnim) {
 				if (BipedAnim->kBones[optIdx].pParent && BipedAnim->kBones[optIdx].pParent->IsNode()) {
 					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->kBones[optIdx].pParent->m_blockName);
 					if (IsConsoleMode())

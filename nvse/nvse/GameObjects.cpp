@@ -3,6 +3,7 @@
 #include "GameExtraData.h"
 #include "GameTasks.h"
 #include "GameUI.h"
+#include "GameProcess.h"
 
 #include "Bethesda/BSUtilities.hpp"
 
@@ -32,11 +33,26 @@ PlayerCharacter* PlayerCharacter::GetSingleton() {
 	return *(PlayerCharacter**)0x11DEA3C;
 }
 
-NiNode* PlayerCharacter::GetNode(const bool abFirstPerson) const {
+NiNode* PlayerCharacter::GetNode(bool abFirstPerson) const {
 	if (abFirstPerson)
 		return playerNode;
 	else if (renderState)
 		return renderState->rootNode;
+	else
+		return nullptr;
+}
+
+// GAME - 0x950B00
+BipedAnim* PlayerCharacter::GetBiped(bool abFirstPerson) const {
+	return abFirstPerson ? p1stPersonBipedAnim : pBipedAnim;
+}
+
+// GAME - 0x950A60
+Animation* PlayerCharacter::GetAnimation(bool abFirstPerson) const {
+	if (abFirstPerson)
+		return p1stPersonAnimation;
+	else if (baseProcess)
+		return baseProcess->GetAnimation();
 	else
 		return nullptr;
 }

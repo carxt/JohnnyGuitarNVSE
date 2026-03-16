@@ -1030,7 +1030,8 @@ public:
 	TileRect* tile1E0;		// 1E0	Hokeys\hotkey_selector\HK_Item_5
 	TileRect* tile1E4;		// 1E4	Hokeys\hotkey_selector\HK_Item_6
 	TileRect* tile1E8;		// 1E8	Hokeys\hotkey_selector\HK_Item_7
-	uint32_t							unk1EC[5];		// 1EC
+	uint32_t							unk1EC[4];		// 1EC
+	bool bScopeVisible;
 	NiControllerSequence* niContSeq;		// 200
 	uint8_t							byte204;		// 204
 	uint8_t							byte205;		// 205

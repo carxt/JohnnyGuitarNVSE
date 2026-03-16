@@ -177,7 +177,7 @@ public:
 	virtual void	Unk_6B(void);
 	virtual void	Unk_6C(void);
 	virtual void	Unk_6D(void);
-	virtual void	Unk_6E(void);
+	virtual Animation* GetAnimation();
 	virtual void	Unk_6F(void);
 	virtual void	Unk_70(void);
 	virtual void	Unk_71(void);
@@ -344,8 +344,8 @@ public:
 	virtual void	Unk_112();
 	virtual void	Unk_113();
 	virtual void	Unk_114();
-	virtual bool	IsWeaponOut();
-	virtual void	SetWeaponOut(Actor *actor, bool weaponOut);
+	virtual bool	GetWeaponDrawn() const;
+	virtual void	SetWeaponDrawn(Actor *actor, bool weaponOut);
 	virtual void	Unk_117();
 	virtual void	Unk_118();
 	virtual void	Unk_119(Actor *actor);
@@ -669,8 +669,8 @@ class NiControllerManager;
 class AnimSequenceBase;
 
 // 100+
-struct AnimData
-{
+class Animation {
+public:
 	struct Unk124
 	{
 		struct Unk18
@@ -728,8 +728,16 @@ struct AnimData
 	uint32_t							unk120;				// 120
 	Unk124							*unk124;			// 124
 	Unk128							*unk128;			// 128
+
+	void BlendOut(uint32_t aeGroupSection, bool abIronSights) {
+		ThisCall(0x4994F0, this, aeGroupSection, abIronSights);
+	}
+
+	void ReloadTargets(bool abReload) {
+		ThisCall(0x499240, this, abReload);
+	}
 };
-static_assert(sizeof(AnimData) == 0x12C);
+static_assert(sizeof(Animation) == 0x12C);
 
 class QueuedFile;
 class BSFaceGenAnimationData;
@@ -809,7 +817,7 @@ public:
 	uint32_t								unk190[10];			// 190
 	void								*unk1B8;			// 1B8
 	MagicTarget							*magicTarget1BC;	// 1BC
-	AnimData							*animData;			// 1C0
+	Animation							*animData;			// 1C0
 	BSAnimGroupSequence					*animSequence[3];	// 1C4
 	float								angle1D0;			// 1D0
 	float								time1D4;			// 1D4

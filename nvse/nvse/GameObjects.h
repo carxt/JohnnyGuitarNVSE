@@ -6,7 +6,7 @@
 
 struct ScriptEventList;
 class ActiveEffect;
-struct AnimData;
+class Animation;
 
 #if 1
 static const uint32_t s_TESObject_REFR_init = 0x55A2F0;			// TESObject_REFR initialization routine (first reference to s_TESObject_REFR_vtbl)
@@ -72,9 +72,9 @@ public:
 	virtual void		Unk_76(void);
 	virtual void		Unk_77(void);
 	virtual void		Unk_78(void);
-	virtual AnimData* GetAnimData();			// 0079
-	virtual BipedAnim* GetValidBip01Names(void);	// 007A	Character only
-	virtual BipedAnim* CallGetValidBip01Names(void);
+	virtual Animation*	GetAnimation() const;			// 0079
+	virtual BipedAnim*	GetBiped() const;	// 007A	Character only
+	virtual BipedAnim*	GetCurrentBiped() const;
 	virtual void		SetValidBip01Names(BipedAnim* validBip01Names);
 	virtual NiPoint3* GetPos();				// GetPos or GetDistance
 	virtual void		Unk_7E(uint32_t arg0);
@@ -168,6 +168,8 @@ public:
 	static TESObjectREFR* __stdcall Create(bool bTemp = false);
 
 	float GetHealth() { return ThisCall<float>(0x568AD0, this); }
+
+	void ReplaceModel() { ThisCall(0x5710C0, this); }
 
 	MEMBER_FN_PREFIX(TESObjectREFR);
 #if 1
@@ -716,7 +718,7 @@ public:
 	virtual void	Unk_137(void);
 	virtual void	Unk_138(void);
 
-	BipedAnim* validBip01Names;	// 1B4
+	BipedAnim* pBipedAnim;	// 1B4
 	float			totalArmorDR;		// 1B8
 	float			totalArmorDT;		// 1BC
 	uint8_t			isTrespassing;		// 1C0
@@ -836,8 +838,8 @@ public:
 	uint8_t								byte682;				// 682
 	uint8_t								byte683;				// 683
 	uint32_t								unk684[2];				// 684
-	BipedAnim* VB01N1stPerson;		// 68C
-	void* unk690;				// 690
+	BipedAnim*							p1stPersonBipedAnim;		// 68C
+	Animation*							p1stPersonAnimation;				// 690
 	NiNode* playerNode;			// 694 used as node if unk64A is true
 	uint32_t								unk698[4];				// 698
 	tList<TESTopic>						topicList;				// 6A8
@@ -945,7 +947,9 @@ public:
 	bool ToggleFirstPerson(bool toggleON);
 	char GetDetectionState();
 
-	NiNode* GetNode(const bool abFirstPerson) const;
+	NiNode* GetNode(bool abFirstPerson) const;
+	BipedAnim* GetBiped(bool abFirstPerson) const;
+	Animation* GetAnimation(bool abFirstPerson) const;
 };
 static_assert(sizeof(PlayerCharacter) == 0xE50);
 

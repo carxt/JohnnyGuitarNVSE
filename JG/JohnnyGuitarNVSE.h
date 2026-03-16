@@ -357,7 +357,7 @@ namespace hk_CameraShakeHook {
 	float camShakeMinAlt = 0, camShakeTimeAlt = 0;
 	bool __fastcall fn_camAltShakeHook(Actor* a_refr, void* edx, NiMatrix3* outMatrix) {
 		NiMatrix3 shakeMatrix = {};
-		AnimData* anData = ThisCall<AnimData*>(0x08B70D0, a_refr);
+		Animation* anData = ThisCall<Animation*>(0x08B70D0, a_refr);
 		if (!anData) return true;
 		float timePassed = anData->flt0D0;
 		auto originalShakeMult = *(float*)(0x11DFED4), originalShakeTime = *(float*)(0x11DFED8);

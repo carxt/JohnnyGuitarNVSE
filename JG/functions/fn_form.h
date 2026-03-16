@@ -437,7 +437,7 @@ bool Cmd_RemoveScopeModelPath_Execute(COMMAND_ARGS) {
 	*result = 0;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && weapon && IS_TYPE(weapon, TESObjectWEAP)) {
-		if (weapon && weapon->HasScope()) model = &(weapon->targetNIF);
+		if (weapon && weapon->HasScope()) model = &(weapon->kScope);
 		if (model) {
 			model->SetModel("");
 			*result = 1;

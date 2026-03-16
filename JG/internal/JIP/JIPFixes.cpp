@@ -7,6 +7,7 @@
 #include "GameTiles.h"
 #include "GameData.h"
 #include "GameRTTI.h"
+#include "GameOSDepend.h"
 #include "JG/JohnnyExtraData.hpp"
 #include "ParamInfos.h"
 #include "PluginAPI.h"
@@ -15,6 +16,7 @@
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 
 #include <array>
+#include <GameUI.h>
 
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
@@ -648,29 +650,106 @@ namespace JIPFixes {
 	}
 
 	namespace ModelReloadFix {
-		uint32_t uiReturnAddr = 0;
-		void __declspec(naked) QueueItem_Asm() {
-			__asm {
-				push    0
-				push    0
-				push    0
-				push    1
-				push    0
-				push    1
-				push    eax
-				push    1
-				push    edi
-				push    1
-				push    esi
-				mov     ecx, edx
-				call    ebx
-				jmp     uiReturnAddr
+
+		uint32_t uiWeaponHasScope = 0;
+
+		bool Cmd_ReloadEquippedModels_Execute(COMMAND_ARGS) {
+			const TESMain* pMain = TESMain::GetSingleton();
+			if (pMain->bIsFlyCam && pMain->bFreezeTime)
+				return true;
+
+			constexpr uint32_t uiDisallowedFlags = TESForm::FormFlags::STILL_LOADING | TESForm::FormFlags::DELETED | TESForm::FormFlags::DISABLED;
+			if (thisObj->uiFormFlags.Get(uiDisallowedFlags) || !thisObj->IsCharacter())
+				return true;
+
+			Actor* pActor = static_cast<Actor*>(thisObj);
+			const BaseProcess* pProcess = pActor->baseProcess;
+			if (!pProcess || pProcess->processLevel != PROCESS_TYPE::HIGH)
+				return true;
+
+			const NiNode* pRoot = thisObj->GetNiNode();
+			BipedAnim* pBiped = thisObj->GetBiped();
+			if (!pRoot || !pBiped)
+				return true;
+
+			int32_t iTargetObject = -1;
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &iTargetObject) && iTargetObject != 6 && iTargetObject < 20) {
+				Bitfield32 uiValidParts = 0xFFFFFFBF;
+				if (iTargetObject >= 0)
+					uiValidParts = (1u << iTargetObject) & 0xFFFFFFBF;
+
+				const bool bPlayer = pActor == PlayerCharacter::GetSingleton();
+				if (bPlayer) {
+					PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(pActor);
+					BipedAnim* pBiped1st = pPlayer->GetBiped(true);
+					BipedAnim* pBiped3rd = pPlayer->GetBiped(false);
+					for (uint32_t i = 0; i < 20; i++) {
+						if (uiValidParts.GetBit(i)) {
+							if (i == 5) {
+								pBiped1st->RemoveBipedWeapon();
+								pBiped3rd->RemoveBipedWeapon();
+							}
+							else {
+								pBiped1st->RemovePart(i, true);
+								pBiped3rd->RemovePart(i, true);
+							}
+						}
+					}
+				}
+				else {
+					for (uint32_t i = 0; i < 20; i++) {
+						if (uiValidParts.GetBit(i)) {
+							if (i == 5)
+								pBiped->RemoveBipedWeapon();
+							else
+								pBiped->RemovePart(i, true);
+						}
+					}
+				}
+
+				thisObj->ReplaceModel();
+
+				bool bWeaponDrawn = pProcess->GetWeaponDrawn();
+
+				if (bPlayer) {
+					if (uiValidParts.GetBit(5)) {
+						TESObjectWEAP* pWeapon = pBiped->kObjects[5].pWeapon;
+						if (pWeapon && ThisCall<uint8_t>(uiWeaponHasScope, pActor)) {
+							const bool bScopeVisible = HUDMainMenu::GetSingleton()->bScopeVisible;
+							Interface::InitGunScope(&pWeapon->kScope);
+							Interface::SetGunScopeVisible(bScopeVisible);
+						}
+					}
+
+					PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(pActor);
+					Animation* pAnim1st = pPlayer->GetAnimation(true);
+					Animation* pAnim3rd = pPlayer->GetAnimation(false);
+
+					if (bWeaponDrawn && pAnim1st->animSequence[4])
+						pAnim1st->BlendOut(4, false);
+					if (bWeaponDrawn && pAnim3rd->animSequence[4])
+						pAnim3rd->BlendOut(4, false);
+
+					pAnim1st->ReloadTargets(true);
+					pAnim3rd->ReloadTargets(false);
+				}
+				else {
+					Animation* pAnim = pActor->GetAnimation();
+
+					if (bWeaponDrawn && pAnim->animSequence[4])
+						pAnim->BlendOut(4, false);
+					pAnim->ReloadTargets(false);
+				}
 			}
+			return true;
 		}
 
 		void InitHooks() {
-			WriteRelJump(GetJIPAddress(0x10019E38), QueueItem_Asm);
-			uiReturnAddr = GetJIPAddress(0x10019E4D);
+			uiWeaponHasScope = GetJIPAddress(0x10058F10);
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x280D));
+			if (pInfo) {
+				pInfo->execute = Cmd_ReloadEquippedModels_Execute;
+			}
 		}
 	}
 
@@ -1123,6 +1202,7 @@ namespace JIPFixes {
 
 		}
 		else {
+			UpdateDataFix::InitHooks();
 			ConsoleCmdFix::InitHooks();
 			PaletteCorruptionFix::InitHooks();
 			NotifyDurationFix::InitHooks();
@@ -1130,7 +1210,6 @@ namespace JIPFixes {
 			FireWeaponFix::InitHooks();
 			ItemDescriptionFixFix::InitHooks();
 			ModelReloadFix::InitHooks();
-			UpdateDataFix::InitHooks();
 			PerkEntryFix::InitHooks();
 			WeaponModEffectsFix::InitHooks();
 			OnMenuClickFix::InitHooks();

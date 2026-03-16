@@ -266,19 +266,19 @@ static_assert(sizeof(OSSoundGlobals) == 0x328);
 class OSSoundGlobals {};
 
 // A4
-class OSGlobals {
+class TESMain {
 public:
-	OSGlobals();
-	~OSGlobals();
+	TESMain();
+	~TESMain();
 
-	uint8_t			oneMore;			// 00
-	uint8_t			quitGame;			// 01	The seven are initialized to 0, this one is set by QQQ
-	uint8_t			exitToMainMenu;		// 02
-	uint8_t			unk03;				// 03
-	uint8_t			unk04;				// 04
-	uint8_t			unk05;				// 05
-	uint8_t			unk06;				// 06	This looks promising as TFC status byte
-	uint8_t			disableAI;			// 07
+	bool					bResumeLoadingThread;
+	bool					bQuitGame;
+	bool					bResetGame;
+	bool					bGameActive;
+	bool					bOnIdle;
+	bool					bReloadContent;
+	bool					bIsFlyCam;
+	bool					bFreezeTime;
 	HWND			window;				// 08
 	HINSTANCE		procInstance;		// 0C
 	uint32_t			mainThreadID;		// 10
@@ -292,8 +292,12 @@ public:
 	uint32_t* unk50;				// 50	same object as unk18
 	//..
 	uint32_t			unk60;				// 60	relates to unk50
+
+	static TESMain* GetSingleton() {
+		return *reinterpret_cast<TESMain**>(0x11DEA0C);
+	}
 };
 
-//static_assert(sizeof(OSGlobals) == 0x0A4);	// found in oldWinMain 0x0086AF4B
+//static_assert(sizeof(TESMain) == 0x0A4);	// found in oldWinMain 0x0086AF4B
 
-extern OSGlobals** g_osGlobals;
+extern TESMain** g_osGlobals;

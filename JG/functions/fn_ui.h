@@ -463,7 +463,7 @@ bool Cmd_SetWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 	char cScopePath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cScopePath, &pScopeForm)) {
 		if (pScopeForm && pScopeForm->GetFormType() == FORM_TYPE::TESObjectWEAP) {
-			TESModel* pModel = &static_cast<TESObjectWEAP*>(pScopeForm)->targetNIF;
+			TESModel* pModel = &static_cast<TESObjectWEAP*>(pScopeForm)->kScope;
 			Interface::InitGunScope(pModel);
 			
 		}
