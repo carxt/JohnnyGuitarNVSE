@@ -311,6 +311,10 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cName[MAX_PATH] = {};
+	NVSEArrayElement kElements[4];
+	NVSEArrayVar* pOutArray;
+
+	bool bValid = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName)) {
 		NiAVObject* pRoot = thisObj->Get3D();
 
@@ -320,8 +324,6 @@ bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 		else
 			pTarget = pRoot;
 
-		NVSEArrayElement kElements[4];
-		NVSEArrayVar* pOutArray;
 		if (pTarget) {
 			const NiBound& rBound = pTarget->GetWorldBound();
 			kElements[0] = rBound.kCenter.x;
@@ -329,15 +331,18 @@ bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 			kElements[2] = rBound.kCenter.z;
 			kElements[3] = rBound.fRadius;
 			pOutArray = g_arrInterface->CreateArray(kElements, 4, scriptObj);
+			bValid = true;
 		}
-		else {
-			kElements[0] = 0.f;
-			kElements[1] = 0.f;
-			kElements[2] = 0.f;
-			kElements[3] = 0.f;
-			pOutArray = g_arrInterface->CreateArray(kElements, 4, scriptObj);
-		}
-		g_arrInterface->AssignCommandResult(pOutArray, result);
 	}
+
+	if (!bValid) {
+		kElements[0] = 0.f;
+		kElements[1] = 0.f;
+		kElements[2] = 0.f;
+		kElements[3] = 0.f;
+		pOutArray = g_arrInterface->CreateArray(kElements, 4, scriptObj);
+	}
+
+	g_arrInterface->AssignCommandResult(pOutArray, result);
 	return true;
 }
