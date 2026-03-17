@@ -114,7 +114,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			}
 			if (resetVanityCam) {
 				if (PlayerCharacter::GetSingleton()) {
-					bool bIsInVanityMode = (*reinterpret_cast<bool*>(0x11E07B8) && *reinterpret_cast<bool*>(0x11E07B9)) || PlayerCharacter::GetSingleton()->byte64D; //64d = autovanity mode.
+					bool bIsInVanityMode = *reinterpret_cast<uint16_t*>(0x11E07B8) || PlayerCharacter::GetSingleton()->byte64D; //64d = autovanity mode.
 					if (!bIsInVanityMode) {
 						ResetVanityWheel();
 					}
