@@ -1111,6 +1111,20 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace PowerArmorCondition {
+
+		bool Cmd_GetPCCanUsePowerArmor_Eval(COMMAND_ARGS_EVAL) {
+			*result = PlayerCharacter::GetSingleton()->canUsePA;
+		}
+
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x22AA));
+			if (pInfo) {
+				pInfo->eval = Cmd_GetPCCanUsePowerArmor_Eval;
+			}
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -1224,6 +1238,7 @@ namespace JIPFixes {
 		RespawnDisableFix::InitHooks();
 		CopyFaceGenFromFix::InitHooks();
 		BetterSearch::InitHooks();
+		PowerArmorCondition::InitHooks();
 	}
 
 	void InitDeferredHooks() {
