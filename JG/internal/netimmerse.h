@@ -46,17 +46,17 @@ class NiPropertyState;
 class NiDX9Renderer;
 
 struct NiUpdateData {
-	NiUpdateData(float afTime = 0.f, bool abUpdateControllers = false, bool abIsMultiThreaded = false, bool abMTParticles = false, bool abUpdateGeomorphs = false, bool abUpdateShadowSceneNode = false)
-		: fTime(afTime), bUpdateControllers(abUpdateControllers), bIsMultiThreaded(abIsMultiThreaded), bMTParticles(abMTParticles), bUpdateGeomorphs(abUpdateGeomorphs), bUpdateShadowSceneNode(abUpdateShadowSceneNode)
+	NiUpdateData(float afTime = 0.f, bool abUpdateControllers = false, bool abIsMultiThreaded = false)
+		: fTime(afTime), bUpdateControllers(abUpdateControllers), bParallelUpdate(abIsMultiThreaded), bFoundParticles(false), bFoundMorphController(false), bSceneGraphChange(false)
 	{}
 	~NiUpdateData() {};
 
 	float	fTime;
 	bool	bUpdateControllers;
-	bool	bIsMultiThreaded;
-	bool	bMTParticles;
-	bool	bUpdateGeomorphs;
-	bool	bUpdateShadowSceneNode;
+	bool	bParallelUpdate;
+	bool	bFoundParticles;
+	bool	bFoundMorphController;
+	bool	bSceneGraphChange;
 };
 
 // 44
@@ -962,6 +962,19 @@ public:
 	void Update() {
 		NiUpdateData kData;
 		Update(kData);
+	}
+
+	void UpdateSelected(NiUpdateData& arData) {
+		ThisCall(0xA59C90, this, &arData);
+	}
+
+	void UpdateSelected() {
+		NiUpdateData kData;
+		Update(kData);
+	}
+
+	void UpdateProperties() {
+		ThisCall(0xA5A040, this);
 	}
 
 	void SetLocalRotate(const NiMatrix3& arMat) {

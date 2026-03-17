@@ -67,7 +67,7 @@ public:
 	virtual void		AnimateNiNode();
 	virtual void		GenerateNiNode(bool arg1);
 	virtual void		Set3D(NiNode* niNode, bool unloadArt);
-	virtual NiNode*		GetNiNode();
+	virtual NiNode*		Get3D();
 	virtual void		Unk_75(void);
 	virtual void		Unk_76(void);
 	virtual void		Unk_77(void);

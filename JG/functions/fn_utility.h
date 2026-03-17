@@ -675,7 +675,7 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 	char sequenceName[MAX_PATH] = { 0 };
 	char blockName[MAX_PATH] = { 0 };
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sequenceName, &blockName)) {
-		NiNode* root = thisObj->GetNiNode();
+		NiNode* root = thisObj->Get3D();
 		if (root) {
 			NiAVObject* target = root;
 			if (blockName[0])

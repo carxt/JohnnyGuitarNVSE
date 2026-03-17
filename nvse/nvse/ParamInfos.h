@@ -625,6 +625,14 @@ static ParamInfo kParams_OneInt_OneFloat[2] =
 	{ "Float", kParamType_Float, 0 },
 };
 
+static ParamInfo kParams_ScenegraphUpdate[] =
+{
+	{ "Type", kParamType_Integer, 0 },
+	{ "Time", kParamType_Float, 1 },
+	{ "Update Controllers", kParamType_Integer, 1 },
+	{ "Block Name", kParamType_String, 1 }
+};
+
 static ParamInfo kParams_OneForm_OneOptionalInt[2] =
 {
 	{ "form",	kParamType_AnyForm,	0 },

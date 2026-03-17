@@ -160,7 +160,7 @@ void __fastcall SetCameraRotateHook(NiNode* apThis, void*, NiMatrix3& arRot) {
 			TESForm* pForm = TESForm::GetFormByNumericID(uiReferenceToTrack);
 			if (pForm->IsReference() && pCamera) {
 				TESObjectREFR* pTrackRef = (TESObjectREFR*)pForm;
-				NiNode* pRootNode = pTrackRef->GetNiNode();
+				NiNode* pRootNode = pTrackRef->Get3D();
 				NiVector3 kPos;
 				if (pRootNode && pRootNode->m_pWorldBound && pRootNode->m_pWorldBound->iRadius) {
 					kPos = pRootNode->m_pWorldBound->kCenter;

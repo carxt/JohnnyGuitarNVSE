@@ -132,11 +132,11 @@ TESActorBase* Actor::GetActorBase() {
 }
 
 NiNode* TESObjectREFR::GetNode(const char* nodeName) {
-	NiNode* rootNode = GetNiNode();
+	NiNode* rootNode = Get3D();
 	return rootNode ? (*nodeName ? rootNode->GetNode(nodeName) : rootNode) : NULL;
 }
 hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) {
-	NiNode* rootNode = GetNiNode();
+	NiNode* rootNode = Get3D();
 	if (rootNode) {
 		NiNode* targetNode = rootNode->GetNode(nodeName);
 		if (targetNode && targetNode->m_collisionObject) {
@@ -153,7 +153,7 @@ hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) {
 }
 
 NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName) {
-	NiNode* rootNode = GetNiNode();
+	NiNode* rootNode = Get3D();
 	return BSUtilities::GetObjectByName(rootNode,  blockName);
 }
 

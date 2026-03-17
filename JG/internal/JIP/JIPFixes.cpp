@@ -667,7 +667,7 @@ namespace JIPFixes {
 			if (!pProcess || pProcess->processLevel != PROCESS_TYPE::HIGH)
 				return true;
 
-			const NiNode* pRoot = thisObj->GetNiNode();
+			const NiNode* pRoot = thisObj->Get3D();
 			BipedAnim* pBiped = thisObj->GetBiped();
 			if (!pRoot || !pBiped)
 				return true;

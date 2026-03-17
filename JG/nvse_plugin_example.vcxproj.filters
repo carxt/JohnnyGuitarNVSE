@@ -196,6 +196,9 @@
     <ClCompile Include="internal\Game\Gamebryo\NiObject.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\AILinearTaskThreadManager.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -578,6 +581,9 @@
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\TESTextureList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\AILinearTaskThreadManager.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/AILinearTaskThreadManager.hpp"
 
 DEFINE_COMMAND_PLUGIN(SetAlphaPropertyValue, , true, kParams_OneString_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetAlphaPropertyValue, , true, kParams_OneString_OneInt);
@@ -10,6 +11,7 @@ DEFINE_COMMAND_PLUGIN(SetSwitchNodeIndex, , true, kParams_OneString_OneInt);
 DEFINE_COMMAND_PLUGIN(GetSwitchNodeIndex, , true, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(SetNiLODLevel, , false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetNiLODLevel, , false, nullptr);
+DEFINE_COMMAND_PLUGIN(UpdateScenegraph, , true, kParams_ScenegraphUpdate);
 
 namespace {
 	enum class AlphaPropertyItem  : int32_t {
@@ -36,6 +38,16 @@ namespace {
 		COUNT
 	};
 
+	enum class NiUpdateType : int32_t {
+		NONE		= -1,
+		FULL,
+		SELECTED,
+		TRANSFORMS_AND_BOUNDS,
+		PROPERTIES,
+		CONTROLLERS,
+		COUNT
+	};
+
 	template<typename T>
 	inline bool InRange(volatile T value) {
 		return value > T::NONE && value < T::COUNT;
@@ -59,7 +71,7 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	uint32_t uiValue = 0;
 	char cObjectName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue) && cObjectName[0] && InRange(eItem)) {
-		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(thisObj->GetNiNode(), cObjectName, NiProperty::kPropertyType_Alpha));
+		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(thisObj->Get3D(), cObjectName, NiProperty::kPropertyType_Alpha));
 		if (!pAlpha)
 			return true;
 
@@ -83,7 +95,7 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 				pAlpha->SetTestRef(static_cast<uint8_t>(uiValue));
 				break;
 			default:
-				return true;
+				__assume(0);
 		}
 		*result = 1;
 	}
@@ -95,7 +107,7 @@ bool Cmd_GetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	AlphaPropertyItem eItem = AlphaPropertyItem::NONE;
 	char cObjectName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem) && cObjectName[0] && InRange(eItem)) {
-		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(thisObj->GetNiNode(), cObjectName, NiProperty::kPropertyType_Alpha));
+		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(thisObj->Get3D(), cObjectName, NiProperty::kPropertyType_Alpha));
 		if (!pAlpha)
 			return true;
 
@@ -119,7 +131,7 @@ bool Cmd_GetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 				*result = pAlpha->GetTestRef();
 				break;
 			default:
-				return true;
+				__assume(0);
 		}
 	}
 	return true;
@@ -131,7 +143,7 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	uint32_t uiValue = 0;
 	char cObjectName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue) && cObjectName[0] && InRange(eItem)) {
-		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(thisObj->GetNiNode(), cObjectName, NiProperty::kPropertyType_Stencil));
+		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(thisObj->Get3D(), cObjectName, NiProperty::kPropertyType_Stencil));
 		if (!pStencil)
 			return true;
 
@@ -161,7 +173,7 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 				pStencil->SetStencilFunction(static_cast<NiStencilProperty::TestFunc>(uiValue));
 				break;
 			default:
-				return true;
+				__assume(0);
 		}
 		*result = 1;
 	}
@@ -173,7 +185,7 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	StencilPropertyItem eItem = StencilPropertyItem::NONE;
 	char cObjectName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem) && cObjectName[0] && InRange(eItem)) {
-		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(thisObj->GetNiNode(), cObjectName, NiProperty::kPropertyType_Stencil));
+		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(thisObj->Get3D(), cObjectName, NiProperty::kPropertyType_Stencil));
 		if (!pStencil)
 			return true;
 
@@ -203,7 +215,7 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 				*result = pStencil->GetStencilFunction();
 				break;
 			default:
-				return true;
+				__assume(0);
 		}
 	}
 	return true;
@@ -214,7 +226,7 @@ bool Cmd_SetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	int32_t iIndex = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &iIndex) && cObjectName[0]) {
-		NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->GetNiNode(), cObjectName);
+		NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->Get3D(), cObjectName);
 		if (pObject && pObject->IsExactKindOf<NiSwitchNode>()) {
 			static_cast<NiSwitchNode*>(pObject)->SetIndex(iIndex);
 			*result = 1;
@@ -227,7 +239,7 @@ bool Cmd_GetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cObjectName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName) && cObjectName[0]) {
-		NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->GetNiNode(), cObjectName);
+		NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->Get3D(), cObjectName);
 		if (pObject && pObject->IsExactKindOf<NiSwitchNode>())
 			*result = static_cast<NiSwitchNode*>(pObject)->GetIndex();
 	}
@@ -246,5 +258,47 @@ bool Cmd_SetNiLODLevel_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetNiLODLevel_Execute(COMMAND_ARGS) {
 	*result = NiLODNode::ms_iGlobalLOD;
+	return true;
+}
+
+bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
+	*result = 0;
+	NiUpdateType eType = NiUpdateType::NONE;
+	float fTime = FLT_MAX;
+	BOOL bUpdateControllers = FALSE;
+	char cName[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &fTime, &bUpdateControllers, &cName) && InRange<NiUpdateType>(eType)) {
+		NiAVObject* pRoot = thisObj->Get3D();
+
+		NiAVObject* pTarget = nullptr;
+		if (cName[0])
+			pTarget = BSUtilities::GetObjectByName(pRoot, cName);
+		else
+			pTarget = pRoot;
+
+		if (pTarget) {
+			NiUpdateData kData(fTime != FLT_MAX ? fTime : 0.f, bUpdateControllers, AILinearTaskThreadManager::ShouldQueue3DTask());
+			switch (eType) {
+				case NiUpdateType::FULL:
+					pTarget->Update(kData);
+					break;
+				case NiUpdateType::SELECTED:
+					pTarget->UpdateSelected(kData);
+					break;
+				case NiUpdateType::TRANSFORMS_AND_BOUNDS:
+					pTarget->UpdateTransformAndBounds(kData);
+					break;
+				case NiUpdateType::PROPERTIES:
+					pTarget->UpdateProperties();
+					break;
+				case NiUpdateType::CONTROLLERS:
+					pTarget->UpdateControllers(kData);
+					break;
+				default:
+					__assume(0);
+			}
+			*result = 1;
+		}
+	}
 	return true;
 }

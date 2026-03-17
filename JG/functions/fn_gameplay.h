@@ -1351,7 +1351,7 @@ bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 	NiPoint3 Point;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &(Point.x), &(Point.y), &(Point.z))) {
-		((void(__cdecl*)(NiNode*, NiPoint3*, int))(0x62B8D0))(thisObj->GetNiNode(), &Point, 1);
+		((void(__cdecl*)(NiNode*, NiPoint3*, int))(0x62B8D0))(thisObj->Get3D(), &Point, 1);
 		*result = 1;
 	}
 	return true;
