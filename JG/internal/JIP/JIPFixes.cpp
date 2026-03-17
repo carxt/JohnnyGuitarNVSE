@@ -1115,6 +1115,7 @@ namespace JIPFixes {
 
 		bool Cmd_GetPCCanUsePowerArmor_Eval(COMMAND_ARGS_EVAL) {
 			*result = PlayerCharacter::GetSingleton()->canUsePA;
+			return true;
 		}
 
 		void InitHooks() {
