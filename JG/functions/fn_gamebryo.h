@@ -43,6 +43,7 @@ namespace {
 		NONE		= -1,
 		FULL,
 		SELECTED,
+		BOUNDS,
 		TRANSFORMS_AND_BOUNDS,
 		PROPERTIES,
 		CONTROLLERS,
@@ -285,6 +286,9 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 					break;
 				case NiUpdateType::SELECTED:
 					pTarget->UpdateSelected(kData);
+					break;
+				case NiUpdateType::BOUNDS:
+					pTarget->UpdateWorldBound();
 					break;
 				case NiUpdateType::TRANSFORMS_AND_BOUNDS:
 					pTarget->UpdateTransformAndBounds(kData);
