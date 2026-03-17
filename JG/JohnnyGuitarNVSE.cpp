@@ -514,6 +514,7 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(ToggleWeaponScopeUIModel);
 	REG_CMD(ClearWeaponScopeUIModel);
 	REG_CMD(UpdateScenegraph);
+	REG_TYPED_CMD(GetNiBound, Array);
 }
 
 void ReadINI() {

@@ -940,11 +940,17 @@ public:
 
 	NiNode*					m_parent;				// 18
 	bhkNiCollisionObject*	m_collisionObject;		// 1C
-	NIBound*				m_pWorldBound;			// 20
+	NiBound*				m_pWorldBound;			// 20
 	DList<NiProperty>		m_propertyList;			// 24
 	Bitfield32				m_flags;				// 30
 	NiTransform				m_local;
 	NiTransform				m_world;
+
+#ifdef GAME
+	static constexpr AddressPtr<NiBound, 0x11F4288> kNullBound;
+#else
+	static constexpr AddressPtr<NiBound, 0xF1FD88> kNullBound;
+#endif
 
 	NiProperty* GetProperty(uint32_t auiType) const;
 
@@ -991,6 +997,10 @@ public:
 
 	NiTimeController* GetController(const NiRTTI* apRTTI) const {
 		return ThisCall<NiTimeController*>(0xA5C570, this, apRTTI);
+	}
+
+	const NiBound& GetWorldBound() const {
+		return m_pWorldBound ? *m_pWorldBound : kNullBound;
 	}
 };
 
@@ -1922,7 +1932,7 @@ public:
 	uint16_t			word0A;			// 0A
 	uint16_t			word0C;			// 0C
 	uint16_t			word0E;			// 0E
-	NIBound		bounds;			// 10
+	NiBound		bounds;			// 10
 	NiVector3* vertices;		// 20
 	NiVector3* normals;		// 24
 	NiColorA* vertexColors;	// 28

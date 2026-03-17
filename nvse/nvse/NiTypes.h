@@ -108,8 +108,9 @@ struct NiTransform
 };
 
 // 10
-struct NIBound
+class NiBound
 {
+public:
 	NiVector3	kCenter;
 	union {
 		float	fRadius;

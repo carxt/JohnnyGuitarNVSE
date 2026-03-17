@@ -12,6 +12,7 @@ DEFINE_COMMAND_PLUGIN(GetSwitchNodeIndex, , true, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(SetNiLODLevel, , false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetNiLODLevel, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(UpdateScenegraph, , true, kParams_ScenegraphUpdate);
+DEFINE_COMMAND_PLUGIN(GetNiBound, , true, kParams_OneOptionalString);
 
 namespace {
 	enum class AlphaPropertyItem  : int32_t {
@@ -299,6 +300,40 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 			}
 			*result = 1;
 		}
+	}
+	return true;
+}
+
+bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cName[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName)) {
+		NiAVObject* pRoot = thisObj->Get3D();
+
+		NiAVObject* pTarget = nullptr;
+		if (cName[0])
+			pTarget = BSUtilities::GetObjectByName(pRoot, cName);
+		else
+			pTarget = pRoot;
+
+		NVSEArrayElement kElements[4];
+		NVSEArrayVar* pOutArray;
+		if (pTarget) {
+			const NiBound& rBound = pTarget->GetWorldBound();
+			kElements[0] = rBound.kCenter.x;
+			kElements[1] = rBound.kCenter.y;
+			kElements[2] = rBound.kCenter.z;
+			kElements[3] = rBound.fRadius;
+			pOutArray = g_arrInterface->CreateArray(kElements, 4, scriptObj);
+		}
+		else {
+			kElements[0] = 0.f;
+			kElements[1] = 0.f;
+			kElements[2] = 0.f;
+			kElements[3] = 0.f;
+			pOutArray = g_arrInterface->CreateArray(kElements, 4, scriptObj);
+		}
+		g_arrInterface->AssignCommandResult(pOutArray, result);
 	}
 	return true;
 }
