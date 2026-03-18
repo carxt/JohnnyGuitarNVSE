@@ -1484,7 +1484,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 		if (cNodeName[0] != 0) {
 			PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
 			if (thisObj == pPlayer) {
-				pActorNode = pPlayer->GetNode(!pPlayer->is3rdPerson);
+				pActorNode = pPlayer->Get3D(!pPlayer->is3rdPerson);
 			}
 			else
 				pActorNode = thisObj->GetRefNiNode();

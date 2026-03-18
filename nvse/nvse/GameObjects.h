@@ -947,7 +947,7 @@ public:
 	bool ToggleFirstPerson(bool toggleON);
 	char GetDetectionState();
 
-	NiNode* GetNode(bool abFirstPerson) const;
+	NiNode* Get3D(bool abFirstPerson) const;
 	BipedAnim* GetBiped(bool abFirstPerson) const;
 	Animation* GetAnimation(bool abFirstPerson) const;
 };

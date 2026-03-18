@@ -33,7 +33,7 @@ PlayerCharacter* PlayerCharacter::GetSingleton() {
 	return *(PlayerCharacter**)0x11DEA3C;
 }
 
-NiNode* PlayerCharacter::GetNode(bool abFirstPerson) const {
+NiNode* PlayerCharacter::Get3D(bool abFirstPerson) const {
 	if (abFirstPerson)
 		return playerNode;
 	else if (renderState)

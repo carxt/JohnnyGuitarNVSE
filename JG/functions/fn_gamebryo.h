@@ -3,16 +3,16 @@
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/AILinearTaskThreadManager.hpp"
 
-DEFINE_COMMAND_PLUGIN(SetAlphaPropertyValue, , true, kParams_OneString_TwoInts);
-DEFINE_COMMAND_PLUGIN(GetAlphaPropertyValue, , true, kParams_OneString_OneInt);
-DEFINE_COMMAND_PLUGIN(SetStencilPropertyValue, , true, kParams_OneString_TwoInts);
-DEFINE_COMMAND_PLUGIN(GetStencilPropertyValue, , true, kParams_OneString_OneInt);
-DEFINE_COMMAND_PLUGIN(SetSwitchNodeIndex, , true, kParams_OneString_OneInt);
-DEFINE_COMMAND_PLUGIN(GetSwitchNodeIndex, , true, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(SetAlphaPropertyValue, , true, kParams_SetPropertyValue);
+DEFINE_COMMAND_PLUGIN(GetAlphaPropertyValue, , true, kParams_GetPropertyValue);
+DEFINE_COMMAND_PLUGIN(SetStencilPropertyValue, , true, kParams_SetPropertyValue);
+DEFINE_COMMAND_PLUGIN(GetStencilPropertyValue, , true, kParams_GetPropertyValue);
+DEFINE_COMMAND_PLUGIN(SetSwitchNodeIndex, , true, kParams_SetSwitchNodeIndex);
+DEFINE_COMMAND_PLUGIN(GetSwitchNodeIndex, , true, kParams_GetSwitchNodeIndex);
 DEFINE_COMMAND_PLUGIN(SetNiLODLevel, , false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetNiLODLevel, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(UpdateScenegraph, , true, kParams_ScenegraphUpdate);
-DEFINE_COMMAND_PLUGIN(GetNiBound, , true, kParams_OneOptionalString);
+DEFINE_COMMAND_PLUGIN(GetNiBound, , true, kParams_GetNiBound);
 
 namespace {
 	enum class AlphaPropertyItem  : int32_t {
@@ -55,10 +55,14 @@ namespace {
 		return value > T::NONE && value < T::COUNT;
 	}
 
-	NiProperty* __fastcall GetPropertyByName(NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
-		if (!apRoot)
-			return nullptr;
+	NiAVObject* __fastcall GetRoot(TESObjectREFR* apRef, bool abFirstPerson) {
+		if (apRef == PlayerCharacter::GetSingleton())
+			return static_cast<PlayerCharacter*>(apRef)->Get3D(abFirstPerson);
+		else
+			return apRef->Get3D();
+	}
 
+	NiProperty* __fastcall GetPropertyByName(NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
 		NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
 		if (!pObject)
 			return nullptr;
@@ -72,8 +76,9 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	AlphaPropertyItem eItem = AlphaPropertyItem::NONE;
 	uint32_t uiValue = 0;
 	char cObjectName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue) && cObjectName[0] && InRange(eItem)) {
-		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(thisObj->Get3D(), cObjectName, NiProperty::kPropertyType_Alpha));
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha));
 		if (!pAlpha)
 			return true;
 
@@ -108,8 +113,9 @@ bool Cmd_GetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	*result = 0;
 	AlphaPropertyItem eItem = AlphaPropertyItem::NONE;
 	char cObjectName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem) && cObjectName[0] && InRange(eItem)) {
-		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(thisObj->Get3D(), cObjectName, NiProperty::kPropertyType_Alpha));
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha));
 		if (!pAlpha)
 			return true;
 
@@ -144,8 +150,9 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	StencilPropertyItem eItem = StencilPropertyItem::NONE;
 	uint32_t uiValue = 0;
 	char cObjectName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue) && cObjectName[0] && InRange(eItem)) {
-		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(thisObj->Get3D(), cObjectName, NiProperty::kPropertyType_Stencil));
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil));
 		if (!pStencil)
 			return true;
 
@@ -186,8 +193,9 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	*result = 0;
 	StencilPropertyItem eItem = StencilPropertyItem::NONE;
 	char cObjectName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem) && cObjectName[0] && InRange(eItem)) {
-		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(thisObj->Get3D(), cObjectName, NiProperty::kPropertyType_Stencil));
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil));
 		if (!pStencil)
 			return true;
 
@@ -227,8 +235,9 @@ bool Cmd_SetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cObjectName[MAX_PATH] = {};
 	int32_t iIndex = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &iIndex) && cObjectName[0]) {
-		NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->Get3D(), cObjectName);
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &iIndex, &bFirstPerson) && cObjectName[0]) {
+		NiAVObject* pObject = BSUtilities::GetObjectByName(GetRoot(thisObj, bFirstPerson), cObjectName);
 		if (pObject && pObject->IsExactKindOf<NiSwitchNode>()) {
 			static_cast<NiSwitchNode*>(pObject)->SetIndex(iIndex);
 			*result = 1;
@@ -240,8 +249,9 @@ bool Cmd_SetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 bool Cmd_GetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cObjectName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName) && cObjectName[0]) {
-		NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->Get3D(), cObjectName);
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &bFirstPerson) && cObjectName[0]) {
+		NiAVObject* pObject = BSUtilities::GetObjectByName(GetRoot(thisObj, bFirstPerson), cObjectName);
 		if (pObject && pObject->IsExactKindOf<NiSwitchNode>())
 			*result = static_cast<NiSwitchNode*>(pObject)->GetIndex();
 	}
@@ -269,8 +279,9 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 	float fTime = FLT_MAX;
 	BOOL bUpdateControllers = FALSE;
 	char cName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &fTime, &bUpdateControllers, &cName) && InRange<NiUpdateType>(eType)) {
-		NiAVObject* pRoot = thisObj->Get3D();
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &fTime, &bUpdateControllers, &cName, &bFirstPerson) && InRange<NiUpdateType>(eType)) {
+		NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
 
 		NiAVObject* pTarget = nullptr;
 		if (cName[0])
@@ -311,12 +322,14 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+
 	NVSEArrayElement kElements[4];
 	NVSEArrayVar* pOutArray;
 
 	bool bValid = false;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName)) {
-		NiAVObject* pRoot = thisObj->Get3D();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName, &bFirstPerson)) {
+		NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
 
 		NiAVObject* pTarget = nullptr;
 		if (cName[0])

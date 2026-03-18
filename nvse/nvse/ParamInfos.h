@@ -630,14 +630,6 @@ static ParamInfo kParams_OneInt_OneFloat[2] =
 	{ "Float", kParamType_Float, 0 },
 };
 
-static ParamInfo kParams_ScenegraphUpdate[] =
-{
-	{ "Type", kParamType_Integer, 0 },
-	{ "Time", kParamType_Float, 1 },
-	{ "Update Controllers", kParamType_Integer, 1 },
-	{ "Block Name", kParamType_String, 1 }
-};
-
 static ParamInfo kParams_OneForm_OneOptionalInt[2] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
@@ -653,8 +645,8 @@ static ParamInfo kParams_OneForm_OneInt_OneOptionalInt[3] =
 
 static ParamInfo kParams_OneObjectID_OneOptionalInt[2] =
 {
-	{ "item",		kParamType_ObjectID,	0 },
-	{ "integer",	kParamType_Integer,		1 },
+	{ "item",		kParamType_ObjectID, 0 },
+	{ "integer",	kParamType_Integer,	 1 },
 };
 
 static ParamInfo kParams_OneForm_TwoInts[3] =
@@ -984,4 +976,47 @@ static ParamInfo kParams_ThreeFloatsTwoOptionalFloats[] =
 	{	"Z",				kParamType_Float, 0	},
 	{	"Target Radius",	kParamType_Float, 1	},
 	{	"Target Angle",		kParamType_Float, 1	},
+};
+
+static ParamInfo kParams_SetPropertyValue[] =
+{
+	{ "Property Name",	kParamType_String,	0 },
+	{ "Item",			kParamType_Integer, 0 },
+	{ "Value",			kParamType_Integer, 0 },
+	{ "First Person",	kParamType_Integer, 1 },
+};
+
+static ParamInfo kParams_GetPropertyValue[] =
+{
+	{ "Property Name",	kParamType_String,	0 },
+	{ "Item",			kParamType_Integer, 0 },
+	{ "First Person",	kParamType_Integer, 1 },
+};
+
+static ParamInfo kParams_SetSwitchNodeIndex[] =
+{
+	{ "Block Name",		kParamType_String,	0 },
+	{ "Index",			kParamType_Integer,	0 },
+	{ "First Person",	kParamType_Integer,	1 },
+};
+
+static ParamInfo kParams_GetSwitchNodeIndex[] =
+{
+	{ "Block Name",		kParamType_String,	0 },
+	{ "First Person",	kParamType_Integer,	1 },
+};
+
+static ParamInfo kParams_ScenegraphUpdate[] =
+{
+	{ "Type",				kParamType_Integer, 0 },
+	{ "Time",				kParamType_Float,	1 },
+	{ "Update Controllers",	kParamType_Integer, 1 },
+	{ "Block Name",			kParamType_String,	1 },
+	{ "First Person",		kParamType_Integer, 1 }
+};
+
+static ParamInfo kParams_GetNiBound[] =
+{
+	{ "Block Name",		kParamType_String,	1 },
+	{ "First Person",	kParamType_Integer,	1 },
 };
