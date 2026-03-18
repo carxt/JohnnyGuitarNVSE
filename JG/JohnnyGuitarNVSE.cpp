@@ -43,11 +43,8 @@ _UncaptureLambdaVars UncaptureLambdaVars;
 
 #define JG_VERSION 523
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
-	MEM_CONTEXT eOrgContext;
-	if (!bIsGECK) {
-		eOrgContext = GetMemContext();
-		SetMemContext(MC_DEFAULT);
-	}
+	MEM_CONTEXT eOrgContext = GetMemContext();
+	SetMemContext(MC_DEFAULT);
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_PostPostLoad: // GAME + GECK 
 		{
@@ -148,8 +145,13 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		default:
 			break;
 	}
-	if (!bIsGECK) {
-		SetMemContext(eOrgContext);
+	SetMemContext(eOrgContext);
+}
+
+void MessageHandlerGECK(NVSEMessagingInterface::Message* msg) {
+	if (msg->type == NVSEMessagingInterface::kMessage_PostPostLoad && bFixJIP) {
+		JIPFixes::InitCommandHooks();
+		JIPFixes::InitHooks();
 	}
 }
 
@@ -584,19 +586,23 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 	g_arrInterface = static_cast<NVSEArrayVarInterface*>(nvse->QueryInterface(kInterface_ArrayVar));
 	g_strInterface = static_cast<NVSEStringVarInterface*>(nvse->QueryInterface(kInterface_StringVar));
 
+	ReadINI();
+
+	NVSEMessagingInterface* pMessaging = static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging));
+	pMessaging->RegisterListener(nvse->GetPluginHandle(), "NVSE", bIsGECK ? MessageHandlerGECK : MessageHandler);
+
+	if (bFixJIP) {
+		JIPFixes::InitData();
+		JIPFixes::InitEarlyHooks();
+	}
+
 	if (!bIsGECK) {
-		ReadINI();
-
-		static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
-
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		SaveGameUMap.reserve(0xFF);
 		shakeRequests.reserve(0xFF);
 
 		if (bFixJIP) {
-			JIPFixes::InitData();
-			JIPFixes::InitEarlyHooks();
 			JohnnyExtraData::InitName();
 		}
 
