@@ -53,6 +53,9 @@ EventInformation* OnGeneralSubtitleHandler;
 EventInformation* OnReputationChangeHandler;
 EventInformation* OnNPCAVChangeHandler;
 
+extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
+extern NVSEScriptInterface* g_scriptInterface;
+
 uint32_t handlePreRenderEvent() {
 	for (auto const& callback : OnRenderGamePreUpdateHandler->callbacks) {
 		CallUDF(callback.script, nullptr, OnRenderGamePreUpdateHandler->numMaxArgs);

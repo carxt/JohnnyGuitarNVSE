@@ -2,124 +2,59 @@
 #include <unordered_set>
 #include <unordered_map>
 
-#include "GameUI.h"
-#include <algorithm>
-NVSEArrayVarInterface* g_arrInterface = NULL;
-NVSEStringVarInterface* g_strInterface = NULL;
-NVSEMessagingInterface* g_msg = NULL;
-NVSEScriptInterface* g_scriptInterface = NULL;
-NVSECommandTableInterface* g_cmdTableInterface = NULL;
-InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
-float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ContChangesEntry* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
-(float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ContChangesEntry*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
-void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
-bool isShowLevelUp = true;
-bool bArrowKeysDisabled = false;
-bool bCombatMusicDisabled = false;
-#define ExtractFormatStringArgs(...) g_scriptInterface->ExtractFormatStringArgs(__VA_ARGS__)
-#define IS_TYPE(form, type) (*(uint32_t*)form == kVtbl_##type)
-#define NOT_ID(form, type) (form->GetFormType() != FORM_TYPE::##type)
-#define IS_ID(form, type) (form->GetFormType() == FORM_TYPE::##type)
+#include "JG/JohnnyGameSettings.hpp"
+#include <JG/DialogueResponseOverride.hpp>
+#include <JG/ExtraReputationIcons.hpp>
+#include <JG/ExtraMiscStats.hpp> 
+#include <JG/RSMBarberHook.hpp> 
+#include <JG/BarterFilter.hpp> 
+#include <JG/ExtraUISounds.hpp> 
+#include <JG/NPCAccuracy.hpp>
+#include <JG/JohnnyPatches.hpp>
+#include <JG/CustomCameraShake.hpp>
+#include <PluginAPI.h>
+#include "nvse/GameProcess.h"
+#include "misc/WorldToScreen.h"
+#include "JG/EditorIDRestoration.hpp"
+#include "internal/decoding.h"
+
+
 #define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
-#define VarNameSize 64
-bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
-bool fixFleeing = 0;
-bool fixItemStacks = 0;
-bool resetVanityCam = 0;
-bool fixNPCShootingAngle = 0;
-bool noMuzzleFlashCooldown = 0;
-bool enableRadioSubtitles = 0;
-bool removeMainMenuMusic = 0;
-bool fixDeathSounds = 1;
-bool patchPainedPlayer = 0;
-bool bDisableDeathResponses = 0;
-bool bFixJIP = true;
-unsigned int iFPSCapLoadScreen = 0;
-float iDeathSoundMAXTimer = 10;
-bool bDisableDLLCompatibilityRoutines = 0;
-std::unordered_map<uint8_t, float> shakeRequests;
-TESSound* questFailSound = 0;
-TESSound* questNewSound = 0;
-TESSound* questCompeteSound = 0;
-TESSound* locationDiscoverSound = 0;
-std::unordered_map<uint32_t, char*> markerIconMap;
-std::unordered_map <uint32_t, std::vector<const char*>> factionRepIcons;
-std::unordered_map<std::string, int> miscStatMap;
-std::unordered_set<std::string> availableMiscStats;
-uint32_t disableMuzzleLights = -1;
+
+extern NVSEArrayVarInterface* g_arrInterface;
+extern NVSEStringVarInterface* g_strInterface;
+extern NVSEMessagingInterface* g_msg; 
+extern NVSEScriptInterface* g_scriptInterface;
+extern NVSECommandTableInterface* g_cmdTableInterface;
+extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+extern void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...);
+extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
+extern std::unordered_map<uint8_t, float> shakeRequests;
+extern float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ContChangesEntry* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo);
+extern uint32_t g_initialTickCount;
+extern GameTimeGlobals* g_gameTimeGlobals;
+extern StatsMenu* g_statsMenu;
+extern std::unordered_set<DWORD> jg_gameRadioSet;
+extern float g_viewmodel_near;
+extern bool mlcOverridden;
+extern MediaLocationController* mlcOverride;
+extern std::unordered_set<BYTE> SaveGameUMap;
+
 static float vatsSpreadMultValue = 15.0;
-uint32_t g_initialTickCount = 0;
-// Singletons
-GameTimeGlobals* g_gameTimeGlobals = nullptr;
-StatsMenu* g_statsMenu = nullptr;
-uint8_t recalculateStatFilters = 0;
+
 void(__thiscall* OriginalBipedModelUpdateWeapon)(BipedAnim*, TESObjectWEAP*, int) = (void(__thiscall*)(BipedAnim*, TESObjectWEAP*, int)) 0x4AB400;
 uint8_t(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (uint8_t(__thiscall*)(ContChangesEntry*)) 0x4BD820;
-std::unordered_set<BYTE> SaveGameUMap;
+
 uintptr_t g_canSaveNowAddr = 0;
 uintptr_t g_canSaveNowMenuAddr = 0;
-Setting** g_miscStatData = (Setting**)0x11C6D50;
-std::unordered_set<DWORD> jg_gameRadioSet;
-static float g_viewmodel_near = 0.f;
-bool mlcOverridden = false;
-MediaLocationController* mlcOverride = nullptr;
+
 
 
 
 extern "C" {
 	bool __cdecl JGSetViewmodelClipDistance(float value);
 	float __cdecl JGGetViewmodelClipDistance();
-}
-
-namespace hk_GMSTJG {
-	static uintptr_t func_AddGameSetting_Float = 0x040E0B0;
-	static uintptr_t func_AddGameSetting_IntOrStaticStr = 0x40C150;
-	namespace gmst
-	{
-		CustomGameSetting fCombatLocationTargetRadiusMaxBase;
-		CustomGameSetting fCombatRangedWeaponRangeBaseMult;
-		CustomGameSetting iOverrideDialogueEmotionValues;
-		CustomGameSetting iFixAudioMarkerLookupAlgo;
-		CustomGameSetting sNewline;
-
-	};
-	void ExtraGMSTInit()
-	{
-		using namespace gmst;
-		fCombatLocationTargetRadiusMaxBase.Initialize("fCombatLocationTargetRadiusMaxBase", 10.0f);
-		fCombatRangedWeaponRangeBaseMult.Initialize("fCombatRangedWeaponRangeBaseMult", 1.0f);
-		iOverrideDialogueEmotionValues.Initialize("iOverrideDialogueEmotionValues", 0);
-		iFixAudioMarkerLookupAlgo.Initialize("iFixAudioMarkerLookupAlgo", 1);
-		sNewline.Initialize("sNewline", "\n");
-	}
-}
-
-std::vector<uintptr_t> GetFactionsInList(ExtraFactionChanges::FactionListEntry* pFactList) {
-	std::vector<uintptr_t> retObj{};
-		auto factHead = pFactList->Head();
-		while (factHead) {
-			if (factHead->data && factHead->data->rank >= 0) {
-				retObj.push_back(factHead->data->faction->GetFormID());
-			}
-			factHead = factHead->next;
-		}
-		return retObj;
-}
-
-__declspec (noinline) std::vector<uintptr_t> GetFactionsForActor(Actor* r_act) {
-
-	auto actBase = (TESActorBase*) GetPermanentBaseForm(r_act);
-	auto retVec = GetFactionsInList(&(actBase->baseData.factionList));
-
-	ExtraFactionChanges* fRanks = (ExtraFactionChanges*)r_act->extraDataList.GetByType(kExtraData_FactionChanges);
-	if (fRanks) {
-		if (auto factionDataList = fRanks->data) {
-			auto vec2 = GetFactionsInList(factionDataList);
-			retVec.insert(retVec.end(), vec2.begin(), vec2.end());
-		}
-	}
-	return retVec;
 }
 
 NiVector3 kCameraPos;
@@ -132,14 +67,7 @@ bool bOverrideCameraPos = false;
 bool bOverrideCameraRot = false;
 int eAxis = -3;
 
-enum CameraRotationType {
-	kCameraRotationType_TrackTarget = -2,
-	kCameraRotationType_Reset	= -1,
-	kCameraRotationType_None		= 0,
-	kCameraRotationType_X			= 1,
-	kCameraRotationType_Y			= 2,
-	kCameraRotationType_Z			= 3,
-};
+
 
 void __fastcall SetCameraTranslateHook(NiNode* apThis, void*, NiVector3& arPos) {
 	PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
@@ -188,69 +116,6 @@ void __fastcall SetCameraRotateHook(NiNode* apThis, void*, NiMatrix3& arRot) {
 	apThis->SetLocalRotate(arRot);
 }
 
-namespace NPCAccuracy {
-	struct {
-		std::unordered_map<uintptr_t, float> ACTREF;
-
-		std::unordered_map<uintptr_t, float> ACTBAS;
-		std::unordered_map<uintptr_t, float> CSTY;
-		std::unordered_map<uintptr_t, float> FACT;
-	} tables;
-
-	void FlushMapRefs() {
-		tables.ACTREF.clear();
-	}
-	__declspec (noinline) double __fastcall returnActorMult(Actor* a_refr) {
-
-		auto findValInTable = [](uintptr_t dRefId, std::unordered_map<uintptr_t, float>& pMap) -> float {
-			auto it = pMap.find(dRefId);
-			if (it != pMap.end()) {
-				return it->second;
-			}
-			return 1.0f;
-		};
-		double retMul = 1.0f;
-		retMul *= findValInTable(a_refr->GetFormID(), tables.ACTREF);
-		retMul *= findValInTable(GetPermanentBaseForm(a_refr)->GetFormID(), tables.ACTBAS);
-		if (auto pCStyle = a_refr->GetCombatStyle()) {
-			retMul *= findValInTable(pCStyle->GetFormID(), tables.CSTY);
-		}
-		auto factionsForAct = GetFactionsForActor(a_refr);
-		for (auto factRefId : factionsForAct) {
-			retMul *= findValInTable(factRefId, tables.FACT);
-		}
-		return retMul;
-
-	}
-	template <uintptr_t a_addr>
-	class hk_NPCWobble {
-	private:
-		static inline uintptr_t hookCall = a_addr;
-	public:
-		static  float __fastcall hk_AccHook(Actor* a_refr, void* edx, int mode) {
-			auto res = ThisCall<float>(hookCall,a_refr, mode);
-			res *= returnActorMult(a_refr);
-			return res;
-		}
-
-		hk_NPCWobble() {
-
-			uintptr_t hk_hookPoint = hookCall;
-			hookCall = GetRelJumpAddr(hookCall);
-			WriteRelCall(hk_hookPoint, (uintptr_t)hk_AccHook);
-		}
-	};
-	void CreateHook() {
-		tables.ACTREF.max_load_factor(0.75);
-		tables.FACT.max_load_factor(0.75);
-		tables.CSTY.max_load_factor(0.75);
-		tables.ACTBAS.max_load_factor(0.75);
-		hk_NPCWobble<0x0524019>();
-	}
-};
-
-
-
 namespace hk_CombatLocation
 {
 
@@ -261,7 +126,7 @@ namespace hk_CombatLocation
 	public:
 		static  float __cdecl hk_CLCHook(float m_a1, float m_a2) {
 			auto res = CdeclCall<float>(hookCall, m_a1, m_a2);
-			return fmax(res, hk_GMSTJG::gmst::fCombatLocationTargetRadiusMaxBase.Float());
+			return fmax(res, JohnnyGameSettings::fCombatLocationTargetRadiusMaxBase.Float());
 		}
 
 		hk_CombatLocationMaxCall() {
@@ -279,7 +144,7 @@ namespace hk_CombatLocation
 		static  float __fastcall hk_Hook(TESObjectWEAP* r_weap) {
 			auto res = ThisCall<float>(hookCall, r_weap);
 			if (!ThisCall<bool>(0x0647790, r_weap) && ThisCall<bool>(0x04C0C30, r_weap)) {
-				res *= hk_GMSTJG::gmst::fCombatRangedWeaponRangeBaseMult.Float();
+				res *= JohnnyGameSettings::fCombatRangedWeaponRangeBaseMult.Float();
 			}
 			return res;
 		}
@@ -292,11 +157,6 @@ namespace hk_CombatLocation
 	};
 
 
-
-
-
-
-
 	void CombatLocationMaxRadiusBaseInitHook() { //Thanks lStewieAl
 		hk_CombatLocationMaxCall<0x09A089F>();
 		hk_CombatLocationMaxCall<0x09A0A0C>();
@@ -306,188 +166,6 @@ namespace hk_CombatLocation
 	}
 
 }
-
-class DialogueEmotionOverride
-{
-
-public:
-	unsigned int m_emotionType;
-	int m_emotionValue;
-	TESIdleForm* m_speakerAnimation;
-	TESIdleForm* m_listenerAnimation;
-	unsigned int m_flags;
-	DialogueEmotionOverride() {};
-	DialogueEmotionOverride(int emotionType, int emotionValue, TESIdleForm* speakerAnim, TESIdleForm* listenAnim, unsigned int flags) :
-		m_emotionType(emotionType), m_emotionValue(emotionValue), m_speakerAnimation(speakerAnim), m_listenerAnimation(listenAnim), m_flags(flags)
-	{
-
-	}
-	virtual ~DialogueEmotionOverride()
-	{
-
-	}
-
-};
-
-std::unordered_map<uint32_t, std::map<uint32_t, DialogueEmotionOverride>> dialogResponseOverrideMap;
-
-
-
-
-template <class T>
-struct JGSetList {
-	bool isWhiteList = false;
-	std::unordered_set<T> set;
-	void dFlush() {
-		isWhiteList = false;
-		set.clear();
-	};
-	bool Allow(T obj) {
-		return bool(set.count(obj)) == isWhiteList;
-	}
-	void Add(T obj) {
-		set.insert(obj);
-	}
-	void Remove(T obj) {
-		set.erase(obj);
-	}
-};
-
-namespace hk_CameraShakeHook {
-	float camShakeMinAlt = 0, camShakeTimeAlt = 0;
-	bool __fastcall fn_camAltShakeHook(Actor* a_refr, void* edx, NiMatrix3* outMatrix) {
-		NiMatrix3 shakeMatrix = {};
-		Animation* anData = ThisCall<Animation*>(0x08B70D0, a_refr);
-		if (!anData) return true;
-		float timePassed = anData->flt0D0;
-		auto originalShakeMult = *(float*)(0x11DFED4), originalShakeTime = *(float*)(0x11DFED8);
-		*(float*)(0x11DFED4) = camShakeMinAlt;
-		*(float*)(0x11DFED8) = camShakeTimeAlt;
-		float remainTime = CdeclCall<double>(0x8D1B30, timePassed, &shakeMatrix);
-		camShakeMinAlt = *(float*)(0x11DFED4);
-		camShakeTimeAlt = *(float*)(0x11DFED8);
-		*(float*)(0x11DFED4) = originalShakeMult;
-		*(float*)(0x11DFED8) = originalShakeTime;
-		if (remainTime > 0.0f) {
-			float euX = 0, euY= 0, euZ = 0;
-			ThisCall(0x0A592C0, &shakeMatrix, &euX, &euY, &euZ);
-			euX *= remainTime;
-			euY *= remainTime;
-			euZ *= remainTime;
-			ThisCall(0x0A59540, &shakeMatrix, euX, euY, euZ);
-			ThisCall<void*>(0x43F8D0, outMatrix, outMatrix, &shakeMatrix);
-
-		}
-		return true;
-
-	}
-	__declspec(naked) void asm_CameraShakeHook() {
-		__asm {
-			fnstsw ax
-			test ah, 0x41
-			jz retAbort
-			lea edx, dword ptr ss: [ebp-0x34]
-			push edx
-			mov ecx, dword ptr ss: [ebp-0x414]
-			call fn_camAltShakeHook
-			ALIGN 16
-			test al, al
-			jmp retEnd
-			retAbort:
-			fldz
-			fst camShakeMinAlt
-			fstp camShakeTimeAlt
-			retEnd:
-			setnz al
-			ret
-		}
-	}
-	void CreateHook() {
-		WriteRelCall(0x94BCF6, (uintptr_t)asm_CameraShakeHook);
-	}
-
-}
-
-namespace hk_BarterHook {
-	std::unordered_map<DWORD, JGSetList<DWORD>> barterFilterListLeft;
-	std::unordered_map<DWORD, JGSetList<DWORD>> barterFilterListRight;
-	enum barterHideFlags {
-		kBarterDoNotHideLeft = 1 << 0,
-		kBarterDoNotHideRight
-	};
-	template <uintptr_t a_addr>
-	class hk_BarterFilterHookClassLeft {
-	private:
-		static inline uintptr_t hookCall = a_addr;
-	public:
-		static  DWORD __cdecl hk_BarterFilterHook(ContChangesEntry* ref) {
-			auto shouldHide = CdeclCall<bool>(hookCall, ref);
-			if (shouldHide){ return shouldHide; }
-			auto barterMenu = *(BarterMenu**)0x11D8FA4;
-			if (!barterMenu) return shouldHide;
-			auto merchantRef = barterMenu->merchantRef;
-			if (!merchantRef) return shouldHide;
-			auto originalForm = ref->type;
-			if (!PlayerCharacter::GetSingleton()) return shouldHide;
-			auto it = barterFilterListLeft.find(originalForm->GetFormID());
-			if (it != barterFilterListLeft.end()) {
-				auto &barterSet = it->second;
-				shouldHide = barterSet.Allow(merchantRef->GetFormID()) || barterSet.Allow(merchantRef->baseForm->GetFormID()) || barterSet.Allow(0) || barterSet.Allow(PlayerCharacter::GetSingleton()->GetFormID());
-			}
-			return shouldHide;
-		}
-		hk_BarterFilterHookClassLeft() {
-			uintptr_t hk_hookPoint = hookCall;
-			hookCall = *(uintptr_t*)(hk_hookPoint + 1);
-			SafeWrite32((hk_hookPoint + 1) , (uintptr_t) hk_BarterFilterHook);
-
-		}
-
-	};
-
-	template <uintptr_t a_addr>
-	class hk_BarterFilterHookClassRight {
-	private:
-		static inline uintptr_t hookCall = a_addr;
-	public:
-		static  DWORD __cdecl hk_BarterFilterHook(ContChangesEntry* ref) {
-			auto shouldHide = CdeclCall<bool>(hookCall, ref);
-			if (shouldHide) { return shouldHide; }
-			auto barterMenu = *(BarterMenu**)0x11D8FA4;
-			if (!barterMenu) return shouldHide;
-			auto merchantRef = barterMenu->merchantRef;
-			if (!merchantRef) return shouldHide;
-			auto originalForm = ref->type;
-			auto it = barterFilterListRight.find(originalForm->GetFormID());
-			if (it != barterFilterListRight.end()) {
-				auto& barterSet = it->second;
-				shouldHide = barterSet.Allow(merchantRef->GetFormID()) || barterSet.Allow(merchantRef->baseForm->GetFormID()) || barterSet.Allow(0) || barterSet.Allow(PlayerCharacter::GetSingleton()->GetFormID());
-
-			}
-			return shouldHide;
-		}
-		hk_BarterFilterHookClassRight() {
-			uintptr_t hk_hookPoint = hookCall;
-			hookCall = *(uintptr_t*)(hk_hookPoint + 1);
-			SafeWrite32((hk_hookPoint + 1), (uintptr_t)hk_BarterFilterHook);
-
-		}
-
-	};
-
-
-	void CreateHook() {
-		hk_BarterFilterHookClassLeft<0x72DA1C>();
-		hk_BarterFilterHookClassLeft<0x72E1BE>();
-
-		hk_BarterFilterHookClassRight<0x72DACA>();
-		hk_BarterFilterHookClassRight<0x72E207>();
-
-	}
-};
-
-
-
 
 template <uintptr_t a_addr>
 class hk_QuestObjectiveIsDisplayedCall {
@@ -524,14 +202,13 @@ public:
 };
 
 
-
 template <uintptr_t a_addr>
 class hk_EmotionOverrideUndo
 {
 	static void* __fastcall hk_UndoEmotionOverride(void** ptr)
 	{
 		auto retVal = ThisCall<void*>(hookCall, ptr);
-		if (hk_GMSTJG::gmst::iOverrideDialogueEmotionValues.Int() <= 0)
+		if (JohnnyGameSettings::iOverrideDialogueEmotionValues.Int() <= 0)
 		{
 			retVal = nullptr;
 		}
@@ -545,179 +222,6 @@ public:
 		WriteRelCall(hk_hookPoint,(uintptr_t) (hk_UndoEmotionOverride));
 	}
 };
-
-
-
-
-
-namespace hk_DialogueTopicResponseManageHook {
-
-
-	enum kDialogEmotionType
-	{
-		kEmotionNeutral,
-		kEmotionAnger,
-		kEmotionDisgust,
-		kEmotionFear,
-		kEmotionSad,
-		kEmotionHappy,
-		kEmotionSurprise,
-		kEmotionPained,
-		kEmotionMax
-	};
-	struct DialogueResponse
-	{
-		BSString responseText;
-		uint32_t emotionType;
-		uint32_t emotionValue;
-		BSString voiceFilePath;
-		TESIdleForm* speakerAnimation;
-		TESIdleForm* listenerAnimation;
-		uint32_t sound;
-		uint8_t flags;
-		uint8_t pad25[3];
-		uint32_t responseNumber;
-	};
-
-	struct DialogueCache
-	{
-		uint32_t emotionType;
-		uint32_t emotionValue;
-		uint32_t responseNumber;
-		uint32_t speakerAnimation;
-		uint32_t listenerAnimation;
-	};
-	std::unordered_map<uint32_t, std::map<uint32_t, DialogueCache>> cachedDialogueInfo;
-
-
-	static uintptr_t originalTopicInfoLoad = 0x104D5D4;
-	DWORD __fastcall hk_TESTopicInfo_Load(TESTopicInfo* topicInfo, void* edx, TESFile* modInfo)
-	{
-		DWORD retVal = ThisCall<DWORD>(originalTopicInfoLoad, topicInfo, modInfo);
-		if (retVal)
-		{
-			auto responseList = ThisCall<TESTopicInfoResponse**>(0x061E780, topicInfo, NULL);
-			if (auto responseItem = *responseList)
-			{
-				do
-				{
-					DialogueCache diaCache = {};
-					diaCache.emotionType = responseItem->data.emotionType;
-					diaCache.emotionValue = responseItem->data.emotionValue;
-					diaCache.responseNumber = responseItem->data.responseNumber;
-					diaCache.speakerAnimation = (responseItem->spkeakerAnimation) ? responseItem->spkeakerAnimation->GetFormID() : 0;
-					diaCache.listenerAnimation = (responseItem->listenerAnimation) ? responseItem->listenerAnimation->GetFormID() : 0;
-					cachedDialogueInfo[topicInfo->GetFormID()][responseItem->data.responseNumber] = diaCache;
-				} while (responseItem = responseItem->next);
-			}
-		}
-		return retVal;
-	}
-
-	static  DialogueResponse* __fastcall DialogueResponse_Init(DialogueResponse* responseCol,
-		void* edx, TESQuest* quest, TESTopic* topic, TESTopicInfo* topicInfo, Actor* speaker, TESTopicInfoResponse* topicInfoResponse)
-	{
-		if (auto diaCont = dialogResponseOverrideMap.find(topicInfo->GetFormID()); diaCont != dialogResponseOverrideMap.end())
-		{
-
-			Setting* iSTDEmotionVal = (Setting*) 0x11CBDF4;
-			if (auto diaItem = diaCont->second.find(topicInfoResponse->data.responseNumber); diaItem != diaCont->second.end())
-			{
-				if (diaItem->second.m_emotionType < kEmotionMax)
-				{
-					responseCol->emotionType = diaItem->second.m_emotionType;
-				}
-				if (diaItem->second.m_emotionValue > 0)
-				{
-					responseCol->emotionValue = diaItem->second.m_emotionValue;
-
-				}
-				if ((responseCol->emotionType > 0) && hk_GMSTJG::gmst::iOverrideDialogueEmotionValues.Int() >= 1)
-				{
-					responseCol->emotionValue = iSTDEmotionVal->Int();
-				}
-
-				if (IS_TYPE(diaItem->second.m_speakerAnimation, TESIdleForm) || (diaItem->second.m_speakerAnimation == NULL))
-				{
-					responseCol->speakerAnimation = diaItem->second.m_speakerAnimation;
-				}
-				if (IS_TYPE(diaItem->second.m_listenerAnimation, TESIdleForm) || (diaItem->second.m_listenerAnimation == NULL))
-				{
-					responseCol->listenerAnimation = diaItem->second.m_listenerAnimation;
-				}
-				if (diaItem->second.m_flags != -1)
-				{
-					responseCol->flags = diaItem->second.m_flags;
-
-				}
-			}
-
-		}
-
-
-		return responseCol;
-	}
-
-
-
-
-
-	static  __declspec(naked) void  asm_jumpManHook()
-	{
-		__asm
-		{
-			mov ecx, eax
-			jmp DialogueResponse_Init
-		}
-
-	}
-
-	void InitHooks() {
-		WriteRelJump(0x083D413, (uintptr_t) asm_jumpManHook);
-		{
-			//hook is fully functional, but disabled since we dont have a need for it just yet
-
-			//uintptr_t originalAddr = originalTopicInfoLoad;
-			//originalTopicInfoLoad = *(uintptr_t*)originalTopicInfoLoad;
-			//SafeWrite32((uintptr_t)originalAddr, (uintptr_t)hk_TESTopicInfo_Load);
-
-		}
-	}
-
-};
-
-
-
-
-
-namespace hk_RSMBarberHook {
-	JGSetList<DWORD> haircutSetList;
-	JGSetList<DWORD> beardSetList;
-	uintptr_t RSMDestructorOriginal = (uintptr_t)0x07AC530;
-	bool __fastcall hk_TESHair_IsPlayable(TESHair* ptr_hair) {
-		return (ptr_hair->IsPlayable()) && (haircutSetList.Allow(ptr_hair->GetFormID()));
-
-	}
-
-	bool __fastcall hk_BGSHeadPart_IsPlayable(BGSHeadPart* ptr_hdpt) {
-		return (ptr_hdpt->headFlags & 0x1) && (beardSetList.Allow(ptr_hdpt->GetFormID()));
-	}
-	DWORD __fastcall hk_RSMDestroy(void* thisObj, void* EDX, BOOL heapFree) {
-		auto ret = ThisCall<DWORD>(RSMDestructorOriginal, thisObj, heapFree);
-		haircutSetList.dFlush();
-		beardSetList.dFlush();
-		return ret;
-	}
-	void Hook() {
-		RSMDestructorOriginal = *((uintptr_t*) 0x1075974);
-		SafeWrite32(0x1075974, (uintptr_t)hk_RSMDestroy);
-		WriteRelCall(0x07AD35C, (uintptr_t)hk_BGSHeadPart_IsPlayable);
-		WriteRelCall(0x07AF35B, (uintptr_t)hk_TESHair_IsPlayable);
-		WriteRelCall(0x07B1D4A, (uintptr_t)hk_TESHair_IsPlayable);
-
-	}
-};
-
 
 
 namespace SkyCloudHook {
@@ -765,10 +269,7 @@ namespace SkyCloudHook {
 
 	}
 
-
-
 }
-
 
 
 TESObjectCELL* TESObjectREFR::GetParentCell() {
@@ -778,43 +279,9 @@ TESObjectCELL* TESObjectREFR::GetParentCell() {
 	return nullptr;
 }
 
-double GetVectorAngle2D(NiPoint3* pt) {
-	double angle;
-	if (pt->y == 0) {
-		if (pt->x <= 0) {
-			angle = kDblPIx3d2;
-		}
-		else {
-			angle = kDblPId2;
-		}
-	}
-	else {
-		double ratio = pt->x / pt->y;
-		angle = dAtan(ratio);
-		if (pt->y < 0.0) {
-			angle += kDblPI;
-		}
-	}
 
-	return angle;
-}
 
-double GetAngleBetweenPoints(NiPoint3* actorPos, NiPoint3* playerPos, float offset) {
-	NiPoint3 diff;
-	diff.Init(actorPos);
-	diff.Subtract(playerPos);
 
-	double angle = GetVectorAngle2D(&diff) - offset;
-	if (angle > -kDblPI) {
-		if (angle > kDblPI) {
-			angle = kDblPIx2 - angle;
-		}
-	}
-	else {
-		angle += kDblPIx2;
-	}
-	return angle * 57.295779513;
-}
 
 ContChangesEntry* ExtraContainerChanges::EntryDataList::FindForItem(TESForm* item) {
 	ListNode<ContChangesEntry>* iter = this->Head();
@@ -826,66 +293,6 @@ ContChangesEntry* ExtraContainerChanges::EntryDataList::FindForItem(TESForm* ite
 	return nullptr;
 }
 
-float __declspec(naked) __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2) {
-	__asm
-	{
-		movd xmm0, [ecx]
-		subss xmm0, [edx]
-		mulss xmm0, xmm0
-		movd xmm1, [ecx + 4]
-		subss xmm1, [edx + 4]
-		mulss xmm1, xmm1
-		movd xmm2, [ecx + 8]
-		subss xmm2, [edx + 8]
-		mulss xmm2, xmm2
-		addss xmm0, xmm1
-		addss xmm0, xmm2
-		sqrtss xmm0, xmm0
-		movd eax, xmm0
-		push eax
-		fld dword ptr[esp]
-		add esp, 4
-		ret
-	}
-}
-
-
-float __declspec(naked) __fastcall NiNodeComputeDistance2DSquared(NiVector3* Vector1, NiVector3* Vector2) {
-	__asm
-	{
-		movd xmm0, [ecx]
-		subss xmm0, [edx]
-		mulss xmm0, xmm0
-		movd xmm1, [ecx + 4]
-		subss xmm1, [edx + 4]
-		mulss xmm1, xmm1
-		addss xmm0, xmm1
-		movd eax, xmm0
-		push eax
-		fld dword ptr[esp]
-		add esp, 4
-		ret
-	}
-}
-
-
-
-
-
-NiNode* NiNode::GetNode(const char* nodeName) {
-	NiAVObject* found = GetBlock(nodeName);
-	return found ? found->IsNode() : NULL;
-}
-
-__forceinline void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn, float& zIn) {
-	NiPointBuffer->x = xIn;
-	NiPointBuffer->y = yIn;
-	NiPointBuffer->z = zIn;
-}
-
-NiAVObject* NiNode::GetBlock(const char* blockName) {
-	return GetObjectByName(blockName);
-}
 
 bool __fastcall CanSaveNowHook(void* ThisObj, void* edx, int isAutoSave) {
 	return ThisCall<bool>(g_canSaveNowAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
@@ -918,25 +325,9 @@ bool __fastcall FleeFixHook(PlayerCharacter* Player, void* unused, bool& IsHidde
 	return (GetPlayerInCombat(Player, IsHidden) && !IsHidden);
 }
 
-char** defaultMarkerList = (char**)0x11A0404;
-
-char* __fastcall GetMapMarker(TESObjectREFR* thisObj, uint16_t mapMarkerType) {
-	auto it = markerIconMap.find(thisObj->GetFormID());
-	if (it != markerIconMap.end()) return it->second;
-	return defaultMarkerList[mapMarkerType];
-}
-
-__declspec (naked) void GetMapMarkerHook() {
-	//uint32_t static const retAddr = 0x079D337;
-	__asm
-	{
-		mov edx, eax
-		mov ecx, [ebp - 0x24]
-		jmp GetMapMarker
-	}
-}
 
 void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1) {
+	using namespace JohnnyPatches;
 	if (*&a1->muzzleFlash && a1->projectile->lightMuzzleFlash) {
 		if (!disableMuzzleLights || (disableMuzzleLights == 2 && a1->sourceActor != (Actor*)PlayerCharacter::GetSingleton()) || (disableMuzzleLights == 3 && a1->sourceActor == (Actor*)PlayerCharacter::GetSingleton())) {
 			NiNode* niNode = ThisCall<NiNode*>(0x50D810, a1->projectile->lightMuzzleFlash, 0, *&a1->muzzleFlash, 1);
@@ -944,27 +335,14 @@ void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1) {
 		}
 	}
 }
-void SetMapMarkerIcon(TESObjectREFR* marker, char* iconPath) {
-	auto pos = markerIconMap.find(marker->GetFormID());
-	uint32_t bufferSize = strlen(iconPath) + 1;
-	char* pathCopy = BSMemory::malloc<char>(bufferSize);
-	strcpy_s(pathCopy, bufferSize, iconPath);
 
-	if (pos != markerIconMap.end()) {
-		delete[] pos->second;
-		pos->second = pathCopy;
-	}
-	else {
-		markerIconMap.insert({ marker->GetFormID(), pathCopy });
-	}
-}
 
 _declspec(naked) void LevelUpHook() {
 	static const uint32_t noShowAddr = 0x77D903;
 	static const uint32_t showAddr = 0x77D618;
 	_asm {
 		jne noLevelUp
-		mov al, isShowLevelUp
+		mov al, JohnnyPatches::isShowLevelUp
 		test al, al
 		je noLevelUp
 		jmp showAddr
@@ -1064,7 +442,7 @@ __declspec(naked) void DialogueAnimHook() {
 __declspec(naked) void DisableArrowKeysHook() {
 	static const uint32_t retnAddr = 0x70F711;
 	__asm {
-		cmp byte ptr[bArrowKeysDisabled], 1
+		cmp byte ptr[JohnnyPatches::bArrowKeysDisabled], 1
 		jnz DONE
 		cmp dword ptr[ebp + 8], 4
 		jnz MATCHED
@@ -1100,6 +478,7 @@ __declspec(naked) void NPCIncrementingChallengesHook() {
 	}
 }
 void __fastcall UIUpdateSoundHook(BSSoundHandle* sound, int dummy) {
+	using namespace ExtraUISounds;
 	tList<QuestUpdateManager>* g_questUpdateManager = (tList <QuestUpdateManager>*)0x11D970C;
 	if (g_questUpdateManager) {
 		ListNode<QuestUpdateManager>* iter = g_questUpdateManager->Head();
@@ -1151,32 +530,11 @@ __declspec (naked) void VanityModeHook_DEPRECATED() {
 	}
 }
 bool __fastcall CombatMusicHook(uint32_t* a1) {
-	if (bCombatMusicDisabled) return false;
+	if (JohnnyPatches::bCombatMusicDisabled) return false;
 	return ThisCall<bool>(0x992D90, a1);
 }
-TESRegionDataMap* GetMapData(TESRegion* region) {
-	if (region->dataEntries->Empty()) return nullptr;
-	ListNode<TESRegionData>* iter = region->dataEntries->Head();
-	TESRegionData* regData;
-	do {
-		regData = iter->data;
-		if ((*(uint32_t*)regData == 0x1023D28))
-			return (TESRegionDataMap*)regData;
-	} while (iter = iter->next);
-	return nullptr;;
-}
 
-TESRegionDataWeather* GetWeatherData(TESRegion* region) {
-	if (region->dataEntries->Empty()) return nullptr;
-	ListNode<TESRegionData>* iter = region->dataEntries->Head();
-	TESRegionData* regData;
-	do {
-		regData = iter->data;
-		if ((*(uint32_t*)regData == 0x1023E18))
-			return (TESRegionDataWeather*)regData;
-	} while (iter = iter->next);
-	return nullptr;
-}
+
 void __fastcall DropItemHook(PlayerCharacter* a1, void* edx, TESForm* a2, BaseExtraList* a3, uint32_t itemCount, NiPoint3* a5, void* a6) {
 	if (itemCount > 10000) {
 		for (itemCount; itemCount > 10000; itemCount -= 10000) {
@@ -1203,12 +561,11 @@ float __fastcall FixDeathSoundsTopic(HighProcess* thisObj, Actor* actor) { //Sim
 			}
 		}
 	}
-	return thisObj->dyingTimer + iDeathSoundMAXTimer;
+	return thisObj->dyingTimer + JohnnyPatches::iDeathSoundMAXTimer;
 }
 float __fastcall FixDeathSounds(HighProcess* thisObj, Actor* actor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
-	return thisObj->dyingTimer + iDeathSoundMAXTimer;
+	return thisObj->dyingTimer + JohnnyPatches::iDeathSoundMAXTimer;
 }
-
 
 
 float __fastcall FixDeathSoundsAlt(HighProcess* thisObj, Actor* actor) { //Alternate complex, confusing, potentially buggy fix.
@@ -1240,67 +597,6 @@ __declspec (naked) void PatchPlayerPainHook(){
 	}
 }
 
-
-const char* __fastcall GetReputationIconHook(TESReputation* rep) {
-	auto it = factionRepIcons.find(rep->GetFormID());
-	if (it != factionRepIcons.end()) {
-		uint8_t tierID = 0;
-		uint8_t pos = ThisCall<uint8_t>(0x616950, rep, 1);
-		uint8_t neg = ThisCall<uint8_t>(0x616950, rep, 0);
-		if ((pos == 0 && neg == 1) || (pos == 2 && (neg == 2 || neg == 3)) || (pos == 3 && neg == 3)) {
-			tierID = 0; // in pain
-		}
-		else if (((neg == 2 || neg == 3) && (pos == 0 || pos == 1)) || (pos == 3 && neg == 2)) {
-			tierID = 1; // sad
-		}
-		else if (((pos == 0 || pos == 1) && neg == 0) || (pos == 1 && neg == 1)) {
-			tierID = 2; // neutral
-		}
-		else {
-			tierID = 3; // very happy
-		}
-		if (*it->second[tierID]) return it->second[tierID];
-	}
-	return ThisCall<char*>(0x6167D0, rep);
-}
-
-const char* __fastcall GetReputationMessageIconHook(uint32_t a1) {
-	uint32_t addr = (uint32_t)_ReturnAddress();
-	auto* _ebp = GetParentBasePtr(_AddressOfReturnAddress(), false);
-	TESReputation* rep = nullptr;
-	switch (addr) {
-		case 0x615951:
-		case 0x61585A:
-		case 0x615B1E:
-		case 0x615C09:
-			rep = *reinterpret_cast<TESReputation**>(_ebp - 0x110);
-			break;
-		case 0x615E0B:
-		case 0x615F10:
-		case 0x61610F:
-		case 0x616208:
-			rep = *reinterpret_cast<TESReputation**>(_ebp - 0x128);
-			break;
-		default:
-			break;
-	}
-	if (rep && rep->GetFormID()) {
-		auto it = factionRepIcons.find(rep->GetFormID());
-		if (it != factionRepIcons.end()) {
-			uint8_t tierID = 0;
-			if (a1 == 0x11CBAD0 || a1 == 0x11CBC34) {
-				tierID = 1;
-			}
-			else if (a1 == 0x11CBA00 || a1 == 0x11CBD5C) {
-				tierID = 3;
-			}
-			if (*it->second[tierID]) return it->second[tierID];
-		}
-	}
-	return a1 ? ((Setting*)a1)->String() : "\0";
-}
-
-
 void ComputeDiscoveredRadioDirectory() {
 	static ULONGLONG timer = GetTickCount64();
 	if (((GetTickCount64() - timer) > 1000) || jg_gameRadioSet.empty()) {
@@ -1331,7 +627,6 @@ char* __cdecl fixAudioMonoLookupOverflow(char* Dst, const char* suffix){
 }
 
 
-
 Setting* __fastcall GetINISettingHook(INISettingCollection* ini, void* edx, char* name) {
 	Setting* result = ThisCall<Setting*>(0x5E02B0, ini, name);
 	if (result) return result;
@@ -1348,9 +643,11 @@ Setting* __fastcall GetINISettingHook(INISettingCollection* ini, void* edx, char
 	}
 	return nullptr;
 }
+
 bool __fastcall MenuGetFlagHook(StartMenu* menu, uint32_t flags) {
 	return menu != nullptr ? ((flags & menu->flags) != 0) : false;
 }
+
 void __fastcall MenuSetFlagHook(StartMenu* menu, uint32_t flags, bool doSet) {
 	if (menu != nullptr) {
 		if (doSet) {
@@ -1491,61 +788,6 @@ bool __fastcall WantsToFleeHook(CombatState* state) {
 		return state->currentConfidence > state->fleeThreshold008;
 	}
 }
-void __cdecl MiscStatRefreshHook(Tile* tile, int id) {
-	int value = 0;
-	if (id < 43) {
-		value = g_miscStatData[id]->Int();
-	}
-	else {
-		std::string sName = tile->name.pString;
-		auto it = miscStatMap.find(sName);
-		if (it != miscStatMap.end()) {
-			value = it->second;
-		}
-	}
-
-	tile->SetFloat(kTileValue_user1, (float)value, 1);
-}
-bool __cdecl ShouldHideStat(uint32_t* id) {
-	if ((uint32_t)id >= 43) {
-		Tile* tile = g_statsMenu->miscStatIDList.GetTileFromItem(&id);
-		std::string sName = tile->name.c_str();
-		if (miscStatMap.find(sName) == miscStatMap.end()) return true;
-	}
-	return false;
-}
-void UpdateMiscStatList(const char* name, int value) {
-	Tile* tile = nullptr;
-	auto iter = g_statsMenu->miscStatIDList.GetHead();
-	do
-	{
-		if (iter->GetItem() && iter->GetItem()->tile && !strcmp(iter->GetItem()->tile->name.c_str(), name)) {
-			tile = iter->GetItem()->tile;
-			break;
-		}
-	} while (iter = iter->GetNext());
-	if (!tile) {
-		tile = ThisCall<Tile*>(0x7E1190, &g_statsMenu->miscStatIDList, g_statsMenu->miscStatIDList.itemCount, 0, 0, 0);
-		tile->SetString(kTileValue_string, name, 1);
-		tile->name.Set(name);
-		recalculateStatFilters = true;
-	}
-	else if (auto listIdxTileVal = tile->GetValue(kTileValue_listindex)){
-		if (listIdxTileVal && listIdxTileVal->num < 0) {
-			recalculateStatFilters = true;
-		}
-	}
-	tile->SetFloat(kTileValue_user1, (float)value, 1);
-}
-
-void ResetMiscStatMap() {
-	miscStatMap.clear();
-	for (auto& element : availableMiscStats) {
-		miscStatMap[element] = 0;
-		UpdateMiscStatList(element.c_str(), 0);
-	}
-
-}
 
 void ClearPlayerFurniture()
 {
@@ -1659,7 +901,6 @@ void __fastcall SetCellImageSpaceHook(TESObjectCELL* cell, void* edx, TESImageSp
 }
 
 
-
 void HandleFixes() {
 	// use available ammo in inventory instead of NULL when default ammo isn't present
 	WriteRelJump(0x70809E, (uint32_t)InventoryAmmoHook);
@@ -1739,10 +980,11 @@ void HandleFixes() {
 	WriteRelCall(0x063ADAB, (uintptr_t)SkyCloudHook::hk_han_NewGameCloudUpdate);
 	//Stop game from crashing on extensions reeeeeeeeeee
 	WriteRelCall(0x83509D, (uintptr_t)fixAudioMonoLookupOverflow);
-	//CamShakeHook
-	hk_CameraShakeHook::CreateHook();
-	NPCAccuracy::CreateHook();
-	hk_DialogueTopicResponseManageHook::InitHooks();
+
+	CustomCameraShake::Hook();
+	NPCAccuracy::Hook();
+	DialogueResponseOverride::Hook();
+
 	hk_EmotionOverrideUndo< 0x0617D59>();
 	hk_QuestObjectiveIsDisplayedCall<0x05A5E70>();
 
@@ -1750,6 +992,7 @@ void HandleFixes() {
 }
 
 void HandleIniOptions() {
+	using namespace JohnnyPatches;
 	// for bReset3rdPersonCamera
 	//if (resetVanityCam) WriteRelJump(0x942D3D, (uintptr_t)VanityModeHook);
 
@@ -1845,7 +1088,7 @@ float getHUDShakePower() {
 }
 
 void HandleGameSettingsJG(){
-	hk_GMSTJG::ExtraGMSTInit();
+	JohnnyGameSettings::Init();
 	hk_CombatLocation::CombatLocationMaxRadiusBaseInitHook();
 
 }
@@ -1869,10 +1112,6 @@ void HandleFunctionPatches() {
 	// DisableMuzzleFlashLights
 	WriteRelCall(0x9BAFED, (uint32_t)DisableMuzzleFlashLightsHook);
 
-	// SetCustomMapMarkerIcon
-	SafeWrite16(0x79D330, 0x9090);
-	WriteRelCall(0x79D332, (uint32_t)GetMapMarkerHook);
-
 	// DisableMenuArrowKeys
 	WriteRelJump(0x70F708, (uint32_t)DisableArrowKeysHook);
 
@@ -1888,24 +1127,13 @@ void HandleFunctionPatches() {
 	g_canSaveNowMenuAddr = (*(uint32_t*)0x07CBDC8) + 5 + 0x07CBDC7;
 	WriteRelCall(0x07CBDC7, (uintptr_t)CanSaveNowMenuHook);
 
-	// SetCustomReputationChangeIcon
-	WriteRelCall(0x6156A2, uint32_t(GetReputationIconHook));
-	WriteRelCall(0x6156FB, uint32_t(GetReputationIconHook));
-	WriteRelCall(0x615B19, uint32_t(GetReputationMessageIconHook));
-	WriteRelCall(0x615C04, uint32_t(GetReputationMessageIconHook));
-	WriteRelCall(0x61610A, uint32_t(GetReputationMessageIconHook));
-	WriteRelCall(0x616203, uint32_t(GetReputationMessageIconHook));
-	WriteRelCall(0x615855, uint32_t(GetReputationMessageIconHook));
-	WriteRelCall(0x61594C, uint32_t(GetReputationMessageIconHook));
-	WriteRelCall(0x615F0B, uint32_t(GetReputationMessageIconHook));
-	WriteRelCall(0x615E06, uint32_t(GetReputationMessageIconHook));
+	ExtraReputationIcons::Hook();
 
-	// Get/ModExtraMiscStat
-	SafeWrite32(0x7DDAB1, uint32_t(MiscStatRefreshHook));
+	ExtraMiscStats::Hook();
 
 	//Hairstyle handlers
-	hk_RSMBarberHook::Hook();
-	hk_BarterHook::CreateHook();
+	RSMBarberHook::Hook();
+	BarterFilter::Hook();
 
 	WriteRelCall(0x8752F2, uint32_t(SetViewmodelFrustumHook));
 

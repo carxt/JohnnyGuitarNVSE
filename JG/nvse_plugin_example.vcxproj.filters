@@ -199,6 +199,84 @@
     <ClCompile Include="internal\Game\Bethesda\AILinearTaskThreadManager.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="functions\fn_av.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_book.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="decoding.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_dial.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DialogueResponseOverride.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\JohnnyGameSettings.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_file.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_terminal.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_region.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_ui.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\RSMBarberHook.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraMiscStats.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraReputationIcons.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraMarkerIcons.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_utility.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraUISounds.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\JohnnyPatches.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_gameplay.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\NPCAccuracy.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\CustomCameraShake.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="misc\WorldToScreen.cpp">
+      <Filter>misc</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_math.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_gamebyo.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_mediaset.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_form.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\BarterFilter.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -585,6 +663,45 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\AILinearTaskThreadManager.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\DialogueResponseOverride.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyGameSettings.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\fn_common.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\RSMBarberHook.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JGSetList.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\ExtraMiscStats.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\ExtraReputationIcons.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\ExtraMarkerIcons.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\ExtraUISounds.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyPatches.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\NPCAccuracy.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\CustomCameraShake.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\BarterFilter.hpp">
+      <Filter>internal\JG</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

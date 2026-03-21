@@ -4,6 +4,7 @@ class Script;
 struct ScriptEventList;
 #define PASS_VARARGS  scriptObj, eventList
 #define VARARGS Script *scriptObj, ScriptEventList *eventList
+#define VAR_NAME_SIZE 64
 
 //All thanks to jazzisparis for the code, since it's way faster than tanf.
 

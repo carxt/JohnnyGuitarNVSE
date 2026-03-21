@@ -1,17 +1,6 @@
-#include "nvse/GameEffects.h"
-#include "nvse/GameData.h"
-#include "nvse/GameProcess.h"
-#include "nvse/GameRTTI.h"
-#include "nvse/GameUI.h"
-#include "nvse/ScriptUtils.h"
-#include "Bethesda/FileFinder.hpp"
-#include "misc/WorldToScreen.h"
-#include "misc/misc.h"
-#include "JG/EditorIDRestoration.hpp"
-#include "internal/decoding.h"
-#include "nvse/GameSettings.h"
 #include "JohnnyGuitarNVSE.h"
-#include "nvse/ParamInfos.h"
+#include "events/JohnnyEvents.h"
+#include "internal/serialization.h"
 #include "functions/fn_av.h"
 #include "functions/fn_form.h"
 #include "functions/fn_utility.h"
@@ -25,10 +14,7 @@
 #include "functions/fn_book.h"
 #include "functions/fn_dial.h"
 #include "functions/fn_gamebryo.h"
-#include "events/JohnnyEvents.h"
-#include "internal/serialization.h"
 #include "nvse_version.h"
-
 #include "Bethesda/AutoMemContext.hpp"
 #include "JIP/JIPFixes.hpp"
 #include "JG/JohnnyExtraData.hpp"
@@ -41,6 +27,26 @@ bool bIsGECK = false;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 
+NVSEArrayVarInterface* g_arrInterface = NULL;
+NVSEStringVarInterface* g_strInterface = NULL;
+NVSEMessagingInterface* g_msg = NULL;
+NVSEScriptInterface* g_scriptInterface = NULL;
+NVSECommandTableInterface* g_cmdTableInterface = NULL;
+uint32_t g_initialTickCount = 0;
+float g_viewmodel_near = 0.f;
+std::unordered_set<DWORD> jg_gameRadioSet;
+bool mlcOverridden = false;
+MediaLocationController* mlcOverride = nullptr;
+std::unordered_map<uint8_t, float> shakeRequests;
+void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
+InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+std::unordered_set<BYTE> SaveGameUMap;
+float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ContChangesEntry* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
+(float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ContChangesEntry*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
+GameTimeGlobals* g_gameTimeGlobals = nullptr;
+bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
+StatsMenu* g_statsMenu = nullptr;
+
 #define JG_VERSION 523
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	MEM_CONTEXT eOrgContext = GetMemContext();
@@ -48,7 +54,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_PostPostLoad: // GAME + GECK 
 		{
-			if (bFixJIP) {
+			if (JohnnyPatches::bFixJIP) {
 				JIPFixes::InitCommandHooks();
 				JIPFixes::InitHooks();
 			}
@@ -58,9 +64,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		case NVSEMessagingInterface::kMessage_PreLoadGame: // GAME
 		{
 			JohnnyExtraDataArray::GetInstance().ResetScriptData();
-			disableMuzzleLights = 0; //reset the muzzle hook every time
-			bArrowKeysDisabled = false;
-			isShowLevelUp = true;
+			JohnnyPatches::disableMuzzleLights = 0; //reset the muzzle hook every time
+			JohnnyPatches::bArrowKeysDisabled = false;
+			JohnnyPatches::isShowLevelUp = true;
 			ThisCall(0x8C17C0, PlayerCharacter::GetSingleton()); // reevaluate reload speed modifiers
 			ThisCall(0x8C1940, PlayerCharacter::GetSingleton()); // reevaluate equip speed modifiers
 
@@ -70,12 +76,10 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			OnPLChangeHandler->FlushEventCallbacks();
 			RestoreDisabledPlayerControlsHUDFlags();
 			SaveGameUMap.clear();
-			ResetMiscStatMap();
-			hk_RSMBarberHook::haircutSetList.dFlush();
-			hk_RSMBarberHook::beardSetList.dFlush();
+			ExtraMiscStats::ResetMap();
+			RSMBarberHook::Reset();
 			jg_gameRadioSet.clear();
-			hk_BarterHook::barterFilterListLeft.clear();
-			hk_BarterHook::barterFilterListRight.clear();
+			BarterFilter::Clear();
 			NPCAccuracy::FlushMapRefs();
 			shakeRequests.clear();
 			mlcOverridden = false;
@@ -104,12 +108,12 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 				EventInfo->DeleteEvents();
 			}
 			if (!g_statsMenu) g_statsMenu = StatsMenu::Get();
-			if (g_statsMenu && InterfaceManager::GetSingleton() && InterfaceManager::GetSingleton()->IsMenuVisible(kMenuType_Stats) && recalculateStatFilters) {
-				recalculateStatFilters = 0;
-				g_statsMenu->miscStatIDList.Filter(ShouldHideStat);
+			if (g_statsMenu && InterfaceManager::GetSingleton() && InterfaceManager::GetSingleton()->IsMenuVisible(kMenuType_Stats) && ExtraMiscStats::recalculateStatFilters) {
+				ExtraMiscStats::recalculateStatFilters = 0;
+				g_statsMenu->miscStatIDList.Filter(ExtraMiscStats::ShouldHideStat);
 
 			}
-			if (resetVanityCam) {
+			if (JohnnyPatches::resetVanityCam) {
 				if (PlayerCharacter::GetSingleton()) {
 					bool bIsInVanityMode = *reinterpret_cast<uint16_t*>(0x11E07B8) || PlayerCharacter::GetSingleton()->byte64D; //64d = autovanity mode.
 					if (!bIsInVanityMode) {
@@ -126,18 +130,18 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_initialTickCount = GetTickCount();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			EDIDRestoration::PrintErrors();
-			if (bFixJIP)
+			if (JohnnyPatches::bFixJIP)
 				JIPFixes::InitDeferredHooks();
 			
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_PostLoad: // GAME + GECK 
 		{
-			if (!bDisableDLLCompatibilityRoutines) {
+			if (!JohnnyPatches::bDisableDLLCompatibilityRoutines) {
 					HandleDLLInterop();
 			}
 
-			if (!bFixJIP)
+			if (!JohnnyPatches::bFixJIP)
 				JohnnyExtraData::InitName();
 
 			break;
@@ -149,7 +153,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 }
 
 void MessageHandlerGECK(NVSEMessagingInterface::Message* msg) {
-	if (msg->type == NVSEMessagingInterface::kMessage_PostPostLoad && bFixJIP) {
+	if (msg->type == NVSEMessagingInterface::kMessage_PostPostLoad && JohnnyPatches::bFixJIP) {
 		JIPFixes::InitCommandHooks();
 		JIPFixes::InitHooks();
 	}
@@ -520,6 +524,7 @@ void RegisterCommands(const NVSEInterface* nvse) {
 }
 
 void ReadINI() {
+	using namespace JohnnyPatches;
 	char filename[MAX_PATH];
 	GetModuleFileNameA(NULL, filename, MAX_PATH);
 	char* lastSlash = strrchr(filename, '\\') + 1;
@@ -591,7 +596,7 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 	NVSEMessagingInterface* pMessaging = static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging));
 	pMessaging->RegisterListener(nvse->GetPluginHandle(), "NVSE", bIsGECK ? MessageHandlerGECK : MessageHandler);
 
-	if (bFixJIP) {
+	if (JohnnyPatches::bFixJIP) {
 		JIPFixes::InitData();
 		JIPFixes::InitEarlyHooks();
 	}
@@ -602,7 +607,7 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 		SaveGameUMap.reserve(0xFF);
 		shakeRequests.reserve(0xFF);
 
-		if (bFixJIP) {
+		if (JohnnyPatches::bFixJIP) {
 			JohnnyExtraData::InitName();
 		}
 

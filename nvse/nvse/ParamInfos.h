@@ -1020,3 +1020,27 @@ static ParamInfo kParams_GetNiBound[] =
 	{ "Block Name",		kParamType_String,	1 },
 	{ "First Person",	kParamType_Integer,	1 },
 };
+
+static ParamInfo kParamsProjectionArgsLegacy[8] =
+{
+	{ "X_Out", kParamType_String, 0 },
+	{ "Y_Out", kParamType_String, 0 },
+	{ "Z_Out", kParamType_String, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "HandleMode", kParamType_Integer, 0 },
+	{ "Object Ref", kParamType_ObjectRef, 1 }
+};
+
+static ParamInfo kParamsProjectionArgs[8] =
+{
+	{ "X_Out", kParamType_ScriptVariable , 0 },
+	{ "Y_Out", kParamType_ScriptVariable , 0 },
+	{ "Z_Out", kParamType_ScriptVariable , 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "HandleMode", kParamType_Integer, 0 },
+	{ "Object Ref", kParamType_ObjectRef, 1 }
+};
