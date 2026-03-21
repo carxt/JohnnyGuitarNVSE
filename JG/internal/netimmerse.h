@@ -1303,6 +1303,15 @@ public:
 };
 static_assert(sizeof(NiCamera) == 0x114);
 
+enum CameraRotationType {
+	kCameraRotationType_TrackTarget = -2,
+	kCameraRotationType_Reset = -1,
+	kCameraRotationType_None = 0,
+	kCameraRotationType_X = 1,
+	kCameraRotationType_Y = 2,
+	kCameraRotationType_Z = 3,
+};
+
 // C4
 class NiDynamicEffect : public NiAVObject {
 public:
@@ -2218,3 +2227,7 @@ public:
 		ThisCall(0x4D64C0, this, apNode, apName);
 	}
 };
+
+float __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2);
+float __fastcall NiNodeComputeDistance2DSquared(NiVector3* Vector1, NiVector3* Vector2);
+void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn, float& zIn);

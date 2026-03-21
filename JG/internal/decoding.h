@@ -1,4 +1,7 @@
 #pragma once
+#include <GameSound.h>
+#include <GameUI.h>
+#include <GameAPI.h>
 
 class LoadedAreaBound;
 struct ExtraAudioMarkerData;
@@ -530,7 +533,9 @@ struct FontHeightData
 {
 	float heightBase;
 	float heightwGap;
-} s_fontHeightDatas[90];
+};
+
+extern FontHeightData s_fontHeightDatas[90];
 
 // 54
 struct FontInfo
@@ -580,13 +585,6 @@ public:
 	NiVector3* GetStringDimensions(NiVector3* outDims, const char* srcString, uint32_t fontID, uint32_t maxFlt = 0x7F7FFFFF,
 	                               uint32_t startIdx = 0);
 };
-
-__declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims, const char* srcString, uint32_t fontID,
-                                                              uint32_t maxFlt, uint32_t startIdx)
-{
-	static const uint32_t procAddr = 0xA1B020;
-	__asm jmp procAddr
-}
 
 // 18
 class LoadedReferenceMap : public NiTMap<uint32_t, TESObjectREFR*>
@@ -650,27 +648,6 @@ public:
 };
 
 static_assert(sizeof(DebugText) == 0x229C);
-
-DebugText* DebugText::GetSingleton()
-{
-	return ((DebugText * (*)(bool))0xA0D9E0)(true);
-}
-
-DebugText::DebugLine* DebugText::GetDebugInput()
-{
-	DebugLine *linesPtr = lines, *result = lines;
-	uint32_t counter = 200;
-	do
-	{
-		linesPtr++;
-		if (!linesPtr->isVisible) break;
-		if (result->offsetY < linesPtr->offsetY)
-			result = linesPtr;
-	}
-	while (--counter);
-	return result;
-}
-
 
 struct ExtraInfoGeneralTopicDataElement
 {
@@ -1129,142 +1106,14 @@ class NavMeshObstacleManager
 
 static_assert(sizeof(NavMeshObstacleManager) == 0x1A4);
 
-class BSArchiveHeader
-{
-public:
-	BSArchiveHeader();
-	~BSArchiveHeader();
-};
-
-// 70
-class BSArchive : public BSArchiveHeader
-{
-public:
-	BSArchive();
-	~BSArchive();
-
-	uint32_t unk00; // 00	160
-	uint32_t unk04; // 04	164
-	uint32_t unk08; // 08	168
-	uint32_t unk0C; // 0C	16C
-	uint32_t unk10; // 10	170
-	uint32_t unk14; // 14	174
-	uint32_t unk18; // 18	178
-	uint32_t unk1C; // 1C	17C
-	uint16_t fileTypesMask; // 20	180
-	uint16_t word22; // 22	182
-	uint32_t unk24[19]; // 24	184
-};
-
-static_assert(sizeof(BSArchive) == 0x70);
-
-// 1D0
-class Archive : public BSFile
-{
-public:
-	Archive();
-	~Archive();
-
-	NiRefObject refObject; // 158
-	BSArchive archive; // 160
-};
-
-static_assert(sizeof(Archive) == 0x1D0);
-
-// 160
-class ArchiveFile : public BSFile
-{
-public:
-	ArchiveFile();
-	~ArchiveFile();
-
-	uint32_t unk158; // 158
-	uint32_t unk15C; // 15C
-};
-
-static_assert(sizeof(ArchiveFile) == 0x160);
-
-// 178
-class CompressedArchiveFile : public ArchiveFile
-{
-public:
-	CompressedArchiveFile();
-	~CompressedArchiveFile();
-
-	void* ptr160; // 160
-	void* ptr164; // 164
-	uint32_t streamLength; // 168
-	uint32_t unk16C; // 16C
-	uint32_t streamOffset; // 170
-	uint32_t unk174; // 174
-};
-
-static_assert(sizeof(CompressedArchiveFile) == 0x178);
-
-
 struct AnimGroupClassify
 {
 	uint8_t category; // 00
 	uint8_t subType; // 01
 	uint8_t flags; // 02
 	uint8_t byte03; // 03
-}
-s_animGroupClassify[] =
-{
-	{1, 1, 0, 0}, {1, 1, 0, 0}, {1, 1, 0, 0}, {2, 1, 0, 0}, {2, 2, 0, 0}, {2, 3, 0, 0}, {2, 4, 0, 0}, {2, 1, 1, 0},
-	{2, 2, 1, 0},
-	{2, 3, 1, 0}, {2, 4, 1, 0}, {2, 1, 2, 0}, {2, 2, 2, 0}, {2, 3, 2, 0}, {2, 4, 2, 0}, {2, 3, 4, 0}, {2, 4, 4, 0},
-	{3, 0, 0, 0},
-	{3, 0, 1, 0}, {3, 0, 2, 0}, {3, 0, 4, 0}, {3, 0, 5, 0}, {3, 0, 6, 0}, {1, 2, 0, 0}, {1, 2, 0, 0}, {1, 2, 0, 0},
-	{3, 1, 0, 0},
-	{3, 1, 1, 0}, {3, 1, 2, 0}, {3, 1, 4, 0}, {3, 1, 5, 0}, {3, 1, 6, 0}, {3, 2, 0, 0}, {3, 2, 1, 0}, {3, 2, 2, 0},
-	{3, 2, 4, 0},
-	{3, 2, 5, 0}, {3, 2, 6, 0}, {3, 3, 0, 0}, {3, 3, 1, 0}, {3, 3, 2, 0}, {3, 3, 4, 0}, {3, 3, 5, 0}, {3, 3, 6, 0},
-	{3, 4, 0, 0},
-	{3, 4, 1, 0}, {3, 4, 2, 0}, {3, 4, 4, 0}, {3, 4, 5, 0}, {3, 4, 6, 0}, {3, 5, 0, 0}, {3, 5, 1, 0}, {3, 5, 2, 0},
-	{3, 5, 4, 0},
-	{3, 5, 5, 0}, {3, 5, 6, 0}, {3, 6, 0, 0}, {3, 6, 1, 0}, {3, 6, 2, 0}, {3, 6, 4, 0}, {3, 6, 5, 0}, {3, 6, 6, 0},
-	{3, 7, 0, 0},
-	{3, 7, 1, 0}, {3, 7, 2, 0}, {3, 7, 4, 0}, {3, 7, 5, 0}, {3, 7, 6, 0}, {3, 8, 0, 0}, {3, 8, 1, 0}, {3, 8, 2, 0},
-	{3, 8, 4, 0},
-	{3, 8, 5, 0}, {3, 8, 6, 0}, {3, 10, 0, 0}, {3, 10, 1, 0}, {3, 10, 2, 0}, {3, 10, 4, 0}, {3, 10, 5, 0},
-	{3, 10, 6, 0}, {3, 11, 0, 0},
-	{3, 11, 1, 0}, {3, 11, 2, 0}, {3, 11, 4, 0}, {3, 11, 5, 0}, {3, 11, 6, 0}, {3, 12, 0, 0}, {3, 12, 1, 0},
-	{3, 12, 2, 0}, {3, 12, 4, 0},
-	{3, 12, 5, 0}, {3, 12, 6, 0}, {3, 23, 0, 0}, {3, 23, 0, 0}, {3, 23, 0, 0}, {3, 23, 0, 0}, {3, 23, 0, 0},
-	{3, 23, 0, 0}, {3, 23, 0, 0},
-	{3, 23, 0, 0}, {3, 23, 0, 0}, {3, 23, 0, 0}, {3, 21, 0, 0}, {3, 21, 1, 0}, {3, 21, 2, 0}, {3, 21, 4, 0},
-	{3, 21, 5, 0}, {3, 21, 6, 0},
-	{3, 22, 0, 0}, {3, 22, 1, 0}, {3, 22, 2, 0}, {3, 22, 4, 0}, {3, 22, 5, 0}, {3, 22, 6, 0}, {3, 13, 0, 0},
-	{3, 13, 1, 0}, {3, 13, 2, 0},
-	{3, 13, 4, 0}, {3, 13, 5, 0}, {3, 13, 6, 0}, {3, 14, 0, 0}, {3, 14, 1, 0}, {3, 14, 2, 0}, {3, 14, 4, 0},
-	{3, 14, 5, 0}, {3, 14, 6, 0},
-	{3, 15, 0, 0}, {3, 15, 1, 0}, {3, 15, 2, 0}, {3, 15, 4, 0}, {3, 15, 5, 0}, {3, 15, 6, 0}, {3, 16, 0, 0},
-	{3, 16, 1, 0}, {3, 16, 2, 0},
-	{3, 16, 4, 0}, {3, 16, 5, 0}, {3, 16, 6, 0}, {3, 17, 0, 0}, {3, 17, 1, 0}, {3, 17, 2, 0}, {3, 17, 4, 0},
-	{3, 17, 5, 0}, {3, 17, 6, 0},
-	{3, 9, 0, 0}, {3, 9, 1, 0}, {3, 9, 2, 0}, {3, 9, 4, 0}, {3, 9, 5, 0}, {3, 9, 6, 0}, {3, 18, 0, 0}, {3, 18, 1, 0},
-	{3, 18, 2, 0},
-	{3, 18, 4, 0}, {3, 18, 5, 0}, {3, 18, 6, 0}, {3, 19, 0, 0}, {3, 19, 1, 0}, {3, 19, 2, 0}, {3, 19, 4, 0},
-	{3, 19, 5, 0}, {3, 19, 6, 0},
-	{3, 20, 0, 0}, {3, 20, 1, 0}, {3, 20, 2, 0}, {3, 20, 4, 0}, {3, 20, 5, 0}, {3, 20, 6, 0}, {1, 0, 0, 0},
-	{1, 0, 0, 0}, {1, 3, 0, 0},
-	{1, 3, 0, 0}, {1, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0},
-	{4, 0, 0, 0}, {4, 0, 0, 0},
-	{4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0},
-	{4, 0, 0, 0}, {4, 0, 0, 0},
-	{4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0}, {4, 0, 0, 0},
-	{4, 0, 0, 0}, {5, 0, 0, 0},
-	{5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0},
-	{5, 0, 0, 0}, {5, 0, 0, 0},
-	{5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0}, {5, 0, 0, 0},
-	{5, 0, 0, 0}, {5, 0, 0, 0},
-	{5, 0, 0, 0}, {5, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {1, 0, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0},
-	{2, 5, 0, 0}, {1, 4, 0, 0},
-	{1, 4, 0, 0}, {1, 4, 0, 0}, {1, 4, 0, 0}, {1, 4, 0, 0}, {1, 4, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0},
-	{2, 5, 0, 0}, {1, 0, 0, 0},
-	{2, 5, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0}
 };
+extern AnimGroupClassify s_animGroupClassify[];
 
 enum ActorValueCode
 {
@@ -1536,32 +1385,6 @@ public:
 
 	bool CreateExtraData(BSExtraData* xBSData);
 };
-
-ExtraContainerChanges::EntryDataList* TESObjectREFR::GetContainerChangesList()
-{
-	ExtraContainerChanges* xChanges = (ExtraContainerChanges*)this->extraDataList.
-	                                                                GetByType(kExtraData_ContainerChanges);
-	if (xChanges && xChanges->data) return xChanges->data->objList;
-	return nullptr;
-}
-
-bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
-{
-	ExtraContainerChanges::EntryDataList* entryList = containerRef->GetContainerChangesList();
-	if (!entryList) return false;
-	ContChangesEntry* entry = entryList->FindForItem(data.type);
-	if (!entry) return false;
-	data.xData = ExtraDataList::Create(xBSData);
-	if (!entry->extendData)
-	{
-		entry->extendData = BSMemory::malloc<ExtraContainerChanges::ExtendDataList>();
-		entry->extendData->Init();
-	}
-	entry->extendData->Insert(data.xData);
-	return true;
-}
-
-InventoryRef* (*InventoryRefCreate)(TESObjectREFR* container, const ItemEntryData& data, bool bValidate);
 
 struct COORD_DATA
 {

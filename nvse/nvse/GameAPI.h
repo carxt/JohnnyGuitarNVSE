@@ -456,6 +456,78 @@ public:
 
 static_assert(sizeof(BSFile) == 0x158);
 
+class BSArchiveHeader
+{
+public:
+	BSArchiveHeader();
+	~BSArchiveHeader();
+};
+
+// 70
+class BSArchive : public BSArchiveHeader
+{
+public:
+	BSArchive();
+	~BSArchive();
+
+	uint32_t unk00; // 00	160
+	uint32_t unk04; // 04	164
+	uint32_t unk08; // 08	168
+	uint32_t unk0C; // 0C	16C
+	uint32_t unk10; // 10	170
+	uint32_t unk14; // 14	174
+	uint32_t unk18; // 18	178
+	uint32_t unk1C; // 1C	17C
+	uint16_t fileTypesMask; // 20	180
+	uint16_t word22; // 22	182
+	uint32_t unk24[19]; // 24	184
+};
+
+static_assert(sizeof(BSArchive) == 0x70);
+
+// 1D0
+class Archive : public BSFile
+{
+public:
+	Archive();
+	~Archive();
+
+	NiRefObject refObject; // 158
+	BSArchive archive; // 160
+};
+
+static_assert(sizeof(Archive) == 0x1D0);
+
+// 160
+class ArchiveFile : public BSFile
+{
+public:
+	ArchiveFile();
+	~ArchiveFile();
+
+	uint32_t unk158; // 158
+	uint32_t unk15C; // 15C
+};
+
+static_assert(sizeof(ArchiveFile) == 0x160);
+
+// 178
+class CompressedArchiveFile : public ArchiveFile
+{
+public:
+	CompressedArchiveFile();
+	~CompressedArchiveFile();
+
+	void* ptr160; // 160
+	void* ptr164; // 164
+	uint32_t streamLength; // 168
+	uint32_t unk16C; // 16C
+	uint32_t streamOffset; // 170
+	uint32_t unk174; // 174
+};
+
+static_assert(sizeof(CompressedArchiveFile) == 0x178);
+
 //
 struct ToBeNamed {
 	char		m_path[0x104];	// 0000

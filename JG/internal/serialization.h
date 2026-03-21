@@ -1,4 +1,5 @@
 #pragma once
+#include <JG/ExtraMiscStats.hpp>
 
 bool (*_WriteRecord)(uint32_t type, uint32_t version, const void* buffer, uint32_t length);
 bool (*_WriteRecordData)(const void* buffer, uint32_t length);
@@ -7,6 +8,8 @@ uint32_t(*_ReadRecordData)(void* buffer, uint32_t length);
 bool (*_ResolveRefID)(uint32_t refID, uint32_t* outRefID);
 bool (*_OpenRecord)(uint32_t type, uint32_t version);
 #define SERIALIZATION_VERSION 1
+
+extern StatsMenu* g_statsMenu;
 enum RecordIDs
 {
 	kRecordID_MiscStats = 'JGMS',
@@ -14,6 +17,7 @@ enum RecordIDs
 
 void SaveGameCallback(void*)
 {
+	using namespace ExtraMiscStats;
 	if (!miscStatMap.empty())
 		{
 		_OpenRecord(kRecordID_MiscStats, SERIALIZATION_VERSION);
@@ -34,7 +38,7 @@ void SaveGameCallback(void*)
 
 void LoadGameCallback(void*)
 {
-
+	using namespace ExtraMiscStats;
 	uint32_t type, version, length;
 	while (_GetNextRecordInfo(&type, &version, &length))
 	{
