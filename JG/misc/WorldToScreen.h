@@ -116,6 +116,5 @@ extern float __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vec
 bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, float& fBx, float& fBy,
 	float& fBz, float fZeroTolerance, int bOffscreenHandleType);
 
-void NiCameraGetAltHook();
 
 bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, int bHandleType, float zeroTolerance = 0.0000099999997f);

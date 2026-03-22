@@ -12,9 +12,9 @@ namespace NPCAccuracy {
 	};
 
 	extern Tables tables;
-	void Hook();
+	void Install();
 	double __fastcall returnActorMult(Actor* a_refr);
-	void FlushMapRefs();
+	void Reset();
 
 	template <uintptr_t a_addr>
 	class HookNPCAccuracy {

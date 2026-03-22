@@ -57,7 +57,7 @@ namespace ExtraMiscStats {
 		tile->SetFloat(kTileValue_user1, (float)value, 1);
 	}
 
-	void ResetMap() {
+	void Reset() {
 		miscStatMap.clear();
 		for (auto& element : availableMiscStats) {
 			miscStatMap[element] = 0;
@@ -66,7 +66,15 @@ namespace ExtraMiscStats {
 
 	}
 
-	void Hook() {
+	void Update() {
+		if (StatsMenu::Get() && InterfaceManager::GetSingleton() && InterfaceManager::GetSingleton()->IsMenuVisible(kMenuType_Stats) && ExtraMiscStats::recalculateStatFilters) {
+			recalculateStatFilters = 0;
+			StatsMenu::Get()->miscStatIDList.Filter(ShouldHideStat);
+
+		}
+	}
+
+	void Install() {
 		// Get/ModExtraMiscStat
 		SafeWrite32(0x7DDAB1, uint32_t(MiscStatRefreshHook));
 	}

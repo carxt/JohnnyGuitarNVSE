@@ -85,16 +85,8 @@ namespace DialogueResponseOverride {
 
 	}
 
-	void Hook() {
+	void Install() {
 		WriteRelJump(0x083D413, (uintptr_t)asm_jumpManHook);
-		{
-			//hook is fully functional, but disabled since we dont have a need for it just yet
-
-			//uintptr_t originalAddr = originalTopicInfoLoad;
-			//originalTopicInfoLoad = *(uintptr_t*)originalTopicInfoLoad;
-			//SafeWrite32((uintptr_t)originalAddr, (uintptr_t)hk_TESTopicInfo_Load);
-
-		}
 	}
 
 	DialogueEmotionOverride GetDialogueResponse(uint32_t refId, uint32_t responseNumber, DialogueEmotionOverride& newOverride)

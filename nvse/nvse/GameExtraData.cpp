@@ -368,3 +368,13 @@ ExtraHotkey* ExtraHotkey::Create(uint8_t _index) {
 	dataPtr[3] = _index;
 	return (ExtraHotkey*)dataPtr;
 }
+
+ContChangesEntry* ExtraContainerChanges::EntryDataList::FindForItem(TESForm* item) {
+	ListNode<ContChangesEntry>* iter = this->Head();
+
+	do {
+		if (iter->data && iter->data->type == item) return iter->data;
+	} while (iter = iter->next);
+
+	return nullptr;
+}

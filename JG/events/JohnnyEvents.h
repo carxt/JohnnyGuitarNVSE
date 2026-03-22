@@ -1,6 +1,8 @@
 #pragma once
 #include "EventFramework.h"
 #include "ParamInfos.h"
+#include "GameProcess.h"
+#include "decoding.h"
 #include <internal/Game/Bethesda/DialogueResponse.hpp>
 #include <internal/Game/Bethesda/MenuTopic.hpp>
 DEFINE_COMMAND_ALT_PLUGIN(SetJohnnyOnDyingEventHandler, SetOnDyingEventHandler, , false, kParams_Event_OneForm);

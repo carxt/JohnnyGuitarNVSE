@@ -10,13 +10,18 @@
 #include <Bethesda/GameSettingCollection.hpp>
 #include <GameEffects.h>
 #include <JG/JohnnyPatches.hpp>
-#include <unordered_set>
 #include <Bethesda/TESObjectList.hpp>
 #include <Bethesda/TESObject.hpp>
 #include <Bethesda/TESDataHandler.hpp>
 #include <JG/NPCAccuracy.hpp>
 #include "decoding.h"
 #include "GameProcess.h"
+#include <JG/MediaLocationControllerOverride.hpp>
+#include <JG/CustomHUDShake.hpp>
+#include <JG/DisabledSaves.hpp>
+#include <JG/DisabledLevelUp.hpp>
+#include <JG/DisabledMuzzleFlashLights.hpp>
+#include <JG/DisabledArrowKeys.hpp>
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -28,12 +33,8 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 
 std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
 
-extern bool mlcOverridden;
-extern MediaLocationController* mlcOverride;
-extern std::unordered_map<uint8_t, float> shakeRequests;
 extern void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
-extern std::unordered_set<BYTE> SaveGameUMap;
 
 bool Cmd_StopHolotape_Execute(COMMAND_ARGS)
 {
@@ -178,8 +179,7 @@ bool Cmd_SetCasinoChip_Execute(COMMAND_ARGS)
 
 bool Cmd_ClearMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	mlcOverridden = false;
-	mlcOverride = nullptr;
+	MediaLocationControllerOverride::Reset();
 	*result = 1;
 
 	return true;
@@ -189,8 +189,7 @@ bool Cmd_SetMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
 	MediaLocationController* ctrl = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &ctrl) && ctrl && IS_TYPE(ctrl, MediaLocationController)) {
-		mlcOverridden = true;
-		mlcOverride = ctrl;
+		MediaLocationControllerOverride::Set(ctrl);
 		*result = 1;
 	}
 	return true;
@@ -199,9 +198,7 @@ bool Cmd_SetMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 bool Cmd_GetHUDShudderPower_Execute(COMMAND_ARGS) {
 	*result = 0;
 	uint8_t modId = scriptObj->GetCompileIndex();
-	if (modId < 0xFF && shakeRequests.find(modId) != shakeRequests.end()) {
-		*result = shakeRequests[modId];
-	}
+	*result = CustomHUDShake::Get(modId);
 	return true;
 }
 
@@ -210,12 +207,7 @@ bool Cmd_SetHUDShudderPower_Execute(COMMAND_ARGS) {
 	float power = -1.f;
 	uint8_t modId = scriptObj->GetCompileIndex();
 	if (modId < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &power)) {
-		if (power == 0.0f) {
-			shakeRequests.erase(modId);
-		}
-		else {
-			shakeRequests[modId] = power;
-		}
+		CustomHUDShake::Set(modId, power);
 		*result = 1;
 	}
 	return true;
@@ -1182,15 +1174,11 @@ bool Cmd_RemoveHighlightedRef_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_DisableMenuArrowKeys_Execute(COMMAND_ARGS) {
-	if (!JohnnyPatches::bArrowKeysDisabled) {
-		JohnnyPatches::bArrowKeysDisabled = true;
-	}
+	DisabledArrowKeys::Toggle(true);
 	return true;
 }
 bool Cmd_EnableMenuArrowKeys_Execute(COMMAND_ARGS) {
-	if (JohnnyPatches::bArrowKeysDisabled) {
-		JohnnyPatches::bArrowKeysDisabled = false;
-	}
+	DisabledArrowKeys::Toggle(false);
 	return true;
 }
 bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
@@ -1376,7 +1364,7 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 
 bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS) {
 	uint32_t ToExtract;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &ToExtract)) JohnnyPatches::isShowLevelUp = ToExtract;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &ToExtract)) DisabledLevelUp::isShowLevelUp = ToExtract;
 	return true;
 }
 
@@ -1403,10 +1391,12 @@ bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
-	int disable = -1;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &disable);
-	if (disable >= 0 && disable <= 3) JohnnyPatches::disableMuzzleLights = disable;
-	*result = JohnnyPatches::disableMuzzleLights;
+	int mode = -1;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &mode);
+	if (mode < 0 || mode > 3) {
+		mode = -1;
+	}
+	*result = DisabledMuzzleFlashLights::SetMode(mode);
 	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %.f", *result);
 	return true;
 }
@@ -1415,12 +1405,7 @@ bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 	BYTE modIdx = scriptObj->GetCompileIndex();
 	*result = 0;
 	if (modIdx < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &doDisable)) {
-		if (doDisable) {
-			SaveGameUMap.insert(modIdx);
-		}
-		else {
-			SaveGameUMap.erase(modIdx);
-		}
+		DisabledSaves::Toggle(modIdx, doDisable > 0);
 		*result = 1;
 	}
 	return true;

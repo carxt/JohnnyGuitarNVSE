@@ -9,7 +9,6 @@ bool (*_ResolveRefID)(uint32_t refID, uint32_t* outRefID);
 bool (*_OpenRecord)(uint32_t type, uint32_t version);
 #define SERIALIZATION_VERSION 1
 
-extern StatsMenu* g_statsMenu;
 enum RecordIDs
 {
 	kRecordID_MiscStats = 'JGMS',
@@ -70,7 +69,7 @@ void LoadGameCallback(void*)
 		}
 	}
 
-	g_statsMenu->miscStatIDList.Filter(ShouldHideStat);
+	StatsMenu::Get()->miscStatIDList.Filter(ShouldHideStat);
 }
 
 	void SerializationInit(const NVSEInterface* nvse)

@@ -15,8 +15,11 @@
 #include "decoding.h"
 
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
-extern float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ContChangesEntry* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo);
 extern GameTimeGlobals* g_gameTimeGlobals;
+
+float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ContChangesEntry* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
+(float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ContChangesEntry*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
+
 
 bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -175,6 +178,7 @@ bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
 
+// TODO refactor:: move logic to BarterFilter.cpp
 bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
 	TESForm* itemFilter = nullptr, * filterArg = nullptr;
 	uint32_t unhideOrHide = 0, flags = 0;
