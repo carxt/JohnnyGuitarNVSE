@@ -1,5 +1,7 @@
 #pragma once
 #include "GameForms.h"
+#include "GameObjects.h"
+#include "GameExtraData.h"
 
 class BSTempEffect;
 class NiBSBoneLODController;
@@ -50,6 +52,8 @@ struct ActorHitData
 	float				dmgMult;		// 5C
 	uint32_t				unk60;			// 60	Unused
 };
+
+class Animation;
 
 // 30
 class BaseProcess

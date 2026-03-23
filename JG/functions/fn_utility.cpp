@@ -9,10 +9,11 @@
 #include <misc/misc.h>
 #include <decoding.h>
 #include <unordered_set>
+#include <JG/CameraOverride.hpp>
+#include <JG/JohnnyRadios.hpp>
+#include <JG/DisabledLevelUp.hpp>
 
 extern uint32_t g_initialTickCount;
-extern float g_viewmodel_near;
-extern std::unordered_set<DWORD> jg_gameRadioSet;
 
 bool Cmd_GameGetSecondsPassed_Eval(COMMAND_ARGS_EVAL) {
 	*result = ThisCall<float>(0x07013E0, (void*)0x11F6394);
@@ -56,7 +57,7 @@ bool Cmd_GetAvailableRadios_Execute(COMMAND_ARGS) {
 	tList<TESObjectACTI> availableRadios = {};
 	CdeclCall<void>(0x04FF1A0, thisObj, &availableRadios, nullptr);
 	for (auto radioIter = availableRadios.Begin(); !radioIter.End(); radioIter.Next()) {
-		if (*radioIter && !CdeclCall<bool>(0x0079BE30, *radioIter) && (jg_gameRadioSet.count((*radioIter)->GetFormID()) > 0)) {
+		if (*radioIter && !CdeclCall<bool>(0x0079BE30, *radioIter) && JohnnyRadios::IsAvailable((*radioIter)->GetFormID())) {
 			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
 		}
 	}
@@ -420,7 +421,7 @@ bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS) {
-	*result = JohnnyPatches::isShowLevelUp;
+	*result = DisabledLevelUp::isShowLevelUp;
 	if (IsConsoleMode()) Console_Print("IsLevelUpMenuEnabled >> %.f", *result);
 	return true;
 }
@@ -508,14 +509,14 @@ bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	float fDistance = 0.f;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fDistance)) {
-		g_viewmodel_near = fDistance;
+		JohnnyPatches::g_viewmodel_near = fDistance;
 		*result = 1;
 	}
 	return true;
 }
 
 bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
-	*result = g_viewmodel_near;
+	*result = JohnnyPatches::g_viewmodel_near;
 	if (IsConsoleMode()) Console_Print("GetViewmodelClipDistance >> %.3f", *result);
 	return true;
 }
@@ -585,29 +586,23 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-extern NiVector3 kCameraPos;
-extern NiMatrix3 kCameraRot;
-extern uint32_t uiReferenceToTrack;
-extern bool bOverrideCameraPos;
-extern bool bOverrideCameraRot;
-extern int eAxis;
-
 bool Cmd_SetCameraTranslate_Execute(COMMAND_ARGS) {
+	using namespace CameraOverride;
 	int override = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &kCameraPos.x, &kCameraPos.y, &kCameraPos.z)) {
-		bOverrideCameraPos = override > 0;
+		OverridePos(override > 0);
 	}
 	return true;
 }
 
-
-
+// TODO move more of the logic to CameraOverride.cpp
 bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
+	using namespace CameraOverride;
 	float fAngle = 0.f;
 	TESObjectREFR* pRef = nullptr;
 	int override = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &eAxis, &fAngle, &pRef)) {
-		bOverrideCameraRot = override > 0;
+		OverrideRot(override > 0);
 		fAngle = fAngle * 0.01745329252; // PI / 180
 		NiMatrix3 kNewRot;
 		switch (eAxis) {

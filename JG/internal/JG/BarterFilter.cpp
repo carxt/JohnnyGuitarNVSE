@@ -67,7 +67,7 @@ namespace BarterFilter {
 	};
 
 
-	void Hook() {
+	void Install() {
 		BarterLeftHook<0x72DA1C>();
 		BarterLeftHook<0x72E1BE>();
 
@@ -75,7 +75,7 @@ namespace BarterFilter {
 		BarterRightHook<0x72E207>();
 
 	}
-	void Clear()
+	void Reset()
 	{
 		leftList.clear();
 		rightList.clear();

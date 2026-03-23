@@ -3,6 +3,6 @@
 namespace RSMBarberHook {
 	extern JGSetList<DWORD> haircutSetList;
 	extern JGSetList<DWORD> beardSetList;
-	void Hook();
+	void Install();
 	void Reset();
 };

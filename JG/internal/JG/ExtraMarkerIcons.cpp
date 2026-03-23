@@ -35,7 +35,7 @@ namespace ExtraMarkerIcons {
 			jmp GetMapMarker
 		}
 	}
-	void Hook() {
+	void Install() {
 		// SetCustomMapMarkerIcon
 		SafeWrite16(0x79D330, 0x9090);
 		WriteRelCall(0x79D332, (uint32_t)GetMapMarkerHook);

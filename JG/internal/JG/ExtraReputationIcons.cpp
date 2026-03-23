@@ -64,7 +64,7 @@ namespace ExtraReputationIcons {
 		return a1 ? ((Setting*)a1)->String() : "\0";
 	}
 
-	void Hook() {
+	void Install() {
 		// SetCustomReputationChangeIcon
 		WriteRelCall(0x6156A2, uint32_t(GetReputationIconHook));
 		WriteRelCall(0x6156FB, uint32_t(GetReputationIconHook));

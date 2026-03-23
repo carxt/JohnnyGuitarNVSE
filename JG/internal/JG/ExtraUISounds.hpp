@@ -6,4 +6,6 @@ namespace ExtraUISounds {
 	extern TESSound* questNewSound;
 	extern TESSound* questCompeteSound;
 	extern TESSound* locationDiscoverSound;
+
+	void Install();
 }

@@ -19,7 +19,7 @@ namespace RSMBarberHook {
 		beardSetList.dFlush();
 		return ret;
 	}
-	void Hook() {
+	void Install() {
 		RSMDestructorOriginal = *((uintptr_t*)0x1075974);
 		SafeWrite32(0x1075974, (uintptr_t)hk_RSMDestroy);
 		WriteRelCall(0x07AD35C, (uintptr_t)hk_BGSHeadPart_IsPlayable);

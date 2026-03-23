@@ -182,6 +182,7 @@ bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+// TODO refactor: move logic to ExtraReputationIcons.cpp
 bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	using namespace ExtraReputationIcons;
 	*result = 0;

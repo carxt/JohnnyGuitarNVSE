@@ -32,7 +32,7 @@ namespace NPCAccuracy {
 		return retVec;
 	}
 
-	void FlushMapRefs() {
+	void Reset() {
 		tables.ACTREF.clear();
 	}
 	__declspec (noinline) double __fastcall returnActorMult(Actor* a_refr) {
@@ -58,7 +58,7 @@ namespace NPCAccuracy {
 
 	}
 	
-	void Hook() {
+	void Install() {
 		tables.ACTREF.max_load_factor(0.75);
 		tables.FACT.max_load_factor(0.75);
 		tables.CSTY.max_load_factor(0.75);

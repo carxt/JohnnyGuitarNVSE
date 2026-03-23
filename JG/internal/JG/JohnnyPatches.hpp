@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_set>
 namespace JohnnyPatches {
 	extern bool fixFleeing;
 	extern bool fixItemStacks;
@@ -7,16 +8,26 @@ namespace JohnnyPatches {
 	extern bool noMuzzleFlashCooldown;
 	extern bool enableRadioSubtitles;
 	extern bool removeMainMenuMusic;
-	extern bool fixDeathSounds ;
+	extern bool fixDeathSounds;
 	extern bool patchPainedPlayer;
 	extern bool bDisableDeathResponses;
 	extern bool bFixJIP;
 	extern unsigned int iFPSCapLoadScreen;
 	extern float iDeathSoundMAXTimer;
 	extern bool bDisableDLLCompatibilityRoutines;
-	extern bool isShowLevelUp;
-	extern bool bArrowKeysDisabled;
 	extern bool bCombatMusicDisabled;
-	extern uint32_t disableMuzzleLights;
+
+	extern float g_viewmodel_near;
+
+	void ReadINI();
+	void Install();
+
+	void ResetVanityWheel();
+	void HandleDLLInterop();
 
 }
+// exports
+extern "C" {
+	bool __cdecl JGSetViewmodelClipDistance(float value);
+	float __cdecl JGGetViewmodelClipDistance();
+} 

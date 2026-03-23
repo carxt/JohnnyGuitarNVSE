@@ -18,6 +18,21 @@
 #include "Bethesda/AutoMemContext.hpp"
 #include "JIP/JIPFixes.hpp"
 #include "JG/JohnnyExtraData.hpp"
+#include <JG/NPCAccuracy.hpp>
+#include <JG/MediaLocationControllerOverride.hpp>
+#include <JG/CameraOverride.hpp>
+#include <JG/JohnnyRadios.hpp>
+#include <JG/RSMBarberHook.hpp> 
+#include <JG/BarterFilter.hpp> 
+#include "JG/EditorIDRestoration.hpp"
+#include <JG/CustomHUDShake.hpp>
+#include "JG/JohnnyGameSettings.hpp"
+#include <JG/JohnnyPatches.hpp>
+#include <JG/JohnnyFixes.hpp>
+#include <JG/DisabledSaves.hpp>
+#include <JG/DisabledLevelUp.hpp>
+#include <JG/DisabledMuzzleFlashLights.hpp>
+#include <JG/DisabledArrowKeys.hpp>
 
 BS_ALLOCATORS
 
@@ -33,21 +48,18 @@ NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_scriptInterface = NULL;
 NVSECommandTableInterface* g_cmdTableInterface = NULL;
 uint32_t g_initialTickCount = 0;
-float g_viewmodel_near = 0.f;
-std::unordered_set<DWORD> jg_gameRadioSet;
-bool mlcOverridden = false;
-MediaLocationController* mlcOverride = nullptr;
-std::unordered_map<uint8_t, float> shakeRequests;
+
 void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
 InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
-std::unordered_set<BYTE> SaveGameUMap;
-float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ContChangesEntry* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
-(float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ContChangesEntry*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
+
 GameTimeGlobals* g_gameTimeGlobals = nullptr;
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
-StatsMenu* g_statsMenu = nullptr;
 
 #define JG_VERSION 523
+
+#define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
+#define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
+
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	MEM_CONTEXT eOrgContext = GetMemContext();
 	SetMemContext(MC_DEFAULT);
@@ -64,9 +76,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		case NVSEMessagingInterface::kMessage_PreLoadGame: // GAME
 		{
 			JohnnyExtraDataArray::GetInstance().ResetScriptData();
-			JohnnyPatches::disableMuzzleLights = 0; //reset the muzzle hook every time
-			JohnnyPatches::bArrowKeysDisabled = false;
-			JohnnyPatches::isShowLevelUp = true;
+			DisabledMuzzleFlashLights::Reset(); //reset the muzzle hook every time
+			DisabledArrowKeys::Reset();
+			DisabledLevelUp::Reset();
 			ThisCall(0x8C17C0, PlayerCharacter::GetSingleton()); // reevaluate reload speed modifiers
 			ThisCall(0x8C1940, PlayerCharacter::GetSingleton()); // reevaluate equip speed modifiers
 
@@ -75,53 +87,30 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			OnCrosshairHandler->FlushEventCallbacks();
 			OnPLChangeHandler->FlushEventCallbacks();
 			RestoreDisabledPlayerControlsHUDFlags();
-			SaveGameUMap.clear();
-			ExtraMiscStats::ResetMap();
+			DisabledSaves::Reset();
+			ExtraMiscStats::Reset();
 			RSMBarberHook::Reset();
-			jg_gameRadioSet.clear();
-			BarterFilter::Clear();
-			NPCAccuracy::FlushMapRefs();
-			shakeRequests.clear();
-			mlcOverridden = false;
-			mlcOverride = nullptr;
-			ClearPlayerFurniture(); //fix furniture crash on reload
-
-			bOverrideCameraPos = false;
-			bOverrideCameraRot = false;
-			kCameraPos = NiVector3(0,0,0);
-			kCameraRot = NiMatrix3::IDENTITY;
+			JohnnyRadios::Reset();
+			BarterFilter::Reset();
+			NPCAccuracy::Reset();
+			CustomHUDShake::Reset();
+			MediaLocationControllerOverride::Reset();
+			JohnnyFixes::ClearPlayerFurniture(); //fix furniture crash on reload
+			CameraOverride::Reset();
 			noHolotapeStopSound = false;
 			hkOwner = nullptr;
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_MainGameLoop: // GAME
 		{
-			if (InterfaceManager::GetSingleton()->currentMode == 1) {
-				float power = getHUDShakePower();
-				if (power > 0.0f) {
-					CdeclCall<void>(0x94C3A0, power);
-				}
-			}
-			ComputeDiscoveredRadioDirectory();
+			CustomHUDShake::Update();
+			JohnnyRadios::Update();
 			for (const auto& EventInfo : EventInfos) {
 				EventInfo->AddQueuedEvents();
 				EventInfo->DeleteEvents();
 			}
-			if (!g_statsMenu) g_statsMenu = StatsMenu::Get();
-			if (g_statsMenu && InterfaceManager::GetSingleton() && InterfaceManager::GetSingleton()->IsMenuVisible(kMenuType_Stats) && ExtraMiscStats::recalculateStatFilters) {
-				ExtraMiscStats::recalculateStatFilters = 0;
-				g_statsMenu->miscStatIDList.Filter(ExtraMiscStats::ShouldHideStat);
-
-			}
-			if (JohnnyPatches::resetVanityCam) {
-				if (PlayerCharacter::GetSingleton()) {
-					bool bIsInVanityMode = *reinterpret_cast<uint16_t*>(0x11E07B8) || PlayerCharacter::GetSingleton()->byte64D; //64d = autovanity mode.
-					if (!bIsInVanityMode) {
-						ResetVanityWheel();
-					}
-				}
-			}
-
+			ExtraMiscStats::Update();
+			JohnnyPatches::ResetVanityWheel();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_DeferredInit: // GAME
@@ -137,9 +126,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		}
 		case NVSEMessagingInterface::kMessage_PostLoad: // GAME + GECK 
 		{
-			if (!JohnnyPatches::bDisableDLLCompatibilityRoutines) {
-					HandleDLLInterop();
-			}
+			JohnnyPatches::HandleDLLInterop();
 
 			if (!JohnnyPatches::bFixJIP)
 				JohnnyExtraData::InitName();
@@ -523,27 +510,7 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_TYPED_CMD(GetNiBound, Array);
 }
 
-void ReadINI() {
-	using namespace JohnnyPatches;
-	char filename[MAX_PATH];
-	GetModuleFileNameA(NULL, filename, MAX_PATH);
-	char* lastSlash = strrchr(filename, '\\') + 1;
-	uint32_t length = MAX_PATH - (lastSlash - filename);;
-	strcpy_s(lastSlash, length, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
-	fixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
-	fixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
-	fixNPCShootingAngle = GetPrivateProfileInt("MAIN", "bFixNPCShootingAngle", 1, filename);
-	iFPSCapLoadScreen = GetPrivateProfileInt("MAIN", "iFPSLimitLoadScreen", 0, filename);
-	noMuzzleFlashCooldown = GetPrivateProfileInt("MAIN", "bNoMuzzleFlashCooldown", 0, filename);
-	resetVanityCam = GetPrivateProfileInt("MAIN", "bReset3rdPersonCamera", 0, filename);
-	enableRadioSubtitles = GetPrivateProfileInt("MAIN", "bEnableRadioSubtitles", 0, filename);
-	removeMainMenuMusic = GetPrivateProfileInt("MAIN", "bRemoveMainMenuMusic", 0, filename);
-	fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 1, filename);
-	patchPainedPlayer = GetPrivateProfileInt("MAIN", "bRemovePlayerPainExpression", 0, filename);
-	bFixJIP = GetPrivateProfileInt("MAIN", "bJIPFixes", 1, filename);
-	iDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
-	bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
-}
+
 
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {
 	// fill out the info structure
@@ -591,7 +558,7 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 	g_arrInterface = static_cast<NVSEArrayVarInterface*>(nvse->QueryInterface(kInterface_ArrayVar));
 	g_strInterface = static_cast<NVSEStringVarInterface*>(nvse->QueryInterface(kInterface_StringVar));
 
-	ReadINI();
+	JohnnyPatches::ReadINI();
 
 	NVSEMessagingInterface* pMessaging = static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging));
 	pMessaging->RegisterListener(nvse->GetPluginHandle(), "NVSE", bIsGECK ? MessageHandlerGECK : MessageHandler);
@@ -604,8 +571,8 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 	if (!bIsGECK) {
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
-		SaveGameUMap.reserve(0xFF);
-		shakeRequests.reserve(0xFF);
+		DisabledSaves::Init();
+		CustomHUDShake::Init();
 
 		if (JohnnyPatches::bFixJIP) {
 			JohnnyExtraData::InitName();
@@ -616,7 +583,9 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 		InventoryRefGetForID = static_cast<InventoryRef * (*)(uint32_t)>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
 		CaptureLambdaVars = static_cast<_CaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
 		UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
-		HandleGameHooks();
+		JohnnyFixes::Install();
+		JohnnyPatches::Install();
+		JohnnyGameSettings::Init();
 		HandleEventHooks();
 		ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
 		SerializationInit(nvse);

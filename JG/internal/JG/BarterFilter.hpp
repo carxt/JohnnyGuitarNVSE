@@ -9,6 +9,6 @@ namespace BarterFilter {
 	};
 	extern std::unordered_map<DWORD, JGSetList<DWORD>> leftList;
 	extern std::unordered_map<DWORD, JGSetList<DWORD>> rightList;
-	void Hook();
-	void Clear();
+	void Install();
+	void Reset();
 }

@@ -202,3 +202,10 @@ bool Actor::IsInDialogueWithPlayer() const {
 bool Actor::GetRespawn() const {
 	return ThisCall<bool>(0x87F4A0, this);
 }
+
+TESObjectCELL* TESObjectREFR::GetParentCell() {
+	if (this->parentCell) return parentCell;
+	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
+	if (xPersistentCell && xPersistentCell->persistentCell) return xPersistentCell->persistentCell;
+	return nullptr;
+}

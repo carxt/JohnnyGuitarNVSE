@@ -67,5 +67,5 @@ namespace DialogueResponseOverride {
 
 	DialogueEmotionOverride GetDialogueResponse(uint32_t refId, uint32_t responseNumber, DialogueEmotionOverride& newOverride);
 	
-	void Hook();
+	void Install();
 };

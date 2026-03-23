@@ -77,22 +77,3 @@ bool WorldToScreen(NiPoint3* p_in, float& x_out, float& y_out, float& z_out, int
 }
 
 
-void __stdcall CopyNiCamera(NiCameraAlt* MemoryAddressToCopy, float fov) {
-	SceneGraph* sing_SceneGraph = *(SceneGraph**)0x11DEB7C;
-	PlayerCharacter* g_ThePlayer = *(PlayerCharacter**)0x11DEA3C;
-	if (!sing_SceneGraph || !g_ThePlayer) return;
-	if ((NiCamera*)MemoryAddressToCopy != sing_SceneGraph->camera || fabs(fov - g_ThePlayer->worldFOV) > 0.0000099999997) return;
-	memcpy(JGGameCamera.CamPos, &(((NiAVObject*)MemoryAddressToCopy)->m_local.rotate), sizeof(JGCameraPosition));
-	memcpy(JGGameCamera.WorldMatrx, &(MemoryAddressToCopy->m_aafWorldToCam[0][0]), sizeof(JGWorldToScreenMatrix));
-}
-
-__declspec(naked) void NiCameraGetAltHook() {
-	__asm
-	{
-		push dword ptr ss : [ebp + 8]
-		push dword ptr ss : [ebp - 8]
-		call CopyNiCamera
-		leave
-		retn 0x10
-	}
-}

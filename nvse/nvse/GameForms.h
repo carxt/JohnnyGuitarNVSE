@@ -2819,6 +2819,7 @@ public:
 	void EjectShellCasing(TESObjectREFR* apReference) {
 		ThisCall(0x524DB0, this, apReference);
 	}
+	TESForm* GetAmmoInInventory();
 };
 static_assert(sizeof(TESObjectWEAP) == 0x388);
 
