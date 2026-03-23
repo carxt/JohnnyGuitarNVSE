@@ -227,7 +227,7 @@ TESObjectIMOD* TESObjectWEAP::GetItemMod(uint8_t which) {
 TESAmmo* TESObjectWEAP::GetAmmo() {
 	if (!ammo.ammo) return NULL;
 	if IS_ID(ammo.ammo, BGSListForm)
-		return (TESAmmo*)((BGSListForm*)ammo.ammo)->list.GetFirstItem();
+		return (TESAmmo*)((BGSListForm*)ammo.ammo)->GetFormList()->GetItem();
 	return (TESAmmo*)ammo.ammo;
 }
 
@@ -237,13 +237,16 @@ TESForm* TESObjectWEAP::GetAmmoInInventory()
 		if (IS_TYPE(ammo.ammo, BGSListForm)) {
 			BGSListForm* ammoList = (BGSListForm*)ammo.ammo;
 			ExtraContainerChanges* xChanges = GetExtraType(PlayerCharacter::GetSingleton()->extraDataList, ContainerChanges);
-			TESForm* ammo = nullptr;
 			if (ammoList && xChanges && xChanges->data) {
-				for (uint32_t i = 0; i < ammoList->Count(); i++) {
-					ammo = ammoList->GetNthForm(i);
-					if (IS_TYPE(ammo, TESAmmo)) {
-						uint32_t count = ThisCall<uint32_t>(0x4C8F30, xChanges->data, ammo);
-						if (count > 0) return ammo;
+				auto* pIter = ammoList->GetFormList();
+				while (pIter && !pIter->IsEmpty()) {
+					TESForm* pForm = pIter->GetItem();
+					pIter = pIter->GetNext();
+
+					if (IS_TYPE(pForm, TESAmmo)) {
+						uint32_t count = ThisCall<uint32_t>(0x4C8F30, xChanges->data, pForm);
+						if (count > 0) 
+							return pForm;
 					}
 				}
 			}
@@ -260,26 +263,6 @@ public:
 		return pForm && (pForm->GetFormID() == m_pForm->GetFormID()) ? true : false;
 	}
 };
-
-int32_t BGSListForm::GetIndexOf(TESForm* pForm) {
-	return list.GetIndexOf(FindByForm(pForm));
-}
-
-int32_t BGSListForm::RemoveForm(TESForm* pForm) {
-	int32_t index = GetIndexOf(pForm);
-	if (index >= 0) {
-		RemoveNthForm(index);
-	}
-	return index;
-}
-
-int32_t BGSListForm::ReplaceForm(TESForm* pForm, TESForm* pReplaceWith) {
-	int32_t index = GetIndexOf(pForm);
-	if (index >= 0) {
-		list.ReplaceNth(index, pReplaceWith);
-	}
-	return index;
-}
 
 bool TESPackage::IsFlagSet(uint32_t flag) {
 	return (packageFlags & flag) == flag;

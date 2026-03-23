@@ -310,6 +310,9 @@
     <ClCompile Include="internal\JG\JohnnyFixes.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -768,6 +771,9 @@
     </ClInclude>
     <ClInclude Include="internal\JG\JohnnyFixes.hpp">
       <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

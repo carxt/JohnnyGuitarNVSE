@@ -82,10 +82,12 @@ bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
 	if (!PlayerCharacter::GetSingleton()) return true;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &formList)) {
 		if (formList && IS_TYPE(formList, BGSListForm)) {
-			ListNode<TESForm>* iter = formList->list.Head();
+			BSSimpleList<TESForm*>* pIter = formList->GetFormList();
 
-			do {
-				TESForm* currData = iter->data;
+			while (pIter && !pIter->IsEmpty()) {
+				TESForm* currData = pIter->GetItem();
+				pIter = pIter->GetNext();
+
 				if (!currData) continue;
 				if (IS_TYPE(currData, TESHair)) {
 					RSMBarberHook::haircutSetList.Add(currData->GetFormID());
@@ -94,7 +96,7 @@ bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
 				if (IS_TYPE(currData, BGSHeadPart)) {
 					RSMBarberHook::beardSetList.Add(currData->GetFormID());
 				}
-			} while (iter = iter->next);
+			};
 		}
 		auto playerBase = reinterpret_cast<TESNPC*>(PlayerCharacter::GetSingleton()->GetActorBase());
 		RSMBarberHook::haircutSetList.isWhiteList = bool(flags & kFlag_WhiteListHair);
@@ -328,13 +330,14 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || !form || (!IS_TYPE(form, BGSListForm) && (!form->IsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker))))
 		return true;
 	if (IS_TYPE(form, BGSListForm)) {
-		ListNode<TESForm>* iterator = ((BGSListForm*)form)->list.Head();
-		while (iterator) {
-			TESObjectREFR* ref = (TESObjectREFR*)(iterator->data);
-			if (ref->IsReference() && ref->IsMapMarker() && GetExtraType(ref->extraDataList, MapMarker)) {
+		BSSimpleList<TESForm*>* pIter = ((BGSListForm*)form)->GetFormList();
+		while (pIter && !pIter->IsEmpty()) {
+			TESObjectREFR* ref = (TESObjectREFR*)pIter->GetItem();
+			pIter = pIter->GetNext();
+
+			if (ref && ref->IsReference() && ref->IsMapMarker() && GetExtraType(ref->extraDataList, MapMarker)) {
 				ExtraMarkerIcons::SetMapMarkerIcon(ref, iconPath);
 			}
-			iterator = iterator->next;
 		}
 	}
 	else {

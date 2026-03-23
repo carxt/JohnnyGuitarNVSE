@@ -159,6 +159,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="functions\fn_utility.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AILinearTaskThreadManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSSpinLock.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Conversation.cpp" />
@@ -259,6 +260,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\AILinearTaskThreadManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseFormComponent.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleArray.hpp" />

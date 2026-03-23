@@ -153,26 +153,28 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 	if (!fullMatch) {
 		for (uint32_t i = 0; i < size; i++) {
 			if (elements[i].GetTESForm() == nullptr) return true;
-			ListNode<TESForm>* listIter = formList->list.Head();
-			do {
-				if (elements[i].GetTESForm() == listIter->data) {
+			BSSimpleList<TESForm*>* pIter= formList->GetFormList();
+			while(pIter && !pIter->IsEmpty()) {
+				if (elements[i].GetTESForm() == pIter->GetItem()) {
 					*result = 1;
 					return true;
 				}
-			} while (listIter = listIter->next);
+				pIter = pIter->GetNext();
+			};
 		}
 	}
 	else {
 		for (uint32_t i = 0; i < size; i++) {
 			if (elements[i].GetTESForm() == nullptr) return true;
 			int elementFound = 0;
-			ListNode<TESForm>* listIter = formList->list.Head();
-			do {
-				if (elements[i].GetTESForm() == listIter->data) {
+			BSSimpleList<TESForm*>* pIter = formList->GetFormList();
+			while (pIter && !pIter->IsEmpty()) {
+				if (elements[i].GetTESForm() == pIter->GetItem()) {
 					elementFound = 1;
 					break;
 				}
-			} while (listIter = listIter->next);
+				pIter = pIter->GetNext();
+			};
 			if (elementFound == 0) {
 				return true;
 			}

@@ -7,6 +7,7 @@
 #include "internal/havok.h"
 #include "Bethesda/TESModel.hpp"
 #include "Bethesda/TESBoundAnimObject.hpp"
+#include "Bethesda/BGSListForm.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -4966,70 +4967,6 @@ public:
 	// 08:	Full-Screen Motion Blur: Strength
 };
 static_assert(sizeof(TESImageSpaceModifier) == 0x730);
-
-// 24
-class BGSListForm : public TESForm {
-public:
-	BGSListForm();
-	~BGSListForm();
-
-	tList<TESForm> list;			// 018
-
-	uint32_t	numAddedObjects;	// number of objects added via script - assumed to be at the start of the list
-
-	uint32_t Count() const {
-		return list.Count();
-	}
-
-	TESForm* GetNthForm(int32_t n) const {
-		return list.GetNthItem(n);
-	}
-
-	uint32_t AddAt(TESForm* pForm, int32_t n) {
-		int32_t	result = list.AddAt(pForm, n);
-
-		if (result >= 0 && IsAddedObject(n))
-			numAddedObjects++;
-
-		return result;
-	}
-
-	int32_t GetIndexOf(TESForm* pForm);
-
-	TESForm* RemoveNthForm(int32_t n) {
-		TESForm* form = list.RemoveNth(n);
-
-		if (form && IsAddedObject(n)) {
-			if (numAddedObjects == 0) {
-				_MESSAGE("BGSListForm::RemoveNthForm: numAddedObjects = 0");
-			}
-			else {
-				numAddedObjects--;
-			}
-		}
-
-		return form;
-	}
-
-	TESForm* ReplaceNthForm(int32_t n, TESForm* pReplaceWith) {
-		return list.ReplaceNth(n, pReplaceWith);
-	}
-
-	int32_t RemoveForm(TESForm* pForm);
-	int32_t ReplaceForm(TESForm* pForm, TESForm* pReplaceWith);
-
-	bool IsAddedObject(uint32_t idx) {
-		return (idx >= 0) && (idx < numAddedObjects);
-	}
-
-	void RemoveAll() {
-		list.RemoveAll();
-		numAddedObjects = 0;
-	}
-};
-
-static_assert(sizeof(BGSListForm) == 0x024);
-
 // 08
 class BGSPerkEntry {
 public:

@@ -82,12 +82,13 @@ void FilterForm::SetUpFiltering() {
 			continue;
 		}
 		if (IS_TYPE(currentFilter, BGSListForm)) {
-			ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
-			do {
-				TESForm* it = iterator->data;
-				if (it && !it->IsReference() && IsAcceptedParameter(it))
-					InsertToFilter(i, it->GetFormID());
-			} while (iterator = iterator->next);
+			BSSimpleList<TESForm*>* pIter = ((BGSListForm*)currentFilter)->GetFormList();
+			while (pIter && !pIter->IsEmpty()) {
+				TESForm* pForm = pIter->GetItem();
+				pIter = pIter->GetNext();
+				if (pForm && !pForm->IsReference() && IsAcceptedParameter(pForm))
+					InsertToFilter(i, pForm->GetFormID());
+			};
 		}
 		else InsertToFilter(i, currentFilter->GetFormID());
 	}
@@ -100,10 +101,13 @@ bool FilterForm::IsBaseInFilter(uint32_t filterNum, TESForm* form) {
 }
 
 void FilterForm::insertFormList(BGSListForm* formlist, uint32_t filter) {
-	ListNode<TESForm>* iterator = formlist->list.Head();
-	do {
-		InsertToFilter(filter, iterator->data->GetFormID());
-	} while (iterator = iterator->next);
+	BSSimpleList<TESForm*>* pIter = formlist->GetFormList();
+	while (pIter && !pIter->IsEmpty()){
+		TESForm* pForm = pIter->GetItem();
+		pIter = pIter->GetNext();
+		if (pForm)
+			InsertToFilter(filter, pForm->GetFormID());
+	};
 }
 
 bool FilterInt::IsFilterEqual(FilterType Filter, uint32_t nuFilter) {
@@ -125,12 +129,13 @@ void FilterFormInt::SetUpFiltering() {
 	TESForm* currentFilter = genFilters[0].form;
 	if (!currentFilter) return;
 	if (IS_TYPE(currentFilter, BGSListForm)) {
-		ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
-		do {
-			TESForm* it = iterator->data;
-			if (it && IsAcceptedParameter(it))
-				InsertToFilter(0, it->GetFormID());
-		} while (iterator = iterator->next);
+		BSSimpleList<TESForm*>* pIter = ((BGSListForm*)currentFilter)->GetFormList();
+		while (pIter && !pIter->IsEmpty()) {
+			TESForm* pForm = pIter->GetItem();
+			pIter = pIter->GetNext();
+			if (pForm && IsAcceptedParameter(pForm))
+				InsertToFilter(0, pForm->GetFormID());
+		};
 	}
 	else if (IsAcceptedParameter(currentFilter)) InsertToFilter(0, currentFilter->GetFormID());
 }
