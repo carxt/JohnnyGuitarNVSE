@@ -105,7 +105,7 @@ namespace JIPFixes {
 			TESForm* pForm = *(TESForm**)pData;
 			NiAVObject* pRoot = nullptr;
 			if (pForm && pForm->IsReference())
-				pRoot = static_cast<TESObjectREFR*>(pForm)->GetRefNiNode();
+				pRoot = static_cast<TESObjectREFR*>(pForm)->Get3DSimple();
 
 			InvalidateObjPalette(pRoot);
 

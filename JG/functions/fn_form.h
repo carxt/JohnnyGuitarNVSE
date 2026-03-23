@@ -111,4 +111,7 @@ DEFINE_COMMAND_PLUGIN(GetCameraShotPath, , false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetCameraShotPath, , false, kParams_OneForm_OneString);
 DEFINE_COMMAND_PLUGIN(GetCameraShotImageSpaceModifier, , false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetCameraShotImageSpaceModifier, , false, kParams_OneForm_OneOptionalForm);
-
+DEFINE_COMMAND_PLUGIN(CallPerRef, , false, kParamsCallPerRef);
+DEFINE_COMMAND_PLUGIN_EXP(CallPerRefEx, , false, kParamsCallPerRefEx);
+DEFINE_COMMAND_PLUGIN(CallPerMobileObject, , false, kParamsCallPerMobileObject);
+DEFINE_COMMAND_PLUGIN_EXP(CallPerMobileObjectEx, , false, kParamsCallPerMobileObject);

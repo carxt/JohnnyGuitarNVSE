@@ -3610,7 +3610,7 @@ public:
 	TESObjectCELL();
 	~TESObjectCELL();
 
-	typedef tList<TESObjectREFR> RefList;
+	typedef BSSimpleList<TESObjectREFR*> RefList;
 
 	struct ExteriorCoords {
 		int32_t		x;			// 00
@@ -3731,6 +3731,9 @@ public:
 	void ToggleNodes(uint32_t nodeBits, uint8_t doHide);
 	void GenerateRenderedTexture(NiCamera* camera, NiRenderedTexture** outTexture);
 	TESWorldSpace* GetWorldSpace() const { return IsInterior() ? nullptr : worldSpace; }
+
+	void CellRefLockEnter();
+	void CellRefLockLeave();
 };
 static_assert(sizeof(TESObjectCELL) == 0xE0);
 

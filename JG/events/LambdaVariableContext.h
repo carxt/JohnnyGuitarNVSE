@@ -12,8 +12,8 @@ class LambdaVariableContext {
 public:
 	LambdaVariableContext(const LambdaVariableContext& other) = delete;
 	LambdaVariableContext& operator=(const LambdaVariableContext& other) = delete;
-	explicit LambdaVariableContext(Script* scriptLambda);
+	explicit LambdaVariableContext(Script* scriptLambda) noexcept;
 	LambdaVariableContext(LambdaVariableContext&& other) noexcept;
 	LambdaVariableContext& operator=(LambdaVariableContext&& other) noexcept;
-	~LambdaVariableContext();
+	~LambdaVariableContext() noexcept;
 };

@@ -542,7 +542,7 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 		}
 		else {
 			lastForm = thisObj;
-			NiNode* refNode = thisObj->GetRefNiNode();
+			NiNode* refNode = thisObj->Get3DSimple();
 			if (!refNode)
 				return true;
 

@@ -272,7 +272,7 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &xIn, &yIn, &zIn, &HandleType, &refr)) {
 		if (refr) {
-			xIn += refr->posX; yIn += refr->posY; zIn += refr->posZ;
+			xIn += refr->pos.x; yIn += refr->pos.y; zIn += refr->pos.z;
 		}
 		NiPoint3 NiPointBuffer = { 0,0,0 };
 		NiPointAssign(&NiPointBuffer, xIn, yIn, zIn);
@@ -294,7 +294,7 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 	ScriptVar* X_outS, * Y_outS, * Z_outS;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &NiPosIn.x, &NiPosIn.y, &NiPosIn.z, &HandleType, &refr)) {
 		if (refr) {
-			NiPosIn.x += refr->posX; NiPosIn.y += refr->posY; NiPosIn.z += refr->posZ;
+			NiPosIn.x += refr->pos.x; NiPosIn.y += refr->pos.y; NiPosIn.z += refr->pos.z;
 		}
 		NiPoint3 NiPosOut = { 0, 0, 0 };
 		*result = (WorldToScreen(&NiPosIn, NiPosOut.x, NiPosOut.y, NiPosOut.z, HandleType) ? 1 : 0);
