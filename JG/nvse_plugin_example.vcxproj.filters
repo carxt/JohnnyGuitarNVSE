@@ -277,6 +277,39 @@
     <ClCompile Include="internal\JG\BarterFilter.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\CameraOverride.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\CloudUpdateFix.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\CustomHUDShake.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledArrowKeys.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledLevelUp.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledMuzzleFlashLights.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledSaves.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\JohnnyRadios.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\MediaLocationControllerOverride.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\JohnnyFixes.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -701,6 +734,39 @@
       <Filter>internal\JG</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\BarterFilter.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\CameraOverride.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\CloudUpdateFix.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\CustomHUDShake.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\DisabledArrowKeys.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\DisabledLevelUp.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\DisabledMuzzleFlashLights.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\DisabledSaves.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\QuestObjectiveDisplayFix.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyRadios.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\MediaLocationControllerOverride.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyFixes.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
   </ItemGroup>
