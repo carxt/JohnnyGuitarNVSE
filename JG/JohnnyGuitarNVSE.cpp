@@ -33,6 +33,9 @@
 #include <JG/DisabledLevelUp.hpp>
 #include <JG/DisabledMuzzleFlashLights.hpp>
 #include <JG/DisabledArrowKeys.hpp>
+#include <JG/ExtraMiscStats.hpp>
+#include <events/LambdaVariableContext.h>
+#include <decoding.h>
 
 BS_ALLOCATORS
 
@@ -82,10 +85,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			ThisCall(0x8C17C0, PlayerCharacter::GetSingleton()); // reevaluate reload speed modifiers
 			ThisCall(0x8C1940, PlayerCharacter::GetSingleton()); // reevaluate equip speed modifiers
 
-			OnDyingHandler->FlushEventCallbacks();
-			OnLimbGoneHandler->FlushEventCallbacks();
-			OnCrosshairHandler->FlushEventCallbacks();
-			OnPLChangeHandler->FlushEventCallbacks();
 			RestoreDisabledPlayerControlsHUDFlags();
 			DisabledSaves::Reset();
 			ExtraMiscStats::Reset();
@@ -97,18 +96,15 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			MediaLocationControllerOverride::Reset();
 			JohnnyFixes::ClearPlayerFurniture(); //fix furniture crash on reload
 			CameraOverride::Reset();
+			JohnnyEvents::Reset();
 			noHolotapeStopSound = false;
-			hkOwner = nullptr;
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_MainGameLoop: // GAME
 		{
 			CustomHUDShake::Update();
 			JohnnyRadios::Update();
-			for (const auto& EventInfo : EventInfos) {
-				EventInfo->AddQueuedEvents();
-				EventInfo->DeleteEvents();
-			}
+			JohnnyEvents::Update();
 			ExtraMiscStats::Update();
 			JohnnyPatches::ResetVanityWheel();
 			break;
@@ -586,9 +582,9 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 		JohnnyFixes::Install();
 		JohnnyPatches::Install();
 		JohnnyGameSettings::Init();
-		HandleEventHooks();
+		JohnnyEvents::Install();
 		ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
-		SerializationInit(nvse);
+		Serialization::Init(nvse);
 	}
 
 	return true;

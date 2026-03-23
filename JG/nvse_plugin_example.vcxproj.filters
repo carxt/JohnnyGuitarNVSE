@@ -118,9 +118,6 @@
     <ClCompile Include="misc\misc.cpp">
       <Filter>misc</Filter>
     </ClCompile>
-    <ClCompile Include="events\EventFramework.cpp">
-      <Filter>events</Filter>
-    </ClCompile>
     <ClCompile Include="internal\JG\EditorIDRestoration.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
@@ -265,9 +262,6 @@
     <ClCompile Include="functions\fn_math.cpp">
       <Filter>functions</Filter>
     </ClCompile>
-    <ClCompile Include="functions\fn_gamebyo.cpp">
-      <Filter>functions</Filter>
-    </ClCompile>
     <ClCompile Include="functions\fn_mediaset.cpp">
       <Filter>functions</Filter>
     </ClCompile>
@@ -312,6 +306,14 @@
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_gamebryo.cpp" />
+    <ClCompile Include="internal\serialization.cpp" />
+    <ClCompile Include="events\EventFramework.cpp">
+      <Filter>events</Filter>
+    </ClCompile>
+    <ClCompile Include="events\JohnnyEvents.cpp">
+      <Filter>events</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

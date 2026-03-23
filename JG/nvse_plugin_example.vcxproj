@@ -143,13 +143,14 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="..\shared\Utils\DebugLog.cpp" />
     <ClCompile Include="decoding.cpp" />
     <ClCompile Include="events\EventFramework.cpp" />
+    <ClCompile Include="events\JohnnyEvents.cpp" />
     <ClCompile Include="events\LambdaVariableContext.cpp" />
     <ClCompile Include="functions\fn_av.cpp" />
     <ClCompile Include="functions\fn_book.cpp" />
     <ClCompile Include="functions\fn_dial.cpp" />
     <ClCompile Include="functions\fn_file.cpp" />
     <ClCompile Include="functions\fn_form.cpp" />
-    <ClCompile Include="functions\fn_gamebyo.cpp" />
+    <ClCompile Include="functions\fn_gamebryo.cpp" />
     <ClCompile Include="functions\fn_gameplay.cpp" />
     <ClCompile Include="functions\fn_math.cpp" />
     <ClCompile Include="functions\fn_mediaset.cpp" />
@@ -207,6 +208,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\JIP\JIPFixes.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
     <ClCompile Include="internal\netimmerse.cpp" />
+    <ClCompile Include="internal\serialization.cpp" />
     <ClCompile Include="internal\sha1\sha1.cpp" />
     <ClCompile Include="internal\utility.cpp" />
     <ClCompile Include="JohnnyGuitarNVSE.cpp" />
