@@ -2,7 +2,7 @@ name: MSBuild
 
 on:
   push:
-    branches: [ "TestRelease" ]
+    branches: [ "dev" ]
 
 env:
   SOLUTION_FILE_PATH: JG/johnnyguitar.sln
