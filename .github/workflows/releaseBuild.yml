@@ -1,0 +1,55 @@
+name: MSBuild
+
+on:
+  release:
+    types: [published]
+
+env:
+  SOLUTION_FILE_PATH: JG/johnnyguitar.sln
+
+permissions: write-all
+
+jobs:
+  build:
+    runs-on: windows-2025-vs2026
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Add MSBuild to PATH
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore NuGet packages
+      run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+
+    - name: Build Release
+      run: msbuild /m /p:Configuration=Release ${{env.SOLUTION_FILE_PATH}} /p:PostBuildEventUseInBuild=false
+
+    - name: Package Artifacts
+      run: |
+        $iniDir = "JG\assets"
+        $releaseDir = "JG\Release"
+        New-Item -ItemType Directory -Name artifacts -Force | Out-Null
+        New-Item -ItemType Directory -Name "nvse\plugins" -path $releaseDir -Force | Out-Null
+        Copy-Item -Path "$releaseDir\JohnnyGuitarNVSE.dll", "$releaseDir\JohnnyGuitarNVSE.pdb", "$iniDir\JohnnyGuitar.ini" -Destination "$releaseDir\nvse\plugins"
+        Compress-Archive -Path "$releaseDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-${{ github.event.release.tag_name }}.zip"
+      shell: pwsh
+
+    - name: Attach artifacts to release
+      shell: pwsh
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        $tag = "${{ github.event.release.tag_name }}"
+        gh release upload $tag "artifacts\\JohnnyGuitarNVSE-$tag.zip" --clobber
+
+    - name: Upload mod to NexusMods
+      id: upload
+      uses: Nexus-Mods/upload-action@main
+      with:
+        api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+        file_group_id: ${{ vars.NEXUSMODS_GROUP_ID }}
+        filename: "artifacts\\JohnnyGuitarNVSE-${{ github.event.release.tag_name }}.zip"
+        display_name: "JohnnyGuitar NVSE"
+        file_category: "main"
+        version: ${{ github.event.release.tag_name }}
