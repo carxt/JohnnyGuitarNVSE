@@ -2,7 +2,7 @@ name: MSBuild
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "TestRelease" ]
 
 env:
   SOLUTION_FILE_PATH: JG/johnnyguitar.sln
@@ -20,11 +20,9 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Build Release
-      working-directory: ${{env.GITHUB_WORKSPACE}}
       run: msbuild /m /p:Configuration=Release ${{env.SOLUTION_FILE_PATH}} /p:PostBuildEventUseInBuild=false
 
     - name: Build Debug
-      working-directory: ${{env.GITHUB_WORKSPACE}}
       run: msbuild /m /p:Configuration=Debug ${{env.SOLUTION_FILE_PATH}} /p:PostBuildEventUseInBuild=false
 
     - name: Generate Timestamp
@@ -53,36 +51,32 @@ jobs:
         name: Zipped-Artifacts-${{ env.artifact_timestamp }}
         path: artifacts/
 
-    - name: Get Release
-      id: get_release
-      uses: cardinalby/git-get-release-action@v1
+    - name: Delete Old Continuous Release
+      id: delete_old_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release delete continuous --yes --cleanup-tag
+      shell: bash
+
+    - name: Create Continuous Release
+      id: create_continuous_release
+      uses: ncipollo/release-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag: 'continuous'
-        doNotFailIfNotFound: true
-    - name: Delete old release if exists
-      if: steps.get_release.outputs.id != ''
-      uses: dev-drprasad/delete-tag-and-release@v1.0
-      with:
-        tag_name: continuous
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        delete_release: true
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: continuous
-        release_name: "Continuous release"
-        draft: false
+        tag: continuous
+        name: "Continuous release"
         prerelease: true
+        allowUpdates: true
+        removeArtifacts: true
+        generateReleaseNotes: true
+        artifacts: artifacts/JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip,artifacts/JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip
         body: |
           Continuous release generated from the latest push to development branch.
 
     - name: Upload mod to NexusMods
-      id: upload
+      id: nexus_upload
       uses: Nexus-Mods/upload-action@main
       with:
         api_key: ${{ secrets.NEXUSMODS_API_KEY }}
@@ -92,22 +86,3 @@ jobs:
         description: "Auto build from the latest GitHub commit. Use for testing only."
         file_category: "miscellaneous"
         version: ${{ env.artifact_timestamp }}
-        
-    - name: Upload Artifact (Release)
-      uses: actions/upload-release-asset@v1
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: artifacts/JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip
-        asset_name: JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip
-        asset_content_type: application/zip
-    - name: Upload Artifact (Debug)
-      uses: actions/upload-release-asset@v1
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: artifacts/JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip
-        asset_name: JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip
-        asset_content_type: application/zip
