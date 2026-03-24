@@ -250,12 +250,6 @@ bool Cmd_TuneRadioRef_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-
-
-
-
-
-
 bool Cmd_GetFormRecipesAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESForm* form = nullptr;
@@ -426,11 +420,7 @@ bool Cmd_GetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-/* 	uint32_t			directionalXY;		// 2C
-uint32_t			directionalZ;		// 30
-float			directionalFade;	// 34
-float			fogClipDist;		// 38
-float			fogPower;*/
+
 
 BGSEncounterZone* GetEncounterZone(ExtraDataList* list) {
 	ExtraEncounterZone* xZone = (ExtraEncounterZone*)list->GetByType(kExtraData_EncounterZone);
@@ -829,6 +819,7 @@ bool Cmd_ClearArmorAltTexture_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESEffectShader* shader;
@@ -872,6 +863,7 @@ bool Cmd_GetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 uint32_t SwapRGB(uint32_t rgbhex) {
 	uint32_t r = (rgbhex >> 0x10) & 0xFF;
 	uint32_t g = (rgbhex >> 0x8) & 0xFF;
@@ -924,6 +916,7 @@ bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESEffectShader* shader;
@@ -999,6 +992,7 @@ bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 	g_arrInterface->AssignCommandResult(perkArr, result);
 	return true;
 }
+
 bool Cmd_FaceGenRefreshAppearance_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (thisObj && thisObj->IsCharacter()) {
@@ -1007,8 +1001,6 @@ bool Cmd_FaceGenRefreshAppearance_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-
-
 
 bool Cmd_FaceGenGetNthProperty_Execute(COMMAND_ARGS) {
 	TESNPC* npc = nullptr;
@@ -1081,6 +1073,7 @@ bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 	g_strInterface->Assign(PASS_COMMAND_ARGS, title);
 	return true;
 }
+
 bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTalkingActivator* activator = nullptr;
@@ -1092,6 +1085,7 @@ bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetActorEffectType_Execute(COMMAND_ARGS) {
 	*result = 0;
 	SpellItem* effect = nullptr;
@@ -1104,6 +1098,7 @@ bool Cmd_GetActorEffectType_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetBodyPartTraitString_Execute(COMMAND_ARGS) {
 	const char* resStr = nullptr;
 	BGSBodyPartData* bpData = nullptr;
@@ -1180,6 +1175,7 @@ bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetNoteRead_Execute(COMMAND_ARGS) {
 	uint32_t isRead = 0;
 	*result = 0;
@@ -1206,6 +1202,7 @@ bool Cmd_GetQuestDelay_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectWEAP* weap = nullptr;
@@ -1232,6 +1229,7 @@ bool Cmd_GetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectWEAP* weap = nullptr;
@@ -1291,6 +1289,7 @@ bool Cmd_GetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectWEAP* weapon = nullptr;
@@ -1301,6 +1300,7 @@ bool Cmd_SetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetProjectileSound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSProjectile* projectile = nullptr;
@@ -1337,6 +1337,7 @@ bool Cmd_SetExplosionSound_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetCreatureCombatSkill_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESCreature* creature = nullptr;
@@ -1349,6 +1350,7 @@ bool Cmd_GetCreatureCombatSkill_Execute(COMMAND_ARGS) {
 		* result = creature->combatSkill;
 	return true;
 }
+
 bool Cmd_SetContainerSound_Execute(COMMAND_ARGS) {
 	int whichSound = -1;
 	TESObjectCONT* container = nullptr;
@@ -1372,6 +1374,7 @@ bool Cmd_SetContainerSound_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetContainerSound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	int whichSound = -1;
@@ -1413,6 +1416,7 @@ bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 // 0 - alive, 1 - dying/ragdolled, 2 - dead, 3 - unconscious, 5 - restrained, 6 - essential unconscious
 bool Cmd_GetLifeState_Execute(COMMAND_ARGS) {
 	Actor* actor = (Actor*)thisObj;
@@ -1449,6 +1453,7 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 	g_arrInterface->AssignCommandResult(factionMemberArr, result);
 	return true;
 }
+
 bool Cmd_SetEquipType_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESForm* pForm = nullptr;
@@ -1463,6 +1468,7 @@ bool Cmd_SetEquipType_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
 	TESRace* race = nullptr;
 	uint32_t modelID, isFemale;
@@ -1480,6 +1486,7 @@ bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
 	TESRace* race = nullptr;
 	uint32_t modelID, isFemale;
@@ -1497,6 +1504,7 @@ bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	TESObjectARMO* armor = nullptr;
 	uint32_t isFemale, flagID;
@@ -1511,6 +1519,7 @@ bool Cmd_GetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	TESObjectARMO* armor = nullptr;
 	uint32_t isFemale;
@@ -1589,6 +1598,7 @@ bool Cmd_GetMusicTypeDB_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetMusicTypeDB_Execute(COMMAND_ARGS) {
 	BGSMusicType* mtype = nullptr;
 	float newVal = 0;
@@ -1660,6 +1670,7 @@ bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 	TESObjectWEAP* weap = nullptr;
 	int id = -1;
@@ -1806,6 +1817,7 @@ bool Cmd_GetBaseEffectAV_Execute(COMMAND_ARGS) {
 		*result = effect->actorVal;
 	return true;
 }
+
 bool Cmd_GetBaseEffectArchetype_Execute(COMMAND_ARGS) {
 	*result = -1;
 	EffectSetting* effect = nullptr;
@@ -1878,6 +1890,7 @@ bool Cmd_GetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* cell = nullptr;

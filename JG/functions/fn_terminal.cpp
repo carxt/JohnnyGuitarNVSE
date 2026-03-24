@@ -54,6 +54,7 @@ bool Cmd_RemoveTerminalMenuItem_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetTerminalMenuItemCount_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* terminal = nullptr;
@@ -63,6 +64,7 @@ bool Cmd_GetTerminalMenuItemCount_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* terminal = nullptr;
@@ -73,6 +75,7 @@ bool Cmd_GetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* terminal = nullptr;
@@ -87,6 +90,7 @@ bool Cmd_SetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* terminal = nullptr;
@@ -112,6 +116,7 @@ bool Cmd_GetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* terminal = nullptr;
@@ -130,6 +135,7 @@ bool Cmd_SetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* terminal = nullptr;
@@ -148,6 +154,7 @@ bool Cmd_GetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_AddTerminalMenuItem_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* terminal = nullptr;

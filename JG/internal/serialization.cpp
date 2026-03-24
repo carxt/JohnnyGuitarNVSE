@@ -1,5 +1,4 @@
 #include "serialization.h"
-#include "GameUI.h"
 #include <JG/ExtraMiscStats.hpp>
 
 namespace Serialization {
@@ -20,24 +19,12 @@ namespace Serialization {
 
 	void SaveGameCallback(void*)
 	{
-		using namespace ExtraMiscStats;
-		if (!miscStatMap.empty())
+		if (ExtraMiscStats::HasDataToSave())
 		{
 			_OpenRecord(kRecordID_MiscStats, SERIALIZATION_VERSION);
-			uint16_t mapLen = static_cast<uint16_t>(miscStatMap.size());
-			_WriteRecordData(&mapLen, sizeof(uint16_t));
-			for (auto& it : miscStatMap) {
-				uint16_t len = static_cast<uint16_t>(it.first.length());
-				_WriteRecordData(&len, sizeof(uint16_t));
-				_WriteRecordData(it.first.c_str(), it.first.length());
-				_WriteRecordData(&it.second, sizeof(int));
-			}
+			ExtraMiscStats::SerializeData(_WriteRecordData);
 		}
-
-
 	}
-
-
 
 	void LoadGameCallback(void*)
 	{
@@ -47,33 +34,15 @@ namespace Serialization {
 		{
 			switch (type)
 			{
-			case kRecordID_MiscStats: {
-				uint16_t mapLen = 0;
-				_ReadRecordData(&mapLen, sizeof(uint16_t));
-				if (mapLen > 0) {
-					char buffer[MAX_PATH] = { 0 };
-					for (int i = 0; i < mapLen; i++) {
-						uint16_t len = 0;
-						_ReadRecordData(&len, sizeof(uint16_t));
-						_ReadRecordData(buffer, len);
-						buffer[len] = 0;
-						std::string sName = std::string(buffer);
-						int value = 0;
-						_ReadRecordData(&value, sizeof(int));
-						auto statIter = miscStatMap.find(sName);
-						if (statIter == miscStatMap.end()) { continue; }
-						miscStatMap[sName] = value;
-						UpdateMiscStatList(buffer, value);
-
-					}
+				case kRecordID_MiscStats: {
+					ExtraMiscStats::DeserializeData(_ReadRecordData);
+					break;
+				}
+				default: {
+					break;
 				}
 			}
-			default:
-				break;
-			}
 		}
-
-		StatsMenu::Get()->miscStatIDList.Filter(ShouldHideStat);
 	}
 
 	void Init(const NVSEInterface* nvse)

@@ -10,6 +10,8 @@ namespace ExtraMiscStats {
 
 	Setting** g_miscStatData = (Setting**)0x11C6D50;
 
+	constexpr size_t maxMiscStatCount = UINT16_MAX;
+
 	void __cdecl MiscStatRefreshHook(Tile* tile, int id) {
 		int value = 0;
 		if (id < 43) {
@@ -67,15 +69,106 @@ namespace ExtraMiscStats {
 	}
 
 	void Update() {
-		if (StatsMenu::Get() && InterfaceManager::GetSingleton() && InterfaceManager::GetSingleton()->IsMenuVisible(kMenuType_Stats) && ExtraMiscStats::recalculateStatFilters) {
-			recalculateStatFilters = 0;
+		if (StatsMenu::Get() && InterfaceManager::GetSingleton() && InterfaceManager::GetSingleton()->IsMenuVisible(kMenuType_Stats) && recalculateStatFilters) {
+			recalculateStatFilters = false;
 			StatsMenu::Get()->miscStatIDList.Filter(ShouldHideStat);
 
+		}
+	}
+
+	void ForceUpdate() {
+		if (StatsMenu::Get()) {
+			StatsMenu::Get()->miscStatIDList.Filter(ShouldHideStat);
 		}
 	}
 
 	void Install() {
 		// Get/ModExtraMiscStat
 		SafeWrite32(0x7DDAB1, uint32_t(MiscStatRefreshHook));
+	}
+
+	bool InitStat(const char* name) {
+
+		std::string sName = name;
+		if (availableMiscStats.size() > maxMiscStatCount) {
+			// lmao
+			TerminateProcess(GetCurrentProcess(), 0xE);
+		}
+		if (bool(availableMiscStats.count(sName))) return false;
+		availableMiscStats.emplace(sName);
+		miscStatMap[sName] = 0;
+		return true;
+	}
+
+	bool ModStat(const char* name, int mod) {
+		int value = 0;
+		std::string sName = name;
+		if (!bool(availableMiscStats.count(sName))) return false;
+		auto it = miscStatMap.find(sName);
+		if (it != miscStatMap.end()) {
+			it->second += mod;
+			value = it->second;
+		}
+		else {
+			miscStatMap[sName] = mod;
+			value = mod;
+		}
+		// creating/updating menu entry
+		UpdateMiscStatList(name, value);
+		return true;
+	}
+
+	void SetStat(const char* name, int value)
+	{
+		std::string sName = std::string(name);
+		auto statIter = miscStatMap.find(sName);
+		if (statIter != miscStatMap.end()) {
+			miscStatMap[sName] = value;
+			UpdateMiscStatList(name, value);
+		}
+	}
+
+	int GetStat(const char* name) {
+		std::string sName = name;
+		if (!availableMiscStats.count(sName)) return -1;
+		auto it = miscStatMap.find(sName);
+		if (it != miscStatMap.end()) return it->second;
+		return 0;
+	}
+
+	bool HasDataToSave()
+	{
+		return !miscStatMap.empty();
+	}
+
+	void SerializeData(WriteFunc writeFunc) {
+		uint16_t mapLen = static_cast<uint16_t>(miscStatMap.size());
+		writeFunc(&mapLen, sizeof(uint16_t));
+
+		for (auto& it : miscStatMap) {
+			uint16_t len = static_cast<uint16_t>(it.first.length());
+			writeFunc(&len, sizeof(uint16_t));
+			writeFunc(it.first.c_str(), it.first.length());
+			writeFunc(&it.second, sizeof(int));
+		}
+	}
+
+	void DeserializeData(ReadFunc readFunc) {
+		uint16_t mapLen = 0;
+		readFunc(&mapLen, sizeof(uint16_t));
+
+		if (mapLen > 0) {
+			char buffer[MAX_PATH] = { 0 };
+			for (int i = 0; i < mapLen; i++) {
+				uint16_t len = 0;
+				readFunc(&len, sizeof(uint16_t));
+				readFunc(buffer, len);
+				buffer[len] = 0;
+				int value = 0;
+				readFunc(&value, sizeof(int));
+				SetStat(buffer, value);
+			}
+		}
+		ForceUpdate();
 	}
 };

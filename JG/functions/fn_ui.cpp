@@ -73,113 +73,43 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
-	enum {
-		kFlag_WhiteListHair = 1 << 0,
-		kFlag_WhiteListBeard,
-	};
+	
 	BGSListForm* formList = nullptr;
 	uint32_t flags = 0;
 	if (!PlayerCharacter::GetSingleton()) return true;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &formList)) {
 		if (formList && IS_TYPE(formList, BGSListForm)) {
-			BSSimpleList<TESForm*>* pIter = formList->GetFormList();
-
-			while (pIter && !pIter->IsEmpty()) {
-				TESForm* currData = pIter->GetItem();
-				pIter = pIter->GetNext();
-
-				if (!currData) continue;
-				if (IS_TYPE(currData, TESHair)) {
-					RSMBarberHook::haircutSetList.Add(currData->GetFormID());
-					continue;
-				}
-				if (IS_TYPE(currData, BGSHeadPart)) {
-					RSMBarberHook::beardSetList.Add(currData->GetFormID());
-				}
-			};
+			RSMBarberHook::Load(formList);
 		}
-		auto playerBase = reinterpret_cast<TESNPC*>(PlayerCharacter::GetSingleton()->GetActorBase());
-		RSMBarberHook::haircutSetList.isWhiteList = bool(flags & kFlag_WhiteListHair);
-		if (RSMBarberHook::haircutSetList.isWhiteList) {
-			RSMBarberHook::haircutSetList.Add(playerBase->hair->GetFormID());
-		}
-		else {
-			RSMBarberHook::haircutSetList.Remove(playerBase->hair->GetFormID());
-
-		}
-		RSMBarberHook::beardSetList.isWhiteList = bool(flags & kFlag_WhiteListBeard);
-		if (RSMBarberHook::beardSetList.isWhiteList) {
-			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
-				if (*iter) { RSMBarberHook::beardSetList.Add((*iter)->GetFormID()); };
-			}
-		}
-		else {
-			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
-				if (*iter) { RSMBarberHook::beardSetList.Remove((*iter)->GetFormID()); };
-			}
-		}
-		CdeclCall<void>(0x705870, 2);
+		RSMBarberHook::ShowMenu(flags);
 	}
 	return true;
 }
 
 bool Cmd_InitExtraMiscStat_Execute(COMMAND_ARGS) {
-	using namespace ExtraMiscStats;
 	char name[MAX_PATH] = {};
-	int mod = 0;
-	int value;
-	constexpr size_t maxMiscStatCount = UINT16_MAX;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
-		std::string sName = name;
-		if (availableMiscStats.size() > maxMiscStatCount) {
-			TerminateProcess(GetCurrentProcess(), 0xE);
-		}
-		if (bool(availableMiscStats.count(sName))) return true;
-		availableMiscStats.emplace(sName);
-		miscStatMap[sName] = mod;
-		value = mod;
-		// creating/updating menu entry
-		*result = 1;
+		*result = ExtraMiscStats::InitStat(name);
 	}
 	return true;
 }
 
 bool Cmd_ModExtraMiscStat_Execute(COMMAND_ARGS) {
-	using namespace ExtraMiscStats;
 	char name[MAX_PATH] = {};
 	int mod;
-	int value;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name, &mod)) {
-		std::string sName = name;
-		if (!bool(availableMiscStats.count(sName))) return true;
-		auto it = miscStatMap.find(sName);
-		if (it != miscStatMap.end()) {
-			it->second += mod;
-			value = it->second;
-		}
-		else {
-			miscStatMap[sName] = mod;
-			value = mod;
-		}
-		// creating/updating menu entry
-		UpdateMiscStatList(name, value);
-
-		*result = 1;
+		*result = ExtraMiscStats::ModStat(name, mod);
 	}
 	return true;
 }
 
 bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
-	using namespace ExtraMiscStats;
 	char name[MAX_PATH] = {};
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
-		std::string sName = name;
-		if (!availableMiscStats.count(sName)) return true;
-		auto it = miscStatMap.find(sName);
-		if (it != miscStatMap.end()) *result = it->second;
+		*result = ExtraMiscStats::GetStat(name);
 		if (IsConsoleMode()) Console_Print("GetExtraMiscStat \"%s\": %.f", name, *result);
 	}
 	return true;
@@ -311,6 +241,7 @@ bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESWorldSpace* worlspace = nullptr;

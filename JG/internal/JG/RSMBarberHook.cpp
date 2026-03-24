@@ -1,5 +1,6 @@
 #include "RSMBarberHook.hpp"
 #include "GameForms.h"
+#include <GameObjects.h>
 namespace RSMBarberHook {
 	JGSetList<DWORD> haircutSetList;
 	JGSetList<DWORD> beardSetList;
@@ -31,5 +32,52 @@ namespace RSMBarberHook {
 	{
 		haircutSetList.dFlush();
 		beardSetList.dFlush();
+	}
+
+	enum {
+		kFlag_WhiteListHair = 1 << 0,
+		kFlag_WhiteListBeard,
+	};
+
+	void Load(BGSListForm* pList) {
+		BSSimpleList<TESForm*>* pIter = pList->GetFormList();
+
+		while (pIter && !pIter->IsEmpty()) {
+			TESForm* currData = pIter->GetItem();
+			pIter = pIter->GetNext();
+
+			if (!currData) continue;
+			if (IS_TYPE(currData, TESHair)) {
+				haircutSetList.Add(currData->GetFormID());
+				continue;
+			}
+			if (IS_TYPE(currData, BGSHeadPart)) {
+				beardSetList.Add(currData->GetFormID());
+			}
+		};
+	}
+
+	void ShowMenu(uint32_t flags) {
+		auto playerBase = reinterpret_cast<TESNPC*>(PlayerCharacter::GetSingleton()->GetActorBase());
+		haircutSetList.isWhiteList = bool(flags & kFlag_WhiteListHair);
+		if (haircutSetList.isWhiteList) {
+			haircutSetList.Add(playerBase->hair->GetFormID());
+		}
+		else {
+			haircutSetList.Remove(playerBase->hair->GetFormID());
+
+		}
+		beardSetList.isWhiteList = bool(flags & kFlag_WhiteListBeard);
+		if (beardSetList.isWhiteList) {
+			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
+				if (*iter) { beardSetList.Add((*iter)->GetFormID()); };
+			}
+		}
+		else {
+			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
+				if (*iter) { beardSetList.Remove((*iter)->GetFormID()); };
+			}
+		}
+		CdeclCall<void>(0x705870, 2);
 	}
 }
