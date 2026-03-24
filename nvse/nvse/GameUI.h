@@ -477,13 +477,13 @@ public:
 		if (this->itemCount == 1)
 		{
 			auto numVisibleItemsTrait = TraitNameToID("_number_of_visible_items");
-			if (this->parentTile->GetValueFloat(numVisibleItemsTrait) > 0)
+			if (this->parentTile->GetFloat(numVisibleItemsTrait) > 0)
 			{
 				auto valPtr = ThisCall<Tile::Value*>(0xA00E90, this->parentTile, kTileValue_height);
 				ThisCall(0xA09200, valPtr);
 				ThisCall(0xA09130, valPtr, kTileValue_Copy, newTile, kTileValue_height);
 
-				auto numVisible = this->parentTile->GetValueFloat(numVisibleItemsTrait);
+				auto numVisible = this->parentTile->GetFloat(numVisibleItemsTrait);
 				ThisCall(0xA09080, valPtr, kTileValue_Mul, numVisible);
 				ThisCall(0xA09410, valPtr, 0);
 			}
@@ -522,7 +522,7 @@ public:
 	bool IsEnabled()
 	{
 		static uint32_t enabledTrait = TraitNameToID("_enabled");
-		return parentTile && parentTile->GetValueFloat(enabledTrait);
+		return parentTile && parentTile->GetFloat(enabledTrait);
 	}
 
 	void Init()

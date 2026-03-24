@@ -12,12 +12,16 @@
 #include "ParamInfos.h"
 #include "PluginAPI.h"
 #include "utility.h"
+#include <decoding.h>
 
 #include "Shared/BSMemory/BSScrapMemory.hpp"
+#include "Shared/Utils/StackObject.hpp"
+#include "Shared/Utils/CustomClass.hpp"
 
 #include <array>
 #include <GameUI.h>
 
+class BSRenderedTexture;
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern NVSEScriptInterface* g_scriptInterface;
@@ -399,18 +403,18 @@ namespace JIPFixes {
 
 		static void __declspec(naked) ConstructItemEntryNameHookFix_Asm() {
 			__asm {
-				sub esp, 4
-				mov edx, esp
-				mov ecx, eax
-				call ConstructItemEntryNameHookFix
-				mov edx, dword ptr[esp]
-				add esp, 4
-				test eax, eax
-				jz EXIT // If null, exit
-				mov ecx, edx
-				jmp uiSuccessAddr
+				sub		esp, 4
+				mov		edx, esp
+				mov		ecx, eax
+				call	ConstructItemEntryNameHookFix
+				mov		edx, dword ptr[esp]
+				add		esp, 4
+				test	eax, eax
+				jz		EXIT // If null, exit
+				mov		ecx, edx
+				jmp		uiSuccessAddr
 			EXIT:
-				jmp uiFailAddr
+				jmp		uiFailAddr
 			}
 		}
 
@@ -1145,6 +1149,212 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace GetMenuItemListRefsFix {
+
+		uint32_t __fastcall GetTileIndex(Tile* apTile) {
+			Tile* pParent = apTile->parent;
+			if (pParent) [[likely]] {
+				auto kIter = pParent->children.Head();
+				uint32_t uiIndex = 0;
+				while (kIter) {
+					Tile* pChild = kIter->data;
+					kIter = kIter->next;
+					if (pChild == apTile)
+						return uiIndex;
+					++uiIndex;
+				}
+			}
+			return 0;
+		}
+
+		static uint32_t uiReturnAddr;
+		void __declspec(naked) GetTileIndex_Asm() {
+			__asm {
+				// Store SetElement ptr
+				mov		[esp + 0x1C], edi
+				
+				// Our code - ECX now contains the tile
+				mov     ecx, [ecx]
+				push	eax
+				push	edx
+				call	GetTileIndex
+				mov		edi, eax
+				pop		edx
+				pop		eax
+				
+				// Get Item
+				mov     ecx, [eax]
+
+				jmp		uiReturnAddr
+			}
+		}
+
+		void InitHooks() {
+			uiReturnAddr = GetJIPAddress(0x1003BD6C);
+			SafeWrite8(GetJIPAddress(0x1003BD5A) + 1, 0x3D); // Change reg to EDI
+			SafeWrite8(GetJIPAddress(0x1003BDB1), 0x90);
+			SafeWrite8(GetJIPAddress(0x1003BD58) + 1, 0x58);
+			WriteRelJump(GetJIPAddress(0x1003BD66), GetTileIndex_Asm);
+		}
+	}
+
+	namespace WaterRenderFix {
+		
+		constexpr float WATER_OPACITY = 0.8f;
+		constexpr float WATER_REFLECTIVITY = 0.3f;
+
+		static constexpr AddressPtr<NiPointer<BSRenderedTexture>, 0x11C7C2C>	spSkyReflectionMap;
+
+		// Greetings from Real Time Reflections
+		class JIPCullingProcess : public CustomClass<BSCullingProcess> {
+		private:
+			struct WaterShaderEntry {
+				bool							bLOD;
+				bool							bDepth;
+				bool							bReflect;
+				bool							bRefract;
+				float							fWaterReflectivityAmt;
+				float							fWaterOpacity;
+				NiPointer<BSRenderedTexture>	spReflectionTexture;
+			};
+			
+			// Holy crap, stl sucks
+			using ScrapMap = std::unordered_map<WaterShaderProperty*, WaterShaderEntry, std::hash<WaterShaderProperty*>, std::equal_to<WaterShaderProperty*>, BSScrapAllocator<std::pair<WaterShaderProperty* const, WaterShaderEntry>>>;
+
+			ScrapMap kWaterShaderProps;
+
+			bool __fastcall DowngradeWaterShader(WaterShaderProperty* apWaterShaderProp) {
+				if (apWaterShaderProp->bDisplacement)
+					return false;
+
+				WaterShaderEntry kExistingEntry;
+				auto kIter = kWaterShaderProps.find(apWaterShaderProp);
+				if (kIter != kWaterShaderProps.end()) {
+					return true;
+				}
+
+				WaterShaderEntry kEntry;
+				kEntry.bDepth = apWaterShaderProp->bDepth;
+				kEntry.bReflect = apWaterShaderProp->bReflections;
+				kEntry.bRefract = apWaterShaderProp->bRefractions;
+				kEntry.fWaterReflectivityAmt = apWaterShaderProp->kVarAmounts.fWaterReflectivityAmt;
+				kEntry.fWaterOpacity = apWaterShaderProp->kVarAmounts.fWaterOpacity;
+				kEntry.spReflectionTexture = apWaterShaderProp->spReflectionMap;
+
+				apWaterShaderProp->bDepth = false;
+				apWaterShaderProp->bRefractions = false;
+				apWaterShaderProp->kVarAmounts.fWaterReflectivityAmt = WATER_REFLECTIVITY;
+				apWaterShaderProp->kVarAmounts.fWaterOpacity = WATER_OPACITY;
+				if (!TES::GetSingleton()->currentInterior && spSkyReflectionMap.Get()) {
+					if (apWaterShaderProp->bReflections) {
+						apWaterShaderProp->spReflectionMap = spSkyReflectionMap.Get();
+					}
+				}
+				else {
+					apWaterShaderProp->bReflections = false;
+				}
+
+				apWaterShaderProp->ClearRenderPasses();
+
+				kWaterShaderProps.insert({ apWaterShaderProp, kEntry });
+				return true;
+			}
+
+			void __fastcall RestoreWaterShaders() {
+				for (auto& rItem : kWaterShaderProps) {
+					WaterShaderProperty* pKey = rItem.first;
+					WaterShaderEntry& rEntry = rItem.second;
+					if (pKey) {
+						pKey->bDepth = rEntry.bDepth;
+						pKey->bReflections = rEntry.bReflect;
+						pKey->bRefractions = rEntry.bRefract;
+						pKey->kVarAmounts.fWaterReflectivityAmt = rEntry.fWaterReflectivityAmt;
+						pKey->kVarAmounts.fWaterOpacity = rEntry.fWaterOpacity;
+						pKey->spReflectionMap = rEntry.spReflectionTexture;
+
+						pKey->ClearRenderPasses();
+					}
+				}
+			}
+
+			void _Append(NiGeometry* apGeom) {
+				BSShaderProperty* pShaderProp = apGeom->shaderProp;
+				if (pShaderProp->iShader == 17) {
+					if (!DowngradeWaterShader(static_cast<WaterShaderProperty*>(const_cast<BSShaderProperty*>(pShaderProp))))
+						return;
+				}
+
+				spAccumulator->RegisterObject(apGeom);
+			}
+
+		public:
+			void __fastcall Initialize() {
+				BuildVTable<BSCullingProcess, 20>(
+					{
+						{ 19, &JIPCullingProcess::_Append }
+					},
+					0x101E2EC
+				);
+
+				new (&kWaterShaderProps) ScrapMap();
+			}
+
+			void __fastcall Destroy() {
+				RestoreWaterShaders();
+				kWaterShaderProps.~ScrapMap();
+			}
+		};
+
+		struct JIPRenderData {
+			uint32_t	uiWidth;
+			uint32_t	uiHeight;
+			D3DFORMAT	eD3DFormat;
+			uint32_t	uiRenderMode;
+			uint32_t	uiBackgroundColorMask;
+			uint32_t	eImageSpaceEffect;
+		};
+
+		void __fastcall RenderWater(void* apWaterManager, NiCamera* apCamera) {
+			if (TES::GetSingleton()->currentInterior)
+				return;
+
+			BSShaderAccumulator* pAccum = TESMain::GetSingleton()->spDrawWorldAccum;
+			if (pAccum->bCellHasWater && !pAccum->bIsUnderwater) {
+				ThisCall(0x4EAF80, apWaterManager, apCamera);
+				ThisCall(0x4EBBE0, apWaterManager);
+			}
+		}
+
+		void __cdecl AccumulateScene(NiCamera* apCamera, NiNode* apNode, BSCullingProcess* apCullingProcess) {
+			BSShaderAccumulator* pAccum = TESMain::GetSingleton()->spDrawWorldAccum;
+
+			apCullingProcess->spAccumulator->bCellHasWater = pAccum->bCellHasWater;
+			apCullingProcess->spAccumulator->bIsUnderwater = pAccum->bIsUnderwater;
+			apCullingProcess->spAccumulator->iCurrentWaterHeight = pAccum->iCurrentWaterHeight;
+
+			if (pAccum->bCellHasWater) {
+				StackObject<JIPCullingProcess, 0x4A0EB0, 0x4A0F60> kCullingProcess(nullptr);
+				kCullingProcess->m_pkCamera = apCullingProcess->m_pkCamera;
+				kCullingProcess->eCullMode = apCullingProcess->eCullMode;
+				kCullingProcess->spAccumulator = apCullingProcess->spAccumulator;
+				kCullingProcess->Initialize();
+				CdeclCall(0xB6BEE0, apCamera, apNode, &kCullingProcess);
+				CdeclCall(0xB6C0D0, apCamera, apCullingProcess->spAccumulator);
+				kCullingProcess->Destroy();
+			}
+			else {
+				CdeclCall(0xB6BEE0, apCamera, apNode, apCullingProcess);
+				CdeclCall(0xB6C0D0, apCamera, apCullingProcess->spAccumulator);
+			}
+		}
+
+		void InitHooks() {
+			SafeWrite32(GetJIPAddress(0x10004963) + 1, uint32_t(AccumulateScene));
+			ReplaceCall(GetJIPAddress(0x1002D27D), RenderWater);
+			PatchMemoryNop(GetJIPAddress(0x10004976), 2);
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -1193,23 +1403,31 @@ namespace JIPFixes {
 			return;
 		}
 
-		{
-			std::vector<uint8_t> kBuffer(JIP_TARGET_SIZE);
-			DWORD dwBytesRead = 0;
-			BOOL bRead = ReadFile(hJIPFile, kBuffer.data(), dwFileSize, &dwBytesRead, nullptr);
+		DWORD dwBytesRead = 0;
+		HANDLE hMemoryMapping = CreateFileMapping(hJIPFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
+		if (!hMemoryMapping) {
 			CloseHandle(hJIPFile);
+			ShowErrorMessage("Failed to create JIP LN mapping!");
+			return;
+		}
 
-			if (bRead) {
-				uint32_t uiHash = crc32(kBuffer.data(), kBuffer.size());
-				if (uiHash != JIP_TARGET_HASH) {
-					ShowErrorMessage("Incompatible JIP LN binary!");
-					return;
-				}
-			}
-			else {
-				ShowErrorMessage("Failed to read JIP LN!");
-				return;
-			}
+		const uint8_t* pFileData = reinterpret_cast<const uint8_t*>(MapViewOfFile(hMemoryMapping, FILE_MAP_READ, 0, 0, 0));
+		if (!pFileData) {
+			CloseHandle(hMemoryMapping);
+			CloseHandle(hJIPFile);
+			ShowErrorMessage("Failed to read JIP LN!");
+			return;
+		}
+
+		const uint32_t uiHash = crc32(pFileData, dwFileSize);
+
+		UnmapViewOfFile(pFileData);
+		CloseHandle(hMemoryMapping);
+		CloseHandle(hJIPFile);
+
+		if (uiHash != JIP_TARGET_HASH) {
+			ShowErrorMessage("Incompatible JIP LN binary!");
+			return;
 		}
 
 		hJIP = hJIPModule;
@@ -1248,6 +1466,8 @@ namespace JIPFixes {
 			PerkEntryFix::InitHooks();
 			WeaponModEffectsFix::InitHooks();
 			OnMenuClickFix::InitHooks();
+			GetMenuItemListRefsFix::InitHooks();
+			WaterRenderFix::InitHooks();
 		}
 	}
 

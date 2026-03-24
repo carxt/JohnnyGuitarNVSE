@@ -261,7 +261,7 @@ public:
 	static uint32_t	TraitNameToIDAdd(const char* traitName);
 	Value* GetValue(uint32_t typeID);
 	Value* GetValueName(const char* valueName);
-	float			GetValueFloat(uint32_t id);
+	float			GetFloat(uint32_t id);
 	DListNode<Tile>* GetNthChild(uint32_t index);
 	Tile* GetChild(const char* childName);
 	Tile* GetComponent(const char* componentTile, const char*& trait);
