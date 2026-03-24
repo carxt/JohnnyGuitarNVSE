@@ -134,8 +134,8 @@ public:
 
 	TESForm* baseForm;				// 020
 
-	float			rotX, rotY, rotZ;		// 024 - either public or accessed via simple inline accessor common to all child classes
-	float			posX, posY, posZ;		// 030 - seems to be private
+	NiPoint3		rot;		// 024 - either public or accessed via simple inline accessor common to all child classes
+	NiPoint3		pos;		// 030 - seems to be private
 	float			scale;					// 03C
 
 	TESObjectCELL* parentCell;			// 040
@@ -145,11 +145,11 @@ public:
 	ScriptEventList* GetEventList() const;
 
 	bool IsTaken() const { return uiFormFlags.Get(FormFlags::TAKEN); } // Need to implement
-	__forceinline NiNode* GetRefNiNode() { return renderState ? renderState->rootNode : nullptr; }
+	__forceinline NiNode* Get3DSimple() const{ return renderState ? renderState->rootNode : nullptr; }
 	const char* hk_GetName();
 	const char* GetFullName() const;
-	NiVector3* PosVector() { return (NiVector3*)&posX; }
-	CoordXY* PosXY() { return (CoordXY*)&posX; }
+	NiVector3* PosVector() { return (NiVector3*)&pos; }
+	CoordXY* PosXY() { return (CoordXY*)&pos; }
 
 	void Update3D();
 	TESContainer* GetContainer();

@@ -599,11 +599,11 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 		if (ref == nullptr) {
 			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
 		}
-		if (ref->GetRefNiNode()) {
+		if (ref->Get3DSimple()) {
 			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
 			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(sound->GetFormID(), uiFlags);
 			handle.SetPosition(*ref->GetPos());
-			handle.SetObjectToFollow(ref->GetRefNiNode());
+			handle.SetObjectToFollow(ref->Get3DSimple());
 			uint32_t time = fTime * 1000.0;
 			handle.FadeInPlay(time);
 			*result = 1;
@@ -1043,7 +1043,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-double GetVectorAngle2D(NiPoint3* pt) {
+double GetVectorAngle2D(const NiPoint3* pt) {
 	double angle;
 	if (pt->y == 0) {
 		if (pt->x <= 0) {
@@ -1435,7 +1435,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 				pActorNode = pPlayer->Get3D(!pPlayer->is3rdPerson);
 			}
 			else
-				pActorNode = thisObj->GetRefNiNode();
+				pActorNode = thisObj->Get3DSimple();
 		}
 
 		bool bChangedPos = false;

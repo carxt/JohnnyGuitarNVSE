@@ -1,6 +1,6 @@
 ﻿#include "LambdaVariableContext.h"
 
-LambdaVariableContext::LambdaVariableContext(Script* scriptLambda) : scriptLambda(scriptLambda) {
+LambdaVariableContext::LambdaVariableContext(Script* scriptLambda) noexcept : scriptLambda(scriptLambda) {
 	if (scriptLambda)
 		CaptureLambdaVars(scriptLambda);
 }
@@ -19,7 +19,7 @@ LambdaVariableContext& LambdaVariableContext::operator=(LambdaVariableContext&& 
 	return *this;
 }
 
-LambdaVariableContext::~LambdaVariableContext() {
+LambdaVariableContext::~LambdaVariableContext() noexcept {
 	if (this->scriptLambda)
 		UncaptureLambdaVars(this->scriptLambda);
 }

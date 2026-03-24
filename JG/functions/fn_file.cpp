@@ -225,7 +225,7 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 		if (ref == nullptr) {
 			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
 		}
-		if (ref->GetRefNiNode()) {
+		if (ref->Get3DSimple()) {
 			bool bVoiceFlag = (voiceFlag > 0);
 			bool bLoopFlag = (loopFlag > 0);
 			uint32_t audioFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
@@ -240,7 +240,7 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 			}
 			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(path, BSAudioManager::AudioFlags(audioFlags), nullptr);
 			handle.SetPosition(*ref->GetPos());
-			handle.SetObjectToFollow(ref->GetRefNiNode());
+			handle.SetObjectToFollow(ref->Get3DSimple());
 			if (fadeInTime <= 0) {
 				handle.Play(false);
 			}

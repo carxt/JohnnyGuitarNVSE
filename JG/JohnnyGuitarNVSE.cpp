@@ -50,6 +50,7 @@ NVSEStringVarInterface* g_strInterface = NULL;
 NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_scriptInterface = NULL;
 NVSECommandTableInterface* g_cmdTableInterface = NULL;
+ExpressionEvaluatorUtils s_expEvalUtils;
 uint32_t g_initialTickCount = 0;
 
 void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
@@ -504,6 +505,10 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(ClearWeaponScopeUIModel);
 	REG_CMD(UpdateScenegraph);
 	REG_TYPED_CMD(GetNiBound, Array);
+	REG_CMD(CallPerRef);
+	REG_CMD(CallPerRefEx);
+	REG_CMD(CallPerMobileObject);
+	REG_CMD(CallPerMobileObjectEx);
 }
 
 
@@ -546,6 +551,8 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* i
 }
 
 EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
+	nvse->InitExpressionEvaluatorUtils(&s_expEvalUtils);
+
 	nvse->SetOpcodeBase(0x3100);
 	RegisterCommands(nvse);
 

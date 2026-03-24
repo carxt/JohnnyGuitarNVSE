@@ -1044,3 +1044,35 @@ static ParamInfo kParamsProjectionArgs[8] =
 	{ "HandleMode", kParamType_Integer, 0 },
 	{ "Object Ref", kParamType_ObjectRef, 1 }
 };
+
+static ParamInfo kParamsCallPerRef[] =
+{
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "Type Filter", kParamType_Integer , 1 },
+	{ "Distance Filter", kParamType_Float, 1 },
+	{ "Angle Filter", kParamType_Float, 1 },
+	{ "Cell", kParamType_AnyForm , 1 }
+};
+
+static ParamInfo kParamsCallPerRefEx[] =
+{
+	{ "Script", kNVSEParamType_Form, 0 },
+	{ "Type Filter Array", kNVSEParamType_Array , 0 },
+	{ "Distance Filter", kNVSEParamType_Number, 1 },
+	{ "Angle Filter", kNVSEParamType_Number, 1 },
+	{ "Cell", kNVSEParamType_Form , 1 }
+};
+
+static ParamInfo kParamsCallPerMobileObject[] =
+{
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "Process Level", kParamType_Integer , 0 },
+	{ "Type Filter", kParamType_Integer , 1 },
+};
+
+static ParamInfo kParamsCallPerMobileObjectEx[] =
+{
+	{ "Script", kNVSEParamType_Form, 0 },
+	{ "Process Level", kNVSEParamType_Number , 0 },
+	{ "Type Filter Array", kNVSEParamType_Array , 0 },
+};
