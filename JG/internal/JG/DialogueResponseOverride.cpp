@@ -104,4 +104,42 @@ namespace DialogueResponseOverride {
 
 	}
 
+	void Set(uint32_t formID, uint32_t responseNumber, uint32_t emotion, int32_t emotionValue, TESIdleForm* speakerAnim, TESIdleForm* listenerAnim, uint32_t flags) 
+	{
+		auto it = overrideMap[formID].find(responseNumber);
+		//if (it != overrideMap[dialogResponse->GetFormID()].end())
+		if (false)
+		{
+
+			it->second.m_emotionType = (it->second.m_emotionType <= kEmotionMax) ? emotion : it->second.m_emotionType;
+			it->second.m_emotionValue = emotionValue;
+		}
+		else
+		{
+			overrideMap[formID][responseNumber] = DialogueEmotionOverride(emotion, emotionValue, speakerAnim, listenerAnim, flags);
+		}
+	}
+
+	void Remove(uint32_t formID, uint32_t responseNumber)
+	{
+		auto it = overrideMap.find(formID);
+		if (it != overrideMap.end())
+		{
+			it->second.erase(responseNumber);
+			if (it->second.size() < 1)
+			{
+				overrideMap.erase(formID);
+			}
+		}
+	}
+
+	uint32_t GetResponseAmount(uint32_t formID) {
+		auto it = cachedDialogueInfo.find(formID);
+		if (it != cachedDialogueInfo.end())
+		{
+			return it->second.size();
+		}
+		return 0;
+	}
+
 };

@@ -10,22 +10,16 @@ enum ResponseRelatedTopicType {
 
 bool Cmd_DialogResponseGetResponseAmount_Execute(COMMAND_ARGS)
 {
-	using namespace DialogueResponseOverride;
 	TESTopicInfo* dialogResponse = nullptr;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo))
 	{
-		auto it = cachedDialogueInfo.find(dialogResponse->GetFormID());
-		if (it != cachedDialogueInfo.end())
-		{
-			*result = it->second.size();
-		}
+		*result = DialogueResponseOverride::GetResponseAmount(dialogResponse->GetFormID());
 	}
 	return true;
 }
 
 bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
-	using namespace DialogueResponseOverride;
 	TESTopicInfo* dialogResponse = nullptr;
 	uint32_t responseNumber = 0;
 	int32_t setOrRemove = 0;
@@ -37,37 +31,16 @@ bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
 	TESIdleForm* speakerAnim = *(TESIdleForm**)0x11CA244;
 	TESIdleForm* listenerAnim = *(TESIdleForm**)0x11CA244;
 
-	//Unlike 99.9% of functions in this game, dialog responses use a 1-based index, not a 0-based index.
-	//This means the first element will be 1, not 0.
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseNumber, &setOrRemove, &responseEmotion, &responseEmotionValue, &speakerAnim, &listenerAnim, &flags) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo))
 	{
 		if (setOrRemove > 0)
 		{
-			auto it = overrideMap[dialogResponse->GetFormID()].find(responseNumber);
-			//if (it != overrideMap[dialogResponse->GetFormID()].end())
-			if (false)
-			{
-
-				it->second.m_emotionType = (it->second.m_emotionType <= kEmotionMax) ? responseEmotion : it->second.m_emotionType;
-				it->second.m_emotionValue = responseEmotionValue;
-			}
-			else
-			{
-				overrideMap[dialogResponse->GetFormID()][responseNumber] = DialogueEmotionOverride(responseEmotion, responseEmotionValue, speakerAnim, listenerAnim, flags);
-			}
+			DialogueResponseOverride::Set(dialogResponse->GetFormID(), responseNumber, responseEmotion, responseEmotionValue, speakerAnim, listenerAnim, flags);
 		}
 
 		else
 		{
-			auto it = overrideMap.find(dialogResponse->GetFormID());
-			if (it != overrideMap.end())
-			{
-				it->second.erase(responseNumber);
-				if (it->second.size() < 1)
-				{
-					overrideMap.erase(dialogResponse->GetFormID());
-				}
-			}
+			DialogueResponseOverride::Remove(dialogResponse->GetFormID(), responseNumber);
 		}
 
 	}

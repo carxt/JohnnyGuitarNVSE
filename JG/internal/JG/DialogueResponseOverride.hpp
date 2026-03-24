@@ -41,7 +41,6 @@ namespace DialogueResponseOverride {
 		uint32_t speakerAnimation;
 		uint32_t listenerAnimation;
 	};
-	extern std::unordered_map<uint32_t, std::map<uint32_t, DialogueCache>> cachedDialogueInfo;
 
 	class DialogueEmotionOverride
 	{
@@ -63,9 +62,9 @@ namespace DialogueResponseOverride {
 		}
 
 	};
-	extern std::unordered_map<uint32_t, std::map<uint32_t, DialogueEmotionOverride>> overrideMap;
 
-	DialogueEmotionOverride GetDialogueResponse(uint32_t refId, uint32_t responseNumber, DialogueEmotionOverride& newOverride);
-	
 	void Install();
+	void Set(uint32_t formID, uint32_t responseNumber, uint32_t emotion, int32_t emotionValue, TESIdleForm* speakerAnim, TESIdleForm* listenerAnim, uint32_t flags);
+	void Remove(uint32_t formID, uint32_t responseNumber);
+	uint32_t GetResponseAmount(uint32_t formID);
 };
