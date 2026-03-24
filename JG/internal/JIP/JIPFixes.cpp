@@ -1145,6 +1145,55 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace GetMenuItemListRefsFix {
+
+		uint32_t __fastcall GetTileIndex(Tile* apTile) {
+			Tile* pParent = apTile->parent;
+			if (pParent) [[likely]] {
+				auto kIter = pParent->children.Head();
+				uint32_t uiIndex = 0;
+				while (kIter) {
+					Tile* pChild = kIter->data;
+					kIter = kIter->next;
+					if (pChild == apTile)
+						return uiIndex;
+					++uiIndex;
+				}
+			}
+			return 0;
+		}
+
+		static uint32_t uiReturnAddr;
+		void __declspec(naked) GetTileIndex_Asm() {
+			__asm {
+				// Store SetElement ptr
+				mov		[esp + 0x1C], edi
+				
+				// Our code - ECX now contains the tile
+				mov     ecx, [ecx]
+				push	eax
+				push	edx
+				call	GetTileIndex
+				mov		edi, eax
+				pop		edx
+				pop		eax
+				
+				// Get Item
+				mov     ecx, [eax]
+
+				jmp		uiReturnAddr
+			}
+		}
+
+		void InitHooks() {
+			uiReturnAddr = GetJIPAddress(0x1003BD6C);
+			SafeWrite8(GetJIPAddress(0x1003BD5A) + 1, 0x3D); // Change reg to EDI
+			SafeWrite8(GetJIPAddress(0x1003BDB1), 0x90);
+			SafeWrite8(GetJIPAddress(0x1003BD58) + 1, 0x58);
+			WriteRelJump(GetJIPAddress(0x1003BD66), GetTileIndex_Asm);
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -1248,6 +1297,7 @@ namespace JIPFixes {
 			PerkEntryFix::InitHooks();
 			WeaponModEffectsFix::InitHooks();
 			OnMenuClickFix::InitHooks();
+			GetMenuItemListRefsFix::InitHooks();
 		}
 	}
 

@@ -57,6 +57,11 @@ Tile::Value* Tile::GetValueName(const char* valueName) {
 	return GetValue(TraitNameToID(valueName));
 }
 
+// GAME - 0xA011B0
+float Tile::GetFloat(uint32_t auiTrait) {
+	return ThisCall<float>(0xA011B0, this, auiTrait);
+}
+
 DListNode<Tile>* Tile::GetNthChild(uint32_t index) {
 	return children.Tail()->Regress(index);
 }
