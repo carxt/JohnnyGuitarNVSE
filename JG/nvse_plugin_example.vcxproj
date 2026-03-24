@@ -181,6 +181,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiMemObject.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMemory.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiObject.cpp" />
+    <ClCompile Include="internal\JG\AddItemMessages.cpp" />
     <ClCompile Include="internal\JG\BarterFilter.cpp" />
     <ClCompile Include="internal\JG\CameraOverride.cpp" />
     <ClCompile Include="internal\JG\CloudUpdateFix.cpp" />
@@ -335,6 +336,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiTStringPointerMap.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTStringTemplateMap.hpp" />
     <ClInclude Include="internal\havok.h" />
+    <ClInclude Include="internal\JG\AddItemMessages.hpp" />
     <ClInclude Include="internal\JG\BarterFilter.hpp" />
     <ClInclude Include="internal\JG\CameraOverride.hpp" />
     <ClInclude Include="internal\JG\CloudUpdateFix.hpp" />
@@ -388,6 +390,5 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <None Include="internal\Game\Gamebryo\NiTStringTemplateMap.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets" />
 </Project>

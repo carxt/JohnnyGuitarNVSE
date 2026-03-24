@@ -17,6 +17,7 @@
 #include "DisabledLevelUp.hpp"
 #include "DisabledMuzzleFlashLights.hpp"
 #include "DisabledArrowKeys.hpp"
+#include "AddItemMessages.hpp"
 
 namespace JohnnyPatches {
 	bool fixFleeing = false;
@@ -32,6 +33,7 @@ namespace JohnnyPatches {
 	bool bFixJIP = true;
 	bool bDisableDLLCompatibilityRoutines = false;
 	bool bCombatMusicDisabled = false;
+	bool bMultipleAddItemMessages = false;
 
 	unsigned int iFPSCapLoadScreen = 0;
 	float iDeathSoundMAXTimer = 10;
@@ -225,6 +227,7 @@ namespace JohnnyPatches {
 		removeMainMenuMusic = GetPrivateProfileInt("MAIN", "bRemoveMainMenuMusic", 0, filename);
 		fixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 1, filename);
 		patchPainedPlayer = GetPrivateProfileInt("MAIN", "bRemovePlayerPainExpression", 0, filename);
+		bMultipleAddItemMessages = GetPrivateProfileInt("MAIN", "bMultipleAddItemMessages", 0, filename);
 		bFixJIP = GetPrivateProfileInt("MAIN", "bJIPFixes", 1, filename);
 		iDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
@@ -274,6 +277,10 @@ namespace JohnnyPatches {
 		if (bDisableDeathResponses) {
 			SafeWrite8(0x098414C, 0x90);
 			WriteRelCall(0x098414D, (uintptr_t)DisableDeathResponsesHook);
+		}
+
+		if (bMultipleAddItemMessages) {
+			AddItemMessages::Install();
 		}
 
 		// WorldToScreen
