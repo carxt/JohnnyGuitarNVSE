@@ -181,51 +181,20 @@ bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
 void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
 
-// TODO refactor:: move logic to BarterFilter.cpp
+
 bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
 	TESForm* itemFilter = nullptr, * filterArg = nullptr;
 	uint32_t unhideOrHide = 0, flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &unhideOrHide, &flags, &filterArg) && itemFilter) {
-		auto addToBarterFilter = [itemFilter](std::unordered_map<DWORD, JGSetList<DWORD>>& st_Filter, DWORD r_id) -> void {
-			st_Filter[itemFilter->GetFormID()].Add(r_id);
-			st_Filter[itemFilter->GetFormID()].isWhiteList = true;
-			};
-
-		auto removeFromBarterFilter = [itemFilter](std::unordered_map<DWORD, JGSetList<DWORD>>& st_Filter, DWORD r_id) -> void {
-			if (r_id)
-			{
-				auto it = st_Filter.find(itemFilter->GetFormID());
-				if (it != st_Filter.end()) {
-					it->second.Remove(r_id);
-				}
-			}
-			else {
-				auto it = st_Filter.find(itemFilter->GetFormID());
-				if (it != st_Filter.end()) {
-					it->second.dFlush();
-					st_Filter.erase(it);
-				}
-			}
-			};
 		DWORD idToHandle = 0;
 		if (filterArg) {
 			idToHandle = filterArg->GetFormID();
 		}
 		if (unhideOrHide) {
-			if ((flags & BarterFilter::Flags::kDoNotHideLeft) == 0) {
-				addToBarterFilter(BarterFilter::leftList, idToHandle);
-			}
-			if ((flags & BarterFilter::Flags::kDoNotHideRight) == 0) {
-				addToBarterFilter(BarterFilter::rightList, idToHandle);
-			}
+			BarterFilter::Add(itemFilter->GetFormID(), flags, idToHandle);
 		}
 		else {
-			if ((flags & BarterFilter::Flags::kDoNotHideLeft) == 0) {
-				removeFromBarterFilter(BarterFilter::leftList, idToHandle);
-			}
-			if ((flags & BarterFilter::Flags::kDoNotHideRight) == 0) {
-				removeFromBarterFilter(BarterFilter::rightList, idToHandle);
-			}
+			BarterFilter::Remove(itemFilter->GetFormID(), flags, idToHandle);
 		}
 
 	}
@@ -242,15 +211,7 @@ bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
 		if (filterArg) {
 			idToHandle = filterArg->GetFormID();
 		}
-		auto it = BarterFilter::leftList.find(itemFilter->GetFormID());
-		if (it != BarterFilter::leftList.end()) {
-			outflags |= 1 << 0;
-		}
-		it = BarterFilter::rightList.find(itemFilter->GetFormID());
-		if (it != BarterFilter::rightList.end()) {
-			outflags |= 1 << 1;
-		}
-		*result = outflags;
+		*result = BarterFilter::IsHidden(idToHandle);
 	}
 	return true;
 }
