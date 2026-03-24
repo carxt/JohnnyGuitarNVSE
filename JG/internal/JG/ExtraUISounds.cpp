@@ -37,4 +37,23 @@ namespace ExtraUISounds {
 	void Install() {
 		WriteRelCall(0x77A8E9, (uint32_t)UIUpdateSoundHook);
 	}
+
+	void SetSound(TESSound* sound, uint32_t type) {
+		switch (type) {
+		case 1:
+			questFailSound = sound;
+			break;
+		case 2:
+			questNewSound = sound;
+			break;
+		case 3:
+			questCompeteSound = sound;
+			break;
+		case 4:
+			locationDiscoverSound = sound;
+			break;
+		default:
+			break;
+		}
+	}
 }

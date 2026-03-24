@@ -2,10 +2,7 @@
 #include <GameSound.h>
 
 namespace ExtraUISounds {
-	extern TESSound* questFailSound;
-	extern TESSound* questNewSound;
-	extern TESSound* questCompeteSound;
-	extern TESSound* locationDiscoverSound;
 
 	void Install();
+	void SetSound(TESSound* sound, uint32_t type);
 }
