@@ -114,28 +114,14 @@ bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-// TODO refactor: move logic to ExtraReputationIcons.cpp
+
 bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
-	using namespace ExtraReputationIcons;
 	*result = 0;
 	TESReputation* rep = nullptr;
 	uint32_t tierID = 0;
 	char path[MAX_PATH] = {};
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &rep, &tierID, &path) && rep && IS_TYPE(rep, TESReputation) && tierID >= 1 && tierID <= 4)) return true;
-	auto pos = factionRepIcons.find(rep->GetFormID());
-	uint32_t bufferSize = strlen(path) + 1;
-	char* pathCopy = new char[bufferSize];
-	strcpy_s(pathCopy, bufferSize, path);
-
-	if (pos != factionRepIcons.end()) {
-		if (*pos->second[tierID - 1]) delete[] pos->second[tierID - 1];
-		pos->second[tierID - 1] = pathCopy;
-	}
-	else {
-		std::vector<const char*> v{ "", "", "", "" };
-		v[tierID - 1] = pathCopy;
-		factionRepIcons.insert(std::pair<uint32_t, std::vector<const char*>>(rep->GetFormID(), v));
-	}
+	ExtraReputationIcons::Set(rep->GetFormID(), tierID, path);
 	*result = 1;
 	return true;
 }

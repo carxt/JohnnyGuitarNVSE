@@ -2,6 +2,7 @@
 #include <unordered_map>
 
 namespace ExtraReputationIcons {
-	extern std::unordered_map <uint32_t, std::vector<const char*>> factionRepIcons;
 	void Install();
+	void Set(uint32_t formID, uint32_t tierID, const char* path);
+	void Dump();
 }

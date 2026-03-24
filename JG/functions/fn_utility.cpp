@@ -72,11 +72,7 @@ bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_DumpIconMap_Execute(COMMAND_ARGS) {
-	using namespace ExtraReputationIcons;
-	auto it = factionRepIcons.begin();
-	for (auto const& it : factionRepIcons) {
-		Console_Print("0x%X - %s %s %s %s", it.first, it.second[0], it.second[1], it.second[2], it.second[3]);
-	}
+	ExtraReputationIcons::Dump();
 	return true;
 }
 
