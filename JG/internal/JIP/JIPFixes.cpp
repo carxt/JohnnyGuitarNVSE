@@ -1201,6 +1201,7 @@ namespace JIPFixes {
 	namespace WaterRenderFix {
 		
 		constexpr float WATER_OPACITY = 0.8f;
+		constexpr float WATER_REFLECTIVITY = 0.3f;
 
 		static constexpr AddressPtr<NiPointer<BSRenderedTexture>, 0x11C7C2C>	spSkyReflectionMap;
 
@@ -1212,6 +1213,7 @@ namespace JIPFixes {
 				bool							bDepth;
 				bool							bReflect;
 				bool							bRefract;
+				float							fWaterReflectivityAmt;
 				float							fWaterOpacity;
 				NiPointer<BSRenderedTexture>	spReflectionTexture;
 			};
@@ -1235,11 +1237,13 @@ namespace JIPFixes {
 				kEntry.bDepth = apWaterShaderProp->bDepth;
 				kEntry.bReflect = apWaterShaderProp->bReflections;
 				kEntry.bRefract = apWaterShaderProp->bRefractions;
+				kEntry.fWaterReflectivityAmt = apWaterShaderProp->kVarAmounts.fWaterReflectivityAmt;
 				kEntry.fWaterOpacity = apWaterShaderProp->kVarAmounts.fWaterOpacity;
 				kEntry.spReflectionTexture = apWaterShaderProp->spReflectionMap;
 
 				apWaterShaderProp->bDepth = false;
 				apWaterShaderProp->bRefractions = false;
+				apWaterShaderProp->kVarAmounts.fWaterReflectivityAmt = WATER_REFLECTIVITY;
 				apWaterShaderProp->kVarAmounts.fWaterOpacity = WATER_OPACITY;
 				if (!TES::GetSingleton()->currentInterior && spSkyReflectionMap.Get()) {
 					if (apWaterShaderProp->bReflections) {
@@ -1264,6 +1268,7 @@ namespace JIPFixes {
 						pKey->bDepth = rEntry.bDepth;
 						pKey->bReflections = rEntry.bReflect;
 						pKey->bRefractions = rEntry.bRefract;
+						pKey->kVarAmounts.fWaterReflectivityAmt = rEntry.fWaterReflectivityAmt;
 						pKey->kVarAmounts.fWaterOpacity = rEntry.fWaterOpacity;
 						pKey->spReflectionMap = rEntry.spReflectionTexture;
 
