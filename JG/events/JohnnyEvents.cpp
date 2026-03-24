@@ -6,6 +6,9 @@
 #include <internal/Game/Bethesda/MenuTopic.hpp>
 
 
+extern NVSEScriptInterface* g_scriptInterface;
+
+namespace JohnnyEvents {
 
 	EventInformation* OnDyingHandler;
 	EventInformation* OnStartQuestHandler;
@@ -32,374 +35,6 @@
 	EventInformation* OnGeneralSubtitleHandler;
 	EventInformation* OnReputationChangeHandler;
 	EventInformation* OnNPCAVChangeHandler;
-
-	extern NVSEScriptInterface* g_scriptInterface;
-
-	bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		FilterFormInt::Data filter = { nullptr, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script)) {
-			if (OnLimbGoneHandler) {
-				if (setOrRemove)
-					OnLimbGoneHandler->RegisterEvent(script, (void**)&filter);
-				else OnLimbGoneHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-	bool Cmd_SetJohnnyOnSettingsUpdateEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) && script && IS_TYPE(script, Script)) {
-			if (OnSettingsUpdateHandler) {
-				if (setOrRemove)
-					OnSettingsUpdateHandler->RegisterEvent(script, nullptr);
-				else OnSettingsUpdateHandler->RemoveEvent(script, nullptr);
-			}
-		}
-		return true;
-	}
-	bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		FilterFormInt::Data filter = { nullptr, -1 };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script)) {
-			if (OnCrosshairHandler) {
-				if (setOrRemove)
-					OnCrosshairHandler->RegisterEvent(script, (void**)&filter);
-				else OnCrosshairHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-
-	bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		FilterFormInt::Data filter = { PlayerCharacter::GetSingleton(), -1 };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
-			if (OnAVChangeHandler) {
-				if (setOrRemove)
-					OnAVChangeHandler->RegisterEvent(script, (void**)&filter, flags);
-				else OnAVChangeHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-
-	bool Cmd_SetOnNPCActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		FilterFormInt::Data filter = { nullptr, -1 };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
-			if (OnNPCAVChangeHandler) {
-				if (setOrRemove)
-					OnNPCAVChangeHandler->RegisterEvent(script, (void**)&filter, flags);
-				else OnNPCAVChangeHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-	bool Cmd_SetJohnnyOnRemovePerkEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnRemovePerkHandler) {
-				if (setOrRemove)
-					OnRemovePerkHandler->RegisterEvent(script, (void**)filter);
-				else OnRemovePerkHandler->RemoveEvent(script, (void**)filter);
-			}
-		}
-		return true;
-	}
-	bool Cmd_SetJohnnyOnAddPerkEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnAddPerkHandler) {
-				if (setOrRemove)
-					OnAddPerkHandler->RegisterEvent(script, (void**)filter);
-				else OnAddPerkHandler->RemoveEvent(script, (void**)filter);
-			}
-		}
-		return true;
-	}
-	bool Cmd_SetJohnnyOnChallengeCompleteEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnChallengeCompleteHandler) {
-				if (setOrRemove)
-					OnChallengeCompleteHandler->RegisterEvent(script, (void**)filter);
-				else OnChallengeCompleteHandler->RemoveEvent(script, (void**)filter);
-			}
-		}
-		return true;
-	}
-	bool Cmd_SetJohnnySeenDataEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnSeenDataUpdateHandler) {
-				if (setOrRemove)
-					OnSeenDataUpdateHandler->RegisterEvent(script, (void**)filter);
-				else OnSeenDataUpdateHandler->RemoveEvent(script, (void**)filter);
-			}
-		}
-		return true;
-	}
-	bool Cmd_SetJohnnyOnDyingEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnDyingHandler) {
-				if (setOrRemove)
-					OnDyingHandler->RegisterEvent(script, (void**)filter);
-				else OnDyingHandler->RemoveEvent(script, (void**)filter);
-			}
-		}
-		return true;
-	}
-
-	bool Cmd_SetJohnnyOnStartQuestEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnStartQuestHandler) {
-				if (setOrRemove)
-					OnStartQuestHandler->RegisterEvent(script, (void**)filter);
-				else OnStartQuestHandler->RemoveEvent(script, (void**)filter);
-			}
-		}
-
-		return true;
-	}
-
-	bool Cmd_SetJohnnyOnStopQuestEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnStopQuestHandler) {
-				if (setOrRemove)
-					OnStopQuestHandler->RegisterEvent(script, (void**)filter);
-				else OnStopQuestHandler->RemoveEvent(script, (void**)filter);
-			}
-		}
-
-		return true;
-	}
-
-	bool Cmd_SetJohnnyOnCompleteQuestEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnCompleteQuestHandler) {
-				if (setOrRemove)
-					OnCompleteQuestHandler->RegisterEvent(script, (void**)filter);
-				else OnCompleteQuestHandler->RemoveEvent(script, (void**)filter);
-			}
-		}
-		return true;
-	}
-
-	bool Cmd_SetJohnnyOnFailQuestEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnFailQuestHandler) {
-				if (setOrRemove)
-					OnFailQuestHandler->RegisterEvent(script, (void**)filter);
-				else OnFailQuestHandler->RemoveEvent(script, (void**)filter);
-			}
-		}
-		return true;
-	}
-
-	bool Cmd_SetJohnnyOnRenderUpdateEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		uint32_t flags = 0;
-		uint32_t optionalFlags = 0;
-
-		enum EnumFlags {
-			kDoNotFireInRenderMenu = 1 << 0,
-			kDoNotFireInGameMode = 1 << 1,
-			kUseGamePreEvent = 1 << 2,
-		};
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &optionalFlags) && script && IS_TYPE(script, Script)) {
-			if (!(optionalFlags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler) {
-				if (!(optionalFlags & kUseGamePreEvent)) {
-					if (setOrRemove)
-						OnRenderGameModeUpdateHandler->RegisterEvent(script, nullptr);
-					else OnRenderGameModeUpdateHandler->RemoveEvent(script, nullptr);
-				}
-				else if (OnRenderGamePreUpdateHandler) {
-					if (setOrRemove)
-						OnRenderGamePreUpdateHandler->RegisterEvent(script, nullptr);
-					else OnRenderGamePreUpdateHandler->RemoveEvent(script, nullptr);
-				}
-			}
-
-			if (!(optionalFlags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler) {
-				if (setOrRemove)
-					OnRenderRenderedMenuUpdateHandler->RegisterEvent(script, nullptr);
-				else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script, nullptr);
-			}
-		}
-
-		return true;
-	}
-
-	bool Cmd_SetOnProcessLevelChangeEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		FilterFormInt::Data filter = { nullptr, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script)) {
-			if (OnPLChangeHandler) {
-				if (setOrRemove)
-					OnPLChangeHandler->RegisterEvent(script, (void**)&filter);
-				else OnPLChangeHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-
-
-	bool Cmd_SetJohnnyOnRadioPostSoundAttachEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnRadioPostSoundAttachHandler) {
-				if (setOrRemove)
-					OnRadioPostSoundAttachHandler->RegisterEvent(script, (void**)&filter);
-				else OnRadioPostSoundAttachHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-
-	bool Cmd_SetJohnnyOnKeyboardControllerSelectionChangeEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		FilterInt::Data filter{};
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script)) {
-			if (OnKeyboardControllerSelectionChangeHandler) {
-				if (setOrRemove)
-					OnKeyboardControllerSelectionChangeHandler->RegisterEvent(script, (void**)&filter);
-				else OnKeyboardControllerSelectionChangeHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-
-
-
-
-	bool Cmd_SetJohnnyOnSleepWaitEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		FilterInt::Data filter{};
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script)) {
-			if (OnSleepWaitEventHandler) {
-				if (setOrRemove)
-					OnSleepWaitEventHandler->RegisterEvent(script, (void**)&filter);
-				else OnSleepWaitEventHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-
-	bool Cmd_SetOnTakeBackItemEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[2] = { nullptr, nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0], &filter[1]) && script && IS_TYPE(script, Script)) {
-			if (OnTakeBackItemHandler) {
-				if (setOrRemove)
-					OnTakeBackItemHandler->RegisterEvent(script, (void**)&filter);
-				else OnTakeBackItemHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-
-
-	bool Cmd_SetOnNPCResponseEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		FilterInt::Data filter{};
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script)) {
-			if (OnNPCResponseHandler) {
-				if (setOrRemove)
-					OnNPCResponseHandler->RegisterEvent(script, (void**)&filter);
-				else OnNPCResponseHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-
-	bool Cmd_SetOnGeneralSubtitleEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnGeneralSubtitleHandler) {
-				if (setOrRemove)
-					OnGeneralSubtitleHandler->RegisterEvent(script, (void**)&filter);
-				else OnGeneralSubtitleHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-
-	bool Cmd_SetOnReputationChangeEventHandler_Execute(COMMAND_ARGS) {
-		uint32_t setOrRemove = 0;
-		Script* script = nullptr;
-		TESForm* filter[1] = { nullptr };
-		uint32_t flags = 0;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter[0]) && script && IS_TYPE(script, Script)) {
-			if (OnReputationChangeHandler) {
-				if (setOrRemove)
-					OnReputationChangeHandler->RegisterEvent(script, (void**)&filter);
-				else OnReputationChangeHandler->RemoveEvent(script, (void**)&filter);
-			}
-		}
-		return true;
-	}
-
-namespace JohnnyEvents {
 
 
 	uint32_t handlePreRenderEvent() {
@@ -866,6 +501,24 @@ namespace JohnnyEvents {
 	}
 
 
+	void RegisterOnNPCActorValueChange(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		if (OnNPCAVChangeHandler) {
+			if (toggle)
+				OnNPCAVChangeHandler->RegisterEvent(script, filters, userFlags);
+			else OnNPCAVChangeHandler->RemoveEvent(script, filters);
+		}
+	}
+
+	void RegisterOnTakeBackItem(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		if (OnTakeBackItemHandler) {
+			if (toggle)
+				OnTakeBackItemHandler->RegisterEvent(script, filters);
+			else OnTakeBackItemHandler->RemoveEvent(script, filters);
+		}
+	}
+
 	void Install() {
 		OnDyingHandler = JGCreateEvent("OnDying", 1, 1);
 		OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1);
@@ -978,6 +631,136 @@ namespace JohnnyEvents {
 			EventInfo->DeleteEvents();
 		}
 	}
-}
 
+	void Register(EventInformation* eventInfo, Script* script, void** filters, bool toggle, uint32_t userFlags = 0)
+	{
+		if (eventInfo) {
+			if (toggle)
+				eventInfo->RegisterEvent(script, filters, userFlags);
+			else eventInfo->RemoveEvent(script, filters);
+		}
+	}
+
+	void RegisterOnDying(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnDyingHandler, script, filters, toggle);
+	}
+
+	void RegisterOnStartQuest(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnStartQuestHandler, script, filters, toggle);
+	}
+
+	void RegisterOnStopQuest(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnStopQuestHandler, script, filters, toggle);
+	}
+
+	void RegisterOnFailQuest(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnFailQuestHandler, script, filters, toggle);
+	}
+
+	void RegisterOnCompleteQuest(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnCompleteQuestHandler, script, filters, toggle);
+	}
+
+	void RegisterOnSeenDataUpdate(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnSeenDataUpdateHandler, script, filters, toggle);
+	}
+
+	void RegisterOnLimbGone(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnLimbGoneHandler, script, filters, toggle);
+	}
+	void RegisterOnChallengeComplete(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnChallengeCompleteHandler, script, filters, toggle);
+	}
+	void RegisterOnCrosshair(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnCrosshairHandler, script, filters, toggle);
+	}
+	void RegisterOnSettingsUpdate(Script* script, bool toggle, uint32_t userFlags)
+	{
+		Register(OnSettingsUpdateHandler, script, nullptr, toggle);
+	}
+	void RegisterOnAddPerk(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnAddPerkHandler, script, filters, toggle);
+	}
+	void RegisterOnRemovePerk(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnRemovePerkHandler, script, filters, toggle);
+	}
+	void RegisterOnActorValueChange(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnAVChangeHandler, script, filters, toggle, userFlags);
+	}
+
+	void RegisterOnProcessLevelChange(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnPLChangeHandler, script, filters, toggle);
+	}
+
+	void RegisterOnRadioPostSoundAttach(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnRadioPostSoundAttachHandler, script, filters, toggle);
+	}
+
+	void RegisterOnInputSwitch(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnKeyboardControllerSelectionChangeHandler, script, filters, toggle);
+	}
+
+	void RegisterOnSleepWait(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnSleepWaitEventHandler, script, filters, toggle);
+	}
+
+	enum EnumFlags {
+		kDoNotFireInRenderMenu = 1 << 0,
+		kDoNotFireInGameMode = 1 << 1,
+		kUseGamePreEvent = 1 << 2,
+	};
+
+	void RegisterOnRender(Script* script, bool toggle, uint32_t userFlags)
+	{
+		if (!(userFlags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler) {
+			if (!(userFlags & kUseGamePreEvent)) {
+				if (toggle)
+					OnRenderGameModeUpdateHandler->RegisterEvent(script, nullptr);
+				else OnRenderGameModeUpdateHandler->RemoveEvent(script, nullptr);
+			}
+			else if (OnRenderGamePreUpdateHandler) {
+				if (toggle)
+					OnRenderGamePreUpdateHandler->RegisterEvent(script, nullptr);
+				else OnRenderGamePreUpdateHandler->RemoveEvent(script, nullptr);
+			}
+		}
+
+		if (!(userFlags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler) {
+			if (toggle)
+				OnRenderRenderedMenuUpdateHandler->RegisterEvent(script, nullptr);
+			else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script, nullptr);
+		}
+	}
+
+	void RegisterOnNPCResponse(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnNPCResponseHandler, script, filters, toggle);
+	}
+
+	void RegisterOnGeneralSubtitle(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnGeneralSubtitleHandler, script, filters, toggle);
+	}
+
+	void RegisterOnReputationChange(Script* script, void** filters, bool toggle, uint32_t userFlags)
+	{
+		Register(OnReputationChangeHandler, script, filters, toggle);
+	}
+}
 

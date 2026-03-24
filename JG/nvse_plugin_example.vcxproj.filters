@@ -319,6 +319,9 @@
     <ClCompile Include="internal\decoding.cpp">
       <Filter>internal</Filter>
     </ClCompile>
+    <ClCompile Include="functions\fn_event.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -780,6 +783,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\fn_event.h">
+      <Filter>functions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

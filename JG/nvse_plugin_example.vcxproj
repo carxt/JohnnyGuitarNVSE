@@ -147,6 +147,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="functions\fn_av.cpp" />
     <ClCompile Include="functions\fn_book.cpp" />
     <ClCompile Include="functions\fn_dial.cpp" />
+    <ClCompile Include="functions\fn_event.cpp" />
     <ClCompile Include="functions\fn_file.cpp" />
     <ClCompile Include="functions\fn_form.cpp" />
     <ClCompile Include="functions\fn_gamebryo.cpp" />
@@ -248,6 +249,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="functions\fn_book.h" />
     <ClInclude Include="functions\fn_common.h" />
     <ClInclude Include="functions\fn_dial.h" />
+    <ClInclude Include="functions\fn_event.h" />
     <ClInclude Include="functions\fn_file.h" />
     <ClInclude Include="functions\fn_form.h" />
     <ClInclude Include="functions\fn_gamebryo.h" />

@@ -14,6 +14,7 @@
 #include "functions/fn_book.h"
 #include "functions/fn_dial.h"
 #include "functions/fn_gamebryo.h"
+#include "functions/fn_event.h"
 #include "nvse_version.h"
 #include "Bethesda/AutoMemContext.hpp"
 #include "JIP/JIPFixes.hpp"
