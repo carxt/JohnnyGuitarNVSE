@@ -37,6 +37,7 @@
 #include <JG/ExtraMiscStats.hpp>
 #include <events/LambdaVariableContext.h>
 #include <decoding.h>
+#include <misc/WorldToScreen.h>
 
 BS_ALLOCATORS
 

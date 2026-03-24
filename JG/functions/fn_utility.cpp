@@ -571,44 +571,21 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 bool Cmd_SetCameraTranslate_Execute(COMMAND_ARGS) {
 	using namespace CameraOverride;
 	int override = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &kCameraPos.x, &kCameraPos.y, &kCameraPos.z)) {
-		OverridePos(override > 0);
+	NiVector3 kNewPos;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &kNewPos.x, &kNewPos.y, &kNewPos.z)) {
+		OverridePos(override > 0, kNewPos);
 	}
 	return true;
 }
 
-// TODO move more of the logic to CameraOverride.cpp
 bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
-	using namespace CameraOverride;
 	float fAngle = 0.f;
 	TESObjectREFR* pRef = nullptr;
 	int override = 0;
+	int eAxis;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &eAxis, &fAngle, &pRef)) {
-		OverrideRot(override > 0);
-		fAngle = fAngle * 0.01745329252; // PI / 180
-		NiMatrix3 kNewRot;
-		switch (eAxis) {
-		case kCameraRotationType_None:
-			kCameraRot = NiMatrix3::IDENTITY;
-			break;
-		case kCameraRotationType_X:
-			kNewRot.MakeXRotation(fAngle);
-			break;
-		case kCameraRotationType_Y:
-			kNewRot.MakeYRotation(fAngle);
-			break;
-		case kCameraRotationType_Z:
-			kNewRot.MakeZRotation(fAngle);
-			break;
-		}
-
-		if (eAxis > kCameraRotationType_None) {
-			kCameraRot = kCameraRot * kNewRot;
-		}
-
-		if (pRef) {
-			uiReferenceToTrack = pRef->GetFormID();
-		}
+		CameraOverride::OverrideRot(override > 0, eAxis, fAngle, pRef);
+		
 	}
 	return true;
 }

@@ -76,14 +76,42 @@ namespace CameraOverride {
 		WriteRelCall(0x94BDD5, uint32_t(SetCameraRotateHook));
 	}
 
-	void OverridePos(bool override)
+	void OverridePos(bool override, const NiVector3& kNewPos)
 	{
 		bOverrideCameraPos = override;
+		if (override) {
+			kCameraPos = kNewPos;
+		}
 	}
 
-	void OverrideRot(bool override)
+	void OverrideRot(bool override, int axis, float fAngle, TESObjectREFR* pRef)
 	{
 		bOverrideCameraRot = override;
+		eAxis = axis;
+		fAngle = fAngle * 0.01745329252; // PI / 180
+		NiMatrix3 kNewRot;
+		switch (eAxis) {
+		case kCameraRotationType_None:
+			kCameraRot = NiMatrix3::IDENTITY;
+			break;
+		case kCameraRotationType_X:
+			kNewRot.MakeXRotation(fAngle);
+			break;
+		case kCameraRotationType_Y:
+			kNewRot.MakeYRotation(fAngle);
+			break;
+		case kCameraRotationType_Z:
+			kNewRot.MakeZRotation(fAngle);
+			break;
+		}
+
+		if (eAxis > kCameraRotationType_None) {
+			kCameraRot = kCameraRot * kNewRot;
+		}
+
+		if (pRef) {
+			uiReferenceToTrack = pRef->GetFormID();
+		}
 	}
 
 }
