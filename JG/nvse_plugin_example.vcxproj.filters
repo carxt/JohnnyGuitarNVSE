@@ -202,9 +202,6 @@
     <ClCompile Include="functions\fn_book.cpp">
       <Filter>functions</Filter>
     </ClCompile>
-    <ClCompile Include="decoding.cpp">
-      <Filter>internal</Filter>
-    </ClCompile>
     <ClCompile Include="functions\fn_dial.cpp">
       <Filter>functions</Filter>
     </ClCompile>
@@ -307,13 +304,20 @@
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
-    <ClCompile Include="functions\fn_gamebryo.cpp" />
-    <ClCompile Include="internal\serialization.cpp" />
     <ClCompile Include="events\EventFramework.cpp">
       <Filter>events</Filter>
     </ClCompile>
     <ClCompile Include="events\JohnnyEvents.cpp">
       <Filter>events</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_gamebryo.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\serialization.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\decoding.cpp">
+      <Filter>internal</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

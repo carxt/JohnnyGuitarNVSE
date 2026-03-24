@@ -141,7 +141,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="..\shared\BSMemory\BSScrapMemory.cpp" />
     <ClCompile Include="..\shared\SafeWrite\SafeWrite.cpp" />
     <ClCompile Include="..\shared\Utils\DebugLog.cpp" />
-    <ClCompile Include="decoding.cpp" />
     <ClCompile Include="events\EventFramework.cpp" />
     <ClCompile Include="events\JohnnyEvents.cpp" />
     <ClCompile Include="events\LambdaVariableContext.cpp" />
@@ -158,6 +157,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="functions\fn_terminal.cpp" />
     <ClCompile Include="functions\fn_ui.cpp" />
     <ClCompile Include="functions\fn_utility.cpp" />
+    <ClCompile Include="internal\decoding.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AILinearTaskThreadManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp" />
