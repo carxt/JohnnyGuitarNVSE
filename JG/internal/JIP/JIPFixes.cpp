@@ -1242,23 +1242,31 @@ namespace JIPFixes {
 			return;
 		}
 
-		{
-			std::vector<uint8_t> kBuffer(JIP_TARGET_SIZE);
-			DWORD dwBytesRead = 0;
-			BOOL bRead = ReadFile(hJIPFile, kBuffer.data(), dwFileSize, &dwBytesRead, nullptr);
+		DWORD dwBytesRead = 0;
+		HANDLE hMemoryMapping = CreateFileMapping(hJIPFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
+		if (!hMemoryMapping) {
 			CloseHandle(hJIPFile);
+			ShowErrorMessage("Failed to create JIP LN mapping!");
+			return;
+		}
 
-			if (bRead) {
-				uint32_t uiHash = crc32(kBuffer.data(), kBuffer.size());
-				if (uiHash != JIP_TARGET_HASH) {
-					ShowErrorMessage("Incompatible JIP LN binary!");
-					return;
-				}
-			}
-			else {
-				ShowErrorMessage("Failed to read JIP LN!");
-				return;
-			}
+		const uint8_t* pFileData = reinterpret_cast<const uint8_t*>(MapViewOfFile(hMemoryMapping, FILE_MAP_READ, 0, 0, 0));
+		if (!pFileData) {
+			CloseHandle(hMemoryMapping);
+			CloseHandle(hJIPFile);
+			ShowErrorMessage("Failed to read JIP LN!");
+			return;
+		}
+
+		const uint32_t uiHash = crc32(pFileData, dwFileSize);
+
+		UnmapViewOfFile(pFileData);
+		CloseHandle(hMemoryMapping);
+		CloseHandle(hJIPFile);
+
+		if (uiHash != JIP_TARGET_HASH) {
+			ShowErrorMessage("Incompatible JIP LN binary!");
+			return;
 		}
 
 		hJIP = hJIPModule;
