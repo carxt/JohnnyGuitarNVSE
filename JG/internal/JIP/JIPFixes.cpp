@@ -1355,6 +1355,32 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace GetSelectedItemRefFix {
+
+		static uint32_t uiReturnAddr;
+		void __declspec(naked) GetBarterRef_Asm() {
+			__asm {
+				test	eax, eax
+				jz		NO_MERCHANT_CONTAINER
+
+				mov     edx, [eax + 0xC]
+				jmp		EXIT
+
+				NO_MERCHANT_CONTAINER:
+				mov     edx, dword ptr ds : [0x11D8FA4]
+				mov     edx, [edx + 0x80]
+
+			EXIT:
+				jmp		uiReturnAddr
+			}
+		}
+
+		void InitHooks() {
+			uiReturnAddr = GetJIPAddress(0x10038FA2);
+			WriteRelJump(GetJIPAddress(0x10038F4A), GetBarterRef_Asm);
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -1468,6 +1494,7 @@ namespace JIPFixes {
 			OnMenuClickFix::InitHooks();
 			GetMenuItemListRefsFix::InitHooks();
 			WaterRenderFix::InitHooks();
+			GetSelectedItemRefFix::InitHooks();
 		}
 	}
 
