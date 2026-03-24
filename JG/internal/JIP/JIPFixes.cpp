@@ -1241,7 +1241,6 @@ namespace JIPFixes {
 				apWaterShaderProp->bDepth = false;
 				apWaterShaderProp->bRefractions = false;
 				apWaterShaderProp->kVarAmounts.fWaterOpacity = WATER_OPACITY;
-				apWaterShaderProp->fFogAmount = 1.f;
 				if (!TES::GetSingleton()->currentInterior && spSkyReflectionMap.Get()) {
 					if (apWaterShaderProp->bReflections) {
 						apWaterShaderProp->spReflectionMap = spSkyReflectionMap.Get();
