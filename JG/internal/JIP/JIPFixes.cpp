@@ -23,18 +23,37 @@ extern NVSECommandTableInterface* g_cmdTableInterface;
 extern NVSEScriptInterface* g_scriptInterface;
 extern bool bFixJIP;
 extern bool bIsGECK;
-extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);;
+extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
+
+static HMODULE hJIP = 0;
+constexpr uint32_t CRC32_TABLE_SIZE = 256;
+constexpr uint32_t JIP_TARGET_HASH = 0x9DF36B6;
+constexpr uint32_t JIP_TARGET_SIZE = 502272;
+
+static size_t __fastcall GetJIPAddress(size_t aiAddress) {
+	return reinterpret_cast<size_t>(hJIP) + aiAddress - 0x10000000;
+}
+
+namespace JIPSettings {
+
+	bool IsSettingClear(const char* apSetting, const char* apPath) {
+		return GetPrivateProfileInt("JIP", apSetting, 1, apPath) == 0;
+	}
+
+	void InitConditionalHooks() {
+		char cFilename[MAX_PATH];
+		GetModuleFileNameA(NULL, cFilename, MAX_PATH);
+		char* pLastSlash = strrchr(cFilename, '\\') + 1;
+		uint32_t uiLength = MAX_PATH - (pLastSlash - cFilename);
+		strcpy_s(pLastSlash, uiLength, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
+
+		if (IsSettingClear("bFixPositiveChemDuration", cFilename))
+			PatchMemoryNopRange(GetJIPAddress(0x100128C3), GetJIPAddress(0x100128E1));
+	}
+
+}
 
 namespace JIPFixes {
-
-	static HMODULE hJIP = 0;
-	constexpr uint32_t CRC32_TABLE_SIZE = 256;
-	constexpr uint32_t JIP_TARGET_HASH = 0x9DF36B6;
-	constexpr uint32_t JIP_TARGET_SIZE = 502272;
-
-	static size_t __fastcall GetJIPAddress(size_t aiAddress) {
-		return reinterpret_cast<size_t>(hJIP) + aiAddress - 0x10000000;
-	}
 
 	static constexpr std::array<uint32_t, CRC32_TABLE_SIZE> initCRC32Table() {
 		constexpr uint32_t polynomial = 0xEDB88320;
@@ -1205,6 +1224,7 @@ namespace JIPFixes {
 
 		}
 		else {
+			JIPSettings::InitConditionalHooks();
 			EarlyFixedStrings::InitHooks();
 		}
 	}
