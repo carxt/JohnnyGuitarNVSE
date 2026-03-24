@@ -265,7 +265,7 @@
     <ClCompile Include="functions\fn_math.cpp">
       <Filter>functions</Filter>
     </ClCompile>
-    <ClCompile Include="functions\fn_gamebyo.cpp">
+    <ClCompile Include="functions\fn_gamebryo.cpp">
       <Filter>functions</Filter>
     </ClCompile>
     <ClCompile Include="functions\fn_mediaset.cpp">
