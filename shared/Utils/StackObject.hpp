@@ -3,7 +3,7 @@
 template <class T, uint32_t auiConstructAddr = 0, uint32_t auiDestructAddr = 0>
 class StackObject {
 private:
-	alignas(T) std::byte data[sizeof(T)];
+	uint8_t data[sizeof(T)];
 
 public:
 	template <typename ...Args>

@@ -12,12 +12,16 @@
 #include "ParamInfos.h"
 #include "PluginAPI.h"
 #include "utility.h"
+#include <decoding.h>
 
 #include "Shared/BSMemory/BSScrapMemory.hpp"
+#include "Shared/Utils/StackObject.hpp"
+#include "Shared/Utils/CustomClass.hpp"
 
 #include <array>
 #include <GameUI.h>
 
+class BSRenderedTexture;
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern NVSEScriptInterface* g_scriptInterface;
@@ -1194,6 +1198,159 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace WaterRenderFix {
+		
+		constexpr float WATER_OPACITY = 0.8f;
+
+		static constexpr AddressPtr<NiPointer<BSRenderedTexture>, 0x11C7C2C>	spSkyReflectionMap;
+
+		// Greetings from Real Time Reflections
+		class JIPCullingProcess : public CustomClass<BSCullingProcess> {
+		private:
+			struct WaterShaderEntry {
+				bool							bLOD;
+				bool							bDepth;
+				bool							bReflect;
+				bool							bRefract;
+				float							fWaterOpacity;
+				NiPointer<BSRenderedTexture>	spReflectionTexture;
+			};
+			
+			// Holy crap, stl sucks
+			using ScrapMap = std::unordered_map<WaterShaderProperty*, WaterShaderEntry, std::hash<WaterShaderProperty*>, std::equal_to<WaterShaderProperty*>, BSScrapAllocator<std::pair<WaterShaderProperty* const, WaterShaderEntry>>>;
+
+			ScrapMap kWaterShaderProps;
+
+			bool __fastcall DowngradeWaterShader(WaterShaderProperty* apWaterShaderProp) {
+				if (apWaterShaderProp->bDisplacement)
+					return false;
+
+				WaterShaderEntry kExistingEntry;
+				auto kIter = kWaterShaderProps.find(apWaterShaderProp);
+				if (kIter != kWaterShaderProps.end()) {
+					return true;
+				}
+
+				WaterShaderEntry kEntry;
+				kEntry.bDepth = apWaterShaderProp->bDepth;
+				kEntry.bReflect = apWaterShaderProp->bReflections;
+				kEntry.bRefract = apWaterShaderProp->bRefractions;
+				kEntry.fWaterOpacity = apWaterShaderProp->kVarAmounts.fWaterOpacity;
+				kEntry.spReflectionTexture = apWaterShaderProp->spReflectionMap;
+
+				apWaterShaderProp->bDepth = false;
+				apWaterShaderProp->bRefractions = false;
+				apWaterShaderProp->kVarAmounts.fWaterOpacity = WATER_OPACITY;
+				apWaterShaderProp->fFogAmount = 1.f;
+				if (!TES::GetSingleton()->currentInterior && spSkyReflectionMap.Get()) {
+					if (apWaterShaderProp->bReflections) {
+						apWaterShaderProp->spReflectionMap = spSkyReflectionMap.Get();
+					}
+				}
+				else {
+					apWaterShaderProp->bReflections = false;
+				}
+
+				apWaterShaderProp->ClearRenderPasses();
+
+				kWaterShaderProps.insert({ apWaterShaderProp, kEntry });
+				return true;
+			}
+
+			void __fastcall RestoreWaterShaders() {
+				for (auto& rItem : kWaterShaderProps) {
+					WaterShaderProperty* pKey = rItem.first;
+					WaterShaderEntry& rEntry = rItem.second;
+					if (pKey) {
+						pKey->bDepth = rEntry.bDepth;
+						pKey->bReflections = rEntry.bReflect;
+						pKey->bRefractions = rEntry.bRefract;
+						pKey->kVarAmounts.fWaterOpacity = rEntry.fWaterOpacity;
+						pKey->spReflectionMap = rEntry.spReflectionTexture;
+
+						pKey->ClearRenderPasses();
+					}
+				}
+			}
+
+			void _Append(NiGeometry* apGeom) {
+				BSShaderProperty* pShaderProp = apGeom->shaderProp;
+				if (pShaderProp->iShader == 17) {
+					if (!DowngradeWaterShader(static_cast<WaterShaderProperty*>(const_cast<BSShaderProperty*>(pShaderProp))))
+						return;
+				}
+
+				spAccumulator->RegisterObject(apGeom);
+			}
+
+		public:
+			void __fastcall Initialize() {
+				BuildVTable<BSCullingProcess, 20>(
+					{
+						{ 19, &JIPCullingProcess::_Append }
+					},
+					0x101E2EC
+				);
+
+				new (&kWaterShaderProps) ScrapMap();
+			}
+
+			void __fastcall Destroy() {
+				RestoreWaterShaders();
+				kWaterShaderProps.~ScrapMap();
+			}
+		};
+
+		struct JIPRenderData {
+			uint32_t	uiWidth;
+			uint32_t	uiHeight;
+			D3DFORMAT	eD3DFormat;
+			uint32_t	uiRenderMode;
+			uint32_t	uiBackgroundColorMask;
+			uint32_t	eImageSpaceEffect;
+		};
+
+		void __fastcall RenderWater(void* apWaterManager, NiCamera* apCamera) {
+			if (TES::GetSingleton()->currentInterior)
+				return;
+
+			BSShaderAccumulator* pAccum = TESMain::GetSingleton()->spDrawWorldAccum;
+			if (pAccum->bCellHasWater && !pAccum->bIsUnderwater) {
+				ThisCall(0x4EAF80, apWaterManager, apCamera);
+				ThisCall(0x4EBBE0, apWaterManager);
+			}
+		}
+
+		void __cdecl AccumulateScene(NiCamera* apCamera, NiNode* apNode, BSCullingProcess* apCullingProcess) {
+			BSShaderAccumulator* pAccum = TESMain::GetSingleton()->spDrawWorldAccum;
+
+			apCullingProcess->spAccumulator->bCellHasWater = pAccum->bCellHasWater;
+			apCullingProcess->spAccumulator->bIsUnderwater = pAccum->bIsUnderwater;
+			apCullingProcess->spAccumulator->iCurrentWaterHeight = pAccum->iCurrentWaterHeight;
+
+			if (pAccum->bCellHasWater) {
+				StackObject<JIPCullingProcess, 0x4A0EB0, 0x4A0F60> kCullingProcess(nullptr);
+				kCullingProcess->m_pkCamera = apCullingProcess->m_pkCamera;
+				kCullingProcess->eCullMode = apCullingProcess->eCullMode;
+				kCullingProcess->spAccumulator = apCullingProcess->spAccumulator;
+				kCullingProcess->Initialize();
+				CdeclCall(0xB6BEE0, apCamera, apNode, &kCullingProcess);
+				CdeclCall(0xB6C0D0, apCamera, apCullingProcess->spAccumulator);
+				kCullingProcess->Destroy();
+			}
+			else {
+				CdeclCall(0xB6BEE0, apCamera, apNode, apCullingProcess);
+				CdeclCall(0xB6C0D0, apCamera, apCullingProcess->spAccumulator);
+			}
+		}
+
+		void InitHooks() {
+			SafeWrite32(GetJIPAddress(0x10004963) + 1, uint32_t(AccumulateScene));
+			ReplaceCall(GetJIPAddress(0x1002D27D), RenderWater);
+			PatchMemoryNop(GetJIPAddress(0x10004976), 2);
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -1306,6 +1463,7 @@ namespace JIPFixes {
 			WeaponModEffectsFix::InitHooks();
 			OnMenuClickFix::InitHooks();
 			GetMenuItemListRefsFix::InitHooks();
+			WaterRenderFix::InitHooks();
 		}
 	}
 

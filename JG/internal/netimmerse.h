@@ -5,6 +5,7 @@
 
 #include "Gamebryo/NiObject.hpp"
 #include "Gamebryo/NiRTTI.hpp"
+#include "Bethesda/BSRenderedTexture.hpp"
 
 struct NavMeshInfo;
 class bhkRigidBody;
@@ -829,46 +830,73 @@ public:
 	uint32_t				unk18;		// 18
 };
 
+class NiShadeProperty : public NiProperty {
+public:
+	Bitfield16	m_usFlags;
+	int32_t		iShaderPropertyType;
+};
+ASSERT_SIZE(NiShadeProperty, 0x20);
+
+class ShadowSceneLight;
+class BSShaderAccumulator;
+
 // 60
-class BSShaderProperty : public NiObjectNET {
+class BSShaderProperty : public NiShadeProperty {
 public:
 	BSShaderProperty();
 	~BSShaderProperty();
 
-	virtual void	Unk_23(void);
-	virtual void	Unk_24(uint32_t arg1);
-	virtual void	Unk_25(void);
-	virtual void	Unk_26(uint32_t arg1);
-	virtual void	Unk_27(uint32_t arg1);
-	virtual void	Unk_28(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6);
-	virtual void	Unk_29(uint32_t arg1);
-	virtual void	Unk_2A(void);
-	virtual void	Unk_2B(uint32_t arg1);
-	virtual void	Unk_2C(uint32_t arg1, uint32_t arg2, uint32_t arg3);
-	virtual void	Unk_2D(void);
-	virtual void	Unk_2E(uint32_t arg1);
-	virtual void	Unk_2F(uint32_t arg1, uint32_t arg2);
-	virtual void	Unk_30(void);
+	class RenderPass {
+	public:
+		NiGeometry*			pGeometry;
+		uint16_t			usPassEnum;
+		uint8_t				eAccumulationHint;
+		bool				bFirstPass;
+		bool				bLastPass;
+		uint8_t				ucNumLights;
+		uint8_t				ucMaxNumLights;
+		uint8_t				ucExtraParam;
+		ShadowSceneLight**	ppSceneLights;
+	};
 
-	uint16_t			unk18;		// 18
-	uint16_t			unk1A;		// 1A
-	uint32_t			unk1C;		// 1C
-	uint32_t			unk20;		// 20
-	uint32_t			unk24;		// 24
-	float			flt28;		// 28
-	float			flt2C;		// 2C
-	float			flt30;		// 30
-	float			flt34;		// 34
-	uint32_t			unk38;		// 38
-	void* ptr03C;	// 3C	Seen 010B8480
-	uint32_t			unk40;		// 40
-	uint32_t			unk44;		// 44
-	uint32_t			unk48;		// 48
-	uint32_t			unk4C;		// 4C
-	uint32_t			unk50;		// 50
-	uint32_t			unk54;		// 54
-	uint32_t			unk58;		// 58
-	float			flt5C;		// 5C
+	class RenderPassArray : public NiTObjectArray<RenderPass*> {
+	public:
+		uint32_t uiPassCount;
+	};
+
+	virtual void						CopyTo(BSShaderProperty* apTarget);
+	virtual void						CopyToMembers(BSShaderProperty* apTarget);
+	virtual void						SetupGeometry(NiGeometry* apGeometry);
+	virtual RenderPassArray*			GetRenderPasses(const NiGeometry* apGeometry, const uint32_t auiEnabledPasses, uint16_t* apusPassCount, const uint32_t aeRenderMode, BSShaderAccumulator* apAccumulator, bool abAddPass);
+	virtual uint16_t					GetNumberofPasses(NiGeometry* apGeometry);
+	virtual RenderPassArray*			GetSIBlockRenderPasses() const;
+	virtual RenderPass*					GetRenderDepthPass(NiGeometry* apGeometry);
+	virtual BSShaderProperty*			ClarifyShader(NiGeometry* apGeometry, bool unk0 = 0, bool unk2 = 1);
+	virtual NiSourceTexture*			GetBaseTexture() const;
+	virtual RenderPassArray*			GetWaterFogPassList(NiGeometry* apGeometry);
+	virtual void						GetTextureUse(void* apCountFunc, class BGSTextureUseMap* apTexMap) const;
+	virtual void						PrecacheTextures() const;
+
+	Bitfield32			ulFlags[2];
+	float				fAlpha;
+	float				fFadeAlpha;
+	float				fEnvMapScale;
+	float				fCameraDistance;
+	int32_t				iLastRenderPassState;
+	RenderPassArray*	pRenderPassArray;
+	RenderPassArray*	pDepthMapRenderPassArray;
+	RenderPassArray*	pConstAlphaRenderPassArray;
+	RenderPassArray*	pLocalMapRenderPassArray;
+	RenderPassArray*	pSIBlockRenderPassArray;
+	RenderPassArray*	pWaterFogRenderPassArray;
+	RenderPassArray*	pSilhouettePassArray;
+	int32_t				iShader;
+	float				fDepthBias;
+
+	void ClearRenderPasses() {
+		if (pRenderPassArray)
+			pRenderPassArray->uiPassCount = 0;
+	}
 };
 static_assert(sizeof(BSShaderProperty) == 0x60);
 
@@ -878,34 +906,53 @@ public:
 	WaterShaderProperty();
 	~WaterShaderProperty();
 
-	uint8_t				byte060;		// 060
-	uint8_t				byte061;		// 061
-	uint8_t				byte062;		// 062
-	uint8_t				byte063;		// 063
-	uint32_t				unk064;			// 064
-	uint32_t				unk068;			// 068
-	float				flt06C;			// 06C
-	float				flt070;			// 070
-	uint32_t				unk074;			// 074
-	uint32_t				unk078;			// 078
-	uint8_t				byte07C;		// 07C
-	uint8_t				byte07D;		// 07D
-	uint8_t				byte07E;		// 07E
-	uint8_t				byte07F;		// 07F
-	uint8_t				byte080;		// 080
-	uint8_t				byte081;		// 081
-	uint8_t				byte082;		// 082
-	uint8_t				byte083;		// 083
-	uint32_t				unk084;			// 084
-	float				flt088[40];		// 088
-	uint32_t				unk128[3];		// 128
-	NiSourceTexture* srcTexture;	// 134
-	NiObject* noDepth;		// 138	Seen 010AE500
-	NiObject* reflections;	// 13C		"
-	NiObject* refractions;	// 140
-	NiObject* depth;			// 144		"
-	uint32_t				unk148;			// 148
-	uint32_t				unk14C;			// 14C
+	struct VarAmounts {
+		float fSunSpecularPower;
+		float fWaterReflectivityAmt;
+		float fWaterOpacity;
+		float fWaterDistortionAmt;
+	};
+
+	bool							bDisplacement;
+	bool							bLOD;
+	bool							bFullReflections;
+	bool							bDepth;
+	int32_t							iTexOffsetX;
+	int32_t							iTexOffsetY;
+	float							fBlendRadius;
+	float							fBlendNormalsAmount;
+	float							fFogFar;
+	float							fFogRange;
+	bool							bIsMoving;
+	bool							bInWater;
+	bool							bIsUnderwater;
+	bool							bUpdateConstants;
+	bool							bReflections;
+	bool							bRefractions;
+	bool							bObjectTexCoords;
+	bool							bSpecularLighting;
+	DWORD							uiStencilMask;
+	NiColorA						kShallowColor;
+	NiColorA						kDeepColor;
+	NiColorA						kReflectionColor;
+	VarAmounts						kVarAmounts;
+	NiPoint4						kBlendRadius;
+	NiPoint4						kDepthFalloff;
+	NiPoint4						kDepthOffset;
+	NiPoint4						kFresnelRI;
+	NiColorA						kTile;
+	float							fFresnelAmount;
+	float							fNoiseScale;
+	float							fFogAmount;
+	float							fUVScale;
+	NiTPointerList<NiLight*>		kLights;
+	NiPointer<NiTexture>			spNoiseHeightMap;
+	NiPointer<BSRenderedTexture>	spNoiseNormalMap;
+	NiPointer<BSRenderedTexture>	spReflectionMap;
+	NiPointer<BSRenderedTexture>	spRefractionMap;
+	NiPointer<BSRenderedTexture>	spDepthMap;
+	NiPointer<NiTexture>			spDisplacementNormalMap;
+	RenderPass*						pWaterPass;
 };
 static_assert(sizeof(WaterShaderProperty) == 0x150);
 
@@ -1794,12 +1841,12 @@ public:
 	NiAccumulator();
 	~NiAccumulator();
 
-	virtual void	Unk_23(void);
-	virtual void	Unk_24(void);
-	virtual void	Unk_25(void);
-	virtual void	Unk_26(uint32_t arg);
-	virtual void	Unk_27(void);
-	virtual void	Unk_28(void);
+	virtual void StartAccumulating(const NiCamera* pkCamera);
+	virtual void FinishAccumulating();
+	virtual void RegisterObjectArray(void* kArray);
+	virtual bool RegisterObject(NiGeometry* apGeometry);
+	virtual bool AddShared(NiAVObject* apObject);
+	virtual void ClearSharedMap();
 };
 
 class NiBackToFrontAccumulator : public NiAccumulator {
@@ -1863,11 +1910,13 @@ public:
 	AccumStruct			accum114;		// 114
 	AccumStruct			accum128;		// 128
 	uint32_t				unk13C[6];		// 13C
-	float				flt154;			// 154
-	float				flt158;			// 158
-	float				flt15C;			// 15C
-	float				flt160;			// 160
-	uint32_t				unk164[4];		// 164
+	NiColorA				flt154;			// 154
+	bool					bWaterReflection;
+	bool					bRenderWaterDepth;
+	bool					bCellHasWater;
+	bool					bIsUnderwater;
+	int32_t					iCurrentWaterHeight;
+	uint32_t				unk164[2];		// 168
 	BSBatchRenderer* batchRenderer;	// 174
 	uint32_t				unk178[7];		// 178
 	ShadowSceneNode* shadowScene;	// 194
@@ -2188,27 +2237,28 @@ public:
 	virtual void	Cull(NiCamera* camera, ShadowSceneNode* scene, NiCulledGeoList* culledGeo);
 	virtual void	AddGeo(NiGeometry* arg);
 
-	uint8_t				m_useAddGeoFn;	// 04 - call AddGeo when true, else just add to the list
-	uint8_t				pad05[3];		// 05
-	NiCulledGeoList* m_culledGeo;	// 08
-	uint32_t				unk0C[33];		// 0C
+	bool				m_bUseVirtualAppend;
+	NiCulledGeoList*	m_pkVisibleSet;	// 08
+	NiCamera*			m_pkCamera;
+	uint32_t			unk0C[32];		// 0C
 };
 static_assert(sizeof(NiCullingProcess) == 0x90);
 
-// CC
+class BSCompoundFrustum;
+
+// C8
 class BSCullingProcess : public NiCullingProcess {
 public:
 	BSCullingProcess();
 	~BSCullingProcess();
 
-	uint32_t					unk90;			// 90
-	uint32_t					unk94[10];		// 94
-	uint32_t					unkBC;			// BC
-	uint32_t					unkC0;			// C0
-	BSShaderAccumulator* shaderAccum;	// C4
-	uint32_t					unkC8;			// C8
+	uint32_t						eCullMode;			// 90
+	uint32_t						eTypeStack[10];		// 94
+	uint32_t						uiStackIndex;			// BC
+	BSCompoundFrustum*				pCompoundFrustum;			// C0
+	NiPointer<BSShaderAccumulator>	spAccumulator;	// C4
 };
-static_assert(sizeof(BSCullingProcess) == 0xCC);
+static_assert(sizeof(BSCullingProcess) == 0xC8);
 
 class NiTreeCtrl
 {
