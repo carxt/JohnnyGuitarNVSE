@@ -22,7 +22,8 @@ public:
 };
 
 // 020
-struct BaseExtraList {
+class BaseExtraList {
+public:
 	virtual void	Unk_00(void);
 
 	BSExtraData* m_data;					// 004
@@ -42,7 +43,8 @@ struct BaseExtraList {
 	char GetExtraFactionRank(TESFaction* faction);
 };
 
-struct ExtraDataList : public BaseExtraList {
+class ExtraDataList : public BaseExtraList {
+public:
 	ExtraDataList* CreateCopy();
 	static ExtraDataList* __stdcall Create(BSExtraData* xBSData = NULL);
 };

@@ -158,7 +158,7 @@ public:
 	TESForm* GetBaseForm();
 	bool GetDisabled(bool checkQueue = true) const;
 	ExtraContainerChanges* GetOrCreateContainerChanges();
-	ExtraContainerChanges::EntryDataList* GetContainerChangesList();
+	BSSimpleList<ItemChange*>* GetContainerChangesList();
 	
 	TESObjectCELL* GetParentCell();
 	NiAVObject* GetNiBlock(const char* blockName);
@@ -460,7 +460,7 @@ public:
 	virtual void		Unk_EC(void);
 	virtual void		Unk_ED(void);
 	virtual void		Unk_EE(void);
-	virtual ExtraContainerChanges::EntryData* GetPreferedWeapon(uint32_t unk);
+	virtual ItemChange* GetPreferedWeapon(uint32_t unk);
 	virtual void		Unk_F0(void);
 	virtual void		Unk_F1(void);
 	virtual void		Unk_F2(void);
@@ -681,7 +681,7 @@ public:
 	void PlayIdle(TESIdleForm* idleAnim);
 	float GetKillXP();
 	void DismemberLimb(uint32_t bodyPartID, bool explode);
-	void EquipItemAlt(ExtraContainerChanges::EntryData* itemEntry, bool noUnequip, bool noMessage);
+	void EquipItemAlt(ItemChange* itemEntry, bool noUnequip, bool noMessage);
 	void EquipContainer(TESContainer* container);
 	bool HasNoPath();
 
@@ -730,7 +730,7 @@ static_assert(sizeof(Character) == 0x1C8);
 class bhkRigidBody;
 struct ParentSpaceNode;
 struct TeleportLink;
-struct ItemChange;
+class ItemChange;
 class NiObject;
 struct MusicMarker;
 

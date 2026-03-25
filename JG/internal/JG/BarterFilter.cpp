@@ -16,14 +16,14 @@ namespace BarterFilter {
 	private:
 		static inline uintptr_t hookCall = a_addr;
 	public:
-		static  DWORD __cdecl Hook(ContChangesEntry* ref) {
+		static  DWORD __cdecl Hook(ItemChange* ref) {
 			auto shouldHide = CdeclCall<bool>(hookCall, ref);
 			if (shouldHide) { return shouldHide; }
 			auto barterMenu = *(BarterMenu**)0x11D8FA4;
 			if (!barterMenu) return shouldHide;
 			auto merchantRef = barterMenu->merchantRef;
 			if (!merchantRef) return shouldHide;
-			auto originalForm = ref->type;
+			auto originalForm = ref->pObject;
 			if (!PlayerCharacter::GetSingleton()) return shouldHide;
 			auto it = leftList.find(originalForm->GetFormID());
 			if (it != leftList.end()) {
@@ -46,14 +46,14 @@ namespace BarterFilter {
 	private:
 		static inline uintptr_t hookCall = a_addr;
 	public:
-		static  DWORD __cdecl Hook(ContChangesEntry* ref) {
+		static  DWORD __cdecl Hook(ItemChange* ref) {
 			auto shouldHide = CdeclCall<bool>(hookCall, ref);
 			if (shouldHide) { return shouldHide; }
 			auto barterMenu = *(BarterMenu**)0x11D8FA4;
 			if (!barterMenu) return shouldHide;
 			auto merchantRef = barterMenu->merchantRef;
 			if (!merchantRef) return shouldHide;
-			auto originalForm = ref->type;
+			auto originalForm = ref->pObject;
 			auto it = rightList.find(originalForm->GetFormID());
 			if (it != rightList.end()) {
 				auto& barterSet = it->second;

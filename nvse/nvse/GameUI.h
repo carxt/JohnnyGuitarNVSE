@@ -331,7 +331,7 @@ public:
 	enum
 	{
 		kFlag_RecalculateHeightsOnInsert = 1,
-		kFlag_FreeContChangeOnListItemDestruction = 2, // assumes the object is a ContChangesEntry - do not set this if the object isn't one...
+		kFlag_FreeContChangeOnListItemDestruction = 2, // assumes the object is a ItemChange - do not set this if the object isn't one...
 	};
 
 	Tile* parentTile;	// 0C
@@ -690,7 +690,16 @@ public:
 	uint32_t				unk90;			// 90
 };
 
-typedef ListBox<ContChangesEntry> MenuItemEntryList;
+typedef ListBox<ItemChange> MenuItemEntryList;
+
+struct HotKeysWheel {
+	Tile*		pWheel;
+	Tile*		pHotkeyTiles[8];
+	bool		bSelectingHotkey;
+	int32_t		iLastHighlightedHotkey;
+	uint32_t	uiHighlihtedHotkeyTrait;
+	uint32_t	uiHighlihtedTextTrait;
+};
 
 // 124
 class InventoryMenu : public Menu		// 1002
@@ -725,17 +734,14 @@ public:
 	uint32_t				filter;			// 084
 	uint32_t				unk088[12];		// 088
 	MenuItemEntryList	itemList;		// 0B8
-	TileRect* tile0E8;		// 0E8
-	TileRect* tile0EC;		// 0EC
-	TileRect* tile0F0;		// 0F0
-	TileRect* tile0F4;		// 0F4
-	TileRect* tile0F8;		// 0F8
-	TileRect* tile0FC;		// 0FC
-	TileRect* tile100;		// 100
-	TileRect* tile104;		// 104
-	TileRect* tile108;		// 108
-	uint32_t				unk10C[6];		// 10C
+	HotKeysWheel				kHotKeyWheel;		// 0E8
+	uint32_t				unk10C[2];		// 10C
+
+	static InventoryMenu* GetInstance() {
+		return *reinterpret_cast<InventoryMenu**>(0x11D9EA4);
+	}
 };
+ASSERT_SIZE(InventoryMenu, 0x124);
 
 // 2A4
 class StatsMenu : public Menu			// 1003
@@ -1430,7 +1436,7 @@ public:
 };
 static_assert(sizeof(TextEditMenu) == 0x5C);
 
-typedef tList<ContChangesEntry> BarterItemList;
+typedef tList<ItemChange> BarterItemList;
 
 // 120
 class BarterMenu : public Menu			// 1053

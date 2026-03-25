@@ -7,7 +7,7 @@
 struct ParamInfo;
 class TESForm;
 class TESObjectREFR;
-struct BaseExtraList;
+class BaseExtraList;
 
 #define playerID	0x7
 #define playerRefID 0x14

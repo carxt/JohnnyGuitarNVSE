@@ -60,25 +60,34 @@ AnimGroupClassify s_animGroupClassify[] =
 
 bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
 {
-	ExtraContainerChanges::EntryDataList* entryList = containerRef->GetContainerChangesList();
-	if (!entryList) return false;
-	ContChangesEntry* entry = entryList->FindForItem(data.type);
-	if (!entry) return false;
+	BSSimpleList<ItemChange*>* entryList = containerRef->GetContainerChangesList();
+	if (!entryList)
+		return false;
+	
+	BSSimpleList<ItemChange*>* pEntry = entryList->Find([&](BSSimpleList<ItemChange*>* apEntry) {
+		return apEntry->GetItem()->pObject == data.type;
+		}
+	);
+
+	if (!pEntry)
+		return false;
+
+	ItemChange* pChange = pEntry->GetItem();
+	if (!pChange)
+		return false;
+
 	data.xData = ExtraDataList::Create(xBSData);
-	if (!entry->extendData)
-	{
-		entry->extendData = BSMemory::malloc<ExtraContainerChanges::ExtendDataList>();
-		entry->extendData->Init();
-	}
-	entry->extendData->Insert(data.xData);
+	if (!pChange->pExtraLists)
+		pChange->pExtraLists = new BSSimpleList<ExtraDataList*>();
+	pChange->pExtraLists->AddHead(data.xData);
 	return true;
 }
 
-ExtraContainerChanges::EntryDataList* TESObjectREFR::GetContainerChangesList()
+BSSimpleList<ItemChange*>* TESObjectREFR::GetContainerChangesList()
 {
 	ExtraContainerChanges* xChanges = (ExtraContainerChanges*)this->extraDataList.
 		GetByType(kExtraData_ContainerChanges);
-	if (xChanges && xChanges->data) return xChanges->data->objList;
+	if (xChanges && xChanges->pChanges) return xChanges->pChanges->pItems;
 	return nullptr;
 }
 
