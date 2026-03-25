@@ -697,8 +697,8 @@ struct HotKeysWheel {
 	Tile*		pHotkeyTiles[8];
 	bool		bSelectingHotkey;
 	int32_t		iLastHighlightedHotkey;
-	uint32_t	uiHighlihtedHotkeyTrait;
-	uint32_t	uiHighlihtedTextTrait;
+	uint32_t	uiHighlightedHotkeyTrait;
+	uint32_t	uiHighlightedTextTrait;
 };
 
 // 124
