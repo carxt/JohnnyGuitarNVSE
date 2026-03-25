@@ -20,8 +20,8 @@ extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 extern GameTimeGlobals* g_gameTimeGlobals;
 
-float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ContChangesEntry* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
-(float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ContChangesEntry*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
+float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ItemChange* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
+(float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ItemChange*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
 
 
 bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
@@ -1733,7 +1733,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	TESObjectWEAP* weapon = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &weapon)) return true;
 	float condition = 1.0F;
-	ListNode<ExtraDataList>* extendPtr = nullptr;
+	ExtraDataList* extendPtr = nullptr;
 	if (!weapon) {
 		if (!thisObj) return true;
 		InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
@@ -1750,20 +1750,19 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 			weapon = (TESObjectWEAP*)invRef->data.type;
 			if NOT_ID(weapon, TESObjectWEAP) return true;
 			if (invRef->data.xData) {
-				condition = invRef->data.entry->GetItemHealthPerc() / 100.0F;
-				ListNode<ExtraDataList> tempExtend(invRef->data.xData);
-				extendPtr = &tempExtend;
+				condition = invRef->data.entry->GetItemHealth(true) / 100.0F;
+				extendPtr = invRef->data.xData;
 			}
 		}
 	}
 	else if NOT_ID(weapon, TESObjectWEAP) return true;
 	MiddleHighProcess* midHiProc = (MiddleHighProcess*)PlayerCharacter::GetSingleton()->baseProcess;
-	ContChangesEntry* weaponInfo = midHiProc->weaponInfo;
+	ItemChange* weaponInfo = midHiProc->weaponInfo;
 	TESForm* ammo = nullptr;
-	if (extendPtr && weaponInfo && (weaponInfo->type == weapon) && midHiProc->ammoInfo)
-		ammo = midHiProc->ammoInfo->type;
-	if (!ammo) ammo = weapon->GetAmmo();
-	ContChangesEntry tempEntry(extendPtr, 1, weapon);
+	if (!extendPtr && weaponInfo && (weaponInfo->pObject == weapon) && midHiProc->ammoInfo)
+		ammo = midHiProc->ammoInfo->pObject;
+	if (!ammo) 
+		ammo = weapon->GetAmmo();
 	midHiProc->weaponInfo = nullptr;
 	*result = GetWeaponDPS(&(PlayerCharacter::GetSingleton()->avOwner), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
 	midHiProc->weaponInfo = weaponInfo;
@@ -1963,18 +1962,24 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 
-	if (!thisObj) return true;
-	InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
-	if (!invRef || (invRef->containerRef != PlayerCharacter::GetSingleton())) return true;
-	uint8_t type = invRef->data.type->GetFormType();
-	if ((type != FORM_TYPE::TESObjectARMO) && (type != FORM_TYPE::TESObjectWEAP) && (type != FORM_TYPE::AlchemyItem)) return true;
+	if (!thisObj) 
+		return true;
 
-	ExtraDataList* xData = invRef->data.xData;
-	if (xData && xData->HasType(kExtraData_Hotkey))
-	{
-		ExtraHotkey* xHotkey = (ExtraHotkey*)xData->GetByType(kExtraData_Hotkey);
-		if (xHotkey)
-		{
+	InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
+	if (!pInvRef || pInvRef->containerRef != PlayerCharacter::GetSingleton())
+		return true;
+
+	if (!pInvRef->data.type)
+		return true;
+
+	FORM_TYPE eFormType = pInvRef->data.type->GetFormType();
+	if (eFormType != FORM_TYPE::TESObjectARMO && eFormType != FORM_TYPE::TESObjectWEAP && eFormType != FORM_TYPE::AlchemyItem)
+		return true;
+
+	ExtraDataList* pExtraData = pInvRef->data.xData;
+	if (pExtraData && pExtraData->HasType(kExtraData_Hotkey)) {
+		ExtraHotkey* xHotkey = (ExtraHotkey*)pExtraData->GetByType(kExtraData_Hotkey);
+		if (xHotkey) {
 			*result = xHotkey->index + 1;
 		}
 	}

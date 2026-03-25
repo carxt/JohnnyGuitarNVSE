@@ -237,14 +237,14 @@ TESForm* TESObjectWEAP::GetAmmoInInventory()
 		if (IS_TYPE(ammo.ammo, BGSListForm)) {
 			BGSListForm* ammoList = (BGSListForm*)ammo.ammo;
 			ExtraContainerChanges* xChanges = GetExtraType(PlayerCharacter::GetSingleton()->extraDataList, ContainerChanges);
-			if (ammoList && xChanges && xChanges->data) {
+			if (ammoList && xChanges && xChanges->pChanges) {
 				auto* pIter = ammoList->GetFormList();
 				while (pIter && !pIter->IsEmpty()) {
 					TESForm* pForm = pIter->GetItem();
 					pIter = pIter->GetNext();
 
 					if (IS_TYPE(pForm, TESAmmo)) {
-						uint32_t count = ThisCall<uint32_t>(0x4C8F30, xChanges->data, pForm);
+						uint32_t count = ThisCall<uint32_t>(0x4C8F30, xChanges->pChanges, pForm);
 						if (count > 0) 
 							return pForm;
 					}

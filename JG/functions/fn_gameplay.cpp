@@ -875,16 +875,21 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 			TESForm* containerOwner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
 			if (!containerOwner) return true;
 			ExtraContainerChanges* xChanges = (ExtraContainerChanges*)((Actor*)thisObj)->extraDataList.GetByType(kExtraData_ContainerChanges);
-			if (!xChanges || !xChanges->data || !xChanges->data->objList)
+			if (!xChanges || !xChanges->pChanges || !xChanges->pChanges->pItems)
 				return true;
-			ListNode<ContChangesEntry>* contChangesIter = xChanges->data->objList->Head();
-			ContChangesEntry* entry;
-			do {
-				if (!(entry = contChangesIter->data) || !entry->extendData || !entry->type) continue;
-				ListNode<ExtraDataList>* xdlIter = entry->extendData->Head();
+			BSSimpleList<ItemChange*>* contChangesIter = xChanges->pChanges->pItems->GetHead();
+			while (contChangesIter && !contChangesIter->IsEmpty()){
+				ItemChange* entry = contChangesIter->GetItem();
+				contChangesIter = contChangesIter->GetNext();
+
+				if (!entry || !entry->pExtraLists || !entry->pObject)
+					continue;
+
+				BSSimpleList<ExtraDataList*>* xdlIter = entry->pExtraLists->GetHead();
 				ExtraDataList* xData;
-				do {
-					xData = xdlIter->data;
+				while (xdlIter && !xdlIter->IsEmpty()){
+					xData = xdlIter->GetItem();
+					xdlIter = xdlIter->GetNext();
 					if (xData && xData->HasType(kExtraData_Ownership)) {
 						ExtraOwnership* xOwn = (ExtraOwnership*)xData->GetByType(kExtraData_Ownership);
 						if (xOwn->owner) {
@@ -895,8 +900,8 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 							}
 						}
 					}
-				} while (xdlIter = xdlIter->next);
-			} while (contChangesIter = contChangesIter->next);
+				}
+			}
 		}
 		else {
 			TESForm* owner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
@@ -910,16 +915,16 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* actor = static_cast<Actor*>(thisObj);
-	ContChangesEntry* weapInfo = actor->baseProcess->GetWeaponInfo();
-	if (weapInfo && weapInfo->type) {
+	ItemChange* weapInfo = actor->baseProcess->GetWeaponInfo();
+	if (weapInfo && weapInfo->pObject) {
 		bool hasDecreaseSpreadEffect = ThisCall<bool>(0x4BDA70, weapInfo, 3);
-		double minSpread = ThisCall<double>(0x524B80, weapInfo->type, hasDecreaseSpreadEffect);
-		double weapSpread = ThisCall<float>(0x524BE0, weapInfo->type, hasDecreaseSpreadEffect);
+		double minSpread = ThisCall<double>(0x524B80, weapInfo->pObject, hasDecreaseSpreadEffect);
+		double weapSpread = ThisCall<float>(0x524BE0, weapInfo->pObject, hasDecreaseSpreadEffect);
 		double spread = ThisCall<double>(0x8B0DD0, actor, 1);
 
 		float totalSpread = (weapSpread * spread + minSpread) * 0.01745329238474369;
 
-		TESAmmo* eqAmmo = ThisCall<TESAmmo*>(0x525980, weapInfo->type, static_cast<MobileObject*>(actor));
+		TESAmmo* eqAmmo = ThisCall<TESAmmo*>(0x525980, weapInfo->pObject, static_cast<MobileObject*>(actor));
 		totalSpread = CdeclCall<float>(0x59A030, 3, (eqAmmo ? &eqAmmo->effectList : nullptr), totalSpread);
 
 		double spreadPenalty = ThisCall<double>(0x8B0DD0, actor, 2);
@@ -931,7 +936,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 
 		bool hasSplitBeamEffect = ThisCall<bool>(0x4BDA70, weapInfo, 0xC);
 		if (hasSplitBeamEffect) {
-			totalSpread *= ThisCall<float>(0x4BCF60, weapInfo->type, 0xC, 1);
+			totalSpread *= ThisCall<float>(0x4BCF60, weapInfo->pObject, 0xC, 1);
 		}
 		*result = totalSpread;
 	}
@@ -1335,11 +1340,11 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS)
 		}
 		else
 		{
-			ContChangesEntry* wpnInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo();
-			if (wpnInfo && wpnInfo->extendData)
+			ItemChange* wpnInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo();
+			if (wpnInfo && wpnInfo->pExtraLists)
 			{
-				weapon = ((TESObjectWEAP*)wpnInfo->type);
-				xData = wpnInfo->extendData->GetFirstItem();
+				weapon = ((TESObjectWEAP*)wpnInfo->pObject);
+				xData = wpnInfo->pExtraLists->GetItem();
 			}
 		}
 		if (weapon && xData && (weapon->weaponSkill == kAVCode_Unarmed || weapon->weaponSkill == kAVCode_MeleeWeapons))

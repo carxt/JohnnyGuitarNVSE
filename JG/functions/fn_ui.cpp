@@ -328,10 +328,10 @@ bool Cmd_IsMenuPaused_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-float CalculateRepairedHealth(ContChangesEntry* target, ContChangesEntry* repairItem) {
+float CalculateRepairedHealth(ItemChange* target, ItemChange* repairItem) {
 	if (!target || !repairItem) return 0.0f;
-	float targetHealth = target->GetItemHealthPerc(true);
-	float repairItemHealth = repairItem->GetItemHealthPerc(true);
+	float targetHealth = target->GetItemHealth(true);
+	float repairItemHealth = repairItem->GetItemHealth(true);
 	int repairSkill = PlayerCharacter::GetSingleton()->avOwner.GetActorValueI(kAVCode_Repair);
 	int outParam = -1;
 	double result = CdeclCall<double>(0x648090, repairSkill, targetHealth, repairItemHealth, &outParam);
@@ -342,7 +342,7 @@ bool Cmd_UpdateRepairMenu_Execute(COMMAND_ARGS) {
 	*result = 0;
 	RepairMenu* rm = *(RepairMenu**)0x11DA75C;
 	if (!rm) return true;
-	ContChangesEntry* target = *(ContChangesEntry**)0x11DA760;
+	ItemChange* target = *(ItemChange**)0x11DA760;
 	if (!target) return true;
 	auto iter = rm->repairItems.GetHead();
 	if (!iter) return true;

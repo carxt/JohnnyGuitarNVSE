@@ -165,11 +165,15 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSSpinLock.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\ContainerItemExtra.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Conversation.cpp" />
     <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp" />
     <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp" />
     <ClCompile Include="internal\Game\Bethesda\GameSettingCollection.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\InventoryChanges.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\InventoryIterator.cpp" />
     <ClCompile Include="internal\Game\Bethesda\IOTask.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\ItemChange.cpp" />
     <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Setting.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESBoundObject.cpp" />
@@ -278,6 +282,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSTask.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSTCaseInsensitiveStringMap.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSUtilities.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ContainerItemExtra.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ContainerObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Conversation.hpp" />
     <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\DialogueResponse.hpp" />
@@ -286,7 +292,10 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\GameSettingCollection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\INIPrefSettingCollection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\INISettingCollection.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\InventoryChanges.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\InventoryIterator.hpp" />
     <ClInclude Include="internal\Game\Bethesda\IOTask.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ItemChange.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MemoryContexts.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp" />
     <ClInclude Include="internal\Game\Bethesda\RendererSettingCollection.hpp" />

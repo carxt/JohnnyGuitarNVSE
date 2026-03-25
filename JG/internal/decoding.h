@@ -1359,15 +1359,15 @@ struct QuestUpdateManager
 
 struct ItemEntryData
 {
-	TESForm* type;
-	ContChangesEntry* entry;
-	ExtraDataList* xData;
+	TESForm*		type;
+	ItemChange*		entry;
+	ExtraDataList*	xData;
 
 	ItemEntryData()
 	{
 	}
 
-	ItemEntryData(TESForm* _type, ContChangesEntry* _entry, ExtraDataList* _xData) : type(_type), entry(_entry),
+	ItemEntryData(TESForm* _type, ItemChange* _entry, ExtraDataList* _xData) : type(_type), entry(_entry),
 		xData(_xData)
 	{
 	}

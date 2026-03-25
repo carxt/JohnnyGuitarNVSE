@@ -13,7 +13,7 @@
 namespace JohnnyFixes {
 	float vatsSpreadMultValue = 15.0;
 	void(__thiscall* OriginalBipedModelUpdateWeapon)(BipedAnim*, TESObjectWEAP*, int) = (void(__thiscall*)(BipedAnim*, TESObjectWEAP*, int)) 0x4AB400;
-	uint8_t(__thiscall* ContChangesEntry_GetWeaponModFlags)(ContChangesEntry* weapEntry) = (uint8_t(__thiscall*)(ContChangesEntry*)) 0x4BD820;
+	uint8_t(__thiscall* ItemChange_GetWeaponModFlags)(ItemChange* weapEntry) = (uint8_t(__thiscall*)(ItemChange*)) 0x4BD820;
 
 
 	__declspec(naked) void InventoryAmmoHook() {
@@ -90,7 +90,7 @@ namespace JohnnyFixes {
 	void __fastcall BipedModelUpdateWeapon(BipedAnim* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods) {
 		if (fnCharacter && fnCharacter->baseProcess) {
 			if (auto weapInfo = fnCharacter->baseProcess->GetWeaponInfo()) {
-				weapMods = ContChangesEntry_GetWeaponModFlags(weapInfo);
+				weapMods = ItemChange_GetWeaponModFlags(weapInfo);
 			}
 		}
 		OriginalBipedModelUpdateWeapon(BipedAnim, weap, weapMods);

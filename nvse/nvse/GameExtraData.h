@@ -3,6 +3,9 @@
 #include "Utilities.h"
 #include "GameBSExtraData.h"
 #include "GameForms.h"
+#include "Bethesda/BSSimpleList.hpp"
+#include "Bethesda/InventoryChanges.hpp"
+#include "Bethesda/ItemChange.hpp"
 
 /*    Class							     vtbl	  Type  Size
  *   ----------------------------		------		--  --
@@ -332,165 +335,16 @@ public:
 	ExtraContainerChanges();
 	virtual ~ExtraContainerChanges();
 
-	class ExtendDataList : public tList<ExtraDataList> {
-	public:
-		void Clear();
-		ExtraDataList* RemoveExtra(ExtraDataList* xDataList, BSExtraData* xData);
-		ExtraDataList* RemoveByType(ExtraDataList* xDataList, uint32_t type);
-		void CleanEmpty();
-	};
+	InventoryChanges* pChanges;
 
-	struct EntryData {
-		ExtendDataList* extendData;
-		int32_t			countDelta;
-		TESForm* type;
-
-		EntryData(ListNode<ExtraDataList>* extend, int32_t count, TESForm* item) :
-			extendData((ExtendDataList*)extend), countDelta(count), type(item) {}
-
-		void Cleanup();
-		void RemoveCannotWear();
-		float GetItemHealthPerc(bool arg1 = true) { return ThisCall<float>(0x4BCDB0, this, arg1); }
-		ExtraDataList* GetEquippedExtra();
-		float CalculateWeaponDamage(float condition, TESForm* ammo);
-	};
-
-	struct EntryDataList : tList<EntryData> {
-		EntryData* FindForItem(TESForm* item);
-	};
-
-	struct Data {
-		EntryDataList* objList;
-		TESObjectREFR* owner;
-		float			totalWgCurrent;
-		float			totalWgLast;
-		uint8_t			byte10;	// referenced in relation to scripts in container
-		uint8_t			pad[3];
-
-		static Data* Create(TESObjectREFR* owner);
-		float GetInventoryWeight();
-	};
-
-	Data* data;	// 00C
-
-	EntryData* GetByType(TESForm* type);
-
-	void DebugDump();
-	void Cleanup();	// clean up unneeded extra data from each EntryData
+	ItemChange* GetByType(TESForm* type);
 
 	static ExtraContainerChanges* Create();
 
-	// find the equipped item whose form matches the passed matcher
-	struct FoundEquipData {
-		TESForm* pForm;
-		ExtraDataList* pExtraData;
-	};
-	FoundEquipData FindEquipped(FormMatcher& matcher) const;
-
-	EntryDataList* GetEntryDataList() const {
-		return data ? data->objList : NULL;
+	BSSimpleList<ItemChange*>* GetEntryDataList() const {
+		return pChanges ? pChanges->pItems : NULL;
 	}
 };
-typedef ExtraContainerChanges::EntryData ContChangesEntry;
-
-// Finds an ExtraDataList in an ExtendDataList
-class ExtraDataListInExtendDataListMatcher {
-	ExtraDataList* m_toMatch;
-public:
-	ExtraDataListInExtendDataListMatcher(ExtraDataList* match) : m_toMatch(match) {}
-
-	bool Accept(const ExtraDataList* match) const {
-		return (m_toMatch == match);
-	}
-};
-
-// Finds an ExtraDataList in an ExtendDataList embedded in one of the EntryData from an EntryDataList
-class ExtraDataListInEntryDataListMatcher {
-	ExtraDataList* m_toMatch;
-public:
-	ExtraDataListInEntryDataListMatcher(ExtraDataList* match) : m_toMatch(match) {}
-
-	bool Accept(const ExtraContainerChanges::EntryData* match) const {
-		if (match && match->extendData)
-			return match->extendData->GetIndexOf(ExtraDataListInExtendDataListMatcher(m_toMatch)) >= 0;
-		else
-			return false;
-	}
-};
-
-// Finds an ExtendDataList in an EntryDataList
-class ExtendDataListInEntryDataListMatcher {
-	ExtraContainerChanges::ExtendDataList* m_toMatch;
-public:
-	ExtendDataListInEntryDataListMatcher(ExtraContainerChanges::ExtendDataList* match) : m_toMatch(match) {}
-
-	bool Accept(const ExtraContainerChanges::EntryData* match) const {
-		if (match && match->extendData)
-			return (match->extendData == m_toMatch);
-		else
-			return false;
-	}
-};
-
-// Finds an EntryData in an EntryDataList
-class EntryDataInEntryDataListMatcher {
-	ExtraContainerChanges::EntryData* m_toMatch;
-public:
-	EntryDataInEntryDataListMatcher(ExtraContainerChanges::EntryData* match) : m_toMatch(match) {}
-
-	bool Accept(const ExtraContainerChanges::EntryData* match) const {
-		return (m_toMatch == match);
-	}
-};
-
-// Finds an Item (type) in an EntryDataList
-class ItemInEntryDataListMatcher {
-	TESForm* m_toMatch;
-public:
-	ItemInEntryDataListMatcher(TESForm* match) : m_toMatch(match) {}
-
-	bool Accept(const ExtraContainerChanges::EntryData* match) const {
-		return (match && m_toMatch == match->type);
-	}
-};
-
-// Finds an Item from its base form in an EntryDataList
-class BaseInEntryDataLastMatcher {
-	TESForm* m_toMatch;
-public:
-	BaseInEntryDataLastMatcher(TESForm* match) : m_toMatch(match) {}
-
-	bool Accept(const ExtraContainerChanges::EntryData* match) const {
-		return (match && match->type && m_toMatch == GetTESForm(match->type));
-	}
-};
-
-// Finds an item by refID in an EntryDataList
-class RefIDInEntryDataListMatcher {
-	uint32_t m_toMatch;
-public:
-	RefIDInEntryDataListMatcher(uint32_t match) : m_toMatch(match) {}
-
-	bool Accept(const ExtraContainerChanges::EntryData* match) const {
-		return (match && match->type && m_toMatch == match->type->GetFormID());
-	}
-};
-
-// Finds an item by the refID of its base form in an EntryDataList
-class BaseIDInEntryDataListMatcher {
-	uint32_t m_toMatch;
-public:
-	BaseIDInEntryDataListMatcher(uint32_t match) : m_toMatch(match) {}
-
-	bool Accept(const ExtraContainerChanges::EntryData* match) const {
-		return (match && match->type && GetTESForm(match->type) && m_toMatch == GetTESForm(match->type)->GetFormID());
-	}
-};
-
-typedef ExtraContainerChanges::FoundEquipData EquipData;
-
-extern ExtraContainerChanges::ExtendDataList* ExtraContainerChangesExtendDataListCreate(ExtraDataList* pExtraDataList = NULL);
-extern void ExtraContainerChangesExtendDataListFree(ExtraContainerChanges::ExtendDataList* xData, bool bFreeList = false);
 
 // 010
 class ExtraHealth : public BSExtraData {

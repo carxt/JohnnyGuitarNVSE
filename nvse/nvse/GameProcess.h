@@ -153,8 +153,8 @@ public:
 	virtual void	Unk_4F(void);
 	virtual void	Unk_50(void);
 	virtual void	Unk_51(void);
-	virtual ExtraContainerChanges::EntryData *GetWeaponInfo();
-	virtual ExtraContainerChanges::EntryData *GetAmmoInfo();
+	virtual ItemChange* GetWeaponInfo();
+	virtual ItemChange* GetAmmoInfo();
 	virtual void	Unk_54(void);
 	virtual void	Unk_55(void);
 	virtual void	Unk_56(void);
@@ -784,8 +784,8 @@ public:
 	uint32_t								unk108;				// 108
 	TESIdleForm							*idleForm10C;		// 10C
 	uint32_t								unk110;				// 110  EntryData, also handled as part of weapon code. AmmoInfo.
-	ExtraContainerChanges::EntryData	*weaponInfo;		// 114
-	ExtraContainerChanges::EntryData	*ammoInfo;			// 118
+	ItemChange	*weaponInfo;		// 114
+	ItemChange	*ammoInfo;			// 118
 	QueuedFile							*unk11C;			// 11C
 	uint8_t								byt120;				// 120
 	uint8_t								byt121;				// 121
