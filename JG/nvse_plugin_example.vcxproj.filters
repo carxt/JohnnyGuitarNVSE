@@ -325,7 +325,9 @@
     <ClCompile Include="functions\fn_event.cpp">
       <Filter>functions</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\AddItemMessages.cpp" />
+    <ClCompile Include="internal\JG\AddItemMessages.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
