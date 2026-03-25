@@ -61,6 +61,7 @@ InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 
 GameTimeGlobals* g_gameTimeGlobals = nullptr;
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
+bool (*Cmd_Update3D)(COMMAND_ARGS) = 0;
 
 #define JG_VERSION 523
 
@@ -77,6 +78,10 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 				JIPFixes::InitCommandHooks();
 				JIPFixes::InitHooks();
 			}
+
+			const CommandInfo* pUpdate3D = g_cmdTableInterface->GetByOpcode(0x152D);
+			if (pUpdate3D)
+				Cmd_Update3D = pUpdate3D->execute;
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_NewGame:

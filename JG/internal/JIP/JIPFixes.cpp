@@ -27,7 +27,6 @@ extern NVSECommandTableInterface* g_cmdTableInterface;
 extern NVSEScriptInterface* g_scriptInterface;
 extern bool bFixJIP;
 extern bool bIsGECK;
-extern uint32_t uiJIPUpdate3DAddr;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 
 static HMODULE hJIP = 0;
@@ -1385,7 +1384,6 @@ namespace JIPFixes {
 	namespace Update3DTweak {
 
 		void InitHooks() {
-			uiJIPUpdate3DAddr = GetJIPAddress(0x10058220);
 			SafeWrite8(GetJIPAddress(0x1005825F) + 1, 0); // Change priority to critical
 		}
 

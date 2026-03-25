@@ -4,6 +4,7 @@
 #include "GameTasks.h"
 #include "GameUI.h"
 #include "GameProcess.h"
+#include "CommandTable.h"
 
 #include "Bethesda/BSUtilities.hpp"
 
@@ -89,19 +90,9 @@ const char* TESObjectREFR::GetFullName() const {
 	return ThisCall<const char*>(0x55D520, this);
 }
 
-uint32_t uiJIPUpdate3DAddr = 0;
+extern bool (*Cmd_Update3D)(COMMAND_ARGS);
 void TESObjectREFR::Update3D() {
-	if (uiJIPUpdate3DAddr) {
-		ThisCall(uiJIPUpdate3DAddr, this);
-	}
-	else {
-		if (this == PlayerCharacter::GetSingleton())
-			ThisCall(kUpdateAppearanceAddr, this);
-		else {
-			Set3D(nullptr, false);
-			ModelLoader::GetSingleton()->QueueReference(this, IO_TASK_PRIORITY_CRITICAL, false);
-		}
-	}
+	Cmd_Update3D(nullptr, nullptr, this, nullptr, nullptr, nullptr, nullptr, nullptr);
 }
 
 TESObjectREFR* TESObjectREFR::Create(bool bTemp) {
