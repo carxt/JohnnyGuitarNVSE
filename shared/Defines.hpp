@@ -42,8 +42,15 @@ constexpr float fHK2NI = static_cast<float>(dDM2NI); // 1 Havok to Ni
 constexpr float fNI2HK = static_cast<float>(dNI2DM); // 1 Ni to Havok
 
 template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret ThisCall(uint32_t _addr, const void* _this, Args ...args) {
-	return ((T_Ret(__thiscall*)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
+constexpr __forceinline T_Ret ThisCall(uint32_t _addr, const void* _this, Args ...args) noexcept {
+	if constexpr (std::is_class_v<T_Ret>) {
+		T_Ret ret;
+		((T_Ret * (__thiscall*)(const void*, T_Ret&, Args...))_addr)(_this, ret, std::forward<Args>(args)...);
+		return ret;
+	}
+	else {
+		return ((T_Ret(__thiscall*)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
+	}
 }
 
 template <typename T_Ret = void, typename ...Args>
