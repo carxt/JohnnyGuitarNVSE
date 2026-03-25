@@ -93,8 +93,8 @@ void TESObjectREFR::Update3D() {
 	if (this == PlayerCharacter::GetSingleton())
 		ThisCall(kUpdateAppearanceAddr, this);
 	else {
-		Set3D(NULL, true);
-		ModelLoader::GetSingleton()->QueueReference(this, 1, 0);
+		Set3D(nullptr, false);
+		ModelLoader::GetSingleton()->QueueReference(this, IO_TASK_PRIORITY_CRITICAL, false);
 	}
 }
 

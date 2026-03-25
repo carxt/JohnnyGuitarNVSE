@@ -15,6 +15,9 @@
 #include "decoding.h"
 #include <events/LambdaVariableContext.h>
 #include <numbers>
+#include <Bethesda/AILinearTaskThreadManager.hpp>
+#include <JG/TaskQueue.hpp>
+#include <Bethesda/BSShaderManager.hpp>
 
 extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, uint8_t numArgs, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
@@ -2511,6 +2514,87 @@ bool Cmd_CallPerMobileObjectEx_Execute(COMMAND_ARGS) {
 			LambdaVariableContext kVarContext(pScript);
 			*result = IterateMobileObjects(eProcessLevel, kFilterData);
 		}
+	}
+	return true;
+}
+
+enum UPDATE3D_FLAGS_EX {
+	UPDATE_MODEL	= 1u << 0,
+	UPDATE_SKIN		= 1u << 1,
+	UPDATE_HEAD		= 1u << 2,
+	UPDATE_FACE		= 1u << 3,
+	UPDATE_SCALE	= 1u << 4,
+	UPDATE_LIGHTS	= 1u << 5,
+	UPDATE_POS		= 1u << 6,
+};
+
+void RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
+	if (auiFlags & UPDATE_MODEL) {
+		apReference->Update3D();
+		ThisCall(0x456520, *reinterpret_cast<DWORD**>(0x1202D98));
+
+		NiAVObject* pRoot = apReference->Get3DSimple();
+		if (pRoot && pRoot->IsFadeNode())
+			static_cast<BSFadeNode*>(pRoot)->TurnFadeNodeOn();
+	}
+
+	if (auiFlags & UPDATE_SCALE)
+		apReference->SetScale(apReference->GetScale());
+
+	if (auiFlags & UPDATE_LIGHTS) {
+		ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(BSShaderManager::SceneGraphType::WORLD);
+		pSSN->UpdateObjectLighting(apReference->Get3DSimple(), false);
+	}
+}
+
+bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
+	uint32_t uiFlags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags) && uiFlags) {
+		bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
+		if (thisObj->IsMobileObject()) {
+			MobileObject* pObj = static_cast<MobileObject*>(thisObj);
+			if (pObj->baseProcess) {
+				pObj->baseProcess->Set3DUpdateFlag(uiFlags);
+
+				if (uiFlags & UPDATE_LIGHTS) {
+					ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(BSShaderManager::SceneGraphType::WORLD);
+					pSSN->UpdateObjectLighting(pObj->Get3DSimple(), false);
+				}
+			}
+		}
+		else {
+			if (bQueue) {
+				QueuedTask kTask;
+				kTask.kItems[0].p = thisObj;
+				kTask.kItems[1].ui = uiFlags;
+				kTask.pFunction = QUEUED_TASK{
+					TESObjectREFR * pRef = reinterpret_cast<TESObjectREFR*>(arTask.kItems[0].p);
+					uint32_t uiFlags = arTask.kItems[1].ui;
+					RefreshReferenceModel(pRef, uiFlags);
+				};
+				TaskQueue::QueueTask(kTask);
+			}
+			else {
+				RefreshReferenceModel(thisObj, uiFlags);
+			}
+		}
+
+		if (uiFlags & UPDATE_POS) {
+			if (bQueue) {
+				QueuedTask kTask;
+				kTask.kItems[0].p = thisObj;
+				kTask.pFunction = QUEUED_TASK{
+					TESObjectREFR * pRef = reinterpret_cast<TESObjectREFR*>(arTask.kItems[0].p);
+					pRef->Update3DPosition();
+				};
+				TaskQueue::QueueTask(kTask);
+			}
+			else {
+				thisObj->Update3DPosition();
+			}
+		}
+
+		*result = 1;
 	}
 	return true;
 }

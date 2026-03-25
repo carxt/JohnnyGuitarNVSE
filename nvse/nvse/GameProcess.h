@@ -352,12 +352,12 @@ public:
 	virtual void	SetWeaponDrawn(Actor *actor, bool weaponOut);
 	virtual void	Unk_117();
 	virtual void	Unk_118();
-	virtual void	Unk_119(Actor *actor);
-	virtual void	Unk_11A(uint32_t unk);
-	virtual void	Unk_11B();
-	virtual void	Unk_11C();
-	virtual bool	Unk_11D(uint32_t arg);
-	virtual void	Unk_11E();
+	virtual void	Update3DModel(Actor* apActor);
+	virtual void	Set3DUpdateFlag(uint8_t aucFlag);
+	virtual void	Clear3DUpdateFlag(uint8_t aucFlag);
+	virtual void	ClearAll3DUpdateFlags();
+	virtual bool	Get3DUpdateFlag(uint8_t aucFlag) const;
+	virtual uint8_t	GetAll3DUpdateFlags() const;
 	virtual void	Unk_11F();
 	virtual void	Unk_120();
 	virtual void	Unk_121();

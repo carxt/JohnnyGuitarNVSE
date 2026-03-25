@@ -382,6 +382,6 @@ public:
 	BackgroundCloneThread* bgCloneThread;		// 28
 
 	static ModelLoader* GetSingleton();
-	void QueueReference(TESObjectREFR* refr, uint32_t arg2, uint32_t arg3);
+	void QueueReference(TESObjectREFR* apRef, IO_TASK_PRIORITY aePriority, bool abAllowQueueReferenceQueuing);
 	NiNode* LoadModel(const char* nifPath, uint32_t arg2, uint8_t arg3, uint32_t arg4, uint8_t arg5, uint8_t arg6);
 };

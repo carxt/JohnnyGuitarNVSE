@@ -164,6 +164,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BaseExtraList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSShaderManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSSpinLock.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ContainerItemExtra.cpp" />
@@ -218,6 +219,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\JG\NPCAccuracy.cpp" />
     <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp" />
     <ClCompile Include="internal\JG\RSMBarberHook.cpp" />
+    <ClCompile Include="internal\JG\TaskQueue.cpp" />
     <ClCompile Include="internal\JIP\JIPFixes.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
     <ClCompile Include="internal\netimmerse.cpp" />
@@ -282,6 +284,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSRenderedTexture.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSShaderManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleArray.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleArrayRefCounted.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleList.hpp" />
@@ -415,6 +418,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\NPCAccuracy.hpp" />
     <ClInclude Include="internal\JG\QuestObjectiveDisplayFix.hpp" />
     <ClInclude Include="internal\JG\RSMBarberHook.hpp" />
+    <ClInclude Include="internal\JG\TaskQueue.hpp" />
     <ClInclude Include="internal\JIP\JIPFixes.hpp" />
     <ClInclude Include="internal\md5\md5.h" />
     <ClInclude Include="internal\netimmerse.h" />

@@ -1155,6 +1155,10 @@ public:
 	uint32_t			unkC8;			// C8
 	TESObjectREFR* linkedObj;		// CC
 	uint32_t			unkD0[5];		// D0
+
+	void TurnFadeNodeOn() {
+		ThisCall(0x476AB0, this);
+	};
 };
 
 // B4
@@ -1328,6 +1332,10 @@ public:
 	float							flt1F0[3];		// 1F0
 	uint8_t							byte1FC;		// 1FC
 	uint8_t							pad1FD[3];		// 1FD
+
+	void UpdateObjectLighting(NiAVObject* apObject, bool abActiveLightsOnly) {
+		ThisCall(0xB5D9F0, this, apObject, abActiveLightsOnly);
+	}
 };
 static_assert(sizeof(ShadowSceneNode) == 0x200);
 

@@ -65,11 +65,11 @@ public:
 	virtual void		Unk_6D(void);	// REFR: calls 006C
 	virtual void		Unk_6E(void);	// MobileActor: calls 006D then NiNode::Func0040
 	virtual void		Unk_6F(void);
-	virtual bool		Unload3D();
-	virtual void		AnimateNiNode();
-	virtual void		GenerateNiNode(bool arg1);
-	virtual void		Set3D(NiNode* niNode, bool unloadArt);
-	virtual NiNode*		Get3D();
+	virtual bool		DetachHavok();
+	virtual void		InitHavok();
+	virtual NiAVObject*	Load3D(bool abBackgroundLoad);
+	virtual void		Set3D(NiAVObject* apObject, bool abTestProcessLevel = false);
+	virtual NiNode*		Get3D() const;
 	virtual void		Unk_75(void);
 	virtual void		Unk_76(void);
 	virtual void		Unk_77(void);
@@ -172,6 +172,11 @@ public:
 	float GetHealth() { return ThisCall<float>(0x568AD0, this); }
 
 	void ReplaceModel() { ThisCall(0x5710C0, this); }
+
+	void Update3DPosition() { ThisCall(0x562020, this); 	}
+
+	float GetScale() const { return scale; }
+	void SetScale(float afScale) { ThisCall(0x567490, this, afScale); }
 
 	MEMBER_FN_PREFIX(TESObjectREFR);
 #if 1

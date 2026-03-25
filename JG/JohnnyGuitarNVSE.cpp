@@ -35,6 +35,7 @@
 #include <JG/DisabledMuzzleFlashLights.hpp>
 #include <JG/DisabledArrowKeys.hpp>
 #include <JG/ExtraMiscStats.hpp>
+#include <JG/TaskQueue.hpp>
 #include <events/LambdaVariableContext.h>
 #include <decoding.h>
 #include <misc/WorldToScreen.h>
@@ -105,6 +106,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		}
 		case NVSEMessagingInterface::kMessage_MainGameLoop: // GAME
 		{
+			TaskQueue::ExecuteTasks();
 			CustomHUDShake::Update();
 			JohnnyRadios::Update();
 			JohnnyEvents::Update();
@@ -511,6 +513,7 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(CallPerRefEx);
 	REG_CMD(CallPerMobileObject);
 	REG_CMD(CallPerMobileObjectEx);
+	REG_CMD(Update3DAlt);
 }
 
 

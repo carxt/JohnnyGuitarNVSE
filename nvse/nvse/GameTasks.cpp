@@ -51,8 +51,6 @@ ModelLoader* ModelLoader::GetSingleton() {
 	return *(ModelLoader**)0x011C3B3C;
 }
 
-__declspec(naked) void ModelLoader::QueueReference(TESObjectREFR* refr, uint32_t arg2, uint32_t arg3)
-// arg2 is encoded based on the parent cell and arg3 is most likely a boolean
-{
-	__asm	jmp		kModelLoader_QueueReference
+void ModelLoader::QueueReference(TESObjectREFR* apRef, IO_TASK_PRIORITY aePriority, bool abAllowQueueReferenceQueuing) {
+	ThisCall(0x444850, this, apRef, aePriority, abAllowQueueReferenceQueuing);
 }
