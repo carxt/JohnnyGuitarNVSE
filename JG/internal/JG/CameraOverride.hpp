@@ -1,14 +1,11 @@
 #pragma once
-#include "misc/WorldToScreen.h"
+#include <GameObjects.h>
+#include <NiTypes.h>
 namespace CameraOverride {
-	extern NiVector3 kCameraPos;
-	extern NiMatrix3 kCameraRot;
-	extern uint32_t uiReferenceToTrack;
-	extern int eAxis;
 
 	void Reset();
 	void Install();
-	void OverridePos(bool override);
-	void OverrideRot(bool override);
+	void OverridePos(bool override, const NiVector3& kNewPos);
+	void OverrideRot(bool override, int eAxis, float fAngle, TESObjectREFR* pRef);
 
-}
+} 

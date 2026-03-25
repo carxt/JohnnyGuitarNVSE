@@ -118,9 +118,6 @@
     <ClCompile Include="misc\misc.cpp">
       <Filter>misc</Filter>
     </ClCompile>
-    <ClCompile Include="events\EventFramework.cpp">
-      <Filter>events</Filter>
-    </ClCompile>
     <ClCompile Include="internal\JG\EditorIDRestoration.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
@@ -204,9 +201,6 @@
     </ClCompile>
     <ClCompile Include="functions\fn_book.cpp">
       <Filter>functions</Filter>
-    </ClCompile>
-    <ClCompile Include="decoding.cpp">
-      <Filter>internal</Filter>
     </ClCompile>
     <ClCompile Include="functions\fn_dial.cpp">
       <Filter>functions</Filter>
@@ -312,6 +306,24 @@
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="events\EventFramework.cpp">
+      <Filter>events</Filter>
+    </ClCompile>
+    <ClCompile Include="events\JohnnyEvents.cpp">
+      <Filter>events</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_gamebryo.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\serialization.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\decoding.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\fn_event.cpp">
+      <Filter>functions</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\AddItemMessages.cpp" />
   </ItemGroup>
@@ -781,6 +793,9 @@
     </ClInclude>
     <ClInclude Include="internal\JG\AddItemMessages.hpp">
       <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\fn_event.h">
+      <Filter>functions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

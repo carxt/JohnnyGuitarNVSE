@@ -4,6 +4,7 @@
 #include <misc/misc.h>
 #include <misc/WorldToScreen.h>
 #include "netimmerse.h"
+
 void Cmd_GetPlayerCamFOV(uint32_t worldOr1stOrScene, double* result) {
 	if (!PlayerCharacter::GetSingleton()) return;
 	*result = worldOr1stOrScene ? PlayerCharacter::GetSingleton()->firstPersonFOV : PlayerCharacter::GetSingleton()->worldFOV;
@@ -179,6 +180,8 @@ bool Cmd_RGBtoHSV_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
+// lmao
 bool Cmd_Sign_Execute(COMMAND_ARGS) {
 	float value;
 	*result = 0;
@@ -187,6 +190,7 @@ bool Cmd_Sign_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_Lerp_Execute(COMMAND_ARGS) {
 	float v0 = 0, v1 = 0, t = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &v0, &v1, &t)) {
@@ -194,6 +198,7 @@ bool Cmd_Lerp_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_Remap_Execute(COMMAND_ARGS) {
 	float v1current = 0, v1min = 0, v1max = 0, v2min = 0, v2max = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &v1current, &v1min, &v1max, &v2min, &v2max)) {
@@ -201,6 +206,7 @@ bool Cmd_Remap_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_Clamp_Execute(COMMAND_ARGS) {
 	float value = 0, min = 0, max = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &value, &min, &max)) {
@@ -238,6 +244,7 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 
 	return true;
 }
+
 bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char NiName[MAX_PATH] = {};

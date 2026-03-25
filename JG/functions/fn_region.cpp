@@ -80,6 +80,7 @@ bool Cmd_SetRegionMapName_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetRegionMapName_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && region && IS_TYPE(region, TESRegion)) {
@@ -108,6 +109,7 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 	g_arrInterface->AssignCommandResult(weatherArr, result);
 	return true;
 }
+
 bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	*result = 0;
@@ -131,6 +133,7 @@ bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && region && IS_TYPE(region, TESRegion)) {
@@ -144,6 +147,7 @@ bool Cmd_GetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	int bOverride = -1;
@@ -157,6 +161,7 @@ bool Cmd_SetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && region && IS_TYPE(region, TESRegion)) {
@@ -170,6 +175,7 @@ bool Cmd_GetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	int priority = -1;
@@ -183,6 +189,7 @@ bool Cmd_SetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_IsWeatherInRegion_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	TESWeather* weather = nullptr;
@@ -207,6 +214,7 @@ bool Cmd_IsWeatherInRegion_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_RemoveRegionWeather_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	TESWeather* weather = nullptr;
@@ -232,6 +240,7 @@ bool Cmd_RemoveRegionWeather_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
 	TESRegion* region = nullptr;
 	TESWeather* weather = nullptr;

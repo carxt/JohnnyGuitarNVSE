@@ -308,6 +308,7 @@ bool Cmd_GetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset = nullptr;
 	TESSound* soundForm = nullptr;
@@ -330,6 +331,7 @@ bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset = nullptr;
 	int traitID = -1;
@@ -344,6 +346,7 @@ bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	MediaSet* mediaset = nullptr;
 	int traitID = -1;

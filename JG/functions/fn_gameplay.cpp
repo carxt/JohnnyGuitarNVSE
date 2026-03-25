@@ -349,6 +349,7 @@ void GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPo
 		}
 	}
 }
+
 bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
 	NavMeshArray* pNavMeshArray = apCell->pNavMeshes;
 	if (!pNavMeshArray)
@@ -715,6 +716,7 @@ bool Cmd_AddNavmeshObstacle_Execute(COMMAND_ARGS) {
 	*result = 1;
 	return true;
 }
+
 bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESSound* sound = nullptr;
@@ -961,6 +963,7 @@ bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 	} while (iter = iter->next);
 	return true;
 }
+
 bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* actorCell = PlayerCharacter::GetSingleton()->parentCell;
@@ -968,17 +971,20 @@ bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 		*result = ThisCall<bool>(0x9764A0, ProcessLists::GetSingleton(), actorCell->IsInterior());
 	return true;
 }
+
 bool Cmd_ToggleCombatMusic_Execute(COMMAND_ARGS) {
 	uint32_t toggle = 1;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &toggle);
 	JohnnyPatches::bCombatMusicDisabled = (toggle == 0);
 	return true;
 }
+
 bool Cmd_IsCombatMusicEnabled_Execute(COMMAND_ARGS) {
 	*result = (JohnnyPatches::bCombatMusicDisabled == 0);
 	if (IsConsoleMode()) Console_Print("IsCombatMusicEnabled >> %.f", *result);
 	return true;
 }
+
 bool Cmd_IsCompassHostile_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* toCheck = (Actor*)thisObj;
@@ -993,6 +999,7 @@ bool Cmd_IsCompassHostile_Execute(COMMAND_ARGS) {
 	if (IsConsoleMode()) Console_Print("IsCompassHostile >> %.f", *result);
 	return true;
 }
+
 void RestoreDisabledPlayerControlsHUDFlags() {
 	SafeWrite32(0x771A53, HUDMainMenu::kXpMeter | HUDMainMenu::kSubtitles | HUDMainMenu::kMessages | HUDMainMenu::kQuestReminder | HUDMainMenu::kRadiationMeter);
 }
@@ -1009,6 +1016,7 @@ bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
 
 	return true;
 }
+
 bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	*result = -1;
 
@@ -1200,6 +1208,7 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 	*result = 0;
 	uint32_t avCode;
@@ -1344,6 +1353,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+
 bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	int pipboyTab = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pipboyTab);
@@ -1410,7 +1420,6 @@ bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-
 
 bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 	*result = false;

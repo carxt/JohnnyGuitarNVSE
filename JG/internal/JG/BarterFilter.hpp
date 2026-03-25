@@ -3,12 +3,10 @@
 #include "JG\JGSetList.hpp"
 
 namespace BarterFilter {
-	enum Flags {
-		kDoNotHideLeft = 1 << 0,
-		kDoNotHideRight
-	};
-	extern std::unordered_map<DWORD, JGSetList<DWORD>> leftList;
-	extern std::unordered_map<DWORD, JGSetList<DWORD>> rightList;
+
 	void Install();
 	void Reset();
+	void Add(uint32_t item, uint32_t flags, uint32_t vendor);
+	void Remove(uint32_t item, uint32_t flags, uint32_t vendor);
+	uint32_t IsHidden(uint32_t item);
 }

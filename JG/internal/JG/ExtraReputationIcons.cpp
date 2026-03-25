@@ -1,6 +1,7 @@
 #include "ExtraReputationIcons.hpp"
 #include <GameForms.h>
 #include <Bethesda/Setting.hpp>
+#include <GameAPI.h>
 
 namespace ExtraReputationIcons {
 	std::unordered_map <uint32_t, std::vector<const char*>> factionRepIcons;
@@ -76,5 +77,29 @@ namespace ExtraReputationIcons {
 		WriteRelCall(0x61594C, uint32_t(GetReputationMessageIconHook));
 		WriteRelCall(0x615F0B, uint32_t(GetReputationMessageIconHook));
 		WriteRelCall(0x615E06, uint32_t(GetReputationMessageIconHook));
+	}
+
+	void Set(uint32_t formID, uint32_t tierID, const char* path) {
+		auto pos = factionRepIcons.find(formID);
+		uint32_t bufferSize = strlen(path) + 1;
+		char* pathCopy = new char[bufferSize];
+		strcpy_s(pathCopy, bufferSize, path);
+
+		if (pos != factionRepIcons.end()) {
+			if (*pos->second[tierID - 1]) delete[] pos->second[tierID - 1];
+			pos->second[tierID - 1] = pathCopy;
+		}
+		else {
+			std::vector<const char*> v{ "", "", "", "" };
+			v[tierID - 1] = pathCopy;
+			factionRepIcons.insert(std::pair<uint32_t, std::vector<const char*>>(formID, v));
+		}
+	}
+
+	void Dump() {
+		auto it = factionRepIcons.begin();
+		for (auto const& it : factionRepIcons) {
+			Console_Print("0x%X - %s %s %s %s", it.first, it.second[0], it.second[1], it.second[2], it.second[3]);
+		}
 	}
 }

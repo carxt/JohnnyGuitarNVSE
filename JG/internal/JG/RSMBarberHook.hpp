@@ -1,8 +1,10 @@
 #pragma once
 #include "JG\JGSetList.hpp"
+#include "GameForms.h"
+
 namespace RSMBarberHook {
-	extern JGSetList<DWORD> haircutSetList;
-	extern JGSetList<DWORD> beardSetList;
 	void Install();
 	void Reset();
+	void Load(BGSListForm* pList);
+	void ShowMenu(uint32_t flags);
 };
