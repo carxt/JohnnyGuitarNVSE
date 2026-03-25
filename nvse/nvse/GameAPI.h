@@ -31,7 +31,7 @@ void Console_Print(const char* fmt, ...);
 
 #if RUNTIME
 
-typedef bool (*_ExtractArgs)(ParamInfo* paramInfo, void* scriptData, uint32_t* arg2, TESObjectREFR* arg3, TESObjectREFR* arg4, Script* script, ScriptEventList* eventList, ...);
+typedef bool (*_ExtractArgs)(ParamInfo* paramInfo, void* scriptData, uint32_t* arg2, TESObjectREFR* arg3, TESObjectREFR* arg4, Script* script, ScriptLocals* eventList, ...);
 extern const _ExtractArgs ExtractArgs;
 
 typedef TESForm* (*_CreateFormInstance)(uint8_t type);
@@ -105,7 +105,8 @@ struct ScriptVar {
 
 // only records individual objects if there's a block that matches it
 // ### how can it tell?
-struct ScriptEventList {
+class ScriptLocals {
+public:
 	enum {
 		kEvent_OnAdd = 1,
 		kEvent_OnEquip = 2,
@@ -169,7 +170,7 @@ struct ScriptEventList {
 	uint32_t ResetAllVariables();
 };
 
-ScriptEventList* EventListFromForm(TESForm* form);
+ScriptLocals* EventListFromForm(TESForm* form);
 
 typedef bool (*_MarkBaseExtraListScriptEvent)(TESForm* target, BaseExtraList* extraList, uint32_t eventMask);
 extern const _MarkBaseExtraListScriptEvent MarkBaseExtraListScriptEvent;
@@ -205,7 +206,7 @@ struct ExtractedParam {
 		// variable
 		struct {
 			ScriptVar* var;
-			ScriptEventList* parent;
+			ScriptLocals* parent;
 		} var;
 	} data;
 };
@@ -366,7 +367,7 @@ public:
 	virtual bool HasMoreArgs();
 	virtual std::string GetFormatString();
 
-	ScriptFormatStringArgs(uint32_t _numArgs, uint8_t* _scriptData, Script* _scriptObj, ScriptEventList* _eventList);
+	ScriptFormatStringArgs(uint32_t _numArgs, uint8_t* _scriptData, Script* _scriptObj, ScriptLocals* _eventList);
 	uint32_t GetNumArgs();
 	uint8_t* GetScriptData();
 
@@ -374,12 +375,12 @@ private:
 	uint32_t			numArgs;
 	uint8_t* scriptData;
 	Script* scriptObj;
-	ScriptEventList* eventList;
+	ScriptLocals* eventList;
 	std::string fmtString;
 };
 bool SCRIPT_ASSERT(bool expr, Script* script, const char* errorMsg, ...);
 
-bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* scriptDataIn, double* outVarData, uint8_t* outModIndex = NULL, bool shortPath = false);
+bool ExtractSetStatementVar(Script* script, ScriptLocals* eventList, void* scriptDataIn, double* outVarData, uint8_t* outModIndex = NULL, bool shortPath = false);
 bool ExtractFormattedString(FormatStringArgs& args, char* buffer);
 
 class ChangesMap;

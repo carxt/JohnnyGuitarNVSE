@@ -142,9 +142,9 @@ struct ForEachContext
 	uint32_t				sourceID;
 	uint32_t				iteratorID;
 	uint32_t				variableType;
-	ScriptEventList::VarList * var;
+	ScriptLocals::VarList * var;
 
-	ForEachContext(uint32_t src, uint32_t iter, uint32_t varType, ScriptEventList::VarList * _var) : sourceID(src), iteratorID(iter), variableType(varType), var(_var) { }
+	ForEachContext(uint32_t src, uint32_t iter, uint32_t varType, ScriptLocals::VarList * _var) : sourceID(src), iteratorID(iter), variableType(varType), var(_var) { }
 };
 
 #endif
@@ -167,7 +167,7 @@ protected:
 			Operator				* op;
 #if RUNTIME		// run-time only
 			ArrayID					arrID;
-			ScriptEventList::VarList	* var;
+			ScriptLocals::VarList	* var;
 #endif
 			// compile-time only
 			VariableInfo			* varInfo;
@@ -191,7 +191,7 @@ protected:
 
 	ScriptToken(const ScriptToken& rhs);	// unimplemented, don't want copy constructor called
 #if RUNTIME
-	ScriptToken(ScriptEventList::VarList* var);
+	ScriptToken(ScriptLocals::VarList* var);
 #endif
 
 	Token_Type	ReadFrom(ExpressionEvaluator* context);	// reconstitute param from compiled data, return the type
@@ -208,7 +208,7 @@ public:
 	virtual bool					GetBool() const;
 #if RUNTIME
 	virtual ArrayID					GetArray() const;
-	ScriptEventList::VarList *	GetVar() const;
+	ScriptLocals::VarList *	GetVar() const;
 #endif
 	virtual bool			CanConvertTo(Token_Type to) const;	// behavior varies b/w compile/run-time for ambiguous types
 	virtual ArrayID			GetOwningArrayID() const { return 0; }
@@ -302,7 +302,7 @@ struct ForEachContextToken : public ScriptToken
 {
 	ForEachContext		context;
 
-	ForEachContextToken(uint32_t srcID, uint32_t iterID, uint32_t varType, ScriptEventList::VarList* var);
+	ForEachContextToken(uint32_t srcID, uint32_t iterID, uint32_t varType, ScriptLocals::VarList* var);
 	virtual const ForEachContext* GetForEachContext() const { return Type() == kTokenType_ForEachContext ? &context : NULL; }
 };
 

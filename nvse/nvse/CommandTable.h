@@ -5,7 +5,7 @@
 
 class TESObjectREFR;
 class Script;
-struct ScriptEventList;
+class ScriptLocals;
 struct ScriptLineBuffer;
 struct ScriptBuffer;
 struct PluginInfo;
@@ -122,8 +122,8 @@ struct ParamInfo
 
 #define USE_EXTRACT_ARGS_EX NVSE_CORE
 
-#define COMMAND_ARGS		ParamInfo * paramInfo, void * scriptData, TESObjectREFR * thisObj, TESObjectREFR * containingObj, Script * scriptObj, ScriptEventList * eventList, double * result, uint32_t * opcodeOffsetPtr
-#define COMMAND_ARGS_EX		ParamInfo *paramInfo, void *scriptData, uint32_t *opcodeOffsetPtr, Script *scriptObj, ScriptEventList *eventList
+#define COMMAND_ARGS		ParamInfo * paramInfo, void * scriptData, TESObjectREFR * thisObj, TESObjectREFR * containingObj, Script * scriptObj, ScriptLocals * eventList, double * result, uint32_t * opcodeOffsetPtr
+#define COMMAND_ARGS_EX		ParamInfo *paramInfo, void *scriptData, uint32_t *opcodeOffsetPtr, Script *scriptObj, ScriptLocals *eventList
 #define PASS_COMMAND_ARGS	paramInfo, scriptData, thisObj, containingObj, scriptObj, eventList, result, opcodeOffsetPtr
 #define COMMAND_ARGS_EVAL	TESObjectREFR * thisObj, void * arg1, void * arg2, double * result
 #define PASS_CMD_ARGS_EVAL	thisObj, arg1, arg2, result

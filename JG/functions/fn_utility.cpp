@@ -269,7 +269,7 @@ bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nodeName, &X_outS, &Y_outS, &Z_outS)) {
 		hkpRigidBody* rigidBody = thisObj->GetRigidBody(nodeName);
 		if (rigidBody) {
-			NiVector4 linVelocity = rigidBody->motion.linVelocity;
+			NiPoint4 linVelocity = rigidBody->motion.linVelocity;
 			setVarByName(PASS_VARARGS, X_outS, linVelocity.x);
 			setVarByName(PASS_VARARGS, Y_outS, linVelocity.y);
 			setVarByName(PASS_VARARGS, Z_outS, linVelocity.z);
@@ -313,8 +313,8 @@ bool Cmd_RefAddrxData_Execute(COMMAND_ARGS) {
 	TESForm* form = nullptr;
 	DWORD type;
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
-		if (type < kExtraData_Max) {
-			void* res = thisObj->extraDataList.GetByType(type);
+		if (type < EXTRA_DATA_TYPE::COUNT) {
+			void* res = thisObj->extraDataList.GetExtraData(type);
 			if (res) {
 				Console_Print("0x%08X", res);
 				return true;
@@ -571,7 +571,7 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 bool Cmd_SetCameraTranslate_Execute(COMMAND_ARGS) {
 	using namespace CameraOverride;
 	int override = 0;
-	NiVector3 kNewPos;
+	NiPoint3 kNewPos;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &kNewPos.x, &kNewPos.y, &kNewPos.z)) {
 		OverridePos(override > 0, kNewPos);
 	}

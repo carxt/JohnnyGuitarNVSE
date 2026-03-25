@@ -4,7 +4,7 @@
 
 struct _FormType {
 	enum Type : uint32_t {
-		None = 0,
+		NONE = 0,
 		TES4,
 		Group,
 		GameSetting,
@@ -125,10 +125,168 @@ struct _FormType {
 		BGSDehydrationStage,
 		BGSHungerStage,
 		BGSSleepDeprevationStage,
-		Count
+		COUNT
 	};
 };
-using FORM_TYPE = _FormType::Type;	
+using FORM_TYPE = _FormType::Type;
+
+#define TESFORM_TYPE(data) static constexpr FORM_TYPE _TYPE = FORM_TYPE::data;
+
+#pragma endregion
+
+#pragma region ExtraData
+
+struct _ExtraDataType {
+	enum Type : uint8_t {
+		NONE							= 0,
+		ExtraHavok						= 1,
+		ExtraCell3D						= 2,
+		ExtraCellWaterType				= 3,
+		ExtraRegionList					= 4,
+		ExtraSeenData					= 5,
+		ExtraEditorID					= 6,
+		ExtraCellMusicType				= 7,
+		ExtraCellClimate				= 8,
+		ExtraProcessMiddleLow			= 9,
+		ExtraCellCanopyShadowMask		= 10,
+		ExtraDetachTime					= 11,
+		ExtraPersistentCell				= 12,
+		ExtraScript						= 13,
+		ExtraAction						= 14,
+		ExtraStartingPosition			= 15,
+		ExtraAnim						= 16,
+		ExtraUsedMarkers				= 18,
+		ExtraDistantData				= 19,
+		ExtraRagDollData				= 20,
+		ExtraContainerChanges			= 21,
+		ExtraWorn						= 22,
+		ExtraWornLeft					= 23,
+		ExtraPackageStartLocation		= 24,
+		ExtraPackage					= 25,
+		ExtraTresPassPackage			= 26,
+		ExtraRunOncePacks				= 27,
+		ExtraReferencePointer			= 28,
+		ExtraFollower					= 29,
+		ExtraLevCreaModifier			= 30,
+		ExtraGhost						= 31,
+		ExtraOriginalReference			= 32,
+		ExtraOwnership					= 33,
+		ExtraGlobal						= 34,
+		ExtraRank						= 35,
+		ExtraCount						= 36,
+		ExtraHealth						= 37,
+		ExtraUses						= 38,
+		ExtraTimeLeft					= 39,
+		ExtraCharge						= 40,
+		ExtraLight						= 41,
+		ExtraLock						= 42,
+		ExtraTeleport					= 43,
+		ExtraMapMarker					= 44,
+		ExtraAnimSave					= 45,
+		ExtraLeveledCreature			= 46,
+		ExtraLeveledItem				= 47,
+		ExtraScale						= 48,
+		ExtraSeed						= 49,
+		NonActorMagicCaster				= 50,
+		NonActorMagicTarget				= 51,
+		ExtraMasterFileCell				= 52,
+		ExtraPlayerCrimeList			= 53,
+		//								  54,
+		ExtraEnableStateParent			= 55,
+		ExtraEnableStateChildren		= 56,
+		ExtraItemDropper				= 57,
+		ExtraDroppedItemList			= 58,
+		ExtraRandomTeleportMarker		= 59,
+		ExtraMerchantContainer			= 60,
+		ExtraSavedHavokData				= 61,
+		ExtraCannotWear					= 62,
+		ExtraPoison						= 63,
+		ExtraMagicLight					= 64, // Oblivion leftover, unused
+		ExtraLastFinishedSequence		= 65,
+		ExtraSavedAnimation				= 66,
+		ExtraNorthRotation				= 67,
+		ExtraXTarget					= 68,
+		ExtraFriendHits					= 69,
+		ExtraHeadingTarget				= 70,
+		ExtraBoundArmor					= 71, // Oblivion leftover, unused
+		ExtraRefractionProperty			= 72,
+		ExtraStartingWorldOrCell		= 73,
+		ExtraHotkey						= 74,
+		ExtraEditorRef3DData			= 75,
+		ExtraEditorRefMoveData			= 76,
+		ExtraInfoGeneralTopic			= 77,
+		ExtraHasNoRumors				= 78,
+		ExtraSound						= 79,
+		ExtraTerminalState				= 80,
+		ExtraLinkedRef					= 81,
+		ExtraLinkedRefChildren			= 82,
+		ExtraActivateRef				= 83,
+		ExtraActivateRefChildren		= 84,
+		ExtraTalkingActor				= 85,
+		ExtraObjectHealth				= 86,
+		ExtraDecalRefs					= 87,
+		ExtraCellImageSpace				= 89,
+		ExtraNavMeshPortal				= 90,
+		ExtraModelSwap					= 91,
+		ExtraRadius						= 92,
+		ExtraRadiation					= 93,
+		ExtraFactionChanges				= 94,
+		ExtraDismemberedLimbs			= 95,
+		ExtraMultiBound					= 97,
+		ExtraMultiBoundData				= 98,
+		ExtraMultiBoundRef				= 99,
+		ExtraCellEnviroType				= 100, // Oblivion leftover, unused
+		ExtraReflectedRefs				= 101,
+		ExtraReflectorRefs				= 102,
+		ExtraEmittanceSource			= 103,
+		ExtraRadioData					= 104,
+		ExtraCombatStyle				= 105,
+		ExtraPrimitive					= 107,
+		ExtraOpenCloseActivateRef		= 108,
+		ExtraAnimNoteReceiver			= 109,
+		ExtraAmmo						= 110,
+		ExtraPatrolRefData				= 111,
+		ExtraPackageData				= 112,
+		ExtraOcclusionPlane				= 113,
+		ExtraCollisionData				= 114,
+		ExtraSayTopicInfoOnceADay		= 115,
+		ExtraEncounterZone				= 116,
+		ExtraSayToTopicInfo				= 117,
+		ExtraOcclusionPlaneRefData		= 118,
+		ExtraPortalRefData				= 119,
+		ExtraPortal						= 120,
+		ExtraRoom						= 121,
+		ExtraHealthPerc					= 122,
+		ExtraRoomRefData				= 123,
+		ExtraGuardedRefData				= 124,
+		ExtraCreatureAwakeSound			= 125,
+		ExtraWaterZoneMap				= 126,
+		//								  127,
+		ExtraIgnoredBySandbox			= 128,
+		ExtraCellAcousticSpace			= 129,
+		ExtraReservedMarkers			= 130,
+		ExtraWeaponIdleSound			= 131,
+		ExtraWaterLightRefs				= 132,
+		ExtraLitWaterRefs				= 133,
+		ExtraWeaponAttackSound			= 134,
+		ExtraActivateLoopSound			= 135,
+		ExtraPatrolRefInUseData			= 136,
+		ExtraAshPileRef					= 137,
+		ExtraCreatureMovementSound		= 138,
+		ExtraFollowerSwimBreadcrumbs	= 139,
+		ExtraCellImpactSwap				= 140,
+		ExtraWeaponModFlags				= 141,
+		ExtraModdingItem				= 142,
+		ExtraSecuritronFace				= 143,
+		ExtraAudioMarker				= 144,
+		ExtraAudioBuoyMarker			= 145,
+		ExtraSpecialRenderFlags			= 146,
+		COUNT,
+	};
+};
+using EXTRA_DATA_TYPE = _ExtraDataType::Type;
+
+#define BSEXTRA_TYPE(data) static constexpr EXTRA_DATA_TYPE _TYPE = EXTRA_DATA_TYPE::data;
 
 #pragma endregion
 
@@ -145,6 +303,18 @@ struct _ProcessType {
 	};
 };
 using PROCESS_TYPE = _ProcessType::Type;
+
+struct _Confidence {
+	enum Type : uint8_t {
+		COWARDLY = 0,
+		CAUTIOUS = 1,
+		AVERAGE = 2,
+		BRAVE = 3,
+		FOOLHARDY = 4,
+		COUNT,
+	};
+};
+using CONFIDENCE = _Confidence::Type;
 
 #pragma endregion
 
@@ -762,7 +932,7 @@ struct _AnimationGroupSection {
 		IDLE			= 0,
 		MOVEMENT		= 1,
 		LEFT_ARM		= 2,
-		AGS_TALKING		= 3,
+		TALKING			= 3,
 		WEAPON			= 4,
 		WEAPON_UP		= 5,
 		WEAPON_DOWN		= 6,
@@ -807,16 +977,6 @@ struct _AnimationIdlePlayType {
 using ANIM_IDLE_PLAY_TYPE = _AnimationIdlePlayType::Type;
 
 #pragma endregion
-
-enum CONFIDENCE : uint8_t {
-	CONFIDENCE_COWARDLY		= 0,
-	CONFIDENCE_CAUTIOUS		= 1,
-	CONFIDENCE_AVERAGE		= 2,
-	CONFIDENCE_BRAVE		= 3,
-	CONFIDENCE_FOOLHARDY	= 4,
-	CONFIDENCE_COUNT,
-};
-
 
 #pragma region Weapons
 
@@ -929,15 +1089,18 @@ enum WEAPON_RUMBLE_PATTERN {
 
 #pragma region Combat
 
-enum COMBAT_LOW_STATE : uint32_t {
-	COMBAT_LOW_STATE_NONE			= 0,
-	COMBAT_LOW_STATE_ATTACKING		= 1,
-	COMBAT_LOW_STATE_PURSUING		= 2,
-	COMBAT_LOW_STATE_INVESTIGATING	= 3,
-	COMBAT_LOW_STATE_SEARCHING		= 4,
-	COMBAT_LOW_STATE_FLEEING		= 5,
-	COMBAT_LOW_STATE_COUNT			= 6,
+struct _CombatLowState {
+	enum State : uint32_t {
+		NONE			= 0,
+		ATTACKING		= 1,
+		PURSUING		= 2,
+		INVESTIGATING	= 3,
+		SEARCHING		= 4,
+		FLEEING			= 5,
+		COUNT			= 6,
+	};
 };
+using COMBAT_LOW_STATE = _CombatLowState::State;
 
 enum COMBAT_VARIABLE : uint32_t {
 	TARGET_LOCATION				= 0,
@@ -987,43 +1150,49 @@ enum COMBAT_VARIABLE : uint32_t {
 	ANY_VALUE					= 0xFFFFFFFF,
 };
 
-enum COMBAT_MOVE_MODE : uint32_t {
-	COMBAT_MOVE_MODE_WALK		= 0,
-	COMBAT_MOVE_MODE_FAST_WALK	= 1,
-	COMBAT_MOVE_MODE_SNEAK		= 2,
-	COMBAT_MOVE_MODE_RUN		= 3,
-	COMBAT_MOVE_MODE_SLOW_RUN	= 4,
-	COMBAT_MOVE_MODE_COUNT		= 5,
+struct _CombatMoveMode {
+	enum Mode : uint32_t {
+		WALK		= 0,
+		FAST_WALK	= 1,
+		SNEAK		= 2,
+		RUN			= 3,
+		SLOW_RUN	= 4,
+		COUNT		= 5,
+	};
 };
+using COMBAT_MOVE_MODE = _CombatMoveMode::Mode;
 
 enum COMBAT_LOCATION_FLAGS : uint32_t {
 	COMBAT_LOCATION_USE_EVADE	= 1,
 	COMBAT_LOCATION_HARD_RADIUS = 2,
 };
 
-enum COMBAT_WORLD_STATE : uint32_t {
-	COMBAT_WORLD_STATE_TARGET_DEAD					= 0,
-	COMBAT_WORLD_STATE_AT_LOCATION					= 1, // -> COMBAT_LOCATION_TYPE
-	COMBAT_WORLD_STATE_NOT_AT_LOCATION				= 2, // -> COMBAT_LOCATION_TYPE
-	COMBAT_WORLD_STATE_TARGET_LOST					= 3,
-	COMBAT_WORLD_STATE_TARGET_DETECTED				= 4,
-	COMBAT_WORLD_STATE_TARGET_360_LOS				= 5,
-	COMBAT_WORLD_STATE_TARGET_BLOCKED				= 6,
-	COMBAT_WORLD_STATE_TARGET_SPACE_DIFFERENT		= 7,
-	COMBAT_WORLD_STATE_EXPLOSIVE_PROJECTILE_BLOCKED = 8,
-	COMBAT_WORLD_STATE_TARGET_FLUSHED				= 9,
-	COMBAT_WORLD_STATE_WEAPON_DRAWN					= 10, // -> COMBAT_WEAPON_TYPE
-	COMBAT_WORLD_STATE_WEAPON_TYPE_EQUIPPED			= 11, // -> COMBAT_WEAPON_TYPE
-	COMBAT_WORLD_STATE_HAS_WEAPON_TYPE				= 12, // -> COMBAT_WEAPON_TYPE
-	COMBAT_WORLD_STATE_HAS_COMBAT_ITEM				= 13, // -> COMBAT_LOCATION_TYPE
-	COMBAT_WORLD_STATE_THREATENED					= 14,
-	COMBAT_WORLD_STATE_WANTS_TO_FLEE				= 15,
-	COMBAT_WORLD_STATE_USED_COMBAT_ITEM				= 16,
-	COMBAT_WORLD_STATE_HIDING						= 17,
-	COMBAT_WORLD_STATE_EXECUTION_FLAGS				= 18, // -> COMBAT_PERMISSIONS
-	COMBAT_WORLD_STATE_GROUP_STRATEGY_ASSIGNMENT	= 19,
-	COMBAT_WORLD_STATE_COUNT,
+struct _CombatWorldState {
+	enum State {
+		TARGET_DEAD						= 0,
+		AT_LOCATION						= 1, // -> COMBAT_LOCATION_TYPE
+		NOT_AT_LOCATION					= 2, // -> COMBAT_LOCATION_TYPE
+		TARGET_LOST						= 3,
+		TARGET_DETECTED					= 4,
+		TARGET_360_LOS					= 5,
+		TARGET_BLOCKED					= 6,
+		TARGET_SPACE_DIFFERENT			= 7,
+		EXPLOSIVE_PROJECTILE_BLOCKED	= 8,
+		TARGET_FLUSHED					= 9,
+		WEAPON_DRAWN					= 10, // -> COMBAT_WEAPON_TYPE
+		WEAPON_TYPE_EQUIPPED			= 11, // -> COMBAT_WEAPON_TYPE
+		HAS_WEAPON_TYPE					= 12, // -> COMBAT_WEAPON_TYPE
+		HAS_COMBAT_ITEM					= 13, // -> COMBAT_LOCATION_TYPE
+		THREATENED						= 14,
+		WANTS_TO_FLEE					= 15,
+		USED_COMBAT_ITEM				= 16,
+		HIDING							= 17,
+		EXECUTION_FLAGS					= 18, // -> COMBAT_PERMISSIONS
+		GROUP_STRATEGY_ASSIGNMENT		= 19,
+		COUNT,
+	};
 };
+using COMBAT_WORLD_STATE = _CombatWorldState::State;
 
 enum COMBAT_EXECUTION_FLAGS : uint32_t {
 	COMBAT_PERMISSION_USE_COVER				= 0,
@@ -1049,94 +1218,115 @@ enum COMBAT_ITEM_TYPE {
 	COMBAT_ITEM_TYPE_COUNT,
 };
 
-enum LOCATION_TARGET_TYPE : uint8_t {
-	LOCATION_TARGET_TYPE_DESTINATION,
-	LOCATION_TARGET_TYPE_GUARD,
-	LOCATION_TARGET_TYPE_CLUSTER,
-	LOCATION_TARGET_TYPE_COMBAT_AREA,
+struct _LocationTargetType {
+	enum Type : uint8_t {
+		DESTINATION,
+		GUARD,
+		CLUSTER,
+		COMBAT_AREA,
+	};
 };
+using LOCATION_TARGET_TYPE = _LocationTargetType::Type;
 
-enum COMBAT_PROCEDURE_TYPE {
-	COMBAT_PROCEDURE_ATTACK_RANGED		= 0,
-	COMBAT_PROCEDURE_ATTACK_MELEE		= 1,
-	COMBAT_PROCEDURE_ATTACK_GRENADE		= 2,
-	COMBAT_PROCEDURE_ATTACK_LOW			= 3,
-	COMBAT_PROCEDURE_EVADE				= 4,
-	COMBAT_PROCEDURE_SWITCH_WEAPON		= 5,
-	COMBAT_PROCEDURE_MOVE				= 6,
-	COMBAT_PROCEDURE_BE_IN_COVER		= 7,
-	COMBAT_PROCEDURE_ACTIVATE_OBJECT	= 8,
-	COMBAT_PROCEDURE_HIDE_FROM_TARGET	= 9,
-	COMBAT_PROCEDURE_SEARCH				= 10,
-	COMBAT_PROCEDURE_USE_COMBAT_ITEM	= 11,
-	COMBAT_PROCEDURE_ENGAGE_TARGET		= 12,
+struct _CombatProcedureType {
+	enum Type {
+		ATTACK_RANGED		= 0,
+		ATTACK_MELEE		= 1,
+		ATTACK_GRENADE		= 2,
+		ATTACK_LOW			= 3,
+		EVADE				= 4,
+		SWITCH_WEAPON		= 5,
+		MOVE				= 6,
+		BE_IN_COVER			= 7,
+		ACTIVATE_OBJECT		= 8,
+		HIDE_FROM_TARGET	= 9,
+		SEARCH				= 10,
+		USE_COMBAT_ITEM		= 11,
+		ENGAGE_TARGET		= 12,
+	};
 };
+using COMBAT_PROCEDURE_TYPE = _CombatProcedureType::Type;
 
-enum COMBAT_ACTION_TYPE {
-	COMBAT_ACTION_ATTACK_RANGED_EXPLOSIVE,
-	COMBAT_ACTION_ATTACK_RANGED_EXPLOSIVE_COVER,
-	COMBAT_ACTION_ATTACK_RANGED,
-	COMBAT_ACTION_ATTACK_RANGED_COVER,
-	COMBAT_ACTION_ATTACK_GRENADE,
-	COMBAT_ACTION_ATTACK_GRENADE_FLUSH_TARGET,
-	COMBAT_ACTION_ATTACK_GRENADE_COVER,
-	COMBAT_ACTION_ATTACK_MELEE,
-	COMBAT_ACTION_ATTACK_HAND_TO_HAND,
-	COMBAT_ACTION_MOVE,
-	COMBAT_ACTION_MOVE_SWITCH_TO_MELEE,
-	COMBAT_ACTION_MOVE_ATTACK_RANGED,
-	COMBAT_ACTION_MOVE_ATTACK_EXPLOSIVE,
-	COMBAT_ACTION_MOVE_ATTACK_GRENADE,
-	COMBAT_ACTION_DRAW_WEAPON,
-	COMBAT_ACTION_SWITCH_WEAPON,
-	COMBAT_ACTION_AVOID_THREAT,
-	COMBAT_ACTION_SEARCH,
-	COMBAT_ACTION_INVESTIGATE,
-	COMBAT_ACTION_DODGE,
-	COMBAT_ACTION_IGNORE_BLOCKED_TARGET,
-	COMBAT_ACTION_FLEE,
-	COMBAT_ACTION_ACTIVATE_COMBAT_ITEM,
-	COMBAT_ACTION_USE_COMBAT_ITEM,
-	COMBAT_ACTION_ACQUIRE_LOS,
-	COMBAT_ACTION_HIDE,
-	COMBAT_ACTION_APPROACH_TARGET,
+struct _CombatActionType {
+	enum Type {
+		ATTACK_RANGED_EXPLOSIVE,
+		ATTACK_RANGED_EXPLOSIVE_COVER,
+		ATTACK_RANGED,
+		ATTACK_RANGED_COVER,
+		ATTACK_GRENADE,
+		ATTACK_GRENADE_FLUSH_TARGET,
+		ATTACK_GRENADE_COVER,
+		ATTACK_MELEE,
+		ATTACK_HAND_TO_HAND,
+		MOVE,
+		MOVE_SWITCH_TO_MELEE,
+		MOVE_ATTACK_RANGED,
+		MOVE_ATTACK_EXPLOSIVE,
+		MOVE_ATTACK_GRENADE,
+		DRAW_WEAPON,
+		SWITCH_WEAPON,
+		AVOID_THREAT,
+		SEARCH,
+		INVESTIGATE,
+		DODGE,
+		IGNORE_BLOCKED_TARGET,
+		FLEE,
+		ACTIVATE_COMBAT_ITEM,
+		USE_COMBAT_ITEM,
+		ACQUIRE_LOS,
+		HIDE,
+		APPROACH_TARGET,
+	};
 };
+using COMBAT_ACTION_TYPE = _CombatActionType::Type;
 
-enum COMBAT_GROUP_STRATEGY {
-	COMBAT_GROUP_STRATEGY_FALLBACK	= 0,
-	COMBAT_GROUP_STRATEGY_ADVANCE	= 1,
-	COMBAT_GROUP_STRATEGY_FLANK		= 2,
-	COMBAT_GROUP_STRATEGY_AMBUSH	= 3,
-	COMBAT_GROUP_STRATEGY_COUNT		= 4,
+struct _CombatGroupStrategy {
+	enum Type {
+		FALLBACK	= 0,
+		ADVANCE		= 1,
+		FLANK		= 2,
+		AMBUSH		= 3,
+		COUNT,
+	};
 };
+using COMBAT_GROUP_STRATEGY = _CombatGroupStrategy::Type;
 
 #pragma endregion
 
-enum DIALOGUE_TYPE {
-	DT_TOPIC			= 0,
-	DT_CONVERSATION		= 1,
-	DT_COMBAT			= 2,
-	DT_PERSUASION		= 3,
-	DT_DETECTION		= 4,
-	DT_SERVICE			= 5,
-	DT_MISCELLANEOUS	= 6,
-	DT_RADIO			= 7,
-	DIALOGUE_TYPE_COUNT,
+struct _DialogueType {
+	enum Type {
+		TOPIC			= 0,
+		CONVERSATION	= 1,
+		COMBAT			= 2,
+		PERSUASION		= 3,
+		DETECTION		= 4,
+		SERVICE			= 5,
+		MISCELLANEOUS	= 6,
+		RADIO			= 7,
+		COUNT,
+	};
 };
+using DIALOGUE_TYPE = _DialogueType::Type;
 
-enum FACTION_RELATION : uint32_t {
-	FACTION_RELATION_ENEMY		= 0,
-	FACTION_RELATION_NEUTRAL	= 1,
-	FACTION_RELATION_ALLY		= 2,
-	FACTION_RELATION_FRIEND		= 3,
+struct _FactionRelation {
+	enum Type : uint32_t {
+		ENEMY	= 0,
+		NEUTRAL	= 1,
+		ALLY	= 2,
+		FRIEND	= 3,
+	};
 };
+using FACTION_RELATION = _FactionRelation::Type;
 
-enum ACTOR_SEGMENT_INVIEW : uint32_t {
-	ACTOR_SEGMENT_INVIEW_BOTTOM = 0,
-	ACTOR_SEGMENT_INVIEW_MIDDLE = 1,
-	ACTOR_SEGMENT_INVIEW_TOP	= 2,
-	ACTOR_SEGMENT_INVIEW_NONE	= 3,
+struct _ActorSegmentInView {
+	enum Type : uint32_t {
+		BOTTOM	= 0,
+		MIDDLE	= 1,
+		TOP		= 2,
+		NONE	= 3,
+	};
 };
+using ACTOR_SEGMENT_IN_VIEW = _ActorSegmentInView::Type;
 
 enum HavokMaterialType {
 	BHK_MATERIAL_STONE				= 0,

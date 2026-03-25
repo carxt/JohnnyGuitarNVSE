@@ -223,8 +223,8 @@ bool Cmd_Clamp_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NiVector3 pos1;
-	NiVector3 pos2;
+	NiPoint3 pos1;
+	NiPoint3 pos2;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &(pos1.x), &(pos1.y), &(pos1.z), &(pos2.x), &(pos2.y), &(pos2.z))) {
 		*result = NiNodeComputeDistance(&pos1, &pos2);
 		if (IsConsoleMode()) Console_Print("Get3DDistance >> %f", *result);
@@ -248,7 +248,7 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char NiName[MAX_PATH] = {};
-	NiVector3 Coord;
+	NiPoint3 Coord;
 	if (!thisObj || !(ExtractArgsEx(EXTRACT_ARGS_EX, &NiName, &(Coord.x), &(Coord.y), &(Coord.z)))) return true;
 	NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
 	if (!t_Node) return true;

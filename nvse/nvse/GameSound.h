@@ -123,7 +123,7 @@ public:
 	virtual void	Unk_12(void);
 	virtual void	Unk_13(float arg1, float arg2, float arg3);
 	virtual void	Unk_14(float arg1, float arg2, float arg3);
-	virtual void	Unk_15(NiVector3& arg1);
+	virtual void	Unk_15(NiPoint3& arg1);
 	virtual void	Unk_16(void);
 	virtual void	Unk_17(float arg1, float arg2);
 	virtual void	Unk_18(uint16_t arg1, uint16_t arg2, uint16_t arg3, uint16_t arg4, uint16_t arg5);
@@ -233,7 +233,7 @@ struct AudioRequestData {
 	FunctionArg			value1;		// 08
 	FunctionArg			value2;		// 0C
 	NiNode*				niNode;	// 10
-	NiVector3			pos;		// 14
+	NiPoint3			pos;		// 14
 };
 // 188
 class BSAudioManager {

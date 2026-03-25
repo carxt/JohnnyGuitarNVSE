@@ -321,17 +321,17 @@ public:
 	Moon* masserMoon; // 030
 	Moon* secundaMoon; // 034
 	Precipitation* precipitation; // 038
-	NiVector3 vector03C; // 03C
+	NiPoint3 vector03C; // 03C
 	NiColor waterReflection; // 048
-	NiVector3 vector054; // 054
+	NiPoint3 vector054; // 054
 	NiColor sunAmbient; // 060
 	NiColor sunDirectional; // 06C
-	NiVector3 vector078; // 078
-	NiVector3 vector084; // 084
-	NiVector3 vector090; // 090
-	NiVector3 vector09C; // 09C
-	NiVector3 vector0A8; // 0A8
-	NiVector3 vector0B4; // 0B4
+	NiPoint3 vector078; // 078
+	NiPoint3 vector084; // 084
+	NiPoint3 vector090; // 090
+	NiPoint3 vector09C; // 09C
+	NiPoint3 vector0A8; // 0A8
+	NiPoint3 vector0B4; // 0B4
 	NiColor sunFog; // 0C0
 	float windSpeed; // 0CC
 	float windDirection; // 0D0
@@ -582,7 +582,7 @@ public:
 	FontInfo* extraFonts[80]; // 24
 
 	//	outDims.x := width (pxl); outDims.y := height (pxl); outDims.z := numLines
-	NiVector3* GetStringDimensions(NiVector3* outDims, const char* srcString, uint32_t fontID, uint32_t maxFlt = 0x7F7FFFFF,
+	NiPoint3* GetStringDimensions(NiPoint3* outDims, const char* srcString, uint32_t fontID, uint32_t maxFlt = 0x7F7FFFFF,
 	                               uint32_t startIdx = 0);
 };
 
@@ -606,7 +606,7 @@ public:
 
 	virtual void Unk_58(void);
 
-	NiVector3 destPos; // 80
+	NiPoint3 destPos; // 80
 };
 
 // 229C
@@ -817,55 +817,6 @@ struct PCMiscStat
 struct TypeSignature
 {
 	char signature[8];
-};
-
-
-// 24
-class SeenData
-{
-public:
-	SeenData();
-	virtual ~SeenData();
-	virtual void		DrawSeenData(NiNode* apDrawNode, const NiPoint3& arSeenStart, int) const;
-	virtual uint32_t	GetSaveSize() const;
-	virtual void		SaveGameBGS(BGSSaveFormBuffer* apBuffer) const;
-	virtual void		SaveGameTES(uint32_t) const;
-	virtual void		LoadGameBGS(BGSLoadGameBuffer* apBuffer);
-	virtual void		LoadGameTES(uint32_t);
-
-	uint32_t alphaLevels[8]; // 04
-
-	bool GetBitSeen(uint32_t row, uint32_t column);
-};
-
-// 2C
-class IntSeenData : public SeenData
-{
-public:
-	IntSeenData();
-	~IntSeenData();
-
-	int8_t segmentX; // 24
-	int8_t segmentY; // 25
-	uint8_t pad26[2]; // 26
-	IntSeenData* nextSegment; // 28
-
-	IntSeenData* GetSectionSeenData(int sectionX, int sectionY);
-};
-
-struct MusicMarker
-{
-	TESObjectREFR* markerRef;
-	ExtraAudioMarkerData* markerData;
-
-	MusicMarker(TESObjectREFR* _markerRef, ExtraAudioMarkerData* data) : markerRef(_markerRef), markerData(data)
-	{
-	}
-
-	bool operator <(const MusicMarker& rhs) const
-	{
-		return markerData->mediaLocCtrlID < rhs.markerData->mediaLocCtrlID;
-	}
 };
 
 

@@ -1787,7 +1787,7 @@ public:
 	FORenderedTerminal();
 	~FORenderedTerminal();
 
-	NiVector3 localTranslate;
+	NiPoint3 localTranslate;
 	NiAVObject* powerButton;
 	float fltE8;
 	uint8_t bytEC;

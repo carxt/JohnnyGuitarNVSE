@@ -60,11 +60,11 @@ AnimGroupClassify s_animGroupClassify[] =
 
 bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
 {
-	BSSimpleList<ItemChange*>* entryList = containerRef->GetContainerChangesList();
-	if (!entryList)
+	BSSimpleList<ItemChange*>* pItemChanges = containerRef->GetContainerChangesList();
+	if (!pItemChanges)
 		return false;
 	
-	BSSimpleList<ItemChange*>* pEntry = entryList->Find([&](BSSimpleList<ItemChange*>* apEntry) {
+	BSSimpleList<ItemChange*>* pEntry = pItemChanges->Find([&](BSSimpleList<ItemChange*>* apEntry) {
 		return apEntry->GetItem()->pObject == data.type;
 		}
 	);
@@ -76,18 +76,21 @@ bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
 	if (!pChange)
 		return false;
 
-	data.xData = ExtraDataList::Create(xBSData);
+	data.xData = ExtraDataList::Create();
+	data.xData->AddExtra(xBSData);
+
 	if (!pChange->pExtraLists)
 		pChange->pExtraLists = new BSSimpleList<ExtraDataList*>();
+
 	pChange->pExtraLists->AddHead(data.xData);
 	return true;
 }
 
 BSSimpleList<ItemChange*>* TESObjectREFR::GetContainerChangesList()
 {
-	ExtraContainerChanges* xChanges = (ExtraContainerChanges*)this->extraDataList.
-		GetByType(kExtraData_ContainerChanges);
-	if (xChanges && xChanges->pChanges) return xChanges->pChanges->pItems;
+	ExtraContainerChanges* xChanges = extraDataList.GetExtraData<ExtraContainerChanges>();
+	if (xChanges && xChanges->pChanges) 
+		return xChanges->pChanges->pItems;
 	return nullptr;
 }
 
@@ -111,7 +114,7 @@ DebugText::DebugLine* DebugText::GetDebugInput()
 	return result;
 }
 
-__declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims, const char* srcString, uint32_t fontID,
+__declspec(naked) NiPoint3* FontManager::GetStringDimensions(NiPoint3* outDims, const char* srcString, uint32_t fontID,
 	uint32_t maxFlt, uint32_t startIdx)
 {
 	static const uint32_t procAddr = 0xA1B020;

@@ -3,7 +3,7 @@
 #include "Utilities.h"
 #include "GameForms.h"
 
-struct ScriptEventList;
+class ScriptLocals;
 struct ScriptVar;
 struct ScriptBuffer;
 
@@ -35,7 +35,7 @@ public:
 		TESForm		*form;		// 08
 		uint32_t		varIdx;		// 0C always zero in editor
 
-		void	Resolve(ScriptEventList * eventList);
+		void	Resolve(ScriptLocals * eventList);
 	};
 
 	struct RefVarList : tList<RefVariable>
@@ -111,7 +111,7 @@ public:
 
 	VariableInfo	*GetVariableByName(const char *varName);
 	//uint32_t			GetVariableType(VariableInfo *var);
-	ScriptVar		*AddVariable(ScriptEventList *eventList, uint32_t ownerID, uint8_t modIdx);
+	ScriptVar		*AddVariable(ScriptLocals *eventList, uint32_t ownerID, uint8_t modIdx);
 	uint32_t			GetDataLength();
 
 	static bool	RunScriptLine(const char *text, TESObjectREFR *object = NULL);
@@ -121,13 +121,13 @@ public:
 	MEMBER_FN_PREFIX(Script);
 #if 1
 	// arg3 appears to be true for result scripts (runs script even if dataLength <= 4)
-	DEFINE_MEMBER_FN(Execute, bool, kScript_ExecuteFnAddr, TESObjectREFR* thisObj, ScriptEventList* eventList, TESObjectREFR* containingObj, bool arg3);
+	DEFINE_MEMBER_FN(Execute, bool, kScript_ExecuteFnAddr, TESObjectREFR* thisObj, ScriptLocals* eventList, TESObjectREFR* containingObj, bool arg3);
 	DEFINE_MEMBER_FN(Constructor, Script *, 0x005AA0F0);
 	DEFINE_MEMBER_FN(SetText, void, 0x005ABE50, const char * text);
 	DEFINE_MEMBER_FN(Run, bool, 0x005AC400, void * scriptContext, bool unkAlwaysOne, TESObjectREFR * object);
 	DEFINE_MEMBER_FN(Destructor, void, 0x005AA1A0);
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	DEFINE_MEMBER_FN(Execute, bool, kScript_ExecuteFnAddr, TESObjectREFR* thisObj, ScriptEventList* eventList, TESObjectREFR* containingObj, bool arg3);
+	DEFINE_MEMBER_FN(Execute, bool, kScript_ExecuteFnAddr, TESObjectREFR* thisObj, ScriptLocals* eventList, TESObjectREFR* containingObj, bool arg3);
 	DEFINE_MEMBER_FN(Constructor, Script *, 0x005AA220);
 	DEFINE_MEMBER_FN(SetText, void, 0x005AC000, const char * text);
 	DEFINE_MEMBER_FN(Run, bool, 0x005AC5B0, void * scriptContext, bool unkAlwaysOne, TESObjectREFR * object);
@@ -136,7 +136,7 @@ public:
 #else
 #error
 #endif
-	ScriptEventList	*CreateEventList();
+	ScriptLocals	*CreateEventList();
 };
 
 static_assert(sizeof(Script) == SCRIPT_SIZE);
@@ -145,7 +145,7 @@ struct ScriptRunner
 {
 	uint32_t				unk00;			// 00
 	TESForm				*baseForm;		// 04
-	ScriptEventList		*eventList;		// 08
+	ScriptLocals		*eventList;		// 08
 	uint32_t				unk10;			// 10
 	Script				*script;		// 14
 	uint32_t				unk18;			// 18	= 6 after failed to evaluate expression

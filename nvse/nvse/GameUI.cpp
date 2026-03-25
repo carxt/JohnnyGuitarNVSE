@@ -105,7 +105,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 		if (playStartStopSound)
 		{
 			BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStart", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
-			sound.SetPosition(*PlayerCharacter::GetSingleton()->GetPos());
+			sound.SetPosition(PlayerCharacter::GetSingleton()->GetPos());
 			sound.Play(false);
 		}
 		else
@@ -133,7 +133,7 @@ void MapMenu::StopHolotape()
 	if (!noHolotapeStopSound)
 	{
 		BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStop", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
-		handle.SetPosition(*PlayerCharacter::GetSingleton()->GetPos());
+		handle.SetPosition(PlayerCharacter::GetSingleton()->GetPos());
 		handle.Play(false);
 	}
 	noHolotapeStopSound = false;

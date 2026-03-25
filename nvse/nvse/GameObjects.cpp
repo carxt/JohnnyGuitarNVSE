@@ -13,20 +13,21 @@ TESForm* TESObjectREFR::GetBaseForm()
 	if (this->baseForm) {
 		baseform = this->baseForm;
 		if (baseform->GetCompileIndex() == 0xFF) {
-			if (IS_TYPE(baseform, BGSPlaceableWater)) {
+			if (IS_TYPE(baseform, BGSPlaceableWater))
 				return ((BGSPlaceableWater*)baseform)->water;
-			}
-			ExtraLeveledCreature* xLvlCrea = (ExtraLeveledCreature*)this->extraDataList.GetByType(kExtraData_LeveledCreature);
-			if (xLvlCrea && xLvlCrea->baseForm) {
-				return xLvlCrea->baseForm;
-			}
+
+			ExtraLeveledCreature* pLevCrea = extraDataList.GetExtraData<ExtraLeveledCreature>();
+			if (pLevCrea && pLevCrea->pOriginalBase)
+				return pLevCrea->pOriginalBase;
 		}
 	}
 	return baseform;
 }
-ScriptEventList* TESObjectREFR::GetEventList() const {
-	ExtraScript* xScript = (ExtraScript*)extraDataList.GetByType(kExtraData_Script);
-	return xScript ? xScript->eventList : NULL;
+
+// GAME - 0x5673E0
+ScriptLocals* TESObjectREFR::GetScriptLocals() const {
+	ExtraScript* xScript = extraDataList.GetExtraData<ExtraScript>();
+	return xScript ? xScript->pLocals : NULL;
 }
 
 PlayerCharacter* PlayerCharacter::GetSingleton() {
@@ -106,13 +107,10 @@ TESObjectREFR* TESObjectREFR::Create(bool bTemp) {
 
 TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj)	// For LevelledForm, find real baseForm, not temporary one.
 {
-	ExtraLeveledCreature* pXCreatureData = NULL;
-
 	if (thisObj) {
-		pXCreatureData = (ExtraLeveledCreature*) thisObj->extraDataList.GetByType(kExtraData_LeveledCreature);
-		if (pXCreatureData && pXCreatureData->baseForm) {
-			return pXCreatureData->baseForm;
-		}
+		ExtraLeveledCreature* pXCreatureData = thisObj->extraDataList.GetExtraData<ExtraLeveledCreature>();
+		if (pXCreatureData && pXCreatureData->pOriginalBase)
+			return pXCreatureData->pOriginalBase;
 		return thisObj->baseForm;
 	}
 	return NULL;
@@ -121,14 +119,14 @@ TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj)	// For LevelledForm, find 
 
 TESCombatStyle* Actor::GetCombatStyle() 
 {
-	ExtraCombatStyle* xCmbStyle = GetExtraType(extraDataList, CombatStyle);
-	if (xCmbStyle && xCmbStyle->combatStyle) return xCmbStyle->combatStyle;
+	ExtraCombatStyle* xCmbStyle = extraDataList.GetExtraData<ExtraCombatStyle>();
+	if (xCmbStyle && xCmbStyle->pCombatStyle) return xCmbStyle->pCombatStyle;
 	return ((TESActorBase*)baseForm)->GetCombatStyle();
 }
 
 TESActorBase* Actor::GetActorBase() {
-	ExtraLeveledCreature* xLvlCre = GetExtraType(extraDataList, LeveledCreature);
-	return (xLvlCre && xLvlCre->form) ? (TESActorBase*)xLvlCre->form : (TESActorBase*)baseForm;
+	ExtraLeveledCreature* xLvlCre = extraDataList.GetExtraData<ExtraLeveledCreature>();
+	return (xLvlCre && xLvlCre->pTemplate) ? (TESActorBase*)xLvlCre->pTemplate : (TESActorBase*)baseForm;
 }
 
 NiNode* TESObjectREFR::GetNode(const char* nodeName) {
@@ -204,8 +202,10 @@ bool Actor::GetRespawn() const {
 }
 
 TESObjectCELL* TESObjectREFR::GetParentCell() {
-	if (this->parentCell) return parentCell;
-	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
-	if (xPersistentCell && xPersistentCell->persistentCell) return xPersistentCell->persistentCell;
+	if (parentCell) 
+		return parentCell;
+	ExtraPersistentCell* xPersistentCell = extraDataList.GetExtraData<ExtraPersistentCell>();
+	if (xPersistentCell && xPersistentCell->pPersistentCell) 
+		return xPersistentCell->pPersistentCell;
 	return nullptr;
 }

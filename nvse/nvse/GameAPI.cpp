@@ -138,8 +138,8 @@ std::string GetSavegamePath() {
 }
 
 // ExtractArgsEx code
-ScriptEventList* ResolveExternalVar(ScriptEventList* in_EventList, Script* in_Script, uint8_t*& scriptData) {
-	ScriptEventList* refEventList = NULL;
+ScriptLocals* ResolveExternalVar(ScriptLocals* in_EventList, Script* in_Script, uint8_t*& scriptData) {
+	ScriptLocals* refEventList = NULL;
 	uint16_t varIdx = *((uint16_t*)++scriptData);
 	scriptData += 2;
 
@@ -151,7 +151,7 @@ ScriptEventList* ResolveExternalVar(ScriptEventList* in_EventList, Script* in_Sc
 			if (refObj->GetFormType() == FORM_TYPE::TESObjectREFR) {
 				TESObjectREFR* refr = DYNAMIC_CAST(refObj, TESForm, TESObjectREFR);
 				if (refr)
-					refEventList = refr->GetEventList();
+					refEventList = refr->GetScriptLocals();
 			}
 			else if (refObj->GetFormType() == FORM_TYPE::TESQuest) {
 				TESQuest* quest = DYNAMIC_CAST(refObj, TESForm, TESQuest);
@@ -164,7 +164,7 @@ ScriptEventList* ResolveExternalVar(ScriptEventList* in_EventList, Script* in_Sc
 	return refEventList;
 }
 
-TESGlobal* ResolveGlobalVar(ScriptEventList* in_EventList, Script* in_Script, uint8_t*& scriptData) {
+TESGlobal* ResolveGlobalVar(ScriptLocals* in_EventList, Script* in_Script, uint8_t*& scriptData) {
 	TESGlobal* global = NULL;
 	uint16_t varIdx = *((uint16_t*)++scriptData);
 	scriptData += 2;
@@ -176,7 +176,7 @@ TESGlobal* ResolveGlobalVar(ScriptEventList* in_EventList, Script* in_Script, ui
 	return global;
 }
 
-static bool ExtractFloat(double& out, uint8_t*& scriptData, Script* scriptObj, ScriptEventList* eventList) {
+static bool ExtractFloat(double& out, uint8_t*& scriptData, Script* scriptObj, ScriptLocals* eventList) {
 	//extracts one float arg
 
 	bool ret = false;
@@ -220,7 +220,7 @@ static bool ExtractFloat(double& out, uint8_t*& scriptData, Script* scriptObj, S
 	return ret;
 }
 
-TESForm* ExtractFormFromFloat(uint8_t*& scriptData, Script* scriptObj, ScriptEventList* eventList) {
+TESForm* ExtractFormFromFloat(uint8_t*& scriptData, Script* scriptObj, ScriptLocals* eventList) {
 	TESForm* outForm = NULL;
 	if (*scriptData == 'r')		//doesn't work as intended yet so refs must be local vars
 	{
@@ -239,7 +239,7 @@ TESForm* ExtractFormFromFloat(uint8_t*& scriptData, Script* scriptObj, ScriptEve
 	return outForm;
 }
 
-TESForm* ResolveForm(uint8_t*& scriptData, Script* scriptObj, ScriptEventList* eventList) {
+TESForm* ResolveForm(uint8_t*& scriptData, Script* scriptObj, ScriptLocals* eventList) {
 	TESForm* outForm = NULL;
 	char argType = *scriptData;
 	uint16_t	varIdx = *((uint16_t*)(scriptData + 1));
@@ -270,7 +270,7 @@ static const char* StringFromStringVar(uint32_t strID) {
 		return "";
 }
 
-static const char* ResolveStringArgument(ScriptEventList* eventList, const char* stringArg) {
+static const char* ResolveStringArgument(ScriptLocals* eventList, const char* stringArg) {
 	const char* result = stringArg;
 
 	if (stringArg && stringArg[0] == '$') {
@@ -285,7 +285,7 @@ static const char* ResolveStringArgument(ScriptEventList* eventList, const char*
 	return result;
 }
 
-void ScriptEventList::Dump(void) {
+void ScriptLocals::Dump(void) {
 	uint32_t nEvents = m_eventList->Count();
 
 	for (uint32_t n = 0; n < nEvents; ++n) {
@@ -296,7 +296,7 @@ void ScriptEventList::Dump(void) {
 	}
 }
 
-uint32_t ScriptEventList::ResetAllVariables() {
+uint32_t ScriptLocals::ResetAllVariables() {
 	if (!m_vars) return 0;
 	ListNode<ScriptVar>* varIter = m_vars->Head();
 	ScriptVar* scriptVar;
@@ -311,7 +311,7 @@ uint32_t ScriptEventList::ResetAllVariables() {
 	return numVars;
 }
 
-ScriptVar* ScriptEventList::GetVariable(uint32_t id) {
+ScriptVar* ScriptLocals::GetVariable(uint32_t id) {
 	if (m_vars) {
 		ListNode<ScriptVar>* varIter = m_vars->Head();
 		ScriptVar* scriptVar;
@@ -324,11 +324,11 @@ ScriptVar* ScriptEventList::GetVariable(uint32_t id) {
 	return NULL;
 }
 
-ScriptEventList* EventListFromForm(TESForm* form) {
-	ScriptEventList* eventList = NULL;
+ScriptLocals* EventListFromForm(TESForm* form) {
+	ScriptLocals* eventList = NULL;
 	TESObjectREFR* refr = DYNAMIC_CAST(form, TESForm, TESObjectREFR);
 	if (refr)
-		eventList = refr->GetEventList();
+		eventList = refr->GetScriptLocals();
 	else {
 		TESQuest* quest = DYNAMIC_CAST(form, TESForm, TESQuest);
 		if (quest)
@@ -382,7 +382,7 @@ static void OmitFormatStringArgs(std::string str, FormatStringArgs& args) {
 	}
 }
 
-//static bool ExtractFormattedString(uint32_t &numArgs, char* buffer, uint8_t* &scriptData, Script* scriptObj, ScriptEventList* eventList)
+//static bool ExtractFormattedString(uint32_t &numArgs, char* buffer, uint8_t* &scriptData, Script* scriptObj, ScriptLocals* eventList)
 bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 	//extracts args based on format string, prints formatted string to buffer
 	static const int maxArgs = 20;
@@ -734,7 +734,7 @@ void RegisterStringVarInterface(NVSEStringVarInterface* intfc) {
 	s_StringVarInterface = intfc;
 }
 
-bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* scriptDataIn, double* outVarData, uint8_t* outModIndex, bool shortPath) {
+bool ExtractSetStatementVar(Script* script, ScriptLocals* eventList, void* scriptDataIn, double* outVarData, uint8_t* outModIndex, bool shortPath) {
 	/*	DOES NOT WORK WITH FalloutNV, we are going to abuse the stack instead:
 	//when script command called as righthand side of a set statement, the script data containing the variable
 	//to assign to remains on the stack as arg to a previous function. We can get to it through scriptData in COMMAND_ARGS
@@ -807,7 +807,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 					TESScriptableForm* scriptable = DYNAMIC_CAST(refr->baseForm, TESForm, TESScriptableForm);
 					if (scriptable) {
 						script = scriptable->script;
-						eventList = refr->GetEventList();
+						eventList = refr->GetScriptLocals();
 					}
 					else
 						break;
@@ -876,7 +876,7 @@ uint32_t GetActorValueForString(const char* strActorVal, bool bForScript) {
 	return eActorVal_NoActorValue;
 }
 
-ScriptFormatStringArgs::ScriptFormatStringArgs(uint32_t _numArgs, uint8_t* _scriptData, Script* _scriptObj, ScriptEventList* _eventList)
+ScriptFormatStringArgs::ScriptFormatStringArgs(uint32_t _numArgs, uint8_t* _scriptData, Script* _scriptObj, ScriptLocals* _eventList)
 	: numArgs(_numArgs), scriptData(_scriptData), scriptObj(_scriptObj), eventList(_eventList) {
 	//extract format string
 	uint16_t len = *((uint16_t*)scriptData);

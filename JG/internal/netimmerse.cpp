@@ -5,7 +5,7 @@ NiProperty* NiAVObject::GetProperty(uint32_t auiType) const {
 	return ThisCall<NiProperty*>(0xA59D30, this, auiType);
 }
 
-float __declspec(naked) __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2) {
+float __declspec(naked) __fastcall NiNodeComputeDistance(NiPoint3* Vector1, NiPoint3* Vector2) {
 	__asm
 	{
 		movd xmm0, [ecx]
@@ -29,7 +29,7 @@ float __declspec(naked) __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiV
 }
 
 
-float __declspec(naked) __fastcall NiNodeComputeDistance2DSquared(NiVector3* Vector1, NiVector3* Vector2) {
+float __declspec(naked) __fastcall NiNodeComputeDistance2DSquared(NiPoint3* Vector1, NiPoint3* Vector2) {
 	__asm
 	{
 		movd xmm0, [ecx]

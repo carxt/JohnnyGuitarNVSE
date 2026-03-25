@@ -12,7 +12,7 @@ struct ParamInfo;
 class TESObjectREFR;
 class Script;
 class TESForm;
-struct ScriptEventList;
+class ScriptLocals;
 struct ArrayKey;
 namespace PluginAPI { class ArrayAPI; }
 struct PluginInfo;
@@ -270,7 +270,7 @@ struct NVSEMessagingInterface
 		kMessage_MainGameLoop,			// called each game loop
 		kMessage_ScriptCompile,   // EDITOR: called after successful script compilation in GECK. data: pointer to Script
 								// RUNTIME: also gets called after successful script compilation at runtime via functions.
-		kMessage_EventListDestroyed, // called before a script event list is destroyed, dataLen: 4, data: ScriptEventList* ptr
+		kMessage_EventListDestroyed, // called before a script event list is destroyed, dataLen: 4, data: ScriptLocals* ptr
 		kMessage_PostQueryPlugins, // called after all plugins have been queried
 
 		kMessage_OnFramePresent, // called when the game is about to present a frame
@@ -574,9 +574,9 @@ struct NVSEScriptInterface
 
 	uint32_t	(* GetFunctionParams)(Script* funcScript, uint8_t* paramTypesOut);
 	bool	(* ExtractArgsEx)(ParamInfo * paramInfo, void * scriptDataIn, uint32_t * scriptDataOffset, Script * scriptObj,
-		ScriptEventList * eventList, ...);
+		ScriptLocals * eventList, ...);
 	bool	(* ExtractFormatStringArgs)(uint32_t fmtStringPos, char* buffer, ParamInfo * paramInfo, void * scriptDataIn, 
-		uint32_t * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, uint32_t maxParams, ...);
+		uint32_t * scriptDataOffset, Script * scriptObj, ScriptLocals * eventList, uint32_t maxParams, ...);
 
 	bool	(*CallFunctionAlt)(Script *funcScript, TESObjectREFR *callingObj, uint8_t numArgs, ...);
 

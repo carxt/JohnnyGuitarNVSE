@@ -301,6 +301,21 @@ bool Cmd_HasHealthDamageEffect_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+static float Sign(const NiPoint3& p1, const NiPoint3& p2, const NiPoint3& p3) {
+	return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+}
+
+static bool PointInTriangle(const NiPoint3& pt, const NiPoint3& v1, const NiPoint3& v2, const NiPoint3& v3) {
+	bool b1 = Sign(pt, v1, v2) < 0.0;
+	bool b2 = Sign(pt, v2, v3) < 0.0;
+	bool b3 = Sign(pt, v3, v1) < 0.0;
+
+	return (b1 == b2) && (b2 == b3);
+}
+
+static NiPoint3 GetTriangleCenter(const NiPoint3& v1, const NiPoint3& v2, const NiPoint3& v3) {
+	return NiPoint3((v1.x + v2.x + v3.x) / 3.0f, (v1.y + v2.y + v3.y) / 3.0f, (v1.z + v2.z + v3.z) / 3.0f);
+}
 
 void GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
 	NavMeshArray* pNavMeshArray = apCell->pNavMeshes;
@@ -333,7 +348,7 @@ void GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPo
 			}
 
 
-			NiPoint3 kTriCenter = NiPoint3::GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
+			NiPoint3 kTriCenter = GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
 
 			if (zLimit > 0 && fabs(kTriCenter.z - arPointToTest.z) > zLimit) continue;
 
@@ -384,9 +399,9 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 
 
 			// Check if player is inside the triangle
-			if (NiPoint3::PointInTriangle(arPointToTest, kVerts[0], kVerts[1], kVerts[2])) {
+			if (PointInTriangle(arPointToTest, kVerts[0], kVerts[1], kVerts[2])) {
 				// Get triangle center
-				NiPoint3 kTriCenter = NiPoint3::GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
+				NiPoint3 kTriCenter = GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
 
 				if (zLimit > 0 && fabs(kTriCenter.z - arPointToTest.z) > zLimit) continue;
 
@@ -603,7 +618,7 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 		if (ref->Get3DSimple()) {
 			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
 			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(sound->GetFormID(), uiFlags);
-			handle.SetPosition(*ref->GetPos());
+			handle.SetPosition(ref->GetPos());
 			handle.SetObjectToFollow(ref->Get3DSimple());
 			uint32_t time = fTime * 1000.0;
 			handle.FadeInPlay(time);
@@ -691,7 +706,7 @@ bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* cell = thisObj->GetParentCell();
 	if (!cell || cell->IsInterior()) return true;
-	NiPoint3* pos = thisObj->GetPos();
+	const NiPoint3& pos = thisObj->GetPos();
 	COORD_DATA coordData;
 	TESObjectLAND* landscape = ThisCall<TESObjectLAND*>(0x546FB0, cell); // TESObjectCELL::GetLand
 	if (!landscape) return true;
@@ -768,14 +783,14 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char locationName[256] = {};
 	if (thisObj->parentCell && (thisObj->parentCell->cellFlags & 1) != 0) {
-		strcpy_s(locationName, thisObj->parentCell->fullName.name.c_str());
+		strcpy_s(locationName, thisObj->parentCell->fullName.GetFullName());
 	}
 	else {
 		TESWorldSpace* wspc = GetWorldspace(thisObj);
 		if (wspc) {
 			BSString str;
-			NiPoint3* pos = thisObj->GetPos();
-			wspc->GetMapNameForLocation(str, pos->x, pos->y, pos->z);
+			const NiPoint3& pos = thisObj->GetPos();
+			wspc->GetMapNameForLocation(str, pos.x, pos.y, pos.z);
 			strcpy_s(locationName, str.c_str());
 		}
 	}
@@ -826,13 +841,14 @@ bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 
 bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ExtraOwnership* xOwn = ThisCall<ExtraOwnership*>(0x567790, thisObj); // TESObjectREFR::ResolveOwnership
-	if (xOwn) {
-		ThisCall(0x8C0EC0, PlayerCharacter::GetSingleton(), thisObj, xOwn, 0xFFFFFFFF); //TESObjectREFR::HandleMinorCrime
+	TESForm* pOwner = ThisCall<TESForm*>(0x567790, thisObj); // TESObjectREFR::GetOwner
+	if (pOwner) {
+		ThisCall(0x8C0EC0, PlayerCharacter::GetSingleton(), thisObj, pOwner, 0xFFFFFFFF); // Actor::TrespassAlarm
 		*result = 1;
 	}
 	return true;
 }
+
 bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	*result = 0;
 	uint32_t skipInvisible = 0;
@@ -872,9 +888,9 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems) && container) {
 		if (checkItems) {
-			TESForm* containerOwner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
+			TESForm* containerOwner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::GetOwner
 			if (!containerOwner) return true;
-			ExtraContainerChanges* xChanges = (ExtraContainerChanges*)((Actor*)thisObj)->extraDataList.GetByType(kExtraData_ContainerChanges);
+			ExtraContainerChanges* xChanges = thisObj->extraDataList.GetExtraData<ExtraContainerChanges>();
 			if (!xChanges || !xChanges->pChanges || !xChanges->pChanges->pItems)
 				return true;
 			BSSimpleList<ItemChange*>* contChangesIter = xChanges->pChanges->pItems->GetHead();
@@ -890,22 +906,20 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 				while (xdlIter && !xdlIter->IsEmpty()){
 					xData = xdlIter->GetItem();
 					xdlIter = xdlIter->GetNext();
-					if (xData && xData->HasType(kExtraData_Ownership)) {
-						ExtraOwnership* xOwn = (ExtraOwnership*)xData->GetByType(kExtraData_Ownership);
-						if (xOwn->owner) {
-							if (xOwn->owner->GetFormID() == containerOwner->GetFormID()) {
-								ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, containerOwner); // Actor::HandleStealing
-								*result = 1;
-								return true;
-							}
+					if (xData) {
+						ExtraOwnership* xOwn = xData->GetExtraData<ExtraOwnership>();
+						if (xOwn && xOwn->pOwner && xOwn->pOwner->GetFormID() == containerOwner->GetFormID()) {
+							ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, containerOwner); // Actor::StealAlarm
+							*result = 1;
+							return true;
 						}
 					}
 				}
 			}
 		}
 		else {
-			TESForm* owner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
-			ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, owner); // Actor::HandleStealing,
+			TESForm* owner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::GetOwner
+			ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, owner); // Actor::StealAlarm
 			*result = 1;
 		}
 	}
@@ -1025,7 +1039,7 @@ bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
 bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	*result = -1;
 
-	NiPoint3* playerPos = PlayerCharacter::GetSingleton()->GetPos();
+	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetPos();
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
@@ -1043,7 +1057,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
-			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
+			auto distToPlayer = target->target->GetPos().SqrDistance(playerPos);
 			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
 				closestHostile = target->target;
@@ -1078,10 +1092,8 @@ double GetVectorAngle2D(const NiPoint3* pt) {
 }
 
 
-double GetAngleBetweenPoints(NiPoint3* actorPos, NiPoint3* playerPos, float offset) {
-	NiPoint3 diff;
-	diff.Init(actorPos);
-	diff.Subtract(playerPos);
+double GetAngleBetweenPoints(const NiPoint3& actorPos, const NiPoint3& playerPos, float offset) {
+	NiPoint3 diff = actorPos - playerPos;
 
 	double angle = GetVectorAngle2D(&diff) - offset;
 	if (angle > -kDblPI) {
@@ -1099,7 +1111,7 @@ double GetAngleBetweenPoints(NiPoint3* actorPos, NiPoint3* playerPos, float offs
 bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	*result = -1;
 
-	NiPoint3* playerPos = PlayerCharacter::GetSingleton()->GetPos();
+	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetPos();
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
@@ -1115,7 +1127,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
-			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
+			auto distToPlayer = target->target->GetPos().SqrDistance(playerPos);
 			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
 				closestHostile = target->target;
@@ -1352,7 +1364,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS)
 			if (poison)
 				ThisCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
 			else
-				ThisCall(0x410140, xData, kExtraData_Poison); // ExtraDataList::RemoveByType
+				ThisCall(0x410140, xData, EXTRA_DATA_TYPE::ExtraPoison); // ExtraDataList::RemoveExtra
 			*result = 1;
 		}
 	}

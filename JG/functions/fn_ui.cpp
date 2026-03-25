@@ -244,7 +244,7 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	TESObjectREFR* form;
 	char iconPath[MAX_PATH] = {};
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || !form || (!IS_TYPE(form, BGSListForm) && (!form->IsReference() || !form->IsMapMarker() || !GetExtraType(form->extraDataList, MapMarker))))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || !form || (!IS_TYPE(form, BGSListForm) && (!form->IsReference() || !form->IsMapMarker() || !form->extraDataList.HasExtra<ExtraMapMarker>())))
 		return true;
 	if (IS_TYPE(form, BGSListForm)) {
 		BSSimpleList<TESForm*>* pIter = ((BGSListForm*)form)->GetFormList();
@@ -252,7 +252,7 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 			TESObjectREFR* ref = (TESObjectREFR*)pIter->GetItem();
 			pIter = pIter->GetNext();
 
-			if (ref && ref->IsReference() && ref->IsMapMarker() && GetExtraType(ref->extraDataList, MapMarker)) {
+			if (ref && ref->IsReference() && ref->IsMapMarker() && ref->extraDataList.HasExtra<ExtraMapMarker>()) {
 				ExtraMarkerIcons::SetMapMarkerIcon(ref, iconPath);
 			}
 		}
@@ -260,18 +260,23 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	else {
 		ExtraMarkerIcons::SetMapMarkerIcon(form, iconPath);
 	}
-	if (IsConsoleMode()) Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->GetFormID(), iconPath);
+	if (IsConsoleMode()) 
+		Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->GetFormID(), iconPath);
 	return true;
 }
 
 bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
-	ExtraMapMarker* mapMarkerExtra;
-	if (!thisObj || (!thisObj->IsReference() || !thisObj->IsMapMarker())) return true;
-	mapMarkerExtra = GetExtraType(thisObj->extraDataList, MapMarker);
-	if (!mapMarkerExtra || !mapMarkerExtra->data)  return true;
-	const char* resStr = ExtraMarkerIcons::GetMapMarker(thisObj, mapMarkerExtra->data->type);
+	if (!thisObj || (!thisObj->IsReference() || !thisObj->IsMapMarker())) 
+		return true;
+
+	ExtraMapMarker* mapMarkerExtra = thisObj->extraDataList.GetExtraData<ExtraMapMarker>();
+	if (!mapMarkerExtra || !mapMarkerExtra->pData)
+		return true;
+	
+	const char* resStr = ExtraMarkerIcons::GetMapMarker(thisObj, mapMarkerExtra->pData->usType);
 	g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
-	if (IsConsoleMode()) Console_Print("GetCustomMapMarkerIcon >> %s", resStr);
+	if (IsConsoleMode()) 
+		Console_Print("GetCustomMapMarkerIcon >> %s", resStr);
 	return true;
 }
 

@@ -239,7 +239,7 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 				audioFlags |= BSAudioManager::kAudioFlags_DontCache;
 			}
 			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(path, BSAudioManager::AudioFlags(audioFlags), nullptr);
-			handle.SetPosition(*ref->GetPos());
+			handle.SetPosition(ref->GetPos());
 			handle.SetObjectToFollow(ref->Get3DSimple());
 			if (fadeInTime <= 0) {
 				handle.Play(false);
