@@ -325,6 +325,7 @@
     <ClCompile Include="functions\fn_event.cpp">
       <Filter>functions</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\AddItemMessages.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -789,6 +790,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BSRenderedTexture.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\AddItemMessages.hpp">
+      <Filter>internal\JG</Filter>
     </ClInclude>
     <ClInclude Include="functions\fn_event.h">
       <Filter>functions</Filter>
