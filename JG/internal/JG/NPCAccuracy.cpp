@@ -5,14 +5,14 @@ namespace NPCAccuracy {
 
 	Tables tables;
 
-	std::vector<uintptr_t> GetFactionsInList(ExtraFactionChanges::FactionListEntry* pFactList) {
+	std::vector<uintptr_t> GetFactionsInList(BSSimpleList<FactionRank*>* pFactList) {
 		std::vector<uintptr_t> retObj{};
-		auto factHead = pFactList->Head();
-		while (factHead) {
-			if (factHead->data && factHead->data->rank >= 0) {
-				retObj.push_back(factHead->data->faction->GetFormID());
-			}
-			factHead = factHead->next;
+		auto pIter = pFactList->GetHead();
+		while (pIter && !pIter->IsEmpty()) {
+			const FactionRank* pRank = pIter->GetItem();
+			pIter = pIter->GetNext();
+			if (pRank && pRank->cRank >= 0)
+				retObj.push_back(pRank->pFaction->GetFormID());
 		}
 		return retObj;
 	}
@@ -20,14 +20,12 @@ namespace NPCAccuracy {
 	__declspec (noinline) std::vector<uintptr_t> GetFactionsForActor(Actor* r_act) {
 
 		auto actBase = (TESActorBase*)GetPermanentBaseForm(r_act);
-		auto retVec = GetFactionsInList(&(actBase->baseData.factionList));
+		auto retVec = GetFactionsInList(&actBase->baseData.factionList);
 
-		ExtraFactionChanges* fRanks = (ExtraFactionChanges*)r_act->extraDataList.GetExtraData(kExtraData_FactionChanges);
-		if (fRanks) {
-			if (auto factionDataList = fRanks->data) {
-				auto vec2 = GetFactionsInList(factionDataList);
-				retVec.insert(retVec.end(), vec2.begin(), vec2.end());
-			}
+		ExtraFactionChanges* pFactionChanges = r_act->extraDataList.GetExtraData<ExtraFactionChanges>();
+		if (pFactionChanges && pFactionChanges->pFactionChanges) {
+			auto vec2 = GetFactionsInList(pFactionChanges->pFactionChanges);
+			retVec.insert(retVec.end(), vec2.begin(), vec2.end());
 		}
 		return retVec;
 	}

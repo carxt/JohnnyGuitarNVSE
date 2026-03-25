@@ -56,7 +56,7 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
 bool Cmd_AudioMarkerGetCurrent_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (PlayerCharacter::GetSingleton() && PlayerCharacter::GetSingleton()->currMusicMarker) {
-		if (auto mMarker = PlayerCharacter::GetSingleton()->currMusicMarker->markerRef) {
+		if (auto mMarker = PlayerCharacter::GetSingleton()->currMusicMarker->pReference) {
 			*(DWORD*)result = mMarker->GetFormID();
 		}
 	}
@@ -71,13 +71,12 @@ bool Cmd_AudioMarkerGetCurrent_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
-	MediaLocationController* locationController = nullptr;
 	*result = 0;
 	if (thisObj) {
-		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetExtraData(kExtraData_AudioMarker);
-		if (audioMrkr && audioMrkr->data) {
-			uintptr_t locController = audioMrkr->data->mediaLocCtrlID;
-			locationController = (MediaLocationController*)LookupFormByID(locController);
+		ExtraAudioMarker* audioMrkr = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
+		if (audioMrkr && audioMrkr->pData) {
+			uintptr_t locController = audioMrkr->pData->uiMediaLocationController;
+			MediaLocationController* locationController = (MediaLocationController*)TESForm::GetFormByNumericID(locController);
 			*(DWORD*)result = locationController->GetFormID();
 			if (IsConsoleMode()) {
 
@@ -108,9 +107,9 @@ bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
 bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
 	MediaLocationController* locationController;
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &locationController) && locationController && IS_TYPE(locationController, MediaLocationController)) {
-		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetExtraData(kExtraData_AudioMarker);
-		if (audioMrkr && audioMrkr->data) {
-			audioMrkr->data->mediaLocCtrlID = locationController->GetFormID();
+		ExtraAudioMarker* audioMrkr = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
+		if (audioMrkr && audioMrkr->pData) {
+			audioMrkr->pData->uiMediaLocationController = locationController->GetFormID();
 			Console_Print("AudioMarkerSetController >> 0x%lx, %s", locationController->GetFormID(), locationController->GetFormEditorID());
 
 		}
@@ -132,9 +131,9 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 		kFlags
 	};
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type, &newVal)) {
-		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetExtraData(kExtraData_AudioMarker);
+		ExtraAudioMarker* audioMrkr = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
 		ExtraRadius* rad = thisObj->extraDataList.GetExtraData<ExtraRadius>();
-		if (audioMrkr && audioMrkr->data) {
+		if (audioMrkr && audioMrkr->pData) {
 			switch (type) {
 			case kRadius:
 				if (rad) {
@@ -142,13 +141,13 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 				}
 				break;
 			case kLayer2:
-				audioMrkr->data->layer2TriggerPerc = newVal;
+				audioMrkr->pData->fSecondLayerPercent = newVal;
 				break;
 			case kLayer3:
-				audioMrkr->data->layer3TriggerPerc = newVal;
+				audioMrkr->pData->fThirdLayerPercent = newVal;
 				break;
 			case kFlags:
-				audioMrkr->data->flags = uint32_t(newVal);
+				audioMrkr->pData->bUseController = bool(newVal);
 				break;
 
 			}
@@ -170,9 +169,9 @@ bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
 		kFlags
 	};
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
-		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetExtraData(kExtraData_AudioMarker);
+		ExtraAudioMarker* audioMrkr = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
 		ExtraRadius* rad = thisObj->extraDataList.GetExtraData<ExtraRadius>();
-		if (audioMrkr && audioMrkr->data) {
+		if (audioMrkr && audioMrkr->pData) {
 			switch (type) {
 			case kRadius:
 				if (rad) {
@@ -180,13 +179,13 @@ bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
 				}
 				break;
 			case kLayer2:
-				*result = audioMrkr->data->layer2TriggerPerc;
+				*result = audioMrkr->pData->fSecondLayerPercent;
 				break;
 			case kLayer3:
-				*result = audioMrkr->data->layer3TriggerPerc;
+				*result = audioMrkr->pData->fThirdLayerPercent;
 				break;
 			case kFlags:
-				*result = audioMrkr->data->flags;
+				*result = audioMrkr->pData->bUseController;
 				break;
 
 			}

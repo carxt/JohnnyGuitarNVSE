@@ -88,9 +88,9 @@ bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
 
 BSSimpleList<ItemChange*>* TESObjectREFR::GetContainerChangesList()
 {
-	ExtraContainerChanges* xChanges = (ExtraContainerChanges*)this->extraDataList.
-		GetExtraData(kExtraData_ContainerChanges);
-	if (xChanges && xChanges->pChanges) return xChanges->pChanges->pItems;
+	ExtraContainerChanges* xChanges = extraDataList.GetExtraData<ExtraContainerChanges>();
+	if (xChanges && xChanges->pChanges) 
+		return xChanges->pChanges->pItems;
 	return nullptr;
 }
 
@@ -114,7 +114,7 @@ DebugText::DebugLine* DebugText::GetDebugInput()
 	return result;
 }
 
-__declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims, const char* srcString, uint32_t fontID,
+__declspec(naked) NiPoint3* FontManager::GetStringDimensions(NiPoint3* outDims, const char* srcString, uint32_t fontID,
 	uint32_t maxFlt, uint32_t startIdx)
 {
 	static const uint32_t procAddr = 0xA1B020;

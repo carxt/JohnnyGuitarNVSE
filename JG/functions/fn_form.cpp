@@ -494,14 +494,14 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char newPrompt[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPrompt)) {
-		ExtraActivateRef* xActivateRef = (ExtraActivateRef*)thisObj->extraDataList.GetExtraData(kExtraData_ActivateRef);
+		ExtraActivateRef* xActivateRef = thisObj->extraDataList.GetExtraData<ExtraActivateRef>();
 		if (xActivateRef) {
-			xActivateRef->activationPromptOverride.Set(newPrompt);
+			xActivateRef->strActivationPrompt.Set(newPrompt);
 		}
 		else {
 			xActivateRef = BSMemory::malloc<ExtraActivateRef>();
 			ThisCall(0x4338B0, xActivateRef);
-			xActivateRef->activationPromptOverride.Set(newPrompt);
+			xActivateRef->strActivationPrompt.Set(newPrompt);
 			thisObj->extraDataList.AddExtra(xActivateRef);
 		}
 		*result = 1;
@@ -511,10 +511,10 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ExtraActivateRef* xActivateRef = (ExtraActivateRef*)thisObj->extraDataList.GetExtraData(kExtraData_ActivateRef);
+	ExtraActivateRef* xActivateRef = thisObj->extraDataList.GetExtraData<ExtraActivateRef>();
 	if (xActivateRef) {
-		g_strInterface->Assign(PASS_COMMAND_ARGS, xActivateRef->activationPromptOverride.c_str());
-		if (IsConsoleMode()) Console_Print("GetRefActivationPromptOverride >> %s", xActivateRef->activationPromptOverride.c_str());
+		g_strInterface->Assign(PASS_COMMAND_ARGS, xActivateRef->strActivationPrompt.c_str());
+		if (IsConsoleMode()) Console_Print("GetRefActivationPromptOverride >> %s", xActivateRef->strActivationPrompt.c_str());
 	}
 	return true;
 }
@@ -1431,25 +1431,26 @@ bool Cmd_GetLifeState_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESFaction* faction = nullptr;
-	int32_t rank = -1;
+	TESFaction* pFaction = nullptr;
+	int32_t iRank = -1;
 	NVSEArrayVar* factionMemberArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction, &rank) && faction) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pFaction, &iRank) && pFaction) {
 		TESDataHandler::GetSingleton()->pObjects->ForEach([&](TESObject* apObject) {
-			TESActorBase* actorBase = DYNAMIC_CAST(apObject, TESBoundObject, TESActorBase);
-			if (actorBase && actorBase->baseData.factionList.Count() != 0) {
-				ListNode<FactionListData>* fctIter = actorBase->baseData.factionList.Head();
-				FactionListData* factionData;
-				do {
-					factionData = fctIter->data;
-					if (factionData && factionData->faction && factionData->faction == faction) {
-						if (rank == -1 || (rank == factionData->rank)) {
-							g_arrInterface->AppendElement(factionMemberArr, NVSEArrayElement(actorBase));
-						}
-					}
-				} while (fctIter = fctIter->next);
+			if (!apObject || !apObject->IsActorBase())
+				return;
+
+			TESActorBase* pActorBase = static_cast<TESActorBase*>(apObject);
+			if (pActorBase->baseData.factionList.IsEmpty())
+				return;
+
+			auto pIter = pActorBase->baseData.factionList.GetHead();
+			while (pIter && !pIter->IsEmpty()) {
+				FactionRank* pRank = pIter->GetItem();
+				pIter = pIter->GetNext();
+				if (pRank && pRank->pFaction == pFaction && (iRank == -1 || iRank == pRank->cRank))
+					g_arrInterface->AppendElement(factionMemberArr, NVSEArrayElement(pActorBase));
 			}
-			});
+		});
 	}
 	g_arrInterface->AssignCommandResult(factionMemberArr, result);
 	return true;
@@ -2201,8 +2202,7 @@ namespace RefWalker {
 		}
 
 		bool __fastcall CheckDistance(TESObjectREFR* apRef) const {
-			const NiPoint3 kVector(apRef->pos.x - kPosAndDist.x, apRef->pos.y - kPosAndDist.y, apRef->pos.z - kPosAndDist.z);
-			const float fDistance = kVector.length_sqr();
+			const float fDistance = apRef->pos.SqrDistance(NiPoint3(kPosAndDist));
 			return fDistance <= kPosAndDist.w;
 		}
 
@@ -2218,13 +2218,13 @@ namespace RefWalker {
 		}
 
 		bool __fastcall CheckAngle(TESObjectREFR* apRef) const {
-			const NiPoint3 kVector(apRef->pos.x - kPosAndDist.x, apRef->pos.y - kPosAndDist.y, 0.f);
+			const NiPoint3 kVector = apRef->pos - NiPoint3(kPosAndDist);
 			return std::abs(GetAngle(kVector, fHeading)) <= fConeSize;
 		}
 
 		bool __fastcall CheckDistanceAndAngle(TESObjectREFR* apRef) const {
-			const NiPoint3 kVector(apRef->pos.x - kPosAndDist.x, apRef->pos.y - kPosAndDist.y, apRef->pos.z - kPosAndDist.z);
-			const float fDistance = kVector.length_sqr();
+			const NiPoint3 kVector = apRef->pos - NiPoint3(kPosAndDist);
+			const float fDistance = kVector.SqrLength();
 			if (fDistance > kPosAndDist.w)
 				return false;
 
@@ -2339,7 +2339,7 @@ bool Cmd_CallPerRef_Execute(COMMAND_ARGS) {
 
 		NiPoint4 kPosAndDist;
 		TESObjectREFR* pCaller = thisObj ? thisObj : PlayerCharacter::GetSingleton();
-		const NiVector3* pPos = pCaller->PosVector();
+		const NiPoint3* pPos = pCaller->PosVector();
 		kPosAndDist.x = pPos->x;
 		kPosAndDist.y = pPos->y;
 		kPosAndDist.z = pPos->z;
@@ -2413,7 +2413,7 @@ bool Cmd_CallPerRefEx_Execute(COMMAND_ARGS) {
 
 		NiPoint4 kPosAndDist;
 		TESObjectREFR* pCaller = thisObj ? thisObj : PlayerCharacter::GetSingleton();
-		const NiVector3* pPos = pCaller->PosVector();
+		const NiPoint3* pPos = pCaller->PosVector();
 		kPosAndDist.x = pPos->x;
 		kPosAndDist.y = pPos->y;
 		kPosAndDist.z = pPos->z;

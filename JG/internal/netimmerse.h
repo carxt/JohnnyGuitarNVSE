@@ -98,7 +98,7 @@ public:
 struct QuaternionKey {
 	float			time;			// 00
 	NiQuaternion	value;			// 04
-	NiVector3		TBC;			// 14
+	NiPoint3		TBC;			// 14
 	NiQuaternion	quaternion20;	// 20
 	NiQuaternion	quaternion30;	// 30
 };
@@ -1034,7 +1034,7 @@ public:
 		m_local.rotate = arMat;
 	}
 
-	void SetLocalTranslate(const NiVector3& arTrn) {
+	void SetLocalTranslate(const NiPoint3& arTrn) {
 		m_local.translate = arTrn;
 	}
 
@@ -1312,12 +1312,12 @@ public:
 	BSSimpleArray<NiFrustumPlanes*>	array13C;		// 13C
 	BSSimpleArray<void*>				array14C;		// 14C	010C1E9C
 	uint32_t							unk15C[3];		// 15C
-	NiVector4						unk168;			// 168
-	NiVector4						unk178;			// 178
-	NiVector4						unk188;			// 188
-	NiVector4						unk198;			// 198
-	NiVector4						unk1A8;			// 1A8
-	NiVector4						unk1B8;			// 1B8
+	NiPoint4						unk168;			// 168
+	NiPoint4						unk178;			// 178
+	NiPoint4						unk188;			// 188
+	NiPoint4						unk198;			// 198
+	NiPoint4						unk1A8;			// 1A8
+	NiPoint4						unk1B8;			// 1B8
 	uint32_t							lightingPasses;	// 1C8
 	float							flt1CC[3];		// 1CC
 	uint32_t							unk1D8;			// 1D8
@@ -1344,7 +1344,7 @@ public:
 	NiViewport		viewPort;			// 100
 	float			LODAdjust;			// 110
 
-	bool LookAtWorldPoint(const NiVector3& kWorldPt, const NiVector3& kWorldUp) {
+	bool LookAtWorldPoint(const NiPoint3& kWorldPt, const NiPoint3& kWorldUp) {
 		return ThisCall<bool>(0xA701B0, this, &kWorldPt, &kWorldUp);
 	}
 };
@@ -1414,7 +1414,7 @@ public:
 
 	NiColor			fogColor;			// E0
 	uint32_t			unkEC;				// EC
-	NiVector3		direction;			// F0
+	NiPoint3		direction;			// F0
 };
 
 class BSSceneGraph : public NiNode {
@@ -1500,9 +1500,9 @@ public:
 	virtual void		Unk_28(void);
 	virtual void		Unk_29(void);
 	virtual void		Unk_2A(void);
-	virtual void		SetBackgroundColor(NiVector4* inARGB);
+	virtual void		SetBackgroundColor(NiPoint4* inARGB);
 	virtual void		Unk_2C(void);
-	virtual void		GetBackgroundColor(NiVector4* outARGB);
+	virtual void		GetBackgroundColor(NiPoint4* outARGB);
 	virtual void		Unk_2E(void);
 	virtual void		Unk_2F(void);
 	virtual void		Unk_30(void);
@@ -1556,7 +1556,7 @@ public:
 	virtual bool		EndScene();
 	virtual void		DisplayScene();
 	virtual void		Clear(float* rect, uint32_t flags);
-	virtual void		SetupCamera(NiVector3* pos, NiVector3* at, NiVector3* up, NiVector3* right, NiFrustum* frustum, float* viewport);
+	virtual void		SetupCamera(NiPoint3* pos, NiPoint3* at, NiPoint3* up, NiPoint3* right, NiFrustum* frustum, float* viewport);
 	virtual void		SetupScreenSpaceCamera(float* viewport);
 	virtual bool		BeginUsingRenderTargetGroup(NiRenderTargetGroup* renderTarget, ClearFlags clearFlags);
 	virtual bool		EndUsingRenderTargetGroup();
@@ -1991,8 +1991,8 @@ public:
 	uint16_t			word0C;			// 0C
 	uint16_t			word0E;			// 0E
 	NiBound		bounds;			// 10
-	NiVector3* vertices;		// 20
-	NiVector3* normals;		// 24
+	NiPoint3* vertices;		// 20
+	NiPoint3* normals;		// 24
 	NiColorA* vertexColors;	// 28
 	UVCoord* uvCoords;		// 2C
 	uint32_t			unk30;			// 30
@@ -2278,6 +2278,6 @@ public:
 	}
 };
 
-float __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2);
-float __fastcall NiNodeComputeDistance2DSquared(NiVector3* Vector1, NiVector3* Vector2);
+float __fastcall NiNodeComputeDistance(NiPoint3* Vector1, NiPoint3* Vector2);
+float __fastcall NiNodeComputeDistance2DSquared(NiPoint3* Vector1, NiPoint3* Vector2);
 void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn, float& zIn);

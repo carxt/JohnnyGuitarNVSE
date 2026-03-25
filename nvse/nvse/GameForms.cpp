@@ -150,13 +150,14 @@ const char* TESBipedModelForm::GetPath(uint32_t whichPath, bool bFemalePath) {
 }
 
 char TESActorBaseData::GetFactionRank(TESFaction* faction) {
-	ListNode<FactionListData>* facIter = factionList.Head();
-	FactionListData* data;
-	do {
-		data = facIter->data;
-		if (data && (data->faction == faction))
-			return data->rank;
-	} while (facIter = facIter->next);
+	auto pIter = factionList.GetHead();
+	while (pIter && !pIter->IsEmpty()) {
+		FactionRank* pRank = pIter->GetItem();
+		if (pRank && pRank->pFaction == faction)
+			return pRank->cRank;
+
+		pIter = pIter->GetNext();
+	}
 	return -1;
 }
 
@@ -236,7 +237,7 @@ TESForm* TESObjectWEAP::GetAmmoInInventory()
 	if (ammo.ammo) {
 		if (IS_TYPE(ammo.ammo, BGSListForm)) {
 			BGSListForm* ammoList = (BGSListForm*)ammo.ammo;
-			ExtraContainerChanges* xChanges = GetExtraType(PlayerCharacter::GetSingleton()->extraDataList, ContainerChanges);
+			ExtraContainerChanges* xChanges = PlayerCharacter::GetSingleton()->extraDataList.GetExtraData<ExtraContainerChanges>();
 			if (ammoList && xChanges && xChanges->pChanges) {
 				auto* pIter = ammoList->GetFormList();
 				while (pIter && !pIter->IsEmpty()) {
@@ -422,10 +423,6 @@ bool AlchemyItem::IsPoison() {
 		if (effSetting && !(effSetting->effectFlags & 4)) return false;
 	} while (iter = iter->GetNext());
 	return effSetting != NULL;
-}
-
-const char* TESFullName::GetFullName(const TESForm* apForm) {
-	return CdeclCall<const char*>(0x482720, apForm);
 }
 
 // GAME - 0x541AC0

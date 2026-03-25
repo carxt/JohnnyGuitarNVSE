@@ -8,6 +8,7 @@
 #include "Bethesda/TESModel.hpp"
 #include "Bethesda/TESBoundAnimObject.hpp"
 #include "Bethesda/BGSListForm.hpp"
+#include "Bethesda/TESFullName.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -283,7 +284,7 @@ class TESWaterForm;
 class Script;
 class TESObjectREFR;
 class TESChildCell;
-struct ScriptEventList;
+class ScriptLocals;
 class TESObjectLIGH;
 class TESEffectShader;
 class TESObjectIMOD;
@@ -331,17 +332,6 @@ struct Condition {
 
 struct ConditionList : tList<Condition> {
 	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result, bool arg4) { return ThisCall<bool>(0x680C60, this, runOnRef, arg2, result, arg4); }
-};
-
-// C
-class TESFullName : public BaseFormComponent {
-public:
-	TESFullName();
-	~TESFullName();
-
-	BSString	name;		// 004
-
-	static const char* GetFullName(const TESForm* apForm);
 };
 
 // 0C
@@ -910,11 +900,7 @@ public:
 	uint16_t		pad0A;			// 0A
 };
 
-struct FactionListData {
-	TESFaction* faction;
-	int8_t		rank;
-	uint8_t		pad[3];
-};
+class FactionRank;
 
 // 034
 class TESActorBaseData : public BaseFormComponent {
@@ -998,7 +984,7 @@ public:
 #ifdef RUNTIME
 	uint32_t			changedFlags;		// 28/000	Absent in Editor
 #endif
-	tList<FactionListData>	factionList;	// 2C/28
+	BSSimpleList<FactionRank*>	factionList;	// 2C/28
 
 	char GetFactionRank(TESFaction* faction);
 	void SetFactionRank(TESFaction* faction, char rank);
@@ -3921,24 +3907,24 @@ public:
 	struct LandData {
 		//	Note: All arrays in the structs are of 289 elements.
 		struct Geometry {
-			NiVector3* quad0Vertices;
-			NiVector3* quad1Vertices;
-			NiVector3* quad2Vertices;
-			NiVector3* quad3Vertices;
+			NiPoint3* quad0Vertices;
+			NiPoint3* quad1Vertices;
+			NiPoint3* quad2Vertices;
+			NiPoint3* quad3Vertices;
 		};
 
 		struct Struct08 {
-			NiVector3* quad0Unk;
-			NiVector3* quad1Unk;
-			NiVector3* quad2Unk;
-			NiVector3* quad3Unk;
+			NiPoint3* quad0Unk;
+			NiPoint3* quad1Unk;
+			NiPoint3* quad2Unk;
+			NiPoint3* quad3Unk;
 		};
 
 		struct Struct0C {
-			NiVector4* quad0Unk;
-			NiVector4* quad1Unk;
-			NiVector4* quad2Unk;
-			NiVector4* quad3Unk;
+			NiPoint4* quad0Unk;
+			NiPoint4* quad1Unk;
+			NiPoint4* quad2Unk;
+			NiPoint4* quad3Unk;
 		};
 
 		struct Struct10 {
@@ -4028,7 +4014,7 @@ public:
 		// So: this list would contain both Objectives and LocalVariables !
 		// That seems very strange but still, looking at Get/SetObjective... and ShowQuestVars there's no doubt.
 	ConditionList			conditions;			// 54
-	ScriptEventList*		scriptEventList;	// 5C
+	ScriptLocals*		scriptEventList;	// 5C
 	uint8_t					currentStage;		// 60
 	uint8_t					pad61[3];			// 61
 	BSString				editorName;			// 64

@@ -24,10 +24,10 @@ struct JGWorldToScreenMatrix {
 
 struct JGCameraPosition {
 	NiMatrix3				m_localRotate;			// 34
-	NiVector3				m_localTranslate;		// 58
+	NiPoint3				m_localTranslate;		// 58
 	float					m_localScale;			// 64
 	NiMatrix3				m_worldRotate;			// 68
-	NiVector3				m_worldTranslate;		// 8C
+	NiPoint3				m_worldTranslate;		// 8C
 	float					m_worldScale;			// 98
 };
 
@@ -37,7 +37,7 @@ struct JGCameraParams {
 };
 extern JGCameraParams JGGameCamera;
 
-extern float __fastcall NiNodeComputeDistance(NiVector3* Vector1, NiVector3* Vector2);
+extern float __fastcall NiNodeComputeDistance(NiPoint3* Vector1, NiPoint3* Vector2);
 
 
 bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, float& fBx, float& fBy,

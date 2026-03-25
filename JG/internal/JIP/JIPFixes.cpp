@@ -390,11 +390,11 @@ namespace JIPFixes {
 			if (!pFullName)
 				return nullptr;
 
-			const char* pString = pFullName->name.c_str();
+			const char* pString = pFullName->c_str();
 			if (!pString || pString[0] == '\0')
 				return nullptr;
 
-			*arLength = pFullName->name.GetLength();
+			*arLength = pFullName->GetFullNameLength();
 			return pString;
 		}
 

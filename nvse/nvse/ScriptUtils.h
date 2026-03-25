@@ -10,7 +10,7 @@
 */
 
 struct Operator;
-struct ScriptEventList;
+class ScriptLocals;
 class ExpressionEvaluator;
 struct UserFunctionParam;
 struct FunctionInfo;
@@ -109,7 +109,7 @@ public:
 	~ExpressionEvaluator();
 
 	Script			* script;
-	ScriptEventList	* eventList;
+	ScriptLocals	* eventList;
 
 	void			Error(const char* fmt, ...);
 	bool			HasErrors() { return (m_flags & kFlag_ErrorOccurred) != 0; }

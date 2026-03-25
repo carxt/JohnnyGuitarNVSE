@@ -3,10 +3,12 @@
 #include "GameForms.h"
 #include "GameBSExtraData.h"
 #include "GameExtraData.h"
+#include "Obsidian/AudioMarkerInfo.hpp"
 
-struct ScriptEventList;
+class ScriptLocals;
 class ActiveEffect;
 class Animation;
+class MapMarkerData;
 
 #if 1
 static const uint32_t s_TESObject_REFR_init = 0x55A2F0;			// TESObject_REFR initialization routine (first reference to s_TESObject_REFR_vtbl)
@@ -76,7 +78,7 @@ public:
 	virtual BipedAnim*	GetBiped() const;	// 007A	Character only
 	virtual BipedAnim*	GetCurrentBiped() const;
 	virtual void		SetValidBip01Names(BipedAnim* validBip01Names);
-	virtual NiPoint3* GetPos();				// GetPos or GetDistance
+	virtual const NiPoint3& GetPos() const;				// GetPos or GetDistance
 	virtual void		Unk_7E(uint32_t arg0);
 	virtual void		Unk_7F(void);
 	virtual void		Unk_80(uint32_t arg0);
@@ -142,13 +144,13 @@ public:
 	ExtraDataList	extraDataList;			// 044
 	RenderState* renderState;			// 064
 
-	ScriptEventList* GetEventList() const;
+	ScriptLocals* GetScriptLocals() const;
 
 	bool IsTaken() const { return uiFormFlags.Get(FormFlags::TAKEN); } // Need to implement
 	__forceinline NiNode* Get3DSimple() const{ return renderState ? renderState->rootNode : nullptr; }
 	const char* hk_GetName();
 	const char* GetFullName() const;
-	NiVector3* PosVector() { return (NiVector3*)&pos; }
+	NiPoint3* PosVector() { return (NiPoint3*)&pos; }
 	CoordXY* PosXY() { return (CoordXY*)&pos; }
 
 	void Update3D();
@@ -611,7 +613,7 @@ public:
 	uint8_t								byte15C;					// 15C-
 	uint8_t								byte15D;					// 15D-
 	uint16_t								jip15E;						// 15E+
-	NiVector3							startingPos;				// 160
+	NiPoint3							startingPos;				// 160
 	float								flt16C;						// 16C
 	TESForm* startingWorldOrCell;		// 170
 	uint8_t								byte174;					// 174-
@@ -732,7 +734,7 @@ struct ParentSpaceNode;
 struct TeleportLink;
 class ItemChange;
 class NiObject;
-struct MusicMarker;
+class AudioMarkerInfo;
 
 struct PerkRank {
 	BGSPerk* perk;
@@ -761,7 +763,7 @@ public:
 	virtual void		Unk_13A(void);
 
 	struct MapMarkerInfo {
-		ExtraMapMarker::MarkerData* markerData;
+		MapMarkerData* markerData;
 		TESObjectREFR* markerRef;
 	};
 
@@ -884,8 +886,8 @@ public:
 	bool								canUsePA;				// 7C7
 	tList<MapMarkerInfo>				mapMarkers;				// 7C8
 	TESWorldSpace* worldSpc7D0;			// 7D0
-	tList<MusicMarker>					musicMarkers;			// 7D4
-	MusicMarker* currMusicMarker;		// 7DC
+	tList<AudioMarkerInfo>					musicMarkers;			// 7D4
+	AudioMarkerInfo* currMusicMarker;		// 7DC
 	uint32_t								unk7E0[39];				// 7E0
 	tList<PerkRank>						perkRanksPC;			// 87C
 	tList<BGSEntryPointPerkEntry>		perkEntriesPC[74];		// 884
@@ -902,8 +904,8 @@ public:
 	float								fCombatTimer;
 	float								fYieldTimer;
 	NiAVObject*							pWobbleNodes[2][12];
-	NiVector3							vectorDD4;				// DD4
-	NiVector3							cameraPos;				// DE0
+	NiPoint3							vectorDD4;				// DD4
+	NiPoint3							cameraPos;				// DE0
 	bhkRigidBody* rigidBody;				// DEC
 	bool								pcInCombat;				// DF0
 	bool								pcUnseen;				// DF1
