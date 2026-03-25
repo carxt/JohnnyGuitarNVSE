@@ -423,8 +423,9 @@ bool Cmd_GetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
 
 
 BGSEncounterZone* GetEncounterZone(ExtraDataList* list) {
-	ExtraEncounterZone* xZone = (ExtraEncounterZone*)list->GetExtraData(kExtraData_EncounterZone);
-	if (xZone && xZone->zone) return xZone->zone;
+	ExtraEncounterZone* xZone = list->GetExtraData<ExtraEncounterZone>();
+	if (xZone && xZone->pZone) 
+		return xZone->pZone;
 	return nullptr;
 }
 
@@ -1561,18 +1562,17 @@ bool Cmd_GetBaseScale_Execute(COMMAND_ARGS) {
 
 bool Cmd_RemovePrimitive_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ExtraPrimitive* xPrimitive;
-	if (thisObj->extraDataList.HasExtra(kExtraData_Primitive)) {
-		xPrimitive = GetExtraType(thisObj->extraDataList, Primitive);
-		thisObj->extraDataList.RemoveExtra(xPrimitive, true);
+	if (thisObj->extraDataList.HasExtra<ExtraPrimitive>()) {
+		ExtraPrimitive* pPrimitive = thisObj->extraDataList.GetExtraData<ExtraPrimitive>();
+		thisObj->extraDataList.RemoveExtra(pPrimitive, true);
 		thisObj->Update3D();
 		*result = 1;
 	}
 	return true;
 }
 bool Cmd_GetPrimitiveType_Execute(COMMAND_ARGS) {
-	ExtraPrimitive* xPrimitive = GetExtraType(thisObj->extraDataList, Primitive);
-	*result = (xPrimitive && xPrimitive->primitive) ? xPrimitive->primitive->type : 0;
+	ExtraPrimitive* pPrimitive = thisObj->extraDataList.GetExtraData<ExtraPrimitive>();
+	*result = (pPrimitive && pPrimitive->pPrimitive) ? pPrimitive->pPrimitive->type : 0;
 	return true;
 }
 
@@ -1775,8 +1775,9 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* cell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell) && cell && IS_TYPE(cell, TESObjectCELL)) {
-		ExtraSeenData* seenData = (ExtraSeenData*)cell->extraDataList.GetExtraData(kExtraData_SeenData);
-		if (seenData && seenData->data) *result = 1;
+		ExtraSeenData* seenData = cell->extraDataList.GetExtraData<ExtraSeenData>();
+		if (seenData && seenData->pSeenData)
+			*result = 1;
 		if (IsConsoleMode())
 			Console_Print("IsCellVisited >> %.0f", *result);
 	}
@@ -1790,8 +1791,8 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	int32_t detachTime = 0;
 	float gameHoursPassed = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell) && cell && IS_TYPE(cell, TESObjectCELL)) {
-		ExtraDetachTime* xDetachTime = (ExtraDetachTime*)cell->extraDataList.GetExtraData(kExtraData_DetachTime);
-		detachTime = xDetachTime == 0 ? 0 : xDetachTime->time;
+		ExtraDetachTime* xDetachTime = cell->extraDataList.GetExtraData<ExtraDetachTime>();
+		detachTime = xDetachTime == 0 ? 0 : xDetachTime->uiTime;
 		if (detachTime == 0) {
 			*result = -1;
 		}
@@ -1977,12 +1978,12 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 		return true;
 
 	ExtraDataList* pExtraData = pInvRef->data.xData;
-	if (pExtraData && pExtraData->HasExtra(kExtraData_Hotkey)) {
-		ExtraHotkey* xHotkey = (ExtraHotkey*)pExtraData->GetExtraData(kExtraData_Hotkey);
-		if (xHotkey) {
-			*result = xHotkey->index + 1;
-		}
-	}
+	if (!pExtraData)
+		return true;
+
+	ExtraHotkey* pHotkey = pExtraData->GetExtraData<ExtraHotkey>();
+	if (pHotkey)
+		*result = pHotkey->ucIndex + 1;
 
 	return true;
 }

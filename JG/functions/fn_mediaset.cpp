@@ -9,10 +9,10 @@ bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS)
 	TESObjectCELL* pCell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL))
 	{
-		ExtraCellAcousticSpace* pXAcousticSpace = (ExtraCellAcousticSpace*)pCell->extraDataList.GetExtraData(kExtraData_CellAcousticSpace);
-		if (pXAcousticSpace && pXAcousticSpace->acousticSpace)
+		ExtraCellAcousticSpace* pXAcousticSpace = pCell->extraDataList.GetExtraData<ExtraCellAcousticSpace>();
+		if (pXAcousticSpace && pXAcousticSpace->pSpace)
 		{
-			*(DWORD*)result = pXAcousticSpace->acousticSpace->GetFormID();
+			*(DWORD*)result = pXAcousticSpace->pSpace->GetFormID();
 		}
 		if (IsConsoleMode())
 		{
@@ -133,12 +133,12 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 	};
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type, &newVal)) {
 		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetExtraData(kExtraData_AudioMarker);
-		ExtraRadius* rad = (ExtraRadius*)thisObj->extraDataList.GetExtraData(kExtraData_Radius);
+		ExtraRadius* rad = thisObj->extraDataList.GetExtraData<ExtraRadius>();
 		if (audioMrkr && audioMrkr->data) {
 			switch (type) {
 			case kRadius:
 				if (rad) {
-					rad->radius = newVal;
+					rad->fRadius = newVal;
 				}
 				break;
 			case kLayer2:
@@ -171,12 +171,12 @@ bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
 	};
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
 		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetExtraData(kExtraData_AudioMarker);
-		ExtraRadius* rad = (ExtraRadius*)thisObj->extraDataList.GetExtraData(kExtraData_Radius);
+		ExtraRadius* rad = thisObj->extraDataList.GetExtraData<ExtraRadius>();
 		if (audioMrkr && audioMrkr->data) {
 			switch (type) {
 			case kRadius:
 				if (rad) {
-					*result = rad->radius;
+					*result = rad->fRadius;
 				}
 				break;
 			case kLayer2:

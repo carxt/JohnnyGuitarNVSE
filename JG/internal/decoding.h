@@ -819,40 +819,6 @@ struct TypeSignature
 	char signature[8];
 };
 
-
-// 24
-class SeenData
-{
-public:
-	SeenData();
-	virtual ~SeenData();
-	virtual void		DrawSeenData(NiNode* apDrawNode, const NiPoint3& arSeenStart, int) const;
-	virtual uint32_t	GetSaveSize() const;
-	virtual void		SaveGameBGS(BGSSaveFormBuffer* apBuffer) const;
-	virtual void		SaveGameTES(uint32_t) const;
-	virtual void		LoadGameBGS(BGSLoadGameBuffer* apBuffer);
-	virtual void		LoadGameTES(uint32_t);
-
-	uint32_t alphaLevels[8]; // 04
-
-	bool GetBitSeen(uint32_t row, uint32_t column);
-};
-
-// 2C
-class IntSeenData : public SeenData
-{
-public:
-	IntSeenData();
-	~IntSeenData();
-
-	int8_t segmentX; // 24
-	int8_t segmentY; // 25
-	uint8_t pad26[2]; // 26
-	IntSeenData* nextSegment; // 28
-
-	IntSeenData* GetSectionSeenData(int sectionX, int sectionY);
-};
-
 struct MusicMarker
 {
 	TESObjectREFR* markerRef;

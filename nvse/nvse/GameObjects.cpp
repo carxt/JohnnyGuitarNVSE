@@ -204,8 +204,10 @@ bool Actor::GetRespawn() const {
 }
 
 TESObjectCELL* TESObjectREFR::GetParentCell() {
-	if (this->parentCell) return parentCell;
-	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetExtraData(kExtraData_PersistentCell);
-	if (xPersistentCell && xPersistentCell->persistentCell) return xPersistentCell->persistentCell;
+	if (parentCell) 
+		return parentCell;
+	ExtraPersistentCell* xPersistentCell = extraDataList.GetExtraData<ExtraPersistentCell>();
+	if (xPersistentCell && xPersistentCell->pPersistentCell) 
+		return xPersistentCell->pPersistentCell;
 	return nullptr;
 }

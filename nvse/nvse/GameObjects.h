@@ -19,7 +19,7 @@ static const uint32_t s_TESObjectREFR_Set3D = 0x5702E0;			// void : (const char*
 #error
 #endif
 const uint32_t kUpdateAppearanceAddr = 0x8D3FA0;
-struct NiPoint3;
+class NiPoint3;
 // 68
 class TESObjectREFR : public TESForm {
 public:

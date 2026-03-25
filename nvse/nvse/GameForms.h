@@ -3794,7 +3794,7 @@ static_assert(sizeof(LODdata) == 0x3C);
 typedef NiTPointerMap<int32_t, TESObjectCELL*> CellPointerMap;
 
 // EC
-struct NiPoint3;
+class NiPoint3;
 class TESWorldSpace : public TESForm {
 public:
 	TESWorldSpace();

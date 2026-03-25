@@ -826,9 +826,9 @@ bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 
 bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ExtraOwnership* xOwn = ThisCall<ExtraOwnership*>(0x567790, thisObj); // TESObjectREFR::ResolveOwnership
-	if (xOwn) {
-		ThisCall(0x8C0EC0, PlayerCharacter::GetSingleton(), thisObj, xOwn, 0xFFFFFFFF); //TESObjectREFR::HandleMinorCrime
+	TESForm* pOwner = ThisCall<TESForm*>(0x567790, thisObj); // TESObjectREFR::GetOwner
+	if (pOwner) {
+		ThisCall(0x8C0EC0, PlayerCharacter::GetSingleton(), thisObj, pOwner, 0xFFFFFFFF); // Actor::TrespassAlarm
 		*result = 1;
 	}
 	return true;
@@ -872,7 +872,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems) && container) {
 		if (checkItems) {
-			TESForm* containerOwner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
+			TESForm* containerOwner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::GetOwner
 			if (!containerOwner) return true;
 			ExtraContainerChanges* xChanges = (ExtraContainerChanges*)((Actor*)thisObj)->extraDataList.GetExtraData(kExtraData_ContainerChanges);
 			if (!xChanges || !xChanges->pChanges || !xChanges->pChanges->pItems)
@@ -891,21 +891,19 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 					xData = xdlIter->GetItem();
 					xdlIter = xdlIter->GetNext();
 					if (xData && xData->HasExtra(kExtraData_Ownership)) {
-						ExtraOwnership* xOwn = (ExtraOwnership*)xData->GetExtraData(kExtraData_Ownership);
-						if (xOwn->owner) {
-							if (xOwn->owner->GetFormID() == containerOwner->GetFormID()) {
-								ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, containerOwner); // Actor::HandleStealing
-								*result = 1;
-								return true;
-							}
+						ExtraOwnership* xOwn = xData->GetExtraData<ExtraOwnership>();
+						if (xOwn->pOwner && xOwn->pOwner->GetFormID() == containerOwner->GetFormID()) {
+							ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, containerOwner); // Actor::StealAlarm
+							*result = 1;
+							return true;
 						}
 					}
 				}
 			}
 		}
 		else {
-			TESForm* owner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
-			ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, owner); // Actor::HandleStealing,
+			TESForm* owner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::GetOwner
+			ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, owner); // Actor::StealAlarm
 			*result = 1;
 		}
 	}

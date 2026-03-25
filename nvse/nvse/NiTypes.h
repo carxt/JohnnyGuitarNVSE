@@ -115,7 +115,8 @@ struct NiPoint2 {
 		return *this = NiPoint3(x op v.x, y op v.y, z op v.z); \
 	}
 
-struct NiPoint3 {
+class NiPoint3 {
+public:
 	float x, y, z;
 
 	void Scale(float scale) {

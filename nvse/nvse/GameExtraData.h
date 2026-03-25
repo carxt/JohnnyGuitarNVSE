@@ -6,144 +6,16 @@
 #include "Bethesda/BSSimpleList.hpp"
 #include "Bethesda/InventoryChanges.hpp"
 #include "Bethesda/ItemChange.hpp"
-
-/*    Class							     vtbl	  Type  Size
- *   ----------------------------		------		--  --
- *	ExtraAction                        ????????		0E	14
- *	ExtraActivateLoopSound             ????????		87	18
- *	ExtraActivateRef                   ????????		53	18
- *	ExtraActivateRefChildren           ????????		54	18
- *	ExtraAmmo                          ????????		6E	14
- *	ExtraAnim                          ????????		10	10
- *	ExtraAshPileRef                    ????????		89	10
- *	ExtraCannotWear                    ????????		3E	0C	// no data
- *	ExtraCell3D                        ????????		2	10
- *	ExtraCellAcousticSpace             ????????		81	10
- *	ExtraCellCanopyShadowMask          ????????		0A	1C
- *	ExtraCellClimate                   ????????		8	10
- *	ExtraCellImageSpace                ????????		59	10
- *	ExtraCellMusicType                 ????????		7	10
- *	ExtraCellWaterType                 ????????		3	10
- *	ExtraCharge                        ????????		28	10
- *	ExtraCollisionData                 ????????		72	10
- *	ExtraCombatStyle                   ????????		69	10
- *	ExtraContainerChanges              ????????		15	10
- *	ExtraCount                         ????????		24	10
- *	ExtraCreatureAwakeSound            ????????		7D	18
- *	ExtraCreatureMovementSound         ????????		8A	18
- *	ExtraDecalRefs                     ????????		57	14
- *	ExtraDetachTime                    ????????		0B	10
- *	ExtraDismemberedLimbs              ????????		5F	30
- *	ExtraDistantData                   ????????		13	18
- *	ExtraDroppedItemList               ????????		3A	14
- *	ExtraEditorRefMovedData            ????????		4C	30
- *	ExtraEmittanceSource               ????????		67	10
- *	ExtraEnableStateChildren           ????????		38	14
- *	ExtraEnableStateParent             ????????		37	14
- *	ExtraEncounterZone                 ????????		74	10
- *	ExtraFactionChanges                ????????		5E	10
- *	ExtraFollower                      ????????		1D	10
- *	ExtraFollowerSwimBreadcrumbs       ????????		8B	28
- *	ExtraFriendHits                    ????????		45	1C
- *	ExtraGhost                         ????????		1F	0C	// no data
- *	ExtraGlobal                        ????????		22	10
- *	ExtraGuardedRefData                ????????		7C	1C
- *	ExtraHasNoRumors                   ????????		4E	10
- *	ExtraHavok                         ????????		1	14
- *	ExtraHeadingTarget                 ????????		46	10
- *	ExtraHealth                        ????????		25	10
- *	ExtraHealthPerc                    ????????		7A	10
- *	ExtraHotkey                        ????????		4A	10
- *	ExtraIgnoredBySandbox              ????????		80	0C	// no data
- *	ExtraInfoGeneralTopic              ????????		4D	10
- *	ExtraItemDropper                   ????????		39	10
- *	ExtraLastFinishedSequence          ????????		41	10
- *	ExtraLevCreaModifier               ????????		1E	10
- *	ExtraLeveledCreature               ????????		2E	14
- *	ExtraLeveledItem                   ????????		2F	14
- *	ExtraLight                         ????????		29	10
- *	ExtraLinkedRef                     ????????		51	10
- *	ExtraLinkedRefChildren             ????????		52	14
- *	ExtraLitWaterRefs                  ????????		85	14
- *	ExtraLock                          ????????		2A	10
- *	ExtraMapMarker                     ????????		2C	10
- *	ExtraMerchantContainer             ????????		3C	10
- *	ExtraModelSwap                     ????????		5B	14
- *	ExtraMultiBound                    ????????		61	10
- *	ExtraMultiBoundData                ????????		62	10
- *	ExtraMultiBoundRef                 ????????		63	10
- *	ExtraNavMeshPortal                 ????????		5A	14
- *	ExtraNorthRotation                 ????????		43	10
- *	ExtraObjectHealth                  ????????		56	10
- *	ExtraOcclusionPlane                ????????		71	10
- *	ExtraOcclusionPlaneRefData         ????????		76	10
- *	ExtraOpenCloseActivateRef          ????????		6C	10
- *	ExtraOriginalReference             ????????		20	10
- *	ExtraOwnership                     ????????		21	10
- *	ExtraPackage                       ????????		19	1C
- *	ExtraPackageData                   ????????		70	10
- *	ExtraPackageStartLocation          ????????		18	1C
- *	ExtraPatrolRefData                 ????????		6F	10
- *	ExtraPatrolRefInUseData            ????????		88	10
- *	ExtraPersistentCell                ????????		0C	10
- *	ExtraPlayerCrimeList               ????????		35	10
- *	ExtraPoison                        ????????		3F	10
- *	ExtraPortal                        ????????		78	10
- *	ExtraPortalRefData                 ????????		77	10
- *	ExtraPrimitive                     ????????		6B	10
- *	ExtraProcessMiddleLow              ????????		9	10
- *	ExtraRadiation                     ????????		5D	10
- *	ExtraRadioData                     ????????		68	1C
- *	ExtraRadius                        ????????		5C	10
- *	ExtraRagdollData                   ????????		14	10
- *	ExtraRandomTeleportMarker          ????????		3B	10
- *	ExtraRank                          ????????		23	10
- *	ExtraReferencePointer              ????????		1C	10
- *	ExtraReflectedRefs                 ????????		65	14
- *	ExtraReflectorRefs                 ????????		66	14
- *	ExtraRefractionProperty            ????????		48	10
- *	ExtraRegionList                    ????????		4	10
- *	ExtraReservedMarkers               ????????		82	10
- *	ExtraRoom                          ????????		79	10
- *	ExtraRoomRefData                   ????????		7B	10
- *	ExtraRunOncePacks                  ????????		1B	10
- *	ExtraSavedAnimation                ????????		42	10
- *	ExtraSavedHavokData                ????????		3D	10
- *	ExtraSayToTopicInfo                ????????		75	18
- *	ExtraSayTopicInfoOnceADay          ????????		73	10
- *	ExtraScale                         ????????		30	10
- *	ExtraScript                        ????????		0D	14
- *	ExtraSeed                          ????????		31	10
- *	ExtraSeenData                      ????????		5	10
- *	ExtraSound                         ????????		4F	18
- *	ExtraStartingPosition              ????????		0F	24
- *	ExtraStartingWorldOrCell           ????????		49	10
- *	ExtraTalkingActor                  ????????		55	10
- *	ExtraTeleport                      ????????		2B	10
- *	ExtraTerminalState                 ????????		50	10
- *	ExtraTimeLeft                      ????????		27	10
- *	ExtraTrespassPackage               ????????		1A	10
- *	ExtraUsedMarkers                   ????????		12	10
- *	ExtraUses                          ????????		26	10
- *	ExtraWaterLightRefs                ????????		84	14
- *	ExtraWaterZoneMap                  ????????		7E	20
- *	ExtraWeaponAttackSound             ????????		86	18
- *	ExtraWeaponIdleSound               ????????		83	18
- *	ExtraWeaponModFlags                ????????		8D	10
- *	ExtraWorn                          ????????		16	0C	// no data
- *	ExtraWornLeft                      ????????		17	0C	// no data
- *	ExtraXTarget                       ????????		44	10
- */
-
- /* BaseExtraList methods:
-	 AddExtra		0x0040A180
-	 GetByType		0x0040A320, pass typeID
-	 ItemsInList		0x0040A130
-	 RemoveExtra		0x0040A250
-
-   ExtraDataList methods:
-	 DuplicateExtraListForContainer	0x0041B090
- */
+#include "Bethesda/ExtraCellAcousticSpace.hpp"
+#include "Bethesda/ExtraEncounterZone.hpp"
+#include "Bethesda/ExtraRadius.hpp"
+#include "Bethesda/ExtraPoison.hpp"
+#include "Bethesda/ExtraPersistentCell.hpp"
+#include "Bethesda/ExtraOwnership.hpp"
+#include "Bethesda/ExtraPrimitive.hpp"
+#include "Bethesda/ExtraHotkey.hpp"
+#include "Bethesda/ExtraSeenData.hpp"
+#include "Bethesda/ExtraDetachTime.hpp"
 
 class BGSPrimitive;
 struct AnimData;
@@ -347,69 +219,6 @@ public:
 };
 
 // 010
-class ExtraHealth : public BSExtraData {
-public:
-	ExtraHealth();
-	virtual ~ExtraHealth();
-	float health;
-
-	static ExtraHealth* __stdcall Create(float _health = 0);
-};
-
-// 00C
-class ExtraWorn : public BSExtraData	// Item is equipped
-{
-public:
-	ExtraWorn();
-	virtual ~ExtraWorn();
-
-	static ExtraWorn* Create();
-};
-
-// 00C
-class ExtraWornLeft : public BSExtraData	// haven't seen used yet
-{
-public:
-	ExtraWornLeft();
-	virtual ~ExtraWornLeft();
-
-	//static ExtraWornLeft* Create();
-};
-
-// 00C
-class ExtraCannotWear : public BSExtraData	//	Seen used as ForceEquip ! Unused as forceUnequip (bug?)
-{
-public:
-	ExtraCannotWear();
-	virtual ~ExtraCannotWear();
-
-	static ExtraCannotWear* Create();
-};
-
-// 010
-class ExtraHotkey : public BSExtraData {
-public:
-	ExtraHotkey();
-	virtual ~ExtraHotkey();
-
-	uint8_t	index;		// 00C (is 0-7)
-
-	static ExtraHotkey* __stdcall Create(uint8_t _index = 0);
-};
-
-// 010
-class ExtraCount : public BSExtraData {
-public:
-	ExtraCount();
-	virtual ~ExtraCount();
-
-	int16_t	count;	// 00C
-	uint8_t	pad[2];	// 00E
-
-	static ExtraCount* __stdcall Create(uint32_t count = 0);
-};
-
-// 010
 class ExtraLock : public BSExtraData {
 public:
 	ExtraLock();
@@ -427,17 +236,6 @@ public:
 	Data* data;		// 00C
 
 	static ExtraLock* Create();
-};
-
-// 010
-class ExtraUses : public BSExtraData {
-public:
-	ExtraUses();
-	~ExtraUses();
-
-	uint32_t unk0;
-
-	static ExtraUses* Create();
 };
 
 // 010
@@ -461,67 +259,6 @@ public:
 	Data* data;
 
 	static ExtraTeleport* Create();
-};
-
-// 010
-class ExtraRandomTeleportMarker : public BSExtraData {
-public:
-	ExtraRandomTeleportMarker();
-	~ExtraRandomTeleportMarker();
-
-	TESObjectREFR* teleportRef;
-};
-
-// 014
-class ExtraAmmo : public BSExtraData {
-public:
-	ExtraAmmo();
-	~ExtraAmmo();
-
-	TESAmmo* ammo;
-	uint32_t unk4;
-};
-
-// 010
-class ExtraOwnership : public BSExtraData {
-public:
-	ExtraOwnership();
-	virtual ~ExtraOwnership();
-
-	TESForm* owner;	// maybe this should be a union {TESFaction*; TESNPC*} but it would be more unwieldy to access and modify
-
-	static ExtraOwnership* __stdcall Create(TESForm* _owner);
-};
-
-// 010
-class ExtraRank : public BSExtraData {
-public:
-	ExtraRank();
-	virtual ~ExtraRank();
-
-	int32_t	rank; // 00C
-
-	static ExtraRank* __stdcall Create(uint32_t _rank);
-};
-
-// 010
-class ExtraGlobal : public BSExtraData {								//ownership data, stored separately from ExtraOwnership
-public:
-	ExtraGlobal();
-	virtual ~ExtraGlobal();
-
-	TESGlobal* globalVar;	// 00C
-};
-
-// 010
-class ExtraWeaponModFlags : public BSExtraData {
-public:
-	ExtraWeaponModFlags();
-	~ExtraWeaponModFlags();
-
-	uint8_t	flags; // 00C
-
-	static ExtraWeaponModFlags* __stdcall Create(uint8_t _flags = 0);
 };
 
 class ExtraFactionChanges : public BSExtraData {
@@ -627,95 +364,6 @@ public:
 	void SetHidden(bool hidden) { data->flags = (hidden) ? (data->flags | kFlag_Hidden) : (data->flags & ~kFlag_Hidden); }
 };
 
-// 14
-class ExtraHavok : public BSExtraData {
-public:
-	ExtraHavok();
-	virtual ~ExtraHavok();
-
-	bhkWorld* world;			// 0C
-	uint32_t			unk10;			// 10
-};
-
-// 10
-class ExtraRegionList : public BSExtraData {
-public:
-	ExtraRegionList();
-	virtual ~ExtraRegionList();
-
-	TESRegionList* regionList;	// 0C
-};
-
-
-class ExtraDetachTime : public BSExtraData {
-public:
-	ExtraDetachTime();
-	~ExtraDetachTime();
-
-	int32_t time;
-};
-
-// 10
-class ExtraSeenData : public BSExtraData {
-public:
-	ExtraSeenData();
-	virtual ~ExtraSeenData();
-
-	SeenData* data;		// 0C
-};
-
-// 10
-class ExtraCellWaterType : public BSExtraData {
-public:
-	ExtraCellWaterType();
-	virtual ~ExtraCellWaterType();
-
-	TESWaterForm* waterForm;		// 0C
-
-	static ExtraCellWaterType* __stdcall Create(TESWaterForm* _waterForm);
-};
-
-// 10
-class ExtraCellMusicType : public BSExtraData {
-public:
-	ExtraCellMusicType();
-	virtual ~ExtraCellMusicType();
-
-	BGSMusicType* musicType;
-
-	static ExtraCellMusicType* __stdcall Create(BGSMusicType* _musicType);
-};
-
-// 10
-class ExtraCellClimate : public BSExtraData {
-public:
-	ExtraCellClimate();
-	virtual ~ExtraCellClimate();
-
-	TESClimate* climate;		// 0C
-
-	static ExtraCellClimate* __stdcall Create(TESClimate* _climate);
-};
-
-// 10
-class ExtraPersistentCell : public BSExtraData {
-public:
-	ExtraPersistentCell();
-	virtual ~ExtraPersistentCell();
-
-	TESObjectCELL* persistentCell;	// 0C
-};
-
-// 24
-class ExtraStartingPosition : public BSExtraData {
-public:
-	ExtraStartingPosition();
-	virtual ~ExtraStartingPosition();
-
-	NiVector3	posVector;	// 0C
-	NiVector3	rotVector;	// 18
-};
-
 // 10
 class ExtraAnim : public BSExtraData {
 public:
@@ -723,16 +371,6 @@ public:
 	virtual ~ExtraAnim();
 
 	AnimData* animData;	// 0C
-};
-
-// 1C
-class ExtraPackage : public BSExtraData {
-public:
-	ExtraPackage();
-	virtual ~ExtraPackage();
-
-	TESPackage* package;	// 0C
-	uint32_t			unk10[3];	// 10
 };
 
 // 10
@@ -744,31 +382,6 @@ public:
 	tList<Actor>* followers;		// 0C
 };
 
-// 10
-class ExtraOriginalReference : public BSExtraData {
-public:
-	ExtraOriginalReference();
-	virtual ~ExtraOriginalReference();
-
-	TESObjectREFR* originalRef;		// 0C
-
-	static ExtraOriginalReference* __stdcall Create(TESObjectREFR* _originalRef);
-};
-
-// 10
-class ExtraLight : public BSExtraData {
-public:
-	ExtraLight();
-	virtual ~ExtraLight();
-
-	struct Data {
-		NiPointLight* pointLight;
-		float			flt04;
-	};
-
-	Data* data;		// 0C
-};
-
 // 14
 class ExtraEnableStateChildren : public BSExtraData {
 public:
@@ -778,15 +391,6 @@ public:
 	tList<TESObjectREFR>	children;	// 0C
 };
 
-// 10
-class ExtraItemDropper : public BSExtraData {
-public:
-	ExtraItemDropper();
-	virtual ~ExtraItemDropper();
-
-	TESObjectREFR* dropper;	// 0C
-};
-
 // 14
 class ExtraDroppedItemList : public BSExtraData {
 public:
@@ -794,75 +398,6 @@ public:
 	virtual ~ExtraDroppedItemList();
 
 	tList<TESObjectREFR>	itemRefs;	// 0C
-};
-
-// 10
-class ExtraMerchantContainer : public BSExtraData {
-public:
-	ExtraMerchantContainer();
-	virtual ~ExtraMerchantContainer();
-
-	TESObjectREFR* containerRef;	// 0C
-};
-
-// 10
-class ExtraRefractionProperty : public BSExtraData {
-public:
-	ExtraRefractionProperty();
-	virtual ~ExtraRefractionProperty();
-
-	float			refraction;		// 0C
-};
-
-// 10
-class ExtraPoison : public BSExtraData {
-public:
-	ExtraPoison();
-	virtual ~ExtraPoison();
-
-	AlchemyItem* poisonEffect;	// 0C
-};
-
-// 10
-class ExtraNorthRotation : public BSExtraData {
-public:
-	ExtraNorthRotation();
-	virtual ~ExtraNorthRotation();
-
-	float		rotation;		// 0C
-};
-
-// 10
-class ExtraStartingWorldOrCell : public BSExtraData {
-public:
-	ExtraStartingWorldOrCell();
-	virtual ~ExtraStartingWorldOrCell();
-
-	TESForm* worldOrCell;	// 0C
-};
-
-// 10
-class ExtraTerminalState : public BSExtraData {
-public:
-	ExtraTerminalState();
-	~ExtraTerminalState();
-
-	uint8_t			lockedOut;	// 0C
-	uint8_t			lockLevel;	// 0D unlocked: 0xFE
-	uint16_t			pad;
-
-	static ExtraTerminalState* Create();
-};
-
-// 10
-class ExtraLinkedRef : public BSExtraData {
-public:
-	ExtraLinkedRef();
-	virtual ~ExtraLinkedRef();
-
-	TESObjectREFR* linkedRef;		// 0C
-
-	static ExtraLinkedRef* __stdcall Create(TESObjectREFR* _linkedRef = NULL);
 };
 
 // 14
@@ -889,57 +424,6 @@ public:
 	BSString				activationPromptOverride;
 };
 
-// 10
-class ExtraTalkingActor : public BSExtraData {
-public:
-	ExtraTalkingActor();
-	virtual ~ExtraTalkingActor();
-
-	Actor* actor;		// 0C
-};
-
-// 10
-class ExtraObjectHealth : public BSExtraData {
-public:
-	ExtraObjectHealth();
-	virtual ~ExtraObjectHealth();
-
-	float			health;		// 0C
-
-	static ExtraObjectHealth* __stdcall Create(float _health);
-};
-
-// 10
-class ExtraCellImageSpace : public BSExtraData {
-public:
-	ExtraCellImageSpace();
-	virtual ~ExtraCellImageSpace();
-
-	TESImageSpace* imageSpace;	// 0C
-
-	static ExtraCellImageSpace* __stdcall Create(TESImageSpace* _imgSpace);
-};
-
-// 10
-class ExtraRadius : public BSExtraData {
-public:
-	ExtraRadius();
-	virtual ~ExtraRadius();
-
-	float			radius;		// 0C
-
-	static ExtraRadius* __stdcall Create(float _radius);
-};
-
-// 10
-class ExtraRadiation : public BSExtraData {
-public:
-	ExtraRadiation();
-	virtual ~ExtraRadiation();
-
-	float			radiation;	// 0C
-};
-
 // 30
 class ExtraDismemberedLimbs : public BSExtraData {
 public:
@@ -962,79 +446,6 @@ public:
 	bool							wasEaten;			// 1C
 	uint8_t							pad1D[3];			// 1D
 	BSSimpleArray<DismemberedLimb*>	dismemberedLimbs;	// 20
-};
-
-// 1C
-class ExtraRadioData : public BSExtraData {
-public:
-	ExtraRadioData();
-	virtual ~ExtraRadioData();
-
-	float				radius;			// 0C
-	uint32_t				rangeType;		// 10
-	float				staticPerc;		// 14
-	TESObjectREFR* positionRef;	// 18
-};
-
-// 10
-class ExtraPrimitive : public BSExtraData {
-public:
-	ExtraPrimitive();
-	virtual ~ExtraPrimitive();
-
-	BGSPrimitive* primitive;		// 0C
-
-	static ExtraPrimitive* __stdcall Create(BGSPrimitive* _primitive = NULL);
-};
-
-// 10
-class ExtraCollisionData : public BSExtraData {
-public:
-	ExtraCollisionData();
-	virtual ~ExtraCollisionData();
-
-	uint32_t			layer;			// 0C
-};
-
-// 10
-class ExtraEncounterZone : public BSExtraData {
-public:
-	ExtraEncounterZone();
-	virtual ~ExtraEncounterZone();
-
-	BGSEncounterZone* zone;		// 0C
-};
-
-// 1C
-class ExtraSayToTopicInfo : public BSExtraData {
-public:
-	ExtraSayToTopicInfo();
-	virtual ~ExtraSayToTopicInfo();
-
-	TESTopicInfo* info;		// 0C
-	TESTopic* topic;		// 10
-	TESQuest* quest;		// 14
-	Actor* speaker;	// 18
-};
-
-// 10
-class ExtraCellAcousticSpace : public BSExtraData {
-public:
-	ExtraCellAcousticSpace();
-	virtual ~ExtraCellAcousticSpace();
-
-	BGSAcousticSpace* acousticSpace;		// 0C
-
-	static ExtraCellAcousticSpace* __stdcall Create(BGSAcousticSpace* _acousticSpace = NULL);
-};
-
-// 10
-class ExtraAshPileRef : public BSExtraData {
-public:
-	ExtraAshPileRef();
-	virtual ~ExtraAshPileRef();
-
-	Actor* sourceRef;		// 0C
 };
 
 // 28
@@ -1072,16 +483,4 @@ public:
 	virtual ~ExtraAudioMarker();
 
 	ExtraAudioMarkerData* data;
-};
-
-// 14
-class ExtraSpecialRenderFlags : public BSExtraData {
-public:
-	ExtraSpecialRenderFlags();
-	virtual ~ExtraSpecialRenderFlags();
-
-	uint32_t		flags;		// 0C
-	uint32_t		unk10;		// 10
-
-	static ExtraSpecialRenderFlags* __stdcall Create(uint32_t _flags = 0);
 };
