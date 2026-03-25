@@ -16,7 +16,7 @@ TESForm* TESObjectREFR::GetBaseForm()
 			if (IS_TYPE(baseform, BGSPlaceableWater)) {
 				return ((BGSPlaceableWater*)baseform)->water;
 			}
-			ExtraLeveledCreature* xLvlCrea = (ExtraLeveledCreature*)this->extraDataList.GetByType(kExtraData_LeveledCreature);
+			ExtraLeveledCreature* xLvlCrea = (ExtraLeveledCreature*)this->extraDataList.GetExtraData(kExtraData_LeveledCreature);
 			if (xLvlCrea && xLvlCrea->baseForm) {
 				return xLvlCrea->baseForm;
 			}
@@ -25,7 +25,7 @@ TESForm* TESObjectREFR::GetBaseForm()
 	return baseform;
 }
 ScriptEventList* TESObjectREFR::GetEventList() const {
-	ExtraScript* xScript = (ExtraScript*)extraDataList.GetByType(kExtraData_Script);
+	ExtraScript* xScript = (ExtraScript*)extraDataList.GetExtraData(kExtraData_Script);
 	return xScript ? xScript->eventList : NULL;
 }
 
@@ -109,7 +109,7 @@ TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj)	// For LevelledForm, find 
 	ExtraLeveledCreature* pXCreatureData = NULL;
 
 	if (thisObj) {
-		pXCreatureData = (ExtraLeveledCreature*) thisObj->extraDataList.GetByType(kExtraData_LeveledCreature);
+		pXCreatureData = (ExtraLeveledCreature*) thisObj->extraDataList.GetExtraData(kExtraData_LeveledCreature);
 		if (pXCreatureData && pXCreatureData->baseForm) {
 			return pXCreatureData->baseForm;
 		}
@@ -205,7 +205,7 @@ bool Actor::GetRespawn() const {
 
 TESObjectCELL* TESObjectREFR::GetParentCell() {
 	if (this->parentCell) return parentCell;
-	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetByType(kExtraData_PersistentCell);
+	ExtraPersistentCell* xPersistentCell = (ExtraPersistentCell*)this->extraDataList.GetExtraData(kExtraData_PersistentCell);
 	if (xPersistentCell && xPersistentCell->persistentCell) return xPersistentCell->persistentCell;
 	return nullptr;
 }

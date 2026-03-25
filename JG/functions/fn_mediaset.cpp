@@ -9,7 +9,7 @@ bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS)
 	TESObjectCELL* pCell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL))
 	{
-		ExtraCellAcousticSpace* pXAcousticSpace = (ExtraCellAcousticSpace*)pCell->extraDataList.GetByType(kExtraData_CellAcousticSpace);
+		ExtraCellAcousticSpace* pXAcousticSpace = (ExtraCellAcousticSpace*)pCell->extraDataList.GetExtraData(kExtraData_CellAcousticSpace);
 		if (pXAcousticSpace && pXAcousticSpace->acousticSpace)
 		{
 			*(DWORD*)result = pXAcousticSpace->acousticSpace->GetFormID();
@@ -74,7 +74,7 @@ bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
 	MediaLocationController* locationController = nullptr;
 	*result = 0;
 	if (thisObj) {
-		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
+		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetExtraData(kExtraData_AudioMarker);
 		if (audioMrkr && audioMrkr->data) {
 			uintptr_t locController = audioMrkr->data->mediaLocCtrlID;
 			locationController = (MediaLocationController*)LookupFormByID(locController);
@@ -108,7 +108,7 @@ bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
 bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
 	MediaLocationController* locationController;
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &locationController) && locationController && IS_TYPE(locationController, MediaLocationController)) {
-		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
+		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetExtraData(kExtraData_AudioMarker);
 		if (audioMrkr && audioMrkr->data) {
 			audioMrkr->data->mediaLocCtrlID = locationController->GetFormID();
 			Console_Print("AudioMarkerSetController >> 0x%lx, %s", locationController->GetFormID(), locationController->GetFormEditorID());
@@ -132,8 +132,8 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 		kFlags
 	};
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type, &newVal)) {
-		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
-		ExtraRadius* rad = (ExtraRadius*)thisObj->extraDataList.GetByType(kExtraData_Radius);
+		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetExtraData(kExtraData_AudioMarker);
+		ExtraRadius* rad = (ExtraRadius*)thisObj->extraDataList.GetExtraData(kExtraData_Radius);
 		if (audioMrkr && audioMrkr->data) {
 			switch (type) {
 			case kRadius:
@@ -170,8 +170,8 @@ bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
 		kFlags
 	};
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
-		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetByType(kExtraData_AudioMarker);
-		ExtraRadius* rad = (ExtraRadius*)thisObj->extraDataList.GetByType(kExtraData_Radius);
+		ExtraAudioMarker* audioMrkr = (ExtraAudioMarker*)thisObj->extraDataList.GetExtraData(kExtraData_AudioMarker);
+		ExtraRadius* rad = (ExtraRadius*)thisObj->extraDataList.GetExtraData(kExtraData_Radius);
 		if (audioMrkr && audioMrkr->data) {
 			switch (type) {
 			case kRadius:

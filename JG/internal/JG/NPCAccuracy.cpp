@@ -22,7 +22,7 @@ namespace NPCAccuracy {
 		auto actBase = (TESActorBase*)GetPermanentBaseForm(r_act);
 		auto retVec = GetFactionsInList(&(actBase->baseData.factionList));
 
-		ExtraFactionChanges* fRanks = (ExtraFactionChanges*)r_act->extraDataList.GetByType(kExtraData_FactionChanges);
+		ExtraFactionChanges* fRanks = (ExtraFactionChanges*)r_act->extraDataList.GetExtraData(kExtraData_FactionChanges);
 		if (fRanks) {
 			if (auto factionDataList = fRanks->data) {
 				auto vec2 = GetFactionsInList(factionDataList);

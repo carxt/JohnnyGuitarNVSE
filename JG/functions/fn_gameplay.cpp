@@ -874,7 +874,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 		if (checkItems) {
 			TESForm* containerOwner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::ResolveOwnership
 			if (!containerOwner) return true;
-			ExtraContainerChanges* xChanges = (ExtraContainerChanges*)((Actor*)thisObj)->extraDataList.GetByType(kExtraData_ContainerChanges);
+			ExtraContainerChanges* xChanges = (ExtraContainerChanges*)((Actor*)thisObj)->extraDataList.GetExtraData(kExtraData_ContainerChanges);
 			if (!xChanges || !xChanges->pChanges || !xChanges->pChanges->pItems)
 				return true;
 			BSSimpleList<ItemChange*>* contChangesIter = xChanges->pChanges->pItems->GetHead();
@@ -890,8 +890,8 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 				while (xdlIter && !xdlIter->IsEmpty()){
 					xData = xdlIter->GetItem();
 					xdlIter = xdlIter->GetNext();
-					if (xData && xData->HasType(kExtraData_Ownership)) {
-						ExtraOwnership* xOwn = (ExtraOwnership*)xData->GetByType(kExtraData_Ownership);
+					if (xData && xData->HasExtra(kExtraData_Ownership)) {
+						ExtraOwnership* xOwn = (ExtraOwnership*)xData->GetExtraData(kExtraData_Ownership);
 						if (xOwn->owner) {
 							if (xOwn->owner->GetFormID() == containerOwner->GetFormID()) {
 								ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, containerOwner); // Actor::HandleStealing
@@ -1352,7 +1352,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS)
 			if (poison)
 				ThisCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
 			else
-				ThisCall(0x410140, xData, kExtraData_Poison); // ExtraDataList::RemoveByType
+				ThisCall(0x410140, xData, kExtraData_Poison); // ExtraDataList::RemoveExtra
 			*result = 1;
 		}
 	}

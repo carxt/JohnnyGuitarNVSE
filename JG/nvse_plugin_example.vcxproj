@@ -162,12 +162,15 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\decoding.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AILinearTaskThreadManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BaseExtraList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSSpinLock.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ContainerItemExtra.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Conversation.cpp" />
     <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\ExtraDataList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp" />
     <ClCompile Include="internal\Game\Bethesda\GameSettingCollection.cpp" />
     <ClCompile Include="internal\Game\Bethesda\InventoryChanges.cpp" />
@@ -269,9 +272,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\decoding.h" />
     <ClInclude Include="internal\Game\Bethesda\AILinearTaskThreadManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BaseExtraList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseFormComponent.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSRenderedTexture.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleArray.hpp" />
@@ -287,6 +292,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\Conversation.hpp" />
     <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\DialogueResponse.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ExtraDataList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FileFinder.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FormID.hpp" />
     <ClInclude Include="internal\Game\Bethesda\GameSettingCollection.hpp" />

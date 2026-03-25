@@ -300,7 +300,7 @@ enum {
 	kExtraData_Max
 };
 
-#define GetExtraType(xDataList, Type) (Extra ## Type*)(xDataList).GetByType(kExtraData_ ## Type)
+#define GetExtraType(xDataList, Type) (Extra ## Type*)(xDataList).GetExtraData(kExtraData_ ## Type)
 
 // 014
 class ExtraAction : public BSExtraData {

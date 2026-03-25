@@ -423,7 +423,7 @@ bool Cmd_GetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
 
 
 BGSEncounterZone* GetEncounterZone(ExtraDataList* list) {
-	ExtraEncounterZone* xZone = (ExtraEncounterZone*)list->GetByType(kExtraData_EncounterZone);
+	ExtraEncounterZone* xZone = (ExtraEncounterZone*)list->GetExtraData(kExtraData_EncounterZone);
 	if (xZone && xZone->zone) return xZone->zone;
 	return nullptr;
 }
@@ -493,7 +493,7 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char newPrompt[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPrompt)) {
-		ExtraActivateRef* xActivateRef = (ExtraActivateRef*)thisObj->extraDataList.GetByType(kExtraData_ActivateRef);
+		ExtraActivateRef* xActivateRef = (ExtraActivateRef*)thisObj->extraDataList.GetExtraData(kExtraData_ActivateRef);
 		if (xActivateRef) {
 			xActivateRef->activationPromptOverride.Set(newPrompt);
 		}
@@ -501,7 +501,7 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 			xActivateRef = BSMemory::malloc<ExtraActivateRef>();
 			ThisCall(0x4338B0, xActivateRef);
 			xActivateRef->activationPromptOverride.Set(newPrompt);
-			thisObj->extraDataList.Add(xActivateRef);
+			thisObj->extraDataList.AddExtra(xActivateRef);
 		}
 		*result = 1;
 	}
@@ -510,7 +510,7 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ExtraActivateRef* xActivateRef = (ExtraActivateRef*)thisObj->extraDataList.GetByType(kExtraData_ActivateRef);
+	ExtraActivateRef* xActivateRef = (ExtraActivateRef*)thisObj->extraDataList.GetExtraData(kExtraData_ActivateRef);
 	if (xActivateRef) {
 		g_strInterface->Assign(PASS_COMMAND_ARGS, xActivateRef->activationPromptOverride.c_str());
 		if (IsConsoleMode()) Console_Print("GetRefActivationPromptOverride >> %s", xActivateRef->activationPromptOverride.c_str());
@@ -1562,9 +1562,9 @@ bool Cmd_GetBaseScale_Execute(COMMAND_ARGS) {
 bool Cmd_RemovePrimitive_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ExtraPrimitive* xPrimitive;
-	if (thisObj->extraDataList.HasType(kExtraData_Primitive)) {
+	if (thisObj->extraDataList.HasExtra(kExtraData_Primitive)) {
 		xPrimitive = GetExtraType(thisObj->extraDataList, Primitive);
-		thisObj->extraDataList.Remove(xPrimitive, true);
+		thisObj->extraDataList.RemoveExtra(xPrimitive, true);
 		thisObj->Update3D();
 		*result = 1;
 	}
@@ -1775,7 +1775,7 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* cell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell) && cell && IS_TYPE(cell, TESObjectCELL)) {
-		ExtraSeenData* seenData = (ExtraSeenData*)cell->extraDataList.GetByType(kExtraData_SeenData);
+		ExtraSeenData* seenData = (ExtraSeenData*)cell->extraDataList.GetExtraData(kExtraData_SeenData);
 		if (seenData && seenData->data) *result = 1;
 		if (IsConsoleMode())
 			Console_Print("IsCellVisited >> %.0f", *result);
@@ -1790,7 +1790,7 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	int32_t detachTime = 0;
 	float gameHoursPassed = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell) && cell && IS_TYPE(cell, TESObjectCELL)) {
-		ExtraDetachTime* xDetachTime = (ExtraDetachTime*)cell->extraDataList.GetByType(kExtraData_DetachTime);
+		ExtraDetachTime* xDetachTime = (ExtraDetachTime*)cell->extraDataList.GetExtraData(kExtraData_DetachTime);
 		detachTime = xDetachTime == 0 ? 0 : xDetachTime->time;
 		if (detachTime == 0) {
 			*result = -1;
@@ -1977,8 +1977,8 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 		return true;
 
 	ExtraDataList* pExtraData = pInvRef->data.xData;
-	if (pExtraData && pExtraData->HasType(kExtraData_Hotkey)) {
-		ExtraHotkey* xHotkey = (ExtraHotkey*)pExtraData->GetByType(kExtraData_Hotkey);
+	if (pExtraData && pExtraData->HasExtra(kExtraData_Hotkey)) {
+		ExtraHotkey* xHotkey = (ExtraHotkey*)pExtraData->GetExtraData(kExtraData_Hotkey);
 		if (xHotkey) {
 			*result = xHotkey->index + 1;
 		}
@@ -2329,7 +2329,7 @@ bool Cmd_CallPerRef_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Script* pScript = nullptr;
 	TESObjectCELL* pCell = nullptr;
-	FORM_TYPE eFormFilter = FORM_TYPE::None;
+	FORM_TYPE eFormFilter = FORM_TYPE::NONE;
 	float fDistanceFilter = 0.f;
 	float fAngleFilter = -FLT_MAX;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pScript, &eFormFilter, &fDistanceFilter, &fAngleFilter, &pCell) && pScript && IS_TYPE(pScript, Script)) {
@@ -2455,7 +2455,7 @@ bool Cmd_CallPerMobileObject_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Script* pScript = nullptr;
 	PROCESS_TYPE eProcessLevel = PROCESS_TYPE::INVALID;
-	FORM_TYPE eFormFilter = FORM_TYPE::None;
+	FORM_TYPE eFormFilter = FORM_TYPE::NONE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pScript, &eProcessLevel, &eFormFilter) && pScript && IS_TYPE(pScript, Script)) {
 		NiPoint4 kPosAndDist;
 		TESObjectREFR* pCaller = thisObj ? thisObj : PlayerCharacter::GetSingleton();

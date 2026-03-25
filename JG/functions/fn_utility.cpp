@@ -314,7 +314,7 @@ bool Cmd_RefAddrxData_Execute(COMMAND_ARGS) {
 	DWORD type;
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
 		if (type < kExtraData_Max) {
-			void* res = thisObj->extraDataList.GetByType(type);
+			void* res = thisObj->extraDataList.GetExtraData(type);
 			if (res) {
 				Console_Print("0x%08X", res);
 				return true;

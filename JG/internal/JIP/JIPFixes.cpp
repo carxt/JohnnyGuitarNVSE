@@ -992,7 +992,7 @@ namespace JIPFixes {
 			if (cTypeBufer[0] && cTypeBufer[0] != ' ') {
 				if (cTypeBufer[0] >= '0' && cTypeBufer[0] <= '9') {
 					FORM_TYPE eFormType = static_cast<FORM_TYPE>(atoi(cTypeBufer));
-					if (eFormType > FORM_TYPE::None && eFormType < FORM_TYPE::Count)
+					if (eFormType > FORM_TYPE::NONE && eFormType < FORM_TYPE::COUNT)
 						kFormTypes.push_back(eFormType);
 					bSearchType = true;
 				}
@@ -1000,7 +1000,7 @@ namespace JIPFixes {
 					std::string_view svType(cTypeBufer);
 					if (svType.front() != '*' || svType.length() > 1) {
 						StringToLower(svType);
-						for (uint32_t i = FORM_TYPE::None; i < FORM_TYPE::Count; i++) {
+						for (uint32_t i = FORM_TYPE::NONE; i < FORM_TYPE::COUNT; i++) {
 							if (FindSubstring(TESForm::GetFormTypeString(i), svType) || FindSubstring(TESForm::GetFormTypeName(i), svType))
 								kFormTypes.push_back(static_cast<FORM_TYPE>(i));
 						}
