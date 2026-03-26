@@ -361,6 +361,12 @@
     <ClCompile Include="internal\Game\Gamebryo\NiPoint4.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\TaskQueue.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSShaderManager.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -948,6 +954,12 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\AudioMarkerInfo.hpp">
       <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\TaskQueue.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSShaderManager.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
