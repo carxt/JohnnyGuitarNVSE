@@ -1386,7 +1386,22 @@ namespace JIPFixes {
 		void InitHooks() {
 			SafeWrite8(GetJIPAddress(0x1005825F) + 1, 0); // Change priority to critical
 		}
+	}
 
+	namespace AddItemAltNoCond {
+
+		uint32_t uiSetItemHealthAddr;
+		void __fastcall SetItemHealth(TESContainer* apContainer, float afHealth) {
+			if (afHealth < 0.f)
+				return;
+
+			FastCall(uiSetItemHealthAddr, apContainer, afHealth);
+		}
+
+		void InitHooks() {
+			uiSetItemHealthAddr = GetJIPAddress(0x1000D520);
+			ReplaceCall(GetJIPAddress(0x10058476), SetItemHealth);
+		}
 	}
 
 	void ShowErrorMessage(const char* fmt, ...) {
@@ -1504,6 +1519,7 @@ namespace JIPFixes {
 			WaterRenderFix::InitHooks();
 			GetSelectedItemRefFix::InitHooks();
 			Update3DTweak::InitHooks();
+			AddItemAltNoCond::InitHooks();
 		}
 	}
 
