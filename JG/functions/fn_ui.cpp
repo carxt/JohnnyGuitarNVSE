@@ -200,7 +200,7 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPath, &isFemale, &form) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			bipedModel->icon[isFemale].ddsPath.Set(newPath);
+			bipedModel->icon[isFemale].SetTextureName(newPath);
 			*result = 1;
 		}
 	}
@@ -222,7 +222,7 @@ bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	TESWorldSpace* worlspace = nullptr;
 	char path[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace, &path) && worlspace && IS_TYPE(worlspace, TESWorldSpace)) {
-		worlspace->texture.ddsPath.Set(path);
+		worlspace->texture.SetTextureName(path);
 		*result = 1;
 	}
 	return true;
@@ -232,8 +232,8 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESWorldSpace* worlspace = nullptr;
 	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace) && worlspace && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.pString)) {
-		strcpy_s(path, worlspace->texture.ddsPath.pString);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace) && worlspace && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.GetTextureNameLength())) {
+		strcpy_s(path, worlspace->texture.GetTextureName());
 		g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 		if (IsConsoleMode())
 			Console_Print("GetWorldSpaceMapTexture >> %s", path);

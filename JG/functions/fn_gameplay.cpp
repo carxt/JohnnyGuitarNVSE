@@ -129,7 +129,7 @@ bool Cmd_GetCasinoDeckTexture_Execute(COMMAND_ARGS)
 	const char* resStr = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex) && casino && IS_TYPE(casino, TESCasino) && deckIndex >= 0 && deckIndex <= 3)
 	{
-		resStr = casino->blackjackDeck[deckIndex].ddsPath.pString;
+		resStr = casino->blackjackDeck[deckIndex].GetTextureName();
 		if (IsConsoleMode())
 			Console_Print("GetCasinoDeckTexture >> %s", resStr);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
@@ -145,7 +145,7 @@ bool Cmd_SetCasinoDeckTexture_Execute(COMMAND_ARGS)
 	char newPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex, &newPath) && casino && IS_TYPE(casino, TESCasino) && newPath && deckIndex >= 0 && deckIndex <= 3)
 	{
-		casino->blackjackDeck[deckIndex].ddsPath.Set(newPath);
+		casino->blackjackDeck[deckIndex].SetTextureName(newPath);
 		*result = 1;
 	}
 	return true;
@@ -939,7 +939,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 		float totalSpread = (weapSpread * spread + minSpread) * 0.01745329238474369;
 
 		TESAmmo* eqAmmo = ThisCall<TESAmmo*>(0x525980, weapInfo->pObject, static_cast<MobileObject*>(actor));
-		totalSpread = CdeclCall<float>(0x59A030, 3, (eqAmmo ? &eqAmmo->effectList : nullptr), totalSpread);
+		totalSpread = CdeclCall<float>(0x59A030, 3, (eqAmmo ? eqAmmo->GetAmmoEffectList() : nullptr), totalSpread);
 
 		double spreadPenalty = ThisCall<double>(0x8B0DD0, actor, 2);
 

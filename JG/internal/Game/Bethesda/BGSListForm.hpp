@@ -10,6 +10,8 @@ public:
 	BSSimpleList<TESForm*>	kList;
 	uint32_t				uiNumAddedObjects;
 
+	TESFORM_TYPE(BGSListForm);
+
 	BSSimpleList<TESForm*>* GetFormList();
 	const BSSimpleList<TESForm*>* GetFormList() const;
 

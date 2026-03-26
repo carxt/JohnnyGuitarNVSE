@@ -69,7 +69,7 @@ bool Cmd_SetNoteImage_Execute(COMMAND_ARGS) {
 	BGSNote* note = nullptr;
 	char path[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &path) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kImage) {
-		note->picture->ddsPath.Set(path);
+		note->picture->SetTextureName(path);
 		*result = 1;
 	}
 	return true;
@@ -79,7 +79,7 @@ bool Cmd_GetNoteImage_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* note = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kImage) {
-		g_strInterface->Assign(PASS_COMMAND_ARGS, note->picture->ddsPath.c_str());
+		g_strInterface->Assign(PASS_COMMAND_ARGS, note->picture->GetTextureName());
 	}
 	return true;
 }
@@ -524,18 +524,23 @@ bool Cmd_GetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetWeaponAltTextures_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* weapon;
-	NVSEArrayVar* txstArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && weapon && IS_TYPE(weapon, TESObjectWEAP)) {
-		TESModelTextureSwap* model = &weapon->textureSwap;
-		if (!model) return true;
-		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+	TESObjectWEAP* pWeapon;
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
+		TESModelTextureSwap* pModel = &pWeapon->textureSwap;
+		if (!pModel)
+			return true;
 
-		do {
-			if (iter->data && iter->data->textureID) g_arrInterface->AppendElement(txstArr, NVSEArrayElement(iter->data->textureID));
-		} while (iter = iter->next);
+		auto pIter = pModel->GetTexSwapList();
+		while (pIter && !pIter->IsEmpty()) {
+			TEX_SWAP* pEntry = pIter->GetItem();
+			pIter = pIter->GetNext();
+			if (pEntry && pEntry->pTextureSet) {
+				g_arrInterface->AppendElement(pArray, NVSEArrayElement(pEntry->pTextureSet));
+			}
+		}
 	}
-	g_arrInterface->AssignCommandResult(txstArr, result);
+	g_arrInterface->AssignCommandResult(pArray, result);
 	return true;
 }
 
@@ -649,177 +654,146 @@ TESModelTextureSwap* GetArmorModel(TESObjectARMO* armor, uint32_t id) {
 
 bool Cmd_GetAltTexturesEx_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESForm* form = nullptr;
-	uint32_t whichModel;
-	NVSEArrayVar* txstArr = g_arrInterface->CreateMap(nullptr, nullptr, 0, scriptObj);
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &whichModel) && form && (IS_TYPE(form, TESObjectARMO) || IS_TYPE(form, TESObjectWEAP))) {
-		TESModelTextureSwap* model;
-		if (IS_TYPE(form, TESObjectARMO)) {
-			TESObjectARMO* armor = DYNAMIC_CAST(form, TESForm, TESObjectARMO);
-			model = GetArmorModel(armor, whichModel);
+	TESForm* pForm = nullptr;
+	uint32_t uiWhichModel;
+	NVSEArrayVar* pMap = g_arrInterface->CreateMap(nullptr, nullptr, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &uiWhichModel) && pForm && (IS_TYPE(pForm, TESObjectARMO) || IS_TYPE(pForm, TESObjectWEAP))) {
+		TESModelTextureSwap* pModel;
+		if (IS_TYPE(pForm, TESObjectARMO)) {
+			TESObjectARMO* pArmor = DYNAMIC_CAST(pForm, TESForm, TESObjectARMO);
+			pModel = GetArmorModel(pArmor, uiWhichModel);
 		}
 		else {
-			TESObjectWEAP* weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
-			model = &weapon->textureSwap;
+			TESObjectWEAP* pWeapon = DYNAMIC_CAST(pForm, TESForm, TESObjectWEAP);
+			pModel = &pWeapon->textureSwap;
 		}
-		if (!model) return true;
-		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+		if (!pModel) 
+			return true;
 
-		do {
-			if (iter->data && iter->data->textureID) g_arrInterface->SetElement(txstArr, NVSEArrayElement(iter->data->index3D), NVSEArrayElement(iter->data->textureID));
-		} while (iter = iter->next);
-
+		auto pIter = pModel->GetTexSwapList();
+		while (pIter && !pIter->IsEmpty()) {
+			TEX_SWAP* pEntry = pIter->GetItem();
+			pIter = pIter->GetNext();
+			if (pEntry && pEntry->pTextureSet) {
+				g_arrInterface->SetElement(pMap, NVSEArrayElement(pEntry->uiObjectIndex), NVSEArrayElement(pEntry->pTextureSet));
+			}
+		}
 	}
-	g_arrInterface->AssignCommandResult(txstArr, result);
+	g_arrInterface->AssignCommandResult(pMap, result);
 	return true;
 }
 
 bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectARMO* armor = nullptr;
-	uint32_t whichModel;
-	NVSEArrayVar* txstArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &whichModel) && armor && IS_TYPE(armor, TESObjectARMO)) {
-		TESModelTextureSwap* model = GetArmorModel(armor, whichModel);
-		if (!model) return true;
-		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
-
-		do {
-			if (iter->data && iter->data->textureID) g_arrInterface->AppendElement(txstArr, NVSEArrayElement(iter->data->textureID));
-		} while (iter = iter->next);
-
+	TESObjectARMO* pArmor = nullptr;
+	uint32_t uiWhichModel;
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pArmor, &uiWhichModel) && pArmor && IS_TYPE(pArmor, TESObjectARMO)) {
+		TESModelTextureSwap* pModel = GetArmorModel(pArmor, uiWhichModel);
+		if (!pModel) 
+			return true;
+		
+		auto pIter = pModel->GetTexSwapList();
+		while (pIter && !pIter->IsEmpty()) {
+			TEX_SWAP* pEntry = pIter->GetItem();
+			pIter = pIter->GetNext();
+			if (pEntry && pEntry->pTextureSet) {
+				g_arrInterface->AppendElement(pArray, NVSEArrayElement(pEntry->pTextureSet));
+			}
+		}
 	}
-	g_arrInterface->AssignCommandResult(txstArr, result);
+	g_arrInterface->AssignCommandResult(pArray, result);
 	return true;
 }
 bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* weapon = nullptr;
-	BGSTextureSet* txst = nullptr;
-	int id = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &id, &txst) && weapon && IS_TYPE(weapon, TESObjectWEAP) && txst && IS_TYPE(txst, BGSTextureSet)) {
-		TESModelTextureSwap* model = &weapon->textureSwap;
-		if (!model) return true;
+	TESObjectWEAP* pWeapon = nullptr;
+	BGSTextureSet* pTextureSet = nullptr;
+	int32_t iIndex = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &iIndex, &pTextureSet) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP) && pTextureSet && IS_TYPE(pTextureSet, BGSTextureSet)) {
+		TESModelTextureSwap* pModel = &pWeapon->textureSwap;
+		if (!pModel) 
+			return true;
 
-		TESModelTextureSwap::Texture* texture = nullptr;
-		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
-
-		do {
-			if (iter->data && iter->data->index3D == id) {
-				texture = iter->data;
-				break;
-			}
-		} while (iter = iter->next);
-
-		if (texture) {
-
-			texture->textureID = txst;
+		TEX_SWAP* pSwap = pModel->GetTexSwap(iIndex);
+		if (pSwap) {
+			pSwap->pTextureSet = pTextureSet;
 			*result = 1;
-
 		}
 		else {
-			TESModelTextureSwap::Texture* texture = BSMemory::malloc<TESModelTextureSwap::Texture>();
-			if (texture != nullptr) {
-				texture->index3D = id;
-				texture->textureID = txst;
-				*(texture->textureName) = '\0';
-				model->textureList.Append(texture);
-				*result = 1;
-
-			}
+			pModel->AddTexSwap("", iIndex, pTextureSet);
+			*result = 1;
 		}
 	}
 	return true;
 }
 bool Cmd_SetArmorAltTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSTextureSet* txst = nullptr;
-	TESObjectARMO* armor = nullptr;
-	int id = -1;
-	uint32_t whichModel;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &whichModel, &id, &txst) && txst && IS_TYPE(txst, BGSTextureSet) && armor && IS_TYPE(armor, TESObjectARMO)) {
-		TESModelTextureSwap* model = GetArmorModel(armor, whichModel);
-		if (!model) return true;
+	BGSTextureSet* pTextureSet = nullptr;
+	TESObjectARMO* pArmor = nullptr;
+	int32_t iIndex = -1;
+	uint32_t uiWhichModel;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pArmor, &uiWhichModel, &iIndex, &pTextureSet) && pTextureSet && IS_TYPE(pTextureSet, BGSTextureSet) && pArmor && IS_TYPE(pArmor, TESObjectARMO)) {
+		TESModelTextureSwap* pModel = GetArmorModel(pArmor, uiWhichModel);
+		if (!pModel) 
+			return true;
 
-		TESModelTextureSwap::Texture* texture = nullptr;
-		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
-
-		do {
-			if (iter->data && iter->data->index3D == id) {
-				texture = iter->data;
-				break;
-			}
-		} while (iter = iter->next);
-
-		if (texture) {
-
-			texture->textureID = txst;
+		TEX_SWAP* pSwap = pModel->GetTexSwap(iIndex);
+		if (pSwap) {
+			pSwap->pTextureSet = pTextureSet;
 			*result = 1;
-
 		}
 		else {
-			TESModelTextureSwap::Texture* texture = BSMemory::malloc<TESModelTextureSwap::Texture>();
-			if (texture != nullptr) {
-				texture->index3D = id;
-				texture->textureID = txst;
-				*(texture->textureName) = '\0';
-				model->textureList.Append(texture);
-				*result = 1;
-
-			}
+			pModel->AddTexSwap("", iIndex, pTextureSet);
+			*result = 1;
 		}
-
 	}
 	return true;
 }
 
 bool Cmd_ClearWeaponAltTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* weapon;
-	int id = -2;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &id) && weapon && IS_TYPE(weapon, TESObjectWEAP)) {
-		TESModelTextureSwap* model = &weapon->textureSwap;
-		if (!model) return true;
+	TESObjectWEAP* pWeapon;
+	int32_t iIndex = -2;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &iIndex) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
+		TESModelTextureSwap* pModel = &pWeapon->textureSwap;
+		if (!pModel) 
+			return true;
 
-		if (id == -1) {
-			model->textureList.RemoveAll();
+		if (iIndex == -1) {
+			pModel->ClearTexSwapList();
 			*result = 1;
 			return true;
 		}
-
-		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
-		do {
-			if (iter->data && iter->data->index3D == id) {
-				model->textureList.Remove(iter->data);
-				*result = 1;
-				break;
-			}
-		} while (iter = iter->next);
+		else {
+			pModel->RemoveTexSwap(iIndex);
+			*result = 1;
+			return true;
+		}
 	}
 	return true;
 }
 
 bool Cmd_ClearArmorAltTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectARMO* armor = nullptr;
-	int id = -2;
-	uint32_t whichModel;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &whichModel, &id) && armor && IS_TYPE(armor, TESObjectARMO)) {
-		TESModelTextureSwap* model = GetArmorModel(armor, whichModel);
-		if (!model) return true;
-		if (id == -1) {
-			model->textureList.RemoveAll();
+	TESObjectARMO* pArmor = nullptr;
+	int32_t iIndex = -2;
+	uint32_t uiWhichModel;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pArmor, &uiWhichModel, &iIndex) && pArmor && IS_TYPE(pArmor, TESObjectARMO)) {
+		TESModelTextureSwap* pModel = GetArmorModel(pArmor, uiWhichModel);
+		if (!pModel) 
+			return true;
+
+		if (iIndex == -1) {
+			pModel->ClearTexSwapList();
 			*result = 1;
 			return true;
 		}
-		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
-		do {
-			if (iter->data && iter->data->index3D == id) {
-				model->textureList.Remove(iter->data);
-				*result = 1;
-				break;
-			}
-		} while (iter = iter->next);
+		else {
+			pModel->RemoveTexSwap(iIndex);
+			*result = 1;
+			return true;
+		}
 	}
 	return true;
 }
@@ -832,13 +806,13 @@ bool Cmd_SetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID, &newPath) && shader && IS_TYPE(shader, TESEffectShader) && traitID >= 0 && traitID <= 2) {
 		switch (traitID) {
 		case 0:
-			shader->fillTexture.ddsPath.Set(newPath);
+			shader->fillTexture.SetTextureName(newPath);
 			break;
 		case 1:
-			shader->particleShaderTexture.ddsPath.Set(newPath);
+			shader->particleShaderTexture.SetTextureName(newPath);
 			break;
 		case 2:
-			shader->holesTexture.ddsPath.Set(newPath);
+			shader->holesTexture.SetTextureName(newPath);
 			break;
 		}
 		*result = 1;
@@ -854,13 +828,13 @@ bool Cmd_GetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID) && shader && IS_TYPE(shader, TESEffectShader) && traitID >= 0 && traitID <= 2) {
 		switch (traitID) {
 		case 0:
-			resStr = shader->fillTexture.ddsPath.c_str();
+			resStr = shader->fillTexture.GetTextureName();
 			break;
 		case 1:
-			resStr = shader->particleShaderTexture.ddsPath.c_str();
+			resStr = shader->particleShaderTexture.GetTextureName();
 			break;
 		case 2:
-			resStr = shader->holesTexture.ddsPath.c_str();
+			resStr = shader->holesTexture.GetTextureName();
 			break;
 		}
 		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
@@ -1145,12 +1119,12 @@ bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &isFemale) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			path = bipedModel->messageIcon[isFemale].icon.ddsPath.c_str();
+			path = bipedModel->messageIcon[isFemale].GetMessageIconTextureName();
 		}
 		else {
 			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
 			if (icon) {
-				path = icon->icon.ddsPath.c_str();
+				path = icon->GetMessageIconTextureName();
 			}
 		}
 		if (IsConsoleMode()) Console_Print("GetMessageIconPath >> %s", path);
@@ -1166,13 +1140,13 @@ bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &form, &isFemale) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			bipedModel->messageIcon[isFemale].icon.ddsPath.Set(path);
+			bipedModel->messageIcon[isFemale].SetMessageIconTextureName(path);
 			*result = 1;
 		}
 		else {
 			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
 			if (icon) {
-				icon->icon.ddsPath.Set(path);
+				icon->SetMessageIconTextureName(path);
 				*result = 1;
 			}
 		}
@@ -1467,7 +1441,7 @@ bool Cmd_SetEquipType_Execute(COMMAND_ARGS) {
 		pForm = GetTESForm(pForm);
 		BGSEquipType* pEquipType = DYNAMIC_CAST(pForm, TESForm, BGSEquipType);
 		if (pEquipType) {
-			pEquipType->equipType = newEquipType;
+			pEquipType->SetEquipType(newEquipType);
 			*result = 1;
 		}
 	}
@@ -2151,7 +2125,7 @@ bool Cmd_GetCameraShotImageSpaceModifier_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSCameraShot* pCameraShot = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
-		TESImageSpaceModifier* pIMOD = pCameraShot->pModifier;
+		TESImageSpaceModifier* pIMOD = pCameraShot->GetFormImageSpaceModifier();
 		if (pIMOD) {
 			*reinterpret_cast<uint32_t*>(result) = pIMOD->GetFormID();
 		}
@@ -2169,7 +2143,7 @@ bool Cmd_SetCameraShotImageSpaceModifier_Execute(COMMAND_ARGS) {
 		if (pIMOD && !IS_TYPE(pIMOD, TESImageSpaceModifier))
 			return true;
 
-		pCameraShot->pModifier = pIMOD;
+		pCameraShot->SetFormImageSpaceModifier(pIMOD);
 		*result = 1;
 	}
 	return true;

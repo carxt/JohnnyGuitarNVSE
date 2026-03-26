@@ -26,11 +26,11 @@ namespace JohnnyFixes {
 		}
 	}
 
-	tList<TESAmmoEffect>* __fastcall GetAmmoEffectsCheckType(TESForm* form)
+	BSSimpleList<TESAmmoEffect*>* __fastcall GetAmmoEffectsCheckType(TESForm* form)
 	{
 		if (IS_TYPE(form, TESAmmo))
 		{
-			return &((TESAmmo*)form)->effectList;
+			return ((TESAmmo*)form)->GetAmmoEffectList();
 		}
 		return nullptr;
 	}

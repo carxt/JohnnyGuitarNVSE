@@ -390,6 +390,17 @@ const FORM_ENUM_STRING* TESForm::GetFormEnumString(uint8_t aucFormID) {
 	return &pFormEnumStrings[aucFormID];
 }
 
+// GAME - 0x484E40
+bool TESForm::IsDefaultForm() const {
+	return IsDefaultForm(GetFormID());
+}
+
+// GAME - 0x484B40
+// GECK - 0x4F7F40
+bool TESForm::IsDefaultForm(FormID auiID) {
+	return auiID.IsDefault();
+}
+
 // GAME - 0x486890
 // GECK - 0x4F8E80
 uint32_t TESForm::GetFormTypeFromFormString(uint32_t auiFormString) {

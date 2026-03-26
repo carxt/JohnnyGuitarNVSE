@@ -1556,3 +1556,26 @@ struct _CreatureType {
 	};
 };
 using CREATURE_TYPE = _CreatureType::Type;
+
+struct _AmmoEffectType {
+	enum Type : uint32_t {
+		DAMAGE				= 0,
+		DAMAGE_RESISTANCE	= 1,
+		DAMAGE_THRESHOLD	= 2,
+		SPREAD				= 3,
+		CONDITION			= 4,
+		FATIGUE				= 5,
+		COUNT
+	};
+};
+using AMMO_EFFECT_TYPE = _AmmoEffectType::Type;
+
+struct _AmmoOperationType {
+	enum Type : uint32_t {
+		ADD			= 0,
+		MULTIPLY	= 1,
+		SUBTRACT	= 2,
+		COUNT
+	};
+};
+using AMMO_OPERATION_TYPE = _AmmoOperationType::Type;

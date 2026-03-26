@@ -530,11 +530,11 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer) {
 										break;
 
 									case 1:	// short name
-										strName = ammo->shortName.c_str();
+										strName = ammo->GetShortName();
 										break;
 
 									case 2:	// abbrev
-										strName = ammo->abbreviation.c_str();
+										strName = ammo->GetAbbreviation();
 										break;
 								}
 							}
@@ -806,7 +806,7 @@ bool ExtractSetStatementVar(Script* script, ScriptLocals* eventList, void* scrip
 					TESObjectREFR* refr = DYNAMIC_CAST(refForm, TESForm, TESObjectREFR);
 					TESScriptableForm* scriptable = DYNAMIC_CAST(refr->baseForm, TESForm, TESScriptableForm);
 					if (scriptable) {
-						script = scriptable->script;
+						script = scriptable->GetFormScript();
 						eventList = refr->GetScriptLocals();
 					}
 					else
@@ -815,7 +815,7 @@ bool ExtractSetStatementVar(Script* script, ScriptLocals* eventList, void* scrip
 				else if (refForm->GetFormType() == FORM_TYPE::TESQuest) {
 					TESScriptableForm* scriptable = DYNAMIC_CAST(refForm, TESForm, TESScriptableForm);
 					if (scriptable) {
-						script = scriptable->script;
+						script = scriptable->GetFormScript();
 						TESQuest* quest = DYNAMIC_CAST(scriptable, TESScriptableForm, TESQuest);
 						eventList = quest->scriptEventList;
 					}

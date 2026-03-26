@@ -8,9 +8,6 @@
 #include "BSTCaseInsensitiveStringMap.hpp"
 #include "Gamebryo/NiTLargeArray.hpp"
 
-#define IS_ID(form, type) (form->GetFormType() == FORM_TYPE::##type)
-#define NOT_ID(form, type) (form->GetFormType() != FORM_TYPE::##type)
-
 class NiColor;
 class BGSSaveGameBuffer;
 class BGSLoadFormBuffer;
@@ -172,6 +169,7 @@ public:
 			REFRACTED_BY_AUTO_WATER = 1u << 29, // TESObjectREFR
 			CONTINUOUS_BROADCAST	= 1u << 30, // BGSTalkingActivator
 			NAVMESH_GEN_GROUND		= 1u << 30, // GECK - TESObjectREFR, TESObjectACTI, TESObjectCONT, BGSStaticCollection 
+			LOCK_MULTIBOUND			= 1u << 31, // GECK
 
 			TAKEN = DELETED | ALTERED,
 		};
@@ -190,6 +188,11 @@ public:
 	uint32_t	GetFormID() const;
 	FORM_TYPE	GetFormType() const;
 	uint8_t		GetCompileIndex() const;
+
+	template <class T>
+	inline bool IsType() const noexcept {
+		return GetFormType() == T::_TYPE;
+	}
 
 	static const char* GetFormTypeName(uint32_t auiFormType);
 	const char* GetFormTypeName() const;
@@ -289,7 +292,6 @@ public:
 	TESFile* GetFile(int32_t aiIndex) const;
 	TESFile* GetOwnerMaster() const;
 	uint32_t GetFormIDWithoutIndex() const;
-	uint32_t GetLoadFormID() const;
 	uint32_t GetFileCount() const;
 
 	static TESForm* GetFormByNumericID(uint32_t auID);
@@ -297,7 +299,10 @@ public:
 
 	static const FORM_ENUM_STRING* GetFormEnumString(uint8_t aucFormID);
 
-	static uint32_t GetFormTypeFromFormString(uint32_t auiFormString);
+	uint32_t GetFormTypeFromFormString(uint32_t auiFormString);
+
+	bool IsDefaultForm() const;
+	static bool IsDefaultForm(FormID auiID);
 };
 
 ASSERT_SIZE(TESForm, 0x18);

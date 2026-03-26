@@ -120,7 +120,7 @@ void  TESBipedModelForm::SetPath(const char* newPath, uint32_t whichPath, bool b
 			toSet = &groundModel[bFemalePath ? 1 : 0].strModel;
 			break;
 		case ePath_Icon:
-			toSet = &icon[bFemalePath ? 1 : 0].ddsPath;
+			toSet = &icon[bFemalePath ? 1 : 0].strTextureName;
 			break;
 	}
 
@@ -139,7 +139,7 @@ const char* TESBipedModelForm::GetPath(uint32_t whichPath, bool bFemalePath) {
 			pathStr = &groundModel[bFemalePath ? 1 : 0].strModel;
 			break;
 		case ePath_Icon:
-			pathStr = &icon[bFemalePath ? 1 : 0].ddsPath;
+			pathStr = &icon[bFemalePath ? 1 : 0].strTextureName;
 			break;
 	}
 
@@ -225,30 +225,25 @@ TESObjectIMOD* TESObjectWEAP::GetItemMod(uint8_t which) {
 	return itemMod[which - 1];
 }
 
-TESAmmo* TESObjectWEAP::GetAmmo() {
-	if (!ammo.ammo) return NULL;
-	if IS_ID(ammo.ammo, BGSListForm)
-		return (TESAmmo*)((BGSListForm*)ammo.ammo)->GetFormList()->GetItem();
-	return (TESAmmo*)ammo.ammo;
+TESAmmo* TESObjectWEAP::GetAmmo(Actor* apActor) {
+	return ThisCall<TESAmmo*>(0x525980, this, apActor);
 }
 
 TESForm* TESObjectWEAP::GetAmmoInInventory()
 {
-	if (ammo.ammo) {
-		if (IS_TYPE(ammo.ammo, BGSListForm)) {
-			BGSListForm* ammoList = (BGSListForm*)ammo.ammo;
-			ExtraContainerChanges* xChanges = PlayerCharacter::GetSingleton()->extraDataList.GetExtraData<ExtraContainerChanges>();
-			if (ammoList && xChanges && xChanges->pChanges) {
-				auto* pIter = ammoList->GetFormList();
-				while (pIter && !pIter->IsEmpty()) {
-					TESForm* pForm = pIter->GetItem();
-					pIter = pIter->GetNext();
+	BGSListForm* pAmmoList = ammo.GetAmmoFormList();
+	if (pAmmoList) {
+		ExtraContainerChanges* xChanges = PlayerCharacter::GetSingleton()->extraDataList.GetExtraData<ExtraContainerChanges>();
+		if (pAmmoList && xChanges && xChanges->pChanges) {
+			auto pIter = pAmmoList->GetFormList();
+			while (pIter && !pIter->IsEmpty()) {
+				TESForm* pForm = pIter->GetItem();
+				pIter = pIter->GetNext();
 
-					if (IS_TYPE(pForm, TESAmmo)) {
-						uint32_t count = ThisCall<uint32_t>(0x4C8F30, xChanges->pChanges, pForm);
-						if (count > 0) 
-							return pForm;
-					}
+				if (IS_TYPE(pForm, TESAmmo)) {
+					uint32_t count = ThisCall<uint32_t>(0x4C8F30, xChanges->pChanges, pForm);
+					if (count > 0)
+						return pForm;
 				}
 			}
 		}
