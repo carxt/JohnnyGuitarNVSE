@@ -140,7 +140,7 @@ namespace JohnnyEvents {
 				CallUDF(callback.script, nullptr, OnChallengeCompleteHandler->numMaxArgs, challenge);
 			}
 		}
-		return challenge->data.type;
+		return challenge->kData.eType;
 	}
 
 	uint32_t __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
@@ -162,7 +162,7 @@ namespace JohnnyEvents {
 		return fabs(a - b) < epsilon;
 	}
 
-	void __stdcall HandleAVChangeEvent(ActorValueOwner* avOwner, int avCode, float previousVal, float modVal, void* onChangeCallback) {
+	void __stdcall HandleAVChangeEvent(ActorValueOwner* avOwner, ActorValue::Index avCode, float previousVal, float modVal, void* onChangeCallback) {
 		if (onChangeCallback == nullptr)
 			previousVal = avOwner->GetActorValueF(avCode) - modVal;
 

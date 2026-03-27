@@ -23,6 +23,7 @@ public:
 	void				SetMaxLength(uint32_t auiLength);
 
 	bool				Set(const T* apText, uint32_t auiLength = 0);
+	bool				Set(const BSStringT<T>& arSource);
 
 	int32_t				StrCmp(const T* apText, bool abNotCaseSensitive) const;
 	int32_t				StrCmp(const BSStringT<T>& arOther, bool abNotCaseSensitive) const;

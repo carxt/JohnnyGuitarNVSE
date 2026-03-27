@@ -224,24 +224,6 @@ static const char** s_procNames = (const char**)0x011A3CC0;
 #error unsupported Fallout version
 #endif
 
-const char* TESFaction::GetNthRankName(uint32_t whichRank, bool bFemale) {
-	TESFaction::Rank* rank = ranks.GetNthItem(whichRank);
-	if (!rank)
-		return NULL;
-	else
-		return bFemale ? rank->femaleName.c_str() : rank->name.c_str();
-}
-
-void TESFaction::SetNthRankName(const char* newName, uint32_t whichRank, bool bFemale) {
-	TESFaction::Rank* rank = ranks.GetNthItem(whichRank);
-	if (rank) {
-		if (bFemale)
-			rank->femaleName.Set(newName);
-		else
-			rank->name.Set(newName);
-	}
-}
-
 #if 0
 uint32_t EffectItemList::CountItems() const {
 	return list.Count();

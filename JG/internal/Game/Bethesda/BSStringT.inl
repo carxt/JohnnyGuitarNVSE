@@ -116,6 +116,32 @@ inline bool BSStringT<T>::Set(const T* apText, uint32_t auiLengthgth) {
 	return uiLength != 0;
 }
 
+// GAME - 0x438470
+template<typename T>
+inline bool BSStringT<T>::Set(const BSStringT<T>& arSource) {
+	uint32_t uiLength = arSource.GetLength();
+	if (uiLength > GetMaxLength()) {
+		T* pOrgStr = pString;
+		pString = BSMemory::malloc<T>(uiLength + sizeof(T));
+		std::memcpy(pString, arSource.GetString(), uiLength + sizeof(T));
+		if (pOrgStr)
+			BSMemory::free(pOrgStr);
+		SetMaxLength(uiLength);
+
+	}
+	else if (uiLength) {
+		std::memcpy(pString, arSource.GetString(), uiLength + sizeof(T));
+	}
+	else {
+		if (pString)
+			BSMemory::free(pString);
+		pString = nullptr;
+		SetMaxLength(0);
+	};
+	SetLength(uiLength);
+	return uiLength != 0;
+}
+
 // GAME - 0x408A80
 template<typename T>
 inline int32_t BSStringT<T>::StrCmp(const T* apText, bool abNotCaseSensitive) const {

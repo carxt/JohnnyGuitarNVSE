@@ -129,7 +129,7 @@ bool Cmd_GetCasinoDeckTexture_Execute(COMMAND_ARGS)
 	const char* resStr = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex) && casino && IS_TYPE(casino, TESCasino) && deckIndex >= 0 && deckIndex <= 3)
 	{
-		resStr = casino->blackjackDeck[deckIndex].GetTextureName();
+		resStr = casino->kBlackjackDeck[deckIndex].GetTextureName();
 		if (IsConsoleMode())
 			Console_Print("GetCasinoDeckTexture >> %s", resStr);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
@@ -145,7 +145,7 @@ bool Cmd_SetCasinoDeckTexture_Execute(COMMAND_ARGS)
 	char newPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex, &newPath) && casino && IS_TYPE(casino, TESCasino) && newPath && deckIndex >= 0 && deckIndex <= 3)
 	{
-		casino->blackjackDeck[deckIndex].SetTextureName(newPath);
+		casino->kBlackjackDeck[deckIndex].SetTextureName(newPath);
 		*result = 1;
 	}
 	return true;
@@ -158,7 +158,7 @@ bool Cmd_GetCasinoChip_Execute(COMMAND_ARGS)
 	TESForm* chipForm = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino) && casino)
 	{
-		chipForm = TESForm::GetFormByNumericID(casino->currencyRefID);
+		chipForm = TESForm::GetFormByNumericID(casino->kCasinoData.uiCasinoChipID);
 		*(uint32_t*)result = chipForm->GetFormID();
 	}
 	return true;
@@ -171,7 +171,7 @@ bool Cmd_SetCasinoChip_Execute(COMMAND_ARGS)
 	TESForm* chip = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &chip) && casino && IS_TYPE(casino, TESCasino) && chip && IS_TYPE(chip, TESCasinoChips))
 	{
-		casino->currencyRefID = chip->GetFormID();
+		casino->kCasinoData.uiCasinoChipID = chip->GetFormID();
 		*result = 1;
 	}
 	return true;
@@ -683,7 +683,7 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	int delta = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &delta);
-	int karmaBefore = PlayerCharacter::GetSingleton()->avOwner.GetActorValueI(kAVCode_Karma);
+	int karmaBefore = PlayerCharacter::GetSingleton()->avOwner.GetActorValueI(ActorValue::Index::KARMA);
 	int ikarmaMax = GameSettingCollection::iKarmaMax->Int();
 	int iKarmaMin = GameSettingCollection::iKarmaMin->Int();
 	if (delta >= 0 && ((delta + karmaBefore) > ikarmaMax)) {
@@ -693,7 +693,7 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 		delta = iKarmaMin - karmaBefore;
 	}
 	if (delta != 0) {
-		PlayerCharacter::GetSingleton()->ModActorValue(kAVCode_Karma, delta, 0);
+		PlayerCharacter::GetSingleton()->ModActorValue(ActorValue::Index::KARMA, delta, 0);
 		*result = 1;
 	}
 	return true;
@@ -871,8 +871,8 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0
-				|| target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0
+				|| target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
 			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
@@ -1054,7 +1054,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos().SqrDistance(playerPos);
@@ -1124,7 +1124,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	for (; !iter.End(); ++iter) {
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos().SqrDistance(playerPos);
@@ -1228,7 +1228,7 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
 
 bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t avCode;
+	ActorValue::Index avCode;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode)) {
 		Actor* actor = (Actor*)thisObj;
 		ActorValueOwner* avOwner = &actor->avOwner;
@@ -1255,7 +1255,7 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
-	uint32_t avCode;
+	ActorValue::Index avCode;
 	*result = 0;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode)) {
 		Actor* actor = (Actor*)thisObj;

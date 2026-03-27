@@ -224,7 +224,7 @@ bool Cmd_IsRadioRefPlaying_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (thisObj && thisObj->baseForm && IS_TYPE(thisObj->baseForm, TESObjectACTI)) {
 		TESObjectACTI* baseActi = (TESObjectACTI*)thisObj->baseForm;
-		if (baseActi->radioStation) {
+		if (baseActi->GetRadioStation()) {
 			*result = (CdeclCall<void*>(0x0832930, thisObj) != nullptr);
 		}
 	}
@@ -235,7 +235,7 @@ bool Cmd_TuneRadioRef_Execute(COMMAND_ARGS) {
 	BGSTalkingActivator* actiDst = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &actiDst) && thisObj && thisObj->baseForm && IS_TYPE(thisObj->baseForm, TESObjectACTI)) {
 		if (TESObjectACTI* actiBase = (TESObjectACTI*)thisObj->baseForm) {
-			BGSTalkingActivator* originalTK = actiBase->radioStation;
+			BGSTalkingActivator* originalTK = actiBase->GetRadioStation();
 			if (actiDst == nullptr) {
 				actiDst = originalTK;
 			}
@@ -243,9 +243,9 @@ bool Cmd_TuneRadioRef_Execute(COMMAND_ARGS) {
 				auto activateState = CdeclCall<unsigned int>(0x047B250, thisObj);
 				if ((CdeclCall<void*>(0x0832930, thisObj) != nullptr) || (activateState == 1) || (activateState == 2)) { //the exact same logic the game uses
 					CdeclCall<void*>(0x08325B0, thisObj, 0);
-					actiBase->radioStation = actiDst;
+					actiBase->SetRadioStation(actiDst);
 					CdeclCall<void*>(0x08325B0, thisObj, 1);
-					actiBase->radioStation = originalTK;
+					actiBase->SetRadioStation(originalTK);
 				}
 			}
 		}
@@ -283,7 +283,7 @@ bool Cmd_SetFactionFlags_Execute(COMMAND_ARGS) {
 	TESFaction* faction = nullptr;
 	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction, &flags) && faction && IS_TYPE(faction, TESFaction)) {
-		faction->factionFlags = flags;
+		faction->kData.uiFlags = flags;
 		*result = 1;
 	}
 	return true;
@@ -293,7 +293,7 @@ bool Cmd_GetFactionFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESFaction* faction = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction) && faction && IS_TYPE(faction, TESFaction)) {
-		*result = faction->factionFlags;
+		*result = faction->kData.uiFlags;
 		if (IsConsoleMode()) Console_Print("GetFactionFlags >> %.f", *result);
 	}
 	return true;
@@ -1025,7 +1025,7 @@ bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 	uint32_t titleOrTier = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &titleOrTier);
 	if (titleOrTier == 1) {
-		int karmaTier = CdeclCall<int>(0x47E040, PlayerCharacter::GetSingleton()->avOwner.GetActorValueF(kAVCode_Karma)); // GetKarmaTier
+		int karmaTier = CdeclCall<int>(0x47E040, PlayerCharacter::GetSingleton()->avOwner.GetActorValueF(ActorValue::Index::KARMA)); // GetKarmaTier
 		switch (karmaTier) {
 		case 0:
 			title = *(char**)0x11D41B4; // sAlignGood
@@ -1417,10 +1417,10 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 				return;
 
 			TESActorBase* pActorBase = static_cast<TESActorBase*>(apObject);
-			if (pActorBase->baseData.GetFactionList()->IsEmpty())
+			if (pActorBase->GetFactionList()->IsEmpty())
 				return;
 
-			auto pIter = pActorBase->baseData.GetFactionList();
+			auto pIter = pActorBase->GetFactionList();
 			while (pIter && !pIter->IsEmpty()) {
 				FactionRank* pRank = pIter->GetItem();
 				pIter = pIter->GetNext();

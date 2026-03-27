@@ -381,7 +381,6 @@ private:
 bool SCRIPT_ASSERT(bool expr, Script* script, const char* errorMsg, ...);
 
 bool ExtractSetStatementVar(Script* script, ScriptLocals* eventList, void* scriptDataIn, double* outVarData, uint8_t* outModIndex = NULL, bool shortPath = false);
-bool ExtractFormattedString(FormatStringArgs& args, char* buffer);
 
 class ChangesMap;
 class InteriorCellNewReferencesMap;

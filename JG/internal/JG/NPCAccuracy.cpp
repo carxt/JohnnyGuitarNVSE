@@ -20,7 +20,7 @@ namespace NPCAccuracy {
 	__declspec (noinline) std::vector<uintptr_t> GetFactionsForActor(Actor* r_act) {
 
 		auto actBase = (TESActorBase*)GetPermanentBaseForm(r_act);
-		auto retVec = GetFactionsInList(actBase->baseData.GetFactionList());
+		auto retVec = GetFactionsInList(actBase->GetFactionList());
 
 		ExtraFactionChanges* pFactionChanges = r_act->extraDataList.GetExtraData<ExtraFactionChanges>();
 		if (pFactionChanges && pFactionChanges->pFactionChanges) {

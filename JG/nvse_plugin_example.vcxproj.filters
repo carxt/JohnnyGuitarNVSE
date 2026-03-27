@@ -505,6 +505,27 @@
     <ClCompile Include="internal\Game\Bethesda\TESTextureListArray.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ActorValueOwner.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BipedAnim.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESAttributes.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectACTI.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESActorBase.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESSpellList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESFaction.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1308,6 +1329,63 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\TESCaravanMoney.hpp">
       <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ActorValueOwner.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BipedAnim.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\CachedValuesOwner.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESAnimation.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESAttributes.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESKey.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESLevCharacter.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESLevCreature.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectACTI.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectSTAT.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESPackageData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESReactionForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\TESCasino.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\TESChallenge.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESLandTexture.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESActorBase.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESSpellList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESClass.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESFaction.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
