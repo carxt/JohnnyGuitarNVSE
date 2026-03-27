@@ -5,34 +5,59 @@
 #include "GameBSExtraData.h"
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
-#include "Bethesda/TESModelRDT.hpp"
-#include "Bethesda/TESBoundAnimObject.hpp"
-#include "Bethesda/BGSListForm.hpp"
-#include "Bethesda/TESFullName.hpp"
-#include "Bethesda/TESTexture1024.hpp"
-#include "Bethesda/BGSMessageIcon.hpp"
-#include "Bethesda/TESValueForm.hpp"
-#include "Bethesda/TESScriptableForm.hpp"
-#include "Bethesda/TESEnchantableForm.hpp"
-#include "Bethesda/TESWeightForm.hpp"
-#include "Bethesda/TESImageSpaceModifiableForm.hpp"
-#include "Bethesda/TESHealthForm.hpp"
-#include "Bethesda/BGSTextureModel.hpp"
-#include "Bethesda/TESModelTextureSwap.hpp"
-#include "Bethesda/TESAttackDamageForm.hpp"
-#include "Bethesda/BGSClipRoundsForm.hpp"
-#include "Bethesda/BGSPickupPutdownSounds.hpp"
-#include "Bethesda/BGSDestructibleObjectForm.hpp"
-#include "Bethesda/BGSAmmoForm.hpp"
+
 #include "Bethesda/BGSAcousticSpace.hpp"
-#include "Bethesda/BGSMenuIcon.hpp"
+#include "Bethesda/BGSAddonNode.hpp"
+#include "Bethesda/BGSAmmoForm.hpp"
+#include "Bethesda/BGSBipedModelList.hpp"
+#include "Bethesda/BGSCameraShot.hpp"
+#include "Bethesda/BGSClipRoundsForm.hpp"
+#include "Bethesda/BGSDefaultObjectManager.hpp"
+#include "Bethesda/BGSDestructibleObjectForm.hpp"
 #include "Bethesda/BGSEncounterZone.hpp"
-#include "Bethesda/BGSPreloadable.hpp"
-#include "Bethesda/TESModelAnim.hpp"
-#include "Bethesda/BGSRepairItemList.hpp"
 #include "Bethesda/BGSEquipType.hpp"
+#include "Bethesda/BGSHeadPart.hpp"
+#include "Bethesda/BGSListForm.hpp"
+#include "Bethesda/BGSMenuIcon.hpp"
+#include "Bethesda/BGSMessageIcon.hpp"
+#include "Bethesda/BGSMusicType.hpp"
+#include "Bethesda/BGSOpenCloseForm.hpp"
+#include "Bethesda/BGSPickupPutdownSounds.hpp"
+#include "Bethesda/BGSPlaceableWater.hpp"
+#include "Bethesda/BGSPreloadable.hpp"
+#include "Bethesda/BGSRagdoll.hpp"
+#include "Bethesda/BGSRepairItemList.hpp"
+#include "Bethesda/BGSTextureModel.hpp"
+#include "Bethesda/BGSTouchSpellForm.hpp"
+#include "Bethesda/TESActorBaseData.hpp"
+#include "Bethesda/TESAIForm.hpp"
 #include "Bethesda/TESAmmo.hpp"
+#include "Bethesda/TESAttackDamageForm.hpp"
+#include "Bethesda/TESBoundAnimObject.hpp"
+#include "Bethesda/TESCombatStyle.hpp"
+#include "Bethesda/TESContainer.hpp"
+#include "Bethesda/TESEnchantableForm.hpp"
+#include "Bethesda/TESEyes.hpp"
+#include "Bethesda/TESFullName.hpp"
+#include "Bethesda/TESGlobal.hpp"
+#include "Bethesda/TESGrass.hpp"
+#include "Bethesda/TESHair.hpp"
+#include "Bethesda/TESHealthForm.hpp"
+#include "Bethesda/TESImageSpaceModifiableForm.hpp"
+#include "Bethesda/TESModelAnim.hpp"
+#include "Bethesda/TESModelRDT.hpp"
+#include "Bethesda/TESModelTextureSwap.hpp"
+#include "Bethesda/TESObjectANIO.hpp"
+#include "Bethesda/TESRaceForm.hpp"
+#include "Bethesda/TESScriptableForm.hpp"
+#include "Bethesda/TESTexture1024.hpp"
+#include "Bethesda/TESValueForm.hpp"
+#include "Bethesda/TESWeightForm.hpp"
+#include "Obsidian/BGSDehydrationStage.hpp"
+#include "Obsidian/BGSHungerStage.hpp"
+#include "Obsidian/BGSSleepDeprevationStage.hpp"
 #include "Obsidian/TESAmmoEffect.hpp"
+#include "Obsidian/TESReputation.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -501,16 +526,6 @@ public:
 
 static_assert(sizeof(MagicItemForm) == 0x34);
 
-// 008
-class BGSBipedModelList : public BaseFormComponent {
-public:
-	BGSBipedModelList();
-	~BGSBipedModelList();
-
-	BGSListForm* models;		// 004
-	// 008
-};
-
 // 0DC
 class TESBipedModelForm : public BaseFormComponent {
 public:
@@ -642,125 +657,7 @@ struct LvlListExtra {
 	float			health;		// 08
 };
 
-// 0C
-class TESContainer : public BaseFormComponent {
-public:
-	TESContainer();
-	~TESContainer();
-
-	struct FormCount {
-		int32_t			count;			//	00
-		TESForm*		form;			//	04
-		LvlListExtra*	contExtraData;	//	08
-	};
-	typedef tList<FormCount> FormCountList;
-
-	FormCountList	formCountList;	// 04
-};
-
-// 00C
-class BGSTouchSpellForm : public BaseFormComponent {
-public:
-	BGSTouchSpellForm();
-	~BGSTouchSpellForm();
-
-	TESForm*	unarmedEffect;	// 04
-	uint16_t		unarmedAnim;	// 08
-	uint16_t		pad0A;			// 0A
-};
-
 class FactionRank;
-
-// 034
-class TESActorBaseData : public BaseFormComponent {
-public:
-	TESActorBaseData();
-	~TESActorBaseData();
-
-	virtual void			Fn_04(TESForm* selectedForm);	// Called during form initialization after LoadForm and InitForm
-	// flags access
-	virtual bool			Fn_05(void);	// 00100000
-	virtual bool			Fn_06(void);	// 00200000
-	virtual bool			Fn_07(void);	// 10000000
-	virtual bool			Fn_08(void);	// 20000000
-	virtual bool			GetAsForm(void);	// 80000000
-	virtual bool			Fn_0A(void);	// 00400000
-	virtual bool			Fn_0B(void);	// 00400000
-	virtual bool			Fn_0C(void);	// 00800000
-	virtual bool			Fn_0D(void);
-	virtual bool			Fn_0E(void);
-	virtual bool			Fn_0F(void);
-	virtual bool			Fn_10(void);
-	virtual bool			Fn_11(void);
-	virtual bool			Fn_12(void);
-	virtual void			Fn_13(void* arg);
-	virtual bool			Fn_14(void);
-	virtual void			Fn_15(void* arg);
-	virtual uint32_t			Fn_16(void);
-	virtual void			Fn_17(void* arg);
-	virtual uint32_t			Fn_18(void);	// return unk08
-	virtual float			Fn_19(void);	// return unk14
-	virtual BGSVoiceType* GetVoiceType(void);
-
-	enum {
-		kFlags_Female = 1 << 0,
-		kFlags_Essential = 1 << 1,
-		kFlags_HasCharGenFace = 1 << 2,
-		kFlags_Respawn = 1 << 3,
-		kFlags_AutoCalcStats = 1 << 4,
-		//								1 << 5,
-		//								1 << 6,
-		kFlags_PCLevelMult = 1 << 7,
-		kFlags_UseTemplate = 1 << 8,
-		kFlags_NoLowLevelProcessing = 1 << 9,
-		//								1 << 10,
-		kFlags_NoBloodSpray = 1 << 11,
-		kFlags_NoBloodDecal = 1 << 12,
-		//								1 << 13,
-		//								1 << 14,
-		//								1 << 15,
-		//								1 << 16,
-		//								1 << 17,
-		//								1 << 18,
-		//								1 << 19,
-		kFlags_NoVATSMelee = 1 << 20,
-		//								1 << 21,
-		kFlags_CanBeAllRaces = 1 << 22,
-		//								1 << 23,
-		//								1 << 24,
-		//								1 << 25,
-		kFlags_NoKnockdowns = 1 << 26,
-		kFlags_NotPushable = 1 << 27,
-		//								1 << 28,
-		//								1 << 29,
-		kFlags_NoRotateToHeadTrack = 1 << 30,
-		//								1 << 31,
-	};
-
-	uint32_t			flags;				// 04	Comparing with LoadForm and FNVEdit
-	uint16_t			fatigue;			// 08	Fatique
-	uint16_t			barterGold;			// 0A	Barter Gold
-	int16_t			level;				// 0C	Level/ Level Mult
-	uint16_t			calcMin;			// 0E	Calc min
-	uint16_t			calcMax;			// 10	Calc max
-	uint16_t			speedMultiplier;	// 12	Speed Multiplier (confirmed)
-	float			karma;				// 14	Karma
-	uint16_t			dispositionBase;	// 18	Disposition Base
-	uint16_t			templateFlags;		// 1A	Template Flags
-	TESForm*		deathItem;		// 1C	Death Item: object or FormList
-	BGSVoiceType*	voiceType;		// 20
-	TESForm*		templateActor;		// 24	Points toward Template
-#ifdef RUNTIME
-	uint32_t			changedFlags;		// 28/000	Absent in Editor
-#endif
-	BSSimpleList<FactionRank*>	factionList;	// 2C/28
-
-	char GetFactionRank(TESFaction* faction);
-	void SetFactionRank(TESFaction* faction, char rank);
-
-	bool IsFemale() { return flags & kFlags_Female ? true : false; }	// place holder until GECK
-};
-
 // 14
 class TESSpellList : public BaseFormComponent {
 public:
@@ -792,65 +689,6 @@ public:
 
 	// removes all spells and returns how many spells were removed
 	//uint32_t RemoveAllSpells();
-};
-
-// 020
-class TESAIForm : public BaseFormComponent {
-public:
-	TESAIForm();
-	~TESAIForm();
-
-	typedef tList<TESPackage> PackageList;
-
-	virtual uint32_t	GetSaveSize(uint32_t changedFlags);
-	virtual void	Save(uint32_t changedFlags);
-	virtual void	Load(uint32_t changedFlags);
-
-	uint8_t	agression;				// 04
-	uint8_t	confidence;				// 05
-	uint8_t	energyLevel;			// 06
-	uint8_t	responsibility;			// 07
-	uint8_t	mood;					// 08
-	uint8_t	pad09[3];				// 09
-
-	uint32_t	buySellsAndServices;	// 0C
-	uint8_t	teaches;				// 10
-	uint8_t	maximumTrainingLevel;	// 11
-	uint8_t	assistance;				// 12
-	uint8_t	aggroRadiusBehavior;	// 13
-	int32_t	aggroRadius;			// 14
-
-	PackageList	packageList;	// 18
-
-	uint32_t	GetPackageCount() const {
-		return packageList.Count();
-	}
-
-	// return the nth package
-	TESPackage* GetNthPackage(int32_t anIndex) const {
-		return packageList.GetNthItem(anIndex);
-	}
-
-	// replace the nth package
-	TESPackage* SetNthPackage(TESPackage* pPackage, int32_t anIndex) {
-		return packageList.ReplaceNth(anIndex == -1 ? eListEnd : anIndex, pPackage);
-	}
-
-	// return the nth package
-	int32_t AddPackageAt(TESPackage* pPackage, int32_t anIndex) {
-		return packageList.AddAt(pPackage, anIndex == -1 ? eListEnd : anIndex);
-	}
-
-	TESPackage* RemovePackageAt(int32_t anIndex) {
-		return packageList.RemoveNth(anIndex == -1 ? eListEnd : anIndex);
-	}
-
-	// removes all packages and returns how many were removed
-	uint32_t RemoveAllPackages() const {
-		uint32_t cCount = GetPackageCount();
-		packageList.RemoveAll();
-		return cCount - GetPackageCount();
-	}
 };
 
 // 00C
@@ -1016,15 +854,6 @@ public:
 	uint8_t	padD[3];	// D
 };
 
-// 08
-class TESRaceForm : public BaseFormComponent {
-public:
-	TESRaceForm();
-	~TESRaceForm();
-
-	TESRace* race;	// 04
-};
-
 // 8
 // ### derives from NiObject
 class BSTextureSet {
@@ -1034,17 +863,6 @@ public:
 
 	void* _vtbl;	// 0
 	uint32_t	unk04;		// 4
-};
-
-// 0C
-class TESSoundFile : public BaseFormComponent {
-public:
-	TESSoundFile();
-	~TESSoundFile();
-
-	virtual void	Set(const char* str);
-
-	BSString			path;	// 04
 };
 
 // 24
@@ -1093,16 +911,6 @@ public:
 	uint32_t			status;			// 020	bit0 = displayed, bit 1 = completed. 1 and 3 significant. If setting it to 3, quest flags bit1 will be set also.
 
 	int32_t GetTargetIndex(TESObjectREFR* refr);
-};
-
-class BGSOpenCloseForm {
-public:
-	virtual void	Unk_00(uint32_t arg0, uint32_t arg1);
-	virtual void	Unk_01(uint32_t arg0, uint32_t arg1);
-	virtual bool	Unk_02(void);
-
-	BGSOpenCloseForm();
-	~BGSOpenCloseForm();
 };
 
 /**** forms ****/
@@ -1309,31 +1117,6 @@ public:
 
 static_assert(sizeof(BGSTextureSet) == 0xA0);
 
-// 28
-class TESGlobal : public TESForm {
-public:
-	TESGlobal();
-	~TESGlobal();
-
-	enum {
-		kType_Float = 'f',
-		kType_Long = 'l',
-		kType_Short = 's'
-	};
-
-	BSString		name;		// 18
-	uint8_t			type;		// 20
-	uint8_t			pad21[3];	// 21
-	union {
-		float		data;
-		uint32_t		uRefID;
-	};
-
-	uint32_t ResolveRefValue();
-};
-
-static_assert(sizeof(TESGlobal) == 0x28);
-
 // 60
 class TESClass : public TESForm {
 public:
@@ -1376,16 +1159,6 @@ public:
 };
 
 static_assert(sizeof(TESClass) == 0x60);
-
-class TESReputation : public TESForm, public TESFullName, public TESIcon, public BGSMessageIcon {
-public:
-	float		fMaxReputation;
-	float		fPositiveReputation;
-	float		fNegativeReputation;
-	uint32_t	uiReputationChangedWasPositive;
-};
-
-static_assert(sizeof(TESReputation) == 0x50);
 
 // 4C
 class TESFaction : public TESForm {
@@ -1458,77 +1231,6 @@ public:
 };
 
 static_assert(sizeof(TESFaction) == 0x4C);
-
-// 50
-class BGSHeadPart : public TESForm {
-public:
-	BGSHeadPart();
-	~BGSHeadPart();
-
-	enum {
-		kFlag_Playable = 0x01,
-	};
-
-	TESFullName			fullName;	// 18
-	TESModelTextureSwap	texSwap;	// 24
-
-	uint8_t				headFlags;	// 44
-	uint8_t				pad45[3];	// 45
-	uint32_t				unk48;		// 48
-	uint32_t				unk4C;		// 4C
-};
-
-static_assert(sizeof(BGSHeadPart) == 0x50);
-
-// 4C
-class TESHair : public TESForm {
-public:
-	TESHair();
-	~TESHair();
-
-	enum {
-		kFlag_Playable = 0x01,
-		kFlag_NotMale = 0x02,
-		kFlag_NotFemale = 0x04,
-		kFlag_Fixed = 0x08,
-	};
-
-	TESFullName		fullName;	// 18
-	TESModel		model;		// 24
-	TESTexture		texture;	// 3C
-
-	uint8_t			hairFlags;	// 48	Playable, not Male, not Female, Fixed
-	uint8_t			pad49[3];	// 49
-
-	bool IsPlayable() { return (hairFlags & kFlag_Playable) == kFlag_Playable; }
-	void SetPlayable(bool doset) { if (doset) hairFlags |= kFlag_Playable; else hairFlags &= ~kFlag_Playable; }
-};
-
-static_assert(sizeof(TESHair) == 0x4C);
-
-// 34
-class TESEyes : public TESForm {
-public:
-	TESEyes();
-	~TESEyes();
-
-	enum {
-		kFlag_Playable = 0x01,
-		kFlag_NotMale = 0x02,
-		kFlag_NotFemale = 0x04,
-	};
-
-	TESFullName		fullName;	// 18
-	TESTexture		texture;	// 24
-
-	uint8_t			eyeFlags;	// 30
-	uint8_t			pad31[3];	// 31
-
-	bool IsPlayable() { return (eyeFlags & kFlag_Playable) == kFlag_Playable; }
-	void SetPlayable(bool doset) { if (doset) eyeFlags |= kFlag_Playable; else eyeFlags &= ~kFlag_Playable; }
-};
-
-static_assert(sizeof(TESEyes) == 0x34);
 
 // 4E4 - incomplete
 class TESRace : public TESForm {
@@ -1770,32 +1472,6 @@ public:
 };
 
 static_assert(sizeof(EffectSetting) == 0xB0);
-
-// 68
-class TESGrass : public TESBoundObject {
-public:
-	TESGrass();
-	~TESGrass();
-
-	TESModel		model;					// 30
-
-	uint8_t			density;				// 48
-	uint8_t			minSlope;				// 49
-	uint8_t			maxSlope;				// 4A
-	uint8_t			pad4B;					// 4B
-	uint16_t			unitFromWaterAmount;	// 4C
-	uint8_t			pad4E[2];				// 4E
-	uint8_t			unitFromWaterType;		// 50
-	uint8_t			pad51[3];				// 51
-	float			positionRange;			// 54
-	float			heightRange;			// 58
-	float			colorRange;				// 5C
-	float			wavePeriod;				// 60
-	uint8_t			flags;					// 64
-	uint8_t			pad65[3];				// 65
-};
-
-static_assert(sizeof(TESGrass) == 0x68);
 
 // 28
 class TESLandTexture : public TESForm {
@@ -2197,17 +1873,6 @@ class BGSStaticCollection;
 
 // BGSMovableStatic (6C)
 class BGSMovableStatic;
-
-// BGSPlaceableWater (50)
-class BGSPlaceableWater : public TESBoundObject {
-public:
-	BGSPlaceableWater();
-	~BGSPlaceableWater();
-
-	TESModel			model;	// 030
-	uint32_t				flags;	// 048
-	TESWaterForm* water;	// 04C
-};
 
 // TESObjectTREE (94)
 class TESObjectTREE;
@@ -4225,105 +3890,6 @@ public:
 	float	flt008;
 };
 
-// 108
-class TESCombatStyle : public TESForm {
-public:
-	TESCombatStyle();
-	~TESCombatStyle();
-
-	enum {
-		kFlag_ChooseAttackUsingChance = 1,
-		kFlag_MeleeAlertOK = 2,
-		kFlag_FleeBasedOnPersonalSurvival = 4,
-		kFlag_IgnoreThreats = 16,
-		kFlag_IgnoreDamagingSelf = 32,
-		kFlag_IgnoreDamagingGroup = 64,
-		kFlag_IgnoreDamagingSpectators = 128,
-		kFlag_CannotUseStealthboy = 256,
-	};
-
-	float	coverSearchRadius;				// 018
-	float	takeCoverChance;				// 01C
-	float	waitTimeMin;					// 020
-	float	waitTimeMax;					// 024
-	float	waitToFireTimerMin;				// 028
-	float	waitToFireTimerMax;				// 02C
-	float	fireTimerMin;					// 030
-	float	fireTimerMax;					// 034
-	float	rangedWeapRangeMultMin;			// 038
-	uint8_t	pad3C[4];						// 03C
-	uint8_t	weaponRestrictions;				// 040
-	uint8_t	pad41[3];						// 041
-	float	rangedWeapRangeMultMax;			// 044
-	float	maxTargetingFOV;				// 048
-	float	combatRadius;					// 04C
-	float	semiAutoFiringDelayMultMin;		// 050
-	float	semiAutoFiringDelayMultMax;		// 054
-	uint8_t	dodgeChance;					// 058
-	uint8_t	LRChance;						// 059
-	uint8_t	pad5A[2];						// 05A
-	float	dodgeLRTimerMin;				// 05C
-	float	dodgeLRTimerMax;				// 060
-	float	dodgeFWTimerMin;				// 064
-	float	dodgeFWTimerMax;				// 068
-	float	dodgeBKTimerMin;				// 06C
-	float	dodgeBKTimerMax;				// 070
-	float	idleTimerMin;					// 074
-	float	idleTimerMax;					// 078
-	uint8_t	blockChance;					// 07C
-	uint8_t	attackChance;					// 07D
-	uint8_t	pad7E[2];						// 07E
-	float	staggerBonusToAttack;			// 080
-	float	KOBonusToAttack;				// 084
-	float	H2HBonusToAttack;				// 088
-	uint8_t	powerAttackChance;				// 08C
-	uint8_t	pad8D[3];						// 08D
-	float	staggerBonusToPower;			// 090
-	float	KOBonusToPower;					// 094
-	uint8_t	powerAttackN;					// 098
-	uint8_t	powerAttackF;					// 099
-	uint8_t	powerAttackB;					// 09A
-	uint8_t	powerAttackL;					// 09B
-	uint8_t	powerAttackR;					// 09C
-	uint8_t	pad9D[3];						// 09D
-	float	holdTimerMin;					// 0A0
-	float	holdTimerMax;					// 0A4
-	uint16_t	csFlags;						// 0A8
-	uint8_t	pad0AA[2];						// 0AA
-	uint8_t	acrobaticDodgeChance;			// 0AC
-	uint8_t	rushAttackChance;				// 0AD
-	uint8_t	pad0AE[2];						// 0AE
-	float	rushAttackDistMult;				// 0B0
-	float	dodgeFatigueModMult;			// 0B4
-	float	dodgeFatigueModBase;			// 0B8
-	float	encumSpeedModBase;				// 0BC
-	float	encumSpeedModMult;				// 0C0
-	float	dodgeUnderAttackMult;			// 0C4
-	float	dodgeNotUnderAttackMult;		// 0C8
-	float	dodgeBackUnderAttackMult;		// 0CC
-	float	dodgeBackNotUnderAttackMult;	// 0D0
-	float	dodgeFWAttackingMult;			// 0D4
-	float	dodgeFWNotAttackingMult;		// 0D8
-	float	blockSkillModMult;				// 0DC
-	float	blockSkillModBase;				// 0E0
-	float	blockUnderAttackMult;			// 0E4
-	float	blockNotUnderAttackMult;		// 0E8
-	float	attackSkillModMult;				// 0EC
-	float	attackSkillModBase;				// 0F0
-	float	attackUnderAttackMult;			// 0F4
-	float	attackNotUnderAttackMult;		// 0F8
-	float	attackDuringBlockMult;			// 0FC
-	float	powerAttackFatigueModBase;		// 100
-	float	powerAttackFatigueModMult;		// 104
-
-	void SetFlag(uint32_t pFlag, bool bEnable) {
-		if (bEnable) csFlags |= pFlag;
-		else csFlags &= ~pFlag;
-	}
-};
-
-static_assert(sizeof(TESCombatStyle) == 0x108);
-
 // 2C
 class TESRecipeCategory : public TESForm {
 public:
@@ -4415,16 +3981,6 @@ public:
 
 // TESLevSpell (44)
 class TESLevSpell;
-
-// TESObjectANIO (3C)
-class TESObjectANIO : public TESForm {
-public:
-	TESObjectANIO();
-	~TESObjectANIO();
-
-	TESModelTextureSwap	modelSwap;		// 18
-	TESIdleForm* idleForm;		// 38
-};
 
 // 194
 class TESWaterForm : public TESForm {
@@ -4955,22 +4511,6 @@ public:
 };
 static_assert(sizeof(MediaLocationController) == 0xB8);
 
-// BGSAddonNode (60)
-class BGSAddonNode : public TESBoundObject {
-public:
-	BGSAddonNode();
-	~BGSAddonNode();
-
-	TESModel	model;				// 030
-	uint32_t unk48[2];
-	uint32_t nodeIndex;
-	TESSound* sound;
-	uint32_t flags;
-	uint32_t unk5C[1];
-};
-
-static_assert(sizeof(BGSAddonNode) == 0x60);
-
 // C4
 class ActorValueInfo : public TESForm {
 public:
@@ -5015,100 +4555,6 @@ public:
 	uint32_t		threshold;	// 18
 	SpellItem* effect;	// 1C
 };
-
-// 20
-class BGSDehydrationStage : public TESForm {
-public:
-	BGSDehydrationStage();
-	~BGSDehydrationStage();
-
-	uint32_t		threshold;	// 18
-	SpellItem* effect;	// 1C
-};
-
-// 20
-class BGSHungerStage : public TESForm {
-public:
-	BGSHungerStage();
-	~BGSHungerStage();
-
-	uint32_t		threshold;	// 18
-	SpellItem* effect;	// 1C
-};
-
-// 20
-class BGSSleepDeprevationStage : public TESForm {
-public:
-	BGSSleepDeprevationStage();
-	~BGSSleepDeprevationStage();
-
-	uint32_t		threshold;	// 18
-	SpellItem* effect;	// 1C
-};
-
-class BGSCameraShot : public TESForm, public TESModel, public TESImageSpaceModifiableForm {
-public:
-	BGSCameraShot();
-	~BGSCameraShot();
-
-	enum Action {
-		SHOOT	= 0,
-		FLY		= 1,
-		HIT		= 2,
-		ZOOM	= 3,
-		COUNT,
-	};
-
-	enum Object : int32_t {
-		ATTACKER	= 0,
-		PROJECTILE	= 1,
-		TARGET		= 2,
-	};
-
-	struct ALIGN4 _CameraShotFlags {
-		enum Flags : uint32_t {
-			POSITION_FOLLOWS_LOCATION	= 1u << 0,
-			POSITION_FOLLOWS_TARGET		= 1u << 1,
-			DONT_FOLLOW_BONE			= 1u << 2,
-			FIRST_PERSON_CAMERA			= 1u << 3,
-			NO_TRACER					= 1u << 4,
-			START_AT_TIME_ZERO			= 1u << 5,
-		};
-
-		bool bPositionFollowsLocation	: 1;
-		bool bPositionFollowsTarget		: 1;
-		bool bDontFollowBone			: 1;
-		bool bFirstPersonCamera			: 1;
-		bool bNoTracer					: 1;
-		bool bStartAtTimeZero			: 1;
-	};
-	using CameraShotFlags = _CameraShotFlags::Flags;
-
-	struct Data {
-		Action						eAction;
-		Object						eLocation;
-		Object						eTarget;
-		Bitfield<_CameraShotFlags>	uiFlags;
-		float						fPlayerTimeMult;
-		float						fTargetTimeMult;
-		float						fGlobalTimeMult;
-		float						fMaxTime;
-		float						fMinTime;
-		float						fTargetPercentBetweenActors;
-	};
-
-	Data					kData;
-	NiPointer<NiNode>		spLocationNode;
-	NiPointer<NiNode>		spTargetNode;
-	TESObjectREFR*			pReference;
-	NiPointer<NiNode>		spCameraNode;
-	NiPointer<NiAVObject>	spImagespaceTarget;
-	int8_t					cCameraHasRotation;
-	bool					bCameraTooClose;
-	bool					bCameraIsKillCam;
-};
-
-ASSERT_SIZE(BGSCameraShot, 0x78);
 
 // BGSCameraPath (38)
 class BGSCameraPath;
@@ -5217,18 +4663,6 @@ public:
 
 static_assert(sizeof(BGSMessage) == 0x40);
 
-// BGSRagdoll (148)
-class BGSRagdoll : public TESForm {
-public:
-	BGSRagdoll();
-	~BGSRagdoll();
-
-	TESModel	model;					// 018
-	uint32_t	unk030[(0x148 - 0x30) >> 2];	// 030
-};
-
-static_assert(sizeof(BGSRagdoll) == 0x148);
-
 // 44
 class BGSLightingTemplate : public TESForm {
 public:
@@ -5249,121 +4683,6 @@ public:
 };
 
 static_assert(sizeof(BGSLightingTemplate) == 0x44);
-
-// BGSMusicType (30)
-class BGSMusicType : public TESForm {
-public:
-	BGSMusicType();
-	~BGSMusicType();
-
-	TESSoundFile	soundFile;	// 18
-	float			dB;		// 24
-	tList<char*>* filesInFolder;		// 28
-	uint32_t			randomFile;		// 2C
-};
-
-// BGSDefaultObjectManager, with help from "Luthien Anarion"
-
-static_assert(sizeof(BGSMusicType) == 0x30);
-
-const char kDefaultObjectNames[34][28] = {	// 0x0118C360 is an array of struct: { char * Name, uint8_t kFormType , uint8_t pad[3] }
-	  "Stimpack",
-	  "SuperStimpack",
-	  "RadX",
-	  "RadAway",
-	  "Morphine",
-	  "Perk Paralysis",
-	  "Player Faction",
-	  "Mysterious Stranger NPC",
-	  "Mysterious Stranger Faction",
-	  "Default Music",
-	  "Battle Music",
-	  "Death Music",
-	  "Success Music",
-	  "Level Up Music",
-	  "Player Voice (Male)",
-	  "Player Voice (Male Child)",
-	  "Player Voice (Female)",
-	  "Player Voice (Female Child)",
-	  "Eat Package Default Food",
-	  "Every Actor Ability",
-	  "Drug Wears Off Image Space",
-	  "Doctor's Bag",
-	  "Miss Fortune NPC",
-	  "Miss Fortune Faction",
-	  "Meltdown Explosion",
-	  "Unarmed Forward PA",
-	  "Unarmed Backward PA",
-	  "Unarmed Left PA",
-	  "Unarmed Right PA",
-	  "Unarmed Crouch PA",
-	  "Unarmed Counter PA",
-	  "Spotter Effect",
-	  "Item Detected Effect",
-	  "Cateye Mobile Effect (NYI)"
-};
-
-// BGSDefaultObjectManager (A0)
-class BGSDefaultObjectManager : public TESForm {
-public:
-	BGSDefaultObjectManager();
-	~BGSDefaultObjectManager();
-
-	static BGSDefaultObjectManager* GetSingleton();
-
-	enum {
-		kDefaultObject_Max = 34,
-	};
-
-	typedef TESForm* FormArray[kDefaultObject_Max];
-
-	struct FormStruct {
-		TESForm* Stimpak;
-		TESForm* SuperStimpak;
-		TESForm* RadX;
-		TESForm* RadAway;
-		TESForm* Morphine;
-		TESForm* PerkParalysis;
-		TESForm* PlayerFaction;
-		TESForm* MysteriousStranger;
-		TESForm* MysteriousStrangerFaction;
-		TESForm* DefaultMusic;
-		TESForm* BattleMusic;
-		TESForm* DefaultDeath;
-		TESForm* SuccessMusic;
-		TESForm* LevelUpMusic;
-		TESForm* PlayerVoiceMale;
-		TESForm* PlayerVoiceMaleChild;
-		TESForm* PlayerVoiceFemale;
-		TESForm* PlayerVoiceFemaleChild;
-		TESForm* EatPackageDefaultFood;
-		TESForm* EveryActorAbility;
-		TESForm* DrugWearOffImageSpace;
-		// FNV
-		TESForm* DoctorsBag;
-		TESForm* MissFortuneNPC;
-		TESForm* MissFortuneFaction;
-		TESForm* MeltdownExplosion;
-		TESForm* UnarmedForwardPA;
-		TESForm* UnarmedBackwardPA;
-		TESForm* UnarmedLeftPA;
-		TESForm* UnarmedRightPA;
-		TESForm* UnarmedCrouchPA;
-		TESForm* UnarmedCounterPA;
-		TESForm* SpotterEffect;
-		TESForm* ItemDetectedEffect;
-		TESForm* CateyeMobileEffectNYI;
-	};
-
-	union DefaultObjects {
-		FormStruct	asStruct;
-		FormArray	asArray;
-	};
-
-	DefaultObjects	defaultObjects;	// 018
-};
-
-static_assert(sizeof(BGSDefaultObjectManager) == 0xA0);
 
 enum EActionListForm {
 	eActionListForm_AddAt = 00,

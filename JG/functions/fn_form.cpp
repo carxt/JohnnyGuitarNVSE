@@ -1417,10 +1417,10 @@ bool Cmd_GetFactionMembers_Execute(COMMAND_ARGS) {
 				return;
 
 			TESActorBase* pActorBase = static_cast<TESActorBase*>(apObject);
-			if (pActorBase->baseData.factionList.IsEmpty())
+			if (pActorBase->baseData.GetFactionList()->IsEmpty())
 				return;
 
-			auto pIter = pActorBase->baseData.factionList.GetHead();
+			auto pIter = pActorBase->baseData.GetFactionList();
 			while (pIter && !pIter->IsEmpty()) {
 				FactionRank* pRank = pIter->GetItem();
 				pIter = pIter->GetNext();
@@ -1558,7 +1558,7 @@ bool Cmd_GetMusicTypePath_Execute(COMMAND_ARGS) {
 	BGSMusicType* mtype = nullptr;
 	const char* path = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype) && mtype && IS_TYPE(mtype, BGSMusicType)) {
-		path = mtype->soundFile.path.c_str();
+		path = mtype->GetSoundFile();
 		g_strInterface->Assign(PASS_COMMAND_ARGS, path);
 		if (IsConsoleMode()) {
 			Console_Print("GetMusicTypePath >> %s", path);
@@ -1570,7 +1570,7 @@ bool Cmd_GetMusicTypePath_Execute(COMMAND_ARGS) {
 bool Cmd_GetMusicTypeDB_Execute(COMMAND_ARGS) {
 	BGSMusicType* mtype = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype) && mtype && IS_TYPE(mtype, BGSMusicType)) {
-		*result = mtype->dB;
+		*result = mtype->fAttenuation;
 		if (IsConsoleMode())
 			Console_Print("GetMusicTypeDB >> %f", *result);
 	}
@@ -1581,7 +1581,7 @@ bool Cmd_SetMusicTypeDB_Execute(COMMAND_ARGS) {
 	BGSMusicType* mtype = nullptr;
 	float newVal = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype, &newVal) && mtype && IS_TYPE(mtype, BGSMusicType)) {
-		mtype->dB = newVal;
+		mtype->fAttenuation = newVal;
 		*result = 1;
 	}
 	return true;
@@ -1591,7 +1591,7 @@ bool Cmd_SetMusicTypePath_Execute(COMMAND_ARGS) {
 	BGSMusicType* mtype = nullptr;
 	char newPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype, &newPath) && mtype && IS_TYPE(mtype, BGSMusicType)) {
-		mtype->soundFile.path.Set(newPath);
+		mtype->SetSoundFile(newPath);
 		*result = 1;
 	}
 	return true;
@@ -1778,7 +1778,7 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 			*result = 1;
 		}
 		else {
-			float daysPassed = g_gameTimeGlobals->daysPassed == 0 ? 1.0 : g_gameTimeGlobals->daysPassed->data;
+			float daysPassed = g_gameTimeGlobals->daysPassed == 0 ? 1.0 : g_gameTimeGlobals->daysPassed->GetValue();
 			gameHoursPassed = floor(daysPassed * 24.0);
 			*result = ((gameHoursPassed - detachTime) >= iHoursToRespawnCell);
 		}

@@ -10,12 +10,12 @@
 
 TESForm* TESObjectREFR::GetBaseForm()
 {
-	TESForm* baseform = nullptr;
+	TESBoundObject* baseform = nullptr;
 	if (this->baseForm) {
 		baseform = this->baseForm;
 		if (baseform->GetCompileIndex() == 0xFF) {
 			if (IS_TYPE(baseform, BGSPlaceableWater))
-				return ((BGSPlaceableWater*)baseform)->water;
+				return baseform->GetWaterType();
 
 			ExtraLeveledCreature* pLevCrea = extraDataList.GetExtraData<ExtraLeveledCreature>();
 			if (pLevCrea && pLevCrea->pOriginalBase)

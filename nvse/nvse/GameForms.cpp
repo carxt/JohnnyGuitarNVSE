@@ -7,11 +7,9 @@
 #if 1
 static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo
 static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x00066E920;	// See GetActorValueName
-BGSDefaultObjectManager** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
 #else
 static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0;
 static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0;
-BGSDefaultObjectManager** g_defaultObjectManager = (BGSDefaultObjectManager**)0x0;
 #endif
 
 TESForm* __fastcall GetTESForm(const TESForm* apForm) {
@@ -26,45 +24,6 @@ TESForm* __fastcall GetTESForm(const TESForm* apForm) {
 
 	return const_cast<TESForm*>(apForm);
 }
-
-#if 0
-TESFullName* TESForm::GetFullName() {
-	if (typeID == FORM_TYPE::TESObjectCELL) // some exterior cells inherit name of parent worldspace
-	{
-		TESObjectCELL* cell = (TESObjectCELL*)this;
-		TESFullName* fullName = &cell->fullName;
-		if ((!fullName->name.pString || !fullName->name.GetLength()) && cell->worldSpace)
-			return &cell->worldSpace->fullName;
-		return fullName;
-	}
-	const TESForm* baseForm = IsReference() ? ((TESObjectREFR*)this)->baseForm : this;
-	return DYNAMIC_CAST(baseForm, TESForm, TESFullName);
-}
-
-const char* TESForm::GetTheName() {
-	TESFullName* fullName = GetFullName();
-	return fullName ? fullName->name.c_str() : "";
-}
-
-TESForm* TESForm::CloneForm(bool persist) const {
-	TESForm* result = CreateFormInstance(typeID);
-	if (result) {
-		result->CopyFrom(this);
-		// it looks like some fields are not copied, case in point: TESObjectCONT does not copy BoundObject information.
-		TESBoundObject* boundObject = DYNAMIC_CAST(result, TESForm, TESBoundObject);
-		if (boundObject) {
-			TESBoundObject* boundSource = DYNAMIC_CAST(this, TESForm, TESBoundObject);
-			if (boundSource) {
-				for (uint8_t i = 0; i < 6; i++)
-					boundObject->bounds[i] = boundSource->bounds[i];
-			}
-		}
-		DoAddForm(result, persist);
-	}
-
-	return result;
-}
-#endif
 
 // static
 uint32_t TESBipedModelForm::MaskForSlot(uint32_t slot) {
@@ -147,18 +106,6 @@ const char* TESBipedModelForm::GetPath(uint32_t whichPath, bool bFemalePath) {
 		return pathStr->pString;
 	else
 		return "";
-}
-
-char TESActorBaseData::GetFactionRank(TESFaction* faction) {
-	auto pIter = factionList.GetHead();
-	while (pIter && !pIter->IsEmpty()) {
-		FactionRank* pRank = pIter->GetItem();
-		if (pRank && pRank->pFaction == faction)
-			return pRank->cRank;
-
-		pIter = pIter->GetNext();
-	}
-	return -1;
 }
 
 static const uint8_t kHandGripTable[] =
@@ -403,10 +350,6 @@ const char* EffectItemList::GetNthEIName(uint32_t whichEffect) const {
 		return "<no name>";
 }
 #endif
-
-BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton() {
-	return *g_defaultObjectManager;
-}
 
 bool AlchemyItem::IsPoison() {
 	EffectItem* effItem;

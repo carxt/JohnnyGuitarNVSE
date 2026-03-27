@@ -192,7 +192,7 @@ static bool ExtractFloat(double& out, uint8_t*& scriptData, Script* scriptObj, S
 		{
 			TESGlobal* global = ResolveGlobalVar(eventList, scriptObj, scriptData);
 			if (global) {
-				out = global->data;
+				out = global->GetValue();
 				ret = true;
 			}
 			break;
@@ -779,7 +779,7 @@ bool ExtractSetStatementVar(Script* script, ScriptLocals* eventList, void* scrip
 
 			TESGlobal* globalVar = DYNAMIC_CAST(refVar->form, TESForm, TESGlobal);
 			if (globalVar) {
-				*outVarData = globalVar->data;
+				*outVarData = globalVar->GetValue();
 				if (outModIndex)
 					*outModIndex = (globalVar->GetFormID() >> 24);
 				bExtracted = true;

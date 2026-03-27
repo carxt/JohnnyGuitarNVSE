@@ -1289,9 +1289,9 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 	float fadeOutTime = -1;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source, &fadeOutTime) && soundForm && IS_TYPE(soundForm, TESSound) && source) {
-		if (soundForm->soundFile.path.GetLength()) {
+		if (soundForm->soundFile.GetSoundFileLength()) {
 			CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
-			const char* soundPath = soundForm->soundFile.path.pString;
+			const char* soundPath = soundForm->soundFile.GetSoundFile();
 			BSGameSound* pSound;
 			uint32_t uiKey;
 			auto kObjIter = BSAudioManager::Get()->soundPlayingObjects.GetFirstPos();

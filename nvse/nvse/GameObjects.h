@@ -134,7 +134,7 @@ public:
 
 	TESSound* loopSound;				// 01C
 
-	TESForm* baseForm;				// 020
+	TESBoundObject* baseForm;				// 020
 
 	NiPoint3		rot;		// 024 - either public or accessed via simple inline accessor common to all child classes
 	NiPoint3		pos;		// 030 - seems to be private

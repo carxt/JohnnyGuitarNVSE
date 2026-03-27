@@ -7,12 +7,11 @@ namespace RSMBarberHook {
 	uintptr_t RSMDestructorOriginal = (uintptr_t)0x07AC530;
 
 	bool __fastcall hk_TESHair_IsPlayable(TESHair* ptr_hair) {
-		return (ptr_hair->IsPlayable()) && (haircutSetList.Allow(ptr_hair->GetFormID()));
-
+		return ptr_hair->GetPlayable() && haircutSetList.Allow(ptr_hair->GetFormID());
 	}
 
 	bool __fastcall hk_BGSHeadPart_IsPlayable(BGSHeadPart* ptr_hdpt) {
-		return (ptr_hdpt->headFlags & 0x1) && (beardSetList.Allow(ptr_hdpt->GetFormID()));
+		return ptr_hdpt->GetPlayable() && beardSetList.Allow(ptr_hdpt->GetFormID());
 	}
 	DWORD __fastcall hk_RSMDestroy(void* thisObj, void* EDX, BOOL heapFree) {
 		auto ret = ThisCall<DWORD>(RSMDestructorOriginal, thisObj, heapFree);
