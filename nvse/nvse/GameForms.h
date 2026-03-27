@@ -6,6 +6,7 @@
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
 
+#include "Bethesda/ActorValueInfo.hpp"
 #include "Bethesda/BGSAcousticSpace.hpp"
 #include "Bethesda/BGSAddonNode.hpp"
 #include "Bethesda/BGSAmmoForm.hpp"
@@ -33,9 +34,11 @@
 #include "Bethesda/TESAIForm.hpp"
 #include "Bethesda/TESAmmo.hpp"
 #include "Bethesda/TESAttackDamageForm.hpp"
+#include "Bethesda/TESBipedModelForm.hpp"
 #include "Bethesda/TESBoundAnimObject.hpp"
 #include "Bethesda/TESCombatStyle.hpp"
 #include "Bethesda/TESContainer.hpp"
+#include "Bethesda/TESDescription.hpp"
 #include "Bethesda/TESEnchantableForm.hpp"
 #include "Bethesda/TESEyes.hpp"
 #include "Bethesda/TESFullName.hpp"
@@ -44,20 +47,31 @@
 #include "Bethesda/TESHair.hpp"
 #include "Bethesda/TESHealthForm.hpp"
 #include "Bethesda/TESImageSpaceModifiableForm.hpp"
+#include "Bethesda/TESLeveledList.hpp"
 #include "Bethesda/TESModelAnim.hpp"
+#include "Bethesda/TESModelList.hpp"
 #include "Bethesda/TESModelRDT.hpp"
 #include "Bethesda/TESModelTextureSwap.hpp"
 #include "Bethesda/TESObjectANIO.hpp"
+#include "Bethesda/TESObjectARMO.hpp"
+#include "Bethesda/TESObjectBOOK.hpp"
+#include "Bethesda/TESObjectCLOT.hpp"
+#include "Bethesda/TESObjectMISC.hpp"
 #include "Bethesda/TESRaceForm.hpp"
 #include "Bethesda/TESScriptableForm.hpp"
+#include "Bethesda/TESSkill.hpp"
 #include "Bethesda/TESTexture1024.hpp"
 #include "Bethesda/TESValueForm.hpp"
 #include "Bethesda/TESWeightForm.hpp"
+
 #include "Obsidian/BGSDehydrationStage.hpp"
 #include "Obsidian/BGSHungerStage.hpp"
 #include "Obsidian/BGSSleepDeprevationStage.hpp"
 #include "Obsidian/TESAmmoEffect.hpp"
 #include "Obsidian/TESReputation.hpp"
+#include "Obsidian/TESCaravanMoney.hpp"
+#include "Obsidian/TESCaravanDeck.hpp"
+#include "Obsidian/TESCaravanCard.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -526,122 +540,6 @@ public:
 
 static_assert(sizeof(MagicItemForm) == 0x34);
 
-// 0DC
-class TESBipedModelForm : public BaseFormComponent {
-public:
-	TESBipedModelForm();
-	~TESBipedModelForm();
-
-	// bit indices starting from lsb
-	enum EPartBit {
-		ePart_Head = 0,
-		ePart_Hair,
-		ePart_UpperBody,
-		ePart_LeftHand,
-		ePart_RightHand,
-		ePart_Weapon,
-		ePart_PipBoy,
-		ePart_Backpack,
-		ePart_Necklace,
-		ePart_Headband,
-		ePart_Hat,
-		ePart_Eyeglasses,
-		ePart_Nosering,
-		ePart_Earrings,
-		ePart_Mask,
-		ePart_Choker,
-		ePart_MouthObject,
-		ePart_BodyAddon1,
-		ePart_BodyAddon2,
-		ePart_BodyAddon3
-	};
-
-	enum EPartBitMask {
-		ePartBitMask_Full = 0x07FFFF,
-	};
-
-	enum ESlot {
-		eSlot_Head = 0x1 << ePart_Head,
-		eSlot_Hair = 0x1 << ePart_Hair,
-		eSlot_UpperBody = 0x1 << ePart_UpperBody,
-		eSlot_LeftHand = 0x1 << ePart_LeftHand,
-		eSlot_RightHand = 0x1 << ePart_RightHand,
-		eSlot_Weapon = 0x1 << ePart_Weapon,
-		eSlot_PipBoy = 0x1 << ePart_PipBoy,
-		eSlot_Backpack = 0x1 << ePart_Backpack,
-		eSlot_Necklace = 0x1 << ePart_Necklace,
-		eSlot_Headband = 0x1 << ePart_Headband,
-		eSlot_Hat = 0x1 << ePart_Hat,
-		eSlot_Eyeglasses = 0x1 << ePart_Eyeglasses,
-		eSlot_Nosering = 0x1 << ePart_Nosering,
-		eSlot_Earrings = 0x1 << ePart_Earrings,
-		eSlot_Mask = 0x1 << ePart_Mask,
-		eSlot_Choker = 0x1 << ePart_Choker,
-		eSlot_MouthObject = 0x1 << ePart_MouthObject,
-		eSlot_BodyAddon1 = 0x1 << ePart_BodyAddon1,
-		eSlot_BodyAddon2 = 0x1 << ePart_BodyAddon2,
-		eSlot_BodyAddon3 = 0x1 << ePart_BodyAddon3
-	};
-
-	enum EBipedFlags {
-		eBipedFlag_HasBackPack = 0x4,
-		eBipedFlag_MediumArmor = 0x8,
-		eBipedFlag_PowerArmor = 0x20,
-		eBipedFlag_NonPlayable = 0x40,
-		eBipedFlag_HeavyArmor = 0x80,
-	};
-
-	enum EBipedPath {
-		ePath_Biped,
-		ePath_Ground,
-		ePath_Icon,
-		ePath_Max
-	};
-
-	// missing part mask and flags
-	uint32_t					partMask;			// 004
-	uint32_t					bipedFlags;			// 008
-	TESModelTextureSwap		bipedModel[2];		// 00C
-	TESModelTextureSwap		groundModel[2];		// 04C
-	TESIcon					icon[2];			// 08C
-	BGSMessageIcon			messageIcon[2];		// 0A4
-	TESModelRDT				modelRDT;			// 0C4
-	// 0DC
-
-	static uint32_t MaskForSlot(uint32_t mask);
-
-	bool IsPowerArmor() const { return (bipedFlags & eBipedFlag_PowerArmor) == eBipedFlag_PowerArmor; }
-	bool IsNonPlayable() const { return (bipedFlags & eBipedFlag_NonPlayable) == eBipedFlag_NonPlayable; }
-	bool IsPlayable() const { return !IsNonPlayable(); }
-	void SetPlayable(bool doset) { if (doset) bipedFlags &= ~eBipedFlag_NonPlayable; else bipedFlags |= eBipedFlag_NonPlayable; }
-	void SetPowerArmor(bool bPA) {
-		if (bPA) {
-			bipedFlags |= eBipedFlag_PowerArmor;
-		}
-		else {
-			bipedFlags &= ~eBipedFlag_PowerArmor;
-		}
-	}
-	void SetNonPlayable(bool bNP) {
-		if (bNP) {
-			bipedFlags |= eBipedFlag_NonPlayable;
-		}
-		else {
-			bipedFlags &= ~eBipedFlag_NonPlayable;
-		}
-	}
-	void  SetPath(const char* newPath, uint32_t whichPath, bool bfemalePath);
-	const char* GetPath(uint32_t whichPath, bool bFemalePath);
-
-	uint32_t GetSlotsMask() const;
-	void SetSlotsMask(uint32_t mask);	// Limited by ePartBitMask_Full
-
-	uint32_t GetBipedMask() const;
-	void SetBipedMask(uint32_t mask);
-};
-
-static_assert(sizeof(TESBipedModelForm) == 0x0DC);
-
 // 0C
 struct LvlListExtra {
 	union						// 00
@@ -803,32 +701,6 @@ public:
 };
 
 static_assert(sizeof(TESActorBase) == 0x10C);
-
-// 14
-class TESModelList : public BaseFormComponent {
-public:
-	TESModelList();
-	~TESModelList();
-
-	tList<char>		modelList;	// 04
-	uint32_t			count;		// 0C
-	uint32_t			unk10;		// 10
-
-	bool ModelListAction(char* path, char action);
-	void CopyFrom(TESModelList* source);
-};
-
-// 008
-class TESDescription : public BaseFormComponent {
-public:
-	TESDescription();
-	~TESDescription();
-
-	virtual const char* Get(TESForm* overrideForm, uint32_t chunkID);
-
-	uint32_t	formDiskOffset;	// 4 - how does this work for descriptions in mods?
-	// maybe extracts the mod ID then uses that to find the src file?
-};
 
 // 10
 class TESReactionForm : public BaseFormComponent {
@@ -1347,26 +1219,6 @@ public:
 };
 static_assert(sizeof(TESSound) == 0x68);
 
-// 60
-class TESSkill : public TESForm {
-public:
-	TESSkill();
-	~TESSkill();
-
-	TESDescription	description;	// 18
-	TESTexture		texture;		// 20
-
-	uint32_t			unk2C;			// 2C
-	uint32_t			unk30;			// 30
-	uint32_t			unk34;			// 34
-	float			unk38;			// 38
-	float			unk3C;			// 3C
-	TESDescription	desc2[3];		// 40
-	uint32_t			unk58[(0x60 - 0x58) >> 2];	// 58
-};
-
-static_assert(sizeof(TESSkill) == 0x60);
-
 // B0
 class EffectSetting : public TESForm {
 public:
@@ -1613,97 +1465,6 @@ public:
 	BGSNote*			password;		// 0A0	PNAM
 	TermData			data;			// 0A4	DNAM
 };
-// 190
-class TESObjectARMO : public TESBoundObject {
-public:
-	TESObjectARMO();
-	~TESObjectARMO();
-
-	struct MovementSound {
-		TESSound* sound;
-		uint8_t			unk04[3];
-		uint8_t			chance;
-		uint32_t			type;
-		//				0x11	Walk
-		//				0x12	Sneak
-		//				0x13	Run
-		//				0x14	Sneak (Armor)
-		//				0x15	Run (Armor)
-		//				0x16	Walk (Armor)
-	};
-
-	TESFullName					fullName;				// 030
-	TESScriptableForm			scriptable;				// 03C
-	TESEnchantableForm			enchantable;			// 048
-	TESValueForm				value;					// 058
-	TESWeightForm				weight;					// 060
-	TESHealthForm				health;					// 068
-	TESBipedModelForm			bipedModel;				// 070
-	BGSDestructibleObjectForm	destuctible;			// 14C
-	BGSEquipType				equipType;				// 154
-	BGSRepairItemList			repairItemList;			// 15C
-	BGSBipedModelList			bipedModelList;			// 164
-	BGSPickupPutdownSounds		pickupPutdownSounds;	// 16C
-
-	uint16_t						armorRating;			// 178
-	uint16_t						modifiesVoice;			// 17A
-	float						damageThreshold;		// 17C
-	uint32_t						armorFlags;				// 180
-	uint32_t						unk184;					// 184
-	union												// 188
-	{
-		TESObjectARMO* audioTemplate;
-		tList<MovementSound>* movementSounds;
-	};
-	uint8_t						overrideSounds;			// 18C
-	uint8_t						pad18D[3];				// 18D
-	void SetFacegenFlag(uint32_t pFlag, uint32_t bFemale, bool bEnable) {
-		bipedModel.bipedModel[bFemale].ucFaceGenFlags.Set(pFlag, bEnable);
-	}
-};
-static_assert(sizeof(TESObjectARMO) == 0x190);
-
-// C4
-class TESObjectBOOK : public TESBoundObject {
-public:
-	TESObjectBOOK();
-	~TESObjectBOOK();
-
-	TESFullName					fullName;		// 30
-	TESModelTextureSwap			model;			// 3C
-	TESIcon						icon;			// 5C
-	TESScriptableForm			scriptable;		// 68
-	TESEnchantableForm			enchantable;	// 74
-	TESValueForm				value;			// 84
-	TESWeightForm				weight;			// 8C
-	TESDescription				description;	// 94
-	BGSDestructibleObjectForm	destuctible;	// 9C
-	BGSMessageIcon				messageIcon;	// A4
-	BGSPickupPutdownSounds		sounds;			// B4
-	uint8_t						flags;			// C0
-	uint8_t						skillCode;		// C1
-	uint8_t						byteC2;			// C2
-	uint8_t						byteC3;			// C3
-};
-static_assert(sizeof(TESObjectBOOK) == 0xC4);
-
-// 154
-class TESObjectCLOT : public TESBoundObject {
-public:
-	TESObjectCLOT();
-	~TESObjectCLOT();
-
-	// bases
-	TESFullName					fullName;		// 030
-	TESScriptableForm			scriptable;		// 03C
-	TESEnchantableForm			enchantable;	// 048
-	TESValueForm				value;			// 058
-	TESWeightForm				weight;			// 060
-	TESBipedModelForm			bipedModel;		// 068
-	BGSDestructibleObjectForm	destuctible;	// 144
-	BGSEquipType				equipType;		// 14C
-	// unk data
-};
 
 // 9C
 class TESObjectCONT : public TESBoundAnimObject {
@@ -1803,26 +1564,6 @@ public:
 };
 static_assert(sizeof(TESObjectLIGH) == 0x0C8);
 
-// AC
-class TESObjectMISC : public TESBoundObject {
-public:
-	TESObjectMISC();
-	~TESObjectMISC();
-
-	TESFullName					fullName;		// 30
-	TESModelTextureSwap			modelSwap;		// 3C
-	TESIcon						icon;			// 5C
-	TESScriptableForm			scriptable;		// 68
-	TESValueForm				value;			// 74
-	TESWeightForm				weight;			// 7C
-	BGSDestructibleObjectForm	destructible;	// 84
-	BGSMessageIcon				messageIcon;	// 8C
-	BGSPickupPutdownSounds		pickupPutdown;	// 9C
-
-	uint32_t						unkA8;			// A8
-};
-static_assert(sizeof(TESObjectMISC) == 0xAC);
-
 // 9C
 class TESCasinoChips : public TESBoundObject {
 public:
@@ -1840,23 +1581,6 @@ public:
 	uint32_t						unk94[2];		// 94
 };
 static_assert(sizeof(TESCasinoChips) == 0x9C);
-
-// CC
-class TESCaravanMoney : public TESBoundObject {
-public:
-	TESCaravanMoney();
-	~TESCaravanMoney();
-
-	TESFullName					fullName;		// 30
-	TESModelTextureSwap			modelSwap;		// 3C
-	TESIcon						icon;			// 5C
-	BGSMessageIcon				messageIcon;	// 68
-	TESValueForm				value;			// 78
-	BGSPickupPutdownSounds		pickupPutdown;	// 80
-
-	uint32_t						unk8C[16];		// 8C
-};
-static_assert(sizeof(TESCaravanMoney) == 0xCC);
 
 // 58
 class TESObjectSTAT : public TESBoundObject {
@@ -2218,49 +1942,6 @@ enum AmmoEffectID {
 	kAmmoEffect_FatigueMod = 5,
 };
 
-enum CardSuits {
-	kHearts = 1,
-	kSpades,
-	kDiamonds,
-	kClubs,
-	kJoker
-};
-enum CardValues {
-	kAce = 1,
-	k2,
-	k3,
-	k4,
-	k5,
-	k6,
-	k7,
-	k8,
-	k9,
-	k10,
-	kJack = 12,
-	kQueen,
-	kKing,
-	kJokerCard
-};
-class TESCaravanCard : public TESBoundObject {
-public:
-	TESCaravanCard();
-	~TESCaravanCard();
-
-	TESFullName name;
-	TESModelTextureSwap model;
-	TESIcon icon;
-	BGSMessageIcon messageIcon;
-	TESValueForm value;
-	TESScriptableForm script;
-	BGSPickupPutdownSounds pickupSound;
-	void* pad98;
-	TESTexture textureFace;
-	TESTexture textureBack;
-	CardValues cardValue;
-	CardSuits cardSuit;
-};
-static_assert(sizeof(TESCaravanCard) == 0xBC);
-
 class BSFaceGenNiNode;
 
 // 2B0
@@ -2477,46 +2158,6 @@ public:
 	BGSListForm* weaponList;		// 158
 	uint8_t						byt015C;			// 15C
 	uint8_t						pad015D[3];			// 15D
-};
-
-// 34
-class TESLeveledList : public BaseFormComponent {
-public:
-	struct LoadBaseData	// as used by LoadForm
-	{
-		int16_t			level;		// 00
-		uint16_t			fill002;	// 02
-		TESObjectREFR* refr;		// 04
-		int16_t			count;		// 08
-		uint16_t			fill00A;	// 0A
-	};	// 0C
-
-	struct ListData {
-		TESForm* form;		// 00
-		int16_t			count;		// 04
-		int16_t			level;		// 06
-		LvlListExtra* extra;		// 08
-	}; // 0C
-
-	enum {
-		kFlags_CalcAllLevels = 1 << 0,
-		kFlags_CalcEachInCount = 1 << 1,
-		kFlags_UseAll = 1 << 2,
-	};
-
-	tList<ListData>		list;			// 04
-	uint8_t				chanceNone;		// 0C
-	uint8_t				flags;			// 0D
-	uint16_t				pad00E;			// 0E
-	TESGlobal* global;		// 10 use global value for chance none?
-	ExtraDataList		extraDatas;		// 14 ??? BaseExtraList::DebugDump() shows no data
-
-	void AddItem(TESForm* form, uint16_t level, uint16_t count, float health);
-	uint32_t RemoveItem(TESForm* form);
-	void Dump();
-	bool RemoveNthItem(uint32_t itemIndex);
-	int32_t GetItemIndexByForm(TESForm* form);
-	int32_t GetItemIndexByLevel(uint32_t level);
 };
 
 // TESLevCreature (68)
@@ -4511,41 +4152,6 @@ public:
 };
 static_assert(sizeof(MediaLocationController) == 0xB8);
 
-// C4
-class ActorValueInfo : public TESForm {
-public:
-	ActorValueInfo();
-	~ActorValueInfo();
-
-	TESFullName		fullName;
-	TESDescription	description;
-	TESIcon			icon;
-
-	char*			infoName;		// 38
-	BSString		avName;			// 3C
-	uint32_t			avFlags;		// 44
-		//		bit 0x01	used in list of modified ActorValue for Player and others. Either can damage or "special damage", see 0x00937280
-		//		bit 0x03
-		//		bit 0x04
-		//		bit 0x07
-		//		bit 0x08
-		//		bit 0x0B
-		//		bit 0x0C
-		//		bit 0x0E	canModify
-	uint32_t			unk48;			// 48
-	uint32_t			callback4C;		// 4C
-	uint32_t			unk50;			// 50
-	void(__cdecl*	onChangeCallback)(ActorValueOwner* avOwner, int avCode, float previousVal, float newVal, ActorValueOwner* avOwner2);
-	uint32_t			unk4C[27];		// 4C
-};
-
-static_assert(sizeof(ActorValueInfo) == 0xC4);
-
-extern const ActorValueInfo** ActorValueInfoPointerArray;
-
-typedef ActorValueInfo* (*_GetActorValueInfo)(uint32_t actorValueCode);
-extern const _GetActorValueInfo GetActorValueInfo;
-
 // 20
 class BGSRadiationStage : public TESForm {
 public:
@@ -4827,15 +4433,5 @@ public:
 	TESSound* INAM;
 };
 static_assert(sizeof(MediaSet) == 0xC4);
-
-class TESCaravanDeck : public TESForm {
-public:
-	TESCaravanDeck();
-	~TESCaravanDeck();
-	TESFullName name;
-	tList<TESCaravanCard>* cards;
-	uint32_t count;
-};
-static_assert(sizeof(TESCaravanDeck) == 0x2C);
 
 extern TESForm* __fastcall GetTESForm(const TESForm* apForm);

@@ -49,6 +49,18 @@ public:
 	TYPE Get(TYPE data) const { return GetField() & data; }
 	TYPE Get(TYPE mask, TYPE pos) const { return (GetField() & mask) >> pos; }
 
+	void SetBit(uint32_t bit) {
+		GetField() |= TYPE(1) << bit;
+	}
+
+	void ClearBit(uint32_t bit) {
+		GetField() &= ~(TYPE(1) << bit);
+	}
+
+	void SetBit(uint32_t bit, bool state) {
+		state ? SetBit(bit) : ClearBit(bit);
+	}
+
 	bool GetBit(uint32_t bit) const {
 		if constexpr (sizeof(TYPE) == 4)
 			return _bittest(reinterpret_cast<const long*>(this), bit);

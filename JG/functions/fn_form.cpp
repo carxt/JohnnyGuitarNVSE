@@ -640,13 +640,13 @@ bool Cmd_SetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
 TESModelTextureSwap* GetArmorModel(TESObjectARMO* armor, uint32_t id) {
 	switch (id) {
 	case 1:
-		return &armor->bipedModel.bipedModel[0]; // male biped
+		return &armor->kBipedModels[0]; // male biped
 	case 2:
-		return &armor->bipedModel.bipedModel[1]; // female biped
+		return &armor->kBipedModels[1]; // female biped
 	case 3:
-		return &armor->bipedModel.groundModel[0]; // male world
+		return &armor->kWorldModels[0]; // male world
 	case 4:
-		return &armor->bipedModel.groundModel[1]; //female world
+		return &armor->kWorldModels[1]; //female world
 	default:
 		return nullptr;
 	}
@@ -1119,7 +1119,7 @@ bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &isFemale) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			path = bipedModel->messageIcon[isFemale].GetMessageIconTextureName();
+			path = bipedModel->kMessageIcons[isFemale].GetMessageIconTextureName();
 		}
 		else {
 			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
@@ -1140,7 +1140,7 @@ bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &form, &isFemale) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			bipedModel->messageIcon[isFemale].SetMessageIconTextureName(path);
+			bipedModel->kMessageIcons[isFemale].SetMessageIconTextureName(path);
 			*result = 1;
 		}
 		else {
@@ -1490,7 +1490,7 @@ bool Cmd_GetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &flagID, &isFemale) && armor && IS_TYPE(armor, TESObjectARMO)) {
 		if (isFemale <= 1 && flagID <= 3) {
-			*result = armor->bipedModel.bipedModel[isFemale].ucFaceGenFlags.GetBit(flagID) ? 1 : 0;
+			*result = armor->kBipedModels[isFemale].ucFlags.GetBit(flagID);
 			if (IsConsoleMode()) {
 				Console_Print("GetFacegenModelFlag %i %i >> %.f", flagID, isFemale, *result);
 			}
@@ -1506,7 +1506,7 @@ bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	bool bEnable;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &flagID, &isFemale, &bEnable) && armor && IS_TYPE(armor, TESObjectARMO) && flagID <= 3) {
-		armor->SetFacegenFlag(1 << flagID, isFemale, bEnable);
+		armor->kBipedModels[isFemale].ucFlags.SetBit(flagID, bEnable);
 		*result = 1;
 	}
 	return true;

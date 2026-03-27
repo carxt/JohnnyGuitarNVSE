@@ -4,7 +4,7 @@
 #include "TESTextureList.hpp"
 #include "BSStringT.hpp"
 
-class TESFile;
+class TESForm;
 class TESModelTextureSwap;
 
 class TESModel : public BaseFormComponent {
@@ -15,24 +15,33 @@ public:
 	virtual void					SetModel(const char* apPath);
 	virtual TESModelTextureSwap*	GetAsModelMaterialSwap() const;
 
-	struct ALIGN1 _FacegenFlags {
+	struct ALIGN1 _Flags {
 		enum Flags : uint8_t {
-			HEAD			= 1u << 0,
-			TORSO			= 1u << 1,
-			RIGHT_HAND		= 1u << 2,
-			LEFT_HAND		= 1u << 3,
+			HAS_FACEGEN			= 1u << 0,
+			SKIN_TORSO			= 1u << 1,
+			SKIN_RIGHT_HAND		= 1u << 2,
+			SKIN_LEFT_HAND		= 1u << 3,
+
+			SKIN_MASK			= SKIN_TORSO | SKIN_RIGHT_HAND | SKIN_LEFT_HAND
 		};
 	
-		bool bHead		: 1;
-		bool bTorso		: 1;
-		bool bRightHand : 1;
-		bool bLeftHand	: 1;
+		bool bHasFacegen	: 1;
+		bool bSkinTorso		: 1;
+		bool bSkinRightHand	: 1;
+		bool bSkinLeftHand	: 1;
 	};
-	using FacegenFlags = _FacegenFlags::Flags;
+	using Flags = _Flags::Flags;
 
-	BSString				strModel;
-	TESTextureList			kTextures;
-	Bitfield<_FacegenFlags>	ucFaceGenFlags;
+	BSString			strModel;
+	TESTextureList		kTextures;
+	Bitfield<_Flags>	ucFlags;
+
+	bool GetHasFacegenData() const;
+	void SetHasFacegenData(bool abVal);
+
+	uint32_t GetSkinFlags() const;
+
+	static const char* GetModel(const TESForm* apForm);
 };
 
 ASSERT_SIZE(TESModel, 0x18);

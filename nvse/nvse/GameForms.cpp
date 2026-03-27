@@ -4,14 +4,6 @@
 #include "GameObjects.h"
 #include "GameData.h"
 
-#if 1
-static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo
-static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x00066E920;	// See GetActorValueName
-#else
-static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0;
-static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0;
-#endif
-
 TESForm* __fastcall GetTESForm(const TESForm* apForm) {
 	if (!apForm) 
 		return nullptr;
@@ -23,89 +15,6 @@ TESForm* __fastcall GetTESForm(const TESForm* apForm) {
 	}
 
 	return const_cast<TESForm*>(apForm);
-}
-
-// static
-uint32_t TESBipedModelForm::MaskForSlot(uint32_t slot) {
-	switch (slot) {
-		case ePart_Head:		return eSlot_Head;
-		case ePart_Hair:		return eSlot_Hair;
-		case ePart_UpperBody:	return eSlot_UpperBody;
-		case ePart_LeftHand:	return eSlot_LeftHand;
-		case ePart_RightHand:	return eSlot_RightHand;
-		case ePart_Weapon:		return eSlot_Weapon;
-		case ePart_PipBoy:		return eSlot_PipBoy;
-		case ePart_Backpack:	return eSlot_Backpack;
-		case ePart_Necklace:	return eSlot_Necklace;
-		case ePart_Headband:	return eSlot_Headband;
-		case ePart_Hat:			return eSlot_Hat;
-		case ePart_Eyeglasses:	return eSlot_Eyeglasses;
-		case ePart_Nosering:	return eSlot_Nosering;
-		case ePart_Earrings:	return eSlot_Earrings;
-		case ePart_Mask:		return eSlot_Mask;
-		case ePart_Choker:		return eSlot_Choker;
-		case ePart_MouthObject:	return eSlot_MouthObject;
-		case ePart_BodyAddon1:	return eSlot_BodyAddon1;
-		case ePart_BodyAddon2:	return eSlot_BodyAddon2;
-		case ePart_BodyAddon3:	return eSlot_BodyAddon3;
-		default:				return -1;
-	}
-}
-
-uint32_t TESBipedModelForm::GetSlotsMask() const {
-	return partMask;
-}
-
-void TESBipedModelForm::SetSlotsMask(uint32_t mask) {
-	partMask = (mask & ePartBitMask_Full);
-}
-
-uint32_t TESBipedModelForm::GetBipedMask() const {
-	return bipedFlags;
-}
-
-void TESBipedModelForm::SetBipedMask(uint32_t mask) {
-	bipedFlags = mask & 0xFF;
-}
-
-void  TESBipedModelForm::SetPath(const char* newPath, uint32_t whichPath, bool bFemalePath) {
-	BSString* toSet = NULL;
-
-	switch (whichPath) {
-		case ePath_Biped:
-			toSet = &bipedModel[bFemalePath ? 1 : 0].strModel;
-			break;
-		case ePath_Ground:
-			toSet = &groundModel[bFemalePath ? 1 : 0].strModel;
-			break;
-		case ePath_Icon:
-			toSet = &icon[bFemalePath ? 1 : 0].strTextureName;
-			break;
-	}
-
-	if (toSet)
-		toSet->Set(newPath);
-}
-
-const char* TESBipedModelForm::GetPath(uint32_t whichPath, bool bFemalePath) {
-	BSString* pathStr = NULL;
-
-	switch (whichPath) {
-		case ePath_Biped:
-			pathStr = &bipedModel[bFemalePath ? 1 : 0].strModel;
-			break;
-		case ePath_Ground:
-			pathStr = &groundModel[bFemalePath ? 1 : 0].strModel;
-			break;
-		case ePath_Icon:
-			pathStr = &icon[bFemalePath ? 1 : 0].strTextureName;
-			break;
-	}
-
-	if (pathStr)
-		return pathStr->pString;
-	else
-		return "";
 }
 
 static const uint8_t kHandGripTable[] =

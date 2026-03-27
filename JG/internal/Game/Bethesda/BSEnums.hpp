@@ -1293,6 +1293,21 @@ using COMBAT_GROUP_STRATEGY = _CombatGroupStrategy::Type;
 
 #pragma endregion
 
+#pragma region Sex
+
+// Sex
+struct _Sex {
+	enum Sex : int32_t {
+		NONE	= -1,
+		MALE	= 0,
+		FEMALE	= 1,
+		COUNT
+	};
+};
+using SEX = _Sex::Sex;
+
+#pragma endregion
+
 struct _DialogueType {
 	enum Type {
 		TOPIC			= 0,
@@ -1579,3 +1594,44 @@ struct _AmmoOperationType {
 	};
 };
 using AMMO_OPERATION_TYPE = _AmmoOperationType::Type;
+
+struct _BipedObject {
+	enum Object : int32_t {
+		NONE		= -1,
+		HEAD,
+		HAIR,
+		UPPER_BODY,
+		LEFT_HAND,
+		RIGHT_HAND,
+		WEAPON,
+		PIPBOY,
+		BACKPACK,
+		NECKLACE,
+		HEADBAND,
+		HAT,
+		EYE_GLASSES,
+		NOSE_RING,
+		EARRINGS,
+		MASK,
+		CHOKER,
+		MOUTH_OBJECT,
+		BODY_ADDON_1,
+		BODY_ADDON_2,
+		BODY_ADDON_3,
+		COUNT
+	};
+};
+using BIPED_OBJECT = _BipedObject::Object;
+
+struct _BipedBone {
+	enum Bone : int32_t {
+		NONE	= -1,
+		HEAD	= 0,
+		WEAPON	= 1,
+		PIPBOY	= 2,
+		SPINE	= 3,
+		NECK	= 4,
+		COUNT,
+	};
+};
+using BIPED_BONE = _BipedBone::Bone;
