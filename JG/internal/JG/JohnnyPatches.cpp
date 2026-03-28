@@ -178,17 +178,18 @@ namespace JohnnyPatches {
 	void ResetVanityWheel() {
 		if (!resetVanityCam) return;
 		if (PlayerCharacter::GetSingleton()) {
-			bool bIsInVanityMode = *reinterpret_cast<uint16_t*>(0x11E07B8) || PlayerCharacter::GetSingleton()->byte64D; //64d = autovanity mode.			if (!bIsInVanityMode) {
+			bool bIsInVanityMode = *reinterpret_cast<uint16_t*>(0x11E07B8) || PlayerCharacter::GetSingleton()->byte64D; //64d = autovanity mode.
+			if (!bIsInVanityMode) {
+				float* VanityWheel = (float*)0x11E0B5C;
+				float* MaxChaseCam = (ThisCall<float*>((uintptr_t)0x0403E20, (void*)0x11CD568));
+				static float f_VanityWheelcState = *MaxChaseCam;
 
-			float* VanityWheel = (float*)0x11E0B5C;
-			float* MaxChaseCam = (ThisCall<float*>((uintptr_t)0x0403E20, (void*)0x11CD568));
-			static float f_VanityWheelcState = *MaxChaseCam;
-
-			if (*MaxChaseCam < *VanityWheel) {
-				*VanityWheel = f_VanityWheelcState;
-			}
-			else {
-				f_VanityWheelcState = *VanityWheel;
+				if (*MaxChaseCam < *VanityWheel) {
+					*VanityWheel = f_VanityWheelcState;
+				}
+				else {
+					f_VanityWheelcState = *VanityWheel;
+				}
 			}
 		}
 	}
