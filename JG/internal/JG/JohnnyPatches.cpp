@@ -18,6 +18,7 @@
 #include "DisabledMuzzleFlashLights.hpp"
 #include "DisabledArrowKeys.hpp"
 #include "AddItemMessages.hpp"
+#include "ExtraMarkerIcons.hpp"
 
 namespace JohnnyPatches {
 	bool fixFleeing = false;
@@ -302,6 +303,8 @@ namespace JohnnyPatches {
 
 		// ToggleDisableSaves
 		DisabledSaves::Install();
+
+		ExtraMarkerIcons::Install();
 
 		ExtraReputationIcons::Install();
 
