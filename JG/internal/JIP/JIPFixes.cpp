@@ -1079,8 +1079,10 @@ namespace JIPFixes {
 	}
 
 	namespace OnMenuClickFix {
-		Tile* pClickedTile = nullptr;
+		static inline Tile* const INVALID_TILE = reinterpret_cast<Tile*>(-1);
+		Tile* pClickedTile = INVALID_TILE;
 		uint32_t uiMenuHandleClickHook = 0;
+		char cEmptyBuffer[4] = { 0 };
 
 		void __fastcall MenuHandleClickHookDetour(void* apMenu, void* edx, uint32_t auiTileID, Tile* apTile) {
 			pClickedTile = apTile;
@@ -1090,19 +1092,21 @@ namespace JIPFixes {
 #pragma optimize("y", off)
 		bool __cdecl CallFunctionAlt(Script* apScript, TESObjectREFR* apRef, uint8_t aucArgCount, uint32_t auiMenuID, uint32_t auiTileID, const char* apTileString) {
 			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
-			const char* pTilePath = reinterpret_cast<const char*>(pEBP - 0x94);
-			bool bReturnVal = false;
-			if (pClickedTile) {
-				bReturnVal = g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, pClickedTile->name.c_str());
-			}
-			else {
+			if (pClickedTile == INVALID_TILE) {
+				const char* pTilePath = reinterpret_cast<const char*>(pEBP - 0x94);
 				char cErrorBuffer[512];
 				our_snprintf(cErrorBuffer, sizeof(cErrorBuffer), "Error! \"%s\" has been unloaded while being processed by OnClickMenuHandler. Do NOT do this!", pTilePath);
 				_MESSAGE(cErrorBuffer);
 				Console_Print(cErrorBuffer);
 				*reinterpret_cast<DWORD*>(pEBP + 0xC) = 0;
+				return false;
 			}
-			return bReturnVal;
+			else if (pClickedTile) {
+				return g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, pClickedTile->name.GetString());
+			}
+			else {
+				return g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, cEmptyBuffer);
+			}
 		}
 #pragma optimize("", on)
 
@@ -1111,7 +1115,7 @@ namespace JIPFixes {
 		public:
 			void CleanupTile(Tile* apTile) {
 				if (pClickedTile == apTile)
-					pClickedTile = nullptr;
+					pClickedTile = INVALID_TILE;
 
 				ThisCall(kRemoveTileFromUpdateList.GetOverwrittenAddr(), this, apTile);
 			}
