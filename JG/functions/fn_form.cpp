@@ -2529,7 +2529,7 @@ enum UPDATE3D_FLAGS_EX {
 	UPDATE_POS		= 1u << 6,
 };
 
-void RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
+static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
 	if (auiFlags & UPDATE_MODEL) {
 		apReference->Update3D();
 		ThisCall(0x456520, *reinterpret_cast<DWORD**>(0x1202D98));
@@ -2552,7 +2552,7 @@ void RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
 	}
 }
 
-void __fastcall RequestModelUpdate(TESObjectREFR* apReference, uint32_t auiFlags, bool abQueue) {
+static void __fastcall RequestModelUpdate(TESObjectREFR* apReference, uint32_t auiFlags, bool abQueue) {
 	if (abQueue) {
 		JohnnyExtraData* pExtraData = JohnnyExtraData::GetOrCreate(apReference);
 		pExtraData->IncRefCount();
