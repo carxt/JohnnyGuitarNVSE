@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include "JG/JGSetList.hpp"
 #include <JG/BarterFilter.hpp>
+#include <JG/JohnnyExtraData.hpp>
 #include <GameData.h>
 #include <GameRTTI.h>
 #include "decoding.h"
@@ -2553,13 +2554,20 @@ void RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
 
 void __fastcall RequestModelUpdate(TESObjectREFR* apReference, uint32_t auiFlags, bool abQueue) {
 	if (abQueue) {
+		JohnnyExtraData* pExtraData = JohnnyExtraData::GetOrCreate(apReference);
+		pExtraData->IncRefCount();
+
 		QueuedTask kTask;
-		kTask.kItems[0].p = apReference;
+		kTask.kItems[0].p = pExtraData;
 		kTask.kItems[1].ui = auiFlags;
 		kTask.pFunction = QUEUED_TASK{
-			TESObjectREFR * pRef = reinterpret_cast<TESObjectREFR*>(arTask.kItems[0].p);
-			uint32_t uiFlags = arTask.kItems[1].ui;
-			RefreshReferenceModel(pRef, uiFlags);
+			JohnnyExtraData* pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
+			TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pData->pOwner);
+			if (pRef) {
+				uint32_t uiFlags = arTask.kItems[1].ui;
+				RefreshReferenceModel(pRef, uiFlags);
+			}
+			pData->DecRefCount();
 		};
 		TaskQueue::QueueTask(kTask);
 	}
