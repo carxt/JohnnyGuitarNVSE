@@ -188,7 +188,7 @@ namespace EDIDRestoration {
 				return;
 			}
 			// Ignore 0x18E because Obsidian had a skill issue
-			else if (pExistingForm->GetFormID() != 0x18E) [[likely]] {
+			else if (pExistingForm->GetFormID() != 0x18E && strcmp(apEDID, "Wilderness")) [[likely]] {
 				const TESFile* pFileA = apForm->GetFile(0);
 				const TESFile* pFileB = pExistingForm->GetFile(0);
 				char cText[512];
