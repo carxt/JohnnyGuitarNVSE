@@ -508,9 +508,9 @@ static TESForm* lastForm = nullptr;
 
 bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 	float x, y, z, w;
-	bool rotate = false;
-	bool update = false;
-	bool world = false;
+	BOOL rotate = false;
+	BOOL update = false;
+	BOOL world = false;
 	bool local = false;
 	char blockName[128] = {};
 

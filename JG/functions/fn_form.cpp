@@ -1529,7 +1529,7 @@ bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	TESObjectARMO* armor = nullptr;
 	uint32_t isFemale;
 	uint32_t flagID;
-	bool bEnable;
+	BOOL bEnable;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &flagID, &isFemale, &bEnable) && armor && IS_TYPE(armor, TESObjectARMO) && flagID <= 3) {
 		armor->SetFacegenFlag(1 << flagID, isFemale, bEnable);
