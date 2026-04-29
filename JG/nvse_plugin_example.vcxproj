@@ -309,6 +309,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\ExtraEncounterZone.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraFactionChanges.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraHotkey.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ExtraItemDropper.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraLeveledCreature.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraMapMarker.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraOwnership.hpp" />
@@ -318,6 +319,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\ExtraRadius.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraScript.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraSeenData.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ExtraWeaponModFlags.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FactionRank.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FileFinder.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FormID.hpp" />

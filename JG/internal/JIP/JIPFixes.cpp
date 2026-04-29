@@ -1,6 +1,8 @@
 #include "JIPFixes.hpp"
 #include "Bethesda/BSStringT.hpp"
 #include "Bethesda/AutoMemContext.hpp"
+#include "Bethesda/ExtraItemDropper.hpp"
+#include "Bethesda/ExtraWeaponModFlags.hpp"
 #include "events/EventFramework.h"
 #include "GameObjects.h"
 #include "GameProcess.h"
@@ -1408,6 +1410,34 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace ModFlagsFix {
+		uint8_t __fastcall GetModFlags(ItemChange* apItem) {
+			if (apItem && apItem->pObject && apItem->pObject->GetFormType() == FORM_TYPE::TESObjectWEAP && apItem->pExtraLists) {
+				auto pIter = apItem->pExtraLists;
+				while (pIter && !pIter->IsEmpty()) {
+					ExtraDataList* pList = pIter->GetItem();
+					if (pList) {
+						ExtraItemDropper* pDropper = pList->GetExtraData<ExtraItemDropper>();
+						ExtraWeaponModFlags* pModFlags = nullptr;
+						if (pDropper && pDropper->pDropper)
+							pModFlags = pDropper->pDropper->extraDataList.GetExtraData<ExtraWeaponModFlags>();
+						else
+							pModFlags = pList->GetExtraData<ExtraWeaponModFlags>();
+
+						if (pModFlags)
+							return pModFlags->ucWeaponModsActive;
+					}
+					pIter = pIter->GetNext();
+				}
+			}
+			return 0;
+		}
+
+		void InitHooks() {
+			WriteRelJump(GetJIPAddress(0x1000DD40), GetModFlags);
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -1524,6 +1554,7 @@ namespace JIPFixes {
 			GetSelectedItemRefFix::InitHooks();
 			Update3DTweak::InitHooks();
 			AddItemAltNoCond::InitHooks();
+			ModFlagsFix::InitHooks();
 		}
 	}
 
