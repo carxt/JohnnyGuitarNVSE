@@ -12,6 +12,8 @@
 #include <JG/CameraOverride.hpp>
 #include <JG/JohnnyRadios.hpp>
 #include <JG/DisabledLevelUp.hpp>
+#include "Gamebryo/NiParticleSystem.hpp"
+#include "Gamebryo/NiPSysEmitter.hpp"
 
 extern uint32_t g_initialTickCount;
 
@@ -619,6 +621,103 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 		else if (IsConsoleMode()) {
 			Console_Print("Root node not found");
 		}
+	}
+	return true;
+}
+
+bool Cmd_SetNiPSysEmitterValue_Execute(COMMAND_ARGS)
+{
+	char blockName[MAX_PATH] = { 0 };
+	uint32_t valueId{};
+	float newValue{};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &blockName, &valueId, &newValue)) {
+		const auto root = thisObj->Get3D();
+		if (!root) {
+			if (IsConsoleMode()) {
+				Console_Print("Root node not found");
+			}
+
+			return true;
+		}
+
+		const NiAVObject* target = root;
+		if (blockName[0]) {
+			target = BSUtilities::GetObjectByName(root, blockName);
+		}
+
+		if (!target) {
+			if (IsConsoleMode()) {
+				Console_Print("Block not found: %s", blockName);
+			}
+
+			return true;
+		}
+
+		const auto pSys = target->NiDynamicCast<NiParticleSystem>();
+		if (!pSys) {
+			if (IsConsoleMode()) {
+				Console_Print("Particle system not found");
+			}
+
+			return true;
+		}
+
+		pSys->m_kModifierList.ForEach([=](const NiPSysModifierPtr& pModifier, int) {
+			if (const auto pEmitter = pModifier->NiDynamicCast<NiPSysEmitter>()) {
+				switch (valueId) {
+				case 1:
+					pEmitter->m_fSpeed = newValue;
+					break;
+				case 2:
+					pEmitter->m_fSpeedVar = newValue;
+					break;
+				case 3:
+					pEmitter->m_fDeclination = newValue;
+					break;
+				case 4:
+					pEmitter->m_fDeclinationVar = newValue;
+					break;
+				case 5:
+					pEmitter->m_fPlanarAngle = newValue;
+					break;
+				case 6:
+					pEmitter->m_fPlanarAngleVar = newValue;
+					break;
+				case 7:
+					pEmitter->m_kInitialColor.r = newValue;
+					break;
+				case 8:
+					pEmitter->m_kInitialColor.g = newValue;
+					break;
+				case 9:
+					pEmitter->m_kInitialColor.b = newValue;
+					break;
+				case 10:
+					pEmitter->m_kInitialColor.a = newValue;
+					break;
+				case 11:
+					pEmitter->m_fInitialRadius = newValue;
+					break;
+				case 12:
+					pEmitter->m_fRadiusVar = newValue;
+					break;
+				case 13:
+					pEmitter->m_fLifeSpan = newValue;
+					break;
+				case 14:
+					pEmitter->m_fLifeSpanVar = newValue;
+					break;
+				case 15:
+					pEmitter->m_fScale = newValue;
+					break;
+				default:
+					if (IsConsoleMode()) {
+						Console_Print("Unknown value id: %d", valueId);
+					}
+					break;
+				}
+			}
+		});
 	}
 	return true;
 }

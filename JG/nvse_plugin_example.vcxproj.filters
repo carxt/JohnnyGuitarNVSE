@@ -961,6 +961,12 @@
     <ClInclude Include="internal\Game\Bethesda\BSShaderManager.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiPSysEmitter.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPSysModifier.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiParticles.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiParticleSystem.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiProperty.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPropertyState.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
