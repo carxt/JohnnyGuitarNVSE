@@ -13,6 +13,7 @@
 #include <JG/JohnnyRadios.hpp>
 #include <JG/DisabledLevelUp.hpp>
 #include "Gamebryo/NiParticleSystem.hpp"
+#include "Gamebryo/NiPSysBoxEmitter.hpp"
 #include "Gamebryo/NiPSysEmitter.hpp"
 
 extern uint32_t g_initialTickCount;
@@ -711,9 +712,27 @@ bool Cmd_SetNiPSysEmitterValue_Execute(COMMAND_ARGS)
 					pEmitter->m_fScale = newValue;
 					break;
 				default:
+					if (const auto pBoxEmitter = pModifier->NiDynamicCast<NiPSysBoxEmitter>()) {
+						if (valueId == 16) {
+							pBoxEmitter->m_fEmitterWidth = newValue;
+							return;
+						}
+
+						if (valueId == 17) {
+							pBoxEmitter->m_fEmitterHeight = newValue;
+							return;
+						}
+
+						if (valueId == 18) {
+							pBoxEmitter->m_fEmitterDepth = newValue;
+							return;
+						}
+					}
+
 					if (IsConsoleMode()) {
 						Console_Print("Unknown value id: %d", valueId);
 					}
+
 					break;
 				}
 			}

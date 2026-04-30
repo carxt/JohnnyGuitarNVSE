@@ -363,8 +363,10 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiPoint4.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiProperty.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPropertyState.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPSysBoxEmitter.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPSysEmitter.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPSysModifier.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPSysVolumeEmitter.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRefObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRTTI.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSmartPointer.hpp" />
