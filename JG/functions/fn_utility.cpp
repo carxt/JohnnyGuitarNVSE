@@ -8,13 +8,9 @@
 #include <GameUI.h>
 #include <misc/misc.h>
 #include <decoding.h>
-#include <unordered_set>
 #include <JG/CameraOverride.hpp>
 #include <JG/JohnnyRadios.hpp>
 #include <JG/DisabledLevelUp.hpp>
-#include "Gamebryo/NiParticleSystem.hpp"
-#include "Gamebryo/NiPSysBoxEmitter.hpp"
-#include "Gamebryo/NiPSysEmitter.hpp"
 
 extern uint32_t g_initialTickCount;
 
