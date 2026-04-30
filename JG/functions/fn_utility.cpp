@@ -626,8 +626,7 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_SetNiPSysEmitterValue_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetNiPSysEmitterValue_Execute(COMMAND_ARGS) {
 	char blockName[MAX_PATH] = { 0 };
 	uint32_t valueId{};
 	float newValue{};
