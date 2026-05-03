@@ -2593,11 +2593,12 @@ bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
 				}
 				else {
 					pActor->baseProcess->Set3DUpdateFlag(uiFlags);
+					if (!bQueue)
+						pActor->baseProcess->Update3DModel(pActor);
 
 					constexpr uint32_t uiNPCCustomFlags = UPDATE_LIGHTS | UPDATE_POS;
-					if (uiFlags & uiNPCCustomFlags) {
-						RefreshReferenceModel(thisObj, uiFlags & ~uiNPCCustomFlags);
-					}
+					if (uiFlags & uiNPCCustomFlags)
+						RequestModelUpdate(thisObj, uiFlags & ~uiNPCCustomFlags, bQueue);
 				}
 			}
 		}
