@@ -2577,6 +2577,8 @@ static void __fastcall RequestModelUpdate(TESObjectREFR* apReference, uint32_t a
 }
 
 bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
+	constexpr uint32_t uiAddedFlags = UPDATE_LIGHTS | UPDATE_POS;
+
 	*result = 0;
 	uint32_t uiFlags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags) && uiFlags) {
@@ -2593,11 +2595,13 @@ bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
 				}
 				else {
 					pActor->baseProcess->Set3DUpdateFlag(uiFlags);
+					if (!bQueue)
+						pActor->baseProcess->Update3DModel(pActor);
 
-					constexpr uint32_t uiNPCCustomFlags = UPDATE_LIGHTS | UPDATE_POS;
-					if (uiFlags & uiNPCCustomFlags) {
-						RefreshReferenceModel(thisObj, uiFlags & ~uiNPCCustomFlags);
-					}
+					
+					const uint32_t uiCustomFlags = uiFlags & uiAddedFlags;
+					if (uiCustomFlags)
+						RequestModelUpdate(thisObj, uiCustomFlags, bQueue);
 				}
 			}
 		}
