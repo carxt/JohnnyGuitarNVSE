@@ -1408,6 +1408,152 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace LeveledListFixes {
+
+		bool Cmd_LeveledListRemoveForm_Execute(COMMAND_ARGS) {
+			*result = 0;
+			TESForm* pListForm = nullptr;
+			TESForm* pForm = nullptr;
+			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pForm))
+				return true;
+
+			TESLeveledList* pList = TESLeveledList::GetFormAsLeveledList(pListForm);
+			if (!pList || !pForm)
+				return true;
+
+			uint32_t uiDeletedCount = 0;
+			auto pIter = pList->GetLeveledList();
+			while (pIter && !pIter->IsEmpty()) {
+				LeveledObject* pItem = pIter->GetItem();
+				if (pItem && pItem->pForm == pForm) {
+
+					auto pScriptIter = pList->kScriptAddedObjects.GetHead();
+					while (pScriptIter && !pScriptIter->IsEmpty()) {
+						auto pItem = pScriptIter->GetItem();
+						if (pItem == pItem)
+							pScriptIter->RemoveHead();
+						pScriptIter = pScriptIter->GetNext();
+					}
+
+					delete pItem;
+					pIter->RemoveHead();
+					++uiDeletedCount;
+				}
+				else {
+					pIter = pIter->GetNext();
+				}
+			}
+
+			if (pList->kScriptAddedObjects.IsEmpty())
+				pListForm->RemoveChange(0x80000000);
+
+			*result = uiDeletedCount;
+			return true;
+		}
+
+		bool Cmd_LeveledListClear_Execute(COMMAND_ARGS) {
+			*result = 0;
+			TESForm* pListForm = nullptr;
+			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm))
+				return true;
+
+			TESLeveledList* pList = TESLeveledList::GetFormAsLeveledList(pListForm);
+			if (!pList)
+				return true;
+
+			uint32_t uiDeletedCount = 0;
+			auto pIter = pList->GetLeveledList();
+			while (pIter && !pIter->IsEmpty()) {
+				LeveledObject* pItem =  pIter->GetItem();
+				if (pItem) {
+					auto pScriptIter = pList->kScriptAddedObjects.GetHead();
+					while (pScriptIter && !pScriptIter->IsEmpty()) {
+						auto pItem = pScriptIter->GetItem();
+						if (pItem == pItem)
+							pScriptIter->RemoveHead();
+						pScriptIter = pScriptIter->GetNext();
+					}
+
+					delete pItem;
+					pIter->RemoveHead();
+					++uiDeletedCount;
+				}
+				else {
+					pIter = pIter->GetNext();
+				}
+			}
+
+			if (pList->kScriptAddedObjects.IsEmpty())
+				pListForm->RemoveChange(0x80000000);
+
+			*result = uiDeletedCount;
+			return true;
+		}
+
+		bool Cmd_RemoveNthLevItem_Execute(COMMAND_ARGS) {
+			*result = 0;
+			TESForm* pListForm = nullptr;
+			uint32_t uiIndex = 0;
+			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &uiIndex))
+				return true;
+
+			TESLeveledList* pList = TESLeveledList::GetFormAsLeveledList(pListForm);
+			if (!pList)
+				return true;
+
+			auto pIter = pList->GetLeveledList();
+			while (pIter && !pIter->IsEmpty()) {
+				if (uiIndex == 0) {
+					LeveledObject* pItem = pIter->GetItem();
+					if (pItem) {
+						auto pScriptIter = pList->kScriptAddedObjects.GetHead();
+						while (pScriptIter && !pScriptIter->IsEmpty()) {
+							auto pItem = pScriptIter->GetItem();
+							if (pItem == pItem)
+								pScriptIter->RemoveHead();
+							pScriptIter = pScriptIter->GetNext();
+						}
+
+						delete pItem;
+						pIter->RemoveHead();
+						*result = 1;
+					}
+					break;
+				}
+				else {
+					pIter = pIter->GetNext();
+					--uiIndex;
+				}
+			}
+
+			if (pList->kScriptAddedObjects.IsEmpty())
+				pListForm->RemoveChange(0x80000000);
+
+			return true;
+		}
+
+		void InitHooks() {
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x221F));
+				if (pInfo) {
+					pInfo->execute = Cmd_LeveledListRemoveForm_Execute;
+				}
+			}
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2228));
+				if (pInfo) {
+					pInfo->execute = Cmd_RemoveNthLevItem_Execute;
+				}
+			}
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2229));
+				if (pInfo) {
+					pInfo->execute = Cmd_LeveledListClear_Execute;
+				}
+			}
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -1536,6 +1682,7 @@ namespace JIPFixes {
 		CopyFaceGenFromFix::InitHooks();
 		BetterSearch::InitHooks();
 		PowerArmorCondition::InitHooks();
+		LeveledListFixes::InitHooks();
 	}
 
 	void InitDeferredHooks() {
