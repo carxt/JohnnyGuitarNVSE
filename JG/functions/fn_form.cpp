@@ -2598,7 +2598,7 @@ bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
 
 					constexpr uint32_t uiNPCCustomFlags = UPDATE_LIGHTS | UPDATE_POS;
 					if (uiFlags & uiNPCCustomFlags)
-						RequestModelUpdate(thisObj, uiFlags & ~uiNPCCustomFlags, bQueue);
+						RequestModelUpdate(thisObj, uiFlags & uiNPCCustomFlags, bQueue);
 				}
 			}
 		}
