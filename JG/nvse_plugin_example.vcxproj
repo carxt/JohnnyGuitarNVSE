@@ -184,6 +184,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESFile.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESFullName.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESLeveledList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObject.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectList.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFixedString.cpp" />
@@ -346,6 +347,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESFullName.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESLeveledList.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESLevItem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESModel.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectList.hpp" />
