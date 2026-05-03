@@ -15,8 +15,8 @@ struct LeveledObject {
 	~LeveledObject();
 
 	TESForm*			pForm;
-	int16_t				usCount;
-	int16_t				usLevel;
+	uint16_t			usCount;
+	uint16_t			usLevel;
 	ContainerItemExtra* pItemExtra;
 };
 
