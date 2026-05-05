@@ -1077,15 +1077,17 @@ static ParamInfo kParamsCallPerMobileObjectEx[] =
 	{ "Type Filter Array", kNVSEParamType_Array , 0 },
 };
 
-static ParamInfo kParams_SetNiPSysEmitterValue[] =
+static ParamInfo kParams_SetNiPSysModifierValue[] =
 {
-	{ "Block name", kParamType_String, 0 },
-	{ "Value ID", kParamType_Integer, 0 },
-	{ "New value", kParamType_Float, 0 },
+	{ "Block Name", kParamType_String, 0 },
+	{ "Item", kParamType_Integer, 0 },
+	{ "Value", kParamType_Float, 0 },
+	{ "First Person", kParamType_Integer, 1 },
 };
 
-static ParamInfo kParams_GetNiPSysEmitterValue[] =
+static ParamInfo kParams_GetNiPSysModifierValue[] =
 {
-	{ "Block name", kParamType_String, 0 },
-	{ "Value ID", kParamType_Integer, 0 },
+	{ "Block Name", kParamType_String, 0 },
+	{ "Item", kParamType_Integer, 0 },
+	{ "First Person", kParamType_Integer, 1 },
 };

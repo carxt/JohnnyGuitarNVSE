@@ -26,14 +26,6 @@ public:
 
 	CREATE_OBJECT(NiParticleSystem, 0xC1B7F0);
 	NIRTTI_ADDRESS(0x12024E0);
-
-	void UpdateDownwardPassEx(NiUpdateData& arData, uint32_t auiFlags);
-	void UpdateWorldDataEx(NiUpdateData& arData);
-	void UpdateWorldBoundEx();
-	void UpdateSystemEx(float afTime);
-	void Do_UpdateSystemEx(float afTime);
-
-	void PerformSystemReset();
 };
 
 ASSERT_SIZE(NiParticleSystem, 0x110);

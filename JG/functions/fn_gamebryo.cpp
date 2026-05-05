@@ -40,19 +40,59 @@ enum class NiUpdateType : int32_t {
 	COUNT
 };
 
-NiAVObject* __fastcall GetRoot(TESObjectREFR* apRef, bool abFirstPerson) {
+enum class ParticleModifierItem : int32_t {
+	NONE = -1,
+
+	// NiPSysModifier
+	ORDER,
+	ACTIVE,
+
+	// NiPSysEmitter
+	EMITTER_SPEED,
+	EMITTER_SPEED_VAR,
+	EMITTER_DECLINATION,
+	EMITTER_DECLINATION_VAR,
+	EMITTER_PLANAR_ANGLE,
+	EMITTER_PLANAR_ANGLE_VAR,
+	EMITTER_INITIAL_COLOR_RED,
+	EMITTER_INITIAL_COLOR_GREEN,
+	EMITTER_INITIAL_COLOR_BLUE,
+	EMITTER_INITIAL_COLOR_ALPHA,
+	EMITTER_INITIAL_RADIUS,
+	EMITTER_RADIUS_VAR,
+	EMITTER_LIFESPAN,
+	EMITTER_LIFESPAN_VAR,
+	EMITTER_SCALE,
+
+	// NiPSysBoxEmitter
+	BOX_EMITTER_WIDTH,
+	BOX_EMITTER_HEIGHT,
+	BOX_EMITTER_DEPTH,
+
+	COUNT
+};
+
+static NiAVObject* __fastcall GetRoot(TESObjectREFR* apRef, bool abFirstPerson) {
 	if (apRef == PlayerCharacter::GetSingleton())
 		return static_cast<PlayerCharacter*>(apRef)->Get3D(abFirstPerson);
 	else
 		return apRef->Get3D();
 }
 
-NiProperty* __fastcall GetPropertyByName(NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
+static NiProperty* __fastcall GetPropertyByName(const NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
 	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
 	if (!pObject)
 		return nullptr;
 
 	return pObject->GetProperty(aeType);
+}
+
+static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* apRoot, const NiFixedString& arObjectName) {
+	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
+	if (!pObject)
+		return nullptr;
+
+	return pObject->NiDynamicCast<NiParticleSystem>();
 }
 
 bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
@@ -99,7 +139,7 @@ bool Cmd_GetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha));
+		const NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha));
 		if (!pAlpha)
 			return true;
 
@@ -179,7 +219,7 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil));
+		const NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil));
 		if (!pStencil)
 			return true;
 
@@ -235,9 +275,9 @@ bool Cmd_GetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &bFirstPerson) && cObjectName[0]) {
-		NiAVObject* pObject = BSUtilities::GetObjectByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		const NiAVObject* pObject = BSUtilities::GetObjectByName(GetRoot(thisObj, bFirstPerson), cObjectName);
 		if (pObject && pObject->IsExactKindOf<NiSwitchNode>())
-			*result = static_cast<NiSwitchNode*>(pObject)->GetIndex();
+			*result = static_cast<const NiSwitchNode*>(pObject)->GetIndex();
 	}
 	return true;
 }
@@ -313,15 +353,15 @@ bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 
 	bool bValid = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName, &bFirstPerson)) {
-		NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
+		const NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
 
-		NiAVObject* pTarget = nullptr;
+		const NiAVObject* pTarget = nullptr;
 		if (cName[0])
 			pTarget = BSUtilities::GetObjectByName(pRoot, cName);
 		else
 			pTarget = pRoot;
 
-		if (pTarget) {
+		if (pTarget && pTarget->m_pWorldBound) {
 			const NiBound& rBound = pTarget->GetWorldBound();
 			kElements[0] = rBound.kCenter.x;
 			kElements[1] = rBound.kCenter.y;
@@ -345,29 +385,31 @@ bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
-	char sequenceName[MAX_PATH] = { 0 };
-	char blockName[MAX_PATH] = { 0 };
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sequenceName, &blockName)) {
-		NiNode* root = thisObj->Get3D();
-		if (root) {
-			NiAVObject* target = root;
-			if (blockName[0])
-				target = BSUtilities::GetObjectByName(root, blockName);
+	*result = 0;
+	char cSequenceName[MAX_PATH] = { 0 };
+	char cObjectName[MAX_PATH] = { 0 };
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cSequenceName, &cObjectName, &bFirstPerson) && cSequenceName[0]) {
+		const NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
+		if (pRoot) {
+			const NiAVObject* pTarget = pRoot;
+			if (cObjectName[0])
+				pTarget = BSUtilities::GetObjectByName(pRoot, cObjectName);
 
-			if (target) {
+			if (pTarget) {
 				const NiRTTI* NiControllerManager_ms_RTTI = reinterpret_cast<NiRTTI*>(0x11F36AC);
-				NiControllerManager* controller = static_cast<NiControllerManager*>(target->GetController(NiControllerManager_ms_RTTI));
-				if (controller) {
-					*result = controller->IsSequenceActive(sequenceName);
+				NiControllerManager* pCtrlMgr = static_cast<NiControllerManager*>(pTarget->GetController(NiControllerManager_ms_RTTI));
+				if (pCtrlMgr) {
+					*result = pCtrlMgr->IsSequenceActive(cSequenceName);
 					if (IsConsoleMode())
-						Console_Print("IsNiSequenceActive >> %s: %s", sequenceName, *result ? "true" : "false");
+						Console_Print("IsNiSequenceActive >> %s: %s", cSequenceName, *result ? "true" : "false");
 				}
 				else if (IsConsoleMode()) {
 					Console_Print("Controller not found");
 				}
 			}
 			else if (IsConsoleMode()) {
-				Console_Print("Block not found: %s", blockName);
+				Console_Print("Block not found: %s", cObjectName);
 			}
 		}
 		else if (IsConsoleMode()) {
@@ -377,230 +419,191 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_SetNiPSysEmitterValue_Execute(COMMAND_ARGS) {
-	char blockName[MAX_PATH] = { 0 };
-	uint32_t valueId{};
-	float newValue{};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &blockName, &valueId, &newValue)) {
-		const auto root = thisObj->Get3D();
-		if (!root) {
-			if (IsConsoleMode()) {
-				Console_Print("Root node not found");
-			}
-
+bool Cmd_SetNiPSysModifierValue_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cObjectName[MAX_PATH] = { 0 };
+	ParticleModifierItem eItem = ParticleModifierItem::NONE;
+	float fValue = FLT_MAX;
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &eItem, &fValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		if (!pSys)
 			return true;
-		}
-
-		const NiAVObject* target = root;
-		if (blockName[0]) {
-			target = BSUtilities::GetObjectByName(root, blockName);
-		}
-
-		if (!target) {
-			if (IsConsoleMode()) {
-				Console_Print("Block not found: %s", blockName);
-			}
-
-			return true;
-		}
-
-		const auto pSys = target->NiDynamicCast<NiParticleSystem>();
-		if (!pSys) {
-			if (IsConsoleMode()) {
-				Console_Print("Particle system not found");
-			}
-
-			return true;
-		}
-
-		pSys->m_kModifierList.ForEach([=](const NiPSysModifierPtr& pModifier, int) {
-			if (const auto pEmitter = pModifier->NiDynamicCast<NiPSysEmitter>()) {
-				switch (valueId) {
-				case 1:
-					pEmitter->m_fSpeed = newValue;
-					break;
-				case 2:
-					pEmitter->m_fSpeedVar = newValue;
-					break;
-				case 3:
-					pEmitter->m_fDeclination = newValue;
-					break;
-				case 4:
-					pEmitter->m_fDeclinationVar = newValue;
-					break;
-				case 5:
-					pEmitter->m_fPlanarAngle = newValue;
-					break;
-				case 6:
-					pEmitter->m_fPlanarAngleVar = newValue;
-					break;
-				case 7:
-					pEmitter->m_kInitialColor.r = newValue;
-					break;
-				case 8:
-					pEmitter->m_kInitialColor.g = newValue;
-					break;
-				case 9:
-					pEmitter->m_kInitialColor.b = newValue;
-					break;
-				case 10:
-					pEmitter->m_kInitialColor.a = newValue;
-					break;
-				case 11:
-					pEmitter->m_fInitialRadius = newValue;
-					break;
-				case 12:
-					pEmitter->m_fRadiusVar = newValue;
-					break;
-				case 13:
-					pEmitter->m_fLifeSpan = newValue;
-					break;
-				case 14:
-					pEmitter->m_fLifeSpanVar = newValue;
-					break;
-				case 15:
-					pEmitter->m_fScale = newValue;
-					break;
+			
+		pSys->m_kModifierList.ForEach([=](const NiPSysModifierPtr& spModifier, int) {
+			switch (eItem) {
+				case ParticleModifierItem::ORDER:
+					// TODO: Should we edit the list?
+					return;
+				case ParticleModifierItem::ACTIVE:
+					spModifier->SetActive(fValue > 0.f);
+					return;
 				default:
-					if (const auto pBoxEmitter = pModifier->NiDynamicCast<NiPSysBoxEmitter>()) {
-						if (valueId == 16) {
-							pBoxEmitter->m_fEmitterWidth = newValue;
-							return;
-						}
-
-						if (valueId == 17) {
-							pBoxEmitter->m_fEmitterHeight = newValue;
-							return;
-						}
-
-						if (valueId == 18) {
-							pBoxEmitter->m_fEmitterDepth = newValue;
-							return;
-						}
-					}
-
-					if (IsConsoleMode()) {
-						Console_Print("Unknown value id: %d", valueId);
-					}
-
 					break;
+			}
+
+			if (auto pEmitter = spModifier->NiDynamicCast<NiPSysEmitter>()) {
+				switch (eItem) {
+					case ParticleModifierItem::EMITTER_SPEED:
+						pEmitter->m_fSpeed = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_SPEED_VAR:
+						pEmitter->m_fSpeedVar = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_DECLINATION:
+						pEmitter->m_fDeclination = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_DECLINATION_VAR:
+						pEmitter->m_fDeclinationVar = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_PLANAR_ANGLE:
+						pEmitter->m_fPlanarAngle = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_PLANAR_ANGLE_VAR:
+						pEmitter->m_fPlanarAngleVar = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_RED:
+						pEmitter->m_kInitialColor.r = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_GREEN:
+						pEmitter->m_kInitialColor.g = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_BLUE:
+						pEmitter->m_kInitialColor.b = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_ALPHA:
+						pEmitter->m_kInitialColor.a = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_RADIUS:
+						pEmitter->m_fInitialRadius = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_RADIUS_VAR:
+						pEmitter->m_fRadiusVar = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_LIFESPAN:
+						pEmitter->m_fLifeSpan = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_LIFESPAN_VAR:
+						pEmitter->m_fLifeSpanVar = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_SCALE:
+						pEmitter->m_fScale = fValue;
+						return;
+					default:
+						break;
 				}
 			}
-			});
+
+			if (auto pBoxEmitter = spModifier->NiDynamicCast<NiPSysBoxEmitter>()) {
+				switch (eItem) {
+					case ParticleModifierItem::BOX_EMITTER_WIDTH:
+						pBoxEmitter->m_fEmitterWidth = fValue;
+						return;
+					case ParticleModifierItem::BOX_EMITTER_HEIGHT:
+						pBoxEmitter->m_fEmitterHeight = fValue;
+						return;
+					case ParticleModifierItem::BOX_EMITTER_DEPTH:
+						pBoxEmitter->m_fEmitterDepth = fValue;
+						return;
+					default:
+						break;
+				}
+			}
+		});
 	}
 	return true;
 }
 
-bool Cmd_GetNiPSysEmitterValue_Execute(COMMAND_ARGS) {
-	char blockName[MAX_PATH] = { 0 };
-	uint32_t valueId{};
+bool Cmd_GetNiPSysModifierValue_Execute(COMMAND_ARGS) {
+	char cObjectName[MAX_PATH] = { 0 };
+	ParticleModifierItem eItem = ParticleModifierItem::NONE;
+	BOOL bFirstPerson = FALSE;
 	*result = 0.0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &blockName, &valueId)) {
-		const auto root = thisObj->Get3D();
-		if (!root) {
-			if (IsConsoleMode()) {
-				Console_Print("Root node not found");
-			}
-
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		if (!pSys)
 			return true;
-		}
 
-		const NiAVObject* target = root;
-		if (blockName[0]) {
-			target = BSUtilities::GetObjectByName(root, blockName);
-		}
-
-		if (!target) {
-			if (IsConsoleMode()) {
-				Console_Print("Block not found: %s", blockName);
-			}
-
-			return true;
-		}
-
-		const auto pSys = target->NiDynamicCast<NiParticleSystem>();
-		if (!pSys) {
-			if (IsConsoleMode()) {
-				Console_Print("Particle system not found");
-			}
-
-			return true;
-		}
-
-		pSys->m_kModifierList.ForEach([=](const NiPSysModifierPtr& pModifier, int) {
-			if (const auto pEmitter = pModifier->NiDynamicCast<NiPSysEmitter>()) {
-				switch (valueId) {
-				case 1:
-					*result = pEmitter->m_fSpeed;
-					break;
-				case 2:
-					*result = pEmitter->m_fSpeedVar;
-					break;
-				case 3:
-					*result = pEmitter->m_fDeclination;
-					break;
-				case 4:
-					*result = pEmitter->m_fDeclinationVar;
-					break;
-				case 5:
-					*result = pEmitter->m_fPlanarAngle;
-					break;
-				case 6:
-					*result = pEmitter->m_fPlanarAngleVar;
-					break;
-				case 7:
-					*result = pEmitter->m_kInitialColor.r;
-					break;
-				case 8:
-					*result = pEmitter->m_kInitialColor.g;
-					break;
-				case 9:
-					*result = pEmitter->m_kInitialColor.b;
-					break;
-				case 10:
-					*result = pEmitter->m_kInitialColor.a;
-					break;
-				case 11:
-					*result = pEmitter->m_fInitialRadius;
-					break;
-				case 12:
-					*result = pEmitter->m_fRadiusVar;
-					break;
-				case 13:
-					*result = pEmitter->m_fLifeSpan;
-					break;
-				case 14:
-					*result = pEmitter->m_fLifeSpanVar;
-					break;
-				case 15:
-					*result = pEmitter->m_fScale;
-					break;
+		pSys->m_kModifierList.ForEach([=](const NiPSysModifierPtr& spModifier, int) {
+			switch (eItem) {
+				case ParticleModifierItem::ORDER:
+					*result = spModifier->m_uiOrder;
+					return;
+				case ParticleModifierItem::ACTIVE:
+					*result = spModifier->m_bActive;
+					return;
 				default:
-					if (const auto pBoxEmitter = pModifier->NiDynamicCast<NiPSysBoxEmitter>()) {
-						if (valueId == 16) {
-							*result = pBoxEmitter->m_fEmitterWidth;
-							return;
-						}
-
-						if (valueId == 17) {
-							*result = pBoxEmitter->m_fEmitterHeight;
-							return;
-						}
-
-						if (valueId == 18) {
-							*result = pBoxEmitter->m_fEmitterDepth;
-							return;
-						}
-					}
-
-					if (IsConsoleMode()) {
-						Console_Print("Unknown value id: %d", valueId);
-					}
-
 					break;
+			}
+
+			if (const auto pEmitter = spModifier->NiDynamicCast<NiPSysEmitter>()) {
+				switch (eItem) {
+					case ParticleModifierItem::EMITTER_SPEED:
+						*result = pEmitter->m_fSpeed;
+						return;
+					case ParticleModifierItem::EMITTER_SPEED_VAR:
+						*result = pEmitter->m_fSpeedVar;
+						return;
+					case ParticleModifierItem::EMITTER_DECLINATION:
+						*result = pEmitter->m_fDeclination;
+						return;
+					case ParticleModifierItem::EMITTER_DECLINATION_VAR:
+						*result = pEmitter->m_fDeclinationVar;
+						return;
+					case ParticleModifierItem::EMITTER_PLANAR_ANGLE:
+						*result = pEmitter->m_fPlanarAngle;
+						return;
+					case ParticleModifierItem::EMITTER_PLANAR_ANGLE_VAR:
+						*result = pEmitter->m_fPlanarAngleVar;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_RED:
+						*result = pEmitter->m_kInitialColor.r;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_GREEN:
+						*result = pEmitter->m_kInitialColor.g;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_BLUE:
+						*result = pEmitter->m_kInitialColor.b;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_ALPHA:
+						*result = pEmitter->m_kInitialColor.a;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_RADIUS:
+						*result = pEmitter->m_fInitialRadius;
+						return;
+					case ParticleModifierItem::EMITTER_RADIUS_VAR:
+						*result = pEmitter->m_fRadiusVar;
+						return;
+					case ParticleModifierItem::EMITTER_LIFESPAN:
+						*result = pEmitter->m_fLifeSpan;
+						return;
+					case ParticleModifierItem::EMITTER_LIFESPAN_VAR:
+						*result = pEmitter->m_fLifeSpanVar;
+						return;
+					case ParticleModifierItem::EMITTER_SCALE:
+						*result = pEmitter->m_fScale;
+						return;
+					default:
+						break;
 				}
 			}
-			});
+
+			if (const auto pBoxEmitter = spModifier->NiDynamicCast<NiPSysBoxEmitter>()) {
+				switch (eItem) {
+					case ParticleModifierItem::BOX_EMITTER_WIDTH:
+						*result = pBoxEmitter->m_fEmitterWidth;
+						return;
+					case ParticleModifierItem::BOX_EMITTER_HEIGHT:
+						*result = pBoxEmitter->m_fEmitterHeight;
+						return;
+					case ParticleModifierItem::BOX_EMITTER_DEPTH:
+						*result = pBoxEmitter->m_fEmitterDepth;
+						return;
+					default:
+						break;
+				}
+			}
+		});
 	}
 	return true;
 }

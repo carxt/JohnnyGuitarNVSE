@@ -30,8 +30,6 @@ public:
 	const char* GetName() const {
 		return m_kName.c_str();
 	}
-
-	void UpdateModifier(float afTime, NiPSysData* apData);
 };
 
 ASSERT_SIZE(NiPSysModifier, 0x18)

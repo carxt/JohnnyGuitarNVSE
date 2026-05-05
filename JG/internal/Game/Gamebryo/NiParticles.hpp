@@ -14,8 +14,6 @@ public:
 
 	CREATE_OBJECT(NiParticles, 0x84B290);
 	NIRTTI_ADDRESS(0xF2188C);
-
-	NiPSysData* GetModelData() const;
 };
 
 ASSERT_SIZE(NiParticles, 0xC4)
