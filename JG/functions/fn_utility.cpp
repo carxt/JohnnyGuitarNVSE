@@ -8,7 +8,6 @@
 #include <GameUI.h>
 #include <misc/misc.h>
 #include <decoding.h>
-#include <unordered_set>
 #include <JG/CameraOverride.hpp>
 #include <JG/JohnnyRadios.hpp>
 #include <JG/DisabledLevelUp.hpp>
@@ -586,39 +585,6 @@ bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &eAxis, &fAngle, &pRef)) {
 		CameraOverride::OverrideRot(override > 0, eAxis, fAngle, pRef);
 		
-	}
-	return true;
-}
-
-bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
-	char sequenceName[MAX_PATH] = { 0 };
-	char blockName[MAX_PATH] = { 0 };
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sequenceName, &blockName)) {
-		NiNode* root = thisObj->Get3D();
-		if (root) {
-			NiAVObject* target = root;
-			if (blockName[0])
-				target = BSUtilities::GetObjectByName(root, blockName);
-
-			if (target) {
-				const NiRTTI* NiControllerManager_ms_RTTI = reinterpret_cast<NiRTTI*>(0x11F36AC);
-				NiControllerManager* controller = static_cast<NiControllerManager*>(target->GetController(NiControllerManager_ms_RTTI));
-				if (controller) {
-					*result = controller->IsSequenceActive(sequenceName);
-					if (IsConsoleMode())
-						Console_Print("IsNiSequenceActive >> %s: %s", sequenceName, *result ? "true" : "false");
-				}
-				else if (IsConsoleMode()) {
-					Console_Print("Controller not found");
-				}
-			}
-			else if (IsConsoleMode()) {
-				Console_Print("Block not found: %s", blockName);
-			}
-		}
-		else if (IsConsoleMode()) {
-			Console_Print("Root node not found");
-		}
 	}
 	return true;
 }

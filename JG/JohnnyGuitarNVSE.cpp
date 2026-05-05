@@ -519,6 +519,8 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(CallPerMobileObject);
 	REG_CMD(CallPerMobileObjectEx);
 	REG_CMD(Update3DAlt);
+	REG_CMD(SetNiPSysEmitterValue);
+	REG_TYPED_CMD(GetNiPSysEmitterValue, Default);
 }
 
 

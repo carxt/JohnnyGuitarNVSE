@@ -37,4 +37,3 @@ DEFINE_COMMAND_PLUGIN(GetAvailableRadios, , true, nullptr);
 DEFINE_COMMAND_PLUGIN(NullArgs, , false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(NullNoArgs, , false, nullptr);
 DEFINE_CMD_ALT_COND_PLUGIN(GameGetSecondsPassed, GGetSecPass, , false, nullptr);
-DEFINE_COMMAND_PLUGIN(IsNiSequenceActive, , true, kParams_IsNiSequenceActive);

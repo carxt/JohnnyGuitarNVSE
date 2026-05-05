@@ -1076,3 +1076,16 @@ static ParamInfo kParamsCallPerMobileObjectEx[] =
 	{ "Process Level", kNVSEParamType_Number , 0 },
 	{ "Type Filter Array", kNVSEParamType_Array , 0 },
 };
+
+static ParamInfo kParams_SetNiPSysEmitterValue[] =
+{
+	{ "Block name", kParamType_String, 0 },
+	{ "Value ID", kParamType_Integer, 0 },
+	{ "New value", kParamType_Float, 0 },
+};
+
+static ParamInfo kParams_GetNiPSysEmitterValue[] =
+{
+	{ "Block name", kParamType_String, 0 },
+	{ "Value ID", kParamType_Integer, 0 },
+};
