@@ -286,17 +286,15 @@ bool Cmd_GetDefaultHeapSize_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
-	char edid[MAX_PATH] = {};
-	TESForm* form = nullptr;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &edid) && edid[0]) {
-		form = ((TESForm * (__cdecl*)(char*))(0x483A00))(edid); //LookupEditorID
-		if (form) {
-			*(uint32_t*)result = form->GetFormID();
-		}
-		if (IsConsoleMode()) {
-			Console_Print("EditorIDToFormID >> 0x%X", *result);
-		}
+	char cEDID[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cEDID) && cEDID[0]) {
+		const TESForm* pForm = TESForm::GetFormByEditorID(cEDID);
+		if (pForm)
+			*reinterpret_cast<uint32_t*>(result) = pForm->GetFormID();
+
+		if (IsConsoleMode())
+			Console_Print("EditorIDToFormID >> 0x%08X", *result);
 	}
 	return true;
 }
