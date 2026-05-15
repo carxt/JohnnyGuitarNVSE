@@ -1,10 +1,10 @@
 #pragma once
 
 namespace BSMemory {
-	extern [[nodiscard]] __declspec(allocator) __declspec(restrict) void* malloc(std::size_t size);
-	extern [[nodiscard]] __declspec(allocator) __declspec(restrict) void* calloc(std::size_t size);
-	extern [[nodiscard]] __declspec(allocator) __declspec(restrict) void* aligned_alloc(size_t alignment, std::size_t size);
-	extern [[nodiscard]] __declspec(allocator) __declspec(restrict) void* realloc(void* ptr, std::size_t new_size);
+	[[nodiscard]] extern __declspec(allocator) __declspec(restrict) void* malloc(std::size_t size);
+	[[nodiscard]] extern __declspec(allocator) __declspec(restrict) void* calloc(std::size_t size);
+	[[nodiscard]] extern __declspec(allocator) __declspec(restrict) void* aligned_alloc(size_t alignment, std::size_t size);
+	[[nodiscard]] extern __declspec(allocator) __declspec(restrict) void* realloc(void* ptr, std::size_t new_size);
 
 	extern __declspec(noalias) void	aligned_free(void* ptr);
 

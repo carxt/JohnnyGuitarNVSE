@@ -42,13 +42,13 @@ public:
 
 	static void InitName();
 
-	static [[nodiscard]] JohnnyExtraData* __fastcall Find(const TESForm* apForm);
+	[[nodiscard]] static JohnnyExtraData* __fastcall Find(const TESForm* apForm);
 
-	static [[nodiscard]] JohnnyExtraData* __fastcall GetOrCreate(TESForm* apForm);
+	[[nodiscard]] static JohnnyExtraData* __fastcall GetOrCreate(TESForm* apForm);
 
-	static [[nodiscard]] bool __fastcall Add(TESForm* apForm, JohnnyExtraData* apExtraData);
+	[[nodiscard]] static bool __fastcall Add(TESForm* apForm, JohnnyExtraData* apExtraData);
 
-	static [[nodiscard]] JohnnyExtraData* __fastcall Add(TESForm* apForm);
+	[[nodiscard]] static JohnnyExtraData* __fastcall Add(TESForm* apForm);
 
 	// Used only by EDIDRestoration
 	void DetachEditorIDs();
