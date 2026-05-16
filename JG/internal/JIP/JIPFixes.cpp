@@ -696,7 +696,15 @@ namespace JIPFixes {
 				return true;
 
 			int32_t iTargetObject = -1;
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &iTargetObject) && iTargetObject != 6 && iTargetObject < 20) {
+			if (reinterpret_cast<uint8_t*>(scriptData)[*opcodeOffsetPtr - 2] && reinterpret_cast<uint8_t*>(scriptData)[*opcodeOffsetPtr]) {
+				int32_t iArgSlot;
+				if (!ExtractArgsEx(EXTRACT_ARGS_EX, &iArgSlot))
+					return true;
+
+				iTargetObject = iArgSlot;
+			}
+
+			if (iTargetObject != 6 && iTargetObject < 20) {
 				Bitfield32 uiValidParts = 0xFFFFFFBF;
 				if (iTargetObject >= 0)
 					uiValidParts = (1u << iTargetObject) & 0xFFFFFFBF;
