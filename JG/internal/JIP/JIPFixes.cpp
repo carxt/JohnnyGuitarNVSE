@@ -118,21 +118,28 @@ namespace JIPFixes {
 				return;
 
 			NiControllerManager* pControllerManager = ThisCall<NiControllerManager*>(0xA5C570, apObject, 0x11F36AC);
-			if (pControllerManager && pControllerManager->m_spObjectPalette)
+			if (pControllerManager && pControllerManager->m_spObjectPalette) [[likely]]
 				ThisCall(0xA6E960, pControllerManager->m_spObjectPalette.m_pObject);
 		}
 
 		CallDetour kMemPoolFree;
-		void __fastcall MemoryPool_Free(void* pBlock, unsigned int size) {
-			char* pData = static_cast<char*>(pBlock);
-			TESForm* pForm = *(TESForm**)pData;
-			NiAVObject* pRoot = nullptr;
-			if (pForm && pForm->IsReference())
-				pRoot = static_cast<TESObjectREFR*>(pForm)->Get3DSimple();
+		void __fastcall MemoryPool_Free(void* apBlock, uint32_t auiSize) {
+			char* pData = static_cast<char*>(apBlock);
+			TESForm* pForm = *reinterpret_cast<TESForm**>(pData);
+			
+			if (pForm && pForm->IsReference()) [[likely]] {
+				if (pForm == PlayerCharacter::GetSingleton()) {
+					PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(pForm);
+					InvalidateObjPalette(pPlayer->Get3D(true));
+					InvalidateObjPalette(pPlayer->Get3D(false));
+				}
+				else {
+					TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pForm);
+					InvalidateObjPalette(pRef->Get3DSimple());
+				}
+			}
 
-			InvalidateObjPalette(pRoot);
-
-			FastCall(kMemPoolFree.GetOverwrittenAddr(), pBlock, size);
+			FastCall(kMemPoolFree.GetOverwrittenAddr(), apBlock, auiSize);
 		}
 
 		void InitHooks() {
