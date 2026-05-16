@@ -7,6 +7,8 @@
 
 
 extern NVSEScriptInterface* g_scriptInterface;
+extern NVSEMessagingInterface* g_msgInterface;
+extern uint32_t g_pluginHandle;
 
 namespace JohnnyEvents {
 
@@ -36,452 +38,597 @@ namespace JohnnyEvents {
 	EventInformation* OnReputationChangeHandler;
 	EventInformation* OnNPCAVChangeHandler;
 
+	enum JG_NVSE_MESSAGE_ID : uint32_t {
+		JG_EVENT_BASE = 10000,
 
-	uint32_t handlePreRenderEvent() {
-		for (auto const& callback : OnRenderGamePreUpdateHandler->callbacks) {
-			CallUDF(callback.script, nullptr, OnRenderGamePreUpdateHandler->numMaxArgs);
+		JG_OnDying,
+		JG_OnStartQuest,
+		JG_OnStopQuest,
+		JG_OnFailQuest,
+		JG_OnCompleteQuest,
+		JG_OnSeenDataUpdate,
+		JG_OnLimbGone,
+		JG_OnChallengeComplete,
+		JG_OnCrosshair,
+		JG_OnSettingsUpdate,
+		JG_OnAddPerk,
+		JG_OnRemovePerk,
+		JG_OnRenderGamePreUpdate,
+		JG_OnRenderGameModeUpdate,
+		JG_OnRenderRenderedMenuUpdate,
+		JG_OnAVChange,
+		JG_OnPLChange,
+		JG_OnRadioPostSoundAttach,
+		JG_OnKeyboardControllerSelectionChange,
+		JG_OnSleepWaitEvent,
+		JG_OnTakeBackItem,
+		JG_OnNPCResponse,
+		JG_OnGeneralSubtitle,
+		JG_OnReputationChange,
+		JG_OnNPCAVChange,
+	};
+
+	template<typename T>
+	inline void __fastcall SendNVSEMessage(JG_NVSE_MESSAGE_ID aeID, T& arData) {
+		g_msgInterface->Dispatch(g_pluginHandle, aeID, &arData, sizeof(T), nullptr);
+	}
+
+	inline void __fastcall SendNVSEMessage(JG_NVSE_MESSAGE_ID aeID) {
+		g_msgInterface->Dispatch(g_pluginHandle, 0, nullptr, 0, nullptr);
+	}
+
+	uint32_t HandlePreRenderEvent() {
+		SendNVSEMessage(JG_OnRenderGamePreUpdate);
+		for (auto const& rCallback : OnRenderGamePreUpdateHandler->callbacks) {
+			CallUDF(rCallback.script, nullptr, OnRenderGamePreUpdateHandler->numMaxArgs);
 		}
 		return CdeclCall<bool>(0x7050D0);
 	}
 
-	void __fastcall handleRemovePerkEvent(Actor* actor, int EDX, BGSPerk* perk, bool isTeammatePerk) {
-		if (!actor->GetPerkRank(perk, isTeammatePerk))
+	void __fastcall HandleRemovePerkEvent(Actor* apActor, int EDX, BGSPerk* apPerk, bool abTeammate) {
+		if (!apActor->GetPerkRank(apPerk, abTeammate))
 			return;
-		for (auto const& callback : OnRemovePerkHandler->callbacks) {
-			if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) {
-				CallUDF(callback.script, actor, OnRemovePerkHandler->numMaxArgs, perk);
+
+		{
+			struct EventData {
+				Actor*		pActor;
+				BGSPerk*	pPerk;
+				bool		bCompanion;
+			} kData(apActor, apPerk, abTeammate);
+			SendNVSEMessage(JG_OnRemovePerk, kData);
+		}
+
+		for (auto const& rCallback : OnRemovePerkHandler->callbacks) {
+			if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apPerk)) {
+				CallUDF(rCallback.script, apActor, OnRemovePerkHandler->numMaxArgs, apPerk);
 			}
 		}
-		actor->RemovePerk(perk, isTeammatePerk);
+		apActor->RemovePerk(apPerk, abTeammate);
 	}
 
-	void __fastcall handleAddPerkEvent(Actor* actor, int EDX, BGSPerk* perk, uint8_t newRank, bool isTeammatePerk) {
-		for (auto const& callback : OnAddPerkHandler->callbacks) {
-			if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, perk)) {
-				CallUDF(callback.script, actor, OnAddPerkHandler->numMaxArgs, perk, newRank - 1, newRank);
+	void __fastcall HandleAddPerkEvent(Actor* apActor, int EDX, BGSPerk* apPerk, uint8_t aucRank, bool abTeammate) {
+
+		{
+			struct EventData {
+				Actor*		pActor;
+				BGSPerk*	pPerk;
+				bool		bCompanion;
+				uint8_t		ucRank;
+			} kData(apActor, apPerk, abTeammate, aucRank);
+			SendNVSEMessage(JG_OnAddPerk, kData);
+		}
+
+		for (auto const& rCallback : OnAddPerkHandler->callbacks) {
+			if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apPerk)) {
+				CallUDF(rCallback.script, apActor, OnAddPerkHandler->numMaxArgs, apPerk, aucRank - 1, aucRank);
 			}
 		}
-		actor->SetPerkRank(perk, newRank, isTeammatePerk);
+		apActor->SetPerkRank(apPerk, aucRank, abTeammate);
 	}
 
-	void __stdcall handleDyingEvent(Actor* thisObj) {
-		if (thisObj->IsActor() && thisObj->lifeState == 1 && (thisObj->GetFullName()[0] || thisObj == PlayerCharacter::GetSingleton())) {
-			for (auto const& callback : OnDyingHandler->callbacks) {
-				if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, thisObj)) {
-					CallUDF(callback.script, nullptr, OnDyingHandler->numMaxArgs, thisObj);
+	void __stdcall HandleDyingEvent(Actor* apActor) {
+		if (apActor->IsActor() && apActor->lifeState == 1) {
+
+			SendNVSEMessage(JG_OnAddPerk, apActor);
+
+			if ((apActor->GetFullName()[0] || apActor == PlayerCharacter::GetSingleton())) {
+				for (auto const& rCallback : OnDyingHandler->callbacks) {
+					if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apActor)) {
+						CallUDF(rCallback.script, nullptr, OnDyingHandler->numMaxArgs, apActor);
+					}
 				}
 			}
 		}
 	}
-	uint32_t __fastcall handleCrosshairEvent(TESObjectREFR* crosshairRef) {
-		if (crosshairRef) {
-			for (auto const& callback : OnCrosshairHandler->callbacks) {
-				FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
-				if ((filter->IsInFilter(0, crosshairRef->GetFormID()) || filter->IsInFilter(0, crosshairRef->baseForm->GetFormID())) && filter->IsInFilter(1, crosshairRef->baseForm->GetFormType())) {
-					CallUDF(callback.script, nullptr, OnCrosshairHandler->numMaxArgs, crosshairRef);
+
+	uint32_t __fastcall HandleCrosshairEvent(TESObjectREFR* apRef) {
+		if (apRef) {
+			SendNVSEMessage(JG_OnCrosshair, apRef);
+
+			for (auto const& rCallback : OnCrosshairHandler->callbacks) {
+				FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
+				if ((pFilter->IsInFilter(0, apRef->GetFormID()) || pFilter->IsInFilter(0, apRef->baseForm->GetFormID())) && pFilter->IsInFilter(1, apRef->baseForm->GetFormType())) {
+					CallUDF(rCallback.script, nullptr, OnCrosshairHandler->numMaxArgs, apRef);
 				}
 			}
 		}
-		return ThisCall<uint32_t>(0x579280, crosshairRef);
+		return ThisCall<uint32_t>(0x579280, apRef);
 	}
-	bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* xData, Actor* actor, byte dummy, int limb, byte isExplode) {
-		for (auto const& callback : OnLimbGoneHandler->callbacks) {
-			FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
-			if ((filter->IsInFilter(0, actor->GetFormID()) || filter->IsInFilter(0, actor->baseForm->GetFormID())) && filter->IsInFilter(1, limb)) {
-				CallUDF(callback.script, nullptr, OnLimbGoneHandler->numMaxArgs, actor, limb);
+	bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* apLimbData, void*, Actor* apActor, uint32_t aeLimb, bool abExplodedLimb) {
+
+		{
+			struct EventData {
+				Actor*					pActor;
+				ExtraDismemberedLimbs*	pLimbData;
+				uint32_t				eLimb;
+				bool					bExploded;
+			} kData(apActor, apLimbData, aeLimb, abExplodedLimb);
+			SendNVSEMessage(JG_OnLimbGone, kData);
+		}
+
+		for (auto const& rCallback : OnLimbGoneHandler->callbacks) {
+			FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
+			if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->baseForm->GetFormID())) && pFilter->IsInFilter(1, aeLimb)) {
+				CallUDF(rCallback.script, nullptr, OnLimbGoneHandler->numMaxArgs, apActor, aeLimb);
 			}
 		}
-		return ThisCall<bool>(0x430410, xData, actor, limb, isExplode);
+		return ThisCall<bool>(0x430410, apLimbData, apActor, aeLimb, abExplodedLimb);
 	}
-	void __fastcall handleQuestStartStop(TESQuest* Quest, bool IsStarted) {
-		EventInformation* thisEvent = IsStarted ? OnStartQuestHandler : OnStopQuestHandler;
-		for (auto const& callback : thisEvent->callbacks) {
-			if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) {
-				CallUDF(callback.script, nullptr, thisEvent->numMaxArgs, Quest);
+
+	void __fastcall HandleQuestStartStop(TESQuest* apQuest, bool abStarted) {
+		SendNVSEMessage(abStarted ? JG_OnStartQuest : JG_OnStopQuest, apQuest);
+
+		const EventInformation* pEvent = abStarted ? OnStartQuestHandler : OnStopQuestHandler;
+		for (auto const& rCallback : pEvent->callbacks) {
+			if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apQuest)) {
+				CallUDF(rCallback.script, nullptr, pEvent->numMaxArgs, apQuest);
 			}
 		}
 	}
 
-	void __cdecl handleQuestComplete(TESQuest* Quest) {
-		for (auto const& callback : OnCompleteQuestHandler->callbacks) {
-			if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) {
-				CallUDF(callback.script, nullptr, OnCompleteQuestHandler->numMaxArgs, Quest);
+	void __cdecl HandleQuestComplete(TESQuest* apQuest) {
+		SendNVSEMessage(JG_OnCompleteQuest, apQuest);
+
+		for (auto const& rCallback : OnCompleteQuestHandler->callbacks) {
+			if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apQuest)) {
+				CallUDF(rCallback.script, nullptr, OnCompleteQuestHandler->numMaxArgs, apQuest);
 			}
 		}
-		CdeclCall(0x77A480, Quest);
+		CdeclCall(0x77A480, apQuest);
 	}
 
-	void __cdecl handleQuestFail(TESQuest* Quest) {
-		for (auto const& callback : OnFailQuestHandler->callbacks) {
-			if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, Quest)) {
-				CallUDF(callback.script, nullptr, OnFailQuestHandler->numMaxArgs, Quest);
+	void __cdecl HandleQuestFail(TESQuest* apQuest) {
+		SendNVSEMessage(JG_OnFailQuest, apQuest);
+
+		for (auto const& rCallback : OnFailQuestHandler->callbacks) {
+			if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apQuest)) {
+				CallUDF(rCallback.script, nullptr, OnFailQuestHandler->numMaxArgs, apQuest);
 			}
 		}
-		CdeclCall(0x77A480, Quest);
+		CdeclCall(0x77A480, apQuest);
 	}
 
-	void* __cdecl handleSettingsUpdate() {
-		for (auto const& callback : OnSettingsUpdateHandler->callbacks) {
-			CallUDF(callback.script, nullptr, OnSettingsUpdateHandler->numMaxArgs);
+	void* __cdecl HandleSettingsUpdate() {
+		SendNVSEMessage(JG_OnSettingsUpdate);
+
+		for (auto const& rCallback : OnSettingsUpdateHandler->callbacks) {
+			CallUDF(rCallback.script, nullptr, OnSettingsUpdateHandler->numMaxArgs);
 		}
 		return CdeclCall<void*>(0x45D180);
 	}
-	ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* cell) {
-		for (auto const& callback : OnSeenDataUpdateHandler->callbacks) {
-			if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, cell)) {
-				CallUDF(callback.script, nullptr, OnSeenDataUpdateHandler->numMaxArgs, cell);
+
+	ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* apCell) {
+		SendNVSEMessage(JG_OnSeenDataUpdate, apCell);
+
+		for (auto const& rCallback : OnSeenDataUpdateHandler->callbacks) {
+			if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apCell)) {
+				CallUDF(rCallback.script, nullptr, OnSeenDataUpdateHandler->numMaxArgs, apCell);
 			}
 		}
-		return &cell->extraDataList;
+		return &apCell->extraDataList;
 	}
-	uint32_t __fastcall HandleChallengeCompleteEvent(TESChallenge* challenge) {
-		for (auto const& callback : OnChallengeCompleteHandler->callbacks) {
-			if (reinterpret_cast<FilterForm*>(callback.eventFilter)->IsBaseInFilter(0, challenge)) {
-				CallUDF(callback.script, nullptr, OnChallengeCompleteHandler->numMaxArgs, challenge);
+
+	uint32_t __fastcall HandleChallengeCompleteEvent(TESChallenge* apChallenge) {
+		SendNVSEMessage(JG_OnChallengeComplete, apChallenge);
+
+		for (auto const& rCallback : OnChallengeCompleteHandler->callbacks) {
+			if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apChallenge)) {
+				CallUDF(rCallback.script, nullptr, OnChallengeCompleteHandler->numMaxArgs, apChallenge);
 			}
 		}
-		return challenge->data.type;
+		return apChallenge->data.type;
 	}
 
-	uint32_t __fastcall handlerRenderGameEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
-		for (auto const& callback : OnRenderGameModeUpdateHandler->callbacks) {
-			CallUDF(callback.script, nullptr, OnRenderGameModeUpdateHandler->numMaxArgs);
+	uint32_t __fastcall HandleRenderGameEvent(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
+
+		{
+			struct EventData {
+				BSRenderedTexture*		pTexture;
+				bool					bRenderedMenu;
+				bool					bSkipFirstPerson;
+			} kData(apDestination, abRenderedMenuMode, abSkipFirstPerson);
+			SendNVSEMessage(JG_OnRenderGameModeUpdate, kData);
 		}
-		return ThisCall<uint32_t>(0x08706B0, ECX, arg1, arg2, arg3);
-	}
 
-	uint32_t __fastcall handlerRenderMenuEvent(void* ECX, void* edx, int arg1, int arg2, int arg3) {
-		for (auto const& callback : OnRenderRenderedMenuUpdateHandler->callbacks) {
-			CallUDF(callback.script, nullptr, OnRenderRenderedMenuUpdateHandler->numMaxArgs);
+		for (auto const& rCallback : OnRenderGameModeUpdateHandler->callbacks) {
+			CallUDF(rCallback.script, nullptr, OnRenderGameModeUpdateHandler->numMaxArgs);
 		}
-		return ThisCall<uint32_t>(0x08706B0, ECX, arg1, arg2, arg3);
+		return ThisCall<uint32_t>(0x8706B0, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
 	}
 
-	bool CompareFloats(float a, float b) {
-		const float epsilon = 0.0001f;
-		return fabs(a - b) < epsilon;
+	uint32_t __fastcall HandleRenderMenuEvent(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
+
+		{
+			struct EventData {
+				BSRenderedTexture*		pTexture;
+				bool					bRenderedMenu;
+				bool					bSkipFirstPerson;
+			} kData(apDestination, abRenderedMenuMode, abSkipFirstPerson);
+			SendNVSEMessage(JG_OnRenderRenderedMenuUpdate, kData);
+		}
+
+		for (auto const& rCallback : OnRenderRenderedMenuUpdateHandler->callbacks) {
+			CallUDF(rCallback.script, nullptr, OnRenderRenderedMenuUpdateHandler->numMaxArgs);
+		}
+		return ThisCall<uint32_t>(0x8706B0, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
 	}
 
-	void __stdcall HandleAVChangeEvent(ActorValueOwner* avOwner, int avCode, float previousVal, float modVal, void* onChangeCallback) {
-		if (onChangeCallback == nullptr)
-			previousVal = avOwner->GetActorValueF(avCode) - modVal;
+	inline static bool __fastcall CompareFloats(float a, float b) {
+		constexpr float fEpsilon = 0.0001f;
+		return fabs(a - b) < fEpsilon;
+	}
 
-		const float fNewValue = previousVal + modVal;
-		const float fPreviousValue = previousVal;
+	void __stdcall HandleAVChangeEvent(ActorValueOwner* apActor, uint32_t aeActorValue, float afPreviousValue, float afModValue, void* apChangeCallback) {
+		if (apChangeCallback == nullptr)
+			afPreviousValue = apActor->GetActorValueF(aeActorValue) - afModValue;
+
+		const float fNewValue = afPreviousValue + afModValue;
+		const float fPreviousValue = afPreviousValue;
 
 		const float fNewValueFloor = floor(fNewValue);
 		const float fPreviousValueFloor = floor(fPreviousValue);
 
-		TESForm* pForm = avOwner->GetAsForm();
-		Actor* pActor = nullptr;
-		if (pForm->IsActor())
-			pActor = static_cast<Actor*>(pForm);
+		TESForm* pForm = apActor->GetAsForm();
+		Actor* pActor = pForm->IsActor() ? static_cast<Actor*>(pForm) : nullptr;
 
 		if (!CompareFloats(fNewValueFloor, fPreviousValueFloor)) {
-			//Console_Print("actor 0x%X av %d prev %.2f mod %.2f new %.2f callback 0x%X", avOwner->GetAsForm()->GetFormID(), avCode, previousVal, modVal, newVal, onChangeCallback);
+
+			{
+				struct EventData {
+					TESForm*	pForm;
+					float		fNewValue;
+					float		fPreviousValue;
+				} kData(pForm, fNewValue, fPreviousValue);
+				SendNVSEMessage(JG_OnAVChange, kData);
+			}
 
 			if (pActor && pActor->IsPlayerRef()) {
-				for (auto const& callback : OnAVChangeHandler->callbacks) {
-					FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
-					if (filter->IsInFilter(1, avCode)) {
+				for (auto const& rCallback : OnAVChangeHandler->callbacks) {
+					FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
+					if (pFilter->IsInFilter(1, aeActorValue)) {
 
-						bool bFullValues = callback.UserFlags.Get(1);
+						bool bFullValues = rCallback.UserFlags.Get(1);
 
 						const float& fNewVal = bFullValues ? fNewValue : fNewValueFloor;
 						const float& fPrevVal = bFullValues ? fPreviousValue : fPreviousValueFloor;
 
-						CallUDF(callback.script, nullptr, OnAVChangeHandler->numMaxArgs, avCode, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
+						CallUDF(rCallback.script, nullptr, OnAVChangeHandler->numMaxArgs, aeActorValue, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
 					}
 				}
 			}
 			else {
-				for (auto const& callback : OnNPCAVChangeHandler->callbacks) {
-					FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
-					if (filter->IsInFilter(1, avCode) && (filter->IsInFilter(0, pForm->GetFormID()) || (pActor && filter->IsInFilter(0, pActor->GetBaseForm()->GetFormID())))) {
+				for (auto const& rCallback : OnNPCAVChangeHandler->callbacks) {
+					FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
+					if (pFilter->IsInFilter(1, aeActorValue) && (pFilter->IsInFilter(0, pForm->GetFormID()) || (pActor && pFilter->IsInFilter(0, pActor->GetBaseForm()->GetFormID())))) {
 
-						bool bFullValues = callback.UserFlags.Get(1);
+						bool bFullValues = rCallback.UserFlags.Get(1);
 
 						const float& fNewVal = bFullValues ? fNewValue : fNewValueFloor;
 						const float& fPrevVal = bFullValues ? fPreviousValue : fPreviousValueFloor;
 
-						CallUDF(callback.script, nullptr, OnNPCAVChangeHandler->numMaxArgs, pForm, avCode, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
+						CallUDF(rCallback.script, nullptr, OnNPCAVChangeHandler->numMaxArgs, pForm, aeActorValue, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
 					}
 				}
 			}
 		}
 	}
+
 	template <uint32_t originalCall>
-	bool __fastcall HandlePLChangeEvent(Actor* actor) {
-		if (actor == nullptr || actor->baseProcess == nullptr) return true; //early exit, no need to handle error states because there's no baseProcess.
-		int oldLevel = actor->baseProcess->processLevel;
-		bool result = ThisCall<bool>(originalCall, actor);
-		int newLevel = actor->baseProcess->processLevel;
-		if (oldLevel != newLevel) {
-			for (auto const& callback : OnPLChangeHandler->callbacks) {
-				FilterFormInt* filter = reinterpret_cast<FilterFormInt*>(callback.eventFilter);
-				if ((filter->IsInFilter(0, actor->GetFormID()) || filter->IsInFilter(0, actor->GetBaseForm()->GetFormID())) &&
-					filter->IsInFilter(1, newLevel)) {
-					CallUDF(callback.script, nullptr, OnPLChangeHandler->numMaxArgs, actor, oldLevel, newLevel);
+	bool __fastcall HandlePLChangeEvent(Actor* apActor) {
+		if (apActor == nullptr || apActor->baseProcess == nullptr) [[unlikely]]
+			return true; //early exit, no need to  error states because there's no baseProcess.
+
+		const uint32_t eOldLevel = apActor->baseProcess->processLevel;
+		const bool bResult = ThisCall<bool>(originalCall, apActor);
+		const uint32_t eNewLevel = apActor->baseProcess->processLevel;
+		if (eOldLevel != eNewLevel) {
+
+			{
+				struct EventData {
+					Actor*		pActor;
+					uint32_t	eOldLevel;
+					uint32_t	eNewLevel;
+				} kData(apActor, eOldLevel, eNewLevel);
+				SendNVSEMessage(JG_OnPLChange, kData);
+			}
+
+			for (auto const& rCallback : OnPLChangeHandler->callbacks) {
+				FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
+				if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetBaseForm()->GetFormID())) && pFilter->IsInFilter(1, eNewLevel)) {
+					CallUDF(rCallback.script, nullptr, OnPLChangeHandler->numMaxArgs, apActor, eOldLevel, eNewLevel);
 				}
 			}
 		}
-		return result;
+		return bResult;
 	}
 
-	void __fastcall HandleOnRadioPostSoundAttach(TESObjectACTI* a_radioActi, unsigned int mode) {
-		if (a_radioActi == nullptr) return;
-		for (auto const& callback : OnRadioPostSoundAttachHandler->callbacks) {
-			FilterForm* filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
-			if (filter->IsBaseInFilter(0, a_radioActi)) {
-				CallUDF(callback.script, nullptr, OnRadioPostSoundAttachHandler->numMaxArgs, a_radioActi, (mode > 0) ? 1 : 0);
-			}
-		}
-	}
+	void __fastcall HandleOnRadioPostSoundAttach(TESObjectACTI* apRadio, bool abActive) {
+		if (!apRadio) 
+			return;
 
-
-	void __fastcall HandleInputSwitch(InterfaceManager* a_man, Menu* a_menu) {
-		int menuId = -1;
-		if (a_menu) {
-			menuId = a_menu->GetID();
-		}
-		for (auto const& callback : OnKeyboardControllerSelectionChangeHandler->callbacks) {
-			auto filter = reinterpret_cast<FilterInt*>(callback.eventFilter);
-			if (filter->IsInFilter(0, menuId) || filter->IsInFilter(0, 0)) {
-				CallUDF(callback.script, nullptr, OnKeyboardControllerSelectionChangeHandler->numMaxArgs, menuId);
-			}
-		}
-	}
-
-
-	void __fastcall HandleOnSleepWait(SleepWaitMenu* a_man, uint32_t clickMode) {
-		for (auto const& callback : OnSleepWaitEventHandler->callbacks) {
-			auto filter = reinterpret_cast<FilterInt*>(callback.eventFilter);
-			if (filter->IsInFilter(0, int(a_man->isRest) + 1) || filter->IsInFilter(0, 0)) {
-				CallUDF(callback.script, nullptr, OnKeyboardControllerSelectionChangeHandler->numMaxArgs, (int(a_man->isRest) + 1));
-			}
-		}
-	}
-
-
-
-	__declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, uint32_t avCode, float prevVal, float newVal, ActorValueOwner* attacker)
-	{
-		__asm
 		{
+			struct EventData {
+				TESObjectACTI*	pRadio;
+				bool			bActive;
+			} kData(apRadio, abActive);
+			SendNVSEMessage(JG_OnRadioPostSoundAttach, kData);
+		}
+
+		for (auto const& rCallback : OnRadioPostSoundAttachHandler->callbacks) {
+			FilterForm* pFilter = reinterpret_cast<FilterForm*>(rCallback.eventFilter);
+			if (pFilter->IsBaseInFilter(0, apRadio)) {
+				CallUDF(rCallback.script, nullptr, OnRadioPostSoundAttachHandler->numMaxArgs, apRadio, abActive ? 1u : 0u);
+			}
+		}
+	}
+
+
+	void __fastcall HandleInputSwitch(InterfaceManager* apManager, Menu* apMenu) {
+		SendNVSEMessage(JG_OnKeyboardControllerSelectionChange, apMenu);
+
+		const uint32_t uiMenuID = apMenu ? apMenu->GetID() : -1;
+		for (auto const& rCallback : OnKeyboardControllerSelectionChangeHandler->callbacks) {
+			auto pFilter = reinterpret_cast<FilterInt*>(rCallback.eventFilter);
+			if (pFilter->IsInFilter(0, uiMenuID) || pFilter->IsInFilter(0, 0)) {
+				CallUDF(rCallback.script, nullptr, OnKeyboardControllerSelectionChangeHandler->numMaxArgs, uiMenuID);
+			}
+		}
+	}
+
+
+	void __fastcall HandleOnSleepWait(SleepWaitMenu* apMenu, uint32_t auiTileID) {
+		SendNVSEMessage(JG_OnSleepWaitEvent, apMenu);
+
+		for (auto const& rCallback : OnSleepWaitEventHandler->callbacks) {
+			auto pFilter = reinterpret_cast<FilterInt*>(rCallback.eventFilter);
+			if (pFilter->IsInFilter(0, uint32_t(apMenu->isRest) + 1) || pFilter->IsInFilter(0, 0)) {
+				CallUDF(rCallback.script, nullptr, OnSleepWaitEventHandler->numMaxArgs, (int(apMenu->isRest) + 1));
+			}
+		}
+	}
+
+	__declspec(naked) void __cdecl AVChangeEventAsm(ActorValueOwner* avOwner, uint32_t avCode, float prevVal, float newVal, ActorValueOwner* attacker) {
+		__asm {
 			push    ebp
 			mov     ebp, esp
 			mov     eax, [ebp + 0xC]
 			cmp     eax, 0x4D
-			jnb     done
+			jnb     DONE
 			mov     ecx, ds:0x11D61C8[eax * 4]
 			test    ecx, ecx
-			jz      done
+			jz      DONE
 			push    ecx
 			mov		ecx, dword ptr[ecx + 0x54]
 			push	ecx
 			mov     ecx, [ebp + 8]
-			//cmp     dword ptr[ecx - 0x98], 0x14 // Check for PlayerREF
-			//jnz     skipHandler
 			push    dword ptr[ebp + 0x14]
 			push    dword ptr[ebp + 0x10]
 			push    eax
 			push    dword ptr[ebp + 0x08]
 			call    HandleAVChangeEvent
-			skipHandler :
 			mov     ecx, [ebp - 4]
-				cmp     dword ptr[ecx + 0x54], 0
-				jz      done
-				mov     eax, 0x66EE72
-				jmp     eax
-				done :
+			cmp     dword ptr[ecx + 0x54], 0
+			jz      DONE
+			mov     eax, 0x66EE72
+			jmp     eax
+			DONE:
 			leave
-				retn
+			retn
 		}
 	}
 
 	__declspec(naked) void OnCrosshairEventAsm() {
-		static const uint32_t retnAddr = 0x775A69;
+		static constexpr uint32_t retnAddr = 0x775A69;
 		__asm {
-			mov ecx, [ebp + 0x8]
-			call handleCrosshairEvent
-			movzx ecx, [ebp + 0x10]
-			test ecx, ecx
-			jmp retnAddr
+			mov		ecx, [ebp + 0x8]
+			call	HandleCrosshairEvent
+			movzx	ecx, [ebp + 0x10]
+			test	ecx, ecx
+			jmp		retnAddr
 		}
 	}
 	__declspec (naked) void OnDyingEventAsm() {
-		static const uint32_t checkProtect = 0xEC408C;
-		__asm
-		{
-			push dword ptr[ebp - 0x18]
-			call handleDyingEvent
-			mov ecx, dword ptr ss : [ebp - 0xC]
-			mov dword ptr fs : [0] , ecx
-			pop ecx
-			pop esi
-			mov ecx, dword ptr ss : [ebp - 0x14]
-			xor ecx, ebp
-			call checkProtect
-			mov esp, ebp
-			pop ebp
-			mov esp, ebx
-			pop ebx
-			retn 8
+		static constexpr uint32_t checkProtect = 0xEC408C;
+		__asm {
+			push	dword ptr[ebp - 0x18]
+			call	HandleDyingEvent
+			mov		ecx, dword ptr ss : [ebp - 0xC]
+			mov		dword ptr fs : [0] , ecx
+			pop		ecx
+			pop		esi
+			mov		ecx, dword ptr ss : [ebp - 0x14]
+			xor		ecx, ebp
+			call	checkProtect
+			mov		esp, ebp
+			pop		ebp
+			mov		esp, ebx
+			pop		ebx
+			retn	8
 		}
 	}
 
 	__declspec (naked) void OnQuestStartStopEventAsm() {
-		__asm
-		{
-			mov ecx, dword ptr[ebp - 4]
-			mov dl, byte ptr[ebp + 8]
-			call handleQuestStartStop
-			mov esp, ebp
-			pop ebp
-			ret 4
+		__asm {
+			mov		ecx, dword ptr[ebp - 4]
+			mov		dl, byte ptr[ebp + 8]
+			call	HandleQuestStartStop
+			mov		esp, ebp
+			pop		ebp
+			ret		4
 		}
 	}
-
 
 	__declspec (naked) void OnKeyboardControllerSelectionChangeAsm() {
-		__asm
-		{
+		__asm {
 			ret 4
 		}
 	}
 
-	TESObjectREFR* hkOwner = nullptr;
+	TESObjectREFR* pItemOwnerRef = nullptr;
 
-	ExtraDataList* __fastcall GetExtraDataListHook(TESObjectREFR* owner)
-	{
-		hkOwner = owner;
-		return &owner->extraDataList;
+	ExtraDataList* __fastcall GetExtraDataListHook(TESObjectREFR* apRef) {
+		pItemOwnerRef = apRef;
+		return &apRef->extraDataList;
 	}
 
-	void __fastcall HandleTakeBackItem(void* contChanges, void* edx, PlayerCharacter* player, TESForm* item, bool keepOwner, int32_t quantity, void* xList, bool a9, Actor* target, int a10, int a11, bool a12, bool a13, void* cEntry)
-	{
-		for (auto const& callback : OnTakeBackItemHandler->callbacks) {
-			auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
-			TESObjectREFR* owner = target->IsActor() ? target : hkOwner;
-			if (filter->IsBaseInFilter(0, item) && (filter->IsInFilter(1, owner->GetFormID()) || filter->IsInFilter(1, owner->baseForm->GetFormID()))) {
-				CallUDF(callback.script, nullptr, OnTakeBackItemHandler->numMaxArgs, owner, item, quantity);
+	TESObjectREFR* __fastcall HandleTakeBackItem(InventoryChanges* apInvChanges, void*, TESObjectREFR* apRef, TESBoundObject* apObject, bool abStealing, int32_t aiNumber, ExtraDataList* apExtraList, bool abDropWorld, TESObjectREFR* apOtherContainer, const NiPoint3* apPoint, const NiPoint3* apRotate, bool abDelete, bool abPreferStolen, ItemChange* apItemChange) {
+		TESObjectREFR* pOwner = apOtherContainer->IsActor() ? apOtherContainer : pItemOwnerRef;
+
+		{
+			struct EventData {
+				TESObjectREFR*	pOwner;
+				TESBoundObject* pObject;
+				int32_t			iCount;
+			} kData(pOwner, apObject, aiNumber);
+			SendNVSEMessage(JG_OnTakeBackItem, kData);
+		}
+
+		for (auto const& rCallback : OnTakeBackItemHandler->callbacks) {
+			auto pFilter = reinterpret_cast<FilterForm*>(rCallback.eventFilter);
+			if (pFilter->IsBaseInFilter(0, apObject) && (pFilter->IsInFilter(1, pOwner->GetFormID()) || pFilter->IsInFilter(1, pOwner->baseForm->GetFormID()))) {
+				CallUDF(rCallback.script, nullptr, OnTakeBackItemHandler->numMaxArgs, pOwner, apObject, aiNumber);
 			}
 		}
-		ThisCall<TESObjectREFR*>(0x4C37D0, contChanges, player, item, keepOwner, quantity, xList, a9, target, a10, a11, a12, a13, cEntry);
+		return ThisCall<TESObjectREFR*>(0x4C37D0, apInvChanges, apRef, apObject, abStealing, aiNumber, apExtraList, abDropWorld, apOtherContainer, apPoint, apRotate, abDelete, abPreferStolen, apItemChange);
 	}
 
-	template <uintptr_t a_addr>
+	template <uintptr_t auiAddress>
 	class RadioTuneOnHook {
 	private:
-		static inline uintptr_t hookCall = a_addr;
+		static inline CallDetour kDetour;
 	public:
-		static  DWORD __cdecl Hook(TESObjectACTI* ref, DWORD mode) {
-			auto res = CdeclCall<DWORD>(hookCall, ref, mode);
-			HandleOnRadioPostSoundAttach(ref, mode);
-			return res;
+		static void  __cdecl Hook(TESObjectACTI* apRef, bool abActive) {
+			CdeclCall(kDetour.GetOverwrittenAddr(), apRef, abActive);
+			HandleOnRadioPostSoundAttach(apRef, abActive);
 		}
 
 		RadioTuneOnHook() {
-			uintptr_t hookPoint = hookCall;
-			hookCall = GetRelJumpAddr(hookCall);
-			WriteRelCall(hookPoint, (uintptr_t)Hook);
+			kDetour.ReplaceCall(auiAddress, Hook);
 		}
 	};
 
-
-	template <uintptr_t a_addr>
+	template <uintptr_t auiAddress>
 	class InputSwitchHook {
 	private:
-		static inline uintptr_t hookCall = a_addr;
+		static inline CallDetour kDetour;
 	public:
-		static  DWORD __fastcall Hook(InterfaceManager* r_man, void* edx, Tile* newTile, DWORD tileVal, DWORD doPlaySound) {
-			Menu* curMen = ThisCall<Menu*>(0x720E60, r_man);
-			bool fireEvent = r_man->activeTileAlt != newTile;
-			auto res = ThisCall<DWORD>(hookCall, r_man, newTile, tileVal, doPlaySound);
-			if (fireEvent) {
-				HandleInputSwitch(r_man, curMen);
-			}
-			return res;
+		static void __fastcall Hook(InterfaceManager* apInterfaceManager, void*, Tile* apTarget, int32_t aiType, bool abPlaySounds) {
+			void* pMenuManager = CdeclCall<void*>(0x71E290, true);
+			Menu* pFrontmostMenu = ThisCall<Menu*>(0x720E60, pMenuManager); // MenuManager::GetFrontmostMenu
+			const bool bFireEvent = apInterfaceManager->activeTileAlt != apTarget;
+			ThisCall(kDetour.GetOverwrittenAddr(), apInterfaceManager, apTarget, aiType, abPlaySounds);
+			if (bFireEvent)
+				HandleInputSwitch(apInterfaceManager, pFrontmostMenu);
 		}
 		InputSwitchHook() {
-			uintptr_t hookPoint = hookCall;
-			hookCall = GetRelJumpAddr(hookCall);
-			WriteRelCall(hookPoint, (uintptr_t)Hook);
+			kDetour.ReplaceCall(auiAddress, Hook);
 		}
 	};
 
-
-	void __fastcall handleSleepWaitClick(SleepWaitMenu* menu, void* edx, int mode, void* tile)
-	{
-		ThisCall(0x7C0220, menu, mode, tile);
-		if (mode == 4) {
-			HandleOnSleepWait(menu, mode);
-		}
+	void __fastcall HandleSleepWaitClick(SleepWaitMenu* apMenu, void*, uint32_t auiTileID, Tile* apTarget) {
+		ThisCall(0x7C0220, apMenu, auiTileID, apTarget);
+		if (auiTileID == 4)
+			HandleOnSleepWait(apMenu, auiTileID);
 	}
 
-	void __stdcall HandleOnNPCResponse(DialogueResponse* npcResponse)
-	{
-		int emotionID = 0;
-		int emotionValue = 0;
-		int responseNumber = 0;
-		const char* responseString = "";
-		const char* voicePath = "";
+	void __fastcall HandleOnNPCResponse(DialogueResponse* apResponse) {
+		struct EventData {
+			uint32_t	uiEmotionID = 0;
+			uint32_t	uiEmotionValue = 0;
+			uint32_t	uiResponseNumber = 0;
+			const char* pResponseString = "";
+			const char* pVoicePath = "";
+		} kData;
 
-		if (npcResponse)
-		{
-			emotionID = npcResponse->uiEmotionType;
-			emotionValue = npcResponse->uiEmotionValue;
-			responseNumber = npcResponse->uiResponseNumber;
-			responseString = npcResponse->strResponseText.c_str();
-			voicePath = npcResponse->strVoiceFilePath.c_str();
+		if (apResponse) {
+			kData.uiEmotionID = apResponse->uiEmotionType;
+			kData.uiEmotionValue = apResponse->uiEmotionValue;
+			kData.uiResponseNumber = apResponse->uiResponseNumber;
+			kData.pResponseString = apResponse->strResponseText.c_str();
+			kData.pVoicePath = apResponse->strVoiceFilePath.c_str();
 		}
 
-		for (auto const& callback : OnNPCResponseHandler->callbacks) {
-			auto filter = reinterpret_cast<FilterInt*>(callback.eventFilter);
-			if (filter->IsInFilter(0, emotionID) || filter->IsInFilter(0, 0)) {
-				CallUDF(callback.script, nullptr, OnNPCResponseHandler->numMaxArgs, responseString, voicePath, emotionID, emotionValue, responseNumber);
+		SendNVSEMessage(JG_OnNPCResponse, kData);
+
+		for (auto const& rCallback : OnNPCResponseHandler->callbacks) {
+			auto pFilter = reinterpret_cast<FilterInt*>(rCallback.eventFilter);
+			if (pFilter->IsInFilter(0, kData.uiEmotionID) || pFilter->IsInFilter(0, 0)) {
+				CallUDF(rCallback.script, nullptr, OnNPCResponseHandler->numMaxArgs, kData.pResponseString, kData.pVoicePath, kData.uiEmotionID, kData.uiEmotionValue, kData.uiResponseNumber);
 			}
 		}
-		return;
 	}
 
 	//Currently Displayed Text, Source Position, Target Reference (Usually Player)
-	void __stdcall HandleOnGeneralSubtitle(char* apText, NiPoint3 akPos, TESObjectREFR* apTarget)
-	{
-		NiPoint3 pos = akPos;
-		const char* subtitleString = apText ? apText : "";
-		float x = pos.x;
-		float y = pos.y;
-		float z = pos.z;
+	void __fastcall HandleOnGeneralSubtitle(const char* apText, NiPoint3 akPos, TESObjectREFR* apTarget) {
+		{
+			struct EventData {
+				const char*		pText;
+				TESObjectREFR*	pTarget;
+				NiPoint3		kPos;
+			} kData(apText, apTarget, akPos);
+			SendNVSEMessage(JG_OnGeneralSubtitle, kData);
+		}
 
-		TESObjectREFR* player = apTarget ? apTarget : nullptr;
+		const char* pSubtitleString = apText ? apText : "";
+		const uint32_t uiX = *reinterpret_cast<uint32_t*>(&akPos.x);
+		const uint32_t uiY = *reinterpret_cast<uint32_t*>(&akPos.y);
+		const uint32_t uiZ = *reinterpret_cast<uint32_t*>(&akPos.z);
 
-		for (auto const& callback : OnGeneralSubtitleHandler->callbacks) {
-			auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
-			if (filter->IsInFilter(0, player) || filter->IsInFilter(0, 0)) {
-				CallUDF(callback.script, nullptr, OnGeneralSubtitleHandler->numMaxArgs, subtitleString, player, *(uint32_t*)&x, *(uint32_t*)&y, *(uint32_t*)&z);
+		for (auto const& rCallback : OnGeneralSubtitleHandler->callbacks) {
+			auto pFilter = reinterpret_cast<FilterForm*>(rCallback.eventFilter);
+			if (pFilter->IsInFilter(0, apTarget) || pFilter->IsInFilter(0, 0)) {
+				CallUDF(rCallback.script, nullptr, OnGeneralSubtitleHandler->numMaxArgs, pSubtitleString, apTarget, uiX, uiY, uiZ);
 			}
 		}
 		return;
 	}
 
 	void __fastcall HandleOnReputationChange(TESReputation* apRep) {
-		for (auto const& callback : OnReputationChangeHandler->callbacks) {
-			float fPos = apRep->fPositiveReputation;
-			float fNeg = apRep->fNegativeReputation;
-			auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
-			if (filter->IsBaseInFilter(0, apRep)) {
-				CallUDF(callback.script, nullptr, OnReputationChangeHandler->numMaxArgs, apRep, *(uint32_t*)&fPos, *(uint32_t*)&fNeg);
+		{
+			struct EventData {
+				TESReputation*	pReputation;
+				float			fPos;
+				float			fNeg;
+			} kData(apRep, apRep->fPositiveReputation, apRep->fNegativeReputation);
+			SendNVSEMessage(JG_OnReputationChange, kData);
+		}
+
+		const uint32_t uiPos = *reinterpret_cast<uint32_t*>(&apRep->fPositiveReputation);
+		const uint32_t uiNeg = *reinterpret_cast<uint32_t*>(&apRep->fNegativeReputation);
+		for (auto const& rCallback : OnReputationChangeHandler->callbacks) {
+			auto pFilter = reinterpret_cast<FilterForm*>(rCallback.eventFilter);
+			if (pFilter->IsBaseInFilter(0, apRep)) {
+				CallUDF(rCallback.script, nullptr, OnReputationChangeHandler->numMaxArgs, apRep, uiPos, uiNeg);
 			}
 		}
 	}
 
 	//Fires when general subtitles are sent to the HUD.
-	bool __fastcall HandleOnGeneralSubtitleEvent(HUDMainMenu* thisPtr, void* edx, char* apText, BSSoundHandle akSound, NiPoint3 akPos, TESObjectREFR* apTarget, bool abInstant)
-	{
-		if (apText) HandleOnGeneralSubtitle(apText, akPos, apTarget);
+	bool __fastcall HandleOnGeneralSubtitleEvent(HUDMainMenu* apMenu, void*, const char* apText, BSSoundHandle akSound, NiPoint3 akPos, TESObjectREFR* apTarget, bool abInstant) {
+		if (apText) 
+			HandleOnGeneralSubtitle(apText, akPos, apTarget);
 
-		return ThisCall<bool>(0x774FD0, thisPtr, apText, akSound, akPos, apTarget, abInstant);
+		return ThisCall<bool>(0x774FD0, apMenu, apText, akSound, akPos, apTarget, abInstant);
 	}
 
 	bool __fastcall HandleOnNPCResponseEvent(MenuTopic* apThis) {
@@ -492,34 +639,16 @@ namespace JohnnyEvents {
 		return apThis->pFirstResponse && apThis->pFirstResponse->GetItem();
 	}
 
-	void __fastcall HandleOnReputationChangeEvent(TESReputation* apThis, void* edx, uint32_t auiChangeFlag)
-	{
+	void __fastcall HandleOnReputationChangeEvent(TESReputation* apThis, void*, uint32_t auiChangeFlag) {
 		if (auiChangeFlag & 2)
 			HandleOnReputationChange(apThis);
 
 		ThisCall(0x484B60, apThis, auiChangeFlag);
 	}
 
-
-	void RegisterOnNPCActorValueChange(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		if (OnNPCAVChangeHandler) {
-			if (toggle)
-				OnNPCAVChangeHandler->RegisterEvent(script, filters, userFlags);
-			else OnNPCAVChangeHandler->RemoveEvent(script, filters);
-		}
-	}
-
-	void RegisterOnTakeBackItem(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		if (OnTakeBackItemHandler) {
-			if (toggle)
-				OnTakeBackItemHandler->RegisterEvent(script, filters);
-			else OnTakeBackItemHandler->RemoveEvent(script, filters);
-		}
-	}
-
 	void Install() {
+		CallUDF = g_scriptInterface->CallFunctionAlt;
+
 		OnDyingHandler = JGCreateEvent("OnDying", 1, 1);
 		OnStartQuestHandler = JGCreateEvent("OnStartQuest", 1, 1);
 		OnStopQuestHandler = JGCreateEvent("OnStopQuest", 1, 1);
@@ -543,48 +672,47 @@ namespace JohnnyEvents {
 		OnReputationChangeHandler = JGCreateEvent("OnReputationChangeHandler", 3, 1);
 		OnNPCAVChangeHandler = JGCreateEvent("OnNPCActorValueChangeHandler", 4, 2, FilterFormInt::Create);
 
-		CallUDF = g_scriptInterface->CallFunctionAlt;
-		WriteRelCall(0x55678A, (uint32_t)HandleSeenDataUpdateEvent);
-		WriteRelCall(0x557053, (uint32_t)HandleSeenDataUpdateEvent);
-		WriteRelJump(0x89F4A4, (uint32_t)OnDyingEventAsm);
-		WriteRelJump(0x60CA24, (uint32_t)OnQuestStartStopEventAsm);
-		WriteRelCall(0x572FF1, (uint32_t)HandleLimbGoneEvent);
-		WriteRelCall(0x5F5C78, (uint32_t)HandleChallengeCompleteEvent);
-		WriteRelCall(0x5F6222, (uint32_t)HandleChallengeCompleteEvent);
-		WriteRelCall(0x776010, (uint32_t)handleCrosshairEvent);
-		WriteRelCall(0x60CB5A, (uint32_t)handleQuestFail);
-		WriteRelCall(0x60CA78, (uint32_t)handleQuestComplete);
-		WriteRelCall(0x7D6D73, (uint32_t)handleSettingsUpdate);
-		WriteRelCall(0x5D4E5B, (uint32_t)handleAddPerkEvent);
-		WriteRelCall(0x7865BD, (uint32_t)handleAddPerkEvent);
-		WriteRelCall(0x7E772D, (uint32_t)handleAddPerkEvent);
-		SafeWriteBuf(0x7E7732, "\x0F\x1F\x00", 3);
-		SafeWriteBuf(0x7865C2, "\x0F\x1F\x00", 3);
-		SafeWriteBuf(0x5D4E60, "\x0F\x1F\x00", 3);
-		WriteRelCall(0x5D4F89, (uint32_t)handleRemovePerkEvent);
-		SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00", 3);
+		WriteRelCall(0x55678A, HandleSeenDataUpdateEvent);
+		WriteRelCall(0x557053, HandleSeenDataUpdateEvent);
+		WriteRelJump(0x89F4A4, OnDyingEventAsm);
+		WriteRelJump(0x60CA24, OnQuestStartStopEventAsm);
+		WriteRelCall(0x572FF1, HandleLimbGoneEvent);
+		WriteRelCall(0x5F5C78, HandleChallengeCompleteEvent);
+		WriteRelCall(0x5F6222, HandleChallengeCompleteEvent);
+		WriteRelCall(0x776010, HandleCrosshairEvent);
+		WriteRelCall(0x60CB5A, HandleQuestFail);
+		WriteRelCall(0x60CA78, HandleQuestComplete);
+		WriteRelCall(0x7D6D73, HandleSettingsUpdate);
+		WriteRelCall(0x5D4E5B, HandleAddPerkEvent);
+		WriteRelCall(0x7865BD, HandleAddPerkEvent);
+		WriteRelCall(0x7E772D, HandleAddPerkEvent);
+		SafeWriteBuf(0x7E7732, "\x0F\x1F\x00");
+		SafeWriteBuf(0x7865C2, "\x0F\x1F\x00");
+		SafeWriteBuf(0x5D4E60, "\x0F\x1F\x00");
+		WriteRelCall(0x5D4F89, HandleRemovePerkEvent);
+		SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00");
 		SafeWrite8(0x60CA29, 0xCC);
-		WriteRelJump(0x66EE50, (uint32_t)AVChangeEventAsm);
+		WriteRelJump(0x66EE50, AVChangeEventAsm);
 		// Process Level change: MoveToHigh
-		SafeWrite32(0x108AC7C, (uint32_t)HandlePLChangeEvent<0x881D30>);
-		SafeWrite32(0x10872EC, (uint32_t)HandlePLChangeEvent<0x881D30>);
-		SafeWrite32(0x1086CAC, (uint32_t)HandlePLChangeEvent<0x881D30>);
-		SafeWrite32(0x1084494, (uint32_t)HandlePLChangeEvent<0x881D30>);
+		ReplaceVirtualFunc(0x108AC7C, HandlePLChangeEvent<0x881D30>);
+		ReplaceVirtualFunc(0x10872EC, HandlePLChangeEvent<0x881D30>);
+		ReplaceVirtualFunc(0x1086CAC, HandlePLChangeEvent<0x881D30>);
+		ReplaceVirtualFunc(0x1084494, HandlePLChangeEvent<0x881D30>);
 		// MoveToLow
-		SafeWrite32(0x108AC80, (uint32_t)HandlePLChangeEvent<0x882B90>);
-		SafeWrite32(0x10872F0, (uint32_t)HandlePLChangeEvent<0x882B90>);
-		SafeWrite32(0x1086CB0, (uint32_t)HandlePLChangeEvent<0x882B90>);
-		SafeWrite32(0x1084498, (uint32_t)HandlePLChangeEvent<0x882B90>);
+		ReplaceVirtualFunc(0x108AC80, HandlePLChangeEvent<0x882B90>);
+		ReplaceVirtualFunc(0x10872F0, HandlePLChangeEvent<0x882B90>);
+		ReplaceVirtualFunc(0x1086CB0, HandlePLChangeEvent<0x882B90>);
+		ReplaceVirtualFunc(0x1084498, HandlePLChangeEvent<0x882B90>);
 		// MoveToMiddleLow
-		SafeWrite32(0x108AC84, (uint32_t)HandlePLChangeEvent<0x883240>);
-		SafeWrite32(0x10872F4, (uint32_t)HandlePLChangeEvent<0x883240>);
-		SafeWrite32(0x1086CB4, (uint32_t)HandlePLChangeEvent<0x883240>);
-		SafeWrite32(0x108449C, (uint32_t)HandlePLChangeEvent<0x883240>);
+		ReplaceVirtualFunc(0x108AC84, HandlePLChangeEvent<0x883240>);
+		ReplaceVirtualFunc(0x10872F4, HandlePLChangeEvent<0x883240>);
+		ReplaceVirtualFunc(0x1086CB4, HandlePLChangeEvent<0x883240>);
+		ReplaceVirtualFunc(0x108449C, HandlePLChangeEvent<0x883240>);
 		// MoveToMiddleHigh
-		SafeWrite32(0x108AC88, (uint32_t)HandlePLChangeEvent<0x883800>);
-		SafeWrite32(0x10872F8, (uint32_t)HandlePLChangeEvent<0x883800>);
-		SafeWrite32(0x1086CB8, (uint32_t)HandlePLChangeEvent<0x883800>);
-		SafeWrite32(0x10844A0, (uint32_t)HandlePLChangeEvent<0x883800>);
+		ReplaceVirtualFunc(0x108AC88, HandlePLChangeEvent<0x883800>);
+		ReplaceVirtualFunc(0x10872F8, HandlePLChangeEvent<0x883800>);
+		ReplaceVirtualFunc(0x1086CB8, HandlePLChangeEvent<0x883800>);
+		ReplaceVirtualFunc(0x10844A0, HandlePLChangeEvent<0x883800>);
 
 		// Keyboard/Controller selection change
 		InputSwitchHook<0x0718059>();
@@ -595,172 +723,166 @@ namespace JohnnyEvents {
 		RadioTuneOnHook<0x579C64>();
 		RadioTuneOnHook<0x57A23A>();
 
-		SafeWrite32(0x10763B8, (uint32_t)handleSleepWaitClick);
+		ReplaceVirtualFunc(0x10763B8, HandleSleepWaitClick);
 
-		//testing
 		OnRenderGamePreUpdateHandler = JGCreateEvent("OnRenderGamePreUpdateHandler", 0, 0, nullptr);
-		WriteRelCall(0x943748, (uintptr_t)handlePreRenderEvent);
+		WriteRelCall(0x943748, HandlePreRenderEvent);
 		OnRenderGameModeUpdateHandler = JGCreateEvent("OnRenderGameModeUpdateHandler", 0, 0, nullptr);
-		WriteRelCall(0x870244, (uintptr_t)handlerRenderGameEvent);
+		WriteRelCall(0x870244, HandleRenderGameEvent);
 		OnRenderRenderedMenuUpdateHandler = JGCreateEvent("OnRenderRenderedMenuUpdateHandler", 0, 0, nullptr);
-		WriteRelCall(0x8702A9, (uintptr_t)handlerRenderMenuEvent);
+		WriteRelCall(0x8702A9, HandleRenderMenuEvent);
 
-		WriteRelCall(0x4CB976, (uint32_t)HandleTakeBackItem);
-		WriteRelCall(0x8F24A1, (uint32_t)GetExtraDataListHook);
+		WriteRelCall(0x4CB976, HandleTakeBackItem);
+		WriteRelCall(0x8F24A1, GetExtraDataListHook);
 
-		WriteRelCall(0x7630FD, (uint32_t)HandleOnNPCResponseEvent);
+		WriteRelCall(0x7630FD, HandleOnNPCResponseEvent);
 
 		//HUDMainMenu::AppendSubtitleData() called by Interface::ShowText()
-		WriteRelCall(0x7052B8, (uint32_t)HandleOnGeneralSubtitleEvent);
+		WriteRelCall(0x7052B8, HandleOnGeneralSubtitleEvent);
 
-		SafeWrite32(0x104BA6C, (uint32_t)HandleOnReputationChangeEvent);
+		ReplaceVirtualFunc(0x104BA6C, HandleOnReputationChangeEvent);
 	}
 
-	void Reset()
-	{
+	void Reset() {
 		OnDyingHandler->FlushEventCallbacks();
 		OnLimbGoneHandler->FlushEventCallbacks();
 		OnCrosshairHandler->FlushEventCallbacks();
 		OnPLChangeHandler->FlushEventCallbacks();
-		hkOwner = nullptr;
+		pItemOwnerRef = nullptr;
 	}
 
 	void Update() {
-		for (const auto& EventInfo : EventInfos) {
-			EventInfo->AddQueuedEvents();
-			EventInfo->DeleteEvents();
+		for (const auto& rInfo : EventInfos) {
+			rInfo->AddQueuedEvents();
+			rInfo->DeleteEvents();
 		}
 	}
 
-	void Register(EventInformation* eventInfo, Script* script, void** filters, bool toggle, uint32_t userFlags = 0)
-	{
-		if (eventInfo) {
-			if (toggle)
-				eventInfo->RegisterEvent(script, filters, userFlags);
-			else eventInfo->RemoveEvent(script, filters);
+	void __fastcall Register(EventInformation* apEventInfo, Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0) {
+		if (apEventInfo) {
+			if (abToggle)
+				apEventInfo->RegisterEvent(apScript, apFilters, auiUserFlags);
+			else 
+				apEventInfo->RemoveEvent(apScript, apFilters);
 		}
 	}
 
-	void RegisterOnDying(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnDyingHandler, script, filters, toggle);
+	void RegisterOnDying(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnDyingHandler, apScript, apFilters, abToggle);
 	}
 
-	void RegisterOnStartQuest(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnStartQuestHandler, script, filters, toggle);
+	void RegisterOnStartQuest(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnStartQuestHandler, apScript, apFilters, abToggle);
 	}
 
-	void RegisterOnStopQuest(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnStopQuestHandler, script, filters, toggle);
+	void RegisterOnStopQuest(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnStopQuestHandler, apScript, apFilters, abToggle);
 	}
 
-	void RegisterOnFailQuest(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnFailQuestHandler, script, filters, toggle);
+	void RegisterOnFailQuest(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnFailQuestHandler, apScript, apFilters, abToggle);
 	}
 
-	void RegisterOnCompleteQuest(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnCompleteQuestHandler, script, filters, toggle);
+	void RegisterOnCompleteQuest(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnCompleteQuestHandler, apScript, apFilters, abToggle);
 	}
 
-	void RegisterOnSeenDataUpdate(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnSeenDataUpdateHandler, script, filters, toggle);
+	void RegisterOnSeenDataUpdate(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnSeenDataUpdateHandler, apScript, apFilters, abToggle);
 	}
 
-	void RegisterOnLimbGone(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnLimbGoneHandler, script, filters, toggle);
-	}
-	void RegisterOnChallengeComplete(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnChallengeCompleteHandler, script, filters, toggle);
-	}
-	void RegisterOnCrosshair(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnCrosshairHandler, script, filters, toggle);
-	}
-	void RegisterOnSettingsUpdate(Script* script, bool toggle, uint32_t userFlags)
-	{
-		Register(OnSettingsUpdateHandler, script, nullptr, toggle);
-	}
-	void RegisterOnAddPerk(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnAddPerkHandler, script, filters, toggle);
-	}
-	void RegisterOnRemovePerk(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnRemovePerkHandler, script, filters, toggle);
-	}
-	void RegisterOnActorValueChange(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnAVChangeHandler, script, filters, toggle, userFlags);
+	void RegisterOnLimbGone(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnLimbGoneHandler, apScript, apFilters, abToggle);
 	}
 
-	void RegisterOnProcessLevelChange(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnPLChangeHandler, script, filters, toggle);
+	void RegisterOnChallengeComplete(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnChallengeCompleteHandler, apScript, apFilters, abToggle);
 	}
 
-	void RegisterOnRadioPostSoundAttach(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnRadioPostSoundAttachHandler, script, filters, toggle);
+	void RegisterOnCrosshair(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnCrosshairHandler, apScript, apFilters, abToggle);
 	}
 
-	void RegisterOnInputSwitch(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnKeyboardControllerSelectionChangeHandler, script, filters, toggle);
+	void RegisterOnSettingsUpdate(Script* script, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnSettingsUpdateHandler, script, nullptr, abToggle);
 	}
 
-	void RegisterOnSleepWait(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnSleepWaitEventHandler, script, filters, toggle);
+	void RegisterOnAddPerk(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnAddPerkHandler, apScript, apFilters, abToggle);
+	}
+	
+	void RegisterOnRemovePerk(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnRemovePerkHandler, apScript, apFilters, abToggle);
+	}
+
+	void RegisterOnActorValueChange(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnAVChangeHandler, apScript, apFilters, abToggle, auiUserFlags);
+	}
+
+	void RegisterOnProcessLevelChange(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnPLChangeHandler, apScript, apFilters, abToggle);
+	}
+
+	void RegisterOnRadioPostSoundAttach(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnRadioPostSoundAttachHandler, apScript, apFilters, abToggle);
+	}
+
+	void RegisterOnInputSwitch(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnKeyboardControllerSelectionChangeHandler, apScript, apFilters, abToggle);
+	}
+
+	void RegisterOnSleepWait(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnSleepWaitEventHandler, apScript, apFilters, abToggle);
 	}
 
 	enum EnumFlags {
-		kDoNotFireInRenderMenu = 1 << 0,
-		kDoNotFireInGameMode = 1 << 1,
-		kUseGamePreEvent = 1 << 2,
+		kDoNotFireInRenderMenu	= 1 << 0,
+		kDoNotFireInGameMode	= 1 << 1,
+		kUseGamePreEvent		= 1 << 2,
 	};
 
-	void RegisterOnRender(Script* script, bool toggle, uint32_t userFlags)
-	{
-		if (!(userFlags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler) {
-			if (!(userFlags & kUseGamePreEvent)) {
-				if (toggle)
-					OnRenderGameModeUpdateHandler->RegisterEvent(script, nullptr);
-				else OnRenderGameModeUpdateHandler->RemoveEvent(script, nullptr);
+	void RegisterOnRender(Script* apScript, bool abToggle, uint32_t auiUserFlags) {
+		if (!(auiUserFlags & kDoNotFireInGameMode) && OnRenderGameModeUpdateHandler) {
+			if (!(auiUserFlags & kUseGamePreEvent)) {
+				if (abToggle)
+					OnRenderGameModeUpdateHandler->RegisterEvent(apScript, nullptr);
+				else
+					OnRenderGameModeUpdateHandler->RemoveEvent(apScript, nullptr);
 			}
 			else if (OnRenderGamePreUpdateHandler) {
-				if (toggle)
-					OnRenderGamePreUpdateHandler->RegisterEvent(script, nullptr);
-				else OnRenderGamePreUpdateHandler->RemoveEvent(script, nullptr);
+				if (abToggle)
+					OnRenderGamePreUpdateHandler->RegisterEvent(apScript, nullptr);
+				else 
+					OnRenderGamePreUpdateHandler->RemoveEvent(apScript, nullptr);
 			}
 		}
 
-		if (!(userFlags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler) {
-			if (toggle)
-				OnRenderRenderedMenuUpdateHandler->RegisterEvent(script, nullptr);
-			else OnRenderRenderedMenuUpdateHandler->RemoveEvent(script, nullptr);
+		if (!(auiUserFlags & kDoNotFireInRenderMenu) && OnRenderRenderedMenuUpdateHandler) {
+			if (abToggle)
+				OnRenderRenderedMenuUpdateHandler->RegisterEvent(apScript, nullptr);
+			else 
+				OnRenderRenderedMenuUpdateHandler->RemoveEvent(apScript, nullptr);
 		}
 	}
 
-	void RegisterOnNPCResponse(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnNPCResponseHandler, script, filters, toggle);
+	void RegisterOnNPCResponse(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnNPCResponseHandler, apScript, apFilters, abToggle);
 	}
 
-	void RegisterOnGeneralSubtitle(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnGeneralSubtitleHandler, script, filters, toggle);
+	void RegisterOnGeneralSubtitle(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnGeneralSubtitleHandler, apScript, apFilters, abToggle);
 	}
 
-	void RegisterOnReputationChange(Script* script, void** filters, bool toggle, uint32_t userFlags)
-	{
-		Register(OnReputationChangeHandler, script, filters, toggle);
+	void RegisterOnReputationChange(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnReputationChangeHandler, apScript, apFilters, abToggle);
+	}
+
+	void RegisterOnNPCActorValueChange(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnNPCAVChangeHandler, apScript, apFilters, abToggle, auiUserFlags);
+	}
+
+	void RegisterOnTakeBackItem(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
+		Register(OnTakeBackItemHandler, apScript, apFilters, abToggle, auiUserFlags);
 	}
 }
 
