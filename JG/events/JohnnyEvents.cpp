@@ -77,7 +77,7 @@ namespace JohnnyEvents {
 		g_msgInterface->Dispatch(g_pluginHandle, aeID, nullptr, 0, nullptr);
 	}
 
-	uint32_t HandlePreRenderEvent() {
+	bool HandlePreRenderEvent() {
 		SendNVSEMessage(JG_OnRenderGamePreUpdate);
 		for (auto const& rCallback : OnRenderGamePreUpdateHandler->callbacks) {
 			CallUDF(rCallback.script, nullptr, OnRenderGamePreUpdateHandler->numMaxArgs);
