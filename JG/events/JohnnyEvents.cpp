@@ -74,7 +74,7 @@ namespace JohnnyEvents {
 	}
 
 	inline void __fastcall SendNVSEMessage(JG_NVSE_MESSAGE_ID aeID) {
-		g_msgInterface->Dispatch(g_pluginHandle, 0, nullptr, 0, nullptr);
+		g_msgInterface->Dispatch(g_pluginHandle, aeID, nullptr, 0, nullptr);
 	}
 
 	uint32_t HandlePreRenderEvent() {
