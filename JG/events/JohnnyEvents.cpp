@@ -295,9 +295,10 @@ namespace JohnnyEvents {
 			{
 				struct EventData {
 					TESForm*	pForm;
+					uint32_t	eActorValue;
 					float		fNewValue;
 					float		fPreviousValue;
-				} kData(pForm, fNewValue, fPreviousValue);
+				} kData(pForm, aeActorValue, fNewValue, fPreviousValue);
 				SendNVSEMessage(JG_OnAVChange, kData);
 			}
 
