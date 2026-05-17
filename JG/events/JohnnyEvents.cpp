@@ -273,11 +273,6 @@ namespace JohnnyEvents {
 		ThisCall(0x8706B0, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
 	}
 
-	inline static bool __fastcall CompareFloats(float a, float b) {
-		constexpr float fEpsilon = 0.0001f;
-		return fabs(a - b) < fEpsilon;
-	}
-
 	void __stdcall HandleAVChangeEvent(ActorValueOwner* apActor, uint32_t aeActorValue, float afPreviousValue, float afModValue, void* apChangeCallback) {
 		if (apChangeCallback == nullptr)
 			afPreviousValue = apActor->GetActorValueF(aeActorValue) - afModValue;
@@ -289,7 +284,7 @@ namespace JohnnyEvents {
 		const float fPreviousValueFloor = floor(fPreviousValue);
 
 		TESForm* pForm = apActor->GetAsForm();
-		if (pForm && !CompareFloats(fNewValueFloor, fPreviousValueFloor)) {
+		if (pForm && int32_t(fNewValueFloor) != int32_t(fPreviousValueFloor)) {
 			Actor* pActor = pForm->IsActor() ? static_cast<Actor*>(pForm) : nullptr;
 
 			{
@@ -307,7 +302,7 @@ namespace JohnnyEvents {
 					FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
 					if (pFilter->IsInFilter(1, aeActorValue)) {
 
-						bool bFullValues = rCallback.UserFlags.Get(1);
+						const bool bFullValues = rCallback.UserFlags.Get(1);
 
 						const float& fNewVal = bFullValues ? fNewValue : fNewValueFloor;
 						const float& fPrevVal = bFullValues ? fPreviousValue : fPreviousValueFloor;
@@ -321,7 +316,7 @@ namespace JohnnyEvents {
 					FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
 					if (pFilter->IsInFilter(1, aeActorValue) && (pFilter->IsInFilter(0, pForm->GetFormID()) || (pActor && pFilter->IsInFilter(0, pActor->GetBaseForm()->GetFormID())))) {
 
-						bool bFullValues = rCallback.UserFlags.Get(1);
+						const bool bFullValues = rCallback.UserFlags.Get(1);
 
 						const float& fNewVal = bFullValues ? fNewValue : fNewValueFloor;
 						const float& fPrevVal = bFullValues ? fPreviousValue : fPreviousValueFloor;
