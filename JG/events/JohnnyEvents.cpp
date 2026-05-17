@@ -478,12 +478,6 @@ namespace JohnnyEvents {
 		}
 	}
 
-	__declspec (naked) void OnKeyboardControllerSelectionChangeAsm() {
-		__asm {
-			ret 4
-		}
-	}
-
 	TESObjectREFR* pItemOwnerRef = nullptr;
 
 	ExtraDataList* __fastcall GetExtraDataListHook(TESObjectREFR* apRef) {
