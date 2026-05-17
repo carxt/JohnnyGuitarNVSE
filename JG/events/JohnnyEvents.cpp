@@ -239,7 +239,7 @@ namespace JohnnyEvents {
 		return apChallenge->data.type;
 	}
 
-	uint32_t __fastcall HandleRenderGameEvent(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
+	void __fastcall HandleRenderGameEvent(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
 
 		{
 			struct EventData {
@@ -253,10 +253,10 @@ namespace JohnnyEvents {
 		for (auto const& rCallback : OnRenderGameModeUpdateHandler->callbacks) {
 			CallUDF(rCallback.script, nullptr, OnRenderGameModeUpdateHandler->numMaxArgs);
 		}
-		return ThisCall<uint32_t>(0x8706B0, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
+		ThisCall(0x8706B0, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
 	}
 
-	uint32_t __fastcall HandleRenderMenuEvent(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
+	void __fastcall HandleRenderMenuEvent(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
 
 		{
 			struct EventData {
@@ -270,7 +270,7 @@ namespace JohnnyEvents {
 		for (auto const& rCallback : OnRenderRenderedMenuUpdateHandler->callbacks) {
 			CallUDF(rCallback.script, nullptr, OnRenderRenderedMenuUpdateHandler->numMaxArgs);
 		}
-		return ThisCall<uint32_t>(0x8706B0, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
+		ThisCall(0x8706B0, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
 	}
 
 	inline static bool __fastcall CompareFloats(float a, float b) {
