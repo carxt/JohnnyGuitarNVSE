@@ -289,9 +289,8 @@ namespace JohnnyEvents {
 		const float fPreviousValueFloor = floor(fPreviousValue);
 
 		TESForm* pForm = apActor->GetAsForm();
-		Actor* pActor = pForm->IsActor() ? static_cast<Actor*>(pForm) : nullptr;
-
-		if (!CompareFloats(fNewValueFloor, fPreviousValueFloor)) {
+		if (pForm && !CompareFloats(fNewValueFloor, fPreviousValueFloor)) {
+			Actor* pActor = pForm->IsActor() ? static_cast<Actor*>(pForm) : nullptr;
 
 			{
 				struct EventData {
