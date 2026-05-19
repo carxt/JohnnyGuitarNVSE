@@ -1683,6 +1683,7 @@ namespace JIPFixes {
 			JIPSettings::InitConditionalHooks();
 			EarlyFixedStrings::InitHooks();
 			LogMover::InitHooks();
+			VersionPrint::InitHooks();
 		}
 	}
 
