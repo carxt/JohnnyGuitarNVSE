@@ -1569,6 +1569,21 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace LogMover {
+
+		void InitHooks() {
+			FILE** pLog = reinterpret_cast<FILE**>(GetJIPAddress(0x1006A388));
+			if (fclose(pLog[0]) != 0)
+				return;
+
+			if (MoveFileExA("jip_ln_nvse.log", "logs\\jip_ln_nvse.log", MOVEFILE_REPLACE_EXISTING)) {
+				pLog[0] = _fsopen("logs\\jip_ln_nvse.log", "a+b", _SH_DENYWR);
+				void(__cdecl * PrintLog)(const char* apText, ...) = reinterpret_cast<void(__cdecl*)(const char*, ...)>(GetJIPAddress(0x10006740));
+				PrintLog("JohnnyGuitar Fixes and Tweaks initialized");
+			}
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -1658,6 +1673,7 @@ namespace JIPFixes {
 		else {
 			JIPSettings::InitConditionalHooks();
 			EarlyFixedStrings::InitHooks();
+			LogMover::InitHooks();
 		}
 	}
 
