@@ -40,6 +40,9 @@ enum class NiUpdateType : int32_t {
 	PROPERTIES,
 	CONTROLLERS,
 	SHADER_PROPERTIES,
+	HAVOK_SYNC_BOTH,
+	HAVOK_SYNC_TO,
+	HAVOK_SYNC_FROM,
 	COUNT
 };
 
@@ -127,6 +130,25 @@ static void __fastcall InvalidateRenderPasses(NiAVObject* apObject, bool abQueue
 	}
 	else {
 		InvalidateRenderPassesRecurse(apObject);
+	}
+}
+
+static void __fastcall SynchronizeHavok(NiAVObject* apObject, bhkNiCollisionObject::SyncMode aeSyncMode, bool abQueue = AILinearTaskThreadManager::ShouldQueue3DTask()) {
+	if (abQueue) [[unlikely]] {
+		QueuedTask kTask;
+		kTask.kItems[0].p = apObject;
+		kTask.kItems[1].ui = aeSyncMode;
+		apObject->IncRefCount();
+		kTask.pFunction = QUEUED_TASK{
+			NiAVObject * pObject = reinterpret_cast<NiAVObject*>(arTask.kItems[0].p);
+			const bhkNiCollisionObject::SyncMode eSyncMode = static_cast<bhkNiCollisionObject::SyncMode>(arTask.kItems[1].ui);
+			bhkNiCollisionObject::Synchronize(pObject, eSyncMode);
+			pObject->DecRefCount();
+		};
+		TaskQueue::QueueTask(kTask);
+	}
+	else {
+		bhkNiCollisionObject::Synchronize(apObject, aeSyncMode);
 	}
 }
 
@@ -382,6 +404,15 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 				break;
 			case NiUpdateType::SHADER_PROPERTIES:
 				InvalidateRenderPasses(pTarget, bQueue);
+				break;
+			case NiUpdateType::HAVOK_SYNC_BOTH:
+				SynchronizeHavok(pTarget, bhkNiCollisionObject::SYNC_BOTH, bQueue);
+				break;
+			case NiUpdateType::HAVOK_SYNC_TO:
+				SynchronizeHavok(pTarget, bhkNiCollisionObject::SYNC_TO_HAVOK, bQueue);
+				break;
+			case NiUpdateType::HAVOK_SYNC_FROM:
+				SynchronizeHavok(pTarget, bhkNiCollisionObject::SYNC_FROM_HAVOK, bQueue);
 				break;
 			default:
 				__assume(0);
