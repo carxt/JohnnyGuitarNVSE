@@ -1584,6 +1584,15 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace VersionPrint {
+
+		const char cVersionString[] = "JIP LN version: %.2f + JohnnyGuitar Fixes and Tweaks";
+
+		void InitHooks() {
+			SafeWrite32(GetJIPAddress(0x1001359D) + 1, size_t(&cVersionString));
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
