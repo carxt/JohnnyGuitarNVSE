@@ -52,9 +52,11 @@ NVSEArrayVarInterface* g_arrInterface = NULL;
 NVSEStringVarInterface* g_strInterface = NULL;
 NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_scriptInterface = NULL;
+NVSEMessagingInterface* g_msgInterface = NULL;
 NVSECommandTableInterface* g_cmdTableInterface = NULL;
 ExpressionEvaluatorUtils s_expEvalUtils;
 uint32_t g_initialTickCount = 0;
+uint32_t g_pluginHandle = 0;
 
 void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
 InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
@@ -537,7 +539,9 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* i
 	}
 
 	if (nvse->nvseVersion < PACKED_NVSE_VERSION) {
-		MessageBoxA(nullptr, "NVSE version is outdated. This plugin requires v6.4.4 minimum.", "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
+		char cBuffer[128];
+		sprintf_s(cBuffer, "NVSE version is outdated. This plugin requires v%i.%i.%i minimum.", NVSE_VERSION_INTEGER, NVSE_VERSION_INTEGER_MINOR, NVSE_VERSION_INTEGER_BETA);
+		MessageBoxA(nullptr, cBuffer, "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
 		return false;
 	}
 
@@ -575,8 +579,9 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 
 	JohnnyPatches::ReadINI();
 
-	NVSEMessagingInterface* pMessaging = static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging));
-	pMessaging->RegisterListener(nvse->GetPluginHandle(), "NVSE", bIsGECK ? MessageHandlerGECK : MessageHandler);
+	g_pluginHandle = nvse->GetPluginHandle();
+	g_msgInterface = static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging));
+	g_msgInterface->RegisterListener(g_pluginHandle, "NVSE", bIsGECK ? MessageHandlerGECK : MessageHandler);
 
 	if (JohnnyPatches::bFixJIP) {
 		JIPFixes::InitData();
