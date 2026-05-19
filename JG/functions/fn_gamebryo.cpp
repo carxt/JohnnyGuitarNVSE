@@ -5,6 +5,8 @@
 #include "Gamebryo/NiPSysEmitter.hpp"
 #include "Gamebryo/NiPSysModifier.hpp"
 
+#include <JG/TaskQueue.hpp>
+
 enum class AlphaPropertyItem : int32_t {
 	NONE = -1,
 	BLEND_TOGGLE,
@@ -37,6 +39,7 @@ enum class NiUpdateType : int32_t {
 	TRANSFORMS_AND_BOUNDS,
 	PROPERTIES,
 	CONTROLLERS,
+	SHADER_PROPERTIES,
 	COUNT
 };
 
@@ -79,12 +82,12 @@ static NiAVObject* __fastcall GetRoot(TESObjectREFR* apRef, bool abFirstPerson) 
 		return apRef->Get3D();
 }
 
-static NiProperty* __fastcall GetPropertyByName(const NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
+static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
 	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
 	if (!pObject)
-		return nullptr;
+		return { nullptr, nullptr };
 
-	return pObject->GetProperty(aeType);
+	return { pObject->GetProperty(aeType), pObject };
 }
 
 static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* apRoot, const NiFixedString& arObjectName) {
@@ -95,6 +98,38 @@ static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* ap
 	return pObject->NiDynamicCast<NiParticleSystem>();
 }
 
+static void __fastcall InvalidateRenderPassesRecurse(const NiAVObject* apObject) {
+	BSShaderProperty* pShaderProp = static_cast<BSShaderProperty*>(apObject->GetProperty(NiProperty::kPropertyType_Shade));
+	if (pShaderProp)
+		pShaderProp->InvalidateState();
+
+	if (apObject->IsNode()) {
+		const NiNode* pNode = static_cast<const NiNode*>(apObject);
+		for (uint32_t i = 0; i < pNode->GetArrayCount(); ++i) {
+			const NiAVObject* pChild = pNode->GetAt(i);
+			if (pChild)
+				InvalidateRenderPassesRecurse(pChild);
+		}
+	}
+}
+
+static void __fastcall InvalidateRenderPasses(NiAVObject* apObject, bool abQueue = AILinearTaskThreadManager::ShouldQueue3DTask()) {
+	if (abQueue) [[unlikely]] {
+		QueuedTask kTask;
+		kTask.kItems[0].p = apObject;
+		apObject->IncRefCount();
+		kTask.pFunction = QUEUED_TASK{
+			NiAVObject* pObject = reinterpret_cast<NiAVObject*>(arTask.kItems[0].p);
+			InvalidateRenderPassesRecurse(pObject);
+			pObject->DecRefCount();
+		};
+		TaskQueue::QueueTask(kTask);
+	}
+	else {
+		InvalidateRenderPassesRecurse(apObject);
+	}
+}
+
 bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	*result = 0;
 	AlphaPropertyItem eItem = AlphaPropertyItem::NONE;
@@ -102,7 +137,8 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha));
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
+		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
 		if (!pAlpha)
 			return true;
 
@@ -128,6 +164,9 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 		default:
 			__assume(0);
 		}
+
+		InvalidateRenderPasses(kObjects.second);
+
 		*result = 1;
 	}
 	return true;
@@ -139,7 +178,8 @@ bool Cmd_GetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		const NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha));
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
+		const NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
 		if (!pAlpha)
 			return true;
 
@@ -176,7 +216,8 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil));
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
+		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
 		if (!pStencil)
 			return true;
 
@@ -208,6 +249,9 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 		default:
 			__assume(0);
 		}
+
+		InvalidateRenderPasses(kObjects.second);
+
 		*result = 1;
 	}
 	return true;
@@ -219,7 +263,8 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		const NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil));
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
+		const NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
 		if (!pStencil)
 			return true;
 
@@ -302,8 +347,8 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 	NiUpdateType eType = NiUpdateType::NONE;
 	float fTime = FLT_MAX;
 	BOOL bUpdateControllers = FALSE;
-	char cName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
+	char cName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &fTime, &bUpdateControllers, &cName, &bFirstPerson) && InRange<NiUpdateType>(eType)) {
 		NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
 
@@ -314,7 +359,8 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 			pTarget = pRoot;
 
 		if (pTarget) {
-			NiUpdateData kData(fTime != FLT_MAX ? fTime : 0.f, bUpdateControllers, AILinearTaskThreadManager::ShouldQueue3DTask());
+			const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
+			NiUpdateData kData(fTime != FLT_MAX ? fTime : 0.f, bUpdateControllers, bQueue);
 			switch (eType) {
 			case NiUpdateType::FULL:
 				pTarget->Update(kData);
@@ -333,6 +379,9 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 				break;
 			case NiUpdateType::CONTROLLERS:
 				pTarget->UpdateControllers(kData);
+				break;
+			case NiUpdateType::SHADER_PROPERTIES:
+				InvalidateRenderPasses(pTarget, bQueue);
 				break;
 			default:
 				__assume(0);
