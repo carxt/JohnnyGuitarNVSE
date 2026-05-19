@@ -2,13 +2,11 @@
 #include "EventFramework.h"
 #include "GameProcess.h"
 #include "decoding.h"
+#include "JohnnyMessageData.hpp"
 #include <internal/Game/Bethesda/DialogueResponse.hpp>
 #include <internal/Game/Bethesda/MenuTopic.hpp>
 
-
 extern NVSEScriptInterface* g_scriptInterface;
-extern NVSEMessagingInterface* g_msgInterface;
-extern uint32_t g_pluginHandle;
 
 namespace JohnnyEvents {
 
@@ -38,47 +36,11 @@ namespace JohnnyEvents {
 	EventInformation* OnReputationChangeHandler;
 	EventInformation* OnNPCAVChangeHandler;
 
-	enum JG_NVSE_MESSAGE_ID : uint32_t {
-		JG_EVENT_BASE = 10000,
-
-		JG_OnDying,
-		JG_OnStartQuest,
-		JG_OnStopQuest,
-		JG_OnFailQuest,
-		JG_OnCompleteQuest,
-		JG_OnSeenDataUpdate,
-		JG_OnLimbGone,
-		JG_OnChallengeComplete,
-		JG_OnCrosshair,
-		JG_OnSettingsUpdate,
-		JG_OnAddPerk,
-		JG_OnRemovePerk,
-		JG_OnRenderGamePreUpdate,
-		JG_OnRenderGameModeUpdate,
-		JG_OnRenderRenderedMenuUpdate,
-		JG_OnAVChange,
-		JG_OnPLChange,
-		JG_OnRadioPostSoundAttach,
-		JG_OnKeyboardControllerSelectionChange,
-		JG_OnSleepWaitEvent,
-		JG_OnTakeBackItem,
-		JG_OnNPCResponse,
-		JG_OnGeneralSubtitle,
-		JG_OnReputationChange,
-		JG_OnNPCAVChange,
-	};
-
-	template<typename T>
-	inline void __fastcall SendNVSEMessage(JG_NVSE_MESSAGE_ID aeID, T& arData) {
-		g_msgInterface->Dispatch(g_pluginHandle, aeID, &arData, sizeof(T), nullptr);
-	}
-
-	inline void __fastcall SendNVSEMessage(JG_NVSE_MESSAGE_ID aeID) {
-		g_msgInterface->Dispatch(g_pluginHandle, aeID, nullptr, 0, nullptr);
-	}
-
 	bool HandlePreRenderEvent() {
-		SendNVSEMessage(JG_OnRenderGamePreUpdate);
+		{
+			using namespace JohnnyMessageData;
+			SendNVSEMessage(JG_OnRenderGamePreUpdate);
+		}
 		for (auto const& rCallback : OnRenderGamePreUpdateHandler->callbacks) {
 			CallUDF(rCallback.script, nullptr, OnRenderGamePreUpdateHandler->numMaxArgs);
 		}
@@ -90,11 +52,8 @@ namespace JohnnyEvents {
 			return;
 
 		{
-			struct EventData {
-				Actor*		pActor;
-				BGSPerk*	pPerk;
-				bool		bCompanion;
-			} kData(apActor, apPerk, abTeammate);
+			using namespace JohnnyMessageData;
+			PerkRemoveData kData(apActor, apPerk, abTeammate);
 			SendNVSEMessage(JG_OnRemovePerk, kData);
 		}
 
@@ -109,12 +68,8 @@ namespace JohnnyEvents {
 	void __fastcall HandleAddPerkEvent(Actor* apActor, int EDX, BGSPerk* apPerk, uint8_t aucRank, bool abTeammate) {
 
 		{
-			struct EventData {
-				Actor*		pActor;
-				BGSPerk*	pPerk;
-				bool		bCompanion;
-				uint8_t		ucRank;
-			} kData(apActor, apPerk, abTeammate, aucRank);
+			using namespace JohnnyMessageData;
+			PerkAddData kData(apActor, apPerk, abTeammate, aucRank);
 			SendNVSEMessage(JG_OnAddPerk, kData);
 		}
 
@@ -129,7 +84,10 @@ namespace JohnnyEvents {
 	void __stdcall HandleDyingEvent(Actor* apActor) {
 		if (apActor->IsActor() && apActor->lifeState == 1) {
 
-			SendNVSEMessage(JG_OnAddPerk, apActor);
+			{
+				using namespace JohnnyMessageData;
+				SendNVSEMessage(JG_OnDying, apActor);
+			}
 
 			if ((apActor->GetFullName()[0] || apActor == PlayerCharacter::GetSingleton())) {
 				for (auto const& rCallback : OnDyingHandler->callbacks) {
@@ -143,7 +101,11 @@ namespace JohnnyEvents {
 
 	uint32_t __fastcall HandleCrosshairEvent(TESObjectREFR* apRef) {
 		if (apRef) {
-			SendNVSEMessage(JG_OnCrosshair, apRef);
+
+			{
+				using namespace JohnnyMessageData;
+				SendNVSEMessage(JG_OnCrosshair, apRef);
+			}
 
 			for (auto const& rCallback : OnCrosshairHandler->callbacks) {
 				FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
@@ -157,12 +119,8 @@ namespace JohnnyEvents {
 	bool __fastcall HandleLimbGoneEvent(ExtraDismemberedLimbs* apLimbData, void*, Actor* apActor, uint32_t aeLimb, bool abExplodedLimb) {
 
 		{
-			struct EventData {
-				Actor*					pActor;
-				ExtraDismemberedLimbs*	pLimbData;
-				uint32_t				eLimb;
-				bool					bExploded;
-			} kData(apActor, apLimbData, aeLimb, abExplodedLimb);
+			using namespace JohnnyMessageData;
+			DismemberData kData(apActor, apLimbData, aeLimb, abExplodedLimb);
 			SendNVSEMessage(JG_OnLimbGone, kData);
 		}
 
@@ -176,7 +134,10 @@ namespace JohnnyEvents {
 	}
 
 	void __fastcall HandleQuestStartStop(TESQuest* apQuest, bool abStarted) {
-		SendNVSEMessage(abStarted ? JG_OnStartQuest : JG_OnStopQuest, apQuest);
+		{
+			using namespace JohnnyMessageData;
+			SendNVSEMessage(abStarted ? JG_OnStartQuest : JG_OnStopQuest, apQuest);
+		}
 
 		const EventInformation* pEvent = abStarted ? OnStartQuestHandler : OnStopQuestHandler;
 		for (auto const& rCallback : pEvent->callbacks) {
@@ -187,7 +148,10 @@ namespace JohnnyEvents {
 	}
 
 	void __cdecl HandleQuestComplete(TESQuest* apQuest) {
-		SendNVSEMessage(JG_OnCompleteQuest, apQuest);
+		{
+			using namespace JohnnyMessageData;
+			SendNVSEMessage(JG_OnCompleteQuest, apQuest);
+		}
 
 		for (auto const& rCallback : OnCompleteQuestHandler->callbacks) {
 			if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apQuest)) {
@@ -198,7 +162,10 @@ namespace JohnnyEvents {
 	}
 
 	void __cdecl HandleQuestFail(TESQuest* apQuest) {
-		SendNVSEMessage(JG_OnFailQuest, apQuest);
+		{
+			using namespace JohnnyMessageData;
+			SendNVSEMessage(JG_OnFailQuest, apQuest);
+		}
 
 		for (auto const& rCallback : OnFailQuestHandler->callbacks) {
 			if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apQuest)) {
@@ -209,7 +176,10 @@ namespace JohnnyEvents {
 	}
 
 	void* __cdecl HandleSettingsUpdate() {
-		SendNVSEMessage(JG_OnSettingsUpdate);
+		{
+			using namespace JohnnyMessageData;
+			SendNVSEMessage(JG_OnSettingsUpdate);
+		}
 
 		for (auto const& rCallback : OnSettingsUpdateHandler->callbacks) {
 			CallUDF(rCallback.script, nullptr, OnSettingsUpdateHandler->numMaxArgs);
@@ -218,7 +188,10 @@ namespace JohnnyEvents {
 	}
 
 	ExtraDataList* __fastcall HandleSeenDataUpdateEvent(TESObjectCELL* apCell) {
-		SendNVSEMessage(JG_OnSeenDataUpdate, apCell);
+		{
+			using namespace JohnnyMessageData;
+			SendNVSEMessage(JG_OnSeenDataUpdate, apCell);
+		}
 
 		for (auto const& rCallback : OnSeenDataUpdateHandler->callbacks) {
 			if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apCell)) {
@@ -229,7 +202,10 @@ namespace JohnnyEvents {
 	}
 
 	uint32_t __fastcall HandleChallengeCompleteEvent(TESChallenge* apChallenge) {
-		SendNVSEMessage(JG_OnChallengeComplete, apChallenge);
+		{
+			using namespace JohnnyMessageData;
+			SendNVSEMessage(JG_OnChallengeComplete, apChallenge);
+		}
 
 		for (auto const& rCallback : OnChallengeCompleteHandler->callbacks) {
 			if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apChallenge)) {
@@ -242,11 +218,8 @@ namespace JohnnyEvents {
 	void __fastcall HandleRenderGameEvent(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
 
 		{
-			struct EventData {
-				BSRenderedTexture*		pTexture;
-				bool					bRenderedMenu;
-				bool					bSkipFirstPerson;
-			} kData(apDestination, abRenderedMenuMode, abSkipFirstPerson);
+			using namespace JohnnyMessageData;
+			RenderGameData kData(apDestination, abRenderedMenuMode, abSkipFirstPerson);
 			SendNVSEMessage(JG_OnRenderGameModeUpdate, kData);
 		}
 
@@ -259,11 +232,8 @@ namespace JohnnyEvents {
 	void __fastcall HandleRenderMenuEvent(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
 
 		{
-			struct EventData {
-				BSRenderedTexture*		pTexture;
-				bool					bRenderedMenu;
-				bool					bSkipFirstPerson;
-			} kData(apDestination, abRenderedMenuMode, abSkipFirstPerson);
+			using namespace JohnnyMessageData;
+			RenderGameData kData(apDestination, abRenderedMenuMode, abSkipFirstPerson);
 			SendNVSEMessage(JG_OnRenderRenderedMenuUpdate, kData);
 		}
 
@@ -288,12 +258,8 @@ namespace JohnnyEvents {
 			Actor* pActor = pForm->IsActor() ? static_cast<Actor*>(pForm) : nullptr;
 
 			{
-				struct EventData {
-					TESForm*	pForm;
-					uint32_t	eActorValue;
-					float		fNewValue;
-					float		fPreviousValue;
-				} kData(pForm, aeActorValue, fNewValue, fPreviousValue);
+				using namespace JohnnyMessageData;
+				ActorValueChangeData kData(pForm, aeActorValue, fNewValue, fPreviousValue);
 				SendNVSEMessage(JG_OnAVChange, kData);
 			}
 
@@ -339,11 +305,8 @@ namespace JohnnyEvents {
 		if (eOldLevel != eNewLevel) {
 
 			{
-				struct EventData {
-					Actor*		pActor;
-					uint32_t	eOldLevel;
-					uint32_t	eNewLevel;
-				} kData(apActor, eOldLevel, eNewLevel);
+				using namespace JohnnyMessageData;
+				ProcessLevelChangeData kData(apActor, eOldLevel, eNewLevel);
 				SendNVSEMessage(JG_OnPLChange, kData);
 			}
 
@@ -362,10 +325,8 @@ namespace JohnnyEvents {
 			return;
 
 		{
-			struct EventData {
-				TESObjectACTI*	pRadio;
-				bool			bActive;
-			} kData(apRadio, abActive);
+			using namespace JohnnyMessageData;
+			RadioPostSoundAttachData kData(apRadio, abActive);
 			SendNVSEMessage(JG_OnRadioPostSoundAttach, kData);
 		}
 
@@ -379,7 +340,10 @@ namespace JohnnyEvents {
 
 
 	void __fastcall HandleInputSwitch(InterfaceManager* apManager, Menu* apMenu) {
-		SendNVSEMessage(JG_OnKeyboardControllerSelectionChange, apMenu);
+		{
+			using namespace JohnnyMessageData;
+			SendNVSEMessage(JG_OnKeyboardControllerSelectionChange, apMenu);
+		}
 
 		const uint32_t uiMenuID = apMenu ? apMenu->GetID() : -1;
 		for (auto const& rCallback : OnKeyboardControllerSelectionChangeHandler->callbacks) {
@@ -392,7 +356,10 @@ namespace JohnnyEvents {
 
 
 	void __fastcall HandleOnSleepWait(SleepWaitMenu* apMenu, uint32_t auiTileID) {
-		SendNVSEMessage(JG_OnSleepWaitEvent, apMenu);
+		{
+			using namespace JohnnyMessageData;
+			SendNVSEMessage(JG_OnSleepWaitEvent, apMenu);
+		}
 
 		for (auto const& rCallback : OnSleepWaitEventHandler->callbacks) {
 			auto pFilter = reinterpret_cast<FilterInt*>(rCallback.eventFilter);
@@ -484,11 +451,8 @@ namespace JohnnyEvents {
 		TESObjectREFR* pOwner = apOtherContainer->IsActor() ? apOtherContainer : pItemOwnerRef;
 
 		{
-			struct EventData {
-				TESObjectREFR*	pOwner;
-				TESBoundObject* pObject;
-				int32_t			iCount;
-			} kData(pOwner, apObject, aiNumber);
+			using namespace JohnnyMessageData;
+			TakeBackItemData kData(pOwner, apObject, aiNumber);
 			SendNVSEMessage(JG_OnTakeBackItem, kData);
 		}
 
@@ -541,28 +505,35 @@ namespace JohnnyEvents {
 	}
 
 	void __fastcall HandleOnNPCResponse(DialogueResponse* apResponse) {
-		struct EventData {
-			uint32_t	uiEmotionID = 0;
-			uint32_t	uiEmotionValue = 0;
-			uint32_t	uiResponseNumber = 0;
-			const char* pResponseString = "";
-			const char* pVoicePath = "";
-		} kData;
+		uint32_t	uiEmotionID = 0;
+		uint32_t	uiEmotionValue = 0;
+		uint32_t	uiResponseNumber = 0;
+		const char* pResponseString = "";
+		const char* pVoicePath = "";
 
 		if (apResponse) {
-			kData.uiEmotionID = apResponse->uiEmotionType;
-			kData.uiEmotionValue = apResponse->uiEmotionValue;
-			kData.uiResponseNumber = apResponse->uiResponseNumber;
-			kData.pResponseString = apResponse->strResponseText.c_str();
-			kData.pVoicePath = apResponse->strVoiceFilePath.c_str();
+			uiEmotionID = apResponse->uiEmotionType;
+			uiEmotionValue = apResponse->uiEmotionValue;
+			uiResponseNumber = apResponse->uiResponseNumber;
+			pResponseString = apResponse->strResponseText.c_str();
+			pVoicePath = apResponse->strVoiceFilePath.c_str();
 		}
 
-		SendNVSEMessage(JG_OnNPCResponse, kData);
+		{
+			using namespace JohnnyMessageData;
+			NPCResponseData kData;
+			kData.uiEmotionID = uiEmotionID;
+			kData.uiEmotionValue = uiEmotionValue;
+			kData.uiResponseNumber = uiResponseNumber;
+			kData.pResponseString = pResponseString;
+			kData.pVoicePath = pVoicePath;
+			SendNVSEMessage(JG_OnNPCResponse, kData);
+		}
 
 		for (auto const& rCallback : OnNPCResponseHandler->callbacks) {
 			auto pFilter = reinterpret_cast<FilterInt*>(rCallback.eventFilter);
-			if (pFilter->IsInFilter(0, kData.uiEmotionID) || pFilter->IsInFilter(0, 0)) {
-				CallUDF(rCallback.script, nullptr, OnNPCResponseHandler->numMaxArgs, kData.pResponseString, kData.pVoicePath, kData.uiEmotionID, kData.uiEmotionValue, kData.uiResponseNumber);
+			if (pFilter->IsInFilter(0, uiEmotionID) || pFilter->IsInFilter(0, 0)) {
+				CallUDF(rCallback.script, nullptr, OnNPCResponseHandler->numMaxArgs, pResponseString, pVoicePath, uiEmotionID, uiEmotionValue, uiResponseNumber);
 			}
 		}
 	}
@@ -570,11 +541,8 @@ namespace JohnnyEvents {
 	//Currently Displayed Text, Source Position, Target Reference (Usually Player)
 	void __fastcall HandleOnGeneralSubtitle(const char* apText, NiPoint3 akPos, TESObjectREFR* apTarget) {
 		{
-			struct EventData {
-				const char*		pText;
-				TESObjectREFR*	pTarget;
-				NiPoint3		kPos;
-			} kData(apText, apTarget, akPos);
+			using namespace JohnnyMessageData;
+			GeneralSubtitleData kData(apText, apTarget, akPos);
 			SendNVSEMessage(JG_OnGeneralSubtitle, kData);
 		}
 
@@ -594,11 +562,8 @@ namespace JohnnyEvents {
 
 	void __fastcall HandleOnReputationChange(TESReputation* apRep) {
 		{
-			struct EventData {
-				TESReputation*	pReputation;
-				float			fPos;
-				float			fNeg;
-			} kData(apRep, apRep->fPositiveReputation, apRep->fNegativeReputation);
+			using namespace JohnnyMessageData;
+			ReputationChangeData kData(apRep, apRep->fPositiveReputation, apRep->fNegativeReputation);
 			SendNVSEMessage(JG_OnReputationChange, kData);
 		}
 
