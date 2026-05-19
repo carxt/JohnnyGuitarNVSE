@@ -1677,7 +1677,7 @@ namespace JIPFixes {
 			return;
 
 		if (bIsGECK) {
-
+			LogMover::InitHooks();
 		}
 		else {
 			JIPSettings::InitConditionalHooks();
