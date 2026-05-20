@@ -276,6 +276,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="functions\fn_terminal.h" />
     <ClInclude Include="functions\fn_ui.h" />
     <ClInclude Include="functions\fn_utility.h" />
+    <ClInclude Include="internal\CommandOpcodes.h" />
     <ClInclude Include="internal\decoding.h" />
     <ClInclude Include="internal\Game\Bethesda\AILinearTaskThreadManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp" />

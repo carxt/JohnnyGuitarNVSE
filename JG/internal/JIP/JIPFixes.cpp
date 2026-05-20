@@ -13,6 +13,7 @@
 #include "PluginAPI.h"
 #include "utility.h"
 #include <decoding.h>
+#include "internal/CommandOpcodes.h"
 
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 #include "Shared/Utils/StackObject.hpp"
@@ -559,7 +560,7 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x22A1));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kCopyFaceGenFrom));
 			if (pInfo) {
 				CopyFaceGenFrom = pInfo->execute;
 				pInfo->execute = Cmd_CopyFaceGenFrom_Execute;
@@ -579,7 +580,7 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x26C0));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetSoundSourceFile));
 			if (pInfo) {
 				SetSoundSourceFile = pInfo->execute;
 				pInfo->execute = Cmd_SetSoundSourceFile_Execute;
@@ -643,7 +644,7 @@ namespace JIPFixes {
 		};
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x27FC));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetOnDialogTopicEventHandler));
 			if (pInfo) {
 				pInfo->execute = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
 				SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
@@ -683,7 +684,7 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x28EF));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kClearDeadActors));
 			if (pInfo) {
 				pInfo->params = kParams_OneOptionalInt;
 				pInfo->numParams = 1;
@@ -804,7 +805,7 @@ namespace JIPFixes {
 
 		void InitHooks() {
 			uiWeaponHasScope = GetJIPAddress(0x10058F10);
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x280D));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kReloadEquippedModels));
 			if (pInfo) {
 				pInfo->execute = Cmd_ReloadEquippedModels_Execute;
 			}
@@ -1094,7 +1095,7 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2246));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSearch));
 			if (pInfo) {
 				Cmd_Search_Org_Parse = pInfo->parse;
 				pInfo->execute		= Cmd_Search_JG_Execute;
@@ -1181,7 +1182,7 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x22AA));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetPCCanUsePowerArmor));
 			if (pInfo) {
 				pInfo->eval = Cmd_GetPCCanUsePowerArmor_Eval;
 			}
@@ -1569,19 +1570,19 @@ namespace JIPFixes {
 
 		void InitHooks() {
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x221F));
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kLeveledListRemoveForm));
 				if (pInfo) {
 					pInfo->execute = Cmd_LeveledListRemoveForm_Execute;
 				}
 			}
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2228));
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kRemoveNthLevItem));
 				if (pInfo) {
 					pInfo->execute = Cmd_RemoveNthLevItem_Execute;
 				}
 			}
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2229));
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kLeveledListClear));
 				if (pInfo) {
 					pInfo->execute = Cmd_LeveledListClear_Execute;
 				}
