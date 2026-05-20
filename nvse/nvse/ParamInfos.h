@@ -1082,3 +1082,18 @@ static ParamInfo kParams_OneArray[] =
 
 	{	"array",	kNVSEParamType_Array,	0	}
 };
+
+static ParamInfo kParams_SetNiPSysModifierValue[] =
+{
+	{ "Block Name", kParamType_String, 0 },
+	{ "Item", kParamType_Integer, 0 },
+	{ "Value", kParamType_Float, 0 },
+	{ "First Person", kParamType_Integer, 1 },
+};
+
+static ParamInfo kParams_GetNiPSysModifierValue[] =
+{
+	{ "Block Name", kParamType_String, 0 },
+	{ "Item", kParamType_Integer, 0 },
+	{ "First Person", kParamType_Integer, 1 },
+};

@@ -188,7 +188,7 @@ namespace EDIDRestoration {
 				return;
 			}
 			// Ignore 0x18E because Obsidian had a skill issue
-			else if (pExistingForm->GetFormID() != 0x18E) [[likely]] {
+			else if (pExistingForm->GetFormID() != 0x18E && strcmp(apEDID, "Wilderness")) [[likely]] {
 				const TESFile* pFileA = apForm->GetFile(0);
 				const TESFile* pFileB = pExistingForm->GetFile(0);
 				char cText[512];
@@ -360,7 +360,13 @@ namespace EDIDRestoration {
 	}
 
 	void PrintErrors() {
-		if (bHadEDIDConflicts)
-			Console_Print("Some EDIDs are conflicting! Check JohnnyGuitarNVSE.log for details.");
+		if (bHadEDIDConflicts) {
+			// This is crucial for my sanity
+			const char* pName = "mod";
+			float fRandom01 = CdeclCall<float>(0x5C5420);
+			if (fRandom01 < 0.001f)
+				pName = "slop";
+			Console_Print("Some EDIDs are conflicting! Check JohnnyGuitarNVSE.log for details. (Ignore this message if you are not a %s author.)", pName);
+		}
 	}
 }

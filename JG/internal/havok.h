@@ -593,6 +593,17 @@ public:
 
 	uint32_t			flags;			// 0C
 	bhkWorldObject* worldObj;		// 10
+
+	enum SyncMode : uint32_t {
+		SYNC_BOTH		= 0,
+		SYNC_TO_HAVOK	= 1,
+		SYNC_FROM_HAVOK = 2,
+		SYNC_NONE		= 3,
+	};
+
+	static void Synchronize(NiAVObject* apObject, bhkNiCollisionObject::SyncMode aeSyncMode) {
+		CdeclCall(0xC6C3D0, apObject, aeSyncMode);
+	}
 };
 
 // 14

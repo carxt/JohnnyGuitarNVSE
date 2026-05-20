@@ -52,9 +52,11 @@ NVSEArrayVarInterface* g_arrInterface = NULL;
 NVSEStringVarInterface* g_strInterface = NULL;
 NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_scriptInterface = NULL;
+NVSEMessagingInterface* g_msgInterface = NULL;
 NVSECommandTableInterface* g_cmdTableInterface = NULL;
 ExpressionEvaluatorUtils s_expEvalUtils;
 uint32_t g_initialTickCount = 0;
+uint32_t g_pluginHandle = 0;
 
 void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
 InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
@@ -63,7 +65,7 @@ GameTimeGlobals* g_gameTimeGlobals = nullptr;
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 bool (*Cmd_Update3D)(COMMAND_ARGS) = 0;
 
-#define JG_VERSION 525
+#define JG_VERSION 526
 
 #define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
@@ -519,7 +521,9 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(CallPerMobileObject);
 	REG_CMD(CallPerMobileObjectEx);
 	REG_CMD(Update3DAlt);
-	REG_CMD(ar_Shuffle);
+	REG_CMD(SetNiPSysModifierValue);
+	REG_TYPED_CMD(GetNiPSysModifierValue, Default);
+  REG_CMD(ar_Shuffle);
 }
 
 
@@ -536,7 +540,9 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* i
 	}
 
 	if (nvse->nvseVersion < PACKED_NVSE_VERSION) {
-		MessageBoxA(nullptr, "NVSE version is outdated. This plugin requires v6.4.4 minimum.", "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
+		char cBuffer[128];
+		sprintf_s(cBuffer, "NVSE version is outdated. This plugin requires v%i.%i.%i minimum.", NVSE_VERSION_INTEGER, NVSE_VERSION_INTEGER_MINOR, NVSE_VERSION_INTEGER_BETA);
+		MessageBoxA(nullptr, cBuffer, "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
 		return false;
 	}
 
@@ -574,8 +580,9 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 
 	JohnnyPatches::ReadINI();
 
-	NVSEMessagingInterface* pMessaging = static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging));
-	pMessaging->RegisterListener(nvse->GetPluginHandle(), "NVSE", bIsGECK ? MessageHandlerGECK : MessageHandler);
+	g_pluginHandle = nvse->GetPluginHandle();
+	g_msgInterface = static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging));
+	g_msgInterface->RegisterListener(g_pluginHandle, "NVSE", bIsGECK ? MessageHandlerGECK : MessageHandler);
 
 	if (JohnnyPatches::bFixJIP) {
 		JIPFixes::InitData();

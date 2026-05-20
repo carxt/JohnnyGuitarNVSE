@@ -53,7 +53,7 @@ bool Cmd_PlayHolotape_Execute(COMMAND_ARGS)
 	*result = 0;
 	BGSNote* note = nullptr;
 	int playStartStopSound = 1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &playStartStopSound) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice || note->type == BGSNote::kSound)
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &playStartStopSound) && note && IS_TYPE(note, BGSNote) && (note->type == BGSNote::kVoice || note->type == BGSNote::kSound))
 	{
 		MapMenu* mapMenu = MapMenu::GetSingleton();
 		mapMenu->PlayHolotape(note, playStartStopSound > 0);

@@ -118,21 +118,28 @@ namespace JIPFixes {
 				return;
 
 			NiControllerManager* pControllerManager = ThisCall<NiControllerManager*>(0xA5C570, apObject, 0x11F36AC);
-			if (pControllerManager && pControllerManager->m_spObjectPalette)
+			if (pControllerManager && pControllerManager->m_spObjectPalette) [[likely]]
 				ThisCall(0xA6E960, pControllerManager->m_spObjectPalette.m_pObject);
 		}
 
 		CallDetour kMemPoolFree;
-		void __fastcall MemoryPool_Free(void* pBlock, unsigned int size) {
-			char* pData = static_cast<char*>(pBlock);
-			TESForm* pForm = *(TESForm**)pData;
-			NiAVObject* pRoot = nullptr;
-			if (pForm && pForm->IsReference())
-				pRoot = static_cast<TESObjectREFR*>(pForm)->Get3DSimple();
+		void __fastcall MemoryPool_Free(void* apBlock, uint32_t auiSize) {
+			char* pData = static_cast<char*>(apBlock);
+			TESForm* pForm = *reinterpret_cast<TESForm**>(pData);
+			
+			if (pForm && pForm->IsReference()) [[likely]] {
+				if (pForm == PlayerCharacter::GetSingleton()) {
+					PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(pForm);
+					InvalidateObjPalette(pPlayer->Get3D(true));
+					InvalidateObjPalette(pPlayer->Get3D(false));
+				}
+				else {
+					TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pForm);
+					InvalidateObjPalette(pRef->Get3DSimple());
+				}
+			}
 
-			InvalidateObjPalette(pRoot);
-
-			FastCall(kMemPoolFree.GetOverwrittenAddr(), pBlock, size);
+			FastCall(kMemPoolFree.GetOverwrittenAddr(), apBlock, auiSize);
 		}
 
 		void InitHooks() {
@@ -559,7 +566,27 @@ namespace JIPFixes {
 			}
 		}
 	}
-  
+	namespace SoundSourceFileFix
+	{
+		bool(__cdecl* SetSoundSourceFile)(COMMAND_ARGS) = nullptr;
+		//Set the max path to 1000 instead of 128.
+		bool Cmd_SetSoundSourceFile_Execute(COMMAND_ARGS)
+		{
+			TESSound* sound;
+			char path[1000];
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &path))
+				sound->soundFile.Set(path);
+			return true;
+		}
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0xD6C0));
+			if (pInfo) {
+				SetSoundSourceFile = pInfo->execute;
+				pInfo->execute = Cmd_SetSoundSourceFile_Execute;
+			}
+		}
+	
+	}
 	namespace SetOnDialogTopicEventHandlerEx {
 
 		EventInformation* OnDialogTopicHandler = nullptr;
@@ -696,7 +723,15 @@ namespace JIPFixes {
 				return true;
 
 			int32_t iTargetObject = -1;
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &iTargetObject) && iTargetObject != 6 && iTargetObject < 20) {
+			if (reinterpret_cast<uint8_t*>(scriptData)[*opcodeOffsetPtr - 2] && reinterpret_cast<uint8_t*>(scriptData)[*opcodeOffsetPtr]) {
+				int32_t iArgSlot;
+				if (!ExtractArgsEx(EXTRACT_ARGS_EX, &iArgSlot))
+					return true;
+
+				iTargetObject = iArgSlot;
+			}
+
+			if (iTargetObject != 6 && iTargetObject < 20) {
 				Bitfield32 uiValidParts = 0xFFFFFFBF;
 				if (iTargetObject >= 0)
 					uiValidParts = (1u << iTargetObject) & 0xFFFFFFBF;
@@ -1079,8 +1114,10 @@ namespace JIPFixes {
 	}
 
 	namespace OnMenuClickFix {
-		Tile* pClickedTile = nullptr;
+		static inline Tile* const INVALID_TILE = reinterpret_cast<Tile*>(-1);
+		Tile* pClickedTile = INVALID_TILE;
 		uint32_t uiMenuHandleClickHook = 0;
+		char cEmptyBuffer[4] = { 0 };
 
 		void __fastcall MenuHandleClickHookDetour(void* apMenu, void* edx, uint32_t auiTileID, Tile* apTile) {
 			pClickedTile = apTile;
@@ -1090,19 +1127,21 @@ namespace JIPFixes {
 #pragma optimize("y", off)
 		bool __cdecl CallFunctionAlt(Script* apScript, TESObjectREFR* apRef, uint8_t aucArgCount, uint32_t auiMenuID, uint32_t auiTileID, const char* apTileString) {
 			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
-			const char* pTilePath = reinterpret_cast<const char*>(pEBP - 0x94);
-			bool bReturnVal = false;
-			if (pClickedTile) {
-				bReturnVal = g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, pClickedTile->name.c_str());
-			}
-			else {
+			if (pClickedTile == INVALID_TILE) {
+				const char* pTilePath = reinterpret_cast<const char*>(pEBP - 0x94);
 				char cErrorBuffer[512];
 				our_snprintf(cErrorBuffer, sizeof(cErrorBuffer), "Error! \"%s\" has been unloaded while being processed by OnClickMenuHandler. Do NOT do this!", pTilePath);
 				_MESSAGE(cErrorBuffer);
 				Console_Print(cErrorBuffer);
 				*reinterpret_cast<DWORD*>(pEBP + 0xC) = 0;
+				return false;
 			}
-			return bReturnVal;
+			else if (pClickedTile) {
+				return g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, pClickedTile->name.GetString());
+			}
+			else {
+				return g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, cEmptyBuffer);
+			}
 		}
 #pragma optimize("", on)
 
@@ -1111,7 +1150,7 @@ namespace JIPFixes {
 		public:
 			void CleanupTile(Tile* apTile) {
 				if (pClickedTile == apTile)
-					pClickedTile = nullptr;
+					pClickedTile = INVALID_TILE;
 
 				ThisCall(kRemoveTileFromUpdateList.GetOverwrittenAddr(), this, apTile);
 			}
@@ -1404,6 +1443,176 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace LeveledListFixes {
+
+		bool Cmd_LeveledListRemoveForm_Execute(COMMAND_ARGS) {
+			*result = 0;
+			TESForm* pListForm = nullptr;
+			TESForm* pForm = nullptr;
+			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pForm))
+				return true;
+
+			TESLeveledList* pList = TESLeveledList::GetFormAsLeveledList(pListForm);
+			if (!pList || !pForm)
+				return true;
+
+			uint32_t uiDeletedCount = 0;
+			auto pIter = pList->GetLeveledList();
+			while (pIter && !pIter->IsEmpty()) {
+				LeveledObject* pItem = pIter->GetItem();
+				if (pItem && pItem->pForm == pForm) {
+
+					auto pScriptIter = pList->kScriptAddedObjects.GetHead();
+					while (pScriptIter && !pScriptIter->IsEmpty()) {
+						auto pItem = pScriptIter->GetItem();
+						if (pItem == pItem)
+							pScriptIter->RemoveHead();
+						pScriptIter = pScriptIter->GetNext();
+					}
+
+					delete pItem;
+					pIter->RemoveHead();
+					++uiDeletedCount;
+				}
+				else {
+					pIter = pIter->GetNext();
+				}
+			}
+
+			if (pList->kScriptAddedObjects.IsEmpty())
+				pListForm->RemoveChange(0x80000000);
+
+			*result = uiDeletedCount;
+			return true;
+		}
+
+		bool Cmd_LeveledListClear_Execute(COMMAND_ARGS) {
+			*result = 0;
+			TESForm* pListForm = nullptr;
+			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm))
+				return true;
+
+			TESLeveledList* pList = TESLeveledList::GetFormAsLeveledList(pListForm);
+			if (!pList)
+				return true;
+
+			uint32_t uiDeletedCount = 0;
+			auto pIter = pList->GetLeveledList();
+			while (pIter && !pIter->IsEmpty()) {
+				LeveledObject* pItem =  pIter->GetItem();
+				if (pItem) {
+					auto pScriptIter = pList->kScriptAddedObjects.GetHead();
+					while (pScriptIter && !pScriptIter->IsEmpty()) {
+						auto pItem = pScriptIter->GetItem();
+						if (pItem == pItem)
+							pScriptIter->RemoveHead();
+						pScriptIter = pScriptIter->GetNext();
+					}
+
+					delete pItem;
+					pIter->RemoveHead();
+					++uiDeletedCount;
+				}
+				else {
+					pIter = pIter->GetNext();
+				}
+			}
+
+			if (pList->kScriptAddedObjects.IsEmpty())
+				pListForm->RemoveChange(0x80000000);
+
+			*result = uiDeletedCount;
+			return true;
+		}
+
+		bool Cmd_RemoveNthLevItem_Execute(COMMAND_ARGS) {
+			*result = 0;
+			TESForm* pListForm = nullptr;
+			uint32_t uiIndex = 0;
+			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &uiIndex))
+				return true;
+
+			TESLeveledList* pList = TESLeveledList::GetFormAsLeveledList(pListForm);
+			if (!pList)
+				return true;
+
+			auto pIter = pList->GetLeveledList();
+			while (pIter && !pIter->IsEmpty()) {
+				if (uiIndex == 0) {
+					LeveledObject* pItem = pIter->GetItem();
+					if (pItem) {
+						auto pScriptIter = pList->kScriptAddedObjects.GetHead();
+						while (pScriptIter && !pScriptIter->IsEmpty()) {
+							auto pItem = pScriptIter->GetItem();
+							if (pItem == pItem)
+								pScriptIter->RemoveHead();
+							pScriptIter = pScriptIter->GetNext();
+						}
+
+						delete pItem;
+						pIter->RemoveHead();
+						*result = 1;
+					}
+					break;
+				}
+				else {
+					pIter = pIter->GetNext();
+					--uiIndex;
+				}
+			}
+
+			if (pList->kScriptAddedObjects.IsEmpty())
+				pListForm->RemoveChange(0x80000000);
+
+			return true;
+		}
+
+		void InitHooks() {
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x221F));
+				if (pInfo) {
+					pInfo->execute = Cmd_LeveledListRemoveForm_Execute;
+				}
+			}
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2228));
+				if (pInfo) {
+					pInfo->execute = Cmd_RemoveNthLevItem_Execute;
+				}
+			}
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2229));
+				if (pInfo) {
+					pInfo->execute = Cmd_LeveledListClear_Execute;
+				}
+			}
+		}
+	}
+
+	namespace LogMover {
+
+		void InitHooks() {
+			FILE** pLog = reinterpret_cast<FILE**>(GetJIPAddress(0x1006A388));
+			if (fclose(pLog[0]) != 0)
+				return;
+
+			if (MoveFileExA("jip_ln_nvse.log", "logs\\jip_ln_nvse.log", MOVEFILE_REPLACE_EXISTING)) {
+				pLog[0] = _fsopen("logs\\jip_ln_nvse.log", "a+b", _SH_DENYWR);
+				void(__cdecl * PrintLog)(const char* apText, ...) = reinterpret_cast<void(__cdecl*)(const char*, ...)>(GetJIPAddress(0x10006740));
+				PrintLog("JohnnyGuitar Fixes and Tweaks initialized");
+			}
+		}
+	}
+
+	namespace VersionPrint {
+
+		const char cVersionString[] = "JIP LN version: %.2f + JohnnyGuitar Fixes and Tweaks";
+
+		void InitHooks() {
+			SafeWrite32(GetJIPAddress(0x1001359D) + 1, size_t(&cVersionString));
+		}
+	}
+
 	void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
@@ -1488,11 +1697,13 @@ namespace JIPFixes {
 			return;
 
 		if (bIsGECK) {
-
+			LogMover::InitHooks();
 		}
 		else {
 			JIPSettings::InitConditionalHooks();
 			EarlyFixedStrings::InitHooks();
+			LogMover::InitHooks();
+			VersionPrint::InitHooks();
 		}
 	}
 
@@ -1530,8 +1741,10 @@ namespace JIPFixes {
 		SetOnDialogTopicEventHandlerEx::InitHooks();
 		RespawnDisableFix::InitHooks();
 		CopyFaceGenFromFix::InitHooks();
+		SoundSourceFileFix::InitHooks();
 		BetterSearch::InitHooks();
 		PowerArmorCondition::InitHooks();
+		LeveledListFixes::InitHooks();
 	}
 
 	void InitDeferredHooks() {

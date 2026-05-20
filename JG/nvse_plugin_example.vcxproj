@@ -184,6 +184,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESFile.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESFullName.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESLeveledList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObject.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectList.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFixedString.cpp" />
@@ -258,6 +259,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="..\shared\Utils\DebugLog.hpp" />
     <ClInclude Include="events\EventFramework.h" />
     <ClInclude Include="events\JohnnyEvents.h" />
+    <ClInclude Include="events\JohnnyMessageData.hpp" />
     <ClInclude Include="events\LambdaVariableContext.h" />
     <ClInclude Include="functions\fn_av.h" />
     <ClInclude Include="functions\fn_book.h" />
@@ -346,6 +348,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESFullName.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESLeveledList.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESLevItem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESModel.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectList.hpp" />
@@ -356,9 +360,17 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiMemObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemory.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiObject.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiParticles.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiParticleSystem.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPoint2.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPoint3.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPoint4.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiProperty.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPropertyState.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPSysBoxEmitter.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPSysEmitter.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPSysModifier.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPSysVolumeEmitter.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRefObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRTTI.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSmartPointer.hpp" />

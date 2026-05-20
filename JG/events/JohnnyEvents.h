@@ -2,30 +2,29 @@
 #include "GameScript.h"
 namespace JohnnyEvents {
 
-	void RegisterOnDying(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnStartQuest(Script* script, void** filters,  bool toggle, uint32_t userFlags = 0);
-	void RegisterOnStopQuest(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnFailQuest(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnCompleteQuest(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnSeenDataUpdate(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnLimbGone(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnChallengeComplete(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnCrosshair(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnSettingsUpdate(Script* script, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnAddPerk(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnRemovePerk(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnActorValueChange(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnProcessLevelChange(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnRadioPostSoundAttach(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnInputSwitch(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnSleepWait(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnRender(Script* script, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnNPCResponse(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnGeneralSubtitle(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnReputationChange(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnNPCActorValueChange(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-	void RegisterOnTakeBackItem(Script* script, void** filters, bool toggle, uint32_t userFlags = 0);
-
+	void RegisterOnDying(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnStartQuest(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnStopQuest(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnFailQuest(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnCompleteQuest(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnSeenDataUpdate(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnLimbGone(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnChallengeComplete(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnCrosshair(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnSettingsUpdate(Script* apScript, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnAddPerk(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnRemovePerk(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnActorValueChange(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnProcessLevelChange(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnRadioPostSoundAttach(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnInputSwitch(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnSleepWait(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnRender(Script* apScript, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnNPCResponse(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnGeneralSubtitle(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnReputationChange(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnNPCActorValueChange(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
+	void RegisterOnTakeBackItem(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
 
 	void Install();
 	void Reset();

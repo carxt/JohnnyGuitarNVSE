@@ -9,6 +9,8 @@
 #include "Bethesda/TESBoundAnimObject.hpp"
 #include "Bethesda/BGSListForm.hpp"
 #include "Bethesda/TESFullName.hpp"
+#include "Bethesda/TESLeveledList.hpp"
+#include "Bethesda/TESLevItem.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -3140,46 +3142,6 @@ public:
 	uint8_t						pad015D[3];			// 15D
 };
 
-// 34
-class TESLeveledList : public BaseFormComponent {
-public:
-	struct LoadBaseData	// as used by LoadForm
-	{
-		int16_t			level;		// 00
-		uint16_t			fill002;	// 02
-		TESObjectREFR* refr;		// 04
-		int16_t			count;		// 08
-		uint16_t			fill00A;	// 0A
-	};	// 0C
-
-	struct ListData {
-		TESForm* form;		// 00
-		int16_t			count;		// 04
-		int16_t			level;		// 06
-		LvlListExtra* extra;		// 08
-	}; // 0C
-
-	enum {
-		kFlags_CalcAllLevels = 1 << 0,
-		kFlags_CalcEachInCount = 1 << 1,
-		kFlags_UseAll = 1 << 2,
-	};
-
-	tList<ListData>		list;			// 04
-	uint8_t				chanceNone;		// 0C
-	uint8_t				flags;			// 0D
-	uint16_t				pad00E;			// 0E
-	TESGlobal* global;		// 10 use global value for chance none?
-	ExtraDataList		extraDatas;		// 14 ??? BaseExtraList::DebugDump() shows no data
-
-	void AddItem(TESForm* form, uint16_t level, uint16_t count, float health);
-	uint32_t RemoveItem(TESForm* form);
-	void Dump();
-	bool RemoveNthItem(uint32_t itemIndex);
-	int32_t GetItemIndexByForm(TESForm* form);
-	int32_t GetItemIndexByLevel(uint32_t level);
-};
-
 // TESLevCreature (68)
 class TESLevCreature : public TESBoundObject {
 public:
@@ -3347,15 +3309,6 @@ public:
 		if (bEnable) projFlags |= pFlag;
 		else projFlags &= ~pFlag;
 	}
-};
-
-// TESLevItem (44)
-class TESLevItem : public TESBoundObject {
-public:
-	TESLevItem();
-	~TESLevItem();
-
-	TESLeveledList		list;
 };
 
 // 36C

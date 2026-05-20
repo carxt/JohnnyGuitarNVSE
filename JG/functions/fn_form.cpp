@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include "JG/JGSetList.hpp"
 #include <JG/BarterFilter.hpp>
+#include <JG/JohnnyExtraData.hpp>
 #include <GameData.h>
 #include <GameRTTI.h>
 #include "decoding.h"
@@ -1529,7 +1530,7 @@ bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	TESObjectARMO* armor = nullptr;
 	uint32_t isFemale;
 	uint32_t flagID;
-	bool bEnable;
+	BOOL bEnable;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &flagID, &isFemale, &bEnable) && armor && IS_TYPE(armor, TESObjectARMO) && flagID <= 3) {
 		armor->SetFacegenFlag(1 << flagID, isFemale, bEnable);
@@ -2528,7 +2529,7 @@ enum UPDATE3D_FLAGS_EX {
 	UPDATE_POS		= 1u << 6,
 };
 
-void RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
+static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
 	if (auiFlags & UPDATE_MODEL) {
 		apReference->Update3D();
 		ThisCall(0x456520, *reinterpret_cast<DWORD**>(0x1202D98));
@@ -2545,53 +2546,67 @@ void RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
 		ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(BSShaderManager::SceneGraphType::WORLD);
 		pSSN->UpdateObjectLighting(apReference->Get3DSimple(), false);
 	}
+
+	if (auiFlags & UPDATE_POS) {
+		apReference->Update3DPosition();
+	}
+}
+
+static void __fastcall RequestModelUpdate(TESObjectREFR* apReference, uint32_t auiFlags, bool abQueue) {
+	if (abQueue) {
+		JohnnyExtraData* pExtraData = JohnnyExtraData::GetOrCreate(apReference);
+		pExtraData->IncRefCount();
+
+		QueuedTask kTask;
+		kTask.kItems[0].p = pExtraData;
+		kTask.kItems[1].ui = auiFlags;
+		kTask.pFunction = QUEUED_TASK{
+			JohnnyExtraData* pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
+			TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pData->pOwner);
+			if (pRef) {
+				uint32_t uiFlags = arTask.kItems[1].ui;
+				RefreshReferenceModel(pRef, uiFlags);
+			}
+			pData->DecRefCount();
+		};
+		TaskQueue::QueueTask(kTask);
+	}
+	else {
+		RefreshReferenceModel(apReference, auiFlags);
+	}
 }
 
 bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
+	constexpr uint32_t uiAddedFlags = UPDATE_LIGHTS | UPDATE_POS;
+
+	*result = 0;
 	uint32_t uiFlags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags) && uiFlags) {
-		bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
-		if (thisObj->IsMobileObject()) {
-			MobileObject* pObj = static_cast<MobileObject*>(thisObj);
-			if (pObj->baseProcess) {
-				pObj->baseProcess->Set3DUpdateFlag(uiFlags);
+		if (!thisObj->Get3DSimple() || thisObj->IsStillLoading())
+			return true;
 
-				if (uiFlags & UPDATE_LIGHTS) {
-					ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(BSShaderManager::SceneGraphType::WORLD);
-					pSSN->UpdateObjectLighting(pObj->Get3DSimple(), false);
+		const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
+		if (thisObj->IsActor()) {
+			Actor* pActor = static_cast<Actor*>(thisObj);
+			if (pActor->baseProcess) {
+				// Creatures can't refresh their models in vanilla, so we have to handle them ourselves.
+				if (pActor->IsCreature()) {
+					RequestModelUpdate(thisObj, uiFlags, bQueue);
+				}
+				else {
+					pActor->baseProcess->Set3DUpdateFlag(uiFlags);
+					if (!bQueue)
+						pActor->baseProcess->Update3DModel(pActor);
+
+					
+					const uint32_t uiCustomFlags = uiFlags & uiAddedFlags;
+					if (uiCustomFlags)
+						RequestModelUpdate(thisObj, uiCustomFlags, bQueue);
 				}
 			}
 		}
 		else {
-			if (bQueue) {
-				QueuedTask kTask;
-				kTask.kItems[0].p = thisObj;
-				kTask.kItems[1].ui = uiFlags;
-				kTask.pFunction = QUEUED_TASK{
-					TESObjectREFR * pRef = reinterpret_cast<TESObjectREFR*>(arTask.kItems[0].p);
-					uint32_t uiFlags = arTask.kItems[1].ui;
-					RefreshReferenceModel(pRef, uiFlags);
-				};
-				TaskQueue::QueueTask(kTask);
-			}
-			else {
-				RefreshReferenceModel(thisObj, uiFlags);
-			}
-		}
-
-		if (uiFlags & UPDATE_POS) {
-			if (bQueue) {
-				QueuedTask kTask;
-				kTask.kItems[0].p = thisObj;
-				kTask.pFunction = QUEUED_TASK{
-					TESObjectREFR * pRef = reinterpret_cast<TESObjectREFR*>(arTask.kItems[0].p);
-					pRef->Update3DPosition();
-				};
-				TaskQueue::QueueTask(kTask);
-			}
-			else {
-				thisObj->Update3DPosition();
-			}
+			RequestModelUpdate(thisObj, uiFlags, bQueue);
 		}
 
 		*result = 1;
