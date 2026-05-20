@@ -997,6 +997,9 @@
     <ClInclude Include="events\JohnnyMessageData.hpp">
       <Filter>events</Filter>
     </ClInclude>
+    <ClInclude Include="internal\CommandOpcodes.h">
+      <Filter>internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

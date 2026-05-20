@@ -1,6 +1,7 @@
 #include "JohnnyGuitarNVSE.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
+#include "internal/CommandOpcodes.h"
 #include "functions/fn_av.h"
 #include "functions/fn_form.h"
 #include "functions/fn_utility.h"
@@ -81,7 +82,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 				JIPFixes::InitHooks();
 			}
 
-			const CommandInfo* pUpdate3D = g_cmdTableInterface->GetByOpcode(0x152D);
+			const CommandInfo* pUpdate3D = g_cmdTableInterface->GetByOpcode(CommandOpcodes::kUpdate3D);
 			if (pUpdate3D)
 				Cmd_Update3D = pUpdate3D->execute;
 			break;
