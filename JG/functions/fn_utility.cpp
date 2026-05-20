@@ -524,27 +524,33 @@ bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
-	*result = 0;
+	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	uint32_t arrID;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID)) return true;
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!inArr) return true;
 	if (g_arrInterface->GetContainerType(inArr) != NVSEArrayVarInterface::kArrType_Array) return true;
-	std::random_device rd;  
+	std::random_device rd;
 	std::mt19937 gen(rd());
-	for (auto iCounter = (g_arrInterface->GetArraySize(inArr) - 1);iCounter >= 1; iCounter--)
+	auto lAr_Size = g_arrInterface->GetArraySize(inArr);
+	if (lAr_Size < 1) return true;
+	BSScrapBuffer<NVSEArrayElement> elements(lAr_Size);
+	g_arrInterface->GetElements(inArr, elements.get(), NULL);
+	for (auto iCounter = (lAr_Size - 1); iCounter >= 1; iCounter--)
 	{
 		std::uniform_int_distribution<> distrib(1, iCounter);
 		auto iPicker = distrib(gen);
 		if (iPicker < iCounter)
 		{
-			NVSEArrayElement bufferCurrentElement;
-			NVSEArrayElement bufferPickedElement;
-			g_arrInterface->GetElement(inArr, iPicker, bufferPickedElement);
-			g_arrInterface->GetElement(inArr, iCounter, bufferCurrentElement);
-			g_arrInterface->SetElement(inArr, iPicker, bufferCurrentElement);
-			g_arrInterface->SetElement(inArr, iCounter, bufferPickedElement);
+			NVSEArrayElement bufferElement;
+			bufferElement = elements[iPicker];
+			elements[iPicker] = elements[iCounter];
+			elements[iCounter] = bufferElement;
 		}
 	}
+	for (uint32_t i = 0; i < lAr_Size; i++) {
+		g_arrInterface->AppendElement(outArr, NVSEArrayElement(elements[i]));
+	}
+	g_arrInterface->AssignCommandResult(outArr, result);
 	return true;
 }
