@@ -631,7 +631,6 @@ bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID)) return true;
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!inArr) return true;
-
 	if (g_arrInterface->GetContainerType(inArr) != NVSEArrayVarInterface::kArrType_Array) return true;
 	std::random_device rd;  
 	std::mt19937 gen(rd());
@@ -648,7 +647,6 @@ bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
 			g_arrInterface->SetElement(inArr, iPicker, bufferCurrentElement);
 			g_arrInterface->SetElement(inArr, iCounter, bufferPickedElement);
 		}
-		return true;
 	}
 	return true;
 }
