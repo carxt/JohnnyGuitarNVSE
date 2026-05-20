@@ -566,7 +566,27 @@ namespace JIPFixes {
 			}
 		}
 	}
-  
+	namespace SoundSourceFileFix
+	{
+		bool(__cdecl* SetSoundSourceFile)(COMMAND_ARGS) = nullptr;
+		//Set the max path to 1000 instead of 128.
+		bool Cmd_SetSoundSourceFile_Execute(COMMAND_ARGS)
+		{
+			TESSound* sound;
+			char path[1000];
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &path))
+				sound->soundFile.Set(path);
+			return true;
+		}
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0xD6C0));
+			if (pInfo) {
+				SetSoundSourceFile = pInfo->execute;
+				pInfo->execute = Cmd_SetSoundSourceFile_Execute;
+			}
+		}
+	
+	}
 	namespace SetOnDialogTopicEventHandlerEx {
 
 		EventInformation* OnDialogTopicHandler = nullptr;
@@ -1721,6 +1741,7 @@ namespace JIPFixes {
 		SetOnDialogTopicEventHandlerEx::InitHooks();
 		RespawnDisableFix::InitHooks();
 		CopyFaceGenFromFix::InitHooks();
+		SoundSourceFileFix::InitHooks();
 		BetterSearch::InitHooks();
 		PowerArmorCondition::InitHooks();
 		LeveledListFixes::InitHooks();
