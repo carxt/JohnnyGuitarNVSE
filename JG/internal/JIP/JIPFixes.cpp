@@ -1594,7 +1594,7 @@ namespace JIPFixes {
 
 		void InitHooks() {
 			FILE** pLog = reinterpret_cast<FILE**>(GetJIPAddress(0x1006A388));
-			if (fclose(pLog[0]) != 0)
+			if (!pLog[0] || fclose(pLog[0]) != 0)
 				return;
 
 			if (MoveFileExA("jip_ln_nvse.log", "logs\\jip_ln_nvse.log", MOVEFILE_REPLACE_EXISTING)) {
