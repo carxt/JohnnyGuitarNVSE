@@ -566,20 +566,20 @@ namespace JIPFixes {
 			}
 		}
 	}
-	namespace SoundSourceFileFix
-	{
+
+	namespace SoundSourceFileFix {
 		bool(__cdecl* SetSoundSourceFile)(COMMAND_ARGS) = nullptr;
-		//Set the max path to 1000 instead of 128.
-		bool Cmd_SetSoundSourceFile_Execute(COMMAND_ARGS)
-		{
-			TESSound* sound;
-			char path[1000];
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &path))
-				sound->soundFile.Set(path);
+
+		bool Cmd_SetSoundSourceFile_Execute(COMMAND_ARGS) {
+			TESSound* pSound = nullptr;
+			char cPath[1024];
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSound, &cPath) && pSound)
+				pSound->soundFile.Set(cPath);
 			return true;
 		}
+
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0xD6C0));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x26C0));
 			if (pInfo) {
 				SetSoundSourceFile = pInfo->execute;
 				pInfo->execute = Cmd_SetSoundSourceFile_Execute;
