@@ -523,6 +523,7 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(Update3DAlt);
 	REG_CMD(SetNiPSysModifierValue);
 	REG_TYPED_CMD(GetNiPSysModifierValue, Default);
+  REG_CMD(ar_Shuffle);
 }
 
 
