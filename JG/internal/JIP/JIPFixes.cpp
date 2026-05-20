@@ -1590,6 +1590,47 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace ExtraDataFixes {
+
+		// Credits to alex19ep for finding the bug and analysis
+
+		constexpr uint32_t uiJIPExtraDataVersion = 2;
+
+		static uint32_t uiReturnAddr;
+		static uint32_t uiGiveUpAddr;
+		void __declspec(naked) SanityCheck_Asm() {
+			__asm {
+				// If version is from the unpatched JIP, don't even bother
+				// It's not possible to assess how much corrupted the save data is
+				// As much as I'd like to attempt to recover it, after seeing affected cosaves, it's hopeless
+				cmp		dword ptr[ebp - 0x28], 1
+				je		GIVE_UP
+
+				mov     edx, [ebp - 0x10]
+				lea     ecx, [ebp - 0x14]
+				jmp		uiReturnAddr;
+
+				// Give up. Giving up is always easiest
+			GIVE_UP:
+				jmp		uiGiveUpAddr;
+			}
+		}
+
+		void InitHooks() {
+			uiReturnAddr = GetJIPAddress(0x10015B43);
+			uiGiveUpAddr = GetJIPAddress(0x10015560);
+
+			WriteRelJump(GetJIPAddress(0x10015B3D), SanityCheck_Asm);
+
+			// Fix offset size
+			SafeWrite8(GetJIPAddress(0x100167EA + 2), 0xC0);
+
+			// Raise current version to 2
+			SafeWrite8(GetJIPAddress(0x10015B33 + 3), uiJIPExtraDataVersion);
+			SafeWrite8(GetJIPAddress(0x10016761 + 1), uiJIPExtraDataVersion);
+		}
+	}
+
 	namespace LogMover {
 
 		void InitHooks() {
@@ -1732,6 +1773,7 @@ namespace JIPFixes {
 			GetSelectedItemRefFix::InitHooks();
 			Update3DTweak::InitHooks();
 			AddItemAltNoCond::InitHooks();
+			ExtraDataFixes::InitHooks();
 		}
 	}
 
