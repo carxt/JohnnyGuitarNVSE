@@ -12,6 +12,7 @@
 #include <JG/CameraOverride.hpp>
 #include <JG/JohnnyRadios.hpp>
 #include <JG/DisabledLevelUp.hpp>
+#include <random>
 
 extern uint32_t g_initialTickCount;
 
@@ -619,6 +620,35 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 		else if (IsConsoleMode()) {
 			Console_Print("Root node not found");
 		}
+	}
+	return true;
+}
+
+
+bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
+	*result = 0;
+	uint32_t arrID;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID)) return true;
+	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
+	if (!inArr) return true;
+
+	if (g_arrInterface->GetContainerType(inArr) != NVSEArrayVarInterface::kArrType_Array) return true;
+	std::random_device rd;  
+	std::mt19937 gen(rd());
+	for (auto iCounter = (g_arrInterface->GetArraySize(inArr) - 1);iCounter >= 1; iCounter--)
+	{
+		std::uniform_int_distribution<> distrib(1, iCounter);
+		auto iPicker = distrib(gen);
+		if (iPicker < iCounter)
+		{
+			NVSEArrayElement bufferCurrentElement;
+			NVSEArrayElement bufferPickedElement;
+			g_arrInterface->GetElement(inArr, iPicker, bufferPickedElement);
+			g_arrInterface->GetElement(inArr, iCounter, bufferCurrentElement);
+			g_arrInterface->SetElement(inArr, iPicker, bufferCurrentElement);
+			g_arrInterface->SetElement(inArr, iCounter, bufferPickedElement);
+		}
+		return true;
 	}
 	return true;
 }

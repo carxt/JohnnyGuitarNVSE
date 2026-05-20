@@ -1076,3 +1076,9 @@ static ParamInfo kParamsCallPerMobileObjectEx[] =
 	{ "Process Level", kNVSEParamType_Number , 0 },
 	{ "Type Filter Array", kNVSEParamType_Array , 0 },
 };
+
+static ParamInfo kParams_OneArray[] =
+{
+
+	{	"array",	kNVSEParamType_Array,	0	}
+};
