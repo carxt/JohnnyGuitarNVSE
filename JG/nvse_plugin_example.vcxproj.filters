@@ -370,6 +370,9 @@
     <ClCompile Include="internal\Game\Bethesda\TESLeveledList.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\RadioSkipOGGWAVPatch.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -999,6 +1002,9 @@
     </ClInclude>
     <ClInclude Include="internal\CommandOpcodes.h">
       <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\RadioSkipOGGWAVPatch.hpp">
+      <Filter>internal\JG</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
