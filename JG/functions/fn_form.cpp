@@ -428,7 +428,7 @@ bool Cmd_GetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
 
 BGSEncounterZone* GetEncounterZone(ExtraDataList* list) {
 	ExtraEncounterZone* xZone = list->GetExtraData<ExtraEncounterZone>();
-	if (xZone && xZone->pZone) 
+	if (xZone && xZone->pZone)
 		return xZone->pZone;
 	return nullptr;
 }
@@ -1766,7 +1766,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	TESForm* ammo = nullptr;
 	if (!extendPtr && weaponInfo && (weaponInfo->pObject == weapon) && midHiProc->ammoInfo)
 		ammo = midHiProc->ammoInfo->pObject;
-	if (!ammo) 
+	if (!ammo)
 		ammo = weapon->GetAmmo();
 	midHiProc->weaponInfo = nullptr;
 	*result = GetWeaponDPS(&(PlayerCharacter::GetSingleton()->avOwner), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
@@ -1968,7 +1968,7 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 
-	if (!thisObj) 
+	if (!thisObj)
 		return true;
 
 	InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
@@ -2292,7 +2292,7 @@ namespace RefWalker {
 		uint32_t uiCount = 0;
 		TESObjectREFR* pCaller = arFilter.pCaller;
 		ProcessLists* pPL = ProcessLists::GetSingleton();
-		
+
 		const uint32_t uiBegin = pPL->beginOffsets[aeProcessLevel];
 		const uint32_t uiEnd = pPL->endOffsets[aeProcessLevel];
 
@@ -2598,7 +2598,7 @@ bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
 					if (!bQueue)
 						pActor->baseProcess->Update3DModel(pActor);
 
-					
+
 					const uint32_t uiCustomFlags = uiFlags & uiAddedFlags;
 					if (uiCustomFlags)
 						RequestModelUpdate(thisObj, uiCustomFlags, bQueue);
@@ -2610,6 +2610,16 @@ bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
 		}
 
 		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetRecipeCategoryFlags_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESRecipeCategory* category = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &category) && category && IS_TYPE(category, TESRecipeCategory)) {
+		*result = category->flags;
+		if (IsConsoleMode()) Console_Print("GetRecipeCategoryFlags >> %.f", *result);
 	}
 	return true;
 }

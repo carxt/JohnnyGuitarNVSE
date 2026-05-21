@@ -116,3 +116,4 @@ DEFINE_COMMAND_PLUGIN_EXP(CallPerRefEx, , false, kParamsCallPerRefEx);
 DEFINE_COMMAND_PLUGIN(CallPerMobileObject, , false, kParamsCallPerMobileObject);
 DEFINE_COMMAND_PLUGIN_EXP(CallPerMobileObjectEx, , false, kParamsCallPerMobileObjectEx);
 DEFINE_COMMAND_PLUGIN(Update3DAlt, , true, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(GetRecipeCategoryFlags, , false, kParams_OneForm);

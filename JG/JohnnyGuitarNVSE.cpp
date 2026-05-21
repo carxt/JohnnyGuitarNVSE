@@ -24,8 +24,8 @@
 #include <JG/MediaLocationControllerOverride.hpp>
 #include <JG/CameraOverride.hpp>
 #include <JG/JohnnyRadios.hpp>
-#include <JG/RSMBarberHook.hpp> 
-#include <JG/BarterFilter.hpp> 
+#include <JG/RSMBarberHook.hpp>
+#include <JG/BarterFilter.hpp>
 #include "JG/EditorIDRestoration.hpp"
 #include <JG/CustomHUDShake.hpp>
 #include "JG/JohnnyGameSettings.hpp"
@@ -75,7 +75,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 	MEM_CONTEXT eOrgContext = GetMemContext();
 	SetMemContext(MC_DEFAULT);
 	switch (msg->type) {
-		case NVSEMessagingInterface::kMessage_PostPostLoad: // GAME + GECK 
+		case NVSEMessagingInterface::kMessage_PostPostLoad: // GAME + GECK
 		{
 			if (JohnnyPatches::bFixJIP) {
 				JIPFixes::InitCommandHooks();
@@ -130,10 +130,10 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			EDIDRestoration::PrintErrors();
 			if (JohnnyPatches::bFixJIP)
 				JIPFixes::InitDeferredHooks();
-			
+
 			break;
 		}
-		case NVSEMessagingInterface::kMessage_PostLoad: // GAME + GECK 
+		case NVSEMessagingInterface::kMessage_PostLoad: // GAME + GECK
 		{
 			JohnnyPatches::HandleDLLInterop();
 
@@ -525,6 +525,7 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(SetNiPSysModifierValue);
 	REG_TYPED_CMD(GetNiPSysModifierValue, Default);
 	REG_TYPED_CMD(ar_Shuffle, Array);
+  REG_CMD(GetRecipeCategoryFlags);
 }
 
 
