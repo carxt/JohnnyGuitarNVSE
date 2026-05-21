@@ -994,6 +994,12 @@
     <ClInclude Include="internal\Game\Bethesda\TESLevItem.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="events\JohnnyMessageData.hpp">
+      <Filter>events</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\CommandOpcodes.h">
+      <Filter>internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

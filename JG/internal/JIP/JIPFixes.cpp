@@ -13,6 +13,7 @@
 #include "PluginAPI.h"
 #include "utility.h"
 #include <decoding.h>
+#include "internal/CommandOpcodes.h"
 
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 #include "Shared/Utils/StackObject.hpp"
@@ -559,14 +560,34 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x22A1));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kCopyFaceGenFrom));
 			if (pInfo) {
 				CopyFaceGenFrom = pInfo->execute;
 				pInfo->execute = Cmd_CopyFaceGenFrom_Execute;
 			}
 		}
 	}
-  
+
+	namespace SoundSourceFileFix {
+		bool(__cdecl* SetSoundSourceFile)(COMMAND_ARGS) = nullptr;
+
+		bool Cmd_SetSoundSourceFile_Execute(COMMAND_ARGS) {
+			TESSound* pSound = nullptr;
+			char cPath[1024];
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSound, &cPath) && pSound)
+				pSound->soundFile.Set(cPath);
+			return true;
+		}
+
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetSoundSourceFile));
+			if (pInfo) {
+				SetSoundSourceFile = pInfo->execute;
+				pInfo->execute = Cmd_SetSoundSourceFile_Execute;
+			}
+		}
+	
+	}
 	namespace SetOnDialogTopicEventHandlerEx {
 
 		EventInformation* OnDialogTopicHandler = nullptr;
@@ -623,7 +644,7 @@ namespace JIPFixes {
 		};
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x27FC));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetOnDialogTopicEventHandler));
 			if (pInfo) {
 				pInfo->execute = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
 				SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
@@ -663,7 +684,7 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x28EF));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kClearDeadActors));
 			if (pInfo) {
 				pInfo->params = kParams_OneOptionalInt;
 				pInfo->numParams = 1;
@@ -784,7 +805,7 @@ namespace JIPFixes {
 
 		void InitHooks() {
 			uiWeaponHasScope = GetJIPAddress(0x10058F10);
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x280D));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kReloadEquippedModels));
 			if (pInfo) {
 				pInfo->execute = Cmd_ReloadEquippedModels_Execute;
 			}
@@ -1074,7 +1095,7 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2246));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSearch));
 			if (pInfo) {
 				Cmd_Search_Org_Parse = pInfo->parse;
 				pInfo->execute		= Cmd_Search_JG_Execute;
@@ -1161,7 +1182,7 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x22AA));
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetPCCanUsePowerArmor));
 			if (pInfo) {
 				pInfo->eval = Cmd_GetPCCanUsePowerArmor_Eval;
 			}
@@ -1549,23 +1570,88 @@ namespace JIPFixes {
 
 		void InitHooks() {
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x221F));
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kLeveledListRemoveForm));
 				if (pInfo) {
 					pInfo->execute = Cmd_LeveledListRemoveForm_Execute;
 				}
 			}
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2228));
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kRemoveNthLevItem));
 				if (pInfo) {
 					pInfo->execute = Cmd_RemoveNthLevItem_Execute;
 				}
 			}
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2229));
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kLeveledListClear));
 				if (pInfo) {
 					pInfo->execute = Cmd_LeveledListClear_Execute;
 				}
 			}
+		}
+	}
+
+	namespace ExtraDataFixes {
+
+		// Credits to alex19ep for finding the bug and analysis
+
+		constexpr uint32_t uiJIPExtraDataVersion = 2;
+
+		static uint32_t uiReturnAddr;
+		static uint32_t uiGiveUpAddr;
+		void __declspec(naked) SanityCheck_Asm() {
+			__asm {
+				// If version is from the unpatched JIP, don't even bother
+				// It's not possible to assess how much corrupted the save data is
+				// As much as I'd like to attempt to recover it, after seeing affected cosaves, it's hopeless
+				cmp		dword ptr[ebp - 0x28], 1
+				je		GIVE_UP
+
+				mov     edx, [ebp - 0x10]
+				lea     ecx, [ebp - 0x14]
+				jmp		uiReturnAddr;
+
+				// Give up. Giving up is always easiest
+			GIVE_UP:
+				jmp		uiGiveUpAddr;
+			}
+		}
+
+		void InitHooks() {
+			uiReturnAddr = GetJIPAddress(0x10015B43);
+			uiGiveUpAddr = GetJIPAddress(0x10015560);
+
+			WriteRelJump(GetJIPAddress(0x10015B3D), SanityCheck_Asm);
+
+			// Fix offset size
+			SafeWrite8(GetJIPAddress(0x100167EA + 2), 0xC0);
+
+			// Raise current version to 2
+			SafeWrite8(GetJIPAddress(0x10015B33 + 3), uiJIPExtraDataVersion);
+			SafeWrite8(GetJIPAddress(0x10016761 + 1), uiJIPExtraDataVersion);
+		}
+	}
+
+	namespace LogMover {
+
+		void InitHooks() {
+			FILE** pLog = reinterpret_cast<FILE**>(GetJIPAddress(0x1006A388));
+			if (!pLog[0] || fclose(pLog[0]) != 0)
+				return;
+
+			if (MoveFileExA("jip_ln_nvse.log", "logs\\jip_ln_nvse.log", MOVEFILE_REPLACE_EXISTING)) {
+				pLog[0] = _fsopen("logs\\jip_ln_nvse.log", "a+b", _SH_DENYWR);
+				void(__cdecl * PrintLog)(const char* apText, ...) = reinterpret_cast<void(__cdecl*)(const char*, ...)>(GetJIPAddress(0x10006740));
+				PrintLog("JohnnyGuitar Fixes and Tweaks initialized");
+			}
+		}
+	}
+
+	namespace VersionPrint {
+
+		const char cVersionString[] = "JIP LN version: %.2f + JohnnyGuitar Fixes and Tweaks";
+
+		void InitHooks() {
+			SafeWrite32(GetJIPAddress(0x1001359D) + 1, size_t(&cVersionString));
 		}
 	}
 
@@ -1653,11 +1739,13 @@ namespace JIPFixes {
 			return;
 
 		if (bIsGECK) {
-
+			LogMover::InitHooks();
 		}
 		else {
 			JIPSettings::InitConditionalHooks();
 			EarlyFixedStrings::InitHooks();
+			LogMover::InitHooks();
+			VersionPrint::InitHooks();
 		}
 	}
 
@@ -1685,6 +1773,7 @@ namespace JIPFixes {
 			GetSelectedItemRefFix::InitHooks();
 			Update3DTweak::InitHooks();
 			AddItemAltNoCond::InitHooks();
+			ExtraDataFixes::InitHooks();
 		}
 	}
 
@@ -1695,6 +1784,7 @@ namespace JIPFixes {
 		SetOnDialogTopicEventHandlerEx::InitHooks();
 		RespawnDisableFix::InitHooks();
 		CopyFaceGenFromFix::InitHooks();
+		SoundSourceFileFix::InitHooks();
 		BetterSearch::InitHooks();
 		PowerArmorCondition::InitHooks();
 		LeveledListFixes::InitHooks();

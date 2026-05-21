@@ -1077,6 +1077,12 @@ static ParamInfo kParamsCallPerMobileObjectEx[] =
 	{ "Type Filter Array", kNVSEParamType_Array , 0 },
 };
 
+static ParamInfo kParams_OneArray[] =
+{
+
+	{	"array",	kNVSEParamType_Array,	0	}
+};
+
 static ParamInfo kParams_SetNiPSysModifierValue[] =
 {
 	{ "Block Name", kParamType_String, 0 },

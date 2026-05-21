@@ -78,6 +78,7 @@ jobs:
     - name: Upload mod to NexusMods
       id: nexus_upload
       uses: Nexus-Mods/upload-action@main
+      continue-on-error: true
       with:
         api_key: ${{ secrets.NEXUSMODS_API_KEY }}
         file_group_id: ${{ vars.NEXUSMODS_BETA_GROUP_ID }}

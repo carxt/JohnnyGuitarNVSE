@@ -897,6 +897,10 @@ public:
 		if (pRenderPassArray)
 			pRenderPassArray->uiPassCount = 0;
 	}
+
+	void InvalidateState() {
+		iLastRenderPassState = -1;
+	}
 };
 static_assert(sizeof(BSShaderProperty) == 0x60);
 
@@ -1073,7 +1077,15 @@ public:
 	NiAVObject* GetBlock(const char* blockName);
 	NiNode* GetNode(const char* nodeName);
 
-	NiAVObject* GetAt(uint32_t index) {
+	uint32_t GetArrayCount() const {
+		return m_children.GetSize();
+	}
+
+	uint32_t GetChildCount() const {
+		return m_children.GetEffectiveSize();
+	}
+
+	NiAVObject* GetAt(uint32_t index) const {
 		return m_children.GetAt(index);
 	}
 };

@@ -11,6 +11,7 @@
 #include <JG/CameraOverride.hpp>
 #include <JG/JohnnyRadios.hpp>
 #include <JG/DisabledLevelUp.hpp>
+#include <random>
 
 extern uint32_t g_initialTickCount;
 
@@ -500,71 +501,6 @@ bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-static NiPointer<NiAVObject> lastBlock = nullptr;
-static TESForm* lastForm = nullptr;
-
-bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
-	float x, y, z, w;
-	BOOL rotate = false;
-	BOOL update = false;
-	BOOL world = false;
-	bool local = false;
-	char blockName[128] = {};
-
-	*result = false;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &blockName, &x, &y, &z, &w, &rotate, &world, &update)) {
-		NiAVObject* object = nullptr;
-		if (lastForm == thisObj && !strcmp(lastBlock.m_pObject->m_blockName, blockName)) {
-			object = lastBlock;
-		}
-		else {
-			lastForm = thisObj;
-			NiNode* refNode = thisObj->Get3DSimple();
-			if (!refNode)
-				return true;
-
-			object = BSUtilities::GetObjectByName(refNode, blockName);
-			if (!object)
-				return true;
-
-			lastBlock = object;
-		}
-		if (world) {
-			if (rotate) {
-				// NiMatrix3::FromEulerAnglesXYZ
-				ThisCall(0xA59540, &object->m_world.rotate, x, y, z);
-			}
-			else {
-				object->m_world.translate.x = x;
-				object->m_world.translate.y = y;
-				object->m_world.translate.z = z;
-			}
-
-			object->m_world.scale = w;
-		}
-		else {
-			if (rotate) {
-				// NiMatrix3::FromEulerAnglesXYZ
-				ThisCall(0xA59540, &object->m_local.rotate, x, y, z);
-			}
-			else {
-				object->m_local.translate.x = x;
-				object->m_local.translate.y = y;
-				object->m_local.translate.z = z;
-			}
-
-			object->m_local.scale = w;
-		}
-
-		if (update) {
-			NiUpdateData updateData;
-			object->Update(updateData);
-		}
-		*result = true;
-	}
-	return true;
-}
-
 bool Cmd_SetCameraTranslate_Execute(COMMAND_ARGS) {
 	using namespace CameraOverride;
 	int override = 0;
@@ -584,5 +520,37 @@ bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
 		CameraOverride::OverrideRot(override > 0, eAxis, fAngle, pRef);
 		
 	}
+	return true;
+}
+
+bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
+	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	uint32_t arrID;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID)) return true;
+	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
+	if (!inArr) return true;
+	if (g_arrInterface->GetContainerType(inArr) != NVSEArrayVarInterface::kArrType_Array) return true;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	auto lAr_Size = g_arrInterface->GetArraySize(inArr);
+	if (lAr_Size < 1) return true;
+	BSScrapBuffer<NVSEArrayElement> elements(lAr_Size);
+	g_arrInterface->GetElements(inArr, elements.get(), NULL);
+	for (auto iCounter = (lAr_Size - 1); iCounter >= 1; iCounter--)
+	{
+		std::uniform_int_distribution<> distrib(1, iCounter);
+		auto iPicker = distrib(gen);
+		if (iPicker < iCounter)
+		{
+			NVSEArrayElement bufferElement;
+			bufferElement = elements[iPicker];
+			elements[iPicker] = elements[iCounter];
+			elements[iCounter] = bufferElement;
+		}
+	}
+	for (uint32_t i = 0; i < lAr_Size; i++) {
+		g_arrInterface->AppendElement(outArr, NVSEArrayElement(elements[i]));
+	}
+	g_arrInterface->AssignCommandResult(outArr, result);
 	return true;
 }
