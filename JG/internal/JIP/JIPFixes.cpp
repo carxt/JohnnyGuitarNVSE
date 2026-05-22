@@ -1,6 +1,7 @@
 #include "JIPFixes.hpp"
 #include "Bethesda/BSStringT.hpp"
 #include "Bethesda/AutoMemContext.hpp"
+#include "Bethesda/Setting.hpp"
 #include "events/EventFramework.h"
 #include "GameObjects.h"
 #include "GameProcess.h"
@@ -1631,6 +1632,84 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace GameSettingFix {
+
+		struct SettingsMap {
+			struct ALIGN8 Entry {
+				Entry*		pNext;
+				uint32_t    uiKey;
+				Setting*	pData;
+			};
+
+			struct Bucket {
+				Entry* pEntries;
+			};
+
+			Bucket*		pBuckets;
+			uint32_t    uiSize;
+			uint32_t    uiCount;
+		};
+
+		static constexpr uint32_t uiMapSize = 4096;
+		SettingsMap* pGSMap = nullptr;
+
+		uint32_t uiHashAddr;
+		static inline uint32_t __fastcall StrHashCI(const char* apKey) {
+			return FastCall<uint32_t>(uiHashAddr, apKey);
+		}
+
+		uint32_t uiAllocAddr;
+		template<typename T>
+		inline T* PoolAlloc(uint32_t auiCount = 1) {
+			return FastCall<T*>(uiAllocAddr, sizeof(T) * auiCount);
+		}
+
+		static void InitializeMap() {
+			MEMORY_CONTEXT(MC_STATIC_VARS);
+			pGSMap->uiCount = 0;
+			pGSMap->uiSize = uiMapSize;
+			pGSMap->pBuckets = BSMemory::malloc<SettingsMap::Bucket>(uiMapSize);
+			ZeroMemory(pGSMap->pBuckets, sizeof(SettingsMap::Bucket) * uiMapSize);
+		}
+
+		static void __fastcall AddGameSetting(Setting* apSetting) {
+			ASSUME_ASSERT(pGSMap != nullptr);
+			ASSUME_ASSERT(pGSMap->pBuckets != nullptr);
+
+			const uint32_t uiHash = StrHashCI(apSetting->pKey);
+			const uint32_t uiBucket = uiHash % uiMapSize;
+
+			SettingsMap::Bucket* pBucket = &pGSMap->pBuckets[uiBucket];
+			SettingsMap::Entry* pEntry = PoolAlloc<SettingsMap::Entry>();
+			pEntry->pData = apSetting;
+			pEntry->uiKey = uiHash;
+			pEntry->pNext = pBucket->pEntries;
+			pBucket->pEntries = pEntry;
+			++pGSMap->uiCount;
+		}
+
+		CallDetour kRegisterGameSetting;
+		class Hook {
+		public:
+			void RegisterGameSetting(const char* apKey, Setting* apSetting) {
+				AddGameSetting(apSetting);
+				ThisCall(kRegisterGameSetting.GetOverwrittenAddr(), this, apKey, apSetting);
+			}
+		};
+
+		void InitHooks() {
+			uiHashAddr = GetJIPAddress(0x100010F0);
+			uiAllocAddr = GetJIPAddress(0x10003C80);
+
+			PatchMemoryNop(GetJIPAddress(0x10011B13), 2);
+
+			pGSMap = reinterpret_cast<SettingsMap*>(GetJIPAddress(0x1006FF84));
+			InitializeMap();
+
+			kRegisterGameSetting.ReplaceCallEx(0x404E87, &Hook::RegisterGameSetting);
+		}
+	}
+
 	namespace LogMover {
 
 		void InitHooks() {
@@ -1744,6 +1823,7 @@ namespace JIPFixes {
 		else {
 			JIPSettings::InitConditionalHooks();
 			EarlyFixedStrings::InitHooks();
+			GameSettingFix::InitHooks();
 			LogMover::InitHooks();
 			VersionPrint::InitHooks();
 		}
