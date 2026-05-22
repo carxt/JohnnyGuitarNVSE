@@ -19,6 +19,7 @@
 #include "DisabledArrowKeys.hpp"
 #include "AddItemMessages.hpp"
 #include "ExtraMarkerIcons.hpp"
+#include "RadioSkipOGGWAVPatch.hpp"
 
 namespace JohnnyPatches {
 	bool fixFleeing = false;
@@ -35,6 +36,7 @@ namespace JohnnyPatches {
 	bool bDisableDLLCompatibilityRoutines = false;
 	bool bCombatMusicDisabled = false;
 	bool bMultipleAddItemMessages = false;
+	bool bFixOggWavRadioPlayback = false;
 
 	unsigned int iFPSCapLoadScreen = 0;
 	float iDeathSoundMAXTimer = 10;
@@ -231,12 +233,16 @@ namespace JohnnyPatches {
 		patchPainedPlayer = GetPrivateProfileInt("MAIN", "bRemovePlayerPainExpression", 0, filename);
 		bMultipleAddItemMessages = GetPrivateProfileInt("MAIN", "bMultipleAddItemMessages", 0, filename);
 		bFixJIP = GetPrivateProfileInt("MAIN", "bJIPFixes", 1, filename);
+		bFixOggWavRadioPlayback = GetPrivateProfileInt("MAIN", "bFixOggWavRadioPlayback", 1, filename);
 		iDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
 	}
 
 	void Install() {
 
+		if (bFixOggWavRadioPlayback) {
+			RadioSkipOGGWAVPatch::Install();
+		}
 		// for bFixFleeing
 		if (fixFleeing) WriteRelCall(0x8F5FE2, (uint32_t)FleeFixHook);
 
@@ -321,6 +327,9 @@ namespace JohnnyPatches {
 		CameraOverride::Install();
 
 		WriteRelCall(0x798BB1, (uint32_t)StopHolotapeSoundHook);
+
+
+
 	}
 
 }

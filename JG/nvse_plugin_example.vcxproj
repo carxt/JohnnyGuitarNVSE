@@ -219,6 +219,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\JG\MediaLocationControllerOverride.cpp" />
     <ClCompile Include="internal\JG\NPCAccuracy.cpp" />
     <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp" />
+    <ClCompile Include="internal\JG\RadioSkipOGGWAVPatch.cpp" />
     <ClCompile Include="internal\JG\RSMBarberHook.cpp" />
     <ClCompile Include="internal\JG\TaskQueue.cpp" />
     <ClCompile Include="internal\JIP\JIPFixes.cpp" />
@@ -430,6 +431,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\MediaLocationControllerOverride.hpp" />
     <ClInclude Include="internal\JG\NPCAccuracy.hpp" />
     <ClInclude Include="internal\JG\QuestObjectiveDisplayFix.hpp" />
+    <ClInclude Include="internal\JG\RadioSkipOGGWAVPatch.hpp" />
     <ClInclude Include="internal\JG\RSMBarberHook.hpp" />
     <ClInclude Include="internal\JG\TaskQueue.hpp" />
     <ClInclude Include="internal\JIP\JIPFixes.hpp" />
