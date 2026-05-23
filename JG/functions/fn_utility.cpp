@@ -375,6 +375,9 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
 		case 7:
 			enabled = resetVanityCam;
 			break;
+		case 8:
+			enabled = bFixJIP;
+			break;
 		default:
 			break;
 		}
