@@ -10,37 +10,37 @@ namespace RadioSkipOGGWAVPatch {
 		return ThisCall<unsigned int>(0x63D040, pBSWin32Audio);
 
 	}
-	void* hk_QueryRadioSkipUpdate(BSSoundHandle* pSound, unsigned int offset, bool bDoRewind)
+	void* hk_QueryRadioSkipUpdate(BSSoundHandle* pSound, unsigned int iOffset, bool bDoRewind)
 	{
-		unsigned int msToRewind = 50; //the default value added by the game to skip
-		unsigned int setOffset = offset - msToRewind;
-		if (bDoRewind && ((BSWin32Audio_GetTimePassed()) <= setOffset))
+		unsigned int lMsToRewind = 50; //the default value added by the game to skip
+		unsigned int lRewindedOffset = iOffset - lMsToRewind;
+		if (bDoRewind && ((BSWin32Audio_GetTimePassed()) <= iOffset))
 		{
 			return NULL;
 		}
-		return  ThisCall<void*>(0xAD8FD0, pSound, bDoRewind ? setOffset : offset);
+		return  ThisCall<void*>(0xAD8FD0, pSound, iOffset);
 	}
-	void* __fastcall hk_QueryRadioSkipUpdatePipboy(BSSoundHandle* pSound, void* edx, unsigned int offset)
+	void* __fastcall hk_QueryRadioSkipUpdatePipboy(BSSoundHandle* pSound, void* _EDX, unsigned int iOffset)
 	{
 
-		return  hk_QueryRadioSkipUpdate(pSound, offset, true);
+		return  hk_QueryRadioSkipUpdate(pSound, iOffset, true);
 	}
-	void* __fastcall hk_QueryRadioSkipUpdatePlaced(BSSoundHandle* pSound, void* edx, unsigned int offset)
+	void* __fastcall hk_QueryRadioSkipUpdatePlaced(BSSoundHandle* pSound, void* _EDX, unsigned int iOffset)
 	{
 		auto* _ebp = GetParentBasePtr(_AddressOfReturnAddress(), false);
-		char* path = reinterpret_cast<char*>(_ebp - 0x17C);
-		bool doRewind = strstr(path, ".mp3") == NULL; //the entire issue is the seek code assumes mp3
-		auto toRet = hk_QueryRadioSkipUpdate(pSound, offset, doRewind);
-		return toRet;
+		char* lSoundPath = reinterpret_cast<char*>(_ebp - 0x17C);
+		//undo seek for ogg/wav
+		bool doRewind = (strstr(lSoundPath, ".ogg") != NULL) || (strstr(lSoundPath, ".wav") != NULL);
+		return hk_QueryRadioSkipUpdate(pSound, iOffset, doRewind);
 	}
 
 	void* __cdecl hk_AllowOGGPlayBackFilepath(char* pPath, const char* pConstantWAV)
 	{
 		//Radios can actually play OGG directly... but the code only checks for WAV, although later it checks and if it doesn't find a wav, it falls back to an OGG.
 		//This leads to the hacky workaround where you must specify the file path as .wav even though it's an OGG.
-		auto toRet = strstr(pPath, pConstantWAV);
-		if (!toRet) { toRet = strstr(pPath, ".ogg"); }
-		return toRet;
+		auto retVal = strstr(pPath, pConstantWAV);
+		if (!retVal) { retVal = strstr(pPath, ".ogg"); }
+		return retVal;
 	}
 
 	void Install() 
