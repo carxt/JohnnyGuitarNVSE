@@ -15,10 +15,10 @@
 
 #define JIP_CHANGES 1
 
-static const auto our_snprintf	= snprintf;
-static const auto our_sprintf	= sprintf;
-static const auto our_vsprintf	= vsprintf;
-static const auto our_vsnprintf = vsnprintf;
+constexpr inline const auto our_snprintf	= snprintf;
+constexpr inline const auto our_sprintf		= sprintf;
+constexpr inline const auto our_vsprintf	= vsprintf;
+constexpr inline const auto our_vsnprintf	= vsnprintf;
 
 #include "Utils/DebugLog.hpp"
 #include "Utils/Bitfield.hpp"
@@ -27,22 +27,22 @@ static const auto our_vsnprintf = vsnprintf;
 #include "SafeWrite/SafeWrite.hpp"
 
 // Game unit conversion constants
-constexpr double dM2NI	= 69.99125671386719;	// 1 Meter to Ni
-constexpr double dDM2NI = dM2NI / 10.0;			// 1 Decimeter to Ni
-constexpr double dCM2NI = dM2NI / 100.0;		// 1 Centimeter to Ni
-constexpr double dMM2NI = dM2NI / 1000.0;		// 1 Millimeter to Ni
+constexpr inline double dM2NI	= 69.99125671386719;	// 1 Meter to Ni
+constexpr inline double dDM2NI  = dM2NI / 10.0;			// 1 Decimeter to Ni
+constexpr inline double dCM2NI  = dM2NI / 100.0;		// 1 Centimeter to Ni
+constexpr inline double dMM2NI  = dM2NI / 1000.0;		// 1 Millimeter to Ni
 
-constexpr double dNI2M	= 1.0 / dM2NI;			// 1 Ni to Meter
-constexpr double dNI2DM = 1.0 / dDM2NI;			// 1 Ni to Decimeter
-constexpr double dNI2CM = 1.0 / dCM2NI;			// 1 Ni to Centimeter
-constexpr double dNI2MM = 1.0 / dMM2NI;			// 1 Ni to Millimeter
+constexpr inline double dNI2M	= 1.0 / dM2NI;			// 1 Ni to Meter
+constexpr inline double dNI2DM  = 1.0 / dDM2NI;			// 1 Ni to Decimeter
+constexpr inline double dNI2CM  = 1.0 / dCM2NI;			// 1 Ni to Centimeter
+constexpr inline double dNI2MM  = 1.0 / dMM2NI;			// 1 Ni to Millimeter
 
 // Havok uses decimeters (10cm) as base unit
-constexpr float fHK2NI = static_cast<float>(dDM2NI); // 1 Havok to Ni
-constexpr float fNI2HK = static_cast<float>(dNI2DM); // 1 Ni to Havok
+constexpr inline float fHK2NI = static_cast<float>(dDM2NI); // 1 Havok to Ni
+constexpr inline float fNI2HK = static_cast<float>(dNI2DM); // 1 Ni to Havok
 
 template <typename T_Ret = void, typename ...Args>
-constexpr __forceinline T_Ret ThisCall(uint32_t _addr, const void* _this, Args ...args) noexcept {
+__forceinline T_Ret ThisCall(uint32_t _addr, const void* _this, Args ...args) noexcept(false) {
 	if constexpr (std::is_class_v<T_Ret>) {
 		T_Ret ret;
 		((T_Ret * (__thiscall*)(const void*, T_Ret&, Args...))_addr)(_this, ret, std::forward<Args>(args)...);
@@ -54,17 +54,17 @@ constexpr __forceinline T_Ret ThisCall(uint32_t _addr, const void* _this, Args .
 }
 
 template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret StdCall(uint32_t _addr, Args ...args) {
+__forceinline T_Ret StdCall(uint32_t _addr, Args ...args) noexcept(false) {
 	return ((T_Ret(__stdcall*)(Args...))_addr)(std::forward<Args>(args)...);
 }
 
 template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret CdeclCall(uint32_t _addr, Args ...args) {
+__forceinline T_Ret CdeclCall(uint32_t _addr, Args ...args) noexcept(false) {
 	return ((T_Ret(__cdecl*)(Args...))_addr)(std::forward<Args>(args)...);
 }
 
 template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret FastCall(uint32_t _addr, Args ...args) {
+__forceinline T_Ret FastCall(uint32_t _addr, Args ...args) noexcept(false) {
 	return ((T_Ret(__fastcall*)(Args...))_addr)(std::forward<Args>(args)...);
 }
 
