@@ -38,3 +38,4 @@ DEFINE_COMMAND_PLUGIN(NullArgs, , false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(NullNoArgs, , false, nullptr);
 DEFINE_CMD_ALT_COND_PLUGIN(GameGetSecondsPassed, GGetSecPass, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(ar_Shuffle, , false, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(GetCurrentSkyColor, , false, kParams_OneInt_ThreeScriptVars);

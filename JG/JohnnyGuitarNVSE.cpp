@@ -525,10 +525,9 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(SetNiPSysModifierValue);
 	REG_TYPED_CMD(GetNiPSysModifierValue, Default);
 	REG_TYPED_CMD(ar_Shuffle, Array);
-  REG_CMD(GetRecipeCategoryFlags);
+	REG_CMD(GetRecipeCategoryFlags);
+	REG_CMD(GetCurrentSkyColor);
 }
-
-
 
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {
 	// fill out the info structure

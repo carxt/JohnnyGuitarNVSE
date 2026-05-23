@@ -557,3 +557,23 @@ bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
 	g_arrInterface->AssignCommandResult(outArr, result);
 	return true;
 }
+
+bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
+	*result = 0;
+	ScriptVar* pRed = nullptr;
+	ScriptVar* pGreen = nullptr;
+	ScriptVar* pBlue = nullptr;
+	uint32_t eColorType;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eColorType, &pRed, &pGreen, &pBlue) && eColorType >= Sky::SC_SKY_UPPER && eColorType < Sky::SC_COUNT) {
+		ASSUME_ASSERT(pRed && pGreen && pBlue);
+		const Sky* pSky = Sky::GetSingleton();
+		const NiColor& rColor = pSky->kColors[eColorType];
+		pRed->data = rColor.r;
+		pGreen->data = rColor.g;
+		pBlue->data = rColor.b;
+		if (IsConsoleMode()) 
+			Console_Print("GetCurrentSkyColor %d >> %f %f %f", eColorType, rColor.r, rColor.g, rColor.b);
+		*result = 1;
+	}
+	return true;
+}
