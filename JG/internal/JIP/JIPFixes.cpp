@@ -1672,9 +1672,6 @@ namespace JIPFixes {
 		}
 	}
 
-		}
-	}
-
 	namespace LogMover {
 
 		void InitHooks() {
