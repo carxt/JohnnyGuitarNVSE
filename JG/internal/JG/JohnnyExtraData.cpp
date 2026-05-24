@@ -41,7 +41,7 @@ const NiFixedString& JohnnyExtraData::GetEditorID() const {
 	return kFormData.kEditorIDs.GetItem();
 }
 
-JohnnyExtraData::EDIDResult JohnnyExtraData::SetEditorID(const NiFixedString& arEDID) {
+JohnnyExtraData::EDIDResult __fastcall JohnnyExtraData::SetEditorID(const NiFixedString& arEDID) {
 	if (!arEDID.GetLength()) {
 		DEBUG_MSG("%08X Tried to set an empty EDID", pOwner->GetFormID());
 		return EDIDResult::FAILURE;
@@ -68,7 +68,7 @@ JohnnyExtraData::EDIDResult JohnnyExtraData::SetEditorID(const NiFixedString& ar
 	}
 }
 
-JohnnyExtraData::EDIDResult JohnnyExtraData::RemoveEditorID(const NiFixedString& arEDID) {
+JohnnyExtraData::EDIDResult __fastcall JohnnyExtraData::RemoveEditorID(const NiFixedString& arEDID) {
 	kFormData.kEditorIDs.Remove(arEDID);
 	return EDIDResult::SUCCESS;
 }

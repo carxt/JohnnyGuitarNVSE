@@ -1672,6 +1672,19 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace EDIDLookupFix {
+
+		TESForm* __fastcall GetEDID(void* apThis, const char* apEDID) {
+			return TESForm::GetFormByEditorID(apEDID);
+		}
+		
+		void InitHooks() {
+			ReplaceCall(JIPUtils::GetAddress(0x1000178C), GetEDID);
+			ReplaceCall(JIPUtils::GetAddress(0x10002E25), GetEDID);
+			ReplaceCall(JIPUtils::GetAddress(0x10009ACB), GetEDID);
+		}
+	}
+
 	namespace LogMover {
 
 		void InitHooks() {
@@ -1743,6 +1756,7 @@ namespace JIPFixes {
 			Update3DTweak::InitHooks();
 			AddItemAltNoCond::InitHooks();
 			ExtraDataFixes::InitHooks();
+			EDIDLookupFix::InitHooks();
 		}
 	}
 
