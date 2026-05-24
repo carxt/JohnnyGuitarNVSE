@@ -33,8 +33,8 @@ public:
 	ScriptData	kScriptData;
 
 	const NiFixedString& GetEditorID() const;
-	EDIDResult SetEditorID(const NiFixedString& arEDID);
-	EDIDResult RemoveEditorID(const NiFixedString& arEDID);
+	EDIDResult __fastcall SetEditorID(const NiFixedString& arEDID);
+	EDIDResult __fastcall RemoveEditorID(const NiFixedString& arEDID);
 
 	static const NiFixedString& GetName();
 
