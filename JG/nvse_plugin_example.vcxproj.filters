@@ -373,6 +373,18 @@
     <ClCompile Include="internal\JG\RadioSkipOGGWAVPatch.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JIP\JIPSettings.cpp">
+      <Filter>internal\JIP</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JIP\JIPUtils.cpp">
+      <Filter>internal\JIP</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\FixedStringsRework.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TLSData.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1005,6 +1017,18 @@
     </ClInclude>
     <ClInclude Include="internal\JG\RadioSkipOGGWAVPatch.hpp">
       <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JIP\JIPSettings.hpp">
+      <Filter>internal\JIP</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JIP\JIPUtils.hpp">
+      <Filter>internal\JIP</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\FixedStringsRework.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TLSData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

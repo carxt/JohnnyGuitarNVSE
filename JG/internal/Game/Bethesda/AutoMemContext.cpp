@@ -1,4 +1,5 @@
 #include "AutoMemContext.hpp"
+#include "TLSData.hpp"
 
 // GAME - 0x404EB0
 AutoMemContext::AutoMemContext(MEM_CONTEXT aeMemContext, bool abOverridable, const char* apFile, uint32_t auiLine) {
@@ -23,10 +24,10 @@ void AutoMemContext::Leave() const {
 
 // GAME - 0x404F50
 MEM_CONTEXT GetMemContext() {
-	return CdeclCall<MEM_CONTEXT>(0x404F50);
+	return static_cast<MEM_CONTEXT>(TLSData::GetMemContext());
 }
 
 // GAME - 0x404F30
 void SetMemContext(MEM_CONTEXT aeMemContext) {
-	return CdeclCall(0x404F30, aeMemContext);
+	TLSData::SetMemContext(aeMemContext);
 }

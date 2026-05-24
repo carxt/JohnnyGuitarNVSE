@@ -37,6 +37,7 @@
 #include <JG/DisabledArrowKeys.hpp>
 #include <JG/ExtraMiscStats.hpp>
 #include <JG/TaskQueue.hpp>
+#include <JG/FixedStringsRework.hpp>
 #include <events/LambdaVariableContext.h>
 #include <decoding.h>
 #include <misc/WorldToScreen.h>
@@ -72,8 +73,7 @@ bool (*Cmd_Update3D)(COMMAND_ARGS) = 0;
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
-	MEM_CONTEXT eOrgContext = GetMemContext();
-	SetMemContext(MC_DEFAULT);
+	MEMORY_CONTEXT(MC_DEFAULT);
 	switch (msg->type) {
 		case NVSEMessagingInterface::kMessage_PostPostLoad: // GAME + GECK
 		{
@@ -112,6 +112,11 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			noHolotapeStopSound = false;
 			break;
 		}
+		case NVSEMessagingInterface::kMessage_PostLoadGame: // GAME
+		{
+			NiGlobalStringTable::RemoveUnusedStrings();
+			break;
+		}
 		case NVSEMessagingInterface::kMessage_MainGameLoop: // GAME
 		{
 			TaskQueue::ExecuteTasks();
@@ -128,6 +133,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_initialTickCount = GetTickCount();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			EDIDRestoration::PrintErrors();
+			NiGlobalStringTable::RemoveUnusedStrings();
 			if (JohnnyPatches::bFixJIP)
 				JIPFixes::InitDeferredHooks();
 
@@ -145,7 +151,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		default:
 			break;
 	}
-	SetMemContext(eOrgContext);
 }
 
 void MessageHandlerGECK(NVSEMessagingInterface::Message* msg) {
@@ -591,25 +596,25 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 	}
 
 	if (!bIsGECK) {
+		FixedStringsRework::Init();
+
+		NVSEDataInterface* nvseData = static_cast<NVSEDataInterface*>(nvse->QueryInterface(kInterface_Data));
+		JohnnyExtraData::InitName();
+		JohnnyExtraData::Initialize(nvseData);
+
+		InventoryRefGetForID = static_cast<InventoryRef * (*)(uint32_t)>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
+		CaptureLambdaVars = static_cast<_CaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
+		UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
+		ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
+
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		DisabledSaves::Init();
 		CustomHUDShake::Init();
-
-		if (JohnnyPatches::bFixJIP) {
-			JohnnyExtraData::InitName();
-		}
-
-		NVSEDataInterface* nvseData = static_cast<NVSEDataInterface*>(nvse->QueryInterface(kInterface_Data));
-		JohnnyExtraData::Initialize(nvseData);
-		InventoryRefGetForID = static_cast<InventoryRef * (*)(uint32_t)>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
-		CaptureLambdaVars = static_cast<_CaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
-		UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
 		JohnnyFixes::Install();
 		JohnnyPatches::Install();
 		JohnnyGameSettings::Init();
 		JohnnyEvents::Install();
-		ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
 		Serialization::Init(nvse);
 	}
 
