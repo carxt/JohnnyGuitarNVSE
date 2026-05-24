@@ -1743,7 +1743,6 @@ namespace JIPFixes {
 			Update3DTweak::InitHooks();
 			AddItemAltNoCond::InitHooks();
 			ExtraDataFixes::InitHooks();
-			EDIDLookupTweak::InitHooks();
 		}
 	}
 
