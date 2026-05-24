@@ -4,5 +4,5 @@ namespace DisabledSaves {
 	void Init();
 	void Install();
 	void Reset();
-	void Toggle(uint8_t modId, bool toggle);
+	void Toggle(uint8_t aucMod, bool abToggle, uint32_t auiTypeFlags);
 }
