@@ -367,6 +367,15 @@ namespace CameraOverlay {
 	};
 
 
+	CallDetour kSaveReset;
+	bool __fastcall ResetGameHook(void* apThis, void*, void* apFile) {
+		bool bResult = ThisCall<bool>(kSaveReset.GetOverwrittenAddr(), apThis, apFile);
+		if (bResult)
+			Reset();
+		return bResult;
+	}
+
+
 	static NiCamera* CreateCamera(bool abOrtho) {
 		constexpr float fFOV = 85.f;
 
@@ -449,6 +458,7 @@ namespace CameraOverlay {
 
 		kPostISRenderDetour.ReplaceCall(0x8703F1, PostISRenderHook);
 		kRenderUIDetour.ReplaceCallEx(0x7144D3, &InterfaceRender::RenderUIHook);
+		kSaveReset.ReplaceCall(0x85081D, ResetGameHook);
 	}
 
 	void Init() {

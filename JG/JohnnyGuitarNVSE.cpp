@@ -94,9 +94,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		{
 			JohnnyExtraDataArray::GetInstance().ResetScriptData();
 
-			if (msg->type == NVSEMessagingInterface::kMessage_PreLoadGame)
-				CameraOverlay::Reset();
-			else
+			if (msg->type == NVSEMessagingInterface::kMessage_NewGame)
 				CameraOverlay::ReInit();
 
 			DisabledMuzzleFlashLights::Reset(); //reset the muzzle hook every time
