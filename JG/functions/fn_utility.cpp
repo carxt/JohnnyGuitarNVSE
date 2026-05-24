@@ -11,6 +11,7 @@
 #include <JG/CameraOverride.hpp>
 #include <JG/JohnnyRadios.hpp>
 #include <JG/DisabledLevelUp.hpp>
+#include <JIP/JIPUtils.hpp>
 #include <random>
 
 extern uint32_t g_initialTickCount;
@@ -376,7 +377,7 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
 			enabled = resetVanityCam;
 			break;
 		case 8:
-			enabled = bFixJIP;
+			enabled = bFixJIP && JIPUtils::IsValid();
 			break;
 		default:
 			break;
