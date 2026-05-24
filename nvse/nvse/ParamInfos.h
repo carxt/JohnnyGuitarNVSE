@@ -1098,6 +1098,13 @@ static ParamInfo kParams_GetNiPSysModifierValue[] =
 	{ "First Person", kParamType_Integer, 1 },
 };
 
+static ParamInfo kParams_SetParticleEmitterSpawnRate[] =
+{
+	{ "Block Name", kParamType_String, 0 },
+	{ "Value", kParamType_Float, 0 },
+	{ "First Person", kParamType_Integer, 1 },
+};
+
 static ParamInfo kParamsRemapLand[] =
 {
 	{ "Target Land FormID", kParamType_Integer , 0 },

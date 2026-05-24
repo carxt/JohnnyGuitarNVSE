@@ -730,3 +730,42 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
+bool Cmd_SetParticleEmitterSpawnRate_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cObjectName[MAX_PATH] = {};
+	float fValue = 1.f;
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &fValue, &bFirstPerson)) {
+		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		if (pSys) {
+			NiPSysEmitterCtlr* pEmitterCtrl = pSys->GetController<NiPSysEmitterCtlr>();
+			if (pEmitterCtrl) {
+				NiFloatInterpolator* pInterp = pEmitterCtrl->GetBirthRateInterpolator();
+				if (pInterp) {
+					pInterp->m_fFloatValue = fValue;
+					*result = 1;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetParticleEmitterSpawnRate_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &bFirstPerson)) {
+		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		if (pSys) {
+			NiPSysEmitterCtlr* pEmitterCtrl = pSys->GetController<NiPSysEmitterCtlr>();
+			if (pEmitterCtrl) {
+				NiFloatInterpolator* pInterp = pEmitterCtrl->GetBirthRateInterpolator();
+				if (pInterp)
+					*result = pInterp->m_fFloatValue;
+			}
+		}
+	}
+	return true;
+}

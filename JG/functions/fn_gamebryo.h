@@ -18,6 +18,8 @@ DEFINE_COMMAND_PLUGIN(GetNiBound, , true, kParams_GetNiBound);
 DEFINE_COMMAND_PLUGIN(IsNiSequenceActive, , true, kParams_IsNiSequenceActive);
 DEFINE_COMMAND_PLUGIN(SetNiPSysModifierValue, , true, kParams_SetNiPSysModifierValue);
 DEFINE_COMMAND_PLUGIN(GetNiPSysModifierValue, , true, kParams_GetNiPSysModifierValue);
+DEFINE_COMMAND_PLUGIN(SetParticleEmitterSpawnRate, , true, kParams_SetParticleEmitterSpawnRate);
+DEFINE_COMMAND_PLUGIN(GetParticleEmitterSpawnRate, , true, kParams_GetSwitchNodeIndex);
 
 namespace {
 	

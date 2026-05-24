@@ -545,6 +545,8 @@ void RegisterCommands(const NVSEInterface* nvse) {
   	REG_CMD(GetRecipeCategoryFlags);
 	REG_CMD(GetCurrentSkyColor);
 	REG_CMD(RemapLand);
+	REG_CMD(SetParticleEmitterSpawnRate);
+	REG_CMD(GetParticleEmitterSpawnRate);
 }
 
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {

@@ -214,9 +214,9 @@ public:
 	NiFloatInterpolator();
 	~NiFloatInterpolator();
 
-	float				value;		// 0C
-	NiFloatData* data;		// 10
-	uint32_t				unk14;		// 14
+	float					m_fFloatValue;
+	NiPointer<NiFloatData>	m_spFloatData;
+	uint32_t				m_uiLastIdx;
 };
 
 // 24
@@ -435,7 +435,7 @@ public:
 
 	virtual void	Unk_3A(void);
 
-	NiTransformInterpolator* interpolator;		// 34
+	NiPointer<NiInterpolator> m_spInterpolator;
 };
 
 // 38
@@ -447,6 +447,39 @@ public:
 	static NiTransformController* __stdcall Create(NiNode* pTarget, NiTransformInterpolator* pInterpolator);
 };
 static_assert(sizeof(NiTransformController) == 0x38);
+
+class NiPSysModifier;
+
+class NiPSysModifierCtlr : public NiSingleInterpController {
+public:
+	NiPSysModifierCtlr();
+	virtual ~NiPSysModifierCtlr();
+
+	NiFixedString	m_kModifierName;
+	NiPSysModifier* m_pkModifier;
+
+	NIRTTI_ADDRESS(0x12027C8);
+};
+
+class NiPSysEmitterCtlr : public NiPSysModifierCtlr {
+public:
+	NiPSysEmitterCtlr();
+	virtual ~NiPSysEmitterCtlr();
+
+	NiPointer<NiInterpolator>	m_spEmitterActiveInterpolator;
+	NiInterpolator*				m_pkLastBirthRateInterpolator;
+	float						m_fLastScaledTime;
+	bool						m_bLastActive;
+	NiTPrimitiveSet<float>		m_kParticleAges;
+
+	CREATE_OBJECT(NiPSysEmitterCtlr, 0xC1C5E0);
+	NIRTTI_ADDRESS(0x12024E8);
+
+	// GAME - 0x639B60
+	NiFloatInterpolator* GetBirthRateInterpolator() const {
+		return ThisCall<NiFloatInterpolator*>(0x639B60, this);
+	}
+};
 
 // 0C
 class NiExtraData : public NiObject {
