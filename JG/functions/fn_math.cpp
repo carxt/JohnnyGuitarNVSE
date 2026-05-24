@@ -4,13 +4,14 @@
 #include <misc/misc.h>
 #include <misc/WorldToScreen.h>
 #include "netimmerse.h"
+#include "Bethesda/TESMain.hpp"
 
 void Cmd_GetPlayerCamFOV(uint32_t worldOr1stOrScene, double* result) {
 	if (!PlayerCharacter::GetSingleton()) return;
 	*result = worldOr1stOrScene ? PlayerCharacter::GetSingleton()->firstPersonFOV : PlayerCharacter::GetSingleton()->worldFOV;
 	if (worldOr1stOrScene > 1) {
-		auto g_sceneGraph = *(SceneGraph**)0x11DEB7C;
-		*result = g_sceneGraph ? g_sceneGraph->cameraFOV : 0;
+		auto g_sceneGraph = TESMain::GetWorldSceneGraph();
+		*result = g_sceneGraph ? g_sceneGraph->fCurrentFOV : 0;
 	}
 }
 
@@ -39,8 +40,8 @@ bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS)
 	worldOut->data = PlayerCharacter::GetSingleton()->firstPersonFOV;
 	firstPersonOut->data = PlayerCharacter::GetSingleton()->worldFOV;
 	if (scenegraphOut) {
-		auto g_sceneGraph = *(SceneGraph**)0x11DEB7C;
-		scenegraphOut->data = g_sceneGraph ? g_sceneGraph->cameraFOV : 0;
+		auto g_sceneGraph = TESMain::GetWorldSceneGraph();
+		scenegraphOut->data = g_sceneGraph ? g_sceneGraph->fCurrentFOV : 0;
 
 	}
 	return true;
@@ -239,7 +240,7 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 		NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
 		ActorHitData* hitData = actor->baseProcess->GetHitData();
 		if (!hitData || !t_Node) return true;
-		*result = NiNodeComputeDistance(&(t_Node->m_world.translate), &(hitData->impactPos));
+		*result = NiNodeComputeDistance(&(t_Node->m_kWorld.m_kTranslate), &(hitData->impactPos));
 	}
 
 	return true;
@@ -252,7 +253,7 @@ bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	if (!thisObj || !(ExtractArgsEx(EXTRACT_ARGS_EX, &NiName, &(Coord.x), &(Coord.y), &(Coord.z)))) return true;
 	NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
 	if (!t_Node) return true;
-	*result = NiNodeComputeDistance(&(t_Node->m_world.translate), &Coord);
+	*result = NiNodeComputeDistance(&(t_Node->m_kWorld.m_kTranslate), &Coord);
 	if (IsConsoleMode()) Console_Print("Get3DDistanceToNiNode >> %f", *result);
 	return true;
 }
@@ -265,7 +266,7 @@ bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	NiAVObject* Node1 = ref1->GetNiBlock(NiName1);
 	NiAVObject* Node2 = ref2->GetNiBlock(NiName2);
 	if (!Node1 || !Node2) return true;
-	*result = NiNodeComputeDistance(&(Node1->m_world.translate), &(Node2->m_world.translate));
+	*result = NiNodeComputeDistance(&(Node1->m_kWorld.m_kTranslate), &(Node2->m_kWorld.m_kTranslate));
 	if (IsConsoleMode()) Console_Print("Get3DDistanceBetweenNiNodes >> %f", *result);
 	return true;
 }

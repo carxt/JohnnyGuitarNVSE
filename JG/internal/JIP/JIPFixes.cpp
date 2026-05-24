@@ -26,6 +26,7 @@
 #include "Shared/Utils/CustomClass.hpp"
 
 #include <GameUI.h>
+#include <Bethesda/BSShaderUtil.hpp>
 
 class BSRenderedTexture;
 
@@ -1330,10 +1331,10 @@ namespace JIPFixes {
 
 		void __cdecl AccumulateScene(NiCamera* apCamera, NiNode* apNode, BSCullingProcess* apCullingProcess) {
 			BSShaderAccumulator* pAccum = TESMain::GetSingleton()->spDrawWorldAccum;
-
-			apCullingProcess->spAccumulator->bCellHasWater = pAccum->bCellHasWater;
-			apCullingProcess->spAccumulator->bIsUnderwater = pAccum->bIsUnderwater;
-			apCullingProcess->spAccumulator->iCurrentWaterHeight = pAccum->iCurrentWaterHeight;
+			BSShaderAccumulator* pCullingAccum = static_cast<BSShaderAccumulator*>(apCullingProcess->GetAccumulator());
+			pCullingAccum->bCellHasWater = pAccum->bCellHasWater;
+			pCullingAccum->bIsUnderwater = pAccum->bIsUnderwater;
+			pCullingAccum->iCurrentWaterHeight = pAccum->iCurrentWaterHeight;
 
 			if (pAccum->bCellHasWater) {
 				StackObject<JIPCullingProcess, 0x4A0EB0, 0x4A0F60> kCullingProcess(nullptr);
@@ -1341,13 +1342,13 @@ namespace JIPFixes {
 				kCullingProcess->eCullMode = apCullingProcess->eCullMode;
 				kCullingProcess->spAccumulator = apCullingProcess->spAccumulator;
 				kCullingProcess->Initialize();
-				CdeclCall(0xB6BEE0, apCamera, apNode, &kCullingProcess);
-				CdeclCall(0xB6C0D0, apCamera, apCullingProcess->spAccumulator);
+				BSShaderUtil::AccumulateScene(apCamera, apNode, kCullingProcess.GetPtr());
+				BSShaderUtil::RenderScene(apCamera, pCullingAccum);
 				kCullingProcess->Destroy();
 			}
 			else {
-				CdeclCall(0xB6BEE0, apCamera, apNode, apCullingProcess);
-				CdeclCall(0xB6C0D0, apCamera, apCullingProcess->spAccumulator);
+				BSShaderUtil::AccumulateScene(apCamera, apNode, apCullingProcess);
+				BSShaderUtil::RenderScene(apCamera, pCullingAccum);
 			}
 		}
 

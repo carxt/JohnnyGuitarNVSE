@@ -15,10 +15,10 @@
 
 #define JIP_CHANGES 1
 
-constexpr inline const auto our_snprintf	= snprintf;
-constexpr inline const auto our_sprintf		= sprintf;
-constexpr inline const auto our_vsprintf	= vsprintf;
-constexpr inline const auto our_vsnprintf	= vsnprintf;
+constexpr inline auto our_snprintf	= snprintf;
+constexpr inline auto our_sprintf	= sprintf;
+constexpr inline auto our_vsprintf	= vsprintf;
+constexpr inline auto our_vsnprintf	= vsnprintf;
 
 #include "Utils/DebugLog.hpp"
 #include "Utils/Bitfield.hpp"

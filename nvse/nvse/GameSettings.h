@@ -57,4 +57,8 @@ public:
 	bool Bool() const {
 		return uValue.b;
 	}
+
+	const Bitfield32& Bitfield() const {
+		return uValue.i;
+	}
 };

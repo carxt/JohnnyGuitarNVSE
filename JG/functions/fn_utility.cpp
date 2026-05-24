@@ -449,9 +449,9 @@ bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 		if (thisObj && thisObj->IsCharacter() && optIdx <= 4)
 			if (auto BipedAnim = ((Character*)thisObj)->pBipedAnim) {
 				if (BipedAnim->kBones[optIdx].pParent && BipedAnim->kBones[optIdx].pParent->IsNode()) {
-					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->kBones[optIdx].pParent->m_blockName);
+					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->kBones[optIdx].pParent->m_kName);
 					if (IsConsoleMode())
-						Console_Print("GetOptionalBone >> %s", BipedAnim->kBones[optIdx].pParent->m_blockName);
+						Console_Print("GetOptionalBone >> %s", BipedAnim->kBones[optIdx].pParent->m_kName);
 				}
 			}
 	}

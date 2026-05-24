@@ -1,6 +1,11 @@
 #pragma once
 
+#include "BSTextureManager.hpp"
+
 class ShadowSceneNode;
+class NiDX9Renderer;
+class NiFixedString;
+class ImageSpaceManager;
 
 class BSShaderManager {
 public:
@@ -15,6 +20,15 @@ public:
 	};
 	using SceneGraphType = _SSNType::Type;
 
+	static constexpr AddressPtr<NiFixedString*, 0x11F94BC> pTexPercTag;
+
+	static NiDX9Renderer* GetRenderer();
+
+	static BSTextureManager* GetTextureManager();
+
+	static ImageSpaceManager* GetImageSpaceManager();
 
 	static ShadowSceneNode* GetShadowSceneNode(uint32_t aeType);
+
+	static const NiFixedString& GetTexPercTag();
 };

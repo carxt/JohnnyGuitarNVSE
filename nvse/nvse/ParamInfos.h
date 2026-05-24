@@ -1097,3 +1097,11 @@ static ParamInfo kParams_GetNiPSysModifierValue[] =
 	{ "Item", kParamType_Integer, 0 },
 	{ "First Person", kParamType_Integer, 1 },
 };
+
+static ParamInfo kParamsRemapLand[] =
+{
+	{ "Target Land FormID", kParamType_Integer , 0 },
+	{ "Source WorldSpace", kParamType_WorldSpace, 1 },
+	{ "Source Cell X", kParamType_Integer, 1 },
+	{ "Source Cell Y", kParamType_Integer, 1 },
+};

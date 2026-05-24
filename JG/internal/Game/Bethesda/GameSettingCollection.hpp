@@ -9,7 +9,7 @@ class GameSettingCollection	: public SettingCollectionMap<Setting> {
 public:
 	virtual bool ReadSetting(TESFile* apFile, const char* apKey);
 
-	bool GetSetting(const char* apName, Setting* apSettingOut);
+	bool GetSetting(const char* apName, Setting*& apSettingOut);
 
 	static constexpr AddressPtr<Setting, 0x11CDEBC> fAIAcquireObjectDistance;
 	static constexpr AddressPtr<Setting, 0x11CD210> fAIAwareofPlayerTimer;

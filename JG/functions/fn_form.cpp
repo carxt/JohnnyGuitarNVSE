@@ -18,7 +18,9 @@
 #include <numbers>
 #include <Bethesda/AILinearTaskThreadManager.hpp>
 #include <JG/TaskQueue.hpp>
+#include <JG/LandRemapping.hpp>
 #include <Bethesda/BSShaderManager.hpp>
+#include <Bethesda/TESMain.hpp>
 
 extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, uint8_t numArgs, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
@@ -70,7 +72,7 @@ bool Cmd_SetNoteImage_Execute(COMMAND_ARGS) {
 	BGSNote* note = nullptr;
 	char path[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &path) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kImage) {
-		note->picture->ddsPath.Set(path);
+		note->picture->SetTextureName(path);
 		*result = 1;
 	}
 	return true;
@@ -80,7 +82,7 @@ bool Cmd_GetNoteImage_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* note = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kImage) {
-		g_strInterface->Assign(PASS_COMMAND_ARGS, note->picture->ddsPath.c_str());
+		g_strInterface->Assign(PASS_COMMAND_ARGS, note->picture->GetTextureName());
 	}
 	return true;
 }
@@ -445,7 +447,7 @@ bool Cmd_SetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	if (!world || !IS_TYPE(world, TESWorldSpace))
 		return true;
 	if (!zone || IS_TYPE(zone, BGSEncounterZone)) {
-		world->encounterZone = zone;
+		world->pEncounterZone = zone;
 		*result = 1;
 	}
 	return true;
@@ -455,8 +457,9 @@ bool Cmd_GetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESWorldSpace* world = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &world) && world && IS_TYPE(world, TESWorldSpace)) {
-		BGSEncounterZone* zone = world->encounterZone;
-		if (zone) *(uint32_t*)result = zone->GetFormID();
+		BGSEncounterZone* zone = world->pEncounterZone;
+		if (zone) 
+			*(uint32_t*)result = zone->GetFormID();
 	}
 	return true;
 }
@@ -827,19 +830,19 @@ bool Cmd_ClearArmorAltTexture_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESEffectShader* shader;
-	uint32_t traitID;
-	char newPath[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID, &newPath) && shader && IS_TYPE(shader, TESEffectShader) && traitID >= 0 && traitID <= 2) {
-		switch (traitID) {
+	TESEffectShader* pShader = nullptr;
+	uint32_t uiTexture;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &uiTexture, &cPath) && pShader && IS_TYPE(pShader, TESEffectShader) && uiTexture >= 0 && uiTexture <= 2) {
+		switch (uiTexture) {
 		case 0:
-			shader->fillTexture.ddsPath.Set(newPath);
+			pShader->fillTexture.SetTextureName(cPath);
 			break;
 		case 1:
-			shader->particleShaderTexture.ddsPath.Set(newPath);
+			pShader->particleShaderTexture.SetTextureName(cPath);
 			break;
 		case 2:
-			shader->holesTexture.ddsPath.Set(newPath);
+			pShader->holesTexture.SetTextureName(cPath);
 			break;
 		}
 		*result = 1;
@@ -849,22 +852,22 @@ bool Cmd_SetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESEffectShader* shader;
-	uint32_t traitID;
-	const char* resStr = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID) && shader && IS_TYPE(shader, TESEffectShader) && traitID >= 0 && traitID <= 2) {
-		switch (traitID) {
+	TESEffectShader* pShader = nullptr;
+	uint32_t uiTexture;
+	const char* pPath = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &uiTexture) && pShader && IS_TYPE(pShader, TESEffectShader) && uiTexture >= 0 && uiTexture <= 2) {
+		switch (uiTexture) {
 		case 0:
-			resStr = shader->fillTexture.ddsPath.c_str();
+			pPath = pShader->fillTexture.GetTextureName();
 			break;
 		case 1:
-			resStr = shader->particleShaderTexture.ddsPath.c_str();
+			pPath = pShader->particleShaderTexture.GetTextureName();
 			break;
 		case 2:
-			resStr = shader->holesTexture.ddsPath.c_str();
+			pPath = pShader->holesTexture.GetTextureName();
 			break;
 		}
-		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
 	}
 	return true;
 }
@@ -1146,12 +1149,12 @@ bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &isFemale) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			path = bipedModel->messageIcon[isFemale].icon.ddsPath.c_str();
+			path = bipedModel->messageIcon[isFemale].icon.GetTextureName();
 		}
 		else {
 			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
 			if (icon) {
-				path = icon->icon.ddsPath.c_str();
+				path = icon->icon.GetTextureName();
 			}
 		}
 		if (IsConsoleMode()) Console_Print("GetMessageIconPath >> %s", path);
@@ -1167,13 +1170,13 @@ bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &form, &isFemale) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			bipedModel->messageIcon[isFemale].icon.ddsPath.Set(path);
+			bipedModel->messageIcon[isFemale].icon.SetTextureName(path);
 			*result = 1;
 		}
 		else {
 			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
 			if (icon) {
-				icon->icon.ddsPath.Set(path);
+				icon->icon.SetTextureName(path);
 				*result = 1;
 			}
 		}
@@ -2540,7 +2543,7 @@ static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_
 	}
 
 	if (auiFlags & UPDATE_SCALE)
-		apReference->SetScale(apReference->GetScale());
+		apReference->SetScale(apReference->GetRawScale());
 
 	if (auiFlags & UPDATE_LIGHTS) {
 		ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(BSShaderManager::SceneGraphType::WORLD);
@@ -2620,6 +2623,67 @@ bool Cmd_GetRecipeCategoryFlags_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &category) && category && IS_TYPE(category, TESRecipeCategory)) {
 		*result = category->flags;
 		if (IsConsoleMode()) Console_Print("GetRecipeCategoryFlags >> %.f", *result);
+	}
+	return true;
+}
+
+bool Cmd_RemapLand_Execute(COMMAND_ARGS) {
+	*result = 0;
+	uint32_t uiLandID = 0;
+	TESWorldSpace* pWorld = nullptr;
+	int32_t iGridX = INT32_MAX, iGridY = INT32_MAX;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiLandID, &pWorld, &iGridX, &iGridY)) {
+		bool bValidCoord;
+		if (pWorld) {
+			const int32_t iWorldMinX = int32_t(pWorld->kMinCoords.x) >> 12;
+			const int32_t iWorldMinY = int32_t(pWorld->kMinCoords.y) >> 12;
+
+			const int32_t iWorldMaxX = int32_t(pWorld->kMaxCoords.x) >> 12;
+			const int32_t iWorldMaxY = int32_t(pWorld->kMaxCoords.y) >> 12;
+			bValidCoord = iGridX <= iWorldMaxX && iGridY <= iWorldMaxY && iGridX >= iWorldMinX && iGridY >= iWorldMinY;
+		}
+		else {
+			constexpr int32_t iMax =  32767;
+			constexpr int32_t iMin = -32768;
+			bValidCoord = iGridX <= iMax && iGridY <= iMax && iGridX >= iMin && iGridY >= iMin;
+		}
+
+		if (pWorld && !bValidCoord) {
+			if (IsConsoleMode())
+				Console_Print("RemapLand >> You must provide valid cell coordinates");
+			return true;
+		}
+
+		TESForm* pFoundForm = TESForm::GetFormByNumericID(uiLandID);
+		bool bFoundLand = false;
+		if (pFoundForm) {
+			if (pFoundForm->GetFormType() == FORM_TYPE::TESObjectLAND) {
+				bFoundLand = true;
+			}
+			else {
+				if (IsConsoleMode())
+					Console_Print("RemapLand >> Found form is not to a TESObjectLAND!");
+				return true;
+			}
+		}
+
+		LandRemapping::RemapLand(uiLandID, pWorld, iGridX, iGridY);
+
+		if (bFoundLand) {
+			TESObjectLAND* pLand = static_cast<TESObjectLAND*>(pFoundForm);
+			if (pLand->IsLoaded()) {
+				QueuedTask kTask;
+				kTask.kItems[0].ui = uiLandID;
+				kTask.pFunction = QUEUED_TASK{
+					TESObjectLAND * pLand = static_cast<TESObjectLAND*>(TESForm::GetFormByNumericID(arTask.kItems[0].ui));
+					if (pLand)
+						LandRemapping::ReloadModel(pLand, true);
+				};
+				TaskQueue::QueueTask(kTask);
+			}
+		}
+		
+		*result = 1;
 	}
 	return true;
 }
