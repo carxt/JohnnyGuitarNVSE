@@ -187,6 +187,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESLeveledList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObject.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectList.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TLSData.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFixedString.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiGlobalStringTable.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMemObject.cpp" />
@@ -211,6 +212,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\JG\ExtraMiscStats.cpp" />
     <ClCompile Include="internal\JG\ExtraReputationIcons.cpp" />
     <ClCompile Include="internal\JG\ExtraUISounds.cpp" />
+    <ClCompile Include="internal\JG\FixedStringsRework.cpp" />
     <ClCompile Include="internal\JG\JohnnyFixes.cpp" />
     <ClCompile Include="internal\JG\JohnnyPatches.cpp" />
     <ClCompile Include="internal\JG\JohnnyGameSettings.cpp" />
@@ -223,6 +225,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\JG\RSMBarberHook.cpp" />
     <ClCompile Include="internal\JG\TaskQueue.cpp" />
     <ClCompile Include="internal\JIP\JIPFixes.cpp" />
+    <ClCompile Include="internal\JIP\JIPSettings.cpp" />
+    <ClCompile Include="internal\JIP\JIPUtils.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
     <ClCompile Include="internal\netimmerse.cpp" />
     <ClCompile Include="internal\serialization.cpp" />
@@ -356,6 +360,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESTextureList.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TLSData.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiCriticalSection.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFixedString.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiGlobalStringTable.hpp" />
@@ -422,6 +427,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\ExtraMiscStats.hpp" />
     <ClInclude Include="internal\JG\ExtraReputationIcons.hpp" />
     <ClInclude Include="internal\JG\ExtraUISounds.hpp" />
+    <ClInclude Include="internal\JG\FixedStringsRework.hpp" />
     <ClInclude Include="internal\JG\JGSetList.hpp" />
     <ClInclude Include="internal\JG\JohnnyFixes.hpp" />
     <ClInclude Include="internal\JG\JohnnyPatches.hpp" />
@@ -435,6 +441,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\RSMBarberHook.hpp" />
     <ClInclude Include="internal\JG\TaskQueue.hpp" />
     <ClInclude Include="internal\JIP\JIPFixes.hpp" />
+    <ClInclude Include="internal\JIP\JIPSettings.hpp" />
+    <ClInclude Include="internal\JIP\JIPUtils.hpp" />
     <ClInclude Include="internal\md5\md5.h" />
     <ClInclude Include="internal\netimmerse.h" />
     <ClInclude Include="internal\serialization.h" />

@@ -9,7 +9,7 @@
 
 class NiFixedString;
 
-// Replaced by JIP
+// Replaced by JIP and JG
 class SPEC_EMPTY_BASES NiGlobalStringTable : public NiMemObject {
 public:
 	typedef char* GlobalStringHandle;
@@ -19,12 +19,22 @@ public:
 	NiCriticalSection						m_kCriticalSection;
 #endif
 
-	static GlobalStringHandle AddString(const char* pcString);
-	static void IncRefCount(GlobalStringHandle& arHandle);
-	static void DecRefCount(GlobalStringHandle& arHandle);
-	static uint32_t GetLength(const GlobalStringHandle& arHandle);
+#ifdef GAME
+	static constexpr AddressPtr<uint32_t, 0x11F42C4> uiTotalStrings;
+	static constexpr AddressPtr<uint32_t, 0x11F42C8> uiTotalCollisions;
+#else
+	static constexpr AddressPtr<uint32_t, 0xF20174> uiTotalStrings;
+	static constexpr AddressPtr<uint32_t, 0xF20178> uiTotalCollisions;
+#endif
 
-	static char* GetRealBufferStart(const GlobalStringHandle& arHandle);
+	static GlobalStringHandle AddString(const char* apString) noexcept;
+	static void RemoveUnusedStrings() noexcept;
+
+	static void IncRefCount(GlobalStringHandle& arHandle) noexcept;
+	static void DecRefCount(GlobalStringHandle& arHandle) noexcept;
+	static uint32_t GetLength(const GlobalStringHandle& arHandle) noexcept;
+
+	static char* GetRealBufferStart(const GlobalStringHandle& arHandle) noexcept;
 };
 
 #if !JIP_CHANGES
