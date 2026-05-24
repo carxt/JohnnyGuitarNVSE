@@ -2,7 +2,6 @@
 #include "GameData.h"
 #include "JohnnyExtraData.hpp"
 #include "misc/misc.h"
-#include <Bethesda/AutoMemContext.hpp>
 
 namespace EDIDRestoration {
 
@@ -360,7 +359,6 @@ namespace EDIDRestoration {
 				if (bSuccess) [[likely]] {
 					DEBUG_MSG("Added EDID \"%s\" to form %08X", apEDID, GetFormID());
 					if (!GetTemporary() && GetFormID()) [[likely]] {
-						MEMORY_CONTEXT((GetCompileIndex() != 0xFF && IsBoundObject()) ? MC_STATIC_VARS : MC_FORMS);
 						AddToGameMap(this, strEDID);
 					}
 				}
