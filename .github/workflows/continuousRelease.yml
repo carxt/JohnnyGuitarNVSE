@@ -86,4 +86,5 @@ jobs:
         display_name: "JohnnyGuitarNVSE - Continuous Release"
         description: "Auto build from the latest GitHub commit. Use for testing only."
         file_category: "miscellaneous"
+        archive_existing_file: true
         version: ${{ env.artifact_timestamp }}
