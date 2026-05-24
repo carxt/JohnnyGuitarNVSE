@@ -3,6 +3,7 @@
 // keeping this in a separate file so we don't need to include dinput/dsound everywhere
 
 #include "Gamebryo/NiSmartPointer.hpp"
+#include "Bethesda/TESMain.hpp"
 
 #define DIRECTINPUT_VERSION 0x0800
 #define DIRECTSOUND_VERSION 0x0800
@@ -266,44 +267,3 @@ static_assert(sizeof(OSSoundGlobals) == 0x328);
 #endif
 
 class OSSoundGlobals {};
-
-class BSShaderAccumulator;
-class NiCamera;
-
-class TESMain {
-public:
-	TESMain();
-	~TESMain();
-
-	bool							bResumeLoadingThread;
-	bool							bQuitGame;
-	bool							bResetGame;
-	bool							bGameActive;
-	bool							bOnIdle;
-	bool							bReloadContent;
-	bool							bIsFlyCam;
-	bool							bFreezeTime;
-	HWND							hWnd;
-	HINSTANCE						hInstance;
-	uint32_t						uiMainThreadID;
-	HANDLE							hMainThread;
-	char							kPackedTaskHeap[16];
-	char							kTaskQueue[40];
-	char							kSecondaryPackedTaskHeap[16];
-	char							kSecondaryTaskQueue[40];
-	NiPointer<BSShaderAccumulator>	spDrawWorldAccum;
-	NiPointer<BSShaderAccumulator>	spDraw1stPersonAccum;
-	NiPointer<BSShaderAccumulator>	spDraw1stPersonDepthAccum;
-	NiPointer<BSShaderAccumulator>	spScreenSplatterAccum;
-	NiPointer<BSShaderAccumulator>	spRenderedMenuAccum;
-	bool							bRenderingMenuBG;
-	NiPointer<NiCamera>				spFirstPersonCamera;
-
-	static TESMain* GetSingleton() {
-		return *reinterpret_cast<TESMain**>(0x11DEA0C);
-	}
-};
-
-ASSERT_SIZE(TESMain, 0xA4);
-
-extern TESMain** g_osGlobals;

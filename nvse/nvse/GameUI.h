@@ -45,7 +45,7 @@ public:
 	}
 
 	uint32_t					flags;				// 000
-	SceneGraph* sceneGraph004;		// 004
+	NiPointer<SceneGraph> spSceneGraph;		// 004
 	SceneGraph* sceneGraph008;		// 008
 	uint32_t					currentMode;		// 00C	1 = GameMode; 2 = MenuMode
 	uint32_t					unk010;				// 010
@@ -81,9 +81,9 @@ public:
 	uint8_t					byte07E;			// 07E
 	uint8_t					byte07F;			// 07F
 	NiNode* niNode080;			// 080
-	NiNode* niNode084;			// 084
+	NiNode* pCursorRoot;			// 084
 	uint32_t					unk088;				// 088
-	BSShaderAccumulator* shaderAccum08C;	// 08C
+	NiPointer<BSShaderAccumulator> spInterfaceAccum;	// 08C
 	BSShaderAccumulator* shaderAccum090;	// 090
 	ShadowSceneNode* shadowScene094;	// 094
 	ShadowSceneNode* shadowScene098;	// 098
@@ -1057,6 +1057,8 @@ public:
 	float							flt274;			// 274
 
 	static HUDMainMenu* GetSingleton() { return *(HUDMainMenu**)0x11D96C0; }
+
+	static NiCamera* Create3DCamera() { return CdeclCall<NiCamera*>(0x77EE50); }
 };
 static_assert(sizeof(HUDMainMenu) == 0x278);
 
@@ -1128,6 +1130,8 @@ public:
 	uint8_t				byte220[2];		// 220
 	uint16_t				flags;			// 222
 	uint32_t				unk224[231];	// 224
+
+	static constexpr AddressPtr<bool, 0x11C70F8> bRendering;
 };
 static_assert(sizeof(LoadingMenu) == 0x5C0);
 

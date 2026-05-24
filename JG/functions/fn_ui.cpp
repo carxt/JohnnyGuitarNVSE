@@ -193,14 +193,14 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS) {
 };
 
 bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
-	uint32_t isFemale = 0;
-	TESForm* form = nullptr;
-	char newPath[MAX_PATH] = {};
+	BOOL bFemale = 0;
+	TESForm* pForm = nullptr;
+	char cPath[MAX_PATH] = {};
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPath, &isFemale, &form) && form) {
-		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
-		if (bipedModel) {
-			bipedModel->icon[isFemale].ddsPath.Set(newPath);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &bFemale, &pForm) && pForm) {
+		TESBipedModelForm* pBipedModel = DYNAMIC_CAST(pForm, TESForm, TESBipedModelForm);
+		if (pBipedModel) {
+			pBipedModel->icon[bFemale].SetTextureName(cPath);
 			*result = 1;
 		}
 	}
@@ -219,10 +219,10 @@ bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESWorldSpace* worlspace = nullptr;
-	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace, &path) && worlspace && IS_TYPE(worlspace, TESWorldSpace)) {
-		worlspace->texture.ddsPath.Set(path);
+	TESWorldSpace* pWorldSpace = nullptr;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace, &cPath) && pWorldSpace && IS_TYPE(pWorldSpace, TESWorldSpace)) {
+		pWorldSpace->SetTextureName(cPath);
 		*result = 1;
 	}
 	return true;
@@ -230,13 +230,13 @@ bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESWorldSpace* worlspace = nullptr;
-	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &worlspace) && worlspace && IS_TYPE(worlspace, TESWorldSpace) && (worlspace->texture.ddsPath.pString)) {
-		strcpy_s(path, worlspace->texture.ddsPath.pString);
-		g_strInterface->Assign(PASS_COMMAND_ARGS, path);
+	TESWorldSpace* pWorldSpace = nullptr;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace) && pWorldSpace && IS_TYPE(pWorldSpace, TESWorldSpace) && pWorldSpace->GetTextureNameLength()) {
+		strcpy_s(cPath, pWorldSpace->GetTextureName());
+		g_strInterface->Assign(PASS_COMMAND_ARGS, cPath);
 		if (IsConsoleMode())
-			Console_Print("GetWorldSpaceMapTexture >> %s", path);
+			Console_Print("GetWorldSpaceMapTexture >> %s", cPath);
 	}
 	return true;
 }

@@ -36,6 +36,8 @@
 #include <JG/DisabledMuzzleFlashLights.hpp>
 #include <JG/DisabledArrowKeys.hpp>
 #include <JG/ExtraMiscStats.hpp>
+#include <JG/CameraOverlay.hpp>
+#include <JG/LandRemapping.hpp>
 #include <JG/TaskQueue.hpp>
 #include <JG/FixedStringsRework.hpp>
 #include <events/LambdaVariableContext.h>
@@ -91,6 +93,12 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		case NVSEMessagingInterface::kMessage_PreLoadGame: // GAME
 		{
 			JohnnyExtraDataArray::GetInstance().ResetScriptData();
+
+			if (msg->type == NVSEMessagingInterface::kMessage_PreLoadGame)
+				CameraOverlay::Reset();
+			else
+				CameraOverlay::ReInit();
+
 			DisabledMuzzleFlashLights::Reset(); //reset the muzzle hook every time
 			DisabledArrowKeys::Reset();
 			DisabledLevelUp::Reset();
@@ -109,17 +117,20 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			JohnnyFixes::ClearPlayerFurniture(); //fix furniture crash on reload
 			CameraOverride::Reset();
 			JohnnyEvents::Reset();
+			LandRemapping::Reset();
 			noHolotapeStopSound = false;
 			break;
 		}
-		case NVSEMessagingInterface::kMessage_PostLoadGame: // GAME
+		case NVSEMessagingInterface::kMessage_PostLoadGame:
 		{
 			NiGlobalStringTable::RemoveUnusedStrings();
+			CameraOverlay::ReInit();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_MainGameLoop: // GAME
 		{
 			TaskQueue::ExecuteTasks();
+			CameraOverlay::Update();
 			CustomHUDShake::Update();
 			JohnnyRadios::Update();
 			JohnnyEvents::Update();
@@ -132,6 +143,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 			g_initialTickCount = GetTickCount();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
+			CameraOverlay::Init();
 			EDIDRestoration::PrintErrors();
 			NiGlobalStringTable::RemoveUnusedStrings();
 			if (JohnnyPatches::bFixJIP)
@@ -530,8 +542,9 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(SetNiPSysModifierValue);
 	REG_TYPED_CMD(GetNiPSysModifierValue, Default);
 	REG_TYPED_CMD(ar_Shuffle, Array);
-	REG_CMD(GetRecipeCategoryFlags);
+  	REG_CMD(GetRecipeCategoryFlags);
 	REG_CMD(GetCurrentSkyColor);
+	REG_CMD(RemapLand);
 }
 
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {

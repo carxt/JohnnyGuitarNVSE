@@ -701,31 +701,29 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 		NiAVObject* pObject = BSUtilities::GetObjectByName(GetRoot(thisObj, bFirstPerson), cBlockName);
 		if (bWorld) {
 			if (bRotate) {
-				// NiMatrix3::FromEulerAnglesXYZ
-				ThisCall(0xA59540, &pObject->m_world.rotate, x, y, z);
+				pObject->m_kWorld.m_kRotate.FromEulerAnglesXYZ(x, y, z);
 			}
 			else {
-				pObject->m_world.translate.x = x;
-				pObject->m_world.translate.y = y;
-				pObject->m_world.translate.z = z;
+				pObject->m_kWorld.m_kTranslate.x = x;
+				pObject->m_kWorld.m_kTranslate.y = y;
+				pObject->m_kWorld.m_kTranslate.z = z;
 			}
 
 			if (w >= 0.f)
-				pObject->m_world.scale = w;
+				pObject->m_kWorld.m_fScale = w;
 		}
 		else {
 			if (bRotate) {
-				// NiMatrix3::FromEulerAnglesXYZ
-				ThisCall(0xA59540, &pObject->m_local.rotate, x, y, z);
+				pObject->m_kLocal.m_kRotate.FromEulerAnglesXYZ(x, y, z);
 			}
 			else {
-				pObject->m_local.translate.x = x;
-				pObject->m_local.translate.y = y;
-				pObject->m_local.translate.z = z;
+				pObject->m_kLocal.m_kTranslate.x = x;
+				pObject->m_kLocal.m_kTranslate.y = y;
+				pObject->m_kLocal.m_kTranslate.z = z;
 			}
 			
 			if (w >= 0.f)
-				pObject->m_local.scale = w;
+				pObject->m_kLocal.m_fScale = w;
 		}
 
 		*result = true;
