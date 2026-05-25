@@ -102,7 +102,7 @@ static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* ap
 }
 
 static void __fastcall InvalidateRenderPassesRecurse(const NiAVObject* apObject) {
-	BSShaderProperty* pShaderProp = static_cast<BSShaderProperty*>(apObject->GetProperty(NiProperty::kPropertyType_Shade));
+	BSShaderProperty* pShaderProp = static_cast<BSShaderProperty*>(apObject->GetProperty(NiProperty::PropertyType::SHADE));
 	if (pShaderProp)
 		pShaderProp->InvalidateState();
 
@@ -159,7 +159,7 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::PropertyType::ALPHA);
 		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
 		if (!pAlpha)
 			return true;
@@ -200,7 +200,7 @@ bool Cmd_GetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::PropertyType::ALPHA);
 		const NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
 		if (!pAlpha)
 			return true;
@@ -238,7 +238,7 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::PropertyType::STENCIL);
 		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
 		if (!pStencil)
 			return true;
@@ -285,7 +285,7 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::PropertyType::STENCIL);
 		const NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
 		if (!pStencil)
 			return true;

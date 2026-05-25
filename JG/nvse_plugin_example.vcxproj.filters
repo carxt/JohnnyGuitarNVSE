@@ -613,6 +613,54 @@
     <ClCompile Include="internal\Game\Bethesda\TLSData.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiRenderer.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiShadeProperty.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSPerk.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSPerkEntry.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSTextureSet.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSShaderProperty.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESCondition.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSMessage.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESClimate.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESWeather.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESWeatherList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ImageSpaceModifierInstanceForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESRegionDataList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ImageSpaceModifierInstance.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSDebris.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESLoadScreen.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -960,9 +1008,6 @@
     </ClInclude>
     <ClInclude Include="functions\fn_event.h">
       <Filter>functions</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Obsidian\AudioMarkerData.hpp">
-      <Filter>internal\Game\Obsidian</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\ExtraAudioMarker.hpp">
       <Filter>internal\Game\Obsidian</Filter>
@@ -1650,6 +1695,132 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\TLSData.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiShadeProperty.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiRect.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiRenderer.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\DecalData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSPerk.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSPerkEntry.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSTextureSet.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSShaderProperty.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSTextureSet.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESCondition.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\AudioMarkerData.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSImpactData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSImpactDataSet.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSRadiationStage.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSMessage.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESClimate.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESWeather.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESWeatherList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\WeatherEntry.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ImageSpaceModifierInstanceForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ImageSpaceParameterData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESImageSpaceModifiableCountForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESRegion.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESRegionData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataGrass.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataLandscape.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataMap.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataSound.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataWeather.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESRegionList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESRegionSound.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ImageSpaceModifierInstance.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSEntryPoint.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSEntryPointFunctionData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSEntryPointFunctionDataLeveledList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSEntryPointFunctionDataOneValue.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSEntryPointFunctionDataTwoValue.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSEntryPointPerkEntry.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSDebris.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESLoadScreen.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\TESLoadScreenType.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

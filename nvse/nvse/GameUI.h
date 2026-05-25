@@ -1692,7 +1692,7 @@ public:
 	ListBox<TESRecipe>			recipeList;		// 06C
 	ListBox<TESRecipe>* unk09C;		// 09C
 	ListBox<RecipeComponent>	componentList;	// 0A0
-	ListBox<Condition>			conditionList;	// 0D0
+	ListBox<TESConditionItem>		conditionList;	// 0D0
 	uint32_t						unk100;			// 100
 };
 

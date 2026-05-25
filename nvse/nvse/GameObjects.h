@@ -4,6 +4,7 @@
 #include "GameBSExtraData.h"
 #include "GameExtraData.h"
 #include "Obsidian/AudioMarkerInfo.hpp"
+#include "Bethesda/TESRegionList.hpp"
 
 class ScriptLocals;
 class ActiveEffect;
@@ -708,6 +709,10 @@ public:
 	bool IsInDialogueWithPlayer() const;
 
 	bool GetRespawn() const;
+
+	uint16_t GetLevel() const {
+		return ThisCall<uint16_t>(0x87F9F0, this);
+	}
 };
 
 // 1C0

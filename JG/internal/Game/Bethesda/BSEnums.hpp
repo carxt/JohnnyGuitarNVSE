@@ -1753,3 +1753,19 @@ struct _BSIntersectResult {
 	};
 };
 using BS_INTERSECT_RESULT = _BSIntersectResult::Result;
+
+struct _RegionDataType {
+	enum Type {
+		NONE		= 0,
+		GENERAL		= 1,
+		OBJECTS		= 2,
+		WEATHER		= 3,
+		MAP			= 4,
+		LANDSCAPE	= 5,
+		GRASS		= 6,
+		SOUND		= 7,
+		IMPOSTER	= 8,
+		COUNT		= 9,
+	};
+};
+using REGION_DATA_ID = _RegionDataType::Type;

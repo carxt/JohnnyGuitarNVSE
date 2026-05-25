@@ -16,7 +16,7 @@ public:
 	virtual int32_t		GetPermanentActorValueI(ActorValue::Index aeIndex);
 	virtual float		GetPermanentActorValueF(ActorValue::Index aeIndex);
 	virtual TESForm*	GetAsForm() const;
-	virtual uint16_t	GetLevel() const;
+	virtual uint16_t	GetActorLevel() const;
 
 	static bool GetDerivedActorValue(ActorValueOwner* apOwner, ActorValue::Index aeIndex, float& arVal);
 

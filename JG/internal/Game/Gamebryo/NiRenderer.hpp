@@ -3,6 +3,7 @@
 #include "NiObject.hpp"
 #include "NiCriticalSection.hpp"
 #include "NiRect.hpp"
+#include "NiAccumulator.hpp"
 
 class NiShader;
 class NiDynamicEffectState;
@@ -11,7 +12,6 @@ class NiDX9Renderer;
 class NiPropertyState;
 class NiRenderTargetGroup;
 class NiFrustum;
-class NiAccumulator;
 class NiCamera;
 class NiPoint3;
 

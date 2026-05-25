@@ -9,6 +9,7 @@
 #include "Gamebryo/NiAlphaAccumulator.hpp"
 #include "Gamebryo/NiRenderer.hpp"
 #include "Bethesda/NiUpdateData.hpp"
+#include "Bethesda/BSShaderProperty.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
 #include "Bethesda/BSCullingProcess.hpp"
 
@@ -525,31 +526,6 @@ public:
 	NiNode* parentNode;	// 10
 };
 
-// 18
-class NiProperty : public NiObjectNET {
-public:
-	NiProperty();
-	~NiProperty();
-
-	virtual uint32_t	GetPropertyType();
-	virtual void	UpdateController(float arg);
-
-	enum {
-		kPropertyType_Alpha = 0,
-		kPropertyType_Culling = 1,
-		kPropertyType_Material = 2,
-		kPropertyType_Shade = 3,
-		kPropertyType_TileShader = kPropertyType_Shade,
-		kPropertyType_Stencil = 4,
-		kPropertyType_Texturing = 5,
-		kPropertyType_Dither = 8,
-		kPropertyType_Specular = 9,
-		kPropertyType_VertexColor = 10,
-		kPropertyType_ZBuffer = 11,
-		kPropertyType_Fog = 13,
-	};
-};
-
 // 4C
 class NiMaterialProperty : public NiProperty {
 public:
@@ -866,79 +842,8 @@ public:
 	uint32_t				unk18;		// 18
 };
 
-class NiShadeProperty : public NiProperty {
-public:
-	Bitfield16	m_usFlags;
-	int32_t		iShaderPropertyType;
-};
-ASSERT_SIZE(NiShadeProperty, 0x20);
-
 class ShadowSceneLight;
 class BSShaderAccumulator;
-
-// 60
-class BSShaderProperty : public NiShadeProperty {
-public:
-	BSShaderProperty();
-	~BSShaderProperty();
-
-	class RenderPass {
-	public:
-		NiGeometry*			pGeometry;
-		uint16_t			usPassEnum;
-		uint8_t				eAccumulationHint;
-		bool				bFirstPass;
-		bool				bLastPass;
-		uint8_t				ucNumLights;
-		uint8_t				ucMaxNumLights;
-		uint8_t				ucExtraParam;
-		ShadowSceneLight**	ppSceneLights;
-	};
-
-	class RenderPassArray : public NiTObjectArray<RenderPass*> {
-	public:
-		uint32_t uiPassCount;
-	};
-
-	virtual void						CopyTo(BSShaderProperty* apTarget);
-	virtual void						CopyToMembers(BSShaderProperty* apTarget);
-	virtual void						SetupGeometry(NiGeometry* apGeometry);
-	virtual RenderPassArray*			GetRenderPasses(const NiGeometry* apGeometry, const uint32_t auiEnabledPasses, uint16_t* apusPassCount, const uint32_t aeRenderMode, BSShaderAccumulator* apAccumulator, bool abAddPass);
-	virtual uint16_t					GetNumberofPasses(NiGeometry* apGeometry);
-	virtual RenderPassArray*			GetSIBlockRenderPasses() const;
-	virtual RenderPass*					GetRenderDepthPass(NiGeometry* apGeometry);
-	virtual BSShaderProperty*			ClarifyShader(NiGeometry* apGeometry, bool unk0 = 0, bool unk2 = 1);
-	virtual NiSourceTexture*			GetBaseTexture() const;
-	virtual RenderPassArray*			GetWaterFogPassList(NiGeometry* apGeometry);
-	virtual void						GetTextureUse(void* apCountFunc, class BGSTextureUseMap* apTexMap) const;
-	virtual void						PrecacheTextures() const;
-
-	Bitfield32			ulFlags[2];
-	float				fAlpha;
-	float				fFadeAlpha;
-	float				fEnvMapScale;
-	float				fCameraDistance;
-	int32_t				iLastRenderPassState;
-	RenderPassArray*	pRenderPassArray;
-	RenderPassArray*	pDepthMapRenderPassArray;
-	RenderPassArray*	pConstAlphaRenderPassArray;
-	RenderPassArray*	pLocalMapRenderPassArray;
-	RenderPassArray*	pSIBlockRenderPassArray;
-	RenderPassArray*	pWaterFogRenderPassArray;
-	RenderPassArray*	pSilhouettePassArray;
-	int32_t				iShader;
-	float				fDepthBias;
-
-	void ClearRenderPasses() {
-		if (pRenderPassArray)
-			pRenderPassArray->uiPassCount = 0;
-	}
-
-	void InvalidateState() {
-		iLastRenderPassState = -1;
-	}
-};
-static_assert(sizeof(BSShaderProperty) == 0x60);
 
 // 150
 class WaterShaderProperty : public BSShaderProperty {

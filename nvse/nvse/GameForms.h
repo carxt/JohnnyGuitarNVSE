@@ -14,23 +14,31 @@
 #include "Bethesda/BGSBipedModelList.hpp"
 #include "Bethesda/BGSCameraShot.hpp"
 #include "Bethesda/BGSClipRoundsForm.hpp"
+#include "Bethesda/BGSDebris.hpp"
 #include "Bethesda/BGSDefaultObjectManager.hpp"
 #include "Bethesda/BGSDestructibleObjectForm.hpp"
 #include "Bethesda/BGSEncounterZone.hpp"
+#include "Bethesda/BGSEntryPointPerkEntry.hpp"
 #include "Bethesda/BGSEquipType.hpp"
 #include "Bethesda/BGSHeadPart.hpp"
-#include "Bethesda/TESFaction.hpp"
+#include "Bethesda/BGSImpactData.hpp"
+#include "Bethesda/BGSImpactDataSet.hpp"
 #include "Bethesda/BGSListForm.hpp"
 #include "Bethesda/BGSMenuIcon.hpp"
+#include "Bethesda/BGSMessage.hpp"
 #include "Bethesda/BGSMessageIcon.hpp"
 #include "Bethesda/BGSMusicType.hpp"
 #include "Bethesda/BGSOpenCloseForm.hpp"
+#include "Bethesda/BGSPerk.hpp"
+#include "Bethesda/BGSPerkEntry.hpp"
 #include "Bethesda/BGSPickupPutdownSounds.hpp"
 #include "Bethesda/BGSPlaceableWater.hpp"
 #include "Bethesda/BGSPreloadable.hpp"
+#include "Bethesda/BGSRadiationStage.hpp"
 #include "Bethesda/BGSRagdoll.hpp"
 #include "Bethesda/BGSRepairItemList.hpp"
 #include "Bethesda/BGSTextureModel.hpp"
+#include "Bethesda/BGSTextureSet.hpp"
 #include "Bethesda/BGSTouchSpellForm.hpp"
 #include "Bethesda/BipedAnim.hpp"
 #include "Bethesda/CachedValuesOwner.hpp"
@@ -44,22 +52,28 @@
 #include "Bethesda/TESBipedModelForm.hpp"
 #include "Bethesda/TESBoundAnimObject.hpp"
 #include "Bethesda/TESClass.hpp"
+#include "Bethesda/TESClimate.hpp"
 #include "Bethesda/TESCombatStyle.hpp"
+#include "Bethesda/TESCondition.hpp"
 #include "Bethesda/TESContainer.hpp"
 #include "Bethesda/TESDescription.hpp"
 #include "Bethesda/TESEnchantableForm.hpp"
 #include "Bethesda/TESEyes.hpp"
+#include "Bethesda/TESFaction.hpp"
 #include "Bethesda/TESFullName.hpp"
 #include "Bethesda/TESGlobal.hpp"
 #include "Bethesda/TESGrass.hpp"
 #include "Bethesda/TESHair.hpp"
 #include "Bethesda/TESHealthForm.hpp"
+#include "Bethesda/TESIcon.hpp"
 #include "Bethesda/TESImageSpaceModifiableForm.hpp"
 #include "Bethesda/TESKey.hpp"
 #include "Bethesda/TESLandTexture.hpp"
 #include "Bethesda/TESLevCharacter.hpp"
 #include "Bethesda/TESLevCreature.hpp"
 #include "Bethesda/TESLeveledList.hpp"
+#include "Bethesda/TESLevItem.hpp"
+#include "Bethesda/TESLoadScreen.hpp"
 #include "Bethesda/TESModelAnim.hpp"
 #include "Bethesda/TESModelList.hpp"
 #include "Bethesda/TESModelRDT.hpp"
@@ -70,6 +84,7 @@
 #include "Bethesda/TESObjectARMO.hpp"
 #include "Bethesda/TESObjectBOOK.hpp"
 #include "Bethesda/TESObjectCLOT.hpp"
+#include "Bethesda/TESObjectLAND.hpp"
 #include "Bethesda/TESObjectMISC.hpp"
 #include "Bethesda/TESObjectSTAT.hpp"
 #include "Bethesda/TESPackageData.hpp"
@@ -90,12 +105,8 @@
 #include "Obsidian/TESCaravanMoney.hpp"
 #include "Obsidian/TESCasino.hpp"
 #include "Obsidian/TESChallenge.hpp"
+#include "Obsidian/TESLoadScreenType.hpp"
 #include "Obsidian/TESReputation.hpp"
-#include "Bethesda/TESLeveledList.hpp"
-#include "Bethesda/TESLevItem.hpp"
-#include "Bethesda/TESObjectLAND.hpp"
-#include "Bethesda/TESIcon.hpp"
-#include "Bethesda/TESTexture1024.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -395,34 +406,6 @@ struct PermanentClonedForm {
 	uint32_t cloneRefID;
 };
 
-struct Condition {
-	uint8_t			type;				// 00
-	uint8_t			pad01[3];			// 01
-	union {
-		float		value;
-		uint32_t		global;
-	}				comparisonValue;	// 04
-	uint32_t			opcode;				// 08
-	union {
-		float		value;
-		uint32_t		number;
-		TESForm* form;
-	}				parameter1;			// 0C
-	union {
-		float		value;
-		uint32_t		number;
-		TESForm* form;
-	}				parameter2;			// 10
-	uint32_t			runOnType;			// 14	Subject, Target, Reference, CombatTarget, LinkedReference
-	TESObjectREFR* reference;			// 18
-
-	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result) { return ThisCall<bool>(0x681600, this, runOnRef, arg2, result); }
-};
-
-struct ConditionList : tList<Condition> {
-	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result, bool arg4) { return ThisCall<bool>(0x680C60, this, runOnRef, arg2, result, arg4); }
-};
-
 class TESImageSpaceModifier;
 
 // 24
@@ -464,7 +447,7 @@ public:
 	uint32_t				actorValueOrOther;	// 10
 	EffectSetting*		setting;			// 14
 	float				cost;				// 18 on autocalc items this seems to be the cost
-	ConditionList		conditions;			// 1C
+	TESCondition		conditions;			// 1C
 
 	//bool HasActorValue() const;
 	//uint32_t GetActorValue() const;
@@ -581,17 +564,6 @@ struct LvlListExtra {
 
 class FactionRank;
 
-// 8
-// ### derives from NiObject
-class BSTextureSet {
-public:
-	BSTextureSet();
-	~BSTextureSet();
-
-	void* _vtbl;	// 0
-	uint32_t	unk04;		// 4
-};
-
 // 24
 class BGSQuestObjective {
 public:
@@ -625,7 +597,7 @@ public:
 
 		uint8_t			byte00;			// 00
 		uint8_t			pad01[3];		// 01
-		ConditionList	conditions;		// 04
+		TESCondition	conditions;		// 04
 		TESObjectREFR*	target;			// 0C
 		Data			data;			// 10
 	};
@@ -676,7 +648,7 @@ public:
 	};
 
 	TESModelAnim					anim;			// 018
-	ConditionList					conditions;		// 030
+	TESCondition					conditions;		// 030
 	Data							data;			// 038
 	BSSimpleArray<TESIdleForm*>*	children;		// 040	NiFormArray, contains all idle anims in path if eIFgf_flagUnknown is set
 	TESIdleForm*					parent;			// 044
@@ -717,7 +689,7 @@ public:
 		tList<TESTopic>		followUps;
 	};
 
-	ConditionList		conditions;			// 18
+	TESCondition		conditions;			// 18
 	uint16_t				unk20;				// 20
 	bool				saidOnce;			// 22
 	uint8_t				type;				// 23
@@ -786,63 +758,6 @@ public:
 		return ThisCall<TopicInfoArray*>(0x619F70, this, apQuest);
 	}
 };
-
-// A0
-class BGSTextureSet : public TESBoundObject {
-public:
-	BGSTextureSet();
-	~BGSTextureSet();
-
-	enum	// texture types
-	{
-		kDiffuse = 0,
-		kNormal,
-		kEnvMask,
-		kGlow,
-		kParallax,
-		kEnv
-	};
-
-	enum {
-		kTexFlag_NoSpecMap = 0x0001,
-	};
-
-	// 24
-	struct DecalInfo {
-		enum {
-			kFlag_Parallax = 0x01,
-			kFlag_AlphaBlend = 0x02,
-			kFlag_AlphaTest = 0x04,
-		};
-
-		float	minWidth;		// 00
-		float	maxWidth;		// 04
-		float	minHeight;		// 08
-		float	maxHeight;		// 0C
-		float	depth;			// 10
-		float	shininess;		// 14
-		float	parallaxScale;	// 18
-		uint8_t	parallaxPasses;	// 1C
-		uint8_t	flags;			// 1D
-		uint8_t	pad1E[2];		// 1E
-		uint32_t	color;			// 20
-	};
-
-	BSTextureSet	bsTexSet;		// 30
-
-	TESTexture		textures[6];	// 38
-	DecalInfo* decalInfo;	// 80
-	uint16_t			texFlags;		// 84
-	uint8_t			pad86[2];		// 86
-	uint32_t			unk88;			// 88
-	uint32_t			unk8C;			// 8C
-	uint32_t			unk90;			// 90
-	uint32_t			unk94;			// 94
-	uint32_t			unk98;			// 98
-	uint32_t			unk9C;			// 9C
-};
-
-static_assert(sizeof(BGSTextureSet) == 0xA0);
 
 // 4E4 - incomplete
 class TESRace : public TESForm {
@@ -1156,7 +1071,7 @@ public:
 		BSString			resultText;
 		Script*				resultScript;
 		uint8_t				pad[78];
-		tList<Condition>	conditions;
+		TESCondition		conditions;
 		BGSNote*			displayNote;
 		BGSTerminal*		subMenu;
 		uint8_t				entryFlags;
@@ -1946,193 +1861,6 @@ public:
 	}
 };
 
-// 36C
-class TESWeather : public TESForm {
-public:
-	TESWeather();
-	~TESWeather();
-
-	struct WeatherSound {
-		uint32_t		soundID;	// refID of TESSound
-		uint32_t		type;		// 0 - Default; 1 - Precip; 2 - Wind; 3 - Thunder
-	};
-
-	uint32_t					unk018;						// 018	TESImageSpaceModifiableCountForm<6>
-	TESImageSpaceModifier* imageSpaceMods[6];			// 01C
-	TESTexture1024			layerTextures[4];			// 034
-	uint8_t					cloudSpeed[4];				// 064
-	uint32_t					cloudColor[4][6];			// 068
-	TESModel				model;						// 0C8
-	uint8_t					windSpeed;					// 0E0
-	uint8_t					cloudSpeedLower;			// 0E1
-	uint8_t					cloudSpeedUpper;			// 0E2
-	uint8_t					transDelta;					// 0E3
-	uint8_t					sunGlare;					// 0E4
-	uint8_t					sunDamage;					// 0E5
-	uint8_t					precipitationBeginFadeIn;	// 0E6
-	uint8_t					precipitationEndFadeOut;	// 0E7
-	uint8_t					lightningBeginFadeIn;		// 0E8
-	uint8_t					lightningEndFadeOut;		// 0E9
-	uint8_t					lightningFrequency;			// 0EA
-	uint8_t					weatherClassification;		// 0EB
-	uint32_t					lightningColor;				// 0EC
-	float					fogDistance[6];				// 0F0
-	uint32_t					colors[10][6];				// 108
-	tList<WeatherSound>		sounds;						// 1F8
-	uint32_t					unk200[91];					// 200
-};
-static_assert(sizeof(TESWeather) == 0x36C);
-
-struct WeatherEntry {
-	TESWeather* weather;
-	uint32_t			chance;
-	TESGlobal* global;
-};
-typedef tList<WeatherEntry> WeatherTypes;
-
-// 58
-class TESClimate : public TESForm {
-public:
-	TESClimate();
-	~TESClimate();
-
-	TESModel			nightSkyModel;		// 18
-	WeatherTypes		weatherTypes;		// 30
-	TESTexture			sunTexture;			// 38
-	TESTexture			sunGlareTexture;	// 44
-	uint8_t				sunriseBegin;		// 50
-	uint8_t				sunriseEnd;			// 51
-	uint8_t				sunsetBegin;		// 52
-	uint8_t				sunsetEnd;			// 53
-	uint8_t				volatility;			// 54
-	uint8_t				phaseLength;		// 55
-	uint8_t				pad56[2];			// 56
-
-	WeatherEntry* GetWeatherEntry(TESWeather* weather, bool remove);
-};
-
-static_assert(sizeof(TESClimate) == 0x58);
-
-enum RegionDataID {
-	REGION_DATA_NONE			= 0,
-	REGION_DATA_GENERAL_ID		= 1,
-	REGION_DATA_OBJECTS_ID		= 2,
-	REGION_DATA_WEATHER_ID		= 3,
-	REGION_DATA_MAP_ID			= 4,
-	REGION_DATA_LANDSCAPE_ID	= 5,
-	REGION_DATA_GRASS_ID		= 6,
-	REGION_DATA_SOUND_ID		= 7,
-	REGION_DATA_IMPOSTER		= 8,
-	REGION_DATA_COUNT			= 9,
-};
-
-struct RegionData {
-	RegionDataID	eDataTypeID;
-	bool			bOverride;
-	uint8_t			cPriority;
-};
-
-// 08
-class TESRegionData {
-public:
-	TESRegionData();
-
-	enum {
-		kRegionData_Weather = 3,
-		kRegionData_Map,
-		kRegionData_Landscape,
-		kRegionData_Grass,
-		kRegionData_Sound,
-		kRegionData_Imposter
-	};
-
-	virtual					~TESRegionData();
-	virtual void			Save();
-	virtual bool			LoadRegionData(RegionData* apData);
-	virtual void			Initialize(TESRegion* apRegion);
-	virtual RegionDataID	GetID() const;
-	virtual TESRegionData*	Copy();
-	virtual TESRegionData*	Blend(TESRegionData* apRegionData);
-	virtual void			BlendInto(TESRegionData* apRegionData, uint32_t auiTotalBlending);
-	virtual bool			Validate() const;
-
-	bool	bOverride;
-	bool	bIgnore;
-	uint8_t	cPriority;
-};
-typedef tList<TESRegionData> RegionDataEntryList;
-
-class TESRegionDataGrass : public TESRegionData {
-public:
-	TESRegionDataGrass();
-	~TESRegionDataGrass();
-
-	virtual void	Unk_0A(void);
-};
-
-// 10
-class TESRegionDataImposter : public TESRegionData {
-public:
-	TESRegionDataImposter();
-	~TESRegionDataImposter();
-
-	tList<TESObjectREFR>	imposters;	// 08
-};
-
-class TESRegionDataLandscape : public TESRegionData {
-public:
-	TESRegionDataLandscape();
-	~TESRegionDataLandscape();
-
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-};
-
-class TESRegionDataMap : public TESRegionData {
-public:
-	TESRegionDataMap();
-	~TESRegionDataMap();
-
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-	virtual void	Unk_0C(void);
-	virtual void	Unk_0D(void);
-
-	BSString	mapName;
-};
-
-struct SoundType {
-	TESSound* sound;
-	uint32_t			flags;
-	uint32_t			chance;
-};
-typedef tList<SoundType> SoundTypeList;
-
-class TESRegionDataSound : public TESRegionData {
-public:
-	TESRegionDataSound();
-	~TESRegionDataSound();
-
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-	virtual void	Unk_0C(void);
-	virtual void	Unk_0D(void);
-	virtual void	Unk_0E(void);
-
-	uint32_t			unk08;
-	SoundTypeList	soundTypes;
-	uint32_t			incidentalMediaSet;
-	tList<uint32_t>	mediaSetEntries;
-};
-
-class TESRegionDataWeather : public TESRegionData {
-public:
-	TESRegionDataWeather();
-	~TESRegionDataWeather();
-
-	WeatherTypes	weatherTypes;
-};
-
 struct AreaPointEntry {
 	float	x;
 	float	y;
@@ -2147,31 +1875,6 @@ struct RegionAreaEntry {
 	uint32_t				pointCount;
 };
 typedef tList<RegionAreaEntry> RegionAreaEntryList;
-
-// 38
-class TESRegion : public TESForm {
-public:
-	TESRegion();
-	~TESRegion();
-
-	RegionDataEntryList* dataEntries;	// 18
-	RegionAreaEntryList* areaEntries;	// 1C
-	TESWorldSpace* worldSpace;	// 20
-	TESWeather* weather;		// 24
-	uint32_t				unk28[4];		// 28
-};
-
-static_assert(sizeof(TESRegion) == 0x38);
-
-// 10
-class TESRegionList : public BSSimpleList<TESRegion*> {
-public:
-	TESRegionList();
-	virtual ~TESRegionList();
-
-	bool			bOwnsRegionMemory;		// 0C
-};
-static_assert(sizeof(TESRegionList) == 0x10);
 
 // NavMeshInfoMap (40)
 class NavMeshInfoMap;
@@ -2537,7 +2240,7 @@ public:
 	tList<void>				lVarOrObjectives;	// 4C
 		// So: this list would contain both Objectives and LocalVariables !
 		// That seems very strange but still, looking at Get/SetObjective... and ShowQuestVars there's no doubt.
-	ConditionList			conditions;			// 54
+	TESCondition			conditions;			// 54
 	ScriptLocals*		scriptEventList;	// 5C
 	uint8_t					currentStage;		// 60
 	uint8_t					pad61[3];			// 61
@@ -3101,7 +2804,7 @@ public:
 	uint32_t					reqSkillLevel;	// 28
 	uint32_t					categoryID;		// 2C
 	uint32_t					subCategoryID;	// 30
-	ConditionList			conditions;		// 34
+	TESCondition			conditions;		// 34
 	ComponentList			inputs;			// 3C
 	ComponentList			outputs;		// 44
 	uint32_t					unk4C;			// 4C
@@ -3111,45 +2814,6 @@ public:
 };
 
 static_assert(sizeof(TESRecipe) == 0x5C);
-
-class TESLoadScreenType : public TESForm {
-public:
-	TESLoadScreenType();
-	~TESLoadScreenType();
-
-	struct floatRGB {
-		float R, G, B;
-	};
-
-	uint32_t			type;						// 018
-	// Data 1
-	uint32_t			x;							// 01C
-	uint32_t			y;							// 020
-	uint32_t			width;						// 024
-	uint32_t			height;						// 028
-	uint32_t			orientation;				// 02C
-	uint32_t			font1;						// 030
-	floatRGB		fontcolor1;					// 034
-	uint32_t			justification;				// 040
-	uint32_t			unk044[(0x58 - 0x44) >> 2];	// 044
-	// Data 2
-	uint32_t			font2;						// 058
-	floatRGB		fontcolor2;					// 05C
-	uint32_t			unk068;						// 068
-	uint32_t			stats;						// 06C
-};
-
-// TESLoadScreen (3C)
-class TESLoadScreen : public TESForm {
-public:
-	TESLoadScreen();
-	~TESLoadScreen();
-
-	TESTexture			texture;		// 018
-	TESDescription		description;	// 024
-	uint32_t				unk2C[2];		// 02C
-	TESLoadScreenType* type;			// 034
-};
 
 // TESLevSpell (44)
 class TESLevSpell;
@@ -3224,16 +2888,6 @@ public:
 };
 
 static_assert(sizeof(BGSExplosion) == 0xA8);
-
-// BGSDebris (24)
-class BGSDebris : public TESForm {
-	BGSDebris();
-	~BGSDebris();
-
-	BGSPreloadable				preloadable;	// 018
-	uint32_t	unk01C;
-	uint32_t	unk020;
-};
 
 // B0
 class TESImageSpace : public TESForm {
@@ -3358,153 +3012,11 @@ public:
 	// 08:	Full-Screen Motion Blur: Strength
 };
 static_assert(sizeof(TESImageSpaceModifier) == 0x730);
-// 08
-class BGSPerkEntry {
-public:
-	BGSPerkEntry();
-	~BGSPerkEntry();
-
-	virtual void	Fn_00(void);
-	virtual void	Fn_01(void);
-	virtual void	Fn_02(void);
-	virtual void	Fn_03(void);
-	virtual uint32_t	GetType();		//	0 - Quest; 1 - Ability; 2 - Entry Point
-	virtual void	Fn_05(void);
-	virtual void	Fn_06(void);
-	virtual void	Fn_07(void);
-	virtual void	Fn_08(void);
-	virtual void	GetAsForm(void);
-	virtual void	Fn_0A(void);
-	virtual void	Fn_0B(void);
-	virtual void	Fn_0C(void);
-	virtual void	Fn_0D(void);
-
-	uint8_t				rank;				// 04 +1 for value shown in GECK
-	uint8_t				priority;			// 05
-	uint16_t				type;				// 06 (Quest: 0xC24, Ability: 0xB27, Entry Point: 0xD16)
-};
-
-// 10
-class BGSQuestPerkEntry : public BGSPerkEntry {
-public:
-	BGSQuestPerkEntry();
-	~BGSQuestPerkEntry();
-
-	virtual void	Fn_0E(void);
-
-	TESQuest* quest;				// 08
-	uint8_t				stage;				// 0C
-	uint8_t				pad[3];				// 0D
-};
-
-// 0C
-class BGSAbilityPerkEntry : public BGSPerkEntry {
-public:
-	BGSAbilityPerkEntry();
-	~BGSAbilityPerkEntry();
-
-	virtual void	Fn_0E(void);
-
-	SpellItem* ability;			// 08
-};
-
-class BGSEntryPointFunctionData {
-public:
-	BGSEntryPointFunctionData();
-	~BGSEntryPointFunctionData();
-
-	virtual void	Fn_00(void);
-	virtual void	Fn_01(void);
-	virtual void	Fn_02(void);
-	virtual void	Fn_03(void);
-	virtual void	Fn_04(void);
-	virtual void	Fn_05(void);
-	virtual void	Fn_06(void);
-};
-
-// 08
-class BGSEntryPointFunctionDataOneValue : public BGSEntryPointFunctionData {
-public:
-	BGSEntryPointFunctionDataOneValue();
-	~BGSEntryPointFunctionDataOneValue();
-
-	float				value;				// 04
-};
-
-// 0C
-class BGSEntryPointFunctionDataTwoValue : public BGSEntryPointFunctionData {
-public:
-	BGSEntryPointFunctionDataTwoValue();
-	~BGSEntryPointFunctionDataTwoValue();
-
-	float				value[2];			// 04
-};
-
-class BGSEntryPointFunctionDataLeveledList : public BGSEntryPointFunctionData {
-public:
-	BGSEntryPointFunctionDataLeveledList();
-	~BGSEntryPointFunctionDataLeveledList();
-
-	TESLevItem* leveledList;		// 04
-};
-
-class BGSEntryPointFunctionDataActivateChoice : public BGSEntryPointFunctionData {
-public:
-	BGSEntryPointFunctionDataActivateChoice();
-	~BGSEntryPointFunctionDataActivateChoice();
-
-	virtual void		Fn_07(void);
-
-	BSString			label;				// 04
-	Script*				script;			// 0C
-	uint32_t				flags;				// 10
-};
 
 struct EntryPointConditions {
-	ConditionList		tab1;
-	ConditionList		tab2;
-	ConditionList		tab3;
-};
-
-// 14
-class BGSEntryPointPerkEntry : public BGSPerkEntry {
-public:
-	BGSEntryPointPerkEntry();
-	~BGSEntryPointPerkEntry();
-
-	virtual void	Fn_0E(void);
-
-	uint8_t						entryPoint;		// 08
-	uint8_t						function;		// 09
-	uint8_t						conditionTabs;	// 0A
-	uint8_t						pad0B;			// 0B
-	BGSEntryPointFunctionData* data;			// 0C
-	EntryPointConditions* conditions;	// 10
-};
-
-// 50
-class BGSPerk : public TESForm {
-public:
-	BGSPerk();
-	~BGSPerk();
-
-	struct PerkData {
-		bool				isTrait;	// 00
-		uint8_t				minLevel;	// 01
-		uint8_t				numRanks;	// 02
-		bool				isPlayable;	// 03
-		bool				isHidden;	// 04
-		uint8_t				unk05;		// 05 todo: collapse to pad[3] after verifying isPlayable and isHidden
-		uint8_t				unk06;		// 06
-		uint8_t				unk07;		// 07
-	};
-
-	TESFullName				fullName;			// 18
-	TESDescription			description;		// 24
-	TESIcon					icon;				// 2C
-	PerkData				data;				// 38
-	ConditionList			conditions;			// 40
-	tList<BGSPerkEntry>		entries;			// 48
+	TESCondition		tab1;
+	TESCondition		tab2;
+	TESCondition		tab3;
 };
 
 // B0
@@ -3617,113 +3129,8 @@ public:
 };
 static_assert(sizeof(MediaLocationController) == 0xB8);
 
-// 20
-class BGSRadiationStage : public TESForm {
-public:
-	BGSRadiationStage();
-	~BGSRadiationStage();
-
-	uint32_t		threshold;	// 18
-	SpellItem* effect;	// 1C
-};
-
 // BGSCameraPath (38)
 class BGSCameraPath;
-
-struct ColorRGB {
-	uint8_t	red;	// 000
-	uint8_t	green;	// 001
-	uint8_t	blue;	// 002
-	uint8_t	alpha;	// 003 or unused if no alpha
-};	// 004 looks to be endian swapped !
-
-struct DecalData {
-	float		minWidth;		// 000
-	float		maxWidth;		// 004
-	float		minHeight;		// 008
-	float		maxHeight;		// 00C
-	float		depth;			// 010
-	float		shininess;		// 014
-	float		parallaxScale;	// 018
-	uint8_t		parallaxPasses;	// 01C
-	uint8_t		flags;			// 01D	Parallax, Alpha - Blending, Alpha - Testing
-	uint8_t		unk01E[2];		// 01E
-	ColorRGB	color;			// 020
-};	// 024
-
-static_assert(sizeof(DecalData) == 0x024);
-
-// 78
-class BGSImpactData : public TESForm {
-public:
-	BGSImpactData();
-	~BGSImpactData();
-
-	TESModel		model;				// 18
-
-	float			effectDuration;		// 30
-	uint8_t			effectOrientation;	// 34	0 - Surface Normal, 1 - Projectile Vector, 2 - Projectile Reflection
-	uint8_t			pad35[3];			// 35
-	float			angleThreshold;		// 38
-	float			placementRadius;	// 3C
-	uint8_t			soundLevel;			// 40
-	uint8_t			pad41[3];			// 41
-	uint8_t			noDecalData;		// 44
-	uint8_t			pad45[3];			// 45
-
-	BGSTextureSet* textureSet;		// 48
-	TESSound* sound1;			// 4C
-	TESSound* sound2;			// 50
-
-	float			decalMinWidth;		// 54
-	float			decalMaxWidth;		// 58
-	float			decalMinHeight;		// 5C
-	float			decalMaxHeight;		// 60
-	float			decalDepth;			// 64
-	float			decalShininess;		// 68
-	float			parallaxScale;		// 6C
-	uint8_t			parallaxPasses;		// 70
-	uint8_t			decalFlags;			// 71	1 - Parallax, 2 - Alpha-Blending, 4 - Alpha-Testing
-	uint8_t			unk72[2];			// 72
-	uint32_t			decalColor;			// 74
-};
-
-static_assert(sizeof(BGSImpactData) == 0x78);
-
-// 4C
-class BGSImpactDataSet : public TESForm {
-public:
-	BGSImpactDataSet();
-	~BGSImpactDataSet();
-
-	BGSPreloadable	preloadable;		// 18
-	BGSImpactData* impactDatas[12];	// 1C
-};
-
-static_assert(sizeof(BGSImpactDataSet) == 0x4C);
-
-// 40
-class BGSMessage : public TESForm {
-public:
-	BGSMessage();
-	~BGSMessage();
-
-	struct Button {
-		BSString		label;
-		ConditionList	conditions;
-	};
-
-	TESFullName		fullName;		// 18
-	TESDescription	description;	// 24
-
-	BGSMenuIcon* menuIcon;		// 2C
-	tList<Button>	buttons;		// 30
-	uint8_t			msgFlags;		// 38	1 - Message Box, 2 - Auto-display
-	uint8_t			pad39[3];		// 39
-	uint32_t			displayTime;	// 3C
-};
-
-static_assert(sizeof(BGSMessage) == 0x40);
 
 // 44
 class BGSLightingTemplate : public TESForm {
