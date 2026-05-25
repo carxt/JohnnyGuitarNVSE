@@ -243,7 +243,7 @@ namespace JohnnyEvents {
 		ThisCall(0x8706B0, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
 	}
 
-	void __stdcall HandleAVChangeEvent(ActorValueOwner* apActor, uActorValue::Index32_t aeActorValue, float afPreviousValue, float afModValue, void* apChangeCallback) {
+	void __stdcall HandleAVChangeEvent(ActorValueOwner* apActor, ActorValue::Index aeActorValue, float afPreviousValue, float afModValue, void* apChangeCallback) {
 		if (apChangeCallback == nullptr)
 			afPreviousValue = apActor->GetActorValueF(aeActorValue) - afModValue;
 

@@ -136,62 +136,11 @@
     <ClCompile Include="internal\netimmerse.cpp">
       <Filter>internal</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSSpinLock.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\Conversation.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\GameSettingCollection.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\IOTask.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\Setting.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESDataHandler.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESFile.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESObject.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESObjectList.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESBoundObject.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
     <ClCompile Include="..\shared\Utils\DebugLog.cpp">
       <Filter>shared\Utils</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Gamebryo\NiObject.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\AILinearTaskThreadManager.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
     <ClCompile Include="functions\fn_av.cpp">
       <Filter>functions</Filter>
@@ -301,9 +250,6 @@
     <ClCompile Include="internal\JG\JohnnyFixes.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
     <ClCompile Include="events\EventFramework.cpp">
       <Filter>events</Filter>
     </ClCompile>
@@ -325,30 +271,6 @@
     <ClCompile Include="internal\JG\AddItemMessages.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\ItemChange.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\InventoryChanges.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\InventoryIterator.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\ContainerItemExtra.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BaseExtraList.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\ExtraDataList.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESFullName.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
     <ClCompile Include="internal\Game\Gamebryo\NiPoint2.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
@@ -361,167 +283,11 @@
     <ClCompile Include="internal\JG\TaskQueue.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSShaderManager.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESTexture.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSMessageIcon.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESScriptableForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESValueForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESHealthForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESWeightForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
     <ClCompile Include="internal\Game\Obsidian\TESAmmoEffect.cpp">
       <Filter>internal\Game\Obsidian</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESModelTextureSwap.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESImageSpaceModifiableForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESAttackDamageForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSClipRoundsForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSDestructibleObjectForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSPickupPutdownSounds.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSAmmoForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESAmmo.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSAcousticSpace.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSEncounterZone.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSRepairItemList.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSEquipType.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSOpenCloseForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSBipedModelList.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESContainer.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSTouchSpellForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESActorBaseData.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSDefaultObjectManager.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESSoundFile.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESRaceForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSAddonNode.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESAIForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\PackageList.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESGlobal.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSMusicType.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSPlaceableWater.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESHair.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESEyes.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BGSHeadPart.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
     <ClCompile Include="internal\Game\Obsidian\TESReputation.cpp">
       <Filter>internal\Game\Obsidian</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\ActorValue.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESBipedModelForm.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESLeveledList.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESModel.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESModelList.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESObjectARMO.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESObjectBOOK.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESObjectMISC.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESTextureListArray.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\ActorValueOwner.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BipedAnim.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESAttributes.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESObjectACTI.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESActorBase.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESSpellList.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESFaction.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\TESLeveledList.cpp">
       <Filter>internal\Game\Bethesda</Filter>
@@ -538,21 +304,6 @@
     <ClCompile Include="internal\JG\FixedStringsRework.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TLSData.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSPackedTaskQueue.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSSemaphore.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSPackedTask.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSNonReentrantSpinLock.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
     <ClCompile Include="internal\Game\Gamebryo\NiCullingProcess.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
@@ -568,23 +319,8 @@
     <ClCompile Include="internal\Game\Gamebryo\NiMatrix3.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSRenderedTexture.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSShaderUtil.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\ScrapHeap.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESMain.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
     <ClCompile Include="internal\JG\CameraOverlay.cpp">
       <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSCullingProcess.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Gamebryo\NiObjectNET.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
@@ -592,25 +328,289 @@
     <ClCompile Include="internal\JG\LandRemapping.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TESObjectLAND.cpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClCompile>
     <ClCompile Include="internal\Game\Gamebryo\NiColor.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Gamebryo\NiColorA.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\BSTimer.cpp">
+    <ClCompile Include="internal\Game\Bethesda\TESTexture.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\TimeGlobal.cpp">
+    <ClCompile Include="internal\Game\Bethesda\ActorValue.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ActorValueOwner.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\AILinearTaskThreadManager.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BaseExtraList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSAcousticSpace.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSAddonNode.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSAmmoForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSBipedModelList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSClipRoundsForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSDefaultObjectManager.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSDestructibleObjectForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSEncounterZone.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSEquipType.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSHeadPart.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSMessageIcon.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSMusicType.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSOpenCloseForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSPickupPutdownSounds.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSPlaceableWater.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSRepairItemList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSTouchSpellForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BipedAnim.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSCullingProcess.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSNonReentrantSpinLock.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSPackedTask.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSPackedTaskQueue.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSRenderedTexture.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSSemaphore.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSShaderManager.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSShaderUtil.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSSpinLock.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BSTextureManager.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSTimer.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ContainerItemExtra.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Conversation.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ExtraDataList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\GameSettingCollection.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\InventoryChanges.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\InventoryIterator.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\IOTask.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ItemChange.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\PackageList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ScrapHeap.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Setting.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESActorBase.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESActorBaseData.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESAIForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESAmmo.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESAttackDamageForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESAttributes.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESBipedModelForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESBoundObject.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESContainer.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESDataHandler.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESEyes.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESFaction.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESFile.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESFullName.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESGlobal.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESHair.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESHealthForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESImageSpaceModifiableForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESLeveledList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESMain.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESModel.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESModelList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESModelTextureSwap.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObject.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectACTI.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectARMO.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectBOOK.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectLAND.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectMISC.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESRaceForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESScriptableForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESSoundFile.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESSpellList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\TESTexture.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESTextureListArray.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESValueForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESWeightForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TimeGlobal.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TLSData.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
   </ItemGroup>
@@ -862,111 +862,6 @@
     <ClInclude Include="internal\Game\Gamebryo\NiTSet.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BaseFormComponent.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSSimpleArray.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSSimpleArrayRefCounted.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSSimpleList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSSpinLock.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSStringT.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSTask.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSTCaseInsensitiveStringMap.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSUtilities.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\Conversation.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\DialogueResponse.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\FileFinder.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\FormID.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\GameSettingCollection.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\INIPrefSettingCollection.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\INISettingCollection.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\IOTask.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\MemoryContexts.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\RendererSettingCollection.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\Setting.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\SettingCollection.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\SettingCollectionList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\SettingCollectionMap.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\SettingT.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESBoundAnimObject.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESDataHandler.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESFile.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESObject.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESObjectList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiTObjectSet.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
@@ -975,9 +870,6 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiTStringPointerMap.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESBoundObject.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="..\shared\Utils\DebugLog.hpp">
       <Filter>shared\Utils</Filter>
@@ -990,15 +882,6 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiRTTI.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESModel.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESTextureList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\AILinearTaskThreadManager.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\DialogueResponseOverride.hpp">
       <Filter>internal\JG</Filter>
@@ -1072,116 +955,11 @@
     <ClInclude Include="internal\JG\JohnnyFixes.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSRenderedTexture.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
     <ClInclude Include="internal\JG\AddItemMessages.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
     <ClInclude Include="functions\fn_event.h">
       <Filter>functions</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ItemChange.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\InventoryChanges.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\InventoryIterator.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ContainerObject.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ContainerItemExtra.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BaseExtraList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraDataList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraCellAcousticSpace.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraEncounterZone.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraRadius.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraPoison.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraPersistentCell.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraOwnership.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraPrimitive.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraHotkey.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraSeenData.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\SeenData.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraDetachTime.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\IntSeenData.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraFactionChanges.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraLeveledCreature.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraCombatStyle.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraMapMarker.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\MapMarkerData.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESFullName.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraActivateRef.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\RefActivateData.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\FactionRank.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\DismemberedLimb.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraDismemberedLimbs.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraContainerChanges.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraScript.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\AudioMarkerData.hpp">
       <Filter>internal\Game\Obsidian</Filter>
@@ -1204,119 +982,8 @@
     <ClInclude Include="internal\JG\TaskQueue.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSShaderManager.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESTexture.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESTexture1024.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESIcon.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSMessageIcon.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESScriptableForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESValueForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESEnchantableForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESHealthForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESWeightForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESModelRDT.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\TESAmmoEffect.hpp">
       <Filter>internal\Game\Obsidian</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESImageSpaceModifiableForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSTextureModel.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESModelTextureSwap.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESAttackDamageForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSClipRoundsForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSDestructibleObjectForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSPickupPutdownSounds.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSAmmoForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESAmmo.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSAcousticSpace.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSMenuIcon.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSVoiceType.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSEncounterZone.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSPreloadable.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESModelAnim.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSRepairItemList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSEquipType.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSOpenCloseForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSBipedModelList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESContainer.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSTouchSpellForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSRagdoll.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESCombatStyle.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESActorBaseData.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSDefaultObjectManager.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSCameraShot.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\BGSDehydrationStage.hpp">
       <Filter>internal\Game\Obsidian</Filter>
@@ -1327,86 +994,8 @@
     <ClInclude Include="internal\Game\Obsidian\BGSSleepDeprevationStage.hpp">
       <Filter>internal\Game\Obsidian</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSMusicType.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESSoundFile.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESRaceForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESGlobal.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSAddonNode.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESObjectANIO.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESAIForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\PackageList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESGrass.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSPlaceableWater.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESEyes.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESHair.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSHeadPart.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\TESReputation.hpp">
       <Filter>internal\Game\Obsidian</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ActorValue.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ActorValueInfo.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESBipedModelForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESDescription.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESLeveledList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESModelList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESObjectARMA.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESObjectARMO.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESObjectBOOK.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESObjectCLOT.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESObjectMISC.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESSkill.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESTextureListArray.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\TESCaravanCard.hpp">
       <Filter>internal\Game\Obsidian</Filter>
@@ -1417,62 +1006,11 @@
     <ClInclude Include="internal\Game\Obsidian\TESCaravanMoney.hpp">
       <Filter>internal\Game\Obsidian</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ActorValueOwner.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BipedAnim.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\CachedValuesOwner.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESAnimation.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESAttributes.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESKey.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESLevCharacter.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESLevCreature.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESObjectACTI.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESObjectSTAT.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESPackageData.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESReactionForm.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\TESCasino.hpp">
       <Filter>internal\Game\Obsidian</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\TESChallenge.hpp">
       <Filter>internal\Game\Obsidian</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESLandTexture.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESActorBase.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESSpellList.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESClass.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESFaction.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiParticles.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
@@ -1501,9 +1039,6 @@
     <ClInclude Include="internal\Game\Bethesda\TESLeveledList.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESLevItem.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
     <ClInclude Include="events\JohnnyMessageData.hpp">
       <Filter>events</Filter>
     </ClInclude>
@@ -1522,53 +1057,8 @@
     <ClInclude Include="internal\JG\FixedStringsRework.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TLSData.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraItemDropper.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ExtraWeaponModFlags.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
     <ClInclude Include="internal\JG\CameraOverlay.hpp">
       <Filter>internal\JG</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSShaderUtil.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESMain.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\ScrapHeap.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSPackedTaskQueue.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSSemaphore.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSPackedTask.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSTCommonLLMessageQueue.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSTCommonMessageQueue.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSTCommonScrapHeapMessageQueue.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSScrapHeapQueueElem.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSNonReentrantSpinLock.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSTMessageQueue.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiCullingProcess.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
@@ -1585,17 +1075,11 @@
     <ClInclude Include="internal\Game\Gamebryo\NiVisibleArray.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\NiUpdateData.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiTransform.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiMatrix3.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiAccumulator.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
@@ -1612,35 +1096,11 @@
     <ClInclude Include="internal\JG\LandRemapping.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESChildCell.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESObjectLAND.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiColor.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiColorA.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\QueuedFile.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\QueuedChildren.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\FixedStrings.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSTimer.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TimeGlobal.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BSTextureManager.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\TESIcon.hpp">
       <Filter>internal\Game\Bethesda</Filter>
@@ -1649,6 +1109,546 @@
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\TESTexture1024.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ActorValue.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ActorValueInfo.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ActorValueOwner.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\AILinearTaskThreadManager.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BaseExtraList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BaseFormComponent.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSAcousticSpace.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSAddonNode.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSAmmoForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSBipedModelList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSCameraShot.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSClipRoundsForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSDefaultObjectManager.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSDestructibleObjectForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSEncounterZone.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSEquipType.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSHeadPart.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSMenuIcon.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSMessageIcon.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSMusicType.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSOpenCloseForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSPickupPutdownSounds.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSPlaceableWater.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSPreloadable.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSRagdoll.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSRepairItemList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSTextureModel.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSTouchSpellForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSVoiceType.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BipedAnim.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSNonReentrantSpinLock.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSPackedTask.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSPackedTaskQueue.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSRenderedTexture.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSScrapHeapQueueElem.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSSemaphore.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSShaderManager.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSShaderUtil.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSSimpleArray.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSSimpleArrayRefCounted.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSSimpleList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSSpinLock.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSStringT.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSTask.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSTCaseInsensitiveStringMap.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSTCommonLLMessageQueue.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSTCommonMessageQueue.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSTCommonScrapHeapMessageQueue.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSTextureManager.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSTimer.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSTMessageQueue.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSUtilities.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\CachedValuesOwner.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ContainerItemExtra.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ContainerObject.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Conversation.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\DialogueResponse.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\DismemberedLimb.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraActivateRef.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraCellAcousticSpace.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraCombatStyle.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraContainerChanges.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraDataList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraDetachTime.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraDismemberedLimbs.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraEncounterZone.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraFactionChanges.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraHotkey.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraItemDropper.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraLeveledCreature.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraMapMarker.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraOwnership.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraPersistentCell.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraPoison.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraPrimitive.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraRadius.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraScript.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraSeenData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraWeaponModFlags.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\FactionRank.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\FileFinder.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\FixedStrings.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\FormID.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\GameSettingCollection.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\INIPrefSettingCollection.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\INISettingCollection.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\IntSeenData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\InventoryChanges.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\InventoryIterator.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\IOTask.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ItemChange.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MapMarkerData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MemoryContexts.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\NiUpdateData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\PackageList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\QueuedChildren.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\QueuedFile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\RefActivateData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\RendererSettingCollection.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ScrapHeap.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\SeenData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Setting.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\SettingCollection.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\SettingCollectionList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\SettingCollectionMap.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\SettingT.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESActorBase.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESActorBaseData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESAIForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESAmmo.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESAnimation.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESAttackDamageForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESAttributes.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESBipedModelForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESBoundAnimObject.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESBoundObject.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESChildCell.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESClass.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESCombatStyle.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESContainer.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESDataHandler.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESDescription.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESEnchantableForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESEyes.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESFaction.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESFile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESFullName.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESGlobal.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESGrass.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESHair.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESHealthForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESIcon.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESImageSpaceModifiableForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESKey.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESLandTexture.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESLevCharacter.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESLevCreature.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESLeveledList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESLevItem.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESMain.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESModel.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESModelAnim.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESModelList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESModelRDT.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESModelTextureSwap.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObject.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectACTI.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectANIO.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectARMA.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectARMO.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectBOOK.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectCLOT.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectLAND.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectMISC.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectSTAT.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESPackageData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESRaceForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESReactionForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESScriptableForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESSkill.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESSoundFile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESSpellList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESTexture.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESTexture1024.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESTextureList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESTextureListArray.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESValueForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESWeightForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TimeGlobal.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TLSData.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1678,6 +1678,15 @@
     <None Include="internal\Game\Gamebryo\NiTArray.inl">
       <Filter>internal\Game\Gamebryo</Filter>
     </None>
+    <None Include="internal\Game\Gamebryo\NiPoint2.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiPoint3.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiPoint4.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
     <None Include="internal\Game\Bethesda\BSSimpleArray.inl">
       <Filter>internal\Game\Bethesda</Filter>
     </None>
@@ -1690,22 +1699,13 @@
     <None Include="internal\Game\Bethesda\BSTask.inl">
       <Filter>internal\Game\Bethesda</Filter>
     </None>
-    <None Include="internal\Game\Bethesda\SettingT.inl">
-      <Filter>internal\Game\Bethesda</Filter>
-    </None>
-    <None Include="internal\Game\Gamebryo\NiPoint2.inl">
-      <Filter>internal\Game\Gamebryo</Filter>
-    </None>
-    <None Include="internal\Game\Gamebryo\NiPoint3.inl">
-      <Filter>internal\Game\Gamebryo</Filter>
-    </None>
-    <None Include="internal\Game\Gamebryo\NiPoint4.inl">
-      <Filter>internal\Game\Gamebryo</Filter>
-    </None>
     <None Include="internal\Game\Bethesda\BSTCommonLLMessageQueue.inl">
       <Filter>internal\Game\Bethesda</Filter>
     </None>
     <None Include="internal\Game\Bethesda\BSTCommonMessageQueue.inl">
+      <Filter>internal\Game\Bethesda</Filter>
+    </None>
+    <None Include="internal\Game\Bethesda\SettingT.inl">
       <Filter>internal\Game\Bethesda</Filter>
     </None>
   </ItemGroup>

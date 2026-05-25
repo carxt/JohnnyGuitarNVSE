@@ -200,7 +200,7 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &bFemale, &pForm) && pForm) {
 		TESBipedModelForm* pBipedModel = DYNAMIC_CAST(pForm, TESForm, TESBipedModelForm);
 		if (pBipedModel) {
-			pBipedModel->icon[bFemale].SetTextureName(cPath);
+			pBipedModel->kIcons[bFemale].SetTextureName(cPath);
 			*result = 1;
 		}
 	}
