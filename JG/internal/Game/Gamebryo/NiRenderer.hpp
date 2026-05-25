@@ -13,6 +13,7 @@ class NiRenderTargetGroup;
 class NiFrustum;
 class NiAccumulator;
 class NiCamera;
+class NiPoint3;
 
 class NiRenderer : public NiObject {
 public:

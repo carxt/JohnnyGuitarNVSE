@@ -18,7 +18,7 @@ void NiRenderer::SetSorter(NiAccumulator* apAccumulator) {
 
 // GAME - 0x4A0E50
 bool NiRenderer::GetInsideFrameState() const {
-	return ThisCall<bool>(this, 0x4A0E50);
+	return ThisCall<bool>(0x4A0E50, this);
 }
 
 // GAME - 0x4A0370
