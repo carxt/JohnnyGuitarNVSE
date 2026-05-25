@@ -55,6 +55,18 @@ public:
 	NIRTTI_ADDRESS(0x11F4758);
 
 	static NiRenderer* GetRenderer();
+
+	NiAccumulator* GetSorter() const;
+	void SetSorter(NiAccumulator* apAccumulator);
+
+	bool GetInsideFrameState() const;
+
+	void LockRenderer();
+	void UnlockRenderer();
+
+	void SetCameraData(const NiCamera* apCamera);
+
+	void SetCameraData(const NiPoint3& arWorldLoc, const NiPoint3& arWorldDir, const NiPoint3& arWorldUp, const NiPoint3& arWorldRight, const NiFrustum& arFrustum, const NiRect<float>& arPort);
 };
 
 ASSERT_SIZE(NiRenderer, 0x280)
