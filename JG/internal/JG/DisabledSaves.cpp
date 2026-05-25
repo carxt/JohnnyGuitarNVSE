@@ -67,7 +67,7 @@ namespace DisabledSaves {
 	}
 
 	void Toggle(uint8_t aucMod, bool abToggle, uint32_t auiTypeFlags) {
-		if (auiTypeFlags)
+		if (abToggle)
 			kSaveBlockers.insert({ aucMod, auiTypeFlags });
 		else
 			kSaveBlockers.erase(aucMod);
