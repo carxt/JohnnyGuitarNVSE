@@ -2,7 +2,7 @@
 
 #include "NiMemObject.hpp"
 
-#if !JIP_CHANGES
+#if !USE_MODDED_CHANGES
 #include "NiTArray.hpp"
 #include "NiCriticalSection.hpp"
 #endif
@@ -14,7 +14,7 @@ class SPEC_EMPTY_BASES NiGlobalStringTable : public NiMemObject {
 public:
 	typedef char* GlobalStringHandle;
 
-#if !JIP_CHANGES
+#if !USE_MODDED_CHANGES
 	NiTPrimitiveArray<GlobalStringHandle>	m_kHashArray[512];
 	NiCriticalSection						m_kCriticalSection;
 #endif
@@ -37,6 +37,6 @@ public:
 	static char* GetRealBufferStart(const GlobalStringHandle& arHandle) noexcept;
 };
 
-#if !JIP_CHANGES
+#if !USE_MODDED_CHANGES
 ASSERT_SIZE(NiGlobalStringTable, 0x2100);
 #endif

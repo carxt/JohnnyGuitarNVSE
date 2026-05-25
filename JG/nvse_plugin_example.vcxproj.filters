@@ -661,6 +661,9 @@
     <ClCompile Include="internal\Game\Bethesda\TESLoadScreen.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSSoundHandle.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1821,6 +1824,15 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\TESLoadScreenType.hpp">
       <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSSoundInfo.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSDebugSoundInfo.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSSoundHandle.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

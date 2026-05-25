@@ -13,7 +13,7 @@
 #include <string>
 #include <cassert>
 
-#define JIP_CHANGES 1
+#define USE_MODDED_CHANGES 1
 
 constexpr inline auto our_snprintf	= snprintf;
 constexpr inline auto our_sprintf	= sprintf;

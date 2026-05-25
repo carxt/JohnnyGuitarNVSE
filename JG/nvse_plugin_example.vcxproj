@@ -196,6 +196,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BSShaderManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSShaderProperty.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSShaderUtil.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSSoundHandle.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSSpinLock.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSTextureManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSTimer.cpp" />
@@ -419,6 +420,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSVoiceType.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BipedAnim.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSDebugSoundInfo.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp" />
@@ -434,6 +436,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSSimpleArray.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleArrayRefCounted.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleList.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSSoundHandle.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSSoundInfo.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSpinLock.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSStringT.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSTask.hpp" />

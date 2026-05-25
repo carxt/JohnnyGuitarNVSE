@@ -177,7 +177,7 @@ public:
 	using FormFlags = _FormFlags::Flags;
 
 	uint8_t					eFormType;
-#if JIP_CHANGES
+#if USE_MODDED_CHANGES
 	Bitfield8				ucJIPFormFlags5;
 	Bitfield16				usJIPFormFlags6;
 #endif

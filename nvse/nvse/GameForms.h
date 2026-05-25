@@ -705,7 +705,7 @@ public:
 	uint32_t				speechChallenge;	// 44
 	TESQuest*			quest;				// 48
 	uint32_t				modInfoFileOffset;	// 4C	during LoadForm
-#if JIP_CHANGES
+#if USE_MODDED_CHANGES
 	TESTopic*				pParentTopic;
 #endif
 

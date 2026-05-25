@@ -2,100 +2,13 @@
 #include "GameTypes.h"
 #include "GameObjects.h"
 
+#include "Bethesda/BSSoundInfo.hpp"
+#include "Bethesda/BSSoundHandle.hpp"
+
 class NiAVObject;
 class TESSound;
 class NiNode;
 class BSAudioManagerThread;
-
-// 254
-class BSSoundInfo {
-public:
-	struct Data {
-		const char* dword0;
-		char		cPath04[260];
-		const char* pFilePath;
-		char		cFilePath[260];
-		float		float210;
-		float		float214;
-		NiPoint3	kPosition;
-		DWORD		dword224;
-		float		float228;
-		float		float22C;
-		uint32_t		uiStaticAttenuation;
-		uint32_t		uiDistanceAttenuation;
-		uint32_t		uiFaderAttenuation;
-	};
-
-
-	uint32_t		uiID;
-	float		fFrequency;
-	float		fVolume;
-	uint32_t		uiAudioFlags;
-	uint32_t		uiDuration;
-	bool		bIsPlaying;
-	Data		kData;
-};
-static_assert(sizeof(BSSoundInfo) == 0x254);
-
-
-class BSSoundHandle {
-public:
-	uint32_t	uiSoundID;
-	bool	bAssumeSuccess;
-	uint32_t	uiState;
-
-	BSSoundHandle() : uiSoundID(-1), bAssumeSuccess(false), uiState(0) {}
-	~BSSoundHandle() {}
-
-	BSSoundHandle operator=(const BSSoundHandle& arHandle) {
-		uiSoundID = arHandle.uiSoundID;
-		bAssumeSuccess = arHandle.bAssumeSuccess;
-		uiState = arHandle.uiState;
-		return *this;
-	}
-
-	BSSoundHandle operator=(const BSSoundHandle* apHandle) {
-		uiSoundID = apHandle->uiSoundID;
-		bAssumeSuccess = apHandle->bAssumeSuccess;
-		uiState = apHandle->uiState;
-		return *this;
-	}
-
-	bool IsPlaying() const {
-		return ThisCall<bool>(0xAD8930, this);
-	}
-
-	bool Play(bool abUnk) {
-		return ThisCall<bool>(0xAD8830, this, abUnk);
-	}
-
-	bool FadeInPlay(uint32_t auiMilliseconds) {
-		return ThisCall<bool>(0xAD8D60, this, auiMilliseconds);
-	}
-
-	bool Stop() {
-		return ThisCall<bool>(0xAD88F0, this);
-	}
-
-	bool FadeOutAndRelease(uint32_t auiMilliseconds) {
-		return ThisCall<bool>(0xAD8DA0, this, auiMilliseconds);
-	}
-
-	bool SetPosition(NiPoint3 akPosition) {
-		return ThisCall<bool>(0xAD8B60, this, akPosition);
-	}
-
-	void SetObjectToFollow(NiAVObject* apObject) {
-		ThisCall(0xAD8F20, this, apObject);
-	}
-
-	bool SetVolume(float afVolume) {
-		return ThisCall<bool>(0xAD89E0, this, afVolume);
-	}
-};
-
-static_assert(sizeof(BSSoundHandle) == 0xC);
-
 
 // 230
 class BSGameSound {

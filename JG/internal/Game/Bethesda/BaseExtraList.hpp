@@ -8,7 +8,7 @@ public:
 	virtual ~BaseExtraList();
 
 	BSExtraData*	pHead;
-#if !JIP_CHANGES
+#if !USE_MODDED_CHANGES
 	Bitfield8		ucPresenceBitfield[21];
 #else
 	Bitfield8		ucPresenceBitfield[19];
