@@ -11,9 +11,12 @@ class TESGlobal;
 class TESForm;
 
 struct LeveledObject {
+	LeveledObject();
+	~LeveledObject();
+
 	TESForm*			pForm;
-	int16_t				usCount;
-	int16_t				usLevel;
+	uint16_t			usCount;
+	uint16_t			usLevel;
 	ContainerItemExtra* pItemExtra;
 };
 
@@ -44,6 +47,11 @@ public:
 	Bitfield<_LeveledListFlags>		ucFlags;
 	TESGlobal*						pChanceGlobal;
 	BSSimpleList<LeveledObject*>	kScriptAddedObjects;
+
+	const BSSimpleList<LeveledObject*>* GetLeveledList() const;
+	BSSimpleList<LeveledObject*>* GetLeveledList();
+
+	LeveledObject* AddLeveledObject(uint16_t ausLevel, uint16_t ausCount, TESForm* apForm, ContainerItemExtra* apExtra);
 
 	bool GetCalcAllBelow() const;
 	bool GetUseAll() const;

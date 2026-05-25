@@ -1076,3 +1076,39 @@ static ParamInfo kParamsCallPerMobileObjectEx[] =
 	{ "Process Level", kNVSEParamType_Number , 0 },
 	{ "Type Filter Array", kNVSEParamType_Array , 0 },
 };
+
+static ParamInfo kParams_OneArray[] =
+{
+
+	{	"array",	kNVSEParamType_Array,	0	}
+};
+
+static ParamInfo kParams_SetNiPSysModifierValue[] =
+{
+	{ "Block Name", kParamType_String, 0 },
+	{ "Item", kParamType_Integer, 0 },
+	{ "Value", kParamType_Float, 0 },
+	{ "First Person", kParamType_Integer, 1 },
+};
+
+static ParamInfo kParams_GetNiPSysModifierValue[] =
+{
+	{ "Block Name", kParamType_String, 0 },
+	{ "Item", kParamType_Integer, 0 },
+	{ "First Person", kParamType_Integer, 1 },
+};
+
+static ParamInfo kParams_SetParticleEmitterSpawnRate[] =
+{
+	{ "Block Name", kParamType_String, 0 },
+	{ "Value", kParamType_Float, 0 },
+	{ "First Person", kParamType_Integer, 1 },
+};
+
+static ParamInfo kParamsRemapLand[] =
+{
+	{ "Target Land FormID", kParamType_Integer , 0 },
+	{ "Source WorldSpace", kParamType_WorldSpace, 1 },
+	{ "Source Cell X", kParamType_Integer, 1 },
+	{ "Source Cell Y", kParamType_Integer, 1 },
+};

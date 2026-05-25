@@ -41,10 +41,10 @@ namespace CameraOverride {
 						kPos = pTrackRef->GetPos();
 					}
 
-					pCamera->m_parent = nullptr;
+					pCamera->m_pkParent = nullptr;
 					pCamera->LookAtWorldPoint(kPos, NiPoint3(0, 0, 1));
-					pCamera->m_parent = apThis;
-					apThis->SetLocalRotate(pCamera->m_local.rotate);
+					pCamera->m_pkParent = apThis;
+					apThis->SetLocalRotate(pCamera->m_kLocal.m_kRotate);
 					pCamera->SetLocalRotate(NiMatrix3::IDENTITY);
 				}
 			}

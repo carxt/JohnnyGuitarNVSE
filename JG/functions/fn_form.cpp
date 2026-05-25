@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include "JG/JGSetList.hpp"
 #include <JG/BarterFilter.hpp>
+#include <JG/JohnnyExtraData.hpp>
 #include <GameData.h>
 #include <GameRTTI.h>
 #include "decoding.h"
@@ -17,7 +18,9 @@
 #include <numbers>
 #include <Bethesda/AILinearTaskThreadManager.hpp>
 #include <JG/TaskQueue.hpp>
+#include <JG/LandRemapping.hpp>
 #include <Bethesda/BSShaderManager.hpp>
+#include <Bethesda/TESMain.hpp>
 
 extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, uint8_t numArgs, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
@@ -427,7 +430,7 @@ bool Cmd_GetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
 
 BGSEncounterZone* GetEncounterZone(ExtraDataList* list) {
 	ExtraEncounterZone* xZone = list->GetExtraData<ExtraEncounterZone>();
-	if (xZone && xZone->pZone) 
+	if (xZone && xZone->pZone)
 		return xZone->pZone;
 	return nullptr;
 }
@@ -444,7 +447,7 @@ bool Cmd_SetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	if (!world || !IS_TYPE(world, TESWorldSpace))
 		return true;
 	if (!zone || IS_TYPE(zone, BGSEncounterZone)) {
-		world->encounterZone = zone;
+		world->pEncounterZone = zone;
 		*result = 1;
 	}
 	return true;
@@ -454,8 +457,9 @@ bool Cmd_GetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESWorldSpace* world = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &world) && world && IS_TYPE(world, TESWorldSpace)) {
-		BGSEncounterZone* zone = world->encounterZone;
-		if (zone) *(uint32_t*)result = zone->GetFormID();
+		BGSEncounterZone* zone = world->pEncounterZone;
+		if (zone) 
+			*(uint32_t*)result = zone->GetFormID();
 	}
 	return true;
 }
@@ -800,19 +804,19 @@ bool Cmd_ClearArmorAltTexture_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESEffectShader* shader;
-	uint32_t traitID;
-	char newPath[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID, &newPath) && shader && IS_TYPE(shader, TESEffectShader) && traitID >= 0 && traitID <= 2) {
-		switch (traitID) {
+	TESEffectShader* pShader = nullptr;
+	uint32_t uiTexture;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &uiTexture, &cPath) && pShader && IS_TYPE(pShader, TESEffectShader) && uiTexture >= 0 && uiTexture <= 2) {
+		switch (uiTexture) {
 		case 0:
-			shader->fillTexture.SetTextureName(newPath);
+			pShader->fillTexture.SetTextureName(cPath);
 			break;
 		case 1:
-			shader->particleShaderTexture.SetTextureName(newPath);
+			pShader->particleShaderTexture.SetTextureName(cPath);
 			break;
 		case 2:
-			shader->holesTexture.SetTextureName(newPath);
+			pShader->holesTexture.SetTextureName(cPath);
 			break;
 		}
 		*result = 1;
@@ -822,22 +826,22 @@ bool Cmd_SetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESEffectShader* shader;
-	uint32_t traitID;
-	const char* resStr = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID) && shader && IS_TYPE(shader, TESEffectShader) && traitID >= 0 && traitID <= 2) {
-		switch (traitID) {
+	TESEffectShader* pShader = nullptr;
+	uint32_t uiTexture;
+	const char* pPath = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &uiTexture) && pShader && IS_TYPE(pShader, TESEffectShader) && uiTexture >= 0 && uiTexture <= 2) {
+		switch (uiTexture) {
 		case 0:
-			resStr = shader->fillTexture.GetTextureName();
+			pPath = pShader->fillTexture.GetTextureName();
 			break;
 		case 1:
-			resStr = shader->particleShaderTexture.GetTextureName();
+			pPath = pShader->particleShaderTexture.GetTextureName();
 			break;
 		case 2:
-			resStr = shader->holesTexture.GetTextureName();
+			pPath = pShader->holesTexture.GetTextureName();
 			break;
 		}
-		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
 	}
 	return true;
 }
@@ -1503,7 +1507,7 @@ bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	TESObjectARMO* armor = nullptr;
 	uint32_t isFemale;
 	uint32_t flagID;
-	bool bEnable;
+	BOOL bEnable;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &armor, &flagID, &isFemale, &bEnable) && armor && IS_TYPE(armor, TESObjectARMO) && flagID <= 3) {
 		armor->kBipedModels[isFemale].ucFlags.SetBit(flagID, bEnable);
@@ -1739,7 +1743,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	TESForm* ammo = nullptr;
 	if (!extendPtr && weaponInfo && (weaponInfo->pObject == weapon) && midHiProc->ammoInfo)
 		ammo = midHiProc->ammoInfo->pObject;
-	if (!ammo) 
+	if (!ammo)
 		ammo = weapon->GetAmmo();
 	midHiProc->weaponInfo = nullptr;
 	*result = GetWeaponDPS(&(PlayerCharacter::GetSingleton()->avOwner), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
@@ -1941,7 +1945,7 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 
-	if (!thisObj) 
+	if (!thisObj)
 		return true;
 
 	InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
@@ -2265,7 +2269,7 @@ namespace RefWalker {
 		uint32_t uiCount = 0;
 		TESObjectREFR* pCaller = arFilter.pCaller;
 		ProcessLists* pPL = ProcessLists::GetSingleton();
-		
+
 		const uint32_t uiBegin = pPL->beginOffsets[aeProcessLevel];
 		const uint32_t uiEnd = pPL->endOffsets[aeProcessLevel];
 
@@ -2502,7 +2506,7 @@ enum UPDATE3D_FLAGS_EX {
 	UPDATE_POS		= 1u << 6,
 };
 
-void RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
+static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
 	if (auiFlags & UPDATE_MODEL) {
 		apReference->Update3D();
 		ThisCall(0x456520, *reinterpret_cast<DWORD**>(0x1202D98));
@@ -2513,61 +2517,146 @@ void RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
 	}
 
 	if (auiFlags & UPDATE_SCALE)
-		apReference->SetScale(apReference->GetScale());
+		apReference->SetScale(apReference->GetRawScale());
 
 	if (auiFlags & UPDATE_LIGHTS) {
 		ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(BSShaderManager::SceneGraphType::WORLD);
 		pSSN->UpdateObjectLighting(apReference->Get3DSimple(), false);
 	}
+
+	if (auiFlags & UPDATE_POS) {
+		apReference->Update3DPosition();
+	}
+}
+
+static void __fastcall RequestModelUpdate(TESObjectREFR* apReference, uint32_t auiFlags, bool abQueue) {
+	if (abQueue) {
+		JohnnyExtraData* pExtraData = JohnnyExtraData::GetOrCreate(apReference);
+		pExtraData->IncRefCount();
+
+		QueuedTask kTask;
+		kTask.kItems[0].p = pExtraData;
+		kTask.kItems[1].ui = auiFlags;
+		kTask.pFunction = QUEUED_TASK{
+			JohnnyExtraData* pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
+			TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pData->pOwner);
+			if (pRef) {
+				uint32_t uiFlags = arTask.kItems[1].ui;
+				RefreshReferenceModel(pRef, uiFlags);
+			}
+			pData->DecRefCount();
+		};
+		TaskQueue::QueueTask(kTask);
+	}
+	else {
+		RefreshReferenceModel(apReference, auiFlags);
+	}
 }
 
 bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
+	constexpr uint32_t uiAddedFlags = UPDATE_LIGHTS | UPDATE_POS;
+
+	*result = 0;
 	uint32_t uiFlags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags) && uiFlags) {
-		bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
-		if (thisObj->IsMobileObject()) {
-			MobileObject* pObj = static_cast<MobileObject*>(thisObj);
-			if (pObj->baseProcess) {
-				pObj->baseProcess->Set3DUpdateFlag(uiFlags);
+		if (!thisObj->Get3DSimple() || thisObj->IsStillLoading())
+			return true;
 
-				if (uiFlags & UPDATE_LIGHTS) {
-					ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(BSShaderManager::SceneGraphType::WORLD);
-					pSSN->UpdateObjectLighting(pObj->Get3DSimple(), false);
+		const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
+		if (thisObj->IsActor()) {
+			Actor* pActor = static_cast<Actor*>(thisObj);
+			if (pActor->baseProcess) {
+				// Creatures can't refresh their models in vanilla, so we have to handle them ourselves.
+				if (pActor->IsCreature()) {
+					RequestModelUpdate(thisObj, uiFlags, bQueue);
+				}
+				else {
+					pActor->baseProcess->Set3DUpdateFlag(uiFlags);
+					if (!bQueue)
+						pActor->baseProcess->Update3DModel(pActor);
+
+
+					const uint32_t uiCustomFlags = uiFlags & uiAddedFlags;
+					if (uiCustomFlags)
+						RequestModelUpdate(thisObj, uiCustomFlags, bQueue);
 				}
 			}
 		}
 		else {
-			if (bQueue) {
-				QueuedTask kTask;
-				kTask.kItems[0].p = thisObj;
-				kTask.kItems[1].ui = uiFlags;
-				kTask.pFunction = QUEUED_TASK{
-					TESObjectREFR * pRef = reinterpret_cast<TESObjectREFR*>(arTask.kItems[0].p);
-					uint32_t uiFlags = arTask.kItems[1].ui;
-					RefreshReferenceModel(pRef, uiFlags);
-				};
-				TaskQueue::QueueTask(kTask);
+			RequestModelUpdate(thisObj, uiFlags, bQueue);
+		}
+
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetRecipeCategoryFlags_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESRecipeCategory* category = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &category) && category && IS_TYPE(category, TESRecipeCategory)) {
+		*result = category->flags;
+		if (IsConsoleMode()) Console_Print("GetRecipeCategoryFlags >> %.f", *result);
+	}
+	return true;
+}
+
+bool Cmd_RemapLand_Execute(COMMAND_ARGS) {
+	*result = 0;
+	uint32_t uiLandID = 0;
+	TESWorldSpace* pWorld = nullptr;
+	int32_t iGridX = INT32_MAX, iGridY = INT32_MAX;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiLandID, &pWorld, &iGridX, &iGridY)) {
+		bool bValidCoord;
+		if (pWorld) {
+			const int32_t iWorldMinX = int32_t(pWorld->kMinCoords.x) >> 12;
+			const int32_t iWorldMinY = int32_t(pWorld->kMinCoords.y) >> 12;
+
+			const int32_t iWorldMaxX = int32_t(pWorld->kMaxCoords.x) >> 12;
+			const int32_t iWorldMaxY = int32_t(pWorld->kMaxCoords.y) >> 12;
+			bValidCoord = iGridX <= iWorldMaxX && iGridY <= iWorldMaxY && iGridX >= iWorldMinX && iGridY >= iWorldMinY;
+		}
+		else {
+			constexpr int32_t iMax =  32767;
+			constexpr int32_t iMin = -32768;
+			bValidCoord = iGridX <= iMax && iGridY <= iMax && iGridX >= iMin && iGridY >= iMin;
+		}
+
+		if (pWorld && !bValidCoord) {
+			if (IsConsoleMode())
+				Console_Print("RemapLand >> You must provide valid cell coordinates");
+			return true;
+		}
+
+		TESForm* pFoundForm = TESForm::GetFormByNumericID(uiLandID);
+		bool bFoundLand = false;
+		if (pFoundForm) {
+			if (pFoundForm->GetFormType() == FORM_TYPE::TESObjectLAND) {
+				bFoundLand = true;
 			}
 			else {
-				RefreshReferenceModel(thisObj, uiFlags);
+				if (IsConsoleMode())
+					Console_Print("RemapLand >> Found form is not to a TESObjectLAND!");
+				return true;
 			}
 		}
 
-		if (uiFlags & UPDATE_POS) {
-			if (bQueue) {
+		LandRemapping::RemapLand(uiLandID, pWorld, iGridX, iGridY);
+
+		if (bFoundLand) {
+			TESObjectLAND* pLand = static_cast<TESObjectLAND*>(pFoundForm);
+			if (pLand->IsLoaded()) {
 				QueuedTask kTask;
-				kTask.kItems[0].p = thisObj;
+				kTask.kItems[0].ui = uiLandID;
 				kTask.pFunction = QUEUED_TASK{
-					TESObjectREFR * pRef = reinterpret_cast<TESObjectREFR*>(arTask.kItems[0].p);
-					pRef->Update3DPosition();
+					TESObjectLAND * pLand = static_cast<TESObjectLAND*>(TESForm::GetFormByNumericID(arTask.kItems[0].ui));
+					if (pLand)
+						LandRemapping::ReloadModel(pLand, true);
 				};
 				TaskQueue::QueueTask(kTask);
 			}
-			else {
-				thisObj->Update3DPosition();
-			}
 		}
-
+		
 		*result = 1;
 	}
 	return true;

@@ -1,9 +1,9 @@
 #pragma once
 
 namespace BSScrapMemory {
-	extern [[nodiscard]] __declspec(allocator) __declspec(restrict) void* malloc(std::size_t size);
-	extern [[nodiscard]] __declspec(allocator) __declspec(restrict) void* calloc(std::size_t size);
-	extern [[nodiscard]] __declspec(allocator) __declspec(restrict) void* aligned_alloc(size_t alignment, std::size_t size);
+	[[nodiscard]] extern __declspec(allocator) __declspec(restrict) void* malloc(std::size_t size);
+	[[nodiscard]] extern __declspec(allocator) __declspec(restrict) void* calloc(std::size_t size);
+	[[nodiscard]] extern __declspec(allocator) __declspec(restrict) void* aligned_alloc(size_t alignment, std::size_t size);
 
 	extern __declspec(noalias) void	aligned_free(void* ptr);
 

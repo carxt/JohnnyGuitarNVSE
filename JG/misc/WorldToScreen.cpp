@@ -64,7 +64,7 @@ bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, f
 		}
 		return false;
 	}
-	fBz = NiNodeComputeDistance(&(((NiAVObject*)cam)->m_world.translate), (NiPoint3*)kPt);
+	fBz = NiNodeComputeDistance(&(((NiAVObject*)cam)->m_kWorld.m_kTranslate), kPt);
 }
 
 //NiPoint3* NiPointBuffer = NULL;

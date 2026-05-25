@@ -53,7 +53,7 @@ bool Cmd_PlayHolotape_Execute(COMMAND_ARGS)
 	*result = 0;
 	BGSNote* note = nullptr;
 	int playStartStopSound = 1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &playStartStopSound) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice || note->type == BGSNote::kSound)
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &playStartStopSound) && note && IS_TYPE(note, BGSNote) && (note->type == BGSNote::kVoice || note->type == BGSNote::kSound))
 	{
 		MapMenu* mapMenu = MapMenu::GetSingleton();
 		mapMenu->PlayHolotape(note, playStartStopSound > 0);
@@ -121,31 +121,26 @@ bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_GetCasinoDeckTexture_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetCasinoDeckTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESCasino* casino = nullptr;
-	int32_t deckIndex;
-	const char* resStr = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex) && casino && IS_TYPE(casino, TESCasino) && deckIndex >= 0 && deckIndex <= 3)
-	{
-		resStr = casino->kBlackjackDeck[deckIndex].GetTextureName();
+	TESCasino* pCasino = nullptr;
+	uint32_t uiDeck = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &uiDeck) && pCasino && IS_TYPE(pCasino, TESCasino) && uiDeck >= 0 && uiDeck <= 3) {
+		const char* pPath = pCasino->kBlackjackDeck[uiDeck].GetTextureName();
 		if (IsConsoleMode())
-			Console_Print("GetCasinoDeckTexture >> %s", resStr);
-		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
+			Console_Print("GetCasinoDeckTexture >> %s", pPath);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
 	}
 	return true;
 }
 
-bool Cmd_SetCasinoDeckTexture_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetCasinoDeckTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESCasino* casino = nullptr;
-	int32_t deckIndex;
-	char newPath[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &deckIndex, &newPath) && casino && IS_TYPE(casino, TESCasino) && newPath && deckIndex >= 0 && deckIndex <= 3)
-	{
-		casino->kBlackjackDeck[deckIndex].SetTextureName(newPath);
+	TESCasino* pCasino = nullptr;
+	uint32_t uiDeck;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &uiDeck, &cPath) && pCasino && IS_TYPE(pCasino, TESCasino) && cPath[0] && uiDeck >= 0 && uiDeck <= 3) {
+		pCasino->kBlackjackDeck[uiDeck].SetTextureName(cPath);
 		*result = 1;
 	}
 	return true;
@@ -710,8 +705,8 @@ bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	COORD_DATA coordData;
 	TESObjectLAND* landscape = ThisCall<TESObjectLAND*>(0x546FB0, cell); // TESObjectCELL::GetLand
 	if (!landscape) return true;
-	ThisCall(0x53B550, landscape, &coordData, pos, 1); // TESObjectLAND::GetCoordData
-	TESLandTexture* txt = ThisCall<TESLandTexture*>(0x53A630, landscape, coordData.iBlock, coordData.iVertidx); // TESObjectLAND::GetMainTexture
+	landscape->GetCoordData(coordData, pos, 1);
+	TESLandTexture* txt = ThisCall<TESLandTexture*>(0x53A630, landscape, coordData.iBlock, coordData.iVertIdx); // TESObjectLAND::GetMainTexture
 	if (txt) *(uint32_t*)result = txt->GetFormID();
 	return true;
 }
@@ -774,7 +769,7 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 
 TESWorldSpace* GetWorldspace(TESObjectREFR* ref) {
 	TESObjectCELL* cell = ref->parentCell;
-	if (!cell) cell = ref->childCell.GetPersistentCell();
+	if (!cell) cell = ref->childCell.GetSaveParentCell();
 	if (cell && (cell->cellFlags & 1) == 0) return cell->worldSpace;
 	return nullptr;
 }
@@ -1303,7 +1298,7 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 
 				BSFadeNode* pFadeNode = static_cast<BSFadeNode*>(spObject.m_pObject);
 
-				if (pFadeNode->linkedObj != source)
+				if (pFadeNode->pLinkedObj != source)
 					continue;
 
 				BSAudioManager::Get()->playingSounds.GetAt(uiKey, pSound);
@@ -1428,11 +1423,18 @@ bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
 	return true;
 }
 bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
-	int doDisable = 1;
-	BYTE modIdx = scriptObj->GetCompileIndex();
+	enum SaveTypeFlags {
+		NORMAL = 1,
+		AUTO   = 2,
+		SYSTEM = 4,
+	};
+
+	BOOL bDisable = TRUE;
+	uint32_t uiTypeFlags = SaveTypeFlags::NORMAL | SaveTypeFlags::AUTO | SaveTypeFlags::SYSTEM;
+	uint8_t ucIndex = scriptObj->GetCompileIndex();
 	*result = 0;
-	if (modIdx < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &doDisable)) {
-		DisabledSaves::Toggle(modIdx, doDisable > 0);
+	if (ucIndex < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &bDisable, &uiTypeFlags)) {
+		DisabledSaves::Toggle(ucIndex, bDisable > 0, uiTypeFlags);
 		*result = 1;
 	}
 	return true;
@@ -1471,9 +1473,9 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 			NiAVObject* pNewCasingNode = BSUtilities::GetObjectByName(pActorNode, cNodeName);
 			pCasingNode = BSUtilities::GetObjectByName(pActorNode, "ShellCasingNode");
 			if (pCasingNode && pNewCasingNode) {
-				kOrgTrans = pCasingNode->m_world;
+				kOrgTrans = pCasingNode->m_kWorld;
 
-				pCasingNode->m_world = pNewCasingNode->m_world;
+				pCasingNode->m_kWorld = pNewCasingNode->m_kWorld;
 
 				bChangedPos = true;
 			}
@@ -1490,7 +1492,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 
 
 		if (bChangedPos)
-			pCasingNode->m_world = kOrgTrans;
+			pCasingNode->m_kWorld = kOrgTrans;
 
 		if (bHasCasingPath)
 			pWeapon->shellCasingModel.strModel.pString = (char*)pOrgCasingPath;

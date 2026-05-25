@@ -31,7 +31,7 @@ jobs:
         $releaseDir = "JG\Release"
         New-Item -ItemType Directory -Name artifacts -Force | Out-Null
         New-Item -ItemType Directory -Name "nvse\plugins" -path $releaseDir -Force | Out-Null
-        Copy-Item -Path "$releaseDir\JohnnyGuitarNVSE.dll", "$releaseDir\JohnnyGuitarNVSE.pdb", "$iniDir\JohnnyGuitar.ini" -Destination "$releaseDir\nvse\plugins"
+        Copy-Item -Path "$releaseDir\johnnyguitar.dll", "$releaseDir\johnnyguitar.pdb", "$iniDir\JohnnyGuitar.ini" -Destination "$releaseDir\nvse\plugins"
         Compress-Archive -Path "$releaseDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-${{ github.event.release.tag_name }}.zip"
       shell: pwsh
 
@@ -52,4 +52,5 @@ jobs:
         filename: "artifacts\\JohnnyGuitarNVSE-${{ github.event.release.tag_name }}.zip"
         display_name: "JohnnyGuitar NVSE"
         file_category: "main"
+        show_requirements_pop_up: true
         version: ${{ github.event.release.tag_name }}

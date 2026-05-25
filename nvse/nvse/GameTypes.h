@@ -634,16 +634,3 @@ public:
 			return -1;
 	}
 };
-
-struct CoordXY {
-	float	x;
-	float	y;
-
-	CoordXY() {}
-	CoordXY(float _x, float _y) : x(_x), y(_y) {}
-
-	inline CoordXY& operator =(const CoordXY& rhs) {
-		*(double*)this = *(double*)&rhs;
-		return *this;
-	}
-};

@@ -150,8 +150,8 @@ public:
 	__forceinline NiNode* Get3DSimple() const{ return renderState ? renderState->rootNode : nullptr; }
 	const char* hk_GetName();
 	const char* GetFullName() const;
-	NiPoint3* PosVector() { return (NiPoint3*)&pos; }
-	CoordXY* PosXY() { return (CoordXY*)&pos; }
+	NiPoint3* PosVector() { return &pos; }
+	NiPoint2* PosXY() { return (NiPoint2*)&pos; }
 
 	void Update3D();
 	TESContainer* GetContainer();
@@ -175,8 +175,13 @@ public:
 
 	void Update3DPosition() { ThisCall(0x562020, this); 	}
 
-	float GetScale() const { return scale; }
+	void Set3DVerySimple(NiAVObject* apObject) { ThisCall(0x571080, this, apObject); }
+
+	float GetRawScale() const { return scale; }
+	float GetScale() const { return ThisCall<float>(0x567400, this); }
 	void SetScale(float afScale) { ThisCall(0x567490, this, afScale); }
+
+	void SetRefPersists(bool abVal) { ThisCall(0x565480, this, abVal); }
 
 	MEMBER_FN_PREFIX(TESObjectREFR);
 #if 1

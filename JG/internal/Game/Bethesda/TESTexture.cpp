@@ -8,6 +8,11 @@ const char* TESTexture::GetTextureName() const {
 		return "";
 }
 
+// GAME - 0x48E730
+const char* TESTexture::GetTextureName(const TESForm* apForm, const TESObjectREFR* apRef) {
+	return CdeclCall<const char*>(0x48E730, apForm, apRef);
+}
+
 // GAME - 0x489100
 void TESTexture::SetTextureName(const char* apName) {
 	strTextureName.Set(apName);

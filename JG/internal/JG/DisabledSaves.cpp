@@ -1,43 +1,76 @@
 #include "DisabledSaves.hpp"
-#include <unordered_set>
+#include <unordered_map>
+#include <utility.h>
 
 namespace DisabledSaves {
-	uintptr_t g_canSaveNowAddr = 0;
-	uintptr_t g_canSaveNowMenuAddr = 0;
+#pragma optimize("y", off)
+	std::unordered_map<uint8_t, Bitfield32> kSaveBlockers;
 
-	std::unordered_set<BYTE> SaveGameUMap;
+	enum SaveTypeBits {
+		NORMAL = 0,
+		AUTO   = 1,
+		SYSTEM = 2,
+	};
 
-	bool __fastcall CanSaveNowHook(void* ThisObj, void* edx, int isAutoSave) {
-		return ThisCall<bool>(g_canSaveNowAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
+	CallDetour kCanSaveNowDetour;
+	bool __fastcall CanSaveNowHook(void* apThis, void*, bool abAutoSave) {
+		bool bCanSave = ThisCall<bool>(kCanSaveNowDetour.GetOverwrittenAddr(), apThis, abAutoSave);
+		if (kSaveBlockers.empty())
+			return bCanSave;
+
+		if (bCanSave) {
+			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+			bool bSystemSave = *reinterpret_cast<bool*>(pEBP - 9);
+			for (auto& rMod : kSaveBlockers) {
+				if (rMod.second.GetBit(SYSTEM) && bSystemSave)
+					return false;
+
+				if (rMod.second.GetBit(AUTO) && abAutoSave)
+					return false;
+
+				if (rMod.second.GetBit(NORMAL))
+					return false;
+			}
+		}
+
+		return bCanSave;
 	}
 
-	bool __fastcall CanSaveNowMenuHook(void* ThisObj, void* edx, int isAutoSave) {
-		return ThisCall<bool>(g_canSaveNowMenuAddr, ThisObj, isAutoSave) && SaveGameUMap.empty();
+	CallDetour kSaveNowMenuDetour;
+	bool __fastcall CanSaveNowMenuHook(void* apThis, void*, bool abAutoSave) {
+		bool bCanSave = ThisCall<bool>(kCanSaveNowDetour.GetOverwrittenAddr(), apThis, abAutoSave);
+		if (kSaveBlockers.empty())
+			return bCanSave;
+
+		if (bCanSave) {
+			for (auto& rMod : kSaveBlockers) {
+				if (rMod.second.GetBit(NORMAL))
+					return false;
+			}
+		}
+
+		return bCanSave;
 	}
 
-	void Init()
-	{
-		SaveGameUMap.reserve(0xFF);
+	void Init() {
+		kSaveBlockers.reserve(0xFF);
 	}
 
 	void Reset() {
-		SaveGameUMap.clear();
+		kSaveBlockers.clear();
 	}
 
 	void Install() {
 		// ToggleDisableSaves
-		g_canSaveNowAddr = (*(uint32_t*)0x0850443) + 5 + 0x0850442;
-		WriteRelCall(0x0850442, (uintptr_t)CanSaveNowHook);
-		g_canSaveNowMenuAddr = (*(uint32_t*)0x07CBDC8) + 5 + 0x07CBDC7;
-		WriteRelCall(0x07CBDC7, (uintptr_t)CanSaveNowMenuHook);
+		kCanSaveNowDetour.ReplaceCall(0x850442, CanSaveNowHook);
+		kSaveNowMenuDetour.ReplaceCall(0x7CBDC7, CanSaveNowMenuHook);
 	}
-	void Toggle(uint8_t modId, bool toggle)
-	{
-		if (toggle) {
-			SaveGameUMap.insert(modId);
-		}
-		else {
-			SaveGameUMap.erase(modId);
-		}
+
+	void Toggle(uint8_t aucMod, bool abToggle, uint32_t auiTypeFlags) {
+		if (abToggle)
+			kSaveBlockers.insert({ aucMod, auiTypeFlags });
+		else
+			kSaveBlockers.erase(aucMod);
 	}
+#pragma optimize("y", on)
 }

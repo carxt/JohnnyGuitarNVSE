@@ -6,6 +6,7 @@
 #include "CommandTable.h"
 #include "GameScript.h"
 #include "StringVar.h"
+#include <Bethesda/TLSData.hpp>
 
 static NVSEStringVarInterface* s_StringVarInterface = NULL;
 bool extraTraces = false;
@@ -58,38 +59,8 @@ const _ShowCompilerError ShowCompilerError = (_ShowCompilerError)0x005C5730;	// 
 
 #if RUNTIME
 
-struct TLSData {
-	// thread local storage
-
-	uint32_t	pad000[(0x260 - 0x000) >> 2];	// 000
-	NiNode* lastNiNode;			// 260
-	TESObjectREFR* lastNiNodeREFR;		// 264
-	uint8_t			consoleMode;			// 268
-	uint8_t			pad269[3];				// 269
-	// 25C is used as do not head track the player , 2B8 is used to init QueudFile::unk0018
-};
-
-static TLSData* GetTLSData() {
-	uint32_t TlsIndex = *g_TlsIndexPtr;
-	TLSData* data = NULL;
-
-	__asm {
-		mov		ecx, [TlsIndex]
-		mov		edx, fs: [2Ch]	// linear address of thread local storage array
-		mov		eax, [edx + ecx * 4]
-		mov[data], eax
-	}
-
-	return data;
-}
-
 bool IsConsoleMode() {
-	TLSData* tlsData = GetTLSData();
-
-	if (tlsData)
-		return tlsData->consoleMode != 0;
-
-	return false;
+	return TLSData::Get()->bConsoleOutput;
 }
 
 bool GetConsoleEcho() {

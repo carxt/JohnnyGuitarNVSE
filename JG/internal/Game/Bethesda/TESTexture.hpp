@@ -3,6 +3,9 @@
 #include "BaseFormComponent.hpp"
 #include "BSStringT.hpp"
 
+class TESForm;
+class TESObjectREFR;
+
 class TESTexture : public BaseFormComponent {
 public:
 	TESTexture();
@@ -15,6 +18,7 @@ public:
 	BSString strTextureName;
 
 	const char* GetTextureName() const;
+	static const char* GetTextureName(const TESForm* apForm, const TESObjectREFR* apRef);
 	void SetTextureName(const char* apName);
 
 	uint32_t GetTextureNameLength() const;

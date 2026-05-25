@@ -307,6 +307,20 @@ public:
 
 	virtual Sky* Destructor(bool doFree);
 
+	enum SkyColors {
+		SC_SKY_UPPER	= 0,
+		SC_FOG			= 1,
+		SC_CLOUDS_LOWER = 2,
+		SC_AMBIENT		= 3,
+		SC_SUNLIGHT		= 4,
+		SC_SUN			= 5,
+		SC_STARS		= 6,
+		SC_SKY_LOWER	= 7,
+		SC_HORIZON		= 8,
+		SC_CLOUDS_UPPER = 9,
+		SC_COUNT,
+	};
+
 	NiNode* niNode004; // 004
 	NiNode* niNode008; // 008
 	TESClimate* firstClimate; // 00C
@@ -321,18 +335,9 @@ public:
 	Moon* masserMoon; // 030
 	Moon* secundaMoon; // 034
 	Precipitation* precipitation; // 038
-	NiPoint3 vector03C; // 03C
-	NiColor waterReflection; // 048
-	NiPoint3 vector054; // 054
-	NiColor sunAmbient; // 060
-	NiColor sunDirectional; // 06C
-	NiPoint3 vector078; // 078
-	NiPoint3 vector084; // 084
-	NiPoint3 vector090; // 090
-	NiPoint3 vector09C; // 09C
-	NiPoint3 vector0A8; // 0A8
-	NiPoint3 vector0B4; // 0B4
-	NiColor sunFog; // 0C0
+	NiColor							kColors[SC_COUNT];
+	NiColor							kWaterFogColor;
+	NiColor							kSunSpecularColor;
 	float windSpeed; // 0CC
 	float windDirection; // 0D0
 	uint32_t unk0D4[6]; // 0D4
@@ -359,7 +364,7 @@ public:
 	void RefreshMoon();
 	void RefreshClimate(TESClimate* climate, bool immediate = true);
 	bool GetIsRaining();
-	__forceinline static Sky* Get() { return *(Sky**)0x11DEA20; }
+	static Sky* GetSingleton() { return *reinterpret_cast<Sky**>(0x11DEA20); }
 };
 
 static_assert(sizeof(Sky) == 0x138);
@@ -1335,26 +1340,6 @@ public:
 	bool removed;
 
 	bool CreateExtraData(BSExtraData* xBSData);
-};
-
-struct COORD_DATA
-{
-	COORD_DATA() : Blockpoint(), Cellpoint(), Vertcoord()
-	{
-	};
-
-	NiPoint2 Cellpoint;
-	NiPoint2 Blockpoint;
-	tagPOINT Block;
-	int iBlock;
-	NiPoint2 Tilepoint;
-	tagPOINT Tile;
-	int iShape;
-	NiPoint3 Vertcoord;
-	int iVertidx;
-	int iTrivertidx[3];
-	bool bTriright;
-	bool bTriupper;
 };
 
 struct SingleTimer
