@@ -69,7 +69,7 @@ GameTimeGlobals* g_gameTimeGlobals = nullptr;
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 bool (*Cmd_Update3D)(COMMAND_ARGS) = 0;
 
-#define JG_VERSION 526
+#define JG_VERSION 527
 
 #define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
