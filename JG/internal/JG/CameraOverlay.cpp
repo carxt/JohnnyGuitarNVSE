@@ -167,6 +167,11 @@ namespace CameraOverlay {
 			pReference = BSMemory::create<TESObjectREFR, 0x55A2F0>();
 			pReference->SetFormEditorID(apName);
 
+			// Pseudo temporary
+			// We avoid calling SetTemporary as it removes the form from EDID and FormID maps, and invalides the FormID
+			// Having the flag is enough to prevent it from saving
+			pReference->uiFormFlags.Set(TESForm::FormFlags::TEMPORARY);
+
 			char cRootName[256];
 			strcpy_s(cRootName, apName);
 			strcat_s(cRootName, "_RootNode");
@@ -193,6 +198,7 @@ namespace CameraOverlay {
 				}
 
 				pReference->Set3DVerySimple(nullptr);
+				pReference->uiFormFlags.Clear(TESForm::FormFlags::TEMPORARY);
 				delete pReference;
 				pReference = nullptr;
 			}
