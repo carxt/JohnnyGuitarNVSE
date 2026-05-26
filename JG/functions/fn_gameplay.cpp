@@ -1424,9 +1424,11 @@ bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
 }
 bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 	enum SaveTypeFlags {
-		NORMAL = 1,
-		AUTO   = 2,
-		SYSTEM = 4,
+		NORMAL = 0x1,
+		AUTO   = 0x2,
+		SYSTEM = 0x4,
+		FORCED = 0x8,
+		QUICK  = 0x10,
 	};
 
 	BOOL bDisable = TRUE;
