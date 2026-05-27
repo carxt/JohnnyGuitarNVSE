@@ -1,22 +1,26 @@
 #include "DisabledSaves.hpp"
 #include <Bethesda/BGSSaveLoadManager.hpp>
+#include <Bethesda/GameSettingCollection.hpp>
 #include <unordered_map>
 #include <utility.h>
 
 namespace DisabledSaves {
-#pragma optimize("y", off)
+
 	std::unordered_map<uint8_t, Bitfield32> kSaveBlockers;
 
-	enum SaveTypeBits {
-		NORMAL = 0,
-		AUTO   = 1,
-		SYSTEM = 2,
-		FORCED = 3,
-		QUICK  = 4,
-	};
+	static bool __fastcall CanSave(uint32_t auiFlags) {
+		for (auto& rMod : kSaveBlockers) {
+			if (rMod.second.Get(auiFlags))
+				return false;
+			else if (rMod.second.GetBit(SaveTypeBits::NORMAL) && !auiFlags)
+				return false;
+		}
+		return true;
+	}
 
+#pragma optimize("y", off)
 	CallDetour kCanSaveNowDetour;
-	bool __fastcall CanSaveNowHook(BGSSaveLoadManager* apThis, void*, bool abAutoSave) {
+	static bool __fastcall CanSaveNowHook(BGSSaveLoadManager* apThis, void*, bool abAutoSave) {
 		bool bCanSave = ThisCall<bool>(kCanSaveNowDetour.GetOverwrittenAddr(), apThis, abAutoSave);
 		if (kSaveBlockers.empty())
 			return bCanSave;
@@ -29,43 +33,47 @@ namespace DisabledSaves {
 
 			uint32_t uiFlags = 0;
 			if (bSystemSave)
-				uiFlags |= (1 << SYSTEM);
+				uiFlags |= SaveTypeFlags::SYSTEM;
 
 			if (bQuickSave)
-				uiFlags |= (1 << QUICK);
+				uiFlags |= SaveTypeFlags::QUICK;
 
 			if (bForcedSave)
-				uiFlags |= (1 << FORCED);
+				uiFlags |= SaveTypeFlags::FORCED;
 
 			if (abAutoSave)
-				uiFlags |= (1 << AUTO);
+				uiFlags |= SaveTypeFlags::AUTO;
 
 
-			for (auto& rMod : kSaveBlockers) {
-				if (rMod.second.Get(uiFlags))
-					return false;
-				else if (rMod.second.GetBit(NORMAL) && !uiFlags)
-					return false;
-			}
+			bCanSave = CanSave(uiFlags);
 		}
 
 		return bCanSave;
 	}
 
 	CallDetour kSaveNowMenuDetour;
-	bool __fastcall CanSaveNowMenuHook(void* apThis, void*, bool abAutoSave) {
+	static bool __fastcall CanSaveNowMenuHook(void* apThis, void*, bool abAutoSave) {
 		bool bCanSave = ThisCall<bool>(kCanSaveNowDetour.GetOverwrittenAddr(), apThis, abAutoSave);
 		if (kSaveBlockers.empty())
 			return bCanSave;
 
 		if (bCanSave) {
-			for (auto& rMod : kSaveBlockers) {
-				if (rMod.second.GetBit(NORMAL))
-					return false;
-			}
+			bCanSave = CanSave(SaveTypeFlags::NORMAL);
 		}
 
 		return bCanSave;
+	}
+
+	CallDetour kSaveMessageDetour;
+	static bool __cdecl ShowMessage(const char* apText, uint32_t aeEmotion, const char* apImagePath, const char* apSoundName, float afTime, bool abInstant) {
+		bool bCanSave = CanSave(SaveTypeFlags::QUICK);
+		const char* pText = apText;
+		const char* pImagePath = apImagePath;
+		if (!bCanSave) {
+			pText = GameSettingCollection::sCantSaveNow->String();
+			pImagePath = reinterpret_cast<const char*>(0x10208A0); // glow_message_vaultboy_sad.
+		}
+		return CdeclCall<bool>(kSaveMessageDetour.GetOverwrittenAddr(), pText, aeEmotion, pImagePath, apSoundName, afTime, abInstant);
 	}
 
 	void Init() {
@@ -80,13 +88,15 @@ namespace DisabledSaves {
 		// ToggleDisableSaves
 		kCanSaveNowDetour.ReplaceCall(0x850442, CanSaveNowHook);
 		kSaveNowMenuDetour.ReplaceCall(0x7CBDC7, CanSaveNowMenuHook);
+		kSaveMessageDetour.ReplaceCall(0x8509C7, ShowMessage);
 	}
+#pragma optimize("y", on)
 
 	void Toggle(uint8_t aucMod, bool abToggle, uint32_t auiTypeFlags) {
 		if (abToggle)
-			kSaveBlockers.insert({ aucMod, auiTypeFlags });
+			kSaveBlockers[aucMod] = auiTypeFlags;
 		else
 			kSaveBlockers.erase(aucMod);
 	}
-#pragma optimize("y", on)
+
 }
