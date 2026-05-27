@@ -152,6 +152,10 @@ public:
 	uint32_t					unk4B8;				// 4B8
 	uint32_t					pipBoyMode;			// 4BC
 	uint32_t					unk4C0[48];			// 4C0
+
+	bool IsInMenuMode() const {
+		return currentMode != 1;
+	}
 };
 static_assert(sizeof(InterfaceManager) == 0x580);
 

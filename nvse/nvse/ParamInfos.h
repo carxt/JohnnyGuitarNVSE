@@ -106,6 +106,13 @@ static ParamInfo kParams_TwoFloats[2] =
 	{	"float",	kParamType_Float,	0 },
 };
 
+static ParamInfo kParams_TwoFloats_OneOptionalInt[3] =
+{
+	{	"float",	kParamType_Float,	0 },
+	{	"float",	kParamType_Float,	0 },
+	{ 	"Integer",	kParamType_Integer,	1 },
+};
+
 static ParamInfo kParams_OneObjectID[1] =
 {
 	{	"item", kParamType_ObjectID, 0},
@@ -201,6 +208,12 @@ static ParamInfo kParams_OneOptionalActorRef[1] =
 static ParamInfo kParams_Axis[1] =
 {
 	{	"axis",	kParamType_Axis,	0	},
+};
+
+static ParamInfo kParams_OneAxis_OneOptionalInt[2] =
+{
+	{	"axis",	kParamType_Axis,	0	},
+	{	"flag",	kParamType_Integer,	1	},
 };
 
 static ParamInfo kParams_FormList[1] =
