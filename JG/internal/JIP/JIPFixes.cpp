@@ -1411,56 +1411,54 @@ namespace JIPFixes {
 
 	namespace CursorPosUICords {
 
-		bool(__cdecl* GetCursorPos)(COMMAND_ARGS) = nullptr;
+		bool* pbHUDCursorMode = nullptr;
 
 		bool Cmd_GetCursorPos_Execute(COMMAND_ARGS) {
 			*result = 0;
-			char axis;
-			uint32_t useUICords = 0;
-
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &axis, &useUICords)) {
-				float cursorPos = (axis == 'X') ? InterfaceManager::GetSingleton()->cursorX : InterfaceManager::GetSingleton()->cursorY;
-				if (useUICords != 0) {
-					float resConverter = *(float*)0x11D8A48;
-					cursorPos *= resConverter;
+			char cAxis;
+			BOOL bUICoordinates = FALSE;
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &cAxis, &bUICoordinates)) {
+				float fCursorPos = (cAxis == 'X' || cAxis == 'x') ? InterfaceManager::GetSingleton()->cursorX : InterfaceManager::GetSingleton()->cursorY;
+				if (bUICoordinates) {
+					const float fUIPixelSize = *reinterpret_cast<float*>(0x11D8A48);
+					fCursorPos *= fUIPixelSize;
 				}
-				*result = cursorPos;
+				*result = fCursorPos;
 			}
 
 			return true;
 		}
 
-		bool(__cdecl* SetCursorPos)(COMMAND_ARGS) = nullptr;
-
 		bool Cmd_SetCursorPos_Execute(COMMAND_ARGS) {
-			float posX, posY;
-			uint32_t useUICords = 0;
-			InterfaceManager* interfaceMgr = InterfaceManager::GetSingleton();
-
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &posX, &posY, &useUICords) && (interfaceMgr->currentMode > 1 || *reinterpret_cast<bool*>(JIPUtils::GetAddress(0x10076378)))) {
-				float resConverter = *(float*)0x11D8A48;
-				float fScreenWidth = RendererSettingCollection::Display::iSizeW->Int() * resConverter * 0.5;
-				float fScreenHeight = RendererSettingCollection::Display::iSizeH->Int() * resConverter * 0.5;
-				if (useUICords != 0) {
-					posX /= resConverter;
-					posY /= resConverter;
+			*result = 0;
+			float fPosX, fPosY;
+			BOOL bUICoordinates = FALSE;
+			InterfaceManager* pUIMgr = InterfaceManager::GetSingleton();
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &fPosX, &fPosY, &bUICoordinates) && (pUIMgr->IsInMenuMode() || *pbHUDCursorMode)) {
+				const float fUIPixelSize = *reinterpret_cast<float*>(0x11D8A48);
+				const float fScreenWidth = RendererSettingCollection::Display::iSizeW->Int() * fUIPixelSize * 0.5f;
+				const float fScreenHeight = RendererSettingCollection::Display::iSizeH->Int() * fUIPixelSize * 0.5f;
+				if (bUICoordinates) {
+					fPosX /= fUIPixelSize;
+					fPosY /= fUIPixelSize;
 				}
-				interfaceMgr->cursorX = posX;
-				interfaceMgr->cursorY = posY;
-				interfaceMgr->cursor->node->m_kLocal.m_kTranslate.x = ((posX * resConverter) - fScreenWidth);
-				interfaceMgr->cursor->node->m_kLocal.m_kTranslate.z = (fScreenHeight - (posY * resConverter));
+				pUIMgr->cursorX = fPosX;
+				pUIMgr->cursorY = fPosY;
+				pUIMgr->cursor->node->m_kLocal.m_kTranslate.x = (fPosX * fUIPixelSize) - fScreenWidth;
+				pUIMgr->cursor->node->m_kLocal.m_kTranslate.z = fScreenHeight - (fPosY * fUIPixelSize);
+				*result = 1;
 			}
 
 			return true;
 		}
 
 		void InitHooks() {
+			pbHUDCursorMode = reinterpret_cast<bool*>(JIPUtils::GetAddress(0x10076378));
 			{
 				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetCursorPos));
 				if (pInfo) {
 					pInfo->params = kParams_OneAxis_OneOptionalInt;
 					pInfo->numParams = 2;
-					GetCursorPos = pInfo->execute;
 					pInfo->execute = Cmd_GetCursorPos_Execute;
 				}
 			}
@@ -1469,7 +1467,6 @@ namespace JIPFixes {
 				if (pInfo) {
 					pInfo->params = kParams_TwoFloats_OneOptionalInt;
 					pInfo->numParams = 3;
-					SetCursorPos = pInfo->execute;
 					pInfo->execute = Cmd_SetCursorPos_Execute;
 				}
 			}
