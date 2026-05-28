@@ -230,6 +230,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESCondition.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESContainer.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESDataHandler.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESEnchantableForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESEyes.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESFaction.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESFile.cpp" />

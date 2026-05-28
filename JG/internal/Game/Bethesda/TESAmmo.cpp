@@ -44,3 +44,8 @@ const char* TESAmmo::GetShortName() const {
 const char* TESAmmo::GetAbbreviation() const {
 	return strAbbreviation.GetString();
 }
+
+// GAME - 0x503A70
+void TESAmmo::GetEffectNames(char* apBuffer, uint32_t auiBufferSize) const {
+	ThisCall(0x503A70, this, apBuffer, auiBufferSize);
+}

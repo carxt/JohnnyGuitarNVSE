@@ -10,7 +10,7 @@ public:
 	TESDescription();
 	~TESDescription();
 
-	virtual const char* GetDescription(TESForm* apForm, uint32_t auiChunkID);
+	virtual const char* GetDescription(TESForm* apForm, uint32_t auiChunkID) const;
 
 	uint32_t	uiFileOffset;
 };

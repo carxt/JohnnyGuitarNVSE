@@ -2674,7 +2674,7 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 		case FORM_TYPE::TESObjectIMOD:
 		{
 			const TESObjectIMOD* pItemMod = static_cast<TESObjectIMOD*>(pForm);
-			const char* pModDescription = pItemMod->description.Get(pForm, 'CSED');
+			const char* pModDescription = pItemMod->description.GetDescription(pForm, 'CSED');
 			if (pModDescription)
 				strcpy_s(cEffects, sizeof(cEffects), pModDescription);
 		}

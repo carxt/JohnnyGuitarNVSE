@@ -65,6 +65,8 @@ public:
 
 	const char* GetShortName() const;
 	const char* GetAbbreviation() const;
+
+	void GetEffectNames(char* apBuffer, uint32_t auiBufferSize) const;
 };
 
 ASSERT_SIZE(TESAmmo, 0xDC);
