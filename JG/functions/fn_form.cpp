@@ -2691,7 +2691,7 @@ bool Cmd_RemapLand_Execute(COMMAND_ARGS) {
 bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESForm* form = NULL;
-	char extraEffects[0x100] = {};
+	char effects[0x100] = {};
 
 	ExtractArgsEx(EXTRACT_ARGS_EX, &form);
 	if (!form) {
@@ -2700,7 +2700,7 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 	}
 
 	switch (form->GetFormType()) {
-		
+
 		// Item mod
 		case FORM_TYPE::TESObjectIMOD:
 		{
@@ -2708,46 +2708,46 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 			if (itemMod) {
 				const char* modDesc = itemMod->description.Get(itemMod, 'CSED');
 				if (modDesc) {
-					strcpy_s(extraEffects, sizeof(extraEffects), modDesc);
+					strcpy_s(effects, sizeof(effects), modDesc);
 				}
 			}
 		}
 		break;
-		
+
 		// Ingestible
 		case FORM_TYPE::AlchemyItem:
 		{
 			AlchemyItem* ingestible = static_cast<AlchemyItem*>(form);
 			if (ingestible) {
-				ThisCall(0x406620, &(ingestible->magicItem.list), extraEffects, sizeof(extraEffects));
+				ThisCall(0x406620, &(ingestible->magicItem.list), effects, sizeof(effects));
 			}
 		}
 		break;
-		
+
 		// Ammo
 		case FORM_TYPE::TESAmmo:
 		{
 			TESAmmo* ammo = static_cast<TESAmmo*>(form);
 			if (ammo) {
-				ThisCall(0x503A70, ammo, extraEffects, sizeof(extraEffects));
+				ThisCall(0x503A70, ammo, effects, sizeof(effects));
 			}
 		}
 		break;
-		
+
 		// Weapon & Armor
 		default:
 		{
 			TESEnchantableForm* enchantable = DYNAMIC_CAST(form, TESForm, TESEnchantableForm);
 			if (enchantable && enchantable->enchantItem) {
-				ThisCall(0x406620, &(enchantable->enchantItem->magicItem.list), extraEffects, sizeof(extraEffects));
+				ThisCall(0x406620, &(enchantable->enchantItem->magicItem.list), effects, sizeof(effects));
 			}
 		}
 	}
 
-	g_strInterface->Assign(PASS_COMMAND_ARGS, extraEffects);
+	g_strInterface->Assign(PASS_COMMAND_ARGS, effects);
 
 	if (IsConsoleMode())
-		Console_Print("GetItemEffectString >> %s", extraEffects);
+		Console_Print("GetItemEffectString >> %s", effects);
 
 	return true;
 }
