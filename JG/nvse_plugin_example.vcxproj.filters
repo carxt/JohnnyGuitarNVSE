@@ -664,6 +664,33 @@
     <ClCompile Include="internal\Game\Bethesda\BSSoundHandle.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESWaterForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Obsidian\TESRecipe.cpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Obsidian\TESRecipeComponent.cpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Obsidian\MediaLocationController.cpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Obsidian\MediaSet.cpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiSourceTexture.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiTexture.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESEnchantableForm.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1833,6 +1860,57 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BSSoundHandle.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadManager.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSDegradePriority.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESWaterForm.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\TESObjectIMOD.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\TESRecipe.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\TESRecipeCategory.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\TESRecipeComponent.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\MediaLocationController.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\MediaSet.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiPalette.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiPersistentSrcTextureRendererData.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiPixelData.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiPixelFormat.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiSourceTexture.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiTexture.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\TESCasinoChips.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

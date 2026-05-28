@@ -261,6 +261,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESTexture.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESTextureListArray.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESValueForm.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESWaterForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWeather.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWeatherList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWeightForm.cpp" />
@@ -283,6 +284,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiPoint4.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiRenderer.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiShadeProperty.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiSourceTexture.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiTexture.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiTransform.cpp" />
     <ClCompile Include="internal\Game\Obsidian\MediaLocationController.cpp" />
     <ClCompile Include="internal\Game\Obsidian\MediaSet.cpp" />
@@ -429,6 +432,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSDebugSoundInfo.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSDegradePriority.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp" />
@@ -595,6 +599,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESTextureList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESTextureListArray.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESValueForm.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESWaterForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESWeather.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESWeatherList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESWeightForm.hpp" />
@@ -616,9 +621,13 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiMemObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemory.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiObject.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPalette.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiParticles.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiParticleSystem.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiObjectNET.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPersistentSrcTextureRendererData.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPixelData.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPixelFormat.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPlane.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPoint2.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPoint3.hpp" />
@@ -635,9 +644,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiRTTI.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiShadeProperty.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSmartPointer.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiSourceTexture.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTAbstractPoolAllocator.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTDefaultAllocator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTexture.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTLargeArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTLargeObjectArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTLargePrimitiveArray.hpp" />

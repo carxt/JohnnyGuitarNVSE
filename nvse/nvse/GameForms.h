@@ -66,6 +66,7 @@
 #include "Bethesda/TESHair.hpp"
 #include "Bethesda/TESHealthForm.hpp"
 #include "Bethesda/TESIcon.hpp"
+#include "Bethesda/TESWaterForm.hpp"
 #include "Bethesda/TESImageSpaceModifiableForm.hpp"
 #include "Bethesda/TESKey.hpp"
 #include "Bethesda/TESLandTexture.hpp"
@@ -2740,31 +2741,6 @@ public:
 
 // TESLevSpell (44)
 class TESLevSpell;
-
-// 194
-class TESWaterForm : public TESForm {
-public:
-	TESWaterForm();
-	~TESWaterForm();
-
-	TESFullName				fullName;		// 018
-	TESAttackDamageForm		attackDamage;	// 024
-	uint32_t					unk02C[14];		// 02C
-	TESTexture				noiseMap;		// 064
-	uint8_t					opacity;		// 070 ANAM
-	uint8_t					flags;			// 071 FNAM (0x01: causes damage, 0x02: reflective)
-	uint8_t					unk072[2];		// 072
-	uint32_t					unk074[2];		// 074
-	TESSound* sound;			// 07C
-	TESWaterForm* waterForm;		// 080
-	float					visData[49];	// 084
-	uint32_t					unk148[12];		// 148
-	SpellItem* drinkEffect;	// 178
-	uint32_t					unk17C[3];		// 17C
-	uint8_t					radiation;		// 188
-	uint8_t					pad189[3];		// 189
-	uint32_t					unk18C[2];		// 18C
-};
 
 // A8
 class BGSExplosion : public TESBoundObject {
