@@ -495,6 +495,10 @@ public:
 	uint32_t uiHostileCount;
 
 	bool RemoveNthEffect(uint32_t index);
+
+	void GetEffectsString(char* apBuffer, uint32_t auiBufferSize) const {
+		ThisCall(0x406620, this, apBuffer, auiBufferSize);
+	}
 };
 
 static_assert(sizeof(EffectItemList) == 0x10);

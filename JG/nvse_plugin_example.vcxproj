@@ -186,6 +186,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BGSTextureSet.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSTouchSpellForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BipedAnim.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSCullingProcess.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSNonReentrantSpinLock.cpp" />
@@ -419,6 +420,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSTouchSpellForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSVoiceType.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BipedAnim.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSDebugSoundInfo.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />

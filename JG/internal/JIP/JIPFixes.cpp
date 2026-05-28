@@ -5,6 +5,7 @@
 #include "Bethesda/AutoMemContext.hpp"
 #include "Bethesda/Setting.hpp"
 #include "Bethesda/BSStringT.hpp"
+#include <Bethesda/RendererSettingCollection.hpp>
 
 #include "decoding.h"
 #include "events/EventFramework.h"
@@ -79,7 +80,7 @@ namespace JIPFixes {
 		void __fastcall MemoryPool_Free(void* apBlock, uint32_t auiSize) {
 			char* pData = static_cast<char*>(apBlock);
 			TESForm* pForm = *reinterpret_cast<TESForm**>(pData);
-			
+
 			if (pForm && pForm->IsReference()) [[likely]] {
 				if (pForm == PlayerCharacter::GetSingleton()) {
 					PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(pForm);
@@ -551,7 +552,7 @@ namespace JIPFixes {
 				pInfo->execute = Cmd_SetSoundSourceFile_Execute;
 			}
 		}
-	
+
 	}
 	namespace SetOnDialogTopicEventHandlerEx {
 #pragma optimize("y", off)
@@ -563,7 +564,7 @@ namespace JIPFixes {
 			TESForm* filter[1] = { nullptr };
 			if (ExtractArgsEx(EXTRACT_ARGS_EX, &script, &setOrRemove, &filter[0]) && script && IS_TYPE(script, Script)) {
 				TESForm* pFilterForm = filter[0];
-		
+
 				if (!pFilterForm || IS_TYPE(pFilterForm, TESTopic) || IS_TYPE(pFilterForm, TESTopicInfo)) {
 					if (OnDialogTopicHandler) {
 						if (setOrRemove)
@@ -622,7 +623,7 @@ namespace JIPFixes {
 		}
 #pragma optimize("", on)
 	}
-      
+
 	namespace RespawnDisableFix {
 
 		bool(__cdecl* ClearDeadActors)(COMMAND_ARGS) = nullptr;
@@ -952,7 +953,7 @@ namespace JIPFixes {
 			const TESFile* pFile = apForm->GetFile(0);
 			if (!pFile)
 				return false;
-			
+
 			return std::find(arFiles.begin(), arFiles.end(), pFile) != arFiles.end();
 		}
 
@@ -1176,7 +1177,7 @@ namespace JIPFixes {
 			__asm {
 				// Store SetElement ptr
 				mov		[esp + 0x1C], edi
-				
+
 				// Our code - ECX now contains the tile
 				mov     ecx, [ecx]
 				push	eax
@@ -1185,7 +1186,7 @@ namespace JIPFixes {
 				mov		edi, eax
 				pop		edx
 				pop		eax
-				
+
 				// Get Item
 				mov     ecx, [eax]
 
@@ -1203,7 +1204,7 @@ namespace JIPFixes {
 	}
 
 	namespace WaterRenderFix {
-		
+
 		constexpr float WATER_OPACITY = 0.8f;
 		constexpr float WATER_REFLECTIVITY = 0.3f;
 
@@ -1221,7 +1222,7 @@ namespace JIPFixes {
 				float							fWaterOpacity;
 				NiPointer<BSRenderedTexture>	spReflectionTexture;
 			};
-			
+
 			// Holy crap, stl sucks
 			using ScrapMap = std::unordered_map<WaterShaderProperty*, WaterShaderEntry, std::hash<WaterShaderProperty*>, std::equal_to<WaterShaderProperty*>, BSScrapAllocator<std::pair<WaterShaderProperty* const, WaterShaderEntry>>>;
 
@@ -1407,6 +1408,71 @@ namespace JIPFixes {
 			ReplaceCall(JIPUtils::GetAddress(0x10058476), SetItemHealth);
 		}
 	}
+
+	namespace CursorPosUICords {
+
+		bool* pbHUDCursorMode = nullptr;
+
+		bool Cmd_GetCursorPos_Execute(COMMAND_ARGS) {
+			*result = 0;
+			char cAxis;
+			BOOL bUICoordinates = FALSE;
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &cAxis, &bUICoordinates)) {
+				float fCursorPos = (cAxis == 'X' || cAxis == 'x') ? InterfaceManager::GetSingleton()->cursorX : InterfaceManager::GetSingleton()->cursorY;
+				if (bUICoordinates) {
+					const float fUIPixelSize = *reinterpret_cast<float*>(0x11D8A48);
+					fCursorPos *= fUIPixelSize;
+				}
+				*result = fCursorPos;
+			}
+
+			return true;
+		}
+
+		bool Cmd_SetCursorPos_Execute(COMMAND_ARGS) {
+			*result = 0;
+			float fPosX, fPosY;
+			BOOL bUICoordinates = FALSE;
+			InterfaceManager* pUIMgr = InterfaceManager::GetSingleton();
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &fPosX, &fPosY, &bUICoordinates) && (pUIMgr->IsInMenuMode() || *pbHUDCursorMode)) {
+				const float fUIPixelSize = *reinterpret_cast<float*>(0x11D8A48);
+				const float fScreenWidth = RendererSettingCollection::Display::iSizeW->Int() * fUIPixelSize * 0.5f;
+				const float fScreenHeight = RendererSettingCollection::Display::iSizeH->Int() * fUIPixelSize * 0.5f;
+				if (bUICoordinates) {
+					fPosX /= fUIPixelSize;
+					fPosY /= fUIPixelSize;
+				}
+				pUIMgr->cursorX = fPosX;
+				pUIMgr->cursorY = fPosY;
+				pUIMgr->cursor->node->m_kLocal.m_kTranslate.x = (fPosX * fUIPixelSize) - fScreenWidth;
+				pUIMgr->cursor->node->m_kLocal.m_kTranslate.z = fScreenHeight - (fPosY * fUIPixelSize);
+				*result = 1;
+			}
+
+			return true;
+		}
+
+		void InitHooks() {
+			pbHUDCursorMode = reinterpret_cast<bool*>(JIPUtils::GetAddress(0x10076378));
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetCursorPos));
+				if (pInfo) {
+					pInfo->params = kParams_OneAxis_OneOptionalInt;
+					pInfo->numParams = 2;
+					pInfo->execute = Cmd_GetCursorPos_Execute;
+				}
+			}
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetCursorPos));
+				if (pInfo) {
+					pInfo->params = kParams_TwoFloats_OneOptionalInt;
+					pInfo->numParams = 3;
+					pInfo->execute = Cmd_SetCursorPos_Execute;
+				}
+			}
+		}
+	}
+
 
 	namespace LeveledListFixes {
 
@@ -1678,7 +1744,7 @@ namespace JIPFixes {
 		TESForm* __fastcall GetEDID(void* apThis, const char* apEDID) {
 			return TESForm::GetFormByEditorID(apEDID);
 		}
-		
+
 		void InitHooks() {
 			ReplaceCall(JIPUtils::GetAddress(0x1000178C), GetEDID);
 			ReplaceCall(JIPUtils::GetAddress(0x10002E25), GetEDID);
@@ -1772,6 +1838,7 @@ namespace JIPFixes {
 		BetterSearch::InitHooks();
 		PowerArmorCondition::InitHooks();
 		LeveledListFixes::InitHooks();
+		CursorPosUICords::InitHooks();
 	}
 
 	void InitDeferredHooks() {

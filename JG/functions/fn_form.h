@@ -118,3 +118,4 @@ DEFINE_COMMAND_PLUGIN_EXP(CallPerMobileObjectEx, , false, kParamsCallPerMobileOb
 DEFINE_COMMAND_PLUGIN(Update3DAlt, , true, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetRecipeCategoryFlags, , false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(RemapLand, , false, kParamsRemapLand);
+DEFINE_COMMAND_PLUGIN(GetItemEffectString, , false, kParams_OneOptionalObjectID);

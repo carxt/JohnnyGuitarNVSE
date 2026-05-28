@@ -545,6 +545,7 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(RemapLand);
 	REG_CMD(SetParticleEmitterSpawnRate);
 	REG_CMD(GetParticleEmitterSpawnRate);
+	REG_TYPED_CMD(GetItemEffectString, String);
 }
 
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {

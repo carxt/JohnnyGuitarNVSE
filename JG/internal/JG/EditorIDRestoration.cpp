@@ -257,12 +257,12 @@ namespace EDIDRestoration {
 			return pData->RemoveEditorID(arEDID);
 		}
 
-		static const NiFixedString& __fastcall GetEDID(const TESForm* apForm) noexcept {
+		static const NiFixedString* __fastcall GetEDID(const TESForm* apForm) noexcept {
 			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
 			if (!pData) [[unlikely]]
 				return nullptr;
 
-			return pData->GetEditorID();
+			return &pData->GetEditorID();
 		}
 	}
 
@@ -335,14 +335,14 @@ namespace EDIDRestoration {
 	class TESFormEx : public TESForm {
 	public:
 		uint32_t hk_GetFormEditorIDLength() const noexcept {
-			const NiFixedString& rEDID = ExtraData::GetEDID(this);
-			return rEDID ? rEDID.GetLength() : 0;
+			const NiFixedString* pEDID = ExtraData::GetEDID(this);
+			return pEDID ? pEDID->GetLength() : 0;
 		}
 
 		// vftable + 0x130
 		const char* hk_GetFormEditorID() const noexcept {
-			const NiFixedString& rEDID = ExtraData::GetEDID(this);
-			return rEDID ? rEDID.c_str() : "";
+			const NiFixedString* pEDID = ExtraData::GetEDID(this);
+			return pEDID ? pEDID->c_str() : "";
 		}
 
 		// vftable + 0x134

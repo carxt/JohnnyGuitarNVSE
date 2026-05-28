@@ -59,6 +59,6 @@ public:
 	}
 
 	const Bitfield32& Bitfield() const {
-		return uValue.i;
+		return *reinterpret_cast<const Bitfield32*>(&uValue.i);
 	}
 };
