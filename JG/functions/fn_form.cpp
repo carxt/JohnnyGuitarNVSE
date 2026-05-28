@@ -258,35 +258,36 @@ bool Cmd_TuneRadioRef_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetFormRecipesAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESForm* form = nullptr;
-	NVSEArrayVar* rcpArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) {
+	TESForm* pForm = nullptr;
+	NVSEArrayVar* pRecipes = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && pForm) {
 		auto pIter = TESDataHandler::GetSingleton()->kRecipes.GetHead();
 		while (pIter && !pIter->IsEmpty()) {
 			TESRecipe* pRecipe = pIter->GetItem();
-			pIter = pIter->GetNext();
-			if (pRecipe && !pRecipe->outputs.Empty()) {
-				TESRecipe::ComponentList* outputs = &pRecipe->outputs;
-				auto it2 = outputs->Head();
-				do {
-					if (it2->data && it2->data->item && (it2->data->item->GetFormID() == form->GetFormID())) {
-						g_arrInterface->AppendElement(rcpArr, NVSEArrayElement(pRecipe));
+			if (pRecipe && !pRecipe->GetOutputList()->IsEmpty()) {
+				auto pOutputsIter = pRecipe->GetOutputList();
+				while (pOutputsIter && !pOutputsIter->IsEmpty()) {
+					TESRecipeComponent* pComponent = pOutputsIter->GetItem();
+					if (pComponent && pComponent->GetItem() && (pComponent->GetItem()->GetFormID() == pForm->GetFormID())) {
+						g_arrInterface->AppendElement(pRecipes, NVSEArrayElement(pRecipe));
 						break;
 					}
-				} while (it2 = it2->next);
+					pOutputsIter = pOutputsIter->GetNext();
+				}
 			}
+			pIter = pIter->GetNext();
 		}
 	}
-	g_arrInterface->AssignCommandResult(rcpArr, result);
+	g_arrInterface->AssignCommandResult(pRecipes, result);
 	return true;
 }
 
 bool Cmd_SetFactionFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESFaction* faction = nullptr;
-	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction, &flags) && faction && IS_TYPE(faction, TESFaction)) {
-		faction->kData.uiFlags = flags;
+	TESFaction* pFaction = nullptr;
+	uint32_t uiFlags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pFaction, &uiFlags) && pFaction && IS_TYPE(pFaction, TESFaction)) {
+		pFaction->kData.uiFlags = uiFlags;
 		*result = 1;
 	}
 	return true;
@@ -294,10 +295,11 @@ bool Cmd_SetFactionFlags_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetFactionFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESFaction* faction = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction) && faction && IS_TYPE(faction, TESFaction)) {
-		*result = faction->kData.uiFlags;
-		if (IsConsoleMode()) Console_Print("GetFactionFlags >> %.f", *result);
+	TESFaction* pFaction = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pFaction) && pFaction && IS_TYPE(pFaction, TESFaction)) {
+		*result = pFaction->kData.uiFlags;
+		if (IsConsoleMode())
+			Console_Print("GetFactionFlags >> %.f", *result);
 	}
 	return true;
 }
@@ -2583,10 +2585,11 @@ bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetRecipeCategoryFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESRecipeCategory* category = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &category) && category && IS_TYPE(category, TESRecipeCategory)) {
-		*result = category->flags;
-		if (IsConsoleMode()) Console_Print("GetRecipeCategoryFlags >> %.f", *result);
+	TESRecipeCategory* pCategory = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCategory) && pCategory && IS_TYPE(pCategory, TESRecipeCategory)) {
+		*result = pCategory->ucFlags;
+		if (IsConsoleMode()) 
+			Console_Print("GetRecipeCategoryFlags >> %.f", *result);
 	}
 	return true;
 }
@@ -2674,7 +2677,7 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 		case FORM_TYPE::TESObjectIMOD:
 		{
 			const TESObjectIMOD* pItemMod = static_cast<TESObjectIMOD*>(pForm);
-			const char* pModDescription = pItemMod->description.GetDescription(pForm, 'CSED');
+			const char* pModDescription = pItemMod->GetDescription(pForm, 'CSED');
 			if (pModDescription)
 				strcpy_s(cEffects, sizeof(cEffects), pModDescription);
 		}

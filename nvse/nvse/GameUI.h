@@ -1695,7 +1695,7 @@ public:
 	uint32_t						unk068;			// 068
 	ListBox<TESRecipe>			recipeList;		// 06C
 	ListBox<TESRecipe>* unk09C;		// 09C
-	ListBox<RecipeComponent>	componentList;	// 0A0
+	ListBox<TESRecipeComponent>	componentList;	// 0A0
 	ListBox<TESConditionItem>		conditionList;	// 0D0
 	uint32_t						unk100;			// 100
 };

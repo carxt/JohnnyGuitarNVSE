@@ -107,6 +107,11 @@
 #include "Obsidian/TESChallenge.hpp"
 #include "Obsidian/TESLoadScreenType.hpp"
 #include "Obsidian/TESReputation.hpp"
+#include "Obsidian/TESObjectIMOD.hpp"
+#include "Obsidian/TESCasinoChips.hpp"
+#include "Obsidian/TESRecipe.hpp"
+#include "Obsidian/MediaSet.hpp"
+#include "Obsidian/MediaLocationController.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -1185,24 +1190,6 @@ public:
 };
 static_assert(sizeof(TESObjectLIGH) == 0x0C8);
 
-// 9C
-class TESCasinoChips : public TESBoundObject {
-public:
-	TESCasinoChips();
-	~TESCasinoChips();
-
-	TESFullName					fullName;		// 30
-	TESModelTextureSwap			modelSwap;		// 3C
-	TESIcon						icon;			// 5C
-	BGSMessageIcon				messageIcon;	// 68
-	TESValueForm				value;			// 78
-	BGSDestructibleObjectForm	destructible;	// 80
-	BGSPickupPutdownSounds		pickupPutdown;	// 88
-
-	uint32_t						unk94[2];		// 94
-};
-static_assert(sizeof(TESCasinoChips) == 0x9C);
-
 // BGSStaticCollection (50)
 class BGSStaticCollection;
 
@@ -1217,24 +1204,6 @@ class TESFlora;
 
 // TESFurniture (88)
 class TESFurniture;
-
-class TESObjectIMOD : public TESBoundObject {
-public:
-	TESObjectIMOD();
-	~TESObjectIMOD();
-
-	// bases
-	TESFullName					name;				// 030
-	TESModelTextureSwap			model;				// 03C
-	TESIcon						icon;				// 05C
-	TESScriptableForm			scriptForm;			// 068
-	TESDescription				description;		// 074
-	TESValueForm				value;				// 07C
-	TESWeightForm				weight;				// 084
-	BGSDestructibleObjectForm	destructible;		// 08C
-	BGSMessageIcon				messageIcon;		// 094
-	BGSPickupPutdownSounds		pickupPutdownSounds;// 0A4
-};
 
 // 388
 class TESObjectWEAP : public TESBoundObject {
@@ -2769,56 +2738,6 @@ public:
 	float	flt008;
 };
 
-// 2C
-class TESRecipeCategory : public TESForm {
-public:
-	TESRecipeCategory();
-	~TESRecipeCategory();
-
-	TESFullName			fullName;	// 18
-
-	uint32_t				flags;		// 24
-};
-
-static_assert(sizeof(TESRecipeCategory) == 0x28);
-
-struct RecipeComponent {
-	uint32_t		quantity;
-	TESForm* item;
-};
-
-// 5C
-class TESRecipe : public TESForm {
-public:
-	TESRecipe();
-	~TESRecipe();
-
-	struct ComponentList : tList<RecipeComponent> {
-		void* GetComponents(Script* scriptObj);
-		void AddComponent(TESForm* form, uint32_t quantity);
-		uint32_t RemoveComponent(TESForm* form);
-		void ReplaceComponent(TESForm* form, TESForm* replace);
-		uint32_t GetQuantity(TESForm* form);
-		void SetQuantity(TESForm* form, uint32_t quantity);
-	};
-
-	TESFullName				fullName;		// 18
-
-	uint32_t					reqSkill;		// 24
-	uint32_t					reqSkillLevel;	// 28
-	uint32_t					categoryID;		// 2C
-	uint32_t					subCategoryID;	// 30
-	TESCondition			conditions;		// 34
-	ComponentList			inputs;			// 3C
-	ComponentList			outputs;		// 44
-	uint32_t					unk4C;			// 4C
-	uint32_t					unk50;			// 50
-	TESRecipeCategory* category;		// 54
-	TESRecipeCategory* subCategory;	// 58
-};
-
-static_assert(sizeof(TESRecipe) == 0x5C);
-
 // TESLevSpell (44)
 class TESLevSpell;
 
@@ -3112,27 +3031,6 @@ public:
 };
 static_assert(sizeof(BGSBodyPartData) == 0x74);
 
-// B8
-class MediaLocationController : public TESForm {
-public:
-	MediaLocationController();
-	~MediaLocationController();
-
-	TESFullName			fullName;		// 18
-	uint32_t				unk24[20];		// 24
-	float				flt70;			// 70
-	float				flt74;			// 74
-	float				flt7C;			// 7C
-	uint32_t				unk80[2];		// 80
-	tList<void>			list88;			// 88
-	tList<void>			list90;			// 90
-	tList<void>			list98;			// 98
-	tList<void>			listA0;			// A0
-	tList<void>			listA8;			// A8
-	tList<void>			listB0;			// B0
-};
-static_assert(sizeof(MediaLocationController) == 0xB8);
-
 // BGSCameraPath (38)
 class BGSCameraPath;
 
@@ -3277,28 +3175,5 @@ public:
 	TESTexture holesTexture;
 };
 static_assert(sizeof(TESEffectShader) == 0x170);
-
-class MediaSet : public TESForm {
-public:
-	MediaSet();
-	~MediaSet();
-	struct MediaSetData {
-		BSString filepath; // NAM2 NAM3 NAM4 NAM5 NAM6 NAM7
-		float dB; // NAM8 NAM9 NAM0 ANAM BNAM CNAM
-		float boundary; // JNAM KNAM LNAM MNAM NNAM ONAM
-	};
-	TESFullName	fullName;
-	uint32_t unk24[8];
-	uint32_t type; // NAM1
-	MediaSetData data[6];
-	uint32_t flags; //PNAM
-	float DNAM;
-	float ENAM;
-	float FNAM;
-	float GNAM;
-	TESSound* HNAM;
-	TESSound* INAM;
-};
-static_assert(sizeof(MediaSet) == 0xC4);
 
 extern TESForm* __fastcall GetTESForm(const TESForm* apForm);
