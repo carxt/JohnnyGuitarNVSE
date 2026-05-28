@@ -2690,64 +2690,61 @@ bool Cmd_RemapLand_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESForm* form = NULL;
-	char effects[0x100] = {};
+	TESForm* pForm = nullptr;
 
-	ExtractArgsEx(EXTRACT_ARGS_EX, &form);
-	if (!form) {
-		if (!thisObj) return true;
-		form = thisObj->baseForm;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pForm);
+
+	if (!pForm) {
+		if (!thisObj) 
+			return true;
+		pForm = thisObj->baseForm;
 	}
 
-	switch (form->GetFormType()) {
+	if (!pForm)
+		return true;
 
+	char cEffects[512] = {};
+
+	switch (pForm->GetFormType()) {
 		// Item mod
 		case FORM_TYPE::TESObjectIMOD:
 		{
-			TESObjectIMOD* itemMod = static_cast<TESObjectIMOD*>(form);
-			if (itemMod) {
-				const char* modDesc = itemMod->description.Get(itemMod, 'CSED');
-				if (modDesc) {
-					strcpy_s(effects, sizeof(effects), modDesc);
-				}
-			}
+			const TESObjectIMOD* pItemMod = static_cast<TESObjectIMOD*>(pForm);
+			const char* pModDescription = pItemMod->description.Get(pForm, 'CSED');
+			if (pModDescription)
+				strcpy_s(cEffects, sizeof(cEffects), pModDescription);
 		}
 		break;
 
 		// Ingestible
 		case FORM_TYPE::AlchemyItem:
 		{
-			AlchemyItem* ingestible = static_cast<AlchemyItem*>(form);
-			if (ingestible) {
-				ThisCall(0x406620, &(ingestible->magicItem.list), effects, sizeof(effects));
-			}
+			const AlchemyItem* pAlchItem = static_cast<AlchemyItem*>(pForm);
+			pAlchItem->magicItem.list.GetEffectsString(cEffects, sizeof(cEffects));
 		}
 		break;
 
 		// Ammo
 		case FORM_TYPE::TESAmmo:
 		{
-			TESAmmo* ammo = static_cast<TESAmmo*>(form);
-			if (ammo) {
-				ThisCall(0x503A70, ammo, effects, sizeof(effects));
-			}
+			const TESAmmo* pAmmo = static_cast<TESAmmo*>(pForm);
+			pAmmo->GetEffectNames(cEffects, sizeof(cEffects));
 		}
 		break;
 
 		// Weapon & Armor
 		default:
 		{
-			TESEnchantableForm* enchantable = DYNAMIC_CAST(form, TESForm, TESEnchantableForm);
-			if (enchantable && enchantable->enchantItem) {
-				ThisCall(0x406620, &(enchantable->enchantItem->magicItem.list), effects, sizeof(effects));
-			}
+			const EnchantmentItem* pItem = TESEnchantableForm::GetFormEnchanting(pForm);
+			if (pItem)
+				pItem->magicItem.list.GetEffectsString(cEffects, sizeof(cEffects));
 		}
 	}
 
-	g_strInterface->Assign(PASS_COMMAND_ARGS, effects);
+	g_strInterface->Assign(PASS_COMMAND_ARGS, cEffects);
 
 	if (IsConsoleMode())
-		Console_Print("GetItemEffectString >> %s", effects);
+		Console_Print("GetItemEffectString >> %s", cEffects);
 
 	return true;
 }
