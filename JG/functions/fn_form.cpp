@@ -458,7 +458,7 @@ bool Cmd_GetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	TESWorldSpace* world = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &world) && world && IS_TYPE(world, TESWorldSpace)) {
 		BGSEncounterZone* zone = world->pEncounterZone;
-		if (zone) 
+		if (zone)
 			*(uint32_t*)result = zone->GetFormID();
 	}
 	return true;
@@ -2682,8 +2682,72 @@ bool Cmd_RemapLand_Execute(COMMAND_ARGS) {
 				TaskQueue::QueueTask(kTask);
 			}
 		}
-		
+
 		*result = 1;
 	}
+	return true;
+}
+
+bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* form = NULL;
+	char extraEffects[0x100] = {};
+
+	ExtractArgsEx(EXTRACT_ARGS_EX, &form);
+	if (!form) {
+		if (!thisObj) return true;
+		form = thisObj->baseForm;
+	}
+
+	switch (form->GetFormType()) {
+		
+		// Item mod
+		case FORM_TYPE::TESObjectIMOD:
+		{
+			TESObjectIMOD* itemMod = static_cast<TESObjectIMOD*>(form);
+			if (itemMod) {
+				const char* modDesc = itemMod->description.Get(itemMod, 'CSED');
+				if (modDesc) {
+					strcpy_s(extraEffects, sizeof(extraEffects), modDesc);
+				}
+			}
+		}
+		break;
+		
+		// Ingestible
+		case FORM_TYPE::AlchemyItem:
+		{
+			AlchemyItem* ingestible = static_cast<AlchemyItem*>(form);
+			if (ingestible) {
+				ThisCall(0x406620, &(ingestible->magicItem.list), extraEffects, sizeof(extraEffects));
+			}
+		}
+		break;
+		
+		// Ammo
+		case FORM_TYPE::TESAmmo:
+		{
+			TESAmmo* ammo = static_cast<TESAmmo*>(form);
+			if (ammo) {
+				ThisCall(0x503A70, ammo, extraEffects, sizeof(extraEffects));
+			}
+		}
+		break;
+		
+		// Weapon & Armor
+		default:
+		{
+			TESEnchantableForm* enchantable = DYNAMIC_CAST(form, TESForm, TESEnchantableForm);
+			if (enchantable && enchantable->enchantItem) {
+				ThisCall(0x406620, &(enchantable->enchantItem->magicItem.list), extraEffects, sizeof(extraEffects));
+			}
+		}
+	}
+
+	g_strInterface->Assign(PASS_COMMAND_ARGS, extraEffects);
+
+	if (IsConsoleMode())
+		Console_Print("GetItemEffectString >> %s", extraEffects);
+
 	return true;
 }
