@@ -393,6 +393,10 @@ public:
 	uint16_t	unk1;					// 0A
 	uint32_t	unk2;					// 0C
 	// 010
+
+	static EnchantmentItem* GetFormEnchanting(TESForm* apForm) {
+		return CdeclCall<EnchantmentItem*>(0x4BE330, apForm);
+	}
 };
 
 class TESImageSpaceModifier;
@@ -527,6 +531,10 @@ public:
 	uint32_t uiHostileCount;
 
 	bool RemoveNthEffect(uint32_t index);
+
+	void GetEffectsString(char* apBuffer, uint32_t auiBufferSize) const {
+		ThisCall(0x406620, this, apBuffer, auiBufferSize);
+	}
 };
 
 static_assert(sizeof(EffectItemList) == 0x10);
@@ -1193,7 +1201,7 @@ public:
 	TESDescription();
 	~TESDescription();
 
-	virtual const char* Get(TESForm* overrideForm, uint32_t chunkID);
+	virtual const char* Get(TESForm* overrideForm, uint32_t chunkID) const;
 
 	uint32_t	formDiskOffset;	// 4 - how does this work for descriptions in mods?
 	// maybe extracts the mod ID then uses that to find the src file?
@@ -2851,6 +2859,10 @@ public:
 	bool IsNonPlayable() { return (flags & kFlags_NonPlayable) == kFlags_NonPlayable; }
 	bool IsPlayable() { return !IsNonPlayable(); }
 	void SetPlayable(bool doset) { if (doset) flags &= ~kFlags_NonPlayable; else flags |= kFlags_NonPlayable; }
+
+	void GetEffectNames(char* apBuffer, uint32_t auiBufferSize) const {
+		ThisCall(0x503A70, this, apBuffer, auiBufferSize);
+	}
 };
 
 static_assert(sizeof(TESAmmo) == 0xDC);
