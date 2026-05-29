@@ -172,6 +172,10 @@ public:
 	static void ClearGunScope() {
 		CdeclCall(0x709CA0);
 	}
+
+	static bool IsLoadingMenuVisible() {
+		return CdeclCall<bool>(0x705E80);
+	}
 };
 
 struct HighlightedRef {

@@ -81,6 +81,7 @@ namespace Utils {
 					++uiPlayingAnims;
 			}
 		}
+
 		if (!uiPlayingAnims)
 			apManager->SetActive(false);
 	}
@@ -159,8 +160,8 @@ namespace CameraOverlay {
 	struct Overlay {
 		TESObjectREFR*		pReference = nullptr;
 
-		NiAVObject* GetRoot() const {
-			return pReference->Get3DSimple();
+		NiNode* GetRoot() const {
+			return static_cast<NiNode*>(pReference->Get3DSimple());
 		}
 
 		NiNode* __fastcall Initialize(const char* apName) {
@@ -258,6 +259,21 @@ namespace CameraOverlay {
 	bool __fastcall RenderOverlay(BSRenderedTexture* apTexture, uint32_t aeOverlay) {
 		bool bRendered = false;
 		if (spSceneOverlayRoot && spSceneOverlayRoot->GetChildCount()) [[likely]] {
+			{
+				bool bHasChildren = false;
+				for (uint32_t i = 0; i < CameraVariants::COUNT; ++i) {
+					auto& rOverlay = kOverlays[aeOverlay][i];
+					if (rOverlay.pReference) {
+						NiNode* pRoot = rOverlay.GetRoot();
+						if (pRoot)
+							bHasChildren |= pRoot->GetChildCount() != 0;
+					}
+				}
+
+				if (!bHasChildren)
+					return bRendered;
+			}
+
 			ShadowSceneNode* pSceneNode = BSShaderManager::GetShadowSceneNode(BSShaderManager::SceneGraphType::WORLD);
 
 			spAccumulator->pActiveShadowSceneNode = pSceneNode;
@@ -349,7 +365,7 @@ namespace CameraOverlay {
 	class InterfaceRender : public InterfaceManager {
 	public:
 		void RenderUIHook(BSCullingProcess* apCuller, bool abPipboyVisible) {
-			if (BSRenderedTexture::IsOutsideFrame()) [[unlikely]] {
+			if (BSRenderedTexture::IsOutsideFrame() || Interface::IsLoadingMenuVisible()) [[unlikely]] {
 				ThisCall(kRenderUIDetour.GetOverwrittenAddr(), this, apCuller, abPipboyVisible);
 			}
 			else [[likely]] {
@@ -371,15 +387,6 @@ namespace CameraOverlay {
 			}
 		}
 	};
-
-
-	CallDetour kSaveReset;
-	bool __fastcall ResetGameHook(void* apThis, void*, void* apFile) {
-		bool bResult = ThisCall<bool>(kSaveReset.GetOverwrittenAddr(), apThis, apFile);
-		if (bResult)
-			Reset();
-		return bResult;
-	}
 
 
 	static NiCamera* CreateCamera(bool abOrtho) {
@@ -464,7 +471,6 @@ namespace CameraOverlay {
 
 		kPostISRenderDetour.ReplaceCall(0x8703F1, PostISRenderHook);
 		kRenderUIDetour.ReplaceCallEx(0x7144D3, &InterfaceRender::RenderUIHook);
-		kSaveReset.ReplaceCall(0x85081D, ResetGameHook);
 	}
 
 	void Init() {
