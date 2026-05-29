@@ -734,6 +734,9 @@
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\EffectSetting.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -2018,7 +2021,13 @@
     <ClInclude Include="internal\Game\Bethesda\MagicItemForm.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\EffectArchetypes.hpp">
+    <ClInclude Include="internal\Game\Bethesda\TESTexture1024.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadManager.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
