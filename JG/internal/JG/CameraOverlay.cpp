@@ -234,7 +234,9 @@ namespace CameraOverlay {
 
 			const bool bEmptyFrame = BSRenderedTexture::IsOutsideFrame();
 			
+#ifdef _DEBUG
 			D3DPERF_BeginEvent(0, L"Overlay Render");
+#endif
 
 			if (bEmptyFrame)
 				BSRenderedTexture::StartOffscreen(aeClearFlags, apRenderTarget);
@@ -248,7 +250,9 @@ namespace CameraOverlay {
 			else
 				BSRenderedTexture::End();
 
+#ifdef _DEBUG
 			D3DPERF_EndEvent();
+#endif
 
 			return true;
 		}
