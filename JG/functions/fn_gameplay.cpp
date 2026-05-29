@@ -594,10 +594,16 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 
 
 
-bool __fastcall ValidTempEffect(EffectItem* effectItem) {
-	if (!effectItem || (effectItem->duration <= 0) || !effectItem->setting) return false;
-	uint8_t archtype = effectItem->setting->archtype;
-	return !archtype || ((archtype == 1) && (effectItem->setting->effectFlags & 0x2000)) || ((archtype > 10) && (archtype < 14)) || (archtype == 24) || (archtype > 33);
+bool __fastcall ValidTempEffect(EffectItem* apEffectItem) {
+	if (!apEffectItem || (apEffectItem->GetDuration() <= 0) || !apEffectItem->GetEffectSetting())
+		return false;
+
+	const auto eArchetype = apEffectItem->GetEffectSetting()->GetEffectArchetype();
+	return !eArchetype == EffectArchetypes::Type::VALUE_MODIFIER
+		|| (eArchetype == EffectArchetypes::Type::SCRIPT && apEffectItem->GetEffectSetting()->GetFlags().bDisplayEffectName)
+		|| (eArchetype >= EffectArchetypes::Type::INVISIBILITY && eArchetype <= EffectArchetypes::Type::DARKNESS)
+		|| (eArchetype == EffectArchetypes::Type::PARALYSIS)
+		|| (eArchetype >= EffectArchetypes::Type::CONCUSSION);
 }
 
 
@@ -608,7 +614,7 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &fTime) && sound && IS_TYPE(sound, TESSound)) {
 		TESObjectREFR* ref = thisObj;
 		if (ref == nullptr) {
-			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
+			ref = PlayerCharacter::GetSingleton();
 		}
 		if (ref->Get3DSimple()) {
 			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
@@ -923,33 +929,36 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	*result = 0;
-	Actor* actor = static_cast<Actor*>(thisObj);
-	ItemChange* weapInfo = actor->baseProcess->GetWeaponInfo();
-	if (weapInfo && weapInfo->pObject) {
-		bool hasDecreaseSpreadEffect = ThisCall<bool>(0x4BDA70, weapInfo, 3);
-		double minSpread = ThisCall<double>(0x524B80, weapInfo->pObject, hasDecreaseSpreadEffect);
-		double weapSpread = ThisCall<float>(0x524BE0, weapInfo->pObject, hasDecreaseSpreadEffect);
-		double spread = ThisCall<double>(0x8B0DD0, actor, 1);
+	Actor* pActor = static_cast<Actor*>(thisObj);
+	if (!thisObj->IsActor() || !pActor->baseProcess || pActor->baseProcess->GetProcessLevel() > PROCESS_TYPE::MIDDLE_HIGH)
+		return true;
 
-		float totalSpread = (weapSpread * spread + minSpread) * 0.01745329238474369;
+	ItemChange* pWeaponItem = pActor->baseProcess->GetCurrentWeapon();
+	if (pWeaponItem && pWeaponItem->pObject) {
+		bool bDecreaseSpread = pWeaponItem->HasModEffectActive(WEAPON_MOD_EFFECT_TYPE::DECREASE_SPREAD);
+		float fMinSpread = ThisCall<float>(0x524B80, pWeaponItem->pObject, bDecreaseSpread); // TESObjectWEAP::GetMinSpread
+		float fWeapSpread = ThisCall<float>(0x524BE0, pWeaponItem->pObject, bDecreaseSpread); // TESObjectWEAP::GetMaxSpread
+		float fSpread = ThisCall<float>(0x8B0DD0, pActor, 1); // Actor::GetGunSkill
 
-		TESAmmo* eqAmmo = ThisCall<TESAmmo*>(0x525980, weapInfo->pObject, static_cast<MobileObject*>(actor));
-		totalSpread = CdeclCall<float>(0x59A030, 3, (eqAmmo ? eqAmmo->GetAmmoEffectList() : nullptr), totalSpread);
+		float fTotalSpread = (fWeapSpread * fSpread + fMinSpread) * 0.01745329238474369;
 
-		double spreadPenalty = ThisCall<double>(0x8B0DD0, actor, 2);
+		TESAmmo* pAmmo = ThisCall<TESAmmo*>(0x525980, pWeaponItem->pObject, pActor); // TESObjectWEAP::GetCurrentAmmo
+		fTotalSpread = TESAmmoEffect::ApplyAmmoEffect(AMMO_EFFECT_TYPE::SPREAD, (pAmmo ? pAmmo->GetAmmoEffectList() : nullptr), fTotalSpread);
 
-		totalSpread += spreadPenalty * GameSettingCollection::fNPCMaxGunWobbleAngle->Float() * 0.01745329238474369;
+		float fSpreadPenalty = ThisCall<float>(0x8B0DD0, pActor, 2); // Actor::GetGunSkill
 
-		float noIdea = ThisCall<HighProcess*>(0x8D8520, actor)->angle1D0;
-		totalSpread = totalSpread + noIdea;
+		fTotalSpread += fSpreadPenalty * GameSettingCollection::fNPCMaxGunWobbleAngle->Float() * 0.01745329238474369f;
 
-		bool hasSplitBeamEffect = ThisCall<bool>(0x4BDA70, weapInfo, 0xC);
-		if (hasSplitBeamEffect) {
-			totalSpread *= ThisCall<float>(0x4BCF60, weapInfo->pObject, 0xC, 1);
-		}
-		*result = totalSpread;
+		fTotalSpread = fTotalSpread + static_cast<MiddleHighProcess*>(pActor->baseProcess)->fAimLooking;
+
+		if (pWeaponItem->HasModEffectActive(WEAPON_MOD_EFFECT_TYPE::SPLIT_BEAM))
+			fTotalSpread *= ThisCall<float>(0x4BCF60, pWeaponItem->pObject, WEAPON_MOD_EFFECT_TYPE::SPLIT_BEAM, 1); // TESObjectWEAP::GetModEffectValue
+
+		*result = fTotalSpread;
 	}
-	if (IsConsoleMode()) Console_Print("GetCalculatedSpread >> %f", *result);
+	if (IsConsoleMode()) 
+		Console_Print("GetCalculatedSpread >> %f", *result);
+
 	return true;
 }
 
@@ -1223,55 +1232,53 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
 
 bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ActorValue::Index avCode;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode)) {
+	ActorValue::Index eActorValue;
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &eActorValue)) {
 		Actor* actor = (Actor*)thisObj;
 		ActorValueOwner* avOwner = &actor->avOwner;
-		float oldVal = avOwner->GetActorValueF(avCode);
+		float oldVal = avOwner->GetActorValueF(eActorValue);
 
 		tList<void>* actorPermSetAVList = &actor->list0E0;
-		void* avEntry = ThisCall<void*>(0x937760, actorPermSetAVList, avCode);
-		ThisCall(0x937400, actorPermSetAVList, avEntry);
+		void* avEntry = ThisCall<void*>(0x937760, actorPermSetAVList, eActorValue); // ModifierList::GetModifierItem
+		ThisCall(0x937400, actorPermSetAVList, avEntry); // ModifierList::DeleteModifier
 		thisObj->AddChange(0x400000);
 
 		if (!actor->IsPlayerRef()) {
 			BaseProcess* base = actor->baseProcess;
-			if (base) {
-				base->Unk_EC(avCode);
-			}
+			if (base)
+				base->SetCachedActorValueOutOfDate(eActorValue);
 		}
 
 		// call handle change with new value
-		float newVal = avOwner->GetActorValueF(avCode);
-		HandleActorValueChange(avOwner, avCode, oldVal, newVal, nullptr);
+		float newVal = avOwner->GetActorValueF(eActorValue);
+		HandleActorValueChange(avOwner, eActorValue, oldVal, newVal, nullptr);
 		*result = 1;
 	}
 	return true;
 }
 
 bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
-	ActorValue::Index avCode;
+	ActorValue::Index eActorValue;
 	*result = 0;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode)) {
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &eActorValue)) {
 		Actor* actor = (Actor*)thisObj;
 		ActorValueOwner* avOwner = &actor->avOwner;
-		float oldVal = avOwner->GetActorValueF(avCode);
+		float oldVal = avOwner->GetActorValueF(eActorValue);
 
 		tList<void>* actorPermForceAVList = &actor->list0D0;
-		void* avEntry = ThisCall<void*>(0x937760, actorPermForceAVList, avCode);
+		void* avEntry = ThisCall<void*>(0x937760, actorPermForceAVList, eActorValue);
 		ThisCall(0x937400, actorPermForceAVList, avEntry);
 		thisObj->AddChange(0x800000);
 
 		if (!actor->IsPlayerRef()) {
 			BaseProcess* base = actor->baseProcess;
-			if (base) {
-				base->Unk_EC(avCode);
-			}
+			if (base)
+				base->SetCachedActorValueOutOfDate(eActorValue);
 		}
 
 		// call handle change with new value
-		float newVal = avOwner->GetActorValueF(avCode);
-		HandleActorValueChange(avOwner, avCode, oldVal, newVal, nullptr);
+		float newVal = avOwner->GetActorValueF(eActorValue);
+		HandleActorValueChange(avOwner, eActorValue, oldVal, newVal, nullptr);
 		*result = 1;
 	}
 	return true;
@@ -1320,46 +1327,47 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
-	NiPoint3 Point;
+	NiPoint3 kVector;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &(Point.x), &(Point.y), &(Point.z))) {
-		((void(__cdecl*)(NiNode*, NiPoint3*, int))(0x62B8D0))(thisObj->Get3D(), &Point, 1);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kVector.x, &kVector.y, &kVector.z)) {
+		CdeclCall(0x62B8D0, thisObj->Get3D(), &kVector, true);
 		*result = 1;
 	}
 	return true;
 }
 
-bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS)
-{
-	//removal support by jazzisparis
+bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
+	// Removal support by jazzisparis
 	*result = 0;
-	AlchemyItem* poison = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &poison) && (!poison || (IS_TYPE(poison, AlchemyItem) && poison->IsPoison())))
-	{
-		TESObjectWEAP* weapon = nullptr;
-		ExtraDataList* xData = nullptr;
-		if (!thisObj->IsActor())
-		{
-			InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
-			if (!invRef) return true;
-			weapon = (TESObjectWEAP*)(invRef->data.type);
-			xData = invRef->data.xData;
-		}
-		else
-		{
-			ItemChange* wpnInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo();
-			if (wpnInfo && wpnInfo->pExtraLists)
-			{
-				weapon = ((TESObjectWEAP*)wpnInfo->pObject);
-				xData = wpnInfo->pExtraLists->GetItem();
+	AlchemyItem* pPoison = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pPoison) && (!pPoison || (IS_TYPE(pPoison, AlchemyItem) && pPoison->IsPoison()))) {
+		TESObjectWEAP* pWeapon = nullptr;
+		ExtraDataList* pExtraData = nullptr;
+		if (!thisObj->IsActor()) {
+			InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
+			if (!pInvRef)
+				return true;
+
+			if (!pInvRef->data.type)
+				return true;
+
+			if (pInvRef->data.type->GetFormType() == FORM_TYPE::TESObjectWEAP) {
+				pWeapon = static_cast<TESObjectWEAP*>(pInvRef->data.type);
+				pExtraData = pInvRef->data.xData;
 			}
 		}
-		if (weapon && xData && (weapon->weaponSkill == kAVCode_Unarmed || weapon->weaponSkill == kAVCode_MeleeWeapons))
-		{
-			if (poison)
-				ThisCall(0x419D10, xData, poison); // ExtraDataList::UpdateExtraPoison
+		else if (static_cast<Actor*>(thisObj)->baseProcess) {
+			ItemChange* pWeaponItem = static_cast<Actor*>(thisObj)->baseProcess->GetCurrentWeapon();
+			if (pWeaponItem && pWeaponItem->pExtraLists) {
+				pWeapon = static_cast<TESObjectWEAP*>(pWeaponItem->GetContainerObject());
+				pExtraData = pWeaponItem->pExtraLists->GetItem();
+			}
+		}
+		if (pWeapon && pExtraData && (pWeapon->weaponSkill == kAVCode_Unarmed || pWeapon->weaponSkill == kAVCode_MeleeWeapons)) {
+			if (pPoison)
+				ThisCall(0x419D10, pExtraData, pPoison); // ExtraDataList::UpdateExtraPoison
 			else
-				ThisCall(0x410140, xData, EXTRA_DATA_TYPE::ExtraPoison); // ExtraDataList::RemoveExtra
+				pExtraData->RemoveExtra<ExtraPoison>();
 			*result = 1;
 		}
 	}
@@ -1385,13 +1393,15 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS) {
-	uint32_t ToExtract;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &ToExtract)) DisabledLevelUp::isShowLevelUp = ToExtract;
+	BOOL bValue;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bValue))
+		DisabledLevelUp::isShowLevelUp = bValue;
 	return true;
 }
 
 bool Cmd_Jump_Execute(COMMAND_ARGS) {
-	if (!thisObj->IsActor()) return true;
+	if (!thisObj->IsActor()) 
+		return true;
 	((MobileObject*)thisObj)->Unk_95();
 	return true;
 }
@@ -1444,7 +1454,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 		if (!thisObj || !thisObj->IsActor())
 			return false;
 
-		Actor* pActor = (Actor*)thisObj;
+		Actor* pActor = static_cast<Actor*>(thisObj);
 
 		TESObjectWEAP* pWeapon = pActor->GetEquippedWeapon();
 		if (!pWeapon || pWeapon->IsMelee())

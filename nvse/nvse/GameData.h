@@ -42,15 +42,3 @@ static uint32_t* g_CreatedObjectSize = (uint32_t*)0x011C54D0;
 #else
 #error
 #endif
-
-// 10
-class BoundObjectListHead {
-public:
-	BoundObjectListHead();
-	~BoundObjectListHead();
-
-	uint32_t			boundObjectCount;	// 0
-	TESBoundObject* first;			// 4
-	TESBoundObject* last;				// 8
-	uint32_t			unkC;				// C
-};

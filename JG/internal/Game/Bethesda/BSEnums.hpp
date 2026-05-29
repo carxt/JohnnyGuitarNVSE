@@ -303,6 +303,7 @@ struct _ProcessType {
 	};
 };
 using PROCESS_TYPE = _ProcessType::Type;
+using PROCESS_LEVEL = _ProcessType::Type;
 
 struct _Confidence {
 	enum Type : uint8_t {
@@ -1665,6 +1666,29 @@ struct _AmmoOperationType {
 	};
 };
 using AMMO_OPERATION_TYPE = _AmmoOperationType::Type;
+
+struct _WeaponModEffectType {
+	enum Type : uint32_t {
+		NONE					= 0,
+		INCREASE_WEAPON_DAMAGE	= 1,
+		INCREASE_CLIP_SIZE		= 2,
+		DECREASE_SPREAD			= 3,
+		DECREASE_WEIGHT			= 4,
+		AMMO_REGEN_SHOT			= 5,
+		AMMO_REGEN_SECONDS		= 6,
+		EQUIP_SPEED				= 7,
+		FIRE_SPEED				= 8,
+		PROJECTILE_SPEED		= 9,
+		MAX_HEALTH				= 10,
+		SILENCE					= 11,
+		SPLIT_BEAM				= 12,
+		VATS_BONUS				= 13,
+		IRON_SITES				= 14,
+		VATS_SPECIAL_ATTACK		= 15,
+		COUNT,
+	};
+};
+using WEAPON_MOD_EFFECT_TYPE = _WeaponModEffectType::Type;
 
 struct _BipedObject {
 	enum Object : int32_t {

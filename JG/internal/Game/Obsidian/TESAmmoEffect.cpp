@@ -26,3 +26,13 @@ float TESAmmoEffect::GetEffectValue() const {
 void TESAmmoEffect::SetEffectValue(float afValue) {
 	kData.fValue = afValue;
 }
+
+// GAME - 0x59A1E0
+void TESAmmoEffect::BuildMenuString(char* apBuffer, uint32_t auiBufferSize) const {
+	ThisCall(0x59A1E0, this, apBuffer, auiBufferSize);
+}
+
+// GAME - 0x59A030
+float TESAmmoEffect::ApplyAmmoEffect(uint32_t aeType, BSSimpleList<TESAmmoEffect*>* apEffects, float afDamage) {
+	return CdeclCall<float>(0x59A030, aeType, apEffects, afDamage);
+}

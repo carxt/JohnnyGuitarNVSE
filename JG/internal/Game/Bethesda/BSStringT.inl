@@ -19,7 +19,17 @@ inline BSStringT<T>::BSStringT(const T* apText) {
 template<typename T>
 inline BSStringT<T>::BSStringT(const BSStringT& arSrc) {
 	Init();
-	Set(arSrc.pString);
+	Set(arSrc);
+}
+
+template<typename T>
+inline BSStringT<T>::BSStringT(BSStringT&& arSrc) {
+	pString = arSrc.pString;
+	usLength = arSrc.usLength;
+	usMaxLength = arSrc.usMaxLength;
+	arSrc.pString = nullptr;
+	arSrc.usLength = 0;
+	arSrc.usMaxLength = 0;
 }
 
 // GAME - 0x403970
@@ -72,6 +82,11 @@ inline uint16_t BSStringT<T>::GetMaxLength() const {
 template<typename T>
 inline void BSStringT<T>::SetMaxLength(uint32_t auiLength) {
 	usMaxLength = auiLength > UINT16_MAX ? UINT16_MAX : auiLength;
+}
+
+template<typename T>
+inline uint32_t BSStringT<T>::GetByteLengthWithNull() const {
+	return GetLength() + sizeof(T);
 }
 
 // GAME - 0x4037F0
@@ -175,8 +190,31 @@ inline int32_t BSStringT<T>::StrCmp(const BSStringT<T>& arOther, bool abNotCaseS
 
 // GAME - 0x438390
 template<typename T>
-inline void BSStringT<T>::operator=(const T* apText) {
+inline BSStringT<T>& BSStringT<T>::operator=(const T* apText) {
 	Set(apText);
+	return *this;
+}
+
+// GAME - 0x501C10
+template<typename T>
+inline BSStringT<T>& BSStringT<T>::operator=(const BSStringT<T>& arOther) {
+	Set(arOther);
+	return *this;
+}
+
+template<typename T>
+inline BSStringT<T>& BSStringT<T>::operator=(BSStringT<T>&& arOther) {
+	pString = arOther.pString;
+	usLength = arOther.usLength;
+	usMaxLength = arOther.usMaxLength;
+	arOther.pString = nullptr;
+	arOther.usLength = 0;
+	arOther.usMaxLength = 0;
+}
+
+template<typename T>
+inline bool BSStringT<T>::operator==(const T* apText) const {
+	return StrCmp(apText, true) == 0;
 }
 
 // GAME - 0x501C60
@@ -187,30 +225,46 @@ inline bool BSStringT<T>::operator==(const BSStringT<T>& arOther) const {
 
 // GAME - 0x404820
 template<typename T>
-inline BSStringT<T>* BSStringT<T>::operator+=(const T* apText) {
+inline BSStringT<T>& BSStringT<T>::operator+=(const T* apText) {
 	if (!apText)
-		return this;
+		return *this;
 
 	if (GetString()) {
-		uint32_t uiAppendLength = strlen(apText);
-		uint32_t uiNewLength = GetLength() + uiAppendLength;
+		const uint32_t uiAppendLength = apText ? strlen(apText) : 0;
+		const uint32_t uiNewLength = GetLength() + uiAppendLength;
 		if (uiNewLength > GetMaxLength()) {
 			Set(GetString(), uiNewLength);
 		}
-		uint32_t uiLength = GetLength();
+		const uint32_t uiLength = GetLength();
 		memcpy(&pString[uiLength], apText, uiAppendLength + sizeof(T));
 		SetLength(uiNewLength);
 	}
 	else {
 		Set(apText);
 	}
-	return this;
+	return *this;
 }
 
 // GAME - 0x7E0D80
 template<typename T>
-inline BSStringT<T>* BSStringT<T>::operator+=(const BSStringT<T>& arOther) {
-	return operator+=(arOther.GetString());
+inline BSStringT<T>& BSStringT<T>::operator+=(const BSStringT<T>& arOther) {
+	if (!arOther)
+		return *this;
+
+	if (GetString()) {
+		const uint32_t uiAppendLength = arOther.GetLength();
+		const uint32_t uiNewLength = GetLength() + uiAppendLength;
+		if (uiNewLength > GetMaxLength()) {
+			Set(GetString(), uiNewLength);
+		}
+		const uint32_t uiLength = GetLength();
+		memcpy(&pString[uiLength], arOther.GetString(), arOther.GetByteLengthWithNull());
+		SetLength(uiNewLength);
+	}
+	else {
+		Set(arOther);
+	}
+	return *this;
 }
 
 // GAME - 0x83DA30

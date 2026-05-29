@@ -761,27 +761,6 @@ struct PlayingMusic
 
 static_assert(sizeof(PlayingMusic) == 0x288);
 
-// 34
-struct GameTimeGlobals
-{
-	TESGlobal* year; // 00
-	TESGlobal* month; // 04
-	TESGlobal* day; // 08
-	TESGlobal* hour; // 0C
-	TESGlobal* daysPassed; // 10
-	TESGlobal* timeScale; // 14
-	uint32_t unk18; // 18
-	bool gameLoaded; // 1C
-	uint8_t pad1D[3]; // 1D
-	uint32_t unk20; // 20
-	uint32_t unk24; // 24
-	uint32_t unk28; // 28
-	float lastUpdHour; // 2C
-	uint32_t initialized; // 30
-
-	float GetDaysPassed(int bgnYear = 2281, int bgnMonth = 9, int bgnDay = 13);
-};
-
 // 10
 struct EffectArchTypeEntry
 {

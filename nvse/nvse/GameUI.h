@@ -1508,7 +1508,7 @@ public:
 };
 static_assert(sizeof(HackingMenu) == 0x1DC);
 
-struct ActorHitData;
+class HitData;
 struct VATSTargetInfo {
 	uint32_t actionType;
 	uint8_t isSuccess;
@@ -1520,7 +1520,7 @@ struct VATSTargetInfo {
 	uint8_t gap0A[2];
 	TESObjectREFR* ref;
 	uint32_t avCode;
-	ActorHitData* hitData;
+	HitData* hitData;
 	float unk18;
 	float unk1C;
 	float apCost;

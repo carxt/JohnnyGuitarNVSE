@@ -40,9 +40,6 @@ extern const _CreateFormInstance CreateFormInstance;
 bool IsConsoleMode();
 bool GetConsoleEcho();
 void SetConsoleEcho(bool doEcho);
-const char* GetFullName(TESForm* baseForm);
-const char* GetActorValueString(uint32_t actorValue); // should work now
-uint32_t GetActorValueForString(const char* strActorVal, bool bForScript = false);
 
 typedef char* (*_GetActorValueName)(uint32_t actorValueCode);
 extern const _GetActorValueName GetActorValueName;
@@ -78,15 +75,6 @@ typedef bool (*_QueueUIMessage)(const char* msgText, uint32_t iconType, const ch
 extern const _QueueUIMessage QueueUIMessage;
 
 const uint32_t kMaxMessageLength = 0x4000;
-
-#else
-
-typedef TESForm* (__cdecl* _GetFormByID)(const char* editorID);
-extern const _GetFormByID GetFormByID;
-
-typedef void(__cdecl* _ShowCompilerError)(ScriptBuffer* Buffer, const char* format, ...);
-extern const _ShowCompilerError		ShowCompilerError;
-
 #endif
 
 struct NVSEStringVarInterface;

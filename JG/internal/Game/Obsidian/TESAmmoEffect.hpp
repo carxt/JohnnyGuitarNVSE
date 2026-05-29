@@ -26,6 +26,10 @@ public:
 
 	float GetEffectValue() const;
 	void SetEffectValue(float afValue);
+
+	void BuildMenuString(char* apBuffer, uint32_t auiBufferSize) const;
+
+	static float ApplyAmmoEffect(uint32_t aeType, BSSimpleList<TESAmmoEffect*>* apEffects, float afDamage);
 };
 
 ASSERT_SIZE(TESAmmoEffect, 0x30);

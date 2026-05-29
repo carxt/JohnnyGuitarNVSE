@@ -299,9 +299,9 @@ namespace JohnnyEvents {
 		if (apActor == nullptr || apActor->baseProcess == nullptr) [[unlikely]]
 			return true; //early exit, no need to  error states because there's no baseProcess.
 
-		const uint32_t eOldLevel = apActor->baseProcess->processLevel;
+		const uint32_t eOldLevel = apActor->baseProcess->GetProcessLevel();
 		const bool bResult = ThisCall<bool>(originalCall, apActor);
-		const uint32_t eNewLevel = apActor->baseProcess->processLevel;
+		const uint32_t eNewLevel = apActor->baseProcess->GetProcessLevel();
 		if (eOldLevel != eNewLevel) {
 
 			{

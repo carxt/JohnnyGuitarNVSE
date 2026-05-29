@@ -184,10 +184,10 @@ bool Cmd_RGBtoHSV_Execute(COMMAND_ARGS) {
 
 // lmao
 bool Cmd_Sign_Execute(COMMAND_ARGS) {
-	float value;
+	float fValue = 0.f;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &value) && value != 0) {
-		*result = value > 0 ? 1 : -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fValue) && fValue != 0.f) {
+		*result = fValue > 0.f ? 1.f : -1.f;
 	}
 	return true;
 }
@@ -209,38 +209,42 @@ bool Cmd_Remap_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_Clamp_Execute(COMMAND_ARGS) {
-	float value = 0, min = 0, max = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &value, &min, &max)) {
-		*result = value;
-		if (value < min) {
-			*result = min;
-		}
-		else if (value > max) {
-			*result = max;
-		}
+	float fValue = 0.f, fMin = 0.f, fMax = 0.f;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fValue, &fMin, &fMax)) {
+		*result = fValue;
+		if (fValue < fMin)
+			*result = fMin;
+		else if (fValue > fMax)
+			*result = fMax;
 	}
 	return true;
 }
 
 bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NiPoint3 pos1;
-	NiPoint3 pos2;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &(pos1.x), &(pos1.y), &(pos1.z), &(pos2.x), &(pos2.y), &(pos2.z))) {
-		*result = NiNodeComputeDistance(&pos1, &pos2);
-		if (IsConsoleMode()) Console_Print("Get3DDistance >> %f", *result);
+	NiPoint3 kPosA;
+	NiPoint3 kPosB;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kPosA.x, &kPosA.y, &kPosA.z, &kPosB.x, &kPosB.y, &kPosB.z)) {
+		*result = kPosA.Distance(kPosB);
+		if (IsConsoleMode()) 
+			Console_Print("Get3DDistance >> %f", *result);
 	}
 	return true;
 }
 
 bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
-	Actor* actor = (Actor*)thisObj;
-	char NiName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &NiName) && actor->IsActor() && actor->baseProcess) {
-		NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
-		ActorHitData* hitData = actor->baseProcess->GetHitData();
-		if (!hitData || !t_Node) return true;
-		*result = NiNodeComputeDistance(&(t_Node->m_kWorld.m_kTranslate), &(hitData->impactPos));
+	Actor* pActor = static_cast<Actor*>(thisObj);
+	char cObjectName[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName) && pActor->IsActor() && pActor->baseProcess) {
+		NiAVObject* pObject = thisObj->GetNiBlock(cObjectName);
+		if (!pObject)
+			return true;
+
+		HitData* pHitData = pActor->baseProcess->GetLastHitData();
+		if (!pHitData)
+			return true;
+		
+		*result = pObject->m_kWorld.m_kTranslate.Distance(pHitData->kImpactPos);
 	}
 
 	return true;
@@ -248,47 +252,56 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 
 bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char NiName[MAX_PATH] = {};
-	NiPoint3 Coord;
-	if (!thisObj || !(ExtractArgsEx(EXTRACT_ARGS_EX, &NiName, &(Coord.x), &(Coord.y), &(Coord.z)))) return true;
-	NiAVObject* t_Node = thisObj->GetNiBlock(NiName);
-	if (!t_Node) return true;
-	*result = NiNodeComputeDistance(&(t_Node->m_kWorld.m_kTranslate), &Coord);
-	if (IsConsoleMode()) Console_Print("Get3DDistanceToNiNode >> %f", *result);
+	char cObjectName[MAX_PATH] = {};
+	NiPoint3 kPos;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &kPos.x, &kPos.y, &kPos.z)) {
+		NiAVObject* pObject = thisObj->GetNiBlock(cObjectName);
+		if (!pObject) 
+			return true;
+
+		*result = pObject->m_kWorld.m_kTranslate.Distance(kPos);
+
+		if (IsConsoleMode()) 
+			Console_Print("Get3DDistanceToNiNode >> %f", *result);
+	}
 	return true;
 }
 
 bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char NiName1[MAX_PATH], NiName2[MAX_PATH] = {};
-	TESObjectREFR* ref1, * ref2;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &ref1, &ref2, &NiName1, &NiName2))) return true;
-	NiAVObject* Node1 = ref1->GetNiBlock(NiName1);
-	NiAVObject* Node2 = ref2->GetNiBlock(NiName2);
-	if (!Node1 || !Node2) return true;
-	*result = NiNodeComputeDistance(&(Node1->m_kWorld.m_kTranslate), &(Node2->m_kWorld.m_kTranslate));
-	if (IsConsoleMode()) Console_Print("Get3DDistanceBetweenNiNodes >> %f", *result);
+	char cObjectAName[MAX_PATH] = {};
+	char cObjectBName[MAX_PATH] = {};
+	TESObjectREFR* pRefA = nullptr;
+	TESObjectREFR* pRefB = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRefA, &pRefB, &cObjectAName, &cObjectBName)) {
+		NiAVObject* pObjectA = pRefA->GetNiBlock(cObjectAName);
+		NiAVObject* pObjectB = pRefB->GetNiBlock(cObjectBName);
+		if (!pObjectA || !pObjectB)
+			return true;
+		
+		*result = pObjectA->m_kWorld.m_kTranslate.Distance(pObjectB->m_kWorld.m_kTranslate);
+		
+		if (IsConsoleMode()) 
+			Console_Print("Get3DDistanceBetweenNiNodes >> %f", *result);
+	}
 	return true;
 }
 
 bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 	*result = 0;
-	float xIn = 0, yIn = 0, zIn = 0;
-	uint32_t HandleType = 0;
-	char X_outS[VAR_NAME_SIZE], Y_outS[VAR_NAME_SIZE], Z_outS[VAR_NAME_SIZE];
-	TESObjectREFR* refr = nullptr;
+	NiPoint3 kPoint;
+	uint32_t eHandleType = 0;
+	char cOutX[VAR_NAME_SIZE], cOutY[VAR_NAME_SIZE], cOutZ[VAR_NAME_SIZE];
+	TESObjectREFR* pRef = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cOutX, &cOutY, &cOutZ, &kPoint.x, &kPoint.y, &kPoint.z, &eHandleType, &pRef)) {
+		if (pRef)
+			kPoint += pRef->pos;
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &xIn, &yIn, &zIn, &HandleType, &refr)) {
-		if (refr) {
-			xIn += refr->pos.x; yIn += refr->pos.y; zIn += refr->pos.z;
-		}
-		NiPoint3 NiPointBuffer = { 0,0,0 };
-		NiPointAssign(&NiPointBuffer, xIn, yIn, zIn);
 		float xOut = 0, yOut = 0, zOut = 0, outOfX = 0, outOfY = 0;
-		*result = (WorldToScreen(&NiPointBuffer, xOut, yOut, zOut, HandleType) ? 1 : 0);
-		setVarByName(PASS_VARARGS, X_outS, xOut);
-		setVarByName(PASS_VARARGS, Y_outS, yOut);
-		setVarByName(PASS_VARARGS, Z_outS, zOut);
+		*result = (WorldToScreen(&kPoint, xOut, yOut, zOut, eHandleType) ? 1 : 0);
+		setVarByName(PASS_VARARGS, cOutX, xOut);
+		setVarByName(PASS_VARARGS, cOutY, yOut);
+		setVarByName(PASS_VARARGS, cOutZ, zOut);
 	}
 	return true;
 }
@@ -296,19 +309,19 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float xIn = 0, yIn = 0, zIn = 0;
-	uint32_t HandleType = 0;
-	NiPoint3 NiPosIn = { 0,0,0 };
-	TESObjectREFR* refr = nullptr;
-	ScriptVar* X_outS, * Y_outS, * Z_outS;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &NiPosIn.x, &NiPosIn.y, &NiPosIn.z, &HandleType, &refr)) {
-		if (refr) {
-			NiPosIn.x += refr->pos.x; NiPosIn.y += refr->pos.y; NiPosIn.z += refr->pos.z;
-		}
-		NiPoint3 NiPosOut = { 0, 0, 0 };
-		*result = (WorldToScreen(&NiPosIn, NiPosOut.x, NiPosOut.y, NiPosOut.z, HandleType) ? 1 : 0);
-		X_outS->data = NiPosOut.x;
-		Y_outS->data = NiPosOut.y;
-		Z_outS->data = NiPosOut.z;
+	uint32_t eHandleType = 0;
+	NiPoint3 kPoint = { 0,0,0 };
+	TESObjectREFR* pRef = nullptr;
+	ScriptVar* pOutX, * pOutY, * pOutZ;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pOutX, &pOutY, &pOutZ, &kPoint.x, &kPoint.y, &kPoint.z, &eHandleType, &pRef)) {
+		if (pRef)
+			kPoint += pRef->pos;
+
+		NiPoint3 kOut = { 0, 0, 0 };
+		*result = (WorldToScreen(&kPoint, kOut.x, kOut.y, kOut.z, eHandleType) ? 1 : 0);
+		pOutX->data = kOut.x;
+		pOutY->data = kOut.y;
+		pOutZ->data = kOut.z;
 	}
 	return true;
 }

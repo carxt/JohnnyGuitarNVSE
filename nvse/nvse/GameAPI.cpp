@@ -18,10 +18,6 @@ typedef void* (*_GetSingleton)(bool canCreateNew);
 
 const _ExtractArgs ExtractArgs = (_ExtractArgs)0x005ACCB0;
 
-const _FormHeap_Allocate FormHeap_Allocate = (_FormHeap_Allocate)0x00401000;
-const _FormHeap_Free FormHeap_Free = (_FormHeap_Free)0x00401030;
-
-const _LookupFormByID LookupFormByID = (_LookupFormByID)0x004839C0;
 const _CreateFormInstance CreateFormInstance = (_CreateFormInstance)0x00465110;
 
 const _GetSingleton ConsoleManager_GetSingleton = (_GetSingleton)0x0071B160;
@@ -69,16 +65,6 @@ bool GetConsoleEcho() {
 
 void SetConsoleEcho(bool doEcho) {
 	*bEchoConsole = doEcho ? 1 : 0;
-}
-
-const char* GetFullName(TESForm* baseForm) {
-	if (baseForm) {
-		const char* pName = TESFullName::GetFullName(baseForm);
-		if (pName && pName[0])
-			return pName;
-		return "<no name>";
-	}
-	return "<NULL>";
 }
 
 ConsoleManager* ConsoleManager::GetSingleton(void) {
@@ -205,7 +191,7 @@ TESForm* ExtractFormFromFloat(uint8_t*& scriptData, Script* scriptObj, ScriptLoc
 
 	ScriptVar* var = eventList->GetVariable(varIdx);
 	if (var)
-		outForm = LookupFormByID(*((uint64_t*)&var->data));
+		outForm = TESForm::GetFormByNumericID(*((uint64_t*)&var->data));
 
 	return outForm;
 }
@@ -464,39 +450,6 @@ bool ExtractSetStatementVar(Script* script, ScriptLocals* eventList, void* scrip
 	}
 
 	return bExtracted;
-}
-
-// g_baseActorValueNames is only filled in after oblivion's global initializers run
-const char* GetActorValueString(uint32_t actorValue) {
-	const char* name = 0;
-	if (actorValue <= eActorVal_FalloutMax)
-		name = GetActorValueName(actorValue);
-	if (!name)
-		name = "unknown";
-
-	return name;
-}
-
-uint32_t GetActorValueForScript(const char* avStr) {
-	for (uint32_t i = 0; i <= eActorVal_FalloutMax; i++) {
-		char* name = GetActorValueName(i);
-		if (_stricmp(avStr, name) == 0)
-			return i;
-	}
-
-	return eActorVal_NoActorValue;
-}
-
-uint32_t GetActorValueForString(const char* strActorVal, bool bForScript) {
-	if (bForScript)
-		return GetActorValueForScript(strActorVal);
-
-	for (uint32_t n = 0; n <= eActorVal_FalloutMax; n++) {
-		char* name = GetActorValueName(n);
-		if (_stricmp(strActorVal, name) == 0)
-			return n;
-	}
-	return eActorVal_NoActorValue;
 }
 
 ScriptFormatStringArgs::ScriptFormatStringArgs(uint32_t _numArgs, uint8_t* _scriptData, Script* _scriptObj, ScriptLocals* _eventList)

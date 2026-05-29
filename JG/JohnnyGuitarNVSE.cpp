@@ -65,7 +65,6 @@ uint32_t g_pluginHandle = 0;
 void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
 InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 
-GameTimeGlobals* g_gameTimeGlobals = nullptr;
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 bool (*Cmd_Update3D)(COMMAND_ARGS) = 0;
 
@@ -138,7 +137,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		}
 		case NVSEMessagingInterface::kMessage_DeferredInit: // GAME
 		{
-			g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 			g_initialTickCount = GetTickCount();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
 			CameraOverlay::Init();

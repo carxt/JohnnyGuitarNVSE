@@ -21,10 +21,10 @@
 #include <JG/LandRemapping.hpp>
 #include <Bethesda/BSShaderManager.hpp>
 #include <Bethesda/TESMain.hpp>
+#include <Bethesda/Calendar.hpp>
 
 extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, uint8_t numArgs, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
-extern GameTimeGlobals* g_gameTimeGlobals;
 
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ItemChange* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ItemChange*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
@@ -32,10 +32,10 @@ float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float cond
 
 bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
+	BGSNote* pNote = nullptr;
 	TESQuest* quest = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &quest) && note && IS_TYPE(note, BGSNote) && IS_TYPE(quest, TESQuest)) {
-		note->questList.Remove(quest);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &quest) && pNote && IS_TYPE(pNote, BGSNote) && IS_TYPE(quest, TESQuest)) {
+		pNote->questList.Remove(quest);
 		*result = 1;
 	}
 	return true;
@@ -43,20 +43,20 @@ bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
 
 bool Cmd_AddNoteQuest_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
+	BGSNote* pNote = nullptr;
 	TESQuest* quest = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &quest) && note && IS_TYPE(note, BGSNote) && IS_TYPE(quest, TESQuest)) {
-		note->questList.Append(quest);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &quest) && pNote && IS_TYPE(pNote, BGSNote) && IS_TYPE(quest, TESQuest)) {
+		pNote->questList.Append(quest);
 		*result = 1;
 	}
 	return true;
 }
 bool Cmd_GetNoteQuestList_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
+	BGSNote* pNote = nullptr;
 	NVSEArrayVar* quests = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && !note->questList.Empty()) {
-		ListNode<TESQuest>* iter = note->questList.Head();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && !pNote->questList.Empty()) {
+		ListNode<TESQuest>* iter = pNote->questList.Head();
 		do {
 			if (iter->data) {
 				g_arrInterface->AppendElement(quests, NVSEArrayElement(iter->data->GetFormID()));
@@ -69,10 +69,10 @@ bool Cmd_GetNoteQuestList_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetNoteImage_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
+	BGSNote* pNote = nullptr;
 	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &path) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kImage) {
-		note->picture->SetTextureName(path);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &path) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kImage) {
+		pNote->picture->SetTextureName(path);
 		*result = 1;
 	}
 	return true;
@@ -80,18 +80,18 @@ bool Cmd_SetNoteImage_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetNoteImage_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kImage) {
-		g_strInterface->Assign(PASS_COMMAND_ARGS, note->picture->GetTextureName());
+	BGSNote* pNote = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kImage) {
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pNote->picture->GetTextureName());
 	}
 	return true;
 }
 bool Cmd_SetNoteTopic_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
+	BGSNote* pNote = nullptr;
 	TESTopic* topic = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &topic) && note && IS_TYPE(note, BGSNote) && IS_TYPE(topic, TESTopic) && note->type == BGSNote::kVoice) {
-		note->voice = topic;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &topic) && pNote && IS_TYPE(pNote, BGSNote) && IS_TYPE(topic, TESTopic) && pNote->type == BGSNote::kVoice) {
+		pNote->voice = topic;
 		*result = 1;
 	}
 	return true;
@@ -99,20 +99,20 @@ bool Cmd_SetNoteTopic_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetNoteTopic_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice) {
-		if (note->voice)
-			*(uint32_t*)result = note->voice->GetFormID();
+	BGSNote* pNote = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kVoice) {
+		if (pNote->voice)
+			*(uint32_t*)result = pNote->voice->GetFormID();
 	}
 	return true;
 }
 
 bool Cmd_SetNoteSound_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
+	BGSNote* pNote = nullptr;
 	TESSound* sound = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &sound) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kSound) {
-		note->sound = sound;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &sound) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kSound) {
+		pNote->sound = sound;
 		*result = 1;
 	}
 	return true;
@@ -120,20 +120,20 @@ bool Cmd_SetNoteSound_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetNoteSound_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kSound) {
-		if (note->sound)
-			*(uint32_t*)result = note->sound->GetFormID();
+	BGSNote* pNote = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kSound) {
+		if (pNote->sound)
+			*(uint32_t*)result = pNote->sound->GetFormID();
 	}
 	return true;
 }
 
 bool Cmd_SetNoteType_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
+	BGSNote* pNote = nullptr;
 	int type = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &type) && note && IS_TYPE(note, BGSNote) && type >= 0 && type <= 3) {
-		note->type = (BGSNote::Type)type;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &type) && pNote && IS_TYPE(pNote, BGSNote) && type >= 0 && type <= 3) {
+		pNote->type = (BGSNote::Type)type;
 		*result = 1;
 	}
 	return true;
@@ -141,43 +141,44 @@ bool Cmd_SetNoteType_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetNoteType_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote)) {
-		*result = note->type;
+	BGSNote* pNote = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
+		*result = pNote->type;
 	}
 	return true;
 }
 
 bool Cmd_SetNoteSpeaker_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
+	BGSNote* pNote = nullptr;
 	TESNPC* npc = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &npc) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice) {
-		note->speaker = npc;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &npc) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kVoice) {
+		pNote->speaker = npc;
 		*result = 1;
 	}
 	return true;
 }
 bool Cmd_GetNoteSpeaker_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSNote* note = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note) && note && IS_TYPE(note, BGSNote) && note->type == BGSNote::kVoice) {
-		if (note->speaker)
-			*(uint32_t*)result = note->speaker->GetFormID();
+	BGSNote* pNote = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kVoice) {
+		if (pNote->speaker)
+			*(uint32_t*)result = pNote->speaker->GetFormID();
 	}
 	return true;
 }
 
 bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
-	if (!thisObj) { return true; }
 	*result = 0;
+	if (!thisObj) 
+		return true;
+
 	if (thisObj->IsActor()) {
-		auto actorProcess = ((Actor*)thisObj)->baseProcess;
-		if (actorProcess) {
-			auto furniRef = actorProcess->GetCurrentFurnitureRef();
-			if (furniRef) {
-				*(uint32_t*)result = furniRef->GetFormID();
-			}
+		BaseProcess* pAIProcess = static_cast<Actor*>(thisObj)->baseProcess;
+		if (pAIProcess) {
+			TESObjectREFR* pFurniture = pAIProcess->GetCurrentFurniture();
+			if (pFurniture)
+				*(uint32_t*)result = pFurniture->GetFormID();
 		}
 
 	}
@@ -1153,15 +1154,15 @@ bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
 bool Cmd_SetNoteRead_Execute(COMMAND_ARGS) {
 	uint32_t isRead = 0;
 	*result = 0;
-	BGSNote* note = nullptr;
+	BGSNote* pNote = nullptr;
 	uint32_t serialize = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &isRead, &serialize) && note) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &isRead, &serialize) && pNote) {
 		if (serialize)
 		{
-			ThisCall(0x5E9300, note, isRead > 0);
+			ThisCall(0x5E9300, pNote, isRead > 0);
 		}
 		else {
-			note->read = isRead > 0;
+			pNote->read = isRead > 0;
 		}
 		*result = 1;
 	}
@@ -1704,42 +1705,57 @@ bool Cmd_SetIMODAnimatable_Execute(COMMAND_ARGS) {
 // A modified version of GetCalculatedWeaponDamage, all credits go to JazzIsParis
 bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* weapon = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &weapon)) return true;
-	float condition = 1.0F;
-	ExtraDataList* extendPtr = nullptr;
-	if (!weapon) {
-		if (!thisObj) return true;
-		InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
-		if (!invRef) {
-			TESForm* base = thisObj->baseForm;
-			if (IS_ID(base, TESObjectWEAP))
-				weapon = (TESObjectWEAP*)base;
+	TESObjectWEAP* pWeapon = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon)) 
+		return true;
+
+	PlayerCharacter* const pPlayer = PlayerCharacter::GetSingleton();
+	if (!pPlayer->baseProcess || pPlayer->baseProcess->GetProcessLevel() > PROCESS_TYPE::MIDDLE_HIGH)
+		return true;
+
+	float fCondition = 1.f;
+	ExtraDataList* pExtraData = nullptr;
+	if (!pWeapon) {
+		if (!thisObj) 
+			return true;
+
+		InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
+		if (!pInvRef) {
+			if (thisObj->baseForm && thisObj->baseForm->GetFormType() == FORM_TYPE::TESObjectWEAP)
+				pWeapon = static_cast<TESObjectWEAP*>(thisObj->baseForm);
 			else
 				return true;
 
-			condition = thisObj->GetHealth();
+			fCondition = thisObj->GetHealth();
 		}
 		else {
-			weapon = (TESObjectWEAP*)invRef->data.type;
-			if NOT_ID(weapon, TESObjectWEAP) return true;
-			if (invRef->data.xData) {
-				condition = invRef->data.entry->GetItemHealth(true) / 100.0F;
-				extendPtr = invRef->data.xData;
+			if (pInvRef->data.type && pInvRef->data.type->GetFormType() != FORM_TYPE::TESObjectWEAP)
+				return true;
+
+			pWeapon = static_cast<TESObjectWEAP*>(pInvRef->data.type);
+
+			if (pInvRef->data.xData) {
+				fCondition = pInvRef->data.entry->GetItemHealth(true) / 100.f;
+				pExtraData = pInvRef->data.xData;
 			}
 		}
 	}
-	else if NOT_ID(weapon, TESObjectWEAP) return true;
-	MiddleHighProcess* midHiProc = (MiddleHighProcess*)PlayerCharacter::GetSingleton()->baseProcess;
-	ItemChange* weaponInfo = midHiProc->weaponInfo;
-	TESForm* ammo = nullptr;
-	if (!extendPtr && weaponInfo && (weaponInfo->pObject == weapon) && midHiProc->ammoInfo)
-		ammo = midHiProc->ammoInfo->pObject;
-	if (!ammo)
-		ammo = weapon->GetAmmo();
-	midHiProc->weaponInfo = nullptr;
-	*result = GetWeaponDPS(&(PlayerCharacter::GetSingleton()->avOwner), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
-	midHiProc->weaponInfo = weaponInfo;
+	else if (pWeapon->GetFormType() != FORM_TYPE::TESObjectWEAP) {
+		return true;
+	}
+
+	MiddleHighProcess* pAIProcess = static_cast<MiddleHighProcess*>(pPlayer->baseProcess);
+	ItemChange* pWeaponItem = pAIProcess->pCurrentWeapon;
+	TESForm* pAmmo = nullptr;
+	if (!pExtraData && pWeaponItem && (pWeaponItem->pObject == pWeapon) && pAIProcess->pCurrentAmmo)
+		pAmmo = pAIProcess->pCurrentAmmo->pObject;
+
+	if (!pAmmo)
+		pAmmo = pWeapon->GetAmmo();
+
+	pAIProcess->pCurrentWeapon = nullptr;
+	*result = GetWeaponDPS(&(pPlayer->avOwner), pWeapon, fCondition, 1, pWeaponItem, 0, 0, -1, 0.f, 0.f, 0, 0, pAmmo);
+	pAIProcess->pCurrentWeapon = pWeaponItem;
 	if (IsConsoleMode())
 		Console_Print("GetCalculatedWeaponDPS >> %f", *result);
 	return true;
@@ -1747,10 +1763,10 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 
 bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL* cell = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell) && cell && IS_TYPE(cell, TESObjectCELL)) {
-		ExtraSeenData* seenData = cell->extraDataList.GetExtraData<ExtraSeenData>();
-		if (seenData && seenData->pSeenData)
+	TESObjectCELL* pCell = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
+		ExtraSeenData* pSeenData = pCell->extraDataList.GetExtraData<ExtraSeenData>();
+		if (pSeenData && pSeenData->pSeenData)
 			*result = 1;
 		if (IsConsoleMode())
 			Console_Print("IsCellVisited >> %.0f", *result);
@@ -1760,23 +1776,20 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 
 bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL* cell = nullptr;
-	uint32_t iHoursToRespawnCell = *(uint32_t*)0x11CA164;
-	int32_t detachTime = 0;
-	float gameHoursPassed = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell) && cell && IS_TYPE(cell, TESObjectCELL)) {
-		ExtraDetachTime* xDetachTime = cell->extraDataList.GetExtraData<ExtraDetachTime>();
-		detachTime = xDetachTime == 0 ? 0 : xDetachTime->uiTime;
-		if (detachTime == 0) {
+	TESObjectCELL* pCell = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
+		ExtraDetachTime* pDetachTime = pCell->extraDataList.GetExtraData<ExtraDetachTime>();
+		uint32_t uiDetachTime = pDetachTime ? pDetachTime->uiTime : 0;
+		if (uiDetachTime == 0) {
 			*result = -1;
 		}
-		else if (detachTime == -1 || detachTime == -2) {	//-1 is used by ResetInterior, -2 by ShowOff's ResetInteriorAlt.
+		else if (uiDetachTime == uint32_t(-1) || uiDetachTime == uint32_t(-2)) { // -1 is used by ResetInterior, -2 by ShowOff's ResetInteriorAlt.
 			*result = 1;
 		}
 		else {
-			float daysPassed = g_gameTimeGlobals->daysPassed == 0 ? 1.0 : g_gameTimeGlobals->daysPassed->GetValue();
-			gameHoursPassed = floor(daysPassed * 24.0);
-			*result = ((gameHoursPassed - detachTime) >= iHoursToRespawnCell);
+			uint32_t iHoursToRespawnCell = *(uint32_t*)0x11CA164;
+			uint32_t uiGameHoursPassed = Calendar::GetSingleton()->GetHoursPassed();
+			*result = (uiGameHoursPassed - uiDetachTime) >= iHoursToRespawnCell;
 		}
 		if (IsConsoleMode())
 			Console_Print("IsCellExpired >> %.0f", *result);
@@ -1786,17 +1799,20 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetBaseEffectAV_Execute(COMMAND_ARGS) {
 	*result = -1;
-	EffectSetting* effect = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &effect) && effect && IS_TYPE(effect, EffectSetting) && (effect->archtype == 0) && effect->actorVal)
-		*result = effect->actorVal;
+	EffectSetting* pEffect = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pEffect) && pEffect && IS_TYPE(pEffect, EffectSetting)) {
+		if (pEffect->GetEffectArchetype() == EffectArchetypes::Type::VALUE_MODIFIER && pEffect->GetAssociatedActorValue()){
+			*result = pEffect->GetAssociatedActorValue();
+		}
+	}
 	return true;
 }
 
 bool Cmd_GetBaseEffectArchetype_Execute(COMMAND_ARGS) {
 	*result = -1;
-	EffectSetting* effect = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &effect) && effect && IS_TYPE(effect, EffectSetting))
-		*result = effect->archtype;
+	EffectSetting* pEffect = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pEffect) && pEffect && IS_TYPE(pEffect, EffectSetting))
+		*result = pEffect->GetEffectArchetype();
 	return true;
 }
 
@@ -2687,7 +2703,7 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 		case FORM_TYPE::AlchemyItem:
 		{
 			const AlchemyItem* pAlchItem = static_cast<AlchemyItem*>(pForm);
-			pAlchItem->magicItem.list.GetEffectsString(cEffects, sizeof(cEffects));
+			pAlchItem->magicItem.GetEffectsString(cEffects, sizeof(cEffects));
 		}
 		break;
 
@@ -2704,7 +2720,7 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 		{
 			const EnchantmentItem* pItem = TESEnchantableForm::GetFormEnchanting(pForm);
 			if (pItem)
-				pItem->magicItem.list.GetEffectsString(cEffects, sizeof(cEffects));
+				pItem->GetEffectsString(cEffects, sizeof(cEffects));
 		}
 	}
 

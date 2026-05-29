@@ -97,13 +97,14 @@ enum EType {
 
 bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t stopAnim = 0;
-	Actor* actor = (Actor*)thisObj;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &stopAnim);
-	if (actor && actor->IsActor() && actor->baseProcess->GetIdleForm350()) {
-		actor->baseProcess->ResetQueuedIdleFlags();
-		actor->baseProcess->SetIdleForm350(nullptr);
-		if (stopAnim > 0) ThisCall(0x498910, actor->GetAnimation(), 1, 1); // SpecialIdleFree
+	BOOL bStopAnim = 0;
+	Actor* pActor = static_cast<Actor*>(thisObj);
+	ExtractArgsEx(EXTRACT_ARGS_EX, &bStopAnim);
+	if (pActor && pActor->IsActor() && pActor->baseProcess->GetCurrentProcessIdle()) {
+		pActor->baseProcess->ClearPostAnimationActions();
+		pActor->baseProcess->SetCurrentProcessIdle(nullptr);
+		if (bStopAnim > 0)
+			ThisCall(0x498910, pActor->GetAnimation(), 1, 1); // SpecialIdleFree
 		*result = 1;
 	}
 	return true;

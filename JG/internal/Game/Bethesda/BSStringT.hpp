@@ -8,6 +8,7 @@ public:
 	BSStringT();
 	BSStringT(const T* apText);
 	BSStringT(const BSStringT& arSrc);
+	BSStringT(BSStringT&& arSrc);
 	~BSStringT();
 
 	T*			pString		= nullptr;
@@ -17,21 +18,31 @@ public:
 	void				Init();
 
 	const T*			GetString() const;
+	
 	uint32_t			GetLength() const;
 	void				SetLength(uint32_t auiLength);
+
 	uint16_t			GetMaxLength() const;
 	void				SetMaxLength(uint32_t auiLength);
 
+	uint32_t			GetByteLengthWithNull() const;
+
 	bool				Set(const T* apText, uint32_t auiLength = 0);
-	bool				Set(const BSStringT<T>& arSource);
+	bool				Set(const BSStringT& arSource);
 
 	int32_t				StrCmp(const T* apText, bool abNotCaseSensitive) const;
-	int32_t				StrCmp(const BSStringT<T>& arOther, bool abNotCaseSensitive) const;
+	int32_t				StrCmp(const BSStringT& arOther, bool abNotCaseSensitive) const;
 
-	void				operator=(const T* apText);
-	bool				operator==(const BSStringT<T>& arOther) const;
-	BSStringT<T>*		operator+=(const T* apText);
-	BSStringT<T>*		operator+=(const BSStringT<T>& arOther);
+	BSStringT&			operator=(const T* apText);
+	BSStringT&			operator=(const BSStringT& arOther);
+
+	BSStringT&			operator=(BSStringT&& arOther);
+
+	bool				operator==(const T* apText) const;
+	bool				operator==(const BSStringT& arOther) const;
+
+	BSStringT&			operator+=(const T* apText);
+	BSStringT&			operator+=(const BSStringT& arOther);
 	const T*			operator[](uint32_t auiIndex);
 						operator const T* ();
 

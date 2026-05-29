@@ -680,7 +680,7 @@ namespace JIPFixes {
 
 			Actor* pActor = static_cast<Actor*>(thisObj);
 			const BaseProcess* pProcess = pActor->baseProcess;
-			if (!pProcess || pProcess->processLevel != PROCESS_TYPE::HIGH)
+			if (!pProcess || pProcess->GetProcessLevel() != PROCESS_TYPE::HIGH)
 				return true;
 
 			const NiNode* pRoot = thisObj->Get3D();

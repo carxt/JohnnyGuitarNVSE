@@ -8,6 +8,7 @@
 
 #include "Bethesda/ActorValueInfo.hpp"
 #include "Bethesda/ActorValueOwner.hpp"
+#include "Bethesda/AlchemyItem.hpp"
 #include "Bethesda/BGSAcousticSpace.hpp"
 #include "Bethesda/BGSAddonNode.hpp"
 #include "Bethesda/BGSAmmoForm.hpp"
@@ -42,6 +43,8 @@
 #include "Bethesda/BGSTouchSpellForm.hpp"
 #include "Bethesda/BipedAnim.hpp"
 #include "Bethesda/CachedValuesOwner.hpp"
+#include "Bethesda/EffectSetting.hpp"
+#include "Bethesda/MagicItemForm.hpp"
 #include "Bethesda/TESActorBase.hpp"
 #include "Bethesda/TESActorBaseData.hpp"
 #include "Bethesda/TESAIForm.hpp"
@@ -66,7 +69,6 @@
 #include "Bethesda/TESHair.hpp"
 #include "Bethesda/TESHealthForm.hpp"
 #include "Bethesda/TESIcon.hpp"
-#include "Bethesda/TESWaterForm.hpp"
 #include "Bethesda/TESImageSpaceModifiableForm.hpp"
 #include "Bethesda/TESKey.hpp"
 #include "Bethesda/TESLandTexture.hpp"
@@ -95,24 +97,25 @@
 #include "Bethesda/TESSkill.hpp"
 #include "Bethesda/TESTexture1024.hpp"
 #include "Bethesda/TESValueForm.hpp"
+#include "Bethesda/TESWaterForm.hpp"
 #include "Bethesda/TESWeightForm.hpp"
 
 #include "Obsidian/BGSDehydrationStage.hpp"
 #include "Obsidian/BGSHungerStage.hpp"
 #include "Obsidian/BGSSleepDeprevationStage.hpp"
+#include "Obsidian/MediaLocationController.hpp"
+#include "Obsidian/MediaSet.hpp"
 #include "Obsidian/TESAmmoEffect.hpp"
 #include "Obsidian/TESCaravanCard.hpp"
 #include "Obsidian/TESCaravanDeck.hpp"
 #include "Obsidian/TESCaravanMoney.hpp"
 #include "Obsidian/TESCasino.hpp"
+#include "Obsidian/TESCasinoChips.hpp"
 #include "Obsidian/TESChallenge.hpp"
 #include "Obsidian/TESLoadScreenType.hpp"
-#include "Obsidian/TESReputation.hpp"
 #include "Obsidian/TESObjectIMOD.hpp"
-#include "Obsidian/TESCasinoChips.hpp"
 #include "Obsidian/TESRecipe.hpp"
-#include "Obsidian/MediaSet.hpp"
-#include "Obsidian/MediaLocationController.hpp"
+#include "Obsidian/TESReputation.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -413,149 +416,6 @@ struct PermanentClonedForm {
 };
 
 class TESImageSpaceModifier;
-
-// 24
-class EffectItem {
-public:
-	EffectItem();
-	~EffectItem();
-
-	enum {
-		kRange_Self = 0,
-		kRange_Touch,
-		kRange_Target,
-	};
-
-	struct ScriptEffectInfo {
-		uint32_t		scriptRefID;
-		uint32_t		school;
-		BSString	effectName;
-		uint32_t		visualEffectCode;
-		uint32_t		isHostile;
-
-		void SetName(const char* name);
-		void SetSchool(uint32_t school);
-		void SetVisualEffectCode(uint32_t code);
-		void SetIsHostile(bool bIsHostile);
-		bool IsHostile() const;
-		void SetScriptRefID(uint32_t refID);
-
-		ScriptEffectInfo* Clone() const;
-		void CopyFrom(const ScriptEffectInfo* from);
-		static ScriptEffectInfo* Create();
-	};
-
-	// mising flags
-	uint32_t				magnitude;			// 00	used as a float
-	uint32_t				area;				// 04
-	uint32_t				duration;			// 08
-	uint32_t				range;				// 0C
-	uint32_t				actorValueOrOther;	// 10
-	EffectSetting*		setting;			// 14
-	float				cost;				// 18 on autocalc items this seems to be the cost
-	TESCondition		conditions;			// 1C
-
-	//bool HasActorValue() const;
-	//uint32_t GetActorValue() const;
-	//bool IsValidActorValue(uint32_t actorValue) const;
-	//void SetActorValue(uint32_t actorValue);
-
-	//bool IsScriptedEffect() const;
-	//uint32_t ScriptEffectRefId() const;
-	//uint32_t ScriptEffectSchool() const;
-	//uint32_t ScriptEffectVisualEffectCode() const;
-	//bool IsScriptEffectHostile() const;
-
-	//EffectItem* Clone() const;
-	//void CopyFrom(const EffectItem* from);
-	//static EffectItem* Create();
-	//static EffectItem* ProxyEffectItemFor(uint32_t effectCode);
-	//
-	//bool operator<(EffectItem*rhs) const;
-	//// return the magicka cost of this effect item
-	//// adjust for skill level if actorCasting is used
-	//float MagickaCost(TESForm* actorCasting = NULL) const;
-
-	//void SetMagnitude(uint32_t magnitude);
-	//void ModMagnitude(float modBy);
-	//void SetArea(uint32_t area);
-	//void ModArea(float modBy);
-	//void SetDuration(uint32_t duration);
-	//void ModDuration(float modBy);
-	//void SetRange(uint32_t range);
-	//bool IsHostile() const;
-};
-
-// 10
-class EffectItemList : public BSSimpleList<EffectItem*> {
-public:
-	EffectItemList();
-	~EffectItemList();
-
-	virtual bool		IsMedicine() const;
-	virtual bool		IsFood() const;
-	virtual float		GetCost(Actor* apActor) const;
-	virtual uint32_t	GetMaxEffectCount() const;
-	virtual uint32_t	GetLevel() const;
-
-	uint32_t uiHostileCount;
-
-	bool RemoveNthEffect(uint32_t index);
-
-	void GetEffectsString(char* apBuffer, uint32_t auiBufferSize) const {
-		ThisCall(0x406620, this, apBuffer, auiBufferSize);
-	}
-};
-
-static_assert(sizeof(EffectItemList) == 0x10);
-
-// 1C
-class MagicItem : public TESFullName {
-public:
-	MagicItem();
-	~MagicItem();
-
-	virtual void	Unk_04(void); // pure virtual
-	virtual void	Unk_05(void); // pure virtual
-	virtual uint32_t	GetType();
-	virtual bool	Unk_07(void);
-	virtual bool	Unk_08(void);
-	virtual void	Unk_09(void); // pure virtual
-	virtual void	Unk_0A(void); // pure virtual
-	virtual void	Unk_0B(void); // pure virtual
-	virtual void	Unk_0C(void); // pure virtual
-	virtual void	Unk_0D(void); // pure virtual
-	virtual void	Unk_0E(void);
-	virtual void	Unk_0F(void); // pure virtual
-
-	EffectItemList	list;	// 00C
-//	uint32_t	unk018;			// 018
-	// perhaps types are no longer correct!
-	enum EType {
-		kType_None = 0,
-		kType_Spell = 1,
-		kType_Enchantment = 2,
-		kType_Alchemy = 3,
-		kType_Ingredient = 4,
-	};
-	EType Type() const;
-};
-
-static_assert(sizeof(MagicItem) == 0x1C);
-
-// 034
-class MagicItemForm : public TESForm {
-public:
-	MagicItemForm();
-	~MagicItemForm();
-
-	virtual void	ByteSwap(void); // pure virtual
-
-	// base
-	MagicItem	magicItem;	// 018
-};
-
-static_assert(sizeof(MagicItemForm) == 0x34);
 
 // 0C
 struct LvlListExtra {
@@ -883,112 +743,6 @@ public:
 	}
 };
 static_assert(sizeof(TESSound) == 0x68);
-
-// B0
-class EffectSetting : public TESForm {
-public:
-	EffectSetting();
-	~EffectSetting();
-
-	enum {
-		kArchType_ValueModifier = 0,
-		kArchType_Script,
-		kArchType_Dispel,
-		kArchType_CureDisease,
-		kArchType_Absorb,
-		kArchType_Shield,
-		kArchType_Calm,
-		kArchType_Demoralize,
-		kArchType_Frenzy,
-		kArchType_CommandCreature,
-		kArchType_CommandHumanoid,
-		kArchType_Invisibility,
-		kArchType_Chameleon,
-		kArchType_Light,
-		kArchType_Darkness,
-		kArchType_NightEye,
-		kArchType_Lock,
-		kArchType_Open,
-		kArchType_BoundItem,
-		kArchType_SummonCreature,
-		kArchType_DetectLife,
-		kArchType_Telekinesis,
-		kArchType_DisintigrateArmor,
-		kArchType_DisinitgrateWeapon,
-		kArchType_Paralysis,
-		kArchType_Reanimate,
-		kArchType_SoulTrap,
-		kArchType_TurnUndead,
-		kArchType_SunDamage,
-		kArchType_Vampirism,
-		kArchType_CureParalysis,
-		kArchType_CureAddiction,
-		kArchType_CurePoison,
-		kArchType_Concussion,
-		kArchType_ValueAndParts,
-		kArchType_LimbCondition,
-		kArchType_Turbo,
-	};
-
-	enum EffectFlags {
-		kEffectFlag_HOSTILE = 0x1,
-		kEffectFlag_RECOVER = 0x2,
-		kEffectFlag_DETRIMENTAL = 0x4,
-		kEffectFlag_UNK_8 = 0x8, 
-		kEffectFlag_SELF = 0x10,
-		kEffectFlag_TOUCH = 0x20,
-		kEffectFlag_TARGET = 0x40, 
-		kEffectFlag_NO_DURATION = 0x80,
-		kEffectFlag_NO_MAGNITUDE = 0x100,
-		kEffectFlag_NO_AREA = 0x200,
-		kEffectFlag_PERSIST = 0x400,
-		kEffectFlag_CREATE_SPELLMAKING = 0x800,
-		kEffectFlag_GORY_VISUALS = 0x1000,
-		kEffectFlag_kDisplayNameOnly = 0x2000,
-		kEffectFlag_kRadioBroadcastSomething = 0x8000,
-		kEffectFlag_kUseSkill = 0x80000,
-		kEffectFlag_kUseAttribute = 0x100000,
-		kEffectFlag_PAINLESS = 0x1000000,
-		kEffectFlag_kSprayProjectileType = 0x2000000,
-		kEffectFlag_kBoltProjectileType = 0x4000000,
-		kEffectFlag_NO_HIT_EFFECT = 0x8000000,
-		kEffectFlag_NO_DEATH_DISPEL = 0x10000000,
-	};
-
-	TESModel		model;			// 18
-	TESDescription	description;	// 30
-	TESFullName		fullName;		// 38
-	TESIcon			icon;			// 44
-	uint32_t			unk50;			// 50
-	uint32_t			unk54;			// 54
-	uint32_t			effectFlags;	// 58
-	float			unk5C;			// 5C
-	TESForm* associatedItem;// 60	// Script* for ScriptEffects
-	uint32_t			unk64;			// 64
-	uint32_t			resistVal;		// 68 - actor value for resistance
-	uint16_t			unk6C;			// 6C
-	uint8_t			pad6E[2];		// 6E
-	TESObjectLIGH* light;			// 70
-	float			projectileSpeed;// 74
-	TESEffectShader* effectShader;	// 78 - effect shader
-	uint32_t			unk7C;			// 7C
-	uint32_t			unk80;			// 80
-	uint32_t			unk84;			// 84
-	uint32_t			hitSound;		// 88
-	uint32_t			unk8C;			// 8C
-	float			unk90;			// 90 - fMagicDefaultCEEnchantFactor
-	float			unk94;			// 94 - fMagicDefaultCEBarterFactor
-	uint8_t			archtype;		// 98
-	uint8_t			pad99[3];		// 99
-	uint8_t			actorVal;		// 9C - actor value
-	uint8_t			pad9D[3];		// 9D
-	uint32_t			unkA0;			// A0
-	uint32_t			unkA4;			// A4
-	uint32_t			unkA8;			// A8
-	uint32_t			unkAC;			// AC
-};
-
-static_assert(sizeof(EffectSetting) == 0xB0);
 
 // 44
 class EnchantmentItem : public MagicItemForm {
@@ -1691,32 +1445,6 @@ public:
 	BGSListForm* weaponList;		// 158
 	uint8_t						byt015C;			// 15C
 	uint8_t						pad015D[3];			// 15D
-};
-
-// D8
-class AlchemyItem : public TESBoundObject {
-public:
-	AlchemyItem();
-	~AlchemyItem();
-
-	MagicItem					magicItem;				// 30
-	TESModelTextureSwap			model;					// 4C
-	TESIcon						icon;					// 6C
-	BGSMessageIcon				messageIcon;			// 78
-	TESScriptableForm			scriptable;				// 88
-	TESWeightForm				weight;					// 94
-	BGSEquipType				equipType;				// 9C
-	BGSDestructibleObjectForm	destructible;			// A4
-	BGSPickupPutdownSounds		pickupPutdownsounds;	// AC
-	uint32_t						value;					// B8
-	uint8_t						alchFlags;				// BC
-	uint8_t						padBD[3];				// BD
-	SpellItem* withdrawalEffect;		// C0
-	float						addictionChance;		// C4
-	TESSound* consumeSound;			// C8
-	TESIcon						iconCC;					// CC
-
-	bool IsPoison();
 };
 
 static_assert(sizeof(AlchemyItem) == 0xD8);
