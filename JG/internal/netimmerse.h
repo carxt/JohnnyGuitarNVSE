@@ -376,7 +376,7 @@ public:
 	NIRTTI_ADDRESS(0x11F36AC);
 
 	NiControllerSequence* GetSequenceByName(const NiFixedString& arName) const {
-		return ThisCall<NiControllerSequence*>(0xA5C4B0, this, &arName);
+		return ThisCall<NiControllerSequence*>(0x47A520, this, &arName);
 	}
 
 	uint32_t GetSequenceCount() const {
