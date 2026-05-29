@@ -5,9 +5,9 @@ namespace DisabledMuzzleFlashLights {
 	uint32_t disableMuzzleLights = -1;
 
 	void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1) {
-		if (*&a1->muzzleFlash && a1->projectile->lightMuzzleFlash) {
+		if (*&a1->muzzleFlash && a1->projectile->kData.pMuzzleFlashLight) {
 			if (!disableMuzzleLights || (disableMuzzleLights == 2 && a1->sourceActor != (Actor*)PlayerCharacter::GetSingleton()) || (disableMuzzleLights == 3 && a1->sourceActor == (Actor*)PlayerCharacter::GetSingleton())) {
-				NiNode* niNode = ThisCall<NiNode*>(0x50D810, a1->projectile->lightMuzzleFlash, 0, *&a1->muzzleFlash, 1);
+				NiNode* niNode = ThisCall<NiNode*>(0x50D810, a1->projectile->kData.pMuzzleFlashLight, 0, *&a1->muzzleFlash, 1);
 				ThisCall(0x66B0D0, &a1->flashLight, niNode);
 			}
 		}

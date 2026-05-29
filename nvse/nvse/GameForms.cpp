@@ -242,10 +242,6 @@ const char* EffectItemList::GetNthEIName(uint32_t whichEffect) const {
 }
 #endif
 
-bool AlchemyItem::IsPoison() {
-	return magicItem.CanBePoison();
-}
-
 // GAME - 0x541AC0
 void TESObjectCELL::CellRefLockEnter() {
 	ThisCall(0x541AC0, this);

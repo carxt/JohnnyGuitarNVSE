@@ -39,11 +39,12 @@ extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 bool Cmd_StopHolotape_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	int playStopSound = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &playStopSound);
-	noHolotapeStopSound = playStopSound == 0;
-	MapMenu* mapMenu = MapMenu::GetSingleton();
-	mapMenu->StopHolotape();
+	BOOL bPlayStopSound = FALSE;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &bPlayStopSound);
+	noHolotapeStopSound = bPlayStopSound == 0;
+	MapMenu* pMapMenu = MapMenu::GetSingleton();
+	if (pMapMenu)
+		pMapMenu->StopHolotape();
 	*result = 1;
 	return true;
 
@@ -51,12 +52,13 @@ bool Cmd_StopHolotape_Execute(COMMAND_ARGS)
 bool Cmd_PlayHolotape_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	BGSNote* note = nullptr;
-	int playStartStopSound = 1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &note, &playStartStopSound) && note && IS_TYPE(note, BGSNote) && (note->type == BGSNote::kVoice || note->type == BGSNote::kSound))
+	BGSNote* pNote = nullptr;
+	BOOL bPlayStartStopSound = TRUE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &bPlayStartStopSound) && pNote && IS_TYPE(pNote, BGSNote) && (pNote->GetNoteType() == BGSNote::NoteType::VOICE || pNote->GetNoteType() == BGSNote::NoteType::VOICE))
 	{
-		MapMenu* mapMenu = MapMenu::GetSingleton();
-		mapMenu->PlayHolotape(note, playStartStopSound > 0);
+		MapMenu* pMapMenu = MapMenu::GetSingleton();
+		if (pMapMenu)
+			pMapMenu->PlayHolotape(pNote, bPlayStartStopSound > 0);
 		*result = 1;
 	}
 	return true;
@@ -1340,7 +1342,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	// Removal support by jazzisparis
 	*result = 0;
 	AlchemyItem* pPoison = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pPoison) && (!pPoison || (IS_TYPE(pPoison, AlchemyItem) && pPoison->IsPoison()))) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pPoison) && (!pPoison || (IS_TYPE(pPoison, AlchemyItem) && pPoison->CanBePoison()))) {
 		TESObjectWEAP* pWeapon = nullptr;
 		ExtraDataList* pExtraData = nullptr;
 		if (!thisObj->IsActor()) {

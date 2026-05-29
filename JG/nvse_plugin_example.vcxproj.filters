@@ -733,8 +733,13 @@
     <ClCompile Include="internal\Game\Bethesda\EffectArchetypes.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\EffectSetting.cpp" />
-    <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp">
+    <ClCompile Include="internal\Game\Bethesda\BGSNote.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSProjectile.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\EffectSetting.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2021,13 +2026,22 @@
     <ClInclude Include="internal\Game\Bethesda\MagicItemForm.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\TESTexture1024.hpp">
+    <ClInclude Include="internal\Game\Bethesda\EffectArchetypes.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadManager.hpp">
+    <ClInclude Include="internal\Game\Bethesda\AlchemyItem.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp">
+    <ClInclude Include="internal\Game\Bethesda\BGSIdleCollection.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSIdleMarker.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSNote.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSProjectile.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>

@@ -179,11 +179,13 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BGSMessage.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSMessageIcon.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSMusicType.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSNote.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSOpenCloseForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSPerk.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSPerkEntry.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSPickupPutdownSounds.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSPlaceableWater.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSProjectile.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSRepairItemList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSTextureSet.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSTouchSpellForm.cpp" />
@@ -403,6 +405,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\ActorValueInfo.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ActorValueOwner.hpp" />
     <ClInclude Include="internal\Game\Bethesda\AILinearTaskThreadManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\AlchemyItem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseExtraList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseFormComponent.hpp" />
@@ -425,6 +428,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSEntryPointPerkEntry.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSEquipType.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSHeadPart.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSIdleCollection.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSIdleMarker.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSImpactData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSImpactDataSet.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp" />
@@ -432,12 +437,14 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSMessage.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSMessageIcon.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSMusicType.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSNote.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSOpenCloseForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSPerk.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSPerkEntry.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSPickupPutdownSounds.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSPlaceableWater.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSPreloadable.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSProjectile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSRadiationStage.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSRagdoll.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSRepairItemList.hpp" />

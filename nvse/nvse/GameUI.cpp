@@ -49,20 +49,20 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 	{
 		StopHolotape();
 	}
-	if (note->type == BGSNote::kSound)
+	if (note->GetNoteType() == BGSNote::NoteType::SOUND)
 	{
-		BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(note->voice->GetFormID(), BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100);
+		BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(note->GetNoteSound()->GetFormID(), BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100);
 
 		holotapeDialogues.Append(&sound);
 		isHolotapeVoicePlaying = true;
 	}
-	else if (note->type == BGSNote::kVoice)
+	else if (note->GetNoteType() == BGSNote::NoteType::VOICE)
 	{
 		auto character = BSMemory::create<Character, 0x8D1F40>(false);
 		character->SetTemporary();
-		ThisCall(0x575690, character, note->speaker);
+		ThisCall(0x575690, character, note->GetNoteSpeaker());
 
-		auto pConversation = BSMemory::create<Conversation, 0x83B850>(character, PlayerCharacter::GetSingleton(), note->voice);
+		auto pConversation = BSMemory::create<Conversation, 0x83B850>(character, PlayerCharacter::GetSingleton(), note->GetNoteTopic());
 
 		// use the audio flags from the original function to be compatible with JIP's VoiceModulation hook
 		uint32_t audioFlags = *(uint32_t*)0x7974CA;

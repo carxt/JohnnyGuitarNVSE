@@ -33,9 +33,9 @@ float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float cond
 bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	TESQuest* quest = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &quest) && pNote && IS_TYPE(pNote, BGSNote) && IS_TYPE(quest, TESQuest)) {
-		pNote->questList.Remove(quest);
+	TESQuest* pQuest = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &pQuest) && pNote && IS_TYPE(pNote, BGSNote) && IS_TYPE(pQuest, TESQuest)) {
+		pNote->kOwnerQuests.Remove(pQuest);
 		*result = 1;
 	}
 	return true;
@@ -44,9 +44,9 @@ bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
 bool Cmd_AddNoteQuest_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	TESQuest* quest = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &quest) && pNote && IS_TYPE(pNote, BGSNote) && IS_TYPE(quest, TESQuest)) {
-		pNote->questList.Append(quest);
+	TESQuest* pQuest = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &pQuest) && pNote && IS_TYPE(pNote, BGSNote) && IS_TYPE(pQuest, TESQuest)) {
+		pNote->kOwnerQuests.AddHead(pQuest);
 		*result = 1;
 	}
 	return true;
@@ -54,25 +54,26 @@ bool Cmd_AddNoteQuest_Execute(COMMAND_ARGS) {
 bool Cmd_GetNoteQuestList_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	NVSEArrayVar* quests = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && !pNote->questList.Empty()) {
-		ListNode<TESQuest>* iter = pNote->questList.Head();
-		do {
-			if (iter->data) {
-				g_arrInterface->AppendElement(quests, NVSEArrayElement(iter->data->GetFormID()));
-			}
-		} while (iter = iter->next);
+	NVSEArrayVar* pQuests = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && !pNote->kOwnerQuests.IsEmpty()) {
+		auto pIter = pNote->kOwnerQuests.GetHead();
+		while (pIter && !pIter->IsEmpty()) {
+			TESQuest* pQuest = pIter->GetItem();
+			if (pQuest)
+				g_arrInterface->AppendElement(pQuests, NVSEArrayElement(pQuest->GetFormID()));
+			pIter = pIter->GetNext();
+		}
 	}
-	g_arrInterface->AssignCommandResult(quests, result);
+	g_arrInterface->AssignCommandResult(pQuests, result);
 	return true;
 }
 
 bool Cmd_SetNoteImage_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &path) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kImage) {
-		pNote->picture->SetTextureName(path);
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &cPath) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::IMAGE) {
+		pNote->pNotePicture->SetTextureName(cPath);
 		*result = 1;
 	}
 	return true;
@@ -81,17 +82,17 @@ bool Cmd_SetNoteImage_Execute(COMMAND_ARGS) {
 bool Cmd_GetNoteImage_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kImage) {
-		g_strInterface->Assign(PASS_COMMAND_ARGS, pNote->picture->GetTextureName());
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::IMAGE) {
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pNote->pNotePicture->GetTextureName());
 	}
 	return true;
 }
 bool Cmd_SetNoteTopic_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	TESTopic* topic = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &topic) && pNote && IS_TYPE(pNote, BGSNote) && IS_TYPE(topic, TESTopic) && pNote->type == BGSNote::kVoice) {
-		pNote->voice = topic;
+	TESTopic* pTopic = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &pTopic) && pNote && IS_TYPE(pNote, BGSNote) && IS_TYPE(pTopic, TESTopic) && pNote->GetNoteType() == BGSNote::NoteType::VOICE) {
+		pNote->pNoteTopic = pTopic;
 		*result = 1;
 	}
 	return true;
@@ -100,9 +101,9 @@ bool Cmd_SetNoteTopic_Execute(COMMAND_ARGS) {
 bool Cmd_GetNoteTopic_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kVoice) {
-		if (pNote->voice)
-			*(uint32_t*)result = pNote->voice->GetFormID();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::VOICE) {
+		if (pNote->pNoteTopic)
+			*(uint32_t*)result = pNote->pNoteTopic->GetFormID();
 	}
 	return true;
 }
@@ -110,9 +111,9 @@ bool Cmd_GetNoteTopic_Execute(COMMAND_ARGS) {
 bool Cmd_SetNoteSound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	TESSound* sound = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &sound) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kSound) {
-		pNote->sound = sound;
+	TESSound* pSound = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &pSound) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::SOUND) {
+		pNote->pNoteSound = pSound;
 		*result = 1;
 	}
 	return true;
@@ -121,9 +122,9 @@ bool Cmd_SetNoteSound_Execute(COMMAND_ARGS) {
 bool Cmd_GetNoteSound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kSound) {
-		if (pNote->sound)
-			*(uint32_t*)result = pNote->sound->GetFormID();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::SOUND) {
+		if (pNote->pNoteSound)
+			*(uint32_t*)result = pNote->pNoteSound->GetFormID();
 	}
 	return true;
 }
@@ -131,9 +132,9 @@ bool Cmd_GetNoteSound_Execute(COMMAND_ARGS) {
 bool Cmd_SetNoteType_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	int type = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &type) && pNote && IS_TYPE(pNote, BGSNote) && type >= 0 && type <= 3) {
-		pNote->type = (BGSNote::Type)type;
+	BGSNote::NoteType eType;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &eType) && pNote && IS_TYPE(pNote, BGSNote) && eType >= BGSNote::NoteType::SOUND && eType <= BGSNote::NoteType::VOICE) {
+		pNote->SetNoteType(eType);
 		*result = 1;
 	}
 	return true;
@@ -143,7 +144,7 @@ bool Cmd_GetNoteType_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
-		*result = pNote->type;
+		*result = pNote->GetNoteType();
 	}
 	return true;
 }
@@ -151,9 +152,9 @@ bool Cmd_GetNoteType_Execute(COMMAND_ARGS) {
 bool Cmd_SetNoteSpeaker_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	TESNPC* npc = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &npc) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kVoice) {
-		pNote->speaker = npc;
+	TESActorBase* pSpeaker = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &pSpeaker) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::VOICE) {
+		pNote->pSpeaker = pSpeaker;
 		*result = 1;
 	}
 	return true;
@@ -161,9 +162,9 @@ bool Cmd_SetNoteSpeaker_Execute(COMMAND_ARGS) {
 bool Cmd_GetNoteSpeaker_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->type == BGSNote::kVoice) {
-		if (pNote->speaker)
-			*(uint32_t*)result = pNote->speaker->GetFormID();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::VOICE) {
+		if (pNote->pSpeaker)
+			*(uint32_t*)result = pNote->pSpeaker->GetFormID();
 	}
 	return true;
 }
@@ -553,24 +554,24 @@ bool Cmd_GetWeaponAltTextures_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSIdleMarker* marker;
-	NVSEArrayVar* idleArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker) && marker && IS_TYPE(marker, BGSIdleMarker) && marker->idleCollection.animCount > 0) {
-		for (int i = 0; i < marker->idleCollection.animCount; i++) {
-			g_arrInterface->AppendElement(idleArr, NVSEArrayElement(marker->idleCollection.idleList[i]));
+	BGSIdleMarker* pMarker;
+	NVSEArrayVar* pIdles = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMarker) && pMarker && IS_TYPE(pMarker, BGSIdleMarker) && pMarker->ucIdleCount > 0) {
+		for (int i = 0; i < pMarker->ucIdleCount; i++) {
+			g_arrInterface->AppendElement(pIdles, NVSEArrayElement(pMarker->ppIdles[i]));
 		}
 	}
-	g_arrInterface->AssignCommandResult(idleArr, result);
+	g_arrInterface->AssignCommandResult(pIdles, result);
 	return true;
 }
 
 bool Cmd_SetIdleMarkerAnimation_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSIdleMarker* marker = nullptr;
-	TESIdleForm* newAnim = nullptr;
-	uint32_t animId;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker, &animId, &newAnim) && marker && IS_TYPE(marker, BGSIdleMarker) && marker->idleCollection.animCount > animId) {
-		marker->idleCollection.idleList[animId] = newAnim;
+	BGSIdleMarker* pMarker = nullptr;
+	TESIdleForm* pIdle = nullptr;
+	uint32_t uiIndex;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMarker, &uiIndex, &pIdle) && pMarker && IS_TYPE(pMarker, BGSIdleMarker) && pMarker->ucIdleCount > uiIndex) {
+		pMarker->ppIdles[uiIndex] = pIdle;
 		*result = 1;
 	}
 	return true;
@@ -578,23 +579,29 @@ bool Cmd_SetIdleMarkerAnimation_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSIdleMarker* marker = nullptr;
-	uint32_t arrID;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker, &arrID) && marker && IS_TYPE(marker, BGSIdleMarker)) {
-		NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
-		if (!inArr) return true;
-		uint32_t size = g_arrInterface->GetArraySize(inArr);
-		if (!size) return true;
+	BGSIdleMarker* pMarker = nullptr;
+	uint32_t uiArrayID;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMarker, &uiArrayID) && pMarker && IS_TYPE(pMarker, BGSIdleMarker)) {
+		NVSEArrayVar* pArray = g_arrInterface->LookupArrayByID(uiArrayID);
+		if (!pArray)
+			return true;
 
-		BSScrapBuffer<NVSEArrayElement> elements(size);
-		g_arrInterface->GetElements(inArr, elements.get(), nullptr);
-		TESIdleForm** idleList = BSMemory::malloc<TESIdleForm*>(size);
-		for (uint32_t i = 0; i < size; i++) {
-			idleList[i] = (TESIdleForm*)elements[i].GetTESForm();
+		uint32_t uiSize = g_arrInterface->GetArraySize(pArray);
+		if (!uiSize || uiSize > UINT8_MAX)
+			return true;
+
+		BSScrapBuffer<NVSEArrayElement> kElements(uiSize);
+		g_arrInterface->GetElements(pArray, kElements.get(), nullptr);
+		TESIdleForm** ppIdles = BSMemory::malloc<TESIdleForm*>(uiSize);
+		for (uint32_t i = 0; i < uiSize; i++) {
+			ppIdles[i] = static_cast<TESIdleForm*>(kElements[i].GetTESForm());
 		}
-		if (marker->idleCollection.idleList) BSMemory::free(marker->idleCollection.idleList);
-		marker->idleCollection.idleList = idleList;
-		marker->idleCollection.animCount = size;
+
+		if (pMarker->ppIdles) 
+			BSMemory::free(pMarker->ppIdles);
+
+		pMarker->ppIdles = ppIdles;
+		pMarker->ucIdleCount = uiSize;
 		*result = 1;
 	}
 
@@ -603,39 +610,39 @@ bool Cmd_SetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSIdleMarker* marker = nullptr;
-	uint32_t traitID;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker, &traitID) && marker && IS_TYPE(marker, BGSIdleMarker)) {
-		switch (traitID) {
+	BGSIdleMarker* pMarker = nullptr;
+	uint32_t uiTrait;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMarker, &uiTrait) && pMarker && IS_TYPE(pMarker, BGSIdleMarker)) {
+		switch (uiTrait) {
 		case 1:
-			*result = marker->idleCollection.flags;
+			*result = pMarker->ucIdleFlags;
 			break;
 		case 2:
-			*result = marker->idleCollection.idleTimer;
+			*result = pMarker->fTimerCheckForIdle;
 			break;
 		case 3:
-			*result = marker->idleCollection.animCount;
+			*result = pMarker->ucIdleCount;
 			break;
 		default:
 			return true;
 		}
-		if (IsConsoleMode()) Console_Print("GetIdleMarkerTraitNumeric %d >> %.2f", traitID, *result);
+		if (IsConsoleMode()) Console_Print("GetIdleMarkerTraitNumeric %d >> %.2f", uiTrait, *result);
 	}
 	return true;
 }
 
 bool Cmd_SetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSIdleMarker* marker = nullptr;
-	uint32_t traitID;
-	float newVal;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker, &traitID, &newVal) && marker && IS_TYPE(marker, BGSIdleMarker)) {
-		switch (traitID) {
+	BGSIdleMarker* pMarker = nullptr;
+	uint32_t uiTrait;
+	float fValue;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMarker, &uiTrait, &fValue) && pMarker && IS_TYPE(pMarker, BGSIdleMarker)) {
+		switch (uiTrait) {
 		case 1:
-			marker->idleCollection.flags = newVal;
+			pMarker->ucIdleFlags = fValue;
 			break;
 		case 2:
-			marker->idleCollection.idleTimer = newVal;
+			pMarker->fTimerCheckForIdle = fValue;
 			break;
 		default:
 			return true;
@@ -1152,17 +1159,16 @@ bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetNoteRead_Execute(COMMAND_ARGS) {
-	uint32_t isRead = 0;
 	*result = 0;
 	BGSNote* pNote = nullptr;
-	uint32_t serialize = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &isRead, &serialize) && pNote) {
-		if (serialize)
-		{
-			ThisCall(0x5E9300, pNote, isRead > 0);
+	BOOL bRead = FALSE;
+	BOOL bSave = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &bRead, &bSave) && pNote) {
+		if (bSave) {
+			pNote->SetHasBeenRead(bRead > 0);
 		}
 		else {
-			pNote->read = isRead > 0;
+			pNote->bHasBeenRead = bRead > 0;
 		}
 		*result = 1;
 	}
@@ -1170,9 +1176,9 @@ bool Cmd_SetNoteRead_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetQuestDelay_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESQuest* quest = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &quest) && quest && IS_TYPE(quest, TESQuest)) {
-		*result = quest->questDelayTime;
+	TESQuest* pQuest = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest) && pQuest && IS_TYPE(pQuest, TESQuest)) {
+		*result = pQuest->questDelayTime;
 		if (IsConsoleMode()) Console_Print("GetQuestDelay >> %.3f", *result);
 	}
 	return true;
@@ -1238,18 +1244,18 @@ bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESQuest* quest = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &quest) && quest)
-		*result = (quest->flags & 0x40) ? 1 : 0;
+	TESQuest* pQuest = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest) && pQuest)
+		*result = (pQuest->flags & 0x40) ? 1 : 0;
 	if (IsConsoleMode()) Console_Print("GetQuestFailed >> %.2f", *result);
 	return true;
 }
 
 bool Cmd_GetQuestFailed_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	TESQuest* quest = (TESQuest*)arg1;
-	if (quest)
-		*result = (quest->flags & 0x40) ? 1 : 0;
+	TESQuest* pQuest = (TESQuest*)arg1;
+	if (pQuest)
+		*result = (pQuest->flags & 0x40) ? 1 : 0;
 	return true;
 }
 
@@ -1285,13 +1291,13 @@ bool Cmd_SetProjectileSound_Execute(COMMAND_ARGS) {
 		*result = 1;
 		switch (soundID) {
 		case 1:
-			projectile->soundProjectile = sound;
+			projectile->kData.pSoundProjectile = sound;
 			break;
 		case 2:
-			projectile->soundCountDown = sound;
+			projectile->kData.pSoundCountDown = sound;
 			break;
 		case 3:
-			projectile->soundDisable = sound;
+			projectile->kData.pSoundDisable = sound;
 			break;
 		default:
 			*result = 0;
@@ -1981,7 +1987,7 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 bool Cmd_GetMineArmedEx_Execute(COMMAND_ARGS)
 {
 	if (GrenadeProjectile* projectile = (GrenadeProjectile*)thisObj; IS_ID(projectile, GrenadeProjectile) && !(projectile->projFlags & 0x200) &&
-		((((BGSProjectile*)thisObj->baseForm)->projFlags & 0x426) == 0x26))
+		static_cast<BGSProjectile*>(thisObj->baseForm)->kData.uiFlags.Get(0x426) == 0x26)
 		*result = 1;
 	return true;
 }
@@ -2703,7 +2709,7 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 		case FORM_TYPE::AlchemyItem:
 		{
 			const AlchemyItem* pAlchItem = static_cast<AlchemyItem*>(pForm);
-			pAlchItem->magicItem.GetEffectsString(cEffects, sizeof(cEffects));
+			pAlchItem->GetEffectsString(cEffects, sizeof(cEffects));
 		}
 		break;
 

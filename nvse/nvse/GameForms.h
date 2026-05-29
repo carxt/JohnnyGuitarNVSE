@@ -6,6 +6,9 @@
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
 
+#include "Bethesda/BGSProjectile.hpp"
+#include "Bethesda/BGSNote.hpp"
+#include "Bethesda/BGSIdleMarker.hpp"
 #include "Bethesda/ActorValueInfo.hpp"
 #include "Bethesda/ActorValueOwner.hpp"
 #include "Bethesda/AlchemyItem.hpp"
@@ -1445,122 +1448,6 @@ public:
 	BGSListForm* weaponList;		// 158
 	uint8_t						byt015C;			// 15C
 	uint8_t						pad015D[3];			// 15D
-};
-
-static_assert(sizeof(AlchemyItem) == 0xD8);
-
-class BGSIdleCollection : public BaseFormComponent {
-public:
-	BGSIdleCollection();
-	~BGSIdleCollection();
-
-	uint8_t flags;
-	uint8_t animCount;
-	TESIdleForm** idleList;
-	float idleTimer;
-};
-
-static_assert(sizeof(BGSIdleCollection) == 0x10);
-
-class BGSIdleMarker : public TESBoundObject {
-public:
-	BGSIdleMarker();
-	~BGSIdleMarker();
-	BGSIdleCollection idleCollection;
-};
-
-static_assert(sizeof(BGSIdleMarker) == 0x40);
-
-// BGSNote (80)
-class BGSNote : public TESBoundObject {
-public:
-	BGSNote();
-	~BGSNote();
-
-	enum Type : uint8_t
-	{
-		kSound = 0,
-		kText = 1,
-		kImage = 2,
-		kVoice = 3,
-	};
-	// bases
-	TESModel					model;					// 30
-	TESFullName					fullName;				// 48
-	TESIcon						icon;					// 54
-	BGSPickupPutdownSounds		pickupPutdownSounds;	// 60
-	union												// 6C
-	{
-		TESDescription* noteText;
-		TESTexture* picture;
-		TESTopic* voice;
-		TESSound* sound;
-	};
-	TESNPC*						speaker;
-	tList<TESQuest>				questList;
-	Type						type;
-	bool						read;
-};
-static_assert(sizeof(BGSNote) == 0x80);
-
-// BGSConstructibleObject (B0)
-class BGSConstructibleObject;
-
-// C0
-class BGSProjectile : public TESBoundObject {
-public:
-	BGSProjectile();
-	~BGSProjectile();
-
-	enum {
-		kFlags_Hitscan = 0x1,
-		kFlags_Explosion = 0x2,
-		kFlags_AltTrigger = 0x4,
-		kFlags_MuzzleFlash = 0x8,
-		//								0x10,
-		kFlags_CanBeDisabled = 0x20,
-		kFlags_CanBePicked = 0x40,
-		kFlags_Supersonic = 0x80,
-		kFlags_PinsLimbs = 0x100,
-		kFlags_PassSmallTransparent = 0x200,
-		kFlags_Detonates = 0x400,
-		kFlags_Rotation = 0x800,
-	};
-
-	TESFullName						fullName;			// 30
-	TESModel						model;				// 3C
-	BGSPreloadable					preloadable;		// 54
-	BGSDestructibleObjectForm		destructible;		// 58
-
-	uint16_t							projFlags;			// 60
-	uint16_t							type;				// 62
-	float							gravity;			// 64
-	float							speed;				// 68
-	float							range;				// 6C
-	TESObjectLIGH* lightProjectile;	// 70
-	TESObjectLIGH* lightMuzzleFlash;	// 74
-	float							tracerChance;		// 78
-	float							altProximity;		// 7C
-	float							altTimer;			// 80
-	BGSExplosion* explosion;			// 84
-	TESSound* soundProjectile;	// 88
-	float							flashDuration;		// 8C
-	float							fadeDuration;		// 90
-	float							impactForce;		// 94
-	TESSound* soundCountDown;	// 98
-	TESSound* soundDisable;		// 9C
-	TESObjectWEAP* defaultWeapSrc;	// A0
-	float							rotationX;			// A4
-	float							rotationY;			// A8
-	float							rotationZ;			// AC
-	float							bouncyMult;			// B0
-	TESModel						muzzleFlash;		// B4
-	uint8_t							soundLevel;			// CC
-
-	void SetFlag(uint32_t pFlag, bool bEnable) {
-		if (bEnable) projFlags |= pFlag;
-		else projFlags &= ~pFlag;
-	}
 };
 
 struct AreaPointEntry {
