@@ -548,7 +548,6 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(SetParticleEmitterSpawnRate);
 	REG_CMD(GetParticleEmitterSpawnRate);
 	REG_TYPED_CMD(GetItemEffectString, String);
-	//REG_CMD(BlendAnimSequence);
 }
 
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {
