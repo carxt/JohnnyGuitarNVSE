@@ -9,6 +9,11 @@
 #include "Bethesda/TESBoundAnimObject.hpp"
 #include "Bethesda/BGSListForm.hpp"
 #include "Bethesda/TESFullName.hpp"
+#include "Bethesda/TESLeveledList.hpp"
+#include "Bethesda/TESLevItem.hpp"
+#include "Bethesda/TESObjectLAND.hpp"
+#include "Bethesda/TESIcon.hpp"
+#include "Bethesda/TESTexture1024.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -334,35 +339,6 @@ struct ConditionList : tList<Condition> {
 	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result, bool arg4) { return ThisCall<bool>(0x680C60, this, runOnRef, arg2, result, arg4); }
 };
 
-// 0C
-class TESTexture : public BaseFormComponent {
-public:
-	TESTexture();
-	~TESTexture();
-
-	virtual uint32_t	Unk_04(void);
-	virtual void	GetNormalMap(BSString* str);
-	virtual char*	GetPathRoot(void);
-
-	BSString		ddsPath;	// 04
-};
-
-// 0C
-class TESTexture1024 : public TESTexture {
-public:
-	TESTexture1024();
-	~TESTexture1024();
-};
-
-// 00C
-class TESIcon : public TESTexture {
-public:
-	TESIcon();
-	~TESIcon();
-
-	void SetPath(const char* newPath) { ddsPath.Set(newPath); }
-};
-
 // C
 class TESScriptableForm : public BaseFormComponent {
 public:
@@ -417,6 +393,10 @@ public:
 	uint16_t	unk1;					// 0A
 	uint32_t	unk2;					// 0C
 	// 010
+
+	static EnchantmentItem* GetFormEnchanting(TESForm* apForm) {
+		return CdeclCall<EnchantmentItem*>(0x4BE330, apForm);
+	}
 };
 
 class TESImageSpaceModifier;
@@ -551,6 +531,10 @@ public:
 	uint32_t uiHostileCount;
 
 	bool RemoveNthEffect(uint32_t index);
+
+	void GetEffectsString(char* apBuffer, uint32_t auiBufferSize) const {
+		ThisCall(0x406620, this, apBuffer, auiBufferSize);
+	}
 };
 
 static_assert(sizeof(EffectItemList) == 0x10);
@@ -624,6 +608,10 @@ public:
 	};	// there seem to be an array (length 6) post 0x88
 
 	tList<Texture> textureList;	// 018
+
+	void SwapTextures(NiAVObject* apObject) {
+		ThisCall(0x48AFE0, this, apObject);
+	}
 };
 
 // 008
@@ -1217,7 +1205,7 @@ public:
 	TESDescription();
 	~TESDescription();
 
-	virtual const char* Get(TESForm* overrideForm, uint32_t chunkID);
+	virtual const char* Get(TESForm* overrideForm, uint32_t chunkID) const;
 
 	uint32_t	formDiskOffset;	// 4 - how does this work for descriptions in mods?
 	// maybe extracts the mod ID then uses that to find the src file?
@@ -2875,6 +2863,10 @@ public:
 	bool IsNonPlayable() { return (flags & kFlags_NonPlayable) == kFlags_NonPlayable; }
 	bool IsPlayable() { return !IsNonPlayable(); }
 	void SetPlayable(bool doset) { if (doset) flags &= ~kFlags_NonPlayable; else flags |= kFlags_NonPlayable; }
+
+	void GetEffectNames(char* apBuffer, uint32_t auiBufferSize) const {
+		ThisCall(0x503A70, this, apBuffer, auiBufferSize);
+	}
 };
 
 static_assert(sizeof(TESAmmo) == 0xDC);
@@ -3140,46 +3132,6 @@ public:
 	uint8_t						pad015D[3];			// 15D
 };
 
-// 34
-class TESLeveledList : public BaseFormComponent {
-public:
-	struct LoadBaseData	// as used by LoadForm
-	{
-		int16_t			level;		// 00
-		uint16_t			fill002;	// 02
-		TESObjectREFR* refr;		// 04
-		int16_t			count;		// 08
-		uint16_t			fill00A;	// 0A
-	};	// 0C
-
-	struct ListData {
-		TESForm* form;		// 00
-		int16_t			count;		// 04
-		int16_t			level;		// 06
-		LvlListExtra* extra;		// 08
-	}; // 0C
-
-	enum {
-		kFlags_CalcAllLevels = 1 << 0,
-		kFlags_CalcEachInCount = 1 << 1,
-		kFlags_UseAll = 1 << 2,
-	};
-
-	tList<ListData>		list;			// 04
-	uint8_t				chanceNone;		// 0C
-	uint8_t				flags;			// 0D
-	uint16_t				pad00E;			// 0E
-	TESGlobal* global;		// 10 use global value for chance none?
-	ExtraDataList		extraDatas;		// 14 ??? BaseExtraList::DebugDump() shows no data
-
-	void AddItem(TESForm* form, uint16_t level, uint16_t count, float health);
-	uint32_t RemoveItem(TESForm* form);
-	void Dump();
-	bool RemoveNthItem(uint32_t itemIndex);
-	int32_t GetItemIndexByForm(TESForm* form);
-	int32_t GetItemIndexByLevel(uint32_t level);
-};
-
 // TESLevCreature (68)
 class TESLevCreature : public TESBoundObject {
 public:
@@ -3347,15 +3299,6 @@ public:
 		if (bEnable) projFlags |= pFlag;
 		else projFlags &= ~pFlag;
 	}
-};
-
-// TESLevItem (44)
-class TESLevItem : public TESBoundObject {
-public:
-	TESLevItem();
-	~TESLevItem();
-
-	TESLeveledList		list;
 };
 
 // 36C
@@ -3590,6 +3533,16 @@ class NavMeshInfoMap;
 
 class NavMesh;
 class NavMeshArray;
+
+class CellMopp : public NiRefObject {
+public:
+	NiTObjectArray<NiPointer<bhkRigidBody>> kRigidBodies;
+
+	void Kill() {
+		ThisCall(0x621E60, this);
+	}
+};
+
 // E0
 class TESObjectCELL : public TESForm {
 public:
@@ -3720,14 +3673,26 @@ public:
 
 	void CellRefLockEnter();
 	void CellRefLockLeave();
+
+	static uint32_t GetCoord(int16_t x, int16_t y) {
+		return (int32_t(x) << 16) | uint16_t(y);
+	};
+
+	CellMopp* GetCellMopp() const {
+		return ThisCall<CellMopp*>(0x537B30, this);
+	}
+
+	void SetupMopp() {
+		ThisCall(0x5535F0, this);
+	}
 };
 static_assert(sizeof(TESObjectCELL) == 0xE0);
 
 // 3C	Init proc: 0x6FC490
-struct LODdata {
+struct BGSTerrainManager {
 	// 60
 	struct LODNode {
-		LODdata* parent;		// 00
+		BGSTerrainManager* parent;		// 00
 		uint32_t			lodLevel;		// 04
 		Coordinate		cellXY;			// 08
 		uint8_t			byte0C;			// 0C
@@ -3775,13 +3740,13 @@ struct LODdata {
 	uint8_t							byte2B;		// 2B
 	BSSimpleArray<TESObjectREFR*>	array2C;	// 2C
 };
-static_assert(sizeof(LODdata) == 0x3C);
+static_assert(sizeof(BGSTerrainManager) == 0x3C);
 
 typedef NiTPointerMap<int32_t, TESObjectCELL*> CellPointerMap;
 
 // EC
 class NiPoint3;
-class TESWorldSpace : public TESForm {
+class TESWorldSpace : public TESForm, public TESFullName, public TESTexture {
 public:
 	TESWorldSpace();
 	~TESWorldSpace();
@@ -3813,7 +3778,7 @@ public:
 		WCoordXY	cellSECoordinates;	// 0C
 	};	// 010
 
-	struct ImpactData {
+	struct ImpactSwap {
 		typedef NiTMap<BGSImpactData*, BGSImpactData*> ImpactImpactMap;
 		enum MaterialType {
 			eMT_Stone,
@@ -3853,128 +3818,42 @@ public:
 		kParentFlag_UseISData = 1 << 5,
 	};
 
-	TESFullName			fullName;			// 18
-	TESTexture			texture;			// 24
-	CellPointerMap*		cellMap;			// 30
-	TESObjectCELL*		cell;				// 34
-	uint32_t				unk38;				// 38
-	LODdata*			lodData;			// 3C
-	TESClimate*			climate;			// 40
-	TESImageSpace*		imageSpace;		// 44
-	ImpactData*			impacts;			// 48
-	uint8_t				flags;				// 4C
-	uint8_t				unk4D;				// 4D
-	uint16_t				parentFlags;		// 4E
-	RefListPointerMap	pointerMap;			// 50
-	tList<void>			lst60;				// 60
-	tList<void>			lst68;				// 68
-	TESWorldSpace*		parent;			// 70
-	TESWaterForm*		waterFormFirst;	// 74
-	TESWaterForm*		waterFormLast;		// 78
-	float				waterLODHeight;		// 7C
-	MapData				mapData;			// 80
-	float				worldMapScale;		// 90
-	float				worldMapCellX;		// 94
-	float				worldMapCellY;		// 98
-	BGSMusicType*		musicType;			// 9C
-	CoordXY				min;				// A0
-	CoordXY				max;				// A8
-	OffsetDataMap		offsetMap;			// B0
-	BSString			strC0;				// C0
-	float				defaultLandHeight;	// C8
-	float				defaultWaterHeight;	// CC
-	BGSEncounterZone*	encounterZone;		// D0
-	TESTexture			canopyShadow;		// D4
-	TESTexture			waterNoiseTexture;	// E0
+	CellPointerMap*						pCellMap;
+	TESObjectCELL*						pPersistentCell;
+	uint32_t							kTerrainLODManager; // Unused
+	BGSTerrainManager*					pTerrainManager;
+	TESClimate*							pClimate;
+	TESImageSpace*						pImageSpace;
+	ImpactSwap*							pImpactSwap;
+	Bitfield8							ucWorldFlags;
+	Bitfield16							usParentUseFlags;
+	RefListPointerMap					kFixedPersistentRefMap;			// 50
+	BSSimpleList<TESObjectREFR*>		kMobilePersistentRefs;
+	NiTMap<uint32_t, TESObjectREFR*>*	pOverlappedMultiBoundMap;
+	NiPointer<NiRefObject>				spPortalGraph;
+	TESWorldSpace*						pParentWorld;			// 70
+	TESWaterForm*						pWorldWater;
+	TESWaterForm*						pLODWater;
+	float								fWaterLODHeight;
+	MapData								kMapData;			// 80
+	float								worldMapScale;		// 90
+	float								worldMapCellX;		// 94
+	float								worldMapCellY;		// 98
+	BGSMusicType*						pMusic;
+	NiPoint2							kMinCoords;
+	NiPoint2							kMaxCoords;
+	OffsetDataMap						kOffsetMap;
+	BSString							strEditorID;
+	float								fDefaultLandHeight;
+	float								fDefaultWaterHeight;
+	BGSEncounterZone*					pEncounterZone;
+	TESTexture							kCanopyShadowTexture;
+	TESTexture							kWaterNoiseTexture;
 
 	TESWorldSpace* GetRootMapWorld();
 };
 static_assert(sizeof(TESWorldSpace) == 0xEC);
 
-// 04
-class TESChildCell {
-public:
-	virtual TESObjectCELL* GetPersistentCell();
-};
-
-// 2C
-class TESObjectLAND : public TESForm {
-public:
-	TESObjectLAND();
-	~TESObjectLAND();
-
-	// A4
-	struct LandData {
-		//	Note: All arrays in the structs are of 289 elements.
-		struct Geometry {
-			NiPoint3* quad0Vertices;
-			NiPoint3* quad1Vertices;
-			NiPoint3* quad2Vertices;
-			NiPoint3* quad3Vertices;
-		};
-
-		struct Struct08 {
-			NiPoint3* quad0Unk;
-			NiPoint3* quad1Unk;
-			NiPoint3* quad2Unk;
-			NiPoint3* quad3Unk;
-		};
-
-		struct Struct0C {
-			NiPoint4* quad0Unk;
-			NiPoint4* quad1Unk;
-			NiPoint4* quad2Unk;
-			NiPoint4* quad3Unk;
-		};
-
-		struct Struct10 {
-			uint8_t* quad0Unk;
-			uint8_t* quad1Unk;
-			uint8_t* quad2Unk;
-			uint8_t* quad3Unk;
-		};
-
-		struct Struct30 {
-			uint32_t			unk00;
-			uint32_t			unk04;
-			uint32_t			unk08;
-			uint32_t			unk0C;
-			uint32_t			unk10;
-			uint32_t			unk14;
-		};
-
-		struct GrassAreaParam;
-		typedef NiTPointerMap<uint32_t, GrassAreaParam*> GrassAreaParamMap;
-
-		void*					ptr00;			// 00
-		Geometry*				geometry;		// 04
-		Struct08*				ptr08;			// 08
-		Struct0C*				ptr0C;			// 0C
-		void*					ptr10;			// 10
-		NiObject*				object14;		// 14
-		float					minHeight;		// 18
-		float					maxHeight;		// 1C
-		TESLandTexture*			textures20[4];	// 20
-		Struct30*				ptrs30[4];		// 30
-		void**					ptrs40[4];		// 40
-		uint32_t					unk50;			// 50
-		GrassAreaParamMap		grassParams54;	// 54
-		GrassAreaParamMap		grassParams64;	// 64
-		GrassAreaParamMap		grassParams74;	// 74
-		GrassAreaParamMap		grassParams84;	// 84
-		NiObject*				object94;		// 94
-		int32_t					cellCoordX;		// 98
-		int32_t					cellCoordY;		// 9C
-		float					meanHeight;		// A0
-	};
-
-	TESChildCell		childCell;		// 18
-	uint32_t				landFlags;		// 1C
-	TESObjectCELL*		cell;			// 20
-	QueuedFile*			queuedFile;	// 24
-	LandData*			landData;		// 28
-};
-static_assert(sizeof(TESObjectLAND) == 0x2C);
 
 struct VariableInfo {
 	uint32_t			idx;		// 00

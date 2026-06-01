@@ -2,7 +2,7 @@
 
 #include "GameTypes.h"
 #include "NiTypes.h"
-#include "Bethesda/IOTask.hpp"
+#include "Bethesda/QueuedFile.hpp"
 //#include "NiNodes.h"
 
 /*******************************************************
@@ -65,41 +65,6 @@ class RefNiObject;
 class BSAnimGroupSequence;
 struct BSAData;
 class TESWorldSpace;
-
-
-class QueuedFile;
-
-// 014
-class QueuedChildren : public BSSimpleArray<NiPointer<QueuedFile>> {
-	uint32_t	counter;
-};
-
-// 028
-class QueuedFile : public IOTask {
-public:
-	QueuedFile();
-	~QueuedFile();
-
-	//Unk_01:	doesNothing
-	//Unk_02:	virtual void Call_Unk_0A(void);
-	//Unk_03:	implemented
-	virtual void Unk_08(void);				// doesNothing
-	virtual void Unk_09(uint32_t arg0);
-	virtual void Unk_0A(void);
-
-	// size?
-	struct FileEntry {
-		uint32_t		unk00;
-		uint32_t		unk04;
-		uint32_t		size;
-		uint32_t		offset;
-	};
-
-	BSTask* unk018;			// 018 init to tlsData:2B4 not confirmed OBSE for QueuedModel, seen QueuedReference (ref to which model will be attached)
-	QueuedReference* queuedRef;		// 01C could be last QueuedRef
-	QueuedChildren* queuedChildren;	// 020
-	uint32_t* unk024;			// 024	struct, 004 is a base, 008 is a length
-};
 
 // 40
 class QueuedReference : public QueuedFile {
@@ -362,6 +327,7 @@ class QueuedReplacementKFList;
 class QueuedHelmet;
 class BSFileEntry;
 class LoadedFile;
+class TESBoundObject;
 
 // 1C
 class ModelLoader {
@@ -384,4 +350,6 @@ public:
 	static ModelLoader* GetSingleton();
 	void QueueReference(TESObjectREFR* apRef, IO_TASK_PRIORITY aePriority, bool abAllowQueueReferenceQueuing);
 	NiNode* LoadModel(const char* nifPath, uint32_t arg2, uint8_t arg3, uint32_t arg4, uint8_t arg5, uint8_t arg6);
+
+	TESModel* GetModelForBoundObject(TESBoundObject* apBoundObject, TESObjectREFR* apRef);
 };

@@ -109,7 +109,7 @@ void TESBipedModelForm::SetBipedMask(uint32_t mask) {
 	bipedFlags = mask & 0xFF;
 }
 
-void  TESBipedModelForm::SetPath(const char* newPath, uint32_t whichPath, bool bFemalePath) {
+void TESBipedModelForm::SetPath(const char* newPath, uint32_t whichPath, bool bFemalePath) {
 	BSString* toSet = NULL;
 
 	switch (whichPath) {
@@ -120,7 +120,7 @@ void  TESBipedModelForm::SetPath(const char* newPath, uint32_t whichPath, bool b
 			toSet = &groundModel[bFemalePath ? 1 : 0].strModel;
 			break;
 		case ePath_Icon:
-			toSet = &icon[bFemalePath ? 1 : 0].ddsPath;
+			toSet = &icon[bFemalePath ? 1 : 0].strTextureName;
 			break;
 	}
 
@@ -139,7 +139,7 @@ const char* TESBipedModelForm::GetPath(uint32_t whichPath, bool bFemalePath) {
 			pathStr = &groundModel[bFemalePath ? 1 : 0].strModel;
 			break;
 		case ePath_Icon:
-			pathStr = &icon[bFemalePath ? 1 : 0].ddsPath;
+			pathStr = &icon[bFemalePath ? 1 : 0].strTextureName;
 			break;
 	}
 

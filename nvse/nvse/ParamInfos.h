@@ -2,51 +2,51 @@
 
 #include "CommandTable.h"
 #include <ScriptUtils.h>
-static ParamInfo kParams_OneInt_ThreeScriptVars[4] =
+static ParamInfo kParams_OneInt_ThreeScriptVars[] =
 {
 	{	"int", kParamType_Integer, 0 },
 	{	"int", kParamType_ScriptVariable, 0 },
 	{	"int", kParamType_ScriptVariable, 0 },
 	{	"int", kParamType_ScriptVariable, 0 },
 };
-static ParamInfo kParams_OneInt[1] =
+static ParamInfo kParams_OneInt[] =
 {
-	{	"int", kParamType_Integer, 0 },
-};
-
-static ParamInfo kParams_TwoInts[2] =
-{
-	{	"int", kParamType_Integer, 0 },
 	{	"int", kParamType_Integer, 0 },
 };
 
-static ParamInfo kParams_OneRef_OneOptionalInt[2] =
+static ParamInfo kParams_TwoInts[] =
+{
+	{	"int", kParamType_Integer, 0 },
+	{	"int", kParamType_Integer, 0 },
+};
+
+static ParamInfo kParams_OneRef_OneOptionalInt[] =
 {
 	{ "target",kParamType_ObjectRef, 0 },
 	{	"int", kParamType_Integer, 1 },
 };
-static ParamInfo kParams_OneOptionalInt[1] =
+static ParamInfo kParams_OneOptionalInt[] =
 {
 	{	"int", kParamType_Integer, 1 },
 };
 
-static ParamInfo kParams_OneInt_OneOptionalInt[2] =
+static ParamInfo kParams_OneInt_OneOptionalInt[] =
 {
 	{	"int", kParamType_Integer, 0 },
 	{	"int", kParamType_Integer, 1 },
 };
 
-static ParamInfo kParams_OneFloat[1] =
+static ParamInfo kParams_OneFloat[] =
 {
 	{	"float", kParamType_Float,	0 },
 };
 
-static ParamInfo kParams_OneString[1] =
+static ParamInfo kParams_OneString[] =
 {
 	{	"string",	kParamType_String,	0 },
 };
 
-static ParamInfo kParams_OneOptionalString[1] =
+static ParamInfo kParams_OneOptionalString[] =
 {
 	{	"string",	kParamType_String,	1 },
 };
@@ -63,26 +63,26 @@ static ParamInfo kParams_OneString_OneFloat[] =
 	{	"string",	kParamType_String,	0 },
 	{	"float",	kParamType_Float,	0 },
 };
-static ParamInfo kParams_OneString_OneOptionalFloat[2] =
+static ParamInfo kParams_OneString_OneOptionalFloat[] =
 {
 	{	"string",	kParamType_String,	0 },
 	{	"float",	kParamType_Float,	1 },
 };
 
-static ParamInfo kParams_OneString_OneOptionalObjectRef[2] =
+static ParamInfo kParams_OneString_OneOptionalObjectRef[] =
 {
 	{ "string", kParamType_String, 0 },
 	{ "ref", kParamType_ObjectRef, 1 },
 };
 
-static ParamInfo kParams_OneString_OneOptionalFloat_TwoOptionalInts[4] =
+static ParamInfo kParams_OneString_OneOptionalFloat_TwoOptionalInts[] =
 {
 	{ "string",	kParamType_String,	0 },
 	{ "float", kParamType_Float, 1 },
 	{ "integer", kParamType_Integer, 1 },
 	{ "integer", kParamType_Integer, 1 },
 };
-static ParamInfo kParams_OneString_OneOptionalFloat_ThreeOptionalInts[5] =
+static ParamInfo kParams_OneString_OneOptionalFloat_ThreeOptionalInts[] =
 {
 	{ "string",	kParamType_String,	0 },
 	{ "float", kParamType_Float, 1 },
@@ -90,7 +90,7 @@ static ParamInfo kParams_OneString_OneOptionalFloat_ThreeOptionalInts[5] =
 	{ "integer", kParamType_Integer, 1 },
 	{ "integer", kParamType_Integer, 1 },
 };
-static ParamInfo kParams_OneString_OneOptionalFloat_FourOptionalInts[6] =
+static ParamInfo kParams_OneString_OneOptionalFloat_FourOptionalInts[] =
 {
 	{ "string",	kParamType_String,	0 },
 	{ "float", kParamType_Float, 1 },
@@ -100,59 +100,66 @@ static ParamInfo kParams_OneString_OneOptionalFloat_FourOptionalInts[6] =
 	{ "integer", kParamType_Integer, 1 },
 };
 
-static ParamInfo kParams_TwoFloats[2] =
+static ParamInfo kParams_TwoFloats[] =
 {
 	{	"float",	kParamType_Float,	0 },
 	{	"float",	kParamType_Float,	0 },
 };
 
-static ParamInfo kParams_OneObjectID[1] =
+static ParamInfo kParams_TwoFloats_OneOptionalInt[] =
+{
+	{	"float",	kParamType_Float,	0 },
+	{	"float",	kParamType_Float,	0 },
+	{ 	"Integer",	kParamType_Integer,	1 },
+};
+
+static ParamInfo kParams_OneObjectID[] =
 {
 	{	"item", kParamType_ObjectID, 0},
 };
 
-static ParamInfo kParams_OneOptionalObjectID[1] =
+static ParamInfo kParams_OneOptionalObjectID[] =
 {
 	{	"item", kParamType_ObjectID, 1},
 };
 
-static ParamInfo kParams_OneInt_OneOptionalObjectID[2] =
+static ParamInfo kParams_OneInt_OneOptionalObjectID[] =
 {
 	{	"path type",	kParamType_Integer,			0	},
 	{	"item",			kParamType_ObjectID,	1	},
 };
 
-static ParamInfo kParams_OneObjectID_OneInt[2] =
+static ParamInfo kParams_OneObjectID_OneInt[] =
 {
 	{	"item",		kParamType_ObjectID,	0	},
 	{	"integer",	kParamType_Integer,			0	},
 };
 
-static ParamInfo kParams_OneFloat_OneOptionalObjectID[2] =
+static ParamInfo kParams_OneFloat_OneOptionalObjectID[] =
 {
 	{	"float",		kParamType_Float,			0	},
 	{	"item",			kParamType_ObjectID,	1	},
 };
 
-static ParamInfo kParams_OneMagicItem_OneOptionalObjectID[2] =
+static ParamInfo kParams_OneMagicItem_OneOptionalObjectID[] =
 {
    {	"magic item",	kParamType_MagicItem,		0	},
    {	"item",			kParamType_ObjectID,	1	},
 };
 
-static ParamInfo kParams_OneInventoryItem_OneOptionalObjectID[2] =
+static ParamInfo kParams_OneInventoryItem_OneOptionalObjectID[] =
 {
    {	"inv item",		kParamType_MagicItem,		0	},
    {	"target item",	kParamType_ObjectID,	1	},
 };
 
-static ParamInfo kParams_OneFormList_OneOptionalObjectID[2] =
+static ParamInfo kParams_OneFormList_OneOptionalObjectID[] =
 {
    {	"form list",	kParamType_FormList,		0	},
    {	"target item",	kParamType_ObjectID,	1	},
 };
 
-static ParamInfo kParams_OneActorValue[1] =
+static ParamInfo kParams_OneActorValue[] =
 {
 	{	"actor value", kParamType_ActorValue, 0},
 };
@@ -188,179 +195,185 @@ static ParamInfo kParams_FormatString[21] =
 #define SIZEOF_FMT_STRING_PARAMS 21
 #define NUM_PARAMS(paramInfoName) SIZEOF_ARRAY(paramInfoName, ParamInfo)
 
-static ParamInfo kParams_OneActorRef[1] =
+static ParamInfo kParams_OneActorRef[] =
 {
 	{	"actor reference",	kParamType_Actor,	0	},
 };
 
-static ParamInfo kParams_OneOptionalActorRef[1] =
+static ParamInfo kParams_OneOptionalActorRef[] =
 {
 	{	"actor reference",	kParamType_Actor,	1	},
 };
 
-static ParamInfo kParams_Axis[1] =
+static ParamInfo kParams_Axis[] =
 {
 	{	"axis",	kParamType_Axis,	0	},
 };
 
-static ParamInfo kParams_FormList[1] =
+static ParamInfo kParams_OneAxis_OneOptionalInt[] =
+{
+	{	"axis",	kParamType_Axis,	0	},
+	{	"flag",	kParamType_Integer,	1	},
+};
+
+static ParamInfo kParams_FormList[] =
 {
 	{	"form list", kParamType_FormList,	0		},
 };
 
-static ParamInfo kParams_TwoStrings[2] =
+static ParamInfo kParams_TwoStrings[] =
 {
 	{	"string",	kParamType_String,	0	},
 	{	"string",	kParamType_String,	0	},
 };
 
-static ParamInfo kParams_OneObject[1] =
+static ParamInfo kParams_OneObject[] =
 {
 	{	"target item",	kParamType_TESObject,	0	},
 };
 
-static ParamInfo kParams_OneOptionalObject[1] =
+static ParamInfo kParams_OneOptionalObject[] =
 {
    {	"target item",	kParamType_TESObject,	1	},
 };
 
-static ParamInfo kParams_OneString_OneOptionalObject[2] =
+static ParamInfo kParams_OneString_OneOptionalObject[] =
 {
 	{	"string",		kParamType_String,			0	},
 	{	"item",			kParamType_TESObject,	1	},
 };
 
-static ParamInfo kParams_OneObject_OneOptionalObject[2] =
+static ParamInfo kParams_OneObject_OneOptionalObject[] =
 {
 	{	"target item",	kParamType_TESObject,		0	},
 	{	"object",		kParamType_TESObject,		1	},
 };
 
-static ParamInfo kParams_OneInt_OneOptionalObject[2] =
+static ParamInfo kParams_OneInt_OneOptionalObject[] =
 {
 	{	"int",	kParamType_Integer,			0	},
 	{	"item",			kParamType_TESObject,	1	},
 };
 
-static ParamInfo kParams_SetEquippedFloat[2] =
+static ParamInfo kParams_SetEquippedFloat[] =
 {
 	{	"val", kParamType_Float, 0 },
 	{	"slot", kParamType_Integer, 0 },
 };
 
-static ParamInfo kParams_FormList_Integer[2] =
+static ParamInfo kParams_FormList_Integer[] =
 {
 	{	"form list", kParamType_FormList,	0		},
 	{	"index",	 kParamType_Integer,	0		}
 };
 
-static ParamInfo kParams_OneQuest[1] =
+static ParamInfo kParams_OneQuest[] =
 {
 	{	"quest", kParamType_Quest, 0 },
 };
 
-static ParamInfo kParams_OneNPC[1] =
+static ParamInfo kParams_OneNPC[] =
 {
 	{	"NPC",	kParamType_NPC,	1	},
 };
 
-static ParamInfo kParams_OneOptionalObjectRef[1] =
+static ParamInfo kParams_OneOptionalObjectRef[] =
 {
 	{	"ref", kParamType_ObjectRef, 1},
 };
 
-static ParamInfo kParams_OneInt_OneOptionalObjectRef[2] =
+static ParamInfo kParams_OneInt_OneOptionalObjectRef[] =
 {
 	{	"flag",		kParamType_Integer,	0	},
 	{	"ref",		kParamType_ObjectRef,	1	},
 };
 
-static ParamInfo kParams_OneIndex_OneOptionalObjectRef[2] =
+static ParamInfo kParams_OneIndex_OneOptionalObjectRef[] =
 {
 	{	"index",		kParamType_Integer,	0	},
 	{	"ref",		kParamType_ObjectRef,	1	},
 };
 
-static ParamInfo kParams_OnePackage_OneIndex_OneOptionalObjectRef[3] =
+static ParamInfo kParams_OnePackage_OneIndex_OneOptionalObjectRef[] =
 {
 	{	"package",		kParamType_AnyForm,		0	},
 	{	"index",		kParamType_Integer,		0	},
 	{	"ref",			kParamType_ObjectRef,	1	},
 };
 
-static ParamInfo kParams_OneForm_OneOptionalObjectRef[2] =
+static ParamInfo kParams_OneForm_OneOptionalObjectRef[] =
 {
 	{	"form",	kParamType_AnyForm,		0	},
 	{	"ref",	kParamType_ObjectRef,	1	},
 };
 
-static ParamInfo kParams_OneForm_OneInt[2] =
+static ParamInfo kParams_OneForm_OneInt[] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
 	{	"int",	kParamType_Integer, 0	},
 };
 
-static ParamInfo kParams_TwoForms_OneInt[3] =
+static ParamInfo kParams_TwoForms_OneInt[] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
 	{	"form",	kParamType_AnyForm,	0	},
 	{	"int",	kParamType_Integer, 0	},
 };
-static ParamInfo kParams_TwoForms_OneOptionalFloat[3] =
+static ParamInfo kParams_TwoForms_OneOptionalFloat[] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
 	{	"form",	kParamType_AnyForm,	0	},
 	{	"float",	kParamType_Float, 1	},
 };
-static ParamInfo kParams_OneForm[1] =
+static ParamInfo kParams_OneForm[] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
 };
 
-static ParamInfo kParams_OneForm_OneFloat[2] =
+static ParamInfo kParams_OneForm_OneFloat[] =
 {
 	{	"form",		kParamType_AnyForm,	0	},
 	{	"float",	kParamType_Float,	0	},
 };
-static ParamInfo kParams_OneForm_OneOptionalForm[2] =
+static ParamInfo kParams_OneForm_OneOptionalForm[] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
 	{	"form",	kParamType_AnyForm,	1	},
 };
-static ParamInfo kParams_OneOptionalForm[1] =
+static ParamInfo kParams_OneOptionalForm[] =
 {
 	{	"form",	kParamType_AnyForm,	1	},
 };
 
-static ParamInfo kParams_EquipItem[3] =
+static ParamInfo kParams_EquipItem[] =
 {
 	{	"item",			kParamType_ObjectID,	0	},
 	{	"silent",		kParamType_Integer,		1	},
 	{	"lockEquip",	kParamType_Integer,		1	},
 };
 
-static ParamInfo kParams_OneFaction[1] =
+static ParamInfo kParams_OneFaction[] =
 {
 	{	"faction",	kParamType_Faction,	0	},
 };
 
-static ParamInfo kParams_OneOptionalActorBase[1] =
+static ParamInfo kParams_OneOptionalActorBase[] =
 {
 	{	"base actor",	kParamType_ActorBase,	1	},
 };
 
-static ParamInfo kParams_OneInt_OneOptionalActorBase[2] =
+static ParamInfo kParams_OneInt_OneOptionalActorBase[] =
 {
 	{	"bool",			kParamType_Integer,		0	},
 	{	"base actor",	kParamType_ActorBase,	1	},
 };
 
-static ParamInfo kParams_OneRace[1] =
+static ParamInfo kParams_OneRace[] =
 {
 	{	"race",	kParamType_Race,	0	},
 };
 
-static ParamInfo kParams_GenericForm[4] =
+static ParamInfo kParams_GenericForm[] =
 {
 	{	"which",			kParamType_Integer,	0	},
 	{	"containingForm",	kParamType_AnyForm,	0	},
@@ -368,25 +381,25 @@ static ParamInfo kParams_GenericForm[4] =
 	{	"index",			kParamType_Integer,	0	},
 };
 
-static ParamInfo kParams_GenericDeleteForm[3] =
+static ParamInfo kParams_GenericDeleteForm[] =
 {
 	{	"which",			kParamType_Integer,	0	},
 	{	"containingForm",	kParamType_AnyForm,	0	},
 	{	"index",			kParamType_Integer,	0	},
 };
 
-static ParamInfo kParams_OneInt_OneForm[2] =
+static ParamInfo kParams_OneInt_OneForm[] =
 {
 	{	"index",	kParamType_Integer, 0	},
 	{	"form",		kParamType_AnyForm,	0	},
 };
 
-static ParamInfo kParams_AnyExpr[1] =
+static ParamInfo kParams_AnyExpr[] =
 {
 	{ "any expression", kNVSEParamType_BasicType, 0 },
 };
 
-static ParamInfo kParams_OneString_ThreeFloats[4] =
+static ParamInfo kParams_OneString_ThreeFloats[] =
 {
 	{ "String", kParamType_String, 0 },
 	{ "float", kParamType_Float, 0 },
@@ -394,7 +407,7 @@ static ParamInfo kParams_OneString_ThreeFloats[4] =
 	{ "float", kParamType_Float, 0 },
 };
 
-static ParamInfo kParams_FourStrings[4] =
+static ParamInfo kParams_FourStrings[] =
 {
 	{ "String", kParamType_String, 0 },
 	{ "X_Out", kParamType_String, 0 },
@@ -402,7 +415,7 @@ static ParamInfo kParams_FourStrings[4] =
 	{ "Z_Out", kParamType_String, 0 },
 };
 
-static ParamInfo kParams_TwoRefs_TwoStrings[4] =
+static ParamInfo kParams_TwoRefs_TwoStrings[] =
 {
 	{ "ref", kParamType_ObjectRef, 0 },
 	{ "ref", kParamType_ObjectRef, 0 },
@@ -410,36 +423,36 @@ static ParamInfo kParams_TwoRefs_TwoStrings[4] =
 	{ "String", kParamType_String, 0 },
 };
 
-static ParamInfo kParams_OneString_OneOptionalObjectID[2] =
+static ParamInfo kParams_OneString_OneOptionalObjectID[] =
 {
 	{ "String", kParamType_String, 0 },
 	{ "ObjectID",	kParamType_ObjectID, 1 },
 };
 
-static ParamInfo kParams_OneForm_OneString[2] =
+static ParamInfo kParams_OneForm_OneString[] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "String", kParamType_String, 0 },
 };
 
-static ParamInfo kParams_OneString_TwoOptionalInts[3] =
+static ParamInfo kParams_OneString_TwoOptionalInts[] =
 {
 	{"String", kParamType_String, 0},
 	{"Integer", kParamType_Integer, 1},
 	{"Integer", kParamType_Integer, 1},
 };
-static ParamInfo kParams_TwoOptionalInts[2] =
+static ParamInfo kParams_TwoOptionalInts[] =
 {
 	{"Integer", kParamType_Integer, 1},
 	{"Integer", kParamType_Integer, 1},
 };
-static ParamInfo kParams_ThreeOptionalInts[3] =
+static ParamInfo kParams_ThreeOptionalInts[] =
 {
 	{"Integer", kParamType_Integer, 1},
 	{"Integer", kParamType_Integer, 1},
 	{"Integer", kParamType_Integer, 1},
 };
-static ParamInfo kParams_ThreeOptionalFloats[3] =
+static ParamInfo kParams_ThreeOptionalFloats[] =
 {
 	{"Float", kParamType_Float, 1},
 	{"Float", kParamType_Float, 1},
@@ -451,7 +464,7 @@ static ParamInfo kParams_ar_SortEditor[] =
 	{	"bDescending",	kNVSEParamType_Number,	1	},
 };
 
-static ParamInfo kParams_TwoStrings_OneOptionalString_FourOptionalInts[7] =
+static ParamInfo kParams_TwoStrings_OneOptionalString_FourOptionalInts[] =
 {
 	{"String", kParamType_String, 0},
 	{"String", kParamType_String, 0},
@@ -462,38 +475,38 @@ static ParamInfo kParams_TwoStrings_OneOptionalString_FourOptionalInts[7] =
 	{"Integer", kParamType_Integer, 1},
 };
 
-static ParamInfo kParams_OneString_OneInt[2] =
+static ParamInfo kParams_OneString_OneInt[] =
 {
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 0 },
 };
 
-static ParamInfo kParams_OneInt_OneString[2] =
+static ParamInfo kParams_OneInt_OneString[] =
 {
 	{ "Integer", kParamType_Integer, 0 },
 	{ "string",	kParamType_String,	0 },
 };
 
-static ParamInfo kParams_OneString_OneOptionalInt[2] =
+static ParamInfo kParams_OneString_OneOptionalInt[] =
 {
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 1 },
 };
-static ParamInfo kParams_OneString_ThreeOptionalInts[4] =
+static ParamInfo kParams_OneString_ThreeOptionalInts[] =
 {
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 1 },
 	{ "Integer", kParamType_Integer, 1 },
 	{ "Integer", kParamType_Integer, 1 },
 };
-static ParamInfo kParams_OneString_TwoOptionalInts_OneOptionalFloat[4] =
+static ParamInfo kParams_OneString_TwoOptionalInts_OneOptionalFloat[] =
 {
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 1 },
 	{ "Integer", kParamType_Integer, 1 },
 	{ "Float", kParamType_Float, 1 },
 };
-static ParamInfo kParams_Event_OneForm[4] =
+static ParamInfo kParams_Event_OneForm[] =
 {
 	{ "setOrRemove", kParamType_Integer, 0 },
 	{ "Script", kParamType_AnyForm, 0 },
@@ -501,7 +514,7 @@ static ParamInfo kParams_Event_OneForm[4] =
 	{ "Form", kParamType_AnyForm, 1 }
 };
 
-static ParamInfo kParams_Event_TwoForms[5] =
+static ParamInfo kParams_Event_TwoForms[] =
 {
 	{ "setOrRemove", kParamType_Integer, 0 },
 	{ "Script", kParamType_AnyForm, 0 },
@@ -510,14 +523,14 @@ static ParamInfo kParams_Event_TwoForms[5] =
 	{ "Form", kParamType_AnyForm, 1 }
 };
 
-static ParamInfo kParams_Event[3] =
+static ParamInfo kParams_Event[] =
 {
 	{ "setOrRemove", kParamType_Integer, 0 },
 	{ "Script", kParamType_AnyForm, 0 },
 	{ "flags", kParamType_Integer, 1 },
 };
 
-static ParamInfo kParams_Event_OptionalFlag[4] =
+static ParamInfo kParams_Event_OptionalFlag[] =
 {
 	{ "setOrRemove", kParamType_Integer, 0 },
 	{ "Script", kParamType_AnyForm, 0 },
@@ -525,7 +538,7 @@ static ParamInfo kParams_Event_OptionalFlag[4] =
 	{ "optionalFlags", kParamType_Integer, 1 },
 };
 
-static ParamInfo kParams_Event_OneForm_OneInt[5] =
+static ParamInfo kParams_Event_OneForm_OneInt[] =
 {
 	{ "setOrRemove", kParamType_Integer, 0 },
 	{ "Script", kParamType_AnyForm, 0 },
@@ -533,53 +546,53 @@ static ParamInfo kParams_Event_OneForm_OneInt[5] =
 	{ "Form", kParamType_AnyForm, 1 },
 	{ "Integer", kParamType_Integer, 1 },
 };
-static ParamInfo kParams_Event_OneInt[4] =
+static ParamInfo kParams_Event_OneInt[] =
 {
 	{ "setOrRemove", kParamType_Integer, 0 },
 	{ "Script", kParamType_AnyForm, 0 },
 	{ "flags", kParamType_Integer, 1 },
 	{ "Integer", kParamType_Integer, 1 },
 };
-static ParamInfo kParams_OneString_OneForm_OneOptionalInt[3] =
+static ParamInfo kParams_OneString_OneForm_OneOptionalInt[] =
 {
 	{ "String", kParamType_String, 0 },
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 1 },
 };
-static ParamInfo kParams_OneForm_TwoInts_OneForm[4] =
+static ParamInfo kParams_OneForm_TwoInts_OneForm[] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Form", kParamType_AnyForm, 0 }
 };
-static ParamInfo kParams_OneForm_OneInt_OneFloat[3] =
+static ParamInfo kParams_OneForm_OneInt_OneFloat[] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Float", kParamType_Float, 0 }
 };
 
-static ParamInfo kParams_OneActorBase[1] =
+static ParamInfo kParams_OneActorBase[] =
 {
 	{ "ActorBase", kParamType_ActorBase, 0 },
 };
 
-static ParamInfo kParams_OneForm_OneInt_OneForm[3] =
+static ParamInfo kParams_OneForm_OneInt_OneForm[] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Form", kParamType_AnyForm, 0 }
 };
 
-static ParamInfo kParams_OneInt_OneForm_OneInt[3] =
+static ParamInfo kParams_OneInt_OneForm_OneInt[] =
 {
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 0 }
 };
 
-static ParamInfo kParams_OneForm_OneInt_OneForm_OneInt[4] =
+static ParamInfo kParams_OneForm_OneInt_OneForm_OneInt[] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 0 },
@@ -587,26 +600,26 @@ static ParamInfo kParams_OneForm_OneInt_OneForm_OneInt[4] =
 	{ "Integer", kParamType_Integer, 0 }
 };
 
-static ParamInfo kParams_OneForm_OneInt_OneString[3] =
+static ParamInfo kParams_OneForm_OneInt_OneString[] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 0 },
 	{ "String", kParamType_String, 0 }
 };
 
-static ParamInfo kParams_OneOptionalFloat[1] =
+static ParamInfo kParams_OneOptionalFloat[] =
 {
 	{ "Float", kParamType_Float, 1 },
 };
 
-static ParamInfo kParams_ThreeFloats[3] =
+static ParamInfo kParams_ThreeFloats[] =
 {
 	{ "Float", kParamType_Float, 0 },
 	{ "Float", kParamType_Float, 0 },
 	{ "Float", kParamType_Float, 0 },
 };
 
-static ParamInfo kParams_ThreeFloats_OneInt_OneOptionalFloat[5] =
+static ParamInfo kParams_ThreeFloats_OneInt_OneOptionalFloat[] =
 {
 	{ "Float", kParamType_Float, 0 },
 	{ "Float", kParamType_Float, 0 },
@@ -615,7 +628,7 @@ static ParamInfo kParams_ThreeFloats_OneInt_OneOptionalFloat[5] =
 	{ "Float", kParamType_Float, 1 }
 };
 
-static ParamInfo kParams_FiveFloats[5] =
+static ParamInfo kParams_FiveFloats[] =
 {
 	{ "Float", kParamType_Float, 0 },
 	{ "Float", kParamType_Float, 0 },
@@ -624,39 +637,39 @@ static ParamInfo kParams_FiveFloats[5] =
 	{ "Float", kParamType_Float, 0 },
 };
 
-static ParamInfo kParams_OneInt_OneFloat[2] =
+static ParamInfo kParams_OneInt_OneFloat[] =
 {
 	{ "int", kParamType_Integer, 0 },
 	{ "Float", kParamType_Float, 0 },
 };
 
-static ParamInfo kParams_OneForm_OneOptionalInt[2] =
+static ParamInfo kParams_OneForm_OneOptionalInt[] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "int",	kParamType_Integer, 1 },
 };
 
-static ParamInfo kParams_OneForm_OneInt_OneOptionalInt[3] =
+static ParamInfo kParams_OneForm_OneInt_OneOptionalInt[] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "int",	kParamType_Integer, 0 },
 	{ "int",	kParamType_Integer, 1 },
 };
 
-static ParamInfo kParams_OneObjectID_OneOptionalInt[2] =
+static ParamInfo kParams_OneObjectID_OneOptionalInt[] =
 {
 	{ "item",		kParamType_ObjectID, 0 },
 	{ "integer",	kParamType_Integer,	 1 },
 };
 
-static ParamInfo kParams_OneForm_TwoInts[3] =
+static ParamInfo kParams_OneForm_TwoInts[] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "int",	kParamType_Integer, 0 },
 	{ "int",	kParamType_Integer, 0 },
 };
 
-static ParamInfo kParams_OneForm_TwoInts_OneString[4] =
+static ParamInfo kParams_OneForm_TwoInts_OneString[] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "int",	kParamType_Integer, 0 },
@@ -664,7 +677,7 @@ static ParamInfo kParams_OneForm_TwoInts_OneString[4] =
 	{ "string",	kParamType_String,	0 },
 };
 
-static ParamInfo kParams_SixFloats[6] =
+static ParamInfo kParams_SixFloats[] =
 {
 	{ "Float", kParamType_Float, 0 },
 	{ "Float", kParamType_Float, 0 },
@@ -674,24 +687,24 @@ static ParamInfo kParams_SixFloats[6] =
 	{ "Float", kParamType_Float, 0 },
 };
 
-static ParamInfo kParams_OneForm_ThreeInts[4] =
-{
-	{ "form",	kParamType_AnyForm,	0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
-};
-
-static ParamInfo kParams_OneForm_FourInts[5] =
+static ParamInfo kParams_OneForm_ThreeInts[] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "int",	kParamType_Integer, 0 },
 	{ "int",	kParamType_Integer, 0 },
 	{ "int",	kParamType_Integer, 0 },
+};
+
+static ParamInfo kParams_OneForm_FourInts[] =
+{
+	{ "form",	kParamType_AnyForm,	0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
+	{ "int",	kParamType_Integer, 0 },
 	{ "int",	kParamType_Integer, 0 },
 };
 
-static ParamInfo kParams_OneForm_FourInts_TwoOptionalForms_OneOptionalInt[8] =
+static ParamInfo kParams_OneForm_FourInts_TwoOptionalForms_OneOptionalInt[] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "int",	kParamType_Integer, 0 },
@@ -704,44 +717,44 @@ static ParamInfo kParams_OneForm_FourInts_TwoOptionalForms_OneOptionalInt[8] =
 
 };
 
-static ParamInfo kParams_TwoForms[2] =
+static ParamInfo kParams_TwoForms[] =
 {
 	{ "form",	kParamType_AnyForm,	0 },
 	{ "form",	kParamType_AnyForm,	0 },
 };
 
-static ParamInfo kParams_OneString_OneInt_OneForm[3] =
+static ParamInfo kParams_OneString_OneInt_OneForm[] =
 {
 	{ "string",	kParamType_String,	0 },
 	{ "int",	kParamType_Integer, 0 },
 	{ "form",	kParamType_AnyForm,	0 },
 };
 
-static ParamInfo kParams_OneIMOD[1] =
+static ParamInfo kParams_OneIMOD[] =
 {
 	{ "IMOD",	kParamType_ImageSpaceModifier,	0 },
 };
 
-static ParamInfo kParams_OneIMOD_OneInt[2] =
+static ParamInfo kParams_OneIMOD_OneInt[] =
 {
 	{ "IMOD",	kParamType_ImageSpaceModifier,	0 },
 	{ "int",	kParamType_Integer, 0 },
 };
 
-static ParamInfo kParams_TwoStrings_OneInt[3] =
+static ParamInfo kParams_TwoStrings_OneInt[] =
 {
 	{ "string",	kParamType_String,	0 },
 	{ "string",	kParamType_String,	0 },
 	{ "Integer", kParamType_Integer, 0 },
 };
 
-static ParamInfo kParams_OneActorValue_OneOptionalInt[2] =
+static ParamInfo kParams_OneActorValue_OneOptionalInt[] =
 {
 	{ "AV",	kParamType_ActorValue,	0 },
 	{ "Integer",	kParamType_Integer,	1 },
 };
 
-static ParamInfo kParams_BMP[6] =
+static ParamInfo kParams_BMP[] =
 {
 	{ "filename", kParamType_String, 0 },
 	{ "R_Out", kParamType_String, 0 },
@@ -767,25 +780,25 @@ static ParamInfo kParams_ThreeStrings_OneInt[] =
 	{ "Integer", kParamType_Integer, 0 }
 };
 
-static ParamInfo kParams_OneRef_OneInt[2] =
+static ParamInfo kParams_OneRef_OneInt[] =
 {
 	{ "target",            kParamType_ObjectRef,    0    },
 	{ "quantity",        kParamType_Integer,        1    },
 };
 
-static ParamInfo kParams_OneRef_OneForm_OneInt[3] =
+static ParamInfo kParams_OneRef_OneForm_OneInt[] =
 {
 	{ "target",            kParamType_ObjectRef,    0    },
 	{ "Form",			kParamType_AnyForm, 0		},
 	{ "quantity",        kParamType_Integer,        1    },
 };
 
-static ParamInfo kParams_OneRef[1] =
+static ParamInfo kParams_OneRef[] =
 {
 	{ "target",            kParamType_ObjectRef,    0    }
 };
 
-static ParamInfo kParams_OneActorBase_TwoInts_OneFloat[4] =
+static ParamInfo kParams_OneActorBase_TwoInts_OneFloat[] =
 {
 	{ "target",         kParamType_ActorBase,    0    },
 	{ "Property Type",	kParamType_Integer,			0},
@@ -793,14 +806,14 @@ static ParamInfo kParams_OneActorBase_TwoInts_OneFloat[4] =
 	{ "value",       kParamType_Float,        0 },
 };
 
-static ParamInfo kParams_OneActorBase_TwoInts[3] =
+static ParamInfo kParams_OneActorBase_TwoInts[] =
 {
 	{ "target",         kParamType_ActorBase,    0    },
 	{ "Property Type",	kParamType_Integer,			0},
 	{ "Property",       kParamType_Integer,        0 },
 };
 
-static ParamInfo kParams_SixScriptVars[6] =
+static ParamInfo kParams_SixScriptVars[] =
 {
 	{ "Script Var", kParamType_ScriptVariable , 0 },
 	{ "Script Var", kParamType_ScriptVariable , 0 },
@@ -810,21 +823,21 @@ static ParamInfo kParams_SixScriptVars[6] =
 	{ "Script Var", kParamType_ScriptVariable , 0 },
 };
 
-static ParamInfo kParams_TwoScriptVars_OneOptionalScriptVar[3] =
+static ParamInfo kParams_TwoScriptVars_OneOptionalScriptVar[] =
 {
 	{ "Script Var", kParamType_ScriptVariable , 0 },
 	{ "Script Var", kParamType_ScriptVariable , 0 },
 	{ "Script Var", kParamType_ScriptVariable , 1 },
 };
 
-static ParamInfo kParams_OneForm_OneInt_OneOptionalForm[3] =
+static ParamInfo kParams_OneForm_OneInt_OneOptionalForm[] =
 {
 	{ "Form", kParamType_AnyForm, 0 },
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Form", kParamType_AnyForm, 1 }
 };
 
-static ParamInfo kParams_ThreeInts[3] =
+static ParamInfo kParams_ThreeInts[] =
 {
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Integer", kParamType_Integer, 0 },
@@ -832,7 +845,7 @@ static ParamInfo kParams_ThreeInts[3] =
 };
 
 
-static ParamInfo kParams_OneDialogRes_OneTopic_OneInt_OneOptionalInt[4] =
+static ParamInfo kParams_OneDialogRes_OneTopic_OneInt_OneOptionalInt[] =
 {
 	{ "Dialog Response",	kParamType_AnyForm,		0},
 	{ "Dialog Topic",		kParamType_Topic,		0},
@@ -842,13 +855,13 @@ static ParamInfo kParams_OneDialogRes_OneTopic_OneInt_OneOptionalInt[4] =
 };
 
 
-static ParamInfo kParams_OneInt_OneOptionalForm[2] =
+static ParamInfo kParams_OneInt_OneOptionalForm[] =
 {
 	{	"index",	kParamType_Integer, 0	},
 	{	"form",		kParamType_AnyForm,	1	},
 };
 
-static ParamInfo kSplatterParams[8] = {
+static ParamInfo kSplatterParams[] = {
 	{ "Count",			kParamType_Integer, 0 },
 	{ "Duration",		kParamType_Float,	0 },
 	{ "Size mult",		kParamType_Float,	0 },
@@ -870,7 +883,7 @@ static ParamInfo kTransformParams[] =
 	{	"World Data",	kNVSEParamType_Boolean, 0	},
 	{	"Update",		kNVSEParamType_Boolean, 0	},
 };
-static ParamInfo kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm[4] =
+static ParamInfo kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm[] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
 	{	"int",	kParamType_Integer, 0	},
@@ -878,7 +891,7 @@ static ParamInfo kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm[4] =
 	{	"form",	kParamType_AnyForm,	1	},
 
 };
-static ParamInfo kParams_OneActorRef_OneInt[2] =
+static ParamInfo kParams_OneActorRef_OneInt[] =
 {
 	{	"actor reference",	kParamType_Actor,	0	},
 	{	"int",	kParamType_Integer,				0	},
@@ -886,37 +899,37 @@ static ParamInfo kParams_OneActorRef_OneInt[2] =
 };
 
 
-static ParamInfo kParams_OneFloat_OneOptionalForm[2] =
+static ParamInfo kParams_OneFloat_OneOptionalForm[] =
 {
 	{	"float", kParamType_Float,	0 },
 	{   "form", kParamType_AnyForm, 1 }
 };
 
-static ParamInfo kParams_EjectCasing[2] =
+static ParamInfo kParams_EjectCasing[] =
 {
 	{	"Target Node",			kParamType_String,	1	},
 	{	"Custom Casing Path",	kParamType_String,  1	},
 };
 
-static ParamInfo kParams_OneCasino[1] =
+static ParamInfo kParams_OneCasino[] =
 {
 	{	"Casino",	kParamType_Casino,	1	},
 };
 
-static ParamInfo kParams_OneCasinoOneInt[2] =
+static ParamInfo kParams_OneCasinoOneInt[] =
 {
 	{	"Casino",	kParamType_Casino,	1	},
 	{	"int",		kParamType_Integer,	1	},
 };
 
-static ParamInfo kParams_OneCasinoOneIntOneString[3] =
+static ParamInfo kParams_OneCasinoOneIntOneString[] =
 {
 	{	"Casino",	kParamType_Casino,	1	},
 	{	"int",		kParamType_Integer,	1	},
 	{	"string",	kParamType_String,	1	},
 };
 
-static ParamInfo kParams_OneCasinoOneForm[2] =
+static ParamInfo kParams_OneCasinoOneForm[] =
 {
 	{	"Casino",	kParamType_Casino,	1	},
 	{	"form",		kParamType_AnyForm,	1	},
@@ -924,12 +937,12 @@ static ParamInfo kParams_OneCasinoOneForm[2] =
 
 
 
-static ParamInfo kParams_OneCell[1] =
+static ParamInfo kParams_OneCell[] =
 {
 	{	"cell",	kParamType_Cell,	0	},
 };
 
-static ParamInfo kParams_OneCell_OneOptionalForm[2] =
+static ParamInfo kParams_OneCell_OneOptionalForm[] =
 {
 	{	"cell",	kParamType_Cell,	0	},
 	{	"form",	kParamType_AnyForm,	1	}
@@ -958,12 +971,14 @@ static ParamInfo kParams_OneRefOneOptionalFloatOneOptionalInt[] =
 	{ 	"Face Target",			kParamType_Integer, 1 },
 };
 
-static ParamInfo kParams_IsNiSequenceActive[2] =
+static ParamInfo kParams_IsNiSequenceActive[] =
 {
 	{ "Sequence Name",	kParamType_String,	0 },
 	{ "Block Name", kParamType_String, 1 },
+	{ "First Person", kParamType_Integer, 1 },
 };
-static ParamInfo kParams_GetTopicInfo[3] =
+
+static ParamInfo kParams_GetTopicInfo[] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
 	{	"int",	kParamType_Quest, 1	},
@@ -1021,7 +1036,7 @@ static ParamInfo kParams_GetNiBound[] =
 	{ "First Person",	kParamType_Integer,	1 },
 };
 
-static ParamInfo kParamsProjectionArgsLegacy[8] =
+static ParamInfo kParamsProjectionArgsLegacy[] =
 {
 	{ "X_Out", kParamType_String, 0 },
 	{ "Y_Out", kParamType_String, 0 },
@@ -1033,7 +1048,7 @@ static ParamInfo kParamsProjectionArgsLegacy[8] =
 	{ "Object Ref", kParamType_ObjectRef, 1 }
 };
 
-static ParamInfo kParamsProjectionArgs[8] =
+static ParamInfo kParamsProjectionArgs[] =
 {
 	{ "X_Out", kParamType_ScriptVariable , 0 },
 	{ "Y_Out", kParamType_ScriptVariable , 0 },
@@ -1075,4 +1090,48 @@ static ParamInfo kParamsCallPerMobileObjectEx[] =
 	{ "Script", kNVSEParamType_Form, 0 },
 	{ "Process Level", kNVSEParamType_Number , 0 },
 	{ "Type Filter Array", kNVSEParamType_Array , 0 },
+};
+
+static ParamInfo kParams_OneArray[] =
+{
+
+	{	"array",	kNVSEParamType_Array,	0	}
+};
+
+static ParamInfo kParams_SetNiPSysModifierValue[] =
+{
+	{ "Block Name", kParamType_String, 0 },
+	{ "Item", kParamType_Integer, 0 },
+	{ "Value", kParamType_Float, 0 },
+	{ "First Person", kParamType_Integer, 1 },
+};
+
+static ParamInfo kParams_GetNiPSysModifierValue[] =
+{
+	{ "Block Name", kParamType_String, 0 },
+	{ "Item", kParamType_Integer, 0 },
+	{ "First Person", kParamType_Integer, 1 },
+};
+
+static ParamInfo kParams_SetParticleEmitterSpawnRate[] =
+{
+	{ "Block Name", kParamType_String, 0 },
+	{ "Value", kParamType_Float, 0 },
+	{ "First Person", kParamType_Integer, 1 },
+};
+
+static ParamInfo kParamsRemapLand[] =
+{
+	{ "Target Land FormID", kParamType_Integer , 0 },
+	{ "Source WorldSpace", kParamType_WorldSpace, 1 },
+	{ "Source Cell X", kParamType_Integer, 1 },
+	{ "Source Cell Y", kParamType_Integer, 1 },
+};
+
+static ParamInfo kParamsApplyModelTextureSwap[] =
+{
+	{ "Base Form", kParamType_TESObject , 0 },
+	{ "Reference", kParamType_ObjectRef, 1 },
+	{ "Block Name", kParamType_String, 1 },
+	{ "First Person", kParamType_Integer, 1 },
 };

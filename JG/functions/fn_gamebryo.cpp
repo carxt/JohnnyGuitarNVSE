@@ -1,5 +1,13 @@
 #include "fn_gamebryo.h"
 
+#include "Gamebryo/NiParticleSystem.hpp"
+#include "Gamebryo/NiPSysBoxEmitter.hpp"
+#include "Gamebryo/NiPSysEmitter.hpp"
+#include "Gamebryo/NiPSysModifier.hpp"
+
+#include <JG/TaskQueue.hpp>
+#include <GameTasks.h>
+
 enum class AlphaPropertyItem : int32_t {
 	NONE = -1,
 	BLEND_TOGGLE,
@@ -32,22 +40,117 @@ enum class NiUpdateType : int32_t {
 	TRANSFORMS_AND_BOUNDS,
 	PROPERTIES,
 	CONTROLLERS,
+	SHADER_PROPERTIES,
+	HAVOK_SYNC_BOTH,
+	HAVOK_SYNC_TO,
+	HAVOK_SYNC_FROM,
 	COUNT
 };
 
-NiAVObject* __fastcall GetRoot(TESObjectREFR* apRef, bool abFirstPerson) {
+enum class ParticleModifierItem : int32_t {
+	NONE = -1,
+
+	// NiPSysModifier
+	ORDER,
+	ACTIVE,
+
+	// NiPSysEmitter
+	EMITTER_SPEED,
+	EMITTER_SPEED_VAR,
+	EMITTER_DECLINATION,
+	EMITTER_DECLINATION_VAR,
+	EMITTER_PLANAR_ANGLE,
+	EMITTER_PLANAR_ANGLE_VAR,
+	EMITTER_INITIAL_COLOR_RED,
+	EMITTER_INITIAL_COLOR_GREEN,
+	EMITTER_INITIAL_COLOR_BLUE,
+	EMITTER_INITIAL_COLOR_ALPHA,
+	EMITTER_INITIAL_RADIUS,
+	EMITTER_RADIUS_VAR,
+	EMITTER_LIFESPAN,
+	EMITTER_LIFESPAN_VAR,
+	EMITTER_SCALE,
+
+	// NiPSysBoxEmitter
+	BOX_EMITTER_WIDTH,
+	BOX_EMITTER_HEIGHT,
+	BOX_EMITTER_DEPTH,
+
+	COUNT
+};
+
+static NiAVObject* __fastcall GetRoot(TESObjectREFR* apRef, bool abFirstPerson) {
 	if (apRef == PlayerCharacter::GetSingleton())
 		return static_cast<PlayerCharacter*>(apRef)->Get3D(abFirstPerson);
 	else
 		return apRef->Get3D();
 }
 
-NiProperty* __fastcall GetPropertyByName(NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
+static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
+	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
+	if (!pObject)
+		return { nullptr, nullptr };
+
+	return { pObject->GetProperty(aeType), pObject };
+}
+
+static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* apRoot, const NiFixedString& arObjectName) {
 	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
 	if (!pObject)
 		return nullptr;
 
-	return pObject->GetProperty(aeType);
+	return pObject->NiDynamicCast<NiParticleSystem>();
+}
+
+static void __fastcall InvalidateRenderPassesRecurse(const NiAVObject* apObject) {
+	BSShaderProperty* pShaderProp = static_cast<BSShaderProperty*>(apObject->GetProperty(NiProperty::kPropertyType_Shade));
+	if (pShaderProp)
+		pShaderProp->InvalidateState();
+
+	if (apObject->IsNode()) {
+		const NiNode* pNode = static_cast<const NiNode*>(apObject);
+		for (uint32_t i = 0; i < pNode->GetArrayCount(); ++i) {
+			const NiAVObject* pChild = pNode->GetAt(i);
+			if (pChild)
+				InvalidateRenderPassesRecurse(pChild);
+		}
+	}
+}
+
+static void __fastcall InvalidateRenderPasses(NiAVObject* apObject, bool abQueue = AILinearTaskThreadManager::ShouldQueue3DTask()) {
+	if (abQueue) [[unlikely]] {
+		QueuedTask kTask;
+		kTask.kItems[0].p = apObject;
+		apObject->IncRefCount();
+		kTask.pFunction = QUEUED_TASK{
+			NiAVObject* pObject = reinterpret_cast<NiAVObject*>(arTask.kItems[0].p);
+			InvalidateRenderPassesRecurse(pObject);
+			pObject->DecRefCount();
+		};
+		TaskQueue::QueueTask(kTask);
+	}
+	else {
+		InvalidateRenderPassesRecurse(apObject);
+	}
+}
+
+static void __fastcall SynchronizeHavok(NiAVObject* apObject, bhkNiCollisionObject::SyncMode aeSyncMode, bool abQueue = AILinearTaskThreadManager::ShouldQueue3DTask()) {
+	if (abQueue) [[unlikely]] {
+		QueuedTask kTask;
+		kTask.kItems[0].p = apObject;
+		kTask.kItems[1].ui = aeSyncMode;
+		apObject->IncRefCount();
+		kTask.pFunction = QUEUED_TASK{
+			NiAVObject * pObject = reinterpret_cast<NiAVObject*>(arTask.kItems[0].p);
+			const bhkNiCollisionObject::SyncMode eSyncMode = static_cast<bhkNiCollisionObject::SyncMode>(arTask.kItems[1].ui);
+			bhkNiCollisionObject::Synchronize(pObject, eSyncMode);
+			pObject->DecRefCount();
+		};
+		TaskQueue::QueueTask(kTask);
+	}
+	else {
+		bhkNiCollisionObject::Synchronize(apObject, aeSyncMode);
+	}
 }
 
 bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
@@ -57,7 +160,8 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha));
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
+		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
 		if (!pAlpha)
 			return true;
 
@@ -83,6 +187,9 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 		default:
 			__assume(0);
 		}
+
+		InvalidateRenderPasses(kObjects.second);
+
 		*result = 1;
 	}
 	return true;
@@ -94,7 +201,8 @@ bool Cmd_GetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha));
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
+		const NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
 		if (!pAlpha)
 			return true;
 
@@ -131,7 +239,8 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil));
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
+		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
 		if (!pStencil)
 			return true;
 
@@ -163,6 +272,9 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 		default:
 			__assume(0);
 		}
+
+		InvalidateRenderPasses(kObjects.second);
+
 		*result = 1;
 	}
 	return true;
@@ -174,7 +286,8 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil));
+		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
+		const NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
 		if (!pStencil)
 			return true;
 
@@ -230,9 +343,9 @@ bool Cmd_GetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &bFirstPerson) && cObjectName[0]) {
-		NiAVObject* pObject = BSUtilities::GetObjectByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		const NiAVObject* pObject = BSUtilities::GetObjectByName(GetRoot(thisObj, bFirstPerson), cObjectName);
 		if (pObject && pObject->IsExactKindOf<NiSwitchNode>())
-			*result = static_cast<NiSwitchNode*>(pObject)->GetIndex();
+			*result = static_cast<const NiSwitchNode*>(pObject)->GetIndex();
 	}
 	return true;
 }
@@ -257,8 +370,8 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 	NiUpdateType eType = NiUpdateType::NONE;
 	float fTime = FLT_MAX;
 	BOOL bUpdateControllers = FALSE;
-	char cName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
+	char cName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &fTime, &bUpdateControllers, &cName, &bFirstPerson) && InRange<NiUpdateType>(eType)) {
 		NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
 
@@ -269,7 +382,8 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 			pTarget = pRoot;
 
 		if (pTarget) {
-			NiUpdateData kData(fTime != FLT_MAX ? fTime : 0.f, bUpdateControllers, AILinearTaskThreadManager::ShouldQueue3DTask());
+			const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
+			NiUpdateData kData(fTime != FLT_MAX ? fTime : 0.f, bUpdateControllers, bQueue);
 			switch (eType) {
 			case NiUpdateType::FULL:
 				pTarget->Update(kData);
@@ -288,6 +402,18 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 				break;
 			case NiUpdateType::CONTROLLERS:
 				pTarget->UpdateControllers(kData);
+				break;
+			case NiUpdateType::SHADER_PROPERTIES:
+				InvalidateRenderPasses(pTarget, bQueue);
+				break;
+			case NiUpdateType::HAVOK_SYNC_BOTH:
+				SynchronizeHavok(pTarget, bhkNiCollisionObject::SYNC_BOTH, bQueue);
+				break;
+			case NiUpdateType::HAVOK_SYNC_TO:
+				SynchronizeHavok(pTarget, bhkNiCollisionObject::SYNC_TO_HAVOK, bQueue);
+				break;
+			case NiUpdateType::HAVOK_SYNC_FROM:
+				SynchronizeHavok(pTarget, bhkNiCollisionObject::SYNC_FROM_HAVOK, bQueue);
 				break;
 			default:
 				__assume(0);
@@ -308,15 +434,15 @@ bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 
 	bool bValid = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName, &bFirstPerson)) {
-		NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
+		const NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
 
-		NiAVObject* pTarget = nullptr;
+		const NiAVObject* pTarget = nullptr;
 		if (cName[0])
 			pTarget = BSUtilities::GetObjectByName(pRoot, cName);
 		else
 			pTarget = pRoot;
 
-		if (pTarget) {
+		if (pTarget && pTarget->m_pWorldBound) {
 			const NiBound& rBound = pTarget->GetWorldBound();
 			kElements[0] = rBound.kCenter.x;
 			kElements[1] = rBound.kCenter.y;
@@ -336,5 +462,342 @@ bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 	}
 
 	g_arrInterface->AssignCommandResult(pOutArray, result);
+	return true;
+}
+
+bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cSequenceName[MAX_PATH] = { 0 };
+	char cObjectName[MAX_PATH] = { 0 };
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cSequenceName, &cObjectName, &bFirstPerson) && cSequenceName[0]) {
+		const NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
+		if (pRoot) {
+			const NiAVObject* pTarget = pRoot;
+			if (cObjectName[0])
+				pTarget = BSUtilities::GetObjectByName(pRoot, cObjectName);
+
+			if (pTarget) {
+				const NiRTTI* NiControllerManager_ms_RTTI = reinterpret_cast<NiRTTI*>(0x11F36AC);
+				NiControllerManager* pCtrlMgr = static_cast<NiControllerManager*>(pTarget->GetController(NiControllerManager_ms_RTTI));
+				if (pCtrlMgr) {
+					*result = pCtrlMgr->IsSequenceActive(cSequenceName);
+					if (IsConsoleMode())
+						Console_Print("IsNiSequenceActive >> %s: %s", cSequenceName, *result ? "true" : "false");
+				}
+				else if (IsConsoleMode()) {
+					Console_Print("Controller not found");
+				}
+			}
+			else if (IsConsoleMode()) {
+				Console_Print("Block not found: %s", cObjectName);
+			}
+		}
+		else if (IsConsoleMode()) {
+			Console_Print("Root node not found");
+		}
+	}
+	return true;
+}
+
+bool Cmd_SetNiPSysModifierValue_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cObjectName[MAX_PATH] = { 0 };
+	ParticleModifierItem eItem = ParticleModifierItem::NONE;
+	float fValue = FLT_MAX;
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &eItem, &fValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		if (!pSys)
+			return true;
+			
+		pSys->m_kModifierList.ForEach([=](const NiPSysModifierPtr& spModifier, int) {
+			switch (eItem) {
+				case ParticleModifierItem::ORDER:
+					// TODO: Should we edit the list?
+					return;
+				case ParticleModifierItem::ACTIVE:
+					spModifier->SetActive(fValue > 0.f);
+					return;
+				default:
+					break;
+			}
+
+			if (auto pEmitter = spModifier->NiDynamicCast<NiPSysEmitter>()) {
+				switch (eItem) {
+					case ParticleModifierItem::EMITTER_SPEED:
+						pEmitter->m_fSpeed = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_SPEED_VAR:
+						pEmitter->m_fSpeedVar = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_DECLINATION:
+						pEmitter->m_fDeclination = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_DECLINATION_VAR:
+						pEmitter->m_fDeclinationVar = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_PLANAR_ANGLE:
+						pEmitter->m_fPlanarAngle = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_PLANAR_ANGLE_VAR:
+						pEmitter->m_fPlanarAngleVar = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_RED:
+						pEmitter->m_kInitialColor.r = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_GREEN:
+						pEmitter->m_kInitialColor.g = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_BLUE:
+						pEmitter->m_kInitialColor.b = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_ALPHA:
+						pEmitter->m_kInitialColor.a = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_RADIUS:
+						pEmitter->m_fInitialRadius = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_RADIUS_VAR:
+						pEmitter->m_fRadiusVar = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_LIFESPAN:
+						pEmitter->m_fLifeSpan = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_LIFESPAN_VAR:
+						pEmitter->m_fLifeSpanVar = fValue;
+						return;
+					case ParticleModifierItem::EMITTER_SCALE:
+						pEmitter->m_fScale = fValue;
+						return;
+					default:
+						break;
+				}
+			}
+
+			if (auto pBoxEmitter = spModifier->NiDynamicCast<NiPSysBoxEmitter>()) {
+				switch (eItem) {
+					case ParticleModifierItem::BOX_EMITTER_WIDTH:
+						pBoxEmitter->m_fEmitterWidth = fValue;
+						return;
+					case ParticleModifierItem::BOX_EMITTER_HEIGHT:
+						pBoxEmitter->m_fEmitterHeight = fValue;
+						return;
+					case ParticleModifierItem::BOX_EMITTER_DEPTH:
+						pBoxEmitter->m_fEmitterDepth = fValue;
+						return;
+					default:
+						break;
+				}
+			}
+		});
+	}
+	return true;
+}
+
+bool Cmd_GetNiPSysModifierValue_Execute(COMMAND_ARGS) {
+	char cObjectName[MAX_PATH] = { 0 };
+	ParticleModifierItem eItem = ParticleModifierItem::NONE;
+	BOOL bFirstPerson = FALSE;
+	*result = 0.0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		if (!pSys)
+			return true;
+
+		pSys->m_kModifierList.ForEach([=](const NiPSysModifierPtr& spModifier, int) {
+			switch (eItem) {
+				case ParticleModifierItem::ORDER:
+					*result = spModifier->m_uiOrder;
+					return;
+				case ParticleModifierItem::ACTIVE:
+					*result = spModifier->m_bActive;
+					return;
+				default:
+					break;
+			}
+
+			if (const auto pEmitter = spModifier->NiDynamicCast<NiPSysEmitter>()) {
+				switch (eItem) {
+					case ParticleModifierItem::EMITTER_SPEED:
+						*result = pEmitter->m_fSpeed;
+						return;
+					case ParticleModifierItem::EMITTER_SPEED_VAR:
+						*result = pEmitter->m_fSpeedVar;
+						return;
+					case ParticleModifierItem::EMITTER_DECLINATION:
+						*result = pEmitter->m_fDeclination;
+						return;
+					case ParticleModifierItem::EMITTER_DECLINATION_VAR:
+						*result = pEmitter->m_fDeclinationVar;
+						return;
+					case ParticleModifierItem::EMITTER_PLANAR_ANGLE:
+						*result = pEmitter->m_fPlanarAngle;
+						return;
+					case ParticleModifierItem::EMITTER_PLANAR_ANGLE_VAR:
+						*result = pEmitter->m_fPlanarAngleVar;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_RED:
+						*result = pEmitter->m_kInitialColor.r;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_GREEN:
+						*result = pEmitter->m_kInitialColor.g;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_BLUE:
+						*result = pEmitter->m_kInitialColor.b;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_COLOR_ALPHA:
+						*result = pEmitter->m_kInitialColor.a;
+						return;
+					case ParticleModifierItem::EMITTER_INITIAL_RADIUS:
+						*result = pEmitter->m_fInitialRadius;
+						return;
+					case ParticleModifierItem::EMITTER_RADIUS_VAR:
+						*result = pEmitter->m_fRadiusVar;
+						return;
+					case ParticleModifierItem::EMITTER_LIFESPAN:
+						*result = pEmitter->m_fLifeSpan;
+						return;
+					case ParticleModifierItem::EMITTER_LIFESPAN_VAR:
+						*result = pEmitter->m_fLifeSpanVar;
+						return;
+					case ParticleModifierItem::EMITTER_SCALE:
+						*result = pEmitter->m_fScale;
+						return;
+					default:
+						break;
+				}
+			}
+
+			if (const auto pBoxEmitter = spModifier->NiDynamicCast<NiPSysBoxEmitter>()) {
+				switch (eItem) {
+					case ParticleModifierItem::BOX_EMITTER_WIDTH:
+						*result = pBoxEmitter->m_fEmitterWidth;
+						return;
+					case ParticleModifierItem::BOX_EMITTER_HEIGHT:
+						*result = pBoxEmitter->m_fEmitterHeight;
+						return;
+					case ParticleModifierItem::BOX_EMITTER_DEPTH:
+						*result = pBoxEmitter->m_fEmitterDepth;
+						return;
+					default:
+						break;
+				}
+			}
+		});
+	}
+	return true;
+}
+
+bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
+	float x, y, z, w;
+	BOOL bRotate = FALSE;
+	BOOL bWorld = FALSE;
+	BOOL bFirstPerson = FALSE;
+	uint32_t eModifier = 0;
+	char cBlockName[128] = {};
+
+	*result = false;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cBlockName, &x, &y, &z, &w, &bRotate, &bWorld, &eModifier, &bFirstPerson)) {
+		NiAVObject* pObject = BSUtilities::GetObjectByName(GetRoot(thisObj, bFirstPerson), cBlockName);
+		if (bWorld) {
+			if (bRotate) {
+				pObject->m_kWorld.m_kRotate.FromEulerAnglesXYZ(x, y, z);
+			}
+			else {
+				pObject->m_kWorld.m_kTranslate.x = x;
+				pObject->m_kWorld.m_kTranslate.y = y;
+				pObject->m_kWorld.m_kTranslate.z = z;
+			}
+
+			if (w >= 0.f)
+				pObject->m_kWorld.m_fScale = w;
+		}
+		else {
+			if (bRotate) {
+				pObject->m_kLocal.m_kRotate.FromEulerAnglesXYZ(x, y, z);
+			}
+			else {
+				pObject->m_kLocal.m_kTranslate.x = x;
+				pObject->m_kLocal.m_kTranslate.y = y;
+				pObject->m_kLocal.m_kTranslate.z = z;
+			}
+			
+			if (w >= 0.f)
+				pObject->m_kLocal.m_fScale = w;
+		}
+
+		*result = true;
+	}
+	return true;
+}
+
+bool Cmd_SetParticleEmitterSpawnRate_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cObjectName[MAX_PATH] = {};
+	float fValue = 1.f;
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &fValue, &bFirstPerson)) {
+		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		if (pSys) {
+			NiPSysEmitterCtlr* pEmitterCtrl = pSys->GetController<NiPSysEmitterCtlr>();
+			if (pEmitterCtrl) {
+				NiFloatInterpolator* pInterp = pEmitterCtrl->GetBirthRateInterpolator();
+				if (pInterp) {
+					pInterp->m_fFloatValue = fValue;
+					*result = 1;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetParticleEmitterSpawnRate_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &bFirstPerson)) {
+		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		if (pSys) {
+			NiPSysEmitterCtlr* pEmitterCtrl = pSys->GetController<NiPSysEmitterCtlr>();
+			if (pEmitterCtrl) {
+				NiFloatInterpolator* pInterp = pEmitterCtrl->GetBirthRateInterpolator();
+				if (pInterp)
+					*result = pInterp->m_fFloatValue;
+			}
+		}
+	}
+	return true;
+}
+
+// TODO: Move to forms, and make a utils header
+bool Cmd_ApplyModelTextureSwap_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESBoundObject* pBaseForm = nullptr;
+	TESObjectREFR* pReference = nullptr;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBaseForm, &pReference, &cObjectName, &bFirstPerson) && pBaseForm) {
+		NiAVObject* pScene = GetRoot(thisObj, bFirstPerson);
+		if (cObjectName[0])
+			pScene = BSUtilities::GetObjectByName(pScene, cObjectName);
+
+		if (pScene) {
+			TESModel* pModel = ModelLoader::GetSingleton()->GetModelForBoundObject(pBaseForm, pReference);
+			if (pModel) {
+				TESModelTextureSwap* pTexSwap = pModel->GetAsModelMaterialSwap();
+				if (pTexSwap) {
+					pTexSwap->SwapTextures(pScene);
+					*result = 1;
+				}
+			}
+
+			if (pBaseForm->GetHasPLSpecTex()) {
+				CdeclCall(0x4B7660, pScene); // SwapPlatformLanguageTextures
+				*result = 1;
+			}
+		}
+	}
 	return true;
 }

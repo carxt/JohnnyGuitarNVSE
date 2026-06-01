@@ -1,6 +1,7 @@
 #include "JohnnyGuitarNVSE.h"
 #include "events/JohnnyEvents.h"
 #include "internal/serialization.h"
+#include "internal/CommandOpcodes.h"
 #include "functions/fn_av.h"
 #include "functions/fn_form.h"
 #include "functions/fn_utility.h"
@@ -23,8 +24,8 @@
 #include <JG/MediaLocationControllerOverride.hpp>
 #include <JG/CameraOverride.hpp>
 #include <JG/JohnnyRadios.hpp>
-#include <JG/RSMBarberHook.hpp> 
-#include <JG/BarterFilter.hpp> 
+#include <JG/RSMBarberHook.hpp>
+#include <JG/BarterFilter.hpp>
 #include "JG/EditorIDRestoration.hpp"
 #include <JG/CustomHUDShake.hpp>
 #include "JG/JohnnyGameSettings.hpp"
@@ -35,7 +36,10 @@
 #include <JG/DisabledMuzzleFlashLights.hpp>
 #include <JG/DisabledArrowKeys.hpp>
 #include <JG/ExtraMiscStats.hpp>
+#include <JG/CameraOverlay.hpp>
+#include <JG/LandRemapping.hpp>
 #include <JG/TaskQueue.hpp>
+#include <JG/FixedStringsRework.hpp>
 #include <events/LambdaVariableContext.h>
 #include <decoding.h>
 #include <misc/WorldToScreen.h>
@@ -52,9 +56,11 @@ NVSEArrayVarInterface* g_arrInterface = NULL;
 NVSEStringVarInterface* g_strInterface = NULL;
 NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_scriptInterface = NULL;
+NVSEMessagingInterface* g_msgInterface = NULL;
 NVSECommandTableInterface* g_cmdTableInterface = NULL;
 ExpressionEvaluatorUtils s_expEvalUtils;
 uint32_t g_initialTickCount = 0;
+uint32_t g_pluginHandle = 0;
 
 void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
 InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
@@ -63,23 +69,22 @@ GameTimeGlobals* g_gameTimeGlobals = nullptr;
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 bool (*Cmd_Update3D)(COMMAND_ARGS) = 0;
 
-#define JG_VERSION 525
+#define JG_VERSION 528
 
 #define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 
 void MessageHandler(NVSEMessagingInterface::Message* msg) {
-	MEM_CONTEXT eOrgContext = GetMemContext();
-	SetMemContext(MC_DEFAULT);
+	MEMORY_CONTEXT(MC_DEFAULT);
 	switch (msg->type) {
-		case NVSEMessagingInterface::kMessage_PostPostLoad: // GAME + GECK 
+		case NVSEMessagingInterface::kMessage_PostPostLoad: // GAME + GECK
 		{
 			if (JohnnyPatches::bFixJIP) {
 				JIPFixes::InitCommandHooks();
 				JIPFixes::InitHooks();
 			}
 
-			const CommandInfo* pUpdate3D = g_cmdTableInterface->GetByOpcode(0x152D);
+			const CommandInfo* pUpdate3D = g_cmdTableInterface->GetByOpcode(CommandOpcodes::kUpdate3D);
 			if (pUpdate3D)
 				Cmd_Update3D = pUpdate3D->execute;
 			break;
@@ -88,6 +93,12 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		case NVSEMessagingInterface::kMessage_PreLoadGame: // GAME
 		{
 			JohnnyExtraDataArray::GetInstance().ResetScriptData();
+
+			if (msg->type == NVSEMessagingInterface::kMessage_NewGame)
+				CameraOverlay::ReInit();
+			else
+				CameraOverlay::Reset();
+
 			DisabledMuzzleFlashLights::Reset(); //reset the muzzle hook every time
 			DisabledArrowKeys::Reset();
 			DisabledLevelUp::Reset();
@@ -106,12 +117,20 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			JohnnyFixes::ClearPlayerFurniture(); //fix furniture crash on reload
 			CameraOverride::Reset();
 			JohnnyEvents::Reset();
+			LandRemapping::Reset();
 			noHolotapeStopSound = false;
+			break;
+		}
+		case NVSEMessagingInterface::kMessage_PostLoadGame:
+		{
+			NiGlobalStringTable::RemoveUnusedStrings();
+			CameraOverlay::ReInit();
 			break;
 		}
 		case NVSEMessagingInterface::kMessage_MainGameLoop: // GAME
 		{
 			TaskQueue::ExecuteTasks();
+			CameraOverlay::Update();
 			CustomHUDShake::Update();
 			JohnnyRadios::Update();
 			JohnnyEvents::Update();
@@ -124,13 +143,15 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 			g_gameTimeGlobals = (GameTimeGlobals*)0x11DE7B8;
 			g_initialTickCount = GetTickCount();
 			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
+			CameraOverlay::Init();
 			EDIDRestoration::PrintErrors();
+			NiGlobalStringTable::RemoveUnusedStrings();
 			if (JohnnyPatches::bFixJIP)
 				JIPFixes::InitDeferredHooks();
-			
+
 			break;
 		}
-		case NVSEMessagingInterface::kMessage_PostLoad: // GAME + GECK 
+		case NVSEMessagingInterface::kMessage_PostLoad: // GAME + GECK
 		{
 			JohnnyPatches::HandleDLLInterop();
 
@@ -142,7 +163,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg) {
 		default:
 			break;
 	}
-	SetMemContext(eOrgContext);
 }
 
 void MessageHandlerGECK(NVSEMessagingInterface::Message* msg) {
@@ -519,9 +539,17 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(CallPerMobileObject);
 	REG_CMD(CallPerMobileObjectEx);
 	REG_CMD(Update3DAlt);
+	REG_CMD(SetNiPSysModifierValue);
+	REG_TYPED_CMD(GetNiPSysModifierValue, Default);
+	REG_TYPED_CMD(ar_Shuffle, Array);
+  	REG_CMD(GetRecipeCategoryFlags);
+	REG_CMD(GetCurrentSkyColor);
+	REG_CMD(RemapLand);
+	REG_CMD(SetParticleEmitterSpawnRate);
+	REG_CMD(GetParticleEmitterSpawnRate);
+	REG_TYPED_CMD(GetItemEffectString, String);
+	REG_CMD(ApplyModelTextureSwap);
 }
-
-
 
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {
 	// fill out the info structure
@@ -535,7 +563,9 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* i
 	}
 
 	if (nvse->nvseVersion < PACKED_NVSE_VERSION) {
-		MessageBoxA(nullptr, "NVSE version is outdated. This plugin requires v6.4.4 minimum.", "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
+		char cBuffer[128];
+		sprintf_s(cBuffer, "NVSE version is outdated. This plugin requires v%i.%i.%i minimum.", NVSE_VERSION_INTEGER, NVSE_VERSION_INTEGER_MINOR, NVSE_VERSION_INTEGER_BETA);
+		MessageBoxA(nullptr, cBuffer, "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
 		return false;
 	}
 
@@ -573,8 +603,9 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 
 	JohnnyPatches::ReadINI();
 
-	NVSEMessagingInterface* pMessaging = static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging));
-	pMessaging->RegisterListener(nvse->GetPluginHandle(), "NVSE", bIsGECK ? MessageHandlerGECK : MessageHandler);
+	g_pluginHandle = nvse->GetPluginHandle();
+	g_msgInterface = static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging));
+	g_msgInterface->RegisterListener(g_pluginHandle, "NVSE", bIsGECK ? MessageHandlerGECK : MessageHandler);
 
 	if (JohnnyPatches::bFixJIP) {
 		JIPFixes::InitData();
@@ -582,25 +613,25 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
 	}
 
 	if (!bIsGECK) {
+		FixedStringsRework::Init();
+
+		NVSEDataInterface* nvseData = static_cast<NVSEDataInterface*>(nvse->QueryInterface(kInterface_Data));
+		JohnnyExtraData::InitName();
+		JohnnyExtraData::Initialize(nvseData);
+
+		InventoryRefGetForID = static_cast<InventoryRef * (*)(uint32_t)>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
+		CaptureLambdaVars = static_cast<_CaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
+		UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
+		ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
+
 		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
 		JGGameCamera.CamPos = new JGCameraPosition;
 		DisabledSaves::Init();
 		CustomHUDShake::Init();
-
-		if (JohnnyPatches::bFixJIP) {
-			JohnnyExtraData::InitName();
-		}
-
-		NVSEDataInterface* nvseData = static_cast<NVSEDataInterface*>(nvse->QueryInterface(kInterface_Data));
-		JohnnyExtraData::Initialize(nvseData);
-		InventoryRefGetForID = static_cast<InventoryRef * (*)(uint32_t)>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
-		CaptureLambdaVars = static_cast<_CaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
-		UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
 		JohnnyFixes::Install();
 		JohnnyPatches::Install();
 		JohnnyGameSettings::Init();
 		JohnnyEvents::Install();
-		ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
 		Serialization::Init(nvse);
 	}
 

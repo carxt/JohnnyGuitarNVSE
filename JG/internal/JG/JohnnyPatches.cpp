@@ -19,6 +19,9 @@
 #include "DisabledArrowKeys.hpp"
 #include "AddItemMessages.hpp"
 #include "ExtraMarkerIcons.hpp"
+#include "RadioSkipOGGWAVPatch.hpp"
+#include "CameraOverlay.hpp"
+#include "LandRemapping.hpp"
 
 namespace JohnnyPatches {
 	bool fixFleeing = false;
@@ -35,6 +38,7 @@ namespace JohnnyPatches {
 	bool bDisableDLLCompatibilityRoutines = false;
 	bool bCombatMusicDisabled = false;
 	bool bMultipleAddItemMessages = false;
+	bool bFixOggWavRadioPlayback = false;
 
 	unsigned int iFPSCapLoadScreen = 0;
 	float iDeathSoundMAXTimer = 10;
@@ -118,12 +122,12 @@ namespace JohnnyPatches {
 		}
 	}
 
-	void __stdcall CopyNiCamera(NiCameraAlt* MemoryAddressToCopy, float fov) {
+	void __stdcall CopyNiCamera(NiCamera* MemoryAddressToCopy, float fov) {
 		SceneGraph* sing_SceneGraph = *(SceneGraph**)0x11DEB7C;
 		PlayerCharacter* g_ThePlayer = *(PlayerCharacter**)0x11DEA3C;
 		if (!sing_SceneGraph || !g_ThePlayer) return;
-		if ((NiCamera*)MemoryAddressToCopy != sing_SceneGraph->camera || fabs(fov - g_ThePlayer->worldFOV) > 0.0000099999997) return;
-		memcpy(JGGameCamera.CamPos, &(((NiAVObject*)MemoryAddressToCopy)->m_local.rotate), sizeof(JGCameraPosition));
+		if (MemoryAddressToCopy != sing_SceneGraph->spCamera || fabs(fov - g_ThePlayer->worldFOV) > 0.0000099999997) return;
+		memcpy(JGGameCamera.CamPos, &((MemoryAddressToCopy)->m_kLocal.m_kRotate), sizeof(JGCameraPosition));
 		memcpy(JGGameCamera.WorldMatrx, &(MemoryAddressToCopy->m_aafWorldToCam[0][0]), sizeof(JGWorldToScreenMatrix));
 	}
 
@@ -145,26 +149,26 @@ namespace JohnnyPatches {
 
 
 
-	void __fastcall SetViewmodelFrustumHook(NiCameraAlt* camera, void*, NiFrustum* frustum) {
-		float nearDistance = frustum->n;
-		float ratio = camera->maxFarNearRatio;
+	void __fastcall SetViewmodelFrustumHook(NiCamera* camera, void*, NiFrustum* m_kViewFrustum) {
+		float nearDistance = m_kViewFrustum->m_fNear;
+		float ratio = camera->m_fMaxFarNearRatio;
 		if (g_viewmodel_near > 0.f) {
 			nearDistance = std::max(g_viewmodel_near, 0.001f);
-			ratio = frustum->f / nearDistance;
+			ratio = m_kViewFrustum->m_fFar / nearDistance;
 		}
 
-		camera->frustum.n = nearDistance;
-		float fMinNear = frustum->f / ratio;
-		if (fMinNear > camera->frustum.n)
-			camera->frustum.n = fMinNear;
-		if (camera->minNearPlaneDist > camera->frustum.n)
-			camera->frustum.n = camera->minNearPlaneDist;
-		camera->frustum.l = frustum->l;
-		camera->frustum.r = frustum->r;
-		camera->frustum.t = frustum->t;
-		camera->frustum.b = frustum->b;
-		camera->frustum.f = frustum->f;
-		camera->frustum.o = frustum->o;
+		camera->m_kViewFrustum.m_fNear = nearDistance;
+		float fMinNear = m_kViewFrustum->m_fFar / ratio;
+		if (fMinNear > camera->m_kViewFrustum.m_fNear)
+			camera->m_kViewFrustum.m_fNear = fMinNear;
+		if (camera->m_fMinNearPlaneDist > camera->m_kViewFrustum.m_fNear)
+			camera->m_kViewFrustum.m_fNear = camera->m_fMinNearPlaneDist;
+		camera->m_kViewFrustum.m_fLeft = m_kViewFrustum->m_fLeft;
+		camera->m_kViewFrustum.m_fRight = m_kViewFrustum->m_fRight;
+		camera->m_kViewFrustum.m_fTop = m_kViewFrustum->m_fTop;
+		camera->m_kViewFrustum.m_fBottom = m_kViewFrustum->m_fBottom;
+		camera->m_kViewFrustum.m_fFar = m_kViewFrustum->m_fFar;
+		camera->m_kViewFrustum.m_bOrtho = m_kViewFrustum->m_bOrtho;
 	}
 
 	void __fastcall StopHolotapeSoundHook(BSSoundHandle* handle, void* edx, bool a2)
@@ -231,12 +235,16 @@ namespace JohnnyPatches {
 		patchPainedPlayer = GetPrivateProfileInt("MAIN", "bRemovePlayerPainExpression", 0, filename);
 		bMultipleAddItemMessages = GetPrivateProfileInt("MAIN", "bMultipleAddItemMessages", 0, filename);
 		bFixJIP = GetPrivateProfileInt("MAIN", "bJIPFixes", 1, filename);
+		bFixOggWavRadioPlayback = GetPrivateProfileInt("MAIN", "bFixOggWavRadioPlayback", 1, filename);
 		iDeathSoundMAXTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
 	}
 
 	void Install() {
 
+		if (bFixOggWavRadioPlayback) {
+			RadioSkipOGGWAVPatch::Install();
+		}
 		// for bFixFleeing
 		if (fixFleeing) WriteRelCall(0x8F5FE2, (uint32_t)FleeFixHook);
 
@@ -319,6 +327,10 @@ namespace JohnnyPatches {
 		MediaLocationControllerOverride::Install();
 
 		CameraOverride::Install();
+
+		CameraOverlay::Install();
+
+		LandRemapping::Install();
 
 		WriteRelCall(0x798BB1, (uint32_t)StopHolotapeSoundHook);
 	}

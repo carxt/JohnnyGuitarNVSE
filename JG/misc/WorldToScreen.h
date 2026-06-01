@@ -1,18 +1,6 @@
 #pragma once
 #include <GameForms.h>
 
-
-struct NiCameraAlt //Defined here because the one in NVSE is wrong.
-{
-	uint8_t			undefinedDataStruct[156];
-	float			m_aafWorldToCam[4][4];	// 09C
-	NiFrustum		frustum;			// 0DC
-	float			minNearPlaneDist;	// 0F8
-	float			maxFarNearRatio;	// 0FC
-	NiViewport		m_kPort;			// 100
-	float			LODAdjust;			// 110
-};
-
 struct JGWorldToScreenMatrix {
 	float			m_aafWorldToCam[4][4];	// 09C
 	NiFrustum		frustum;			// 0DC

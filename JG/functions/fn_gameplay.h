@@ -31,7 +31,7 @@ DEFINE_COMMAND_PLUGIN(ModNthTempEffectTimeLeft, , true, kParams_OneInt_OneFloat)
 DEFINE_COMMAND_PLUGIN(GetCalculatedSpread, , true, nullptr);
 DEFINE_COMMAND_PLUGIN(SendStealingAlarm, , true, kParams_OneRef_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetCompassHostiles, , false, kParams_TwoOptionalInts);
-DEFINE_COMMAND_PLUGIN(ToggleDisableSaves, , false, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(ToggleDisableSaves, , false, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SendTrespassAlarmAlt, , true, nullptr);
 DEFINE_COMMAND_PLUGIN(IsCrimeOrEnemy, , true, nullptr);
 DEFINE_CMD_ALT_COND_PLUGIN(GetLocationSpecificLoadScreensOnly, , , false, nullptr);

@@ -134,8 +134,8 @@ hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) {
 	NiNode* rootNode = Get3D();
 	if (rootNode) {
 		NiNode* targetNode = rootNode->GetNode(nodeName);
-		if (targetNode && targetNode->m_collisionObject) {
-			bhkWorldObject* hWorldObj = targetNode->m_collisionObject->worldObj;
+		if (targetNode && targetNode->m_spCollisionObject) {
+			bhkWorldObject* hWorldObj = targetNode->m_spCollisionObject->worldObj;
 			if (hWorldObj) {
 				hkpRigidBody* rigidBody = (hkpRigidBody*)hWorldObj->refObject;
 				uint8_t motionType = rigidBody->motion.type;

@@ -3,9 +3,14 @@
 #include "NiTypes.h"
 #include "GameTypes.h"
 
-#include "Gamebryo/NiObject.hpp"
+#include "Gamebryo/NiObjectNET.hpp"
 #include "Gamebryo/NiRTTI.hpp"
+#include "Gamebryo/NiCullingProcess.hpp"
+#include "Gamebryo/NiAlphaAccumulator.hpp"
+#include "Gamebryo/NiRenderer.hpp"
+#include "Bethesda/NiUpdateData.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
+#include "Bethesda/BSCullingProcess.hpp"
 
 struct NavMeshInfo;
 class bhkRigidBody;
@@ -45,20 +50,6 @@ class BSPortalGraph;
 class NiTriShape;
 class NiPropertyState;
 class NiDX9Renderer;
-
-struct NiUpdateData {
-	NiUpdateData(float afTime = 0.f, bool abUpdateControllers = false, bool abIsMultiThreaded = false)
-		: fTime(afTime), bUpdateControllers(abUpdateControllers), bParallelUpdate(abIsMultiThreaded), bFoundParticles(false), bFoundMorphController(false), bSceneGraphChange(false)
-	{}
-	~NiUpdateData() {};
-
-	float	fTime;
-	bool	bUpdateControllers;
-	bool	bParallelUpdate;
-	bool	bFoundParticles;
-	bool	bFoundMorphController;
-	bool	bSceneGraphChange;
-};
 
 // 44
 class LoadedAreaBound : public NiRefObject
@@ -223,9 +214,9 @@ public:
 	NiFloatInterpolator();
 	~NiFloatInterpolator();
 
-	float				value;		// 0C
-	NiFloatData* data;		// 10
-	uint32_t				unk14;		// 14
+	float					m_fFloatValue;
+	NiPointer<NiFloatData>	m_spFloatData;
+	uint32_t				m_uiLastIdx;
 };
 
 // 24
@@ -276,7 +267,17 @@ public:
 	NiControllerSequence();
 	~NiControllerSequence();
 
-	virtual void	Unk_23(void);
+	virtual bool Deactivate(float afEaseOutTime, bool);
+
+	enum AnimState : uint32_t {
+		INACTIVE,
+		ANIMATING,
+		EASEIN,
+		EASEOUT,
+		TRANSSOURCE,
+		TRANSDEST,
+		MORPHSOURCE
+	};
 
 	struct ControlledBlock {
 		NiInterpolator* interpolator;
@@ -299,7 +300,7 @@ public:
 	float				flt38;					// 38
 	float				flt3C;					// 3C
 	NiControllerManager* manager;				// 40
-	uint32_t				unk44;					// 44
+	AnimState				m_eState;					// 44
 	uint32_t				unk48;					// 48
 	float				flt4C;					// 4C
 	float				flt50;					// 50
@@ -307,6 +308,10 @@ public:
 	uint32_t				unk58;					// 58
 	const char* rootNodeName;			// 5C
 	uint32_t				unk60[5];				// 60
+
+	AnimState GetState() const {
+		return m_eState;
+	}
 };
 static_assert(sizeof(NiControllerSequence) == 0x74);
 
@@ -329,8 +334,8 @@ public:
 	virtual bool	IsStreamable() const;					// 43
 	virtual bool	TargetIsRequiredType() const;			// 44
 
-	uint16_t								flags;				// 08
-	uint16_t								unk0A;				// 0A
+	Bitfield16							m_usFlags;				// 08
+	uint16_t							unk0A;				// 0A
 	float								frequency;			// 0C
 	float								phaseTime;			// 10
 	float								flt14;				// 14
@@ -339,8 +344,16 @@ public:
 	float								flt20;				// 20
 	float								flt24;				// 24
 	float								flt28;				// 28
-	NiNode* target;			// 2C
-	NiMultiTargetTransformController* multiTargetCtrl;	// 30
+	NiNode*								target;			// 2C
+	NiMultiTargetTransformController*	multiTargetCtrl;	// 30
+
+	bool GetActive() const {
+		return m_usFlags.GetBit(3);
+	}
+	
+	void SetActive(bool abVal){
+		m_usFlags.Set(8, abVal);
+	}
 };
 
 class BSAnimNoteListener;
@@ -359,16 +372,32 @@ public:
 	NiTObjectSet<NiPointer<NiControllerSequence> >		m_kTempBlendSeqs;
 	NiPointer<NiDefaultAVObjectPalette>					m_spObjectPalette;
 
+	CREATE_OBJECT(NiControllerManager, 0xA2F6C0);
+	NIRTTI_ADDRESS(0x11F36AC);
+
 	NiControllerSequence* GetSequenceByName(const NiFixedString& arName) const {
-		return ThisCall<NiControllerSequence*>(0xA5C4B0, this, &arName);
+		return ThisCall<NiControllerSequence*>(0x47A520, this, &arName);
+	}
+
+	uint32_t GetSequenceCount() const {
+		return m_kSequenceArray.GetSize();
+	}
+
+	NiControllerSequence* GetSequenceAt(uint32_t auiIndex) const {
+		return m_kSequenceArray.GetAt(auiIndex);
+	};
+
+	bool DeactivateSequence(NiControllerSequence* apSequence, float afEaseOutTime) {
+		return apSequence->Deactivate(afEaseOutTime, 0);
 	}
 
 	bool IsSequenceActive(const NiFixedString& arName) const {
 		const uint32_t uiSize = m_kActiveSequences.GetSize();
 		if (uiSize) {
 			for (uint32_t i = 0; i < uiSize; i++) {
-				if (m_kActiveSequences.GetAt(i)->sequenceName == arName) {
-					return true;
+				NiControllerSequence* pSequence = m_kActiveSequences.GetAt(i);
+				if (pSequence->sequenceName == arName) {
+					return pSequence->GetState() != NiControllerSequence::AnimState::INACTIVE;
 				}
 			}
 		}
@@ -406,7 +435,7 @@ public:
 
 	virtual void	Unk_3A(void);
 
-	NiTransformInterpolator* interpolator;		// 34
+	NiPointer<NiInterpolator> m_spInterpolator;
 };
 
 // 38
@@ -418,6 +447,39 @@ public:
 	static NiTransformController* __stdcall Create(NiNode* pTarget, NiTransformInterpolator* pInterpolator);
 };
 static_assert(sizeof(NiTransformController) == 0x38);
+
+class NiPSysModifier;
+
+class NiPSysModifierCtlr : public NiSingleInterpController {
+public:
+	NiPSysModifierCtlr();
+	virtual ~NiPSysModifierCtlr();
+
+	NiFixedString	m_kModifierName;
+	NiPSysModifier* m_pkModifier;
+
+	NIRTTI_ADDRESS(0x12027C8);
+};
+
+class NiPSysEmitterCtlr : public NiPSysModifierCtlr {
+public:
+	NiPSysEmitterCtlr();
+	virtual ~NiPSysEmitterCtlr();
+
+	NiPointer<NiInterpolator>	m_spEmitterActiveInterpolator;
+	NiInterpolator*				m_pkLastBirthRateInterpolator;
+	float						m_fLastScaledTime;
+	bool						m_bLastActive;
+	NiTPrimitiveSet<float>		m_kParticleAges;
+
+	CREATE_OBJECT(NiPSysEmitterCtlr, 0xC1C5E0);
+	NIRTTI_ADDRESS(0x12024E8);
+
+	// GAME - 0x639B60
+	NiFloatInterpolator* GetBirthRateInterpolator() const {
+		return ThisCall<NiFloatInterpolator*>(0x639B60, this);
+	}
+};
 
 // 0C
 class NiExtraData : public NiObject {
@@ -461,32 +523,6 @@ public:
 
 	Tile* parentTile;	// 0C
 	NiNode* parentNode;	// 10
-};
-
-// 18
-class NiObjectNET : public NiObject {
-public:
-	NiObjectNET();
-	~NiObjectNET();
-
-	NiFixedString		m_blockName;				// 08
-	NiPointer<NiTimeController>	m_controller;				// 0C
-	NiExtraData**		m_extraDataList;			// 10
-	uint16_t				m_extraDataListLen;			// 14
-	uint16_t				m_extraDataListCapacity;	// 16
-
-	void DumpExtraData();
-	bool AddExtraData(NiExtraData* extraData) {
-		return ThisCall<bool>(0xA5BCA0, this, extraData);
-	}
-
-	void SetName(NiFixedString& arString) {
-		ThisCall(0xA5B950, this, &arString);
-	}
-
-	NiTimeController* GetController(const NiRTTI* apRTTI) const {
-		return ThisCall<NiTimeController*>(0xA5C570, this, apRTTI);
-	}
 };
 
 // 18
@@ -897,6 +933,10 @@ public:
 		if (pRenderPassArray)
 			pRenderPassArray->uiPassCount = 0;
 	}
+
+	void InvalidateState() {
+		iLastRenderPassState = -1;
+	}
 };
 static_assert(sizeof(BSShaderProperty) == 0x60);
 
@@ -985,13 +1025,13 @@ public:
 	virtual void			OnVisible(NiCullingProcess* apCuller);
 	virtual void			PurgeRendererData(NiDX9Renderer* apRenderer);
 
-	NiNode*					m_parent;				// 18
-	bhkNiCollisionObject*	m_collisionObject;		// 1C
-	NiBound*				m_pWorldBound;			// 20
-	DList<NiProperty>		m_propertyList;			// 24
-	Bitfield32				m_flags;				// 30
-	NiTransform				m_local;
-	NiTransform				m_world;
+	NiNode*							m_pkParent;				// 18
+	NiPointer<bhkNiCollisionObject>	m_spCollisionObject;		// 1C
+	NiBound*						m_pWorldBound;			// 20
+	DList<NiProperty>				m_propertyList;			// 24
+	Bitfield32						m_uiFlags;				// 30
+	NiTransform						m_kLocal;
+	NiTransform						m_kWorld;
 
 #ifdef GAME
 	static constexpr AddressPtr<NiBound, 0x11F4288> kNullBound;
@@ -1002,7 +1042,23 @@ public:
 	NiProperty* GetProperty(uint32_t auiType) const;
 
 	void SetAppCulled(bool abCulled) {
-		m_flags.Set(1, abCulled);
+		m_uiFlags.Set(1, abCulled);
+	}
+
+	bool GetAppCulled() const {
+		return m_uiFlags.GetBit(0);
+	}
+
+	void SetAlwaysDraw(bool abVal) {
+		ThisCall(0x546780, this, abVal);
+	}
+
+	void SetFixedBound(bool abVal) {
+		m_uiFlags.Set(0x2000, abVal);
+	}
+
+	void SetIgnoreFade(bool abVal) {
+		m_uiFlags.Set(0x8000, abVal);
 	}
 
 	void DumpProperties();
@@ -1031,23 +1087,32 @@ public:
 	}
 
 	void SetLocalRotate(const NiMatrix3& arMat) {
-		m_local.rotate = arMat;
+		m_kLocal.m_kRotate = arMat;
 	}
 
 	void SetLocalTranslate(const NiPoint3& arTrn) {
-		m_local.translate = arTrn;
+		m_kLocal.m_kTranslate = arTrn;
 	}
 
 	void SetLocalScale(float afScale) {
-		m_local.scale = afScale;
+		m_kLocal.m_fScale = afScale;
 	}
 
 	NiTimeController* GetController(const NiRTTI* apRTTI) const {
 		return ThisCall<NiTimeController*>(0xA5C570, this, apRTTI);
 	}
 
+	template <class ControllerType>
+	ControllerType* GetController() const {
+		return static_cast<ControllerType*>(GetController(&ControllerType::ms_RTTI));
+	}
+
 	const NiBound& GetWorldBound() const {
 		return m_pWorldBound ? *m_pWorldBound : kNullBound;
+	}
+
+	NiNode* GetParent() const {
+		return m_pkParent;
 	}
 };
 
@@ -1057,24 +1122,44 @@ public:
 	NiNode();
 	~NiNode();
 
-	virtual void			AttachChild(NiAVObject* apChild, bool abFirstAvail);
-	virtual void			InsertChildAt(uint32_t i, NiAVObject* apChild);
-	virtual void			DetachChild(NiAVObject* apChild, NiAVObject*& aspAVObject);
-	virtual void			DetachChildAlt(NiAVObject* apChild);
-	virtual void			DetachChildAt(uint32_t i, NiAVObject*& aspAVObject);
-	virtual NiAVObject*		DetachChildAtAlt(uint32_t i);
-	virtual void			SetAt(uint32_t i, NiAVObject* apChild, NiAVObject*& aspAVObject);
-	virtual void			SetAtAlt(uint32_t i, NiAVObject* apChild);
-	virtual void			UpdateUpwardPass();
+	virtual void	AttachChild(NiAVObject* apChild, bool abFirstAvail);
+	virtual void	InsertChildAt(uint32_t i, NiAVObject* apChild);
+	virtual void	DetachChildAlt(NiAVObject* apChild, NiPointer<NiAVObject>& arResult);
+	virtual void	DetachChild(NiAVObject* apChild);
+	virtual void	DetachChildAtAlt(uint32_t i, NiPointer<NiAVObject>& arResult);
+	virtual void	DetachChildAt(uint32_t i);
+	virtual void	SetAtAlt(uint32_t i, NiAVObject* apChild, NiPointer<NiAVObject>& arResult);
+	virtual void	SetAt(uint32_t i, NiAVObject* apChild);
+	virtual void	UpdateUpwardPass();
 
-	NiTObjectArray<NiPointer<NiAVObject>>	m_children;		// 9C
+	NiTObjectArray<NiPointer<NiAVObject>>	m_kChildren;		// 9C
 
-	static NiNode* __stdcall Create(const char* nodeName);
+	static NiNode* Create(uint16_t ausChildCount = 0);
+
 	NiAVObject* GetBlock(const char* blockName);
 	NiNode* GetNode(const char* nodeName);
 
-	NiAVObject* GetAt(uint32_t index) {
-		return m_children.GetAt(index);
+	uint32_t GetArrayCount() const {
+		return m_kChildren.GetSize();
+	}
+
+	uint32_t GetChildCount() const {
+		return m_kChildren.GetEffectiveSize();
+	}
+
+	NiAVObject* GetAt(uint32_t auiIndex) const {
+		return m_kChildren.GetAt(auiIndex);
+	}
+
+	NiAVObject* GetAtChecked(uint32_t auiIndex) const {
+		if (GetArrayCount() <= auiIndex)
+			return nullptr;
+
+		return GetAt(auiIndex);
+	}
+
+	void RemoveChildren() {
+		m_kChildren.RemoveAll();
 	}
 };
 static_assert(sizeof(NiNode) == 0xAC);
@@ -1101,7 +1186,7 @@ public:
 	NIRTTI_ADDRESS(0x11F5EB4);
 
 	void SetIndex(int32_t aiIndex) {
-		if (aiIndex >= -1 && aiIndex < static_cast<int32_t>(m_children.GetSize()))
+		if (aiIndex >= -1 && aiIndex < static_cast<int32_t>(m_kChildren.GetSize()))
 			m_iIndex = aiIndex;
 	}
 
@@ -1149,12 +1234,20 @@ public:
 	BSFadeNode();
 	~BSFadeNode();
 
-	float			fltAC[4];		// AC
-	uint32_t			unkBC[2];		// BC
-	uint32_t			fadeType;			// C4
-	uint32_t			unkC8;			// C8
-	TESObjectREFR* linkedObj;		// CC
-	uint32_t			unkD0[5];		// D0
+	float									fNearDistSqr;
+	float									fFarDistSqr;
+	float									fLastFade;
+	float									fCurrentFade;
+	float									fBoundRadius;
+	float									fTimeSinceUpdate;
+	uint32_t								eMultType;
+	uint32_t								uiFrameCounter;
+	TESObjectREFR*							pLinkedObj;
+	void*									pBoundArray;
+	BSSimpleList<class BSMultiBoundRoom*>	kParentRoomList;
+	BSSimpleList<class BSPortal*>			kParentPortalList;
+
+	CREATE_OBJECT(BSFadeNode, 0xB4EAA0);
 
 	void TurnFadeNodeOn() {
 		ThisCall(0x476AB0, this);
@@ -1265,7 +1358,7 @@ public:
 	uint8_t					byte0EE[2];		// 0EE
 	uint32_t					unk0F0;			// 0F0
 	uint32_t					unk0F4;			// 0F4
-	NiLight* light;			// 0F8
+	NiPointer<NiLight> spLight;			// 0F8
 	uint32_t					unk0FC;			// 0FC
 	uint32_t					unk100[6];		// 100
 	uint8_t					byte118;		// 118
@@ -1281,6 +1374,8 @@ public:
 };
 static_assert(sizeof(ShadowSceneLight) == 0x250);
 
+class NiDirectionalLight;
+
 // 200
 class ShadowSceneNode : public NiNode {
 public:
@@ -1295,7 +1390,7 @@ public:
 	DListNode<ShadowSceneLight>* node0D4;		// 0D4
 	ShadowSceneLight* data0D8;		// 0D8
 	ShadowSceneLight* data0DC;		// 0DC
-	ShadowSceneLight* data0E0;		// 0E0
+	ShadowSceneLight* pSunLight;		// 0E0
 	uint32_t							unk0E4[6];		// 0E4
 	void* ptr0FC;		// 0FC
 	void* ptr100;		// 100
@@ -1328,13 +1423,17 @@ public:
 	uint8_t							byte1DC;		// 1DC
 	uint8_t							pad1DD[3];		// 1DD
 	BSPortalGraph* portalGraph;	// 1E0
-	uint32_t							unk1E4[3];		// 1E4
-	float							flt1F0[3];		// 1F0
+	NiPoint3						kLightingOffset;		// 1E4
+	NiPoint3						kEyePos;		// 1F0
 	uint8_t							byte1FC;		// 1FC
 	uint8_t							pad1FD[3];		// 1FD
 
 	void UpdateObjectLighting(NiAVObject* apObject, bool abActiveLightsOnly) {
 		ThisCall(0xB5D9F0, this, apObject, abActiveLightsOnly);
+	}
+
+	void SetSunLight(NiDirectionalLight* apLight) {
+		ThisCall(0xB5AAC0, this, apLight);
 	}
 };
 static_assert(sizeof(ShadowSceneNode) == 0x200);
@@ -1345,15 +1444,21 @@ public:
 	NiCamera();
 	~NiCamera();
 
-	float			worldToCam[4][4];	// 09C
-	NiFrustum		frustum;			// 0DC
-	float			minNearPlaneDist;	// 0F8
-	float			maxFarNearRatio;	// 0FC
-	NiViewport		viewPort;			// 100
-	float			LODAdjust;			// 110
+	float			m_aafWorldToCam[4][4];	// 09C
+	NiFrustum		m_kViewFrustum;			// 0DC
+	float			m_fMinNearPlaneDist;	// 0F8
+	float			m_fMaxFarNearRatio;	// 0FC
+	NiViewport		m_kPort;			// 100
+	float			m_fLODAdjust;			// 110
 
-	bool LookAtWorldPoint(const NiPoint3& kWorldPt, const NiPoint3& kWorldUp) {
-		return ThisCall<bool>(0xA701B0, this, &kWorldPt, &kWorldUp);
+	CREATE_OBJECT(NiCamera, 0xA71430);
+
+	bool LookAtWorldPoint(const NiPoint3& arWorldPt, const NiPoint3& arWorldUp) {
+		return ThisCall<bool>(0xA701B0, this, &arWorldPt, &arWorldUp);
+	}
+
+	void SetViewFrustum(const NiFrustum& arFrustum) {
+		ThisCall(0xA6FAF0, this, &arFrustum);
 	}
 };
 static_assert(sizeof(NiCamera) == 0x114);
@@ -1373,19 +1478,17 @@ public:
 	NiDynamicEffect();
 	~NiDynamicEffect();
 
-	uint8_t			byte9C;			// 9C
-	uint8_t			byte9D;			// 9D
-	uint8_t			byte9E;			// 9E
-	uint8_t			byte9F;			// 9F
-	uint32_t			unkA0;			// A0
-	uint32_t			unkA4;			// A4
-	uint32_t			unkA8;			// A8
-	uint32_t			unkAC;			// AC
-	uint32_t			unkB0;			// B0
-	uint32_t			unkB4;			// B4
-	uint32_t			unkB8;			// B8
-	uint32_t			unkBC;			// BC
-	uint32_t			unkC0;			// C0
+	bool					m_bOn;
+	uint8_t					m_ucEffectType;
+#if JIP_LIGHTS
+	bool					bResetTraits;
+	Bitfield8				ucExtraFlags;
+#endif
+	int32_t					m_iIndex;
+	uint32_t				m_uiPushCount;
+	uint32_t				m_uiRevID;
+	NiTPointerList<NiNode*>	m_kAffectedNodeList;
+	NiTPointerList<NiNode*>	m_kUnaffectedNodeList;
 };
 
 // F0
@@ -1394,9 +1497,21 @@ public:
 	NiLight();
 	~NiLight();
 
-	float			fadeValue;			// C4
-	NiColor			ambientColor;		// C8
-	NiColor			directionalColor;	// D4
+	float	m_fDimmer;
+	NiColor m_kAmb;
+	NiColor m_kDiff;
+	union { // Bethesda reuses red specular color for light radius, JIP adds a pointer to the light object
+		NiColor	 m_kSpec;
+		struct {
+			float			m_fRadius;
+			float			_empty;
+#if JIP_LIGHTS
+			TESObjectLIGH*	pLightForm;
+#else
+			float			_empty2;
+#endif
+		};
+	};
 };
 
 // FC
@@ -1405,13 +1520,15 @@ public:
 	NiPointLight();
 	~NiPointLight();
 
-	float			radius;				// E0
-	float			fltE4;				// E4
-	float			fltE8;				// E8
-	uint32_t			unkEC;				// EC
-	float			attenuation1;		// F0
-	float			attenuation2;		// F4
-	float			attenuation3;		// F8
+	union {
+		struct {
+			float m_fAtten0;
+			float m_fAtten1;
+			float m_fAtten2;
+		};
+		NiPoint3 m_kLightOffset;
+	};
+	void* m_pvRendererData;
 };
 
 // FC
@@ -1420,18 +1537,28 @@ public:
 	NiDirectionalLight();
 	~NiDirectionalLight();
 
-	NiColor			fogColor;			// E0
-	uint32_t			unkEC;				// EC
-	NiPoint3		direction;			// F0
+	NiPoint3		m_kWorldDir;
 };
+
+class BSCullingProcess;
 
 class BSSceneGraph : public NiNode {
 public:
 	BSSceneGraph();
 	~BSSceneGraph();
 
-	virtual void	Unk_40(void);
-	virtual void	Unk_41(void);
+	virtual float	GetFarDistance();
+	virtual void	SetViewDistanceBasedOnFrameRate(float afTime);
+
+	NiPointer<NiCamera> spCamera;
+	NiVisibleArray*		pVisArray;
+	BSCullingProcess*	pCuller;
+	bool				bMenuSceneGraph;
+	float				fCurrentFOV;
+
+	NiNode* GetCameraRoot() const {
+		return static_cast<NiNode*>(GetAtChecked(0));
+	}
 };
 
 // C0
@@ -1439,12 +1566,6 @@ class SceneGraph : public BSSceneGraph {
 public:
 	SceneGraph();
 	~SceneGraph();
-
-	NiCamera* camera;			// AC
-	uint32_t				unkB0;				// B0
-	NiCullingProcess* cullingProc;		// B4
-	uint32_t				isMinFarPlaneDist;	// B8 The farplane is set to 20480.0 when the flag is true. Probably used for interiors.
-	float				cameraFOV;			// BC
 };
 
 // 3C
@@ -1467,23 +1588,11 @@ public:
 	~BSAnimGroupSequence();
 
 	TESAnimGroup* animGroup;		// 74
+
+	static bool PlaySounds(NiControllerSequence* apSequence, TESObjectREFR* apRef) {
+		return CdeclCall<bool>(0x4EEF00, apSequence, apRef);
+	}
 };
-
-// 210
-class NiRenderer : public NiObject {
-public:
-	NiRenderer();
-	~NiRenderer();
-
-	virtual void	Unk_23(void);
-
-	uint32_t			unk008[126];	// 008
-	uint32_t			sceneState;		// 200
-	uint32_t			unk204;			// 204
-	uint32_t			unk208;			// 208
-	uint32_t			unk20C;			// 20C
-};
-static_assert(sizeof(NiRenderer) == 0x210);
 
 class NiVBBlock;
 class NiDX9LightManager;
@@ -1493,14 +1602,6 @@ public:
 	NiDX9Renderer();
 	~NiDX9Renderer();
 
-	enum ClearFlags {
-		kClear_NONE = 0,
-		kClear_BACKBUFFER = 1,
-		kClear_STENCIL = 2,
-		kClear_ZBUFFER = 4,
-		kClear_ALL = kClear_BACKBUFFER | kClear_STENCIL | kClear_ZBUFFER
-	};
-
 	virtual void		Unk_24(void);
 	virtual void		Unk_25(void);
 	virtual void		Unk_26(void);
@@ -1508,15 +1609,15 @@ public:
 	virtual void		Unk_28(void);
 	virtual void		Unk_29(void);
 	virtual void		Unk_2A(void);
-	virtual void		SetBackgroundColor(NiPoint4* inARGB);
-	virtual void		Unk_2C(void);
-	virtual void		GetBackgroundColor(NiPoint4* outARGB);
-	virtual void		Unk_2E(void);
-	virtual void		Unk_2F(void);
+	virtual void		SetBackgroundColorAlpha(const NiColorA& arColor);
+	virtual void		SetBackgroundColor(const NiColor& arColor);
+	virtual void		GetBackgroundColor(NiColorA& arColor) const;
+	virtual void		SetStencilClear(uint32_t uiClear);
+	virtual uint32_t	GetStencilClear() const;
 	virtual void		Unk_30(void);
 	virtual void		Unk_31(void);
-	virtual NiRenderTargetGroup* GetDefaultRT();	// get back buffer rt
-	virtual NiRenderTargetGroup* GetCurrentRT();	// get currentRTGroup
+	virtual NiRenderTargetGroup* GetDefaultRenderTargetGroup() const;	// get back buffer rt
+	virtual NiRenderTargetGroup* GetCurrentRenderTargetGroup() const;	// get currentRTGroup
 	virtual void		Unk_34(void);
 	virtual void		Unk_35(void);
 	virtual void		Unk_36(void);
@@ -1659,7 +1760,7 @@ public:
 		REFRESHRATE_DEFAULT = 0
 	};
 
-	uint32_t								unk210[30];					// 210
+	uint32_t								unk210[2];					// 210
 	IDirect3DDevice9* device;					// 288
 	uint32_t								unk28C[76];					// 28C
 	HANDLE								deviceWindow;				// 3BC
@@ -1699,7 +1800,20 @@ public:
 	FrameBufferMode						frameBufferMode;			// AC4
 	uint32_t								backBufferCount;			// AC8
 	RefreshRate							refreshRate;				// ACC
-	uint32_t								unkAD0[44];					// AD0
+	uint32_t								unkAD0[44];					// 
+
+	// GAME - 0x7148C0
+	void ClearBuffer(const NiRect<float>* apRect, uint32_t auiClearFlags) {
+		ThisCall(0x7148C0, this, apRect, auiClearFlags);
+	};
+
+	uint32_t GetScreenHeight() const {
+		return ThisCall<uint32_t>(0xB6C1D0, this);
+	};
+
+	uint32_t GetScreenWidth() const {
+		return ThisCall<uint32_t>(0xB6C1A0, this);
+	};
 };
 static_assert(sizeof(NiDX9Renderer) == 0xB80);
 
@@ -1844,36 +1958,6 @@ public:
 };
 static_assert(sizeof(TileShaderProperty) == 0xB0);
 
-class NiAccumulator : public NiObject {
-public:
-	NiAccumulator();
-	~NiAccumulator();
-
-	virtual void StartAccumulating(const NiCamera* pkCamera);
-	virtual void FinishAccumulating();
-	virtual void RegisterObjectArray(void* kArray);
-	virtual bool RegisterObject(NiGeometry* apGeometry);
-	virtual bool AddShared(NiAVObject* apObject);
-	virtual void ClearSharedMap();
-};
-
-class NiBackToFrontAccumulator : public NiAccumulator {
-public:
-	NiBackToFrontAccumulator();
-	~NiBackToFrontAccumulator();
-
-	virtual void	Unk_29(void);
-};
-
-// 34
-class NiAlphaAccumulator : public NiBackToFrontAccumulator {
-public:
-	NiAlphaAccumulator();
-	~NiAlphaAccumulator();
-
-	uint32_t			unk08[11];		// 08
-};
-
 // 98
 class BSBatchRenderer : public NiObject {
 public:
@@ -1886,6 +1970,8 @@ public:
 	uint32_t			unk08[36];		// 08
 };
 static_assert(sizeof(BSBatchRenderer) == 0x98);
+
+class BSOcclusionQuery;
 
 // 280
 class BSShaderAccumulator : public NiAlphaAccumulator {
@@ -1906,31 +1992,57 @@ public:
 		uint32_t		unk10;
 	};
 
-	uint32_t				unk034[4];		// 034
-	float				flt044;			// 044
-	uint32_t				unk048[21];		// 048
-	AccumStruct			accum09C;		// 09C
-	AccumStruct			accum0B0;		// 0B0
-	AccumStruct			accum0C4;		// 0C4
-	AccumStruct			accum0D8;		// 0D8
-	AccumStruct			accum0EC;		// 0EC
-	AccumStruct			accum100;		// 100
-	AccumStruct			accum114;		// 114
-	AccumStruct			accum128;		// 128
-	uint32_t				unk13C[6];		// 13C
-	NiColorA				flt154;			// 154
-	bool					bWaterReflection;
-	bool					bRenderWaterDepth;
-	bool					bCellHasWater;
-	bool					bIsUnderwater;
-	int32_t					iCurrentWaterHeight;
-	uint32_t				unk164[2];		// 168
-	BSBatchRenderer* batchRenderer;	// 174
-	uint32_t				unk178[7];		// 178
-	ShadowSceneNode* shadowScene;	// 194
-	uint32_t				unk198;			// 198
-	uint32_t				unk19C;			// 19C
-	uint32_t				unk1A0[56];		// 1A0
+	struct SunOcclusionTest {
+		BSOcclusionQuery*	pOcclusionQuery;
+		bool				bWaiting;
+		float				fPercentOccluded;
+		uint32_t			uiPixelCount;
+		uint32_t			uiFrameCount;
+	};
+
+	uint32_t								eAccumulationMode;
+	bool									bWorldGeometry;
+	bool									bCacheGeometry;
+	bool									bDoDepthPasses;
+	uint32_t								uiSunPixelCount;
+	bool									bWaitingForSunQuery;
+	float									fPercentSunOccludedStored;
+	SunOcclusionTest						kSunTests[3];
+	bool									bAccumulate;
+	bool									bIs1stPerson;
+	bool									bRenderNoShader;
+	uint16_t								usQueryCount;
+	uint16_t								usQuerySize;
+	BSOcclusionQuery**						ppOcclusionQueries;
+	NiTPointerList<NiGeometry*>				kVolumetricFogGeometries;
+	AccumStruct								accum09C[4];
+	AccumStruct								accum0EC[4];
+	uint32_t								unk13C[4];
+	uint32_t								uiLastOcclusionRef;
+	bool									bLastOcclusionResult;
+	NiColorA								kSilhouetteColor;
+	bool									bIsWaterReflection; // Ignores water shaders
+	bool									bIsWaterRefraction;
+	bool									bCellHasWater;
+	bool									bIsUnderwater;
+	int32_t									iCurrentWaterHeight;
+	bool									bRenderDecals;
+	void*									pInstanceRenderer;
+	BSBatchRenderer*						pBatchRenderers[2];
+	uint32_t*								pCurrentPasses;
+	uint32_t*								pCurrentBuckets;
+	bool*									pCurrentFirstPasses;
+	bool*									pCurrentActivePasses;
+	uint32_t								uiBatchRendererCount;
+	uint32_t								uiBatchRendererPassCount;
+	ShadowSceneNode*						pActiveShadowSceneNode;	// 194
+	uint32_t								unk198;			// 198
+	uint32_t								unk19C;			// 19C
+	uint32_t								unk1A0[56];		// 1A0
+
+	static BSShaderAccumulator* Create(uint32_t aeBatchRendererCreationType = 99, uint32_t auiBatchRendererCount = 1, uint32_t aeMaxPassCount = 759) {
+		return NiCreate<BSShaderAccumulator, 0xB660D0>(aeBatchRendererCreationType, auiBatchRendererCount, aeMaxPassCount);
+	}
 };
 static_assert(sizeof(BSShaderAccumulator) == 0x280);
 
@@ -2211,62 +2323,7 @@ public:
 };
 static_assert(sizeof(ParticleShaderProperty) == 0x14C);
 
-struct NiCulledGeoList {
-	NiGeometry** m_geo;		// 00
-	uint32_t			m_numItems;		// 04
-	uint32_t			m_bufLen;		// 08
-	uint32_t			m_bufGrowSize;	// 0C
-};
-
-// 90
-class NiCullingProcess {
-public:
-	NiCullingProcess();
-	~NiCullingProcess();
-
-	virtual void	Unk_00(void);
-	virtual void	Unk_01(void);
-	virtual void	Unk_02(void);
-	virtual void	Unk_03(void);
-	virtual void	Unk_04(void);
-	virtual void	Unk_05(void);
-	virtual void	Unk_06(void);
-	virtual void	Unk_07(void);
-	virtual void	Unk_08(void);
-	virtual void	Unk_09(void);
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-	virtual void	Unk_0C(void);
-	virtual void	Unk_0D(void);
-	virtual void	Unk_0E(void);
-	virtual void	Unk_0F(void);
-	virtual void	Destructor(bool freeMemory);
-	virtual void	Unk_11(void* arg);
-	virtual void	Cull(NiCamera* camera, ShadowSceneNode* scene, NiCulledGeoList* culledGeo);
-	virtual void	AddGeo(NiGeometry* arg);
-
-	bool				m_bUseVirtualAppend;
-	NiCulledGeoList*	m_pkVisibleSet;	// 08
-	NiCamera*			m_pkCamera;
-	uint32_t			unk0C[32];		// 0C
-};
-static_assert(sizeof(NiCullingProcess) == 0x90);
-
 class BSCompoundFrustum;
-
-// C8
-class BSCullingProcess : public NiCullingProcess {
-public:
-	BSCullingProcess();
-	~BSCullingProcess();
-
-	uint32_t						eCullMode;			// 90
-	uint32_t						eTypeStack[10];		// 94
-	uint32_t						uiStackIndex;			// BC
-	BSCompoundFrustum*				pCompoundFrustum;			// C0
-	NiPointer<BSShaderAccumulator>	spAccumulator;	// C4
-};
-static_assert(sizeof(BSCullingProcess) == 0xC8);
 
 class NiTreeCtrl
 {
@@ -2289,3 +2346,8 @@ public:
 float __fastcall NiNodeComputeDistance(NiPoint3* Vector1, NiPoint3* Vector2);
 float __fastcall NiNodeComputeDistance2DSquared(NiPoint3* Vector1, NiPoint3* Vector2);
 void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn, float& zIn);
+
+class NiRenderTargetGroup : public NiObject {
+public:
+	// has more data but not needed atm
+};
