@@ -1435,35 +1435,7 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			WriteRelJump(GetJIPAddress(0x1000DD40), GetModFlags);
-		}
-	}
-
-	namespace ModFlagsFix {
-		uint8_t __fastcall GetModFlags(ItemChange* apItem) {
-			if (apItem && apItem->pObject && apItem->pObject->GetFormType() == FORM_TYPE::TESObjectWEAP && apItem->pExtraLists) {
-				auto pIter = apItem->pExtraLists;
-				while (pIter && !pIter->IsEmpty()) {
-					ExtraDataList* pList = pIter->GetItem();
-					if (pList) {
-						ExtraItemDropper* pDropper = pList->GetExtraData<ExtraItemDropper>();
-						ExtraWeaponModFlags* pModFlags = nullptr;
-						if (pDropper && pDropper->pDropper)
-							pModFlags = pDropper->pDropper->extraDataList.GetExtraData<ExtraWeaponModFlags>();
-						else
-							pModFlags = pList->GetExtraData<ExtraWeaponModFlags>();
-
-						if (pModFlags)
-							return pModFlags->ucWeaponModsActive;
-					}
-					pIter = pIter->GetNext();
-				}
-			}
-			return 0;
-		}
-
-		void InitHooks() {
-			WriteRelJump(GetJIPAddress(0x1000DD40), GetModFlags);
+			WriteRelJump(JIPUtils::GetAddress(0x1000DD40), GetModFlags);
 		}
 	}
 
