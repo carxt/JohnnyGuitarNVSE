@@ -1135,4 +1135,3 @@ static ParamInfo kParamsApplyModelTextureSwap[] =
 	{ "Block Name", kParamType_String, 1 },
 	{ "First Person", kParamType_Integer, 1 },
 };
-};
