@@ -1127,3 +1127,12 @@ static ParamInfo kParamsRemapLand[] =
 	{ "Source Cell X", kParamType_Integer, 1 },
 	{ "Source Cell Y", kParamType_Integer, 1 },
 };
+
+static ParamInfo kParamsApplyModelTextureSwap[] =
+{
+	{ "Base Form", kParamType_TESObject , 0 },
+	{ "Reference", kParamType_ObjectRef, 1 },
+	{ "Block Name", kParamType_String, 1 },
+	{ "First Person", kParamType_Integer, 1 },
+};
+};

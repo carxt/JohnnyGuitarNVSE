@@ -608,6 +608,10 @@ public:
 	};	// there seem to be an array (length 6) post 0x88
 
 	tList<Texture> textureList;	// 018
+
+	void SwapTextures(NiAVObject* apObject) {
+		ThisCall(0x48AFE0, this, apObject);
+	}
 };
 
 // 008

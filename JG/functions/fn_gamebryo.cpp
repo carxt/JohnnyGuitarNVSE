@@ -6,6 +6,7 @@
 #include "Gamebryo/NiPSysModifier.hpp"
 
 #include <JG/TaskQueue.hpp>
+#include <GameTasks.h>
 
 enum class AlphaPropertyItem : int32_t {
 	NONE = -1,
@@ -764,6 +765,37 @@ bool Cmd_GetParticleEmitterSpawnRate_Execute(COMMAND_ARGS) {
 				NiFloatInterpolator* pInterp = pEmitterCtrl->GetBirthRateInterpolator();
 				if (pInterp)
 					*result = pInterp->m_fFloatValue;
+			}
+		}
+	}
+	return true;
+}
+
+// TODO: Move to forms, and make a utils header
+bool Cmd_ApplyModelTextureSwap_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESBoundObject* pBaseForm = nullptr;
+	TESObjectREFR* pReference = nullptr;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBaseForm, &pReference, &cObjectName, &bFirstPerson) && pBaseForm) {
+		NiAVObject* pScene = GetRoot(thisObj, bFirstPerson);
+		if (cObjectName[0])
+			pScene = BSUtilities::GetObjectByName(pScene, cObjectName);
+
+		if (pScene) {
+			TESModel* pModel = ModelLoader::GetSingleton()->GetModelForBoundObject(pBaseForm, pReference);
+			if (pModel) {
+				TESModelTextureSwap* pTexSwap = pModel->GetAsModelMaterialSwap();
+				if (pTexSwap) {
+					pTexSwap->SwapTextures(pScene);
+					*result = 1;
+				}
+			}
+
+			if (pBaseForm->GetHasPLSpecTex()) {
+				CdeclCall(0x4B7660, pScene); // SwapPlatformLanguageTextures
+				*result = 1;
 			}
 		}
 	}
