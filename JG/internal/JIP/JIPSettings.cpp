@@ -16,6 +16,9 @@ namespace JIPSettings {
 
 		if (IsSettingClear("bFixPositiveChemDuration", cFilename))
 			PatchMemoryNopRange(JIPUtils::GetAddress(0x100128C3), JIPUtils::GetAddress(0x100128E1));
+
+		if (IsSettingClear("bWorldSpaceShellCasings", cFilename))
+			PatchMemoryNopRange(JIPUtils::GetAddress(0x10011F9A), JIPUtils::GetAddress(0x10011FA9));
 	}
 
 }
