@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BSExtraData.hpp"
+#include "Bethesda/BSExtraData.hpp"
 
 class ExtraWeaponModFlags : public BSExtraData {
 public:

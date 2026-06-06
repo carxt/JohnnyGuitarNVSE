@@ -216,6 +216,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiPoint2.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiPoint3.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiPoint4.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiRenderer.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiTransform.cpp" />
     <ClCompile Include="internal\JG\AddItemMessages.cpp" />
     <ClCompile Include="internal\JG\BarterFilter.cpp" />
@@ -365,7 +366,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\ExtraRadius.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraScript.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraSeenData.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\ExtraWeaponModFlags.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FactionRank.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FileFinder.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FixedStrings.hpp" />
@@ -441,7 +441,9 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiPSysEmitter.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPSysModifier.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPSysVolumeEmitter.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiRect.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRefObject.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiRenderer.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRTTI.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSmartPointer.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTAbstractPoolAllocator.hpp" />
@@ -475,6 +477,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Obsidian\AudioMarkerData.hpp" />
     <ClInclude Include="internal\Game\Obsidian\AudioMarkerInfo.hpp" />
     <ClInclude Include="internal\Game\Obsidian\ExtraAudioMarker.hpp" />
+    <ClInclude Include="internal\Game\Obsidian\ExtraWeaponModFlags.hpp" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\JG\AddItemMessages.hpp" />
     <ClInclude Include="internal\JG\BarterFilter.hpp" />

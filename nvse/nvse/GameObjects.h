@@ -47,8 +47,7 @@ public:
 	virtual void		Unk_5C(void);
 	virtual void		Unk_5D(void);
 	virtual void		Unk_5E(void);
-	virtual TESObjectREFR* RemoveItem(TESForm* toRemove, BaseExtraList* extraList, uint32_t quantity, bool keepOwner, bool drop, TESObjectREFR* destRef,
-		uint32_t unk6, uint32_t unk7, bool unk8, bool unk9);
+	virtual TESObjectREFR* RemoveItem(TESBoundObject* apObject, ExtraDataList* apExtraList, uint32_t auiCount, bool abStealing, bool abDropWorld, TESObjectREFR* apOtherContainer, NiPoint3* apPoint, NiPoint3* apRotate, bool abDeleteExtra, bool abPreferStolen);
 	virtual void		Unk_60(void);
 	virtual bool		EquipObject(TESForm* item, uint32_t count, ExtraDataList* xData, bool lockEquip);
 	virtual void		Unk_62(void);

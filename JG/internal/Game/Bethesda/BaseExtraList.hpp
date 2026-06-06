@@ -38,6 +38,11 @@ public:
 
 	void RemoveExtra(uint8_t aucType);
 
+	template <class T>
+	inline void RemoveExtra() noexcept {
+		RemoveExtra(T::_TYPE);
+	};
+
 	BSExtraData* AddExtra(BSExtraData* apExtra);
 
 	void RemoveAll(bool abDelete);

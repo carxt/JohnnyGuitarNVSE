@@ -24,7 +24,9 @@ public:
 
 	void InitScripts();
 
-	int32_t GetObjectCount(TESBoundObject* apObject) const;
+	ItemChange* GetObjectInList(const TESBoundObject* apObject, bool abLeveled, uint32_t auiRefID) const;
+
+	int32_t GetObjectCount(const TESBoundObject* apObject) const;
 	
 	typedef bool(* IterateFunc)(ItemChange*, void*);
 	int32_t IterateInventory(IterateFunc apFunc, void* apArgument, uint32_t auiIterateFlags) const;

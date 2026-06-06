@@ -875,6 +875,10 @@ public:
 	typedef tList<FormCount> FormCountList;
 
 	FormCountList	formCountList;	// 04
+
+	static bool ContainerCanHoldType(FORM_TYPE aeFormType) {
+		return CdeclCall<bool>(0x481F30, aeFormType);
+	}
 };
 
 // 00C

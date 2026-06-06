@@ -20,8 +20,13 @@ void InventoryChanges::InitScripts() {
 	ThisCall(0x4D1960, this);
 }
 
+// GAME - 0x4BFBA0
+ItemChange* InventoryChanges::GetObjectInList(const TESBoundObject* apObject, bool abLeveled, uint32_t auiRefID) const {
+	return ThisCall<ItemChange*>(0x4BFBA0, this, apObject, abLeveled, auiRefID);
+}
+
 // GAME - 0x4C8F30
-int32_t InventoryChanges::GetObjectCount(TESBoundObject* apObject) const {
+int32_t InventoryChanges::GetObjectCount(const TESBoundObject* apObject) const {
 	return ThisCall<int32_t>(0x4C8F30, this, apObject);
 }
 
