@@ -583,7 +583,7 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* i
 	};
 
 	// version checks pass
-	_MESSAGE("JohnnyGuitarNVSE %u Loaded succesfully.", info->version);
+	_MESSAGE("JohnnyGuitarNVSE %u Loaded successfully.", info->version);
 
 	bIsGECK = nvse->isEditor != 0;
 
