@@ -119,3 +119,4 @@ DEFINE_COMMAND_PLUGIN(Update3DAlt, , true, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetRecipeCategoryFlags, , false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(RemapLand, , false, kParamsRemapLand);
 DEFINE_COMMAND_PLUGIN(GetItemEffectString, , false, kParams_OneOptionalObjectID);
+DEFINE_CMD_COND_PLUGIN(GetCombatTargetDistance, , true, nullptr);

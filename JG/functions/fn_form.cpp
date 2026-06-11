@@ -2748,3 +2748,19 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 
 	return true;
 }
+
+bool Cmd_GetCombatTargetDistance_Eval(COMMAND_ARGS_EVAL) {
+	*result = -1.0;
+	if (thisObj->IsActor()) {
+		const Actor* pActor = static_cast<Actor*>(thisObj);
+		const Actor* pTarget = pActor->GetCombatTarget();
+		if (pTarget)
+			*result = pActor->GetPos().Distance(pTarget->GetPos());
+	}
+	return true;
+}
+
+bool Cmd_GetCombatTargetDistance_Execute(COMMAND_ARGS) {
+	Cmd_GetCombatTargetDistance_Eval(thisObj, nullptr, nullptr, result);
+	return true;
+}

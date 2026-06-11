@@ -499,8 +499,8 @@ public:
 	virtual void		Unk_107(void);
 	virtual void		Unk_108(void);
 	virtual void		Unk_109(void);
-	virtual CombatController* GetCombatController(void);
-	virtual Actor* GetCombatTarget(void);
+	virtual CombatController* GetCombatController() const;
+	virtual Actor*		GetCombatTarget() const;
 	virtual void		Unk_10C(void);
 	virtual void		Unk_10D(void);
 	virtual void		Unk_10E(void);
