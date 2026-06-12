@@ -1428,6 +1428,8 @@ public:
 	uint8_t							byte1FC;		// 1FC
 	uint8_t							pad1FD[3];		// 1FD
 
+	NIRTTI_ADDRESS(0x11F9E80);
+
 	void UpdateObjectLighting(NiAVObject* apObject, bool abActiveLightsOnly) {
 		ThisCall(0xB5D9F0, this, apObject, abActiveLightsOnly);
 	}

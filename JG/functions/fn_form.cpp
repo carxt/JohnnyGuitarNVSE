@@ -2532,6 +2532,17 @@ enum UPDATE3D_FLAGS_EX {
 	UPDATE_POS		= 1u << 6,
 };
 
+static ShadowSceneNode* FindSceneNodeRecurse(const NiAVObject* apObject) {
+	NiNode* pParent = apObject->GetParent();
+	if (!pParent)
+		return nullptr;
+
+	if (pParent->IsExactKindOf<ShadowSceneNode>())
+		return static_cast<ShadowSceneNode*>(pParent);
+	else
+		return FindSceneNodeRecurse(pParent);
+}
+
 static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
 	if (auiFlags & UPDATE_MODEL) {
 		apReference->Update3D();
@@ -2546,8 +2557,10 @@ static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_
 		apReference->SetScale(apReference->GetRawScale());
 
 	if (auiFlags & UPDATE_LIGHTS) {
-		ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(BSShaderManager::SceneGraphType::WORLD);
-		pSSN->UpdateObjectLighting(apReference->Get3DSimple(), false);
+		NiAVObject* pRoot = apReference->Get3DSimple();
+		ShadowSceneNode* pSSN = FindSceneNodeRecurse(pRoot);
+		if (pSSN)
+			pSSN->UpdateObjectLighting(pRoot, false);
 	}
 
 	if (auiFlags & UPDATE_POS) {
