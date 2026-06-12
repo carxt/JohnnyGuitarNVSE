@@ -2558,9 +2558,11 @@ static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_
 
 	if (auiFlags & UPDATE_LIGHTS) {
 		NiAVObject* pRoot = apReference->Get3DSimple();
-		ShadowSceneNode* pSSN = FindSceneNodeRecurse(pRoot);
-		if (pSSN)
-			pSSN->UpdateObjectLighting(pRoot, false);
+		if (pRoot) {
+			ShadowSceneNode* pSSN = FindSceneNodeRecurse(pRoot);
+			if (pSSN)
+				pSSN->UpdateObjectLighting(pRoot, false);
+		}
 	}
 
 	if (auiFlags & UPDATE_POS) {
