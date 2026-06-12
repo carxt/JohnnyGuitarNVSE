@@ -579,24 +579,44 @@ bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+void __fastcall StopAnimLoop(Animation* apAnimation, uint32_t aiGroup) {
+	if (aiGroup == -1) {
+		for (uint32_t i = 0; i < 8; ++i) {
+			apAnimation->uiLoopCounts[i] = 0;
+		}
+	}
+	else {
+		apAnimation->uiLoopCounts[aiGroup] = 0;
+	}
+}
+
 bool Cmd_StopIdleLoop_Execute(COMMAND_ARGS) {
 	int32_t eGroup = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eGroup)) {
 		if (eGroup != -1 && (eGroup < 0 || eGroup > 7))
 			return true;
 
-		Animation* pAnimation = thisObj->GetAnimation();
-		if (pAnimation) {
-			if (eGroup == -1) {
-				for (uint32_t i = 0; i < 8; ++i) {
-					pAnimation->uiLoopCounts[i] = 0;
-				}
+		if (thisObj == PlayerCharacter::GetSingleton()) {
+			PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(thisObj);
+			Animation* pAnimation = pPlayer->GetAnimation(true);
+			if (pAnimation) {
+				StopAnimLoop(pAnimation, eGroup);
+				*result = 1;
 			}
-			else {
-				pAnimation->uiLoopCounts[eGroup] = 0;
+			pAnimation = pPlayer->GetAnimation(false);
+			if (pAnimation) {
+				StopAnimLoop(pAnimation, eGroup);
+				*result = 1;
 			}
-			*result = 1;
 		}
+		else {
+			Animation* pAnimation = thisObj->GetAnimation();
+			if (pAnimation) {
+				StopAnimLoop(pAnimation, eGroup);
+				*result = 1;
+			}
+		}
+
 	}
 	return true;
 }
