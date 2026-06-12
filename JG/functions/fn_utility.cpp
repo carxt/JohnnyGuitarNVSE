@@ -578,3 +578,25 @@ bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
+bool Cmd_StopIdleLoop_Execute(COMMAND_ARGS) {
+	int32_t eGroup = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eGroup)) {
+		if (eGroup != -1 && (eGroup < 0 || eGroup > 7))
+			return true;
+
+		Animation* pAnimation = thisObj->GetAnimation();
+		if (pAnimation) {
+			if (eGroup == -1) {
+				for (uint32_t i = 0; i < 8; ++i) {
+					pAnimation->uiLoopCounts[i] = 0;
+				}
+			}
+			else {
+				pAnimation->uiLoopCounts[eGroup] = 0;
+			}
+			*result = 1;
+		}
+	}
+	return true;
+}
