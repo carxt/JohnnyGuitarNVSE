@@ -778,7 +778,7 @@ bool Cmd_ApplyModelTextureSwap_Execute(COMMAND_ARGS) {
 	TESObjectREFR* pReference = nullptr;
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBaseForm, &pReference, &cObjectName, &bFirstPerson) && pBaseForm) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBaseForm, &cObjectName, &pReference, &bFirstPerson) && pBaseForm) {
 		NiAVObject* pScene = GetRoot(thisObj, bFirstPerson);
 		if (cObjectName[0])
 			pScene = BSUtilities::GetObjectByName(pScene, cObjectName);
