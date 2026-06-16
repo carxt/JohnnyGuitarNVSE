@@ -40,8 +40,6 @@ public:
 
 	static void __fastcall Initialize(NVSEDataInterface* apNVSEData);
 
-	static void InitName();
-
 	[[nodiscard]] static JohnnyExtraData* __fastcall Find(const TESForm* apForm);
 
 	[[nodiscard]] static JohnnyExtraData* __fastcall GetOrCreate(TESForm* apForm);

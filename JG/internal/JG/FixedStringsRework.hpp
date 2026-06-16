@@ -1,5 +1,5 @@
 #pragma once
 
 namespace FixedStringsRework {
-	void Init();
+	SPEC_NOINLINE void Init();
 }

@@ -1,6 +1,6 @@
 #include "LandRemapping.hpp"
 #include "GameForms.h"
-#include "internal/serialization.h"
+#include "JohnnySerialization.hpp"
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/FixedStrings.hpp"
@@ -149,7 +149,7 @@ namespace LandRemapping {
 
 	void DeserializeData(ReadFunc readFunc) {
 		DEBUG_MSG("Deserializing remapped lands...");
-		using namespace Serialization;
+		using namespace JohnnySerialization;
 		uint32_t uiMapSize = 0;
 		readFunc(&uiMapSize, sizeof(uiMapSize));
 

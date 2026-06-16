@@ -181,7 +181,9 @@ namespace JohnnyPatches {
 	}
 
 	void ResetVanityWheel() {
-		if (!resetVanityCam) return;
+		if (!resetVanityCam) 
+			return;
+
 		if (PlayerCharacter::GetSingleton()) {
 			bool bIsInVanityMode = *reinterpret_cast<uint16_t*>(0x11E07B8) || PlayerCharacter::GetSingleton()->byte64D; //64d = autovanity mode.
 			if (!bIsInVanityMode) {
@@ -199,8 +201,14 @@ namespace JohnnyPatches {
 		}
 	}
 
-	__declspec (noinline) void HandleDLLInterop() {
-		if (!bDisableDLLCompatibilityRoutines) return;
+	void Update() {
+		ResetVanityWheel();
+	}
+
+	void HandleDLLInterop() {
+		if (!bDisableDLLCompatibilityRoutines)
+			return;
+
 		if (GetModuleHandle("jip_nvse.dll") != NULL) { //JIP is on.
 			uint8_t* fnPtr = (uint8_t*)GetRelJumpAddr(0x0524014);
 			while ((fnPtr[0] != 0xCC) && fnPtr[1] != 0xCC) {
@@ -240,7 +248,7 @@ namespace JohnnyPatches {
 		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
 	}
 
-	void Install() {
+	void Init() {
 
 		if (bFixOggWavRadioPlayback) {
 			RadioSkipOGGWAVPatch::Install();
@@ -310,7 +318,7 @@ namespace JohnnyPatches {
 		WriteRelCall(0x82FC0B, (uint32_t)CombatMusicHook);
 
 		// ToggleDisableSaves
-		DisabledSaves::Install();
+		DisabledSaves::Init();
 
 		ExtraMarkerIcons::Install();
 

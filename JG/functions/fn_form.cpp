@@ -29,7 +29,6 @@ using namespace ScriptUtils;
 
 extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, uint8_t numArgs, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
-extern GameTimeGlobals* g_gameTimeGlobals;
 
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ItemChange* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ItemChange*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
@@ -1813,7 +1812,7 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 			*result = 1;
 		}
 		else {
-			float daysPassed = g_gameTimeGlobals->daysPassed == 0 ? 1.0 : g_gameTimeGlobals->daysPassed->data;
+			const float daysPassed = GameTimeGlobals::GetSingleton()->daysPassed ? GameTimeGlobals::GetSingleton()->daysPassed->data : 1.f;
 			gameHoursPassed = floor(daysPassed * 24.0);
 			*result = ((gameHoursPassed - detachTime) >= iHoursToRespawnCell);
 		}

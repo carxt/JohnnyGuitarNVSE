@@ -1,4 +1,4 @@
-#include "JohnnyEvents.h"
+#include "JohnnyEvents.hpp"
 #include "EventFramework.h"
 #include "GameProcess.h"
 #include "decoding.h"
@@ -600,7 +600,7 @@ namespace JohnnyEvents {
 		ThisCall(0x484B60, apThis, auiChangeFlag);
 	}
 
-	void Install() {
+	void Init() {
 		CallUDF = g_scriptInterface->CallFunctionAlt;
 
 		OnDyingHandler = JGCreateEvent("OnDying", 1, 1);

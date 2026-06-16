@@ -1,5 +1,5 @@
 #pragma once
 
 namespace JIPSettings {
-	void InitConditionalHooks();
+	SPEC_NOINLINE void InitConditionalHooks();
 }

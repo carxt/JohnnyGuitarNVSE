@@ -1,6 +1,7 @@
 #pragma once
 #include <PluginAPI.h>
-namespace Serialization {
+
+namespace JohnnySerialization {
 
 	extern bool (*_WriteRecord)(uint32_t type, uint32_t version, const void* buffer, uint32_t length);
 	extern bool (*_WriteRecordData)(const void* buffer, uint32_t length);

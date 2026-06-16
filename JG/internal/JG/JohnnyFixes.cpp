@@ -332,7 +332,7 @@ namespace JohnnyFixes {
 		}
 	}
 
-	void Install() {
+	void Init() {
 		// for Runtime EDIDs
 		EDIDRestoration::InitHooks();
 		// use available ammo in inventory instead of NULL when default ammo isn't present

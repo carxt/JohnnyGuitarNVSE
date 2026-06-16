@@ -1,6 +1,6 @@
 #pragma once
 
-#pragma warning(disable: 4100 4201 4244 4324 4389 5054)
+#pragma warning(disable: 4100 4201 4244 4324 4389 5054 28159)
 
 #include <d3d9.h>
 
