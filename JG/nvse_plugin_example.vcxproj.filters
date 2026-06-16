@@ -457,6 +457,9 @@
     <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\ScriptUtils.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1233,6 +1236,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\ScriptUtils.hpp">
+      <Filter>internal\JG</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

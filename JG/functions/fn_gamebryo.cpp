@@ -8,6 +8,9 @@
 #include <JG/TaskQueue.hpp>
 #include <GameTasks.h>
 
+#include "JG/ScriptUtils.hpp"
+using namespace ScriptUtils;
+
 enum class AlphaPropertyItem : int32_t {
 	NONE = -1,
 	BLEND_TOGGLE,
@@ -78,13 +81,6 @@ enum class ParticleModifierItem : int32_t {
 
 	COUNT
 };
-
-static NiAVObject* __fastcall GetRoot(TESObjectREFR* apRef, bool abFirstPerson) {
-	if (apRef == PlayerCharacter::GetSingleton())
-		return static_cast<PlayerCharacter*>(apRef)->Get3D(abFirstPerson);
-	else
-		return apRef->Get3D();
-}
 
 static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
 	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
@@ -160,7 +156,7 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
 		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
 		if (!pAlpha)
 			return true;
@@ -201,7 +197,7 @@ bool Cmd_GetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
 		const NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
 		if (!pAlpha)
 			return true;
@@ -239,7 +235,7 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
 		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
 		if (!pStencil)
 			return true;
@@ -286,7 +282,7 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetRoot(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
 		const NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
 		if (!pStencil)
 			return true;
@@ -329,7 +325,7 @@ bool Cmd_SetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 	int32_t iIndex = 0;
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &iIndex, &bFirstPerson) && cObjectName[0]) {
-		NiAVObject* pObject = BSUtilities::GetObjectByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		NiAVObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
 		if (pObject && pObject->IsExactKindOf<NiSwitchNode>()) {
 			static_cast<NiSwitchNode*>(pObject)->SetIndex(iIndex);
 			*result = 1;
@@ -343,7 +339,7 @@ bool Cmd_GetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &bFirstPerson) && cObjectName[0]) {
-		const NiAVObject* pObject = BSUtilities::GetObjectByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		const NiAVObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
 		if (pObject && pObject->IsExactKindOf<NiSwitchNode>())
 			*result = static_cast<const NiSwitchNode*>(pObject)->GetIndex();
 	}
@@ -373,7 +369,7 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 	BOOL bFirstPerson = FALSE;
 	char cName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &fTime, &bUpdateControllers, &cName, &bFirstPerson) && InRange<NiUpdateType>(eType)) {
-		NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
+		NiAVObject* pRoot = GetReferenceScene(thisObj, bFirstPerson);
 
 		NiAVObject* pTarget = nullptr;
 		if (cName[0])
@@ -434,7 +430,7 @@ bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 
 	bool bValid = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName, &bFirstPerson)) {
-		const NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
+		const NiAVObject* pRoot = GetReferenceScene(thisObj, bFirstPerson);
 
 		const NiAVObject* pTarget = nullptr;
 		if (cName[0])
@@ -471,7 +467,7 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = { 0 };
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cSequenceName, &cObjectName, &bFirstPerson) && cSequenceName[0]) {
-		const NiAVObject* pRoot = GetRoot(thisObj, bFirstPerson);
+		const NiAVObject* pRoot = GetReferenceScene(thisObj, bFirstPerson);
 		if (pRoot) {
 			const NiAVObject* pTarget = pRoot;
 			if (cObjectName[0])
@@ -507,7 +503,7 @@ bool Cmd_SetNiPSysModifierValue_Execute(COMMAND_ARGS) {
 	float fValue = FLT_MAX;
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &eItem, &fValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		NiParticleSystem* pSys = GetParticleSystemByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
 		if (!pSys)
 			return true;
 			
@@ -601,7 +597,7 @@ bool Cmd_GetNiPSysModifierValue_Execute(COMMAND_ARGS) {
 	BOOL bFirstPerson = FALSE;
 	*result = 0.0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		NiParticleSystem* pSys = GetParticleSystemByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
 		if (!pSys)
 			return true;
 
@@ -699,7 +695,7 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 
 	*result = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cBlockName, &x, &y, &z, &w, &bRotate, &bWorld, &eModifier, &bFirstPerson)) {
-		NiAVObject* pObject = BSUtilities::GetObjectByName(GetRoot(thisObj, bFirstPerson), cBlockName);
+		NiAVObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cBlockName);
 		if (bWorld) {
 			if (bRotate) {
 				pObject->m_kWorld.m_kRotate.FromEulerAnglesXYZ(x, y, z);
@@ -738,7 +734,7 @@ bool Cmd_SetParticleEmitterSpawnRate_Execute(COMMAND_ARGS) {
 	float fValue = 1.f;
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &fValue, &bFirstPerson)) {
-		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		NiParticleSystem* pSys = GetParticleSystemByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
 		if (pSys) {
 			NiPSysEmitterCtlr* pEmitterCtrl = pSys->GetController<NiPSysEmitterCtlr>();
 			if (pEmitterCtrl) {
@@ -758,44 +754,13 @@ bool Cmd_GetParticleEmitterSpawnRate_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &bFirstPerson)) {
-		NiParticleSystem* pSys = GetParticleSystemByName(GetRoot(thisObj, bFirstPerson), cObjectName);
+		NiParticleSystem* pSys = GetParticleSystemByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
 		if (pSys) {
 			NiPSysEmitterCtlr* pEmitterCtrl = pSys->GetController<NiPSysEmitterCtlr>();
 			if (pEmitterCtrl) {
 				NiFloatInterpolator* pInterp = pEmitterCtrl->GetBirthRateInterpolator();
 				if (pInterp)
 					*result = pInterp->m_fFloatValue;
-			}
-		}
-	}
-	return true;
-}
-
-// TODO: Move to forms, and make a utils header
-bool Cmd_ApplyModelTextureSwap_Execute(COMMAND_ARGS) {
-	*result = 0;
-	TESBoundObject* pBaseForm = nullptr;
-	TESObjectREFR* pReference = nullptr;
-	char cObjectName[MAX_PATH] = {};
-	BOOL bFirstPerson = FALSE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBaseForm, &cObjectName, &pReference, &bFirstPerson) && pBaseForm) {
-		NiAVObject* pScene = GetRoot(thisObj, bFirstPerson);
-		if (cObjectName[0])
-			pScene = BSUtilities::GetObjectByName(pScene, cObjectName);
-
-		if (pScene) {
-			TESModel* pModel = ModelLoader::GetSingleton()->GetModelForBoundObject(pBaseForm, pReference);
-			if (pModel) {
-				TESModelTextureSwap* pTexSwap = pModel->GetAsModelMaterialSwap();
-				if (pTexSwap) {
-					pTexSwap->SwapTextures(pScene);
-					*result = 1;
-				}
-			}
-
-			if (pBaseForm->GetHasPLSpecTex()) {
-				CdeclCall(0x4B7660, pScene); // SwapPlatformLanguageTextures
-				*result = 1;
 			}
 		}
 	}

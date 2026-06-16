@@ -551,6 +551,8 @@ void RegisterCommands(const NVSEInterface* nvse) {
 	REG_CMD(ApplyModelTextureSwap);
 	REG_CMD(GetCombatTargetDistance);
 	REG_CMD(StopIdleLoop);
+	REG_CMD(SetIKState);
+	REG_CMD(GetIKState);
 }
 
 EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {

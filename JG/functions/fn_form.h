@@ -119,4 +119,7 @@ DEFINE_COMMAND_PLUGIN(Update3DAlt, , true, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetRecipeCategoryFlags, , false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(RemapLand, , false, kParamsRemapLand);
 DEFINE_COMMAND_PLUGIN(GetItemEffectString, , false, kParams_OneOptionalObjectID);
+DEFINE_COMMAND_PLUGIN(ApplyModelTextureSwap, , true, kParamsApplyModelTextureSwap);
 DEFINE_CMD_COND_PLUGIN(GetCombatTargetDistance, , true, nullptr);
+DEFINE_COMMAND_PLUGIN(SetIKState, , true, kParams_TwoInts);
+DEFINE_CMD_COND_PLUGIN(GetIKState, , true, kParams_OneInt);

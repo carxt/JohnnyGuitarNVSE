@@ -7,6 +7,7 @@
 #include <PluginAPI.h>
 #include <GameExtraData.h>
 #include "GameProcess.h"
+#include "GameTasks.h"
 #include <unordered_map>
 #include "JG/JGSetList.hpp"
 #include <JG/BarterFilter.hpp>
@@ -21,6 +22,10 @@
 #include <JG/LandRemapping.hpp>
 #include <Bethesda/BSShaderManager.hpp>
 #include <Bethesda/TESMain.hpp>
+#include <Bethesda/BSUtilities.hpp>
+
+#include "JG/ScriptUtils.hpp"
+using namespace ScriptUtils;
 
 extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, uint8_t numArgs, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
@@ -2764,6 +2769,37 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+
+bool Cmd_ApplyModelTextureSwap_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESBoundObject* pBaseForm = nullptr;
+	TESObjectREFR* pReference = nullptr;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBaseForm, &cObjectName, &pReference, &bFirstPerson) && pBaseForm) {
+		NiAVObject* pScene = GetReferenceScene(thisObj, bFirstPerson);
+		if (cObjectName[0])
+			pScene = BSUtilities::GetObjectByName(pScene, cObjectName);
+
+		if (pScene) {
+			TESModel* pModel = ModelLoader::GetSingleton()->GetModelForBoundObject(pBaseForm, pReference);
+			if (pModel) {
+				TESModelTextureSwap* pTexSwap = pModel->GetAsModelMaterialSwap();
+				if (pTexSwap) {
+					pTexSwap->SwapTextures(pScene);
+					*result = 1;
+				}
+			}
+
+			if (pBaseForm->GetHasPLSpecTex()) {
+				CdeclCall(0x4B7660, pScene); // SwapPlatformLanguageTextures
+				*result = 1;
+			}
+		}
+	}
+	return true;
+}
+
 bool Cmd_GetCombatTargetDistance_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1.0;
 	if (thisObj->IsActor()) {
@@ -2778,4 +2814,70 @@ bool Cmd_GetCombatTargetDistance_Eval(COMMAND_ARGS_EVAL) {
 bool Cmd_GetCombatTargetDistance_Execute(COMMAND_ARGS) {
 	Cmd_GetCombatTargetDistance_Eval(thisObj, nullptr, nullptr, result);
 	return true;
+}
+
+enum class IKType : int32_t {
+	NONE = -1,
+	LOOK = 0,
+	FOOT = 1,
+	GRAB = 2,
+	COUNT,
+};
+
+bool Cmd_SetIKState_Execute(COMMAND_ARGS) {
+	IKType eType = IKType::NONE;
+	BOOL bToggle = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &bToggle) && InRange(eType) && thisObj->IsActor()) {
+		const Actor* pActor = static_cast<Actor*>(thisObj);
+		bhkRagdollController* pCtrl = pActor->ragDollController;
+		if (pCtrl) {
+			switch (eType) {
+				case IKType::LOOK:
+					pCtrl->SetLookIKEnable(bToggle);
+					break;
+				case IKType::FOOT:
+					pCtrl->SetFootIKEnable(bToggle);
+					break;
+				case IKType::GRAB:
+					pCtrl->SetGrabIKEnable(bToggle);
+					break;
+				default:
+					__assume(0);
+					break;
+			}
+		}
+	}
+	return true;
+}
+
+bool SPEC_NOINLINE Cmd_GetIKState_Eval(COMMAND_ARGS_EVAL) {
+	*result = -1.0;
+	const IKType eType = *reinterpret_cast<IKType*>(&arg1);
+	if (InRange(eType) && thisObj->IsActor()) {
+		const Actor* pActor = static_cast<Actor*>(thisObj);
+		bhkRagdollController* pCtrl = pActor->ragDollController;
+		if (pCtrl) {
+			switch (eType) {
+				case IKType::LOOK:
+					*result = pCtrl->GetLookIKEnable();
+					break;
+				case IKType::FOOT:
+					*result = pCtrl->GetFootIKEnable();
+					break;
+				case IKType::GRAB:
+					*result = pCtrl->GetGrabIKEnable();
+					break;
+				default:
+					__assume(0);
+					break;
+			}
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetIKState_Execute(COMMAND_ARGS) {
+	IKType eType = IKType::NONE;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &eType);
+	return Cmd_GetIKState_Eval(thisObj, reinterpret_cast<void*>(eType), nullptr, result);
 }
