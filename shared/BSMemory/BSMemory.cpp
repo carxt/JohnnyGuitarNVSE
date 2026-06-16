@@ -1,12 +1,12 @@
 #include "BSMemory.hpp"
-#include <mutex>
+#include <shared_mutex>
 
 namespace BSMemory {
 
 	// -------------------------------------------------------------------------
 	// Internal globals and functions
 	// -------------------------------------------------------------------------
-	std::mutex			kAllocInitLock;
+	std::shared_mutex	kAllocInitLock;
 	void*				pMemoryManager = nullptr;
 	bool				bInitialized = false;
 	void* __fastcall	InitAllocator(void* apThis, void*, std::size_t size);
@@ -108,8 +108,8 @@ namespace BSMemory {
 	}
 
 	// This function sets up correct addresses based on the program
-	_declspec(noinline) void* BSAllocatorInitializer() {
-		std::lock_guard<std::mutex> kLock(kAllocInitLock);
+	__declspec(noinline) void* BSAllocatorInitializer() {
+		std::lock_guard kLock(kAllocInitLock);
 		if (bInitialized)
 			return pMemoryManager;
 
