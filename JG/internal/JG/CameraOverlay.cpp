@@ -260,25 +260,33 @@ namespace CameraOverlay {
 
 	static Overlay kOverlays[OverlayTypes::COUNT][CameraVariants::COUNT];
 
-	bool __fastcall RenderOverlay(BSRenderedTexture* apTexture, uint32_t aeOverlay) {
-		bool bRendered = false;
-		if (spSceneOverlayRoot && spSceneOverlayRoot->GetChildCount()) [[likely]] {
-			{
-				bool bHasChildren = false;
-				for (uint32_t i = 0; i < CameraVariants::COUNT; ++i) {
-					auto& rOverlay = kOverlays[aeOverlay][i];
-					if (rOverlay.pReference) {
-						NiNode* pRoot = rOverlay.GetRoot();
-						if (pRoot)
-							bHasChildren |= pRoot->GetChildCount() != 0;
-					}
-				}
-
-				if (!bHasChildren)
-					return bRendered;
+	static bool __fastcall ShouldRenderOverlay(uint32_t aeOverlay) {
+		bool bHasChildren = false;
+		for (uint32_t i = 0; i < CameraVariants::COUNT; ++i) {
+			auto& rOverlay = kOverlays[aeOverlay][i];
+			if (rOverlay.pReference) {
+				NiNode* pRoot = rOverlay.GetRoot();
+				if (pRoot)
+					bHasChildren |= pRoot->GetChildCount() != 0;
 			}
+		}
+
+		return bHasChildren;
+	}
+
+	static bool __fastcall RenderOverlay(BSRenderedTexture* apTexture, uint32_t aeOverlay) {
+		bool bRendered = false;
+		constexpr uint32_t uiSaveLoadFlags = BGSSaveLoadGame::GlobalFlags::SAVE_GAME_SAVING | BGSSaveLoadGame::GlobalFlags::SAVE_GAME_LOADING;
+		if (BGSSaveLoadGame::GetSingleton()->uiGlobalFlags.Get(uiSaveLoadFlags)) [[unlikely]]
+			return bRendered;
+
+		if (spSceneOverlayRoot && spSceneOverlayRoot->GetChildCount()) [[likely]] {
+			if (!ShouldRenderOverlay(aeOverlay))
+				return bRendered;
 
 			ShadowSceneNode* pSceneNode = BSShaderManager::GetShadowSceneNode(BSShaderManager::SceneGraphType::WORLD);
+			if (!pSceneNode || !pSceneNode->pSunLight || !pSceneNode->pSunLight->spLight) [[unlikely]]
+				return bRendered;
 
 			spAccumulator->pActiveShadowSceneNode = pSceneNode;
 
