@@ -34,7 +34,6 @@ class BSRenderedTexture;
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern NVSEScriptInterface* g_scriptInterface;
 extern bool bFixJIP;
-extern bool bIsGECK;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t auiFormID);
 
@@ -608,13 +607,13 @@ namespace JIPFixes {
 			}
 		};
 
-		void InitHooks() {
+		void InitHooks(bool abGECK) {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetOnDialogTopicEventHandler));
 			if (pInfo) {
 				pInfo->execute = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
 				SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
 
-				if (!bIsGECK) {
+				if (!abGECK) {
 					OnDialogTopicHandler = JGCreateEvent("OnDialogTopicHandler", 1, 1);
 					kGetResultScript.ReplaceCallEx(0x61F18B, &TESTopicInfoEx::GetResultScript);
 					SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8", 8);
@@ -648,7 +647,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-		void InitHooks() {
+		void InitHooks(bool abGECK) {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kClearDeadActors));
 			if (pInfo) {
 				pInfo->params = kParams_OneOptionalInt;
@@ -656,7 +655,7 @@ namespace JIPFixes {
 				ClearDeadActors = pInfo->execute;
 				pInfo->execute = Cmd_ClearDeadActors_Execute;
 
-				if (!bIsGECK) {
+				if (!abGECK) {
 					WriteRelCallEx(JIPUtils::GetAddress(0x10030C38), &HighProcessEx::FadeAndDisable);
 					PatchMemoryNop(JIPUtils::GetAddress(0x10030C3D), 2);
 				}
@@ -1782,11 +1781,11 @@ namespace JIPFixes {
 		JIPUtils::Init();
 	}
 
-	void InitEarlyHooks() {
+	void InitEarlyHooks(bool abGECK) {
 		if (!JIPUtils::IsValid())
 			return;
 
-		if (bIsGECK) {
+		if (abGECK) {
 			LogMover::InitHooks();
 		}
 		else {
@@ -1798,11 +1797,11 @@ namespace JIPFixes {
 		}
 	}
 
-	void InitHooks() {
+	void InitHooks(bool abGECK) {
 		if (!JIPUtils::IsValid())
 			return;
 
-		if (bIsGECK) {
+		if (abGECK) {
 
 		}
 		else {
@@ -1827,12 +1826,12 @@ namespace JIPFixes {
 		}
 	}
 
-	void InitCommandHooks() {
+	void InitCommandHooks(bool abGECK) {
 		if (!JIPUtils::IsValid())
 			return;
 
-		SetOnDialogTopicEventHandlerEx::InitHooks();
-		RespawnDisableFix::InitHooks();
+		SetOnDialogTopicEventHandlerEx::InitHooks(abGECK);
+		RespawnDisableFix::InitHooks(abGECK);
 		CopyFaceGenFromFix::InitHooks();
 		SoundSourceFileFix::InitHooks();
 		BetterSearch::InitHooks();
@@ -1841,11 +1840,11 @@ namespace JIPFixes {
 		CursorPosUICords::InitHooks();
 	}
 
-	void InitDeferredHooks() {
+	void InitDeferredHooks(bool abGECK) {
 		if (!JIPUtils::IsValid())
 			return;
 
-		if (bIsGECK) {
+		if (abGECK) {
 		}
 		else {
 		}

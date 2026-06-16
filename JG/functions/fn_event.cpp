@@ -1,8 +1,8 @@
 #include "fn_event.h"
-#include <events/EventFramework.h>
-#include <GameObjects.h>
-#include <events/JohnnyEvents.h>
 #include <decoding.h>
+#include <events/EventFramework.h>
+#include <events/JohnnyEvents.hpp>
+#include <GameObjects.h>
 
 bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
 	uint32_t setOrRemove = 0;

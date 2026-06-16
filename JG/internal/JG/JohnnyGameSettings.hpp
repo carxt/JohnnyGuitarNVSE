@@ -69,6 +69,6 @@ namespace JohnnyGameSettings {
 		}
 	};
 
-	void Init();
+	SPEC_NOINLINE void Init();
 	
 };

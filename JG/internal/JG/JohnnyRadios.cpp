@@ -3,6 +3,7 @@
 #include <GameForms.h>
 
 namespace JohnnyRadios {
+	static ULONGLONG timer = GetTickCount64();
 	std::unordered_set<DWORD> availableRadios;
 
 	void Reset() {
@@ -10,7 +11,6 @@ namespace JohnnyRadios {
 	}
 
 	void Update() {
-		static ULONGLONG timer = GetTickCount64();
 		if (((GetTickCount64() - timer) > 1000) || availableRadios.empty()) {
 			timer = GetTickCount64();
 			availableRadios.clear();

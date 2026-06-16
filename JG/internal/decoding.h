@@ -779,7 +779,9 @@ struct GameTimeGlobals
 	float lastUpdHour; // 2C
 	uint32_t initialized; // 30
 
-	float GetDaysPassed(int bgnYear = 2281, int bgnMonth = 9, int bgnDay = 13);
+	static GameTimeGlobals* GetSingleton() {
+		return reinterpret_cast<GameTimeGlobals*>(0x11DE7B8);
+	}
 };
 
 // 10

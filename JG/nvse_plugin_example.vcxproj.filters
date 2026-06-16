@@ -313,9 +313,6 @@
     <ClCompile Include="functions\fn_gamebryo.cpp">
       <Filter>functions</Filter>
     </ClCompile>
-    <ClCompile Include="internal\serialization.cpp">
-      <Filter>internal</Filter>
-    </ClCompile>
     <ClCompile Include="internal\decoding.cpp">
       <Filter>internal</Filter>
     </ClCompile>
@@ -460,6 +457,15 @@
     <ClCompile Include="internal\JG\ScriptUtils.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\JohnnySerialization.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\JohnnyMessageHandler.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\JohnnyCommands.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -535,7 +541,7 @@
     <ClInclude Include="events\EventFramework.h">
       <Filter>events</Filter>
     </ClInclude>
-    <ClInclude Include="events\JohnnyEvents.h">
+    <ClInclude Include="events\JohnnyEvents.hpp">
       <Filter>events</Filter>
     </ClInclude>
     <ClInclude Include="functions\fn_av.h">
@@ -582,9 +588,6 @@
     </ClInclude>
     <ClInclude Include="functions\fn_book.h">
       <Filter>functions</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\serialization.h">
-      <Filter>internal</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameSound.h">
       <Filter>nvse</Filter>
@@ -1238,6 +1241,18 @@
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\ScriptUtils.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyMessageHandler.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnySerialization.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyCommands.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyPluginData.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
   </ItemGroup>
