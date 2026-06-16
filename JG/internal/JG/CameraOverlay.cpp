@@ -478,7 +478,7 @@ namespace CameraOverlay {
 	}
 
 	void Init() {
-		constexpr uint32_t uiChildCount = OverlayTypes::COUNT + CameraVariants::COUNT;
+		constexpr uint32_t uiChildCount = (OverlayTypes::COUNT * CameraVariants::COUNT) + CameraVariants::COUNT;
 		spSceneOverlayRoot = NiNode::Create(uiChildCount);
 		spSceneOverlayRoot->SetName("JG_CameraOverlaySceneRoot");
 		spSceneOverlayRoot->SetAlwaysDraw(true);
