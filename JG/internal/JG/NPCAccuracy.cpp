@@ -115,13 +115,13 @@ namespace NPCAccuracy {
 		return fMultiplier;
 	}
 
-	CallDetour kGetGunSkillDetour;
+	CallDetour kGetGunSpreadDetour;
 	class Hook : public Actor {
 	public:
 		float GetGunSkillHook(enum SpreadMode aeMode) {
-			float fSkill = ThisCall<float>(kGetGunSkillDetour.GetOverwrittenAddr(), this, aeMode);
-			fSkill *= GetAdditionalWobbleMultiplier(this);
-			return fSkill;
+			float fSpread = ThisCall<float>(kGetGunSpreadDetour.GetOverwrittenAddr(), this, aeMode);
+			fSpread *= GetAdditionalWobbleMultiplier(this);
+			return fSpread;
 		}
 	};
 
@@ -195,6 +195,6 @@ namespace NPCAccuracy {
 	}
 
 	void Install() {
-		kGetGunSkillDetour.ReplaceCallEx(0x0524019, &Hook::GetGunSkillHook);
+		kGetGunSpreadDetour.ReplaceCallEx(0x0524019, &Hook::GetGunSkillHook);
 	}
 };

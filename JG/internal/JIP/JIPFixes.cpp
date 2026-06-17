@@ -1751,6 +1751,25 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace SanerWeaponWobbleHook {
+
+		CallDetour kGetGunSpreadDetour;
+		class Hook : public Actor {
+		public:
+			float GetGunSpreadHook(enum SpreadMode aeMode) {
+				if (jipActorFlags2 & 8)
+					return 0.f;
+
+				return ThisCall<float>(kGetGunSpreadDetour.GetOverwrittenAddr(), this, aeMode);
+			}
+		};
+
+		void InitHooks() {
+			PatchMemoryNopRange(JIPUtils::GetAddress(0x1000BA54), JIPUtils::GetAddress(0x1000BA63));
+			kGetGunSpreadDetour.ReplaceCallEx(0x524019, &Hook::GetGunSpreadHook);
+		}
+	}
+
 	namespace LogMover {
 
 		void InitHooks() {
@@ -1794,6 +1813,7 @@ namespace JIPFixes {
 			GameSettingFix::InitHooks();
 			LogMover::InitHooks();
 			VersionPrint::InitHooks();
+			SanerWeaponWobbleHook::InitHooks();
 		}
 	}
 

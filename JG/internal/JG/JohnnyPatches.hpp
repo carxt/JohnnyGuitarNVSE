@@ -23,7 +23,6 @@ namespace JohnnyPatches {
 	SPEC_NOINLINE void Init();
 
 	SPEC_NOINLINE void Update();
-	SPEC_NOINLINE void HandleDLLInterop();
 
 }
 // exports

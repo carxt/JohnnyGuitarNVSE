@@ -36,10 +36,6 @@ extern NVSECommandTableInterface* g_cmdTableInterface;
 
 // The reason we're doing functions per event is because we don't want a massive, cache destroying message handler function
 
-static SPEC_NOINLINE void PostLoad() {
-	JohnnyPatches::HandleDLLInterop();
-}
-
 static SPEC_NOINLINE void PostPostLoad(bool abGECK) {
 	if (JohnnyPatches::bFixJIP) {
 		JIPFixes::InitCommandHooks(abGECK);
@@ -132,9 +128,6 @@ void JohnnyMessageHandler::Game(NVSEMessagingInterface::Message* apMessage) {
 	}
 	else {
 		switch (eMessageType) {
-			[[unlikely]] case NVSEMessagingInterface::kMessage_PostLoad:
-				PostLoad();
-				break;
 			[[unlikely]] case NVSEMessagingInterface::kMessage_PostPostLoad:
 				PostPostLoad(false);
 				break;

@@ -205,26 +205,6 @@ namespace JohnnyPatches {
 		ResetVanityWheel();
 	}
 
-	void HandleDLLInterop() {
-		if (!bDisableDLLCompatibilityRoutines)
-			return;
-
-		if (GetModuleHandle("jip_nvse.dll") != NULL) { //JIP is on.
-			uint8_t* fnPtr = (uint8_t*)GetRelJumpAddr(0x0524014);
-			while ((fnPtr[0] != 0xCC) && fnPtr[1] != 0xCC) {
-				if ((fnPtr[0] == 0x75) && (fnPtr[2] == 0x6A) && (fnPtr[3] == 0x2) && (fnPtr[9] == 0xFF) && (fnPtr[10] == 0xD0)) {
-					fnPtr += 4;
-					if ((*(uint32_t*)(fnPtr) == 0x8B0DD0B8) && fnPtr[4] == 0) {
-						//found
-						uintptr_t dest = GetRelJumpAddr(0x0524019);
-						SafeWrite32((uintptr_t)(fnPtr + 1), dest);
-					}
-				}
-				fnPtr++;
-			}
-		}
-	}
-
 	void ReadINI() {
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
