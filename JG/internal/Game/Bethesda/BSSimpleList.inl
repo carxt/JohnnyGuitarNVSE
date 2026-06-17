@@ -62,7 +62,10 @@ inline void BSSimpleList<T>::SetNext(BSSimpleList<T>* apNext) {
 // GAME - 0x8256D0
 template<class T>
 inline bool BSSimpleList<T>::IsEmpty() const { 
-	return !m_pkNext && !m_item; 
+	if (m_pkNext)
+		return false;
+
+	return m_item == T(0); 
 }
 
 // GAME - 0x631540
@@ -138,7 +141,7 @@ inline void BSSimpleList<T>::RemoveAll() {
 		delete m_pkNext;
 		m_pkNext = pNext;
 	}
-	m_item = 0;
+	m_item = T(0);
 }
 
 // GAME - 0xB99730
@@ -152,7 +155,7 @@ inline void BSSimpleList<T>::RemoveHead() {
 		delete pNext;
 	}
 	else {
-		m_item = 0;
+		m_item = T(0);
 	}
 }
 
@@ -168,7 +171,7 @@ inline void BSSimpleList<T>::RemoveTail() {
 		delete pTail;
 	}
 	else {
-		m_item = 0;
+		m_item = T(0);
 	}
 }
 
@@ -198,7 +201,7 @@ inline void BSSimpleList<T>::Remove(const T& arItem) {
 			delete pNext;
 		}
 		else {
-			m_item = 0;
+			m_item = T(0);
 		}
 	}
 	else {
