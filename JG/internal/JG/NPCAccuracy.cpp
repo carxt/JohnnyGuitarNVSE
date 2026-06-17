@@ -120,7 +120,8 @@ namespace NPCAccuracy {
 	public:
 		float GetGunSkillHook(enum SpreadMode aeMode) {
 			float fSpread = ThisCall<float>(kGetGunSpreadDetour.GetOverwrittenAddr(), this, aeMode);
-			fSpread *= GetAdditionalWobbleMultiplier(this);
+			if (fSpread != 0.f)
+				fSpread *= GetAdditionalWobbleMultiplier(this);
 			return fSpread;
 		}
 	};
