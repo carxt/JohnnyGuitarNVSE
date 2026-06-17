@@ -2345,10 +2345,6 @@ public:
 	}
 };
 
-float __fastcall NiNodeComputeDistance(NiPoint3* Vector1, NiPoint3* Vector2);
-float __fastcall NiNodeComputeDistance2DSquared(NiPoint3* Vector1, NiPoint3* Vector2);
-void NiPointAssign(NiPoint3* NiPointBuffer, float& xIn, float& yIn, float& zIn);
-
 class NiRenderTargetGroup : public NiObject {
 public:
 	// has more data but not needed atm
