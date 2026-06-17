@@ -134,7 +134,7 @@ public:
 
 	TESSound* loopSound;				// 01C
 
-	TESForm* baseForm;				// 020
+	TESBoundObject* baseForm;				// 020
 
 	NiPoint3		rot;		// 024 - either public or accessed via simple inline accessor common to all child classes
 	NiPoint3		pos;		// 030 - seems to be private
@@ -194,10 +194,7 @@ public:
 
 static_assert(sizeof(TESObjectREFR) == 0x068);
 
-
-
-
-TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj);	// For LevelledForm, find real baseForm, not temporary one.
+TESBoundObject* GetPermanentBaseForm(TESObjectREFR* apReference);	// For LevelledForm, find real baseForm, not temporary one.
 
 class BaseProcess;
 

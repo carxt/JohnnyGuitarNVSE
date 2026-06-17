@@ -418,94 +418,45 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 
 
 bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
-
 	*result = 0;
-	float mul = 1.0f;
-	TESForm* a_form = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
-		if (fabs(mul) < FLT_EPSILON) { mul = FLT_EPSILON + DBL_EPSILON; }
-		switch (a_form->GetFormType()) {
-		case FORM_TYPE::TESNPC:
-		case FORM_TYPE::TESCreature:
-			NPCAccuracy::tables.ACTBAS[a_form->GetFormID()] = mul;
-			break;
-		case FORM_TYPE::TESCombatStyle:
-			NPCAccuracy::tables.CSTY[a_form->GetFormID()] = mul;
-			break;
-		case FORM_TYPE::TESFaction:
-			NPCAccuracy::tables.FACT[a_form->GetFormID()] = mul;
-			break;
+	float fMultiplier = 1.f;
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fMultiplier, &pForm)) {
+		TESForm* pTarget = pForm ? pForm : thisObj;
+		if (pTarget) {
+			if (fabs(fMultiplier) < FLT_EPSILON)
+				fMultiplier = FLT_EPSILON + DBL_EPSILON;
 
+			NPCAccuracy::SetMultiplier(pTarget, fMultiplier);
 		}
 	}
-	else if (thisObj) {
-		NPCAccuracy::tables.ACTREF[thisObj->GetFormID()] = mul;
 
-	}
 	return true;
 }
 
 
 bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
-
 	*result = 1;
-	TESForm* a_form = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
-		switch (a_form->GetFormType()) {
-		case FORM_TYPE::TESNPC:
-		case FORM_TYPE::TESCreature:
-			if (auto it = NPCAccuracy::tables.ACTBAS.find(a_form->GetFormID()); it != NPCAccuracy::tables.ACTBAS.end()) {
-				*result = it->second;
-			}
-			break;
-		case FORM_TYPE::TESCombatStyle:
-			if (auto it = NPCAccuracy::tables.CSTY.find(a_form->GetFormID()); it != NPCAccuracy::tables.CSTY.end()) {
-				*result = it->second;
-			}
-			break;
-		case FORM_TYPE::TESFaction:
-			if (auto it = NPCAccuracy::tables.FACT.find(a_form->GetFormID()); it != NPCAccuracy::tables.FACT.end()) {
-				*result = it->second;
-			}
-			break;
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) {
+		TESForm* pTarget = pForm ? pForm : thisObj;
+		if (pTarget)
+			*result = NPCAccuracy::GetMultiplier(pTarget);
+	}
 
-		}
-	}
-	else if (thisObj) {
-		if (auto it = NPCAccuracy::tables.ACTREF.find(thisObj->GetFormID()); it != NPCAccuracy::tables.ACTREF.end()) {
-			*result = it->second;
-		}
-	}
 	return true;
-
-
 }
 
 bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
-
 	*result = 0;
-	TESForm* a_form = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
-		switch (a_form->GetFormType()) {
-		case FORM_TYPE::TESNPC:
-		case FORM_TYPE::TESCreature:
-			NPCAccuracy::tables.ACTBAS.erase(a_form->GetFormID());
-			break;
-		case FORM_TYPE::TESCombatStyle:
-			NPCAccuracy::tables.CSTY.erase(a_form->GetFormID());
-			break;
-		case FORM_TYPE::TESFaction:
-			NPCAccuracy::tables.FACT.erase(a_form->GetFormID());
-			break;
-
-		}
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) {
+		TESForm* pTarget = pForm ? pForm : thisObj;
+		if (pTarget)
+			NPCAccuracy::RemoveMultiplier(pTarget);
 	}
-	else if (thisObj) {
-		NPCAccuracy::tables.ACTREF.erase(thisObj->GetFormID());
 
-	}
 	return true;
-
 }
 
 bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
