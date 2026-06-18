@@ -25,9 +25,6 @@ struct JGCameraParams {
 };
 extern JGCameraParams JGGameCamera;
 
-extern float __fastcall NiNodeComputeDistance(NiPoint3* Vector1, NiPoint3* Vector2);
-
-
 bool __fastcall WorldToScreenPoint3(JGWorldToScreenMatrix* cam, NiPoint3* kPt, float& fBx, float& fBy,
 	float& fBz, float fZeroTolerance, int bOffscreenHandleType);
 
