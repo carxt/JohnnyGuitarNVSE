@@ -2883,7 +2883,11 @@ bool Cmd_GetIKState_Execute(COMMAND_ARGS) {
 
 bool Cmd_IsCarryable_Eval(COMMAND_ARGS_EVAL) {
 	TESForm* pForm = reinterpret_cast<TESForm*>(arg1);
-	*result = TESContainer::ContainerCanHoldForm(pForm ? pForm : thisObj);
+	pForm = pForm ? pForm : thisObj;
+	if (!pForm)
+		pForm = CdeclCall<TESForm*>(0x6008F0); // TESIdleManager::GetUsedItem
+
+	*result = TESContainer::ContainerCanHoldForm(pForm);
 	return true;
 }
 
