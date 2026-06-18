@@ -1,39 +1,14 @@
 #pragma once
-#include <GameObjects.h>
-#include <unordered_map>
+
+class TESForm;
+
 namespace NPCAccuracy {
 
-	struct Tables {
-		std::unordered_map<uintptr_t, float> ACTREF;
-
-		std::unordered_map<uintptr_t, float> ACTBAS;
-		std::unordered_map<uintptr_t, float> CSTY;
-		std::unordered_map<uintptr_t, float> FACT;
-	};
-
-	extern Tables tables;
 	void Install();
-	double __fastcall returnActorMult(Actor* a_refr);
-	void Reset();
+	void Reset();	
 
-	template <uintptr_t a_addr>
-	class HookNPCAccuracy {
-	private:
-		static inline uintptr_t hookCall = a_addr;
-	public:
-		static  float __fastcall Hook(Actor* a_refr, void* edx, int mode) {
-			auto res = ThisCall<float>(hookCall, a_refr, mode);
-			res *= returnActorMult(a_refr);
-			return res;
-		}
+	SPEC_NOINLINE void  __fastcall SetMultiplier(const TESForm* apForm, float afMultiplier);
+	SPEC_NOINLINE float __fastcall GetMultiplier(const TESForm* apForm);
+	SPEC_NOINLINE void  __fastcall RemoveMultiplier(const TESForm* apForm);
 
-		HookNPCAccuracy() {
-
-			uintptr_t hookPoint = hookCall;
-			hookCall = GetRelJumpAddr(hookCall);
-			WriteRelCall(hookPoint, (uintptr_t)Hook);
-		}
-	};
-
-	
 };
