@@ -2880,3 +2880,20 @@ bool Cmd_GetIKState_Execute(COMMAND_ARGS) {
 	ExtractArgsEx(EXTRACT_ARGS_EX, &eType);
 	return Cmd_GetIKState_Eval(thisObj, reinterpret_cast<void*>(eType), nullptr, result);
 }
+
+bool Cmd_IsCarryable_Eval(COMMAND_ARGS_EVAL) {
+	TESForm* pForm = reinterpret_cast<TESForm*>(arg1);
+	*result = TESContainer::ContainerCanHoldForm(pForm ? pForm : thisObj);
+	return true;
+}
+
+bool Cmd_IsCarryable_Execute(COMMAND_ARGS) {
+	TESForm* pForm = nullptr;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pForm);
+	Cmd_IsCarryable_Eval(thisObj, pForm, nullptr, result);
+
+	if (IsConsoleMode())
+		Console_Print("IsCarryable >> %f", *result);
+
+	return true;
+}

@@ -425,7 +425,7 @@ namespace JohnnyCommands {
 		REG_CMD(StopIdleLoop);
 		REG_CMD(SetIKState);
 		REG_CMD(GetIKState);
-
+		REG_CMD(IsCarryable);
 	}
 
 }

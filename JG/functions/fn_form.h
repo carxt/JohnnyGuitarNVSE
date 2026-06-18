@@ -123,3 +123,4 @@ DEFINE_COMMAND_PLUGIN(ApplyModelTextureSwap, , true, kParamsApplyModelTextureSwa
 DEFINE_CMD_COND_PLUGIN(GetCombatTargetDistance, , true, nullptr);
 DEFINE_COMMAND_PLUGIN(SetIKState, , true, kParams_TwoInts);
 DEFINE_CMD_COND_PLUGIN(GetIKState, , true, kParams_OneInt);
+DEFINE_CMD_COND_PLUGIN(IsCarryable, , false, kParams_OneOptionalForm);

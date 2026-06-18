@@ -875,6 +875,10 @@ public:
 	typedef tList<FormCount> FormCountList;
 
 	FormCountList	formCountList;	// 04
+
+	static bool ContainerCanHoldType(uint8_t aucFormType);
+
+	static bool ContainerCanHoldForm(const TESForm* apForm);
 };
 
 // 00C
@@ -2365,7 +2369,7 @@ public:
 	uint8_t						green;			// 0A5
 	uint8_t						blue;			// 0A6
 	uint8_t						padA7;			// 0A7
-	uint32_t						lightFlags;		// 0A8
+	Bitfield32					lightFlags;		// 0A8
 	float						falloffExp;		// 0AC
 	float						FOV;			// 0B0
 	float						fadeValue;		// 0B4
@@ -2373,8 +2377,11 @@ public:
 	uint32_t						padBC[3];		// 0BC
 
 	void SetFlag(uint32_t pFlag, bool bEnable) {
-		if (bEnable) lightFlags |= pFlag;
-		else lightFlags &= ~pFlag;
+		lightFlags.Set(pFlag, bEnable);
+	}
+
+	bool GetCanCarry() const {
+		return lightFlags.Get(kFlag_CanBeCarried);
 	}
 
 	NiPointLight* CreatePointLight(TESObjectREFR* targetRef, NiNode* targetNode, bool arg3);
