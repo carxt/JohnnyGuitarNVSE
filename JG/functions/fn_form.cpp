@@ -12,6 +12,7 @@
 #include "JG/JGSetList.hpp"
 #include <JG/BarterFilter.hpp>
 #include <JG/JohnnyExtraData.hpp>
+#include <JG/AnimActivationHeight.hpp>
 #include <GameData.h>
 #include <GameRTTI.h>
 #include "decoding.h"
@@ -2914,5 +2915,15 @@ bool Cmd_PickIdleEx_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetRef) && pTargetRef && pTargetRef->baseForm)
 		*result = static_cast<LowProcess*>(pUser->baseProcess)->FindSpecialIdletoPlay(pUser, pTargetRef->baseForm, pTargetRef);
 
+	return true;
+}
+
+bool Cmd_GetUsedItemHeight_Eval(COMMAND_ARGS_EVAL) {
+	*result = AnimActivationHeight::GetHeight();
+	return true;
+}
+
+bool Cmd_GetUsedItemHeight_Execute(COMMAND_ARGS) {
+	Cmd_GetUsedItemHeight_Eval(thisObj, nullptr, nullptr, result);
 	return true;
 }

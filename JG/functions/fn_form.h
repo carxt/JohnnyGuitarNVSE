@@ -125,3 +125,4 @@ DEFINE_COMMAND_PLUGIN(SetIKState, , true, kParams_TwoInts);
 DEFINE_CMD_COND_PLUGIN(GetIKState, , true, kParams_OneInt);
 DEFINE_CMD_COND_PLUGIN(IsCarryable, , false, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(PickIdleEx, , true, kParams_OneRef);
+DEFINE_CMD_COND_PLUGIN(GetUsedItemHeight, , false, nullptr);

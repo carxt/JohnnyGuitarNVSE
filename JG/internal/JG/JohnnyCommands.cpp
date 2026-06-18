@@ -19,6 +19,7 @@
 #include "JG/JohnnyPluginData.hpp"
 #include "JG/DisabledSaves.hpp"
 #include "JG/CustomHUDShake.hpp"
+#include "JG/AnimActivationHeight.hpp"
 
 #include <misc/WorldToScreen.h>
 
@@ -35,6 +36,7 @@ namespace JohnnyCommands {
 
 		DisabledSaves::Init();
 		CustomHUDShake::Init();
+		AnimActivationHeight::Init();
 	}
 
 	void Init(const NVSEInterface* apNVSE) {
@@ -427,6 +429,7 @@ namespace JohnnyCommands {
 		REG_CMD(GetIKState);
 		REG_CMD(IsCarryable);
 		REG_CMD(PickIdleEx);
+		REG_CMD(GetUsedItemHeight);
 	}
 
 }
