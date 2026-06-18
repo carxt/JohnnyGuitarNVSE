@@ -654,6 +654,8 @@ public:
 	float				gameDayDied;
 	uint32_t				unkAC;		// not initialized!
 	uint32_t				unkB0;		// not initialized!
+
+	bool FindSpecialIdletoPlay(Actor* apActor, TESBoundObject* apObject, TESObjectREFR* apRef);
 };
 
 // C8

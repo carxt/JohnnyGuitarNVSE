@@ -52,6 +52,9 @@
     <Filter Include="internal\Game\Obsidian">
       <UniqueIdentifier>{da7aa40f-8fbc-4f02-9bc9-a40f643f9f60}</UniqueIdentifier>
     </Filter>
+    <Filter Include="internal\JG\Core">
+      <UniqueIdentifier>{48c727a7-e34b-4088-bc09-c038bcd3fd3d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
@@ -116,9 +119,6 @@
       <Filter>misc</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\EditorIDRestoration.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\JohnnyExtraData.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
     <ClCompile Include="internal\JIP\JIPFixes.cpp">
@@ -205,9 +205,6 @@
     <ClCompile Include="internal\JG\DialogueResponseOverride.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\JohnnyGameSettings.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
     <ClCompile Include="functions\fn_file.cpp">
       <Filter>functions</Filter>
     </ClCompile>
@@ -236,9 +233,6 @@
       <Filter>functions</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\ExtraUISounds.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\JohnnyPatches.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
     <ClCompile Include="functions\fn_gameplay.cpp">
@@ -296,9 +290,6 @@
       <Filter>internal\JG</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\JohnnyFixes.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp">
@@ -458,14 +449,27 @@
       <Filter>internal\JG</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\JohnnySerialization.cpp">
-      <Filter>internal\JG</Filter>
+      <Filter>internal\JG\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\JohnnyPatches.cpp">
+      <Filter>internal\JG\Core</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\JohnnyMessageHandler.cpp">
-      <Filter>internal\JG</Filter>
+      <Filter>internal\JG\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\JohnnyGameSettings.cpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\JohnnyFixes.cpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\JohnnyExtraData.cpp">
+      <Filter>internal\JG\Core</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\JohnnyCommands.cpp">
-      <Filter>internal\JG</Filter>
+      <Filter>internal\JG\Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameProcess.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -614,9 +618,6 @@
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\EditorIDRestoration.hpp">
-      <Filter>internal\JG</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\JG\JohnnyExtraData.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
     <ClInclude Include="internal\JIP\JIPFixes.hpp">
@@ -853,9 +854,6 @@
     <ClInclude Include="internal\JG\DialogueResponseOverride.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\JohnnyGameSettings.hpp">
-      <Filter>internal\JG</Filter>
-    </ClInclude>
     <ClInclude Include="functions\fn_common.h">
       <Filter>functions</Filter>
     </ClInclude>
@@ -875,9 +873,6 @@
       <Filter>internal\JG</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\ExtraUISounds.hpp">
-      <Filter>internal\JG</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\JG\JohnnyPatches.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\NPCAccuracy.hpp">
@@ -917,9 +912,6 @@
       <Filter>internal\JG</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\MediaLocationControllerOverride.hpp">
-      <Filter>internal\JG</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\JG\JohnnyFixes.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp">
@@ -1243,17 +1235,29 @@
     <ClInclude Include="internal\JG\ScriptUtils.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\JohnnyMessageHandler.hpp">
-      <Filter>internal\JG</Filter>
-    </ClInclude>
     <ClInclude Include="internal\JG\JohnnySerialization.hpp">
-      <Filter>internal\JG</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\JG\JohnnyCommands.hpp">
-      <Filter>internal\JG</Filter>
+      <Filter>internal\JG\Core</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\JohnnyPluginData.hpp">
-      <Filter>internal\JG</Filter>
+      <Filter>internal\JG\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyPatches.hpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyMessageHandler.hpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyGameSettings.hpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyFixes.hpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyExtraData.hpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyCommands.hpp">
+      <Filter>internal\JG\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

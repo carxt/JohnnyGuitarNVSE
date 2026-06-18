@@ -426,6 +426,7 @@ namespace JohnnyCommands {
 		REG_CMD(SetIKState);
 		REG_CMD(GetIKState);
 		REG_CMD(IsCarryable);
+		REG_CMD(PickIdleEx);
 	}
 
 }

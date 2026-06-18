@@ -2901,3 +2901,18 @@ bool Cmd_IsCarryable_Execute(COMMAND_ARGS) {
 
 	return true;
 }
+
+bool Cmd_PickIdleEx_Execute(COMMAND_ARGS) {
+	if (!thisObj->IsActor())
+		return true;
+	
+	Actor* pUser = static_cast<Actor*>(thisObj);
+	if (!pUser->baseProcess)
+		return true;
+
+	TESObjectREFR* pTargetRef = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetRef) && pTargetRef && pTargetRef->baseForm)
+		*result = static_cast<LowProcess*>(pUser->baseProcess)->FindSpecialIdletoPlay(pUser, pTargetRef->baseForm, pTargetRef);
+
+	return true;
+}
