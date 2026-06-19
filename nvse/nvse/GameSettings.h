@@ -19,8 +19,8 @@ public:
 		char			h;
 	};
 
-	CustomGameSetting() { memset(this, 0, sizeof(CustomGameSetting)); }
-	~CustomGameSetting() {};
+	CustomGameSetting() : __vftable(nullptr), uValue(0), pKey(nullptr) {};
+	~CustomGameSetting() = default;
 
 	void*		__vftable;
 	Info		uValue;
