@@ -1,143 +1,170 @@
 #include "BarterFilter.hpp"
-#include <GameExtraData.h>
+#include "GameExtraData.h"
 #include "GameUI.h"
 
+#include "JGSetList.hpp"
+
+#include "unordered_map"
+
 namespace BarterFilter {
-	std::unordered_map<DWORD, JGSetList<DWORD>> leftList;
-	std::unordered_map<DWORD, JGSetList<DWORD>> rightList;
+	using SellerFilter = std::unordered_set<uint32_t>;
+	using ItemFilterMap = std::unordered_map<uint32_t, SellerFilter>;
+
+	struct BarterFilters {
+		enum FilterType {
+			PLAYER,
+			VENDOR,
+			COUNT,
+		};
+
+		ItemFilterMap kItems[FilterType::COUNT];
+
+		bool __fastcall Add(FilterType auiFilter, uint32_t auiItemFormID, uint32_t auiSellerFormID) {
+			kItems[auiFilter][auiItemFormID].insert(auiSellerFormID);
+			return true;
+		}
+
+		bool __fastcall Remove(FilterType auiFilter, uint32_t auiItemFormID, uint32_t auiSellerFormID) {
+			bool bResult = false;
+			ItemFilterMap& rItems = kItems[auiFilter];
+			auto it = rItems.find(auiItemFormID);
+			if (it != rItems.end()) {
+				if (auiSellerFormID) {
+					it->second.erase(auiSellerFormID);
+				}
+				else {
+					it->second.clear();
+					rItems.erase(it);
+				}
+				bResult |= true;
+			}
+			return bResult;
+		}
+		
+		bool __fastcall Find(FilterType auiFilter, uint32_t auiItemFormID, uint32_t auiSellerFormID) {
+			bool bResult = false;
+			ItemFilterMap& rItems = kItems[auiFilter];
+			auto it = rItems.find(auiItemFormID);
+			if (it != rItems.end()) {
+				bResult = true;
+				if (auiSellerFormID)
+					bResult = it->second.contains(auiSellerFormID);
+			}
+			return bResult;
+		}
+
+		DECLSPEC_NOINLINE bool __fastcall ShouldHideItem(FilterType auiFilter, const ItemChange* apItem) const {
+			bool bShouldHide = false;
+			const BarterMenu* pBarterMenu = BarterMenu::GetSingleton();
+			if (!pBarterMenu) [[unlikely]]
+				return bShouldHide;
+
+			const TESObjectREFR* pMerchant = pBarterMenu->merchantRef;
+			if (!pMerchant) [[unlikely]]
+				return bShouldHide;
+
+			const TESBoundObject* pObject = apItem->pObject;
+			if (!pObject) [[unlikely]]
+				return bShouldHide;
+
+			const BSSimpleList<ItemChange*>* pMovedItems = auiFilter == FilterType::PLAYER ? &pBarterMenu->kItemsToBuy : &pBarterMenu->kItemsToSell;
+			while (pMovedItems && !pMovedItems->IsEmpty()) {
+				if (pMovedItems->GetItem() && pMovedItems->GetItem()->pObject == pObject)
+					return bShouldHide;
+				pMovedItems = pMovedItems->GetNext();
+			}
+
+			const ItemFilterMap& rItems = kItems[auiFilter];
+			auto it = rItems.find(pObject->GetFormID());
+			if (it != rItems.end()) {
+				auto& rBarterSet = it->second;
+				bShouldHide = rBarterSet.contains(pMerchant->GetFormID())
+					|| rBarterSet.contains(pMerchant->baseForm->GetFormID())
+					|| rBarterSet.contains(0)
+					|| rBarterSet.contains(PlayerCharacter::GetSingleton()->GetFormID());
+			}
+			return bShouldHide;
+		}
+	};
+
+	BarterFilters* pBarterFilters = nullptr;
 
 	enum Flags {
-		kDoNotHideLeft = 1 << 0,
-		kDoNotHideRight
+		SHOW_IN_PLAYER = 1 << 0,
+		SHOW_IN_VENDOR = 1 << 1,
 	};
 
-	template <uintptr_t a_addr>
-	class BarterLeftHook {
+
+
+	template <uintptr_t uiAddress, BarterFilters::FilterType eFilter>
+	class BarterHook {
 	private:
-		static inline uintptr_t hookCall = a_addr;
+		static inline CallDetour kDetour;
 	public:
-		static  DWORD __cdecl Hook(ItemChange* ref) {
-			auto shouldHide = CdeclCall<bool>(hookCall, ref);
-			if (shouldHide) { return shouldHide; }
-			auto barterMenu = *(BarterMenu**)0x11D8FA4;
-			if (!barterMenu) return shouldHide;
-			auto merchantRef = barterMenu->merchantRef;
-			if (!merchantRef) return shouldHide;
-			auto originalForm = ref->pObject;
-			if (!PlayerCharacter::GetSingleton()) return shouldHide;
-			auto it = leftList.find(originalForm->GetFormID());
-			if (it != leftList.end()) {
-				auto& barterSet = it->second;
-				shouldHide = barterSet.Allow(merchantRef->GetFormID()) || barterSet.Allow(merchantRef->baseForm->GetFormID()) || barterSet.Allow(0) || barterSet.Allow(PlayerCharacter::GetSingleton()->GetFormID());
-			}
-			return shouldHide;
-		}
-		BarterLeftHook() {
-			uintptr_t hk_hookPoint = hookCall;
-			hookCall = *(uintptr_t*)(hk_hookPoint + 1);
-			SafeWrite32((hk_hookPoint + 1), (uintptr_t)Hook);
+		static bool __cdecl FilterHook(ItemChange* apItem) {
+			bool bShouldHide = CdeclCall<bool>(kDetour.GetOverwrittenAddr(), apItem);
+			if (bShouldHide || !pBarterFilters)
+				return bShouldHide;
 
+			return pBarterFilters->ShouldHideItem(eFilter, apItem);
 		}
 
+		BarterHook() {
+			kDetour.SafeWrite32(uiAddress + 1, uint32_t(BarterHook::FilterHook));
+		}
 	};
 
-	template <uintptr_t a_addr>
-	class BarterRightHook {
-	private:
-		static inline uintptr_t hookCall = a_addr;
-	public:
-		static  DWORD __cdecl Hook(ItemChange* ref) {
-			auto shouldHide = CdeclCall<bool>(hookCall, ref);
-			if (shouldHide) { return shouldHide; }
-			auto barterMenu = *(BarterMenu**)0x11D8FA4;
-			if (!barterMenu) return shouldHide;
-			auto merchantRef = barterMenu->merchantRef;
-			if (!merchantRef) return shouldHide;
-			auto originalForm = ref->pObject;
-			auto it = rightList.find(originalForm->GetFormID());
-			if (it != rightList.end()) {
-				auto& barterSet = it->second;
-				shouldHide = barterSet.Allow(merchantRef->GetFormID()) || barterSet.Allow(merchantRef->baseForm->GetFormID()) || barterSet.Allow(0) || barterSet.Allow(PlayerCharacter::GetSingleton()->GetFormID());
+	void Init() {
+		BarterHook<0x72DA1C, BarterFilters::PLAYER>(); // BarterMenu::DoClick
+		BarterHook<0x72DACA, BarterFilters::VENDOR>(); // BarterMenu::DoClick
 
-			}
-			return shouldHide;
-		}
-		BarterRightHook() {
-			uintptr_t hk_hookPoint = hookCall;
-			hookCall = *(uintptr_t*)(hk_hookPoint + 1);
-			SafeWrite32((hk_hookPoint + 1), (uintptr_t)Hook);
-
-		}
-
-	};
-
-
-	void Install() {
-		BarterLeftHook<0x72DA1C>();
-		BarterLeftHook<0x72E1BE>();
-
-		BarterRightHook<0x72DACA>();
-		BarterRightHook<0x72E207>();
-
-	}
-	void Reset()
-	{
-		leftList.clear();
-		rightList.clear();
+		BarterHook<0x72E1BE, BarterFilters::PLAYER>(); // BarterMenu::UpdateLists
+		BarterHook<0x72E207, BarterFilters::VENDOR>(); // BarterMenu::UpdateLists
 	}
 
-	void Add(uint32_t item, uint32_t flags, uint32_t vendor)
-	{
-		if ((flags & kDoNotHideLeft) == 0) {
-			leftList[item].Add(vendor);
-			leftList[item].isWhiteList = true;
-		}
-		if ((flags & kDoNotHideRight) == 0) {
-			rightList[item].Add(vendor);
-			rightList[item].isWhiteList = true;
+	void Reset() {
+		if (pBarterFilters) {
+			delete pBarterFilters;
+			pBarterFilters = nullptr;
 		}
 	}
 
-	void Remove(uint32_t item, uint32_t flags, uint32_t vendor)
-	{
-		if ((flags & kDoNotHideLeft) == 0) {
-			auto it = leftList.find(item);
-			if (it != leftList.end()) {
-				if (vendor) {
-					it->second.Remove(vendor);
-				}
-				else {
-					it->second.dFlush();
-					leftList.erase(it);
-				}
-			}
+	bool __fastcall Add(uint32_t auiItemFormID, uint32_t auiFlags, uint32_t auiSellerFormID) {
+		bool bResult = false;
 
-		}
-		if ((flags & kDoNotHideRight) == 0) {
+		if (!pBarterFilters)
+			pBarterFilters = new BarterFilters();
 
-			auto it = rightList.find(item);
-			if (it != rightList.end()) {
-				if (vendor) {
-					it->second.Remove(vendor);
-				}
-				else {
-					it->second.dFlush();
-					rightList.erase(it);
-				}
+		if (pBarterFilters) {
+			for (uint32_t i = 0; i < BarterFilters::COUNT; ++i) {
+				if ((auiFlags & (1 << i)) == 0)
+					bResult |= pBarterFilters->Add(BarterFilters::FilterType(i), auiItemFormID, auiSellerFormID);
 			}
 		}
+
+		return bResult;
 	}
-	uint32_t IsHidden(uint32_t item)
-	{
-		uint32_t result = 0;
-		auto it = BarterFilter::leftList.find(item);
-		if (it != BarterFilter::leftList.end()) {
-			result |= 1 << 0;
+
+	bool __fastcall Remove(uint32_t auiItemFormID, uint32_t auiFlags, uint32_t auiSellerFormID) {
+		bool bResult = false;
+		if (pBarterFilters) {
+			for (uint32_t i = 0; i < BarterFilters::COUNT; ++i) {
+				if ((auiFlags & (1 << i)) == 0)
+					bResult |= pBarterFilters->Remove(BarterFilters::FilterType(i), auiItemFormID, auiSellerFormID);
+			}
 		}
-		it = BarterFilter::rightList.find(item);
-		if (it != BarterFilter::rightList.end()) {
-			result |= 1 << 1;
+
+		return bResult;
+	}
+
+	uint32_t __fastcall IsHidden(uint32_t auiItemFormID, uint32_t auiSellerFormID) {
+		uint32_t uiResult = 0;
+		if (pBarterFilters) {
+			for (uint32_t i = 0; i < BarterFilters::COUNT; ++i) {
+				uiResult |= !pBarterFilters->Find(BarterFilters::FilterType(i), auiItemFormID, auiSellerFormID) << i;
+			}
 		}
-		return result;
+
+		return uiResult;
 	}
 };

@@ -194,35 +194,33 @@ void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC
 
 
 bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
-	TESForm* itemFilter = nullptr, * filterArg = nullptr;
-	uint32_t unhideOrHide = 0, flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &unhideOrHide, &flags, &filterArg) && itemFilter) {
-		DWORD idToHandle = 0;
-		if (filterArg) {
-			idToHandle = filterArg->GetFormID();
-		}
-		if (unhideOrHide) {
-			BarterFilter::Add(itemFilter->GetFormID(), flags, idToHandle);
-		}
-		else {
-			BarterFilter::Remove(itemFilter->GetFormID(), flags, idToHandle);
-		}
+	const TESForm* pItem = nullptr;
+	const TESForm* pSeller = nullptr;
+	BOOL bAdd = TRUE;
+	uint32_t uiFlags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pItem, &bAdd, &uiFlags, &pSeller) && pItem) {
+		const uint32_t uiFormID = pItem->GetFormID();
+		const uint32_t uiSellerFormID = pSeller ? pSeller->GetFormID() : 0;
 
+		if (bAdd)
+			*result = BarterFilter::Add(uiFormID, uiFlags, uiSellerFormID);
+		else
+			*result = BarterFilter::Remove(uiFormID, uiFlags, uiSellerFormID);
 	}
 	return true;
 }
 
 bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
-	TESForm* itemFilter, * filterArg = nullptr;
-	DWORD flags = 0;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &filterArg) && itemFilter) {
-		DWORD outflags = 0;
-		DWORD idToHandle = 0;
-		if (filterArg) {
-			idToHandle = filterArg->GetFormID();
-		}
-		*result = BarterFilter::IsHidden(idToHandle);
+	const TESForm* pItem = nullptr;
+	const TESForm* pSeller = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pItem, &pSeller) && pItem) {
+		const uint32_t uiFormID = pItem->GetFormID();
+		const uint32_t uiSellerFormID = pSeller ? pSeller->GetFormID() : 0;
+
+		*result = BarterFilter::IsHidden(uiFormID, uiSellerFormID);
+		if (IsConsoleMode())
+			Console_Print("IsItemBarterHiddenEx >> %f", *result);
 	}
 	return true;
 }
