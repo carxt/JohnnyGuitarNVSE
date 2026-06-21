@@ -1492,9 +1492,13 @@ public:
 	MenuItemEntryList	leftItems;		// 0A8
 	MenuItemEntryList	rightItems;		// 0D8
 	MenuItemEntryList* currentItems;	// 108
-	BarterItemList		leftBarter;		// 10C
-	BarterItemList		rightBarter;	// 114
+	BSSimpleList<ItemChange*>		kItemsToBuy;		// 10C
+	BSSimpleList<ItemChange*>		kItemsToSell;	// 114
 	uint32_t				unk11C;			// 11C
+
+	static BarterMenu* GetSingleton() {
+		return *reinterpret_cast<BarterMenu**>(0x11D8FA4);
+	}
 };
 
 // 1DC

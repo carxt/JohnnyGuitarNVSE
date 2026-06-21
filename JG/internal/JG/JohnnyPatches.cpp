@@ -308,7 +308,7 @@ namespace JohnnyPatches {
 
 		//Hairstyle handlers
 		RSMBarberHook::Install();
-		BarterFilter::Install();
+		BarterFilter::Init();
 
 		WriteRelCall(0x8752F2, uint32_t(SetViewmodelFrustumHook));
 
