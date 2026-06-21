@@ -166,7 +166,7 @@ namespace EDIDRestoration {
 			return CdeclCall<int32_t>(0xEC67AA, c);
 		}
 
-#pragma optimize("y", on)
+STACK_FRAME_OPT_ENABLE
 		class CIFixedStringFormMap : public BSTCaseInsensitiveStringMap<TESForm*> {
 		public:
 			bool _IsKeysEqual(const char* __restrict apKey1, const char* __restrict apKey2) const noexcept {
@@ -190,7 +190,7 @@ namespace EDIDRestoration {
 				return (*apKey1 | *apKey2) == 0;
 			}
 		};
-#pragma optimize("", on)
+STACK_FRAME_OPT_RESET
 
 		static void InitHooks() noexcept {
 			// Replace map's function

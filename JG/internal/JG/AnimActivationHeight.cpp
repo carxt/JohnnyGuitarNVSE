@@ -5,7 +5,9 @@ namespace AnimActivationHeight {
 
 	float fActivationHeight = 0.f;
 
-#pragma optimize("y", off)
+	// WARNING
+	// Amazingly, #pragma optimize does not apply to functions in templates
+	// So never ever enable "Omit frame pointers", otherwise this will break :)
 	template<uint32_t uiAddress, int32_t iOffset>
 	class Set_Hook {
 		static inline CallDetour kDetour;
@@ -54,7 +56,6 @@ namespace AnimActivationHeight {
 		Set_Hook<0x8FF0DF, 0x10>(); // LowProcess::FindSpecialIdletoPlay
 		Reset_Hook<0x8FF199>();
 	}
-#pragma optimize("", on)
 
 	float GetHeight() {
 		return fActivationHeight;

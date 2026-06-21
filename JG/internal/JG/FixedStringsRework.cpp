@@ -13,7 +13,7 @@
 #include <execution>
 #include <span>
 
-#pragma optimize("y", on)
+STACK_FRAME_OPT_ENABLE
 #pragma warning(disable: 4200)
 
 namespace FixedStringsRework {
@@ -480,6 +480,6 @@ namespace FixedStringsRework {
 }
 
 #pragma warning(default: 4200)
-#pragma optimize("", on)
+STACK_FRAME_OPT_RESET
 
 #undef SCOPED_TIMER

@@ -1,7 +1,7 @@
 #include "SafeWrite.hpp"
 #include <memoryapi.h>
 
-#pragma optimize("y", on)
+STACK_FRAME_OPT_ENABLE
 
 class MemoryUnlock {
 public:
@@ -89,4 +89,4 @@ void __fastcall PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
 }
 
-#pragma optimize("", on)
+STACK_FRAME_OPT_RESET

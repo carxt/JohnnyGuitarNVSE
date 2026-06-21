@@ -554,7 +554,7 @@ namespace JIPFixes {
 
 	}
 	namespace SetOnDialogTopicEventHandlerEx {
-#pragma optimize("y", off)
+STACK_FRAME_OPT_DISABLE
 		EventInformation* OnDialogTopicHandler = nullptr;
 
 		bool Cmd_SetOnDialogTopicEventHandler_JG_Execute(COMMAND_ARGS) {
@@ -620,7 +620,7 @@ namespace JIPFixes {
 				}
 			}
 		}
-#pragma optimize("", on)
+STACK_FRAME_OPT_RESET
 	}
 
 	namespace RespawnDisableFix {
@@ -1079,7 +1079,7 @@ namespace JIPFixes {
 	}
 
 	namespace OnMenuClickFix {
-#pragma optimize("y", off)
+STACK_FRAME_OPT_DISABLE
 		static inline Tile* const INVALID_TILE = reinterpret_cast<Tile*>(-1);
 		Tile* pClickedTile = INVALID_TILE;
 		uint32_t uiMenuHandleClickHook = 0;
@@ -1135,7 +1135,7 @@ namespace JIPFixes {
 
 			kRemoveTileFromUpdateList.ReplaceCallEx(0x706C98, &Hook::CleanupTile);
 		}
-#pragma optimize("", on)
+STACK_FRAME_OPT_RESET
 	}
 
 	namespace PowerArmorCondition {

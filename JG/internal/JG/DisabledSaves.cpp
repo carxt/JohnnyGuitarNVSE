@@ -18,7 +18,7 @@ namespace DisabledSaves {
 		return true;
 	}
 
-#pragma optimize("y", off)
+STACK_FRAME_OPT_DISABLE
 	CallDetour kCanSaveNowDetour;
 	static bool __fastcall CanSaveNowHook(BGSSaveLoadManager* apThis, void*, bool abAutoSave) {
 		bool bCanSave = ThisCall<bool>(kCanSaveNowDetour.GetOverwrittenAddr(), apThis, abAutoSave);
@@ -90,7 +90,7 @@ namespace DisabledSaves {
 		kSaveNowMenuDetour.ReplaceCall(0x7CBDC7, CanSaveNowMenuHook);
 		kSaveMessageDetour.ReplaceCall(0x8509C7, ShowMessage);
 	}
-#pragma optimize("", on)
+STACK_FRAME_OPT_RESET
 
 	void Toggle(uint8_t aucMod, bool abToggle, uint32_t auiTypeFlags) {
 		if (abToggle)
