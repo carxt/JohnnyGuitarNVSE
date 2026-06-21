@@ -90,7 +90,7 @@ namespace DisabledSaves {
 		kSaveNowMenuDetour.ReplaceCall(0x7CBDC7, CanSaveNowMenuHook);
 		kSaveMessageDetour.ReplaceCall(0x8509C7, ShowMessage);
 	}
-#pragma optimize("y", on)
+#pragma optimize("", on)
 
 	void Toggle(uint8_t aucMod, bool abToggle, uint32_t auiTypeFlags) {
 		if (abToggle)

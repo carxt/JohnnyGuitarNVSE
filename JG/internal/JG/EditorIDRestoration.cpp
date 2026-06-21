@@ -190,7 +190,7 @@ namespace EDIDRestoration {
 				return (*apKey1 | *apKey2) == 0;
 			}
 		};
-#pragma optimize("y", off)
+#pragma optimize("", on)
 
 		static void InitHooks() noexcept {
 			// Replace map's function

@@ -54,7 +54,7 @@ namespace AnimActivationHeight {
 		Set_Hook<0x8FF0DF, 0x10>(); // LowProcess::FindSpecialIdletoPlay
 		Reset_Hook<0x8FF199>();
 	}
-#pragma optimize("y", on)
+#pragma optimize("", on)
 
 	float GetHeight() {
 		return fActivationHeight;

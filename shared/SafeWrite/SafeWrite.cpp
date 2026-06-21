@@ -89,4 +89,4 @@ void __fastcall PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
 }
 
-#pragma optimize("y", off)
+#pragma optimize("", on)
