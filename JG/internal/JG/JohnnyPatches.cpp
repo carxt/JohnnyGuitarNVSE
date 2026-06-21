@@ -298,7 +298,7 @@ namespace JohnnyPatches {
 		WriteRelCall(0x82FC0B, (uint32_t)CombatMusicHook);
 
 		// ToggleDisableSaves
-		DisabledSaves::Init();
+		DisabledSaves::Install();
 
 		ExtraMarkerIcons::Install();
 
