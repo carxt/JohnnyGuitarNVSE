@@ -71,7 +71,7 @@ namespace HookUtils {
 
 	SPEC_NOINLINE void __fastcall ReplaceVirtualCall(uintptr_t address, uintptr_t target, uint32_t overwriteLength) noexcept {
 		constexpr uint32_t call_length = 5;
-		MemoryUnlock unlock(address, overwriteLength);
+		MemoryUnlock unlock(address, overwriteLength ? overwriteLength : call_length);
 		if (overwriteLength)
 			memset(reinterpret_cast<void*>(address + call_length), 0x90, overwriteLength - call_length);
 
