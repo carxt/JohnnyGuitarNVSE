@@ -1465,15 +1465,6 @@ public:
 };
 static_assert(sizeof(NiCamera) == 0x114);
 
-enum CameraRotationType {
-	kCameraRotationType_TrackTarget = -2,
-	kCameraRotationType_Reset = -1,
-	kCameraRotationType_None = 0,
-	kCameraRotationType_X = 1,
-	kCameraRotationType_Y = 2,
-	kCameraRotationType_Z = 3,
-};
-
 // C4
 class NiDynamicEffect : public NiAVObject {
 public:

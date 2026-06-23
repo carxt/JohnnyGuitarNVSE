@@ -6,33 +6,32 @@ namespace CameraOverride {
 	NiPoint3 kCameraPos;
 	NiMatrix3 kCameraRot = NiMatrix3::IDENTITY;
 	NiMatrix3 kCameraIdentity = NiMatrix3(0, 0, 1,
-		1, 0, 0,
-		0, 1, 0);
+										  1, 0, 0,
+										  0, 1, 0);
 	uint32_t uiReferenceToTrack = 0;
 	bool bOverrideCameraPos = false;
 	bool bOverrideCameraRot = false;
-	int eAxis = -3;
+	int32_t eAxis = -3;
 
-	void __fastcall SetCameraTranslateHook(NiNode* apThis, void*, NiPoint3& arPos) {
+	static SPEC_NOINLINE void __fastcall SetCameraTranslate(NiNode* apThis, uint32_t auiAddress, NiPoint3& arPos) {
 		PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
 		if (bOverrideCameraPos && pPlayer->IsThirdPerson())
 			arPos = kCameraPos;
 
-		apThis->SetLocalTranslate(arPos);
+		ThisCall(auiAddress, apThis, &arPos);
 	}
 
-	void __fastcall SetCameraRotateHook(NiNode* apThis, void*, NiMatrix3& arRot) {
-		PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
-		NiCamera* pCamera = (NiCamera*)apThis->GetAt(0);
-		if (eAxis == kCameraRotationType_Reset) {
+	static SPEC_NOINLINE void __fastcall SetCameraRotate(NiNode* apThis, uint32_t auiAddress, const NiMatrix3& arRot) {
+		NiCamera* pCamera = static_cast<NiCamera*>(apThis->GetAt(0));
+		if (eAxis == CameraRotationType::ROTATE_RESET) {
 			kCameraRot = arRot;
 		}
-		else if (bOverrideCameraRot && pPlayer->IsThirdPerson()) {
-			if (eAxis == kCameraRotationType_TrackTarget) {
-				TESForm* pForm = TESForm::GetFormByNumericID(uiReferenceToTrack);
+		else if (bOverrideCameraRot && PlayerCharacter::GetSingleton()->IsThirdPerson()) {
+			if (eAxis == CameraRotationType::ROTATE_TO_TARGET) {
+				const TESForm* pForm = TESForm::GetFormByNumericID(uiReferenceToTrack);
 				if (pForm->IsReference() && pCamera) {
-					TESObjectREFR* pTrackRef = (TESObjectREFR*)pForm;
-					NiNode* pRootNode = pTrackRef->Get3D();
+					const TESObjectREFR* pTrackRef = static_cast<const TESObjectREFR*>(pForm);
+					const NiNode* pRootNode = pTrackRef->Get3D();
 					NiPoint3 kPos;
 					if (pRootNode && pRootNode->m_pWorldBound && pRootNode->m_pWorldBound->iRadius) {
 						kPos = pRootNode->m_pWorldBound->kCenter;
@@ -42,14 +41,14 @@ namespace CameraOverride {
 					}
 
 					pCamera->m_pkParent = nullptr;
-					pCamera->LookAtWorldPoint(kPos, NiPoint3(0, 0, 1));
+					pCamera->LookAtWorldPoint(kPos, NiPoint3::UNIT_Z);
 					pCamera->m_pkParent = apThis;
 					apThis->SetLocalRotate(pCamera->m_kLocal.m_kRotate);
 					pCamera->SetLocalRotate(NiMatrix3::IDENTITY);
 				}
 			}
 			else {
-				apThis->SetLocalRotate(kCameraRot);
+				ThisCall(auiAddress, apThis, &kCameraRot);
 			}
 			return;
 		}
@@ -57,61 +56,87 @@ namespace CameraOverride {
 			pCamera->SetLocalRotate(kCameraIdentity);
 		}
 
-		apThis->SetLocalRotate(arRot);
+		ThisCall(auiAddress, apThis, &arRot);
 	}
+
+	template<uint32_t uiAddress>
+	class SetCameraTranslateHook {
+		static inline HookUtils::CallDetour kDetour;
+
+		static void __fastcall Hook(NiNode* apThis, void*, NiPoint3& arPos) {
+			SetCameraTranslate(apThis, kDetour, arPos);
+		}
+
+	public:
+		SetCameraTranslateHook() {
+			kDetour.ReplaceCall(uiAddress, Hook);
+		}
+	};
+
+	template<uint32_t uiAddress>
+	class SetCameraRotateHook {
+		static inline HookUtils::CallDetour kDetour;
+
+		static void __fastcall Hook(NiNode* apThis, void*, const NiMatrix3& arRot) {
+			SetCameraRotate(apThis, kDetour, arRot);
+		}
+
+	public:
+		SetCameraRotateHook() {
+			kDetour.ReplaceCall(uiAddress, Hook);
+		}
+	};
 
 	void Reset() {
 		bOverrideCameraPos = false;
 		bOverrideCameraRot = false;
-		kCameraPos = NiPoint3(0, 0, 0);
+		kCameraPos = NiPoint3::ZERO;
 		kCameraRot = NiMatrix3::IDENTITY;
 	}
 
-	void Install()
-	{
-		HookUtils::WriteRelCall(0x94AD8A, uint32_t(SetCameraTranslateHook));
-		HookUtils::WriteRelCall(0x94AD9D, uint32_t(SetCameraRotateHook));
+	void Install() {
+		// PlayerCharacter::HandleFlycamMovement
+		SetCameraTranslateHook<0x94AD8A>();
+		SetCameraRotateHook<0x94AD9D>();
 
-		HookUtils::WriteRelCall(0x94BDC2, uint32_t(SetCameraTranslateHook));
-		HookUtils::WriteRelCall(0x94BDD5, uint32_t(SetCameraRotateHook));
+		// PlayerCharacter::UpdateCamera
+		SetCameraTranslateHook<0x94BDC2>();
+		SetCameraRotateHook<0x94BDD5>();
 	}
 
-	void OverridePos(bool override, const NiPoint3& kNewPos)
-	{
-		bOverrideCameraPos = override;
-		if (override) {
-			kCameraPos = kNewPos;
-		}
+	void OverridePos(bool abOverride, const NiPoint3& arNewPos) {
+		bOverrideCameraPos = abOverride;
+		if (abOverride)
+			kCameraPos = arNewPos;
 	}
 
-	void OverrideRot(bool override, int axis, float fAngle, TESObjectREFR* pRef)
-	{
-		bOverrideCameraRot = override;
-		eAxis = axis;
-		fAngle = fAngle * 0.01745329252; // PI / 180
+	void OverrideRot(bool abOverride, CameraRotationType aeRotType, float afAngle, const TESObjectREFR* apRef) {
+		bOverrideCameraRot = abOverride;
+		eAxis = aeRotType;
+
+		afAngle = afAngle * 0.01745329252; // PI / 180
+
 		NiMatrix3 kNewRot;
-		switch (eAxis) {
-		case kCameraRotationType_None:
-			kCameraRot = NiMatrix3::IDENTITY;
-			break;
-		case kCameraRotationType_X:
-			kNewRot.MakeXRotation(fAngle);
-			break;
-		case kCameraRotationType_Y:
-			kNewRot.MakeYRotation(fAngle);
-			break;
-		case kCameraRotationType_Z:
-			kNewRot.MakeZRotation(fAngle);
-			break;
+		switch (aeRotType) {
+			case CameraRotationType::ROTATE_NONE:
+				kCameraRot = NiMatrix3::IDENTITY;
+				break;
+			case CameraRotationType::ROTATE_X:
+				kNewRot.MakeXRotation(afAngle);
+				break;
+			case CameraRotationType::ROTATE_Y:
+				kNewRot.MakeYRotation(afAngle);
+				break;
+			case CameraRotationType::ROTATE_Z:
+				kNewRot.MakeZRotation(afAngle);
+				break;
 		}
 
-		if (eAxis > kCameraRotationType_None) {
+		if (eAxis > CameraRotationType::ROTATE_NONE)
 			kCameraRot = kCameraRot * kNewRot;
-		}
 
-		if (pRef) {
-			uiReferenceToTrack = pRef->GetFormID();
-		}
+		if (apRef)
+			uiReferenceToTrack = apRef->GetFormID();
 	}
 
 }

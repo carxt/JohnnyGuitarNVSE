@@ -506,24 +506,20 @@ bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetCameraTranslate_Execute(COMMAND_ARGS) {
-	using namespace CameraOverride;
-	int override = 0;
+	BOOL bOverride = FALSE;
 	NiPoint3 kNewPos;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &kNewPos.x, &kNewPos.y, &kNewPos.z)) {
-		OverridePos(override > 0, kNewPos);
-	}
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bOverride, &kNewPos.x, &kNewPos.y, &kNewPos.z))
+		CameraOverride::OverridePos(bOverride > 0, kNewPos);
 	return true;
 }
 
 bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
+	CameraOverride::CameraRotationType eRotType = CameraOverride::CameraRotationType::ROTATE_NONE;
+	BOOL bOverride = FALSE;
 	float fAngle = 0.f;
-	TESObjectREFR* pRef = nullptr;
-	int override = 0;
-	int eAxis;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &eAxis, &fAngle, &pRef)) {
-		CameraOverride::OverrideRot(override > 0, eAxis, fAngle, pRef);
-		
-	}
+	const TESObjectREFR* pRef = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bOverride, &eRotType, &fAngle, &pRef))
+		CameraOverride::OverrideRot(bOverride > 0, eRotType, fAngle, pRef);
 	return true;
 }
 
