@@ -126,11 +126,25 @@ namespace HookUtils {
 	protected:
 		uintptr_t overwritten_addr = 0;
 
-		static DECLSPEC_NOINLINE bool __fastcall ValidateCallAddress(uintptr_t address, const char* caller) noexcept {
+		static DECLSPEC_NOINLINE bool __fastcall ValidateCallAddress(uintptr_t address, const char* caller, bool noError = false) noexcept {
 			if (*reinterpret_cast<uint8_t*>(address) != 0xE8) {
-				char cTextBuffer[72];
-				sprintf_s(cTextBuffer, "Cannot write detour - address 0x%08X is not a function call.", address);
-				MessageBoxA(nullptr, cTextBuffer, caller, MB_OK | MB_ICONERROR);
+				if (!noError) {
+					char cTextBuffer[72];
+					sprintf_s(cTextBuffer, "Cannot write detour - address 0x%08X is not a function call.", address);
+					MessageBoxA(nullptr, cTextBuffer, caller, MB_OK | MB_ICONERROR);
+				}
+				return false;
+			}
+			return true;
+		}
+
+		static DECLSPEC_NOINLINE bool __fastcall ValidateJumpAddress(uintptr_t address, const char* caller, bool noError = false) noexcept {
+			if (*reinterpret_cast<uint8_t*>(address) != 0xE9) {
+				if (!noError) {
+					char cTextBuffer[72];
+					sprintf_s(cTextBuffer, "Cannot write detour - address 0x%08X is not a jump.", address);
+					MessageBoxA(nullptr, cTextBuffer, caller, MB_OK | MB_ICONERROR);
+				}
 				return false;
 			}
 			return true;
@@ -154,19 +168,42 @@ namespace HookUtils {
 	class CallDetour : public Detour {
 	public:
 		template <DetourFunction T>
-		inline void __fastcall WriteRelCall(uintptr_t address, T target) noexcept {
-			if (ValidateCallAddress(address, __FUNCTION__)) {
+		inline void __fastcall WriteRelCall(uintptr_t address, T target, bool optional = false) noexcept {
+			bool bHook = optional;
+			if (ValidateCallAddress(address, __FUNCTION__, optional)) {
 				overwritten_addr = GetRelJumpAddr(address);
-				HookUtils::WriteRelCall(address, target);
+				bHook = true;
 			}
+
+			if (bHook)
+				HookUtils::WriteRelCall(address, target);
 		}
 
 		template <DetourFunction T>
-		inline void __fastcall ReplaceCall(uintptr_t address, T target) noexcept {
-			if (ValidateCallAddress(address, __FUNCTION__)) {
+		inline void __fastcall ReplaceCall(uintptr_t address, T target, bool optional = false) noexcept {
+			bool bHook = optional;
+			if (ValidateCallAddress(address, __FUNCTION__, optional)) {
 				overwritten_addr = GetRelJumpAddr(address);
-				HookUtils::ReplaceCall(address, target);
+				bHook = true;
 			}
+
+			if (bHook)
+				HookUtils::ReplaceCall(address, target);
+		}
+	};
+
+	class JumpDetour : public Detour {
+	public:
+		template <DetourFunction T>
+		inline void __fastcall WriteRelJump(uintptr_t address, T target, bool optional = false) noexcept {
+			bool bHook = optional;
+			if (ValidateJumpAddress(address, __FUNCTION__, optional)) {
+				overwritten_addr = GetRelJumpAddr(address);
+				bHook = true;
+			}
+
+			if (bHook)
+				HookUtils::WriteRelJump(address, target);
 		}
 	};
 

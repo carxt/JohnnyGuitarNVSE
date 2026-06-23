@@ -3881,16 +3881,12 @@ struct VariableInfo {
 };
 
 // TESQuest (6C)
-class TESQuest : public TESForm {
+class TESQuest : public TESForm, public TESScriptableForm, public TESIcon, public TESFullName {
 public:
 	TESQuest();
 	~TESQuest();
 
 	virtual char* GetEditorName() const;
-
-	TESScriptableForm		scriptable;			// 18
-	TESIcon					icon;				// 24
-	TESFullName				fullName;			// 30
 
 	struct StageInfo {
 		uint8_t			stage;		// 00 stageID
