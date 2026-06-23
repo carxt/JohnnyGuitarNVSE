@@ -101,7 +101,7 @@ namespace JohnnyGameSettings {
 		}
 	};
 
-	void InitCombatValues() { // Thanks lStewieAl
+	void InitCombatValues() { 
 		fCombatLocationTargetRadiusMaxBase.Initialize("fCombatLocationTargetRadiusMaxBase", 10.0f);
 		fCombatRangedWeaponRangeBaseMult.Initialize("fCombatRangedWeaponRangeBaseMult", 1.0f);
 
@@ -113,6 +113,7 @@ namespace JohnnyGameSettings {
 		fCombatCoverHoldingGroundTimer.Initialize("fCombatCoverHoldingGroundTimer", 2.f);
 		fCombatCoverTargetBlockedTimer.Initialize("fCombatCoverTargetBlockedTimer", 2.f);
 
+		// Thanks lStewieAl
 		CombatLocationHook<0x9A089F>();
 		CombatLocationHook<0x9A0A0C>();
 
