@@ -2802,6 +2802,14 @@ public:
 		ThisCall(0x524DB0, this, apReference);
 	}
 	TESForm* GetAmmoInInventory();
+
+	bool IsFixedRange() const {
+		return ThisCall<bool>(0x647790, this);
+	}
+
+	bool IsRangedWeapon() const {
+		return ThisCall<bool>(0x4C0C30, this);
+	}
 };
 static_assert(sizeof(TESObjectWEAP) == 0x388);
 
