@@ -1,27 +1,28 @@
 #include "fn_gameplay.h"
-#include "GameForms.h"
 
 #include "Bethesda/BSUtilities.hpp"
-#include <GameUI.h>
-#include <Bethesda/INISettingCollection.hpp>
-#include <misc/WorldToScreen.h>
-#include <GameRTTI.h>
-#include <JG/CustomCameraShake.hpp>
-#include <Bethesda/GameSettingCollection.hpp>
-#include <GameEffects.h>
-#include <JG/JohnnyPatches.hpp>
-#include <Bethesda/TESObjectList.hpp>
-#include <Bethesda/TESObject.hpp>
-#include <Bethesda/TESDataHandler.hpp>
-#include <JG/NPCAccuracy.hpp>
+#include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/INISettingCollection.hpp"
+#include "Bethesda/TESDataHandler.hpp"
+#include "Bethesda/TESObject.hpp"
+#include "Bethesda/TESObjectList.hpp"
 #include "decoding.h"
+#include "GameEffects.h"
+#include "GameForms.h"
 #include "GameProcess.h"
-#include <JG/MediaLocationControllerOverride.hpp>
-#include <JG/CustomHUDShake.hpp>
-#include <JG/DisabledSaves.hpp>
-#include <JG/DisabledLevelUp.hpp>
-#include <JG/DisabledMuzzleFlashLights.hpp>
-#include <JG/DisabledArrowKeys.hpp>
+#include "GameRTTI.h"
+#include "GameUI.h"
+#include "JG/CustomCameraShake.hpp"
+#include "JG/CustomHUDShake.hpp"
+#include "JG/DisabledArrowKeys.hpp"
+#include "JG/DisabledLevelUp.hpp"
+#include "JG/DisabledMuzzleFlashLights.hpp"
+#include "JG/DisabledSaves.hpp"
+#include "JG/JohnnyPatches.hpp"
+#include "JG/MediaLocationControllerOverride.hpp"
+#include "JG/NPCAccuracy.hpp"
+#include "JG/ScriptUtils.hpp"
+#include "misc/WorldToScreen.h"
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -418,94 +419,45 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 
 
 bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
-
 	*result = 0;
-	float mul = 1.0f;
-	TESForm* a_form = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
-		if (fabs(mul) < FLT_EPSILON) { mul = FLT_EPSILON + DBL_EPSILON; }
-		switch (a_form->GetFormType()) {
-		case FORM_TYPE::TESNPC:
-		case FORM_TYPE::TESCreature:
-			NPCAccuracy::tables.ACTBAS[a_form->GetFormID()] = mul;
-			break;
-		case FORM_TYPE::TESCombatStyle:
-			NPCAccuracy::tables.CSTY[a_form->GetFormID()] = mul;
-			break;
-		case FORM_TYPE::TESFaction:
-			NPCAccuracy::tables.FACT[a_form->GetFormID()] = mul;
-			break;
+	float fMultiplier = 1.f;
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fMultiplier, &pForm)) {
+		TESForm* pTarget = pForm ? pForm : thisObj;
+		if (pTarget) {
+			if (fabs(fMultiplier) < FLT_EPSILON)
+				fMultiplier = FLT_EPSILON + DBL_EPSILON;
 
+			NPCAccuracy::SetMultiplier(pTarget, fMultiplier);
 		}
 	}
-	else if (thisObj) {
-		NPCAccuracy::tables.ACTREF[thisObj->GetFormID()] = mul;
 
-	}
 	return true;
 }
 
 
 bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
-
 	*result = 1;
-	TESForm* a_form = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
-		switch (a_form->GetFormType()) {
-		case FORM_TYPE::TESNPC:
-		case FORM_TYPE::TESCreature:
-			if (auto it = NPCAccuracy::tables.ACTBAS.find(a_form->GetFormID()); it != NPCAccuracy::tables.ACTBAS.end()) {
-				*result = it->second;
-			}
-			break;
-		case FORM_TYPE::TESCombatStyle:
-			if (auto it = NPCAccuracy::tables.CSTY.find(a_form->GetFormID()); it != NPCAccuracy::tables.CSTY.end()) {
-				*result = it->second;
-			}
-			break;
-		case FORM_TYPE::TESFaction:
-			if (auto it = NPCAccuracy::tables.FACT.find(a_form->GetFormID()); it != NPCAccuracy::tables.FACT.end()) {
-				*result = it->second;
-			}
-			break;
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) {
+		TESForm* pTarget = pForm ? pForm : thisObj;
+		if (pTarget)
+			*result = NPCAccuracy::GetMultiplier(pTarget);
+	}
 
-		}
-	}
-	else if (thisObj) {
-		if (auto it = NPCAccuracy::tables.ACTREF.find(thisObj->GetFormID()); it != NPCAccuracy::tables.ACTREF.end()) {
-			*result = it->second;
-		}
-	}
 	return true;
-
-
 }
 
 bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
-
 	*result = 0;
-	TESForm* a_form = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
-		switch (a_form->GetFormType()) {
-		case FORM_TYPE::TESNPC:
-		case FORM_TYPE::TESCreature:
-			NPCAccuracy::tables.ACTBAS.erase(a_form->GetFormID());
-			break;
-		case FORM_TYPE::TESCombatStyle:
-			NPCAccuracy::tables.CSTY.erase(a_form->GetFormID());
-			break;
-		case FORM_TYPE::TESFaction:
-			NPCAccuracy::tables.FACT.erase(a_form->GetFormID());
-			break;
-
-		}
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) {
+		TESForm* pTarget = pForm ? pForm : thisObj;
+		if (pTarget)
+			NPCAccuracy::RemoveMultiplier(pTarget);
 	}
-	else if (thisObj) {
-		NPCAccuracy::tables.ACTREF.erase(thisObj->GetFormID());
 
-	}
 	return true;
-
 }
 
 bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
@@ -1015,13 +967,13 @@ bool Cmd_IsCompassHostile_Execute(COMMAND_ARGS) {
 }
 
 void RestoreDisabledPlayerControlsHUDFlags() {
-	SafeWrite32(0x771A53, HUDMainMenu::kXpMeter | HUDMainMenu::kSubtitles | HUDMainMenu::kMessages | HUDMainMenu::kQuestReminder | HUDMainMenu::kRadiationMeter);
+	HookUtils::SafeWrite32(0x771A53, HUDMainMenu::kXpMeter | HUDMainMenu::kSubtitles | HUDMainMenu::kMessages | HUDMainMenu::kQuestReminder | HUDMainMenu::kRadiationMeter);
 }
 
 bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
 	uint32_t flags;
 	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &flags)) {
-		SafeWrite32(0x771A53, flags);
+		HookUtils::SafeWrite32(0x771A53, flags);
 		HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
 	}
 	else {
@@ -1413,15 +1365,17 @@ bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
-	int mode = -1;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &mode);
-	if (mode < 0 || mode > 3) {
-		mode = -1;
-	}
-	*result = DisabledMuzzleFlashLights::SetMode(mode);
-	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %.f", *result);
+	*result = 0;
+	DisabledMuzzleFlashLights::Mode eMode = DisabledMuzzleFlashLights::Mode::NONE;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &eMode);
+	if (ScriptUtils::InRange(eMode))
+		*result = DisabledMuzzleFlashLights::SetMode(eMode);
+
+	if (IsConsoleMode()) 
+		Console_Print("DisableMuzzleFlashLights >> %.f", *result);
 	return true;
 }
+
 bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 	BOOL bDisable = TRUE;
 	uint32_t uiTypeFlags = DisabledSaves::SaveTypeFlags::ALL;

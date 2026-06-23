@@ -434,3 +434,24 @@ void TESObjectCELL::CellRefLockEnter() {
 void TESObjectCELL::CellRefLockLeave() {
 	ThisCall(0x541AE0, this);
 }
+
+bool TESContainer::ContainerCanHoldType(uint8_t aucFormType) {
+	return CdeclCall<bool>(0x481F30, aucFormType);
+}
+
+bool TESContainer::ContainerCanHoldForm(const TESForm* apForm) {
+	if (!apForm)
+		return false;
+
+	if (apForm->IsReference()) {
+		const TESObjectREFR* pRef = static_cast<const TESObjectREFR*>(apForm);
+		return ContainerCanHoldForm(pRef->baseForm);
+	}
+	else if (apForm->GetFormType() == FORM_TYPE::TESObjectLIGH) {
+		const TESObjectLIGH* pLight = static_cast<const TESObjectLIGH*>(apForm);
+		return pLight->GetCanCarry();
+	}
+	else {
+		return ContainerCanHoldType(apForm->GetFormType());
+	}
+}

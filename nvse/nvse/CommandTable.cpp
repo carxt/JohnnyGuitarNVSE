@@ -311,7 +311,7 @@ int __fastcall hookOpCodeDataList(uint32_t ECX, uint32_t EDX, uint32_t opCode) {
 
 void ApplyPatchEditorOpCodeDataList(void) {
 	int32_t RelativeAddress = (uint32_t)(&hookOpCodeDataList) - hookOpCodeDataListAddress - 5 /* EIP after instruction that we modify*/;
-	SafeWrite32(hookOpCodeDataListAddress+1, (uint32_t)RelativeAddress);
+	HookUtils::SafeWrite32(hookOpCodeDataListAddress+1, (uint32_t)RelativeAddress);
 }
 
 #endif
@@ -323,11 +323,11 @@ static void ApplyPatch(const PatchLocation * patch, uint32_t newData)
 		switch(patch->type)
 		{
 		case 0:
-			SafeWrite32(patch->ptr, newData + patch->offset);
+			HookUtils::SafeWrite32(patch->ptr, newData + patch->offset);
 			break;
 
 		case 1:
-			SafeWrite16(patch->ptr, newData + patch->offset);
+			HookUtils::SafeWrite16(patch->ptr, newData + patch->offset);
 			break;
 		}
 	}

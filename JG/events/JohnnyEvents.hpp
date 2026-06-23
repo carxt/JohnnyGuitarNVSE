@@ -26,7 +26,7 @@ namespace JohnnyEvents {
 	void RegisterOnNPCActorValueChange(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
 	void RegisterOnTakeBackItem(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
 
-	void Install();
+	void Init();
 	void Reset();
 	void Update();
 }

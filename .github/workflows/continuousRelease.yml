@@ -81,10 +81,10 @@ jobs:
       continue-on-error: true
       with:
         api_key: ${{ secrets.NEXUSMODS_API_KEY }}
-        file_group_id: ${{ vars.NEXUSMODS_BETA_GROUP_ID }}
+        file_id: ${{ vars.NEXUSMODS_BETA_GROUP_ID }}
         filename: "artifacts\\JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip"
         display_name: "JohnnyGuitarNVSE - Continuous Release"
         description: "Auto build from the latest GitHub commit. Use for testing only."
-        file_category: "miscellaneous"
-        archive_existing_file: true
+        category: "miscellaneous"
+        archive_existing_version: true
         version: ${{ env.artifact_timestamp }}

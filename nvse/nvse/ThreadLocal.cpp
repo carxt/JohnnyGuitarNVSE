@@ -46,7 +46,7 @@ void ThreadLocalData::Init()
 	ASSERT_STR(s_tlsIndex != 0xFFFFFFFF, "TlsAlloc() failed in ThreadLocalData::Init()");
 
 	// hook BackgroundLoaderThread threadProc retn
-//	WriteRelJump(kBackgroundLoaderThreadHookAddr, (uint32_t)&BackgroundLoaderThreadHook);
+//	HookUtils::WriteRelJump(kBackgroundLoaderThreadHookAddr, (uint32_t)&BackgroundLoaderThreadHook);
 }
 
 void ThreadLocalData::DeInit()

@@ -102,13 +102,13 @@ TESObjectREFR* TESObjectREFR::Create(bool bTemp) {
 	return refr;
 }
 
-TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj)	// For LevelledForm, find real baseForm, not temporary one.
+TESBoundObject* GetPermanentBaseForm(TESObjectREFR* apReference)	// For LevelledForm, find real baseForm, not temporary one.
 {
-	if (thisObj) {
-		ExtraLeveledCreature* pXCreatureData = thisObj->extraDataList.GetExtraData<ExtraLeveledCreature>();
+	if (apReference) {
+		ExtraLeveledCreature* pXCreatureData = apReference->extraDataList.GetExtraData<ExtraLeveledCreature>();
 		if (pXCreatureData && pXCreatureData->pOriginalBase)
 			return pXCreatureData->pOriginalBase;
-		return thisObj->baseForm;
+		return apReference->baseForm;
 	}
 	return NULL;
 }

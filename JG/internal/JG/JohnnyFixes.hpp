@@ -1,5 +1,5 @@
 #pragma once
 namespace JohnnyFixes {
-	void Install();
+	SPEC_NOINLINE void Init();
 	void ClearPlayerFurniture();
 }

@@ -654,6 +654,8 @@ public:
 	float				gameDayDied;
 	uint32_t				unkAC;		// not initialized!
 	uint32_t				unkB0;		// not initialized!
+
+	bool FindSpecialIdletoPlay(Actor* apActor, TESBoundObject* apObject, TESObjectREFR* apRef);
 };
 
 // C8
@@ -711,10 +713,10 @@ public:
 	uint32_t							unk03C[2];			// 03C
 	NiNode							*nNeck1;			// 044
 	float							unk048;				// 048
-	uint16_t							groupIDs[8];		// 04C
+	uint16_t						groupIDs[8];		// 04C
 	int32_t							sequenceState1[8];	// 05C
-	int32_t							sequenceState2[8];	// 07C
-	uint32_t							unk09C[12];			// 09C
+	uint32_t						uiLoopCounts[8];	// 07C
+	uint32_t						unk09C[12];			// 09C
 	float							flt0CC;				// 0CC
 	float							flt0D0;				// 0D0
 	uint32_t							unk0D4;				// 0D4

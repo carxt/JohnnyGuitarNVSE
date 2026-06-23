@@ -86,7 +86,7 @@ namespace DialogueResponseOverride {
 	}
 
 	void Install() {
-		WriteRelJump(0x083D413, (uintptr_t)asm_jumpManHook);
+		HookUtils::WriteRelJump(0x083D413, (uintptr_t)asm_jumpManHook);
 	}
 
 	DialogueEmotionOverride GetDialogueResponse(uint32_t refId, uint32_t responseNumber, DialogueEmotionOverride& newOverride)

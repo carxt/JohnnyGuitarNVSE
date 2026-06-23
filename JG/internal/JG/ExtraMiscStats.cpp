@@ -84,7 +84,7 @@ namespace ExtraMiscStats {
 
 	void Install() {
 		// Get/ModExtraMiscStat
-		SafeWrite32(0x7DDAB1, uint32_t(MiscStatRefreshHook));
+		HookUtils::SafeWrite32(0x7DDAB1, uint32_t(MiscStatRefreshHook));
 	}
 
 	bool InitStat(const char* name) {

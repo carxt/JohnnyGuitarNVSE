@@ -37,7 +37,7 @@ namespace ExtraMarkerIcons {
 	}
 	void Install() {
 		// SetCustomMapMarkerIcon
-		SafeWrite16(0x79D330, 0x9090);
-		WriteRelCall(0x79D332, (uint32_t)GetMapMarkerHook);
+		HookUtils::SafeWrite16(0x79D330, 0x9090);
+		HookUtils::WriteRelCall(0x79D332, (uint32_t)GetMapMarkerHook);
 	}
 }

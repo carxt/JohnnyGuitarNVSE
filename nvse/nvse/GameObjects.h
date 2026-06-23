@@ -133,7 +133,7 @@ public:
 
 	TESSound* loopSound;				// 01C
 
-	TESForm* baseForm;				// 020
+	TESBoundObject* baseForm;				// 020
 
 	NiPoint3		rot;		// 024 - either public or accessed via simple inline accessor common to all child classes
 	NiPoint3		pos;		// 030 - seems to be private
@@ -193,10 +193,7 @@ public:
 
 static_assert(sizeof(TESObjectREFR) == 0x068);
 
-
-
-
-TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj);	// For LevelledForm, find real baseForm, not temporary one.
+TESBoundObject* GetPermanentBaseForm(TESObjectREFR* apReference);	// For LevelledForm, find real baseForm, not temporary one.
 
 class BaseProcess;
 
@@ -498,8 +495,8 @@ public:
 	virtual void		Unk_107(void);
 	virtual void		Unk_108(void);
 	virtual void		Unk_109(void);
-	virtual CombatController* GetCombatController(void);
-	virtual Actor* GetCombatTarget(void);
+	virtual CombatController* GetCombatController() const;
+	virtual Actor*		GetCombatTarget() const;
 	virtual void		Unk_10C(void);
 	virtual void		Unk_10D(void);
 	virtual void		Unk_10E(void);
@@ -1074,18 +1071,18 @@ public:
 };
 static_assert(sizeof(Projectile) == 0x150);
 
-struct ProjectileData {
-	uint8_t byte00;
-	uint8_t byte01;
-	uint8_t byte02;
-	uint8_t gap03;
-	float unk04;
-	float flashDuration;
-	NiNode* muzzleFlash;
-	NiPointLight* flashLight;
-	BGSProjectile* projectile;
-	TESObjectWEAP* sourceWeap;
-	Actor* sourceActor;
+class MuzzleFlash {
+public:
+	bool					bEnabled;
+	bool					bMPSEnabled;
+	bool					bUpdateLight;
+	float					fEnableTimer;
+	float					fDurationTimer;
+	NiPointer<NiNode>		spNode;
+	NiPointer<NiPointLight>	spLight;
+	BGSProjectile*			pProjectile;
+	TESObjectWEAP*			pSourceWeapon;
+	Actor*					pSourceActor;
 };
 
 // 154

@@ -1,6 +1,6 @@
 #pragma once
 
-#pragma warning(disable: 4100 4201 4244 4324 4389 5054)
+#pragma warning(disable: 4100 4201 4244 4324 4389 5054 28159)
 
 #include <d3d9.h>
 
@@ -111,7 +111,15 @@ __forceinline T_Ret FastCall(uint32_t _addr, Args ...args) noexcept(false) {
 #define SPEC_NORETURN		__declspec(noreturn)
 #define SPEC_NOALIAS		__declspec(noalias)
 #define SPEC_EMPTY_BASES	__declspec(empty_bases)
+#define SPEC_NAKED			__declspec(naked)
 
 #define _HELPER_COMBINE1(X,Y) X##Y
 #define _HELPER_COMBINE(X,Y) _HELPER_COMBINE1(X,Y)
+
+#define STACK_FRAME_OPT_ENABLE  _Pragma("optimize(\"y\", on)")
+#define STACK_FRAME_OPT_DISABLE _Pragma("optimize(\"y\", off)")
+#define STACK_FRAME_OPT_RESET   _Pragma("optimize(\"\", on)")
+
+#define RUNTIME_CHECKS_DISABLE _Pragma("runtime_checks(\"\", off)")
+#define RUNTIME_CHECKS_RESET   _Pragma("runtime_checks(\"\", restore)")
 #pragma endregion

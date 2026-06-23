@@ -1131,7 +1131,7 @@ static ParamInfo kParamsRemapLand[] =
 static ParamInfo kParamsApplyModelTextureSwap[] =
 {
 	{ "Base Form", kParamType_TESObject , 0 },
-	{ "Reference", kParamType_ObjectRef, 1 },
 	{ "Block Name", kParamType_String, 1 },
+	{ "Reference", kParamType_ObjectRef, 1 },
 	{ "First Person", kParamType_Integer, 1 },
 };

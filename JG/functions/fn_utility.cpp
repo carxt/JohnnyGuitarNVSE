@@ -506,24 +506,20 @@ bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetCameraTranslate_Execute(COMMAND_ARGS) {
-	using namespace CameraOverride;
-	int override = 0;
+	BOOL bOverride = FALSE;
 	NiPoint3 kNewPos;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &kNewPos.x, &kNewPos.y, &kNewPos.z)) {
-		OverridePos(override > 0, kNewPos);
-	}
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bOverride, &kNewPos.x, &kNewPos.y, &kNewPos.z))
+		CameraOverride::OverridePos(bOverride > 0, kNewPos);
 	return true;
 }
 
 bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
+	CameraOverride::CameraRotationType eRotType = CameraOverride::CameraRotationType::ROTATE_NONE;
+	BOOL bOverride = FALSE;
 	float fAngle = 0.f;
-	TESObjectREFR* pRef = nullptr;
-	int override = 0;
-	int eAxis;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &eAxis, &fAngle, &pRef)) {
-		CameraOverride::OverrideRot(override > 0, eAxis, fAngle, pRef);
-		
-	}
+	const TESObjectREFR* pRef = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bOverride, &eRotType, &fAngle, &pRef))
+		CameraOverride::OverrideRot(bOverride > 0, eRotType, fAngle, pRef);
 	return true;
 }
 
@@ -575,6 +571,48 @@ bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
 		if (IsConsoleMode()) 
 			Console_Print("GetCurrentSkyColor %d >> %f %f %f", eColorType, rColor.r, rColor.g, rColor.b);
 		*result = 1;
+	}
+	return true;
+}
+
+void __fastcall StopAnimLoop(Animation* apAnimation, uint32_t aiGroup) {
+	if (aiGroup == -1) {
+		for (uint32_t i = 0; i < 8; ++i) {
+			apAnimation->uiLoopCounts[i] = 0;
+		}
+	}
+	else {
+		apAnimation->uiLoopCounts[aiGroup] = 0;
+	}
+}
+
+bool Cmd_StopIdleLoop_Execute(COMMAND_ARGS) {
+	int32_t eGroup = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eGroup)) {
+		if (eGroup != -1 && (eGroup < 0 || eGroup > 7))
+			return true;
+
+		if (thisObj == PlayerCharacter::GetSingleton()) {
+			PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(thisObj);
+			Animation* pAnimation = pPlayer->GetAnimation(true);
+			if (pAnimation) {
+				StopAnimLoop(pAnimation, eGroup);
+				*result = 1;
+			}
+			pAnimation = pPlayer->GetAnimation(false);
+			if (pAnimation) {
+				StopAnimLoop(pAnimation, eGroup);
+				*result = 1;
+			}
+		}
+		else {
+			Animation* pAnimation = thisObj->GetAnimation();
+			if (pAnimation) {
+				StopAnimLoop(pAnimation, eGroup);
+				*result = 1;
+			}
+		}
+
 	}
 	return true;
 }

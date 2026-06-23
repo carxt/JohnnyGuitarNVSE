@@ -13,7 +13,7 @@
 #include <execution>
 #include <span>
 
-#pragma optimize("y", on)
+STACK_FRAME_OPT_ENABLE
 #pragma warning(disable: 4200)
 
 namespace FixedStringsRework {
@@ -456,18 +456,18 @@ namespace FixedStringsRework {
 		static void Init() {
 
 #ifdef GAME
-			SafeWrite8(0xA5B630, 0xC3);
-			WriteRelJump(0xA5B690, Hooks::GetFixedString);
-			WriteRelJump(0xA5B460, Hooks::FreeUnusedFixedStrings);
+			HookUtils::SafeWrite8(0xA5B630, 0xC3);
+			HookUtils::WriteRelJump(0xA5B690, Hooks::GetFixedString);
+			HookUtils::WriteRelJump(0xA5B460, Hooks::FreeUnusedFixedStrings);
 #else
-			SafeWrite8(0x81B060, 0xC3);
-			WriteRelJump(0x81B0C0, Hooks::GetFixedString);
-			WriteRelJump(0x81AF10, Hooks::FreeUnusedFixedStrings);
+			HookUtils::SafeWrite8(0x81B060, 0xC3);
+			HookUtils::WriteRelJump(0x81B0C0, Hooks::GetFixedString);
+			HookUtils::WriteRelJump(0x81AF10, Hooks::FreeUnusedFixedStrings);
 #endif
 
 			if (JIPUtils::IsValid()) {
-				PatchMemoryNopRange(JIPUtils::GetAddress(0x10012260), JIPUtils::GetAddress(0x1001228D));
-				WriteRelJump(JIPUtils::GetAddress(0x1000CE20), Hooks::GetFixedString);
+				HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x10012260), JIPUtils::GetAddress(0x1001228D));
+				HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000CE20), Hooks::GetFixedString);
 			}
 		}
 	}
@@ -480,6 +480,6 @@ namespace FixedStringsRework {
 }
 
 #pragma warning(default: 4200)
-#pragma optimize("", on)
+STACK_FRAME_OPT_RESET
 
 #undef SCOPED_TIMER

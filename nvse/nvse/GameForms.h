@@ -876,9 +876,9 @@ public:
 
 	FormCountList	formCountList;	// 04
 
-	static bool ContainerCanHoldType(FORM_TYPE aeFormType) {
-		return CdeclCall<bool>(0x481F30, aeFormType);
-	}
+	static bool ContainerCanHoldType(uint8_t aucFormType);
+
+	static bool ContainerCanHoldForm(const TESForm* apForm);
 };
 
 // 00C
@@ -2369,7 +2369,7 @@ public:
 	uint8_t						green;			// 0A5
 	uint8_t						blue;			// 0A6
 	uint8_t						padA7;			// 0A7
-	uint32_t						lightFlags;		// 0A8
+	Bitfield32					lightFlags;		// 0A8
 	float						falloffExp;		// 0AC
 	float						FOV;			// 0B0
 	float						fadeValue;		// 0B4
@@ -2377,8 +2377,11 @@ public:
 	uint32_t						padBC[3];		// 0BC
 
 	void SetFlag(uint32_t pFlag, bool bEnable) {
-		if (bEnable) lightFlags |= pFlag;
-		else lightFlags &= ~pFlag;
+		lightFlags.Set(pFlag, bEnable);
+	}
+
+	bool GetCanCarry() const {
+		return lightFlags.Get(kFlag_CanBeCarried);
 	}
 
 	NiPointLight* CreatePointLight(TESObjectREFR* targetRef, NiNode* targetNode, bool arg3);
@@ -2799,6 +2802,14 @@ public:
 		ThisCall(0x524DB0, this, apReference);
 	}
 	TESForm* GetAmmoInInventory();
+
+	bool IsFixedRange() const {
+		return ThisCall<bool>(0x647790, this);
+	}
+
+	bool IsRangedWeapon() const {
+		return ThisCall<bool>(0x4C0C30, this);
+	}
 };
 static_assert(sizeof(TESObjectWEAP) == 0x388);
 
@@ -3870,16 +3881,12 @@ struct VariableInfo {
 };
 
 // TESQuest (6C)
-class TESQuest : public TESForm {
+class TESQuest : public TESForm, public TESScriptableForm, public TESIcon, public TESFullName {
 public:
 	TESQuest();
 	~TESQuest();
 
 	virtual char* GetEditorName() const;
-
-	TESScriptableForm		scriptable;			// 18
-	TESIcon					icon;				// 24
-	TESFullName				fullName;			// 30
 
 	struct StageInfo {
 		uint8_t			stage;		// 00 stageID

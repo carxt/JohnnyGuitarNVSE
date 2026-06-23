@@ -1238,3 +1238,41 @@ public:
 
 	uint32_t			unk1C[13];		// 1C
 };
+
+class hkaRaycastInterface {
+public:
+	hkaRaycastInterface();
+
+	virtual			~hkaRaycastInterface();
+	virtual bool* castRay(bool*, hkVector4*, hkVector4*, uint32_t, float, hkVector4*);
+	virtual bool* castRayAlt(bool*, hkVector4*, hkVector4*, uint32_t, hkVector4*);
+};
+
+class ALIGN16 bhkRagdollController : public hkaRaycastInterface {
+public:
+	// CBA to import all types
+
+	bool GetLookIKEnable() const {
+		return ThisCall<bool>(0x5BA540, this);
+	}
+
+	void SetLookIKEnable(bool abVal) {
+		ThisCall(0x5BA4F0, this, abVal);
+	}
+
+	bool GetFootIKEnable() const {
+		return ThisCall<bool>(0x5BA180, this);
+	}
+
+	void SetFootIKEnable(bool abVal) {
+		ThisCall(0x5BA130, this, abVal);
+	}
+
+	bool GetGrabIKEnable() const {
+		return ThisCall<bool>(0x5BA360, this);
+	}
+
+	void SetGrabIKEnable(bool abVal) {
+		ThisCall(0x5BA310, this, abVal);
+	}
+};

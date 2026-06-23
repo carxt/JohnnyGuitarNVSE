@@ -1,270 +1,232 @@
 #pragma once
 
-DECLSPEC_NOINLINE void __fastcall SafeWrite8(SIZE_T addr, SIZE_T data);
-DECLSPEC_NOINLINE void __fastcall SafeWrite16(SIZE_T addr, SIZE_T data);
-DECLSPEC_NOINLINE void __fastcall SafeWrite32(SIZE_T addr, SIZE_T data);
-DECLSPEC_NOINLINE void __fastcall SafeWriteBuf(SIZE_T addr, const void* data, SIZE_T len);
+namespace HookUtils {
 
-template <SIZE_T N>
-inline void SafeWriteBuf(SIZE_T addr, const char(&data)[N]) {
-	SafeWriteBuf(addr, data, N - 1);
-}
+	namespace {
+		template <typename T>
+		class _MethodConverter {
+			union {
+				const T		func;
+				uintptr_t	funcPtr;
+			};
+		public:
+			constexpr _MethodConverter(const T function) noexcept : func(function) {};
 
-// 5 bytes
-DECLSPEC_NOINLINE void __fastcall WriteRelJump(SIZE_T jumpSrc, SIZE_T jumpTgt);
-DECLSPEC_NOINLINE void __fastcall WriteRelCall(SIZE_T jumpSrc, SIZE_T jumpTgt);
+			constexpr operator uintptr_t() const noexcept { return funcPtr; };
+		};
+
+		template <typename T>
+		concept WritableFunction =
+			std::is_member_function_pointer_v<T> ||
+			std::is_pointer_v<T> ||
+			std::is_integral_v<T>;
+
+		template <typename T>
+		concept DetourFunction =
+			std::is_member_function_pointer_v<T> ||
+			std::is_pointer_v<T>;
+	}
+
+	class MemoryUnlock {
+		const uintptr_t _addr;
+		const uintptr_t _size;
+		DWORD _oldProtect;
+	public:
+		MemoryUnlock(uintptr_t address, uintptr_t size = sizeof(uintptr_t), uint32_t flags = 0x40) noexcept; // flags set to PAGE_EXECUTE_READWRITE
+		~MemoryUnlock() noexcept;
+	};
+
+	// Taken from lStewieAl.
+	// Returns the address of the jump/called function, assuming there is one.
+	constexpr uintptr_t __fastcall GetRelAddr(uintptr_t address, uintptr_t target, uint32_t offset) noexcept {
+		return target - address - offset - 4;
+	}
+
+	constexpr uintptr_t __fastcall GetRelJumpAddr(uintptr_t address) noexcept {
+		return *reinterpret_cast<uintptr_t*>(address + 1) + address + 5;
+	}
+
+	constexpr uintptr_t __fastcall GetWriteAddr(uintptr_t address) noexcept {
+		return *reinterpret_cast<uintptr_t*>(address);
+	}
+
+	void __fastcall PatchMemoryNop(uintptr_t address, uint32_t size) noexcept;
+
+	void __fastcall SafeWrite8(uintptr_t address, uint8_t data) noexcept;
+	void __fastcall SafeWrite16(uintptr_t address, uint16_t data) noexcept;
+	void __fastcall SafeWrite32(uintptr_t address, uint32_t data) noexcept;
+	void __fastcall SafeWrite64(uintptr_t address, uint64_t data) noexcept;
+	void __fastcall SafeWriteBuf(uintptr_t address, const void* data, uint32_t dataLength) noexcept;
+
+	void __fastcall ReplaceCall(uintptr_t address, uintptr_t target) noexcept;
+	void __fastcall ReplaceVirtualCall(uintptr_t address, uintptr_t target, uint32_t overwriteLength) noexcept;
+
+	void __fastcall WriteRelCall(uintptr_t address, uintptr_t target) noexcept;
+	void __fastcall WriteRelJump(uintptr_t address, uintptr_t target) noexcept;
+	void __fastcall WriteRelJnz(uintptr_t address, uintptr_t target) noexcept;
+	void __fastcall WriteRelJle(uintptr_t address, uintptr_t target) noexcept;
+
+	inline void __fastcall PatchMemoryNopRange(uintptr_t startAddress, uintptr_t endAddress) noexcept {
+		PatchMemoryNop(startAddress, endAddress - startAddress);
+	}
+
+	template <uintptr_t N>
+	inline void SafeWriteBuf(uintptr_t address, const char(&data)[N]) noexcept {
+		SafeWriteBuf(address, data, N - 1);
+	}
 
 
-// 6 bytes
-DECLSPEC_NOINLINE void __fastcall WriteRelJnz(SIZE_T jumpSrc, SIZE_T jumpTgt);
-DECLSPEC_NOINLINE void __fastcall WriteRelJle(SIZE_T jumpSrc, SIZE_T jumpTgt);
+	template <WritableFunction T>
+	inline void __fastcall ReplaceCall(uintptr_t address, T target) noexcept {
+		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
+		ReplaceCall(address, _TYPE(target));
+	}
 
-DECLSPEC_NOINLINE void __fastcall PatchMemoryNop(ULONG_PTR Address, SIZE_T Size);
-static inline void __fastcall PatchMemoryNopRange(ULONG_PTR StartAddress, ULONG_PTR EndAddress) {
-	PatchMemoryNop(StartAddress, EndAddress - StartAddress);
-}
+	template <WritableFunction T>
+	inline void __fastcall WriteRelCall(uintptr_t address, T target) noexcept {
+		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
+		WriteRelCall(address, _TYPE(target));
+	}
 
-template <typename T>
-inline void __fastcall WriteRelCall(SIZE_T jumpSrc, T jumpTgt) {
-	WriteRelCall(jumpSrc, (SIZE_T)jumpTgt);
-}
+	template <WritableFunction T>
+	inline void __fastcall WriteRelJump(uintptr_t address, T target) noexcept {
+		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
+		WriteRelJump(address, _TYPE(target));
+	}
 
-template <typename T>
-inline void __fastcall WriteRelJump(SIZE_T jumpSrc, T jumpTgt) {
-	WriteRelJump(jumpSrc, (SIZE_T)jumpTgt);
-}
+	template <WritableFunction T>
+	inline void __fastcall ReplaceVirtualCall(uintptr_t address, T target, uint32_t overwriteLength) noexcept {
+		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
+		ReplaceVirtualCall(address, _TYPE(target), overwriteLength);
+	}
 
-DECLSPEC_NOINLINE void __fastcall ReplaceCall(SIZE_T jumpSrc, SIZE_T jumpTgt);
+	template <WritableFunction T>
+	inline void __fastcall ReplaceVirtualFunc(uintptr_t address, T target) noexcept {
+		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
+		SafeWrite32(address, _TYPE(target));
+	}
 
-template <typename T>
-inline void __fastcall ReplaceCall(SIZE_T jumpSrc, T jumpTgt) {
-	ReplaceCall(jumpSrc, (SIZE_T)jumpTgt);
-}
+	constexpr void** __fastcall GetVTable(void* __restrict apClass) noexcept {
+		return *reinterpret_cast<void***>(apClass);
+	}
 
-void __fastcall ReplaceVirtualFunc(SIZE_T jumpSrc, void* jumpTgt);
-
-// Stores the function-to-call before overwriting it, to allow calling the overwritten function after our hook is over.
-// Thanks Demorome and lStewieAl
-
-// Taken from lStewieAl.
-// Returns the address of the jump/called function, assuming there is one.
-static inline SIZE_T GetRelJumpAddr(SIZE_T jumpSrc) {
-	return *(SIZE_T*)(jumpSrc + 1) + jumpSrc + 5;
-}
-
-static inline SIZE_T GetWriteAddr(SIZE_T writeAddr) {
-	return *(SIZE_T*)(writeAddr);
-}
-
-// Specialization for member function pointers
-template <typename C, typename Ret, typename... Args>
-inline void __fastcall WriteRelJumpEx(SIZE_T source, Ret(C::* const target)(Args...) const) {
-    union
-    {
-        Ret(C::* tgt)(Args...) const;
-        SIZE_T funcPtr;
-    } conversion;
-    conversion.tgt = target;
-
-    WriteRelJump(source, conversion.funcPtr);
-}
-
-template <typename C, typename Ret, typename... Args>
-inline void __fastcall WriteRelJumpEx(SIZE_T source, Ret(C::* const target)(Args...)) {
-    union
-    {
-        Ret(C::* tgt)(Args...);
-        SIZE_T funcPtr;
-    } conversion;
-    conversion.tgt = target;
-
-    WriteRelJump(source, conversion.funcPtr);
-}
-
-template <typename C, typename Ret, typename... Args>
-inline void __fastcall WriteRelCallEx(SIZE_T source, Ret(C::* const target)(Args...) const) {
-	union
-	{
-		Ret(C::* tgt)(Args...) const;
-		SIZE_T funcPtr;
-	} conversion;
-	conversion.tgt = target;
-
-	WriteRelCall(source, conversion.funcPtr);
-}
-
-template <typename C, typename Ret, typename... Args>
-inline void __fastcall WriteRelCallEx(SIZE_T source, Ret(C::* const target)(Args...)) {
-	union
-	{
-		Ret(C::* tgt)(Args...);
-		SIZE_T funcPtr;
-	} conversion;
-	conversion.tgt = target;
-
-	WriteRelCall(source, conversion.funcPtr);
-}
-
-template <typename C, typename Ret, typename... Args>
-inline void __fastcall ReplaceCallEx(SIZE_T source, Ret(C::* const target)(Args...) const) {
-	union
-	{
-		Ret(C::* tgt)(Args...) const;
-		SIZE_T funcPtr;
-	} conversion;
-	conversion.tgt = target;
-
-	ReplaceCall(source, conversion.funcPtr);
-}
-
-template <typename C, typename Ret, typename... Args>
-inline void __fastcall ReplaceCallEx(SIZE_T source, Ret(C::* const target)(Args...)) {
-	union
-	{
-		Ret(C::* tgt)(Args...);
-		SIZE_T funcPtr;
-	} conversion;
-	conversion.tgt = target;
-
-	ReplaceCall(source, conversion.funcPtr);
-}
-
-template <typename C, typename Ret, typename... Args>
-inline void __fastcall ReplaceVirtualFuncEx(SIZE_T source, Ret(C::* const target)(Args...) const) {
-	union
-	{
-		Ret(C::* tgt)(Args...) const;
-		SIZE_T funcPtr;
-	} conversion;
-	conversion.tgt = target;
-
-	SafeWrite32(source, conversion.funcPtr);
-}
-
-template <typename C, typename Ret, typename... Args>
-inline void __fastcall ReplaceVirtualFuncEx(SIZE_T source, Ret(C::* const target)(Args...)) {
-	union
-	{
-		Ret(C::* tgt)(Args...);
-		SIZE_T funcPtr;
-	} conversion;
-	conversion.tgt = target;
-
-	SafeWrite32(source, conversion.funcPtr);
-}
-
-static inline void** __fastcall GetVTable(void* __restrict apClass) {
-	return *reinterpret_cast<void***>(apClass);
-}
-
-static inline void __fastcall SetVTable(void* __restrict apClass, void** __restrict apVTable) {
-	*reinterpret_cast<void***>(apClass) = apVTable;
-}
-
-template <typename C, typename Ret, typename... Args>
-inline void __fastcall ReplaceVTableEntry(void** apVTable, uint32_t auiPosition, Ret(C::* const target)(Args...) const) {
-	union {
-		Ret(C::* tgt)(Args...) const;
-		SIZE_T funcPtr;
-	} conversion;
-	conversion.tgt = target;
-
-	apVTable[auiPosition] = (void*)conversion.funcPtr;
-}
-
-template <typename C, typename Ret, typename... Args>
-inline void __fastcall ReplaceVTableEntry(void** apVTable, uint32_t auiPosition, Ret(C::* const target)(Args...)) {
-	union {
-		Ret(C::* tgt)(Args...);
-		SIZE_T funcPtr;
-	} conversion;
-	conversion.tgt = target;
-
-	apVTable[auiPosition] = (void*)conversion.funcPtr;
-}
-
-class CallDetour {
-	SIZE_T overwritten_addr = 0;
-public:
-	DECLSPEC_NOINLINE void __fastcall WriteRelCall(SIZE_T jumpSrc, void* jumpTgt)
-	{
-		__assume(jumpSrc != 0);
-		__assume(jumpTgt != nullptr);
-		if (*reinterpret_cast<uint8_t*>(jumpSrc) != 0xE8) {
-			char cTextBuffer[72];
-			sprintf_s(cTextBuffer, "Cannot write detour; jumpSrc is not a function call. (0x%08X)", jumpSrc);
-			MessageBoxA(nullptr, cTextBuffer, "WriteRelCall", MB_OK | MB_ICONERROR);
-			return;
-		}
-		overwritten_addr = GetRelJumpAddr(jumpSrc);
-		::WriteRelCall(jumpSrc, jumpTgt);
+	constexpr void __fastcall SetVTable(void* __restrict apClass, void** __restrict apVTable) noexcept {
+		*reinterpret_cast<void***>(apClass) = apVTable;
 	}
 
 	template <typename T>
-	DECLSPEC_NOINLINE void __fastcall ReplaceCall(SIZE_T jumpSrc, T jumpTgt) {
-		__assume(jumpSrc != 0);
-		if (*reinterpret_cast<uint8_t*>(jumpSrc) != 0xE8) {
-			char cTextBuffer[72];
-			sprintf_s(cTextBuffer, "Cannot write detour; jumpSrc is not a function call. (0x%08X)", jumpSrc);
-			MessageBoxA(nullptr, cTextBuffer, "WriteRelCall", MB_OK | MB_ICONERROR);
-			return;
+	inline void __fastcall ReplaceVTableEntry(void** apVTable, uint32_t auiPosition, T target) noexcept {
+		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
+		reinterpret_cast<uintptr_t*>(apVTable)[auiPosition] = _TYPE(target);
+	}
+
+	// Stores the function-to-call before overwriting it, to allow calling the overwritten function after our hook is over.
+	// Thanks Demorome and lStewieAl
+	class Detour {
+	protected:
+		uintptr_t overwritten_addr = 0;
+
+		static DECLSPEC_NOINLINE bool __fastcall ValidateCallAddress(uintptr_t address, const char* caller, bool noError = false) noexcept {
+			if (*reinterpret_cast<uint8_t*>(address) != 0xE8) {
+				if (!noError) {
+					char cTextBuffer[72];
+					sprintf_s(cTextBuffer, "Cannot write detour - address 0x%08X is not a function call.", address);
+					MessageBoxA(nullptr, cTextBuffer, caller, MB_OK | MB_ICONERROR);
+				}
+				return false;
+			}
+			return true;
 		}
-		overwritten_addr = GetRelJumpAddr(jumpSrc);
-		::ReplaceCall(jumpSrc, (SIZE_T)jumpTgt);
-	}
 
-	template <typename C, typename Ret, typename... Args>
-	inline void __fastcall ReplaceCallEx(SIZE_T source, Ret(C::* const target)(Args...) const) {
-		union
-		{
-			Ret(C::* tgt)(Args...) const;
-			SIZE_T funcPtr;
-		} conversion;
-		conversion.tgt = target;
+		static DECLSPEC_NOINLINE bool __fastcall ValidateJumpAddress(uintptr_t address, const char* caller, bool noError = false) noexcept {
+			if (*reinterpret_cast<uint8_t*>(address) != 0xE9) {
+				if (!noError) {
+					char cTextBuffer[72];
+					sprintf_s(cTextBuffer, "Cannot write detour - address 0x%08X is not a jump.", address);
+					MessageBoxA(nullptr, cTextBuffer, caller, MB_OK | MB_ICONERROR);
+				}
+				return false;
+			}
+			return true;
+		}
 
-		ReplaceCall(source, conversion.funcPtr);
-	}
+	public:
+		[[nodiscard]] inline uintptr_t GetOverwrittenAddr() const noexcept { return overwritten_addr; }
 
-	template <typename C, typename Ret, typename... Args>
-	inline void __fastcall ReplaceCallEx(SIZE_T source, Ret(C::* const target)(Args...)) {
-		union
-		{
-			Ret(C::* tgt)(Args...);
-			SIZE_T funcPtr;
-		} conversion;
-		conversion.tgt = target;
+		operator uintptr_t () const {
+			return GetOverwrittenAddr();
+		}
 
-		ReplaceCall(source, conversion.funcPtr);
-	}
+		template <DetourFunction T>
+		inline void __fastcall SafeWrite32(uintptr_t address, T target) noexcept {
+			using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
+			overwritten_addr = GetWriteAddr(address);
+			HookUtils::SafeWrite32(address, _TYPE(target));
+		}
+	};
 
-	template <typename T>
-	inline void SafeWrite32(SIZE_T jumpSrc, T jumpTgt) {
-		__assume(jumpSrc != 0);
-		overwritten_addr = GetWriteAddr(jumpSrc);
-		::SafeWrite32(jumpSrc, (SIZE_T)jumpTgt);
-	}
+	class CallDetour : public Detour {
+	public:
+		template <DetourFunction T>
+		inline void __fastcall WriteRelCall(uintptr_t address, T target, bool optional = false) noexcept {
+			bool bHook = optional;
+			if (ValidateCallAddress(address, __FUNCTION__, optional)) {
+				overwritten_addr = GetRelJumpAddr(address);
+				bHook = true;
+			}
 
-	[[nodiscard]] SIZE_T GetOverwrittenAddr() const { return overwritten_addr; }
-};
+			if (bHook)
+				HookUtils::WriteRelCall(address, target);
+		}
 
-class VirtFuncDetour {
-protected:
-	SIZE_T overwritten_addr = 0;
+		template <DetourFunction T>
+		inline void __fastcall ReplaceCall(uintptr_t address, T target, bool optional = false) noexcept {
+			bool bHook = optional;
+			if (ValidateCallAddress(address, __FUNCTION__, optional)) {
+				overwritten_addr = GetRelJumpAddr(address);
+				bHook = true;
+			}
 
-public:
-	template <typename C, typename Ret, typename... Args>
-	inline void __fastcall ReplaceVirtualFuncEx(SIZE_T source, Ret(C::* const target)(Args...)) {
-		union
-		{
-			Ret(C::* tgt)(Args...);
-			SIZE_T funcPtr;
-		} conversion;
-		conversion.tgt = target;
+			if (bHook)
+				HookUtils::ReplaceCall(address, target);
+		}
+	};
 
-		overwritten_addr = *(uint32_t*)source;
+	class JumpDetour : public Detour {
+	public:
+		template <DetourFunction T>
+		inline void __fastcall WriteRelJump(uintptr_t address, T target, bool optional = false) noexcept {
+			bool bHook = optional;
+			if (ValidateJumpAddress(address, __FUNCTION__, optional)) {
+				overwritten_addr = GetRelJumpAddr(address);
+				bHook = true;
+			}
 
-		SafeWrite32(source, conversion.funcPtr);
-	}
+			if (bHook)
+				HookUtils::WriteRelJump(address, target);
+		}
+	};
 
-	[[nodiscard]] SIZE_T GetOverwrittenAddr() const { return overwritten_addr; }
+	class VirtFuncDetour : public Detour {
+	public:
+		template <DetourFunction T>
+		inline void __fastcall ReplaceVirtualFunc(uintptr_t address, T target) noexcept {
+			overwritten_addr = *reinterpret_cast<uintptr_t*>(address);
+			HookUtils::ReplaceVirtualFunc(address, target);
+		}
+	};
+
+	// This detour is conditional due to its nature
+	// Detour returns only an overwritten, *non virtual* call
+	class VirtCallDetour : public Detour {
+	public:
+		template <DetourFunction T>
+		inline void __fastcall ReplaceVirtualCall(uintptr_t address, T target, uint32_t overwriteLength) noexcept {
+			if (*reinterpret_cast<uint8_t*>(address) == 0xE8)
+				overwritten_addr = GetRelJumpAddr(address);
+
+			HookUtils::ReplaceVirtualCall(address, target, overwriteLength);
+		}
+	};
+
 };

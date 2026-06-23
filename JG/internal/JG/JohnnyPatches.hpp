@@ -19,11 +19,10 @@ namespace JohnnyPatches {
 
 	extern float g_viewmodel_near;
 
-	void ReadINI();
-	void Install();
+	SPEC_NOINLINE void ReadINI();
+	SPEC_NOINLINE void Init();
 
-	void ResetVanityWheel();
-	void HandleDLLInterop();
+	SPEC_NOINLINE void Update();
 
 }
 // exports

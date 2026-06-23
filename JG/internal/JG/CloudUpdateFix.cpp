@@ -41,14 +41,14 @@ namespace CloudUpdateFix {
 
 	}
 	void Install() {
-		SafeWrite8(0x06346F3, 0x90);
-		WriteRelJump(0x06346F4, (uintptr_t)HookCloudCheck);
+		HookUtils::SafeWrite8(0x06346F3, 0x90);
+		HookUtils::WriteRelJump(0x06346F4, (uintptr_t)HookCloudCheck);
 		fn_Clouds_Update = *(uintptr_t*)0x104EC14;
-		SafeWrite32(0x104EC14, (uintptr_t)HookCloudUpdate);
+		HookUtils::SafeWrite32(0x104EC14, (uintptr_t)HookCloudUpdate);
 
 		//Cloud int update
-		SafeWrite8(0x63AD66, 0xEB);
-		WriteRelCall(0x063ADAB, (uintptr_t)HookNewGameCloudUpdate);
+		HookUtils::SafeWrite8(0x63AD66, 0xEB);
+		HookUtils::WriteRelCall(0x063ADAB, (uintptr_t)HookNewGameCloudUpdate);
 	}
 
 
