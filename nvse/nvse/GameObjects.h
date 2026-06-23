@@ -1072,18 +1072,18 @@ public:
 };
 static_assert(sizeof(Projectile) == 0x150);
 
-struct ProjectileData {
-	uint8_t byte00;
-	uint8_t byte01;
-	uint8_t byte02;
-	uint8_t gap03;
-	float unk04;
-	float flashDuration;
-	NiNode* muzzleFlash;
-	NiPointLight* flashLight;
-	BGSProjectile* projectile;
-	TESObjectWEAP* sourceWeap;
-	Actor* sourceActor;
+class MuzzleFlash {
+public:
+	bool					bEnabled;
+	bool					bMPSEnabled;
+	bool					bUpdateLight;
+	float					fEnableTimer;
+	float					fDurationTimer;
+	NiPointer<NiNode>		spNode;
+	NiPointer<NiPointLight>	spLight;
+	BGSProjectile*			pProjectile;
+	TESObjectWEAP*			pSourceWeapon;
+	Actor*					pSourceActor;
 };
 
 // 154

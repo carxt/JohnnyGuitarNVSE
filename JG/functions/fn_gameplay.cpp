@@ -1,27 +1,28 @@
 #include "fn_gameplay.h"
-#include "GameForms.h"
 
 #include "Bethesda/BSUtilities.hpp"
-#include <GameUI.h>
-#include <Bethesda/INISettingCollection.hpp>
-#include <misc/WorldToScreen.h>
-#include <GameRTTI.h>
-#include <JG/CustomCameraShake.hpp>
-#include <Bethesda/GameSettingCollection.hpp>
-#include <GameEffects.h>
-#include <JG/JohnnyPatches.hpp>
-#include <Bethesda/TESObjectList.hpp>
-#include <Bethesda/TESObject.hpp>
-#include <Bethesda/TESDataHandler.hpp>
-#include <JG/NPCAccuracy.hpp>
+#include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/INISettingCollection.hpp"
+#include "Bethesda/TESDataHandler.hpp"
+#include "Bethesda/TESObject.hpp"
+#include "Bethesda/TESObjectList.hpp"
 #include "decoding.h"
+#include "GameEffects.h"
+#include "GameForms.h"
 #include "GameProcess.h"
-#include <JG/MediaLocationControllerOverride.hpp>
-#include <JG/CustomHUDShake.hpp>
-#include <JG/DisabledSaves.hpp>
-#include <JG/DisabledLevelUp.hpp>
-#include <JG/DisabledMuzzleFlashLights.hpp>
-#include <JG/DisabledArrowKeys.hpp>
+#include "GameRTTI.h"
+#include "GameUI.h"
+#include "JG/CustomCameraShake.hpp"
+#include "JG/CustomHUDShake.hpp"
+#include "JG/DisabledArrowKeys.hpp"
+#include "JG/DisabledLevelUp.hpp"
+#include "JG/DisabledMuzzleFlashLights.hpp"
+#include "JG/DisabledSaves.hpp"
+#include "JG/JohnnyPatches.hpp"
+#include "JG/MediaLocationControllerOverride.hpp"
+#include "JG/NPCAccuracy.hpp"
+#include "JG/ScriptUtils.hpp"
+#include "misc/WorldToScreen.h"
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -1364,15 +1365,17 @@ bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
-	int mode = -1;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &mode);
-	if (mode < 0 || mode > 3) {
-		mode = -1;
-	}
-	*result = DisabledMuzzleFlashLights::SetMode(mode);
-	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %.f", *result);
+	*result = 0;
+	DisabledMuzzleFlashLights::Mode eMode = DisabledMuzzleFlashLights::Mode::NONE;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &eMode);
+	if (ScriptUtils::InRange(eMode))
+		*result = DisabledMuzzleFlashLights::SetMode(eMode);
+
+	if (IsConsoleMode()) 
+		Console_Print("DisableMuzzleFlashLights >> %.f", *result);
 	return true;
 }
+
 bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 	BOOL bDisable = TRUE;
 	uint32_t uiTypeFlags = DisabledSaves::SaveTypeFlags::ALL;
