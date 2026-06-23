@@ -10,7 +10,7 @@ namespace JohnnyPluginData {
 
 	constexpr const char* JG_LOG_PATH = "logs\\JohnnyGuitarNVSE.log";
 
-	constexpr uint32_t JG_VERSION = 528;
+	constexpr uint32_t JG_VERSION = 529;
 
 	constexpr double JG_VERSION_DECIMAL = JG_VERSION / 100.0;
 
