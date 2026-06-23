@@ -221,7 +221,7 @@ public:
 
 typedef EventInformation* EventInfo;
 extern std::mutex eventInfosMutex;
-extern std::vector<EventInfo> EventInfos;
+extern std::vector<EventInfo> kEventInfos;
 
 extern void* __fastcall GenericCreateFilter(void** Filters, uint32_t numFilters);
 
