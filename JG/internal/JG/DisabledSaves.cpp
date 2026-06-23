@@ -19,9 +19,9 @@ namespace DisabledSaves {
 	}
 
 STACK_FRAME_OPT_DISABLE
-	CallDetour kCanSaveNowDetour;
+	HookUtils::CallDetour kCanSaveNowDetour;
 	static bool __fastcall CanSaveNowHook(BGSSaveLoadManager* apThis, void*, bool abAutoSave) {
-		bool bCanSave = ThisCall<bool>(kCanSaveNowDetour.GetOverwrittenAddr(), apThis, abAutoSave);
+		bool bCanSave = ThisCall<bool>(kCanSaveNowDetour, apThis, abAutoSave);
 		if (kSaveBlockers.empty())
 			return bCanSave;
 
@@ -51,9 +51,9 @@ STACK_FRAME_OPT_DISABLE
 		return bCanSave;
 	}
 
-	CallDetour kSaveNowMenuDetour;
+	HookUtils::CallDetour kSaveNowMenuDetour;
 	static bool __fastcall CanSaveNowMenuHook(void* apThis, void*, bool abAutoSave) {
-		bool bCanSave = ThisCall<bool>(kCanSaveNowDetour.GetOverwrittenAddr(), apThis, abAutoSave);
+		bool bCanSave = ThisCall<bool>(kCanSaveNowDetour, apThis, abAutoSave);
 		if (kSaveBlockers.empty())
 			return bCanSave;
 
@@ -64,7 +64,7 @@ STACK_FRAME_OPT_DISABLE
 		return bCanSave;
 	}
 
-	CallDetour kSaveMessageDetour;
+	HookUtils::CallDetour kSaveMessageDetour;
 	static bool __cdecl ShowMessage(const char* apText, uint32_t aeEmotion, const char* apImagePath, const char* apSoundName, float afTime, bool abInstant) {
 		bool bCanSave = CanSave(SaveTypeFlags::QUICK);
 		const char* pText = apText;
@@ -73,7 +73,7 @@ STACK_FRAME_OPT_DISABLE
 			pText = GameSettingCollection::sCantSaveNow->String();
 			pImagePath = reinterpret_cast<const char*>(0x10208A0); // glow_message_vaultboy_sad.
 		}
-		return CdeclCall<bool>(kSaveMessageDetour.GetOverwrittenAddr(), pText, aeEmotion, pImagePath, apSoundName, afTime, abInstant);
+		return CdeclCall<bool>(kSaveMessageDetour, pText, aeEmotion, pImagePath, apSoundName, afTime, abInstant);
 	}
 
 	void Init() {

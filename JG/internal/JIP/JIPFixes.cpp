@@ -59,7 +59,7 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			SafeWrite32(JIPUtils::GetAddress(0x10059A86 + 1), uint32_t(ScriptCompiler_Compile));
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x10059A86 + 1), uint32_t(ScriptCompiler_Compile));
 		}
 
 	}
@@ -75,7 +75,7 @@ namespace JIPFixes {
 				ThisCall(0xA6E960, pControllerManager->m_spObjectPalette.m_pObject);
 		}
 
-		CallDetour kMemPoolFree;
+		HookUtils::CallDetour kMemPoolFree;
 		void __fastcall MemoryPool_Free(void* apBlock, uint32_t auiSize) {
 			char* pData = static_cast<char*>(apBlock);
 			TESForm* pForm = *reinterpret_cast<TESForm**>(pData);
@@ -92,7 +92,7 @@ namespace JIPFixes {
 				}
 			}
 
-			FastCall(kMemPoolFree.GetOverwrittenAddr(), apBlock, auiSize);
+			FastCall(kMemPoolFree, apBlock, auiSize);
 		}
 
 		void InitHooks() {
@@ -300,15 +300,15 @@ namespace JIPFixes {
 		void InitHooks() {
 			const uint32_t uiJIPMessageDurationAddr = JIPUtils::GetAddress(0x1006A1B4);
 			for (uint32_t uiAddress : uiDefaultTimes)
-				SafeWrite32(uiAddress + 2, uiJIPMessageDurationAddr);
+				HookUtils::SafeWrite32(uiAddress + 2, uiJIPMessageDurationAddr);
 
-			SafeWriteBuf(0x70535C, "\x51\xD9\x45\x18\xD9\x1C\x24", 7);
+			HookUtils::SafeWriteBuf(0x70535C, "\x51\xD9\x45\x18\xD9\x1C\x24", 7);
 		}
 	}
 
 	namespace CloseActiveMenuFix {
 		void InitHooks() {
-			SafeWrite8(JIPUtils::GetAddress(0x1003B87B + 1), 0x7A);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1003B87B + 1), 0x7A);
 		}
 	}
 
@@ -336,10 +336,10 @@ namespace JIPFixes {
 
 		void InitHooks() {
 			uiDoFireWeaponAddr = JIPUtils::GetAddress(0x1001B6F0);
-			SafeWrite32(JIPUtils::GetAddress(0x1001B827) + 4, uint32_t(DoFireWeaponExWrapper));
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1001B827) + 4, uint32_t(DoFireWeaponExWrapper));
 
-			PatchMemoryNop(0x523B3F, 8);
-			WriteRelCallEx(0x523B3F, &ActorEx::GetCombatControllerEx);
+			HookUtils::PatchMemoryNop(0x523B3F, 8);
+			HookUtils::WriteRelCall(0x523B3F, &ActorEx::GetCombatControllerEx);
 		}
 	}
 
@@ -381,8 +381,8 @@ namespace JIPFixes {
 		void InitHooks() {
 			uiFailAddr		= JIPUtils::GetAddress(0x1000DF10);
 			uiSuccessAddr	= JIPUtils::GetAddress(0x1000DECA);
-			WriteRelJump(JIPUtils::GetAddress(0x1000DEC2), ConstructItemEntryNameHookFix_Asm);
-			SafeWriteBuf(JIPUtils::GetAddress(0x1000DECC), "\x8D\x30\x90", 3); // Patch to use string from EAX instead of EAX+0x34
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000DEC2), ConstructItemEntryNameHookFix_Asm);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1000DECC), "\x8D\x30\x90", 3); // Patch to use string from EAX instead of EAX+0x34
 		}
 	}
 
@@ -416,8 +416,8 @@ namespace JIPFixes {
 			} conversion;
 			conversion.tgt = target;
 
-			WriteRelCall(source, conversion.funcPtr);
-			PatchMemoryNop(source + 5, NOP_SIZE);
+			HookUtils::WriteRelCall(source, conversion.funcPtr);
+			HookUtils::PatchMemoryNop(source + 5, NOP_SIZE);
 		}
 
 		void InitHooks() {
@@ -434,7 +434,7 @@ namespace JIPFixes {
 			ReplaceVirtualCall<2>(JIPUtils::GetAddress(0x10058927), &Hook::UpdateDownwardPass);
 			ReplaceVirtualCall<2>(JIPUtils::GetAddress(0x10058A7E), &Hook::UpdateDownwardPass);
 
-			ReplaceVirtualFuncEx(JIPUtils::GetAddress(0x100280FE + 1), &Hook::UpdateDownwardPass);
+			HookUtils::ReplaceVirtualFunc(JIPUtils::GetAddress(0x100280FE + 1), &Hook::UpdateDownwardPass);
 		}
 	}
 
@@ -484,32 +484,32 @@ namespace JIPFixes {
 #if 0
 			uiFoundStringAddr = JIPUtils::GetAddress(0x1000CE06);
 			uiNewStringAddr = JIPUtils::GetAddress(0x1000CDDB);
-			WriteRelJump(JIPUtils::GetAddress(0x1000CDD0), CompareFix_Asm);
-			SafeWrite8(0xA5B630, 0xC3);
-			WriteRelJump(0xA5B690, JIPUtils::GetAddress(0x1000CE20));
-			WriteRelJump(0xA5B460, JIPUtils::GetAddress(0x1000CEA0));
-			PatchMemoryNopRange(JIPUtils::GetAddress(0x10012260), JIPUtils::GetAddress(0x1001228D));
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000CDD0), CompareFix_Asm);
+			HookUtils::SafeWrite8(0xA5B630, 0xC3);
+			HookUtils::WriteRelJump(0xA5B690, JIPUtils::GetAddress(0x1000CE20));
+			HookUtils::WriteRelJump(0xA5B460, JIPUtils::GetAddress(0x1000CEA0));
+			HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x10012260), JIPUtils::GetAddress(0x1001228D));
 
-			WriteRelJump(uint32_t(CompareFix_Asm) + 0x1D, uiFoundStringAddr);
-			WriteRelJump(uint32_t(CompareFix_Asm) + 0x29, uiNewStringAddr);
+			HookUtils::WriteRelJump(uint32_t(CompareFix_Asm) + 0x1D, uiFoundStringAddr);
+			HookUtils::WriteRelJump(uint32_t(CompareFix_Asm) + 0x29, uiNewStringAddr);
 
 			constexpr uint32_t BUCKET_SIZE = 4;
 			constexpr uint32_t NEW_BUCKET_COUNT = 8192;
 
-			SafeWrite32(JIPUtils::GetAddress(0x1000CD8E) + 1, NEW_BUCKET_COUNT * BUCKET_SIZE);
-			SafeWrite32(JIPUtils::GetAddress(0x1000CD9A) + 1, NEW_BUCKET_COUNT);
-			SafeWrite32(JIPUtils::GetAddress(0x1000CDBD) + 2, NEW_BUCKET_COUNT - 1);
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1000CD8E) + 1, NEW_BUCKET_COUNT * BUCKET_SIZE);
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1000CD9A) + 1, NEW_BUCKET_COUNT);
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1000CDBD) + 2, NEW_BUCKET_COUNT - 1);
 
-			SafeWrite32(JIPUtils::GetAddress(0x1000CEB4) + 2, NEW_BUCKET_COUNT * BUCKET_SIZE);
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1000CEB4) + 2, NEW_BUCKET_COUNT * BUCKET_SIZE);
 
-			ReplaceCall(JIPUtils::GetAddress(0x1000CD93), StaticAlloc);
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1000CD93), StaticAlloc);
 #endif
 		}
 	}
 
 	namespace PerkEntryFix {
 		void InitHooks() {
-			PatchMemoryNop(JIPUtils::GetAddress(0x1000F3F3), 6);
+			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x1000F3F3), 6);
 		}
 	}
 
@@ -576,7 +576,7 @@ STACK_FRAME_OPT_DISABLE
 			return true;
 		}
 
-		CallDetour kGetResultScript;
+		HookUtils::CallDetour kGetResultScript;
 		class TESTopicInfoEx : public TESTopicInfo {
 		public:
 			enum ResultScriptType : uint32_t {
@@ -603,7 +603,7 @@ STACK_FRAME_OPT_DISABLE
 					}
 				}
 
-				return ThisCall<Script*>(kGetResultScript.GetOverwrittenAddr(), this, aeScript);
+				return ThisCall<Script*>(kGetResultScript, this, aeScript);
 			}
 		};
 
@@ -611,12 +611,12 @@ STACK_FRAME_OPT_DISABLE
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetOnDialogTopicEventHandler));
 			if (pInfo) {
 				pInfo->execute = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
-				SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
+				HookUtils::SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
 
 				if (!abGECK) {
 					OnDialogTopicHandler = JGCreateEvent("OnDialogTopicHandler", 1, 1);
-					kGetResultScript.ReplaceCallEx(0x61F18B, &TESTopicInfoEx::GetResultScript);
-					SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8", 8);
+					kGetResultScript.ReplaceCall(0x61F18B, &TESTopicInfoEx::GetResultScript);
+					HookUtils::SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8", 8);
 				}
 			}
 		}
@@ -656,8 +656,8 @@ STACK_FRAME_OPT_RESET
 				pInfo->execute = Cmd_ClearDeadActors_Execute;
 
 				if (!abGECK) {
-					WriteRelCallEx(JIPUtils::GetAddress(0x10030C38), &HighProcessEx::FadeAndDisable);
-					PatchMemoryNop(JIPUtils::GetAddress(0x10030C3D), 2);
+					HookUtils::WriteRelCall(JIPUtils::GetAddress(0x10030C38), &HighProcessEx::FadeAndDisable);
+					HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x10030C3D), 2);
 				}
 			}
 		}
@@ -796,10 +796,10 @@ STACK_FRAME_OPT_RESET
 		public:
 			AutoLineWidth(uint32_t auiNewWidth) {
 				uiOriginalWidth = *reinterpret_cast<uint32_t*>(LINE_WIDTH_ADDR);
-				SafeWrite32(LINE_WIDTH_ADDR, auiNewWidth);
+				HookUtils::SafeWrite32(LINE_WIDTH_ADDR, auiNewWidth);
 			}
 			~AutoLineWidth() {
-				SafeWrite32(LINE_WIDTH_ADDR, uiOriginalWidth);
+				HookUtils::SafeWrite32(LINE_WIDTH_ADDR, uiOriginalWidth);
 			}
 		};
 
@@ -1073,8 +1073,8 @@ STACK_FRAME_OPT_RESET
 
 	namespace WeaponModEffectsFix {
 		void InitHooks() {
-			PatchMemoryNop(JIPUtils::GetAddress(0x1003DA30), 5);
-			SafeWrite8(JIPUtils::GetAddress(0x1003DA2B + 2), 0xF);
+			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x1003DA30), 5);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1003DA2B + 2), 0xF);
 		}
 	}
 
@@ -1109,31 +1109,31 @@ STACK_FRAME_OPT_DISABLE
 			}
 		}
 
-		CallDetour kRemoveTileFromUpdateList;
+		HookUtils::CallDetour kRemoveTileFromUpdateList;
 		class Hook {
 		public:
 			void CleanupTile(Tile* apTile) {
 				if (pClickedTile == apTile)
 					pClickedTile = INVALID_TILE;
 
-				ThisCall(kRemoveTileFromUpdateList.GetOverwrittenAddr(), this, apTile);
+				ThisCall(kRemoveTileFromUpdateList, this, apTile);
 			}
 		};
 
 		void InitHooks() {
 			uiMenuHandleClickHook = JIPUtils::GetAddress(0x10008570);
-			SafeWrite32(JIPUtils::GetAddress(0x10039C8A) + 1, uint32_t(MenuHandleClickHookDetour));
-			SafeWrite32(JIPUtils::GetAddress(0x1003A008) + 1, uint32_t(MenuHandleClickHookDetour));
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x10039C8A) + 1, uint32_t(MenuHandleClickHookDetour));
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1003A008) + 1, uint32_t(MenuHandleClickHookDetour));
 
-			SafeWriteBuf(JIPUtils::GetAddress(0x10008683), "\x6A\x00\x90");
-			PatchMemoryNop(JIPUtils::GetAddress(0x10008693), 6);
-			WriteRelCall(JIPUtils::GetAddress(0x10008693), CallFunctionAlt);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10008683), "\x6A\x00\x90");
+			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x10008693), 6);
+			HookUtils::WriteRelCall(JIPUtils::GetAddress(0x10008693), CallFunctionAlt);
 
-			WriteRelJump(JIPUtils::GetAddress(0x1000872F), JIPUtils::GetAddress(0x1000873B));
-			PatchMemoryNop(JIPUtils::GetAddress(0x10008791), 6);
-			WriteRelCall(JIPUtils::GetAddress(0x10008791), CallFunctionAlt);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000872F), JIPUtils::GetAddress(0x1000873B));
+			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x10008791), 6);
+			HookUtils::WriteRelCall(JIPUtils::GetAddress(0x10008791), CallFunctionAlt);
 
-			kRemoveTileFromUpdateList.ReplaceCallEx(0x706C98, &Hook::CleanupTile);
+			kRemoveTileFromUpdateList.ReplaceCall(0x706C98, &Hook::CleanupTile);
 		}
 STACK_FRAME_OPT_RESET
 	}
@@ -1195,10 +1195,10 @@ STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			uiReturnAddr = JIPUtils::GetAddress(0x1003BD6C);
-			SafeWrite8(JIPUtils::GetAddress(0x1003BD5A) + 1, 0x3D); // Change reg to EDI
-			SafeWrite8(JIPUtils::GetAddress(0x1003BDB1), 0x90);
-			SafeWrite8(JIPUtils::GetAddress(0x1003BD58) + 1, 0x58);
-			WriteRelJump(JIPUtils::GetAddress(0x1003BD66), GetTileIndex_Asm);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1003BD5A) + 1, 0x3D); // Change reg to EDI
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1003BDB1), 0x90);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1003BD58) + 1, 0x58);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1003BD66), GetTileIndex_Asm);
 		}
 	}
 
@@ -1353,9 +1353,9 @@ STACK_FRAME_OPT_RESET
 		}
 
 		void InitHooks() {
-			SafeWrite32(JIPUtils::GetAddress(0x10004963) + 1, uint32_t(AccumulateScene));
-			ReplaceCall(JIPUtils::GetAddress(0x1002D27D), RenderWater);
-			PatchMemoryNop(JIPUtils::GetAddress(0x10004976), 2);
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x10004963) + 1, uint32_t(AccumulateScene));
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1002D27D), RenderWater);
+			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x10004976), 2);
 		}
 	}
 
@@ -1381,14 +1381,14 @@ STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			uiReturnAddr = JIPUtils::GetAddress(0x10038FA2);
-			WriteRelJump(JIPUtils::GetAddress(0x10038F4A), GetBarterRef_Asm);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10038F4A), GetBarterRef_Asm);
 		}
 	}
 
 	namespace Update3DTweak {
 
 		void InitHooks() {
-			SafeWrite8(JIPUtils::GetAddress(0x1005825F) + 1, 0); // Change priority to critical
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1005825F) + 1, 0); // Change priority to critical
 		}
 	}
 
@@ -1404,7 +1404,7 @@ STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			uiSetItemHealthAddr = JIPUtils::GetAddress(0x1000D520);
-			ReplaceCall(JIPUtils::GetAddress(0x10058476), SetItemHealth);
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10058476), SetItemHealth);
 		}
 	}
 
@@ -1649,14 +1649,14 @@ STACK_FRAME_OPT_RESET
 			uiReturnAddr = JIPUtils::GetAddress(0x10015B43);
 			uiGiveUpAddr = JIPUtils::GetAddress(0x10015560);
 
-			WriteRelJump(JIPUtils::GetAddress(0x10015B3D), SanityCheck_Asm);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10015B3D), SanityCheck_Asm);
 
 			// Fix offset size
-			SafeWrite8(JIPUtils::GetAddress(0x100167EA + 2), 0xC0);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100167EA + 2), 0xC0);
 
 			// Raise current version to 2
-			SafeWrite8(JIPUtils::GetAddress(0x10015B33 + 3), uiJIPExtraDataVersion);
-			SafeWrite8(JIPUtils::GetAddress(0x10016761 + 1), uiJIPExtraDataVersion);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10015B33 + 3), uiJIPExtraDataVersion);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10016761 + 1), uiJIPExtraDataVersion);
 		}
 	}
 
@@ -1716,12 +1716,12 @@ STACK_FRAME_OPT_RESET
 			++pGSMap->uiCount;
 		}
 
-		CallDetour kRegisterGameSetting;
+		HookUtils::CallDetour kRegisterGameSetting;
 		class Hook {
 		public:
 			void RegisterGameSetting(const char* apKey, Setting* apSetting) {
 				AddGameSetting(apSetting);
-				ThisCall(kRegisterGameSetting.GetOverwrittenAddr(), this, apKey, apSetting);
+				ThisCall(kRegisterGameSetting, this, apKey, apSetting);
 			}
 		};
 
@@ -1729,12 +1729,12 @@ STACK_FRAME_OPT_RESET
 			uiHashAddr = JIPUtils::GetAddress(0x100010F0);
 			uiAllocAddr = JIPUtils::GetAddress(0x10003C80);
 
-			PatchMemoryNop(JIPUtils::GetAddress(0x10011B13), 2);
+			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x10011B13), 2);
 
 			pGSMap = reinterpret_cast<SettingsMap*>(JIPUtils::GetAddress(0x1006FF84));
 			InitializeMap();
 
-			kRegisterGameSetting.ReplaceCallEx(0x404E87, &Hook::RegisterGameSetting);
+			kRegisterGameSetting.ReplaceCall(0x404E87, &Hook::RegisterGameSetting);
 		}
 	}
 
@@ -1745,28 +1745,28 @@ STACK_FRAME_OPT_RESET
 		}
 
 		void InitHooks() {
-			ReplaceCall(JIPUtils::GetAddress(0x1000178C), GetEDID);
-			ReplaceCall(JIPUtils::GetAddress(0x10002E25), GetEDID);
-			ReplaceCall(JIPUtils::GetAddress(0x10009ACB), GetEDID);
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1000178C), GetEDID);
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10002E25), GetEDID);
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10009ACB), GetEDID);
 		}
 	}
 
 	namespace SanerWeaponWobbleHook {
 
-		CallDetour kGetGunSpreadDetour;
+		HookUtils::CallDetour kGetGunSpreadDetour;
 		class Hook : public Actor {
 		public:
 			float GetGunSpreadHook(enum SpreadMode aeMode) {
 				if (jipActorFlags2 & 8)
 					return 0.f;
 
-				return ThisCall<float>(kGetGunSpreadDetour.GetOverwrittenAddr(), this, aeMode);
+				return ThisCall<float>(kGetGunSpreadDetour, this, aeMode);
 			}
 		};
 
 		void InitHooks() {
-			PatchMemoryNopRange(JIPUtils::GetAddress(0x1000BA54), JIPUtils::GetAddress(0x1000BA63));
-			kGetGunSpreadDetour.ReplaceCallEx(0x524019, &Hook::GetGunSpreadHook);
+			HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x1000BA54), JIPUtils::GetAddress(0x1000BA63));
+			kGetGunSpreadDetour.ReplaceCall(0x524019, &Hook::GetGunSpreadHook);
 		}
 	}
 
@@ -1791,7 +1791,7 @@ STACK_FRAME_OPT_RESET
 		const char cVersionString[] = "JIP LN version: %.2f + JohnnyGuitar Fixes and Tweaks";
 
 		void InitHooks() {
-			SafeWrite32(JIPUtils::GetAddress(0x1001359D) + 1, size_t(&cVersionString));
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1001359D) + 1, size_t(&cVersionString));
 		}
 
 	}

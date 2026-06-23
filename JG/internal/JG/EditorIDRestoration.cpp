@@ -194,32 +194,32 @@ STACK_FRAME_OPT_RESET
 
 		static void InitHooks() noexcept {
 			// Replace map's function
-			ReplaceVirtualFuncEx(0x101CAC0, &CIFixedStringFormMap::_IsKeysEqual);
+			HookUtils::ReplaceVirtualFunc(0x101CAC0, &CIFixedStringFormMap::_IsKeysEqual);
 
 			// Don't copy strings to the map
 			// This means memory ownership belongs to us (JohnnyExtraData)
 			// Pray no one adds forms into the map without using SetFormEditorID
 			// Why? Memory
-			SafeWrite8(0x483AEA + 1, 0);
+			HookUtils::SafeWrite8(0x483AEA + 1, 0);
 
 			// Increase the bucket count (same as the main form map)
-			SafeWrite32(0x483AEC + 1, 0x2008D);
+			HookUtils::SafeWrite32(0x483AEC + 1, 0x2008D);
 
 			// Skip manual EDID insertion, as we handle it in SetFormEditorID
-			WriteRelJump(0x4679F8, 0x467A84);
+			HookUtils::WriteRelJump(0x4679F8, 0x467A84);
 
 			// Game registers some default forms manually, right after calling SetFormEditorID
 			// SetFormEditorID already registers them in the map, why do it twice?
-			PatchMemoryNop(0x46CA2B, 5); // GameYear
-			PatchMemoryNop(0x46CB0D, 5); // GameMonth
-			PatchMemoryNop(0x46CBEF, 5); // GameDay
-			PatchMemoryNop(0x46CCD1, 5); // GameHour
-			PatchMemoryNop(0x46CDAF, 5); // GameDaysPassed
-			PatchMemoryNop(0x46CE91, 5); // TimeScale
-			PatchMemoryNop(0x46DC77, 5); // PlayCredits
+			HookUtils::PatchMemoryNop(0x46CA2B, 5); // GameYear
+			HookUtils::PatchMemoryNop(0x46CB0D, 5); // GameMonth
+			HookUtils::PatchMemoryNop(0x46CBEF, 5); // GameDay
+			HookUtils::PatchMemoryNop(0x46CCD1, 5); // GameHour
+			HookUtils::PatchMemoryNop(0x46CDAF, 5); // GameDaysPassed
+			HookUtils::PatchMemoryNop(0x46CE91, 5); // TimeScale
+			HookUtils::PatchMemoryNop(0x46DC77, 5); // PlayCredits
 
 			// Same thing for default topics
-			PatchMemoryNop(0x61A243, 5);
+			HookUtils::PatchMemoryNop(0x61A243, 5);
 		}
 
 		static void __fastcall Set(const NiFixedString& arEDID, TESForm* apForm) noexcept {
@@ -331,7 +331,7 @@ STACK_FRAME_OPT_RESET
 		return 0;
 	}
 
-	CallDetour kRemoveFromDataStructures[2];
+	HookUtils::CallDetour kRemoveFromDataStructures[2];
 	class TESFormEx : public TESForm {
 	public:
 		uint32_t hk_GetFormEditorIDLength() const noexcept {
@@ -388,7 +388,7 @@ STACK_FRAME_OPT_RESET
 		// Removes EDIDs from the map when form is marked as temporary, or added to the garbage collector
 		template<uint32_t INDEX>
 		void hk_DetachEditorIDs() noexcept {
-			ThisCall(kRemoveFromDataStructures[INDEX].GetOverwrittenAddr(), this);
+			ThisCall(kRemoveFromDataStructures[INDEX], this);
 			JohnnyExtraData* pData = JohnnyExtraData::Find(this);
 			if (pData) [[likely]]
 				pData->DetachEditorIDs();
@@ -419,10 +419,10 @@ STACK_FRAME_OPT_RESET
 	template<uint32_t VTABLE_ADDR>
 	class CustomSetReplacer {
 	private:
-		static inline VirtFuncDetour kDetour;
+		static inline HookUtils::VirtFuncDetour kDetour;
 
 		bool SetFormEditorID(const char* apEDID) noexcept {
-			const bool bResult = ThisCall<bool>(kDetour.GetOverwrittenAddr(), this, apEDID);
+			const bool bResult = ThisCall<bool>(kDetour, this, apEDID);
 			if (bResult)
 				return reinterpret_cast<TESFormEx*>(this)->hk_SetFormEditorID(apEDID);
 			return bResult;
@@ -430,9 +430,7 @@ STACK_FRAME_OPT_RESET
 
 	public:
 		CustomSetReplacer() noexcept {
-			kDetour.ReplaceVirtualFuncEx(VTABLE_ADDR, &CustomSetReplacer::SetFormEditorID);
-		}
-		~CustomSetReplacer() noexcept {
+			kDetour.ReplaceVirtualFunc(VTABLE_ADDR, &CustomSetReplacer::SetFormEditorID);
 		}
 	};
 
@@ -440,35 +438,35 @@ STACK_FRAME_OPT_RESET
 		Map::InitHooks();
 		IgnoredConflicts::InitializeStrings();
 
-		kRemoveFromDataStructures[0].ReplaceCallEx(0x48449A, &TESFormEx::hk_DetachEditorIDs<0>); // TESForm::SetTemporary
-		kRemoveFromDataStructures[1].ReplaceCallEx(0x8680A4, &TESFormEx::hk_DetachEditorIDs<1>); // GarbageCollector::Add(TESObjectREFR)
+		kRemoveFromDataStructures[0].ReplaceCall(0x48449A, &TESFormEx::hk_DetachEditorIDs<0>); // TESForm::SetTemporary
+		kRemoveFromDataStructures[1].ReplaceCall(0x8680A4, &TESFormEx::hk_DetachEditorIDs<1>); // GarbageCollector::Add(TESObjectREFR)
 
-		WriteRelJump(0x483A00, TESFormEx::hk_GetFormByEditorID); // TESForm::GetFormByEditorID - adds a lock
+		HookUtils::WriteRelJump(0x483A00, TESFormEx::hk_GetFormByEditorID); // TESForm::GetFormByEditorID - adds a lock
 
-		WriteRelJumpEx(0x474CB0, &TESFormEx::hk_GetFormEditorIDLength); // TESForm::GetFormEditorIDLength
+		HookUtils::WriteRelJump(0x474CB0, &TESFormEx::hk_GetFormEditorIDLength); // TESForm::GetFormEditorIDLength
 
-		ReplaceCallEx(0x486903, &TESFormEx::hk_GetFormEditorID); // TESForm::GetFormDetailedString
-		ReplaceCallEx(0x451CBA, &TESFormEx::hk_GetFormEditorID); // TESObjectCELL::GetCellName
-		ReplaceCallEx(0x558796, &TESFormEx::hk_GetFormEditorID); // TESObjectCELL::SaveRenderFailureData
-		ReplaceCallEx(0x55D498, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::GetFormEditorID
-		ReplaceCallEx(0x55D683, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::GetFormDetailedString
-		ReplaceCallEx(0x55DF83, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
-		ReplaceCallEx(0x55E076, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
-		ReplaceCallEx(0x55E0CC, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
-		ReplaceCallEx(0x61DA92, &TESFormEx::hk_GetFormEditorID); // TESTopicInfo::GetFormDetailedString
+		HookUtils::ReplaceCall(0x486903, &TESFormEx::hk_GetFormEditorID); // TESForm::GetFormDetailedString
+		HookUtils::ReplaceCall(0x451CBA, &TESFormEx::hk_GetFormEditorID); // TESObjectCELL::GetCellName
+		HookUtils::ReplaceCall(0x558796, &TESFormEx::hk_GetFormEditorID); // TESObjectCELL::SaveRenderFailureData
+		HookUtils::ReplaceCall(0x55D498, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::GetFormEditorID
+		HookUtils::ReplaceCall(0x55D683, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::GetFormDetailedString
+		HookUtils::ReplaceCall(0x55DF83, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
+		HookUtils::ReplaceCall(0x55E076, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
+		HookUtils::ReplaceCall(0x55E0CC, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
+		HookUtils::ReplaceCall(0x61DA92, &TESFormEx::hk_GetFormEditorID); // TESTopicInfo::GetFormDetailedString
 		
-		ReplaceCallEx(0x71B748, &TESObjectREFREx::GetNameForConsole); // replaces empty string with editor id in selected ref name in console
-		ReplaceCallEx(0x710BFC, &TESObjectREFREx::GetNameForConsole);
+		HookUtils::ReplaceCall(0x71B748, &TESObjectREFREx::GetNameForConsole); // replaces empty string with editor id in selected ref name in console
+		HookUtils::ReplaceCall(0x710BFC, &TESObjectREFREx::GetNameForConsole);
 
-		ReplaceCallEx(0x66FF57, &TESFormEx::hk_SetFormEditorID); // ActorValueInfo::ActorValueInfo
-		ReplaceCallEx(0x58D7BC, &TESFormEx::hk_SetFormEditorID); // BGSDefaultObjectManager::BGSDefaultObjectManager
+		HookUtils::ReplaceCall(0x66FF57, &TESFormEx::hk_SetFormEditorID); // ActorValueInfo::ActorValueInfo
+		HookUtils::ReplaceCall(0x58D7BC, &TESFormEx::hk_SetFormEditorID); // BGSDefaultObjectManager::BGSDefaultObjectManager
 
 		for (uint32_t i = 0; i < ARRAYSIZE(TESForm_Vtables); i++) {
 			if (*reinterpret_cast<uintptr_t*>(TESForm_Vtables[i] + 0x130) == 0x00401280)
-				ReplaceVirtualFuncEx(TESForm_Vtables[i] + 0x130, &TESFormEx::hk_GetFormEditorID);
+				HookUtils::ReplaceVirtualFunc(TESForm_Vtables[i] + 0x130, &TESFormEx::hk_GetFormEditorID);
 
 			if (*reinterpret_cast<uintptr_t*>(TESForm_Vtables[i] + 0x134) == 0x00401290)
-				ReplaceVirtualFuncEx(TESForm_Vtables[i] + 0x134, &TESFormEx::hk_SetFormEditorID);
+				HookUtils::ReplaceVirtualFunc(TESForm_Vtables[i] + 0x134, &TESFormEx::hk_SetFormEditorID);
 		}
 
 		// These forms already have SetFormEditorID that stores EDID in ExtraData, or a member variable

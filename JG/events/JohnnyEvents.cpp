@@ -468,10 +468,10 @@ namespace JohnnyEvents {
 	template <uintptr_t auiAddress>
 	class RadioTuneOnHook {
 	private:
-		static inline CallDetour kDetour;
+		static inline HookUtils::CallDetour kDetour;
 	public:
 		static void  __cdecl Hook(TESObjectACTI* apRef, bool abActive) {
-			CdeclCall(kDetour.GetOverwrittenAddr(), apRef, abActive);
+			CdeclCall(kDetour, apRef, abActive);
 			HandleOnRadioPostSoundAttach(apRef, abActive);
 		}
 
@@ -483,13 +483,13 @@ namespace JohnnyEvents {
 	template <uintptr_t auiAddress>
 	class InputSwitchHook {
 	private:
-		static inline CallDetour kDetour;
+		static inline HookUtils::CallDetour kDetour;
 	public:
 		static void __fastcall Hook(InterfaceManager* apInterfaceManager, void*, Tile* apTarget, int32_t aiType, bool abPlaySounds) {
 			void* pMenuManager = CdeclCall<void*>(0x71E290, true);
 			Menu* pFrontmostMenu = ThisCall<Menu*>(0x720E60, pMenuManager); // MenuManager::GetFrontmostMenu
 			const bool bFireEvent = apInterfaceManager->activeTileAlt != apTarget;
-			ThisCall(kDetour.GetOverwrittenAddr(), apInterfaceManager, apTarget, aiType, abPlaySounds);
+			ThisCall(kDetour, apInterfaceManager, apTarget, aiType, abPlaySounds);
 			if (bFireEvent)
 				HandleInputSwitch(apInterfaceManager, pFrontmostMenu);
 		}
@@ -626,47 +626,47 @@ namespace JohnnyEvents {
 		OnReputationChangeHandler = JGCreateEvent("OnReputationChangeHandler", 3, 1);
 		OnNPCAVChangeHandler = JGCreateEvent("OnNPCActorValueChangeHandler", 4, 2, FilterFormInt::Create);
 
-		WriteRelCall(0x55678A, HandleSeenDataUpdateEvent);
-		WriteRelCall(0x557053, HandleSeenDataUpdateEvent);
-		WriteRelJump(0x89F4A4, OnDyingEventAsm);
-		WriteRelJump(0x60CA24, OnQuestStartStopEventAsm);
-		WriteRelCall(0x572FF1, HandleLimbGoneEvent);
-		WriteRelCall(0x5F5C78, HandleChallengeCompleteEvent);
-		WriteRelCall(0x5F6222, HandleChallengeCompleteEvent);
-		WriteRelCall(0x776010, HandleCrosshairEvent);
-		WriteRelCall(0x60CB5A, HandleQuestFail);
-		WriteRelCall(0x60CA78, HandleQuestComplete);
-		WriteRelCall(0x7D6D73, HandleSettingsUpdate);
-		WriteRelCall(0x5D4E5B, HandleAddPerkEvent);
-		WriteRelCall(0x7865BD, HandleAddPerkEvent);
-		WriteRelCall(0x7E772D, HandleAddPerkEvent);
-		SafeWriteBuf(0x7E7732, "\x0F\x1F\x00");
-		SafeWriteBuf(0x7865C2, "\x0F\x1F\x00");
-		SafeWriteBuf(0x5D4E60, "\x0F\x1F\x00");
-		WriteRelCall(0x5D4F89, HandleRemovePerkEvent);
-		SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00");
-		SafeWrite8(0x60CA29, 0xCC);
-		WriteRelJump(0x66EE50, AVChangeEventAsm);
+		HookUtils::WriteRelCall(0x55678A, HandleSeenDataUpdateEvent);
+		HookUtils::WriteRelCall(0x557053, HandleSeenDataUpdateEvent);
+		HookUtils::WriteRelJump(0x89F4A4, OnDyingEventAsm);
+		HookUtils::WriteRelJump(0x60CA24, OnQuestStartStopEventAsm);
+		HookUtils::WriteRelCall(0x572FF1, HandleLimbGoneEvent);
+		HookUtils::WriteRelCall(0x5F5C78, HandleChallengeCompleteEvent);
+		HookUtils::WriteRelCall(0x5F6222, HandleChallengeCompleteEvent);
+		HookUtils::WriteRelCall(0x776010, HandleCrosshairEvent);
+		HookUtils::WriteRelCall(0x60CB5A, HandleQuestFail);
+		HookUtils::WriteRelCall(0x60CA78, HandleQuestComplete);
+		HookUtils::WriteRelCall(0x7D6D73, HandleSettingsUpdate);
+		HookUtils::WriteRelCall(0x5D4E5B, HandleAddPerkEvent);
+		HookUtils::WriteRelCall(0x7865BD, HandleAddPerkEvent);
+		HookUtils::WriteRelCall(0x7E772D, HandleAddPerkEvent);
+		HookUtils::SafeWriteBuf(0x7E7732, "\x0F\x1F\x00");
+		HookUtils::SafeWriteBuf(0x7865C2, "\x0F\x1F\x00");
+		HookUtils::SafeWriteBuf(0x5D4E60, "\x0F\x1F\x00");
+		HookUtils::WriteRelCall(0x5D4F89, HandleRemovePerkEvent);
+		HookUtils::SafeWriteBuf(0x5D4F8E, "\x0F\x1F\x00");
+		HookUtils::SafeWrite8(0x60CA29, 0xCC);
+		HookUtils::WriteRelJump(0x66EE50, AVChangeEventAsm);
 		// Process Level change: MoveToHigh
-		ReplaceVirtualFunc(0x108AC7C, HandlePLChangeEvent<0x881D30>);
-		ReplaceVirtualFunc(0x10872EC, HandlePLChangeEvent<0x881D30>);
-		ReplaceVirtualFunc(0x1086CAC, HandlePLChangeEvent<0x881D30>);
-		ReplaceVirtualFunc(0x1084494, HandlePLChangeEvent<0x881D30>);
+		HookUtils::ReplaceVirtualFunc(0x108AC7C, HandlePLChangeEvent<0x881D30>);
+		HookUtils::ReplaceVirtualFunc(0x10872EC, HandlePLChangeEvent<0x881D30>);
+		HookUtils::ReplaceVirtualFunc(0x1086CAC, HandlePLChangeEvent<0x881D30>);
+		HookUtils::ReplaceVirtualFunc(0x1084494, HandlePLChangeEvent<0x881D30>);
 		// MoveToLow
-		ReplaceVirtualFunc(0x108AC80, HandlePLChangeEvent<0x882B90>);
-		ReplaceVirtualFunc(0x10872F0, HandlePLChangeEvent<0x882B90>);
-		ReplaceVirtualFunc(0x1086CB0, HandlePLChangeEvent<0x882B90>);
-		ReplaceVirtualFunc(0x1084498, HandlePLChangeEvent<0x882B90>);
+		HookUtils::ReplaceVirtualFunc(0x108AC80, HandlePLChangeEvent<0x882B90>);
+		HookUtils::ReplaceVirtualFunc(0x10872F0, HandlePLChangeEvent<0x882B90>);
+		HookUtils::ReplaceVirtualFunc(0x1086CB0, HandlePLChangeEvent<0x882B90>);
+		HookUtils::ReplaceVirtualFunc(0x1084498, HandlePLChangeEvent<0x882B90>);
 		// MoveToMiddleLow
-		ReplaceVirtualFunc(0x108AC84, HandlePLChangeEvent<0x883240>);
-		ReplaceVirtualFunc(0x10872F4, HandlePLChangeEvent<0x883240>);
-		ReplaceVirtualFunc(0x1086CB4, HandlePLChangeEvent<0x883240>);
-		ReplaceVirtualFunc(0x108449C, HandlePLChangeEvent<0x883240>);
+		HookUtils::ReplaceVirtualFunc(0x108AC84, HandlePLChangeEvent<0x883240>);
+		HookUtils::ReplaceVirtualFunc(0x10872F4, HandlePLChangeEvent<0x883240>);
+		HookUtils::ReplaceVirtualFunc(0x1086CB4, HandlePLChangeEvent<0x883240>);
+		HookUtils::ReplaceVirtualFunc(0x108449C, HandlePLChangeEvent<0x883240>);
 		// MoveToMiddleHigh
-		ReplaceVirtualFunc(0x108AC88, HandlePLChangeEvent<0x883800>);
-		ReplaceVirtualFunc(0x10872F8, HandlePLChangeEvent<0x883800>);
-		ReplaceVirtualFunc(0x1086CB8, HandlePLChangeEvent<0x883800>);
-		ReplaceVirtualFunc(0x10844A0, HandlePLChangeEvent<0x883800>);
+		HookUtils::ReplaceVirtualFunc(0x108AC88, HandlePLChangeEvent<0x883800>);
+		HookUtils::ReplaceVirtualFunc(0x10872F8, HandlePLChangeEvent<0x883800>);
+		HookUtils::ReplaceVirtualFunc(0x1086CB8, HandlePLChangeEvent<0x883800>);
+		HookUtils::ReplaceVirtualFunc(0x10844A0, HandlePLChangeEvent<0x883800>);
 
 		// Keyboard/Controller selection change
 		InputSwitchHook<0x0718059>();
@@ -677,24 +677,24 @@ namespace JohnnyEvents {
 		RadioTuneOnHook<0x579C64>();
 		RadioTuneOnHook<0x57A23A>();
 
-		ReplaceVirtualFunc(0x10763B8, HandleSleepWaitClick);
+		HookUtils::ReplaceVirtualFunc(0x10763B8, HandleSleepWaitClick);
 
 		OnRenderGamePreUpdateHandler = JGCreateEvent("OnRenderGamePreUpdateHandler", 0, 0, nullptr);
-		WriteRelCall(0x943748, HandlePreRenderEvent);
+		HookUtils::WriteRelCall(0x943748, HandlePreRenderEvent);
 		OnRenderGameModeUpdateHandler = JGCreateEvent("OnRenderGameModeUpdateHandler", 0, 0, nullptr);
-		WriteRelCall(0x870244, HandleRenderGameEvent);
+		HookUtils::WriteRelCall(0x870244, HandleRenderGameEvent);
 		OnRenderRenderedMenuUpdateHandler = JGCreateEvent("OnRenderRenderedMenuUpdateHandler", 0, 0, nullptr);
-		WriteRelCall(0x8702A9, HandleRenderMenuEvent);
+		HookUtils::WriteRelCall(0x8702A9, HandleRenderMenuEvent);
 
-		WriteRelCall(0x4CB976, HandleTakeBackItem);
-		WriteRelCall(0x8F24A1, GetExtraDataListHook);
+		HookUtils::WriteRelCall(0x4CB976, HandleTakeBackItem);
+		HookUtils::WriteRelCall(0x8F24A1, GetExtraDataListHook);
 
-		WriteRelCall(0x7630FD, HandleOnNPCResponseEvent);
+		HookUtils::WriteRelCall(0x7630FD, HandleOnNPCResponseEvent);
 
 		//HUDMainMenu::AppendSubtitleData() called by Interface::ShowText()
-		WriteRelCall(0x7052B8, HandleOnGeneralSubtitleEvent);
+		HookUtils::WriteRelCall(0x7052B8, HandleOnGeneralSubtitleEvent);
 
-		ReplaceVirtualFunc(0x104BA6C, HandleOnReputationChangeEvent);
+		HookUtils::ReplaceVirtualFunc(0x104BA6C, HandleOnReputationChangeEvent);
 	}
 
 	void Reset() {

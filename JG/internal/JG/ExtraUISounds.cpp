@@ -35,7 +35,7 @@ namespace ExtraUISounds {
 	}
 
 	void Install() {
-		WriteRelCall(0x77A8E9, (uint32_t)UIUpdateSoundHook);
+		HookUtils::WriteRelCall(0x77A8E9, (uint32_t)UIUpdateSoundHook);
 	}
 
 	void SetSound(TESSound* sound, uint32_t type) {

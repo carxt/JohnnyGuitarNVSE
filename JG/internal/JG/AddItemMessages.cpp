@@ -14,12 +14,12 @@ namespace AddItemMessages {
 	}
 
 	void Install() {
-		SafeWriteBuf(0x482205, "\x0F\x84\x42\x04");
-		PatchMemoryNop(0x4824BA, 5);
-		SafeWriteBuf(0x4824C8, "\x0F\x85\x33\xFD\xFF\xFF");
-		SafeWriteBuf(0x4824D2, "\x0F\x84\x29\xFD\xFF\xFF");
-		SafeWriteBuf(0x4824DE, "\x0F\x85\x1D\xFD\xFF\xFF");
-		WriteRelJump(0x482648, (uintptr_t)MessageLoop_Asm);
+		HookUtils::SafeWriteBuf(0x482205, "\x0F\x84\x42\x04");
+		HookUtils::PatchMemoryNop(0x4824BA, 5);
+		HookUtils::SafeWriteBuf(0x4824C8, "\x0F\x85\x33\xFD\xFF\xFF");
+		HookUtils::SafeWriteBuf(0x4824D2, "\x0F\x84\x29\xFD\xFF\xFF");
+		HookUtils::SafeWriteBuf(0x4824DE, "\x0F\x85\x1D\xFD\xFF\xFF");
+		HookUtils::WriteRelJump(0x482648, (uintptr_t)MessageLoop_Asm);
 	}
 
 }

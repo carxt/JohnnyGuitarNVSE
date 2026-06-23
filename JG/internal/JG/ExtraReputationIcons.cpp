@@ -67,16 +67,16 @@ namespace ExtraReputationIcons {
 
 	void Install() {
 		// SetCustomReputationChangeIcon
-		WriteRelCall(0x6156A2, uint32_t(GetReputationIconHook));
-		WriteRelCall(0x6156FB, uint32_t(GetReputationIconHook));
-		WriteRelCall(0x615B19, uint32_t(GetReputationMessageIconHook));
-		WriteRelCall(0x615C04, uint32_t(GetReputationMessageIconHook));
-		WriteRelCall(0x61610A, uint32_t(GetReputationMessageIconHook));
-		WriteRelCall(0x616203, uint32_t(GetReputationMessageIconHook));
-		WriteRelCall(0x615855, uint32_t(GetReputationMessageIconHook));
-		WriteRelCall(0x61594C, uint32_t(GetReputationMessageIconHook));
-		WriteRelCall(0x615F0B, uint32_t(GetReputationMessageIconHook));
-		WriteRelCall(0x615E06, uint32_t(GetReputationMessageIconHook));
+		HookUtils::WriteRelCall(0x6156A2, uint32_t(GetReputationIconHook));
+		HookUtils::WriteRelCall(0x6156FB, uint32_t(GetReputationIconHook));
+		HookUtils::WriteRelCall(0x615B19, uint32_t(GetReputationMessageIconHook));
+		HookUtils::WriteRelCall(0x615C04, uint32_t(GetReputationMessageIconHook));
+		HookUtils::WriteRelCall(0x61610A, uint32_t(GetReputationMessageIconHook));
+		HookUtils::WriteRelCall(0x616203, uint32_t(GetReputationMessageIconHook));
+		HookUtils::WriteRelCall(0x615855, uint32_t(GetReputationMessageIconHook));
+		HookUtils::WriteRelCall(0x61594C, uint32_t(GetReputationMessageIconHook));
+		HookUtils::WriteRelCall(0x615F0B, uint32_t(GetReputationMessageIconHook));
+		HookUtils::WriteRelCall(0x615E06, uint32_t(GetReputationMessageIconHook));
 	}
 
 	void Set(uint32_t formID, uint32_t tierID, const char* path) {

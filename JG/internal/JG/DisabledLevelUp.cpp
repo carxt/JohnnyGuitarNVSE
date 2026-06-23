@@ -19,7 +19,7 @@ namespace DisabledLevelUp {
 	}
 
 	void Install() {
-		WriteRelJump(0x77D612, uint32_t(LevelUpHook));
+		HookUtils::WriteRelJump(0x77D612, uint32_t(LevelUpHook));
 	}
 	void Reset()
 	{

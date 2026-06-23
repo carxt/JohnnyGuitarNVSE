@@ -15,7 +15,7 @@ namespace DisabledMuzzleFlashLights {
 
 	void Install() {
 		// DisableMuzzleFlashLights
-		WriteRelCall(0x9BAFED, (uint32_t)DisableMuzzleFlashLightsHook);
+		HookUtils::WriteRelCall(0x9BAFED, (uint32_t)DisableMuzzleFlashLightsHook);
 	}
 	void Reset() {
 		disableMuzzleLights = 0; //reset the muzzle hook every time

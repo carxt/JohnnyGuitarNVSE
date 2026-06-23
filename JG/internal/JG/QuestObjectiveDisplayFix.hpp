@@ -28,9 +28,9 @@ namespace QuestObjectiveDisplayFix {
 		QuestObjectiveDisplayHook() {
 			if (*(char*)a_addr == 0xE9) //there's a jump here, so detour it
 			{
-				hPreviousAddressHook = GetRelJumpAddr(a_addr);
+				hPreviousAddressHook = HookUtils::GetRelJumpAddr(a_addr);
 			}
-			WriteRelJump((a_addr), (uintptr_t)Hook);
+			HookUtils::WriteRelJump((a_addr), (uintptr_t)Hook);
 		}
 
 	};

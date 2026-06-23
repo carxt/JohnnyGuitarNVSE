@@ -99,10 +99,10 @@ namespace BarterFilter {
 	template <uintptr_t uiAddress, BarterFilters::FilterType eFilter>
 	class BarterHook {
 	private:
-		static inline CallDetour kDetour;
+		static inline HookUtils::CallDetour kDetour;
 	public:
 		static bool __cdecl FilterHook(ItemChange* apItem) {
-			bool bShouldHide = CdeclCall<bool>(kDetour.GetOverwrittenAddr(), apItem);
+			bool bShouldHide = CdeclCall<bool>(kDetour, apItem);
 			if (bShouldHide || !pBarterFilters)
 				return bShouldHide;
 
@@ -110,7 +110,7 @@ namespace BarterFilter {
 		}
 
 		BarterHook() {
-			kDetour.SafeWrite32(uiAddress + 1, uint32_t(BarterHook::FilterHook));
+			kDetour.SafeWrite32(uiAddress + 1, BarterHook::FilterHook);
 		}
 	};
 

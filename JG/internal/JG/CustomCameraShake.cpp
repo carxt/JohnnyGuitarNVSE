@@ -52,7 +52,7 @@ namespace CustomCameraShake {
 		}
 	}
 	void Hook() {
-		WriteRelCall(0x94BCF6, (uintptr_t)asm_CameraShakeHook);
+		HookUtils::WriteRelCall(0x94BCF6, (uintptr_t)asm_CameraShakeHook);
 	}
 
 }

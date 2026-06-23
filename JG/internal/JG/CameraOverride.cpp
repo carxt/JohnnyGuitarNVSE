@@ -69,11 +69,11 @@ namespace CameraOverride {
 
 	void Install()
 	{
-		WriteRelCall(0x94AD8A, uint32_t(SetCameraTranslateHook));
-		WriteRelCall(0x94AD9D, uint32_t(SetCameraRotateHook));
+		HookUtils::WriteRelCall(0x94AD8A, uint32_t(SetCameraTranslateHook));
+		HookUtils::WriteRelCall(0x94AD9D, uint32_t(SetCameraRotateHook));
 
-		WriteRelCall(0x94BDC2, uint32_t(SetCameraTranslateHook));
-		WriteRelCall(0x94BDD5, uint32_t(SetCameraRotateHook));
+		HookUtils::WriteRelCall(0x94BDC2, uint32_t(SetCameraTranslateHook));
+		HookUtils::WriteRelCall(0x94BDD5, uint32_t(SetCameraRotateHook));
 	}
 
 	void OverridePos(bool override, const NiPoint3& kNewPos)

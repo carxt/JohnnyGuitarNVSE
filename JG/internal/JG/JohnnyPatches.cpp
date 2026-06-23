@@ -234,12 +234,12 @@ namespace JohnnyPatches {
 			RadioSkipOGGWAVPatch::Install();
 		}
 		// for bFixFleeing
-		if (fixFleeing) WriteRelCall(0x8F5FE2, (uint32_t)FleeFixHook);
+		if (fixFleeing) HookUtils::WriteRelCall(0x8F5FE2, (uint32_t)FleeFixHook);
 
 		// for bFixItemStackCount
 		if (fixItemStacks) {
-			WriteRelCall(0x780D11, (uint32_t)DropItemHook);
-			SafeWriteBuf(0x780D11 + 5, "\x90\x90\x90", 3);
+			HookUtils::WriteRelCall(0x780D11, (uint32_t)DropItemHook);
+			HookUtils::SafeWriteBuf(0x780D11 + 5, "\x90\x90\x90", 3);
 		}
 
 		// for b60FPSDuringLoading
@@ -249,32 +249,32 @@ namespace JohnnyPatches {
 			if (fpsLoadScreenPatch <= 0) { fpsLoadScreenPatch = 1; }
 			if (fpsLoadScreenPatch >= 1000) { fpsLoadScreenPatch = 1000; }
 
-			SafeWrite32(0x78D4A4, fpsLoadScreenPatch);
+			HookUtils::SafeWrite32(0x78D4A4, fpsLoadScreenPatch);
 		}
 		// for bFixNPCShootingAngle
-		if (fixNPCShootingAngle) PatchMemoryNop(0x9D13B2, 8);
+		if (fixNPCShootingAngle) HookUtils::PatchMemoryNop(0x9D13B2, 8);
 
 		// for bNoMuzzleFlashCooldown
-		if (noMuzzleFlashCooldown)	SafeWriteBuf(0x9BB6A8, "\x90\x90", 2);
+		if (noMuzzleFlashCooldown)	HookUtils::SafeWriteBuf(0x9BB6A8, "\x90\x90", 2);
 
 		// for bEnableRadioSubtitles
-		if (enableRadioSubtitles) SafeWrite8(0x833876, 0x84);
+		if (enableRadioSubtitles) HookUtils::SafeWrite8(0x833876, 0x84);
 
 		// fix for death topics getting cut off
 		if (fixDeathSounds) {
-			SafeWrite16(0x8EC5C6, 0xBA90);
-			SafeWrite32(0x8EC5C8, (uintptr_t)FixDeathSoundsHook);
+			HookUtils::SafeWrite16(0x8EC5C6, 0xBA90);
+			HookUtils::SafeWrite32(0x8EC5C8, (uintptr_t)FixDeathSoundsHook);
 		}
 		if (patchPainedPlayer) {
-			WriteRelCall(0x936394, (uintptr_t)PatchPlayerPainHook);
-			WriteRelCall(0x936703, (uintptr_t)PatchPlayerPainHook);
+			HookUtils::WriteRelCall(0x936394, (uintptr_t)PatchPlayerPainHook);
+			HookUtils::WriteRelCall(0x936703, (uintptr_t)PatchPlayerPainHook);
 		}
 		// for bRemoveMainMenuMusic
-		if (removeMainMenuMusic) SafeWrite16(0x830109, 0x2574);
+		if (removeMainMenuMusic) HookUtils::SafeWrite16(0x830109, 0x2574);
 
 		if (bDisableDeathResponses) {
-			SafeWrite8(0x098414C, 0x90);
-			WriteRelCall(0x098414D, (uintptr_t)DisableDeathResponsesHook);
+			HookUtils::SafeWrite8(0x098414C, 0x90);
+			HookUtils::WriteRelCall(0x098414D, (uintptr_t)DisableDeathResponsesHook);
 		}
 
 		if (bMultipleAddItemMessages) {
@@ -282,7 +282,7 @@ namespace JohnnyPatches {
 		}
 
 		// WorldToScreen
-		WriteRelJump(0xC5244A, (uint32_t)NiCameraGetAltHook);
+		HookUtils::WriteRelJump(0xC5244A, (uint32_t)NiCameraGetAltHook);
 
 		// ToggleLevelUpMenu
 		DisabledLevelUp::Install();
@@ -295,7 +295,7 @@ namespace JohnnyPatches {
 		ExtraUISounds::Install();
 
 		// DisableCombatMusic
-		WriteRelCall(0x82FC0B, (uint32_t)CombatMusicHook);
+		HookUtils::WriteRelCall(0x82FC0B, (uint32_t)CombatMusicHook);
 
 		// ToggleDisableSaves
 		DisabledSaves::Install();
@@ -310,7 +310,7 @@ namespace JohnnyPatches {
 		RSMBarberHook::Install();
 		BarterFilter::Init();
 
-		WriteRelCall(0x8752F2, uint32_t(SetViewmodelFrustumHook));
+		HookUtils::WriteRelCall(0x8752F2, uint32_t(SetViewmodelFrustumHook));
 
 		MediaLocationControllerOverride::Install();
 
@@ -320,7 +320,7 @@ namespace JohnnyPatches {
 
 		LandRemapping::Install();
 
-		WriteRelCall(0x798BB1, (uint32_t)StopHolotapeSoundHook);
+		HookUtils::WriteRelCall(0x798BB1, (uint32_t)StopHolotapeSoundHook);
 	}
 
 }

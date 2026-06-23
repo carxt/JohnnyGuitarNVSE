@@ -10,7 +10,7 @@ namespace AnimActivationHeight {
 	// So never ever enable "Omit frame pointers", otherwise this will break :)
 	template<uint32_t uiAddress, int32_t iOffset>
 	class Set_Hook {
-		static inline CallDetour kDetour;
+		static inline HookUtils::CallDetour kDetour;
 
 		float GetEyeLevelHook() {
 			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
@@ -19,22 +19,22 @@ namespace AnimActivationHeight {
 
 			fActivationHeight = pRef->GetPos().z - pThis->GetPos().z;
 
-			return ThisCall<float>(kDetour.GetOverwrittenAddr(), this);
+			return ThisCall<float>(kDetour, this);
 		}
 
 	public:
 		Set_Hook() {
-			kDetour.ReplaceCallEx(uiAddress, &Set_Hook::GetEyeLevelHook);
+			kDetour.ReplaceCall(uiAddress, &Set_Hook::GetEyeLevelHook);
 		}
 	};
 
 	template<uint32_t uiAddress>
 	class Reset_Hook {
-		static inline CallDetour kDetour;
+		static inline HookUtils::CallDetour kDetour;
 
 		static void SetUsedItemLevelHook(int32_t aiLevel) {
 			fActivationHeight = 0.f;
-			CdeclCall(kDetour.GetOverwrittenAddr(), aiLevel);
+			CdeclCall(kDetour, aiLevel);
 		}
 
 	public:
