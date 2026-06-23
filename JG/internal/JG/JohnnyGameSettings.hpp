@@ -22,8 +22,8 @@ namespace JohnnyGameSettings {
 
 		CombatLocationHook() {
 			uintptr_t hk_hookPoint = hookCall;
-			hookCall = GetRelJumpAddr(hookCall);
-			WriteRelCall(hk_hookPoint, (uintptr_t)Hook);
+			hookCall = HookUtils::GetRelJumpAddr(hookCall);
+			HookUtils::WriteRelCall(hk_hookPoint, (uintptr_t)Hook);
 		}
 	};
 
@@ -42,8 +42,8 @@ namespace JohnnyGameSettings {
 
 		CombatRangedWeaponRangeHook() {
 			uintptr_t hk_hookPoint = hookCall;
-			hookCall = GetRelJumpAddr(hookCall);
-			WriteRelCall(hk_hookPoint, (uintptr_t)Hook);
+			hookCall = HookUtils::GetRelJumpAddr(hookCall);
+			HookUtils::WriteRelCall(hk_hookPoint, (uintptr_t)Hook);
 		}
 	};
 
@@ -64,8 +64,8 @@ namespace JohnnyGameSettings {
 	public:
 		OverrideEmotionValuesHook() {
 			uintptr_t hk_hookPoint = hookCall;
-			hookCall = GetRelJumpAddr(hookCall);
-			WriteRelCall(hk_hookPoint, (uintptr_t)(Hook));
+			hookCall = HookUtils::GetRelJumpAddr(hookCall);
+			HookUtils::WriteRelCall(hk_hookPoint, (uintptr_t)(Hook));
 		}
 	};
 

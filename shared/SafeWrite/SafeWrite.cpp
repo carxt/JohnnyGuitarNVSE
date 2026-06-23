@@ -3,90 +3,106 @@
 
 STACK_FRAME_OPT_ENABLE
 
-class MemoryUnlock {
-public:
-	MemoryUnlock(SIZE_T _addr, SIZE_T _size = sizeof(SIZE_T)) : addr(_addr), size(_size) {
-		VirtualProtect((void*)addr, size, PAGE_EXECUTE_READWRITE, &oldProtect);
-	}
-	~MemoryUnlock() {
-		VirtualProtect((void*)addr, size, oldProtect, &oldProtect);
+namespace HookUtils {
+
+	MemoryUnlock::MemoryUnlock(uintptr_t addr, uintptr_t size, uint32_t flags) noexcept : _addr(addr), _size(size) {
+		VirtualProtect(reinterpret_cast<void*>(_addr), _size, flags, &_oldProtect);
 	}
 
-private:
-	const SIZE_T addr;
-	const SIZE_T size;
-	SIZE_T oldProtect;
-};
-
-void __fastcall SafeWrite8(SIZE_T addr, SIZE_T data)
-{
-	MemoryUnlock unlock(addr);
-	*((uint8_t*)addr) = data;
-}
-
-void __fastcall SafeWrite16(SIZE_T addr, SIZE_T data)
-{
-	MemoryUnlock unlock(addr);
-	*((uint16_t*)addr) = data;
-}
-
-void __fastcall SafeWrite32(SIZE_T addr, SIZE_T data)
-{
-	MemoryUnlock unlock(addr);
-	*((uint32_t*)addr) = data;
-}
-
-void __fastcall SafeWriteBuf(SIZE_T addr, const void *data, SIZE_T len)
-{
-	MemoryUnlock unlock(addr, len);
-	memcpy((void *)addr, data, len);
-}
-
-void __fastcall WriteRelJump(SIZE_T jumpSrc, SIZE_T jumpTgt)
-{
-	MemoryUnlock unlock(jumpSrc, 5);
-	*((uint8_t*)jumpSrc) = 0xE9;
-	*((uint32_t*)(jumpSrc + 1)) = jumpTgt - jumpSrc - 1 - 4;
-}
-
-void __fastcall WriteRelCall(SIZE_T jumpSrc, SIZE_T jumpTgt)
-{
-	MemoryUnlock unlock(jumpSrc, 5);
-	*((uint8_t*)jumpSrc) = 0xE8;
-	*((uint32_t*)(jumpSrc + 1)) = jumpTgt - jumpSrc - 1 - 4;
-}
-
-void __fastcall ReplaceCall(SIZE_T jumpSrc, SIZE_T jumpTgt)
-{
-	SafeWrite32(jumpSrc + 1, jumpTgt - jumpSrc - 1 - 4);
-}
-
-void __fastcall ReplaceVirtualFunc(SIZE_T jumpSrc, void* jumpTgt) {
-	SafeWrite32(jumpSrc, (SIZE_T)jumpTgt);
-}
-
-void __fastcall WriteRelJnz(SIZE_T jumpSrc, SIZE_T jumpTgt)
-{
-	// jnz rel32
-	SafeWrite16(jumpSrc, 0x850F);
-	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
-}
-
-void __fastcall WriteRelJle(SIZE_T jumpSrc, SIZE_T jumpTgt)
-{
-	// jle rel32
-	SafeWrite16(jumpSrc, 0x8E0F);
-	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
-}
-
-void __fastcall PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
-{
-	{
-		MemoryUnlock unlock(Address, Size);
-		for (SIZE_T i = 0; i < Size; i++)
-			*(volatile BYTE*)(Address + i) = 0x90; //0x90 == opcode for NOP
+	MemoryUnlock::~MemoryUnlock() noexcept {
+		VirtualProtect(reinterpret_cast<void*>(_addr), _size, _oldProtect, &_oldProtect);
 	}
-	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
+
+	template<typename TYPE>
+	inline void __fastcall RawWrite(uintptr_t address, TYPE data) noexcept {
+		*reinterpret_cast<TYPE*>(address) = data;
+	}
+
+	template<uint32_t offset>
+	inline void __fastcall RawWriteRel(uintptr_t address, uintptr_t target) noexcept {
+		*reinterpret_cast<uintptr_t*>(address + offset) = GetRelAddr(address, target, offset);
+	}
+
+	template<typename TYPE>
+	DECLSPEC_NOINLINE void __fastcall SafeWrite(uintptr_t address, TYPE data) noexcept {
+		MemoryUnlock unlock(address, sizeof(TYPE));
+		RawWrite(address, data);
+	}
+
+	template <typename T>
+	DECLSPEC_NOINLINE void __fastcall SafeWriteRel(uintptr_t address, uintptr_t target) noexcept {
+		constexpr uint32_t offset = sizeof(T);
+		MemoryUnlock unlock(address, sizeof(uintptr_t) + offset);
+		RawWriteRel<offset>(address, target);
+	}
+
+	template <typename T>
+	DECLSPEC_NOINLINE void __fastcall SafeWriteRel(uintptr_t address, uintptr_t target, T opcode) noexcept {
+		constexpr uint32_t offset = sizeof(T);
+		MemoryUnlock unlock(address, sizeof(uintptr_t) + offset);
+		RawWrite<T>(address, opcode);
+		RawWriteRel<offset>(address, target);
+	}
+
+	void __fastcall SafeWrite8(uintptr_t address, uint8_t data) noexcept {
+		SafeWrite<uint8_t>(address, data);
+	}
+
+	void __fastcall SafeWrite16(uintptr_t address, uint16_t data) noexcept {
+		SafeWrite<uint16_t>(address, data);
+	}
+
+	void __fastcall SafeWrite32(uintptr_t address, uint32_t data) noexcept {
+		SafeWrite<uint32_t>(address, data);
+	}
+
+	void __fastcall SafeWrite64(uintptr_t address, uint64_t data) noexcept {
+		SafeWrite<uint64_t>(address, data);
+	}
+
+	SPEC_NOINLINE void __fastcall SafeWriteBuf(uintptr_t address, const void* data, uint32_t dataLength) noexcept {
+		MemoryUnlock unlock(address, dataLength);
+		memcpy(reinterpret_cast<void*>(address), data, dataLength);
+	}
+
+	void __fastcall ReplaceCall(uintptr_t address, uintptr_t target) noexcept {
+		SafeWriteRel<uint8_t>(address, target);
+	}
+
+	SPEC_NOINLINE void __fastcall ReplaceVirtualCall(uintptr_t address, uintptr_t target, uint32_t overwriteLength) noexcept {
+		constexpr uint32_t call_length = 5;
+		MemoryUnlock unlock(address, overwriteLength);
+		if (overwriteLength)
+			memset(reinterpret_cast<void*>(address + call_length), 0x90, overwriteLength - call_length);
+
+		RawWrite<uint8_t>(address, 0xE8);
+		RawWriteRel<sizeof(uint8_t)>(address, target);
+	}
+
+	void __fastcall WriteRelCall(uintptr_t address, uintptr_t target) noexcept {
+		SafeWriteRel<uint8_t>(address, target, 0xE8);
+	}
+
+	void __fastcall WriteRelJump(uintptr_t address, uintptr_t target) noexcept {
+		SafeWriteRel<uint8_t>(address, target, 0xE9);
+	}
+
+	void __fastcall WriteRelJnz(uintptr_t address, uintptr_t target) noexcept {
+		SafeWriteRel<uint16_t>(address, target, 0x850F);
+	}
+
+	void __fastcall WriteRelJle(uintptr_t address, uintptr_t target) noexcept {
+		SafeWriteRel<uint16_t>(address, target, 0x8E0F);
+	}
+
+	SPEC_NOINLINE void __fastcall PatchMemoryNop(uintptr_t address, uint32_t size) noexcept {
+		{
+			MemoryUnlock unlock(address, size);
+			memset(reinterpret_cast<void*>(address), 0x90, size);
+		}
+		FlushInstructionCache(GetCurrentProcess(), reinterpret_cast<void*>(address), size);
+	}
+
 }
 
 STACK_FRAME_OPT_RESET

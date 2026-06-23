@@ -46,9 +46,9 @@ namespace RadioSkipOGGWAVPatch {
 	void Install() 
 	{
 
-		WriteRelCall(0x8337F7, (uintptr_t)hk_QueryRadioSkipUpdatePipboy);
-		WriteRelCall(0x8354CC, (uintptr_t)hk_QueryRadioSkipUpdatePlaced);
-		WriteRelCall(0x833680, (uintptr_t)hk_AllowOGGPlayBackFilepath);
+		HookUtils::WriteRelCall(0x8337F7, (uintptr_t)hk_QueryRadioSkipUpdatePipboy);
+		HookUtils::WriteRelCall(0x8354CC, (uintptr_t)hk_QueryRadioSkipUpdatePlaced);
+		HookUtils::WriteRelCall(0x833680, (uintptr_t)hk_AllowOGGPlayBackFilepath);
 
 	}
 

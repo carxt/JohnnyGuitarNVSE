@@ -28,6 +28,6 @@ namespace MediaLocationControllerOverride {
 
 	void Install()
 	{
-		WriteRelCall(0x82FC95, (uint32_t)MLCOverrideHook);
+		HookUtils::WriteRelCall(0x82FC95, (uint32_t)MLCOverrideHook);
 	}
 }

@@ -22,10 +22,10 @@ namespace RSMBarberHook {
 	}
 	void Install() {
 		RSMDestructorOriginal = *((uintptr_t*)0x1075974);
-		SafeWrite32(0x1075974, (uintptr_t)hk_RSMDestroy);
-		WriteRelCall(0x07AD35C, (uintptr_t)hk_BGSHeadPart_IsPlayable);
-		WriteRelCall(0x07AF35B, (uintptr_t)hk_TESHair_IsPlayable);
-		WriteRelCall(0x07B1D4A, (uintptr_t)hk_TESHair_IsPlayable);
+		HookUtils::SafeWrite32(0x1075974, (uintptr_t)hk_RSMDestroy);
+		HookUtils::WriteRelCall(0x07AD35C, (uintptr_t)hk_BGSHeadPart_IsPlayable);
+		HookUtils::WriteRelCall(0x07AF35B, (uintptr_t)hk_TESHair_IsPlayable);
+		HookUtils::WriteRelCall(0x07B1D4A, (uintptr_t)hk_TESHair_IsPlayable);
 
 	}
 	void Reset()

@@ -344,14 +344,14 @@ namespace CameraOverlay {
 	template <uint32_t auiAddress, int32_t aiOffset>
 	class RenderHookDetour {
 	public:
-		static inline CallDetour kDetour;
+		static inline HookUtils::CallDetour kDetour;
 
 		template <int32_t aiOffset>
 		static bool __cdecl RenderHook() {
 			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 			BSRenderedTexture* pTexture = *reinterpret_cast<BSRenderedTexture**>(pEBP + aiOffset);
 			RenderOverlay(pTexture, OverlayTypes::PRE_IMAGESPACE);
-			return CdeclCall<bool>(kDetour.GetOverwrittenAddr());
+			return CdeclCall<bool>(kDetour);
 		}
 
 		RenderHookDetour() {
@@ -359,18 +359,18 @@ namespace CameraOverlay {
 		}	
 	};
 
-	CallDetour kPostISRenderDetour;
+	HookUtils::CallDetour kPostISRenderDetour;
 	bool __cdecl PostISRenderHook() {
 		RenderOverlay(nullptr, OverlayTypes::POST_IMAGESPACE);
-		return CdeclCall<bool>(kPostISRenderDetour.GetOverwrittenAddr());
+		return CdeclCall<bool>(kPostISRenderDetour);
 	}
 
-	CallDetour kRenderUIDetour;
+	HookUtils::CallDetour kRenderUIDetour;
 	class InterfaceRender : public InterfaceManager {
 	public:
 		void RenderUIHook(BSCullingProcess* apCuller, bool abPipboyVisible) {
 			if (BSRenderedTexture::IsOutsideFrame() || Interface::IsLoadingMenuVisible()) [[unlikely]] {
-				ThisCall(kRenderUIDetour.GetOverwrittenAddr(), this, apCuller, abPipboyVisible);
+				ThisCall(kRenderUIDetour, this, apCuller, abPipboyVisible);
 			}
 			else [[likely]] {
 				RenderOverlay(nullptr, OverlayTypes::PRE_INTERFACE);
@@ -379,7 +379,7 @@ namespace CameraOverlay {
 				if (pCursorRoot)
 					pCursorRoot->SetAppCulled(true);
 
-				ThisCall(kRenderUIDetour.GetOverwrittenAddr(), this, apCuller, abPipboyVisible);
+				ThisCall(kRenderUIDetour, this, apCuller, abPipboyVisible);
 
 				RenderOverlay(nullptr, OverlayTypes::POST_INTERFACE);
 
@@ -474,7 +474,7 @@ namespace CameraOverlay {
 		RenderHookDetour<0x87096C, -0x14>(); // PipBoy
 
 		kPostISRenderDetour.ReplaceCall(0x8703F1, PostISRenderHook);
-		kRenderUIDetour.ReplaceCallEx(0x7144D3, &InterfaceRender::RenderUIHook);
+		kRenderUIDetour.ReplaceCall(0x7144D3, &InterfaceRender::RenderUIHook);
 	}
 
 	void Init() {

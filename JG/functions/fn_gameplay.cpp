@@ -966,13 +966,13 @@ bool Cmd_IsCompassHostile_Execute(COMMAND_ARGS) {
 }
 
 void RestoreDisabledPlayerControlsHUDFlags() {
-	SafeWrite32(0x771A53, HUDMainMenu::kXpMeter | HUDMainMenu::kSubtitles | HUDMainMenu::kMessages | HUDMainMenu::kQuestReminder | HUDMainMenu::kRadiationMeter);
+	HookUtils::SafeWrite32(0x771A53, HUDMainMenu::kXpMeter | HUDMainMenu::kSubtitles | HUDMainMenu::kMessages | HUDMainMenu::kQuestReminder | HUDMainMenu::kRadiationMeter);
 }
 
 bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
 	uint32_t flags;
 	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &flags)) {
-		SafeWrite32(0x771A53, flags);
+		HookUtils::SafeWrite32(0x771A53, flags);
 		HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
 	}
 	else {

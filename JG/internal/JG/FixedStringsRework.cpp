@@ -456,18 +456,18 @@ namespace FixedStringsRework {
 		static void Init() {
 
 #ifdef GAME
-			SafeWrite8(0xA5B630, 0xC3);
-			WriteRelJump(0xA5B690, Hooks::GetFixedString);
-			WriteRelJump(0xA5B460, Hooks::FreeUnusedFixedStrings);
+			HookUtils::SafeWrite8(0xA5B630, 0xC3);
+			HookUtils::WriteRelJump(0xA5B690, Hooks::GetFixedString);
+			HookUtils::WriteRelJump(0xA5B460, Hooks::FreeUnusedFixedStrings);
 #else
-			SafeWrite8(0x81B060, 0xC3);
-			WriteRelJump(0x81B0C0, Hooks::GetFixedString);
-			WriteRelJump(0x81AF10, Hooks::FreeUnusedFixedStrings);
+			HookUtils::SafeWrite8(0x81B060, 0xC3);
+			HookUtils::WriteRelJump(0x81B0C0, Hooks::GetFixedString);
+			HookUtils::WriteRelJump(0x81AF10, Hooks::FreeUnusedFixedStrings);
 #endif
 
 			if (JIPUtils::IsValid()) {
-				PatchMemoryNopRange(JIPUtils::GetAddress(0x10012260), JIPUtils::GetAddress(0x1001228D));
-				WriteRelJump(JIPUtils::GetAddress(0x1000CE20), Hooks::GetFixedString);
+				HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x10012260), JIPUtils::GetAddress(0x1001228D));
+				HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000CE20), Hooks::GetFixedString);
 			}
 		}
 	}

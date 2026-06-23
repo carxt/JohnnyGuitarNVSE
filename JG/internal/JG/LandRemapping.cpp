@@ -181,13 +181,13 @@ namespace LandRemapping {
 	}
 
 	void Install() {
-		ReplaceCallEx(0x534BA8, &Hooks::IsRemapped);
-		ReplaceCallEx(0x535D75, &Hooks::IsRemapped);
-		ReplaceCallEx(0x535C2D, &Hooks::IsRemapped);
-		ReplaceCallEx(0x535FD6, &Hooks::IsRemapped);
-		ReplaceCallEx(0x535E22, &Hooks::GetRemapWorld);
-		ReplaceCallEx(0x535E4A, &Hooks::GetRemapX);
-		ReplaceCallEx(0x535E3E, &Hooks::GetRemapY);
+		HookUtils::ReplaceCall(0x534BA8, &Hooks::IsRemapped);
+		HookUtils::ReplaceCall(0x535D75, &Hooks::IsRemapped);
+		HookUtils::ReplaceCall(0x535C2D, &Hooks::IsRemapped);
+		HookUtils::ReplaceCall(0x535FD6, &Hooks::IsRemapped);
+		HookUtils::ReplaceCall(0x535E22, &Hooks::GetRemapWorld);
+		HookUtils::ReplaceCall(0x535E4A, &Hooks::GetRemapX);
+		HookUtils::ReplaceCall(0x535E3E, &Hooks::GetRemapY);
 	}
 
 	void Reset() {
