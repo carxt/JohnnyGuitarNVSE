@@ -1,33 +1,32 @@
 #include "MediaLocationControllerOverride.hpp"
-#include <GameObjects.h>
+
+class PlayerCharacter;
 
 namespace MediaLocationControllerOverride {
 
-	bool mlcOverridden = false;
-	MediaLocationController* mlcOverride = nullptr;
+	bool bOverrideActive = false;
+	MediaLocationController* pOverrideController = nullptr;
 
-	MediaLocationController* __fastcall MLCOverrideHook(PlayerCharacter* player)
-	{
-		if (mlcOverridden)
-		{
-			return mlcOverride;
-		}
-		return ThisCall<MediaLocationController*>(0x9698A0, player);
+	HookUtils::CallDetour kDetour;
+	MediaLocationController* __fastcall GetMediaLocationControllerHook(PlayerCharacter* apPlayer) {
+		if (bOverrideActive)
+			return pOverrideController;
+		return ThisCall<MediaLocationController*>(kDetour, apPlayer);
 
 	}
 
 	void Reset() {
-		mlcOverridden = false;
-		mlcOverride = nullptr;
+		bOverrideActive = false;
+		pOverrideController = nullptr;
 	}
 
-	void Set(MediaLocationController* newMLC) {
-		mlcOverridden = true;
-		mlcOverride = newMLC;
+	void Set(MediaLocationController* apController) {
+		bOverrideActive = true;
+		pOverrideController = apController;
 	}
 
-	void Install()
-	{
-		HookUtils::WriteRelCall(0x82FC95, (uint32_t)MLCOverrideHook);
+	void Install() {
+		kDetour.ReplaceCall(0x82FC95, GetMediaLocationControllerHook);
 	}
+
 }

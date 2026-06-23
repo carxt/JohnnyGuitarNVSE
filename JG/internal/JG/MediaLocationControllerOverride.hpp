@@ -1,8 +1,13 @@
 #pragma once
-#include "GameForms.h"
+
+class MediaLocationController;
 
 namespace MediaLocationControllerOverride {
+
 	void Install();
+
 	void Reset();
-	void Set(MediaLocationController* ctrl);
+
+	void Set(MediaLocationController* apController);
+
 }
