@@ -40,7 +40,7 @@ namespace JohnnyGameSettings {
 		static inline HookUtils::CallDetour kDetour;
 
 		static float __cdecl Hook(float afLeft, float afRight) {
-			float fValue = CdeclCall<float>(kDetour.GetOverwrittenAddr(), afLeft, afRight);
+			float fValue = CdeclCall<float>(kDetour, afLeft, afRight);
 			return std::max(fValue, fCombatLocationTargetRadiusMaxBase.Float());
 		}
 
@@ -56,7 +56,7 @@ namespace JohnnyGameSettings {
 		static inline HookUtils::CallDetour kDetour;
 
 		static float __fastcall Hook(TESObjectWEAP* apWeapon) {
-			float fMaxRange = ThisCall<float>(kDetour.GetOverwrittenAddr(), apWeapon);
+			float fMaxRange = ThisCall<float>(kDetour, apWeapon);
 			if (!apWeapon->IsFixedRange() && apWeapon->IsRangedWeapon())
 				fMaxRange *= fCombatRangedWeaponRangeBaseMult.Float();
 			return fMaxRange;
@@ -74,7 +74,7 @@ namespace JohnnyGameSettings {
 		static inline HookUtils::CallDetour kDetour;
 
 		static void __fastcall Hook(void* apTimer, float afValue) {
-			ThisCall<float>(kDetour.GetOverwrittenAddr(), apTimer, rSetting.Float());
+			ThisCall<float>(kDetour, apTimer, rSetting.Float());
 		}
 
 	public:
@@ -88,7 +88,7 @@ namespace JohnnyGameSettings {
 		static inline HookUtils::CallDetour kDetour;
 
 		static uint32_t __fastcall Hook(void* apResponse) {
-			uint32_t eEmotionType = ThisCall<uint32_t>(kDetour.GetOverwrittenAddr(), apResponse);
+			uint32_t eEmotionType = ThisCall<uint32_t>(kDetour, apResponse);
 			if (iOverrideDialogueEmotionValues.Int() <= 0)
 				eEmotionType = 0;
 
@@ -185,7 +185,7 @@ namespace JohnnyGameSettings {
 
 	HookUtils::CallDetour kHavokInitDetour;
 	void __cdecl DeferredHavokInitHook() {
-		CdeclCall(kHavokInitDetour.GetOverwrittenAddr());
+		CdeclCall(kHavokInitDetour);
 
 		// The reason we are only setting values is because game already has globals for them
 		// and in order to not confuse other engine modders, it's better this way
