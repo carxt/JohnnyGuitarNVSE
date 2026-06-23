@@ -469,8 +469,12 @@
     <ClCompile Include="internal\JG\JohnnyCommands.cpp">
       <Filter>internal\JG\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameProcess.cpp" />
-    <ClCompile Include="internal\JG\AnimActivationHeight.cpp" />
+    <ClCompile Include="internal\JG\AnimActivationHeight.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\nvse\nvse\GameProcess.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
