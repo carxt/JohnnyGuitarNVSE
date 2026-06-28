@@ -38,7 +38,6 @@ public:
 	//static Tile::Value *		GetMenuComponentValue(const char * componentPath);
 	//static Tile *				GetMenuComponentTile(const char * componentPath);
 
-	uint32_t GetTopVisibleMenuID();
 	Tile* GetActiveTile();
 	VATSHighlightData* GetVATSHighlightData() {
 		return ThisCall<VATSHighlightData*>(0x602170, this);
@@ -175,6 +174,10 @@ public:
 
 	static bool IsLoadingMenuVisible() {
 		return CdeclCall<bool>(0x705E80);
+	}
+
+	static uint32_t GetTopMenuID() {
+		return CdeclCall<uint32_t>(0x7023C0);
 	}
 };
 

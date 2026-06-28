@@ -401,86 +401,86 @@ bool Cmd_ClearWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
-
 	*result = -1;
-	uint32_t rightSide = 0;
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &rightSide)) {
+	if (!InterfaceManager::GetSingleton())
+		return true;
 
-		InterfaceManager* interfaceMgr = InterfaceManager::GetSingleton();
-		if (!interfaceMgr) return true;
-
+	BOOL bRightSide = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bRightSide)) {
 		// Find listbox
-		ListBox<ItemChange>* entryList;
-		switch (interfaceMgr->GetTopVisibleMenuID())
-		{
+		const ListBox<ItemChange>* pListBox = nullptr;
+		switch (Interface::GetTopMenuID()) {
 			case kMenuType_Inventory:
-				entryList = &InventoryMenu::GetSingleton()->itemList;
+				pListBox = &InventoryMenu::GetSingleton()->itemList;
 				break;
 			case kMenuType_Container:
 			{
-				ContainerMenu* cntMenu = ContainerMenu::GetSingleton();
-				entryList = rightSide ? &cntMenu->rightItems : &cntMenu->leftItems;
+				const ContainerMenu* pMenu = ContainerMenu::GetSingleton();
+				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
 			case kMenuType_Repair:
-				entryList = &RepairMenu::GetSingleton()->repairItems;
+				pListBox = &RepairMenu::GetSingleton()->repairItems;
 				break;
 			case kMenuType_Barter:
 			{
-				BarterMenu* brtMenu = BarterMenu::GetSingleton();
-				entryList = rightSide ? &brtMenu->rightItems : &brtMenu->leftItems;
+				const BarterMenu* pMenu = BarterMenu::GetSingleton();
+				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
 			case kMenuType_RepairServices:
-				entryList = &RepairServicesMenu::GetSingleton()->itemList;
+				pListBox = &RepairServicesMenu::GetSingleton()->itemList;
 				break;
 			default:
 				return true;
 		}
 
-		InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
-		if (!invRef) return true;
+		InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
+		if (!pInvRef)
+			return true;
 
-		for (auto iter = entryList->GetHead(); iter; iter = iter->GetNext()) {
-			auto listItem = iter->GetItem();
+		for (auto pIter = pListBox->GetHead(); pIter && !pIter->IsEmpty(); pIter = pIter->GetNext()) {
+			auto pItem = pIter->GetItem();
 
-			if (listItem && listItem->tile && listItem->object) {
-				ItemChange* listItemChange = listItem->object;
+			if (pItem && pItem->tile && pItem->object) {
+				const ItemChange* pItemChange = pItem->object;
 
-				if (listItemChange->pObject == invRef->data.type) {
-					bool isMatch = false;
+				if (pItemChange->pObject != pInvRef->data.type)
+					continue;
 
-					// Does extra data match
-					if (invRef->data.xData) {
-						if (listItemChange->pExtraLists && listItemChange->pExtraLists->IsInList(invRef->data.xData))
-							isMatch = true;
+				bool bMatched = false;
+
+				// Does extra data match
+				if (pInvRef->data.xData) {
+					if (pItemChange->pExtraLists && pItemChange->pExtraLists->IsInList(pInvRef->data.xData))
+						bMatched = true;
+				}
+
+				// No extra data
+				else if (!pItemChange->pExtraLists || pItemChange->pExtraLists->IsEmpty())
+					bMatched = true;
+
+				// Find matching tile index
+				if (!bMatched)
+					continue;
+
+				const Tile* pEntryTile = pItem->tile;
+				const Tile* pParent = pEntryTile->parent;
+				if (!pParent) [[unlikely]]
+					continue;
+
+				auto kIter = pParent->children.GetHeadPos();
+				uint32_t uiIndex = 0;
+				while (kIter) {
+					Tile* pChild = pParent->children.GetNext(kIter);
+					if (pChild == pEntryTile) {
+						*result = uiIndex;
+						if (IsConsoleMode())
+							Console_Print("GetMenuItemListIndex >> %d", uiIndex);
+						return true;
 					}
-
-					// No extra data
-					else if (!listItemChange->pExtraLists || listItemChange->pExtraLists->IsEmpty())
-						isMatch = true;
-
-					// Find matching tile index
-					if (isMatch) {
-						Tile* pEntryTile = listItem->tile;
-						Tile* pParent = pEntryTile->parent;
-						if (pParent) [[likely]] {
-							auto kIter = pParent->children.Head();
-							uint32_t uiIndex = 0;
-							while (kIter) {
-								Tile* pChild = kIter->data;
-								kIter = kIter->next;
-								if (pChild == pEntryTile)
-								{
-									*result = uiIndex;
-									if (IsConsoleMode()) Console_Print("GetMenuItemListIndex >> %d", uiIndex);
-									return true;
-								}
-								++uiIndex;
-							}
-						}
-					}
+					++uiIndex;
 				}
 			}
 		}
@@ -489,52 +489,50 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SelectMenuItemListIndex_Execute(COMMAND_ARGS) {
+	*result = 0;
 
-	uint32_t tileIndex = 0;
-	uint32_t rightSide = 0;
+	if (!InterfaceManager::GetSingleton())
+		return true;
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tileIndex, &rightSide)) {
-
-		InterfaceManager* interfaceMgr = InterfaceManager::GetSingleton();
-		if (!interfaceMgr) return true;
-
+	uint32_t uiTileIndex = 0;
+	BOOL bRightSide = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiTileIndex, &bRightSide)) {
 		// Find listbox
-		ListBox<ItemChange>* entryList;
-		switch (interfaceMgr->GetTopVisibleMenuID())
+		ListBox<ItemChange>* pListBox = nullptr;
+		switch (Interface::GetTopMenuID())
 		{
 			case kMenuType_Inventory:
-				entryList = &InventoryMenu::GetSingleton()->itemList;
+				pListBox = &InventoryMenu::GetSingleton()->itemList;
 				break;
 			case kMenuType_Container:
 			{
-				ContainerMenu* cntMenu = ContainerMenu::GetSingleton();
-				entryList = rightSide ? &cntMenu->rightItems : &cntMenu->leftItems;
+				ContainerMenu* pMenu = ContainerMenu::GetSingleton();
+				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
 			case kMenuType_Repair:
-				entryList = &RepairMenu::GetSingleton()->repairItems;
+				pListBox = &RepairMenu::GetSingleton()->repairItems;
 				break;
 			case kMenuType_Barter:
 			{
-				BarterMenu* brtMenu = BarterMenu::GetSingleton();
-				entryList = rightSide ? &brtMenu->rightItems : &brtMenu->leftItems;
+				BarterMenu* pMenu = BarterMenu::GetSingleton();
+				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
 			case kMenuType_RepairServices:
-				entryList = &RepairServicesMenu::GetSingleton()->itemList;
+				pListBox = &RepairServicesMenu::GetSingleton()->itemList;
 				break;
 			default:
 				return true;
 		}
 
 		// Select tile
-		if (tileIndex < entryList->itemCount) {
-			Tile* tile = entryList->GetNthTile(tileIndex);
-			entryList->SetSelectedTile(tile);
-			entryList->ScrollToHighlight();
+		if (uiTileIndex < pListBox->itemCount) {
+			Tile* tile = pListBox->GetNthTile(uiTileIndex);
+			pListBox->SetSelectedTile(tile);
+			pListBox->ScrollToHighlight();
 			*result = 1;
 		}
-
 	}
 	return true;
 }

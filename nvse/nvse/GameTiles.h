@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nvse/GameTypes.h"
+#include "Gamebryo/NiTList.hpp"
 
 typedef uint32_t(*_TraitNameToID)(const char* traitName);
 extern const _TraitNameToID TraitNameToID;
@@ -247,7 +248,7 @@ public:
 		void SetString(const char* strVal, bool bPropagate = true);
 	};
 
-	DList<Tile>					children;		// 04
+	NiTList<Tile*>				children;		// 04
 	BSSimpleArray<Value*>		values;			// 10
 	BSString						name;			// 20
 	Tile* parent;		// 28
