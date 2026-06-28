@@ -10,6 +10,8 @@
 #include <JG/ExtraReputationIcons.hpp>
 #include <JG/ExtraMarkerIcons.hpp>
 
+extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 	if (PlayerCharacter::GetSingleton()) {
 		auto headNode = PlayerCharacter::GetSingleton()->questObjectiveList.Head();
@@ -73,7 +75,7 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
-	
+
 	BGSListForm* formList = nullptr;
 	uint32_t flags = 0;
 	if (!PlayerCharacter::GetSingleton()) return true;
@@ -260,22 +262,22 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	else {
 		ExtraMarkerIcons::SetMapMarkerIcon(form, iconPath);
 	}
-	if (IsConsoleMode()) 
+	if (IsConsoleMode())
 		Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->GetFormID(), iconPath);
 	return true;
 }
 
 bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
-	if (!thisObj || (!thisObj->IsReference() || !thisObj->IsMapMarker())) 
+	if (!thisObj || (!thisObj->IsReference() || !thisObj->IsMapMarker()))
 		return true;
 
 	ExtraMapMarker* mapMarkerExtra = thisObj->extraDataList.GetExtraData<ExtraMapMarker>();
 	if (!mapMarkerExtra || !mapMarkerExtra->pData)
 		return true;
-	
+
 	const char* resStr = ExtraMarkerIcons::GetMapMarker(thisObj, mapMarkerExtra->pData->usType);
 	g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
-	if (IsConsoleMode()) 
+	if (IsConsoleMode())
 		Console_Print("GetCustomMapMarkerIcon >> %s", resStr);
 	return true;
 }
@@ -394,5 +396,145 @@ bool Cmd_ToggleWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 bool Cmd_ClearWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 	Interface::SetGunScopeVisible(false);
 	Interface::ClearGunScope();
+	return true;
+}
+
+
+bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
+
+	*result = -1;
+	uint32_t rightSide = 0;
+
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &rightSide)) {
+
+		InterfaceManager* interfaceMgr = InterfaceManager::GetSingleton();
+		if (!interfaceMgr) return true;
+
+		// Find listbox
+		ListBox<ItemChange>* entryList;
+		switch (interfaceMgr->GetTopVisibleMenuID())
+		{
+			case kMenuType_Inventory:
+				entryList = &InventoryMenu::GetSingleton()->itemList;
+				break;
+			case kMenuType_Container:
+			{
+				ContainerMenu* cntMenu = ContainerMenu::GetSingleton();
+				entryList = rightSide ? &cntMenu->rightItems : &cntMenu->leftItems;
+				break;
+			}
+			case kMenuType_Repair:
+				entryList = &RepairMenu::GetSingleton()->repairItems;
+				break;
+			case kMenuType_Barter:
+			{
+				BarterMenu* brtMenu = BarterMenu::GetSingleton();
+				entryList = rightSide ? &brtMenu->rightItems : &brtMenu->leftItems;
+				break;
+			}
+			case kMenuType_RepairServices:
+				entryList = &RepairServicesMenu::GetSingleton()->itemList;
+				break;
+			default:
+				return true;
+		}
+
+		InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
+		if (!invRef) return true;
+
+		for (auto iter = entryList->GetHead(); iter; iter = iter->GetNext()) {
+			auto listItem = iter->GetItem();
+
+			if (listItem && listItem->tile && listItem->object) {
+				ItemChange* listItemChange = listItem->object;
+
+				if (listItemChange->pObject == invRef->data.type) {
+					bool isMatch = false;
+
+					// Does extra data match
+					if (invRef->data.xData) {
+						if (listItemChange->pExtraLists && listItemChange->pExtraLists->IsInList(invRef->data.xData))
+							isMatch = true;
+					}
+
+					// No extra data
+					else if (!listItemChange->pExtraLists || listItemChange->pExtraLists->IsEmpty())
+						isMatch = true;
+
+					// Find matching tile index
+					if (isMatch) {
+						Tile* pEntryTile = listItem->tile;
+						Tile* pParent = pEntryTile->parent;
+						if (pParent) [[likely]] {
+							auto kIter = pParent->children.Head();
+							uint32_t uiIndex = 0;
+							while (kIter) {
+								Tile* pChild = kIter->data;
+								kIter = kIter->next;
+								if (pChild == pEntryTile)
+								{
+									*result = uiIndex;
+									if (IsConsoleMode()) Console_Print("GetMenuItemListIndex >> %d", uiIndex);
+									return true;
+								}
+								++uiIndex;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return true;
+}
+
+bool Cmd_SelectMenuItemListIndex_Execute(COMMAND_ARGS) {
+
+	uint32_t tileIndex = 0;
+	uint32_t rightSide = 0;
+
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tileIndex, &rightSide)) {
+
+		InterfaceManager* interfaceMgr = InterfaceManager::GetSingleton();
+		if (!interfaceMgr) return true;
+
+		// Find listbox
+		ListBox<ItemChange>* entryList;
+		switch (interfaceMgr->GetTopVisibleMenuID())
+		{
+			case kMenuType_Inventory:
+				entryList = &InventoryMenu::GetSingleton()->itemList;
+				break;
+			case kMenuType_Container:
+			{
+				ContainerMenu* cntMenu = ContainerMenu::GetSingleton();
+				entryList = rightSide ? &cntMenu->rightItems : &cntMenu->leftItems;
+				break;
+			}
+			case kMenuType_Repair:
+				entryList = &RepairMenu::GetSingleton()->repairItems;
+				break;
+			case kMenuType_Barter:
+			{
+				BarterMenu* brtMenu = BarterMenu::GetSingleton();
+				entryList = rightSide ? &brtMenu->rightItems : &brtMenu->leftItems;
+				break;
+			}
+			case kMenuType_RepairServices:
+				entryList = &RepairServicesMenu::GetSingleton()->itemList;
+				break;
+			default:
+				return true;
+		}
+
+		// Select tile
+		if (tileIndex < entryList->itemCount) {
+			Tile* tile = entryList->GetNthTile(tileIndex);
+			entryList->SetSelectedTile(tile);
+			entryList->ScrollToHighlight();
+			*result = 1;
+		}
+
+	}
 	return true;
 }

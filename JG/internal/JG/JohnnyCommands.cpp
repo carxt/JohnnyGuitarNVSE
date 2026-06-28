@@ -430,6 +430,8 @@ namespace JohnnyCommands {
 		REG_CMD(IsCarryable);
 		REG_CMD(PickIdleEx);
 		REG_CMD(GetUsedItemHeight);
+		REG_CMD(GetMenuItemListIndex);
+		REG_CMD(SelectMenuItemListIndex);
 	}
 
 }
