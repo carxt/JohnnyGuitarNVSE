@@ -1434,7 +1434,7 @@ STACK_FRAME_OPT_RESET
 		}
 
 		void InitHooks() {
-			WriteRelJump(JIPUtils::GetAddress(0x1000DD40), GetModFlags);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000DD40), GetModFlags);
 		}
 	}
 
@@ -1692,8 +1692,8 @@ STACK_FRAME_OPT_RESET
 	namespace VanillaExtraDataGetter {
 
 		void InitHooks() {
-			WriteRelJump(JIPUtils::GetAddress(0x100573D0), 0x410220);
-			WriteRelJump(JIPUtils::GetAddress(0x10057580), 0x419AD0);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100573D0), 0x410220);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10057580), 0x419AD0);
 		}
 	}
 
@@ -1738,7 +1738,7 @@ STACK_FRAME_OPT_RESET
 		}
 
 		void InitHooks() {
-			WriteRelJump(JIPUtils::GetAddress(0x1000DC20), ClearHotkey);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000DC20), ClearHotkey);
 		}
 	}
 
@@ -1807,7 +1807,7 @@ STACK_FRAME_OPT_RESET
 		};
 
 		void InitHooks() {
-			WriteRelJumpEx(JIPUtils::GetAddress(0x10058500), &Hook::RemoveItemTarget);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10058500), &Hook::RemoveItemTarget);
 		}
 	}
 
