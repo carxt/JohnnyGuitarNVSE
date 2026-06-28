@@ -38,7 +38,6 @@ public:
 	//static Tile::Value *		GetMenuComponentValue(const char * componentPath);
 	//static Tile *				GetMenuComponentTile(const char * componentPath);
 
-	uint32_t GetTopVisibleMenuID();
 	Tile* GetActiveTile();
 	VATSHighlightData* GetVATSHighlightData() {
 		return ThisCall<VATSHighlightData*>(0x602170, this);
@@ -175,6 +174,10 @@ public:
 
 	static bool IsLoadingMenuVisible() {
 		return CdeclCall<bool>(0x705E80);
+	}
+
+	static uint32_t GetTopMenuID() {
+		return CdeclCall<uint32_t>(0x7023C0);
 	}
 };
 
@@ -745,7 +748,7 @@ public:
 	HotKeysWheel				kHotKeyWheel;		// 0E8
 	uint32_t				unk10C[2];		// 10C
 
-	static InventoryMenu* GetInstance() {
+	static InventoryMenu* GetSingleton() {
 		return *reinterpret_cast<InventoryMenu**>(0x11D9EA4);
 	}
 };
@@ -1181,6 +1184,10 @@ public:
 	MenuItemEntryList	rightItems;		// 0C8
 	MenuItemEntryList* currentItems;	// 0F8
 	uint32_t				unk0FC[4];		// 0FC
+
+	static ContainerMenu* GetSingleton() {
+		return *reinterpret_cast<ContainerMenu**>(0x11D93F8);
+	}
 };
 static_assert(sizeof(ContainerMenu) == 0x10C);
 
@@ -1408,6 +1415,10 @@ public:
 	TileImage* tile54;		// 54
 	TileImage* tile58;		// 58
 	MenuItemEntryList		repairItems;	// 5C
+
+	static RepairMenu* GetSingleton() {
+		return *reinterpret_cast<RepairMenu**>(0x11DA75C);
+	}
 };
 
 // 5C
@@ -1627,6 +1638,10 @@ public:
 	uint32_t				unk98;			// 98
 	uint8_t				skill;			// 9C
 	uint8_t				pad9D[3];		// 9D
+
+	static RepairServicesMenu* GetSingleton() {
+		return *reinterpret_cast<RepairServicesMenu**>(0x11DA7F0);
+	}
 };
 
 // 90

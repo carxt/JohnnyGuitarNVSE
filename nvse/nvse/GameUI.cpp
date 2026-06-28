@@ -37,7 +37,6 @@ Menu* InterfaceManager::TempMenuByType(uint32_t menuType) {
 	return NULL;
 }
 
-
 void RaceSexMenu::UpdatePlayerHead(void) {
 	ThisCall(s_RaceSexMenu__UpdatePlayerHead, this);
 }

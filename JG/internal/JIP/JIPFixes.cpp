@@ -1156,13 +1156,12 @@ STACK_FRAME_OPT_RESET
 	namespace GetMenuItemListRefsFix {
 
 		uint32_t __fastcall GetTileIndex(Tile* apTile) {
-			Tile* pParent = apTile->parent;
+			const Tile* pParent = apTile->parent;
 			if (pParent) [[likely]] {
-				auto kIter = pParent->children.Head();
+				auto kIter = pParent->children.GetHeadPos();
 				uint32_t uiIndex = 0;
 				while (kIter) {
-					Tile* pChild = kIter->data;
-					kIter = kIter->next;
+					const Tile* pChild = pParent->children.GetNext(kIter);
 					if (pChild == apTile)
 						return uiIndex;
 					++uiIndex;

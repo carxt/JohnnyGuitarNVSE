@@ -27,4 +27,5 @@ DEFINE_COMMAND_PLUGIN(UpdateRepairMenu, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(SetWeaponScopeUIModel, , false, kParams_OneString_OneOptionalObject);
 DEFINE_COMMAND_PLUGIN(ToggleWeaponScopeUIModel, , false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(ClearWeaponScopeUIModel, , false, nullptr);
-
+DEFINE_COMMAND_PLUGIN(GetMenuItemListIndex, , true, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(SelectMenuItemListIndex, , false, kParams_OneInt_OneOptionalInt);

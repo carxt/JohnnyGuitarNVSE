@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nvse/GameTypes.h"
+#include "Gamebryo/NiTList.hpp"
 
 typedef uint32_t(*_TraitNameToID)(const char* traitName);
 extern const _TraitNameToID TraitNameToID;
@@ -247,7 +248,7 @@ public:
 		void SetString(const char* strVal, bool bPropagate = true);
 	};
 
-	DList<Tile>					children;		// 04
+	NiTList<Tile*>				children;		// 04
 	BSSimpleArray<Value*>		values;			// 10
 	BSString						name;			// 20
 	Tile* parent;		// 28
@@ -262,7 +263,6 @@ public:
 	Value* GetValue(uint32_t typeID);
 	Value* GetValueName(const char* valueName);
 	float			GetFloat(uint32_t id);
-	DListNode<Tile>* GetNthChild(uint32_t index);
 	Tile* GetChild(const char* childName);
 	Tile* GetComponent(const char* componentTile, const char*& trait);
 	Tile* GetComponentTile(const char* componentTile);
@@ -272,11 +272,25 @@ public:
 	void			SetFloat(uint32_t id, float fltVal, bool bPropagate = true) { ThisCall(0xA012D0, this, id, fltVal, bPropagate); }
 	void			SetString(uint32_t id, const char* strVal, bool bPropagate = true) { ThisCall(0xA01350, this, id, strVal, bPropagate); }
 	Menu* GetParentMenu();
-	void			DestroyAllChildren();
+	void			DeleteChildren();
 	void			PokeValue(uint32_t valueID);
 	void			FakeClick();
 
 	void			Dump();
+
+	static void Lock() {
+		CdeclCall(0xA044F0);
+	}
+
+	static void Unlock() {
+		CdeclCall(0xA04500);
+	}
+};
+
+class AutoTileLock {
+public:
+	AutoTileLock() { Tile::Lock(); };
+	~AutoTileLock() { Tile::Unlock(); };
 };
 
 // 3C
