@@ -411,30 +411,34 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 		// Find listbox
 		const ListBox<ItemChange>* pListBox = nullptr;
 		switch (Interface::GetTopMenuID()) {
-			case kMenuType_Inventory:
-				pListBox = &InventoryMenu::GetSingleton()->itemList;
-				break;
-			case kMenuType_Container:
+			case Interface::Menus::MainFour:
+			{
+				if (Menu::IsMenuVisible(Interface::Menus::Inventory))
+					pListBox = &InventoryMenu::GetSingleton()->itemList;
+				else if (Menu::IsMenuVisible(Interface::Menus::PipboyRepair))
+					pListBox = &RepairMenu::GetSingleton()->repairItems;
+			}
+			case Interface::Menus::Container:
 			{
 				const ContainerMenu* pMenu = ContainerMenu::GetSingleton();
 				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
-			case kMenuType_Repair:
-				pListBox = &RepairMenu::GetSingleton()->repairItems;
-				break;
-			case kMenuType_Barter:
+			case Interface::Menus::Barter:
 			{
 				const BarterMenu* pMenu = BarterMenu::GetSingleton();
 				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
-			case kMenuType_RepairServices:
+			case Interface::Menus::VendorRepair:
 				pListBox = &RepairServicesMenu::GetSingleton()->itemList;
 				break;
 			default:
 				return true;
 		}
+
+		if (!pListBox)
+			return true;
 
 		InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
 		if (!pInvRef)
@@ -501,30 +505,34 @@ bool Cmd_SelectMenuItemListIndex_Execute(COMMAND_ARGS) {
 		ListBox<ItemChange>* pListBox = nullptr;
 		switch (Interface::GetTopMenuID())
 		{
-			case kMenuType_Inventory:
-				pListBox = &InventoryMenu::GetSingleton()->itemList;
-				break;
-			case kMenuType_Container:
+			case Interface::Menus::MainFour:
+				{
+					if (Menu::IsMenuVisible(Interface::Menus::Inventory))
+						pListBox = &InventoryMenu::GetSingleton()->itemList;
+					else if (Menu::IsMenuVisible(Interface::Menus::PipboyRepair))
+						pListBox = &RepairMenu::GetSingleton()->repairItems;
+				}
+			case Interface::Menus::Container:
 			{
 				ContainerMenu* pMenu = ContainerMenu::GetSingleton();
 				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
-			case kMenuType_Repair:
-				pListBox = &RepairMenu::GetSingleton()->repairItems;
-				break;
-			case kMenuType_Barter:
+			case Interface::Menus::Barter:
 			{
 				BarterMenu* pMenu = BarterMenu::GetSingleton();
 				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
-			case kMenuType_RepairServices:
+			case Interface::Menus::VendorRepair:
 				pListBox = &RepairServicesMenu::GetSingleton()->itemList;
 				break;
 			default:
 				return true;
 		}
+
+		if (!pListBox)
+			return true;
 
 		// Select tile
 		if (uiTileIndex < pListBox->itemCount) {

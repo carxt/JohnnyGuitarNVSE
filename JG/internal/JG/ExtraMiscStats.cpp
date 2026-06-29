@@ -69,7 +69,7 @@ namespace ExtraMiscStats {
 	}
 
 	void Update() {
-		if (StatsMenu::Get() && InterfaceManager::GetSingleton() && InterfaceManager::GetSingleton()->IsMenuVisible(kMenuType_Stats) && recalculateStatFilters) {
+		if (StatsMenu::Get() && InterfaceManager::GetSingleton() && Menu::IsMenuVisible(Interface::Menus::Stats) && recalculateStatFilters) {
 			recalculateStatFilters = false;
 			StatsMenu::Get()->miscStatIDList.Filter(ShouldHideStat);
 
