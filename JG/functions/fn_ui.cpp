@@ -413,10 +413,11 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 		switch (Interface::GetTopMenuID()) {
 			case Interface::Menus::MainFour:
 			{
-				if (Menu::IsMenuVisible(Interface::Menus::Inventory))
-					pListBox = &InventoryMenu::GetSingleton()->itemList;
-				else if (Menu::IsMenuVisible(Interface::Menus::PipboyRepair))
+				if (Menu::IsMenuVisible(Interface::Menus::PipboyRepair))
 					pListBox = &RepairMenu::GetSingleton()->repairItems;
+				else if (Menu::IsMenuVisible(Interface::Menus::Inventory))
+					pListBox = &InventoryMenu::GetSingleton()->itemList;
+				break;
 			}
 			case Interface::Menus::Container:
 			{
@@ -507,10 +508,11 @@ bool Cmd_SelectMenuItemListIndex_Execute(COMMAND_ARGS) {
 		{
 			case Interface::Menus::MainFour:
 				{
-					if (Menu::IsMenuVisible(Interface::Menus::Inventory))
-						pListBox = &InventoryMenu::GetSingleton()->itemList;
-					else if (Menu::IsMenuVisible(Interface::Menus::PipboyRepair))
+					if (Menu::IsMenuVisible(Interface::Menus::PipboyRepair))
 						pListBox = &RepairMenu::GetSingleton()->repairItems;
+					else if (Menu::IsMenuVisible(Interface::Menus::Inventory))
+						pListBox = &InventoryMenu::GetSingleton()->itemList;
+					break;
 				}
 			case Interface::Menus::Container:
 			{
