@@ -19,8 +19,6 @@ class BSShaderAccumulator;
 class ShadowSceneNode;
 class NiSourceTexture;
 class FORenderedMenu;
-typedef Menu* (*_TempMenuByType)(uint32_t menuType);
-extern const _TempMenuByType TempMenuByType;
 
 struct PackedMenu;
 
@@ -31,9 +29,7 @@ public:
 	~InterfaceManager();
 
 	static InterfaceManager* GetSingleton(void);
-	static bool					IsMenuVisible(uint32_t menuType);
 	static Menu* GetMenuByType(uint32_t menuType);
-	static Menu* TempMenuByType(uint32_t menuType);
 	//static TileMenu *			GetMenuByPath(const char * componentPath, const char ** slashPos);
 	//static Tile::Value *		GetMenuComponentValue(const char * componentPath);
 	//static Tile *				GetMenuComponentTile(const char * componentPath);
@@ -160,6 +156,56 @@ static_assert(sizeof(InterfaceManager) == 0x580);
 
 class Interface {
 public:
+	enum Menus {
+		NoMenu					= 0,
+		MainFour				= 1,
+		OtherRoot				= 2,
+		Console					= 3,
+
+		Message					= 1001,
+		Inventory				= 1002,
+		Stats					= 1003,
+		HUDMainMenu				= 1004,
+		Loading					= 1007,
+		Container				= 1008,
+		Dialog					= 1009,
+		SleepWait				= 1012,
+		Pause					= 1013,
+		LockPick				= 1014,
+		Quantity				= 1016,
+		AudioMenu				= 1017,
+		VideoMenu				= 1018,
+		GamePlayMenu			= 1020,
+		PipboyData				= 1023,
+		BookMenu				= 1026,
+		LevelUp					= 1027,
+		PipboyRepair			= 1035,
+		RaceMenu				= 1036,
+		SurgeryMenu				= 1036,
+		BarberMenu				= 1036,
+		Credits					= 1047,
+		CharGen					= 1048,
+		TextEdit				= 1051,
+		Barter					= 1053,
+		Surgery					= 1054,
+		Hacking					= 1055,
+		VATS					= 1056,
+		Computers				= 1057,
+		VendorRepair			= 1058,
+		Tutorial				= 1059,
+		SPECIALBook				= 1060,
+		ItemModMenu				= 1061,
+		LoveTester				= 1074,
+		CompanionWheel			= 1075,
+		MedicalQuestionnaire	= 1076,
+		Recipe					= 1077,
+		SlotMachine				= 1080,
+		BlackJack				= 1081,
+		Roulette				= 1082,
+		Caravan					= 1083,
+		Traits					= 1084,
+	};
+
 	static void InitGunScope(TESModel* apModel) {
 		CdeclCall(0x709C20, apModel);
 	}
@@ -195,48 +241,6 @@ struct VATSHighlightData {
 };
 
 void Debug_DumpMenus(void);
-
-enum {
-	kMenuType_Min = 0x3E9,
-	kMenuType_Message = kMenuType_Min,
-	kMenuType_Inventory,
-	kMenuType_Stats,
-	kMenuType_HUDMain,
-	kMenuType_Loading = 0x3EF,
-	kMenuType_Container,
-	kMenuType_Dialog,
-	kMenuType_SleepWait = 0x3F4,
-	kMenuType_Start,
-	kMenuType_LockPick,
-	kMenuType_Quantity = 0x3F8,
-	kMenuType_Map = 0x3FF,
-	kMenuType_Book = 0x402,
-	kMenuType_LevelUp,
-	kMenuType_Repair = 0x40B,
-	kMenuType_RaceSex,
-	kMenuType_Credits = 0x417,
-	kMenuType_CharGen,
-	kMenuType_TextEdit = 0x41B,
-	kMenuType_Barter = 0x41D,
-	kMenuType_Surgery,
-	kMenuType_Hacking,
-	kMenuType_VATS,
-	kMenuType_Computers,
-	kMenuType_RepairServices,
-	kMenuType_Tutorial,
-	kMenuType_SpecialBook,
-	kMenuType_ItemMod,
-	kMenuType_LoveTester = 0x432,
-	kMenuType_CompanionWheel,
-	kMenuType_TraitSelect,
-	kMenuType_Recipe,
-	kMenuType_SlotMachine = 0x438,
-	kMenuType_Blackjack,
-	kMenuType_Roulette,
-	kMenuType_Caravan,
-	kMenuType_Trait = 0x43C,
-	kMenuType_Max = kMenuType_Trait,
-};
 
 struct EventCallbackScripts;
 
@@ -276,6 +280,10 @@ public:
 
 	Menu* HandleMenuInput(int tileID, Tile* clickedTile);
 	Tile* AddTileFromTemplate(Tile* destTile, const char* templateName, uint32_t arg3);
+
+	static bool IsMenuVisible(Interface::Menus aeMenu) {
+		return CdeclCall<bool>(0x7027B0, aeMenu);
+	}
 };
 
 // 170
