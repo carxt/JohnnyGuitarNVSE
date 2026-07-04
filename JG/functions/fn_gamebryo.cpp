@@ -474,8 +474,7 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 				pTarget = BSUtilities::GetObjectByName(pRoot, cObjectName);
 
 			if (pTarget) {
-				const NiRTTI* NiControllerManager_ms_RTTI = reinterpret_cast<NiRTTI*>(0x11F36AC);
-				NiControllerManager* pCtrlMgr = static_cast<NiControllerManager*>(pTarget->GetController(NiControllerManager_ms_RTTI));
+				NiControllerManager* pCtrlMgr = pTarget->GetController<NiControllerManager>();
 				if (pCtrlMgr) {
 					*result = pCtrlMgr->IsSequenceActive(cSequenceName);
 					if (IsConsoleMode())
@@ -491,6 +490,32 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 		}
 		else if (IsConsoleMode()) {
 			Console_Print("Root node not found");
+		}
+	}
+	return true;
+}
+
+bool Cmd_StopNiSequence_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cSequenceName[MAX_PATH] = { 0 };
+	float fEaseOutTime = 0.f;
+	char cObjectName[MAX_PATH] = { 0 };
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cSequenceName, &fEaseOutTime, &cObjectName, &bFirstPerson) && cSequenceName[0]) {
+		const NiAVObject* pRoot = GetReferenceScene(thisObj, bFirstPerson);
+		if (pRoot) {
+			const NiAVObject* pTarget = pRoot;
+			if (cObjectName[0])
+				pTarget = BSUtilities::GetObjectByName(pRoot, cObjectName);
+
+			if (pTarget) {
+				NiControllerManager* pCtrlMgr = pTarget->GetController<NiControllerManager>();
+				if (pCtrlMgr) {
+					NiControllerSequence* pSequence = pCtrlMgr->GetSequenceByName(cSequenceName);
+					if (pSequence)
+						*result = pCtrlMgr->DeactivateSequence(pSequence, fEaseOutTime);
+				}
+			}
 		}
 	}
 	return true;
