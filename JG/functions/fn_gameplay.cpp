@@ -1456,9 +1456,12 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 	TESObjectREFR* pTarget = nullptr;
 	float fRadius = -1.f;
 	BOOL bFaceTarget = FALSE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTarget, &fRadius, &bFaceTarget) && pTarget && pTarget->IsReference() && thisObj->IsActor()) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTarget, &fRadius, &bFaceTarget) && thisObj->IsActor()) {
 		Actor* pActor = static_cast<Actor*>(thisObj);
 		if (pTarget) {
+			if (!pTarget->IsReference())
+				return true;
+
 			if (bFaceTarget)
 				*result = pActor->SetPathfindingGoalAndAngle(pTarget, fRadius);
 			else
