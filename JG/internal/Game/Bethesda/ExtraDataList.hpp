@@ -15,6 +15,8 @@ public:
 #endif
 
 	void CopyListForReference(ExtraDataList* apCopy, bool abRemove);
+
+	int16_t GetCount() const;
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

@@ -18,3 +18,8 @@ void ExtraDataList::CopyListForContainer(ExtraDataList* apCopy, bool abDontRemov
 void ExtraDataList::CopyListForReference(ExtraDataList* apCopy, bool abRemove) {
 	ThisCall(0x412490, this, apCopy, abRemove);
 }
+
+// GAME - 0x418770
+int16_t ExtraDataList::GetCount() const {
+	return ThisCall<int16_t>(0x418770, this);
+}

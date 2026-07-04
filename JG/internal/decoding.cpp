@@ -77,7 +77,8 @@ bool InventoryRef::CreateExtraData(BSExtraData* xBSData)
 		return false;
 
 	data.xData = ExtraDataList::Create();
-	data.xData->AddExtra(xBSData);
+	if (xBSData)
+		data.xData->AddExtra(xBSData);
 
 	if (!pChange->pExtraLists)
 		pChange->pExtraLists = new BSSimpleList<ExtraDataList*>();

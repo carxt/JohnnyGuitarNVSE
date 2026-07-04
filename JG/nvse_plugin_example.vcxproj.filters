@@ -445,6 +445,9 @@
     <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiRenderer.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+     </ClCompile>
     <ClCompile Include="internal\JG\ScriptUtils.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
@@ -1054,6 +1057,9 @@
     <ClInclude Include="internal\Game\Bethesda\BSShaderManager.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraItemDropper.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiParticles.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
@@ -1236,6 +1242,15 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiRect.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiRenderer.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\ExtraWeaponModFlags.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\ScriptUtils.hpp">
       <Filter>internal\JG</Filter>
