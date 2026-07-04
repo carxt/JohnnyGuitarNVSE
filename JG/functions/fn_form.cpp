@@ -225,16 +225,19 @@ bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-
-bool Cmd_IsRadioRefPlaying_Execute(COMMAND_ARGS) {
+bool Cmd_IsRadioRefPlaying_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj && thisObj->baseForm && IS_TYPE(thisObj->baseForm, TESObjectACTI)) {
-		TESObjectACTI* baseActi = (TESObjectACTI*)thisObj->baseForm;
+		TESObjectACTI* baseActi = static_cast<TESObjectACTI*>(thisObj->baseForm);
 		if (baseActi->radioStation) {
 			*result = (CdeclCall<void*>(0x0832930, thisObj) != nullptr);
 		}
 	}
 	return true;
+}
+
+bool Cmd_IsRadioRefPlaying_Execute(COMMAND_ARGS) {
+	return Cmd_IsRadioRefPlaying_Eval(thisObj, nullptr, nullptr, result);
 }
 
 bool Cmd_TuneRadioRef_Execute(COMMAND_ARGS) {
@@ -1429,13 +1432,17 @@ bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 }
 
 // 0 - alive, 1 - dying/ragdolled, 2 - dead, 3 - unconscious, 5 - restrained, 6 - essential unconscious
-bool Cmd_GetLifeState_Execute(COMMAND_ARGS) {
-	Actor* actor = (Actor*)thisObj;
+bool Cmd_GetLifeState_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
-	if (actor && actor->IsActor()) {
-		*result = actor->lifeState;
-		if (IsConsoleMode()) Console_Print("GetLifeState >> %.f", *result);
-	}
+	if (thisObj && thisObj->IsActor())
+		*result = static_cast<Actor*>(thisObj)->lifeState;
+	return true;
+}
+
+bool Cmd_GetLifeState_Execute(COMMAND_ARGS) {
+	Cmd_GetLifeState_Eval(thisObj, nullptr, nullptr, result);
+	if (IsConsoleMode()) 
+		Console_Print("GetLifeState >> %.f", *result);
 	return true;
 }
 

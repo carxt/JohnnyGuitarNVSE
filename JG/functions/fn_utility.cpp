@@ -228,17 +228,25 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
+bool Cmd_GetSequenceAnimGroup_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
-	uint32_t sequenceID;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sequenceID) && sequenceID < 8) {
-		if (auto animData = thisObj->GetAnimation()) {
-			if (auto sequence = animData->animSequence[sequenceID]) {
-				uint16_t groupID = animData->groupIDs[sequenceID] & 0xFF;
-				*result = groupID;
-			}
+	const uint32_t uiSequence = reinterpret_cast<uint32_t>(arg1);
+	if (thisObj && uiSequence < 8) {
+		const Animation* pAnim = thisObj->GetAnimation();
+		if (pAnim && pAnim->animSequence[uiSequence]) {
+			uint16_t usGroupID = pAnim->groupIDs[uiSequence] & 0xFF;
+			*result = usGroupID;
 		}
 	}
+
+	return true;
+}
+
+bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
+	*result = -1;
+	uint32_t uiSequence;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiSequence))
+		Cmd_GetSequenceAnimGroup_Eval(thisObj, reinterpret_cast<void*>(uiSequence), nullptr, result);
 
 	return true;
 }
@@ -257,10 +265,17 @@ bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
+bool Cmd_GetPipBoyMode_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	if (InterfaceManager::GetSingleton()) *result = InterfaceManager::GetSingleton()->pipBoyMode;
-	if (IsConsoleMode()) Console_Print("GetPipBoyMode >> %.2f", *result);
+	if (InterfaceManager::GetSingleton())
+		*result = InterfaceManager::GetSingleton()->pipBoyMode;
+	return true;
+}
+
+bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
+	Cmd_GetPipBoyMode_Eval(nullptr, nullptr, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetPipBoyMode >> %.2f", *result);
 	return true;
 }
 
@@ -329,63 +344,78 @@ bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
-	int type = 0;
-	uint32_t tickCount;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &type);
-	tickCount = GetTickCount();
-	double timePlayed = tickCount - g_initialTickCount;
-	switch (type) {
+bool Cmd_GetTimePlayed_Eval(COMMAND_ARGS_EVAL) {
+	uint32_t uiTtype = reinterpret_cast<uint32_t>(arg1);
+	DWORD dwTickCount = GetTickCount();
+	double dTimePlayed = dwTickCount - g_initialTickCount;
+	switch (uiTtype) {
 	case 0:
-		*result = timePlayed;
+		*result = dTimePlayed;
 		break;
 	case 1:
-		*result = timePlayed / 1000;
+		*result = dTimePlayed / 1000;
 		break;
 	case 2:
-		*result = timePlayed / 60000;
+		*result = dTimePlayed / 60000;
 		break;
-	}
-	if (IsConsoleMode()) {
-		Console_Print("%f", *result);
+	default:
+		*result = 0;
+		break;
 	}
 	return true;
 }
 
-bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
+bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
+	uint32_t uiTtype = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &uiTtype);
+	Cmd_GetTimePlayed_Eval(nullptr, reinterpret_cast<void*>(uiTtype), nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetTimePlayed >> %f", *result);
+	return true;
+}
+
+
+bool Cmd_GetJohnnyPatch_Eval(COMMAND_ARGS_EVAL) {
 	using namespace JohnnyPatches;
-	int patch = 0;
-	bool enabled = false;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &patch)) {
-		switch (patch) {
+	uint32_t uiPatch = reinterpret_cast<uint32_t>(arg1);
+	bool bEnabled = false;
+	switch (uiPatch) {
 		case 1:
-			enabled = true;
+			bEnabled = true;
 			break;
 		case 3:
-			enabled = fixFleeing;
+			bEnabled = fixFleeing;
 			break;
 		case 4:
-			enabled = fixItemStacks;
+			bEnabled = fixItemStacks;
 			break;
 		case 5:
-			enabled = fixNPCShootingAngle;
+			bEnabled = fixNPCShootingAngle;
 			break;
 		case 6:
-			enabled = noMuzzleFlashCooldown;
+			bEnabled = noMuzzleFlashCooldown;
 			break;
 		case 7:
-			enabled = resetVanityCam;
+			bEnabled = resetVanityCam;
 			break;
 		case 8:
-			enabled = bFixJIP && JIPUtils::IsValid();
+			bEnabled = bFixJIP && JIPUtils::IsValid();
 			break;
 		default:
 			break;
-		}
-		if (IsConsoleMode())
-			Console_Print("GetJohnnyPatch %d >> %d", patch, enabled);
 	}
-	*result = enabled;
+	*result = bEnabled;
+	return true;
+}
+
+bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
+	*result = 0;
+	uint32_t uiPatch = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiPatch)) {
+		Cmd_GetJohnnyPatch_Eval(nullptr, reinterpret_cast<void*>(uiPatch), nullptr, result);
+		if (IsConsoleMode())
+			Console_Print("GetJohnnyPatch %d >> %d", uiPatch, *result);
+	}
 	return true;
 }
 

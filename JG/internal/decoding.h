@@ -215,6 +215,8 @@ public:
 	MoonUpdateStatus eUpdateMoonTexture;
 	float unk074;
 	float lastUpdateHour;
+
+	static constexpr AddressPtr<uint32_t, 0x11CCA80> eCurrentPhase;
 };
 
 // 18

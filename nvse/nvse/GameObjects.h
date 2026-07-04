@@ -330,6 +330,10 @@ public:
 	uint32_t	unk04[3];	// 04
 
 	void RemoveEffect(EffectItem* effItem);
+
+	bool HasDamageHealthEffect() const {
+		return ThisCall<bool>(0x822E00, this);
+	}
 };
 static_assert(sizeof(MagicTarget) == 0x10);
 
@@ -705,6 +709,10 @@ public:
 	bool IsInDialogueWithPlayer() const;
 
 	bool GetRespawn() const;
+
+	float GetRunSpeed() {
+		return ThisCall<float>(0x884EB0, this);
+	}
 };
 
 // 1C0
@@ -904,7 +912,7 @@ public:
 	NiObject* unkD3C;				// D3C
 	uint32_t								unkD40;					// D40
 	Actor* reticleActor;			// D44
-	tList<CompassTarget>* compassTargets;				// D48
+	BSSimpleList<CompassTarget*>* compassTargets;				// D48
 	uint32_t								unkD4C[6];				// D4C
 	CombatActors* combatActors;			// D64
 	uint32_t								teammateCount;			// D68

@@ -291,9 +291,15 @@ bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
+	*result = 0;
+	if (thisObj->IsActor())
+		*result = static_cast<Actor*>(thisObj)->magicTarget.HasDamageHealthEffect();
+	return true;
+}
+
 bool Cmd_HasHealthDamageEffect_Execute(COMMAND_ARGS) {
-	Actor* actor = (Actor*)thisObj;
-	*result = ThisCall<bool>(0x822E00, &actor->magicTarget);
+	Cmd_HasHealthDamageEffect_Eval(thisObj, nullptr, nullptr, result);
 	return true;
 }
 
@@ -436,15 +442,19 @@ bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 }
 
 
-bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
+bool Cmd_GetExtraAccuracyPenaltyMult_Eval(COMMAND_ARGS_EVAL) {
 	*result = 1;
-	TESForm* pForm = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) {
-		TESForm* pTarget = pForm ? pForm : thisObj;
-		if (pTarget)
-			*result = NPCAccuracy::GetMultiplier(pTarget);
-	}
+	TESForm* pForm = static_cast<TESForm*>(arg1);
+	TESForm* pTarget = pForm ? pForm : thisObj;
+	if (pTarget)
+		*result = NPCAccuracy::GetMultiplier(pTarget);
+	return true;
+}
 
+bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) 
+		Cmd_GetExtraAccuracyPenaltyMult_Eval(thisObj, pForm, nullptr, result);
 	return true;
 }
 
@@ -645,10 +655,17 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-bool Cmd_GetMoonPhase_Execute(COMMAND_ARGS) {
-	*result = *(int*)0x11CCA80;
+
+bool Cmd_GetMoonPhase_Eval(COMMAND_ARGS_EVAL) {
+	*result = Moon::eCurrentPhase;
 	return true;
 }
+
+bool Cmd_GetMoonPhase_Execute(COMMAND_ARGS) {
+	Cmd_GetMoonPhase_Eval(nullptr, nullptr, nullptr, result);
+	return true;
+}
+
 bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* cell = thisObj->GetParentCell();
@@ -767,11 +784,14 @@ bool IsCombatTarget(Actor* source, Actor* toSearch) {
 	return false;
 }
 
-bool IsHostileCompassTarget(Actor* toSearch) {
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
-	for (; !iter.End(); ++iter) {
-		PlayerCharacter::CompassTarget* target = iter.Get();
-		if (target->isHostile && target->target == toSearch) return true;
+bool __fastcall IsHostileCompassTarget(const TESObjectREFR* apTarget) {
+	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	while (pIter && !pIter->IsEmpty()) {
+		PlayerCharacter::CompassTarget* pTarget = pIter->GetItem();
+		if (pTarget->isHostile && pTarget->target == apTarget)
+			return true;
+
+		pIter = pIter->GetNext();
 	}
 	return false;
 }
@@ -814,9 +834,10 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	}
 
 	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
-	for (; !iter.End(); ++iter) {
-		PlayerCharacter::CompassTarget* target = iter.Get();
+	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	while (pIter && !pIter->IsEmpty()) {
+		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		pIter = pIter->GetNext();
 		if (target->isHostile) {
 			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0
 				|| target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
@@ -939,30 +960,28 @@ bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ToggleCombatMusic_Execute(COMMAND_ARGS) {
-	uint32_t toggle = 1;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &toggle);
-	JohnnyPatches::bCombatMusicDisabled = (toggle == 0);
+	BOOL bValue = TRUE;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &bValue);
+	JohnnyPatches::bCombatMusicDisabled = bValue == FALSE;
 	return true;
 }
 
 bool Cmd_IsCombatMusicEnabled_Execute(COMMAND_ARGS) {
-	*result = (JohnnyPatches::bCombatMusicDisabled == 0);
-	if (IsConsoleMode()) Console_Print("IsCombatMusicEnabled >> %.f", *result);
+	*result = JohnnyPatches::bCombatMusicDisabled == false;
+	if (IsConsoleMode())
+		Console_Print("IsCombatMusicEnabled >> %.f", *result);
+	return true;
+}
+
+bool Cmd_IsCompassHostile_Eval(COMMAND_ARGS_EVAL) {
+	*result = IsHostileCompassTarget(thisObj);
 	return true;
 }
 
 bool Cmd_IsCompassHostile_Execute(COMMAND_ARGS) {
-	*result = 0;
-	Actor* toCheck = (Actor*)thisObj;
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
-	for (; !iter.End(); ++iter) {
-		PlayerCharacter::CompassTarget* target = iter.Get();
-		if (target->isHostile && target->target == toCheck) {
-			*result = 1;
-			break;
-		}
-	}
-	if (IsConsoleMode()) Console_Print("IsCompassHostile >> %.f", *result);
+	Cmd_IsCompassHostile_Eval(thisObj, nullptr, nullptr, result);
+	if (IsConsoleMode()) 
+		Console_Print("IsCompassHostile >> %.f", *result);
 	return true;
 }
 
@@ -997,9 +1016,10 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
-	for (; !iter.End(); ++iter) {
-		PlayerCharacter::CompassTarget* target = iter.Get();
+	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	while (pIter && !pIter->IsEmpty()) {
+		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		pIter = pIter->GetNext();
 		if (target->isHostile) {
 			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
 				continue;
@@ -1017,10 +1037,10 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-double GetVectorAngle2D(const NiPoint3* pt) {
+double __fastcall GetVectorAngle2D(const NiPoint3& pt) {
 	double angle;
-	if (pt->y == 0) {
-		if (pt->x <= 0) {
+	if (pt.y == 0) {
+		if (pt.x <= 0) {
 			angle = kDblPIx3d2;
 		}
 		else {
@@ -1028,9 +1048,9 @@ double GetVectorAngle2D(const NiPoint3* pt) {
 		}
 	}
 	else {
-		double ratio = pt->x / pt->y;
+		double ratio = pt.x / pt.y;
 		angle = dAtan(ratio);
-		if (pt->y < 0.0) {
+		if (pt.y < 0.0) {
 			angle += kDblPI;
 		}
 	}
@@ -1039,10 +1059,10 @@ double GetVectorAngle2D(const NiPoint3* pt) {
 }
 
 
-double GetAngleBetweenPoints(const NiPoint3& actorPos, const NiPoint3& playerPos, float offset) {
+double __fastcall GetAngleBetweenPoints(const NiPoint3& actorPos, const NiPoint3& playerPos, float offset) {
 	NiPoint3 diff = actorPos - playerPos;
 
-	double angle = GetVectorAngle2D(&diff) - offset;
+	double angle = GetVectorAngle2D(diff) - offset;
 	if (angle > -kDblPI) {
 		if (angle > kDblPI) {
 			angle = kDblPIx2 - angle;
@@ -1067,9 +1087,11 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
-	for (; !iter.End(); ++iter) {
-		PlayerCharacter::CompassTarget* target = iter.Get();
+	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	while (pIter && !pIter->IsEmpty()) {
+		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		pIter = pIter->GetNext();
+
 		if (target->isHostile) {
 			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
 				continue;
@@ -1153,13 +1175,21 @@ bool Cmd_EnableMenuArrowKeys_Execute(COMMAND_ARGS) {
 	DisabledArrowKeys::Toggle(false);
 	return true;
 }
-bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
+
+SPEC_NOINLINE bool Cmd_GetRunSpeed_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	Actor* actor = (Actor*)thisObj;
-	*result = ThisCall<float>(0x884EB0, actor);
-	if (IsConsoleMode()) Console_Print("GetRunSpeed >> %.2f", *result);
+	if (thisObj->IsActor())
+		*result = static_cast<Actor*>(thisObj)->GetRunSpeed();
 	return true;
 }
+
+bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
+	Cmd_GetRunSpeed_Eval(thisObj, nullptr, nullptr, result);
+	if (IsConsoleMode()) 
+		Console_Print("GetRunSpeed >> %.2f", *result);
+	return true;
+}
+
 bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
 	uint32_t index, isVisible;
 	*result = 0;
@@ -1476,8 +1506,15 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
+bool Cmd_GetGrenadeHoldTime_Eval(COMMAND_ARGS_EVAL) {
 	*result = PlayerCharacter::GetSingleton()->timeGrenadeHeld;
+	return true;
+}
+
+bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
+	Cmd_GetGrenadeHoldTime_Eval(nullptr, nullptr, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetGrenadeHoldTime >> %f", *result);
 	return true;
 }
 
@@ -1511,7 +1548,7 @@ bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_IsInDialogueWithPlayer_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_IsInDialogueWithPlayer_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj && thisObj->IsActor()) {
 		Actor* pActor = static_cast<Actor*>(thisObj);
@@ -1521,8 +1558,9 @@ bool Cmd_IsInDialogueWithPlayer_Eval(COMMAND_ARGS_EVAL) {
 }
 
 bool Cmd_IsInDialogueWithPlayer_Execute(COMMAND_ARGS) {
-	*result = 0;
 	Cmd_IsInDialogueWithPlayer_Eval(thisObj, nullptr, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("IsInDialogueWithPlayer >> %f", *result);
 	return true;
 }
 
@@ -1556,7 +1594,14 @@ bool Cmd_SetYieldTimer_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetYieldTimer_Execute(COMMAND_ARGS) {
+bool Cmd_GetYieldTimer_Eval(COMMAND_ARGS_EVAL) {
 	*result = PlayerCharacter::GetSingleton()->fYieldTimer;
+	return true;
+}
+
+bool Cmd_GetYieldTimer_Execute(COMMAND_ARGS) {
+	Cmd_GetYieldTimer_Eval(nullptr, nullptr, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetYieldTimer >> %f", *result);
 	return true;
 }
