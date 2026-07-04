@@ -978,6 +978,14 @@ static ParamInfo kParams_IsNiSequenceActive[] =
 	{ "First Person", kParamType_Integer, 1 },
 };
 
+static ParamInfo kParams_StopNiSequence[] =
+{
+	{ "Sequence Name",	kParamType_String,	0 },
+	{ "Ease Out Time",	kParamType_Float,	1 },
+	{ "Block Name", kParamType_String, 1 },
+	{ "First Person", kParamType_Integer, 1 },
+};
+
 static ParamInfo kParams_GetTopicInfo[] =
 {
 	{	"form",	kParamType_AnyForm,	0	},

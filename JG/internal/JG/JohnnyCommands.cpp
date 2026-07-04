@@ -432,6 +432,7 @@ namespace JohnnyCommands {
 		REG_CMD(GetUsedItemHeight);
 		REG_CMD(GetMenuItemListIndex);
 		REG_CMD(SelectMenuItemListIndex);
+		REG_CMD(StopNiSequence);
 	}
 
 }
