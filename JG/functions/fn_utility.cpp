@@ -14,7 +14,7 @@
 #include <JIP/JIPUtils.hpp>
 #include <random>
 
-extern uint32_t g_initialTickCount;
+extern DWORD dwGameStartTimestamp;
 
 bool Cmd_GameGetSecondsPassed_Eval(COMMAND_ARGS_EVAL) {
 	*result = ThisCall<float>(0x07013E0, (void*)0x11F6394);
@@ -347,7 +347,7 @@ bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 bool Cmd_GetTimePlayed_Eval(COMMAND_ARGS_EVAL) {
 	uint32_t uiTtype = reinterpret_cast<uint32_t>(arg1);
 	DWORD dwTickCount = GetTickCount();
-	double dTimePlayed = dwTickCount - g_initialTickCount;
+	double dTimePlayed = dwTickCount - dwGameStartTimestamp;
 	switch (uiTtype) {
 	case 0:
 		*result = dTimePlayed;
@@ -376,30 +376,29 @@ bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_GetJohnnyPatch_Eval(COMMAND_ARGS_EVAL) {
-	using namespace JohnnyPatches;
 	uint32_t uiPatch = reinterpret_cast<uint32_t>(arg1);
 	bool bEnabled = false;
 	switch (uiPatch) {
 		case 1:
-			bEnabled = true;
+			bEnabled = true; // EditorIDs
 			break;
 		case 3:
-			bEnabled = fixFleeing;
+			bEnabled = JohnnyPatches::bFixFleeing;
 			break;
 		case 4:
-			bEnabled = fixItemStacks;
+			bEnabled = JohnnyPatches::bFixItemStacks;
 			break;
 		case 5:
-			bEnabled = fixNPCShootingAngle;
+			bEnabled = JohnnyPatches::bFixNPCShootingAngle;
 			break;
 		case 6:
-			bEnabled = noMuzzleFlashCooldown;
+			bEnabled = JohnnyPatches::bNoMuzzleFlashCooldown;
 			break;
 		case 7:
-			bEnabled = resetVanityCam;
+			bEnabled = JohnnyPatches::bResetVanityCam;
 			break;
 		case 8:
-			bEnabled = bFixJIP && JIPUtils::IsValid();
+			bEnabled = JohnnyPatches::bFixJIP && JIPUtils::IsValid();
 			break;
 		default:
 			break;
@@ -523,14 +522,14 @@ bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	float fDistance = 0.f;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fDistance)) {
-		JohnnyPatches::g_viewmodel_near = fDistance;
+		JohnnyPatches::fViewmodelNearDistance = fDistance;
 		*result = 1;
 	}
 	return true;
 }
 
 bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
-	*result = JohnnyPatches::g_viewmodel_near;
+	*result = JohnnyPatches::fViewmodelNearDistance;
 	if (IsConsoleMode()) Console_Print("GetViewmodelClipDistance >> %.3f", *result);
 	return true;
 }

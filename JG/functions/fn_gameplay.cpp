@@ -22,7 +22,7 @@
 #include "JG/MediaLocationControllerOverride.hpp"
 #include "JG/NPCAccuracy.hpp"
 #include "JG/ScriptUtils.hpp"
-#include "misc/WorldToScreen.h"
+#include "JG/WorldToScreen.hpp"
 
 #include <shared/BSMemory/BSScrapMemory.hpp>
 
@@ -43,7 +43,7 @@ bool Cmd_StopHolotape_Execute(COMMAND_ARGS) {
 	ExtractArgsEx(EXTRACT_ARGS_EX, &bPlayStopSound);
 	MapMenu* pMapMenu = MapMenu::GetSingleton();
 	if (pMapMenu) {
-		noHolotapeStopSound = bPlayStopSound == FALSE;
+		bNoHolotapeStopSound = bPlayStopSound == FALSE;
 		pMapMenu->StopHolotape();
 		*result = 1;
 	}

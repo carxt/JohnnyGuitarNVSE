@@ -25,7 +25,7 @@ void RaceSexMenu::UpdatePlayerHead(void) {
 	ThisCall(s_RaceSexMenu__UpdatePlayerHead, this);
 }
 // reimplementation by lStewieAl
-bool noHolotapeStopSound = false;
+bool bNoHolotapeStopSound = false;
 void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 {
 	if (isHolotapeVoicePlaying)
@@ -93,7 +93,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 		}
 		else
 		{
-			noHolotapeStopSound = true;
+			bNoHolotapeStopSound = true;
 		}
 		*(uint8_t*)0x11DCFA4 = true;
 		ThisCall(0xAD85A0, BSWin32Audio::GetSingleton()); // FadeInDialogueSound
@@ -113,13 +113,13 @@ void MapMenu::StopHolotape()
 	holotapeTotalTime = 0.0f;
 	holotapePlayStartTime = 0;
 	isHolotapeVoicePlaying = 0;
-	if (!noHolotapeStopSound)
+	if (!bNoHolotapeStopSound)
 	{
 		BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStop", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
 		handle.SetPosition(PlayerCharacter::GetSingleton()->GetPos());
 		handle.Play(false);
 	}
-	noHolotapeStopSound = false;
+	bNoHolotapeStopSound = false;
 	ThisCall(0xAD8650, BSWin32Audio::GetSingleton()); // FadeOutDialogueSound
 	*(uint8_t*)0x11DCFA4 = false;
 	ThisCall(0x775670, HUDMainMenu::GetSingleton()); // ClearSubtitlesString

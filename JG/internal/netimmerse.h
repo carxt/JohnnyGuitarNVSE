@@ -1449,8 +1449,8 @@ public:
 	float			m_aafWorldToCam[4][4];	// 09C
 	NiFrustum		m_kViewFrustum;			// 0DC
 	float			m_fMinNearPlaneDist;	// 0F8
-	float			m_fMaxFarNearRatio;	// 0FC
-	NiViewport		m_kPort;			// 100
+	float			m_fMaxFarNearRatio;		// 0FC
+	NiViewport		m_kPort;				// 100
 	float			m_fLODAdjust;			// 110
 
 	CREATE_OBJECT(NiCamera, 0xA71430);

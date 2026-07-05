@@ -1,9 +1,10 @@
 #include "fn_math.h"
-#include <GameObjects.h>
-#include <GameProcess.h>
-#include <misc/misc.h>
-#include <misc/WorldToScreen.h>
+#include "GameObjects.h"
+#include "GameProcess.h"
+#include "misc/misc.h"
 #include "netimmerse.h"
+#include "JG/WorldToScreen.hpp"
+
 #include "Bethesda/TESMain.hpp"
 
 enum FOVType {
@@ -312,7 +313,7 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 			kPos += pRef->pos;
 
 		NiPoint3 kResult = { 0.f, 0.f, 0.f };
-		*result = (WorldToScreen(&kPos, kResult.x, kResult.y, kResult.z, eHandleType) ? 1.0 : 0.0);
+		*result = (WorldToScreen::WorldToScreen(&kPos, kResult, eHandleType) ? 1.0 : 0.0);
 
 		setVarByName(PASS_VARARGS, cOutX, kResult.x);
 		setVarByName(PASS_VARARGS, cOutY, kResult.y);
@@ -335,7 +336,7 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 			kPos += pRef->pos; 
 
 		NiPoint3 kResult = { 0.f, 0.f, 0.f };
-		*result = (WorldToScreen(&kPos, kResult.x, kResult.y, kResult.z, eHandleType) ? 1.0 : 0.0);
+		*result = (WorldToScreen::WorldToScreen(&kPos, kResult, eHandleType) ? 1.0 : 0.0);
 
 		pOutX->data = kResult.x;
 		pOutY->data = kResult.y;
@@ -351,16 +352,16 @@ bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS) {
 	char cOutX[VAR_NAME_SIZE]; 
 	char cOutY[VAR_NAME_SIZE];
 	char cOutZ[VAR_NAME_SIZE];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cOutX, &cOutY, &cOutZ, &bLocal) && JGGameCamera.CamPos) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cOutX, &cOutY, &cOutZ, &bLocal)) {
 		if (bLocal) {
-			setVarByName(PASS_VARARGS, cOutX, JGGameCamera.CamPos->m_localTranslate.x);
-			setVarByName(PASS_VARARGS, cOutY, JGGameCamera.CamPos->m_localTranslate.y);
-			setVarByName(PASS_VARARGS, cOutZ, JGGameCamera.CamPos->m_localTranslate.z);
+			setVarByName(PASS_VARARGS, cOutX, WorldToScreen::kCameraData.kLocal.x);
+			setVarByName(PASS_VARARGS, cOutY, WorldToScreen::kCameraData.kLocal.y);
+			setVarByName(PASS_VARARGS, cOutZ, WorldToScreen::kCameraData.kLocal.z);
 		}
 		else {
-			setVarByName(PASS_VARARGS, cOutX, JGGameCamera.CamPos->m_worldTranslate.x);
-			setVarByName(PASS_VARARGS, cOutY, JGGameCamera.CamPos->m_worldTranslate.y);
-			setVarByName(PASS_VARARGS, cOutZ, JGGameCamera.CamPos->m_worldTranslate.z);
+			setVarByName(PASS_VARARGS, cOutX, WorldToScreen::kCameraData.kWorld.x);
+			setVarByName(PASS_VARARGS, cOutY, WorldToScreen::kCameraData.kWorld.y);
+			setVarByName(PASS_VARARGS, cOutZ, WorldToScreen::kCameraData.kWorld.z);
 		}
 	}
 	return true;

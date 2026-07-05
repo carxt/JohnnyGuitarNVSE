@@ -21,8 +21,6 @@
 #include "JG/CustomHUDShake.hpp"
 #include "JG/AnimActivationHeight.hpp"
 
-#include <misc/WorldToScreen.h>
-
 #define REG_CMD(name) apNVSE->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) apNVSE->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 
@@ -31,9 +29,6 @@ ExpressionEvaluatorUtils s_expEvalUtils;
 namespace JohnnyCommands {
 
 	void InitCommandData() {
-		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
-		JGGameCamera.CamPos = new JGCameraPosition;
-
 		DisabledSaves::Init();
 		CustomHUDShake::Init();
 		AnimActivationHeight::Init();

@@ -114,7 +114,7 @@ namespace BarterFilter {
 		}
 	};
 
-	void Init() {
+	void Install() {
 		BarterHook<0x72DA1C, BarterFilters::PLAYER>(); // BarterMenu::DoClick
 		BarterHook<0x72DACA, BarterFilters::VENDOR>(); // BarterMenu::DoClick
 

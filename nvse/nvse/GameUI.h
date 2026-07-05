@@ -691,7 +691,7 @@ public:
 
 };
 static_assert(sizeof(MapMenu) == 0x230);
-extern bool noHolotapeStopSound;
+extern bool bNoHolotapeStopSound;
 
 // 94
 class MessageMenu : public Menu			// 1001

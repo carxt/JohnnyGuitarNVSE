@@ -476,7 +476,7 @@ public:
 	virtual void		Unk_F0(void);
 	virtual void		Unk_F1(void);
 	virtual void		Unk_F2(void);
-	virtual void		Unk_F3(void);
+	virtual TESObjectREFR* DropObject(TESForm* apItem, ExtraDataList* apExtraList, int32_t aiCount, const NiPoint3* apPoint, const NiPoint3* apRotate);
 	virtual void		Unk_F4(void);
 	virtual void		Unk_F5(void);
 	virtual void		Unk_F6(void);
@@ -664,6 +664,8 @@ public:
 	bool GetDead() { return (lifeState == 1) || (lifeState == 2); }
 	bool GetRestrained() { return lifeState == 5; }
 
+	bool IsTalking() const { return ThisCall<bool>(0x8A67F0, this); }
+
 	TESActorBase* GetActorBase();
 	bool GetLOS(Actor* target);
 	char GetCurrentAIPackage();
@@ -826,7 +828,7 @@ public:
 	bool								bIs3rdPersonVisible;				// 64A	= not FirstPerson
 	bool								is3rdPerson;			// 64B
 	bool								bThirdPerson;			// 64C
-	uint8_t								byte64D;				// 64D
+	uint8_t								bTemp3rdPerson;				// 64D
 	uint8_t								byte64E;				// 64E
 	bool								isUsingScope;			// 64F
 	uint8_t								byte650;				// 650
@@ -973,6 +975,10 @@ public:
 	void RemovePlayerMapMarker() {
 		ThisCall(0x952F90, this);
 	}
+
+	static constexpr AddressPtr<bool, 0x11E07B8> bIsVanityMode;
+	static constexpr AddressPtr<bool, 0x11E07B9> bIsAutoVanityMode;
+	static constexpr AddressPtr<NiPoint3, 0x11E0B58> kVanityModePos;
 };
 static_assert(sizeof(PlayerCharacter) == 0xE50);
 

@@ -30,7 +30,7 @@
 
 #include "Bethesda/AutoMemContext.hpp"
 
-uint32_t g_initialTickCount = 0;
+DWORD dwGameStartTimestamp = 0;
 bool (*Cmd_Update3D)(COMMAND_ARGS) = 0;
 extern NVSECommandTableInterface* g_cmdTableInterface;
 
@@ -54,7 +54,8 @@ static SPEC_NOINLINE void DeferredInit() {
 	if (JohnnyPatches::bFixJIP)
 		JIPFixes::InitDeferredHooks(false);
 
-	g_initialTickCount = GetTickCount();
+	dwGameStartTimestamp = GetTickCount();
+	JohnnyPatches::DeferredInit();
 	CameraOverlay::Init();
 	EDIDRestoration::PrintErrors();
 	NiGlobalStringTable::RemoveUnusedStrings();
@@ -105,7 +106,7 @@ static void __fastcall GameReset(uint32_t aeType) {
 	JohnnyEvents::Reset();
 	LandRemapping::Reset();
 
-	noHolotapeStopSound = false;
+	bNoHolotapeStopSound = false;
 }
 
 static void PostLoadGame() {

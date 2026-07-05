@@ -244,9 +244,6 @@
     <ClCompile Include="internal\JG\CustomCameraShake.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
-    <ClCompile Include="misc\WorldToScreen.cpp">
-      <Filter>misc</Filter>
-    </ClCompile>
     <ClCompile Include="functions\fn_math.cpp">
       <Filter>functions</Filter>
     </ClCompile>
@@ -475,6 +472,12 @@
     <ClCompile Include="..\nvse\nvse\GameProcess.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\DeathSoundFix.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\WorldToScreen.cpp">
+      <Filter>internal\JG</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -584,9 +587,6 @@
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="misc\misc.h">
-      <Filter>misc</Filter>
-    </ClInclude>
-    <ClInclude Include="misc\WorldToScreen.h">
       <Filter>misc</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\ParamInfos.h">
@@ -1265,6 +1265,12 @@
       <Filter>internal\JG\Core</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\AnimActivationHeight.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\DeathSoundFix.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\WorldToScreen.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,7 +2,7 @@
 
 namespace BarterFilter {
 
-	void Init();
+	void Install();
 	void Reset();
 
 	bool __fastcall Add(uint32_t auiItemFormID, uint32_t auiFlags, uint32_t auiSellerFormID);
