@@ -1,52 +1,28 @@
 #include "JohnnyGuitarNVSE.h"
-#include "events/JohnnyEvents.h"
-#include "internal/serialization.h"
-#include "internal/CommandOpcodes.h"
-#include "functions/fn_av.h"
-#include "functions/fn_form.h"
-#include "functions/fn_utility.h"
-#include "functions/fn_math.h"
-#include "functions/fn_file.h"
-#include "functions/fn_gameplay.h"
-#include "functions/fn_mediaset.h"
-#include "functions/fn_region.h"
-#include "functions/fn_terminal.h"
-#include "functions/fn_ui.h"
-#include "functions/fn_book.h"
-#include "functions/fn_dial.h"
-#include "functions/fn_gamebryo.h"
-#include "functions/fn_event.h"
+#include "decoding.h"
 #include "nvse_version.h"
+
 #include "Bethesda/AutoMemContext.hpp"
-#include "JIP/JIPFixes.hpp"
+
+#include "events/LambdaVariableContext.h"
+#include "events/JohnnyEvents.hpp"
+
+#include "JG/FixedStringsRework.hpp"
+#include "JG/JohnnyCommands.hpp"
 #include "JG/JohnnyExtraData.hpp"
-#include <JG/NPCAccuracy.hpp>
-#include <JG/MediaLocationControllerOverride.hpp>
-#include <JG/CameraOverride.hpp>
-#include <JG/JohnnyRadios.hpp>
-#include <JG/RSMBarberHook.hpp>
-#include <JG/BarterFilter.hpp>
-#include "JG/EditorIDRestoration.hpp"
-#include <JG/CustomHUDShake.hpp>
+#include "JG/JohnnyFixes.hpp"
 #include "JG/JohnnyGameSettings.hpp"
-#include <JG/JohnnyPatches.hpp>
-#include <JG/JohnnyFixes.hpp>
-#include <JG/DisabledSaves.hpp>
-#include <JG/DisabledLevelUp.hpp>
-#include <JG/DisabledMuzzleFlashLights.hpp>
-#include <JG/DisabledArrowKeys.hpp>
-#include <JG/ExtraMiscStats.hpp>
-#include <JG/CameraOverlay.hpp>
-#include <JG/LandRemapping.hpp>
-#include <JG/TaskQueue.hpp>
-#include <JG/FixedStringsRework.hpp>
-#include <events/LambdaVariableContext.h>
-#include <decoding.h>
-#include <misc/WorldToScreen.h>
+#include "JG/JohnnyMessageHandler.hpp"
+#include "JG/JohnnyPatches.hpp"
+#include "JG/JohnnyPluginData.hpp"
+#include "JG/JohnnySerialization.hpp"
+#include "JG/TaskQueue.hpp"
+
+#include "JIP/JIPFixes.hpp"
 
 BS_ALLOCATORS
 
-IDebugLog	   gLog("logs\\JohnnyGuitarNVSE.log");
+IDebugLog	   gLog(JohnnyPluginData::JG_LOG_PATH);
 
 bool bIsGECK = false;
 _CaptureLambdaVars CaptureLambdaVars;
@@ -58,576 +34,86 @@ NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_scriptInterface = NULL;
 NVSEMessagingInterface* g_msgInterface = NULL;
 NVSECommandTableInterface* g_cmdTableInterface = NULL;
-ExpressionEvaluatorUtils s_expEvalUtils;
-uint32_t g_initialTickCount = 0;
 uint32_t g_pluginHandle = 0;
 
 void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
 InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
-bool (*Cmd_Update3D)(COMMAND_ARGS) = 0;
 
-#define JG_VERSION 527
+EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* apNVSE, PluginInfo* apInfo) {
+	apInfo->infoVersion = PluginInfo::kInfoVersion;
+	apInfo->name = JohnnyPluginData::JG_PLUGIN_NAME;
+	apInfo->version = JohnnyPluginData::JG_VERSION;
 
-#define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);
-#define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
-
-void MessageHandler(NVSEMessagingInterface::Message* msg) {
-	MEMORY_CONTEXT(MC_DEFAULT);
-	switch (msg->type) {
-		case NVSEMessagingInterface::kMessage_PostPostLoad: // GAME + GECK
-		{
-			if (JohnnyPatches::bFixJIP) {
-				JIPFixes::InitCommandHooks();
-				JIPFixes::InitHooks();
-			}
-
-			const CommandInfo* pUpdate3D = g_cmdTableInterface->GetByOpcode(CommandOpcodes::kUpdate3D);
-			if (pUpdate3D)
-				Cmd_Update3D = pUpdate3D->execute;
-			break;
-		}
-		case NVSEMessagingInterface::kMessage_NewGame:
-		case NVSEMessagingInterface::kMessage_PreLoadGame: // GAME
-		{
-			JohnnyExtraDataArray::GetInstance().ResetScriptData();
-
-			if (msg->type == NVSEMessagingInterface::kMessage_NewGame)
-				CameraOverlay::ReInit();
-
-			DisabledMuzzleFlashLights::Reset(); //reset the muzzle hook every time
-			DisabledArrowKeys::Reset();
-			DisabledLevelUp::Reset();
-			ThisCall(0x8C17C0, PlayerCharacter::GetSingleton()); // reevaluate reload speed modifiers
-			ThisCall(0x8C1940, PlayerCharacter::GetSingleton()); // reevaluate equip speed modifiers
-
-			RestoreDisabledPlayerControlsHUDFlags();
-			DisabledSaves::Reset();
-			ExtraMiscStats::Reset();
-			RSMBarberHook::Reset();
-			JohnnyRadios::Reset();
-			BarterFilter::Reset();
-			NPCAccuracy::Reset();
-			CustomHUDShake::Reset();
-			MediaLocationControllerOverride::Reset();
-			JohnnyFixes::ClearPlayerFurniture(); //fix furniture crash on reload
-			CameraOverride::Reset();
-			JohnnyEvents::Reset();
-			LandRemapping::Reset();
-			noHolotapeStopSound = false;
-			break;
-		}
-		case NVSEMessagingInterface::kMessage_PostLoadGame:
-		{
-			NiGlobalStringTable::RemoveUnusedStrings();
-			CameraOverlay::ReInit();
-			break;
-		}
-		case NVSEMessagingInterface::kMessage_MainGameLoop: // GAME
-		{
-			TaskQueue::ExecuteTasks();
-			CameraOverlay::Update();
-			CustomHUDShake::Update();
-			JohnnyRadios::Update();
-			JohnnyEvents::Update();
-			ExtraMiscStats::Update();
-			JohnnyPatches::ResetVanityWheel();
-			break;
-		}
-		case NVSEMessagingInterface::kMessage_DeferredInit: // GAME
-		{
-			g_initialTickCount = GetTickCount();
-			Console_Print("JohnnyGuitar version: %.2f", ((float)JG_VERSION / 100));
-			CameraOverlay::Init();
-			EDIDRestoration::PrintErrors();
-			NiGlobalStringTable::RemoveUnusedStrings();
-			if (JohnnyPatches::bFixJIP)
-				JIPFixes::InitDeferredHooks();
-
-			break;
-		}
-		case NVSEMessagingInterface::kMessage_PostLoad: // GAME + GECK
-		{
-			JohnnyPatches::HandleDLLInterop();
-
-			if (!JohnnyPatches::bFixJIP)
-				JohnnyExtraData::InitName();
-
-			break;
-		}
-		default:
-			break;
-	}
-}
-
-void MessageHandlerGECK(NVSEMessagingInterface::Message* msg) {
-	if (msg->type == NVSEMessagingInterface::kMessage_PostPostLoad && JohnnyPatches::bFixJIP) {
-		JIPFixes::InitCommandHooks();
-		JIPFixes::InitHooks();
-	}
-}
-
-void RegisterCommands(const NVSEInterface* nvse) {
-	REG_CMD(JGLegacyWorldToScreen);
-	REG_CMD(ToggleLevelUpMenu);
-	REG_CMD(IsLevelUpMenuEnabled);
-	REG_CMD(GetBaseEffectAV);
-	REG_CMD(GetBaseEffectArchetype);
-	REG_CMD(IsCellVisited);
-	REG_CMD(IsCellExpired);
-	REG_TYPED_CMD(MD5File, String);
-	REG_TYPED_CMD(SHA1File, String);
-	REG_CMD(TogglePipBoy);
-	REG_CMD(GetCalculatedWeaponDPS);
-	REG_CMD(GetInteriorLightingTraitNumeric);
-	REG_CMD(SetInteriorLightingTraitNumeric);
-	REG_CMD(GetPixelFromBMP);
-	REG_TYPED_CMD(GetWorldSpaceMapTexture, String);
-	REG_CMD(Jump);
-	REG_CMD(SetCameraShake);
-	REG_CMD(StopVATSCam);
-	REG_CMD(GetIMODAnimatable);
-	REG_CMD(SetIMODAnimatable);
-	REG_TYPED_CMD(GetEditorID, String);
-	REG_CMD(GetJohnnyPatch);
-	REG_CMD(SetVelEx);
-	REG_CMD(NullArgs); //formerly UwUDelete.
-	REG_CMD(GetMediaSetTraitNumeric);
-	REG_CMD(SetMediaSetTraitNumeric);
-	REG_TYPED_CMD(GetMediaSetTraitString, String);
-	REG_CMD(SetMediaSetTraitString);
-	REG_TYPED_CMD(GetMediaSetTraitSound, Form);
-	REG_CMD(SetMediaSetTraitSound);
-	REG_TYPED_CMD(GetWeapon1stPersonModel, Form);
-	REG_CMD(SetWeapon1stPersonModel);
-	REG_TYPED_CMD(GetBufferedCellsAlt, Array);
-	REG_CMD(GetTimePlayed);
-	REG_CMD(GetActorValueModifierAlt);
-	REG_CMD(AsmBreak);
-	REG_CMD(RefAddr);
-	REG_TYPED_CMD(GetMusicTypePath, String);
-	REG_CMD(GetMusicTypeDB);
-	REG_CMD(SetMusicTypeDB);
-	REG_TYPED_CMD(EditorIDToFormID, Form);
-	REG_CMD(GetRegionWeatherOverride);
-	REG_CMD(SetRegionWeatherOverride);
-	REG_CMD(GetRegionWeatherPriority);
-	REG_CMD(SetRegionWeatherPriority);
-	REG_CMD(IsWeatherInRegion);
-	REG_CMD(RemoveRegionWeather);
-	REG_CMD(AddRegionWeather);
-	REG_TYPED_CMD(GetRegionWeathers, Array);
-	REG_CMD(ClearRegionWeathers);
-	REG_CMD(StopSoundAlt);
-	REG_CMD(RemovePrimitive);
-	REG_CMD(GetPrimitiveType);
-	REG_CMD(GetBaseScale);
-	REG_TYPED_CMD(GetCustomMapMarker, Form);
-	REG_CMD(UnsetAV);
-	REG_CMD(UnforceAV);
-	REG_CMD(ToggleNthPipboyLight);
-	REG_CMD(SetBipedIconPathAlt);
-	REG_CMD(GetFacegenModelFlag);
-	REG_CMD(SetFacegenModelFlag);
-	REG_TYPED_CMD(GetRaceBodyModelPath, String);
-	REG_CMD(SetEquipType);
-	REG_TYPED_CMD(GetFactionMembers, Array);
-	REG_TYPED_CMD(GetRaceHeadModelPath, String);
-	REG_CMD(GetDefaultHeapSize);
-	REG_CMD(Get3DDistanceBetweenNiNodes);
-	REG_CMD(Get3DDistanceToNiNode);
-	REG_CMD(Get3DDistanceFromHitToNiNode);
-	REG_CMD(GetVector3DDistance);
-	REG_CMD(GetLinearVelocity);
-	REG_CMD(GetLifeState);
-	REG_CMD(GetRaceFlag);
-	REG_CMD(SetRaceFlag);
-	REG_TYPED_CMD(GetContainerSound, Form);
-	REG_CMD(SetContainerSound);
-	REG_CMD(SetJohnnyOnDyingEventHandler);
-	REG_CMD(SetJohnnyOnStartQuestEventHandler);
-	REG_CMD(SetJohnnyOnStopQuestEventHandler);
-	REG_CMD(DisableMuzzleFlashLights);
-	REG_CMD(SetCustomMapMarkerIcon);
-	REG_CMD(GetCreatureCombatSkill);
-	REG_CMD(SetExplosionSound);
-	REG_CMD(SetProjectileSound);
-	REG_CMD(SetWeaponWorldModelPath);
-	REG_CMD(Clamp);
-	REG_CMD(Remap);
-	REG_CMD(Lerp);
-	REG_CMD(SetJohnnySeenDataEventHandler);
-	REG_CMD(SetJohnnyOnLimbGoneEventHandler);
-	REG_CMD(Sign);
-	REG_CMD(AddTerminalMenuItem);
-	REG_TYPED_CMD(GetTerminalMenuItemText, String);
-	REG_CMD(SetTerminalMenuItemText);
-	REG_TYPED_CMD(GetTerminalMenuItemNote, Form);
-	REG_CMD(SetTerminalMenuItemNote);
-	REG_TYPED_CMD(GetTerminalMenuItemSubmenu, Form);
-	REG_CMD(SetTerminalMenuItemSubmenu);
-	REG_CMD(GetRunSpeed);
-	REG_CMD(DisableMenuArrowKeys);
-	REG_CMD(EnableMenuArrowKeys);
-	REG_CMD(GetQuestFailed);
-	REG_CMD(SetJohnnyOnChallengeCompleteEventHandler);
-	REG_CMD(GetTerminalMenuItemCount);
-	REG_CMD(GetPipBoyMode);
-	REG_CMD(GetWeaponVATSTraitNumeric);
-	REG_CMD(SetWeaponVATSTraitNumeric);
-	REG_CMD(RemoveTerminalMenuItem);
-	REG_CMD(SetWorldSpaceMapTexture);
-	REG_CMD(GetFormOverrideIndex);
-	REG_CMD(SetJohnnyOnCrosshairEventHandler);
-	REG_CMD(GetSequenceAnimGroup);
-	REG_CMD(QueueObjectiveText);
-	REG_CMD(QueueCinematicText);
-	REG_TYPED_CMD(ar_SortEditor, Array);
-	REG_CMD(SetUIUpdateSound);
-	REG_CMD(GetActorValueAlt);
-	REG_CMD(ModActorValueAlt);
-	REG_CMD(SetActorValueAlt);
-	REG_CMD(ForceActorValueAlt);
-	REG_CMD(DamageActorValueAlt);
-	REG_CMD(RestoreActorValueAlt);
-	REG_CMD(HighlightBodyPartAlt);
-	REG_CMD(DeactivateAllHighlightsAlt);
-	REG_CMD(SetJohnnyOnCompleteQuestEventHandler);
-	REG_CMD(SetJohnnyOnFailQuestEventHandler);
-	REG_CMD(IsDLLLoaded);
-	REG_CMD(SetJohnnyOnSettingsUpdateEventHandler);
-	REG_CMD(GetQuestDelay);
-	REG_CMD(GetNearestCompassHostileDirection);
-	REG_TYPED_CMD(GetNearestCompassHostile, Form);
-	REG_CMD(RefreshIdle);
-	REG_CMD(SetNoteRead);
-	REG_CMD(SetDisablePlayerControlsHUDVisibilityFlags);
-	REG_CMD(GetCameraTranslation);
-	REG_CMD(IsCompassHostile);
-	REG_CMD(SetMessageIconPath);
-	REG_TYPED_CMD(GetMessageIconPath, String);
-	REG_CMD(ExitGameAlt);
-	REG_CMD(ToggleCombatMusic);
-	REG_CMD(IsCombatMusicEnabled);
-	REG_CMD(SetJohnnyOnAddPerkEventHandler);
-	REG_CMD(SetJohnnyOnRemovePerkEventHandler);
-	REG_CMD(IsHostilesNearby);
-	REG_CMD(ModNthTempEffectTimeLeft);
-	REG_TYPED_CMD(GetWeaponWorldModelPath, String);
-	REG_TYPED_CMD(GetBodyPartTraitString, String);
-	REG_CMD(GetActorEffectType);
-	REG_CMD(GetTextureWidth);
-	REG_CMD(GetTextureHeight);
-	REG_CMD(GetTextureFormat);
-	REG_CMD(GetTextureMipMapCount);
-	REG_CMD(GetCalculatedSpread);
-	REG_CMD(SendStealingAlarm);
-	REG_CMD(ApplyWeaponPoison);
-	REG_TYPED_CMD(GetTalkingActivatorActor, Form);
-	REG_TYPED_CMD(GetPlayerKarmaTitle, String);
-	REG_TYPED_CMD(GetCompassHostiles, Array);
-	REG_CMD(ToggleDisableSaves);
-	REG_CMD(SetJohnnyOnRenderUpdateEventHandler);
-	REG_CMD(WorldToScreen);
-	REG_CMD(FaceGenGetNthProperty);
-	REG_CMD(FaceGenSetNthProperty);
-	REG_CMD(FaceGenRefreshAppearance);
-	REG_CMD(SendTrespassAlarmAlt);
-	REG_CMD(IsCrimeOrEnemy);
-	REG_TYPED_CMD(GetAvailablePerks, Array);
-	REG_CMD(GetThresholdedActorValue);
-	REG_CMD(GetEffectShaderTraitNumeric);
-	REG_CMD(SetEffectShaderTraitNumeric);
-	REG_TYPED_CMD(GetEffectShaderTexturePath, String);
-	REG_CMD(SetEffectShaderTexturePath);
-	REG_CMD(GetSystemColor);
-	REG_CMD(RGBtoHSV);
-	REG_CMD(HSVtoRGB);
-	REG_CMD(GetLocationSpecificLoadScreensOnly);
-	REG_TYPED_CMD(GetArmorAltTextures, Array);
-	REG_CMD(GetIdleMarkerTraitNumeric);
-	REG_TYPED_CMD(GetIdleMarkerAnimations, Array);
-	REG_CMD(SetIdleMarkerTraitNumeric);
-	REG_CMD(SetIdleMarkerAnimation);
-	REG_CMD(SetIdleMarkerAnimations);
-	REG_TYPED_CMD(GetWeaponAltTextures, Array);
-	REG_TYPED_CMD(GetRefActivationPromptOverride, String);
-	REG_CMD(SetRefActivationPromptOverride);
-	REG_CMD(GetTerminalMenuItemFlags);
-	REG_CMD(SetTerminalMenuItemFlags);
-	REG_TYPED_CMD(GetLocationName, String);
-	REG_TYPED_CMD(GetRegionMapName, String);
-	REG_CMD(SetRegionMapName);
-	REG_CMD(GetRGBColor);
-	REG_TYPED_CMD(GetPlayingEffectShaders, Array);
-	REG_CMD(GetBookFlags);
-	REG_CMD(SetBookFlags);
-	REG_CMD(GetBookSkill);
-	REG_CMD(SetBookSkill);
-	REG_CMD(SetOnActorValueChangeEventHandler);
-	REG_CMD(RefreshTerminalMenu);
-	REG_CMD(SetRefEncounterZone);
-	REG_TYPED_CMD(GetRefEncounterZone, Form);
-	REG_CMD(SetCellEncounterZone);
-	REG_CMD(SetWorldspaceEncounterZone);
-	REG_TYPED_CMD(GetWorldspaceEncounterZone, Form);
-	REG_CMD(UpdateCrosshairPrompt);
-	REG_CMD(GetLightingTemplateTraitNumeric);
-	REG_CMD(SetLightingTemplateTraitNumeric);
-	REG_TYPED_CMD(GetLightingTemplateCell, Form);
-	REG_CMD(SetLightingTemplateCell);
-	REG_CMD(RemoveScopeModelPath);
-	REG_TYPED_CMD(GetNthRegionWeatherType, Form);
-	REG_CMD(GetNthRegionWeatherChance);
-	REG_TYPED_CMD(GetNthRegionWeatherGlobal, Form);
-	REG_CMD(PlaySoundFile);
-	REG_CMD(StopSoundFile);
-	REG_CMD(StopSoundLooping);
-	REG_CMD(GetSystemColorAlt);
-	REG_CMD(SetCustomReputationChangeIcon);
-	REG_CMD(SetArmorAltTexture);
-	REG_CMD(SetWeaponAltTexture);
-	REG_CMD(ClearWeaponAltTexture);
-	REG_CMD(ClearArmorAltTexture);
-	REG_CMD(AddNavmeshObstacle);
-	REG_CMD(RemoveNavmeshObstacle);
-	REG_CMD(RollCredits);
-	REG_CMD(GetFactionFlags);
-	REG_CMD(SetFactionFlags);
-	REG_TYPED_CMD(GetLandTextureUnderFeet, Form);
-	REG_CMD(SetOnProcessLevelChangeEventHandler);
-	REG_CMD(GetExtraMiscStat);
-	REG_CMD(ModExtraMiscStat);
-	REG_CMD(GetMoonPhase);
-	REG_TYPED_CMD(GetFormRecipesAlt, Array);
-	REG_CMD(RewardKarmaAlt);
-	REG_CMD(GetPackedPlayerFOV);
-	REG_CMD(DialogResponseAddRelatedTopic);
-	REG_TYPED_CMD(DialogResponseRelatedGetAll, Array);
-	REG_CMD(GetPlayerCamFOV);
-	REG_CMD(ShowBarberMenuEx);
-	REG_CMD(InitExtraMiscStat);
-	REG_CMD(TriggerScreenSplatterEx);
-	REG_CMD(SetViewmodelClipDistance);
-	REG_CMD(GetViewmodelClipDistance);
-	REG_CMD(SetBlockTransform);
-	REG_CMD(RefAddrxData);
-	REG_CMD(AudioMarkerGetController);
-	REG_CMD(AudioMarkerSetController);
-	REG_CMD(AudioMarkerGetProperty);
-	REG_CMD(AudioMarkerSetProperty);
-	REG_CMD(IsRadioRefPlaying);
-	REG_CMD(TuneRadioRef);
-	REG_TYPED_CMD(GetAllGameRadios, Array);
-	REG_TYPED_CMD(GetAvailableRadios, Array);
-	REG_CMD(SetJohnnyOnRadioPostSoundAttachEventHandler);
-	REG_CMD(AudioMarkerGetCurrent);
-	REG_CMD(HideItemBarterEx);
-	REG_CMD(IsItemBarterHiddenEx);
-	REG_CMD(GetCurrentFurnitureRef);
-	REG_CMD(SetCameraShakeNoHUDShudder);
-	REG_CMD(GameGetSecondsPassed);
-	REG_CMD(SetJohnnyOnKeyboardControllerSelectionChangeEventHandler);
-	REG_CMD(IsBSALoaded);
-	REG_TYPED_CMD(GetTempIngestibleEffects, Array);
-	REG_CMD(PlaySoundFade);
-	REG_TYPED_CMD(GetPointInNavMesh, Array);
-	REG_TYPED_CMD(GetNearestNavMeshTriangle, Array);
-	REG_TYPED_CMD(GetAltTexturesEx, Array);
-	REG_CMD(HasHealthDamageEffect);
-	REG_CMD(SetAlwaysRun);
-	REG_CMD(SetAutoMove);
-	REG_CMD(SetActorMovementFlags);
-	REG_CMD(PushUIQuestToTop);
-	REG_CMD(SetExtraAccuracyPenaltyMult);
-	REG_CMD(RemoveExtraAccuracyPenaltyMult);
-	REG_CMD(SetJohnnyOnSleepWaitEventHandler);
-	REG_CMD(GetExtraAccuracyPenaltyMult);
-	REG_CMD(SetCustomMapMarker);
-	REG_CMD(ClearCustomMapMarker);
-	REG_CMD(EjectCasing);
-	REG_TYPED_CMD(GetNoteSpeaker, Form);
-	REG_CMD(SetNoteSpeaker);
-	REG_CMD(GetNoteType);
-	REG_CMD(SetNoteType);
-	REG_TYPED_CMD(GetNoteSound, Form);
-	REG_CMD(SetNoteSound);
-	REG_TYPED_CMD(GetNoteTopic, Form);
-	REG_CMD(SetNoteTopic);
-	REG_TYPED_CMD(GetNoteImage, String);
-	REG_CMD(SetNoteImage);
-	REG_TYPED_CMD(GetNoteQuestList, Array);
-	REG_CMD(AddNoteQuest);
-	REG_CMD(RemoveNoteQuest);
-	REG_CMD(SetHUDShudderPower);
-	REG_CMD(GetHUDShudderPower);
-	REG_CMD(SetDialogResponseOverrideValues); // do not document
-	REG_CMD(SetMediaLocationControllerOverride); // do not document
-	REG_CMD(ClearMediaLocationControllerOverride); // do not document
-	REG_CMD(GetCasinoWinnings);
-	REG_CMD(SetCasinoWinnings);
-	REG_CMD(GetAcousticSpace);
-	REG_CMD(SetAcousticSpace);
-	REG_CMD(SetCameraTranslate);
-	REG_CMD(SetCameraRotate);
-	REG_CMD(PlayHolotape);
-	REG_CMD(StopHolotape);
-	REG_CMD(SetOnTakeBackItemEventHandler);
-	REG_TYPED_CMD(GetCasinoDeckTexture, String);
-	REG_CMD(SetCasinoDeckTexture);
-	REG_TYPED_CMD(GetCasinoChip, Form);
-	REG_CMD(SetCasinoChip);
-	REG_TYPED_CMD(GetCustomMapMarkerIcon, String);
-	REG_CMD(GetSleepWaitMenuState);
-	REG_CMD(SetOnNPCResponseEventHandler);
-	REG_CMD(PlaySoundFromPath);
-	REG_CMD(PlaySound3DFromPath);
-	REG_CMD(StopSoundFromPath);
-	REG_CMD(StopSound3DFromPath);
-	REG_CMD(IsSoundPlayingFromPath);
-	REG_CMD(SetOnGeneralSubtitleEventHandler);
-	REG_CMD(PathToRef);
-	REG_CMD(SetOnReputationChangeEventHandler);
-	REG_CMD(IsNiSequenceActive);
-	REG_CMD(GetHotkeySlot);
-	REG_CMD(SetOnNPCActorValueChangeEventHandler);
-	REG_CMD(GetGrenadeHoldTime);
-	REG_CMD(RemoveHighlightedRef);
-	REG_CMD(GetSaidOnce);
-	REG_CMD(SetSaidOnce);
-	REG_TYPED_CMD(GetTopicInfo, Array);
-	REG_CMD(IsMenuPaused);
-	REG_CMD(IsInDialogueWithPlayer);
-	REG_CMD(SetHUDVisibilityOverride);
-	REG_CMD(GetHUDVisibilityOverride);
-	REG_CMD(UpdateRepairMenu);
-	REG_TYPED_CMD(GetWeaponsForMod, Array);
-	REG_CMD(GetMineArmedEx);
-	REG_CMD(SetMusicTypePath);
-	REG_TYPED_CMD(GetParentTopic, Form);
-	REG_CMD(GetCameraShotTraitNumeric);
-	REG_CMD(SetCameraShotTraitNumeric);
-	REG_CMD(GetCameraShotFlags);
-	REG_CMD(SetCameraShotFlags);
-	REG_CMD(GetCameraShotPath);
-	REG_CMD(SetCameraShotPath);
-	REG_TYPED_CMD(GetCameraShotImageSpaceModifier, Form);
-	REG_CMD(SetCameraShotImageSpaceModifier);
-	REG_CMD(SetAlphaPropertyValue);
-	REG_CMD(GetAlphaPropertyValue);
-	REG_CMD(SetStencilPropertyValue);
-	REG_CMD(GetStencilPropertyValue);
-	REG_CMD(PathToPoint);
-	REG_CMD(GetYieldTimer);
-	REG_CMD(SetYieldTimer);
-	REG_CMD(SetSwitchNodeIndex);
-	REG_CMD(GetSwitchNodeIndex);
-	REG_CMD(SetNiLODLevel);
-	REG_CMD(GetNiLODLevel);
-	REG_CMD(SetWeaponScopeUIModel);
-	REG_CMD(ToggleWeaponScopeUIModel);
-	REG_CMD(ClearWeaponScopeUIModel);
-	REG_CMD(UpdateScenegraph);
-	REG_TYPED_CMD(GetNiBound, Array);
-	REG_CMD(CallPerRef);
-	REG_CMD(CallPerRefEx);
-	REG_CMD(CallPerMobileObject);
-	REG_CMD(CallPerMobileObjectEx);
-	REG_CMD(Update3DAlt);
-	REG_CMD(SetNiPSysModifierValue);
-	REG_TYPED_CMD(GetNiPSysModifierValue, Default);
-	REG_TYPED_CMD(ar_Shuffle, Array);
-  	REG_CMD(GetRecipeCategoryFlags);
-	REG_CMD(GetCurrentSkyColor);
-	REG_CMD(RemapLand);
-	REG_CMD(SetParticleEmitterSpawnRate);
-	REG_CMD(GetParticleEmitterSpawnRate);
-	REG_TYPED_CMD(GetItemEffectString, String);
-}
-
-EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info) {
-	// fill out the info structure
-	info->infoVersion = PluginInfo::kInfoVersion;
-	info->name = "JohnnyGuitarNVSE";
-	info->version = JG_VERSION;
-
-	if (nvse->isNogore) {
-		MessageBoxA(nullptr, "German NoGore release of the game is not supported", "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
+	if (apNVSE->isNogore) {
+		MessageBoxA(nullptr, "German NoGore release of the game is not supported", JohnnyPluginData::JG_FULL_NAME, MB_OK | MB_ICONERROR);
 		return false;
 	}
 
-	if (nvse->nvseVersion < PACKED_NVSE_VERSION) {
+	if (apNVSE->nvseVersion < PACKED_NVSE_VERSION) {
 		char cBuffer[128];
 		sprintf_s(cBuffer, "NVSE version is outdated. This plugin requires v%i.%i.%i minimum.", NVSE_VERSION_INTEGER, NVSE_VERSION_INTEGER_MINOR, NVSE_VERSION_INTEGER_BETA);
-		MessageBoxA(nullptr, cBuffer, "JohnnyGuitarNVSE", MB_OK | MB_ICONERROR);
+		MessageBoxA(nullptr, cBuffer, JohnnyPluginData::JG_FULL_NAME, MB_OK | MB_ICONERROR);
 		return false;
 	}
 
-	if (!nvse->isEditor) {
-		if (nvse->runtimeVersion < RUNTIME_VERSION_1_4_0_525) {
-			_MESSAGE("incorrect New Vegas version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
+	if (!apNVSE->isEditor) {
+		if (apNVSE->runtimeVersion < RUNTIME_VERSION_1_4_0_525) {
+			_MESSAGE("incorrect New Vegas version (got %08X need at least %08X)", apNVSE->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
 			return false;
 		}
 	}
 	else {
-		if (nvse->editorVersion < CS_VERSION_1_4_0_518) {
-			_MESSAGE("incorrect GECK version (got %08X need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
+		if (apNVSE->editorVersion < CS_VERSION_1_4_0_518) {
+			_MESSAGE("incorrect GECK version (got %08X need at least %08X)", apNVSE->editorVersion, CS_VERSION_1_4_0_518);
 			return false;
 		}
 	};
 
 	// version checks pass
-	_MESSAGE("JohnnyGuitarNVSE %u Loaded succesfully.", info->version);
+	_MESSAGE("JohnnyGuitarNVSE %u Loaded successfully.", apInfo->version);
 
-	bIsGECK = nvse->isEditor != 0;
+	bIsGECK = apNVSE->isEditor != 0;
 
 	return true;
 }
 
-EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* nvse) {
-	nvse->InitExpressionEvaluatorUtils(&s_expEvalUtils);
+EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* apNVSE) {
+	g_pluginHandle = apNVSE->GetPluginHandle();
+	g_msgInterface = static_cast<NVSEMessagingInterface*>(apNVSE->QueryInterface(kInterface_Messaging));
+	g_msgInterface->RegisterListener(g_pluginHandle, "NVSE", bIsGECK ? JohnnyMessageHandler::GECK : JohnnyMessageHandler::Game);
 
-	nvse->SetOpcodeBase(0x3100);
-	RegisterCommands(nvse);
+	g_scriptInterface = static_cast<NVSEScriptInterface*>(apNVSE->QueryInterface(kInterface_Script));
+	g_cmdTableInterface = static_cast<NVSECommandTableInterface*>(apNVSE->QueryInterface(kInterface_CommandTable));
+	g_arrInterface = static_cast<NVSEArrayVarInterface*>(apNVSE->QueryInterface(kInterface_ArrayVar));
+	g_strInterface = static_cast<NVSEStringVarInterface*>(apNVSE->QueryInterface(kInterface_StringVar));
 
-	g_scriptInterface = static_cast<NVSEScriptInterface*>(nvse->QueryInterface(kInterface_Script));
-	g_cmdTableInterface = static_cast<NVSECommandTableInterface*>(nvse->QueryInterface(kInterface_CommandTable));
-	g_arrInterface = static_cast<NVSEArrayVarInterface*>(nvse->QueryInterface(kInterface_ArrayVar));
-	g_strInterface = static_cast<NVSEStringVarInterface*>(nvse->QueryInterface(kInterface_StringVar));
+	JohnnyCommands::Init(apNVSE);
 
 	JohnnyPatches::ReadINI();
 
-	g_pluginHandle = nvse->GetPluginHandle();
-	g_msgInterface = static_cast<NVSEMessagingInterface*>(nvse->QueryInterface(kInterface_Messaging));
-	g_msgInterface->RegisterListener(g_pluginHandle, "NVSE", bIsGECK ? MessageHandlerGECK : MessageHandler);
-
 	if (JohnnyPatches::bFixJIP) {
 		JIPFixes::InitData();
-		JIPFixes::InitEarlyHooks();
+		JIPFixes::InitEarlyHooks(bIsGECK);
 	}
 
 	if (!bIsGECK) {
-		FixedStringsRework::Init();
-
-		NVSEDataInterface* nvseData = static_cast<NVSEDataInterface*>(nvse->QueryInterface(kInterface_Data));
-		JohnnyExtraData::InitName();
-		JohnnyExtraData::Initialize(nvseData);
-
-		InventoryRefGetForID = static_cast<InventoryRef * (*)(uint32_t)>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
-		CaptureLambdaVars = static_cast<_CaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
-		UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
+		NVSEDataInterface* pNVSEData = static_cast<NVSEDataInterface*>(apNVSE->QueryInterface(kInterface_Data));
+		InventoryRefGetForID = static_cast<InventoryRef * (*)(uint32_t)>(pNVSEData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
+		CaptureLambdaVars = static_cast<_CaptureLambdaVars>(pNVSEData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
+		UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(pNVSEData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
 		ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
 
-		JGGameCamera.WorldMatrx = new JGWorldToScreenMatrix;
-		JGGameCamera.CamPos = new JGCameraPosition;
-		DisabledSaves::Init();
-		CustomHUDShake::Init();
-		JohnnyFixes::Install();
-		JohnnyPatches::Install();
+		FixedStringsRework::Init();
+
+		JohnnyExtraData::Initialize(pNVSEData);
+
+		JohnnyFixes::Init();
+		JohnnyPatches::Init();
 		JohnnyGameSettings::Init();
-		JohnnyEvents::Install();
-		Serialization::Init(nvse);
+		JohnnyEvents::Init();
+		JohnnySerialization::Init(apNVSE);
 	}
 
 	return true;

@@ -4,6 +4,8 @@
 #include "BSSimpleList.hpp"
 #include "BSStringT.hpp"
 
+class AlchemyItem;
+
 class ExtraDataList : public BaseExtraList {
 public:
 	static ExtraDataList* Create();
@@ -15,6 +17,9 @@ public:
 #endif
 
 	void CopyListForReference(ExtraDataList* apCopy, bool abRemove);
+
+	void SetPoison(AlchemyItem* apPoison);
+	void RemovePoison();
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

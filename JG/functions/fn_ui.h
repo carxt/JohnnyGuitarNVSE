@@ -20,11 +20,12 @@ DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , false, kParams_OneInt_OneOptionalForm)
 DEFINE_COMMAND_ALT_PLUGIN(PushUIQuestToTop, PushSelectedQuestInterfaceListEntryToTheTopOfThePipBoyQuestLogInterfaceImmediately, , false, kParams_OneQuest);
 DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , false, nullptr); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , false, nullptr);
-DEFINE_CMD_ALT_COND_PLUGIN(IsMenuPaused, , "", false, kParams_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(IsMenuPaused, , false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetHUDVisibilityOverride, "Sets HUD element visibility override flags", false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", false, nullptr);
 DEFINE_COMMAND_PLUGIN(UpdateRepairMenu, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(SetWeaponScopeUIModel, , false, kParams_OneString_OneOptionalObject);
 DEFINE_COMMAND_PLUGIN(ToggleWeaponScopeUIModel, , false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(ClearWeaponScopeUIModel, , false, nullptr);
-
+DEFINE_COMMAND_PLUGIN(GetMenuItemListIndex, , true, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(SelectMenuItemListIndex, , false, kParams_OneInt_OneOptionalInt);

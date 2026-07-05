@@ -20,13 +20,4 @@ DEFINE_COMMAND_PLUGIN(SetNiPSysModifierValue, , true, kParams_SetNiPSysModifierV
 DEFINE_COMMAND_PLUGIN(GetNiPSysModifierValue, , true, kParams_GetNiPSysModifierValue);
 DEFINE_COMMAND_PLUGIN(SetParticleEmitterSpawnRate, , true, kParams_SetParticleEmitterSpawnRate);
 DEFINE_COMMAND_PLUGIN(GetParticleEmitterSpawnRate, , true, kParams_GetSwitchNodeIndex);
-
-namespace {
-	
-	template<typename T>
-	inline bool InRange(volatile T value) {
-		return value > T::NONE && value < T::COUNT;
-	}
-	
-}
-
+DEFINE_COMMAND_PLUGIN(StopNiSequence, , true, kParams_StopNiSequence);

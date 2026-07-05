@@ -327,6 +327,7 @@ class QueuedReplacementKFList;
 class QueuedHelmet;
 class BSFileEntry;
 class LoadedFile;
+class TESBoundObject;
 
 // 1C
 class ModelLoader {
@@ -349,4 +350,6 @@ public:
 	static ModelLoader* GetSingleton();
 	void QueueReference(TESObjectREFR* apRef, IO_TASK_PRIORITY aePriority, bool abAllowQueueReferenceQueuing);
 	NiNode* LoadModel(const char* nifPath, uint32_t arg2, uint8_t arg3, uint32_t arg4, uint8_t arg5, uint8_t arg6);
+
+	TESModel* GetModelForBoundObject(TESBoundObject* apBoundObject, TESObjectREFR* apRef);
 };

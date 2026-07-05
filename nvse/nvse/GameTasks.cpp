@@ -54,3 +54,7 @@ ModelLoader* ModelLoader::GetSingleton() {
 void ModelLoader::QueueReference(TESObjectREFR* apRef, IO_TASK_PRIORITY aePriority, bool abAllowQueueReferenceQueuing) {
 	ThisCall(0x444850, this, apRef, aePriority, abAllowQueueReferenceQueuing);
 }
+
+TESModel* ModelLoader::GetModelForBoundObject(TESBoundObject* apBoundObject, TESObjectREFR* apRef) {
+	return ThisCall<TESModel*>(0x446A60, this, apBoundObject, apRef);
+}

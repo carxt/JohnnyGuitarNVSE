@@ -129,6 +129,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="..\nvse\nvse\GameForms.cpp" />
     <ClCompile Include="..\nvse\nvse\GameObjects.cpp" />
     <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp" />
+    <ClCompile Include="..\nvse\nvse\GameProcess.cpp" />
     <ClCompile Include="..\nvse\nvse\GameRTTI.cpp" />
     <ClCompile Include="..\nvse\nvse\GameScript.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp" />
@@ -311,12 +312,14 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Obsidian\TESRecipeComponent.cpp" />
     <ClCompile Include="internal\Game\Obsidian\TESReputation.cpp" />
     <ClCompile Include="internal\JG\AddItemMessages.cpp" />
+    <ClCompile Include="internal\JG\AnimActivationHeight.cpp" />
     <ClCompile Include="internal\JG\BarterFilter.cpp" />
     <ClCompile Include="internal\JG\CameraOverlay.cpp" />
     <ClCompile Include="internal\JG\CameraOverride.cpp" />
     <ClCompile Include="internal\JG\CloudUpdateFix.cpp" />
     <ClCompile Include="internal\JG\CustomCameraShake.cpp" />
     <ClCompile Include="internal\JG\CustomHUDShake.cpp" />
+    <ClCompile Include="internal\JG\DeathSoundFix.cpp" />
     <ClCompile Include="internal\JG\DialogueResponseOverride.cpp" />
     <ClCompile Include="internal\JG\DisabledArrowKeys.cpp" />
     <ClCompile Include="internal\JG\DisabledLevelUp.cpp" />
@@ -328,7 +331,10 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\JG\ExtraReputationIcons.cpp" />
     <ClCompile Include="internal\JG\ExtraUISounds.cpp" />
     <ClCompile Include="internal\JG\FixedStringsRework.cpp" />
+    <ClCompile Include="internal\JG\JohnnySerialization.cpp" />
+    <ClCompile Include="internal\JG\JohnnyCommands.cpp" />
     <ClCompile Include="internal\JG\JohnnyFixes.cpp" />
+    <ClCompile Include="internal\JG\JohnnyMessageHandler.cpp" />
     <ClCompile Include="internal\JG\JohnnyPatches.cpp" />
     <ClCompile Include="internal\JG\JohnnyGameSettings.cpp" />
     <ClCompile Include="internal\JG\JohnnyExtraData.cpp" />
@@ -339,18 +345,18 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp" />
     <ClCompile Include="internal\JG\RadioSkipOGGWAVPatch.cpp" />
     <ClCompile Include="internal\JG\RSMBarberHook.cpp" />
+    <ClCompile Include="internal\JG\ScriptUtils.cpp" />
     <ClCompile Include="internal\JG\TaskQueue.cpp" />
+    <ClCompile Include="internal\JG\WorldToScreen.cpp" />
     <ClCompile Include="internal\JIP\JIPFixes.cpp" />
     <ClCompile Include="internal\JIP\JIPSettings.cpp" />
     <ClCompile Include="internal\JIP\JIPUtils.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
     <ClCompile Include="internal\netimmerse.cpp" />
-    <ClCompile Include="internal\serialization.cpp" />
     <ClCompile Include="internal\sha1\sha1.cpp" />
     <ClCompile Include="internal\utility.cpp" />
     <ClCompile Include="JohnnyGuitarNVSE.cpp" />
     <ClCompile Include="misc\misc.cpp" />
-    <ClCompile Include="misc\WorldToScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\CommandTable.h" />
@@ -379,7 +385,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="..\shared\Utils\Bitfield.hpp" />
     <ClInclude Include="..\shared\Utils\DebugLog.hpp" />
     <ClInclude Include="events\EventFramework.h" />
-    <ClInclude Include="events\JohnnyEvents.h" />
+    <ClInclude Include="events\JohnnyEvents.hpp" />
     <ClInclude Include="events\JohnnyMessageData.hpp" />
     <ClInclude Include="events\LambdaVariableContext.h" />
     <ClInclude Include="functions\fn_av.h" />
@@ -741,12 +747,14 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Obsidian\TESReputation.hpp" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\JG\AddItemMessages.hpp" />
+    <ClInclude Include="internal\JG\AnimActivationHeight.hpp" />
     <ClInclude Include="internal\JG\BarterFilter.hpp" />
     <ClInclude Include="internal\JG\CameraOverlay.hpp" />
     <ClInclude Include="internal\JG\CameraOverride.hpp" />
     <ClInclude Include="internal\JG\CloudUpdateFix.hpp" />
     <ClInclude Include="internal\JG\CustomCameraShake.hpp" />
     <ClInclude Include="internal\JG\CustomHUDShake.hpp" />
+    <ClInclude Include="internal\JG\DeathSoundFix.hpp" />
     <ClInclude Include="internal\JG\DialogueResponseOverride.hpp" />
     <ClInclude Include="internal\JG\DisabledArrowKeys.hpp" />
     <ClInclude Include="internal\JG\DisabledLevelUp.hpp" />
@@ -759,7 +767,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\ExtraUISounds.hpp" />
     <ClInclude Include="internal\JG\FixedStringsRework.hpp" />
     <ClInclude Include="internal\JG\JGSetList.hpp" />
+    <ClInclude Include="internal\JG\JohnnySerialization.hpp" />
+    <ClInclude Include="internal\JG\JohnnyCommands.hpp" />
     <ClInclude Include="internal\JG\JohnnyFixes.hpp" />
+    <ClInclude Include="internal\JG\JohnnyPluginData.hpp" />
+    <ClInclude Include="internal\JG\JohnnyMessageHandler.hpp" />
     <ClInclude Include="internal\JG\JohnnyPatches.hpp" />
     <ClInclude Include="internal\JG\JohnnyGameSettings.hpp" />
     <ClInclude Include="internal\JG\JohnnyExtraData.hpp" />
@@ -770,18 +782,18 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\QuestObjectiveDisplayFix.hpp" />
     <ClInclude Include="internal\JG\RadioSkipOGGWAVPatch.hpp" />
     <ClInclude Include="internal\JG\RSMBarberHook.hpp" />
+    <ClInclude Include="internal\JG\ScriptUtils.hpp" />
     <ClInclude Include="internal\JG\TaskQueue.hpp" />
+    <ClInclude Include="internal\JG\WorldToScreen.hpp" />
     <ClInclude Include="internal\JIP\JIPFixes.hpp" />
     <ClInclude Include="internal\JIP\JIPSettings.hpp" />
     <ClInclude Include="internal\JIP\JIPUtils.hpp" />
     <ClInclude Include="internal\md5\md5.h" />
     <ClInclude Include="internal\netimmerse.h" />
-    <ClInclude Include="internal\serialization.h" />
     <ClInclude Include="internal\sha1\sha1.h" />
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="JohnnyGuitarNVSE.h" />
     <ClInclude Include="misc\misc.h" />
-    <ClInclude Include="misc\WorldToScreen.h" />
     <ClInclude Include="..\nvse\nvse\PluginAPI.h" />
   </ItemGroup>
   <ItemGroup>

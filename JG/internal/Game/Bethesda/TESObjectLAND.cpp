@@ -115,6 +115,11 @@ void TESObjectLAND::GetVertex(uint32_t auiBlock, uint32_t auiVertex, NiPoint3& a
 #endif
 }
 
+// GAME - 0x53A5E0
+TESLandTexture* TESObjectLAND::GetMainTexture(const NiPoint3& arPosition) const {
+    return ThisCall<TESLandTexture*>(0x53A5E0, this, &arPosition);
+}
+
 // GAME - 0x535B30
 NiPoint3 TESObjectLAND::GetWorldOffsetForBlock(uint32_t auiBlock) const {
     return ThisCall<NiPoint3>(0x535B30, this, auiBlock);

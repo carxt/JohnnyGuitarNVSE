@@ -69,7 +69,7 @@ namespace ExtraMiscStats {
 	}
 
 	void Update() {
-		if (StatsMenu::Get() && InterfaceManager::GetSingleton() && InterfaceManager::GetSingleton()->IsMenuVisible(kMenuType_Stats) && recalculateStatFilters) {
+		if (StatsMenu::Get() && InterfaceManager::GetSingleton() && Menu::IsMenuVisible(Interface::Menus::Stats) && recalculateStatFilters) {
 			recalculateStatFilters = false;
 			StatsMenu::Get()->miscStatIDList.Filter(ShouldHideStat);
 
@@ -84,7 +84,7 @@ namespace ExtraMiscStats {
 
 	void Install() {
 		// Get/ModExtraMiscStat
-		SafeWrite32(0x7DDAB1, uint32_t(MiscStatRefreshHook));
+		HookUtils::SafeWrite32(0x7DDAB1, uint32_t(MiscStatRefreshHook));
 	}
 
 	bool InitStat(const char* name) {

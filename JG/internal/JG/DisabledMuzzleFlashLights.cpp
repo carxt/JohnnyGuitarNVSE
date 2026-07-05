@@ -2,27 +2,30 @@
 #include "GameObjects.h"
 
 namespace DisabledMuzzleFlashLights {
-	uint32_t disableMuzzleLights = -1;
 
-	void __fastcall DisableMuzzleFlashLightsHook(ProjectileData* a1) {
-		if (*&a1->muzzleFlash && a1->projectile->kData.pMuzzleFlashLight) {
-			if (!disableMuzzleLights || (disableMuzzleLights == 2 && a1->sourceActor != (Actor*)PlayerCharacter::GetSingleton()) || (disableMuzzleLights == 3 && a1->sourceActor == (Actor*)PlayerCharacter::GetSingleton())) {
-				NiNode* niNode = ThisCall<NiNode*>(0x50D810, a1->projectile->kData.pMuzzleFlashLight, 0, *&a1->muzzleFlash, 1);
-				ThisCall(0x66B0D0, &a1->flashLight, niNode);
-			}
+	Mode eDisableMode = Mode::ENABLE;
+
+	HookUtils::CallDetour kDetour;
+
+	void __fastcall DisableMuzzleFlashLightsHook(MuzzleFlash* apMuzzleFlash) {
+		if (eDisableMode == Mode::ENABLE
+			|| (eDisableMode == Mode::DISABLE_NPCS && apMuzzleFlash->pSourceActor != PlayerCharacter::GetSingleton())
+			|| (eDisableMode == Mode::DISABLE_PLAYER && apMuzzleFlash->pSourceActor == PlayerCharacter::GetSingleton())) {
+			ThisCall(kDetour, apMuzzleFlash);
 		}
 	}
 
 	void Install() {
-		// DisableMuzzleFlashLights
-		WriteRelCall(0x9BAFED, (uint32_t)DisableMuzzleFlashLightsHook);
+		kDetour.ReplaceCall(0x9BAFED, DisableMuzzleFlashLightsHook);
 	}
+
 	void Reset() {
-		disableMuzzleLights = 0; //reset the muzzle hook every time
+		eDisableMode = Mode::ENABLE; //reset the muzzle hook every time
 	}
-	uint32_t SetMode(uint32_t mode)
-	{
-		disableMuzzleLights = mode;
-		return disableMuzzleLights;
+
+	Mode SetMode(Mode aeMode) {
+		eDisableMode = aeMode;
+		return eDisableMode;
 	}
+
 }

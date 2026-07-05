@@ -7,10 +7,12 @@
 #include <PluginAPI.h>
 #include <GameExtraData.h>
 #include "GameProcess.h"
+#include "GameTasks.h"
 #include <unordered_map>
 #include "JG/JGSetList.hpp"
 #include <JG/BarterFilter.hpp>
 #include <JG/JohnnyExtraData.hpp>
+#include <JG/AnimActivationHeight.hpp>
 #include <GameData.h>
 #include <GameRTTI.h>
 #include "decoding.h"
@@ -21,7 +23,10 @@
 #include <JG/LandRemapping.hpp>
 #include <Bethesda/BSShaderManager.hpp>
 #include <Bethesda/TESMain.hpp>
-#include <Bethesda/Calendar.hpp>
+#include <Bethesda/BSUtilities.hpp>
+
+#include "JG/ScriptUtils.hpp"
+using namespace ScriptUtils;
 
 extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, uint8_t numArgs, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
@@ -191,49 +196,50 @@ void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC
 
 
 bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
-	TESForm* itemFilter = nullptr, * filterArg = nullptr;
-	uint32_t unhideOrHide = 0, flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &unhideOrHide, &flags, &filterArg) && itemFilter) {
-		DWORD idToHandle = 0;
-		if (filterArg) {
-			idToHandle = filterArg->GetFormID();
-		}
-		if (unhideOrHide) {
-			BarterFilter::Add(itemFilter->GetFormID(), flags, idToHandle);
-		}
-		else {
-			BarterFilter::Remove(itemFilter->GetFormID(), flags, idToHandle);
-		}
+	const TESForm* pItem = nullptr;
+	const TESForm* pSeller = nullptr;
+	BOOL bAdd = TRUE;
+	uint32_t uiFlags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pItem, &bAdd, &uiFlags, &pSeller) && pItem) {
+		const uint32_t uiFormID = pItem->GetFormID();
+		const uint32_t uiSellerFormID = pSeller ? pSeller->GetFormID() : 0;
 
+		if (bAdd)
+			*result = BarterFilter::Add(uiFormID, uiFlags, uiSellerFormID);
+		else
+			*result = BarterFilter::Remove(uiFormID, uiFlags, uiSellerFormID);
 	}
 	return true;
 }
 
 bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
-	TESForm* itemFilter, * filterArg = nullptr;
-	DWORD flags = 0;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemFilter, &filterArg) && itemFilter) {
-		DWORD outflags = 0;
-		DWORD idToHandle = 0;
-		if (filterArg) {
-			idToHandle = filterArg->GetFormID();
-		}
-		*result = BarterFilter::IsHidden(idToHandle);
+	const TESForm* pItem = nullptr;
+	const TESForm* pSeller = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pItem, &pSeller) && pItem) {
+		const uint32_t uiFormID = pItem->GetFormID();
+		const uint32_t uiSellerFormID = pSeller ? pSeller->GetFormID() : 0;
+
+		*result = BarterFilter::IsHidden(uiFormID, uiSellerFormID);
+		if (IsConsoleMode())
+			Console_Print("IsItemBarterHiddenEx >> %f", *result);
 	}
 	return true;
 }
 
-
-bool Cmd_IsRadioRefPlaying_Execute(COMMAND_ARGS) {
+bool Cmd_IsRadioRefPlaying_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj && thisObj->baseForm && IS_TYPE(thisObj->baseForm, TESObjectACTI)) {
-		TESObjectACTI* baseActi = (TESObjectACTI*)thisObj->baseForm;
+		TESObjectACTI* baseActi = static_cast<TESObjectACTI*>(thisObj->baseForm);
 		if (baseActi->GetRadioStation()) {
 			*result = (CdeclCall<void*>(0x0832930, thisObj) != nullptr);
 		}
 	}
 	return true;
+}
+
+bool Cmd_IsRadioRefPlaying_Execute(COMMAND_ARGS) {
+	return Cmd_IsRadioRefPlaying_Eval(thisObj, nullptr, nullptr, result);
 }
 
 bool Cmd_TuneRadioRef_Execute(COMMAND_ARGS) {
@@ -1399,13 +1405,17 @@ bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 }
 
 // 0 - alive, 1 - dying/ragdolled, 2 - dead, 3 - unconscious, 5 - restrained, 6 - essential unconscious
-bool Cmd_GetLifeState_Execute(COMMAND_ARGS) {
-	Actor* actor = (Actor*)thisObj;
+bool Cmd_GetLifeState_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
-	if (actor && actor->IsActor()) {
-		*result = actor->lifeState;
-		if (IsConsoleMode()) Console_Print("GetLifeState >> %.f", *result);
-	}
+	if (thisObj && thisObj->IsActor())
+		*result = static_cast<Actor*>(thisObj)->lifeState;
+	return true;
+}
+
+bool Cmd_GetLifeState_Execute(COMMAND_ARGS) {
+	Cmd_GetLifeState_Eval(thisObj, nullptr, nullptr, result);
+	if (IsConsoleMode()) 
+		Console_Print("GetLifeState >> %.f", *result);
 	return true;
 }
 
@@ -1735,14 +1745,11 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 			fCondition = thisObj->GetHealth();
 		}
 		else {
-			if (pInvRef->data.type && pInvRef->data.type->GetFormType() != FORM_TYPE::TESObjectWEAP)
-				return true;
-
-			pWeapon = static_cast<TESObjectWEAP*>(pInvRef->data.type);
-
-			if (pInvRef->data.xData) {
-				fCondition = pInvRef->data.entry->GetItemHealth(true) / 100.f;
-				pExtraData = pInvRef->data.xData;
+			weapon = (TESObjectWEAP*)invRef->pForm;
+			if NOT_ID(weapon, TESObjectWEAP) return true;
+			if (invRef->pExtraDataList) {
+				condition = invRef->pItemChange->GetItemHealth(true) / 100.0F;
+				extendPtr = invRef->pExtraDataList;
 			}
 		}
 	}
@@ -1793,9 +1800,9 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 			*result = 1;
 		}
 		else {
-			uint32_t iHoursToRespawnCell = *(uint32_t*)0x11CA164;
-			uint32_t uiGameHoursPassed = Calendar::GetSingleton()->GetHoursPassed();
-			*result = (uiGameHoursPassed - uiDetachTime) >= iHoursToRespawnCell;
+			const float daysPassed = GameTimeGlobals::GetSingleton()->daysPassed ? GameTimeGlobals::GetSingleton()->daysPassed->data : 1.f;
+			gameHoursPassed = floor(daysPassed * 24.0);
+			*result = ((gameHoursPassed - detachTime) >= iHoursToRespawnCell);
 		}
 		if (IsConsoleMode())
 			Console_Print("IsCellExpired >> %.0f", *result);
@@ -1963,17 +1970,17 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 		return true;
 
 	InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
-	if (!pInvRef || pInvRef->containerRef != PlayerCharacter::GetSingleton())
+	if (!pInvRef || pInvRef->pContainerRef != PlayerCharacter::GetSingleton())
 		return true;
 
-	if (!pInvRef->data.type)
+	if (!pInvRef->pForm)
 		return true;
 
-	FORM_TYPE eFormType = pInvRef->data.type->GetFormType();
+	FORM_TYPE eFormType = pInvRef->pForm->GetFormType();
 	if (eFormType != FORM_TYPE::TESObjectARMO && eFormType != FORM_TYPE::TESObjectWEAP && eFormType != FORM_TYPE::AlchemyItem)
 		return true;
 
-	ExtraDataList* pExtraData = pInvRef->data.xData;
+	ExtraDataList* pExtraData = pInvRef->pExtraDataList;
 	if (!pExtraData)
 		return true;
 
@@ -2520,6 +2527,17 @@ enum UPDATE3D_FLAGS_EX {
 	UPDATE_POS		= 1u << 6,
 };
 
+static ShadowSceneNode* FindSceneNodeRecurse(const NiAVObject* apObject) {
+	NiNode* pParent = apObject->GetParent();
+	if (!pParent)
+		return nullptr;
+
+	if (pParent->IsExactKindOf<ShadowSceneNode>())
+		return static_cast<ShadowSceneNode*>(pParent);
+	else
+		return FindSceneNodeRecurse(pParent);
+}
+
 static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
 	if (auiFlags & UPDATE_MODEL) {
 		apReference->Update3D();
@@ -2534,8 +2552,12 @@ static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_
 		apReference->SetScale(apReference->GetRawScale());
 
 	if (auiFlags & UPDATE_LIGHTS) {
-		ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(BSShaderManager::SceneGraphType::WORLD);
-		pSSN->UpdateObjectLighting(apReference->Get3DSimple(), false);
+		NiAVObject* pRoot = apReference->Get3DSimple();
+		if (pRoot) {
+			ShadowSceneNode* pSSN = FindSceneNodeRecurse(pRoot);
+			if (pSSN)
+				pSSN->UpdateObjectLighting(pRoot, false);
+		}
 	}
 
 	if (auiFlags & UPDATE_POS) {
@@ -2735,5 +2757,164 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 	if (IsConsoleMode())
 		Console_Print("GetItemEffectString >> %s", cEffects);
 
+	return true;
+}
+
+
+bool Cmd_ApplyModelTextureSwap_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESBoundObject* pBaseForm = nullptr;
+	TESObjectREFR* pReference = nullptr;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBaseForm, &cObjectName, &pReference, &bFirstPerson) && pBaseForm) {
+		NiAVObject* pScene = GetReferenceScene(thisObj, bFirstPerson);
+		if (cObjectName[0])
+			pScene = BSUtilities::GetObjectByName(pScene, cObjectName);
+
+		if (pScene) {
+			TESModel* pModel = ModelLoader::GetSingleton()->GetModelForBoundObject(pBaseForm, pReference);
+			if (pModel) {
+				TESModelTextureSwap* pTexSwap = pModel->GetAsModelMaterialSwap();
+				if (pTexSwap) {
+					pTexSwap->SwapTextures(pScene);
+					*result = 1;
+				}
+			}
+
+			if (pBaseForm->GetHasPLSpecTex()) {
+				CdeclCall(0x4B7660, pScene); // SwapPlatformLanguageTextures
+				*result = 1;
+			}
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetCombatTargetDistance_Eval(COMMAND_ARGS_EVAL) {
+	*result = -1.0;
+	if (thisObj->IsActor()) {
+		const Actor* pActor = static_cast<Actor*>(thisObj);
+		const Actor* pTarget = pActor->GetCombatTarget();
+		if (pTarget)
+			*result = pActor->GetPos().Distance(pTarget->GetPos());
+	}
+	return true;
+}
+
+bool Cmd_GetCombatTargetDistance_Execute(COMMAND_ARGS) {
+	Cmd_GetCombatTargetDistance_Eval(thisObj, nullptr, nullptr, result);
+	return true;
+}
+
+enum class IKType : int32_t {
+	NONE = -1,
+	LOOK = 0,
+	FOOT = 1,
+	GRAB = 2,
+	COUNT,
+};
+
+bool Cmd_SetIKState_Execute(COMMAND_ARGS) {
+	IKType eType = IKType::NONE;
+	BOOL bToggle = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &bToggle) && InRange(eType) && thisObj->IsActor()) {
+		const Actor* pActor = static_cast<Actor*>(thisObj);
+		bhkRagdollController* pCtrl = pActor->ragDollController;
+		if (pCtrl) {
+			switch (eType) {
+				case IKType::LOOK:
+					pCtrl->SetLookIKEnable(bToggle);
+					break;
+				case IKType::FOOT:
+					pCtrl->SetFootIKEnable(bToggle);
+					break;
+				case IKType::GRAB:
+					pCtrl->SetGrabIKEnable(bToggle);
+					break;
+				default:
+					__assume(0);
+					break;
+			}
+		}
+	}
+	return true;
+}
+
+bool SPEC_NOINLINE Cmd_GetIKState_Eval(COMMAND_ARGS_EVAL) {
+	*result = -1.0;
+	const IKType eType = *reinterpret_cast<IKType*>(&arg1);
+	if (InRange(eType) && thisObj->IsActor()) {
+		const Actor* pActor = static_cast<Actor*>(thisObj);
+		bhkRagdollController* pCtrl = pActor->ragDollController;
+		if (pCtrl) {
+			switch (eType) {
+				case IKType::LOOK:
+					*result = pCtrl->GetLookIKEnable();
+					break;
+				case IKType::FOOT:
+					*result = pCtrl->GetFootIKEnable();
+					break;
+				case IKType::GRAB:
+					*result = pCtrl->GetGrabIKEnable();
+					break;
+				default:
+					__assume(0);
+					break;
+			}
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetIKState_Execute(COMMAND_ARGS) {
+	IKType eType = IKType::NONE;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &eType);
+	return Cmd_GetIKState_Eval(thisObj, reinterpret_cast<void*>(eType), nullptr, result);
+}
+
+bool Cmd_IsCarryable_Eval(COMMAND_ARGS_EVAL) {
+	TESForm* pForm = reinterpret_cast<TESForm*>(arg1);
+	pForm = pForm ? pForm : thisObj;
+	if (!pForm)
+		pForm = CdeclCall<TESForm*>(0x6008F0); // TESIdleManager::GetUsedItem
+
+	*result = TESContainer::ContainerCanHoldForm(pForm);
+	return true;
+}
+
+bool Cmd_IsCarryable_Execute(COMMAND_ARGS) {
+	TESForm* pForm = nullptr;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pForm);
+	Cmd_IsCarryable_Eval(thisObj, pForm, nullptr, result);
+
+	if (IsConsoleMode())
+		Console_Print("IsCarryable >> %f", *result);
+
+	return true;
+}
+
+bool Cmd_PickIdleEx_Execute(COMMAND_ARGS) {
+	if (!thisObj->IsActor())
+		return true;
+	
+	Actor* pUser = static_cast<Actor*>(thisObj);
+	if (!pUser->baseProcess)
+		return true;
+
+	TESObjectREFR* pTargetRef = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetRef) && pTargetRef && pTargetRef->baseForm)
+		*result = static_cast<LowProcess*>(pUser->baseProcess)->FindSpecialIdletoPlay(pUser, pTargetRef->baseForm, pTargetRef);
+
+	return true;
+}
+
+bool Cmd_GetUsedItemHeight_Eval(COMMAND_ARGS_EVAL) {
+	*result = AnimActivationHeight::GetHeight();
+	return true;
+}
+
+bool Cmd_GetUsedItemHeight_Execute(COMMAND_ARGS) {
+	Cmd_GetUsedItemHeight_Eval(thisObj, nullptr, nullptr, result);
 	return true;
 }

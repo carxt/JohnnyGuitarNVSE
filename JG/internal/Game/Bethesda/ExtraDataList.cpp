@@ -18,3 +18,13 @@ void ExtraDataList::CopyListForContainer(ExtraDataList* apCopy, bool abDontRemov
 void ExtraDataList::CopyListForReference(ExtraDataList* apCopy, bool abRemove) {
 	ThisCall(0x412490, this, apCopy, abRemove);
 }
+
+// GAME - 0x419D10
+void ExtraDataList::SetPoison(AlchemyItem* apPoison) {
+	ThisCall(0x419D10, this, apPoison);
+}
+
+// GAME - 0x41AF30
+void ExtraDataList::RemovePoison() {
+	ThisCall(0x41AF30, this);
+}

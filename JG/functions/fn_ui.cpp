@@ -10,6 +10,8 @@
 #include <JG/ExtraReputationIcons.hpp>
 #include <JG/ExtraMarkerIcons.hpp>
 
+extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 	if (PlayerCharacter::GetSingleton()) {
 		auto headNode = PlayerCharacter::GetSingleton()->questObjectiveList.Head();
@@ -73,7 +75,7 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
-	
+
 	BGSListForm* formList = nullptr;
 	uint32_t flags = 0;
 	if (!PlayerCharacter::GetSingleton()) return true;
@@ -260,22 +262,22 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	else {
 		ExtraMarkerIcons::SetMapMarkerIcon(form, iconPath);
 	}
-	if (IsConsoleMode()) 
+	if (IsConsoleMode())
 		Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->GetFormID(), iconPath);
 	return true;
 }
 
 bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
-	if (!thisObj || (!thisObj->IsReference() || !thisObj->IsMapMarker())) 
+	if (!thisObj || (!thisObj->IsReference() || !thisObj->IsMapMarker()))
 		return true;
 
 	ExtraMapMarker* mapMarkerExtra = thisObj->extraDataList.GetExtraData<ExtraMapMarker>();
 	if (!mapMarkerExtra || !mapMarkerExtra->pData)
 		return true;
-	
+
 	const char* resStr = ExtraMarkerIcons::GetMapMarker(thisObj, mapMarkerExtra->pData->usType);
 	g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
-	if (IsConsoleMode()) 
+	if (IsConsoleMode())
 		Console_Print("GetCustomMapMarkerIcon >> %s", resStr);
 	return true;
 }
@@ -394,5 +396,153 @@ bool Cmd_ToggleWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 bool Cmd_ClearWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 	Interface::SetGunScopeVisible(false);
 	Interface::ClearGunScope();
+	return true;
+}
+
+
+bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
+	*result = -1;
+
+	if (!InterfaceManager::GetSingleton())
+		return true;
+
+	BOOL bRightSide = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bRightSide)) {
+		// Find listbox
+		const ListBox<ItemChange>* pListBox = nullptr;
+		switch (Interface::GetTopMenuID()) {
+			case Interface::Menus::MainFour:
+			{
+				if (Menu::IsMenuVisible(Interface::Menus::PipboyRepair))
+					pListBox = &RepairMenu::GetSingleton()->repairItems;
+				else if (Menu::IsMenuVisible(Interface::Menus::Inventory))
+					pListBox = &InventoryMenu::GetSingleton()->itemList;
+				break;
+			}
+			case Interface::Menus::Container:
+			{
+				const ContainerMenu* pMenu = ContainerMenu::GetSingleton();
+				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
+				break;
+			}
+			case Interface::Menus::Barter:
+			{
+				const BarterMenu* pMenu = BarterMenu::GetSingleton();
+				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
+				break;
+			}
+			case Interface::Menus::VendorRepair:
+				pListBox = &RepairServicesMenu::GetSingleton()->itemList;
+				break;
+			default:
+				return true;
+		}
+
+		if (!pListBox)
+			return true;
+
+		InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
+		if (!pInvRef)
+			return true;
+
+		for (auto pIter = pListBox->GetHead(); pIter && !pIter->IsEmpty(); pIter = pIter->GetNext()) {
+			auto pItem = pIter->GetItem();
+
+			if (pItem && pItem->tile && pItem->object) {
+				const ItemChange* pItemChange = pItem->object;
+
+				if (pItemChange->pObject != pInvRef->pForm)
+					continue;
+
+				bool bMatched = false;
+
+				// Does extra data match
+				if (pInvRef->pExtraDataList) {
+					if (pItemChange->pExtraLists && pItemChange->pExtraLists->IsInList(pInvRef->pExtraDataList))
+						bMatched = true;
+				}
+
+				// No extra data
+				else if (!pItemChange->pExtraLists || pItemChange->pExtraLists->IsEmpty())
+					bMatched = true;
+
+				// Find matching tile index
+				if (!bMatched)
+					continue;
+
+				const Tile* pEntryTile = pItem->tile;
+				const Tile* pParent = pEntryTile->parent;
+				if (!pParent) [[unlikely]]
+					continue;
+
+				auto kIter = pParent->children.GetHeadPos();
+				uint32_t uiIndex = 0;
+				while (kIter) {
+					Tile* pChild = pParent->children.GetNext(kIter);
+					if (pChild == pEntryTile) {
+						*result = uiIndex;
+						if (IsConsoleMode())
+							Console_Print("GetMenuItemListIndex >> %d", uiIndex);
+						return true;
+					}
+					++uiIndex;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+bool Cmd_SelectMenuItemListIndex_Execute(COMMAND_ARGS) {
+	*result = 0;
+
+	if (!InterfaceManager::GetSingleton())
+		return true;
+
+	uint32_t uiTileIndex = 0;
+	BOOL bRightSide = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiTileIndex, &bRightSide)) {
+		// Find listbox
+		ListBox<ItemChange>* pListBox = nullptr;
+		switch (Interface::GetTopMenuID())
+		{
+			case Interface::Menus::MainFour:
+				{
+					if (Menu::IsMenuVisible(Interface::Menus::PipboyRepair))
+						pListBox = &RepairMenu::GetSingleton()->repairItems;
+					else if (Menu::IsMenuVisible(Interface::Menus::Inventory))
+						pListBox = &InventoryMenu::GetSingleton()->itemList;
+					break;
+				}
+			case Interface::Menus::Container:
+			{
+				ContainerMenu* pMenu = ContainerMenu::GetSingleton();
+				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
+				break;
+			}
+			case Interface::Menus::Barter:
+			{
+				BarterMenu* pMenu = BarterMenu::GetSingleton();
+				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
+				break;
+			}
+			case Interface::Menus::VendorRepair:
+				pListBox = &RepairServicesMenu::GetSingleton()->itemList;
+				break;
+			default:
+				return true;
+		}
+
+		if (!pListBox)
+			return true;
+
+		// Select tile
+		if (uiTileIndex < pListBox->itemCount) {
+			Tile* tile = pListBox->GetNthTile(uiTileIndex);
+			pListBox->SetSelectedTile(tile);
+			pListBox->ScrollToHighlight();
+			*result = 1;
+		}
+	}
 	return true;
 }

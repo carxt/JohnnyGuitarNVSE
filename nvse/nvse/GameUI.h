@@ -19,10 +19,82 @@ class BSShaderAccumulator;
 class ShadowSceneNode;
 class NiSourceTexture;
 class FORenderedMenu;
-typedef Menu* (*_TempMenuByType)(uint32_t menuType);
-extern const _TempMenuByType TempMenuByType;
 
 struct PackedMenu;
+
+
+class Interface {
+public:
+	enum Menus {
+		NoMenu					= 0,
+		MainFour				= 1,
+		OtherRoot				= 2,
+		Console					= 3,
+
+		Message					= 1001,
+		Inventory				= 1002,
+		Stats					= 1003,
+		HUDMainMenu				= 1004,
+		Loading					= 1007,
+		Container				= 1008,
+		Dialog					= 1009,
+		SleepWait				= 1012,
+		Pause					= 1013,
+		LockPick				= 1014,
+		Quantity				= 1016,
+		AudioMenu				= 1017,
+		VideoMenu				= 1018,
+		GamePlayMenu			= 1020,
+		PipboyData				= 1023,
+		BookMenu				= 1026,
+		LevelUp					= 1027,
+		PipboyRepair			= 1035,
+		RaceMenu				= 1036,
+		SurgeryMenu				= 1036,
+		BarberMenu				= 1036,
+		Credits					= 1047,
+		CharGen					= 1048,
+		TextEdit				= 1051,
+		Barter					= 1053,
+		Surgery					= 1054,
+		Hacking					= 1055,
+		VATS					= 1056,
+		Computers				= 1057,
+		VendorRepair			= 1058,
+		Tutorial				= 1059,
+		SPECIALBook				= 1060,
+		ItemModMenu				= 1061,
+		LoveTester				= 1074,
+		CompanionWheel			= 1075,
+		MedicalQuestionnaire	= 1076,
+		Recipe					= 1077,
+		SlotMachine				= 1080,
+		BlackJack				= 1081,
+		Roulette				= 1082,
+		Caravan					= 1083,
+		Traits					= 1084,
+	};
+
+	static void InitGunScope(TESModel* apModel) {
+		CdeclCall(0x709C20, apModel);
+	}
+
+	static void SetGunScopeVisible(bool abVisible) {
+		CdeclCall(0x709C40, abVisible);
+	}
+
+	static void ClearGunScope() {
+		CdeclCall(0x709CA0);
+	}
+
+	static bool IsLoadingMenuVisible() {
+		return CdeclCall<bool>(0x705E80);
+	}
+
+	static uint32_t GetTopMenuID() {
+		return CdeclCall<uint32_t>(0x7023C0);
+	}
+};
 
 // 584
 class InterfaceManager {
@@ -31,14 +103,11 @@ public:
 	~InterfaceManager();
 
 	static InterfaceManager* GetSingleton(void);
-	static bool					IsMenuVisible(uint32_t menuType);
 	static Menu* GetMenuByType(uint32_t menuType);
-	static Menu* TempMenuByType(uint32_t menuType);
 	//static TileMenu *			GetMenuByPath(const char * componentPath, const char ** slashPos);
 	//static Tile::Value *		GetMenuComponentValue(const char * componentPath);
 	//static Tile *				GetMenuComponentTile(const char * componentPath);
 
-	uint32_t GetTopVisibleMenuID();
 	Tile* GetActiveTile();
 	VATSHighlightData* GetVATSHighlightData() {
 		return ThisCall<VATSHighlightData*>(0x602170, this);
@@ -156,23 +225,16 @@ public:
 	bool IsInMenuMode() const {
 		return currentMode != 1;
 	}
+
+	void OpenPipboy(void (__cdecl *apCallback)(), Interface::Menus aeMenuToOpen) {
+		ThisCall(0x70F4E0, this, apCallback, aeMenuToOpen);
+	}
+
+	void ClosePipboy(void (__cdecl *apCallback)()) {
+		ThisCall(0x70F690, this, apCallback);
+	}
 };
 static_assert(sizeof(InterfaceManager) == 0x580);
-
-class Interface {
-public:
-	static void InitGunScope(TESModel* apModel) {
-		CdeclCall(0x709C20, apModel);
-	}
-
-	static void SetGunScopeVisible(bool abVisible) {
-		CdeclCall(0x709C40, abVisible);
-	}
-
-	static void ClearGunScope() {
-		CdeclCall(0x709CA0);
-	}
-};
 
 struct HighlightedRef {
 	TESObjectREFR* refr;
@@ -188,48 +250,6 @@ struct VATSHighlightData {
 };
 
 void Debug_DumpMenus(void);
-
-enum {
-	kMenuType_Min = 0x3E9,
-	kMenuType_Message = kMenuType_Min,
-	kMenuType_Inventory,
-	kMenuType_Stats,
-	kMenuType_HUDMain,
-	kMenuType_Loading = 0x3EF,
-	kMenuType_Container,
-	kMenuType_Dialog,
-	kMenuType_SleepWait = 0x3F4,
-	kMenuType_Start,
-	kMenuType_LockPick,
-	kMenuType_Quantity = 0x3F8,
-	kMenuType_Map = 0x3FF,
-	kMenuType_Book = 0x402,
-	kMenuType_LevelUp,
-	kMenuType_Repair = 0x40B,
-	kMenuType_RaceSex,
-	kMenuType_Credits = 0x417,
-	kMenuType_CharGen,
-	kMenuType_TextEdit = 0x41B,
-	kMenuType_Barter = 0x41D,
-	kMenuType_Surgery,
-	kMenuType_Hacking,
-	kMenuType_VATS,
-	kMenuType_Computers,
-	kMenuType_RepairServices,
-	kMenuType_Tutorial,
-	kMenuType_SpecialBook,
-	kMenuType_ItemMod,
-	kMenuType_LoveTester = 0x432,
-	kMenuType_CompanionWheel,
-	kMenuType_TraitSelect,
-	kMenuType_Recipe,
-	kMenuType_SlotMachine = 0x438,
-	kMenuType_Blackjack,
-	kMenuType_Roulette,
-	kMenuType_Caravan,
-	kMenuType_Trait = 0x43C,
-	kMenuType_Max = kMenuType_Trait,
-};
 
 struct EventCallbackScripts;
 
@@ -269,6 +289,10 @@ public:
 
 	Menu* HandleMenuInput(int tileID, Tile* clickedTile);
 	Tile* AddTileFromTemplate(Tile* destTile, const char* templateName, uint32_t arg3);
+
+	static bool IsMenuVisible(Interface::Menus aeMenu) {
+		return CdeclCall<bool>(0x7027B0, aeMenu);
+	}
 };
 
 // 170
@@ -667,7 +691,7 @@ public:
 
 };
 static_assert(sizeof(MapMenu) == 0x230);
-extern bool noHolotapeStopSound;
+extern bool bNoHolotapeStopSound;
 
 // 94
 class MessageMenu : public Menu			// 1001
@@ -741,7 +765,7 @@ public:
 	HotKeysWheel				kHotKeyWheel;		// 0E8
 	uint32_t				unk10C[2];		// 10C
 
-	static InventoryMenu* GetInstance() {
+	static InventoryMenu* GetSingleton() {
 		return *reinterpret_cast<InventoryMenu**>(0x11D9EA4);
 	}
 };
@@ -1136,6 +1160,7 @@ public:
 	uint32_t				unk224[231];	// 224
 
 	static constexpr AddressPtr<bool, 0x11C70F8> bRendering;
+	static constexpr AddressPtr<bool, 0x11CABB8> bLocationSpecificLoadScreensOnly;
 };
 static_assert(sizeof(LoadingMenu) == 0x5C0);
 
@@ -1177,6 +1202,10 @@ public:
 	MenuItemEntryList	rightItems;		// 0C8
 	MenuItemEntryList* currentItems;	// 0F8
 	uint32_t				unk0FC[4];		// 0FC
+
+	static ContainerMenu* GetSingleton() {
+		return *reinterpret_cast<ContainerMenu**>(0x11D93F8);
+	}
 };
 static_assert(sizeof(ContainerMenu) == 0x10C);
 
@@ -1404,6 +1433,10 @@ public:
 	TileImage* tile54;		// 54
 	TileImage* tile58;		// 58
 	MenuItemEntryList		repairItems;	// 5C
+
+	static RepairMenu* GetSingleton() {
+		return *reinterpret_cast<RepairMenu**>(0x11DA75C);
+	}
 };
 
 // 5C
@@ -1488,9 +1521,13 @@ public:
 	MenuItemEntryList	leftItems;		// 0A8
 	MenuItemEntryList	rightItems;		// 0D8
 	MenuItemEntryList* currentItems;	// 108
-	BarterItemList		leftBarter;		// 10C
-	BarterItemList		rightBarter;	// 114
+	BSSimpleList<ItemChange*>		kItemsToBuy;		// 10C
+	BSSimpleList<ItemChange*>		kItemsToSell;	// 114
 	uint32_t				unk11C;			// 11C
+
+	static BarterMenu* GetSingleton() {
+		return *reinterpret_cast<BarterMenu**>(0x11D8FA4);
+	}
 };
 
 // 1DC
@@ -1619,6 +1656,10 @@ public:
 	uint32_t				unk98;			// 98
 	uint8_t				skill;			// 9C
 	uint8_t				pad9D[3];		// 9D
+
+	static RepairServicesMenu* GetSingleton() {
+		return *reinterpret_cast<RepairServicesMenu**>(0x11DA7F0);
+	}
 };
 
 // 90

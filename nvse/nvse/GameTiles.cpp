@@ -62,22 +62,22 @@ float Tile::GetFloat(uint32_t auiTrait) {
 	return ThisCall<float>(0xA011B0, this, auiTrait);
 }
 
-DListNode<Tile>* Tile::GetNthChild(uint32_t index) {
-	return children.Tail()->Regress(index);
-}
-
 char* Tile::GetComponentFullName(char* resStr) {
 	if IS_TYPE(this, TileMenu)
 		return StrCopy(resStr, name.pString);
+
+	AutoTileLock kLock;
 	char* fullName = parent->GetComponentFullName(resStr);
 	*fullName++ = '/';
 	fullName = StrCopy(fullName, name.pString);
-	DListNode<Tile>* node = parent->children.Tail();
-	while (node->data != this)
-		node = node->prev;
+	NiTListItem<Tile*>* node = reinterpret_cast<NiTListItem<Tile*>*>(parent->children.GetTailPos());
+	while (node->m_element != this)
+		node = node->m_pkPrev;
+
 	int index = 0;
-	while ((node = node->prev) && StrEqualCS(name.pString, node->data->name.pString))
+	while ((node = node->m_pkPrev) && StrEqualCS(name.pString, node->m_element->name.pString))
 		index++;
+
 	if (index) {
 		*fullName++ = ':';
 		fullName = IntToStr(index, fullName);
@@ -138,18 +138,12 @@ __declspec(naked) void Tile::FakeClick() {
 	}
 }
 
-void Tile::DestroyAllChildren() {
-	DListNode<Tile>* node = children.Tail();
-	Tile* child;
-	while (node) {
-		child = node->data;
-		node = node->prev;
-		if (child) 
-			delete child;
-	}
+void Tile::DeleteChildren() {
+	ThisCall(0xA04150, this);
 }
 
 Tile* Tile::GetChild(const char* childName) {
+	AutoTileLock kLock;
 	int childIndex = 0;
 	char* colon = FindChr(childName, ':');
 	if (colon) {
@@ -158,9 +152,11 @@ Tile* Tile::GetChild(const char* childName) {
 		childIndex = StrToInt(colon + 1);
 	}
 	Tile* result = NULL;
-	for (DListNode<Tile>* node = children.Head(); node; node = node->next) {
-		if (node->data && ((*childName == '*') || StrEqualCI(node->data->name.pString, childName)) && !childIndex--) {
-			result = node->data;
+	auto kIter = children.GetHeadPos();
+	while (kIter) {
+		Tile* pTile = children.GetNext(kIter);
+		if (pTile && ((*childName == '*') || StrEqualCI(pTile->name.pString, childName)) && !childIndex--) {
+			result = pTile;
 			break;
 		}
 	}
@@ -169,6 +165,7 @@ Tile* Tile::GetChild(const char* childName) {
 }
 
 Tile* Tile::GetComponent(const char* componentPath, const char*& trait) {
+	AutoTileLock kLock;
 	Tile* parentTile = this;
 	char* slashPos;
 	while (slashPos = SlashPos(componentPath)) {

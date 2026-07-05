@@ -12,5 +12,5 @@ namespace JIPUtils {
 		return reinterpret_cast<size_t>(hJIP) + aiAddress - 0x10000000;
 	}
 
-	void Init();
+	SPEC_NOINLINE void Init();
 }

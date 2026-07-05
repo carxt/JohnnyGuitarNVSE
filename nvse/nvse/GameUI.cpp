@@ -8,9 +8,7 @@ NiTPrimitiveArray<Tile*>* g_TileMenuArray = (NiTPrimitiveArray<Tile*> *)0x011F35
 #if 1
 static const uint32_t s_RaceSexMenu__UpdatePlayerHead = 0x007B25A0;	// End of RaceSexMenu::Func003.case0, call containing QueuedHead::Init (3rd before jmp)
 static uint8_t* g_bUpdatePlayerModel = (uint8_t*)0x011C5CB4;	// this is set to true when player confirms change of race in RaceSexMenu -
-																	// IF requires change of skeleton - and back to false when model updated
-const _TempMenuByType TempMenuByType = (_TempMenuByType)0x00707990;	// Called from called from call RaceSexMenu::Init
-#elif EDITOR
+																	// IF requires change of skeleton - and back to false when model updated#elif EDITOR
 #else
 #error
 #endif
@@ -19,30 +17,15 @@ InterfaceManager* InterfaceManager::GetSingleton(void) {
 	return *(InterfaceManager**)0x011D8A80;
 }
 
-bool InterfaceManager::IsMenuVisible(uint32_t menuType) {
-	if ((menuType >= kMenuType_Min) && (menuType <= kMenuType_Max))
-		return g_MenuVisibilityArray[menuType] != 0;
-
-	return false;
-}
-
 Menu* InterfaceManager::GetMenuByType(uint32_t menuType) {
 	return CdeclCall<Menu*>(0xA09030, menuType);
 }
-
-Menu* InterfaceManager::TempMenuByType(uint32_t menuType) {
-	if ((menuType >= kMenuType_Min) && (menuType <= kMenuType_Max)) {
-		return ::TempMenuByType(menuType);
-	}
-	return NULL;
-}
-
 
 void RaceSexMenu::UpdatePlayerHead(void) {
 	ThisCall(s_RaceSexMenu__UpdatePlayerHead, this);
 }
 // reimplementation by lStewieAl
-bool noHolotapeStopSound = false;
+bool bNoHolotapeStopSound = false;
 void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 {
 	if (isHolotapeVoicePlaying)
@@ -110,7 +93,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 		}
 		else
 		{
-			noHolotapeStopSound = true;
+			bNoHolotapeStopSound = true;
 		}
 		*(uint8_t*)0x11DCFA4 = true;
 		ThisCall(0xAD85A0, BSWin32Audio::GetSingleton()); // FadeInDialogueSound
@@ -130,13 +113,13 @@ void MapMenu::StopHolotape()
 	holotapeTotalTime = 0.0f;
 	holotapePlayStartTime = 0;
 	isHolotapeVoicePlaying = 0;
-	if (!noHolotapeStopSound)
+	if (!bNoHolotapeStopSound)
 	{
 		BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStop", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
 		handle.SetPosition(PlayerCharacter::GetSingleton()->GetPos());
 		handle.Play(false);
 	}
-	noHolotapeStopSound = false;
+	bNoHolotapeStopSound = false;
 	ThisCall(0xAD8650, BSWin32Audio::GetSingleton()); // FadeOutDialogueSound
 	*(uint8_t*)0x11DCFA4 = false;
 	ThisCall(0x775670, HUDMainMenu::GetSingleton()); // ClearSubtitlesString

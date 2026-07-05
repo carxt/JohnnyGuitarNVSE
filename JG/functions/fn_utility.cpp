@@ -14,7 +14,7 @@
 #include <JIP/JIPUtils.hpp>
 #include <random>
 
-extern uint32_t g_initialTickCount;
+extern DWORD dwGameStartTimestamp;
 
 bool Cmd_GameGetSecondsPassed_Eval(COMMAND_ARGS_EVAL) {
 	*result = ThisCall<float>(0x07013E0, (void*)0x11F6394);
@@ -229,17 +229,25 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
+bool Cmd_GetSequenceAnimGroup_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
-	uint32_t sequenceID;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sequenceID) && sequenceID < 8) {
-		if (auto animData = thisObj->GetAnimation()) {
-			if (auto sequence = animData->animSequence[sequenceID]) {
-				uint16_t groupID = animData->groupIDs[sequenceID] & 0xFF;
-				*result = groupID;
-			}
+	const uint32_t uiSequence = reinterpret_cast<uint32_t>(arg1);
+	if (thisObj && uiSequence < 8) {
+		const Animation* pAnim = thisObj->GetAnimation();
+		if (pAnim && pAnim->animSequence[uiSequence]) {
+			uint16_t usGroupID = pAnim->groupIDs[uiSequence] & 0xFF;
+			*result = usGroupID;
 		}
 	}
+
+	return true;
+}
+
+bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
+	*result = -1;
+	uint32_t uiSequence;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiSequence))
+		Cmd_GetSequenceAnimGroup_Eval(thisObj, reinterpret_cast<void*>(uiSequence), nullptr, result);
 
 	return true;
 }
@@ -258,10 +266,17 @@ bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
+bool Cmd_GetPipBoyMode_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	if (InterfaceManager::GetSingleton()) *result = InterfaceManager::GetSingleton()->pipBoyMode;
-	if (IsConsoleMode()) Console_Print("GetPipBoyMode >> %.2f", *result);
+	if (InterfaceManager::GetSingleton())
+		*result = InterfaceManager::GetSingleton()->pipBoyMode;
+	return true;
+}
+
+bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
+	Cmd_GetPipBoyMode_Eval(nullptr, nullptr, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetPipBoyMode >> %.2f", *result);
 	return true;
 }
 
@@ -330,63 +345,77 @@ bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
-	int type = 0;
-	uint32_t tickCount;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &type);
-	tickCount = GetTickCount();
-	double timePlayed = tickCount - g_initialTickCount;
-	switch (type) {
+bool Cmd_GetTimePlayed_Eval(COMMAND_ARGS_EVAL) {
+	uint32_t uiTtype = reinterpret_cast<uint32_t>(arg1);
+	DWORD dwTickCount = GetTickCount();
+	double dTimePlayed = dwTickCount - dwGameStartTimestamp;
+	switch (uiTtype) {
 	case 0:
-		*result = timePlayed;
+		*result = dTimePlayed;
 		break;
 	case 1:
-		*result = timePlayed / 1000;
+		*result = dTimePlayed / 1000;
 		break;
 	case 2:
-		*result = timePlayed / 60000;
+		*result = dTimePlayed / 60000;
 		break;
-	}
-	if (IsConsoleMode()) {
-		Console_Print("%f", *result);
+	default:
+		*result = 0;
+		break;
 	}
 	return true;
 }
 
-bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
-	using namespace JohnnyPatches;
-	int patch = 0;
-	bool enabled = false;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &patch)) {
-		switch (patch) {
+bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
+	uint32_t uiTtype = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &uiTtype);
+	Cmd_GetTimePlayed_Eval(nullptr, reinterpret_cast<void*>(uiTtype), nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetTimePlayed >> %f", *result);
+	return true;
+}
+
+
+bool Cmd_GetJohnnyPatch_Eval(COMMAND_ARGS_EVAL) {
+	uint32_t uiPatch = reinterpret_cast<uint32_t>(arg1);
+	bool bEnabled = false;
+	switch (uiPatch) {
 		case 1:
-			enabled = true;
+			bEnabled = true; // EditorIDs
 			break;
 		case 3:
-			enabled = fixFleeing;
+			bEnabled = JohnnyPatches::bFixFleeing;
 			break;
 		case 4:
-			enabled = fixItemStacks;
+			bEnabled = JohnnyPatches::bFixItemStacks;
 			break;
 		case 5:
-			enabled = fixNPCShootingAngle;
+			bEnabled = JohnnyPatches::bFixNPCShootingAngle;
 			break;
 		case 6:
-			enabled = noMuzzleFlashCooldown;
+			bEnabled = JohnnyPatches::bNoMuzzleFlashCooldown;
 			break;
 		case 7:
-			enabled = resetVanityCam;
+			bEnabled = JohnnyPatches::bResetVanityCam;
 			break;
 		case 8:
-			enabled = bFixJIP && JIPUtils::IsValid();
+			bEnabled = JohnnyPatches::bFixJIP && JIPUtils::IsValid();
 			break;
 		default:
 			break;
-		}
-		if (IsConsoleMode())
-			Console_Print("GetJohnnyPatch %d >> %d", patch, enabled);
 	}
-	*result = enabled;
+	*result = bEnabled;
+	return true;
+}
+
+bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
+	*result = 0;
+	uint32_t uiPatch = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiPatch)) {
+		Cmd_GetJohnnyPatch_Eval(nullptr, reinterpret_cast<void*>(uiPatch), nullptr, result);
+		if (IsConsoleMode())
+			Console_Print("GetJohnnyPatch %d >> %d", uiPatch, *result);
+	}
 	return true;
 }
 
@@ -494,37 +523,33 @@ bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	float fDistance = 0.f;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fDistance)) {
-		JohnnyPatches::g_viewmodel_near = fDistance;
+		JohnnyPatches::fViewmodelNearDistance = fDistance;
 		*result = 1;
 	}
 	return true;
 }
 
 bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
-	*result = JohnnyPatches::g_viewmodel_near;
+	*result = JohnnyPatches::fViewmodelNearDistance;
 	if (IsConsoleMode()) Console_Print("GetViewmodelClipDistance >> %.3f", *result);
 	return true;
 }
 
 bool Cmd_SetCameraTranslate_Execute(COMMAND_ARGS) {
-	using namespace CameraOverride;
-	int override = 0;
+	BOOL bOverride = FALSE;
 	NiPoint3 kNewPos;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &kNewPos.x, &kNewPos.y, &kNewPos.z)) {
-		OverridePos(override > 0, kNewPos);
-	}
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bOverride, &kNewPos.x, &kNewPos.y, &kNewPos.z))
+		CameraOverride::OverridePos(bOverride > 0, kNewPos);
 	return true;
 }
 
 bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
+	CameraOverride::CameraRotationType eRotType = CameraOverride::CameraRotationType::ROTATE_NONE;
+	BOOL bOverride = FALSE;
 	float fAngle = 0.f;
-	TESObjectREFR* pRef = nullptr;
-	int override = 0;
-	int eAxis;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &override, &eAxis, &fAngle, &pRef)) {
-		CameraOverride::OverrideRot(override > 0, eAxis, fAngle, pRef);
-		
-	}
+	const TESObjectREFR* pRef = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bOverride, &eRotType, &fAngle, &pRef))
+		CameraOverride::OverrideRot(bOverride > 0, eRotType, fAngle, pRef);
 	return true;
 }
 
@@ -576,6 +601,48 @@ bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
 		if (IsConsoleMode()) 
 			Console_Print("GetCurrentSkyColor %d >> %f %f %f", eColorType, rColor.r, rColor.g, rColor.b);
 		*result = 1;
+	}
+	return true;
+}
+
+void __fastcall StopAnimLoop(Animation* apAnimation, uint32_t aiGroup) {
+	if (aiGroup == -1) {
+		for (uint32_t i = 0; i < 8; ++i) {
+			apAnimation->uiLoopCounts[i] = 0;
+		}
+	}
+	else {
+		apAnimation->uiLoopCounts[aiGroup] = 0;
+	}
+}
+
+bool Cmd_StopIdleLoop_Execute(COMMAND_ARGS) {
+	int32_t eGroup = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eGroup)) {
+		if (eGroup != -1 && (eGroup < 0 || eGroup > 7))
+			return true;
+
+		if (thisObj == PlayerCharacter::GetSingleton()) {
+			PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(thisObj);
+			Animation* pAnimation = pPlayer->GetAnimation(true);
+			if (pAnimation) {
+				StopAnimLoop(pAnimation, eGroup);
+				*result = 1;
+			}
+			pAnimation = pPlayer->GetAnimation(false);
+			if (pAnimation) {
+				StopAnimLoop(pAnimation, eGroup);
+				*result = 1;
+			}
+		}
+		else {
+			Animation* pAnimation = thisObj->GetAnimation();
+			if (pAnimation) {
+				StopAnimLoop(pAnimation, eGroup);
+				*result = 1;
+			}
+		}
+
 	}
 	return true;
 }

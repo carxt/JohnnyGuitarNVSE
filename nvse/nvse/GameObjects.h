@@ -195,10 +195,7 @@ public:
 
 static_assert(sizeof(TESObjectREFR) == 0x068);
 
-
-
-
-TESForm* GetPermanentBaseForm(TESObjectREFR* thisObj);	// For LevelledForm, find real baseForm, not temporary one.
+TESBoundObject* GetPermanentBaseForm(TESObjectREFR* apReference);	// For LevelledForm, find real baseForm, not temporary one.
 
 class BaseProcess;
 
@@ -212,7 +209,7 @@ public:
 	virtual void		Unk_92(void);
 	virtual void		Unk_93(void);
 	virtual void		Unk_94(void);
-	virtual void		Unk_95(void);
+	virtual void		Jump(void);
 	virtual void		Unk_96(void);
 	virtual void		Unk_97(void);
 	virtual void		Unk_98(void);
@@ -334,6 +331,10 @@ public:
 	uint32_t	unk04[3];	// 04
 
 	void RemoveEffect(EffectItem* effItem);
+
+	bool HasDamageHealthEffect() const {
+		return ThisCall<bool>(0x822E00, this);
+	}
 };
 static_assert(sizeof(MagicTarget) == 0x10);
 
@@ -415,7 +416,6 @@ public:
 class CombatController;
 struct PackageInfo;
 struct CombatActors;
-struct ItemEntryData;
 class BSAnimGroupSequence;
 class BackUpPackage;
 class PathingAvoidNodeArray;
@@ -477,7 +477,7 @@ public:
 	virtual void		Unk_F0(void);
 	virtual void		Unk_F1(void);
 	virtual void		Unk_F2(void);
-	virtual void		Unk_F3(void);
+	virtual TESObjectREFR* DropObject(TESForm* apItem, ExtraDataList* apExtraList, int32_t aiCount, const NiPoint3* apPoint, const NiPoint3* apRotate);
 	virtual void		Unk_F4(void);
 	virtual void		Unk_F5(void);
 	virtual void		Unk_F6(void);
@@ -500,8 +500,8 @@ public:
 	virtual void		Unk_107(void);
 	virtual void		Unk_108(void);
 	virtual void		Unk_109(void);
-	virtual CombatController* GetCombatController(void);
-	virtual Actor* GetCombatTarget(void);
+	virtual CombatController* GetCombatController() const;
+	virtual Actor*		GetCombatTarget() const;
 	virtual void		Unk_10C(void);
 	virtual void		Unk_10D(void);
 	virtual void		Unk_10E(void);
@@ -665,6 +665,8 @@ public:
 	bool GetDead() { return (lifeState == 1) || (lifeState == 2); }
 	bool GetRestrained() { return lifeState == 5; }
 
+	bool IsTalking() const { return ThisCall<bool>(0x8A67F0, this); }
+
 	TESActorBase* GetActorBase();
 	bool GetLOS(Actor* target);
 	char GetCurrentAIPackage();
@@ -672,7 +674,6 @@ public:
 	bool IsFleeing();
 	TESObjectWEAP* GetEquippedWeapon();
 	bool IsItemEquipped(TESForm* item);
-	bool GetEquippedItemData(uint32_t slotIndex, ItemEntryData& itemData);
 	uint8_t EquippedWeaponHasMod(uint8_t modID);
 	bool IsSneaking();
 	void StopCombat();
@@ -712,6 +713,10 @@ public:
 
 	uint16_t GetLevel() const {
 		return ThisCall<uint16_t>(0x87F9F0, this);
+	}
+	
+	float GetRunSpeed() {
+		return ThisCall<float>(0x884EB0, this);
 	}
 };
 
@@ -817,7 +822,7 @@ public:
 	TESObjectREFR* lastExteriorDoor;		// 604
 	void* unk608;				// 608
 	void* unk60C;				// 60C
-	tList<CasinoStats>* casinoDataList;				// 610
+	BSSimpleList<CasinoStats*>* casinoDataList;				// 610
 	tList<TESCaravanCard>* caravanCards1;			// 614
 	tList<TESCaravanCard>* caravanCards2;			// 618
 	uint32_t								unk61C[7];				// 61C
@@ -828,7 +833,7 @@ public:
 	bool								bIs3rdPersonVisible;				// 64A	= not FirstPerson
 	bool								is3rdPerson;			// 64B
 	bool								bThirdPerson;			// 64C
-	uint8_t								byte64D;				// 64D
+	uint8_t								bTemp3rdPerson;				// 64D
 	uint8_t								byte64E;				// 64E
 	bool								isUsingScope;			// 64F
 	uint8_t								byte650;				// 650
@@ -912,7 +917,7 @@ public:
 	NiObject* unkD3C;				// D3C
 	uint32_t								unkD40;					// D40
 	Actor* reticleActor;			// D44
-	tList<CompassTarget>* compassTargets;				// D48
+	BSSimpleList<CompassTarget*>* compassTargets;				// D48
 	uint32_t								unkD4C[6];				// D4C
 	CombatActors* combatActors;			// D64
 	uint32_t								teammateCount;			// D68
@@ -967,6 +972,18 @@ public:
 	NiNode* Get3D(bool abFirstPerson) const;
 	BipedAnim* GetBiped(bool abFirstPerson) const;
 	Animation* GetAnimation(bool abFirstPerson) const;
+
+	void SetPlayerMapMarker(NiPoint3 akLocation, TESForm* apSpace) {
+		ThisCall(0x952E60, this, akLocation, apSpace);
+	}
+
+	void RemovePlayerMapMarker() {
+		ThisCall(0x952F90, this);
+	}
+
+	static constexpr AddressPtr<bool, 0x11E07B8> bIsVanityMode;
+	static constexpr AddressPtr<bool, 0x11E07B9> bIsAutoVanityMode;
+	static constexpr AddressPtr<NiPoint3, 0x11E0B58> kVanityModePos;
 };
 static_assert(sizeof(PlayerCharacter) == 0xE50);
 
@@ -1080,18 +1097,18 @@ public:
 };
 static_assert(sizeof(Projectile) == 0x150);
 
-struct ProjectileData {
-	uint8_t byte00;
-	uint8_t byte01;
-	uint8_t byte02;
-	uint8_t gap03;
-	float unk04;
-	float flashDuration;
-	NiNode* muzzleFlash;
-	NiPointLight* flashLight;
-	BGSProjectile* projectile;
-	TESObjectWEAP* sourceWeap;
-	Actor* sourceActor;
+class MuzzleFlash {
+public:
+	bool					bEnabled;
+	bool					bMPSEnabled;
+	bool					bUpdateLight;
+	float					fEnableTimer;
+	float					fDurationTimer;
+	NiPointer<NiNode>		spNode;
+	NiPointer<NiPointLight>	spLight;
+	BGSProjectile*			pProjectile;
+	TESObjectWEAP*			pSourceWeapon;
+	Actor*					pSourceActor;
 };
 
 // 154

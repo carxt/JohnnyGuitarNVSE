@@ -84,9 +84,6 @@ void __fastcall JohnnyExtraData::Initialize(NVSEDataInterface* apNVSEData) {
 	JohnnyExtraDataGlobals::pfAdd			= static_cast<bool(*)(TESForm*, PluginFormExtraData*)>(apNVSEData->GetFunc(NVSEDataInterface::kNVSEData_FormExtraDataAdd));
 	JohnnyExtraDataGlobals::pfRemoveByName	= static_cast<void (*)(TESForm*, const char*)>(apNVSEData->GetFunc(NVSEDataInterface::kNVSEData_FormExtraDataRemoveByName));
 	JohnnyExtraDataGlobals::pfRemoveByPtr	= static_cast<void (*)(TESForm*, PluginFormExtraData*)>(apNVSEData->GetFunc(NVSEDataInterface::kNVSEData_FormExtraDataRemoveByPtr));
-}
-
-void JohnnyExtraData::InitName() {
 	JohnnyExtraDataGlobals::strName = "JohnnyExtraData";
 }
 

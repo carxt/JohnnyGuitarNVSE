@@ -48,9 +48,9 @@ jobs:
       uses: Nexus-Mods/upload-action@main
       with:
         api_key: ${{ secrets.NEXUSMODS_API_KEY }}
-        file_group_id: ${{ vars.NEXUSMODS_GROUP_ID }}
+        file_id: ${{ vars.NEXUSMODS_GROUP_ID }}
         filename: "artifacts\\JohnnyGuitarNVSE-${{ github.event.release.tag_name }}.zip"
         display_name: "JohnnyGuitar NVSE"
-        file_category: "main"
+        category: "main"
         show_requirements_pop_up: true
         version: ${{ github.event.release.tag_name }}

@@ -129,14 +129,25 @@ public:
 	NiNode* GetLandNode(uint32_t auiNode) const;
 
 	NiPoint2 GetMinMaxLandHeight() const;
+
 	NiPoint2 GetMinMaxBlockHeight(uint32_t auiBlock) const;
+
 	bool GetCoordData(COORD_DATA& arCoordData, const NiPoint3& arCoord, bool abForceToVertex) const;
+
 	bool GetLandHeight(const NiPoint3& arPoint, float& arfHeight) const;
+
 	bool GetLandNormal(const NiPoint3& arPoint, NiPoint3& arNormal, NiPoint3& arFaceNormal) const;
 	bool GetLandNormal(const COORD_DATA& arCoordData, NiPoint3& arNormal, NiPoint3& arFaceNormal) const;
+
 	bool GetLandColor(const COORD_DATA& arCoordData, NiColorA& arColor) const;
+
 	void GetVertex(uint32_t auiBlock, uint32_t auiVertex, NiPoint3& arOut) const;
+
+	TESLandTexture* GetMainTexture(const NiPoint3& arPosition) const;
+
 	NiPoint3 GetWorldOffsetForBlock(uint32_t auiBlock) const;
+
+
 	int32_t GetDataX() const;
 	int32_t GetDataY() const;
 

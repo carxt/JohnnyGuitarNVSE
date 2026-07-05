@@ -56,10 +56,10 @@ public:
 	uint32_t							unk03C[2];			// 03C
 	NiNode							*nNeck1;			// 044
 	float							unk048;				// 048
-	uint16_t							groupIDs[8];		// 04C
+	uint16_t						groupIDs[8];		// 04C
 	int32_t							sequenceState1[8];	// 05C
-	int32_t							sequenceState2[8];	// 07C
-	uint32_t							unk09C[12];			// 09C
+	uint32_t						uiLoopCounts[8];	// 07C
+	uint32_t						unk09C[12];			// 09C
 	float							flt0CC;				// 0CC
 	float							flt0D0;				// 0D0
 	uint32_t							unk0D4;				// 0D4
@@ -226,4 +226,8 @@ struct ProcessLists {
 	static ProcessLists* GetSingleton() {
 		return reinterpret_cast<ProcessLists*>(0x11E0E80);
 	};
+
+	bool AreHostileActorsNear(bool abInterior) {
+		return ThisCall<bool>(0x9764A0, this, abInterior);
+	}
 };

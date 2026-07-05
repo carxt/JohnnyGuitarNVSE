@@ -29,7 +29,7 @@ namespace DisabledArrowKeys {
 	void Install()
 	{
 		// DisableMenuArrowKeys
-		WriteRelJump(0x70F708, (uint32_t)DisableArrowKeysHook);
+		HookUtils::WriteRelJump(0x70F708, (uint32_t)DisableArrowKeysHook);
 	}
 	void Reset()
 	{

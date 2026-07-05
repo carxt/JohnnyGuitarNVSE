@@ -1,27 +1,30 @@
 #include "fn_gameplay.h"
-#include "GameForms.h"
 
 #include "Bethesda/BSUtilities.hpp"
-#include <GameUI.h>
-#include <Bethesda/INISettingCollection.hpp>
-#include <misc/WorldToScreen.h>
-#include <GameRTTI.h>
-#include <JG/CustomCameraShake.hpp>
-#include <Bethesda/GameSettingCollection.hpp>
-#include <GameEffects.h>
-#include <JG/JohnnyPatches.hpp>
-#include <Bethesda/TESObjectList.hpp>
-#include <Bethesda/TESObject.hpp>
-#include <Bethesda/TESDataHandler.hpp>
-#include <JG/NPCAccuracy.hpp>
+#include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/INISettingCollection.hpp"
+#include "Bethesda/TESDataHandler.hpp"
+#include "Bethesda/TESObject.hpp"
+#include "Bethesda/TESObjectList.hpp"
 #include "decoding.h"
+#include "GameEffects.h"
+#include "GameForms.h"
 #include "GameProcess.h"
-#include <JG/MediaLocationControllerOverride.hpp>
-#include <JG/CustomHUDShake.hpp>
-#include <JG/DisabledSaves.hpp>
-#include <JG/DisabledLevelUp.hpp>
-#include <JG/DisabledMuzzleFlashLights.hpp>
-#include <JG/DisabledArrowKeys.hpp>
+#include "GameRTTI.h"
+#include "GameUI.h"
+#include "JG/CustomCameraShake.hpp"
+#include "JG/CustomHUDShake.hpp"
+#include "JG/DisabledArrowKeys.hpp"
+#include "JG/DisabledLevelUp.hpp"
+#include "JG/DisabledMuzzleFlashLights.hpp"
+#include "JG/DisabledSaves.hpp"
+#include "JG/JohnnyPatches.hpp"
+#include "JG/MediaLocationControllerOverride.hpp"
+#include "JG/NPCAccuracy.hpp"
+#include "JG/ScriptUtils.hpp"
+#include "JG/WorldToScreen.hpp"
+
+#include <shared/BSMemory/BSScrapMemory.hpp>
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -31,93 +34,79 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 
 #define NUM_ARGS *((uint8_t*)scriptData + *opcodeOffsetPtr)
 
-std::unordered_map<TESForm*, std::pair<float, float>> tempEffectMap;
-
 extern void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 
-bool Cmd_StopHolotape_Execute(COMMAND_ARGS)
-{
+bool Cmd_StopHolotape_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BOOL bPlayStopSound = FALSE;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &bPlayStopSound);
-	noHolotapeStopSound = bPlayStopSound == 0;
 	MapMenu* pMapMenu = MapMenu::GetSingleton();
-	if (pMapMenu)
+	if (pMapMenu) {
+		bNoHolotapeStopSound = bPlayStopSound == FALSE;
 		pMapMenu->StopHolotape();
-	*result = 1;
-	return true;
+		*result = 1;
+	}
 
+	return true;
 }
-bool Cmd_PlayHolotape_Execute(COMMAND_ARGS)
-{
+
+bool Cmd_PlayHolotape_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
 	BOOL bPlayStartStopSound = TRUE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &bPlayStartStopSound) && pNote && IS_TYPE(pNote, BGSNote) && (pNote->GetNoteType() == BGSNote::NoteType::VOICE || pNote->GetNoteType() == BGSNote::NoteType::VOICE))
-	{
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &bPlayStartStopSound) && pNote && IS_TYPE(pNote, BGSNote) && (pNote->GetNoteType() == BGSNote::kVoice || pNote->GetNoteType() == BGSNote::kSound)){
 		MapMenu* pMapMenu = MapMenu::GetSingleton();
-		if (pMapMenu)
+		if (pMapMenu) {
 			pMapMenu->PlayHolotape(pNote, bPlayStartStopSound > 0);
-		*result = 1;
+			*result = 1;
+		}
 	}
-	return true;
 
+	return true;
 }
 
-bool __cdecl Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS)
-{
-	TESCasino* casino = nullptr;
-	int32_t earnings;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &earnings) && casino && IS_TYPE(casino, TESCasino))
-	{
-
-		auto casinoRefId = casino->GetFormID();
-		auto iter = PlayerCharacter::GetSingleton()->casinoDataList->Head();
-		if (iter) {
-			do
-			{
-				if (auto casinoData = iter->data)
-				{
-					if (casinoData->casinoRefID == casinoRefId)
-					{
-						casinoData->earnings = earnings;
-						return true;
-					}
-				}
-			} while (iter = iter->next);
+bool Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESCasino* pCasino = nullptr;
+	int32_t iEarnings;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &iEarnings) && pCasino && IS_TYPE(pCasino, TESCasino)) {
+		const uint32_t uiFormID = pCasino->GetFormID();
+		auto pIter = PlayerCharacter::GetSingleton()->casinoDataList;
+		while (pIter && !pIter->IsEmpty()) {
+			CasinoStats* pStats = pIter->GetItem();
+			if (pStats && pStats->casinoRefID == uiFormID) {
+				pStats->earnings = iEarnings;
+				*result = 1;
+				return true;
+			}
+			pIter = pIter->GetNext();
 		}
 
-		auto casinoStats = BSMemory::malloc<CasinoStats>();
-		casinoStats->earningStage = 0;
-		casinoStats->earnings = earnings;
-		casinoStats->casinoRefID = casinoRefId;
-		PlayerCharacter::GetSingleton()->casinoDataList->Insert(casinoStats);
+		CasinoStats* pStats = BSMemory::malloc<CasinoStats>();
+		pStats->earningStage = 0;
+		pStats->earnings = iEarnings;
+		pStats->casinoRefID = uiFormID;
+		PlayerCharacter::GetSingleton()->casinoDataList->AddHead(pStats);
 	}
 
 	return true;
 }
 
-bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS)
-{
+bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESCasino* casino = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino) && casino && IS_TYPE(casino, TESCasino))
-	{
-		auto casinoRefId = casino->GetFormID();
-		auto iter = PlayerCharacter::GetSingleton()->casinoDataList->Head();
-		if (!iter) return true;
-		do
-		{
-			if (auto casinoData = iter->data)
-			{
-				if (casinoData->casinoRefID == casinoRefId)
-				{
-					*result = casinoData->earnings;
-					break;
-				}
+	TESCasino* pCasino = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino) && pCasino && IS_TYPE(pCasino, TESCasino)) {
+		const uint32_t uiFormID = pCasino->GetFormID();
+		auto pIter = PlayerCharacter::GetSingleton()->casinoDataList;
+		while (pIter && !pIter->IsEmpty()) {
+			CasinoStats* pStats = pIter->GetItem();
+			if (pStats && pStats->casinoRefID == uiFormID) {
+				*result = pStats->earnings;
+				return true;
 			}
-		} while (iter = iter->next);
+			pIter = pIter->GetNext();
+		}
 	}
 
 	return true;
@@ -148,27 +137,23 @@ bool Cmd_SetCasinoDeckTexture_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetCasinoChip_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetCasinoChip_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESCasino* casino = nullptr;
-	TESForm* chipForm = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino) && casino)
-	{
-		chipForm = TESForm::GetFormByNumericID(casino->kCasinoData.uiCasinoChipID);
-		*(uint32_t*)result = chipForm->GetFormID();
+	TESCasino* pCasino = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino) && pCasino && pCasino->kCasinoData.uiCasinoChipID) {
+		TESForm* pChipForm = TESForm::GetFormByNumericID(pCasino->kCasinoData.uiCasinoChipID);
+		if (pChipForm)
+			*reinterpret_cast<uint32_t*>(result) = pChipForm->GetFormID();
 	}
 	return true;
 }
 
-bool Cmd_SetCasinoChip_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetCasinoChip_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESCasino* casino = nullptr;
-	TESForm* chip = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &casino, &chip) && casino && IS_TYPE(casino, TESCasino) && chip && IS_TYPE(chip, TESCasinoChips))
-	{
-		casino->kCasinoData.uiCasinoChipID = chip->GetFormID();
+	TESCasino* pCasino = nullptr;
+	TESForm* pChip = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &pChip) && pCasino && IS_TYPE(pCasino, TESCasino) && pChip && IS_TYPE(pChip, TESCasinoChips)) {
+		pCasino->kCasinoData.uiCasinoChipID = pChip->GetFormID();
 		*result = 1;
 	}
 	return true;
@@ -184,9 +169,9 @@ bool Cmd_ClearMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	MediaLocationController* ctrl = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &ctrl) && ctrl && IS_TYPE(ctrl, MediaLocationController)) {
-		MediaLocationControllerOverride::Set(ctrl);
+	MediaLocationController* pCtrl = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCtrl) && pCtrl && IS_TYPE(pCtrl, MediaLocationController)) {
+		MediaLocationControllerOverride::Set(pCtrl);
 		*result = 1;
 	}
 	return true;
@@ -194,17 +179,17 @@ bool Cmd_SetMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetHUDShudderPower_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint8_t modId = scriptObj->GetCompileIndex();
-	*result = CustomHUDShake::Get(modId);
+	uint8_t ucIndex = scriptObj->GetCompileIndex();
+	*result = CustomHUDShake::Get(ucIndex);
 	return true;
 }
 
 bool Cmd_SetHUDShudderPower_Execute(COMMAND_ARGS) {
 	*result = 0;
-	float power = -1.f;
-	uint8_t modId = scriptObj->GetCompileIndex();
-	if (modId < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &power)) {
-		CustomHUDShake::Set(modId, power);
+	float fPower = -1.f;
+	uint8_t ucIndex = scriptObj->GetCompileIndex();
+	if (ucIndex < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &fPower)) {
+		CustomHUDShake::Set(ucIndex, fPower);
 		*result = 1;
 	}
 	return true;
@@ -213,15 +198,15 @@ bool Cmd_SetHUDShudderPower_Execute(COMMAND_ARGS) {
 
 bool Cmd_ClearCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ThisCall(0x952F90, PlayerCharacter::GetSingleton());
+	PlayerCharacter::GetSingleton()->RemovePlayerMapMarker();
 	*result = 1;
 	return true;
 }
 
 bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NiPoint3 pos;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pos.x, &pos.y, &pos.z)) {
+	NiPoint3 kPos;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kPos.x, &kPos.y, &kPos.z)) {
 		TESForm* pSpace = nullptr;
 		TESObjectCELL* pParentCell = PlayerCharacter::GetSingleton()->parentCell;
 		if (pParentCell) {
@@ -231,14 +216,14 @@ bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 				pSpace = pParentCell->worldSpace;
 		}
 		if (pSpace) {
-			ThisCall(0x952E60, PlayerCharacter::GetSingleton(), pos.x, pos.y, pos.z, pSpace);
+			PlayerCharacter::GetSingleton()->SetPlayerMapMarker(kPos, pSpace);
 			*result = 1;
 		}
 	}
 	return true;
 }
-bool Cmd_SetActorMovementFlags_Execute(COMMAND_ARGS)
-{
+
+bool Cmd_SetActorMovementFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
 	uint32_t uiFlags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags)) {
@@ -283,18 +268,24 @@ bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 	*result = 0;
-	int autoMove = -1;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &autoMove);
-	if (autoMove > -1) {
-		PlayerCharacter::GetSingleton()->autoMove = (autoMove > 0);
+	int32_t iAutoMove = -1;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &iAutoMove);
+	if (iAutoMove > -1) {
+		PlayerCharacter::GetSingleton()->autoMove = iAutoMove > 0;
 		*result = 1;
 	}
 	return true;
 }
 
+bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
+	*result = 0;
+	if (thisObj->IsActor())
+		*result = static_cast<Actor*>(thisObj)->magicTarget.HasDamageHealthEffect();
+	return true;
+}
+
 bool Cmd_HasHealthDamageEffect_Execute(COMMAND_ARGS) {
-	Actor* actor = (Actor*)thisObj;
-	*result = ThisCall<bool>(0x822E00, &actor->magicTarget);
+	Cmd_HasHealthDamageEffect_Eval(thisObj, nullptr, nullptr, result);
 	return true;
 }
 
@@ -310,11 +301,11 @@ static bool PointInTriangle(const NiPoint3& pt, const NiPoint3& v1, const NiPoin
 	return (b1 == b2) && (b2 == b3);
 }
 
-static NiPoint3 GetTriangleCenter(const NiPoint3& v1, const NiPoint3& v2, const NiPoint3& v3) {
+static NiPoint3 __fastcall GetTriangleCenter(const NiPoint3& v1, const NiPoint3& v2, const NiPoint3& v3) {
 	return NiPoint3((v1.x + v2.x + v3.x) / 3.0f, (v1.y + v2.y + v3.y) / 3.0f, (v1.z + v2.z + v3.z) / 3.0f);
 }
 
-void GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
+static void __fastcall GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
 	NavMeshArray* pNavMeshArray = apCell->pNavMeshes;
 	if (!pNavMeshArray)
 		return;
@@ -362,7 +353,7 @@ void GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPo
 	}
 }
 
-bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
+static bool __fastcall GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
 	NavMeshArray* pNavMeshArray = apCell->pNavMeshes;
 	if (!pNavMeshArray)
 		return false;
@@ -420,94 +411,49 @@ bool GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest,
 
 
 bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
-
 	*result = 0;
-	float mul = 1.0f;
-	TESForm* a_form = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mul, &a_form) && a_form) {
-		if (fabs(mul) < FLT_EPSILON) { mul = FLT_EPSILON + DBL_EPSILON; }
-		switch (a_form->GetFormType()) {
-		case FORM_TYPE::TESNPC:
-		case FORM_TYPE::TESCreature:
-			NPCAccuracy::tables.ACTBAS[a_form->GetFormID()] = mul;
-			break;
-		case FORM_TYPE::TESCombatStyle:
-			NPCAccuracy::tables.CSTY[a_form->GetFormID()] = mul;
-			break;
-		case FORM_TYPE::TESFaction:
-			NPCAccuracy::tables.FACT[a_form->GetFormID()] = mul;
-			break;
+	float fMultiplier = 1.f;
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fMultiplier, &pForm)) {
+		TESForm* pTarget = pForm ? pForm : thisObj;
+		if (pTarget) {
+			if (fabs(fMultiplier) < FLT_EPSILON)
+				fMultiplier = FLT_EPSILON + DBL_EPSILON;
 
+			NPCAccuracy::SetMultiplier(pTarget, fMultiplier);
 		}
 	}
-	else if (thisObj) {
-		NPCAccuracy::tables.ACTREF[thisObj->GetFormID()] = mul;
 
-	}
 	return true;
 }
 
 
-bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
-
+bool Cmd_GetExtraAccuracyPenaltyMult_Eval(COMMAND_ARGS_EVAL) {
 	*result = 1;
-	TESForm* a_form = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
-		switch (a_form->GetFormType()) {
-		case FORM_TYPE::TESNPC:
-		case FORM_TYPE::TESCreature:
-			if (auto it = NPCAccuracy::tables.ACTBAS.find(a_form->GetFormID()); it != NPCAccuracy::tables.ACTBAS.end()) {
-				*result = it->second;
-			}
-			break;
-		case FORM_TYPE::TESCombatStyle:
-			if (auto it = NPCAccuracy::tables.CSTY.find(a_form->GetFormID()); it != NPCAccuracy::tables.CSTY.end()) {
-				*result = it->second;
-			}
-			break;
-		case FORM_TYPE::TESFaction:
-			if (auto it = NPCAccuracy::tables.FACT.find(a_form->GetFormID()); it != NPCAccuracy::tables.FACT.end()) {
-				*result = it->second;
-			}
-			break;
-
-		}
-	}
-	else if (thisObj) {
-		if (auto it = NPCAccuracy::tables.ACTREF.find(thisObj->GetFormID()); it != NPCAccuracy::tables.ACTREF.end()) {
-			*result = it->second;
-		}
-	}
+	TESForm* pForm = static_cast<TESForm*>(arg1);
+	TESForm* pTarget = pForm ? pForm : thisObj;
+	if (pTarget)
+		*result = NPCAccuracy::GetMultiplier(pTarget);
 	return true;
+}
 
-
+bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) 
+		Cmd_GetExtraAccuracyPenaltyMult_Eval(thisObj, pForm, nullptr, result);
+	return true;
 }
 
 bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
-
 	*result = 0;
-	TESForm* a_form = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &a_form) && a_form) {
-		switch (a_form->GetFormType()) {
-		case FORM_TYPE::TESNPC:
-		case FORM_TYPE::TESCreature:
-			NPCAccuracy::tables.ACTBAS.erase(a_form->GetFormID());
-			break;
-		case FORM_TYPE::TESCombatStyle:
-			NPCAccuracy::tables.CSTY.erase(a_form->GetFormID());
-			break;
-		case FORM_TYPE::TESFaction:
-			NPCAccuracy::tables.FACT.erase(a_form->GetFormID());
-			break;
-
-		}
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) {
+		TESForm* pTarget = pForm ? pForm : thisObj;
+		if (pTarget)
+			NPCAccuracy::RemoveMultiplier(pTarget);
 	}
-	else if (thisObj) {
-		NPCAccuracy::tables.ACTREF.erase(thisObj->GetFormID());
 
-	}
 	return true;
-
 }
 
 bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
@@ -631,11 +577,14 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+template<typename KEY, typename DATA>
+using ScrapMap = std::unordered_map<KEY, DATA, std::hash<KEY>, std::equal_to<KEY>, BSScrapAllocator<std::pair<const KEY, DATA>>>;
+
 bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NVSEArrayVar* effArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	tempEffectMap.clear();
-	if (auto iter = ((Actor*)PlayerCharacter::GetSingleton())->magicTarget.GetEffectList()->Head())
+	ScrapMap<TESForm*, std::pair<float, float>> tempEffectMap;
+	if (auto iter = PlayerCharacter::GetSingleton()->magicTarget.GetEffectList()->Head())
 	{
 		do
 		{
@@ -664,7 +613,6 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 			g_arrInterface->AppendElements(effArrInner, effect.first, effect.second.first, effect.second.second);
 			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effArrInner));
 		}
-		tempEffectMap.clear();
 	}
 	g_arrInterface->AssignCommandResult(effArr, result);
 	return true;
@@ -672,11 +620,11 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_SetCameraShakeNoHUDShudder_Execute(COMMAND_ARGS) {
-	float shakeMult, time = 0.f;
+	float fShakeMult, fTime = 0.f;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shakeMult, &time)) {
-		CustomCameraShake::mult = shakeMult;
-		CustomCameraShake::duration = time;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fShakeMult, &fTime)) {
+		CustomCameraShake::mult = fShakeMult;
+		CustomCameraShake::duration = fTime;
 		*result = 1;
 	}
 	return true;
@@ -701,51 +649,65 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-bool Cmd_GetMoonPhase_Execute(COMMAND_ARGS) {
-	*result = *(int*)0x11CCA80;
+
+bool Cmd_GetMoonPhase_Eval(COMMAND_ARGS_EVAL) {
+	*result = Moon::eCurrentPhase;
 	return true;
 }
+
+bool Cmd_GetMoonPhase_Execute(COMMAND_ARGS) {
+	Cmd_GetMoonPhase_Eval(nullptr, nullptr, nullptr, result);
+	return true;
+}
+
 bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL* cell = thisObj->GetParentCell();
-	if (!cell || cell->IsInterior()) return true;
-	const NiPoint3& pos = thisObj->GetPos();
-	COORD_DATA coordData;
-	TESObjectLAND* landscape = ThisCall<TESObjectLAND*>(0x546FB0, cell); // TESObjectCELL::GetLand
-	if (!landscape) return true;
-	landscape->GetCoordData(coordData, pos, 1);
-	TESLandTexture* txt = ThisCall<TESLandTexture*>(0x53A630, landscape, coordData.iBlock, coordData.iVertIdx); // TESObjectLAND::GetMainTexture
-	if (txt) *(uint32_t*)result = txt->GetFormID();
+	TESObjectCELL* pCell = thisObj->GetParentCell();
+	if (!pCell || pCell->IsInterior())
+		return true;
+
+	TESObjectLAND* pLand = pCell->GetLand();
+	if (!pLand)
+		return true;
+
+	const NiPoint3& rPos = thisObj->GetPos();
+	COORD_DATA kCoordData;
+	pLand->GetCoordData(kCoordData, rPos, 1);
+	TESLandTexture* pTexture = pLand->GetMainTexture(thisObj->GetPos());
+	if (pTexture)
+		*reinterpret_cast<uint32_t*>(result) = pTexture->GetFormID();
 	return true;
 }
 
 bool Cmd_RemoveNavmeshObstacle_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NavMeshObstacleManager* g_nomgr = ThisCall<NavMeshObstacleManager*>(0x6C0720, nullptr);
-	ThisCall(0x6C0C80, g_nomgr, thisObj);
-	*result = 1;
+	if (thisObj->IsObstacle()) {
+		NavMeshObstacleManager::GetSingleton()->RemoveObstacleForReference(thisObj);
+		*result = 1;
+	}
 	return true;
 }
 
 bool Cmd_AddNavmeshObstacle_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NavMeshObstacleManager* g_nomgr = ThisCall<NavMeshObstacleManager*>(0x6C0720, nullptr);
-	ThisCall(0x6C0C30, g_nomgr, thisObj);
-	*result = 1;
+	if (thisObj->IsObstacle()) {
+		NavMeshObstacleManager::GetSingleton()->AddObstacleForReference(thisObj);
+		*result = 1;
+	}
 	return true;
 }
 
 bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESSound* sound = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound) && sound && IS_TYPE(sound, TESSound)) {
+	TESSound* pSoundForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSoundForm) && pSoundForm && IS_TYPE(pSoundForm, TESSound)) {
 		CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
 		BSGameSound* pSound;
 		uint32_t uiKey;
 		auto kIter = BSAudioManager::Get()->playingSounds.GetFirstPos();
 		while (kIter) {
 			BSAudioManager::Get()->playingSounds.GetNext(kIter, uiKey, pSound);
-			if (!pSound || (pSound->sourceSound != sound))
+			if (!pSound || pSound->sourceSound != pSoundForm)
 				continue;
 
 			BSSoundHandle handle;
@@ -775,47 +737,51 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-TESWorldSpace* GetWorldspace(TESObjectREFR* ref) {
-	TESObjectCELL* cell = ref->parentCell;
-	if (!cell) cell = ref->childCell.GetSaveParentCell();
-	if (cell && (cell->cellFlags & 1) == 0) return cell->worldSpace;
+TESWorldSpace* __fastcall GetWorldSpace(const TESObjectREFR* apRef) {
+	const TESObjectCELL* pCell = apRef->parentCell;
+	if (!pCell)
+		pCell = apRef->childCell.GetSaveParentCell();
+
+	if (pCell && !pCell->IsInterior()) 
+		return pCell->worldSpace;
+
 	return nullptr;
 }
 
 bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char locationName[256] = {};
-	if (thisObj->parentCell && (thisObj->parentCell->cellFlags & 1) != 0) {
-		strcpy_s(locationName, thisObj->parentCell->fullName.GetFullName());
+	char cLocationName[MAX_PATH] = {};
+	if (thisObj->parentCell && thisObj->parentCell->IsInterior()) {
+		strcpy_s(cLocationName, thisObj->parentCell->fullName.GetFullName());
 	}
 	else {
-		TESWorldSpace* wspc = GetWorldspace(thisObj);
-		if (wspc) {
-			BSString str;
-			const NiPoint3& pos = thisObj->GetPos();
-			wspc->GetMapNameForLocation(str, pos.x, pos.y, pos.z);
-			strcpy_s(locationName, str.c_str());
+		const TESWorldSpace* pWorld = GetWorldSpace(thisObj);
+		if (pWorld) {
+			BSString strName;
+			pWorld->GetMapNameForLocation(strName, thisObj->GetPos());
+			strcpy_s(cLocationName, strName.c_str());
 		}
 	}
-	g_strInterface->Assign(PASS_COMMAND_ARGS, locationName);
-	return true;
-}
-
-bool Cmd_GetLocationSpecificLoadScreensOnly_Execute(COMMAND_ARGS) {
-	*result = (float)(*(uint8_t*)0x11CABB8);
+	g_strInterface->Assign(PASS_COMMAND_ARGS, cLocationName);
 	return true;
 }
 
 bool Cmd_GetLocationSpecificLoadScreensOnly_Eval(COMMAND_ARGS_EVAL) {
-	*result = (float)(*(uint8_t*)0x11CABB8);
+	*result = LoadingMenu::bLocationSpecificLoadScreensOnly;
 	return true;
 }
 
-bool IsCombatTarget(Actor* source, Actor* toSearch) {
+bool Cmd_GetLocationSpecificLoadScreensOnly_Execute(COMMAND_ARGS) {
+	Cmd_GetLocationSpecificLoadScreensOnly_Eval(nullptr, nullptr, nullptr, result);
+	return true;
+}
+
+bool __fastcall IsCombatTarget(const Actor* source, const Actor* toSearch) {
 	if (source->isInCombat && source->combatTargets) {
 		Actor** actorsArr = source->combatTargets->pBuffer;
 		uint32_t count = source->combatTargets->uiSize;
-		if (!actorsArr) return false;
+		if (!actorsArr)
+			return false;
 		for (; count; count--, actorsArr++) {
 			if (*actorsArr == toSearch) return true;
 		}
@@ -823,22 +789,27 @@ bool IsCombatTarget(Actor* source, Actor* toSearch) {
 	return false;
 }
 
-bool IsHostileCompassTarget(Actor* toSearch) {
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
-	for (; !iter.End(); ++iter) {
-		PlayerCharacter::CompassTarget* target = iter.Get();
-		if (target->isHostile && target->target == toSearch) return true;
+bool __fastcall IsHostileCompassTarget(const TESObjectREFR* apTarget) {
+	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	while (pIter && !pIter->IsEmpty()) {
+		PlayerCharacter::CompassTarget* pTarget = pIter->GetItem();
+		if (pTarget->isHostile && pTarget->target == apTarget)
+			return true;
+
+		pIter = pIter->GetNext();
 	}
 	return false;
 }
+
 bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 	*result = 0;
-	Actor* actor = (Actor*)thisObj;
-	if (ThisCall<bool>(0x579690, thisObj) && (!thisObj->IsActor() || !actor->isTeammate) ||
-		thisObj->IsActor() && (IsCombatTarget(actor, PlayerCharacter::GetSingleton()) || IsHostileCompassTarget(actor))) {
+	Actor* pActor = static_cast<Actor*>(thisObj);
+	if (ThisCall<bool>(0x579690, thisObj) && (!thisObj->IsActor() || !pActor->isTeammate) ||
+		thisObj->IsActor() && (IsCombatTarget(pActor, PlayerCharacter::GetSingleton()) || IsHostileCompassTarget(thisObj))) {
 		*result = 1;
 	}
-	if (IsConsoleMode()) Console_Print("IsCrimeOrEnemy >> %.f", *result);
+	if (IsConsoleMode()) 
+		Console_Print("IsCrimeOrEnemy >> %.f", *result);
 	return true;
 }
 
@@ -870,9 +841,10 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	}
 
 	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
-	for (; !iter.End(); ++iter) {
-		PlayerCharacter::CompassTarget* target = iter.Get();
+	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	while (pIter && !pIter->IsEmpty()) {
+		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		pIter = pIter->GetNext();
 		if (target->isHostile) {
 			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0
 				|| target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
@@ -964,8 +936,6 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-
-
 bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 	*result = 0;
 	uint32_t index;
@@ -991,48 +961,46 @@ bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 
 bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL* actorCell = PlayerCharacter::GetSingleton()->parentCell;
-	if (actorCell)
-		*result = ThisCall<bool>(0x9764A0, ProcessLists::GetSingleton(), actorCell->IsInterior());
+	TESObjectCELL* pCell = PlayerCharacter::GetSingleton()->parentCell;
+	if (pCell)
+		*result = ProcessLists::GetSingleton()->AreHostileActorsNear(pCell->IsInterior());
 	return true;
 }
 
 bool Cmd_ToggleCombatMusic_Execute(COMMAND_ARGS) {
-	uint32_t toggle = 1;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &toggle);
-	JohnnyPatches::bCombatMusicDisabled = (toggle == 0);
+	BOOL bValue = TRUE;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &bValue);
+	JohnnyPatches::bCombatMusicDisabled = bValue == FALSE;
 	return true;
 }
 
 bool Cmd_IsCombatMusicEnabled_Execute(COMMAND_ARGS) {
-	*result = (JohnnyPatches::bCombatMusicDisabled == 0);
-	if (IsConsoleMode()) Console_Print("IsCombatMusicEnabled >> %.f", *result);
+	*result = JohnnyPatches::bCombatMusicDisabled == false;
+	if (IsConsoleMode())
+		Console_Print("IsCombatMusicEnabled >> %.f", *result);
+	return true;
+}
+
+bool Cmd_IsCompassHostile_Eval(COMMAND_ARGS_EVAL) {
+	*result = IsHostileCompassTarget(thisObj);
 	return true;
 }
 
 bool Cmd_IsCompassHostile_Execute(COMMAND_ARGS) {
-	*result = 0;
-	Actor* toCheck = (Actor*)thisObj;
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
-	for (; !iter.End(); ++iter) {
-		PlayerCharacter::CompassTarget* target = iter.Get();
-		if (target->isHostile && target->target == toCheck) {
-			*result = 1;
-			break;
-		}
-	}
-	if (IsConsoleMode()) Console_Print("IsCompassHostile >> %.f", *result);
+	Cmd_IsCompassHostile_Eval(thisObj, nullptr, nullptr, result);
+	if (IsConsoleMode()) 
+		Console_Print("IsCompassHostile >> %.f", *result);
 	return true;
 }
 
 void RestoreDisabledPlayerControlsHUDFlags() {
-	SafeWrite32(0x771A53, HUDMainMenu::kXpMeter | HUDMainMenu::kSubtitles | HUDMainMenu::kMessages | HUDMainMenu::kQuestReminder | HUDMainMenu::kRadiationMeter);
+	HookUtils::SafeWrite32(0x771A53, HUDMainMenu::kXpMeter | HUDMainMenu::kSubtitles | HUDMainMenu::kMessages | HUDMainMenu::kQuestReminder | HUDMainMenu::kRadiationMeter);
 }
 
 bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
 	uint32_t flags;
 	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &flags)) {
-		SafeWrite32(0x771A53, flags);
+		HookUtils::SafeWrite32(0x771A53, flags);
 		HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
 	}
 	else {
@@ -1056,9 +1024,10 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
-	for (; !iter.End(); ++iter) {
-		PlayerCharacter::CompassTarget* target = iter.Get();
+	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	while (pIter && !pIter->IsEmpty()) {
+		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		pIter = pIter->GetNext();
 		if (target->isHostile) {
 			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
@@ -1076,10 +1045,10 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-double GetVectorAngle2D(const NiPoint3* pt) {
+double __fastcall GetVectorAngle2D(const NiPoint3& pt) {
 	double angle;
-	if (pt->y == 0) {
-		if (pt->x <= 0) {
+	if (pt.y == 0) {
+		if (pt.x <= 0) {
 			angle = kDblPIx3d2;
 		}
 		else {
@@ -1087,9 +1056,9 @@ double GetVectorAngle2D(const NiPoint3* pt) {
 		}
 	}
 	else {
-		double ratio = pt->x / pt->y;
+		double ratio = pt.x / pt.y;
 		angle = dAtan(ratio);
-		if (pt->y < 0.0) {
+		if (pt.y < 0.0) {
 			angle += kDblPI;
 		}
 	}
@@ -1098,10 +1067,10 @@ double GetVectorAngle2D(const NiPoint3* pt) {
 }
 
 
-double GetAngleBetweenPoints(const NiPoint3& actorPos, const NiPoint3& playerPos, float offset) {
+double __fastcall GetAngleBetweenPoints(const NiPoint3& actorPos, const NiPoint3& playerPos, float offset) {
 	NiPoint3 diff = actorPos - playerPos;
 
-	double angle = GetVectorAngle2D(&diff) - offset;
+	double angle = GetVectorAngle2D(diff) - offset;
 	if (angle > -kDblPI) {
 		if (angle > kDblPI) {
 			angle = kDblPIx2 - angle;
@@ -1126,9 +1095,11 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
-	for (; !iter.End(); ++iter) {
-		PlayerCharacter::CompassTarget* target = iter.Get();
+	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	while (pIter && !pIter->IsEmpty()) {
+		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		pIter = pIter->GetNext();
+
 		if (target->isHostile) {
 			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
@@ -1212,13 +1183,21 @@ bool Cmd_EnableMenuArrowKeys_Execute(COMMAND_ARGS) {
 	DisabledArrowKeys::Toggle(false);
 	return true;
 }
-bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
+
+SPEC_NOINLINE bool Cmd_GetRunSpeed_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	Actor* actor = (Actor*)thisObj;
-	*result = ThisCall<float>(0x884EB0, actor);
-	if (IsConsoleMode()) Console_Print("GetRunSpeed >> %.2f", *result);
+	if (thisObj->IsActor())
+		*result = static_cast<Actor*>(thisObj)->GetRunSpeed();
 	return true;
 }
+
+bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
+	Cmd_GetRunSpeed_Eval(thisObj, nullptr, nullptr, result);
+	if (IsConsoleMode()) 
+		Console_Print("GetRunSpeed >> %.2f", *result);
+	return true;
+}
+
 bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
 	uint32_t index, isVisible;
 	*result = 0;
@@ -1287,16 +1266,14 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
-	TESSound* soundForm = nullptr;
-	TESObjectREFR* source = nullptr;
-	BSFadeNode* fadeNode = nullptr;
-	float fadeOutTime = -1;
+	TESSound* pSoundForm = nullptr;
+	TESObjectREFR* pSource = nullptr;
+	float fFadeOutTime = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &soundForm, &source, &fadeOutTime) && soundForm && IS_TYPE(soundForm, TESSound) && source) {
-		if (soundForm->soundFile.GetSoundFileLength()) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSoundForm, &pSource, &fFadeOutTime) && pSoundForm && IS_TYPE(pSoundForm, TESSound) && pSource) {
+		if (pSoundForm->soundFile.GetSoundFileLength()) {
 			CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
-			const char* soundPath = soundForm->soundFile.GetSoundFile();
-			BSGameSound* pSound;
+			const char* pSoundPath = pSoundForm->soundFile.GetSoundFile();
 			uint32_t uiKey;
 			auto kObjIter = BSAudioManager::Get()->soundPlayingObjects.GetFirstPos();
 			while (kObjIter) {
@@ -1306,19 +1283,20 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 					continue;
 
 				BSFadeNode* pFadeNode = static_cast<BSFadeNode*>(spObject.m_pObject);
-
-				if (pFadeNode->pLinkedObj != source)
+				if (pFadeNode->pLinkedObj != pSource)
 					continue;
 
+				BSGameSound* pSound;
 				BSAudioManager::Get()->playingSounds.GetAt(uiKey, pSound);
-				if (pSound && StrBeginsCI(pSound->filePath + 0xB, soundPath)) {
-					BSSoundHandle handle;
-					handle.uiSoundID = pSound->mapKey;
+				if (pSound && StrBeginsCI(pSound->filePath + 0xB, pSoundPath)) {
+					BSSoundHandle kHandle;
+					kHandle.uiSoundID = pSound->mapKey;
 
-					if (fadeOutTime == -1)
-						handle.Stop();
+					if (fFadeOutTime == -1)
+						kHandle.Stop();
 					else
-						handle.FadeOutAndRelease(fadeOutTime * 1000.0);
+						kHandle.FadeOutAndRelease(fFadeOutTime * 1000.0);
+
 					*result = 1;
 					break;
 				}
@@ -1329,47 +1307,43 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
-	NiPoint3 kVector;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kVector.x, &kVector.y, &kVector.z)) {
-		CdeclCall(0x62B8D0, thisObj->Get3D(), &kVector, true);
+	NiPoint3 kVelocity;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kVelocity.x, &kVelocity.y, &kVelocity.z)) {
+		CdeclCall(0x62B8D0, thisObj->Get3D(), &kVelocity, true); // TESHavokUtilities::AddVelocity
 		*result = 1;
 	}
 	return true;
 }
 
 bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
-	// Removal support by jazzisparis
+	//removal support by jazzisparis
 	*result = 0;
 	AlchemyItem* pPoison = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pPoison) && (!pPoison || (IS_TYPE(pPoison, AlchemyItem) && pPoison->CanBePoison()))) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pPoison) && (!pPoison || (IS_TYPE(pPoison, AlchemyItem) && pPoison->IsPoison()))) {
 		TESObjectWEAP* pWeapon = nullptr;
-		ExtraDataList* pExtraData = nullptr;
+		ExtraDataList* pExtraDataList = nullptr;
 		if (!thisObj->IsActor()) {
 			InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
-			if (!pInvRef)
+			if (!pInvRef || !pInvRef->pForm || pInvRef->pForm->GetFormType() != FORM_TYPE::TESObjectWEAP)
 				return true;
 
-			if (!pInvRef->data.type)
-				return true;
-
-			if (pInvRef->data.type->GetFormType() == FORM_TYPE::TESObjectWEAP) {
-				pWeapon = static_cast<TESObjectWEAP*>(pInvRef->data.type);
-				pExtraData = pInvRef->data.xData;
-			}
+			pWeapon = static_cast<TESObjectWEAP*>(pInvRef->pForm);
+			pExtraDataList = pInvRef->pExtraDataList;
 		}
-		else if (static_cast<Actor*>(thisObj)->baseProcess) {
-			ItemChange* pWeaponItem = static_cast<Actor*>(thisObj)->baseProcess->GetCurrentWeapon();
+		else {
+			ItemChange* pWeaponItem = ((Actor*)thisObj)->baseProcess->GetCurrentWeapon();
 			if (pWeaponItem && pWeaponItem->pExtraLists) {
-				pWeapon = static_cast<TESObjectWEAP*>(pWeaponItem->GetContainerObject());
-				pExtraData = pWeaponItem->pExtraLists->GetItem();
+				pWeapon = static_cast<TESObjectWEAP*>(pWeaponItem->pObject);
+				pExtraDataList = pWeaponItem->pExtraLists->GetItem();
 			}
 		}
-		if (pWeapon && pExtraData && (pWeapon->weaponSkill == kAVCode_Unarmed || pWeapon->weaponSkill == kAVCode_MeleeWeapons)) {
+
+		if (pWeapon && pExtraDataList && (pWeapon->weaponSkill == kAVCode_Unarmed || pWeapon->weaponSkill == kAVCode_MeleeWeapons)) {
 			if (pPoison)
-				ThisCall(0x419D10, pExtraData, pPoison); // ExtraDataList::UpdateExtraPoison
+				pExtraDataList->SetPoison(pPoison);
 			else
-				pExtraData->RemoveExtra<ExtraPoison>();
+				pExtraDataList->RemovePoison();
 			*result = 1;
 		}
 	}
@@ -1377,17 +1351,16 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
-	int pipboyTab = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &pipboyTab);
 	*result = 0;
-	if (pipboyTab == 0 || pipboyTab == 1002 || pipboyTab == 1003 || pipboyTab == 1023) {
-		if (InterfaceManager::GetSingleton()) {
-			if (!InterfaceManager::GetSingleton()->pipBoyMode) {
-				ThisCall(0x70F4E0, InterfaceManager::GetSingleton(), 0, pipboyTab);
-			}
-			else if (InterfaceManager::GetSingleton()->pipBoyMode == 3) {
-				ThisCall(0x70F690, InterfaceManager::GetSingleton(), 0);
-			}
+	Interface::Menus eMenu = Interface::NoMenu;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &eMenu);
+	if (eMenu == Interface::NoMenu || eMenu == Interface::Inventory || eMenu == Interface::Stats || eMenu == Interface::PipboyData) {
+		InterfaceManager* pMgr = InterfaceManager::GetSingleton();
+		if (pMgr) {
+			if (pMgr->pipBoyMode == 0)
+				pMgr->OpenPipboy(nullptr, eMenu);
+			else if (pMgr->pipBoyMode == 3)
+				pMgr->ClosePipboy(nullptr);
 			*result = 1;
 		}
 	}
@@ -1395,16 +1368,21 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS) {
-	BOOL bValue;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bValue))
+	*result = 0;
+	BOOL bValue = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bValue)) {
 		DisabledLevelUp::isShowLevelUp = bValue;
+		*result = 1;
+	}
 	return true;
 }
 
 bool Cmd_Jump_Execute(COMMAND_ARGS) {
-	if (!thisObj->IsActor()) 
-		return true;
-	((MobileObject*)thisObj)->Unk_95();
+	*result = 0;
+	if (thisObj->IsMobileObject()) {
+		static_cast<MobileObject*>(thisObj)->Jump();
+		*result = 1;
+	}
 	return true;
 }
 
@@ -1413,27 +1391,32 @@ bool Cmd_StopVATSCam_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+static inline constexpr AddressPtr<float, 0x11DFED4> fCameraShakeMult;
+static inline constexpr AddressPtr<float, 0x11DFED8> fCameraShakeCurrentTime;
+
 bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
-	float shakeMult, time;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shakeMult, &time)) {
-		*(float*)(0x11DFED4) = shakeMult;
-		*(float*)(0x11DFED8) = time;
+	float fShakeMult, fTime;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fShakeMult, &fTime)) {
+		fCameraShakeMult = fShakeMult;
+		fCameraShakeCurrentTime = fTime;
 		*result = 1;
 	}
 	return true;
 }
 
 bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
-	int mode = -1;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &mode);
-	if (mode < 0 || mode > 3) {
-		mode = -1;
-	}
-	*result = DisabledMuzzleFlashLights::SetMode(mode);
-	if (IsConsoleMode()) Console_Print("DisableMuzzleFlashLights >> %.f", *result);
+	*result = 0;
+	DisabledMuzzleFlashLights::Mode eMode = DisabledMuzzleFlashLights::Mode::NONE;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &eMode);
+	if (ScriptUtils::InRange(eMode))
+		*result = DisabledMuzzleFlashLights::SetMode(eMode);
+
+	if (IsConsoleMode()) 
+		Console_Print("DisableMuzzleFlashLights >> %.f", *result);
 	return true;
 }
+
 bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 	BOOL bDisable = TRUE;
 	uint32_t uiTypeFlags = DisabledSaves::SaveTypeFlags::ALL;
@@ -1514,9 +1497,12 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 	TESObjectREFR* pTarget = nullptr;
 	float fRadius = -1.f;
 	BOOL bFaceTarget = FALSE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTarget, &fRadius, &bFaceTarget) && pTarget && pTarget->IsReference() && thisObj->IsActor()) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTarget, &fRadius, &bFaceTarget) && thisObj->IsActor()) {
 		Actor* pActor = static_cast<Actor*>(thisObj);
 		if (pTarget) {
+			if (!pTarget->IsReference())
+				return true;
+
 			if (bFaceTarget)
 				*result = pActor->SetPathfindingGoalAndAngle(pTarget, fRadius);
 			else
@@ -1531,8 +1517,15 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
+bool Cmd_GetGrenadeHoldTime_Eval(COMMAND_ARGS_EVAL) {
 	*result = PlayerCharacter::GetSingleton()->timeGrenadeHeld;
+	return true;
+}
+
+bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
+	Cmd_GetGrenadeHoldTime_Eval(nullptr, nullptr, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetGrenadeHoldTime >> %f", *result);
 	return true;
 }
 
@@ -1566,7 +1559,7 @@ bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_IsInDialogueWithPlayer_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_IsInDialogueWithPlayer_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj && thisObj->IsActor()) {
 		Actor* pActor = static_cast<Actor*>(thisObj);
@@ -1576,8 +1569,9 @@ bool Cmd_IsInDialogueWithPlayer_Eval(COMMAND_ARGS_EVAL) {
 }
 
 bool Cmd_IsInDialogueWithPlayer_Execute(COMMAND_ARGS) {
-	*result = 0;
 	Cmd_IsInDialogueWithPlayer_Eval(thisObj, nullptr, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("IsInDialogueWithPlayer >> %f", *result);
 	return true;
 }
 
@@ -1611,7 +1605,14 @@ bool Cmd_SetYieldTimer_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetYieldTimer_Execute(COMMAND_ARGS) {
+bool Cmd_GetYieldTimer_Eval(COMMAND_ARGS_EVAL) {
 	*result = PlayerCharacter::GetSingleton()->fYieldTimer;
+	return true;
+}
+
+bool Cmd_GetYieldTimer_Execute(COMMAND_ARGS) {
+	Cmd_GetYieldTimer_Eval(nullptr, nullptr, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetYieldTimer >> %f", *result);
 	return true;
 }

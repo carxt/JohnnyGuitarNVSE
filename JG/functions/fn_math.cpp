@@ -1,58 +1,68 @@
 #include "fn_math.h"
-#include <GameObjects.h>
-#include <GameProcess.h>
-#include <misc/misc.h>
-#include <misc/WorldToScreen.h>
+#include "GameObjects.h"
+#include "GameProcess.h"
+#include "misc/misc.h"
 #include "netimmerse.h"
+#include "JG/WorldToScreen.hpp"
+
 #include "Bethesda/TESMain.hpp"
 
-void Cmd_GetPlayerCamFOV(uint32_t worldOr1stOrScene, double* result) {
-	if (!PlayerCharacter::GetSingleton()) return;
-	*result = worldOr1stOrScene ? PlayerCharacter::GetSingleton()->firstPersonFOV : PlayerCharacter::GetSingleton()->worldFOV;
-	if (worldOr1stOrScene > 1) {
-		auto g_sceneGraph = TESMain::GetWorldSceneGraph();
-		*result = g_sceneGraph ? g_sceneGraph->fCurrentFOV : 0;
+enum FOVType {
+	VIEWMODEL	= 0,
+	WORLD		= 1,
+	CURRENT		= 2,
+};
+
+bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL) {
+	const FOVType eFOV = *reinterpret_cast<FOVType*>(&arg1);
+	switch (eFOV) {
+		case FOVType::VIEWMODEL:
+			*result = PlayerCharacter::GetSingleton()->firstPersonFOV;
+			break;
+		case FOVType::WORLD:
+			*result = PlayerCharacter::GetSingleton()->worldFOV;
+			break;
+		default:
+			*result = TESMain::GetWorldSceneGraph()->fCurrentFOV;
+			break;
 	}
-}
-
-bool Cmd_GetPlayerCamFOV_Execute(COMMAND_ARGS)
-{
-	*result = 0;
-	uint32_t worldOr1stOrScene = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &worldOr1stOrScene)) return true;
-	Cmd_GetPlayerCamFOV(worldOr1stOrScene, result);
 	return true;
 }
 
-bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL)
-{
+bool Cmd_GetPlayerCamFOV_Execute(COMMAND_ARGS) {
 	*result = 0;
-	Cmd_GetPlayerCamFOV((uint32_t)arg1, result);
+	FOVType eFOV = FOVType::VIEWMODEL;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eFOV)) 
+		Cmd_GetPlayerCamFOV_Eval(thisObj, reinterpret_cast<void*>(eFOV), nullptr, result);
 	return true;
 }
 
-bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ScriptVar* worldOut, * firstPersonOut, * scenegraphOut = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &worldOut, &firstPersonOut, &scenegraphOut) || !PlayerCharacter::GetSingleton()) return true;
+	ScriptVar* pViewmodelFOV = nullptr;
+	ScriptVar* pWorldFOV = nullptr;
+	ScriptVar* pCurrentFOV = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pViewmodelFOV, &pWorldFOV, &pCurrentFOV) || !PlayerCharacter::GetSingleton())
+		return true;
+
+	ASSUME_ASSERT(pViewmodelFOV && pWorldFOV);
+
+	pViewmodelFOV->data = PlayerCharacter::GetSingleton()->firstPersonFOV;
+	pWorldFOV->data = PlayerCharacter::GetSingleton()->worldFOV;
+	if (pCurrentFOV)
+		pCurrentFOV->data = TESMain::GetWorldSceneGraph()->fCurrentFOV;
+
 	*result = 1;
-	worldOut->data = PlayerCharacter::GetSingleton()->firstPersonFOV;
-	firstPersonOut->data = PlayerCharacter::GetSingleton()->worldFOV;
-	if (scenegraphOut) {
-		auto g_sceneGraph = TESMain::GetWorldSceneGraph();
-		scenegraphOut->data = g_sceneGraph ? g_sceneGraph->fCurrentFOV : 0;
-
-	}
 	return true;
 }
 
 bool Cmd_GetRGBColor_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t r, g, b;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &r, &g, &b) && r <= 255 && g <= 255 && b <= 255) {
-		*result = ((r & 0xFF) << 16) + ((g & 0xFF) << 8) + (b & 0xFF);
-		if (IsConsoleMode()) Console_Print("0x%X", (uint32_t)*result);
+	uint32_t uiR, uiG, uiB;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiR, &uiG, &uiB) && uiR <= UINT8_MAX && uiG <= UINT8_MAX && uiB <= UINT8_MAX) {
+		*result = uint32_t(((uiR & UINT8_MAX) << 16) + ((uiG & UINT8_MAX) << 8) + (uiB & UINT8_MAX));
+		if (IsConsoleMode()) 
+			Console_Print("0x%X", (uint32_t)*result);
 	}
 	return true;
 }
@@ -184,31 +194,34 @@ bool Cmd_RGBtoHSV_Execute(COMMAND_ARGS) {
 
 // lmao
 bool Cmd_Sign_Execute(COMMAND_ARGS) {
-	float fValue = 0.f;
 	*result = 0;
+	float fValue = 0.f;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fValue) && fValue != 0.f) {
-		*result = fValue > 0.f ? 1.f : -1.f;
+		*result = fValue > 0.f ? 1.0 : -1.0;
 	}
 	return true;
 }
 
 bool Cmd_Lerp_Execute(COMMAND_ARGS) {
-	float v0 = 0, v1 = 0, t = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &v0, &v1, &t)) {
-		*result = (1 - t) * v0 + t * v1;
+	*result = 0;
+	float fStart = 0.f, fEnd = 0.f, fValue = 0.f;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fStart, &fEnd, &fValue)) {
+		*result = (1.f - fValue) * fStart + fValue * fEnd;
 	}
 	return true;
 }
 
 bool Cmd_Remap_Execute(COMMAND_ARGS) {
-	float v1current = 0, v1min = 0, v1max = 0, v2min = 0, v2max = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &v1current, &v1min, &v1max, &v2min, &v2max)) {
-		*result = (v1current - v1min) / (v1max - v1min) * (v2max - v2min) + v2min;
+	*result = 0;
+	float fValue = 0.f, fMinA = 0.f, fMaxA = 0.f, fMinB = 0.f, fMaxB = 0.f;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fValue, &fMinA, &fMaxA, &fMinB, &fMaxB)) {
+		*result = (fValue - fMinA) / (fMaxA - fMinA) * (fMaxB - fMinB) + fMinB;
 	}
 	return true;
 }
 
 bool Cmd_Clamp_Execute(COMMAND_ARGS) {
+	*result = 0;
 	float fValue = 0.f, fMin = 0.f, fMax = 0.f;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fValue, &fMin, &fMax)) {
 		*result = fValue;
@@ -233,18 +246,16 @@ bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
-	Actor* pActor = static_cast<Actor*>(thisObj);
-	char cObjectName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName) && pActor->IsActor() && pActor->baseProcess) {
-		NiAVObject* pObject = thisObj->GetNiBlock(cObjectName);
-		if (!pObject)
-			return true;
-
-		HitData* pHitData = pActor->baseProcess->GetLastHitData();
-		if (!pHitData)
+	*result = 0;
+	const Actor* pActor = static_cast<Actor*>(thisObj);
+	char cObjectName[MAX_PATH];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName) && pActor->IsMobileObject() && pActor->baseProcess) {
+		const NiAVObject* pObject = thisObj->GetNiBlock(cObjectName);
+		const ActorHitData* pHitData = pActor->baseProcess->GetHitData();
+		if (!pHitData || !pObject) 
 			return true;
 		
-		*result = pObject->m_kWorld.m_kTranslate.Distance(pHitData->kImpactPos);
+		*result = pObject->m_kWorld.m_kTranslate.Distance(pHitData->impactPos);
 	}
 
 	return true;
@@ -252,99 +263,105 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 
 bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char cObjectName[MAX_PATH] = {};
 	NiPoint3 kPos;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &kPos.x, &kPos.y, &kPos.z)) {
-		NiAVObject* pObject = thisObj->GetNiBlock(cObjectName);
-		if (!pObject) 
-			return true;
+	char cObjectName[MAX_PATH] = {};
+	if (!thisObj || !(ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &kPos.x, &kPos.y, &kPos.z))) 
+		return true;
 
-		*result = pObject->m_kWorld.m_kTranslate.Distance(kPos);
-
-		if (IsConsoleMode()) 
-			Console_Print("Get3DDistanceToNiNode >> %f", *result);
-	}
+	const NiAVObject* pObject = thisObj->GetNiBlock(cObjectName);
+	if (!pObject) 
+		return true;
+	
+	*result = pObject->m_kWorld.m_kTranslate.Distance(kPos);
+	
+	if (IsConsoleMode()) 
+		Console_Print("Get3DDistanceToNiNode >> %f", *result);
 	return true;
 }
 
 bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char cObjectAName[MAX_PATH] = {};
-	char cObjectBName[MAX_PATH] = {};
 	TESObjectREFR* pRefA = nullptr;
 	TESObjectREFR* pRefB = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRefA, &pRefB, &cObjectAName, &cObjectBName)) {
-		NiAVObject* pObjectA = pRefA->GetNiBlock(cObjectAName);
-		NiAVObject* pObjectB = pRefB->GetNiBlock(cObjectBName);
-		if (!pObjectA || !pObjectB)
-			return true;
-		
-		*result = pObjectA->m_kWorld.m_kTranslate.Distance(pObjectB->m_kWorld.m_kTranslate);
-		
-		if (IsConsoleMode()) 
-			Console_Print("Get3DDistanceBetweenNiNodes >> %f", *result);
-	}
+	char cObjectNameA[MAX_PATH];
+	char cObjectNameB[MAX_PATH];
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pRefA, &pRefB, &cObjectNameA, &cObjectNameB)) 
+		return true;
+
+	const NiAVObject* pObjectA = pRefA->GetNiBlock(cObjectNameA);
+	const NiAVObject* pObjectB = pRefB->GetNiBlock(cObjectNameB);
+	if (!pObjectA || !pObjectB) 
+		return true;
+
+	*result = pObjectA->m_kWorld.m_kTranslate.Distance(pObjectB->m_kWorld.m_kTranslate);
+
+	if (IsConsoleMode()) 
+		Console_Print("Get3DDistanceBetweenNiNodes >> %f", *result);
 	return true;
 }
 
 bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NiPoint3 kPoint;
 	uint32_t eHandleType = 0;
-	char cOutX[VAR_NAME_SIZE], cOutY[VAR_NAME_SIZE], cOutZ[VAR_NAME_SIZE];
 	TESObjectREFR* pRef = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cOutX, &cOutY, &cOutZ, &kPoint.x, &kPoint.y, &kPoint.z, &eHandleType, &pRef)) {
+	NiPoint3 kPos;
+	char cOutX[VAR_NAME_SIZE];
+	char cOutY[VAR_NAME_SIZE];
+	char cOutZ[VAR_NAME_SIZE];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cOutX, &cOutY, &cOutZ, &kPos.x, &kPos.y, &kPos.z, &eHandleType, &pRef)) {
 		if (pRef)
-			kPoint += pRef->pos;
+			kPos += pRef->pos;
 
-		float xOut = 0, yOut = 0, zOut = 0, outOfX = 0, outOfY = 0;
-		*result = (WorldToScreen(&kPoint, xOut, yOut, zOut, eHandleType) ? 1 : 0);
-		setVarByName(PASS_VARARGS, cOutX, xOut);
-		setVarByName(PASS_VARARGS, cOutY, yOut);
-		setVarByName(PASS_VARARGS, cOutZ, zOut);
+		NiPoint3 kResult = { 0.f, 0.f, 0.f };
+		*result = (WorldToScreen::WorldToScreen(&kPos, kResult, eHandleType) ? 1.0 : 0.0);
+
+		setVarByName(PASS_VARARGS, cOutX, kResult.x);
+		setVarByName(PASS_VARARGS, cOutY, kResult.y);
+		setVarByName(PASS_VARARGS, cOutZ, kResult.z);
 	}
 	return true;
 }
 
 bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 	*result = 0;
-	float xIn = 0, yIn = 0, zIn = 0;
 	uint32_t eHandleType = 0;
-	NiPoint3 kPoint = { 0,0,0 };
 	TESObjectREFR* pRef = nullptr;
-	ScriptVar* pOutX, * pOutY, * pOutZ;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pOutX, &pOutY, &pOutZ, &kPoint.x, &kPoint.y, &kPoint.z, &eHandleType, &pRef)) {
+	ScriptVar* pOutX = nullptr;
+	ScriptVar* pOutY = nullptr;
+	ScriptVar* pOutZ = nullptr;
+	NiPoint3 kPos;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pOutX, &pOutY, &pOutZ, &kPos.x, &kPos.y, &kPos.z, &eHandleType, &pRef)) {
+		ASSUME_ASSERT(pOutX && pOutY && pOutZ);
 		if (pRef)
-			kPoint += pRef->pos;
+			kPos += pRef->pos; 
 
-		NiPoint3 kOut = { 0, 0, 0 };
-		*result = (WorldToScreen(&kPoint, kOut.x, kOut.y, kOut.z, eHandleType) ? 1 : 0);
-		pOutX->data = kOut.x;
-		pOutY->data = kOut.y;
-		pOutZ->data = kOut.z;
+		NiPoint3 kResult = { 0.f, 0.f, 0.f };
+		*result = (WorldToScreen::WorldToScreen(&kPos, kResult, eHandleType) ? 1.0 : 0.0);
+
+		pOutX->data = kResult.x;
+		pOutY->data = kResult.y;
+		pOutZ->data = kResult.z;
 	}
 	return true;
 }
 
 bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS) {
 	*result = 0;
-	float xIn = 0, yIn = 0, zIn = 0;
-	uint32_t doGetLocal = 0;
-	char X_outS[VAR_NAME_SIZE], Y_outS[VAR_NAME_SIZE], Z_outS[VAR_NAME_SIZE];
-	TESObjectREFR* refr = nullptr;
-
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &X_outS, &Y_outS, &Z_outS, &doGetLocal)) {
-		if (auto m_GameCameraPos = JGGameCamera.CamPos) {
-			if (doGetLocal) {
-				setVarByName(PASS_VARARGS, X_outS, m_GameCameraPos->m_localTranslate.x);
-				setVarByName(PASS_VARARGS, Y_outS, m_GameCameraPos->m_localTranslate.y);
-				setVarByName(PASS_VARARGS, Z_outS, m_GameCameraPos->m_localTranslate.z);
-			}
-			else {
-				setVarByName(PASS_VARARGS, X_outS, m_GameCameraPos->m_worldTranslate.x);
-				setVarByName(PASS_VARARGS, Y_outS, m_GameCameraPos->m_worldTranslate.y);
-				setVarByName(PASS_VARARGS, Z_outS, m_GameCameraPos->m_worldTranslate.z);
-			}
+	BOOL bLocal = FALSE;
+	TESObjectREFR* pRef = nullptr;
+	char cOutX[VAR_NAME_SIZE]; 
+	char cOutY[VAR_NAME_SIZE];
+	char cOutZ[VAR_NAME_SIZE];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cOutX, &cOutY, &cOutZ, &bLocal)) {
+		if (bLocal) {
+			setVarByName(PASS_VARARGS, cOutX, WorldToScreen::kCameraData.kLocal.x);
+			setVarByName(PASS_VARARGS, cOutY, WorldToScreen::kCameraData.kLocal.y);
+			setVarByName(PASS_VARARGS, cOutZ, WorldToScreen::kCameraData.kLocal.z);
+		}
+		else {
+			setVarByName(PASS_VARARGS, cOutX, WorldToScreen::kCameraData.kWorld.x);
+			setVarByName(PASS_VARARGS, cOutY, WorldToScreen::kCameraData.kWorld.y);
+			setVarByName(PASS_VARARGS, cOutZ, WorldToScreen::kCameraData.kWorld.z);
 		}
 	}
 	return true;

@@ -3,7 +3,7 @@
 
 bool (*CallUDF)(Script* funcScript, TESObjectREFR* callingObj, uint8_t numArgs, ...);
 std::mutex eventInfosMutex;
-std::vector<EventInfo> EventInfos;
+std::vector<EventInfo> kEventInfos;
 
 void* __fastcall GenericCreateFilter(void** Filters, uint32_t numFilters) {
 	return new FilterForm(Filters, numFilters);
@@ -12,17 +12,17 @@ void* __fastcall GenericCreateFilter(void** Filters, uint32_t numFilters) {
 EventInfo __cdecl JGCreateEvent(const char* EventName, uint8_t maxArgs, uint8_t maxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t)) {
 	std::lock_guard<std::mutex> lock(eventInfosMutex);
 	EventInfo eventinfo = new EventInformation(EventName, maxArgs, maxFilters, CreatorFunction);
-	EventInfos.push_back(eventinfo);
+	kEventInfos.push_back(eventinfo);
 	return eventinfo;
 }
 
 void __cdecl JGFreeEvent(EventInfo& toRemove) {
 	std::lock_guard<std::mutex> lock(eventInfosMutex);
 	if (!toRemove) return;
-	auto it = std::find(std::begin(EventInfos), std::end(EventInfos), toRemove);
-	if (it != EventInfos.end()) {
+	auto it = std::find(std::begin(kEventInfos), std::end(kEventInfos), toRemove);
+	if (it != kEventInfos.end()) {
 		delete* it;
-		it = EventInfos.erase(it);
+		it = kEventInfos.erase(it);
 	}
 	toRemove = nullptr;
 }

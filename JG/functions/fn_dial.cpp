@@ -105,13 +105,19 @@ bool Cmd_DialogResponseRelatedGetAll_Execute(COMMAND_ARGS) {
 
 }
 
+bool Cmd_GetSaidOnce_Eval(COMMAND_ARGS_EVAL) {
+	*result = -1;
+	TESTopicInfo* pInfo = static_cast<TESTopicInfo*>(arg1);
+	if (pInfo && IS_TYPE(pInfo, TESTopicInfo))
+		*result = pInfo->saidOnce;
+	return true;
+}
 
 bool Cmd_GetSaidOnce_Execute(COMMAND_ARGS) {
 	*result = -1;
 	TESTopicInfo* pInfo = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo) && pInfo && IS_TYPE(pInfo, TESTopicInfo)) {
-		*result = pInfo->saidOnce;
-	}
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo))
+		Cmd_GetSaidOnce_Eval(nullptr, pInfo, nullptr, result);
 	return true;
 }
 
