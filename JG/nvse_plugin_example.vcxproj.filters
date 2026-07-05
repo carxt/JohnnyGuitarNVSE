@@ -1677,9 +1677,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\TESImageSpaceModifiableForm.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
     <ClInclude Include="internal\JG\NPCAccuracy.hpp">
       <Filter>internal\JG</Filter>
-    </ClInclude>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\TESKey.hpp">
       <Filter>internal\Game\Bethesda</Filter>
@@ -2061,6 +2061,45 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSIdleCollection.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSIdleMarker.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSNote.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSProjectile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\AnimActivationHeight.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\WorldToScreen.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\ScriptUtils.hpp">
+      <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnySerialization.hpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyMessageHandler.hpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyPluginData.hpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyExtraData.hpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\JohnnyCommands.hpp">
+      <Filter>internal\JG\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\DeathSoundFix.hpp">
+      <Filter>internal\JG</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
