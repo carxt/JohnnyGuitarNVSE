@@ -964,8 +964,8 @@ public:
 	}
 };
 
-class NavMeshObstacleManager
-{
+class NavMeshObstacleManager {
+public:
 	enum OBSTACLE_MANAGER_BACKGROUND_STATE : __int32
 	{
 		OBSTACLE_MANAGER_BACKGROUND_STATE_PROCESSING_OBSTACLES = 0x0,
@@ -1062,6 +1062,18 @@ class NavMeshObstacleManager
 	uint8_t mainThreadPerformaceTimer;
 	uint8_t backgroundThreadPerformanceTimer;
 	uint8_t gap1A2[2];
+
+	static NavMeshObstacleManager* GetSingleton() {
+		return CdeclCall<NavMeshObstacleManager*>(0x6C0720);
+	}
+
+	void AddObstacleForReference(TESObjectREFR* apReference) {
+		ThisCall(0x6C0C30, this, apReference);
+	}
+
+	void RemoveObstacleForReference(TESObjectREFR* apReference) {
+		ThisCall(0x6C0C80, this, apReference);
+	}
 };
 
 static_assert(sizeof(NavMeshObstacleManager) == 0x1A4);
@@ -1317,34 +1329,52 @@ struct QuestUpdateManager
 	char sound[260];
 };
 
-struct ItemEntryData
-{
-	TESForm*		type;
-	ItemChange*		entry;
-	ExtraDataList*	xData;
+struct ItemEntryData {
+	ItemEntryData(TESBoundObject* apForm, ItemChange* apItemChange, ExtraDataList* apExtraDataList) :
+		pForm(apForm), pItemChange(apItemChange), pExtraDataList(apExtraDataList) {}
 
-	ItemEntryData()
-	{
-	}
-
-	ItemEntryData(TESForm* _type, ItemChange* _entry, ExtraDataList* _xData) : type(_type), entry(_entry),
-		xData(_xData)
-	{
-	}
+	TESBoundObject*	pForm			= nullptr;
+	ItemChange*		pItemChange		= nullptr;
+	ExtraDataList*	pExtraDataList	= nullptr;
 };
 
-class InventoryRef
-{
+class InventoryRef : public ItemEntryData {
 public:
-	ItemEntryData data;
-	TESObjectREFR* containerRef;
-	TESObjectREFR* tempRef;
-	uint32_t deferredActions[6];
-	bool doValidation;
-	bool removed;
+	class DeferredAction {
+	public:
+		enum Type {
+			EQUIP,
+			REMOVE,
+		};
 
-	bool CreateExtraData(BSExtraData* xBSData);
+		Type			eType;
+		ItemEntryData	pItemData;
+		TESObjectREFR*	pTarget;
+	};
+
+	class ActionStack {
+	public:
+		struct Node {
+			Node*			pNext;
+			DeferredAction	kAction;
+		};
+
+		Node* pHead;
+	};
+
+	TESObjectREFR*	pContainerRef;
+	TESObjectREFR*	pTempRef;
+	ActionStack		kDeferredActions;
+	ItemChange*		pTempItemChange;
+	uint8_t			padding[0x10];
+	bool			bDoValidation;
+	bool			bRemoved;
+
+
+	bool __fastcall CreateExtraData(BSExtraData* apExtraData);
 };
+
+ASSERT_SIZE(InventoryRef, 0x30);
 
 struct SingleTimer
 {

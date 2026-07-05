@@ -153,8 +153,8 @@ public:
 	virtual void	Unk_4F(void);
 	virtual void	Unk_50(void);
 	virtual void	Unk_51(void);
-	virtual ItemChange* GetWeaponInfo();
-	virtual ItemChange* GetAmmoInfo();
+	virtual ItemChange* GetCurrentWeapon() const;
+	virtual ItemChange* GetCurrentAmmo() const;
 	virtual void	Unk_54(void);
 	virtual void	Unk_55(void);
 	virtual void	Unk_56(void);
@@ -980,4 +980,8 @@ struct ProcessLists {
 	static ProcessLists* GetSingleton() {
 		return reinterpret_cast<ProcessLists*>(0x11E0E80);
 	};
+
+	bool AreHostileActorsNear(bool abInterior) {
+		return ThisCall<bool>(0x9764A0, this, abInterior);
+	}
 };

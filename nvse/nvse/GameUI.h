@@ -22,6 +22,80 @@ class FORenderedMenu;
 
 struct PackedMenu;
 
+
+class Interface {
+public:
+	enum Menus {
+		NoMenu					= 0,
+		MainFour				= 1,
+		OtherRoot				= 2,
+		Console					= 3,
+
+		Message					= 1001,
+		Inventory				= 1002,
+		Stats					= 1003,
+		HUDMainMenu				= 1004,
+		Loading					= 1007,
+		Container				= 1008,
+		Dialog					= 1009,
+		SleepWait				= 1012,
+		Pause					= 1013,
+		LockPick				= 1014,
+		Quantity				= 1016,
+		AudioMenu				= 1017,
+		VideoMenu				= 1018,
+		GamePlayMenu			= 1020,
+		PipboyData				= 1023,
+		BookMenu				= 1026,
+		LevelUp					= 1027,
+		PipboyRepair			= 1035,
+		RaceMenu				= 1036,
+		SurgeryMenu				= 1036,
+		BarberMenu				= 1036,
+		Credits					= 1047,
+		CharGen					= 1048,
+		TextEdit				= 1051,
+		Barter					= 1053,
+		Surgery					= 1054,
+		Hacking					= 1055,
+		VATS					= 1056,
+		Computers				= 1057,
+		VendorRepair			= 1058,
+		Tutorial				= 1059,
+		SPECIALBook				= 1060,
+		ItemModMenu				= 1061,
+		LoveTester				= 1074,
+		CompanionWheel			= 1075,
+		MedicalQuestionnaire	= 1076,
+		Recipe					= 1077,
+		SlotMachine				= 1080,
+		BlackJack				= 1081,
+		Roulette				= 1082,
+		Caravan					= 1083,
+		Traits					= 1084,
+	};
+
+	static void InitGunScope(TESModel* apModel) {
+		CdeclCall(0x709C20, apModel);
+	}
+
+	static void SetGunScopeVisible(bool abVisible) {
+		CdeclCall(0x709C40, abVisible);
+	}
+
+	static void ClearGunScope() {
+		CdeclCall(0x709CA0);
+	}
+
+	static bool IsLoadingMenuVisible() {
+		return CdeclCall<bool>(0x705E80);
+	}
+
+	static uint32_t GetTopMenuID() {
+		return CdeclCall<uint32_t>(0x7023C0);
+	}
+};
+
 // 584
 class InterfaceManager {
 public:
@@ -151,81 +225,16 @@ public:
 	bool IsInMenuMode() const {
 		return currentMode != 1;
 	}
+
+	void OpenPipboy(void (__cdecl *apCallback)(), Interface::Menus aeMenuToOpen) {
+		ThisCall(0x70F4E0, this, apCallback, aeMenuToOpen);
+	}
+
+	void ClosePipboy(void (__cdecl *apCallback)()) {
+		ThisCall(0x70F690, this, apCallback);
+	}
 };
 static_assert(sizeof(InterfaceManager) == 0x580);
-
-class Interface {
-public:
-	enum Menus {
-		NoMenu					= 0,
-		MainFour				= 1,
-		OtherRoot				= 2,
-		Console					= 3,
-
-		Message					= 1001,
-		Inventory				= 1002,
-		Stats					= 1003,
-		HUDMainMenu				= 1004,
-		Loading					= 1007,
-		Container				= 1008,
-		Dialog					= 1009,
-		SleepWait				= 1012,
-		Pause					= 1013,
-		LockPick				= 1014,
-		Quantity				= 1016,
-		AudioMenu				= 1017,
-		VideoMenu				= 1018,
-		GamePlayMenu			= 1020,
-		PipboyData				= 1023,
-		BookMenu				= 1026,
-		LevelUp					= 1027,
-		PipboyRepair			= 1035,
-		RaceMenu				= 1036,
-		SurgeryMenu				= 1036,
-		BarberMenu				= 1036,
-		Credits					= 1047,
-		CharGen					= 1048,
-		TextEdit				= 1051,
-		Barter					= 1053,
-		Surgery					= 1054,
-		Hacking					= 1055,
-		VATS					= 1056,
-		Computers				= 1057,
-		VendorRepair			= 1058,
-		Tutorial				= 1059,
-		SPECIALBook				= 1060,
-		ItemModMenu				= 1061,
-		LoveTester				= 1074,
-		CompanionWheel			= 1075,
-		MedicalQuestionnaire	= 1076,
-		Recipe					= 1077,
-		SlotMachine				= 1080,
-		BlackJack				= 1081,
-		Roulette				= 1082,
-		Caravan					= 1083,
-		Traits					= 1084,
-	};
-
-	static void InitGunScope(TESModel* apModel) {
-		CdeclCall(0x709C20, apModel);
-	}
-
-	static void SetGunScopeVisible(bool abVisible) {
-		CdeclCall(0x709C40, abVisible);
-	}
-
-	static void ClearGunScope() {
-		CdeclCall(0x709CA0);
-	}
-
-	static bool IsLoadingMenuVisible() {
-		return CdeclCall<bool>(0x705E80);
-	}
-
-	static uint32_t GetTopMenuID() {
-		return CdeclCall<uint32_t>(0x7023C0);
-	}
-};
 
 struct HighlightedRef {
 	TESObjectREFR* refr;
@@ -1151,6 +1160,7 @@ public:
 	uint32_t				unk224[231];	// 224
 
 	static constexpr AddressPtr<bool, 0x11C70F8> bRendering;
+	static constexpr AddressPtr<bool, 0x11CABB8> bLocationSpecificLoadScreensOnly;
 };
 static_assert(sizeof(LoadingMenu) == 0x5C0);
 

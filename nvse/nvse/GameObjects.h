@@ -208,7 +208,7 @@ public:
 	virtual void		Unk_92(void);
 	virtual void		Unk_93(void);
 	virtual void		Unk_94(void);
-	virtual void		Unk_95(void);
+	virtual void		Jump(void);
 	virtual void		Unk_96(void);
 	virtual void		Unk_97(void);
 	virtual void		Unk_98(void);
@@ -415,7 +415,6 @@ public:
 class CombatController;
 struct PackageInfo;
 struct CombatActors;
-struct ItemEntryData;
 class BSAnimGroupSequence;
 class BackUpPackage;
 class PathingAvoidNodeArray;
@@ -672,7 +671,6 @@ public:
 	bool IsFleeing();
 	TESObjectWEAP* GetEquippedWeapon();
 	bool IsItemEquipped(TESForm* item);
-	bool GetEquippedItemData(uint32_t slotIndex, ItemEntryData& itemData);
 	uint8_t EquippedWeaponHasMod(uint8_t modID);
 	bool IsSneaking();
 	void StopCombat();
@@ -817,7 +815,7 @@ public:
 	TESObjectREFR* lastExteriorDoor;		// 604
 	void* unk608;				// 608
 	void* unk60C;				// 60C
-	tList<CasinoStats>* casinoDataList;				// 610
+	BSSimpleList<CasinoStats*>* casinoDataList;				// 610
 	tList<TESCaravanCard>* caravanCards1;			// 614
 	tList<TESCaravanCard>* caravanCards2;			// 618
 	uint32_t								unk61C[7];				// 61C
@@ -967,6 +965,14 @@ public:
 	NiNode* Get3D(bool abFirstPerson) const;
 	BipedAnim* GetBiped(bool abFirstPerson) const;
 	Animation* GetAnimation(bool abFirstPerson) const;
+
+	void SetPlayerMapMarker(NiPoint3 akLocation, TESForm* apSpace) {
+		ThisCall(0x952E60, this, akLocation, apSpace);
+	}
+
+	void RemovePlayerMapMarker() {
+		ThisCall(0x952F90, this);
+	}
 };
 static_assert(sizeof(PlayerCharacter) == 0xE50);
 

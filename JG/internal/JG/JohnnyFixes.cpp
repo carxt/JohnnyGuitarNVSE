@@ -89,7 +89,7 @@ namespace JohnnyFixes {
 	}
 	void __fastcall BipedModelUpdateWeapon(BipedAnim* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods) {
 		if (fnCharacter && fnCharacter->baseProcess) {
-			if (auto weapInfo = fnCharacter->baseProcess->GetWeaponInfo()) {
+			if (auto weapInfo = fnCharacter->baseProcess->GetCurrentWeapon()) {
 				weapMods = ItemChange_GetWeaponModFlags(weapInfo);
 			}
 		}

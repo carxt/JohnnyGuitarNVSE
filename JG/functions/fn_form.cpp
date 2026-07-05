@@ -1765,11 +1765,11 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 			condition = thisObj->GetHealth();
 		}
 		else {
-			weapon = (TESObjectWEAP*)invRef->data.type;
+			weapon = (TESObjectWEAP*)invRef->pForm;
 			if NOT_ID(weapon, TESObjectWEAP) return true;
-			if (invRef->data.xData) {
-				condition = invRef->data.entry->GetItemHealth(true) / 100.0F;
-				extendPtr = invRef->data.xData;
+			if (invRef->pExtraDataList) {
+				condition = invRef->pItemChange->GetItemHealth(true) / 100.0F;
+				extendPtr = invRef->pExtraDataList;
 			}
 		}
 	}
@@ -1985,17 +1985,17 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 		return true;
 
 	InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
-	if (!pInvRef || pInvRef->containerRef != PlayerCharacter::GetSingleton())
+	if (!pInvRef || pInvRef->pContainerRef != PlayerCharacter::GetSingleton())
 		return true;
 
-	if (!pInvRef->data.type)
+	if (!pInvRef->pForm)
 		return true;
 
-	FORM_TYPE eFormType = pInvRef->data.type->GetFormType();
+	FORM_TYPE eFormType = pInvRef->pForm->GetFormType();
 	if (eFormType != FORM_TYPE::TESObjectARMO && eFormType != FORM_TYPE::TESObjectWEAP && eFormType != FORM_TYPE::AlchemyItem)
 		return true;
 
-	ExtraDataList* pExtraData = pInvRef->data.xData;
+	ExtraDataList* pExtraData = pInvRef->pExtraDataList;
 	if (!pExtraData)
 		return true;
 

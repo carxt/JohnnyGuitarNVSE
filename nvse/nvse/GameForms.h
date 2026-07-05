@@ -3700,6 +3700,10 @@ public:
 	void SetupMopp() {
 		ThisCall(0x5535F0, this);
 	}
+
+	TESObjectLAND* GetLand() {
+		return ThisCall<TESObjectLAND*>(0x546FB0, this);
+	}
 };
 static_assert(sizeof(TESObjectCELL) == 0xE0);
 
@@ -3767,7 +3771,7 @@ public:
 	~TESWorldSpace();
 
 	// Returns true if name has changed
-	virtual bool	GetMapNameForLocation(BSString& name, float x, float y, float z);
+	virtual bool	GetMapNameForLocation(BSString& arName, NiPoint3 akLocation) const;
 	virtual void	Unk_4F(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6);
 
 	struct DCoordXY {

@@ -451,14 +451,14 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 			if (pItem && pItem->tile && pItem->object) {
 				const ItemChange* pItemChange = pItem->object;
 
-				if (pItemChange->pObject != pInvRef->data.type)
+				if (pItemChange->pObject != pInvRef->pForm)
 					continue;
 
 				bool bMatched = false;
 
 				// Does extra data match
-				if (pInvRef->data.xData) {
-					if (pItemChange->pExtraLists && pItemChange->pExtraLists->IsInList(pInvRef->data.xData))
+				if (pInvRef->pExtraDataList) {
+					if (pItemChange->pExtraLists && pItemChange->pExtraLists->IsInList(pInvRef->pExtraDataList))
 						bMatched = true;
 				}
 
