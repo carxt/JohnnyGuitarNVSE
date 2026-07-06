@@ -8,31 +8,31 @@ namespace WorldToScreen {
 
 	CameraParams kCameraData;
 
-	bool __fastcall WorldToScreenPoint3(const CameraParams& arCamera, const NiPoint3* apPos, NiPoint3& arOut, float afZeroTolerance, int aeOffscreenHandleType) {
+	bool __fastcall WorldToScreenPoint3(const CameraParams& arCamera, const NiPoint3& arPos, NiPoint3& arOut, float afZeroTolerance, int aeOffscreenHandleType) {
 		bool st = false;
 		// project a world space point to screen space
-		float fW = apPos->x * arCamera.m_aafWorldToCam[3][0] +
-			apPos->y * arCamera.m_aafWorldToCam[3][1] +
-			apPos->z * arCamera.m_aafWorldToCam[3][2] +
+		float fW = arPos.x * arCamera.m_aafWorldToCam[3][0] +
+			arPos.y * arCamera.m_aafWorldToCam[3][1] +
+			arPos.z * arCamera.m_aafWorldToCam[3][2] +
 			arCamera.m_aafWorldToCam[3][3];
 
-		arOut.x = apPos->x * arCamera.m_aafWorldToCam[0][0] +
-			apPos->y * arCamera.m_aafWorldToCam[0][1] +
-			apPos->z * arCamera.m_aafWorldToCam[0][2] +
+		arOut.x = arPos.x * arCamera.m_aafWorldToCam[0][0] +
+			arPos.y * arCamera.m_aafWorldToCam[0][1] +
+			arPos.z * arCamera.m_aafWorldToCam[0][2] +
 			arCamera.m_aafWorldToCam[0][3];
 
-		arOut.y = apPos->x * arCamera.m_aafWorldToCam[1][0] +
-			apPos->y * arCamera.m_aafWorldToCam[1][1] +
-			apPos->z * arCamera.m_aafWorldToCam[1][2] +
+		arOut.y = arPos.x * arCamera.m_aafWorldToCam[1][0] +
+			arPos.y * arCamera.m_aafWorldToCam[1][1] +
+			arPos.z * arCamera.m_aafWorldToCam[1][2] +
 			arCamera.m_aafWorldToCam[1][3];
 		if (fW == 0.f)
 			return false;
 
 		float fInvW = 1.f / fW;
 		// Transform Z, not entirely sure if it works. This indicates whether you're in front or behind the camera.
-		arOut.z = apPos->x * arCamera.m_aafWorldToCam[2][0] +
-			apPos->y * arCamera.m_aafWorldToCam[2][1] +
-			apPos->z * arCamera.m_aafWorldToCam[2][2] +
+		arOut.z = arPos.x * arCamera.m_aafWorldToCam[2][0] +
+			arPos.y * arCamera.m_aafWorldToCam[2][1] +
+			arPos.z * arCamera.m_aafWorldToCam[2][2] +
 			arCamera.m_aafWorldToCam[2][3];
 
 		arOut.z = arOut.z * fInvW;
@@ -77,30 +77,27 @@ namespace WorldToScreen {
 			}
 			return false;
 		}
-		arOut.z = arCamera.kWorld.Distance(*apPos);
+		arOut.z = arCamera.kWorld.Distance(arPos);
 	}
 
-	bool __fastcall WorldToScreen(const NiPoint3* apPos, NiPoint3& arOut, int aeOffscreenHandleType, float afZeroTolerance) {
-		return WorldToScreenPoint3(kCameraData, apPos, arOut, afZeroTolerance, aeOffscreenHandleType);
+	bool __fastcall WorldToScreen(const NiPoint3& arPos, NiPoint3& arOut, int aeOffscreenHandleType, float afZeroTolerance) {
+		return WorldToScreenPoint3(kCameraData, arPos, arOut, afZeroTolerance, aeOffscreenHandleType);
 	}
 
-#pragma warning(push)
-#pragma warning(disable : 6385)
 	void __stdcall CopyNiCamera(const NiCamera* apCamera, float afFOV) {
-		SceneGraph* pSceneGraph = TESMain::GetWorldSceneGraph();
-		PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
+		const SceneGraph* pSceneGraph = TESMain::GetWorldSceneGraph();
+		const PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
 		if (!pSceneGraph || !pPlayer)
 			return;
 
-		if (apCamera != pSceneGraph->spCamera || fabs(afFOV - pPlayer->worldFOV) > 0.0000099999997f)
+		if (apCamera != pSceneGraph->spCamera || fabs(afFOV - pPlayer->worldFOV) > ZERO_TOLERANCE)
 			return;
 
 		kCameraData.kLocal = apCamera->m_kLocal.m_kTranslate;
 		kCameraData.kWorld = apCamera->m_kWorld.m_kTranslate;
-		memcpy(&kCameraData.m_aafWorldToCam, &apCamera->m_aafWorldToCam[0][0], sizeof(apCamera->m_aafWorldToCam));
+		memcpy(&kCameraData.m_aafWorldToCam, &apCamera->m_aafWorldToCam, sizeof(apCamera->m_aafWorldToCam));
 		kCameraData.m_kPort = apCamera->m_kPort;
 	}
-#pragma warning(pop)
 
 	SPEC_NAKED void NiCameraGetAltHook() {
 		__asm
@@ -122,6 +119,6 @@ namespace WorldToScreen {
 // exports
 extern "C" {
 	bool __cdecl JG_WorldToScreen(const NiPoint3* apPos, NiPoint3& arOut, int aeOffscreenHandleType) {
-		return WorldToScreen::WorldToScreenPoint3(WorldToScreen::kCameraData, apPos, arOut, WorldToScreen::ZERO_TOLERANCE, aeOffscreenHandleType);
+		return WorldToScreen::WorldToScreenPoint3(WorldToScreen::kCameraData, *apPos, arOut, WorldToScreen::ZERO_TOLERANCE, aeOffscreenHandleType);
 	}
 }

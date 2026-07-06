@@ -17,8 +17,8 @@ namespace WorldToScreen {
 
 	void Install();
 
-	bool __fastcall WorldToScreenPoint3(const CameraParams& arCamera, const NiPoint3* apPos, NiPoint3& arOut, float afZeroTolerance, int aeOffscreenHandleType);
+	bool __fastcall WorldToScreenPoint3(const CameraParams& arCamera, const NiPoint3& arPos, NiPoint3& arOut, float afZeroTolerance, int aeOffscreenHandleType);
 
-	bool __fastcall WorldToScreen(const NiPoint3* apPos, NiPoint3& arOut, int aeOffscreenHandleType, float afZeroTolerance = ZERO_TOLERANCE);
+	bool __fastcall WorldToScreen(const NiPoint3& arPos, NiPoint3& arOut, int aeOffscreenHandleType, float afZeroTolerance = ZERO_TOLERANCE);
 
 }

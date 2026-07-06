@@ -313,7 +313,7 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 			kPos += pRef->pos;
 
 		NiPoint3 kResult = { 0.f, 0.f, 0.f };
-		*result = (WorldToScreen::WorldToScreen(&kPos, kResult, eHandleType) ? 1.0 : 0.0);
+		*result = (WorldToScreen::WorldToScreen(kPos, kResult, eHandleType) ? 1.0 : 0.0);
 
 		setVarByName(PASS_VARARGS, cOutX, kResult.x);
 		setVarByName(PASS_VARARGS, cOutY, kResult.y);
@@ -336,7 +336,7 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 			kPos += pRef->pos; 
 
 		NiPoint3 kResult = { 0.f, 0.f, 0.f };
-		*result = (WorldToScreen::WorldToScreen(&kPos, kResult, eHandleType) ? 1.0 : 0.0);
+		*result = (WorldToScreen::WorldToScreen(kPos, kResult, eHandleType) ? 1.0 : 0.0);
 
 		pOutX->data = kResult.x;
 		pOutY->data = kResult.y;
