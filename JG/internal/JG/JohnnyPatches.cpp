@@ -107,7 +107,7 @@ namespace JohnnyPatches {
 			kFrustum.m_fNear = std::max(fViewmodelNearDistance, 0.001f);
 
 			const float fOrgRatio = apCamera->m_fMaxFarNearRatio;
-			apCamera->m_fMaxFarNearRatio = kFrustum.m_fNear;
+			apCamera->m_fMaxFarNearRatio = kFrustum.m_fFar / kFrustum.m_fNear;
 			ThisCall(kSetViewFrustumDetour, apCamera, &kFrustum);
 			apCamera->m_fMaxFarNearRatio = fOrgRatio;
 		}
