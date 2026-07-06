@@ -55,7 +55,7 @@ bool Cmd_PlayHolotape_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
 	BOOL bPlayStartStopSound = TRUE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &bPlayStartStopSound) && pNote && IS_TYPE(pNote, BGSNote) && (pNote->GetNoteType() == BGSNote::kVoice || pNote->GetNoteType() == BGSNote::kSound)){
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &bPlayStartStopSound) && pNote && IS_TYPE(pNote, BGSNote) && (pNote->GetNoteType() == BGSNote::NoteType::VOICE || pNote->GetNoteType() == BGSNote::NoteType::SOUND)){
 		MapMenu* pMapMenu = MapMenu::GetSingleton();
 		if (pMapMenu) {
 			pMapMenu->PlayHolotape(pNote, bPlayStartStopSound > 0);
@@ -208,7 +208,7 @@ bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 	NiPoint3 kPos;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kPos.x, &kPos.y, &kPos.z)) {
 		TESForm* pSpace = nullptr;
-		TESObjectCELL* pParentCell = PlayerCharacter::GetSingleton()->parentCell;
+		TESObjectCELL* pParentCell = PlayerCharacter::GetSingleton()->GetParentCell();
 		if (pParentCell) {
 			if (pParentCell->IsInterior())
 				pSpace = pParentCell;
@@ -567,7 +567,7 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 		if (ref->Get3DSimple()) {
 			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
 			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(sound->GetFormID(), uiFlags);
-			handle.SetPosition(ref->GetPos());
+			handle.SetPosition(ref->GetPosition());
 			handle.SetObjectToFollow(ref->Get3DSimple());
 			uint32_t time = fTime * 1000.0;
 			handle.FadeInPlay(time);
@@ -670,10 +670,10 @@ bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	if (!pLand)
 		return true;
 
-	const NiPoint3& rPos = thisObj->GetPos();
+	const NiPoint3& rPos = thisObj->GetPosition();
 	COORD_DATA kCoordData;
 	pLand->GetCoordData(kCoordData, rPos, 1);
-	TESLandTexture* pTexture = pLand->GetMainTexture(thisObj->GetPos());
+	TESLandTexture* pTexture = pLand->GetMainTexture(thisObj->GetPosition());
 	if (pTexture)
 		*reinterpret_cast<uint32_t*>(result) = pTexture->GetFormID();
 	return true;
@@ -738,9 +738,9 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 }
 
 TESWorldSpace* __fastcall GetWorldSpace(const TESObjectREFR* apRef) {
-	const TESObjectCELL* pCell = apRef->parentCell;
+	const TESObjectCELL* pCell = apRef->GetParentCell();
 	if (!pCell)
-		pCell = apRef->childCell.GetSaveParentCell();
+		pCell = apRef->GetSaveParentCell();
 
 	if (pCell && !pCell->IsInterior()) 
 		return pCell->worldSpace;
@@ -751,14 +751,14 @@ TESWorldSpace* __fastcall GetWorldSpace(const TESObjectREFR* apRef) {
 bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cLocationName[MAX_PATH] = {};
-	if (thisObj->parentCell && thisObj->parentCell->IsInterior()) {
-		strcpy_s(cLocationName, thisObj->parentCell->fullName.GetFullName());
+	if (thisObj->GetParentCell() && thisObj->GetParentCell()->IsInterior()) {
+		strcpy_s(cLocationName, thisObj->GetParentCell()->fullName.GetFullName());
 	}
 	else {
 		const TESWorldSpace* pWorld = GetWorldSpace(thisObj);
 		if (pWorld) {
 			BSString strName;
-			pWorld->GetMapNameForLocation(strName, thisObj->GetPos());
+			pWorld->GetMapNameForLocation(strName, thisObj->GetPosition());
 			strcpy_s(cLocationName, strName.c_str());
 		}
 	}
@@ -865,7 +865,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 		if (checkItems) {
 			TESForm* containerOwner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::GetOwner
 			if (!containerOwner) return true;
-			ExtraContainerChanges* xChanges = thisObj->extraDataList.GetExtraData<ExtraContainerChanges>();
+			ExtraContainerChanges* xChanges = thisObj->GetExtraData<ExtraContainerChanges>();
 			if (!xChanges || !xChanges->pChanges || !xChanges->pChanges->pItems)
 				return true;
 			BSSimpleList<ItemChange*>* contChangesIter = xChanges->pChanges->pItems->GetHead();
@@ -961,7 +961,7 @@ bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 
 bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL* pCell = PlayerCharacter::GetSingleton()->parentCell;
+	TESObjectCELL* pCell = PlayerCharacter::GetSingleton()->GetParentCell();
 	if (pCell)
 		*result = ProcessLists::GetSingleton()->AreHostileActorsNear(pCell->IsInterior());
 	return true;
@@ -1013,7 +1013,7 @@ bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
 bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	*result = -1;
 
-	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetPos();
+	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetPosition();
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
@@ -1032,7 +1032,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
-			auto distToPlayer = target->target->GetPos().SqrDistance(playerPos);
+			auto distToPlayer = target->target->GetPosition().SqrDistance(playerPos);
 			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
 				closestHostile = target->target;
@@ -1086,7 +1086,7 @@ double __fastcall GetAngleBetweenPoints(const NiPoint3& actorPos, const NiPoint3
 bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	*result = -1;
 
-	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetPos();
+	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetPosition();
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
@@ -1104,7 +1104,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
-			auto distToPlayer = target->target->GetPos().SqrDistance(playerPos);
+			auto distToPlayer = target->target->GetPosition().SqrDistance(playerPos);
 			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
 				closestHostile = target->target;
@@ -1114,7 +1114,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 
 	if (closestHostile) {
 		auto playerRotation = PlayerCharacter::GetSingleton()->GetZRotation(0);
-		double headingAngle = GetAngleBetweenPoints(closestHostile->GetPos(), playerPos, playerRotation);
+		double headingAngle = GetAngleBetweenPoints(closestHostile->GetPosition(), playerPos, playerRotation);
 
 		// shift the coordinates from -180:180 to 0:360 and offset them (360 / 8 quadrants / 2) degrees
 		int angle = headingAngle + 180 + 22.5;
@@ -1320,7 +1320,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	//removal support by jazzisparis
 	*result = 0;
 	AlchemyItem* pPoison = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pPoison) && (!pPoison || (IS_TYPE(pPoison, AlchemyItem) && pPoison->IsPoison()))) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pPoison) && (!pPoison || (IS_TYPE(pPoison, AlchemyItem) && pPoison->CanBePoison()))) {
 		TESObjectWEAP* pWeapon = nullptr;
 		ExtraDataList* pExtraDataList = nullptr;
 		if (!thisObj->IsActor()) {
@@ -1445,7 +1445,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 		if (!pWeapon || pWeapon->IsMelee())
 			return false;
 
-		NiNode* pActorNode = nullptr;
+		NiAVObject* pActorNode = nullptr;
 		if (cNodeName[0] != 0) {
 			PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
 			if (thisObj == pPlayer) {
@@ -1458,7 +1458,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 		bool bChangedPos = false;
 		NiAVObject* pCasingNode = nullptr;
 		NiTransform kOrgTrans;
-		if (pActorNode) {
+		if (pActorNode && pActorNode->IsNode()) {
 			NiAVObject* pNewCasingNode = BSUtilities::GetObjectByName(pActorNode, cNodeName);
 			pCasingNode = BSUtilities::GetObjectByName(pActorNode, "ShellCasingNode");
 			if (pCasingNode && pNewCasingNode) {

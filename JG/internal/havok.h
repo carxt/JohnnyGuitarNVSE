@@ -1228,6 +1228,14 @@ public:
 	virtual void	Unk_3F(void);
 
 	uint32_t			unk14[2];		// 14
+
+	uint32_t GetMotionType() const {
+		return ThisCall<uint32_t>(0x517630, this);
+	}
+
+	static bool IsMotionTypeDynamic(const uint32_t& arMotionType) {
+		return CdeclCall<bool>(0xC8CCE0, &arMotionType);
+	}
 };
 
 // 50

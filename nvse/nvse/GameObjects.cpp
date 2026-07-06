@@ -7,7 +7,7 @@
 #include "CommandTable.h"
 
 #include "Bethesda/BSUtilities.hpp"
-
+#if 0
 TESForm* TESObjectREFR::GetBaseForm()
 {
 	TESBoundObject* baseform = nullptr;
@@ -24,22 +24,17 @@ TESForm* TESObjectREFR::GetBaseForm()
 	}
 	return baseform;
 }
-
-// GAME - 0x5673E0
-ScriptLocals* TESObjectREFR::GetScriptLocals() const {
-	ExtraScript* xScript = extraDataList.GetExtraData<ExtraScript>();
-	return xScript ? xScript->pLocals : NULL;
-}
+#endif
 
 PlayerCharacter* PlayerCharacter::GetSingleton() {
 	return *(PlayerCharacter**)0x11DEA3C;
 }
 
-NiNode* PlayerCharacter::Get3D(bool abFirstPerson) const {
+NiAVObject* PlayerCharacter::Get3D(bool abFirstPerson) const {
 	if (abFirstPerson)
 		return playerNode;
-	else if (renderState)
-		return renderState->rootNode;
+	else if (pLoadedData)
+		return pLoadedData->spSceneRoot;
 	else
 		return nullptr;
 }
@@ -59,111 +54,24 @@ Animation* PlayerCharacter::GetAnimation(bool abFirstPerson) const {
 		return nullptr;
 }
 
-__declspec(naked) TESContainer* TESObjectREFR::GetContainer() {
-	__asm
-	{
-		mov		eax, [ecx]
-		mov		eax, [eax + 0x100]
-		call	eax
-		test	al, al
-		mov		eax, [ecx + 0x20]
-		jz		notActor
-		add		eax, 0x64
-		retn
-		notActor :
-		cmp		dword ptr[eax], kVtbl_TESObjectCONT
-			jnz		notCONT
-			add		eax, 0x30
-			retn
-			notCONT :
-		xor eax, eax
-			retn
-	}
-}
-
-bool TESObjectREFR::IsMapMarker() {
-	return baseForm->GetFormID() == 0x10;
-}
-
-// GAME - 0x55D520
-const char* TESObjectREFR::GetFullName() const {
-	return ThisCall<const char*>(0x55D520, this);
-}
-
 extern bool (*Cmd_Update3D)(COMMAND_ARGS);
-void TESObjectREFR::Update3D() {
-	Cmd_Update3D(nullptr, nullptr, this, nullptr, nullptr, nullptr, nullptr, nullptr);
+void __fastcall UpdateReference3D(TESObjectREFR* apReference) {
+	Cmd_Update3D(nullptr, nullptr, apReference, nullptr, nullptr, nullptr, nullptr, nullptr);
 }
-
-TESObjectREFR* TESObjectREFR::Create(bool bTemp) {
-	TESObjectREFR* refr = BSMemory::malloc<TESObjectREFR>();
-	ThisCall(s_TESObject_REFR_init, refr);
-	if (bTemp) ThisCall(0x484490, refr);
-	return refr;
-}
-
-TESBoundObject* GetPermanentBaseForm(TESObjectREFR* apReference)	// For LevelledForm, find real baseForm, not temporary one.
-{
-	if (apReference) {
-		ExtraLeveledCreature* pXCreatureData = apReference->extraDataList.GetExtraData<ExtraLeveledCreature>();
-		if (pXCreatureData && pXCreatureData->pOriginalBase)
-			return pXCreatureData->pOriginalBase;
-		return apReference->baseForm;
-	}
-	return NULL;
-}
-
 
 TESCombatStyle* Actor::GetCombatStyle() 
 {
-	ExtraCombatStyle* xCmbStyle = extraDataList.GetExtraData<ExtraCombatStyle>();
+	ExtraCombatStyle* xCmbStyle = GetExtraData<ExtraCombatStyle>();
 	if (xCmbStyle && xCmbStyle->pCombatStyle) return xCmbStyle->pCombatStyle;
-	return ((TESActorBase*)baseForm)->GetCombatStyle();
+	return ((TESActorBase*)GetObjectReference())->GetCombatStyle();
 }
 
 TESActorBase* Actor::GetActorBase() {
-	ExtraLeveledCreature* xLvlCre = extraDataList.GetExtraData<ExtraLeveledCreature>();
-	return (xLvlCre && xLvlCre->pTemplate) ? (TESActorBase*)xLvlCre->pTemplate : (TESActorBase*)baseForm;
-}
-
-NiNode* TESObjectREFR::GetNode(const char* nodeName) {
-	NiNode* rootNode = Get3D();
-	return rootNode ? (*nodeName ? rootNode->GetNode(nodeName) : rootNode) : NULL;
-}
-hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) {
-	NiNode* rootNode = Get3D();
-	if (rootNode) {
-		NiNode* targetNode = rootNode->GetNode(nodeName);
-		if (targetNode && targetNode->m_spCollisionObject) {
-			bhkWorldObject* hWorldObj = targetNode->m_spCollisionObject->worldObj;
-			if (hWorldObj) {
-				hkpRigidBody* rigidBody = (hkpRigidBody*)hWorldObj->refObject;
-				uint8_t motionType = rigidBody->motion.type;
-				if ((motionType == 2) || (motionType == 3) || (motionType == 6))
-					return rigidBody;
-			}
-		}
-	}
-	return NULL;
-}
-
-NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName) {
-	NiNode* rootNode = Get3D();
-	return BSUtilities::GetObjectByName(rootNode,  blockName);
+	return (TESActorBase*)GetObjectReference();
 }
 
 TESObjectWEAP* Actor::GetEquippedWeapon() {
 	return ThisCall<TESObjectWEAP*>(0x8A1710, this);
-}
-
-
-bool TESObjectREFR::GetDisabled(bool checkQueue) const
-{
-	bool ((__fastcall * fn_GetDisabled)) (const TESObjectREFR*) = decltype(fn_GetDisabled)( 0x0440DA0);
-	if (!checkQueue) return fn_GetDisabled(this);
-	bool((__cdecl * fn_InEnableRefs)) (const TESObjectREFR*) = decltype(fn_InEnableRefs)(0x05AA680);
-	bool((__cdecl * fn_InPendingDisableRefs)) (const TESObjectREFR*) = decltype(fn_InPendingDisableRefs)(0x05AA630);
-	return (fn_GetDisabled(this) && !fn_InEnableRefs(this) ) || fn_InPendingDisableRefs(this);
 }
 
 // GAME - 0x8B36F0
@@ -196,13 +104,4 @@ bool Actor::IsInDialogueWithPlayer() const {
 
 bool Actor::GetRespawn() const {
 	return ThisCall<bool>(0x87F4A0, this);
-}
-
-TESObjectCELL* TESObjectREFR::GetParentCell() {
-	if (parentCell) 
-		return parentCell;
-	ExtraPersistentCell* xPersistentCell = extraDataList.GetExtraData<ExtraPersistentCell>();
-	if (xPersistentCell && xPersistentCell->pPersistentCell) 
-		return xPersistentCell->pPersistentCell;
-	return nullptr;
 }

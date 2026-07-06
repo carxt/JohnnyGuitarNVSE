@@ -207,7 +207,7 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnLimbGoneHandler->callbacks) {
 				FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-				if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->baseForm->GetFormID())) && pFilter->IsInFilter(1, aeLimb)) {
+				if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetOriginalObjectReference()->GetFormID())) && pFilter->IsInFilter(1, aeLimb)) {
 					CallUDF(rCallback.script, nullptr, OnLimbGoneHandler->numMaxArgs, apActor, aeLimb);
 				}
 			}
@@ -224,7 +224,7 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnCrosshairHandler->callbacks) {
 				FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-				if ((pFilter->IsInFilter(0, apRef->GetFormID()) || pFilter->IsInFilter(0, apRef->baseForm->GetFormID())) && pFilter->IsInFilter(1, apRef->baseForm->GetFormType())) {
+				if ((pFilter->IsInFilter(0, apRef->GetFormID()) || pFilter->IsInFilter(0, apRef->GetOriginalObjectReference()->GetFormID())) && pFilter->IsInFilter(1, apRef->GetOriginalObjectReference()->GetFormType())) {
 					CallUDF(rCallback.script, nullptr, OnCrosshairHandler->numMaxArgs, apRef);
 				}
 			}
@@ -242,13 +242,13 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnTakeBackItemHandler->callbacks) {
 				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.eventFilter);
-				if (pFilter->IsBaseInFilter(0, apObject) && (pFilter->IsInFilter(1, apOwner->GetFormID()) || pFilter->IsInFilter(1, apOwner->baseForm->GetFormID()))) {
+				if (pFilter->IsBaseInFilter(0, apObject) && (pFilter->IsInFilter(1, apOwner->GetFormID()) || pFilter->IsInFilter(1, apOwner->GetOriginalObjectReference()->GetFormID()))) {
 					CallUDF(rCallback.script, nullptr, OnTakeBackItemHandler->numMaxArgs, apOwner, apObject, aiNumber);
 				}
 			}
 		}
 
-		static void __fastcall OnAVChange(ActorValueOwner* apActor, uint32_t aeActorValue, float afPreviousValue, float afModValue, void* apChangeCallback) {
+		static void __fastcall OnAVChange(ActorValueOwner* apActor, ActorValue::Index aeActorValue, float afPreviousValue, float afModValue, void* apChangeCallback) {
 			if (!apChangeCallback)
 				afPreviousValue = apActor->GetActorValueF(aeActorValue) - afModValue;
 
@@ -285,7 +285,7 @@ namespace JohnnyEvents {
 				else {
 					for (auto const& rCallback : OnNPCAVChangeHandler->callbacks) {
 						FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-						if (pFilter->IsInFilter(1, aeActorValue) && (pFilter->IsInFilter(0, pForm->GetFormID()) || (pActor && pFilter->IsInFilter(0, pActor->GetBaseForm()->GetFormID())))) {
+						if (pFilter->IsInFilter(1, aeActorValue) && (pFilter->IsInFilter(0, pForm->GetFormID()) || (pActor && pFilter->IsInFilter(0, pActor->GetOriginalObjectReference()->GetFormID())))) {
 
 							const bool bFullValues = rCallback.UserFlags.Get(1);
 
@@ -309,7 +309,7 @@ namespace JohnnyEvents {
 
 				for (auto const& rCallback : OnPLChangeHandler->callbacks) {
 					FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-					if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetBaseForm()->GetFormID())) && pFilter->IsInFilter(1, aeNewLevel)) {
+					if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetOriginalObjectReference()->GetFormID())) && pFilter->IsInFilter(1, aeNewLevel)) {
 						CallUDF(rCallback.script, nullptr, OnPLChangeHandler->numMaxArgs, apActor, aeOldLevel, aeNewLevel);
 					}
 				}
@@ -582,9 +582,9 @@ namespace JohnnyEvents {
 				if (!apActor || !apActor->baseProcess) [[unlikely]]
 					return true;
 
-				const uint32_t eOldLevel = apActor->baseProcess->processLevel;
+				const uint32_t eOldLevel = apActor->baseProcess->GetProcessLevel();
 				const bool bResult = ThisCall<bool>(kDetour, apActor);
-				const uint32_t eNewLevel = apActor->baseProcess->processLevel;
+				const uint32_t eNewLevel = apActor->baseProcess->GetProcessLevel();
 				Events::OnProcessChangeEvent(apActor, eOldLevel, eNewLevel);
 				return bResult;
 			}
@@ -597,14 +597,14 @@ namespace JohnnyEvents {
 
 		HookUtils::CallDetour kOnAVChangeDetour;
 		STACK_FRAME_OPT_DISABLE
-		static ActorValueInfo* __cdecl OnAVChange(uint32_t aeActorValue) {
+		static ActorValueInfo* __cdecl OnAVChange(ActorValue::Index aeActorValue) {
 			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 			ActorValueOwner* pActor = *reinterpret_cast<ActorValueOwner**>(pEBP + 0x8);
 			float fOldVal = *reinterpret_cast<float*>(pEBP + 0x10);
 			float fNewVal = *reinterpret_cast<float*>(pEBP + 0x14);
 			ActorValueInfo* pInfo = CdeclCall<ActorValueInfo*>(kOnAVChangeDetour, aeActorValue);
-			if (pInfo && pInfo->onChangeCallback)
-				Events::OnAVChange(pActor, aeActorValue, fOldVal, fNewVal, pInfo->onChangeCallback);
+			if (pInfo && pInfo->pModifiedCallback)
+				Events::OnAVChange(pActor, aeActorValue, fOldVal, fNewVal, pInfo->pModifiedCallback);
 			return pInfo;
 		}
 		STACK_FRAME_OPT_RESET

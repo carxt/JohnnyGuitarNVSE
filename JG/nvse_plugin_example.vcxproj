@@ -129,7 +129,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="..\nvse\nvse\GameForms.cpp" />
     <ClCompile Include="..\nvse\nvse\GameObjects.cpp" />
     <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameProcess.cpp" />
     <ClCompile Include="..\nvse\nvse\GameRTTI.cpp" />
     <ClCompile Include="..\nvse\nvse\GameScript.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp" />
@@ -269,8 +268,10 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESObjectARMO.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectBOOK.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectLAND.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESObjectLIGH.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectMISC.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESObjectREFR.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESRaceForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESRegionDataList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESScriptableForm.cpp" />
@@ -624,8 +625,10 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESObjectBOOK.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectCLOT.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectLAND.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESObjectLIGH.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectMISC.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESObjectREFR.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectSTAT.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESPackageData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESRaceForm.hpp" />

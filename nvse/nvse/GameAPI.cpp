@@ -413,7 +413,7 @@ bool ExtractSetStatementVar(Script* script, ScriptLocals* eventList, void* scrip
 
 				if (refForm->GetFormType() == FORM_TYPE::TESObjectREFR) {
 					TESObjectREFR* refr = DYNAMIC_CAST(refForm, TESForm, TESObjectREFR);
-					TESScriptableForm* scriptable = DYNAMIC_CAST(refr->baseForm, TESForm, TESScriptableForm);
+					TESScriptableForm* scriptable = DYNAMIC_CAST(refr->GetObjectReference(), TESForm, TESScriptableForm);
 					if (scriptable) {
 						script = scriptable->GetFormScript();
 						eventList = refr->GetScriptLocals();

@@ -77,10 +77,10 @@ namespace NPCAccuracy {
 	}
 
 	static SPEC_NOINLINE ScrapVector<uint32_t> __fastcall GetFactionsForActor(Actor* apActor) {
-		TESActorBase* pActorBase = static_cast<TESActorBase*>(GetPermanentBaseForm(apActor));
+		TESActorBase* pActorBase = static_cast<TESActorBase*>(apActor->GetOriginalObjectReference());
 		ScrapVector<uint32_t> kFactions = GetFactionsInList(pActorBase->GetFactionList());
 
-		const ExtraFactionChanges* pFactionChanges = apActor->extraDataList.GetExtraData<ExtraFactionChanges>();
+		const ExtraFactionChanges* pFactionChanges = apActor->GetExtraData<ExtraFactionChanges>();
 		if (pFactionChanges && pFactionChanges->pFactionChanges) {
 			ScrapVector<uint32_t> kAdditionalFactions = GetFactionsInList(pFactionChanges->pFactionChanges);
 			kFactions.append_range(kAdditionalFactions);
@@ -100,7 +100,7 @@ namespace NPCAccuracy {
 
 		fMultiplier *= pMultipliers->GetMultiplier(apActor, AccuracyMultipliers::ACTOR);
 		
-		const TESBoundObject* pBaseForm = GetPermanentBaseForm(apActor);
+		const TESBoundObject* pBaseForm = apActor->GetOriginalObjectReference();
 		if (pBaseForm) [[likely]]
 			fMultiplier *= pMultipliers->GetMultiplier(pBaseForm, AccuracyMultipliers::ACTOR_BASE);
 

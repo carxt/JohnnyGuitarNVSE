@@ -1,4 +1,6 @@
 #include "TESContainer.hpp"
+#include "TESObjectLIGH.hpp"
+#include "TESObjectREFR.hpp"
 
 // GAME - 0x481610
 TESContainer* TESContainer::Create(TESContainer* apThis) {
@@ -46,6 +48,23 @@ bool TESContainer::HasObject(TESBoundObject* apObject) const {
 }
 
 // GAME - 0x481F30
-bool TESContainer::ContainerCanHoldType(uint32_t auiFormType) {
-	return CdeclCall<bool>(0x481F30, auiFormType);
+bool TESContainer::ContainerCanHoldType(uint8_t aucFormType) {
+	return CdeclCall<bool>(0x481F30, aucFormType);
+}
+
+bool TESContainer::ContainerCanHoldForm(const TESForm* apForm) {
+	if (!apForm)
+		return false;
+
+	if (apForm->IsReference()) {
+		const TESObjectREFR* pRef = static_cast<const TESObjectREFR*>(apForm);
+		return ContainerCanHoldForm(pRef->GetObjectReference());
+	}
+	else if (apForm->GetFormType() == FORM_TYPE::TESObjectLIGH) {
+		const TESObjectLIGH* pLight = static_cast<const TESObjectLIGH*>(apForm);
+		return pLight->GetCanCarry();
+	}
+	else {
+		return ContainerCanHoldType(apForm->GetFormType());
+	}
 }

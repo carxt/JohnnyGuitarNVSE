@@ -5,6 +5,8 @@
 #include "BSStringT.hpp"
 
 class AlchemyItem;
+class TESActorBase;
+class InventoryChanges;
 
 class ExtraDataList : public BaseExtraList {
 public:
@@ -20,6 +22,15 @@ public:
 
 	void SetPoison(AlchemyItem* apPoison);
 	void RemovePoison();
+
+	TESActorBase* GetLevCreaTemplate() const;
+	TESActorBase* GetLevCreaOriginalBase() const;
+
+	bool GetIgnoredBySandbox() const;
+	void SetIgnoredBySandbox(bool abVal);
+
+	InventoryChanges* GetContainerChanges() const;
+	void SetContainerChanges(InventoryChanges* apChanges);
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

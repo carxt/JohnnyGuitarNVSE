@@ -5,6 +5,7 @@
 #include "GameExtraData.h"
 #include "Obsidian/AudioMarkerInfo.hpp"
 #include "Bethesda/TESRegionList.hpp"
+#include "Bethesda/TESObjectREFR.hpp"
 
 class ScriptLocals;
 class ActiveEffect;
@@ -23,7 +24,7 @@ static const uint32_t s_TESObjectREFR_Set3D = 0x5702E0;			// void : (const char*
 #endif
 const uint32_t kUpdateAppearanceAddr = 0x8D3FA0;
 class NiPoint3;
-// 68
+#if 0
 class TESObjectREFR : public TESForm {
 public:
 	MEMBER_FN_PREFIX(TESObjectREFR);
@@ -194,8 +195,9 @@ public:
 };
 
 static_assert(sizeof(TESObjectREFR) == 0x068);
+#endif
 
-TESBoundObject* GetPermanentBaseForm(TESObjectREFR* apReference);	// For LevelledForm, find real baseForm, not temporary one.
+void __fastcall UpdateReference3D(TESObjectREFR* apReference);
 
 class BaseProcess;
 
@@ -969,7 +971,7 @@ public:
 	bool ToggleFirstPerson(bool toggleON);
 	char GetDetectionState();
 
-	NiNode* Get3D(bool abFirstPerson) const;
+	NiAVObject* Get3D(bool abFirstPerson) const;
 	BipedAnim* GetBiped(bool abFirstPerson) const;
 	Animation* GetAnimation(bool abFirstPerson) const;
 

@@ -284,7 +284,22 @@ bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 	char X_outS[VAR_NAME_SIZE] = {}, Y_outS[VAR_NAME_SIZE] = {}, Z_outS[VAR_NAME_SIZE] = {};
 	char nodeName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nodeName, &X_outS, &Y_outS, &Z_outS)) {
-		hkpRigidBody* rigidBody = thisObj->GetRigidBody(nodeName);
+		NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->Get3D(), nodeName);
+		if (!pObject)
+			return true;
+
+		if (!pObject->m_spCollisionObject || !pObject->m_spCollisionObject->IsBhkNiCollisionObject())
+			return true;
+
+		bhkNiCollisionObject* pColObj = static_cast<bhkNiCollisionObject*>(pObject->m_spCollisionObject.m_pObject);
+		if (!pColObj->worldObj || !pColObj->worldObj->refObject)
+			return true;
+
+		uint32_t eMotionType = static_cast<bhkRigidBody*>(pColObj->worldObj)->GetMotionType();
+		if (!bhkRigidBody::IsMotionTypeDynamic(eMotionType))
+			return true;
+
+		hkpRigidBody* rigidBody = static_cast<hkpRigidBody*>(pColObj->worldObj->refObject);
 		if (rigidBody) {
 			NiPoint4 linVelocity = rigidBody->motion.linVelocity;
 			setVarByName(PASS_VARARGS, X_outS, linVelocity.x);
@@ -329,7 +344,7 @@ bool Cmd_RefAddrxData_Execute(COMMAND_ARGS) {
 	DWORD type;
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
 		if (type < EXTRA_DATA_TYPE::COUNT) {
-			void* res = thisObj->extraDataList.GetExtraData(type);
+			void* res = thisObj->GetExtraData(type);
 			if (res) {
 				Console_Print("0x%08X", res);
 				return true;

@@ -682,7 +682,7 @@ STACK_FRAME_OPT_RESET
 			if (!pProcess || pProcess->GetProcessLevel() != PROCESS_TYPE::HIGH)
 				return true;
 
-			const NiNode* pRoot = thisObj->Get3D();
+			const NiAVObject* pRoot = thisObj->Get3D();
 			BipedAnim* pBiped = thisObj->GetBiped();
 			if (!pRoot || !pBiped)
 				return true;

@@ -409,9 +409,6 @@ STACK_FRAME_OPT_RESET
 			if (!pName || !pName[0])
 				pName = GetFormEditorID();
 
-			if (!pName || !pName[0])
-				pName = baseForm->GetFormEditorID();
-
 			return pName;
 		}
 	};

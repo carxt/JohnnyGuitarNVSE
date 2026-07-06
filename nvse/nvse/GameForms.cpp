@@ -10,8 +10,8 @@ TESForm* __fastcall GetTESForm(const TESForm* apForm) {
 
 	if (apForm->IsReference()) {
 		const TESObjectREFR* refr = static_cast<const TESObjectREFR*>(apForm);
-		if (refr->baseForm) 
-			return refr->baseForm;
+		if (refr->GetObjectReference()) 
+			return refr->GetObjectReference();
 	}
 
 	return const_cast<TESForm*>(apForm);
@@ -89,7 +89,7 @@ TESForm* TESObjectWEAP::GetAmmoInInventory()
 {
 	BGSListForm* pAmmoList = ammo.GetAmmoFormList();
 	if (pAmmoList) {
-		ExtraContainerChanges* xChanges = PlayerCharacter::GetSingleton()->extraDataList.GetExtraData<ExtraContainerChanges>();
+		ExtraContainerChanges* xChanges = PlayerCharacter::GetSingleton()->GetExtraData<ExtraContainerChanges>();
 		if (pAmmoList && xChanges && xChanges->pChanges) {
 			auto pIter = pAmmoList->GetFormList();
 			while (pIter && !pIter->IsEmpty()) {
@@ -250,25 +250,4 @@ void TESObjectCELL::CellRefLockEnter() {
 // GAME - 0x541AE0
 void TESObjectCELL::CellRefLockLeave() {
 	ThisCall(0x541AE0, this);
-}
-
-bool TESContainer::ContainerCanHoldType(uint8_t aucFormType) {
-	return CdeclCall<bool>(0x481F30, aucFormType);
-}
-
-bool TESContainer::ContainerCanHoldForm(const TESForm* apForm) {
-	if (!apForm)
-		return false;
-
-	if (apForm->IsReference()) {
-		const TESObjectREFR* pRef = static_cast<const TESObjectREFR*>(apForm);
-		return ContainerCanHoldForm(pRef->baseForm);
-	}
-	else if (apForm->GetFormType() == FORM_TYPE::TESObjectLIGH) {
-		const TESObjectLIGH* pLight = static_cast<const TESObjectLIGH*>(apForm);
-		return pLight->GetCanCarry();
-	}
-	else {
-		return ContainerCanHoldType(apForm->GetFormType());
-	}
 }

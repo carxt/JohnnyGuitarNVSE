@@ -79,7 +79,7 @@ namespace BarterFilter {
 			if (it != rItems.end()) {
 				auto& rBarterSet = it->second;
 				bShouldHide = rBarterSet.contains(pMerchant->GetFormID())
-					|| rBarterSet.contains(pMerchant->baseForm->GetFormID())
+					|| rBarterSet.contains(pMerchant->GetObjectReference()->GetFormID())
 					|| rBarterSet.contains(0)
 					|| rBarterSet.contains(PlayerCharacter::GetSingleton()->GetFormID());
 			}

@@ -78,7 +78,7 @@ void FilterForm::SetUpFiltering() {
 		if (!currentFilter) continue;
 		if (!(IsAcceptedParameter(currentFilter))) continue;
 		if (currentFilter->IsReference()) {
-			InsertToFilter(i, ((TESObjectREFR*)currentFilter)->baseForm->GetFormID());
+			InsertToFilter(i, static_cast<TESObjectREFR*>(currentFilter)->GetObjectReference()->GetFormID());
 			continue;
 		}
 		if (IS_TYPE(currentFilter, BGSListForm)) {
@@ -95,8 +95,12 @@ void FilterForm::SetUpFiltering() {
 }
 
 bool FilterForm::IsBaseInFilter(uint32_t filterNum, TESForm* form) {
-	if (!form) return false;
-	if (form->IsReference()) return IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->GetFormID());
+	if (!form) 
+		return false;
+
+	if (form->IsReference()) 
+		return IsInFilter(filterNum, static_cast<TESObjectREFR*>(form)->GetObjectReference()->GetFormID());
+
 	return IsInFilter(filterNum, form->GetFormID());
 }
 

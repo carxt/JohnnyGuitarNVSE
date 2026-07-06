@@ -281,7 +281,7 @@ namespace JohnnyFixes {
 
 		ThisCall<void>(0x547750, cell, imageSpace);
 		PlayerCharacter* player = PlayerCharacter::GetSingleton();
-		if (player->parentCell != nullptr && player->parentCell == cell) {
+		if (player->GetParentCell() != nullptr && player->GetParentCell() == cell) {
 			CdeclCall<void>(0xB4F430, imageSpace->traitValues);
 		}
 	}

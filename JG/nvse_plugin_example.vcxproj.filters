@@ -754,14 +754,17 @@
     <ClCompile Include="internal\JG\AnimActivationHeight.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameProcess.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="internal\JG\DeathSoundFix.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\WorldToScreen.cpp">
       <Filter>internal\JG</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectLIGH.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectREFR.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2100,6 +2103,12 @@
     </ClInclude>
     <ClInclude Include="internal\JG\DeathSoundFix.hpp">
       <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectLIGH.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectREFR.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

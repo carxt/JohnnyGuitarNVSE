@@ -2,16 +2,28 @@
 
 #pragma warning(disable: 4100 4201 4244 4324 4389 5054 28159)
 
+#define USE_MODDED_CHANGES 1
+#define USE_DXMATH 0
+
+#pragma region Includes
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
 #include <d3d9.h>
 
-#include <Windows.Foundation.h>
-#include <wrl\wrappers\corewrappers.h>
-#include <wrl\client.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <cmath>
 #include <string>
 #include <cassert>
+#include <mutex>
+#include <shared_mutex>
+#include <numbers>
 
 #define USE_MODDED_CHANGES 1
 
@@ -20,11 +32,10 @@ constexpr inline auto our_sprintf	= sprintf;
 constexpr inline auto our_vsprintf	= vsprintf;
 constexpr inline auto our_vsnprintf	= vsnprintf;
 
-#include "Utils/DebugLog.hpp"
-#include "Utils/Bitfield.hpp"
-#include "Utils/AddressPtr.hpp"
-
 #include "SafeWrite/SafeWrite.hpp"
+#include "Utils/AddressPtr.hpp"
+#include "Utils/Bitfield.hpp"
+#include "Utils/DebugLog.hpp"
 
 // Game unit conversion constants
 constexpr inline double dM2NI	= 69.99125671386719;	// 1 Meter to Ni
@@ -40,33 +51,6 @@ constexpr inline double dNI2MM  = 1.0 / dMM2NI;			// 1 Ni to Millimeter
 // Havok uses decimeters (10cm) as base unit
 constexpr inline float fHK2NI = static_cast<float>(dDM2NI); // 1 Havok to Ni
 constexpr inline float fNI2HK = static_cast<float>(dNI2DM); // 1 Ni to Havok
-
-template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret ThisCall(uint32_t _addr, const void* _this, Args ...args) noexcept(false) {
-	if constexpr (std::is_class_v<T_Ret>) {
-		T_Ret ret;
-		((T_Ret * (__thiscall*)(const void*, T_Ret&, Args...))_addr)(_this, ret, std::forward<Args>(args)...);
-		return ret;
-	}
-	else {
-		return ((T_Ret(__thiscall*)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
-	}
-}
-
-template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret StdCall(uint32_t _addr, Args ...args) noexcept(false) {
-	return ((T_Ret(__stdcall*)(Args...))_addr)(std::forward<Args>(args)...);
-}
-
-template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret CdeclCall(uint32_t _addr, Args ...args) noexcept(false) {
-	return ((T_Ret(__cdecl*)(Args...))_addr)(std::forward<Args>(args)...);
-}
-
-template <typename T_Ret = void, typename ...Args>
-__forceinline T_Ret FastCall(uint32_t _addr, Args ...args) noexcept(false) {
-	return ((T_Ret(__fastcall*)(Args...))_addr)(std::forward<Args>(args)...);
-}
 
 #pragma region Macros
 #define EXTERN_DLL_EXPORT extern "C" __declspec(dllexport)
@@ -122,4 +106,36 @@ __forceinline T_Ret FastCall(uint32_t _addr, Args ...args) noexcept(false) {
 
 #define RUNTIME_CHECKS_DISABLE _Pragma("runtime_checks(\"\", off)")
 #define RUNTIME_CHECKS_RESET   _Pragma("runtime_checks(\"\", restore)")
+
+#pragma endregion
+
+#pragma region Function Callers
+
+template <typename T_Ret = void, typename ...Args>
+SPEC_INLINE T_Ret ThisCall(size_t _addr, const void* _this, Args ...args) noexcept(false) {
+	if constexpr (std::is_class_v<T_Ret>) {
+		T_Ret ret;
+		((T_Ret * (__thiscall*)(const void*, T_Ret&, Args...))_addr)(_this, ret, std::forward<Args>(args)...);
+		return ret;
+	}
+	else {
+		return ((T_Ret(__thiscall*)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
+	}
+}
+
+template <typename T_Ret = void, typename ...Args>
+SPEC_INLINE T_Ret StdCall(size_t _addr, Args ...args) noexcept(false) {
+	return ((T_Ret(__stdcall*)(Args...))_addr)(std::forward<Args>(args)...);
+}
+
+template <typename T_Ret = void, typename ...Args>
+SPEC_INLINE T_Ret CdeclCall(size_t _addr, Args ...args) noexcept(false) {
+	return ((T_Ret(__cdecl*)(Args...))_addr)(std::forward<Args>(args)...);
+}
+
+template <typename T_Ret = void, typename ...Args>
+SPEC_INLINE T_Ret FastCall(size_t _addr, Args ...args) noexcept(false) {
+	return ((T_Ret(__fastcall*)(Args...))_addr)(std::forward<Args>(args)...);
+}
+
 #pragma endregion

@@ -29,7 +29,9 @@ public:
 
 	bool HasObject(TESBoundObject* apObject) const;
 
-	static bool ContainerCanHoldType(uint32_t auiFormType);
+	static bool ContainerCanHoldType(uint8_t aucFormType);
+
+	static bool ContainerCanHoldForm(const TESForm* apForm);
 };
 
 ASSERT_SIZE(TESContainer, 0xC);

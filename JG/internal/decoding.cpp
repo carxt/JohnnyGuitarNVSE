@@ -59,7 +59,11 @@ AnimGroupClassify s_animGroupClassify[] =
 };
 
 bool __fastcall InventoryRef::CreateExtraData(BSExtraData* apExtraData) {
-	BSSimpleList<ItemChange*>* pItemChanges = pContainerRef->GetContainerChangesList();
+	InventoryChanges* pInvChanges = pContainerRef->GetExtra()->GetContainerChanges();
+	if (!pInvChanges)
+		return false;
+
+	BSSimpleList<ItemChange*>* pItemChanges = pInvChanges->pItems;
 	if (!pItemChanges)
 		return false;
 	
@@ -84,15 +88,6 @@ bool __fastcall InventoryRef::CreateExtraData(BSExtraData* apExtraData) {
 	pChange->pExtraLists->AddHead(pExtraDataList);
 	return true;
 }
-
-BSSimpleList<ItemChange*>* TESObjectREFR::GetContainerChangesList()
-{
-	ExtraContainerChanges* xChanges = extraDataList.GetExtraData<ExtraContainerChanges>();
-	if (xChanges && xChanges->pChanges) 
-		return xChanges->pChanges->pItems;
-	return nullptr;
-}
-
 
 DebugText* DebugText::GetSingleton()
 {
