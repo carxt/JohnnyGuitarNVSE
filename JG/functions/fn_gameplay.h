@@ -78,5 +78,7 @@ DEFINE_CMD_COND_PLUGIN(IsInDialogueWithPlayer, , true, nullptr);
 DEFINE_COMMAND_PLUGIN(PathToPoint, , true, kParams_ThreeFloatsTwoOptionalFloats);
 DEFINE_COMMAND_PLUGIN(SetYieldTimer, , false, kParams_OneFloat);
 DEFINE_CMD_COND_PLUGIN(GetYieldTimer, , false, nullptr);
+DEFINE_COMMAND_PLUGIN(GetPCRootWorldspace, , false, nullptr);
+DEFINE_CMD_COND_PLUGIN(GetPCInRootWorldspace, , false, kParams_OneWorldSpace);
 
 void RestoreDisabledPlayerControlsHUDFlags();

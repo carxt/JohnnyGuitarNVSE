@@ -427,6 +427,8 @@ namespace JohnnyCommands {
 		REG_CMD(GetMenuItemListIndex);
 		REG_CMD(SelectMenuItemListIndex);
 		REG_CMD(StopNiSequence);
+		REG_CMD(GetPCInRootWorldspace);
+		REG_TYPED_CMD(GetPCRootWorldspace, Form);
 	}
 
 }
