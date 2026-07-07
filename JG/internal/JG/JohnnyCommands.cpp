@@ -418,7 +418,6 @@ namespace JohnnyCommands {
 		REG_CMD(GetParticleEmitterSpawnRate);
 		REG_TYPED_CMD(GetItemEffectString, String);
 		REG_CMD(ApplyModelTextureSwap);
-		REG_CMD(GetCombatTargetDistance);
 		REG_CMD(StopIdleLoop);
 		REG_CMD(SetIKState);
 		REG_CMD(GetIKState);
