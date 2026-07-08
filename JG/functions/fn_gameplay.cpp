@@ -1618,7 +1618,7 @@ bool Cmd_GetPCInRootWorldspace_Eval(COMMAND_ARGS_EVAL)
 	auto pMapMenu = MapMenu::GetSingleton();
 	if (pMapMenu && pMapMenu->parentmostLastExtDoorWorldspace)
 	{
-		*result = pWorldSpace->uiFormID == pMapMenu->parentmostLastExtDoorWorldspace->uiFormID;
+		*result = pWorldSpace->GetFormID() == pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
 	}
 	return true;  
 }
@@ -1640,7 +1640,7 @@ bool Cmd_GetPCRootWorldspace_Execute(COMMAND_ARGS)
 	auto pMapMenu = MapMenu::GetSingleton();
 	if (pMapMenu && pMapMenu->parentmostLastExtDoorWorldspace)
 	{
-		*reinterpret_cast<uint32_t*>(result) = pMapMenu->parentmostLastExtDoorWorldspace->uiFormID;
+		*reinterpret_cast<uint32_t*>(result) = pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
 	}
 	return true; 
 }
