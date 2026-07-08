@@ -578,6 +578,12 @@ static ParamInfo kParams_OneActorBase[] =
 	{ "ActorBase", kParamType_ActorBase, 0 },
 };
 
+static ParamInfo kParams_OneWorldSpace[] =
+{
+	{ "WorldSpace", kParamType_WorldSpace, 0 },
+};
+
+
 static ParamInfo kParams_OneForm_OneInt_OneForm[] =
 {
 	{ "Form", kParamType_AnyForm, 0 },

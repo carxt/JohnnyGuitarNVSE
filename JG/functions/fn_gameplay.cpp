@@ -1610,3 +1610,37 @@ bool Cmd_GetYieldTimer_Execute(COMMAND_ARGS) {
 		Console_Print("GetYieldTimer >> %f", *result);
 	return true;
 }
+
+bool Cmd_GetPCInRootWorldspace_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	auto pWorldSpace = static_cast<TESWorldSpace*>(arg1);
+	auto pMapMenu = MapMenu::GetSingleton();
+	if (pMapMenu && pMapMenu->parentmostLastExtDoorWorldspace)
+	{
+		*result = pWorldSpace->GetFormID() == pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
+	}
+	return true;  
+}
+
+bool Cmd_GetPCInRootWorldspace_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESWorldSpace* pWorldSpace = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace))
+	{
+		*result = Cmd_GetPCInRootWorldspace_Eval(thisObj, pWorldSpace, nullptr, result);
+	}
+	return true;
+}
+
+bool Cmd_GetPCRootWorldspace_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	auto pMapMenu = MapMenu::GetSingleton();
+	if (pMapMenu && pMapMenu->parentmostLastExtDoorWorldspace)
+	{
+		*reinterpret_cast<uint32_t*>(result) = pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
+	}
+	return true; 
+}
