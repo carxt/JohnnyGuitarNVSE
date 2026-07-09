@@ -115,7 +115,7 @@ DEFINE_COMMAND_PLUGIN(CallPerRef, , false, kParamsCallPerRef);
 DEFINE_COMMAND_PLUGIN_EXP(CallPerRefEx, , false, kParamsCallPerRefEx);
 DEFINE_COMMAND_PLUGIN(CallPerMobileObject, , false, kParamsCallPerMobileObject);
 DEFINE_COMMAND_PLUGIN_EXP(CallPerMobileObjectEx, , false, kParamsCallPerMobileObjectEx);
-DEFINE_CMD_ALT_COND_PLUGIN(Update3DAlt, IThinkItsAGoodIdeaToMakeSureTheModelIsProperlyUpdatedSoUsingThisNewVersionOfUpdate3DShouldDoTheTrickBecauseItWontFlickerAnymore, , true, kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(Update3DAlt, IThinkItsAGoodIdeaToMakeSureTheModelIsProperlyUpdatedSoUsingThisNewVersionOfUpdate3DShouldDoTheTrickBecauseItWontFlickerAnymore, , true, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetRecipeCategoryFlags, , false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(RemapLand, , false, kParamsRemapLand);
 DEFINE_COMMAND_PLUGIN(GetItemEffectString, , false, kParams_OneOptionalObjectID);
