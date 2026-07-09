@@ -251,9 +251,9 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 	*result = 0;
 	const Actor* pActor = static_cast<Actor*>(thisObj);
 	char cObjectName[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName) && pActor->IsMobileObject() && pActor->baseProcess) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName) && pActor->IsMobileObject() && pActor->GetCurrentAIProcess()) {
 		const NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->Get3DSimple(), cObjectName);
-		const HitData* pHitData = pActor->baseProcess->GetLastHitData();
+		const HitData* pHitData = pActor->GetCurrentAIProcess()->GetLastHitData();
 		if (!pHitData || !pObject) 
 			return true;
 		

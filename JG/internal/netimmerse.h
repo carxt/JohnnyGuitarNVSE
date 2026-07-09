@@ -14,7 +14,7 @@
 #include "Bethesda/BSRenderedTexture.hpp"
 #include "Bethesda/BSCullingProcess.hpp"
 
-struct NavMeshInfo;
+class NavMeshInfo;
 class bhkRigidBody;
 class TESObjectCELL;
 class bhkPhantom;

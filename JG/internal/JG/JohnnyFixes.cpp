@@ -88,8 +88,8 @@ namespace JohnnyFixes {
 		}
 	}
 	void __fastcall BipedModelUpdateWeapon(BipedAnim* BipedAnim, Character* fnCharacter, TESObjectWEAP* weap, int weapMods) {
-		if (fnCharacter && fnCharacter->baseProcess) {
-			if (auto weapInfo = fnCharacter->baseProcess->GetCurrentWeapon()) {
+		if (fnCharacter && fnCharacter->GetCurrentAIProcess()) {
+			if (auto weapInfo = fnCharacter->GetCurrentAIProcess()->GetCurrentWeapon()) {
 				weapMods = ItemChange_GetWeaponModFlags(weapInfo);
 			}
 		}
@@ -251,7 +251,7 @@ namespace JohnnyFixes {
 		}
 
 		// Game does not null check the base process
-		if (pActor && pActor->baseProcess && pActor->baseProcess->GetCurrentFurniture() == apComparedRef) {
+		if (pActor && pActor->GetCurrentAIProcess() && pActor->GetCurrentAIProcess()->GetCurrentFurniture() == apComparedRef) {
 			arResult = 1;
 		}
 
@@ -290,8 +290,8 @@ namespace JohnnyFixes {
 		bool res = !(ThisCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head1)) && !(ThisCall<bool>(0x573090, actor, BGSBodyPartData::eBodyPart_Head2));
 		if (res) {
 			res = [](Actor* actor) -> bool {
-				if (auto thisObj = actor->baseProcess; thisObj->GetProcessLevel() <= PROCESS_TYPE::HIGH) {
-					if (actor->GetDead()) {
+				if (auto thisObj = actor->GetCurrentAIProcess(); thisObj->GetProcessLevel() <= PROCESS_TYPE::HIGH) {
+					if (actor->IsDead(false)) {
 						if (DialoguePackage* pPackage = (DialoguePackage*)thisObj->GetCurrentPackage()) {
 							if ((actor != pPackage->subject) && (actor == pPackage->speaker)) { //check for subject because in some cases, subject == target
 								return false;
@@ -325,7 +325,7 @@ namespace JohnnyFixes {
 
 	void ClearPlayerFurniture()
 	{
-		if (auto pAIProcess = PlayerCharacter::GetSingleton()->baseProcess) {
+		if (auto pAIProcess = PlayerCharacter::GetSingleton()->GetCurrentAIProcess()) {
 			pAIProcess->SetSitSleepState(PlayerCharacter::GetSingleton(), SIT_SLEEP_STATE::NORMAL, nullptr, 0x7F);
 		}
 	}

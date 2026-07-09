@@ -31,6 +31,9 @@ public:
 
 	InventoryChanges* GetContainerChanges() const;
 	void SetContainerChanges(InventoryChanges* apChanges);
+
+	BSString GetActivateTextOverride() const;
+	void SetActivateTextOverride(const char* apText);
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

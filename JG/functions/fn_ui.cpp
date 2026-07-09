@@ -339,7 +339,7 @@ float CalculateRepairedHealth(ItemChange* target, ItemChange* repairItem) {
 	if (!target || !repairItem) return 0.0f;
 	float targetHealth = target->GetItemHealth(true);
 	float repairItemHealth = repairItem->GetItemHealth(true);
-	int repairSkill = PlayerCharacter::GetSingleton()->avOwner.GetActorValueI(ActorValue::Index::REPAIR);
+	int repairSkill = PlayerCharacter::GetSingleton()->GetActorValueI(ActorValue::Index::REPAIR);
 	int outParam = -1;
 	double result = CdeclCall<double>(0x648090, repairSkill, targetHealth, repairItemHealth, &outParam);
 	return (float)(result / 100.0);

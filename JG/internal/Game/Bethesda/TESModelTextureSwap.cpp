@@ -27,7 +27,7 @@ void TESModelTextureSwap::RemoveTexSwap(int32_t aiIndex) {
 	auto pIter = GetTexSwapList();
 	while (pIter && !pIter->IsEmpty()) {
 		TEX_SWAP* pSwap = pIter->GetItem();
-		if (pSwap && pSwap->uiObjectIndex == aiIndex) {
+		if (pSwap && pSwap->iObjectIndex == aiIndex) {
 			pIter->Remove(pSwap);
 			delete pSwap;
 			return;

@@ -1394,15 +1394,16 @@ struct _DialogueType {
 };
 using DIALOGUE_TYPE = _DialogueType::Type;
 
-struct _FactionRelation {
+struct _FightReaction {
 	enum Type : uint32_t {
-		ENEMY	= 0,
-		NEUTRAL	= 1,
+		NEUTRAL	= 0,
+		ENEMY	= 1,
 		ALLY	= 2,
 		FRIEND	= 3,
+		COUNT,
 	};
 };
-using FACTION_RELATION = _FactionRelation::Type;
+using FIGHT_REACTION = _FightReaction::Type;
 
 struct _ActorSegmentInView {
 	enum Type : uint32_t {
@@ -1639,7 +1640,8 @@ struct _CreatureType {
 		SUPER_MUTANT	= 4,
 		FERAL_GHOUL		= 5,
 		ROBOT			= 6,
-		GIANT			= 7
+		GIANT			= 7,
+		COUNT,
 	};
 };
 using CREATURE_TYPE = _CreatureType::Type;
@@ -1778,6 +1780,20 @@ struct _BSIntersectResult {
 };
 using BS_INTERSECT_RESULT = _BSIntersectResult::Result;
 
+struct _PathHandlerResult {
+	enum Result : int32_t {
+		NONE				= -1,
+		OK					= 0,
+		CANT_MOVE			= 0,
+		CANT_REACH_Z		= 0,
+		CANT_USE_DOOR		= 0,
+		FELL_OFF_PATH		= 0,
+		DONE				= 0,
+		DONE_SLEEP_SPECIAL	= 0,
+	};
+};
+using PATH_HANDLER_RESULT = _PathHandlerResult::Result;
+
 struct _RegionDataType {
 	enum Type {
 		NONE		= 0,
@@ -1793,3 +1809,111 @@ struct _RegionDataType {
 	};
 };
 using REGION_DATA_ID = _RegionDataType::Type;
+
+struct _LODMult {
+	enum Mult : uint32_t {
+		NONE = 0,
+		OBJECTS = 1,
+		ITEMS = 2,
+		ACTORS = 3,
+		TREES = 4,
+		LANDSCAPE = 5,
+		DISTANT_LOD = 6,
+		ACTOR_BODY_PART = 7,
+		RENDERED_MENU = 8,
+		INVISIBLE = 9,
+		IMPOSTER = 10,
+		COUNT,
+	};
+};
+using LOD_MULT = _LODMult::Mult;
+
+struct _ConditionRunOn {
+	enum RunOn : uint32_t {
+		SUBJECT,
+		TARGET,
+		REFERENCE,
+		COMBAT_TARGET,
+		LINKED_REFERENCE,
+		COUNT,
+	};
+};
+using CONDITION_RUN_ON = _ConditionRunOn::RunOn;
+
+struct _ConditionComparison {
+	enum Comparison : uint32_t {
+		EQUAL,
+		NOT_EQUAL,
+		GREATER_THAN,
+		GREATER_THAN_OR_EQUAL,
+		LESS_THAN,
+		LESS_THAN_OR_EQUAL,
+		COUNT,
+	};
+};
+using CONDITION_COMPARISON = _ConditionComparison::Comparison;
+
+struct _LockLevel {
+	enum Level {
+		VERY_EASY,
+		EASY,
+		AVERAGE,
+		HARD,
+		VERY_HARD,
+		IMPOSSIBLE,
+		COUNT,
+	};
+};
+using LOCK_LEVEL = _LockLevel::Level;
+
+struct _SoundLevel {
+	enum Level {
+		LOUD,
+		NORMAL,
+		SILENT,
+		COUNT,
+	};
+};
+using SOUND_LEVEL = _SoundLevel::Level;
+
+struct _LifeState {
+	enum State {
+		ALIVE			= 0,
+		DYING			= 1,
+		DEAD			= 2,
+		UNCONSCIOUS		= 3,
+		REANIMATE		= 4,
+		RESTRAINED		= 5,
+		ESSENTIAL_DOWN	= 6,
+	};
+};
+using ACTOR_LIFE_STATE = _LifeState::State;
+
+struct _CreatureSoundType {
+	enum Type {
+		LEFT		= 0,
+		RIGHT		= 1,
+		BACKLEFT	= 2,
+		BACKRIGHT	= 3,
+		IDLE		= 4,
+		AWARE		= 5,
+		ATTACK		= 6,
+		HIT			= 7,
+		DEATH		= 8,
+		WEAPON		= 9,
+		MOVEMENT	= 10,
+		AWAKE		= 11,
+		AUX1		= 12,
+		AUX2		= 13,
+		AUX3		= 14,
+		AUX4		= 15,
+		AUX5		= 16,
+		AUX6		= 17,
+		AUX7		= 18,
+		AUX8		= 19,
+		JUMP		= 20,
+		LOOP		= 21,
+		COUNT		= 22
+	};
+};
+using CREATURE_SOUND_TYPE = _CreatureSoundType::Type;

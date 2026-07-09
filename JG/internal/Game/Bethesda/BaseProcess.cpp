@@ -5,6 +5,11 @@ PROCESS_TYPE BaseProcess::GetProcessLevel() const {
 	return static_cast<PROCESS_TYPE>(eProcessLevel);
 }
 
+// GAME - 0x7DF1F0
+float BaseProcess::GetLastTimeProcessed() const {
+	return fHourLastProcessed;
+}
+
 // GAME - 0x8ACED0
 bool BaseProcess::GetCachedFlag(uint32_t auiFlag) const {
 	return ThisCall<bool>(0x8ACED0, this, auiFlag);

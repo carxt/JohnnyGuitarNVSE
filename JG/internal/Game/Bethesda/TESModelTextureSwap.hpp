@@ -10,7 +10,7 @@ class TESForm;
 
 struct SPEC_EMPTY_BASES TEX_SWAP : public BSMemObject {
 	BGSTextureSet*	pTextureSet;
-	int32_t			uiObjectIndex;
+	int32_t			iObjectIndex;
 	char			cObjectName[128];
 };
 

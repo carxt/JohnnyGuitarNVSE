@@ -926,7 +926,22 @@ public:
 
 static_assert(sizeof(NavMesh) == 0x108);
 
-typedef NiPointer<NavMesh> NavMeshPtr;
+class NavMeshPtr : public NiPointer<NavMesh> {
+public:
+	using NiPointer<NavMesh>::NiPointer;
+	NavMeshPtr& operator=(NavMesh* apObject) { NiPointer<NavMesh>::operator=(apObject); return *this; }
+
+	// GAME - 0x464FC0
+	static void MakeNavMeshPtr(NavMeshPtr& arNavMeshOut, NavMesh* apNavMesh) {
+		arNavMeshOut = NavMeshPtr(apNavMesh);
+	}
+
+	// GAME - 0x464FC0
+	static NavMeshPtr MakeNavMeshPtr(NavMesh* apNavMesh) {
+		return NavMeshPtr(apNavMesh);
+	}
+};
+
 
 
 class NavMeshArray : public BSSimpleArray<NavMeshPtr>

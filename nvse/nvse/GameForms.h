@@ -6,9 +6,6 @@
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
 
-#include "Bethesda/BGSProjectile.hpp"
-#include "Bethesda/BGSNote.hpp"
-#include "Bethesda/BGSIdleMarker.hpp"
 #include "Bethesda/ActorValueInfo.hpp"
 #include "Bethesda/ActorValueOwner.hpp"
 #include "Bethesda/AlchemyItem.hpp"
@@ -25,6 +22,7 @@
 #include "Bethesda/BGSEntryPointPerkEntry.hpp"
 #include "Bethesda/BGSEquipType.hpp"
 #include "Bethesda/BGSHeadPart.hpp"
+#include "Bethesda/BGSIdleMarker.hpp"
 #include "Bethesda/BGSImpactData.hpp"
 #include "Bethesda/BGSImpactDataSet.hpp"
 #include "Bethesda/BGSListForm.hpp"
@@ -32,12 +30,14 @@
 #include "Bethesda/BGSMessage.hpp"
 #include "Bethesda/BGSMessageIcon.hpp"
 #include "Bethesda/BGSMusicType.hpp"
+#include "Bethesda/BGSNote.hpp"
 #include "Bethesda/BGSOpenCloseForm.hpp"
 #include "Bethesda/BGSPerk.hpp"
 #include "Bethesda/BGSPerkEntry.hpp"
 #include "Bethesda/BGSPickupPutdownSounds.hpp"
 #include "Bethesda/BGSPlaceableWater.hpp"
 #include "Bethesda/BGSPreloadable.hpp"
+#include "Bethesda/BGSProjectile.hpp"
 #include "Bethesda/BGSRadiationStage.hpp"
 #include "Bethesda/BGSRagdoll.hpp"
 #include "Bethesda/BGSRepairItemList.hpp"
@@ -62,6 +62,7 @@
 #include "Bethesda/TESCombatStyle.hpp"
 #include "Bethesda/TESCondition.hpp"
 #include "Bethesda/TESContainer.hpp"
+#include "Bethesda/TESCreature.hpp"
 #include "Bethesda/TESDescription.hpp"
 #include "Bethesda/TESEnchantableForm.hpp"
 #include "Bethesda/TESEyes.hpp"
@@ -84,6 +85,7 @@
 #include "Bethesda/TESModelList.hpp"
 #include "Bethesda/TESModelRDT.hpp"
 #include "Bethesda/TESModelTextureSwap.hpp"
+#include "Bethesda/TESNPC.hpp"
 #include "Bethesda/TESObjectACTI.hpp"
 #include "Bethesda/TESObjectANIO.hpp"
 #include "Bethesda/TESObjectARMA.hpp"
@@ -1336,75 +1338,6 @@ struct FaceGenData {
 	uint32_t		maxOffset;	// 14
 	uint32_t		count;		// 18
 	uint32_t		size;		// 1C
-};
-
-// 1EC
-class TESNPC : public TESActorBase {
-public:
-	TESNPC();
-	~TESNPC();
-
-	TESRaceForm				race;				// 10C
-	uint8_t					skillValues[14];	// 114
-	uint8_t					skillOffsets[14];	// 122
-	TESClass* classID;			// 130
-	FaceGenData				faceGenData[3];		// 134
-	uint32_t					unk194[8];			// 194
-	FaceGenData* faceGenDataPtr;	// 1B4
-	TESHair* hair;				// 1B8
-	float					hairLength;			// 1BC
-	TESEyes* eyes;				// 1C0
-	BSFaceGenNiNode* unk1C4;			// 1C4
-	BSFaceGenNiNode* unk1C8;			// 1C8
-	uint32_t					unk1CC;				// 1CC
-	uint16_t					unk1D0;				// 1D0
-	uint16_t					unk1D2;				// 1D2
-	TESCombatStyle* combatStyle;		// 1D4
-	uint32_t					hairColor;			// 1D8
-	tList<BGSHeadPart>		headPart;			// 1DC
-	uint32_t					impactMaterialType;	// 1E4
-	uint32_t					unk01E8;			// 1E8
-	TESRace* race1EC;			// 1EC
-	TESNPC* copyFrom;			// 1F0	Not set once PlayerRef exists and the target is the Player
-	float					height;				// 1F4
-	float					weight;				// 1F8	Aparently, getWeight purposly returns height except for the player.
-	NiTPrimitiveArray<FaceGenUndo*>	faceGenUndo;		// 1FC
-
-	void SetSex(uint32_t flags);
-	void SetRace(TESRace* pRace);
-	void CopyAppearance(TESNPC* srcNPC);
-};
-
-static_assert(sizeof(TESNPC) == 0x20C);
-
-// 160
-class TESCreature : public TESActorBase {
-public:
-	TESCreature();
-	~TESCreature();
-
-	TESAttackDamageForm			attackDmg;			// 10C
-	TESModelList				modelList;			// 114
-
-	TESCreature* audioTemplate;		// 128
-	uint8_t						type;				// 12C
-	uint8_t						combatSkill;		// 12D
-	uint8_t						magicSkill;			// 12E
-	uint8_t						stealthSkill;		// 12F
-	uint8_t						attackReach;		// 130
-	uint8_t						pad0131[3];			// 131
-	float						turningSpeed;		// 134
-	float						footWeight;			// 138
-	float						baseScale;			// 13C
-	TESCombatStyle* combatStyle;		// 140
-	BGSBodyPartData* bodyPartData;		// 144
-	uint32_t						materialType;		// 148
-	BGSImpactDataSet* impactDataSet;		// 14C
-	uint32_t						unk0150;			// 150
-	uint32_t						soundLevel;			// 154
-	BGSListForm* weaponList;		// 158
-	uint8_t						byt015C;			// 15C
-	uint8_t						pad015D[3];			// 15D
 };
 
 struct AreaPointEntry {

@@ -181,7 +181,7 @@ bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 		return true;
 
 	if (thisObj->IsActor()) {
-		BaseProcess* pAIProcess = static_cast<Actor*>(thisObj)->baseProcess;
+		BaseProcess* pAIProcess = static_cast<Actor*>(thisObj)->GetCurrentAIProcess();
 		if (pAIProcess) {
 			TESObjectREFR* pFurniture = pAIProcess->GetCurrentFurniture();
 			if (pFurniture)
@@ -509,18 +509,9 @@ bool Cmd_GetRefEncounterZone_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char newPrompt[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPrompt)) {
-		ExtraActivateRef* xActivateRef = thisObj->GetExtraData<ExtraActivateRef>();
-		if (xActivateRef) {
-			xActivateRef->strActivationPrompt.Set(newPrompt);
-		}
-		else {
-			xActivateRef = BSMemory::malloc<ExtraActivateRef>();
-			ThisCall(0x4338B0, xActivateRef);
-			xActivateRef->strActivationPrompt.Set(newPrompt);
-			thisObj->GetExtra()->AddExtra(xActivateRef);
-		}
+	char cPrompt[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPrompt)) {
+		thisObj->GetExtra()->SetActivateTextOverride(cPrompt);
 		*result = 1;
 	}
 	return true;
@@ -695,7 +686,7 @@ bool Cmd_GetAltTexturesEx_Execute(COMMAND_ARGS) {
 			TEX_SWAP* pEntry = pIter->GetItem();
 			pIter = pIter->GetNext();
 			if (pEntry && pEntry->pTextureSet) {
-				g_arrInterface->SetElement(pMap, NVSEArrayElement(pEntry->uiObjectIndex), NVSEArrayElement(pEntry->pTextureSet));
+				g_arrInterface->SetElement(pMap, NVSEArrayElement(pEntry->iObjectIndex), NVSEArrayElement(pEntry->pTextureSet));
 			}
 		}
 	}
@@ -1035,7 +1026,7 @@ bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 	uint32_t titleOrTier = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &titleOrTier);
 	if (titleOrTier == 1) {
-		int karmaTier = CdeclCall<int>(0x47E040, PlayerCharacter::GetSingleton()->avOwner.GetActorValueF(ActorValue::Index::KARMA)); // GetKarmaTier
+		int karmaTier = CdeclCall<int>(0x47E040, PlayerCharacter::GetSingleton()->GetActorValueF(ActorValue::Index::KARMA)); // GetKarmaTier
 		switch (karmaTier) {
 		case 0:
 			title = *(char**)0x11D41B4; // sAlignGood
@@ -1327,14 +1318,17 @@ bool Cmd_SetExplosionSound_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetCreatureCombatSkill_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESCreature* creature = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &creature)) return true;
-	if (!creature) {
-		if (!thisObj || !thisObj->IsActor()) return true;
-		creature = (TESCreature*)thisObj->GetOriginalObjectReference();
+	TESCreature* pCreature = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pCreature)) 
+		return true;
+	
+	if (!pCreature) {
+		if (!thisObj || !thisObj->IsActor()) 
+			return true;
+		pCreature = static_cast<TESCreature*>(thisObj->GetOriginalObjectReference());
 	}
-	if IS_TYPE(creature, TESCreature)
-		* result = creature->combatSkill;
+	if IS_TYPE(pCreature, TESCreature)
+		*result = pCreature->kData.ucCombatSkill;
 	return true;
 }
 
@@ -1408,7 +1402,7 @@ bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 bool Cmd_GetLifeState_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
 	if (thisObj && thisObj->IsActor())
-		*result = static_cast<Actor*>(thisObj)->lifeState;
+		*result = static_cast<Actor*>(thisObj)->GetLifeState();
 	return true;
 }
 
@@ -1531,9 +1525,9 @@ bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL) {
 	if (pBase) {
 		FORM_TYPE eType = pBase->GetFormType();
 		if (eType == FORM_TYPE::TESNPC)
-			*result = static_cast<TESNPC*>(pBase)->height;
+			*result = static_cast<TESNPC*>(pBase)->GetHeight();
 		else if (eType == FORM_TYPE::TESCreature)
-			*result = static_cast<TESCreature*>(pBase)->baseScale;
+			*result = static_cast<TESCreature*>(pBase)->GetBaseScale();
 	}
 	else if (thisObj) {
 		*result = GetBaseScale(thisObj);
@@ -1726,7 +1720,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 		return true;
 
 	PlayerCharacter* const pPlayer = PlayerCharacter::GetSingleton();
-	if (!pPlayer->baseProcess || pPlayer->baseProcess->GetProcessLevel() > PROCESS_TYPE::MIDDLE_HIGH)
+	if (!pPlayer->GetCurrentAIProcess() || pPlayer->GetCurrentAIProcess()->GetProcessLevel() > PROCESS_TYPE::MIDDLE_HIGH)
 		return true;
 
 	float fCondition = 1.f;
@@ -1760,7 +1754,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 		return true;
 	}
 
-	MiddleHighProcess* pAIProcess = static_cast<MiddleHighProcess*>(pPlayer->baseProcess);
+	MiddleHighProcess* pAIProcess = static_cast<MiddleHighProcess*>(pPlayer->GetCurrentAIProcess());
 	ItemChange* pWeaponItem = pAIProcess->pCurrentWeapon;
 	TESForm* pAmmo = nullptr;
 	if (!pExtraData && pWeaponItem && (pWeaponItem->pObject == pWeapon) && pAIProcess->pCurrentAmmo)
@@ -1770,7 +1764,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 		pAmmo = pWeapon->GetAmmo();
 
 	pAIProcess->pCurrentWeapon = nullptr;
-	*result = GetWeaponDPS(&(pPlayer->avOwner), pWeapon, fCondition, 1, pWeaponItem, 0, 0, -1, 0.f, 0.f, 0, 0, pAmmo);
+	*result = GetWeaponDPS(pPlayer, pWeapon, fCondition, 1, pWeaponItem, 0, 0, -1, 0.f, 0.f, 0, 0, pAmmo);
 	pAIProcess->pCurrentWeapon = pWeaponItem;
 	if (IsConsoleMode())
 		Console_Print("GetCalculatedWeaponDPS >> %f", *result);
@@ -2604,15 +2598,15 @@ bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
 		const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
 		if (thisObj->IsActor()) {
 			Actor* pActor = static_cast<Actor*>(thisObj);
-			if (pActor->baseProcess) {
+			if (pActor->GetCurrentAIProcess()) {
 				// Creatures can't refresh their models in vanilla, so we have to handle them ourselves.
 				if (pActor->IsCreature()) {
 					RequestModelUpdate(thisObj, uiFlags, bQueue);
 				}
 				else {
-					pActor->baseProcess->Set3DUpdateFlag(uiFlags);
+					pActor->GetCurrentAIProcess()->Set3DUpdateFlag(uiFlags);
 					if (!bQueue)
-						pActor->baseProcess->Update3DModel(pActor);
+						pActor->GetCurrentAIProcess()->Update3DModel(pActor);
 
 
 					const uint32_t uiCustomFlags = uiFlags & uiAddedFlags;
@@ -2823,7 +2817,7 @@ bool Cmd_SetIKState_Execute(COMMAND_ARGS) {
 	BOOL bToggle = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &bToggle) && InRange(eType) && thisObj->IsActor()) {
 		const Actor* pActor = static_cast<Actor*>(thisObj);
-		bhkRagdollController* pCtrl = pActor->ragDollController;
+		bhkRagdollController* pCtrl = pActor->pRagdollController;
 		if (pCtrl) {
 			switch (eType) {
 				case IKType::LOOK:
@@ -2849,7 +2843,7 @@ bool SPEC_NOINLINE Cmd_GetIKState_Eval(COMMAND_ARGS_EVAL) {
 	const IKType eType = *reinterpret_cast<IKType*>(&arg1);
 	if (InRange(eType) && thisObj->IsActor()) {
 		const Actor* pActor = static_cast<Actor*>(thisObj);
-		bhkRagdollController* pCtrl = pActor->ragDollController;
+		bhkRagdollController* pCtrl = pActor->pRagdollController;
 		if (pCtrl) {
 			switch (eType) {
 				case IKType::LOOK:
@@ -2902,12 +2896,12 @@ bool Cmd_PickIdleEx_Execute(COMMAND_ARGS) {
 		return true;
 	
 	Actor* pUser = static_cast<Actor*>(thisObj);
-	if (!pUser->baseProcess)
+	if (!pUser->GetCurrentAIProcess())
 		return true;
 
 	TESObjectREFR* pTargetRef = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetRef) && pTargetRef && pTargetRef->GetObjectReference())
-		*result = static_cast<LowProcess*>(pUser->baseProcess)->FindSpecialIdletoPlay(pUser, pTargetRef->GetObjectReference(), pTargetRef);
+		*result = static_cast<LowProcess*>(pUser->GetCurrentAIProcess())->FindSpecialIdletoPlay(pUser, pTargetRef->GetObjectReference(), pTargetRef);
 
 	return true;
 }

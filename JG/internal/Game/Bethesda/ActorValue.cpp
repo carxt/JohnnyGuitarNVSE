@@ -10,13 +10,13 @@ ActorValue* ActorValue::GetSingleton() {
 }
 
 // GAME - 0x47F060
-bool ActorValue::GetIsSkill(Index aeIndex) {
-    return aeIndex >= Index::BARTER && aeIndex < Index::INVENTORY_WEIGHT;
+bool ActorValue::IsSkill(Index aeIndex) {
+    return CdeclCall<bool>(0x47F060, aeIndex);
 }
 
 // GAME - 0x406D70
 bool ActorValue::GetFlag(Index aeIndex, uint32_t auiFlag) {
-    return (GetSingleton()->pInfos[aeIndex]->uiAVFlags & auiFlag) != 0;
+    return CdeclCall<bool>(0x406D70, aeIndex, auiFlag);
 }
 
 // GAME - 0x66EC80
@@ -33,4 +33,9 @@ const char* ActorValue::GetActorValueName(ActorValue::Index aeIndex) {
     if (aeIndex >= Index::AGGRESSION && aeIndex < Index::COUNT)
         return GetSingleton()->pInfos[aeIndex]->pInfoName;
     return "Invalid";
+}
+
+// GAME - 0x66EE50
+void ActorValue::CheckCallModifiedCallback(ActorValueOwner* apActor, Index aeIndex, float afOldVal, float afNewVal, ActorValueOwner* apActorSource) {
+    CdeclCall(0x66EE50, apActor, aeIndex, afOldVal, afNewVal, apActorSource);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 class ActorValueInfo;
+class ActorValueOwner;
 
 class ActorValue {
 public:
@@ -135,11 +136,17 @@ public:
 
 	static ActorValue* GetSingleton();
 
-	static bool GetIsSkill(Index aeIndex);
+	static bool IsSkill(Index aeIndex);
+
 	static bool GetFlag(Index aeIndex, uint32_t auiFlag);
+
 	static uint8_t ToArrayIndex(Section aeSection, Index aeIndex);
+
 	static Index ToActorValue(Section aeSection, uint8_t aeIndex);
+
 	static const char* GetActorValueName(Index aeIndex);
+
+	static void CheckCallModifiedCallback(ActorValueOwner* apActor, Index aeIndex, float afOldVal, float afNewVal, ActorValueOwner* apActorSource = nullptr);
 };
 
 ASSERT_SIZE(ActorValue, 0x134);

@@ -58,3 +58,13 @@ InventoryChanges* ExtraDataList::GetContainerChanges() const {
 void ExtraDataList::SetContainerChanges(InventoryChanges* apChanges) {
 	ThisCall(0x419650, this, apChanges);
 }
+
+// GAME - 0x41EC80
+BSString ExtraDataList::GetActivateTextOverride() const {
+	return ThisCall<BSString>(0x41EC80, this);
+}
+
+// GAME - 0x41ECE0
+void ExtraDataList::SetActivateTextOverride(const char* apText) {
+	ThisCall(0x41ECE0, this, apText);
+}

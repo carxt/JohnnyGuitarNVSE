@@ -65,12 +65,12 @@ bool Cmd_SetRegionMapName_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion, &cName) && pRegion && IS_TYPE(pRegion, TESRegion)) {
 		TESRegionDataMap* pMapData = GetMapData(pRegion);
 		if (pMapData) {
-			pMapData->strMapName.Set(cName);
+			pMapData->SetMapName(cName);
 		}
 		else {
 			pMapData = BSMemory::malloc<TESRegionDataMap>();
 			ThisCall(0x4F3CA0, pMapData); // TESRegionDataMap::TESRegionDataMap
-			pMapData->strMapName.Set(cName);
+			pMapData->SetMapName(cName);
 			pRegion->pDataList->Add(pMapData);
 		}
 		*result = 1;

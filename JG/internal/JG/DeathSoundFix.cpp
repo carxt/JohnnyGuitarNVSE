@@ -9,7 +9,7 @@ namespace DeathSoundFix {
 
 	float __fastcall FixDeathSoundsTopic(HighProcess* apProcess, Actor* apActor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
 		//all the checks can be skipped because they were done above already
-		if (apActor->GetDead()) {
+		if (apActor->IsDead(false)) {
 			if (DialoguePackage* pPackage = static_cast<DialoguePackage*>(apProcess->GetCurrentPackage())) {
 				if ((apActor != pPackage->subject) && (apActor == pPackage->speaker)) { //check for subject because in some cases, subject == target
 					return -1.0f;
@@ -26,7 +26,7 @@ namespace DeathSoundFix {
 	float __fastcall FixDeathSoundsAlt(HighProcess* apProcess, Actor* apActor) { //Alternate complex, confusing, potentially buggy fix.
 		constexpr float DYING_TIMER_MIN = FLT_EPSILON * 10; //Establish low tolerance, this should be ideal. Unless someone sets fDyingTimer to 0 or something, but that's their problem.
 		float fDyingTimer = apProcess->dyingTimer;
-		bool bKeepTalking = apActor->IsTalking() || !(apActor->unk80 & 1);
+		bool bKeepTalking = apActor->IsTalking() || !apActor->bVoiceFileDone;
 		if (bKeepTalking) {
 			if (fDyingTimer <= DYING_TIMER_MIN) 
 				fDyingTimer = DYING_TIMER_MIN;

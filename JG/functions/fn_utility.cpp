@@ -97,12 +97,12 @@ enum EType {
 
 bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BOOL bStopAnim = 0;
+	BOOL bStopAnim = FALSE;
 	Actor* pActor = static_cast<Actor*>(thisObj);
 	ExtractArgsEx(EXTRACT_ARGS_EX, &bStopAnim);
-	if (pActor && pActor->IsActor() && pActor->baseProcess->GetCurrentProcessIdle()) {
-		pActor->baseProcess->ClearPostAnimationActions();
-		pActor->baseProcess->SetCurrentProcessIdle(nullptr);
+	if (pActor && pActor->IsActor() && pActor->GetCurrentAIProcess() && pActor->GetCurrentAIProcess()->GetCurrentProcessIdle()) {
+		pActor->GetCurrentAIProcess()->ClearPostAnimationActions();
+		pActor->GetCurrentAIProcess()->SetCurrentProcessIdle(nullptr);
 		if (bStopAnim > 0)
 			ThisCall(0x498910, pActor->GetAnimation(), 1, 1); // SpecialIdleFree
 		*result = 1;

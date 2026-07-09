@@ -678,7 +678,7 @@ STACK_FRAME_OPT_RESET
 				return true;
 
 			Actor* pActor = static_cast<Actor*>(thisObj);
-			const BaseProcess* pProcess = pActor->baseProcess;
+			const BaseProcess* pProcess = pActor->GetCurrentAIProcess();
 			if (!pProcess || pProcess->GetProcessLevel() != PROCESS_TYPE::HIGH)
 				return true;
 
@@ -1756,7 +1756,7 @@ STACK_FRAME_OPT_RESET
 		class Hook : public Actor {
 		public:
 			float GetGunSpreadHook(enum SpreadMode aeMode) {
-				if (jipActorFlags2 & 8)
+				if (ucJIPActorFlags1.Get(8))
 					return 0.f;
 
 				return ThisCall<float>(kGetGunSpreadDetour, this, aeMode);

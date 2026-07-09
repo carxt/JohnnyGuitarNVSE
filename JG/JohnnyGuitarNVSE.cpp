@@ -3,6 +3,7 @@
 #include "nvse_version.h"
 
 #include "Bethesda/AutoMemContext.hpp"
+#include "FaceGen/FR2MatrixVTC.hpp"
 
 #include "events/LambdaVariableContext.h"
 #include "events/JohnnyEvents.hpp"

@@ -105,7 +105,7 @@ namespace JohnnyEvents {
 		}
 
 		static void __fastcall OnDying(Actor* apActor) {
-			if (apActor && apActor->IsActor() && apActor->lifeState == 1) {
+			if (apActor && apActor->IsActor() && apActor->IsDying()) {
 				{
 					using namespace JohnnyMessageData;
 					SendNVSEMessage(JG_OnDying, apActor);
@@ -268,7 +268,7 @@ namespace JohnnyEvents {
 					SendNVSEMessage(JG_OnAVChange, kData);
 				}
 
-				if (pActor && pActor->IsPlayerRef()) {
+				if (pActor && pActor->IsPlayer()) {
 					for (auto const& rCallback : OnAVChangeHandler->callbacks) {
 						FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
 						if (pFilter->IsInFilter(1, aeActorValue)) {
@@ -493,7 +493,7 @@ namespace JohnnyEvents {
 				if (kDetour)
 					ThisCall(kDetour, apActor, apPerk, aucRank, abTeammate);
 				else
-					apActor->SetPerkRank(apPerk, aucRank, abTeammate);
+					apActor->AddPerk(apPerk, aucRank, abTeammate);
 			}
 
 		public:
@@ -579,12 +579,12 @@ namespace JohnnyEvents {
 			static inline HookUtils::VirtFuncDetour kDetour;
 
 			static bool __fastcall Hook(Actor* apActor) {
-				if (!apActor || !apActor->baseProcess) [[unlikely]]
+				if (!apActor || !apActor->GetCurrentAIProcess()) [[unlikely]]
 					return true;
 
-				const uint32_t eOldLevel = apActor->baseProcess->GetProcessLevel();
+				const uint32_t eOldLevel = apActor->GetCurrentAIProcess()->GetProcessLevel();
 				const bool bResult = ThisCall<bool>(kDetour, apActor);
-				const uint32_t eNewLevel = apActor->baseProcess->GetProcessLevel();
+				const uint32_t eNewLevel = apActor->GetCurrentAIProcess()->GetProcessLevel();
 				Events::OnProcessChangeEvent(apActor, eOldLevel, eNewLevel);
 				return bResult;
 			}

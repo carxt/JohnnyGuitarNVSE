@@ -668,6 +668,8 @@ public:
 
 	PROCESS_TYPE GetProcessLevel() const;
 
+	float GetLastTimeProcessed() const;
+
 	bool GetCachedFlag(uint32_t auiFlag) const;
 	void SetCachedFlag(uint32_t auiFlag, bool abSet);
 
