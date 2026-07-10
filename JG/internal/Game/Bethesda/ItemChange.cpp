@@ -43,3 +43,8 @@ float ItemChange::GetItemHealth(bool abPercentage) const {
 bool ItemChange::GetWorn(bool abLeftOnly) const {
 	return ThisCall<bool>(0x4BDDD0, this, abLeftOnly);
 }
+
+// GAME - 0x4BD820
+uint8_t ItemChange::GetModSlots() const {
+	return ThisCall<uint8_t>(0x4BD820, this);
+}

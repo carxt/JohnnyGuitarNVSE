@@ -22,8 +22,12 @@ public:
 	void							DeleteAllExtra();
 
 	bool							HasLeveledExtra() const;
+
 	float							GetItemHealth(bool abPercentage) const;
+
 	bool							GetWorn(bool abLeftOnly) const;
+
+	uint8_t							GetModSlots() const;
 };
 
 ASSERT_SIZE(ItemChange, 0xC);

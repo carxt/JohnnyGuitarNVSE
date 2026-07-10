@@ -258,7 +258,7 @@ public:
 	TESObjectREFR* unk70;			// 70 - loaded
 	uint32_t			unk74;			// 74 - loaded
 	uint32_t			unk78;			// 78 - loaded
-	uint8_t			unk7C;			// 7C - loaded
+	bool			bSpeakingDone;			// 7C - loaded
 	uint8_t			unk7D;			// 7D - loaded
 	uint8_t			unk7E;			// 7E - loaded
 	uint8_t			unk7F;			// 7F - loaded
