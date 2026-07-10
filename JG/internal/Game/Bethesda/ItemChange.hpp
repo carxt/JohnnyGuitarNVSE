@@ -9,7 +9,8 @@ class ExtraDataList;
 class ItemChange {
 public:
 	ItemChange();
-	ItemChange(TESBoundObject* apObject, int32_t aiNumber = 0);
+	ItemChange(const ItemChange& arOther);
+	ItemChange(TESBoundObject* apObject, int32_t aiNumber);
 	~ItemChange();
 
 	BSSimpleList<ExtraDataList*>*	pExtraLists;

@@ -1,20 +1,23 @@
 #include "ItemChange.hpp"
 
 // GAME - 0x76B630
-ItemChange::ItemChange() : pObject(nullptr), pExtraLists(nullptr), iNumber(0) {
+ItemChange::ItemChange() {
+	ThisCall(0x76B630, this);
+}
+
+// GAME - 0x4BC650
+ItemChange::ItemChange(const ItemChange& arOther) {
+	ThisCall(0x4BC650, this, &arOther);
 }
 
 // GAME - 0x4BC550
 ItemChange::ItemChange(TESBoundObject* apObject, int32_t aiNumber) {
-	pObject = apObject;
-	pExtraLists = new BSSimpleList<ExtraDataList*>();
-	iNumber = aiNumber;
+	ThisCall(0x4BC550, this, apObject, aiNumber);
 }
 
 // GAME - 0x4BC5F0
 ItemChange::~ItemChange() {
-	delete pExtraLists;
-	pExtraLists = nullptr;
+	ThisCall(0x4BC5F0, this);
 }
 
 // GAME - 0x559450
