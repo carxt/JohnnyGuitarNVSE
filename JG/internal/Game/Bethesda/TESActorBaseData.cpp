@@ -24,3 +24,8 @@ bool TESActorBaseData::GetUsesLeveledTemplate() const {
 uint32_t TESActorBaseData::GetAlignmentForKarma(float afKarma) {
 	return CdeclCall<uint32_t>(0x47E040, afKarma);
 }
+
+// GAME - 0x47E0E0
+const char* TESActorBaseData::GetKarmicTitle(Actor* apActor) {
+	return CdeclCall<const char*>(0x47E0E0, apActor);
+}

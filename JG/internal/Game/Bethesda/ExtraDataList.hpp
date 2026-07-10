@@ -7,6 +7,7 @@
 class AlchemyItem;
 class TESActorBase;
 class InventoryChanges;
+class BGSEncounterZone;
 
 class ExtraDataList : public BaseExtraList {
 public:
@@ -34,6 +35,9 @@ public:
 
 	BSString GetActivateTextOverride() const;
 	void SetActivateTextOverride(const char* apText);
+
+	BGSEncounterZone* GetEncounterZone() const;
+	void SetEncounterZone(BGSEncounterZone* apZone);
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

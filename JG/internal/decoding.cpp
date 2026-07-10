@@ -68,7 +68,7 @@ bool __fastcall InventoryRef::CreateExtraData(BSExtraData* apExtraData) {
 		return false;
 	
 	BSSimpleList<ItemChange*>* pEntry = pItemChanges->Find([&](const BSSimpleList<ItemChange*>* apEntry) {
-		return apEntry->GetItem()->pObject == pForm;
+		return apEntry->GetItem()->GetContainerObject() == pForm;
 		}
 	);
 

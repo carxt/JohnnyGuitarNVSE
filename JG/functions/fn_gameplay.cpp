@@ -867,7 +867,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 				ItemChange* entry = contChangesIter->GetItem();
 				contChangesIter = contChangesIter->GetNext();
 
-				if (!entry || !entry->pExtraLists || !entry->pObject)
+				if (!entry || !entry->pExtraLists || !entry->GetContainerObject())
 					continue;
 
 				BSSimpleList<ExtraDataList*>* xdlIter = entry->pExtraLists->GetHead();
@@ -902,15 +902,15 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 		return true;
 
 	ItemChange* pWeaponItem = pActor->GetCurrentAIProcess()->GetCurrentWeapon();
-	if (pWeaponItem && pWeaponItem->pObject) {
+	if (pWeaponItem && pWeaponItem->GetContainerObject()) {
 		bool bDecreaseSpread = pWeaponItem->HasModEffectActive(WEAPON_MOD_EFFECT_TYPE::DECREASE_SPREAD);
-		float fMinSpread = ThisCall<float>(0x524B80, pWeaponItem->pObject, bDecreaseSpread); // TESObjectWEAP::GetMinSpread
-		float fWeapSpread = ThisCall<float>(0x524BE0, pWeaponItem->pObject, bDecreaseSpread); // TESObjectWEAP::GetMaxSpread
+		float fMinSpread = ThisCall<float>(0x524B80, pWeaponItem->GetContainerObject(), bDecreaseSpread); // TESObjectWEAP::GetMinSpread
+		float fWeapSpread = ThisCall<float>(0x524BE0, pWeaponItem->GetContainerObject(), bDecreaseSpread); // TESObjectWEAP::GetMaxSpread
 		float fSpread = ThisCall<float>(0x8B0DD0, pActor, 1); // Actor::GetGunSkill
 
 		float fTotalSpread = (fWeapSpread * fSpread + fMinSpread) * 0.01745329238474369;
 
-		TESAmmo* pAmmo = ThisCall<TESAmmo*>(0x525980, pWeaponItem->pObject, pActor); // TESObjectWEAP::GetCurrentAmmo
+		TESAmmo* pAmmo = ThisCall<TESAmmo*>(0x525980, pWeaponItem->GetContainerObject(), pActor); // TESObjectWEAP::GetCurrentAmmo
 		fTotalSpread = TESAmmoEffect::ApplyAmmoEffect(AMMO_EFFECT_TYPE::SPREAD, (pAmmo ? pAmmo->GetAmmoEffectList() : nullptr), fTotalSpread);
 
 		float fSpreadPenalty = ThisCall<float>(0x8B0DD0, pActor, 2); // Actor::GetGunSkill
@@ -920,7 +920,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 		fTotalSpread = fTotalSpread + static_cast<MiddleHighProcess*>(pActor->GetCurrentAIProcess())->fAimLooking;
 
 		if (pWeaponItem->HasModEffectActive(WEAPON_MOD_EFFECT_TYPE::SPLIT_BEAM))
-			fTotalSpread *= ThisCall<float>(0x4BCF60, pWeaponItem->pObject, WEAPON_MOD_EFFECT_TYPE::SPLIT_BEAM, 1); // TESObjectWEAP::GetModEffectValue
+			fTotalSpread *= ThisCall<float>(0x4BCF60, pWeaponItem->GetContainerObject(), WEAPON_MOD_EFFECT_TYPE::SPLIT_BEAM, 1); // TESObjectWEAP::GetModEffectValue
 
 		*result = fTotalSpread;
 	}
@@ -1328,7 +1328,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 		else {
 			ItemChange* pWeaponItem = ((Actor*)thisObj)->GetCurrentAIProcess()->GetCurrentWeapon();
 			if (pWeaponItem && pWeaponItem->pExtraLists) {
-				pWeapon = static_cast<TESObjectWEAP*>(pWeaponItem->pObject);
+				pWeapon = static_cast<TESObjectWEAP*>(pWeaponItem->GetContainerObject());
 				pExtraDataList = pWeaponItem->pExtraLists->GetItem();
 			}
 		}

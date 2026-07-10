@@ -805,7 +805,9 @@
     <ClCompile Include="internal\Game\Bethesda\TESCreature.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
-    <ClCompile Include="internal\Game\Bethesda\CreatureSounds.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\CreatureSounds.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">

@@ -8,6 +8,7 @@ class TESFaction;
 class TESForm;
 class TESLevItem;
 class FactionRank;
+class Actor;
 
 class TESActorBaseData : public BaseFormComponent {
 public:
@@ -239,6 +240,8 @@ public:
 	bool GetUsesLeveledTemplate() const;
 
 	static uint32_t GetAlignmentForKarma(float afKarma);
+
+	static const char* GetKarmicTitle(Actor* apActor);
 };
 
 ASSERT_SIZE(TESActorBaseData, 0x34);

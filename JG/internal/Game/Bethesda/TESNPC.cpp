@@ -51,6 +51,11 @@ float TESNPC::GetWeight() const {
 }
 
 // GAME - 0x603AD0
-void TESNPC::GetFaceCoord(FR2MatrixVTC<float>(&arCoords)[2][2]) const {
+void TESNPC::GetFaceCoord(NPCFaceGenCoords& arCoords) const {
 	ThisCall(0x603AD0, this, &arCoords);
+}
+
+// GAME - 0x601800
+NPCFaceGenCoords* TESNPC::GetOffsetFaceCoord() const {
+	return ThisCall<NPCFaceGenCoords*>(0x601800, this);
 }

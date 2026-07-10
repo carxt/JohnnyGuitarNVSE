@@ -63,13 +63,13 @@ namespace BarterFilter {
 			if (!pMerchant) [[unlikely]]
 				return bShouldHide;
 
-			const TESBoundObject* pObject = apItem->pObject;
+			const TESBoundObject* pObject = apItem->GetContainerObject();
 			if (!pObject) [[unlikely]]
 				return bShouldHide;
 
 			const BSSimpleList<ItemChange*>* pMovedItems = auiFilter == FilterType::PLAYER ? &pBarterMenu->kItemsToBuy : &pBarterMenu->kItemsToSell;
 			while (pMovedItems && !pMovedItems->IsEmpty()) {
-				if (pMovedItems->GetItem() && pMovedItems->GetItem()->pObject == pObject)
+				if (pMovedItems->GetItem() && pMovedItems->GetItem()->GetContainerObject() == pObject)
 					return bShouldHide;
 				pMovedItems = pMovedItems->GetNext();
 			}

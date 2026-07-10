@@ -192,10 +192,6 @@ bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
-void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
-
-
 bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
 	const TESForm* pItem = nullptr;
 	const TESForm* pSeller = nullptr;
@@ -437,27 +433,16 @@ bool Cmd_GetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-
-BGSEncounterZone* GetEncounterZone(ExtraDataList* list) {
-	ExtraEncounterZone* xZone = list->GetExtraData<ExtraEncounterZone>();
-	if (xZone && xZone->pZone)
-		return xZone->pZone;
-	return nullptr;
-}
-
-void SetEncounterZone(ExtraDataList* list, BGSEncounterZone* zone) {
-	ThisCall(0x421C60, list, zone);
-}
-
 bool Cmd_SetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSEncounterZone* zone = nullptr;
-	TESWorldSpace* world;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &world, &zone);
-	if (!world || !IS_TYPE(world, TESWorldSpace))
+	BGSEncounterZone* pZone = nullptr;
+	TESWorldSpace* pWorld = nullptr;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pWorld, &pZone);
+	if (!pWorld || !IS_TYPE(pWorld, TESWorldSpace))
 		return true;
-	if (!zone || IS_TYPE(zone, BGSEncounterZone)) {
-		world->pEncounterZone = zone;
+
+	if (!pZone || IS_TYPE(pZone, BGSEncounterZone)) {
+		pWorld->pEncounterZone = pZone;
 		*result = 1;
 	}
 	return true;
@@ -465,24 +450,25 @@ bool Cmd_SetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESWorldSpace* world = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &world) && world && IS_TYPE(world, TESWorldSpace)) {
-		BGSEncounterZone* zone = world->pEncounterZone;
-		if (zone)
-			*(uint32_t*)result = zone->GetFormID();
+	TESWorldSpace* pWorld = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorld) && pWorld && IS_TYPE(pWorld, TESWorldSpace)) {
+		BGSEncounterZone* pZone = pWorld->pEncounterZone;
+		if (pZone)
+			*(uint32_t*)result = pZone->GetFormID();
 	}
 	return true;
 }
 
 bool Cmd_SetCellEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSEncounterZone* zone = nullptr;
-	TESObjectCELL* cell;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &cell, &zone);
-	if (!cell || !IS_TYPE(cell, TESObjectCELL))
+	BGSEncounterZone* pZone = nullptr;
+	TESObjectCELL* pCell = nullptr;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, &pZone);
+	if (!pCell || !IS_TYPE(pCell, TESObjectCELL))
 		return true;
-	if (!zone || IS_TYPE(zone, BGSEncounterZone)) {
-		SetEncounterZone(&cell->extraDataList, zone);
+
+	if (!pZone || IS_TYPE(pZone, BGSEncounterZone)) {
+		pCell->extraDataList.SetEncounterZone(pZone);
 		*result = 1;
 	}
 	return true;
@@ -490,10 +476,10 @@ bool Cmd_SetCellEncounterZone_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetRefEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSEncounterZone* zone = nullptr;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &zone);
-	if (!zone || IS_TYPE(zone, BGSEncounterZone)) {
-		SetEncounterZone(thisObj->GetExtra(), zone);
+	BGSEncounterZone* pZone = nullptr;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pZone);
+	if (!pZone || IS_TYPE(pZone, BGSEncounterZone)) {
+		thisObj->GetExtra()->SetEncounterZone(pZone);
 		*result = 1;
 	}
 	return true;
@@ -501,9 +487,9 @@ bool Cmd_SetRefEncounterZone_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetRefEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSEncounterZone* zone = GetEncounterZone(thisObj->GetExtra());
-	if (zone)
-		*(uint32_t*)result = zone->GetFormID();
+	BGSEncounterZone* pZone = thisObj->GetExtra()->GetEncounterZone();
+	if (pZone)
+		*(uint32_t*)result = pZone->GetFormID();
 	return true;
 }
 
@@ -990,7 +976,7 @@ bool Cmd_FaceGenGetNthProperty_Execute(COMMAND_ARGS) {
 
 		uintptr_t propertyListMinorIdx = PropertyListIndex % 2;
 		uintptr_t propertyListMajorIdx = (PropertyIndex - propertyListMinorIdx) / 2;
-		if (auto FaceGenPTR = TESNPC_GetFaceGenData(npc)) {
+		if (auto FaceGenPTR = npc->GetOffsetFaceCoord()) {
 			*result = CdeclCall<float>(0x652230, FaceGenPTR, propertyListMajorIdx, propertyListMinorIdx, PropertyIndex);
 			if (IsConsoleMode())
 				Console_Print("GetFaceGenNthProperty %.2f", *result);
@@ -1009,7 +995,7 @@ bool Cmd_FaceGenSetNthProperty_Execute(COMMAND_ARGS) {
 		uintptr_t propertyListMinorIdx = PropertyListIndex % 2;
 		uintptr_t propertyListMajorIdx = (PropertyIndex - propertyListMinorIdx) / 2;
 
-		if (auto FaceGenPTR = TESNPC_GetFaceGenData(npc)) {
+		if (auto FaceGenPTR = npc->GetOffsetFaceCoord()) {
 			CdeclCall<void>(0x652320, FaceGenPTR, propertyListMajorIdx, PropertyListIndex, PropertyIndex, val);
 			*result = 1;
 			if (IsConsoleMode()) {
@@ -1022,34 +1008,35 @@ bool Cmd_FaceGenSetNthProperty_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char* title;
-	uint32_t titleOrTier = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &titleOrTier);
-	if (titleOrTier == 1) {
-		int karmaTier = CdeclCall<int>(0x47E040, PlayerCharacter::GetSingleton()->GetActorValueF(ActorValue::Index::KARMA)); // GetKarmaTier
-		switch (karmaTier) {
+	const char* pTitle = nullptr;
+	uint32_t uiTitleOrTier = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &uiTitleOrTier);
+	if (uiTitleOrTier == 1) {
+		uint32_t uiAlignment = TESActorBaseData::GetAlignmentForKarma(PlayerCharacter::GetSingleton()->GetActorValueF(ActorValue::Index::KARMA));
+		switch (uiAlignment) {
 		case 0:
-			title = *(char**)0x11D41B4; // sAlignGood
+			pTitle = GameSettingCollection::sAlignGood->String();
 			break;
 		case 1:
-			title = *(char**)0x11D3208; // sAlignNeutral
+			pTitle = GameSettingCollection::sAlignNeutral->String();
 			break;
 		case 2:
-			title = *(char**)0x11D4580; // sAlignEvil
+			pTitle = GameSettingCollection::sAlignEvil->String();
 			break;
 		case 3:
-			title = *(char**)0x11D5000; // sAlignVeryGood
+			pTitle = GameSettingCollection::sAlignVeryGood->String();
 			break;
 		case 4:
-			title = *(char**)0x11D31D8; // sAlignVeryEvil
+			pTitle = GameSettingCollection::sAlignVeryEvil->String();
 			break;
 		}
 	}
 	else {
-		title = CdeclCall<char*>(0x47E0E0, PlayerCharacter::GetSingleton()); // Actor::GetKarmaTitle
+		pTitle = TESActorBaseData::GetKarmicTitle(PlayerCharacter::GetSingleton());
 	}
-	if (IsConsoleMode()) Console_Print("GetPlayerKarmaTitle >> %s", title);
-	g_strInterface->Assign(PASS_COMMAND_ARGS, title);
+	if (IsConsoleMode()) 
+		Console_Print("GetPlayerKarmaTitle >> %s", pTitle);
+	g_strInterface->Assign(PASS_COMMAND_ARGS, pTitle);
 	return true;
 }
 
@@ -1322,12 +1309,10 @@ bool Cmd_GetCreatureCombatSkill_Execute(COMMAND_ARGS) {
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pCreature)) 
 		return true;
 	
-	if (!pCreature) {
-		if (!thisObj || !thisObj->IsActor()) 
-			return true;
+	if (!pCreature && thisObj && thisObj->IsCreature())
 		pCreature = static_cast<TESCreature*>(thisObj->GetOriginalObjectReference());
-	}
-	if IS_TYPE(pCreature, TESCreature)
+
+	if (pCreature && IS_TYPE(pCreature, TESCreature))
 		*result = pCreature->kData.ucCombatSkill;
 	return true;
 }
@@ -1530,7 +1515,7 @@ bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL) {
 			*result = static_cast<TESCreature*>(pBase)->GetBaseScale();
 	}
 	else if (thisObj) {
-		*result = GetBaseScale(thisObj);
+		*result = thisObj->GetScale();
 	}
 	return true;
 }
@@ -1548,8 +1533,7 @@ bool Cmd_GetBaseScale_Execute(COMMAND_ARGS) {
 bool Cmd_RemovePrimitive_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (thisObj->HasExtra<ExtraPrimitive>()) {
-		ExtraPrimitive* pPrimitive = thisObj->GetExtraData<ExtraPrimitive>();
-		thisObj->GetExtra()->RemoveExtra(pPrimitive, true);
+		thisObj->GetExtra()->RemoveExtra<ExtraPrimitive>();
 		UpdateReference3D(thisObj);
 		*result = 1;
 	}
@@ -1757,8 +1741,8 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	MiddleHighProcess* pAIProcess = static_cast<MiddleHighProcess*>(pPlayer->GetCurrentAIProcess());
 	ItemChange* pWeaponItem = pAIProcess->pCurrentWeapon;
 	TESForm* pAmmo = nullptr;
-	if (!pExtraData && pWeaponItem && (pWeaponItem->pObject == pWeapon) && pAIProcess->pCurrentAmmo)
-		pAmmo = pAIProcess->pCurrentAmmo->pObject;
+	if (!pExtraData && pWeaponItem && (pWeaponItem->GetContainerObject() == pWeapon) && pAIProcess->pCurrentAmmo)
+		pAmmo = pAIProcess->pCurrentAmmo->GetContainerObject();
 
 	if (!pAmmo)
 		pAmmo = pWeapon->GetAmmo();

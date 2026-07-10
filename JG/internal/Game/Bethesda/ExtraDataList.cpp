@@ -68,3 +68,13 @@ BSString ExtraDataList::GetActivateTextOverride() const {
 void ExtraDataList::SetActivateTextOverride(const char* apText) {
 	ThisCall(0x41ECE0, this, apText);
 }
+
+// GAME - 0x421C30
+BGSEncounterZone* ExtraDataList::GetEncounterZone() const {
+	return ThisCall<BGSEncounterZone*>(0x421C30, this);
+}
+
+// GAME - 0x421C60
+void ExtraDataList::SetEncounterZone(BGSEncounterZone* apZone) {
+	ThisCall(0x421C60, this, apZone);
+}
