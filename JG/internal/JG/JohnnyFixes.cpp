@@ -4,7 +4,7 @@
 #include "GameSettings.h"
 #include "GameUI.h"
 
-#include "CloudUpdateFix.hpp"
+#include "SkyUpdateFixes.hpp"
 #include "EditorIDRestoration.hpp"
 #include "QuestObjectiveDisplayFix.hpp"
 
@@ -445,7 +445,7 @@ namespace JohnnyFixes {
 		HookUtils::WriteRelJump(0x490BBB, AnimDataNullCheck);
 		kRemoveSequenceDetour.ReplaceCall(0xA2EC64, RemoveSequenceNullCheck);
 
-		CloudUpdateFix::Install();
+		SkyUpdateFixes::Install();
 
 		// Stop game from crashing on extensions reeeeeeeeeee
 		AudioMonoLookupOverflowFix::InitHooks();

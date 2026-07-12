@@ -80,46 +80,38 @@ struct DetectionData
 
 
 // 08
-class SkyObject
-{
+class SkyObject {
 public:
-	SkyObject();
-
 	virtual				~SkyObject();
 	virtual NiNode*		GetRoot() const;
 	virtual void		Initialize(NiNode* apRoot);
 	virtual void		Update(Sky* apSky, float afValue);
 
-	NiNode* rootNode; // 04
+	NiPointer<NiNode> spRoot;
 };
 
-// 1C
-class Atmosphere : public SkyObject
-{
+ASSERT_SIZE(SkyObject, 0x8)
+
+class Atmosphere : public SkyObject {
 public:
-	Atmosphere();
-	~Atmosphere();
+	virtual void	InitializeAlt(NiNode* apRoot, BSFogProperty* apFogProperty);
 
-	virtual void Fn_04(NiNode* niNode, NiRefObject* unk);
-
-	NiNode* node08; // 08
-	BSFogProperty* fogProp; // 0C	Same as *0x11DEB00
-	NiRefObject* object10; // 10
-	NiRefObject* object14; // 14
-	uint8_t byte18; // 18
-	uint8_t pad19[3]; // 19
+	NiPointer<NiNode>			spAtmosphere;
+	NiPointer<BSFogProperty>	spFog;
+	NiPointer<NiNode>			spSkyQuadNode;
+	NiRefObjectPtr				spSkyQuad;
+	bool						bUpdateFogDistance;
 };
 
-// 10
-class Stars : public SkyObject
-{
+ASSERT_SIZE(Atmosphere, 0x1C);
+
+class Stars : public SkyObject {
 public:
-	Stars();
-	~Stars();
-
-	NiNode* node08; // 08
-	float flt0C; // 0C
+	NiPointer<NiNode>	spStars;
+	float				fAlpha;
 };
+
+ASSERT_SIZE(Stars, 0x10);
 
 // 2C
 class Sun : public SkyObject
@@ -149,24 +141,23 @@ public:
 	Clouds();
 	~Clouds();
 
-	NiAVObject* layer0; // 08	(NiTriStrips)
-	NiAVObject* layer1; // 0C		"
-	NiAVObject* layer2; // 10		"
-	NiAVObject* layer3; // 14		"
-	uint32_t unk18[4]; // 18
-	float flt28; // 28
-	float flt2C; // 2C
-	float flt30; // 30
-	float flt34; // 34
-	float flt38; // 38
-	float flt3C; // 3C
-	float flt40; // 40
-	float flt44; // 44
-	float flt48; // 48
-	float flt4C; // 4C
-	float flt50; // 50
-	float flt54; // 54
-	uint32_t numLayers; // 58
+	NiPointer<NiGeometry>	spClouds[4];
+	NiPointer<NiTexture>	spTransTexture[4];
+	NiColor					kColors[4];
+	uint16_t				usNumLayers;
+	bool					bForceTransTextureUpdate;
+
+	void ForceTransTextureUpdate() {
+		bForceTransTextureUpdate = true;
+	}
+
+	void RemoveTextures() {
+		ThisCall(0x6349E0, this);
+	}
+
+	void ClearTransTextures() {
+		ThisCall(0x634930, this);
+	}
 };
 
 enum MoonUpdateStatus : __int32
@@ -300,76 +291,177 @@ public:
 	uint32_t unk40; // 40
 };
 
-// 138
-class Sky
-{
+class SkyTextureManager {
 public:
-	Sky();
-	~Sky();
-
-	virtual Sky* Destructor(bool doFree);
-
-	enum SkyColors {
-		SC_SKY_UPPER	= 0,
-		SC_FOG			= 1,
-		SC_CLOUDS_LOWER = 2,
-		SC_AMBIENT		= 3,
-		SC_SUNLIGHT		= 4,
-		SC_SUN			= 5,
-		SC_STARS		= 6,
-		SC_SKY_LOWER	= 7,
-		SC_HORIZON		= 8,
-		SC_CLOUDS_UPPER = 9,
-		SC_COUNT,
-	};
-
-	NiNode* niNode004; // 004
-	NiNode* niNode008; // 008
-	TESClimate* firstClimate; // 00C
-	TESWeather* firstWeather; // 010
-	TESWeather* weather014; // 014
-	TESWeather* weather018; // 018
-	TESWeather* weatherOverride; // 01C
-	Atmosphere* atmosphere; // 020
-	Stars* stars; // 024
-	Sun* sun; // 028
-	Clouds* clouds; // 02C
-	Moon* masserMoon; // 030
-	Moon* secundaMoon; // 034
-	Precipitation* precipitation; // 038
-	NiColor							kColors[SC_COUNT];
-	NiColor							kWaterFogColor;
-	NiColor							kSunSpecularColor;
-	float windSpeed; // 0CC
-	float windDirection; // 0D0
-	uint32_t unk0D4[6]; // 0D4
-	float gameHour; // 0EC
-	float lastUpdateHour; // 0F0
-	float weatherPercent; // 0F4
-	uint32_t unk0F8; // 0F8
-	uint32_t unk0FC; // 0FC
-	float lightningFxPerc; // 100
-	uint32_t unk104; // 104
-	float flt108; // 108
-	float flt10C; // 10C
-	float flt110; // 110
-	uint32_t unk114; // 114
-	uint32_t flags; // 118
-	ImageSpaceModifierInstanceForm* pCurrentWeatherImageSpaceMod; // 11C
-	ImageSpaceModifierInstanceForm* pCurrentWeatherImageSpaceMod2; // 120
-	ImageSpaceModifierInstanceForm* pLastWeatherImageSpaceMod; // 124
-	ImageSpaceModifierInstanceForm* pLastWeatherImageSpaceMod2; // 128
-	float flt12C; // 12C
-	float flt130; // 130
-	float flt134; // 134
-
-	void RefreshMoon();
-	void RefreshClimate(TESClimate* climate, bool immediate = true);
-	bool GetIsRaining();
-	static Sky* GetSingleton() { return *reinterpret_cast<Sky**>(0x11DEA20); }
 };
 
-static_assert(sizeof(Sky) == 0x138);
+// 138
+struct SPEC_EMPTY_BASES SkySound : public BSMemObject {
+	BSSoundHandle	kHandle;
+	TESWeather*		pWeather;
+	uint32_t		uiType;
+	uint32_t		uiFormID;
+	uint32_t		uiData;
+
+	static constexpr AddressPtr<uint8_t, 0x11CCB74> ucThunderCount;
+};
+
+class Sky {
+public:
+	Sky();
+	virtual ~Sky();
+
+	struct _SkyObjectType {
+		enum Type {
+			SUNGLARE	= 1,
+			CLOUDS		= 3,
+			STARS		= 5,
+			MOON		= 7,
+		};
+	};
+	using SkyObjectType = _SkyObjectType::Type;
+
+	struct _SkyColor {
+		enum Color {
+			SKY_UPPER		= 0,
+			FOG				= 1,
+			CLOUDS_LOWER	= 2,
+			AMBIENT			= 3,
+			SUNLIGHT		= 4,
+			SUN				= 5,
+			STARS			= 6,
+			SKY_LOWER		= 7,
+			HORIZON			= 8,
+			CLOUDS_UPPER	= 9,
+			COUNT,
+		};
+	};
+	using SkyColor = _SkyColor::Color;
+
+	struct _FogDistance {
+		enum Distance {
+			FOG_NEAR		= 0,
+			FOG_FAR			= 1,
+			FOG_WATER_NEAR	= 2,
+			FOG_WATER_FAR	= 3,
+			COUNT			= 4,
+		};
+	};
+	using FogDistance = _FogDistance::Distance;
+
+	struct _Mode {
+		enum Mode {
+			NONE			= 0,
+			INTERIOR		= 1,
+			FAKE_EXTERIOR	= 2,
+			FULL			= 3,
+			COUNT,
+		};
+	};
+	using Mode = _Mode::Mode;
+
+	struct ALIGN4 _Flags {
+		enum Flags : uint32_t {
+			REFRESH_WEATHER			= 1u << 0,
+			FORCED_UPDATE			= 1u << 1,
+			UNDERWATER				= 1u << 2,
+			REFRESH_ACCELERATION	= 1u << 3,
+			FAST_TRAVEL				= 1u << 4,
+			REFRESH_MOON			= 1u << 5,
+			REFRESH_CLIMATE			= 1u << 6,
+			//								7
+			REFRESH_SUNRISE_BEGIN	= 1u << 8,
+			REFRESH_SUNRISE_END		= 1u << 9,
+			REFRESH_SUNSET_BEGIN	= 1u << 10,
+			REFRESH_SUNSET_END		= 1u << 11,
+			REFRESH_SUNRISE_COLOR	= 1u << 12,
+			REFRESH_SUNSET_COLOR	= 1u << 13,
+		};
+
+		bool bRefreshWeather		: 1;
+		bool bForcedUpdate			: 1;
+		bool bUnderwater			: 1;
+		bool bRefreshAcceleration	: 1;
+		bool bFastTravel			: 1;
+		bool bRefreshMoon			: 1;
+		bool bRefreshClimate		: 1;
+		bool bHideSky				: 1;
+		bool bRefreshSunriseBegin	: 1;
+		bool bRefreshSunriseEnd		: 1;
+		bool bRefreshSunsetBegin	: 1;
+		bool bRefreshSunsetEnd		: 1;
+		bool bRefreshSunsetColor	: 1;
+	};
+	using Flags = _Flags::Flags;
+
+	NiPointer<BSMultiBoundNode>		spRoot;
+	NiPointer<NiNode>				spMoonsRoot;
+	TESClimate*						pCurrentClimate;
+	TESWeather*						pCurrentWeather;
+	TESWeather*						pLastWeather;
+	TESWeather*						pDefaultWeather;
+	TESWeather*						pOverrideWeather;
+	Atmosphere*						pAtmosphere;
+	Stars*							pStars;
+	Sun*							pSun;
+	Clouds*							pClouds;
+	Moon*							pMasser;
+	Moon*							pSecunda;
+	Precipitation*					pPrecipitation;
+	NiColor							kColors[SkyColor::COUNT];
+	NiColor							kWaterFogColor;
+	NiColor							kSunSpecularColor;
+	float							fWindSpeed;
+	float							fWindAngle;
+	float							fFogDistances[FogDistance::COUNT];
+	float							fFogHeight;
+	float							fFogPower;
+	float							fCurrentGameHour;
+	float							fLastWeatherUpdate;
+	float							fCurrentWeatherPct;
+	Mode							eMode;
+	BSSimpleList<SkySound*>*		pSkySoundList;
+	float							fFlash;
+	uint32_t						uiFlashTime;
+	uint32_t						uiLastMoonPhaseUpdate;
+	float							fWindowReflectionTimer;
+	float							fAccelBeginPct;
+	SkyTextureManager				kTextureManager;
+	Bitfield<_Flags>				uiFlags;
+	ImageSpaceModifierInstanceForm* pFadeInIMODCurrent;
+	ImageSpaceModifierInstanceForm* pFadeOutIMODCurrent;
+	ImageSpaceModifierInstanceForm* pFadeInIMODLast;
+	ImageSpaceModifierInstanceForm* pFadeOutIMODLast;
+	float							fHighNoon;
+	float							fMidnightWax;
+	float							fMidnightWane;
+
+	static Sky* GetSingleton() {
+		return *reinterpret_cast<Sky**>(0x11DEA20);
+	}
+
+	void ReloadAllTextures() {
+		ThisCall(0x63E2F0, this);
+	}
+
+	void ResetWeather() {
+		ThisCall(0x63D060, this);
+	}
+
+	void ActivateWeatherSounds(TESWeather* apWeather) {
+		ThisCall(0x63DDB0, this, apWeather);
+	}
+
+	void Update(float afDelta) {
+		ThisCall(0x63AC70, this, afDelta);
+	}
+
+	void UpdateHDRValues() {
+		ThisCall(0x63EF20, this);
+	}
+};
+
+ASSERT_SIZE(Sky, 0x138);
 
 // 04
 class GridArray

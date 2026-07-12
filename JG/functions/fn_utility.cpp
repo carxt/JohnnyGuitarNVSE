@@ -590,7 +590,7 @@ bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
 	ScriptVar* pGreen = nullptr;
 	ScriptVar* pBlue = nullptr;
 	uint32_t eColorType;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eColorType, &pRed, &pGreen, &pBlue) && eColorType >= Sky::SC_SKY_UPPER && eColorType < Sky::SC_COUNT) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eColorType, &pRed, &pGreen, &pBlue) && eColorType >= Sky::SkyColor::SKY_UPPER && eColorType < Sky::SkyColor::COUNT) {
 		ASSUME_ASSERT(pRed && pGreen && pBlue);
 		const Sky* pSky = Sky::GetSingleton();
 		const NiColor& rColor = pSky->kColors[eColorType];
