@@ -247,7 +247,8 @@ namespace SkyUpdateFixes {
 
 			static void SkyFinishLoadGame() {
 				Sky* pSky = Sky::GetSingleton();
-				if (pSky->pClouds && (pSky->eMode == Sky::Mode::FULL || pSky->eMode == Sky::Mode::FAKE_EXTERIOR)) {
+				const bool bHasSky = pSky->eMode == Sky::Mode::FULL || pSky->eMode == Sky::Mode::FAKE_EXTERIOR;
+				if (pSky->pClouds && bHasSky) {
 					pSky->pClouds->ForceTransTextureUpdate();
 #if 1
 					// Bethesda I hate you so much
@@ -275,6 +276,10 @@ namespace SkyUpdateFixes {
 					pSky->pClouds->Update(pSky, 0.f);
 #endif
 				}
+				
+				// Sky::Update only handles pCurrentWeather
+				if (bHasSky)
+					pSky->ActivateWeatherSounds(pSky->pLastWeather);
 
 				ThisCall(uiLoadGame_SkyUpdate, pSky, 0.f);  // Sky::Update
 				ThisCall(uiLoadGame_UpdateHDRValues, pSky); // Sky::UpdateHDRValues
