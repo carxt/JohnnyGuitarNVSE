@@ -195,7 +195,6 @@ namespace JohnnyGameSettings {
 
 		float& fMaxWind = *reinterpret_cast<float*>(0x11B02DC);
 		fMaxWind = GameSettingCollection::fMaximumWind->Float();
-		fMaxWind = GameSettingCollection::fMaximumWind->Float();
 
 		float& fJumpMoveBase = *reinterpret_cast<float*>(0x1267BBC);
 		fJumpMoveBase = GameSettingCollection::fJumpMoveBase->Float();
