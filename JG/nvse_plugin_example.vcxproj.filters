@@ -1279,6 +1279,9 @@
     <ClInclude Include="internal\JG\SkyUpdateFixes.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSWindModifier.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

@@ -345,6 +345,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSTimer.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSTMessageQueue.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSUtilities.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSWindModifier.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ContainerItemExtra.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ContainerObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Conversation.hpp" />

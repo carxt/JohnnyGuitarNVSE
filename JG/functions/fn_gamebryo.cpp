@@ -4,6 +4,7 @@
 #include "Gamebryo/NiPSysBoxEmitter.hpp"
 #include "Gamebryo/NiPSysEmitter.hpp"
 #include "Gamebryo/NiPSysModifier.hpp"
+#include "Bethesda/BSWindModifier.hpp"
 
 #include <JG/TaskQueue.hpp>
 #include <GameTasks.h>
@@ -78,6 +79,10 @@ enum class ParticleModifierItem : int32_t {
 	BOX_EMITTER_WIDTH,
 	BOX_EMITTER_HEIGHT,
 	BOX_EMITTER_DEPTH,
+
+	// BSWindModifier
+
+	WIND_MODIFIER_STRENGTH,
 
 	COUNT
 };
@@ -611,6 +616,16 @@ bool Cmd_SetNiPSysModifierValue_Execute(COMMAND_ARGS) {
 						break;
 				}
 			}
+
+			if (const auto pWindModifier = spModifier->NiDynamicCast<BSWindModifier>()) {
+				switch (eItem) {
+					case ParticleModifierItem::WIND_MODIFIER_STRENGTH:
+						pWindModifier->fStrength = fValue;
+						return;
+					default:
+						break;
+				}
+			}
 		});
 	}
 	return true;
@@ -700,6 +715,16 @@ bool Cmd_GetNiPSysModifierValue_Execute(COMMAND_ARGS) {
 						return;
 					case ParticleModifierItem::BOX_EMITTER_DEPTH:
 						*result = pBoxEmitter->m_fEmitterDepth;
+						return;
+					default:
+						break;
+				}
+			}
+
+			if (const auto pWindModifier = spModifier->NiDynamicCast<BSWindModifier>()) {
+				switch (eItem) {
+					case ParticleModifierItem::WIND_MODIFIER_STRENGTH:
+						*result = pWindModifier->fStrength;
 						return;
 					default:
 						break;
