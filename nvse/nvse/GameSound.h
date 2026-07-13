@@ -77,6 +77,10 @@ public:
 		return ThisCall<bool>(0xAD88F0, this);
 	}
 
+	bool Release() {
+		return ThisCall<bool>(0xAD8D10, this);
+	}
+
 	bool FadeOutAndRelease(uint32_t auiMilliseconds) {
 		return ThisCall<bool>(0xAD8DA0, this, auiMilliseconds);
 	}

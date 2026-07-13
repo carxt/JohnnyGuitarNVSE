@@ -34,6 +34,8 @@ namespace JohnnyGameSettings {
 	CustomGameSetting fHavokCalculatePitchTimeOut;
 	CustomGameSetting fHavokMaxSlopeDefault;
 
+	CustomGameSetting fNPCMaxGunWobbleAngleVATS;
+
 	template <uintptr_t uiAddress>
 	class CombatLocationHook {
 	private:
@@ -218,6 +220,11 @@ namespace JohnnyGameSettings {
 		kHavokInitDetour.ReplaceCall(0x44FC25, DeferredHavokInitHook);
 	}
 
+	void InitNPCValues() {
+		fNPCMaxGunWobbleAngleVATS.Initialize("fNPCMaxGunWobbleAngleVATS", 15.f);
+		HookUtils::SafeWrite32(0x8B1026 + 1, uint32_t(&fNPCMaxGunWobbleAngleVATS));
+	}
+
 	void Init() {
 		iFixAudioMarkerLookupAlgo.Initialize("iFixAudioMarkerLookupAlgo", 1);
 
@@ -229,5 +236,6 @@ namespace JohnnyGameSettings {
 		InitPathingValues();
 		InitAIValues();
 		InitHavokValues();
+		InitNPCValues();
 	}
 }

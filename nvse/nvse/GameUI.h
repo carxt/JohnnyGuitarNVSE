@@ -75,6 +75,8 @@ public:
 		Traits					= 1084,
 	};
 
+	static constexpr AddressPtr<bool, 0x11D8907> bIsLoadingNewGame;
+
 	static void InitGunScope(TESModel* apModel) {
 		CdeclCall(0x709C20, apModel);
 	}

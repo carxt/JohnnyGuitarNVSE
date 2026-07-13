@@ -5,14 +5,15 @@ namespace QuestObjectiveDisplayFix {
 
 	HookUtils::JumpDetour kDetour;
 
-	static uint32_t __fastcall QuestObjectiveDisplayHook(const BGSQuestObjective* pObjective) {
-		uint32_t uiResult = 1;
+	static uint32_t __fastcall QuestObjectiveDisplayHook(const BGSQuestObjective* apObjective) {
+		uint32_t uiResult;
 		if (kDetour)
-			uiResult = ThisCall<uint32_t>(kDetour, pObjective);
+			uiResult = ThisCall<uint32_t>(kDetour, apObjective);
+		else
+			uiResult = apObjective->status & BGSQuestObjective::eQObjStatus_displayed;
 
 		if (uiResult) {
-			uiResult = pObjective->status & BGSQuestObjective::eQObjStatus_displayed;
-			if (!(pObjective->displayText.GetLength() || pObjective->quest->GetFullNameLength()))
+			if (!(apObjective->displayText.GetLength() || apObjective->quest->GetFullNameLength()))
 				uiResult = 0;
 		}
 

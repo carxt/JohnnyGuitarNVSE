@@ -51,7 +51,7 @@ namespace CustomCameraShake {
 				ret
 		}
 	}
-	void Hook() {
+	void Install() {
 		HookUtils::WriteRelCall(0x94BCF6, (uintptr_t)asm_CameraShakeHook);
 	}
 

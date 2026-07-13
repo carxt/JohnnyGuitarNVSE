@@ -230,7 +230,7 @@ public:
 	virtual void	Unk_9C(void);
 	virtual TESPackageData	*GetPackageData();
 	virtual void	Unk_9E(void);
-	virtual TESPackage	*GetCurrentPackage();
+	virtual TESPackage	*GetCurrentPackage() const;
 	virtual uint32_t	GetPackageInfo0C();
 	virtual void	Unk_A1();
 	virtual void	Unk_A2();
