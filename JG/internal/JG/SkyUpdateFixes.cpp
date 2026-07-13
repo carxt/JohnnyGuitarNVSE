@@ -236,7 +236,10 @@ namespace SkyUpdateFixes {
 		public:
 			bool GetWeatherUpdateFlagOrSaveLoad() {
 				THIS_OBJ(Sky);
-				return ThisCall<bool>(kGetWeatherUpdateFlagDetour, this) || BGSSaveLoadGame::GetSingleton()->GetSaveGameLoading();
+				const bool bSaveLoad = BGSSaveLoadGame::GetSingleton()->GetSaveGameLoading();
+				if (bSaveLoad)
+					pThis->ActivateWeatherSounds(pThis->pLastWeather);
+				return ThisCall<bool>(kGetWeatherUpdateFlagDetour, this) || bSaveLoad;
 			}
 
 			static void RevertSky() {
@@ -277,10 +280,6 @@ namespace SkyUpdateFixes {
 #endif
 				}
 				
-				// Sky::Update only handles pCurrentWeather
-				if (bHasSky)
-					pSky->ActivateWeatherSounds(pSky->pLastWeather);
-
 				ThisCall(uiLoadGame_SkyUpdate, pSky, 0.f);  // Sky::Update
 				ThisCall(uiLoadGame_UpdateHDRValues, pSky); // Sky::UpdateHDRValues
 			}
@@ -319,6 +318,7 @@ namespace SkyUpdateFixes {
 			HookUtils::SafeWrite32(0x84C260, uint32_t(FinishLoadGame_Asm));
 
 			// Add GetSaveGameLoading check for ActivateWeatherSounds in Sky::UpdateSound
+			// Also call ActivateWeatherSounds for pLastWeather on saveload
 			kGetWeatherUpdateFlagDetour.ReplaceCall(0x63D874, &Hook::GetWeatherUpdateFlagOrSaveLoad);
 		}
 	}
