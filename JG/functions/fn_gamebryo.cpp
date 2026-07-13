@@ -82,16 +82,16 @@ enum class ParticleModifierItem : int32_t {
 	COUNT
 };
 
-static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
-	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
+static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const char* apObjectName, uint32_t aeType) {
+	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, apObjectName);
 	if (!pObject)
 		return { nullptr, nullptr };
 
 	return { pObject->GetProperty(aeType), pObject };
 }
 
-static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* apRoot, const NiFixedString& arObjectName) {
-	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
+static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* apRoot, const char* apObjectName) {
+	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, apObjectName);
 	if (!pObject)
 		return nullptr;
 
