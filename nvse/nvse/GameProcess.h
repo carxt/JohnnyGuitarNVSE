@@ -632,7 +632,7 @@ public:
 	uint8_t				pad31[3];
 	uint32_t				unk34;
 	FloatPair			unk38;
-	TESForm				*unk40;		// Used when picking idle anims.
+	const TESObjectREFR*	pTarget;		// Used when picking idle anims.
 	uint32_t				unk44;		// not initialized!	refr, expected actor, might be CombatTarget
 	uint32_t				unk48;
 	uint32_t				unk4C;
