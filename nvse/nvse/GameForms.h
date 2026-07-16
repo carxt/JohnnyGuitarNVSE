@@ -5154,26 +5154,69 @@ public:
 };
 static_assert(sizeof(BGSBodyPartData) == 0x74);
 
+class MediaSet;
+
 // B8
-class MediaLocationController : public TESForm {
+class MediaLocationController : public TESForm, public TESFullName {
 public:
 	MediaLocationController();
 	~MediaLocationController();
 
-	TESFullName			fullName;		// 18
-	uint32_t				unk24[20];		// 24
-	float				flt70;			// 70
-	float				flt74;			// 74
-	float				flt7C;			// 7C
-	uint32_t				unk80[2];		// 80
-	tList<void>			list88;			// 88
-	tList<void>			list90;			// 90
-	tList<void>			list98;			// 98
-	tList<void>			listA0;			// A0
-	tList<void>			listA8;			// A8
-	tList<void>			listB0;			// B0
+	struct ALIGN4 _Flags {
+		enum Flags {
+			DEAD_REP_MASK		= 0xF,
+			LOOP_MASK			= 0x3,
+
+			DEAD_REP_POS		= 0,
+			LOOP_POS			= 4,
+
+			DEFAULT_TIME 		= 1u << 6,
+
+			IGNORE_ACTOR_COUNT	= 1u << 8,
+		};
+
+		uint8_t	eDeadRep			: 4;
+		uint8_t	eLoop				: 2;
+		bool	bDefaultTime		: 1;
+		bool						: 1;
+		bool	bIgnoreActorCount	: 1; // Added by JohnnyGuitar
+	};
+	using Flags = _Flags::Flags;
+
+	uint32_t				uiLocationDelay;
+	uint32_t				uiLayerTime;
+	uint32_t				uiLoopTime;
+	uint32_t				uiMediaStartTime;
+	bool					bIsActive;
+	bool					bInTension;
+	bool					bInCombat;
+	bool					bIsDay;
+	bool					bIsConditional;
+	float					fCurrentPlayerRadius;
+	uint32_t				uiFoundHostileActors; // Both based on player's compass targets 
+	uint32_t				uiFoundFactionActors;
+	uint32_t				eCurrentFactionReaction;
+	int8_t					cCurrentLayer;
+	MediaSet*				pCurrentMediaSet;
+	TESFullName				kMediaLocationControllerName;
+	TESFaction*				pFaction;
+	uint32_t				eFactionConditional;
+	TESObjectREFR*			pAudioMarker;
+	Bitfield<_Flags>		uiFlags;
+	float					fLayerTwoPercent;
+	float					fLayerThreePercent;
+	float					fRetriggerDelay;
+	float					fLocationDelay;
+	uint32_t				uiDayStart;
+	uint32_t				uiNightStart;
+	BSSimpleList<MediaSet*> kConditionalNeutralSets;
+	BSSimpleList<MediaSet*> kConditionalAllySets;
+	BSSimpleList<MediaSet*> kConditionalFriendSets;
+	BSSimpleList<MediaSet*> kConditionalEnemySets;
+	BSSimpleList<MediaSet*> kLocationSets;
+	BSSimpleList<MediaSet*> kBattleSets;
 };
-static_assert(sizeof(MediaLocationController) == 0xB8);
+ASSERT_SIZE(MediaLocationController, 0xB8);
 
 // BGSAddonNode (60)
 class BGSAddonNode : public TESBoundObject {
