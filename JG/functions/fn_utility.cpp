@@ -16,16 +16,15 @@
 
 extern DWORD dwGameStartTimestamp;
 
-bool Cmd_GameGetSecondsPassed_Eval(COMMAND_ARGS_EVAL) {
+SPEC_INLINE bool Cmd_GameGetSecondsPassed_Eval(COMMAND_ARGS_EVAL) {
 	*result = ThisCall<float>(0x07013E0, (void*)0x11F6394);
 	return true;
 }
 
 bool Cmd_GameGetSecondsPassed_Execute(COMMAND_ARGS) {
 	Cmd_GameGetSecondsPassed_Eval(thisObj, 0, 0, result);
-	if (IsConsoleMode()) {
+	if (IsConsoleMode())
 		Console_Print("GameGetSecondsPassed >> %0.2f", *result);
-	}
 	return true;
 }
 
@@ -228,27 +227,23 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetSequenceAnimGroup_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetSequenceAnimGroup_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
 	const uint32_t uiSequence = reinterpret_cast<uint32_t>(arg1);
 	if (thisObj && uiSequence < 8) {
 		const Animation* pAnim = thisObj->GetAnimation();
 		if (pAnim && pAnim->animSequence[uiSequence]) {
-			uint16_t usGroupID = pAnim->groupIDs[uiSequence] & 0xFF;
+			const uint16_t usGroupID = pAnim->groupIDs[uiSequence] & 0xFF;
 			*result = usGroupID;
 		}
 	}
-
 	return true;
 }
 
 bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
-	*result = -1;
-	uint32_t uiSequence;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiSequence))
-		Cmd_GetSequenceAnimGroup_Eval(thisObj, reinterpret_cast<void*>(uiSequence), nullptr, result);
-
-	return true;
+	uint32_t uiSequence = UINT32_MAX;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &uiSequence);
+	return Cmd_GetSequenceAnimGroup_Eval(thisObj, reinterpret_cast<void*>(uiSequence), nullptr, result);
 }
 
 bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
@@ -265,7 +260,7 @@ bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetPipBoyMode_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetPipBoyMode_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (InterfaceManager::GetSingleton())
 		*result = InterfaceManager::GetSingleton()->pipBoyMode;
@@ -344,11 +339,11 @@ bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetTimePlayed_Eval(COMMAND_ARGS_EVAL) {
-	uint32_t uiTtype = reinterpret_cast<uint32_t>(arg1);
-	DWORD dwTickCount = GetTickCount();
-	double dTimePlayed = dwTickCount - dwGameStartTimestamp;
-	switch (uiTtype) {
+SPEC_NOINLINE bool Cmd_GetTimePlayed_Eval(COMMAND_ARGS_EVAL) {
+	const uint32_t uiType = reinterpret_cast<uint32_t>(arg1);
+	const DWORD dwTickCount = GetTickCount();
+	const double dTimePlayed = dwTickCount - dwGameStartTimestamp;
+	switch (uiType) {
 	case 0:
 		*result = dTimePlayed;
 		break;
@@ -366,17 +361,17 @@ bool Cmd_GetTimePlayed_Eval(COMMAND_ARGS_EVAL) {
 }
 
 bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
-	uint32_t uiTtype = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &uiTtype);
-	Cmd_GetTimePlayed_Eval(nullptr, reinterpret_cast<void*>(uiTtype), nullptr, result);
+	uint32_t uiType = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &uiType);
+	Cmd_GetTimePlayed_Eval(nullptr, reinterpret_cast<void*>(uiType), nullptr, result);
 	if (IsConsoleMode())
 		Console_Print("GetTimePlayed >> %f", *result);
 	return true;
 }
 
 
-bool Cmd_GetJohnnyPatch_Eval(COMMAND_ARGS_EVAL) {
-	uint32_t uiPatch = reinterpret_cast<uint32_t>(arg1);
+SPEC_NOINLINE bool Cmd_GetJohnnyPatch_Eval(COMMAND_ARGS_EVAL) {
+	const uint32_t uiPatch = reinterpret_cast<uint32_t>(arg1);
 	bool bEnabled = false;
 	switch (uiPatch) {
 		case 1:

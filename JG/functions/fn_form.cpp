@@ -225,7 +225,7 @@ bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_IsRadioRefPlaying_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_IsRadioRefPlaying_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj && thisObj->baseForm && IS_TYPE(thisObj->baseForm, TESObjectACTI)) {
 		TESObjectACTI* baseActi = static_cast<TESObjectACTI*>(thisObj->baseForm);
@@ -1275,20 +1275,20 @@ bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
+SPEC_NOINLINE bool Cmd_GetQuestFailed_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	TESQuest* quest = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &quest) && quest)
-		*result = (quest->flags & 0x40) ? 1 : 0;
-	if (IsConsoleMode()) Console_Print("GetQuestFailed >> %.2f", *result);
+	TESQuest* pQuest = static_cast<TESQuest*>(arg1);
+	if (pQuest)
+		*result = (pQuest->flags & 0x40) ? 1 : 0;
 	return true;
 }
 
-bool Cmd_GetQuestFailed_Eval(COMMAND_ARGS_EVAL) {
-	*result = 0;
-	TESQuest* quest = (TESQuest*)arg1;
-	if (quest)
-		*result = (quest->flags & 0x40) ? 1 : 0;
+bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
+	TESQuest* pQuest = nullptr;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest);
+	Cmd_GetQuestFailed_Eval(nullptr, pQuest, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetQuestFailed >> %.2f", *result);
 	return true;
 }
 
@@ -1432,7 +1432,7 @@ bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 }
 
 // 0 - alive, 1 - dying/ragdolled, 2 - dead, 3 - unconscious, 5 - restrained, 6 - essential unconscious
-bool Cmd_GetLifeState_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetLifeState_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
 	if (thisObj && thisObj->IsActor())
 		*result = static_cast<Actor*>(thisObj)->lifeState;
@@ -1552,7 +1552,7 @@ bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	TESActorBase* pBase = reinterpret_cast<TESActorBase*>(arg1);
 	if (pBase) {
@@ -1570,11 +1570,10 @@ bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_GetBaseScale_Execute(COMMAND_ARGS) {
 	TESActorBase* pBase = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBase)) {
-		Cmd_GetBaseScale_Eval(thisObj, pBase, 0, result);
-		if (IsConsoleMode())
-			Console_Print("GetBaseScale : %0.2f", *result);
-	}
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pBase);
+	Cmd_GetBaseScale_Eval(thisObj, pBase, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetBaseScale : %0.2f", *result);
 	return true;
 }
 
@@ -2839,7 +2838,7 @@ bool Cmd_SetIKState_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool SPEC_NOINLINE Cmd_GetIKState_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetIKState_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1.0;
 	const IKType eType = *reinterpret_cast<IKType*>(&arg1);
 	if (InRange(eType) && thisObj->IsActor()) {
@@ -2871,7 +2870,7 @@ bool Cmd_GetIKState_Execute(COMMAND_ARGS) {
 	return Cmd_GetIKState_Eval(thisObj, reinterpret_cast<void*>(eType), nullptr, result);
 }
 
-bool Cmd_IsCarryable_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_IsCarryable_Eval(COMMAND_ARGS_EVAL) {
 	TESForm* pForm = reinterpret_cast<TESForm*>(arg1);
 	pForm = pForm ? pForm : thisObj;
 	if (!pForm)
@@ -2912,7 +2911,7 @@ bool Cmd_PickIdleEx_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetUsedItemHeight_Eval(COMMAND_ARGS_EVAL) {
+SPEC_INLINE bool Cmd_GetUsedItemHeight_Eval(COMMAND_ARGS_EVAL) {
 	*result = AnimActivationHeight::GetHeight();
 	return true;
 }

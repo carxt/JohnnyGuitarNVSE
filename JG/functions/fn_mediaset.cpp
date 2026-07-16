@@ -53,36 +53,30 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
 }
 
 
-bool Cmd_AudioMarkerGetCurrent_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_AudioMarkerGetCurrent_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (PlayerCharacter::GetSingleton() && PlayerCharacter::GetSingleton()->currMusicMarker) {
-		if (auto mMarker = PlayerCharacter::GetSingleton()->currMusicMarker->pReference) {
-			*(DWORD*)result = mMarker->GetFormID();
-		}
+		if (TESObjectREFR* pMarkerRef = PlayerCharacter::GetSingleton()->currMusicMarker->pReference)
+			*reinterpret_cast<uint32_t*>(result) = pMarkerRef->GetFormID();
 	}
 	return true;
 }
 
 
 bool Cmd_AudioMarkerGetCurrent_Execute(COMMAND_ARGS) {
-	Cmd_AudioMarkerGetCurrent_Eval(thisObj, nullptr, nullptr, result);
-	return true;
+	return Cmd_AudioMarkerGetCurrent_Eval(thisObj, nullptr, nullptr, result);
 }
 
 
-bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj) {
-		ExtraAudioMarker* audioMrkr = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
-		if (audioMrkr && audioMrkr->pData) {
-			uintptr_t locController = audioMrkr->pData->uiMediaLocationController;
-			MediaLocationController* locationController = (MediaLocationController*)TESForm::GetFormByNumericID(locController);
-			*(DWORD*)result = locationController->GetFormID();
-			if (IsConsoleMode()) {
-
-			}
-		}
-		else if (IsConsoleMode()) {
+		ExtraAudioMarker* pExtraMarker = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
+		if (pExtraMarker && pExtraMarker->pData) {
+			uintptr_t uiCtrlFormID = pExtraMarker->pData->uiMediaLocationController;
+			TESForm* pFoundForm = TESForm::GetFormByNumericID(uiCtrlFormID);
+			if (pFoundForm->GetFormType() == FORM_TYPE::MediaLocationController)
+				*reinterpret_cast<uint32_t*>(result) = pFoundForm->GetFormID();
 		}
 	}
 	return true;
@@ -90,15 +84,11 @@ bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
 	Cmd_AudioMarkerGetController_Eval(thisObj, nullptr, nullptr, result);
-	if (IsConsoleMode()) {
-		if (thisObj) {
-			if (*result) {
-				Console_Print("AudioMarkerGetController >> 0x%lx", *(DWORD*)result);
-			}
-			else {
-				Console_Print("Calling reference is not an AudioMarker");
-			}
-		}
+	if (thisObj && IsConsoleMode()) {
+		if (*result)
+			Console_Print("AudioMarkerGetController >> 0x%lx", *reinterpret_cast<uint32_t*>(result));
+		else
+			Console_Print("Calling reference is not an AudioMarker");
 	}
 	return true;
 }

@@ -13,7 +13,8 @@ enum FOVType {
 	CURRENT		= 2,
 };
 
-bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL) {
+	*result = 0;
 	const FOVType eFOV = *reinterpret_cast<FOVType*>(&arg1);
 	switch (eFOV) {
 		case FOVType::VIEWMODEL:
@@ -30,11 +31,9 @@ bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL) {
 }
 
 bool Cmd_GetPlayerCamFOV_Execute(COMMAND_ARGS) {
-	*result = 0;
 	FOVType eFOV = FOVType::VIEWMODEL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eFOV)) 
-		Cmd_GetPlayerCamFOV_Eval(thisObj, reinterpret_cast<void*>(eFOV), nullptr, result);
-	return true;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &eFOV);
+	return Cmd_GetPlayerCamFOV_Eval(thisObj, reinterpret_cast<void*>(eFOV), nullptr, result);
 }
 
 bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS) {

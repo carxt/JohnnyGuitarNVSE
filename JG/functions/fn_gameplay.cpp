@@ -277,7 +277,7 @@ bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj->IsActor())
 		*result = static_cast<Actor*>(thisObj)->magicTarget.HasDamageHealthEffect();
@@ -285,8 +285,7 @@ bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
 }
 
 bool Cmd_HasHealthDamageEffect_Execute(COMMAND_ARGS) {
-	Cmd_HasHealthDamageEffect_Eval(thisObj, nullptr, nullptr, result);
-	return true;
+	return Cmd_HasHealthDamageEffect_Eval(thisObj, nullptr, nullptr, result);
 }
 
 static float Sign(const NiPoint3& p1, const NiPoint3& p2, const NiPoint3& p3) {
@@ -428,7 +427,7 @@ bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 }
 
 
-bool Cmd_GetExtraAccuracyPenaltyMult_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetExtraAccuracyPenaltyMult_Eval(COMMAND_ARGS_EVAL) {
 	*result = 1;
 	TESForm* pForm = static_cast<TESForm*>(arg1);
 	TESForm* pTarget = pForm ? pForm : thisObj;
@@ -439,9 +438,8 @@ bool Cmd_GetExtraAccuracyPenaltyMult_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 	TESForm* pForm = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) 
-		Cmd_GetExtraAccuracyPenaltyMult_Eval(thisObj, pForm, nullptr, result);
-	return true;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pForm);
+	return Cmd_GetExtraAccuracyPenaltyMult_Eval(thisObj, pForm, nullptr, result);
 }
 
 bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
@@ -644,7 +642,7 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetMoonPhase_Eval(COMMAND_ARGS_EVAL) {
+SPEC_INLINE bool Cmd_GetMoonPhase_Eval(COMMAND_ARGS_EVAL) {
 	*result = Moon::eCurrentPhase;
 	return true;
 }
@@ -760,7 +758,7 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetLocationSpecificLoadScreensOnly_Eval(COMMAND_ARGS_EVAL) {
+SPEC_INLINE bool Cmd_GetLocationSpecificLoadScreensOnly_Eval(COMMAND_ARGS_EVAL) {
 	*result = LoadingMenu::bLocationSpecificLoadScreensOnly;
 	return true;
 }
@@ -973,7 +971,7 @@ bool Cmd_IsCombatMusicEnabled_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_IsCompassHostile_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_IsCompassHostile_Eval(COMMAND_ARGS_EVAL) {
 	*result = IsHostileCompassTarget(thisObj);
 	return true;
 }
@@ -1511,7 +1509,7 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetGrenadeHoldTime_Eval(COMMAND_ARGS_EVAL) {
+SPEC_INLINE bool Cmd_GetGrenadeHoldTime_Eval(COMMAND_ARGS_EVAL) {
 	*result = PlayerCharacter::GetSingleton()->timeGrenadeHeld;
 	return true;
 }
@@ -1599,7 +1597,7 @@ bool Cmd_SetYieldTimer_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetYieldTimer_Eval(COMMAND_ARGS_EVAL) {
+SPEC_INLINE bool Cmd_GetYieldTimer_Eval(COMMAND_ARGS_EVAL) {
 	*result = PlayerCharacter::GetSingleton()->fYieldTimer;
 	return true;
 }
@@ -1611,21 +1609,19 @@ bool Cmd_GetYieldTimer_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetPCInRootWorldspace_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetPCInRootWorldspace_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	auto pWorldSpace = static_cast<TESWorldSpace*>(arg1);
-	auto pMapMenu = MapMenu::GetSingleton();
-	if (pMapMenu && pMapMenu->parentmostLastExtDoorWorldspace)
+	const TESWorldSpace* pWorldSpace = static_cast<TESWorldSpace*>(arg1);
+	const MapMenu* pMapMenu = MapMenu::GetSingleton();
+	if (pWorldSpace && pMapMenu && pMapMenu->parentmostLastExtDoorWorldspace)
 		*result = pWorldSpace->GetFormID() == pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
 	return true;  
 }
 
 bool Cmd_GetPCInRootWorldspace_Execute(COMMAND_ARGS) {
-	*result = 0;
 	TESWorldSpace* pWorldSpace = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace))
-		Cmd_GetPCInRootWorldspace_Eval(thisObj, pWorldSpace, nullptr, result);
-	return true;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace);
+	return Cmd_GetPCInRootWorldspace_Eval(thisObj, pWorldSpace, nullptr, result);;
 }
 
 bool Cmd_GetPCRootWorldspace_Execute(COMMAND_ARGS) {
