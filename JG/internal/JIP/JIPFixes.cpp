@@ -3,9 +3,11 @@
 #include "JIPUtils.hpp"
 
 #include "Bethesda/AutoMemContext.hpp"
-#include "Bethesda/Setting.hpp"
 #include "Bethesda/BSStringT.hpp"
-#include <Bethesda/RendererSettingCollection.hpp>
+#include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/FixedStrings.hpp"
+#include "Bethesda/RendererSettingCollection.hpp"
+#include "Bethesda/Setting.hpp"
 
 #include "decoding.h"
 #include "events/EventFramework.h"
@@ -1769,6 +1771,39 @@ STACK_FRAME_OPT_RESET
 		}
 	}
 
+	namespace ProjectileLightFix {
+
+		uint32_t uiCreateJIPLightAddr;
+		HookUtils::CallDetour kFreeLightDetour;
+		class Hook {
+		public:
+			NiAVObject* GenDynamic(TESObjectREFR* apRequester, BSFadeNode* apNode, bool abForceDynamic) {
+				TESObjectLIGH* pLight = reinterpret_cast<TESObjectLIGH*>(this);
+				NiNode* pLightNode = apNode;
+				NiAVObject* pAttach = BSUtilities::GetObjectByName(apNode, FixedStrings::GetAttachLight());
+				if (pAttach && pAttach->IsNode())
+					pLightNode = static_cast<NiNode*>(pAttach);
+				return FastCall<NiAVObject*>(uiCreateJIPLightAddr, this, pLightNode);
+			}
+
+			void FreeLight() {
+				NiLight* pLight = reinterpret_cast<NiPointer<NiLight>*>(this)->m_pObject;
+				NiNode* pParent = pLight->GetParent();
+				if (pParent)
+					pParent->DetachChild(pLight);
+				ThisCall(kFreeLightDetour, this);
+			}
+		};
+
+		void InitHooks() {
+			uiCreateJIPLightAddr = JIPUtils::GetAddress(0x10009B80);
+			HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x100127E0), JIPUtils::GetAddress(0x100127FE));
+			
+			HookUtils::ReplaceCall(0x9C3DF5, &Hook::GenDynamic);
+			kFreeLightDetour.ReplaceCall(0x9C3E54, &Hook::FreeLight);
+		}
+	}
+
 	namespace LogMover {
 
 		void InitHooks() {
@@ -1813,6 +1848,7 @@ STACK_FRAME_OPT_RESET
 			LogMover::InitHooks();
 			VersionPrint::InitHooks();
 			SanerWeaponWobbleHook::InitHooks();
+			ProjectileLightFix::InitHooks();
 		}
 	}
 
