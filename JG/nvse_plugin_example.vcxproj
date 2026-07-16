@@ -246,7 +246,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\JG\JohnnyExtraData.cpp" />
     <ClCompile Include="internal\JG\JohnnyRadios.cpp" />
     <ClCompile Include="internal\JG\LandRemapping.cpp" />
-    <ClCompile Include="internal\JG\MediaLocationControllerOverride.cpp" />
+    <ClCompile Include="internal\JG\MediaLocationControllerTweaks.cpp" />
     <ClCompile Include="internal\JG\NPCAccuracy.cpp" />
     <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp" />
     <ClCompile Include="internal\JG\RadioSkipOGGWAVPatch.cpp" />
@@ -513,7 +513,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\JohnnyExtraData.hpp" />
     <ClInclude Include="internal\JG\JohnnyRadios.hpp" />
     <ClInclude Include="internal\JG\LandRemapping.hpp" />
-    <ClInclude Include="internal\JG\MediaLocationControllerOverride.hpp" />
+    <ClInclude Include="internal\JG\MediaLocationControllerTweaks.hpp" />
     <ClInclude Include="internal\JG\NPCAccuracy.hpp" />
     <ClInclude Include="internal\JG\QuestObjectiveDisplayFix.hpp" />
     <ClInclude Include="internal\JG\RadioSkipOGGWAVPatch.hpp" />
