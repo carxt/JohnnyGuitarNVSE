@@ -19,7 +19,7 @@
 #include "JG/DisabledMuzzleFlashLights.hpp"
 #include "JG/DisabledSaves.hpp"
 #include "JG/JohnnyPatches.hpp"
-#include "JG/MediaLocationControllerOverride.hpp"
+#include "JG/MediaLocationControllerTweaks.hpp"
 #include "JG/NPCAccuracy.hpp"
 #include "JG/ScriptUtils.hpp"
 #include "JG/WorldToScreen.hpp"
@@ -161,7 +161,7 @@ bool Cmd_SetCasinoChip_Execute(COMMAND_ARGS) {
 
 bool Cmd_ClearMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	MediaLocationControllerOverride::Reset();
+	MediaLocationControllerTweaks::ResetOverride();
 	*result = 1;
 
 	return true;
@@ -171,7 +171,7 @@ bool Cmd_SetMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
 	MediaLocationController* pCtrl = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCtrl) && pCtrl && IS_TYPE(pCtrl, MediaLocationController)) {
-		MediaLocationControllerOverride::Set(pCtrl);
+		MediaLocationControllerTweaks::SetOverride(pCtrl);
 		*result = 1;
 	}
 	return true;

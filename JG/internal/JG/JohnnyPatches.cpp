@@ -23,7 +23,7 @@
 #include "ExtraReputationIcons.hpp"
 #include "ExtraUISounds.hpp"
 #include "LandRemapping.hpp"
-#include "MediaLocationControllerOverride.hpp"
+#include "MediaLocationControllerTweaks.hpp"
 #include "NPCAccuracy.hpp"
 #include "RadioSkipOGGWAVPatch.hpp"
 #include "RSMBarberHook.hpp"
@@ -250,7 +250,7 @@ namespace JohnnyPatches {
 
 		kSetViewFrustumDetour.ReplaceCall(0x8752F2, SetViewmodelFrustumHook);
 
-		MediaLocationControllerOverride::Install();
+		MediaLocationControllerTweaks::Install();
 
 		CameraOverride::Install();
 

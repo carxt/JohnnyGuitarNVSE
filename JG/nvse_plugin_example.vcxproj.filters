@@ -418,9 +418,6 @@
     <ClCompile Include="internal\JG\RSMBarberHook.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\MediaLocationControllerOverride.cpp">
-      <Filter>internal\JG\Features</Filter>
-    </ClCompile>
     <ClCompile Include="internal\JG\LandRemapping.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
@@ -480,6 +477,9 @@
     </ClCompile>
     <ClCompile Include="internal\JG\SkyUpdateFixes.cpp">
       <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\MediaLocationControllerTweaks.cpp">
+      <Filter>internal\JG\Features</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1213,9 +1213,6 @@
     <ClInclude Include="internal\JG\NPCAccuracy.hpp">
       <Filter>internal\JG\Features</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\MediaLocationControllerOverride.hpp">
-      <Filter>internal\JG\Features</Filter>
-    </ClInclude>
     <ClInclude Include="internal\JG\LandRemapping.hpp">
       <Filter>internal\JG\Features</Filter>
     </ClInclude>
@@ -1278,6 +1275,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BSWindModifier.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\MediaLocationControllerTweaks.hpp">
+      <Filter>internal\JG\Features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
