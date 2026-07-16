@@ -130,7 +130,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="..\nvse\nvse\GameObjects.cpp" />
     <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp" />
     <ClCompile Include="..\nvse\nvse\GameProcess.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameRTTI.cpp" />
     <ClCompile Include="..\nvse\nvse\GameScript.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTiles.cpp" />

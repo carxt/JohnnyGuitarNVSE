@@ -78,9 +78,6 @@
     <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameRTTI.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="..\nvse\nvse\GameScript.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
