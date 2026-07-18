@@ -8,6 +8,7 @@
 #include "Bethesda/FixedStrings.hpp"
 #include "Bethesda/RendererSettingCollection.hpp"
 #include "Bethesda/Setting.hpp"
+#include "Bethesda/TimeGlobal.hpp"
 
 #include "decoding.h"
 #include "events/EventFramework.h"
@@ -1474,6 +1475,29 @@ STACK_FRAME_OPT_RESET
 	}
 
 
+	namespace TriggerLightningFXFix {
+
+		bool Cmd_TriggerLightningFX_Execute(COMMAND_ARGS) {
+			*result = 0;
+			Sky* pSky = Sky::GetSingleton();
+			if (pSky->GetIsRaining())
+			{
+				*result = 1;
+				pSky->fFlash = 1;
+				pSky->uiFlashTime = TimeGlobal::GetSingleton()->uiLastTime;
+			}
+			return true;
+		}
+
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kTriggerLightningFX));
+			if (pInfo) {
+				pInfo->execute = Cmd_TriggerLightningFX_Execute;
+			}
+		}
+	}
+
+
 	namespace LeveledListFixes {
 
 		bool Cmd_LeveledListRemoveForm_Execute(COMMAND_ARGS) {
@@ -1798,7 +1822,7 @@ STACK_FRAME_OPT_RESET
 		void InitHooks() {
 			uiCreateJIPLightAddr = JIPUtils::GetAddress(0x10009B80);
 			HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x100127E0), JIPUtils::GetAddress(0x100127FE));
-			
+
 			HookUtils::ReplaceCall(0x9C3DF5, &Hook::GenDynamic);
 			kFreeLightDetour.ReplaceCall(0x9C3E54, &Hook::FreeLight);
 		}
@@ -1893,6 +1917,7 @@ STACK_FRAME_OPT_RESET
 		PowerArmorCondition::InitHooks();
 		LeveledListFixes::InitHooks();
 		CursorPosUICords::InitHooks();
+		TriggerLightningFXFix::InitHooks();
 	}
 
 	void InitDeferredHooks(bool abGECK) {
