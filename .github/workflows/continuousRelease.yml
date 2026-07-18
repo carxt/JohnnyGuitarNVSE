@@ -22,8 +22,8 @@ jobs:
     - name: Build Release
       run: msbuild /m /p:Configuration=Release ${{env.SOLUTION_FILE_PATH}} /p:PostBuildEventUseInBuild=false
 
-    - name: Build Debug
-      run: msbuild /m /p:Configuration=Debug ${{env.SOLUTION_FILE_PATH}} /p:PostBuildEventUseInBuild=false
+    - name: Build ReleaseDebug
+      run: msbuild /m /p:Configuration=ReleaseDebug ${{env.SOLUTION_FILE_PATH}} /p:PostBuildEventUseInBuild=false
 
     - name: Generate Timestamp
       run: |
@@ -35,14 +35,14 @@ jobs:
       run: |
         $iniDir = "JG\assets"
         $releaseDir = "JG\Release"
-        $debugDir = "JG\Debug"
+        $debugDir = "JG\ReleaseDebug"
         New-Item -ItemType Directory -Name artifacts -Force | Out-Null
         New-Item -ItemType Directory -Name "nvse\plugins" -path $releaseDir -Force | Out-Null
         New-Item -ItemType Directory -Name "nvse\plugins" -path $debugDir -Force | Out-Null
         Copy-Item -Path "$releaseDir\johnnyguitar.dll", "$releaseDir\johnnyguitar.pdb", "$iniDir\JohnnyGuitar.ini" -Destination "$releaseDir\nvse\plugins"
         Copy-Item -Path "$debugDir\johnnyguitar.dll", "$debugDir\johnnyguitar.pdb", "$iniDir\JohnnyGuitar.ini" -Destination "$debugDir\nvse\plugins"
         Compress-Archive -Path "$releaseDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip"
-        Compress-Archive -Path "$debugDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip"
+        Compress-Archive -Path "$debugDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-ReleaseDebug-${{ env.artifact_timestamp }}.zip"
       shell: pwsh
 
     - name: Publish Zipped Artifacts
@@ -71,7 +71,7 @@ jobs:
         allowUpdates: true
         removeArtifacts: true
         generateReleaseNotes: true
-        artifacts: artifacts/JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip,artifacts/JohnnyGuitarNVSE-Debug-${{ env.artifact_timestamp }}.zip
+        artifacts: artifacts/JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip,artifacts/JohnnyGuitarNVSE-ReleaseDebug-${{ env.artifact_timestamp }}.zip
         body: |
           Continuous release generated from the latest push to development branch.
 
