@@ -82,7 +82,7 @@ jobs:
       with:
         api_key: ${{ secrets.NEXUSMODS_API_KEY }}
         file_id: ${{ vars.NEXUSMODS_BETA_GROUP_ID }}
-        filename: "artifacts\\JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip"
+        filename: "artifacts\\JohnnyGuitarNVSE-ReleaseDebug-${{ env.artifact_timestamp }}.zip"
         display_name: "JohnnyGuitarNVSE - Continuous Release"
         description: "Auto build from the latest GitHub commit. Use for testing only."
         category: "miscellaneous"
