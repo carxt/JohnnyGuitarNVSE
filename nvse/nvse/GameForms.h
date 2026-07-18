@@ -5,7 +5,7 @@
 #include "GameBSExtraData.h"
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
-#include "Bethesda/TESModel.hpp"
+#include "Bethesda/TESModelTextureSwap.hpp"
 #include "Bethesda/TESBoundAnimObject.hpp"
 #include "Bethesda/BGSListForm.hpp"
 #include "Bethesda/TESFullName.hpp"
@@ -596,23 +596,6 @@ public:
 
 // 020
 class BGSTextureSet;
-class TESModelTextureSwap : public TESModel {
-public:
-	TESModelTextureSwap();
-	virtual ~TESModelTextureSwap();
-
-	struct Texture {
-		BGSTextureSet* textureID;	// 00
-		uint32_t	index3D;			// 04
-		char	textureName[0x80];	// 08
-	};	// there seem to be an array (length 6) post 0x88
-
-	tList<Texture> textureList;	// 018
-
-	void SwapTextures(NiAVObject* apObject) {
-		ThisCall(0x48AFE0, this, apObject);
-	}
-};
 
 // 008
 class BGSClipRoundsForm : public BaseFormComponent {
