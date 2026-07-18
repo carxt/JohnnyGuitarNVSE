@@ -125,3 +125,6 @@ DEFINE_CMD_COND_PLUGIN(GetIKState, , true, kParams_OneInt);
 DEFINE_CMD_COND_PLUGIN(IsCarryable, , false, kParams_OneOptionalObjectID);
 DEFINE_COMMAND_PLUGIN(PickIdleEx, , true, kParams_OneRef);
 DEFINE_CMD_COND_PLUGIN(GetUsedItemHeight, , false, nullptr);
+DEFINE_COMMAND_PLUGIN(ClearAltTexture, , false, kParams_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(SetAltTexture, , false, kParams_OneForm_OneInt_OneForm);
+DEFINE_COMMAND_PLUGIN(GetAltTextures, , false, kParams_OneForm);
