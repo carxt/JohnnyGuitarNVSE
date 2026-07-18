@@ -702,6 +702,7 @@ bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {
 	g_arrInterface->AssignCommandResult(txstArr, result);
 	return true;
 }
+
 bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectWEAP* weapon = nullptr;
@@ -741,6 +742,7 @@ bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetArmorAltTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTextureSet* txst = nullptr;
@@ -2918,5 +2920,284 @@ SPEC_INLINE bool Cmd_GetUsedItemHeight_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_GetUsedItemHeight_Execute(COMMAND_ARGS) {
 	Cmd_GetUsedItemHeight_Eval(thisObj, nullptr, nullptr, result);
+	return true;
+}
+
+bool Cmd_ClearAltTexture_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* form = nullptr;
+	int id = -2;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &id) && form) {
+		TESModelTextureSwap* model = nullptr;
+		if (IS_TYPE(form, AlchemyItem)) {
+			AlchemyItem* item = DYNAMIC_CAST(form, TESForm, AlchemyItem);
+			model = &item->model;
+		}
+		else if (IS_TYPE(form, TESAmmo)) {
+			TESAmmo* ammo = DYNAMIC_CAST(form, TESForm, TESAmmo);
+			model = &ammo->model;
+		}
+		else if (IS_TYPE(form, TESCaravanCard)) {
+			TESCaravanCard* card = DYNAMIC_CAST(form, TESForm, TESCaravanCard);
+			model = &card->model;
+		}
+		else if (IS_TYPE(form, TESCaravanMoney)) {
+			TESCaravanMoney* money = DYNAMIC_CAST(form, TESForm, TESCaravanMoney);
+			model = &money->modelSwap;
+		}
+		else if (IS_TYPE(form, TESCasinoChips)) {
+			TESCasinoChips* chips = DYNAMIC_CAST(form, TESForm, TESCasinoChips);
+			model = &chips->modelSwap;
+		}
+		else if (IS_TYPE(form, TESLevCharacter)) {
+			TESLevCharacter* lChar = DYNAMIC_CAST(form, TESForm, TESLevCharacter);
+			model = &lChar->texture;
+		}
+		else if (IS_TYPE(form, TESLevCreature)) {
+			TESLevCreature* lCrea = DYNAMIC_CAST(form, TESForm, TESLevCreature);
+			model = &lCrea->texture;
+		}
+		else if (IS_TYPE(form, TESObjectACTI)) {
+			TESObjectACTI* acti = DYNAMIC_CAST(form, TESForm, TESObjectACTI);
+			model = &acti->modelTextureSwap;
+		}
+		else if (IS_TYPE(form, TESObjectANIO)) {
+			TESObjectANIO* anio = DYNAMIC_CAST(form, TESForm, TESObjectANIO);
+			model = &anio->modelSwap;
+		}
+		else if (IS_TYPE(form, TESObjectBOOK)) {
+			TESObjectBOOK* book = DYNAMIC_CAST(form, TESForm, TESObjectBOOK);
+			model = &book->model;
+		}
+		else if (IS_TYPE(form, TESObjectCONT)) {
+			TESObjectCONT* container = DYNAMIC_CAST(form, TESForm, TESObjectCONT);
+			model = &container->model;
+		}
+		else if (IS_TYPE(form, TESObjectDOOR)) {
+			TESObjectDOOR* door = DYNAMIC_CAST(form, TESForm, TESObjectDOOR);
+			model = &door->model;
+		}
+		else if (IS_TYPE(form, TESObjectIMOD)) {
+			TESObjectIMOD* imod = DYNAMIC_CAST(form, TESForm, TESObjectIMOD);
+			model = &imod->model;
+		}
+		else if (IS_TYPE(form, TESObjectLIGH)) {
+			TESObjectLIGH* light = DYNAMIC_CAST(form, TESForm, TESObjectLIGH);
+			model = &light->modelSwap;
+		}
+		else if (IS_TYPE(form, TESObjectMISC)) {
+			TESObjectMISC* misc = DYNAMIC_CAST(form, TESForm, TESObjectMISC);
+			model = &misc->modelSwap;
+		}
+		else if (IS_TYPE(form, TESObjectSTAT)) {
+			TESObjectSTAT* stat = DYNAMIC_CAST(form, TESForm, TESObjectSTAT);
+			model = &stat->model;
+		}
+
+		if (!model) return true;
+
+		if (id == -1) {
+			model->textureList.RemoveAll();
+			*result = 1;
+			return true;
+		}
+
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+		do {
+			if (iter->data && iter->data->index3D == id) {
+				model->textureList.Remove(iter->data);
+				*result = 1;
+				break;
+			}
+		} while (iter = iter->next);
+	}
+	return true;
+}
+
+bool Cmd_SetAltTexture_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* form = nullptr;
+	BGSTextureSet* txst = nullptr;
+	int id = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &id, &txst) && form && txst && IS_TYPE(txst, BGSTextureSet)) {
+		TESModelTextureSwap* model = nullptr;
+		if (IS_TYPE(form, AlchemyItem)) {
+			AlchemyItem* item = DYNAMIC_CAST(form, TESForm, AlchemyItem);
+			model = &item->model;
+		}
+		else if (IS_TYPE(form, TESAmmo)) {
+			TESAmmo* ammo = DYNAMIC_CAST(form, TESForm, TESAmmo);
+			model = &ammo->model;
+		}
+		else if (IS_TYPE(form, TESCaravanCard)) {
+			TESCaravanCard* card = DYNAMIC_CAST(form, TESForm, TESCaravanCard);
+			model = &card->model;
+		}
+		else if (IS_TYPE(form, TESCaravanMoney)) {
+			TESCaravanMoney* money = DYNAMIC_CAST(form, TESForm, TESCaravanMoney);
+			model = &money->modelSwap;
+		}
+		else if (IS_TYPE(form, TESCasinoChips)) {
+			TESCasinoChips* chips = DYNAMIC_CAST(form, TESForm, TESCasinoChips);
+			model = &chips->modelSwap;
+		}
+		else if (IS_TYPE(form, TESLevCharacter)) {
+			TESLevCharacter* lChar = DYNAMIC_CAST(form, TESForm, TESLevCharacter);
+			model = &lChar->texture;
+		}
+		else if (IS_TYPE(form, TESLevCreature)) {
+			TESLevCreature* lCrea = DYNAMIC_CAST(form, TESForm, TESLevCreature);
+			model = &lCrea->texture;
+		}
+		else if (IS_TYPE(form, TESObjectACTI)) {
+			TESObjectACTI* acti = DYNAMIC_CAST(form, TESForm, TESObjectACTI);
+			model = &acti->modelTextureSwap;
+		}
+		else if (IS_TYPE(form, TESObjectANIO)) {
+			TESObjectANIO* anio = DYNAMIC_CAST(form, TESForm, TESObjectANIO);
+			model = &anio->modelSwap;
+		}
+		else if (IS_TYPE(form, TESObjectBOOK)) {
+			TESObjectBOOK* book = DYNAMIC_CAST(form, TESForm, TESObjectBOOK);
+			model = &book->model;
+		}
+		else if (IS_TYPE(form, TESObjectCONT)) {
+			TESObjectCONT* container = DYNAMIC_CAST(form, TESForm, TESObjectCONT);
+			model = &container->model;
+		}
+		else if (IS_TYPE(form, TESObjectDOOR)) {
+			TESObjectDOOR* door = DYNAMIC_CAST(form, TESForm, TESObjectDOOR);
+			model = &door->model;
+		}
+		else if (IS_TYPE(form, TESObjectIMOD)) {
+			TESObjectIMOD* imod = DYNAMIC_CAST(form, TESForm, TESObjectIMOD);
+			model = &imod->model;
+		}
+		else if (IS_TYPE(form, TESObjectLIGH)) {
+			TESObjectLIGH* light = DYNAMIC_CAST(form, TESForm, TESObjectLIGH);
+			model = &light->modelSwap;
+		}
+		else if (IS_TYPE(form, TESObjectMISC)) {
+			TESObjectMISC* misc = DYNAMIC_CAST(form, TESForm, TESObjectMISC);
+			model = &misc->modelSwap;
+		}
+		else if (IS_TYPE(form, TESObjectSTAT)) {
+			TESObjectSTAT* stat = DYNAMIC_CAST(form, TESForm, TESObjectSTAT);
+			model = &stat->model;
+		}
+		
+		if (!model) return true;
+
+		TESModelTextureSwap::Texture* texture = nullptr;
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+
+		do {
+			if (iter->data && iter->data->index3D == id) {
+				texture = iter->data;
+				break;
+			}
+		} while (iter = iter->next);
+
+		if (texture) {
+
+			texture->textureID = txst;
+			*result = 1;
+
+		}
+		else {
+			TESModelTextureSwap::Texture* texture = BSMemory::malloc<TESModelTextureSwap::Texture>();
+			if (texture != nullptr) {
+				texture->index3D = id;
+				texture->textureID = txst;
+				*(texture->textureName) = '\0';
+				model->textureList.Append(texture);
+				*result = 1;
+
+			}
+		}
+
+	}
+	return true;
+}
+
+bool Cmd_GetAltTextures_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* form;
+	NVSEArrayVar* txstArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) {
+		TESModelTextureSwap* model = nullptr;
+		if (IS_TYPE(form, AlchemyItem)) {
+			AlchemyItem* item = DYNAMIC_CAST(form, TESForm, AlchemyItem);
+			model = &item->model;
+		}
+		else if (IS_TYPE(form, TESAmmo)) {
+			TESAmmo* ammo = DYNAMIC_CAST(form, TESForm, TESAmmo);
+			model = &ammo->model;
+		}
+		else if (IS_TYPE(form, TESCaravanCard)) {
+			TESCaravanCard* card = DYNAMIC_CAST(form, TESForm, TESCaravanCard);
+			model = &card->model;
+		}
+		else if (IS_TYPE(form, TESCaravanMoney)) {
+			TESCaravanMoney* money = DYNAMIC_CAST(form, TESForm, TESCaravanMoney);
+			model = &money->modelSwap;
+		}
+		else if (IS_TYPE(form, TESCasinoChips)) {
+			TESCasinoChips* chips = DYNAMIC_CAST(form, TESForm, TESCasinoChips);
+			model = &chips->modelSwap;
+		}
+		else if (IS_TYPE(form, TESLevCharacter)) {
+			TESLevCharacter* lChar = DYNAMIC_CAST(form, TESForm, TESLevCharacter);
+			model = &lChar->texture;
+		}
+		else if (IS_TYPE(form, TESLevCreature)) {
+			TESLevCreature* lCrea = DYNAMIC_CAST(form, TESForm, TESLevCreature);
+			model = &lCrea->texture;
+		}
+		else if (IS_TYPE(form, TESObjectACTI)) {
+			TESObjectACTI* acti = DYNAMIC_CAST(form, TESForm, TESObjectACTI);
+			model = &acti->modelTextureSwap;
+		}
+		else if (IS_TYPE(form, TESObjectANIO)) {
+			TESObjectANIO* anio = DYNAMIC_CAST(form, TESForm, TESObjectANIO);
+			model = &anio->modelSwap;
+		}
+		else if (IS_TYPE(form, TESObjectBOOK)) {
+			TESObjectBOOK* book = DYNAMIC_CAST(form, TESForm, TESObjectBOOK);
+			model = &book->model;
+		}
+		else if (IS_TYPE(form, TESObjectCONT)) {
+			TESObjectCONT* container = DYNAMIC_CAST(form, TESForm, TESObjectCONT);
+			model = &container->model;
+		}
+		else if (IS_TYPE(form, TESObjectDOOR)) {
+			TESObjectDOOR* door = DYNAMIC_CAST(form, TESForm, TESObjectDOOR);
+			model = &door->model;
+		}
+		else if (IS_TYPE(form, TESObjectIMOD)) {
+			TESObjectIMOD* imod = DYNAMIC_CAST(form, TESForm, TESObjectIMOD);
+			model = &imod->model;
+		}
+		else if (IS_TYPE(form, TESObjectLIGH)) {
+			TESObjectLIGH* light = DYNAMIC_CAST(form, TESForm, TESObjectLIGH);
+			model = &light->modelSwap;
+		}
+		else if (IS_TYPE(form, TESObjectMISC)) {
+			TESObjectMISC* misc = DYNAMIC_CAST(form, TESForm, TESObjectMISC);
+			model = &misc->modelSwap;
+		}
+		else if (IS_TYPE(form, TESObjectSTAT)) {
+			TESObjectSTAT* stat = DYNAMIC_CAST(form, TESForm, TESObjectSTAT);
+			model = &stat->model;
+		}
+
+		if (!model) return true;
+		ListNode<TESModelTextureSwap::Texture>* iter = model->textureList.Head();
+
+		do {
+			if (iter->data && iter->data->textureID) g_arrInterface->AppendElement(txstArr, NVSEArrayElement(iter->data->textureID));
+		} while (iter = iter->next);
+	}
+	g_arrInterface->AssignCommandResult(txstArr, result);
 	return true;
 }

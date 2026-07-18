@@ -429,6 +429,10 @@ namespace JohnnyCommands {
 		REG_CMD(StopNiSequence);
 		REG_CMD(GetPCInRootWorldspace);
 		REG_TYPED_CMD(GetPCRootWorldspace, Form);
+		REG_TYPED_CMD(GetAltTextures, Array);
+		REG_CMD(SetAltTexture);
+		REG_CMD(ClearAltTexture);
+
 	}
 
 }
