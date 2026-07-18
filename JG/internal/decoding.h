@@ -459,6 +459,11 @@ public:
 	void UpdateHDRValues() {
 		ThisCall(0x63EF20, this);
 	}
+
+	bool GetIsRaining() {
+		return ThisCall<bool>(0x59E950, this);
+	}
+
 };
 
 ASSERT_SIZE(Sky, 0x138);
