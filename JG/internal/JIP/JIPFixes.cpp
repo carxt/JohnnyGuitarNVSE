@@ -1831,13 +1831,20 @@ STACK_FRAME_OPT_RESET
 	namespace LogMover {
 
 		void InitHooks() {
+			// We're using JIP's fs functions to avoid issues with our Debug build's imports
+			using pfn_fclose = int(__cdecl*)(FILE*);
+			using pfn_fsopen = FILE*(__cdecl*)(const char*, const char*, int);
+			using pfn_PrintLog = void(__cdecl*)(const char*, ...);
+
+			pfn_fclose fclose = *reinterpret_cast<pfn_fclose*>(JIPUtils::GetAddress(0x1005C1A8));
+			pfn_fsopen fsopen = *reinterpret_cast<pfn_fsopen*>(JIPUtils::GetAddress(0x1005C180));
 			FILE** pLog = reinterpret_cast<FILE**>(JIPUtils::GetAddress(0x1006A388));
 			if (!pLog[0] || fclose(pLog[0]))
 				return;
 
 			if (MoveFileEx("jip_ln_nvse.log", "logs\\jip_ln_nvse.log", MOVEFILE_REPLACE_EXISTING)) {
-				pLog[0] = _fsopen("logs\\jip_ln_nvse.log", "a+b", _SH_DENYWR);
-				void(__cdecl * PrintLog)(const char* apText, ...) = reinterpret_cast<void(__cdecl*)(const char*, ...)>(JIPUtils::GetAddress(0x10006740));
+				pLog[0] = fsopen("logs\\jip_ln_nvse.log", "a+b", _SH_DENYWR);
+				pfn_PrintLog PrintLog = reinterpret_cast<pfn_PrintLog>(JIPUtils::GetAddress(0x10006740));
 				PrintLog("JohnnyGuitar Fixes and Tweaks initialized");
 			}
 		}
