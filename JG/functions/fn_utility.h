@@ -21,7 +21,7 @@ DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , false, kParams_OneInt_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(IsDLLLoaded, , false, kParams_OneString_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(RefreshIdle, , true, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(ExitGameAlt, , false, nullptr);
-DEFINE_COMMAND_PLUGIN(UpdateCrosshairPrompt, , false, nullptr);
+DEFINE_COMMAND_ALT_PLUGIN(UpdateCrosshairPrompt, UpdateCrosshair, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(SetOptionalBone, , true, kParams_OneInt_OneString);
 DEFINE_COMMAND_PLUGIN(GetOptionalBone, , true, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(TriggerScreenSplatterEx, , false, kSplatterParams);
