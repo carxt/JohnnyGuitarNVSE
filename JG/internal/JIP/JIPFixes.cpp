@@ -1810,12 +1810,12 @@ STACK_FRAME_OPT_RESET
 				return FastCall<NiAVObject*>(uiCreateJIPLightAddr, this, pLightNode);
 			}
 
-			void FreeLight() {
+			void FreeLight(void* apNewVal) {
 				NiLight* pLight = reinterpret_cast<NiPointer<NiLight>*>(this)->m_pObject;
 				NiNode* pParent = pLight->GetParent();
 				if (pParent)
 					pParent->DetachChild(pLight);
-				ThisCall(kFreeLightDetour, this);
+				ThisCall(kFreeLightDetour, this, apNewVal);
 			}
 		};
 
