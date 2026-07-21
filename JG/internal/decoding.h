@@ -1405,27 +1405,6 @@ enum SpecialInputCode
 	kInputCode_PageDown = 0x8000000A
 };
 
-enum UpdateType
-{
-	QuestAdded = 0x0,
-	QuestCompleted = 0x1,
-	QuestFailed = 0x2,
-	LocationDiscovered = 0x3,
-};
-
-struct QuestUpdateManager
-{
-	TESQuest* quest;
-	UpdateType updateType;
-	char title[260];
-	char subtitle[260];
-	uint32_t unk210;
-	uint32_t queuePriority;
-	uint32_t titleFont;
-	uint32_t subtitleFont;
-	char sound[260];
-};
-
 struct ItemEntryData {
 	ItemEntryData(TESBoundObject* apForm, ItemChange* apItemChange, ExtraDataList* apExtraDataList) :
 		pForm(apForm), pItemChange(apItemChange), pExtraDataList(apExtraDataList) {}

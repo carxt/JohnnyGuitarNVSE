@@ -444,6 +444,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\MemoryContexts.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp" />
     <ClInclude Include="internal\Game\Bethesda\NiUpdateData.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\QuestUpdateManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\QueuedChildren.hpp" />
     <ClInclude Include="internal\Game\Bethesda\QueuedFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\RefActivateData.hpp" />

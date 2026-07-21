@@ -1285,6 +1285,9 @@
     <ClInclude Include="internal\Game\Bethesda\TESModelTextureSwap.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\QuestUpdateManager.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

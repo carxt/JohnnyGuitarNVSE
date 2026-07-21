@@ -183,12 +183,11 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetUIUpdateSound_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESSound* sound = nullptr;
-	uint32_t type = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &type) && sound && type >= 1 && type <= 4 && IS_TYPE(sound, TESSound)) {
-		ExtraUISounds::SetSound(sound, type);
+	TESSound* pSound = nullptr;
+	uint32_t uiType = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSound, &uiType) && pSound && IS_TYPE(pSound, TESSound) && uiType >= 1 && uiType <= 4) {
+		ExtraUISounds::SetQuestSound(pSound, QuestUpdateManager::UpdateType(uiType - 1));
 		*result = 1;
-		
 	}
 	return true;
 }
