@@ -1412,10 +1412,10 @@ bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
 bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 	BOOL bDisable = TRUE;
 	uint32_t uiTypeFlags = DisabledSaves::SaveTypeFlags::ALL;
-	const uint8_t ucIndex = scriptObj->GetCompileIndex();
+	const TESFile* pFile = scriptObj->GetFile(0);
 	*result = 0;
-	if (ucIndex < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &bDisable, &uiTypeFlags)) {
-		DisabledSaves::Toggle(ucIndex, bDisable > 0, uiTypeFlags);
+	if (pFile && ExtractArgsEx(EXTRACT_ARGS_EX, &bDisable, &uiTypeFlags)) {
+		DisabledSaves::Toggle(pFile, uiTypeFlags, bDisable > 0);
 		*result = 1;
 	}
 	return true;
