@@ -1089,6 +1089,10 @@ public:
 	static HUDMainMenu* GetSingleton() { return *(HUDMainMenu**)0x11D96C0; }
 
 	static NiCamera* Create3DCamera() { return CdeclCall<NiCamera*>(0x77EE50); }
+
+	static void SetHUDShake(float afShakePower) {
+		CdeclCall(0x94C3A0, afShakePower);
+	}
 };
 static_assert(sizeof(HUDMainMenu) == 0x278);
 

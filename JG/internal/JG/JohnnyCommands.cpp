@@ -29,7 +29,6 @@ ExpressionEvaluatorUtils s_expEvalUtils;
 namespace JohnnyCommands {
 
 	void InitCommandData() {
-		CustomHUDShake::Init();
 		AnimActivationHeight::Init();
 	}
 

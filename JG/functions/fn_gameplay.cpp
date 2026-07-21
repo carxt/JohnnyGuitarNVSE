@@ -179,17 +179,18 @@ bool Cmd_SetMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetHUDShudderPower_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint8_t ucIndex = scriptObj->GetCompileIndex();
-	*result = CustomHUDShake::Get(ucIndex);
+	const TESFile* pFile = scriptObj->GetFile(0);
+	if (pFile)
+		*result = CustomHUDShake::Get(pFile);
 	return true;
 }
 
 bool Cmd_SetHUDShudderPower_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float fPower = -1.f;
-	uint8_t ucIndex = scriptObj->GetCompileIndex();
-	if (ucIndex < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &fPower)) {
-		CustomHUDShake::Set(ucIndex, fPower);
+	const TESFile* pFile = scriptObj->GetFile(0);
+	if (pFile && ExtractArgsEx(EXTRACT_ARGS_EX, &fPower)) {
+		CustomHUDShake::Set(pFile, fPower);
 		*result = 1;
 	}
 	return true;
