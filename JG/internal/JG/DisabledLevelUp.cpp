@@ -2,27 +2,39 @@
 
 namespace DisabledLevelUp {
 
-	bool isShowLevelUp = true;
+	bool bShowLevelUp = true;
 
-	_declspec(naked) void LevelUpHook() {
-		static const uint32_t noShowAddr = 0x77D903;
-		static const uint32_t showAddr = 0x77D618;
+	SPEC_NAKED void LevelUpHook() {
+		static constexpr uint32_t uiNoShowLvlUpAddr	= 0x77D903;
+		static constexpr uint32_t uiShowLvlUpAddr	= 0x77D618;
 		_asm {
-			jne noLevelUp
-			mov al, isShowLevelUp
-			test al, al
-			je noLevelUp
-			jmp showAddr
-			noLevelUp :
-			jmp noShowAddr
+			jne		NO_LEVEL_UP
+
+			mov		al, bShowLevelUp
+			test	al, al
+			je		NO_LEVEL_UP
+
+			jmp		uiShowLvlUpAddr
+
+			NO_LEVEL_UP:
+			jmp		uiNoShowLvlUpAddr
 		}
 	}
 
+	void Reset() {
+		bShowLevelUp = true;
+	}
+
 	void Install() {
-		HookUtils::WriteRelJump(0x77D612, uint32_t(LevelUpHook));
+		HookUtils::WriteRelJump(0x77D612, LevelUpHook);
 	}
-	void Reset()
-	{
-		isShowLevelUp = true;
+
+	bool GetShowLevelUpMenu() {
+		return bShowLevelUp;
 	}
+
+	void SetShowLevelUpMenu(bool abVal) {
+		bShowLevelUp = abVal;
+	}
+
 }

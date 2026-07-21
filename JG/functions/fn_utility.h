@@ -11,7 +11,6 @@ DEFINE_COMMAND_PLUGIN(RefAddrxData, , true, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(EditorIDToFormID, , false, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(GetDefaultHeapSize, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(GetLinearVelocity, , true, kParams_FourStrings);
-DEFINE_COMMAND_PLUGIN(IsLevelUpMenuEnabled, , false, nullptr);
 DEFINE_CMD_COND_PLUGIN(GetPipBoyMode, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(GetFormOverrideIndex, , false, kParams_OneForm);
 DEFINE_CMD_COND_PLUGIN(GetSequenceAnimGroup, , true, kParams_OneInt);

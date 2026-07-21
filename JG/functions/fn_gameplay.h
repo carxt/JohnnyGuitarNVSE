@@ -3,6 +3,7 @@
 
 // Functions affecting gameplay
 DEFINE_COMMAND_PLUGIN(ToggleLevelUpMenu, , false, kParams_OneInt);
+DEFINE_CMD_COND_PLUGIN(IsLevelUpMenuEnabled, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(TogglePipBoy, , false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(Jump, , true, nullptr);
 DEFINE_COMMAND_PLUGIN(StopVATSCam, , false, nullptr);

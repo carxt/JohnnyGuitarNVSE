@@ -428,12 +428,6 @@ bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS) {
-	*result = DisabledLevelUp::isShowLevelUp;
-	if (IsConsoleMode()) Console_Print("IsLevelUpMenuEnabled >> %.f", *result);
-	return true;
-}
-
 bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS) {
 	ThisCall(0x0703DA0, nullptr);
 	ThisCall(0x07D0A70, nullptr);

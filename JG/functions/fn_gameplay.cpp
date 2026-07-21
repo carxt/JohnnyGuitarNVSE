@@ -1364,9 +1364,21 @@ bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BOOL bValue = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bValue)) {
-		DisabledLevelUp::isShowLevelUp = bValue;
+		DisabledLevelUp::SetShowLevelUpMenu(bValue);
 		*result = 1;
 	}
+	return true;
+}
+
+SPEC_INLINE bool Cmd_IsLevelUpMenuEnabled_Eval(COMMAND_ARGS_EVAL) {
+	*result = DisabledLevelUp::GetShowLevelUpMenu();
+	return true;
+}
+
+bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS) {
+	Cmd_IsLevelUpMenuEnabled_Eval(nullptr, nullptr, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("IsLevelUpMenuEnabled >> %.f", *result);
 	return true;
 }
 
