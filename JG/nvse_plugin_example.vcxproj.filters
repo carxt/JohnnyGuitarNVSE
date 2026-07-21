@@ -481,6 +481,9 @@
     <ClCompile Include="internal\JG\MediaLocationControllerTweaks.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESModelTextureSwap.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1278,6 +1281,9 @@
     </ClInclude>
     <ClInclude Include="internal\JG\MediaLocationControllerTweaks.hpp">
       <Filter>internal\JG\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESModelTextureSwap.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
