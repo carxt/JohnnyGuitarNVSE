@@ -2759,6 +2759,9 @@ bool Cmd_ApplyModelTextureSwap_Execute(COMMAND_ARGS) {
 			pScene = BSUtilities::GetObjectByName(pScene, cObjectName);
 
 		if (pScene) {
+			if (!pReference)
+				pReference = thisObj;
+
 			TESModel* pModel = ModelLoader::GetSingleton()->GetModelForBoundObject(pBaseForm, pReference);
 			if (pModel) {
 				TESModelTextureSwap* pTexSwap = pModel->GetAsModelMaterialSwap();
