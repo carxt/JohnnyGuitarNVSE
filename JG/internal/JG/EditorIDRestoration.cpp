@@ -257,16 +257,27 @@ STACK_FRAME_OPT_RESET
 			return pData->RemoveEditorID(arEDID);
 		}
 
-		static const NiFixedString* __fastcall GetEDID(const TESForm* apForm) noexcept {
+		static JohnnyExtraData::EDIDResult __fastcall GetEDID(const TESForm* apForm, NiFixedString& arOutEDID) noexcept {
 			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
-			if (!pData) [[unlikely]]
-				return nullptr;
+			if (pData && pData->GetEditorID()) {
+				arOutEDID = pData->GetEditorID();
+				return JohnnyExtraData::EDIDResult::SUCCESS;
+			}
+			return JohnnyExtraData::EDIDResult::FAILURE;
+		}
 
-			const NiFixedString& strEDID = pData->GetEditorID();
-			if (strEDID.c_str())
-				return &strEDID;
+		static const char* __fastcall GetEDIDString(const TESForm* apForm) noexcept {
+			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			if (pData && pData->GetEditorID())
+				return pData->GetEditorID().c_str();
+			return "";
+		}
 
-			return nullptr;
+		static uint32_t __fastcall GetEDIDLength(const TESForm* apForm) noexcept {
+			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			if (pData && pData->GetEditorID())
+				return pData->GetEditorID().GetLength();
+			return 0;
 		}
 	}
 
@@ -339,14 +350,12 @@ STACK_FRAME_OPT_RESET
 	class TESFormEx : public TESForm {
 	public:
 		uint32_t hk_GetFormEditorIDLength() const noexcept {
-			const NiFixedString* pEDID = ExtraData::GetEDID(this);
-			return pEDID ? pEDID->GetLength() : 0;
+			return ExtraData::GetEDIDLength(this);
 		}
 
 		// vftable + 0x130
 		const char* hk_GetFormEditorID() const noexcept {
-			const NiFixedString* pEDID = ExtraData::GetEDID(this);
-			return pEDID ? pEDID->c_str() : "";
+			return ExtraData::GetEDIDString(this);
 		}
 
 		// vftable + 0x134
