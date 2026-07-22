@@ -262,7 +262,11 @@ STACK_FRAME_OPT_RESET
 			if (!pData) [[unlikely]]
 				return nullptr;
 
-			return &pData->GetEditorID();
+			const NiFixedString& strEDID = pData->GetEditorID();
+			if (strEDID.c_str())
+				return &strEDID;
+
+			return nullptr;
 		}
 	}
 
