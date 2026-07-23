@@ -16,6 +16,8 @@ which allows it to be used in commercial software.
 #include <assert.h>
 #include "sha1.h"
 
+#include <shared/BSMemory/BSMemory.hpp>
+
 // circular left bit rotation.  MSB wraps around to LSB
 Uint32 SHA1::lrot(Uint32 x, int bits) {
 	return (x << bits) | (x >> (32 - bits));
@@ -160,7 +162,7 @@ unsigned char* SHA1::getDigest() {
 	// finish the final block
 	addBytes((char*)footer, neededZeros + 8);
 	// allocate memory for the digest bytes
-	unsigned char* digest = (unsigned char*)malloc(20);
+	unsigned char* digest = (unsigned char*)BSMemory::malloc(20);
 	// copy the digest bytes
 	storeBigEndianUint32(digest, H0);
 	storeBigEndianUint32(digest + 4, H1);

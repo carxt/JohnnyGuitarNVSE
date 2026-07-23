@@ -23,7 +23,7 @@ public:
 	SHA1();
 	~SHA1();
 	void addBytes(const char* data, int num);
-	unsigned char* getDigest();
+	[[nodiscard]] unsigned char* getDigest();
 	// utility methods
 	static Uint32 lrot(Uint32 x, int bits);
 	static void storeBigEndianUint32(unsigned char* byte, Uint32 num);
