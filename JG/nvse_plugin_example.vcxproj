@@ -105,7 +105,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GAME;WIN32;NDEBUG;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;RUNTIME;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GAME;WIN32;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;RUNTIME;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
