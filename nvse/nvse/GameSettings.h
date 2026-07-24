@@ -58,6 +58,10 @@ public:
 		return uValue.b;
 	}
 
+	const char* String() const {
+		return uValue.str;
+	}
+
 	const Bitfield32& Bitfield() const {
 		return *reinterpret_cast<const Bitfield32*>(&uValue.i);
 	}
