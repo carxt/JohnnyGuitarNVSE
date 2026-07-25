@@ -9,7 +9,7 @@ namespace NewNiObjects {
 		pController->BuildVTable<NiFloatInterpController, 60>({
 			{ 2, &NiLightRadiusController::_GetRTTI },
 			{ 37, &NiLightRadiusController::_Update }
-			}, 0x1098CCC);
+			});
 
 		return pController;
 	}
