@@ -21,3 +21,7 @@ DEFINE_COMMAND_PLUGIN(GetNiPSysModifierValue, , true, kParams_GetNiPSysModifierV
 DEFINE_COMMAND_PLUGIN(SetParticleEmitterSpawnRate, , true, kParams_SetParticleEmitterSpawnRate);
 DEFINE_COMMAND_PLUGIN(GetParticleEmitterSpawnRate, , true, kParams_GetSwitchNodeIndex);
 DEFINE_COMMAND_PLUGIN(StopNiSequence, , true, kParams_StopNiSequence);
+DEFINE_COMMAND_PLUGIN(SetNiLightValue, , true, kParams_SetNiLightValue);
+DEFINE_COMMAND_PLUGIN(GetNiLightValue, , true, kParams_GetPropertyValue);
+DEFINE_COMMAND_PLUGIN(SetNiLightColor, , true, kParams_SetNiLightColor);
+DEFINE_COMMAND_PLUGIN(GetNiLightColor, , true, kParams_GetNiLightColor);

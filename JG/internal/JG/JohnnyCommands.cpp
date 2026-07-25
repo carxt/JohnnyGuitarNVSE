@@ -430,7 +430,10 @@ namespace JohnnyCommands {
 		REG_TYPED_CMD(GetAltTextures, Array);
 		REG_CMD(SetAltTexture);
 		REG_CMD(ClearAltTexture);
-
+		REG_CMD(SetNiLightValue);
+		REG_CMD(GetNiLightValue);
+		REG_CMD(SetNiLightColor);
+		REG_CMD(GetNiLightColor);
 	}
 
 }
