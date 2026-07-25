@@ -1,0 +1,50 @@
+#include "NewNiObjects.hpp"
+
+namespace NewNiObjects {
+
+	STACK_FRAME_OPT_ENABLE
+
+	NiLightRadiusController* NiLightRadiusController::CreateObject() {
+		NiLightRadiusController* pController = reinterpret_cast<NiLightRadiusController*>(NiLightDimmerController::CreateObject());
+		pController->BuildVTable<NiFloatInterpController, 60>({
+			{ 2, &NiLightRadiusController::_GetRTTI },
+			{ 37, &NiLightRadiusController::_Update }
+			}, 0x1098CCC);
+
+		return pController;
+	}
+
+	void NiLightRadiusController::_Update(NiUpdateData& arUpdateData) {
+		if (GetManagerControlled())
+			m_fScaledTime = INVALID_TIME;
+		else if (DontDoUpdate(arUpdateData.fTime) && (!m_spInterpolator || !m_spInterpolator->AlwaysUpdate()))
+			return;
+
+		if (!m_spInterpolator)
+			return;
+
+		float fValue;
+		if (m_spInterpolator->UpdateFloat(m_fScaledTime, m_pkTarget, fValue) && m_pkTarget) {
+			NiLight* pLight = static_cast<NiLight*>(m_pkTarget);
+			if (pLight)
+				pLight->SetRadius(fValue);
+		}
+	}
+
+	void InitNewLoaders() {
+		NiStream::RegisterLoader("NiLightRadiusController", NiLightRadiusController::CreateObject);
+	}
+
+	HookUtils::CallDetour kInitLoadersDetour;
+	void __cdecl InitLoadersHook() {
+		CdeclCall(kInitLoadersDetour);
+		InitNewLoaders();
+	}
+
+	STACK_FRAME_OPT_RESET
+
+	void Install() {
+		kInitLoadersDetour.ReplaceCall(0x86AA47, InitLoadersHook);
+	}
+
+}

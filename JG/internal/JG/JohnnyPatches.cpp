@@ -28,6 +28,7 @@
 #include "RadioSkipOGGWAVPatch.hpp"
 #include "RSMBarberHook.hpp"
 #include "WorldToScreen.hpp"
+#include "NewNiObjects.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
 
@@ -265,6 +266,8 @@ namespace JohnnyPatches {
 		NPCAccuracy::Install();
 
 		DialogueResponseOverride::Install();
+
+		NewNiObjects::Install();
 	}
 
 	void DeferredInit() {
