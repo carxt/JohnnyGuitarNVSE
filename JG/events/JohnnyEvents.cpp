@@ -645,6 +645,7 @@ namespace JohnnyEvents {
 		static TESObjectREFR* __fastcall OnTakeBackItem(InventoryChanges* apInvChanges, void*, TESObjectREFR* apRef, TESBoundObject* apObject, bool abStealing, int32_t aiNumber, ExtraDataList* apExtraList, bool abDropWorld, TESObjectREFR* apOtherContainer, const NiPoint3* apPoint, const NiPoint3* apRotate, bool abDelete, bool abPreferStolen, ItemChange* apItemChange) {
 			TESObjectREFR* pOwner = apOtherContainer->IsActor() ? apOtherContainer : pItemOwnerRef;
 			Events::OnTakeBackItem(pOwner, apObject, aiNumber);
+			pItemOwnerRef = nullptr;
 			return ThisCall<TESObjectREFR*>(kOnTakeBackItemDetour, apInvChanges, apRef, apObject, abStealing, aiNumber, apExtraList, abDropWorld, apOtherContainer, apPoint, apRotate, abDelete, abPreferStolen, apItemChange);
 		}
 
