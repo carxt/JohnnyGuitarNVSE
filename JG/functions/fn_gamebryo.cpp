@@ -842,6 +842,9 @@ bool Cmd_SetNiLightValue_Execute(COMMAND_ARGS) {
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &fValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
 		NiObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (!pObject)
+			return true;
+
 		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
 		if (!pLight)
 			return true;
@@ -885,6 +888,9 @@ bool Cmd_GetNiLightValue_Execute(COMMAND_ARGS) {
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
 		NiObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (!pObject)
+			return true;
+
 		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
 		if (!pLight)
 			return true;
@@ -927,21 +933,25 @@ bool Cmd_SetNiLightColor_Execute(COMMAND_ARGS) {
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &kColor.r, &kColor.g, &kColor.b, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
 		NiObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
-		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
-		if (pLight) {
-			switch (eItem) {
-				case LightColorItem::DIFFUSE:
-					pLight->SetDiffuseColor(kColor);
-					break;
-				case LightColorItem::AMBIENT:
-					pLight->SetAmbientColor(kColor);
-					break;
-				default:
-					__assume(0);
-			}
+		if (!pObject)
+			return true;
 
-			*result = 1;
+		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
+		if (!pLight)
+			return true;
+
+		switch (eItem) {
+			case LightColorItem::DIFFUSE:
+				pLight->SetDiffuseColor(kColor);
+				break;
+			case LightColorItem::AMBIENT:
+				pLight->SetAmbientColor(kColor);
+				break;
+			default:
+				__assume(0);
 		}
+
+		*result = 1;
 	}
 
 	return true;
@@ -960,29 +970,33 @@ bool Cmd_GetNiLightColor_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &pRed, &pGreen, &pBlue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
 		ASSUME_ASSERT(pRed && pGreen && pBlue);
 		NiObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (!pObject)
+			return true;
+
 		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
-		if (pLight) {
-			NiColor kColor;
-			switch (eItem) {
-				case LightColorItem::DIFFUSE:
-					kColor = pLight->GetDiffuseColor();
-					break;
-				case LightColorItem::AMBIENT:
-					kColor = pLight->GetAmbientColor();
-					break;
-				default:
-					__assume(0);
-			}
+		if (!pLight)
+			return true;
 
-			pRed->data = kColor.r;
-			pGreen->data = kColor.g;
-			pBlue->data = kColor.b;
-
-			if (IsConsoleMode())
-				Console_Print("GetNiLightColor %i >> %f %f %f", eItem, kColor.r, kColor.g, kColor.b);
-
-			*result = 1;
+		NiColor kColor;
+		switch (eItem) {
+			case LightColorItem::DIFFUSE:
+				kColor = pLight->GetDiffuseColor();
+				break;
+			case LightColorItem::AMBIENT:
+				kColor = pLight->GetAmbientColor();
+				break;
+			default:
+				__assume(0);
 		}
+
+		pRed->data = kColor.r;
+		pGreen->data = kColor.g;
+		pBlue->data = kColor.b;
+
+		if (IsConsoleMode())
+			Console_Print("GetNiLightColor %i >> %f %f %f", eItem, kColor.r, kColor.g, kColor.b);
+
+		*result = 1;
 	}
 
 	return true;
