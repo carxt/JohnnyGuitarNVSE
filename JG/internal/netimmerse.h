@@ -1557,7 +1557,29 @@ public:
 
 	NIRTTI_ADDRESS(0x11F4A28);
 
-	void SetRadius(float afRadius) {
+	float GetDimmer() const { return m_fDimmer; };
+
+	// GAME - 0x50DD20
+	void SetDimmer(float afDimmer) {
+		m_fDimmer = afDimmer;
+		IncRevisionID();
+	}
+
+	const NiColor& GetAmbientColor() const { return m_kAmb; };
+	void SetAmbientColor(const NiColor& arColor) {
+		m_kAmb = arColor;
+		IncRevisionID();
+	}
+
+	const NiColor& GetDiffuseColor() const { return m_kDiff; };
+	void SetDiffuseColor(const NiColor& arColor) {
+		m_kDiff = arColor;
+		IncRevisionID();
+	}
+
+	float GetLightRadius() const { return m_fRadius; };
+
+	void SetLightRadius(float afRadius) {
 		m_fRadius = afRadius;
 		IncRevisionID();
 	}
@@ -1578,6 +1600,41 @@ public:
 			float m_fAtten2;
 		};
 		NiPoint3 m_kLightOffset;
+	};
+
+	CREATE_OBJECT(NiPointLight, 0xA7D6E0);
+	NIRTTI_ADDRESS(0x11F4A98);
+};
+
+class NiSpotLight : public NiPointLight {
+public:
+	NiSpotLight();
+	~NiSpotLight();
+
+	NiPoint3	m_kWorldDir;
+	float		m_fOuterSpotAngle;
+	float		m_fInnerSpotAngle;
+	float		m_fSpotExponent;
+
+	CREATE_OBJECT(NiSpotLight, 0xA94E20);
+	NIRTTI_ADDRESS(0x11F5EC4);
+
+	float GetOuterSpotAngle() const { return m_fOuterSpotAngle; };
+	void SetOuterSpotAngle(float afAngle) {
+		m_fOuterSpotAngle = afAngle;
+		IncRevisionID();
+	};
+
+	float GetInnerSpotAngle() const { return m_fInnerSpotAngle; };
+	void SetInnerSpotAngle(float afAngle) {
+		m_fInnerSpotAngle = afAngle;
+		IncRevisionID();
+	};
+
+	float GetSpotExponent() const { return m_fSpotExponent; };
+	void SetSpotExponent(float afExponent) {
+		m_fSpotExponent = afExponent;
+		IncRevisionID();
 	};
 };
 

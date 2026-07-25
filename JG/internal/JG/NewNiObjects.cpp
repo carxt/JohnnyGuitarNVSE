@@ -34,7 +34,7 @@ namespace NewNiObjects {
 		if (m_spInterpolator->UpdateFloat(m_fScaledTime, m_pkTarget, fValue) && m_pkTarget) {
 			NiLight* pLight = static_cast<NiLight*>(m_pkTarget);
 			if (pLight)
-				pLight->SetRadius(fValue);
+				pLight->SetLightRadius(fValue);
 		}
 	}
 
