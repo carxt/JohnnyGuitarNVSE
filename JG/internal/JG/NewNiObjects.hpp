@@ -10,6 +10,7 @@ namespace NewNiObjects {
 		NiNewRTTI(NiLightRadiusController, NiFloatInterpController);
 
 		static NiLightRadiusController* CreateObject();
+		NiLightRadiusController*		_CreateClone(NiCloningProcess& arCloneProc);
 		void							_Update(NiUpdateData& arUpdateData);
 	};
 

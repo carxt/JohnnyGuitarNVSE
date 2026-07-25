@@ -8,10 +8,17 @@ namespace NewNiObjects {
 		NiLightRadiusController* pController = reinterpret_cast<NiLightRadiusController*>(NiLightDimmerController::CreateObject());
 		pController->BuildVTable<NiFloatInterpController, 60>({
 			{ 2, &NiLightRadiusController::_GetRTTI },
+			{ 18, &NiLightRadiusController::_CreateClone },
 			{ 37, &NiLightRadiusController::_Update }
 			});
 
 		return pController;
+	}
+
+	NiLightRadiusController* NiLightRadiusController::_CreateClone(NiCloningProcess& arCloneProc) {
+		NiLightRadiusController* pClone = CreateObject();
+		ThisCall(0xA57620, this, pClone, &arCloneProc); // NiFloatInterpController::CopyMembers
+		return pClone;
 	}
 
 	void NiLightRadiusController::_Update(NiUpdateData& arUpdateData) {
@@ -32,6 +39,7 @@ namespace NewNiObjects {
 	}
 
 	void InitNewLoaders() {
+		_MESSAGE("Registering new NiObjects...");
 		NiStream::RegisterLoader("NiLightRadiusController", NiLightRadiusController::CreateObject);
 	}
 
