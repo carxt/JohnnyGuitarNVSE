@@ -1530,6 +1530,8 @@ public:
 	void IncRevisionID() { ++m_uiRevID; }
 };
 
+ASSERT_SIZE(NiDynamicEffect, 0xC4)
+
 // F0
 class NiLight : public NiDynamicEffect {
 public:
@@ -1551,6 +1553,7 @@ public:
 #endif
 		};
 	};
+	void*	m_pvRendererData;
 
 	NIRTTI_ADDRESS(0x11F4A28);
 
@@ -1559,6 +1562,8 @@ public:
 		IncRevisionID();
 	}
 };
+
+ASSERT_SIZE(NiLight, 0xF0)
 
 // FC
 class NiPointLight : public NiLight {
@@ -1574,7 +1579,6 @@ public:
 		};
 		NiPoint3 m_kLightOffset;
 	};
-	void* m_pvRendererData;
 };
 
 // FC
