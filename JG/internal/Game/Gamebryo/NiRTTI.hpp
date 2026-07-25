@@ -46,7 +46,7 @@ ASSERT_SIZE(NiRTTI, 0x8);
     static inline const NiRTTI ms_RTTI = NiRTTI(#classname, baseclassname##::ms_RTTI);
 
 #define NiImplementGetRTTI(classname) \
-	inline const NiRTTI* GetRTTIEx() {return &classname##::ms_RTTI;}
+	inline const NiRTTI* _GetRTTI() {return &classname##::ms_RTTI;}
 
 #define NiNewRTTI(classname, baseclassname) \
 	NiImplementRTTI(classname, baseclassname) \
