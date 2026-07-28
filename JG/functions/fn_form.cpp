@@ -1964,7 +1964,7 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 		return true;
 
 	FORM_TYPE eFormType = pInvRef->pForm->GetFormType();
-	if (eFormType != FORM_TYPE::TESObjectARMO && eFormType != FORM_TYPE::TESObjectWEAP && eFormType != FORM_TYPE::AlchemyItem)
+	if (eFormType != FORM_TYPE::TESObjectARMO && eFormType != FORM_TYPE::TESObjectWEAP && eFormType != FORM_TYPE::AlchemyItem && eFormType != FORM_TYPE::TESObjectBOOK)
 		return true;
 
 	ExtraDataList* pExtraData = pInvRef->pExtraDataList;
