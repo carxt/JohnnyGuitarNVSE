@@ -729,6 +729,10 @@ struct HotKeysWheel {
 	int32_t		iLastHighlightedHotkey;
 	uint32_t	uiHighlightedHotkeyTrait;
 	uint32_t	uiHighlightedTextTrait;
+
+	void UpdateHotkeyList() {
+		ThisCall(0x7017B0, this);
+	}
 };
 
 // 124
@@ -770,6 +774,13 @@ public:
 	static InventoryMenu* GetSingleton() {
 		return *reinterpret_cast<InventoryMenu**>(0x11D9EA4);
 	}
+
+
+	static ItemChange* Selection() {
+		return *reinterpret_cast<ItemChange**>(0x11D9EA8);
+	}
+
+
 };
 ASSERT_SIZE(InventoryMenu, 0x124);
 

@@ -39,6 +39,7 @@ extern NVSEScriptInterface* g_scriptInterface;
 extern bool bFixJIP;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t auiFormID);
+extern TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
 
 namespace JIPFixes {
 
@@ -325,7 +326,7 @@ namespace JIPFixes {
 		thread_local bool bScriptedCall = false;
 		uint32_t uiDoFireWeaponAddr = 0;
 
-		
+
 		STACK_FRAME_OPT_ENABLE
 
 		void __fastcall DoFireWeaponExWrapper(Actor* apActor, void*, TESObjectWEAP* apWeapon) {
@@ -333,7 +334,7 @@ namespace JIPFixes {
 			FastCall(uiDoFireWeaponAddr, apActor, nullptr, apWeapon);
 			bScriptedCall = false;
 		}
-		
+
 		HookUtils::VirtCallDetour kDetour;
 		class ActorEx : public Actor {
 		public:
@@ -634,7 +635,7 @@ namespace JIPFixes {
 				}
 			}
 		}
-		
+
 	}
 
 	namespace RespawnDisableFix {
@@ -1493,6 +1494,93 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace SetHotkeyItemRefFix {
+
+		uint32_t uiJIPCreateExtraDataAddr;
+		class JIPInventoryRef : public InventoryRef {
+		public:
+			ExtraDataList* CreateExtraData() {
+				return ThisCall<ExtraDataList*>(uiJIPCreateExtraDataAddr, this);
+			}
+		};
+
+		bool Cmd_GetHotkeyItemRef_Execute(COMMAND_ARGS)
+		{
+			int32_t iHotkey;
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &iHotkey))
+			{
+
+				const int32_t iCorrectedHotKey = iHotkey - 1;
+				InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(PlayerCharacter::GetSingleton());
+				if (pInvChanges) {
+					ItemChange* pHotkeyItem = pInvChanges->GetHotkeyItem(iCorrectedHotKey);
+					if (pHotkeyItem) {
+						ExtraDataList* pExtraList = pHotkeyItem->pExtraLists ? pHotkeyItem->pExtraLists->GetItem() : nullptr;
+						TESObjectREFR* invRef = InventoryRefCreateEntry(PlayerCharacter::GetSingleton(), pHotkeyItem->pObject, pHotkeyItem->iNumber, pExtraList);
+						*(uint32_t*)result = invRef->GetFormID();
+					}
+
+					delete pHotkeyItem;
+				}
+			}
+			return true;
+		}
+
+        bool Cmd_SetHotkeyItemRef_Execute(COMMAND_ARGS) {
+            int32_t iHotkey = 0;
+            if (ExtractArgsEx(EXTRACT_ARGS_EX, &iHotkey)) {
+                InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
+                if (!pInvRef || pInvRef->pContainerRef != PlayerCharacter::GetSingleton())
+                    return true;
+
+                if (!pInvRef->pForm)
+                    return true;
+
+                FORM_TYPE eFormType = pInvRef->pForm->GetFormType();
+                if (eFormType != FORM_TYPE::TESObjectARMO && eFormType != FORM_TYPE::TESObjectWEAP && eFormType != FORM_TYPE::AlchemyItem && eFormType != FORM_TYPE::TESObjectBOOK)
+                    return true;
+
+                const int32_t iCorrectedHotKey = iHotkey - 1;
+
+                InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(PlayerCharacter::GetSingleton());
+                if (pInvChanges) {
+                    ItemChange* pHotkeyItem = pInvChanges->GetHotkeyItem(iCorrectedHotKey);
+                    if (pHotkeyItem) {
+                        pInvChanges->RemoveHotkeyItem(pHotkeyItem, iCorrectedHotKey);
+                    }
+
+                    ExtraDataList* pExtraList = pInvRef->pItemChange->pExtraLists ? pInvRef->pItemChange->pExtraLists->GetItem() : static_cast<JIPInventoryRef*>(pInvRef)->CreateExtraData();
+					pInvChanges->SetHotkeyItem(pInvRef->pItemChange, pExtraList, iCorrectedHotKey);
+
+                    if (InventoryMenu::GetSingleton()) {
+                        InventoryMenu::GetSingleton()->kHotKeyWheel.UpdateHotkeyList();
+                    }
+
+                    delete pHotkeyItem;
+
+                    *result = 1;
+                }
+            }
+            return true;
+        }
+
+		void InitHooks() {
+			uiJIPCreateExtraDataAddr = JIPUtils::GetAddress(0x10002A00);
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x28F1));
+				if (pInfo) {
+					pInfo->execute = Cmd_GetHotkeyItemRef_Execute;
+				}
+			}
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2716));
+				if (pInfo) {
+					pInfo->execute = Cmd_SetHotkeyItemRef_Execute;
+				}
+			}
+		}
+	}
+
 
 	namespace TriggerLightningFXFix {
 
@@ -1951,6 +2039,8 @@ namespace JIPFixes {
 		LeveledListFixes::InitHooks();
 		CursorPosUICords::InitHooks();
 		TriggerLightningFXFix::InitHooks();
+		SetHotkeyItemRefFix::InitHooks();
+
 	}
 
 	void InitDeferredHooks(bool abGECK) {
