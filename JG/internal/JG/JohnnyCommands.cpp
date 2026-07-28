@@ -9,6 +9,7 @@
 #include "functions/fn_form.h"
 #include "functions/fn_gamebryo.h"
 #include "functions/fn_gameplay.h"
+#include "functions/fn_hit.h"
 #include "functions/fn_math.h"
 #include "functions/fn_mediaset.h"
 #include "functions/fn_region.h"
@@ -434,6 +435,13 @@ namespace JohnnyCommands {
 		REG_CMD(GetNiLightValue);
 		REG_CMD(SetNiLightColor);
 		REG_CMD(GetNiLightColor);
+		REG_CMD(ApplyHitData);
+		REG_CMD(GetObjectMaterial);
+		REG_CMD(ApplyObjectImpact);
+		REG_CMD(InterruptWeaponAnim);
+		REG_CMD(ApplyRagdollForce);
+		REG_CMD(Set3rdPersonOverlay);
+		REG_CMD(Set3rdPersonOverlayCullParts);
 	}
 
 }

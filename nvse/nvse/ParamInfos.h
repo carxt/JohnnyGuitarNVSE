@@ -1177,3 +1177,70 @@ static ParamInfo kParamsApplyModelTextureSwap[] =
 	{ "Reference", kParamType_ObjectRef, 1 },
 	{ "First Person", kParamType_Integer, 1 },
 };
+
+static ParamInfo kParams_FourFloats[] =
+{
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+	{ "Float", kParamType_Float, 0 },
+};
+
+static ParamInfo kParams_ApplyHitData[] =
+{
+	{ "Attacker",		kParamType_Actor,		1 },
+	{ "Health Damage",	kParamType_Float,		1 },
+	{ "Fatigue Damage",	kParamType_Float,		1 },
+	{ "Limb Damage",	kParamType_Float,		1 },
+	{ "Weapon",			kParamType_ObjectID,	1 },
+	{ "Hit Location",	kParamType_Integer,		1 },
+	{ "Flags",			kParamType_Integer,		1 },
+	{ "Fire OnHit",		kParamType_Integer,		1 },
+	{ "Fire Alarm",		kParamType_Integer,		1 },
+	{ "Fire Blood",		kParamType_Integer,		1 },
+	{ "Fire Sound",		kParamType_Integer,		1 },
+	{ "Skip Clear",		kParamType_Integer,		1 },
+};
+
+static ParamInfo kParams_GetObjectMaterial[] =
+{
+	{ "Cam X",	kParamType_Float,	1 },
+	{ "Cam Y",	kParamType_Float,	1 },
+	{ "Cam Z",	kParamType_Float,	1 },
+	{ "Hit X",	kParamType_Float,	1 },
+	{ "Hit Y",	kParamType_Float,	1 },
+	{ "Hit Z",	kParamType_Float,	1 },
+	{ "Layer",	kParamType_Integer,	1 },
+};
+
+static ParamInfo kParams_ApplyObjectImpact[] =
+{
+	{ "Material",	kParamType_Integer,		1 },
+	{ "Weapon",		kParamType_ObjectID,	1 },
+	{ "Sound",		kParamType_Integer,		1 },
+	{ "Particle",	kParamType_Integer,		1 },
+	{ "Pos X",		kParamType_Float,		1 },
+	{ "Pos Y",		kParamType_Float,		1 },
+	{ "Pos Z",		kParamType_Float,		1 },
+};
+
+static ParamInfo kParams_Set3rdPersonOverlayCullParts[] =
+{
+	{ "Mode",	kParamType_Integer, 0 },
+	{ "Part 0",	kParamType_Integer, 1 },
+	{ "Part 1",	kParamType_Integer, 1 },
+	{ "Part 2",	kParamType_Integer, 1 },
+	{ "Part 3",	kParamType_Integer, 1 },
+	{ "Part 4",	kParamType_Integer, 1 },
+	{ "Part 5",	kParamType_Integer, 1 },
+	{ "Part 6",	kParamType_Integer, 1 },
+	{ "Part 7",	kParamType_Integer, 1 },
+	{ "Part 8",	kParamType_Integer, 1 },
+	{ "Part 9",	kParamType_Integer, 1 },
+	{ "Part 10",	kParamType_Integer, 1 },
+	{ "Part 11",	kParamType_Integer, 1 },
+	{ "Part 12",	kParamType_Integer, 1 },
+	{ "Part 13",	kParamType_Integer, 1 },
+	{ "Part 14",	kParamType_Integer, 1 },
+	{ "Part 15",	kParamType_Integer, 1 },
+};
