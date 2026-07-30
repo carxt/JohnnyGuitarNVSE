@@ -1504,20 +1504,18 @@ namespace JIPFixes {
 			}
 		};
 
-		bool Cmd_GetHotkeyItemRef_Execute(COMMAND_ARGS)
-		{
-			int32_t iHotkey;
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &iHotkey))
-			{
-
+		bool Cmd_GetHotkeyItemRef_Execute(COMMAND_ARGS) {
+			int32_t iHotkey = 0;
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &iHotkey) && iHotkey > 0) {
 				const int32_t iCorrectedHotKey = iHotkey - 1;
-				InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(PlayerCharacter::GetSingleton());
+				const InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(PlayerCharacter::GetSingleton());
 				if (pInvChanges) {
 					ItemChange* pHotkeyItem = pInvChanges->GetHotkeyItem(iCorrectedHotKey);
 					if (pHotkeyItem) {
 						ExtraDataList* pExtraList = pHotkeyItem->pExtraLists ? pHotkeyItem->pExtraLists->GetItem() : nullptr;
-						TESObjectREFR* invRef = InventoryRefCreateEntry(PlayerCharacter::GetSingleton(), pHotkeyItem->pObject, pHotkeyItem->iNumber, pExtraList);
-						*(uint32_t*)result = invRef->GetFormID();
+						TESObjectREFR* pInvRef = InventoryRefCreateEntry(PlayerCharacter::GetSingleton(), pHotkeyItem->pObject, pHotkeyItem->iNumber, pExtraList);
+						if (pInvRef)
+							*reinterpret_cast<uint32_t*>(result) = pInvRef->GetFormID();
 					}
 
 					delete pHotkeyItem;
@@ -1528,7 +1526,7 @@ namespace JIPFixes {
 
         bool Cmd_SetHotkeyItemRef_Execute(COMMAND_ARGS) {
             int32_t iHotkey = 0;
-            if (ExtractArgsEx(EXTRACT_ARGS_EX, &iHotkey)) {
+            if (ExtractArgsEx(EXTRACT_ARGS_EX, &iHotkey) && iHotkey > 0) {
                 InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
                 if (!pInvRef || pInvRef->pContainerRef != PlayerCharacter::GetSingleton())
                     return true;
@@ -1536,7 +1534,7 @@ namespace JIPFixes {
                 if (!pInvRef->pForm)
                     return true;
 
-                FORM_TYPE eFormType = pInvRef->pForm->GetFormType();
+                const FORM_TYPE eFormType = pInvRef->pForm->GetFormType();
                 if (eFormType != FORM_TYPE::TESObjectARMO && eFormType != FORM_TYPE::TESObjectWEAP && eFormType != FORM_TYPE::AlchemyItem && eFormType != FORM_TYPE::TESObjectBOOK)
                     return true;
 
@@ -1545,16 +1543,14 @@ namespace JIPFixes {
                 InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(PlayerCharacter::GetSingleton());
                 if (pInvChanges) {
                     ItemChange* pHotkeyItem = pInvChanges->GetHotkeyItem(iCorrectedHotKey);
-                    if (pHotkeyItem) {
+                    if (pHotkeyItem)
                         pInvChanges->RemoveHotkeyItem(pHotkeyItem, iCorrectedHotKey);
-                    }
 
                     ExtraDataList* pExtraList = pInvRef->pItemChange->pExtraLists ? pInvRef->pItemChange->pExtraLists->GetItem() : static_cast<JIPInventoryRef*>(pInvRef)->CreateExtraData();
 					pInvChanges->SetHotkeyItem(pInvRef->pItemChange, pExtraList, iCorrectedHotKey);
 
-                    if (InventoryMenu::GetSingleton()) {
+                    if (InventoryMenu::GetSingleton())
                         InventoryMenu::GetSingleton()->kHotKeyWheel.UpdateHotkeyList();
-                    }
 
                     delete pHotkeyItem;
 
@@ -1567,13 +1563,13 @@ namespace JIPFixes {
 		void InitHooks() {
 			uiJIPCreateExtraDataAddr = JIPUtils::GetAddress(0x10002A00);
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x28F1));
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetHotkeyItemRef));
 				if (pInfo) {
 					pInfo->execute = Cmd_GetHotkeyItemRef_Execute;
 				}
 			}
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(0x2716));
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetHotkeyItemRef));
 				if (pInfo) {
 					pInfo->execute = Cmd_SetHotkeyItemRef_Execute;
 				}
