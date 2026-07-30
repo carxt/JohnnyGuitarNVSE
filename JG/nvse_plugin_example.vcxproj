@@ -848,9 +848,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <None Include="internal\Game\Bethesda\BSTFreeList.inl" />
     <None Include="internal\Game\Bethesda\SettingT.inl" />
     <None Include="internal\Game\FaceGen\FR2MatrixVTC.inl" />
-    <None Include="internal\Game\Gamebryo\NiPoint2.inl" />
-    <None Include="internal\Game\Gamebryo\NiPoint3.inl" />
-    <None Include="internal\Game\Gamebryo\NiPoint4.inl" />
     <None Include="internal\Game\Gamebryo\NiTArray.inl" />
     <None Include="internal\Game\Gamebryo\NiTLargeArray.inl" />
     <None Include="internal\Game\Gamebryo\NiTListBase.inl" />

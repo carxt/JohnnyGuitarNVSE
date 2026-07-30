@@ -2254,15 +2254,6 @@
     <None Include="internal\Game\Gamebryo\NiTArray.inl">
       <Filter>internal\Game\Gamebryo</Filter>
     </None>
-    <None Include="internal\Game\Gamebryo\NiPoint2.inl">
-      <Filter>internal\Game\Gamebryo</Filter>
-    </None>
-    <None Include="internal\Game\Gamebryo\NiPoint3.inl">
-      <Filter>internal\Game\Gamebryo</Filter>
-    </None>
-    <None Include="internal\Game\Gamebryo\NiPoint4.inl">
-      <Filter>internal\Game\Gamebryo</Filter>
-    </None>
     <None Include="internal\Game\Bethesda\BSSimpleArray.inl">
       <Filter>internal\Game\Bethesda</Filter>
     </None>
