@@ -19,6 +19,7 @@
 #include "LandRemapping.hpp"
 #include "MediaLocationControllerTweaks.hpp"
 #include "NPCAccuracy.hpp"
+#include "PlayerBodyOverlay.hpp"
 #include "RSMBarberHook.hpp"
 #include "TaskQueue.hpp"
 
@@ -78,6 +79,7 @@ static void MainGameLoop() {
 
 static void __fastcall GameReset(uint32_t aeType) {
 	JohnnyExtraDataArray::GetInstance().ResetScriptData();
+	PlayerBodyOverlay::Reset();
 
 	if (aeType == NVSEMessagingInterface::kMessage_NewGame)
 		CameraOverlay::ReInit();
@@ -141,6 +143,9 @@ void JohnnyMessageHandler::Game(NVSEMessagingInterface::Message* apMessage) {
 				break;
 			[[unlikely]] case NVSEMessagingInterface::kMessage_PostLoadGame:
 				PostLoadGame();
+				break;
+			[[unlikely]] case NVSEMessagingInterface::kMessage_ExitToMainMenu:
+				PlayerBodyOverlay::Reset();
 				break;
 			default:
 				break;

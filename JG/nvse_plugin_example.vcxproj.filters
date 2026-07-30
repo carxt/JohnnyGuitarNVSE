@@ -220,6 +220,9 @@
     <ClCompile Include="functions\fn_gameplay.cpp">
       <Filter>functions</Filter>
     </ClCompile>
+    <ClCompile Include="functions\fn_hit.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
     <ClCompile Include="functions\fn_math.cpp">
       <Filter>functions</Filter>
     </ClCompile>
@@ -466,6 +469,9 @@
     <ClCompile Include="internal\JG\CameraOverlay.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\PlayerBodyOverlay.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
     <ClCompile Include="internal\JG\BarterFilter.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
@@ -575,6 +581,9 @@
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="functions\fn_gameplay.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\fn_hit.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="functions\fn_math.h">
@@ -1265,6 +1274,9 @@
       <Filter>internal\JG\Features</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\CameraOverlay.hpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\PlayerBodyOverlay.hpp">
       <Filter>internal\JG\Features</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\BarterFilter.hpp">

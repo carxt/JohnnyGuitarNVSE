@@ -206,6 +206,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="functions\fn_form.cpp" />
     <ClCompile Include="functions\fn_gamebryo.cpp" />
     <ClCompile Include="functions\fn_gameplay.cpp" />
+    <ClCompile Include="functions\fn_hit.cpp" />
     <ClCompile Include="functions\fn_math.cpp" />
     <ClCompile Include="functions\fn_mediaset.cpp" />
     <ClCompile Include="functions\fn_region.cpp" />
@@ -306,6 +307,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\JG\LandRemapping.cpp" />
     <ClCompile Include="internal\JG\MediaLocationControllerTweaks.cpp" />
     <ClCompile Include="internal\JG\NPCAccuracy.cpp" />
+    <ClCompile Include="internal\JG\PlayerBodyOverlay.cpp" />
     <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp" />
     <ClCompile Include="internal\JG\RadioSkipOGGWAVPatch.cpp" />
     <ClCompile Include="internal\JG\RSMBarberHook.cpp" />
@@ -361,6 +363,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="functions\fn_form.h" />
     <ClInclude Include="functions\fn_gamebryo.h" />
     <ClInclude Include="functions\fn_gameplay.h" />
+    <ClInclude Include="functions\fn_hit.h" />
     <ClInclude Include="functions\fn_math.h" />
     <ClInclude Include="functions\fn_mediaset.h" />
     <ClInclude Include="functions\fn_region.h" />
@@ -576,6 +579,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\LandRemapping.hpp" />
     <ClInclude Include="internal\JG\MediaLocationControllerTweaks.hpp" />
     <ClInclude Include="internal\JG\NPCAccuracy.hpp" />
+    <ClInclude Include="internal\JG\PlayerBodyOverlay.hpp" />
     <ClInclude Include="internal\JG\QuestObjectiveDisplayFix.hpp" />
     <ClInclude Include="internal\JG\RadioSkipOGGWAVPatch.hpp" />
     <ClInclude Include="internal\JG\RSMBarberHook.hpp" />
