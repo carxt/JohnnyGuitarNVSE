@@ -34,6 +34,10 @@ public:
 	TESAmmo* GetAmmoForWeapon(TESObjectWEAP* apWeapon, bool& arbHasAmmo) const;
 
 	void ResetCachedWeights();
+
+	ItemChange* GetHotkeyItem(int32_t aiHotkey) const;
+	void RemoveHotkeyItem(ItemChange* apItem, int32_t aiHotkey) const;
+	void SetHotkeyItem(ItemChange* apItem, ExtraDataList* apExtra, int32_t aiHotkey) const;
 };
 
 ASSERT_SIZE(InventoryChanges, 0x14);
