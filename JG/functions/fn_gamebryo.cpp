@@ -82,7 +82,7 @@ enum class ParticleModifierItem : int32_t {
 	COUNT
 };
 
-static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
+static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const NiFixedString& arObjectName, NiProperty::PropertyType aeType) {
 	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
 	if (!pObject)
 		return { nullptr, nullptr };
@@ -440,10 +440,10 @@ bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 
 		if (pTarget && pTarget->m_pWorldBound) {
 			const NiBound& rBound = pTarget->GetWorldBound();
-			kElements[0] = rBound.kCenter.x;
-			kElements[1] = rBound.kCenter.y;
-			kElements[2] = rBound.kCenter.z;
-			kElements[3] = rBound.fRadius;
+			kElements[0] = rBound.GetCenter().x;
+			kElements[1] = rBound.GetCenter().y;
+			kElements[2] = rBound.GetCenter().z;
+			kElements[3] = rBound.GetRadius();
 			pOutArray = g_arrInterface->CreateArray(kElements, 4, scriptObj);
 			bValid = true;
 		}

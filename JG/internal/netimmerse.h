@@ -3,7 +3,7 @@
 #include "NiTypes.h"
 #include "GameTypes.h"
 
-#include "Gamebryo/NiObjectNET.hpp"
+#include "Gamebryo/NiAVObject.hpp"
 #include "Gamebryo/NiRTTI.hpp"
 #include "Gamebryo/NiCullingProcess.hpp"
 #include "Gamebryo/NiAlphaAccumulator.hpp"
@@ -903,124 +903,6 @@ public:
 static_assert(sizeof(WaterShaderProperty) == 0x150);
 
 class NiDynamicEffectState;
-
-// 9C
-class NiAVObject : public NiObjectNET {
-public:
-	NiAVObject();
-	~NiAVObject();
-
-	virtual void			UpdateControllers(NiUpdateData& arData);
-	virtual void			ApplyTransform(NiMatrix3& arMat, NiPoint3& arTrn, bool abOnLeft);
-	virtual void			SetMaterialNeedsUpdate(bool abNeedsUpdate);
-	virtual void			SetDefaultMaterialNeedsUpdateFlag(bool abNeedsUpdate);
-	virtual NiAVObject*		GetObjectByName(const NiFixedString& arName) const;
-	virtual void			SetSelectiveUpdateFlags(bool& arSelectiveUpdate, bool abSelectiveUpdateTransforms, bool& arRigid);
-	virtual void			UpdateDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
-	virtual void			UpdateSelectedDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
-	virtual void			UpdateRigidDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
-	virtual void			UpdatePropertiesDownward(NiPropertyState* apParentState);
-	virtual void			UpdateEffectsDownward(NiDynamicEffectState* apEffectState);
-	virtual void			UpdateWorldData(NiUpdateData& arData);
-	virtual void			UpdateWorldBound();
-	virtual void			UpdateTransformAndBounds(NiUpdateData& arData);
-	virtual void			PreAttachUpdate(NiNode* apEventualParent, NiUpdateData& arData);
-	virtual void			PreAttachUpdateProperties(NiNode* apEventualParent);
-	virtual void			PreAttachUpdateEffects(NiNode* apEventualParent);
-	virtual void			PostAttachUpdate();
-	virtual void			OnVisible(NiCullingProcess* apCuller);
-	virtual void			PurgeRendererData(NiDX9Renderer* apRenderer);
-
-	NiNode*							m_pkParent;				// 18
-	NiPointer<bhkNiCollisionObject>	m_spCollisionObject;		// 1C
-	NiBound*						m_pWorldBound;			// 20
-	DList<NiProperty>				m_propertyList;			// 24
-	Bitfield32						m_uiFlags;				// 30
-	NiTransform						m_kLocal;
-	NiTransform						m_kWorld;
-
-#ifdef GAME
-	static constexpr AddressPtr<NiBound, 0x11F4288> kNullBound;
-#else
-	static constexpr AddressPtr<NiBound, 0xF1FD88> kNullBound;
-#endif
-
-	NiProperty* GetProperty(uint32_t auiType) const;
-
-	void SetAppCulled(bool abCulled) {
-		m_uiFlags.Set(1, abCulled);
-	}
-
-	bool GetAppCulled() const {
-		return m_uiFlags.GetBit(0);
-	}
-
-	void SetAlwaysDraw(bool abVal) {
-		ThisCall(0x546780, this, abVal);
-	}
-
-	void SetFixedBound(bool abVal) {
-		m_uiFlags.Set(0x2000, abVal);
-	}
-
-	void SetIgnoreFade(bool abVal) {
-		m_uiFlags.Set(0x8000, abVal);
-	}
-
-	void DumpProperties();
-	void DumpParents();
-
-	void Update(NiUpdateData& arData) {
-		ThisCall(0xA59C60, this, &arData);
-	}
-
-	void Update() {
-		NiUpdateData kData;
-		Update(kData);
-	}
-
-	void UpdateSelected(NiUpdateData& arData) {
-		ThisCall(0xA59C90, this, &arData);
-	}
-
-	void UpdateSelected() {
-		NiUpdateData kData;
-		Update(kData);
-	}
-
-	void UpdateProperties() {
-		ThisCall(0xA5A040, this);
-	}
-
-	void SetLocalRotate(const NiMatrix3& arMat) {
-		m_kLocal.m_kRotate = arMat;
-	}
-
-	void SetLocalTranslate(const NiPoint3& arTrn) {
-		m_kLocal.m_kTranslate = arTrn;
-	}
-
-	void SetLocalScale(float afScale) {
-		m_kLocal.m_fScale = afScale;
-	}
-
-	NiTimeController* GetController(const NiRTTI* apRTTI) const {
-		return ThisCall<NiTimeController*>(0xA5C570, this, apRTTI);
-	}
-
-	template <class ControllerType>
-	ControllerType* GetController() const {
-		return static_cast<ControllerType*>(GetController(&ControllerType::ms_RTTI));
-	}
-
-	const NiBound& GetWorldBound() const {
-		return m_pWorldBound ? *m_pWorldBound : kNullBound;
-	}
-
-	NiNode* GetParent() const {
-		return m_pkParent;
-	}
-};
 
 // AC
 class NiNode : public NiAVObject {
@@ -2162,24 +2044,6 @@ public:
 static_assert(sizeof(ParticleShaderProperty) == 0x14C);
 
 class BSCompoundFrustum;
-
-class NiTreeCtrl
-{
-public:
-	static NiTreeCtrl* Create(NiNode* apNode)
-	{
-		NiTreeCtrl* pAlloc = CdeclCall<NiTreeCtrl*>(0x401000, 0x30U);
-
-		DWORD* pTESMain = *(DWORD**)0x11DEA0C;
-		return ThisCall<NiTreeCtrl*>(0x4D61B0, pAlloc, pTESMain[3], pTESMain[2], apNode, "Test", 0x80000000,
-			0x80000000, 800, 600);
-	}
-
-	void CreateTree(NiNode* apNode, const char* apName)
-	{
-		ThisCall(0x4D64C0, this, apNode, apName);
-	}
-};
 
 class NiRenderTargetGroup : public NiObject {
 public:

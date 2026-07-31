@@ -808,6 +808,12 @@
     <ClCompile Include="internal\Game\Bethesda\CreatureSounds.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiAVObject.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiBound.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -2226,6 +2232,12 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\CreatureSounds.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiAVObject.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiBound.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

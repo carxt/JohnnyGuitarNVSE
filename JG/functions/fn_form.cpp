@@ -2509,12 +2509,12 @@ enum UPDATE3D_FLAGS_EX {
 };
 
 static ShadowSceneNode* FindSceneNodeRecurse(const NiAVObject* apObject) {
-	NiNode* pParent = apObject->GetParent();
+	const NiNode* pParent = apObject->GetParent();
 	if (!pParent)
 		return nullptr;
 
 	if (pParent->IsExactKindOf<ShadowSceneNode>())
-		return static_cast<ShadowSceneNode*>(pParent);
+		return static_cast<ShadowSceneNode*>(const_cast<NiNode*>(pParent));
 	else
 		return FindSceneNodeRecurse(pParent);
 }

@@ -19,6 +19,7 @@
 #include "internal/Game/Gamebryo/NiFrustum.hpp"
 #include "internal/Game/Gamebryo/NiColor.hpp"
 #include "internal/Game/Gamebryo/NiColorA.hpp"
+#include "internal/Game/Gamebryo/NiBound.hpp"
 
 struct NiQuaternion;
 
@@ -33,17 +34,6 @@ struct NiQuaternion
 	void EulerYPR(NiPoint3 &ypr);
 	void RotationMatrix(NiMatrix3 &rotMatrix);
 	void Dump();
-};
-
-// 10
-class NiBound
-{
-public:
-	NiPoint3	kCenter;
-	union {
-		float	fRadius;
-		int		iRadius;
-	};
 };
 
 // 10

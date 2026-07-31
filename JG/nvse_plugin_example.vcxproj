@@ -299,6 +299,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESWeightForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TimeGlobal.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TLSData.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiAVObject.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiBound.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiColor.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiColorA.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiCullingProcess.cpp" />
@@ -699,7 +701,9 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\FaceGen\oldstd.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiAccumulator.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiAlphaAccumulator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiAVObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiBackToFrontAccumulator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiBound.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiColor.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiColorA.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiCriticalSection.hpp" />
