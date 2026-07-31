@@ -12,11 +12,14 @@ public:
 	NiObjectNET();
 	virtual ~NiObjectNET();
 
-	enum CopyType {
-		COPY_NONE	= 0,
-		COPY_EXACT	= 1,
-		COPY_UNIQUE = 2,
+	struct _CopyType {
+		enum Type {
+			NONE	= 0,
+			EXACT	= 1,
+			UNIQUE	= 2,
+		};
 	};
+	using CopyType = _CopyType::Type;
 
 	NiFixedString					m_kName;
 	NiPointer<NiTimeController>		m_spControllers;
@@ -32,23 +35,31 @@ public:
 	static constexpr AddressPtr<NiCriticalSection, 0xF1FE80> kExtraDataLock;
 #endif
 
-	const char* GetName() const { return m_kName.m_kHandle; };
-	void SetName(const NiFixedString& arString) { m_kName = arString;	};
+	const NiFixedString& GetName() const;
+	void SetName(const NiFixedString& arName);
 
-	NiTimeController* GetControllers() const { return m_spControllers; };
+	NiTimeController* GetControllers() const;
+	void SetControllers(NiTimeController* apController);
+
 	NiTimeController* GetController(const NiRTTI* apRTTI) const;
 	template <class ControllerType>
 	ControllerType* GetController() const {
 		return static_cast<ControllerType*>(GetController(&ControllerType::ms_RTTI));
 	}
 
+	void PrependController(NiTimeController* apController);
 	void RemoveController(NiTimeController* apController);
+	void RemoveAllControllers();
+
+	uint16_t GetExtraDataSize() const;
+	bool SetExtraDataSize(uint16_t ausSize);
 
 	NiExtraData* GetExtraData(const NiFixedString& arKey) const;
 	bool AddExtraData(NiExtraData* apExtraData);
 	bool AddExtraData(const NiFixedString& arKey, NiExtraData* apExtraData);
-	bool RemoveExtraData(const NiFixedString& arKey);
+	bool InsertExtraData(NiExtraData* apExtraData);
 	void DeleteExtraData(uint16_t ausIndex);
+	bool RemoveExtraData(const NiFixedString& arKey);
 	void RemoveAllExtraData();
 
 	static CopyType GetDefaultCopyType();
