@@ -2,7 +2,6 @@
 
 #include "Utilities.h"
 #include "GameTypes.h"
-#include "GameBSExtraData.h"
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
 
@@ -47,6 +46,7 @@
 #include "Bethesda/BipedAnim.hpp"
 #include "Bethesda/CachedValuesOwner.hpp"
 #include "Bethesda/EffectSetting.hpp"
+#include "Bethesda/ExtraDataList.hpp"
 #include "Bethesda/MagicItemForm.hpp"
 #include "Bethesda/TESActorBase.hpp"
 #include "Bethesda/TESActorBaseData.hpp"

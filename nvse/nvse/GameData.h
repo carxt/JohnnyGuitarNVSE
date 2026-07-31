@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameForms.h"
-#include "GameExtraData.h"
 #include "Utilities.h"
 
 #include "Bethesda/TESDataHandler.hpp"

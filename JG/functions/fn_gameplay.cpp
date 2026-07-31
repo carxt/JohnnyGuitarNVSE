@@ -1,17 +1,20 @@
 #include "fn_gameplay.h"
 
-#include "Bethesda/BSUtilities.hpp"
-#include "Bethesda/GameSettingCollection.hpp"
-#include "Bethesda/INISettingCollection.hpp"
-#include "Bethesda/TESDataHandler.hpp"
-#include "Bethesda/TESObject.hpp"
-#include "Bethesda/TESObjectList.hpp"
 #include "decoding.h"
 #include "GameEffects.h"
 #include "GameForms.h"
 #include "GameProcess.h"
 #include "GameRTTI.h"
 #include "GameUI.h"
+
+#include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/INISettingCollection.hpp"
+#include "Bethesda/TESDataHandler.hpp"
+#include "Bethesda/TESObject.hpp"
+#include "Bethesda/TESObjectList.hpp"
+#include "Bethesda/ExtraOwnership.hpp"
+
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
 #include "JG/DisabledArrowKeys.hpp"
@@ -24,7 +27,7 @@
 #include "JG/ScriptUtils.hpp"
 #include "JG/WorldToScreen.hpp"
 
-#include <shared/BSMemory/BSScrapMemory.hpp>
+#include "shared/BSMemory/BSScrapMemory.hpp"
 
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
@@ -797,7 +800,7 @@ bool __fastcall IsHostileCompassTarget(const TESObjectREFR* apTarget) {
 bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* pActor = static_cast<Actor*>(thisObj);
-	if (ThisCall<bool>(0x579690, thisObj) && (!thisObj->IsActor() || !pActor->IsPlayerTeammate()) ||
+	if (thisObj->IsCrimeToActivate() && (!thisObj->IsActor() || !pActor->IsPlayerTeammate()) ||
 		thisObj->IsActor() && (IsCombatTarget(pActor, PlayerCharacter::GetSingleton()) || IsHostileCompassTarget(thisObj))) {
 		*result = 1;
 	}
@@ -808,7 +811,7 @@ bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 
 bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESForm* pOwner = ThisCall<TESForm*>(0x567790, thisObj); // TESObjectREFR::GetOwner
+	TESForm* pOwner = thisObj->GetOwner();
 	if (pOwner) {
 		ThisCall(0x8C0EC0, PlayerCharacter::GetSingleton(), thisObj, pOwner, 0xFFFFFFFF); // Actor::TrespassAlarm
 		*result = 1;
@@ -856,11 +859,14 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems) && container) {
 		if (checkItems) {
-			TESForm* containerOwner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::GetOwner
-			if (!containerOwner) return true;
+			TESForm* containerOwner = container->GetOwner();
+			if (!containerOwner)
+				return true;
+
 			ExtraContainerChanges* xChanges = thisObj->GetExtraData<ExtraContainerChanges>();
 			if (!xChanges || !xChanges->pChanges || !xChanges->pChanges->pItems)
 				return true;
+
 			BSSimpleList<ItemChange*>* contChangesIter = xChanges->pChanges->pItems->GetHead();
 			while (contChangesIter && !contChangesIter->IsEmpty()){
 				ItemChange* entry = contChangesIter->GetItem();
@@ -886,7 +892,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 			}
 		}
 		else {
-			TESForm* owner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::GetOwner
+			TESForm* owner = container->GetOwner();
 			ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, owner); // Actor::StealAlarm
 			*result = 1;
 		}

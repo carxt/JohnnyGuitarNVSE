@@ -1,6 +1,8 @@
 #include "NPCAccuracy.hpp"
 #include "GameObjects.h"
 
+#include "Bethesda/ExtraFactionChanges.hpp"
+
 #include <Shared/BSMemory/BSScrapMemory.hpp>
 
 #include <unordered_map>

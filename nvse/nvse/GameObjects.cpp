@@ -1,6 +1,5 @@
 #include "GameObjects.h"
 #include "GameRTTI.h"
-#include "GameExtraData.h"
 #include "GameTasks.h"
 #include "GameUI.h"
 #include "GameProcess.h"

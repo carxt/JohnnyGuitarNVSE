@@ -38,6 +38,9 @@ public:
 
 	BGSEncounterZone* GetEncounterZone() const;
 	void SetEncounterZone(BGSEncounterZone* apZone);
+
+	float GetRadius() const;
+	void SetRadius(float afRadius);
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

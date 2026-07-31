@@ -1,8 +1,6 @@
 #pragma once
 
 #include "GameForms.h"
-#include "GameBSExtraData.h"
-#include "GameExtraData.h"
 #include "Obsidian/AudioMarkerInfo.hpp"
 #include "Bethesda/TESRegionList.hpp"
 #include "Bethesda/Character.hpp"

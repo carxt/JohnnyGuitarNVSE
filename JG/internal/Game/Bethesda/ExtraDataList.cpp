@@ -78,3 +78,13 @@ BGSEncounterZone* ExtraDataList::GetEncounterZone() const {
 void ExtraDataList::SetEncounterZone(BGSEncounterZone* apZone) {
 	ThisCall(0x421C60, this, apZone);
 }
+
+// GAME - 0x422320
+float ExtraDataList::GetRadius() const {
+	return ThisCall<float>(0x422320, this);
+}
+
+// GAME - 0x422220
+void ExtraDataList::SetRadius(float afRadius) {
+	ThisCall(0x422220, this, afRadius);
+}

@@ -1,33 +1,41 @@
 #include "fn_form.h"
-#include "GameSettings.h"
-#include "Bethesda/TESObjectList.hpp"
-#include "GameObjects.h"
-#include "GameForms.h"
-#include "Shared/BSMemory/BSScrapMemory.hpp"
-#include <PluginAPI.h>
-#include <GameExtraData.h>
-#include "GameProcess.h"
-#include "GameTasks.h"
-#include <unordered_map>
-#include "JG/JGSetList.hpp"
-#include <JG/BarterFilter.hpp>
-#include <JG/JohnnyExtraData.hpp>
-#include <JG/AnimActivationHeight.hpp>
-#include <GameData.h>
-#include <GameRTTI.h>
 #include "decoding.h"
-#include <events/LambdaVariableContext.h>
-#include <numbers>
-#include <Bethesda/AILinearTaskThreadManager.hpp>
-#include <JG/TaskQueue.hpp>
-#include <JG/LandRemapping.hpp>
-#include <Bethesda/BSShaderManager.hpp>
-#include <Bethesda/TESMain.hpp>
-#include <Bethesda/BSUtilities.hpp>
-#include <Bethesda/Calendar.hpp>
+#include "events/LambdaVariableContext.h"
+#include "GameData.h"
+#include "GameForms.h"
+#include "GameObjects.h"
+#include "GameProcess.h"
+#include "GameRTTI.h"
+#include "GameSettings.h"
+#include "GameTasks.h"
+#include "PluginAPI.h"
 
+#include "Bethesda/AILinearTaskThreadManager.hpp"
+#include "Bethesda/BSShaderManager.hpp"
+#include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/Calendar.hpp"
+#include "Bethesda/ExtraActivateRef.hpp"
+#include "Bethesda/ExtraDetachTime.hpp"
+#include "Bethesda/ExtraFactionChanges.hpp"
+#include "Bethesda/ExtraHotkey.hpp"
+#include "Bethesda/ExtraPrimitive.hpp"
+#include "Bethesda/ExtraSeenData.hpp"
+#include "Bethesda/TESMain.hpp"
+#include "Bethesda/TESObjectList.hpp"
+
+#include "JG/AnimActivationHeight.hpp"
+#include "JG/BarterFilter.hpp"
+#include "JG/JGSetList.hpp"
+#include "JG/JohnnyExtraData.hpp"
+#include "JG/LandRemapping.hpp"
 #include "JG/ScriptUtils.hpp"
+#include "JG/TaskQueue.hpp"
 using namespace ScriptUtils;
+
+#include "numbers"
+#include "unordered_map"
+
+#include "Shared/BSMemory/BSScrapMemory.hpp"
 
 extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, uint8_t numArgs, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
@@ -505,10 +513,11 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ExtraActivateRef* xActivateRef = thisObj->GetExtraData<ExtraActivateRef>();
-	if (xActivateRef) {
-		g_strInterface->Assign(PASS_COMMAND_ARGS, xActivateRef->strActivationPrompt.c_str());
-		if (IsConsoleMode()) Console_Print("GetRefActivationPromptOverride >> %s", xActivateRef->strActivationPrompt.c_str());
+	ExtraActivateRef* pActivateRef = thisObj->GetExtraData<ExtraActivateRef>();
+	if (pActivateRef) {
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pActivateRef->strActivationPrompt.c_str());
+		if (IsConsoleMode()) 
+			Console_Print("GetRefActivationPromptOverride >> %s", pActivateRef->strActivationPrompt.c_str());
 	}
 	return true;
 }
@@ -1770,8 +1779,8 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* pCell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
-		ExtraDetachTime* pDetachTime = pCell->extraDataList.GetExtraData<ExtraDetachTime>();
-		uint32_t uiDetachTime = pDetachTime ? pDetachTime->uiTime : 0;
+		const ExtraDetachTime* pDetachTime = pCell->extraDataList.GetExtraData<ExtraDetachTime>();
+		const uint32_t uiDetachTime = pDetachTime ? pDetachTime->uiTime : 0;
 		if (uiDetachTime == 0) {
 			*result = -1;
 		}
@@ -1779,9 +1788,9 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 			*result = 1;
 		}
 		else {
-			uint32_t iHoursToRespawnCell = *(uint32_t*)0x11CA164;
-			uint32_t uiGameHoursPassed = Calendar::GetSingleton()->GetHoursPassed();
-			*result = (uiGameHoursPassed - uiDetachTime) >= iHoursToRespawnCell;
+			const uint32_t uiHoursToRespawnCell = GameSettingCollection::iHoursToRespawnCell->Int();
+			const uint32_t uiGameHoursPassed = Calendar::GetSingleton()->GetHoursPassed();
+			*result = (uiGameHoursPassed - uiDetachTime) >= uiHoursToRespawnCell;
 		}
 		if (IsConsoleMode())
 			Console_Print("IsCellExpired >> %.0f", *result);
@@ -1941,8 +1950,7 @@ bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS) {
 	*result = 0;
 
 	if (!thisObj)

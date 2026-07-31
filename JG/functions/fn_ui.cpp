@@ -1,14 +1,19 @@
 #include "fn_ui.h"
+
+#include "decoding.h"
+#include "GameObjects.h"
+#include "GameRTTI.h"
+#include "GameUI.h"
+
+#include "Bethesda/FileFinder.hpp"
+#include "Bethesda/ExtraMapMarker.hpp"
+
+#include "JG/ExtraMarkerIcons.hpp"
+#include "JG/ExtraMiscStats.hpp"
+#include "JG/ExtraReputationIcons.hpp"
+#include "JG/RSMBarberHook.hpp"
+
 #include "Shared/Utils/StackObject.hpp"
-#include <GameObjects.h>
-#include <GameUI.h>
-#include <JG/RSMBarberHook.hpp>
-#include <JG/ExtraMiscStats.hpp>
-#include <decoding.h>
-#include <GameRTTI.h>
-#include <Bethesda/FileFinder.hpp>
-#include <JG/ExtraReputationIcons.hpp>
-#include <JG/ExtraMarkerIcons.hpp>
 
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 

@@ -1,5 +1,4 @@
 #include "BarterFilter.hpp"
-#include "GameExtraData.h"
 #include "GameUI.h"
 
 #include "JGSetList.hpp"
