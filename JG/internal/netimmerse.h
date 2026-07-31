@@ -3,7 +3,7 @@
 #include "NiTypes.h"
 #include "GameTypes.h"
 
-#include "Gamebryo/NiAVObject.hpp"
+#include "Gamebryo/NiNode.hpp"
 #include "Gamebryo/NiRTTI.hpp"
 #include "Gamebryo/NiCullingProcess.hpp"
 #include "Gamebryo/NiAlphaAccumulator.hpp"
@@ -903,54 +903,6 @@ public:
 static_assert(sizeof(WaterShaderProperty) == 0x150);
 
 class NiDynamicEffectState;
-
-// AC
-class NiNode : public NiAVObject {
-public:
-	NiNode();
-	~NiNode();
-
-	virtual void	AttachChild(NiAVObject* apChild, bool abFirstAvail);
-	virtual void	InsertChildAt(uint32_t i, NiAVObject* apChild);
-	virtual void	DetachChildAlt(NiAVObject* apChild, NiPointer<NiAVObject>& arResult);
-	virtual void	DetachChild(NiAVObject* apChild);
-	virtual void	DetachChildAtAlt(uint32_t i, NiPointer<NiAVObject>& arResult);
-	virtual void	DetachChildAt(uint32_t i);
-	virtual void	SetAtAlt(uint32_t i, NiAVObject* apChild, NiPointer<NiAVObject>& arResult);
-	virtual void	SetAt(uint32_t i, NiAVObject* apChild);
-	virtual void	UpdateUpwardPass();
-
-	NiTObjectArray<NiPointer<NiAVObject>>	m_kChildren;		// 9C
-
-	static NiNode* Create(uint16_t ausChildCount = 0);
-
-	NiAVObject* GetBlock(const char* blockName);
-	NiNode* GetNode(const char* nodeName);
-
-	uint32_t GetArrayCount() const {
-		return m_kChildren.GetSize();
-	}
-
-	uint32_t GetChildCount() const {
-		return m_kChildren.GetEffectiveSize();
-	}
-
-	NiAVObject* GetAt(uint32_t auiIndex) const {
-		return m_kChildren.GetAt(auiIndex);
-	}
-
-	NiAVObject* GetAtChecked(uint32_t auiIndex) const {
-		if (GetArrayCount() <= auiIndex)
-			return nullptr;
-
-		return GetAt(auiIndex);
-	}
-
-	void RemoveChildren() {
-		m_kChildren.RemoveAll();
-	}
-};
-static_assert(sizeof(NiNode) == 0xAC);
 
 class NiSwitchNode : public NiNode {
 public:

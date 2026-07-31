@@ -136,9 +136,6 @@
     <ClCompile Include="..\shared\BSMemory\BSScrapMemory.cpp">
       <Filter>shared\BSMemory</Filter>
     </ClCompile>
-    <ClCompile Include="internal\netimmerse.cpp">
-      <Filter>internal</Filter>
-    </ClCompile>
     <ClCompile Include="..\shared\Utils\DebugLog.cpp">
       <Filter>shared\Utils</Filter>
     </ClCompile>
@@ -812,6 +809,9 @@
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Gamebryo\NiBound.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiNode.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2237,6 +2237,9 @@
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiBound.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiNode.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
   </ItemGroup>

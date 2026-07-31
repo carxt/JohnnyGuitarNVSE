@@ -310,6 +310,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiMatrix3.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMemObject.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMemory.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiNode.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiObject.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiObjectNET.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiPlane.cpp" />
@@ -368,7 +369,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\JIP\JIPSettings.cpp" />
     <ClCompile Include="internal\JIP\JIPUtils.cpp" />
     <ClCompile Include="internal\md5\md5.cpp" />
-    <ClCompile Include="internal\netimmerse.cpp" />
     <ClCompile Include="internal\sha1\sha1.cpp" />
     <ClCompile Include="internal\utility.cpp" />
     <ClCompile Include="JohnnyGuitarNVSE.cpp" />
@@ -715,6 +715,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiMatrix3.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemory.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiNode.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPalette.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiParticles.hpp" />
