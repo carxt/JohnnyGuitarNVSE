@@ -38,7 +38,7 @@ namespace SkyUpdateFixes {
 
 				pCloud->SetAppCulled(true);
 
-				NiProperty* pProperty = pCloud->GetProperty(NiProperty::kPropertyType_Shade);
+				NiProperty* pProperty = pCloud->GetProperty(NiProperty::PropertyType::SHADE);
 				if (!pProperty) [[unlikely]]
 					return;
 

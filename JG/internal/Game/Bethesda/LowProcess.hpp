@@ -67,7 +67,7 @@ public:
 	Bitfield<_LowFlags>				ucLowProcessFlags;
 	TESBoundObject*					pItemBeingUsed;
 	CombatTimer						kCombatDelayTimer;
-	TESObjectREFR*					pTarget;
+	const TESObjectREFR*			pTarget;
 	TESObjectREFR*					pGenericLocation;
 	TESObjectREFR*					pSecondLocation;
 	BGSListForm*					pTargetFormList;

@@ -71,7 +71,7 @@ bool Cmd_AudioMarkerGetCurrent_Execute(COMMAND_ARGS) {
 SPEC_NOINLINE bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj) {
-		ExtraAudioMarker* pExtraMarker = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
+		ExtraAudioMarker* pExtraMarker = thisObj->GetExtraData<ExtraAudioMarker>();
 		if (pExtraMarker && pExtraMarker->pData) {
 			uintptr_t uiCtrlFormID = pExtraMarker->pData->uiMediaLocationController;
 			TESForm* pFoundForm = TESForm::GetFormByNumericID(uiCtrlFormID);

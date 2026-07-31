@@ -35,18 +35,25 @@ public:
 
 	struct ALIGN4 _Flags {
 		enum Flags {
-			DEAD_REP_MASK	= 0xF,
-			LOOP_MASK		= 0x3,
+			DEAD_REP_MASK		= 0xF,
+			LOOP_MASK			= 0x3,
 
-			DEAD_REP_POS	= 0,
-			LOOP_POS		= 4,
+			DEAD_REP_POS		= 0,
+			LOOP_POS			= 4,
 
-			DEFAULT_TIME 	= 1u << 6,
+			DEFAULT_TIME 		= 1u << 6,
+#if USE_MODDED_CHANGES
+			IGNORE_ACTOR_COUNT	= 1u << 8,
+#endif
 		};
 
-		uint8_t	eDeadRep		: 4;
-		uint8_t	eLoop			: 2;
-		bool	bDefaultTime	: 1;
+		uint8_t	eDeadRep			: 4;
+		uint8_t	eLoop				: 2;
+		bool	bDefaultTime		: 1;
+		bool						: 1;
+#if USE_MODDED_CHANGES
+		bool	bIgnoreActorCount	: 1; // Added by JohnnyGuitar
+#endif
 	};
 	using Flags = _Flags::Flags;
 

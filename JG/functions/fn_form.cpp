@@ -2869,11 +2869,11 @@ bool Cmd_PickIdleEx_Execute(COMMAND_ARGS) {
 		return true;
 
 	TESObjectREFR* pTargetRef = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetRef) && pTargetRef && pTargetRef->baseForm) {
-		LowProcess* pAIProcess = static_cast<LowProcess*>(pUser->baseProcess);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetRef) && pTargetRef && pTargetRef->GetObjectReference()) {
+		LowProcess* pAIProcess = static_cast<LowProcess*>(pUser->GetCurrentAIProcess());
 		const TESObjectREFR* pOrgTarget = pAIProcess->pTarget;
 		pAIProcess->pTarget = pTargetRef;
-		*result = pAIProcess->FindSpecialIdletoPlay(pUser, pTargetRef->baseForm, pTargetRef);
+		*result = pAIProcess->FindSpecialIdletoPlay(pUser, pTargetRef->GetOriginalObjectReference(), pTargetRef);
 		pAIProcess->pTarget = pOrgTarget;
 	}
 

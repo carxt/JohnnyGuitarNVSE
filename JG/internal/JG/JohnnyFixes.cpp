@@ -102,8 +102,8 @@ namespace JohnnyFixes {
 		TESObjectREFR* pReference = *reinterpret_cast<TESObjectREFR**>(pEBP + 0x8);
 		if (pReference && pReference->IsActor()) {
 			Actor* pActor = static_cast<Actor*>(pReference);
-			if (pActor->baseProcess) {
-				ItemChange* pWeaponItem = pActor->baseProcess->GetCurrentWeapon();
+			if (pActor->GetCurrentAIProcess()) {
+				ItemChange* pWeaponItem = pActor->GetCurrentAIProcess()->GetCurrentWeapon();
 				if (pWeaponItem)
 					aucModSlots = pWeaponItem->GetModSlots();
 			}
@@ -335,7 +335,7 @@ namespace JohnnyFixes {
 	void __fastcall SetCellImageSpaceHook(TESObjectCELL* apCell, void*, TESImageSpace* apImageSpace) {
 		ThisCall(kSetCellImageSpaceDetour, apCell, apImageSpace);
 		const PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
-		if (apImageSpace && pPlayer->parentCell && pPlayer->parentCell == apCell)
+		if (apImageSpace && pPlayer->GetParentCell() && pPlayer->GetParentCell() == apCell)
 			CdeclCall(0xB4F430, apImageSpace->traitValues);
 	}
 
@@ -346,8 +346,8 @@ namespace JohnnyFixes {
 
 			bool bCanSpeak = !bNoHead;
 			if (bCanSpeak) {
-				const BaseProcess* pAIProcess = apActor->baseProcess;
-				if (pAIProcess && pAIProcess->processLevel == PROCESS_TYPE::HIGH && apActor->GetDead()) {
+				const BaseProcess* pAIProcess = apActor->GetCurrentAIProcess();
+				if (pAIProcess && pAIProcess->GetProcessLevel() == PROCESS_TYPE::HIGH && apActor->IsDead(false)) {
 					const DialoguePackage* pPackage = static_cast<DialoguePackage*>(pAIProcess->GetCurrentPackage());
 					if (pPackage) {
 						const bool bDialoguePackage = pPackage->type == PACKAGE_TYPE::DIALOGUE || pPackage->type == PACKAGE_TYPE::IN_GAME_DIALOGUE;
@@ -377,9 +377,9 @@ namespace JohnnyFixes {
 	}
 
 	void ClearPlayerFurniture() {
-		BaseProcess* pAIProcess = PlayerCharacter::GetSingleton()->baseProcess;
+		BaseProcess* pAIProcess = PlayerCharacter::GetSingleton()->GetCurrentAIProcess();
 		if (pAIProcess)
-			pAIProcess->SetFurnitureRef(PlayerCharacter::GetSingleton(), 0, nullptr, 0x7F);
+			pAIProcess->ClearFurniture(PlayerCharacter::GetSingleton());
 	}
 
 	void Init() {
