@@ -17,7 +17,7 @@
 #include "JohnnyPatches.hpp"
 #include "JohnnyRadios.hpp"
 #include "LandRemapping.hpp"
-#include "MediaLocationControllerOverride.hpp"
+#include "MediaLocationControllerTweaks.hpp"
 #include "NPCAccuracy.hpp"
 #include "RSMBarberHook.hpp"
 #include "TaskQueue.hpp"
@@ -100,7 +100,7 @@ static void __fastcall GameReset(uint32_t aeType) {
 	BarterFilter::Reset();
 	NPCAccuracy::Reset();
 	CustomHUDShake::Reset();
-	MediaLocationControllerOverride::Reset();
+	MediaLocationControllerTweaks::ResetOverride();
 	JohnnyFixes::ClearPlayerFurniture(); //fix furniture crash on reload
 	CameraOverride::Reset();
 	JohnnyEvents::Reset();

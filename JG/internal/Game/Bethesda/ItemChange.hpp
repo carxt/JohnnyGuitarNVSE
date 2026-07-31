@@ -69,6 +69,8 @@ public:
 	float GetModifiedDamageThreshold(ActorValueOwner* apActor) const;
 
 	float GetModifiedAttackDamage(ActorValueOwner* apActor, float afDamageMult, bool abIgnoreExplosion) const;
+
+	uint8_t	GetModSlots() const;
 };
 
 ASSERT_SIZE(ItemChange, 0xC);

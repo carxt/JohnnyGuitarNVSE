@@ -315,24 +315,19 @@ bool Cmd_GetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
 }
 
 // To be hooked by RTM
-bool Cmd_IsMenuPaused_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_IsMenuPaused_Eval(COMMAND_ARGS_EVAL) {
+	*result = 1.0;
 	uint32_t uiMenuID = reinterpret_cast<uint32_t>(arg1);
-	if (uiMenuID == 0) {
+	if (uiMenuID == 0)
 		*result = InterfaceManager::GetSingleton()->currentMode != 1;
-	}
-	else {
-		*result = 1.0;
-	}
 	return true;
 }
 
 bool Cmd_IsMenuPaused_Execute(COMMAND_ARGS) {
 	*result = 1;
 	uint32_t uiMenuID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiMenuID)) {
-		Cmd_IsMenuPaused_Eval(thisObj, reinterpret_cast<void*>(uiMenuID), nullptr, result);
-	}
-	return true;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &uiMenuID);
+	return Cmd_IsMenuPaused_Eval(thisObj, reinterpret_cast<void*>(uiMenuID), nullptr, result);
 }
 
 float CalculateRepairedHealth(ItemChange* target, ItemChange* repairItem) {

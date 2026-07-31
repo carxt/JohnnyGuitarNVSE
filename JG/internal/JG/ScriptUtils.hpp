@@ -11,6 +11,6 @@ namespace ScriptUtils {
 		return value > T::NONE && value < T::COUNT;
 	}
 
-	NiAVObject* __fastcall GetReferenceScene(TESObjectREFR* apRef, bool abFirstPerson);
+	SPEC_NOINLINE NiAVObject* __fastcall GetReferenceScene(TESObjectREFR* apRef, bool abFirstPerson);
 
 }

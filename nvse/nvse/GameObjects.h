@@ -398,7 +398,7 @@ public:
 	float				flt108;			// 108
 	float				flt10C;			// 10C
 	float				distTravelled;	// 110
-	NiRefObject* object114;		// 114
+	NiPointer<NiLight> spLight;		// 114
 	uint8_t				byte118;		// 118
 	uint8_t				pad119[3];		// 119
 	NiNode* node11C;		// 11C

@@ -29,8 +29,6 @@ ExpressionEvaluatorUtils s_expEvalUtils;
 namespace JohnnyCommands {
 
 	void InitCommandData() {
-		DisabledSaves::Init();
-		CustomHUDShake::Init();
 		AnimActivationHeight::Init();
 	}
 
@@ -418,7 +416,6 @@ namespace JohnnyCommands {
 		REG_CMD(GetParticleEmitterSpawnRate);
 		REG_TYPED_CMD(GetItemEffectString, String);
 		REG_CMD(ApplyModelTextureSwap);
-		REG_CMD(GetCombatTargetDistance);
 		REG_CMD(StopIdleLoop);
 		REG_CMD(SetIKState);
 		REG_CMD(GetIKState);
@@ -428,6 +425,15 @@ namespace JohnnyCommands {
 		REG_CMD(GetMenuItemListIndex);
 		REG_CMD(SelectMenuItemListIndex);
 		REG_CMD(StopNiSequence);
+		REG_CMD(GetPCInRootWorldspace);
+		REG_TYPED_CMD(GetPCRootWorldspace, Form);
+		REG_TYPED_CMD(GetAltTextures, Array);
+		REG_CMD(SetAltTexture);
+		REG_CMD(ClearAltTexture);
+		REG_CMD(SetNiLightValue);
+		REG_CMD(GetNiLightValue);
+		REG_CMD(SetNiLightColor);
+		REG_CMD(GetNiLightColor);
 	}
 
 }

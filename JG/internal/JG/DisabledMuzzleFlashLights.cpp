@@ -7,16 +7,17 @@ namespace DisabledMuzzleFlashLights {
 
 	HookUtils::CallDetour kDetour;
 
-	void __fastcall DisableMuzzleFlashLightsHook(MuzzleFlash* apMuzzleFlash) {
+	void __fastcall CreateMuzzleFlashLightsHook(MuzzleFlash* apMuzzleFlash) {
 		if (eDisableMode == Mode::ENABLE
-			|| (eDisableMode == Mode::DISABLE_NPCS && apMuzzleFlash->pSourceActor != PlayerCharacter::GetSingleton())
-			|| (eDisableMode == Mode::DISABLE_PLAYER && apMuzzleFlash->pSourceActor == PlayerCharacter::GetSingleton())) {
+			|| (eDisableMode == Mode::DISABLE_NPCS && apMuzzleFlash->pSourceActor == PlayerCharacter::GetSingleton())
+			|| (eDisableMode == Mode::DISABLE_PLAYER && apMuzzleFlash->pSourceActor != PlayerCharacter::GetSingleton())) {
+
 			ThisCall(kDetour, apMuzzleFlash);
 		}
 	}
 
 	void Install() {
-		kDetour.ReplaceCall(0x9BAFED, DisableMuzzleFlashLightsHook);
+		kDetour.ReplaceCall(0x9BAFED, CreateMuzzleFlashLightsHook);
 	}
 
 	void Reset() {

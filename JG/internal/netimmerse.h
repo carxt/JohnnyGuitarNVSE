@@ -165,34 +165,37 @@ public:
 	uint32_t			unk14;		// 14
 };
 
+class NiBoolInterpolator;
+class NiQuatTransform;
+
 // 0C
 class NiInterpolator : public NiObject {
 public:
 	NiInterpolator();
 	~NiInterpolator();
 
-	virtual void	Unk_23(void);
-	virtual void	Unk_24(void);
-	virtual void	Unk_25(void);
-	virtual void	Unk_26(void);
-	virtual void	Unk_27(void);
-	virtual void	Unk_28(void);
-	virtual void	Unk_29(void);
-	virtual void	Unk_2A(void);
-	virtual void	Unk_2B(void);
-	virtual void	Unk_2C(void);
-	virtual void	Unk_2D(void);
-	virtual void	Unk_2E(void);
-	virtual void	Unk_2F(void);
-	virtual void	Unk_30(void);
-	virtual void	Unk_31(void);
-	virtual void	Unk_32(void);
-	virtual void	Unk_33(void);
-	virtual void	Unk_34(void);
-	virtual void	Unk_35(void);
-	virtual void	Unk_36(void);
+	virtual bool				UpdateTransform(float afTime, NiObjectNET* apTarget, NiQuatTransform& arValue);
+	virtual bool				UpdateColorA(float afTime, NiObjectNET* apTarget, NiColorA& arValue);
+	virtual bool				UpdatePoint3(float afTime, NiObjectNET* apTarget, NiPoint3& arValue);
+	virtual bool				UpdateQuaternion(float afTime, NiObjectNET* apTarget, NiQuaternion& arValue);
+	virtual bool				UpdateFloat(float afTime, NiObjectNET* apTarget, float& arValue);
+	virtual bool				UpdateBool(float afTime, NiObjectNET* apTarget, bool& arValue);
+	virtual bool				IsBoolValueSupported() const;
+	virtual bool				IsFloatValueSupported() const;
+	virtual bool				IsQuaternionValueSupported() const;
+	virtual bool				IsPoint3ValueSupported() const;
+	virtual bool				IsColorAValueSupported() const;
+	virtual bool				IsTransformValueSupported() const;
+	virtual void				Collapse();
+	virtual void				GetActiveTimeRange(float& arBeginKeyTime, float& arEndKeyTime) const;
+	virtual void				GuaranteeTimeRange(float afStartTime, float afEndTime);
+	virtual NiInterpolator*		GetSequenceInterpolator(float afStartTime, float afEndTime);
+	virtual bool				ResolveDependencies();
+	virtual bool				SetUpDependencies();
+	virtual bool				AlwaysUpdate() const;
+	virtual NiBoolInterpolator* IsNiBoolInterpolator() const;
 
-	float		flt08;		// 08
+	float m_fLastTime;
 };
 
 // 0C
@@ -336,18 +339,17 @@ public:
 	virtual bool	IsStreamable() const;					// 43
 	virtual bool	TargetIsRequiredType() const;			// 44
 
-	Bitfield16							m_usFlags;				// 08
-	uint16_t							unk0A;				// 0A
-	float								frequency;			// 0C
-	float								phaseTime;			// 10
-	float								flt14;				// 14
-	float								flt18;				// 18
-	float								flt1C;				// 1C
-	float								flt20;				// 20
-	float								flt24;				// 24
-	float								flt28;				// 28
-	NiNode*								target;			// 2C
-	NiMultiTargetTransformController*	multiTargetCtrl;	// 30
+	Bitfield16						m_usFlags;
+	float							m_fFrequency;
+	float							m_fPhase;
+	float							m_fLoKeyTime;
+	float							m_fHiKeyTime;
+	float							m_fStartTime;
+	float							m_fLastTime;
+	float							m_fWeightedLastTime;
+	float							m_fScaledTime;
+	NiObjectNET*					m_pkTarget;
+	NiPointer<NiTimeController>		m_spNext;
 
 	bool GetActive() const {
 		return m_usFlags.GetBit(3);
@@ -355,6 +357,18 @@ public:
 	
 	void SetActive(bool abVal){
 		m_usFlags.Set(8, abVal);
+	}
+
+	bool GetManagerControlledBit() const {
+		return m_usFlags.GetBit(5);
+	}
+
+	bool DontDoUpdate(float afTime) {
+#ifdef GAME
+		return ThisCall<bool>(0xA36250, this, afTime);
+#else
+		return ThisCall<bool>(0x7E75E0, this, afTime);
+#endif
 	}
 };
 
@@ -408,25 +422,36 @@ public:
 };
 static_assert(sizeof(NiControllerManager) == 0x7C);
 
+class NiBlendInterpolator;
+
 // 34
 class NiInterpController : public NiTimeController {
 public:
 	NiInterpController();
 	~NiInterpController();
 
-	virtual void	Unk_2D(void);
-	virtual void	Unk_2E(void);
-	virtual void	Unk_2F(void);
-	virtual void	Unk_30(void);
-	virtual void	Unk_31(void);
-	virtual void	SetInterpolator(NiInterpolator* pInterpolator, uint32_t arg2);
-	virtual void	Unk_33(void);
-	virtual void	Unk_34(void);
-	virtual void	Unk_35(void);
-	virtual void	Unk_36(void);
-	virtual void	Unk_37(void);
-	virtual void	Unk_38(void);
-	virtual void	Unk_39(void);
+	virtual uint16_t				GetInterpolatorCount() const;
+	virtual const char*				GetInterpolatorID(uint16_t ausIndex = 0) const;
+	virtual uint16_t				GetInterpolatorIndex(const char* apID) const;
+	virtual uint16_t				GetInterpolatorIndexFx(uint16_t ausIndex = 0) const;
+	virtual NiInterpolator*			GetInterpolator(uint16_t ausIndex = 0) const;
+	virtual void					SetInterpolator(NiInterpolator* apInterpolator, uint16_t ausIndex = 0);
+	virtual void					ResetTimeExtrema();
+	virtual uint32_t				GetCtlrID() const;
+	virtual NiInterpolator*			CreatePoseInterpolator(uint16_t ausIndex = 0);
+	virtual void					SynchronizePoseInterpolator(NiInterpolator* apInterpolator, uint16_t ausIndex = 0);
+	virtual NiBlendInterpolator*	CreateBlendInterpolator(uint16_t ausIndex = 0, bool abManagerControlled = false, bool abAccumulateAnimations = false, float afWeightThreshold = 0.0f, uint8_t aucArraySize = 2);
+	virtual void					GuaranteeTimeRange(float afStartTime, float afEndTime);
+	virtual bool					InterpolatorIsCorrectType(NiInterpolator* apInterpolator, uint16_t ausIndex = 0) const;
+
+	NIRTTI_ADDRESS(0x11F36B4);
+
+	static inline constexpr uint16_t	INVALID_INDEX	= UINT16_MAX;
+	static inline constexpr float		INVALID_TIME	= -FLT_MAX;
+
+	bool GetManagerControlled() const {
+		return GetManagerControlledBit();
+	}
 };
 
 // 38
@@ -435,9 +460,28 @@ public:
 	NiSingleInterpController();
 	~NiSingleInterpController();
 
-	virtual void	Unk_3A(void);
+	virtual bool InterpTargetIsCorrectType(NiObjectNET* apObject) const;
 
 	NiPointer<NiInterpolator> m_spInterpolator;
+
+	CREATE_OBJECT(NiSingleInterpController, 0xC5C9D0);
+	NIRTTI_ADDRESS(0x11F3714);
+};
+
+class NiFloatInterpController : public NiSingleInterpController {
+public:
+	NiFloatInterpController();
+	virtual ~NiFloatInterpController();
+
+	virtual void GetTargetFloatValue(float& arValue);
+
+	NIRTTI_ADDRESS(0x11F4220);
+};
+
+class NiLightDimmerController : public NiFloatInterpController {
+public:
+	CREATE_OBJECT(NiLightDimmerController, 0xA4D0D0);
+	NIRTTI_ADDRESS(0x11F3FA0);
 };
 
 // 38
@@ -1222,7 +1266,11 @@ public:
 	uint32_t				m_uiRevID;
 	NiTPointerList<NiNode*>	m_kAffectedNodeList;
 	NiTPointerList<NiNode*>	m_kUnaffectedNodeList;
+
+	void IncRevisionID() { ++m_uiRevID; }
 };
+
+ASSERT_SIZE(NiDynamicEffect, 0xC4)
 
 // F0
 class NiLight : public NiDynamicEffect {
@@ -1245,7 +1293,39 @@ public:
 #endif
 		};
 	};
+	void*	m_pvRendererData;
+
+	NIRTTI_ADDRESS(0x11F4A28);
+
+	float GetDimmer() const { return m_fDimmer; };
+
+	// GAME - 0x50DD20
+	void SetDimmer(float afDimmer) {
+		m_fDimmer = afDimmer;
+		IncRevisionID();
+	}
+
+	const NiColor& GetAmbientColor() const { return m_kAmb; };
+	void SetAmbientColor(const NiColor& arColor) {
+		m_kAmb = arColor;
+		IncRevisionID();
+	}
+
+	const NiColor& GetDiffuseColor() const { return m_kDiff; };
+	void SetDiffuseColor(const NiColor& arColor) {
+		m_kDiff = arColor;
+		IncRevisionID();
+	}
+
+	float GetLightRadius() const { return m_fRadius; };
+
+	void SetLightRadius(float afRadius) {
+		m_fRadius = afRadius;
+		IncRevisionID();
+	}
 };
+
+ASSERT_SIZE(NiLight, 0xF0)
 
 // FC
 class NiPointLight : public NiLight {
@@ -1261,7 +1341,41 @@ public:
 		};
 		NiPoint3 m_kLightOffset;
 	};
-	void* m_pvRendererData;
+
+	CREATE_OBJECT(NiPointLight, 0xA7D6E0);
+	NIRTTI_ADDRESS(0x11F4A98);
+};
+
+class NiSpotLight : public NiPointLight {
+public:
+	NiSpotLight();
+	~NiSpotLight();
+
+	NiPoint3	m_kWorldDir;
+	float		m_fOuterSpotAngle;
+	float		m_fInnerSpotAngle;
+	float		m_fSpotExponent;
+
+	CREATE_OBJECT(NiSpotLight, 0xA94E20);
+	NIRTTI_ADDRESS(0x11F5EC4);
+
+	float GetOuterSpotAngle() const { return m_fOuterSpotAngle; };
+	void SetOuterSpotAngle(float afAngle) {
+		m_fOuterSpotAngle = afAngle;
+		IncRevisionID();
+	};
+
+	float GetInnerSpotAngle() const { return m_fInnerSpotAngle; };
+	void SetInnerSpotAngle(float afAngle) {
+		m_fInnerSpotAngle = afAngle;
+		IncRevisionID();
+	};
+
+	float GetSpotExponent() const { return m_fSpotExponent; };
+	void SetSpotExponent(float afExponent) {
+		m_fSpotExponent = afExponent;
+		IncRevisionID();
+	};
 };
 
 // FC
@@ -2000,4 +2114,15 @@ class BSCompoundFrustum;
 class NiRenderTargetGroup : public NiObject {
 public:
 	// has more data but not needed atm
+};
+
+class NiStream {
+public:
+	static void RegisterLoader(const char* apName, void* apFunction) {
+#if GAME
+		CdeclCall(0xA64900, apName, apFunction);
+#else
+		CdeclCall(0x81D570, apName, apFunction);
+#endif
+	}
 };

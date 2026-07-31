@@ -75,6 +75,8 @@ public:
 		Traits					= 1084,
 	};
 
+	static constexpr AddressPtr<bool, 0x11D8907> bIsLoadingNewGame;
+
 	static void InitGunScope(TESModel* apModel) {
 		CdeclCall(0x709C20, apModel);
 	}
@@ -727,6 +729,10 @@ struct HotKeysWheel {
 	int32_t		iLastHighlightedHotkey;
 	uint32_t	uiHighlightedHotkeyTrait;
 	uint32_t	uiHighlightedTextTrait;
+
+	void UpdateHotkeyList() {
+		ThisCall(0x7017B0, this);
+	}
 };
 
 // 124
@@ -768,6 +774,13 @@ public:
 	static InventoryMenu* GetSingleton() {
 		return *reinterpret_cast<InventoryMenu**>(0x11D9EA4);
 	}
+
+
+	static ItemChange* Selection() {
+		return *reinterpret_cast<ItemChange**>(0x11D9EA8);
+	}
+
+
 };
 ASSERT_SIZE(InventoryMenu, 0x124);
 
@@ -1087,6 +1100,10 @@ public:
 	static HUDMainMenu* GetSingleton() { return *(HUDMainMenu**)0x11D96C0; }
 
 	static NiCamera* Create3DCamera() { return CdeclCall<NiCamera*>(0x77EE50); }
+
+	static void SetHUDShake(float afShakePower) {
+		CdeclCall(0x94C3A0, afShakePower);
+	}
 };
 static_assert(sizeof(HUDMainMenu) == 0x278);
 

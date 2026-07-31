@@ -3,9 +3,12 @@
 #include "JIPUtils.hpp"
 
 #include "Bethesda/AutoMemContext.hpp"
-#include "Bethesda/Setting.hpp"
 #include "Bethesda/BSStringT.hpp"
-#include <Bethesda/RendererSettingCollection.hpp>
+#include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/FixedStrings.hpp"
+#include "Bethesda/RendererSettingCollection.hpp"
+#include "Bethesda/Setting.hpp"
+#include "Bethesda/TimeGlobal.hpp"
 
 #include "decoding.h"
 #include "events/EventFramework.h"
@@ -36,6 +39,7 @@ extern NVSEScriptInterface* g_scriptInterface;
 extern bool bFixJIP;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t auiFormID);
+extern TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
 
 namespace JIPFixes {
 
@@ -50,6 +54,7 @@ namespace JIPFixes {
 			// ... rest is not needed
 		};
 
+		STACK_FRAME_OPT_ENABLE
 		bool __fastcall ScriptCompiler_Compile(void* apThis, void*, void* apScript, ScriptCompileData* apCompileData) {
 			if (apCompileData->strCompilerName.pString && apCompileData->strCompilerName.pString[0] == 'C') {
 				apCompileData->eCompilerIndex = strcmp(apCompileData->strCompilerName.pString, "Console") == 0;
@@ -57,6 +62,7 @@ namespace JIPFixes {
 
 			return ThisCall<bool>(0x5AEB90, apThis, apScript, apCompileData);
 		}
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x10059A86 + 1), uint32_t(ScriptCompiler_Compile));
@@ -66,11 +72,13 @@ namespace JIPFixes {
 
 	namespace PaletteCorruptionFix {
 
+		STACK_FRAME_OPT_ENABLE
+
 		static void __fastcall InvalidateObjPalette(NiAVObject* apObject) {
 			if (!apObject) [[unlikely]]
 				return;
 
-			NiControllerManager* pControllerManager = ThisCall<NiControllerManager*>(0xA5C570, apObject, 0x11F36AC);
+			NiControllerManager* pControllerManager = apObject->GetController<NiControllerManager>();
 			if (pControllerManager && pControllerManager->m_spObjectPalette) [[likely]]
 				ThisCall(0xA6E960, pControllerManager->m_spObjectPalette.m_pObject);
 		}
@@ -94,6 +102,8 @@ namespace JIPFixes {
 
 			FastCall(kMemPoolFree, apBlock, auiSize);
 		}
+
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			kMemPoolFree.ReplaceCall(JIPUtils::GetAddress(0x1002BF45), MemoryPool_Free);
@@ -302,7 +312,7 @@ namespace JIPFixes {
 			for (uint32_t uiAddress : uiDefaultTimes)
 				HookUtils::SafeWrite32(uiAddress + 2, uiJIPMessageDurationAddr);
 
-			HookUtils::SafeWriteBuf(0x70535C, "\x51\xD9\x45\x18\xD9\x1C\x24", 7);
+			HookUtils::SafeWriteBuf(0x70535C, "\x51\xD9\x45\x18\xD9\x1C\x24");
 		}
 	}
 
@@ -316,16 +326,25 @@ namespace JIPFixes {
 		thread_local bool bScriptedCall = false;
 		uint32_t uiDoFireWeaponAddr = 0;
 
+
+		STACK_FRAME_OPT_ENABLE
+
 		void __fastcall DoFireWeaponExWrapper(Actor* apActor, void*, TESObjectWEAP* apWeapon) {
 			bScriptedCall = true;
 			FastCall(uiDoFireWeaponAddr, apActor, nullptr, apWeapon);
 			bScriptedCall = false;
 		}
 
+		HookUtils::VirtCallDetour kDetour;
 		class ActorEx : public Actor {
 		public:
 			CombatController* GetCombatControllerEx() {
-				CombatController* pController = GetCombatController();
+				CombatController* pController;
+				if (kDetour)
+					pController = ThisCall<CombatController*>(kDetour, this);
+				else
+					pController = GetCombatController();
+
 				if (bScriptedCall && pController && !pController->combatProcedure1)
 					return nullptr;
 
@@ -333,17 +352,19 @@ namespace JIPFixes {
 			}
 		};
 
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			uiDoFireWeaponAddr = JIPUtils::GetAddress(0x1001B6F0);
 			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1001B827) + 4, uint32_t(DoFireWeaponExWrapper));
 
-			HookUtils::PatchMemoryNop(0x523B3F, 8);
-			HookUtils::WriteRelCall(0x523B3F, &ActorEx::GetCombatControllerEx);
+			kDetour.ReplaceVirtualCall(0x523B3F, &ActorEx::GetCombatControllerEx, 8);
 		}
 	}
 
 	namespace ItemDescriptionFixFix {
+
+		STACK_FRAME_OPT_ENABLE
 		const char* __fastcall ConstructItemEntryNameHookFix(TESBoundObject* apObject, uint32_t* arLength) {
 			*arLength = 0;
 			const TESFullName* pFullName = DYNAMIC_CAST(apObject, TESBoundObject, TESFullName);
@@ -357,11 +378,12 @@ namespace JIPFixes {
 			*arLength = pFullName->GetFullNameLength();
 			return pString;
 		}
+		STACK_FRAME_OPT_RESET
 
 		static uint32_t uiFailAddr = 0;
 		static uint32_t uiSuccessAddr = 0;
 
-		static void __declspec(naked) ConstructItemEntryNameHookFix_Asm() {
+		static SPEC_NAKED void ConstructItemEntryNameHookFix_Asm() {
 			__asm {
 				sub		esp, 4
 				mov		edx, esp
@@ -382,13 +404,14 @@ namespace JIPFixes {
 			uiFailAddr		= JIPUtils::GetAddress(0x1000DF10);
 			uiSuccessAddr	= JIPUtils::GetAddress(0x1000DECA);
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000DEC2), ConstructItemEntryNameHookFix_Asm);
-			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1000DECC), "\x8D\x30\x90", 3); // Patch to use string from EAX instead of EAX+0x34
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1000DECC), "\x8D\x30\x90"); // Patch to use string from EAX instead of EAX+0x34
 		}
 	}
 
 	namespace UpdateDataFix {
 		// This one is personal - my mistake for making it a global... sorry Jazz
 
+		STACK_FRAME_OPT_ENABLE
 		class Hook {
 		public:
 			void UpdateDownwardPass(NiUpdateData& arData, uint32_t auiFlags) {
@@ -405,34 +428,22 @@ namespace JIPFixes {
 				NiUpdateData kData;
 				reinterpret_cast<NiTimeController*>(this)->Update(kData);
 			}
-
 		};
-
-		template <uint32_t NOP_SIZE = 1, typename C, typename Ret, typename... Args>
-		inline void __fastcall ReplaceVirtualCall(SIZE_T source, Ret(C::* const target)(Args...)) {
-			union {
-				Ret(C::* tgt)(Args...);
-				SIZE_T funcPtr;
-			} conversion;
-			conversion.tgt = target;
-
-			HookUtils::WriteRelCall(source, conversion.funcPtr);
-			HookUtils::PatchMemoryNop(source + 5, NOP_SIZE);
-		}
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
-			ReplaceVirtualCall(JIPUtils::GetAddress(0x1000A09A), &Hook::UpdateTransformAndBounds);
-			ReplaceVirtualCall(JIPUtils::GetAddress(0x10019C7A), &Hook::UpdateDownwardPass);
+			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x1000A09A), &Hook::UpdateTransformAndBounds, 6);
+			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x10019C7A), &Hook::UpdateDownwardPass, 6);
 
-			ReplaceVirtualCall(JIPUtils::GetAddress(0x1002AE08), &Hook::UpdateDownwardPass);
-			ReplaceVirtualCall(JIPUtils::GetAddress(0x1002B07A), &Hook::UpdateDownwardPass);
-			ReplaceVirtualCall(JIPUtils::GetAddress(0x1002B18A), &Hook::UpdateDownwardPass);
+			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x1002AE08), &Hook::UpdateDownwardPass, 6);
+			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x1002B07A), &Hook::UpdateDownwardPass, 6);
+			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x1002B18A), &Hook::UpdateDownwardPass, 6);
 
-			ReplaceVirtualCall(JIPUtils::GetAddress(0x1002CE4D), &Hook::Update);
+			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x1002CE4D), &Hook::Update, 6);
 
-			ReplaceVirtualCall<2>(JIPUtils::GetAddress(0x1005887C), &Hook::UpdateDownwardPass);
-			ReplaceVirtualCall<2>(JIPUtils::GetAddress(0x10058927), &Hook::UpdateDownwardPass);
-			ReplaceVirtualCall<2>(JIPUtils::GetAddress(0x10058A7E), &Hook::UpdateDownwardPass);
+			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x1005887C), &Hook::UpdateDownwardPass, 7);
+			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x10058927), &Hook::UpdateDownwardPass, 7);
+			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x10058A7E), &Hook::UpdateDownwardPass, 7);
 
 			HookUtils::ReplaceVirtualFunc(JIPUtils::GetAddress(0x100280FE + 1), &Hook::UpdateDownwardPass);
 		}
@@ -447,7 +458,7 @@ namespace JIPFixes {
 			return strcmp(a, b);
 		}
 
-		void __declspec(naked) CompareFix_Asm() {
+		static SPEC_NAKED void CompareFix_Asm() {
 			__asm {
 				START:
 				cmp		[eax + 4], esi
@@ -517,12 +528,14 @@ namespace JIPFixes {
 
 		bool(__cdecl* CopyFaceGenFrom)(COMMAND_ARGS) = nullptr;
 
+		STACK_FRAME_OPT_ENABLE
 		bool Cmd_CopyFaceGenFrom_Execute(COMMAND_ARGS) {
 			const bool bLoadFaceGenHeadEGTFilesOrg = *reinterpret_cast<bool*>(0x11D5AE0);
 			const bool bResult = CopyFaceGenFrom(PASS_COMMAND_ARGS);
 			*reinterpret_cast<bool*>(0x11D5AE0) = bLoadFaceGenHeadEGTFilesOrg;
 			return bResult;
 		}
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kCopyFaceGenFrom));
@@ -554,7 +567,7 @@ namespace JIPFixes {
 
 	}
 	namespace SetOnDialogTopicEventHandlerEx {
-STACK_FRAME_OPT_DISABLE
+
 		EventInformation* OnDialogTopicHandler = nullptr;
 
 		bool Cmd_SetOnDialogTopicEventHandler_JG_Execute(COMMAND_ARGS) {
@@ -577,6 +590,7 @@ STACK_FRAME_OPT_DISABLE
 		}
 
 		HookUtils::CallDetour kGetResultScript;
+		STACK_FRAME_OPT_DISABLE
 		class TESTopicInfoEx : public TESTopicInfo {
 		public:
 			enum ResultScriptType : uint32_t {
@@ -606,6 +620,7 @@ STACK_FRAME_OPT_DISABLE
 				return ThisCall<Script*>(kGetResultScript, this, aeScript);
 			}
 		};
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks(bool abGECK) {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetOnDialogTopicEventHandler));
@@ -616,11 +631,11 @@ STACK_FRAME_OPT_DISABLE
 				if (!abGECK) {
 					OnDialogTopicHandler = JGCreateEvent("OnDialogTopicHandler", 1, 1);
 					kGetResultScript.ReplaceCall(0x61F18B, &TESTopicInfoEx::GetResultScript);
-					HookUtils::SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8", 8);
+					HookUtils::SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8");
 				}
 			}
 		}
-STACK_FRAME_OPT_RESET
+
 	}
 
 	namespace RespawnDisableFix {
@@ -628,6 +643,8 @@ STACK_FRAME_OPT_RESET
 		bool(__cdecl* ClearDeadActors)(COMMAND_ARGS) = nullptr;
 
 		thread_local BOOL bSkipRespawning = FALSE;
+
+		STACK_FRAME_OPT_ENABLE
 
 		class HighProcessEx : public HighProcess {
 		public:
@@ -646,6 +663,8 @@ STACK_FRAME_OPT_RESET
 			}
 			return true;
 		}
+
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks(bool abGECK) {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kClearDeadActors));
@@ -1079,17 +1098,20 @@ STACK_FRAME_OPT_RESET
 	}
 
 	namespace OnMenuClickFix {
-STACK_FRAME_OPT_DISABLE
+
 		static inline Tile* const INVALID_TILE = reinterpret_cast<Tile*>(-1);
 		Tile* pClickedTile = INVALID_TILE;
 		uint32_t uiMenuHandleClickHook = 0;
 		char cEmptyBuffer[4] = { 0 };
 
+		STACK_FRAME_OPT_ENABLE
 		void __fastcall MenuHandleClickHookDetour(void* apMenu, void* edx, uint32_t auiTileID, Tile* apTile) {
 			pClickedTile = apTile;
 			FastCall(uiMenuHandleClickHook, apMenu, edx, auiTileID, apTile);
 		}
+		STACK_FRAME_OPT_RESET
 
+		STACK_FRAME_OPT_DISABLE
 		bool __cdecl CallFunctionAlt(Script* apScript, TESObjectREFR* apRef, uint8_t aucArgCount, uint32_t auiMenuID, uint32_t auiTileID, const char* apTileString) {
 			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 			if (pClickedTile == INVALID_TILE) {
@@ -1108,8 +1130,10 @@ STACK_FRAME_OPT_DISABLE
 				return g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, cEmptyBuffer);
 			}
 		}
+		STACK_FRAME_OPT_RESET
 
 		HookUtils::CallDetour kRemoveTileFromUpdateList;
+		STACK_FRAME_OPT_ENABLE
 		class Hook {
 		public:
 			void CleanupTile(Tile* apTile) {
@@ -1119,6 +1143,7 @@ STACK_FRAME_OPT_DISABLE
 				ThisCall(kRemoveTileFromUpdateList, this, apTile);
 			}
 		};
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			uiMenuHandleClickHook = JIPUtils::GetAddress(0x10008570);
@@ -1135,15 +1160,16 @@ STACK_FRAME_OPT_DISABLE
 
 			kRemoveTileFromUpdateList.ReplaceCall(0x706C98, &Hook::CleanupTile);
 		}
-STACK_FRAME_OPT_RESET
 	}
 
 	namespace PowerArmorCondition {
 
+		STACK_FRAME_OPT_ENABLE
 		bool Cmd_GetPCCanUsePowerArmor_Eval(COMMAND_ARGS_EVAL) {
 			*result = PlayerCharacter::GetSingleton()->canUsePA;
 			return true;
 		}
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetPCCanUsePowerArmor));
@@ -1155,6 +1181,7 @@ STACK_FRAME_OPT_RESET
 
 	namespace GetMenuItemListRefsFix {
 
+		STACK_FRAME_OPT_ENABLE
 		uint32_t __fastcall GetTileIndex(Tile* apTile) {
 			const Tile* pParent = apTile->parent;
 			if (pParent) [[likely]] {
@@ -1169,9 +1196,10 @@ STACK_FRAME_OPT_RESET
 			}
 			return 0;
 		}
+		STACK_FRAME_OPT_RESET
 
 		static uint32_t uiReturnAddr;
-		void __declspec(naked) GetTileIndex_Asm() {
+		static SPEC_NAKED void GetTileIndex_Asm() {
 			__asm {
 				// Store SetElement ptr
 				mov		[esp + 0x1C], edi
@@ -1207,6 +1235,8 @@ STACK_FRAME_OPT_RESET
 		constexpr float WATER_REFLECTIVITY = 0.3f;
 
 		static constexpr AddressPtr<NiPointer<BSRenderedTexture>, 0x11C7C2C>	spSkyReflectionMap;
+
+		STACK_FRAME_OPT_ENABLE
 
 		// Greetings from Real Time Reflections
 		class JIPCullingProcess : public CustomClass<BSCullingProcess> {
@@ -1308,15 +1338,6 @@ STACK_FRAME_OPT_RESET
 			}
 		};
 
-		struct JIPRenderData {
-			uint32_t	uiWidth;
-			uint32_t	uiHeight;
-			D3DFORMAT	eD3DFormat;
-			uint32_t	uiRenderMode;
-			uint32_t	uiBackgroundColorMask;
-			uint32_t	eImageSpaceEffect;
-		};
-
 		void __fastcall RenderWater(void* apWaterManager, NiCamera* apCamera) {
 			if (TES::GetSingleton()->currentInterior)
 				return;
@@ -1351,6 +1372,8 @@ STACK_FRAME_OPT_RESET
 			}
 		}
 
+		STACK_FRAME_OPT_RESET
+
 		void InitHooks() {
 			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x10004963) + 1, uint32_t(AccumulateScene));
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1002D27D), RenderWater);
@@ -1361,7 +1384,7 @@ STACK_FRAME_OPT_RESET
 	namespace GetSelectedItemRefFix {
 
 		static uint32_t uiReturnAddr;
-		void __declspec(naked) GetBarterRef_Asm() {
+		static SPEC_NAKED void GetBarterRef_Asm() {
 			__asm {
 				test	eax, eax
 				jz		NO_MERCHANT_CONTAINER
@@ -1394,12 +1417,12 @@ STACK_FRAME_OPT_RESET
 	namespace AddItemAltNoCond {
 
 		uint32_t uiSetItemHealthAddr;
+		STACK_FRAME_OPT_ENABLE
 		void __fastcall SetItemHealth(TESContainer* apContainer, float afHealth) {
-			if (afHealth < 0.f)
-				return;
-
-			FastCall(uiSetItemHealthAddr, apContainer, afHealth);
+			if (afHealth >= 0.f)
+				FastCall(uiSetItemHealthAddr, apContainer, afHealth);
 		}
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			uiSetItemHealthAddr = JIPUtils::GetAddress(0x1000D520);
@@ -1467,6 +1490,111 @@ STACK_FRAME_OPT_RESET
 					pInfo->numParams = 3;
 					pInfo->execute = Cmd_SetCursorPos_Execute;
 				}
+			}
+		}
+	}
+
+	namespace SetHotkeyItemRefFix {
+
+		uint32_t uiJIPCreateExtraDataAddr;
+		class JIPInventoryRef : public InventoryRef {
+		public:
+			ExtraDataList* CreateExtraData() {
+				return ThisCall<ExtraDataList*>(uiJIPCreateExtraDataAddr, this);
+			}
+		};
+
+		bool Cmd_GetHotkeyItemRef_Execute(COMMAND_ARGS) {
+			int32_t iHotkey = 0;
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &iHotkey) && iHotkey > 0) {
+				const int32_t iCorrectedHotKey = iHotkey - 1;
+				const InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(PlayerCharacter::GetSingleton());
+				if (pInvChanges) {
+					ItemChange* pHotkeyItem = pInvChanges->GetHotkeyItem(iCorrectedHotKey);
+					if (pHotkeyItem) {
+						ExtraDataList* pExtraList = pHotkeyItem->pExtraLists ? pHotkeyItem->pExtraLists->GetItem() : nullptr;
+						TESObjectREFR* pInvRef = InventoryRefCreateEntry(PlayerCharacter::GetSingleton(), pHotkeyItem->pObject, pHotkeyItem->iNumber, pExtraList);
+						if (pInvRef)
+							*reinterpret_cast<uint32_t*>(result) = pInvRef->GetFormID();
+					}
+
+					delete pHotkeyItem;
+				}
+			}
+			return true;
+		}
+
+        bool Cmd_SetHotkeyItemRef_Execute(COMMAND_ARGS) {
+            int32_t iHotkey = 0;
+            if (ExtractArgsEx(EXTRACT_ARGS_EX, &iHotkey) && iHotkey > 0) {
+                InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
+                if (!pInvRef || pInvRef->pContainerRef != PlayerCharacter::GetSingleton())
+                    return true;
+
+                if (!pInvRef->pForm)
+                    return true;
+
+                const FORM_TYPE eFormType = pInvRef->pForm->GetFormType();
+                if (eFormType != FORM_TYPE::TESObjectARMO && eFormType != FORM_TYPE::TESObjectWEAP && eFormType != FORM_TYPE::AlchemyItem && eFormType != FORM_TYPE::TESObjectBOOK)
+                    return true;
+
+                const int32_t iCorrectedHotKey = iHotkey - 1;
+
+                InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(PlayerCharacter::GetSingleton());
+                if (pInvChanges) {
+                    ItemChange* pHotkeyItem = pInvChanges->GetHotkeyItem(iCorrectedHotKey);
+                    if (pHotkeyItem)
+                        pInvChanges->RemoveHotkeyItem(pHotkeyItem, iCorrectedHotKey);
+
+                    ExtraDataList* pExtraList = pInvRef->pItemChange->pExtraLists ? pInvRef->pItemChange->pExtraLists->GetItem() : static_cast<JIPInventoryRef*>(pInvRef)->CreateExtraData();
+					pInvChanges->SetHotkeyItem(pInvRef->pItemChange, pExtraList, iCorrectedHotKey);
+
+                    if (InventoryMenu::GetSingleton())
+                        InventoryMenu::GetSingleton()->kHotKeyWheel.UpdateHotkeyList();
+
+                    delete pHotkeyItem;
+
+                    *result = 1;
+                }
+            }
+            return true;
+        }
+
+		void InitHooks() {
+			uiJIPCreateExtraDataAddr = JIPUtils::GetAddress(0x10002A00);
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetHotkeyItemRef));
+				if (pInfo) {
+					pInfo->execute = Cmd_GetHotkeyItemRef_Execute;
+				}
+			}
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetHotkeyItemRef));
+				if (pInfo) {
+					pInfo->execute = Cmd_SetHotkeyItemRef_Execute;
+				}
+			}
+		}
+	}
+
+
+	namespace TriggerLightningFXFix {
+
+		bool Cmd_TriggerLightningFX_Execute(COMMAND_ARGS) {
+			*result = 0;
+			Sky* pSky = Sky::GetSingleton();
+			if (pSky && pSky->GetIsRaining()) {
+				pSky->fFlash = 1;
+				pSky->uiFlashTime = TimeGlobal::GetSingleton()->uiLastTime;
+				*result = 1;
+			}
+			return true;
+		}
+
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kTriggerLightningFX));
+			if (pInfo) {
+				pInfo->execute = Cmd_TriggerLightningFX_Execute;
 			}
 		}
 	}
@@ -1626,7 +1754,7 @@ STACK_FRAME_OPT_RESET
 
 		static uint32_t uiReturnAddr;
 		static uint32_t uiGiveUpAddr;
-		void __declspec(naked) SanityCheck_Asm() {
+		static SPEC_NAKED void SanityCheck_Asm() {
 			__asm {
 				// If version is from the unpatched JIP, don't even bother
 				// It's not possible to assess how much corrupted the save data is
@@ -1680,6 +1808,8 @@ STACK_FRAME_OPT_RESET
 		static constexpr uint32_t uiMapSize = 4096;
 		SettingsMap* pGSMap = nullptr;
 
+		STACK_FRAME_OPT_ENABLE
+
 		uint32_t uiHashAddr;
 		static inline uint32_t __fastcall StrHashCI(const char* apKey) {
 			return FastCall<uint32_t>(uiHashAddr, apKey);
@@ -1724,6 +1854,8 @@ STACK_FRAME_OPT_RESET
 			}
 		};
 
+		STACK_FRAME_OPT_RESET
+
 		void InitHooks() {
 			uiHashAddr = JIPUtils::GetAddress(0x100010F0);
 			uiAllocAddr = JIPUtils::GetAddress(0x10003C80);
@@ -1739,9 +1871,11 @@ STACK_FRAME_OPT_RESET
 
 	namespace EDIDLookupFix {
 
+		STACK_FRAME_OPT_ENABLE
 		TESForm* __fastcall GetEDID(void* apThis, const char* apEDID) {
 			return TESForm::GetFormByEditorID(apEDID);
 		}
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1000178C), GetEDID);
@@ -1753,6 +1887,7 @@ STACK_FRAME_OPT_RESET
 	namespace SanerWeaponWobbleHook {
 
 		HookUtils::CallDetour kGetGunSpreadDetour;
+		STACK_FRAME_OPT_ENABLE
 		class Hook : public Actor {
 		public:
 			float GetGunSpreadHook(enum SpreadMode aeMode) {
@@ -1762,6 +1897,7 @@ STACK_FRAME_OPT_RESET
 				return ThisCall<float>(kGetGunSpreadDetour, this, aeMode);
 			}
 		};
+		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
 			HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x1000BA54), JIPUtils::GetAddress(0x1000BA63));
@@ -1769,16 +1905,56 @@ STACK_FRAME_OPT_RESET
 		}
 	}
 
+	namespace ProjectileLightFix {
+
+		uint32_t uiCreateJIPLightAddr;
+		HookUtils::CallDetour kFreeLightDetour;
+		class Hook {
+		public:
+			NiAVObject* GenDynamic(TESObjectREFR* apRequester, BSFadeNode* apNode, bool abForceDynamic) {
+				TESObjectLIGH* pLight = reinterpret_cast<TESObjectLIGH*>(this);
+				NiNode* pLightNode = apNode;
+				NiAVObject* pAttach = BSUtilities::GetObjectByName(apNode, FixedStrings::GetAttachLight());
+				if (pAttach && pAttach->IsNode())
+					pLightNode = static_cast<NiNode*>(pAttach);
+				return FastCall<NiAVObject*>(uiCreateJIPLightAddr, this, pLightNode);
+			}
+
+			void FreeLight(void* apNewVal) {
+				NiLight* pLight = reinterpret_cast<NiPointer<NiLight>*>(this)->m_pObject;
+				NiNode* pParent = pLight->GetParent();
+				if (pParent)
+					pParent->DetachChild(pLight);
+				ThisCall(kFreeLightDetour, this, apNewVal);
+			}
+		};
+
+		void InitHooks() {
+			uiCreateJIPLightAddr = JIPUtils::GetAddress(0x10009B80);
+			HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x100127E0), JIPUtils::GetAddress(0x100127FE));
+
+			HookUtils::ReplaceCall(0x9C3DF5, &Hook::GenDynamic);
+			kFreeLightDetour.ReplaceCall(0x9C3E54, &Hook::FreeLight);
+		}
+	}
+
 	namespace LogMover {
 
 		void InitHooks() {
+			// We're using JIP's fs functions to avoid issues with our Debug build's imports
+			using pfn_fclose = int(__cdecl*)(FILE*);
+			using pfn_fsopen = FILE*(__cdecl*)(const char*, const char*, int);
+			using pfn_PrintLog = void(__cdecl*)(const char*, ...);
+
+			pfn_fclose fclose = *reinterpret_cast<pfn_fclose*>(JIPUtils::GetAddress(0x1005C1A8));
+			pfn_fsopen fsopen = *reinterpret_cast<pfn_fsopen*>(JIPUtils::GetAddress(0x1005C180));
 			FILE** pLog = reinterpret_cast<FILE**>(JIPUtils::GetAddress(0x1006A388));
 			if (!pLog[0] || fclose(pLog[0]))
 				return;
 
 			if (MoveFileEx("jip_ln_nvse.log", "logs\\jip_ln_nvse.log", MOVEFILE_REPLACE_EXISTING)) {
-				pLog[0] = _fsopen("logs\\jip_ln_nvse.log", "a+b", _SH_DENYWR);
-				void(__cdecl * PrintLog)(const char* apText, ...) = reinterpret_cast<void(__cdecl*)(const char*, ...)>(JIPUtils::GetAddress(0x10006740));
+				pLog[0] = fsopen("logs\\jip_ln_nvse.log", "a+b", _SH_DENYWR);
+				pfn_PrintLog PrintLog = reinterpret_cast<pfn_PrintLog>(JIPUtils::GetAddress(0x10006740));
 				PrintLog("JohnnyGuitar Fixes and Tweaks initialized");
 			}
 		}
@@ -1813,6 +1989,7 @@ STACK_FRAME_OPT_RESET
 			LogMover::InitHooks();
 			VersionPrint::InitHooks();
 			SanerWeaponWobbleHook::InitHooks();
+			ProjectileLightFix::InitHooks();
 		}
 	}
 
@@ -1857,6 +2034,9 @@ STACK_FRAME_OPT_RESET
 		PowerArmorCondition::InitHooks();
 		LeveledListFixes::InitHooks();
 		CursorPosUICords::InitHooks();
+		TriggerLightningFXFix::InitHooks();
+		SetHotkeyItemRefFix::InitHooks();
+
 	}
 
 	void InitDeferredHooks(bool abGECK) {

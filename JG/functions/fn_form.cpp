@@ -224,7 +224,7 @@ bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_IsRadioRefPlaying_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_IsRadioRefPlaying_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj && thisObj->GetObjectReference() && IS_TYPE(thisObj->GetObjectReference(), TESObjectACTI)) {
 		TESObjectACTI* baseActi = static_cast<TESObjectACTI*>(thisObj->GetObjectReference());
@@ -519,15 +519,14 @@ bool Cmd_GetWeaponAltTextures_Execute(COMMAND_ARGS) {
 	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
 		TESModelTextureSwap* pModel = &pWeapon->textureSwap;
-		if (!pModel)
-			return true;
-
-		auto pIter = pModel->GetTexSwapList();
-		while (pIter && !pIter->IsEmpty()) {
-			TEX_SWAP* pEntry = pIter->GetItem();
-			pIter = pIter->GetNext();
-			if (pEntry && pEntry->pTextureSet) {
-				g_arrInterface->AppendElement(pArray, NVSEArrayElement(pEntry->pTextureSet));
+		if (pModel) {
+			auto pIter = pModel->GetTexSwapList();
+			while (pIter && !pIter->IsEmpty()) {
+				TEX_SWAP* pEntry = pIter->GetItem();
+				pIter = pIter->GetNext();
+				if (pEntry && pEntry->pTextureSet) {
+					g_arrInterface->AppendElement(pArray, NVSEArrayElement(pEntry->pTextureSet));
+				}
 			}
 		}
 	}
@@ -664,15 +663,14 @@ bool Cmd_GetAltTexturesEx_Execute(COMMAND_ARGS) {
 			TESObjectWEAP* pWeapon = DYNAMIC_CAST(pForm, TESForm, TESObjectWEAP);
 			pModel = &pWeapon->textureSwap;
 		}
-		if (!pModel) 
-			return true;
-
-		auto pIter = pModel->GetTexSwapList();
-		while (pIter && !pIter->IsEmpty()) {
-			TEX_SWAP* pEntry = pIter->GetItem();
-			pIter = pIter->GetNext();
-			if (pEntry && pEntry->pTextureSet) {
-				g_arrInterface->SetElement(pMap, NVSEArrayElement(pEntry->iObjectIndex), NVSEArrayElement(pEntry->pTextureSet));
+		if (pModel) {
+			auto pIter = pModel->GetTexSwapList();
+			while (pIter && !pIter->IsEmpty()) {
+				TEX_SWAP* pEntry = pIter->GetItem();
+				pIter = pIter->GetNext();
+				if (pEntry && pEntry->pTextureSet) {
+					g_arrInterface->SetElement(pMap, NVSEArrayElement(pEntry->iObjectIndex), NVSEArrayElement(pEntry->pTextureSet));
+				}
 			}
 		}
 	}
@@ -687,21 +685,21 @@ bool Cmd_GetArmorAltTextures_Execute(COMMAND_ARGS) {
 	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pArmor, &uiWhichModel) && pArmor && IS_TYPE(pArmor, TESObjectARMO)) {
 		TESModelTextureSwap* pModel = GetArmorModel(pArmor, uiWhichModel);
-		if (!pModel) 
-			return true;
-		
-		auto pIter = pModel->GetTexSwapList();
-		while (pIter && !pIter->IsEmpty()) {
-			TEX_SWAP* pEntry = pIter->GetItem();
-			pIter = pIter->GetNext();
-			if (pEntry && pEntry->pTextureSet) {
-				g_arrInterface->AppendElement(pArray, NVSEArrayElement(pEntry->pTextureSet));
+		if (pModel) {
+			auto pIter = pModel->GetTexSwapList();
+			while (pIter && !pIter->IsEmpty()) {
+				TEX_SWAP* pEntry = pIter->GetItem();
+				pIter = pIter->GetNext();
+				if (pEntry && pEntry->pTextureSet) {
+					g_arrInterface->AppendElement(pArray, NVSEArrayElement(pEntry->pTextureSet));
+				}
 			}
 		}
 	}
 	g_arrInterface->AssignCommandResult(pArray, result);
 	return true;
 }
+
 bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectWEAP* pWeapon = nullptr;
@@ -709,7 +707,7 @@ bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 	int32_t iIndex = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &iIndex, &pTextureSet) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP) && pTextureSet && IS_TYPE(pTextureSet, BGSTextureSet)) {
 		TESModelTextureSwap* pModel = &pWeapon->textureSwap;
-		if (!pModel) 
+		if (!pModel)
 			return true;
 
 		TEX_SWAP* pSwap = pModel->GetTexSwap(iIndex);
@@ -724,6 +722,7 @@ bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_SetArmorAltTexture_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTextureSet* pTextureSet = nullptr;
@@ -732,7 +731,7 @@ bool Cmd_SetArmorAltTexture_Execute(COMMAND_ARGS) {
 	uint32_t uiWhichModel;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pArmor, &uiWhichModel, &iIndex, &pTextureSet) && pTextureSet && IS_TYPE(pTextureSet, BGSTextureSet) && pArmor && IS_TYPE(pArmor, TESObjectARMO)) {
 		TESModelTextureSwap* pModel = GetArmorModel(pArmor, uiWhichModel);
-		if (!pModel) 
+		if (!pModel)
 			return true;
 
 		TEX_SWAP* pSwap = pModel->GetTexSwap(iIndex);
@@ -754,7 +753,7 @@ bool Cmd_ClearWeaponAltTexture_Execute(COMMAND_ARGS) {
 	int32_t iIndex = -2;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &iIndex) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
 		TESModelTextureSwap* pModel = &pWeapon->textureSwap;
-		if (!pModel) 
+		if (!pModel)
 			return true;
 
 		if (iIndex == -1) {
@@ -778,7 +777,7 @@ bool Cmd_ClearArmorAltTexture_Execute(COMMAND_ARGS) {
 	uint32_t uiWhichModel;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pArmor, &uiWhichModel, &iIndex) && pArmor && IS_TYPE(pArmor, TESObjectARMO)) {
 		TESModelTextureSwap* pModel = GetArmorModel(pArmor, uiWhichModel);
-		if (!pModel) 
+		if (!pModel)
 			return true;
 
 		if (iIndex == -1) {
@@ -1226,20 +1225,20 @@ bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
+SPEC_NOINLINE bool Cmd_GetQuestFailed_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	TESQuest* pQuest = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest) && pQuest)
+	TESQuest* pQuest = static_cast<TESQuest*>(arg1);
+	if (pQuest)
 		*result = (pQuest->flags & 0x40) ? 1 : 0;
-	if (IsConsoleMode()) Console_Print("GetQuestFailed >> %.2f", *result);
 	return true;
 }
 
-bool Cmd_GetQuestFailed_Eval(COMMAND_ARGS_EVAL) {
-	*result = 0;
-	TESQuest* pQuest = (TESQuest*)arg1;
-	if (pQuest)
-		*result = (pQuest->flags & 0x40) ? 1 : 0;
+bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
+	TESQuest* pQuest = nullptr;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest);
+	Cmd_GetQuestFailed_Eval(nullptr, pQuest, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetQuestFailed >> %.2f", *result);
 	return true;
 }
 
@@ -1384,7 +1383,7 @@ bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 }
 
 // 0 - alive, 1 - dying/ragdolled, 2 - dead, 3 - unconscious, 5 - restrained, 6 - essential unconscious
-bool Cmd_GetLifeState_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetLifeState_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
 	if (thisObj && thisObj->IsActor())
 		*result = static_cast<Actor*>(thisObj)->GetLifeState();
@@ -1504,7 +1503,7 @@ bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	TESActorBase* pBase = reinterpret_cast<TESActorBase*>(arg1);
 	if (pBase) {
@@ -1522,11 +1521,10 @@ bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_GetBaseScale_Execute(COMMAND_ARGS) {
 	TESActorBase* pBase = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBase)) {
-		Cmd_GetBaseScale_Eval(thisObj, pBase, 0, result);
-		if (IsConsoleMode())
-			Console_Print("GetBaseScale : %0.2f", *result);
-	}
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pBase);
+	Cmd_GetBaseScale_Eval(thisObj, pBase, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("GetBaseScale : %0.2f", *result);
 	return true;
 }
 
@@ -1958,7 +1956,7 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 		return true;
 
 	FORM_TYPE eFormType = pInvRef->pForm->GetFormType();
-	if (eFormType != FORM_TYPE::TESObjectARMO && eFormType != FORM_TYPE::TESObjectWEAP && eFormType != FORM_TYPE::AlchemyItem)
+	if (eFormType != FORM_TYPE::TESObjectARMO && eFormType != FORM_TYPE::TESObjectWEAP && eFormType != FORM_TYPE::AlchemyItem && eFormType != FORM_TYPE::TESObjectBOOK)
 		return true;
 
 	ExtraDataList* pExtraData = pInvRef->pExtraDataList;
@@ -2754,6 +2752,9 @@ bool Cmd_ApplyModelTextureSwap_Execute(COMMAND_ARGS) {
 			pScene = BSUtilities::GetObjectByName(pScene, cObjectName);
 
 		if (pScene) {
+			if (!pReference)
+				pReference = thisObj;
+
 			TESModel* pModel = ModelLoader::GetSingleton()->GetModelForBoundObject(pBaseForm, pReference);
 			if (pModel) {
 				TESModelTextureSwap* pTexSwap = pModel->GetAsModelMaterialSwap();
@@ -2769,22 +2770,6 @@ bool Cmd_ApplyModelTextureSwap_Execute(COMMAND_ARGS) {
 			}
 		}
 	}
-	return true;
-}
-
-bool Cmd_GetCombatTargetDistance_Eval(COMMAND_ARGS_EVAL) {
-	*result = -1.0;
-	if (thisObj->IsActor()) {
-		const Actor* pActor = static_cast<Actor*>(thisObj);
-		const Actor* pTarget = pActor->GetCombatTarget();
-		if (pTarget)
-			*result = pActor->GetPosition().Distance(pTarget->GetPosition());
-	}
-	return true;
-}
-
-bool Cmd_GetCombatTargetDistance_Execute(COMMAND_ARGS) {
-	Cmd_GetCombatTargetDistance_Eval(thisObj, nullptr, nullptr, result);
 	return true;
 }
 
@@ -2822,7 +2807,7 @@ bool Cmd_SetIKState_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool SPEC_NOINLINE Cmd_GetIKState_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetIKState_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1.0;
 	const IKType eType = *reinterpret_cast<IKType*>(&arg1);
 	if (InRange(eType) && thisObj->IsActor()) {
@@ -2854,7 +2839,7 @@ bool Cmd_GetIKState_Execute(COMMAND_ARGS) {
 	return Cmd_GetIKState_Eval(thisObj, reinterpret_cast<void*>(eType), nullptr, result);
 }
 
-bool Cmd_IsCarryable_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_IsCarryable_Eval(COMMAND_ARGS_EVAL) {
 	TESForm* pForm = reinterpret_cast<TESForm*>(arg1);
 	pForm = pForm ? pForm : thisObj;
 	if (!pForm)
@@ -2884,18 +2869,90 @@ bool Cmd_PickIdleEx_Execute(COMMAND_ARGS) {
 		return true;
 
 	TESObjectREFR* pTargetRef = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetRef) && pTargetRef && pTargetRef->GetObjectReference())
-		*result = static_cast<LowProcess*>(pUser->GetCurrentAIProcess())->FindSpecialIdletoPlay(pUser, pTargetRef->GetObjectReference(), pTargetRef);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetRef) && pTargetRef && pTargetRef->baseForm) {
+		LowProcess* pAIProcess = static_cast<LowProcess*>(pUser->baseProcess);
+		const TESObjectREFR* pOrgTarget = pAIProcess->pTarget;
+		pAIProcess->pTarget = pTargetRef;
+		*result = pAIProcess->FindSpecialIdletoPlay(pUser, pTargetRef->baseForm, pTargetRef);
+		pAIProcess->pTarget = pOrgTarget;
+	}
 
 	return true;
 }
 
-bool Cmd_GetUsedItemHeight_Eval(COMMAND_ARGS_EVAL) {
+SPEC_INLINE bool Cmd_GetUsedItemHeight_Eval(COMMAND_ARGS_EVAL) {
 	*result = AnimActivationHeight::GetHeight();
 	return true;
 }
 
 bool Cmd_GetUsedItemHeight_Execute(COMMAND_ARGS) {
 	Cmd_GetUsedItemHeight_Eval(thisObj, nullptr, nullptr, result);
+	return true;
+}
+
+bool Cmd_ClearAltTexture_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* pForm;
+	int32_t iIndex = -2;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &iIndex) && pForm) {
+		TESModelTextureSwap* pModel = DYNAMIC_CAST(pForm, TESForm, TESModelTextureSwap);
+		if (!pModel)
+			return true;
+
+		if (iIndex == -1) {
+			pModel->ClearTexSwapList();
+			*result = 1;
+			return true;
+		}
+		else {
+			pModel->RemoveTexSwap(iIndex);
+			*result = 1;
+			return true;
+		}
+	}
+	return true;
+}
+
+bool Cmd_SetAltTexture_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* pForm = nullptr;
+	BGSTextureSet* pTextureSet = nullptr;
+	int32_t iIndex = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &iIndex, &pTextureSet) && pForm && pTextureSet && IS_TYPE(pTextureSet, BGSTextureSet)) {
+		TESModelTextureSwap* pModel = DYNAMIC_CAST(pForm, TESForm, TESModelTextureSwap);
+		if (!pModel)
+			return true;
+
+		TEX_SWAP* pSwap = pModel->GetTexSwap(iIndex);
+		if (pSwap) {
+			pSwap->pTextureSet = pTextureSet;
+			*result = 1;
+		}
+		else {
+			pModel->AddTexSwap("", iIndex, pTextureSet);
+			*result = 1;
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetAltTextures_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* pForm = nullptr;
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && pForm) {
+		TESModelTextureSwap* pModel = DYNAMIC_CAST(pForm, TESForm, TESModelTextureSwap);
+		if (pModel) {
+			auto pIter = pModel->GetTexSwapList();
+			while (pIter && !pIter->IsEmpty()) {
+				TEX_SWAP* pEntry = pIter->GetItem();
+				pIter = pIter->GetNext();
+				if (pEntry && pEntry->pTextureSet) {
+					g_arrInterface->AppendElement(pArray, NVSEArrayElement(pEntry->pTextureSet));
+				}
+			}
+		}
+	}
+	g_arrInterface->AssignCommandResult(pArray, result);
 	return true;
 }

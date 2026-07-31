@@ -1,4 +1,7 @@
 #pragma once
-namespace CloudUpdateFix {
+
+namespace SkyUpdateFixes {
+
 	void Install();
+
 }

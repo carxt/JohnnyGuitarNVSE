@@ -1280,6 +1280,8 @@ void GetSHA1File(const char* filePath, char* outHash) {
 
 	for (uint8_t idx = 0; idx < 0x14; idx++, outHash += 2)
 		sprintf_s(outHash, 3, "%02X", digest[idx]);
+
+	BSMemory::free(digest);
 }
 
 // Taken from xNVSE

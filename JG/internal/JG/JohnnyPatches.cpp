@@ -1,10 +1,18 @@
 #include "JohnnyPatches.hpp"
+
+#include "decoding.h"
+#include "GameObjects.h"
+#include "GameProcess.h"
+#include "GameSound.h"
+#include "GameUI.h"
+
 #include "AddItemMessages.hpp"
 #include "BarterFilter.hpp"
 #include "CameraOverlay.hpp"
 #include "CameraOverride.hpp"
+#include "CustomCameraShake.hpp"
 #include "DeathSoundFix.hpp"
-#include "decoding.h"
+#include "DialogueResponseOverride.hpp"
 #include "DisabledArrowKeys.hpp"
 #include "DisabledLevelUp.hpp"
 #include "DisabledMuzzleFlashLights.hpp"
@@ -14,15 +22,13 @@
 #include "ExtraMiscStats.hpp"
 #include "ExtraReputationIcons.hpp"
 #include "ExtraUISounds.hpp"
-#include "GameObjects.h"
-#include "GameProcess.h"
-#include "GameSound.h"
-#include "GameUI.h"
 #include "LandRemapping.hpp"
-#include "MediaLocationControllerOverride.hpp"
+#include "MediaLocationControllerTweaks.hpp"
+#include "NPCAccuracy.hpp"
 #include "RadioSkipOGGWAVPatch.hpp"
 #include "RSMBarberHook.hpp"
 #include "WorldToScreen.hpp"
+#include "NewNiObjects.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
 
@@ -107,7 +113,7 @@ namespace JohnnyPatches {
 			kFrustum.m_fNear = std::max(fViewmodelNearDistance, 0.001f);
 
 			const float fOrgRatio = apCamera->m_fMaxFarNearRatio;
-			apCamera->m_fMaxFarNearRatio = kFrustum.m_fNear;
+			apCamera->m_fMaxFarNearRatio = kFrustum.m_fFar / kFrustum.m_fNear;
 			ThisCall(kSetViewFrustumDetour, apCamera, &kFrustum);
 			apCamera->m_fMaxFarNearRatio = fOrgRatio;
 		}
@@ -245,7 +251,7 @@ namespace JohnnyPatches {
 
 		kSetViewFrustumDetour.ReplaceCall(0x8752F2, SetViewmodelFrustumHook);
 
-		MediaLocationControllerOverride::Install();
+		MediaLocationControllerTweaks::Install();
 
 		CameraOverride::Install();
 
@@ -254,6 +260,14 @@ namespace JohnnyPatches {
 		LandRemapping::Install();
 
 		kHolotapePlayDetour.ReplaceCall(0x798BB1, StopHolotapeSoundHook);
+
+		CustomCameraShake::Install();
+
+		NPCAccuracy::Install();
+
+		DialogueResponseOverride::Install();
+
+		NewNiObjects::Install();
 	}
 
 	void DeferredInit() {

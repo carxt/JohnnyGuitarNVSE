@@ -39,6 +39,7 @@ uint32_t g_pluginHandle = 0;
 
 void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
 InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
 
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 
@@ -102,6 +103,7 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* apNVSE) {
 	if (!bIsGECK) {
 		NVSEDataInterface* pNVSEData = static_cast<NVSEDataInterface*>(apNVSE->QueryInterface(kInterface_Data));
 		InventoryRefGetForID = static_cast<InventoryRef * (*)(uint32_t)>(pNVSEData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
+		InventoryRefCreateEntry = static_cast<TESObjectREFR* (__stdcall*)(TESObjectREFR*, TESForm*, uint32_t, ExtraDataList*)>(pNVSEData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreateEntry));
 		CaptureLambdaVars = static_cast<_CaptureLambdaVars>(pNVSEData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
 		UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(pNVSEData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
 		ExtractArgsEx = g_scriptInterface->ExtractArgsEx;

@@ -1,8 +1,13 @@
 #pragma once
-#include <GameSound.h>
+
+#include "Bethesda\QuestUpdateManager.hpp"
+
+class TESSound;
 
 namespace ExtraUISounds {
 
 	void Install();
-	void SetSound(TESSound* sound, uint32_t type);
+
+	void __fastcall SetQuestSound(TESSound* apSound, QuestUpdateManager::UpdateType aeType);
+
 }

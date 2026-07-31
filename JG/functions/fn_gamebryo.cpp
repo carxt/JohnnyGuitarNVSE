@@ -4,6 +4,7 @@
 #include "Gamebryo/NiPSysBoxEmitter.hpp"
 #include "Gamebryo/NiPSysEmitter.hpp"
 #include "Gamebryo/NiPSysModifier.hpp"
+#include "Bethesda/BSWindModifier.hpp"
 
 #include <JG/TaskQueue.hpp>
 #include <GameTasks.h>
@@ -79,19 +80,40 @@ enum class ParticleModifierItem : int32_t {
 	BOX_EMITTER_HEIGHT,
 	BOX_EMITTER_DEPTH,
 
+	// BSWindModifier
+
+	WIND_MODIFIER_STRENGTH,
+
 	COUNT
 };
 
-static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const NiFixedString& arObjectName, NiProperty::PropertyType aeType) {
-	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
+enum class LightItem : int32_t {
+	NONE = -1,
+	DIMMER,
+	RADIUS,
+	OUTER_SPOT_ANGLE,
+	INNER_SPOT_ANGLE,
+	SPOT_EXPONENT,
+	COUNT
+};
+
+enum class LightColorItem : int32_t {
+	NONE = -1,
+	DIFFUSE,
+	AMBIENT,
+	COUNT
+};
+
+static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const char* apObjectName, NiProperty::PropertyType aeType) {
+	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, apObjectName);
 	if (!pObject)
 		return { nullptr, nullptr };
 
 	return { pObject->GetProperty(aeType), pObject };
 }
 
-static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* apRoot, const NiFixedString& arObjectName) {
-	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
+static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* apRoot, const char* apObjectName) {
+	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, apObjectName);
 	if (!pObject)
 		return nullptr;
 
@@ -611,6 +633,16 @@ bool Cmd_SetNiPSysModifierValue_Execute(COMMAND_ARGS) {
 						break;
 				}
 			}
+
+			if (const auto pWindModifier = spModifier->NiDynamicCast<BSWindModifier>()) {
+				switch (eItem) {
+					case ParticleModifierItem::WIND_MODIFIER_STRENGTH:
+						pWindModifier->fStrength = fValue;
+						return;
+					default:
+						break;
+				}
+			}
 		});
 	}
 	return true;
@@ -705,6 +737,16 @@ bool Cmd_GetNiPSysModifierValue_Execute(COMMAND_ARGS) {
 						break;
 				}
 			}
+
+			if (const auto pWindModifier = spModifier->NiDynamicCast<BSWindModifier>()) {
+				switch (eItem) {
+					case ParticleModifierItem::WIND_MODIFIER_STRENGTH:
+						*result = pWindModifier->fStrength;
+						return;
+					default:
+						break;
+				}
+			}
 		});
 	}
 	return true;
@@ -789,5 +831,173 @@ bool Cmd_GetParticleEmitterSpawnRate_Execute(COMMAND_ARGS) {
 			}
 		}
 	}
+	return true;
+}
+
+bool Cmd_SetNiLightValue_Execute(COMMAND_ARGS) {
+	*result = 0;
+	LightItem eItem = LightItem::NONE;
+	float fValue = 0;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &fValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (!pObject)
+			return true;
+
+		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
+		if (!pLight)
+			return true;
+
+		NiSpotLight* pSpotLight = nullptr;
+		if (eItem >= LightItem::OUTER_SPOT_ANGLE && eItem <= LightItem::SPOT_EXPONENT) {
+			pSpotLight = pLight->NiDynamicCast<NiSpotLight>();
+			if (!pSpotLight)
+				return true;
+		}
+
+		switch (eItem) {
+			case LightItem::DIMMER:
+				pLight->SetDimmer(fValue);
+				break;
+			case LightItem::RADIUS:
+				pLight->SetLightRadius(fValue);
+				break;
+			case LightItem::OUTER_SPOT_ANGLE:
+				pSpotLight->SetOuterSpotAngle(fValue);
+				break;
+			case LightItem::INNER_SPOT_ANGLE:
+				pSpotLight->SetInnerSpotAngle(fValue);
+				break;
+			case LightItem::SPOT_EXPONENT:
+				pSpotLight->SetSpotExponent(fValue);
+				break;
+			default:
+				__assume(0);
+		}
+
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetNiLightValue_Execute(COMMAND_ARGS) {
+	*result = 0;
+	LightItem eItem = LightItem::NONE;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (!pObject)
+			return true;
+
+		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
+		if (!pLight)
+			return true;
+
+		NiSpotLight* pSpotLight = nullptr;
+		if (eItem >= LightItem::OUTER_SPOT_ANGLE && eItem <= LightItem::SPOT_EXPONENT) {
+			pSpotLight = pLight->NiDynamicCast<NiSpotLight>();
+			if (!pSpotLight)
+				return true;
+		}
+
+		switch (eItem) {
+			case LightItem::DIMMER:
+				*result = pLight->GetDimmer();
+				break;
+			case LightItem::RADIUS:
+				*result = pLight->GetLightRadius();
+				break;
+			case LightItem::OUTER_SPOT_ANGLE:
+				*result = pSpotLight->GetOuterSpotAngle();
+				break;
+			case LightItem::INNER_SPOT_ANGLE:
+				*result = pSpotLight->GetInnerSpotAngle();
+				break;
+			case LightItem::SPOT_EXPONENT:
+				*result = pSpotLight->GetSpotExponent();
+				break;
+			default:
+				__assume(0);
+		}
+	}
+	return true;
+}
+
+bool Cmd_SetNiLightColor_Execute(COMMAND_ARGS) {
+	*result = 0;
+	LightColorItem eItem = LightColorItem::NONE;
+	NiColor kColor;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &kColor.r, &kColor.g, &kColor.b, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (!pObject)
+			return true;
+
+		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
+		if (!pLight)
+			return true;
+
+		switch (eItem) {
+			case LightColorItem::DIFFUSE:
+				pLight->SetDiffuseColor(kColor);
+				break;
+			case LightColorItem::AMBIENT:
+				pLight->SetAmbientColor(kColor);
+				break;
+			default:
+				__assume(0);
+		}
+
+		*result = 1;
+	}
+
+	return true;
+}
+
+bool Cmd_GetNiLightColor_Execute(COMMAND_ARGS) {
+	*result = 0;
+
+	ScriptVar* pRed = nullptr;
+	ScriptVar* pGreen = nullptr;
+	ScriptVar* pBlue = nullptr;
+
+	LightColorItem eItem = LightColorItem::NONE;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &pRed, &pGreen, &pBlue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		ASSUME_ASSERT(pRed && pGreen && pBlue);
+		NiObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (!pObject)
+			return true;
+
+		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
+		if (!pLight)
+			return true;
+
+		NiColor kColor;
+		switch (eItem) {
+			case LightColorItem::DIFFUSE:
+				kColor = pLight->GetDiffuseColor();
+				break;
+			case LightColorItem::AMBIENT:
+				kColor = pLight->GetAmbientColor();
+				break;
+			default:
+				__assume(0);
+		}
+
+		pRed->data = kColor.r;
+		pGreen->data = kColor.g;
+		pBlue->data = kColor.b;
+
+		if (IsConsoleMode())
+			Console_Print("GetNiLightColor %i >> %f %f %f", eItem, kColor.r, kColor.g, kColor.b);
+
+		*result = 1;
+	}
+
 	return true;
 }

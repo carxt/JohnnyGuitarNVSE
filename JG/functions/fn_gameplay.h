@@ -3,6 +3,7 @@
 
 // Functions affecting gameplay
 DEFINE_COMMAND_PLUGIN(ToggleLevelUpMenu, , false, kParams_OneInt);
+DEFINE_CMD_COND_PLUGIN(IsLevelUpMenuEnabled, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(TogglePipBoy, , false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(Jump, , true, nullptr);
 DEFINE_COMMAND_PLUGIN(StopVATSCam, , false, nullptr);
@@ -78,5 +79,7 @@ DEFINE_CMD_COND_PLUGIN(IsInDialogueWithPlayer, , true, nullptr);
 DEFINE_COMMAND_PLUGIN(PathToPoint, , true, kParams_ThreeFloatsTwoOptionalFloats);
 DEFINE_COMMAND_PLUGIN(SetYieldTimer, , false, kParams_OneFloat);
 DEFINE_CMD_COND_PLUGIN(GetYieldTimer, , false, nullptr);
+DEFINE_COMMAND_PLUGIN(GetPCRootWorldspace, , false, nullptr);
+DEFINE_CMD_COND_PLUGIN(GetPCInRootWorldspace, , false, kParams_OneWorldSpace);
 
 void RestoreDisabledPlayerControlsHUDFlags();

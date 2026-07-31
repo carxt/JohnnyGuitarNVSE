@@ -58,6 +58,12 @@
     <Filter Include="internal\Game\FaceGen">
       <UniqueIdentifier>{b331cf33-6dcb-490c-9600-fe0f180f9bbc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="internal\JG\Fixes">
+      <UniqueIdentifier>{c8383eb4-5183-4f6d-952a-a7639d8bdfe7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="internal\JG\Features">
+      <UniqueIdentifier>{e02485ea-f49a-465f-b8fd-bd71a3eabf4f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
@@ -73,9 +79,6 @@
       <Filter>nvse</Filter>
     </ClCompile>
     <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameRTTI.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
     <ClCompile Include="..\nvse\nvse\GameScript.cpp">
@@ -121,9 +124,6 @@
     <ClCompile Include="misc\misc.cpp">
       <Filter>misc</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\EditorIDRestoration.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
     <ClCompile Include="internal\JIP\JIPFixes.cpp">
       <Filter>internal\JIP</Filter>
     </ClCompile>
@@ -151,9 +151,6 @@
     <ClCompile Include="functions\fn_dial.cpp">
       <Filter>functions</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\DialogueResponseOverride.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
     <ClCompile Include="functions\fn_file.cpp">
       <Filter>functions</Filter>
     </ClCompile>
@@ -166,32 +163,11 @@
     <ClCompile Include="functions\fn_ui.cpp">
       <Filter>functions</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\RSMBarberHook.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\ExtraMiscStats.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\ExtraReputationIcons.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\ExtraMarkerIcons.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
     <ClCompile Include="functions\fn_utility.cpp">
       <Filter>functions</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\ExtraUISounds.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
     <ClCompile Include="functions\fn_gameplay.cpp">
       <Filter>functions</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\NPCAccuracy.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\CustomCameraShake.cpp">
-      <Filter>internal\JG</Filter>
     </ClCompile>
     <ClCompile Include="functions\fn_math.cpp">
       <Filter>functions</Filter>
@@ -205,37 +181,7 @@
     <ClCompile Include="functions\fn_form.cpp">
       <Filter>functions</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\BarterFilter.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\CameraOverride.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\CloudUpdateFix.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\CustomHUDShake.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\DisabledArrowKeys.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\DisabledLevelUp.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\DisabledMuzzleFlashLights.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\DisabledSaves.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
     <ClCompile Include="internal\JG\JohnnyRadios.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\MediaLocationControllerOverride.cpp">
-      <Filter>internal\JG</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
     <ClCompile Include="events\EventFramework.cpp">
@@ -252,9 +198,6 @@
     </ClCompile>
     <ClCompile Include="functions\fn_event.cpp">
       <Filter>functions</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\JG\AddItemMessages.cpp">
-      <Filter>internal\JG</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Gamebryo\NiPoint2.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
@@ -751,14 +694,92 @@
     <ClCompile Include="internal\JG\JohnnyCommands.cpp">
       <Filter>internal\JG\Core</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\AnimActivationHeight.cpp">
+    <ClCompile Include="internal\JG\WorldToScreen.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\DeathSoundFix.cpp">
-      <Filter>internal\JG</Filter>
+      <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\WorldToScreen.cpp">
-      <Filter>internal\JG</Filter>
+    <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\RadioSkipOGGWAVPatch.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\NPCAccuracy.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\RSMBarberHook.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\LandRemapping.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\FixedStringsRework.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraUISounds.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraReputationIcons.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraMiscStats.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraMarkerIcons.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\EditorIDRestoration.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledSaves.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledMuzzleFlashLights.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledLevelUp.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledArrowKeys.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DialogueResponseOverride.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\CustomHUDShake.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\CustomCameraShake.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\CameraOverride.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\CameraOverlay.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\BarterFilter.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\AnimActivationHeight.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\AddItemMessages.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\SkyUpdateFixes.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\MediaLocationControllerTweaks.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESModelTextureSwap.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\NewNiObjects.cpp">
+      <Filter>internal\JG\Features</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\TESObjectLIGH.cpp">
       <Filter>internal\Game\Bethesda</Filter>
@@ -957,9 +978,6 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiCriticalSection.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\JG\EditorIDRestoration.hpp">
-      <Filter>internal\JG</Filter>
     </ClInclude>
     <ClInclude Include="internal\JIP\JIPFixes.hpp">
       <Filter>internal\JIP</Filter>
@@ -1768,9 +1786,6 @@
     <ClInclude Include="internal\JG\JohnnyRadios.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\MediaLocationControllerOverride.hpp">
-      <Filter>internal\JG</Filter>
-    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
@@ -2149,8 +2164,11 @@
     <ClInclude Include="internal\JG\JohnnyCommands.hpp">
       <Filter>internal\JG\Core</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\DeathSoundFix.hpp">
+    <ClInclude Include="internal\JG\WorldToScreen.hpp">
       <Filter>internal\JG</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\DeathSoundFix.hpp">
+      <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\TESObjectLIGH.hpp">
       <Filter>internal\Game\Bethesda</Filter>

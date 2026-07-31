@@ -44,3 +44,18 @@ TESAmmo* InventoryChanges::GetAmmoForWeapon(TESObjectWEAP* apWeapon, bool& arbHa
 void InventoryChanges::ResetCachedWeights() {
 	ThisCall(0x4BF0E0, this);
 }
+
+// GAME - 0x4BF4B0
+ItemChange* InventoryChanges::GetHotkeyItem(int32_t aiHotkey) const {
+	return ThisCall<ItemChange*>(0x4BF4B0, this, aiHotkey);
+}
+
+// GAME - 0x4BF330
+void InventoryChanges::RemoveHotkeyItem(ItemChange* apItem, int32_t aiHotkey) const {
+	ThisCall(0x4BF330, this, apItem, aiHotkey);
+}
+
+// GAME - 0x4BF800
+void InventoryChanges::SetHotkeyItem(ItemChange* apItem, ExtraDataList* apExtra, int32_t aiHotkey) const {
+	ThisCall(0x4BF800, this, apItem, apExtra, aiHotkey);
+}

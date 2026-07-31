@@ -1,7 +1,8 @@
 #include "ItemChange.hpp"
 
 // GAME - 0x76B630
-ItemChange::ItemChange() : pObject(nullptr), pExtraLists(nullptr), iNumber(0) {
+ItemChange::ItemChange() {
+	ThisCall(0x76B630, this);
 }
 
 // GAME - 0x4BC650
@@ -162,3 +163,8 @@ float ItemChange::GetModifiedAttackDamage(ActorValueOwner* apActor, float afDama
 	return ThisCall<float>(0x4BDF00, this, apActor, afDamageMult, abIgnoreExplosion);
 }
 #endif
+
+// GAME - 0x4BD820
+uint8_t ItemChange::GetModSlots() const {
+	return ThisCall<uint8_t>(0x4BD820, this);
+}

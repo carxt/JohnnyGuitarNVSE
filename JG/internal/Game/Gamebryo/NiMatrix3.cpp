@@ -435,7 +435,7 @@ void NiMatrix3::MakeRotation(float afAngle, float afX, float afY, float afZ) noe
 
 	m_pEntry[2][0] = fXZm + fYSin;
 	m_pEntry[2][1] = fYZm - fXSin;
-	m_pEntry[2][2] = fYZm * fOmCos + fCos;
+	m_pEntry[2][2] = fZ2  * fOmCos + fCos;
 #endif
 }
 

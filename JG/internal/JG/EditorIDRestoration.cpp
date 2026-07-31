@@ -3,6 +3,8 @@
 #include "JohnnyExtraData.hpp"
 #include "misc/misc.h"
 
+STACK_FRAME_OPT_ENABLE
+
 namespace EDIDRestoration {
 
 #define DEBUG_PRINTS 0
@@ -162,11 +164,11 @@ namespace EDIDRestoration {
 	};
 
 	namespace Map {
-		__forceinline char tolower_game(int32_t c) {
+
+		SPEC_INLINE char tolower_game(int32_t c) {
 			return CdeclCall<int32_t>(0xEC67AA, c);
 		}
 
-STACK_FRAME_OPT_ENABLE
 		class CIFixedStringFormMap : public BSTCaseInsensitiveStringMap<TESForm*> {
 		public:
 			bool _IsKeysEqual(const char* __restrict apKey1, const char* __restrict apKey2) const noexcept {
@@ -190,7 +192,6 @@ STACK_FRAME_OPT_ENABLE
 				return (*apKey1 | *apKey2) == 0;
 			}
 		};
-STACK_FRAME_OPT_RESET
 
 		static void InitHooks() noexcept {
 			// Replace map's function
@@ -238,9 +239,11 @@ STACK_FRAME_OPT_RESET
 			TESForm::pAllFormsByEditorID->GetAt(apEDID, pForm);
 			return pForm;
 		}
+
 	}
 
 	namespace ExtraData {
+
 		static JohnnyExtraData::EDIDResult __fastcall AddEDID(TESForm* apForm, const NiFixedString& arEDID) noexcept {
 			JohnnyExtraData* pData = JohnnyExtraData::GetOrCreate(apForm);
 			if (!pData) [[unlikely]]
@@ -257,19 +260,36 @@ STACK_FRAME_OPT_RESET
 			return pData->RemoveEditorID(arEDID);
 		}
 
-		static const NiFixedString* __fastcall GetEDID(const TESForm* apForm) noexcept {
+		static JohnnyExtraData::EDIDResult __fastcall GetEDID(const TESForm* apForm, NiFixedString& arOutEDID) noexcept {
 			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
-			if (!pData) [[unlikely]]
-				return nullptr;
-
-			return &pData->GetEditorID();
+			if (pData && pData->GetEditorID()) [[likely]] {
+				arOutEDID = pData->GetEditorID();
+				return JohnnyExtraData::EDIDResult::SUCCESS;
+			}
+			return JohnnyExtraData::EDIDResult::FAILURE;
 		}
+
+		static const char* __fastcall GetEDIDString(const TESForm* apForm) noexcept {
+			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			if (pData && pData->GetEditorID()) [[likely]]
+				return pData->GetEditorID().c_str();
+			return "";
+		}
+
+		static uint32_t __fastcall GetEDIDLength(const TESForm* apForm) noexcept {
+			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			if (pData && pData->GetEditorID()) [[likely]]
+				return pData->GetEditorID().GetLength();
+			return 0;
+		}
+
 	}
 
 	namespace IgnoredConflicts {
+
 		static NiFixedString strWilderness;
 
-		static bool SPEC_NOINLINE __fastcall IsIgnored(const TESForm* apExistingForm, const NiFixedString& arEDID) noexcept {
+		static SPEC_NOINLINE bool __fastcall IsIgnored(const TESForm* apExistingForm, const NiFixedString& arEDID) noexcept {
 			// Ignore 0x18E because Obsidian had a skill issue
 			if (apExistingForm->GetFormID() == 0x18E) [[unlikely]]
 				return true;
@@ -283,28 +303,33 @@ STACK_FRAME_OPT_RESET
 		static void InitializeStrings() noexcept {
 			strWilderness = "Wilderness";
 		}
+
 	}
 
-	static void SPEC_NOINLINE __fastcall LogEDIDConflict(const TESForm* apExistingForm, const NiFixedString& arEDID, const TESForm* apForm) noexcept {
+	static SPEC_NOINLINE void __fastcall LogEDIDConflict(const TESForm* apExistingForm, const NiFixedString& arEDID, const TESForm* apForm) noexcept {
 		const TESFile* pFileA = apForm->GetFile(0);
 		const TESFile* pFileB = apExistingForm->GetFile(0);
-		char cText[512];
+
+		const char* pFileAName = pFileA ? pFileA->GetName() : "";
+		const char* pFileBName = pFileB ? pFileB->GetName() : "";
+
 		if (apExistingForm->GetFormType() == apForm->GetFormType()) [[likely]] {
-			sprintf_s(cText, "%08X (\"%s\") steals EDID \"%s\" from %08X (\"%s\")",
-				apForm->GetFormID(), pFileA ? pFileA->GetName() : "", arEDID.c_str(),
-				apExistingForm->GetFormID(), pFileB ? pFileB->GetName() : "");
+			_MESSAGE("%08X (\"%s\") steals EDID \"%s\" from %08X (\"%s\")",
+				apForm->GetFormID(), pFileAName, 
+				arEDID.c_str(),
+				apExistingForm->GetFormID(), pFileBName);
 		}
 		else [[unlikely]] {
-			sprintf_s(cText, "%08X (\"%s\") steals EDID \"%s\" from %08X (\"%s\") + changes type from %s to %s",
-				apForm->GetFormID(), pFileA ? pFileA->GetName() : "", arEDID.c_str(),
-				apExistingForm->GetFormID(), pFileB ? pFileB->GetName() : "",
+			_MESSAGE("%08X (\"%s\") steals EDID \"%s\" from %08X (\"%s\") + changes type from %s to %s",
+				apForm->GetFormID(), pFileAName, 
+				arEDID.c_str(),
+				apExistingForm->GetFormID(), pFileBName,
 				apExistingForm->GetFormTypeName(), apForm->GetFormTypeName());
 		}
-		_MESSAGE(cText);
 		bHadEDIDConflicts = true;
 	}
 
-	static void SPEC_NOINLINE __fastcall AddToGameMap(TESForm* apForm, const NiFixedString& arEDID) noexcept {
+	static SPEC_NOINLINE void __fastcall AddToGameMap(TESForm* apForm, const NiFixedString& arEDID) noexcept {
 		const TESForm* pExistingForm = Map::Get(arEDID);
 		if (pExistingForm) [[unlikely]] {
 			if (pExistingForm == apForm) [[likely]] {
@@ -322,7 +347,7 @@ STACK_FRAME_OPT_RESET
 	}
 
 	// exported
-	uint32_t __cdecl JGNVSE_GetFormIDFromEDID(char* apEDID) noexcept {
+	uint32_t __cdecl JGNVSE_GetFormIDFromEDID(const char* apEDID) noexcept {
 		if (apEDID && apEDID[0]) [[likely]] {
 			const TESForm* pForm = Map::Get(apEDID);
 			if (pForm)
@@ -335,14 +360,12 @@ STACK_FRAME_OPT_RESET
 	class TESFormEx : public TESForm {
 	public:
 		uint32_t hk_GetFormEditorIDLength() const noexcept {
-			const NiFixedString* pEDID = ExtraData::GetEDID(this);
-			return pEDID ? pEDID->GetLength() : 0;
+			return ExtraData::GetEDIDLength(this);
 		}
 
 		// vftable + 0x130
 		const char* hk_GetFormEditorID() const noexcept {
-			const NiFixedString* pEDID = ExtraData::GetEDID(this);
-			return pEDID ? pEDID->c_str() : "";
+			return ExtraData::GetEDIDString(this);
 		}
 
 		// vftable + 0x134
@@ -489,4 +512,7 @@ STACK_FRAME_OPT_RESET
 			Console_Print("Some EDIDs are conflicting! Check JohnnyGuitarNVSE.log for details. (Ignore this message if you are not a %s author.)", pName);
 		}
 	}
+
 }
+
+STACK_FRAME_OPT_RESET

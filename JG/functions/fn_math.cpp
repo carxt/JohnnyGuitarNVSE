@@ -15,7 +15,8 @@ enum FOVType {
 	CURRENT		= 2,
 };
 
-bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL) {
+	*result = 0;
 	const FOVType eFOV = *reinterpret_cast<FOVType*>(&arg1);
 	switch (eFOV) {
 		case FOVType::VIEWMODEL:
@@ -32,11 +33,9 @@ bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL) {
 }
 
 bool Cmd_GetPlayerCamFOV_Execute(COMMAND_ARGS) {
-	*result = 0;
 	FOVType eFOV = FOVType::VIEWMODEL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eFOV)) 
-		Cmd_GetPlayerCamFOV_Eval(thisObj, reinterpret_cast<void*>(eFOV), nullptr, result);
-	return true;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &eFOV);
+	return Cmd_GetPlayerCamFOV_Eval(thisObj, reinterpret_cast<void*>(eFOV), nullptr, result);
 }
 
 bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS) {
@@ -315,7 +314,7 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 			kPos += pRef->GetPosition();
 
 		NiPoint3 kResult = { 0.f, 0.f, 0.f };
-		*result = (WorldToScreen::WorldToScreen(&kPos, kResult, eHandleType) ? 1.0 : 0.0);
+		*result = (WorldToScreen::WorldToScreen(kPos, kResult, eHandleType) ? 1.0 : 0.0);
 
 		setVarByName(PASS_VARARGS, cOutX, kResult.x);
 		setVarByName(PASS_VARARGS, cOutY, kResult.y);
@@ -338,7 +337,7 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 			kPos += pRef->GetPosition(); 
 
 		NiPoint3 kResult = { 0.f, 0.f, 0.f };
-		*result = (WorldToScreen::WorldToScreen(&kPos, kResult, eHandleType) ? 1.0 : 0.0);
+		*result = (WorldToScreen::WorldToScreen(kPos, kResult, eHandleType) ? 1.0 : 0.0);
 
 		pOutX->data = kResult.x;
 		pOutY->data = kResult.y;

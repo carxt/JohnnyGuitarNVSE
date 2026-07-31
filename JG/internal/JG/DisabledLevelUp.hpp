@@ -1,7 +1,12 @@
 #pragma once
 
 namespace DisabledLevelUp {
-	extern bool isShowLevelUp;
-	void Install();
+
 	void Reset();
+
+	void Install();
+
+	bool GetShowLevelUpMenu();
+	void SetShowLevelUpMenu(bool abVal);
+
 }

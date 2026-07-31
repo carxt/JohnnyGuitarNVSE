@@ -6,14 +6,18 @@
 
 namespace DisabledSaves {
 
-	std::unordered_map<uint8_t, Bitfield32> kSaveBlockers;
+	using SaveBlockMap = std::unordered_map<const TESFile*, Bitfield32>;
+
+	SaveBlockMap* pSaveBlockers = nullptr;
 
 	static bool __fastcall CanSave(uint32_t auiFlags) {
-		for (auto& rMod : kSaveBlockers) {
-			if (rMod.second.Get(auiFlags))
-				return false;
-			else if (rMod.second.GetBit(SaveTypeBits::NORMAL) && !auiFlags)
-				return false;
+		if (pSaveBlockers) {
+			for (auto& rMod : *pSaveBlockers) {
+				if (rMod.second.Get(auiFlags))
+					return false;
+				else if (rMod.second.GetBit(SaveTypeBits::NORMAL) && !auiFlags)
+					return false;
+			}
 		}
 		return true;
 	}
@@ -22,7 +26,7 @@ STACK_FRAME_OPT_DISABLE
 	HookUtils::CallDetour kCanSaveNowDetour;
 	static bool __fastcall CanSaveNowHook(BGSSaveLoadManager* apThis, void*, bool abAutoSave) {
 		bool bCanSave = ThisCall<bool>(kCanSaveNowDetour, apThis, abAutoSave);
-		if (kSaveBlockers.empty())
+		if (!pSaveBlockers || pSaveBlockers->empty())
 			return bCanSave;
 
 		if (bCanSave) {
@@ -54,19 +58,18 @@ STACK_FRAME_OPT_DISABLE
 	HookUtils::CallDetour kSaveNowMenuDetour;
 	static bool __fastcall CanSaveNowMenuHook(void* apThis, void*, bool abAutoSave) {
 		bool bCanSave = ThisCall<bool>(kCanSaveNowDetour, apThis, abAutoSave);
-		if (kSaveBlockers.empty())
+		if (!pSaveBlockers || pSaveBlockers->empty())
 			return bCanSave;
 
-		if (bCanSave) {
+		if (bCanSave)
 			bCanSave = CanSave(SaveTypeFlags::NORMAL);
-		}
 
 		return bCanSave;
 	}
 
 	HookUtils::CallDetour kSaveMessageDetour;
 	static bool __cdecl ShowMessage(const char* apText, uint32_t aeEmotion, const char* apImagePath, const char* apSoundName, float afTime, bool abInstant) {
-		bool bCanSave = CanSave(SaveTypeFlags::QUICK);
+		const bool bCanSave = CanSave(SaveTypeFlags::QUICK);
 		const char* pText = apText;
 		const char* pImagePath = apImagePath;
 		if (!bCanSave) {
@@ -76,12 +79,11 @@ STACK_FRAME_OPT_DISABLE
 		return CdeclCall<bool>(kSaveMessageDetour, pText, aeEmotion, pImagePath, apSoundName, afTime, abInstant);
 	}
 
-	void Init() {
-		kSaveBlockers.reserve(0xFF);
-	}
-
 	void Reset() {
-		kSaveBlockers.clear();
+		if (pSaveBlockers) {
+			delete pSaveBlockers;
+			pSaveBlockers = nullptr;
+		}
 	}
 
 	void Install() {
@@ -92,11 +94,14 @@ STACK_FRAME_OPT_DISABLE
 	}
 STACK_FRAME_OPT_RESET
 
-	void Toggle(uint8_t aucMod, bool abToggle, uint32_t auiTypeFlags) {
+	void __fastcall Toggle(const TESFile* apFile, uint32_t auiTypeFlags, bool abToggle) {
+		if (!pSaveBlockers)
+			pSaveBlockers = new SaveBlockMap;
+
 		if (abToggle)
-			kSaveBlockers[aucMod] = auiTypeFlags;
+			pSaveBlockers->insert({ apFile, auiTypeFlags });
 		else
-			kSaveBlockers.erase(aucMod);
+			pSaveBlockers->erase(apFile);
 	}
 
 }

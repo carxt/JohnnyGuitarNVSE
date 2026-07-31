@@ -703,6 +703,9 @@ public:
 class BGSLoadGameSubBuffer;
 class BGSReconstructFormsInFileMap;
 class BGSReconstructFormsInAllFilesMap;
+class BGSSaveLoadFormIDMap;
+class BGSSaveLoadQueuedSubBufferMap;
+class BGSSaveLoadHistory;
 
 class BGSSaveLoadGame	// 0x011DDF38
 {
@@ -737,25 +740,55 @@ public:
 		NiTPointerMap<uint32_t, BGSCellNumericIDArrayMap*>	kWorldspaceReferencesMap;
 	};
 
-	BGSSaveLoadChangesMap* changesMap;			// 000
-	BGSSaveLoadChangesMap* previousChangeMap;	// 004
-	RefIDIndexMapping* refIDmapping;			// 008
-	RefIDIndexMapping* visitedWorldspaces;	// 00C
-	BGSSaveLoadReferencesMap* sct010;				// 010
-	NiTMap<TESForm*, BGSLoadGameSubBuffer>* maps014[3];			// 014	0 = changed Animations, 2 = changed Havok Move
-	NiTMap<uint32_t, uint32_t>* map018;				// 018
-	BSSimpleArray<char*>* strings;				// 01C
-	BGSReconstructFormsInAllFilesMap* rfiafMap;				// 020
-	BSSimpleArray<BGSLoadFormBuffer*>		changedForms;			// 024
-	NiTMap<uint32_t, Actor*>					map0034;				// 034 Either dead or not dead actors
-	uint8_t									saveMods[255];			// 044
-	uint8_t									loadedMods[255];		// 143
+	struct ALIGN4 _GlobalFlags {
+		enum Flags : uint32_t {
+			GLOBAL_BLOCK_CHANGES	= 1u << 0,
+			SAVE_GAME_LOADING		= 1u << 1,
+			SAVE_GAME_SAVING		= 1u << 2,
+			INITING_FORMS			= 1u << 3,
+			DEFER_INIT_FORMS		= 1u << 4,
+			POSITIONING_PLAYER		= 1u << 5,
+			PLAYER_LOCATION_INVALID = 1u << 6,
+			SAVE_LOAD_FAILED		= 1u << 7,
+		};
 
-	uint16_t									pad242;					// 242
-	uint32_t									flg244;					// 244 bit 6 block updating player position/rotation from save, bit 2 set during save
-	uint8_t									formVersion;			// 248
-	uint8_t									pad249[3];				// 249
+		bool bGlobalBlockChanges	: 1;
+		bool bSaveGameLoading		: 1;
+		bool bSaveGameSaving		: 1;
+		bool bInitingForms			: 1;
+		bool bDeferInitForms		: 1;
+		bool bPositioningPlayer		: 1;
+		bool bPlayerLocationInvalid : 1;
+		bool bSaveLoadFailed		: 1;
+	};
+	using GlobalFlags = _GlobalFlags::Flags;
+
+	BGSSaveLoadChangesMap*					pChangesMap;
+	BGSSaveLoadChangesMap*					pOldChangesMap;
+	BGSSaveLoadFormIDMap*					pFormIDMap;
+	BGSSaveLoadFormIDMap*					pWorldspaceFormIDMap;
+	BGSSaveLoadReferencesMap*				pReferencesMap;
+	BGSSaveLoadQueuedSubBufferMap*			pQueuedSubBuffersMap;
+	NiTMap<uint32_t, uint32_t>*				pChangedFormIDMap;
+	BGSSaveLoadHistory*						pHistory;
+	BGSReconstructFormsInAllFilesMap*		pReconstructForms;
+	BSSimpleArray<BGSLoadFormBuffer*>		kChangedForms;
+	NiTMap<uint32_t, Actor*>				kQueuedInitPackageLocationsActorMap;
+	uint8_t									ucSaveMods[255];
+	uint8_t									ucLoadedMods[255];
+	Bitfield<_GlobalFlags>					uiGlobalFlags;
+	uint8_t									ucCurrentMinorVersion;
+
+	static BGSSaveLoadGame* GetSingleton() {
+		return *reinterpret_cast<BGSSaveLoadGame**>(0x11DDF38);
+	}
+
+	bool GetSaveGameLoading() const {
+		return uiGlobalFlags.bSaveGameLoading;
+	}
 };
+
+ASSERT_SIZE(BGSSaveLoadGame, 0x24C);
 
 #if RUNTIME
 class SaveGameManager {

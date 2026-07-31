@@ -19,7 +19,7 @@
 #include "JG/DisabledMuzzleFlashLights.hpp"
 #include "JG/DisabledSaves.hpp"
 #include "JG/JohnnyPatches.hpp"
-#include "JG/MediaLocationControllerOverride.hpp"
+#include "JG/MediaLocationControllerTweaks.hpp"
 #include "JG/NPCAccuracy.hpp"
 #include "JG/ScriptUtils.hpp"
 #include "JG/WorldToScreen.hpp"
@@ -159,7 +159,7 @@ bool Cmd_SetCasinoChip_Execute(COMMAND_ARGS) {
 
 bool Cmd_ClearMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	MediaLocationControllerOverride::Reset();
+	MediaLocationControllerTweaks::ResetOverride();
 	*result = 1;
 
 	return true;
@@ -169,7 +169,7 @@ bool Cmd_SetMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
 	MediaLocationController* pCtrl = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCtrl) && pCtrl && IS_TYPE(pCtrl, MediaLocationController)) {
-		MediaLocationControllerOverride::Set(pCtrl);
+		MediaLocationControllerTweaks::SetOverride(pCtrl);
 		*result = 1;
 	}
 	return true;
@@ -177,17 +177,18 @@ bool Cmd_SetMediaLocationControllerOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetHUDShudderPower_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint8_t ucIndex = scriptObj->GetCompileIndex();
-	*result = CustomHUDShake::Get(ucIndex);
+	const TESFile* pFile = scriptObj->GetFile(0);
+	if (pFile)
+		*result = CustomHUDShake::Get(pFile);
 	return true;
 }
 
 bool Cmd_SetHUDShudderPower_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float fPower = -1.f;
-	uint8_t ucIndex = scriptObj->GetCompileIndex();
-	if (ucIndex < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &fPower)) {
-		CustomHUDShake::Set(ucIndex, fPower);
+	const TESFile* pFile = scriptObj->GetFile(0);
+	if (pFile && ExtractArgsEx(EXTRACT_ARGS_EX, &fPower)) {
+		CustomHUDShake::Set(pFile, fPower);
 		*result = 1;
 	}
 	return true;
@@ -275,7 +276,7 @@ bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj->IsActor())
 		*result = static_cast<Actor*>(thisObj)->HasDamageHealthEffect();
@@ -283,8 +284,7 @@ bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
 }
 
 bool Cmd_HasHealthDamageEffect_Execute(COMMAND_ARGS) {
-	Cmd_HasHealthDamageEffect_Eval(thisObj, nullptr, nullptr, result);
-	return true;
+	return Cmd_HasHealthDamageEffect_Eval(thisObj, nullptr, nullptr, result);
 }
 
 static float Sign(const NiPoint3& p1, const NiPoint3& p2, const NiPoint3& p3) {
@@ -426,7 +426,7 @@ bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 }
 
 
-bool Cmd_GetExtraAccuracyPenaltyMult_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_GetExtraAccuracyPenaltyMult_Eval(COMMAND_ARGS_EVAL) {
 	*result = 1;
 	TESForm* pForm = static_cast<TESForm*>(arg1);
 	TESForm* pTarget = pForm ? pForm : thisObj;
@@ -437,9 +437,8 @@ bool Cmd_GetExtraAccuracyPenaltyMult_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_GetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 	TESForm* pForm = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) 
-		Cmd_GetExtraAccuracyPenaltyMult_Eval(thisObj, pForm, nullptr, result);
-	return true;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pForm);
+	return Cmd_GetExtraAccuracyPenaltyMult_Eval(thisObj, pForm, nullptr, result);
 }
 
 bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
@@ -644,7 +643,7 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetMoonPhase_Eval(COMMAND_ARGS_EVAL) {
+SPEC_INLINE bool Cmd_GetMoonPhase_Eval(COMMAND_ARGS_EVAL) {
 	*result = Moon::eCurrentPhase;
 	return true;
 }
@@ -760,7 +759,7 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetLocationSpecificLoadScreensOnly_Eval(COMMAND_ARGS_EVAL) {
+SPEC_INLINE bool Cmd_GetLocationSpecificLoadScreensOnly_Eval(COMMAND_ARGS_EVAL) {
 	*result = LoadingMenu::bLocationSpecificLoadScreensOnly;
 	return true;
 }
@@ -981,7 +980,7 @@ bool Cmd_IsCombatMusicEnabled_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_IsCompassHostile_Eval(COMMAND_ARGS_EVAL) {
+SPEC_NOINLINE bool Cmd_IsCompassHostile_Eval(COMMAND_ARGS_EVAL) {
 	*result = IsHostileCompassTarget(thisObj);
 	return true;
 }
@@ -1365,9 +1364,21 @@ bool Cmd_ToggleLevelUpMenu_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BOOL bValue = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bValue)) {
-		DisabledLevelUp::isShowLevelUp = bValue;
+		DisabledLevelUp::SetShowLevelUpMenu(bValue);
 		*result = 1;
 	}
+	return true;
+}
+
+SPEC_INLINE bool Cmd_IsLevelUpMenuEnabled_Eval(COMMAND_ARGS_EVAL) {
+	*result = DisabledLevelUp::GetShowLevelUpMenu();
+	return true;
+}
+
+bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS) {
+	Cmd_IsLevelUpMenuEnabled_Eval(nullptr, nullptr, nullptr, result);
+	if (IsConsoleMode())
+		Console_Print("IsLevelUpMenuEnabled >> %.f", *result);
 	return true;
 }
 
@@ -1414,10 +1425,10 @@ bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
 bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 	BOOL bDisable = TRUE;
 	uint32_t uiTypeFlags = DisabledSaves::SaveTypeFlags::ALL;
-	const uint8_t ucIndex = scriptObj->GetCompileIndex();
+	const TESFile* pFile = scriptObj->GetFile(0);
 	*result = 0;
-	if (ucIndex < 0xFF && ExtractArgsEx(EXTRACT_ARGS_EX, &bDisable, &uiTypeFlags)) {
-		DisabledSaves::Toggle(ucIndex, bDisable > 0, uiTypeFlags);
+	if (pFile && ExtractArgsEx(EXTRACT_ARGS_EX, &bDisable, &uiTypeFlags)) {
+		DisabledSaves::Toggle(pFile, uiTypeFlags, bDisable > 0);
 		*result = 1;
 	}
 	return true;
@@ -1511,7 +1522,7 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetGrenadeHoldTime_Eval(COMMAND_ARGS_EVAL) {
+SPEC_INLINE bool Cmd_GetGrenadeHoldTime_Eval(COMMAND_ARGS_EVAL) {
 	*result = PlayerCharacter::GetSingleton()->timeGrenadeHeld;
 	return true;
 }
@@ -1599,7 +1610,7 @@ bool Cmd_SetYieldTimer_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetYieldTimer_Eval(COMMAND_ARGS_EVAL) {
+SPEC_INLINE bool Cmd_GetYieldTimer_Eval(COMMAND_ARGS_EVAL) {
 	*result = PlayerCharacter::GetSingleton()->fYieldTimer;
 	return true;
 }
@@ -1609,4 +1620,27 @@ bool Cmd_GetYieldTimer_Execute(COMMAND_ARGS) {
 	if (IsConsoleMode())
 		Console_Print("GetYieldTimer >> %f", *result);
 	return true;
+}
+
+SPEC_NOINLINE bool Cmd_GetPCInRootWorldspace_Eval(COMMAND_ARGS_EVAL) {
+	*result = 0;
+	const TESWorldSpace* pWorldSpace = static_cast<TESWorldSpace*>(arg1);
+	const MapMenu* pMapMenu = MapMenu::GetSingleton();
+	if (pWorldSpace && pMapMenu && pMapMenu->parentmostLastExtDoorWorldspace)
+		*result = pWorldSpace->GetFormID() == pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
+	return true;  
+}
+
+bool Cmd_GetPCInRootWorldspace_Execute(COMMAND_ARGS) {
+	TESWorldSpace* pWorldSpace = nullptr;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace);
+	return Cmd_GetPCInRootWorldspace_Eval(thisObj, pWorldSpace, nullptr, result);;
+}
+
+bool Cmd_GetPCRootWorldspace_Execute(COMMAND_ARGS) {
+	*result = 0;
+	auto pMapMenu = MapMenu::GetSingleton();
+	if (pMapMenu && pMapMenu->parentmostLastExtDoorWorldspace)
+		*reinterpret_cast<uint32_t*>(result) = pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
+	return true; 
 }

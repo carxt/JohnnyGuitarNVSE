@@ -3,53 +3,56 @@
 #include <GameUI.h>
 
 namespace CustomHUDShake {
-	std::unordered_map<uint8_t, float> shakeRequests;
 
-	float GetHUDShakePower() {
-		if (shakeRequests.empty()) {
-			return 0.0f;
-		}
-		auto maxElement = std::max_element(
-			shakeRequests.begin(), shakeRequests.end(),
+	using ShakeRequestMap = std::unordered_map<const TESFile*, float>;
+
+	ShakeRequestMap* pShakeRequests = nullptr;
+
+	static float GetHUDShakePower() {
+		if (!pShakeRequests || pShakeRequests->empty())
+			return 0.f;
+
+		auto it = std::max_element(
+			pShakeRequests->begin(), pShakeRequests->end(),
 			[](const auto& a, const auto& b) {
 				return a.second < b.second;
 			});
-		return maxElement->second;
-	}
-
-	void Init()
-	{
-		shakeRequests.reserve(0xFF);
+		return it->second;
 	}
 
 	void Reset() {
-		shakeRequests.clear();
+		if (pShakeRequests) {
+			delete pShakeRequests;
+			pShakeRequests = nullptr;
+		}
 	}
 
-	void Update()
-	{
+	void Update() {
 		if (InterfaceManager::GetSingleton()->currentMode == 1) {
-			float power = GetHUDShakePower();
-			if (power > 0.0f) {
-				CdeclCall<void>(0x94C3A0, power);
-			}
+			float fPower = GetHUDShakePower();
+			if (fPower > 0.f)
+				HUDMainMenu::SetHUDShake(fPower);
 		}
-	}
-	float Get(uint8_t modId)
-	{
-		if (modId < 0xFF && shakeRequests.find(modId) != shakeRequests.end()) {
-			return shakeRequests[modId];
-		}
-		return 0.0f;
 	}
 
-	void Set(uint8_t modId, float power)
-	{
-		if (power == 0.0f) {
-			shakeRequests.erase(modId);
+	float __fastcall Get(const TESFile* apFile) {
+		if (pShakeRequests) {
+			auto it = pShakeRequests->find(apFile);
+			if (it != pShakeRequests->end())
+				return it->second;
 		}
-		else {
-			shakeRequests[modId] = power;
-		}
+
+		return 0.f;
 	}
+
+	void __fastcall Set(const TESFile* apFile, float afPower) {
+		if (!pShakeRequests)
+			pShakeRequests = new ShakeRequestMap();
+
+		if (afPower <= 0.f)
+			pShakeRequests->erase(apFile);
+		else
+			pShakeRequests->insert({ apFile, afPower });
+	}
+
 }

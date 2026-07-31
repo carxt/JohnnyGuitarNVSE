@@ -165,7 +165,7 @@ inline int32_t BSStringT<T>::StrCmp(const T* apText, bool abNotCaseSensitive) co
 			if constexpr (std::is_same_v<T, wchar_t>)
 				return std::wcscmp(GetString(), apText);
 			else
-				return stricmp(GetString(), apText);
+				return _stricmp(GetString(), apText);
 		}
 		else {
 			if constexpr (std::is_same_v<T, wchar_t>)
