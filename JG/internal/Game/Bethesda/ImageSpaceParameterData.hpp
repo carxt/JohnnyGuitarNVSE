@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Gamebryo/NiColor.hpp"
 #include "Gamebryo/NiColorA.hpp"
 
 class ImageSpaceParameterData {
