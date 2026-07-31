@@ -23,6 +23,7 @@ public:
 	static const NiPoint3 UNIT_Z;
 	static const NiPoint3 UNIT_ALL;
 	static const NiPoint3 ZERO;
+	static const NiPoint3 INFINITY_POINT3;
 
 	float& operator[](uint32_t i) noexcept;
 	const float& operator[](uint32_t i) const noexcept;
@@ -35,7 +36,7 @@ public:
 
 	NiPoint3 operator+(const NiPoint3& arOther) const noexcept;
 	NiPoint3 operator-(const NiPoint3& arOther) const noexcept;
-	float	operator*(const NiPoint3& arOther) const noexcept;
+	float	 operator*(const NiPoint3& arOther) const noexcept;
 	NiPoint3 operator/(const NiPoint3& arOther) const noexcept;
 
 	NiPoint3 operator+(float afVal) const noexcept;
@@ -63,6 +64,7 @@ public:
 	float XYLength() const noexcept;
 	float SqrLength() const noexcept;
 	float SqrXYLength() const noexcept;
+	float VectorLength() const noexcept;
 
 	int32_t LengthCheck(float afLength) const noexcept;
 	int32_t LengthCheck(const NiPoint3& arOther, float afLength) const noexcept;
@@ -83,6 +85,10 @@ public:
 
 	bool CloseEnough(const NiPoint3& arOther, float afDelta) const noexcept;
 	bool CloseEnoughXY(const NiPoint3& arOther, float afDelta) const noexcept;
+
+	NiPoint3 Perpendicular() const noexcept;
+
+	static NiPoint3 ComponentProduct(const NiPoint3& arA, const NiPoint3& arB);
 };
 
 ASSERT_SIZE(NiPoint3, 0xC);

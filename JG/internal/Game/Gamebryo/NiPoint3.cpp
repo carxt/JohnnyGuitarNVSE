@@ -7,19 +7,22 @@
 #endif
 
 // GAME - 0x11A946C
-const NiPoint3 NiPoint3::UNIT_X		= { 1.f, 0.f, 0.f };
+const NiPoint3 NiPoint3::UNIT_X		        = { 1.f, 0.f, 0.f };
 
 // GAME - 0x11A9478
-const NiPoint3 NiPoint3::UNIT_Y		= { 0.f, 1.f, 0.f };
+const NiPoint3 NiPoint3::UNIT_Y		        = { 0.f, 1.f, 0.f };
 
 // GAME - 0x11A9484
-const NiPoint3 NiPoint3::UNIT_Z		= { 0.f, 0.f, 1.f };
+const NiPoint3 NiPoint3::UNIT_Z		        = { 0.f, 0.f, 1.f };
 
 // GAME - 0x11A9490
-const NiPoint3 NiPoint3::UNIT_ALL	= { 1.f, 1.f, 1.f };
+const NiPoint3 NiPoint3::UNIT_ALL       	= { 1.f, 1.f, 1.f };
 
 // GAME - 0x11F426C
-const NiPoint3 NiPoint3::ZERO		= { 0.f, 0.f, 0.f };
+const NiPoint3 NiPoint3::ZERO		        = { 0.f, 0.f, 0.f };
+
+// GAME - 0x11A949C
+const NiPoint3 NiPoint3::INFINITY_POINT3    = { FLT_MAX, FLT_MAX, FLT_MAX };
 
 // GAME - 0x6815C0
 NiPoint3::NiPoint3() noexcept {}
@@ -71,18 +74,22 @@ bool NiPoint3::operator==(const NiPoint3& arOther) const noexcept {
     return x == arOther.x && y == arOther.y && z == arOther.z;
 }
 
+// GAME - 0x4A0BD0
 NiPoint3 NiPoint3::operator-() const noexcept {
     return NiPoint3(-x, -y, -z);
 }
 
+// GAME - 0x439E90
 NiPoint3 NiPoint3::operator+(const NiPoint3& arOther) const noexcept {
     return NiPoint3(x + arOther.x, y + arOther.y, z + arOther.z);
 }
 
+// GAME - 0x439EF0
 NiPoint3 NiPoint3::operator-(const NiPoint3& arOther) const noexcept {
     return NiPoint3(x - arOther.x, y - arOther.y, z - arOther.z);
 }
 
+// GAME - 0x4B6190
 float    NiPoint3::operator*(const NiPoint3& arOther) const noexcept {
     return x * arOther.x + y * arOther.y + z * arOther.z;
 }
@@ -99,14 +106,17 @@ NiPoint3 NiPoint3::operator-(float afVal) const noexcept {
     return NiPoint3(x - afVal, y - afVal, z - afVal);
 }
 
+// GAME - 0x45BB20
 NiPoint3 NiPoint3::operator*(float afVal) const noexcept {
     return NiPoint3(x * afVal, y * afVal, z * afVal);
 }
 
+// GAME - 0x53D280
 NiPoint3 NiPoint3::operator/(float afVal) const noexcept {
     return NiPoint3(x / afVal, y / afVal, z / afVal);
 }
 
+// GAME - 0x63C8A0
 NiPoint3& NiPoint3::operator+=(const NiPoint3& arOther) noexcept {
     x += arOther.x;
     y += arOther.y;
@@ -114,6 +124,7 @@ NiPoint3& NiPoint3::operator+=(const NiPoint3& arOther) noexcept {
     return *this;
 }
 
+// GAME - 0x4578C0
 NiPoint3& NiPoint3::operator-=(const NiPoint3& arOther) noexcept {
     x -= arOther.x;
     y -= arOther.y;
@@ -149,6 +160,7 @@ NiPoint3& NiPoint3::operator-=(float afVal) noexcept {
     return *this;
 }
 
+// GAME - 0x439180
 NiPoint3& NiPoint3::operator*=(float afVal) noexcept {
     x *= afVal;
     y *= afVal;
@@ -156,6 +168,7 @@ NiPoint3& NiPoint3::operator*=(float afVal) noexcept {
     return *this;
 }
 
+// GAME - 0x4941C0
 NiPoint3& NiPoint3::operator/=(float afVal) noexcept {
     x /= afVal;
     y /= afVal;
@@ -163,6 +176,7 @@ NiPoint3& NiPoint3::operator/=(float afVal) noexcept {
     return *this;
 }
 
+// GAME - 0x4A3760
 NiPoint3 operator*(float afVal, const NiPoint3& arVec) noexcept {
     return NiPoint3(arVec.x * afVal, arVec.y * afVal, arVec.z * afVal);
 }
@@ -197,6 +211,11 @@ float NiPoint3::SqrLength() const noexcept {
 // GAME - 0x595C80
 float NiPoint3::SqrXYLength() const noexcept {
     return x * x + y * y;
+}
+
+// GAME - 0x7EB7F0
+float NiPoint3::VectorLength() const noexcept {
+    return ThisCall<float>(0x7EB7F0, this);
 }
 
 int32_t NiPoint3::LengthCheck(float afLength) const noexcept {
@@ -316,4 +335,14 @@ bool NiPoint3::CloseEnough(const NiPoint3& arOther, float afDelta) const noexcep
 bool NiPoint3::CloseEnoughXY(const NiPoint3& arOther, float afDelta) const noexcept {
     return std::fabs(x - arOther.x) < afDelta
         && std::fabs(y - arOther.y) < afDelta;
+}
+
+// GAME - 0xC5A800
+NiPoint3 NiPoint3::Perpendicular() const noexcept {
+    return ThisCall<NiPoint3>(0xC5A800, this);
+}
+
+// GAME - 0x4A1F90
+NiPoint3 NiPoint3::ComponentProduct(const NiPoint3& arA, const NiPoint3& arB) {
+    return NiPoint3(arA.x * arB.x, arA.y * arB.y, arA.z * arB.z);
 }

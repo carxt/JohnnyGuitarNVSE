@@ -7,9 +7,9 @@ struct FR2MatrixVTC {
 	FR2MatrixVTC();
 	~FR2MatrixVTC();
 
-	oldstd::vector<T>	data;
-	uint32_t			nrows;
-	uint32_t			ncols;
+	oldstd::vector<T>	kData;
+	uint32_t			uiRowCount;
+	uint32_t			uiColCount;
 };
 
 #include "FR2MatrixVTC.inl"
