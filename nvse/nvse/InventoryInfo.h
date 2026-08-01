@@ -15,11 +15,11 @@ typedef std::vector<ExtraContainerChanges::EntryData*> ExtraDataVec;
 typedef std::map<TESForm*, uint32_t> ExtraContainerMap;
 
 void PrintItemType(TESForm * form);
-TESForm* GetItemByIdx(TESObjectREFR* thisObj, uint32_t objIdx, int32_t* outNumItems);
-TESForm* GetItemByRefID(TESObjectREFR* thisObj, uint32_t refID, int32_t* outNumItems = NULL);
-TESForm* GetItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, uint32_t refID, float* outHealth, TESForm** outOwner, uint32_t* outRank, int32_t* inOutIndex = NULL,
+TESForm* GetItemByIdx(TESObjectREFR* apRef, uint32_t objIdx, int32_t* outNumItems);
+TESForm* GetItemByRefID(TESObjectREFR* apRef, uint32_t refID, int32_t* outNumItems = NULL);
+TESForm* GetItemWithHealthAndOwnershipByRefID(TESObjectREFR* apRef, uint32_t refID, float* outHealth, TESForm** outOwner, uint32_t* outRank, int32_t* inOutIndex = NULL,
 	int32_t* outNumItems = NULL);	// returns the inOutIndex stack, or the first if it is NULL
-TESForm * SetFirstItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, uint32_t refID, int32_t NumItems = 1, float Health = -1.0, TESForm* pOwner = NULL, uint32_t Rank = 0);
+TESForm * SetFirstItemWithHealthAndOwnershipByRefID(TESObjectREFR* apRef, uint32_t refID, int32_t NumItems = 1, float Health = -1.0, TESForm* pOwner = NULL, uint32_t Rank = 0);
 
 class ExtraContainerInfo
 {
@@ -202,4 +202,4 @@ public:
 bool SameHealth(ExtraHealth* pXHealth, TESHealthForm* pHealth, float Health);
 bool SameOwner(ExtraOwnership* pXOwner, ExtraRank* pXRank, TESForm* pOwner, uint32_t Rank);
 
-TESForm * AddItemHealthPercentOwner(TESObjectREFR* thisObj, uint32_t refID, int32_t NumItems = 1, float Health = 100.0, TESForm* pOwner = NULL, uint32_t Rank = 0);
+TESForm * AddItemHealthPercentOwner(TESObjectREFR* apRef, uint32_t refID, int32_t NumItems = 1, float Health = 100.0, TESForm* pOwner = NULL, uint32_t Rank = 0);

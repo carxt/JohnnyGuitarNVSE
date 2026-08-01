@@ -342,7 +342,7 @@ namespace JohnnyFixes {
 	namespace NoHeadlessTalkingFix {
 
 		bool __fastcall CanSpeakThroughHead(Actor* apActor) {
-			const bool bNoHead = ThisCall<bool>(0x573090, apActor, BGSBodyPartData::eBodyPart_Head1) || ThisCall<bool>(0x573090, apActor, BGSBodyPartData::eBodyPart_Head2);
+			const bool bNoHead = apActor->GetDismembered(BODY_PART_TYPE::HEAD_1) || apActor->GetDismembered(BODY_PART_TYPE::HEAD_2);
 
 			bool bCanSpeak = !bNoHead;
 			if (bCanSpeak) {

@@ -283,7 +283,7 @@ FunctionInfo::FunctionInfo(Script* script)
 		return;
 
 	//								0             4       6       8       A             E
-	// scriptData should look like: 1D 00 00 00 | 10 00 | XX XX | 07 00 | XX XX XX XX | ....
+	// apCompiledParams should look like: 1D 00 00 00 | 10 00 | XX XX | 07 00 | XX XX XX XX | ....
 	//							        scn       begin    len    opcode   block len     our data
 	// if it doesn't, it's not a function script
 	if (script->info.dataLength < 15)
@@ -597,22 +597,22 @@ namespace PluginAPI {
 		va_start(args, numArgs);
 		bool success = caller.vSetArgs(numArgs, args);
 		if (success) {
-			*result = NVSEArrayVarInterface::Element();
+			arResult = NVSEArrayVarInterface::Element();
 			ScriptToken* ret = UserFunctionManager::Call(caller);
 			if (ret) {
 				switch (ret->Type()) {
 					case kTokenType_Number:
-						*result =  ret->GetNumber();
+						arResult =  ret->GetNumber();
 						break;
 					case kTokenType_Form:
-						*result =  ret->GetTESForm();
+						arResult =  ret->GetTESForm();
 						break;
 					case kTokenType_Array:
-						*result = (NVSEArrayVarInterface::Array*)ret->GetArray();
+						arResult = (NVSEArrayVarInterface::Array*)ret->GetArray();
 						break;
 					case kTokenType_String:
 						{
-							*result = NVSEArrayVarInterface::Element(ret->GetString());
+							arResult = NVSEArrayVarInterface::Element(ret->GetString());
 							break;
 						}
 					default:

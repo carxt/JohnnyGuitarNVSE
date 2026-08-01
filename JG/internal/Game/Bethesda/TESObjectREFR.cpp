@@ -428,6 +428,11 @@ void TESObjectREFR::SetTargeted(bool abVal) {
 	uiFormFlags.Set(FormFlags::TARGETED, abVal);
 }
 
+// GAME - 0x573090
+bool TESObjectREFR::GetDismembered(BODY_PART_TYPE aeLimb) {
+	return ThisCall<bool>(0x573090, this, aeLimb);
+}
+
 // GAME - 0x55D310
 // GECK - 0x63D740
 TESContainer* TESObjectREFR::HasContainer() const {

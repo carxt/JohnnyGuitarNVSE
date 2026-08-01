@@ -538,10 +538,10 @@ namespace JIPFixes {
 		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kCopyFaceGenFrom));
+			SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kCopyFaceGenFrom));
 			if (pInfo) {
-				CopyFaceGenFrom = pInfo->execute;
-				pInfo->execute = Cmd_CopyFaceGenFrom_Execute;
+				CopyFaceGenFrom = pInfo->pExecuteFunction;
+				pInfo->pExecuteFunction = Cmd_CopyFaceGenFrom_Execute;
 			}
 		}
 	}
@@ -558,10 +558,10 @@ namespace JIPFixes {
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetSoundSourceFile));
+			SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetSoundSourceFile));
 			if (pInfo) {
-				SetSoundSourceFile = pInfo->execute;
-				pInfo->execute = Cmd_SetSoundSourceFile_Execute;
+				SetSoundSourceFile = pInfo->pExecuteFunction;
+				pInfo->pExecuteFunction = Cmd_SetSoundSourceFile_Execute;
 			}
 		}
 
@@ -623,10 +623,10 @@ namespace JIPFixes {
 		STACK_FRAME_OPT_RESET
 
 		void InitHooks(bool abGECK) {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetOnDialogTopicEventHandler));
+			SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetOnDialogTopicEventHandler));
 			if (pInfo) {
-				pInfo->execute = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
-				HookUtils::SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
+				pInfo->pExecuteFunction = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
+				HookUtils::SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->pParameters[2].bIsOptional), 1);
 
 				if (!abGECK) {
 					OnDialogTopicHandler = JGCreateEvent("OnDialogTopicHandler", 1, 1);
@@ -667,12 +667,12 @@ namespace JIPFixes {
 		STACK_FRAME_OPT_RESET
 
 		void InitHooks(bool abGECK) {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kClearDeadActors));
+			SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kClearDeadActors));
 			if (pInfo) {
-				pInfo->params = kParams_OneOptionalInt;
-				pInfo->numParams = 1;
-				ClearDeadActors = pInfo->execute;
-				pInfo->execute = Cmd_ClearDeadActors_Execute;
+				pInfo->pParameters = kParams_OneOptionalInt;
+				pInfo->usParamCount = 1;
+				ClearDeadActors = pInfo->pExecuteFunction;
+				pInfo->pExecuteFunction = Cmd_ClearDeadActors_Execute;
 
 				if (!abGECK) {
 					HookUtils::WriteRelCall(JIPUtils::GetAddress(0x10030C38), &HighProcessEx::FadeAndDisable);
@@ -693,21 +693,21 @@ namespace JIPFixes {
 				return true;
 
 			constexpr uint32_t uiDisallowedFlags = TESForm::FormFlags::STILL_LOADING | TESForm::FormFlags::DELETED | TESForm::FormFlags::DISABLED;
-			if (thisObj->uiFormFlags.Get(uiDisallowedFlags) || !thisObj->IsCharacter())
+			if (apRef->uiFormFlags.Get(uiDisallowedFlags) || !apRef->IsCharacter())
 				return true;
 
-			Actor* pActor = static_cast<Actor*>(thisObj);
+			Actor* pActor = static_cast<Actor*>(apRef);
 			const BaseProcess* pProcess = pActor->GetCurrentAIProcess();
 			if (!pProcess || pProcess->GetProcessLevel() != PROCESS_TYPE::HIGH)
 				return true;
 
-			const NiAVObject* pRoot = thisObj->Get3D();
-			BipedAnim* pBiped = thisObj->GetBiped();
+			const NiAVObject* pRoot = apRef->Get3D();
+			BipedAnim* pBiped = apRef->GetBiped();
 			if (!pRoot || !pBiped)
 				return true;
 
 			int32_t iTargetObject = -1;
-			if (reinterpret_cast<uint8_t*>(scriptData)[*opcodeOffsetPtr - 2] && reinterpret_cast<uint8_t*>(scriptData)[*opcodeOffsetPtr]) {
+			if (apCompiledParams[arOffset - 2] && apCompiledParams[arOffset]) {
 				int32_t iArgSlot;
 				if (!ExtractArgsEx(EXTRACT_ARGS_EX, &iArgSlot))
 					return true;
@@ -749,7 +749,7 @@ namespace JIPFixes {
 					}
 				}
 
-				thisObj->ReplaceModel();
+				apRef->ReplaceModel();
 
 				bool bWeaponDrawn = pProcess->GetWeaponDrawn();
 
@@ -788,21 +788,21 @@ namespace JIPFixes {
 
 		void InitHooks() {
 			uiWeaponHasScope = JIPUtils::GetAddress(0x10058F10);
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kReloadEquippedModels));
+			SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kReloadEquippedModels));
 			if (pInfo) {
-				pInfo->execute = Cmd_ReloadEquippedModels_Execute;
+				pInfo->pExecuteFunction = Cmd_ReloadEquippedModels_Execute;
 			}
 		}
 	}
 
 	namespace BetterSearch {
 
-		static ParamInfo kSearchParams[] =
+		static SCRIPT_PARAMETER kSearchParams[] =
 		{
-			{ "Query", kParamType_String, false },
-			{ "Form Type", kParamType_String, true },
-			{ "Plugin Name", kParamType_String, true },
-			{ "Runtime Form Handling (0 - none, 1 - skip, 2 - only)", kParamType_Integer, true }
+			{ "Query", SCRIPT_PARAMETER_TYPE::STRING, false },
+			{ "Form Type", SCRIPT_PARAMETER_TYPE::STRING, true },
+			{ "Plugin Name", SCRIPT_PARAMETER_TYPE::STRING, true },
+			{ "Runtime Form Handling (0 - none, 1 - skip, 2 - only)", SCRIPT_PARAMETER_TYPE::INTEGER, true }
 		};
 
 		constexpr uint32_t MAX_LINE_WIDTH = 1700;
@@ -1059,32 +1059,32 @@ namespace JIPFixes {
 			return true;
 		}
 
-		bool(__cdecl* Cmd_Search_Org_Parse)(uint32_t, ParamInfo*, ScriptLineBuffer*, ScriptBuffer*) = nullptr;
-		bool Cmd_Search_JG_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf) {
+		bool(__cdecl* Cmd_Search_Org_Parse)(uint32_t, SCRIPT_PARAMETER*, SCRIPT_LINE*, ScriptCompileData*) = nullptr;
+		bool Cmd_Search_JG_Parse(uint32_t ausParamCount, SCRIPT_PARAMETER* apParameters, SCRIPT_LINE* apLine, ScriptCompileData* apCompileData) {
 			// Replace "" with " " because obsnig is stupid and doesn't allow empty strings as params
-			const char* pText = lineBuf->paramText;
+			const char* pText = apLine->cLine;
 			char cNewText[512] = { 0 };
 			uint32_t uiNewTextLen = 0;
-			for (uint32_t i = 0; i < lineBuf->paramTextLen; i++) {
+			for (uint32_t i = 0; i < apLine->uiSize; i++) {
 				cNewText[uiNewTextLen++] = pText[i];
 				if (pText[i] == '"' && pText[i + 1] == '"') {
 					cNewText[uiNewTextLen] = ' ';
 					uiNewTextLen++;
 				}
 			}
-			strcpy_s(lineBuf->paramText, cNewText);
-			lineBuf->paramTextLen = uiNewTextLen;
-			return Cmd_Search_Org_Parse(numParams, paramInfo, lineBuf, scriptBuf);
+			strcpy_s(apLine->cLine, cNewText);
+			apLine->uiSize = uiNewTextLen;
+			return Cmd_Search_Org_Parse(ausParamCount, apParameters, apLine, apCompileData);
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSearch));
+			SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSearch));
 			if (pInfo) {
-				Cmd_Search_Org_Parse = pInfo->parse;
-				pInfo->execute		= Cmd_Search_JG_Execute;
-				pInfo->parse		= Cmd_Search_JG_Parse;
-				pInfo->params		= kSearchParams;
-				pInfo->numParams	= ARRAYSIZE(kSearchParams);
+				Cmd_Search_Org_Parse = pInfo->pCompileFunction;
+				pInfo->pExecuteFunction		= Cmd_Search_JG_Execute;
+				pInfo->pCompileFunction		= Cmd_Search_JG_Parse;
+				pInfo->pParameters		= kSearchParams;
+				pInfo->usParamCount	= ARRAYSIZE(kSearchParams);
 			}
 		}
 
@@ -1166,15 +1166,15 @@ namespace JIPFixes {
 
 		STACK_FRAME_OPT_ENABLE
 		bool Cmd_GetPCCanUsePowerArmor_Eval(COMMAND_ARGS_EVAL) {
-			*result = PlayerCharacter::GetSingleton()->canUsePA;
+			arResult = PlayerCharacter::GetSingleton()->canUsePA;
 			return true;
 		}
 		STACK_FRAME_OPT_RESET
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetPCCanUsePowerArmor));
+			SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetPCCanUsePowerArmor));
 			if (pInfo) {
-				pInfo->eval = Cmd_GetPCCanUsePowerArmor_Eval;
+				pInfo->pConditionFunction = Cmd_GetPCCanUsePowerArmor_Eval;
 			}
 		}
 	}
@@ -1435,7 +1435,7 @@ namespace JIPFixes {
 		bool* pbHUDCursorMode = nullptr;
 
 		bool Cmd_GetCursorPos_Execute(COMMAND_ARGS) {
-			*result = 0;
+			arResult = 0;
 			char cAxis;
 			BOOL bUICoordinates = FALSE;
 			if (ExtractArgsEx(EXTRACT_ARGS_EX, &cAxis, &bUICoordinates)) {
@@ -1444,14 +1444,14 @@ namespace JIPFixes {
 					const float fUIPixelSize = *reinterpret_cast<float*>(0x11D8A48);
 					fCursorPos *= fUIPixelSize;
 				}
-				*result = fCursorPos;
+				arResult = fCursorPos;
 			}
 
 			return true;
 		}
 
 		bool Cmd_SetCursorPos_Execute(COMMAND_ARGS) {
-			*result = 0;
+			arResult = 0;
 			float fPosX, fPosY;
 			BOOL bUICoordinates = FALSE;
 			InterfaceManager* pUIMgr = InterfaceManager::GetSingleton();
@@ -1467,7 +1467,7 @@ namespace JIPFixes {
 				pUIMgr->cursorY = fPosY;
 				pUIMgr->cursor->node->m_kLocal.m_kTranslate.x = (fPosX * fUIPixelSize) - fScreenWidth;
 				pUIMgr->cursor->node->m_kLocal.m_kTranslate.z = fScreenHeight - (fPosY * fUIPixelSize);
-				*result = 1;
+				arResult = 1;
 			}
 
 			return true;
@@ -1476,19 +1476,19 @@ namespace JIPFixes {
 		void InitHooks() {
 			pbHUDCursorMode = reinterpret_cast<bool*>(JIPUtils::GetAddress(0x10076378));
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetCursorPos));
+				SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetCursorPos));
 				if (pInfo) {
-					pInfo->params = kParams_OneAxis_OneOptionalInt;
-					pInfo->numParams = 2;
-					pInfo->execute = Cmd_GetCursorPos_Execute;
+					pInfo->pParameters = kParams_OneAxis_OneOptionalInt;
+					pInfo->usParamCount = 2;
+					pInfo->pExecuteFunction = Cmd_GetCursorPos_Execute;
 				}
 			}
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetCursorPos));
+				SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetCursorPos));
 				if (pInfo) {
-					pInfo->params = kParams_TwoFloats_OneOptionalInt;
-					pInfo->numParams = 3;
-					pInfo->execute = Cmd_SetCursorPos_Execute;
+					pInfo->pParameters = kParams_TwoFloats_OneOptionalInt;
+					pInfo->usParamCount = 3;
+					pInfo->pExecuteFunction = Cmd_SetCursorPos_Execute;
 				}
 			}
 		}
@@ -1515,7 +1515,7 @@ namespace JIPFixes {
 						ExtraDataList* pExtraList = pHotkeyItem->pExtraLists ? pHotkeyItem->pExtraLists->GetItem() : nullptr;
 						TESObjectREFR* pInvRef = InventoryRefCreateEntry(PlayerCharacter::GetSingleton(), pHotkeyItem->pObject, pHotkeyItem->iNumber, pExtraList);
 						if (pInvRef)
-							*reinterpret_cast<uint32_t*>(result) = pInvRef->GetFormID();
+							reinterpret_cast<uint32_t&>(arResult) = pInvRef->GetFormID();
 					}
 
 					delete pHotkeyItem;
@@ -1527,7 +1527,7 @@ namespace JIPFixes {
         bool Cmd_SetHotkeyItemRef_Execute(COMMAND_ARGS) {
             int32_t iHotkey = 0;
             if (ExtractArgsEx(EXTRACT_ARGS_EX, &iHotkey) && iHotkey > 0) {
-                InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
+                InventoryRef* pInvRef = InventoryRefGetForID(apRef->GetFormID());
                 if (!pInvRef || pInvRef->pContainerRef != PlayerCharacter::GetSingleton())
                     return true;
 
@@ -1554,7 +1554,7 @@ namespace JIPFixes {
 
                     delete pHotkeyItem;
 
-                    *result = 1;
+                    arResult = 1;
                 }
             }
             return true;
@@ -1563,15 +1563,15 @@ namespace JIPFixes {
 		void InitHooks() {
 			uiJIPCreateExtraDataAddr = JIPUtils::GetAddress(0x10002A00);
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetHotkeyItemRef));
+				SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetHotkeyItemRef));
 				if (pInfo) {
-					pInfo->execute = Cmd_GetHotkeyItemRef_Execute;
+					pInfo->pExecuteFunction = Cmd_GetHotkeyItemRef_Execute;
 				}
 			}
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetHotkeyItemRef));
+				SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetHotkeyItemRef));
 				if (pInfo) {
-					pInfo->execute = Cmd_SetHotkeyItemRef_Execute;
+					pInfo->pExecuteFunction = Cmd_SetHotkeyItemRef_Execute;
 				}
 			}
 		}
@@ -1581,20 +1581,20 @@ namespace JIPFixes {
 	namespace TriggerLightningFXFix {
 
 		bool Cmd_TriggerLightningFX_Execute(COMMAND_ARGS) {
-			*result = 0;
+			arResult = 0;
 			Sky* pSky = Sky::GetSingleton();
 			if (pSky && pSky->GetIsRaining()) {
 				pSky->fFlash = 1;
 				pSky->uiFlashTime = TimeGlobal::GetSingleton()->uiLastTime;
-				*result = 1;
+				arResult = 1;
 			}
 			return true;
 		}
 
 		void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kTriggerLightningFX));
+			SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kTriggerLightningFX));
 			if (pInfo) {
-				pInfo->execute = Cmd_TriggerLightningFX_Execute;
+				pInfo->pExecuteFunction = Cmd_TriggerLightningFX_Execute;
 			}
 		}
 	}
@@ -1603,7 +1603,7 @@ namespace JIPFixes {
 	namespace LeveledListFixes {
 
 		bool Cmd_LeveledListRemoveForm_Execute(COMMAND_ARGS) {
-			*result = 0;
+			arResult = 0;
 			TESForm* pListForm = nullptr;
 			TESForm* pForm = nullptr;
 			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pForm))
@@ -1639,12 +1639,12 @@ namespace JIPFixes {
 			if (pList->kScriptAddedObjects.IsEmpty())
 				pListForm->RemoveChange(0x80000000);
 
-			*result = uiDeletedCount;
+			arResult = uiDeletedCount;
 			return true;
 		}
 
 		bool Cmd_LeveledListClear_Execute(COMMAND_ARGS) {
-			*result = 0;
+			arResult = 0;
 			TESForm* pListForm = nullptr;
 			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm))
 				return true;
@@ -1678,12 +1678,12 @@ namespace JIPFixes {
 			if (pList->kScriptAddedObjects.IsEmpty())
 				pListForm->RemoveChange(0x80000000);
 
-			*result = uiDeletedCount;
+			arResult = uiDeletedCount;
 			return true;
 		}
 
 		bool Cmd_RemoveNthLevItem_Execute(COMMAND_ARGS) {
-			*result = 0;
+			arResult = 0;
 			TESForm* pListForm = nullptr;
 			uint32_t uiIndex = 0;
 			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &uiIndex))
@@ -1708,7 +1708,7 @@ namespace JIPFixes {
 
 						delete pItem;
 						pIter->RemoveHead();
-						*result = 1;
+						arResult = 1;
 					}
 					break;
 				}
@@ -1726,21 +1726,21 @@ namespace JIPFixes {
 
 		void InitHooks() {
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kLeveledListRemoveForm));
+				SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kLeveledListRemoveForm));
 				if (pInfo) {
-					pInfo->execute = Cmd_LeveledListRemoveForm_Execute;
+					pInfo->pExecuteFunction = Cmd_LeveledListRemoveForm_Execute;
 				}
 			}
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kRemoveNthLevItem));
+				SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kRemoveNthLevItem));
 				if (pInfo) {
-					pInfo->execute = Cmd_RemoveNthLevItem_Execute;
+					pInfo->pExecuteFunction = Cmd_RemoveNthLevItem_Execute;
 				}
 			}
 			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kLeveledListClear));
+				SCRIPT_FUNCTION* pInfo = const_cast<SCRIPT_FUNCTION*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kLeveledListClear));
 				if (pInfo) {
-					pInfo->execute = Cmd_LeveledListClear_Execute;
+					pInfo->pExecuteFunction = Cmd_LeveledListClear_Execute;
 				}
 			}
 		}

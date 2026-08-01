@@ -12,10 +12,10 @@ struct TLSData {
 	class TESObjectREFR*				pBackgroundLoadingRef;		// TESObjectREFR
 	bool								bConsoleOutput;				// Script
 	class TESForm*						pCrimeVictim;				// Script
-	class SCRIPT_LOCAL*					pLastVar;					// ScriptLocals
+	struct SCRIPT_LOCAL*				pLastVar;					// ScriptLocals
 	uint32_t							uiLastVarSearchID;			// ScriptLocals
 	class ScriptLocals*					pLastVarSearchScriptLocals;	// ScriptLocals
-	class SCRIPT_REFERENCED_OBJECT*		pLastRefObject;				// Script
+	struct SCRIPT_REFERENCED_OBJECT*	pLastRefObject;				// Script
 	uint32_t							uiLastRefSearchIndex;		// Script
 	class ScriptLocals*					pLastScriptLocals;			// Script
 	class Script*						pLastRefSearchScript;		// Script

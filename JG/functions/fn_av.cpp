@@ -11,12 +11,12 @@ bool(__cdecl* Cmd_RestoreAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5B
 bool(__cdecl* Cmd_GetBaseAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BE6E0;
 
 bool Cmd_GetThresholdedActorValue_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	ActorValue::Index eIndex;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eIndex) && thisObj->IsActor()) {
-		*result = static_cast<Actor*>(thisObj)->GetClampedActorValueF(eIndex);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eIndex) && apRef->IsActor()) {
+		arResult = static_cast<Actor*>(apRef)->GetClampedActorValueF(eIndex);
 		if (IsConsoleMode()) 
-			Console_Print("GetThresholdAV %d >> %.2f", eIndex, *result);
+			Console_Print("GetThresholdAV %d >> %.2f", eIndex, arResult);
 	}
 	return true;
 }

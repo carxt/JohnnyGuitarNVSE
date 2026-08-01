@@ -7,9 +7,8 @@ class NiColorA;
 
 class SPEC_EMPTY_BASES NiColor : public BSMemObject {
 public:
-	NiColor() noexcept;
 	explicit NiColor(float afValue) noexcept;
-	NiColor(float afR, float afG, float afB) noexcept;
+	NiColor(float afR = 0.f, float afG = 0.f, float afB = 0.f) noexcept;
 	NiColor(const NiColor& arOther) noexcept;
 	explicit NiColor(const NiPoint3& arOther) noexcept;
 	explicit NiColor(const NiColorA& arOther) noexcept;

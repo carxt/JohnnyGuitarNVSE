@@ -15,3 +15,5 @@ struct FR2MatrixVTC {
 #include "FR2MatrixVTC.inl"
 
 ASSERT_SIZE(FR2MatrixVTC<float>, 0x20);
+
+using FaceGenCoords = FR2MatrixVTC<float>[2][2];

@@ -1,126 +1,122 @@
 #include "fn_dial.h"
-#include "JG\DialogueResponseOverride.hpp"
-#include <Bethesda/TESDataHandler.hpp>
 
-enum ResponseRelatedTopicType {
-	kRelatedTopicType_LinkFrom = 0,
-	kRelatedTopicType_Choice,
-	kRelatedTopicType_FollowUp,
+#include "Bethesda/TESDataHandler.hpp"
+
+#include "JG/DialogueResponseOverride.hpp"
+#include "JG/ScriptUtils.hpp"
+using namespace ScriptUtils;
+
+enum class ConversationTopicType {
+	NONE = -1,
+	LINK_FROM = 0,
+	LINK_TO,
+	FOLLOW_UP,
+	COUNT
 };
 
-bool Cmd_DialogResponseGetResponseAmount_Execute(COMMAND_ARGS)
-{
-	TESTopicInfo* dialogResponse = nullptr;
-	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo))
-	{
-		*result = DialogueResponseOverride::GetResponseAmount(dialogResponse->GetFormID());
+bool Cmd_DialogResponseGetResponseAmount_Execute(COMMAND_ARGS) {
+	TESTopicInfo* pTopicInfo = nullptr;
+	arResult = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTopicInfo) && pTopicInfo && IS_TYPE(pTopicInfo, TESTopicInfo)) {
+		arResult = DialogueResponseOverride::GetResponseAmount(pTopicInfo->GetFormID());
 	}
 	return true;
 }
 
 bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
-	TESTopicInfo* dialogResponse = nullptr;
-	uint32_t responseNumber = 0;
-	int32_t setOrRemove = 0;
+	TESTopicInfo* pTopicInfo = nullptr;
+	uint32_t uiResponseID = 0;
+	BOOL bAdd = FALSE;
+	DIALOGUE_EMOTION eEmotion = DIALOGUE_EMOTION::NEUTRAL;
+	uint32_t uiEmotionValue = 0;
+	TESIdleForm* pSpeakerAnim	= pXMarker.ReadAs<TESIdleForm*>();
+	TESIdleForm* pListenerAnim	= pXMarker.ReadAs<TESIdleForm*>();
+	uint32_t uiFlags = -1;
 
-	uint32_t responseEmotion = 0;
-	int32_t responseEmotionValue = 0;
-	uint32_t flags = -1;
-	//Init to xMarker
-	TESIdleForm* speakerAnim = *(TESIdleForm**)0x11CA244;
-	TESIdleForm* listenerAnim = *(TESIdleForm**)0x11CA244;
-
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseNumber, &setOrRemove, &responseEmotion, &responseEmotionValue, &speakerAnim, &listenerAnim, &flags) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo))
-	{
-		if (setOrRemove > 0)
-		{
-			DialogueResponseOverride::Set(dialogResponse->GetFormID(), responseNumber, responseEmotion, responseEmotionValue, speakerAnim, listenerAnim, flags);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTopicInfo, &uiResponseID, &bAdd, &eEmotion, &uiEmotionValue, &pSpeakerAnim, &pListenerAnim, &uiFlags) && pTopicInfo && IS_TYPE(pTopicInfo, TESTopicInfo)) {
+		if (bAdd > 0) {
+			DialogueResponseOverride::Set(pTopicInfo->GetFormID(), uiResponseID, eEmotion, uiEmotionValue, pSpeakerAnim, pListenerAnim, uiFlags);
 		}
-
-		else
-		{
-			DialogueResponseOverride::Remove(dialogResponse->GetFormID(), responseNumber);
+		else {
+			DialogueResponseOverride::Remove(pTopicInfo->GetFormID(), uiResponseID);
 		}
-
 	}
 	return true;
 }
 
 
 bool Cmd_DialogResponseAddRelatedTopic_Execute(COMMAND_ARGS) {
-	TESTopicInfo* dialogResponse = nullptr;
-	TESTopic* topic = nullptr;
-	uint32_t responseType = -1;
-	int32_t addPosition = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &topic, &responseType, &addPosition) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo) && responseType >= ResponseRelatedTopicType::kRelatedTopicType_LinkFrom && responseType <= ResponseRelatedTopicType::kRelatedTopicType_FollowUp) {
-		if (!dialogResponse->relatedTopics) {
-			//initializer for the relatedTopics structure.
-			dialogResponse->relatedTopics = ThisCall<TESTopicInfo::RelatedTopics*>(0x061CE40, BSMemory::malloc<TESTopicInfo::RelatedTopics>());
-		}
-		TESTopicInfo::RelatedTopics* relTopics = dialogResponse->relatedTopics;
-		switch (responseType) {
-		case kRelatedTopicType_LinkFrom:
-			relTopics->linkFrom.AddAt(topic, addPosition);
-			break;
-		case kRelatedTopicType_Choice:
-			relTopics->choices.AddAt(topic, addPosition);
-			break;
-		case kRelatedTopicType_FollowUp:
-			relTopics->followUps.AddAt(topic, addPosition);
-			break;
+	TESTopicInfo* pTopicInfo = nullptr;
+	TESTopic* pTopic = nullptr;
+	ConversationTopicType eType = ConversationTopicType::NONE;
+	int32_t iPosition = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTopicInfo, &pTopic, &eType, &iPosition) && pTopicInfo && IS_TYPE(pTopicInfo, TESTopicInfo) && InRange(eType)) {
+		if (!pTopicInfo->GetConversationData())
+			pTopicInfo->SetConversationData(nullptr);
+
+		TESConversationData* pConvData = pTopicInfo->GetConversationData();
+		switch (eType) {
+			case ConversationTopicType::LINK_FROM:
+				pConvData->GetLinkFrom()->AddAt(iPosition, pTopic);
+				break;
+			case ConversationTopicType::LINK_TO:
+				pConvData->GetLinkTo()->AddAt(iPosition, pTopic);
+				break;
+			case ConversationTopicType::FOLLOW_UP:
+				pConvData->GetFollowUp()->AddAt(iPosition, pTopic);
+				break;
 		}
 	}
 	return true;
 }
 
 bool Cmd_DialogResponseRelatedGetAll_Execute(COMMAND_ARGS) {
-	TESTopicInfo* dialogResponse = nullptr;
-	uint32_t responseType = -1;
-	NVSEArrayVar* topicArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	TESTopicInfo* pTopicInfo = nullptr;
+	ConversationTopicType eType = ConversationTopicType::NONE;
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, apScript);
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &dialogResponse, &responseType) && dialogResponse && IS_TYPE(dialogResponse, TESTopicInfo) && responseType >= ResponseRelatedTopicType::kRelatedTopicType_LinkFrom && responseType <= ResponseRelatedTopicType::kRelatedTopicType_FollowUp) {
-		TESTopicInfo::RelatedTopics* relTopics = dialogResponse->relatedTopics;
-		if (relTopics) {
-			auto addToArray = [topicArr](tList<TESTopic>::Iterator iter) -> void {
-				for (; !iter.End(); iter.Next()) {
-					g_arrInterface->AppendElement(topicArr, NVSEArrayElement(*iter));
-				}
-				};
-			switch (responseType) {
-			case kRelatedTopicType_LinkFrom:
-				addToArray(relTopics->linkFrom.Begin());
-				break;
-			case kRelatedTopicType_Choice:
-				addToArray(relTopics->choices.Begin());
-				break;
-			case kRelatedTopicType_FollowUp:
-				addToArray(relTopics->followUps.Begin());
-				break;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTopicInfo, &eType) && pTopicInfo && IS_TYPE(pTopicInfo, TESTopicInfo) && InRange(eType)) {
+		TESConversationData* pConvData = pTopicInfo->GetConversationData();
+		if (pConvData) {
+			auto addToArray = [pArray](BSSimpleList<TESTopic*>* apIter) {
+				TESTopic* pTopic = apIter->GetItem();
+				if (pTopic)
+					g_arrInterface->AppendElement(pArray, NVSEArrayElement(pTopic));
+			};
+			switch (eType) {
+				case ConversationTopicType::LINK_FROM:
+					pConvData->GetLinkFrom()->ForEach(addToArray);
+					break;
+				case ConversationTopicType::LINK_TO:
+					pConvData->GetLinkTo()->ForEach(addToArray);
+					break;
+				case ConversationTopicType::FOLLOW_UP:
+					pConvData->GetFollowUp()->ForEach(addToArray);
+					break;
 			}
 		}
 	}
-	g_arrInterface->AssignCommandResult(topicArr, result);
+	g_arrInterface->AssignCommandResult(pArray, &arResult);
 	return true;
 
 }
 
 SPEC_NOINLINE bool Cmd_GetSaidOnce_Eval(COMMAND_ARGS_EVAL) {
-	*result = -1;
-	TESTopicInfo* pInfo = static_cast<TESTopicInfo*>(arg1);
+	arResult = -1;
+	TESTopicInfo* pInfo = static_cast<TESTopicInfo*>(apParam1);
 	if (pInfo && IS_TYPE(pInfo, TESTopicInfo))
-		*result = pInfo->saidOnce;
+		arResult = pInfo->GetSaidOnce();
 	return true;
 }
 
 bool Cmd_GetSaidOnce_Execute(COMMAND_ARGS) {
 	TESTopicInfo* pInfo = nullptr;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo);
-	return Cmd_GetSaidOnce_Eval(nullptr, pInfo, nullptr, result);;
+	return Cmd_GetSaidOnce_Eval(nullptr, pInfo, nullptr, arResult);;
 }
 
 bool Cmd_SetSaidOnce_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	TESTopicInfo* pInfo = nullptr;
 	uint32_t bSaidOnce = false;
 	uint32_t bSave = true;
@@ -132,43 +128,35 @@ bool Cmd_SetSaidOnce_Execute(COMMAND_ARGS) {
 				pInfo->ResetSaidOnceFlags();
 		}
 		else {
-			pInfo->saidOnce = bSaidOnce;
+			pInfo->bSaidOnce = bSaidOnce;
 		}
 	}
 	return true;
 }
 
 bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	TESTopic* pTargetTopic = nullptr;
 	int32_t iIndex = -1;
 	TESQuest* pQuest = nullptr;
 
-	NVSEArrayVar* pStoredInfos = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	NVSEArrayVar* pStoredInfos = g_arrInterface->CreateArray(nullptr, 0, apScript);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetTopic, &pQuest)) {
-
-		if (pQuest && !IS_TYPE(pQuest, TESQuest)) //exclude xMarker 
-		{
-
-			return true;
+		if (pQuest && !IS_TYPE(pQuest, TESQuest)) {
+			goto FINISH;
 		}
 
-
-		if (pTargetTopic && !IS_TYPE(pTargetTopic, TESTopic))
-		{
-			if (!pQuest)
-			{
-				return true;
+		if (pTargetTopic && !IS_TYPE(pTargetTopic, TESTopic)) {
+			if (!pQuest) {
+				goto FINISH;
 			}
-			else
-			{
+			else {
 				pTargetTopic = nullptr;
 			}
-
 		}
+
 		if (pTargetTopic) {
-			if (pQuest)
-			{
+			if (pQuest) {
 				auto pTopicInfos = pTargetTopic->GetTopicInfosForQuest(pQuest);
 				if (pTopicInfos) {
 					for (uint32_t i = 0; i < pTopicInfos->GetSize(); i++) {
@@ -178,8 +166,7 @@ bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
 					}
 				}
 			}
-			else
-			{
+			else {
 				auto pTargetTopicInfoList = &pTargetTopic->infos;
 				for (auto kIter = pTargetTopicInfoList->Begin(); !kIter.End(); kIter.Next()) {
 					if (*kIter) {
@@ -199,31 +186,33 @@ bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
 			while (pIter && !pIter->IsEmpty()) {
 				TESTopic* pTopic = pIter->GetItem();
 				pIter = pIter->GetNext();
+
 				auto pTopicInfos = pTopic->GetTopicInfosForQuest(pQuest);
-				if (pTopicInfos) {
-					for (uint32_t i = 0; i < pTopicInfos->GetSize(); i++) {
-						auto pTopicInfo = pTopicInfos->GetAt(i);
-						if (pTopicInfo)
-							g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
-					}
+				if (!pTopicInfos)
+					continue;
+
+				for (uint32_t i = 0; i < pTopicInfos->GetSize(); i++) {
+					auto pTopicInfo = pTopicInfos->GetAt(i);
+					if (pTopicInfo)
+						g_arrInterface->AppendElement(pStoredInfos, NVSEArrayElement(pTopicInfo));
 				}
 			}
 		}
-
 	}
-	g_arrInterface->AssignCommandResult(pStoredInfos, result);
+
+	FINISH:
+	g_arrInterface->AssignCommandResult(pStoredInfos, &arResult);
 
 	return true;
 }
 
 bool Cmd_GetParentTopic_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	TESTopicInfo* pTopicInfo = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTopicInfo) && pTopicInfo && IS_TYPE(pTopicInfo, TESTopicInfo)) {
-		TESTopic* pParentTopic = pTopicInfo->pParentTopic;
-		if (pParentTopic) {
-			*reinterpret_cast<uint32_t*>(result) = pParentTopic->GetFormID();
-		}
+		TESTopic* pParentTopic = pTopicInfo->GetParentTopic();
+		if (pParentTopic)
+			reinterpret_cast<uint32_t&>(arResult) = pParentTopic->GetFormID();
 	}
 	return true;
 }

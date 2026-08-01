@@ -27,9 +27,6 @@ const NiColorA NiColorA::MAGENTA    = { 1.f, 0.f, 1.f, 1.f };
 // GAME - 0x11A9C40
 const NiColorA NiColorA::CYAN		= { 0.f, 1.f, 1.f, 1.f };
 
-// GAME - 0x6815C0
-NiColorA::NiColorA() noexcept {}
-
 NiColorA::NiColorA(float afValue) noexcept : r(afValue), g(afValue), b(afValue), a(1.f) {}
 
 NiColorA::NiColorA(float afR, float afG, float afB) noexcept : r(afR), g(afG), b(afB), a(1.f) {}
@@ -44,6 +41,8 @@ NiColorA::NiColorA(const NiPoint3& arOther) noexcept : r(arOther.x), g(arOther.y
 NiColorA::NiColorA(const NiPoint4& arOther) noexcept : r(arOther.x), g(arOther.y), b(arOther.z), a(arOther.w) {}
 
 NiColorA::NiColorA(const NiColor& arOther) noexcept : r(arOther.r), g(arOther.g), b(arOther.b), a(1.f) {}
+
+NiColorA::NiColorA(const NiColor& arOther, float afA) noexcept : r(arOther.r), g(arOther.g), b(arOther.b), a(afA) {}
 
 float& NiColorA::operator[](uint32_t i) noexcept {
     ASSUME_ASSERT(i < 4);

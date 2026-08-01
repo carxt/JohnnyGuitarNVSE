@@ -1394,6 +1394,25 @@ struct _DialogueType {
 };
 using DIALOGUE_TYPE = _DialogueType::Type;
 
+struct _DialogueSpeaker {
+	enum Type : uint32_t {
+		TARGET	= 0,
+		SELF	= 1,
+		EITHER	= 2,
+		COUNT,
+	};
+};
+using DIALOGUE_SPEAKER = _DialogueSpeaker::Type;
+
+struct _DialogueScriptType {
+	enum Type : uint32_t {
+		BEGIN = 0,
+		END = 1,
+		COUNT,
+	};
+};
+using DIALOGUE_SCRIPT_TYPE = _DialogueScriptType::Type;
+
 struct _FightReaction {
 	enum Type : uint32_t {
 		NEUTRAL	= 0,
@@ -1610,6 +1629,7 @@ struct _BodyPartType {
 	};
 };
 using BODY_PART_TYPE = _BodyPartType::Type;
+using LIMB_TYPE = _BodyPartType::Type;
 
 struct _DetectionLevel {
 	enum Level : uint32_t {
@@ -1889,6 +1909,18 @@ struct _LifeState {
 };
 using ACTOR_LIFE_STATE = _LifeState::State;
 
+struct _CriticalStage {
+	enum Stage {
+		NONE				= 0,
+		GOO_START			= 1,
+		GOO_END				= 2,
+		DISINTEGRATE_START	= 3,
+		DISINTEGRATE_END	= 4,
+		COUNT				= 5,
+	};
+};
+using ACTOR_CRITICAL_STAGE = _CriticalStage::Stage;
+
 struct _CreatureSoundType {
 	enum Type {
 		LEFT		= 0,
@@ -1917,3 +1949,114 @@ struct _CreatureSoundType {
 	};
 };
 using CREATURE_SOUND_TYPE = _CreatureSoundType::Type;
+
+struct _DialogueEmotion {
+	enum Emotion {
+		NEUTRAL		= 0,
+		ANGER		= 1,
+		DISGUST		= 2,
+		FEAR		= 3,
+		SAD			= 4,
+		HAPPY		= 5,
+		SURPRISE	= 6,
+		PAINED		= 7,
+		COUNT
+	};
+};
+using DIALOGUE_EMOTION = _DialogueEmotion::Emotion;
+
+struct _ScriptParamType {
+	enum Type : uint32_t {
+		STRING						= 0x00, // const char*
+		INTEGER						= 0x01, // int32_t
+		FLOAT						= 0x02, // float
+		OBJECT_ID					= 0x03,	// 
+		REFERENCE					= 0x04,	// TESObjectREFR
+		ACTOR_VALUE					= 0x05,	// ActorValue::Index
+		ACTOR						= 0x06,	// Actor
+		SPELL_ITEM					= 0x07,	// SpellItem || TESObjectBOOK
+		AXIS						= 0x08,	// X Y Z
+		CELL						= 0x09,	// TESObjectCELL
+		ANIMATION_GROUP				= 0x0A,	// ANIM_GROUP
+		MAGIC_ITEM					= 0x0B,	// MagicItem
+		SOUND						= 0x0C,	// TESSound
+		TOPIC						= 0x0D,	// TESTopic
+		QUEST						= 0x0E,	// TESQuest
+		RACE						= 0x0F,	// TESRace
+		CLASS						= 0x10,	// TESClass
+		FACTION						= 0x11,	// TESFaction
+		SEX							= 0x12,	// SEX
+		GLOBAL						= 0x13,	// TESGlobal
+		FURNITURE					= 0x14,	// TESFurniture || BGSListForm
+		TESOBJECT					= 0x15,	// TESObject
+		VARIABLE_NAME				= 0x16,	// 
+		QUEST_STAGE					= 0x17,	// 
+		MAP_MARKER					= 0x18,	// TESObjectREFR, pMapMarker
+		ACTOR_BASE					= 0x19,	// TESActorBase
+		CONTAINER					= 0x1A,	// TESObjectREFR, TESObjectREFR::HasContainer
+		WORLDSPACE					= 0x1B,	// TESWorldSpace
+		CRIME_TYPE					= 0x1C,	// 
+		AI_PACKAGE					= 0x1D,	// TESPackage
+		COMBAT_STYLE				= 0x1E,	// TESCombatStyle
+		MAGIC_EFFECT				= 0x1F,	// EffectSetting
+		FORM_TYPE					= 0x20,	// FORM_TYPE
+		WEATHER						= 0x21,	// TESWeather
+		NPC							= 0x22,	// TESNPC
+		OWNER						= 0x23,	// TESNPC || TESFaction
+		EFFECT_SHADER				= 0x24,	// TESEffectShader
+		FORM_LIST					= 0x25,	// BGSListForm
+		MENU_ICON					= 0x26,	// BGSMenuIcon
+		PERK						= 0x27,	// BGSPerk
+		NOTE						= 0x28,	// BGSNote
+		MISCELLANEOUS_STAT			= 0x29,	//
+		IMAGESPACE_MODIFIER			= 0x2A,	// TESImageSpaceModifier
+		IMAGESPACE					= 0x2B,	// TESImageSpace
+		DOUBLE						= 0x2C,	// double
+		SCRIPT_VARIABLE				= 0x2D,	// 
+		//							= 0x2E, 
+		ENCOUNTER_ZONE				= 0x2F,	// BGSEncounterZone
+		IDLE_FORM					= 0x30,	// TESIdleForm
+		MESSAGE						= 0x31,	// BGSMessage
+		INV_OBJ_OR_FORMLIST			= 0x32,	// TESContainer::ContainerCanHoldType || BGSListForm
+		KARMA_ALIGNMENT				= 0x33,	// 
+		EQUIP_TYPE					= 0x34,	// BGSEquipType::Type
+		TESOBJECT_OR_FORMLIST		= 0x35,	// TESObject || BGSListForm
+		SOUND_FILE					= 0x36,	// BGSMusicType
+		CRITICAL_STAGE				= 0x37,	// ACTOR_CRITICAL_STAGE
+		LEVELED_OR_BASE_CHAR		= 0x38,	// TESLevCharacter || TESNPC
+		LEVELED_OR_BASE_CREATURE	= 0x39,	// TESLevCreature || TESCreature
+		LEVELED_CHAR				= 0x3A,	// TESLevCharacter
+		LEVELED_CREATURE			= 0x3B,	// TESLevCreature
+		LEVELED_ITEM				= 0x3C,	// TESLevItem
+		ANY_FORM					= 0x3D,	// TESForm
+		REPUTATION					= 0x3E,	// TESReputation
+		CASINO						= 0x3F,	// TESCasino
+		CASINO_CHIP					= 0x40,	// TESCasinoChips
+		CHALLENGE					= 0x41,	// TESChallenge
+		CARAVAN_MONEY				= 0x42,	// TESCaravanMoney
+		CARAVAN_CARD				= 0x43,	// TESCaravanCard
+		CARAVAN_DECK				= 0x44,	// TESCaravanDeck
+		REGION						= 0x45,	// TESRegion
+	
+		// Custom NVSE types
+		STRING_VARIABLE				= 0x01,
+		ARRAY						= 0x100,	// only usable with compiler override; StandardCompile() will report unrecognized param type
+	};
+};
+using SCRIPT_PARAMETER_TYPE = _ScriptParamType::Type;
+
+struct _ScriptVarType {
+	enum Type : uint8_t {
+		FLOAT		= 0,
+		REFERENCE	= 0,
+		INTEGER		= 1,
+
+		// NVSE, return values only
+		STRING,
+		ARRAY,
+		REF,
+
+		INVALID
+	};
+};
+using SCRIPT_VARIABLE_TYPE = _ScriptVarType::Type;

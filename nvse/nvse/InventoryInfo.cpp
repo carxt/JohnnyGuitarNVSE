@@ -5,18 +5,18 @@ void PrintItemType(TESForm * form)
 	Console_Print("%s (%s)", GetFullName(form), GetObjectClassName(form));
 }
 
-TESForm* GetItemByIdx(TESObjectREFR* thisObj, uint32_t objIdx, int32_t* outNumItems)
+TESForm* GetItemByIdx(TESObjectREFR* apRef, uint32_t objIdx, int32_t* outNumItems)
 {
-	if (!thisObj) return NULL;
+	if (!apRef) return NULL;
 	if(outNumItems) *outNumItems = 0;
 
 	uint32_t count = 0;
 
-	ExtraContainerChanges* pXContainerChanges = static_cast<ExtraContainerChanges*>(thisObj->extraDataList.GetByType(kExtraData_ContainerChanges));
+	ExtraContainerChanges* pXContainerChanges = static_cast<ExtraContainerChanges*>(apRef->extraDataList.GetByType(kExtraData_ContainerChanges));
 	ExtraContainerInfo info(pXContainerChanges ? pXContainerChanges->GetEntryDataList() : NULL);
 
 	TESContainer* pContainer = NULL;
-	TESForm* pBaseForm = thisObj->baseForm;
+	TESForm* pBaseForm = apRef->baseForm;
 	if (pBaseForm) {
 		pContainer = DYNAMIC_CAST(pBaseForm, TESForm, TESContainer);
 	}
@@ -42,18 +42,18 @@ TESForm* GetItemByIdx(TESObjectREFR* thisObj, uint32_t objIdx, int32_t* outNumIt
 	return NULL;
 }
 
-TESForm* GetItemByRefID(TESObjectREFR* thisObj, uint32_t refID, int32_t* outNumItems)
+TESForm* GetItemByRefID(TESObjectREFR* apRef, uint32_t refID, int32_t* outNumItems)
 {
-	if (!thisObj) return NULL;
+	if (!apRef) return NULL;
 	if (outNumItems) *outNumItems = 0;
 
 	uint32_t count = 0;
 
-	ExtraContainerChanges* pXContainerChanges = static_cast<ExtraContainerChanges*>(thisObj->extraDataList.GetByType(kExtraData_ContainerChanges));
+	ExtraContainerChanges* pXContainerChanges = static_cast<ExtraContainerChanges*>(apRef->extraDataList.GetByType(kExtraData_ContainerChanges));
 	ExtraContainerInfo info(pXContainerChanges ? pXContainerChanges->GetEntryDataList() : NULL);
 
 	TESContainer* pContainer = NULL;
-	TESForm* pBaseForm = thisObj->baseForm;
+	TESForm* pBaseForm = apRef->baseForm;
 	if (pBaseForm) {
 		pContainer = DYNAMIC_CAST(pBaseForm, TESForm, TESContainer);
 	}
@@ -79,9 +79,9 @@ TESForm* GetItemByRefID(TESObjectREFR* thisObj, uint32_t refID, int32_t* outNumI
 	return NULL;
 }
 
-TESForm* GetItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, uint32_t refID, float* outHealth, TESForm** outOwner, uint32_t* outRank, int32_t* inOutIndex, int32_t* outNumItems)
+TESForm* GetItemWithHealthAndOwnershipByRefID(TESObjectREFR* apRef, uint32_t refID, float* outHealth, TESForm** outOwner, uint32_t* outRank, int32_t* inOutIndex, int32_t* outNumItems)
 {
-	if (!thisObj) return NULL;
+	if (!apRef) return NULL;
 	if (outNumItems) *outNumItems = 0;
 	if (outHealth) *outHealth = 0.0;
 	if (outOwner) *outOwner = NULL;
@@ -89,7 +89,7 @@ TESForm* GetItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, uint32_t r
 	uint32_t count = 0;
 	TESHealthForm* pHealth = NULL;
 
-	ExtraContainerChanges* pXContainerChanges = static_cast<ExtraContainerChanges*>(thisObj->extraDataList.GetByType(kExtraData_ContainerChanges));
+	ExtraContainerChanges* pXContainerChanges = static_cast<ExtraContainerChanges*>(apRef->extraDataList.GetByType(kExtraData_ContainerChanges));
 	ExtraContainerInfo info(pXContainerChanges ? pXContainerChanges->GetEntryDataList() : NULL);
 
 	// First walk the items in the map
@@ -137,7 +137,7 @@ TESForm* GetItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, uint32_t r
 
 	// Then look in the base container
 	TESContainer* pContainer = NULL;
-	TESForm* pBaseForm = thisObj->baseForm;
+	TESForm* pBaseForm = apRef->baseForm;
 	if (pBaseForm)
 		pContainer = DYNAMIC_CAST(pBaseForm, TESForm, TESContainer);
 
@@ -164,32 +164,32 @@ TESForm* GetItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, uint32_t r
 }
 
 // Assumes there is only one such Item in the container
-TESForm * SetFirstItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, uint32_t refID, int32_t NumItems, float Health, TESForm* pOwner, uint32_t Rank)
+TESForm * SetFirstItemWithHealthAndOwnershipByRefID(TESObjectREFR* apRef, uint32_t refID, int32_t NumItems, float Health, TESForm* pOwner, uint32_t Rank)
 {
-	if (!thisObj) return NULL;
+	if (!apRef) return NULL;
 	if ((Health == -1.0) && (pOwner == NULL) && (Rank == 0)) return NULL; // Nothing to modify!
 
-	ExtraContainerChanges* pXContainerChanges = static_cast<ExtraContainerChanges*>(thisObj->extraDataList.GetByType(kExtraData_ContainerChanges));
+	ExtraContainerChanges* pXContainerChanges = static_cast<ExtraContainerChanges*>(apRef->extraDataList.GetByType(kExtraData_ContainerChanges));
 	if (!pXContainerChanges)
-		return AddItemHealthPercentOwner(thisObj, refID, NumItems, Health, pOwner, Rank);
+		return AddItemHealthPercentOwner(apRef, refID, NumItems, Health, pOwner, Rank);
 
 	if (!pXContainerChanges->GetEntryDataList())
-		return AddItemHealthPercentOwner(thisObj, refID, NumItems, Health, pOwner, Rank);
+		return AddItemHealthPercentOwner(apRef, refID, NumItems, Health, pOwner, Rank);
 	ExtraContainerInfo info(pXContainerChanges->GetEntryDataList());
 
 	ExtraContainerChanges::EntryData* pEntryData = info.GetRefID(refID);
 	if (!pEntryData)
-		return AddItemHealthPercentOwner(thisObj, refID, NumItems, Health, pOwner, Rank);
+		return AddItemHealthPercentOwner(apRef, refID, NumItems, Health, pOwner, Rank);
 
 	ExtraContainerChanges::ExtendDataList* pExtendList = pEntryData->extendData;
 	if (!pExtendList) 
-		return AddItemHealthPercentOwner(thisObj, refID, NumItems, Health, pOwner, Rank);
+		return AddItemHealthPercentOwner(apRef, refID, NumItems, Health, pOwner, Rank);
 
 	if (!pEntryData) 
-		return AddItemHealthPercentOwner(thisObj, refID, NumItems, Health, pOwner, Rank);
+		return AddItemHealthPercentOwner(apRef, refID, NumItems, Health, pOwner, Rank);
 
 	bool Done = false;
-	TESHealthForm* pHealth = DYNAMIC_CAST(thisObj->baseForm, TESForm, TESHealthForm);
+	TESHealthForm* pHealth = DYNAMIC_CAST(apRef->baseForm, TESForm, TESHealthForm);
 	ExtraHealth* pXHealth = NULL;
 	ExtraOwnership* pXOwner = NULL;
 	ExtraRank* pXRank = NULL;
@@ -280,15 +280,15 @@ bool SameOwner(ExtraOwnership* pXOwner, ExtraRank* pXRank, TESForm* pOwner, uint
 		return pXOwner->owner->refID==pOwner->refID;
 }
 
-TESForm * AddItemHealthPercentOwner(TESObjectREFR* thisObj, uint32_t refID, int32_t NumItems, float Health, TESForm* pOwner, uint32_t Rank)
+TESForm * AddItemHealthPercentOwner(TESObjectREFR* apRef, uint32_t refID, int32_t NumItems, float Health, TESForm* pOwner, uint32_t Rank)
 {
-	if (!thisObj) return NULL;
+	if (!apRef) return NULL;
 
 	TESForm * pForm = LookupFormByID(refID);
 	if (!pForm) return NULL;
 	TESHealthForm* pHealth = DYNAMIC_CAST(pForm, TESForm, TESHealthForm);
 	if (!pHealth && (Health != -1.0)) {
-		_MESSAGE("\t\tInventoryInfo\t\tAddItemHealthPercentOwner:\tInvalid refID:%#10X, no health attribute", thisObj->refID);
+		_MESSAGE("\t\tInventoryInfo\t\tAddItemHealthPercentOwner:\tInvalid refID:%#10X, no health attribute", apRef->refID);
 		return NULL;
 	}
 	TESScriptableForm* pScript = DYNAMIC_CAST(pForm, TESForm, TESScriptableForm);
@@ -307,6 +307,6 @@ TESForm * AddItemHealthPercentOwner(TESObjectREFR* thisObj, uint32_t refID, int3
 		if (pScript)
 			pExtraDataList->Add(ExtraScript::Create(pForm, true));
 	}
-	thisObj->AddItem(pForm, pExtraDataList, NumItems);
+	apRef->AddItem(pForm, pExtraDataList, NumItems);
 	return pForm;
 }

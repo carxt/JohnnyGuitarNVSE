@@ -343,16 +343,16 @@ bool Cmd_Default_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
-bool Cmd_Default_Parse(uint32_t numParams, ParamInfo * paramInfo, ScriptLineBuffer * lineBuf, ScriptBuffer * scriptBuf)
+bool Cmd_Default_Parse(uint32_t auiParamCount, ParamInfo * apParameters, ScriptLineBuffer * apScriptLine, ScriptBuffer * apCompileData)
 {
-	return g_defaultParseCommand(numParams, paramInfo, lineBuf, scriptBuf);
+	return g_defaultParseCommand(auiParamCount, apParameters, apScriptLine, apCompileData);
 }
 
 #if RUNTIME
 
 bool Cmd_GetNVSEVersion_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = NVSE_VERSION_INTEGER;
+	arResult = NVSE_VERSION_INTEGER;
 	if (IsConsoleMode()) {
 		Console_Print("NVSE version: %d", NVSE_VERSION_INTEGER);
 	}
@@ -361,12 +361,12 @@ bool Cmd_GetNVSEVersion_Eval(COMMAND_ARGS_EVAL)
 
 bool Cmd_GetNVSEVersion_Execute(COMMAND_ARGS)
 {
-	return Cmd_GetNVSEVersion_Eval(thisObj, 0, 0, result);
+	return Cmd_GetNVSEVersion_Eval(apRef, 0, 0, arResult);
 }
 
 bool Cmd_GetNVSERevision_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = NVSE_VERSION_INTEGER_MINOR;
+	arResult = NVSE_VERSION_INTEGER_MINOR;
 	if (IsConsoleMode()) {
 		Console_Print("NVSE revision: %d", NVSE_VERSION_INTEGER_MINOR);
 	}
@@ -375,12 +375,12 @@ bool Cmd_GetNVSERevision_Eval(COMMAND_ARGS_EVAL)
 
 bool Cmd_GetNVSERevision_Execute(COMMAND_ARGS)
 {
-	return Cmd_GetNVSERevision_Eval(thisObj, 0, 0, result);
+	return Cmd_GetNVSERevision_Eval(apRef, 0, 0, arResult);
 }
 
 bool Cmd_GetNVSEBeta_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = NVSE_VERSION_INTEGER_BETA;
+	arResult = NVSE_VERSION_INTEGER_BETA;
 	if (IsConsoleMode()) {
 		Console_Print("NVSE beta: %d", NVSE_VERSION_INTEGER_BETA);
 	}
@@ -389,7 +389,7 @@ bool Cmd_GetNVSEBeta_Eval(COMMAND_ARGS_EVAL)
 
 bool Cmd_GetNVSEBeta_Execute(COMMAND_ARGS)
 {
-	return Cmd_GetNVSEBeta_Eval(thisObj, 0, 0, result);
+	return Cmd_GetNVSEBeta_Eval(apRef, 0, 0, arResult);
 }
 
 bool Cmd_DumpDocs_Execute(COMMAND_ARGS)
@@ -413,7 +413,7 @@ bool Cmd_tcmd_Execute(COMMAND_ARGS)
 	Debug_DumpMenus();
 	Debug_DumpTraits();
 
-	*result = 0;
+	arResult = 0;
 
 	return true;
 }
@@ -433,7 +433,7 @@ bool Cmd_tcmd2_Execute(COMMAND_ARGS)
 		Console_Print("hello args: failed");
 	}
 
-	*result = 0;
+	arResult = 0;
 
 	return true;
 }
@@ -459,8 +459,8 @@ bool Cmd_tcmd3_Execute(COMMAND_ARGS)
 		// we have a pForm
 	} 
 		
-	if (!pForm && thisObj && thisObj->baseForm) {
-		pForm = thisObj->baseForm;
+	if (!pForm && apRef && apRef->baseForm) {
+		pForm = apRef->baseForm;
 	}
 
 //	DataHandler* pDH = DataHandler::Get();

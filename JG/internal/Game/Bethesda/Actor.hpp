@@ -220,7 +220,7 @@ public:
 	Bitfield8							ucJIPActorFlags3;
 #endif
 	ACTOR_LIFE_STATE					eLifeState;
-	uint32_t							eCriticalStage;
+	ACTOR_CRITICAL_STAGE				eCriticalStage;
 	uint32_t							eQueuedAttack;
 	float								fLastUpdate;
 	bool								bDeadFlag;
@@ -257,13 +257,17 @@ public:
 	float								fHeadTrackTimer;
 	bool								bWasInFrustum;
 	bool								bShouldRotateToTrack;
+#if USE_MODDED_CHANGES
 	uint16_t							usJIP15E;
+#endif
 	NiPoint3							kEditorLocationCoords;
 	float								fEditorLocationZRot;
 	TESForm*							pEditorLocation;
 	bool								bSetOnDeath;
 	bool								bContainerReset;
+#if USE_MODDED_CHANGES
 	uint16_t							usJIP176;
+#endif
 	float								fGunSkillGun;
 	float								fGunSkillHUD;
 	float								fGunSkillActor;

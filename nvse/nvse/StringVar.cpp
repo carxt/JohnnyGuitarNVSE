@@ -342,7 +342,7 @@ bool AssignToStringVarLong(COMMAND_ARGS, const char* newValue)
 	if (!newValue || len >= kMaxMessageLength)		//if null pointer or too long, assign an empty string
 		newValue = "";
 
-	if (ExtractSetStatementVar(scriptObj, eventList, scriptData, &strID, &modIndex)) {
+	if (ExtractSetStatementVar(apScript, apScriptLocals, apCompiledParams, &strID, &modIndex)) {
 		strVar = g_StringMap.Get(strID);
 		bTemp = false;
 	}
@@ -352,7 +352,7 @@ bool AssignToStringVarLong(COMMAND_ARGS, const char* newValue)
 	}
 
 	if (!modIndex)
-		modIndex = scriptObj->GetModIndex();
+		modIndex = apScript->GetModIndex();
 
 	if (strVar)
 	{
@@ -362,7 +362,7 @@ bool AssignToStringVarLong(COMMAND_ARGS, const char* newValue)
 	else
 		strID = g_StringMap.Add(modIndex, newValue, bTemp);
 
-	*result = strID;
+	arResult = strID;
 
 #if _DEBUG	// console feedback disabled in release by request (annoying when called from batch scripts)
 	if (IsConsoleMode() && !bTemp)

@@ -317,11 +317,11 @@ bool LoopManager::Break(ScriptRunner* state, COMMAND_ARGS)
 
 	RestoreStack(state, &loopInfo->ipInfo);
 
-	ScriptRunner	* scriptRunner = GetScriptRunner(opcodeOffsetPtr);
-	int32_t			* calculatedOpLength = GetCalculatedOpLength(opcodeOffsetPtr);
+	ScriptRunner	* scriptRunner = GetScriptRunner(arOffset);
+	int32_t			* calculatedOpLength = GetCalculatedOpLength(arOffset);
 
 	// restore ip
-	*calculatedOpLength += loopInfo->endIP - *opcodeOffsetPtr;
+	*calculatedOpLength += loopInfo->endIP - arOffset;
 
 	delete loopInfo->loop;
 
@@ -345,11 +345,11 @@ bool LoopManager::Continue(ScriptRunner* state, COMMAND_ARGS)
 
 	RestoreStack(state, &loopInfo->ipInfo);
 
-	ScriptRunner	* scriptRunner = GetScriptRunner(opcodeOffsetPtr);
-	int32_t			* calculatedOpLength = GetCalculatedOpLength(opcodeOffsetPtr);
+	ScriptRunner	* scriptRunner = GetScriptRunner(arOffset);
+	int32_t			* calculatedOpLength = GetCalculatedOpLength(arOffset);
 
 	// restore ip
-	*calculatedOpLength += loopInfo->ipInfo.ip - *opcodeOffsetPtr;
+	*calculatedOpLength += loopInfo->ipInfo.ip - arOffset;
 
 	return true;
 }
@@ -357,15 +357,15 @@ bool LoopManager::Continue(ScriptRunner* state, COMMAND_ARGS)
 
 bool WhileLoop::Update(COMMAND_ARGS)
 {
-	// save *opcodeOffsetPtr so we can calc IP to branch to after evaluating loop condition
-	uint32_t originalOffset = *opcodeOffsetPtr;
+	// save arOffset so we can calc IP to branch to after evaluating loop condition
+	uint32_t originalOffset = arOffset;
 
 	// update offset to point to loop condition, evaluate
-	*opcodeOffsetPtr = m_exprOffset;
+	arOffset = m_exprOffset;
 	ExpressionEvaluator eval(PASS_COMMAND_ARGS);
 	bool bResult = eval.ExtractArgs();
 
-	*opcodeOffsetPtr = originalOffset;
+	arOffset = originalOffset;
 
 	if (bResult && eval.Arg(0))
 			bResult = eval.Arg(0)->GetBool();

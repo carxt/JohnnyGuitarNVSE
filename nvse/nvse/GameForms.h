@@ -12,6 +12,8 @@
 #include "Bethesda/BGSAddonNode.hpp"
 #include "Bethesda/BGSAmmoForm.hpp"
 #include "Bethesda/BGSBipedModelList.hpp"
+#include "Bethesda/BGSBodyPart.hpp"
+#include "Bethesda/BGSBodyPartData.hpp"
 #include "Bethesda/BGSCameraShot.hpp"
 #include "Bethesda/BGSClipRoundsForm.hpp"
 #include "Bethesda/BGSDebris.hpp"
@@ -37,6 +39,7 @@
 #include "Bethesda/BGSPlaceableWater.hpp"
 #include "Bethesda/BGSPreloadable.hpp"
 #include "Bethesda/BGSProjectile.hpp"
+#include "Bethesda/BGSQuestObjective.hpp"
 #include "Bethesda/BGSRadiationStage.hpp"
 #include "Bethesda/BGSRagdoll.hpp"
 #include "Bethesda/BGSRepairItemList.hpp"
@@ -64,6 +67,7 @@
 #include "Bethesda/TESContainer.hpp"
 #include "Bethesda/TESCreature.hpp"
 #include "Bethesda/TESDescription.hpp"
+#include "Bethesda/TESEffectShader.hpp"
 #include "Bethesda/TESEnchantableForm.hpp"
 #include "Bethesda/TESEyes.hpp"
 #include "Bethesda/TESFaction.hpp"
@@ -73,6 +77,7 @@
 #include "Bethesda/TESHair.hpp"
 #include "Bethesda/TESHealthForm.hpp"
 #include "Bethesda/TESIcon.hpp"
+#include "Bethesda/TESIdleForm.hpp"
 #include "Bethesda/TESImageSpaceModifiableForm.hpp"
 #include "Bethesda/TESKey.hpp"
 #include "Bethesda/TESLandTexture.hpp"
@@ -96,11 +101,14 @@
 #include "Bethesda/TESObjectMISC.hpp"
 #include "Bethesda/TESObjectSTAT.hpp"
 #include "Bethesda/TESPackageData.hpp"
+#include "Bethesda/TESQuest.hpp"
+#include "Bethesda/TESRace.hpp"
 #include "Bethesda/TESRaceForm.hpp"
 #include "Bethesda/TESReactionForm.hpp"
 #include "Bethesda/TESScriptableForm.hpp"
 #include "Bethesda/TESSkill.hpp"
 #include "Bethesda/TESTexture1024.hpp"
+#include "Bethesda/TESTopicInfo.hpp"
 #include "Bethesda/TESValueForm.hpp"
 #include "Bethesda/TESWaterForm.hpp"
 #include "Bethesda/TESWeightForm.hpp"
@@ -439,100 +447,9 @@ struct LvlListExtra {
 
 class FactionRank;
 
-// 24
-class BGSQuestObjective {
-public:
-	BGSQuestObjective();
-	virtual ~BGSQuestObjective();
-
-	enum {
-		eQObjStatus_displayed = 1,
-		eQObjStatus_completed = 2,
-	};
-
-	struct TargetData {
-		TESObjectREFR* target;
-		uint8_t			flags;
-		uint8_t			filler[3];
-	};
-
-	struct ParentSpaceNode {};
-
-	struct TeleportLink {
-		TESObjectREFR* door;
-		uint32_t			unk04[3];
-	};
-
-	struct Target {
-		struct Data {
-			BSSimpleArray<ParentSpaceNode>	parentSpaceNodes;	// 00
-			BSSimpleArray<TeleportLink>		teleportLinks;		// 10
-			uint32_t							unk20[6];			// 20
-		};
-
-		uint8_t			byte00;			// 00
-		uint8_t			pad01[3];		// 01
-		TESCondition	conditions;		// 04
-		TESObjectREFR*	target;			// 0C
-		Data			data;			// 10
-	};
-
-	uint32_t			objectiveId;	// 004 Objective Index in the GECK
-	BSString		displayText;	// 008
-	TESQuest*		quest;			// 010
-	tList<Target>	targets;		// 014
-	uint32_t			unk01C;			// 01C
-	uint32_t			status;			// 020	bit0 = displayed, bit 1 = completed. 1 and 3 significant. If setting it to 3, quest flags bit1 will be set also.
-
-	int32_t GetTargetIndex(TESObjectREFR* refr);
-};
-
 /**** forms ****/
 
 class TESTopic;
-// 54
-class TESIdleForm : public TESForm {
-public:
-	TESIdleForm();
-	~TESIdleForm();
-
-	enum {
-		eIFgf_groupIdle = 0,
-		eIFgf_groupMovement = 1,
-		eIFgf_groupLeftArm = 2,
-		eIFgf_groupLeftHand = 3,
-		eIFgf_groupLeftWeapon = 4,
-		eIFgf_groupLeftWeaponUp = 5,
-		eIFgf_groupLeftWeaponDown = 6,
-		eIFgf_groupSpecialIdle = 7,
-		eIFgf_groupWholeBody = 20,
-		eIFgf_groupUpperBody = 20,
-
-		eIFgf_flagOptionallyReturnsAFile = 128,
-		eIFgf_flagUnknown = 64,
-	};
-
-	struct Data {
-		uint8_t			groupFlags;		// 000	animation group and other flags
-		uint8_t			loopMin;		// 001
-		uint8_t			loopMax;		// 002
-		uint8_t			fil03B;			// 003
-		uint16_t			replayDelay;	// 004
-		uint8_t			flags;			// 006	bit0 is No attacking
-		uint8_t			fil03F;			// 007
-	};
-
-	TESModelAnim					anim;			// 018
-	TESCondition					conditions;		// 030
-	Data							data;			// 038
-	BSSimpleArray<TESIdleForm*>*	children;		// 040	NiFormArray, contains all idle anims in path if eIFgf_flagUnknown is set
-	TESIdleForm*					parent;			// 044
-	TESIdleForm*					previous;		// 048
-	BSString						editorID;		// 04C
-
-	TESIdleForm* FindIdle(Actor* animActor);
-};
-
 struct TESTopicInfoResponse {
 	struct Data {
 		uint32_t	emotionType;	//	00
@@ -551,50 +468,6 @@ struct TESTopicInfoResponse {
 	TESIdleForm*			listenerAnimation;		//	024
 	TESTopicInfoResponse*	next;					//	028
 };
-
-// 50
-class TESTopicInfo : public TESForm {
-public:
-	TESTopicInfo();
-	~TESTopicInfo();
-
-	struct RelatedTopics {
-		tList<TESTopic>		linkFrom;
-		tList<TESTopic>		choices;
-		tList<TESTopic>		followUps;
-	};
-
-	TESCondition		conditions;			// 18
-	uint16_t				unk20;				// 20
-	bool				saidOnce;			// 22
-	uint8_t				type;				// 23
-	uint8_t				nextSpeaker;		// 24
-	uint8_t				flags1;				// 25
-	uint8_t				flags2;				// 26
-	uint8_t				pad27;				// 27
-	BSString			prompt;				// 28
-	tList<TESTopic>		addTopics;			// 30
-	RelatedTopics*		relatedTopics;		// 38
-	uint32_t				speaker;			// 3C
-	uint32_t				actorValueOrPerk;	// 40
-	uint32_t				speechChallenge;	// 44
-	TESQuest*			quest;				// 48
-	uint32_t				modInfoFileOffset;	// 4C	during LoadForm
-#if USE_MODDED_CHANGES
-	TESTopic*				pParentTopic;
-#endif
-
-	void RunResultScript(bool onEnd, Actor* actor);
-
-	void SetSaidOnce() {
-		ThisCall(0x61F220, this);
-	}
-
-	void ResetSaidOnceFlags() {
-		ThisCall(0x61F280, this);
-	}
-};
-
 class TopicInfoArray : public NiTLargePrimitiveArray<TESTopicInfo*> {
 public:
 };
@@ -632,73 +505,6 @@ public:
 	TopicInfoArray* GetTopicInfosForQuest(TESQuest* apQuest) {
 		return ThisCall<TopicInfoArray*>(0x619F70, this, apQuest);
 	}
-};
-
-// 4E4 - incomplete
-class TESRace : public TESForm {
-public:
-	// 18
-	struct FaceGenData {
-		uint32_t	unk00;
-		uint32_t	unk04;
-		uint32_t	unk08;
-		uint32_t	unk0C;
-		uint32_t	unk10;
-		uint32_t	unk14;
-	};
-
-	// 2
-	struct SkillMod {
-		uint8_t	actorValue;
-		char	mod;
-	};
-
-	enum {
-		kFlag_Playable = 0x00000001,
-		kFlag_Child = 0x00000004,
-	};
-
-	TESRace();
-	~TESRace();
-
-	TESFullName		fullName;				// 018
-	TESDescription	desc;					// 024
-	TESSpellList	spells;					// 02C
-	TESReactionForm	reaction;				// 040
-
-	SkillMod		skillMods[7];			// 050
-	uint8_t			pad05E[2];				// 05E
-	float			height[2];				// 060 male/female
-	float			weight[2];				// 068 male/female
-	uint32_t			raceFlags;				// 070
-
-	TESAttributes	baseAttributes[2];		// 074 male/female
-	tList<TESHair>	hairs;					// 08C
-	TESHair* defaultHair[2];			// 094 male/female
-	uint8_t			defaultHairColor[2];	// 09C male/female
-	uint8_t			fill09E[2];				// 09E
-
-	uint32_t			unk0A0[(0xA8 - 0xA0) >> 2];	// 0A0
-
-	tList<TESEyes>	eyes;					// 0A8
-
-	TESModel		faceModels[2][8];			// 0B0	male/female Head, Ears, Mouth, TeethLower, TeethUpper, Tongue, LeftEye, RightEye
-	TESTexture		faceTextures[2][8];			// 230	male/female Head, Ears, Mouth, TeethLower, TeethUpper, Tongue, LeftEye, RightEye
-	TESTexture		bodyPartsTextures[2][3];	// 2F0	male/female	UpperBody, LeftHand, RightHand
-	TESModel		bodyModels[2][3];			// 338	male/female	UpperBody, LeftHand, RightHand
-	BGSTextureModel	bodyTextures[2];			// 3C8	male/female	EGT file, not DDS.
-	FaceGenData		unk3F8[2][4];				// 3F8  male/female
-
-	uint32_t			unk4B8[(0x4CC - 0x4B8) >> 2]; // 4B8
-
-	BSString			name;				// 4CC
-	NiTPrimitiveArray <void*>	faceGenUndo;		// 4D4 - NiTPrimitiveArray<FaceGenUndo *>
-	uint32_t				unk4E4[6];			// 4E4
-	BGSVoiceType*		voiceTypes[2];		// 4FC // VTCK male/female
-	TESRace*			ageRace[2];			// 504 // ONAM/YNAM
-
-	bool IsPlayable() const { return (raceFlags & kFlag_Playable) == kFlag_Playable; }
-	void SetPlayable(bool doset) { if (doset) raceFlags |= kFlag_Playable; else raceFlags &= ~kFlag_Playable; }
 };
 
 // 68
@@ -1696,41 +1502,6 @@ struct VariableInfo {
 	BSString		name;		// 18
 };
 
-// TESQuest (6C)
-class TESQuest : public TESForm, public TESScriptableForm, public TESIcon, public TESFullName {
-public:
-	TESQuest();
-	~TESQuest();
-
-	virtual char* GetEditorName() const;
-
-	struct StageInfo {
-		uint8_t			stage;		// 00 stageID
-		uint8_t			unk001;		// 01 status ?
-		uint8_t			pad[2];		// 02
-		tList<void>		unk004;		// 04 log entries
-	};
-
-	uint8_t					flags;				// 3C	bit0 is startGameEnabled/isRunning
-	uint8_t					priority;			// 3D
-	uint8_t					pad3E[2];			// 3E
-	float					questDelayTime;		// 40
-	tList<StageInfo>		stages;				// 44
-	tList<void>				lVarOrObjectives;	// 4C
-		// So: this list would contain both Objectives and LocalVariables !
-		// That seems very strange but still, looking at Get/SetObjective... and ShowQuestVars there's no doubt.
-	TESCondition			conditions;			// 54
-	ScriptLocals*		scriptEventList;	// 5C
-	uint8_t					currentStage;		// 60
-	uint8_t					pad61[3];			// 61
-	BSString				editorName;			// 64
-
-	bool SetStage(uint8_t stageID);
-	BGSQuestObjective* GetObjective(uint32_t objectiveID);
-};
-
-static_assert(sizeof(TESQuest) == 0x6C);
-
 // TESIdleForm (54)
 class TESIdleForm;
 
@@ -2417,101 +2188,6 @@ public:
 };
 static_assert(sizeof(TESImageSpaceModifier) == 0x730);
 
-struct EntryPointConditions {
-	TESCondition		tab1;
-	TESCondition		tab2;
-	TESCondition		tab3;
-};
-
-// B0
-class BGSBodyPart : public BaseFormComponent {
-public:
-	BGSBodyPart();
-	~BGSBodyPart();
-
-	enum {
-		kFlags_Severable = 1,
-		kFlags_IKData = 2,
-		kFlags_BipedData = 4,
-		kFlags_Explodable = 8,
-		kFlags_IsHead = 16,
-		kFlags_Headtracking = 32,
-		kFlags_Absolute = 64,
-	};
-
-	BSString			partNode;				// 04
-	BSString			VATSTarget;				// 0C
-	BSString			startNode;				// 14
-	BSString			partName;				// 1C
-	BSString			targetBone;				// 24
-	TESModel			limbReplacement;		// 2C
-	uint32_t				unk44[6];				// 44
-	float				damageMult;				// 5C
-	uint8_t				flags;					// 60
-	uint8_t				pad61;					// 61
-	uint8_t				healthPercent;			// 62
-	uint8_t				actorValue;				// 63
-	uint8_t				toHitChance;			// 64
-	uint8_t				explChance;				// 65
-	uint8_t				explDebrisCount;		// 66
-	uint8_t				pad67;					// 67
-	BGSDebris*			explDebris;			// 68
-	BGSExplosion*		explExplosion;			// 6C
-	float				trackingMaxAngle;		// 70
-	float				explDebrisScale;		// 74
-	uint8_t				sevrDebrisCount;		// 78
-	uint8_t				pad79[3];				// 79
-	BGSDebris*			sevrDebris;			// 7C
-	BGSExplosion*		sevrExplosion;			// 80
-	float				sevrDebrisScale;		// 84
-	float				goreEffTranslate[3];	// 88
-	float				goreEffRotation[3];		// 94
-	BGSImpactDataSet*	sevrImpactDS;			// A0
-	BGSImpactDataSet*	explImpactDS;			// A4
-	uint8_t				sevrDecalCount;			// A8
-	uint8_t				explDecalCount;			// A9
-	uint8_t				padAA[2];				// AA
-	float				limbRepScale;			// AC
-
-	void SetFlag(uint32_t pFlag, bool bEnable) {
-		if (bEnable) flags |= pFlag;
-		else flags &= ~pFlag;
-	}
-};
-
-static_assert(sizeof(BGSBodyPart) == 0xB0);
-
-// 74
-class BGSBodyPartData : public TESForm {
-public:
-	BGSBodyPartData();
-	~BGSBodyPartData();
-
-	enum {
-		eBodyPart_Torso = 0,
-		eBodyPart_Head1,
-		eBodyPart_Head2,
-		eBodyPart_LeftArm1,
-		eBodyPart_LeftArm2,
-		eBodyPart_RightArm1,
-		eBodyPart_RightArm2,
-		eBodyPart_LeftLeg1,
-		eBodyPart_LeftLeg2,
-		eBodyPart_LeftLeg3,
-		eBodyPart_RightLeg1,
-		eBodyPart_RightLeg2,
-		eBodyPart_RightLeg3,
-		eBodyPart_Brain,
-		eBodyPart_Weapon,
-	};
-
-	TESModel		model;				// 018
-	BGSPreloadable	preloadable;		// 030
-	BGSBodyPart* bodyParts[15];		// 034
-	BGSRagdoll* ragDoll;			// 070
-};
-static_assert(sizeof(BGSBodyPartData) == 0x74);
-
 // BGSCameraPath (38)
 class BGSCameraPath;
 
@@ -2536,32 +2212,6 @@ public:
 
 static_assert(sizeof(BGSLightingTemplate) == 0x44);
 
-enum EActionListForm {
-	eActionListForm_AddAt = 00,
-	eActionListForm_DelAt,
-	eActionListForm_ChgAt,
-	eActionListForm_GetAt,
-	eActionListForm_Max,
-};
-
-enum EWhichListForm {
-	eWhichListForm_RaceHair = 00,
-	eWhichListForm_RaceEyes,
-	eWhichListForm_RaceHeadPart,			// ? //
-	eWhichListForm_BaseFaction,
-	eWhichListForm_BaseRank,
-	eWhichListForm_BasePackage,
-	eWhichListForm_BaseSpellListSpell,
-	eWhichListForm_BaseSpellListLevSpell,
-	eWhichListForm_FactionRankName,
-	eWhichListForm_FactionRankFemaleName,
-	eWhichListForm_HeadParts,
-	eWhichListForm_LevCreatureRef,
-	eWhichListForm_LevCharacterRef,
-	eWhichListForm_FormList,
-	eWhichListForm_Max,
-};
-
 struct CasinoStats
 {
 	uint32_t casinoRefID;
@@ -2569,92 +2219,5 @@ struct CasinoStats
 	uint16_t earningStage;
 	uint8_t gap0A[2];
 };
-
-// 170
-class TESEffectShader : public TESForm {
-public:
-	TESEffectShader();
-	~TESEffectShader();
-
-	struct EffectShaderData {
-		uint8_t flags;
-		uint32_t membraneSourceBlendMode;
-		uint32_t membraneBlendOp;
-		uint32_t membraneZTestFunc;
-		uint32_t fillTextureRGB;
-		float fillTextureAlphaFadeInTime;
-		float fillTextureFullAlphaTime;
-		float fillTextureAlphaFadeOutTime;
-		float fillTexturePersistentAlphaRatio;
-		float fillTextureAlphaPulseAmpl;
-		float fillTextureAlphaPulseFreq;
-		float fillTextureAnimSpeedU;
-		float fillTextureAnimSpeedV;
-		float edgeFallOff;
-		uint32_t edgeColor;
-		float edgeAlphaFadeInTime;
-		float edgeFullAlphaTime;
-		float edgeAlphaFadeOutTime;
-		float edgePersistentAlphaRatio;
-		float edgeAlphaPulseAmpl;
-		float edgeAlphaPulseFreq;
-		float fillTextureFullAlphaRatio;
-		float edgeFullAlphaRatio;
-		uint32_t membraneDestBlendMode;
-		uint32_t particleSourceBlendMode;
-		uint32_t particleBlendOp;
-		uint32_t particleZTestFunc;
-		uint32_t particleDestBlendMode;
-		float particleBirthRampUpTime;
-		float particleBirthFullTime;
-		float particleBirthRampDownTime;
-		float particleBirthFullRatio;
-		float particleBirthPersistRatio;
-		float particleLifetime;
-		float particleLifetimeVar;
-		float particleInitSpeedAlongNormal;
-		float particleAccelAlongNormal;
-		NiPoint3 initialVelocity;
-		NiPoint3 acceleration;
-		float scaleKey1;
-		float scaleKey2;
-		float scaleKey1Time;
-		float scaleKey2Time;
-		uint32_t colorKey1RGB;
-		uint32_t colorKey2RGB;
-		uint32_t colorKey3RGB;
-		float colorKey1Alpha;
-		float colorKey2Alpha;
-		float colorKey3Alpha;
-		float colorKey1Time;
-		float colorKey2Time;
-		float colorKey3Time;
-		float particleInitSpeedAlongNormalVar;
-		float particleInitRotDeg;
-		float particleInitRotDegVar;
-		float particleRotSpeedDegPerSec;
-		float particleRotSpeedDegPerSecVar;
-		BGSDebris* addonModels;
-		float holesStartTime;
-		float holesEndTime;
-		float holesStartVal;
-		float holesEndVal;
-		float edgeWidthAlphaUnits;
-		uint32_t edgeColorRGB;
-		float explosionWindSpeed;
-		uint32_t textureCountU;
-		uint32_t textureCountV;
-		float addonFadeInTime;
-		float addonFadeOutTime;
-		float addonScaleStart;
-		float addonScaleEnd;
-		float addonScaleInTime;
-		float addonScaleOutTime;
-	} shaderData;
-	TESTexture fillTexture;
-	TESTexture particleShaderTexture;
-	TESTexture holesTexture;
-};
-static_assert(sizeof(TESEffectShader) == 0x170);
 
 extern TESForm* __fastcall GetTESForm(const TESForm* apForm);

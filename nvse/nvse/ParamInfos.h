@@ -2,1178 +2,1156 @@
 
 #include "CommandTable.h"
 #include <ScriptUtils.h>
-static ParamInfo kParams_OneInt_ThreeScriptVars[] =
+
+static SCRIPT_PARAMETER kParams_OneInt_ThreeScriptVars[] =
 {
-	{	"int", kParamType_Integer, 0 },
-	{	"int", kParamType_ScriptVariable, 0 },
-	{	"int", kParamType_ScriptVariable, 0 },
-	{	"int", kParamType_ScriptVariable, 0 },
-};
-static ParamInfo kParams_OneInt[] =
-{
-	{	"int", kParamType_Integer, 0 },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
 };
 
-static ParamInfo kParams_TwoInts[] =
+static SCRIPT_PARAMETER kParams_OneInt[] =
 {
-	{	"int", kParamType_Integer, 0 },
-	{	"int", kParamType_Integer, 0 },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_OneRef_OneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_TwoInts[] =
 {
-	{ "target",kParamType_ObjectRef, 0 },
-	{	"int", kParamType_Integer, 1 },
-};
-static ParamInfo kParams_OneOptionalInt[] =
-{
-	{	"int", kParamType_Integer, 1 },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_OneInt_OneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_OneRef_OneOptionalInt[] =
 {
-	{	"int", kParamType_Integer, 0 },
-	{	"int", kParamType_Integer, 1 },
+	{ "Reference",SCRIPT_PARAMETER_TYPE::REFERENCE, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneFloat[] =
+static SCRIPT_PARAMETER kParams_OneOptionalInt[] =
 {
-	{	"float", kParamType_Float,	0 },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneString[] =
+static SCRIPT_PARAMETER kParams_OneInt_OneOptionalInt[] =
 {
-	{	"string",	kParamType_String,	0 },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneOptionalString[] =
+static SCRIPT_PARAMETER kParams_OneFloat[] =
 {
-	{	"string",	kParamType_String,	1 },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
 };
 
-static ParamInfo kParams_OneString_TwoInts[] =
+static SCRIPT_PARAMETER kParams_OneString[] =
 {
-	{	"string",	kParamType_String,	0 },
-	{	"int", kParamType_Integer, 0 },
-	{	"int", kParamType_Integer, 0 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
 };
 
-static ParamInfo kParams_OneString_OneFloat[] =
+static SCRIPT_PARAMETER kParams_OneOptionalString[] =
 {
-	{	"string",	kParamType_String,	0 },
-	{	"float",	kParamType_Float,	0 },
-};
-static ParamInfo kParams_OneString_OneOptionalFloat[] =
-{
-	{	"string",	kParamType_String,	0 },
-	{	"float",	kParamType_Float,	1 },
+	{ "String (Optional)", SCRIPT_PARAMETER_TYPE::STRING, true },
 };
 
-static ParamInfo kParams_OneString_OneOptionalObjectRef[] =
+static SCRIPT_PARAMETER kParams_OneString_TwoInts[] =
 {
-	{ "string", kParamType_String, 0 },
-	{ "ref", kParamType_ObjectRef, 1 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_OneString_OneOptionalFloat_TwoOptionalInts[] =
+static SCRIPT_PARAMETER kParams_OneString_OneFloat[] =
 {
-	{ "string",	kParamType_String,	0 },
-	{ "float", kParamType_Float, 1 },
-	{ "integer", kParamType_Integer, 1 },
-	{ "integer", kParamType_Integer, 1 },
-};
-static ParamInfo kParams_OneString_OneOptionalFloat_ThreeOptionalInts[] =
-{
-	{ "string",	kParamType_String,	0 },
-	{ "float", kParamType_Float, 1 },
-	{ "integer", kParamType_Integer, 1 },
-	{ "integer", kParamType_Integer, 1 },
-	{ "integer", kParamType_Integer, 1 },
-};
-static ParamInfo kParams_OneString_OneOptionalFloat_FourOptionalInts[] =
-{
-	{ "string",	kParamType_String,	0 },
-	{ "float", kParamType_Float, 1 },
-	{ "integer", kParamType_Integer, 1 },
-	{ "integer", kParamType_Integer, 1 },
-	{ "integer", kParamType_Integer, 1 },
-	{ "integer", kParamType_Integer, 1 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
 };
 
-static ParamInfo kParams_TwoFloats[] =
+static SCRIPT_PARAMETER kParams_OneString_OneOptionalFloat[] =
 {
-	{	"float",	kParamType_Float,	0 },
-	{	"float",	kParamType_Float,	0 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Float (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
 };
 
-static ParamInfo kParams_TwoFloats_OneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_OneString_OneOptionalObjectRef[] =
 {
-	{	"float",	kParamType_Float,	0 },
-	{	"float",	kParamType_Float,	0 },
-	{ 	"Integer",	kParamType_Integer,	1 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Reference (Optional)", SCRIPT_PARAMETER_TYPE::REFERENCE, true },
 };
 
-static ParamInfo kParams_OneObjectID[] =
+static SCRIPT_PARAMETER kParams_OneString_OneOptionalFloat_TwoOptionalInts[] =
 {
-	{	"item", kParamType_ObjectID, 0},
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Float (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneOptionalObjectID[] =
+static SCRIPT_PARAMETER kParams_OneString_OneOptionalFloat_ThreeOptionalInts[] =
 {
-	{	"item", kParamType_ObjectID, 1},
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Float (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneInt_OneOptionalObjectID[] =
+static SCRIPT_PARAMETER kParams_OneString_OneOptionalFloat_FourOptionalInts[] =
 {
-	{	"path type",	kParamType_Integer,			0	},
-	{	"item",			kParamType_ObjectID,	1	},
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Float (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneObjectID_OneInt[] =
+static SCRIPT_PARAMETER kParams_TwoFloats[] =
 {
-	{	"item",		kParamType_ObjectID,	0	},
-	{	"integer",	kParamType_Integer,			0	},
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
 };
 
-static ParamInfo kParams_OneFloat_OneOptionalObjectID[] =
+static SCRIPT_PARAMETER kParams_TwoFloats_OneOptionalInt[] =
 {
-	{	"float",		kParamType_Float,			0	},
-	{	"item",			kParamType_ObjectID,	1	},
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneMagicItem_OneOptionalObjectID[] =
+static SCRIPT_PARAMETER kParams_OneObjectID[] =
 {
-   {	"magic item",	kParamType_MagicItem,		0	},
-   {	"item",			kParamType_ObjectID,	1	},
+	{ "Item", SCRIPT_PARAMETER_TYPE::OBJECT_ID, false },
 };
 
-static ParamInfo kParams_OneInventoryItem_OneOptionalObjectID[] =
+static SCRIPT_PARAMETER kParams_OneOptionalObjectID[] =
 {
-   {	"inv item",		kParamType_MagicItem,		0	},
-   {	"target item",	kParamType_ObjectID,	1	},
+	{ "Item (Optional)", SCRIPT_PARAMETER_TYPE::OBJECT_ID, true },
 };
 
-static ParamInfo kParams_OneFormList_OneOptionalObjectID[] =
+static SCRIPT_PARAMETER kParams_OneObjectID_OneInt[] =
 {
-   {	"form list",	kParamType_FormList,		0	},
-   {	"target item",	kParamType_ObjectID,	1	},
+	{ "Item", SCRIPT_PARAMETER_TYPE::OBJECT_ID, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_OneActorValue[] =
+static SCRIPT_PARAMETER kParams_OneFloat_OneOptionalObjectID[] =
 {
-	{	"actor value", kParamType_ActorValue, 0},
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Item (Optional)", SCRIPT_PARAMETER_TYPE::OBJECT_ID, true },
+};
+
+static SCRIPT_PARAMETER kParams_OneMagicItem_OneOptionalObjectID[] =
+{
+   { "Magic Item", SCRIPT_PARAMETER_TYPE::MAGIC_ITEM, false },
+   { "Item (Optional)", SCRIPT_PARAMETER_TYPE::OBJECT_ID, true },
+};
+
+static SCRIPT_PARAMETER kParams_OneInventoryItem_OneOptionalObjectID[] =
+{
+   { "inv item", SCRIPT_PARAMETER_TYPE::MAGIC_ITEM, false },
+   { "Object (Optional)", SCRIPT_PARAMETER_TYPE::OBJECT_ID, true },
+};
+
+static SCRIPT_PARAMETER kParams_OneFormList_OneOptionalObjectID[] =
+{
+   { "Form List", SCRIPT_PARAMETER_TYPE::FORM_LIST, false },
+   { "Object (Optional)", SCRIPT_PARAMETER_TYPE::OBJECT_ID, true },
+};
+
+static SCRIPT_PARAMETER kParams_OneActorValue[] =
+{
+	{ "Actor Value", SCRIPT_PARAMETER_TYPE::ACTOR_VALUE, false },
 };
 
 #define FORMAT_STRING_PARAMS 	\
-	{"format string",	kParamType_String, 0}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}, \
-	{"variable",		kParamType_Float, 1}
+	{ "Format String", SCRIPT_PARAMETER_TYPE::STRING, false }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }, \
+	{ "Variable (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }
 
-static ParamInfo kParams_FormatString[21] =
+static SCRIPT_PARAMETER kParams_FormatString[21] =
 {
 	FORMAT_STRING_PARAMS
 };
 
 #define SIZEOF_FMT_STRING_PARAMS 21
-#define NUM_PARAMS(paramInfoName) SIZEOF_ARRAY(paramInfoName, ParamInfo)
+#define NUM_PARAMS(paramInfoName) SIZEOF_ARRAY(paramInfoName, SCRIPT_PARAMETER)
 
-static ParamInfo kParams_OneActorRef[] =
+static SCRIPT_PARAMETER kParams_OneActorRef[] =
 {
-	{	"actor reference",	kParamType_Actor,	0	},
+	{ "Actor", SCRIPT_PARAMETER_TYPE::ACTOR, false },
 };
 
-static ParamInfo kParams_OneOptionalActorRef[] =
+static SCRIPT_PARAMETER kParams_OneOptionalActorRef[] =
 {
-	{	"actor reference",	kParamType_Actor,	1	},
+	{ "Actor (Optional)", SCRIPT_PARAMETER_TYPE::ACTOR, true },
 };
 
-static ParamInfo kParams_Axis[] =
+static SCRIPT_PARAMETER kParams_Axis[] =
 {
-	{	"axis",	kParamType_Axis,	0	},
+	{ "Axis", SCRIPT_PARAMETER_TYPE::AXIS, false },
 };
 
-static ParamInfo kParams_OneAxis_OneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_OneAxis_OneOptionalInt[] =
 {
-	{	"axis",	kParamType_Axis,	0	},
-	{	"flag",	kParamType_Integer,	1	},
+	{ "Axis", SCRIPT_PARAMETER_TYPE::AXIS, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_FormList[] =
+static SCRIPT_PARAMETER kParams_FormList[] =
 {
-	{	"form list", kParamType_FormList,	0		},
+	{ "Form List", SCRIPT_PARAMETER_TYPE::FORM_LIST, false },
 };
 
-static ParamInfo kParams_TwoStrings[] =
+static SCRIPT_PARAMETER kParams_TwoStrings[] =
 {
-	{	"string",	kParamType_String,	0	},
-	{	"string",	kParamType_String,	0	},
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
 };
 
-static ParamInfo kParams_OneObject[] =
+static SCRIPT_PARAMETER kParams_OneObject[] =
 {
-	{	"target item",	kParamType_TESObject,	0	},
+	{ "Object", SCRIPT_PARAMETER_TYPE::TESOBJECT, false },
 };
 
-static ParamInfo kParams_OneOptionalObject[] =
+static SCRIPT_PARAMETER kParams_OneOptionalObject[] =
 {
-   {	"target item",	kParamType_TESObject,	1	},
+   { "Object (Optional)", SCRIPT_PARAMETER_TYPE::TESOBJECT, true },
 };
 
-static ParamInfo kParams_OneString_OneOptionalObject[] =
+static SCRIPT_PARAMETER kParams_OneString_OneOptionalObject[] =
 {
-	{	"string",		kParamType_String,			0	},
-	{	"item",			kParamType_TESObject,	1	},
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Object (Optional)", SCRIPT_PARAMETER_TYPE::TESOBJECT, true },
 };
 
-static ParamInfo kParams_OneObject_OneOptionalObject[] =
+static SCRIPT_PARAMETER kParams_OneObject_OneOptionalObject[] =
 {
-	{	"target item",	kParamType_TESObject,		0	},
-	{	"object",		kParamType_TESObject,		1	},
+	{ "Object", SCRIPT_PARAMETER_TYPE::TESOBJECT, false },
+	{ "Object (Optional)", SCRIPT_PARAMETER_TYPE::TESOBJECT, true },
 };
 
-static ParamInfo kParams_OneInt_OneOptionalObject[] =
+static SCRIPT_PARAMETER kParams_OneInt_OneOptionalObject[] =
 {
-	{	"int",	kParamType_Integer,			0	},
-	{	"item",			kParamType_TESObject,	1	},
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Object (Optional)", SCRIPT_PARAMETER_TYPE::TESOBJECT, true },
 };
 
-static ParamInfo kParams_SetEquippedFloat[] =
+static SCRIPT_PARAMETER kParams_FormList_Integer[] =
 {
-	{	"val", kParamType_Float, 0 },
-	{	"slot", kParamType_Integer, 0 },
+	{ "Form List", SCRIPT_PARAMETER_TYPE::FORM_LIST, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false }
 };
 
-static ParamInfo kParams_FormList_Integer[] =
+static SCRIPT_PARAMETER kParams_OneQuest[] =
 {
-	{	"form list", kParamType_FormList,	0		},
-	{	"index",	 kParamType_Integer,	0		}
+	{ "Quest", SCRIPT_PARAMETER_TYPE::QUEST, false },
 };
 
-static ParamInfo kParams_OneQuest[] =
+static SCRIPT_PARAMETER kParams_OneNPC[] =
 {
-	{	"quest", kParamType_Quest, 0 },
+	{ "NPC (Optional)", SCRIPT_PARAMETER_TYPE::NPC, true },
 };
 
-static ParamInfo kParams_OneNPC[] =
+static SCRIPT_PARAMETER kParams_OneOptionalObjectRef[] =
 {
-	{	"NPC",	kParamType_NPC,	1	},
+	{ "Reference (Optional)", SCRIPT_PARAMETER_TYPE::REFERENCE, true },
 };
 
-static ParamInfo kParams_OneOptionalObjectRef[] =
+static SCRIPT_PARAMETER kParams_OneInt_OneOptionalObjectRef[] =
 {
-	{	"ref", kParamType_ObjectRef, 1},
+	{ "Flag", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Reference (Optional)", SCRIPT_PARAMETER_TYPE::REFERENCE, true },
 };
 
-static ParamInfo kParams_OneInt_OneOptionalObjectRef[] =
+static SCRIPT_PARAMETER kParams_OneIndex_OneOptionalObjectRef[] =
 {
-	{	"flag",		kParamType_Integer,	0	},
-	{	"ref",		kParamType_ObjectRef,	1	},
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Reference (Optional)", SCRIPT_PARAMETER_TYPE::REFERENCE, true },
 };
 
-static ParamInfo kParams_OneIndex_OneOptionalObjectRef[] =
+static SCRIPT_PARAMETER kParams_OnePackage_OneIndex_OneOptionalObjectRef[] =
 {
-	{	"index",		kParamType_Integer,	0	},
-	{	"ref",		kParamType_ObjectRef,	1	},
+	{ "Package", SCRIPT_PARAMETER_TYPE::AI_PACKAGE, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Reference (Optional)", SCRIPT_PARAMETER_TYPE::REFERENCE, true },
 };
 
-static ParamInfo kParams_OnePackage_OneIndex_OneOptionalObjectRef[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneOptionalObjectRef[] =
 {
-	{	"package",		kParamType_AnyForm,		0	},
-	{	"index",		kParamType_Integer,		0	},
-	{	"ref",			kParamType_ObjectRef,	1	},
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Reference (Optional)", SCRIPT_PARAMETER_TYPE::REFERENCE, true },
 };
 
-static ParamInfo kParams_OneForm_OneOptionalObjectRef[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneInt[] =
 {
-	{	"form",	kParamType_AnyForm,		0	},
-	{	"ref",	kParamType_ObjectRef,	1	},
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_OneForm_OneInt[] =
+static SCRIPT_PARAMETER kParams_TwoForms_OneInt[] =
 {
-	{	"form",	kParamType_AnyForm,	0	},
-	{	"int",	kParamType_Integer, 0	},
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_TwoForms_OneInt[] =
+static SCRIPT_PARAMETER kParams_TwoForms_OneOptionalFloat[] =
 {
-	{	"form",	kParamType_AnyForm,	0	},
-	{	"form",	kParamType_AnyForm,	0	},
-	{	"int",	kParamType_Integer, 0	},
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Float (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
 };
-static ParamInfo kParams_TwoForms_OneOptionalFloat[] =
-{
-	{	"form",	kParamType_AnyForm,	0	},
-	{	"form",	kParamType_AnyForm,	0	},
-	{	"float",	kParamType_Float, 1	},
-};
-static ParamInfo kParams_OneForm[] =
-{
-	{	"form",	kParamType_AnyForm,	0	},
-};
 
-static ParamInfo kParams_OneForm_OneFloat[] =
-{
-	{	"form",		kParamType_AnyForm,	0	},
-	{	"float",	kParamType_Float,	0	},
-};
-static ParamInfo kParams_OneForm_OneOptionalForm[] =
-{
-	{	"form",	kParamType_AnyForm,	0	},
-	{	"form",	kParamType_AnyForm,	1	},
-};
-static ParamInfo kParams_OneOptionalForm[] =
+static SCRIPT_PARAMETER kParams_OneForm[] =
 {
-	{	"form",	kParamType_AnyForm,	1	},
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
 };
 
-static ParamInfo kParams_EquipItem[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneFloat[] =
 {
-	{	"item",			kParamType_ObjectID,	0	},
-	{	"silent",		kParamType_Integer,		1	},
-	{	"lockEquip",	kParamType_Integer,		1	},
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
 };
 
-static ParamInfo kParams_OneFaction[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneOptionalForm[] =
 {
-	{	"faction",	kParamType_Faction,	0	},
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true },
 };
 
-static ParamInfo kParams_OneOptionalActorBase[] =
+static SCRIPT_PARAMETER kParams_OneOptionalForm[] =
 {
-	{	"base actor",	kParamType_ActorBase,	1	},
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true },
 };
 
-static ParamInfo kParams_OneInt_OneOptionalActorBase[] =
+static SCRIPT_PARAMETER kParams_OneFaction[] =
 {
-	{	"bool",			kParamType_Integer,		0	},
-	{	"base actor",	kParamType_ActorBase,	1	},
+	{ "Faction", SCRIPT_PARAMETER_TYPE::FACTION, false },
 };
 
-static ParamInfo kParams_OneRace[] =
+static SCRIPT_PARAMETER kParams_OneOptionalActorBase[] =
 {
-	{	"race",	kParamType_Race,	0	},
+	{ "Actor Base (Optional)", SCRIPT_PARAMETER_TYPE::ACTOR_BASE, true },
 };
 
-static ParamInfo kParams_GenericForm[] =
+static SCRIPT_PARAMETER kParams_OneInt_OneOptionalActorBase[] =
 {
-	{	"which",			kParamType_Integer,	0	},
-	{	"containingForm",	kParamType_AnyForm,	0	},
-	{	"form",				kParamType_AnyForm,	0	},
-	{	"index",			kParamType_Integer,	0	},
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Actor Base (Optional)", SCRIPT_PARAMETER_TYPE::ACTOR_BASE, true },
 };
 
-static ParamInfo kParams_GenericDeleteForm[] =
+static SCRIPT_PARAMETER kParams_OneRace[] =
 {
-	{	"which",			kParamType_Integer,	0	},
-	{	"containingForm",	kParamType_AnyForm,	0	},
-	{	"index",			kParamType_Integer,	0	},
+	{ "Race", SCRIPT_PARAMETER_TYPE::RACE, false },
 };
 
-static ParamInfo kParams_OneInt_OneForm[] =
+static SCRIPT_PARAMETER kParams_OneInt_OneForm[] =
 {
-	{	"index",	kParamType_Integer, 0	},
-	{	"form",		kParamType_AnyForm,	0	},
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
 };
 
-static ParamInfo kParams_AnyExpr[] =
+static SCRIPT_PARAMETER kParams_AnyExpr[] =
 {
-	{ "any expression", kNVSEParamType_BasicType, 0 },
+	{ "Any Expression", kNVSEParamType_BasicType, false },
 };
 
-static ParamInfo kParams_OneString_ThreeFloats[] =
+static SCRIPT_PARAMETER kParams_OneString_ThreeFloats[] =
 {
-	{ "String", kParamType_String, 0 },
-	{ "float", kParamType_Float, 0 },
-	{ "float", kParamType_Float, 0 },
-	{ "float", kParamType_Float, 0 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
 };
 
-static ParamInfo kParams_FourStrings[] =
+static SCRIPT_PARAMETER kParams_FourStrings[] =
 {
-	{ "String", kParamType_String, 0 },
-	{ "X_Out", kParamType_String, 0 },
-	{ "Y_Out", kParamType_String, 0 },
-	{ "Z_Out", kParamType_String, 0 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "X (Out)", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Y (Out)", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Z (Out)", SCRIPT_PARAMETER_TYPE::STRING, false },
 };
 
-static ParamInfo kParams_TwoRefs_TwoStrings[] =
+static SCRIPT_PARAMETER kParams_TwoRefs_TwoStrings[] =
 {
-	{ "ref", kParamType_ObjectRef, 0 },
-	{ "ref", kParamType_ObjectRef, 0 },
-	{ "String", kParamType_String, 0 },
-	{ "String", kParamType_String, 0 },
+	{ "Reference", SCRIPT_PARAMETER_TYPE::REFERENCE, false },
+	{ "Reference", SCRIPT_PARAMETER_TYPE::REFERENCE, false },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
 };
 
-static ParamInfo kParams_OneString_OneOptionalObjectID[] =
+static SCRIPT_PARAMETER kParams_OneString_OneOptionalObjectID[] =
 {
-	{ "String", kParamType_String, 0 },
-	{ "ObjectID",	kParamType_ObjectID, 1 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "ObjectID (Optional)", SCRIPT_PARAMETER_TYPE::OBJECT_ID, true },
 };
 
-static ParamInfo kParams_OneForm_OneString[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneString[] =
 {
-	{ "Form", kParamType_AnyForm, 0 },
-	{ "String", kParamType_String, 0 },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
 };
 
-static ParamInfo kParams_OneString_TwoOptionalInts[] =
+static SCRIPT_PARAMETER kParams_OneString_TwoOptionalInts[] =
 {
-	{"String", kParamType_String, 0},
-	{"Integer", kParamType_Integer, 1},
-	{"Integer", kParamType_Integer, 1},
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
-static ParamInfo kParams_TwoOptionalInts[] =
+
+static SCRIPT_PARAMETER kParams_TwoOptionalInts[] =
 {
-	{"Integer", kParamType_Integer, 1},
-	{"Integer", kParamType_Integer, 1},
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
-static ParamInfo kParams_ThreeOptionalInts[] =
+
+static SCRIPT_PARAMETER kParams_ThreeOptionalInts[] =
 {
-	{"Integer", kParamType_Integer, 1},
-	{"Integer", kParamType_Integer, 1},
-	{"Integer", kParamType_Integer, 1},
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
-static ParamInfo kParams_ThreeOptionalFloats[] =
+
+static SCRIPT_PARAMETER kParams_ThreeOptionalFloats[] =
 {
-	{"Float", kParamType_Float, 1},
-	{"Float", kParamType_Float, 1},
-	{"Float", kParamType_Float, 1},
+	{ "Float (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
+	{ "Float (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
+	{ "Float (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
 };
-static ParamInfo kParams_ar_SortEditor[] =
+
+static SCRIPT_PARAMETER kParams_ar_SortEditor[] =
 {
-	{	"array",		kNVSEParamType_Array,	0	},
-	{	"bDescending",	kNVSEParamType_Number,	1	},
+	{ "Array", kNVSEParamType_Array, false },
+	{ "Descending (Optional)", kNVSEParamType_Number, true },
 };
 
-static ParamInfo kParams_TwoStrings_OneOptionalString_FourOptionalInts[] =
+static SCRIPT_PARAMETER kParams_TwoStrings_OneOptionalString_FourOptionalInts[] =
 {
-	{"String", kParamType_String, 0},
-	{"String", kParamType_String, 0},
-	{"String", kParamType_String, 1},
-	{"Integer", kParamType_Integer, 1},
-	{"Integer", kParamType_Integer, 1},
-	{"Integer", kParamType_Integer, 1},
-	{"Integer", kParamType_Integer, 1},
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "String (Optional)", SCRIPT_PARAMETER_TYPE::STRING, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneString_OneInt[] =
+static SCRIPT_PARAMETER kParams_OneString_OneInt[] =
 {
-	{ "string",	kParamType_String,	0 },
-	{ "Integer", kParamType_Integer, 0 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_OneInt_OneString[] =
+static SCRIPT_PARAMETER kParams_OneInt_OneString[] =
 {
-	{ "Integer", kParamType_Integer, 0 },
-	{ "string",	kParamType_String,	0 },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
 };
 
-static ParamInfo kParams_OneString_OneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_OneString_OneOptionalInt[] =
 {
-	{ "string",	kParamType_String,	0 },
-	{ "Integer", kParamType_Integer, 1 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
-static ParamInfo kParams_OneString_ThreeOptionalInts[] =
+
+static SCRIPT_PARAMETER kParams_OneString_ThreeOptionalInts[] =
 {
-	{ "string",	kParamType_String,	0 },
-	{ "Integer", kParamType_Integer, 1 },
-	{ "Integer", kParamType_Integer, 1 },
-	{ "Integer", kParamType_Integer, 1 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
-static ParamInfo kParams_OneString_TwoOptionalInts_OneOptionalFloat[] =
+
+static SCRIPT_PARAMETER kParams_OneString_TwoOptionalInts_OneOptionalFloat[] =
 {
-	{ "string",	kParamType_String,	0 },
-	{ "Integer", kParamType_Integer, 1 },
-	{ "Integer", kParamType_Integer, 1 },
-	{ "Float", kParamType_Float, 1 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Float (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
 };
-static ParamInfo kParams_Event_OneForm[] =
+
+static SCRIPT_PARAMETER kParams_Event_OneForm[] =
 {
-	{ "setOrRemove", kParamType_Integer, 0 },
-	{ "Script", kParamType_AnyForm, 0 },
-	{ "flags", kParamType_Integer, 1 },
-	{ "Form", kParamType_AnyForm, 1 }
+	{ "Set or Remove", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Script", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Flags (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true }
 };
 
-static ParamInfo kParams_Event_TwoForms[] =
+static SCRIPT_PARAMETER kParams_Event_TwoForms[] =
 {
-	{ "setOrRemove", kParamType_Integer, 0 },
-	{ "Script", kParamType_AnyForm, 0 },
-	{ "flags", kParamType_Integer, 1 },
-	{ "Form", kParamType_AnyForm, 1 },
-	{ "Form", kParamType_AnyForm, 1 }
+	{ "Set or Remove", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Script", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Flags (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true }
 };
 
-static ParamInfo kParams_Event[] =
+static SCRIPT_PARAMETER kParams_Event[] =
 {
-	{ "setOrRemove", kParamType_Integer, 0 },
-	{ "Script", kParamType_AnyForm, 0 },
-	{ "flags", kParamType_Integer, 1 },
+	{ "Set or Remove", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Script", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Flags (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_Event_OptionalFlag[] =
+static SCRIPT_PARAMETER kParams_Event_OptionalFlag[] =
 {
-	{ "setOrRemove", kParamType_Integer, 0 },
-	{ "Script", kParamType_AnyForm, 0 },
-	{ "flags", kParamType_Integer, 1 },
-	{ "optionalFlags", kParamType_Integer, 1 },
+	{ "Set or Remove", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Script", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Flags (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "optionalFlags (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_Event_OneForm_OneInt[] =
+static SCRIPT_PARAMETER kParams_Event_OneForm_OneInt[] =
 {
-	{ "setOrRemove", kParamType_Integer, 0 },
-	{ "Script", kParamType_AnyForm, 0 },
-	{ "flags", kParamType_Integer, 1 },
-	{ "Form", kParamType_AnyForm, 1 },
-	{ "Integer", kParamType_Integer, 1 },
+	{ "Set or Remove", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Script", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Flags (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
-static ParamInfo kParams_Event_OneInt[] =
+
+static SCRIPT_PARAMETER kParams_Event_OneInt[] =
 {
-	{ "setOrRemove", kParamType_Integer, 0 },
-	{ "Script", kParamType_AnyForm, 0 },
-	{ "flags", kParamType_Integer, 1 },
-	{ "Integer", kParamType_Integer, 1 },
+	{ "Set or Remove", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Script", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Flags (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
-static ParamInfo kParams_OneString_OneForm_OneOptionalInt[] =
+
+static SCRIPT_PARAMETER kParams_OneString_OneForm_OneOptionalInt[] =
 {
-	{ "String", kParamType_String, 0 },
-	{ "Form", kParamType_AnyForm, 0 },
-	{ "Integer", kParamType_Integer, 1 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
-static ParamInfo kParams_OneForm_TwoInts_OneForm[] =
+
+static SCRIPT_PARAMETER kParams_OneForm_TwoInts_OneForm[] =
 {
-	{ "Form", kParamType_AnyForm, 0 },
-	{ "Integer", kParamType_Integer, 0 },
-	{ "Integer", kParamType_Integer, 0 },
-	{ "Form", kParamType_AnyForm, 0 }
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false }
 };
-static ParamInfo kParams_OneForm_OneInt_OneFloat[] =
+
+static SCRIPT_PARAMETER kParams_OneForm_OneInt_OneFloat[] =
 {
-	{ "Form", kParamType_AnyForm, 0 },
-	{ "Integer", kParamType_Integer, 0 },
-	{ "Float", kParamType_Float, 0 }
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false }
 };
 
-static ParamInfo kParams_OneActorBase[] =
+static SCRIPT_PARAMETER kParams_OneActorBase[] =
 {
-	{ "ActorBase", kParamType_ActorBase, 0 },
+	{ "Actor Base", SCRIPT_PARAMETER_TYPE::ACTOR_BASE, false },
 };
 
-static ParamInfo kParams_OneWorldSpace[] =
+static SCRIPT_PARAMETER kParams_OneWorldSpace[] =
 {
-	{ "WorldSpace", kParamType_WorldSpace, 0 },
+	{ "World Space", SCRIPT_PARAMETER_TYPE::WORLDSPACE, false },
 };
-
 
-static ParamInfo kParams_OneForm_OneInt_OneForm[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneInt_OneForm[] =
 {
-	{ "Form", kParamType_AnyForm, 0 },
-	{ "Integer", kParamType_Integer, 0 },
-	{ "Form", kParamType_AnyForm, 0 }
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false }
 };
 
-static ParamInfo kParams_OneInt_OneForm_OneInt[] =
+static SCRIPT_PARAMETER kParams_OneInt_OneForm_OneInt[] =
 {
-	{ "Integer", kParamType_Integer, 0 },
-	{ "Form", kParamType_AnyForm, 0 },
-	{ "Integer", kParamType_Integer, 0 }
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false }
 };
 
-static ParamInfo kParams_OneForm_OneInt_OneForm_OneInt[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneInt_OneForm_OneInt[] =
 {
-	{ "Form", kParamType_AnyForm, 0 },
-	{ "Integer", kParamType_Integer, 0 },
-	{ "Form", kParamType_AnyForm, 0 },
-	{ "Integer", kParamType_Integer, 0 }
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false }
 };
 
-static ParamInfo kParams_OneForm_OneInt_OneString[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneInt_OneString[] =
 {
-	{ "Form", kParamType_AnyForm, 0 },
-	{ "Integer", kParamType_Integer, 0 },
-	{ "String", kParamType_String, 0 }
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false }
 };
 
-static ParamInfo kParams_OneOptionalFloat[] =
+static SCRIPT_PARAMETER kParams_OneOptionalFloat[] =
 {
-	{ "Float", kParamType_Float, 1 },
+	{ "Float (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
 };
 
-static ParamInfo kParams_ThreeFloats[] =
+static SCRIPT_PARAMETER kParams_ThreeFloats[] =
 {
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
 };
 
-static ParamInfo kParams_ThreeFloats_OneInt_OneOptionalFloat[] =
+static SCRIPT_PARAMETER kParams_ThreeFloats_OneInt_OneOptionalFloat[] =
 {
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Integer", kParamType_Integer, 0 },
-	{ "Float", kParamType_Float, 1 }
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Float (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true }
 };
 
-static ParamInfo kParams_FiveFloats[] =
+static SCRIPT_PARAMETER kParams_FiveFloats[] =
 {
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
 };
 
-static ParamInfo kParams_OneInt_OneFloat[] =
+static SCRIPT_PARAMETER kParams_OneInt_OneFloat[] =
 {
-	{ "int", kParamType_Integer, 0 },
-	{ "Float", kParamType_Float, 0 },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
 };
 
-static ParamInfo kParams_OneForm_OneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneOptionalInt[] =
 {
-	{ "form",	kParamType_AnyForm,	0 },
-	{ "int",	kParamType_Integer, 1 },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneForm_OneInt_OneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneInt_OneOptionalInt[] =
 {
-	{ "form",	kParamType_AnyForm,	0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 1 },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneObjectID_OneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_OneObjectID_OneOptionalInt[] =
 {
-	{ "item",		kParamType_ObjectID, 0 },
-	{ "integer",	kParamType_Integer,	 1 },
+	{ "Item", SCRIPT_PARAMETER_TYPE::OBJECT_ID, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneForm_TwoInts[] =
+static SCRIPT_PARAMETER kParams_OneForm_TwoInts[] =
 {
-	{ "form",	kParamType_AnyForm,	0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_OneForm_TwoInts_OneString[] =
+static SCRIPT_PARAMETER kParams_OneForm_TwoInts_OneString[] =
 {
-	{ "form",	kParamType_AnyForm,	0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "string",	kParamType_String,	0 },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
 };
 
-static ParamInfo kParams_SixFloats[] =
+static SCRIPT_PARAMETER kParams_SixFloats[] =
 {
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
 };
 
-static ParamInfo kParams_OneForm_ThreeInts[] =
+static SCRIPT_PARAMETER kParams_OneForm_ThreeInts[] =
 {
-	{ "form",	kParamType_AnyForm,	0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_OneForm_FourInts[] =
+static SCRIPT_PARAMETER kParams_OneForm_FourInts[] =
 {
-	{ "form",	kParamType_AnyForm,	0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_OneForm_FourInts_TwoOptionalForms_OneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_OneForm_FourInts_TwoOptionalForms_OneOptionalInt[] =
 {
-	{ "form",	kParamType_AnyForm,	0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "form",	kParamType_AnyForm,	1 },
-	{ "form",	kParamType_AnyForm,	1 },
-	{ "int",	kParamType_Integer, 1 },
-
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_TwoForms[] =
+static SCRIPT_PARAMETER kParams_TwoForms[] =
 {
-	{ "form",	kParamType_AnyForm,	0 },
-	{ "form",	kParamType_AnyForm,	0 },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
 };
 
-static ParamInfo kParams_OneString_OneInt_OneForm[] =
+static SCRIPT_PARAMETER kParams_OneString_OneInt_OneForm[] =
 {
-	{ "string",	kParamType_String,	0 },
-	{ "int",	kParamType_Integer, 0 },
-	{ "form",	kParamType_AnyForm,	0 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
 };
 
-static ParamInfo kParams_OneIMOD[] =
+static SCRIPT_PARAMETER kParams_OneIMOD[] =
 {
-	{ "IMOD",	kParamType_ImageSpaceModifier,	0 },
+	{ "Imagespace Modifier", SCRIPT_PARAMETER_TYPE::IMAGESPACE_MODIFIER, false },
 };
 
-static ParamInfo kParams_OneIMOD_OneInt[] =
+static SCRIPT_PARAMETER kParams_OneIMOD_OneInt[] =
 {
-	{ "IMOD",	kParamType_ImageSpaceModifier,	0 },
-	{ "int",	kParamType_Integer, 0 },
+	{ "Imagespace Modifier", SCRIPT_PARAMETER_TYPE::IMAGESPACE_MODIFIER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_TwoStrings_OneInt[] =
+static SCRIPT_PARAMETER kParams_TwoStrings_OneInt[] =
 {
-	{ "string",	kParamType_String,	0 },
-	{ "string",	kParamType_String,	0 },
-	{ "Integer", kParamType_Integer, 0 },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_OneActorValue_OneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_OneActorValue_OneOptionalInt[] =
 {
-	{ "AV",	kParamType_ActorValue,	0 },
-	{ "Integer",	kParamType_Integer,	1 },
+	{ "Actor Value", SCRIPT_PARAMETER_TYPE::ACTOR_VALUE, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_BMP[] =
+static SCRIPT_PARAMETER kParams_BMP[] =
 {
-	{ "filename", kParamType_String, 0 },
-	{ "R_Out", kParamType_String, 0 },
-	{ "G_Out", kParamType_String, 0 },
-	{ "B_Out", kParamType_String, 0 },
-	{ "INT", kParamType_Integer, 0 },
-	{ "INT", kParamType_Integer, 0 },
+	{ "Filename", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "R (Out)", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "G (Out)", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "B (Out)", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_OneForm_OneWeatherID_OneInt_OneOptionalGlobal[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneWeatherID_OneInt_OneOptionalGlobal[] =
 {
-	{ "Form", kParamType_AnyForm, 0 },
-	{ "Weather ID", kParamType_WeatherID, 0 },
-	{ "Integer", kParamType_Integer, 0 },
-	{ "Global", kParamType_Global, 1 }
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Weather", SCRIPT_PARAMETER_TYPE::WEATHER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Global (Optional)", SCRIPT_PARAMETER_TYPE::GLOBAL, true }
 };
 
-static ParamInfo kParams_ThreeStrings_OneInt[] =
+static SCRIPT_PARAMETER kParams_ThreeStrings_OneInt[] =
 {
-	{ "string", kParamType_String, 0 },
-	{ "string", kParamType_String, 0 },
-	{ "string", kParamType_String, 0 },
-	{ "Integer", kParamType_Integer, 0 }
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "String", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false }
 };
 
-static ParamInfo kParams_OneRef_OneInt[] =
+static SCRIPT_PARAMETER kParams_OneRef_OneInt[] =
 {
-	{ "target",            kParamType_ObjectRef,    0    },
-	{ "quantity",        kParamType_Integer,        1    },
+	{ "Reference", SCRIPT_PARAMETER_TYPE::REFERENCE, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneRef_OneForm_OneInt[] =
+static SCRIPT_PARAMETER kParams_OneRef_OneForm_OneInt[] =
 {
-	{ "target",            kParamType_ObjectRef,    0    },
-	{ "Form",			kParamType_AnyForm, 0		},
-	{ "quantity",        kParamType_Integer,        1    },
+	{ "Reference", SCRIPT_PARAMETER_TYPE::REFERENCE, false },
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneRef[] =
+static SCRIPT_PARAMETER kParams_OneRef[] =
 {
-	{ "target",            kParamType_ObjectRef,    0    }
+	{ "Reference", SCRIPT_PARAMETER_TYPE::REFERENCE, false }
 };
 
-static ParamInfo kParams_OneActorBase_TwoInts_OneFloat[] =
+static SCRIPT_PARAMETER kParams_OneActorBase_TwoInts_OneFloat[] =
 {
-	{ "target",         kParamType_ActorBase,    0    },
-	{ "Property Type",	kParamType_Integer,			0},
-	{ "Property",       kParamType_Integer,        0 },
-	{ "value",       kParamType_Float,        0 },
+	{ "Actor Base", SCRIPT_PARAMETER_TYPE::ACTOR_BASE, false },
+	{ "Property Type", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Property", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "value", SCRIPT_PARAMETER_TYPE::FLOAT, false },
 };
 
-static ParamInfo kParams_OneActorBase_TwoInts[] =
+static SCRIPT_PARAMETER kParams_OneActorBase_TwoInts[] =
 {
-	{ "target",         kParamType_ActorBase,    0    },
-	{ "Property Type",	kParamType_Integer,			0},
-	{ "Property",       kParamType_Integer,        0 },
+	{ "Actor Base", SCRIPT_PARAMETER_TYPE::ACTOR_BASE, false },
+	{ "Property Type", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Property", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_SixScriptVars[] =
+static SCRIPT_PARAMETER kParams_SixScriptVars[] =
 {
-	{ "Script Var", kParamType_ScriptVariable , 0 },
-	{ "Script Var", kParamType_ScriptVariable , 0 },
-	{ "Script Var", kParamType_ScriptVariable , 0 },
-	{ "Script Var", kParamType_ScriptVariable , 0 },
-	{ "Script Var", kParamType_ScriptVariable , 0 },
-	{ "Script Var", kParamType_ScriptVariable , 0 },
+	{ "Script Var", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Script Var", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Script Var", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Script Var", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Script Var", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Script Var", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
 };
 
-static ParamInfo kParams_TwoScriptVars_OneOptionalScriptVar[] =
+static SCRIPT_PARAMETER kParams_TwoScriptVars_OneOptionalScriptVar[] =
 {
-	{ "Script Var", kParamType_ScriptVariable , 0 },
-	{ "Script Var", kParamType_ScriptVariable , 0 },
-	{ "Script Var", kParamType_ScriptVariable , 1 },
+	{ "Script Var", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Script Var", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Script Var", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, true },
 };
 
-static ParamInfo kParams_OneForm_OneInt_OneOptionalForm[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneInt_OneOptionalForm[] =
 {
-	{ "Form", kParamType_AnyForm, 0 },
-	{ "Integer", kParamType_Integer, 0 },
-	{ "Form", kParamType_AnyForm, 1 }
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true }
 };
 
-static ParamInfo kParams_ThreeInts[] =
+static SCRIPT_PARAMETER kParams_ThreeInts[] =
 {
-	{ "Integer", kParamType_Integer, 0 },
-	{ "Integer", kParamType_Integer, 0 },
-	{ "Integer", kParamType_Integer, 0 }
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false }
 };
-
 
-static ParamInfo kParams_OneDialogRes_OneTopic_OneInt_OneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_OneDialogRes_OneTopic_OneInt_OneOptionalInt[] =
 {
-	{ "Dialog Response",	kParamType_AnyForm,		0},
-	{ "Dialog Topic",		kParamType_Topic,		0},
-	{ "Integer",			kParamType_Integer,			0},
-	{ "Integer",			kParamType_Integer,		1}
-
+	{ "Dialog Response", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Dialog Topic", SCRIPT_PARAMETER_TYPE::TOPIC, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true }
 };
-
 
-static ParamInfo kParams_OneInt_OneOptionalForm[] =
+static SCRIPT_PARAMETER kParams_OneInt_OneOptionalForm[] =
 {
-	{	"index",	kParamType_Integer, 0	},
-	{	"form",		kParamType_AnyForm,	1	},
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true },
 };
 
-static ParamInfo kSplatterParams[] = {
-	{ "Count",			kParamType_Integer, 0 },
-	{ "Duration",		kParamType_Float,	0 },
-	{ "Size mult",		kParamType_Float,	0 },
-	{ "Opacity mult",	kParamType_Float,	0 },
-	{ "Alpha Texture",	kParamType_String,	0 },
-	{ "Color Texture",	kParamType_String,	0 },
-	{ "Flare Texture",	kParamType_String,	0 },
-	{ "No fade",		kParamType_Integer,	1 }
+static SCRIPT_PARAMETER kSplatterParams[] = {
+	{ "Count", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Duration", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Size mult", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Opacity mult", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Alpha Texture", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Color Texture", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Flare Texture", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "No fade (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true }
 };
 
-static ParamInfo kTransformParams[] =
+static SCRIPT_PARAMETER kTransformParams[] =
 {
-	{	"Block name",	kParamType_String, 0	},
-	{	"X",			kParamType_Float, 0	},
-	{	"Y",			kParamType_Float, 0	},
-	{	"Z",			kParamType_Float, 0	},
-	{	"W",			kParamType_Float, 0	},
-	{	"Is Rotation",	kNVSEParamType_Boolean, 0	},
-	{	"World Data",	kNVSEParamType_Boolean, 0	},
-	{	"Update",		kNVSEParamType_Boolean, 0	},
+	{ "Block name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "X", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Y", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Z", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "W", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Is Rotation", kNVSEParamType_Boolean, false },
+	{ "World Data", kNVSEParamType_Boolean, false },
+	{ "Update", kNVSEParamType_Boolean, false },
 };
-static ParamInfo kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm[] =
-{
-	{	"form",	kParamType_AnyForm,	0	},
-	{	"int",	kParamType_Integer, 0	},
-	{	"int",	kParamType_Integer, 1	},
-	{	"form",	kParamType_AnyForm,	1	},
 
-};
-static ParamInfo kParams_OneActorRef_OneInt[] =
+static SCRIPT_PARAMETER kParams_OneForm_OneInt_OneOptionalInt_OneOptionalForm[] =
 {
-	{	"actor reference",	kParamType_Actor,	0	},
-	{	"int",	kParamType_Integer,				0	},
-
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true },
 };
-
 
-static ParamInfo kParams_OneFloat_OneOptionalForm[] =
+static SCRIPT_PARAMETER kParams_OneActorRef_OneInt[] =
 {
-	{	"float", kParamType_Float,	0 },
-	{   "form", kParamType_AnyForm, 1 }
+	{ "Actor", SCRIPT_PARAMETER_TYPE::ACTOR, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
 };
 
-static ParamInfo kParams_EjectCasing[] =
+static SCRIPT_PARAMETER kParams_OneFloat_OneOptionalForm[] =
 {
-	{	"Target Node",			kParamType_String,	1	},
-	{	"Custom Casing Path",	kParamType_String,  1	},
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true }
 };
 
-static ParamInfo kParams_OneCasino[] =
+static SCRIPT_PARAMETER kParams_EjectCasing[] =
 {
-	{	"Casino",	kParamType_Casino,	1	},
+	{ "Target Node (Optional)", SCRIPT_PARAMETER_TYPE::STRING, true },
+	{ "Custom Casing Path (Optional)", SCRIPT_PARAMETER_TYPE::STRING, true },
 };
 
-static ParamInfo kParams_OneCasinoOneInt[] =
+static SCRIPT_PARAMETER kParams_OneCasino[] =
 {
-	{	"Casino",	kParamType_Casino,	1	},
-	{	"int",		kParamType_Integer,	1	},
+	{ "Casino", SCRIPT_PARAMETER_TYPE::CASINO, true },
 };
 
-static ParamInfo kParams_OneCasinoOneIntOneString[] =
+static SCRIPT_PARAMETER kParams_OneCasinoOneInt[] =
 {
-	{	"Casino",	kParamType_Casino,	1	},
-	{	"int",		kParamType_Integer,	1	},
-	{	"string",	kParamType_String,	1	},
+	{ "Casino", SCRIPT_PARAMETER_TYPE::CASINO, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneCasinoOneForm[] =
+static SCRIPT_PARAMETER kParams_OneCasinoOneIntOneString[] =
 {
-	{	"Casino",	kParamType_Casino,	1	},
-	{	"form",		kParamType_AnyForm,	1	},
+	{ "Casino", SCRIPT_PARAMETER_TYPE::CASINO, true },
+	{ "Integer (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "String (Optional)", SCRIPT_PARAMETER_TYPE::STRING, true },
 };
 
-
-
-static ParamInfo kParams_OneCell[] =
+static SCRIPT_PARAMETER kParams_OneCasinoOneForm[] =
 {
-	{	"cell",	kParamType_Cell,	0	},
+	{ "Casino", SCRIPT_PARAMETER_TYPE::CASINO, true },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true },
 };
 
-static ParamInfo kParams_OneCell_OneOptionalForm[] =
+static SCRIPT_PARAMETER kParams_OneCell[] =
 {
-	{	"cell",	kParamType_Cell,	0	},
-	{	"form",	kParamType_AnyForm,	1	}
+	{ "Cell", SCRIPT_PARAMETER_TYPE::CELL, false },
 };
 
-static ParamInfo kParams_OneBoolThreeFloats[] =
+static SCRIPT_PARAMETER kParams_OneCell_OneOptionalForm[] =
 {
-	{	"Enable",		kParamType_Integer, 0	},
-	{	"X",			kParamType_Float, 0	},
-	{	"Y",			kParamType_Float, 0	},
-	{	"Z",			kParamType_Float, 0	},
+	{ "Cell", SCRIPT_PARAMETER_TYPE::CELL, false },
+	{ "Any Form (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true }
 };
 
-static ParamInfo kParams_OneBoolOneIntOneFloat[] =
+static SCRIPT_PARAMETER kParams_OneBoolThreeFloats[] =
 {
-	{	"Enable",		kParamType_Integer, 0	},
-	{	"Axis/Mode",	kParamType_Integer, 0	},
-	{	"Angle",		kParamType_Float, 0	},
-	{	"Ref To Track",	kParamType_ObjectRef, 1 },
+	{ "Enable", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "X", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Y", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Z", SCRIPT_PARAMETER_TYPE::FLOAT, false },
 };
 
-static ParamInfo kParams_OneRefOneOptionalFloatOneOptionalInt[] =
+static SCRIPT_PARAMETER kParams_OneBoolOneIntOneFloat[] =
 {
-	{	"Target Reference",		kParamType_ObjectRef, 0 },
-	{	"Target Radius",		kParamType_Float, 1	},
-	{ 	"Face Target",			kParamType_Integer, 1 },
+	{ "Enable", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Axis/Mode", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Angle", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Ref To Track (Optional)", SCRIPT_PARAMETER_TYPE::REFERENCE, true },
 };
 
-static ParamInfo kParams_IsNiSequenceActive[] =
+static SCRIPT_PARAMETER kParams_OneRefOneOptionalFloatOneOptionalInt[] =
 {
-	{ "Sequence Name",	kParamType_String,	0 },
-	{ "Block Name", kParamType_String, 1 },
-	{ "First Person", kParamType_Integer, 1 },
+	{ "Target Reference", SCRIPT_PARAMETER_TYPE::REFERENCE, false },
+	{ "Target Radius (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
+	{ "Face Target (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_StopNiSequence[] =
+static SCRIPT_PARAMETER kParams_IsNiSequenceActive[] =
 {
-	{ "Sequence Name",	kParamType_String,	0 },
-	{ "Ease Out Time",	kParamType_Float,	1 },
-	{ "Block Name", kParamType_String, 1 },
-	{ "First Person", kParamType_Integer, 1 },
+	{ "Sequence Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Block Name (Optional)", SCRIPT_PARAMETER_TYPE::STRING, true },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_GetTopicInfo[] =
+static SCRIPT_PARAMETER kParams_StopNiSequence[] =
 {
-	{	"form",	kParamType_AnyForm,	0	},
-	{	"int",	kParamType_Quest, 1	},
+	{ "Sequence Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Ease Out Time (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
+	{ "Block Name (Optional)", SCRIPT_PARAMETER_TYPE::STRING, true },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_ThreeFloatsTwoOptionalFloats[] =
+static SCRIPT_PARAMETER kParams_GetTopicInfo[] =
 {
-	{ 	"X",				kParamType_Float, 0	},
-	{	"Y",				kParamType_Float, 0	},
-	{	"Z",				kParamType_Float, 0	},
-	{	"Target Radius",	kParamType_Float, 1	},
-	{	"Target Angle",		kParamType_Float, 1	},
+	{ "Any Form", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Quest (Optional)", SCRIPT_PARAMETER_TYPE::QUEST, true },
 };
 
-static ParamInfo kParams_SetPropertyValue[] =
+static SCRIPT_PARAMETER kParams_ThreeFloatsTwoOptionalFloats[] =
 {
-	{ "Property Name",	kParamType_String,	0 },
-	{ "Item",			kParamType_Integer, 0 },
-	{ "Value",			kParamType_Integer, 0 },
-	{ "First Person",	kParamType_Integer, 1 },
+	{ "X", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Y", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Z", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Target Radius (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
+	{ "Target Angle (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
 };
 
-static ParamInfo kParams_GetPropertyValue[] =
+static SCRIPT_PARAMETER kParams_SetPropertyValue[] =
 {
-	{ "Property Name",	kParamType_String,	0 },
-	{ "Item",			kParamType_Integer, 0 },
-	{ "First Person",	kParamType_Integer, 1 },
+	{ "Property Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Item", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Value", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_SetNiLightValue[] =
+static SCRIPT_PARAMETER kParams_GetPropertyValue[] =
 {
-	{ "Property Name",	kParamType_String,	0 },
-	{ "Item",			kParamType_Integer, 0 },
-	{ "Value",			kParamType_Float,   0 },
-	{ "First Person",	kParamType_Integer, 1 },
+	{ "Property Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Item", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_SetNiLightColor[] =
+static SCRIPT_PARAMETER kParams_SetNiLightValue[] =
 {
-	{ "Property Name",	kParamType_String,	0 },
-	{ "Item",			kParamType_Integer, 0 },
-	{ "Red",			kParamType_Float,   0 },
-	{ "Green",			kParamType_Float,   0 },
-	{ "Blue",			kParamType_Float,   0 },
-	{ "First Person",	kParamType_Integer, 1 },
+	{ "Property Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Item", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Value", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_GetNiLightColor[] =
+static SCRIPT_PARAMETER kParams_SetNiLightColor[] =
 {
-	{ "Property Name",	kParamType_String,	0 },
-	{ "Item",			kParamType_Integer, 0 },
-	{ "Red",			kParamType_ScriptVariable,   0 },
-	{ "Green",			kParamType_ScriptVariable,   0 },
-	{ "Blue",			kParamType_ScriptVariable,   0 },
-	{ "First Person",	kParamType_Integer, 1 },
+	{ "Property Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Item", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Red", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Green", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Blue", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_SetSwitchNodeIndex[] =
+static SCRIPT_PARAMETER kParams_GetNiLightColor[] =
 {
-	{ "Block Name",		kParamType_String,	0 },
-	{ "Index",			kParamType_Integer,	0 },
-	{ "First Person",	kParamType_Integer,	1 },
+	{ "Property Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Item", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Red", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Green", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Blue", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_GetSwitchNodeIndex[] =
+static SCRIPT_PARAMETER kParams_SetSwitchNodeIndex[] =
 {
-	{ "Block Name",		kParamType_String,	0 },
-	{ "First Person",	kParamType_Integer,	1 },
+	{ "Block Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Integer", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_ScenegraphUpdate[] =
+static SCRIPT_PARAMETER kParams_GetSwitchNodeIndex[] =
 {
-	{ "Type",				kParamType_Integer, 0 },
-	{ "Time",				kParamType_Float,	1 },
-	{ "Update Controllers",	kParamType_Integer, 1 },
-	{ "Block Name",			kParamType_String,	1 },
-	{ "First Person",		kParamType_Integer, 1 }
+	{ "Block Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_GetNiBound[] =
+static SCRIPT_PARAMETER kParams_ScenegraphUpdate[] =
 {
-	{ "Block Name",		kParamType_String,	1 },
-	{ "First Person",	kParamType_Integer,	1 },
+	{ "Type", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Time (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
+	{ "Update Controllers (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Block Name (Optional)", SCRIPT_PARAMETER_TYPE::STRING, true },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true }
 };
 
-static ParamInfo kParamsProjectionArgsLegacy[] =
+static SCRIPT_PARAMETER kParams_GetNiBound[] =
 {
-	{ "X_Out", kParamType_String, 0 },
-	{ "Y_Out", kParamType_String, 0 },
-	{ "Z_Out", kParamType_String, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "HandleMode", kParamType_Integer, 0 },
-	{ "Object Ref", kParamType_ObjectRef, 1 }
+	{ "Block Name (Optional)", SCRIPT_PARAMETER_TYPE::STRING, true },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParamsProjectionArgs[] =
+static SCRIPT_PARAMETER kParams_ProjectionArgsLegacy[] =
 {
-	{ "X_Out", kParamType_ScriptVariable , 0 },
-	{ "Y_Out", kParamType_ScriptVariable , 0 },
-	{ "Z_Out", kParamType_ScriptVariable , 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "Float", kParamType_Float, 0 },
-	{ "HandleMode", kParamType_Integer, 0 },
-	{ "Object Ref", kParamType_ObjectRef, 1 }
+	{ "X (Out)", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Y (Out)", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Z (Out)", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Handle Mode", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Reference (Optional)", SCRIPT_PARAMETER_TYPE::REFERENCE, true }
 };
 
-static ParamInfo kParamsCallPerRef[] =
+static SCRIPT_PARAMETER kParams_ProjectionArgs[] =
 {
-	{ "Script", kParamType_AnyForm, 0 },
-	{ "Type Filter", kParamType_Integer , 1 },
-	{ "Distance Filter", kParamType_Float, 1 },
-	{ "Angle Filter", kParamType_Float, 1 },
-	{ "Cell", kParamType_AnyForm , 1 }
+	{ "X (Out)", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Y (Out)", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Z (Out)", SCRIPT_PARAMETER_TYPE::SCRIPT_VARIABLE, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Float", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "Handle Mode", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Reference (Optional)", SCRIPT_PARAMETER_TYPE::REFERENCE, true }
 };
 
-static ParamInfo kParamsCallPerRefEx[] =
+static SCRIPT_PARAMETER kParams_CallPerRef[] =
 {
-	{ "Script", kNVSEParamType_Form, 0 },
-	{ "Type Filter Array", kNVSEParamType_Array , 0 },
-	{ "Distance Filter", kNVSEParamType_Number, 1 },
-	{ "Angle Filter", kNVSEParamType_Number, 1 },
-	{ "Cell", kNVSEParamType_Form , 1 }
+	{ "Script", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Type Filter (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Distance Filter (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
+	{ "Angle Filter (Optional)", SCRIPT_PARAMETER_TYPE::FLOAT, true },
+	{ "Cell (Optional)", SCRIPT_PARAMETER_TYPE::ANY_FORM, true }
 };
 
-static ParamInfo kParamsCallPerMobileObject[] =
+static SCRIPT_PARAMETER kParams_CallPerRefEx[] =
 {
-	{ "Script", kParamType_AnyForm, 0 },
-	{ "Process Level", kParamType_Integer , 0 },
-	{ "Type Filter", kParamType_Integer , 1 },
+	{ "Script", kNVSEParamType_Form, false },
+	{ "Type Filter Array", kNVSEParamType_Array, false },
+	{ "Distance Filter (Optional)", kNVSEParamType_Number, true },
+	{ "Angle Filter (Optional)", kNVSEParamType_Number, true },
+	{ "Cell (Optional)", kNVSEParamType_Form, true }
 };
 
-static ParamInfo kParamsCallPerMobileObjectEx[] =
+static SCRIPT_PARAMETER kParams_CallPerMobileObject[] =
 {
-	{ "Script", kNVSEParamType_Form, 0 },
-	{ "Process Level", kNVSEParamType_Number , 0 },
-	{ "Type Filter Array", kNVSEParamType_Array , 0 },
+	{ "Script", SCRIPT_PARAMETER_TYPE::ANY_FORM, false },
+	{ "Process Level", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Type Filter (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_OneArray[] =
+static SCRIPT_PARAMETER kParams_CallPerMobileObjectEx[] =
 {
+	{ "Script", kNVSEParamType_Form, false },
+	{ "Process Level", kNVSEParamType_Number, false },
+	{ "Type Filter Array", kNVSEParamType_Array, false },
+};
 
-	{	"array",	kNVSEParamType_Array,	0	}
+static SCRIPT_PARAMETER kParams_OneArray[] =
+{
+	{ "Array", kNVSEParamType_Array, false }
 };
 
-static ParamInfo kParams_SetNiPSysModifierValue[] =
+static SCRIPT_PARAMETER kParams_SetNiPSysModifierValue[] =
 {
-	{ "Block Name", kParamType_String, 0 },
-	{ "Item", kParamType_Integer, 0 },
-	{ "Value", kParamType_Float, 0 },
-	{ "First Person", kParamType_Integer, 1 },
+	{ "Block Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Item", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Value", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_GetNiPSysModifierValue[] =
+static SCRIPT_PARAMETER kParams_GetNiPSysModifierValue[] =
 {
-	{ "Block Name", kParamType_String, 0 },
-	{ "Item", kParamType_Integer, 0 },
-	{ "First Person", kParamType_Integer, 1 },
+	{ "Block Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Item", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParams_SetParticleEmitterSpawnRate[] =
+static SCRIPT_PARAMETER kParams_SetParticleEmitterSpawnRate[] =
 {
-	{ "Block Name", kParamType_String, 0 },
-	{ "Value", kParamType_Float, 0 },
-	{ "First Person", kParamType_Integer, 1 },
+	{ "Block Name", SCRIPT_PARAMETER_TYPE::STRING, false },
+	{ "Value", SCRIPT_PARAMETER_TYPE::FLOAT, false },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParamsRemapLand[] =
+static SCRIPT_PARAMETER kParams_RemapLand[] =
 {
-	{ "Target Land FormID", kParamType_Integer , 0 },
-	{ "Source WorldSpace", kParamType_WorldSpace, 1 },
-	{ "Source Cell X", kParamType_Integer, 1 },
-	{ "Source Cell Y", kParamType_Integer, 1 },
+	{ "Target Land FormID", SCRIPT_PARAMETER_TYPE::INTEGER, false },
+	{ "Source World Space", SCRIPT_PARAMETER_TYPE::WORLDSPACE, true },
+	{ "Source Cell X (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
+	{ "Source Cell Y (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };
 
-static ParamInfo kParamsApplyModelTextureSwap[] =
+static SCRIPT_PARAMETER kParams_ApplyModelTextureSwap[] =
 {
-	{ "Base Form", kParamType_TESObject , 0 },
-	{ "Block Name", kParamType_String, 1 },
-	{ "Reference", kParamType_ObjectRef, 1 },
-	{ "First Person", kParamType_Integer, 1 },
+	{ "Base Form", SCRIPT_PARAMETER_TYPE::TESOBJECT, false },
+	{ "Block Name (Optional)", SCRIPT_PARAMETER_TYPE::STRING, true },
+	{ "Reference (Optional)", SCRIPT_PARAMETER_TYPE::REFERENCE, true },
+	{ "First Person (Optional)", SCRIPT_PARAMETER_TYPE::INTEGER, true },
 };

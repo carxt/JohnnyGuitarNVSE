@@ -252,6 +252,8 @@ public:
 	bool GetTargeted() const;
 	void SetTargeted(bool abVal);
 
+	bool GetDismembered(BODY_PART_TYPE aeLimb);
+
 	TESContainer* HasContainer() const;
 
 	TESObjectREFR* GetLinkedRef() const;

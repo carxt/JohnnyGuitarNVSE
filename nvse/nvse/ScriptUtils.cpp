@@ -1581,8 +1581,8 @@ void PrintCompiledCode(ScriptLineBuffer* buf)
 // Threading not a concern in script editor; ExpressionParser not used at run-time.
 static int32_t s_parserDepth = 0;
 
-ExpressionParser::ExpressionParser(ScriptBuffer* scriptBuf, ScriptLineBuffer* lineBuf) 
-	: m_scriptBuf(scriptBuf), m_lineBuf(lineBuf), m_len(strlen(m_lineBuf->paramText)), m_numArgsParsed(0)
+ExpressionParser::ExpressionParser(ScriptBuffer* apCompileData, ScriptLineBuffer* apScriptLine) 
+	: m_scriptBuf(apCompileData), m_lineBuf(apScriptLine), m_len(strlen(m_lineBuf->paramText)), m_numArgsParsed(0)
 { 
 	ASSERT(s_parserDepth >= 0);
 	s_parserDepth++;
@@ -2851,17 +2851,17 @@ void ExpressionEvaluator::PopFromStack()
 	localData.expressionEvaluator = m_parent;
 }
 
-ExpressionEvaluator::ExpressionEvaluator(COMMAND_ARGS) : m_opcodeOffsetPtr(opcodeOffsetPtr), m_result(result), 
-	m_thisObj(thisObj), script(scriptObj), eventList(eventList), m_params(paramInfo), m_numArgsExtracted(0), m_baseOffset(0),
+ExpressionEvaluator::ExpressionEvaluator(COMMAND_ARGS) : m_opcodeOffsetPtr(arOffset), m_result(result), 
+	m_thisObj(apRef), script(apScript), eventList(eventList), m_params(apParameters), m_numArgsExtracted(0), m_baseOffset(0),
 	m_expectedReturnType(kRetnType_Default)
 {
-	m_scriptData = (uint8_t*)scriptData;
+	m_scriptData = (uint8_t*)apCompiledParams;
 	m_data = m_scriptData + *m_opcodeOffsetPtr;
 
 	memset(m_args, 0, sizeof(m_args));
 
-	m_containingObj = containingObj;	
-	m_baseOffset = *opcodeOffsetPtr - 4;
+	m_containingObj = apContainer;	
+	m_baseOffset = arOffset - 4;
 
 	m_flags.Clear();
 
@@ -3970,13 +3970,13 @@ bool PrecompileScript(ScriptBuffer* buf)
 
 #endif
 
-bool Cmd_Expression_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf)
+bool Cmd_Expression_Parse(uint32_t numParams, ParamInfo* apParameters, ScriptLineBuffer* apScriptLine, ScriptBuffer* apCompileData)
 {
 #if RUNTIME
 	Console_Print("This command cannot be called from the console.");
 	return false;
 #endif
 
-	ExpressionParser parser(scriptBuf, lineBuf);
-	return (parser.ParseArgs(paramInfo, numParams));
+	ExpressionParser parser(apCompileData, apScriptLine);
+	return (parser.ParseArgs(apParameters, numParams));
 }

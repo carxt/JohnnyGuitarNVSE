@@ -2,8 +2,8 @@
 
 class Script;
 class ScriptLocals;
-#define PASS_VARARGS  scriptObj, eventList
-#define VARARGS Script *scriptObj, ScriptLocals *eventList
+#define PASS_VARARGS  apScript, apScriptLocals
+#define VARARGS Script *apScript, ScriptLocals *apScriptLocals
 #define VAR_NAME_SIZE 64
 
 //All thanks to jazzisparis for the code, since it's way faster than tanf.

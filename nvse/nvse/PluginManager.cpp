@@ -807,11 +807,11 @@ bool Cmd_IsPluginInstalled_Execute(COMMAND_ARGS)
 {
 	char	pluginName[256];
 
-	*result = 0;
+	arResult = 0;
 
 	if(!ExtractArgs(EXTRACT_ARGS, &pluginName)) return true;
 
-	*result = (g_pluginManager.GetInfoByName(pluginName) != NULL) ? 1 : 0;
+	arResult = (g_pluginManager.GetInfoByName(pluginName) != NULL) ? 1 : 0;
 
 	return true;
 }
@@ -820,13 +820,13 @@ bool Cmd_GetPluginVersion_Execute(COMMAND_ARGS)
 {
 	char	pluginName[256];
 
-	*result = -1;
+	arResult = -1;
 
 	if(!ExtractArgs(EXTRACT_ARGS, &pluginName)) return true;
 
 	PluginInfo	* info = g_pluginManager.GetInfoByName(pluginName);
 
-	if(info) *result = info->version;
+	if(info) arResult = info->version;
 
 	return true;
 }

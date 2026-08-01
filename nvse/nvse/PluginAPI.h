@@ -7,8 +7,8 @@
 #include "GameAPI.h"
 #endif
 
-struct CommandInfo;
-struct ParamInfo;
+struct SCRIPT_FUNCTION;
+struct SCRIPT_PARAMETER;
 class TESObjectREFR;
 class Script;
 class TESForm;
@@ -25,11 +25,6 @@ typedef uint32_t	PluginHandle;	// treat this as an opaque type
 enum
 {
 	kPluginHandle_Invalid = 0xFFFFFFFF,
-};
-
-enum
-{
-	kPluginOpcode_Debug = kNVSEOpcodeTest,
 };
 
 enum
@@ -64,7 +59,7 @@ struct NVSEInterface
 	uint32_t	runtimeVersion;
 	uint32_t	editorVersion;
 	uint32_t	isEditor;
-	bool	(* RegisterCommand)(CommandInfo * info);	// returns true for success, false for failure
+	bool	(* RegisterCommand)(SCRIPT_FUNCTION * info);	// returns true for success, false for failure
 	void	(* SetOpcodeBase)(uint32_t opcode);
 	void *	(* QueryInterface)(uint32_t id);
 
@@ -74,7 +69,7 @@ struct NVSEInterface
 
 	// CommandReturnType enum defined in CommandTable.h
 	// does the same as RegisterCommand but includes return type; *required* for commands returning arrays
-	bool	(* RegisterTypedCommand)(CommandInfo * info, CommandReturnType retnType);
+	bool	(* RegisterTypedCommand)(SCRIPT_FUNCTION * info, CommandReturnType retnType);
 	// returns a full path the the game directory
 	const char* (* GetRuntimeDirectory)();
 
@@ -89,7 +84,7 @@ struct NVSEInterface
 	// Essentially, allows having multiple different versions of commands that scripts can opt into by specifying a plugin version to compile with.
 	// Notably useful to not break JIP ScriptRunner (SR) scripts when replacing the interface of an existing function, 
 	// ..since SR will assume to compile the oldest version of a func unless a more recent plugin version is specified.
-	bool	(*RegisterTypedCommandVersion)(CommandInfo* info, CommandReturnType retnType, uint32_t requiredPluginVersion);
+	bool	(*RegisterTypedCommandVersion)(SCRIPT_FUNCTION* info, CommandReturnType retnType, uint32_t requiredPluginVersion);
 };
 
 struct NVSEConsoleInterface
@@ -529,13 +524,13 @@ struct NVSECommandTableInterface
 	};
 
 	uint32_t	version;
-	const CommandInfo*	(* Start)(void);
-	const CommandInfo*	(* End)(void);
-	const CommandInfo*	(* GetByOpcode)(uint32_t opcode);
-	const CommandInfo*	(* GetByName)(const char* name);
-	uint32_t				(* GetReturnType)(const CommandInfo* cmd);		// return type enum defined in CommandTable.h
-	uint32_t				(* GetRequiredNVSEVersion)(const CommandInfo* cmd);
-	const PluginInfo*	(* GetParentPlugin)(const CommandInfo* cmd);	// returns a pointer to the PluginInfo of the NVSE plugin that adds the command, if any. returns NULL otherwise
+	const SCRIPT_FUNCTION*	(* Start)(void);
+	const SCRIPT_FUNCTION*	(* End)(void);
+	const SCRIPT_FUNCTION*	(* GetByOpcode)(uint32_t opcode);
+	const SCRIPT_FUNCTION*	(* GetByName)(const char* name);
+	uint32_t				(* GetReturnType)(const SCRIPT_FUNCTION* cmd);		// return type enum defined in CommandTable.h
+	uint32_t				(* GetRequiredNVSEVersion)(const SCRIPT_FUNCTION* cmd);
+	const PluginInfo*	(* GetParentPlugin)(const SCRIPT_FUNCTION* cmd);	// returns a pointer to the PluginInfo of the NVSE plugin that adds the command, if any. returns NULL otherwise
 	const PluginInfo*	(* GetPluginInfoByName)(const char *pluginName);	// Returns a pointer to the PluginInfo of the NVSE plugin of the specified name; returns NULL is the plugin is not loaded.
 	const PluginInfo*	(* GetPluginInfoByDLLName)(const char* dllName);	// Returns a pointer to the PluginInfo of the NVSE plugin with the specified DLL name; returns NULL if the plugin is not loaded.
 };
@@ -593,16 +588,14 @@ struct NVSEScriptInterface
 		kVersion = 1
 	};
 
-	bool	(* CallFunction)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container,
-		NVSEArrayVarInterface::Element * result, uint8_t numArgs, ...);
+	bool	(* CallFunction)(Script* apScript, TESObjectREFR* apRef, TESObjectREFR* apContainer, NVSEArrayVarInterface::Element* apResult, uint8_t numArgs, ...);
 
-	uint32_t	(* GetFunctionParams)(Script* funcScript, uint8_t* paramTypesOut);
-	bool	(* ExtractArgsEx)(ParamInfo * paramInfo, void * scriptDataIn, uint32_t * scriptDataOffset, Script * scriptObj,
-		ScriptLocals * eventList, ...);
-	bool	(* ExtractFormatStringArgs)(uint32_t fmtStringPos, char* buffer, ParamInfo * paramInfo, void * scriptDataIn, 
-		uint32_t * scriptDataOffset, Script * scriptObj, ScriptLocals * eventList, uint32_t maxParams, ...);
+	uint32_t	(* GetFunctionParams)(Script* apScript, uint8_t* apParamTypesOut);
+	bool	(* ExtractArgsEx)(SCRIPT_PARAMETER* apParameters, const char* apCompiledParams, uint32_t& arOffset, Script* apScript, ScriptLocals* apScriptLocals, ...);
+	bool	(* ExtractFormatStringArgs)(uint32_t fmtStringPos, char* buffer, SCRIPT_PARAMETER* apParameters, void* scriptDataIn, 
+		uint32_t& arOffset, Script* apScript, ScriptLocals* apScriptLocals, uint32_t maxParams, ...);
 
-	bool	(*CallFunctionAlt)(Script *funcScript, TESObjectREFR *callingObj, uint8_t numArgs, ...);
+	bool	(*CallFunctionAlt)(Script * apScript, TESObjectREFR *apRef, uint8_t numArgs, ...);
 
 	// Compile a partial script without a script name
 	// Example:
@@ -610,7 +603,7 @@ struct NVSEScriptInterface
 	//		PlaceAtMe Explosion
 	//	 end)");
 	//   g_scriptInterface->CallFunctionAlt(script, *g_thePlayer, 0);
-	Script* (*CompileScript)(const char* scriptText);
+	Script* (*CompileScript)(const char* apScriptText);
 
 	// Compile one line* script that returns a result utilizing the NVSE expression evaluator
 	// Example:
@@ -620,10 +613,10 @@ struct NVSEScriptInterface
 	// Script can then be passed to CallFunction which will set the passed Element* result with the result of the script function call
 	//
 	// *if expression contains SetFunctionValue and %R for line breaks it can be multiline as well
-	Script* (*CompileExpression)(const char* expression);
+	Script* (*CompileExpression)(const char* apExpression);
 
 	// Outputs the decompiled source code text of a script into a stream and/or a buffer.
-	size_t	(__stdcall *DecompileToBuffer)(Script* pScript, FILE* pStream, char* pBuffer);
+	size_t	(__stdcall *DecompileToBuffer)(Script* apScript, FILE* apStream, char* apBuffer);
 };
 
 #endif
@@ -796,7 +789,7 @@ typedef void (*_LambdaUnsaveVariableList)(Script* parentScript);
 typedef bool (*_IsScriptLambda)(Script* parentScript);
 
 // Script-related function pointer typedefs:
-typedef bool (*_HasScriptCommand)(Script* script, CommandInfo* info, CommandInfo* eventBlock);
+typedef bool (*_HasScriptCommand)(Script* script, SCRIPT_FUNCTION* info, SCRIPT_FUNCTION* eventBlock);
 typedef bool (*_DecompileScript)(Script* script, int32_t lineNumber, char* buffer, uint32_t bufferSize);
 
 #endif
@@ -821,7 +814,7 @@ typedef bool (*_DecompileScript)(Script* script, int32_t lineNumber, char* buffe
  *	data conversion on load. Of course it isn't strictly /mandatory/ that you do
  *	this, but I consider not breaking people's save files to be very important.
  *	Also, note that your record data will be uniquely identified by your
- *	assigned opcode base, so make sure that is set up correctly (you really
+ *	assigned uiOpcode base, so make sure that is set up correctly (you really
  *	have to be doing that anyway, but I thought I'd mention it again).
  *	
  *	At any point, a plugin can call the
@@ -955,7 +948,7 @@ struct NVSESerializationInterface
  */
 struct NVSEEventManagerInterface
 {
-	typedef void (*NativeEventHandler)(TESObjectREFR* thisObj, void* parameters);
+	typedef void (*NativeEventHandler)(TESObjectREFR* apRef, void* parameters);
 
 	// Mostly used for filtering information.
 	enum ParamType : uint8_t
@@ -1049,7 +1042,7 @@ struct NVSEEventManagerInterface
 	// Dispatch an event that has been registered with RegisterEvent.
 	// Variadic arguments are passed as parameters to script / function.
 	// Returns false if an error occurred.
-	bool (*DispatchEvent)(const char* eventName, TESObjectREFR* thisObj, ...);
+	bool (*DispatchEvent)(const char* eventName, TESObjectREFR* apRef, ...);
 
 	enum DispatchReturn : int8_t
 	{
@@ -1064,7 +1057,7 @@ struct NVSEEventManagerInterface
 	// If resultCallback is not null, then it is called for each SCRIPT event handler that is dispatched, which allows checking the result of each dispatch.
 	// If the callback returns false, then dispatching for the event will end prematurely, and this returns kRetn_EarlyBreak.
 	// 'anyData' arg is passed to the callbacks.
-	DispatchReturn (*DispatchEventAlt)(const char* eventName, DispatchCallback resultCallback, void* anyData, TESObjectREFR* thisObj, ...);
+	DispatchReturn (*DispatchEventAlt)(const char* eventName, DispatchCallback resultCallback, void* anyData, TESObjectREFR* apRef, ...);
 
 	// Special priorities used for the event priority system.
 	// Greatest priority = will run first, lowest = will run last.
@@ -1102,13 +1095,13 @@ struct NVSEEventManagerInterface
 	// Same as DispatchEvent, but if attempting to dispatch outside of the game's main thread, the dispatch will be deferred.
 	// WARNING: must ensure data will not be invalid if the dispatch is deferred.
 	// Recommended to avoid potential multithreaded crashes, usually related to Console_Print.
-	bool (*DispatchEventThreadSafe)(const char* eventName, PostDispatchCallback postCallback, TESObjectREFR* thisObj, ...);
+	bool (*DispatchEventThreadSafe)(const char* eventName, PostDispatchCallback postCallback, TESObjectREFR* apRef, ...);
 
 	// Same as DispatchEventAlt, but if attempting to dispatch outside of the game's main thread, the dispatch will be deferred.
 	// WARNING: must ensure data will not be invalid if the dispatch is deferred.
 	// Recommended to avoid potential multithreaded crashes, usually related to Console_Print.
 	DispatchReturn (*DispatchEventAltThreadSafe)(const char* eventName, DispatchCallback resultCallback, void* anyData, 
-		PostDispatchCallback postCallback, TESObjectREFR* thisObj, ...);
+		PostDispatchCallback postCallback, TESObjectREFR* apRef, ...);
 
 	// Like the script function SetFunctionValue, but for native handlers.
 	// If never called, then a nullptr element is passed by default.
@@ -1165,7 +1158,7 @@ struct NVSEEventManagerInterface
  *	IMPORTANT: Before releasing a plugin, you MUST contact the NVSE team at the
  *	contact addresses listed in nvse_readme.txt to register a range of opcodes.
  *	This is required to prevent conflicts between multiple plugins, as each
- *	command must be assigned a unique opcode.
+ *	command must be assigned a unique uiOpcode.
  *
  *	The base API is pretty simple. Create a project based on the
  *	nvse_plugin_example project included with the NVSE source code, then define
@@ -1196,13 +1189,13 @@ struct NVSEEventManagerInterface
  *	bool NVSEPlugin_Load(const NVSEInterface * nvse)
  *
  *	In this function, use the SetOpcodeBase callback in NVSEInterface to set the
- *	opcode base to your assigned value, then use RegisterCommand to register all
- *	of your commands. NVSE will fix up your CommandInfo structure when loaded
+ *	uiOpcode base to your assigned value, then use RegisterCommand to register all
+ *	of your commands. NVSE will fix up your SCRIPT_FUNCTION structure when loaded
  *	in the context of the editor, and will fill in any NULL callbacks with their
  *	default values, so don't worry about having a unique 'execute' callback for
  *	the editor, and don't provide a 'parse' callback unless you're actually
- *	overriding the default behavior. The opcode field will also be automatically
- *	updated with the next opcode in the sequence started by SetOpcodeBase.
+ *	overriding the default behavior. The uiOpcode field will also be automatically
+ *	updated with the next uiOpcode in the sequence started by SetOpcodeBase.
  *
  *	At this time, or at any point forward you can call the QueryInterface
  *	callback to retrieve an interface structure for the base services provided
@@ -1248,7 +1241,7 @@ typedef bool (* _NVSEPlugin_Load)(const NVSEInterface * nvse);
  *	A script function using the PluginExpressionEvaluator *MUST* use the Cmd_Expression_Plugin_Parse parser.
  *	For example, this could mean using the premade DEFINE_COMMAND_PLUGIN_EXP or DEFINE_COMMAND_ALT_PLUGIN_EXP macro definitions.
  *	
- *	Also, parameters for the ParamInfo *MUST* be defined using the NVSEParamType enum, NOT the regular ParamType enum.
+ *	Also, parameters for the SCRIPT_PARAMETER *MUST* be defined using the NVSEParamType enum, NOT the regular ParamType enum.
  *	For example, using kParamType_Integer is invalid, but kNVSEParamType_Number is valid.
  ******************************************************************************/
 struct PluginScriptToken;
@@ -1470,9 +1463,9 @@ struct NVSELoggingInterface
  *  Usage:
  *	```
  *  NVSECommandBuilder builder(nvse);
- *  builder.Create("MyCommand", returnType, { ParamInfo{ "param1", kParamType_Integer, 0 }, ParamInfo{ "param2", kParamType_String, 0 } }, false, Cmd_MyCommand_Execute);
+ *  builder.Create("MyCommand", returnType, { SCRIPT_PARAMETER{ "param1", kParamType_Integer, 0 }, SCRIPT_PARAMETER{ "param2", kParamType_String, 0 } }, false, Cmd_MyCommand_Execute);
  *  // or
- *  builder.Create("MyCommand", returnType, { ParamInfo{ "param1", kParamType_Integer, 0 }, ParamInfo{ "param2", kParamType_String, 0 } }, false, [](COMMAND_ARGS)
+ *  builder.Create("MyCommand", returnType, { SCRIPT_PARAMETER{ "param1", kParamType_Integer, 0 }, SCRIPT_PARAMETER{ "param2", kParamType_String, 0 } }, false, [](COMMAND_ARGS)
  *  {
  *     return true;
  *  });
@@ -1484,12 +1477,12 @@ class NVSECommandBuilder
 public:
 	explicit NVSECommandBuilder(const NVSEInterface* scriptInterface) : scriptInterface(scriptInterface) {}
 
-	void Create(const char* name, CommandReturnType returnType, std::initializer_list<ParamInfo> params, bool refRequired, Cmd_Execute fn, Cmd_Parse parse = nullptr, const char* altName = "") const
+	void Create(const char* name, CommandReturnType returnType, std::initializer_list<SCRIPT_PARAMETER> params, bool refRequired, Cmd_Execute fn, Cmd_Parse parse = nullptr, const char* altName = "") const
 	{
-		ParamInfo* paramCopy = nullptr;
+		SCRIPT_PARAMETER* paramCopy = nullptr;
 		if (params.size())
 		{
-			paramCopy = new ParamInfo[params.size()];
+			paramCopy = new SCRIPT_PARAMETER[params.size()];
 			size_t index = 0;
 			for (const auto& param : params)
 			{
@@ -1497,7 +1490,7 @@ public:
 			}
 		}
 
-		auto commandInfo = CommandInfo{
+		auto commandInfo = SCRIPT_FUNCTION{
 			name, altName, 0, "", refRequired, static_cast<uint16_t>(params.size()), paramCopy, fn, parse, nullptr, 0
 		};
 		scriptInterface->RegisterTypedCommand(&commandInfo, returnType);

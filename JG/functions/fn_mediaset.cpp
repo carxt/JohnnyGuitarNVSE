@@ -7,21 +7,21 @@
 #include "Obsidian/ExtraAudioMarker.hpp"
 
 bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	TESObjectCELL* pCell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
 		ExtraCellAcousticSpace* pXAcousticSpace = pCell->extraDataList.GetExtraData<ExtraCellAcousticSpace>();
 		if (pXAcousticSpace && pXAcousticSpace->pSpace) 
-			*reinterpret_cast<uint32_t*>(result) = pXAcousticSpace->pSpace->GetFormID();
+			reinterpret_cast<uint32_t&>(arResult) = pXAcousticSpace->pSpace->GetFormID();
 
 		if (IsConsoleMode())
-			Console_Print("GetAcousticSpace  >> 0x%08X", *reinterpret_cast<uint32_t*>(result));
+			Console_Print("GetAcousticSpace  >> 0x%08X", reinterpret_cast<uint32_t&>(arResult));
 	}
 	return true;
 }
 
 bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	TESObjectCELL* pCell = nullptr;
 	BGSAcousticSpace* pAcousticSpace = nullptr;
 	uintptr_t ExtraCellAcousticSpace_Update = 0x041C090;
@@ -43,37 +43,37 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS) {
 }
 
 SPEC_NOINLINE bool Cmd_AudioMarkerGetCurrent_Eval(COMMAND_ARGS_EVAL) {
-	*result = 0;
+	arResult = 0;
 	if (PlayerCharacter::GetSingleton() && PlayerCharacter::GetSingleton()->currMusicMarker) {
 		if (TESObjectREFR* pMarkerRef = PlayerCharacter::GetSingleton()->currMusicMarker->pReference)
-			*reinterpret_cast<uint32_t*>(result) = pMarkerRef->GetFormID();
+			reinterpret_cast<uint32_t&>(arResult) = pMarkerRef->GetFormID();
 	}
 	return true;
 }
 
 bool Cmd_AudioMarkerGetCurrent_Execute(COMMAND_ARGS) {
-	return Cmd_AudioMarkerGetCurrent_Eval(thisObj, nullptr, nullptr, result);
+	return Cmd_AudioMarkerGetCurrent_Eval(apRef, nullptr, nullptr, arResult);
 }
 
 SPEC_NOINLINE bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
-	*result = 0;
-	if (thisObj) {
-		ExtraAudioMarker* pExtraMarker = thisObj->GetExtraData<ExtraAudioMarker>();
+	arResult = 0;
+	if (apRef) {
+		ExtraAudioMarker* pExtraMarker = apRef->GetExtraData<ExtraAudioMarker>();
 		if (pExtraMarker && pExtraMarker->pData) {
 			uintptr_t uiCtrlFormID = pExtraMarker->pData->uiMediaLocationController;
 			TESForm* pFoundForm = TESForm::GetFormByNumericID(uiCtrlFormID);
 			if (pFoundForm->GetFormType() == FORM_TYPE::MediaLocationController)
-				*reinterpret_cast<uint32_t*>(result) = pFoundForm->GetFormID();
+				reinterpret_cast<uint32_t&>(arResult) = pFoundForm->GetFormID();
 		}
 	}
 	return true;
 }
 
 bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
-	Cmd_AudioMarkerGetController_Eval(thisObj, nullptr, nullptr, result);
-	if (thisObj && IsConsoleMode()) {
-		if (*result)
-			Console_Print("AudioMarkerGetController >> 0x%lx", *reinterpret_cast<uint32_t*>(result));
+	Cmd_AudioMarkerGetController_Eval(apRef, nullptr, nullptr, arResult);
+	if (apRef && IsConsoleMode()) {
+		if (arResult)
+			Console_Print("AudioMarkerGetController >> 0x%lx", reinterpret_cast<uint32_t&>(arResult));
 		else
 			Console_Print("Calling reference is not an AudioMarker");
 	}
@@ -82,8 +82,8 @@ bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
 
 bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
 	MediaLocationController* locationController;
-	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &locationController) && locationController && IS_TYPE(locationController, MediaLocationController)) {
-		ExtraAudioMarker* pAudioMarker = thisObj->GetExtraData<ExtraAudioMarker>();
+	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &locationController) && locationController && IS_TYPE(locationController, MediaLocationController)) {
+		ExtraAudioMarker* pAudioMarker = apRef->GetExtraData<ExtraAudioMarker>();
 		if (pAudioMarker && pAudioMarker->pData) {
 			pAudioMarker->pData->uiMediaLocationController = locationController->GetFormID();
 
@@ -107,12 +107,12 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 		kLayer3,
 		kFlags
 	};
-	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type, &fValue)) {
-		ExtraAudioMarker* pAudioMarker = thisObj->GetExtraData<ExtraAudioMarker>();
+	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &type, &fValue)) {
+		ExtraAudioMarker* pAudioMarker = apRef->GetExtraData<ExtraAudioMarker>();
 		if (pAudioMarker && pAudioMarker->pData) {
 			switch (type) {
 			case kRadius:
-				thisObj->GetExtra()->SetRadius(fValue);
+				apRef->GetExtra()->SetRadius(fValue);
 				break;
 			case kLayer2:
 				pAudioMarker->pData->fSecondLayerPercent = fValue;
@@ -127,7 +127,7 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 			}
 
 			if (IsConsoleMode())
-				Console_Print("AudioMarkerSetProperty >> %s, %d, %.2f", thisObj->GetFormEditorID(), type, fValue);
+				Console_Print("AudioMarkerSetProperty >> %s, %d, %.2f", apRef->GetFormEditorID(), type, fValue);
 		}
 		else if (IsConsoleMode()) {
 			Console_Print("Calling reference is not an AudioMarker");
@@ -144,31 +144,31 @@ bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
 		kLayer3,
 		kFlags
 	};
-	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
-		const ExtraAudioMarker* pAudioMarker = thisObj->GetExtraData<ExtraAudioMarker>();
+	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
+		const ExtraAudioMarker* pAudioMarker = apRef->GetExtraData<ExtraAudioMarker>();
 		if (pAudioMarker && pAudioMarker->pData) {
 			switch (type) {
 			case kRadius:
 				{
-					ExtraRadius* pRadius = thisObj->GetExtraData<ExtraRadius>();
+					ExtraRadius* pRadius = apRef->GetExtraData<ExtraRadius>();
 					if (pRadius)
-						*result = pRadius->fRadius;
+						arResult = pRadius->fRadius;
 				}
 				break;
 			case kLayer2:
-				*result = pAudioMarker->pData->fSecondLayerPercent;
+				arResult = pAudioMarker->pData->fSecondLayerPercent;
 				break;
 			case kLayer3:
-				*result = pAudioMarker->pData->fThirdLayerPercent;
+				arResult = pAudioMarker->pData->fThirdLayerPercent;
 				break;
 			case kFlags:
-				*result = pAudioMarker->pData->bUseController;
+				arResult = pAudioMarker->pData->bUseController;
 				break;
 
 			}
 
 			if (IsConsoleMode())
-				Console_Print("AudioMarkerGetProperty >> %s, %d, %.2f", thisObj->GetFormEditorID(), type, *result);
+				Console_Print("AudioMarkerGetProperty >> %s, %d, %.2f", apRef->GetFormEditorID(), type, arResult);
 		}
 		else if (IsConsoleMode()) {
 			Console_Print("Calling reference is not an AudioMarker");
@@ -182,7 +182,7 @@ bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iTrait) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
 		switch (iTrait) {
 		case 0:
-			*result = pMediaSet->GetType();
+			arResult = pMediaSet->GetType();
 			break;
 		case 1:
 		case 2:
@@ -190,7 +190,7 @@ bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 		case 4:
 		case 5:
 		case 6:
-			*result = pMediaSet->kLayers[iTrait - 1].fAttenuation;
+			arResult = pMediaSet->kLayers[iTrait - 1].fAttenuation;
 			break;
 		case 7:
 		case 8:
@@ -198,27 +198,27 @@ bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 		case 10:
 		case 11:
 		case 12:
-			*result = pMediaSet->kLayers[iTrait - 7].fPercent;
+			arResult = pMediaSet->kLayers[iTrait - 7].fPercent;
 			break;
 		case 13:
-			*result = pMediaSet->ucEnableFlags;
+			arResult = pMediaSet->ucEnableFlags;
 			break;
 		case 14:
-			*result = pMediaSet->fWaitTime;
+			arResult = pMediaSet->fWaitTime;
 			break;
 		case 15:
-			*result = pMediaSet->fLoopFadeOut;
+			arResult = pMediaSet->fLoopFadeOut;
 			break;
 		case 16:
-			*result = pMediaSet->fRecoveryTime;
+			arResult = pMediaSet->fRecoveryTime;
 			break;
 		case 17:
-			*result = pMediaSet->fNightTimeMax;
+			arResult = pMediaSet->fNightTimeMax;
 			break;
 		}
 
 		if (IsConsoleMode())
-			Console_Print("GetMediaSetTraitNumeric %d >> %.2f", iTrait, *result);
+			Console_Print("GetMediaSetTraitNumeric %d >> %.2f", iTrait, arResult);
 	}
 	return true;
 }
@@ -226,9 +226,9 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	MediaSet* pMediaSet = nullptr;
 	int32_t iTrait = -1;
 	float fValue = -1;
-	*result = 0;
+	arResult = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iTrait, &fValue) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
-		*result = 1;
+		arResult = 1;
 		switch (iTrait) {
 		case 0:
 			pMediaSet->SetType(MediaSet::Type(fValue));
@@ -265,7 +265,7 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 			pMediaSet->fNightTimeMax = fValue;
 			break;
 		default:
-			*result = 0;
+			arResult = 0;
 			break;
 		}
 	}
@@ -280,14 +280,14 @@ bool Cmd_GetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 			{
 				TESSound* pSound = pMediaSet->GetSound1();
 				if (pSound)
-					*reinterpret_cast<uint32_t*>(result) = pSound->GetFormID();
+					reinterpret_cast<uint32_t&>(arResult) = pSound->GetFormID();
 			}
 			break;
 		case 1:
 			{
 				TESSound* pSound = pMediaSet->GetSound2();
 				if (pSound)
-					*reinterpret_cast<uint32_t*>(result) = pSound->GetFormID();
+					reinterpret_cast<uint32_t&>(arResult) = pSound->GetFormID();
 			}
 			break;
 		}
@@ -299,7 +299,7 @@ bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	MediaSet* pMediaSet = nullptr;
 	TESSound* pSound = nullptr;
 	int iSoundType = -1;
-	*result = 0;
+	arResult = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iSoundType, &pSound) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
 		if (pSound && !IS_TYPE(pSound, TESSound))
 			return true;
@@ -307,11 +307,11 @@ bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 		switch (iSoundType) {
 		case 0:
 			pMediaSet->SetSound1(pSound);
-			*result = 1;
+			arResult = 1;
 			break;
 		case 1:
 			pMediaSet->SetSound2(pSound);
-			*result = 1;
+			arResult = 1;
 			break;
 		}
 	}
@@ -333,14 +333,14 @@ bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetMediaSetTraitString_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	MediaSet* pMediaSet = nullptr;
 	int32_t iLayer = -1;
 	char cName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iLayer, &cName) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
 		if (iLayer >= 0 && iLayer <= 5) {
 			pMediaSet->kLayers[iLayer].strName.Set(cName);
-			*result = 1;
+			arResult = 1;
 		}
 	}
 	return true;

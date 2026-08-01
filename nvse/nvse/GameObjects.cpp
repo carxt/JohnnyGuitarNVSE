@@ -55,5 +55,7 @@ Animation* PlayerCharacter::GetAnimation(bool abFirstPerson) const {
 
 extern bool (*Cmd_Update3D)(COMMAND_ARGS);
 void __fastcall UpdateReference3D(TESObjectREFR* apReference) {
-	Cmd_Update3D(nullptr, nullptr, apReference, nullptr, nullptr, nullptr, nullptr, nullptr);
+	double dResult;
+	uint32_t uiOffset = 0;
+	Cmd_Update3D(nullptr, nullptr, apReference, nullptr, nullptr, nullptr, dResult, uiOffset);
 }

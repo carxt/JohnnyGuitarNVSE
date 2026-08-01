@@ -16,8 +16,6 @@ class BipedAnim;
 class TESHair;
 class TESEyes;
 
-using NPCFaceGenCoords = FR2MatrixVTC<float>[2][2];
-
 class TESNPC : public TESActorBase, public TESRaceForm {
 public:
 	TESNPC();
@@ -30,8 +28,8 @@ public:
 
 	Data							kData;
 	TESClass*						pClass;
-	NPCFaceGenCoords				kRaceFaceOffsetCoord;
-	NPCFaceGenCoords*				pAlternateFaceOffsetCoord;
+	FaceGenCoords					kRaceFaceOffsetCoord;
+	FaceGenCoords*					pAlternateFaceOffsetCoord;
 	TESHair*						pHair;
 	float							fHairLength;
 	TESEyes*						pEyes;
@@ -67,9 +65,9 @@ public:
 
 	float GetWeight() const;
 
-	void GetFaceCoord(NPCFaceGenCoords &arCoords) const;
+	void GetFaceCoord(FaceGenCoords &arCoords) const;
 
-	NPCFaceGenCoords* GetOffsetFaceCoord() const;
+	FaceGenCoords* GetOffsetFaceCoord() const;
 };
 
 ASSERT_SIZE(TESNPC, 0x20C);

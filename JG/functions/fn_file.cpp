@@ -6,33 +6,33 @@
 bool Cmd_IsBSALoaded_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};
 	char fixPath[MAX_PATH];
-	*result = 0;
+	arResult = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		snprintf(fixPath, MAX_PATH, "DATA\\%s", path);
 		DWORD* archive = CdeclCall<DWORD*>(0xAF5320, fixPath); // ArchiveManager::GetArchiveByName
 		if (archive != nullptr) {
-			*result = 1;
+			arResult = 1;
 		}
 	}
 	return true;
 }
 
 bool Cmd_StopSoundFile_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	CdeclCall<void>(0x8304A0);
-	*result = 1;
+	arResult = 1;
 	return true;
 }
 bool Cmd_PlaySoundFile_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};
-	*result = 0;
+	arResult = 0;
 	uint32_t forcePlay = 0;
 	uint32_t shouldLoop = 0;
 	uint32_t playInMainMenu = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &forcePlay, &shouldLoop, &playInMainMenu) && path[0]) {
 		int type = playInMainMenu > 0 ? 8 : 6;
 		CdeclCall<void>(0x8300C0, type, path, 1000, shouldLoop, forcePlay, 0.0, 0);
-		*result = 1;
+		arResult = 1;
 	}
 	return true;
 }
@@ -49,7 +49,7 @@ void resolveTexturePath(char* path, uint32_t bufferSize) {
 }
 
 bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	char path[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
@@ -58,15 +58,15 @@ bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 			DWORD mipMapCount = 0;
 			file->Seek(0x1C, 1);
 			file->DoRead(&mipMapCount, sizeof(mipMapCount));
-			*result = mipMapCount;
-			if (IsConsoleMode()) Console_Print("GetTextureMipMapCount >> %.f", *result);
+			arResult = mipMapCount;
+			if (IsConsoleMode()) Console_Print("GetTextureMipMapCount >> %.f", arResult);
 			file->Destructor(true);
 		}
 	}
 	return true;
 }
 bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	char path[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
@@ -75,15 +75,15 @@ bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 			char format = 0;
 			file->Seek(0x57, 1);
 			file->DoRead(&format, 1);
-			*result = format - '0';
-			if (IsConsoleMode()) Console_Print("GetTextureFormat >> %.f", *result);
+			arResult = format - '0';
+			if (IsConsoleMode()) Console_Print("GetTextureFormat >> %.f", arResult);
 			file->Destructor(true);
 		}
 	}
 	return true;
 }
 bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	char path[MAX_PATH] = {};
 	//char fixPath[MAX_PATH];
 	uint32_t useDataTextures = 0;
@@ -94,8 +94,8 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 			DWORD width = 0;
 			file->Seek(0x10, 1);
 			file->DoRead(&width, sizeof(width));
-			*result = width;
-			if (IsConsoleMode()) Console_Print("GetTextureWidth >> %.f", *result);
+			arResult = width;
+			if (IsConsoleMode()) Console_Print("GetTextureWidth >> %.f", arResult);
 			file->Destructor(true);
 		}
 	}
@@ -103,7 +103,7 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	char path[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
@@ -112,8 +112,8 @@ bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 			DWORD height = 0;
 			file->Seek(0x0C, 1);
 			file->DoRead(&height, sizeof(height));
-			*result = height;
-			if (IsConsoleMode()) Console_Print("GetTextureHeight >> %.f", *result);
+			arResult = height;
+			if (IsConsoleMode()) Console_Print("GetTextureHeight >> %.f", arResult);
 			file->Destructor(true);
 		}
 	}
@@ -209,7 +209,7 @@ bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
 			int time = fadeInTime * 1000.0;
 			handle.FadeInPlay(time);
 		}
-		*result = 1;
+		arResult = 1;
 	}
 	return true;
 }
@@ -221,7 +221,7 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 	int bDontCacheFlag = 0;
 	float fadeInTime = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &loopFlag, &bDontCacheFlag) && path[0]) {
-		TESObjectREFR* ref = thisObj;
+		TESObjectREFR* ref = apRef;
 		if (ref == nullptr) {
 			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
 		}
@@ -248,7 +248,7 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 				int time = fadeInTime * 1000.0;
 				handle.FadeInPlay(time);
 			}
-			*result = 1;
+			arResult = 1;
 		}
 	}
 	return true;
@@ -275,7 +275,7 @@ bool Cmd_StopSoundFromPath_Execute(COMMAND_ARGS) {
 					int time = fadeOutTime * 1000.0;
 					handle.FadeOutAndRelease(time);
 				}
-				*result = 1;
+				arResult = 1;
 			}
 		}
 	}
@@ -286,7 +286,7 @@ bool Cmd_StopSound3DFromPath_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};
 	float fadeOutTime = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeOutTime) && path[0]) {
-		TESObjectREFR* ref = thisObj;
+		TESObjectREFR* ref = apRef;
 		if (ref == nullptr)
 			ref = PlayerCharacter::GetSingleton();
 
@@ -311,7 +311,7 @@ bool Cmd_StopSound3DFromPath_Execute(COMMAND_ARGS) {
 						int time = fadeOutTime * 1000.0;
 						handle.FadeOutAndRelease(time);
 					}
-					*result = 1;
+					arResult = 1;
 				}
 			}
 		}
@@ -331,7 +331,7 @@ bool Cmd_IsSoundPlayingFromPath_Execute(COMMAND_ARGS) {
 			while (kIter) {
 				BSAudioManager::Get()->playingSounds.GetNext(kIter, uiKey, pSound);
 				if (pSound && _stricmp(pSound->filePath, path) == 0) {
-					*result = 1;
+					arResult = 1;
 					return true;
 				}
 			}
@@ -349,7 +349,7 @@ bool Cmd_IsSoundPlayingFromPath_Execute(COMMAND_ARGS) {
 					continue;
 
 				if (BSAudioManager::Get()->playingSounds.GetAt(uiKey, pSound) && pSound && _stricmp(pSound->filePath, path) == 0) {
-					*result = 1;
+					arResult = 1;
 					return true;
 				}
 			}

@@ -183,7 +183,7 @@ public:
 	uint32_t								unk6B0[2];				// 6B0
 	TESQuest* activeQuest;			// 6B8
 	tList<BGSQuestObjective>			questObjectiveList;		// 6BC
-	tList<BGSQuestObjective::Target>	questTargetList;		// 6C4
+	tList<TESQuestTarget>	questTargetList;		// 6C4
 	uint32_t								unk6CC[8];				// 6CC
 	TESForm* form6EC;				// 6EC TESTING
 	TESForm* form6F0;				// 6F0 TESTING

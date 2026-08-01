@@ -135,20 +135,6 @@ struct TokenPair	// a pair of tokens, specified as 'a::b'
 	~TokenPair();
 };
 
-#if RUNTIME
-
-struct ForEachContext
-{
-	uint32_t				sourceID;
-	uint32_t				iteratorID;
-	uint32_t				variableType;
-	ScriptLocals::VarList * var;
-
-	ForEachContext(uint32_t src, uint32_t iter, uint32_t varType, ScriptLocals::VarList * _var) : sourceID(src), iteratorID(iter), variableType(varType), var(_var) { }
-};
-
-#endif
-
 // slightly less ugly but still cheap polymorphism
 struct ScriptToken
 {
@@ -160,18 +146,18 @@ protected:
 	struct Value {
 		std::string					str;
 		union {
-			Script::RefVariable		* refVar;
+			SCRIPT_REFERENCED_OBJECT* refVar;
 			uint32_t					formID;
 			double					num;
 			TESGlobal				* global;
 			Operator				* op;
 #if RUNTIME		// run-time only
 			ArrayID					arrID;
-			ScriptLocals::VarList	* var;
+			BSSimpleList<SCRIPT_LOCAL*>* var;
 #endif
 			// compile-time only
 			VariableInfo			* varInfo;
-			CommandInfo				* cmd;
+			SCRIPT_FUNCTION				* cmd;
 			ScriptToken				* token;
 		};
 	} value;
@@ -180,9 +166,9 @@ protected:
 	ScriptToken(Token_Type _type, uint8_t _varType, uint16_t _refIdx);
 	ScriptToken(bool boolean);
 	ScriptToken(double num);
-	ScriptToken(Script::RefVariable* refVar, uint16_t refIdx);
+	ScriptToken(SCRIPT_REFERENCED_OBJECT* refVar, uint16_t refIdx);
 	ScriptToken(VariableInfo* varInfo, uint16_t refIdx, uint32_t varType);
-	ScriptToken(CommandInfo* cmdInfo, uint16_t refIdx);
+	ScriptToken(SCRIPT_FUNCTION* cmdInfo, uint16_t refIdx);
 	ScriptToken(const std::string& str);
 	ScriptToken(const char* str);
 	ScriptToken(TESGlobal* global, uint16_t refIdx);
@@ -191,7 +177,7 @@ protected:
 
 	ScriptToken(const ScriptToken& rhs);	// unimplemented, don't want copy constructor called
 #if RUNTIME
-	ScriptToken(ScriptLocals::VarList* var);
+	ScriptToken(BSSimpleList<SCRIPT_LOCAL*>* var);
 #endif
 
 	Token_Type	ReadFrom(ExpressionEvaluator* context);	// reconstitute param from compiled data, return the type
@@ -208,7 +194,7 @@ public:
 	virtual bool					GetBool() const;
 #if RUNTIME
 	virtual ArrayID					GetArray() const;
-	ScriptLocals::VarList *	GetVar() const;
+	BSSimpleList<SCRIPT_LOCAL*>*	GetVar() const;
 #endif
 	virtual bool			CanConvertTo(Token_Type to) const;	// behavior varies b/w compile/run-time for ambiguous types
 	virtual ArrayID			GetOwningArrayID() const { return 0; }
@@ -220,10 +206,10 @@ public:
 	TESGlobal *				GetGlobal() const;
 	Operator *				GetOperator() const;
 	VariableInfo *			GetVarInfo() const;
-	CommandInfo *			GetCommandInfo() const;
-	Script::RefVariable*	GetRefVariable() const;
+	SCRIPT_FUNCTION *			GetCommandInfo() const;
+	SCRIPT_REFERENCED_OBJECT*	GetRefVariable() const;
 	uint16_t					GetRefIndex() const { return IsGood() ? refIdx : 0; }
-	uint8_t					GetVariableType() const { return IsVariable() ? variableType : Script::eVarType_Invalid; }
+	uint8_t					GetVariableType() const { return IsVariable() ? variableType : SCRIPT_VARIABLE_TYPE::INVALID; }
 
 	uint32_t					GetActorValue() const;		// kActorVal_XXX or kActorVal_NoActorValue if none
 	char					GetAxis() const;			// 'X', 'Y', 'Z', or otherwise -1
@@ -231,7 +217,7 @@ public:
 	uint32_t					GetAnimGroup() const;		// TESAnimGroup::kAnimGroup_XXX (kAnimGroup_Max if none)
 	EffectSetting *			GetEffectSetting() const;	// from string, effect code, or TESForm*
 
-	bool					Write(ScriptLineBuffer* buf);
+	bool					Write(SCRIPT_LINE* buf);
 	Token_Type				Type() const		{ return type; }
 
 	bool					IsGood() const		{ return type != kTokenType_Invalid;	}
@@ -244,9 +230,9 @@ public:
 
 	static ScriptToken* Create(bool boolean)													{ return new ScriptToken(boolean); }
 	static ScriptToken* Create(double num)														{ return new ScriptToken(num);	}
-	static ScriptToken* Create(Script::RefVariable* refVar, uint16_t refIdx)						{ return refVar ? new ScriptToken(refVar, refIdx) : NULL; }
-	static ScriptToken* Create(VariableInfo* varInfo, uint16_t refIdx, uint32_t varType)			{ return varInfo ? new ScriptToken(varInfo, refIdx, varType) : NULL; }
-	static ScriptToken* Create(CommandInfo* cmdInfo, uint16_t refIdx)								{ return cmdInfo ? new ScriptToken(cmdInfo, refIdx) : NULL;	}
+	static ScriptToken* Create(SCRIPT_REFERENCED_OBJECT* refVar, uint16_t refIdx)				{ return refVar ? new ScriptToken(refVar, refIdx) : NULL; }
+	static ScriptToken* Create(VariableInfo* varInfo, uint16_t refIdx, uint32_t varType)		{ return varInfo ? new ScriptToken(varInfo, refIdx, varType) : NULL; }
+	static ScriptToken* Create(SCRIPT_FUNCTION* cmdInfo, uint16_t refIdx)							{ return cmdInfo ? new ScriptToken(cmdInfo, refIdx) : NULL;	}
 	static ScriptToken* Create(const std::string& str)											{ return new ScriptToken(str);	}
 	static ScriptToken* Create(const char* str)													{ return new ScriptToken(str);	}
 	static ScriptToken* Create(TESGlobal* global, uint16_t refIdx)								{ return global ? new ScriptToken(global, refIdx) : NULL; }
@@ -296,14 +282,6 @@ struct ArrayElementToken : public ScriptToken
 	virtual bool			CanConvertTo(Token_Type to) const;
 	virtual ArrayID			GetOwningArrayID() const {
 		return type == kTokenType_ArrayElement ? value.arrID : 0; }
-};
-
-struct ForEachContextToken : public ScriptToken
-{
-	ForEachContext		context;
-
-	ForEachContextToken(uint32_t srcID, uint32_t iterID, uint32_t varType, ScriptLocals::VarList* var);
-	virtual const ForEachContext* GetForEachContext() const { return Type() == kTokenType_ForEachContext ? &context : NULL; }
 };
 
 struct AssignableStringToken : public ScriptToken

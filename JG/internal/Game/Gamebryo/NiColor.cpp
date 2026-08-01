@@ -26,9 +26,6 @@ const NiColor NiColor::MAGENTA  = { 1.f, 0.f, 1.f };
 // GAME - 0x11A9BC4
 const NiColor NiColor::CYAN		= { 0.f, 1.f, 1.f };
 
-// GAME - 0x6815C0
-NiColor::NiColor() noexcept {}
-
 NiColor::NiColor(float afValue) noexcept : r(afValue), g(afValue), b(afValue) {}
 
 // GAME - 0x416870

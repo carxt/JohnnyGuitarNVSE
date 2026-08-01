@@ -21,7 +21,7 @@ bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks
 	if (PlayerCharacter::GetSingleton()) {
 		auto headNode = PlayerCharacter::GetSingleton()->questObjectiveList.Head();
 		while (headNode) {
-			Console_Print("objective %s from quest %s", headNode->data->displayText.c_str(), headNode->data->quest->GetEditorName());
+			Console_Print("objective %s from quest %s", headNode->data->GetDisplayText(), headNode->data->GetOwner()->GetEditorName());
 			headNode = headNode->next;
 		}
 	}
@@ -31,7 +31,7 @@ bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks
 
 bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 	TESQuest* quest = nullptr;
-	*result = 0;
+	arResult = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &quest) || !PlayerCharacter::GetSingleton())
 		return true;
 
@@ -45,7 +45,7 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 	auto node = list.Head();
 	while (node) {
 		if (node->data) {
-			if (node->data->quest == quest)
+			if (node->data->GetOwner() == quest)
 				matching.push_back(node->data);
 			else
 				others.push_back(node->data);
@@ -75,7 +75,7 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 		mapMenu->questList.itemCount = 0;
 	}
 
-	*result = 1;
+	arResult = 1;
 	return true;
 }
 
@@ -95,9 +95,9 @@ bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
 
 bool Cmd_InitExtraMiscStat_Execute(COMMAND_ARGS) {
 	char name[MAX_PATH] = {};
-	*result = 0;
+	arResult = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
-		*result = ExtraMiscStats::InitStat(name);
+		arResult = ExtraMiscStats::InitStat(name);
 	}
 	return true;
 }
@@ -105,36 +105,36 @@ bool Cmd_InitExtraMiscStat_Execute(COMMAND_ARGS) {
 bool Cmd_ModExtraMiscStat_Execute(COMMAND_ARGS) {
 	char name[MAX_PATH] = {};
 	int mod;
-	*result = 0;
+	arResult = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name, &mod)) {
-		*result = ExtraMiscStats::ModStat(name, mod);
+		arResult = ExtraMiscStats::ModStat(name, mod);
 	}
 	return true;
 }
 
 bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
 	char name[MAX_PATH] = {};
-	*result = 0;
+	arResult = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
-		*result = ExtraMiscStats::GetStat(name);
-		if (IsConsoleMode()) Console_Print("GetExtraMiscStat \"%s\": %.f", name, *result);
+		arResult = ExtraMiscStats::GetStat(name);
+		if (IsConsoleMode()) Console_Print("GetExtraMiscStat \"%s\": %.f", name, arResult);
 	}
 	return true;
 }
 
 bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	TESReputation* rep = nullptr;
 	uint32_t tierID = 0;
 	char path[MAX_PATH] = {};
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &rep, &tierID, &path) && rep && IS_TYPE(rep, TESReputation) && tierID >= 1 && tierID <= 4)) return true;
 	ExtraReputationIcons::Set(rep->GetFormID(), tierID, path);
-	*result = 1;
+	arResult = 1;
 	return true;
 }
 
 bool Cmd_GetSystemColorAlt_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	ScriptVar* rOut, * gOut, * bOut;
 	uint32_t type;
 	uint8_t color[3] = { 0, 0, 0 };
@@ -153,7 +153,7 @@ bool Cmd_GetSystemColor_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &type) && type > 0 && type <= 5) {
 		SystemColorManager* colorMgr = SystemColorManager::GetSingleton();
 		uint32_t color = (colorMgr->GetColor(type) >> 0x8);
-		*result = color;
+		arResult = color;
 		if (IsConsoleMode()) Console_Print("GetSystemColor %d >> 0x%X", type, color);
 	}
 	return true;
@@ -162,10 +162,10 @@ bool Cmd_GetSystemColor_Execute(COMMAND_ARGS) {
 bool Cmd_QueueObjectiveText_Execute(COMMAND_ARGS) {
 	char text[MAX_PATH] = {};
 	uint32_t isCompleted, allowDisplayMultiple;
-	*result = 0;
+	arResult = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &text, &isCompleted, &allowDisplayMultiple)) {
 		CdeclCall(0x77A5B0, text, isCompleted, allowDisplayMultiple == 0);
-		*result = 1;
+		arResult = 1;
 	}
 	return true;
 };
@@ -187,14 +187,14 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS) {
 	uint32_t queuePriority = kPriorityAppend;
 	uint32_t justification = kJustifyLeft;
 	int titleFont = -1, subTitleFont = -1;
-	*result = 0;
+	arResult = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &title, &subtitle, &soundEdid, &queuePriority, &justification, &titleFont, &subTitleFont)) {
 		if (justification > kJustifyRight) justification = kJustifyRight;
 
 		if (queuePriority == kPriorityClearQueueShowNow) CdeclCall(0x77F500); // HUDMainMenu::HideQuestLocationText
 
 		CdeclCall(0x76B960, title, subtitle, queuePriority == kPriorityAppend, justification, titleFont, subTitleFont, soundEdid); // QuestUpdateManager::SetCustomQuestText
-		*result = 1;
+		arResult = 1;
 	}
 	return true;
 };
@@ -203,12 +203,12 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 	BOOL bFemale = 0;
 	TESForm* pForm = nullptr;
 	char cPath[MAX_PATH] = {};
-	*result = 0;
+	arResult = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &bFemale, &pForm) && pForm) {
 		TESBipedModelForm* pBipedModel = DYNAMIC_CAST(pForm, TESForm, TESBipedModelForm);
 		if (pBipedModel) {
 			pBipedModel->kIcons[bFemale].SetTextureName(cPath);
-			*result = 1;
+			arResult = 1;
 		}
 	}
 
@@ -216,27 +216,27 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	TESObjectREFR* markerRef = ThisCall<TESObjectREFR*>(0x77A400, PlayerCharacter::GetSingleton());
 	if (markerRef) {
-		*(uint32_t*)result = markerRef->GetFormID();
+		reinterpret_cast<uint32_t&>(arResult) = markerRef->GetFormID();
 	}
 	return true;
 }
 
 bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	TESWorldSpace* pWorldSpace = nullptr;
 	char cPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace, &cPath) && pWorldSpace && IS_TYPE(pWorldSpace, TESWorldSpace)) {
 		pWorldSpace->SetTextureName(cPath);
-		*result = 1;
+		arResult = 1;
 	}
 	return true;
 }
 
 bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	TESWorldSpace* pWorldSpace = nullptr;
 	char cPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace) && pWorldSpace && IS_TYPE(pWorldSpace, TESWorldSpace) && pWorldSpace->GetTextureNameLength()) {
@@ -273,14 +273,14 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
-	if (!thisObj || (!thisObj->IsReference() || !thisObj->IsMapMarker()))
+	if (!apRef || (!apRef->IsReference() || !apRef->IsMapMarker()))
 		return true;
 
-	ExtraMapMarker* mapMarkerExtra = thisObj->GetExtraData<ExtraMapMarker>();
+	ExtraMapMarker* mapMarkerExtra = apRef->GetExtraData<ExtraMapMarker>();
 	if (!mapMarkerExtra || !mapMarkerExtra->pData)
 		return true;
 
-	const char* resStr = ExtraMarkerIcons::GetMapMarker(thisObj, mapMarkerExtra->pData->usType);
+	const char* resStr = ExtraMarkerIcons::GetMapMarker(apRef, mapMarkerExtra->pData->usType);
 	g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
 	if (IsConsoleMode())
 		Console_Print("GetCustomMapMarkerIcon >> %s", resStr);
@@ -288,11 +288,11 @@ bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	SleepWaitMenu* swMenu = SleepWaitMenu::Get();
 	if (!swMenu) return true;
-	*result = DWORD(swMenu->isRest) + 1;
-	if (IsConsoleMode()) Console_Print("GetSleepWaitMenuState >> %.f", *result);
+	arResult = DWORD(swMenu->isRest) + 1;
+	if (IsConsoleMode()) Console_Print("GetSleepWaitMenuState >> %.f", arResult);
 	return true;
 }
 
@@ -303,7 +303,7 @@ bool Cmd_SetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
 		if (hud) {
 			hud->visibilityOverrides = visFlags;
 			CdeclCall(0x771700, HUDMainMenu::kHUDState_RECALCULATE);
-			*result = 1;
+			arResult = 1;
 		}
 	}
 
@@ -311,28 +311,28 @@ bool Cmd_SetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	HUDMainMenu* hud = HUDMainMenu::GetSingleton();
 	if (hud) {
-		*result = hud->visibilityOverrides;
+		arResult = hud->visibilityOverrides;
 	}
 	return true;
 }
 
 // To be hooked by RTM
 SPEC_NOINLINE bool Cmd_IsMenuPaused_Eval(COMMAND_ARGS_EVAL) {
-	*result = 1.0;
-	uint32_t uiMenuID = reinterpret_cast<uint32_t>(arg1);
+	arResult = 1.0;
+	uint32_t uiMenuID = reinterpret_cast<uint32_t>(apParam1);
 	if (uiMenuID == 0)
-		*result = InterfaceManager::GetSingleton()->currentMode != 1;
+		arResult = InterfaceManager::GetSingleton()->currentMode != 1;
 	return true;
 }
 
 bool Cmd_IsMenuPaused_Execute(COMMAND_ARGS) {
-	*result = 1;
+	arResult = 1;
 	uint32_t uiMenuID = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &uiMenuID);
-	return Cmd_IsMenuPaused_Eval(thisObj, reinterpret_cast<void*>(uiMenuID), nullptr, result);
+	return Cmd_IsMenuPaused_Eval(apRef, reinterpret_cast<void*>(uiMenuID), nullptr, arResult);
 }
 
 float CalculateRepairedHealth(ItemChange* target, ItemChange* repairItem) {
@@ -341,12 +341,12 @@ float CalculateRepairedHealth(ItemChange* target, ItemChange* repairItem) {
 	float repairItemHealth = repairItem->GetItemHealth(true);
 	int repairSkill = PlayerCharacter::GetSingleton()->GetActorValueI(ActorValue::Index::REPAIR);
 	int outParam = -1;
-	double result = CdeclCall<double>(0x648090, repairSkill, targetHealth, repairItemHealth, &outParam);
-	return (float)(result / 100.0);
+	double arResult = CdeclCall<double>(0x648090, repairSkill, targetHealth, repairItemHealth, &outParam);
+	return (float)(arResult / 100.0);
 }
 
 bool Cmd_UpdateRepairMenu_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	RepairMenu* rm = *(RepairMenu**)0x11DA75C;
 	if (!rm) return true;
 	ItemChange* target = *(ItemChange**)0x11DA760;
@@ -360,7 +360,7 @@ bool Cmd_UpdateRepairMenu_Execute(COMMAND_ARGS) {
 			listItem->tile->SetFloat(kTileValue_user0, repairedHealth);
 		}
 	} while (iter = iter->GetNext());
-	*result = 1;
+	arResult = 1;
 	return true;
 }
 
@@ -378,7 +378,7 @@ bool Cmd_SetWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 			StackObject<TESModel, 0x488F50, 0x489070> kScopeModel;
 			kScopeModel->SetModel(cScopePath);
 			Interface::InitGunScope(kScopeModel.GetPtr());
-			*result = 1;
+			arResult = 1;
 		}
 	}
 	return true;
@@ -388,7 +388,7 @@ bool Cmd_ToggleWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 	BOOL bVisible = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bVisible)) {
 		Interface::SetGunScopeVisible(bVisible);
-		*result = 1;
+		arResult = 1;
 	}
 	return true;
 }
@@ -401,7 +401,7 @@ bool Cmd_ClearWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
-	*result = -1;
+	arResult = -1;
 
 	if (!InterfaceManager::GetSingleton())
 		return true;
@@ -441,7 +441,7 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 		if (!pListBox)
 			return true;
 
-		InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
+		InventoryRef* pInvRef = InventoryRefGetForID(apRef->GetFormID());
 		if (!pInvRef)
 			return true;
 
@@ -480,7 +480,7 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 				while (kIter) {
 					Tile* pChild = pParent->children.GetNext(kIter);
 					if (pChild == pEntryTile) {
-						*result = uiIndex;
+						arResult = uiIndex;
 						if (IsConsoleMode())
 							Console_Print("GetMenuItemListIndex >> %d", uiIndex);
 						return true;
@@ -494,7 +494,7 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SelectMenuItemListIndex_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 
 	if (!InterfaceManager::GetSingleton())
 		return true;
@@ -541,7 +541,7 @@ bool Cmd_SelectMenuItemListIndex_Execute(COMMAND_ARGS) {
 			Tile* tile = pListBox->GetNthTile(uiTileIndex);
 			pListBox->SetSelectedTile(tile);
 			pListBox->ScrollToHighlight();
-			*result = 1;
+			arResult = 1;
 		}
 	}
 	return true;

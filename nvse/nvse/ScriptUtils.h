@@ -26,7 +26,7 @@ class FunctionCaller;
 
 extern ErrOutput g_ErrOut;
 
-// these are used in ParamInfo to specify expected Token_Type of args to commands taking NVSE expressions as args
+// these are used in SCRIPT_PARAMETER to specify expected Token_Type of args to commands taking NVSE expressions as args
 enum {
 	kNVSEParamType_Number =		(1 << kTokenType_Number) | (1 << kTokenType_Ambiguous),
 	kNVSEParamType_Boolean =	(1 << kTokenType_Boolean) | (1 << kTokenType_Ambiguous),
@@ -56,20 +56,20 @@ enum {
 
 #define NVSE_EXPR_MAX_ARGS 20		// max # of args we'll accept to a commmand
 
-// wraps a dynamic ParamInfo array
+// wraps a dynamic SCRIPT_PARAMETER array
 struct DynamicParamInfo
 {
 private:
 	static const uint32_t kMaxParams = 15;	// Should be linked to NVSE_EXPR_MAX_ARGS ?
 
-	ParamInfo	m_paramInfo[kMaxParams];
+	SCRIPT_PARAMETER	m_paramInfo[kMaxParams];
 	uint32_t		m_numParams;
 
 public:
 	DynamicParamInfo(std::vector<UserFunctionParam> &params);
 	DynamicParamInfo() : m_numParams(0) { }
 
-	ParamInfo* Params()	{	return m_paramInfo;	}
+	SCRIPT_PARAMETER* Params()	{	return m_paramInfo;	}
 	uint32_t NumParams()	{ return m_numParams;	}
 };
 
@@ -91,7 +91,7 @@ class ExpressionEvaluator
 	TESObjectREFR		* m_containingObj;
 	uint8_t				* m_data;
 	ScriptToken			* m_args[kMaxArgs];
-	ParamInfo			* m_params;
+	SCRIPT_PARAMETER			* m_params;
 	uint8_t				m_numArgsExtracted;
 	CommandReturnType	m_expectedReturnType;
 	uint16_t				m_baseOffset;
@@ -122,7 +122,7 @@ public:
 	bool			ExtractDefaultArgs(va_list varArgs, bool bConvertTESForms);
 
 	// convert an extracted argument to type expected by ExtractArgs/Ex() and store in varArgs
-	bool			ConvertDefaultArg(ScriptToken* arg, ParamInfo* info, bool bConvertTESForms, va_list& varArgs);
+	bool			ConvertDefaultArg(ScriptToken* arg, SCRIPT_PARAMETER* info, bool bConvertTESForms, va_list& varArgs);
 
 	// extract formatted string args compiled with compiler override
 	bool ExtractFormatStringArgs(va_list varArgs, uint32_t fmtStringPos, char* fmtStringOut, uint32_t maxParams);
@@ -131,7 +131,7 @@ public:
 
 	ScriptToken*	Arg(uint32_t idx) { return idx < kMaxArgs ? m_args[idx] : NULL; }
 	uint8_t			NumArgs() { return m_numArgsExtracted; }
-	void			SetParams(ParamInfo* newParams)	{	m_params = newParams;	}
+	void			SetParams(SCRIPT_PARAMETER* newParams)	{	m_params = newParams;	}
 	void			ExpectReturnType(CommandReturnType type) { m_expectedReturnType = type; }
 	void			ToggleErrorSuppression(bool bSuppress);
 	void			PrintStackTrace();
@@ -151,84 +151,11 @@ public:
 
 bool BasicTokenToElem(ScriptToken* token, ArrayElement& elem, ExpressionEvaluator* context);
 
-class ExpressionParser
-{
-	enum { kMaxArgs = NVSE_EXPR_MAX_ARGS };
-
-	ScriptBuffer		* m_scriptBuf;
-	ScriptLineBuffer	* m_lineBuf;
-	uint32_t				m_len;
-	Token_Type			m_argTypes[kMaxArgs];
-	uint8_t				m_numArgsParsed;
-
-	enum {								// varargs
-		kError_CantParse,
-		kError_TooManyOperators,
-		kError_TooManyOperands,
-		kError_MismatchedBrackets,
-		kError_InvalidOperands,			// string:operator
-		kError_MismatchedQuotes,
-		kError_InvalidDotSyntax,
-		kError_CantFindVariable,		// string:varName
-		kError_ExpectedStringVariable,
-		kError_UnscriptedObject,		// string:objName
-		kError_TooManyArgs,	
-		kError_RefRequired,				// string:commandName
-		kError_MissingParam,			// string:paramName, int:paramIndex
-		kError_UserFuncMissingArgList,	// string:userFunctionName
-		kError_ExpectedUserFunction,
-		kError_UserFunctionContainsMultipleBlocks,
-		kError_UserFunctionVarsMustPrecedeDefinition,
-		kError_UserFunctionParamsUndefined,
-		kError_ExpectedStringLiteral,
-
-		kWarning_UnquotedString,		// string:unquotedString
-		kWarning_FunctionPointer,
-
-		kError_Max
-	};
-
-	static ErrOutput::Message	* s_Messages;
-
-	char	Peek(uint32_t idx = -1) {
-		if (idx == -1)	idx = m_lineBuf->lineOffset;
-		return (idx < m_len) ? m_lineBuf->paramText[idx] : 0;
-	}
-	uint32_t&	Offset()	{ return m_lineBuf->lineOffset; }
-	const char * Text()	{ return m_lineBuf->paramText; }
-	const char * CurText() { return Text() + Offset(); }
-
-	void	Message(uint32_t errorCode, ...);
-
-	Token_Type		Parse();
-	Token_Type		ParseSubExpression(uint32_t exprLen);
-	Operator *		ParseOperator(bool bExpectBinaryOperator, bool bConsumeIfFound = true);
-	ScriptToken	*	ParseOperand(Operator* curOp = NULL);
-	ScriptToken *	PeekOperand(uint32_t& outReadLen);
-	bool			ParseFunctionCall(CommandInfo* cmdInfo);
-	Token_Type		PopOperator(std::stack<Operator*> & ops, std::stack<Token_Type> & operands);
-
-	uint32_t	MatchOpenBracket(Operator* openBracOp);
-	std::string GetCurToken();
-	VariableInfo* LookupVariable(const char* varName, Script::RefVariable* refVar = NULL);
-
-public:
-	ExpressionParser(ScriptBuffer* scriptBuf, ScriptLineBuffer* lineBuf);
-	~ExpressionParser();
-
-	bool			ParseArgs(ParamInfo* params, uint32_t numParams, bool bUsesNVSEParamTypes = true);
-	bool			ValidateArgType(uint32_t paramType, Token_Type argType, bool bIsNVSEParam);
-	bool			ParseUserFunctionCall();
-	bool			ParseUserFunctionDefinition();
-	ScriptToken	*	ParseOperand(bool (* pred)(ScriptToken* operand));
-	Token_Type		ArgType(uint32_t idx) { return idx < kMaxArgs ? m_argTypes[idx] : kTokenType_Invalid; }
-};
-
 void ShowRuntimeError(Script* script, const char* fmt, ...);
-bool PrecompileScript(ScriptBuffer* buf);
+bool PrecompileScript(ScriptCompileData* buf);
 
 // NVSE analogue for Cmd_Default_Parse, accepts expressions as args
-bool Cmd_Expression_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf);
+bool Cmd_Expression_Parse(uint32_t auiParamCount, SCRIPT_PARAMETER* apParameters, SCRIPT_LINE* apScriptLine, ScriptCompileData* apCompileData);
 
 extern Operator s_operators[];
 

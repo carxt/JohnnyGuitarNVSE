@@ -8,14 +8,14 @@ class NiColor;
 
 class SPEC_EMPTY_BASES NiColorA : public BSMemObject {
 public:
-	NiColorA() noexcept;
 	explicit NiColorA(float afValue) noexcept;
 	explicit NiColorA(float afR, float afG, float afB) noexcept;
-	NiColorA(float afR, float afG, float afB, float afA) noexcept;
+	NiColorA(float afR = 0.f, float afG = 0.f, float afB = 0.f, float afA = 0.f) noexcept;
 	NiColorA(const NiColorA& arOther) noexcept;
 	explicit NiColorA(const NiPoint3& arOther) noexcept;
 	explicit NiColorA(const NiPoint4& arOther) noexcept;
 	explicit NiColorA(const NiColor& arOther) noexcept;
+	explicit NiColorA(const NiColor& arOther, float afA) noexcept;
 
 	float r;
 	float g;

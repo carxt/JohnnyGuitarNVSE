@@ -17,56 +17,55 @@
 extern DWORD dwGameStartTimestamp;
 
 SPEC_INLINE bool Cmd_GameGetSecondsPassed_Eval(COMMAND_ARGS_EVAL) {
-	*result = ThisCall<float>(0x07013E0, (void*)0x11F6394);
+	arResult = ThisCall<float>(0x07013E0, (void*)0x11F6394);
 	return true;
 }
 
 bool Cmd_GameGetSecondsPassed_Execute(COMMAND_ARGS) {
-	Cmd_GameGetSecondsPassed_Eval(thisObj, 0, 0, result);
+	Cmd_GameGetSecondsPassed_Eval(apRef, 0, 0, arResult);
 	if (IsConsoleMode())
-		Console_Print("GameGetSecondsPassed >> %0.2f", *result);
+		Console_Print("GameGetSecondsPassed >> %0.2f", arResult);
 	return true;
 }
 
 bool Cmd_NullNoArgs_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	return true;
 }
 
 bool Cmd_NullArgs_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	return true;
 }
 
 
 bool Cmd_GetAllGameRadios_Execute(COMMAND_ARGS) {
-	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(nullptr, 0, apScript);
 	tList<TESObjectACTI>* g_gameRadios = (tList<TESObjectACTI>*)0x11C8264;
 	for (auto radioIter = g_gameRadios->Begin(); !radioIter.End(); radioIter.Next()) {
 		if (*radioIter) {
 			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
 		}
 	}
-	g_arrInterface->AssignCommandResult(radioArr, result);
+	g_arrInterface->AssignCommandResult(radioArr, &arResult);
 	return true;
 }
 
-
 bool Cmd_GetAvailableRadios_Execute(COMMAND_ARGS) {
-	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(nullptr, 0, apScript);
 	tList<TESObjectACTI> availableRadios = {};
-	CdeclCall<void>(0x04FF1A0, thisObj, &availableRadios, nullptr);
+	CdeclCall<void>(0x04FF1A0, apRef, &availableRadios, nullptr);
 	for (auto radioIter = availableRadios.Begin(); !radioIter.End(); radioIter.Next()) {
 		if (*radioIter && !CdeclCall<bool>(0x0079BE30, *radioIter) && JohnnyRadios::IsAvailable((*radioIter)->GetFormID())) {
 			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
 		}
 	}
-	g_arrInterface->AssignCommandResult(radioArr, result);
+	g_arrInterface->AssignCommandResult(radioArr, &arResult);
 	return true;
 }
 
 bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	ThisCall(0x75F2A0, nullptr);
 	return true;
 }
@@ -77,7 +76,7 @@ bool Cmd_DumpIconMap_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_UpdateCrosshairPrompt_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	ThisCall(0x778B10, nullptr);
 	return true;
 }
@@ -95,22 +94,22 @@ enum EType {
 };
 
 bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	BOOL bStopAnim = FALSE;
-	Actor* pActor = static_cast<Actor*>(thisObj);
+	Actor* pActor = static_cast<Actor*>(apRef);
 	ExtractArgsEx(EXTRACT_ARGS_EX, &bStopAnim);
 	if (pActor && pActor->IsActor() && pActor->GetCurrentAIProcess() && pActor->GetCurrentAIProcess()->GetCurrentProcessIdle()) {
 		pActor->GetCurrentAIProcess()->ClearPostAnimationActions();
 		pActor->GetCurrentAIProcess()->SetCurrentProcessIdle(nullptr);
 		if (bStopAnim > 0)
 			ThisCall(0x498910, pActor->GetAnimation(), 1, 1); // SpecialIdleFree
-		*result = 1;
+		arResult = 1;
 	}
 	return true;
 }
 
 bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	int checkOutsideOfGameFolder = 0;
 	char dllName[MAX_PATH] = {};
 	char dllPath[MAX_PATH] = {};
@@ -123,19 +122,19 @@ bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
 				GetModuleFileNameA(module, dllPath, MAX_PATH);
 				GetModuleFileNameA(nullptr, fnvPath, MAX_PATH);
 				fnvPath[strlen(fnvPath) - 13] = '\0';
-				if (strstr(dllPath, fnvPath) != nullptr) *result = 1;
+				if (strstr(dllPath, fnvPath) != nullptr) arResult = 1;
 			}
 			else {
-				*result = 1;
+				arResult = 1;
 			}
 		}
-		if (IsConsoleMode()) Console_Print("IsDLLLoaded \"%s\" >> %.f", dllName, *result);
+		if (IsConsoleMode()) Console_Print("IsDLLLoaded \"%s\" >> %.f", dllName, arResult);
 	}
 	return true;
 }
 
 bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	uint32_t arrID, fullMatch;
 	BGSListForm* formList = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &formList, &fullMatch)) return true;
@@ -153,7 +152,7 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 			BSSimpleList<TESForm*>* pIter= formList->GetFormList();
 			while(pIter && !pIter->IsEmpty()) {
 				if (elements[i].GetTESForm() == pIter->GetItem()) {
-					*result = 1;
+					arResult = 1;
 					return true;
 				}
 				pIter = pIter->GetNext();
@@ -176,19 +175,19 @@ bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 				return true;
 			}
 		}
-		*result = 1;
+		arResult = 1;
 	}
 
 	return true;
 }
 
 bool Cmd_SetUIUpdateSound_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	TESSound* pSound = nullptr;
 	uint32_t uiType = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSound, &uiType) && pSound && IS_TYPE(pSound, TESSound) && uiType >= 1 && uiType <= 4) {
 		ExtraUISounds::SetQuestSound(pSound, QuestUpdateManager::UpdateType(uiType - 1));
-		*result = 1;
+		arResult = 1;
 	}
 	return true;
 }
@@ -204,13 +203,13 @@ private:
 };
 
 bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	uint32_t arrID;
 	uint32_t isReverse = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &isReverse)) return true;
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!inArr) return true;
-	NVSEArrayVar* outArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	NVSEArrayVar* outArr = g_arrInterface->CreateArray(nullptr, 0, apScript);
 	uint32_t size = g_arrInterface->GetArraySize(inArr);
 	BSScrapBuffer<NVSEArrayElement> elements(size);
 	g_arrInterface->GetElements(inArr, elements.get(), nullptr);
@@ -223,18 +222,18 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 		g_arrInterface->AppendElement(outArr, NVSEArrayElement(it->second));
 	}
 
-	g_arrInterface->AssignCommandResult(outArr, result);
+	g_arrInterface->AssignCommandResult(outArr, &arResult);
 	return true;
 }
 
 SPEC_NOINLINE bool Cmd_GetSequenceAnimGroup_Eval(COMMAND_ARGS_EVAL) {
-	*result = -1;
-	const uint32_t uiSequence = reinterpret_cast<uint32_t>(arg1);
-	if (thisObj && uiSequence < 8) {
-		const Animation* pAnim = thisObj->GetAnimation();
+	arResult = -1;
+	const uint32_t uiSequence = reinterpret_cast<uint32_t>(apParam1);
+	if (apRef && uiSequence < 8) {
+		const Animation* pAnim = apRef->GetAnimation();
 		if (pAnim && pAnim->animSequence[uiSequence]) {
 			const uint16_t usGroupID = pAnim->groupIDs[uiSequence] & 0xFF;
-			*result = usGroupID;
+			arResult = usGroupID;
 		}
 	}
 	return true;
@@ -243,34 +242,34 @@ SPEC_NOINLINE bool Cmd_GetSequenceAnimGroup_Eval(COMMAND_ARGS_EVAL) {
 bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
 	uint32_t uiSequence = UINT32_MAX;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &uiSequence);
-	return Cmd_GetSequenceAnimGroup_Eval(thisObj, reinterpret_cast<void*>(uiSequence), nullptr, result);
+	return Cmd_GetSequenceAnimGroup_Eval(apRef, reinterpret_cast<void*>(uiSequence), nullptr, arResult);
 }
 
 bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	TESForm* form = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) {
 		TESFile* pFile = form->GetFile(-1);
 		if (pFile)
-			*result = pFile->ucCompileIndex;
+			arResult = pFile->ucCompileIndex;
 		else
-			*result = 0xFF;
-		if (IsConsoleMode()) Console_Print("GetFormOverrideIndex >> %.f", *result);
+			arResult = 0xFF;
+		if (IsConsoleMode()) Console_Print("GetFormOverrideIndex >> %.f", arResult);
 	}
 	return true;
 }
 
 SPEC_NOINLINE bool Cmd_GetPipBoyMode_Eval(COMMAND_ARGS_EVAL) {
-	*result = 0;
+	arResult = 0;
 	if (InterfaceManager::GetSingleton())
-		*result = InterfaceManager::GetSingleton()->pipBoyMode;
+		arResult = InterfaceManager::GetSingleton()->pipBoyMode;
 	return true;
 }
 
 bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
-	Cmd_GetPipBoyMode_Eval(nullptr, nullptr, nullptr, result);
+	Cmd_GetPipBoyMode_Eval(nullptr, nullptr, nullptr, arResult);
 	if (IsConsoleMode())
-		Console_Print("GetPipBoyMode >> %.2f", *result);
+		Console_Print("GetPipBoyMode >> %.2f", arResult);
 	return true;
 }
 
@@ -278,7 +277,7 @@ bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 	char X_outS[VAR_NAME_SIZE] = {}, Y_outS[VAR_NAME_SIZE] = {}, Z_outS[VAR_NAME_SIZE] = {};
 	char nodeName[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nodeName, &X_outS, &Y_outS, &Z_outS)) {
-		NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->Get3D(), nodeName);
+		NiAVObject* pObject = BSUtilities::GetObjectByName(apRef->Get3D(), nodeName);
 		if (!pObject)
 			return true;
 
@@ -306,29 +305,29 @@ bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetDefaultHeapSize_Execute(COMMAND_ARGS) {
 	uint32_t heapSize = *(reinterpret_cast<uint32_t*>(0x866E9F + 1));
-	*result = heapSize / 1024 / 1024;
+	arResult = heapSize / 1024 / 1024;
 	if (IsConsoleMode())
-		Console_Print("DefaultHeapInitialAllocMB >> `%f", *result);
+		Console_Print("DefaultHeapInitialAllocMB >> `%f", arResult);
 	return true;
 }
 
 bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	char cEDID[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cEDID) && cEDID[0]) {
 		const TESForm* pForm = TESForm::GetFormByEditorID(cEDID);
 		if (pForm)
-			*reinterpret_cast<uint32_t*>(result) = pForm->GetFormID();
+			reinterpret_cast<uint32_t&>(arResult) = pForm->GetFormID();
 
 		if (IsConsoleMode())
-			Console_Print("EditorIDToFormID >> 0x%08X", *result);
+			Console_Print("EditorIDToFormID >> 0x%08X", arResult);
 	}
 	return true;
 }
 
 bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
 	TESForm* form = nullptr;
-	if (thisObj) Console_Print("0x%08X", thisObj);
+	if (apRef) Console_Print("0x%08X", apRef);
 	else if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) Console_Print("0x%08X", form);
 	return true;
 }
@@ -336,9 +335,9 @@ bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
 bool Cmd_RefAddrxData_Execute(COMMAND_ARGS) {
 	TESForm* form = nullptr;
 	DWORD type;
-	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
+	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
 		if (type < EXTRA_DATA_TYPE::COUNT) {
-			void* res = thisObj->GetExtraData(type);
+			void* res = apRef->GetExtraData(type);
 			if (res) {
 				Console_Print("0x%08X", res);
 				return true;
@@ -355,21 +354,21 @@ bool Cmd_AsmBreak_Execute(COMMAND_ARGS) {
 }
 
 SPEC_NOINLINE bool Cmd_GetTimePlayed_Eval(COMMAND_ARGS_EVAL) {
-	const uint32_t uiType = reinterpret_cast<uint32_t>(arg1);
+	const uint32_t uiType = reinterpret_cast<uint32_t>(apParam1);
 	const DWORD dwTickCount = GetTickCount();
 	const double dTimePlayed = dwTickCount - dwGameStartTimestamp;
 	switch (uiType) {
 	case 0:
-		*result = dTimePlayed;
+		arResult = dTimePlayed;
 		break;
 	case 1:
-		*result = dTimePlayed / 1000;
+		arResult = dTimePlayed / 1000;
 		break;
 	case 2:
-		*result = dTimePlayed / 60000;
+		arResult = dTimePlayed / 60000;
 		break;
 	default:
-		*result = 0;
+		arResult = 0;
 		break;
 	}
 	return true;
@@ -378,15 +377,15 @@ SPEC_NOINLINE bool Cmd_GetTimePlayed_Eval(COMMAND_ARGS_EVAL) {
 bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	uint32_t uiType = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &uiType);
-	Cmd_GetTimePlayed_Eval(nullptr, reinterpret_cast<void*>(uiType), nullptr, result);
+	Cmd_GetTimePlayed_Eval(nullptr, reinterpret_cast<void*>(uiType), nullptr, arResult);
 	if (IsConsoleMode())
-		Console_Print("GetTimePlayed >> %f", *result);
+		Console_Print("GetTimePlayed >> %f", arResult);
 	return true;
 }
 
 
 SPEC_NOINLINE bool Cmd_GetJohnnyPatch_Eval(COMMAND_ARGS_EVAL) {
-	const uint32_t uiPatch = reinterpret_cast<uint32_t>(arg1);
+	const uint32_t uiPatch = reinterpret_cast<uint32_t>(apParam1);
 	bool bEnabled = false;
 	switch (uiPatch) {
 		case 1:
@@ -413,17 +412,17 @@ SPEC_NOINLINE bool Cmd_GetJohnnyPatch_Eval(COMMAND_ARGS_EVAL) {
 		default:
 			break;
 	}
-	*result = bEnabled;
+	arResult = bEnabled;
 	return true;
 }
 
 bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	uint32_t uiPatch = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiPatch)) {
-		Cmd_GetJohnnyPatch_Eval(nullptr, reinterpret_cast<void*>(uiPatch), nullptr, result);
+		Cmd_GetJohnnyPatch_Eval(nullptr, reinterpret_cast<void*>(uiPatch), nullptr, arResult);
 		if (IsConsoleMode())
-			Console_Print("GetJohnnyPatch %d >> %d", uiPatch, *result);
+			Console_Print("GetJohnnyPatch %d >> %d", uiPatch, arResult);
 	}
 	return true;
 }
@@ -433,7 +432,7 @@ bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 	const char* edid = "";
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
 		if (!form)
-			form = thisObj;
+			form = apRef;
 		if (form)
 			edid = form->GetFormEditorID();
 		g_strInterface->Assign(PASS_COMMAND_ARGS, edid);
@@ -451,25 +450,25 @@ bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS) {
 	uintptr_t optIdx = -1;
-	*result = 0;
+	arResult = 0;
 	char boneName[MAX_PATH] = { 0 };
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, optIdx, &boneName)) {
 		if (optIdx > 4) return true;
-		auto doUpdateBone = [optIdx, &boneName, &result](BipedAnim* BipedAnim) {
+		auto doUpdateBone = [optIdx, &boneName, &arResult](BipedAnim* BipedAnim) {
 			if (BipedAnim) {
 				if (BipedAnim->pRoot && BipedAnim->pRoot->IsNode()) {
 					auto vb = CdeclCall<NiNode*>(0x04AAE30, BipedAnim->pRoot, boneName);
 					if (vb && vb->IsNode()) {
 						BipedAnim->kBones[optIdx].pParent = vb;
-						*result = 1;
+						arResult = 1;
 					}
 				}
 			}
 			};
-		if (thisObj && thisObj->IsCharacter()) {
-			doUpdateBone(((Character*)thisObj)->pBipedAnim);
-			if (thisObj == PlayerCharacter::GetSingleton()) {
-				doUpdateBone(((PlayerCharacter*)thisObj)->p1stPersonBipedAnim);
+		if (apRef && apRef->IsCharacter()) {
+			doUpdateBone(((Character*)apRef)->pBipedAnim);
+			if (apRef == PlayerCharacter::GetSingleton()) {
+				doUpdateBone(((PlayerCharacter*)apRef)->p1stPersonBipedAnim);
 			}
 		}
 	}
@@ -480,8 +479,8 @@ bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 	uintptr_t optIdx = -1;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &optIdx)) {
-		if (thisObj && thisObj->IsCharacter() && optIdx <= 4)
-			if (auto BipedAnim = ((Character*)thisObj)->pBipedAnim) {
+		if (apRef && apRef->IsCharacter() && optIdx <= 4)
+			if (auto BipedAnim = ((Character*)apRef)->pBipedAnim) {
 				if (BipedAnim->kBones[optIdx].pParent && BipedAnim->kBones[optIdx].pParent->IsNode()) {
 					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->kBones[optIdx].pParent->m_kName);
 					if (IsConsoleMode())
@@ -516,10 +515,10 @@ bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 		*(bool*)0x11C77E9 = uiNoFade;
 
 		ScreenCustomSplatter::ActivateAlt(uiCount, fDuration, fSizeMult, fOpacityMult, pAlphaTex, pColorTex, pFlareTex);
-		*result = 1;
+		arResult = 1;
 		return true;
 	}
-	*result = 0;
+	arResult = 0;
 	return false;
 }
 
@@ -527,14 +526,14 @@ bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	float fDistance = 0.f;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fDistance)) {
 		JohnnyPatches::fViewmodelNearDistance = fDistance;
-		*result = 1;
+		arResult = 1;
 	}
 	return true;
 }
 
 bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
-	*result = JohnnyPatches::fViewmodelNearDistance;
-	if (IsConsoleMode()) Console_Print("GetViewmodelClipDistance >> %.3f", *result);
+	arResult = JohnnyPatches::fViewmodelNearDistance;
+	if (IsConsoleMode()) Console_Print("GetViewmodelClipDistance >> %.3f", arResult);
 	return true;
 }
 
@@ -557,7 +556,7 @@ bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
-	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, apScript);
 	uint32_t arrID;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID)) return true;
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
@@ -584,12 +583,12 @@ bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
 	for (uint32_t i = 0; i < lAr_Size; i++) {
 		g_arrInterface->AppendElement(outArr, NVSEArrayElement(elements[i]));
 	}
-	g_arrInterface->AssignCommandResult(outArr, result);
+	g_arrInterface->AssignCommandResult(outArr, &arResult);
 	return true;
 }
 
 bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
-	*result = 0;
+	arResult = 0;
 	ScriptVar* pRed = nullptr;
 	ScriptVar* pGreen = nullptr;
 	ScriptVar* pBlue = nullptr;
@@ -603,7 +602,7 @@ bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
 		pBlue->data = rColor.b;
 		if (IsConsoleMode()) 
 			Console_Print("GetCurrentSkyColor %d >> %f %f %f", eColorType, rColor.r, rColor.g, rColor.b);
-		*result = 1;
+		arResult = 1;
 	}
 	return true;
 }
@@ -625,24 +624,24 @@ bool Cmd_StopIdleLoop_Execute(COMMAND_ARGS) {
 		if (eGroup != -1 && (eGroup < 0 || eGroup > 7))
 			return true;
 
-		if (thisObj == PlayerCharacter::GetSingleton()) {
-			PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(thisObj);
+		if (apRef == PlayerCharacter::GetSingleton()) {
+			PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(apRef);
 			Animation* pAnimation = pPlayer->GetAnimation(true);
 			if (pAnimation) {
 				StopAnimLoop(pAnimation, eGroup);
-				*result = 1;
+				arResult = 1;
 			}
 			pAnimation = pPlayer->GetAnimation(false);
 			if (pAnimation) {
 				StopAnimLoop(pAnimation, eGroup);
-				*result = 1;
+				arResult = 1;
 			}
 		}
 		else {
-			Animation* pAnimation = thisObj->GetAnimation();
+			Animation* pAnimation = apRef->GetAnimation();
 			if (pAnimation) {
 				StopAnimLoop(pAnimation, eGroup);
-				*result = 1;
+				arResult = 1;
 			}
 		}
 
