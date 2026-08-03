@@ -6,7 +6,7 @@ namespace RadioSkipOGGWAVPatch {
 	//Fix playback
 	unsigned int BSWin32Audio_GetTimePassed()
 	{
-		auto pBSWin32Audio = BSWin32Audio::GetSingleton();
+		auto pBSWin32Audio = BSAudio::GetSingleton();
 		return ThisCall<unsigned int>(0x63D040, pBSWin32Audio);
 
 	}

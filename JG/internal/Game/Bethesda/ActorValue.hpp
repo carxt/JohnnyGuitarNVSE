@@ -140,11 +140,17 @@ public:
 
 	static bool GetFlag(Index aeIndex, uint32_t auiFlag);
 
+	static float ClampActorValue(Index aeIndex, float afValue);
+
 	static uint8_t ToArrayIndex(Section aeSection, Index aeIndex);
 
-	static Index ToActorValue(Section aeSection, uint8_t aeIndex);
+	static Index ToActorValue(Section aeSection, uint8_t aucIndex);
+
+	static ActorValueInfo* GetActorValueInfo(Index aeIndex);
 
 	static const char* GetActorValueName(Index aeIndex);
+
+	static const char* GetActorValueScriptName(Index aeIndex);
 
 	static void CheckCallModifiedCallback(ActorValueOwner* apActor, Index aeIndex, float afOldVal, float afNewVal, ActorValueOwner* apActorSource = nullptr);
 };

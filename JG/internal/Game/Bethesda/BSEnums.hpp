@@ -2,6 +2,9 @@
 
 #pragma region Forms
 
+using FormID	= uint32_t;
+using RefID		= uint32_t;
+
 struct _FormType {
 	enum Type : uint32_t {
 		NONE = 0,
@@ -333,6 +336,42 @@ struct _SitSleepState {
 	};
 };
 using SIT_SLEEP_STATE = _SitSleepState::State;
+
+struct _LifeState {
+	enum State {
+		ALIVE			= 0,
+		DYING			= 1,
+		DEAD			= 2,
+		UNCONSCIOUS		= 3,
+		REANIMATE		= 4,
+		RESTRAINED		= 5,
+		ESSENTIAL_DOWN	= 6,
+	};
+};
+using ACTOR_LIFE_STATE = _LifeState::State;
+
+struct _CriticalStage {
+	enum Stage {
+		NONE				= 0,
+		GOO_START			= 1,
+		GOO_END				= 2,
+		DISINTEGRATE_START	= 3,
+		DISINTEGRATE_END	= 4,
+		COUNT				= 5,
+	};
+};
+using ACTOR_CRITICAL_STAGE = _CriticalStage::Stage;
+
+struct _FightReaction {
+	enum Type : uint32_t {
+		NEUTRAL	= 0,
+		ENEMY	= 1,
+		ALLY	= 2,
+		FRIEND	= 3,
+		COUNT,
+	};
+};
+using FIGHT_REACTION = _FightReaction::Type;
 
 #pragma endregion
 
@@ -919,7 +958,7 @@ struct _AnimGroup {
 		COUNT,
 	};
 };
-using ANIM_GROUP = _AnimGroup::Group;
+using ANIM_GROUP_TYPE = _AnimGroup::Group;
 
 enum ANIM_GROUP_ACTION {
 	AGA_NONE					= -1,
@@ -1047,79 +1086,35 @@ struct _AnimationIdlePlayType {
 };
 using ANIM_IDLE_PLAY_TYPE = _AnimationIdlePlayType::Type;
 
-#pragma endregion
-
-#pragma region Weapons
-
-enum WEAPON_TYPE {
-	WEAPON_TYPE_HAND_TO_HAND_MELEE		= 0,
-	WEAPON_TYPE_ONE_HAND_MELEE			= 1,
-	WEAPON_TYPE_TWO_HAND_MELEE			= 2,
-	WEAPON_TYPE_ONE_HAND_PISTOL			= 3,
-	WEAPON_TYPE_ONE_HAND_PISTOL_ENERGY	= 4,
-	WEAPON_TYPE_TWO_HAND_RIFLE			= 5,
-	WEAPON_TYPE_TWO_HAND_AUTOMATIC		= 6,
-	WEAPON_TYPE_TWO_HAND_RIFLE_ENERGY	= 7,
-	WEAPON_TYPE_TWO_HAND_HANDLE			= 8,
-	WEAPON_TYPE_TWO_HAND_LAUNCHER		= 9,
-	WEAPON_TYPE_ONE_HAND_GRENADE		= 10,
-	WEAPON_TYPE_ONE_HAND_MINE			= 11,
-	WEAPON_TYPE_ONE_HAND_LUNCHBOX_MINE	= 12,
-	WEAPON_TYPE_ONE_HAND_THROWN			= 13,
-	WEAPON_TYPE_COUNT,
+struct _AttackAnimation {
+	enum Animation {
+		DEFAULT				= 255,
+		ATTACK_3			= 38,
+		ATTACK_4			= 44,
+		ATTACK_5			= 50,
+		ATTACK_6			= 56,
+		ATTACK_7			= 62,
+		ATTACK_8			= 68,
+		ATTACK_9			= 144,
+		ATTACK_LEFT			= 26,
+		ATTACK_LOOP			= 74,
+		ATTACK_RIGHT		= 32,
+		ATTACK_SPIN			= 80,
+		ATTACK_SPIN_2		= 86,
+		ATTACK_THROW		= 114,
+		ATTACK_THROW_2		= 120,
+		ATTACK_THROW_3		= 126,
+		ATTACK_THROW_4		= 132,
+		ATTACK_THROW_5		= 138,
+		ATTACK_THROW_6		= 150,
+		ATTACK_THROW_7		= 156,
+		ATTACK_THROW_8		= 162,
+		PLACE_MINE			= 102,
+		PLACE_MINE_2		= 108,
+		COUNT				= 23,
+	};
 };
-
-enum COMBAT_WEAPON_TYPE {
-	COMBAT_WEAPON_TYPE_RANGED_EXPLOSIVE = 0,
-	COMBAT_WEAPON_TYPE_RANGED			= 1,
-	COMBAT_WEAPON_TYPE_MELEE			= 2,
-	COMBAT_WEAPON_TYPE_GRENADE			= 3,
-	COMBAT_WEAPON_TYPE_MINE				= 4,
-	COMBAT_WEAPON_TYPE_THROWN			= 5,
-	COMBAT_WEAPON_TYPE_NONE				= 6,
-	COMBAT_WEAPON_TYPE_INVALID			= 7,
-
-	COMBAT_WEAPON_TYPE_COUNT = COMBAT_WEAPON_TYPE_NONE,
-};
-
-enum WEAPON_SOUND {
-	WEAPON_SOUND_SHOOT_3D = 0,
-	WEAPON_SOUND_SHOOT_2D,
-	WEAPON_SOUND_SHOOT_3D_LOOPING,
-	WEAPON_SOUND_NO_AMMO,
-	WEAPON_SOUND_SWING = WEAPON_SOUND_NO_AMMO,
-	WEAPON_SOUND_BLOCK,
-	WEAPON_SOUND_IDLE,
-	WEAPON_SOUND_EQUIP,
-	WEAPON_SOUND_UNEQUIP
-};
-
-enum ATTACK_ANIMATION {
-	ATTACK_ANIMATION_DEFAULT		= 255,
-	ATTACK_ANIMATION_ATTACK_3		= 38,
-	ATTACK_ANIMATION_ATTACK_4		= 44,
-	ATTACK_ANIMATION_ATTACK_5		= 50,
-	ATTACK_ANIMATION_ATTACK_6		= 56,
-	ATTACK_ANIMATION_ATTACK_7		= 62,
-	ATTACK_ANIMATION_ATTACK_8		= 68,
-	ATTACK_ANIMATION_ATTACK_9		= 144,
-	ATTACK_ANIMATION_ATTACK_LEFT	= 26,
-	ATTACK_ANIMATION_ATTACK_LOOP	= 74,
-	ATTACK_ANIMATION_ATTACK_RIGHT	= 32,
-	ATTACK_ANIMATION_ATTACK_SPIN	= 80,
-	ATTACK_ANIMATION_ATTACK_SPIN_2	= 86,
-	ATTACK_ANIMATION_ATTACK_THROW	= 114,
-	ATTACK_ANIMATION_ATTACK_THROW_2 = 120,
-	ATTACK_ANIMATION_ATTACK_THROW_3 = 126,
-	ATTACK_ANIMATION_ATTACK_THROW_4 = 132,
-	ATTACK_ANIMATION_ATTACK_THROW_5 = 138,
-	ATTACK_ANIMATION_ATTACK_THROW_6 = 150,
-	ATTACK_ANIMATION_ATTACK_THROW_7 = 156,
-	ATTACK_ANIMATION_ATTACK_THROW_8 = 162,
-	ATTACK_ANIMATION_PLACE_MINE		= 102,
-	ATTACK_ANIMATION_PLACE_MINE_2	= 108,
-	ATTACK_ANIMATION_COUNT			= 23,
-};
+using ATTACK_ANIMATION = _AttackAnimation::Animation;
 
 enum RELOAD_ANIM {
 	RELOAD_ANIM_A = 0,
@@ -1147,14 +1142,79 @@ enum RELOAD_ANIM {
 	RELOAD_ANIM_Z,
 	RELOAD_ANIM_COUNT,
 };
-static_assert(RELOAD_ANIM_COUNT == 23);
 
-enum WEAPON_RUMBLE_PATTERN {
-	WEAPON_RUMBLE_PATTERN_CONSTANT = 0,
-	WEAPON_RUMBLE_PATTERN_SQUARE,
-	WEAPON_RUMBLE_PATTERN_TRIANGLE,
-	WEAPON_RUMBLE_PATTERN_SAWTOOTH
+#pragma endregion
+
+#pragma region Weapons
+
+struct _WeaponType {
+	enum Type {
+		HAND_TO_HAND_MELEE		= 0,
+		ONE_HAND_MELEE			= 1,
+		TWO_HAND_MELEE			= 2,
+		ONE_HAND_PISTOL			= 3,
+		ONE_HAND_PISTOL_ENERGY	= 4,
+		TWO_HAND_RIFLE			= 5,
+		TWO_HAND_AUTOMATIC		= 6,
+		TWO_HAND_RIFLE_ENERGY	= 7,
+		TWO_HAND_HANDLE			= 8,
+		TWO_HAND_LAUNCHER		= 9,
+		ONE_HAND_GRENADE		= 10,
+		ONE_HAND_MINE			= 11,
+		ONE_HAND_LUNCHBOX_MINE	= 12,
+		ONE_HAND_THROWN			= 13,
+		COUNT,
+	};
 };
+using WEAPON_TYPE = _WeaponType::Type;
+
+struct _WeaponSound {
+	enum Sound {
+		SHOOT_3D = 0,
+		SHOOT_2D,
+		SHOOT_3D_LOOPING,
+		NO_AMMO,
+		SWING = NO_AMMO,
+		BLOCK,
+		IDLE,
+		EQUIP,
+		UNEQUIP
+	};
+};
+using WEAPON_SOUND = _WeaponSound::Sound;
+
+struct _WeaponRumblePattern {
+	enum Pattern {
+		CONSTANT = 0,
+		SQUARE,
+		TRIANGLE,
+		SAWTOOTH
+	};
+};
+using WEAPON_RUMBLE_PATTERN = _WeaponRumblePattern::Pattern;
+
+struct _WeaponModEffectType {
+	enum Type : uint32_t {
+		NONE					= 0,
+		INCREASE_WEAPON_DAMAGE	= 1,
+		INCREASE_CLIP_SIZE		= 2,
+		DECREASE_SPREAD			= 3,
+		DECREASE_WEIGHT			= 4,
+		AMMO_REGEN_SHOT			= 5,
+		AMMO_REGEN_SECONDS		= 6,
+		EQUIP_SPEED				= 7,
+		FIRE_SPEED				= 8,
+		PROJECTILE_SPEED		= 9,
+		MAX_HEALTH				= 10,
+		SILENCE					= 11,
+		SPLIT_BEAM				= 12,
+		VATS_BONUS				= 13,
+		IRON_SITES				= 14,
+		VATS_SPECIAL_ATTACK		= 15,
+		COUNT,
+	};
+};
+using WEAPON_MOD_EFFECT_TYPE = _WeaponModEffectType::Type;
 
 #pragma endregion
 
@@ -1280,14 +1340,16 @@ enum COMBAT_EXECUTION_FLAGS : uint32_t {
 	COMBAT_EXECUTION_FLAG_CAN_MELEE_TARGET	= 18,
 	COMBAT_EXECUTION_FLAG_START				= COMBAT_EXECUTION_FLAG_GROUP_SEARCHING,
 	COMBAT_EXECUTION_FLAG_COUNT				= 19,
-
 };
 
-enum COMBAT_ITEM_TYPE {
-	COMBAT_ITEM_TYPE_RESTORE	= 0,
-	COMBAT_ITEM_TYPE_BUFF		= 1,
-	COMBAT_ITEM_TYPE_COUNT,
+struct _CombatItemType {
+	enum Type {
+		RESTORE,
+		BUFF,
+		COUNT,
+	};
 };
+using COMBAT_ITEM_TYPE = _CombatItemType::Type;
 
 struct _LocationTargetType {
 	enum Type : uint8_t {
@@ -1362,6 +1424,22 @@ struct _CombatGroupStrategy {
 };
 using COMBAT_GROUP_STRATEGY = _CombatGroupStrategy::Type;
 
+struct _CombatWeaponType {
+	enum Type {
+		RANGED_EXPLOSIVE	= 0,
+		RANGED				= 1,
+		MELEE				= 2,
+		GRENADE				= 3,
+		MINE				= 4,
+		THROWN				= 5,
+		NONE				= 6,
+		INVALID				= 7,
+
+		COUNT = NONE,
+	};
+};
+using COMBAT_WEAPON_TYPE = _CombatWeaponType::Type;
+
 #pragma endregion
 
 #pragma region Sex
@@ -1378,6 +1456,8 @@ struct _Sex {
 using SEX = _Sex::Sex;
 
 #pragma endregion
+
+#pragma region Dialogue
 
 struct _DialogueType {
 	enum Type {
@@ -1404,6 +1484,21 @@ struct _DialogueSpeaker {
 };
 using DIALOGUE_SPEAKER = _DialogueSpeaker::Type;
 
+struct _DialogueEmotion {
+	enum Emotion {
+		NEUTRAL		= 0,
+		ANGER		= 1,
+		DISGUST		= 2,
+		FEAR		= 3,
+		SAD			= 4,
+		HAPPY		= 5,
+		SURPRISE	= 6,
+		PAINED		= 7,
+		COUNT
+	};
+};
+using DIALOGUE_EMOTION = _DialogueEmotion::Emotion;
+
 struct _DialogueScriptType {
 	enum Type : uint32_t {
 		BEGIN = 0,
@@ -1413,16 +1508,7 @@ struct _DialogueScriptType {
 };
 using DIALOGUE_SCRIPT_TYPE = _DialogueScriptType::Type;
 
-struct _FightReaction {
-	enum Type : uint32_t {
-		NEUTRAL	= 0,
-		ENEMY	= 1,
-		ALLY	= 2,
-		FRIEND	= 3,
-		COUNT,
-	};
-};
-using FIGHT_REACTION = _FightReaction::Type;
+#pragma endregion
 
 struct _ActorSegmentInView {
 	enum Type : uint32_t {
@@ -1548,13 +1634,6 @@ enum SoundMessageType : uint32_t {
 	SM_SET_SPEED				= 0x42,
 };
 
-enum SCRIPT_COMPILER_NAME : uint32_t {
-	DEFAULT_COMPILER		= 0,
-	SYSTEM_WINDOW_COMPILER	= 1,
-	DIALOGUE_COMPILER		= 2,
-	COMPILER_NAME_COUNT,
-};
-
 struct _RayCastPathRequestType {
 	enum Type : uint32_t {
 		START	= 0,
@@ -1572,6 +1651,8 @@ struct _RayCastPathResult {
 	};
 };
 using RAYCAST_PATH_RESULT = _RayCastPathResult::Result;
+
+#pragma region Archives
 
 struct _ArchiveTypeIndex {
 	enum Index : uint32_t {
@@ -1606,6 +1687,8 @@ struct _ArchiveType {
 	};
 };
 using ARCHIVE_TYPE = _ArchiveType::Type;
+
+#pragma endregion
 
 struct _BodyPartType {
 	enum Type : int32_t {
@@ -1666,6 +1749,8 @@ struct _CreatureType {
 };
 using CREATURE_TYPE = _CreatureType::Type;
 
+#pragma region Ammo
+
 struct _AmmoEffectType {
 	enum Type : uint32_t {
 		DAMAGE				= 0,
@@ -1689,28 +1774,9 @@ struct _AmmoOperationType {
 };
 using AMMO_OPERATION_TYPE = _AmmoOperationType::Type;
 
-struct _WeaponModEffectType {
-	enum Type : uint32_t {
-		NONE					= 0,
-		INCREASE_WEAPON_DAMAGE	= 1,
-		INCREASE_CLIP_SIZE		= 2,
-		DECREASE_SPREAD			= 3,
-		DECREASE_WEIGHT			= 4,
-		AMMO_REGEN_SHOT			= 5,
-		AMMO_REGEN_SECONDS		= 6,
-		EQUIP_SPEED				= 7,
-		FIRE_SPEED				= 8,
-		PROJECTILE_SPEED		= 9,
-		MAX_HEALTH				= 10,
-		SILENCE					= 11,
-		SPLIT_BEAM				= 12,
-		VATS_BONUS				= 13,
-		IRON_SITES				= 14,
-		VATS_SPECIAL_ATTACK		= 15,
-		COUNT,
-	};
-};
-using WEAPON_MOD_EFFECT_TYPE = _WeaponModEffectType::Type;
+#pragma endregion
+
+#pragma region Biped
 
 struct _BipedObject {
 	enum Object : int32_t {
@@ -1753,6 +1819,8 @@ struct _BipedBone {
 };
 using BIPED_BONE = _BipedBone::Bone;
 
+#pragma endregion
+
 struct _IOTaskPriority {
 	enum Priority {
 		CRITICAL		= 0,
@@ -1769,6 +1837,8 @@ struct _IOTaskPriority {
 	};
 };
 using IO_TASK_PRIORITY = _IOTaskPriority::Priority;
+
+#pragma region Culling
 
 struct _BSCullingType {
 	enum Type : uint32_t {
@@ -1790,6 +1860,8 @@ struct _BSCullResult {
 	};
 };
 using BS_CULL_RESULT = _BSCullResult::Result;
+
+#pragma endregion
 
 struct _BSIntersectResult {
 	enum Result : uint32_t {
@@ -1848,6 +1920,8 @@ struct _LODMult {
 };
 using LOD_MULT = _LODMult::Mult;
 
+#pragma region Conditions
+
 struct _ConditionRunOn {
 	enum RunOn : uint32_t {
 		SUBJECT,
@@ -1873,6 +1947,8 @@ struct _ConditionComparison {
 };
 using CONDITION_COMPARISON = _ConditionComparison::Comparison;
 
+#pragma endregion
+
 struct _LockLevel {
 	enum Level {
 		VERY_EASY,
@@ -1895,31 +1971,6 @@ struct _SoundLevel {
 	};
 };
 using SOUND_LEVEL = _SoundLevel::Level;
-
-struct _LifeState {
-	enum State {
-		ALIVE			= 0,
-		DYING			= 1,
-		DEAD			= 2,
-		UNCONSCIOUS		= 3,
-		REANIMATE		= 4,
-		RESTRAINED		= 5,
-		ESSENTIAL_DOWN	= 6,
-	};
-};
-using ACTOR_LIFE_STATE = _LifeState::State;
-
-struct _CriticalStage {
-	enum Stage {
-		NONE				= 0,
-		GOO_START			= 1,
-		GOO_END				= 2,
-		DISINTEGRATE_START	= 3,
-		DISINTEGRATE_END	= 4,
-		COUNT				= 5,
-	};
-};
-using ACTOR_CRITICAL_STAGE = _CriticalStage::Stage;
 
 struct _CreatureSoundType {
 	enum Type {
@@ -1950,20 +2001,14 @@ struct _CreatureSoundType {
 };
 using CREATURE_SOUND_TYPE = _CreatureSoundType::Type;
 
-struct _DialogueEmotion {
-	enum Emotion {
-		NEUTRAL		= 0,
-		ANGER		= 1,
-		DISGUST		= 2,
-		FEAR		= 3,
-		SAD			= 4,
-		HAPPY		= 5,
-		SURPRISE	= 6,
-		PAINED		= 7,
-		COUNT
-	};
+#pragma region Script
+
+enum SCRIPT_COMPILER_NAME : uint32_t {
+	DEFAULT_COMPILER		= 0,
+	SYSTEM_WINDOW_COMPILER	= 1,
+	DIALOGUE_COMPILER		= 2,
+	COMPILER_NAME_COUNT,
 };
-using DIALOGUE_EMOTION = _DialogueEmotion::Emotion;
 
 struct _ScriptParamType {
 	enum Type : uint32_t {
@@ -1977,7 +2022,7 @@ struct _ScriptParamType {
 		SPELL_ITEM					= 0x07,	// SpellItem || TESObjectBOOK
 		AXIS						= 0x08,	// X Y Z
 		CELL						= 0x09,	// TESObjectCELL
-		ANIMATION_GROUP				= 0x0A,	// ANIM_GROUP
+		ANIMATION_GROUP				= 0x0A,	// ANIM_GROUP_TYPE
 		MAGIC_ITEM					= 0x0B,	// MagicItem
 		SOUND						= 0x0C,	// TESSound
 		TOPIC						= 0x0D,	// TESTopic
@@ -2060,3 +2105,664 @@ struct _ScriptVarType {
 	};
 };
 using SCRIPT_VARIABLE_TYPE = _ScriptVarType::Type;
+
+#pragma endregion
+
+struct _ChunkID {
+	enum ID {
+		NO_CHUNK = 0x0,
+		HEDR_ID = 0x52444548,
+		MAST_ID = 0x5453414D,
+		DELE_ID = 0x454C4544,
+		SCRD_ID = 0x44524353,
+		SCRS_ID = 0x53524353,
+		NAME_ID = 0x454D414E,
+		OBND_ID = 0x444E424F,
+		MODL_ID = 0x4C444F4D,
+		MODD_ID = 0x44444F4D,
+		MOSD_ID = 0x44534F4D,
+		MOD2_ID = 0x32444F4D,
+		MOD3_ID = 0x33444F4D,
+		MOD4_ID = 0x34444F4D,
+		MODT_ID = 0x54444F4D,
+		MO2T_ID = 0x54324F4D,
+		MO3T_ID = 0x54334F4D,
+		MO4T_ID = 0x54344F4D,
+		MODS_ID = 0x53444F4D,
+		MO2S_ID = 0x53324F4D,
+		MO3S_ID = 0x53334F4D,
+		MO4S_ID = 0x53344F4D,
+		MWD1_ID = 0x3144574D,
+		MWD2_ID = 0x3244574D,
+		MWD3_ID = 0x3344574D,
+		MWD4_ID = 0x3444574D,
+		MWD5_ID = 0x3544574D,
+		MWD6_ID = 0x3644574D,
+		MWD7_ID = 0x3744574D,
+		MWT1_ID = 0x3154574D,
+		MWT2_ID = 0x3254574D,
+		MWT3_ID = 0x3354574D,
+		MWT4_ID = 0x3454574D,
+		MWT5_ID = 0x3554574D,
+		MWT6_ID = 0x3654574D,
+		MWT7_ID = 0x3754574D,
+		KFFZ_ID = 0x5A46464B,
+		NIFZ_ID = 0x5A46494E,
+		NIFT_ID = 0x5446494E,
+		ANAM_ID = 0x4D414E41,
+		BNAM_ID = 0x4D414E42,
+		CNAM_ID = 0x4D414E43,
+		DNAM_ID = 0x4D414E44,
+		ENAM_ID = 0x4D414E45,
+		FNAM_ID = 0x4D414E46,
+		GNAM_ID = 0x4D414E47,
+		HNAM_ID = 0x4D414E48,
+		INAM_ID = 0x4D414E49,
+		JNAM_ID = 0x4D414E4A,
+		KNAM_ID = 0x4D414E4B,
+		LNAM_ID = 0x4D414E4C,
+		MNAM_ID = 0x4D414E4D,
+		NNAM_ID = 0x4D414E4E,
+		ONAM_ID = 0x4D414E4F,
+		PNAM_ID = 0x4D414E50,
+		CLNM_ID = 0x4D414E51,
+		RNAM_ID = 0x4D414E52,
+		SNAM_ID = 0x4D414E53,
+		TNAM_ID = 0x4D414E54,
+		UNAM_ID = 0x4D414E55,
+		VNAM_ID = 0x4D414E56,
+		WNAM_ID = 0x4D414E57,
+		WNM1_ID = 0x314D4E57,
+		WNM2_ID = 0x324D4E57,
+		WNM3_ID = 0x334D4E57,
+		WNM4_ID = 0x344D4E57,
+		WNM5_ID = 0x354D4E57,
+		WNM6_ID = 0x364D4E57,
+		WNM7_ID = 0x374D4E57,
+		WMI1_ID = 0x31494D57,
+		WMI2_ID = 0x32494D57,
+		WMI3_ID = 0x33494D57,
+		XNAM_ID = 0x4D414E58,
+		YNAM_ID = 0x4D414E59,
+		ZNAM_ID = 0x4D414E5A,
+		NAM1_ID = 0x314D414E,
+		NAM2_ID = 0x324D414E,
+		NAM3_ID = 0x334D414E,
+		NAM4_ID = 0x344D414E,
+		NAM5_ID = 0x354D414E,
+		NAM6_ID = 0x364D414E,
+		NAM7_ID = 0x374D414E,
+		NAM8_ID = 0x384D414E,
+		NAM9_ID = 0x394D414E,
+		NAM0_ID = 0x304D414E,
+		WMS1_ID = 0x31534D57,
+		WMS2_ID = 0x32534D57,
+		RCLR_ID = 0x524C4352,
+		RPLD_ID = 0x444C5052,
+		RPLI_ID = 0x494C5052,
+		RDAT_ID = 0x54414452,
+		RDOB_ID = 0x424F4452,
+		RDOJ_ID = 0x4A4F4452,
+		RDOT_ID = 0x544F4452,
+		RDWT_ID = 0x54574452,
+		RDMP_ID = 0x504D4452,
+		RDLN_ID = 0x4E4C4452,
+		RDGS_ID = 0x53474452,
+		RDMD_ID = 0x444D4452,
+		RDMO_ID = 0x4F4D4452,
+		RDSD_ID = 0x44534452,
+		RDSI_ID = 0x49534452,
+		RDSB_ID = 0x42534452,
+		RDID_ID = 0x44494452,
+		XIDX_ID = 0x58444958,
+		XACT_ID = 0x54434158,
+		XOWN_ID = 0x4E574F58,
+		XGLB_ID = 0x424C4758,
+		XRNK_ID = 0x4B4E5258,
+		XHLT_ID = 0x544C4858,
+		XHLP_ID = 0x504C4858,
+		XUSE_ID = 0x45535558,
+		XTIM_ID = 0x4D495458,
+		XCNT_ID = 0x544E4358,
+		XCHG_ID = 0x47484358,
+		XSOL_ID = 0x4C4F5358,
+		XSCL_ID = 0x4C435358,
+		XLOC_ID = 0x434F4C58,
+		XTEL_ID = 0x4C455458,
+		XMRK_ID = 0x4B524D58,
+		MMRK_ID = 0x4B524D4D,
+		AMRK_ID = 0x4B524D41,
+		XEDL_ID = 0x4C444558,
+		XPSL_ID = 0x4C535058,
+		XSED_ID = 0x44455358,
+		XPCI_ID = 0x49435058,
+		XRGD_ID = 0x44475258,
+		XRGB_ID = 0x42475258,
+		XLOD_ID = 0x444F4C58,
+		XESP_ID = 0x50534558,
+		XRTM_ID = 0x4D545258,
+		XLKR_ID = 0x524B4C58,
+		XACR_ID = 0x52434158,
+		XAPD_ID = 0x44504158,
+		XAPR_ID = 0x52504158,
+		XATO_ID = 0x4F544158,
+		XMRC_ID = 0x43524D58,
+		XHRS_ID = 0x53524858,
+		XPSN_ID = 0x4E535058,
+		XTRG_ID = 0x47525458,
+		XLCM_ID = 0x4D434C58,
+		XDCR_ID = 0x52434458,
+		XRDS_ID = 0x53445258,
+		XRAD_ID = 0x44415258,
+		XLMB_ID = 0x424D4C58,
+		XMBR_ID = 0x52424D58,
+		XMBO_ID = 0x4F424D58,
+		XEMI_ID = 0x494D4558,
+		XRDO_ID = 0x4F445258,
+		XCLC_ID = 0x434C4358,
+		XCLL_ID = 0x4C4C4358,
+		XCLW_ID = 0x574C4358,
+		XCWT_ID = 0x54574358,
+		XCLR_ID = 0x524C4358,
+		XCLM_ID = 0x4D4C4358,
+		XCMT_ID = 0x544D4358,
+		XCMO_ID = 0x4F4D4358,
+		XCET_ID = 0x54454358,
+		XCCM_ID = 0x4D434358,
+		XCIM_ID = 0x4D494358,
+		XCAS_ID = 0x53414358,
+		XPWR_ID = 0x52575058,
+		XRFB_ID = 0x42465258,
+		XWLT_ID = 0x544C5758,
+		XLTW_ID = 0x57544C58,
+		XNVP_ID = 0x50564E58,
+		XNDP_ID = 0x50444E58,
+		XLCR_ID = 0x504C4358,
+		XPRM_ID = 0x4D525058,
+		XPRD_ID = 0x44525058,
+		XPPA_ID = 0x41505058,
+		XOCP_ID = 0x50434F58,
+		XORD_ID = 0x44524F58,
+		XPOD_ID = 0x444F5058,
+		XPTL_ID = 0x4C545058,
+		XROO_ID = 0x4F4F5258,
+		XRMR_ID = 0x524D5258,
+		XLRM_ID = 0x4D524C58,
+		XMBP_ID = 0x50424D58,
+		XTRI_ID = 0x49525458,
+		XAMC_ID = 0x434D4158,
+		XAMT_ID = 0x544D4158,
+		XEZN_ID = 0x4E5A4558,
+		XIBS_ID = 0x53424958,
+		XWMS_ID = 0x534D5758,
+		XSRF_ID = 0x46525358,
+		XSRD_ID = 0x44525358,
+		ACTN_ID = 0x4E544341,
+		STPR_ID = 0x52505453,
+		SOUL_ID = 0x4C554F53,
+		SLCP_ID = 0x50434C53,
+		CIDA_ID = 0x41445443,
+		TRDT_ID = 0x54445254,
+		TCLT_ID = 0x544C4354,
+		TCLF_ID = 0x464C4354,
+		TCFU_ID = 0x55464354,
+		TDUM_ID = 0x4D554454,
+		ESCE_ID = 0x45435345,
+		ESCS_ID = 0x53435345,
+		ESBS_ID = 0x53425345,
+		ESHS_ID = 0x53485345,
+		ESAS_ID = 0x53415345,
+		WIDX_ID = 0x58444957,
+		MODQ_ID = 0x51444F4D,
+		DATA_ID = 0x41544144,
+		ATDM_ID = 0x4D445441,
+		ACBS_ID = 0x53424341,
+		ATTR_ID = 0x52545441,
+		DESC_ID = 0x43534544,
+		INDX_ID = 0x58444E49,
+		STRV_ID = 0x56525453,
+		INTV_ID = 0x56544E49,
+		FLTV_ID = 0x56544C46,
+		DODT_ID = 0x54444F44,
+		NPAC_ID = 0x4341504E,
+		ND3D_ID = 0x4433444E,
+		ANIS_ID = 0x53494E41,
+		CNTO_ID = 0x4F544E43,
+		SPLO_ID = 0x4F4C5053,
+		REPL_ID = 0x4C504552,
+		BIPL_ID = 0x4C504942,
+		LVLO_ID = 0x4F4C564C,
+		LVLD_ID = 0x444C564C,
+		LVLF_ID = 0x464C564C,
+		LVLG_ID = 0x474C564C,
+		EFID_ID = 0x44494645,
+		EFIT_ID = 0x54494645,
+		AVIT_ID = 0x54495641,
+		SCIT_ID = 0x54494353,
+		SPIT_ID = 0x54495053,
+		ENIT_ID = 0x54494E45,
+		EITM_ID = 0x4D544945,
+		EAMT_ID = 0x544D4145,
+		PKID_ID = 0x44494B50,
+		PKDT_ID = 0x54444B50,
+		PLDT_ID = 0x54444C50,
+		PLD2_ID = 0x32444C50,
+		PSDT_ID = 0x54445350,
+		PTDT_ID = 0x54445450,
+		PTD2_ID = 0x32445450,
+		PKDD_ID = 0x44444B50,
+		PKED_ID = 0x44454B50,
+		PKND_ID = 0x444E4B50,
+		PKFD_ID = 0x44464B50,
+		PKW3_ID = 0x33574B50,
+		PKW2_ID = 0x32574B50,
+		PUID_ID = 0x44495550,
+		PKPT_ID = 0x54504B50,
+		PKES_ID = 0x32454B50,
+		PKAM_ID = 0x4D414B50,
+		POBA_ID = 0x41424F50,
+		POEA_ID = 0x41454F50,
+		POCA_ID = 0x41434F50,
+		BIDX_ID = 0x58444942,
+		BPTM_ID = 0x4D545042,
+		BPTF_ID = 0x46545042,
+		BMDT_ID = 0x54444D42,
+		BMCT_ID = 0x54434D42,
+		PFIG_ID = 0x47494650,
+		PFPC_ID = 0x43504650,
+		MVRF_ID = 0x4652564D,
+		AGTY_ID = 0x59544741,
+		AGFD_ID = 0x44464741,
+		AGSC_ID = 0x43534741,
+		AGSX_ID = 0x58534741,
+		ICON_ID = 0x4E4F4349,
+		ICO2_ID = 0x324F4349,
+		SCRI_ID = 0x49524353,
+		SCHR_ID = 0x52484353,
+		SCVR_ID = 0x52564353,
+		SCTX_ID = 0x58544353,
+		SCDA_ID = 0x41444353,
+		SCRO_ID = 0x4F524353,
+		SCRV_ID = 0x56524353,
+		SLCS_ID = 0x53434C53,
+		SLSD_ID = 0x44534C53,
+		SLLD_ID = 0x444C4C53,
+		SLFD_ID = 0x44464C53,
+		SLUD_ID = 0x44554C53,
+		VHGT_ID = 0x54474856,
+		VNML_ID = 0x4C4D4E56,
+		VCLR_ID = 0x524C4356,
+		BTXT_ID = 0x54585442,
+		ATXT_ID = 0x54585441,
+		VTXT_ID = 0x54585456,
+		MPCD_ID = 0x4443504D,
+		AIDT_ID = 0x54444941,
+		PGRP_ID = 0x50524750,
+		PGRC_ID = 0x52524750,
+		PGRI_ID = 0x49524750,
+		PGRL_ID = 0x4C524750,
+		PGAG_ID = 0x47414750,
+		LVCR_ID = 0x5243564C,
+		GMDT_ID = 0x54444D47,
+		QSTI_ID = 0x49545351,
+		INFC_ID = 0x43464E49,
+		INFX_ID = 0x58464E49,
+		QSDT_ID = 0x54445351,
+		QSTA_ID = 0x41545351,
+		QOBJ_ID = 0x4A424F51,
+		TPIC_ID = 0x43495054,
+		QSTR_ID = 0x52545351,
+		WHGT_ID = 0x54474857,
+		EDID_ID = 0x44494445,
+		FULL_ID = 0x4C4C5546,
+		LODH_ID = 0x48444F4C,
+		LODV_ID = 0x56444F4C,
+		LODS_ID = 0x53444F4C,
+		LODT_ID = 0x54444F4C,
+		LODC_ID = 0x43444F4C,
+		LODN_ID = 0x4E444F4C,
+		FGGS_ID = 0x53474746,
+		FGGA_ID = 0x41474746,
+		FGTS_ID = 0x53544746,
+		HCLR_ID = 0x524C4348,
+		OFST_ID = 0x5453464F,
+		SNDD_ID = 0x44444E53,
+		SNDX_ID = 0x58444E53,
+		CSCR_ID = 0x52435343,
+		CSDT_ID = 0x54445343,
+		CSDF_ID = 0x46445343,
+		CSDI_ID = 0x49445343,
+		CSDC_ID = 0x43445343,
+		CSTD_ID = 0x44545343,
+		CSAD_ID = 0x44415343,
+		CSSD_ID = 0x44535343,
+		WLST_ID = 0x54534C57,
+		LVSR_ID = 0x5053564C,
+		EFSD_ID = 0x44534645,
+		IDLC_ID = 0x434C4449,
+		IDLA_ID = 0x414C4449,
+		IDLF_ID = 0x464C4449,
+		IDLT_ID = 0x544C4449,
+		IDLB_ID = 0x424C4449,
+		IDLN_ID = 0x4E4C4449,
+		PROD_ID = 0x444F5250,
+		NVER_ID = 0x5245564E,
+		NVVX_ID = 0x5856564E,
+		NVTR_ID = 0x5254564E,
+		NVEX_ID = 0x5845564E,
+		NVTX_ID = 0x5854564E,
+		NVLX_ID = 0x584C564E,
+		NVGD_ID = 0x4447564E,
+		NVCA_ID = 0x4143564E,
+		NVDP_ID = 0x5044564E,
+		DEST_ID = 0x54534544,
+		DSTD_ID = 0x44545344,
+		DSTF_ID = 0x46545344,
+		DMDL_ID = 0x4C444D44,
+		DMDT_ID = 0x54444D44,
+		DMDS_ID = 0x53444D44,
+		TX00_ID = 0x30305854,
+		TX01_ID = 0x31305854,
+		TX02_ID = 0x32305854,
+		TX03_ID = 0x33305854,
+		TX04_ID = 0x34305854,
+		TX05_ID = 0x35305854,
+		TX06_ID = 0x36305854,
+		TX07_ID = 0x37305854,
+		TX08_ID = 0x38305854,
+		TX09_ID = 0x39305854,
+		DMTL_ID = 0x4C544D44,
+		NVMI_ID = 0x494D564E,
+		NVCI_ID = 0x4943564E,
+		BPTN_ID = 0x4E545042,
+		BPNN_ID = 0x4E4E5042,
+		BPNT_ID = 0x544E5042,
+		BPNI_ID = 0x494E5042,
+		BPND_ID = 0x444E5042,
+		ETYP_ID = 0x50595445,
+		PRKE_ID = 0x454B5250,
+		PRKF_ID = 0x464B5250,
+		PRKC_ID = 0x434B5250,
+		EPFT_ID = 0x54465045,
+		EPFD_ID = 0x44465045,
+		EPF2_ID = 0x32465045,
+		EPF3_ID = 0x33465045,
+		ITXT_ID = 0x54585449,
+		ISCR_ID = 0x52435349,
+		CRDT_ID = 0x54445243,
+		COED_ID = 0x44454F43,
+		SIAD_ID = 0x44414900,
+		EIAD_ID = 0x444149FF,
+		VTCK_ID = 0x4B435456,
+		TPLT_ID = 0x544C5054,
+		MICO_ID = 0x4F43494D,
+		MIC2_ID = 0x3243494D,
+		NEXT_ID = 0x5458454E,
+		IMPS_ID = 0x53504D49,
+		IMPF_ID = 0x46504D49,
+		LTMP_ID = 0x504D544C,
+		RAFD_ID = 0x44464152,
+		RAFB_ID = 0x42464152,
+		RAFS_ID = 0x53464152,
+		RAFL_ID = 0x4C464152,
+		RAFN_ID = 0x4E464152,
+		RALH_ID = 0x484C4152,
+		RALN_ID = 0x4E4C4152,
+		RAGA_ID = 0x41474152,
+		RAGN_ID = 0x4E474152,
+		RAPS_ID = 0x53504152,
+		VATS_ID = 0x53544156,
+		VANM_ID = 0x4D4E4156,
+		RCID_ID = 0x4C494352,
+		RCQY_ID = 0x59514352,
+		RCCF_ID = 0x46434352,
+		RCOD_ID = 0x444F4352,
+		CQES_ID = 0x53455143,
+		CARD_ID = 0x44524143,
+		BRUS_ID = 0x53555242,
+		DAT2_ID = 0x32544144,
+		XXXX_ID = 0x58585858,
+	};
+};
+using CHUNK_ID = _ChunkID::ID;
+
+#pragma region Tiles
+
+struct _TileType {
+	enum Type {
+		NULL_TYPE	= 0x0,
+		FIRST_TYPE	= 0x385,
+		RECT		= 0x385,
+		IMAGE		= 0x386,
+		_3D			= 0x388,
+		MENU		= 0x389,
+		HOTRECT		= 0x38A,
+		WINDOW		= 0x38B,
+		RADIAL		= 0x38C,
+		LAST_TYPE	= 0x38C,
+		TEMPLATE	= 0x3E7,
+	};
+};
+using TILE_TYPE = _TileType::Type;
+
+struct _TileTrait {
+	enum Trait : int32_t {
+		X					= 0xFA1,
+		Y,
+		VISIBLE,
+		CLASS,
+		CLIP_WINDOW			= 0xFA6,
+		STACKING_TYPE,
+		LOCUS,
+		ALPHA,
+		ID,
+		DISABLE_FADE,
+		LIST_INDEX,
+		DEPTH,
+		CLIPS,
+		TARGET,
+		HEIGHT,
+		WIDTH,
+		RED,
+		GREEN,
+		BLUE,
+		TILE,
+		CHILD_COUNT,
+		JUSTIFY,
+		ZOOM,
+		FONT,
+		WRAP_WIDTH,
+		WRAP_LIMIT,
+		WRAP_LINES,
+		PAGE_NUM,
+		IS_HTML,
+		CROP_OFFSET_Y,
+		CROP_Y = CROP_OFFSET_Y,
+		CROP_OFFSET_X,
+		CROP_X = CROP_OFFSET_X,
+		MENU_FADE,
+		EXPLORE_FADE,
+		MOUSEOVER,
+		STRING,
+		SHIFT_CLICKED,
+		CLICKED				= 0xFC7,
+		CLICK_SOUND			= 0xFCB,
+		FILE_NAME,
+		FILE_WIDTH,
+		FILE_HEIGHT,
+		REPEAT_VERTICAL,
+		REPEAT_HORIZONTAL,
+		ANIMATION			= 0xFD2,
+		LINE_COUNT			= 0xDD4,
+		PAGE_COUNT,
+		XDEFAULT,
+		X_UP,
+		X_DOWN,
+		X_LEFT,
+		X_RIGHT,
+		X_BUTTON_A			= 0xFDD,
+		X_BUTTON_B,
+		X_BUTTON_X,
+		X_BUTTON_Y,
+		X_BUTTON_LT,
+		X_BUTTON_RT,
+		X_BUTTON_LB,
+		X_BUTTON_RB,
+		X_BUTTON_START		= 0xFE7,
+		MOUSEOVER_SOUND,
+		DRAGGABLE,
+		DRAG_START_X,
+		DRAG_START_Y,
+		DRAG_OFFSET_X,
+		DRAG_OFFSET_Y,
+		DRAG_DELTA_X,
+		DRAG_DELTA_Y,
+		DRAG_X,
+		DRAG_Y,
+		WHEELABLE,
+		WHEEL_MOVED,
+		SYSTEM_COLOR,
+		BRIGHTNESS,
+		LINEGAP				= 0xFF7,
+		RESOLUTION_CONVERTER,
+		TEX_ATLAS,
+		ROTATE_ANGLE,
+		ROTATE_AXIS_X,
+		ROTATE_AXIS_Y,
+
+		USER0				= 0x1004,
+		USER1,
+		USER2,
+		USER3,
+		USER4,
+		USER5,
+		USER6,
+		USER7,
+		USER8,
+		USER9,
+		USER10,
+		USER11,
+		USER12,
+		USER13,
+		USER14,
+		USER15,
+		USER16,
+
+		LAST_TRAIT			= 0x101D,
+		
+		MENU_LEVEL			= 0x1771,
+		DELETE_ON_FADE		= 0x1772,
+		MENU_THICKNESS		= 0x1773,
+		NO_CLICK_PAST_DONE	= 0x1776,
+		MIXED_MENU_DONE		= 0x1777,
+		DOES_NOT_STACK		= 0x1778,
+		MENU_VISIBLE		= 0x1779,
+	};
+};
+using TILE_TRAIT = _TileTrait::Trait;
+
+struct _TileValueAction {
+	enum Type {
+		COPY = 0x7D0,
+		ADD,
+		SUB,
+		MUL,
+		DIV,
+		MIN,
+		MAX,
+		MOD,
+		FLOOR,
+		CEIL,
+		ABS,
+		ROUND,
+		GT,
+		GTE,
+		EQ,
+		NEQ,
+		LT,
+		LTE,
+		AND,
+		OR,
+		NOT,
+		ONLY_IF,
+		ONLY_IF_NOT,
+		REF,
+		BEGIN,
+		END,
+	};
+};
+using TILE_VALUE_ACTION = _TileValueAction::Type;
+
+#pragma endregion
+
+struct _MemoryContext {
+	enum Context : uint32_t {
+		STATIC_VARS				= 0,
+		EXTERNAL				= 1,
+		DEBUG					= 2,
+		MEMPOOLS				= 3,
+		RENDERER_OVERHEAD		= 4,
+		SHADER_OVERHEAD			= 5,
+		THREAD_SAFE_STRUCT		= 6,
+		EFFECTS					= 7,
+		STRINGS					= 8,
+		SETTINGS				= 9,
+		SYSTEM					= 10,
+		AUDIO					= 11,
+		FONTS					= 12,
+		INTERFACE				= 13,
+		LOCAL_MAP				= 14,
+		GAMEBRYO				= 15,
+		HAVOK					= 16,
+		SAVE_LOAD				= 17,
+		LOADERS					= 18,
+		ARCHIVE_MANAGER			= 19,
+		MOVIE_PLAYER			= 20,
+		SCRIPT					= 21,
+		FILE_TES				= 22,
+		FILE_BUFFER				= 23,
+		FILE_CACHE				= 24,
+		SCENEGRAPH				= 25,
+		CELLS					= 26,
+		TERRAIN_LAND			= 27,
+		TERRAIN_LOD_MANAGER		= 28,
+		WATER					= 29,
+		TREES_MODELS			= 30,
+		TREES_SPEEDTREE			= 31,
+		GRIDCELL				= 32,
+		SKY						= 33,
+		LOD_SYSTEM				= 34,
+		LOD_LAND				= 35,
+		LOD_OBJECTS				= 36,
+		LOD_TREES				= 37,
+		SHADERS					= 38,
+		IMAGESPACE				= 39,
+		HAIR_SHADER				= 40,
+		PRECIPITATION			= 41,
+		PROCESS_MANAGER			= 42,
+		COMBAT_SYSTEM			= 43,
+		LOADED_REF_COLLECTION	= 44,
+		PATHING					= 45,
+		NAVMESH					= 46,
+		DATAHANDLER				= 47,
+		FORMS					= 48,
+		REFERENCES				= 49,
+		ACTORS					= 50, // Models, queued models, particles, blood
+		ANIMATION				= 51,
+		PLAYER					= 52,
+		DIALOGUE				= 53,
+		INVENTORY				= 54,
+		FACEGEN_SYSTEM			= 55,
+		FACEGEN_EGM				= 56,
+		FACEGEN_EGT				= 57,
+		FACEGEN_GEOM			= 58,
+		UNKNOWN					= 59,
+		UNKNOWN_DIRECTX			= 60,
+		DEBUG_A					= 61,
+		DEBUG_B					= 62,
+		DEBUG_C					= 63,
+		DEBUG_D					= 64,
+		DEFAULT					= 65,
+	};
+};
+using MEM_CONTEXT = _MemoryContext::Context;

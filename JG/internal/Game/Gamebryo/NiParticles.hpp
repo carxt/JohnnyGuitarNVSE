@@ -1,7 +1,6 @@
 #pragma once
 
-#include "netimmerse.h"
-#include "NiSmartPointer.hpp"
+#include "NiGeometry.hpp"
 
 class NiPSysData;
 

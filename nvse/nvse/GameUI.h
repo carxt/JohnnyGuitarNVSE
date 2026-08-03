@@ -1,9 +1,13 @@
 #pragma once
 
 #include "GameForms.h"
-#include "GameTiles.h"
 #include "GameTypes.h"
 #include "GameSound.h"
+#include "Gamebryo/NiQuaternion.hpp"
+#include "Bethesda/TileImage.hpp"
+#include "Bethesda/TileMenu.hpp"
+#include "Bethesda/TileRect.hpp"
+#include "Bethesda/TileText.hpp"
 
 struct BGSSaveLoadFileEntry;
 struct PerkRank;
@@ -335,27 +339,26 @@ public:
 	uint32_t unkC4[2];
 };
 
-template <typename Item> struct ListBoxItem
-{
-	Tile* tile;
-	Item  object;
-	uint8_t byte08;
-	uint8_t pad09[3];
+template <typename Item> 
+struct ListBoxItem {
+	Tile*	pTile;
+	Item	data;
+	bool	bFiltered;
 };
 
 // 30
-template <typename Item> class ListBox : public BSSimpleList<ListBoxItem<Item*>*>
-{
+template <typename Item> 
+class ListBox : public BSSimpleList<ListBoxItem<Item*>*> {
 public:
-	virtual bool	SetSelectedTile(Tile* tile) { return false; };
-	virtual Tile*	GetSelectedTile(void) { return nullptr; };
-	virtual Tile*	HandleKeyboardInput(int code) { return nullptr; };
-	virtual bool	IsMenuEqual(void* that) { return false; };
-	virtual void	ScrollToHighlight(void) {};
-	virtual Tile*	GetTileByIndex(int index, char isNotTileListIndex) { return nullptr; };
-	virtual void	Destructor(bool doFree) {};
-	virtual void	FreeAllTiles(void) {};
-	virtual void	Sort(signed int(__cdecl*)(Item*, Item*)) {};
+	virtual bool	Highlight(Tile* tile) { return false; };
+	virtual Tile*	GetHighlightedItem() { return nullptr; };
+	virtual Tile*	GetHighlightTarget(uint32_t aeButton) { return nullptr; };
+	virtual bool	BelongsTo(const Menu* apMenu) const { return false; };
+	virtual void	ScrollToHighlight() {};
+	virtual Tile*	GetTileAt(uint32_t auiIndex, bool abLiteral) { return nullptr; };
+	virtual			~ListBox() {};
+	virtual void	RemoveAll() {};
+	virtual void	Sort(int32_t(__cdecl*)(Item*, Item*)) {};
 
 	enum
 	{
@@ -363,206 +366,23 @@ public:
 		kFlag_FreeContChangeOnListItemDestruction = 2, // assumes the object is a ItemChange - do not set this if the object isn't one...
 	};
 
-	Tile* parentTile;	// 0C
-	Tile* selected;		// 10
-	Tile* scrollBar;		// 14
-	const char* templateName;	// 18
-	uint16_t			itemCount;		// 1C
-	uint16_t			pad1E;			// 1E
-	float			unk20;			// 20
-	float			storedListIndex;// 24
-	float			storedScrollbarPos;	// 28
-	uint16_t			flags;			// 2C
-	uint16_t			pad2E;			// 2E
-
-	Item* GetSelected()
-	{
-		BSSimpleList<ListBoxItem<Item*>*>* iter = this->GetHead();
-		ListBoxItem<Item*>* item;
-		do
-		{
-			item = iter->GetItem();
-			if (item && (item->tile == selected))
-				return item->object;
-		} while (iter = iter->GetNext());
-		return NULL;
-	}
-
-	Tile* GetNthTile(int32_t index)
-	{
-		if (index >= 0)
-		{
-			BSSimpleList<ListBoxItem<Item*>*>* iter = this->GetHead();
-			do
-			{
-				if (!index)
-				{
-					return iter->GetItem() ? iter->GetItem()->tile : NULL;
-				}
-				index--;
-			} while (iter = iter->GetNext());
-		}
-		return NULL;
-	}
+	Tile*			pContainerRect;
+	Tile*			pHighlightedItem;
+	Tile*			pScrollBar;
+	const char*		pTemplateName;
+	uint16_t		usNextIndex;
+	float			fTotalListHeight;
+	float			fSavedHighlightIndex;
+	float			fSavedScrollbarValue;
+	uint16_t		usFlags;
 
 	typedef bool(__cdecl* FilterFunction)(Item* form);
-	void Filter(FilterFunction callback)
-	{
+	void Filter(FilterFunction callback) {
 		ThisCall(0x729FE0, this, callback);
 	}
 
-	// identical to Filter, but hooked by InventorySortButton for filtering contchanges
-	void FilterAlt(FilterFunction callback)
-	{
-		ThisCall(0x730BB0, this, callback);
-	}
-
-	// Identical to Filter, but passing a value instead of a pointer
-	void FilterVal(bool(__cdecl* callback)(Item))
-	{
-		ThisCall(0x730BB0, this, callback);
-	}
-
-	typedef void(__cdecl* ForEachFunc)(Tile*, Item*);
-	void ForEach(ForEachFunc func, int maxIndex1 = -1, int maxIndex2 = 0x7FFFFFFF)
-	{
-		ThisCall(0x7314C0, this, func, maxIndex1, maxIndex2);
-	}
-
-	Tile* GetTileFromItem(Item** item)
-	{
+	Tile* GetTileFor(Item** item) {
 		return ThisCall<Tile*>(0x7A22D0, this, item);
-	}
-
-	Item* GetItemForTile(Tile* tile)
-	{
-		BSSimpleList<ListBoxItem<Item*>*>* iter = this->GetHead();
-		ListBoxItem<Item*>* item;
-		do
-		{
-			item = iter->GetItem();
-			if (item && (item->tile == tile))
-				return item->object;
-		} while (iter = iter->GetNext());
-		return NULL;
-	}
-
-	void SaveScrollPosition()
-	{
-		ThisCall(0x7312E0, this);
-	}
-
-	int GetNumVisibleItems()
-	{
-		return ThisCall<int>(0x71AE60, this);
-	}
-
-	void RestorePosition(bool playSound = false)
-	{
-		ThisCall(0x731360, this, playSound);
-	}
-
-	//int32_t(__cdecl* apCompare)(const T& aItem1, const T& aItem2)
-	Tile* Insert(Item* item, const char* text, int32_t(*sortingFunction)(const ListBoxItem<Item>*& aItem1, const ListBoxItem<Item>*& aItem2) = nullptr, const char* _templateName = nullptr)
-	{
-		if (!this->parentTile) return nullptr;
-		auto _template = _templateName ? _templateName : this->templateName;
-		if (!_template) return nullptr;
-
-		auto menu = ThisCall<Menu*>(0xA03C90, this->parentTile);
-		Tile* newTile = ThisCall<Tile*>(0xA1DDB0, menu, this->parentTile, _template, nullptr);
-		if (!newTile->GetValue(kTileValue_id))
-		{
-			newTile->SetFloat(kTileValue_id, -1);
-		}
-		if (text)
-		{
-			newTile->SetString(kTileValue_string, text);
-		}
-
-		auto listItem = BSMemory::malloc<ListBoxItem<Item*>>();
-		listItem->tile = newTile;
-		listItem->object = item;
-		listItem->byte08 = 0;
-		if (sortingFunction)
-		{
-			this->InsertSorted(listItem, sortingFunction);
-			if (this->flags & kFlag_RecalculateHeightsOnInsert)
-			{
-				ThisCall(0x71A670, this);
-			}
-		}
-		else
-		{
-			this->AddHead(listItem);
-			if (this->flags & kFlag_RecalculateHeightsOnInsert)
-			{
-				ThisCall(0x7269D0, this, newTile);
-				ThisCall(0x71AD30, this);
-			}
-			newTile->SetFloat(kTileValue_listindex, this->itemCount++);
-		}
-
-		if (this->itemCount == 1)
-		{
-			auto numVisibleItemsTrait = TraitNameToID("_number_of_visible_items");
-			if (this->parentTile->GetFloat(numVisibleItemsTrait) > 0)
-			{
-				auto valPtr = ThisCall<Tile::Value*>(0xA00E90, this->parentTile, kTileValue_height);
-				ThisCall(0xA09200, valPtr);
-				ThisCall(0xA09130, valPtr, kTileValue_Copy, newTile, kTileValue_height);
-
-				auto numVisible = this->parentTile->GetFloat(numVisibleItemsTrait);
-				ThisCall(0xA09080, valPtr, kTileValue_Mul, numVisible);
-				ThisCall(0xA09410, valPtr, 0);
-			}
-		}
-
-		return newTile;
-	}
-
-	Tile* InsertVal(Item item, const char* text, signed int (*sortingFunction)(ListBoxItem<Item>* a1, ListBoxItem<Item>* a2) = nullptr, const char* _templateName = nullptr)
-	{
-		return ThisCall<Tile*>(0x754690, this, item, text, sortingFunction, _templateName);
-	}
-
-	void HighlightLastItem()
-	{
-		int lastIndex = this->itemCount - 1;
-		Tile* tile = this->GetNthTile(lastIndex);
-
-		this->SetSelectedTile(tile);
-		this->ScrollToHighlight();
-	}
-
-	void ScrollToTop()
-	{
-		this->storedScrollbarPos = 0;
-		this->storedListIndex = 0;
-		this->RestorePosition();
-	}
-
-	void SetParentEnabled(bool isEnabled)
-	{
-		static uint32_t enabledTrait = TraitNameToID("_enabled");
-		parentTile->SetFloat(enabledTrait, isEnabled);
-	}
-
-	bool IsEnabled()
-	{
-		static uint32_t enabledTrait = TraitNameToID("_enabled");
-		return parentTile && parentTile->GetFloat(enabledTrait);
-	}
-
-	void Init()
-	{
-		// initialises the fields and appends the menu list to the global listbox array
-		ThisCall(0x723750, this);
-	}
-
-	void Destroy()
-	{
-		ThisCall(0x723820, this);
 	}
 };
 

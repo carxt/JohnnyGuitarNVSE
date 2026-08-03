@@ -2,7 +2,7 @@
 
 #include "Bethesda/BSSimpleList.hpp"
 #include "Bethesda/TESFullName.hpp"
-#include "Bethesda/FormID.hpp"
+#include "Bethesda/FormID_View.hpp"
 #include "Gamebryo/NiPoint3.hpp"
 
 class MediaLocationController;

@@ -1,14 +1,12 @@
 #include "fn_gamebryo.h"
-
+#ifdef GAME
+#include "Bethesda/BSWindModifier.hpp"
 #include "Gamebryo/NiParticleSystem.hpp"
 #include "Gamebryo/NiPSysBoxEmitter.hpp"
 #include "Gamebryo/NiPSysEmitter.hpp"
 #include "Gamebryo/NiPSysModifier.hpp"
-#include "Bethesda/BSWindModifier.hpp"
 
 #include <JG/TaskQueue.hpp>
-#include <GameTasks.h>
-
 #include "JG/ScriptUtils.hpp"
 using namespace ScriptUtils;
 
@@ -188,16 +186,16 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 			pAlpha->SetAlphaBlending(uiValue != 0);
 			break;
 		case AlphaPropertyItem::SOURCE_BLEND_MODE:
-			pAlpha->SetSrcBlendMode(static_cast<NiAlphaProperty::AlphaFunction>(uiValue));
+			pAlpha->SetSrcBlendMode(static_cast<NiAlphaProperty::AlphaFunc>(uiValue));
 			break;
 		case AlphaPropertyItem::DEST_BLEND_MODE:
-			pAlpha->SetDestBlendMode(static_cast<NiAlphaProperty::AlphaFunction>(uiValue));
+			pAlpha->SetDestBlendMode(static_cast<NiAlphaProperty::AlphaFunc>(uiValue));
 			break;
 		case AlphaPropertyItem::TEST_TOGGLE:
 			pAlpha->SetAlphaTesting(uiValue != 0);
 			break;
 		case AlphaPropertyItem::TEST_FUNC:
-			pAlpha->SetTestMode(static_cast<NiAlphaProperty::TestFunction>(uiValue));
+			pAlpha->SetTestMode(static_cast<NiAlphaProperty::TestFunc>(uiValue));
 			break;
 		case AlphaPropertyItem::TEST_REF:
 			pAlpha->SetTestRef(static_cast<uint8_t>(uiValue));
@@ -489,6 +487,7 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = { 0 };
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cSequenceName, &cObjectName, &bFirstPerson) && cSequenceName[0]) {
+		const bool bConsoleMode = IsConsoleMode();
 		const NiAVObject* pRoot = GetReferenceScene(apRef, bFirstPerson);
 		if (pRoot) {
 			const NiAVObject* pTarget = pRoot;
@@ -496,21 +495,28 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 				pTarget = BSUtilities::GetObjectByName(pRoot, cObjectName);
 
 			if (pTarget) {
-				NiControllerManager* pCtrlMgr = pTarget->GetController<NiControllerManager>();
+				const NiControllerManager* pCtrlMgr = pTarget->GetController<NiControllerManager>();
 				if (pCtrlMgr) {
-					arResult = pCtrlMgr->IsSequenceActive(cSequenceName);
-					if (IsConsoleMode())
-						Console_Print("IsNiSequenceActive >> %s: %s", cSequenceName, arResult ? "true" : "false");
+					const NiControllerSequence* pSequence = pCtrlMgr->GetSequenceByName(cSequenceName);
+					if (pSequence) {
+						arResult = pSequence->GetState() != NiControllerSequence::AnimState::INACTIVE;
+
+						if (bConsoleMode)
+							Console_Print("IsNiSequenceActive >> %s: %f", cSequenceName, arResult);
+					}
+					else if (bConsoleMode) {
+						Console_Print("Sequence not found");
+					}
 				}
-				else if (IsConsoleMode()) {
+				else if (bConsoleMode) {
 					Console_Print("Controller not found");
 				}
 			}
-			else if (IsConsoleMode()) {
+			else if (bConsoleMode) {
 				Console_Print("Block not found: %s", cObjectName);
 			}
 		}
-		else if (IsConsoleMode()) {
+		else if (bConsoleMode) {
 			Console_Print("Root node not found");
 		}
 	}
@@ -753,7 +759,7 @@ bool Cmd_GetNiPSysModifierValue_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
-	float x, y, z, w;
+	NiPoint4 kVector;
 	BOOL bRotate = FALSE;
 	BOOL bWorld = FALSE;
 	BOOL bFirstPerson = FALSE;
@@ -761,33 +767,29 @@ bool Cmd_SetBlockTransform_Execute(COMMAND_ARGS) {
 	char cBlockName[128] = {};
 
 	arResult = false;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cBlockName, &x, &y, &z, &w, &bRotate, &bWorld, &eModifier, &bFirstPerson)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cBlockName, &kVector.x, &kVector.y, &kVector.z, &kVector.w, &bRotate, &bWorld, &eModifier, &bFirstPerson)) {
 		NiAVObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(apRef, bFirstPerson), cBlockName);
-		if (bWorld) {
+		if (bWorld) [[unlikely]] {
 			if (bRotate) {
-				pObject->m_kWorld.m_kRotate.FromEulerAnglesXYZ(x, y, z);
+				pObject->m_kWorld.m_kRotate.FromEulerAnglesXYZ(kVector.x, kVector.y, kVector.z);
 			}
 			else {
-				pObject->m_kWorld.m_kTranslate.x = x;
-				pObject->m_kWorld.m_kTranslate.y = y;
-				pObject->m_kWorld.m_kTranslate.z = z;
+				pObject->SetWorldTranslate(NiPoint3(kVector));
 			}
 
-			if (w >= 0.f)
-				pObject->m_kWorld.m_fScale = w;
+			if (kVector.w >= 0.f)
+				pObject->SetWorldScale(kVector.w);
 		}
 		else {
 			if (bRotate) {
-				pObject->m_kLocal.m_kRotate.FromEulerAnglesXYZ(x, y, z);
+				pObject->SetLocalRotate(kVector.x, kVector.y, kVector.z);
 			}
 			else {
-				pObject->m_kLocal.m_kTranslate.x = x;
-				pObject->m_kLocal.m_kTranslate.y = y;
-				pObject->m_kLocal.m_kTranslate.z = z;
+				pObject->SetLocalTranslate(NiPoint3(kVector));
 			}
 			
-			if (w >= 0.f)
-				pObject->m_kLocal.m_fScale = w;
+			if (kVector.w >= 0.f)
+				pObject->SetLocalScale(kVector.w);
 		}
 
 		arResult = true;
@@ -1001,3 +1003,4 @@ bool Cmd_GetNiLightColor_Execute(COMMAND_ARGS) {
 
 	return true;
 }
+#endif

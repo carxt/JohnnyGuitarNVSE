@@ -1,5 +1,4 @@
 #include "GameObjects.h"
-#include "GameData.h"
 #include "JohnnyExtraData.hpp"
 #include "misc/misc.h"
 
@@ -347,7 +346,7 @@ namespace EDIDRestoration {
 	}
 
 	// exported
-	uint32_t __cdecl JGNVSE_GetFormIDFromEDID(const char* apEDID) noexcept {
+	EXTERN_DLL_EXPORT uint32_t __cdecl JGNVSE_GetFormIDFromEDID(const char* apEDID) noexcept {
 		if (apEDID && apEDID[0]) [[likely]] {
 			const TESForm* pForm = Map::Get(apEDID);
 			if (pForm)

@@ -1,13 +1,12 @@
 #include "fn_form.h"
+#ifdef GAME
 #include "decoding.h"
 #include "events/LambdaVariableContext.h"
-#include "GameData.h"
 #include "GameForms.h"
 #include "GameObjects.h"
 #include "GameProcess.h"
 #include "GameRTTI.h"
 #include "GameSettings.h"
-#include "GameTasks.h"
 #include "PluginAPI.h"
 
 #include "Bethesda/AILinearTaskThreadManager.hpp"
@@ -20,6 +19,9 @@
 #include "Bethesda/ExtraHotkey.hpp"
 #include "Bethesda/ExtraPrimitive.hpp"
 #include "Bethesda/ExtraSeenData.hpp"
+#include "Bethesda/GrenadeProjectile.hpp"
+#include "Bethesda/ModelLoader.hpp"
+#include "Bethesda/TESDataHandler.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TESObjectList.hpp"
 
@@ -86,9 +88,12 @@ bool Cmd_SetNoteImage_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	BGSNote* pNote = nullptr;
 	char cPath[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &cPath) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::IMAGE) {
-		pNote->pNotePicture->SetTextureName(cPath);
-		arResult = 1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &cPath) && pNote && IS_TYPE(pNote, BGSNote)) {
+		TESTexture* pImage = pNote->GetNoteImage();
+		if (pImage) {
+			pImage->SetTextureName(cPath);
+			arResult = 1;
+		}
 	}
 	return true;
 }
@@ -96,8 +101,10 @@ bool Cmd_SetNoteImage_Execute(COMMAND_ARGS) {
 bool Cmd_GetNoteImage_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	BGSNote* pNote = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::IMAGE) {
-		g_strInterface->Assign(PASS_COMMAND_ARGS, pNote->pNotePicture->GetTextureName());
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
+		TESTexture* pImage = pNote->GetNoteImage();
+		if (pImage)
+			g_strInterface->Assign(PASS_COMMAND_ARGS, pImage->GetTextureName());
 	}
 	return true;
 }
@@ -106,7 +113,7 @@ bool Cmd_SetNoteTopic_Execute(COMMAND_ARGS) {
 	BGSNote* pNote = nullptr;
 	TESTopic* pTopic = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &pTopic) && pNote && IS_TYPE(pNote, BGSNote) && IS_TYPE(pTopic, TESTopic) && pNote->GetNoteType() == BGSNote::NoteType::VOICE) {
-		pNote->pNoteTopic = pTopic;
+		pNote->SetNoteTopic(pTopic);
 		arResult = 1;
 	}
 	return true;
@@ -115,9 +122,10 @@ bool Cmd_SetNoteTopic_Execute(COMMAND_ARGS) {
 bool Cmd_GetNoteTopic_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	BGSNote* pNote = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::VOICE) {
-		if (pNote->pNoteTopic)
-			reinterpret_cast<uint32_t&>(arResult) = pNote->pNoteTopic->GetFormID();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
+		TESTopic* pTopic = pNote->GetNoteTopic();
+		if (pTopic)
+			ScriptUtils::SetFormIDResult(arResult, pTopic->GetFormID());
 	}
 	return true;
 }
@@ -127,7 +135,7 @@ bool Cmd_SetNoteSound_Execute(COMMAND_ARGS) {
 	BGSNote* pNote = nullptr;
 	TESSound* pSound = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &pSound) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::SOUND) {
-		pNote->pNoteSound = pSound;
+		pNote->SetNoteSound(pSound);
 		arResult = 1;
 	}
 	return true;
@@ -136,9 +144,10 @@ bool Cmd_SetNoteSound_Execute(COMMAND_ARGS) {
 bool Cmd_GetNoteSound_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	BGSNote* pNote = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::SOUND) {
-		if (pNote->pNoteSound)
-			reinterpret_cast<uint32_t&>(arResult) = pNote->pNoteSound->GetFormID();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
+		TESSound* pSound = pNote->GetNoteSound();
+		if (pSound)
+			ScriptUtils::SetFormIDResult(arResult, pSound->GetFormID());
 	}
 	return true;
 }
@@ -168,7 +177,7 @@ bool Cmd_SetNoteSpeaker_Execute(COMMAND_ARGS) {
 	BGSNote* pNote = nullptr;
 	TESActorBase* pSpeaker = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &pSpeaker) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::VOICE) {
-		pNote->pSpeaker = pSpeaker;
+		pNote->SetNoteSpeaker(pSpeaker);
 		arResult = 1;
 	}
 	return true;
@@ -176,9 +185,10 @@ bool Cmd_SetNoteSpeaker_Execute(COMMAND_ARGS) {
 bool Cmd_GetNoteSpeaker_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	BGSNote* pNote = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote) && pNote->GetNoteType() == BGSNote::NoteType::VOICE) {
-		if (pNote->pSpeaker)
-			reinterpret_cast<uint32_t&>(arResult) = pNote->pSpeaker->GetFormID();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
+		TESActorBase* pSpeaker = pNote->GetNoteSpeaker();
+		if (pSpeaker)
+			ScriptUtils::SetFormIDResult(arResult, pSpeaker->GetFormID());
 	}
 	return true;
 }
@@ -193,9 +203,8 @@ bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 		if (pAIProcess) {
 			TESObjectREFR* pFurniture = pAIProcess->GetCurrentFurniture();
 			if (pFurniture)
-				reinterpret_cast<uint32_t&>(arResult) = pFurniture->GetFormID();
+				ScriptUtils::SetFormIDResult(arResult, pFurniture->GetFormID());
 		}
-
 	}
 	return true;
 }
@@ -235,10 +244,9 @@ bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
 SPEC_NOINLINE bool Cmd_IsRadioRefPlaying_Eval(COMMAND_ARGS_EVAL) {
 	arResult = 0;
 	if (apRef && apRef->GetObjectReference() && IS_TYPE(apRef->GetObjectReference(), TESObjectACTI)) {
-		TESObjectACTI* baseActi = static_cast<TESObjectACTI*>(apRef->GetObjectReference());
-		if (baseActi->GetRadioStation()) {
-			arResult = (CdeclCall<void*>(0x0832930, apRef) != nullptr);
-		}
+		TESObjectACTI* pActivator = static_cast<TESObjectACTI*>(apRef->GetObjectReference());
+		if (pActivator->GetRadioStation())
+			arResult = CdeclCall<void*>(0x0832930, apRef) != nullptr;
 	}
 	return true;
 }
@@ -317,14 +325,12 @@ bool Cmd_GetFactionFlags_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_RemoveScopeModelPath_Execute(COMMAND_ARGS) {
-	TESObjectWEAP* weapon = nullptr;
-	TESModel* model = nullptr;
 	arResult = 0;
-
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && weapon && IS_TYPE(weapon, TESObjectWEAP)) {
-		if (weapon && weapon->HasScope()) model = &(weapon->kScope);
-		if (model) {
-			model->SetModel("");
+	TESObjectWEAP* pWeapon = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
+		TESModel* pModel = nullptr;
+		if (pWeapon && pWeapon->HasScope()) {
+			pWeapon->kScope.SetModel("");
 			arResult = 1;
 		}
 	}
@@ -341,6 +347,7 @@ bool Cmd_GetLightingTemplateCell_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	return true;
 }
+
 bool Cmd_SetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	uint32_t traitID = 0;
@@ -436,7 +443,8 @@ bool Cmd_GetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
 		default:
 			return true;
 		}
-		if (IsConsoleMode()) Console_Print("GetLightingTemplateTraitNumeric %d >> %f", traitID, arResult);
+		if (IsConsoleMode()) 
+			Console_Print("GetLightingTemplateTraitNumeric %d >> %f", traitID, arResult);
 	}
 	return true;
 }
@@ -462,7 +470,7 @@ bool Cmd_GetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorld) && pWorld && IS_TYPE(pWorld, TESWorldSpace)) {
 		BGSEncounterZone* pZone = pWorld->pEncounterZone;
 		if (pZone)
-			reinterpret_cast<uint32_t&>(arResult) = pZone->GetFormID();
+			ScriptUtils::SetFormIDResult(arResult, pZone->GetFormID());
 	}
 	return true;
 }
@@ -497,7 +505,7 @@ bool Cmd_GetRefEncounterZone_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	BGSEncounterZone* pZone = apRef->GetExtra()->GetEncounterZone();
 	if (pZone)
-		reinterpret_cast<uint32_t&>(arResult) = pZone->GetFormID();
+		ScriptUtils::SetFormIDResult(arResult, pZone->GetFormID());
 	return true;
 }
 
@@ -642,16 +650,17 @@ bool Cmd_SetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-TESModelTextureSwap* GetArmorModel(TESObjectARMO* armor, uint32_t id) {
-	switch (id) {
+
+TESModelTextureSwap* __fastcall GetArmorModel(TESObjectARMO* apArmor, uint32_t auiType) {
+	switch (auiType) {
 	case 1:
-		return &armor->kBipedModels[0]; // male biped
+		return &apArmor->kBipedModels[0]; // male biped
 	case 2:
-		return &armor->kBipedModels[1]; // female biped
+		return &apArmor->kBipedModels[1]; // female biped
 	case 3:
-		return &armor->kWorldModels[0]; // male world
+		return &apArmor->kWorldModels[0]; // male world
 	case 4:
-		return &armor->kWorldModels[1]; //female world
+		return &apArmor->kWorldModels[1]; // female world
 	default:
 		return nullptr;
 	}
@@ -1052,9 +1061,9 @@ bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	BGSTalkingActivator* pActivator = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pActivator) && pActivator && IS_TYPE(pActivator, BGSTalkingActivator)) {
-		if (pActivator->talkingActor) {
-			reinterpret_cast<uint32_t&>(arResult) = pActivator->talkingActor->GetFormID();
-		}
+		if (pActivator->talkingActor)
+			ScriptUtils::SetFormIDResult(arResult, pActivator->talkingActor->GetFormID());
+
 		if (IsConsoleMode()) 
 			Console_Print("GetTalkingActivatorActor >> 0x%X", arResult);
 	}
@@ -1186,24 +1195,24 @@ bool Cmd_GetQuestDelay_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	TESObjectWEAP* weap = nullptr;
+	TESObjectWEAP* pWeapon = nullptr;
 	uint32_t traitID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &traitID) && weap && IS_TYPE(weap, TESObjectWEAP)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &traitID) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
 		switch (traitID) {
 		case 1:
-			arResult = weap->vatsSkill;
+			arResult = pWeapon->vatsSkill;
 			break;
 		case 2:
-			arResult = weap->vatsDamMult;
+			arResult = pWeapon->vatsDamMult;
 			break;
 		case 3:
-			arResult = weap->vatsAP;
+			arResult = pWeapon->vatsAP;
 			break;
 		case 4:
-			arResult = weap->isSilent;
+			arResult = pWeapon->isSilent;
 			break;
 		case 5:
-			arResult = weap->modRequired;
+			arResult = pWeapon->modRequired;
 			break;
 		}
 		if (IsConsoleMode()) Console_Print("GetWeaponVATSTraitNumeric %d >> %f", traitID, arResult);
@@ -1213,26 +1222,26 @@ bool Cmd_GetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	TESObjectWEAP* weap = nullptr;
+	TESObjectWEAP* pWeapon = nullptr;
 	uint32_t traitID = 0;
-	float value;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &traitID, &value) && weap && IS_TYPE(weap, TESObjectWEAP)) {
+	float fValue;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &traitID, &fValue) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
 		arResult = 1;
 		switch (traitID) {
 		case 1:
-			weap->vatsSkill = value;
+			pWeapon->vatsSkill = fValue;
 			break;
 		case 2:
-			weap->vatsDamMult = value;
+			pWeapon->vatsDamMult = fValue;
 			break;
 		case 3:
-			weap->vatsAP = value;
+			pWeapon->vatsAP = fValue;
 			break;
 		case 4:
-			weap->isSilent = (value > 0 ? 1 : 0);
+			pWeapon->isSilent = (fValue > 0 ? 1 : 0);
 			break;
 		case 5:
-			weap->modRequired = (value > 0 ? 1 : 0);
+			pWeapon->modRequired = (fValue > 0 ? 1 : 0);
 			break;
 		default:
 			arResult = 0;
@@ -1245,8 +1254,8 @@ bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 SPEC_NOINLINE bool Cmd_GetQuestFailed_Eval(COMMAND_ARGS_EVAL) {
 	arResult = 0;
 	TESQuest* pQuest = static_cast<TESQuest*>(apParam1);
-	if (pQuest)
-		arResult = pQuest->kData.ucFlags.bFailed;
+	if (pQuest && pQuest->IsType<TESQuest>())
+		arResult = pQuest->GetFailed();
 	return true;
 }
 
@@ -1261,22 +1270,22 @@ bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	TESObjectWEAP* weapon = nullptr;
-	const char* modelPath = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && weapon && IS_TYPE(weapon, TESObjectWEAP)) {
-		modelPath = weapon->kWorldModel.GetModel();
-		g_strInterface->Assign(PASS_COMMAND_ARGS, modelPath);
-		if (IsConsoleMode()) Console_Print("GetWeaponWorldModelPath >> %s", modelPath);
+	TESObjectWEAP* pWeapon = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
+		const char* pPath = pWeapon->kWorldModel.GetModel();
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
+		if (IsConsoleMode()) 
+			Console_Print("GetWeaponWorldModelPath >> %s", pPath);
 	}
 	return true;
 }
 
 bool Cmd_SetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	TESObjectWEAP* weapon = nullptr;
-	char modelPath[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &modelPath) && weapon && IS_TYPE(weapon, TESObjectWEAP)) {
-		weapon->kWorldModel.SetModel(modelPath);
+	TESObjectWEAP* pWeapon = nullptr;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &cPath) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
+		pWeapon->kWorldModel.SetModel(cPath);
 		arResult = 1;
 	}
 	return true;
@@ -1284,20 +1293,20 @@ bool Cmd_SetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetProjectileSound_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSProjectile* projectile = nullptr;
-	TESSound* sound = nullptr;
-	int soundID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &projectile, &soundID, &sound) && projectile && IS_TYPE(projectile, BGSProjectile) && sound && IS_TYPE(sound, TESSound) && soundID <= 3) {
+	BGSProjectile* pProjectile = nullptr;
+	TESSound* pSound = nullptr;
+	uint32_t uiSoundType = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pProjectile, &uiSoundType, &pSound) && pProjectile && IS_TYPE(pProjectile, BGSProjectile) && pSound && IS_TYPE(pSound, TESSound) && uiSoundType <= 3) {
 		arResult = 1;
-		switch (soundID) {
+		switch (uiSoundType) {
 		case 1:
-			projectile->kData.pSoundProjectile = sound;
+			pProjectile->kData.pSoundProjectile = pSound;
 			break;
 		case 2:
-			projectile->kData.pSoundCountDown = sound;
+			pProjectile->kData.pSoundCountDown = pSound;
 			break;
 		case 3:
-			projectile->kData.pSoundDisable = sound;
+			pProjectile->kData.pSoundDisable = pSound;
 			break;
 		default:
 			arResult = 0;
@@ -1309,11 +1318,11 @@ bool Cmd_SetProjectileSound_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetExplosionSound_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSExplosion* explosion = nullptr;
-	TESSound* sound = nullptr;
-	int soundID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &explosion, &soundID, &sound) && explosion && IS_TYPE(explosion, BGSExplosion) && sound && IS_TYPE(sound, TESSound) && soundID <= 2) {
-		soundID == 1 ? (explosion->sound1 = sound) : (explosion->sound2 = sound);
+	BGSExplosion* pExplosion = nullptr;
+	TESSound* pSound = nullptr;
+	uint32_t uiSoundType = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pExplosion, &uiSoundType, &pSound) && pExplosion && IS_TYPE(pExplosion, BGSExplosion) && pSound && IS_TYPE(pSound, TESSound) && uiSoundType <= 2) {
+		uiSoundType == 1 ? (pExplosion->sound1 = pSound) : (pExplosion->sound2 = pSound);
 		arResult = 1;
 	}
 	return true;
@@ -1334,20 +1343,20 @@ bool Cmd_GetCreatureCombatSkill_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetContainerSound_Execute(COMMAND_ARGS) {
-	int whichSound = -1;
-	TESObjectCONT* container = nullptr;
-	TESSound* newSound = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &container, &whichSound, &newSound) && container && IS_TYPE(container, TESObjectCONT) && newSound && IS_TYPE(newSound, TESSound)) {
+	int32_t iSoundType = -1;
+	TESObjectCONT* pContainer = nullptr;
+	TESSound* pSound = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pContainer, &iSoundType, &pSound) && pContainer && IS_TYPE(pContainer, TESObjectCONT) && pSound && IS_TYPE(pSound, TESSound)) {
 		arResult = 1;
-		switch (whichSound) {
+		switch (iSoundType) {
 		case 0:
-			container->openSound = newSound;
+			pContainer->openSound = pSound;
 			break;
 		case 1:
-			container->closeSound = newSound;
+			pContainer->closeSound = pSound;
 			break;
 		case 2:
-			container->randomLoopingSound = newSound;
+			pContainer->randomLoopingSound = pSound;
 			break;
 		default:
 			arResult = 0;
@@ -1359,18 +1368,21 @@ bool Cmd_SetContainerSound_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetContainerSound_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	int whichSound = -1;
-	TESObjectCONT* container = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &container, &whichSound) && container && IS_TYPE(container, TESObjectCONT)) {
-		switch (whichSound) {
+	int32_t iSoundType = -1;
+	TESObjectCONT* pContainer = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pContainer, &iSoundType) && pContainer && IS_TYPE(pContainer, TESObjectCONT)) {
+		switch (iSoundType) {
 		case 0:
-			if (container->openSound) reinterpret_cast<uint32_t&>(arResult) = container->openSound->GetFormID();
+			if (pContainer->openSound) 
+				ScriptUtils::SetFormIDResult(arResult, pContainer->openSound->GetFormID());
 			break;
 		case 1:
-			if (container->closeSound) reinterpret_cast<uint32_t&>(arResult) = container->closeSound->GetFormID();
+			if (pContainer->closeSound) 
+				ScriptUtils::SetFormIDResult(arResult, pContainer->closeSound->GetFormID());
 			break;
 		case 2:
-			if (container->randomLoopingSound) reinterpret_cast<uint32_t&>(arResult) = container->randomLoopingSound->GetFormID();
+			if (pContainer->randomLoopingSound) 
+				ScriptUtils::SetFormIDResult(arResult, pContainer->randomLoopingSound->GetFormID());
 			break;
 		}
 	}
@@ -1566,22 +1578,30 @@ bool Cmd_GetPrimitiveType_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetMusicTypePath_Execute(COMMAND_ARGS) {
-	BGSMusicType* mtype = nullptr;
-	const char* path = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype) && mtype && IS_TYPE(mtype, BGSMusicType)) {
-		path = mtype->GetSoundFile();
-		g_strInterface->Assign(PASS_COMMAND_ARGS, path);
-		if (IsConsoleMode()) {
-			Console_Print("GetMusicTypePath >> %s", path);
-		}
+	BGSMusicType* pMusicType = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMusicType) && pMusicType && IS_TYPE(pMusicType, BGSMusicType)) {
+		const char* pPath = pMusicType->GetSoundFile();
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
+		if (IsConsoleMode())
+			Console_Print("GetMusicTypePath >> %s", pPath);
+	}
+	return true;
+}
+
+bool Cmd_SetMusicTypePath_Execute(COMMAND_ARGS) {
+	BGSMusicType* pMusicType = nullptr;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMusicType, &cPath) && pMusicType && IS_TYPE(pMusicType, BGSMusicType)) {
+		pMusicType->SetSoundFile(cPath);
+		arResult = 1;
 	}
 	return true;
 }
 
 bool Cmd_GetMusicTypeDB_Execute(COMMAND_ARGS) {
-	BGSMusicType* mtype = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype) && mtype && IS_TYPE(mtype, BGSMusicType)) {
-		arResult = mtype->fAttenuation;
+	BGSMusicType* pMusicType = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMusicType) && pMusicType && IS_TYPE(pMusicType, BGSMusicType)) {
+		arResult = pMusicType->fAttenuation;
 		if (IsConsoleMode())
 			Console_Print("GetMusicTypeDB >> %f", arResult);
 	}
@@ -1589,20 +1609,10 @@ bool Cmd_GetMusicTypeDB_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetMusicTypeDB_Execute(COMMAND_ARGS) {
-	BGSMusicType* mtype = nullptr;
-	float newVal = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype, &newVal) && mtype && IS_TYPE(mtype, BGSMusicType)) {
-		mtype->fAttenuation = newVal;
-		arResult = 1;
-	}
-	return true;
-}
-
-bool Cmd_SetMusicTypePath_Execute(COMMAND_ARGS) {
-	BGSMusicType* mtype = nullptr;
-	char newPath[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mtype, &newPath) && mtype && IS_TYPE(mtype, BGSMusicType)) {
-		mtype->SetSoundFile(newPath);
+	BGSMusicType* pMusicType = nullptr;
+	float fValue = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMusicType, &fValue) && pMusicType && IS_TYPE(pMusicType, BGSMusicType)) {
+		pMusicType->fAttenuation = fValue;
 		arResult = 1;
 	}
 	return true;
@@ -1621,36 +1631,36 @@ bool Cmd_GetBufferedCellsAlt_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
-	TESObjectWEAP* weap = nullptr;
-	int id = -1;
-	TESObjectSTAT* model = nullptr;
 	arResult = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &id, &model) && weap && IS_TYPE(weap, TESObjectWEAP) && (!model || IS_TYPE(model, TESObjectSTAT)) && id <= 7) {
+	TESObjectWEAP* pWeapon = nullptr;
+	int32_t iType = -1;
+	TESObjectSTAT* pModel = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &iType, &pModel) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP) && (!pModel || IS_TYPE(pModel, TESObjectSTAT)) && iType <= 7) {
 		arResult = 1;
-		switch (id) {
+		switch (iType) {
 		case 0:
-			weap->worldStatic = model;
+			pWeapon->worldStatic = pModel;
 			break;
 		case 1:
-			weap->modStatics[0] = model;
+			pWeapon->modStatics[0] = pModel;
 			break;
 		case 2:
-			weap->modStatics[1] = model;
+			pWeapon->modStatics[1] = pModel;
 			break;
 		case 3:
-			weap->modStatics[3] = model;
+			pWeapon->modStatics[3] = pModel;
 			break;
 		case 4:
-			weap->modStatics[2] = model;
+			pWeapon->modStatics[2] = pModel;
 			break;
 		case 5:
-			weap->modStatics[5] = model;
+			pWeapon->modStatics[5] = pModel;
 			break;
 		case 6:
-			weap->modStatics[4] = model;
+			pWeapon->modStatics[4] = pModel;
 			break;
 		case 7:
-			weap->modStatics[6] = model;
+			pWeapon->modStatics[6] = pModel;
 			break;
 		default:
 			arResult = 0;
@@ -1661,43 +1671,46 @@ bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
-	TESObjectWEAP* weap = nullptr;
-	int id = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &id) && weap && IS_TYPE(weap, TESObjectWEAP) && id <= 7) {
-		switch (id) {
+	TESObjectWEAP* pWeapon = nullptr;
+	int32_t iType = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &iType) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP) && iType <= 7) {
+		FormID uiFormID = 0;
+		switch (iType) {
 		case 0:
-			reinterpret_cast<uint32_t&>(arResult) = weap->worldStatic != nullptr ? weap->worldStatic->GetFormID() : 0;
+			uiFormID = pWeapon->worldStatic ? pWeapon->worldStatic->GetFormID() : 0;
 			break;
 		case 1:
-			reinterpret_cast<uint32_t&>(arResult) = weap->modStatics[0] != nullptr ? weap->modStatics[0]->GetFormID() : 0;
+			uiFormID = pWeapon->modStatics[0] ? pWeapon->modStatics[0]->GetFormID() : 0;
 			break;
 		case 2:
-			reinterpret_cast<uint32_t&>(arResult) = weap->modStatics[1] != nullptr ? weap->modStatics[1]->GetFormID() : 0;
+			uiFormID = pWeapon->modStatics[1] ? pWeapon->modStatics[1]->GetFormID() : 0;
 			break;
 		case 3:
-			reinterpret_cast<uint32_t&>(arResult) = weap->modStatics[3] != nullptr ? weap->modStatics[3]->GetFormID() : 0;
+			uiFormID = pWeapon->modStatics[3] ? pWeapon->modStatics[3]->GetFormID() : 0;
 			break;
 		case 4:
-			reinterpret_cast<uint32_t&>(arResult) = weap->modStatics[2] != nullptr ? weap->modStatics[2]->GetFormID() : 0;
+			uiFormID = pWeapon->modStatics[2] ? pWeapon->modStatics[2]->GetFormID() : 0;
 			break;
 		case 5:
-			reinterpret_cast<uint32_t&>(arResult) = weap->modStatics[5] != nullptr ? weap->modStatics[5]->GetFormID() : 0;
+			uiFormID = pWeapon->modStatics[5] ? pWeapon->modStatics[5]->GetFormID() : 0;
 			break;
 		case 6:
-			reinterpret_cast<uint32_t&>(arResult) = weap->modStatics[4] != nullptr ? weap->modStatics[4]->GetFormID() : 0;
+			uiFormID = pWeapon->modStatics[4] ? pWeapon->modStatics[4]->GetFormID() : 0;
 			break;
 		case 7:
-			reinterpret_cast<uint32_t&>(arResult) = weap->modStatics[6] != nullptr ? weap->modStatics[6]->GetFormID() : 0;
+			uiFormID = pWeapon->modStatics[6] ? pWeapon->modStatics[6]->GetFormID() : 0;
 			break;
 		}
+
+		ScriptUtils::SetFormIDResult(arResult, uiFormID);
 	}
 	return true;
 }
 
 bool Cmd_GetIMODAnimatable_Execute(COMMAND_ARGS) {
-	TESImageSpaceModifier* imod = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &imod) && imod && IS_TYPE(imod, TESImageSpaceModifier)) {
-		arResult = imod->animable;
+	TESImageSpaceModifier* pModifier = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pModifier) && pModifier && IS_TYPE(pModifier, TESImageSpaceModifier)) {
+		arResult = pModifier->animable;
 		if (IsConsoleMode())
 			Console_Print("GetIMODAnimatable >> %.f", arResult);
 	}
@@ -1705,13 +1718,13 @@ bool Cmd_GetIMODAnimatable_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetIMODAnimatable_Execute(COMMAND_ARGS) {
-	TESImageSpaceModifier* imod = nullptr;
-	int newVal = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &imod, &newVal) && imod && IS_TYPE(imod, TESImageSpaceModifier) && (newVal == 0 || newVal == 1)) {
-		imod->animable = newVal;
+	TESImageSpaceModifier* pModifier = nullptr;
+	BOOL bVal = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pModifier, &bVal) && pModifier && IS_TYPE(pModifier, TESImageSpaceModifier) && (bVal == 0 || bVal == 1)) {
+		pModifier->animable = bVal;
 		arResult = 1;
 		if (IsConsoleMode())
-			Console_Print("SetIMODAnimatable >> %d", imod->animable);
+			Console_Print("SetIMODAnimatable >> %d", pModifier->animable);
 	}
 	return true;
 }
@@ -1897,12 +1910,12 @@ bool Cmd_GetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	TESObjectCELL* cell = nullptr;
+	TESObjectCELL* pCell = nullptr;
 	int traitID = -1;
 	float value = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell, &traitID, &value) && cell && IS_TYPE(cell, TESObjectCELL)) {
-		if (!cell->IsInterior() || traitID < 0 || traitID > 15) return true;
-		TESObjectCELL::LightingData* lightingData = cell->coords.interior;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, &traitID, &value) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
+		if (!pCell->IsInterior() || traitID < 0 || traitID > 15) return true;
+		TESObjectCELL::LightingData* lightingData = pCell->coords.interior;
 		arResult = 1;
 		switch (traitID) {
 		case 0:
@@ -1991,11 +2004,19 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetMineArmedEx_Execute(COMMAND_ARGS)
-{
-	if (GrenadeProjectile* projectile = (GrenadeProjectile*)apRef; IS_ID(projectile, GrenadeProjectile) && !(projectile->projFlags & 0x200) &&
-		static_cast<BGSProjectile*>(apRef->GetObjectReference())->kData.uiFlags.Get(0x426) == 0x26)
+bool Cmd_GetMineArmedEx_Execute(COMMAND_ARGS) {
+	arResult = 0;
+	if (!apRef->IsType<GrenadeProjectile>())
+		return true;
+
+	const GrenadeProjectile* pGrenade = static_cast<GrenadeProjectile*>(apRef);
+	const BGSProjectile* pBase = pGrenade->GetProjectileBase();
+	if (!pBase)
+		return true;
+	
+	if (!pGrenade->IsFlagSet(GrenadeProjectile::ProjectileFlags::TURNED_OFF) && pGrenade->IsMine() && pGrenade->GetProjectileBase()->GetCanTurnOff())
 		arResult = 1;
+
 	return true;
 }
 
@@ -2151,9 +2172,9 @@ bool Cmd_GetCameraShotImageSpaceModifier_Execute(COMMAND_ARGS) {
 	BGSCameraShot* pCameraShot = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
 		TESImageSpaceModifier* pIMOD = pCameraShot->GetFormImageSpaceModifier();
-		if (pIMOD) {
-			reinterpret_cast<uint32_t&>(arResult) = pIMOD->GetFormID();
-		}
+		if (pIMOD)
+			ScriptUtils::SetFormIDResult(arResult, pIMOD->GetFormID());
+
 		if (IsConsoleMode())
 			Console_Print("GetCameraShotImageSpaceModifier >> %s", pIMOD ? pIMOD->GetFormEditorID() : "None");
 	}
@@ -2178,8 +2199,7 @@ namespace RefWalker {
 	typedef bool(__fastcall* ReferenceFilterFunc)(const struct FilterData& arFilter, TESObjectREFR* apRef);
 	struct ALIGN16 FilterData {
 		template<typename T>
-		class ScrapVector : public std::vector<T, BSScrapAllocator<T>> {
-		};
+		using ScrapVector = std::vector<T, BSScrapAllocator<T>>;
 
 		FilterData(TESObjectREFR* apCaller, Script* apScript, float afConeSize, float afHeading, const NiPoint4& akPosAndDist)
 			: pCaller(apCaller), pScript(apScript), fConeSize(afConeSize * 0.017453292f), fHeading(afHeading), kPosAndDist(akPosAndDist) {}
@@ -2258,7 +2278,7 @@ namespace RefWalker {
 				continue;
 
 			constexpr uint32_t uiDisallowedFlags = TESForm::FormFlags::STILL_LOADING | TESForm::FormFlags::DELETED | TESForm::FormFlags::DISABLED;
-			if (pRef && pRef->uiFormFlags.IsClear(uiDisallowedFlags) && pRef->GetInitialized() && pRef->GetObjectReference() && pRef->Get3DSimple()) {
+			if (pRef && pRef->uiFormFlags.IsClear(uiDisallowedFlags) && pRef->GetInitialized() && pRef->GetObjectReference() && pRef->Get3DVerySimple()) {
 				if (arFilter(pRef))
 					uiCount += CallUDF(arFilter.pScript, pCaller, 1, pRef);
 			}
@@ -2543,7 +2563,7 @@ static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_
 		UpdateReference3D(apReference);
 		ThisCall(0x456520, *reinterpret_cast<DWORD**>(0x1202D98));
 
-		NiAVObject* pRoot = apReference->Get3DSimple();
+		NiAVObject* pRoot = apReference->Get3DVerySimple();
 		if (pRoot && pRoot->IsFadeNode())
 			static_cast<BSFadeNode*>(pRoot)->TurnFadeNodeOn();
 	}
@@ -2552,7 +2572,7 @@ static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_
 		apReference->SetScale(apReference->GetRawScale());
 
 	if (auiFlags & UPDATE_LIGHTS) {
-		NiAVObject* pRoot = apReference->Get3DSimple();
+		NiAVObject* pRoot = apReference->Get3DVerySimple();
 		if (pRoot) {
 			ShadowSceneNode* pSSN = FindSceneNodeRecurse(pRoot);
 			if (pSSN)
@@ -2595,7 +2615,7 @@ bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	uint32_t uiFlags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags) && uiFlags) {
-		if (!apRef->Get3DSimple() || apRef->IsStillLoading())
+		if (!apRef->Get3DVerySimple() || apRef->IsStillLoading())
 			return true;
 
 		const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
@@ -2977,3 +2997,4 @@ bool Cmd_GetAltTextures_Execute(COMMAND_ARGS) {
 	g_arrInterface->AssignCommandResult(pArray, &arResult);
 	return true;
 }
+#endif

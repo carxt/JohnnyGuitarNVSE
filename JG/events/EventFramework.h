@@ -225,6 +225,6 @@ extern std::vector<EventInfo> kEventInfos;
 
 extern void* __fastcall GenericCreateFilter(void** Filters, uint32_t numFilters);
 
-extern EventInfo __cdecl JGCreateEvent(const char* EventName, uint8_t maxArgs, uint8_t maxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t) = nullptr);
+EXTERN_DLL_EXPORT EventInfo __cdecl JGCreateEvent(const char* EventName, uint8_t maxArgs, uint8_t maxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t) = nullptr);
 
-extern void __cdecl JGFreeEvent(EventInfo& toRemove);
+EXTERN_DLL_EXPORT void __cdecl JGFreeEvent(EventInfo& toRemove);

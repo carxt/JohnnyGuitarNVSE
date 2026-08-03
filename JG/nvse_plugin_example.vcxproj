@@ -85,7 +85,8 @@
       <CreateHotpatchableImage>true</CreateHotpatchableImage>
     </ClCompile>
     <Link>
-      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -122,7 +123,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <StringPooling>true</StringPooling>
     </ClCompile>
     <Link>
-      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -158,9 +160,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <ExceptionHandling>false</ExceptionHandling>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
-      <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -184,9 +188,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="..\nvse\nvse\GameForms.cpp" />
     <ClCompile Include="..\nvse\nvse\GameObjects.cpp" />
     <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameScript.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameTasks.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameTiles.cpp" />
     <ClCompile Include="..\nvse\nvse\GameUI.cpp" />
     <ClCompile Include="..\nvse\nvse\Utilities.cpp" />
     <ClCompile Include="..\shared\BSMemory\BSMemory.cpp" />
@@ -217,7 +218,9 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\ActorValue.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ActorValueOwner.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AILinearTaskThreadManager.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\AlchemyItem.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BackgroundCloneThread.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BaseExtraList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BaseProcess.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSAcousticSpace.cpp" />
@@ -233,6 +236,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BGSEncounterZone.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSEquipType.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSHeadPart.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSIdleCollection.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSMessage.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSMessageIcon.cpp" />
@@ -248,11 +252,16 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BGSRepairItemList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSTextureSet.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSTouchSpellForm.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\bhkThreadMemoryRouter.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BipedAnim.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSAnimGroupSequence.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSAudio.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSCloneReserver.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSCriticalSection.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSCullingProcess.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSFile.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSNonReentrantSpinLock.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSPackedTask.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSPackedTaskQueue.cpp" />
@@ -263,6 +272,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BSShaderUtil.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSSoundHandle.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSSpinLock.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSTaskThread.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSTextureManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSTimer.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp" />
@@ -289,18 +299,31 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\ImageSpaceModifierInstanceForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\InventoryChanges.cpp" />
     <ClCompile Include="internal\Game\Bethesda\InventoryIterator.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\IOManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\IOTask.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ItemChange.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\KFModel.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\LoadedFile.cpp" />
     <ClCompile Include="internal\Game\Bethesda\LowProcess.cpp" />
     <ClCompile Include="internal\Game\Bethesda\MagicItem.cpp" />
     <ClCompile Include="internal\Game\Bethesda\MagicTarget.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\MenuConsole.cpp" />
     <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp" />
     <ClCompile Include="internal\Game\Bethesda\MobileObject.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\Model.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\ModelLoader.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ModifierList.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\MuzzleFlash.cpp" />
     <ClCompile Include="internal\Game\Bethesda\NiFormArray.cpp" />
     <ClCompile Include="internal\Game\Bethesda\PackageList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\PathingLocation.cpp" />
     <ClCompile Include="internal\Game\Bethesda\PathingNode.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\Projectile.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\QueuedFile.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\QueuedFileEntry.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\QueuedHelmet.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\QueuedKF.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\QueuedTexture.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ScrapHeap.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Script.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ScriptLocals.cpp" />
@@ -309,6 +332,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESActorBaseData.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESAIForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESAmmo.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESAnimGroup.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESAttackDamageForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESAttributes.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESBipedModelForm.cpp" />
@@ -367,16 +391,31 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESWeather.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWeatherList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWeightForm.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\Tile.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TimeGlobal.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TLSData.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiAdditionalGeometryData.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiAlphaProperty.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiAVObject.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiBinaryStream.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiBound.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiColor.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiColorA.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiControllerManager.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiControllerSequence.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiCriticalSection.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiCullingProcess.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiDefaultAVObjectPalette.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiExtraData.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiFile.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFixedString.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFrustumPlanes.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiGeometry.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiGeometryData.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiGlobalStringTable.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiInterpController.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiInterpolator.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiMaterialProperty.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMatrix3.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMemObject.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiMemory.cpp" />
@@ -387,11 +426,23 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiPoint2.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiPoint3.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiPoint4.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiQuaternion.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiRenderer.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiShadeProperty.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiSkinData.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiSkinInstance.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiSkinPartition.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiSourceTexture.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiStencilProperty.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiTexture.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiTimeController.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiTransform.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiTriBasedGeom.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiTriBasedGeomData.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiTriShape.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiTriShapeData.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiTriStrips.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiTriStripsData.cpp" />
     <ClCompile Include="internal\Game\Obsidian\MediaLocationController.cpp" />
     <ClCompile Include="internal\Game\Obsidian\MediaSet.cpp" />
     <ClCompile Include="internal\Game\Obsidian\TESAmmoEffect.cpp" />
@@ -448,7 +499,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\CommandTable.h" />
     <ClInclude Include="..\nvse\nvse\GameAPI.h" />
-    <ClInclude Include="..\nvse\nvse\GameData.h" />
     <ClInclude Include="..\nvse\nvse\GameEffects.h" />
     <ClInclude Include="..\nvse\nvse\GameForms.h" />
     <ClInclude Include="..\nvse\nvse\GameObjects.h" />
@@ -457,8 +507,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="..\nvse\nvse\GameRTTI.h" />
     <ClInclude Include="..\nvse\nvse\GameSettings.h" />
     <ClInclude Include="..\nvse\nvse\GameSound.h" />
-    <ClInclude Include="..\nvse\nvse\GameTasks.h" />
-    <ClInclude Include="..\nvse\nvse\GameTiles.h" />
     <ClInclude Include="..\nvse\nvse\GameTypes.h" />
     <ClInclude Include="..\nvse\nvse\GameUI.h" />
     <ClInclude Include="..\nvse\nvse\ParamInfos.h" />
@@ -502,7 +550,10 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\ActorValueOwner.hpp" />
     <ClInclude Include="internal\Game\Bethesda\AILinearTaskThreadManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\AlchemyItem.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\AnimGroup_View.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\AttachDistant3DTask.hpp" />
     <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BackgroundCloneThread.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseExtraList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseFormComponent.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseProcess.hpp" />
@@ -551,15 +602,22 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSTextureSet.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSTouchSpellForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSVoiceType.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\bhkThreadMemoryRouter.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BipedAnim.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSAnimGroupSequence.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSAudio.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSAudioListener.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSAudioSynchTimer.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCloneReserver.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSCriticalSection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSDebugSoundInfo.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSDegradePriority.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSNonReentrantSpinLock.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSPackedTask.hpp" />
@@ -578,6 +636,10 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSSpinLock.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSStringT.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSTask.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSTaskManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSTaskManagerIterator.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSTaskManagerThread.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSTaskThread.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSTCaseInsensitiveStringMap.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSTCommonLLMessageQueue.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSTCommonMessageQueue.hpp" />
@@ -633,20 +695,30 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\FastModifierCollection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FileFinder.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FixedStrings.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\FormID.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\FormID_View.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FurnitureMark.hpp" />
     <ClInclude Include="internal\Game\Bethesda\GameSettingCollection.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\GrenadeProjectile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\HitData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ImageSpaceModifierInstance.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ImageSpaceModifierInstanceForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ImageSpaceParameterData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\INIPrefSettingCollection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\INISettingCollection.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\InterfacedClass.hpp" />
     <ClInclude Include="internal\Game\Bethesda\IntSeenData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\InventoryChanges.hpp" />
     <ClInclude Include="internal\Game\Bethesda\InventoryIterator.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\IOManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\IOTask.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ItemChange.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\KFModel.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\LoadedFile.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\LockFreeCaseInsensitiveStringMap.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\LockFreeMap.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\LockFreePriorityQueue.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\LockFreeQueue.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\LockFreeStringMap.hpp" />
     <ClInclude Include="internal\Game\Bethesda\LowProcess.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MagicCaster.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MagicItem.hpp" />
@@ -654,13 +726,16 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\MagicSystem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MagicTarget.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MapMarkerData.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\MemoryContexts.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\MenuConsole.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MiddleHighProcess.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MiddleLowProcess.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MobileObject.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\Model.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ModelLoader.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Modifier.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ModifierList.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\MuzzleFlash.hpp" />
     <ClInclude Include="internal\Game\Bethesda\NiFormArray.hpp" />
     <ClInclude Include="internal\Game\Bethesda\NiUpdateData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\PackageList.hpp" />
@@ -670,9 +745,17 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\PathingNode.hpp" />
     <ClInclude Include="internal\Game\Bethesda\PathingRequest.hpp" />
     <ClInclude Include="internal\Game\Bethesda\PathingSolution.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\Projectile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\QuestUpdateManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\QueuedAnimIdle.hpp" />
     <ClInclude Include="internal\Game\Bethesda\QueuedChildren.hpp" />
     <ClInclude Include="internal\Game\Bethesda\QueuedFile.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\QueuedFileEntry.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\QueuedHelmet.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\QueuedKF.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\QueuedReference.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\QueuedReplacementKFList.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\QueuedTexture.hpp" />
     <ClInclude Include="internal\Game\Bethesda\RefActivateData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\RendererSettingCollection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ScrapHeap.hpp" />
@@ -690,6 +773,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESAIForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESAmmo.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESAnimation.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESAnimGroup.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESAttackDamageForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESAttributes.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESBipedModelForm.hpp" />
@@ -782,6 +866,13 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESWeather.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESWeatherList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESWeightForm.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ThreadSafeStructures.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ThreadSpecificInterfaceManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\Tile.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TileImage.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TileMenu.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TileRect.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TileText.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TimeGlobal.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TLSData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\VirtualPathingNode.hpp" />
@@ -789,18 +880,33 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\FaceGen\FR2MatrixVTC.hpp" />
     <ClInclude Include="internal\Game\FaceGen\oldstd.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiAccumulator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiAdditionalGeometryData.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiAlphaAccumulator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiAlphaProperty.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiAVObject.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiAVObjectPalette.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiBackToFrontAccumulator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiBinaryStream.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiBound.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiColor.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiColorA.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiControllerManager.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiControllerSequence.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiCriticalSection.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiCullingProcess.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiDefaultAVObjectPalette.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiExtraData.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiFile.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFixedString.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFrustum.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFrustumPlanes.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiGeometry.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiGeometryData.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiGlobalStringTable.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiIntegerExtraData.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiInterpController.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiInterpolator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiMaterialProperty.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMatrix3.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemory.hpp" />
@@ -823,17 +929,28 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiPSysEmitter.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPSysModifier.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPSysVolumeEmitter.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiQuaternion.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRect.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRefObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRenderer.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRTTI.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiShadeProperty.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NIShaderDeclaration.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiSkinData.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiSkinInstance.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiSkinPartition.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSmartPointer.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSourceTexture.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiStencilProperty.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTAbstractPoolAllocator.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTDefaultAllocator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTextKey.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTextKeyExtraData.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTexture.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTFixedStringMap.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTFixedStringMapBase.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTimeController.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTLargeArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTLargeObjectArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTLargePrimitiveArray.hpp" />
@@ -854,6 +971,12 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiTPrimitiveArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTPrimitiveSet.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTransform.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTriBasedGeom.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTriBasedGeomData.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTriShape.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTriShapeData.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTriStrips.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTriStripsData.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTSet.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTStringMap.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTStringPointerMap.hpp" />
@@ -933,7 +1056,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="..\nvse\nvse\PluginAPI.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="exports.def" />
     <None Include="internal\Game\Bethesda\BSSimpleArray.inl" />
     <None Include="internal\Game\Bethesda\BSSimpleList.inl" />
     <None Include="internal\Game\Bethesda\BSStringT.inl" />
@@ -941,9 +1063,17 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <None Include="internal\Game\Bethesda\BSTCommonLLMessageQueue.inl" />
     <None Include="internal\Game\Bethesda\BSTCommonMessageQueue.inl" />
     <None Include="internal\Game\Bethesda\BSTFreeList.inl" />
+    <None Include="internal\Game\Bethesda\LockFreeCaseInsensitiveStringMap.inl" />
+    <None Include="internal\Game\Bethesda\LockFreeMap.inl" />
+    <None Include="internal\Game\Bethesda\LockFreePriorityQueue.inl" />
+    <None Include="internal\Game\Bethesda\LockFreeQueue.inl" />
+    <None Include="internal\Game\Bethesda\LockFreeStringMap.inl" />
     <None Include="internal\Game\Bethesda\SettingT.inl" />
+    <None Include="internal\Game\Bethesda\ThreadSpecificInterfaceManager.inl" />
     <None Include="internal\Game\FaceGen\FR2MatrixVTC.inl" />
     <None Include="internal\Game\Gamebryo\NiTArray.inl" />
+    <None Include="internal\Game\Gamebryo\NiTFixedStringMap.inl" />
+    <None Include="internal\Game\Gamebryo\NiTFixedStringMapBase.inl" />
     <None Include="internal\Game\Gamebryo\NiTLargeArray.inl" />
     <None Include="internal\Game\Gamebryo\NiTListBase.inl" />
     <None Include="internal\Game\Gamebryo\NiTMap.inl" />

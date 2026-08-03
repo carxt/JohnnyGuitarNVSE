@@ -6,7 +6,7 @@ TaskQueue TaskQueue::kSingleton;
 
 void __fastcall TaskQueue::QueueTask(const QueuedTask& arTask) noexcept {
 	SRWUniqueLock kLock(kSingleton.kQueueLock);
-	MEMORY_CONTEXT(MEM_CONTEXT::MC_DEFAULT);
+	AUTO_MEM_CONTEXT(MEM_CONTEXT::DEFAULT);
 	kSingleton.kTaskQueue.push(arTask);
 }
 

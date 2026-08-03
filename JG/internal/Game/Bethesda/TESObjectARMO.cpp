@@ -6,8 +6,13 @@ bool TESObjectARMO::GetModulatesVoice() const {
 }
 
 // GAME - 0x514410
+// GECK - 0x5F4B20
 uint8_t TESObjectARMO::GetArmorWeight() const {
+#ifdef GAME
 	return ThisCall<uint8_t>(0x514410, this);
+#else
+	return ThisCall<uint8_t>(0x5F4B20, this);
+#endif
 }
 
 // GAME - 0x4BE060

@@ -36,22 +36,22 @@ namespace Utils {
 		NiMatrix3	kLocalRot;
 	public:
 		AutoObjectOffset(NiAVObject* apObject) : pObject(apObject) {
-			kLocalRot = pObject->m_kLocal.m_kRotate;
+			kLocalRot = pObject->GetLocalRotate();
 
 			NiNode* pParent = pObject->GetParent();
 			if (pParent) {
-				const NiMatrix3 kWorldRot = pObject->m_kWorld.m_kRotate;
+				const NiMatrix3 kWorldRot = pObject->GetWorldRotate();
 
 				pParent->DetachChild(pObject);
 
-				pObject->m_kLocal.m_kRotate = kWorldRot;
+				pObject->SetLocalRotate(kWorldRot);
 
 				NiUpdateData kData;
 				pObject->UpdateTransformAndBounds(kData);
 			}
 		}
 		~AutoObjectOffset() {
-			pObject->m_kLocal.m_kRotate = kLocalRot;
+			pObject->SetLocalRotate(kLocalRot);
 		}
 	};
 
@@ -161,7 +161,7 @@ namespace CameraOverlay {
 		TESObjectREFR*		pReference = nullptr;
 
 		NiNode* GetRoot() const {
-			return static_cast<NiNode*>(pReference->Get3DSimple());
+			return static_cast<NiNode*>(pReference->Get3DVerySimple());
 		}
 
 		NiNode* __fastcall Initialize(const char* apName) {
@@ -285,7 +285,7 @@ namespace CameraOverlay {
 			NiDirectionalLight* pSunLight = static_cast<NiDirectionalLight*>(pSceneNode->pSunLight->spLight.m_pObject);
 			NiColor& rDiff = pSunLight->m_kDiff;
 			NiColor& rAmbient = pSunLight->m_kAmb;
-			NiMatrix3 kSunRot = pSunLight->m_kLocal.m_kRotate;
+			NiMatrix3 kSunRot = pSunLight->GetLocalRotate();
 
 			const NiColor kOrgDiffuse = rDiff;
 			const NiColor kOrgAmbient = rAmbient;
@@ -333,7 +333,7 @@ namespace CameraOverlay {
 			if (bOverrideLight) {
 				pSunLight->m_kDiff = kOrgDiffuse;
 				pSunLight->m_kAmb = kOrgAmbient;
-				pSunLight->m_kLocal.m_kRotate = kOrgSunRot;
+				pSunLight->SetLocalRotate(kOrgSunRot);
 				NiUpdateData kData;
 				pSunLight->UpdateWorldData(kData);
 			}

@@ -4,7 +4,7 @@
 #include "BSStringT.hpp"
 #include "BSSimpleList.hpp"
 #include "TESFile.hpp"
-#include "FormID.hpp"
+#include "FormID_View.hpp"
 #include "BSTCaseInsensitiveStringMap.hpp"
 #include "Gamebryo/NiTLargeArray.hpp"
 
@@ -95,10 +95,10 @@ public:
 	virtual bool			IsParentFormTree() const;
 	virtual bool			IsFormTypeChild(uint8_t aucFormType) const;
 	virtual bool			Activate(TESObjectREFR* apItemActivated, TESObjectREFR* apActionRef, bool abSound, TESBoundObject* apObjectToGet, int32_t aiCount);
-	virtual void			SetFormID(uint32_t auiID, bool abUpdateFile);
+	virtual void			SetFormID(FormID auiFormID, bool abUpdateFile);
 	virtual const char*		GetObjectTypeName() const;
 	virtual const char*		GetFormEditorID() const;
-	virtual bool			SetFormEditorID(const char* apID);
+	virtual bool			SetFormEditorID(const char* apEDID);
 
 	struct EditorData {
 		BSString	strEditorID;
@@ -156,6 +156,9 @@ public:
 			STILL_LOADING			= 1u << 21, // TESForm
 			BEING_DROPPED			= 1u << 22, // TESOBjectREFR
 			DESTROYED				= 1u << 23, // TESObjectREFR
+#if USE_MODDED_CHANGES
+			DONT_SAVE_POSITIONS		= 1u << 23, // TESObjectCELL, added by JIP
+#endif
 			DESTRUCTIBLE			= 1u << 24, // TESObjectREFR
 			OBSTACLE				= 1u << 25, // TESBoundObject
 			NO_AI_ACQUIRE			= 1u << 25, // TESObjectREFR
@@ -185,7 +188,7 @@ public:
 	FormID					uiFormID;
 	BSSimpleList<TESFile*>	kFiles;
 
-	uint32_t	GetFormID() const;
+	FormID		GetFormID() const;
 	FORM_TYPE	GetFormType() const;
 	uint8_t		GetCompileIndex() const;
 
@@ -197,14 +200,14 @@ public:
 	static const char* GetFormTypeName(uint32_t auiFormType);
 	const char* GetFormTypeName() const;
 
-	static const char* GetFormTypeString(uint32_t auiFormType);
+	static const char* GetFormTypeString(uint8_t aucFormType);
 	const char* GetFormTypeString() const;
 
 #ifdef GAME
-	static constexpr AddressPtr<NiTPointerMap<uint32_t, TESForm*>*, 0x11C54C0>		pAllForms;
+	static constexpr AddressPtr<NiTPointerMap<FormID, TESForm*>*, 0x11C54C0>		pAllForms;
 	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0x11C54C8>	pAllFormsByEditorID;
 #else
-	static constexpr AddressPtr<NiTPointerMap<uint32_t, TESForm*>*, 0xED56CC>		pAllForms;
+	static constexpr AddressPtr<NiTPointerMap<FormID, TESForm*>*, 0xED56CC>			pAllForms;
 	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0xED56D4>	pAllFormsByEditorID;
 #endif
 
@@ -289,20 +292,22 @@ public:
 	// Get is virtual
 	void SetContinuousBroadcast(bool abVal);
 
+	bool GetDisabledOrDeleted() const;
+
 	TESFile* GetFile(int32_t aiIndex) const;
 	TESFile* GetOwnerMaster() const;
 	uint32_t GetFormIDWithoutIndex() const;
 	uint32_t GetFileCount() const;
 
-	static TESForm* GetFormByNumericID(uint32_t auID);
+	static TESForm* GetFormByNumericID(FormID auFormID);
 	static TESForm* GetFormByEditorID(const char* apEDID);
 
-	static const FORM_ENUM_STRING* GetFormEnumString(uint8_t aucFormID);
+	static const FORM_ENUM_STRING* GetFormEnumString(uint8_t aucFormType);
 
 	uint32_t GetFormTypeFromFormString(uint32_t auiFormString);
 
 	bool IsDefaultForm() const;
-	static bool IsDefaultForm(FormID auiID);
+	static bool IsDefaultForm(FormID auFormID);
 };
 
 ASSERT_SIZE(TESForm, 0x18);

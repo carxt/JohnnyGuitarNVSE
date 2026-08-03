@@ -121,7 +121,7 @@ void JohnnyMessageHandler::Game(NVSEMessagingInterface::Message* apMessage) {
 	if (eMessageType >= NVSEMessagingInterface::kMessage_OnFramePresent && eMessageType <= NVSEMessagingInterface::kMessage_OnNonPersistentFormUnload) [[likely]]
 		return;
 
-	MEMORY_CONTEXT(MC_DEFAULT);
+	AUTO_MEM_CONTEXT(MEM_CONTEXT::DEFAULT);
 
 	// Obviously a hot path, so we handle it here
 	if (eMessageType == NVSEMessagingInterface::kMessage_MainGameLoop) [[likely]] {

@@ -215,7 +215,7 @@ namespace FixedStringsRework {
 		}
 
 		const char* __fastcall CreateString(const std::string_view& arString, uint32_t auiHash) noexcept {
-			MEMORY_CONTEXT(MC_STRINGS);
+			AUTO_MEM_CONTEXT(MEM_CONTEXT::STRINGS);
 			StringEntry kNewEntry(auiHash, String::Create(arString));
 			kStrings.push_back(kNewEntry);
 			return kNewEntry.Take();
@@ -230,7 +230,7 @@ namespace FixedStringsRework {
 
 	public:
 		StringArray() noexcept {
-			MEMORY_CONTEXT(MC_STRINGS);
+			AUTO_MEM_CONTEXT(MEM_CONTEXT::STRINGS);
 			kStrings.reserve(INITIAL_SIZE);
 			kLock = SRWLOCK_INIT;
 		}
@@ -436,7 +436,7 @@ namespace FixedStringsRework {
 #else
 			char* pMemManager = reinterpret_cast<char*>(0xF21B5C);
 #endif
-			MEMORY_CONTEXT(MC_STATIC_VARS);
+			AUTO_MEM_CONTEXT(MEM_CONTEXT::STATIC_VARS);
 			bool bOrgVal = pMemManager[129];
 			pMemManager[129] = false;
 			pManager = new GlobalStringTable();

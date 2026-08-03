@@ -1,4 +1,5 @@
 #include "fn_av.h"
+#ifdef GAME
 #include "GameObjects.h"
 #include "GameAPI.h"
 
@@ -47,3 +48,4 @@ bool Cmd_GetBaseActorValueAlt_Execute(COMMAND_ARGS) {
 bool Cmd_ModActorValueAlt_Execute(COMMAND_ARGS) {
 	return Cmd_ModAV(PASS_COMMAND_ARGS);
 }
+#endif

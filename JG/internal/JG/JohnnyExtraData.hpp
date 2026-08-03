@@ -1,7 +1,6 @@
 #pragma once
 
 #include <nvse/PluginAPI.h>
-#include <nvse/NiTypes.h>
 #include <vector>
 #include "Bethesda/BSSimpleList.hpp"
 
@@ -27,7 +26,7 @@ public:
 	struct ScriptData {
 	};
 
-	uint32_t	uiFormID;
+	FormID		uiFormID;
 	TESForm*	pOwner;
 	FormData	kFormData;
 	ScriptData	kScriptData;

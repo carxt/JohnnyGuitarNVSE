@@ -1,8 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-#include <vector>
-
 #include "Bethesda/Script.hpp"
 
 class TESObjectREFR;
@@ -131,17 +128,17 @@ struct SCRIPT_FUNCTION;
 
 #define DEFINE_CMD_COND_PLUGIN(name, description, refRequired, apParameters) \
 	DEFINE_CMD_ALT_COND_ANY(name, , description, refRequired, apParameters, NULL)
-bool Cmd_Default_Execute(COMMAND_ARGS);
 
-bool Cmd_Default_Parse(uint32_t auiParamCount, SCRIPT_PARAMETER* apParameters, SCRIPT_LINE* apScriptLine, ScriptCompileData* apCompileData);
+inline bool Cmd_Default_Execute(COMMAND_ARGS)		{ return true; };
+inline bool Cmd_Default_Parse(COMMAND_ARGS_PARSE)	{ return true; };
+inline bool Cmd_Default_Eval(COMMAND_ARGS_EVAL)		{ return true; };
+
 const Cmd_Parse Cmd_Expression_Plugin_Parse = (Cmd_Parse)0x08000000;
-bool Cmd_Default_Eval(COMMAND_ARGS_EVAL);
 
-
-#ifdef RUNTIME
-#define HANDLER(x)	x
+#ifdef GAME
+#define HANDLER(x)		x
 #define HANDLER_EVAL(x)	x
 #else
-#define HANDLER(x)	Cmd_Default_Execute
+#define HANDLER(x)		Cmd_Default_Execute
 #define HANDLER_EVAL(x)	Cmd_Default_Eval
 #endif

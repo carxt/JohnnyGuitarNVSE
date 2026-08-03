@@ -3,6 +3,8 @@
 #include <GameUI.h>
 #include <GameAPI.h>
 
+#include "Gamebryo/NiGeometry.hpp"
+
 class LoadedAreaBound;
 struct ExtraAudioMarkerData;
 struct BGSSaveLoadFileEntry;
@@ -1651,8 +1653,8 @@ public:
 		BSCustomSplatterExtraData* pExtraData = BSCustomSplatterExtraData::Create(kSplatterData);
 		pNewNode->AddExtraData(pExtraData);
 
-		NiTriShape* pShape = static_cast<NiTriShape*>(pNewNode->GetAt(0));
-		BSShaderBloodSplatterProperty* pShaderProp = static_cast<BSShaderBloodSplatterProperty*>(pShape->shaderProp);
+		NiGeometry* pShape = static_cast<NiGeometry*>(pNewNode->GetAt(0));
+		BSShaderBloodSplatterProperty* pShaderProp = pShape->GetShadeProperty<BSShaderBloodSplatterProperty>();
 
 		if (apAlphaTex)
 			pShaderProp->SetTexture(0, apAlphaTex);
@@ -1663,15 +1665,14 @@ public:
 		// IsHDR
 		if (*(bool*)0x11F941E && apFlareTex)
 		{
-			NiTriShape* pHDRShape = static_cast<NiTriShape*>(pNewNode->GetAt(1));
-			pShaderProp = static_cast<BSShaderBloodSplatterProperty*>(pHDRShape->shaderProp);
+			NiGeometry* pHDRShape = static_cast<NiGeometry*>(pNewNode->GetAt(1));
+			pShaderProp = pShape->GetShadeProperty<BSShaderBloodSplatterProperty>();
 			pShaderProp->SetTexture(0, apFlareTex);
 		}
 
 		GetRootNode()->AttachChild(pNewNode, true);
 		BSShaderBloodSplatterProperty::SetFadeSourceRecurse(pNewNode, &pExtraData->kData.fAlpha);
-		NiUpdateData kUpdateData = NiUpdateData();
-		GetRootNode()->Update(kUpdateData);
+		GetRootNode()->Update();
 #endif
 	};
 };

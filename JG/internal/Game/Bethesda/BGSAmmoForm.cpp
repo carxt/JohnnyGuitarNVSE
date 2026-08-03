@@ -2,9 +2,9 @@
 #include "BGSListForm.hpp"
 #include "TESAmmo.hpp"
 
-// GAME - 0x6ECD40
-void BGSAmmoForm::SetAmmo(TESForm* apAmmo) {
-	pAmmo = apAmmo;
+// GAME - 0x474920
+TESForm* BGSAmmoForm::GetAmmoHelper() const {
+    return ThisCall<TESForm*>(0x474920, this);
 }
 
 // GAME - 0x474A00
@@ -21,7 +21,14 @@ BGSListForm* BGSAmmoForm::GetAmmoFormList() const {
     return nullptr;
 }
 
+// GAME - 0x6ECD40
+void BGSAmmoForm::SetAmmo(TESForm* apAmmo) {
+    pAmmo = apAmmo;
+}
+
+#ifdef GAME
 // GAME - 0x474A80
 bool BGSAmmoForm::IsRockItLauncher() const {
     return ThisCall<bool>(0x474A80, this);
 }
+#endif

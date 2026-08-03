@@ -1,11 +1,12 @@
 #include "fn_terminal.h"
+#ifdef GAME
 #include <GameUI.h>
 
 bool Cmd_RefreshTerminalMenu_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	ComputersMenu* g_computersMenu = *(ComputersMenu**)0x11D9334;
-	if (g_computersMenu) {
-		ThisCall(0x7586E0, g_computersMenu, 0);
+	ComputersMenu* pMenu = *(ComputersMenu**)0x11D9334;
+	if (pMenu) {
+		ThisCall(0x7586E0, pMenu, false); // ComputersMenu::DisplayTerminal
 		arResult = 1;
 	}
 	return true;
@@ -13,13 +14,13 @@ bool Cmd_RefreshTerminalMenu_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSTerminal* terminal = nullptr;
-	int menuEntryID = 0;
-	uint32_t flags;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &flags) && terminal && IS_TYPE(terminal, BGSTerminal)) {
-		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry) {
-			entry->entryFlags = flags;
+	BGSTerminal* pTerminal = nullptr;
+	uint32_t uiIndex = 0;
+	uint32_t uiFlags;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal, &uiIndex, &uiFlags) && pTerminal && IS_TYPE(pTerminal, BGSTerminal)) {
+		BGSTerminal::MenuEntry* pEntry = pTerminal->menuEntries.GetNthItem(uiIndex);
+		if (pEntry) {
+			pEntry->entryFlags = uiFlags;
 			arResult = 1;
 		}
 	}
@@ -27,13 +28,14 @@ bool Cmd_SetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSTerminal* terminal = nullptr;
-	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
-		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry) {
-			arResult = entry->entryFlags;
-			if (IsConsoleMode()) Console_Print("GetTerminalMenuItemFlags %d >> %.f", menuEntryID, arResult);
+	BGSTerminal* pTerminal = nullptr;
+	uint32_t uiIndex = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal, &uiIndex) && pTerminal && IS_TYPE(pTerminal, BGSTerminal)) {
+		BGSTerminal::MenuEntry* pEntry = pTerminal->menuEntries.GetNthItem(uiIndex);
+		if (pEntry) {
+			arResult = pEntry->entryFlags;
+			if (IsConsoleMode())
+				Console_Print("GetTerminalMenuItemFlags %d >> %.f", uiIndex, arResult);
 		}
 	}
 	return true;
@@ -41,14 +43,13 @@ bool Cmd_GetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
 
 bool Cmd_RemoveTerminalMenuItem_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSTerminal* terminal = nullptr;
-	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
-		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry) {
-			ThisCall(0x5010F0, entry);
-			terminal->menuEntries.RemoveNth(menuEntryID);
-			BSMemory::free(entry);
+	BGSTerminal* pTerminal = nullptr;
+	uint32_t uiIndex = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal, &uiIndex) && pTerminal && IS_TYPE(pTerminal, BGSTerminal)) {
+		BGSTerminal::MenuEntry* pEntry = pTerminal->menuEntries.GetNthItem(uiIndex);
+		if (pEntry) {
+			pTerminal->menuEntries.RemoveNth(uiIndex);
+			ThisCall(0x5010C0, pEntry, 1);
 			arResult = 1;
 		}
 	}
@@ -57,34 +58,36 @@ bool Cmd_RemoveTerminalMenuItem_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetTerminalMenuItemCount_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSTerminal* terminal = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal) && terminal && IS_TYPE(terminal, BGSTerminal)) {
-		arResult = terminal->menuEntries.Count();
-		if (IsConsoleMode()) Console_Print("GetTerminalMenuItemCount >> %.f", arResult);
+	BGSTerminal* pTerminal = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal) && pTerminal && IS_TYPE(pTerminal, BGSTerminal)) {
+		arResult = pTerminal->menuEntries.Count();
+		if (IsConsoleMode()) 
+			Console_Print("GetTerminalMenuItemCount >> %.f", arResult);
 	}
 	return true;
 }
 
 bool Cmd_GetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSTerminal* terminal = nullptr;
-	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
-		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry && entry->subMenu) reinterpret_cast<uint32_t&>(arResult) = entry->subMenu->GetFormID();
+	BGSTerminal* pTerminal = nullptr;
+	uint32_t uiIndex = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal, &uiIndex) && pTerminal && IS_TYPE(pTerminal, BGSTerminal)) {
+		BGSTerminal::MenuEntry* pEntry = pTerminal->menuEntries.GetNthItem(uiIndex);
+		if (pEntry && pEntry->subMenu)
+			ScriptUtils::SetFormIDResult(arResult, pEntry->subMenu->GetFormID());
 	}
 	return true;
 }
 
 bool Cmd_SetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSTerminal* terminal = nullptr;
-	BGSTerminal* submenu = nullptr;
-	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &submenu) && terminal && IS_TYPE(terminal, BGSTerminal) && submenu && IS_TYPE(submenu, BGSTerminal)) {
-		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry) {
-			entry->subMenu = submenu;
+	BGSTerminal* pTerminal = nullptr;
+	BGSTerminal* pSubMenu = nullptr;
+	uint32_t uiIndex = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal, &uiIndex, &pSubMenu) && pTerminal && IS_TYPE(pTerminal, BGSTerminal) && pSubMenu && IS_TYPE(pSubMenu, BGSTerminal)) {
+		BGSTerminal::MenuEntry* pEntry = pTerminal->menuEntries.GetNthItem(uiIndex);
+		if (pEntry) {
+			pEntry->subMenu = pSubMenu;
 			arResult = 1;
 		}
 	}
@@ -93,13 +96,13 @@ bool Cmd_SetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSTerminal* terminal = nullptr;
-	BGSNote* note = nullptr;
-	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID, &note) && terminal && IS_TYPE(terminal, BGSTerminal) && note && IS_TYPE(note, BGSNote)) {
-		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
+	BGSTerminal* pTerminal = nullptr;
+	BGSNote* pNote = nullptr;
+	uint32_t uiIndex = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal, &uiIndex, &pNote) && pTerminal && IS_TYPE(pTerminal, BGSTerminal) && pNote && IS_TYPE(pNote, BGSNote)) {
+		BGSTerminal::MenuEntry* entry = pTerminal->menuEntries.GetNthItem(uiIndex);
 		if (entry) {
-			entry->displayNote = note;
+			entry->displayNote = pNote;
 			arResult = 1;
 		}
 	}
@@ -108,28 +111,29 @@ bool Cmd_SetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSTerminal* terminal = nullptr;
-	int menuEntryID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal)) {
-		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (entry && entry->displayNote) reinterpret_cast<uint32_t&>(arResult) = entry->displayNote->GetFormID();
+	BGSTerminal* pTerminal = nullptr;
+	uint32_t uiIndex = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal, &uiIndex) && pTerminal && IS_TYPE(pTerminal, BGSTerminal)) {
+		BGSTerminal::MenuEntry* pEntry = pTerminal->menuEntries.GetNthItem(uiIndex);
+		if (pEntry && pEntry->displayNote) 
+			ScriptUtils::SetFormIDResult(arResult, pEntry->displayNote->GetFormID());
 	}
 	return true;
 }
 
 bool Cmd_SetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSTerminal* terminal = nullptr;
-	int textID = 0, menuEntryID = 0;
-	char text[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &textID, &menuEntryID, &text) && terminal && IS_TYPE(terminal, BGSTerminal) && textID > 0) {
-		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (textID == 1) {
-			entry->entryText.Set(text);
+	BGSTerminal* pTerminal = nullptr;
+	uint32_t eTextType = 0, uiIndex = 0;
+	char cText[MAX_PATH];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal, &eTextType, &uiIndex, &cText) && pTerminal && IS_TYPE(pTerminal, BGSTerminal) && eTextType > 0) {
+		BGSTerminal::MenuEntry* pEntry = pTerminal->menuEntries.GetNthItem(uiIndex);
+		if (eTextType == 1) {
+			pEntry->entryText.Set(cText);
 			arResult = 1;
 		}
-		else if (textID == 2) {
-			entry->resultText.Set(text);
+		else if (eTextType == 2) {
+			pEntry->resultText.Set(cText);
 			arResult = 1;
 		}
 	}
@@ -138,33 +142,34 @@ bool Cmd_SetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSTerminal* terminal = nullptr;
-	int textID = 0, menuEntryID = 0;
-	const char* text = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal, &textID, &menuEntryID) && terminal && IS_TYPE(terminal, BGSTerminal) && textID > 0) {
-		BGSTerminal::MenuEntry* entry = terminal->menuEntries.GetNthItem(menuEntryID);
-		if (textID == 1) {
-			text = entry->entryText.c_str();
-		}
-		else if (textID == 2) {
-			text = entry->resultText.c_str();
-		}
-		g_strInterface->Assign(PASS_COMMAND_ARGS, text);
-		if (IsConsoleMode()) Console_Print("GetTerminalMenuItemText >> %s", text);
+	BGSTerminal* pTerminal = nullptr;
+	uint32_t eTextType = 0, uiIndex = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal, &eTextType, &uiIndex) && pTerminal && IS_TYPE(pTerminal, BGSTerminal) && eTextType > 0) {
+		const char* pText = nullptr;
+		BGSTerminal::MenuEntry* pEntry = pTerminal->menuEntries.GetNthItem(uiIndex);
+		if (eTextType == 1)
+			pText = pEntry->entryText.c_str();
+		else if (eTextType == 2)
+			pText = pEntry->resultText.c_str();
+
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pText);
+		if (IsConsoleMode()) 
+			Console_Print("GetTerminalMenuItemText >> %s", pText);
 	}
 	return true;
 }
 
 bool Cmd_AddTerminalMenuItem_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	BGSTerminal* terminal = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &terminal) && terminal && IS_TYPE(terminal, BGSTerminal)) {
-		BGSTerminal::MenuEntry* entry = BSMemory::malloc<BGSTerminal::MenuEntry>();
-		if (entry) {
-			ThisCall(0x500960, entry);
-			terminal->menuEntries.Append(entry);
+	BGSTerminal* pTerminal = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal) && pTerminal && IS_TYPE(pTerminal, BGSTerminal)) {
+		BGSTerminal::MenuEntry* pEntry = BSMemory::malloc<BGSTerminal::MenuEntry>();
+		if (pEntry) {
+			ThisCall(0x500960, pEntry);
+			pTerminal->menuEntries.Append(pEntry);
 			arResult = 1;
 		}
 	}
 	return true;
 }
+#endif

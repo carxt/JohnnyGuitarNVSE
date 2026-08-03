@@ -1,4 +1,5 @@
 #include "fn_book.h"
+#ifdef GAME
 #include "GameAPI.h"
 #include "decoding.h"
 
@@ -45,3 +46,4 @@ bool Cmd_SetBookSkill_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+#endif

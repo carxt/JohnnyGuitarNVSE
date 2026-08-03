@@ -79,7 +79,7 @@ constexpr inline float fNI2HK = static_cast<float>(dNI2DM); // 1 Ni to Havok
 #define ASSERT_SIZE(a, b) static_assert(sizeof(a) == b, "Wrong structure size!");
 #define ASSERT_OFFSET(a, b, c) static_assert(offsetof(a, b) == c, "Wrong member offset!");
 
-#define CREATE_OBJECT(CLASS, ADDRESS) static CLASS* CreateObject() { return CdeclCall<CLASS*>(ADDRESS); };
+#define CREATE_OBJECT(CLASS, ADDRESS) [[nodiscard]] static CLASS* CreateObject() { return CdeclCall<CLASS*>(ADDRESS); };
 
 #ifdef GAME 
 #define FUNCTION_UNKOWN static_assert(false, "Find \"" __FUNCSIG__ "\" in the game" );

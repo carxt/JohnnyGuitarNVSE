@@ -92,7 +92,7 @@ void TESRace::ClearHairList() {
 }
 
 // GAME - 0x6137B0
-TESHair* TESRace::GetRaceHair(uint32_t auiFormID) const {
+TESHair* TESRace::GetRaceHair(FormID auiFormID) const {
 	return ThisCall<TESHair*>(0x6137B0, this, auiFormID);
 }
 
@@ -155,7 +155,7 @@ void TESRace::ClearEyeColorList() {
 }
 
 // GAME - 0x6138B0
-TESEyes* TESRace::GetRaceEyeColor(uint32_t auiFormID) const {
+TESEyes* TESRace::GetRaceEyeColor(FormID auiFormID) const {
 	return ThisCall<TESEyes*>(0x6138B0, this, auiFormID);
 }
 

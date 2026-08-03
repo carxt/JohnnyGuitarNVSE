@@ -11,6 +11,11 @@ void BGSBipedModelList::SetBipedModelList(BGSListForm* apModelList) {
 }
 
 // GAME - 0x475020
-BGSBipedModelList* BGSBipedModelList::GetFormAsBipedModelList(TESForm* apForm) {
+// GECK - 0x4E34D0
+BGSBipedModelList* BGSBipedModelList::GetFormAsBipedModelList(const TESForm* apForm) {
+#ifdef GAME
 	return CdeclCall<BGSBipedModelList*>(0x475020, apForm);
+#else
+	return CdeclCall<BGSBipedModelList*>(0x4E34D0, apForm);
+#endif
 }

@@ -12,6 +12,10 @@ public:
 	bool		bUseGlobalTimeMultiplierTarget;
 	bool		bZeroDelta;
 
+	uint32_t GetTime() const;
+
+	float GetRealTimeSeconds() const;
+
 	void SetGlobalTimeMultiplier(float afMult, bool abNow);
 
 	static float GetGlobalTimeMultiplier();

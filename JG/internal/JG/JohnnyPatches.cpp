@@ -33,6 +33,7 @@
 #include "Bethesda/GameSettingCollection.hpp"
 
 #include <algorithm>
+#include <unordered_set>
 
 namespace JohnnyPatches {
 	bool bFixFleeing = false;
@@ -154,7 +155,7 @@ namespace JohnnyPatches {
 		char filename[MAX_PATH];
 		GetModuleFileNameA(NULL, filename, MAX_PATH);
 		char* lastSlash = strrchr(filename, '\\') + 1;
-		uint32_t length = MAX_PATH - (lastSlash - filename);;
+		uint32_t length = MAX_PATH - (lastSlash - filename);
 		strcpy_s(lastSlash, length, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 		bFixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 		bFixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
@@ -277,13 +278,11 @@ namespace JohnnyPatches {
 }
 
 // exports
-extern "C" {
-	bool __cdecl JGSetViewmodelClipDistance(float value) {
-		JohnnyPatches::fViewmodelNearDistance = value;
-		return true;
-	}
+EXTERN_DLL_EXPORT bool __cdecl JGSetViewmodelClipDistance(float value) {
+	JohnnyPatches::fViewmodelNearDistance = value;
+	return true;
+}
 
-	float __cdecl JGGetViewmodelClipDistance() {
-		return JohnnyPatches::fViewmodelNearDistance;
-	}
+EXTERN_DLL_EXPORT float __cdecl JGGetViewmodelClipDistance() {
+	return JohnnyPatches::fViewmodelNearDistance;
 }

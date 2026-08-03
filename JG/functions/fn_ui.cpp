@@ -1,5 +1,5 @@
 #include "fn_ui.h"
-
+#ifdef GAME
 #include "decoding.h"
 #include "GameObjects.h"
 #include "GameRTTI.h"
@@ -14,6 +14,7 @@
 #include "JG/RSMBarberHook.hpp"
 
 #include "Shared/Utils/StackObject.hpp"
+#include "Shared/BSMemory/BSScrapMemory.hpp"
 
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 
@@ -29,50 +30,53 @@ bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks
 	return true;
 }
 
+template<typename T>
+using ScrapVector = std::vector<T, BSScrapAllocator<T>>;
+
 bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
-	TESQuest* quest = nullptr;
+	TESQuest* pQuest = nullptr;
 	arResult = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &quest) || !PlayerCharacter::GetSingleton())
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest) || !PlayerCharacter::GetSingleton())
 		return true;
 
-	auto& list = PlayerCharacter::GetSingleton()->questObjectiveList;
-	if (list.Empty())
+	auto& kList = PlayerCharacter::GetSingleton()->questObjectiveList;
+	if (kList.Empty())
 		return true;
 
-	std::vector<BGSQuestObjective*> matching;
-	std::vector<BGSQuestObjective*> others;
+	ScrapVector<BGSQuestObjective*> kMatching;
+	ScrapVector<BGSQuestObjective*> kOthers;
 
-	auto node = list.Head();
+	auto node = kList.Head();
 	while (node) {
 		if (node->data) {
-			if (node->data->GetOwner() == quest)
-				matching.push_back(node->data);
+			if (node->data->GetOwner() == pQuest)
+				kMatching.push_back(node->data);
 			else
-				others.push_back(node->data);
+				kOthers.push_back(node->data);
 		}
 		node = node->next;
 	}
 
-	if (matching.empty())
+	if (kMatching.empty())
 		return true;
 
-	node = list.Head();
+	node = kList.Head();
 	while (node->next) {
 		auto next = node->next;
 		node->next = next->next;
 		BSMemory::free(next);
 	}
 
-	node->data = matching[0];
-	for (size_t i = 1; i < matching.size(); i++)
-		list.Append(matching[i]);
-	for (auto obj : others)
-		list.Append(obj);
+	node->data = kMatching[0];
+	for (size_t i = 1; i < kMatching.size(); i++)
+		kList.Append(kMatching[i]);
+	for (auto obj : kOthers)
+		kList.Append(obj);
 
-	MapMenu* mapMenu = MapMenu::GetSingleton();
-	if (mapMenu) {
-		mapMenu->questList.FreeAllTiles();
-		mapMenu->questList.itemCount = 0;
+	MapMenu* pMapMenu = MapMenu::GetSingleton();
+	if (pMapMenu) {
+		pMapMenu->questList.RemoveAll();
+		pMapMenu->questList.usNextIndex = 0;
 	}
 
 	arResult = 1;
@@ -80,91 +84,91 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
+	uint32_t uiFlags = 0;
+	BGSListForm* pFormList = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags, &pFormList)) {
+		if (pFormList && IS_TYPE(pFormList, BGSListForm))
+			RSMBarberHook::Load(pFormList);
 
-	BGSListForm* formList = nullptr;
-	uint32_t flags = 0;
-	if (!PlayerCharacter::GetSingleton()) return true;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &formList)) {
-		if (formList && IS_TYPE(formList, BGSListForm)) {
-			RSMBarberHook::Load(formList);
-		}
-		RSMBarberHook::ShowMenu(flags);
+		RSMBarberHook::ShowMenu(uiFlags);
 	}
 	return true;
 }
 
 bool Cmd_InitExtraMiscStat_Execute(COMMAND_ARGS) {
-	char name[MAX_PATH] = {};
 	arResult = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
-		arResult = ExtraMiscStats::InitStat(name);
-	}
+	char cName[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName))
+		arResult = ExtraMiscStats::InitStat(cName);
 	return true;
 }
 
 bool Cmd_ModExtraMiscStat_Execute(COMMAND_ARGS) {
-	char name[MAX_PATH] = {};
-	int mod;
 	arResult = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name, &mod)) {
-		arResult = ExtraMiscStats::ModStat(name, mod);
-	}
+	char cName[MAX_PATH] = {};
+	int32_t iModValue;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName, &iModValue))
+		arResult = ExtraMiscStats::ModStat(cName, iModValue);
 	return true;
 }
 
 bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
-	char name[MAX_PATH] = {};
 	arResult = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
-		arResult = ExtraMiscStats::GetStat(name);
-		if (IsConsoleMode()) Console_Print("GetExtraMiscStat \"%s\": %.f", name, arResult);
+	char cName[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName)) {
+		arResult = ExtraMiscStats::GetStat(cName);
+		if (IsConsoleMode()) 
+			Console_Print("GetExtraMiscStat \"%s\": %.f", cName, arResult);
 	}
 	return true;
 }
 
 bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	TESReputation* rep = nullptr;
-	uint32_t tierID = 0;
-	char path[MAX_PATH] = {};
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &rep, &tierID, &path) && rep && IS_TYPE(rep, TESReputation) && tierID >= 1 && tierID <= 4)) return true;
-	ExtraReputationIcons::Set(rep->GetFormID(), tierID, path);
-	arResult = 1;
+	TESReputation* pReputation = nullptr;
+	uint32_t uiTierID = 0;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation, &uiTierID, &cPath) && pReputation && IS_TYPE(pReputation, TESReputation) && uiTierID >= 1 && uiTierID <= 4) {
+		ExtraReputationIcons::Set(pReputation->GetFormID(), uiTierID, cPath);
+		arResult = 1;
+	}
 	return true;
 }
 
 bool Cmd_GetSystemColorAlt_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	ScriptVar* rOut, * gOut, * bOut;
-	uint32_t type;
-	uint8_t color[3] = { 0, 0, 0 };
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &type, &rOut, &gOut, &bOut) && type > 0 && type <= 5) {
-		SystemColorManager* colorMgr = SystemColorManager::GetSingleton();
-		uint32_t color = (colorMgr->GetColor(type) >> 0x8);
-		bOut->data = color & 0xFF;
-		gOut->data = (color >> 8) & 0xFF;
-		rOut->data = (color >> 16) & 0xFF;
-		if (IsConsoleMode()) Console_Print("GetSystemColor %d >> %d %d %d", type, rOut->data, gOut->data, bOut->data);
+	ScriptVar* pRed, * pGreen, * pBlue;
+	uint32_t uiType;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiType, &pRed, &pGreen, &pBlue) && uiType > 0 && uiType <= 5) {
+		SystemColorManager* pMgr = SystemColorManager::GetSingleton();
+		uint32_t uiColor = (pMgr->GetColor(uiType) >> 0x8);
+		pBlue->data		= uiColor & 0xFF;
+		pGreen->data	= (uiColor >> 8) & 0xFF;
+		pRed->data		= (uiColor >> 16) & 0xFF;
+		if (IsConsoleMode())
+			Console_Print("GetSystemColor %d >> %d %d %d", uiType, pRed->data, pGreen->data, pBlue->data);
 	}
 	return true;
 }
 bool Cmd_GetSystemColor_Execute(COMMAND_ARGS) {
-	uint32_t type;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &type) && type > 0 && type <= 5) {
-		SystemColorManager* colorMgr = SystemColorManager::GetSingleton();
-		uint32_t color = (colorMgr->GetColor(type) >> 0x8);
-		arResult = color;
-		if (IsConsoleMode()) Console_Print("GetSystemColor %d >> 0x%X", type, color);
+	arResult = 0;
+	uint32_t uiType;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiType) && uiType > 0 && uiType <= 5) {
+		SystemColorManager* pMgr = SystemColorManager::GetSingleton();
+		uint32_t uiColor = (pMgr->GetColor(uiType) >> 0x8);
+		arResult = uiColor;
+		if (IsConsoleMode())
+			Console_Print("GetSystemColor %d >> 0x%X", uiType, uiColor);
 	}
 	return true;
 };
 
 bool Cmd_QueueObjectiveText_Execute(COMMAND_ARGS) {
-	char text[MAX_PATH] = {};
-	uint32_t isCompleted, allowDisplayMultiple;
 	arResult = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &text, &isCompleted, &allowDisplayMultiple)) {
-		CdeclCall(0x77A5B0, text, isCompleted, allowDisplayMultiple == 0);
+	char cText[MAX_PATH] = {};
+	BOOL bCompleted, bAllowMultiple;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cText, &bCompleted, &bAllowMultiple)) {
+		CdeclCall(0x77A5B0, cText, bCompleted, bAllowMultiple == 0); // HUDMainMenu::ShowQuestObjective
 		arResult = 1;
 	}
 	return true;
@@ -189,9 +193,11 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS) {
 	int titleFont = -1, subTitleFont = -1;
 	arResult = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &title, &subtitle, &soundEdid, &queuePriority, &justification, &titleFont, &subTitleFont)) {
-		if (justification > kJustifyRight) justification = kJustifyRight;
+		if (justification > kJustifyRight) 
+			justification = kJustifyRight;
 
-		if (queuePriority == kPriorityClearQueueShowNow) CdeclCall(0x77F500); // HUDMainMenu::HideQuestLocationText
+		if (queuePriority == kPriorityClearQueueShowNow)
+			CdeclCall(0x77F500); // HUDMainMenu::HideQuestLocationText
 
 		CdeclCall(0x76B960, title, subtitle, queuePriority == kPriorityAppend, justification, titleFont, subTitleFont, soundEdid); // QuestUpdateManager::SetCustomQuestText
 		arResult = 1;
@@ -200,10 +206,10 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS) {
 };
 
 bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
-	BOOL bFemale = 0;
-	TESForm* pForm = nullptr;
-	char cPath[MAX_PATH] = {};
 	arResult = 0;
+	char cPath[MAX_PATH] = {};
+	BOOL bFemale = FALSE;
+	TESForm* pForm = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &bFemale, &pForm) && pForm) {
 		TESBipedModelForm* pBipedModel = DYNAMIC_CAST(pForm, TESForm, TESBipedModelForm);
 		if (pBipedModel) {
@@ -211,16 +217,14 @@ bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
 			arResult = 1;
 		}
 	}
-
 	return true;
 }
 
 bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	TESObjectREFR* markerRef = ThisCall<TESObjectREFR*>(0x77A400, PlayerCharacter::GetSingleton());
-	if (markerRef) {
-		reinterpret_cast<uint32_t&>(arResult) = markerRef->GetFormID();
-	}
+	TESObjectREFR* pMarker = ThisCall<TESObjectREFR*>(0x77A400, PlayerCharacter::GetSingleton()); // PlayerCharacter::GetPlayerMarkerTrackingRef
+	if (pMarker)
+		ScriptUtils::SetFormIDResult(arResult, pMarker->GetFormID());
 	return true;
 }
 
@@ -238,37 +242,49 @@ bool Cmd_SetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	TESWorldSpace* pWorldSpace = nullptr;
-	char cPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace) && pWorldSpace && IS_TYPE(pWorldSpace, TESWorldSpace) && pWorldSpace->GetTextureNameLength()) {
-		strcpy_s(cPath, pWorldSpace->GetTextureName());
-		g_strInterface->Assign(PASS_COMMAND_ARGS, cPath);
+		const char* pPath = pWorldSpace->GetTextureName();
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
 		if (IsConsoleMode())
-			Console_Print("GetWorldSpaceMapTexture >> %s", cPath);
+			Console_Print("GetWorldSpaceMapTexture >> %s", pPath);
 	}
 	return true;
 }
 
 bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
-	TESObjectREFR* form;
-	char iconPath[MAX_PATH] = {};
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || !form || (!IS_TYPE(form, BGSListForm) && (!form->IsReference() || !form->IsMapMarker() || !form->HasExtra<ExtraMapMarker>())))
+	arResult = 0;
+	TESForm* pForm = nullptr;
+	char cIconPath[MAX_PATH] = {};
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &cIconPath) || !pForm)
 		return true;
-	if (IS_TYPE(form, BGSListForm)) {
-		BSSimpleList<TESForm*>* pIter = ((BGSListForm*)form)->GetFormList();
+	
+	bool bSuccess = false;
+	if (pForm->IsReference()) {
+		TESObjectREFR* pReference = static_cast<TESObjectREFR*>(pForm);
+		ExtraMarkerIcons::SetMapMarkerIcon(pReference, cIconPath);
+		if (pReference && pReference->IsReference() && pReference->IsMapMarker() && pReference->HasExtra<ExtraMapMarker>()) {
+			ExtraMarkerIcons::SetMapMarkerIcon(pReference, cIconPath);
+			bSuccess = true;
+		}
+	}
+	else if (IS_TYPE(pForm, BGSListForm)) {
+		BSSimpleList<TESForm*>* pIter = static_cast<BGSListForm*>(pForm)->GetFormList();
 		while (pIter && !pIter->IsEmpty()) {
-			TESObjectREFR* ref = (TESObjectREFR*)pIter->GetItem();
+			TESObjectREFR* pReference = static_cast<TESObjectREFR*>(pIter->GetItem());
 			pIter = pIter->GetNext();
 
-			if (ref && ref->IsReference() && ref->IsMapMarker() && ref->HasExtra<ExtraMapMarker>()) {
-				ExtraMarkerIcons::SetMapMarkerIcon(ref, iconPath);
+			if (pReference && pReference->IsReference() && pReference->IsMapMarker() && pReference->HasExtra<ExtraMapMarker>()) {
+				ExtraMarkerIcons::SetMapMarkerIcon(pReference, cIconPath);
+				bSuccess = true;
 			}
 		}
 	}
-	else {
-		ExtraMarkerIcons::SetMapMarkerIcon(form, iconPath);
-	}
-	if (IsConsoleMode())
-		Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->GetFormID(), iconPath);
+
+	arResult = bSuccess;
+
+	if (bSuccess && IsConsoleMode())
+		Console_Print("SetCustomMapMarkerIcon >> %u, %s", pForm->GetFormID(), cIconPath);
+
 	return true;
 }
 
@@ -276,46 +292,50 @@ bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	if (!apRef || (!apRef->IsReference() || !apRef->IsMapMarker()))
 		return true;
 
-	ExtraMapMarker* mapMarkerExtra = apRef->GetExtraData<ExtraMapMarker>();
-	if (!mapMarkerExtra || !mapMarkerExtra->pData)
+	ExtraMapMarker* pMarker = apRef->GetExtraData<ExtraMapMarker>();
+	if (!pMarker || !pMarker->pData)
 		return true;
 
-	const char* resStr = ExtraMarkerIcons::GetMapMarker(apRef, mapMarkerExtra->pData->usType);
-	g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
+	const char* pString = ExtraMarkerIcons::GetMapMarker(apRef, pMarker->pData->usType);
+	g_strInterface->Assign(PASS_COMMAND_ARGS, pString);
+
 	if (IsConsoleMode())
-		Console_Print("GetCustomMapMarkerIcon >> %s", resStr);
+		Console_Print("GetCustomMapMarkerIcon >> %s", pString);
+
 	return true;
 }
 
 bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	SleepWaitMenu* swMenu = SleepWaitMenu::Get();
-	if (!swMenu) return true;
-	arResult = DWORD(swMenu->isRest) + 1;
-	if (IsConsoleMode()) Console_Print("GetSleepWaitMenuState >> %.f", arResult);
+	SleepWaitMenu* pMenu = SleepWaitMenu::Get();
+	if (!pMenu) 
+		return true;
+
+	arResult = DWORD(pMenu->isRest) + 1;
+	if (IsConsoleMode()) 
+		Console_Print("GetSleepWaitMenuState >> %.f", arResult);
+
 	return true;
 }
 
 bool Cmd_SetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
-	uint32_t visFlags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &visFlags)) {
-		HUDMainMenu* hud = HUDMainMenu::GetSingleton();
-		if (hud) {
-			hud->visibilityOverrides = visFlags;
+	uint32_t uiFlags = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags)) {
+		HUDMainMenu* pMenu = HUDMainMenu::GetSingleton();
+		if (pMenu) {
+			pMenu->visibilityOverrides = uiFlags;
 			CdeclCall(0x771700, HUDMainMenu::kHUDState_RECALCULATE);
 			arResult = 1;
 		}
 	}
-
 	return true;
 }
 
 bool Cmd_GetHUDVisibilityOverride_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	HUDMainMenu* hud = HUDMainMenu::GetSingleton();
-	if (hud) {
-		arResult = hud->visibilityOverrides;
-	}
+	HUDMainMenu* pMenu = HUDMainMenu::GetSingleton();
+	if (pMenu)
+		arResult = pMenu->visibilityOverrides;
 	return true;
 }
 
@@ -336,7 +356,9 @@ bool Cmd_IsMenuPaused_Execute(COMMAND_ARGS) {
 }
 
 float CalculateRepairedHealth(ItemChange* target, ItemChange* repairItem) {
-	if (!target || !repairItem) return 0.0f;
+	if (!target || !repairItem)
+		return 0.f;
+
 	float targetHealth = target->GetItemHealth(true);
 	float repairItemHealth = repairItem->GetItemHealth(true);
 	int repairSkill = PlayerCharacter::GetSingleton()->GetActorValueI(ActorValue::Index::REPAIR);
@@ -355,9 +377,9 @@ bool Cmd_UpdateRepairMenu_Execute(COMMAND_ARGS) {
 	if (!iter) return true;
 	do {
 		auto listItem = iter->GetItem();
-		if (listItem && listItem->tile && listItem->object) {
-			float repairedHealth = CalculateRepairedHealth(target, listItem->object);
-			listItem->tile->SetFloat(kTileValue_user0, repairedHealth);
+		if (listItem && listItem->pTile && listItem->data) {
+			float repairedHealth = CalculateRepairedHealth(target, listItem->data);
+			listItem->pTile->Set(TILE_TRAIT::USER0, repairedHealth);
 		}
 	} while (iter = iter->GetNext());
 	arResult = 1;
@@ -372,9 +394,8 @@ bool Cmd_SetWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 		if (pScopeForm && pScopeForm->GetFormType() == FORM_TYPE::TESObjectWEAP) {
 			TESModel* pModel = &static_cast<TESObjectWEAP*>(pScopeForm)->kScope;
 			Interface::InitGunScope(pModel);
-
 		}
-		else if (cScopePath[0] && FileFinder::Locate(cScopePath, nullptr, FileFinder::SKIP_NONE, FileFinder::ARCHIVE_TYPE_MESHES)) {
+		else if (cScopePath[0] && FileFinder::Locate(cScopePath, nullptr, FileFinder::SKIP_NONE, ARCHIVE_TYPE::MESHES)) {
 			StackObject<TESModel, 0x488F50, 0x489070> kScopeModel;
 			kScopeModel->SetModel(cScopePath);
 			Interface::InitGunScope(kScopeModel.GetPtr());
@@ -398,7 +419,6 @@ bool Cmd_ClearWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 	Interface::ClearGunScope();
 	return true;
 }
-
 
 bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 	arResult = -1;
@@ -448,8 +468,8 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 		for (auto pIter = pListBox->GetHead(); pIter && !pIter->IsEmpty(); pIter = pIter->GetNext()) {
 			auto pItem = pIter->GetItem();
 
-			if (pItem && pItem->tile && pItem->object) {
-				const ItemChange* pItemChange = pItem->object;
+			if (pItem && pItem->pTile && pItem->data) {
+				const ItemChange* pItemChange = pItem->data;
 
 				if (pItemChange->GetContainerObject() != pInvRef->pForm)
 					continue;
@@ -458,27 +478,27 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 
 				// Does extra data match
 				if (pInvRef->pExtraDataList) {
-					if (pItemChange->pExtraLists && pItemChange->pExtraLists->IsInList(pInvRef->pExtraDataList))
+					if (pItemChange->GetExtraDataList() && pItemChange->GetExtraDataList()->IsInList(pInvRef->pExtraDataList))
 						bMatched = true;
 				}
 
 				// No extra data
-				else if (!pItemChange->pExtraLists || pItemChange->pExtraLists->IsEmpty())
+				else if (!pItemChange->GetExtraDataList() || pItemChange->GetExtraDataList()->IsEmpty())
 					bMatched = true;
 
 				// Find matching tile index
 				if (!bMatched)
 					continue;
 
-				const Tile* pEntryTile = pItem->tile;
-				const Tile* pParent = pEntryTile->parent;
+				const Tile* pEntryTile = pItem->pTile;
+				const Tile* pParent = pEntryTile->GetParent();
 				if (!pParent) [[unlikely]]
 					continue;
 
-				auto kIter = pParent->children.GetHeadPos();
+				auto kIter = pParent->kChildren.GetHeadPos();
 				uint32_t uiIndex = 0;
 				while (kIter) {
-					Tile* pChild = pParent->children.GetNext(kIter);
+					Tile* pChild = pParent->kChildren.GetNext(kIter);
 					if (pChild == pEntryTile) {
 						arResult = uiIndex;
 						if (IsConsoleMode())
@@ -537,12 +557,13 @@ bool Cmd_SelectMenuItemListIndex_Execute(COMMAND_ARGS) {
 			return true;
 
 		// Select tile
-		if (uiTileIndex < pListBox->itemCount) {
-			Tile* tile = pListBox->GetNthTile(uiTileIndex);
-			pListBox->SetSelectedTile(tile);
+		if (uiTileIndex < pListBox->usNextIndex) {
+			Tile* pTile = pListBox->GetTileAt(uiTileIndex, true);
+			pListBox->Highlight(pTile);
 			pListBox->ScrollToHighlight();
 			arResult = 1;
 		}
 	}
 	return true;
 }
+#endif

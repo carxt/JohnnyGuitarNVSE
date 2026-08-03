@@ -1,8 +1,5 @@
 #pragma once
 
-#include <NiTypes.h>
-
-#include "netimmerse.h"
 #include "NiParticles.hpp"
 #include "NiTPointerList.hpp"
 #include "NiPSysModifier.hpp"

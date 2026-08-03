@@ -34,7 +34,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 	}
 	if (note->GetNoteType() == BGSNote::NoteType::SOUND)
 	{
-		BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(note->GetNoteSound()->GetFormID(), BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100);
+		BSSoundHandle sound = BSAudio::GetSingleton()->GetSoundHandleByFormID(note->GetNoteSound()->GetFormID(), BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100);
 
 		holotapeDialogues.Append(&sound);
 		isHolotapeVoicePlaying = true;
@@ -70,7 +70,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 					ThisCall(0x61F170, topicInfo, 0, character);
 
 					// append sound
-					BSSoundHandle toPlay = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(currentResponse->strVoiceFilePath.c_str(), audioFlags, nullptr);
+					BSSoundHandle toPlay = BSAudio::GetSingleton()->GetSoundHandleByFilePath(currentResponse->strVoiceFilePath.c_str(), audioFlags, nullptr);
 					toPlay.SetVolume(0.9f);
 					holotapeDialogues.Append(&toPlay);
 
@@ -87,7 +87,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 	{
 		if (playStartStopSound)
 		{
-			BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStart", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
+			BSSoundHandle sound = BSAudio::GetSingleton()->GetSoundHandleByEditorID("UIPipBoyHolotapeStart", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
 			sound.SetPosition(PlayerCharacter::GetSingleton()->GetPosition());
 			sound.Play(false);
 		}
@@ -96,7 +96,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 			bNoHolotapeStopSound = true;
 		}
 		*(uint8_t*)0x11DCFA4 = true;
-		ThisCall(0xAD85A0, BSWin32Audio::GetSingleton()); // FadeInDialogueSound
+		ThisCall(0xAD85A0, BSAudio::GetSingleton()); // FadeInDialogueSound
 	}
 }
 
@@ -115,12 +115,12 @@ void MapMenu::StopHolotape()
 	isHolotapeVoicePlaying = 0;
 	if (!bNoHolotapeStopSound)
 	{
-		BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStop", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
+		BSSoundHandle handle = BSAudio::GetSingleton()->GetSoundHandleByEditorID("UIPipBoyHolotapeStop", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
 		handle.SetPosition(PlayerCharacter::GetSingleton()->GetPosition());
 		handle.Play(false);
 	}
 	bNoHolotapeStopSound = false;
-	ThisCall(0xAD8650, BSWin32Audio::GetSingleton()); // FadeOutDialogueSound
+	ThisCall(0xAD8650, BSAudio::GetSingleton()); // FadeOutDialogueSound
 	*(uint8_t*)0x11DCFA4 = false;
 	ThisCall(0x775670, HUDMainMenu::GetSingleton()); // ClearSubtitlesString
 }

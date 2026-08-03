@@ -1,6 +1,7 @@
 #pragma once
-#include <unordered_set>
+
 namespace JohnnyPatches {
+
 	extern bool bFixFleeing;
 	extern bool bFixItemStacks;
 	extern bool bResetVanityCam;
@@ -25,8 +26,3 @@ namespace JohnnyPatches {
 	SPEC_NOINLINE void Update();
 
 }
-// exports
-extern "C" {
-	bool __cdecl JGSetViewmodelClipDistance(float value);
-	float __cdecl JGGetViewmodelClipDistance();
-} 

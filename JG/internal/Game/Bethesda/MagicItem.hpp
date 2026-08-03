@@ -22,7 +22,7 @@ public:
 	virtual bool					IgnoreResistance() const;
 	virtual bool					GetNoAbsorbOrReflect() const;
 	virtual uint32_t				GetChunkID() const;
-	virtual Data*					GetData() const;
+	virtual void*					GetData() const;
 	virtual uint32_t				GetDataSize();
 	virtual bool					CompareMagicItemData(MagicItem* apItem);
 	virtual void					CopyMagicItemData(MagicItem* apItem);

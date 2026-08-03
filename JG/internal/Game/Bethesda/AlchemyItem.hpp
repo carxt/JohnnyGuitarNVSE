@@ -19,8 +19,17 @@ public:
 	AlchemyItem();
 	~AlchemyItem();
 
-	class Data : public MagicItem::Data {
+	struct _Flags {
+		enum Flags {
+			MEDICINE = 0x4,
+		};
+	};
+	using Flags = _Flags::Flags;
+
+	class Data {
 	public:
+		int32_t		iCostOverride;
+		Bitfield8	ucFlags;
 		SpellItem*	pAddictionItem;
 		float		fAddictionChance;
 		TESSound*	pConsumeSound;
@@ -30,6 +39,20 @@ public:
 	TESIcon	kMessageIcon;
 
 	TESFORM_TYPE(AlchemyItem);
+
+	bool GetFlag(Flags aeFlag) const;
+	void SetFlag(Flags aeFlag, bool abVal);
+
+	SpellItem* GetAddictionItem() const;
+	void SetAddictionItem(SpellItem* apItem);
+
+	float GetAddictionChance() const;
+	void SetAddictionChance(float afChance);
+
+	TESSound* GetConsumptionSound() const;
+	void SetConsumptionSound(TESSound* apSound);
+
+	bool IsWater() const;
 };
 
 ASSERT_SIZE(AlchemyItem, 0xD8);

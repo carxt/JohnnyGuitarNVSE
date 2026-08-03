@@ -10,7 +10,7 @@ namespace WorldToScreen {
 		NiPoint3		kWorld;
 		NiPoint3		kLocal;
 		float			m_aafWorldToCam[4][4];
-		NiViewport		m_kPort;
+		NiRect<float>	m_kPort;
 	};
 
 	extern CameraParams kCameraData;

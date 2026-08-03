@@ -1,7 +1,0 @@
-#include "GameAPI.h"
-#include "GameScript.h"
-#include "GameForms.h"
-#include "GameObjects.h"
-#include "CommandTable.h"
-#include "GameRTTI.h"
-#include "internal/utility.h"

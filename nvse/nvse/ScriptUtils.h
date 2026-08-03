@@ -24,8 +24,6 @@ class FunctionCaller;
 #include <cstdarg>
 #endif
 
-extern ErrOutput g_ErrOut;
-
 // these are used in SCRIPT_PARAMETER to specify expected Token_Type of args to commands taking NVSE expressions as args
 enum {
 	kNVSEParamType_Number =		(1 << kTokenType_Number) | (1 << kTokenType_Ambiguous),

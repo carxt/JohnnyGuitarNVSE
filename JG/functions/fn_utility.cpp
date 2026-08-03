@@ -1,28 +1,30 @@
 #include "fn_utility.h"
+#ifdef GAME
 #include "Bethesda/BSUtilities.hpp"
-#include <JG/ExtraUISounds.hpp>
-#include <JG/ExtraReputationIcons.hpp>
-#include <JG/JohnnyPatches.hpp>
-#include <shared/BSMemory/BSScrapMemory.hpp>
+#include "Bethesda/TimeGlobal.hpp"
+#include "decoding.h"
 #include "GameProcess.h"
-#include <GameUI.h>
-#include <misc/misc.h>
-#include <decoding.h>
-#include <JG/CameraOverride.hpp>
-#include <JG/JohnnyRadios.hpp>
-#include <JG/DisabledLevelUp.hpp>
-#include <JIP/JIPUtils.hpp>
-#include <random>
+#include "GameUI.h"
+#include "JG/CameraOverride.hpp"
+#include "JG/DisabledLevelUp.hpp"
+#include "JG/ExtraReputationIcons.hpp"
+#include "JG/ExtraUISounds.hpp"
+#include "JG/JohnnyPatches.hpp"
+#include "JG/JohnnyRadios.hpp"
+#include "JIP/JIPUtils.hpp"
+#include "misc/misc.h"
+#include "random"
+#include "shared/BSMemory/BSScrapMemory.hpp"
 
 extern DWORD dwGameStartTimestamp;
 
 SPEC_INLINE bool Cmd_GameGetSecondsPassed_Eval(COMMAND_ARGS_EVAL) {
-	arResult = ThisCall<float>(0x07013E0, (void*)0x11F6394);
+	arResult = TimeGlobal::GetSingleton()->GetRealTimeSeconds();
 	return true;
 }
 
 bool Cmd_GameGetSecondsPassed_Execute(COMMAND_ARGS) {
-	Cmd_GameGetSecondsPassed_Eval(apRef, 0, 0, arResult);
+	Cmd_GameGetSecondsPassed_Eval(nullptr, nullptr, nullptr, arResult);
 	if (IsConsoleMode())
 		Console_Print("GameGetSecondsPassed >> %0.2f", arResult);
 	return true;
@@ -38,35 +40,40 @@ bool Cmd_NullArgs_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-
 bool Cmd_GetAllGameRadios_Execute(COMMAND_ARGS) {
-	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(nullptr, 0, apScript);
-	tList<TESObjectACTI>* g_gameRadios = (tList<TESObjectACTI>*)0x11C8264;
-	for (auto radioIter = g_gameRadios->Begin(); !radioIter.End(); radioIter.Next()) {
-		if (*radioIter) {
-			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
-		}
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, apScript);
+	BSSimpleList<TESObjectACTI*>* pRadioStations = reinterpret_cast<BSSimpleList<TESObjectACTI*>*>(0x11C8264);
+	while (pRadioStations && !pRadioStations->IsEmpty()) {
+		TESObjectACTI* pRadio = pRadioStations->GetItem();
+		if (pRadio)
+			g_arrInterface->AppendElement(pArray, NVSEArrayElement(pRadio));
+		pRadioStations = pRadioStations->GetNext();
 	}
-	g_arrInterface->AssignCommandResult(radioArr, &arResult);
+	g_arrInterface->AssignCommandResult(pArray, &arResult);
 	return true;
 }
 
 bool Cmd_GetAvailableRadios_Execute(COMMAND_ARGS) {
-	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(nullptr, 0, apScript);
-	tList<TESObjectACTI> availableRadios = {};
-	CdeclCall<void>(0x04FF1A0, apRef, &availableRadios, nullptr);
-	for (auto radioIter = availableRadios.Begin(); !radioIter.End(); radioIter.Next()) {
-		if (*radioIter && !CdeclCall<bool>(0x0079BE30, *radioIter) && JohnnyRadios::IsAvailable((*radioIter)->GetFormID())) {
-			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
-		}
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, apScript);
+
+	BSSimpleList<TESObjectACTI*> kRadios;
+	CdeclCall(0x04FF1A0, apRef, &kRadios, nullptr);
+
+	auto pIter = kRadios.GetHead();
+	while (pIter && !pIter->IsEmpty()) {
+		TESObjectACTI* pRadio = pIter->GetItem();
+		if (pRadio && !CdeclCall<bool>(0x0079BE30, pRadio) && JohnnyRadios::IsAvailable(pRadio->GetFormID()))
+			g_arrInterface->AppendElement(pArray, NVSEArrayElement(pRadio));
+		pIter = pIter->GetNext();
 	}
-	g_arrInterface->AssignCommandResult(radioArr, &arResult);
+
+	g_arrInterface->AssignCommandResult(pArray, &arResult);
 	return true;
 }
 
 bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	ThisCall(0x75F2A0, nullptr);
+	CdeclCall(0x75F2A0);
 	return true;
 }
 
@@ -77,9 +84,10 @@ bool Cmd_DumpIconMap_Execute(COMMAND_ARGS) {
 
 bool Cmd_UpdateCrosshairPrompt_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	ThisCall(0x778B10, nullptr);
+	CdeclCall(0x778B10);
 	return true;
 }
+
 enum EType {
 	kSetting_Bool = 0,
 	kSetting_c,
@@ -122,7 +130,8 @@ bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
 				GetModuleFileNameA(module, dllPath, MAX_PATH);
 				GetModuleFileNameA(nullptr, fnvPath, MAX_PATH);
 				fnvPath[strlen(fnvPath) - 13] = '\0';
-				if (strstr(dllPath, fnvPath) != nullptr) arResult = 1;
+				if (strstr(dllPath, fnvPath) != nullptr) 
+					arResult = 1;
 			}
 			else {
 				arResult = 1;
@@ -206,18 +215,27 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	uint32_t arrID;
 	uint32_t isReverse = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &isReverse)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &isReverse))
+		return true;
+
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
-	if (!inArr) return true;
-	NVSEArrayVar* outArr = g_arrInterface->CreateArray(nullptr, 0, apScript);
-	uint32_t size = g_arrInterface->GetArraySize(inArr);
+	if (!inArr)
+		return true;
+
+	const uint32_t size = g_arrInterface->GetArraySize(inArr);
 	BSScrapBuffer<NVSEArrayElement> elements(size);
 	g_arrInterface->GetElements(inArr, elements.get(), nullptr);
+
 	std::map<const char*, TESForm*, cmp_str> smap(cmp_str(isReverse > 0));
 	for (uint32_t i = 0; i < size; i++) {
-		if (elements[i].GetTESForm() == nullptr) return true;
+		if (elements[i].GetTESForm() == nullptr) 
+			return true;
+
 		smap.insert(std::pair<const char*, TESForm*>(elements[i].GetTESForm()->GetFormEditorID(), elements[i].GetTESForm()));
 	}
+
+	NVSEArrayVar* outArr = g_arrInterface->CreateArray(nullptr, 0, apScript);
+
 	for (std::map<const char*, TESForm*>::iterator it = smap.begin(); it != smap.end(); ++it) {
 		g_arrInterface->AppendElement(outArr, NVSEArrayElement(it->second));
 	}
@@ -247,14 +265,16 @@ bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	TESForm* form = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) {
-		TESFile* pFile = form->GetFile(-1);
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && pForm) {
+		TESFile* pFile = pForm->GetFile(-1);
 		if (pFile)
 			arResult = pFile->ucCompileIndex;
 		else
 			arResult = 0xFF;
-		if (IsConsoleMode()) Console_Print("GetFormOverrideIndex >> %.f", arResult);
+
+		if (IsConsoleMode()) 
+			Console_Print("GetFormOverrideIndex >> %.f", arResult);
 	}
 	return true;
 }
@@ -304,8 +324,8 @@ bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetDefaultHeapSize_Execute(COMMAND_ARGS) {
-	uint32_t heapSize = *(reinterpret_cast<uint32_t*>(0x866E9F + 1));
-	arResult = heapSize / 1024 / 1024;
+	uint32_t uiHeapSize = *reinterpret_cast<uint32_t*>(0x866E9F + 1);
+	arResult = uiHeapSize / 1024.f / 1024.f;
 	if (IsConsoleMode())
 		Console_Print("DefaultHeapInitialAllocMB >> `%f", arResult);
 	return true;
@@ -317,7 +337,7 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cEDID) && cEDID[0]) {
 		const TESForm* pForm = TESForm::GetFormByEditorID(cEDID);
 		if (pForm)
-			reinterpret_cast<uint32_t&>(arResult) = pForm->GetFormID();
+			ScriptUtils::SetFormIDResult(arResult, pForm->GetFormID());
 
 		if (IsConsoleMode())
 			Console_Print("EditorIDToFormID >> 0x%08X", arResult);
@@ -326,24 +346,24 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
-	TESForm* form = nullptr;
-	if (apRef) Console_Print("0x%08X", apRef);
-	else if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) Console_Print("0x%08X", form);
+	TESForm* pForm = nullptr;
+	if (apRef) 
+		Console_Print("0x%08X", apRef);
+	else if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && pForm)
+		Console_Print("0x%08X", pForm);
 	return true;
 }
 
 bool Cmd_RefAddrxData_Execute(COMMAND_ARGS) {
-	TESForm* form = nullptr;
-	DWORD type;
-	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
-		if (type < EXTRA_DATA_TYPE::COUNT) {
-			void* res = apRef->GetExtraData(type);
-			if (res) {
-				Console_Print("0x%08X", res);
-				return true;
-			}
+	uint32_t uiType;
+	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &uiType)) {
+		if (uiType < EXTRA_DATA_TYPE::COUNT) {
+			BSExtraData* pData = apRef->GetExtraData(uiType);
+			if (pData)
+				Console_Print("0x%08X", pData);
+			else
+				Console_Print("Not found");
 		}
-		Console_Print("Not found");
 	}
 	return true;
 }
@@ -428,65 +448,69 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
-	TESForm* form = nullptr;
-	const char* edid = "";
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
-		if (!form)
-			form = apRef;
-		if (form)
-			edid = form->GetFormEditorID();
-		g_strInterface->Assign(PASS_COMMAND_ARGS, edid);
+	TESForm* pForm = nullptr;
+	const char* pEDID = "";
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) {
+		if (!pForm)
+			pForm = apRef;
+
+		if (pForm)
+			pEDID = pForm->GetFormEditorID();
+
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pEDID);
+
 		if (IsConsoleMode())
-			Console_Print("GetEditorID >> %s", edid);
+			Console_Print("GetEditorID >> %s", pEDID);
 	}
 	return true;
 }
 
 bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS) {
-	ThisCall(0x0703DA0, nullptr);
-	ThisCall(0x07D0A70, nullptr);
+	CdeclCall(0x0703DA0); // Interface::CloseConsole
+	CdeclCall(0x07D0A70); // StartMenu::ChooseMainMenu
 	return true;
 }
 
 bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS) {
-	uintptr_t optIdx = -1;
 	arResult = 0;
-	char boneName[MAX_PATH] = { 0 };
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, optIdx, &boneName)) {
-		if (optIdx > 4) return true;
-		auto doUpdateBone = [optIdx, &boneName, &arResult](BipedAnim* BipedAnim) {
-			if (BipedAnim) {
-				if (BipedAnim->pRoot && BipedAnim->pRoot->IsNode()) {
-					auto vb = CdeclCall<NiNode*>(0x04AAE30, BipedAnim->pRoot, boneName);
-					if (vb && vb->IsNode()) {
-						BipedAnim->kBones[optIdx].pParent = vb;
-						arResult = 1;
-					}
+	if (!apRef || !apRef->IsCharacter())
+		return true;
+
+	BIPED_BONE eIndex = BIPED_BONE::NONE;
+	char cBoneName[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eIndex, &cBoneName) && ScriptUtils::InRange(eIndex)) {
+		const NiFixedString strBoneName = cBoneName;
+
+		auto doUpdateBone = [eIndex, &strBoneName, &arResult](BipedAnim* apBiped) {
+			if (apBiped && apBiped->pRoot && apBiped->pRoot->IsNode()) {
+				NiAVObject* pObject = BSUtilities::GetObjectByName(apBiped->pRoot, strBoneName);
+				if (pObject && pObject->IsNode()) {
+					apBiped->kBones[eIndex].pParent = static_cast<NiNode*>(pObject);
+					arResult = 1;
 				}
 			}
-			};
-		if (apRef && apRef->IsCharacter()) {
-			doUpdateBone(((Character*)apRef)->pBipedAnim);
-			if (apRef == PlayerCharacter::GetSingleton()) {
-				doUpdateBone(((PlayerCharacter*)apRef)->p1stPersonBipedAnim);
-			}
-		}
+		};
+
+		doUpdateBone(static_cast<Character*>(apRef)->pBipedAnim);
+		if (apRef == PlayerCharacter::GetSingleton())
+			doUpdateBone(static_cast<PlayerCharacter*>(apRef)->p1stPersonBipedAnim);
 	}
 	return true;
 }
 
 bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
-	uintptr_t optIdx = -1;
+	arResult = 0;
+	if (!apRef || !apRef->IsCharacter())
+		return true;
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &optIdx)) {
-		if (apRef && apRef->IsCharacter() && optIdx <= 4)
-			if (auto BipedAnim = ((Character*)apRef)->pBipedAnim) {
-				if (BipedAnim->kBones[optIdx].pParent && BipedAnim->kBones[optIdx].pParent->IsNode()) {
-					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->kBones[optIdx].pParent->m_kName);
-					if (IsConsoleMode())
-						Console_Print("GetOptionalBone >> %s", BipedAnim->kBones[optIdx].pParent->m_kName);
-				}
-			}
+	BIPED_BONE eIndex = BIPED_BONE::NONE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eIndex) && ScriptUtils::InRange(eIndex)) {
+		BipedAnim* pBiped = static_cast<Character*>(apRef)->pBipedAnim;
+		if (pBiped && pBiped->kBones[eIndex].pParent && pBiped->kBones[eIndex].pParent->IsNode()) {
+			g_strInterface->Assign(PASS_COMMAND_ARGS, pBiped->kBones[eIndex].pParent->GetName());
+			if (IsConsoleMode())
+				Console_Print("GetOptionalBone >> %s", pBiped->kBones[eIndex].pParent->GetName().c_str());
+		}
 	}
 	return true;
 }
@@ -533,7 +557,8 @@ bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	arResult = JohnnyPatches::fViewmodelNearDistance;
-	if (IsConsoleMode()) Console_Print("GetViewmodelClipDistance >> %.3f", arResult);
+	if (IsConsoleMode()) 
+		Console_Print("GetViewmodelClipDistance >> %.3f", arResult);
 	return true;
 }
 
@@ -558,31 +583,38 @@ bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
 bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
 	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, apScript);
 	uint32_t arrID;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
+		return true;
+
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
-	if (!inArr) return true;
-	if (g_arrInterface->GetContainerType(inArr) != NVSEArrayVarInterface::kArrType_Array) return true;
+	if (!inArr) 
+		return true;
+
+	if (g_arrInterface->GetContainerType(inArr) != NVSEArrayVarInterface::kArrType_Array) 
+		return true;
+
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	auto lAr_Size = g_arrInterface->GetArraySize(inArr);
-	if (lAr_Size < 1) return true;
-	BSScrapBuffer<NVSEArrayElement> elements(lAr_Size);
-	g_arrInterface->GetElements(inArr, elements.get(), NULL);
-	for (auto iCounter = (lAr_Size - 1); iCounter >= 1; iCounter--)
-	{
+	if (lAr_Size < 1) 
+		return true;
+
+	BSScrapBuffer<NVSEArrayElement> kElements(lAr_Size);
+	g_arrInterface->GetElements(inArr, kElements.get(), NULL);
+	for (auto iCounter = (lAr_Size - 1); iCounter >= 1; iCounter--) {
 		std::uniform_int_distribution<> distrib(1, iCounter);
-		auto iPicker = distrib(gen);
-		if (iPicker < iCounter)
-		{
-			NVSEArrayElement bufferElement;
-			bufferElement = elements[iPicker];
-			elements[iPicker] = elements[iCounter];
-			elements[iCounter] = bufferElement;
+		int32_t iPicker = distrib(gen);
+		if (iPicker < iCounter) {
+			NVSEArrayElement bufferElement = kElements[iPicker];
+			kElements[iPicker] = kElements[iCounter];
+			kElements[iCounter] = bufferElement;
 		}
 	}
+
 	for (uint32_t i = 0; i < lAr_Size; i++) {
-		g_arrInterface->AppendElement(outArr, NVSEArrayElement(elements[i]));
+		g_arrInterface->AppendElement(outArr, NVSEArrayElement(kElements[i]));
 	}
+	
 	g_arrInterface->AssignCommandResult(outArr, &arResult);
 	return true;
 }
@@ -644,7 +676,7 @@ bool Cmd_StopIdleLoop_Execute(COMMAND_ARGS) {
 				arResult = 1;
 			}
 		}
-
 	}
 	return true;
 }
+#endif

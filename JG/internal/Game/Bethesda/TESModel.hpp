@@ -42,6 +42,9 @@ public:
 	uint32_t GetSkinFlags() const;
 
 	static const char* GetModel(const TESForm* apForm);
+
+	uint32_t GetModelLength() const;
+	static uint32_t GetModelLength(const TESForm* apForm);
 };
 
 ASSERT_SIZE(TESModel, 0x18);

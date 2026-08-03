@@ -41,8 +41,13 @@ BGSPerkEntry* BGSPerk::GetPerkEntryByRank(uint8_t aucRank) const {
 }
 
 // GAME - 0x5EB410
+// GECK - 0x5507F0
 bool BGSPerk::AddPerkEntry(BGSPerkEntry* apEntry) {
+#ifdef GAME
 	return ThisCall<bool>(0x5EB410, this, apEntry);
+#else
+	return ThisCall<bool>(0x5507F0, this, apEntry);
+#endif
 }
 
 // GAME - 0x5EB980

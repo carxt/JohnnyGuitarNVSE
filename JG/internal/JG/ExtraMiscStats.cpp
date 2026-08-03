@@ -18,19 +18,19 @@ namespace ExtraMiscStats {
 			value = g_miscStatData[id]->Int();
 		}
 		else {
-			std::string sName = tile->name.pString;
+			std::string sName = tile->GetName();
 			auto it = miscStatMap.find(sName);
 			if (it != miscStatMap.end()) {
 				value = it->second;
 			}
 		}
 
-		tile->SetFloat(kTileValue_user1, (float)value, 1);
+		tile->Set(TILE_TRAIT::USER1, (float)value, true);
 	}
 	bool __cdecl ShouldHideStat(uint32_t* id) {
 		if ((uint32_t)id >= 43) {
-			Tile* tile = StatsMenu::Get()->miscStatIDList.GetTileFromItem(&id);
-			std::string sName = tile->name.c_str();
+			Tile* tile = StatsMenu::Get()->miscStatIDList.GetTileFor(&id);
+			std::string sName = tile->GetName();
 			if (miscStatMap.find(sName) == miscStatMap.end()) return true;
 		}
 		return false;
@@ -40,23 +40,23 @@ namespace ExtraMiscStats {
 		auto iter = StatsMenu::Get()->miscStatIDList.GetHead();
 		do
 		{
-			if (iter->GetItem() && iter->GetItem()->tile && !strcmp(iter->GetItem()->tile->name.c_str(), name)) {
-				tile = iter->GetItem()->tile;
+			if (iter->GetItem() && iter->GetItem()->pTile && !strcmp(iter->GetItem()->pTile->GetName(), name)) {
+				tile = iter->GetItem()->pTile;
 				break;
 			}
 		} while (iter = iter->GetNext());
 		if (!tile) {
-			tile = ThisCall<Tile*>(0x7E1190, &StatsMenu::Get()->miscStatIDList, StatsMenu::Get()->miscStatIDList.itemCount, 0, 0, 0);
-			tile->SetString(kTileValue_string, name, 1);
-			tile->name.Set(name);
+			tile = ThisCall<Tile*>(0x7E1190, &StatsMenu::Get()->miscStatIDList, StatsMenu::Get()->miscStatIDList.usNextIndex, 0, 0, 0);
+			tile->Set(TILE_TRAIT::STRING, name, true);
+			tile->SetName(name);
 			recalculateStatFilters = true;
 		}
-		else if (auto listIdxTileVal = tile->GetValue(kTileValue_listindex)) {
-			if (listIdxTileVal && listIdxTileVal->num < 0) {
+		else if (auto listIdxTileVal = tile->GetValue(TILE_TRAIT::LIST_INDEX)) {
+			if (listIdxTileVal && listIdxTileVal->fValue < 0.f) {
 				recalculateStatFilters = true;
 			}
 		}
-		tile->SetFloat(kTileValue_user1, (float)value, 1);
+		tile->Set(TILE_TRAIT::USER1, (float)value, true);
 	}
 
 	void Reset() {

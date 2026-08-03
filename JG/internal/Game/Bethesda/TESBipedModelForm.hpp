@@ -66,26 +66,28 @@ public:
 	bool FillsBipedSlot(BIPED_OBJECT aeSlot, bool abHair, BGSBipedModelList* apModelList) const;
 	void SetFillsBipedSlot(BIPED_OBJECT aeSlot, bool abVal);
 
+	bool FillsMatchingBipedSlots(const TESBipedModelForm* apOther) const;
+
 	const char* GetBipedConstraint() const;
 
 	const char* GetBipedModel(SEX aeSex) const;
 
 	TESModelTextureSwap* GetBipedTESModel(SEX aeSex) const;
-	static TESModelTextureSwap* GetBipedTESModel(TESForm* apForm, TESObjectREFR* apRef);
+	static TESModelTextureSwap* GetBipedTESModel(const TESForm* apForm, const TESObjectREFR* apRef);
 
 	const char* GetWorldModel(SEX aeSex) const;
-	static const char* GetWorldModel(TESForm* apForm, TESObjectREFR* apRef);
+	static const char* GetWorldModel(const TESForm* apForm, const TESObjectREFR* apRef);
 
 	TESModelTextureSwap* GetWorldTESModel(SEX aeSex) const;
-	static TESModelTextureSwap* GetWorldTESModel(TESForm* apForm, TESObjectREFR* apRef);
+	static TESModelTextureSwap* GetWorldTESModel(const TESForm* apForm, const TESObjectREFR* apRef);
 
 	const char* GetIcon(SEX aeSex) const;
-	static const char* GetIcon(TESForm* apForm, TESObjectREFR* apRef);
+	static const char* GetIcon(const TESForm* apForm, const TESObjectREFR* apRef);
 
 	const char* GetMessageIcon(SEX aeSex) const;
-	static const char* GetMessageIcon(TESForm* apForm, TESObjectREFR* apRef);
+	static const char* GetMessageIcon(const TESForm* apForm, const TESObjectREFR* apRef);
 
-	static TESBipedModelForm* GetFormAsBipedModel(TESForm* apForm);
+	static TESBipedModelForm* GetFormAsBipedModel(const TESForm* apForm);
 };
 
 ASSERT_SIZE(TESBipedModelForm, 0xDC);

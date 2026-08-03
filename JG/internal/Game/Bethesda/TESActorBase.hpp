@@ -35,6 +35,10 @@ public:
 	virtual void				ModActorValueI(ActorValue::Index aeIndex, int32_t aiValue);
 
 	SEX GetSex() const;
+
+	int32_t GetHealth() const;
+
+	float GetDesirability(TESForm* apForm) const;
 };
 
 ASSERT_SIZE(TESActorBase, 0x10C);

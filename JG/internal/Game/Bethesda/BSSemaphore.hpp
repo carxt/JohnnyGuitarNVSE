@@ -3,13 +3,15 @@
 class BSSemaphore {
 public:
 	BSSemaphore();
-	BSSemaphore(uint32_t auiCount);
-	BSSemaphore(uint32_t auiCount, uint32_t auiMaxCount);
+	BSSemaphore(int32_t aiCount);
+	BSSemaphore(int32_t aiCount, int32_t aiMaxCount);
 	~BSSemaphore();
 
-	uint32_t	uiCount;
-	HANDLE		hSemaphore;
-	uint32_t	uiMaxCount;
+	volatile int32_t	iCount;
+	HANDLE				hSemaphore;
+	int32_t				iMaxCount;
+
+	int32_t GetCount() const;
 
 	void Signal();
 	void Wait();

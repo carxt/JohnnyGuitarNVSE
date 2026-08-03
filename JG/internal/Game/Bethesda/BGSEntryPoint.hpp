@@ -96,10 +96,9 @@ public:
 		uint8_t					ucFunctionType;
 	};
 
-
 	template<typename... Args>
-	static void HandleEntryPoint(BGSEntryPoint::EntryPointType aeEntryPoint, Actor* apPerkOwner, Args ...args) {
-		((void(__cdecl*)(BGSEntryPoint::EntryPointType, Actor* ,Args...))0x5E58F0)(aeEntryPoint, apPerkOwner, std::forward<Args>(args)...);
+	static void HandleEntryPoint(EntryPointType aeEntryPoint, Actor* apPerkOwner, Args ...args) {
+		reinterpret_cast<void(__cdecl*)(EntryPointType, Actor*, Args...)>(0x5E58F0)(aeEntryPoint, apPerkOwner, std::forward<Args>(args)...);
 	}
 };
 

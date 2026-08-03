@@ -26,8 +26,13 @@ TESDescription* BGSNote::GetNoteText() const {
 }
 
 // GAME - 0x5E9200
+// GECK - 0x54B0D0
 void BGSNote::SetNoteText(TESDescription* apText) {
+#ifdef GAME
 	ThisCall(0x5E9200, this, apText);
+#else
+	ThisCall(0x54B0D0, this, apText);
+#endif
 }
 
 // GAME - 0x5E9160
@@ -36,8 +41,13 @@ TESTexture* BGSNote::GetNoteImage() const {
 }
 
 // GAME - 0x5E9190
+// GECK - 0x54B090
 void BGSNote::SetNoteImage(TESTexture* apImage) {
+#ifdef GAME
 	ThisCall(0x5E9190, this, apImage);
+#else
+	ThisCall(0x54B090, this, apImage);
+#endif
 }
 
 // GAME - 0x5E9240

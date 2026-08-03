@@ -423,7 +423,7 @@ public:
 	virtual bool							CanForceGreet(Actor* apActor);
 	virtual void							SetIronSights(bool isAiming);
 	virtual bool							GetIronSights() const;
-	virtual bool							HasMovementAnim(ANIM_GROUP aeAnim);
+	virtual bool							HasMovementAnim(ANIM_GROUP_TYPE aeAnim);
 	virtual int32_t							GetKnockedState();
 	virtual void							SetKnockedState(char state);
 	virtual void							KnockDown(Actor* apActor);
@@ -453,7 +453,7 @@ public:
 	virtual bool							Get3DUpdateFlag(uint8_t aucFlag) const;
 	virtual uint8_t							GetAll3DUpdateFlags() const;
 	virtual void							ClearObjectFromAcquireList(TESObjectREFR* apObject);
-	virtual void							ClearObjectFromAcquireListAlt(uint32_t auiFormID);
+	virtual void							ClearObjectFromAcquireListAlt(FormID auiFormID);
 	virtual TESObjectREFR*					GetLastGreeted() const;
 	virtual void							SetLastGreeted(TESObjectREFR* apRef);
 	virtual BSSoundHandle					GetSoundHandle(uint32_t aeType);

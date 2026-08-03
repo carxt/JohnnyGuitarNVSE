@@ -1208,18 +1208,6 @@ void LineIterator::Next() {
 		dataPtr++;
 }
 
-bool FileToBuffer(const char* filePath, char* buffer) {
-	FileStream srcFile;
-	if (!srcFile.Open(filePath)) return false;
-	uint32_t length = srcFile.GetLength();
-	if (!length) return false;
-	if (length > kMaxMessageLength)
-		length = kMaxMessageLength;
-	srcFile.ReadBuf(buffer, length);
-	buffer[length] = 0;
-	return true;
-}
-
 void __fastcall GetTimeStamp(char* buffer) {
 	time_t rawTime = time(NULL);
 	tm timeInfo;

@@ -13,10 +13,11 @@ public:
 
 	TESForm* pAmmo; // TESAmmo or BGSListForm
 
-	void SetAmmo(TESForm* apAmmo);
+	TESForm* GetAmmoHelper() const;
 
 	TESAmmo* GetAmmoForm() const;
 	BGSListForm* GetAmmoFormList() const;
+	void SetAmmo(TESForm* apAmmo);
 
 	bool IsRockItLauncher() const;
 };

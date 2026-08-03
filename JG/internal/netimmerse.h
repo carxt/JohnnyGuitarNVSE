@@ -1,20 +1,27 @@
 #pragma once
 
-#include "NiTypes.h"
 #include "GameTypes.h"
 
 #include "Gamebryo/NiNode.hpp"
 #include "Gamebryo/NiRTTI.hpp"
+#include "Gamebryo/NiColorA.hpp"
+#include "Gamebryo/NiPoint4.hpp"
 #include "Gamebryo/NiCullingProcess.hpp"
 #include "Gamebryo/NiAlphaAccumulator.hpp"
 #include "Gamebryo/NiRenderer.hpp"
 #include "Gamebryo/NiSourceTexture.hpp"
+#include "Gamebryo/NiControllerManager.hpp"
+#include "Gamebryo/NiAlphaProperty.hpp"
+#include "Gamebryo/NiMaterialProperty.hpp"
+#include "Gamebryo/NiStencilProperty.hpp"
+#include "Gamebryo/NiGeometryData.hpp"
 #include "Bethesda/NiUpdateData.hpp"
 #include "Bethesda/BSShaderProperty.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
 #include "Bethesda/BSCullingProcess.hpp"
 
 class NavMeshInfo;
+class TESAnimGroup;
 class bhkRigidBody;
 class TESObjectCELL;
 class bhkPhantom;
@@ -86,16 +93,6 @@ public:
 	BSSimpleArray<NavMeshInfo*> navMeshInfos; // 78
 	NiRefObject* object88; // 88
 };
-
-// 40
-struct QuaternionKey {
-	float			time;			// 00
-	NiQuaternion	value;			// 04
-	NiPoint3		TBC;			// 14
-	NiQuaternion	quaternion20;	// 20
-	NiQuaternion	quaternion30;	// 30
-};
-static_assert(sizeof(QuaternionKey) == 0x40);
 
 // 2C
 class NiTransformData : public NiObject {
@@ -169,36 +166,6 @@ class NiBoolInterpolator;
 class NiQuatTransform;
 
 // 0C
-class NiInterpolator : public NiObject {
-public:
-	NiInterpolator();
-	~NiInterpolator();
-
-	virtual bool				UpdateTransform(float afTime, NiObjectNET* apTarget, NiQuatTransform& arValue);
-	virtual bool				UpdateColorA(float afTime, NiObjectNET* apTarget, NiColorA& arValue);
-	virtual bool				UpdatePoint3(float afTime, NiObjectNET* apTarget, NiPoint3& arValue);
-	virtual bool				UpdateQuaternion(float afTime, NiObjectNET* apTarget, NiQuaternion& arValue);
-	virtual bool				UpdateFloat(float afTime, NiObjectNET* apTarget, float& arValue);
-	virtual bool				UpdateBool(float afTime, NiObjectNET* apTarget, bool& arValue);
-	virtual bool				IsBoolValueSupported() const;
-	virtual bool				IsFloatValueSupported() const;
-	virtual bool				IsQuaternionValueSupported() const;
-	virtual bool				IsPoint3ValueSupported() const;
-	virtual bool				IsColorAValueSupported() const;
-	virtual bool				IsTransformValueSupported() const;
-	virtual void				Collapse();
-	virtual void				GetActiveTimeRange(float& arBeginKeyTime, float& arEndKeyTime) const;
-	virtual void				GuaranteeTimeRange(float afStartTime, float afEndTime);
-	virtual NiInterpolator*		GetSequenceInterpolator(float afStartTime, float afEndTime);
-	virtual bool				ResolveDependencies();
-	virtual bool				SetUpDependencies();
-	virtual bool				AlwaysUpdate() const;
-	virtual NiBoolInterpolator* IsNiBoolInterpolator() const;
-
-	float m_fLastTime;
-};
-
-// 0C
 class NiKeyBasedInterpolator : public NiInterpolator {
 public:
 	NiKeyBasedInterpolator();
@@ -266,193 +233,11 @@ public:
 };
 static_assert(sizeof(NiTransformInterpolator) == 0x48);
 
-// 74
-class NiControllerSequence : public NiObject {
-public:
-	NiControllerSequence();
-	~NiControllerSequence();
-
-	virtual bool Deactivate(float afEaseOutTime, bool);
-
-	enum AnimState : uint32_t {
-		INACTIVE,
-		ANIMATING,
-		EASEIN,
-		EASEOUT,
-		TRANSSOURCE,
-		TRANSDEST,
-		MORPHSOURCE
-	};
-
-	struct ControlledBlock {
-		NiInterpolator* interpolator;
-		NiMultiTargetTransformController* multiTargetCtrl;
-		// More
-	};
-
-	NiFixedString	 sequenceName;			// 08
-	uint32_t				numControlledBlocks;	// 0C
-	uint32_t				arrayGrowBy;			// 10
-	ControlledBlock** controlledBlocks;		// 14
-	const char** unkNodeName;			// 18
-	float				weight;					// 1C
-	NiTextKeyExtraData* textKeyData;			// 20
-	uint32_t				cycleType;				// 24
-	float				frequency;				// 28
-	float				startTime;				// 2C
-	float				stopTime;				// 30
-	float				flt34;					// 34
-	float				flt38;					// 38
-	float				flt3C;					// 3C
-	NiControllerManager* manager;				// 40
-	AnimState				m_eState;					// 44
-	uint32_t				unk48;					// 48
-	float				flt4C;					// 4C
-	float				flt50;					// 50
-	float				flt54;					// 54
-	uint32_t				unk58;					// 58
-	const char* rootNodeName;			// 5C
-	uint32_t				unk60[5];				// 60
-
-	AnimState GetState() const {
-		return m_eState;
-	}
-};
-static_assert(sizeof(NiControllerSequence) == 0x74);
-
 class NiObjectNET;
-
-// 34
-class NiTimeController : public NiObject {
-public:
-	NiTimeController();
-	~NiTimeController();
-
-	virtual void	Start(float afTime = INFINITY);			// 35
-	virtual void	Stop();									// 36
-	virtual void	Update(NiUpdateData& arUpdateData);		// 37
-	virtual void	SetTarget(NiObjectNET* apTarget);		// 38
-	virtual bool	IsTransformController() const;			// 39
-	virtual bool	IsVertexController() const;				// 40
-	virtual float	ComputeScaledTime(float fTime);			// 41
-	virtual void	OnPreDisplay() const;					// 42
-	virtual bool	IsStreamable() const;					// 43
-	virtual bool	TargetIsRequiredType() const;			// 44
-
-	Bitfield16						m_usFlags;
-	float							m_fFrequency;
-	float							m_fPhase;
-	float							m_fLoKeyTime;
-	float							m_fHiKeyTime;
-	float							m_fStartTime;
-	float							m_fLastTime;
-	float							m_fWeightedLastTime;
-	float							m_fScaledTime;
-	NiObjectNET*					m_pkTarget;
-	NiPointer<NiTimeController>		m_spNext;
-
-	bool GetActive() const {
-		return m_usFlags.GetBit(3);
-	}
-	
-	void SetActive(bool abVal){
-		m_usFlags.Set(8, abVal);
-	}
-
-	bool GetManagerControlledBit() const {
-		return m_usFlags.GetBit(5);
-	}
-
-	bool DontDoUpdate(float afTime) {
-#ifdef GAME
-		return ThisCall<bool>(0xA36250, this, afTime);
-#else
-		return ThisCall<bool>(0x7E75E0, this, afTime);
-#endif
-	}
-};
 
 class BSAnimNoteListener;
 
-// 7C
-class NiControllerManager : public NiTimeController {
-public:
-	NiControllerManager();
-	~NiControllerManager();
-
-	NiTObjectArray<NiPointer<NiControllerSequence>>		m_kSequenceArray;
-	NiTPrimitiveSet<NiControllerSequence*>				m_kActiveSequences;
-	NiTStringPointerMap<NiControllerSequence*>			m_kIndexMap;
-	BSAnimNoteListener*									pListener;
-	bool												m_bCumulative;
-	NiTObjectSet<NiPointer<NiControllerSequence> >		m_kTempBlendSeqs;
-	NiPointer<NiDefaultAVObjectPalette>					m_spObjectPalette;
-
-	CREATE_OBJECT(NiControllerManager, 0xA2F6C0);
-	NIRTTI_ADDRESS(0x11F36AC);
-
-	NiControllerSequence* GetSequenceByName(const NiFixedString& arName) const {
-		return ThisCall<NiControllerSequence*>(0x47A520, this, &arName);
-	}
-
-	uint32_t GetSequenceCount() const {
-		return m_kSequenceArray.GetSize();
-	}
-
-	NiControllerSequence* GetSequenceAt(uint32_t auiIndex) const {
-		return m_kSequenceArray.GetAt(auiIndex);
-	};
-
-	bool DeactivateSequence(NiControllerSequence* apSequence, float afEaseOutTime) {
-		return apSequence->Deactivate(afEaseOutTime, 0);
-	}
-
-	bool IsSequenceActive(const NiFixedString& arName) const {
-		const uint32_t uiSize = m_kActiveSequences.GetSize();
-		if (uiSize) {
-			for (uint32_t i = 0; i < uiSize; i++) {
-				NiControllerSequence* pSequence = m_kActiveSequences.GetAt(i);
-				if (pSequence->sequenceName == arName) {
-					return pSequence->GetState() != NiControllerSequence::AnimState::INACTIVE;
-				}
-			}
-		}
-		return false;
-	}
-};
-static_assert(sizeof(NiControllerManager) == 0x7C);
-
 class NiBlendInterpolator;
-
-// 34
-class NiInterpController : public NiTimeController {
-public:
-	NiInterpController();
-	~NiInterpController();
-
-	virtual uint16_t				GetInterpolatorCount() const;
-	virtual const char*				GetInterpolatorID(uint16_t ausIndex = 0) const;
-	virtual uint16_t				GetInterpolatorIndex(const char* apID) const;
-	virtual uint16_t				GetInterpolatorIndexFx(uint16_t ausIndex = 0) const;
-	virtual NiInterpolator*			GetInterpolator(uint16_t ausIndex = 0) const;
-	virtual void					SetInterpolator(NiInterpolator* apInterpolator, uint16_t ausIndex = 0);
-	virtual void					ResetTimeExtrema();
-	virtual uint32_t				GetCtlrID() const;
-	virtual NiInterpolator*			CreatePoseInterpolator(uint16_t ausIndex = 0);
-	virtual void					SynchronizePoseInterpolator(NiInterpolator* apInterpolator, uint16_t ausIndex = 0);
-	virtual NiBlendInterpolator*	CreateBlendInterpolator(uint16_t ausIndex = 0, bool abManagerControlled = false, bool abAccumulateAnimations = false, float afWeightThreshold = 0.0f, uint8_t aucArraySize = 2);
-	virtual void					GuaranteeTimeRange(float afStartTime, float afEndTime);
-	virtual bool					InterpolatorIsCorrectType(NiInterpolator* apInterpolator, uint16_t ausIndex = 0) const;
-
-	NIRTTI_ADDRESS(0x11F36B4);
-
-	static inline constexpr uint16_t	INVALID_INDEX	= UINT16_MAX;
-	static inline constexpr float		INVALID_TIME	= -FLT_MAX;
-
-	bool GetManagerControlled() const {
-		return GetManagerControlledBit();
-	}
-};
 
 // 38
 class NiSingleInterpController : public NiInterpController {
@@ -527,40 +312,6 @@ public:
 	}
 };
 
-// 0C
-class NiExtraData : public NiObject {
-public:
-	NiExtraData();
-	~NiExtraData();
-
-	virtual void	Unk_23(void);
-	virtual void	Unk_24(void);
-
-	uint32_t			unk08;		// 08
-};
-
-// 10
-class BSXFlags : public NiExtraData {
-public:
-	BSXFlags();
-	~BSXFlags();
-
-	enum {
-		kBSXFlag_Animated = 1 << 0,
-		kBSXFlag_Havok = 1 << 1,
-		kBSXFlag_Ragdoll = 1 << 2,
-		kBSXFlag_Complex = 1 << 3,
-		kBSXFlag_Addon = 1 << 4,
-		kBSXFlag_EditorMarker = 1 << 5,
-		kBSXFlag_Dynamic = 1 << 6,
-		kBSXFlag_Articulated = 1 << 7,
-		kBSXFlag_NeedsTransformUpdates = 1 << 8,
-		kBSXFlag_ExternalEmit = 1 << 9,
-	};
-
-	uint32_t			flags;		// 0C
-};
-
 // 14
 class TileExtra : public NiExtraData {
 public:
@@ -571,173 +322,6 @@ public:
 	NiNode* parentNode;	// 10
 };
 
-// 4C
-class NiMaterialProperty : public NiProperty {
-public:
-	NiMaterialProperty();
-	~NiMaterialProperty();
-
-	int32_t		m_iIndex;
-	NiColor		m_kSpec;
-	NiColor		m_kEmit;
-	NiColor*	m_pExternalEmittance;
-	float		m_fShine;
-	float		m_fAlpha;
-	float		m_fEmitMult;
-	uint32_t	m_uiRevID;
-	void*		m_pvRendererData;
-
-	const NiColor& GetSpecularColor() const {
-		return m_kSpec;
-	}
-
-	void SetSpecularColor(const NiColor& arSpecular) {
-		m_kSpec = arSpecular;
-	}
-
-	const NiColor& GetEmittanceColor() const {
-		return m_kEmit;
-	}
-
-	void SetEmittanceColor(const NiColor& arEmittance) {
-		m_kEmit = arEmittance;
-	}
-
-	float GetShineness() const {
-		return m_fShine;
-	}
-
-	void SetShineness(float afShine) {
-		m_fShine = afShine;
-	}
-
-	float GetAlpha() const {
-		return m_fAlpha;
-	}
-
-	void SetAlpha(float afAlpha) {
-		m_fAlpha = afAlpha;
-	}
-
-	float GetEmittanceMult() const {
-		return m_fEmitMult;
-	}
-
-	void SetEmittanceMult(float afEmitMult) {
-		m_fEmitMult = afEmitMult;
-	}
-};
-
-// 1C
-class NiAlphaProperty : public NiProperty {
-public:
-	NiAlphaProperty();
-	~NiAlphaProperty();
-
-	struct ALIGN2 _Flags {
-		bool	bAlphaBlending	: 1;
-		uint8_t ucSrcBlend		: 4;
-		uint8_t					: 3; // Dest blend is split due to padding issues
-		uint8_t					: 1; 
-		bool	bAlphaTesting	: 1;
-		uint8_t ucTestFunc		: 3;
-		bool	bNoSorter		: 1;
-	};
-	using Flags = _Flags;
-
-	enum AlphaFlags {
-		ALPHA_BLEND_MASK	= 0x0001,
-		SRC_BLEND_MASK		= 0x001E,
-		SRC_BLEND_POS		= 1,
-		DEST_BLEND_MASK		= 0x01E0,
-		DEST_BLEND_POS		= 5,
-
-		TEST_ENABLE_MASK	= 0x0200,
-		TEST_FUNC_MASK		= 0x1C00,
-		TEST_FUNC_POS		= 10,
-		ALPHA_NOSORTER_MASK = 0x2000
-	};
-
-	enum AlphaFunction {
-		ALPHA_ONE			= 0,
-		ALPHA_ZERO			= 1,
-		ALPHA_SRCCOLOR		= 2,
-		ALPHA_INVSRCCOLOR	= 3,
-		ALPHA_DESTCOLOR		= 4,
-		ALPHA_INVDESTCOLOR	= 5,
-		ALPHA_SRCALPHA		= 6,
-		ALPHA_INVSRCALPHA	= 7,
-		ALPHA_DESTALPHA		= 8,
-		ALPHA_INVDESTALPHA	= 9,
-		ALPHA_SRCALPHASAT	= 10,
-		ALPHA_MAX_MODES
-	};
-
-	enum TestFunction {
-		TEST_ALWAYS			= 0,
-		TEST_LESS			= 1,
-		TEST_EQUAL			= 2,
-		TEST_LESSEQUAL		= 3,
-		TEST_GREATER		= 4,
-		TEST_NOTEQUAL		= 5,
-		TEST_GREATEREQUAL	= 6,
-		TEST_NEVER			= 7,
-		TEST_MAX_MODES
-	};
-
-
-	Bitfield<_Flags>	m_usFlags;
-	uint8_t				m_ucAlphaTestRef;
-
-	bool GetAlphaBlending() const {
-		return m_usFlags.bAlphaBlending;
-	}
-
-	void SetAlphaBlending(bool abBlend) {
-		m_usFlags.bAlphaBlending = abBlend;
-	}
-
-	bool GetAlphaTesting() const {
-		return m_usFlags.bAlphaTesting;
-	}
-
-	void SetAlphaTesting(bool abTest) {
-		m_usFlags.bAlphaTesting = abTest;
-	}
-
-	uint8_t GetTestRef() const {
-		return m_ucAlphaTestRef;
-	}
-
-	void SetTestRef(uint8_t aucRef) {
-		m_ucAlphaTestRef = aucRef;
-	}
-
-	AlphaFunction GetSrcBlendMode() const {
-		return static_cast<AlphaFunction>(m_usFlags.ucSrcBlend);
-	}
-
-	void SetSrcBlendMode(AlphaFunction aeSrcBlend) {
-		m_usFlags.ucSrcBlend = aeSrcBlend;
-	}
-
-	AlphaFunction GetDestBlendMode() const {
-		return static_cast<AlphaFunction>(m_usFlags.Get(DEST_BLEND_MASK, DEST_BLEND_POS));
-	}
-
-	void SetDestBlendMode(AlphaFunction aeDestBlend) {
-		m_usFlags.Set(aeDestBlend, DEST_BLEND_MASK, DEST_BLEND_POS);
-	}
-
-	TestFunction GetTestMode() const {
-		return static_cast<TestFunction>(m_usFlags.ucTestFunc);
-	}
-
-	void SetTestMode(TestFunction aeTestFunc) {
-		m_usFlags.ucTestFunc = aeTestFunc;
-	}
-};
-
 // 30
 class NiTexturingProperty : public NiProperty {
 public:
@@ -746,137 +330,6 @@ public:
 
 	uint32_t				unk18[6];	// 18
 };
-
-// 24
-class NiStencilProperty : public NiProperty {
-public:
-	NiStencilProperty();
-	~NiStencilProperty();
-
-	enum TestFunc {
-		TEST_NEVER,
-		TEST_LESS,
-		TEST_EQUAL,
-		TEST_LESSEQUAL,
-		TEST_GREATER,
-		TEST_NOTEQUAL,
-		TEST_GREATEREQUAL,
-		TEST_ALWAYS,
-		TEST_MAX
-	};
-
-	enum Action {
-		ACTION_KEEP,
-		ACTION_ZERO,
-		ACTION_REPLACE,
-		ACTION_INCREMENT,
-		ACTION_DECREMENT,
-		ACTION_INVERT,
-		ACTION_MAX
-	};
-
-	enum {
-		ENABLE_MASK			= 0x1,
-		FAILACTION_MASK		= 0xE,
-		FAILACTION_POS		= 0x1,
-		ZFAILACTION_MASK	= 0x70,
-		ZFAILACTION_POS		= 0x4,
-		PASSACTION_MASK		= 0x380,
-		PASSACTION_POS		= 0x7,
-		DRAWMODE_MASK		= 0xC00,
-		DRAWMODE_POS		= 0xA,
-		TESTFUNC_MASK		= 0xF000,
-		TESTFUNC_POS		= 0xC,
-	};
-
-	enum DrawMode {
-		DRAW_CCW_OR_BOTH	= 0,
-		DRAW_CCW			= 1,
-		DRAW_CW				= 2,
-		DRAW_BOTH			= 3,
-		DRAW_MAX,
-	};
-
-	struct ALIGN2 _Flags {
-		bool	bEnabled		: 1;
-		uint8_t ucFailAction	: 3;
-		uint8_t ucZFailAction	: 3;
-		uint8_t					: 1; // Pass action is split due to padding issues
-		uint8_t					: 2;
-		uint8_t ucDrawMode		: 2;
-		uint8_t ucTestFunc		: 4;
-	};
-	using Flags = _Flags;
-
-	Bitfield<_Flags>	m_usFlags;
-	uint32_t			m_uiRef;
-	uint32_t			m_uiMask;
-
-	bool GetStencilOn() const {
-		return m_usFlags.bEnabled;
-	}
-
-	void SetStencilOn(bool abEnabled) {
-		m_usFlags.bEnabled = abEnabled;
-	}
-
-	uint32_t GetStencilReference() const {
-		return m_uiRef;
-	}
-
-	void SetStencilReference(uint32_t auiRef) {
-		m_uiRef = auiRef;
-	}
-
-	uint32_t GetStencilMask() const {
-		return m_uiMask;
-	}
-
-	void SetStencilMask(uint32_t auiMask) {
-		m_uiMask = auiMask;
-	}
-
-	Action GetStencilFailAction() const {
-		return static_cast<Action>(m_usFlags.ucFailAction);
-	}
-
-	void SetStencilFailAction(Action aeAction) {
-		m_usFlags.ucFailAction = aeAction;
-	}
-
-	Action GetStencilZFailAction() const {
-		return static_cast<Action>(m_usFlags.ucZFailAction);
-	}
-
-	void SetStencilZFailAction(Action aeAction) {
-		m_usFlags.ucZFailAction = aeAction;
-	}
-
-	Action GetStencilPassAction() const {
-		return static_cast<Action>((m_usFlags.Get(PASSACTION_MASK, PASSACTION_POS)));
-	}
-
-	void SetStencilPassAction(Action aeAction) {
-		m_usFlags.Set(aeAction, PASSACTION_MASK, PASSACTION_POS);
-	}
-
-	void SetDrawMode(NiStencilProperty::DrawMode aeDraw) {
-		m_usFlags.ucDrawMode = aeDraw;
-	}
-
-	NiStencilProperty::DrawMode GetDrawMode() const {
-		return static_cast<NiStencilProperty::DrawMode>(m_usFlags.ucDrawMode);
-	}
-
-	void SetStencilFunction(NiStencilProperty::TestFunc aeFunc) {
-		m_usFlags.ucTestFunc = aeFunc;
-	}
-
-	NiStencilProperty::TestFunc GetStencilFunction() const {
-		return static_cast<NiStencilProperty::TestFunc>(m_usFlags.ucTestFunc);
-	}
-};
-static_assert(sizeof(NiStencilProperty) == 0x24);
 
 // 1C
 class NiCullingProperty : public NiProperty {
@@ -1234,7 +687,7 @@ public:
 	NiFrustum		m_kViewFrustum;			// 0DC
 	float			m_fMinNearPlaneDist;	// 0F8
 	float			m_fMaxFarNearRatio;		// 0FC
-	NiViewport		m_kPort;				// 100
+	NiRect<float>	m_kPort;				// 100
 	float			m_fLODAdjust;			// 110
 
 	CREATE_OBJECT(NiCamera, 0xA71430);
@@ -1413,19 +866,6 @@ class SceneGraph : public BSSceneGraph {
 public:
 	SceneGraph();
 	~SceneGraph();
-};
-
-// 3C
-class TESAnimGroup : public NiRefObject {
-public:
-	TESAnimGroup();
-	~TESAnimGroup();
-
-	uint32_t			unk08[2];	// 08
-	uint8_t			index;		// 10
-	uint8_t			unk11;		// 11
-	uint8_t			unk12[1];	// 12
-	uint32_t			unk14[10];	// 14
 };
 
 // 78
@@ -1840,106 +1280,6 @@ struct UVCoord {
 	UVCoord(float _x, float _y) : x(_x), y(_y) {}
 };
 
-struct NiTriangle {
-	uint16_t		point1;
-	uint16_t		point2;
-	uint16_t		point3;
-};
-
-// 54
-class RendererData		//	010F017C
-{
-public:
-	RendererData();
-	~RendererData();
-
-	virtual RendererData* Destructor(bool doFree);
-	virtual bool			Unk_01(uint32_t arg1);
-
-	uint32_t						flags;			// 04
-	NiUnsharedGeometryGroup* unsharedGeom;	// 08
-	uint32_t						unk0C;			// 0C
-	void* ptr10;			// 10
-	uint32_t						unk14;			// 14
-	uint32_t						unk18;			// 18	Vertices/Normals count
-	uint32_t						unk1C;			// 1C		"			"
-	uint32_t						finished;		// 20
-	void* ptr24;			// 24
-	void* ptr28;			// 28
-	uint32_t						trianglePoints;	// 2C
-	uint32_t						unk30;			// 30	Byte size of triangles array
-	void* ptr34;			// 34
-	uint32_t						unk38;			// 38
-	uint32_t						unk3C;			// 3C
-	uint32_t						unk40;			// 40	Triangle count
-	uint32_t						unk44;			// 44		"
-	uint32_t						unk48;			// 48
-	uint32_t						unk4C;			// 4C
-	NiTriangle* triangles;		// 50	Same ptr as in NiTriShapeData
-};
-static_assert(sizeof(RendererData) == 0x54);
-
-// 40
-class NiGeometryData : public NiObject {
-public:
-	NiGeometryData();
-	~NiGeometryData();
-
-	virtual void	Unk_23(uint32_t arg);
-	virtual void	Unk_24(void);
-	virtual void	Unk_25(void);
-	virtual void	Unk_26(void);
-	virtual bool	Unk_27(uint32_t arg);
-	virtual void	Unk_28(void);
-
-	uint16_t			numVertices;	// 08
-	uint16_t			word0A;			// 0A
-	uint16_t			word0C;			// 0C
-	uint16_t			word0E;			// 0E
-	NiBound		bounds;			// 10
-	NiPoint3* vertices;		// 20
-	NiPoint3* normals;		// 24
-	NiColorA* vertexColors;	// 28
-	UVCoord* uvCoords;		// 2C
-	uint32_t			unk30;			// 30
-	RendererData* rendererData;	// 34
-	uint8_t			byte38;			// 38
-	uint8_t			byte39;			// 39
-	uint8_t			byte3A;			// 3A
-	uint8_t			byte3B;			// 3B
-	uint32_t			unk3C;			// 3C
-};
-static_assert(sizeof(NiGeometryData) == 0x40);
-
-// 44
-class NiTriBasedGeomData : public NiGeometryData {
-public:
-	NiTriBasedGeomData();
-	~NiTriBasedGeomData();
-
-	virtual void	Unk_29(uint32_t arg);
-	virtual void	Unk_2A(void);
-	virtual void	Unk_2B(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
-	virtual void	Unk_2C(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
-
-	uint16_t			numTriangles;		// 40
-	uint8_t			pad42[2];			// 42
-};
-
-// 58
-class NiTriShapeData : public NiTriBasedGeomData {
-public:
-	NiTriShapeData();
-	~NiTriShapeData();
-
-	uint32_t			trianglePoints;	// 44
-	NiTriangle* triangles;		// 48
-	uint16_t* points;		// 4C
-	uint32_t			unk50;			// 50
-	uint32_t			unk54;			// 54
-};
-static_assert(sizeof(NiTriShapeData) == 0x58);
-
 // 14
 class NiShader : public NiRefObject {
 public:
@@ -2044,60 +1384,6 @@ public:
 	uint32_t			unk14[31];		// 14
 };
 static_assert(sizeof(TileShader) == 0x90);
-
-// C4
-class NiGeometry : public NiAVObject {
-public:
-	NiGeometry();
-	~NiGeometry();
-
-	virtual void	Unk_37(uint32_t arg1);
-	virtual void	Unk_38(uint32_t arg1);
-	virtual void	Unk_39(void);
-	virtual void	Unk_3A(void);
-	virtual void	Unk_3B(uint32_t arg1);
-
-	NiAlphaProperty*		alphaProp;		// 9C	Seen NiAlphaProperty
-	NiProperty*				niPropA0;		// A0	Seen NiCullingProperty
-	NiMaterialProperty*		materialProp;		// A4	Seen NiMaterialProperty
-	BSShaderProperty*		shaderProp;		// A8	Seen TileShaderProperty
-	NiStencilProperty*		stencilProp;		// AC	Seen NiStencilProperty
-	NiTexturingProperty*	texturingProp;		// B0	Seen NiTexturingProperty
-	uint32_t					unkB4;			// B4
-	NiGeometryData*			geometryData;	// B8	Seen NiTriShapeData
-	uint32_t					unkBC;			// BC
-	NiShader*				shader;		// C0
-};
-static_assert(sizeof(NiGeometry) == 0xC4);
-
-// C4
-class NiTriBasedGeom : public NiGeometry {
-public:
-	NiTriBasedGeom();
-	~NiTriBasedGeom();
-
-	virtual void	Unk_3C(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
-};
-
-// C4
-class NiTriShape : public NiTriBasedGeom {
-public:
-	NiTriShape();
-	~NiTriShape();
-};
-
-// D4
-class BSScissorTriShape : public NiTriShape {
-public:
-	BSScissorTriShape();
-	~BSScissorTriShape();
-
-	uint32_t			unkC4;			// C4
-	uint32_t			unkC8;			// C8
-	uint32_t			width;			// CC
-	uint32_t			height;			// D0
-};
-static_assert(sizeof(BSScissorTriShape) == 0xD4);
 
 // 14C
 class ParticleShaderProperty : public BSShaderProperty {

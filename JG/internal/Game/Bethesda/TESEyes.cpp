@@ -31,6 +31,11 @@ void TESEyes::SetCanBeFemale(bool abVal) {
 }
 
 // GAME - 0x5FC5F0
+// GECK - 0x567420
 bool TESEyes::CanBeEyesForNPC(TESNPC* apNPC) {
+#ifdef GAME
 	return ThisCall<bool>(0x5FC5F0, this, apNPC);
+#else
+	return ThisCall<bool>(0x567420, this, apNPC);
+#endif
 }

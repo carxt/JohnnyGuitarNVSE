@@ -308,7 +308,7 @@ void Actor::UpdateAnimationMovement(Animation* apAnimation, float afDelta) {
 }
 
 // GAME - 0x897910
-uint16_t Actor::GetAnimGroup(ANIM_GROUP aeGroup, ItemChange* apWeaponItem, bool abCheckHandToHand, Animation* apAnimation) {
+uint16_t Actor::GetAnimGroup(ANIM_GROUP_TYPE aeGroup, ItemChange* apWeaponItem, bool abCheckHandToHand, Animation* apAnimation) {
 	return ThisCall<uint16_t>(0x897910, this, aeGroup, apWeaponItem, abCheckHandToHand, apAnimation);
 }
 

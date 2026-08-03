@@ -1,4 +1,5 @@
 #include "fn_math.h"
+#ifdef GAME
 #include "GameObjects.h"
 #include "GameProcess.h"
 #include "misc/misc.h"
@@ -251,7 +252,7 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 	const Actor* pActor = static_cast<Actor*>(apRef);
 	char cObjectName[MAX_PATH];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName) && pActor->IsMobileObject() && pActor->GetCurrentAIProcess()) {
-		const NiAVObject* pObject = BSUtilities::GetObjectByName(apRef->Get3DSimple(), cObjectName);
+		const NiAVObject* pObject = BSUtilities::GetObjectByName(apRef->Get3DVerySimple(), cObjectName);
 		const HitData* pHitData = pActor->GetCurrentAIProcess()->GetLastHitData();
 		if (!pHitData || !pObject) 
 			return true;
@@ -269,7 +270,7 @@ bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	if (!apRef || !(ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &kPos.x, &kPos.y, &kPos.z))) 
 		return true;
 
-	const NiAVObject* pObject = BSUtilities::GetObjectByName(apRef->Get3DSimple(), cObjectName);
+	const NiAVObject* pObject = BSUtilities::GetObjectByName(apRef->Get3DVerySimple(), cObjectName);
 	if (!pObject) 
 		return true;
 	
@@ -289,8 +290,8 @@ bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pRefA, &pRefB, &cObjectNameA, &cObjectNameB)) 
 		return true;
 
-	const NiAVObject* pObjectA = BSUtilities::GetObjectByName(pRefA->Get3DSimple(), cObjectNameA);
-	const NiAVObject* pObjectB = BSUtilities::GetObjectByName(pRefB->Get3DSimple(), cObjectNameB);
+	const NiAVObject* pObjectA = BSUtilities::GetObjectByName(pRefA->Get3DVerySimple(), cObjectNameA);
+	const NiAVObject* pObjectB = BSUtilities::GetObjectByName(pRefB->Get3DVerySimple(), cObjectNameB);
 	if (!pObjectA || !pObjectB) 
 		return true;
 
@@ -367,3 +368,4 @@ bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+#endif

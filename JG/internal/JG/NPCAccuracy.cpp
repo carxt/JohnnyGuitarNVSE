@@ -39,7 +39,7 @@ namespace NPCAccuracy {
 			return kMaps[aeType];
 		}
 
-		float __fastcall GetMultiplier(uint32_t auiFormID, MultType aeType) {
+		float __fastcall GetMultiplier(FormID auiFormID, MultType aeType) {
 			AccuracyMultMap& rMap = GetMap(aeType);
 			auto it = rMap.find(auiFormID);
 			if (it != rMap.end())
@@ -51,11 +51,11 @@ namespace NPCAccuracy {
 			return GetMultiplier(apForm->GetFormID(), aeType);
 		}
 
-		void __fastcall SetMultiplier(uint32_t auiFormID, MultType aeType, float afMult) {
+		void __fastcall SetMultiplier(FormID auiFormID, MultType aeType, float afMult) {
 			GetMap(aeType)[auiFormID] = afMult;
 		}
 
-		void __fastcall RemoveMultiplier(uint32_t auiFormID, MultType aeType) {
+		void __fastcall RemoveMultiplier(FormID auiFormID, MultType aeType) {
 			GetMap(aeType).erase(auiFormID);
 		}
 

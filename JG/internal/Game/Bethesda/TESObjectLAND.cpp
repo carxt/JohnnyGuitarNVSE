@@ -6,15 +6,7 @@ bool TESObjectLAND::GetLandRemapped() const {
 #ifdef GAME
     return kData.uiFlags.bLandRemapped;
 #else
-    const TESObjectCELL* pCell = GetParentCell();
-    if (!pCell)
-        return false;
-
-	const TESWorldSpace* pWorldSpace = pCell->GetWorldSpace();
-    if (!pWorldSpace)
-        return false;
-	
-    return pWorldSpace->GetParentWorld(TESWorldSpace::ParentUseBit::LAND); 
+    return ThisCall<bool>(0x614690, this);
 #endif
 }
 
@@ -116,13 +108,23 @@ void TESObjectLAND::GetVertex(uint32_t auiBlock, uint32_t auiVertex, NiPoint3& a
 }
 
 // GAME - 0x53A5E0
+// GECK - 0x61A760
 TESLandTexture* TESObjectLAND::GetMainTexture(const NiPoint3& arPosition) const {
+#ifdef GAME
     return ThisCall<TESLandTexture*>(0x53A5E0, this, &arPosition);
+#else
+    return ThisCall<TESLandTexture*>(0x61A760, this, &arPosition);
+#endif
 }
 
 // GAME - 0x535B30
+// GECK - 0x614710
 NiPoint3 TESObjectLAND::GetWorldOffsetForBlock(uint32_t auiBlock) const {
+#ifdef GAME
     return ThisCall<NiPoint3>(0x535B30, this, auiBlock);
+#else
+    return ThisCall<NiPoint3>(0x614710, this, auiBlock);
+#endif
 }
 
 // GAME - 0x533FD0
@@ -190,8 +192,13 @@ bool TESObjectLAND::InitLandscape() {
 }
 
 // GAME - 0x539500
+// GECK - 0x61C670
 bool TESObjectLAND::CreateLandscape(TESObjectLAND* apCopyFrom) {
+#ifdef GAME
     return ThisCall<bool>(0x539500, this, apCopyFrom);
+#else
+    return ThisCall<bool>(0x61C670, this, apCopyFrom);
+#endif
 }
 
 // GAME - 0x535B90
@@ -205,8 +212,13 @@ bool TESObjectLAND::LoadVertices(bool abLoad3D) {
 }
 
 // GAME - 0x536D80
+// GECK - 0x61B480
 bool TESObjectLAND::UnloadVertices() {
+#ifdef GAME
     return ThisCall<bool>(0x536D80, this);
+#else
+    return ThisCall<bool>(0x61B480, this);
+#endif
 }
 
 // GAME - 0x535D00
@@ -230,6 +242,11 @@ void TESObjectLAND::Attach3D() {
 }
 
 // GAME - 0x537EB0
+// GECK - 0x61A4F0
 void TESObjectLAND::Detach3D() {
+#ifdef GAME
     ThisCall(0x537EB0, this);
+#else
+    ThisCall(0x61A4F0, this);
+#endif
 }

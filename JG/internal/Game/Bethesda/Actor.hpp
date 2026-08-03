@@ -116,7 +116,7 @@ public:
 	virtual void							SetCombatGroup(CombatGroup* apGroup);
 	virtual bool							InitiateTresPassPackage(TrespassPackage* apPackage);
 	virtual void							UpdateNonRenderSafeDialogueUpdate(float afDelta);
-	virtual BSSoundHandle					VoiceSoundFunctionEx(TESTopic* apTopic, Actor* apTarget, bool abIs2D, bool abNeverSubtitle, int unused, bool abSayTo);
+	virtual BSSoundHandle					VoiceSoundFunction(TESTopic* apTopic, Actor* apTarget, bool abIs2D, bool abNeverSubtitle, int unused, bool abSayTo);
 	virtual void							InitiateSpectator();
 	virtual void							InitiateFlee(TESObjectREFR* apFleeRef, bool abRunOnce, bool abKnowsTarget, bool abCombatMode, TESObjectCELL* apCell, TESObjectREFR* apRef, float afFleeFromDist, float afFleeToDist);
 	virtual void							InitiateSearchForAttacker(TESObjectREFR* apAttacker, NiPoint3);
@@ -396,7 +396,7 @@ public:
 
 	void UpdateAnimationMovement(Animation* apAnimation, float afDelta = 0.f);
 
-	uint16_t GetAnimGroup(ANIM_GROUP aeGroup, ItemChange* apWeaponItem, bool abCheckHandToHand, Animation* apAnimation);
+	uint16_t GetAnimGroup(ANIM_GROUP_TYPE aeGroup, ItemChange* apWeaponItem, bool abCheckHandToHand, Animation* apAnimation);
 
 	void PickAnimations(float afWalkSpeed, float afTurnSpeed);
 

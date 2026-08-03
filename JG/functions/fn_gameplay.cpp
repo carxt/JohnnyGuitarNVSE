@@ -1,5 +1,5 @@
 #include "fn_gameplay.h"
-
+#ifdef GAME
 #include "decoding.h"
 #include "GameEffects.h"
 #include "GameForms.h"
@@ -7,13 +7,14 @@
 #include "GameRTTI.h"
 #include "GameUI.h"
 
+#include "Bethesda/BGSEntryPoint.hpp"
 #include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/ExtraOwnership.hpp"
 #include "Bethesda/GameSettingCollection.hpp"
 #include "Bethesda/INISettingCollection.hpp"
 #include "Bethesda/TESDataHandler.hpp"
 #include "Bethesda/TESObject.hpp"
 #include "Bethesda/TESObjectList.hpp"
-#include "Bethesda/ExtraOwnership.hpp"
 
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
@@ -29,11 +30,11 @@
 
 #include "shared/BSMemory/BSScrapMemory.hpp"
 
+#include "unordered_map"
+
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
-void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
-
-#define NUM_ARGS *((uint8_t*)apCompiledParams + arOffset)
+void(__cdecl* HUDMainMenu_SetMenuMode)(uint32_t) = (void(__cdecl*)(uint32_t))(0x771700);
 
 extern void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
@@ -144,7 +145,7 @@ bool Cmd_GetCasinoChip_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino) && pCasino && pCasino->kCasinoData.uiCasinoChipID) {
 		TESForm* pChipForm = TESForm::GetFormByNumericID(pCasino->kCasinoData.uiCasinoChipID);
 		if (pChipForm)
-			reinterpret_cast<uint32_t&>(arResult) = pChipForm->GetFormID();
+			ScriptUtils::SetFormIDResult(arResult, pChipForm->GetFormID());
 	}
 	return true;
 }
@@ -407,9 +408,9 @@ static bool __fastcall GetPointNavMesh(const TESObjectCELL* apCell, const NiPoin
 			}
 		}
 	}
+
 	return false;
 }
-
 
 bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 	arResult = 0;
@@ -540,8 +541,6 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 	return bResult;
 }
 
-
-
 bool __fastcall ValidTempEffect(EffectItem* apEffectItem) {
 	if (!apEffectItem || (apEffectItem->GetDuration() <= 0) || !apEffectItem->GetEffectSetting())
 		return false;
@@ -558,19 +557,19 @@ bool __fastcall ValidTempEffect(EffectItem* apEffectItem) {
 bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	float fTime = 0;
-	TESSound* sound;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &fTime) && sound && IS_TYPE(sound, TESSound)) {
-		TESObjectREFR* ref = apRef;
-		if (ref == nullptr) {
-			ref = PlayerCharacter::GetSingleton();
+	TESSound* pSound;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSound, &fTime) && pSound && IS_TYPE(pSound, TESSound)) {
+		TESObjectREFR* pRef = apRef;
+		if (pRef == nullptr) {
+			pRef = PlayerCharacter::GetSingleton();
 		}
-		if (ref->Get3DSimple()) {
+		if (pRef->Get3DVerySimple()) {
 			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
-			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(sound->GetFormID(), uiFlags);
-			handle.SetPosition(ref->GetPosition());
-			handle.SetObjectToFollow(ref->Get3DSimple());
-			uint32_t time = fTime * 1000.0;
-			handle.FadeInPlay(time);
+			BSSoundHandle kHandle = BSAudio::GetSingleton()->GetSoundHandleByFormID(pSound->GetFormID(), uiFlags);
+			kHandle.SetPosition(pRef->GetPosition());
+			kHandle.SetObjectToFollow(pRef->Get3DVerySimple());
+			uint32_t uiTime = fTime * 1000;
+			kHandle.FadeInPlay(uiTime);
 			arResult = 1;
 		}
 	}
@@ -583,37 +582,39 @@ using ScrapMap = std::unordered_map<KEY, DATA, std::hash<KEY>, std::equal_to<KEY
 bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	NVSEArrayVar* pEffArr = g_arrInterface->CreateArray(nullptr, 0, apScript);
-	ScrapMap<TESForm*, std::pair<float, float>> kTempEffectMap;
 	auto pList = PlayerCharacter::GetSingleton()->GetActiveEffectList();
-	while (pList && !pList->IsEmpty()) {
-		const ActiveEffect* pEffect = pList->GetItem();
-		pList = pList->GetNext();
-		if (pEffect && pEffect->bActive && !pEffect->bTerminated && pEffect->magicItem && ValidTempEffect(pEffect->effectItem)) {
-			TESForm* pForm = DYNAMIC_CAST(pEffect->magicItem, MagicItem, TESForm);
-			if (pForm && pForm->GetFormType() == FORM_TYPE::AlchemyItem) {
-				const float fTimeLeft = pEffect->duration - pEffect->timeElapsed;
-				auto it = kTempEffectMap.find(pForm);
-				if (it != kTempEffectMap.end() && it->second.second < pEffect->duration) {
-					it->second.first = fTimeLeft;
-					it->second.second = pEffect->duration;
-				}
-				else {
-					kTempEffectMap.insert({ pForm, {fTimeLeft, pEffect->duration} });
+	if (pList && !pList->IsEmpty()) {
+		ScrapMap<TESForm*, std::pair<float, float>> kTempEffectMap;
+		while (pList && !pList->IsEmpty()) {
+			const ActiveEffect* pEffect = pList->GetItem();
+			pList = pList->GetNext();
+			if (pEffect && pEffect->bActive && !pEffect->bTerminated && pEffect->magicItem && ValidTempEffect(pEffect->effectItem)) {
+				TESForm* pForm = DYNAMIC_CAST(pEffect->magicItem, MagicItem, TESForm);
+				if (pForm && pForm->GetFormType() == FORM_TYPE::AlchemyItem) {
+					const float fTimeLeft = pEffect->duration - pEffect->timeElapsed;
+					auto it = kTempEffectMap.find(pForm);
+					if (it != kTempEffectMap.end() && it->second.second < pEffect->duration) {
+						it->second.first = fTimeLeft;
+						it->second.second = pEffect->duration;
+					}
+					else {
+						kTempEffectMap.insert({ pForm, {fTimeLeft, pEffect->duration} });
+					}
 				}
 			}
 		}
-	}
-	if (!kTempEffectMap.empty()) {
-		for (auto& effect : kTempEffectMap) {
-			NVSEArrayVar* pEffArrInner = g_arrInterface->CreateArray(nullptr, 0, apScript);
-			g_arrInterface->AppendElements(pEffArrInner, effect.first, effect.second.first, effect.second.second);
-			g_arrInterface->AppendElement(pEffArr, NVSEArrayElement(pEffArrInner));
+
+		if (!kTempEffectMap.empty()) {
+			for (auto& effect : kTempEffectMap) {
+				NVSEArrayVar* pEffArrInner = g_arrInterface->CreateArray(nullptr, 0, apScript);
+				g_arrInterface->AppendElements(pEffArrInner, effect.first, effect.second.first, effect.second.second);
+				g_arrInterface->AppendElement(pEffArr, NVSEArrayElement(pEffArrInner));
+			}
 		}
 	}
 	g_arrInterface->AssignCommandResult(pEffArr, &arResult);
 	return true;
 }
-
 
 bool Cmd_SetCameraShakeNoHUDShudder_Execute(COMMAND_ARGS) {
 	float fShakeMult, fTime = 0.f;
@@ -652,8 +653,7 @@ SPEC_INLINE bool Cmd_GetMoonPhase_Eval(COMMAND_ARGS_EVAL) {
 }
 
 bool Cmd_GetMoonPhase_Execute(COMMAND_ARGS) {
-	Cmd_GetMoonPhase_Eval(nullptr, nullptr, nullptr, arResult);
-	return true;
+	return Cmd_GetMoonPhase_Eval(nullptr, nullptr, nullptr, arResult);
 }
 
 bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
@@ -668,10 +668,10 @@ bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 
 	const NiPoint3& rPos = apRef->GetPosition();
 	COORD_DATA kCoordData;
-	pLand->GetCoordData(kCoordData, rPos, 1);
+	pLand->GetCoordData(kCoordData, rPos, true);
 	TESLandTexture* pTexture = pLand->GetMainTexture(apRef->GetPosition());
 	if (pTexture)
-		reinterpret_cast<uint32_t&>(arResult) = pTexture->GetFormID();
+		ScriptUtils::SetFormIDResult(arResult, pTexture->GetFormID());
 	return true;
 }
 
@@ -706,9 +706,9 @@ bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 			if (!pSound || pSound->sourceSound != pSoundForm)
 				continue;
 
-			BSSoundHandle handle;
-			handle.uiSoundID = pSound->mapKey;
-			handle.Stop();
+			BSSoundHandle kHandle;
+			kHandle.uiSoundID = pSound->mapKey;
+			kHandle.Stop();
 			arResult = 1;
 		}
 	}
@@ -733,17 +733,6 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-TESWorldSpace* __fastcall GetWorldSpace(const TESObjectREFR* apRef) {
-	const TESObjectCELL* pCell = apRef->GetParentCell();
-	if (!pCell)
-		pCell = apRef->GetSaveParentCell();
-
-	if (pCell && !pCell->IsInterior()) 
-		return pCell->worldSpace;
-
-	return nullptr;
-}
-
 bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	char cLocationName[MAX_PATH] = {};
@@ -751,7 +740,7 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 		strcpy_s(cLocationName, apRef->GetParentCell()->fullName.GetFullName());
 	}
 	else {
-		const TESWorldSpace* pWorld = GetWorldSpace(apRef);
+		const TESWorldSpace* pWorld = apRef->GetWorldSpace();
 		if (pWorld) {
 			BSString strName;
 			pWorld->GetMapNameForLocation(strName, apRef->GetPosition());
@@ -768,8 +757,7 @@ SPEC_INLINE bool Cmd_GetLocationSpecificLoadScreensOnly_Eval(COMMAND_ARGS_EVAL) 
 }
 
 bool Cmd_GetLocationSpecificLoadScreensOnly_Execute(COMMAND_ARGS) {
-	Cmd_GetLocationSpecificLoadScreensOnly_Eval(nullptr, nullptr, nullptr, arResult);
-	return true;
+	return Cmd_GetLocationSpecificLoadScreensOnly_Eval(nullptr, nullptr, nullptr, arResult);
 }
 
 bool __fastcall IsCombatTarget(const Actor* source, const Actor* toSearch) {
@@ -821,69 +809,66 @@ bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	uint32_t skipInvisible = 0;
+	BOOL bSkipInvisible = FALSE;
+	BOOL bUseImproveDetection = FALSE;
 
-	//If player has ImprovedDetection perk effect, then they'll see invisible actors in compass.
-	uint32_t accountForImprovedDetection = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &bSkipInvisible, &bUseImproveDetection);
 
-	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible, &accountForImprovedDetection);
-
-	bool hasImprovedDetection = false;
-	if (accountForImprovedDetection) {
-		float hasPerk = 0.0; //copying code at 0x77A0C4
-		ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, PlayerCharacter::GetSingleton(), &hasPerk);
-		if (hasPerk > 0.0)
-			hasImprovedDetection = true;
+	bool bHasImprovedDetection = false;
+	if (bUseImproveDetection) {
+		float fHasPerk = 0.f; //copying code at 0x77A0C4
+		BGSEntryPoint::HandleEntryPoint(BGSEntryPointType::HAS_IMPROVED_DETECTION, PlayerCharacter::GetSingleton(), &fHasPerk);
+		if (fHasPerk > 0.f)
+			bHasImprovedDetection = true;
 	}
 
-	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(nullptr, 0, apScript);
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, apScript);
 	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
 	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		PlayerCharacter::CompassTarget* pTarget = pIter->GetItem();
 		pIter = pIter->GetNext();
-		if (target->isHostile) {
-			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0
-				|| target->target->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
+		if (pTarget->isHostile) {
+			if (bSkipInvisible > 0 && !bHasImprovedDetection && (pTarget->target->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0
+				|| pTarget->target->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
-			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
+			g_arrInterface->AppendElement(pArray, NVSEArrayElement(pTarget->target));
 		}
 	}
-	g_arrInterface->AssignCommandResult(hostileArr, &arResult);
+	g_arrInterface->AssignCommandResult(pArray, &arResult);
 	return true;
 }
 
 bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
-	TESObjectREFR* container;
-	int checkItems = 0;
 	arResult = 0;
-	if (apRef->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems) && container) {
-		if (checkItems) {
-			TESForm* containerOwner = container->GetOwner();
-			if (!containerOwner)
+	TESObjectREFR* pContainer = nullptr;
+	BOOL bCheckItems = FALSE;
+	if (apRef->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &pContainer, &bCheckItems) && pContainer) {
+		if (bCheckItems) {
+			TESForm* pOwner = pContainer->GetOwner();
+			if (!pOwner)
 				return true;
 
-			ExtraContainerChanges* xChanges = apRef->GetExtraData<ExtraContainerChanges>();
-			if (!xChanges || !xChanges->pChanges || !xChanges->pChanges->pItems)
+			ExtraContainerChanges* pContChanges = apRef->GetExtraData<ExtraContainerChanges>();
+			if (!pContChanges || !pContChanges->pChanges || !pContChanges->pChanges->pItems)
 				return true;
 
-			BSSimpleList<ItemChange*>* contChangesIter = xChanges->pChanges->pItems->GetHead();
-			while (contChangesIter && !contChangesIter->IsEmpty()){
-				ItemChange* entry = contChangesIter->GetItem();
-				contChangesIter = contChangesIter->GetNext();
+			BSSimpleList<ItemChange*>* pItemIter = pContChanges->pChanges->pItems->GetHead();
+			while (pItemIter && !pItemIter->IsEmpty()){
+				ItemChange* pItemChange = pItemIter->GetItem();
+				pItemIter = pItemIter->GetNext();
 
-				if (!entry || !entry->pExtraLists || !entry->GetContainerObject())
+				if (!pItemChange || !pItemChange->GetExtraDataList() || !pItemChange->GetContainerObject())
 					continue;
 
-				BSSimpleList<ExtraDataList*>* xdlIter = entry->pExtraLists->GetHead();
-				ExtraDataList* xData;
-				while (xdlIter && !xdlIter->IsEmpty()){
-					xData = xdlIter->GetItem();
-					xdlIter = xdlIter->GetNext();
-					if (xData) {
-						ExtraOwnership* xOwn = xData->GetExtraData<ExtraOwnership>();
-						if (xOwn && xOwn->pOwner && xOwn->pOwner->GetFormID() == containerOwner->GetFormID()) {
-							ThisCall(0x8BFA40, apRef, container, nullptr, nullptr, 1, containerOwner); // Actor::StealAlarm
+				BSSimpleList<ExtraDataList*>* pExtraIter = pItemChange->GetExtraDataList();
+				while (pExtraIter && !pExtraIter->IsEmpty()){
+					ExtraDataList* pExtraDataList = pExtraIter->GetItem();
+					pExtraIter = pExtraIter->GetNext();
+					if (pExtraDataList) {
+						ExtraOwnership* pOwnership = pExtraDataList->GetExtraData<ExtraOwnership>();
+						if (pOwnership && pOwnership->pOwner && pOwnership->pOwner->GetFormID() == pOwner->GetFormID()) {
+							ThisCall(0x8BFA40, apRef, pContainer, nullptr, nullptr, 1, pOwner); // Actor::StealAlarm
 							arResult = 1;
 							return true;
 						}
@@ -892,8 +877,8 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 			}
 		}
 		else {
-			TESForm* owner = container->GetOwner();
-			ThisCall(0x8BFA40, apRef, container, nullptr, nullptr, 1, owner); // Actor::StealAlarm
+			TESForm* pOwner = pContainer->GetOwner();
+			ThisCall(0x8BFA40, apRef, pContainer, nullptr, nullptr, 1, pOwner); // Actor::StealAlarm
 			arResult = 1;
 		}
 	}
@@ -908,10 +893,10 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 
 	ItemChange* pWeaponItem = pActor->GetCurrentAIProcess()->GetCurrentWeapon();
 	if (pWeaponItem && pWeaponItem->GetContainerObject()) {
-		bool bDecreaseSpread = pWeaponItem->HasModEffectActive(WEAPON_MOD_EFFECT_TYPE::DECREASE_SPREAD);
-		float fMinSpread = ThisCall<float>(0x524B80, pWeaponItem->GetContainerObject(), bDecreaseSpread); // TESObjectWEAP::GetMinSpread
-		float fWeapSpread = ThisCall<float>(0x524BE0, pWeaponItem->GetContainerObject(), bDecreaseSpread); // TESObjectWEAP::GetMaxSpread
-		float fSpread = ThisCall<float>(0x8B0DD0, pActor, 1); // Actor::GetGunSkill
+		const bool bDecreaseSpread = pWeaponItem->HasModEffectActive(WEAPON_MOD_EFFECT_TYPE::DECREASE_SPREAD);
+		const float fMinSpread = ThisCall<float>(0x524B80, pWeaponItem->GetContainerObject(), bDecreaseSpread); // TESObjectWEAP::GetMinSpread
+		const float fWeapSpread = ThisCall<float>(0x524BE0, pWeaponItem->GetContainerObject(), bDecreaseSpread); // TESObjectWEAP::GetMaxSpread
+		const float fSpread = ThisCall<float>(0x8B0DD0, pActor, 1); // Actor::GetGunSkill
 
 		float fTotalSpread = (fWeapSpread * fSpread + fMinSpread) * 0.01745329238474369;
 
@@ -1003,10 +988,10 @@ void RestoreDisabledPlayerControlsHUDFlags() {
 }
 
 bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
-	uint32_t flags;
-	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &flags)) {
-		HookUtils::SafeWrite32(0x771A53, flags);
-		HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
+	uint32_t uiFlags;
+	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags)) {
+		HookUtils::SafeWrite32(0x771A53, uiFlags);
+		HUDMainMenu_SetMenuMode(HUDMainMenu::kHUDState_RECALCULATE);
 	}
 	else {
 		RestoreDisabledPlayerControlsHUDFlags();
@@ -1045,7 +1030,8 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 		}
 	}
 
-	if (closestHostile)	reinterpret_cast<uint32_t&>(arResult) = closestHostile->GetFormID();
+	if (closestHostile)	
+		ScriptUtils::SetFormIDResult(arResult, closestHostile->GetFormID());
 
 	return true;
 }
@@ -1142,10 +1128,12 @@ bool Cmd_DeactivateAllHighlightsAlt_Execute(COMMAND_ARGS) {
 bool Cmd_RemoveHighlightedRef_Execute(COMMAND_ARGS) {
 	arResult = 0;
 
-	if (!apRef) return true;
+	if (!apRef) 
+		return true;
 
 	InterfaceManager* interfaceMgr = InterfaceManager::GetSingleton();
-	if (!interfaceMgr) return true;
+	if (!interfaceMgr) 
+		return true;
 
 	VATSHighlightData* vatsData = interfaceMgr->GetVATSHighlightData();
 
@@ -1287,7 +1275,7 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 
 				BSGameSound* pSound;
 				BSAudioManager::Get()->playingSounds.GetAt(uiKey, pSound);
-				if (pSound && StrBeginsCI(pSound->filePath + 0xB, pSoundPath)) {
+				if (pSound && StrBeginsCI(pSound->cFilePath + 0xB, pSoundPath)) {
 					BSSoundHandle kHandle;
 					kHandle.uiSoundID = pSound->mapKey;
 
@@ -1445,7 +1433,6 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 	const char cNodeName[128] = {};
 	char cNewCasingPath[MAX_PATH] = {};
 	const char* pOrgCasingPath;
-	ConsoleManager* pConsole = ConsoleManager::GetSingleton();
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cNodeName, &cNewCasingPath)) {
 		if (!apRef || !apRef->IsActor())
 			return false;
@@ -1463,7 +1450,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 				pActorNode = pPlayer->Get3D(!pPlayer->is3rdPerson);
 			}
 			else
-				pActorNode = apRef->Get3DSimple();
+				pActorNode = apRef->Get3DVerySimple();
 		}
 
 		bool bChangedPos = false;
@@ -1640,13 +1627,14 @@ SPEC_NOINLINE bool Cmd_GetPCInRootWorldspace_Eval(COMMAND_ARGS_EVAL) {
 bool Cmd_GetPCInRootWorldspace_Execute(COMMAND_ARGS) {
 	TESWorldSpace* pWorldSpace = nullptr;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace);
-	return Cmd_GetPCInRootWorldspace_Eval(apRef, pWorldSpace, nullptr, arResult);;
+	return Cmd_GetPCInRootWorldspace_Eval(apRef, pWorldSpace, nullptr, arResult);
 }
 
 bool Cmd_GetPCRootWorldspace_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	auto pMapMenu = MapMenu::GetSingleton();
 	if (pMapMenu && pMapMenu->parentmostLastExtDoorWorldspace)
-		reinterpret_cast<uint32_t&>(arResult) = pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
+		ScriptUtils::SetFormIDResult(arResult, pMapMenu->parentmostLastExtDoorWorldspace->GetFormID());
 	return true; 
 }
+#endif

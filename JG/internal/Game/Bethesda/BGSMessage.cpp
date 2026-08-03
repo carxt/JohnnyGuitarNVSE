@@ -40,7 +40,6 @@ BSSimpleList<BGSMessage::Button*>* BGSMessage::GetButtonList() {
     return &kButtons;
 }
 
-
 // GAME - 0x5911D0
 void BGSMessage::AddButton(Button* apButton) {
     ThisCall(0x5911D0, this, apButton);

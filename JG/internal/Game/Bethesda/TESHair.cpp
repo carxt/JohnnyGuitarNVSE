@@ -36,6 +36,11 @@ void TESHair::SetFixedColor(bool abVal) {
 }
 
 // GAME - 0x5FDFA0
+// GECK - 0x56A310
 bool TESHair::CanBeHairForNPC(TESNPC* apNPC) {
+#ifdef GAME
 	return ThisCall<bool>(0x5FDFA0, this, apNPC);
+#else
+	return ThisCall<bool>(0x56A310, this, apNPC);
+#endif
 }

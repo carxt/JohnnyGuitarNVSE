@@ -122,7 +122,7 @@ public:
 	BSSimpleList<TESHair*>* GetHairList();
 	void ClearHairList();
 
-	TESHair* GetRaceHair(uint32_t auiFormID) const;
+	TESHair* GetRaceHair(FormID auiFormID) const;
 	void AddHair(TESHair* apHair);
 
 	TESHair* GetDefaultHair(SEX aeSex) const;
@@ -141,7 +141,7 @@ public:
 	BSSimpleList<TESEyes*>* GetEyeColorList();
 	void ClearEyeColorList();
 
-	TESEyes* GetRaceEyeColor(uint32_t auiFormID) const;
+	TESEyes* GetRaceEyeColor(FormID auiFormID) const;
 	void AddEyeColor(TESEyes* apHair);
 
 	TESModel* GetHeadPartModel(SEX aeSex, HeadPart aePart) const;

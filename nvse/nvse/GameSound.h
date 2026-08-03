@@ -3,7 +3,7 @@
 #include "GameObjects.h"
 
 #include "Bethesda/BSSoundInfo.hpp"
-#include "Bethesda/BSSoundHandle.hpp"
+#include "Bethesda/BSAudio.hpp"
 
 class NiAVObject;
 class TESSound;
@@ -60,7 +60,7 @@ public:
 	float			flt02C;					// 02C
 	uint32_t			unk030;					// 030
 	uint16_t			baseSamplingFreq;		// 034
-	char			filePath[254];			// 036	Originally: filePath[260]
+	char			cFilePath[254];			// 036	Originally: filePath[260]
 	TESSound* sourceSound;			// 134	"Stolen" from filePath
 	float			frequencyMod;			// 138	^
 	float			maxAttenuationDist;		// 13C
@@ -239,24 +239,6 @@ public:
 };
 static_assert(sizeof(BSAudioManager) == 0x188);
 
-class BSAudioListener {
-public:
-	BSAudioListener();
-	virtual ~BSAudioListener();
-	virtual void	Unk_01(void);
-	virtual void	Unk_02(void);
-	virtual void	Unk_03(void);
-	virtual void	Unk_04(void);
-	virtual void	Unk_05(void);
-	virtual void	Unk_06(void);
-	virtual void	Unk_07(void);
-	virtual void	Unk_08(void);
-	virtual void	Unk_09(void);
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-	virtual void	Unk_0C(void);
-};
-
 // 64
 class BSWin32AudioListener : public BSAudioListener {
 public:
@@ -266,51 +248,6 @@ public:
 	uint32_t			unk04[14];		// 04
 	float			flt3C;			// 3C
 	uint32_t			unk40[9];		// 40
-};
-
-class BSWin32Audio {
-public:
-	BSWin32Audio();
-
-	virtual ~BSWin32Audio();
-	virtual void	Unk_01(void);
-	virtual void	Unk_02(void);
-	virtual void	Unk_03(void);
-	virtual void	Unk_04(void);
-	virtual BSGameSound* CreateGameSound(const char* filePath);
-	virtual void	Unk_06(void);
-	virtual void	Unk_07(void);
-
-	uint32_t					unk004[3];		// 004
-	BSWin32AudioListener* listener;		// 010
-	uint32_t					unk014[3];		// 014
-	bool(*sub_82D150)(uint32_t*, uint32_t*, uint32_t*, uint32_t*);	// 020
-	bool(*sub_82D280)(uint32_t*, uint32_t*, uint32_t*, uint32_t*);	// 024
-	bool(*sub_5E3630)(uint32_t*);	// 028
-	uint32_t(*sub_82D400)(uint32_t*, TESSound*, uint32_t*);	// 02C
-	void(*sub_832C40)(void);	// 030
-	void(*sub_832C80)(void);	// 034
-
-	static BSWin32Audio* GetSingleton() { return *(BSWin32Audio**)0x11F6D98; };
-
-	BSSoundHandle GetSoundHandleByFilePath(const char* apFileName, uint32_t aeAudioFlags, TESSound* apSound) {
-		BSSoundHandle kHandle;
-		ThisCall(0xAD7480, this, &kHandle, apFileName, aeAudioFlags, apSound);
-		return kHandle;
-	}
-
-	BSSoundHandle GetSoundHandleByFormID(uint32_t auiFormID, uint32_t aeAudioFlags) {
-		BSSoundHandle kHandle;
-		ThisCall(0xAD73B0, this, &kHandle, auiFormID, aeAudioFlags);
-		return kHandle;
-	}
-
-	BSSoundHandle GetSoundHandleByEditorName(const char* apEditorID, uint32_t aeAudioFlags) {
-		BSSoundHandle kHandle;
-		ThisCall(0xAD7550, this, &kHandle, apEditorID, aeAudioFlags);
-		return kHandle;
-	}
-
 };
 
 struct SoundList

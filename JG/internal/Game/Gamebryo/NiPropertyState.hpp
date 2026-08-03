@@ -26,7 +26,7 @@ public:
 			NiPointer<NiTexturingProperty>	m_spTextureProperty;
 			NiPointer<NiProperty>			m_spWireframeProperty;
 		};
-		NiPointer<NiProperty>				m_aspProps[NiProperty::MAX_TYPES];
+		NiPointer<NiProperty>				m_aspProps[NiProperty::PropertyType::COUNT];
 	};
 
 	void Reset();
@@ -35,18 +35,18 @@ public:
 
 	NiPointer<NiProperty>& operator[] (uint32_t auiIndex) { return m_aspProps[auiIndex]; }
 
-	NiAlphaProperty* GetAlphaProperty() const { return m_spAlphaProperty.m_pObject; };
+	NiAlphaProperty* GetAlphaProperty() const { return m_spAlphaProperty; };
 
-	NiCullingProperty* GetCullingProperty() const { return m_spCullingProperty.m_pObject; };
+	NiCullingProperty* GetCullingProperty() const { return m_spCullingProperty; };
 
-	NiMaterialProperty* GetMaterialProperty() const { return m_spMaterialProperty.m_pObject; };
+	NiMaterialProperty* GetMaterialProperty() const { return m_spMaterialProperty; };
 
-	template <class T> 
+	template <class T = NiShadeProperty> 
 	T* GetShadeProperty() const { return static_cast<T*>(m_spShadeProperty.m_pObject); };
 
-	NiStencilProperty* GetStencilProperty() const { return m_spStencilProperty.m_pObject; };
+	NiStencilProperty* GetStencilProperty() const { return m_spStencilProperty; };
 
-	NiTexturingProperty* GetTexturingProperty() const { return m_spTextureProperty.m_pObject; };
+	NiTexturingProperty* GetTexturingProperty() const { return m_spTextureProperty; };
 };
 
 ASSERT_SIZE(NiPropertyState, 0x1C);

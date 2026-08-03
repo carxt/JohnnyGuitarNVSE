@@ -18,7 +18,7 @@ namespace ExtraUISounds {
 				const QuestUpdateManager::QuestUpdate* pUpdate = pIter->GetItem();
 				const QuestUpdateManager::UpdateType eType = pUpdate->eUpdateType;
 				if (eType < QuestUpdateManager::UpdateType::COUNT && uiQuestSounds[eType])
-					rSound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(uiQuestSounds[eType], uiSoundFlags);
+					rSound = BSAudio::GetSingleton()->GetSoundHandleByFormID(uiQuestSounds[eType], uiSoundFlags);
 			}
 			return ThisCall<bool>(kPlayQuestSoundDetour, this, abLoop);
 		}

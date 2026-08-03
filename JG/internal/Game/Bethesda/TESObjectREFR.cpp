@@ -73,7 +73,11 @@ NiMatrix3 TESObjectREFR::GetOrientation() const {
 
 // GAME - 0x56FA90
 bool TESObjectREFR::SetOrientation(const NiMatrix3& arRot) {
+#ifdef GAME
 	return ThisCall<bool>(0x56FA90, this, &arRot);
+#else
+	return arRot.ToEulerAnglesXYZ(kData.kRotation.x, kData.kRotation.y, kData.kRotation.z);
+#endif
 }
 
 // GAME - 0x598040
@@ -92,8 +96,13 @@ float TESObjectREFR::GetScale() const {
 }
 
 // GAME - 0x567490
+// GECK - 0x642910
 void TESObjectREFR::SetScale(float afScale) {
+#ifdef GAME
 	ThisCall(0x567490, this, afScale);
+#else
+	ThisCall(0x642910, this, afScale);
+#endif
 }
 
 // GAME - 0x8D6F30
@@ -102,8 +111,13 @@ TESObjectCELL* TESObjectREFR::GetParentCell() const {
 }
 
 // GAME - 0x575D10
+// GECK - 0x641890
 TESObjectCELL* TESObjectREFR::GetInterior() const {
+#ifdef GAME
 	return ThisCall<TESObjectCELL*>(0x575D10, this);
+#else
+	return ThisCall<TESObjectCELL*>(0x641890, this);
+#endif
 }
 
 // GAME - 0x575D70
@@ -138,7 +152,11 @@ const ExtraDataList* TESObjectREFR::GetExtra() const {
 
 // GAME - 0x527080
 BSExtraData* TESObjectREFR::GetExtraData(uint8_t aucType) const {
+#ifdef GAME
 	return ThisCall<BSExtraData*>(0x527080, this, aucType);
+#else
+	return GetExtra()->GetExtraData(aucType);
+#endif
 }
 
 bool TESObjectREFR::HasExtra(uint8_t aucType) const {
@@ -166,6 +184,12 @@ NiAVObject* TESObjectREFR::Get3DSimple() const {
 #endif
 }
 
+#ifdef GAME
+NiAVObject* TESObjectREFR::Get3DVerySimple() const {
+	return pLoadedData ? pLoadedData->spSceneRoot : nullptr;
+}
+#endif
+
 // GAME - 0x570F70
 // GECK - 0x64C030
 void TESObjectREFR::Set3DSimple(NiAVObject* apScene) {
@@ -192,8 +216,13 @@ bool TESObjectREFR::GetPersistFlagValue() const {
 }
 
 // GAME - 0x565260
+// GECK - 0x642660
 bool TESObjectREFR::MustRefPersist() const {
+#ifdef GAME
 	return ThisCall<bool>(0x565260, this);
+#else
+	return ThisCall<bool>(0x642660, this);
+#endif
 }
 
 // GAME - 0x5653D0
@@ -207,8 +236,13 @@ bool TESObjectREFR::GetRefPersists() const {
 }
 
 // GAME - 0x565480
+// GECK - 0x63DC10
 void TESObjectREFR::SetRefPersists(bool abPersists) {
+#ifdef GAME
 	ThisCall(0x565480, this, abPersists);
+#else
+	ThisCall(0x63DC10, this, abPersists);
+#endif
 }
 
 // GAME - 0x55D520
@@ -228,8 +262,13 @@ void TESObjectREFR::Update3DPosition() {
 #endif
 
 // GAME - 0x5710C0
+// GECK - 0x650F00
 void TESObjectREFR::ReplaceModel() {
+#ifdef GAME
 	ThisCall(0x5710C0, this);
+#else
+	ThisCall(0x650F00, this);
+#endif
 }
 
 // GAME - 0x564E60
@@ -259,8 +298,13 @@ void TESObjectREFR::SetHasTemp3D(bool abVal) {
 }
 
 // GAME - 0x572350
+// GECK - 0x63ED90
 bool TESObjectREFR::Is3DCritical() const {
+#ifdef GAME
 	return ThisCall<bool>(0x572350, this);
+#else
+	return ThisCall<bool>(0x63ED90, this);
+#endif
 }
 
 // GAME - 0x56B250
@@ -279,8 +323,13 @@ bool TESObjectREFR::IsMarker() const {
 }
 
 // GAME - 0x439F90
+// GECK - 0x4BA240
 bool TESObjectREFR::IsMultiBoundRef() const {
+#ifdef GAME
 	return ThisCall<bool>(0x439F90, this);
+#else
+	return ThisCall<bool>(0x4BA240, this);
+#endif
 }
 
 // GAME - 0x54A0CC - inlined
@@ -302,8 +351,13 @@ bool TESObjectREFR::IsMapMarker() const {
 }
 
 // GAME - 0x568680
+// GECK - 0x63DEE0
 bool TESObjectREFR::IsFurniture() const {
+#ifdef GAME
 	return ThisCall<bool>(0x568680, this);
+#else
+	return ThisCall<bool>(0x63DEE0, this);
+#endif
 }
 
 // GAME - 0x56AF40
@@ -331,8 +385,13 @@ bool TESObjectREFR::GetIsImposter() const {
 }
 
 // GAME - 0x564F40
+// GECK - 0x63DAB0
 void TESObjectREFR::SetIsImposter(bool abVal) {
+#ifdef GAME
 	ThisCall(0x564F40, this, abVal);
+#else
+	ThisCall(0x63DAB0, this, abVal);
+#endif
 }
 
 // GAME - 0x579690
@@ -391,8 +450,13 @@ const char* TESObjectREFR::GetModel() const {
 }
 
 // GAME - 0x571630
+// GECK - 0x645C90
 TESModel* TESObjectREFR::GetTESModel() const {
+#ifdef GAME
 	return ThisCall<TESModel*>(0x571630, this);
+#else
+	return ThisCall<TESModel*>(0x645C90, this);
+#endif
 }
 
 #ifdef GAME
@@ -408,8 +472,13 @@ float TESObjectREFR::GetDistanceFromPoint(const NiPoint3& arPoint) const {
 }
 
 // GAME - 0x57B4B0
+// GECK - 0x641B50
 bool TESObjectREFR::GetIsHiddenDoor() const {
+#ifdef GAME
 	return ThisCall<bool>(0x57B4B0, this);
+#else
+	return ThisCall<bool>(0x641B50, this);
+#endif
 }
 
 void TESObjectREFR::SetIsHiddenDoor(bool abVal) {
@@ -464,8 +533,13 @@ void TESObjectREFR::SetLeveledCreature(TESActorBase* apOriginalBase, TESActorBas
 }
 
 // GAME - 0x56AFC0
+// GECK - 0x63E720
 bool TESObjectREFR::HasLeveledCreatureCalced() const {
+#ifdef GAME
 	return ThisCall<bool>(0x56AFC0, this);
+#else
+	return ThisCall<bool>(0x63E720, this);
+#endif
 }
 
 // GAME - 0x567E10
@@ -484,8 +558,13 @@ void TESObjectREFR::AddLight(bool abMagic) {
 }
 
 // GAME - 0x5729E0
+// GECK - 0x647480
 void TESObjectREFR::RemoveLight(bool abMagic) {
+#ifdef GAME
 	ThisCall(0x5729E0, this, abMagic);
+#else
+	ThisCall(0x647480, this, abMagic);
+#endif
 }
 
 // GAME - 0x568AD0
@@ -544,7 +623,7 @@ TESForm* TESObjectREFR::GetOwner() const {
 }
 
 // GAME - 0x56AE60
-bool TESObjectREFR::GetRefRespawns() const {
+bool TESObjectREFR::GetRespawn() const {
 	return ThisCall<bool>(0x56AE60, this);
 }
 
@@ -575,8 +654,13 @@ LockData* TESObjectREFR::GetMyLock() const {
 }
 
 // GAME - 0x569160
+// GECK - 0x63E460
 LockData* TESObjectREFR::GetLock() const {
+#ifdef GAME
 	return ThisCall<LockData*>(0x569160, this);
+#else
+	return ThisCall<LockData*>(0x63E460, this);
+#endif
 }
 
 // GAME - 0x5673E0
@@ -641,7 +725,7 @@ ItemChange* TESObjectREFR::GetInventoryItem(uint32_t auiIndex, bool abBarter) co
 }
 
 // GAME - 0x576260
-ItemChange* TESObjectREFR::GetInventoryItem(TESBoundObject* apObject, uint32_t auiFormID) const {
+ItemChange* TESObjectREFR::GetInventoryItem(TESBoundObject* apObject, FormID auiFormID) const {
 	return ThisCall<ItemChange*>(0x576260, this, apObject, auiFormID);
 }
 
@@ -661,23 +745,43 @@ bool TESObjectREFR::HasAddonNodes(NiNode* apNode) {
 }
 
 // GAME - 0x5784B0
+// GECK - 0x641A90
 bool TESObjectREFR::HasAddonFlags(NiNode* apNode) {
+#ifdef GAME
 	return CdeclCall<bool>(0x5784B0, apNode);
+#else
+	return CdeclCall<bool>(0x641A90, apNode);
+#endif
 }
 
 // GAME - 0x577E20
+// GECK - 0x64D9C0
 bool TESObjectREFR::AddAddonNodes(NiNode* apNode) {
+#ifdef GAME
 	return CdeclCall<bool>(0x577E20, apNode);
+#else
+	return CdeclCall<bool>(0x64D9C0, apNode);
+#endif
 }
 
 // GAME - 0x578300
+// GECK - 0x64A2E0
 bool TESObjectREFR::RemoveAddonNodes(NiNode* apNode) {
+#ifdef GAME
 	return CdeclCall<bool>(0x578300, apNode);
+#else
+	return CdeclCall<bool>(0x64A2E0, apNode);
+#endif
 }
 
 // GAME - 0x578060
+// GECK - 0x64A1C0
 bool TESObjectREFR::AddMasterParticleAddonNodes(NiNode* apNode) {
+#ifdef GAME
 	return CdeclCall<bool>(0x578060, apNode);
+#else
+	return CdeclCall<bool>(0x64A1C0, apNode);
+#endif
 }
 
 // GAME - 0x578170
@@ -688,9 +792,4 @@ bool TESObjectREFR::RemoveMasterParticleAddonNodes(NiNode* apNode) {
 // GAME - 0x564900
 bool TESObjectREFR::IsReferenceFormType(FORM_TYPE aeFormType) {
 	return aeFormType >= FORM_TYPE::TESObjectREFR && (aeFormType <= FORM_TYPE::FlameProjectile || aeFormType == FORM_TYPE::ContinuousBeamProjectile);
-}
-
-// GAME - 0x5AC190
-void TESObjectREFR::RunScript(TESObjectREFR* apRef, ExtraDataList* apExtra) {
-	CdeclCall(0x5AC190, apRef, apExtra);
 }

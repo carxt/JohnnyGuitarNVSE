@@ -255,8 +255,6 @@ public:
 	}
 };
 
-bool FileToBuffer(const char* filePath, char* buffer);
-
 void __fastcall GetTimeStamp(char* buffer);
 
 uint32_t __fastcall ByteSwap(uint32_t dword);

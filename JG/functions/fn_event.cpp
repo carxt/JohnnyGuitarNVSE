@@ -1,4 +1,5 @@
 #include "fn_event.h"
+#ifdef GAME
 #include <decoding.h>
 #include <events/EventFramework.h>
 #include <events/JohnnyEvents.hpp>
@@ -258,3 +259,4 @@ bool Cmd_SetOnReputationChangeEventHandler_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+#endif

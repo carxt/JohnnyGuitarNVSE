@@ -1,4 +1,5 @@
 #include "fn_mediaset.h"
+#ifdef GAME
 #include "GameObjects.h"
 #include "decoding.h"
 
@@ -12,10 +13,10 @@ bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
 		ExtraCellAcousticSpace* pXAcousticSpace = pCell->extraDataList.GetExtraData<ExtraCellAcousticSpace>();
 		if (pXAcousticSpace && pXAcousticSpace->pSpace) 
-			reinterpret_cast<uint32_t&>(arResult) = pXAcousticSpace->pSpace->GetFormID();
+			ScriptUtils::SetFormIDResult(arResult, pXAcousticSpace->pSpace->GetFormID());
 
 		if (IsConsoleMode())
-			Console_Print("GetAcousticSpace  >> 0x%08X", reinterpret_cast<uint32_t&>(arResult));
+			Console_Print("GetAcousticSpace  >> 0x%08X", reinterpret_cast<FormID&>(arResult));
 	}
 	return true;
 }
@@ -46,7 +47,7 @@ SPEC_NOINLINE bool Cmd_AudioMarkerGetCurrent_Eval(COMMAND_ARGS_EVAL) {
 	arResult = 0;
 	if (PlayerCharacter::GetSingleton() && PlayerCharacter::GetSingleton()->currMusicMarker) {
 		if (TESObjectREFR* pMarkerRef = PlayerCharacter::GetSingleton()->currMusicMarker->pReference)
-			reinterpret_cast<uint32_t&>(arResult) = pMarkerRef->GetFormID();
+			ScriptUtils::SetFormIDResult(arResult, pMarkerRef->GetFormID());
 	}
 	return true;
 }
@@ -60,10 +61,10 @@ SPEC_NOINLINE bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
 	if (apRef) {
 		ExtraAudioMarker* pExtraMarker = apRef->GetExtraData<ExtraAudioMarker>();
 		if (pExtraMarker && pExtraMarker->pData) {
-			uintptr_t uiCtrlFormID = pExtraMarker->pData->uiMediaLocationController;
+			FormID uiCtrlFormID = pExtraMarker->pData->uiMediaLocationController;
 			TESForm* pFoundForm = TESForm::GetFormByNumericID(uiCtrlFormID);
 			if (pFoundForm->GetFormType() == FORM_TYPE::MediaLocationController)
-				reinterpret_cast<uint32_t&>(arResult) = pFoundForm->GetFormID();
+				ScriptUtils::SetFormIDResult(arResult, pFoundForm->GetFormID());
 		}
 	}
 	return true;
@@ -73,7 +74,7 @@ bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
 	Cmd_AudioMarkerGetController_Eval(apRef, nullptr, nullptr, arResult);
 	if (apRef && IsConsoleMode()) {
 		if (arResult)
-			Console_Print("AudioMarkerGetController >> 0x%lx", reinterpret_cast<uint32_t&>(arResult));
+			Console_Print("AudioMarkerGetController >> 0x%08X", reinterpret_cast<FormID&>(arResult));
 		else
 			Console_Print("Calling reference is not an AudioMarker");
 	}
@@ -81,15 +82,17 @@ bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
-	MediaLocationController* locationController;
-	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &locationController) && locationController && IS_TYPE(locationController, MediaLocationController)) {
+	arResult = 0;
+	MediaLocationController* pMediaLocController;
+	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaLocController) && pMediaLocController && IS_TYPE(pMediaLocController, MediaLocationController)) {
 		ExtraAudioMarker* pAudioMarker = apRef->GetExtraData<ExtraAudioMarker>();
 		if (pAudioMarker && pAudioMarker->pData) {
-			pAudioMarker->pData->uiMediaLocationController = locationController->GetFormID();
+			pAudioMarker->pData->uiMediaLocationController = pMediaLocController->GetFormID();
 
 			if (IsConsoleMode())
-				Console_Print("AudioMarkerSetController >> 0x%08X, %s", locationController->GetFormID(), locationController->GetFormEditorID());
+				Console_Print("AudioMarkerSetController >> 0x%08X, %s", pMediaLocController->GetFormID(), pMediaLocController->GetFormEditorID());
 
+			arResult = 1;
 		}
 		else if (IsConsoleMode()) {
 			Console_Print("Calling reference is not an AudioMarker");
@@ -99,7 +102,7 @@ bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
-	DWORD type;
+	DWORD eType;
 	float fValue;
 	enum kAMType {
 		kRadius,
@@ -107,10 +110,10 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 		kLayer3,
 		kFlags
 	};
-	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &type, &fValue)) {
+	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &fValue)) {
 		ExtraAudioMarker* pAudioMarker = apRef->GetExtraData<ExtraAudioMarker>();
 		if (pAudioMarker && pAudioMarker->pData) {
-			switch (type) {
+			switch (eType) {
 			case kRadius:
 				apRef->GetExtra()->SetRadius(fValue);
 				break;
@@ -127,7 +130,7 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 			}
 
 			if (IsConsoleMode())
-				Console_Print("AudioMarkerSetProperty >> %s, %d, %.2f", apRef->GetFormEditorID(), type, fValue);
+				Console_Print("AudioMarkerSetProperty >> %s, %d, %.2f", apRef->GetFormEditorID(), eType, fValue);
 		}
 		else if (IsConsoleMode()) {
 			Console_Print("Calling reference is not an AudioMarker");
@@ -137,20 +140,20 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
-	DWORD type;
+	DWORD eType;
 	enum kAMType {
 		kRadius,
 		kLayer2,
 		kLayer3,
 		kFlags
 	};
-	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
+	if (apRef && ExtractArgsEx(EXTRACT_ARGS_EX, &eType)) {
 		const ExtraAudioMarker* pAudioMarker = apRef->GetExtraData<ExtraAudioMarker>();
 		if (pAudioMarker && pAudioMarker->pData) {
-			switch (type) {
+			switch (eType) {
 			case kRadius:
 				{
-					ExtraRadius* pRadius = apRef->GetExtraData<ExtraRadius>();
+					const ExtraRadius* pRadius = apRef->GetExtraData<ExtraRadius>();
 					if (pRadius)
 						arResult = pRadius->fRadius;
 				}
@@ -168,7 +171,7 @@ bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
 			}
 
 			if (IsConsoleMode())
-				Console_Print("AudioMarkerGetProperty >> %s, %d, %.2f", apRef->GetFormEditorID(), type, arResult);
+				Console_Print("AudioMarkerGetProperty >> %s, %d, %.2f", apRef->GetFormEditorID(), eType, arResult);
 		}
 		else if (IsConsoleMode()) {
 			Console_Print("Calling reference is not an AudioMarker");
@@ -273,21 +276,21 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 	MediaSet* pMediaSet = nullptr;
-	int iSoundType = -1;
+	int32_t iSoundType = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iSoundType) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
 		switch (iSoundType) {
 		case 0:
 			{
 				TESSound* pSound = pMediaSet->GetSound1();
 				if (pSound)
-					reinterpret_cast<uint32_t&>(arResult) = pSound->GetFormID();
+					ScriptUtils::SetFormIDResult(arResult, pSound->GetFormID());
 			}
 			break;
 		case 1:
 			{
 				TESSound* pSound = pMediaSet->GetSound2();
 				if (pSound)
-					reinterpret_cast<uint32_t&>(arResult) = pSound->GetFormID();
+					ScriptUtils::SetFormIDResult(arResult, pSound->GetFormID());
 			}
 			break;
 		}
@@ -296,10 +299,10 @@ bool Cmd_GetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
+	arResult = 0;
 	MediaSet* pMediaSet = nullptr;
 	TESSound* pSound = nullptr;
-	int iSoundType = -1;
-	arResult = 0;
+	int32_t iSoundType = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iSoundType, &pSound) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
 		if (pSound && !IS_TYPE(pSound, TESSound))
 			return true;
@@ -319,6 +322,7 @@ bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
+	arResult = 0;
 	MediaSet* pMediaSet = nullptr;
 	int32_t iLayer = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iLayer) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
@@ -345,3 +349,4 @@ bool Cmd_SetMediaSetTraitString_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+#endif

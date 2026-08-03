@@ -1,13 +1,13 @@
 #include "TESForm.hpp"
 
 #ifdef GAME
-static FORM_ENUM_STRING* const pFormEnumStrings = reinterpret_cast<FORM_ENUM_STRING*>(0x1187000);
+static constexpr AddressPtr<FORM_ENUM_STRING, 0x1187000, 121> formEnumString;
 #else
-static FORM_ENUM_STRING* const pFormEnumStrings = reinterpret_cast<FORM_ENUM_STRING*>(0xE94400);
+static constexpr AddressPtr<FORM_ENUM_STRING, 0xE94400, 121> formEnumString;
 #endif
 
 // GAME - 0x84E3A0
-uint32_t TESForm::GetFormID() const{
+FormID TESForm::GetFormID() const{
 	return uiFormID;
 }
 
@@ -17,13 +17,13 @@ FORM_TYPE TESForm::GetFormType() const {
 }
 
 uint8_t TESForm::GetCompileIndex() const {
-	return uiFormID.GetIndex();
+	return FormID_View(uiFormID).GetIndex();
 }
 
 #ifndef GAME
 // GECK - 0x4FB450
-bool TESForm::SetFormEditorID(const char* apID) {
-	return ThisCall<bool>(0x4FB450, apID);
+bool TESForm::SetFormEditorID(const char* apEditorID) {
+	return ThisCall<bool>(0x4FB450, apEditorID);
 }
 #endif
 
@@ -41,12 +41,14 @@ const char* TESForm::GetFormTypeName() const {
 	return GetFormTypeName(GetFormType());
 }
 
-const char* TESForm::GetFormTypeString(uint32_t auiFormType) {
-	return pFormEnumStrings[auiFormType].pFormString;
+// GAME - 0x4612B0
+const char* TESForm::GetFormTypeString(uint8_t aucFormType) {
+	return CdeclCall<const char*>(0x4612B0, aucFormType);
 }
 
+// GAME - 0x440E30
 const char* TESForm::GetFormTypeString() const {
-	return GetFormTypeString(GetFormType());
+	return ThisCall<const char*>(0x440E30, this);
 }
 
 // GAME - 0x460250
@@ -70,6 +72,7 @@ bool TESForm::GetInitialized() const {
 }
 
 // GAME - 0x484AB0
+// GECK - 0x4F7F00
 void TESForm::SetInitialized(bool abVal) {
 	uiFormFlags.Set(FormFlags::INITIALIZED, abVal);
 }
@@ -336,6 +339,11 @@ void TESForm::SetContinuousBroadcast(bool abVal) {
 	uiFormFlags.Set(FormFlags::CONTINUOUS_BROADCAST, abVal);
 }
 
+// GAME - 0x437B90
+bool TESForm::GetDisabledOrDeleted() const {
+	return uiFormFlags.Get(FormFlags::DISABLED | FormFlags::DELETED);
+}
+
 // GAME - 0x484E60
 // GECK - 0x4F9960
 TESFile* TESForm::GetFile(int32_t aiIndex) const {
@@ -358,7 +366,7 @@ TESFile* TESForm::GetOwnerMaster() const {
 
 // GAME - 0x485BC0
 uint32_t TESForm::GetFormIDWithoutIndex() const {
-	return uiFormID.GetID();
+	return FormID_View(uiFormID).GetID();
 }
 
 // GAME - 0x5504E0
@@ -368,11 +376,11 @@ uint32_t TESForm::GetFileCount() const {
 
 // GAME - 0x4839C0
 // GECK - 0x4F9620
-TESForm* TESForm::GetFormByNumericID(uint32_t auID) {
+TESForm* TESForm::GetFormByNumericID(FormID auFormID) {
 #ifdef GAME
-	return CdeclCall<TESForm*>(0x4839C0, auID);
+	return CdeclCall<TESForm*>(0x4839C0, auFormID);
 #else
-	return CdeclCall<TESForm*>(0x4F9620, auID);
+	return CdeclCall<TESForm*>(0x4F9620, auFormID);
 #endif
 }
 
@@ -386,8 +394,8 @@ TESForm* TESForm::GetFormByEditorID(const char* apEDID) {
 #endif
 }
 
-const FORM_ENUM_STRING* TESForm::GetFormEnumString(uint8_t aucFormID) {
-	return &pFormEnumStrings[aucFormID];
+const FORM_ENUM_STRING* TESForm::GetFormEnumString(uint8_t aucFormType) {
+	return &formEnumString[aucFormType];
 }
 
 // GAME - 0x484E40
@@ -397,8 +405,8 @@ bool TESForm::IsDefaultForm() const {
 
 // GAME - 0x484B40
 // GECK - 0x4F7F40
-bool TESForm::IsDefaultForm(FormID auiID) {
-	return auiID.IsDefault();
+bool TESForm::IsDefaultForm(FormID auFormID) {
+	return FormID_View(auFormID).IsDefault();
 }
 
 // GAME - 0x486890

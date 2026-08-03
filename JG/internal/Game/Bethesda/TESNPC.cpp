@@ -11,8 +11,13 @@ void TESNPC::SetClass(TESNPC* apClass) {
 }
 
 // GAME - 0x603B50
+// GECK - 0x56F440
 TESHair* TESNPC::GetHair() const {
+#ifdef GAME
 	return ThisCall<TESHair*>(0x603B50, this);
+#else
+	return ThisCall<TESHair*>(0x56F440, this);
+#endif
 }
 
 // GAME - 0x6031E0
@@ -46,13 +51,23 @@ float TESNPC::GetRaceHeight() const {
 }
 
 // GAME - 0x604250
+// GECK - 0x56F950
 float TESNPC::GetWeight() const {
+#ifdef GAME
 	return ThisCall<float>(0x604250, this);
+#else
+	return ThisCall<float>(0x56F950, this);
+#endif
 }
 
 // GAME - 0x603AD0
+// GECK - 0x56F390
 void TESNPC::GetFaceCoord(FaceGenCoords& arCoords) const {
+#ifdef GAME
 	ThisCall(0x603AD0, this, &arCoords);
+#else
+	ThisCall(0x56F390, this, &arCoords);
+#endif
 }
 
 // GAME - 0x601800

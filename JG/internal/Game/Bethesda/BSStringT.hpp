@@ -49,8 +49,8 @@ public:
 	void				SPrintF(const T* apFmt, ...);
 	void				VSPrintF(const T* apFmt, va_list args);
 
-	void				ToLower();
-	void				ToUpper();
+	void				MakeLower();
+	void				MakeUpper();
 
 	const T*			c_str() const;
 };

@@ -10,7 +10,7 @@
 class CustomGameSetting {
 public:
 	union Info {
-		const char* str;
+		const char*		str;
 		int				i;
 		unsigned int	u;
 		float			f;

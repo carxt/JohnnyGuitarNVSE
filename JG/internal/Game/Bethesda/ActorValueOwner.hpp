@@ -18,7 +18,7 @@ public:
 	virtual TESForm*	GetAsForm() const;
 	virtual uint16_t	GetActorLevel() const;
 
-	static bool GetDerivedActorValue(ActorValueOwner* apOwner, ActorValue::Index aeIndex, float& arVal);
+	static bool GetDerivedActorValue(ActorValueOwner* apOwner, ActorValue::Index aeIndex, float& arValue);
 
 	int32_t GetClampedActorValueI(ActorValue::Index aeIndex);
 	float GetClampedActorValueF(ActorValue::Index aeIndex);

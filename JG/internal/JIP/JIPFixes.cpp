@@ -3,34 +3,37 @@
 #include "JIPUtils.hpp"
 
 #include "Bethesda/AutoMemContext.hpp"
+#include "Bethesda/BSShaderUtil.hpp"
 #include "Bethesda/BSStringT.hpp"
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/FixedStrings.hpp"
+#include "Bethesda/ModelLoader.hpp"
 #include "Bethesda/RendererSettingCollection.hpp"
 #include "Bethesda/Setting.hpp"
+#include "Bethesda/TESDataHandler.hpp"
+#include "Bethesda/Tile.hpp"
 #include "Bethesda/TimeGlobal.hpp"
 
 #include "decoding.h"
 #include "events/EventFramework.h"
-#include "GameData.h"
 #include "GameObjects.h"
 #include "GameOSDepend.h"
 #include "GameProcess.h"
 #include "GameRTTI.h"
-#include "GameTiles.h"
+#include "GameUI.h"
 #include "ParamInfos.h"
 #include "PluginAPI.h"
 #include "utility.h"
 
 #include "JG/JohnnyExtraData.hpp"
+#include "JG/ScriptUtils.hpp"
 #include "internal/CommandOpcodes.h"
 
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 #include "Shared/Utils/StackObject.hpp"
 #include "Shared/Utils/CustomClass.hpp"
 
-#include <GameUI.h>
-#include <Bethesda/BSShaderUtil.hpp>
+#include <unordered_map>
 
 class BSRenderedTexture;
 
@@ -38,7 +41,7 @@ extern NVSECommandTableInterface* g_cmdTableInterface;
 extern NVSEScriptInterface* g_scriptInterface;
 extern bool bFixJIP;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
-extern InventoryRef* (*InventoryRefGetForID)(uint32_t auiFormID);
+extern InventoryRef* (*InventoryRefGetForID)(FormID auiFormID);
 extern TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
 
 namespace JIPFixes {
@@ -80,7 +83,7 @@ namespace JIPFixes {
 
 			NiControllerManager* pControllerManager = apObject->GetController<NiControllerManager>();
 			if (pControllerManager && pControllerManager->m_spObjectPalette) [[likely]]
-				ThisCall(0xA6E960, pControllerManager->m_spObjectPalette.m_pObject);
+				pControllerManager->m_spObjectPalette->ResetAndFillFromScenegraph();
 		}
 
 		HookUtils::CallDetour kMemPoolFree;
@@ -486,7 +489,7 @@ namespace JIPFixes {
 		}
 
 		void* __fastcall StaticAlloc(size_t aSize) {
-			MEMORY_CONTEXT(MC_STATIC_VARS);
+			AUTO_MEM_CONTEXT(MEM_CONTEXT::STATIC_VARS);
 			return BSMemory::malloc(aSize);
 		}
 
@@ -707,7 +710,7 @@ namespace JIPFixes {
 				return true;
 
 			int32_t iTargetObject = -1;
-			if (apCompiledParams[arOffset - 2] && apCompiledParams[arOffset]) {
+			if (apCompiledParams[arOffset - 2] && NUM_ARGS) {
 				int32_t iArgSlot;
 				if (!ExtractArgsEx(EXTRACT_ARGS_EX, &iArgSlot))
 					return true;
@@ -1124,7 +1127,7 @@ namespace JIPFixes {
 				return false;
 			}
 			else if (pClickedTile) {
-				return g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, pClickedTile->name.c_str());
+				return g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, pClickedTile->strName.c_str());
 			}
 			else {
 				return g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, cEmptyBuffer);
@@ -1183,12 +1186,12 @@ namespace JIPFixes {
 
 		STACK_FRAME_OPT_ENABLE
 		uint32_t __fastcall GetTileIndex(Tile* apTile) {
-			const Tile* pParent = apTile->parent;
+			const Tile* pParent = apTile->GetParent();
 			if (pParent) [[likely]] {
-				auto kIter = pParent->children.GetHeadPos();
+				auto kIter = pParent->kChildren.GetHeadPos();
 				uint32_t uiIndex = 0;
 				while (kIter) {
-					const Tile* pChild = pParent->children.GetNext(kIter);
+					const Tile* pChild = pParent->kChildren.GetNext(kIter);
 					if (pChild == apTile)
 						return uiIndex;
 					++uiIndex;
@@ -1311,7 +1314,7 @@ namespace JIPFixes {
 			}
 
 			void _Append(NiGeometry* apGeom) {
-				BSShaderProperty* pShaderProp = apGeom->shaderProp;
+				BSShaderProperty* pShaderProp = apGeom->GetShadeProperty<BSShaderProperty>();
 				if (pShaderProp->iShader == 17) {
 					if (!DowngradeWaterShader(static_cast<WaterShaderProperty*>(const_cast<BSShaderProperty*>(pShaderProp))))
 						return;
@@ -1465,8 +1468,8 @@ namespace JIPFixes {
 				}
 				pUIMgr->cursorX = fPosX;
 				pUIMgr->cursorY = fPosY;
-				pUIMgr->cursor->node->m_kLocal.m_kTranslate.x = (fPosX * fUIPixelSize) - fScreenWidth;
-				pUIMgr->cursor->node->m_kLocal.m_kTranslate.z = fScreenHeight - (fPosY * fUIPixelSize);
+				pUIMgr->cursor->GetModel()->m_kLocal.m_kTranslate.x = (fPosX * fUIPixelSize) - fScreenWidth;
+				pUIMgr->cursor->GetModel()->m_kLocal.m_kTranslate.z = fScreenHeight - (fPosY * fUIPixelSize);
 				arResult = 1;
 			}
 
@@ -1515,7 +1518,7 @@ namespace JIPFixes {
 						ExtraDataList* pExtraList = pHotkeyItem->pExtraLists ? pHotkeyItem->pExtraLists->GetItem() : nullptr;
 						TESObjectREFR* pInvRef = InventoryRefCreateEntry(PlayerCharacter::GetSingleton(), pHotkeyItem->pObject, pHotkeyItem->iNumber, pExtraList);
 						if (pInvRef)
-							reinterpret_cast<uint32_t&>(arResult) = pInvRef->GetFormID();
+							ScriptUtils::SetFormIDResult(arResult, pInvRef->GetFormID());
 					}
 
 					delete pHotkeyItem;
@@ -1822,7 +1825,7 @@ namespace JIPFixes {
 		}
 
 		static void InitializeMap() {
-			MEMORY_CONTEXT(MC_STATIC_VARS);
+			AUTO_MEM_CONTEXT(MEM_CONTEXT::STATIC_VARS);
 			pGSMap->uiCount = 0;
 			pGSMap->uiSize = uiMapSize;
 			pGSMap->pBuckets = BSMemory::malloc<SettingsMap::Bucket>(uiMapSize);

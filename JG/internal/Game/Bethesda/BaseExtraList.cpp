@@ -2,7 +2,7 @@
 
 // GAME - 0x40FE80
 bool BaseExtraList::HasExtra(uint8_t aucType) const {
-#if JIP_CHANGES
+#if USE_MODDED_CHANGES
 	constexpr uint32_t ARRAY_SIZE = 19;
 #else
 	constexpr uint32_t ARRAY_SIZE = 21;
@@ -62,11 +62,9 @@ void BaseExtraList::RemoveAll(bool abDelete) {
 #endif
 }
 
+#ifdef GAME
 // GAME - 0x40FCB0
 void BaseExtraList::RemoveAllDefault(bool abDelete) {
-#ifdef GAME
 	ThisCall(0x40FCB0, this, abDelete);
-#else
-	FUNCTION_UNKOWN
-#endif
 }
+#endif

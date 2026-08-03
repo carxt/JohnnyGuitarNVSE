@@ -3,10 +3,9 @@
 #include "BSSoundHandle.hpp"
 #include "ExtraContainerChanges.hpp"
 #include "ExtraDataList.hpp"
+#include "Gamebryo/NiAVObject.hpp"
 #include "TESBoundObject.hpp"
 #include "TESChildCell.hpp"
-#include "Gamebryo/NiSmartPointer.hpp"
-#include "Gamebryo/NiMatrix3.hpp"
 
 class LockData;
 class DoorTeleportData;
@@ -179,6 +178,7 @@ public:
 	TESObjectREFR* GetCurrentWaterObject() const;
 
 	NiAVObject* Get3DSimple() const;
+	NiAVObject* Get3DVerySimple() const;
 	void Set3DSimple(NiAVObject* apScene);
 	void Set3DVerySimple(NiAVObject* apScene);
 
@@ -288,7 +288,7 @@ public:
 
 	TESForm* GetEmittanceSource() const;
 
-	bool GetRefRespawns() const;
+	bool GetRespawn() const;
 
 	DoorTeleportData* GetTeleport() const;
 
@@ -312,7 +312,7 @@ public:
 	int32_t GetInventoryCount(bool abBarter, bool abIncludeNonPlayable) const;
 	int32_t GetInventoryObjectCount(TESBoundObject* apObject) const;
 	[[nodiscard]] ItemChange* GetInventoryItem(uint32_t auiIndex, bool abBarter) const;
-	[[nodiscard]] ItemChange* GetInventoryItem(TESBoundObject* apObject, uint32_t auiFormID = 0) const;
+	[[nodiscard]] ItemChange* GetInventoryItem(TESBoundObject* apObject, FormID auiFormID = 0) const;
 
 	static TESObjectREFR* FindReferenceFor3D(NiAVObject* apObject);
 
@@ -327,8 +327,6 @@ public:
 	static bool RemoveMasterParticleAddonNodes(NiNode* apNode);
 
 	static bool IsReferenceFormType(FORM_TYPE aeFormType);
-
-	static void RunScript(TESObjectREFR* apRef, ExtraDataList* apExtra);
 };
 
 ASSERT_SIZE(TESObjectREFR, 0x68);

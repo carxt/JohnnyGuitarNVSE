@@ -69,10 +69,12 @@ TESObjectLIGH* BGSProjectile::GetLight() const {
 	return GetData().pLight;
 }
 
+// GAME - 0x4FD3A0
 TESObjectLIGH* BGSProjectile::GetMuzzleFlashLight() const {
 	return GetData().pMuzzleFlashLight;
 }
 
+// GAME - 0x507E10
 float BGSProjectile::GetMuzzleFlashDuration() const {
 	return GetData().fMuzzleFlashDuration;
 }

@@ -1,8 +1,11 @@
 #pragma once
 
 #include "BaseFormComponent.hpp"
+#include "BSSimpleArray.hpp"
 
 class TESIdleForm;
+class Actor;
+class TESObjectREFR;
 
 class BGSIdleCollection : public BaseFormComponent {
 public:
@@ -27,6 +30,18 @@ public:
 	uint8_t							ucIdleCount;
 	TESIdleForm**					ppIdles;
 	float							fTimerCheckForIdle;
+
+	PickType GetPickType() const;
+	void SetPickType(PickType aeType);
+
+	bool GetDoOnce() const;
+	void SetDoOnce(bool abVal);
+
+	uint32_t GetIdleCount() const;
+
+	uint32_t GetIdlesForActor(Actor* apActor, TESObjectREFR* apTargetRef, BSSimpleArray<TESIdleForm*>* apOutIdleArray) const;
+	
+	bool HasIdleForActor(Actor* apActor, TESObjectREFR* apTargetRef) const;
 };
 
 ASSERT_SIZE(BGSIdleCollection, 0x10);

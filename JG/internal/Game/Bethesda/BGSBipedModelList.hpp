@@ -15,7 +15,7 @@ public:
 	BGSListForm* GetBipedModelList() const;
 	void SetBipedModelList(BGSListForm* apModelList);
 
-	static BGSBipedModelList* GetFormAsBipedModelList(TESForm* apForm);
+	static BGSBipedModelList* GetFormAsBipedModelList(const TESForm* apForm);
 };
 
 ASSERT_SIZE(BGSBipedModelList, 0x8);

@@ -138,10 +138,12 @@ struct SCRIPT_PARAMETER {
 };
 
 ASSERT_SIZE(SCRIPT_PARAMETER, 0xC);
-#if 1
+
 #define COMMAND_ARGS		SCRIPT_PARAMETER* apParameters, const char* apCompiledParams, TESObjectREFR* apRef, TESObjectREFR* apContainer, Script* apScript, ScriptLocals* apScriptLocals, double& arResult, uint32_t& arOffset
 #define COMMAND_ARGS_PARSE	uint32_t auiParamCount, SCRIPT_PARAMETER* apParameters, SCRIPT_LINE* apScriptLine, ScriptCompileData* apCompileData
 #define COMMAND_ARGS_EVAL	TESObjectREFR* apRef, void* apParam1, void* apParam2, double& arResult
+
+#define NUM_ARGS apCompiledParams[arOffset]
 
 using Cmd_Execute	= bool (__cdecl*)(COMMAND_ARGS);
 using Cmd_Parse		= bool (__cdecl*)(COMMAND_ARGS_PARSE);
@@ -162,4 +164,3 @@ struct SCRIPT_FUNCTION {
 };
 
 ASSERT_SIZE(SCRIPT_FUNCTION, 0x28);
-#endif

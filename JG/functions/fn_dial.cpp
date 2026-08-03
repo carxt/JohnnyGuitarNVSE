@@ -1,5 +1,5 @@
 #include "fn_dial.h"
-
+#ifdef GAME
 #include "Bethesda/TESDataHandler.hpp"
 
 #include "JG/DialogueResponseOverride.hpp"
@@ -112,7 +112,7 @@ SPEC_NOINLINE bool Cmd_GetSaidOnce_Eval(COMMAND_ARGS_EVAL) {
 bool Cmd_GetSaidOnce_Execute(COMMAND_ARGS) {
 	TESTopicInfo* pInfo = nullptr;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pInfo);
-	return Cmd_GetSaidOnce_Eval(nullptr, pInfo, nullptr, arResult);;
+	return Cmd_GetSaidOnce_Eval(nullptr, pInfo, nullptr, arResult);
 }
 
 bool Cmd_SetSaidOnce_Execute(COMMAND_ARGS) {
@@ -212,7 +212,8 @@ bool Cmd_GetParentTopic_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTopicInfo) && pTopicInfo && IS_TYPE(pTopicInfo, TESTopicInfo)) {
 		TESTopic* pParentTopic = pTopicInfo->GetParentTopic();
 		if (pParentTopic)
-			reinterpret_cast<uint32_t&>(arResult) = pParentTopic->GetFormID();
+			ScriptUtils::SetFormIDResult(arResult, pParentTopic->GetFormID());
 	}
 	return true;
 }
+#endif

@@ -1,102 +1,110 @@
 #include "fn_file.h"
+#ifdef GAME
 #include "GameSound.h"
 #include <Bethesda/FileFinder.hpp>
 #include <misc/misc.h>
 
 bool Cmd_IsBSALoaded_Execute(COMMAND_ARGS) {
-	char path[MAX_PATH] = {};
-	char fixPath[MAX_PATH];
 	arResult = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
-		snprintf(fixPath, MAX_PATH, "DATA\\%s", path);
-		DWORD* archive = CdeclCall<DWORD*>(0xAF5320, fixPath); // ArchiveManager::GetArchiveByName
-		if (archive != nullptr) {
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
+		char cFullPath[MAX_PATH];
+		our_snprintf(cFullPath, sizeof(cFullPath), "DATA\\%s", cPath);
+		DWORD* pArchive = CdeclCall<DWORD*>(0xAF5320, cFullPath); // ArchiveManager::GetArchiveByName
+		if (pArchive)
 			arResult = 1;
-		}
 	}
 	return true;
 }
 
 bool Cmd_StopSoundFile_Execute(COMMAND_ARGS) {
-	arResult = 0;
-	CdeclCall<void>(0x8304A0);
+	CdeclCall(0x8304A0);
 	arResult = 1;
 	return true;
 }
 bool Cmd_PlaySoundFile_Execute(COMMAND_ARGS) {
-	char path[MAX_PATH] = {};
 	arResult = 0;
-	uint32_t forcePlay = 0;
-	uint32_t shouldLoop = 0;
-	uint32_t playInMainMenu = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &forcePlay, &shouldLoop, &playInMainMenu) && path[0]) {
-		int type = playInMainMenu > 0 ? 8 : 6;
-		CdeclCall<void>(0x8300C0, type, path, 1000, shouldLoop, forcePlay, 0.0, 0);
+	char cPath[MAX_PATH] = {};
+	BOOL bForcePlay = 0;
+	BOOL bLoop = 0;
+	BOOL bPlayInMainMenu = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &bForcePlay, &bLoop, &bPlayInMainMenu) && cPath[0]) {
+		int eType = bPlayInMainMenu > 0 ? 8 : 6;
+		CdeclCall(0x8300C0, eType, cPath, 1000, bLoop, bForcePlay, 0.f, 0);
 		arResult = 1;
 	}
 	return true;
 }
-void resolveTexturePath(char* path, uint32_t bufferSize) {
-	if (StrBeginsCI(path, "data\\")) {
-		strcpy_s(path, bufferSize, path + 5);
 
-	}
-	if (StrBeginsCI(path, "textures\\") == 0) {
-		char fixPath[MAX_PATH];
-		strcpy_s(fixPath, path);
-		sprintf_s(path, bufferSize, "textures\\%s", fixPath);
-	}
+bool __cdecl StandardizeTexturePath(const char* apInPath, char* apOutPath, uint32_t auiBufferSize) {
+	return CdeclCall<bool>(0xAF4200, apInPath, apOutPath, auiBufferSize);
+}
+
+template <uint32_t N>
+inline bool StandardizeTexturePath(const char* apInPath, char(&arOutPath)[N]) noexcept {
+	return StandardizeTexturePath(apInPath, arOutPath, N);
 }
 
 bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
-		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
-		if (file != nullptr) {
-			DWORD mipMapCount = 0;
-			file->Seek(0x1C, 1);
-			file->DoRead(&mipMapCount, sizeof(mipMapCount));
-			arResult = mipMapCount;
-			if (IsConsoleMode()) Console_Print("GetTextureMipMapCount >> %.f", arResult);
-			file->Destructor(true);
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
+		char cTexturePath[MAX_PATH];
+		StandardizeTexturePath(cPath, cTexturePath);
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cTexturePath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		if (pFile) {
+			uint32_t uiMipCount = 0;
+			pFile->Seek(0x1C, SEEK_CUR);
+			pFile->Read(&uiMipCount, sizeof(uiMipCount));
+			delete pFile;
+
+			arResult = uiMipCount;
+
+			if (IsConsoleMode())
+				Console_Print("GetTextureMipMapCount >> %.f", arResult);
 		}
 	}
 	return true;
 }
 bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
-		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
-		if (file != nullptr) {
-			char format = 0;
-			file->Seek(0x57, 1);
-			file->DoRead(&format, 1);
-			arResult = format - '0';
-			if (IsConsoleMode()) Console_Print("GetTextureFormat >> %.f", arResult);
-			file->Destructor(true);
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
+		char cTexturePath[MAX_PATH];
+		StandardizeTexturePath(cPath, cTexturePath);
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cTexturePath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		if (pFile) {
+			char cFormat = 0;
+			pFile->Seek(0x57, SEEK_CUR);
+			pFile->Read(&cFormat, sizeof(cFormat));
+			delete pFile;
+
+			arResult = cFormat - '0';
+
+			if (IsConsoleMode())
+				Console_Print("GetTextureFormat >> %.f", arResult);
 		}
 	}
 	return true;
 }
 bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	char path[MAX_PATH] = {};
-	//char fixPath[MAX_PATH];
-	uint32_t useDataTextures = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures) && path[0]) {
-		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
-		if (file != nullptr) {
-			DWORD width = 0;
-			file->Seek(0x10, 1);
-			file->DoRead(&width, sizeof(width));
-			arResult = width;
-			if (IsConsoleMode()) Console_Print("GetTextureWidth >> %.f", arResult);
-			file->Destructor(true);
+	char cPath[MAX_PATH] = {};
+	uint32_t useDataTextures;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &useDataTextures) && cPath[0]) {
+		char cTexturePath[MAX_PATH];
+		StandardizeTexturePath(cPath, cTexturePath);
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cTexturePath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		if (pFile) {
+			uint32_t uiWidth = 0;
+			pFile->Seek(0x10, SEEK_CUR);
+			pFile->Read(&uiWidth, sizeof(uiWidth));
+			delete pFile;
+
+			arResult = uiWidth;
+
+			if (IsConsoleMode()) 
+				Console_Print("GetTextureWidth >> %.f", arResult);
 		}
 	}
 	return true;
@@ -104,110 +112,124 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
-		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
-		if (file != nullptr) {
-			DWORD height = 0;
-			file->Seek(0x0C, 1);
-			file->DoRead(&height, sizeof(height));
-			arResult = height;
-			if (IsConsoleMode()) Console_Print("GetTextureHeight >> %.f", arResult);
-			file->Destructor(true);
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
+		char cTexturePath[MAX_PATH];
+		StandardizeTexturePath(cPath, cTexturePath);
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cTexturePath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		if (pFile) {
+			DWORD uiHeight = 0;
+			pFile->Seek(0xC, SEEK_CUR);
+			pFile->Read(&uiHeight, sizeof(uiHeight));
+			delete pFile;
+
+			arResult = uiHeight;
+
+			if (IsConsoleMode()) 
+				Console_Print("GetTextureHeight >> %.f", arResult);
 		}
 	}
 	return true;
 }
 
 bool Cmd_MD5File_Execute(COMMAND_ARGS) {
-	char filename[MAX_PATH];
-	GetModuleFileNameA(NULL, filename, MAX_PATH);
-	char path[MAX_PATH] = {};
-	char outHash[0x21] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
-		if (strstr(path, "..\\")) return true;
-		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
-		uint32_t length = MAX_PATH - (lastSlash - filename);
-		strcpy_s(lastSlash, length, path);
-		GetMD5File(filename, outHash);
+	char cPath[MAX_PATH] = {};
+	char cHash[0x21] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
+		if (strstr(cPath, "..\\")) 
+			return true;
+
+		char cFileName[MAX_PATH];
+		GetModuleFileNameA(NULL, cFileName, MAX_PATH);
+
+		char* pLastSlash = strrchr(cFileName, '\\') + 1;
+		uint32_t uiLength = MAX_PATH - (pLastSlash - cFileName);
+		strcpy_s(pLastSlash, uiLength, cPath);
+		GetMD5File(cFileName, cHash);
+
 		if (IsConsoleMode())
-			Console_Print(outHash);
-		g_strInterface->Assign(PASS_COMMAND_ARGS, outHash);
+			Console_Print(cHash);
+
+		g_strInterface->Assign(PASS_COMMAND_ARGS, cHash);
 	}
 	return true;
 }
 
-bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
-	char filename[MAX_PATH];
-	GetModuleFileNameA(NULL, filename, MAX_PATH);
-	char path[MAX_PATH] = {};
-	char outHash[0x29] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
-		if (strstr(path, "..\\")) return true;
-		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
-		uint32_t length = MAX_PATH - (lastSlash - filename);
-		strcpy_s(lastSlash, length, path);
-		GetSHA1File(filename, outHash);
+bool Cmd_SHA1File_Execute(COMMAND_ARGS) {;
+	char cPath[MAX_PATH] = {};
+	char cHash[0x29] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
+		if (strstr(cPath, "..\\")) 
+			return true;
+
+		char cFileName[MAX_PATH];
+		GetModuleFileNameA(NULL, cFileName, MAX_PATH);
+
+		char* pLastSlash = strrchr(cFileName, '\\') + 1;
+		uint32_t uiLength = MAX_PATH - (pLastSlash - cFileName);
+		strcpy_s(pLastSlash, uiLength, cPath);
+		GetSHA1File(cFileName, cHash);
+
 		if (IsConsoleMode())
-			Console_Print(outHash);
-		g_strInterface->Assign(PASS_COMMAND_ARGS, outHash);
+			Console_Print(cHash);
+
+		g_strInterface->Assign(PASS_COMMAND_ARGS, cHash);
 	}
 	return true;
 }
 
 bool Cmd_GetPixelFromBMP_Execute(COMMAND_ARGS) {
-	char filename[MAX_PATH];
-	GetModuleFileNameA(NULL, filename, MAX_PATH);
-	char path[MAX_PATH] = {};
-	char RED[64], GREEN[64], BLUE[64];
-	uint32_t width = 0, height = 0;
+	char cPath[MAX_PATH] = {};
+	char cRed[64], cGreen[64], cBlue[64];
+	uint32_t uiWidth = 0, uiHeight = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &cRed, &cGreen, &cBlue, &uiWidth, &uiHeight) && cPath[0]) {
+		char cFileName[MAX_PATH];
+		GetModuleFileNameA(NULL, cFileName, MAX_PATH);
 
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &RED, &GREEN, &BLUE, &width, &height) && path[0]) {
-		char* lastSlash = (char*)(strrchr(filename, '\\') + 1);
-		uint32_t length = MAX_PATH - (lastSlash - filename);
-		strcpy_s(lastSlash, length, path);
-		DWORD R = 0, G = 0, B = 0;
-		if (ReadBMP24(filename, R, G, B, width, height)) {
-			setVarByName(PASS_VARARGS, RED, R);
-			setVarByName(PASS_VARARGS, GREEN, G);
-			setVarByName(PASS_VARARGS, BLUE, B);
+		char* pLastSlash = (char*)(strrchr(cFileName, '\\') + 1);
+		uint32_t uiLength = MAX_PATH - (pLastSlash - cFileName);
+		strcpy_s(pLastSlash, uiLength, cPath);
+
+		DWORD uiRed = 0, uiGreen = 0, uiBlue = 0;
+		if (ReadBMP24(cFileName, uiRed, uiGreen, uiBlue, uiWidth, uiHeight)) {
+			setVarByName(PASS_VARARGS, cRed, uiRed);
+			setVarByName(PASS_VARARGS, cGreen, uiGreen);
+			setVarByName(PASS_VARARGS, cBlue, uiBlue);
 		}
 	}
 	return true;
 }
 
 bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
-	char path[MAX_PATH] = {};
-	int voiceFlag = 0;
-	int systemFlag = 0;
-	int loopFlag = 0;
-	int bDontCacheFlag = 0;
-	float fadeInTime = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &systemFlag, &loopFlag, &bDontCacheFlag) && path[0]) {
-		bool bVoiceFlag = (voiceFlag > 0);
-		bool bSystemFlag = (systemFlag > 0);
-		bool bLoopFlag = (loopFlag > 0);
-		uint32_t audioFlags = BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100;
-		if (bVoiceFlag) {
-			audioFlags |= BSAudioManager::kAudioFlags_IsVoice;
-		}
-		if (bSystemFlag) {
-			audioFlags |= BSAudioManager::kAudioFlags_SystemSound;
-		}
-		if (bLoopFlag) {
-			audioFlags |= BSAudioManager::kAudioFlags_Loop;
-		}
-		if (bDontCacheFlag) {
-			audioFlags |= BSAudioManager::kAudioFlags_DontCache;
-		}
-		BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(path, BSAudioManager::AudioFlags(audioFlags), nullptr);
-		if (fadeInTime <= 0) {
-			handle.Play(false);
+	char cPath[MAX_PATH] = {};
+	BOOL bVoice = FALSE;
+	BOOL bSystemSound = FALSE;
+	BOOL bLoop = FALSE;
+	BOOL bDontCache = FALSE;
+	float fFadeInTime = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &fFadeInTime, &bVoice, &bSystemSound, &bLoop, &bDontCache) && cPath[0]) {
+		const bool bVoiceFlag = (bVoice > 0);
+		const bool bSystemFlag = (bSystemSound > 0);
+		const bool bLoopFlag = (bLoop > 0);
+		uint32_t uiSoundFlags = BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100;
+		if (bVoiceFlag)
+			uiSoundFlags |= BSAudioManager::kAudioFlags_IsVoice;
+
+		if (bSystemFlag)
+			uiSoundFlags |= BSAudioManager::kAudioFlags_SystemSound;
+
+		if (bLoopFlag)
+			uiSoundFlags |= BSAudioManager::kAudioFlags_Loop;
+
+		if (bDontCache)
+			uiSoundFlags |= BSAudioManager::kAudioFlags_DontCache;
+
+		BSSoundHandle kHandle = BSAudio::GetSingleton()->GetSoundHandleByFilePath(cPath, BSAudioManager::AudioFlags(uiSoundFlags), nullptr);
+		if (fFadeInTime <= 0.f) {
+			kHandle.Play(false);
 		}
 		else {
-			int time = fadeInTime * 1000.0;
-			handle.FadeInPlay(time);
+			kHandle.FadeInPlay(fFadeInTime * 1000);
 		}
 		arResult = 1;
 	}
@@ -215,38 +237,37 @@ bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
-	char path[MAX_PATH] = {};
-	int voiceFlag = 0;
-	int loopFlag = 0;
-	int bDontCacheFlag = 0;
-	float fadeInTime = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &loopFlag, &bDontCacheFlag) && path[0]) {
-		TESObjectREFR* ref = apRef;
-		if (ref == nullptr) {
-			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
-		}
-		if (ref->Get3DSimple()) {
-			bool bVoiceFlag = (voiceFlag > 0);
-			bool bLoopFlag = (loopFlag > 0);
-			uint32_t audioFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
-			if (bVoiceFlag) {
-				audioFlags |= BSAudioManager::kAudioFlags_IsVoice;
-			}
-			if (bLoopFlag) {
-				audioFlags |= BSAudioManager::kAudioFlags_Loop;
-			}
-			if (bDontCacheFlag) {
-				audioFlags |= BSAudioManager::kAudioFlags_DontCache;
-			}
-			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(path, BSAudioManager::AudioFlags(audioFlags), nullptr);
-			handle.SetPosition(ref->GetPosition());
-			handle.SetObjectToFollow(ref->Get3DSimple());
-			if (fadeInTime <= 0) {
-				handle.Play(false);
+	char cPath[MAX_PATH] = {};
+	BOOL bVoice = FALSE;
+	BOOL bLoop = FALSE;
+	BOOL bDontCache = FALSE;
+	float fFadeInTime = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &fFadeInTime, &bVoice, &bLoop, &bDontCache) && cPath[0]) {
+		TESObjectREFR* pRef = apRef;
+		if (!pRef)
+			pRef = PlayerCharacter::GetSingleton();
+
+		if (pRef->Get3DVerySimple()) {
+			const bool bVoiceFlag = (bVoice > 0);
+			const bool bLoopFlag = (bLoop > 0);
+			uint32_t uiSoundFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
+			if (bVoiceFlag)
+				uiSoundFlags |= BSAudioManager::kAudioFlags_IsVoice;
+
+			if (bLoopFlag)
+				uiSoundFlags |= BSAudioManager::kAudioFlags_Loop;
+
+			if (bDontCache)
+				uiSoundFlags |= BSAudioManager::kAudioFlags_DontCache;
+
+			BSSoundHandle kHandle = BSAudio::GetSingleton()->GetSoundHandleByFilePath(cPath, BSAudioManager::AudioFlags(uiSoundFlags), nullptr);
+			kHandle.SetPosition(pRef->GetPosition());
+			kHandle.SetObjectToFollow(pRef->Get3DVerySimple());
+			if (fFadeInTime <= 0) {
+				kHandle.Play(false);
 			}
 			else {
-				int time = fadeInTime * 1000.0;
-				handle.FadeInPlay(time);
+				kHandle.FadeInPlay(fFadeInTime * 1000);
 			}
 			arResult = 1;
 		}
@@ -255,25 +276,25 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_StopSoundFromPath_Execute(COMMAND_ARGS) {
-	char path[MAX_PATH] = {};
-	float fadeOutTime = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeOutTime) && path[0]) {
-		CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
+	char cPath[MAX_PATH] = {};
+	float fFadeOutTime = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &fFadeOutTime) && cPath[0]) {
+		CSLock kLock(BSAudioManager::Get()->kMessageProcessingCS);
 		BSGameSound* pSound;
 		uint32_t uiKey;
 		auto kIter = BSAudioManager::Get()->playingSounds.GetFirstPos();
 		while (kIter) {
 			BSAudioManager::Get()->playingSounds.GetNext(kIter, uiKey, pSound);
-			if (pSound && _stricmp(pSound->filePath, path) == 0) {
-				BSSoundHandle handle;
-				handle.uiSoundID = pSound->mapKey;
+			if (pSound && _stricmp(pSound->cFilePath, cPath) == 0) {
+				BSSoundHandle kHandle;
+				kHandle.uiSoundID = pSound->mapKey;
 
-				if (fadeOutTime <= 0) {
-					handle.Stop();
+				if (fFadeOutTime <= 0) {
+					kHandle.Stop();
 				}
 				else {
-					int time = fadeOutTime * 1000.0;
-					handle.FadeOutAndRelease(time);
+					int time = fFadeOutTime * 1000.0;
+					kHandle.FadeOutAndRelease(time);
 				}
 				arResult = 1;
 			}
@@ -296,7 +317,7 @@ bool Cmd_StopSound3DFromPath_Execute(COMMAND_ARGS) {
 		auto kIter = BSAudioManager::Get()->playingSounds.GetFirstPos();
 		while (kIter) {
 			BSAudioManager::Get()->playingSounds.GetNext(kIter, uiKey, pSound);
-			if (pSound && _stricmp(pSound->filePath, path) == 0) {
+			if (pSound && _stricmp(pSound->cFilePath, path) == 0) {
 				NiPointer<NiAVObject> spObj;
 				if (!BSAudioManager::Get()->soundPlayingObjects.GetAt(pSound->mapKey, spObj) || !spObj->IsFadeNode())
 					continue;
@@ -330,7 +351,7 @@ bool Cmd_IsSoundPlayingFromPath_Execute(COMMAND_ARGS) {
 		if (ref == nullptr) {
 			while (kIter) {
 				BSAudioManager::Get()->playingSounds.GetNext(kIter, uiKey, pSound);
-				if (pSound && _stricmp(pSound->filePath, path) == 0) {
+				if (pSound && _stricmp(pSound->cFilePath, path) == 0) {
 					arResult = 1;
 					return true;
 				}
@@ -348,7 +369,7 @@ bool Cmd_IsSoundPlayingFromPath_Execute(COMMAND_ARGS) {
 				if (fadeNode->pLinkedObj != ref)
 					continue;
 
-				if (BSAudioManager::Get()->playingSounds.GetAt(uiKey, pSound) && pSound && _stricmp(pSound->filePath, path) == 0) {
+				if (BSAudioManager::Get()->playingSounds.GetAt(uiKey, pSound) && pSound && _stricmp(pSound->cFilePath, path) == 0) {
 					arResult = 1;
 					return true;
 				}
@@ -357,3 +378,4 @@ bool Cmd_IsSoundPlayingFromPath_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+#endif

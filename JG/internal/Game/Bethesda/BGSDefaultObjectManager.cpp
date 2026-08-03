@@ -13,9 +13,9 @@ BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton() {
 // GAME - 0x58DB10
 // GECK - 0x5A9E10
 TESForm* BGSDefaultObjectManager::GetItem(DefaultObjects aeObject) {
-	BGSDefaultObjectManager* pMgr = GetSingleton();
-	if (pMgr->GetInitialized())
-		return pMgr->pForms[aeObject];
-
-	return nullptr;
+#ifdef GAME
+	return CdeclCall<TESForm*>(0x58DB10, aeObject);
+#else
+	return CdeclCall<TESForm*>(0x5A9E10, aeObject);
+#endif
 }

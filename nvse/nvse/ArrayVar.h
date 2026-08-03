@@ -13,6 +13,7 @@ struct ScriptToken;
 #include "VarMap.h"
 #include "Serialization.h"
 #include "GameAPI.h"
+#include <vector>
 #include <map>
 
 // NVSE array datatype, represented by std::map<ArrayKey, ArrayElement>

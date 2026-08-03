@@ -28,15 +28,14 @@ ExpressionEvaluatorUtils s_expEvalUtils;
 
 namespace JohnnyCommands {
 
-	void InitCommandData() {
+	void InitCommandData(const NVSEInterface* apNVSE) {
+		apNVSE->InitExpressionEvaluatorUtils(&s_expEvalUtils);
 		AnimActivationHeight::Init();
 	}
 
 	void Init(const NVSEInterface* apNVSE) {
-		if (apNVSE->isEditor == 0) {
-			InitCommandData();
-			apNVSE->InitExpressionEvaluatorUtils(&s_expEvalUtils);
-		}
+		if (apNVSE->isEditor == FALSE)
+			InitCommandData(apNVSE);
 
 		apNVSE->SetOpcodeBase(JohnnyPluginData::JG_OPCODE_BASE);
 

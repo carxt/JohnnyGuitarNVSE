@@ -2,7 +2,6 @@
 #include "GameAPI.h"
 #include "GameRTTI.h"
 #include "GameObjects.h"
-#include "GameData.h"
 
 TESForm* __fastcall GetTESForm(const TESForm* apForm) {
 	if (!apForm) 
@@ -216,31 +215,6 @@ uint8_t TESPackage::ObjectCodeForString(const char* objString) {
 
 	return kObjectType_Max;
 }
-
-#if 1
-static const char** s_procNames = (const char**)0x011A3CC0;
-#elif EDITOR
-#else
-#error unsupported Fallout version
-#endif
-
-#if 0
-uint32_t EffectItemList::CountItems() const {
-	return list.Count();
-}
-
-EffectItem* EffectItemList::ItemAt(uint32_t whichItem) {
-	return list.GetNthItem(whichItem);
-}
-
-const char* EffectItemList::GetNthEIName(uint32_t whichEffect) const {
-	EffectItem* effItem = list.GetNthItem(whichEffect);
-	if (effItem->setting)
-		return GetFullName(effItem->setting);
-	else
-		return "<no name>";
-}
-#endif
 
 // GAME - 0x541AC0
 void TESObjectCELL::CellRefLockEnter() {

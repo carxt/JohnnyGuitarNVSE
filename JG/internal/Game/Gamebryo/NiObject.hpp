@@ -27,7 +27,7 @@ class NiBound;
 
 NiSmartPointer(NiObject);
 
-#define CREATE_OBJECT(CLASS, ADDRESS) static CLASS* CreateObject() { return CdeclCall<CLASS*>(ADDRESS); };
+#define CREATE_OBJECT(CLASS, ADDRESS) [[nodiscard]] static CLASS* CreateObject() { return CdeclCall<CLASS*>(ADDRESS); };
 
 class NiObject : public NiRefObject {
 public:
