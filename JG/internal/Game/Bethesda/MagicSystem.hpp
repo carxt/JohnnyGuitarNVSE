@@ -15,6 +15,7 @@ public:
 			WORTCRAFT,
 			LEVELLED,
 			ADDICTION,
+			COUNT,
 		};
 	};
 	using SpellType = _SpellType::Type;
@@ -25,6 +26,7 @@ public:
 			TOUCH,
 			TARGET,
 			ANY,
+			COUNT,
 		};
 	};
 	using Range = _Range::Range;
@@ -37,7 +39,19 @@ public:
 			ILLUSION,
 			MYSTICISM,
 			RESTORATION,
+			COUNT,
 		};
 	};
 	using School = _School::School;
+
+	struct _CastingType {
+		enum Type : uint32_t {
+			CAST_ONCE			= 0,
+			WHEN_USED			= 1,
+			WHEN_STRIKES		= 2,
+			CONSTANT_EFFECT		= 3,
+			COUNT,
+		};
+	};
+	using CastingType = _CastingType::Type;
 };

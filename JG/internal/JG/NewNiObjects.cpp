@@ -1,4 +1,7 @@
 #include "NewNiObjects.hpp"
+#include "Gamebryo/NiLightDimmerController.hpp"
+#include "Gamebryo/NiStream.hpp"
+#include "Gamebryo/NiLight.hpp"
 
 namespace NewNiObjects {
 

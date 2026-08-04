@@ -1061,8 +1061,8 @@ bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	BGSTalkingActivator* pActivator = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pActivator) && pActivator && IS_TYPE(pActivator, BGSTalkingActivator)) {
-		if (pActivator->talkingActor)
-			ScriptUtils::SetFormIDResult(arResult, pActivator->talkingActor->GetFormID());
+		if (pActivator->GetTempRef())
+			ScriptUtils::SetFormIDResult(arResult, pActivator->GetTempRef()->GetFormID());
 
 		if (IsConsoleMode()) 
 			Console_Print("GetTalkingActivatorActor >> 0x%X", arResult);
@@ -1322,7 +1322,10 @@ bool Cmd_SetExplosionSound_Execute(COMMAND_ARGS) {
 	TESSound* pSound = nullptr;
 	uint32_t uiSoundType = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pExplosion, &uiSoundType, &pSound) && pExplosion && IS_TYPE(pExplosion, BGSExplosion) && pSound && IS_TYPE(pSound, TESSound) && uiSoundType <= 2) {
-		uiSoundType == 1 ? (pExplosion->sound1 = pSound) : (pExplosion->sound2 = pSound);
+		if (uiSoundType == 1)
+			pExplosion->SetSound1(pSound);
+		else
+			pExplosion->SetSound2(pSound);
 		arResult = 1;
 	}
 	return true;
@@ -1350,13 +1353,13 @@ bool Cmd_SetContainerSound_Execute(COMMAND_ARGS) {
 		arResult = 1;
 		switch (iSoundType) {
 		case 0:
-			pContainer->openSound = pSound;
+			pContainer->SetOpenSound(pSound);
 			break;
 		case 1:
-			pContainer->closeSound = pSound;
+			pContainer->SetCloseSound(pSound);
 			break;
 		case 2:
-			pContainer->randomLoopingSound = pSound;
+			pContainer->SetLoopSound(pSound);
 			break;
 		default:
 			arResult = 0;
@@ -1373,16 +1376,16 @@ bool Cmd_GetContainerSound_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pContainer, &iSoundType) && pContainer && IS_TYPE(pContainer, TESObjectCONT)) {
 		switch (iSoundType) {
 		case 0:
-			if (pContainer->openSound) 
-				ScriptUtils::SetFormIDResult(arResult, pContainer->openSound->GetFormID());
+			if (pContainer->GetOpenSound()) 
+				ScriptUtils::SetFormIDResult(arResult, pContainer->GetOpenSound()->GetFormID());
 			break;
 		case 1:
-			if (pContainer->closeSound) 
-				ScriptUtils::SetFormIDResult(arResult, pContainer->closeSound->GetFormID());
+			if (pContainer->GetCloseSound()) 
+				ScriptUtils::SetFormIDResult(arResult, pContainer->GetCloseSound()->GetFormID());
 			break;
 		case 2:
-			if (pContainer->randomLoopingSound) 
-				ScriptUtils::SetFormIDResult(arResult, pContainer->randomLoopingSound->GetFormID());
+			if (pContainer->GetLoopSound()) 
+				ScriptUtils::SetFormIDResult(arResult, pContainer->GetLoopSound()->GetFormID());
 			break;
 		}
 	}
@@ -1710,7 +1713,7 @@ bool Cmd_GetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 bool Cmd_GetIMODAnimatable_Execute(COMMAND_ARGS) {
 	TESImageSpaceModifier* pModifier = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pModifier) && pModifier && IS_TYPE(pModifier, TESImageSpaceModifier)) {
-		arResult = pModifier->animable;
+		arResult = pModifier->kData.bAnimatable;
 		if (IsConsoleMode())
 			Console_Print("GetIMODAnimatable >> %.f", arResult);
 	}
@@ -1719,12 +1722,10 @@ bool Cmd_GetIMODAnimatable_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetIMODAnimatable_Execute(COMMAND_ARGS) {
 	TESImageSpaceModifier* pModifier = nullptr;
-	BOOL bVal = 0;
+	BOOL bVal = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pModifier, &bVal) && pModifier && IS_TYPE(pModifier, TESImageSpaceModifier) && (bVal == 0 || bVal == 1)) {
-		pModifier->animable = bVal;
+		pModifier->kData.bAnimatable = bVal;
 		arResult = 1;
-		if (IsConsoleMode())
-			Console_Print("SetIMODAnimatable >> %d", pModifier->animable);
 	}
 	return true;
 }

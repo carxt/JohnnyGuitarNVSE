@@ -22,6 +22,7 @@
 #include "Bethesda/BGSEncounterZone.hpp"
 #include "Bethesda/BGSEntryPointPerkEntry.hpp"
 #include "Bethesda/BGSEquipType.hpp"
+#include "Bethesda/BGSExplosion.hpp"
 #include "Bethesda/BGSHeadPart.hpp"
 #include "Bethesda/BGSIdleMarker.hpp"
 #include "Bethesda/BGSImpactData.hpp"
@@ -43,14 +44,17 @@
 #include "Bethesda/BGSRadiationStage.hpp"
 #include "Bethesda/BGSRagdoll.hpp"
 #include "Bethesda/BGSRepairItemList.hpp"
+#include "Bethesda/BGSTalkingActivator.hpp"
 #include "Bethesda/BGSTextureModel.hpp"
 #include "Bethesda/BGSTextureSet.hpp"
 #include "Bethesda/BGSTouchSpellForm.hpp"
 #include "Bethesda/BipedAnim.hpp"
 #include "Bethesda/CachedValuesOwner.hpp"
 #include "Bethesda/EffectSetting.hpp"
+#include "Bethesda/EnchantmentItem.hpp"
 #include "Bethesda/ExtraDataList.hpp"
 #include "Bethesda/MagicItemForm.hpp"
+#include "Bethesda/SpellItem.hpp"
 #include "Bethesda/TESActorBase.hpp"
 #include "Bethesda/TESActorBaseData.hpp"
 #include "Bethesda/TESAIForm.hpp"
@@ -78,7 +82,9 @@
 #include "Bethesda/TESHealthForm.hpp"
 #include "Bethesda/TESIcon.hpp"
 #include "Bethesda/TESIdleForm.hpp"
+#include "Bethesda/TESImageSpace.hpp"
 #include "Bethesda/TESImageSpaceModifiableForm.hpp"
+#include "Bethesda/TESImageSpaceModifier.hpp"
 #include "Bethesda/TESKey.hpp"
 #include "Bethesda/TESLandTexture.hpp"
 #include "Bethesda/TESLevCharacter.hpp"
@@ -97,6 +103,8 @@
 #include "Bethesda/TESObjectARMO.hpp"
 #include "Bethesda/TESObjectBOOK.hpp"
 #include "Bethesda/TESObjectCLOT.hpp"
+#include "Bethesda/TESObjectCONT.hpp"
+#include "Bethesda/TESObjectDOOR.hpp"
 #include "Bethesda/TESObjectLAND.hpp"
 #include "Bethesda/TESObjectMISC.hpp"
 #include "Bethesda/TESObjectSTAT.hpp"
@@ -107,6 +115,7 @@
 #include "Bethesda/TESReactionForm.hpp"
 #include "Bethesda/TESScriptableForm.hpp"
 #include "Bethesda/TESSkill.hpp"
+#include "Bethesda/TESSound.hpp"
 #include "Bethesda/TESTexture1024.hpp"
 #include "Bethesda/TESTopicInfo.hpp"
 #include "Bethesda/TESValueForm.hpp"
@@ -507,116 +516,6 @@ public:
 	}
 };
 
-// 68
-class TESSound : public TESBoundAnimObject {
-public:
-	TESSound();
-	~TESSound();
-
-	enum {
-		kFlag_RandomFrequencyShift = 1,
-		kFlag_PlayAtRandom = 2,
-		kFlag_EnvironmentIgnored = 4,
-		kFlag_RandomLocation = 8,
-		kFlag_Loop = 16,
-		kFlag_MenuSound = 32,
-		kFlag_2D = 64,
-		kFlag_360LFE = 128,
-		kFlag_DialogueSound = 256,
-		kFlag_EnvelopeFast = 512,
-		kFlag_EnvelopeSlow = 1024,
-		kFlag_2DRadius = 2048,
-		kFlag_MuteWhenSubmerged = 4096,
-		kFlag_StartAtRandomPosition = 8192,
-	};
-
-	TESSoundFile	soundFile;				// 30
-
-	uint32_t			unk3C;					// 3C
-	uint16_t			unk40;					// 40
-	uint16_t			unk42;					// 42
-	uint8_t			minAttenuationDist;		// 44
-	uint8_t			maxAttenuationDist;		// 45
-	int16_t			frequencyAdj;			// 46
-	uint32_t			soundFlags;				// 48
-	uint16_t			staticAttenuation;		// 4C
-	uint8_t			endsAt;					// 4E
-	uint8_t			startsAt;				// 4F
-	uint16_t			attenuationCurve[5];	// 50
-	uint16_t			reverbAttenuation;		// 5A
-	uint32_t			priority;				// 5C
-	uint32_t			unk60;					// 60
-	uint32_t			unk64;					// 64
-
-	void SetFlag(uint32_t pFlag, bool bEnable) {
-		if (bEnable) soundFlags |= pFlag;
-		else soundFlags &= ~pFlag;
-	}
-};
-static_assert(sizeof(TESSound) == 0x68);
-
-// 44
-class EnchantmentItem : public MagicItemForm {
-public:
-	EnchantmentItem();
-	~EnchantmentItem();
-
-	virtual void	ByteSwap(void);
-
-	enum {
-		kType_Weapon = 2,
-		kType_Apparel,
-	};
-
-	uint32_t		type;		// 34
-	uint32_t		unk38;		// 38
-	uint32_t		unk3C;		// 3C
-	uint8_t		enchFlags;	// 40
-	uint8_t		pad41[3];	// 41
-};
-
-static_assert(sizeof(EnchantmentItem) == 0x44);
-
-// 44
-class SpellItem : public MagicItemForm {
-public:
-	SpellItem();
-	~SpellItem();
-
-	virtual void	ByteSwap(void);
-
-	enum {
-		kType_ActorEffect = 0,
-		kType_Disease,
-		kType_Power,
-		kType_LesserPower,
-		kType_Ability,
-		kType_Poison,
-		kType_Addiction = 10,
-	};
-
-	uint32_t		type;		// 34
-	uint32_t		unk38;		// 38
-	uint32_t		unk3C;		// 3C
-	uint8_t		spellFlags;	// 40
-	uint8_t		pad41[3];	// 41
-};
-
-static_assert(sizeof(SpellItem) == 0x44);
-
-class BGSTalkingActivator;
-
-// 98
-class BGSTalkingActivator : public TESObjectACTI {
-public:
-	BGSTalkingActivator();
-	~BGSTalkingActivator();
-
-	Actor* talkingActor;		// 90
-	BGSVoiceType* voiceType;	// 94
-};
-static_assert(sizeof(BGSTalkingActivator) == 0x98);
-
 // BGSTerminal (9C)
 class BGSTerminal : public TESObjectACTI {
 public:
@@ -657,68 +556,6 @@ public:
 	BGSNote*			password;		// 0A0	PNAM
 	TermData			data;			// 0A4	DNAM
 };
-
-// 9C
-class TESObjectCONT : public TESBoundAnimObject {
-public:
-	TESObjectCONT();
-	~TESObjectCONT();
-
-	TESContainer                container;				// 30
-	TESFullName					name;					// 3C
-	TESModelTextureSwap			model;					// 48
-	TESScriptableForm			scriptForm;				// 68
-	TESWeightForm				weightForm;				// 74
-	BGSDestructibleObjectForm	destructForm;			// 7C
-	BGSOpenCloseForm			openCloseForm;			// 84
-
-	uint32_t						unk88;					// 88
-	TESSound* openSound;				// 8C
-	TESSound* closeSound;			// 90
-	TESSound* randomLoopingSound;	// 94
-	uint8_t						flags;					// 98
-	uint8_t						pad99[3];				// 99
-};
-
-// 90
-class TESObjectDOOR : public TESBoundAnimObject {
-public:
-	TESObjectDOOR();
-	~TESObjectDOOR();
-
-	TESFullName					name;					// 30
-	TESModelTextureSwap			model;					// 3C
-	TESScriptableForm			scriptForm;				// 5C
-	BGSDestructibleObjectForm	destructForm;			// 68
-	BGSOpenCloseForm			openCloseForm;			// 70
-
-	uint32_t						unk74;					// 74
-	TESSound* openSound;				// 78
-	TESSound* closeSound;			// 7C
-	TESSound* randomLoopingSound;	// 80
-	uint32_t						unk84;					// 84
-	tList<void>					list88;					// 88
-};
-
-// IngredientItem (A4)
-class IngredientItem;
-
-class NiPointLight;
-
-// BGSStaticCollection (50)
-class BGSStaticCollection;
-
-// BGSMovableStatic (6C)
-class BGSMovableStatic;
-
-// TESObjectTREE (94)
-class TESObjectTREE;
-
-// TESFlora (90)
-class TESFlora;
-
-// TESFurniture (88)
-class TESFurniture;
 
 // 388
 class TESObjectWEAP : public TESBoundObject {
@@ -1502,9 +1339,6 @@ struct VariableInfo {
 	BSString		name;		// 18
 };
 
-// TESIdleForm (54)
-class TESIdleForm;
-
 class TESPatrolPackageData : public TESPackageData {
 public:
 	TESPatrolPackageData();
@@ -2017,176 +1851,6 @@ public:
 
 // TESLevSpell (44)
 class TESLevSpell;
-
-// A8
-class BGSExplosion : public TESBoundObject {
-public:
-	BGSExplosion();
-	~BGSExplosion();
-
-	enum {
-		kFlags_Unknown = 1,
-		kFlags_AlwaysUseWorldOrientation = 2,
-		kFlags_KnockDownAlways = 4,
-		kFlags_KnockDownByFormula = 8,
-		kFlags_IgnoreLOSCheck = 16,
-		kFlags_PushSourceRefOnly = 32,
-		kFlags_IgnoreImageSpaceSwap = 64,
-	};
-
-	TESFullName					fullName;			// 30
-	TESModel					model;				// 3C
-	TESEnchantableForm			enchantable;		// 54
-	BGSPreloadable				preloadable;		// 64
-	TESImageSpaceModifiableForm	imageSpaceModForm;	// 68
-
-	TESForm* placedObj;			// 70
-	float						force;				// 74
-	float						damage;				// 78
-	float						radius;				// 7C
-	TESObjectLIGH* light;				// 80
-	TESSound* sound1;			// 84
-	uint32_t						explFlags;			// 88
-	float						ISradius;			// 8C
-	BGSImpactDataSet* impactDataSet;		// 90
-	TESSound* sound2;			// 94
-	float						RADlevel;			// 98
-	float						dissipationTime;	// 9C
-	float						RADradius;			// A0
-	uint8_t						soundLevel;			// A4	0 - Loud, 1 - Normal, 2 - Silent
-	uint8_t						padA5[3];			// A5
-
-	void SetFlag(uint32_t pFlag, bool bEnable) {
-		if (bEnable) explFlags |= pFlag;
-		else explFlags &= ~pFlag;
-	}
-};
-
-static_assert(sizeof(BGSExplosion) == 0xA8);
-
-// B0
-class TESImageSpace : public TESForm {
-public:
-	TESImageSpace();
-	~TESImageSpace();
-
-	float		traitValues[33];	// 18
-	// 00:	HDR: Eye Adapt Speed
-	// 01:	HDR: Blur Radius
-	// 02:	HDR: Blur Passes
-	// 03:	HDR: Emissive Mult
-	// 04:	HDR: Target LUM
-	// 05:	HDR: Upper LUM Clamp
-	// 06:	HDR: Bright Scale
-	// 07:	HDR: Bright Clamp
-	// 08:	HDR: LUM Ramp No Tex
-	// 09:	HDR: LUM Ramp Min
-	// 10:	HDR: LUM Ramp Max
-	// 11:	HDR: Sunlight Dimmer
-	// 12:	HDR: Grass Dimmer
-	// 13:	HDR: Tree Dimmer
-	// 14:	HDR: Skin Dimmer
-	// 15:	Bloom: Blur Radius
-	// 16:	Bloom: Alpha Mult Interior
-	// 17:	Bloom: Alpha Mult Exterior
-	// 18:	Get Hit: Blur Radius
-	// 19:	Get Hit: Blur Damping Contrast
-	// 20:	Get Hit: Damping Contrast
-	// 21:	Night Eye: Tint: Red
-	// 22:	Night Eye: Tint: Green
-	// 23:	Night Eye: Tint: Blue
-	// 24:	Night Eye: Brightness
-	// 25:	Cinematic: Saturation: Value
-	// 26:	Cinematic: Contrast: Avg Lum Value
-	// 27:	Cinematic: Contrast: Value
-	// 28:	Cinematic: Brightness: Value
-	// 29:	Cinematic: Tint: Red
-	// 30:	Cinematic: Tint: Green
-	// 31:	Cinematic: Tint: Blue
-	// 32:	Cinematic: Tint: Value
-	uint32_t		unk9C[5];			// 9C
-};
-static_assert(sizeof(TESImageSpace) == 0xB0);
-
-// 730
-class TESImageSpaceModifier : public TESForm {
-public:
-	TESImageSpaceModifier();
-	~TESImageSpaceModifier();
-
-	TESSound* outroSound;		// 018
-	TESSound* introSound;		// 01C
-	uint8_t					animable;			// 020
-	uint8_t					pad021[3];			// 021
-	float					duration;			// 024
-	uint32_t					unk028[49];			// 028
-	float					radialBlurCentreX;	// 0EC
-	float					radialBlurCentreY;	// 0F0
-	uint32_t					unk0F4[3];			// 0F4
-	uint8_t					useTarget;			// 100
-	uint8_t					pad101[3];			// 101
-	uint32_t					unk104[4];			// 104
-	NiFloatInterpolator		fltIntrpl1[44];		// 114
-	NiColorInterpolator		clrIntrpl[2];		// 534
-	NiFloatInterpolator		fltIntrpl2[9];		// 57C
-	FloatData* data654[44];		// 654
-	// 00:	HDR: Eye Adapt Speed (Multiply)
-	// 01:	HDR: Eye Adapt Speed (Add)
-	// 02:	HDR: Blur Radius (Multiply)
-	// 03:	HDR: Blur Radius (Add)
-	// 04:	HDR: Skin Dimmer (Multiply)
-	// 05:	HDR: Skin Dimmer (Add)
-	// 06:	HDR: Emissive Mult (Multiply)
-	// 07:	HDR: Emissive Mult (Add)
-	// 08:	HDR: Target LUM (Multiply)
-	// 09:	HDR: Target LUM (Add)
-	// 10:	HDR: Upper LUM Clamp (Multiply)
-	// 11:	HDR: Upper LUM Clamp (Add)
-	// 12:	HDR: Bright Scale (Multiply)
-	// 13:	HDR: Bright Scale (Add)
-	// 14:	HDR: Bright Clamp (Multiply)
-	// 15:	HDR: Bright Clamp (Add)
-	// 16:	HDR: LUM Ramp No Tex (Multiply)
-	// 17:	HDR: LUM Ramp No Tex (Add)
-	// 18:	HDR: LUM Ramp Min (Multiply)
-	// 19:	HDR: LUM Ramp Min (Add)
-	// 20:	HDR: LUM Ramp Max (Multiply)
-	// 21:	HDR: LUM Ramp Max (Add)
-	// 22:	HDR: Sunlight Dimmer (Multiply)
-	// 23:	HDR: Sunlight Dimmer (Add)
-	// 24:	HDR: Grass Dimmer (Multiply)
-	// 25:	HDR: Grass Dimmer (Add)
-	// 26:	HDR: Tree Dimmer (Multiply)
-	// 27:	HDR: Tree Dimmer (Add)
-	// 28:	Bloom: Blur Radius (Multiply)
-	// 29:	Bloom: Blur Radius (Add)
-	// 30:	Bloom: Alpha Mult Interior (Multiply)
-	// 31:	Bloom: Alpha Mult Interior (Add)
-	// 32:	Bloom: Alpha Mult Exterior (Multiply)
-	// 33:	Bloom: Alpha Mult Exterior (Add)
-	// 34:	Cinematic: Saturation (Multiply)
-	// 35:	Cinematic: Saturation (Add)
-	// 36:	Cinematic: Contrast (Multiply)
-	// 37:	Cinematic: Contrast (Add)
-	// 38:	Cinematic: Contrast Avg Lum (Multiply)
-	// 39:	Cinematic: Contrast Avg Lum (Add)
-	// 40:	Cinematic: Brightness (Multiply)
-	// 41:	Cinematic: Brightness (Add)
-	// 42:	Blur: Blur Radius
-	// 43:	Double Vision: Strength
-	ColorData* data704[2];		// 704
-	FloatData* data70C[9];		// 70C
-	// 00:	Radial Blur: Strength
-	// 01:	Radial Blur: Rampup
-	// 02:	Radial Blur: Up Start
-	// 03:	Radial Blur: Rampdown
-	// 04:	Radial Blur: Down Start
-	// 05:	Depth of Field: Strength
-	// 06:	Depth of Field: Distance
-	// 07:	Depth of Field: Range
-	// 08:	Full-Screen Motion Blur: Strength
-};
-static_assert(sizeof(TESImageSpaceModifier) == 0x730);
 
 // BGSCameraPath (38)
 class BGSCameraPath;

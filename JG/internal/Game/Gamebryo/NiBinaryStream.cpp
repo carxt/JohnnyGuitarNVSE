@@ -4,14 +4,14 @@
 // GECK - 0x401210
 uint32_t NiBinaryStream::Read(void* apBuffer, uint32_t auiBytes) {
 	uint32_t uiSize = 1;
-	uint32_t uiBytesRead = BinaryRead(apBuffer, auiBytes, &uiSize, 1);
+	uint32_t uiBytesRead = BinaryRead(apBuffer, auiBytes, &uiSize);
 	return uiBytesRead;
 }
 
 // GAME - 0x473180
 uint32_t NiBinaryStream::Write(const void* apBuffer, uint32_t auiBytes) {
 	uint32_t uiSize = 1;
-	uint32_t uiBytesWritten = BinaryWrite(apBuffer, auiBytes, &uiSize, 1);
+	uint32_t uiBytesWritten = BinaryWrite(apBuffer, auiBytes, &uiSize);
 	return uiBytesWritten;
 }
 

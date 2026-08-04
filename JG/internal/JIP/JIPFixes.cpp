@@ -556,7 +556,7 @@ namespace JIPFixes {
 			TESSound* pSound = nullptr;
 			char cPath[1024];
 			if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSound, &cPath) && pSound)
-				pSound->soundFile.SetSoundFile(cPath);
+				pSound->SetSoundFile(cPath);
 			return true;
 		}
 

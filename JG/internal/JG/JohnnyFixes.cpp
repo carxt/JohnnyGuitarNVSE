@@ -336,7 +336,7 @@ namespace JohnnyFixes {
 		ThisCall(kSetCellImageSpaceDetour, apCell, apImageSpace);
 		const PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
 		if (apImageSpace && pPlayer->GetParentCell() && pPlayer->GetParentCell() == apCell)
-			CdeclCall(0xB4F430, apImageSpace->traitValues);
+			CdeclCall(0xB4F430, &apImageSpace->kData);
 	}
 
 	namespace NoHeadlessTalkingFix {

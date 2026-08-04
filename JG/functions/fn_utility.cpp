@@ -42,12 +42,12 @@ bool Cmd_NullArgs_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetAllGameRadios_Execute(COMMAND_ARGS) {
 	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, apScript);
-	BSSimpleList<TESObjectACTI*>* pRadioStations = reinterpret_cast<BSSimpleList<TESObjectACTI*>*>(0x11C8264);
-	while (pRadioStations && !pRadioStations->IsEmpty()) {
-		TESObjectACTI* pRadio = pRadioStations->GetItem();
+	BSSimpleList<TESObjectREFR*>* pIter = BGSTalkingActivator::kAllRadioStations->GetHead();
+	while (pIter && !pIter->IsEmpty()) {
+		TESObjectREFR* pRadio = pIter->GetItem();
 		if (pRadio)
 			g_arrInterface->AppendElement(pArray, NVSEArrayElement(pRadio));
-		pRadioStations = pRadioStations->GetNext();
+		pIter = pIter->GetNext();
 	}
 	g_arrInterface->AssignCommandResult(pArray, &arResult);
 	return true;
@@ -56,13 +56,13 @@ bool Cmd_GetAllGameRadios_Execute(COMMAND_ARGS) {
 bool Cmd_GetAvailableRadios_Execute(COMMAND_ARGS) {
 	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, apScript);
 
-	BSSimpleList<TESObjectACTI*> kRadios;
-	CdeclCall(0x04FF1A0, apRef, &kRadios, nullptr);
+	BSSimpleList<TESObjectREFR*> kRadios;
+	BGSTalkingActivator::GetRadioStationsInRangeOfRef(apRef, &kRadios, nullptr);
 
 	auto pIter = kRadios.GetHead();
 	while (pIter && !pIter->IsEmpty()) {
-		TESObjectACTI* pRadio = pIter->GetItem();
-		if (pRadio && !CdeclCall<bool>(0x0079BE30, pRadio) && JohnnyRadios::IsAvailable(pRadio->GetFormID()))
+		TESObjectREFR* pRadio = pIter->GetItem();
+		if (pRadio && !CdeclCall<bool>(0x79BE30, pRadio) && JohnnyRadios::IsAvailable(pRadio->GetFormID()))
 			g_arrInterface->AppendElement(pArray, NVSEArrayElement(pRadio));
 		pIter = pIter->GetNext();
 	}

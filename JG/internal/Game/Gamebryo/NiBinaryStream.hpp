@@ -19,8 +19,8 @@ public:
 	uint32_t Read(void* apBuffer, uint32_t auiBytes);
 	uint32_t Write(const void* apBuffer, uint32_t auiBytes);
 
-	uint32_t BinaryRead(void* apBuffer, uint32_t auiTotalBytes, uint32_t* apComponentSizes, uint32_t auiComponentCount);
-	uint32_t BinaryWrite(const void* apBuffer, uint32_t auiTotalBytes, uint32_t* apComponentSizes, uint32_t auiComponentCount);
+	uint32_t BinaryRead(void* apBuffer, uint32_t auiTotalBytes, uint32_t* apComponentSizes, uint32_t auiComponentCount = 1);
+	uint32_t BinaryWrite(const void* apBuffer, uint32_t auiTotalBytes, uint32_t* apComponentSizes, uint32_t auiComponentCount = 1);
 
 	static void DoByteSwap(void* apData, uint32_t auiBytes, uint32_t* apComponentSizes, uint32_t auiComponentCount);
 };
@@ -28,33 +28,49 @@ public:
 ASSERT_SIZE(NiBinaryStream, 0x10);
 
 template <class T>
-void NiBinaryStreamLoad(NiBinaryStream& arStream, T* apValue, uint32_t auiCount = 1) {
+inline void NiBinaryStreamLoad(NiBinaryStream& arStream, T* apValue, uint32_t auiCount = 1) {
 	uint32_t uiSize = sizeof(T);
 	arStream.BinaryRead(apValue, uiSize * auiCount, &uiSize, 1);
 }
 
+inline void NiBinaryStreamLoad(NiBinaryStream& arStream, void* apValue, uint32_t auiCount, uint32_t* apComponentSizes, uint32_t auiComponentCount = 1) {
+	uint32_t uiSize = 0;
+	for (uint32_t i = 0; i < auiComponentCount; i++) {
+		uiSize += apComponentSizes[i];
+	}
+	arStream.BinaryRead(apValue, uiSize * auiCount, apComponentSizes, auiComponentCount);
+}
+
 template <class T>
-void NiBinaryStreamSave(NiBinaryStream& arStream, const T* apValue, uint32_t auiCount = 1) {
+inline void NiBinaryStreamSave(NiBinaryStream& arStream, const T* apValue, uint32_t auiCount = 1) {
 	uint32_t uiSize = sizeof(T);
 	arStream.BinaryWrite(apValue, uiSize * auiCount, &uiSize, 1);
 }
 
+inline void NiBinaryStreamSave(NiBinaryStream& arStream, const void* apValue, uint32_t auiCount, uint32_t* apComponentSizes, uint32_t auiComponentCount = 1) {
+	uint32_t uiSize = 0;
+	for (uint32_t i = 0; i < auiComponentCount; i++) {
+		uiSize += apComponentSizes[i];
+	}
+	arStream.BinaryWrite(apValue, uiSize * auiCount, apComponentSizes, auiComponentCount);
+}
+
 template <class T>
-void NiStreamLoadBinary(NiBinaryStream& arStream, T& arValue) {
+inline void NiStreamLoadBinary(NiBinaryStream& arStream, T& arValue) {
 	NiBinaryStreamLoad(arStream, &arValue, 1);
 }
 
 template <class T>
-void NiStreamLoadBinary(NiBinaryStream& arStream, T* apValue, uint32_t auiCount) {
+inline void NiStreamLoadBinary(NiBinaryStream& arStream, T* apValue, uint32_t auiCount) {
 	NiBinaryStreamLoad(arStream, apValue, auiCount);
 }
 
 template <class T>
-void NiStreamSaveBinary(NiBinaryStream& arStream, const T& arValue) {
+inline void NiStreamSaveBinary(NiBinaryStream& arStream, const T& arValue) {
 	NiBinaryStreamSave(arStream, &arValue, 1);
 }
 
 template <class T>
-void NiStreamSaveBinary(NiBinaryStream& arStream, const T* apValue, uint32_t auiCount) {
+inline void NiStreamSaveBinary(NiBinaryStream& arStream, const T* apValue, uint32_t auiCount) {
 	NiBinaryStreamSave(arStream, apValue, auiCount);
 }

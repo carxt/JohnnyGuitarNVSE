@@ -1,6 +1,6 @@
 #pragma once
 
-#include <netimmerse.h>
+#include "Gamebryo/NiFloatInterpController.hpp"
 #include <shared/Utils/CustomClass.hpp>
 
 namespace NewNiObjects {
