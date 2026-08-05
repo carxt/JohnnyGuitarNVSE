@@ -128,3 +128,4 @@ DEFINE_CMD_COND_PLUGIN(GetUsedItemHeight, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(ClearAltTexture, , false, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetAltTexture, , false, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetAltTextures, , false, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(ReloadEquippedModelsAlt, ReloadModelsAlt, , true, kParams_OneOptionalInt);

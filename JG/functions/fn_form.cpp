@@ -4,6 +4,7 @@
 #include "GameObjects.h"
 #include "GameForms.h"
 #include "Shared/BSMemory/BSScrapMemory.hpp"
+#include "Shared/Utils/StackObject.hpp"
 #include <PluginAPI.h>
 #include <GameExtraData.h>
 #include "GameProcess.h"
@@ -24,6 +25,9 @@
 #include <Bethesda/BSShaderManager.hpp>
 #include <Bethesda/TESMain.hpp>
 #include <Bethesda/BSUtilities.hpp>
+#include <Bethesda/BGSLoadGameSubBuffer.hpp>
+#include <Bethesda/BGSSaveFormBuffer.hpp>
+#include <Bethesda/INIPrefSettingCollection.hpp>
 
 #include "JG/ScriptUtils.hpp"
 using namespace ScriptUtils;
@@ -34,6 +38,33 @@ extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ItemChange* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ItemChange*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
 
+namespace {
+	static SPEC_NOINLINE void __fastcall SaveAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation) {
+		StackObject<BGSSaveFormBuffer, 0x8659C0, 0x847DD0> kSaveBuffer;
+		kSaveBuffer->SetHeader(apReference->GetFormID(), 0, apReference->GetFormType(), 27);
+		kSaveBuffer->SetForm(apReference);
+		if (apReference->IsActor()) {
+			if (apAnimation)
+				apAnimation->Save(kSaveBuffer.GetPtr());
+		}
+		else
+			apReference->SaveAnimation(kSaveBuffer.GetPtr());
+		arBuffer.CopyBuffer(kSaveBuffer.GetPtr());
+	}
+
+	static SPEC_NOINLINE void __fastcall LoadAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation) {
+		BGSLoadFormBuffer* pLoadBuffer = arBuffer.CreateLoadFormBuffer(apReference);
+		if (pLoadBuffer) {
+			if (apReference->IsActor()) {
+				if (apAnimation)
+					apAnimation->Load(pLoadBuffer);
+			}
+			else
+				apReference->LoadAnimation(pLoadBuffer);
+			ThisCall(0x81DB60, pLoadBuffer, true); // BGSLoadFormBuffer destructor
+		}
+	}
+}
 
 bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -2961,5 +2992,186 @@ bool Cmd_GetAltTextures_Execute(COMMAND_ARGS) {
 		}
 	}
 	g_arrInterface->AssignCommandResult(pArray, result);
+	return true;
+}
+
+namespace {
+
+	static bool __fastcall HasScopedWeapon(Character* apCharacter) {
+		ItemChange* pItem = apCharacter->baseProcess->GetCurrentWeapon();
+		if (pItem) {
+			TESObjectWEAP* pWeapon = static_cast<TESObjectWEAP*>(pItem->pObject);
+			return pWeapon && pWeapon->HasScope() && (!pWeapon->HasModScope() || pItem->HasModEffectActive(0xE));
+		}
+		return false;
+	}
+
+	static SPEC_NOINLINE void __fastcall ReloadWeaponScope(Character* apCharacter, BipedAnim* apBiped) {
+		TESObjectWEAP* pWeapon = apBiped->kObjects[BIPED_OBJECT::WEAPON].pWeapon;
+		if (pWeapon && HasScopedWeapon(apCharacter)) {
+			const bool bScopeVisible = HUDMainMenu::GetSingleton()->bScopeVisible;
+			Interface::InitGunScope(&pWeapon->kScope);
+			Interface::SetGunScopeVisible(bScopeVisible);
+		}
+	}
+
+	static SPEC_NOINLINE BipedAnim* __fastcall CanReloadBipedModels(TESObjectREFR* apReference) {
+		constexpr uint32_t uiDisallowedFlags = TESForm::FormFlags::STILL_LOADING | TESForm::FormFlags::DELETED | TESForm::FormFlags::DISABLED;
+		if (apReference->uiFormFlags.Get(uiDisallowedFlags) || !apReference->IsCharacter())
+			return nullptr;
+
+		Character* pChar = static_cast<Character*>(apReference);
+		const BaseProcess* pProcess = pChar->baseProcess;
+		if (!pProcess || pProcess->processLevel != PROCESS_TYPE::HIGH)
+			return nullptr;
+
+		if (!pChar->Get3DSimple())
+			return nullptr;
+
+		return pChar->GetBiped();
+	}
+
+	static void __fastcall ReloadBipedModels(Character* apCharacter, int32_t aiTargetObject) {
+		if (aiTargetObject >= BIPED_OBJECT::COUNT)
+			return;
+
+		BipedAnim* pBiped = CanReloadBipedModels(apCharacter);
+		if (!pBiped)
+			return;
+
+		Bitfield32 uiValidParts = 0xFFFFFFBF;
+		if (aiTargetObject >= 0)
+			uiValidParts = (1u << aiTargetObject) & 0xFFFFFFBF;
+
+		const bool bReloadWeapon = uiValidParts.GetAndClearBit(BIPED_OBJECT::WEAPON);
+		const bool bPlayer = apCharacter == PlayerCharacter::GetSingleton();
+		bool bPlayerHasIS = false;
+
+		BGSLoadGameSubBuffer kSavedAnim1st;
+		BGSLoadGameSubBuffer kSavedAnim3rd;
+
+		NiFixedString strIronSightNodeName;
+
+		if (bPlayer) {
+			PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(apCharacter);
+
+			if (pPlayer->GetIronSights() && pPlayer->pIronSightNode)
+				strIronSightNodeName = pPlayer->pIronSightNode->GetName();
+
+			Animation* pAnim1st = pPlayer->GetAnimation(true);
+			Animation* pAnim3rd = pPlayer->GetAnimation(false);
+
+			SaveAnimation(kSavedAnim1st, apCharacter, pAnim1st);
+			SaveAnimation(kSavedAnim3rd, apCharacter, pAnim3rd);
+	
+			BipedAnim* pBiped1st = pPlayer->GetBiped(true);
+			BipedAnim* pBiped3rd = pPlayer->GetBiped(false);
+			for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
+				if (uiValidParts.GetBit(i)) {
+					pBiped1st->RemovePart(i, true);
+					pBiped3rd->RemovePart(i, true);
+				}
+			}
+
+			if (bReloadWeapon) {
+				pBiped1st->RemoveBipedWeapon();
+				pBiped3rd->RemoveBipedWeapon();
+			}
+		}
+		else {
+			Animation* pAnim = apCharacter->GetAnimation();
+
+			SaveAnimation(kSavedAnim3rd, apCharacter, pAnim);
+
+			for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
+				if (uiValidParts.GetBit(i)) {
+					pBiped->RemovePart(i, true);
+				}
+			}
+
+			if (bReloadWeapon)
+				pBiped->RemoveBipedWeapon();
+		}
+
+		apCharacter->ReplaceModel();
+
+		if (bPlayer) {
+			if (bReloadWeapon)
+				ReloadWeaponScope(apCharacter, pBiped);
+
+			PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(apCharacter);
+
+			if (strIronSightNodeName)
+				pPlayer->pIronSightNode = static_cast<NiNode*>(pPlayer->Get3D(true)->GetObjectByName(strIronSightNodeName));
+
+			Animation* pAnim1st = pPlayer->GetAnimation(true);
+			Animation* pAnim3rd = pPlayer->GetAnimation(false);
+
+			if (!bReloadWeapon) {
+				pAnim1st->ReloadTargets(true);
+				pAnim3rd->ReloadTargets(false);
+			}
+
+			LoadAnimation(kSavedAnim1st, apCharacter, pAnim1st);
+			LoadAnimation(kSavedAnim3rd, apCharacter, pAnim3rd);
+		}
+		else {
+			Animation* pAnim = apCharacter->GetAnimation();
+
+			if (!bReloadWeapon) {
+				pAnim->ReloadTargets(false);
+			}
+
+			LoadAnimation(kSavedAnim3rd, apCharacter, pAnim);
+		}
+
+		BSShaderManager::GetShadowSceneNode(0)->AddObject(apCharacter->Get3D());
+	}
+}
+
+static void __fastcall RequestBipedModelUpdate(Character* apCharacter, int32_t aiTargetObject, bool abQueue) {
+	if (abQueue) {
+		JohnnyExtraData* pExtraData = JohnnyExtraData::GetOrCreate(apCharacter);
+		pExtraData->IncRefCount();
+
+		QueuedTask kTask;
+		kTask.kItems[0].p = pExtraData;
+		kTask.kItems[1].i = aiTargetObject;
+		kTask.pFunction = QUEUED_TASK{
+			JohnnyExtraData* pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
+			Character* pChar = static_cast<Character*>(pData->pOwner);
+			if (pChar) {
+				int32_t iTargetObject = arTask.kItems[1].i;
+				ReloadBipedModels(pChar, iTargetObject);
+			}
+			pData->DecRefCount();
+		};
+		TaskQueue::QueueTask(kTask);
+	}
+	else {
+		ReloadBipedModels(apCharacter, aiTargetObject);
+	}
+}
+
+bool Cmd_ReloadEquippedModelsAlt_Execute(COMMAND_ARGS) {
+	*result = 0;
+	if (!CanReloadBipedModels(thisObj))
+		return true;
+
+	int32_t iTargetObject = BIPED_OBJECT::NONE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &iTargetObject) && iTargetObject < BIPED_OBJECT::COUNT) {
+		const bool bPipBoyReload = iTargetObject == BIPED_OBJECT::PIPBOY && thisObj == PlayerCharacter::GetSingleton();
+		if (bPipBoyReload) {
+			FOPipboyManager* pPipBoy = Interface::GetPipboy();
+			if (pPipBoy)
+				pPipBoy->SetPipBoyManagerReset(true);
+		}
+		else {
+			Character* pChar = static_cast<Character*>(thisObj);
+			const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
+			RequestBipedModelUpdate(pChar, iTargetObject, bQueue);
+			*result = bQueue ? 2 : 1;
+		}
+	}
 	return true;
 }

@@ -48,3 +48,8 @@ bool ItemChange::GetWorn(bool abLeftOnly) const {
 uint8_t ItemChange::GetModSlots() const {
 	return ThisCall<uint8_t>(0x4BD820, this);
 }
+
+// GAME - 0x4BDA70
+bool ItemChange::HasModEffectActive(uint8_t aeEffect) const {
+	return ThisCall<bool>(0x4BDA70, this, aeEffect);
+}

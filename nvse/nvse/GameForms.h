@@ -2763,6 +2763,7 @@ public:
 		else weaponFlags1 &= ~eFlag_IsAutomatic;
 	}
 	bool HasScope() const { return (weaponFlags1 & eFlag_HasScope) != 0; }
+	bool HasModScope() const { return (weaponFlags2 & eFlag_ScopeFromMod) != 0; }
 	bool IsNonPlayable() { return (weaponFlags1 & eflag_NonPlayable) != 0; }
 	bool IsPlayable() { return !IsNonPlayable(); }
 	void SetPlayable(bool doset) {

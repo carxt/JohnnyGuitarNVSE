@@ -216,7 +216,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\AILinearTaskThreadManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BaseExtraList.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSChangeFlags.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSLoadGameSubBuffer.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSNumericIDIndex.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSSaveFormBuffer.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSCullingProcess.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp" />
@@ -249,6 +253,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESFile.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESFullName.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESHavokUtilities.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESLeveledList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESMain.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESModelTextureSwap.cpp" />
@@ -373,8 +378,17 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseExtraList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseFormComponent.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSChangeFlags.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSLoadFormBuffer.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSLoadGameBuffer.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSLoadGameSubBuffer.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSNumericIDIndex.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveFormBuffer.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveGameBuffer.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadBuffer.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFormHeader.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
@@ -465,6 +479,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESFullName.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESHavokUtilities.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESIcon.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESLeveledList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESLevItem.hpp" />

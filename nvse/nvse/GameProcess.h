@@ -720,7 +720,7 @@ public:
 	float							flt0CC;				// 0CC
 	float							flt0D0;				// 0D0
 	uint32_t							unk0D4;				// 0D4
-	NiControllerManager				*unk0D8;			// 0D8
+	NiPointer<NiControllerManager> spManager;			// 0D8
 	NiTPointerMap<uint16_t, AnimSequenceBase*>* unk0DC;			// 0DC
 	BSAnimGroupSequence				*animSequence[8];	// 0E0
 	BSAnimGroupSequence				*animSeq100;		// 100
@@ -742,6 +742,9 @@ public:
 	void ReloadTargets(bool abReload) {
 		ThisCall(0x499240, this, abReload);
 	}
+
+	void Save(BGSSaveFormBuffer* apBuffer) { ThisCall(0x49AB40, this, apBuffer); };
+	void Load(BGSLoadFormBuffer* apBuffer) { ThisCall(0x49B050, this, apBuffer); };
 };
 static_assert(sizeof(Animation) == 0x12C);
 

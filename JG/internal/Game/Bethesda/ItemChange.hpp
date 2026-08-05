@@ -28,6 +28,8 @@ public:
 	bool							GetWorn(bool abLeftOnly) const;
 
 	uint8_t							GetModSlots() const;
+
+	bool							HasModEffectActive(uint8_t aeEffect) const;
 };
 
 ASSERT_SIZE(ItemChange, 0xC);

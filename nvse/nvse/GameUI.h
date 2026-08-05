@@ -77,6 +77,10 @@ public:
 
 	static constexpr AddressPtr<bool, 0x11D8907> bIsLoadingNewGame;
 
+	static FOPipboyManager* GetPipboy() {
+		return CdeclCall<FOPipboyManager*>(0x705990);
+	}
+
 	static void InitGunScope(TESModel* apModel) {
 		CdeclCall(0x709C20, apModel);
 	}
@@ -1894,5 +1898,9 @@ public:
 	float time164;
 	float lightEffectFadeDuration;
 	uint32_t unk16C;
+
+	void SetPipBoyManagerReset(bool abReset) {
+		ThisCall(0x5DB4C0, this, abReset);
+	}
 };
 static_assert(sizeof(FOPipboyManager) == 0x170);

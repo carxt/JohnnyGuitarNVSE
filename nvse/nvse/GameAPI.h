@@ -672,34 +672,6 @@ struct	BGSSaveLoadChangesMap {
 	NiTPointerMap<uint32_t, BGSFormChanges*> kChangeMap;
 };
 
-// 030
-class BGSLoadFormBuffer : public BGSLoadGameBuffer {
-public:
-	BGSLoadFormBuffer();
-	~BGSLoadFormBuffer();
-
-	typedef uint8_t EncodedID[3];
-	struct Header	// 00C
-	{
-		EncodedID	encodeID;			// 00
-		uint32_t		changeFlags;		// 03
-		uint8_t		codedTypeAndLength;	// 07
-		uint8_t		formVersion;		// 08
-		uint8_t		pad009[3];			// 09
-	};
-
-	uint32_t			refID;				// 010
-	Header			header;				// 014
-	uint32_t			bufferSize;			// 020
-	TESForm* form;				// 024
-	uint32_t			flg028;				// 028	bit1 form invalid
-	BGSFormChanges* currentFormChange;	// 02C
-};
-
-class BGSSaveFormBuffer : public BGSLoadGameBuffer {
-	BGSSaveFormBuffer();
-	~BGSSaveFormBuffer();
-};	// in BGSSaveGameBuffer there is a 010, which look like a counter (ChunkCount ?), then the Header
 
 #if 1
 const uint32_t _SaveGameManager_ConstructSavegameFilename = 0x0084FF90;

@@ -6,6 +6,7 @@
 #include "Bethesda/TESDataHandler.hpp"
 #include "Bethesda/TESObject.hpp"
 #include "Bethesda/TESObjectList.hpp"
+#include "Bethesda/TESHavokUtilities.hpp"
 #include "decoding.h"
 #include "GameEffects.h"
 #include "GameForms.h"
@@ -1303,7 +1304,7 @@ bool Cmd_SetVelEx_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NiPoint3 kVelocity;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kVelocity.x, &kVelocity.y, &kVelocity.z)) {
-		CdeclCall(0x62B8D0, thisObj->Get3D(), &kVelocity, true); // TESHavokUtilities::AddVelocity
+		TESHavokUtilities::AddVelocity(thisObj->Get3D(), kVelocity, true);
 		*result = 1;
 	}
 	return true;
