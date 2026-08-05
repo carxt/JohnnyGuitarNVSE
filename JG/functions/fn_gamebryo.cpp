@@ -436,7 +436,7 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 			default:
 				__assume(0);
 			}
-			*result = 1;
+			*result = bQueue ? 2 : 1;
 		}
 	}
 	return true;

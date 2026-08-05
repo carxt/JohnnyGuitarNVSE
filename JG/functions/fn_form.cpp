@@ -2609,7 +2609,7 @@ bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
 			RequestModelUpdate(thisObj, uiFlags, bQueue);
 		}
 
-		*result = 1;
+		*result = bQueue ? 2 : 1;
 	}
 	return true;
 }
