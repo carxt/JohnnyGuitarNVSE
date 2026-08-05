@@ -2558,12 +2558,17 @@ static ShadowSceneNode* FindSceneNodeRecurse(const NiAVObject* apObject) {
 
 static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_t auiFlags) {
 	if (auiFlags & UPDATE_MODEL) {
+		BGSLoadGameSubBuffer kSavedAnim;
+		SaveAnimation(kSavedAnim, apReference, apReference->GetAnimation());
+
 		apReference->Update3D();
 		ThisCall(0x456520, *reinterpret_cast<DWORD**>(0x1202D98));
 
 		NiAVObject* pRoot = apReference->Get3DSimple();
 		if (pRoot && pRoot->IsFadeNode())
 			static_cast<BSFadeNode*>(pRoot)->TurnFadeNodeOn();
+
+		LoadAnimation(kSavedAnim, apReference, apReference->GetAnimation());
 	}
 
 	if (auiFlags & UPDATE_SCALE)
