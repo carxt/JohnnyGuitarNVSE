@@ -460,6 +460,9 @@ namespace JohnnyFixes {
 		// Fix wrong checks in BipedAnim::RunBiped3DDetach
 		HookUtils::SafeWriteBuf(0x4AB0F5, "\x89\x45\xFC\x90\x6A\x01");
 		HookUtils::SafeWriteBuf(0x4AB10C, "\x8B\x45\xFC\x85\xC0\x74\x15\x90");
+
+		// Add a baseform nullcheck for created refs in BGSSaveLoadGame::CheckInitialData
+		HookUtils::SafeWriteBuf(0x849DE6, "\x85\xC0\x74\x08\x8B\x40\x0C");
 	}
 
 }
