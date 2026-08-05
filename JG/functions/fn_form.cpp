@@ -1074,7 +1074,7 @@ bool Cmd_GetActorEffectType_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	SpellItem* pSpell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSpell) && pSpell && IS_TYPE(pSpell, SpellItem)) {
-		arResult = pSpell->type;
+		arResult = pSpell->kData.eType;
 		if (IsConsoleMode()) 
 			Console_Print("GetActorEffectType >> %.2f", arResult);
 	}

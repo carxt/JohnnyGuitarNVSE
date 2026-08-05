@@ -179,7 +179,7 @@ namespace CameraOverlay {
 
 			BSFadeNode* pRoot = BSFadeNode::CreateObject();
 			pRoot->SetName(cRootName);
-			pRoot->pLinkedObj = pReference;
+			pRoot->SetReference(pReference);
 			pRoot->TurnFadeNodeOn();
 			pRoot->SetAlwaysDraw(true);
 			pRoot->SetIgnoreFade(true);

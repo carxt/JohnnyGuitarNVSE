@@ -2,6 +2,7 @@
 
 #include "GameTypes.h"
 
+#include "Gamebryo/NiCamera.hpp"
 #include "Gamebryo/NiNode.hpp"
 #include "Gamebryo/NiRTTI.hpp"
 #include "Gamebryo/NiColorA.hpp"
@@ -26,6 +27,10 @@
 #include "Bethesda/BSShaderProperty.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
 #include "Bethesda/BSCullingProcess.hpp"
+#include "Bethesda/BSFadeNode.hpp"
+#include "Bethesda/BSFogProperty.hpp"
+#include "Bethesda/SceneGraph.hpp"
+#include "Bethesda/BSAnimGroupSequence.hpp"
 
 class NavMeshInfo;
 class TESAnimGroup;
@@ -128,32 +133,6 @@ static_assert(sizeof(WaterShaderProperty) == 0x150);
 
 class NiCamera;
 
-// E4
-class BSFadeNode : public NiNode {
-public:
-	BSFadeNode();
-	~BSFadeNode();
-
-	float									fNearDistSqr;
-	float									fFarDistSqr;
-	float									fLastFade;
-	float									fCurrentFade;
-	float									fBoundRadius;
-	float									fTimeSinceUpdate;
-	uint32_t								eMultType;
-	uint32_t								uiFrameCounter;
-	TESObjectREFR*							pLinkedObj;
-	void*									pBoundArray;
-	BSSimpleList<class BSMultiBoundRoom*>	kParentRoomList;
-	BSSimpleList<class BSPortal*>			kParentPortalList;
-
-	CREATE_OBJECT(BSFadeNode, 0xB4EAA0);
-
-	void TurnFadeNodeOn() {
-		ThisCall(0x476AB0, this);
-	};
-};
-
 // B4
 class BSMultiBoundNode : public NiNode {
 public:
@@ -179,45 +158,6 @@ public:
 
 	uint32_t			unkAC[3];		// AC
 };
-
-// B4
-class NiBillboardNode : public NiNode {
-public:
-	NiBillboardNode();
-	~NiBillboardNode();
-
-	virtual void	Unk_40(void);
-
-	uint32_t			unkAC[2];		// AC
-};
-
-// 64
-class BSFogProperty : public NiObjectNET {
-public:
-	BSFogProperty();
-	~BSFogProperty();
-
-	uint16_t				unk18;		// 18
-	uint16_t				unk1A;		// 1A
-	float				flt1C;		// 1C
-	NiColor				color;		// 20
-	float				distNear;	// 2C
-	float				distFar;	// 30
-	uint32_t				unk34;		// 34
-	uint32_t				unk38;		// 38
-	float				flt3C;		// 3C
-	float				flt40;		// 40
-	float				flt44;		// 44
-	float				flt48;		// 48
-	uint32_t				unk4C;		// 4C
-	uint32_t				unk50;		// 50
-	float				flt54;		// 54
-	float				flt58;		// 58
-	float				flt5C;		// 5C
-	float				power;		// 60
-};
-static_assert(sizeof(BSFogProperty) == 0x64);
-
 
 class BSOcclusionPlane;
 class BSPortal;
@@ -340,71 +280,7 @@ public:
 };
 static_assert(sizeof(ShadowSceneNode) == 0x200);
 
-// 114
-class NiCamera : public NiAVObject {
-public:
-	NiCamera();
-	~NiCamera();
-
-	float			m_aafWorldToCam[4][4];	// 09C
-	NiFrustum		m_kViewFrustum;			// 0DC
-	float			m_fMinNearPlaneDist;	// 0F8
-	float			m_fMaxFarNearRatio;		// 0FC
-	NiRect<float>	m_kPort;				// 100
-	float			m_fLODAdjust;			// 110
-
-	CREATE_OBJECT(NiCamera, 0xA71430);
-
-	bool LookAtWorldPoint(const NiPoint3& arWorldPt, const NiPoint3& arWorldUp) {
-		return ThisCall<bool>(0xA701B0, this, &arWorldPt, &arWorldUp);
-	}
-
-	void SetViewFrustum(const NiFrustum& arFrustum) {
-		ThisCall(0xA6FAF0, this, &arFrustum);
-	}
-};
-static_assert(sizeof(NiCamera) == 0x114);
-
 class BSCullingProcess;
-
-class BSSceneGraph : public NiNode {
-public:
-	BSSceneGraph();
-	~BSSceneGraph();
-
-	virtual float	GetFarDistance();
-	virtual void	SetViewDistanceBasedOnFrameRate(float afTime);
-
-	NiPointer<NiCamera> spCamera;
-	NiVisibleArray*		pVisArray;
-	BSCullingProcess*	pCuller;
-	bool				bMenuSceneGraph;
-	float				fCurrentFOV;
-
-	NiNode* GetCameraRoot() const {
-		return static_cast<NiNode*>(GetAtChecked(0));
-	}
-};
-
-// C0
-class SceneGraph : public BSSceneGraph {
-public:
-	SceneGraph();
-	~SceneGraph();
-};
-
-// 78
-class BSAnimGroupSequence : public NiControllerSequence {
-public:
-	BSAnimGroupSequence();
-	~BSAnimGroupSequence();
-
-	TESAnimGroup* animGroup;		// 74
-
-	static bool PlaySounds(NiControllerSequence* apSequence, TESObjectREFR* apRef) {
-		return CdeclCall<bool>(0x4EEF00, apSequence, apRef);
-	}
-};
 
 class NiVBBlock;
 class NiDX9LightManager;

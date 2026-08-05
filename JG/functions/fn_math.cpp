@@ -27,7 +27,7 @@ SPEC_NOINLINE bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL) {
 			arResult = PlayerCharacter::GetSingleton()->worldFOV;
 			break;
 		default:
-			arResult = TESMain::GetWorldSceneGraph()->fCurrentFOV;
+			arResult = TESMain::GetWorldSceneGraph()->GetCameraFOV();
 			break;
 	}
 	return true;

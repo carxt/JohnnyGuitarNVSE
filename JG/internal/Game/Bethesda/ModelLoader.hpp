@@ -48,7 +48,7 @@ public:
 
 	TESModel* GetModelForBoundObject(TESBoundObject* apBoundObject, TESObjectREFR* apRef) const;
 
-	NiNode* LoadFile(const char* apPath, LOD_MULT aeLODFadeMult = LOD_MULT::NONE, bool abAssignShaders = true, bool abSuppressWarning = false, bool abKeepUV = false, bool abNoUseCountIncrease = false);
+	NiNode* LoadFile(const char* apPath, LOD_MULT_TYPE aeLODFadeMult = LOD_MULT_TYPE::NONE, bool abAssignShaders = true, bool abSuppressWarning = false, bool abKeepUV = false, bool abNoUseCountIncrease = false);
 	KFModel* LoadKF(const char* apPath);
 
 	bool LookupModel(const char* apPath, NiPointer<Model>& arOut);
@@ -61,9 +61,9 @@ public:
 	bool QueueTexture(const char* apPath, IO_TASK_PRIORITY aePriority, QueuedFile* apFile);
 	bool QueueTexture(BSFileEntry* apFileEntry, IO_TASK_PRIORITY aePriority, QueuedFile* apFile);
 
-	void QueueModel(const char* apSource, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT aeLODFadeMult = LOD_MULT::NONE, bool abAssignShaders = true, bool abIncreaseCounter = false, bool abKeepUV = false);
-	void QueueModel(TESModel* apModel, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT aeLODFadeMult = LOD_MULT::NONE, bool abAssignShaders = true, bool abIncreaseCounter = false, bool abKeepUV = false);
-	void QueueModel(TESModel* apModel, NiPointer<IOTask>& arTask, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT aeLODFadeMult = LOD_MULT::NONE, bool abAssignShaders = true, bool abIncreaseCounter = false, bool abKeepUV = false, float afOverriddenVisualDistance = 0.f);
+	void QueueModel(const char* apSource, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT_TYPE aeLODFadeMult = LOD_MULT_TYPE::NONE, bool abAssignShaders = true, bool abIncreaseCounter = false, bool abKeepUV = false);
+	void QueueModel(TESModel* apModel, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT_TYPE aeLODFadeMult = LOD_MULT_TYPE::NONE, bool abAssignShaders = true, bool abIncreaseCounter = false, bool abKeepUV = false);
+	void QueueModel(TESModel* apModel, NiPointer<IOTask>& arTask, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT_TYPE aeLODFadeMult = LOD_MULT_TYPE::NONE, bool abAssignShaders = true, bool abIncreaseCounter = false, bool abKeepUV = false, float afOverriddenVisualDistance = 0.f);
 
 	void LoadAddons(NiNode* apNode);
 };

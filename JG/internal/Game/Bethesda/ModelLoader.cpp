@@ -57,7 +57,7 @@ TESModel* ModelLoader::GetModelForBoundObject(TESBoundObject* apBoundObject, TES
 
 // GAME - 0x447080
 // GECK - 0x4C0040
-NiNode* ModelLoader::LoadFile(const char* apPath, LOD_MULT aeLODFadeMult, bool abAssignShaders, bool abSuppressWarning, bool abKeepUV, bool abNoUseCountIncrease) {
+NiNode* ModelLoader::LoadFile(const char* apPath, LOD_MULT_TYPE aeLODFadeMult, bool abAssignShaders, bool abSuppressWarning, bool abKeepUV, bool abNoUseCountIncrease) {
 #ifdef GAME
 	return ThisCall<NiNode*>(0x447080, this, apPath, aeLODFadeMult, abAssignShaders, abSuppressWarning, abKeepUV, abNoUseCountIncrease);
 #else
@@ -133,7 +133,7 @@ bool ModelLoader::QueueTexture(BSFileEntry* apFileEntry, IO_TASK_PRIORITY aePrio
 
 // GAME - 0x444040
 // GECK - 0x4C21B0
-void ModelLoader::QueueModel(const char* apSource, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT aeLODFadeMult, bool abAssignShaders, bool abIncreaseCounter, bool abKeepUV) {
+void ModelLoader::QueueModel(const char* apSource, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT_TYPE aeLODFadeMult, bool abAssignShaders, bool abIncreaseCounter, bool abKeepUV) {
 #ifdef GAME
 	ThisCall(0x444040, this, apSource, aePriority, apParent, aeLODFadeMult, abAssignShaders, abIncreaseCounter, abKeepUV);
 #else
@@ -143,7 +143,7 @@ void ModelLoader::QueueModel(const char* apSource, IO_TASK_PRIORITY aePriority, 
 
 // GAME - 0x443D30
 // GECK - 0x4C2110
-void ModelLoader::QueueModel(TESModel* apModel, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT aeLODFadeMult, bool abAssignShaders, bool abIncreaseCounter, bool abKeepUV) {
+void ModelLoader::QueueModel(TESModel* apModel, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT_TYPE aeLODFadeMult, bool abAssignShaders, bool abIncreaseCounter, bool abKeepUV) {
 #ifdef GAME
 	ThisCall(0x443D30, this, apModel, aePriority, apParent, aeLODFadeMult, abAssignShaders, abIncreaseCounter, abKeepUV);
 #else
@@ -153,7 +153,7 @@ void ModelLoader::QueueModel(TESModel* apModel, IO_TASK_PRIORITY aePriority, Que
 
 // GAME - 0x443DC0
 // GECK - 0x4BED50
-void ModelLoader::QueueModel(TESModel* apModel, NiPointer<IOTask>& arTask, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT aeLODFadeMult, bool abAssignShaders, bool abIncreaseCounter, bool abKeepUV, float afOverriddenVisualDistance) {
+void ModelLoader::QueueModel(TESModel* apModel, NiPointer<IOTask>& arTask, IO_TASK_PRIORITY aePriority, QueuedFile* apParent, LOD_MULT_TYPE aeLODFadeMult, bool abAssignShaders, bool abIncreaseCounter, bool abKeepUV, float afOverriddenVisualDistance) {
 #ifdef GAME
 	ThisCall(0x443DC0, this, apModel, &arTask, aePriority, apParent, aeLODFadeMult, abAssignShaders, abIncreaseCounter, abKeepUV, afOverriddenVisualDistance);
 #else

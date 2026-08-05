@@ -1270,14 +1270,13 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 					continue;
 
 				BSFadeNode* pFadeNode = static_cast<BSFadeNode*>(spObject.m_pObject);
-				if (pFadeNode->pLinkedObj != pSource)
+				if (pFadeNode->GetReference() != pSource)
 					continue;
 
 				BSGameSound* pSound;
 				BSAudioManager::Get()->playingSounds.GetAt(uiKey, pSound);
 				if (pSound && StrBeginsCI(pSound->cFilePath + 0xB, pSoundPath)) {
-					BSSoundHandle kHandle;
-					kHandle.uiSoundID = pSound->mapKey;
+					BSSoundHandle kHandle(pSound->mapKey);
 
 					if (fFadeOutTime == -1)
 						kHandle.Stop();

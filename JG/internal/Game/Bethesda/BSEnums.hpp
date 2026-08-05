@@ -1902,23 +1902,23 @@ struct _RegionDataType {
 };
 using REGION_DATA_ID = _RegionDataType::Type;
 
-struct _LODMult {
-	enum Mult : uint32_t {
-		NONE = 0,
-		OBJECTS = 1,
-		ITEMS = 2,
-		ACTORS = 3,
-		TREES = 4,
-		LANDSCAPE = 5,
-		DISTANT_LOD = 6,
-		ACTOR_BODY_PART = 7,
-		RENDERED_MENU = 8,
-		INVISIBLE = 9,
-		IMPOSTER = 10,
+struct _LODMultType {
+	enum Type : uint32_t {
+		NONE			= 0,
+		OBJECTS			= 1,
+		ITEMS			= 2,
+		ACTORS			= 3,
+		TREES			= 4,
+		LANDSCAPE		= 5,
+		DISTANT_LOD		= 6,
+		ACTOR_BODY_PART	= 7,
+		RENDERED_MENU	= 8,
+		INVISIBLE		= 9,
+		IMPOSTER		= 10,
 		COUNT,
 	};
 };
-using LOD_MULT = _LODMult::Mult;
+using LOD_MULT_TYPE = _LODMultType::Type;
 
 #pragma region Conditions
 

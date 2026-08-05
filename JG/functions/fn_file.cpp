@@ -322,15 +322,14 @@ bool Cmd_StopSound3DFromPath_Execute(COMMAND_ARGS) {
 				if (!BSAudioManager::Get()->soundPlayingObjects.GetAt(pSound->mapKey, spObj) || !spObj->IsFadeNode())
 					continue;
 
-				if (static_cast<BSFadeNode*>(spObj.m_pObject)->pLinkedObj == ref) {
-					BSSoundHandle handle;
-					handle.uiSoundID = pSound->mapKey;
+				if (static_cast<BSFadeNode*>(spObj.m_pObject)->GetReference() == ref) {
+					BSSoundHandle kHandle(pSound->mapKey);
 					if (fadeOutTime <= 0) {
-						handle.Stop();
+						kHandle.Stop();
 					}
 					else {
 						int time = fadeOutTime * 1000.0;
-						handle.FadeOutAndRelease(time);
+						kHandle.FadeOutAndRelease(time);
 					}
 					arResult = 1;
 				}
@@ -365,8 +364,8 @@ bool Cmd_IsSoundPlayingFromPath_Execute(COMMAND_ARGS) {
 				if (!spObject || !spObject->IsFadeNode())
 					continue;
 
-				BSFadeNode* fadeNode = static_cast<BSFadeNode*>(spObject.m_pObject);
-				if (fadeNode->pLinkedObj != ref)
+				BSFadeNode* pFadeNode = static_cast<BSFadeNode*>(spObject.m_pObject);
+				if (pFadeNode->GetReference() != ref)
 					continue;
 
 				if (BSAudioManager::Get()->playingSounds.GetAt(uiKey, pSound) && pSound && _stricmp(pSound->cFilePath, path) == 0) {

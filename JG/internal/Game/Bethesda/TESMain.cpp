@@ -1,5 +1,4 @@
 #include "TESMain.hpp"
-#include <netimmerse.h>
 
 TESMain* TESMain::GetSingleton() {
 	return *reinterpret_cast<TESMain**>(0x11DEA0C);

@@ -247,10 +247,10 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 SPEC_NOINLINE bool Cmd_GetSequenceAnimGroup_Eval(COMMAND_ARGS_EVAL) {
 	arResult = -1;
 	const uint32_t uiSequence = reinterpret_cast<uint32_t>(apParam1);
-	if (apRef && uiSequence < 8) {
+	if (apRef && uiSequence < ANIM_GROUP_SECTION::COUNT) {
 		const Animation* pAnim = apRef->GetAnimation();
-		if (pAnim && pAnim->animSequence[uiSequence]) {
-			const uint16_t usGroupID = pAnim->groupIDs[uiSequence] & 0xFF;
+		if (pAnim && pAnim->pCurrentSequences[uiSequence]) {
+			const uint16_t usGroupID = pAnim->usGroups[uiSequence] & 0xFF;
 			arResult = usGroupID;
 		}
 	}
@@ -641,12 +641,12 @@ bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
 
 void __fastcall StopAnimLoop(Animation* apAnimation, uint32_t aiGroup) {
 	if (aiGroup == -1) {
-		for (uint32_t i = 0; i < 8; ++i) {
-			apAnimation->uiLoopCounts[i] = 0;
+		for (uint32_t i = 0; i < ANIM_GROUP_SECTION::COUNT; ++i) {
+			apAnimation->iLoopCounts[i] = 0;
 		}
 	}
 	else {
-		apAnimation->uiLoopCounts[aiGroup] = 0;
+		apAnimation->iLoopCounts[aiGroup] = 0;
 	}
 }
 

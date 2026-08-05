@@ -2,7 +2,7 @@
 
 #include "BSPackedTaskQueue.hpp"
 #include "ScrapHeap.hpp"
-#include "Gamebryo/NiRefObject.hpp"
+#include "SceneGraph.hpp"
 
 class BSShaderAccumulator;
 class NiCamera;

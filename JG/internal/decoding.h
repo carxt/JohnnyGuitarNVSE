@@ -4,6 +4,7 @@
 #include <GameAPI.h>
 
 #include "Gamebryo/NiGeometry.hpp"
+#include "Gamebryo/NiBillboardNode.hpp"
 
 class LoadedAreaBound;
 struct ExtraAudioMarkerData;

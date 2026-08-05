@@ -3,6 +3,7 @@
 #include "Gamebryo/NiControllerSequence.hpp"
 
 class TESAnimGroup;
+class TESObjectREFR;
 
 class BSAnimGroupSequence : public NiControllerSequence {
 public:
@@ -13,9 +14,9 @@ public:
 
 	TESAnimGroup* GetAnimGroup() const;
 
-	void CopyMembers(BSAnimGroupSequence* apOther, NiCloningProcess* apCloning);
-
 	float GetScaledTime(float afTime);
+
+	static bool PlaySounds(NiControllerSequence* apSequence, TESObjectREFR* apRef);
 };
 
 ASSERT_SIZE(BSAnimGroupSequence, 0x78);

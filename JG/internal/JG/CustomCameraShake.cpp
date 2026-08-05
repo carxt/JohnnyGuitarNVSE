@@ -8,7 +8,7 @@ namespace CustomCameraShake {
 		NiMatrix3 shakeMatrix = {};
 		Animation* anData = ThisCall<Animation*>(0x08B70D0, a_refr);
 		if (!anData) return true;
-		float timePassed = anData->flt0D0;
+		float timePassed = anData->fTime;
 		auto originalShakeMult = *(float*)(0x11DFED4), originalShakeTime = *(float*)(0x11DFED8);
 		*(float*)(0x11DFED4) = mult;
 		*(float*)(0x11DFED8) = duration;

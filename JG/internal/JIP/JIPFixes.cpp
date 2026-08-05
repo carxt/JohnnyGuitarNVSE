@@ -770,10 +770,10 @@ namespace JIPFixes {
 					Animation* pAnim1st = pPlayer->GetAnimation(true);
 					Animation* pAnim3rd = pPlayer->GetAnimation(false);
 
-					if (bWeaponDrawn && pAnim1st->animSequence[4])
-						pAnim1st->BlendOut(4, false);
-					if (bWeaponDrawn && pAnim3rd->animSequence[4])
-						pAnim3rd->BlendOut(4, false);
+					if (bWeaponDrawn && pAnim1st->pCurrentSequences[ANIM_GROUP_SECTION::WEAPON])
+						pAnim1st->BlendOut(ANIM_GROUP_SECTION::WEAPON, false);
+					if (bWeaponDrawn && pAnim3rd->pCurrentSequences[ANIM_GROUP_SECTION::WEAPON])
+						pAnim3rd->BlendOut(ANIM_GROUP_SECTION::WEAPON, false);
 
 					pAnim1st->ReloadTargets(true);
 					pAnim3rd->ReloadTargets(false);
@@ -781,8 +781,8 @@ namespace JIPFixes {
 				else {
 					Animation* pAnim = pActor->GetAnimation();
 
-					if (bWeaponDrawn && pAnim->animSequence[4])
-						pAnim->BlendOut(4, false);
+					if (bWeaponDrawn && pAnim->pCurrentSequences[ANIM_GROUP_SECTION::WEAPON])
+						pAnim->BlendOut(ANIM_GROUP_SECTION::WEAPON, false);
 					pAnim->ReloadTargets(false);
 				}
 			}
