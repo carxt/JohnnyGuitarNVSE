@@ -456,6 +456,10 @@ namespace JohnnyFixes {
 
 		// Patch the game so the dialog subroutine stops if the actor's head is blown off, I'll add it as an ini setting later.
 		NoHeadlessTalkingFix::InitHooks();
+
+		// Fix wrong checks in BipedAnim::RunBiped3DDetach
+		HookUtils::SafeWriteBuf(0x4AB0F5, "\x89\x45\xFC\x90\x6A\x01");
+		HookUtils::SafeWriteBuf(0x4AB10C, "\x8B\x45\xFC\x85\xC0\x74\x15\x90");
 	}
 
 }
