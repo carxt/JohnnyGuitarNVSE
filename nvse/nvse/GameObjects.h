@@ -665,6 +665,9 @@ public:
 	bool GetRestrained() { return lifeState == 5; }
 
 	bool IsTalking() const { return ThisCall<bool>(0x8A67F0, this); }
+	bool GetIronSights() const { return ThisCall<bool>(0x8BBC10, this); }
+
+	void ReloadTargets(bool abReload) { ThisCall(0x8B0B00, this, abReload); }
 
 	TESActorBase* GetActorBase();
 	bool GetLOS(Actor* target);
@@ -938,7 +941,7 @@ public:
 	float								counterAttackTimer;		// E28
 	uint32_t								unkE2C;					// E2C
 	uint32_t								unkE30;					// E30
-	NiNode* ironSightNode;			// E34
+	NiNode* pIronSightNode;			// E34
 	bool								noHardcoreTracking;		// E38	Appears to be unused
 	bool								skipHCNeedsUpdate;		// E39
 	uint8_t								byteE3A;				// E3A

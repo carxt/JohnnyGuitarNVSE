@@ -687,6 +687,21 @@ namespace JIPFixes {
 
 		uint32_t uiWeaponHasScope = 0;
 
+		SPEC_NOINLINE void __fastcall DetachBiped(BipedAnim* apBiped, uint32_t auiIndex) {
+			NiPointer<NiNode> spNode = apBiped->kObjects[auiIndex].pPartObject;
+			// Should not be doing this, since the command can run while rendering/3D updates happen on other threads
+			// If so, RemovePart/RemoveWeapon will queue the detach and cleanup, but we need the model to be detached *right now*
+			// By detaching here, we allow the game to only queue the cleanup, partial success I guess
+			// Handling it properly would break backwards compatibility with exisitng ReloadEquippedModels users, as we can't queue actions
+			if (spNode && spNode->GetParent())
+				spNode->GetParent()->DetachChild(spNode);
+
+			if (auiIndex == BIPED_OBJECT::WEAPON)
+				apBiped->RemoveBipedWeapon();
+			else
+				apBiped->RemovePart(auiIndex, true);
+		}
+
 		bool Cmd_ReloadEquippedModels_Execute(COMMAND_ARGS) {
 			const TESMain* pMain = TESMain::GetSingleton();
 			if (pMain->bIsFlyCam && pMain->bFreezeTime)
@@ -697,7 +712,7 @@ namespace JIPFixes {
 				return true;
 
 			Actor* pActor = static_cast<Actor*>(thisObj);
-			const BaseProcess* pProcess = pActor->baseProcess;
+			BaseProcess* pProcess = pActor->baseProcess;
 			if (!pProcess || pProcess->processLevel != PROCESS_TYPE::HIGH)
 				return true;
 
@@ -706,7 +721,7 @@ namespace JIPFixes {
 			if (!pRoot || !pBiped)
 				return true;
 
-			int32_t iTargetObject = -1;
+			int32_t iTargetObject = BIPED_OBJECT::NONE;
 			if (reinterpret_cast<uint8_t*>(scriptData)[*opcodeOffsetPtr - 2] && reinterpret_cast<uint8_t*>(scriptData)[*opcodeOffsetPtr]) {
 				int32_t iArgSlot;
 				if (!ExtractArgsEx(EXTRACT_ARGS_EX, &iArgSlot))
@@ -715,48 +730,45 @@ namespace JIPFixes {
 				iTargetObject = iArgSlot;
 			}
 
-			if (iTargetObject != 6 && iTargetObject < 20) {
+			if (iTargetObject != BIPED_OBJECT::PIPBOY && iTargetObject < BIPED_OBJECT::COUNT) {
 				Bitfield32 uiValidParts = 0xFFFFFFBF;
 				if (iTargetObject >= 0)
 					uiValidParts = (1u << iTargetObject) & 0xFFFFFFBF;
 
 				const bool bPlayer = pActor == PlayerCharacter::GetSingleton();
+				const bool bIronSights = pActor->GetIronSights();
+				const bool bWeaponDrawn = pProcess->GetWeaponDrawn();
+				NiFixedString strIronSightNodeName;
+
 				if (bPlayer) {
 					PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(pActor);
+
+					if (bIronSights && pPlayer->pIronSightNode)
+						strIronSightNodeName = pPlayer->pIronSightNode->GetName();
+
 					BipedAnim* pBiped1st = pPlayer->GetBiped(true);
 					BipedAnim* pBiped3rd = pPlayer->GetBiped(false);
-					for (uint32_t i = 0; i < 20; i++) {
+					for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
 						if (uiValidParts.GetBit(i)) {
-							if (i == 5) {
-								pBiped1st->RemoveBipedWeapon();
-								pBiped3rd->RemoveBipedWeapon();
-							}
-							else {
-								pBiped1st->RemovePart(i, true);
-								pBiped3rd->RemovePart(i, true);
-							}
+							DetachBiped(pBiped1st, i);
+							DetachBiped(pBiped3rd, i);
 						}
 					}
 				}
 				else {
-					for (uint32_t i = 0; i < 20; i++) {
+					for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
 						if (uiValidParts.GetBit(i)) {
-							if (i == 5)
-								pBiped->RemoveBipedWeapon();
-							else
-								pBiped->RemovePart(i, true);
+							DetachBiped(pBiped, i);
 						}
 					}
 				}
 
 				thisObj->ReplaceModel();
 
-				bool bWeaponDrawn = pProcess->GetWeaponDrawn();
-
 				if (bPlayer) {
-					if (uiValidParts.GetBit(5)) {
-						TESObjectWEAP* pWeapon = pBiped->kObjects[5].pWeapon;
-						if (pWeapon && ThisCall<uint8_t>(uiWeaponHasScope, pActor)) {
+					if (uiValidParts.GetBit(BIPED_OBJECT::WEAPON)) {
+						TESObjectWEAP* pWeapon = pBiped->kObjects[BIPED_OBJECT::WEAPON].pWeapon;
+						if (pWeapon && ThisCall<bool>(uiWeaponHasScope, pActor)) {
 							const bool bScopeVisible = HUDMainMenu::GetSingleton()->bScopeVisible;
 							Interface::InitGunScope(&pWeapon->kScope);
 							Interface::SetGunScopeVisible(bScopeVisible);
@@ -764,13 +776,17 @@ namespace JIPFixes {
 					}
 
 					PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(pActor);
+
+					if (strIronSightNodeName)
+						pPlayer->pIronSightNode = static_cast<NiNode*>(pPlayer->Get3D(true)->GetObjectByName(strIronSightNodeName));
+
 					Animation* pAnim1st = pPlayer->GetAnimation(true);
 					Animation* pAnim3rd = pPlayer->GetAnimation(false);
 
-					if (bWeaponDrawn && pAnim1st->animSequence[4])
-						pAnim1st->BlendOut(4, false);
-					if (bWeaponDrawn && pAnim3rd->animSequence[4])
-						pAnim3rd->BlendOut(4, false);
+					if (bWeaponDrawn && pAnim1st->animSequence[ANIM_GROUP_SECTION::WEAPON])
+						pAnim1st->BlendOut(ANIM_GROUP_SECTION::WEAPON, bIronSights);
+					if (bWeaponDrawn && pAnim3rd->animSequence[ANIM_GROUP_SECTION::WEAPON])
+						pAnim3rd->BlendOut(ANIM_GROUP_SECTION::WEAPON, bIronSights);
 
 					pAnim1st->ReloadTargets(true);
 					pAnim3rd->ReloadTargets(false);
@@ -778,10 +794,12 @@ namespace JIPFixes {
 				else {
 					Animation* pAnim = pActor->GetAnimation();
 
-					if (bWeaponDrawn && pAnim->animSequence[4])
-						pAnim->BlendOut(4, false);
-					pAnim->ReloadTargets(false);
+					if (bWeaponDrawn && pAnim->animSequence[ANIM_GROUP_SECTION::WEAPON])
+						pAnim->BlendOut(ANIM_GROUP_SECTION::WEAPON, bIronSights);
+					pActor->ReloadTargets(false);
 				}
+			
+				BSShaderManager::GetShadowSceneNode(0)->AddObject(pActor->Get3D());
 			}
 			return true;
 		}

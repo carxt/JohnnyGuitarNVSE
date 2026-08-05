@@ -1481,6 +1481,14 @@ public:
 	void SetSunLight(NiDirectionalLight* apLight) {
 		ThisCall(0xB5AAC0, this, apLight);
 	}
+
+	void AddObject(NiAVObject* apObject) {
+		ThisCall(0xB5EEB0, this, apObject);
+	}
+
+	void RemoveObject(NiAVObject* apObject) {
+		ThisCall(0xB5B1C0, this, apObject);
+	}
 };
 static_assert(sizeof(ShadowSceneNode) == 0x200);
 
