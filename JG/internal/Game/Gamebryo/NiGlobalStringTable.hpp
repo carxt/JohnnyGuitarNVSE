@@ -32,6 +32,7 @@ public:
 
 	static void IncRefCount(GlobalStringHandle& arHandle) noexcept;
 	static void DecRefCount(GlobalStringHandle& arHandle) noexcept;
+	static uint32_t GetRefCount(const GlobalStringHandle& arHandle) noexcept;
 	static uint32_t GetLength(const GlobalStringHandle& arHandle) noexcept;
 
 	static char* GetRealBufferStart(const GlobalStringHandle& arHandle) noexcept;
