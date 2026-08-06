@@ -153,13 +153,15 @@ namespace JIPFixes {
 					uiNameLength = MAX_NAME_LENGTH;
 
 				const uint32_t uiSuffixLength = arSuffix.length();
-				const uint32_t uiBufferSize = uiNameLength + uiSuffixLength + sizeof(char);
+				uint32_t uiBufferSize = uiNameLength + uiSuffixLength + sizeof(char);
 
 				BSScrapBuffer<char> kTempString(uiBufferSize);
 				char* pBuffer = kTempString.get();
 
 				memcpy_s(pBuffer, uiBufferSize, rName.c_str(), uiNameLength);
 				pBuffer += uiNameLength;
+
+				uiBufferSize -= uiNameLength;
 
 				memcpy_s(pBuffer, uiBufferSize, arSuffix.data(), uiSuffixLength);
 				pBuffer += uiSuffixLength;
