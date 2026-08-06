@@ -2960,6 +2960,10 @@ public:
 	void RemovePart(uint32_t aeObject, bool abClear, void* apClearValue = nullptr) {
 		ThisCall(0x4AAFF0, this, aeObject, abClear, apClearValue);
 	}
+
+	static void RunBiped3DDetach(NiAVObject* apObject) {
+		CdeclCall(0x4AB0C0, apObject);
+	}
 };
 static_assert(sizeof(BipedAnim) == 0x2B4);
 

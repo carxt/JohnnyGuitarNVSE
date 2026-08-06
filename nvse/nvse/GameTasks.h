@@ -349,7 +349,26 @@ public:
 
 	static ModelLoader* GetSingleton();
 	void QueueReference(TESObjectREFR* apRef, IO_TASK_PRIORITY aePriority, bool abAllowQueueReferenceQueuing);
-	NiNode* LoadModel(const char* nifPath, uint32_t arg2, uint8_t arg3, uint32_t arg4, uint8_t arg5, uint8_t arg6);
 
 	TESModel* GetModelForBoundObject(TESBoundObject* apBoundObject, TESObjectREFR* apRef);
+
+	// GAME - 0x447080
+	// GECK - 0x4C0040
+	NiNode* LoadFile(const char* apPath, uint32_t  aeLODFadeMult = 0, bool abAssignShaders = true, bool abSuppressWarning = false, bool abKeepUV = false, bool abNoUseCountIncrease = false) {
+		return ThisCall<NiNode*>(0x447080, this, apPath, aeLODFadeMult, abAssignShaders, abSuppressWarning, abKeepUV, abNoUseCountIncrease);
+	}
+
+};
+
+class NiAVObject;
+
+class TaskQueueInterface {
+public:
+	static TaskQueueInterface* GetSingleton() {
+		return reinterpret_cast<TaskQueueInterface*>(0x11DF1A8);
+	}
+
+	void QueueBiped3DDetach(NiAVObject* apObject) {
+		ThisCall(0x87AD00, this, apObject);
+	}
 };

@@ -8,6 +8,7 @@
 #include "Gamebryo/NiCullingProcess.hpp"
 #include "Gamebryo/NiAlphaAccumulator.hpp"
 #include "Gamebryo/NiRenderer.hpp"
+#include "Gamebryo/NiAVObjectPalette.hpp"
 #include "Bethesda/NiUpdateData.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
 #include "Bethesda/BSCullingProcess.hpp"
@@ -372,6 +373,10 @@ public:
 
 class BSAnimNoteListener;
 
+class NiDefaultAVObjectPalette : public NiAVObjectPalette {
+public:
+};
+
 // 7C
 class NiControllerManager : public NiTimeController {
 public:
@@ -535,6 +540,13 @@ public:
 	virtual void	Unk_24(void);
 
 	uint32_t			unk08;		// 08
+};
+
+class NiStringExtraData : public NiExtraData {
+public:
+	NiFixedString m_kString;
+
+	NIRTTI_ADDRESS(0x11F4A38);
 };
 
 // 10
@@ -1517,6 +1529,8 @@ public:
 };
 static_assert(sizeof(NiCamera) == 0x114);
 
+#define JIP_LIGHTS 1
+
 // C4
 class NiDynamicEffect : public NiAVObject {
 public:
@@ -1539,6 +1553,8 @@ public:
 };
 
 ASSERT_SIZE(NiDynamicEffect, 0xC4)
+
+class TESObjectLIGH;
 
 // F0
 class NiLight : public NiDynamicEffect {

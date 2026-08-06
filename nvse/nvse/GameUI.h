@@ -100,6 +100,10 @@ public:
 	static uint32_t GetTopMenuID() {
 		return CdeclCall<uint32_t>(0x7023C0);
 	}
+
+	static NiAVObject* CopyOrDeepCopyNode(NiAVObject* apObject) {
+		return CdeclCall<NiAVObject*>(0x707870, apObject);
+	}
 };
 
 // 584

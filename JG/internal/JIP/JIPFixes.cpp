@@ -3,12 +3,17 @@
 #include "JIPUtils.hpp"
 
 #include "Bethesda/AutoMemContext.hpp"
+#include "Bethesda/BSShaderManager.hpp"
+#include "Bethesda/BSShaderUtil.hpp"
 #include "Bethesda/BSStringT.hpp"
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/FixedStrings.hpp"
 #include "Bethesda/RendererSettingCollection.hpp"
 #include "Bethesda/Setting.hpp"
+#include "Bethesda/TESHavokUtilities.hpp"
 #include "Bethesda/TimeGlobal.hpp"
+#include "Bethesda/AILinearTaskThreadManager.hpp"
+#include "Gamebryo/NiAVObjectPalette.hpp"
 
 #include "decoding.h"
 #include "events/EventFramework.h"
@@ -17,12 +22,14 @@
 #include "GameOSDepend.h"
 #include "GameProcess.h"
 #include "GameRTTI.h"
+#include "GameTasks.h"
 #include "GameTiles.h"
 #include "ParamInfos.h"
 #include "PluginAPI.h"
 #include "utility.h"
 
 #include "JG/JohnnyExtraData.hpp"
+#include "JG/ScriptUtils.hpp"
 #include "internal/CommandOpcodes.h"
 
 #include "Shared/BSMemory/BSScrapMemory.hpp"
@@ -30,7 +37,6 @@
 #include "Shared/Utils/CustomClass.hpp"
 
 #include <GameUI.h>
-#include <Bethesda/BSShaderUtil.hpp>
 
 class BSRenderedTexture;
 
@@ -40,6 +46,68 @@ extern bool bFixJIP;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t auiFormID);
 extern TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
+
+namespace {
+	void RecurseAndAddObjectsToPalette(NiAVObject* apObject, NiDefaultAVObjectPalette* apPalette) {
+		CdeclCall(0xA6E870, apObject, apPalette);
+	}
+
+	void RecurseAndRemoveObjectsFromPalette(NiAVObject* apObject, NiDefaultAVObjectPalette* apPalette) {
+		CdeclCall(0xA6E8E0, apObject, apPalette);
+	}
+
+	static inline NiDefaultAVObjectPalette* GetObjectPalette(const NiAVObject* apRoot) {
+		if (!apRoot) [[unlikely]]
+			return nullptr;
+
+		NiControllerManager* pControllerManager = apRoot->GetController<NiControllerManager>();
+		return pControllerManager ? pControllerManager->m_spObjectPalette.m_pObject : nullptr;
+	}
+
+	static SPEC_NOINLINE void __fastcall RecurseAddObjectsToPalette(NiAVObject* apRoot, NiAVObject* apObject) {
+		RecurseAndAddObjectsToPalette(apObject, GetObjectPalette(apRoot));
+	}
+
+	static SPEC_NOINLINE void __fastcall RecurseRemoveObjectsFromPalette(NiAVObject* apRoot, NiAVObject* apObject) {
+		RecurseAndRemoveObjectsFromPalette(apObject, GetObjectPalette(apRoot));
+	}
+
+	static SPEC_NOINLINE void __fastcall AddObjectToPalette(NiAVObject* apRoot, NiAVObject* apObject) {
+		if (!apObject || !apObject->GetName()) [[unlikely]]
+			return;
+
+		NiDefaultAVObjectPalette* pPalette = GetObjectPalette(apRoot);
+		if (pPalette)
+			pPalette->SetAVObject(apObject->GetName(), apObject);
+	}
+
+	static SPEC_NOINLINE void __fastcall RemoveObjectFromPalette(NiAVObject* apRoot, NiAVObject* apObject) {
+		if (!apObject || !apObject->GetName()) [[unlikely]]
+			return;
+
+		NiDefaultAVObjectPalette* pPalette = GetObjectPalette(apRoot);
+		if (pPalette)
+			pPalette->SetAVObject(apObject->GetName(), nullptr);
+	}
+
+	static SPEC_NOINLINE void __fastcall DetachObject(NiAVObject* apRoot, NiAVObject* apObject) {
+		NiPointer spObject(apObject); // Hold the ref so it doesn't insta delete on DetachChild
+
+		RecurseRemoveObjectsFromPalette(apRoot, apObject);
+
+		// Same story as with ReloadEquippedModels
+		// Detach "unsafely" first, then actually bother with queued cleanup. Based
+		NiNode* pParent = apObject->GetParent();
+		if (pParent) [[likely]]
+			pParent->DetachChild(apObject);
+
+		// Biped3DDetach is light + Havok removal
+		if (AILinearTaskThreadManager::ShouldQueue3DTask()) [[unlikely]]
+			TaskQueueInterface::GetSingleton()->QueueBiped3DDetach(apObject);
+		else [[likely]]
+			BipedAnim::RunBiped3DDetach(apObject);
+	}
+}
 
 namespace JIPFixes {
 
@@ -70,44 +138,291 @@ namespace JIPFixes {
 
 	}
 
-	namespace PaletteCorruptionFix {
+	namespace ModelFixes {
 
-		STACK_FRAME_OPT_ENABLE
+		static NiFixedString strLightFormEDID;
 
-		static void __fastcall InvalidateObjPalette(NiAVObject* apObject) {
-			if (!apObject) [[unlikely]]
-				return;
+		constexpr uint32_t MAX_SUFFIX_LENGTH = 16;
+		constexpr uint32_t MAX_NAME_LENGTH = 32;
 
-			NiControllerManager* pControllerManager = apObject->GetController<NiControllerManager>();
-			if (pControllerManager && pControllerManager->m_spObjectPalette) [[likely]]
-				ThisCall(0xA6E960, pControllerManager->m_spObjectPalette.m_pObject);
+		static void __fastcall AppendSuffix(NiAVObject* apObject, const std::string_view& arSuffix) {
+			const NiFixedString& rName = apObject->GetName();
+			uint32_t uiNameLength = rName.GetLength();
+			if (uiNameLength) [[likely]] {
+				if (uiNameLength > MAX_NAME_LENGTH)
+					uiNameLength = MAX_NAME_LENGTH;
+
+				const uint32_t uiSuffixLength = arSuffix.length();
+				const uint32_t uiBufferSize = uiNameLength + uiSuffixLength + sizeof(char);
+
+				BSScrapBuffer<char> kTempString(uiBufferSize);
+				char* pBuffer = kTempString.get();
+
+				memcpy_s(pBuffer, uiBufferSize, rName.c_str(), uiNameLength);
+				pBuffer += uiNameLength;
+
+				memcpy_s(pBuffer, uiBufferSize, arSuffix.data(), uiSuffixLength);
+				pBuffer += uiSuffixLength;
+
+				*pBuffer = 0;
+
+				apObject->SetName(kTempString.get());
+			}
 		}
 
-		HookUtils::CallDetour kMemPoolFree;
-		void __fastcall MemoryPool_Free(void* apBlock, uint32_t auiSize) {
-			char* pData = static_cast<char*>(apBlock);
-			TESForm* pForm = *reinterpret_cast<TESForm**>(pData);
-
-			if (pForm && pForm->IsReference()) [[likely]] {
-				if (pForm == PlayerCharacter::GetSingleton()) {
-					PlayerCharacter* pPlayer = static_cast<PlayerCharacter*>(pForm);
-					InvalidateObjPalette(pPlayer->Get3D(true));
-					InvalidateObjPalette(pPlayer->Get3D(false));
+		static void __fastcall AppendSuffixRecurse(NiAVObject* apObject, const std::string_view& arSuffix) {
+			AppendSuffix(apObject, arSuffix);
+			if (apObject->IsNode()) [[likely]] {
+				NiNode* pNode = static_cast<NiNode*>(apObject);
+				for (uint32_t i = 0; i < pNode->GetArrayCount(); ++i) {
+					NiAVObject* pChild = pNode->GetAt(i);
+					if (pChild) [[likely]]
+						AppendSuffixRecurse(pChild, arSuffix);
 				}
-				else {
-					TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pForm);
-					InvalidateObjPalette(pRef->Get3DSimple());
+			}
+		}
+
+		static void __fastcall InitLightsRecurse(NiAVObject* apObject, NiAVObject* apRoot) {
+			if (apObject->IsNode()) [[likely]] {
+				NiNode* pNode = static_cast<NiNode*>(apObject);
+				for (uint32_t i = 0; i < pNode->GetArrayCount(); ++i) {
+					NiAVObject* pChild = pNode->GetAt(i);
+					if (pChild) [[likely]]
+						InitLightsRecurse(pChild, apRoot);
+				}
+			}
+			else if (apObject->IsKindOf<NiPointLight>()) {
+				NiExtraData* pData = apObject->GetExtraData(strLightFormEDID);
+				if (!pData)
+					return;
+
+				NiStringExtraData* pStringData = pData->NiDynamicCast<NiStringExtraData>();
+				if (pStringData && pStringData->m_kString) [[likely]] {
+					TESForm* pForm = TESForm::GetFormByEditorID(pStringData->m_kString);
+					if (pForm && pForm->GetFormType() == FORM_TYPE::TESObjectLIGH) [[likely]] {
+						NiPointLight* pLight = static_cast<NiPointLight*>(apObject);
+						pLight->pLightForm = static_cast<TESObjectLIGH*>(pForm);
+
+						NiAVObject* pIter = pLight;
+						do {
+							if (pIter->m_uiFlags.GetAndSetBit(29))
+								break;
+
+							pIter = pIter->GetParent();
+						} while (pIter != apRoot);
+					}
+				}
+				apObject->RemoveExtraData(strLightFormEDID);
+			}
+		}
+
+		static void __fastcall InitLights(NiAVObject* apObject) {
+			InitLightsRecurse(apObject, apObject);
+		}
+
+		NiAVObject* __fastcall DoAttachModel(NiAVObject* apTarget, const char* apCommandString, NiFixedString* apName, NiNode* apRoot) {
+			if (!apTarget || !apTarget->IsNode()) [[unlikely]]
+				return nullptr;
+
+			NiNode* pTarget = static_cast<NiNode*>(apTarget);
+
+			std::string_view svSuffix(nullptr, 0);
+			const char* pPath = apCommandString;
+			if (apCommandString[0] == '*') [[likely]] {
+				const char* pSuffix = apCommandString + 1;
+				const char* pAsterisk = strchr(pSuffix, '*');
+				if (pAsterisk) {
+					uint32_t uiSuffixLength = (pAsterisk - apCommandString) - 1;
+					if (uiSuffixLength > MAX_SUFFIX_LENGTH)
+						uiSuffixLength = MAX_SUFFIX_LENGTH;
+					pPath = pAsterisk + 1;
+					svSuffix = { pSuffix, uiSuffixLength };
 				}
 			}
 
-			FastCall(kMemPoolFree, apBlock, auiSize);
+			NiAVObject* pLoadedObject = ModelLoader::GetSingleton()->LoadFile(pPath);
+			if (!pLoadedObject) [[unlikely]]
+				return nullptr;
+
+			if (!pLoadedObject->m_uiFlags.GetAndSetBit(30))
+				InitLights(pLoadedObject);
+
+			NiAVObject* pCopy = Interface::CopyOrDeepCopyNode(pLoadedObject);
+			if (pCopy) [[likely]] {
+				pCopy->SetAppCulled(false);
+				pCopy->SetLocalRotate(NiMatrix3::IDENTITY);
+
+				if (pCopy->IsFadeNode())
+					static_cast<BSFadeNode*>(pCopy)->TurnFadeNodeOn();
+
+				if (svSuffix.length())
+					AppendSuffixRecurse(pCopy, svSuffix);
+
+				if (apName && !apName->m_kHandle)
+					*apName = pCopy->GetName();
+
+				TESHavokUtilities::RemoveHavokFromSceneGraph(pCopy); 
+
+				pTarget->AttachChild(pCopy, true);
+
+				RecurseAddObjectsToPalette(apRoot, pCopy);
+
+				NiUpdateData kData;
+				pTarget->UpdateTransformAndBounds(kData);
+
+				pCopy->m_uiFlags.Set(0x80000000);
+
+				if (pCopy->m_uiFlags.GetBit(29)) {
+					NiAVObject* pIter = pCopy;
+					do {
+						pIter = pIter->GetParent();
+						if (pIter->m_uiFlags.GetAndSetBit(29))
+							break;
+					} while (pIter != apRoot);
+				}
+			}
+
+			return pCopy;
 		}
 
-		STACK_FRAME_OPT_RESET
+		void __fastcall DoInsertNode(NiAVObject* apTarget, const char* apQuery, const char* apTargetName, NiNode* apRoot) {
+			if (!apTarget || !apRoot)
+				return;
+
+			const NiFixedString strTargetName(apTargetName);
+
+			if (apQuery[0] == '^') {
+				if (apTarget != apRoot) {
+					NiAVObject* pRealTarget = apRoot->GetObjectByName(strTargetName);
+					if (pRealTarget) {
+						if (apTarget->GetParent() != pRealTarget && pRealTarget->IsNode()) {
+							static_cast<NiNode*>(pRealTarget)->AttachChild(apTarget, true);
+							AddObjectToPalette(apRoot, apTarget);
+						}
+					}
+					else {
+						NiNode* pNode = NiNode::Create();
+						pNode->SetName(strTargetName);
+						pNode->m_uiFlags.Set(0x80000000);
+
+						NiNode* pParent = apTarget->GetParent();
+
+						uint32_t uiIndex = 0;
+						while (uiIndex < pParent->GetArrayCount()) {
+							if (pParent->GetAt(uiIndex) == apTarget)
+								break;
+
+							++uiIndex;
+						}
+
+						pNode->AttachChild(apTarget, true);
+
+						pParent->SetAt(uiIndex, pNode);
+
+						AddObjectToPalette(apRoot, pNode);
+					}
+				}
+			}
+			else if (apTarget->IsNode() && !apRoot->GetObjectByName(strTargetName)) {
+				NiNode* pNode = NiNode::Create();
+				pNode->SetName(strTargetName);
+				pNode->m_uiFlags.Set(0x80000000);
+				static_cast<NiNode*>(apTarget)->AttachChild(pNode, true);
+				AddObjectToPalette(apRoot, pNode);
+			}
+		}
+
+		void __fastcall SetOjectName(NiObjectNET* apThis, const char* apName) {
+			apThis->SetName(apName);
+		}
+
+		void __fastcall DetachChild(NiNode* apThis, void*, NiAVObject* apChild) {
+			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+			BOOL bFirstPerson = *reinterpret_cast<BOOL*>(pEBP + 0x4);
+			TESObjectREFR* pRef = *reinterpret_cast<TESObjectREFR**>(pEBP + 0x10);
+
+			NiAVObject* pSceneRoot = ScriptUtils::GetReferenceScene(pRef, bFirstPerson);
+			DetachObject(pSceneRoot, apChild);
+		}
+
+		void __fastcall DetachObjects(TESObjectREFR* apRef, const char* apName) {
+			const NiFixedString strName(apName);
+			NiPointer<NiAVObject> spScene = apRef->Get3DSimple();
+			ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(0);
+			if (spScene) [[likely]] {
+				NiPointer<NiAVObject> spObj = spScene->GetObjectByName(strName);
+				if (spObj)
+					DetachObject(spScene, spObj);
+			}
+			if (apRef == PlayerCharacter::GetSingleton()) {
+				spScene = static_cast<PlayerCharacter*>(apRef)->Get3D(true);
+				NiPointer<NiAVObject> spObj = spScene->GetObjectByName(strName);
+				if (spObj)
+					DetachObject(spScene, spObj);
+			}
+		}
+
+		uint32_t uiReturnAddr;
+		SPEC_NAKED void DetachObjects_Asm() {
+			__asm {
+				mov     ecx, [esp + 0x34]
+				call	DetachObjects
+				jmp		uiReturnAddr
+			}
+		}
+
+		NiAVObject* __fastcall FindObjectRef(TESObjectREFR* apRef, const char* apObjectName) {
+			const NiAVObject* pRoot = apRef->Get3D();
+			if (!pRoot || !apObjectName || !apObjectName[0]) [[unlikely]]
+				return nullptr;
+
+			return pRoot->GetObjectByName(apObjectName);
+		}
+
+		NiNode* __fastcall FindNodeRef(TESObjectREFR* apRef, const char* apObjectName) {
+			NiAVObject* pObject = FindObjectRef(apRef, apObjectName);
+			return pObject ? pObject->IsNode() : nullptr;
+		}
+
+		NiAVObject* __fastcall FindObject(NiAVObject* apObject, const char* apObjectName) {
+			if (!apObjectName || apObjectName[0] == 0) [[unlikely]]
+				return nullptr;
+
+			const NiFixedString strName(apObjectName);
+			if (strName.GetRefCount() <= 1) [[unlikely]]
+				return nullptr;
+
+			if (apObject->m_kName == strName)
+				return apObject;
+
+			return apObject->GetObjectByName(strName);
+		}
+
+		NiAVObject* __fastcall FindObjectSimple(NiAVObject* apObject, const char* apObjectName) {
+			return apObject->GetObjectByName(apObjectName);
+		}
 
 		void InitHooks() {
-			kMemPoolFree.ReplaceCall(JIPUtils::GetAddress(0x1002BF45), MemoryPool_Free);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10003E50), SetOjectName);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000A020), DoAttachModel);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10009DA0), DoInsertNode);
+
+			uiReturnAddr = JIPUtils::GetAddress(0x1002C26B);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1002C228), DetachObjects_Asm);
+			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x1002D39B), DetachChild, 6);
+
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10009A40), InitLights);
+
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10058CB0), FindObjectRef);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10058CF0), FindNodeRef);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100040E0), FindObject);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10004080), FindObjectSimple);
 		}
+
+		void InitStrings() {
+			strLightFormEDID = "LIGH_EDID";
+		}
+
 	}
 
 	namespace NotifyDurationFix {
@@ -2008,6 +2323,7 @@ namespace JIPFixes {
 			VersionPrint::InitHooks();
 			SanerWeaponWobbleHook::InitHooks();
 			ProjectileLightFix::InitHooks();
+			ModelFixes::InitHooks();
 		}
 	}
 
@@ -2021,7 +2337,6 @@ namespace JIPFixes {
 		else {
 			UpdateDataFix::InitHooks();
 			ConsoleCmdFix::InitHooks();
-			PaletteCorruptionFix::InitHooks();
 			NotifyDurationFix::InitHooks();
 			CloseActiveMenuFix::InitHooks();
 			FireWeaponFix::InitHooks();
@@ -2037,6 +2352,8 @@ namespace JIPFixes {
 			AddItemAltNoCond::InitHooks();
 			ExtraDataFixes::InitHooks();
 			EDIDLookupFix::InitHooks();
+
+			ModelFixes::InitStrings();
 		}
 	}
 
