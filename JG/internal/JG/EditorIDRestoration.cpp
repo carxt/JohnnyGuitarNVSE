@@ -307,7 +307,7 @@ namespace EDIDRestoration {
 	}
 
 	static SPEC_NOINLINE void __fastcall LogEDIDConflict(const TESForm* apExistingForm, const NiFixedString& arEDID, const TESForm* apForm) noexcept {
-		const TESFile* pFileA = apForm->GetFile(0);
+		const TESFile* pFileA = apForm->GetFile(-1);
 		const TESFile* pFileB = apExistingForm->GetFile(0);
 
 		const char* pFileAName = pFileA ? pFileA->GetName() : "";
