@@ -186,6 +186,8 @@ public:
 	void SaveAnimation(BGSSaveFormBuffer* apBuffer) { ThisCall(0x563650, this, apBuffer); };
 	void LoadAnimation(BGSLoadFormBuffer* apBuffer) { ThisCall(0x5636E0, this, apBuffer); };
 
+	TESWorldSpace* GetWorldSpace() const { return ThisCall<TESWorldSpace*>(0x575D70, this); }
+
 	MEMBER_FN_PREFIX(TESObjectREFR);
 #if 1
 	DEFINE_MEMBER_FN(Activate, bool, 0x00573170, TESObjectREFR*, uint32_t, uint32_t, uint32_t);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute as the last call (190 bytes)

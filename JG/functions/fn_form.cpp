@@ -2193,14 +2193,14 @@ bool Cmd_SetCameraShotImageSpaceModifier_Execute(COMMAND_ARGS) {
 }
 
 namespace RefWalker {
-	typedef bool(__fastcall* ReferenceFilterFunc)(const struct FilterData& arFilter, TESObjectREFR* apRef);
-	struct ALIGN16 FilterData {
-		template<typename T>
-		class ScrapVector : public std::vector<T, BSScrapAllocator<T>> {
-		};
+	using ReferenceFilterFunc = bool(__fastcall*)(const struct FilterData& arFilter, TESObjectREFR* apRef);
 
-		FilterData(TESObjectREFR* apCaller, Script* apScript, float afConeSize, float afHeading, const NiPoint4& akPosAndDist)
-			: pCaller(apCaller), pScript(apScript), fConeSize(afConeSize * 0.017453292f), fHeading(afHeading), kPosAndDist(akPosAndDist) {}
+	template<typename T>
+	using ScrapVector = std::vector<T, BSScrapAllocator<T>>;
+
+	struct ALIGN16 FilterData {
+		FilterData(TESObjectREFR* apCaller, Script* apScript, float afConeSize, float afHeading, const NiPoint4& akPosAndDist, const TESForm* apSpace = nullptr)
+			: pCaller(apCaller), pScript(apScript), fConeSize(afConeSize * 0.017453292f), fHeading(afHeading), kPosAndDist(akPosAndDist), pSpace(apSpace) {}
 
 		ScrapVector<ReferenceFilterFunc>	kFilterFunctions;
 		Script*								pScript;
@@ -2209,7 +2209,7 @@ namespace RefWalker {
 		float								fConeSize;
 		float								fHeading;
 		PROCESS_TYPE 						eProcessLevel;
-		uint32_t							pad;
+		const TESForm*						pSpace;
 		NiPoint4							kPosAndDist;
 
 		bool __fastcall CheckFormType(TESObjectREFR* apRef) const {
@@ -2249,6 +2249,14 @@ namespace RefWalker {
 				return false;
 
 			return std::abs(GetAngle(kVector, fHeading)) <= fConeSize;
+		}
+
+		bool __fastcall CheckParentCell(TESObjectREFR* apRef) const {
+			return apRef->parentCell == pSpace;
+		}
+
+		bool __fastcall CheckParentWorld(TESObjectREFR* apRef) const {
+			return apRef->GetWorldSpace() == pSpace;
 		}
 
 		bool __fastcall operator()(TESObjectREFR* apRef) const {
@@ -2342,6 +2350,14 @@ namespace RefWalker {
 	bool __fastcall TypeFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
 		return arFilter.CheckFormType(apRef);
 	}
+
+	bool __fastcall CellFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
+		return arFilter.CheckParentCell(apRef);
+	}
+
+	bool __fastcall WorldFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
+		return arFilter.CheckParentWorld(apRef);
+	}
 }
 
 
@@ -2403,20 +2419,19 @@ bool Cmd_CallPerRefEx_Execute(COMMAND_ARGS) {
 
 	Script* pScript = reinterpret_cast<Script*>(kEval.GetNthArg(0)->GetTESForm());
 	if (pScript && IS_TYPE(pScript, Script)) {
-		TESObjectCELL* pCell = nullptr;
-		float fDistanceFilter = 0.f;
-		float fAngleFilter = -FLT_MAX;
-
 		NVSEArrayVar* pTypeArray = kEval.GetNthArg(1)->GetArrayVar();
 		uint32_t uiArraySize = g_arrInterface->GetArraySize(pTypeArray);
 		if (!uiArraySize)
 			return true;
 
+		float fDistanceFilter = 0.f;
 		{
 			PluginScriptToken* pToken = kEval.GetNthArg(2);
 			if (pToken)
 				fDistanceFilter = pToken->GetFloat();
 		}
+
+		float fAngleFilter = -FLT_MAX;
 		{
 			PluginScriptToken* pToken = kEval.GetNthArg(3);
 			if (pToken)
@@ -2476,17 +2491,42 @@ bool Cmd_CallPerMobileObject_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Script* pScript = nullptr;
 	PROCESS_TYPE eProcessLevel = PROCESS_TYPE::INVALID;
+	TESForm* pSpace = nullptr;
 	FORM_TYPE eFormFilter = FORM_TYPE::NONE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pScript, &eProcessLevel, &eFormFilter) && pScript && IS_TYPE(pScript, Script)) {
+	float fDistanceFilter = 0.f;
+	float fAngleFilter = -FLT_MAX;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pScript, &eProcessLevel, &eFormFilter, &fDistanceFilter, &fAngleFilter, &pSpace) && pScript && IS_TYPE(pScript, Script)) {
+		if (fDistanceFilter < 0.f)
+			fDistanceFilter = 0.f;
+
 		NiPoint4 kPosAndDist;
 		TESObjectREFR* pCaller = thisObj ? thisObj : PlayerCharacter::GetSingleton();
+		const NiPoint3* pPos = pCaller->PosVector();
+		kPosAndDist.x = pPos->x;
+		kPosAndDist.y = pPos->y;
+		kPosAndDist.z = pPos->z;
+		kPosAndDist.w = fDistanceFilter * fDistanceFilter;
 
-		FilterData kFilterData(pCaller, pScript, 0.f, 0.f, kPosAndDist);
+		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->rot.z, kPosAndDist, pSpace);
 		if (eFormFilter)
 			kFilterData.kTypeFilters.push_back(eFormFilter);
 
 		if (!kFilterData.kTypeFilters.empty())
 			kFilterData.kFilterFunctions.push_back(TypeFilter);
+
+		if (pSpace) {
+			if (pSpace->GetFormType() == FORM_TYPE::TESObjectCELL)
+				kFilterData.kFilterFunctions.push_back(CellFilter);
+			else if (pSpace->GetFormType() == FORM_TYPE::TESWorldSpace)
+				kFilterData.kFilterFunctions.push_back(WorldFilter);
+
+			if (fAngleFilter > 0.f && kPosAndDist.w > 0.f)
+				kFilterData.kFilterFunctions.push_back(DistanceAndAngleFilter);
+			else if (fAngleFilter > 0.f)
+				kFilterData.kFilterFunctions.push_back(AngleFilter);
+			else if (kPosAndDist.w > 0.f)
+				kFilterData.kFilterFunctions.push_back(DistanceFilter);
+		}
 
 		{
 			LambdaVariableContext kVarContext(pScript);
@@ -2512,10 +2552,38 @@ bool Cmd_CallPerMobileObjectEx_Execute(COMMAND_ARGS) {
 			return true;
 
 		PROCESS_TYPE eProcessLevel = PROCESS_TYPE(kEval.GetNthArg(1)->GetInt());
+		float fDistanceFilter = 0.f;
+		{
+			PluginScriptToken* pToken = kEval.GetNthArg(3);
+			if (pToken)
+				fDistanceFilter = pToken->GetFloat();
+		}
+
+		float fAngleFilter = -FLT_MAX;
+		{
+			PluginScriptToken* pToken = kEval.GetNthArg(4);
+			if (pToken)
+				fAngleFilter = pToken->GetFloat();
+		}
+
+		TESForm* pSpace = nullptr;
+		{
+			PluginScriptToken* pToken = kEval.GetNthArg(5);
+			if (pToken)
+				pSpace = reinterpret_cast<TESObjectCELL*>(pToken->GetTESForm());
+		}
+
+		if (fDistanceFilter < 0.f)
+			fDistanceFilter = 0.f;
 
 		NiPoint4 kPosAndDist;
 		TESObjectREFR* pCaller = thisObj ? thisObj : PlayerCharacter::GetSingleton();
-		FilterData kFilterData(pCaller, pScript, 0.f, 0.f, kPosAndDist);
+		const NiPoint3* pPos = pCaller->PosVector();
+		kPosAndDist.x = pPos->x;
+		kPosAndDist.y = pPos->y;
+		kPosAndDist.z = pPos->z;
+		kPosAndDist.w = fDistanceFilter * fDistanceFilter;
+		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->rot.z, kPosAndDist, pSpace);
 
 		BSScrapBuffer<NVSEArrayElement> kElements(uiArraySize);
 		g_arrInterface->GetElements(pTypeArray, kElements.get(), nullptr);
@@ -2526,6 +2594,20 @@ bool Cmd_CallPerMobileObjectEx_Execute(COMMAND_ARGS) {
 
 		if (!kFilterData.kTypeFilters.empty())
 			kFilterData.kFilterFunctions.push_back(TypeFilter);
+
+		if (pSpace) {
+			if (pSpace->GetFormType() == FORM_TYPE::TESObjectCELL)
+				kFilterData.kFilterFunctions.push_back(CellFilter);
+			else if (pSpace->GetFormType() == FORM_TYPE::TESWorldSpace)
+				kFilterData.kFilterFunctions.push_back(WorldFilter);
+
+			if (fAngleFilter > 0.f && kPosAndDist.w > 0.f)
+				kFilterData.kFilterFunctions.push_back(DistanceAndAngleFilter);
+			else if (fAngleFilter > 0.f)
+				kFilterData.kFilterFunctions.push_back(AngleFilter);
+			else if (kPosAndDist.w > 0.f)
+				kFilterData.kFilterFunctions.push_back(DistanceFilter);
+		}
 
 		{
 			LambdaVariableContext kVarContext(pScript);
