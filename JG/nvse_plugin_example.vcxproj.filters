@@ -66,9 +66,6 @@
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameBSExtraData.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="..\nvse\nvse\GameForms.cpp">
       <Filter>nvse</Filter>
     </ClCompile>

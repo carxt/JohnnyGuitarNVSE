@@ -181,7 +181,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameBSExtraData.cpp" />
     <ClCompile Include="..\nvse\nvse\GameForms.cpp" />
     <ClCompile Include="..\nvse\nvse\GameObjects.cpp" />
     <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp" />
