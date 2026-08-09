@@ -58,7 +58,7 @@ JohnnyExtraData::EDIDResult __fastcall JohnnyExtraData::SetEditorID(const NiFixe
 			return EDIDResult::ALREADY_EXISTS;
 		}
 
-		kFormData.kEditorIDs.AddTail(arEDID);
+		kFormData.kEditorIDs.AddHead(arEDID);
 		DEBUG_MSG("%08X Adding EDID alias \"%s\"", pOwner->GetFormID(), arEDID);
 		return EDIDResult::SUCCESS;
 	}
