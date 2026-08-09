@@ -2437,6 +2437,7 @@ bool Cmd_CallPerRefEx_Execute(COMMAND_ARGS) {
 			if (pToken)
 				fAngleFilter = pToken->GetFloat();
 		}
+		TESObjectCELL* pCell = nullptr;
 		{
 			PluginScriptToken* pToken = kEval.GetNthArg(4);
 			if (pToken)
