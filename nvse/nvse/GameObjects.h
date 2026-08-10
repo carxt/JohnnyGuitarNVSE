@@ -3,6 +3,7 @@
 #include "GameForms.h"
 #include "GameBSExtraData.h"
 #include "GameExtraData.h"
+#include "GameSound.h"
 #include "Obsidian/AudioMarkerInfo.hpp"
 
 class ScriptLocals;
@@ -22,6 +23,17 @@ static const uint32_t s_TESObjectREFR_Set3D = 0x5702E0;			// void : (const char*
 #endif
 const uint32_t kUpdateAppearanceAddr = 0x8D3FA0;
 class NiPoint3;
+
+class BSAnimNoteReceiver;
+class ActorCause;
+class TrapEntry;
+class TargetEntry;
+class BSFaceGenAnimationData;
+class MagicCaster;
+class MagicTarget;
+class TESTopic;
+class Actor;
+class TESObjectCELL;
 // 68
 class TESObjectREFR : public TESForm {
 public:
@@ -30,74 +42,83 @@ public:
 	TESObjectREFR();
 	~TESObjectREFR();
 
-	virtual void		Unk_4E(void);	// GetStartingPosition(Position, Rotation, WorldOrCell)
-	virtual void		Unk_4F(void);
-	virtual void		Unk_50(void);
-	virtual void		Unk_51(void);
-	virtual bool		CastShadows();
-	virtual void		Unk_53(void);
-	virtual void		Unk_54(void);
-	virtual void		Unk_55(void);
-	virtual void		Unk_56(void);
-	virtual bool		IsObstacle();
-	virtual void		Unk_58(void);
-	virtual void		Unk_59(void);
-	virtual void		Unk_5A(void);
-	virtual void		Unk_5B(void);
-	virtual void		Unk_5C(void);
-	virtual void		Unk_5D(void);
-	virtual void		Unk_5E(void);
-	virtual TESObjectREFR* RemoveItem(TESForm* toRemove, BaseExtraList* extraList, uint32_t quantity, bool keepOwner, bool drop, TESObjectREFR* destRef,
-		uint32_t unk6, uint32_t unk7, bool unk8, bool unk9);
-	virtual void		Unk_60(void);
-	virtual bool		EquipObject(TESForm* item, uint32_t count, ExtraDataList* xData, bool lockEquip);
-	virtual void		Unk_62(void);
-	virtual void		Unk_63(void);
-	virtual void		AddItem(TESForm* item, ExtraDataList* xDataList, uint32_t quantity);
-	virtual void		Unk_65(void);
-	virtual void		Unk_66(void);
-	virtual void		Unk_67(void);					// Actor: GetMagicEffectList
-	virtual bool		GetIsChildSize(bool checkHeight);		// 068 Actor: GetIsChildSize
-	virtual uint32_t		GetActorUnk0148();			// result can be interchanged with baseForm, so TESForm* ?
-	virtual void		SetActorUnk0148(uint32_t arg0);
-	virtual void		Unk_6B(void);
-	virtual void		Unk_6C(void);	// REFR: GetBSFaceGenNiNodeSkinned
-	virtual void		Unk_6D(void);	// REFR: calls 006C
-	virtual void		Unk_6E(void);	// MobileActor: calls 006D then NiNode::Func0040
-	virtual void		Unk_6F(void);
-	virtual bool		DetachHavok();
-	virtual void		InitHavok();
-	virtual NiAVObject*	Load3D(bool abBackgroundLoad);
-	virtual void		Set3D(NiAVObject* apObject, bool abTestProcessLevel = false);
-	virtual NiNode*		Get3D() const;
-	virtual void		Unk_75(void);
-	virtual void		Unk_76(void);
-	virtual void		Unk_77(void);
-	virtual void		Unk_78(void);
-	virtual Animation*	GetAnimation() const;			// 0079
-	virtual BipedAnim*	GetBiped() const;	// 007A	Character only
-	virtual BipedAnim*	GetCurrentBiped() const;
-	virtual void		SetValidBip01Names(BipedAnim* validBip01Names);
-	virtual const NiPoint3& GetPos() const;				// GetPos or GetDistance
-	virtual void		Unk_7E(uint32_t arg0);
-	virtual void		Unk_7F(void);
-	virtual void		Unk_80(uint32_t arg0);
-	virtual void		Unk_81(uint32_t arg0);
-	virtual void		Unk_82(void);
-	virtual uint32_t		Unk_83(void);
-	virtual void		Unk_84(uint32_t arg0);
-	virtual uint32_t		Unk_85(void);
-	virtual bool		IsCharacter();			// return false for Actor and Creature, true for character and PlayerCharacter
-	virtual bool		IsCreature();
-	virtual bool		IsExplosion();
-	virtual bool		IsProjectile();
-	virtual void		Unk_8A(void);			// SetParentCell (Interior only ?)
-	virtual bool		HasHealth(bool arg0);	// HasHealth (baseForm health > 0 or Flags bit23 set)
-	virtual bool		Unk_8C(void);
-	virtual bool		Unk_8D(void);
-	virtual void		Unk_8E(void);
-	virtual void		Unk_8F(void);
-	virtual void		Unk_90(void);
+#ifdef GAME
+	virtual bool					GetEditorLocation(NiPoint3& arPos, NiPoint3& arRot, TESForm*& apParentLocation, TESObjectCELL* apCell);
+	virtual BSSoundHandle			VoiceSoundFunction(TESTopic* apTopic, Actor* apTarget, bool ab2DSound, bool abAlwaysPlay, bool abForceCorrectDuration, bool abSayTo, bool abForceSubtitles);
+	virtual void					UpdateSoundCallBack();
+	virtual void					DamageObject(float afDamage, bool abForce);
+#endif
+	virtual bool					GetCastShadows() const;
+	virtual void					SetCastShadows(bool abVal);
+	virtual bool					GetMotionBlur() const;
+	virtual void					SetMotionBlur(bool abVal);
+	virtual void					IsDangerous();
+	virtual bool					IsObstacle() const;
+#ifdef EDITOR
+	virtual uint32_t				GetNavMeshGenType() const;
+#endif
+	virtual bool					IsQuestObject() const;
+	virtual void					SetActorCause(ActorCause* apActorCause);
+	virtual ActorCause*				GetActorCause() const;
+	virtual NiPoint3				GetStartingAngle() const;
+	virtual NiPoint3				GetStartingLocation() const;
+	virtual void					SetStartingPosition(NiPoint3 akPos);
+	virtual void					UpdateRefLight();
+	virtual TESObjectREFR*			RemoveItem(TESBoundObject* apObject, ExtraDataList* apExtraList, uint32_t auiCount, bool abStealing, bool abDropWorld, TESObjectREFR* apOtherContainer, NiPoint3* apPoint, NiPoint3* apRotate, bool abDelete, bool abPreferStolen);
+	virtual void					RemoveItemType(uint32_t auiTypeID, bool abStealing, uint32_t auiCount);
+	virtual bool					AddWornItem(TESBoundObject* apObject, uint32_t auiCount, ExtraDataList* apExtraList, bool abForceEquip = false);
+	virtual bool					RemoveWornItem(TESBoundObject* apObject, uint32_t auiCount, ExtraDataList* apExtraList);
+	virtual void					DoTrap(TrapEntry*, TargetEntry*);
+#ifdef GAME
+	virtual void					AddObjecttoContainer(TESBoundObject* apObject, ExtraDataList* apExtraList, uint32_t auiCount);
+	virtual NiPoint3				GetLookingAtLocation() const;
+	virtual MagicCaster*			GetMagicCaster() const;
+	virtual MagicTarget*			GetMagicTarget() const;
+#endif
+	virtual bool					IsChild(bool abCheckHeight);
+	virtual TESActorBase*			GetTemplateActorBase() const;
+	virtual void					SetTemplateActorBase(TESActorBase* apBase);
+	virtual NiNode*					GetFaceNodeBiped(NiNode* apNode = nullptr) const;
+	virtual BSFaceGenNiNode*		GetFaceNodeSkinned(NiNode* apNode = nullptr) const;
+	virtual BSFaceGenNiNode*		GetFaceNode(NiNode* apNode = nullptr) const;
+	virtual BSFaceGenAnimationData* GetFaceAnimationData(NiNode* apNode = nullptr) const;
+	virtual bool					ClampToGround();
+	virtual bool					DetachHavok();
+	virtual void					InitHavok();
+	virtual NiAVObject*				Load3D(bool abBackgroundLoading);
+	virtual void					Set3D(NiAVObject* apObject, bool abDebugPrint);
+	virtual NiNode*					Get3D() const;
+	virtual bool					HasRandomAnim() const;
+	virtual NiPoint3				GetBoundMin() const;
+	virtual NiPoint3				GetBoundMax() const;
+	virtual void					UpdateAnimation();
+	virtual Animation*				GetAnimation() const;
+	virtual BipedAnim*				GetBiped() const;
+	virtual BipedAnim*				GetCurrentBiped() const;
+#ifdef GAME
+	virtual void					SetBiped(BipedAnim* apBiped);
+#endif
+	virtual const NiPoint3&			GetLocationOnReference() const;
+	virtual void					SetRunsInLow(bool abVal);
+	virtual void					MoveHavok(bool abRecursive);
+	virtual void					SetActionComplete(bool abVal);
+	virtual void					SetMovementComplete(bool abVal);
+#ifdef GAME
+	virtual void					ResetInventory(bool abLeveledOnly);
+	virtual NiNode*					GetFireNode() const;
+	virtual void					SetFireNode(NiNode* apNode);
+	virtual SIT_SLEEP_STATE			GetSitSleepState() const;
+	virtual bool					IsCharacter() const;
+	virtual bool					IsCreature() const;
+	virtual bool					IsExplosion() const;
+#endif
+	virtual bool					IsProjectile() const;
+	virtual void					SetParentCell(TESObjectCELL* apCell);
+	virtual bool					IsDead(bool abNotEssential) const;
+	virtual bool					IsKnockedOut() const;
+	virtual bool					IsParalyzed() const;
+	virtual BSAnimNoteReceiver*		CreateAnimNoteReceiver();
+	virtual BSAnimNoteReceiver*		GetAnimNoteReceiever() const;
 
 	enum {
 		kFlags_Unk00000002 = 0x00000002,
@@ -121,15 +142,6 @@ public:
 		NiNode*			niNode18;		// 18
 	};
 
-	struct EditorData {
-		uint32_t	unk00;	// 00
-	};
-	// 0C
-
-#ifdef EDITOR
-	EditorData	editorData;			// +04
-#endif
-
 	TESChildCell	childCell;				// 018
 
 	TESSound* loopSound;				// 01C
@@ -142,6 +154,10 @@ public:
 
 	TESObjectCELL* parentCell;			// 040
 	ExtraDataList	extraDataList;			// 044
+#ifdef EDITOR
+	void* pUnk78;
+	float fTestRadius;
+#endif
 	RenderState* renderState;			// 064
 
 	ScriptLocals* GetScriptLocals() const;
@@ -189,15 +205,13 @@ public:
 	TESWorldSpace* GetWorldSpace() const { return ThisCall<TESWorldSpace*>(0x575D70, this); }
 
 	MEMBER_FN_PREFIX(TESObjectREFR);
-#if 1
-	DEFINE_MEMBER_FN(Activate, bool, 0x00573170, TESObjectREFR*, uint32_t, uint32_t, uint32_t);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute as the last call (190 bytes)
-#elif EDITOR
-#else
-#error
-#endif
 };
 
+#ifdef GAME
 static_assert(sizeof(TESObjectREFR) == 0x068);
+#else
+static_assert(sizeof(TESObjectREFR) == 0x084);
+#endif
 
 TESBoundObject* GetPermanentBaseForm(TESObjectREFR* apReference);	// For LevelledForm, find real baseForm, not temporary one.
 
@@ -276,9 +290,9 @@ public:
 	uint8_t			unk86;			// 86 - loaded
 	uint8_t			unk87;			// 87	Init'd to the inverse of NoLowLevelProcessing
 };
-
+#ifdef GAME
 static_assert(sizeof(MobileObject) == 0x88);
-
+#endif
 class MagicTarget;
 typedef tList<ActiveEffect> ActiveEffectList;
 
@@ -751,7 +765,9 @@ public:
 	uint16_t			unk1C2;				// 1C2
 	float			unk1C4;				// 1C4
 };
+#ifdef GAME
 static_assert(sizeof(Character) == 0x1C8);
+#endif
 class bhkRigidBody;
 struct ParentSpaceNode;
 struct TeleportLink;
@@ -988,8 +1004,9 @@ public:
 	static constexpr AddressPtr<bool, 0x11E07B9> bIsAutoVanityMode;
 	static constexpr AddressPtr<NiPoint3, 0x11E0B58> kVanityModePos;
 };
+#ifdef GAME
 static_assert(sizeof(PlayerCharacter) == 0xE50);
-
+#endif
 
 // 150
 class Projectile : public MobileObject {
@@ -1098,7 +1115,9 @@ public:
 	uint8_t				pad149[3];		// 149
 	float				range;			// 14C
 };
+#ifdef GAME
 static_assert(sizeof(Projectile) == 0x150);
+#endif
 
 class MuzzleFlash {
 public:
@@ -1195,4 +1214,6 @@ public:
 	uint32_t			unk0D4[11];		// 0D4
 	float			unk100;			// 100
 };
+#ifdef GAME
 static_assert(sizeof(Explosion) == 0x104);
+#endif

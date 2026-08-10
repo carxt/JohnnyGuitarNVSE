@@ -139,7 +139,9 @@ public:
 	ScriptLocals	*CreateEventList();
 };
 
+#ifdef GAME
 static_assert(sizeof(Script) == SCRIPT_SIZE);
+#endif
 
 struct ScriptRunner
 {

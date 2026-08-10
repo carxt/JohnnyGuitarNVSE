@@ -2,6 +2,7 @@
 #include <GameSound.h>
 #include <GameUI.h>
 #include <GameAPI.h>
+#include <GameObjects.h>
 
 class LoadedAreaBound;
 struct ExtraAudioMarkerData;
@@ -1043,9 +1044,9 @@ public:
 		return kVertices.GetSize();
 	}
 };
-
+#ifdef GAME
 static_assert(sizeof(NavMesh) == 0x108);
-
+#endif
 typedef NiPointer<NavMesh> NavMeshPtr;
 
 

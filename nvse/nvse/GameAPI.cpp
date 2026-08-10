@@ -14,7 +14,7 @@ bool extraTraces = false;
 // arg1 = 1, ignored if canCreateNew is false, passed to 'init' function if a new object is created
 typedef void* (*_GetSingleton)(bool canCreateNew);
 
-#if 1
+#ifdef GAME
 
 const _ExtractArgs ExtractArgs = (_ExtractArgs)0x005ACCB0;
 
@@ -40,7 +40,7 @@ const _MarkBaseExtraListScriptEvent MarkBaseExtraListScriptEvent = (_MarkBaseExt
 
 SaveGameManager** g_saveGameManager = (SaveGameManager**)0x011DE134;
 
-#elif EDITOR
+#else
 
 //	FormMap* g_FormMap = (FormMap *)0x009EE18C;		// currently unused
 //	TESDataHandler ** g_dataHandler = (TESDataHandler **)0x00A0E064;
@@ -50,10 +50,6 @@ const _GetFormByID GetFormByID = (_GetFormByID)(0x004F9650); // Search for aNonP
 const _FormHeap_Allocate FormHeap_Allocate = (_FormHeap_Allocate)0x00401000;
 const _FormHeap_Free FormHeap_Free = (_FormHeap_Free)0x0000401180;
 const _ShowCompilerError ShowCompilerError = (_ShowCompilerError)0x005C5730;	// Called with aNonPersistentR (still same sub as the other one)
-
-#else
-
-#error RUNTIME_VERSION unknown
 
 #endif
 

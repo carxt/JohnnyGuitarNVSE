@@ -9,10 +9,12 @@ void ExtraDataList::CopyList(ExtraDataList* apCopy) {
 	ThisCall(0x411EC0, this, apCopy);
 }
 
+#ifdef GAME
 // GAME - 0x4121E0
 void ExtraDataList::CopyListForContainer(ExtraDataList* apCopy, bool abDontRemove) {
 	ThisCall(0x4121E0, this, apCopy, abDontRemove);
 }
+#endif
 
 // GAME - 0x412490
 void ExtraDataList::CopyListForReference(ExtraDataList* apCopy, bool abRemove) {

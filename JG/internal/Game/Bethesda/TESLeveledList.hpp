@@ -46,7 +46,9 @@ public:
 	uint8_t							ucChanceNone;
 	Bitfield<_LeveledListFlags>		ucFlags;
 	TESGlobal*						pChanceGlobal;
+#ifdef GAME
 	BSSimpleList<LeveledObject*>	kScriptAddedObjects;
+#endif
 
 	const BSSimpleList<LeveledObject*>* GetLeveledList() const;
 	BSSimpleList<LeveledObject*>* GetLeveledList();
@@ -62,4 +64,8 @@ public:
 	static TESLeveledList* GetFormAsLeveledList(const TESForm* apForm);
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESLeveledList, 0x1C);
+#else
+ASSERT_SIZE(TESLeveledList, 0x14);
+#endif

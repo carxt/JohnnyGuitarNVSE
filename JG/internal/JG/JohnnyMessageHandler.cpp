@@ -1,4 +1,6 @@
 #include "JohnnyMessageHandler.hpp"
+#include "JohnnyPatches.hpp"
+#ifdef GAME
 #include "BarterFilter.hpp"
 #include "CameraOverlay.hpp"
 #include "CameraOverride.hpp"
@@ -14,7 +16,6 @@
 #include "JohnnyExtraData.hpp"
 #include "JohnnyFixes.hpp"
 #include "JohnnyPluginData.hpp"
-#include "JohnnyPatches.hpp"
 #include "JohnnyRadios.hpp"
 #include "LandRemapping.hpp"
 #include "MediaLocationControllerTweaks.hpp"
@@ -22,11 +23,12 @@
 #include "RSMBarberHook.hpp"
 #include "TaskQueue.hpp"
 
-#include "JIP/JIPFixes.hpp"
-
 #include "functions/fn_gameplay.h"
 
 #include <GameUI.h>
+#include <GameObjects.h>
+#endif
+#include "JIP/JIPFixes.hpp"
 
 #include "Bethesda/AutoMemContext.hpp"
 
@@ -36,23 +38,22 @@ extern NVSECommandTableInterface* g_cmdTableInterface;
 
 // The reason we're doing functions per event is because we don't want a massive, cache destroying message handler function
 
-static SPEC_NOINLINE void PostPostLoad(bool abGECK) {
+static SPEC_NOINLINE void PostPostLoad() {
 	if (JohnnyPatches::bFixJIP) {
-		JIPFixes::InitCommandHooks(abGECK);
-		JIPFixes::InitHooks(abGECK);
+		JIPFixes::InitCommandHooks();
+		JIPFixes::InitHooks();
 	}
-
-	if (abGECK)
-		return;
-
+#ifdef GAME
 	const CommandInfo* pUpdate3D = g_cmdTableInterface->GetByOpcode(CommandOpcodes::kUpdate3D);
 	if (pUpdate3D)
 		Cmd_Update3D = pUpdate3D->execute;
+#endif
 }
 
+#ifdef GAME
 static SPEC_NOINLINE void DeferredInit() {
 	if (JohnnyPatches::bFixJIP)
-		JIPFixes::InitDeferredHooks(false);
+		JIPFixes::InitDeferredHooks();
 
 	dwGameStartTimestamp = GetTickCount();
 	JohnnyPatches::DeferredInit();
@@ -114,7 +115,7 @@ static void PostLoadGame() {
 	CameraOverlay::ReInit();
 }
 
-void JohnnyMessageHandler::Game(NVSEMessagingInterface::Message* apMessage) {
+void JohnnyMessageHandler::Handler(NVSEMessagingInterface::Message* apMessage) {
 	const uint32_t eMessageType = apMessage->type;
 
 	// Not needed at the moment, and gets called more often than the rest - thus, skip early
@@ -130,7 +131,7 @@ void JohnnyMessageHandler::Game(NVSEMessagingInterface::Message* apMessage) {
 	else {
 		switch (eMessageType) {
 			[[unlikely]] case NVSEMessagingInterface::kMessage_PostPostLoad:
-				PostPostLoad(false);
+				PostPostLoad();
 				break;
 			[[unlikely]] case NVSEMessagingInterface::kMessage_DeferredInit:
 				DeferredInit();
@@ -147,11 +148,13 @@ void JohnnyMessageHandler::Game(NVSEMessagingInterface::Message* apMessage) {
 		}
 	}
 }
-
-void JohnnyMessageHandler::GECK(NVSEMessagingInterface::Message* apMessage) {
+#else
+void JohnnyMessageHandler::Handler(NVSEMessagingInterface::Message* apMessage) {
 	const uint32_t eMessageType = apMessage->type;
 
 	if (eMessageType == NVSEMessagingInterface::kMessage_PostPostLoad) {
-		PostPostLoad(true);
+		MEMORY_CONTEXT(MC_DEFAULT);
+		PostPostLoad();
 	}
 }
+#endif

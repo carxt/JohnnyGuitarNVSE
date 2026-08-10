@@ -2890,7 +2890,7 @@ bool Cmd_ApplyModelTextureSwap_Execute(COMMAND_ARGS) {
 				}
 			}
 
-			if (pBaseForm->GetHasPLSpecTex()) {
+			if (pBaseForm->GetHasSpecificTextures()) {
 				CdeclCall(0x4B7660, pScene); // SwapPlatformLanguageTextures
 				*result = 1;
 			}

@@ -194,7 +194,7 @@ bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && mediaset && IS_TYPE(mediaset, MediaSet)) {
 		switch (traitID) {
 		case 0:
-			*result = mediaset->type;
+			*result = mediaset->uiType;
 			break;
 		case 1:
 		case 2:
@@ -242,7 +242,7 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 		*result = 1;
 		switch (traitID) {
 		case 0:
-			mediaset->type = newVal;
+			mediaset->uiType = newVal;
 			break;
 		case 1:
 		case 2:

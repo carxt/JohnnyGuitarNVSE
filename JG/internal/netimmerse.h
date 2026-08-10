@@ -467,8 +467,11 @@ public:
 
 	NiPointer<NiInterpolator> m_spInterpolator;
 
-	CREATE_OBJECT(NiSingleInterpController, 0xC5C9D0);
+#ifdef GAME
 	NIRTTI_ADDRESS(0x11F3714);
+#else
+	NIRTTI_ADDRESS(0xF1F0C8);
+#endif
 };
 
 class NiFloatInterpController : public NiSingleInterpController {
@@ -478,13 +481,22 @@ public:
 
 	virtual void GetTargetFloatValue(float& arValue);
 
+#ifdef GAME
 	NIRTTI_ADDRESS(0x11F4220);
+#else
+	NIRTTI_ADDRESS(0xF1FB98);
+#endif
 };
 
 class NiLightDimmerController : public NiFloatInterpController {
 public:
+#ifdef GAME
 	CREATE_OBJECT(NiLightDimmerController, 0xA4D0D0);
 	NIRTTI_ADDRESS(0x11F3FA0);
+#else
+	CREATE_OBJECT(NiLightDimmerController, 0x7FD610);
+	NIRTTI_ADDRESS(0xF1F930);
+#endif
 };
 
 // 38

@@ -39,23 +39,6 @@ const char* GetObjectClassName(void* obj);
 // ConsolePrint() limited to 512 chars; use this to print longer strings to console
 //void Console_Print_Long(const std::string& str);
 
-// Macro for debug output to console at runtime
-#if RUNTIME
-#ifdef _DEBUG
-#define DEBUG_PRINT(x, ...) { Console_Print((x), __VA_ARGS__); }
-#define DEBUG_MESSAGE(x, ...) { PrintDebug((x), __VA_ARGS__); }
-#else
-#define DEBUG_PRINT(x, ...) { }
-#define DEBUG_MESSAGE(x, ...) { }
-#endif	//_DEBUG
-#else
-#define DEBUG_PRINT(x, ...) { }
-#define DEBUG_MESSAGE(x, ...) { }
-// This is so we don't have to handle size change with EditorData :)
-#undef static_assert
-#define static_assert(a)
-#endif	// RUNTIME
-
 #define SIZEOF_ARRAY(arrayName, elementType) (sizeof(arrayName) / sizeof(elementType))
 
 class TESForm;

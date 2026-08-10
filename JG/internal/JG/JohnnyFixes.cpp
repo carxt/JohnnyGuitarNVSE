@@ -1,4 +1,5 @@
 #include "JohnnyFixes.hpp"
+#ifdef GAME
 #include "GameForms.h"
 #include "GameProcess.h"
 #include "GameSettings.h"
@@ -7,9 +8,11 @@
 #include "SkyUpdateFixes.hpp"
 #include "EditorIDRestoration.hpp"
 #include "QuestObjectiveDisplayFix.hpp"
+#endif
 
 STACK_FRAME_OPT_DISABLE
 namespace JohnnyFixes {
+#ifdef GAME
 	SPEC_NAKED void InventoryAmmoHook() {
 		static constexpr uint32_t uiReturnAddr = 0x7080A8;
 		__asm {
@@ -381,8 +384,10 @@ namespace JohnnyFixes {
 		if (pAIProcess)
 			pAIProcess->SetFurnitureRef(PlayerCharacter::GetSingleton(), 0, nullptr, 0x7F);
 	}
+#endif
 
 	void Init() {
+#ifdef GAME
 		// for Runtime EDIDs
 		EDIDRestoration::InitHooks();
 
@@ -463,6 +468,7 @@ namespace JohnnyFixes {
 
 		// Add a baseform nullcheck for created refs in BGSSaveLoadGame::CheckInitialData
 		HookUtils::SafeWriteBuf(0x849DE6, "\x85\xC0\x74\x08\x8B\x40\x0C");
+#endif
 	}
 
 }

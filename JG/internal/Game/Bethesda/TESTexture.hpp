@@ -16,6 +16,12 @@ public:
 	virtual const char* GetDefaultPath() const;
 
 	BSString strTextureName;
+#ifdef EDITOR
+	void*	 pImage;
+	uint32_t uiTextFieldControlId;
+	uint32_t uiEditButtonControlId;
+	uint32_t uiIconControlId;
+#endif
 
 	const char* GetTextureName() const;
 	static const char* GetTextureName(const TESForm* apForm, const TESObjectREFR* apRef);
@@ -24,4 +30,8 @@ public:
 	uint32_t GetTextureNameLength() const;
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESTexture, 0xC);
+#else
+ASSERT_SIZE(TESTexture, 0x1C);
+#endif

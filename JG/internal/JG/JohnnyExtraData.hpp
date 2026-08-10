@@ -20,7 +20,9 @@ public:
 
 	// Persistent
 	struct FormData {
+#ifdef GAME
 		EDIDList	kEditorIDs;
+#endif
 	};
 
 	// Temporary
@@ -32,9 +34,13 @@ public:
 	FormData	kFormData;
 	ScriptData	kScriptData;
 
+#ifdef GAME
 	const NiFixedString& GetEditorID() const;
 	EDIDResult __fastcall SetEditorID(const NiFixedString& arEDID);
 	EDIDResult __fastcall RemoveEditorID(const NiFixedString& arEDID);
+#else
+	const char* GetEditorID() const;
+#endif
 
 	static const NiFixedString& GetName();
 

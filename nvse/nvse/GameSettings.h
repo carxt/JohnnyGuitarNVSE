@@ -19,31 +19,30 @@ public:
 		char			h;
 	};
 
-	CustomGameSetting() : __vftable(nullptr), uValue(0), pKey(nullptr) {};
+	CustomGameSetting() = default;
 	~CustomGameSetting() = default;
 
-	void*		__vftable;
-	Info		uValue;
-	const char* pKey;
+	void*		__vftable		= nullptr;
+	Info		uValue			= { .i = 0 };
+	const char* pKey			= nullptr;
+#ifdef EDITOR
+	uint32_t	formData[11]	= {};
+#endif
 
-	void Initialize(const char* apName, float afValue) {
-		ThisCall(0x40E0B0, this, apName, afValue);
-	}
-
-	void Initialize(const char* apName, double adValue) {
-		ThisCall(0x40E0B0, this, apName, static_cast<float>(adValue));
-	}
-
-	void Initialize(const char* apName, int32_t aiValue) {
-		ThisCall(0x40C150, this, apName, aiValue);
-	}
-
-	void Initialize(const char* apName, const char* apValue) {
-		ThisCall(0x40C150, this, apName, apValue);
-	}
-
-	void Initialize(const char* apName, char acValue) {
-		ThisCall(0x40C150, this, apName, acValue);
+	template<typename T>
+		requires (std::is_integral_v<T> || std::is_floating_point_v<T> || std::is_same_v<T, const char*>)
+	void Initialize(const char* apName, const T value) {
+#ifdef GAME
+		if constexpr (std::is_floating_point_v<T>)
+			ThisCall(0x40E0B0, this, apName, static_cast<float>(value));
+		else
+			ThisCall(0x40C150, this, apName, value);
+#else
+		if constexpr (std::is_floating_point_v<T>)
+			ThisCall(0x491120, this, apName, static_cast<float>(value));
+		else
+			ThisCall(0x491070, this, apName, value);
+#endif
 	}
 
 	float Float() const {
@@ -66,3 +65,9 @@ public:
 		return *reinterpret_cast<const Bitfield32*>(&uValue.i);
 	}
 };
+
+#ifdef GAME
+ASSERT_SIZE(CustomGameSetting, 0xC);
+#else
+ASSERT_SIZE(CustomGameSetting, 0x38);
+#endif

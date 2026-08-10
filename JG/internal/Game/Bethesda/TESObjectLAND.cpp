@@ -6,15 +6,7 @@ bool TESObjectLAND::GetLandRemapped() const {
 #ifdef GAME
     return kData.uiFlags.bLandRemapped;
 #else
-    const TESObjectCELL* pCell = GetParentCell();
-    if (!pCell)
-        return false;
-
-	const TESWorldSpace* pWorldSpace = pCell->GetWorldSpace();
-    if (!pWorldSpace)
-        return false;
-	
-    return pWorldSpace->GetParentWorld(TESWorldSpace::ParentUseBit::LAND); 
+    return ThisCall<bool>(0x614690, this);
 #endif
 }
 
