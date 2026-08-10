@@ -95,9 +95,7 @@ public:
 	virtual Animation*				GetAnimation() const;
 	virtual BipedAnim*				GetBiped() const;
 	virtual BipedAnim*				GetCurrentBiped() const;
-#ifdef GAME
 	virtual void					SetBiped(BipedAnim* apBiped);
-#endif
 	virtual const NiPoint3&			GetLocationOnReference() const;
 	virtual void					SetRunsInLow(bool abVal);
 	virtual void					MoveHavok(bool abRecursive);
