@@ -55,7 +55,7 @@ public:
 	virtual void					IsDangerous();
 	virtual bool					IsObstacle() const;
 #ifdef EDITOR
-	virtual uint32_t				GetNavMeshGenType() const;
+	virtual uint32_t				GetRefNavMeshGenType() const;
 #endif
 	virtual bool					IsQuestObject() const;
 	virtual void					SetActorCause(ActorCause* apActorCause);
