@@ -399,7 +399,7 @@ bool Cmd_GetNiLODLevel_Execute(COMMAND_ARGS) {
 bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NiUpdateType eType = NiUpdateType::NONE;
-	float fTime = FLT_MAX;
+	float fTime = -FLT_MAX;
 	BOOL bUpdateControllers = FALSE;
 	BOOL bFirstPerson = FALSE;
 	char cName[MAX_PATH] = {};
@@ -414,7 +414,7 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 
 		if (pTarget) {
 			const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
-			NiUpdateData kData(fTime != FLT_MAX ? fTime : 0.f, bUpdateControllers, bQueue);
+			NiUpdateData kData(fTime > 0.f ? fTime : 0.f, bUpdateControllers, bQueue);
 			switch (eType) {
 			case NiUpdateType::FULL:
 				pTarget->Update(kData);
