@@ -369,6 +369,6 @@ public:
 	}
 
 	void QueueBiped3DDetach(NiAVObject* apObject) {
-		ThisCall(0x87AD00, this, apObject);
+		ThisCall(0x87ACB0, this, apObject);
 	}
 };
