@@ -2964,6 +2964,10 @@ public:
 	static void RunBiped3DDetach(NiAVObject* apObject) {
 		CdeclCall(0x4AB0C0, apObject);
 	}
+
+	static void AttachToSkeleton(NiNode* apSkeleton, NiAVObject* apSkin, NiNode* apParentNode, bool abShowWarnings = false) {
+		CdeclCall(0x4ADE40, apSkeleton, apSkin, apParentNode, abShowWarnings);
+	}
 };
 static_assert(sizeof(BipedAnim) == 0x2B4);
 

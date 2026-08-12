@@ -188,12 +188,22 @@ namespace JIPFixes {
 			NiNode* pTarget = static_cast<NiNode*>(apTarget);
 
 			std::string_view svSuffix(nullptr, 0);
-			const char* pPath = apCommandString;
-			if (apCommandString[0] == '*') [[likely]] {
-				const char* pSuffix = apCommandString + 1;
+			
+			const char* pCommand = apCommandString;
+
+			// Paired with SkinnedAttach code below, you must see it
+			bool bSkinnedAttach = false;
+			if (pCommand[0] == '&') {
+				bSkinnedAttach = true;
+				pCommand += 1;
+			}
+
+			const char* pPath = pCommand;
+			if (pCommand[0] == '*') [[likely]] {
+				const char* pSuffix = pCommand + 1;
 				const char* pAsterisk = strchr(pSuffix, '*');
 				if (pAsterisk) {
-					uint32_t uiSuffixLength = (pAsterisk - apCommandString) - 1;
+					uint32_t uiSuffixLength = (pAsterisk - pCommand) - 1;
 					if (uiSuffixLength > MAX_SUFFIX_LENGTH)
 						uiSuffixLength = MAX_SUFFIX_LENGTH;
 					pPath = pAsterisk + 1;
@@ -215,6 +225,9 @@ namespace JIPFixes {
 
 				if (pCopy->IsFadeNode())
 					static_cast<BSFadeNode*>(pCopy)->TurnFadeNodeOn();
+
+				if (bSkinnedAttach)
+					BipedAnim::AttachToSkeleton(apRoot, pCopy, nullptr);
 
 				if (svSuffix.length())
 					AppendSuffixRecurse(pCopy, svSuffix);
@@ -246,13 +259,13 @@ namespace JIPFixes {
 			return pCopy;
 		}
 
-		void __fastcall DoInsertNode(NiAVObject* apTarget, const char* apQuery, const char* apTargetName, NiNode* apRoot) {
+		void __fastcall DoInsertNode(NiAVObject* apTarget, const char* apCommandString, const char* apTargetName, NiNode* apRoot) {
 			if (!apTarget || !apRoot)
 				return;
 
 			const NiFixedString strTargetName(apTargetName);
 
-			if (apQuery[0] == '^') {
+			if (apCommandString[0] == '^') {
 				if (apTarget != apRoot) {
 					NiAVObject* pRealTarget = apRoot->GetObjectByName(strTargetName);
 					if (pRealTarget) {
@@ -363,7 +376,43 @@ namespace JIPFixes {
 			return apObject->GetObjectByName(apObjectName);
 		}
 
+		namespace SkinnedAttach {
+
+			// Using & as a skinned attach indicator
+			// See the DoAttachModel code above (oh no, recursive comment jumps)
+
+			uint32_t uiSuffixHandlingAddr = 0x1002BDBE;
+			uint32_t uiCopyPathAddr = 0x1002BDD1;
+			SPEC_NAKED void SkinnedSupport_Asm() {
+				__asm {
+					cmp     cl, '&'
+					jnz		CONTINUE_CHECK
+
+					inc		eax				// Shift the string to the next character
+					mov		ecx, [eax]		// Load the current character (crazy)
+
+					CONTINUE_CHECK:
+					cmp		cl, '*'
+					jz		HANDLE_SUFFIX
+
+					jmp		uiCopyPathAddr
+
+					HANDLE_SUFFIX:
+					jmp		uiSuffixHandlingAddr
+				}
+			}
+
+			void InitHooks() {
+				HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1002BDBE) + 1, 0x48);
+				HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1002BDB9), SkinnedSupport_Asm);
+				uiSuffixHandlingAddr = JIPUtils::GetAddress(0x1002BDBE);
+				uiCopyPathAddr = JIPUtils::GetAddress(0x1002BDD1);
+			}
+		}
+
 		void InitHooks() {
+			SkinnedAttach::InitHooks();
+
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10003E50), SetOjectName);
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000A020), DoAttachModel);
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10009DA0), DoInsertNode);
