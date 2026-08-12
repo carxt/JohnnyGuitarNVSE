@@ -48,6 +48,8 @@ enum class NiUpdateType : int32_t {
 	HAVOK_SYNC_BOTH,
 	HAVOK_SYNC_TO,
 	HAVOK_SYNC_FROM,
+	OBJECT_PALETTE_ADD,
+	OBJECT_PALETTE_REMOVE,
 	COUNT
 };
 
@@ -169,6 +171,17 @@ static void __fastcall SynchronizeHavok(NiAVObject* apObject, bhkNiCollisionObje
 	else {
 		bhkNiCollisionObject::Synchronize(apObject, aeSyncMode);
 	}
+}
+
+static void __fastcall UpdateObjectPalette(NiAVObject* apRoot, NiAVObject* apObject, bool abAdd) {
+	NiDefaultAVObjectPalette* pPalette = GetObjectPalette(apObject);
+	if (!pPalette && apRoot != apObject)
+		pPalette = GetObjectPalette(apRoot);
+
+	if (abAdd)
+		ScriptUtils::RecurseAndAddObjectsToPalette(apObject, pPalette);
+	else
+		ScriptUtils::RecurseAndRemoveObjectsFromPalette(apObject, pPalette);
 }
 
 bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
@@ -432,6 +445,10 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 				break;
 			case NiUpdateType::HAVOK_SYNC_FROM:
 				SynchronizeHavok(pTarget, bhkNiCollisionObject::SYNC_FROM_HAVOK, bQueue);
+				break;
+			case NiUpdateType::OBJECT_PALETTE_ADD:
+			case NiUpdateType::OBJECT_PALETTE_REMOVE:
+				UpdateObjectPalette(pRoot, pTarget, eType == NiUpdateType::OBJECT_PALETTE_ADD);
 				break;
 			default:
 				__assume(0);

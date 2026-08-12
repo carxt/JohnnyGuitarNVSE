@@ -48,52 +48,11 @@ extern InventoryRef* (*InventoryRefGetForID)(uint32_t auiFormID);
 extern TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
 
 namespace {
-	void RecurseAndAddObjectsToPalette(NiAVObject* apObject, NiDefaultAVObjectPalette* apPalette) {
-		CdeclCall(0xA6E870, apObject, apPalette);
-	}
-
-	void RecurseAndRemoveObjectsFromPalette(NiAVObject* apObject, NiDefaultAVObjectPalette* apPalette) {
-		CdeclCall(0xA6E8E0, apObject, apPalette);
-	}
-
-	static inline NiDefaultAVObjectPalette* GetObjectPalette(const NiAVObject* apRoot) {
-		if (!apRoot) [[unlikely]]
-			return nullptr;
-
-		NiControllerManager* pControllerManager = apRoot->GetController<NiControllerManager>();
-		return pControllerManager ? pControllerManager->m_spObjectPalette.m_pObject : nullptr;
-	}
-
-	static SPEC_NOINLINE void __fastcall RecurseAddObjectsToPalette(NiAVObject* apRoot, NiAVObject* apObject) {
-		RecurseAndAddObjectsToPalette(apObject, GetObjectPalette(apRoot));
-	}
-
-	static SPEC_NOINLINE void __fastcall RecurseRemoveObjectsFromPalette(NiAVObject* apRoot, NiAVObject* apObject) {
-		RecurseAndRemoveObjectsFromPalette(apObject, GetObjectPalette(apRoot));
-	}
-
-	static SPEC_NOINLINE void __fastcall AddObjectToPalette(NiAVObject* apRoot, NiAVObject* apObject) {
-		if (!apObject || !apObject->GetName()) [[unlikely]]
-			return;
-
-		NiDefaultAVObjectPalette* pPalette = GetObjectPalette(apRoot);
-		if (pPalette)
-			pPalette->SetAVObject(apObject->GetName(), apObject);
-	}
-
-	static SPEC_NOINLINE void __fastcall RemoveObjectFromPalette(NiAVObject* apRoot, NiAVObject* apObject) {
-		if (!apObject || !apObject->GetName()) [[unlikely]]
-			return;
-
-		NiDefaultAVObjectPalette* pPalette = GetObjectPalette(apRoot);
-		if (pPalette)
-			pPalette->SetAVObject(apObject->GetName(), nullptr);
-	}
 
 	static SPEC_NOINLINE void __fastcall DetachObject(NiAVObject* apRoot, NiAVObject* apObject) {
 		NiPointer spObject(apObject); // Hold the ref so it doesn't insta delete on DetachChild
 
-		RecurseRemoveObjectsFromPalette(apRoot, apObject);
+		ScriptUtils::RecurseRemoveObjectsFromPalette(apRoot, apObject);
 
 		// Same story as with ReloadEquippedModels
 		// Detach "unsafely" first, then actually bother with queued cleanup. Based
@@ -267,7 +226,7 @@ namespace JIPFixes {
 
 				pTarget->AttachChild(pCopy, true);
 
-				RecurseAddObjectsToPalette(apRoot, pCopy);
+				ScriptUtils::RecurseAddObjectsToPalette(apRoot, pCopy);
 
 				NiUpdateData kData;
 				pTarget->UpdateTransformAndBounds(kData);
@@ -299,7 +258,7 @@ namespace JIPFixes {
 					if (pRealTarget) {
 						if (apTarget->GetParent() != pRealTarget && pRealTarget->IsNode()) {
 							static_cast<NiNode*>(pRealTarget)->AttachChild(apTarget, true);
-							AddObjectToPalette(apRoot, apTarget);
+							ScriptUtils::AddObjectToPalette(apRoot, apTarget);
 						}
 					}
 					else {
@@ -321,7 +280,7 @@ namespace JIPFixes {
 
 						pParent->SetAt(uiIndex, pNode);
 
-						AddObjectToPalette(apRoot, pNode);
+						ScriptUtils::AddObjectToPalette(apRoot, pNode);
 					}
 				}
 			}
@@ -330,7 +289,7 @@ namespace JIPFixes {
 				pNode->SetName(strTargetName);
 				pNode->m_uiFlags.Set(0x80000000);
 				static_cast<NiNode*>(apTarget)->AttachChild(pNode, true);
-				AddObjectToPalette(apRoot, pNode);
+				ScriptUtils::AddObjectToPalette(apRoot, pNode);
 			}
 		}
 
