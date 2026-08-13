@@ -6,12 +6,14 @@ void BSCullingProcess::SetCullMode(BS_CULLING_TYPE aeType) {
 }
 
 // GAME - 0xC4F270
+// GECK - 0x9D5FC0
 void BSCullingProcess::PushCullMode(BS_CULLING_TYPE aeType) {
 	eTypeStack[uiStackIndex++] = eCullMode;
 	eCullMode = aeType;
 }
 
 // GAME - 0xC4F2D0
+// GECK - 0x9D6020
 void BSCullingProcess::PopCullMode() {
 	eCullMode = eTypeStack[--uiStackIndex];
 }

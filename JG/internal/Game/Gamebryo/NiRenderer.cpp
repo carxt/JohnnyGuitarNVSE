@@ -18,17 +18,29 @@ void NiRenderer::SetSorter(NiAccumulator* apAccumulator) {
 
 // GAME - 0x4A0E50
 bool NiRenderer::GetInsideFrameState() const {
+#ifdef GAME
 	return ThisCall<bool>(0x4A0E50, this);
+#else
+	return m_eFrameState == FrameState::INSIDE_FRAME || m_eFrameState == FrameState::INSIDE_OFFSCREEN_FRAME;
+#endif
 }
 
 // GAME - 0x4A0370
 void NiRenderer::LockRenderer() {
+#ifdef GAME
 	ThisCall(0x4A0370, this);
+#else
+	m_kRendererLock.Lock();
+#endif
 }
 
 // GAME - 0x4A03C0
 void NiRenderer::UnlockRenderer() {
+#ifdef GAME
 	ThisCall(0x4A03C0, this);
+#else
+	m_kRendererLock.Unlock();
+#endif
 }
 
 // GAME - 0x4E9BB0

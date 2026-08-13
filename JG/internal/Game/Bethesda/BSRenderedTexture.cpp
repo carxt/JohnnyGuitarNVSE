@@ -55,20 +55,21 @@ void BSRenderedTexture::StopOffscreen() {
 #endif
 }
 
-// GAME - 0xB6B7D0
-// GECK - 0x902BA0
-void BSRenderedTexture::Begin(NiRenderTargetGroup* apGroup, uint32_t uiClearMode) {
 #ifdef GAME
+// GAME - 0xB6B7D0
+void BSRenderedTexture::Begin(NiRenderTargetGroup* apGroup, uint32_t uiClearMode) {
 	CdeclCall(0xB6B7D0, apGroup, uiClearMode);
-#else
-	CdeclCall(0x902BA0, apGroup, uiClearMode);
-#endif
 }
+#endif
 
 // GAME - 0x54EDE0
-// GECK - None
+// GECK - 0x902BA0
 void BSRenderedTexture::BeginTexture(BSRenderedTexture* apTexture, uint32_t auiClearMode) {
+#ifdef GAME
 	CdeclCall(0x54EDE0, apTexture, auiClearMode);
+#else
+	CdeclCall(0x902BA0, apTexture, auiClearMode);
+#endif
 }
 
 // GAME - 0xB6B840

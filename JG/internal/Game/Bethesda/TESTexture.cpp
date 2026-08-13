@@ -9,8 +9,13 @@ const char* TESTexture::GetTextureName() const {
 }
 
 // GAME - 0x48E730
+// GECK - 0x50C960
 const char* TESTexture::GetTextureName(const TESForm* apForm, const TESObjectREFR* apRef) {
+#ifdef GAME
 	return CdeclCall<const char*>(0x48E730, apForm, apRef);
+#else
+	return CdeclCall<const char*>(0x50C960, apForm, apRef);
+#endif
 }
 
 // GAME - 0x489100

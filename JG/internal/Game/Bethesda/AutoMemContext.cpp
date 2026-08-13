@@ -18,6 +18,7 @@ void AutoMemContext::Enter(MEM_CONTEXT aeMemContext, bool abOverridable, const c
 }
 
 // GAME - 0x404F70
+// GECK - 0x40C8A0
 void AutoMemContext::Leave() const {
 	SetMemContext(eOldMemContext);
 }
