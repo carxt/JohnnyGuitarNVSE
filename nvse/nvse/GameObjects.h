@@ -221,6 +221,7 @@ public:
 	MobileObject();
 	~MobileObject();
 
+	virtual void		Unk_90(void);
 	virtual void		Unk_91(void);
 	virtual void		Unk_92(void);
 	virtual void		Unk_93(void);
