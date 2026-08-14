@@ -284,6 +284,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\JG\BarterFilter.cpp" />
     <ClCompile Include="internal\JG\CameraOverlay.cpp" />
     <ClCompile Include="internal\JG\CameraOverride.cpp" />
+    <ClCompile Include="internal\JG\FormSkeletons.cpp" />
     <ClCompile Include="internal\JG\NewNiObjects.cpp" />
     <ClCompile Include="internal\JG\SkyUpdateFixes.cpp" />
     <ClCompile Include="internal\JG\CustomCameraShake.cpp" />
@@ -565,6 +566,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\BarterFilter.hpp" />
     <ClInclude Include="internal\JG\CameraOverlay.hpp" />
     <ClInclude Include="internal\JG\CameraOverride.hpp" />
+    <ClInclude Include="internal\JG\FormSkeletons.hpp" />
     <ClInclude Include="internal\JG\NewNiObjects.hpp" />
     <ClInclude Include="internal\JG\SkyUpdateFixes.hpp" />
     <ClInclude Include="internal\JG\CustomCameraShake.hpp" />

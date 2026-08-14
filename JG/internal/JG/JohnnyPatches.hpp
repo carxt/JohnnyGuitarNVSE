@@ -20,6 +20,7 @@ namespace JohnnyPatches {
 
 	SPEC_NOINLINE void ReadINI();
 	SPEC_NOINLINE void Init();
+	SPEC_NOINLINE void PostLoadInit();
 	SPEC_NOINLINE void DeferredInit();
 
 	SPEC_NOINLINE void Update();
