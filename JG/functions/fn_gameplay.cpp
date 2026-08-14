@@ -1493,10 +1493,7 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 	BOOL bFaceTarget = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTarget, &fRadius, &bFaceTarget) && thisObj->IsActor()) {
 		Actor* pActor = static_cast<Actor*>(thisObj);
-		if (pTarget) {
-			if (!pTarget->IsReference())
-				return true;
-
+		if (pTarget && pTarget->IsReference()) {
 			if (bFaceTarget)
 				*result = pActor->SetPathfindingGoalAndAngle(pTarget, fRadius);
 			else

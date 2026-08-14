@@ -970,9 +970,9 @@ static ParamInfo kParams_OneBoolOneIntOneFloat[] =
 	{	"Ref To Track",	kParamType_ObjectRef, 1 },
 };
 
-static ParamInfo kParams_OneRefOneOptionalFloatOneOptionalInt[] =
+static ParamInfo kParams_PathToRef[] =
 {
-	{	"Target Reference",		kParamType_ObjectRef, 0 },
+	{	"Target Reference",		kParamType_AnyForm, 0 },
 	{	"Target Radius",		kParamType_Float, 1	},
 	{ 	"Face Target",			kParamType_Integer, 1 },
 };
