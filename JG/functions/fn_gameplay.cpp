@@ -1448,8 +1448,8 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 		Actor* pActor = (Actor*)thisObj;
 
 		TESObjectWEAP* pWeapon = pActor->GetEquippedWeapon();
-		if (!pWeapon || pWeapon->IsMelee())
-			return false;
+		if (!pWeapon)
+			return true;
 
 		NiNode* pActorNode = nullptr;
 		if (cNodeName[0] != 0) {
