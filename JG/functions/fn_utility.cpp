@@ -541,34 +541,44 @@ bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
-	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
-	uint32_t arrID;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID)) return true;
-	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
-	if (!inArr) return true;
-	if (g_arrInterface->GetContainerType(inArr) != NVSEArrayVarInterface::kArrType_Array) return true;
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	auto lAr_Size = g_arrInterface->GetArraySize(inArr);
-	if (lAr_Size < 1) return true;
-	BSScrapBuffer<NVSEArrayElement> elements(lAr_Size);
-	g_arrInterface->GetElements(inArr, elements.get(), NULL);
-	for (auto iCounter = (lAr_Size - 1); iCounter >= 1; iCounter--)
-	{
-		std::uniform_int_distribution<> distrib(1, iCounter);
-		auto iPicker = distrib(gen);
-		if (iPicker < iCounter)
-		{
-			NVSEArrayElement bufferElement;
-			bufferElement = elements[iPicker];
-			elements[iPicker] = elements[iCounter];
-			elements[iCounter] = bufferElement;
+	uint32_t uiArrayID;
+	NVSEArrayVar* pOutArray = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiArrayID)) [[likely]] {
+		NVSEArrayVar* pInArray = g_arrInterface->LookupArrayByID(uiArrayID);
+		if (!pInArray) [[unlikely]]
+			goto EXIT;
+
+		if (g_arrInterface->GetContainerType(pInArray) != NVSEArrayVarInterface::kArrType_Array) [[unlikely]]
+			goto EXIT;
+
+		const uint32_t uiArraySize = g_arrInterface->GetArraySize(pInArray);
+		if (uiArraySize < 1) [[unlikely]]
+			goto EXIT;
+
+		std::random_device kRandom;
+		BSScrapBuffer<std::mt19937> kGenerator(1); // 5000 BYTES??? Using ScrapHeap, screw the stack
+		new (kGenerator.get()) std::mt19937(kRandom());
+
+		BSScrapBuffer<NVSEArrayElement> kArrayElements(uiArraySize);
+		g_arrInterface->GetElements(pInArray, kArrayElements.get(), nullptr);
+		for (uint32_t uiCounter = (uiArraySize - 1); uiCounter >= 1; uiCounter--) {
+			std::uniform_int_distribution<> kDistrib(1, uiCounter);
+			const int32_t iPicker = kDistrib(*kGenerator.get());
+			if (iPicker < uiCounter) {
+				NVSEArrayElement kTemp = std::move(kArrayElements[iPicker]);
+				kArrayElements[iPicker] = std::move(kArrayElements[uiCounter]);
+				kArrayElements[uiCounter] = std::move(kTemp);
+			}
 		}
+
+		pOutArray = g_arrInterface->CreateArray(kArrayElements.get(), uiArraySize, scriptObj);
 	}
-	for (uint32_t i = 0; i < lAr_Size; i++) {
-		g_arrInterface->AppendElement(outArr, NVSEArrayElement(elements[i]));
-	}
-	g_arrInterface->AssignCommandResult(outArr, result);
+
+EXIT:
+	if (!pOutArray) [[unlikely]]
+		pOutArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+
+	g_arrInterface->AssignCommandResult(pOutArray, result);
 	return true;
 }
 
