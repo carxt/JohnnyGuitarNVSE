@@ -502,6 +502,9 @@
     <ClCompile Include="internal\Game\Gamebryo\NiRenderer.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\FormSkeletons.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1347,6 +1350,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiRect.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\FormSkeletons.hpp">
+      <Filter>internal\JG\Features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
