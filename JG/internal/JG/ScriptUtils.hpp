@@ -3,6 +3,8 @@
 class NiAVObject;
 class TESObjectREFR;
 class NiDefaultAVObjectPalette;
+class BGSLoadGameSubBuffer;
+class Animation;
 
 namespace ScriptUtils {
 
@@ -27,5 +29,9 @@ namespace ScriptUtils {
 	SPEC_NOINLINE void __fastcall AddObjectToPalette(NiAVObject* apRoot, NiAVObject* apObject);
 
 	SPEC_NOINLINE void __fastcall RemoveObjectFromPalette(NiAVObject* apRoot, NiAVObject* apObject);
+
+	SPEC_NOINLINE void __fastcall SaveAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation);
+
+	SPEC_NOINLINE void __fastcall LoadAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation);
 
 }

@@ -38,34 +38,6 @@ extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ItemChange* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ItemChange*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
 
-namespace {
-	static SPEC_NOINLINE void __fastcall SaveAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation) {
-		StackObject<BGSSaveFormBuffer, 0x8659C0, 0x847DD0> kSaveBuffer;
-		kSaveBuffer->SetHeader(apReference->GetFormID(), 0, apReference->GetFormType(), 27);
-		kSaveBuffer->SetForm(apReference);
-		if (apReference->IsActor()) {
-			if (apAnimation)
-				apAnimation->Save(kSaveBuffer.GetPtr());
-		}
-		else
-			apReference->SaveAnimation(kSaveBuffer.GetPtr());
-		arBuffer.CopyBuffer(kSaveBuffer.GetPtr());
-	}
-
-	static SPEC_NOINLINE void __fastcall LoadAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation) {
-		BGSLoadFormBuffer* pLoadBuffer = arBuffer.CreateLoadFormBuffer(apReference);
-		if (pLoadBuffer) {
-			if (apReference->IsActor()) {
-				if (apAnimation)
-					apAnimation->Load(pLoadBuffer);
-			}
-			else
-				apReference->LoadAnimation(pLoadBuffer);
-			ThisCall(0x81DB60, pLoadBuffer, true); // BGSLoadFormBuffer destructor
-		}
-	}
-}
-
 bool Cmd_RemoveNoteQuest_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* note = nullptr;
