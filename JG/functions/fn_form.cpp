@@ -918,7 +918,8 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 			*result = shader->shaderData.flags;
 			break;
 		case 61:
-			*result = shader->shaderData.addonModels->GetFormID();
+			if (shader->shaderData.addonModels)
+				*result = shader->shaderData.addonModels->GetFormID();
 			break;
 		case 4:
 		case 14:
