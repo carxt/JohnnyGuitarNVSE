@@ -953,33 +953,30 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool IsApplicable(BGSPerk* perk) {
-	for (uint32_t i = 0; i < perk->conditions.Count(); i++) {
-		Condition* condition = perk->conditions.GetNthItem(i);
-		bool result = false;
-		if (condition->opcode == 0x46 && !condition->Evaluate(PlayerCharacter::GetSingleton(), 0, &result)) return false;
-	}
-	return true;
-}
-
 bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 	*result = 0;
+	Actor* pTarget = PlayerCharacter::GetSingleton();
+	if (thisObj && thisObj->IsActor())
+		pTarget = static_cast<Actor*>(thisObj);
+
+	const uint32_t uiActorLevel = pTarget->avOwner.GetLevel();
+
 	NVSEArrayVar* perkArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	auto pIter = TESDataHandler::GetSingleton()->kPerks.GetHead();
-	BGSPerk* perk;
-	int perkRank;
 	while (pIter && !pIter->IsEmpty()) {
-		perk = pIter->GetItem();
+		BGSPerk* pPerk = pIter->GetItem();
 		pIter = pIter->GetNext();
-		if (perk->data.isPlayable && perk->data.minLevel > 0 && perk->data.minLevel <= PlayerCharacter::GetSingleton()->avOwner.GetLevel()) {
-			perkRank = PlayerCharacter::GetSingleton()->GetPerkRank(perk, 0);
-			bool result = false;
-			if (perkRank < perk->data.numRanks && !perk->data.isTrait && IsApplicable(perk)
-				&& perk->conditions.Evaluate(PlayerCharacter::GetSingleton(), 0, &result, 0)) {
-				g_arrInterface->AppendElement(perkArr, NVSEArrayElement(perk));
-			}
+
+		if (!pPerk->data.isPlayable || pPerk->data.isTrait)
+			continue;
+
+		if (pPerk->data.minLevel > 0 && pPerk->data.minLevel <= uiActorLevel) {
+			const int32_t iRank = pTarget->GetPerkRank(pPerk, 0);
+			if (iRank < pPerk->data.numRanks && pPerk->IsPerkAttainable(pTarget) && pPerk->IsPerkAvailable(pTarget))
+				g_arrInterface->AppendElement(perkArr, NVSEArrayElement(pPerk));
 		}
 	}
+
 	g_arrInterface->AssignCommandResult(perkArr, result);
 	return true;
 }

@@ -335,7 +335,7 @@ struct Condition {
 	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result) { return ThisCall<bool>(0x681600, this, runOnRef, arg2, result); }
 };
 
-struct ConditionList : tList<Condition> {
+struct ConditionList : public BSSimpleList<Condition*> {
 	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result, bool arg4) { return ThisCall<bool>(0x680C60, this, runOnRef, arg2, result, arg4); }
 };
 
@@ -4989,6 +4989,14 @@ public:
 	PerkData				data;				// 38
 	ConditionList			conditions;			// 40
 	tList<BGSPerkEntry>		entries;			// 48
+
+	bool IsPerkAttainable(TESObjectREFR* apReference) const {
+		return ThisCall<bool>(0x5EBA00, this, apReference);
+	}
+
+	bool IsPerkAvailable(TESObjectREFR* apReference) const {
+		return ThisCall<bool>(0x785150, this, apReference);
+	}
 };
 
 class TESCasino : public TESForm {
