@@ -598,6 +598,13 @@ static ParamInfo kParams_OneInt_OneForm_OneInt[] =
 	{ "Integer", kParamType_Integer, 0 }
 };
 
+static ParamInfo kParams_OneInt_OneFormList_OneInt[] =
+{
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Form List", kParamType_FormList, 0 },
+	{ "Integer", kParamType_Integer, 0 }
+};
+
 static ParamInfo kParams_OneForm_OneInt_OneForm_OneInt[] =
 {
 	{ "Form", kParamType_AnyForm, 0 },

@@ -435,6 +435,7 @@ namespace JohnnyCommands {
 		REG_CMD(SetNiLightColor);
 		REG_CMD(GetNiLightColor);
 		REG_CMD(ReloadEquippedModelsAlt);
+		REG_CMD(ar_IsFormInList);
 	}
 
 }

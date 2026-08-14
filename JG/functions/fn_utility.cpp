@@ -135,47 +135,50 @@ bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
 
 bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t arrID, fullMatch;
-	BGSListForm* formList = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &formList, &fullMatch)) return true;
+	uint32_t uiArrayID = 0;
+	BOOL bFullMatch = FALSE;
+	const BGSListForm* pFormList = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &uiArrayID, &pFormList, &bFullMatch)) [[unlikely]]
+		return true;
 
-	if (!formList || !IS_TYPE(formList, BGSListForm)) return true;
+	if (!pFormList || !IS_TYPE(pFormList, BGSListForm)) [[unlikely]]
+		return true;
 
-	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
-	if (!inArr) return true;
-	uint32_t size = g_arrInterface->GetArraySize(inArr);
-	BSScrapBuffer<NVSEArrayElement> elements(size);
-	g_arrInterface->GetElements(inArr, elements.get(), nullptr);
-	if (!fullMatch) {
-		for (uint32_t i = 0; i < size; i++) {
-			if (elements[i].GetTESForm() == nullptr) return true;
-			BSSimpleList<TESForm*>* pIter= formList->GetFormList();
-			while(pIter && !pIter->IsEmpty()) {
-				if (elements[i].GetTESForm() == pIter->GetItem()) {
-					*result = 1;
-					return true;
-				}
-				pIter = pIter->GetNext();
-			};
+	NVSEArrayVar* pArray = g_arrInterface->LookupArrayByID(uiArrayID);
+	if (!pArray) [[unlikely]]
+		return true;
+
+	const uint32_t uiArraySize = g_arrInterface->GetArraySize(pArray);
+
+	BSScrapBuffer<NVSEArrayElement> kElements(uiArraySize);
+	g_arrInterface->GetElements(pArray, kElements.get(), nullptr);
+
+	const BSSimpleList<TESForm*>* pIter = pFormList->GetFormList();
+	__assume(pIter != nullptr);
+
+	if (bFullMatch) {
+		uint32_t uiFoundItems = 0;
+		for (uint32_t i = 0; i < uiArraySize; i++) {
+			TESForm* pForm = kElements[i].GetTESForm();
+			if (!pForm) [[unlikely]]
+				return true;
+
+			if (pIter->Find(pForm))
+				++uiFoundItems;
 		}
+		*result = uiFoundItems == uiArraySize;
 	}
 	else {
-		for (uint32_t i = 0; i < size; i++) {
-			if (elements[i].GetTESForm() == nullptr) return true;
-			int elementFound = 0;
-			BSSimpleList<TESForm*>* pIter = formList->GetFormList();
-			while (pIter && !pIter->IsEmpty()) {
-				if (elements[i].GetTESForm() == pIter->GetItem()) {
-					elementFound = 1;
-					break;
-				}
-				pIter = pIter->GetNext();
-			};
-			if (elementFound == 0) {
+		for (uint32_t i = 0; i < uiArraySize; i++) {
+			TESForm* pForm = kElements[i].GetTESForm();
+			if (!pForm) [[unlikely]]
+				continue;
+
+			if (pIter->Find(pForm)) {
+				*result = 1;
 				return true;
 			}
 		}
-		*result = 1;
 	}
 
 	return true;
