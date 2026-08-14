@@ -428,8 +428,8 @@ bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS) {
-	ThisCall(0x0703DA0, nullptr);
-	ThisCall(0x07D0A70, nullptr);
+	CdeclCall(0x703DA0);
+	CdeclCall(0x7D0A70);
 	return true;
 }
 
