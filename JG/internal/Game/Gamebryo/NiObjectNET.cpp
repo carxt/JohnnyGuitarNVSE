@@ -10,6 +10,11 @@ NiTimeController* NiObjectNET::GetController(const NiRTTI* apRTTI) const {
 #endif
 }
 
+// GAME - 0xA5C400
+void NiObjectNET::PrependController(NiTimeController* apController) {
+	ThisCall(0xA5C400, this, apController);
+}
+
 // GAME - 0xA5C480
 // GECK - 0x818C40
 void NiObjectNET::RemoveController(NiTimeController* apController) {
