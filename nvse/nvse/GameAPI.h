@@ -417,7 +417,7 @@ public:
 	uint32_t	m_bufSize;	// 010
 	uint32_t	m_uiBufferReadSize;	// 014 - Total read in buffer
 	uint32_t	m_uiPos;	// 018 - Consumed from buffer
-	uint32_t	m_uiAbsolutePos;	// 01C
+	uint32_t	m_uiCurrentFilePos;	// 01C
 	void*	m_buffer;	// 020
 	FILE*	m_File;		// 024
 	uint32_t	m_eMode;
@@ -506,8 +506,8 @@ public:
 	ArchiveFile();
 	~ArchiveFile();
 
-	uint32_t unk158; // 158
-	uint32_t unk15C; // 15C
+	NiPointer<Archive>	spArchive;
+	uint32_t			uiArchiveOffset;
 };
 
 static_assert(sizeof(ArchiveFile) == 0x160);
