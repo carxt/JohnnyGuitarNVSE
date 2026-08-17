@@ -505,6 +505,7 @@
     <ClCompile Include="internal\JG\FormSkeletons.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\BSAUpgrade.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1352,6 +1353,9 @@
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\FormSkeletons.hpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\BSAUpgrade.hpp">
       <Filter>internal\JG\Features</Filter>
     </ClInclude>
   </ItemGroup>

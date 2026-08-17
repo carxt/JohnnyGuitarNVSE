@@ -30,6 +30,7 @@
 #include "WorldToScreen.hpp"
 #include "NewNiObjects.hpp"
 #include "FormSkeletons.hpp"
+#include "BSAUpgrade.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
 
@@ -52,6 +53,7 @@ namespace JohnnyPatches {
 	bool bMultipleAddItemMessages = false;
 	bool bFixOggWavRadioPlayback = false;
 	bool bUseFormSkeletons = false;
+	bool bBSAUpgrade = false;
 	int32_t iFPSCapLoadScreen = 0;
 	float fViewmodelNearDistance = 0.f;
 
@@ -222,6 +224,9 @@ namespace JohnnyPatches {
 		if (bMultipleAddItemMessages) {
 			AddItemMessages::Install();
 		}
+
+		if (bBSAUpgrade)
+			BSAUpgrade::Install();
 
 		WorldToScreen::Install();
 
