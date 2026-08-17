@@ -506,6 +506,15 @@
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\BSAUpgrade.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSDirectoryEntry.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSFileEntry.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSArchive.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1357,6 +1366,18 @@
     </ClInclude>
     <ClInclude Include="internal\JG\BSAUpgrade.hpp">
       <Filter>internal\JG\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSDirectoryEntry.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSFileEntry.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSHash.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSArchive.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

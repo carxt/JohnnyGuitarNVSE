@@ -221,8 +221,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BGSNumericIDIndex.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSSaveFormBuffer.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSArchive.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSCullingProcess.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSDirectoryEntry.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSFileEntry.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSNonReentrantSpinLock.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSPackedTask.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSPackedTaskQueue.cpp" />
@@ -392,9 +395,13 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFormHeader.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSArchive.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSDirectoryEntry.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSFileEntry.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSHash.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSNonReentrantSpinLock.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSPackedTask.hpp" />

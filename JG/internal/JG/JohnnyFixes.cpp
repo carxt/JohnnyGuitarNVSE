@@ -494,6 +494,12 @@ namespace JohnnyFixes {
 
 		// Fix buffer overflow during Fonts file load
 		HookUtils::WriteRelJump(0xA154AC, FontFileSizeFix_Asm);
+
+		// Fix ArchiveManager::GetArchiveForFileEntry skipping a critical section unlock on return
+		HookUtils::WriteRelJump(0xAF6A6A, 0xAF6B82);
+
+		// Fix ArchiveManager::GetFileByFileEntry not using the archive index argument
+		HookUtils::SafeWriteBuf(0xAF6378, "\x8B\x4D\x08\xBA\x01\x00\x00\x00\xD3\xE2\x52");
 	}
 
 }

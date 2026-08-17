@@ -4,6 +4,9 @@
 #include "GameScript.h"
 #include <string>
 
+#include "Bethesda/BSArchive.hpp"
+#include "Bethesda/BSFileEntry.hpp"
+
 struct ParamInfo;
 class TESForm;
 class TESObjectREFR;
@@ -457,44 +460,61 @@ public:
 
 static_assert(sizeof(BSFile) == 0x158);
 
-class BSArchiveHeader
-{
+class BSHash;
+
+class BSCriticalSection {
 public:
-	BSArchiveHeader();
-	~BSArchiveHeader();
+	CRITICAL_SECTION	kCriticalSection;
 };
 
-// 70
-class BSArchive : public BSArchiveHeader
-{
-public:
-	BSArchive();
-	~BSArchive();
-
-	uint32_t unk00; // 00	160
-	uint32_t unk04; // 04	164
-	uint32_t unk08; // 08	168
-	uint32_t unk0C; // 0C	16C
-	uint32_t unk10; // 10	170
-	uint32_t unk14; // 14	174
-	uint32_t unk18; // 18	178
-	uint32_t unk1C; // 1C	17C
-	uint16_t fileTypesMask; // 20	180
-	uint16_t word22; // 22	182
-	uint32_t unk24[19]; // 24	184
-};
-
-static_assert(sizeof(BSArchive) == 0x70);
+class ArchiveFile;
 
 // 1D0
-class Archive : public BSFile
-{
+class Archive : public BSFile, public NiRefObject, public BSArchive {
 public:
 	Archive();
 	~Archive();
 
-	NiRefObject refObject; // 158
-	BSArchive archive; // 160
+	time_t					ulArchiveFileTime;
+	uint32_t				uiFileNameArrayOffset;
+	uint32_t				uiLastDirectoryIndex;
+	uint32_t				uiLastFileIndex;
+	BSCriticalSection		kArchiveCriticalSection;
+	Bitfield8				ucArchiveFlags;
+	char*					pDirectoryStringArray;
+	uint32_t*				pDirectoryStringOffsets;
+	char*					pFileNameStringArray;
+	uint32_t**				pFileNameStringOffsets;
+	uint32_t				uiID;
+
+
+	bool IsType(ARCHIVE_TYPE aeArchiveType) const {
+		return usArchiveType.Get(aeArchiveType);
+	}
+
+	bool IsType(ARCHIVE_TYPE_INDEX aeArchiveTypeIndex) const {
+		return usArchiveType.GetBit(aeArchiveTypeIndex);
+	}
+
+	bool FindFile(const BSHash& arDirectoryHash, const BSHash& arFileNameHash, uint32_t& arDirectoryID, uint32_t& arFileID, const char* apFileName) {
+		return ThisCall<bool>(0xAF9BF0, this, &arDirectoryHash, &arFileNameHash, &arDirectoryID, &arFileID, apFileName);
+	}
+
+	ArchiveFile* GetFile(uint32_t auiDirectoryIndex, uint32_t auiFileIndex, uint32_t auiBufferSize, const char* apFileName) {
+		return ThisCall<ArchiveFile*>(0xAFA550, this, auiDirectoryIndex, auiFileIndex, auiBufferSize, apFileName);
+	}
+
+	BSFileEntry* GetFileEntryForFile(const BSHash& arDirectoryHash, const BSHash& arFileNameHash, const char* apFileName) {
+		return ThisCall<BSFileEntry*>(0xAFA6E0, this, &arDirectoryHash, &arFileNameHash, apFileName);
+	}
+
+	const char* GetDirectoryString(uint32_t auiDirectoryIndex) {
+		return ThisCall<const char*>(0xAF94C0, this, auiDirectoryIndex);
+	}
+
+	const char* GetFileString(uint32_t auiDirectoryIndex, uint32_t auiFileIndex) {
+		return ThisCall<const char*>(0xAF96D0, this, auiDirectoryIndex, auiFileIndex);
+	}
 };
 
 static_assert(sizeof(Archive) == 0x1D0);
