@@ -174,6 +174,7 @@ namespace JohnnyPatches {
 		bUseFormSkeletons = GetPrivateProfileInt("MAIN", "bUseFormSkeletons", 0, filename);
 		bFixJIP = GetPrivateProfileInt("MAIN", "bJIPFixes", 1, filename);
 		bFixOggWavRadioPlayback = GetPrivateProfileInt("MAIN", "bFixOggWavRadioPlayback", 1, filename);
+		bBSAUpgrade = GetPrivateProfileInt("MAIN", "bBSAUpgrade", 1, filename);
 		DeathSoundFix::iDeathSoundMaxTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
 	}
