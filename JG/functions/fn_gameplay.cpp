@@ -210,14 +210,7 @@ bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	NiPoint3 kPos;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kPos.x, &kPos.y, &kPos.z)) {
-		TESForm* pSpace = nullptr;
-		TESObjectCELL* pParentCell = PlayerCharacter::GetSingleton()->GetParentCell();
-		if (pParentCell) {
-			if (pParentCell->IsInterior())
-				pSpace = pParentCell;
-			else
-				pSpace = pParentCell->worldSpace;
-		}
+		TESForm* pSpace = PlayerCharacter::GetSingleton()->GetSpace();
 		if (pSpace) {
 			PlayerCharacter::GetSingleton()->SetPlayerMapMarker(kPos, pSpace);
 			arResult = 1;
@@ -588,17 +581,17 @@ bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 		while (pList && !pList->IsEmpty()) {
 			const ActiveEffect* pEffect = pList->GetItem();
 			pList = pList->GetNext();
-			if (pEffect && pEffect->bActive && !pEffect->bTerminated && pEffect->magicItem && ValidTempEffect(pEffect->effectItem)) {
-				TESForm* pForm = DYNAMIC_CAST(pEffect->magicItem, MagicItem, TESForm);
+			if (pEffect && pEffect->IsActive() && !pEffect->IsDone() && pEffect->GetSpell() && ValidTempEffect(pEffect->GetEffectItem())) {
+				TESForm* pForm = DYNAMIC_CAST(pEffect->GetSpell(), MagicItem, TESForm);
 				if (pForm && pForm->GetFormType() == FORM_TYPE::AlchemyItem) {
-					const float fTimeLeft = pEffect->duration - pEffect->timeElapsed;
+					const float fTimeLeft = pEffect->GetDuration() - pEffect->GetElapsedTime();
 					auto it = kTempEffectMap.find(pForm);
-					if (it != kTempEffectMap.end() && it->second.second < pEffect->duration) {
+					if (it != kTempEffectMap.end() && it->second.second < pEffect->GetDuration()) {
 						it->second.first = fTimeLeft;
-						it->second.second = pEffect->duration;
+						it->second.second = pEffect->GetDuration();
 					}
 					else {
-						kTempEffectMap.insert({ pForm, {fTimeLeft, pEffect->duration} });
+						kTempEffectMap.insert({ pForm, {fTimeLeft, pEffect->GetDuration()} });
 					}
 				}
 			}
@@ -737,7 +730,7 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	char cLocationName[MAX_PATH] = {};
 	if (apRef->GetParentCell() && apRef->GetParentCell()->IsInterior()) {
-		strcpy_s(cLocationName, apRef->GetParentCell()->fullName.GetFullName());
+		strcpy_s(cLocationName, apRef->GetParentCell()->GetFullName());
 	}
 	else {
 		const TESWorldSpace* pWorld = apRef->GetWorldSpace();
@@ -923,8 +916,8 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	uint32_t uiIndex;
-	float modTimeLeft;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &uiIndex, &modTimeLeft) || !apRef->IsActor()) 
+	float fTimeLeftMod;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &uiIndex, &fTimeLeftMod) || !apRef->IsActor()) 
 		return true;
 
 	auto pIter = static_cast<Actor*>(apRef)->GetActiveEffectList();
@@ -934,14 +927,13 @@ bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 	while (pIter && !pIter->IsEmpty()) {
 		ActiveEffect* pEffect = pIter->GetItem();
 		pIter = pIter->GetNext();
-		if (!pEffect || !pEffect->bApplied || !ValidTempEffect(pEffect->effectItem) || !pEffect->magicItem ||
-			!DYNAMIC_CAST(pEffect->magicItem, MagicItem, TESForm))
+		if (!pEffect || !pEffect->IsActive() || !ValidTempEffect(pEffect->GetEffectItem()) || !pEffect->GetSpell() || !DYNAMIC_CAST(pEffect->GetSpell(), MagicItem, TESForm))
 			continue;
 
 		if (!uiIndex--) {
-			pEffect->timeElapsed += -modTimeLeft;
-			if (pEffect->timeElapsed > pEffect->duration)
-				pEffect->Remove(true);
+			pEffect->fElapsedTime += -fTimeLeftMod;
+			if (pEffect->GetElapsedTime() > pEffect->GetDuration())
+				pEffect->Dispel(true);
 			arResult = 1;
 			break;
 		}

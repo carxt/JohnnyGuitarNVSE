@@ -11,9 +11,9 @@ bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	TESObjectCELL* pCell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
-		ExtraCellAcousticSpace* pXAcousticSpace = pCell->extraDataList.GetExtraData<ExtraCellAcousticSpace>();
-		if (pXAcousticSpace && pXAcousticSpace->pSpace) 
-			ScriptUtils::SetFormIDResult(arResult, pXAcousticSpace->pSpace->GetFormID());
+		BGSAcousticSpace* pAcousticSpace = pCell->GetAcousticSpace();
+		if (pCell)
+			ScriptUtils::SetFormIDResult(arResult, pCell->GetFormID());
 
 		if (IsConsoleMode())
 			Console_Print("GetAcousticSpace  >> 0x%08X", reinterpret_cast<FormID&>(arResult));
@@ -38,7 +38,7 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS) {
 				Console_Print("SetAcousticSpace >> Passed an invalid acoustic space");
 			return true;
 		}
-		ThisCall(ExtraCellAcousticSpace_Update, &pCell->extraDataList, pAcousticSpace);
+		pCell->SetAcousticSpace(pAcousticSpace);
 	}
 	return true;
 }

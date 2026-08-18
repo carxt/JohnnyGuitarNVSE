@@ -27,6 +27,7 @@
 #include "Bethesda/BGSIdleMarker.hpp"
 #include "Bethesda/BGSImpactData.hpp"
 #include "Bethesda/BGSImpactDataSet.hpp"
+#include "Bethesda/BGSLightingTemplate.hpp"
 #include "Bethesda/BGSListForm.hpp"
 #include "Bethesda/BGSMenuIcon.hpp"
 #include "Bethesda/BGSMessage.hpp"
@@ -102,6 +103,7 @@
 #include "Bethesda/TESObjectARMA.hpp"
 #include "Bethesda/TESObjectARMO.hpp"
 #include "Bethesda/TESObjectBOOK.hpp"
+#include "Bethesda/TESObjectCELL.hpp"
 #include "Bethesda/TESObjectCLOT.hpp"
 #include "Bethesda/TESObjectCONT.hpp"
 #include "Bethesda/TESObjectDOOR.hpp"
@@ -1013,155 +1015,6 @@ public:
 	}
 };
 
-// E0
-class TESObjectCELL : public TESForm {
-public:
-	TESObjectCELL();
-	~TESObjectCELL();
-
-	typedef BSSimpleList<TESObjectREFR*> RefList;
-
-	struct ExteriorCoords {
-		int32_t		x;			// 00
-		int32_t		y;			// 04
-		uint8_t		byte08;		// 08
-		uint8_t		pad09[3];	// 09
-	};
-	struct Color {
-		uint8_t r;
-		uint8_t g;
-		uint8_t b;
-		uint8_t alpha;
-	};
-	struct LightingData {
-		Color		ambientRGB;		// 00
-		Color		directionalRGB;		// 04
-		Color		fogRGB;		// 08
-		float		fogNear;		// 0C
-		float		fogFar;		// 10
-		int			directionalRotXY;		// 14
-		int			directionalRotZ;		// 18
-		float		directionalFade;		// 1C
-		float		fogClipDist;		// 20
-		float		fogPower;		// 24
-		uint32_t* getValuesFrom;		// 28
-	};
-
-	union CellCoordinates {
-		ExteriorCoords* exterior;
-		LightingData* interior;
-	};
-
-	// 64
-	struct LoadedData {
-		NiPointer<NiNode>									spCell3D;
-		BSSimpleList<TESObjectREFR*>						kLargeAnimatedRefs;
-		NiTMap<TESObjectREFR*, NiNode*>						kAnimatedRefs;
-		NiTMap<TESForm*, TESObjectREFR*>					kEmittanceSourceRefMap; // Form can be either TESRegion or TESObjectLIGH
-		NiTMap<TESObjectREFR*, NiNode*>						kEmittanceLightRefMap;
-		NiTMap<TESObjectREFR*, NiPointer<BSMultiBoundNode>> kMultiboundRefMap;
-		BSSimpleList<TESObjectREFR*>						kScriptedRefs;
-		BSSimpleList<TESObjectREFR*>						kActivatingRefs;
-		BSSimpleList<TESObjectREFR*>						kWaterRefs;
-	};
-
-	enum {
-		kCellFlag_IsInterior = 1 << 0,
-		kCellFlag_HasWater = 1 << 1,
-		kCellFlag_InvertFastTravelBehavior = 1 << 2,
-		kCellFlag_ForceHideLand = 1 << 3,
-		kCellFlag_PublicPlace = 1 << 5,
-		kCellFlag_HandChanged = 1 << 6,
-		kCellFlag_BehaveLikeExterior = 1 << 7,
-	};
-
-	struct ALIGN1 _CellFlags {
-		enum Flags : uint8_t {
-			INTERIOR			= 1u << 0,
-			HAS_WATER			= 1u << 1,
-			CANT_FAST_TRAVEL	= 1u << 2,
-			NO_LOD_WATER		= 1u << 3,
-			HAS_TEMP_DATA		= 1u << 4,
-			PUBLIC				= 1u << 5,
-			TEMP_PUBLIC			= 1u << 6,
-			FAKE_EXTERIOR		= 1u << 7,
-		};
-
-		bool bInterior				: 1;
-		bool bHasWater				: 1;
-		bool bCantFastTravel		: 1;
-		bool bNoLODWater			: 1;
-		bool bHasTempData			: 1;
-		bool bPublic				: 1;
-		bool bTempPublic			: 1;
-		bool bBehaveLikeExterior	: 1;
-	};
-	using CellFlags = _CellFlags::Flags;
-
-	TESFullName				fullName;				// 18
-	Bitfield<_CellFlags>	cellFlags;				// 24
-	uint8_t					byte25;					// 25
-	uint8_t					byte26;					// 26	5 or 6 would mean cell is loaded
-	uint8_t					byte27;					// 27
-	ExtraDataList			extraDataList;			// 28
-	CellCoordinates			coords;					// 48
-	TESObjectLAND* land;					// 4C
-	float					waterHeight;			// 50
-	uint32_t					unk54;					// 54
-	TESTexture				noiseTexture;			// 58
-	NavMeshArray*			pNavMeshes;
-	uint32_t					unk68[6];				// 68
-	void* refLockSemaphore;		// 80
-	uint32_t					unk84[8];				// 84
-	uint32_t					actorCount;				// A4
-	uint16_t					countVisibleDistant;	// A8
-	uint16_t					unkAA;					// AA
-	RefList					objectList;				// AC
-	NiNode* niNodeB4;				// B4
-	NiNode* niNodeB8;				// B8
-	uint32_t					unkBC;					// BC
-	TESWorldSpace* worldSpace;			// C0
-	LoadedData* renderData;			// C4
-	float					fltC8;					// C8
-	uint8_t					byteCC;					// CC
-	uint8_t					byteCD;					// CD
-	uint8_t					byteCE;					// CE
-	uint8_t					byteCF;					// CF
-	uint8_t					byteD0;					// D0
-	uint8_t					byteD1;					// D1
-	uint8_t					byteD2;					// D2
-	uint8_t					byteD3;					// D3
-	BSPortalGraph* portalGraph;			// D4
-	BGSLightingTemplate* lightingTemplate;		// D8
-	uint32_t					inheritFlags;			// DC
-
-	bool IsInterior() const { return cellFlags.bInterior; }
-	NiNode* Get3DNode(uint32_t index);
-	void ToggleNodes(uint32_t nodeBits, uint8_t doHide);
-	void GenerateRenderedTexture(NiCamera* camera, NiRenderedTexture** outTexture);
-	TESWorldSpace* GetWorldSpace() const { return IsInterior() ? nullptr : worldSpace; }
-
-	void CellRefLockEnter();
-	void CellRefLockLeave();
-
-	static uint32_t GetCoord(int16_t x, int16_t y) {
-		return (int32_t(x) << 16) | uint16_t(y);
-	};
-
-	CellMopp* GetCellMopp() const {
-		return ThisCall<CellMopp*>(0x537B30, this);
-	}
-
-	void SetupMopp() {
-		ThisCall(0x5535F0, this);
-	}
-
-	TESObjectLAND* GetLand() {
-		return ThisCall<TESObjectLAND*>(0x546FB0, this);
-	}
-};
-static_assert(sizeof(TESObjectCELL) == 0xE0);
-
 // 3C	Init proc: 0x6FC490
 struct BGSTerrainManager {
 	// 60
@@ -1854,27 +1707,6 @@ class TESLevSpell;
 
 // BGSCameraPath (38)
 class BGSCameraPath;
-
-// 44
-class BGSLightingTemplate : public TESForm {
-public:
-	BGSLightingTemplate();
-	~BGSLightingTemplate();
-
-	uint8_t			ambientRGB[4];			// 18
-	uint8_t			directionalRGB[4];		// 1C
-	uint8_t			fogRGB[4];				// 20
-	float			fogNear;			// 24
-	float			fogFar;				// 28
-	uint32_t			directionalXY;		// 2C
-	uint32_t			directionalZ;		// 30
-	float			directionalFade;	// 34
-	float			fogClipDist;		// 38
-	float			fogPower;			// 3C
-	TESObjectCELL* getValuesFrom;		// 40
-};
-
-static_assert(sizeof(BGSLightingTemplate) == 0x44);
 
 struct CasinoStats
 {

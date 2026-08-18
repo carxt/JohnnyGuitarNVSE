@@ -8,6 +8,7 @@ class AlchemyItem;
 class TESActorBase;
 class InventoryChanges;
 class BGSEncounterZone;
+class BGSAcousticSpace;
 
 class ExtraDataList : public BaseExtraList {
 public:
@@ -38,6 +39,9 @@ public:
 
 	BGSEncounterZone* GetEncounterZone() const;
 	void SetEncounterZone(BGSEncounterZone* apZone);
+
+	BGSAcousticSpace* GetAcousticSpace() const;
+	void SetAcousticSpace(BGSAcousticSpace* apSpace);
 
 	float GetRadius() const;
 	void SetRadius(float afRadius);

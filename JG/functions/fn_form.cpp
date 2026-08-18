@@ -348,106 +348,269 @@ bool Cmd_GetLightingTemplateCell_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+namespace {
+
+	struct ALIGN4 RGBA_view {
+		uint8_t r : 8;
+		uint8_t g : 8;
+		uint8_t b : 8;
+		uint8_t a : 8;
+	};
+
+	enum class LightingTemplateTraits {
+		NONE				= 0,
+
+		AMBIENT_RED			= 1,
+		AMBIENT_GREEN		= 2,
+		AMBIENT_BLUE		= 3,
+
+		DIRECTIONAL_RED		= 4,
+		DIRECTIONAL_GREEN	= 5,
+		DIRECTIONAL_BLUE	= 6,
+
+		FOG_RED				= 7,
+		FOG_GREEN			= 8,
+		FOG_BLUE			= 9,
+
+		FOG_NEAR			= 10,
+		FOG_FAR				= 11,
+
+		DIRECTIONAL_XY		= 12,
+		DIRECTIONAL_Z		= 13,
+		DIRECTIONAL_FADE	= 14,
+
+		CLIP_DISTANCE		= 15,
+
+		FOG_POWER			= 16,
+
+		COUNT
+	};
+
+	enum class InteriorDataTraits {
+		NONE				= -1,
+
+		AMBIENT_RED			= 0,
+		AMBIENT_GREEN		= 1,
+		AMBIENT_BLUE		= 2,
+
+		DIRECTIONAL_RED		= 3,
+		DIRECTIONAL_GREEN	= 4,
+		DIRECTIONAL_BLUE	= 5,
+
+		DIRECTIONAL_XY		= 6,
+		DIRECTIONAL_Z		= 7,
+		DIRECTIONAL_FADE	= 8,
+
+		FOG_RED				= 9,
+		FOG_GREEN			= 10,
+		FOG_BLUE			= 11,
+
+		FOG_NEAR			= 12,
+		FOG_FAR				= 13,
+
+		FOG_POWER			= 14,
+
+		CLIP_DISTANCE		= 15,
+
+		COUNT
+	};
+
+	SPEC_NOINLINE InteriorDataTraits ConvertTemplateType(LightingTemplateTraits aeType) {
+		switch (aeType) {
+			case LightingTemplateTraits::AMBIENT_RED:
+				return InteriorDataTraits::AMBIENT_RED;
+			case LightingTemplateTraits::AMBIENT_GREEN:
+				return InteriorDataTraits::AMBIENT_GREEN;
+			case LightingTemplateTraits::AMBIENT_BLUE:
+				return InteriorDataTraits::AMBIENT_BLUE;
+			case LightingTemplateTraits::DIRECTIONAL_RED:
+				return InteriorDataTraits::DIRECTIONAL_RED;
+			case LightingTemplateTraits::DIRECTIONAL_GREEN:
+				return InteriorDataTraits::DIRECTIONAL_GREEN;
+			case LightingTemplateTraits::DIRECTIONAL_BLUE:
+				return InteriorDataTraits::DIRECTIONAL_BLUE;
+			case LightingTemplateTraits::DIRECTIONAL_XY:
+				return InteriorDataTraits::DIRECTIONAL_XY;
+			case LightingTemplateTraits::DIRECTIONAL_Z:
+				return InteriorDataTraits::DIRECTIONAL_Z;
+			case LightingTemplateTraits::DIRECTIONAL_FADE:
+				return InteriorDataTraits::DIRECTIONAL_FADE;
+			case LightingTemplateTraits::FOG_RED:
+				return InteriorDataTraits::FOG_RED;
+			case LightingTemplateTraits::FOG_GREEN:
+				return InteriorDataTraits::FOG_GREEN;
+			case LightingTemplateTraits::FOG_BLUE:
+				return InteriorDataTraits::FOG_BLUE;
+			case LightingTemplateTraits::FOG_NEAR:
+				return InteriorDataTraits::FOG_NEAR;
+			case LightingTemplateTraits::FOG_FAR:
+				return InteriorDataTraits::FOG_FAR;
+			case LightingTemplateTraits::FOG_POWER:
+				return InteriorDataTraits::FOG_POWER;
+			case LightingTemplateTraits::CLIP_DISTANCE:
+				return InteriorDataTraits::CLIP_DISTANCE;
+			default:
+				return InteriorDataTraits::NONE;
+		}
+	}
+
+	SPEC_NOINLINE double __fastcall GetInteriorDataValue(TESObjectCELL::InteriorData* apData, InteriorDataTraits aeType) {
+		if (!apData)
+			return 0.f;
+
+		switch (aeType) {
+			case InteriorDataTraits::AMBIENT_RED:
+				return reinterpret_cast<RGBA_view&>(apData->uiAmbientColor).r;
+			case InteriorDataTraits::AMBIENT_GREEN:
+				return reinterpret_cast<RGBA_view&>(apData->uiAmbientColor).g;
+			case InteriorDataTraits::AMBIENT_BLUE:
+				return reinterpret_cast<RGBA_view&>(apData->uiAmbientColor).b;
+			case InteriorDataTraits::DIRECTIONAL_RED:
+				return reinterpret_cast<RGBA_view&>(apData->uiDirectionalColor).r;
+			case InteriorDataTraits::DIRECTIONAL_GREEN:
+				return reinterpret_cast<RGBA_view&>(apData->uiDirectionalColor).g;
+			case InteriorDataTraits::DIRECTIONAL_BLUE:
+				return reinterpret_cast<RGBA_view&>(apData->uiDirectionalColor).b;
+			case InteriorDataTraits::DIRECTIONAL_XY:
+				return apData->iDirectionalXY;
+			case InteriorDataTraits::DIRECTIONAL_Z:
+				return apData->iDirectionalZ;
+			case InteriorDataTraits::DIRECTIONAL_FADE:
+				return apData->fDirectionalFade;
+			case InteriorDataTraits::FOG_RED:
+				return reinterpret_cast<RGBA_view&>(apData->uiFogColor).r;
+			case InteriorDataTraits::FOG_GREEN:
+				return reinterpret_cast<RGBA_view&>(apData->uiFogColor).g;
+			case InteriorDataTraits::FOG_BLUE:
+				return reinterpret_cast<RGBA_view&>(apData->uiFogColor).b;
+			case InteriorDataTraits::FOG_NEAR:
+				return apData->fFogNear;
+			case InteriorDataTraits::FOG_FAR:
+				return apData->fFogFar;
+			case InteriorDataTraits::FOG_POWER:
+				return apData->fFogPower;
+			case InteriorDataTraits::CLIP_DISTANCE:
+				return apData->fClipDist;
+			default:
+				return 0.f;
+		}
+	}
+
+	SPEC_NOINLINE bool __fastcall SetInteriorDataValue(TESObjectCELL::InteriorData* apData, InteriorDataTraits aeType, float afValue) {
+		if (!apData)
+			return false;
+
+		switch (aeType) {
+			case InteriorDataTraits::AMBIENT_RED:
+				reinterpret_cast<RGBA_view&>(apData->uiAmbientColor).r = afValue;
+				break;
+			case InteriorDataTraits::AMBIENT_GREEN:
+				reinterpret_cast<RGBA_view&>(apData->uiAmbientColor).g = afValue;
+				break;
+			case InteriorDataTraits::AMBIENT_BLUE:
+				reinterpret_cast<RGBA_view&>(apData->uiAmbientColor).b = afValue;
+				break;
+			case InteriorDataTraits::DIRECTIONAL_RED:
+				reinterpret_cast<RGBA_view&>(apData->uiDirectionalColor).r = afValue;
+				break;
+			case InteriorDataTraits::DIRECTIONAL_GREEN:
+				reinterpret_cast<RGBA_view&>(apData->uiDirectionalColor).g = afValue;
+				break;
+			case InteriorDataTraits::DIRECTIONAL_BLUE:
+				reinterpret_cast<RGBA_view&>(apData->uiDirectionalColor).b = afValue;
+				break;
+			case InteriorDataTraits::DIRECTIONAL_XY:
+				apData->iDirectionalXY = afValue;
+				break;
+			case InteriorDataTraits::DIRECTIONAL_Z:
+				apData->iDirectionalZ = afValue;
+				break;
+			case InteriorDataTraits::DIRECTIONAL_FADE:
+				apData->fDirectionalFade = afValue;
+				break;
+			case InteriorDataTraits::FOG_RED:
+				reinterpret_cast<RGBA_view&>(apData->uiFogColor).r = afValue;
+				break;
+			case InteriorDataTraits::FOG_GREEN:
+				reinterpret_cast<RGBA_view&>(apData->uiFogColor).g = afValue;
+				break;
+			case InteriorDataTraits::FOG_BLUE:
+				reinterpret_cast<RGBA_view&>(apData->uiFogColor).b = afValue;
+				break;
+			case InteriorDataTraits::FOG_NEAR:
+				apData->fFogNear = afValue;
+				break;
+			case InteriorDataTraits::FOG_FAR:
+				apData->fFogFar = afValue;
+				break;
+			case InteriorDataTraits::FOG_POWER:
+				apData->fFogPower = afValue;
+				break;
+			case InteriorDataTraits::CLIP_DISTANCE:
+				apData->fClipDist = afValue;
+				break;
+			default:
+				return false;
+		}
+		return true;
+	}
+
+	double __fastcall GetLightingTemplateValue(BGSLightingTemplate* apTemplate, LightingTemplateTraits aeType) {
+		return GetInteriorDataValue(&apTemplate->kData, ConvertTemplateType(aeType));
+	}
+
+	bool __fastcall SetLightingTemplateValue(BGSLightingTemplate* apTemplate, LightingTemplateTraits aeType, float afValue) {
+		return SetInteriorDataValue(&apTemplate->kData, ConvertTemplateType(aeType), afValue);
+	}
+}
+
 bool Cmd_SetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	uint32_t traitID = 0;
-	BGSLightingTemplate* tmpl = nullptr;
-	float value = 0.0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tmpl, &traitID, &value) && tmpl && IS_TYPE(tmpl, BGSLightingTemplate) && traitID > 0) {
-		switch (traitID) {
-		case 1:
-		case 2:
-		case 3:
-			tmpl->ambientRGB[traitID - 1] = value;
-			break;
-		case 4:
-		case 5:
-		case 6:
-			tmpl->directionalRGB[traitID - 4] = value;
-			break;
-		case 7:
-		case 8:
-		case 9:
-			tmpl->fogRGB[traitID - 7] = value;
-			break;
-		case 10:
-			tmpl->fogNear = value;
-			break;
-		case 11:
-			tmpl->fogFar = value;
-			break;
-		case 12:
-			tmpl->directionalXY = value;
-			break;
-		case 13:
-			tmpl->directionalZ = value;
-			break;
-		case 14:
-			tmpl->directionalFade = value;
-			break;
-		case 15:
-			tmpl->fogClipDist = value;
-			break;
-		case 16:
-			tmpl->fogPower = value;
-			break;
-		default:
-			return true;
-		}
+	LightingTemplateTraits eTrait = LightingTemplateTraits::NONE;
+	BGSLightingTemplate* pTemplate = nullptr;
+	float fValue = 0.f;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTemplate, &eTrait, &fValue) && InRange(eTrait) && pTemplate && IS_TYPE(pTemplate, BGSLightingTemplate)) {
+		arResult = SetLightingTemplateValue(pTemplate, eTrait, fValue);
 	}
 	return true;
 }
 
 bool Cmd_GetLightingTemplateTraitNumeric_Execute(COMMAND_ARGS) {
 	arResult = 0;
-	uint32_t traitID = 0;
-	BGSLightingTemplate* tmpl = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tmpl, &traitID) && tmpl && IS_TYPE(tmpl, BGSLightingTemplate) && traitID > 0) {
-		switch (traitID) {
-		case 1:
-		case 2:
-		case 3:
-			arResult = tmpl->ambientRGB[traitID - 1];
-			break;
-		case 4:
-		case 5:
-		case 6:
-			arResult = tmpl->directionalRGB[traitID - 4];
-			break;
-		case 7:
-		case 8:
-		case 9:
-			arResult = tmpl->fogRGB[traitID - 7];
-			break;
-		case 10:
-			arResult = tmpl->fogNear;
-			break;
-		case 11:
-			arResult = tmpl->fogFar;
-			break;
-		case 12:
-			arResult = tmpl->directionalXY;
-			break;
-		case 13:
-			arResult = tmpl->directionalZ;
-			break;
-		case 14:
-			arResult = tmpl->directionalFade;
-			break;
-		case 15:
-			arResult = tmpl->fogClipDist;
-			break;
-		case 16:
-			arResult = tmpl->fogPower;
-			break;
-		default:
-			return true;
-		}
-		if (IsConsoleMode()) 
-			Console_Print("GetLightingTemplateTraitNumeric %d >> %f", traitID, arResult);
+	LightingTemplateTraits eTrait = LightingTemplateTraits::NONE;
+	BGSLightingTemplate* pTemplate = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTemplate, &eTrait) && InRange(eTrait) && pTemplate && IS_TYPE(pTemplate, BGSLightingTemplate)) {
+		arResult = GetLightingTemplateValue(pTemplate, eTrait);
 	}
 	return true;
 }
+
+bool Cmd_GetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
+	arResult = 0;
+	TESObjectCELL* pCell = nullptr;
+	InteriorDataTraits eTrait = InteriorDataTraits::NONE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, &eTrait) && InRange(eTrait) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
+		arResult = GetInteriorDataValue(pCell->GetInteriorData(), eTrait);
+		if (IsConsoleMode())
+			Console_Print("GetInteriorLightingTraitNumeric %d >> %.2f", eTrait, arResult);
+	}
+	return true;
+}
+
+bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
+	arResult = 0;
+	TESObjectCELL* pCell = nullptr;
+	InteriorDataTraits eTrait = InteriorDataTraits::NONE;
+	float fValue = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, &eTrait, &fValue) && InRange(eTrait) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
+		arResult = SetInteriorDataValue(pCell->GetInteriorData(), eTrait, fValue);
+
+		if (IsConsoleMode())
+			Console_Print("SetInteriorLightingTraitNumeric %d >> %.2f", eTrait, fValue);
+	}
+	return true;
+}
+
 
 bool Cmd_SetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	arResult = 0;
@@ -484,7 +647,7 @@ bool Cmd_SetCellEncounterZone_Execute(COMMAND_ARGS) {
 		return true;
 
 	if (!pZone || IS_TYPE(pZone, BGSEncounterZone)) {
-		pCell->extraDataList.SetEncounterZone(pZone);
+		pCell->SetEncounterZone(pZone);
 		arResult = 1;
 	}
 	return true;
@@ -1793,8 +1956,7 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	TESObjectCELL* pCell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
-		ExtraSeenData* pSeenData = pCell->extraDataList.GetExtraData<ExtraSeenData>();
-		if (pSeenData && pSeenData->pSeenData)
+		if (pCell->GetSeenData())
 			arResult = 1;
 		if (IsConsoleMode())
 			Console_Print("IsCellVisited >> %.0f", arResult);
@@ -1806,8 +1968,7 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	arResult = 0;
 	TESObjectCELL* pCell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
-		const ExtraDetachTime* pDetachTime = pCell->extraDataList.GetExtraData<ExtraDetachTime>();
-		const uint32_t uiDetachTime = pDetachTime ? pDetachTime->uiTime : 0;
+		const uint32_t uiDetachTime = pCell->GetDetachTime();
 		if (uiDetachTime == 0) {
 			arResult = -1;
 		}
@@ -1815,7 +1976,7 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 			arResult = 1;
 		}
 		else {
-			const uint32_t uiHoursToRespawnCell = GameSettingCollection::iHoursToRespawnCell->Int();
+			const uint32_t uiHoursToRespawnCell = TESObjectCELL::GetHoursToClearCorpses();
 			const uint32_t uiGameHoursPassed = Calendar::GetSingleton()->GetHoursPassed();
 			arResult = (uiGameHoursPassed - uiDetachTime) >= uiHoursToRespawnCell;
 		}
@@ -1841,139 +2002,6 @@ bool Cmd_GetBaseEffectArchetype_Execute(COMMAND_ARGS) {
 	EffectSetting* pEffect = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pEffect) && pEffect && IS_TYPE(pEffect, EffectSetting))
 		arResult = pEffect->GetEffectArchetype();
-	return true;
-}
-
-bool Cmd_GetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
-	arResult = 0;
-	TESObjectCELL* cell = nullptr;
-	int traitID = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cell, &traitID) && cell && IS_TYPE(cell, TESObjectCELL)) {
-		if (!cell->IsInterior() || traitID < 0 || traitID > 15) return true;
-		TESObjectCELL::LightingData* lightingData = cell->coords.interior;
-		switch (traitID) {
-		case 0:
-			arResult = lightingData->ambientRGB.r;
-			break;
-		case 1:
-			arResult = lightingData->ambientRGB.g;
-			break;
-		case 2:
-			arResult = lightingData->ambientRGB.b;
-			break;
-		case 3:
-			arResult = lightingData->directionalRGB.r;
-			break;
-		case 4:
-			arResult = lightingData->directionalRGB.g;
-			break;
-		case 5:
-			arResult = lightingData->directionalRGB.b;
-			break;
-		case 6:
-			arResult = lightingData->directionalRotXY;
-			break;
-		case 7:
-			arResult = lightingData->directionalRotZ;
-			break;
-		case 8:
-			arResult = lightingData->directionalFade;
-			break;
-		case 9:
-			arResult = lightingData->fogRGB.r;
-			break;
-		case 10:
-			arResult = lightingData->fogRGB.g;
-			break;
-		case 11:
-			arResult = lightingData->fogRGB.b;
-			break;
-		case 12:
-			arResult = lightingData->fogNear;
-			break;
-		case 13:
-			arResult = lightingData->fogFar;
-			break;
-		case 14:
-			arResult = lightingData->fogPower;
-			break;
-		case 15:
-			arResult = lightingData->fogClipDist;
-			break;
-		default:
-			return true;
-		}
-		if (IsConsoleMode())
-			Console_Print("GetInteriorLightingTraitNumeric %d >> %.2f", traitID, arResult);
-	}
-	return true;
-}
-
-bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
-	arResult = 0;
-	TESObjectCELL* pCell = nullptr;
-	int traitID = -1;
-	float value = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, &traitID, &value) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
-		if (!pCell->IsInterior() || traitID < 0 || traitID > 15) return true;
-		TESObjectCELL::LightingData* lightingData = pCell->coords.interior;
-		arResult = 1;
-		switch (traitID) {
-		case 0:
-			lightingData->ambientRGB.r = value;
-			break;
-		case 1:
-			lightingData->ambientRGB.g = value;
-			break;
-		case 2:
-			lightingData->ambientRGB.b = value;
-			break;
-		case 3:
-			lightingData->directionalRGB.r = value;
-			break;
-		case 4:
-			lightingData->directionalRGB.g = value;
-			break;
-		case 5:
-			lightingData->directionalRGB.b = value;
-			break;
-		case 6:
-			lightingData->directionalRotXY = value;
-			break;
-		case 7:
-			lightingData->directionalRotZ = value;
-			break;
-		case 8:
-			lightingData->directionalFade = value;
-			break;
-		case 9:
-			lightingData->fogRGB.r = value;
-			break;
-		case 10:
-			lightingData->fogRGB.g = value;
-			break;
-		case 11:
-			lightingData->fogRGB.b = value;
-			break;
-		case 12:
-			lightingData->fogNear = value;
-			break;
-		case 13:
-			lightingData->fogFar = value;
-			break;
-		case 14:
-			lightingData->fogPower = value;
-			break;
-		case 15:
-			lightingData->fogClipDist = value;
-			break;
-		default:
-			arResult = 0;
-			return true;
-		}
-		if (IsConsoleMode())
-			Console_Print("SetInteriorLightingTraitNumeric %d >> %.2f", traitID, value);
-	}
 	return true;
 }
 
@@ -2270,7 +2298,7 @@ namespace RefWalker {
 		uint32_t uiCount = 0;
 		TESObjectREFR* pCaller = arFilter.pCaller;
 		apCell->CellRefLockEnter();
-		auto pIter = apCell->objectList.GetHead();
+		auto pIter = apCell->GetRefList();
 		while (pIter && !pIter->IsEmpty()) {
 			TESObjectREFR* pRef = pIter->GetItem();
 			pIter = pIter->GetNext();

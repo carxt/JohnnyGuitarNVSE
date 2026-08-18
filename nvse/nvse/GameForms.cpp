@@ -215,13 +215,3 @@ uint8_t TESPackage::ObjectCodeForString(const char* objString) {
 
 	return kObjectType_Max;
 }
-
-// GAME - 0x541AC0
-void TESObjectCELL::CellRefLockEnter() {
-	ThisCall(0x541AC0, this);
-}
-
-// GAME - 0x541AE0
-void TESObjectCELL::CellRefLockLeave() {
-	ThisCall(0x541AE0, this);
-}

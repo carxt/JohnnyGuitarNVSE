@@ -31,6 +31,7 @@
 #include "Bethesda/BSFogProperty.hpp"
 #include "Bethesda/SceneGraph.hpp"
 #include "Bethesda/BSAnimGroupSequence.hpp"
+#include "Bethesda/BSPortalGraph.hpp"
 
 class NavMeshInfo;
 class TESAnimGroup;
@@ -133,21 +134,6 @@ static_assert(sizeof(WaterShaderProperty) == 0x150);
 
 class NiCamera;
 
-// B4
-class BSMultiBoundNode : public NiNode {
-public:
-	BSMultiBoundNode();
-	~BSMultiBoundNode();
-
-	virtual void	Unk_40(uint32_t arg1, uint32_t arg2);
-	virtual void	Unk_41(void);
-	virtual void	Unk_42(uint32_t arg1);
-	virtual void	Unk_43(uint32_t arg1);
-	virtual void	Unk_44(uint32_t arg1);
-
-	uint32_t			unkAC[2];		// AC
-};
-
 // B8
 class BSParticleSystemManager : public NiNode {
 public:
@@ -163,25 +149,6 @@ class BSOcclusionPlane;
 class BSPortal;
 class BSMultiBoundRoom;
 class ShadowSceneLight;
-
-// 78
-class BSPortalGraph : public NiRefObject {
-public:
-	BSPortalGraph();
-	~BSPortalGraph();
-
-	NiTPointerList<BSOcclusionPlane*>			kOccluders;
-	NiTPointerList<BSPortal*>					kPortals;
-	NiTPointerList<NiPointer<BSMultiBoundRoom>>	kMultiBoundRooms;
-	NiPointer<BSMultiBoundRoom>					spRoomRoot;
-	NiTPointerList<NiPointer<BSMultiBoundRoom>>	kMultiBoundRoomAccumList;
-	NiTObjectArray<NiPointer<NiAVObject>>		kAlwaysRenderChildren;
-	NiPointer<NiNode>							spPortalNodeRoot;
-	NiTPointerList<ShadowSceneLight*>			kAttachAlwaysRenderQueue;
-	NiTPointerList<ShadowSceneLight*>			kDetachAlwaysRenderQueue;
-	BSSimpleArray<NiPointer<NiNode>>			kUnboundNodes;
-};
-static_assert(sizeof(BSPortalGraph) == 0x78);
 
 // 250
 class ShadowSceneLight : public NiRefObject	//	010B7EB8

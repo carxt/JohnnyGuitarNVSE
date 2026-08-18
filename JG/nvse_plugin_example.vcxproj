@@ -212,6 +212,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="functions\fn_ui.cpp" />
     <ClCompile Include="functions\fn_utility.cpp" />
     <ClCompile Include="internal\decoding.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\ActiveEffect.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Actor.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ActorMover.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ActorPackage.cpp" />
@@ -375,6 +376,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESObjectACTI.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectARMO.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectBOOK.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESObjectCELL.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectCONT.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectDOOR.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectLAND.cpp" />
@@ -561,6 +563,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="functions\fn_utility.h" />
     <ClInclude Include="internal\CommandOpcodes.h" />
     <ClInclude Include="internal\decoding.h" />
+    <ClInclude Include="internal\Game\Bethesda\ActiveEffect.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Actor.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ActorLockData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ActorMover.hpp" />
@@ -607,6 +610,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSIdleMarker.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSImpactData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSImpactDataSet.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSLightingTemplate.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSMenuIcon.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSMessage.hpp" />
@@ -648,11 +652,17 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSFogProperty.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSMultiBound.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSMultiBoundNode.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSMultiBoundRoom.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSMultiBoundShape.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSNiNode.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSNodeReferences.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSNonReentrantSpinLock.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSOcclusionPlane.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSPackedTask.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSPackedTaskQueue.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSPortalGraph.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSRenderedTexture.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSceneGraph.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSScrapHeapQueueElem.hpp" />
@@ -864,6 +874,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESObjectARMA.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectARMO.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectBOOK.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESObjectCELL.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectCLOT.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectCONT.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectDOOR.hpp" />
@@ -917,6 +928,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TileText.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TimeGlobal.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TLSData.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ValueModifierEffect.hpp" />
     <ClInclude Include="internal\Game\Bethesda\VirtualPathingNode.hpp" />
     <ClInclude Include="internal\Game\Bethesda\WeatherEntry.hpp" />
     <ClInclude Include="internal\Game\FaceGen\FR2MatrixVTC.hpp" />

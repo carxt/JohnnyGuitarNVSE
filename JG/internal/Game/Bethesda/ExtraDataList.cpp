@@ -154,6 +154,16 @@ void ExtraDataList::SetEncounterZone(BGSEncounterZone* apEncounterZone) {
 #endif
 }
 
+// GAME - 0x41C160
+BGSAcousticSpace* ExtraDataList::GetAcousticSpace() const {
+	return ThisCall<BGSAcousticSpace*>(0x41C160, this);
+}
+
+// GAME - 0x41C090
+void ExtraDataList::SetAcousticSpace(BGSAcousticSpace* apSpace) {
+	ThisCall(0x41C090, this, apSpace);
+}
+
 // GAME - 0x422320
 // GECK - 0x4ABC90
 float ExtraDataList::GetRadius() const {
