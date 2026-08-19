@@ -96,21 +96,6 @@ namespace JohnnyFixes {
 		}
 	}
 
-	HookUtils::CallDetour kSetBipedWeaponDetour;
-	void __fastcall SetBipedWeaponModFix(BipedAnim* apThis, void*, TESObjectWEAP* apWeapon, uint8_t aucModSlots) {
-		uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
-		TESObjectREFR* pReference = *reinterpret_cast<TESObjectREFR**>(pEBP + 0x8);
-		if (pReference && pReference->IsActor()) {
-			Actor* pActor = static_cast<Actor*>(pReference);
-			if (pActor->baseProcess) {
-				ItemChange* pWeaponItem = pActor->baseProcess->GetCurrentWeapon();
-				if (pWeaponItem)
-					aucModSlots = pWeaponItem->GetModSlots();
-			}
-		}
-		ThisCall(kSetBipedWeaponDetour, apThis, apWeapon, aucModSlots);
-	}
-
 	namespace INISettingFixes {
 
 		template<uint32_t uiAddress>
@@ -404,6 +389,76 @@ namespace JohnnyFixes {
 
 	}
 
+	namespace BipedAnimFixes {
+
+		HookUtils::CallDetour kSetBipedWeaponDetour;
+		STACK_FRAME_OPT_DISABLE
+		void __fastcall SetBipedWeaponModFix(BipedAnim* apThis, void*, TESObjectWEAP* apWeapon, uint8_t aucModSlots) {
+			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+			TESObjectREFR* pReference = *reinterpret_cast<TESObjectREFR**>(pEBP + 0x8);
+			if (pReference && pReference->IsActor()) {
+				Actor* pActor = static_cast<Actor*>(pReference);
+				if (pActor->baseProcess) {
+					ItemChange* pWeaponItem = pActor->baseProcess->GetCurrentWeapon();
+					if (pWeaponItem)
+						aucModSlots = pWeaponItem->GetModSlots();
+				}
+			}
+			ThisCall(kSetBipedWeaponDetour, apThis, apWeapon, aucModSlots);
+		}
+		STACK_FRAME_OPT_RESET
+
+		HookUtils::CallDetour kRemoveAllExtraDetour;
+		void __fastcall ReattachBSXFlags(NiAVObject* apObject) {
+			const NiFixedString& rFlagsTag = BSXFlags::GetTag();
+			NiPointer<NiExtraData> spFlags = apObject->GetExtraData(rFlagsTag);
+			ThisCall(kRemoveAllExtraDetour, apObject);
+			if (spFlags)
+				apObject->AddExtraData(rFlagsTag, spFlags);
+		}
+
+		HookUtils::CallDetour kSetClonePtrDetour;
+		STACK_FRAME_OPT_DISABLE
+		NiRefObjectPtr* __fastcall AddControllerToBiped(NiRefObjectPtr* apThis, void*, NiAVObject* apClone) {
+			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+			NiAVObject* pNewObj = *reinterpret_cast<NiAVObject**>(pEBP - 0x18);
+			if (pNewObj) {
+				NiControllerManager* pCtrlMgr = apClone->GetController<NiControllerManager>();
+				if (pCtrlMgr) {
+					pNewObj->PrependController(pCtrlMgr);
+					if (pCtrlMgr->m_spObjectPalette)
+						pCtrlMgr->m_spObjectPalette->SetScene(pNewObj);
+				}
+			}
+			return ThisCall<NiRefObjectPtr*>(kSetClonePtrDetour, apThis, apClone);
+		}
+		STACK_FRAME_OPT_RESET;
+
+		void InitHooks() {
+			// Pass weapon mod flags during TESNPC::InitWornObject
+			// Vaniller doesn't (the only spot where it's 0'd) so NPCs end up with wrong weapon models
+			kSetBipedWeaponDetour.ReplaceCall(0x6061E8, SetBipedWeaponModFix);
+
+			// Fix wrong checks in BipedAnim::RunBiped3DDetach
+			// TLDR is, wrong order of operation and badly made checks
+			// Havok removal no longer depends on object having a parent, and no longer is dependant on BSXFlags presence
+			// Fixed in CE...
+			HookUtils::SafeWriteBuf(0x4AB0F5, "\x89\x45\xFC\x90\x6A\x01");
+			HookUtils::SafeWriteBuf(0x4AB10C, "\x8B\x45\xFC\x85\xC0\x74\x15\x90");
+
+			// Allow skinned weapons
+			// Fixed in CE...
+			HookUtils::WriteRelJump(0x4AF0F8, 0x4AF136);
+
+			// Preserve BSXFlags in BipedAnim::LoadAndAttachAddOn
+			// Fixed in, ffs, CE...
+			kRemoveAllExtraDetour.ReplaceCall(0x4AF07A, ReattachBSXFlags);
+
+			// Support existing NiControllerManagers
+			// You can guess what'll say
+			kSetClonePtrDetour.ReplaceCall(0x4AD44C, AddControllerToBiped);
+		}
+	}
 	void Init() {
 		// for Runtime EDIDs
 		EDIDRestoration::InitHooks();
@@ -429,9 +484,6 @@ namespace JohnnyFixes {
 
 		// use correct weapon skill req penalty setting in weapon spread calculation
 		HookUtils::SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01");
-
-		// fix for various biped model update bugs
-		kSetBipedWeaponDetour.ReplaceCall(0x6061E8, SetBipedWeaponModFix);
 
 		// missing nullcheck in NiMultiTargetTransformController::RemoveNodeRecurse
 		HookUtils::SafeWrite8(0x4F064E, 0x7A);
@@ -479,14 +531,17 @@ namespace JohnnyFixes {
 		// Patch the game so the dialog subroutine stops if the actor's head is blown off, I'll add it as an ini setting later.
 		NoHeadlessTalkingFix::InitHooks();
 
-		// Fix wrong checks in BipedAnim::RunBiped3DDetach
-		HookUtils::SafeWriteBuf(0x4AB0F5, "\x89\x45\xFC\x90\x6A\x01");
-		HookUtils::SafeWriteBuf(0x4AB10C, "\x8B\x45\xFC\x85\xC0\x74\x15\x90");
-
 		// Add a baseform nullcheck for created refs in BGSSaveLoadGame::CheckInitialData
 		HookUtils::SafeWriteBuf(0x849DE6, "\x85\xC0\x74\x08\x8B\x40\x0C");
 
 		DestructionFixes::InitHooks();
+    
+		// Disable frustum culling for the viewmodel
+		// Game tries to do that by setting "always draw" on the player scene, but only on the root node
+		// Fixed in CE... (are you even surprised by now?)
+		HookUtils::SafeWrite8(0x875065 + 1, 1);
+
+		BipedAnimFixes::InitHooks();
 	}
 
 }
