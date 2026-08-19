@@ -375,7 +375,7 @@ namespace JohnnyFixes {
 
 		void InitHooks() {
 			// Simplify destruction stages check
-			// TES Engine requires having a replacement model/explosion/debris or disablement in order to be consided valid
+			// TES Engine requires having a replacement model/explosion/debris or disablement in order to be considered valid
 			// Which means if you only use BSDamageStages, or destruction instead of disablement... it won't work
 			// CE only checks if data exists, and has stage count, which is what we replicate here (who's we?)
 			HookUtils::SafeWriteBuf(0x475A32, "\x85\xC9\x7E\x49\xEB\x41");
