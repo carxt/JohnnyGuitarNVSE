@@ -375,6 +375,8 @@ class BSAnimNoteListener;
 
 class NiDefaultAVObjectPalette : public NiAVObjectPalette {
 public:
+	virtual void			SetScene(NiAVObject* apScene);
+	virtual NiAVObject*		GetScene() const;
 };
 
 // 7C
@@ -569,6 +571,10 @@ public:
 	};
 
 	uint32_t			flags;		// 0C
+
+	static const NiFixedString& GetTag() {
+		return CdeclCall<const NiFixedString&>(0x448A80);
+	}
 };
 
 // 14
