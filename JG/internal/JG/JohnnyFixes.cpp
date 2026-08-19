@@ -367,6 +367,27 @@ namespace JohnnyFixes {
 			pAIProcess->SetFurnitureRef(PlayerCharacter::GetSingleton(), 0, nullptr, 0x7F);
 	}
 
+	namespace DestructionFixes {
+
+		void __fastcall SetDeleteVirt(TESForm* apForm, void*, bool abDelete) {
+			apForm->SetDelete(abDelete);
+		}
+
+		void InitHooks() {
+			// Simplify destruction stages check
+			// TES Engine requires having a replacement model/explosion/debris or disablement in order to be considered valid
+			// Which means if you only use BSDamageStages, or destruction instead of disablement... it won't work
+			// CE only checks if data exists, and has stage count, which is what we replicate here (who's we?)
+			HookUtils::SafeWriteBuf(0x475A32, "\x85\xC9\x7E\x49\xEB\x41");
+
+			// TES Engine calls TESForm::SetDelete on the reference... instead of TESObjectREFR::SetDelete
+			// This results in inproper cleanup of saved data
+			// Naturally, fixed in CE...
+			// I'm replacing it with a virtual call for better compat (sadly no space to do an inline write)
+			HookUtils::ReplaceCall(0x475EA1, SetDeleteVirt);
+		}
+
+	}
 
 	namespace BipedAnimFixes {
 
@@ -513,6 +534,8 @@ namespace JohnnyFixes {
 		// Add a baseform nullcheck for created refs in BGSSaveLoadGame::CheckInitialData
 		HookUtils::SafeWriteBuf(0x849DE6, "\x85\xC0\x74\x08\x8B\x40\x0C");
 
+		DestructionFixes::InitHooks();
+    
 		// Disable frustum culling for the viewmodel
 		// Game tries to do that by setting "always draw" on the player scene, but only on the root node
 		// Fixed in CE... (are you even surprised by now?)
