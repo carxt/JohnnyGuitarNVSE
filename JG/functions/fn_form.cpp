@@ -3308,7 +3308,7 @@ bool Cmd_SetExternalEmittanceSource_Execute(COMMAND_ARGS) {
 				kTask.kItems[0].p = pExtraData;
 				kTask.kItems[1].p = pSource;
 				kTask.pFunction = QUEUED_TASK{
-					JohnnyExtraData * pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
+					JohnnyExtraData* pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
 					TESForm* pSource = reinterpret_cast<TESForm*>(arTask.kItems[1].p);
 					TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pData->pOwner);
 					SetEmittanceSourceForRef(pRef, pSource);
