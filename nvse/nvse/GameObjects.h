@@ -188,6 +188,9 @@ public:
 
 	TESWorldSpace* GetWorldSpace() const { return ThisCall<TESWorldSpace*>(0x575D70, this); }
 
+	TESForm* GetEmittanceSource() const { return ThisCall<TESForm*>(0x569580, this); }
+	void SetEmittanceSource(TESForm* apSource) { extraDataList.SetEmittanceSource(apSource); }
+
 	MEMBER_FN_PREFIX(TESObjectREFR);
 #if 1
 	DEFINE_MEMBER_FN(Activate, bool, 0x00573170, TESObjectREFR*, uint32_t, uint32_t, uint32_t);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute as the last call (190 bytes)

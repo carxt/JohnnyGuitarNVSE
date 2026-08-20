@@ -3696,6 +3696,14 @@ public:
 	TESObjectLAND* GetLand() {
 		return ThisCall<TESObjectLAND*>(0x546FB0, this);
 	}
+
+	void AddEmittanceRef(TESObjectREFR* apReference) {
+		ThisCall(0x5453B0, this, apReference);
+	}
+
+	void RemoveEmittanceRef(TESObjectREFR* apReference) {
+		ThisCall(0x5454F0, this, apReference);
+	}
 };
 static_assert(sizeof(TESObjectCELL) == 0xE0);
 
