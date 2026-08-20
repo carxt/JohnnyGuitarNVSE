@@ -20,6 +20,7 @@
 #include "JG/DisabledSaves.hpp"
 #include "JG/CustomHUDShake.hpp"
 #include "JG/AnimActivationHeight.hpp"
+#include "JG/ExternalEmittanceOnBases.hpp"
 
 #define REG_CMD(name) apNVSE->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) apNVSE->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
@@ -30,6 +31,7 @@ namespace JohnnyCommands {
 
 	void InitCommandData() {
 		AnimActivationHeight::Init();
+		ExternalEmittanceOnBases::Install();
 	}
 
 	void Init(const NVSEInterface* apNVSE) {
@@ -436,6 +438,8 @@ namespace JohnnyCommands {
 		REG_CMD(GetNiLightColor);
 		REG_CMD(ReloadEquippedModelsAlt);
 		REG_CMD(ar_IsFormInList);
+		REG_TYPED_CMD(GetExternalEmittanceSource, Form);
+		REG_CMD(SetExternalEmittanceSource);
 	}
 
 }

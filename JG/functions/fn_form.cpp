@@ -22,6 +22,7 @@
 #include <Bethesda/AILinearTaskThreadManager.hpp>
 #include <JG/TaskQueue.hpp>
 #include <JG/LandRemapping.hpp>
+#include <JG/ExternalEmittanceOnBases.hpp>
 #include <Bethesda/BSShaderManager.hpp>
 #include <Bethesda/TESMain.hpp>
 #include <Bethesda/BSUtilities.hpp>
@@ -3230,6 +3231,50 @@ bool Cmd_ReloadEquippedModelsAlt_Execute(COMMAND_ARGS) {
 			RequestBipedModelUpdate(pChar, iTargetObject, bQueue);
 			*result = bQueue ? 2 : 1;
 		}
+	}
+	return true;
+}
+
+bool Cmd_GetExternalEmittanceSource_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && pForm) {
+		TESForm* pSource = nullptr;
+		if (pForm->IsReference()) {
+			pSource = static_cast<TESObjectREFR*>(pForm)->GetEmittanceSource();
+		}
+		else if (pForm->IsBoundObject()) {
+			pSource = ExternalEmittanceOnBases::GetExternalEmittanceSource(static_cast<TESBoundObject*>(pForm));
+		}
+
+		if (pSource)
+			*reinterpret_cast<uint32_t*>(result) = pSource->GetFormID();
+	}
+
+	return true;
+}
+
+bool Cmd_SetExternalEmittanceSource_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* pForm = nullptr;
+	TESForm* pSource = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &pSource) && pForm) {
+		if (pSource) {
+			if (pSource->GetFormType() != FORM_TYPE::TESRegion || pSource->GetFormType() != FORM_TYPE::TESObjectLIGH)
+				return true;
+		}
+
+		if (pForm->IsReference()) {
+			static_cast<TESObjectREFR*>(pForm)->SetEmittanceSource(pSource);
+		}
+		else if (pForm->IsBoundObject()) {
+			ExternalEmittanceOnBases::SetExternalEmittanceSource(static_cast<TESBoundObject*>(pForm), pSource);
+		}
+		else {
+			return true;
+		}
+
+		*result = 1;
 	}
 	return true;
 }

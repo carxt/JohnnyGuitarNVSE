@@ -129,3 +129,5 @@ DEFINE_COMMAND_PLUGIN(ClearAltTexture, , false, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(SetAltTexture, , false, kParams_OneForm_OneInt_OneForm);
 DEFINE_COMMAND_PLUGIN(GetAltTextures, , false, kParams_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(ReloadEquippedModelsAlt, ReloadModelsAlt, , true, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetExternalEmittanceSource, , false, kParams_TwoForms);
+DEFINE_COMMAND_PLUGIN(SetExternalEmittanceSource, , false, kParams_OneForm_OneOptionalForm);
