@@ -3238,7 +3238,13 @@ bool Cmd_ReloadEquippedModelsAlt_Execute(COMMAND_ARGS) {
 bool Cmd_GetExternalEmittanceSource_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESForm* pForm = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && pForm) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) {
+		if (!pForm)
+			pForm = thisObj;
+
+		if (!pForm)
+			return true;
+
 		TESForm* pSource = nullptr;
 		if (pForm->IsReference()) {
 			pSource = static_cast<TESObjectREFR*>(pForm)->GetEmittanceSource();
