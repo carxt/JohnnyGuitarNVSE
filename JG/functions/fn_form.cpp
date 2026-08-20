@@ -3260,6 +3260,34 @@ bool Cmd_GetExternalEmittanceSource_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+void __fastcall SetEmittanceSourceForRef(TESObjectREFR* apRef, TESForm* apSource) {
+	if (!apRef)
+		return;
+	
+	TESForm* pExistingSource = apRef->GetEmittanceSource();
+	if (pExistingSource == apSource)
+		return;
+
+	TESObjectCELL* pCell = apRef->GetParentCell();
+	if (pCell) {
+		pCell->CellRefLockEnter();
+
+		if (pExistingSource)
+			pCell->RemoveEmittanceRef(apRef);
+	}
+
+	apRef->SetEmittanceSource(apSource);
+
+	if (pCell) {
+		if (apSource)
+			pCell->AddEmittanceRef(apRef);
+		else
+			pCell->RemoveEmittanceRef(apRef);
+
+		pCell->CellRefLockLeave();
+	}
+}
+
 bool Cmd_SetExternalEmittanceSource_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESForm* pForm = nullptr;
@@ -3271,7 +3299,26 @@ bool Cmd_SetExternalEmittanceSource_Execute(COMMAND_ARGS) {
 		}
 
 		if (pForm->IsReference()) {
-			static_cast<TESObjectREFR*>(pForm)->SetEmittanceSource(pSource);
+			TESObjectREFR* pReference = static_cast<TESObjectREFR*>(pForm);
+			if (AILinearTaskThreadManager::GetRunningThreads()) {
+				JohnnyExtraData* pExtraData = JohnnyExtraData::GetOrCreate(pReference);
+				pExtraData->IncRefCount();
+
+				QueuedTask kTask;
+				kTask.kItems[0].p = pExtraData;
+				kTask.kItems[1].p = pSource;
+				kTask.pFunction = QUEUED_TASK{
+					JohnnyExtraData * pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
+					TESForm* pSource = reinterpret_cast<TESForm*>(arTask.kItems[1].p);
+					TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pData->pOwner);
+					SetEmittanceSourceForRef(pRef, pSource);
+					pData->DecRefCount();
+				};
+				TaskQueue::QueueTask(kTask);
+			}
+			else {
+				SetEmittanceSourceForRef(pReference, pSource);
+			}
 		}
 		else if (pForm->IsBoundObject()) {
 			ExternalEmittanceOnBases::SetExternalEmittanceSource(static_cast<TESBoundObject*>(pForm), pSource);

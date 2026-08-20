@@ -28,7 +28,12 @@ namespace ExternalEmittanceOnBases {
 	}
 
 	void __fastcall SetExternalEmittanceSource(TESBoundObject* apObject, TESForm* apSource) {
-		JohnnyExtraData* pData = JohnnyExtraData::GetOrCreate(apObject);
+		JohnnyExtraData* pData = nullptr;
+		if (apSource)
+			pData = JohnnyExtraData::GetOrCreate(apObject);
+		else
+			pData = JohnnyExtraData::Find(apObject);
+
 		if (!pData)
 			return;
 
