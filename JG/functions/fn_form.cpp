@@ -3294,7 +3294,7 @@ bool Cmd_SetExternalEmittanceSource_Execute(COMMAND_ARGS) {
 	TESForm* pSource = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &pSource) && pForm) {
 		if (pSource) {
-			if (pSource->GetFormType() != FORM_TYPE::TESRegion || pSource->GetFormType() != FORM_TYPE::TESObjectLIGH)
+			if (pSource->GetFormType() != FORM_TYPE::TESRegion && pSource->GetFormType() != FORM_TYPE::TESObjectLIGH) {
 				return true;
 		}
 
