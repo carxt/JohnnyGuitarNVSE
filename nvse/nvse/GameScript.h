@@ -117,6 +117,10 @@ public:
 	static bool	RunScriptLine(const char *text, TESObjectREFR *object = NULL);
 	static bool	RunScriptLine2(const char *text, TESObjectREFR *object = NULL, bool bSuppressOutput = true);
 
+	static bool SetActionFlag(TESForm* apForm, ExtraDataList* apList, uint32_t aeEvent) {
+		return CdeclCall<bool>(0x5AC750, apForm, apList, aeEvent);
+	}
+
 	// no changed flags (TESForm flags)
 	MEMBER_FN_PREFIX(Script);
 #if 1

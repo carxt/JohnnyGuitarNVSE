@@ -75,32 +75,17 @@ namespace {
 	static_assert(offsetof(ExtraRefractionPropertyView, fRefractionAmount) == 0xC);
 
 	NiNode* GetPlayerBodyRootFast() {
-		__try {
-			PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
-			NiNode* pBody3p = pPlayer ? pPlayer->Get3DSimple() : nullptr;
-			if (!pBody3p)
-				return nullptr;
-			(void)pBody3p->m_uiFlags.GetField(); // probe read so a dead pointer faults here instead of mid render
-			return pBody3p;
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			return nullptr;
-		}
+		return PlayerCharacter::GetSingleton()->Get3D(false);
 	}
 
 	bool PlayerHasActiveRefraction(float* apRefractionOut) {
 		float fRefraction = 0.0f;
-		__try {
-			PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
-			BSExtraData* pExtra = pPlayer
-				? pPlayer->extraDataList.GetExtraData(EXTRA_DATA_TYPE::ExtraRefractionProperty)
-				: nullptr;
-			if (pExtra)
-				fRefraction = reinterpret_cast<ExtraRefractionPropertyView*>(pExtra)->fRefractionAmount;
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			fRefraction = 0.0f;
-		}
+		PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
+		BSExtraData* pExtra = pPlayer
+			? pPlayer->extraDataList.GetExtraData(EXTRA_DATA_TYPE::ExtraRefractionProperty)
+			: nullptr;
+		if (pExtra)
+			fRefraction = reinterpret_cast<ExtraRefractionPropertyView*>(pExtra)->fRefractionAmount;
 		if (apRefractionOut)
 			*apRefractionOut = fRefraction;
 		return std::isfinite(fRefraction) && fRefraction > 0.0f;
@@ -193,12 +178,7 @@ namespace {
 	}
 
 	bool RegisterBodyGuarded(NiNode* apBody3p, BSShaderAccumulator* apAccum) {
-		__try {
-			RegisterBodyGeometry(apBody3p, apAccum, 0);
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			return false;
-		}
+		RegisterBodyGeometry(apBody3p, apAccum, 0);
 		return true;
 	}
 
@@ -267,26 +247,18 @@ namespace {
 	bool TryReadWorldTranslate(NiAVObject* apObject, NiPoint3& arOut) {
 		if (!apObject)
 			return false;
-		__try {
-			arOut = apObject->m_kWorld.m_kTranslate;
-			return IsFinitePoint(arOut);
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			return false;
-		}
+
+		arOut = apObject->m_kWorld.m_kTranslate;
+		return IsFinitePoint(arOut);
 	}
 
 	bool TryReadWorldTransform(NiAVObject* apObject, NiPoint3& arOutTranslate, NiMatrix3& arOutRotate) {
 		if (!apObject)
 			return false;
-		__try {
-			arOutRotate = apObject->m_kWorld.m_kRotate;
-			arOutTranslate = apObject->m_kWorld.m_kTranslate;
-			return IsFinitePoint(arOutTranslate) && IsFiniteMatrix(arOutRotate);
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			return false;
-		}
+
+		arOutRotate = apObject->m_kWorld.m_kRotate;
+		arOutTranslate = apObject->m_kWorld.m_kTranslate;
+		return IsFinitePoint(arOutTranslate) && IsFiniteMatrix(arOutRotate);
 	}
 
 	bool NormalizePoint(NiPoint3& arP) {
@@ -328,16 +300,12 @@ namespace {
 	}
 
 	void RestoreTransforms(TransformBackup* apBackups, uint32_t auiCount) {
-		__try {
-			while (auiCount) {
-				--auiCount;
-				if (NiAVObject* pObject = apBackups[auiCount].pObject) {
-					pObject->m_kWorld.m_kRotate = apBackups[auiCount].kWorldRotate;
-					pObject->m_kWorld.m_kTranslate = apBackups[auiCount].kWorldTranslate;
-				}
+		while (auiCount) {
+			--auiCount;
+			if (NiAVObject* pObject = apBackups[auiCount].pObject) {
+				pObject->m_kWorld.m_kRotate = apBackups[auiCount].kWorldRotate;
+				pObject->m_kWorld.m_kTranslate = apBackups[auiCount].kWorldTranslate;
 			}
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
 		}
 	}
 
@@ -393,14 +361,9 @@ namespace {
 			return true;
 
 		bool bOk = false;
-		__try {
-			bOk = TransformObjectTree(apBody3p, arDelta,
-				arRotateSourcePivot, arRotateTargetPivot,
-				arCameraDeltaRot, abRotateWithCamera, apBackups, auiMax, arCount, 0);
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			bOk = false;
-		}
+		bOk = TransformObjectTree(apBody3p, arDelta,
+			arRotateSourcePivot, arRotateTargetPivot,
+			arCameraDeltaRot, abRotateWithCamera, apBackups, auiMax, arCount, 0);
 		if (!bOk)
 			RestoreTransforms(apBackups, arCount);
 		return bOk;
@@ -481,28 +444,20 @@ namespace {
 	}
 
 	void RestorePartitions(PartitionBackup* apBackups, uint32_t auiCount) {
-		__try {
-			while (auiCount) {
-				--auiCount;
-				if (apBackups[auiCount].pPartition)
-					apBackups[auiCount].pPartition->ucEnabled = apBackups[auiCount].ucSavedEnabled;
-				if (apBackups[auiCount].pVisible)
-					*apBackups[auiCount].pVisible = apBackups[auiCount].ucSavedVisible;
-			}
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
+		while (auiCount) {
+			--auiCount;
+			if (apBackups[auiCount].pPartition)
+				apBackups[auiCount].pPartition->ucEnabled = apBackups[auiCount].ucSavedEnabled;
+			if (apBackups[auiCount].pVisible)
+				*apBackups[auiCount].pVisible = apBackups[auiCount].ucSavedVisible;
 		}
 	}
 
 	void RestoreFlags(FlagBackup* apBackups, uint32_t auiCount) {
-		__try {
-			while (auiCount) {
-				--auiCount;
-				if (apBackups[auiCount].pFlags)
-					*apBackups[auiCount].pFlags = apBackups[auiCount].uiSavedFlags;
-			}
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
+		while (auiCount) {
+			--auiCount;
+			if (apBackups[auiCount].pFlags)
+				*apBackups[auiCount].pFlags = apBackups[auiCount].uiSavedFlags;
 		}
 	}
 
@@ -561,14 +516,7 @@ namespace {
 			PartitionBackup* apBackups, uint32_t auiMax, uint32_t& arCount) {
 		arCount = 0;
 		uint32_t uiUnusedFlagCount = 0;
-		bool bOk = false;
-		__try {
-			bOk = CullTree(apBody3p, arConfig, apBackups, auiMax, arCount,
-				nullptr, 0, uiUnusedFlagCount, 0);
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			bOk = false;
-		}
+		bool bOk = CullTree(apBody3p, arConfig, apBackups, auiMax, arCount, nullptr, 0, uiUnusedFlagCount, 0);
 		if (!bOk)
 			RestorePartitions(apBackups, arCount);
 		return bOk;
@@ -584,15 +532,9 @@ namespace {
 		if (!apBody3p)
 			return false;
 
-		bool bOk = false;
-		__try {
-			bOk = CullTree(apBody3p, arConfig,
-				apPartitionBackups, auiMaxPartitions, arPartitionCount,
-				apFlagBackups, auiMaxFlags, arFlagCount, 0);
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			bOk = false;
-		}
+		bool bOk = CullTree(apBody3p, arConfig,
+			apPartitionBackups, auiMaxPartitions, arPartitionCount,
+			apFlagBackups, auiMaxFlags, arFlagCount, 0);
 		if (!bOk) {
 			RestoreFlags(apFlagBackups, arFlagCount);
 			RestorePartitions(apPartitionBackups, arPartitionCount);
@@ -679,59 +621,49 @@ namespace {
 	}
 
 	void RestoreShaders(ShaderBackup* apBackups, uint32_t auiCount) {
-		__try {
-			while (auiCount) {
-				--auiCount;
-				BSShaderProperty* pShader = apBackups[auiCount].pShader;
-				if (!pShader)
-					continue;
-				pShader->ulFlags[0] = apBackups[auiCount].uiSavedFlags1;
-				pShader->ulFlags[1] = apBackups[auiCount].uiSavedFlags2;
-				*reinterpret_cast<float*>(
-					reinterpret_cast<uint8_t*>(pShader) + kOffShader_RefractionPower) =
-					apBackups[auiCount].fSavedRefractionPower;
-				pShader->InvalidateState();
-			}
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
+		while (auiCount) {
+			--auiCount;
+			BSShaderProperty* pShader = apBackups[auiCount].pShader;
+			if (!pShader)
+				continue;
+			pShader->ulFlags[0] = apBackups[auiCount].uiSavedFlags1;
+			pShader->ulFlags[1] = apBackups[auiCount].uiSavedFlags2;
+			*reinterpret_cast<float*>(
+				reinterpret_cast<uint8_t*>(pShader) + kOffShader_RefractionPower) =
+				apBackups[auiCount].fSavedRefractionPower;
+			pShader->InvalidateState();
 		}
 	}
 
-	bool PatchRefractionGuarded(NiNode* apBody3p, float afRefraction,
-			ShaderBackup* apBackups, uint32_t auiMax, uint32_t& arCount) {
+	bool PatchRefractionGuarded(NiNode* apBody3p, float afRefraction, ShaderBackup* apBackups, uint32_t auiMax, uint32_t& arCount) {
 		arCount = 0;
 		if (afRefraction <= 0.0f)
 			return true;
+
 		if (afRefraction > 1.0f)
 			afRefraction = 1.0f;
 
-		bool bOk = false;
-		__try {
-			bOk = PatchRefractionTree(apBody3p, afRefraction, apBackups, auiMax, arCount, 0);
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-			bOk = false;
-		}
+		bool bOk = PatchRefractionTree(apBody3p, afRefraction, apBackups, auiMax, arCount, 0);
+
 		if (!bOk)
 			RestoreShaders(apBackups, arCount);
+
 		return bOk;
 	}
 
 	void RestoreInjectedBody(InjectionState& arState) {
 		if (!arState.bActive)
 			return;
-		__try {
-			if (arState.uiShaderCount)
-				RestoreShaders(arState.kShaders, arState.uiShaderCount);
-			if (arState.uiPartitionCount)
-				RestorePartitions(arState.kPartitions, arState.uiPartitionCount);
-			if (arState.uiTransformCount)
-				RestoreTransforms(arState.kTransforms, arState.uiTransformCount);
-			if (arState.pIs1stPerson)
-				*arState.pIs1stPerson = arState.bSavedIs1stPerson;
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-		}
+
+		if (arState.uiShaderCount)
+			RestoreShaders(arState.kShaders, arState.uiShaderCount);
+		if (arState.uiPartitionCount)
+			RestorePartitions(arState.kPartitions, arState.uiPartitionCount);
+		if (arState.uiTransformCount)
+			RestoreTransforms(arState.kTransforms, arState.uiTransformCount);
+		if (arState.pIs1stPerson)
+			*arState.pIs1stPerson = arState.bSavedIs1stPerson;
+
 		arState.bActive = false;
 	}
 
@@ -814,16 +746,11 @@ namespace {
 	HookUtils::CallDetour g_callDetours[kHookCount];
 
 	void RestoreBodyFlagsGuarded(uint32_t* apFlags, uint32_t auiSaved) {
-		__try {
-			*apFlags = auiSaved;
-		}
-		__except (EXCEPTION_EXECUTE_HANDLER) {
-		}
+		*apFlags = auiSaved;
 	}
 
 	template <uint32_t aiHookIndex>
-	void __fastcall HookedDrawScene(void* apThis, void* edx, void* apSun,
-			int abRenderHands, int abIsWireframe, int abIsInVATS) {
+	void __fastcall HookedDrawScene(void* apThis, void* edx, void* apSun, int abRenderHands, int abIsWireframe, int abIsInVATS) {
 		uint32_t* pBodyFlags = nullptr;
 		uint32_t uiSaved = 0;
 		PartitionBackup kPreviewPartitions[kPartitionMax];
@@ -834,14 +761,9 @@ namespace {
 		const bool bSuppressBody = g_enabled || iSuppressFrames > 0;
 		if (bSuppressBody) {
 			if (NiNode* pBody3p = GetPlayerBodyRootFast()) {
-				__try {
-					pBodyFlags = &pBody3p->m_uiFlags.GetField();
-					uiSaved = *pBodyFlags;
-					*pBodyFlags = uiSaved | kNiFlagHidden;
-				}
-				__except (EXCEPTION_EXECUTE_HANDLER) {
-					pBodyFlags = nullptr;
-				}
+				pBodyFlags = &pBody3p->m_uiFlags.GetField();
+				uiSaved = *pBodyFlags;
+				*pBodyFlags = uiSaved | kNiFlagHidden;
 			}
 		} else {
 			const CullConfig kPreviewConfig = GetCullConfig();
@@ -852,20 +774,17 @@ namespace {
 						kPreviewFlags, kFlagMax, uiPreviewFlagCount);
 			}
 		}
-		__try {
-			ThisCall(g_callDetours[aiHookIndex].GetOverwrittenAddr(),
-				apThis, apSun, abRenderHands, abIsWireframe, abIsInVATS);
-		}
-		__finally {
-			if (uiPreviewFlagCount)
-				RestoreFlags(kPreviewFlags, uiPreviewFlagCount);
-			if (uiPreviewPartitionCount)
-				RestorePartitions(kPreviewPartitions, uiPreviewPartitionCount);
-			if (iSuppressFrames > 0)
-				InterlockedDecrement(&g_disableSuppressFrameBudget);
-			if (pBodyFlags)
-				RestoreBodyFlagsGuarded(pBodyFlags, uiSaved);
-		}
+
+		ThisCall(g_callDetours[aiHookIndex].GetOverwrittenAddr(), apThis, apSun, abRenderHands, abIsWireframe, abIsInVATS);
+
+		if (uiPreviewFlagCount)
+			RestoreFlags(kPreviewFlags, uiPreviewFlagCount);
+		if (uiPreviewPartitionCount)
+			RestorePartitions(kPreviewPartitions, uiPreviewPartitionCount);
+		if (iSuppressFrames > 0)
+			InterlockedDecrement(&g_disableSuppressFrameBudget);
+		if (pBodyFlags)
+			RestoreBodyFlagsGuarded(pBodyFlags, uiSaved);
 	}
 
 	// Keep this out of the hook frame. Its locals are about 60 KB.
@@ -875,17 +794,14 @@ namespace {
 		InjectionState kInjected;
 		float fRefraction = 0.0f;
 		const bool bHasRefraction = PlayerHasActiveRefraction(&fRefraction);
-		__try {
-			if (bHasRefraction == abRefractionPass)
-				InjectBodyIntoAccum(apCamera, apAccum, kInjected, abRefractionPass ? fRefraction : 0.0f);
-			if (abRefractionPass)
-				ThisCall(auiOriginalTarget, apAccum, apCamera, apTexture);
-			else
-				CdeclCall(auiOriginalTarget, apCamera, apAccum);
-		}
-		__finally {
-			RestoreInjectedBody(kInjected);
-		}
+		if (bHasRefraction == abRefractionPass)
+			InjectBodyIntoAccum(apCamera, apAccum, kInjected, abRefractionPass ? fRefraction : 0.0f);
+		if (abRefractionPass)
+			ThisCall(auiOriginalTarget, apAccum, apCamera, apTexture);
+		else
+			CdeclCall(auiOriginalTarget, apCamera, apAccum);
+			
+		RestoreInjectedBody(kInjected);
 	}
 
 	bool IsViewmodelAccum(BSShaderAccumulator* apAccum) {
@@ -906,9 +822,7 @@ namespace {
 	}
 
 	template <uint32_t aiHookIndex>
-	void __fastcall HookedRenderNormals(BSShaderAccumulator* apAccum, void* edx,
-			NiCamera* apCamera, void* apTexture) {
-		(void)edx;
+	void __fastcall HookedRenderNormals(BSShaderAccumulator* apAccum, void* edx, NiCamera* apCamera, void* apTexture) {
 		const uintptr_t uiOriginalTarget = g_callDetours[aiHookIndex].GetOverwrittenAddr();
 		if (g_enabled && IsViewmodelAccum(apAccum)) {
 			CallWithInjectedBody(true, uiOriginalTarget, apCamera, apAccum, apTexture);

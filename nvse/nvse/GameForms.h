@@ -883,30 +883,29 @@ public:
 	TESActorBaseData();
 	~TESActorBaseData();
 
-	virtual void			Fn_04(TESForm* selectedForm);	// Called during form initialization after LoadForm and InitForm
-	// flags access
-	virtual bool			Fn_05(void);	// 00100000
-	virtual bool			Fn_06(void);	// 00200000
-	virtual bool			Fn_07(void);	// 10000000
-	virtual bool			Fn_08(void);	// 20000000
-	virtual bool			GetAsForm(void);	// 80000000
-	virtual bool			Fn_0A(void);	// 00400000
-	virtual bool			Fn_0B(void);	// 00400000
-	virtual bool			Fn_0C(void);	// 00800000
-	virtual bool			Fn_0D(void);
-	virtual bool			Fn_0E(void);
-	virtual bool			Fn_0F(void);
-	virtual bool			Fn_10(void);
-	virtual bool			Fn_11(void);
-	virtual bool			Fn_12(void);
-	virtual void			Fn_13(void* arg);
-	virtual bool			Fn_14(void);
-	virtual void			Fn_15(void* arg);
-	virtual uint32_t			Fn_16(void);
-	virtual void			Fn_17(void* arg);
-	virtual uint32_t			Fn_18(void);	// return unk08
-	virtual float			Fn_19(void);	// return unk14
-	virtual BGSVoiceType* GetVoiceType(void);
+	virtual void			CopyFromTemplateForm(TESForm* apForm);
+	virtual bool			GetNoVATSmelee() const;
+	virtual bool			GetAllowPCDialogue() const;
+	virtual bool			GetAllowPickpocket() const;
+	virtual bool			GetIsGhost() const;
+	virtual bool			GetInvulnerable() const;
+	virtual bool			GetCantOpenDoors() const;
+	virtual bool			GetCanBeAllRaces() const;
+	virtual bool			GetAutoCalcServiceFlags() const;
+	virtual bool			GetNoPersuasion() const;
+	virtual bool			GetNoLeftArm() const;
+	virtual bool			GetNoRightArm() const;
+	virtual bool			GetNoHead() const;
+	virtual bool			GetNoShadow() const;
+	virtual bool			GetNoBloodSpray() const;
+	virtual void			SetNoBloodSpray(bool abVal);
+	virtual bool			GetNoBloodDecal() const;
+	virtual void			SetNoBloodDecal(bool abVal);
+	virtual uint32_t		GetBloodImpactMaterial() const;
+	virtual void			SetBloodImpactMaterial(uint32_t aeType);
+	virtual uint32_t		GetFatigue() const;
+	virtual float			GetKarma() const;
+	virtual BGSVoiceType*	GetVoiceType() const;
 
 	enum {
 		kFlags_Female = 1 << 0,
@@ -5075,7 +5074,7 @@ public:
 	uint8_t				flags;					// 60
 	uint8_t				pad61;					// 61
 	uint8_t				healthPercent;			// 62
-	uint8_t				actorValue;				// 63
+	int8_t				actorValue;				// 63
 	uint8_t				toHitChance;			// 64
 	uint8_t				explChance;				// 65
 	uint8_t				explDebrisCount;		// 66
@@ -5101,6 +5100,10 @@ public:
 	void SetFlag(uint32_t pFlag, bool bEnable) {
 		if (bEnable) flags |= pFlag;
 		else flags &= ~pFlag;
+	}
+
+	int8_t GetActorValue() const {
+		return actorValue;
 	}
 };
 
@@ -5134,6 +5137,10 @@ public:
 	BGSPreloadable	preloadable;		// 030
 	BGSBodyPart* bodyParts[15];		// 034
 	BGSRagdoll* ragDoll;			// 070
+
+	BGSBodyPart* GetBodyPart(BODY_PART_TYPE aePart) const {
+		return ThisCall<BGSBodyPart*>(0x5E50F0, this, aePart);
+	}
 };
 static_assert(sizeof(BGSBodyPartData) == 0x74);
 

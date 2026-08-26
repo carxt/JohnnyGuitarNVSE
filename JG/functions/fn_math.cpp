@@ -250,7 +250,7 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName) && pActor->IsMobileObject() && pActor->baseProcess) {
 		const NiAVObject* pObject = thisObj->GetNiBlock(cObjectName);
-		const ActorHitData* pHitData = pActor->baseProcess->GetHitData();
+		const ActorHitData* pHitData = pActor->baseProcess->GetLastHitData();
 		if (!pHitData || !pObject) 
 			return true;
 		

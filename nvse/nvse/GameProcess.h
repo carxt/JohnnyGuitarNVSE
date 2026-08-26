@@ -24,8 +24,13 @@ class bhkCharacterController;
 struct DetectionData;
 
 // 64
-struct ActorHitData
-{
+struct ActorHitData {
+	ActorHitData() {
+		ThisCall(0x9B4D90, this);
+	}
+	~ActorHitData() = default;
+
+
 	Actor				*source;		// 00
 	Actor				*target;		// 04
 	union								// 08
@@ -50,7 +55,15 @@ struct ActorHitData
 	uint32_t				unk54;			// 54
 	uint32_t				flags;			// 58
 	float				dmgMult;		// 5C
-	uint32_t				unk60;			// 60	Unused
+	int32_t				iRefCount;			// 60
+
+	void IncRefCount() {
+		InterlockedIncrement(&reinterpret_cast<uint32_t&>(iRefCount));
+	}
+
+	void DecRefCount() {
+		ThisCall(0x87CEA0, this);
+	}
 };
 
 class Animation;
@@ -507,7 +520,7 @@ public:
 	virtual void	Unk_1B1();
 	virtual void	Unk_1B2();
 	virtual void	Unk_1B3();
-	virtual void	Unk_1B4();
+	virtual NiNode* GetDamageNode(BODY_PART_TYPE aeBodyPart) const;
 	virtual void	Unk_1B5();
 	virtual void	Unk_1B6();
 	virtual void	Unk_1B7();
@@ -547,12 +560,12 @@ public:
 	virtual void	Unk_1D9();
 	virtual void	Unk_1DA();
 	virtual float	GetRadsSec();
-	virtual ActorHitData *GetHitData();
-	virtual void	CopyHitData(ActorHitData *hitData);
-	virtual void	ResetHitData();
-	virtual ActorHitData *GetHitData254();
-	virtual void	CopyHitData254(ActorHitData *hitData);
-	virtual void	ResetHitData254();
+	virtual ActorHitData* GetLastHitData() const;
+	virtual void	SetLastHitData(ActorHitData* apHitData);
+	virtual void	ClearLastHitData();
+	virtual ActorHitData* GetLastAttackHitData();
+	virtual void	SetLastAttackHitData(ActorHitData* apHitData);
+	virtual void	ClearLastAttackHitData();
 	virtual void	Unk_1E2();
 	virtual void	Unk_1E3();
 	virtual void	Unk_1E4();
@@ -741,6 +754,10 @@ public:
 
 	void ReloadTargets(bool abReload) {
 		ThisCall(0x499240, this, abReload);
+	}
+
+	void ClearGroup(ANIM_GROUP_SECTION aeSection, float afEaseOutTime) {
+		ThisCall(0x496080, this, aeSection, afEaseOutTime);
 	}
 };
 static_assert(sizeof(Animation) == 0x12C);

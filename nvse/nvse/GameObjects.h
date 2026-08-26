@@ -439,7 +439,7 @@ public:
 	virtual void		Unk_CB(void);
 	virtual void		Unk_CC(void);
 	virtual void		Unk_CD(void);
-	virtual void		Unk_CE(void);
+	virtual bool		DoDamage(float afHealth, float afFatigue, Actor* apSource);
 	virtual void		Unk_CF(void);
 	virtual void		Unk_D0(void);
 	virtual void		Unk_D1(void);
@@ -712,6 +712,22 @@ public:
 
 	float GetRunSpeed() {
 		return ThisCall<float>(0x884EB0, this);
+	}
+
+	void AttackAlarm(TESObjectREFR* apAttacker, bool abMinorCrime, bool abModDisposition = true) {
+		ThisCall(0x8C0460, this, apAttacker, abMinorCrime, abModDisposition);
+	}
+
+	void SetAnimAction(ANIMATION_ACTION aeAction, BSAnimGroupSequence* apSequence) {
+		ThisCall(0x8A73E0, this, aeAction, apSequence);
+	}
+
+	bool HasBlood() const {
+		return ThisCall<bool>(0x87F260, this);
+	}
+
+	NiNode* GetClosestBone(NiPoint3 akStartingPos, NiPoint3 akImpactPos) const {
+		return ThisCall<NiNode*>(0x8B3D70, this, akStartingPos, akImpactPos);
 	}
 };
 

@@ -316,7 +316,19 @@ public:
 	virtual void	Unk_37(void);
 	virtual void	Unk_38(void);
 
-	uint32_t			unk10;		// 10
+	uint32_t		eMaterialType;
+
+	HavokMaterialType GetMaterial() const {
+		return ThisCall<HavokMaterialType>(0x6205A0, this);
+	}
+
+	HavokMaterialType GetSubshapeMaterial(uint32_t auiKey) const {
+		return ThisCall<HavokMaterialType>(0xC84F10, this, auiKey);
+	}
+
+	static bhkShape* Getbhk(const hkpShape* apShape) {
+		return CdeclCall<bhkShape*>(0x4A3A40, apShape);
+	}
 };
 
 // 14
@@ -541,6 +553,29 @@ public:
 	uint32_t				unk68;		// 68
 	void* unk6C;		// 6C
 	uint32_t				unk70[9];	// 70
+
+	struct ObjectRecData {
+		union Data {
+			bool		b[4];
+			char		c[4];
+			uint16_t	us[2];
+			int32_t		i;
+			float		f;
+			void*		p;
+			uint32_t	ui;
+		};
+
+		bhkWorld*	pWorld; 
+		bool		bRecurse;
+		uint32_t	eAction;
+		Data		uData[4];
+	};
+
+	using pfnRecFunc = void(__cdecl*)(bhkNiCollisionObject* apCollisionObject, ObjectRecData& arData);
+
+	static void DoObjectRec(NiAVObject* apObject, ObjectRecData& arData, pfnRecFunc apFunc) {
+		CdeclCall(0xC68900, apObject, &arData, apFunc);
+	}
 };
 static_assert(sizeof(bhkWorld) == 0x94);
 
