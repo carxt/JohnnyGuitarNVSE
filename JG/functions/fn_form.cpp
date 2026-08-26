@@ -3331,3 +3331,26 @@ bool Cmd_SetExternalEmittanceSource_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
+bool Cmd_GetProjectileMuzzleFlashLight_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSProjectile* pProjectile = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pProjectile) && pProjectile && IS_TYPE(pProjectile, BGSProjectile) && pProjectile->lightMuzzleFlash) {
+		*result = pProjectile->lightMuzzleFlash->GetFormID();
+	}
+	return true;
+}
+
+bool Cmd_SetProjectileMuzzleFlashLight_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSProjectile* pProjectile = nullptr;
+	TESObjectLIGH* pLight = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pProjectile, &pLight) && pProjectile && IS_TYPE(pProjectile, BGSProjectile)) {
+		if (pLight && !IS_TYPE(pLight, TESObjectLIGH))
+			return true;
+
+		pProjectile->lightMuzzleFlash = pLight;
+		*result = 1;
+	}
+	return true;
+}

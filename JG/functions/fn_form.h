@@ -131,3 +131,5 @@ DEFINE_COMMAND_PLUGIN(GetAltTextures, , false, kParams_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(ReloadEquippedModelsAlt, ReloadModelsAlt, , true, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetExternalEmittanceSource, , false, kParams_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(SetExternalEmittanceSource, , false, kParams_OneForm_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(GetProjectileMuzzleFlashLight, , false, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetProjectileMuzzleFlashLight, , false, kParams_OneForm_OneOptionalForm);
