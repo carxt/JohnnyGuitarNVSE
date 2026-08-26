@@ -3336,7 +3336,7 @@ bool Cmd_GetProjectileMuzzleFlashLight_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSProjectile* pProjectile = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pProjectile) && pProjectile && IS_TYPE(pProjectile, BGSProjectile) && pProjectile->lightMuzzleFlash) {
-		*result = pProjectile->lightMuzzleFlash->GetFormID();
+		*reinterpret_cast<uint32_t*>(result) = pProjectile->lightMuzzleFlash->GetFormID();
 	}
 	return true;
 }
