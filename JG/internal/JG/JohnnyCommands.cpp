@@ -440,6 +440,8 @@ namespace JohnnyCommands {
 		REG_CMD(ar_IsFormInList);
 		REG_TYPED_CMD(GetExternalEmittanceSource, Form);
 		REG_CMD(SetExternalEmittanceSource);
+		REG_TYPED_CMD(GetProjectileMuzzleFlashLight, Form);
+		REG_CMD(SetProjectileMuzzleFlashLight);
 	}
 
 }
