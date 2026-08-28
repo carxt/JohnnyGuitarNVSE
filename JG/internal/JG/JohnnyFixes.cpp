@@ -459,6 +459,44 @@ namespace JohnnyFixes {
 			kSetClonePtrDetour.ReplaceCall(0x4AD44C, AddControllerToBiped);
 		}
 	}
+
+	namespace TESEffectShaderFixes {
+
+		SPEC_NAKED void SkinChecks_Asm() {
+			static constexpr uint32_t uiFailAddr	= 0x507C19;
+			static constexpr uint32_t uiSuccessAddr	= 0x507C1D;
+			static constexpr uint32_t uiReturnAddr	= 0x507BE8;
+			__asm {
+				mov		[ebp - 0x10], eax // Store material property
+
+				// Fix 1: Beth did not update stuff from Oblivion
+				// They use NiMaterialProperty names to check if something is a skin
+				// FO3+ uses the FaceGen shaderp property flag for that, but this code doesn't...
+				mov     ecx, [ebp - 0x20] // Get shader property
+				bt		DWORD PTR [ecx + 0x20], 10 // Check FaceGen flag
+				jb		SUCCESS
+
+				// Fix 2: There's no NiMaterialProperty nullcheck lol
+				mov		eax, [ebp - 0x10] // Nullcheck material property
+				test	eax, eax
+				jz		FAIL
+
+				mov		ecx, eax
+				jmp		uiReturnAddr
+			
+				FAIL:
+				jmp		uiFailAddr
+
+				SUCCESS:
+				jmp		uiSuccessAddr
+			}
+		}
+
+		void InitHooks() {
+			HookUtils::WriteRelJump(0x507BE2, SkinChecks_Asm);
+		}
+	}
+
 	void Init() {
 		// for Runtime EDIDs
 		EDIDRestoration::InitHooks();
@@ -542,6 +580,8 @@ namespace JohnnyFixes {
 		HookUtils::SafeWrite8(0x875065 + 1, 1);
 
 		BipedAnimFixes::InitHooks();
+
+		TESEffectShaderFixes::InitHooks();
 	}
 
 }
