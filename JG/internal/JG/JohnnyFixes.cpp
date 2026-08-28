@@ -493,6 +493,13 @@ namespace JohnnyFixes {
 
 		void InitHooks() {
 			HookUtils::WriteRelJump(0x507BE2, SkinChecks_Asm);
+
+			// Use NiFixedString comparison instead of strcmp
+			HookUtils::PatchMemoryNop(0x507BF8, 5); // Remove "skin" str push
+			// mov     ecx, dword ptr ds:[FixedStrings::pSkin] // pSkin is 0x11C6210
+			// cmp     eax, [ecx] // eax is the NiMaterialProperty name ptr
+			// jmp	   +1 // Skip nops
+			HookUtils::SafeWriteBuf(0x507C0C, "\x8B\x0D\x10\x62\x1C\x01\x3B\x01\xEB\x01");
 		}
 	}
 
