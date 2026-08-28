@@ -477,11 +477,10 @@ namespace JohnnyFixes {
 				jb		SUCCESS
 
 				// Fix 2: There's no NiMaterialProperty nullcheck lol
-				mov		eax, [ebp - 0x10] // Nullcheck material property
-				test	eax, eax
+				mov		ecx, [ebp - 0x10] // Nullcheck material property
+				test	ecx, ecx
 				jz		FAIL
 
-				mov		ecx, eax
 				jmp		uiReturnAddr
 			
 				FAIL:
