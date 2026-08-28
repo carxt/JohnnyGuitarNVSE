@@ -471,7 +471,7 @@ namespace JohnnyFixes {
 
 				// Fix 1: Beth did not update stuff from Oblivion
 				// They use NiMaterialProperty names to check if something is a skin
-				// FO3+ uses the FaceGen shaderp property flag for that, but this code doesn't...
+				// FO3+ uses the FaceGen shader property flag for that, but this code doesn't...
 				mov     ecx, [ebp - 0x20] // Get shader property
 				bt		DWORD PTR [ecx + 0x20], 10 // Check FaceGen flag
 				jb		SUCCESS
