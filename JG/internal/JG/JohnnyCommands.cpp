@@ -442,6 +442,8 @@ namespace JohnnyCommands {
 		REG_CMD(SetExternalEmittanceSource);
 		REG_TYPED_CMD(GetProjectileMuzzleFlashLight, Form);
 		REG_CMD(SetProjectileMuzzleFlashLight);
+		REG_CMD(SetShaderPropertyFlag);
+		REG_CMD(GetShaderPropertyFlag);
 	}
 
 }
