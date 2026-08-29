@@ -53,7 +53,7 @@ bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
+		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
 		if (file != nullptr) {
 			DWORD mipMapCount = 0;
 			file->Seek(0x1C, 1);
@@ -70,7 +70,7 @@ bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
+		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
 		if (file != nullptr) {
 			char format = 0;
 			file->Seek(0x57, 1);
@@ -89,7 +89,7 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 	uint32_t useDataTextures = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
+		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
 		if (file != nullptr) {
 			DWORD width = 0;
 			file->Seek(0x10, 1);
@@ -107,7 +107,7 @@ bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
 		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, FileFinder::ARCHIVE_TYPE_ALL_);
+		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
 		if (file != nullptr) {
 			DWORD height = 0;
 			file->Seek(0x0C, 1);

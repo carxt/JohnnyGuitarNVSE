@@ -369,7 +369,7 @@ bool Cmd_SetWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 			Interface::InitGunScope(pModel);
 
 		}
-		else if (cScopePath[0] && FileFinder::Locate(cScopePath, nullptr, FileFinder::SKIP_NONE, FileFinder::ARCHIVE_TYPE_MESHES)) {
+		else if (cScopePath[0] && FileFinder::Locate(cScopePath, nullptr, FileFinder::SKIP_NONE, ARCHIVE_TYPE::MESHES)) {
 			StackObject<TESModel, 0x488F50, 0x489070> kScopeModel;
 			kScopeModel->SetModel(cScopePath);
 			Interface::InitGunScope(kScopeModel.GetPtr());
