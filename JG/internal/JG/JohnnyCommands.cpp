@@ -444,6 +444,7 @@ namespace JohnnyCommands {
 		REG_CMD(SetProjectileMuzzleFlashLight);
 		REG_CMD(SetShaderPropertyFlag);
 		REG_CMD(GetShaderPropertyFlag);
+		REG_TYPED_CMD(GetCustomReputationChangeIcon, String);
 	}
 
 }

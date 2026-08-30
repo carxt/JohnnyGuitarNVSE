@@ -1130,12 +1130,12 @@ bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &isFemale) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			path = bipedModel->messageIcon[isFemale].icon.GetTextureName();
+			path = bipedModel->messageIcon[isFemale != 0].GetMessageIconTextureName();
 		}
 		else {
 			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
 			if (icon) {
-				path = icon->icon.GetTextureName();
+				path = icon->GetMessageIconTextureName();
 			}
 		}
 		if (IsConsoleMode()) Console_Print("GetMessageIconPath >> %s", path);
@@ -1151,13 +1151,13 @@ bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &form, &isFemale) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			bipedModel->messageIcon[isFemale].icon.SetTextureName(path);
+			bipedModel->messageIcon[isFemale != 0].SetMessageIconTextureName(path);
 			*result = 1;
 		}
 		else {
 			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
 			if (icon) {
-				icon->icon.SetTextureName(path);
+				icon->SetMessageIconTextureName(path);
 				*result = 1;
 			}
 		}
