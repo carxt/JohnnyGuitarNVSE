@@ -368,6 +368,24 @@ static ParamInfo kParams_OneInt_OneOptionalActorBase[] =
 	{	"base actor",	kParamType_ActorBase,	1	},
 };
 
+static ParamInfo kParams_OneReputation[] =
+{
+	{	"Reputation",	kParamType_Reputation,	0	},
+};
+
+static ParamInfo kParams_GetReputationFormIcon[] =
+{
+	{	"Reputation",	kParamType_Reputation,	0	},
+	{	"Icon Type",	kParamType_Integer,	0	},
+};
+
+static ParamInfo kParams_SetReputationFormIcon[] =
+{
+	{	"Reputation",	kParamType_Reputation,	0	},
+	{	"Icon Type",	kParamType_Integer,		0	},
+	{	"Icon Path",	kParamType_String,		0	},
+};
+
 static ParamInfo kParams_OneRace[] =
 {
 	{	"race",	kParamType_Race,	0	},

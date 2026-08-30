@@ -1,105 +1,170 @@
 #include "ExtraReputationIcons.hpp"
-#include <GameForms.h>
-#include <Bethesda/Setting.hpp>
-#include <GameAPI.h>
+#include "Bethesda/FileFinder.hpp"
+#include "Bethesda/GameSettingCollection.hpp"
+#include "GameAPI.h"
+#include "GameForms.h"
+#include "array"
+#include "unordered_map"
 
 namespace ExtraReputationIcons {
-	std::unordered_map <uint32_t, std::vector<const char*>> factionRepIcons;
+	using FactionsMap = std::unordered_map<uint32_t, std::array<NiFixedString, 4>>;
+	FactionsMap* pFactionIconsMap = nullptr;
+	SRWLOCK kMapLock = SRWLOCK_INIT;
 
-	const char* __fastcall GetReputationIconHook(TESReputation* rep) {
-		auto it = factionRepIcons.find(rep->GetFormID());
-		if (it != factionRepIcons.end()) {
-			uint8_t tierID = 0;
-			uint8_t pos = ThisCall<uint8_t>(0x616950, rep, 1);
-			uint8_t neg = ThisCall<uint8_t>(0x616950, rep, 0);
-			if ((pos == 0 && neg == 1) || (pos == 2 && (neg == 2 || neg == 3)) || (pos == 3 && neg == 3)) {
-				tierID = 0; // in pain
-			}
-			else if (((neg == 2 || neg == 3) && (pos == 0 || pos == 1)) || (pos == 3 && neg == 2)) {
-				tierID = 1; // sad
-			}
-			else if (((pos == 0 || pos == 1) && neg == 0) || (pos == 1 && neg == 1)) {
-				tierID = 2; // neutral
+	constexpr uint8_t ucReactionMap[Tier::COUNT][Tier::COUNT] = {
+		{ Tier::NEUTRAL, Tier::NEUTRAL, Tier::VERY_HAPPY, Tier::VERY_HAPPY },
+		{ Tier::IN_PAIN, Tier::NEUTRAL, Tier::VERY_HAPPY, Tier::VERY_HAPPY },
+		{ Tier::SAD,	 Tier::SAD,		Tier::IN_PAIN,	  Tier::SAD },
+		{ Tier::SAD,	 Tier::SAD,		Tier::IN_PAIN,	  Tier::IN_PAIN }
+	};
+
+	SPEC_NOINLINE Tier __fastcall GetCurrentTier(const TESReputation* apReputation) {
+		const uint8_t ucNegative = apReputation->GetReputationLevel(TESReputationType::NEGATIVE);
+		const uint8_t ucPositive = apReputation->GetReputationLevel(TESReputationType::POSITIVE);
+		return static_cast<Tier>(ucReactionMap[ucNegative][ucPositive]);
+	}
+
+	STACK_FRAME_OPT_ENABLE
+	SPEC_NOINLINE const char* __fastcall GetCustomIcon(const TESReputation* apReputation, const Setting* apGameSetting = nullptr) {
+		if (!pFactionIconsMap)
+			return nullptr;
+
+		SRWSharedLock kLock(kMapLock);
+		auto it = pFactionIconsMap->find(apReputation->GetFormID());
+		if (it != pFactionIconsMap->end()) {
+			Tier eTier;
+			if (apGameSetting) {
+				eTier = Tier::IN_PAIN;
+				if (apGameSetting == &GameSettingCollection::sRepNegativeGainIcon || apGameSetting == &GameSettingCollection::sRepPositiveLossIcon)
+					eTier = Tier::SAD;
+				else if (apGameSetting == &GameSettingCollection::sRepNegativeLossIcon || apGameSetting == &GameSettingCollection::sRepPositiveGainIcon)
+					eTier = Tier::VERY_HAPPY;
 			}
 			else {
-				tierID = 3; // very happy
+				eTier = GetCurrentTier(apReputation);
 			}
-			if (*it->second[tierID]) return it->second[tierID];
+			const char* pPath = it->second[eTier];
+			if (pPath && pPath[0])
+				return pPath;
 		}
-		return ThisCall<char*>(0x6167D0, rep);
+		return nullptr;
 	}
+	STACK_FRAME_OPT_RESET
 
-	const char* __fastcall GetReputationMessageIconHook(uint32_t a1) {
-		uint32_t addr = (uint32_t)_ReturnAddress();
-		auto* _ebp = GetParentBasePtr(_AddressOfReturnAddress(), false);
-		TESReputation* rep = nullptr;
-		switch (addr) {
-		case 0x615951:
-		case 0x61585A:
-		case 0x615B1E:
-		case 0x615C09:
-			rep = *reinterpret_cast<TESReputation**>(_ebp - 0x110);
-			break;
-		case 0x615E0B:
-		case 0x615F10:
-		case 0x61610F:
-		case 0x616208:
-			rep = *reinterpret_cast<TESReputation**>(_ebp - 0x128);
-			break;
-		default:
-			break;
+	template<uint32_t uiAddress>
+	class GetReputationIconHook {
+		static inline HookUtils::CallDetour kDetour;
+
+		const char* Hook() {
+			TESReputation* pThis = reinterpret_cast<TESReputation*>(this);
+			const char* pPath = GetCustomIcon(pThis);
+			if (pPath)
+				return pPath;
+
+			return ThisCall<const char*>(kDetour, pThis);
 		}
-		if (rep && rep->GetFormID()) {
-			auto it = factionRepIcons.find(rep->GetFormID());
-			if (it != factionRepIcons.end()) {
-				uint8_t tierID = 0;
-				if (a1 == 0x11CBAD0 || a1 == 0x11CBC34) {
-					tierID = 1;
-				}
-				else if (a1 == 0x11CBA00 || a1 == 0x11CBD5C) {
-					tierID = 3;
-				}
-				if (*it->second[tierID]) return it->second[tierID];
+
+	public:
+		GetReputationIconHook() {
+			kDetour.ReplaceCall(uiAddress, &GetReputationIconHook::Hook);
+		}
+	};
+
+	template<uint32_t uiAddress, uint32_t uiOffset>
+	class GetReputationMessageIconHook {
+		static inline HookUtils::CallDetour kDetour;
+
+		const char* Hook() {
+			Setting* pThis = reinterpret_cast<Setting*>(this);
+			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+			TESReputation* pReputation = *reinterpret_cast<TESReputation**>(pEBP - uiOffset);
+			if (pReputation) {
+				const char* pPath = GetCustomIcon(pReputation, pThis);
+				if (pPath)
+					return pPath;
 			}
+			return ThisCall<const char*>(kDetour, pThis);
 		}
-		return a1 ? ((Setting*)a1)->String() : "\0";
-	}
+
+	public:
+		GetReputationMessageIconHook() {
+			kDetour.ReplaceCall(uiAddress, &GetReputationMessageIconHook::Hook);
+		}
+	};
 
 	void Install() {
 		// SetCustomReputationChangeIcon
-		HookUtils::WriteRelCall(0x6156A2, uint32_t(GetReputationIconHook));
-		HookUtils::WriteRelCall(0x6156FB, uint32_t(GetReputationIconHook));
-		HookUtils::WriteRelCall(0x615B19, uint32_t(GetReputationMessageIconHook));
-		HookUtils::WriteRelCall(0x615C04, uint32_t(GetReputationMessageIconHook));
-		HookUtils::WriteRelCall(0x61610A, uint32_t(GetReputationMessageIconHook));
-		HookUtils::WriteRelCall(0x616203, uint32_t(GetReputationMessageIconHook));
-		HookUtils::WriteRelCall(0x615855, uint32_t(GetReputationMessageIconHook));
-		HookUtils::WriteRelCall(0x61594C, uint32_t(GetReputationMessageIconHook));
-		HookUtils::WriteRelCall(0x615F0B, uint32_t(GetReputationMessageIconHook));
-		HookUtils::WriteRelCall(0x615E06, uint32_t(GetReputationMessageIconHook));
+		GetReputationIconHook<0x6156A2>();
+		GetReputationIconHook<0x6156FB>();
+
+		// TESReputation::RemoveReputationExact
+		GetReputationMessageIconHook<0x615B19, 0x110>();
+		GetReputationMessageIconHook<0x615C04, 0x110>();
+
+		// TESReputation::AddReputationExact
+		GetReputationMessageIconHook<0x615855, 0x110>();
+		GetReputationMessageIconHook<0x61594C, 0x110>();
+
+		// TESReputation::RemoveReputation
+		GetReputationMessageIconHook<0x61610A, 0x128>();
+		GetReputationMessageIconHook<0x616203, 0x128>();
+
+		// TESReputation::AddReputation
+		GetReputationMessageIconHook<0x615F0B, 0x128>();
+		GetReputationMessageIconHook<0x615E06, 0x128>();
 	}
 
-	void Set(uint32_t formID, uint32_t tierID, const char* path) {
-		auto pos = factionRepIcons.find(formID);
-		uint32_t bufferSize = strlen(path) + 1;
-		char* pathCopy = new char[bufferSize];
-		strcpy_s(pathCopy, bufferSize, path);
+	STACK_FRAME_OPT_ENABLE
+	SPEC_NOINLINE const char* __fastcall Get(const TESReputation* apReputation, Tier aeTier) {
+		if (!pFactionIconsMap)
+			return nullptr;
 
-		if (pos != factionRepIcons.end()) {
-			if (*pos->second[tierID - 1]) delete[] pos->second[tierID - 1];
-			pos->second[tierID - 1] = pathCopy;
+		SRWSharedLock kLock(kMapLock);
+		auto it = pFactionIconsMap->find(apReputation->GetFormID());
+		if (it != pFactionIconsMap->end()) {
+			const char* pPath = it->second[aeTier];
+			if (pPath && pPath[0])
+				return pPath;
 		}
-		else {
-			std::vector<const char*> v{ "", "", "", "" };
-			v[tierID - 1] = pathCopy;
-			factionRepIcons.insert(std::pair<uint32_t, std::vector<const char*>>(formID, v));
+		return nullptr;
+	}
+
+	const char* __fastcall Get(const TESReputation* apReputation) {
+		return Get(apReputation, GetCurrentTier(apReputation));
+	}
+
+	SPEC_NOINLINE void __fastcall Set(TESReputation* apReputation, Tier aeTier, const char* apPath) {
+		const uint32_t uiFormID = apReputation->GetFormID();
+		
+		SRWUniqueLock kLock(kMapLock);
+		if (apPath && apPath[0]) {
+			char cFinalPath[MAX_PATH];
+			uint32_t i = 0;
+			for (; apPath[i] && i < sizeof(cFinalPath); ++i) {
+				cFinalPath[i] = tolower(apPath[i]);
+			}
+			cFinalPath[i] = 0;
+
+			if (!pFactionIconsMap)
+				pFactionIconsMap = new FactionsMap();
+
+			(*pFactionIconsMap)[uiFormID][aeTier] = cFinalPath;
+		}
+		else if (pFactionIconsMap) {
+			(*pFactionIconsMap)[uiFormID][aeTier] = nullptr;
 		}
 	}
 
-	void Dump() {
-		auto it = factionRepIcons.begin();
-		for (auto const& it : factionRepIcons) {
+	SPEC_NOINLINE void Dump() {
+		if (!pFactionIconsMap)
+			return;
+
+		SRWSharedLock kLock(kMapLock);
+		auto it = pFactionIconsMap->begin();
+		for (auto const& it : *pFactionIconsMap) {
 			Console_Print("0x%X - %s %s %s %s", it.first, it.second[0], it.second[1], it.second[2], it.second[3]);
 		}
 	}
+
+	STACK_FRAME_OPT_RESET
 }

@@ -218,6 +218,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BGSChangeFlags.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSLoadGameSubBuffer.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSMessageIcon.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSNumericIDIndex.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSSaveFormBuffer.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp" />
@@ -279,6 +280,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiPoint4.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiRenderer.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiTransform.cpp" />
+    <ClCompile Include="internal\Game\Obsidian\TESReputation.cpp" />
     <ClCompile Include="internal\JG\AddItemMessages.cpp" />
     <ClCompile Include="internal\JG\AnimActivationHeight.cpp" />
     <ClCompile Include="internal\JG\BarterFilter.cpp" />
@@ -385,6 +387,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSLoadFormBuffer.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSLoadGameBuffer.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSLoadGameSubBuffer.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSMessageIcon.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSNumericIDIndex.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSSaveFormBuffer.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSSaveGameBuffer.hpp" />
@@ -561,6 +564,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Obsidian\AudioMarkerData.hpp" />
     <ClInclude Include="internal\Game\Obsidian\AudioMarkerInfo.hpp" />
     <ClInclude Include="internal\Game\Obsidian\ExtraAudioMarker.hpp" />
+    <ClInclude Include="internal\Game\Obsidian\TESReputation.hpp" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\JG\AddItemMessages.hpp" />
     <ClInclude Include="internal\JG\AnimActivationHeight.hpp" />

@@ -14,6 +14,7 @@
 #include "Bethesda/TESObjectLAND.hpp"
 #include "Bethesda/TESIcon.hpp"
 #include "Bethesda/TESTexture1024.hpp"
+#include "Obsidian/TESReputation.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -348,15 +349,6 @@ public:
 	Script* script;	// 004
 	bool	resolved;	// 008	called during LoadForm, so scripts do not wait for TESForm_InitItem to be resolved
 	uint8_t	pad[3];		// 009
-};
-
-// 010
-class BGSMessageIcon : public BaseFormComponent {
-public:
-	BGSMessageIcon();
-	~BGSMessageIcon();
-
-	TESIcon	icon;		// 004
 };
 
 // 008
@@ -1604,16 +1596,6 @@ public:
 };
 
 static_assert(sizeof(TESClass) == 0x60);
-
-class TESReputation : public TESForm, public TESFullName, public TESIcon, public BGSMessageIcon {
-public:
-	float		fMaxReputation;
-	float		fPositiveReputation;
-	float		fNegativeReputation;
-	uint32_t	uiReputationChangedWasPositive;
-};
-
-static_assert(sizeof(TESReputation) == 0x50);
 
 // 4C
 class TESFaction : public TESForm {

@@ -505,7 +505,15 @@
     <ClCompile Include="internal\JG\FormSkeletons.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\ExternalEmittanceOnBases.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSMessageIcon.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Obsidian\TESReputation.cpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExternalEmittanceOnBases.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1357,6 +1365,12 @@
     </ClInclude>
     <ClInclude Include="internal\JG\ExternalEmittanceOnBases.hpp">
       <Filter>internal\JG\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSMessageIcon.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\TESReputation.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
