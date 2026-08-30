@@ -133,3 +133,7 @@ DEFINE_COMMAND_PLUGIN(GetExternalEmittanceSource, , false, kParams_OneOptionalFo
 DEFINE_COMMAND_PLUGIN(SetExternalEmittanceSource, , false, kParams_OneForm_OneOptionalForm);
 DEFINE_COMMAND_PLUGIN(GetProjectileMuzzleFlashLight, , false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(SetProjectileMuzzleFlashLight, , false, kParams_OneForm_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(GetReputationTitle, , false, kParams_OneReputation);
+DEFINE_COMMAND_PLUGIN(GetReputationIcon, , false, kParams_OneReputation);
+DEFINE_COMMAND_PLUGIN(GetReputationFormIcon, , false, kParams_GetReputationFormIcon);
+DEFINE_COMMAND_PLUGIN(SetReputationFormIcon, , false, kParams_SetReputationFormIcon);

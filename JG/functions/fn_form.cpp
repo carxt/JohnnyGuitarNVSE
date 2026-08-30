@@ -3354,3 +3354,71 @@ bool Cmd_SetProjectileMuzzleFlashLight_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
+bool Cmd_GetReputationTitle_Execute(COMMAND_ARGS) {
+	*result = 0;
+	const char* pTitle = "";
+	TESReputation* pReputation = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation) && pReputation && IS_TYPE(pReputation, TESReputation)) {
+		pTitle = pReputation->GetReputationTitle();
+
+		if (IsConsoleMode())
+			Console_Print("GetReputationTitle >> \"%s\": \"%s\"", pReputation->GetFullName(), pTitle);
+	}
+	g_strInterface->Assign(PASS_COMMAND_ARGS, pTitle);
+	return true;
+}
+
+bool Cmd_GetReputationIcon_Execute(COMMAND_ARGS) {
+	*result = 0;
+	const char* pIcon = "";
+	TESReputation* pReputation = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation) && pReputation && IS_TYPE(pReputation, TESReputation)) {
+		pIcon = pReputation->GetReputationIcon();
+
+		if (IsConsoleMode())
+			Console_Print("GetReputationIcon >> \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
+	}
+	g_strInterface->Assign(PASS_COMMAND_ARGS, pIcon);
+	return true;
+}
+
+enum class ReputationIconType : int32_t {
+	NONE	= -1,
+	MAIN	= 0,
+	MESSAGE = 1,
+	COUNT
+};
+
+bool Cmd_GetReputationFormIcon_Execute(COMMAND_ARGS) {
+	*result = 0;
+	const char* pIcon = "";
+	TESReputation* pReputation = nullptr;
+	ReputationIconType eIconType = ReputationIconType::NONE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation, &eIconType) && pReputation && IS_TYPE(pReputation, TESReputation) && InRange(eIconType)) {
+		if (eIconType == ReputationIconType::MAIN)
+			pIcon = pReputation->GetReputationMainIcon();
+		else if (eIconType == ReputationIconType::MESSAGE)
+			pIcon = pReputation->GetMessageIconTextureName();
+	
+		if (IsConsoleMode())
+			Console_Print("GetReputationFormIcon >> \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
+	}
+	g_strInterface->Assign(PASS_COMMAND_ARGS, pIcon);
+	return true;
+}
+
+bool Cmd_SetReputationFormIcon_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESReputation* pReputation = nullptr;
+	ReputationIconType eIconType = ReputationIconType::NONE;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation, &eIconType, &cPath) && pReputation && IS_TYPE(pReputation, TESReputation) && InRange(eIconType)) {
+		if (eIconType == ReputationIconType::MAIN)
+			pReputation->SetReputationMainIcon(cPath);
+		else if (eIconType == ReputationIconType::MESSAGE)
+			pReputation->SetMessageIconTextureName(cPath);
+		*result = 1;
+	}
+	return true;
+}
