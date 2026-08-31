@@ -434,6 +434,14 @@ namespace JohnnyFixes {
 		}
 		STACK_FRAME_OPT_RESET;
 
+		HookUtils::CallDetour kFindSkinnedNodeDetour;
+		bool __cdecl FindSkinnedNode(NiAVObject* apObject) {
+			if (BSXFlags::GetFlags(apObject, BSXFlags::SKINNED_WEAPON))
+				return false;
+
+			return CdeclCall<bool>(kFindSkinnedNodeDetour, apObject);
+		}
+
 		void InitHooks() {
 			// Pass weapon mod flags during TESNPC::InitWornObject
 			// Vaniller doesn't (the only spot where it's 0'd) so NPCs end up with wrong weapon models
@@ -448,7 +456,7 @@ namespace JohnnyFixes {
 
 			// Allow skinned weapons
 			// Fixed in CE...
-			HookUtils::WriteRelJump(0x4AF0F8, 0x4AF136);
+			kFindSkinnedNodeDetour.ReplaceCall(0x4AF0FC, FindSkinnedNode);
 
 			// Preserve BSXFlags in BipedAnim::LoadAndAttachAddOn
 			// Fixed in, ffs, CE...

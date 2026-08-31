@@ -9,6 +9,8 @@
 #include "Gamebryo/NiAlphaAccumulator.hpp"
 #include "Gamebryo/NiRenderer.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
+#include "Gamebryo/NiStringExtraData.hpp"
+#include "Bethesda/BSXFlags.hpp"
 #include "Bethesda/NiUpdateData.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
 #include "Bethesda/BSCullingProcess.hpp"
@@ -529,51 +531,6 @@ public:
 	// GAME - 0x639B60
 	NiFloatInterpolator* GetBirthRateInterpolator() const {
 		return ThisCall<NiFloatInterpolator*>(0x639B60, this);
-	}
-};
-
-// 0C
-class NiExtraData : public NiObject {
-public:
-	NiExtraData();
-	~NiExtraData();
-
-	virtual void	Unk_23(void);
-	virtual void	Unk_24(void);
-
-	uint32_t			unk08;		// 08
-};
-
-class NiStringExtraData : public NiExtraData {
-public:
-	NiFixedString m_kString;
-
-	NIRTTI_ADDRESS(0x11F4A38);
-};
-
-// 10
-class BSXFlags : public NiExtraData {
-public:
-	BSXFlags();
-	~BSXFlags();
-
-	enum {
-		kBSXFlag_Animated = 1 << 0,
-		kBSXFlag_Havok = 1 << 1,
-		kBSXFlag_Ragdoll = 1 << 2,
-		kBSXFlag_Complex = 1 << 3,
-		kBSXFlag_Addon = 1 << 4,
-		kBSXFlag_EditorMarker = 1 << 5,
-		kBSXFlag_Dynamic = 1 << 6,
-		kBSXFlag_Articulated = 1 << 7,
-		kBSXFlag_NeedsTransformUpdates = 1 << 8,
-		kBSXFlag_ExternalEmit = 1 << 9,
-	};
-
-	uint32_t			flags;		// 0C
-
-	static const NiFixedString& GetTag() {
-		return CdeclCall<const NiFixedString&>(0x448A80);
 	}
 };
 
