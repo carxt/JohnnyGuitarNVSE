@@ -29,10 +29,6 @@ namespace JohnnySerialization {
 		}
 	}
 
-	void PreLoadGameCallback(void*) {
-
-	}
-
 	void LoadGameCallback(void*)
 	{
 		using namespace ExtraMiscStats;
@@ -71,7 +67,6 @@ namespace JohnnySerialization {
 		_ReadRecordData = serialization->ReadRecordData;
 		_ResolveFormID = serialization->ResolveRefID;
 		_OpenRecord = serialization->OpenRecord;
-		serialization->SetPreLoadCallback(nvse->GetPluginHandle(), PreLoadGameCallback);
 		serialization->SetLoadCallback(nvse->GetPluginHandle(), LoadGameCallback);
 		serialization->SetSaveCallback(nvse->GetPluginHandle(), SaveGameCallback);
 	}
