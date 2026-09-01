@@ -2281,6 +2281,26 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace FormFlagsFix {
+
+		// Genuinely one of the most stupid things I've seen here so far
+
+		HookUtils::CallDetour kDetour;
+		void __fastcall ClearJIPFlagsAndInit(Actor* apActor, void*, bool abAddProcess) {
+			apActor->jipActorFlags1 = 0;
+			apActor->jipActorFlags2 = 0;
+			apActor->jipActorFlags3 = 0;
+			ThisCall(kDetour, apActor, abAddProcess);
+		}
+
+		void InitHooks() {
+			HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x100123BE), JIPUtils::GetAddress(0x100123CF));
+
+			HookUtils::SafeWriteBuf(0x483522, "\xC7\x41\x04\x00\x00\x00\x00\xC7\x41");
+			kDetour.ReplaceCall(0x87D5BA, ClearJIPFlagsAndInit);
+		}
+	}
+
 	namespace LogMover {
 
 		void InitHooks() {
@@ -2334,6 +2354,7 @@ namespace JIPFixes {
 			SanerWeaponWobbleHook::InitHooks();
 			ProjectileLightFix::InitHooks();
 			ModelFixes::InitHooks();
+			FormFlagsFix::InitHooks();
 		}
 	}
 

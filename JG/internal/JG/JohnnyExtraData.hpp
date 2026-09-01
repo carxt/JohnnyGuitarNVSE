@@ -25,6 +25,7 @@ public:
 
 	// Temporary
 	struct ScriptData {
+		TESForm*	pExternalEmittanceSource;
 	};
 
 	uint32_t	uiFormID;
@@ -35,6 +36,9 @@ public:
 	const NiFixedString& GetEditorID() const;
 	EDIDResult __fastcall SetEditorID(const NiFixedString& arEDID);
 	EDIDResult __fastcall RemoveEditorID(const NiFixedString& arEDID);
+
+	TESForm* __fastcall GetExternalEmittanceSource() const;
+	void __fastcall SetExternalEmittanceSource(TESForm* apSource);
 
 	static const NiFixedString& GetName();
 

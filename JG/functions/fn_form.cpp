@@ -22,6 +22,7 @@
 #include <Bethesda/AILinearTaskThreadManager.hpp>
 #include <JG/TaskQueue.hpp>
 #include <JG/LandRemapping.hpp>
+#include <JG/ExternalEmittanceOnBases.hpp>
 #include <Bethesda/BSShaderManager.hpp>
 #include <Bethesda/TESMain.hpp>
 #include <Bethesda/BSUtilities.hpp>
@@ -1129,12 +1130,12 @@ bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form, &isFemale) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			path = bipedModel->messageIcon[isFemale].icon.GetTextureName();
+			path = bipedModel->messageIcon[isFemale != 0].GetMessageIconTextureName();
 		}
 		else {
 			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
 			if (icon) {
-				path = icon->icon.GetTextureName();
+				path = icon->GetMessageIconTextureName();
 			}
 		}
 		if (IsConsoleMode()) Console_Print("GetMessageIconPath >> %s", path);
@@ -1150,13 +1151,13 @@ bool Cmd_SetMessageIconPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &form, &isFemale) && form) {
 		TESBipedModelForm* bipedModel = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 		if (bipedModel) {
-			bipedModel->messageIcon[isFemale].icon.SetTextureName(path);
+			bipedModel->messageIcon[isFemale != 0].SetMessageIconTextureName(path);
 			*result = 1;
 		}
 		else {
 			BGSMessageIcon* icon = DYNAMIC_CAST(form, TESForm, BGSMessageIcon);
 			if (icon) {
-				icon->icon.SetTextureName(path);
+				icon->SetMessageIconTextureName(path);
 				*result = 1;
 			}
 		}
@@ -3230,6 +3231,194 @@ bool Cmd_ReloadEquippedModelsAlt_Execute(COMMAND_ARGS) {
 			RequestBipedModelUpdate(pChar, iTargetObject, bQueue);
 			*result = bQueue ? 2 : 1;
 		}
+	}
+	return true;
+}
+
+bool Cmd_GetExternalEmittanceSource_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) {
+		if (!pForm)
+			pForm = thisObj;
+
+		if (!pForm)
+			return true;
+
+		TESForm* pSource = nullptr;
+		if (pForm->IsReference()) {
+			pSource = static_cast<TESObjectREFR*>(pForm)->GetEmittanceSource();
+		}
+		else if (pForm->IsBoundObject()) {
+			pSource = ExternalEmittanceOnBases::GetExternalEmittanceSource(static_cast<TESBoundObject*>(pForm));
+		}
+
+		if (pSource)
+			*reinterpret_cast<uint32_t*>(result) = pSource->GetFormID();
+	}
+
+	return true;
+}
+
+void __fastcall SetEmittanceSourceForRef(TESObjectREFR* apRef, TESForm* apSource) {
+	if (!apRef)
+		return;
+	
+	TESForm* pExistingSource = apRef->GetEmittanceSource();
+	if (pExistingSource == apSource)
+		return;
+
+	TESObjectCELL* pCell = apRef->GetParentCell();
+	if (pCell) {
+		pCell->CellRefLockEnter();
+
+		if (pExistingSource)
+			pCell->RemoveEmittanceRef(apRef);
+	}
+
+	apRef->SetEmittanceSource(apSource);
+
+	if (pCell) {
+		if (apSource)
+			pCell->AddEmittanceRef(apRef);
+		else
+			pCell->RemoveEmittanceRef(apRef);
+
+		pCell->CellRefLockLeave();
+	}
+}
+
+bool Cmd_SetExternalEmittanceSource_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* pForm = nullptr;
+	TESForm* pSource = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &pSource) && pForm) {
+		if (pSource) {
+			if (pSource->GetFormType() != FORM_TYPE::TESRegion && pSource->GetFormType() != FORM_TYPE::TESObjectLIGH)
+				return true;
+		}
+
+		if (pForm->IsReference()) {
+			TESObjectREFR* pReference = static_cast<TESObjectREFR*>(pForm);
+			if (AILinearTaskThreadManager::GetRunningThreads()) {
+				JohnnyExtraData* pExtraData = JohnnyExtraData::GetOrCreate(pReference);
+				pExtraData->IncRefCount();
+
+				QueuedTask kTask;
+				kTask.kItems[0].p = pExtraData;
+				kTask.kItems[1].p = pSource;
+				kTask.pFunction = QUEUED_TASK{
+					JohnnyExtraData* pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
+					TESForm* pSource = reinterpret_cast<TESForm*>(arTask.kItems[1].p);
+					TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pData->pOwner);
+					SetEmittanceSourceForRef(pRef, pSource);
+					pData->DecRefCount();
+				};
+				TaskQueue::QueueTask(kTask);
+			}
+			else {
+				SetEmittanceSourceForRef(pReference, pSource);
+			}
+		}
+		else if (pForm->IsBoundObject()) {
+			ExternalEmittanceOnBases::SetExternalEmittanceSource(static_cast<TESBoundObject*>(pForm), pSource);
+		}
+		else {
+			return true;
+		}
+
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetProjectileMuzzleFlashLight_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSProjectile* pProjectile = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pProjectile) && pProjectile && IS_TYPE(pProjectile, BGSProjectile) && pProjectile->lightMuzzleFlash) {
+		*reinterpret_cast<uint32_t*>(result) = pProjectile->lightMuzzleFlash->GetFormID();
+	}
+	return true;
+}
+
+bool Cmd_SetProjectileMuzzleFlashLight_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSProjectile* pProjectile = nullptr;
+	TESObjectLIGH* pLight = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pProjectile, &pLight) && pProjectile && IS_TYPE(pProjectile, BGSProjectile)) {
+		if (pLight && !IS_TYPE(pLight, TESObjectLIGH))
+			return true;
+
+		pProjectile->lightMuzzleFlash = pLight;
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetReputationTitle_Execute(COMMAND_ARGS) {
+	*result = 0;
+	const char* pTitle = "";
+	TESReputation* pReputation = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation) && pReputation && IS_TYPE(pReputation, TESReputation)) {
+		pTitle = pReputation->GetReputationTitle();
+
+		if (IsConsoleMode())
+			Console_Print("GetReputationTitle >> \"%s\": \"%s\"", pReputation->GetFullName(), pTitle);
+	}
+	g_strInterface->Assign(PASS_COMMAND_ARGS, pTitle);
+	return true;
+}
+
+bool Cmd_GetReputationIcon_Execute(COMMAND_ARGS) {
+	*result = 0;
+	const char* pIcon = "";
+	TESReputation* pReputation = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation) && pReputation && IS_TYPE(pReputation, TESReputation)) {
+		pIcon = pReputation->GetReputationIcon();
+
+		if (IsConsoleMode())
+			Console_Print("GetReputationIcon >> \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
+	}
+	g_strInterface->Assign(PASS_COMMAND_ARGS, pIcon);
+	return true;
+}
+
+enum class ReputationIconType : int32_t {
+	NONE	= -1,
+	MAIN	= 0,
+	MESSAGE = 1,
+	COUNT
+};
+
+bool Cmd_GetReputationFormIcon_Execute(COMMAND_ARGS) {
+	*result = 0;
+	const char* pIcon = "";
+	TESReputation* pReputation = nullptr;
+	ReputationIconType eIconType = ReputationIconType::NONE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation, &eIconType) && pReputation && IS_TYPE(pReputation, TESReputation) && InRange(eIconType)) {
+		if (eIconType == ReputationIconType::MAIN)
+			pIcon = pReputation->GetReputationMainIcon();
+		else if (eIconType == ReputationIconType::MESSAGE)
+			pIcon = pReputation->GetMessageIconTextureName();
+	
+		if (IsConsoleMode())
+			Console_Print("GetReputationFormIcon >> \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
+	}
+	g_strInterface->Assign(PASS_COMMAND_ARGS, pIcon);
+	return true;
+}
+
+bool Cmd_SetReputationFormIcon_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESReputation* pReputation = nullptr;
+	ReputationIconType eIconType = ReputationIconType::NONE;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation, &eIconType, &cPath) && pReputation && IS_TYPE(pReputation, TESReputation) && InRange(eIconType)) {
+		if (eIconType == ReputationIconType::MAIN)
+			pReputation->SetReputationMainIcon(cPath);
+		else if (eIconType == ReputationIconType::MESSAGE)
+			pReputation->SetMessageIconTextureName(cPath);
+		*result = 1;
 	}
 	return true;
 }

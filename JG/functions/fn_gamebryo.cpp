@@ -1,14 +1,17 @@
 #include "fn_gamebryo.h"
 
+#include <GameObjects.h>
+#include <GameTasks.h>
+
 #include "Gamebryo/NiParticleSystem.hpp"
 #include "Gamebryo/NiPSysBoxEmitter.hpp"
 #include "Gamebryo/NiPSysEmitter.hpp"
 #include "Gamebryo/NiPSysModifier.hpp"
+#include "Bethesda/AILinearTaskThreadManager.hpp"
+#include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/BSWindModifier.hpp"
 
 #include <JG/TaskQueue.hpp>
-#include <GameTasks.h>
-
 #include "JG/ScriptUtils.hpp"
 using namespace ScriptUtils;
 
@@ -1016,5 +1019,40 @@ bool Cmd_GetNiLightColor_Execute(COMMAND_ARGS) {
 		*result = 1;
 	}
 
+	return true;
+}
+
+bool Cmd_SetShaderPropertyFlag_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BSShaderProperty::ShaderBits eBit = BSShaderProperty::ShaderBits::MAX_FLAGS;
+	BOOL bValue = FALSE;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eBit, &bValue, &bFirstPerson) && cObjectName[0] && eBit >= 0 && eBit < BSShaderProperty::ShaderBits::MAX_FLAGS) {
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Shade);
+		BSShaderProperty* pShade = static_cast<BSShaderProperty*>(kObjects.first);
+		if (!pShade)
+			return true;
+
+		pShade->SetFlag(eBit, bValue);
+
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetShaderPropertyFlag_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BSShaderProperty::ShaderBits eBit = BSShaderProperty::ShaderBits::MAX_FLAGS;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eBit, &bFirstPerson) && cObjectName[0] && eBit >= 0 && eBit < BSShaderProperty::ShaderBits::MAX_FLAGS) {
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Shade);
+		const BSShaderProperty* pShade = static_cast<BSShaderProperty*>(kObjects.first);
+		if (!pShade)
+			return true;
+
+		*result = pShade->GetFlag(eBit);
+	}
 	return true;
 }

@@ -96,21 +96,6 @@ namespace JohnnyFixes {
 		}
 	}
 
-	HookUtils::CallDetour kSetBipedWeaponDetour;
-	void __fastcall SetBipedWeaponModFix(BipedAnim* apThis, void*, TESObjectWEAP* apWeapon, uint8_t aucModSlots) {
-		uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
-		TESObjectREFR* pReference = *reinterpret_cast<TESObjectREFR**>(pEBP + 0x8);
-		if (pReference && pReference->IsActor()) {
-			Actor* pActor = static_cast<Actor*>(pReference);
-			if (pActor->baseProcess) {
-				ItemChange* pWeaponItem = pActor->baseProcess->GetCurrentWeapon();
-				if (pWeaponItem)
-					aucModSlots = pWeaponItem->GetModSlots();
-			}
-		}
-		ThisCall(kSetBipedWeaponDetour, apThis, apWeapon, aucModSlots);
-	}
-
 	namespace INISettingFixes {
 
 		template<uint32_t uiAddress>
@@ -410,6 +395,150 @@ namespace JohnnyFixes {
 		}
 	}
 
+	namespace DestructionFixes {
+
+		void __fastcall SetDeleteVirt(TESForm* apForm, void*, bool abDelete) {
+			apForm->SetDelete(abDelete);
+		}
+
+		void InitHooks() {
+			// Simplify destruction stages check
+			// TES Engine requires having a replacement model/explosion/debris or disablement in order to be considered valid
+			// Which means if you only use BSDamageStages, or destruction instead of disablement... it won't work
+			// CE only checks if data exists, and has stage count, which is what we replicate here (who's we?)
+			HookUtils::SafeWriteBuf(0x475A32, "\x85\xC9\x7E\x49\xEB\x41");
+
+			// TES Engine calls TESForm::SetDelete on the reference... instead of TESObjectREFR::SetDelete
+			// This results in inproper cleanup of saved data
+			// Naturally, fixed in CE...
+			// I'm replacing it with a virtual call for better compat (sadly no space to do an inline write)
+			HookUtils::ReplaceCall(0x475EA1, SetDeleteVirt);
+		}
+
+	}
+
+	namespace BipedAnimFixes {
+
+		HookUtils::CallDetour kSetBipedWeaponDetour;
+		STACK_FRAME_OPT_DISABLE
+		void __fastcall SetBipedWeaponModFix(BipedAnim* apThis, void*, TESObjectWEAP* apWeapon, uint8_t aucModSlots) {
+			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+			TESObjectREFR* pReference = *reinterpret_cast<TESObjectREFR**>(pEBP + 0x8);
+			if (pReference && pReference->IsActor()) {
+				Actor* pActor = static_cast<Actor*>(pReference);
+				if (pActor->baseProcess) {
+					ItemChange* pWeaponItem = pActor->baseProcess->GetCurrentWeapon();
+					if (pWeaponItem)
+						aucModSlots = pWeaponItem->GetModSlots();
+				}
+			}
+			ThisCall(kSetBipedWeaponDetour, apThis, apWeapon, aucModSlots);
+		}
+		STACK_FRAME_OPT_RESET
+
+		HookUtils::CallDetour kRemoveAllExtraDetour;
+		void __fastcall ReattachBSXFlags(NiAVObject* apObject) {
+			const NiFixedString& rFlagsTag = BSXFlags::GetTag();
+			NiPointer<NiExtraData> spFlags = apObject->GetExtraData(rFlagsTag);
+			ThisCall(kRemoveAllExtraDetour, apObject);
+			if (spFlags)
+				apObject->AddExtraData(rFlagsTag, spFlags);
+		}
+
+		HookUtils::CallDetour kSetClonePtrDetour;
+		STACK_FRAME_OPT_DISABLE
+		NiRefObjectPtr* __fastcall AddControllerToBiped(NiRefObjectPtr* apThis, void*, NiAVObject* apClone) {
+			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+			NiAVObject* pNewObj = *reinterpret_cast<NiAVObject**>(pEBP - 0x18);
+			if (pNewObj) {
+				NiControllerManager* pCtrlMgr = apClone->GetController<NiControllerManager>();
+				if (pCtrlMgr) {
+					pNewObj->PrependController(pCtrlMgr);
+					if (pCtrlMgr->m_spObjectPalette)
+						pCtrlMgr->m_spObjectPalette->SetScene(pNewObj);
+				}
+			}
+			return ThisCall<NiRefObjectPtr*>(kSetClonePtrDetour, apThis, apClone);
+		}
+		STACK_FRAME_OPT_RESET;
+
+		HookUtils::CallDetour kFindSkinnedNodeDetour;
+		bool __cdecl FindSkinnedNode(NiAVObject* apObject) {
+			if (BSXFlags::GetFlags(apObject, BSXFlags::SKINNED_WEAPON))
+				return false;
+
+			return CdeclCall<bool>(kFindSkinnedNodeDetour, apObject);
+		}
+
+		void InitHooks() {
+			// Pass weapon mod flags during TESNPC::InitWornObject
+			// Vaniller doesn't (the only spot where it's 0'd) so NPCs end up with wrong weapon models
+			kSetBipedWeaponDetour.ReplaceCall(0x6061E8, SetBipedWeaponModFix);
+
+			// Fix wrong checks in BipedAnim::RunBiped3DDetach
+			// TLDR is, wrong order of operation and badly made checks
+			// Havok removal no longer depends on object having a parent, and no longer is dependant on BSXFlags presence
+			// Fixed in CE...
+			HookUtils::SafeWriteBuf(0x4AB0F5, "\x89\x45\xFC\x90\x6A\x01");
+			HookUtils::SafeWriteBuf(0x4AB10C, "\x8B\x45\xFC\x85\xC0\x74\x15\x90");
+
+			// Allow skinned weapons
+			// Fixed in CE...
+			kFindSkinnedNodeDetour.ReplaceCall(0x4AF0FC, FindSkinnedNode);
+
+			// Preserve BSXFlags in BipedAnim::LoadAndAttachAddOn
+			// Fixed in, ffs, CE...
+			kRemoveAllExtraDetour.ReplaceCall(0x4AF07A, ReattachBSXFlags);
+
+			// Support existing NiControllerManagers
+			// You can guess what'll say
+			kSetClonePtrDetour.ReplaceCall(0x4AD44C, AddControllerToBiped);
+		}
+	}
+
+	namespace TESEffectShaderFixes {
+
+		SPEC_NAKED void SkinChecks_Asm() {
+			static constexpr uint32_t uiFailAddr	= 0x507C19;
+			static constexpr uint32_t uiSuccessAddr	= 0x507C1D;
+			static constexpr uint32_t uiReturnAddr	= 0x507BE8;
+			__asm {
+				mov		[ebp - 0x10], eax // Store material property
+
+				// Fix 1: Beth did not update stuff from Oblivion
+				// They use NiMaterialProperty names to check if something is a skin
+				// FO3+ uses the FaceGen shader property flag for that, but this code doesn't...
+				mov     ecx, [ebp - 0x8] // Get shader property
+				bt		DWORD PTR [ecx + 0x20], 10 // Check FaceGen flag
+				jb		SUCCESS
+
+				// Fix 2: There's no NiMaterialProperty nullcheck lol
+				mov		ecx, [ebp - 0x10] // Nullcheck material property
+				test	ecx, ecx
+				jz		FAIL
+
+				jmp		uiReturnAddr
+			
+				FAIL:
+				jmp		uiFailAddr
+
+				SUCCESS:
+				jmp		uiSuccessAddr
+			}
+		}
+
+		void InitHooks() {
+			HookUtils::WriteRelJump(0x507BE2, SkinChecks_Asm);
+
+			// Use NiFixedString comparison instead of strcmp
+			HookUtils::PatchMemoryNop(0x507BF8, 5); // Remove "skin" str push
+			// mov     ecx, dword ptr ds:[FixedStrings::pSkin] // pSkin is 0x11C6210
+			// cmp     eax, [ecx] // eax is the NiMaterialProperty name ptr
+			// jmp	   +1 // Skip nops
+			HookUtils::SafeWriteBuf(0x507C0C, "\x8B\x0D\x10\x62\x1C\x01\x3B\x01\xEB\x01");
+		}
+	}
+
 	void Init() {
 		// for Runtime EDIDs
 		EDIDRestoration::InitHooks();
@@ -435,9 +564,6 @@ namespace JohnnyFixes {
 
 		// use correct weapon skill req penalty setting in weapon spread calculation
 		HookUtils::SafeWriteBuf(0x647902 + 1, "\xC8\xEA\x1C\x01");
-
-		// fix for various biped model update bugs
-		kSetBipedWeaponDetour.ReplaceCall(0x6061E8, SetBipedWeaponModFix);
 
 		// missing nullcheck in NiMultiTargetTransformController::RemoveNodeRecurse
 		HookUtils::SafeWrite8(0x4F064E, 0x7A);
@@ -485,10 +611,6 @@ namespace JohnnyFixes {
 		// Patch the game so the dialog subroutine stops if the actor's head is blown off, I'll add it as an ini setting later.
 		NoHeadlessTalkingFix::InitHooks();
 
-		// Fix wrong checks in BipedAnim::RunBiped3DDetach
-		HookUtils::SafeWriteBuf(0x4AB0F5, "\x89\x45\xFC\x90\x6A\x01");
-		HookUtils::SafeWriteBuf(0x4AB10C, "\x8B\x45\xFC\x85\xC0\x74\x15\x90");
-
 		// Add a baseform nullcheck for created refs in BGSSaveLoadGame::CheckInitialData
 		HookUtils::SafeWriteBuf(0x849DE6, "\x85\xC0\x74\x08\x8B\x40\x0C");
 
@@ -500,6 +622,17 @@ namespace JohnnyFixes {
 
 		// Fix ArchiveManager::GetFileByFileEntry not using the archive index argument
 		HookUtils::SafeWriteBuf(0xAF6378, "\x8B\x4D\x08\xBA\x01\x00\x00\x00\xD3\xE2\x52");
+
+		DestructionFixes::InitHooks();
+    
+		// Disable frustum culling for the viewmodel
+		// Game tries to do that by setting "always draw" on the player scene, but only on the root node
+		// Fixed in CE... (are you even surprised by now?)
+		HookUtils::SafeWrite8(0x875065 + 1, 1);
+
+		BipedAnimFixes::InitHooks();
+
+		TESEffectShaderFixes::InitHooks();
 	}
 
 }
