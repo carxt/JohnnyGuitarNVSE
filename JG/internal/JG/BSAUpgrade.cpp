@@ -1,5 +1,6 @@
 #include "BSAUpgrade.hpp"
 #include <GameAPI.h>
+#include <mutex>
 
 namespace BSAUpgrade {
 
@@ -329,15 +330,11 @@ namespace BSAUpgrade {
 		constexpr char DATA_PATH[] = "Data\\";
 
 		uint32_t __fastcall CheckArchiveFiles(Archive* apArchive) {
-			if ((!apArchive->HasDirectoryStrings() || !apArchive->HasFileStrings())) {
+			if ((!apArchive->GetHasDirectoryStrings() || !apArchive->GetHasFileStrings())) [[unlikely]] {
 				return 0;
 			}
 
-			uint32_t uiInvalidedFiles = 0;
-			const uint32_t uiDirCount = apArchive->uiDirectories;
-
 			char cPathBuffer[MAX_PATH];
-
 			cPathBuffer[0] = 0;
 			strcpy_s(cPathBuffer, DATA_PATH);
 
@@ -345,6 +342,10 @@ namespace BSAUpgrade {
 			constexpr uint32_t uiBufferSize = MAX_PATH - uiDataLen;
 			char* pBuffer = &cPathBuffer[uiDataLen - 1];
 
+			apArchive->kArchiveCriticalSection.Lock();
+
+			uint32_t uiInvalidedFiles = 0;
+			const uint32_t uiDirCount = apArchive->uiDirectories;
 			for (uint32_t i = 0; i < uiDirCount; ++i) {
 				const BSDirectoryEntry* pDirectory = &apArchive->pDirectories[i];
 				const uint32_t uiFileCount = pDirectory->uiFiles;
@@ -354,44 +355,44 @@ namespace BSAUpgrade {
 				pBuffer[0] = 0;
 
 				const char* pDirName = apArchive->GetDirectoryString(i);
-				if (pDirName) {
-					//_MESSAGE("    Checking \"%s%s\"", cPathBuffer, pDirName);
+				if (pDirName) [[likely]] {
 					strcat_s(pBuffer, uiBufferSize, pDirName);
-					const DWORD dwDirAttributes = GetFileAttributes(cPathBuffer);
 
-					if (dwDirAttributes != INVALID_FILE_ATTRIBUTES) {
+					const DWORD dwDirAttributes = GetFileAttributes(cPathBuffer);
+					if (dwDirAttributes != INVALID_FILE_ATTRIBUTES && (dwDirAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
 						const uint32_t uiFolderLength = strlen(cPathBuffer) + 1;
 						const uint32_t uiFileBufferSize = MAX_PATH - uiFolderLength;
 						cPathBuffer[uiFolderLength - 1] = '\\';
 						cPathBuffer[uiFolderLength] = 0;
 						char* pFileBuffer = &cPathBuffer[uiFolderLength];
+						pFileBuffer[0] = 0;
+						for (uint32_t j = 0; j < uiFileCount; ++j) {
+							BSFileEntry* pFile = &pDirectory->pFiles[j];
+							if (!pFile->IsChecked() && !pFile->IsInvalidated()) {
+								const char* pFileName = apArchive->GetFileString(i, j);
+								strcat_s(pFileBuffer, uiFileBufferSize, pFileName);
 
-						if (dwDirAttributes & FILE_ATTRIBUTE_DIRECTORY) [[likely]] {
-							for (uint32_t j = 0; j < uiFileCount; ++j) {
-								BSFileEntry* pFile = &pDirectory->pFiles[j];
-								if (!pFile->IsChecked() && !pFile->IsInvalidated()) {
-									const char* pFileName = apArchive->GetFileString(i, j);
-									strcat_s(pFileBuffer, uiFileBufferSize, pFileName);
-									const DWORD dwFileAttributes = GetFileAttributes(cPathBuffer);
-									if (dwFileAttributes != INVALID_FILE_ATTRIBUTES && (dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
-										pFile->SetOffset(0);
-										++uiInvalidedFiles;
-									}
-									pFileBuffer[0] = 0;
+								const DWORD dwFileAttributes = GetFileAttributes(cPathBuffer);
+								if (dwFileAttributes != INVALID_FILE_ATTRIBUTES && (dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0) {
+									pFile->SetOffset(0);
+									++uiInvalidedFiles;
 								}
-								pFile->SetChecked(true);
+								pFileBuffer[0] = 0;
 							}
-							continue;
+							pFile->SetChecked(true);
 						}
+						continue;
 					}
 				}
 
 				for (uint32_t j = 0; j < uiFileCount; ++j) {
-					BSFileEntry* pFile = &pDirectory->pFiles[j];
-					pFile->SetChecked(true);
+					pDirectory->pFiles[j].SetChecked(true);
 				}
 			}
-			_MESSAGE("Invalidated %i files for \"%s\"", uiInvalidedFiles, apArchive->GetFilename());
+
+			apArchive->kArchiveCriticalSection.Unlock();
+
+			_MESSAGE("Invalidated %i files for \"%s\"", uiInvalidedFiles, apArchive->cFileName);
 			return uiInvalidedFiles;
 		}
 

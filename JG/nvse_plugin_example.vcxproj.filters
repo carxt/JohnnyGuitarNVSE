@@ -505,7 +505,6 @@
     <ClCompile Include="internal\JG\FormSkeletons.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\BSAUpgrade.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSDirectoryEntry.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
@@ -514,6 +513,12 @@
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BSArchive.cpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSCriticalSection.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\BSAUpgrade.cpp">
+      <Filter>internal\JG\Features</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1377,6 +1382,9 @@
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BSArchive.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSCriticalSection.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>

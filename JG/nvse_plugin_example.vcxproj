@@ -222,6 +222,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BGSSaveFormBuffer.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSArchive.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSCriticalSection.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSCullingProcess.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSDirectoryEntry.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp" />
@@ -396,6 +397,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFormHeader.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSArchive.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSCriticalSection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSDirectoryEntry.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />

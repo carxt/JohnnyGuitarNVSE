@@ -6,6 +6,7 @@
 
 #include "Bethesda/BSArchive.hpp"
 #include "Bethesda/BSFileEntry.hpp"
+#include "Bethesda/BSCriticalSection.hpp"
 
 struct ParamInfo;
 class TESForm;
@@ -461,12 +462,6 @@ public:
 static_assert(sizeof(BSFile) == 0x158);
 
 class BSHash;
-
-class BSCriticalSection {
-public:
-	CRITICAL_SECTION	kCriticalSection;
-};
-
 class ArchiveFile;
 
 // 1D0
@@ -475,18 +470,35 @@ public:
 	Archive();
 	~Archive();
 
+	struct ALIGN1 _ArchiveFlags {
+		enum Flags : uint8_t {
+			DISABLED				= 1u << 0,
+			PRIMARY					= 1u << 2,
+			SECONDARY				= 1u << 3,
+			HAS_DIRECTORY_STRINGS	= 1u << 4,
+			HAS_FILE_STRINGS		= 1u << 5,
+		};
+
+		bool bDisabled				: 1;
+		bool						: 1;
+		bool bPrimary				: 1;
+		bool bSecondary				: 1;
+		bool bHasDirectoryStrings	: 1;
+		bool bHasFileStrings		: 1;
+	};
+	using ArchiveFlags = _ArchiveFlags::Flags;
+
 	time_t					ulArchiveFileTime;
 	uint32_t				uiFileNameArrayOffset;
 	uint32_t				uiLastDirectoryIndex;
 	uint32_t				uiLastFileIndex;
 	BSCriticalSection		kArchiveCriticalSection;
-	Bitfield8				ucArchiveFlags;
+	Bitfield<_ArchiveFlags>	ucArchiveFlags;
 	char*					pDirectoryStringArray;
 	uint32_t*				pDirectoryStringOffsets;
 	char*					pFileNameStringArray;
 	uint32_t**				pFileNameStringOffsets;
 	uint32_t				uiID;
-
 
 	bool IsType(ARCHIVE_TYPE aeArchiveType) const {
 		return usArchiveType.Get(aeArchiveType);
@@ -494,6 +506,22 @@ public:
 
 	bool IsType(ARCHIVE_TYPE_INDEX aeArchiveTypeIndex) const {
 		return usArchiveType.GetBit(aeArchiveTypeIndex);
+	}
+
+	void SetHasDirectoryStrings(bool abHasDirectoryStrings) {
+		ucArchiveFlags.bHasDirectoryStrings = abHasDirectoryStrings;
+	}
+
+	bool GetHasDirectoryStrings() const {
+		return ucArchiveFlags.bHasDirectoryStrings;
+	}
+
+	void SetHasFileStrings(bool abHasFileStrings) {
+		ucArchiveFlags.bHasFileStrings = abHasFileStrings;
+	}
+
+	bool GetHasFileStrings() const {
+		return ucArchiveFlags.bHasFileStrings;
 	}
 
 	bool FindFile(const BSHash& arDirectoryHash, const BSHash& arFileNameHash, uint32_t& arDirectoryID, uint32_t& arFileID, const char* apFileName) {

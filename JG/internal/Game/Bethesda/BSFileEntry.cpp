@@ -2,10 +2,12 @@
 
 #define FULL_OFFSET 1
 
+// GAME - 0x62A100
 uint32_t BSFileEntry::GetFileSize() const {
 	return uiSize.uiSize;
 }
 
+// GAME - 0x43C3B0
 uint32_t BSFileEntry::GetFileOffset() const {
 #if FULL_OFFSET
 	return uint32_t(uiOffset);
