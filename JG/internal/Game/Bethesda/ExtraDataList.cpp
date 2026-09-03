@@ -38,3 +38,23 @@ TESForm* ExtraDataList::GetEmittanceSource() const {
 void ExtraDataList::SetEmittanceSource(TESForm* apSource) {
 	ThisCall(0x421D50, this, apSource);
 }
+
+// GAME - 0x418C00
+bool ExtraDataList::GetWeaponModSlotActive(uint8_t aucSlot) const {
+	return ThisCall<bool>(0x418C00, this, aucSlot);
+}
+
+// GAME - 0x42E380
+void ExtraDataList::SetWeaponModSlot(uint8_t aucSlot) {
+	ThisCall(0x42E380, this, aucSlot);
+}
+
+// GAME - 0x42E560
+uint8_t ExtraDataList::GetWeaponModFlags() const {
+	return ThisCall<uint8_t>(0x42E560, this);
+}
+
+// GAME - 0x42E4A0
+void ExtraDataList::SetWeaponModFlags(uint8_t aucFlags) {
+	ThisCall(0x42E4A0, this, aucFlags);
+}

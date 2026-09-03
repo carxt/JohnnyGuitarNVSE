@@ -24,6 +24,12 @@ public:
 
 	TESForm* GetEmittanceSource() const;
 	void SetEmittanceSource(TESForm* apSource);
+
+	bool GetWeaponModSlotActive(uint8_t aucSlot) const;
+	void SetWeaponModSlot(uint8_t aucSlot);
+
+	uint8_t GetWeaponModFlags() const;
+	void SetWeaponModFlags(uint8_t aucFlags);
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

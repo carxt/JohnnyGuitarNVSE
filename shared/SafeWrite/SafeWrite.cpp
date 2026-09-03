@@ -88,6 +88,10 @@ namespace HookUtils {
 		SafeWriteRel<uint8_t>(address, target, 0xE9);
 	}
 
+	void __fastcall WriteRelJz(uintptr_t address, uintptr_t target) noexcept {
+		SafeWriteRel<uint16_t>(address, target, 0x840F);
+	}
+
 	void __fastcall WriteRelJnz(uintptr_t address, uintptr_t target) noexcept {
 		SafeWriteRel<uint16_t>(address, target, 0x850F);
 	}

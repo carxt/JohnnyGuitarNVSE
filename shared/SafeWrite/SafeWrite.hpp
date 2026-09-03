@@ -63,6 +63,7 @@ namespace HookUtils {
 
 	void __fastcall WriteRelCall(uintptr_t address, uintptr_t target) noexcept;
 	void __fastcall WriteRelJump(uintptr_t address, uintptr_t target) noexcept;
+	void __fastcall WriteRelJz(uintptr_t address, uintptr_t target) noexcept;
 	void __fastcall WriteRelJnz(uintptr_t address, uintptr_t target) noexcept;
 	void __fastcall WriteRelJle(uintptr_t address, uintptr_t target) noexcept;
 

@@ -1440,6 +1440,36 @@ namespace JIPFixes {
 		}
 	}
 
+	namespace WeaponRefModFlags {
+
+		void __fastcall SetWeaponModFlags(TESObjectREFR* apRef, uint32_t auiFlags) {
+			if (apRef->baseForm && apRef->baseForm->IsWeapon()) {
+				const TESObjectWEAP* pWeapon = static_cast<TESObjectWEAP*>(apRef->baseForm);
+				for (uint32_t i = 0; i < 3; ++i) {
+					if (!pWeapon->itemMod[i])
+						reinterpret_cast<Bitfield32&>(auiFlags).Clear(1u << i);
+				}
+				apRef->extraDataList.SetWeaponModFlags(auiFlags);
+			}
+		}
+
+		static uint32_t uiReturnAddr = 0x1002399E;
+		SPEC_NAKED void SetWeaponModFlags_Asm() {
+			__asm {
+				mov     ecx, [ebp + 0x10]
+				mov		edx, [ebp - 0x4]
+				call	SetWeaponModFlags
+				jmp		uiReturnAddr
+			}
+		}
+
+		void InitHooks() {
+			HookUtils::WriteRelJnz(JIPUtils::GetAddress(0x100236EC), uint32_t(SetWeaponModFlags_Asm));
+			uiReturnAddr = JIPUtils::GetAddress(0x1002399E);
+		}
+
+	}
+
 	namespace OnMenuClickFix {
 
 		static inline Tile* const INVALID_TILE = reinterpret_cast<Tile*>(-1);
@@ -2375,6 +2405,7 @@ namespace JIPFixes {
 			ModelReloadFix::InitHooks();
 			PerkEntryFix::InitHooks();
 			WeaponModEffectsFix::InitHooks();
+			WeaponRefModFlags::InitHooks();
 			OnMenuClickFix::InitHooks();
 			GetMenuItemListRefsFix::InitHooks();
 			WaterRenderFix::InitHooks();
