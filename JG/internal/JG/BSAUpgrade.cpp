@@ -565,10 +565,27 @@ namespace BSAUpgrade {
 
 	}
 
+	struct Settings {
+		bool bFullOffsetRange		: 1 = false;
+		bool bArchiveCache			: 1 = false;
+		bool bArchiveInvalidation	: 1 = false;
+	} kSettings;
+
+	SPEC_NOINLINE void __fastcall ReadINI(const char* apINIPath) {
+		kSettings.bFullOffsetRange		= GetPrivateProfileInt("Archives", "bFullOffsetRange", 1, apINIPath);
+		kSettings.bArchiveCache			= GetPrivateProfileInt("Archives", "bArchiveCache", 1, apINIPath);
+		kSettings.bArchiveInvalidation	= GetPrivateProfileInt("Archives", "bBetterArchiveInvalidation", 1, apINIPath);
+	}
+
 	void Install() {
-		FullOffsetRange::InitHooks();
-		ArchiveCaching::InitHooks();
-		ArchiveInvalidation::InitHooks();
+		if (kSettings.bFullOffsetRange)
+			FullOffsetRange::InitHooks();
+
+		if (kSettings.bArchiveCache)
+			ArchiveCaching::InitHooks();
+
+		if (kSettings.bArchiveInvalidation)
+			ArchiveInvalidation::InitHooks();
 	}
 
 }
