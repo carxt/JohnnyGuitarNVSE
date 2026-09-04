@@ -45,6 +45,8 @@ uint32_t g_pluginHandle = 0;
 
 // Runs during NVSEPlugin_Load
 void OnNVSELoadInit(const NVSEInterface* apNVSE) {
+	JohnnyPatches::ReadINI();
+
 	g_pluginHandle = apNVSE->GetPluginHandle();
 	g_msgInterface = static_cast<NVSEMessagingInterface*>(apNVSE->QueryInterface(kInterface_Messaging));
 	g_msgInterface->RegisterListener(g_pluginHandle, "NVSE", JohnnyMessageHandler::Handler);
@@ -60,33 +62,30 @@ void OnNVSELoadInit(const NVSEInterface* apNVSE) {
 	CaptureLambdaVars = static_cast<_CaptureLambdaVars>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
 	UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
 	ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
+
+	JohnnySerialization::Init(apNVSE);
 #endif
 
 	JohnnyCommands::Init(apNVSE);
- 
-	JohnnyPatches::ReadINI();
-
-	if (JohnnyPatches::bFixJIP) {
-		JIPFixes::InitData();
-		JIPFixes::InitEarlyHooks();
-	}
-
-	JohnnyFixes::Init();
-	JohnnyPatches::Init();
-
-#ifdef GAME
-	JohnnySerialization::Init(apNVSE);
-	JohnnyEvents::Init();
-#endif
 }
 
 // Runs on program's WinMain
 // For the game, it's on NVSEPlugin_Load itself
 // For GECK, NVSEPlugin_Load works like game's NVSEPlugin_Preload, so a hook is needed to init at a similar point to the game
 void OnMainInit() {
+	if (JohnnyPatches::bFixJIP) {
+		JIPFixes::InitData();
+		JIPFixes::InitEarlyHooks();
+	}
+
 	FixedStringsRework::Init();
 	JohnnyExtraData::Initialize(g_dataInterface);
+	JohnnyFixes::Init();
+	JohnnyPatches::Init();
 	JohnnyGameSettings::Init();
+#ifdef GAME
+	JohnnyEvents::Init();
+#endif
 }
 
 #ifndef GAME
