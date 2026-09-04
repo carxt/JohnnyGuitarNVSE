@@ -11,6 +11,10 @@ public:
 
 	virtual NiNode* Clone3DAlt(TESObjectREFR* apRequester);
 	virtual bool	ReplaceModelAlt(const char* apPath);
+#ifdef EDITOR
+	virtual void	Unk_112(int, int, int, int);
+	virtual void	Unk_114(int, int, int, int);
+#endif
 
 	struct Bounds {
 		Bounds() : x(0), y(0), z(0) {};
@@ -29,9 +33,19 @@ public:
 		Bounds kMax;
 	};
 
-	BoundData kBoundData;
+#ifdef GAME
+	BoundData			kBoundData;
+#else
+	BSSimpleList<void*> kUnk3C;
+	BoundData			kBoundData;
+	uint32_t			uiReferenceCount;
+#endif
 
 	float GetBoundSize() const;
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESBoundObject, 0x30)
+#else
+ASSERT_SIZE(TESBoundObject, 0x54)
+#endif

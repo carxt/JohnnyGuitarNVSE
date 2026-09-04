@@ -33,6 +33,13 @@ public:
 	BSString				strModel;
 	TESTextureList			kTextures;
 	Bitfield<_FacegenFlags>	ucFaceGenFlags;
+#ifdef EDITOR
+	uint32_t				uiControlIDs[2];
+#endif
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESModel, 0x18);
+#else
+ASSERT_SIZE(TESModel, 0x24);
+#endif

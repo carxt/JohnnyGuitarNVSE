@@ -1,5 +1,7 @@
 #include "JohnnyExtraData.hpp"
+#ifdef GAME
 #include "EditorIDRestoration.hpp"
+#endif
 #include <atomic>
 #include <cassert>
 
@@ -37,6 +39,7 @@ JohnnyExtraData::~JohnnyExtraData() {
 	//JohnnyExtraDataArray::GetInstance().Remove(this);
 }
 
+#ifdef GAME
 const NiFixedString& JohnnyExtraData::GetEditorID() const {
 	return kFormData.kEditorIDs.GetItem();
 }
@@ -72,6 +75,11 @@ JohnnyExtraData::EDIDResult __fastcall JohnnyExtraData::RemoveEditorID(const NiF
 	kFormData.kEditorIDs.Remove(arEDID);
 	return EDIDResult::SUCCESS;
 }
+#else
+const char* JohnnyExtraData::GetEditorID() const {
+	return pOwner ? pOwner->GetFormEditorID() : nullptr;
+}
+#endif
 
 TESForm* __fastcall JohnnyExtraData::GetExternalEmittanceSource() const {
 	return kScriptData.pExternalEmittanceSource;
@@ -87,12 +95,15 @@ const NiFixedString& JohnnyExtraData::GetName() {
 }
 
 void __fastcall JohnnyExtraData::Initialize(NVSEDataInterface* apNVSEData) {
+	if (!apNVSEData)
+		return;
+
 	DEBUG_MSG("Initializing JohnnyExtraData");
 	JohnnyExtraDataGlobals::pfGet			= static_cast<PluginFormExtraData * (*)(const TESForm*, const char*)>(apNVSEData->GetFunc(NVSEDataInterface::kNVSEData_FormExtraDataGet));
 	JohnnyExtraDataGlobals::pfAdd			= static_cast<bool(*)(TESForm*, PluginFormExtraData*)>(apNVSEData->GetFunc(NVSEDataInterface::kNVSEData_FormExtraDataAdd));
 	JohnnyExtraDataGlobals::pfRemoveByName	= static_cast<void (*)(TESForm*, const char*)>(apNVSEData->GetFunc(NVSEDataInterface::kNVSEData_FormExtraDataRemoveByName));
 	JohnnyExtraDataGlobals::pfRemoveByPtr	= static_cast<void (*)(TESForm*, PluginFormExtraData*)>(apNVSEData->GetFunc(NVSEDataInterface::kNVSEData_FormExtraDataRemoveByPtr));
-	JohnnyExtraDataGlobals::strName = "JohnnyExtraData";
+	JohnnyExtraDataGlobals::strName			= "JohnnyExtraData";
 }
 
 JohnnyExtraData* __fastcall JohnnyExtraData::Find(const TESForm* apForm) {
@@ -135,6 +146,7 @@ JohnnyExtraData* __fastcall JohnnyExtraData::Add(TESForm* apForm) {
 }
 
 void JohnnyExtraData::DetachEditorIDs() {
+#ifdef GAME
 	if (pOwner && !pOwner->GetTemporary() && !kFormData.kEditorIDs.IsEmpty()) {
 		auto pIter = kFormData.kEditorIDs.GetHead();
 		SRWUniqueLock kLock(EDIDRestoration::kEDIDMapLock);
@@ -144,6 +156,7 @@ void JohnnyExtraData::DetachEditorIDs() {
 			pIter = pIter->GetNext();
 		}
 	}
+#endif
 }
 
 void __fastcall JohnnyExtraDataArray::Add(JohnnyExtraData* apExtraData) {

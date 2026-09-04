@@ -20,7 +20,7 @@ uint8_t TESForm::GetCompileIndex() const {
 	return uiFormID.GetIndex();
 }
 
-#ifndef GAME
+#ifdef EDITOR
 // GECK - 0x4FB450
 bool TESForm::SetFormEditorID(const char* apID) {
 	return ThisCall<bool>(0x4FB450, apID);
@@ -110,7 +110,9 @@ bool TESForm::GetInPlaceableWater() const {
 void TESForm::SetInPlaceableWater(bool abVal) {
 	assert(GetFormType() != FORM_TYPE::TESObjectDOOR);
 	uiFormFlags.Set(FormFlags::IN_PLACEABLE_WATER, abVal);
+#ifdef GAME
 	AddChange(0x1);
+#endif
 }
 
 // GAME - 0x549580
@@ -144,7 +146,9 @@ bool TESForm::GetDisabled() const {
 void TESForm::SetDisabled(bool abVal) {
 	assert(IsReference());
 	uiFormFlags.Set(FormFlags::DISABLED, abVal);
+#ifdef GAME
 	AddChange(0x1);
+#endif
 }
 
 // GAME - 0x508D70
@@ -247,7 +251,9 @@ bool TESForm::GetDestroyed() const {
 void TESForm::SetDestroyed(bool abVal) {
 	assert(IsReference());
 	uiFormFlags.Set(FormFlags::DESTROYED, abVal);
+#ifdef GAME
 	AddChange(0x1);
+#endif
 }
 
 // GAME - 0x452370
@@ -283,7 +289,9 @@ bool TESForm::GetVATSTarget() const {
 void TESForm::SetVATSTarget(bool abVal) {
 	assert(IsReference());
 	uiFormFlags.Set(FormFlags::VATS_TARGET_OVERRIDE, abVal);
+#ifdef GAME
 	AddChange(0x1);
+#endif
 }
 
 // GAME - 0x56C760

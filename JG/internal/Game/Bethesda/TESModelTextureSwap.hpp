@@ -19,6 +19,9 @@ public:
 	TESModelTextureSwap();
 	~TESModelTextureSwap();
 
+#ifdef EDITOR
+	uint32_t				uiControlID24;
+#endif
 	BSSimpleList<TEX_SWAP*> kTextureSwaps;
 
 	const BSSimpleList<TEX_SWAP*>* GetTexSwapList() const;
@@ -35,4 +38,8 @@ public:
 	void SwapTextures(NiAVObject* apObject);
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESModelTextureSwap, 0x20);
+#else
+ASSERT_SIZE(TESModelTextureSwap, 0x30);
+#endif

@@ -18,4 +18,8 @@ public:
 	uint32_t GetMessageIconTextureNameLength() const;
 };
 
+#ifdef GAME
 ASSERT_SIZE(BGSMessageIcon, 0x10);
+#else
+ASSERT_SIZE(BGSMessageIcon, 0x20);
+#endif

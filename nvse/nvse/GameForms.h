@@ -337,6 +337,9 @@ struct Condition {
 };
 
 struct ConditionList : public BSSimpleList<Condition*> {
+#ifdef EDITOR
+	uint8_t unk08;
+#endif
 	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result, bool arg4) { return ThisCall<bool>(0x680C60, this, runOnRef, arg2, result, arg4); }
 };
 
@@ -577,7 +580,9 @@ public:
 	MagicItem	magicItem;	// 018
 };
 
+#ifdef GAME
 static_assert(sizeof(MagicItemForm) == 0x34);
+#endif
 
 // 18
 class BGSTextureModel : public TESModel {
@@ -819,7 +824,11 @@ public:
 	void SetBipedMask(uint32_t mask);
 };
 
+#ifdef GAME
 static_assert(sizeof(TESBipedModelForm) == 0x0DC);
+#else
+static_assert(sizeof(TESBipedModelForm) == 0x168);
+#endif
 
 // 0C
 struct LvlListExtra {
@@ -948,7 +957,7 @@ public:
 	TESForm*		deathItem;		// 1C	Death Item: object or FormList
 	BGSVoiceType*	voiceType;		// 20
 	TESForm*		templateActor;		// 24	Points toward Template
-#ifdef RUNTIME
+#ifdef GAME
 	uint32_t			changedFlags;		// 28/000	Absent in Editor
 #endif
 	BSSimpleList<FactionRank*>	factionList;	// 2C/28
@@ -1079,6 +1088,9 @@ public:
 
 	//uint32_t	unk004;	// constructor and Fn_01 sugest this is a tList of char string.
 	//uint32_t	unk008;
+#ifdef EDITOR
+	BSSimpleList<void*> kUnk04;
+#endif
 	tList<char>	animNames;
 	// 00C
 };
@@ -1162,7 +1174,11 @@ public:
 	// 10C
 };
 
+#ifdef GAME
 static_assert(sizeof(TESActorBase) == 0x10C);
+#else
+static_assert(sizeof(TESActorBase) == 0x140);
+#endif
 
 // 14
 class TESModelList : public BaseFormComponent {
@@ -1186,8 +1202,12 @@ public:
 
 	virtual const char* Get(TESForm* overrideForm, uint32_t chunkID) const;
 
-	uint32_t	formDiskOffset;	// 4 - how does this work for descriptions in mods?
-	// maybe extracts the mod ID then uses that to find the src file?
+#ifdef GAME
+	uint32_t	formDiskOffset;
+#else
+	BSString strText;
+	uint32_t uiDlgItem;
+#endif
 };
 
 // 10
@@ -1507,16 +1527,16 @@ public:
 	TESTexture		textures[6];	// 38
 	DecalInfo* decalInfo;	// 80
 	uint16_t			texFlags;		// 84
-	uint8_t			pad86[2];		// 86
-	uint32_t			unk88;			// 88
-	uint32_t			unk8C;			// 8C
-	uint32_t			unk90;			// 90
-	uint32_t			unk94;			// 94
-	uint32_t			unk98;			// 98
-	uint32_t			unk9C;			// 9C
+#ifdef GAME
+	BSFileEntry* pTextureFileEntries[6];
+#endif
 };
 
+#ifdef GAME
 static_assert(sizeof(BGSTextureSet) == 0xA0);
+#else
+static_assert(sizeof(BGSTextureSet) == 0x10C);
+#endif
 
 // 24
 class BGSMenuIcon : public TESForm {
@@ -1527,7 +1547,11 @@ public:
 	TESIcon	icon;	// 18
 };
 
+#ifdef GAME
 static_assert(sizeof(BGSMenuIcon) == 0x24);
+#else
+static_assert(sizeof(BGSMenuIcon) == 0x48);
+#endif
 
 // 28
 class TESGlobal : public TESForm {
@@ -1541,7 +1565,9 @@ public:
 		kType_Short = 's'
 	};
 
+#ifdef  GAME
 	BSString		name;		// 18
+#endif
 	uint8_t			type;		// 20
 	uint8_t			pad21[3];	// 21
 	union {
@@ -1552,7 +1578,11 @@ public:
 	uint32_t ResolveRefValue();
 };
 
+#ifdef GAME
 static_assert(sizeof(TESGlobal) == 0x28);
+#else
+static_assert(sizeof(TESGlobal) == 0x34);
+#endif
 
 // 60
 class TESClass : public TESForm {
@@ -1595,7 +1625,11 @@ public:
 	uint8_t			pad5E[2];		// 5E
 };
 
+#ifdef GAME
 static_assert(sizeof(TESClass) == 0x60);
+#else
+static_assert(sizeof(TESClass) == 0x8C);
+#endif
 
 // 4C
 class TESFaction : public TESForm {
@@ -1643,7 +1677,9 @@ public:
 	void SetFlag(uint32_t pFlag, bool bEnable) {
 		if (bEnable) factionFlags |= pFlag;
 		else factionFlags &= ~pFlag;
+#ifdef GAME
 		AddChange(kModified_FactionFlags);
+#endif
 	}
 	bool IsHidden() {
 		return IsFlagSet(kFlag_HiddenFromPC);
@@ -1667,7 +1703,11 @@ public:
 	void SetNthRankName(const char* newName, uint32_t whichRank, bool bFemale);
 };
 
+#ifdef GAME
 static_assert(sizeof(TESFaction) == 0x4C);
+#else
+static_assert(sizeof(TESFaction) == 0x60);
+#endif
 
 // 50
 class BGSHeadPart : public TESForm {
@@ -1688,7 +1728,11 @@ public:
 	uint32_t				unk4C;		// 4C
 };
 
+#ifdef GAME
 static_assert(sizeof(BGSHeadPart) == 0x50);
+#else
+static_assert(sizeof(BGSHeadPart) == 0x74);
+#endif
 
 // 4C
 class TESHair : public TESForm {
@@ -1714,7 +1758,11 @@ public:
 	void SetPlayable(bool doset) { if (doset) hairFlags |= kFlag_Playable; else hairFlags &= ~kFlag_Playable; }
 };
 
+#ifdef GAME
 static_assert(sizeof(TESHair) == 0x4C);
+#else
+static_assert(sizeof(TESHair) == 0x7C);
+#endif
 
 // 34
 class TESEyes : public TESForm {
@@ -1738,7 +1786,11 @@ public:
 	void SetPlayable(bool doset) { if (doset) eyeFlags |= kFlag_Playable; else eyeFlags &= ~kFlag_Playable; }
 };
 
+#ifdef GAME
 static_assert(sizeof(TESEyes) == 0x34);
+#else
+static_assert(sizeof(TESEyes) == 0x58);
+#endif
 
 // 4E4 - incomplete
 class TESRace : public TESForm {
@@ -1853,7 +1905,6 @@ public:
 		else soundFlags &= ~pFlag;
 	}
 };
-static_assert(sizeof(TESSound) == 0x68);
 
 // 3C
 class BGSAcousticSpace : public TESBoundObject {
@@ -1866,27 +1917,28 @@ public:
 	uint32_t	unk38;	// 38
 };
 
-static_assert(sizeof(BGSAcousticSpace) == 0x3C);
-
 // 60
-class TESSkill : public TESForm {
+class TESSkill : public TESForm, public TESDescription, public TESTexture {
 public:
 	TESSkill();
 	~TESSkill();
 
-	TESDescription	description;	// 18
-	TESTexture		texture;		// 20
+	struct Data {
+		uint32_t	eSkill;
+		uint32_t	eAttribute;
+		uint32_t	eSpecialization;
+		float		fUseValues[2];
+	};
 
-	uint32_t			unk2C;			// 2C
-	uint32_t			unk30;			// 30
-	uint32_t			unk34;			// 34
-	float			unk38;			// 38
-	float			unk3C;			// 3C
-	TESDescription	desc2[3];		// 40
-	uint32_t			unk58[(0x60 - 0x58) >> 2];	// 58
+	Data kData;
+	TESDescription kDescriptions[4];
 };
 
+#ifdef GAME
 static_assert(sizeof(TESSkill) == 0x60);
+#else
+static_assert(sizeof(TESSkill) == 0xAC);
+#endif
 
 // B0
 class EffectSetting : public TESForm {
@@ -1988,11 +2040,17 @@ public:
 	uint8_t			pad9D[3];		// 9D
 	uint32_t			unkA0;			// A0
 	uint32_t			unkA4;			// A4
+#ifdef GAME
 	uint32_t			unkA8;			// A8
 	uint32_t			unkAC;			// AC
+#endif
 };
 
+#ifdef GAME
 static_assert(sizeof(EffectSetting) == 0xB0);
+#else
+static_assert(sizeof(EffectSetting) == 0xE0);
+#endif
 
 // 68
 class TESGrass : public TESBoundObject {
@@ -2018,7 +2076,11 @@ public:
 	uint8_t			pad65[3];				// 65
 };
 
+#ifdef GAME
 static_assert(sizeof(TESGrass) == 0x68);
+#else
+static_assert(sizeof(TESGrass) == 0x98);
+#endif
 
 // 28
 class TESLandTexture : public TESForm {
@@ -2032,9 +2094,17 @@ public:
 	uint8_t			restitution;		// 1E
 	uint8_t			specularExponent;	// 1F
 	tList<TESGrass>	grasses;			// 20
+#ifdef EDITOR
+	BSSimpleList<void*> unk3C;
+	uint32_t			unk44;
+#endif
 };
 
+#ifdef GAME
 static_assert(sizeof(TESLandTexture) == 0x28);
+#else
+static_assert(sizeof(TESLandTexture) == 0x48);
+#endif
 
 // 44
 class EnchantmentItem : public MagicItemForm {
@@ -2056,7 +2126,9 @@ public:
 	uint8_t		pad41[3];	// 41
 };
 
+#ifdef GAME
 static_assert(sizeof(EnchantmentItem) == 0x44);
+#endif
 
 // 44
 class SpellItem : public MagicItemForm {
@@ -2083,7 +2155,9 @@ public:
 	uint8_t		pad41[3];	// 41
 };
 
+#ifdef GAME
 static_assert(sizeof(SpellItem) == 0x44);
+#endif
 
 class BGSTalkingActivator;
 
@@ -2107,7 +2181,11 @@ public:
 	BSString				activationPrompt;	// 88
 };
 
+#ifdef GAME
 static_assert(sizeof(TESObjectACTI) == 0x90);
+#else
+static_assert(sizeof(TESObjectACTI) == 0xC4);
+#endif
 
 // 98
 class BGSTalkingActivator : public TESObjectACTI {
@@ -2118,7 +2196,11 @@ public:
 	Actor* talkingActor;		// 90
 	BGSVoiceType* voiceType;	// 94
 };
+#ifdef GAME
 static_assert(sizeof(BGSTalkingActivator) == 0x98);
+#else
+static_assert(sizeof(BGSTalkingActivator) == 0xCC);
+#endif
 
 // BGSTerminal (9C)
 class BGSTerminal : public TESObjectACTI {
@@ -2208,7 +2290,11 @@ public:
 		bipedModel.bipedModel[bFemale].ucFaceGenFlags.Set(pFlag, bEnable);
 	}
 };
+#ifdef GAME
 static_assert(sizeof(TESObjectARMO) == 0x190);
+#else
+static_assert(sizeof(TESObjectARMO) == 0x240);
+#endif
 
 // C4
 class TESObjectBOOK : public TESBoundObject {
@@ -2232,7 +2318,11 @@ public:
 	uint8_t						byteC2;			// C2
 	uint8_t						byteC3;			// C3
 };
+#ifdef GAME
 static_assert(sizeof(TESObjectBOOK) == 0xC4);
+#else
+static_assert(sizeof(TESObjectBOOK) == 0x120);
+#endif
 
 // 154
 class TESObjectCLOT : public TESBoundObject {
@@ -2351,7 +2441,11 @@ public:
 
 	NiPointLight* CreatePointLight(TESObjectREFR* targetRef, NiNode* targetNode, bool arg3);
 };
+#ifdef GAME
 static_assert(sizeof(TESObjectLIGH) == 0x0C8);
+#else
+static_assert(sizeof(TESObjectLIGH) == 0x11C);
+#endif
 
 // AC
 class TESObjectMISC : public TESBoundObject {
@@ -2371,7 +2465,11 @@ public:
 
 	uint32_t						unkA8;			// A8
 };
+#ifdef GAME
 static_assert(sizeof(TESObjectMISC) == 0xAC);
+#else
+static_assert(sizeof(TESObjectMISC) == 0x100);
+#endif
 
 // 9C
 class TESCasinoChips : public TESBoundObject {
@@ -2389,7 +2487,11 @@ public:
 
 	uint32_t						unk94[2];		// 94
 };
+#ifdef GAME
 static_assert(sizeof(TESCasinoChips) == 0x9C);
+#else
+static_assert(sizeof(TESCasinoChips) == 0xF0);
+#endif
 
 // CC
 class TESCaravanMoney : public TESBoundObject {
@@ -2404,9 +2506,13 @@ public:
 	TESValueForm				value;			// 78
 	BGSPickupPutdownSounds		pickupPutdown;	// 80
 
-	uint32_t						unk8C[16];		// 8C
+	TESModelTextureSwap			anteModels[2];
 };
+#ifdef GAME
 static_assert(sizeof(TESCaravanMoney) == 0xCC);
+#else
+static_assert(sizeof(TESCaravanMoney) == 0x140);
+#endif
 
 // 58
 class TESObjectSTAT : public TESBoundObject {
@@ -2777,7 +2883,11 @@ public:
 		return ThisCall<bool>(0x4C0C30, this);
 	}
 };
+#ifdef GAME
 static_assert(sizeof(TESObjectWEAP) == 0x388);
+#else
+static_assert(sizeof(TESObjectWEAP) == 0x470);
+#endif
 
 enum AmmoEffectID {
 	kAmmoEffect_DamageMod = 0,
@@ -2805,8 +2915,11 @@ public:
 	uint32_t			operation;		// 28
 	float			value;			// 2C
 };
-
+#ifdef GAME
 static_assert(sizeof(TESAmmoEffect) == 0x30);
+#else
+static_assert(sizeof(TESAmmoEffect) == 0x44);
+#endif
 
 // DC
 class TESAmmo : public TESBoundObject {
@@ -2849,8 +2962,11 @@ public:
 		ThisCall(0x503A70, this, apBuffer, auiBufferSize);
 	}
 };
-
+#ifdef GAME
 static_assert(sizeof(TESAmmo) == 0xDC);
+#else
+static_assert(sizeof(TESAmmo) == 0x130);
+#endif
 
 enum CardSuits {
 	kHearts = 1,
@@ -2887,13 +3003,19 @@ public:
 	TESValueForm value;
 	TESScriptableForm script;
 	BGSPickupPutdownSounds pickupSound;
-	void* pad98;
+#ifdef GAME
+	uint32_t uiValue;
+#endif
 	TESTexture textureFace;
 	TESTexture textureBack;
 	CardValues cardValue;
 	CardSuits cardSuit;
 };
+#ifdef GAME
 static_assert(sizeof(TESCaravanCard) == 0xBC);
+#else
+static_assert(sizeof(TESCaravanCard) == 0x12C);
+#endif
 
 class BSFaceGenNiNode;
 
@@ -3077,9 +3199,11 @@ public:
 	uint32_t					hairColor;			// 1D8
 	tList<BGSHeadPart>		headPart;			// 1DC
 	uint32_t					impactMaterialType;	// 1E4
+#ifdef GAME
 	uint32_t					unk01E8;			// 1E8
 	TESRace* race1EC;			// 1EC
 	TESNPC* copyFrom;			// 1F0	Not set once PlayerRef exists and the target is the Player
+#endif
 	float					height;				// 1F4
 	float					weight;				// 1F8	Aparently, getWeight purposly returns height except for the player.
 	NiTPrimitiveArray<FaceGenUndo*>	faceGenUndo;		// 1FC
@@ -3088,8 +3212,11 @@ public:
 	void SetRace(TESRace* pRace);
 	void CopyAppearance(TESNPC* srcNPC);
 };
-
+#ifdef GAME
 static_assert(sizeof(TESNPC) == 0x20C);
+#else
+static_assert(sizeof(TESNPC) == 0x234);
+#endif
 
 // 160
 class TESCreature : public TESActorBase {
@@ -3174,7 +3301,9 @@ public:
 	bool IsPoison();
 };
 
+#ifdef GAME
 static_assert(sizeof(AlchemyItem) == 0xD8);
+#endif
 
 class BGSIdleCollection : public BaseFormComponent {
 public:
@@ -3196,7 +3325,11 @@ public:
 	BGSIdleCollection idleCollection;
 };
 
+#ifdef GAME
 static_assert(sizeof(BGSIdleMarker) == 0x40);
+#else
+static_assert(sizeof(BGSIdleMarker) == 0x64);
+#endif
 
 // BGSNote (80)
 class BGSNote : public TESBoundObject {
@@ -3228,7 +3361,11 @@ public:
 	Type						type;
 	bool						read;
 };
+#ifdef GAME
 static_assert(sizeof(BGSNote) == 0x80);
+#else
+static_assert(sizeof(BGSNote) == 0xC0);
+#endif
 
 // BGSConstructibleObject (B0)
 class BGSConstructibleObject;
@@ -3324,15 +3461,34 @@ public:
 	uint32_t					colors[10][6];				// 108
 	tList<WeatherSound>		sounds;						// 1F8
 	uint32_t					unk200[91];					// 200
+#ifdef EDITOR
+	uint32_t uiSelectedCloud;
+#endif
 };
+#ifdef GAME
 static_assert(sizeof(TESWeather) == 0x36C);
+#else
+static_assert(sizeof(TESWeather) == 0x3D0);
+#endif
 
 struct WeatherEntry {
 	TESWeather* weather;
 	uint32_t			chance;
 	TESGlobal* global;
 };
-typedef tList<WeatherEntry> WeatherTypes;
+
+class TESWeatherList : public tList<WeatherEntry> {
+#ifdef EDITOR
+	virtual void Func0();
+	virtual void Func1();
+	virtual void Func2();
+	virtual void Func3();
+	virtual void Func4();
+	virtual void Func5();
+
+	uint32_t uiDialogs[6];
+#endif
+};
 
 // 58
 class TESClimate : public TESForm {
@@ -3341,7 +3497,7 @@ public:
 	~TESClimate();
 
 	TESModel			nightSkyModel;		// 18
-	WeatherTypes		weatherTypes;		// 30
+	TESWeatherList		weatherTypes;		// 30
 	TESTexture			sunTexture;			// 38
 	TESTexture			sunGlareTexture;	// 44
 	uint8_t				sunriseBegin;		// 50
@@ -3355,7 +3511,11 @@ public:
 	WeatherEntry* GetWeatherEntry(TESWeather* weather, bool remove);
 };
 
+#ifdef GAME
 static_assert(sizeof(TESClimate) == 0x58);
+#else
+static_assert(sizeof(TESClimate) == 0xB4);
+#endif
 
 enum RegionDataID {
 	REGION_DATA_NONE			= 0,
@@ -3474,7 +3634,7 @@ public:
 	TESRegionDataWeather();
 	~TESRegionDataWeather();
 
-	WeatherTypes	weatherTypes;
+	TESWeatherList	weatherTypes;
 };
 
 struct AreaPointEntry {
@@ -3498,14 +3658,20 @@ public:
 	TESRegion();
 	~TESRegion();
 
+#ifdef EDITOR
+	void* unk2C;
+#endif
 	RegionDataEntryList* dataEntries;	// 18
 	RegionAreaEntryList* areaEntries;	// 1C
 	TESWorldSpace* worldSpace;	// 20
 	TESWeather* weather;		// 24
 	uint32_t				unk28[4];		// 28
 };
-
+#ifdef GAME
 static_assert(sizeof(TESRegion) == 0x38);
+#else
+static_assert(sizeof(TESRegion) == 0x50);
+#endif
 
 // 10
 class TESRegionList : public BSSimpleList<TESRegion*> {
@@ -3629,7 +3795,11 @@ public:
 	uint32_t					unk54;					// 54
 	TESTexture				noiseTexture;			// 58
 	NavMeshArray*			pNavMeshes;
+#ifdef GAME
 	uint32_t					unk68[6];				// 68
+#else
+	uint32_t					unk68[5];				// 68
+#endif
 	void* refLockSemaphore;		// 80
 	uint32_t					unk84[8];				// 84
 	uint32_t					actorCount;				// A4
@@ -3639,7 +3809,9 @@ public:
 	NiNode* niNodeB4;				// B4
 	NiNode* niNodeB8;				// B8
 	uint32_t					unkBC;					// BC
+#ifdef GAME
 	TESWorldSpace* worldSpace;			// C0
+#endif
 	LoadedData* renderData;			// C4
 	float					fltC8;					// C8
 	uint8_t					byteCC;					// CC
@@ -3653,12 +3825,21 @@ public:
 	BSPortalGraph* portalGraph;			// D4
 	BGSLightingTemplate* lightingTemplate;		// D8
 	uint32_t					inheritFlags;			// DC
+#ifdef EDITOR
+	uint32_t				unkFC;
+#endif
 
 	bool IsInterior() const { return cellFlags.bInterior; }
 	NiNode* Get3DNode(uint32_t index);
 	void ToggleNodes(uint32_t nodeBits, uint8_t doHide);
 	void GenerateRenderedTexture(NiCamera* camera, NiRenderedTexture** outTexture);
-	TESWorldSpace* GetWorldSpace() const { return IsInterior() ? nullptr : worldSpace; }
+	TESWorldSpace* GetWorldSpace() const { 
+#ifdef GAME
+		return IsInterior() ? nullptr : worldSpace;
+#else
+		return ThisCall<TESWorldSpace*>(0x627820, this);
+#endif
+	}
 
 	void CellRefLockEnter();
 	void CellRefLockLeave();
@@ -3687,7 +3868,11 @@ public:
 		ThisCall(0x5454F0, this, apReference);
 	}
 };
+#ifdef GAME
 static_assert(sizeof(TESObjectCELL) == 0xE0);
+#else
+static_assert(sizeof(TESObjectCELL) == 0x100);
+#endif
 
 // 3C	Init proc: 0x6FC490
 struct BGSTerrainManager {
@@ -3828,9 +4013,11 @@ public:
 	ImpactSwap*							pImpactSwap;
 	Bitfield8							ucWorldFlags;
 	Bitfield16							usParentUseFlags;
+#ifdef GAME
 	RefListPointerMap					kFixedPersistentRefMap;			// 50
 	BSSimpleList<TESObjectREFR*>		kMobilePersistentRefs;
 	NiTMap<uint32_t, TESObjectREFR*>*	pOverlappedMultiBoundMap;
+#endif
 	NiPointer<NiRefObject>				spPortalGraph;
 	TESWorldSpace*						pParentWorld;			// 70
 	TESWaterForm*						pWorldWater;
@@ -3843,8 +4030,10 @@ public:
 	BGSMusicType*						pMusic;
 	NiPoint2							kMinCoords;
 	NiPoint2							kMaxCoords;
+#ifdef GAME
 	OffsetDataMap						kOffsetMap;
 	BSString							strEditorID;
+#endif
 	float								fDefaultLandHeight;
 	float								fDefaultWaterHeight;
 	BGSEncounterZone*					pEncounterZone;
@@ -3852,9 +4041,14 @@ public:
 	TESTexture							kWaterNoiseTexture;
 
 	TESWorldSpace* GetRootMapWorld();
-};
-static_assert(sizeof(TESWorldSpace) == 0xEC);
 
+	float GetDefaultLandHeight() const { return fDefaultLandHeight; }
+};
+#ifdef GAME
+static_assert(sizeof(TESWorldSpace) == 0xEC);
+#else
+static_assert(sizeof(TESWorldSpace) == 0xFC);
+#endif
 
 struct VariableInfo {
 	uint32_t			idx;		// 00
@@ -3881,6 +4075,9 @@ public:
 		tList<void>		unk004;		// 04 log entries
 	};
 
+#ifdef EDITOR
+	void*					pUnk60;
+#endif
 	uint8_t					flags;				// 3C	bit0 is startGameEnabled/isRunning
 	uint8_t					priority;			// 3D
 	uint8_t					pad3E[2];			// 3E
@@ -3890,16 +4087,24 @@ public:
 		// So: this list would contain both Objectives and LocalVariables !
 		// That seems very strange but still, looking at Get/SetObjective... and ShowQuestVars there's no doubt.
 	ConditionList			conditions;			// 54
+#ifdef EDITOR
+	uint32_t				unk84;
+#endif
 	ScriptLocals*		scriptEventList;	// 5C
+#ifdef GAME
 	uint8_t					currentStage;		// 60
-	uint8_t					pad61[3];			// 61
 	BSString				editorName;			// 64
+#endif
 
 	bool SetStage(uint8_t stageID);
 	BGSQuestObjective* GetObjective(uint32_t objectiveID);
 };
 
+#ifdef GAME
 static_assert(sizeof(TESQuest) == 0x6C);
+#else
+static_assert(sizeof(TESQuest) == 0x90);
+#endif
 
 // TESIdleForm (54)
 class TESIdleForm;
@@ -4188,9 +4393,9 @@ public:
 	};
 
 	// In DialoguePackage, there are 0x58 virtual functions (including 0x4E from TESForm)
-
+#ifdef GAME
 	uint32_t			procedureArrayIndex;	// 018 index into array of array of eProcedure terminated by 0x2C.
-											//	   -1 if no procedure array exists for package type.
+#endif								//	   -1 if no procedure array exists for package type.
 	uint32_t				packageFlags;		// 01C
 	char				type;				// 020
 	uint8_t				pad021[1];			// 021
@@ -4223,8 +4428,6 @@ public:
 	static bool IsValidObjectCode(uint8_t o) { return o < kObjectType_Max; }
 	static const char* StringForProcedureCode(eProcedure proc);
 };
-
-static_assert(sizeof(TESPackage) == 0x80);
 
 // DialoguePackage : Only package tested and verified effectivly
 class DialoguePackage : public TESPackage {
@@ -4415,9 +4618,9 @@ public:
 	float flt148; // 148
 	uint32_t unk14C[15]; // 14C
 };
-
+#ifdef GAME
 static_assert(sizeof(CombatController) == 0x188);
-
+#endif
 
 class TESFollowPackageData : public TESPackageData {
 public:
@@ -4523,8 +4726,11 @@ public:
 		else csFlags &= ~pFlag;
 	}
 };
-
+#ifdef GAME
 static_assert(sizeof(TESCombatStyle) == 0x108);
+#else
+static_assert(sizeof(TESCombatStyle) == 0x11C);
+#endif
 
 // 2C
 class TESRecipeCategory : public TESForm {
@@ -4536,8 +4742,11 @@ public:
 
 	uint32_t				flags;		// 24
 };
-
+#ifdef GAME
 static_assert(sizeof(TESRecipeCategory) == 0x28);
+#else
+static_assert(sizeof(TESRecipeCategory) == 0x3C);
+#endif
 
 struct RecipeComponent {
 	uint32_t		quantity;
@@ -4574,7 +4783,11 @@ public:
 	TESRecipeCategory* subCategory;	// 58
 };
 
+#ifdef GAME
 static_assert(sizeof(TESRecipe) == 0x5C);
+#else
+static_assert(sizeof(TESRecipe) == 0x74);
+#endif
 
 class TESLoadScreenType : public TESForm {
 public:
@@ -4697,7 +4910,11 @@ public:
 	}
 };
 
+#ifdef GAME
 static_assert(sizeof(BGSExplosion) == 0xA8);
+#else
+static_assert(sizeof(BGSExplosion) == 0xD8);
+#endif
 
 // BGSDebris (24)
 class BGSDebris : public TESForm {
@@ -4751,7 +4968,11 @@ public:
 	// 32:	Cinematic: Tint: Value
 	uint32_t		unk9C[5];			// 9C
 };
+#ifdef GAME
 static_assert(sizeof(TESImageSpace) == 0xB0);
+#else
+static_assert(sizeof(TESImageSpace) == 0xC4);
+#endif
 
 // 730
 class TESImageSpaceModifier : public TESForm {
@@ -4830,8 +5051,16 @@ public:
 	// 06:	Depth of Field: Distance
 	// 07:	Depth of Field: Range
 	// 08:	Full-Screen Motion Blur: Strength
+#ifdef EDITOR
+	float fUnk744;
+	float fUnk748;
+#endif
 };
+#ifdef GAME
 static_assert(sizeof(TESImageSpaceModifier) == 0x730);
+#else
+static_assert(sizeof(TESImageSpaceModifier) == 0x74C);
+#endif
 // 08
 class BGSPerkEntry {
 public:
@@ -5053,7 +5282,11 @@ public:
 	TESForm* SNAM;			// 74
 	TESForm* XNAM;			// 78
 };
+#ifdef GAME
 static_assert(sizeof(TESChallenge) == 0x7C);
+#else
+static_assert(sizeof(TESChallenge) == 0xB8);
+#endif
 
 // B0
 class BGSBodyPart : public BaseFormComponent {
@@ -5110,8 +5343,9 @@ public:
 		else flags &= ~pFlag;
 	}
 };
-
+#ifdef GAME
 static_assert(sizeof(BGSBodyPart) == 0xB0);
+#endif
 
 // 74
 class BGSBodyPartData : public TESForm {
@@ -5139,10 +5373,18 @@ public:
 
 	TESModel		model;				// 018
 	BGSPreloadable	preloadable;		// 030
+#ifdef GAME
 	BGSBodyPart* bodyParts[15];		// 034
+#else
+	BSSimpleList<BGSBodyPart*> bodyParts;
+#endif
 	BGSRagdoll* ragDoll;			// 070
 };
+#ifdef GAME
 static_assert(sizeof(BGSBodyPartData) == 0x74);
+#else
+static_assert(sizeof(BGSBodyPartData) == 0x60);
+#endif
 
 class MediaSet;
 
@@ -5173,6 +5415,7 @@ public:
 	};
 	using Flags = _Flags::Flags;
 
+#ifdef GAME
 	uint32_t				uiLocationDelay;
 	uint32_t				uiLayerTime;
 	uint32_t				uiLoopTime;
@@ -5188,6 +5431,7 @@ public:
 	uint32_t				eCurrentFactionReaction;
 	int8_t					cCurrentLayer;
 	MediaSet*				pCurrentMediaSet;
+#endif
 	TESFullName				kMediaLocationControllerName;
 	TESFaction*				pFaction;
 	uint32_t				eFactionConditional;
@@ -5206,23 +5450,28 @@ public:
 	BSSimpleList<MediaSet*> kLocationSets;
 	BSSimpleList<MediaSet*> kBattleSets;
 };
+#ifdef GAME
 ASSERT_SIZE(MediaLocationController, 0xB8);
+#else
+ASSERT_SIZE(MediaLocationController, 0x9C);
+#endif
 
 // BGSAddonNode (60)
-class BGSAddonNode : public TESBoundObject {
+class BGSAddonNode : public TESBoundObject, public TESModelTextureSwap {
 public:
 	BGSAddonNode();
 	~BGSAddonNode();
 
-	TESModel	model;				// 030
-	uint32_t unk48[2];
 	uint32_t nodeIndex;
 	TESSound* sound;
 	uint32_t flags;
-	uint32_t unk5C[1];
+	uint32_t unk5C;
 };
-
+#ifdef GAME
 static_assert(sizeof(BGSAddonNode) == 0x60);
+#else
+static_assert(sizeof(BGSAddonNode) == 0x94);
+#endif
 
 // C4
 class ActorValueInfo : public TESForm {
@@ -5251,8 +5500,11 @@ public:
 	void(__cdecl*	onChangeCallback)(ActorValueOwner* avOwner, int avCode, float previousVal, float newVal, ActorValueOwner* avOwner2);
 	uint32_t			unk4C[27];		// 4C
 };
-
+#ifdef GAME
 static_assert(sizeof(ActorValueInfo) == 0xC4);
+#else
+static_assert(sizeof(ActorValueInfo) == 0xF0);
+#endif
 
 extern const ActorValueInfo** ActorValueInfoPointerArray;
 
@@ -5351,6 +5603,7 @@ public:
 	};
 
 	Data					kData;
+#ifdef GAME
 	NiPointer<NiNode>		spLocationNode;
 	NiPointer<NiNode>		spTargetNode;
 	TESObjectREFR*			pReference;
@@ -5359,9 +5612,14 @@ public:
 	int8_t					cCameraHasRotation;
 	bool					bCameraTooClose;
 	bool					bCameraIsKillCam;
+#endif
 };
 
+#ifdef GAME
 ASSERT_SIZE(BGSCameraShot, 0x78);
+#else
+ASSERT_SIZE(BGSCameraShot, 0x80);
+#endif
 
 // BGSCameraPath (38)
 class BGSCameraPath;
@@ -5435,7 +5693,11 @@ public:
 	uint32_t			decalColor;			// 74
 };
 
+#ifdef GAME
 static_assert(sizeof(BGSImpactData) == 0x78);
+#else
+static_assert(sizeof(BGSImpactData) == 0x98);
+#endif
 
 // 4C
 class BGSImpactDataSet : public TESForm {
@@ -5447,7 +5709,11 @@ public:
 	BGSImpactData* impactDatas[12];	// 1C
 };
 
+#ifdef GAME
 static_assert(sizeof(BGSImpactDataSet) == 0x4C);
+#else
+static_assert(sizeof(BGSImpactDataSet) == 0x60);
+#endif
 
 // 190
 class TESObjectARMA : public TESObjectARMO {
@@ -5456,7 +5722,11 @@ public:
 	~TESObjectARMA();
 };
 
+#ifdef GAME
 static_assert(sizeof(TESObjectARMA) == 0x190);
+#else
+static_assert(sizeof(TESObjectARMA) == 0x240);
+#endif
 
 // BGSEncounterZone (30)
 class BGSEncounterZone : public TESForm {
@@ -5493,7 +5763,11 @@ public:
 	uint32_t			displayTime;	// 3C
 };
 
+#ifdef GAME
 static_assert(sizeof(BGSMessage) == 0x40);
+#else
+static_assert(sizeof(BGSMessage) == 0x5C);
+#endif
 
 // BGSRagdoll (148)
 class BGSRagdoll : public TESForm {
@@ -5503,9 +5777,16 @@ public:
 
 	TESModel	model;					// 018
 	uint32_t	unk030[(0x148 - 0x30) >> 2];	// 030
+#ifdef EDITOR
+	uint32_t	unk[12];
+#endif
 };
 
+#ifdef GAME
 static_assert(sizeof(BGSRagdoll) == 0x148);
+#else
+static_assert(sizeof(BGSRagdoll) == 0x198);
+#endif
 
 // 44
 class BGSLightingTemplate : public TESForm {
@@ -5523,10 +5804,16 @@ public:
 	float			directionalFade;	// 34
 	float			fogClipDist;		// 38
 	float			fogPower;			// 3C
-	TESObjectCELL* getValuesFrom;		// 40
+#ifdef GAME
+	uint32_t uiInteriorOffset;		// 40
+#endif
 };
 
+#ifdef GAME
 static_assert(sizeof(BGSLightingTemplate) == 0x44);
+#else
+static_assert(sizeof(BGSLightingTemplate) == 0x54);
+#endif
 
 // BGSMusicType (30)
 class BGSMusicType : public TESForm {
@@ -5534,15 +5821,22 @@ public:
 	BGSMusicType();
 	~BGSMusicType();
 
+
 	TESSoundFile	soundFile;	// 18
 	float			dB;		// 24
+#ifdef GAME
 	tList<char*>* filesInFolder;		// 28
 	uint32_t			randomFile;		// 2C
+#endif
 };
 
 // BGSDefaultObjectManager, with help from "Luthien Anarion"
 
+#ifdef GAME
 static_assert(sizeof(BGSMusicType) == 0x30);
+#else
+static_assert(sizeof(BGSMusicType) == 0x3C);
+#endif
 
 const char kDefaultObjectNames[34][28] = {	// 0x0118C360 is an array of struct: { char * Name, uint8_t kFormType , uint8_t pad[3] }
 	  "Stimpack",
@@ -5641,7 +5935,11 @@ public:
 	DefaultObjects	defaultObjects;	// 018
 };
 
+#ifdef GAME
 static_assert(sizeof(BGSDefaultObjectManager) == 0xA0);
+#else
+static_assert(sizeof(BGSDefaultObjectManager) == 0xB4);
+#endif
 
 enum EActionListForm {
 	eActionListForm_AddAt = 00,
@@ -5762,9 +6060,13 @@ public:
 	TESTexture particleShaderTexture;
 	TESTexture holesTexture;
 };
+#ifdef GAME
 static_assert(sizeof(TESEffectShader) == 0x170);
+#else
+static_assert(sizeof(TESEffectShader) == 0x1B4);
+#endif
 
-class MediaSet : public TESForm {
+class MediaSet : public TESForm, public TESFullName {
 public:
 	MediaSet();
 	~MediaSet();
@@ -5773,9 +6075,18 @@ public:
 		float dB; // NAM8 NAM9 NAM0 ANAM BNAM CNAM
 		float boundary; // JNAM KNAM LNAM MNAM NNAM ONAM
 	};
-	TESFullName	fullName;
-	uint32_t unk24[8];
-	uint32_t type; // NAM1
+#ifdef GAME
+	uint32_t uiMinLayerUpdate;
+	uint32_t uiSeekTime;
+	uint32_t uiLoopUpdate;
+	bool bStarted;
+	bool bInCombat;
+	bool bInTension;
+	bool bIsDay;
+#endif
+	uint8_t ucCurrentLayer;
+	TESFullName kMediaSetName;
+	uint32_t uiType;
 	MediaSetData data[6];
 	uint32_t flags; //PNAM
 	float DNAM;
@@ -5785,7 +6096,11 @@ public:
 	TESSound* HNAM;
 	TESSound* INAM;
 };
+#ifdef GAME
 static_assert(sizeof(MediaSet) == 0xC4);
+#else
+static_assert(sizeof(MediaSet) == 0xC8);
+#endif
 
 class TESCaravanDeck : public TESForm {
 public:
@@ -5795,6 +6110,10 @@ public:
 	tList<TESCaravanCard>* cards;
 	uint32_t count;
 };
+#ifdef GAME
 static_assert(sizeof(TESCaravanDeck) == 0x2C);
+#else
+static_assert(sizeof(TESCaravanDeck) == 0x40);
+#endif
 
 extern TESForm* __fastcall GetTESForm(const TESForm* apForm);

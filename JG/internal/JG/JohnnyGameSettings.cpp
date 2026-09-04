@@ -56,6 +56,7 @@ namespace JohnnyGameSettings {
 	CustomGameSetting sSlotMachineMenuRell2ModelPath;
 	CustomGameSetting sSlotMachineMenuRell3ModelPath;
 
+#ifdef GAME
 	template <uintptr_t uiAddress>
 	class CombatLocationHook {
 	private:
@@ -150,6 +151,7 @@ namespace JohnnyGameSettings {
 			kDetour.ReplaceCall(uiAddress, &ReleaseFileHook::Hook);
 		}
 	};
+#endif
 
 	void InitCombatValues() { 
 		fCombatLocationTargetRadiusMaxBase.Initialize("fCombatLocationTargetRadiusMaxBase", 10.0f);
@@ -163,6 +165,7 @@ namespace JohnnyGameSettings {
 		fCombatCoverHoldingGroundTimer.Initialize("fCombatCoverHoldingGroundTimer", 2.f);
 		fCombatCoverTargetBlockedTimer.Initialize("fCombatCoverTargetBlockedTimer", 2.f);
 
+#ifdef GAME
 		// Thanks lStewieAl
 		CombatLocationHook<0x9A089F>();
 		CombatLocationHook<0x9A0A0C>();
@@ -187,12 +190,15 @@ namespace JohnnyGameSettings {
 		HookUtils::SafeWrite32(0x9D275C + 2, uint32_t(&fCombatCoverHoldingGroundTimer.uValue.f));
 
 		HookUtils::SafeWrite32(0x9D2D3F + 2, uint32_t(&fCombatCoverTargetBlockedTimer.uValue.f));
+#endif
 	}
 
 	void InitOverrideDialogueEmotionValues() {
 		iOverrideDialogueEmotionValues.Initialize("iOverrideDialogueEmotionValues", 0);
 
+#ifdef GAME
 		OverrideEmotionValuesHook<0x617D59>();
+#endif
 	}
 
 	void InitSandboxValues() {
@@ -204,7 +210,7 @@ namespace JohnnyGameSettings {
 		fSandboxEnergyMultSleeping.Initialize("fSandboxEnergyMultSleeping", -0.1f);
 		fSandboxEnergyMultDialogue.Initialize("fSandboxEnergyMultDialogue", 0.2f);
 
-
+#ifdef GAME
 		HookUtils::SafeWrite32(0x119B194, uint32_t(&fSandboxDurationMultSitting));
 		HookUtils::SafeWrite32(0x119B198, uint32_t(&fSandboxDurationMultSleeping));
 		HookUtils::SafeWrite32(0x119B1A8, uint32_t(&fSandboxDurationMultDialogue));
@@ -212,12 +218,14 @@ namespace JohnnyGameSettings {
 		HookUtils::SafeWrite32(0x119B1AC, uint32_t(&fSandboxEnergyMultSitting));
 		HookUtils::SafeWrite32(0x119B1B0, uint32_t(&fSandboxEnergyMultSleeping));
 		HookUtils::SafeWrite32(0x119B1C0, uint32_t(&fSandboxEnergyMultDialogue));
+#endif
 	}
 
 	void InitPathingValues() {
 		fPreferredTriangleCostMultiplier.Initialize("fPreferredTriangleCostMultiplier", 0.01f);
 		fMinimalUsePathingCost.Initialize("fMinimalUsePathingCost", 409600.f);
 
+#ifdef GAME
 		HookUtils::SafeWrite8(0x6A74A4, 0xD8);
 		HookUtils::SafeWrite32(0x6A74A4 + 2, uint32_t(&fPreferredTriangleCostMultiplier.uValue.f));
 		
@@ -225,14 +233,18 @@ namespace JohnnyGameSettings {
 		HookUtils::SafeWrite32(0x6B8973 + 2, uint32_t(&fMinimalUsePathingCost.uValue.f));
 		HookUtils::SafeWrite32(0x6F38DC + 2, uint32_t(&fMinimalUsePathingCost.uValue.f));
 		HookUtils::SafeWrite32(0x6F391D + 2, uint32_t(&fMinimalUsePathingCost.uValue.f));
+#endif
 	}
 
 	void InitAIValues() {
 		fAIDialogueDistance.Initialize("fAIDialogueDistance", 400.f);
 
+#ifdef GAME
 		HookUtils::SafeWrite32(0x8E91D7 + 2, uint32_t(&fAIDialogueDistance.uValue.f));
+#endif
 	}
 
+#ifdef GAME
 	HookUtils::CallDetour kHavokInitDetour;
 	void __cdecl DeferredHavokInitHook() {
 		CdeclCall(kHavokInitDetour);
@@ -259,20 +271,27 @@ namespace JohnnyGameSettings {
 		float& fMaxSlopeDefault = *reinterpret_cast<float*>(0x11B0148);
 		fMaxSlopeDefault = fHavokMaxSlopeDefault.Float();
 	}
+#endif
 
 	void InitHavokValues() {
 		fHavokCalculatePitchTimeOut.Initialize("fHavokCalculatePitchTimeOut", 5.f);
 		fHavokMaxSlopeDefault.Initialize("fHavokMaxSlopeDefault", 47.f);
 
+#ifdef GAME
 		kHavokInitDetour.ReplaceCall(0x44FC25, DeferredHavokInitHook);
+#endif
 	}
 
 	void InitNPCValues() {
 		fNPCMaxGunWobbleAngleVATS.Initialize("fNPCMaxGunWobbleAngleVATS", 15.f);
+
+#ifdef GAME
 		HookUtils::SafeWrite32(0x8B1026 + 1, uint32_t(&fNPCMaxGunWobbleAngleVATS));
+#endif
 	}
 
 	void InitModelPathValues() {
+#ifdef GAME
 		{
 			const char* pString = reinterpret_cast<const char*>(0x10744E4);
 			sLockPickMenuLockModelPath.Initialize("sLockPickMenuLockModelPath", pString);
@@ -370,6 +389,7 @@ namespace JohnnyGameSettings {
 			LoadFileHook<0x7C1672, sSlotMachineMenuRell3ModelPath>();
 			ReleaseFileHook<0x7C0907, sSlotMachineMenuRell3ModelPath>();
 		}
+#endif
 	}
 
 	void Init() {

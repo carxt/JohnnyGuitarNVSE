@@ -1,12 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug_GECK|Win32">
+      <Configuration>Debug_GECK</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDebug_GECK|Win32">
+      <Configuration>ReleaseDebug_GECK</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="ReleaseDebug|Win32">
       <Configuration>ReleaseDebug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release_GECK|Win32">
+      <Configuration>Release_GECK</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
@@ -28,7 +40,19 @@
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
@@ -39,16 +63,30 @@
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -59,13 +97,28 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_GECK</TargetName>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_GECK</TargetName>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir>$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)_GECK</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -102,6 +155,44 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
 )</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EDITOR;WIN32;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <ForcedIncludeFiles>shared/defines.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <ExceptionHandling>false</ExceptionHandling>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <CreateHotpatchableImage>true</CreateHotpatchableImage>
+    </ClCompile>
+    <Link>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Message>Installing DLL...</Message>
+      <Command>if exist "$(MO2)\JohnnyGuitar NVSE\nvse\plugins" (
+copy "$(TargetPath)" "$(MO2)\JohnnyGuitar NVSE\nvse\plugins\$(TargetFileName)"
+copy "$(TargetDir)$(TargetName).pdb" "$(MO2)\JohnnyGuitar NVSE\nvse\plugins\$(TargetName).pdb"
+copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
+)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -123,6 +214,47 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+    </Link>
+    <PostBuildEvent>
+      <Message>Installing DLL...</Message>
+      <Command>if exist "$(MO2)\JohnnyGuitar NVSE\nvse\plugins" (
+copy "$(TargetPath)" "$(MO2)\JohnnyGuitar NVSE\nvse\plugins\$(TargetFileName)"
+copy "$(TargetDir)$(TargetName).pdb" "$(MO2)\JohnnyGuitar NVSE\nvse\plugins\$(TargetName).pdb"
+copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
+)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EDITOR;WIN32;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ForcedIncludeFiles>shared/defines.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <ExceptionHandling>false</ExceptionHandling>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <Optimization>Disabled</Optimization>
+      <StringPooling>true</StringPooling>
+    </ClCompile>
+    <Link>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -179,6 +311,46 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
 )</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>EDITOR;WIN32;NDEBUG;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ForcedIncludeFiles>shared/defines.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <ExceptionHandling>false</ExceptionHandling>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Message>Installing DLL...</Message>
+      <Command>if exist "$(MO2)\JohnnyGuitar NVSE\nvse\plugins" (
+copy "$(TargetPath)" "$(MO2)\JohnnyGuitar NVSE\nvse\plugins\$(TargetFileName)"
+copy "$(TargetDir)$(TargetName).pdb" "$(MO2)\JohnnyGuitar NVSE\nvse\plugins\$(TargetName).pdb"
+copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
+)</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp" />
     <ClCompile Include="..\nvse\nvse\GameForms.cpp" />
@@ -194,34 +366,126 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="..\shared\BSMemory\BSScrapMemory.cpp" />
     <ClCompile Include="..\shared\SafeWrite\SafeWrite.cpp" />
     <ClCompile Include="..\shared\Utils\DebugLog.cpp" />
-    <ClCompile Include="events\EventFramework.cpp" />
-    <ClCompile Include="events\JohnnyEvents.cpp" />
-    <ClCompile Include="events\LambdaVariableContext.cpp" />
-    <ClCompile Include="functions\fn_av.cpp" />
-    <ClCompile Include="functions\fn_book.cpp" />
-    <ClCompile Include="functions\fn_dial.cpp" />
-    <ClCompile Include="functions\fn_event.cpp" />
-    <ClCompile Include="functions\fn_file.cpp" />
-    <ClCompile Include="functions\fn_form.cpp" />
-    <ClCompile Include="functions\fn_gamebryo.cpp" />
-    <ClCompile Include="functions\fn_gameplay.cpp" />
-    <ClCompile Include="functions\fn_math.cpp" />
-    <ClCompile Include="functions\fn_mediaset.cpp" />
-    <ClCompile Include="functions\fn_region.cpp" />
-    <ClCompile Include="functions\fn_terminal.cpp" />
-    <ClCompile Include="functions\fn_ui.cpp" />
-    <ClCompile Include="functions\fn_utility.cpp" />
+    <ClCompile Include="events\EventFramework.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="events\JohnnyEvents.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="events\LambdaVariableContext.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_av.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_book.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_dial.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_event.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_file.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_form.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_gamebryo.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_gameplay.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_math.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_mediaset.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_region.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_terminal.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_ui.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="functions\fn_utility.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\decoding.cpp" />
-    <ClCompile Include="internal\Game\Bethesda\AILinearTaskThreadManager.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\AILinearTaskThreadManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BaseExtraList.cpp" />
-    <ClCompile Include="internal\Game\Bethesda\BGSChangeFlags.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSChangeFlags.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BGSListForm.cpp" />
-    <ClCompile Include="internal\Game\Bethesda\BGSLoadGameSubBuffer.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSLoadGameSubBuffer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BGSMessageIcon.cpp" />
-    <ClCompile Include="internal\Game\Bethesda\BGSNumericIDIndex.cpp" />
-    <ClCompile Include="internal\Game\Bethesda\BGSSaveFormBuffer.cpp" />
-    <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSNumericIDIndex.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSSaveFormBuffer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSSaveLoadManager.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BSArchive.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSCriticalSection.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSCullingProcess.cpp" />
@@ -241,8 +505,16 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSXFlags.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ContainerItemExtra.cpp" />
-    <ClCompile Include="internal\Game\Bethesda\Conversation.cpp" />
-    <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\Conversation.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\ExtraDataList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp" />
     <ClCompile Include="internal\Game\Bethesda\GameSettingCollection.cpp" />
@@ -250,7 +522,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\InventoryIterator.cpp" />
     <ClCompile Include="internal\Game\Bethesda\IOTask.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ItemChange.cpp" />
-    <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\ScrapHeap.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Setting.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESBoundObject.cpp" />
@@ -287,47 +563,171 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiRenderer.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiTransform.cpp" />
     <ClCompile Include="internal\Game\Obsidian\TESReputation.cpp" />
-    <ClCompile Include="internal\JG\AddItemMessages.cpp" />
-    <ClCompile Include="internal\JG\AnimActivationHeight.cpp" />
-    <ClCompile Include="internal\JG\BarterFilter.cpp" />
+    <ClCompile Include="internal\JG\AddItemMessages.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\AnimActivationHeight.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\BarterFilter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\CameraOverlay.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\CameraOverride.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExternalEmittanceOnBases.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\FormSkeletons.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\JG\BSAUpgrade.cpp" />
-    <ClCompile Include="internal\JG\CameraOverlay.cpp" />
-    <ClCompile Include="internal\JG\CameraOverride.cpp" />
-    <ClCompile Include="internal\JG\ExternalEmittanceOnBases.cpp" />
-    <ClCompile Include="internal\JG\FormSkeletons.cpp" />
     <ClCompile Include="internal\JG\NewNiObjects.cpp" />
-    <ClCompile Include="internal\JG\SkyUpdateFixes.cpp" />
-    <ClCompile Include="internal\JG\CustomCameraShake.cpp" />
-    <ClCompile Include="internal\JG\CustomHUDShake.cpp" />
-    <ClCompile Include="internal\JG\DeathSoundFix.cpp" />
-    <ClCompile Include="internal\JG\DialogueResponseOverride.cpp" />
-    <ClCompile Include="internal\JG\DisabledArrowKeys.cpp" />
-    <ClCompile Include="internal\JG\DisabledLevelUp.cpp" />
-    <ClCompile Include="internal\JG\DisabledMuzzleFlashLights.cpp" />
-    <ClCompile Include="internal\JG\DisabledSaves.cpp" />
-    <ClCompile Include="internal\JG\EditorIDRestoration.cpp" />
-    <ClCompile Include="internal\JG\ExtraMarkerIcons.cpp" />
-    <ClCompile Include="internal\JG\ExtraMiscStats.cpp" />
-    <ClCompile Include="internal\JG\ExtraReputationIcons.cpp" />
-    <ClCompile Include="internal\JG\ExtraUISounds.cpp" />
+    <ClCompile Include="internal\JG\SkyUpdateFixes.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\CustomCameraShake.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\CustomHUDShake.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DeathSoundFix.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DialogueResponseOverride.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledArrowKeys.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledLevelUp.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledMuzzleFlashLights.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\DisabledSaves.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\EditorIDRestoration.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraMarkerIcons.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraMiscStats.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraReputationIcons.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraUISounds.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\JG\FixedStringsRework.cpp" />
-    <ClCompile Include="internal\JG\JohnnySerialization.cpp" />
+    <ClCompile Include="internal\JG\JohnnySerialization.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\JG\JohnnyCommands.cpp" />
     <ClCompile Include="internal\JG\JohnnyFixes.cpp" />
     <ClCompile Include="internal\JG\JohnnyMessageHandler.cpp" />
     <ClCompile Include="internal\JG\JohnnyPatches.cpp" />
     <ClCompile Include="internal\JG\JohnnyGameSettings.cpp" />
     <ClCompile Include="internal\JG\JohnnyExtraData.cpp" />
-    <ClCompile Include="internal\JG\JohnnyRadios.cpp" />
-    <ClCompile Include="internal\JG\LandRemapping.cpp" />
-    <ClCompile Include="internal\JG\MediaLocationControllerTweaks.cpp" />
-    <ClCompile Include="internal\JG\NPCAccuracy.cpp" />
-    <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp" />
-    <ClCompile Include="internal\JG\RadioSkipOGGWAVPatch.cpp" />
-    <ClCompile Include="internal\JG\RSMBarberHook.cpp" />
-    <ClCompile Include="internal\JG\ScriptUtils.cpp" />
+    <ClCompile Include="internal\JG\JohnnyRadios.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\LandRemapping.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\MediaLocationControllerTweaks.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\NPCAccuracy.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\RadioSkipOGGWAVPatch.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\RSMBarberHook.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ScriptUtils.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\JG\TaskQueue.cpp" />
-    <ClCompile Include="internal\JG\WorldToScreen.cpp" />
+    <ClCompile Include="internal\JG\WorldToScreen.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\JIP\JIPFixes.cpp" />
     <ClCompile Include="internal\JIP\JIPSettings.cpp" />
     <ClCompile Include="internal\JIP\JIPUtils.cpp" />
@@ -385,23 +785,71 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="functions\fn_utility.h" />
     <ClInclude Include="internal\CommandOpcodes.h" />
     <ClInclude Include="internal\decoding.h" />
-    <ClInclude Include="internal\Game\Bethesda\AILinearTaskThreadManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\AILinearTaskThreadManager.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseExtraList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseFormComponent.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSChangeFlags.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSChangeFlags.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSListForm.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSLoadFormBuffer.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSLoadGameBuffer.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSLoadGameSubBuffer.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSLoadFormBuffer.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSLoadGameBuffer.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSLoadGameSubBuffer.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSMessageIcon.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSNumericIDIndex.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSSaveFormBuffer.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSSaveGameBuffer.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadBuffer.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFormHeader.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSNumericIDIndex.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveFormBuffer.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveGameBuffer.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadBuffer.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFile.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadFormHeader.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadManager.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BSArchive.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCriticalSection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp" />
@@ -437,8 +885,16 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSXFlags.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ContainerItemExtra.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ContainerObject.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\Conversation.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\Conversation.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\DialogueItem.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\DialogueResponse.hpp" />
     <ClInclude Include="internal\Game\Bethesda\DismemberedLimb.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraActivateRef.hpp" />
@@ -476,9 +932,17 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\ItemChange.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MapMarkerData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MemoryContexts.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\NiUpdateData.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\QuestUpdateManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\QuestUpdateManager.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\QueuedChildren.hpp" />
     <ClInclude Include="internal\Game\Bethesda\QueuedFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\RefActivateData.hpp" />
@@ -615,7 +1079,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\JohnnyPatches.hpp" />
     <ClInclude Include="internal\JG\JohnnyGameSettings.hpp" />
     <ClInclude Include="internal\JG\JohnnyExtraData.hpp" />
-    <ClInclude Include="internal\JG\JohnnyRadios.hpp" />
+    <ClInclude Include="internal\JG\JohnnyRadios.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\JG\LandRemapping.hpp" />
     <ClInclude Include="internal\JG\MediaLocationControllerTweaks.hpp" />
     <ClInclude Include="internal\JG\NPCAccuracy.hpp" />
@@ -624,7 +1092,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\RSMBarberHook.hpp" />
     <ClInclude Include="internal\JG\ScriptUtils.hpp" />
     <ClInclude Include="internal\JG\TaskQueue.hpp" />
-    <ClInclude Include="internal\JG\WorldToScreen.hpp" />
+    <ClInclude Include="internal\JG\WorldToScreen.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\JIP\JIPFixes.hpp" />
     <ClInclude Include="internal\JIP\JIPSettings.hpp" />
     <ClInclude Include="internal\JIP\JIPUtils.hpp" />

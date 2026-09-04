@@ -17,28 +17,30 @@
 #include "functions/fn_utility.h"
 
 #include "JG/JohnnyPluginData.hpp"
+#ifdef GAME
 #include "JG/DisabledSaves.hpp"
 #include "JG/CustomHUDShake.hpp"
 #include "JG/AnimActivationHeight.hpp"
 #include "JG/ExternalEmittanceOnBases.hpp"
 
+ExpressionEvaluatorUtils s_expEvalUtils;
+#endif
+
 #define REG_CMD(name) apNVSE->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) apNVSE->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 
-ExpressionEvaluatorUtils s_expEvalUtils;
-
 namespace JohnnyCommands {
 
-	void InitCommandData() {
+	void InitCommandData(const NVSEInterface* apNVSE) {
+#ifdef GAME
 		AnimActivationHeight::Init();
 		ExternalEmittanceOnBases::Install();
+		apNVSE->InitExpressionEvaluatorUtils(&s_expEvalUtils);
+#endif
 	}
 
 	void Init(const NVSEInterface* apNVSE) {
-		if (apNVSE->isEditor == 0) {
-			InitCommandData();
-			apNVSE->InitExpressionEvaluatorUtils(&s_expEvalUtils);
-		}
+		InitCommandData(apNVSE);
 
 		apNVSE->SetOpcodeBase(JohnnyPluginData::JG_OPCODE_BASE);
 

@@ -13,5 +13,9 @@ float TESBoundObject::Bounds::Length() const {
 // GAME - 0x50EBF0
 // GECK - 0x5EF8F0
 float TESBoundObject::GetBoundSize() const {
-	return (kBoundData.kMin - kBoundData.kMax).Length() * 0.5f;
+#ifdef GAME
+	return ThisCall<float>(0x50EBF0, this);
+#else
+	return ThisCall<float>(0x5EF8F0, this);
+#endif
 }

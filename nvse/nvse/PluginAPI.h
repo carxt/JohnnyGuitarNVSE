@@ -2,10 +2,7 @@
 
 #include "nvse/CommandTable.h"
 #include "nvse/Utilities.h"
-
-#if RUNTIME
 #include "GameAPI.h"
-#endif
 
 struct CommandInfo;
 struct ParamInfo;
@@ -642,8 +639,6 @@ struct NVSEScriptInterface
 
 #endif
 
-#if RUNTIME
-
 // Gives access to internal data without reverse engineering NVSE
 struct NVSEDataInterface
 {
@@ -812,8 +807,6 @@ typedef bool (*_IsScriptLambda)(Script* parentScript);
 // Script-related function pointer typedefs:
 typedef bool (*_HasScriptCommand)(Script* script, CommandInfo* info, CommandInfo* eventBlock);
 typedef bool (*_DecompileScript)(Script* script, int32_t lineNumber, char* buffer, uint32_t bufferSize);
-
-#endif
 
 /**** serialization API docs ***************************************************
  *	

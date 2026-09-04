@@ -26,7 +26,9 @@ public:
 	static void Stop();
 	static void StopOffscreen();
 
+#ifdef GAME
 	static void Begin(NiRenderTargetGroup* apGroup, uint32_t uiClearMode);
+#endif
 	static void BeginTexture(BSRenderedTexture* apTexture, uint32_t auiClearMode);
 
 	static void End();

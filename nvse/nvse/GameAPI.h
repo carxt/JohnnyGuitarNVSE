@@ -81,8 +81,6 @@ extern const _ShowMessageBox_button ShowMessageBox_button;
 typedef bool (*_QueueUIMessage)(const char* msgText, uint32_t iconType, const char* iconPath, const char* soundPath, float displayTime, uint8_t unk5);
 extern const _QueueUIMessage QueueUIMessage;
 
-const uint32_t kMaxMessageLength = 0x4000;
-
 #else
 
 typedef TESForm* (__cdecl* _GetFormByID)(const char* editorID);
@@ -92,6 +90,8 @@ typedef void(__cdecl* _ShowCompilerError)(ScriptBuffer* Buffer, const char* form
 extern const _ShowCompilerError		ShowCompilerError;
 
 #endif
+
+const uint32_t kMaxMessageLength = 0x4000;
 
 struct NVSEStringVarInterface;
 // Problem: plugins may want to use %z specifier in format strings, but don't have access to StringVarMap

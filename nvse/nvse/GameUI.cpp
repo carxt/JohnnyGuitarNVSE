@@ -1,17 +1,10 @@
 #include "nvse/GameUI.h"
 #include "GameObjects.h"
+#ifdef GAME
 #include <internal/Game/Bethesda/Conversation.hpp>
 
 uint8_t* g_MenuVisibilityArray = (uint8_t*)0x011F308F;
 NiTPrimitiveArray<Tile*>* g_TileMenuArray = (NiTPrimitiveArray<Tile*> *)0x011F3508;
-
-#if 1
-static const uint32_t s_RaceSexMenu__UpdatePlayerHead = 0x007B25A0;	// End of RaceSexMenu::Func003.case0, call containing QueuedHead::Init (3rd before jmp)
-static uint8_t* g_bUpdatePlayerModel = (uint8_t*)0x011C5CB4;	// this is set to true when player confirms change of race in RaceSexMenu -
-																	// IF requires change of skeleton - and back to false when model updated#elif EDITOR
-#else
-#error
-#endif
 
 InterfaceManager* InterfaceManager::GetSingleton(void) {
 	return *(InterfaceManager**)0x011D8A80;
@@ -22,7 +15,7 @@ Menu* InterfaceManager::GetMenuByType(uint32_t menuType) {
 }
 
 void RaceSexMenu::UpdatePlayerHead(void) {
-	ThisCall(s_RaceSexMenu__UpdatePlayerHead, this);
+	ThisCall(0x7B25A0, this);
 }
 // reimplementation by lStewieAl
 bool bNoHolotapeStopSound = false;
@@ -88,7 +81,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 		if (playStartStopSound)
 		{
 			BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStart", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
-			sound.SetPosition(PlayerCharacter::GetSingleton()->GetPos());
+			sound.SetPosition(PlayerCharacter::GetSingleton()->GetLocationOnReference());
 			sound.Play(false);
 		}
 		else
@@ -116,7 +109,7 @@ void MapMenu::StopHolotape()
 	if (!bNoHolotapeStopSound)
 	{
 		BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStop", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
-		handle.SetPosition(PlayerCharacter::GetSingleton()->GetPos());
+		handle.SetPosition(PlayerCharacter::GetSingleton()->GetLocationOnReference());
 		handle.Play(false);
 	}
 	bNoHolotapeStopSound = false;
@@ -124,3 +117,4 @@ void MapMenu::StopHolotape()
 	*(uint8_t*)0x11DCFA4 = false;
 	ThisCall(0x775670, HUDMainMenu::GetSingleton()); // ClearSubtitlesString
 }
+#endif

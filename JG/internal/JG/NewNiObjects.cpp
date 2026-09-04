@@ -17,7 +17,11 @@ namespace NewNiObjects {
 
 	NiLightRadiusController* NiLightRadiusController::_CreateClone(NiCloningProcess& arCloneProc) {
 		NiLightRadiusController* pClone = CreateObject();
+#ifdef GAME
 		ThisCall(0xA57620, this, pClone, &arCloneProc); // NiFloatInterpController::CopyMembers
+#else
+		ThisCall(0x8083E0, this, pClone, &arCloneProc); // NiFloatInterpController::CopyMembers
+#endif
 		return pClone;
 	}
 
@@ -52,7 +56,11 @@ namespace NewNiObjects {
 	STACK_FRAME_OPT_RESET
 
 	void Install() {
+#ifdef GAME
 		kInitLoadersDetour.ReplaceCall(0x86AA47, InitLoadersHook);
+#else
+		kInitLoadersDetour.ReplaceCall(0x445FEF, InitLoadersHook);
+#endif
 	}
 
 }

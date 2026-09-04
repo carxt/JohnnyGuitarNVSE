@@ -227,22 +227,22 @@ struct ParamInfo
 	DEFINE_CMD_ALT_COND_ANY(name, , description, refRequired, paramInfo, NULL)
 
 typedef bool (* Cmd_Execute)(COMMAND_ARGS);
-bool Cmd_Default_Execute(COMMAND_ARGS);
+inline bool Cmd_Default_Execute(COMMAND_ARGS) { return true; }
 
 typedef bool (* Cmd_Parse)(uint32_t numParams, ParamInfo * paramInfo, ScriptLineBuffer * lineBuf, ScriptBuffer * scriptBuf);
-bool Cmd_Default_Parse(uint32_t numParams, ParamInfo * paramInfo, ScriptLineBuffer * lineBuf, ScriptBuffer * scriptBuf);
+inline bool Cmd_Default_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf) { return true; }
 const Cmd_Parse Cmd_Expression_Plugin_Parse = (Cmd_Parse)0x08000000;
 
 typedef bool (* Cmd_Eval)(COMMAND_ARGS_EVAL);
-bool Cmd_Default_Eval(COMMAND_ARGS_EVAL);
+inline bool Cmd_Default_Eval(COMMAND_ARGS_EVAL) { return true; }
 
 
-#ifdef RUNTIME
+#ifdef GAME
 #define HANDLER(x)	x
 #define HANDLER_EVAL(x)	x
 #else
-#define HANDLER(x)	Cmd_Default_Execute
-#define HANDLER_EVAL(x)	Cmd_Default_Eval
+#define HANDLER(x) reinterpret_cast<Cmd_Execute>(0x5CA000)
+#define HANDLER_EVAL(x)	nullptr
 #endif
 
 const uint32_t kNVSEOpcodeStart = 0x1400;
