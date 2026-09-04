@@ -284,8 +284,10 @@ namespace JohnnyPatches {
 	}
 
 	void PostLoadInit() {
+#ifdef GAME
 		if (bUseFormSkeletons)
 			FormSkeletons::Install();
+#endif
 	}
 
 	void DeferredInit() {

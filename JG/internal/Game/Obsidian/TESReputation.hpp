@@ -61,4 +61,8 @@ public:
 
 using TESReputationType = TESReputation::Type;
 
+#ifdef GAME
 ASSERT_SIZE(TESReputation, 0x50);
+#else
+ASSERT_SIZE(TESReputation, 0x84);
+#endif

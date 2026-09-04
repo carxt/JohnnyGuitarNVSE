@@ -470,6 +470,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSMessageIcon.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSNumericIDIndex.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
@@ -545,6 +546,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiPoint4.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiRenderer.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiTransform.cpp" />
+    <ClCompile Include="internal\Game\Obsidian\TESReputation.cpp" />
     <ClCompile Include="internal\JG\AddItemMessages.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
@@ -569,6 +571,16 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExternalEmittanceOnBases.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\FormSkeletons.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="internal\JG\NewNiObjects.cpp" />
     <ClCompile Include="internal\JG\SkyUpdateFixes.cpp">
@@ -785,6 +797,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSMessageIcon.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSNumericIDIndex.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
