@@ -486,8 +486,12 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSArchive.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSCriticalSection.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSCullingProcess.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSDirectoryEntry.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSFileEntry.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSNonReentrantSpinLock.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSPackedTask.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSPackedTaskQueue.cpp" />
@@ -594,6 +598,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="internal\JG\BSAUpgrade.cpp" />
     <ClCompile Include="internal\JG\NewNiObjects.cpp" />
     <ClCompile Include="internal\JG\SkyUpdateFixes.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
@@ -845,9 +850,14 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSArchive.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSCriticalSection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSDirectoryEntry.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSFileEntry.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSHash.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSMemObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSNonReentrantSpinLock.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSPackedTask.hpp" />
@@ -1039,6 +1049,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\JG\AddItemMessages.hpp" />
     <ClInclude Include="internal\JG\AnimActivationHeight.hpp" />
     <ClInclude Include="internal\JG\BarterFilter.hpp" />
+    <ClInclude Include="internal\JG\BSAUpgrade.hpp" />
     <ClInclude Include="internal\JG\CameraOverlay.hpp" />
     <ClInclude Include="internal\JG\CameraOverride.hpp" />
     <ClInclude Include="internal\JG\ExternalEmittanceOnBases.hpp" />

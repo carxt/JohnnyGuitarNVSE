@@ -36,12 +36,13 @@
 #include <algorithm>
 #include <unordered_set>
 #endif
+#include "BSAUpgrade.hpp"
 #include "NewNiObjects.hpp"
 
 namespace JohnnyPatches {
 
 	bool bFixJIP = true;
-
+	bool bBSAUpgrade = true;
 #ifdef GAME
 	bool bFixFleeing = false;
 	bool bFixItemStacks = false;
@@ -166,6 +167,9 @@ namespace JohnnyPatches {
 		uint32_t length = MAX_PATH - (lastSlash - filename);;
 		strcpy_s(lastSlash, length, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 		bFixJIP = GetPrivateProfileInt("MAIN", "bJIPFixes", 1, filename);
+		bBSAUpgrade = GetPrivateProfileInt("MAIN", "bBSAUpgrade", 1, filename);
+		if (bBSAUpgrade)
+			BSAUpgrade::ReadINI(filename);
 #ifdef GAME
 		bFixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 		bFixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
@@ -288,6 +292,8 @@ namespace JohnnyPatches {
 		if (bUseFormSkeletons)
 			FormSkeletons::Install();
 #endif
+		if (bBSAUpgrade)
+			BSAUpgrade::Install();
 	}
 
 	void DeferredInit() {
