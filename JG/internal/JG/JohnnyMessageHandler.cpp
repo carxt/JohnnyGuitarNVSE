@@ -44,6 +44,8 @@ static SPEC_NOINLINE void PostPostLoad() {
 		JIPFixes::InitHooks();
 	}
 #ifdef GAME
+	JohnnyPatches::PostLoadInit();
+
 	const CommandInfo* pUpdate3D = g_cmdTableInterface->GetByOpcode(CommandOpcodes::kUpdate3D);
 	if (pUpdate3D)
 		Cmd_Update3D = pUpdate3D->execute;

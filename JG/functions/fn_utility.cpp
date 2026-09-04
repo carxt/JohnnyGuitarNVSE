@@ -135,47 +135,50 @@ bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
 
 bool Cmd_ar_IsFormInList_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t arrID, fullMatch;
-	BGSListForm* formList = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &formList, &fullMatch)) return true;
+	uint32_t uiArrayID = 0;
+	BOOL bFullMatch = FALSE;
+	const BGSListForm* pFormList = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &uiArrayID, &pFormList, &bFullMatch)) [[unlikely]]
+		return true;
 
-	if (!formList || !IS_TYPE(formList, BGSListForm)) return true;
+	if (!pFormList || !IS_TYPE(pFormList, BGSListForm)) [[unlikely]]
+		return true;
 
-	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
-	if (!inArr) return true;
-	uint32_t size = g_arrInterface->GetArraySize(inArr);
-	BSScrapBuffer<NVSEArrayElement> elements(size);
-	g_arrInterface->GetElements(inArr, elements.get(), nullptr);
-	if (!fullMatch) {
-		for (uint32_t i = 0; i < size; i++) {
-			if (elements[i].GetTESForm() == nullptr) return true;
-			BSSimpleList<TESForm*>* pIter= formList->GetFormList();
-			while(pIter && !pIter->IsEmpty()) {
-				if (elements[i].GetTESForm() == pIter->GetItem()) {
-					*result = 1;
-					return true;
-				}
-				pIter = pIter->GetNext();
-			};
+	NVSEArrayVar* pArray = g_arrInterface->LookupArrayByID(uiArrayID);
+	if (!pArray) [[unlikely]]
+		return true;
+
+	const uint32_t uiArraySize = g_arrInterface->GetArraySize(pArray);
+
+	BSScrapBuffer<NVSEArrayElement> kElements(uiArraySize);
+	g_arrInterface->GetElements(pArray, kElements.get(), nullptr);
+
+	const BSSimpleList<TESForm*>* pIter = pFormList->GetFormList();
+	__assume(pIter != nullptr);
+
+	if (bFullMatch) {
+		uint32_t uiFoundItems = 0;
+		for (uint32_t i = 0; i < uiArraySize; i++) {
+			TESForm* pForm = kElements[i].GetTESForm();
+			if (!pForm) [[unlikely]]
+				return true;
+
+			if (pIter->Find(pForm))
+				++uiFoundItems;
 		}
+		*result = uiFoundItems == uiArraySize;
 	}
 	else {
-		for (uint32_t i = 0; i < size; i++) {
-			if (elements[i].GetTESForm() == nullptr) return true;
-			int elementFound = 0;
-			BSSimpleList<TESForm*>* pIter = formList->GetFormList();
-			while (pIter && !pIter->IsEmpty()) {
-				if (elements[i].GetTESForm() == pIter->GetItem()) {
-					elementFound = 1;
-					break;
-				}
-				pIter = pIter->GetNext();
-			};
-			if (elementFound == 0) {
+		for (uint32_t i = 0; i < uiArraySize; i++) {
+			TESForm* pForm = kElements[i].GetTESForm();
+			if (!pForm) [[unlikely]]
+				continue;
+
+			if (pIter->Find(pForm)) {
+				*result = 1;
 				return true;
 			}
 		}
-		*result = 1;
 	}
 
 	return true;
@@ -428,8 +431,8 @@ bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS) {
-	ThisCall(0x0703DA0, nullptr);
-	ThisCall(0x07D0A70, nullptr);
+	CdeclCall(0x703DA0);
+	CdeclCall(0x7D0A70);
 	return true;
 }
 
@@ -541,34 +544,44 @@ bool Cmd_SetCameraRotate_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
-	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
-	uint32_t arrID;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID)) return true;
-	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
-	if (!inArr) return true;
-	if (g_arrInterface->GetContainerType(inArr) != NVSEArrayVarInterface::kArrType_Array) return true;
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	auto lAr_Size = g_arrInterface->GetArraySize(inArr);
-	if (lAr_Size < 1) return true;
-	BSScrapBuffer<NVSEArrayElement> elements(lAr_Size);
-	g_arrInterface->GetElements(inArr, elements.get(), NULL);
-	for (auto iCounter = (lAr_Size - 1); iCounter >= 1; iCounter--)
-	{
-		std::uniform_int_distribution<> distrib(1, iCounter);
-		auto iPicker = distrib(gen);
-		if (iPicker < iCounter)
-		{
-			NVSEArrayElement bufferElement;
-			bufferElement = elements[iPicker];
-			elements[iPicker] = elements[iCounter];
-			elements[iCounter] = bufferElement;
+	uint32_t uiArrayID;
+	NVSEArrayVar* pOutArray = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiArrayID)) [[likely]] {
+		NVSEArrayVar* pInArray = g_arrInterface->LookupArrayByID(uiArrayID);
+		if (!pInArray) [[unlikely]]
+			goto EXIT;
+
+		if (g_arrInterface->GetContainerType(pInArray) != NVSEArrayVarInterface::kArrType_Array) [[unlikely]]
+			goto EXIT;
+
+		const uint32_t uiArraySize = g_arrInterface->GetArraySize(pInArray);
+		if (uiArraySize < 1) [[unlikely]]
+			goto EXIT;
+
+		std::random_device kRandom;
+		BSScrapBuffer<std::mt19937> kGenerator(1); // 5000 BYTES??? Using ScrapHeap, screw the stack
+		new (kGenerator.get()) std::mt19937(kRandom());
+
+		BSScrapBuffer<NVSEArrayElement> kArrayElements(uiArraySize);
+		g_arrInterface->GetElements(pInArray, kArrayElements.get(), nullptr);
+		for (uint32_t uiCounter = (uiArraySize - 1); uiCounter >= 1; uiCounter--) {
+			std::uniform_int_distribution<> kDistrib(1, uiCounter);
+			const int32_t iPicker = kDistrib(*kGenerator.get());
+			if (iPicker < uiCounter) {
+				NVSEArrayElement kTemp = std::move(kArrayElements[iPicker]);
+				kArrayElements[iPicker] = std::move(kArrayElements[uiCounter]);
+				kArrayElements[uiCounter] = std::move(kTemp);
+			}
 		}
+
+		pOutArray = g_arrInterface->CreateArray(kArrayElements.get(), uiArraySize, scriptObj);
 	}
-	for (uint32_t i = 0; i < lAr_Size; i++) {
-		g_arrInterface->AppendElement(outArr, NVSEArrayElement(elements[i]));
-	}
-	g_arrInterface->AssignCommandResult(outArr, result);
+
+EXIT:
+	if (!pOutArray) [[unlikely]]
+		pOutArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+
+	g_arrInterface->AssignCommandResult(pOutArray, result);
 	return true;
 }
 

@@ -9,6 +9,7 @@
 #include <Bethesda/FileFinder.hpp>
 #include <JG/ExtraReputationIcons.hpp>
 #include <JG/ExtraMarkerIcons.hpp>
+#include <JG/ScriptUtils.hpp>
 
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 
@@ -119,12 +120,41 @@ bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESReputation* rep = nullptr;
-	uint32_t tierID = 0;
-	char path[MAX_PATH] = {};
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &rep, &tierID, &path) && rep && IS_TYPE(rep, TESReputation) && tierID >= 1 && tierID <= 4)) return true;
-	ExtraReputationIcons::Set(rep->GetFormID(), tierID, path);
-	*result = 1;
+	TESReputation* pReputation = nullptr;
+	int32_t iTier = 0;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation, &iTier, &cPath) && pReputation && IS_TYPE(pReputation, TESReputation) && iTier >= 1 && iTier <= 4) {
+		const ExtraReputationIcons::Tier eTier = static_cast<ExtraReputationIcons::Tier>(iTier - 1);
+		assert(ScriptUtils::InRange(eTier));
+		ExtraReputationIcons::Set(pReputation, eTier, cPath);
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESReputation* pReputation = nullptr;
+	int32_t iTier = 0;
+	const char* pIcon = "";
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation, &iTier) && pReputation && IS_TYPE(pReputation, TESReputation) && ((iTier == -1) || (iTier >= 1 && iTier <= 4))) {
+		const char* pCustomIcon = nullptr;
+		if (iTier == -1)
+			// Current icon
+			pCustomIcon = ExtraReputationIcons::Get(pReputation);
+		else {
+			const ExtraReputationIcons::Tier eTier = static_cast<ExtraReputationIcons::Tier>(iTier - 1);
+			assert(ScriptUtils::InRange(eTier));
+			pCustomIcon = ExtraReputationIcons::Get(pReputation, eTier);
+		}
+
+		if (pCustomIcon)
+			pIcon = pCustomIcon;
+	
+		if (IsConsoleMode())
+			Console_Print("GetCustomReputationChangeIcon \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
+	}
+	g_strInterface->Assign(PASS_COMMAND_ARGS, pIcon);
 	return true;
 }
 
@@ -369,7 +399,7 @@ bool Cmd_SetWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 			Interface::InitGunScope(pModel);
 
 		}
-		else if (cScopePath[0] && FileFinder::Locate(cScopePath, nullptr, FileFinder::SKIP_NONE, FileFinder::ARCHIVE_TYPE_MESHES)) {
+		else if (cScopePath[0] && FileFinder::Locate(cScopePath, nullptr, FileFinder::SKIP_NONE, ARCHIVE_TYPE::MESHES)) {
 			StackObject<TESModel, 0x488F50, 0x489070> kScopeModel;
 			kScopeModel->SetModel(cScopePath);
 			Interface::InitGunScope(kScopeModel.GetPtr());

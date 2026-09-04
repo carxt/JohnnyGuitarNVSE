@@ -202,6 +202,9 @@ public:
 
 	TESWorldSpace* GetWorldSpace() const { return ThisCall<TESWorldSpace*>(0x575D70, this); }
 
+	TESForm* GetEmittanceSource() const { return ThisCall<TESForm*>(0x569580, this); }
+	void SetEmittanceSource(TESForm* apSource) { extraDataList.SetEmittanceSource(apSource); }
+
 	MEMBER_FN_PREFIX(TESObjectREFR);
 };
 

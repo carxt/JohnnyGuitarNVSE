@@ -72,7 +72,7 @@ DEFINE_COMMAND_PLUGIN(GetCasinoChip, , false, kParams_OneCasino);
 DEFINE_COMMAND_PLUGIN(SetCasinoChip, , false, kParams_OneCasinoOneForm);
 DEFINE_COMMAND_PLUGIN(PlayHolotape, , false, kParams_OneForm_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(StopHolotape, , false, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(PathToRef, , true, kParams_OneRefOneOptionalFloatOneOptionalInt);
+DEFINE_COMMAND_PLUGIN(PathToRef, , true, kParams_PathToRef);
 DEFINE_CMD_COND_PLUGIN(GetGrenadeHoldTime, , false, nullptr);
 DEFINE_COMMAND_PLUGIN(GetWeaponsForMod, , false, kParams_OneObjectID);
 DEFINE_CMD_COND_PLUGIN(IsInDialogueWithPlayer, , true, nullptr);

@@ -51,52 +51,10 @@ extern TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* contai
 
 namespace {
 #ifdef GAME
-	void RecurseAndAddObjectsToPalette(NiAVObject* apObject, NiDefaultAVObjectPalette* apPalette) {
-		CdeclCall(0xA6E870, apObject, apPalette);
-	}
-
-	void RecurseAndRemoveObjectsFromPalette(NiAVObject* apObject, NiDefaultAVObjectPalette* apPalette) {
-		CdeclCall(0xA6E8E0, apObject, apPalette);
-	}
-
-	static inline NiDefaultAVObjectPalette* GetObjectPalette(const NiAVObject* apRoot) {
-		if (!apRoot) [[unlikely]]
-			return nullptr;
-
-		NiControllerManager* pControllerManager = apRoot->GetController<NiControllerManager>();
-		return pControllerManager ? pControllerManager->m_spObjectPalette.m_pObject : nullptr;
-	}
-
-	static SPEC_NOINLINE void __fastcall RecurseAddObjectsToPalette(NiAVObject* apRoot, NiAVObject* apObject) {
-		RecurseAndAddObjectsToPalette(apObject, GetObjectPalette(apRoot));
-	}
-
-	static SPEC_NOINLINE void __fastcall RecurseRemoveObjectsFromPalette(NiAVObject* apRoot, NiAVObject* apObject) {
-		RecurseAndRemoveObjectsFromPalette(apObject, GetObjectPalette(apRoot));
-	}
-
-	static SPEC_NOINLINE void __fastcall AddObjectToPalette(NiAVObject* apRoot, NiAVObject* apObject) {
-		if (!apObject || !apObject->GetName()) [[unlikely]]
-			return;
-
-		NiDefaultAVObjectPalette* pPalette = GetObjectPalette(apRoot);
-		if (pPalette)
-			pPalette->SetAVObject(apObject->GetName(), apObject);
-	}
-
-	static SPEC_NOINLINE void __fastcall RemoveObjectFromPalette(NiAVObject* apRoot, NiAVObject* apObject) {
-		if (!apObject || !apObject->GetName()) [[unlikely]]
-			return;
-
-		NiDefaultAVObjectPalette* pPalette = GetObjectPalette(apRoot);
-		if (pPalette)
-			pPalette->SetAVObject(apObject->GetName(), nullptr);
-	}
-
 	static SPEC_NOINLINE void __fastcall DetachObject(NiAVObject* apRoot, NiAVObject* apObject) {
 		NiPointer spObject(apObject); // Hold the ref so it doesn't insta delete on DetachChild
 
-		RecurseRemoveObjectsFromPalette(apRoot, apObject);
+		ScriptUtils::RecurseRemoveObjectsFromPalette(apRoot, apObject);
 
 		// Same story as with ReloadEquippedModels
 		// Detach "unsafely" first, then actually bother with queued cleanup. Based
@@ -234,12 +192,22 @@ namespace JIPFixes {
 			NiNode* pTarget = static_cast<NiNode*>(apTarget);
 
 			std::string_view svSuffix(nullptr, 0);
-			const char* pPath = apCommandString;
-			if (apCommandString[0] == '*') [[likely]] {
-				const char* pSuffix = apCommandString + 1;
+			
+			const char* pCommand = apCommandString;
+
+			// Paired with SkinnedAttach code below, you must see it
+			bool bSkinnedAttach = false;
+			if (pCommand[0] == '&') {
+				bSkinnedAttach = true;
+				pCommand += 1;
+			}
+
+			const char* pPath = pCommand;
+			if (pCommand[0] == '*') [[likely]] {
+				const char* pSuffix = pCommand + 1;
 				const char* pAsterisk = strchr(pSuffix, '*');
 				if (pAsterisk) {
-					uint32_t uiSuffixLength = (pAsterisk - apCommandString) - 1;
+					uint32_t uiSuffixLength = (pAsterisk - pCommand) - 1;
 					if (uiSuffixLength > MAX_SUFFIX_LENGTH)
 						uiSuffixLength = MAX_SUFFIX_LENGTH;
 					pPath = pAsterisk + 1;
@@ -262,6 +230,9 @@ namespace JIPFixes {
 				if (pCopy->IsFadeNode())
 					static_cast<BSFadeNode*>(pCopy)->TurnFadeNodeOn();
 
+				if (bSkinnedAttach)
+					BipedAnim::AttachToSkeleton(apRoot, pCopy, nullptr);
+
 				if (svSuffix.length())
 					AppendSuffixRecurse(pCopy, svSuffix);
 
@@ -272,7 +243,7 @@ namespace JIPFixes {
 
 				pTarget->AttachChild(pCopy, true);
 
-				RecurseAddObjectsToPalette(apRoot, pCopy);
+				ScriptUtils::RecurseAddObjectsToPalette(apRoot, pCopy);
 
 				NiUpdateData kData;
 				pTarget->UpdateTransformAndBounds(kData);
@@ -292,19 +263,19 @@ namespace JIPFixes {
 			return pCopy;
 		}
 
-		void __fastcall DoInsertNode(NiAVObject* apTarget, const char* apQuery, const char* apTargetName, NiNode* apRoot) {
+		void __fastcall DoInsertNode(NiAVObject* apTarget, const char* apCommandString, const char* apTargetName, NiNode* apRoot) {
 			if (!apTarget || !apRoot)
 				return;
 
 			const NiFixedString strTargetName(apTargetName);
 
-			if (apQuery[0] == '^') {
+			if (apCommandString[0] == '^') {
 				if (apTarget != apRoot) {
 					NiAVObject* pRealTarget = apRoot->GetObjectByName(strTargetName);
 					if (pRealTarget) {
 						if (apTarget->GetParent() != pRealTarget && pRealTarget->IsNode()) {
 							static_cast<NiNode*>(pRealTarget)->AttachChild(apTarget, true);
-							AddObjectToPalette(apRoot, apTarget);
+							ScriptUtils::AddObjectToPalette(apRoot, apTarget);
 						}
 					}
 					else {
@@ -326,7 +297,7 @@ namespace JIPFixes {
 
 						pParent->SetAt(uiIndex, pNode);
 
-						AddObjectToPalette(apRoot, pNode);
+						ScriptUtils::AddObjectToPalette(apRoot, pNode);
 					}
 				}
 			}
@@ -335,7 +306,7 @@ namespace JIPFixes {
 				pNode->SetName(strTargetName);
 				pNode->m_uiFlags.Set(0x80000000);
 				static_cast<NiNode*>(apTarget)->AttachChild(pNode, true);
-				AddObjectToPalette(apRoot, pNode);
+				ScriptUtils::AddObjectToPalette(apRoot, pNode);
 			}
 		}
 
@@ -409,7 +380,43 @@ namespace JIPFixes {
 			return apObject->GetObjectByName(apObjectName);
 		}
 
+		namespace SkinnedAttach {
+
+			// Using & as a skinned attach indicator
+			// See the DoAttachModel code above (oh no, recursive comment jumps)
+
+			uint32_t uiSuffixHandlingAddr = 0x1002BDBE;
+			uint32_t uiCopyPathAddr = 0x1002BDD1;
+			SPEC_NAKED void SkinnedSupport_Asm() {
+				__asm {
+					cmp     cl, '&'
+					jnz		CONTINUE_CHECK
+
+					inc		eax				// Shift the string to the next character
+					mov		ecx, [eax]		// Load the current character (crazy)
+
+					CONTINUE_CHECK:
+					cmp		cl, '*'
+					jz		HANDLE_SUFFIX
+
+					jmp		uiCopyPathAddr
+
+					HANDLE_SUFFIX:
+					jmp		uiSuffixHandlingAddr
+				}
+			}
+
+			void InitHooks() {
+				HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1002BDBE) + 1, 0x48);
+				HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1002BDB9), SkinnedSupport_Asm);
+				uiSuffixHandlingAddr = JIPUtils::GetAddress(0x1002BDBE);
+				uiCopyPathAddr = JIPUtils::GetAddress(0x1002BDD1);
+			}
+		}
+
 		void InitHooks() {
+			SkinnedAttach::InitHooks();
+
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10003E50), SetOjectName);
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000A020), DoAttachModel);
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10009DA0), DoInsertNode);
@@ -2301,6 +2308,26 @@ namespace JIPFixes {
 			kFreeLightDetour.ReplaceCall(0x9C3E54, &Hook::FreeLight);
 		}
 	}
+
+	namespace FormFlagsFix {
+
+		// Genuinely one of the most stupid things I've seen here so far
+
+		HookUtils::CallDetour kDetour;
+		void __fastcall ClearJIPFlagsAndInit(Actor* apActor, void*, bool abAddProcess) {
+			apActor->jipActorFlags1 = 0;
+			apActor->jipActorFlags2 = 0;
+			apActor->jipActorFlags3 = 0;
+			ThisCall(kDetour, apActor, abAddProcess);
+		}
+
+		void InitHooks() {
+			HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x100123BE), JIPUtils::GetAddress(0x100123CF));
+
+			HookUtils::SafeWriteBuf(0x483522, "\xC7\x41\x04\x00\x00\x00\x00\xC7\x41");
+			kDetour.ReplaceCall(0x87D5BA, ClearJIPFlagsAndInit);
+		}
+	}
 #endif
 
 	namespace LogMover {
@@ -2353,6 +2380,7 @@ namespace JIPFixes {
 		SanerWeaponWobbleHook::InitHooks();
 		ProjectileLightFix::InitHooks();
 		ModelFixes::InitHooks();
+		FormFlagsFix::InitHooks();
 #endif
 	}
 

@@ -53,3 +53,13 @@ void ExtraDataList::RemovePoison() {
 	RemoveExtra(EXTRA_DATA_TYPE::ExtraPoison);
 #endif
 }
+
+// GAME - 0x421D20
+TESForm* ExtraDataList::GetEmittanceSource() const {
+	return ThisCall<TESForm*>(0x421D20, this);
+}
+
+// GAME - 0x421D50
+void ExtraDataList::SetEmittanceSource(TESForm* apSource) {
+	ThisCall(0x421D50, this, apSource);
+}

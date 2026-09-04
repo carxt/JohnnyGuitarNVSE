@@ -81,6 +81,14 @@ const char* JohnnyExtraData::GetEditorID() const {
 }
 #endif
 
+TESForm* __fastcall JohnnyExtraData::GetExternalEmittanceSource() const {
+	return kScriptData.pExternalEmittanceSource;
+}
+
+void __fastcall JohnnyExtraData::SetExternalEmittanceSource(TESForm* apSource) {
+	kScriptData.pExternalEmittanceSource = apSource;
+}
+
 const NiFixedString& JohnnyExtraData::GetName() {
 	assert(JohnnyExtraDataGlobals::strName.m_kHandle);
 	return JohnnyExtraDataGlobals::strName;

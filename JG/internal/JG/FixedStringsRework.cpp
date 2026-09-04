@@ -21,6 +21,10 @@ namespace FixedStringsRework {
 #define FIXED_STRING_DEBUG 0
 #define FIXED_STRING_ASYNC_CLEANUP 0
 
+	static constexpr uint32_t __fastcall AlignUp(uint32_t auiSize, uint32_t auiAlignment) {
+		return (auiSize + auiAlignment - 1) & ~(auiAlignment - 1);
+	}
+
 	class ALIGN16 String {
 		volatile mutable uint32_t	uiRefCount;
 		uint32_t					uiLength;
@@ -106,9 +110,7 @@ namespace FixedStringsRework {
 
 			if (auiLength >= sizeof(uint32_t) * 2) [[likely]] {
 				uiAllocSize += sizeof(char) + auiLength;
-				const uint32_t uiSpillover = uiAllocSize % uiAlignment;
-				if (uiSpillover != 0)
-					uiAllocSize += uiAlignment - uiSpillover;
+				uiAllocSize = AlignUp(uiAllocSize, uiAlignment);
 			}
 
 			return uiAllocSize;
@@ -126,8 +128,6 @@ namespace FixedStringsRework {
 			BSMemory::free(apString);
 			--NiGlobalStringTable::uiTotalStrings;
 		}
-
-		static String strEmptyString;
 	};
 
 	template<uint32_t INITIAL_SIZE>
@@ -135,23 +135,22 @@ namespace FixedStringsRework {
 		struct StringEntry {
 			constexpr StringEntry() noexcept : uiHash(0), pString(nullptr) {};
 			constexpr StringEntry(uint32_t auiHash, String* apString) noexcept : uiHash(auiHash), pString(apString) {};
-			constexpr StringEntry(const StringEntry& arOther) noexcept : uiHash(arOther.uiHash), pString(arOther.pString) {};
+			StringEntry(const StringEntry&) = delete;
 			constexpr StringEntry(StringEntry&& arOther) noexcept : uiHash(arOther.uiHash), pString(arOther.pString) { arOther.uiHash = 0; arOther.pString = nullptr; }
-			constexpr ~StringEntry() noexcept {}
+			constexpr ~StringEntry() noexcept { uiHash = 0; pString = nullptr; };
 
 			uint32_t	uiHash;
 			String* 	pString;
 
-			constexpr void operator=(const StringEntry& arOther) noexcept {
-				uiHash = arOther.uiHash;
-				pString = arOther.pString;
-			}
-
-			constexpr void operator=(StringEntry&& arOther) noexcept {
-				uiHash = arOther.uiHash;
-				pString = arOther.pString;
-				arOther.uiHash = 0;
-				arOther.pString = nullptr;
+			StringEntry& operator=(const StringEntry&) = delete;
+			constexpr StringEntry& operator=(StringEntry&& arOther) noexcept {
+				if (this != &arOther) {
+					uiHash = arOther.uiHash;
+					pString = arOther.pString;
+					arOther.uiHash = 0;
+					arOther.pString = nullptr;
+				}
+				return *this;
 			}
 
 			constexpr operator const String* () const noexcept {
@@ -216,16 +215,15 @@ namespace FixedStringsRework {
 
 		const char* __fastcall CreateString(const std::string_view& arString, uint32_t auiHash) noexcept {
 			MEMORY_CONTEXT(MC_STRINGS);
-			StringEntry kNewEntry(auiHash, String::Create(arString));
-			kStrings.push_back(kNewEntry);
-			return kNewEntry.Take();
+			return kStrings.emplace_back(auiHash, String::Create(arString)).Take();
 		}
 
 		uint32_t __fastcall DestroyString(uint32_t auiIndex) noexcept {
-			String::Destroy(kStrings[auiIndex]);
-			kStrings[auiIndex] = kStrings.back();
+			StringEntry kEntry = std::move(kStrings[auiIndex]);
+			String::Destroy(kEntry);
+			kStrings[auiIndex] = std::move(kStrings.back());
 			kStrings.pop_back();
-			return auiIndex - 1;
+			return auiIndex;
 		}
 
 	public:
@@ -277,7 +275,7 @@ namespace FixedStringsRework {
 			if (uiSize < uiCapacity / 2)
 				kStrings.shrink_to_fit();
 
-			std::sort(kStrings.begin(), kStrings.end(), [](String* a, String* b) {
+			std::sort(kStrings.begin(), kStrings.end(), [](String* __restrict a, String* __restrict b) {
 				if (a->GetRefCount() == b->GetRefCount()) {
 					return a->GetLength() < b->GetLength();
 				}
@@ -288,7 +286,7 @@ namespace FixedStringsRework {
 #if FIXED_STRING_DEBUG
 		uint32_t DumpInfo() noexcept {
 			SRWSharedLock kGuard(&kLock);
-			uint32_t uiMemoryUsage = kStrings.capacity() * (sizeof(StringEntry) + sizeof(String*));
+			uint32_t uiMemoryUsage = kStrings.capacity() * sizeof(StringEntry);
 
 			for (const StringEntry& rEntry : kStrings) {
 				uiMemoryUsage += String::GetMemorySize(rEntry->GetLength());
@@ -481,5 +479,3 @@ namespace FixedStringsRework {
 
 #pragma warning(default: 4200)
 STACK_FRAME_OPT_RESET
-
-#undef SCOPED_TIMER

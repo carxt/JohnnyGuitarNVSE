@@ -425,6 +425,20 @@ struct NVSEArrayVarInterface
 			}
 			return *this;
 		}
+		Element(Element&& rhs) { 
+			num = rhs.num;
+			type = rhs.type;
+			rhs.type = kType_Invalid;
+			rhs.num = 0.0;
+		}
+
+		Element& operator=(Element&& rhs) {
+			num = rhs.num;
+			type = rhs.type;
+			rhs.type = kType_Invalid;
+			rhs.num = 0.0;
+			return *this;
+		}
 		bool IsValid() const { return type != kType_Invalid; }
 		uint8_t GetType() const { return type; }
 

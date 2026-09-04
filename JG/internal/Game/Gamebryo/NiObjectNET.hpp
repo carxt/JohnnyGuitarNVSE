@@ -42,6 +42,7 @@ public:
 		return static_cast<ControllerType*>(GetController(&ControllerType::ms_RTTI));
 	}
 
+	void PrependController(NiTimeController* apController);
 	void RemoveController(NiTimeController* apController);
 
 	NiExtraData* GetExtraData(const NiFixedString& arKey) const;

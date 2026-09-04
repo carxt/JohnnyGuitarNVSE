@@ -14,6 +14,7 @@
 #include "Bethesda/TESObjectLAND.hpp"
 #include "Bethesda/TESIcon.hpp"
 #include "Bethesda/TESTexture1024.hpp"
+#include "Obsidian/TESReputation.hpp"
 
 class PathingLocation;
 class PathingCoverLocation;
@@ -335,7 +336,7 @@ struct Condition {
 	bool Evaluate(TESObjectREFR* runOnRef, TESForm* arg2, bool* result) { return ThisCall<bool>(0x681600, this, runOnRef, arg2, result); }
 };
 
-struct ConditionList : tList<Condition> {
+struct ConditionList : public BSSimpleList<Condition*> {
 #ifdef EDITOR
 	uint8_t unk08;
 #endif
@@ -351,15 +352,6 @@ public:
 	Script* script;	// 004
 	bool	resolved;	// 008	called during LoadForm, so scripts do not wait for TESForm_InitItem to be resolved
 	uint8_t	pad[3];		// 009
-};
-
-// 010
-class BGSMessageIcon : public BaseFormComponent {
-public:
-	BGSMessageIcon();
-	~BGSMessageIcon();
-
-	TESIcon	icon;		// 004
 };
 
 // 008
@@ -1637,20 +1629,6 @@ public:
 static_assert(sizeof(TESClass) == 0x60);
 #else
 static_assert(sizeof(TESClass) == 0x8C);
-#endif
-
-class TESReputation : public TESForm, public TESFullName, public TESIcon, public BGSMessageIcon {
-public:
-	float		fMaxReputation;
-	float		fPositiveReputation;
-	float		fNegativeReputation;
-	uint32_t	uiReputationChangedWasPositive;
-};
-
-#ifdef GAME
-static_assert(sizeof(TESReputation) == 0x50);
-#else
-static_assert(sizeof(TESReputation) == 0x84);
 #endif
 
 // 4C
@@ -3090,6 +3068,10 @@ public:
 	static void RunBiped3DDetach(NiAVObject* apObject) {
 		CdeclCall(0x4AB0C0, apObject);
 	}
+
+	static void AttachToSkeleton(NiNode* apSkeleton, NiAVObject* apSkin, NiNode* apParentNode, bool abShowWarnings = false) {
+		CdeclCall(0x4ADE40, apSkeleton, apSkin, apParentNode, abShowWarnings);
+	}
 };
 static_assert(sizeof(BipedAnim) == 0x2B4);
 
@@ -3876,6 +3858,14 @@ public:
 
 	TESObjectLAND* GetLand() {
 		return ThisCall<TESObjectLAND*>(0x546FB0, this);
+	}
+
+	void AddEmittanceRef(TESObjectREFR* apReference) {
+		ThisCall(0x5453B0, this, apReference);
+	}
+
+	void RemoveEmittanceRef(TESObjectREFR* apReference) {
+		ThisCall(0x5454F0, this, apReference);
 	}
 };
 #ifdef GAME
@@ -5216,6 +5206,14 @@ public:
 	PerkData				data;				// 38
 	ConditionList			conditions;			// 40
 	tList<BGSPerkEntry>		entries;			// 48
+
+	bool IsPerkAttainable(TESObjectREFR* apReference) const {
+		return ThisCall<bool>(0x5EBA00, this, apReference);
+	}
+
+	bool IsPerkAvailable(TESObjectREFR* apReference) const {
+		return ThisCall<bool>(0x785150, this, apReference);
+	}
 };
 
 class TESCasino : public TESForm {

@@ -13,6 +13,7 @@ DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , false, kParams_OneString_TwoOptional
 DEFINE_COMMAND_PLUGIN(GetSystemColor, , false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetSystemColorAlt, , false, kParams_OneInt_ThreeScriptVars);
 DEFINE_COMMAND_ALT_PLUGIN(SetCustomReputationChangeIcon, scrci, , false, kParams_OneForm_OneInt_OneString);
+DEFINE_COMMAND_ALT_PLUGIN(GetCustomReputationChangeIcon, gcrci, , false, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetExtraMiscStat, , false, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ModExtraMiscStat, , false, kParams_OneString_OneInt);
 DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , false, kParams_OneString);

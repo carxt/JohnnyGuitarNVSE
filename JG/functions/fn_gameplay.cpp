@@ -1436,66 +1436,54 @@ bool Cmd_ToggleDisableSaves_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
-	*result = false;
-	const char cNodeName[128] = {};
-	char cNewCasingPath[MAX_PATH] = {};
-	const char* pOrgCasingPath;
-	ConsoleManager* pConsole = ConsoleManager::GetSingleton();
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cNodeName, &cNewCasingPath)) {
-		if (!thisObj || !thisObj->IsActor())
-			return false;
+	*result = 0;
+	if (!thisObj || !thisObj->IsActor())
+		return true;
 
-		Actor* pActor = (Actor*)thisObj;
+	char cCasingNodeName[MAX_PATH] = {};
+	char cNewCasingPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cCasingNodeName, &cNewCasingPath)) {
+		Actor* pActor = static_cast<Actor*>(thisObj);
 
 		TESObjectWEAP* pWeapon = pActor->GetEquippedWeapon();
-		if (!pWeapon || pWeapon->IsMelee())
-			return false;
+		if (!pWeapon)
+			return true;
 
-		NiNode* pActorNode = nullptr;
-		if (cNodeName[0] != 0) {
-			PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
-			if (thisObj == pPlayer) {
-				pActorNode = pPlayer->Get3D(!pPlayer->is3rdPerson);
-			}
-			else
-				pActorNode = thisObj->Get3DSimple();
-		}
+		NiAVObject* pActorScene = nullptr;
+		if (cCasingNodeName[0] != 0)
+			pActorScene = ScriptUtils::GetReferenceScene(pActor, false);
 
-		bool bChangedPos = false;
-		NiAVObject* pCasingNode = nullptr;
+		NiPointer<NiAVObject> spOrgCasingNode;
 		NiTransform kOrgTrans;
-		if (pActorNode) {
-			NiAVObject* pNewCasingNode = BSUtilities::GetObjectByName(pActorNode, cNodeName);
-			pCasingNode = BSUtilities::GetObjectByName(pActorNode, "ShellCasingNode");
-			if (pCasingNode && pNewCasingNode) {
-				kOrgTrans = pCasingNode->m_kWorld;
+		if (pActorScene) [[likely]] {
+			const NiAVObject* pNewCasingNode = BSUtilities::GetObjectByName(pActorScene, cCasingNodeName);
+			if (pNewCasingNode) [[likely]] {
+				spOrgCasingNode = BSUtilities::GetObjectByName(pActorScene, "ShellCasingNode");
+				if (spOrgCasingNode) [[likely]] {
+					kOrgTrans = spOrgCasingNode->m_kWorld;
 
-				pCasingNode->m_kWorld = pNewCasingNode->m_kWorld;
-
-				bChangedPos = true;
+					spOrgCasingNode->m_kWorld = pNewCasingNode->m_kWorld;
+				}
 			}
 		}
 
-		bool bHasCasingPath = false;
+		BSString strOrgCasingPath;
 		if (cNewCasingPath[0] != 0) {
-			bHasCasingPath = true;
-			pOrgCasingPath = pWeapon->shellCasingModel.strModel.c_str();
-			pWeapon->shellCasingModel.strModel.pString = cNewCasingPath;
+			strOrgCasingPath = std::move(pWeapon->shellCasingModel.strModel);
+			pWeapon->shellCasingModel.SetModel(cNewCasingPath);
 		}
 
 		pWeapon->EjectShellCasing(pActor);
 
+		if (spOrgCasingNode)
+			spOrgCasingNode->m_kWorld = kOrgTrans;
 
-		if (bChangedPos)
-			pCasingNode->m_kWorld = kOrgTrans;
+		if (strOrgCasingPath)
+			pWeapon->shellCasingModel.strModel = std::move(strOrgCasingPath);
 
-		if (bHasCasingPath)
-			pWeapon->shellCasingModel.strModel.pString = (char*)pOrgCasingPath;
-
-		*result = true;
-		return true;
+		*result = 1;
 	}
-	return false;
+	return true;
 }
 
 bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
@@ -1505,10 +1493,7 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 	BOOL bFaceTarget = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTarget, &fRadius, &bFaceTarget) && thisObj->IsActor()) {
 		Actor* pActor = static_cast<Actor*>(thisObj);
-		if (pTarget) {
-			if (!pTarget->IsReference())
-				return true;
-
+		if (pTarget && pTarget->IsReference()) {
 			if (bFaceTarget)
 				*result = pActor->SetPathfindingGoalAndAngle(pTarget, fRadius);
 			else

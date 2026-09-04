@@ -5,6 +5,7 @@
 #include "BSStringT.hpp"
 
 class AlchemyItem;
+class TESForm;
 
 class ExtraDataList : public BaseExtraList {
 public:
@@ -20,6 +21,9 @@ public:
 
 	void SetPoison(AlchemyItem* apPoison);
 	void RemovePoison();
+
+	TESForm* GetEmittanceSource() const;
+	void SetEmittanceSource(TESForm* apSource);
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

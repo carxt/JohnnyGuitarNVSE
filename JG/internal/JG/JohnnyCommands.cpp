@@ -21,6 +21,7 @@
 #include "JG/DisabledSaves.hpp"
 #include "JG/CustomHUDShake.hpp"
 #include "JG/AnimActivationHeight.hpp"
+#include "JG/ExternalEmittanceOnBases.hpp"
 
 ExpressionEvaluatorUtils s_expEvalUtils;
 #endif
@@ -33,6 +34,7 @@ namespace JohnnyCommands {
 	void InitCommandData(const NVSEInterface* apNVSE) {
 #ifdef GAME
 		AnimActivationHeight::Init();
+		ExternalEmittanceOnBases::Install();
 		apNVSE->InitExpressionEvaluatorUtils(&s_expEvalUtils);
 #endif
 	}
@@ -437,6 +439,18 @@ namespace JohnnyCommands {
 		REG_CMD(SetNiLightColor);
 		REG_CMD(GetNiLightColor);
 		REG_CMD(ReloadEquippedModelsAlt);
+		REG_CMD(ar_IsFormInList);
+		REG_TYPED_CMD(GetExternalEmittanceSource, Form);
+		REG_CMD(SetExternalEmittanceSource);
+		REG_TYPED_CMD(GetProjectileMuzzleFlashLight, Form);
+		REG_CMD(SetProjectileMuzzleFlashLight);
+		REG_CMD(SetShaderPropertyFlag);
+		REG_CMD(GetShaderPropertyFlag);
+		REG_TYPED_CMD(GetCustomReputationChangeIcon, String);
+		REG_TYPED_CMD(GetReputationTitle, String);
+		REG_TYPED_CMD(GetReputationIcon, String);
+		REG_TYPED_CMD(GetReputationFormIcon, String);
+		REG_CMD(SetReputationFormIcon);
 	}
 
 }

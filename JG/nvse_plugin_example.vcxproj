@@ -498,6 +498,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BSTextureManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSTimer.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSUtilities.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSXFlags.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ContainerItemExtra.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Conversation.cpp" />
     <ClCompile Include="internal\Game\Bethesda\DialogueItem.cpp" />
@@ -529,6 +530,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiColor.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiColorA.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiCullingProcess.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiExtraData.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFixedString.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFrustumPlanes.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiGlobalStringTable.cpp" />
@@ -845,6 +847,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSTMessageQueue.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSUtilities.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSWindModifier.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSXFlags.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ContainerItemExtra.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ContainerObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Conversation.hpp" />
@@ -930,10 +933,12 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiColorA.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiCriticalSection.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiCullingProcess.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiExtraData.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFixedString.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFrustum.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFrustumPlanes.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiGlobalStringTable.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiIntegerExtraData.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMatrix3.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiMemory.hpp" />
@@ -956,6 +961,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiRenderer.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRTTI.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSmartPointer.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiStringExtraData.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTAbstractPoolAllocator.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTDefaultAllocator.hpp" />
@@ -987,12 +993,15 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Obsidian\AudioMarkerData.hpp" />
     <ClInclude Include="internal\Game\Obsidian\AudioMarkerInfo.hpp" />
     <ClInclude Include="internal\Game\Obsidian\ExtraAudioMarker.hpp" />
+    <ClInclude Include="internal\Game\Obsidian\TESReputation.hpp" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\JG\AddItemMessages.hpp" />
     <ClInclude Include="internal\JG\AnimActivationHeight.hpp" />
     <ClInclude Include="internal\JG\BarterFilter.hpp" />
     <ClInclude Include="internal\JG\CameraOverlay.hpp" />
     <ClInclude Include="internal\JG\CameraOverride.hpp" />
+    <ClInclude Include="internal\JG\ExternalEmittanceOnBases.hpp" />
+    <ClInclude Include="internal\JG\FormSkeletons.hpp" />
     <ClInclude Include="internal\JG\NewNiObjects.hpp" />
     <ClInclude Include="internal\JG\SkyUpdateFixes.hpp" />
     <ClInclude Include="internal\JG\CustomCameraShake.hpp" />

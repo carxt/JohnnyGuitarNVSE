@@ -368,6 +368,24 @@ static ParamInfo kParams_OneInt_OneOptionalActorBase[] =
 	{	"base actor",	kParamType_ActorBase,	1	},
 };
 
+static ParamInfo kParams_OneReputation[] =
+{
+	{	"Reputation",	kParamType_Reputation,	0	},
+};
+
+static ParamInfo kParams_GetReputationFormIcon[] =
+{
+	{	"Reputation",	kParamType_Reputation,	0	},
+	{	"Icon Type",	kParamType_Integer,	0	},
+};
+
+static ParamInfo kParams_SetReputationFormIcon[] =
+{
+	{	"Reputation",	kParamType_Reputation,	0	},
+	{	"Icon Type",	kParamType_Integer,		0	},
+	{	"Icon Path",	kParamType_String,		0	},
+};
+
 static ParamInfo kParams_OneRace[] =
 {
 	{	"race",	kParamType_Race,	0	},
@@ -595,6 +613,13 @@ static ParamInfo kParams_OneInt_OneForm_OneInt[] =
 {
 	{ "Integer", kParamType_Integer, 0 },
 	{ "Form", kParamType_AnyForm, 0 },
+	{ "Integer", kParamType_Integer, 0 }
+};
+
+static ParamInfo kParams_OneInt_OneFormList_OneInt[] =
+{
+	{ "Integer", kParamType_Integer, 0 },
+	{ "Form List", kParamType_FormList, 0 },
 	{ "Integer", kParamType_Integer, 0 }
 };
 
@@ -970,9 +995,9 @@ static ParamInfo kParams_OneBoolOneIntOneFloat[] =
 	{	"Ref To Track",	kParamType_ObjectRef, 1 },
 };
 
-static ParamInfo kParams_OneRefOneOptionalFloatOneOptionalInt[] =
+static ParamInfo kParams_PathToRef[] =
 {
-	{	"Target Reference",		kParamType_ObjectRef, 0 },
+	{	"Target Reference",		kParamType_AnyForm, 0 },
 	{	"Target Radius",		kParamType_Float, 1	},
 	{ 	"Face Target",			kParamType_Integer, 1 },
 };
@@ -1009,7 +1034,7 @@ static ParamInfo kParams_ThreeFloatsTwoOptionalFloats[] =
 
 static ParamInfo kParams_SetPropertyValue[] =
 {
-	{ "Property Name",	kParamType_String,	0 },
+	{ "Block Name",		kParamType_String,	0 },
 	{ "Item",			kParamType_Integer, 0 },
 	{ "Value",			kParamType_Integer, 0 },
 	{ "First Person",	kParamType_Integer, 1 },
@@ -1017,14 +1042,14 @@ static ParamInfo kParams_SetPropertyValue[] =
 
 static ParamInfo kParams_GetPropertyValue[] =
 {
-	{ "Property Name",	kParamType_String,	0 },
+	{ "Block Name",		kParamType_String,	0 },
 	{ "Item",			kParamType_Integer, 0 },
 	{ "First Person",	kParamType_Integer, 1 },
 };
 
 static ParamInfo kParams_SetNiLightValue[] =
 {
-	{ "Property Name",	kParamType_String,	0 },
+	{ "Block Name",		kParamType_String,	0 },
 	{ "Item",			kParamType_Integer, 0 },
 	{ "Value",			kParamType_Float,   0 },
 	{ "First Person",	kParamType_Integer, 1 },
@@ -1032,7 +1057,7 @@ static ParamInfo kParams_SetNiLightValue[] =
 
 static ParamInfo kParams_SetNiLightColor[] =
 {
-	{ "Property Name",	kParamType_String,	0 },
+	{ "Block Name",		kParamType_String,	0 },
 	{ "Item",			kParamType_Integer, 0 },
 	{ "Red",			kParamType_Float,   0 },
 	{ "Green",			kParamType_Float,   0 },
@@ -1042,7 +1067,7 @@ static ParamInfo kParams_SetNiLightColor[] =
 
 static ParamInfo kParams_GetNiLightColor[] =
 {
-	{ "Property Name",	kParamType_String,	0 },
+	{ "Block Name",		kParamType_String,	0 },
 	{ "Item",			kParamType_Integer, 0 },
 	{ "Red",			kParamType_ScriptVariable,   0 },
 	{ "Green",			kParamType_ScriptVariable,   0 },

@@ -1,14 +1,17 @@
 #include "fn_gamebryo.h"
 
+#include <GameObjects.h>
+#include <GameTasks.h>
+
 #include "Gamebryo/NiParticleSystem.hpp"
 #include "Gamebryo/NiPSysBoxEmitter.hpp"
 #include "Gamebryo/NiPSysEmitter.hpp"
 #include "Gamebryo/NiPSysModifier.hpp"
+#include "Bethesda/AILinearTaskThreadManager.hpp"
+#include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/BSWindModifier.hpp"
 
 #include <JG/TaskQueue.hpp>
-#include <GameTasks.h>
-
 #include "JG/ScriptUtils.hpp"
 using namespace ScriptUtils;
 
@@ -48,6 +51,8 @@ enum class NiUpdateType : int32_t {
 	HAVOK_SYNC_BOTH,
 	HAVOK_SYNC_TO,
 	HAVOK_SYNC_FROM,
+	OBJECT_PALETTE_ADD,
+	OBJECT_PALETTE_REMOVE,
 	COUNT
 };
 
@@ -169,6 +174,17 @@ static void __fastcall SynchronizeHavok(NiAVObject* apObject, bhkNiCollisionObje
 	else {
 		bhkNiCollisionObject::Synchronize(apObject, aeSyncMode);
 	}
+}
+
+static void __fastcall UpdateObjectPalette(NiAVObject* apRoot, NiAVObject* apObject, bool abAdd) {
+	NiDefaultAVObjectPalette* pPalette = GetObjectPalette(apObject);
+	if (!pPalette && apRoot != apObject)
+		pPalette = GetObjectPalette(apRoot);
+
+	if (abAdd)
+		ScriptUtils::RecurseAndAddObjectsToPalette(apObject, pPalette);
+	else
+		ScriptUtils::RecurseAndRemoveObjectsFromPalette(apObject, pPalette);
 }
 
 bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
@@ -386,7 +402,7 @@ bool Cmd_GetNiLODLevel_Execute(COMMAND_ARGS) {
 bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NiUpdateType eType = NiUpdateType::NONE;
-	float fTime = FLT_MAX;
+	float fTime = -FLT_MAX;
 	BOOL bUpdateControllers = FALSE;
 	BOOL bFirstPerson = FALSE;
 	char cName[MAX_PATH] = {};
@@ -401,7 +417,7 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 
 		if (pTarget) {
 			const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
-			NiUpdateData kData(fTime != FLT_MAX ? fTime : 0.f, bUpdateControllers, bQueue);
+			NiUpdateData kData(fTime > 0.f ? fTime : 0.f, bUpdateControllers, bQueue);
 			switch (eType) {
 			case NiUpdateType::FULL:
 				pTarget->Update(kData);
@@ -432,6 +448,10 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 				break;
 			case NiUpdateType::HAVOK_SYNC_FROM:
 				SynchronizeHavok(pTarget, bhkNiCollisionObject::SYNC_FROM_HAVOK, bQueue);
+				break;
+			case NiUpdateType::OBJECT_PALETTE_ADD:
+			case NiUpdateType::OBJECT_PALETTE_REMOVE:
+				UpdateObjectPalette(pRoot, pTarget, eType == NiUpdateType::OBJECT_PALETTE_ADD);
 				break;
 			default:
 				__assume(0);
@@ -999,5 +1019,40 @@ bool Cmd_GetNiLightColor_Execute(COMMAND_ARGS) {
 		*result = 1;
 	}
 
+	return true;
+}
+
+bool Cmd_SetShaderPropertyFlag_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BSShaderProperty::ShaderBits eBit = BSShaderProperty::ShaderBits::MAX_FLAGS;
+	BOOL bValue = FALSE;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eBit, &bValue, &bFirstPerson) && cObjectName[0] && eBit >= 0 && eBit < BSShaderProperty::ShaderBits::MAX_FLAGS) {
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Shade);
+		BSShaderProperty* pShade = static_cast<BSShaderProperty*>(kObjects.first);
+		if (!pShade)
+			return true;
+
+		pShade->SetFlag(eBit, bValue);
+
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetShaderPropertyFlag_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BSShaderProperty::ShaderBits eBit = BSShaderProperty::ShaderBits::MAX_FLAGS;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eBit, &bFirstPerson) && cObjectName[0] && eBit >= 0 && eBit < BSShaderProperty::ShaderBits::MAX_FLAGS) {
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Shade);
+		const BSShaderProperty* pShade = static_cast<BSShaderProperty*>(kObjects.first);
+		if (!pShade)
+			return true;
+
+		*result = pShade->GetFlag(eBit);
+	}
 	return true;
 }

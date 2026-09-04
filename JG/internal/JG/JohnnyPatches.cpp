@@ -28,6 +28,8 @@
 #include "RadioSkipOGGWAVPatch.hpp"
 #include "RSMBarberHook.hpp"
 #include "WorldToScreen.hpp"
+#include "NewNiObjects.hpp"
+#include "FormSkeletons.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
 
@@ -55,6 +57,7 @@ namespace JohnnyPatches {
 	bool bCombatMusicDisabled = false;
 	bool bMultipleAddItemMessages = false;
 	bool bFixOggWavRadioPlayback = false;
+	bool bUseFormSkeletons = false;
 	int32_t iFPSCapLoadScreen = 0;
 	float fViewmodelNearDistance = 0.f;
 
@@ -175,6 +178,7 @@ namespace JohnnyPatches {
 		bFixDeathSounds = GetPrivateProfileInt("MAIN", "bFixDeathVoicelines", 1, filename);
 		bPatchPainedPlayer = GetPrivateProfileInt("MAIN", "bRemovePlayerPainExpression", 0, filename);
 		bMultipleAddItemMessages = GetPrivateProfileInt("MAIN", "bMultipleAddItemMessages", 0, filename);
+		bUseFormSkeletons = GetPrivateProfileInt("MAIN", "bUseFormSkeletons", 0, filename);
 		bFixOggWavRadioPlayback = GetPrivateProfileInt("MAIN", "bFixOggWavRadioPlayback", 1, filename);
 		DeathSoundFix::iDeathSoundMaxTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
@@ -277,6 +281,11 @@ namespace JohnnyPatches {
 		DialogueResponseOverride::Install();
 #endif
 		NewNiObjects::Install();
+	}
+
+	void PostLoadInit() {
+		if (bUseFormSkeletons)
+			FormSkeletons::Install();
 	}
 
 	void DeferredInit() {
