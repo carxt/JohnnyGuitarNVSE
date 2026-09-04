@@ -55,11 +55,21 @@ void ExtraDataList::RemovePoison() {
 }
 
 // GAME - 0x421D20
+// GECK - 0x4AB920
 TESForm* ExtraDataList::GetEmittanceSource() const {
+#ifdef GAME
 	return ThisCall<TESForm*>(0x421D20, this);
+#else
+	return ThisCall<TESForm*>(0x4AB920, this);
+#endif
 }
 
 // GAME - 0x421D50
+// GECK - 0x4AB940
 void ExtraDataList::SetEmittanceSource(TESForm* apSource) {
+#ifdef GAME
 	ThisCall(0x421D50, this, apSource);
+#else
+	ThisCall(0x4AB940, this, apSource);
+#endif
 }

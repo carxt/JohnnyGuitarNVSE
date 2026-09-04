@@ -35,6 +35,7 @@ public:
 	float GetReputationValue(Type aeType) const;
 	void SetReputationValue(Type aeType, float afValue);
 
+#ifdef GAME
 	void AddReputationValue(Type aeType, float afValue);
 	void RemoveReputationValue(Type aeType, float afValue);
 
@@ -57,6 +58,7 @@ public:
 	const char* GetReputationDesc() const;
 
 	const char* GetReputationIcon() const;
+#endif
 };
 
 using TESReputationType = TESReputation::Type;

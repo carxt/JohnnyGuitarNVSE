@@ -1,4 +1,7 @@
 #include "BSRenderedTexture.hpp"
+#ifndef GAME
+#include "Gamebryo/NiRenderer.hpp"
+#endif
 
 // GAME - 0xB6B260
 // GECK - 0x902710
@@ -12,7 +15,11 @@ NiRenderTargetGroup* BSRenderedTexture::GetGroup() const {
 
 // GAME - 0x4E9510
 bool BSRenderedTexture::IsOutsideFrame() {
+#ifdef GAME
 	return CdeclCall<bool>(0x4E9510);
+#else
+	return NiRenderer::GetRenderer()->GetFrameState() == NiRenderer::FrameState::OUTSIDE_FRAME;
+#endif
 }
 
 // GAME - 0xB6B890

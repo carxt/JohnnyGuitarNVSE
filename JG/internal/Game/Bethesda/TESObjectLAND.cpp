@@ -1,4 +1,7 @@
 #include "TESObjectLAND.hpp"
+#ifndef GAME
+#include <GameForms.h>
+#endif
 
 // GAME - 0x534140
 // GECK - 0x614690
@@ -164,8 +167,13 @@ float TESObjectLAND::GetDefaultWorldHeight() const {
 #ifdef GAME
     return ThisCall<float>(0x53A550, this);
 #else
-    // TODO: FINISH
-    return -2048.0;
+    const TESObjectCELL* pCell = GetParentCell();
+    if (pCell) {
+        const TESWorldSpace* pWorldSpace = pCell->GetWorldSpace();
+        if (pWorldSpace)
+            return pWorldSpace->GetDefaultLandHeight();
+    }
+    return -2048.f;
 #endif
 }
 

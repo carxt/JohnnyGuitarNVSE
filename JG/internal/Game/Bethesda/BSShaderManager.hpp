@@ -20,8 +20,6 @@ public:
 	};
 	using SceneGraphType = _SSNType::Type;
 
-	static constexpr AddressPtr<NiFixedString*, 0x11F94BC> pTexPercTag;
-
 	static NiDX9Renderer* GetRenderer();
 
 	static BSTextureManager* GetTextureManager();
@@ -31,4 +29,11 @@ public:
 	static ShadowSceneNode* GetShadowSceneNode(uint32_t aeType);
 
 	static const NiFixedString& GetTexPercTag();
+
+private:
+#ifdef GAME
+	static constexpr AddressPtr<NiFixedString*, 0x11F94BC> pTexPercTag;
+#else
+	static constexpr AddressPtr<NiFixedString*, 0xF23F0C>  pTexPercTag;
+#endif
 };

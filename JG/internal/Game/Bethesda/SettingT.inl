@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SettingT.hpp"
-#include <type_traits>
+#include <shared/BSMemory/BSMemory.hpp>
 
 class INISettingCollection;
 class INIPrefSettingCollection;
@@ -11,50 +11,60 @@ class BlendSettingCollection;
 
 template<typename COLLECTION>
 inline COLLECTION* SettingT<COLLECTION>::GetCollection() {
-	if constexpr (std::is_same<COLLECTION, INISettingCollection>::value) {
-#ifdef GAME
-		return CdeclCall<COLLECTION*>(0x44F560);
-#else
-		return CdeclCall<COLLECTION*>(0x41CBC0);
-#endif
-	}
-	else if constexpr (std::is_same<COLLECTION, INIPrefSettingCollection>::value) {
-#ifdef GAME
-		return CdeclCall<COLLECTION*>(0x4DE490);
-#else
-		return CdeclCall<COLLECTION*>(0x40E1A0);
-#endif
-	}
-	else if constexpr (std::is_same<COLLECTION, RendererSettingCollection>::value) {
-#ifdef GAME
-		return CdeclCall<COLLECTION*>(0x45D180);
-#else
-		COLLECTION* Collection = BSMemory::create<COLLECTION>();
-		if (Collection) {
-			((DWORD*)Collection)[0] = (DWORD)0xD3F6C8;
-			*reinterpret_cast<COLLECTION**>(0xF1EF7C) = Collection;
-		}
-		return *reinterpret_cast<COLLECTION**>(0xF1EF7C);
-#endif
-	}
-	else if constexpr (std::is_same<COLLECTION, GameSettingCollection>::value) {
-#ifdef GAME
-		return CdeclCall<COLLECTION*>(0x404A70);
-#else
-		CdeclCall(0x472C70);
-		return *reinterpret_cast<COLLECTION**>(0xF0647C);
-#endif
-	}
-#ifdef GAME
-	else if constexpr (std::is_same<COLLECTION, BlendSettingCollection>::value) {
-		return CdeclCall<BlendSettingCollection*>(0x632E20);
-	}
-#endif
-	else {
-		InitCollection();
-		return pCollection;
-	}
+	InitCollection();
+	return pCollection;
 }
+
+// GAME - 0x44F560
+// GECK - 0x41CBC0
+inline INISettingCollection* SettingT<INISettingCollection>::GetCollection() {
+#ifdef GAME
+	return CdeclCall<INISettingCollection*>(0x44F560);
+#else
+	return CdeclCall<INISettingCollection*>(0x41CBC0);
+#endif
+}
+
+// GAME - 0x4DE490
+// GECK - 0x40E1A0
+inline INIPrefSettingCollection* SettingT<INIPrefSettingCollection>::GetCollection() {
+#ifdef GAME
+	return CdeclCall<INIPrefSettingCollection*>(0x4DE490);
+#else
+	return CdeclCall<INIPrefSettingCollection*>(0x40E1A0);
+#endif
+}
+
+// GAME - 0x45D180
+inline RendererSettingCollection* SettingT<RendererSettingCollection>::GetCollection() {
+#ifdef GAME
+	return CdeclCall<RendererSettingCollection*>(0x45D180);
+#else
+	RendererSettingCollection* pCollection = BSMemory::create<RendererSettingCollection>();
+	if (pCollection) {
+		((DWORD*)pCollection)[0] = (DWORD)0xD3F6C8;
+		*reinterpret_cast<RendererSettingCollection**>(0xF1EF7C) = pCollection;
+	}
+	return *reinterpret_cast<RendererSettingCollection**>(0xF1EF7C);
+#endif
+}
+
+// GAME - 0x404A70
+inline GameSettingCollection* SettingT<GameSettingCollection>::GetCollection() {
+#ifdef GAME
+	return CdeclCall<GameSettingCollection*>(0x404A70);
+#else
+	CdeclCall(0x472C70);
+	return *reinterpret_cast<GameSettingCollection**>(0xF0647C);
+#endif
+}
+
+#ifdef GAME
+// GAME - 0x632E20
+inline BlendSettingCollection* SettingT<BlendSettingCollection>::GetCollection() {
+	return CdeclCall<BlendSettingCollection*>(0x632E20);
+}
+#endif
 
 template<typename COLLECTION>
 inline void SettingT<COLLECTION>::InitCollection() {

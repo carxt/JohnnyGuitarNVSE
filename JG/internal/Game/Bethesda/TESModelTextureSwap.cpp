@@ -30,7 +30,9 @@ void TESModelTextureSwap::AddTexSwap(const char* apObjectName, int32_t aiIndex, 
 #endif
 }
 
+// GECK - 0x505950
 void TESModelTextureSwap::RemoveTexSwap(int32_t aiIndex) {
+#ifdef GAME
 	if (aiIndex == -1)
 		return;
 
@@ -44,6 +46,9 @@ void TESModelTextureSwap::RemoveTexSwap(int32_t aiIndex) {
 		}
 		pIter = pIter->GetNext();
 	}
+#else
+	ThisCall(0x505950, this, aiIndex);
+#endif
 }
 
 // GAME - 0x48ADE0

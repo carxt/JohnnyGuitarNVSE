@@ -16,6 +16,11 @@ void NiRenderer::SetSorter(NiAccumulator* apAccumulator) {
 	m_spAccum = apAccumulator;
 }
 
+// GAME - 0x4E9530
+NiRenderer::FrameState NiRenderer::GetFrameState() const {
+	return m_eFrameState;
+}
+
 // GAME - 0x4A0E50
 bool NiRenderer::GetInsideFrameState() const {
 #ifdef GAME

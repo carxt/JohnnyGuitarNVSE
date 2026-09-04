@@ -4041,6 +4041,8 @@ public:
 	TESTexture							kWaterNoiseTexture;
 
 	TESWorldSpace* GetRootMapWorld();
+
+	float GetDefaultLandHeight() const { return fDefaultLandHeight; }
 };
 #ifdef GAME
 static_assert(sizeof(TESWorldSpace) == 0xEC);

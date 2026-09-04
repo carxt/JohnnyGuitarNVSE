@@ -2,52 +2,37 @@
 
 // GAME - 0x83B830
 Conversation::Conversation() {
-	pCurrentItem = nullptr;
+	ThisCall(0x83B830, this);
 }
 
 // GAME - 0x83B8D0
 Conversation::~Conversation() {
-	ClearList();
+	ThisCall(0x83B8D0, this);
 }
 
 // GAME - 0x83B9A0
 bool Conversation::FirstItem() {
-	pCurrentItem = kDialogueItems.GetHead();
-	return pCurrentItem && pCurrentItem->GetItem() != nullptr;
+	return ThisCall<bool>(0x83B9A0, this);
 }
 
 // GAME - 0x83C7E0
 bool Conversation::NextItem() {
-	if (pCurrentItem)
-		pCurrentItem = pCurrentItem->GetNext();
-
-	return pCurrentItem != nullptr;
+	return ThisCall<bool>(0x83C7E0, this);
 }
 
 // GAME = 0x83C820
 DialogueItem* Conversation::GetCurrentItem() const {
-	if (pCurrentItem)
-		return pCurrentItem->GetItem();
-	return nullptr;
+	return ThisCall<DialogueItem*>(0x83C820, this);
 }
 
 // GAME - 0x83B9F0
 bool Conversation::GetNext() {
-	if (pCurrentItem)
-		pCurrentItem = pCurrentItem->GetNext();
-	return pCurrentItem && pCurrentItem->GetItem();
+	return ThisCall<bool>(0x83B9F0, this);
 }
 
 // GAME - 0x83BAC0
 DialogueItem* Conversation::GetDialogueItemByIndex(uint16_t ausIndex) const {
-	uint16_t usIndex = 0;
-	const BSSimpleList<DialogueItem*>* pIter = kDialogueItems.GetHead();
-	while (pIter && !pIter->IsEmpty()) {
-		if (usIndex == ausIndex)
-			return pIter->GetItem();
-		pIter = pIter->GetNext();
-	}
-	return nullptr;
+	return ThisCall<DialogueItem*>(0x83BAC0, this, ausIndex);
 }
 
 // GAME - 0x83B930

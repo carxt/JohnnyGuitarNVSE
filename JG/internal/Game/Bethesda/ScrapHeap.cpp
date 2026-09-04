@@ -32,7 +32,7 @@ ScrapHeap::~ScrapHeap() noexcept {
 
 // GAME - 0xAA54A0
 // GECK - 0x8559C0
-__declspec(restrict) __declspec(allocator)  void* ScrapHeap::Allocate(uint32_t auiSize, uint32_t auiAlignment) noexcept {
+__declspec(restrict) __declspec(allocator) void* ScrapHeap::Allocate(uint32_t auiSize, uint32_t auiAlignment) noexcept {
 #ifdef GAME
 	return ThisCall<void*>(0xAA54A0, this, auiSize, auiAlignment);
 #else
@@ -58,22 +58,22 @@ uint32_t ScrapHeap::GetAllocatedMemory() const noexcept {
 	return pCurrentStackLoc - pMemHeap;
 }
 
+// GAME - 0xAA5710
+// GECK - 0x855C30
 uint32_t ScrapHeap::Size(const void* apMem) const noexcept {
-	if (!apMem)
-		return 0;
-
-	const ScrapHeap::Block* pBlock = &reinterpret_cast<const ScrapHeap::Block*>(apMem)[-1];
-	return pBlock->GetSize();
+#ifdef GAME
+	return ThisCall<uint32_t>(0xAA5710, this, apMem);
+#else
+	return ThisCall<uint32_t>(0x855C30, this, apMem);
+#endif
 }
 
+// GAME - 0xAA5800
+// GECK - 0x855D20
 uint32_t ScrapHeap::GetAllocationCount() const noexcept {
-	if (pCurrentStackLoc == pMemHeap)
-		return 0;
-
-	uint32_t uiCount = 0;
-	for (auto pBlock = pLastBlock; pBlock; pBlock = pBlock->pPrevious) {
-		if (!pBlock->IsFree())
-			++uiCount;
-	}
-	return uiCount;
+#ifdef GAME
+	return ThisCall<uint32_t>(0xAA5800, this);
+#else
+	return ThisCall<uint32_t>(0x855D20, this);
+#endif
 }
