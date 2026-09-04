@@ -5,7 +5,7 @@ BSCriticalSection::BSCriticalSection() {
 #ifdef GAME
 	ThisCall(0x44FAE0, this);
 #else
-	(*reinterpret_cast<decltype(InitializeCriticalSection)**>(0xD23344))(&kCriticalSection);
+	CallImport<InitializeCriticalSection>(0xD23344, &kCriticalSection);
 #endif
 }
 
@@ -14,7 +14,7 @@ BSCriticalSection::~BSCriticalSection() {
 #ifdef GAME
 	ThisCall(0x44FB00, this);
 #else
-	(*reinterpret_cast<decltype(DeleteCriticalSection)**>(0xD231F0))(&kCriticalSection);
+	CallImport<DeleteCriticalSection>(0xD231F0, &kCriticalSection);
 #endif
 }
 
@@ -23,7 +23,7 @@ void BSCriticalSection::Lock(const char* apName) {
 #ifdef GAME
 	ThisCall(0x4538E0, this, apName);
 #else
-	(*reinterpret_cast<decltype(EnterCriticalSection)**>(0xD231CC))(&kCriticalSection);
+	CallImport<EnterCriticalSection>(0xD231CC, &kCriticalSection);
 #endif
 }
 
@@ -32,7 +32,7 @@ bool BSCriticalSection::TryLock() {
 #ifdef GAME
 	return ThisCall<bool>(0x44B130, this);
 #else
-	return (*reinterpret_cast<decltype(TryEnterCriticalSection)**>(0xD231F4))(&kCriticalSection);
+	return CallImport<TryEnterCriticalSection>(0xD231F4, &kCriticalSection);
 #endif
 }
 
@@ -41,7 +41,7 @@ void BSCriticalSection::Unlock() {
 #ifdef GAME
 	ThisCall(0x82F1F0, this);
 #else
-	(*reinterpret_cast<decltype(LeaveCriticalSection)**>(0xD231D0))(&kCriticalSection);
+	CallImport<LeaveCriticalSection>(0xD231D0, &kCriticalSection);
 #endif
 }
 
