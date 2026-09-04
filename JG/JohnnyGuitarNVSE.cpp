@@ -103,10 +103,28 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* apNVSE, PluginInfo*
 	apInfo->name = JohnnyPluginData::JG_PLUGIN_NAME;
 	apInfo->version = JohnnyPluginData::JG_VERSION;
 
+#ifdef GAME
+	if (apNVSE->isEditor)
+		return false;
+
 	if (apNVSE->isNogore) {
 		MessageBoxA(nullptr, "German NoGore release of the game is not supported", JohnnyPluginData::JG_FULL_NAME, MB_OK | MB_ICONERROR);
 		return false;
 	}
+
+	if (apNVSE->runtimeVersion < RUNTIME_VERSION_1_4_0_525) {
+		_MESSAGE("Incorrect New Vegas version (got %08X need at least %08X)", apNVSE->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
+		return false;
+	}
+#else
+	if (!apNVSE->isEditor)
+		return false;
+
+	if (apNVSE->editorVersion < CS_VERSION_1_4_0_518) {
+		_MESSAGE("Incorrect GECK version (got %08X need at least %08X)", apNVSE->editorVersion, CS_VERSION_1_4_0_518);
+		return false;
+	}
+#endif
 
 	if (apNVSE->nvseVersion < PACKED_NVSE_VERSION) {
 		char cBuffer[128];
@@ -115,27 +133,9 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* apNVSE, PluginInfo*
 		return false;
 	}
 
-	if (!apNVSE->isEditor) {
-		if (apNVSE->runtimeVersion < RUNTIME_VERSION_1_4_0_525) {
-			_MESSAGE("incorrect New Vegas version (got %08X need at least %08X)", apNVSE->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
-			return false;
-		}
-	}
-	else {
-		if (apNVSE->editorVersion < CS_VERSION_1_4_0_518) {
-			_MESSAGE("incorrect GECK version (got %08X need at least %08X)", apNVSE->editorVersion, CS_VERSION_1_4_0_518);
-			return false;
-		}
-	};
+	_MESSAGE("%s %u Loaded successfully.", JohnnyPluginData::JG_FULL_NAME, apInfo->version);
 
-	// version checks pass
-	_MESSAGE("JohnnyGuitarNVSE %u Loaded successfully.", apInfo->version);
-
-#ifdef GAME
-	return apNVSE->isEditor == FALSE;
-#else
-	return apNVSE->isEditor == TRUE;
-#endif
+	return true;
 }
 
 EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* apNVSE) {
