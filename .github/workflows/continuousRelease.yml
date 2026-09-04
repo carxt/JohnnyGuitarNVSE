@@ -53,8 +53,8 @@ jobs:
         Copy-Item -Path "$releaseDir\johnnyguitar.dll", "$releaseDir\johnnyguitar.pdb", "$iniDir\JohnnyGuitar.ini" -Destination "$releaseDir\nvse\plugins"
         Copy-Item -Path "$debugDir\johnnyguitar.dll", "$debugDir\johnnyguitar.pdb", "$iniDir\JohnnyGuitar.ini" -Destination "$debugDir\nvse\plugins"
 
-        Copy-Item -Path "$($releaseDir)_GECK\johnnyguitar_GECK.dll", "$releaseDir\johnnyguitar_GECK.pdb" -Destination "$releaseDir\nvse\plugins"
-        Copy-Item -Path "$($debugDir)_GECK\johnnyguitar_GECK.dll", "$debugDir\johnnyguitar_GECK.pdb" -Destination "$debugDir\nvse\plugins"
+        Copy-Item -Path "$($releaseDir)_GECK\johnnyguitar_GECK.dll", "$($releaseDir)_GECK\johnnyguitar_GECK.pdb" -Destination "$releaseDir\nvse\plugins"
+        Copy-Item -Path "$($debugDir)_GECK\johnnyguitar_GECK.dll", "$($debugDir)_GECK\johnnyguitar_GECK.pdb" -Destination "$debugDir\nvse\plugins"
 
         Compress-Archive -Path "$releaseDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-Release-${{ env.artifact_timestamp }}.zip"
         Compress-Archive -Path "$debugDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-ReleaseDebug-${{ env.artifact_timestamp }}.zip"
