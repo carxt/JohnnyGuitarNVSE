@@ -284,9 +284,6 @@ namespace JohnnyPatches {
 
 		DialogueResponseOverride::Install();
 #endif
-		if (bBSAUpgrade)
-			BSAUpgrade::Install();
-
 		NewNiObjects::Install();
 	}
 
@@ -295,6 +292,8 @@ namespace JohnnyPatches {
 		if (bUseFormSkeletons)
 			FormSkeletons::Install();
 #endif
+		if (bBSAUpgrade)
+			BSAUpgrade::Install();
 	}
 
 	void DeferredInit() {
