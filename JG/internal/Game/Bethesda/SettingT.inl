@@ -10,6 +10,58 @@ class GameSettingCollection;
 class BlendSettingCollection;
 
 template<typename COLLECTION>
+inline COLLECTION* SettingT<COLLECTION>::pCollection = nullptr;
+
+template<typename COLLECTION>
+inline void SettingT<COLLECTION>::InitCollection() {
+	if (!pCollection)
+		pCollection = new COLLECTION();
+}
+
+// GAME - 0x44F570
+// GECK - 0x41C8D0
+inline void SettingT<INISettingCollection>::InitCollection() {
+#ifdef GAME
+	CdeclCall(0x44F570);
+#else
+	CdeclCall(0x41C8D0);
+#endif
+}
+
+// GAME - 0x4DE4A0
+// GECK - 0x40E150
+inline void SettingT<INIPrefSettingCollection>::InitCollection() {
+#ifdef GAME
+	CdeclCall(0x4DE4A0);
+#else
+	CdeclCall(0x40E150);
+#endif
+}
+
+// GAME - 0x45D190
+inline void SettingT<RendererSettingCollection>::InitCollection() {
+#ifdef GAME
+	CdeclCall(0x45D190);
+#else
+	static constexpr AddressPtr<RendererSettingCollection*, 0xF1EF7C> _pCollection;
+	if (!_pCollection) {
+		_pCollection = BSMemory::create<RendererSettingCollection>();
+		_pCollection.ReadAs<uint32_t*>()[0] = 0xD3F6C8;
+	}
+#endif
+}
+
+// GAME - 0x404A80
+// GECK - 0x472C70
+inline void SettingT<GameSettingCollection>::InitCollection() {
+#ifdef GAME
+	CdeclCall(0x404A80);
+#else
+	CdeclCall(0x472C70);
+#endif
+}
+
+template<typename COLLECTION>
 inline COLLECTION* SettingT<COLLECTION>::GetCollection() {
 	InitCollection();
 	return pCollection;
@@ -40,11 +92,7 @@ inline RendererSettingCollection* SettingT<RendererSettingCollection>::GetCollec
 #ifdef GAME
 	return CdeclCall<RendererSettingCollection*>(0x45D180);
 #else
-	RendererSettingCollection* pCollection = BSMemory::create<RendererSettingCollection>();
-	if (pCollection) {
-		((DWORD*)pCollection)[0] = (DWORD)0xD3F6C8;
-		*reinterpret_cast<RendererSettingCollection**>(0xF1EF7C) = pCollection;
-	}
+	InitCollection();
 	return *reinterpret_cast<RendererSettingCollection**>(0xF1EF7C);
 #endif
 }
@@ -65,12 +113,3 @@ inline BlendSettingCollection* SettingT<BlendSettingCollection>::GetCollection()
 	return CdeclCall<BlendSettingCollection*>(0x632E20);
 }
 #endif
-
-template<typename COLLECTION>
-inline void SettingT<COLLECTION>::InitCollection() {
-	if (!pCollection)
-		pCollection = new COLLECTION();
-}
-
-template<typename COLLECTION>
-inline COLLECTION* SettingT<COLLECTION>::pCollection = nullptr;
