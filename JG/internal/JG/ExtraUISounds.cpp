@@ -1,5 +1,6 @@
 #include "ExtraUISounds.hpp"
 #include "GameSound.h"
+#include "GameForms.h"
 
 namespace ExtraUISounds {
 

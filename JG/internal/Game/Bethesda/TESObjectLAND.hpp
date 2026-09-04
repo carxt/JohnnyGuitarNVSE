@@ -172,5 +172,9 @@ public:
 	void Detach3D();
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESObjectLAND, 0x2C);
+#else
+ASSERT_SIZE(TESObjectLAND, 0x40);
+#endif
 ASSERT_SIZE(TESObjectLAND::LoadedLandData, 0xA4);

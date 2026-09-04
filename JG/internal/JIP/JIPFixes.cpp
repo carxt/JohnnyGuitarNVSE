@@ -40,15 +40,17 @@
 
 class BSRenderedTexture;
 
-extern NVSECommandTableInterface* g_cmdTableInterface;
-extern NVSEScriptInterface* g_scriptInterface;
 extern bool bFixJIP;
+extern NVSECommandTableInterface* g_cmdTableInterface;
+#ifdef GAME
+extern NVSEScriptInterface* g_scriptInterface;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t auiFormID);
 extern TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
+#endif
 
 namespace {
-
+#ifdef GAME
 	static SPEC_NOINLINE void __fastcall DetachObject(NiAVObject* apRoot, NiAVObject* apObject) {
 		NiPointer spObject(apObject); // Hold the ref so it doesn't insta delete on DetachChild
 
@@ -66,10 +68,12 @@ namespace {
 		else [[likely]]
 			BipedAnim::RunBiped3DDetach(apObject);
 	}
+#endif
 }
 
 namespace JIPFixes {
 
+#ifdef GAME
 	namespace ConsoleCmdFix {
 
 		class ScriptCompileData {
@@ -891,8 +895,11 @@ namespace JIPFixes {
 		}
 
 	}
+#endif
+
 	namespace SetOnDialogTopicEventHandlerEx {
 
+#ifdef GAME
 		EventInformation* OnDialogTopicHandler = nullptr;
 
 		bool Cmd_SetOnDialogTopicEventHandler_JG_Execute(COMMAND_ARGS) {
@@ -946,18 +953,19 @@ namespace JIPFixes {
 			}
 		};
 		STACK_FRAME_OPT_RESET
+#endif
 
-		void InitHooks(bool abGECK) {
+		void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetOnDialogTopicEventHandler));
 			if (pInfo) {
-				pInfo->execute = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
 				HookUtils::SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
-
-				if (!abGECK) {
-					OnDialogTopicHandler = JGCreateEvent("OnDialogTopicHandler", 1, 1);
-					kGetResultScript.ReplaceCall(0x61F18B, &TESTopicInfoEx::GetResultScript);
-					HookUtils::SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8");
-				}
+#ifdef GAME
+				pInfo->execute = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
+				
+				OnDialogTopicHandler = JGCreateEvent("OnDialogTopicHandler", 1, 1);
+				kGetResultScript.ReplaceCall(0x61F18B, &TESTopicInfoEx::GetResultScript);
+				HookUtils::SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8");
+#endif
 			}
 		}
 
@@ -965,6 +973,7 @@ namespace JIPFixes {
 
 	namespace RespawnDisableFix {
 
+#ifdef GAME
 		bool(__cdecl* ClearDeadActors)(COMMAND_ARGS) = nullptr;
 
 		thread_local BOOL bSkipRespawning = FALSE;
@@ -990,24 +999,26 @@ namespace JIPFixes {
 		}
 
 		STACK_FRAME_OPT_RESET
+#endif
 
-		void InitHooks(bool abGECK) {
+		void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kClearDeadActors));
 			if (pInfo) {
 				pInfo->params = kParams_OneOptionalInt;
-				pInfo->numParams = 1;
+				pInfo->numParams = ARRAYSIZE(kParams_OneOptionalInt);
+#ifdef GAME
 				ClearDeadActors = pInfo->execute;
 				pInfo->execute = Cmd_ClearDeadActors_Execute;
 
-				if (!abGECK) {
-					HookUtils::WriteRelCall(JIPUtils::GetAddress(0x10030C38), &HighProcessEx::FadeAndDisable);
-					HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x10030C3D), 2);
-				}
+				HookUtils::WriteRelCall(JIPUtils::GetAddress(0x10030C38), &HighProcessEx::FadeAndDisable);
+				HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x10030C3D), 2);
+#endif
 			}
 		}
 
 	}
 
+#ifdef GAME
 	namespace ModelReloadFix {
 
 		uint32_t uiWeaponHasScope = 0;
@@ -1137,6 +1148,7 @@ namespace JIPFixes {
 			}
 		}
 	}
+#endif
 
 	namespace BetterSearch {
 
@@ -1148,6 +1160,7 @@ namespace JIPFixes {
 			{ "Runtime Form Handling (0 - none, 1 - skip, 2 - only)", kParamType_Integer, true }
 		};
 
+#ifdef GAME
 		constexpr uint32_t MAX_LINE_WIDTH = 1700;
 		constexpr uint32_t MAX_LINE_LENGTH = 120;
 
@@ -1419,20 +1432,25 @@ namespace JIPFixes {
 			lineBuf->paramTextLen = uiNewTextLen;
 			return Cmd_Search_Org_Parse(numParams, paramInfo, lineBuf, scriptBuf);
 		}
+#endif
 
 		void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSearch));
 			if (pInfo) {
-				Cmd_Search_Org_Parse = pInfo->parse;
-				pInfo->execute		= Cmd_Search_JG_Execute;
-				pInfo->parse		= Cmd_Search_JG_Parse;
 				pInfo->params		= kSearchParams;
 				pInfo->numParams	= ARRAYSIZE(kSearchParams);
+
+#ifdef GAME
+				Cmd_Search_Org_Parse = pInfo->parse;
+				pInfo->execute = Cmd_Search_JG_Execute;
+				pInfo->parse = Cmd_Search_JG_Parse;
+#endif
 			}
 		}
 
 	}
 
+#ifdef GAME
 	namespace WeaponModEffectsFix {
 		void InitHooks() {
 			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x1003DA30), 5);
@@ -1504,6 +1522,7 @@ namespace JIPFixes {
 			kRemoveTileFromUpdateList.ReplaceCall(0x706C98, &Hook::CleanupTile);
 		}
 	}
+#endif
 
 	namespace PowerArmorCondition {
 
@@ -1522,6 +1541,7 @@ namespace JIPFixes {
 		}
 	}
 
+#ifdef GAME
 	namespace GetMenuItemListRefsFix {
 
 		STACK_FRAME_OPT_ENABLE
@@ -1772,9 +1792,11 @@ namespace JIPFixes {
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10058476), SetItemHealth);
 		}
 	}
+#endif
 
 	namespace CursorPosUICords {
 
+#ifdef GAME
 		bool* pbHUDCursorMode = nullptr;
 
 		bool Cmd_GetCursorPos_Execute(COMMAND_ARGS) {
@@ -1815,28 +1837,36 @@ namespace JIPFixes {
 
 			return true;
 		}
+#endif
 
 		void InitHooks() {
+#ifdef GAME
 			pbHUDCursorMode = reinterpret_cast<bool*>(JIPUtils::GetAddress(0x10076378));
+#endif
 			{
 				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetCursorPos));
 				if (pInfo) {
 					pInfo->params = kParams_OneAxis_OneOptionalInt;
-					pInfo->numParams = 2;
+					pInfo->numParams = ARRAYSIZE(kParams_OneAxis_OneOptionalInt);
+#ifdef GAME
 					pInfo->execute = Cmd_GetCursorPos_Execute;
+#endif
 				}
 			}
 			{
 				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetCursorPos));
 				if (pInfo) {
 					pInfo->params = kParams_TwoFloats_OneOptionalInt;
-					pInfo->numParams = 3;
+					pInfo->numParams = ARRAYSIZE(kParams_TwoFloats_OneOptionalInt);
+#ifdef GAME
 					pInfo->execute = Cmd_SetCursorPos_Execute;
+#endif
 				}
 			}
 		}
 	}
 
+#ifdef GAME
 	namespace SetHotkeyItemRefFix {
 
 		uint32_t uiJIPCreateExtraDataAddr;
@@ -1920,7 +1950,6 @@ namespace JIPFixes {
 		}
 	}
 
-
 	namespace TriggerLightningFXFix {
 
 		bool Cmd_TriggerLightningFX_Execute(COMMAND_ARGS) {
@@ -1941,7 +1970,6 @@ namespace JIPFixes {
 			}
 		}
 	}
-
 
 	namespace LeveledListFixes {
 
@@ -2300,6 +2328,7 @@ namespace JIPFixes {
 			kDetour.ReplaceCall(0x87D5BA, ClearJIPFlagsAndInit);
 		}
 	}
+#endif
 
 	namespace LogMover {
 
@@ -2338,80 +2367,69 @@ namespace JIPFixes {
 		JIPUtils::Init();
 	}
 
-	void InitEarlyHooks(bool abGECK) {
+	void InitEarlyHooks() {
 		if (!JIPUtils::IsValid())
 			return;
 
-		if (abGECK) {
-			LogMover::InitHooks();
-		}
-		else {
-			JIPSettings::InitConditionalHooks();
-			EarlyFixedStrings::InitHooks();
-			GameSettingFix::InitHooks();
-			LogMover::InitHooks();
-			VersionPrint::InitHooks();
-			SanerWeaponWobbleHook::InitHooks();
-			ProjectileLightFix::InitHooks();
-			ModelFixes::InitHooks();
-			FormFlagsFix::InitHooks();
-		}
+		LogMover::InitHooks();
+#ifdef GAME
+		JIPSettings::InitConditionalHooks();
+		EarlyFixedStrings::InitHooks();
+		GameSettingFix::InitHooks();
+		VersionPrint::InitHooks();
+		SanerWeaponWobbleHook::InitHooks();
+		ProjectileLightFix::InitHooks();
+		ModelFixes::InitHooks();
+		FormFlagsFix::InitHooks();
+#endif
 	}
 
-	void InitHooks(bool abGECK) {
+	void InitHooks() {
 		if (!JIPUtils::IsValid())
 			return;
 
-		if (abGECK) {
-
-		}
-		else {
-			UpdateDataFix::InitHooks();
-			ConsoleCmdFix::InitHooks();
-			NotifyDurationFix::InitHooks();
-			CloseActiveMenuFix::InitHooks();
-			FireWeaponFix::InitHooks();
-			ItemDescriptionFixFix::InitHooks();
-			ModelReloadFix::InitHooks();
-			PerkEntryFix::InitHooks();
-			WeaponModEffectsFix::InitHooks();
-			OnMenuClickFix::InitHooks();
-			GetMenuItemListRefsFix::InitHooks();
-			WaterRenderFix::InitHooks();
-			GetSelectedItemRefFix::InitHooks();
-			Update3DTweak::InitHooks();
-			AddItemAltNoCond::InitHooks();
-			ExtraDataFixes::InitHooks();
-			EDIDLookupFix::InitHooks();
-
-			ModelFixes::InitStrings();
-		}
+#ifdef GAME
+		UpdateDataFix::InitHooks();
+		ConsoleCmdFix::InitHooks();
+		NotifyDurationFix::InitHooks();
+		CloseActiveMenuFix::InitHooks();
+		FireWeaponFix::InitHooks();
+		ItemDescriptionFixFix::InitHooks();
+		ModelReloadFix::InitHooks();
+		PerkEntryFix::InitHooks();
+		WeaponModEffectsFix::InitHooks();
+		OnMenuClickFix::InitHooks();
+		GetMenuItemListRefsFix::InitHooks();
+		WaterRenderFix::InitHooks();
+		GetSelectedItemRefFix::InitHooks();
+		Update3DTweak::InitHooks();
+		AddItemAltNoCond::InitHooks();
+		ExtraDataFixes::InitHooks();
+		EDIDLookupFix::InitHooks();
+		ModelFixes::InitStrings();
+#endif
 	}
 
-	void InitCommandHooks(bool abGECK) {
+	void InitCommandHooks() {
 		if (!JIPUtils::IsValid())
 			return;
 
-		SetOnDialogTopicEventHandlerEx::InitHooks(abGECK);
-		RespawnDisableFix::InitHooks(abGECK);
-		CopyFaceGenFromFix::InitHooks();
-		SoundSourceFileFix::InitHooks();
+		SetOnDialogTopicEventHandlerEx::InitHooks();
+		RespawnDisableFix::InitHooks();
 		BetterSearch::InitHooks();
 		PowerArmorCondition::InitHooks();
-		LeveledListFixes::InitHooks();
 		CursorPosUICords::InitHooks();
+#ifdef GAME
+		CopyFaceGenFromFix::InitHooks();
+		SoundSourceFileFix::InitHooks();
+		LeveledListFixes::InitHooks();
 		TriggerLightningFXFix::InitHooks();
 		SetHotkeyItemRefFix::InitHooks();
-
+#endif
 	}
 
-	void InitDeferredHooks(bool abGECK) {
+	void InitDeferredHooks() {
 		if (!JIPUtils::IsValid())
 			return;
-
-		if (abGECK) {
-		}
-		else {
-		}
 	}
 }

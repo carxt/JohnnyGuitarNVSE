@@ -24,14 +24,21 @@ jobs:
 
     - name: Build Release
       run: msbuild /m /p:Configuration=Release ${{env.SOLUTION_FILE_PATH}} /p:PostBuildEventUseInBuild=false
+      
+    - name: Build Release_GECK
+      run: msbuild /m /p:Configuration=Release_GECK ${{env.SOLUTION_FILE_PATH}} /p:PostBuildEventUseInBuild=false
 
     - name: Package Artifacts
       run: |
         $iniDir = "JG\assets"
         $releaseDir = "JG\Release"
+
         New-Item -ItemType Directory -Name artifacts -Force | Out-Null
         New-Item -ItemType Directory -Name "nvse\plugins" -path $releaseDir -Force | Out-Null
+
         Copy-Item -Path "$releaseDir\johnnyguitar.dll", "$releaseDir\johnnyguitar.pdb", "$iniDir\JohnnyGuitar.ini" -Destination "$releaseDir\nvse\plugins"
+        Copy-Item -Path "$($releaseDir)_GECK\johnnyguitar_GECK.dll", "$($releaseDir)_GECK\johnnyguitar_GECK.pdb" -Destination "$releaseDir\nvse\plugins"
+
         Compress-Archive -Path "$releaseDir\nvse" -DestinationPath "artifacts\JohnnyGuitarNVSE-${{ github.event.release.tag_name }}.zip"
       shell: pwsh
 

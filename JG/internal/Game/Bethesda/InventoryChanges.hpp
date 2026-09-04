@@ -22,9 +22,10 @@ public:
 
 	static InventoryChanges* GetInventoryChanges(TESObjectREFR* apOwner);
 
-	void InitScripts();
-
 	int32_t GetObjectCount(TESBoundObject* apObject) const;
+
+#ifdef GAME
+	void InitScripts();
 	
 	typedef bool(* IterateFunc)(ItemChange*, void*);
 	int32_t IterateInventory(IterateFunc apFunc, void* apArgument, uint32_t auiIterateFlags) const;
@@ -38,6 +39,7 @@ public:
 	ItemChange* GetHotkeyItem(int32_t aiHotkey) const;
 	void RemoveHotkeyItem(ItemChange* apItem, int32_t aiHotkey) const;
 	void SetHotkeyItem(ItemChange* apItem, ExtraDataList* apExtra, int32_t aiHotkey) const;
+#endif
 };
 
 ASSERT_SIZE(InventoryChanges, 0x14);

@@ -1,4 +1,5 @@
 #include "JohnnyFixes.hpp"
+#ifdef GAME
 #include "GameForms.h"
 #include "GameProcess.h"
 #include "GameSettings.h"
@@ -7,9 +8,11 @@
 #include "SkyUpdateFixes.hpp"
 #include "EditorIDRestoration.hpp"
 #include "QuestObjectiveDisplayFix.hpp"
+#endif
 
 STACK_FRAME_OPT_DISABLE
 namespace JohnnyFixes {
+#ifdef GAME
 	SPEC_NAKED void InventoryAmmoHook() {
 		static constexpr uint32_t uiReturnAddr = 0x7080A8;
 		__asm {
@@ -510,8 +513,10 @@ namespace JohnnyFixes {
 			HookUtils::SafeWriteBuf(0x507C0C, "\x8B\x0D\x10\x62\x1C\x01\x3B\x01\xEB\x01");
 		}
 	}
+#endif
 
 	void Init() {
+#ifdef GAME
 		// for Runtime EDIDs
 		EDIDRestoration::InitHooks();
 
@@ -596,6 +601,7 @@ namespace JohnnyFixes {
 		BipedAnimFixes::InitHooks();
 
 		TESEffectShaderFixes::InitHooks();
+#endif
 	}
 
 }

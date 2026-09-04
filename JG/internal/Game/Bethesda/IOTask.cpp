@@ -1,55 +1,39 @@
 #include "IOTask.hpp"
 
-// GAME - 0x440540
-// GECK - 0x6090D0
-IOTask::IOTask(IO_TASK_PRIORITY aePriority) {
-    SetIOTaskPriority(aePriority);
-}
-
-IOTask::~IOTask() {
-}
-
-void IOTask::PostProcess() {
-}
-
-// GAME - 0x43DB70
-// GECK - 0x4BBC90
-void IOTask::GenerateKey() {
-#ifdef GAME
-	ThisCall(0x43DB70, this);
-#else
-	ThisCall(0x4BBC90, this);
-#endif
-}
-
-// GAME - 0x440660
-// GECK - 0x609130
-void IOTask::Requeue(IO_TASK_PRIORITY aeNewPriority) {
-#ifdef GAME
-    ThisCall(0x440660, this, aeNewPriority);
-#else
-	ThisCall(0x609130, this, aeNewPriority);
-#endif
-}
-
 // GAME - 0x4405B0
 void IOTask::SetIOTaskPriority(IO_TASK_PRIORITY aePriority) {
+#ifdef GAME
+    ThisCall(0x4405B0, this, aePriority);
+#else
     SetPriority(aePriority);
+#endif
 }
 
 // GAME - 0x43CC80
 uint8_t IOTask::GetPriority() const {
+#ifdef GAME
+    return ThisCall<uint8_t>(0x43CC80, this);
+#else
     return GetPriorityFromKey(iKey);
+#endif
 }
 
 // GAME - 0x4405D0
 void IOTask::SetPriority(uint8_t aePriority) {
+#ifdef GAME
+    ThisCall(0x4405D0, this, aePriority);
+#else
     iKey = (uint64_t(aePriority) << 16) + (iKey & 0xFFFFFFFFFF00FFFF);
+#endif
 }
 
 // GAME - 0x43DBB0
 void IOTask::SetKey(uint8_t aeFileIndex, uint32_t auiOffset, uint8_t aePriority, uint16_t ausCounter) {
+#ifdef GAME
+    ThisCall(0x43DBB0, this, aeFileIndex, auiOffset, aePriority, ausCounter);
+#else
     iKey = uint64_t(ausCounter) + (uint64_t(auiOffset) << 24) + (uint64_t(aePriority) << 16) + (uint64_t(aeFileIndex) << 56);
+#endif
 }
 
 // GAME - 0x43D690

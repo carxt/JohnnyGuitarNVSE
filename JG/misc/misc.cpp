@@ -41,6 +41,7 @@ float __fastcall fastDTan(float value) {
 	return (sign ? -tempRes : tempRes);
 }
 
+#ifdef GAME
 void __fastcall setVarByName(VARARGS, const char* var_name, float value) {
 	ListNode<VariableInfo>* traverse = scriptObj->varList.Head();
 	VariableInfo* varInfo;
@@ -85,3 +86,4 @@ bool __fastcall ReadBMP24(char* filename, unsigned long& R, unsigned long& G, un
 	fclose(f);
 	return true;
 }
+#endif

@@ -62,11 +62,9 @@ void BaseExtraList::RemoveAll(bool abDelete) {
 #endif
 }
 
+#ifdef GAME
 // GAME - 0x40FCB0
 void BaseExtraList::RemoveAllDefault(bool abDelete) {
-#ifdef GAME
 	ThisCall(0x40FCB0, this, abDelete);
-#else
-	FUNCTION_UNKOWN
-#endif
 }
+#endif

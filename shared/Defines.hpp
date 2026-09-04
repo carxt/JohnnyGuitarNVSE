@@ -68,6 +68,11 @@ __forceinline T_Ret FastCall(uint32_t _addr, Args ...args) noexcept(false) {
 	return ((T_Ret(__fastcall*)(Args...))_addr)(std::forward<Args>(args)...);
 }
 
+template <auto T_Func, typename ...Args>
+__forceinline auto CallImport(uint32_t _addr, Args ...args) noexcept(false) {
+	return (*reinterpret_cast<decltype(T_Func)*>(_addr))(std::forward<Args>(args)...);
+}
+
 #pragma region Macros
 #define EXTERN_DLL_EXPORT extern "C" __declspec(dllexport)
 

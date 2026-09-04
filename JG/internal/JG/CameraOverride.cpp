@@ -37,7 +37,7 @@ namespace CameraOverride {
 						kPos = pRootNode->m_pWorldBound->kCenter;
 					}
 					else {
-						kPos = pTrackRef->GetPos();
+						kPos = pTrackRef->GetLocationOnReference();
 					}
 
 					pCamera->m_pkParent = nullptr;

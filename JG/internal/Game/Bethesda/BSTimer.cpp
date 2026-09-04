@@ -1,9 +1,12 @@
 #include "BSTimer.hpp"
 
 // GAME - 0xAA4DB0
+// GECK - 0x856570
 void BSTimer::SetGlobalTimeMultiplier(float afMult, bool abNow) {
 #ifdef GAME
 	ThisCall(0xAA4DB0, this, afMult, abNow);
+#else
+	ThisCall(0x856570, this, afMult, abNow);
 #endif
 }
 
@@ -20,5 +23,7 @@ float BSTimer::GetGlobalTimeMultiplier() {
 float BSTimer::GetGlobalTimeMultiplierTarget() {
 #ifdef GAME
 	return *reinterpret_cast<float*>(0x11AC3A4);
+#else
+	return *reinterpret_cast<float*>(0xEB74E0);
 #endif
 }

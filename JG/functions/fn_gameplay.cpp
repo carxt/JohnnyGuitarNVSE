@@ -561,7 +561,7 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 		if (ref->Get3DSimple()) {
 			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
 			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(sound->GetFormID(), uiFlags);
-			handle.SetPosition(ref->GetPos());
+			handle.SetPosition(ref->GetLocationOnReference());
 			handle.SetObjectToFollow(ref->Get3DSimple());
 			uint32_t time = fTime * 1000.0;
 			handle.FadeInPlay(time);
@@ -664,10 +664,10 @@ bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	if (!pLand)
 		return true;
 
-	const NiPoint3& rPos = thisObj->GetPos();
+	const NiPoint3& rPos = thisObj->GetLocationOnReference();
 	COORD_DATA kCoordData;
 	pLand->GetCoordData(kCoordData, rPos, 1);
-	TESLandTexture* pTexture = pLand->GetMainTexture(thisObj->GetPos());
+	TESLandTexture* pTexture = pLand->GetMainTexture(rPos);
 	if (pTexture)
 		*reinterpret_cast<uint32_t*>(result) = pTexture->GetFormID();
 	return true;
@@ -752,7 +752,7 @@ bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 		const TESWorldSpace* pWorld = GetWorldSpace(thisObj);
 		if (pWorld) {
 			BSString strName;
-			pWorld->GetMapNameForLocation(strName, thisObj->GetPos());
+			pWorld->GetMapNameForLocation(strName, thisObj->GetLocationOnReference());
 			strcpy_s(cLocationName, strName.c_str());
 		}
 	}
@@ -1005,7 +1005,7 @@ bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
 bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	*result = -1;
 
-	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetPos();
+	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetLocationOnReference();
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
@@ -1024,7 +1024,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
-			auto distToPlayer = target->target->GetPos().SqrDistance(playerPos);
+			auto distToPlayer = target->target->GetLocationOnReference().SqrDistance(playerPos);
 			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
 				closestHostile = target->target;
@@ -1078,7 +1078,7 @@ double __fastcall GetAngleBetweenPoints(const NiPoint3& actorPos, const NiPoint3
 bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	*result = -1;
 
-	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetPos();
+	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetLocationOnReference();
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
@@ -1096,7 +1096,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(kAVCode_Invisibility) > 0 || target->target->avOwner.GetActorValueI(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
-			auto distToPlayer = target->target->GetPos().SqrDistance(playerPos);
+			auto distToPlayer = target->target->GetLocationOnReference().SqrDistance(playerPos);
 			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
 				closestHostile = target->target;
@@ -1106,7 +1106,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 
 	if (closestHostile) {
 		auto playerRotation = PlayerCharacter::GetSingleton()->GetZRotation(0);
-		double headingAngle = GetAngleBetweenPoints(closestHostile->GetPos(), playerPos, playerRotation);
+		double headingAngle = GetAngleBetweenPoints(closestHostile->GetLocationOnReference(), playerPos, playerRotation);
 
 		// shift the coordinates from -180:180 to 0:360 and offset them (360 / 8 quadrants / 2) degrees
 		int angle = headingAngle + 180 + 22.5;

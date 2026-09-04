@@ -17,7 +17,7 @@ namespace AnimActivationHeight {
 			TESObjectREFR* pRef = *reinterpret_cast<TESObjectREFR**>(pEBP + iOffset);
 			Actor* pThis = reinterpret_cast<Actor*>(this);
 
-			fActivationHeight = pRef->GetPos().z - pThis->GetPos().z;
+			fActivationHeight = pRef->GetLocationOnReference().z - pThis->GetLocationOnReference().z;
 
 			return ThisCall<float>(kDetour, this);
 		}

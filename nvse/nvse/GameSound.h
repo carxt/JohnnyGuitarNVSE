@@ -1,6 +1,5 @@
 #pragma once
 #include "GameTypes.h"
-#include "GameObjects.h"
 
 class NiAVObject;
 class TESSound;
