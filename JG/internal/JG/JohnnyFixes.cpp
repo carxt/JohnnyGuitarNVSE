@@ -622,12 +622,6 @@ namespace JohnnyFixes {
 		// Fix buffer overflow during Fonts file load
 		HookUtils::WriteRelJump(0xA154AC, FontFileSizeFix_Asm);
 
-		// Fix ArchiveManager::GetArchiveForFileEntry skipping a critical section unlock on return
-		HookUtils::WriteRelJump(0xAF6A6A, 0xAF6B82);
-
-		// Fix ArchiveManager::GetFileByFileEntry not using the archive index argument
-		HookUtils::SafeWriteBuf(0xAF6378, "\x8B\x4D\x08\xBA\x01\x00\x00\x00\xD3\xE2\x52");
-
 		DestructionFixes::InitHooks();
     
 		// Disable frustum culling for the viewmodel
@@ -638,6 +632,20 @@ namespace JohnnyFixes {
 		BipedAnimFixes::InitHooks();
 
 		TESEffectShaderFixes::InitHooks();
+#endif
+
+		// Fix ArchiveManager::GetArchiveForFileEntry skipping a critical section unlock on return
+#ifdef GAME
+		HookUtils::WriteRelJump(0xAF6A6A, 0xAF6B82);
+#else
+		HookUtils::WriteRelJump(0x8A544A, 0x8A5562);
+#endif
+
+		// Fix ArchiveManager::GetFileByFileEntry not using the archive index argument
+#ifdef GAME
+		HookUtils::SafeWriteBuf(0xAF6378, "\x8B\x4D\x08\xBA\x01\x00\x00\x00\xD3\xE2\x52");
+#else
+		HookUtils::SafeWriteBuf(0x8A4D58, "\x8B\x4D\x08\xBA\x01\x00\x00\x00\xD3\xE2\x52");
 #endif
 	}
 

@@ -30,19 +30,19 @@
 #include "WorldToScreen.hpp"
 #include "NewNiObjects.hpp"
 #include "FormSkeletons.hpp"
-#include "BSAUpgrade.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
 
 #include <algorithm>
 #include <unordered_set>
 #endif
+#include "BSAUpgrade.hpp"
 #include "NewNiObjects.hpp"
 
 namespace JohnnyPatches {
 
 	bool bFixJIP = true;
-
+	bool bBSAUpgrade = true;
 #ifdef GAME
 	bool bFixFleeing = false;
 	bool bFixItemStacks = false;
@@ -59,7 +59,6 @@ namespace JohnnyPatches {
 	bool bMultipleAddItemMessages = false;
 	bool bFixOggWavRadioPlayback = false;
 	bool bUseFormSkeletons = false;
-	bool bBSAUpgrade = false;
 	int32_t iFPSCapLoadScreen = 0;
 	float fViewmodelNearDistance = 0.f;
 
@@ -168,6 +167,7 @@ namespace JohnnyPatches {
 		uint32_t length = MAX_PATH - (lastSlash - filename);;
 		strcpy_s(lastSlash, length, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
 		bFixJIP = GetPrivateProfileInt("MAIN", "bJIPFixes", 1, filename);
+		bBSAUpgrade = GetPrivateProfileInt("MAIN", "bBSAUpgrade", 1, filename);
 #ifdef GAME
 		bFixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 		bFixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
@@ -182,7 +182,6 @@ namespace JohnnyPatches {
 		bMultipleAddItemMessages = GetPrivateProfileInt("MAIN", "bMultipleAddItemMessages", 0, filename);
 		bUseFormSkeletons = GetPrivateProfileInt("MAIN", "bUseFormSkeletons", 0, filename);
 		bFixOggWavRadioPlayback = GetPrivateProfileInt("MAIN", "bFixOggWavRadioPlayback", 1, filename);
-		bBSAUpgrade = GetPrivateProfileInt("MAIN", "bBSAUpgrade", 1, filename);
 		DeathSoundFix::iDeathSoundMaxTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
 #endif
@@ -236,9 +235,6 @@ namespace JohnnyPatches {
 			AddItemMessages::Install();
 		}
 
-		if (bBSAUpgrade)
-			BSAUpgrade::Install();
-
 		WorldToScreen::Install();
 
 		// ToggleLevelUpMenu
@@ -286,6 +282,9 @@ namespace JohnnyPatches {
 
 		DialogueResponseOverride::Install();
 #endif
+		if (bBSAUpgrade)
+			BSAUpgrade::Install();
+
 		NewNiObjects::Install();
 	}
 
