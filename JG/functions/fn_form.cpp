@@ -351,10 +351,10 @@ bool Cmd_GetLightingTemplateCell_Execute(COMMAND_ARGS) {
 namespace {
 
 	struct ALIGN4 RGBA_view {
-		uint8_t r : 8;
-		uint8_t g : 8;
-		uint8_t b : 8;
-		uint8_t a : 8;
+		uint8_t r;
+		uint8_t g;
+		uint8_t b;
+		uint8_t a;
 	};
 
 	enum class LightingTemplateTraits {
