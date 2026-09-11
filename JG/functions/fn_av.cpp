@@ -20,6 +20,8 @@ bool Cmd_GetThresholdedActorValue_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
+STACK_FRAME_OPT_ENABLE
 bool Cmd_GetActorValueAlt_Execute(COMMAND_ARGS) {
 	return Cmd_GetAV(PASS_COMMAND_ARGS);
 }
@@ -47,3 +49,4 @@ bool Cmd_GetBaseActorValueAlt_Execute(COMMAND_ARGS) {
 bool Cmd_ModActorValueAlt_Execute(COMMAND_ARGS) {
 	return Cmd_ModAV(PASS_COMMAND_ARGS);
 }
+STACK_FRAME_OPT_RESET
