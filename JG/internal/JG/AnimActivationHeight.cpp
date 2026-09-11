@@ -5,6 +5,12 @@ namespace AnimActivationHeight {
 
 	float fActivationHeight = 0.f;
 
+	STACK_FRAME_OPT_ENABLE
+	SPEC_NOINLINE static void __fastcall SetHeight(const Actor* __restrict apActivator, const TESObjectREFR* __restrict apTarget) {
+		fActivationHeight = apTarget->GetLocationOnReference().z - apActivator->GetLocationOnReference().z;
+	}
+	STACK_FRAME_OPT_RESET
+
 	// WARNING
 	// Amazingly, #pragma optimize does not apply to functions in templates
 	// So never ever enable "Omit frame pointers", otherwise this will break :)
@@ -14,11 +20,9 @@ namespace AnimActivationHeight {
 
 		float GetEyeLevelHook() {
 			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
-			TESObjectREFR* pRef = *reinterpret_cast<TESObjectREFR**>(pEBP + iOffset);
-			Actor* pThis = reinterpret_cast<Actor*>(this);
-
-			fActivationHeight = pRef->GetLocationOnReference().z - pThis->GetLocationOnReference().z;
-
+			const TESObjectREFR* pRef = *reinterpret_cast<TESObjectREFR**>(pEBP + iOffset);
+			const Actor* pThis = reinterpret_cast<Actor*>(this);
+			SetHeight(pThis, pRef);
 			return ThisCall<float>(kDetour, this);
 		}
 
