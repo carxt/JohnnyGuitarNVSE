@@ -89,6 +89,7 @@
 #include "Bethesda/SpellItem.hpp"
 #include "Bethesda/TESAmmo.hpp"
 #include "Bethesda/TESClass.hpp"
+#include "Bethesda/TESClimate.hpp"
 #include "Bethesda/TESCreature.hpp"
 #include "Bethesda/TESEyes.hpp"
 #include "Bethesda/TESFaction.hpp"
@@ -116,6 +117,7 @@
 #include "Bethesda/TESSkill.hpp"
 #include "Bethesda/TESTopic.hpp"
 #include "Bethesda/TESTopicInfo.hpp"
+#include "Bethesda/TESWeather.hpp"
 #include "Obsidian/BGSDehydrationStage.hpp"
 #include "Obsidian/BGSHungerStage.hpp"
 #include "Obsidian/BGSSleepDeprevationStage.hpp"
@@ -1195,96 +1197,6 @@ public:
 static_assert(sizeof(TESNPC) == 0x20C);
 #else
 static_assert(sizeof(TESNPC) == 0x234);
-#endif
-
-// 36C
-class TESWeather : public TESForm {
-public:
-	TESWeather();
-	~TESWeather();
-
-	struct WeatherSound {
-		uint32_t		soundID;	// refID of TESSound
-		uint32_t		type;		// 0 - Default; 1 - Precip; 2 - Wind; 3 - Thunder
-	};
-
-	uint32_t					unk018;						// 018	TESImageSpaceModifiableCountForm<6>
-	TESImageSpaceModifier* imageSpaceMods[6];			// 01C
-	TESTexture1024			layerTextures[4];			// 034
-	uint8_t					cloudSpeed[4];				// 064
-	uint32_t					cloudColor[4][6];			// 068
-	TESModel				model;						// 0C8
-	uint8_t					windSpeed;					// 0E0
-	uint8_t					cloudSpeedLower;			// 0E1
-	uint8_t					cloudSpeedUpper;			// 0E2
-	uint8_t					transDelta;					// 0E3
-	uint8_t					sunGlare;					// 0E4
-	uint8_t					sunDamage;					// 0E5
-	uint8_t					precipitationBeginFadeIn;	// 0E6
-	uint8_t					precipitationEndFadeOut;	// 0E7
-	uint8_t					lightningBeginFadeIn;		// 0E8
-	uint8_t					lightningEndFadeOut;		// 0E9
-	uint8_t					lightningFrequency;			// 0EA
-	uint8_t					weatherClassification;		// 0EB
-	uint32_t					lightningColor;				// 0EC
-	float					fogDistance[6];				// 0F0
-	uint32_t					colors[10][6];				// 108
-	tList<WeatherSound>		sounds;						// 1F8
-	uint32_t					unk200[91];					// 200
-#ifdef EDITOR
-	uint32_t uiSelectedCloud;
-#endif
-};
-#ifdef GAME
-static_assert(sizeof(TESWeather) == 0x36C);
-#else
-static_assert(sizeof(TESWeather) == 0x3D0);
-#endif
-
-struct WeatherEntry {
-	TESWeather* weather;
-	uint32_t			chance;
-	TESGlobal* global;
-};
-
-class TESWeatherList : public tList<WeatherEntry> {
-#ifdef EDITOR
-	virtual void Func0();
-	virtual void Func1();
-	virtual void Func2();
-	virtual void Func3();
-	virtual void Func4();
-	virtual void Func5();
-
-	uint32_t uiDialogs[6];
-#endif
-};
-
-// 58
-class TESClimate : public TESForm {
-public:
-	TESClimate();
-	~TESClimate();
-
-	TESModel			nightSkyModel;		// 18
-	TESWeatherList		weatherTypes;		// 30
-	TESTexture			sunTexture;			// 38
-	TESTexture			sunGlareTexture;	// 44
-	uint8_t				sunriseBegin;		// 50
-	uint8_t				sunriseEnd;			// 51
-	uint8_t				sunsetBegin;		// 52
-	uint8_t				sunsetEnd;			// 53
-	uint8_t				volatility;			// 54
-	uint8_t				phaseLength;		// 55
-	uint8_t				pad56[2];			// 56
-
-	WeatherEntry* GetWeatherEntry(TESWeather* weather, bool remove);
-};
-
-#ifdef GAME
-static_assert(sizeof(TESClimate) == 0x58);
-#else
-static_assert(sizeof(TESClimate) == 0xB4);
 #endif
 
 typedef tList<TESRegionData> RegionDataEntryList;

@@ -117,6 +117,7 @@ __forceinline auto CallImport(uint32_t _addr, Args ...args) noexcept(false) {
 #define SPEC_NOALIAS		__declspec(noalias)
 #define SPEC_EMPTY_BASES	__declspec(empty_bases)
 #define SPEC_NAKED			__declspec(naked)
+#define SPEC_NOVTABLE		__declspec(novtable)
 
 #define _HELPER_COMBINE1(X,Y) X##Y
 #define _HELPER_COMBINE(X,Y) _HELPER_COMBINE1(X,Y)
