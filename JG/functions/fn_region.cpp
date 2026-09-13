@@ -1,26 +1,18 @@
 #include "fn_region.h"
+#include "Bethesda/TESRegionDataManager.hpp"
+#include "Bethesda/TESDataHandler.hpp"
 
-TESRegionDataWeather* GetWeatherData(TESRegion* region) {
-	if (region->dataEntries->Empty()) return nullptr;
-	ListNode<TESRegionData>* iter = region->dataEntries->Head();
-	TESRegionData* regData;
-	do {
-		regData = iter->data;
-		if ((*(uint32_t*)regData == 0x1023E18))
-			return (TESRegionDataWeather*)regData;
-	} while (iter = iter->next);
+TESRegionDataWeather* __fastcall GetWeatherData(const TESRegion* apRegion) {
+	TESRegionData* pData = apRegion->GetRegionDataList()->Find(REGION_DATA_ID::WEATHER);
+	if (pData)
+		return static_cast<TESRegionDataWeather*>(pData);
 	return nullptr;
 }
 
-TESRegionDataMap* GetMapData(TESRegion* region) {
-	if (region->dataEntries->Empty()) return nullptr;
-	ListNode<TESRegionData>* iter = region->dataEntries->Head();
-	TESRegionData* regData;
-	do {
-		regData = iter->data;
-		if ((*(uint32_t*)regData == 0x1023D28))
-			return (TESRegionDataMap*)regData;
-	} while (iter = iter->next);
+TESRegionDataMap* __fastcall GetMapData(const TESRegion* apRegion) {
+	TESRegionData* pData = apRegion->GetRegionDataList()->Find(REGION_DATA_ID::MAP);
+	if (pData)
+		return static_cast<TESRegionDataMap*>(pData);
 	return nullptr;
 }
 
@@ -29,8 +21,8 @@ bool Cmd_GetNthRegionWeatherGlobal_Execute(COMMAND_ARGS) {
 	int iIndex = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion, &iIndex) && iIndex > 0 && pRegion && IS_TYPE(pRegion, TESRegion)) {
 		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
-		if (pWeatherData && !pWeatherData->weatherTypes.IsEmpty()) {
-			auto pItem = pWeatherData->weatherTypes.GetAt(iIndex);
+		if (pWeatherData && !pWeatherData->kWeatherList.IsEmpty()) {
+			auto pItem = pWeatherData->kWeatherList.GetAt(iIndex);
 			if (pItem && pItem->GetItem() && pItem->GetItem()->uiChance)
 				*reinterpret_cast<uint32_t*>(result) = pItem->GetItem()->pChanceVar->GetFormID();
 		}
@@ -44,8 +36,8 @@ bool Cmd_GetNthRegionWeatherChance_Execute(COMMAND_ARGS) {
 	int32_t iIndex = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion, &iIndex) && iIndex > 0 && pRegion && IS_TYPE(pRegion, TESRegion)) {
 		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
-		if (pWeatherData && !pWeatherData->weatherTypes.IsEmpty()) {
-			auto pItem = pWeatherData->weatherTypes.GetAt(iIndex);
+		if (pWeatherData && !pWeatherData->kWeatherList.IsEmpty()) {
+			auto pItem = pWeatherData->kWeatherList.GetAt(iIndex);
 			if (pItem && pItem->GetItem())
 				*result = pItem->GetItem()->uiChance;
 		}
@@ -59,8 +51,8 @@ bool Cmd_GetNthRegionWeatherType_Execute(COMMAND_ARGS) {
 	int32_t iIndex = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion, &iIndex) && iIndex > 0 && pRegion && IS_TYPE(pRegion, TESRegion)) {
 		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
-		if (pWeatherData && !pWeatherData->weatherTypes.IsEmpty()) {
-			auto pItem = pWeatherData->weatherTypes.GetAt(iIndex);
+		if (pWeatherData && !pWeatherData->kWeatherList.IsEmpty()) {
+			auto pItem = pWeatherData->kWeatherList.GetAt(iIndex);
 			if (pItem && pItem->GetItem() && pItem->GetItem()->pWeather)
 				*result = pItem->GetItem()->pWeather->GetFormID();
 		}
@@ -69,19 +61,18 @@ bool Cmd_GetNthRegionWeatherType_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetRegionMapName_Execute(COMMAND_ARGS) {
-	TESRegion* region = nullptr;
-	char newName[MAX_PATH];
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &newName) && region && IS_TYPE(region, TESRegion)) {
-		TESRegionDataMap* mapData = GetMapData(region);
-		if (mapData) {
-			mapData->mapName.Set(newName);
+	TESRegion* pRegion = nullptr;
+	char cName[MAX_PATH];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion, &cName) && pRegion && IS_TYPE(pRegion, TESRegion)) {
+		TESRegionDataMap* pMapData = GetMapData(pRegion);
+		if (pMapData) {
+			pMapData->SetMapName(cName);
 		}
 		else {
-			mapData = BSMemory::malloc<TESRegionDataMap>();
-			ThisCall(0x4F3CA0, mapData);
-			mapData->mapName.Set(newName);
-			region->dataEntries->Append(mapData);
+			pMapData = static_cast<TESRegionDataMap*>(TESDataHandler::GetSingleton()->GetRegionDataManager()->ConstructRegionData(REGION_DATA_ID::MAP));
+			pMapData->SetMapName(cName);
+			pRegion->GetRegionDataList()->AddHead(pMapData);
 		}
 		*result = 1;
 	}
@@ -89,10 +80,11 @@ bool Cmd_SetRegionMapName_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetRegionMapName_Execute(COMMAND_ARGS) {
-	TESRegion* region = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && region && IS_TYPE(region, TESRegion)) {
-		TESRegionDataMap* mapData = GetMapData(region);
-		if (mapData) g_strInterface->Assign(PASS_COMMAND_ARGS, mapData->mapName.c_str());
+	TESRegion* pRegion = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion) && pRegion && IS_TYPE(pRegion, TESRegion)) {
+		TESRegionDataMap* pMapData = GetMapData(pRegion);
+		if (pMapData) 
+			g_strInterface->Assign(PASS_COMMAND_ARGS, pMapData->GetMapName());
 	}
 	return true;
 }
@@ -104,7 +96,7 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion) && pRegion && IS_TYPE(pRegion, TESRegion)) {
 		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
 		if (pWeatherData) {
-			auto pIter = pWeatherData->weatherTypes.GetHead();
+			auto pIter = pWeatherData->kWeatherList.GetHead();
 			while (pIter && !pIter->IsEmpty()) {
 				WeatherEntry* pEntry = pIter->GetItem();
 				if (pEntry) {
@@ -126,7 +118,7 @@ bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion) && pRegion && IS_TYPE(pRegion, TESRegion)) {
 		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
 		if (pWeatherData) {
-			pWeatherData->weatherTypes.FlushList();
+			pWeatherData->kWeatherList.FlushList();
 			*result = 1;
 		}
 	}
@@ -134,11 +126,11 @@ bool Cmd_ClearRegionWeathers_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetRegionWeatherOverride_Execute(COMMAND_ARGS) {
-	TESRegion* region = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && region && IS_TYPE(region, TESRegion)) {
-		TESRegionDataWeather* weatherData = GetWeatherData(region);
-		if (weatherData) {
-			*result = weatherData->bOverride;
+	TESRegion* pRegion = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion) && pRegion && IS_TYPE(pRegion, TESRegion)) {
+		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
+		if (pWeatherData) {
+			*result = pWeatherData->bOverride;
 			if (IsConsoleMode()) {
 				Console_Print("GetRegionWeatherOverride >> %.f", *result);
 			}
@@ -148,11 +140,11 @@ bool Cmd_GetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetRegionWeatherOverride_Execute(COMMAND_ARGS) {
-	TESRegion* region = nullptr;
+	TESRegion* pRegion = nullptr;
 	int bOverride = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &bOverride) && region && IS_TYPE(region, TESRegion)) {
-		TESRegionDataWeather* weatherData = GetWeatherData(region);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion, &bOverride) && pRegion && IS_TYPE(pRegion, TESRegion)) {
+		TESRegionDataWeather* weatherData = GetWeatherData(pRegion);
 		if (weatherData) {
 			weatherData->bOverride = bOverride;
 			*result = 1;
@@ -162,11 +154,11 @@ bool Cmd_SetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetRegionWeatherPriority_Execute(COMMAND_ARGS) {
-	TESRegion* region = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region) && region && IS_TYPE(region, TESRegion)) {
-		TESRegionDataWeather* weatherData = GetWeatherData(region);
-		if (weatherData) {
-			*result = weatherData->GetPriority();
+	TESRegion* pRegion = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion) && pRegion && IS_TYPE(pRegion, TESRegion)) {
+		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
+		if (pWeatherData) {
+			*result = pWeatherData->GetPriority();
 			if (IsConsoleMode()) {
 				Console_Print("GetRegionWeatherPriority >> %.f", *result);
 			}
@@ -176,13 +168,13 @@ bool Cmd_GetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetRegionWeatherPriority_Execute(COMMAND_ARGS) {
-	TESRegion* region = nullptr;
-	int priority = -1;
+	TESRegion* pRegion = nullptr;
+	int32_t iPriority = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &region, &priority) && region && IS_TYPE(region, TESRegion) && priority >= 0 && priority <= 100) {
-		TESRegionDataWeather* weatherData = GetWeatherData(region);
-		if (weatherData) {
-			weatherData->SetPriority(priority);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion, &iPriority) && pRegion && IS_TYPE(pRegion, TESRegion) && iPriority >= 0 && iPriority <= 100) {
+		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
+		if (pWeatherData) {
+			pWeatherData->SetPriority(iPriority);
 			*result = 1;
 		}
 	}
@@ -196,7 +188,7 @@ bool Cmd_IsWeatherInRegion_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion, &pWeather) && pRegion && IS_TYPE(pRegion, TESRegion) && pWeather && IS_TYPE(pWeather, TESWeather)) {
 		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
 		if (pWeatherData) {
-			auto pIter = pWeatherData->weatherTypes.GetHead();
+			auto pIter = pWeatherData->kWeatherList.GetHead();
 			while (pIter && !pIter->IsEmpty()) {
 				WeatherEntry* pEntry = pIter->GetItem();
 				if (pEntry && pEntry->pWeather == pWeather) {
@@ -223,7 +215,7 @@ bool Cmd_RemoveRegionWeather_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion, &pWeather) && pRegion && IS_TYPE(pRegion, TESRegion) && pWeather && IS_TYPE(pWeather, TESWeather)) {
 		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
 		if (pWeatherData) {
-			auto pIter = pWeatherData->weatherTypes.GetHead();
+			auto pIter = pWeatherData->kWeatherList.GetHead();
 			while (pIter && !pIter->IsEmpty()) {
 				WeatherEntry* pEntry = pIter->GetItem();
 				if (pEntry && pEntry->pWeather == pWeather) {
@@ -252,7 +244,7 @@ bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRegion, &pWeather, &uiChance, &pChanceVar) && pRegion && IS_TYPE(pRegion, TESRegion) && pWeather && IS_TYPE(pWeather, TESWeather)) {
 		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
 		if (pWeatherData) {
-			auto pIter = pWeatherData->weatherTypes.GetHead();
+			auto pIter = pWeatherData->kWeatherList.GetHead();
 			while (pIter && !pIter->IsEmpty()) {
 				WeatherEntry* pEntry = pIter->GetItem();
 				if (pEntry && pEntry->pWeather == pWeather)
@@ -265,7 +257,7 @@ bool Cmd_AddRegionWeather_Execute(COMMAND_ARGS) {
 			pEntry->uiChance = uiChance;
 			pEntry->pChanceVar = pChanceVar;
 			pEntry->pWeather = pWeather;
-			pWeatherData->weatherTypes.AddHead(pEntry);
+			pWeatherData->kWeatherList.AddHead(pEntry);
 			*result = 1;
 		}
 	}

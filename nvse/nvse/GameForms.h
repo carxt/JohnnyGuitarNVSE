@@ -55,8 +55,13 @@
 #include "Bethesda/MagicItem.hpp"
 #include "Bethesda/TESCondition.hpp"
 #include "Bethesda/TESPatrolPackageData.hpp"
-#include "Bethesda/TESRegionData.hpp"
+#include "Bethesda/TESRegionDataGrass.hpp"
+#include "Bethesda/TESRegionDataLandscape.hpp"
+#include "Bethesda/TESRegionDataMap.hpp"
+#include "Bethesda/TESRegionDataSound.hpp"
+#include "Bethesda/TESRegionDataWeather.hpp"
 #include "Bethesda/TESRegionList.hpp"
+#include "Obsidian/TESRegionDataImposter.hpp"
 
 // Forms themselves
 #include "Bethesda/ActorValueInfo.hpp"
@@ -90,6 +95,7 @@
 #include "Bethesda/TESAmmo.hpp"
 #include "Bethesda/TESClass.hpp"
 #include "Bethesda/TESClimate.hpp"
+#include "Bethesda/TESCombatStyle.hpp"
 #include "Bethesda/TESCreature.hpp"
 #include "Bethesda/TESEyes.hpp"
 #include "Bethesda/TESFaction.hpp"
@@ -103,6 +109,7 @@
 #include "Bethesda/TESLevCharacter.hpp"
 #include "Bethesda/TESLevCreature.hpp"
 #include "Bethesda/TESLevItem.hpp"
+#include "Bethesda/TESLoadScreen.hpp"
 #include "Bethesda/TESObjectACTI.hpp"
 #include "Bethesda/TESObjectANIO.hpp"
 #include "Bethesda/TESObjectARMA.hpp"
@@ -114,9 +121,11 @@
 #include "Bethesda/TESObjectMISC.hpp"
 #include "Bethesda/TESObjectSTAT.hpp"
 #include "Bethesda/TESQuest.hpp"
+#include "Bethesda/TESRegion.hpp"
 #include "Bethesda/TESSkill.hpp"
 #include "Bethesda/TESTopic.hpp"
 #include "Bethesda/TESTopicInfo.hpp"
+#include "Bethesda/TESWaterForm.hpp"
 #include "Bethesda/TESWeather.hpp"
 #include "Obsidian/BGSDehydrationStage.hpp"
 #include "Obsidian/BGSHungerStage.hpp"
@@ -1199,79 +1208,6 @@ static_assert(sizeof(TESNPC) == 0x20C);
 static_assert(sizeof(TESNPC) == 0x234);
 #endif
 
-typedef tList<TESRegionData> RegionDataEntryList;
-
-class TESRegionDataGrass : public TESRegionData {
-public:
-	TESRegionDataGrass();
-	~TESRegionDataGrass();
-
-	virtual void	Unk_0A(void);
-};
-
-// 10
-class TESRegionDataImposter : public TESRegionData {
-public:
-	TESRegionDataImposter();
-	~TESRegionDataImposter();
-
-	tList<TESObjectREFR>	imposters;	// 08
-};
-
-class TESRegionDataLandscape : public TESRegionData {
-public:
-	TESRegionDataLandscape();
-	~TESRegionDataLandscape();
-
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-};
-
-class TESRegionDataMap : public TESRegionData {
-public:
-	TESRegionDataMap();
-	~TESRegionDataMap();
-
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-	virtual void	Unk_0C(void);
-	virtual void	Unk_0D(void);
-
-	BSString	mapName;
-};
-
-struct SoundType {
-	TESSound* sound;
-	uint32_t			flags;
-	uint32_t			chance;
-};
-typedef tList<SoundType> SoundTypeList;
-
-class TESRegionDataSound : public TESRegionData {
-public:
-	TESRegionDataSound();
-	~TESRegionDataSound();
-
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-	virtual void	Unk_0C(void);
-	virtual void	Unk_0D(void);
-	virtual void	Unk_0E(void);
-
-	uint32_t			unk08;
-	SoundTypeList	soundTypes;
-	uint32_t			incidentalMediaSet;
-	tList<uint32_t>	mediaSetEntries;
-};
-
-class TESRegionDataWeather : public TESRegionData {
-public:
-	TESRegionDataWeather();
-	~TESRegionDataWeather();
-
-	TESWeatherList	weatherTypes;
-};
-
 struct AreaPointEntry {
 	float	x;
 	float	y;
@@ -1286,27 +1222,6 @@ struct RegionAreaEntry {
 	uint32_t				pointCount;
 };
 typedef tList<RegionAreaEntry> RegionAreaEntryList;
-
-// 38
-class TESRegion : public TESForm {
-public:
-	TESRegion();
-	~TESRegion();
-
-#ifdef EDITOR
-	void* unk2C;
-#endif
-	RegionDataEntryList* dataEntries;	// 18
-	RegionAreaEntryList* areaEntries;	// 1C
-	TESWorldSpace* worldSpace;	// 20
-	TESWeather* weather;		// 24
-	uint32_t				unk28[4];		// 28
-};
-#ifdef GAME
-static_assert(sizeof(TESRegion) == 0x38);
-#else
-static_assert(sizeof(TESRegion) == 0x50);
-#endif
 
 // NavMeshInfoMap (40)
 class NavMeshInfoMap;
@@ -1685,9 +1600,6 @@ public:
 	uint32_t			unk14;		// 14
 	BSString		name;		// 18
 };
-
-// TESIdleForm (54)
-class TESIdleForm;
 
 enum {
 	kPackageFlag_OffersServices = 1 << 0,
@@ -2189,148 +2101,8 @@ public:
 	float	flt008;
 };
 
-// 108
-class TESCombatStyle : public TESForm {
-public:
-	TESCombatStyle();
-	~TESCombatStyle();
-
-	enum {
-		kFlag_ChooseAttackUsingChance = 1,
-		kFlag_MeleeAlertOK = 2,
-		kFlag_FleeBasedOnPersonalSurvival = 4,
-		kFlag_IgnoreThreats = 16,
-		kFlag_IgnoreDamagingSelf = 32,
-		kFlag_IgnoreDamagingGroup = 64,
-		kFlag_IgnoreDamagingSpectators = 128,
-		kFlag_CannotUseStealthboy = 256,
-	};
-
-	float	coverSearchRadius;				// 018
-	float	takeCoverChance;				// 01C
-	float	waitTimeMin;					// 020
-	float	waitTimeMax;					// 024
-	float	waitToFireTimerMin;				// 028
-	float	waitToFireTimerMax;				// 02C
-	float	fireTimerMin;					// 030
-	float	fireTimerMax;					// 034
-	float	rangedWeapRangeMultMin;			// 038
-	uint8_t	pad3C[4];						// 03C
-	uint8_t	weaponRestrictions;				// 040
-	uint8_t	pad41[3];						// 041
-	float	rangedWeapRangeMultMax;			// 044
-	float	maxTargetingFOV;				// 048
-	float	combatRadius;					// 04C
-	float	semiAutoFiringDelayMultMin;		// 050
-	float	semiAutoFiringDelayMultMax;		// 054
-	uint8_t	dodgeChance;					// 058
-	uint8_t	LRChance;						// 059
-	uint8_t	pad5A[2];						// 05A
-	float	dodgeLRTimerMin;				// 05C
-	float	dodgeLRTimerMax;				// 060
-	float	dodgeFWTimerMin;				// 064
-	float	dodgeFWTimerMax;				// 068
-	float	dodgeBKTimerMin;				// 06C
-	float	dodgeBKTimerMax;				// 070
-	float	idleTimerMin;					// 074
-	float	idleTimerMax;					// 078
-	uint8_t	blockChance;					// 07C
-	uint8_t	attackChance;					// 07D
-	uint8_t	pad7E[2];						// 07E
-	float	staggerBonusToAttack;			// 080
-	float	KOBonusToAttack;				// 084
-	float	H2HBonusToAttack;				// 088
-	uint8_t	powerAttackChance;				// 08C
-	uint8_t	pad8D[3];						// 08D
-	float	staggerBonusToPower;			// 090
-	float	KOBonusToPower;					// 094
-	uint8_t	powerAttackN;					// 098
-	uint8_t	powerAttackF;					// 099
-	uint8_t	powerAttackB;					// 09A
-	uint8_t	powerAttackL;					// 09B
-	uint8_t	powerAttackR;					// 09C
-	uint8_t	pad9D[3];						// 09D
-	float	holdTimerMin;					// 0A0
-	float	holdTimerMax;					// 0A4
-	uint16_t	csFlags;						// 0A8
-	uint8_t	pad0AA[2];						// 0AA
-	uint8_t	acrobaticDodgeChance;			// 0AC
-	uint8_t	rushAttackChance;				// 0AD
-	uint8_t	pad0AE[2];						// 0AE
-	float	rushAttackDistMult;				// 0B0
-	float	dodgeFatigueModMult;			// 0B4
-	float	dodgeFatigueModBase;			// 0B8
-	float	encumSpeedModBase;				// 0BC
-	float	encumSpeedModMult;				// 0C0
-	float	dodgeUnderAttackMult;			// 0C4
-	float	dodgeNotUnderAttackMult;		// 0C8
-	float	dodgeBackUnderAttackMult;		// 0CC
-	float	dodgeBackNotUnderAttackMult;	// 0D0
-	float	dodgeFWAttackingMult;			// 0D4
-	float	dodgeFWNotAttackingMult;		// 0D8
-	float	blockSkillModMult;				// 0DC
-	float	blockSkillModBase;				// 0E0
-	float	blockUnderAttackMult;			// 0E4
-	float	blockNotUnderAttackMult;		// 0E8
-	float	attackSkillModMult;				// 0EC
-	float	attackSkillModBase;				// 0F0
-	float	attackUnderAttackMult;			// 0F4
-	float	attackNotUnderAttackMult;		// 0F8
-	float	attackDuringBlockMult;			// 0FC
-	float	powerAttackFatigueModBase;		// 100
-	float	powerAttackFatigueModMult;		// 104
-
-	void SetFlag(uint32_t pFlag, bool bEnable) {
-		if (bEnable) csFlags |= pFlag;
-		else csFlags &= ~pFlag;
-	}
-};
-#ifdef GAME
-static_assert(sizeof(TESCombatStyle) == 0x108);
-#else
-static_assert(sizeof(TESCombatStyle) == 0x11C);
-#endif
-
-// TESLoadScreen (3C)
-class TESLoadScreen : public TESForm {
-public:
-	TESLoadScreen();
-	~TESLoadScreen();
-
-	TESTexture			texture;		// 018
-	TESDescription		description;	// 024
-	uint32_t				unk2C[2];		// 02C
-	TESLoadScreenType* type;			// 034
-};
-
 // TESLevSpell (44)
 class TESLevSpell;
-
-// 194
-class TESWaterForm : public TESForm {
-public:
-	TESWaterForm();
-	~TESWaterForm();
-
-	TESFullName				fullName;		// 018
-	TESAttackDamageForm		attackDamage;	// 024
-	uint32_t					unk02C[14];		// 02C
-	TESTexture				noiseMap;		// 064
-	uint8_t					opacity;		// 070 ANAM
-	uint8_t					flags;			// 071 FNAM (0x01: causes damage, 0x02: reflective)
-	uint8_t					unk072[2];		// 072
-	uint32_t					unk074[2];		// 074
-	TESSound* sound;			// 07C
-	TESWaterForm* waterForm;		// 080
-	float					visData[49];	// 084
-	uint32_t					unk148[12];		// 148
-	SpellItem* drinkEffect;	// 178
-	uint32_t					unk17C[3];		// 17C
-	uint8_t					radiation;		// 188
-	uint8_t					pad189[3];		// 189
-	uint32_t					unk18C[2];		// 18C
-};
-
 // A8
 class BGSExplosion : public TESBoundObject {
 public:

@@ -603,6 +603,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESImageSpaceModifiableForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESLandTexture.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESLeveledList.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESLoadScreen.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESMain.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESModel.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESModelList.cpp" />
@@ -625,7 +626,9 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESQuestStageItem.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESRaceForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESReactionForm.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESRegion.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESRegionData.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESRegionDataList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESResponse.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESScriptableForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESSoundFile.cpp" />
@@ -635,6 +638,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESTopic.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESTopicInfo.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESValueForm.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESWaterForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWeather.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWeatherList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWeightForm.cpp" />
@@ -657,6 +661,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiPoint3.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiPoint4.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiRenderer.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiTexture.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiTransform.cpp" />
     <ClCompile Include="internal\Game\Obsidian\MediaLocationController.cpp" />
     <ClCompile Include="internal\Game\Obsidian\MediaSet.cpp" />
@@ -1004,6 +1009,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSArchive.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCriticalSection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSCullingProcess.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSDegradePriority.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSDirectoryEntry.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp" />
@@ -1141,6 +1147,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESChildCell.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESClass.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESClimate.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESCombatStyle.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESCondition.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESContainer.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESConversationData.hpp" />
@@ -1169,6 +1176,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESLevCreature.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESLeveledList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESLevItem.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESLoadScreen.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESMain.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESModel.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESModelAnim.hpp" />
@@ -1198,7 +1206,15 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESQuestStageItem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESRaceForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESReactionForm.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESRegion.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESRegionData.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataGrass.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataLandscape.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataList.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataMap.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataSound.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESRegionDataWeather.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESRegionList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESResponse.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESScriptableForm.hpp" />
@@ -1212,6 +1228,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESTopic.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESTopicInfo.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESValueForm.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESWaterForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESWeather.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESWeatherList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESWeightForm.hpp" />
@@ -1239,6 +1256,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiParticles.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiParticleSystem.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiObjectNET.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiPixelFormat.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPlane.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPoint2.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiPoint3.hpp" />
@@ -1258,6 +1276,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiTAbstractPoolAllocator.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTDefaultAllocator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiTexture.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTLargeArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTLargeObjectArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTLargePrimitiveArray.hpp" />
@@ -1303,6 +1322,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Obsidian\TESRecipe.hpp" />
     <ClInclude Include="internal\Game\Obsidian\TESRecipeCategory.hpp" />
     <ClInclude Include="internal\Game\Obsidian\TESRecipeComponent.hpp" />
+    <ClInclude Include="internal\Game\Obsidian\TESRegionDataImposter.hpp" />
     <ClInclude Include="internal\Game\Obsidian\TESReputation.hpp" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\JG\AddItemMessages.hpp" />

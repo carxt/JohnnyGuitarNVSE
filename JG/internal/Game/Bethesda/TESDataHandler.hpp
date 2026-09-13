@@ -164,21 +164,30 @@ public:
 	bool									bLoadingFiles;			// 620
 	bool									bIsLoading;				// 621
 	uint8_t									ucGameSettingsLoadState;// 622
-	TESRegionDataManager*					pRegionManager;			// 624
+	TESRegionDataManager*					pRegionDataManager;		// 624
 	InventoryChanges*						pBarterContainer;		// 628
 	InventoryChanges*						pRecipeContainer;		// 62C
 	TESForm*								pSpotterEffect;			// 630
 	TESForm*								pItemDetectedEffect;	// 634
 	TESForm*								pCatEyeMobileEffect;	// 638
+#ifdef EDITOR
+	const char*								pBetaCommentPath;
+#endif
 
 	static TESDataHandler* GetSingleton();
+
 	BSSimpleList<TESFile*>* GetFileList();
+
+	TESRegionDataManager* GetRegionDataManager() const;
 
 	bool AddFormToDataHandler(TESForm* apForm);
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESDataHandler, 0x63C);
-
+#else
+ASSERT_SIZE(TESDataHandler, 0x640);
+#endif
 
 #ifdef GAME
 static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA220> pDoorMarker;

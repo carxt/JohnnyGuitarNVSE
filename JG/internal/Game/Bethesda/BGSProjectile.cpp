@@ -59,6 +59,7 @@ bool BGSProjectile::GetPinsLimbs() const {
 	return kData.uiFlags.bPinsLimbs;
 }
 
+// GAME - 0x9C2E60
 bool BGSProjectile::GetPassThroughSmallTransparent() const {
 	return kData.uiFlags.bPassThroughSmallTransparent;
 }

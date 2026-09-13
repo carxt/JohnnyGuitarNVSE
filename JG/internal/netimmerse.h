@@ -10,6 +10,7 @@
 #include "Gamebryo/NiRenderer.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 #include "Gamebryo/NiStringExtraData.hpp"
+#include "Gamebryo/NiTexture.hpp"
 #include "Bethesda/BSXFlags.hpp"
 #include "Bethesda/NiUpdateData.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
@@ -2185,46 +2186,6 @@ public:
 	uint32_t				unk64;			// 64
 	uint32_t				unk68;			// 68
 	uint32_t				unk6C;			// 6C
-};
-
-// 30
-class NiTexture : public NiObjectNET {
-public:
-	NiTexture();
-	~NiTexture();
-
-	virtual void	Unk_23(void);
-	virtual void	Unk_24(void);
-	virtual void	Unk_25(void);
-	virtual void	Unk_26(void);
-	virtual void	Unk_27(void);
-	virtual void	Unk_28(void);
-
-	enum {
-		kPxlLayout_Palette8BPP = 0,
-		kPxlLayout_Raw16BPP,
-		kPxlLayout_Raw32BPP,
-		kPxlLayout_Compressed,
-		kPxlLayout_Bumpmap,
-		kPxlLayout_Palette4BPP,
-		kPxlLayout_Default,
-
-		kAlphaFmt_None = 0,
-		kAlphaFmt_Binary1BPP,
-		kAlphaFmt_Smooth8BPP,
-		kAlphaFmt_Default,
-
-		kMipMapFmt_Disabled = 0,
-		kMipMapFmt_Enabled,
-		kMipMapFmt_Default,
-	};
-
-	uint32_t				pixelLayout;	// 18
-	uint32_t				alphaFormat;	// 1C
-	uint32_t				mipmapFormat;	// 20
-	NiDX9TextureData* textureData;	// 24
-	NiTexture* prev;			// 28
-	NiTexture* next;			// 2C
 };
 
 // 48
