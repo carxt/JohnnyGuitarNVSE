@@ -52,6 +52,7 @@
 #include "Bethesda/BGSPerkEntry.hpp"
 #include "Bethesda/BGSQuestObjective.hpp"
 #include "Bethesda/CachedValuesOwner.hpp"
+#include "Bethesda/ImpactSwap.hpp"
 #include "Bethesda/MagicItem.hpp"
 #include "Bethesda/TESCondition.hpp"
 #include "Bethesda/TESPatrolPackageData.hpp"
@@ -72,8 +73,10 @@
 #include "Bethesda/BGSDebris.hpp"
 #include "Bethesda/BGSDefaultObjectManager.hpp"
 #include "Bethesda/BGSEncounterZone.hpp"
+#include "Bethesda/BGSExplosion.hpp"
 #include "Bethesda/BGSHeadPart.hpp"
 #include "Bethesda/BGSIdleMarker.hpp"
+#include "Bethesda/BGSImpactData.hpp"
 #include "Bethesda/BGSImpactDataSet.hpp"
 #include "Bethesda/BGSListForm.hpp"
 #include "Bethesda/BGSMenuIcon.hpp"
@@ -85,6 +88,7 @@
 #include "Bethesda/BGSPlaceableWater.hpp"
 #include "Bethesda/BGSProjectile.hpp"
 #include "Bethesda/BGSRadiationStage.hpp"
+#include "Bethesda/BGSRagdoll.hpp"
 #include "Bethesda/BGSStaticCollection.hpp"
 #include "Bethesda/BGSVoiceType.hpp"
 #include "Bethesda/EffectSetting.hpp"
@@ -97,6 +101,7 @@
 #include "Bethesda/TESClimate.hpp"
 #include "Bethesda/TESCombatStyle.hpp"
 #include "Bethesda/TESCreature.hpp"
+#include "Bethesda/TESEffectShader.hpp"
 #include "Bethesda/TESEyes.hpp"
 #include "Bethesda/TESFaction.hpp"
 #include "Bethesda/TESFurniture.hpp"
@@ -1504,28 +1509,6 @@ public:
 		WCoordXY	cellSECoordinates;	// 0C
 	};	// 010
 
-	struct ImpactSwap {
-		typedef NiTMap<BGSImpactData*, BGSImpactData*> ImpactImpactMap;
-		enum MaterialType {
-			eMT_Stone,
-			eMT_Dirt,
-			eMT_Grass,
-			eMT_Glass,
-			eMT_Metal,
-			eMT_Wood,
-			eMT_Organic,
-			eMT_Cloth,
-			eMT_Water,
-			eMT_HollowMetal,
-			eMT_OrganicBug,
-			eMT_OrganicGlow,
-			eMT_Max
-		};
-
-		ImpactImpactMap* impactImpactMap[eMT_Max];	// 000
-		char				footstepMaterials[0x12C];	// 030
-	};
-
 	typedef NiTPointerMap<uint32_t, BSSimpleList<TESObjectREFR*>*>	RefListPointerMap;
 	typedef NiTMap<TESFile*, TESWorldSpace::OFFSET_DATA*>			OffsetDataMap;
 	enum {
@@ -2103,55 +2086,6 @@ public:
 
 // TESLevSpell (44)
 class TESLevSpell;
-// A8
-class BGSExplosion : public TESBoundObject {
-public:
-	BGSExplosion();
-	~BGSExplosion();
-
-	enum {
-		kFlags_Unknown = 1,
-		kFlags_AlwaysUseWorldOrientation = 2,
-		kFlags_KnockDownAlways = 4,
-		kFlags_KnockDownByFormula = 8,
-		kFlags_IgnoreLOSCheck = 16,
-		kFlags_PushSourceRefOnly = 32,
-		kFlags_IgnoreImageSpaceSwap = 64,
-	};
-
-	TESFullName					fullName;			// 30
-	TESModel					model;				// 3C
-	TESEnchantableForm			enchantable;		// 54
-	BGSPreloadable				preloadable;		// 64
-	TESImageSpaceModifiableForm	imageSpaceModForm;	// 68
-
-	TESForm* placedObj;			// 70
-	float						force;				// 74
-	float						damage;				// 78
-	float						radius;				// 7C
-	TESObjectLIGH* light;				// 80
-	TESSound* sound1;			// 84
-	uint32_t						explFlags;			// 88
-	float						ISradius;			// 8C
-	BGSImpactDataSet* impactDataSet;		// 90
-	TESSound* sound2;			// 94
-	float						RADlevel;			// 98
-	float						dissipationTime;	// 9C
-	float						RADradius;			// A0
-	uint8_t						soundLevel;			// A4	0 - Loud, 1 - Normal, 2 - Silent
-	uint8_t						padA5[3];			// A5
-
-	void SetFlag(uint32_t pFlag, bool bEnable) {
-		if (bEnable) explFlags |= pFlag;
-		else explFlags &= ~pFlag;
-	}
-};
-
-#ifdef GAME
-static_assert(sizeof(BGSExplosion) == 0xA8);
-#else
-static_assert(sizeof(BGSExplosion) == 0xD8);
-#endif
 
 // B0
 class TESImageSpace : public TESForm {
@@ -2331,89 +2265,6 @@ static_assert(sizeof(BGSBodyPartData) == 0x60);
 // BGSCameraPath (38)
 class BGSCameraPath;
 
-struct ColorRGB {
-	uint8_t	red;	// 000
-	uint8_t	green;	// 001
-	uint8_t	blue;	// 002
-	uint8_t	alpha;	// 003 or unused if no alpha
-};	// 004 looks to be endian swapped !
-
-struct DecalData {
-	float		minWidth;		// 000
-	float		maxWidth;		// 004
-	float		minHeight;		// 008
-	float		maxHeight;		// 00C
-	float		depth;			// 010
-	float		shininess;		// 014
-	float		parallaxScale;	// 018
-	uint8_t		parallaxPasses;	// 01C
-	uint8_t		flags;			// 01D	Parallax, Alpha - Blending, Alpha - Testing
-	uint8_t		unk01E[2];		// 01E
-	ColorRGB	color;			// 020
-};	// 024
-
-static_assert(sizeof(DecalData) == 0x024);
-
-// 78
-class BGSImpactData : public TESForm {
-public:
-	BGSImpactData();
-	~BGSImpactData();
-
-	TESModel		model;				// 18
-
-	float			effectDuration;		// 30
-	uint8_t			effectOrientation;	// 34	0 - Surface Normal, 1 - Projectile Vector, 2 - Projectile Reflection
-	uint8_t			pad35[3];			// 35
-	float			angleThreshold;		// 38
-	float			placementRadius;	// 3C
-	uint8_t			soundLevel;			// 40
-	uint8_t			pad41[3];			// 41
-	uint8_t			noDecalData;		// 44
-	uint8_t			pad45[3];			// 45
-
-	BGSTextureSet* textureSet;		// 48
-	TESSound* sound1;			// 4C
-	TESSound* sound2;			// 50
-
-	float			decalMinWidth;		// 54
-	float			decalMaxWidth;		// 58
-	float			decalMinHeight;		// 5C
-	float			decalMaxHeight;		// 60
-	float			decalDepth;			// 64
-	float			decalShininess;		// 68
-	float			parallaxScale;		// 6C
-	uint8_t			parallaxPasses;		// 70
-	uint8_t			decalFlags;			// 71	1 - Parallax, 2 - Alpha-Blending, 4 - Alpha-Testing
-	uint8_t			unk72[2];			// 72
-	uint32_t			decalColor;			// 74
-};
-
-#ifdef GAME
-static_assert(sizeof(BGSImpactData) == 0x78);
-#else
-static_assert(sizeof(BGSImpactData) == 0x98);
-#endif
-
-// BGSRagdoll (148)
-class BGSRagdoll : public TESForm {
-public:
-	BGSRagdoll();
-	~BGSRagdoll();
-
-	TESModel	model;					// 018
-	uint32_t	unk030[(0x148 - 0x30) >> 2];	// 030
-#ifdef EDITOR
-	uint32_t	unk[12];
-#endif
-};
-
-#ifdef GAME
-static_assert(sizeof(BGSRagdoll) == 0x148);
-#else
-static_assert(sizeof(BGSRagdoll) == 0x198);
-#endif
-
 // 44
 class BGSLightingTemplate : public TESForm {
 public:
@@ -2474,96 +2325,5 @@ struct CasinoStats
 	uint16_t earningStage;
 	uint8_t gap0A[2];
 };
-
-// 170
-class TESEffectShader : public TESForm {
-public:
-	TESEffectShader();
-	~TESEffectShader();
-
-	struct EffectShaderData {
-		uint8_t flags;
-		uint32_t membraneSourceBlendMode;
-		uint32_t membraneBlendOp;
-		uint32_t membraneZTestFunc;
-		uint32_t fillTextureRGB;
-		float fillTextureAlphaFadeInTime;
-		float fillTextureFullAlphaTime;
-		float fillTextureAlphaFadeOutTime;
-		float fillTexturePersistentAlphaRatio;
-		float fillTextureAlphaPulseAmpl;
-		float fillTextureAlphaPulseFreq;
-		float fillTextureAnimSpeedU;
-		float fillTextureAnimSpeedV;
-		float edgeFallOff;
-		uint32_t edgeColor;
-		float edgeAlphaFadeInTime;
-		float edgeFullAlphaTime;
-		float edgeAlphaFadeOutTime;
-		float edgePersistentAlphaRatio;
-		float edgeAlphaPulseAmpl;
-		float edgeAlphaPulseFreq;
-		float fillTextureFullAlphaRatio;
-		float edgeFullAlphaRatio;
-		uint32_t membraneDestBlendMode;
-		uint32_t particleSourceBlendMode;
-		uint32_t particleBlendOp;
-		uint32_t particleZTestFunc;
-		uint32_t particleDestBlendMode;
-		float particleBirthRampUpTime;
-		float particleBirthFullTime;
-		float particleBirthRampDownTime;
-		float particleBirthFullRatio;
-		float particleBirthPersistRatio;
-		float particleLifetime;
-		float particleLifetimeVar;
-		float particleInitSpeedAlongNormal;
-		float particleAccelAlongNormal;
-		NiPoint3 initialVelocity;
-		NiPoint3 acceleration;
-		float scaleKey1;
-		float scaleKey2;
-		float scaleKey1Time;
-		float scaleKey2Time;
-		uint32_t colorKey1RGB;
-		uint32_t colorKey2RGB;
-		uint32_t colorKey3RGB;
-		float colorKey1Alpha;
-		float colorKey2Alpha;
-		float colorKey3Alpha;
-		float colorKey1Time;
-		float colorKey2Time;
-		float colorKey3Time;
-		float particleInitSpeedAlongNormalVar;
-		float particleInitRotDeg;
-		float particleInitRotDegVar;
-		float particleRotSpeedDegPerSec;
-		float particleRotSpeedDegPerSecVar;
-		BGSDebris* addonModels;
-		float holesStartTime;
-		float holesEndTime;
-		float holesStartVal;
-		float holesEndVal;
-		float edgeWidthAlphaUnits;
-		uint32_t edgeColorRGB;
-		float explosionWindSpeed;
-		uint32_t textureCountU;
-		uint32_t textureCountV;
-		float addonFadeInTime;
-		float addonFadeOutTime;
-		float addonScaleStart;
-		float addonScaleEnd;
-		float addonScaleInTime;
-		float addonScaleOutTime;
-	} shaderData;
-	TESTexture fillTexture;
-	TESTexture particleShaderTexture;
-	TESTexture holesTexture;
-};
-#ifdef GAME
-static_assert(sizeof(TESEffectShader) == 0x170);
-#else
-static_assert(sizeof(TESEffectShader) == 0x1B4);
-#endif
 
 extern TESForm* __fastcall GetTESForm(const TESForm* apForm);

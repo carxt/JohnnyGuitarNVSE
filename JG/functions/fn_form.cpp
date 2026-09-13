@@ -831,15 +831,15 @@ bool Cmd_SetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	char cPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &uiTexture, &cPath) && pShader && IS_TYPE(pShader, TESEffectShader) && uiTexture >= 0 && uiTexture <= 2) {
 		switch (uiTexture) {
-		case 0:
-			pShader->fillTexture.SetTextureName(cPath);
-			break;
-		case 1:
-			pShader->particleShaderTexture.SetTextureName(cPath);
-			break;
-		case 2:
-			pShader->holesTexture.SetTextureName(cPath);
-			break;
+			case 0:
+				pShader->SetFillTexture(cPath);
+				break;
+			case 1:
+				pShader->SetParticleTexture(cPath);
+				break;
+			case 2:
+				pShader->SetHolesTexture(cPath);
+				break;
 		}
 		*result = 1;
 	}
@@ -853,15 +853,15 @@ bool Cmd_GetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	const char* pPath = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &uiTexture) && pShader && IS_TYPE(pShader, TESEffectShader) && uiTexture >= 0 && uiTexture <= 2) {
 		switch (uiTexture) {
-		case 0:
-			pPath = pShader->fillTexture.GetTextureName();
-			break;
-		case 1:
-			pPath = pShader->particleShaderTexture.GetTextureName();
-			break;
-		case 2:
-			pPath = pShader->holesTexture.GetTextureName();
-			break;
+			case 0:
+				pPath = pShader->GetFillTexture()->GetTextureName();
+				break;
+			case 1:
+				pPath = pShader->GetParticleTexture()->GetTextureName();
+				break;
+			case 2:
+				pPath = pShader->GetHolesTexture()->GetTextureName();
+				break;
 		}
 		g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
 	}
@@ -877,19 +877,19 @@ uint32_t SwapRGB(uint32_t rgbhex) {
 
 bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESEffectShader* shader;
+	TESEffectShader* pShader;
 	uint32_t traitID;
-	float value;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID, &value) && shader && IS_TYPE(shader, TESEffectShader) && traitID >= 0 && traitID <= 76) {
+	float fValue;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &traitID, &fValue) && pShader && IS_TYPE(pShader, TESEffectShader) && traitID >= 0 && traitID <= 76) {
 		switch (traitID) {
 		case 0:
-			shader->shaderData.flags = (uint8_t)value;
+			pShader->GetData()->ucFlags = static_cast<uint8_t>(fValue);
 			break;
 		case 61:
 		{
-			TESForm* pFoundForm = TESForm::GetFormByNumericID(value);
+			TESForm* pFoundForm = TESForm::GetFormByNumericID(fValue);
 			if (pFoundForm && IS_TYPE(pFoundForm, BGSDebris))
-				shader->shaderData.addonModels = static_cast<BGSDebris*>(pFoundForm);
+				pShader->SetAddonModels(static_cast<BGSDebris*>(pFoundForm));
 		}
 		break;
 		case 4:
@@ -897,7 +897,7 @@ bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 47:
 		case 48:
 		case 49:
-			((uint32_t*)shader)[6 + traitID] = SwapRGB((uint32_t)value);
+			((uint32_t*)pShader)[6 + traitID] = SwapRGB((uint32_t)fValue);
 			break;
 		case 1:
 		case 2:
@@ -910,10 +910,10 @@ bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 67:
 		case 69:
 		case 70:
-			((uint32_t*)shader)[6 + traitID] = (uint32_t)value;
+			((uint32_t*)pShader)[6 + traitID] = (uint32_t)fValue;
 			break;
 		default:
-			((float*)shader)[6 + traitID] = value;
+			((float*)pShader)[6 + traitID] = fValue;
 			break;
 		}
 		*result = 1;
@@ -923,24 +923,24 @@ bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESEffectShader* shader;
+	TESEffectShader* pShader;
 	uint32_t traitID;
 	uint32_t color;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &shader, &traitID) && shader && IS_TYPE(shader, TESEffectShader) && traitID >= 0 && traitID <= 76) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &traitID) && pShader && IS_TYPE(pShader, TESEffectShader) && traitID >= 0 && traitID <= 76) {
 		switch (traitID) {
 		case 0:
-			*result = shader->shaderData.flags;
+			*result = pShader->GetData()->ucFlags;
 			break;
 		case 61:
-			if (shader->shaderData.addonModels)
-				*result = shader->shaderData.addonModels->GetFormID();
+			if (pShader->GetAddonModels())
+				*result = pShader->GetAddonModels()->GetFormID();
 			break;
 		case 4:
 		case 14:
 		case 47:
 		case 48:
 		case 49:
-			color = SwapRGB(((uint32_t*)shader)[6 + traitID]);
+			color = SwapRGB(((uint32_t*)pShader)[6 + traitID]);
 			*result = color;
 			if (IsConsoleMode()) Console_Print("GetEffectShaderTraitNumeric %d >> 0x%X", traitID, color);
 			return true;
@@ -956,10 +956,10 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 67:
 		case 69:
 		case 70:
-			*result = ((uint32_t*)shader)[6 + traitID];
+			*result = ((uint32_t*)pShader)[6 + traitID];
 			break;
 		default:
-			*result = ((float*)shader)[6 + traitID];
+			*result = ((float*)pShader)[6 + traitID];
 			break;
 		}
 		if (IsConsoleMode()) Console_Print("GetEffectShaderTraitNumeric %d >> %.2f", traitID, *result);
@@ -1337,11 +1337,14 @@ bool Cmd_SetProjectileSound_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetExplosionSound_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSExplosion* explosion = nullptr;
-	TESSound* sound = nullptr;
-	int soundID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &explosion, &soundID, &sound) && explosion && IS_TYPE(explosion, BGSExplosion) && sound && IS_TYPE(sound, TESSound) && soundID <= 2) {
-		soundID == 1 ? (explosion->sound1 = sound) : (explosion->sound2 = sound);
+	BGSExplosion* pExplosion = nullptr;
+	TESSound* pSound = nullptr;
+	uint32_t uiSoundType = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pExplosion, &uiSoundType, &pSound) && pExplosion && IS_TYPE(pExplosion, BGSExplosion) && pSound && IS_TYPE(pSound, TESSound) && uiSoundType <= 2) {
+		if (uiSoundType == 1)
+			pExplosion->SetSound1(pSound);
+		else
+			pExplosion->SetSound2(pSound);
 		*result = 1;
 	}
 	return true;
