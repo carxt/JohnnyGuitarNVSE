@@ -31,7 +31,7 @@ public:
 	virtual void					LoadMagicItemChunk(TESFile* apFile, uint32_t aeChunkID);
 
 #ifdef GAME
-	uint32_t GetMagicItemFormID() const;
+	FormID GetMagicItemFormID() const;
 #endif
 };
 

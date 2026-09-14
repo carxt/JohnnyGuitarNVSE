@@ -8,7 +8,7 @@ namespace CameraOverride {
 	NiMatrix3 kCameraIdentity = NiMatrix3(0, 0, 1,
 										  1, 0, 0,
 										  0, 1, 0);
-	uint32_t uiReferenceToTrack = 0;
+	FormID uiReferenceToTrack = 0;
 	bool bOverrideCameraPos = false;
 	bool bOverrideCameraRot = false;
 	int32_t eAxis = -3;

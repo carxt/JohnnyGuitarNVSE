@@ -57,7 +57,7 @@ SPEC_NOINLINE bool Cmd_AudioMarkerGetCurrent_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (PlayerCharacter::GetSingleton() && PlayerCharacter::GetSingleton()->currMusicMarker) {
 		if (TESObjectREFR* pMarkerRef = PlayerCharacter::GetSingleton()->currMusicMarker->pReference)
-			*reinterpret_cast<uint32_t*>(result) = pMarkerRef->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pMarkerRef->GetFormID();
 	}
 	return true;
 }
@@ -76,7 +76,7 @@ SPEC_NOINLINE bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
 			uintptr_t uiCtrlFormID = pExtraMarker->pData->uiMediaLocationController;
 			TESForm* pFoundForm = TESForm::GetFormByNumericID(uiCtrlFormID);
 			if (pFoundForm->GetFormType() == FORM_TYPE::MediaLocationController)
-				*reinterpret_cast<uint32_t*>(result) = pFoundForm->GetFormID();
+				*reinterpret_cast<FormID*>(result) = pFoundForm->GetFormID();
 		}
 	}
 	return true;
@@ -86,7 +86,7 @@ bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
 	Cmd_AudioMarkerGetController_Eval(thisObj, nullptr, nullptr, result);
 	if (thisObj && IsConsoleMode()) {
 		if (*result)
-			Console_Print("AudioMarkerGetController >> 0x%lx", *reinterpret_cast<uint32_t*>(result));
+			Console_Print("AudioMarkerGetController >> 0x%lx", *reinterpret_cast<FormID*>(result));
 		else
 			Console_Print("Calling reference is not an AudioMarker");
 	}
@@ -303,7 +303,7 @@ bool Cmd_GetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 		}
 
 		if (pSound)
-			*reinterpret_cast<uint32_t*>(result) = pSound->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pSound->GetFormID();
 	}
 	return true;
 }

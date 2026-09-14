@@ -15,8 +15,8 @@ public:
 	struct Data {
 		ActorValue::Index	eReqSkill;
 		int32_t				iReqSkillLevel;
-		uint32_t			uiCategoryID;
-		uint32_t			uiSubCategoryID;
+		FormID				uiCategoryID;
+		FormID				uiSubCategoryID;
 	};
 
 	Data								kData;

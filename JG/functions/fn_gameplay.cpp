@@ -36,7 +36,7 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 #define NUM_ARGS *((uint8_t*)scriptData + *opcodeOffsetPtr)
 
 extern void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...);
-extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+extern InventoryRef* (*InventoryRefGetForID)(FormID refID);
 
 bool Cmd_StopHolotape_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -77,7 +77,7 @@ bool Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS) {
 	TESCasino* pCasino = nullptr;
 	int32_t iEarnings;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &iEarnings) && pCasino && IS_TYPE(pCasino, TESCasino)) {
-		const uint32_t uiFormID = pCasino->GetFormID();
+		const FormID uiFormID = pCasino->GetFormID();
 		auto pIter = PlayerCharacter::GetSingleton()->casinoDataList;
 		while (pIter && !pIter->IsEmpty()) {
 			CasinoStats* pStats = pIter->GetItem();
@@ -103,7 +103,7 @@ bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESCasino* pCasino = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino) && pCasino && IS_TYPE(pCasino, TESCasino)) {
-		const uint32_t uiFormID = pCasino->GetFormID();
+		const FormID uiFormID = pCasino->GetFormID();
 		auto pIter = PlayerCharacter::GetSingleton()->casinoDataList;
 		while (pIter && !pIter->IsEmpty()) {
 			CasinoStats* pStats = pIter->GetItem();
@@ -149,7 +149,7 @@ bool Cmd_GetCasinoChip_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino) && pCasino) {
 		TESForm* pChip = pCasino->GetChipType();
 		if (pChip)
-			*reinterpret_cast<uint32_t*>(result) = pChip->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pChip->GetFormID();
 	}
 	return true;
 }
@@ -680,7 +680,7 @@ bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	pLand->GetCoordData(kCoordData, rPos, 1);
 	TESLandTexture* pTexture = pLand->GetMainTexture(rPos);
 	if (pTexture)
-		*reinterpret_cast<uint32_t*>(result) = pTexture->GetFormID();
+		*reinterpret_cast<FormID*>(result) = pTexture->GetFormID();
 	return true;
 }
 
@@ -1043,7 +1043,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 		}
 	}
 
-	if (closestHostile)	*(uint32_t*)result = closestHostile->GetFormID();
+	if (closestHostile)	*(FormID*)result = closestHostile->GetFormID();
 
 	return true;
 }
@@ -1638,6 +1638,6 @@ bool Cmd_GetPCRootWorldspace_Execute(COMMAND_ARGS) {
 	*result = 0;
 	auto pMapMenu = MapMenu::GetSingleton();
 	if (pMapMenu && pMapMenu->parentmostLastExtDoorWorldspace)
-		*reinterpret_cast<uint32_t*>(result) = pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
+		*reinterpret_cast<FormID*>(result) = pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
 	return true; 
 }

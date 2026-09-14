@@ -1,7 +1,7 @@
 #include "ExtraMarkerIcons.hpp"
 
 namespace ExtraMarkerIcons {
-	std::unordered_map<uint32_t, char*> markerIconMap;
+	std::unordered_map<FormID, char*> markerIconMap;
 	char** defaultMarkerList = (char**)0x11A0404;
 
 	void SetMapMarkerIcon(TESObjectREFR* marker, char* iconPath) {

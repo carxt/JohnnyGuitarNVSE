@@ -12,7 +12,7 @@ public:
 	BGSSaveLoadFormHeader	kHeader;
 	TESForm*				pForm;
 
-	void SetHeader(uint32_t auiFormID, uint32_t auiChangeFlags, FORM_TYPE aeFormType, uint8_t aucVersion);
+	void SetHeader(FormID auiFormID, uint32_t auiChangeFlags, FORM_TYPE aeFormType, uint8_t aucVersion);
 
 	void SetForm(TESForm* apForm);
 

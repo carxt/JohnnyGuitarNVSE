@@ -4,7 +4,6 @@
 #include "BSStringT.hpp"
 #include "BSSimpleList.hpp"
 #include "TESFile.hpp"
-#include "FormID.hpp"
 #include "BSTCaseInsensitiveStringMap.hpp"
 #include "Gamebryo/NiTLargeArray.hpp"
 
@@ -237,7 +236,7 @@ public:
 	bool					bUnk28;
 #endif
 
-	uint32_t	GetFormID() const;
+	FormID		GetFormID() const;
 	FORM_TYPE	GetFormType() const;
 	uint8_t		GetCompileIndex() const;
 
@@ -248,10 +247,10 @@ public:
 	const char* GetFormTypeString() const;
 
 #ifdef GAME
-	static constexpr AddressPtr<NiTPointerMap<uint32_t, TESForm*>*, 0x11C54C0>		pAllForms;
+	static constexpr AddressPtr<NiTPointerMap<FormID, TESForm*>*, 0x11C54C0>		pAllForms;
 	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0x11C54C8>	pAllFormsByEditorID;
 #else
-	static constexpr AddressPtr<NiTPointerMap<uint32_t, TESForm*>*, 0xED56CC>		pAllForms;
+	static constexpr AddressPtr<NiTPointerMap<FormID, TESForm*>*, 0xED56CC>		pAllForms;
 	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0xED56D4>	pAllFormsByEditorID;
 #endif
 
@@ -342,14 +341,14 @@ public:
 
 	TESFile* GetFile(int32_t aiIndex) const;
 	TESFile* GetOwnerMaster() const;
-	uint32_t GetFormIDWithoutIndex() const;
-	uint32_t GetLoadFormID() const;
+	FormID GetFormIDWithoutIndex() const;
+	FormID GetLoadFormID() const;
 	uint32_t GetFileCount() const;
 
-	static TESForm* GetFormByNumericID(uint32_t auID);
+	static TESForm* GetFormByNumericID(FormID auiFormID);
 	static TESForm* GetFormByEditorID(const char* apEDID);
 
-	static const FORM_ENUM_STRING* GetFormEnumString(uint8_t aucFormID);
+	static const FORM_ENUM_STRING* GetFormEnumString(uint8_t aucFormType);
 
 	static uint32_t GetFormTypeFromFormString(uint32_t auiFormString);
 };

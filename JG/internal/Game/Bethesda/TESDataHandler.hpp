@@ -5,6 +5,7 @@
 #include "Gamebryo/NiTPrimitiveArray.hpp"
 #include "Gamebryo/NiTPointerList.hpp"
 
+using FormID = uint32_t;
 class BGSAcousticSpace;
 class BGSAddonNode;
 class BGSBodyPartData;
@@ -148,7 +149,7 @@ public:
 	NiTPrimitiveArray<TESObjectCELL*>		kCellArray;				// 1DC
 	NiTPrimitiveArray<BGSAddonNode*>		kAddonArray;			// 1EC
 	NiTPointerList<TESForm*>				kBadForms;				// 1FC
-	uint32_t								uiNextCreatedRefID;		// 208
+	FormID									uiNextCreatedRefID;		// 208
 	TESFile*								pActiveFile;			// 20C
 	BSSimpleList<TESFile*>					kFiles;					// 210
 	uint32_t								uiCompiledFileCount;	// 214

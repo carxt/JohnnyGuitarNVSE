@@ -4,8 +4,8 @@
 
 namespace DialogueResponseOverride {
 
-	std::unordered_map<uint32_t, std::map<uint32_t, DialogueEmotionOverride>> overrideMap;
-	std::unordered_map<uint32_t, std::map<uint32_t, DialogueCache>> cachedDialogueInfo;
+	std::unordered_map<FormID, std::map<uint32_t, DialogueEmotionOverride>> overrideMap;
+	std::unordered_map<FormID, std::map<uint32_t, DialogueCache>> cachedDialogueInfo;
 
 	static uintptr_t originalTopicInfoLoad = 0x104D5D4;
 	DWORD __fastcall hk_TESTopicInfo_Load(TESTopicInfo* topicInfo, void* edx, TESFile* modInfo)
@@ -85,7 +85,7 @@ namespace DialogueResponseOverride {
 		HookUtils::WriteRelJump(0x083D413, (uintptr_t)asm_jumpManHook);
 	}
 
-	DialogueEmotionOverride GetDialogueResponse(uint32_t refId, uint32_t responseNumber, DialogueEmotionOverride& newOverride)
+	DialogueEmotionOverride GetDialogueResponse(FormID refId, uint32_t responseNumber, DialogueEmotionOverride& newOverride)
 	{
 		TESIdleForm* speakerAnim = *(TESIdleForm**)0x11CA244;
 		TESIdleForm* listenerAnim = *(TESIdleForm**)0x11CA244;
@@ -100,7 +100,7 @@ namespace DialogueResponseOverride {
 
 	}
 
-	void Set(uint32_t formID, uint32_t responseNumber, uint32_t emotion, int32_t emotionValue, TESIdleForm* speakerAnim, TESIdleForm* listenerAnim, uint32_t flags) 
+	void Set(FormID formID, uint32_t responseNumber, uint32_t emotion, int32_t emotionValue, TESIdleForm* speakerAnim, TESIdleForm* listenerAnim, uint32_t flags) 
 	{
 		auto it = overrideMap[formID].find(responseNumber);
 		//if (it != overrideMap[dialogResponse->GetFormID()].end())
@@ -116,7 +116,7 @@ namespace DialogueResponseOverride {
 		}
 	}
 
-	void Remove(uint32_t formID, uint32_t responseNumber)
+	void Remove(FormID formID, uint32_t responseNumber)
 	{
 		auto it = overrideMap.find(formID);
 		if (it != overrideMap.end())
@@ -129,7 +129,7 @@ namespace DialogueResponseOverride {
 		}
 	}
 
-	uint32_t GetResponseAmount(uint32_t formID) {
+	uint32_t GetResponseAmount(FormID formID) {
 		auto it = cachedDialogueInfo.find(formID);
 		if (it != cachedDialogueInfo.end())
 		{

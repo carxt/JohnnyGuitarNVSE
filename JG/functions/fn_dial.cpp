@@ -229,7 +229,7 @@ bool Cmd_GetParentTopic_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTopicInfo) && pTopicInfo && IS_TYPE(pTopicInfo, TESTopicInfo)) {
 		TESTopic* pParentTopic = pTopicInfo->pParentTopic;
 		if (pParentTopic) {
-			*reinterpret_cast<uint32_t*>(result) = pParentTopic->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pParentTopic->GetFormID();
 		}
 	}
 	return true;

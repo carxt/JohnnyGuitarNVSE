@@ -8,7 +8,7 @@
 
 namespace NPCAccuracy {
 
-	using AccuracyMultMap = std::unordered_map<uint32_t, float>;
+	using AccuracyMultMap = std::unordered_map<FormID, float>;
 
 	template<typename T>
 	using ScrapVector = std::vector<T, BSScrapAllocator<T>>;
@@ -37,7 +37,7 @@ namespace NPCAccuracy {
 			return kMaps[aeType];
 		}
 
-		float __fastcall GetMultiplier(uint32_t auiFormID, MultType aeType) {
+		float __fastcall GetMultiplier(FormID auiFormID, MultType aeType) {
 			AccuracyMultMap& rMap = GetMap(aeType);
 			auto it = rMap.find(auiFormID);
 			if (it != rMap.end())
@@ -49,11 +49,11 @@ namespace NPCAccuracy {
 			return GetMultiplier(apForm->GetFormID(), aeType);
 		}
 
-		void __fastcall SetMultiplier(uint32_t auiFormID, MultType aeType, float afMult) {
+		void __fastcall SetMultiplier(FormID auiFormID, MultType aeType, float afMult) {
 			GetMap(aeType)[auiFormID] = afMult;
 		}
 
-		void __fastcall RemoveMultiplier(uint32_t auiFormID, MultType aeType) {
+		void __fastcall RemoveMultiplier(FormID auiFormID, MultType aeType) {
 			GetMap(aeType).erase(auiFormID);
 		}
 
@@ -64,8 +64,8 @@ namespace NPCAccuracy {
 
 	AccuracyMultipliers* pMultipliers = nullptr;
 
-	static ScrapVector<uint32_t> __fastcall GetFactionsInList(const BSSimpleList<FactionRank*>* apList) {
-		ScrapVector<uint32_t> kFactions;
+	static ScrapVector<FormID> __fastcall GetFactionsInList(const BSSimpleList<FactionRank*>* apList) {
+		ScrapVector<FormID> kFactions;
 		auto pIter = apList->GetHead();
 		while (pIter && !pIter->IsEmpty()) {
 			const FactionRank* pRank = pIter->GetItem();
@@ -76,13 +76,13 @@ namespace NPCAccuracy {
 		return kFactions;
 	}
 
-	static SPEC_NOINLINE ScrapVector<uint32_t> __fastcall GetFactionsForActor(Actor* apActor) {
+	static SPEC_NOINLINE ScrapVector<FormID> __fastcall GetFactionsForActor(Actor* apActor) {
 		TESActorBase* pActorBase = static_cast<TESActorBase*>(GetPermanentBaseForm(apActor));
-		ScrapVector<uint32_t> kFactions = GetFactionsInList(pActorBase->GetFactionList());
+		ScrapVector<FormID> kFactions = GetFactionsInList(pActorBase->GetFactionList());
 
 		const ExtraFactionChanges* pFactionChanges = apActor->extraDataList.GetExtraData<ExtraFactionChanges>();
 		if (pFactionChanges && pFactionChanges->pFactionChanges) {
-			ScrapVector<uint32_t> kAdditionalFactions = GetFactionsInList(pFactionChanges->pFactionChanges);
+			ScrapVector<FormID> kAdditionalFactions = GetFactionsInList(pFactionChanges->pFactionChanges);
 			kFactions.append_range(kAdditionalFactions);
 
 			std::sort(kFactions.begin(), kFactions.end());
@@ -109,7 +109,7 @@ namespace NPCAccuracy {
 			fMultiplier *= pMultipliers->GetMultiplier(pCombatStyle, AccuracyMultipliers::COMBAT_STYLE);
 
 		const ScrapVector<uint32_t> kFactions = GetFactionsForActor(apActor);
-		for (uint32_t uiFactionFormID : kFactions) {
+		for (FormID uiFactionFormID : kFactions) {
 			fMultiplier *= pMultipliers->GetMultiplier(uiFactionFormID, AccuracyMultipliers::FACTION);
 		}
 		return fMultiplier;
@@ -135,7 +135,7 @@ namespace NPCAccuracy {
 		if (!pMultipliers)
 			pMultipliers = new AccuracyMultipliers;
 
-		const uint32_t uiFormID = apForm->GetFormID();
+		const FormID uiFormID = apForm->GetFormID();
 		if (apForm->IsActor()) {
 			return pMultipliers->SetMultiplier(uiFormID, AccuracyMultipliers::ACTOR, afMultiplier);
 		}
@@ -156,7 +156,7 @@ namespace NPCAccuracy {
 		if (!pMultipliers)
 			return 1.f;
 
-		const uint32_t uiFormID = apForm->GetFormID();
+		const FormID uiFormID = apForm->GetFormID();
 		if (apForm->IsActor()) {
 			return pMultipliers->GetMultiplier(uiFormID, AccuracyMultipliers::ACTOR);
 		}
@@ -178,7 +178,7 @@ namespace NPCAccuracy {
 		if (!pMultipliers)
 			return;
 
-		const uint32_t uiFormID = apForm->GetFormID();
+		const FormID uiFormID = apForm->GetFormID();
 		if (apForm->IsActor()) {
 			pMultipliers->RemoveMultiplier(uiFormID, AccuracyMultipliers::ACTOR);
 		}

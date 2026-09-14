@@ -2,6 +2,9 @@
 
 #pragma region Forms
 
+using FormID	= uint32_t;
+using RefID		= uint32_t;
+
 struct _FormType {
 	enum Type : uint32_t {
 		NONE = 0,

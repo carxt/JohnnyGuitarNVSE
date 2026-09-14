@@ -292,7 +292,7 @@ bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetDefaultHeapSize_Execute(COMMAND_ARGS) {
-	uint32_t heapSize = *(reinterpret_cast<uint32_t*>(0x866E9F + 1));
+	uint32_t heapSize = *(reinterpret_cast<FormID*>(0x866E9F + 1));
 	*result = heapSize / 1024 / 1024;
 	if (IsConsoleMode())
 		Console_Print("DefaultHeapInitialAllocMB >> `%f", *result);
@@ -305,7 +305,7 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cEDID) && cEDID[0]) {
 		const TESForm* pForm = TESForm::GetFormByEditorID(cEDID);
 		if (pForm)
-			*reinterpret_cast<uint32_t*>(result) = pForm->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pForm->GetFormID();
 
 		if (IsConsoleMode())
 			Console_Print("EditorIDToFormID >> 0x%08X", *result);

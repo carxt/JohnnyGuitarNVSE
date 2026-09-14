@@ -34,7 +34,7 @@
 using namespace ScriptUtils;
 
 extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, uint8_t numArgs, ...);
-extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+extern InventoryRef* (*InventoryRefGetForID)(FormID refID);
 
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ItemChange* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ItemChange*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
@@ -119,7 +119,7 @@ bool Cmd_GetNoteTopic_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
 		TESTopic* pTopic = pNote->GetNoteTopic();
 		if (pTopic)
-			*reinterpret_cast<uint32_t*>(result) = pTopic->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pTopic->GetFormID();
 	}
 	return true;
 }
@@ -141,7 +141,7 @@ bool Cmd_GetNoteSound_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
 		TESSound* pSound = pNote->GetNoteSound();
 		if (pSound)
-			*reinterpret_cast<uint32_t*>(result) = pSound->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pSound->GetFormID();
 	}
 	return true;
 }
@@ -182,7 +182,7 @@ bool Cmd_GetNoteSpeaker_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
 		TESActorBase* pSpeaker = pNote->GetNoteSpeaker();
 		if (pSpeaker)
-			*reinterpret_cast<uint32_t*>(result) = pSpeaker->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pSpeaker->GetFormID();
 	}
 	return true;
 }
@@ -195,7 +195,7 @@ bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 		if (actorProcess) {
 			auto furniRef = actorProcess->GetCurrentFurnitureRef();
 			if (furniRef) {
-				*(uint32_t*)result = furniRef->GetFormID();
+				*(FormID*)result = furniRef->GetFormID();
 			}
 		}
 
@@ -213,8 +213,8 @@ bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
 	BOOL bAdd = TRUE;
 	uint32_t uiFlags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pItem, &bAdd, &uiFlags, &pSeller) && pItem) {
-		const uint32_t uiFormID = pItem->GetFormID();
-		const uint32_t uiSellerFormID = pSeller ? pSeller->GetFormID() : 0;
+		const FormID uiFormID = pItem->GetFormID();
+		const FormID uiSellerFormID = pSeller ? pSeller->GetFormID() : 0;
 
 		if (bAdd)
 			*result = BarterFilter::Add(uiFormID, uiFlags, uiSellerFormID);
@@ -229,8 +229,8 @@ bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
 	const TESForm* pItem = nullptr;
 	const TESForm* pSeller = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pItem, &pSeller) && pItem) {
-		const uint32_t uiFormID = pItem->GetFormID();
-		const uint32_t uiSellerFormID = pSeller ? pSeller->GetFormID() : 0;
+		const FormID uiFormID = pItem->GetFormID();
+		const FormID uiSellerFormID = pSeller ? pSeller->GetFormID() : 0;
 
 		*result = BarterFilter::IsHidden(uiFormID, uiSellerFormID);
 		if (IsConsoleMode())
@@ -481,7 +481,7 @@ bool Cmd_GetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &world) && world && IS_TYPE(world, TESWorldSpace)) {
 		BGSEncounterZone* zone = world->pEncounterZone;
 		if (zone)
-			*(uint32_t*)result = zone->GetFormID();
+			*(FormID*)result = zone->GetFormID();
 	}
 	return true;
 }
@@ -515,7 +515,7 @@ bool Cmd_GetRefEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSEncounterZone* zone = GetEncounterZone(&thisObj->extraDataList);
 	if (zone)
-		*(uint32_t*)result = zone->GetFormID();
+		*(FormID*)result = zone->GetFormID();
 	return true;
 }
 
@@ -1083,7 +1083,7 @@ bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
 	BGSTalkingActivator* activator = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &activator) && activator && IS_TYPE(activator, BGSTalkingActivator)) {
 		if (activator->talkingActor) {
-			*(uint32_t*)result = activator->talkingActor->GetFormID();
+			*(FormID*)result = activator->talkingActor->GetFormID();
 		}
 		if (IsConsoleMode()) Console_Print("GetTalkingActivatorActor >> 0x%X", *result);
 	}
@@ -1415,7 +1415,7 @@ bool Cmd_GetContainerSound_Execute(COMMAND_ARGS) {
 		}
 
 		if (pSound)
-			*reinterpret_cast<uint32_t*>(result) = pSound->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pSound->GetFormID();
 	}
 	return true;
 }
@@ -1710,28 +1710,28 @@ bool Cmd_GetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &id) && weap && IS_TYPE(weap, TESObjectWEAP) && id <= 7) {
 		switch (id) {
 		case 0:
-			*(uint32_t*)result = weap->worldStatic != nullptr ? weap->worldStatic->GetFormID() : 0;
+			*(FormID*)result = weap->worldStatic != nullptr ? weap->worldStatic->GetFormID() : 0;
 			break;
 		case 1:
-			*(uint32_t*)result = weap->modStatics[0] != nullptr ? weap->modStatics[0]->GetFormID() : 0;
+			*(FormID*)result = weap->modStatics[0] != nullptr ? weap->modStatics[0]->GetFormID() : 0;
 			break;
 		case 2:
-			*(uint32_t*)result = weap->modStatics[1] != nullptr ? weap->modStatics[1]->GetFormID() : 0;
+			*(FormID*)result = weap->modStatics[1] != nullptr ? weap->modStatics[1]->GetFormID() : 0;
 			break;
 		case 3:
-			*(uint32_t*)result = weap->modStatics[3] != nullptr ? weap->modStatics[3]->GetFormID() : 0;
+			*(FormID*)result = weap->modStatics[3] != nullptr ? weap->modStatics[3]->GetFormID() : 0;
 			break;
 		case 4:
-			*(uint32_t*)result = weap->modStatics[2] != nullptr ? weap->modStatics[2]->GetFormID() : 0;
+			*(FormID*)result = weap->modStatics[2] != nullptr ? weap->modStatics[2]->GetFormID() : 0;
 			break;
 		case 5:
-			*(uint32_t*)result = weap->modStatics[5] != nullptr ? weap->modStatics[5]->GetFormID() : 0;
+			*(FormID*)result = weap->modStatics[5] != nullptr ? weap->modStatics[5]->GetFormID() : 0;
 			break;
 		case 6:
-			*(uint32_t*)result = weap->modStatics[4] != nullptr ? weap->modStatics[4]->GetFormID() : 0;
+			*(FormID*)result = weap->modStatics[4] != nullptr ? weap->modStatics[4]->GetFormID() : 0;
 			break;
 		case 7:
-			*(uint32_t*)result = weap->modStatics[6] != nullptr ? weap->modStatics[6]->GetFormID() : 0;
+			*(FormID*)result = weap->modStatics[6] != nullptr ? weap->modStatics[6]->GetFormID() : 0;
 			break;
 		}
 	}
@@ -2184,7 +2184,7 @@ bool Cmd_GetCameraShotImageSpaceModifier_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
 		TESImageSpaceModifier* pIMOD = pCameraShot->GetFormImageSpaceModifier();
 		if (pIMOD) {
-			*reinterpret_cast<uint32_t*>(result) = pIMOD->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pIMOD->GetFormID();
 		}
 		if (IsConsoleMode())
 			Console_Print("GetCameraShotImageSpaceModifier >> %s", pIMOD ? pIMOD->GetFormEditorID() : "None");
@@ -2759,7 +2759,7 @@ bool Cmd_GetRecipeCategoryFlags_Execute(COMMAND_ARGS) {
 
 bool Cmd_RemapLand_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t uiLandID = 0;
+	FormID uiLandID = 0;
 	TESWorldSpace* pWorld = nullptr;
 	int32_t iGridX = INT32_MAX, iGridY = INT32_MAX;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiLandID, &pWorld, &iGridX, &iGridY)) {
@@ -3297,7 +3297,7 @@ bool Cmd_GetExternalEmittanceSource_Execute(COMMAND_ARGS) {
 		}
 
 		if (pSource)
-			*reinterpret_cast<uint32_t*>(result) = pSource->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pSource->GetFormID();
 	}
 
 	return true;
@@ -3379,7 +3379,7 @@ bool Cmd_GetProjectileMuzzleFlashLight_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSProjectile* pProjectile = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pProjectile) && pProjectile && IS_TYPE(pProjectile, BGSProjectile) && pProjectile->GetMuzzleFlashLight()) {
-		*reinterpret_cast<uint32_t*>(result) = pProjectile->GetMuzzleFlashLight()->GetFormID();
+		*reinterpret_cast<FormID*>(result) = pProjectile->GetMuzzleFlashLight()->GetFormID();
 	}
 	return true;
 }

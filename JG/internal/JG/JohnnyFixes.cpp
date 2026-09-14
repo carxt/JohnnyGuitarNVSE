@@ -225,7 +225,7 @@ namespace JohnnyFixes {
 	}
 
 	HookUtils::CallDetour kGetFileChunkDataDetour;
-	void __fastcall TESRegionDataSoundIncidentalIDHook(TESFile* apFile, void* edx, uint32_t* apFormID) {
+	void __fastcall TESRegionDataSoundIncidentalIDHook(TESFile* apFile, void* edx, FormID* apFormID) {
 		ThisCall(kGetFileChunkDataDetour, apFile, apFormID);
 		if (*apFormID)
 			CdeclCall(0x485D50, apFormID, apFile);

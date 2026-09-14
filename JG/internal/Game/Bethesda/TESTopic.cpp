@@ -101,7 +101,7 @@ bool TESTopic::IsPersuasion() const {
 
 // GAME - 0x619E10
 // GECK - 0x593790
-TESTopicInfo* TESTopic::GetInfoByID(uint32_t auiFormID, bool abReverse) {
+TESTopicInfo* TESTopic::GetInfoByID(FormID auiFormID, bool abReverse) {
 #ifdef GAME
 	return ThisCall<TESTopicInfo*>(0x619E10, this, auiFormID, abReverse);
 #else
@@ -143,7 +143,7 @@ TESTopicInfo* TESTopic::GetInfoByIndex(const QuestInfo* apQuestInfo, uint32_t au
 
 // GAME - 0x619820
 // GECK - 0x596790
-bool TESTopic::InsertInfo(TESQuest* apQuest, TESTopicInfo* apTopicInfo, uint32_t auiPreviousInfoID) {
+bool TESTopic::InsertInfo(TESQuest* apQuest, TESTopicInfo* apTopicInfo, FormID auiPreviousInfoID) {
 #ifdef GAME
 	return ThisCall<bool>(0x619820, this, apQuest, apTopicInfo, auiPreviousInfoID);
 #else

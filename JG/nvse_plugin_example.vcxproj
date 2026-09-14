@@ -1108,7 +1108,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\FactionRank.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FileFinder.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FixedStrings.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\FormID.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\FormID_View.hpp" />
     <ClInclude Include="internal\Game\Bethesda\GameSettingCollection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ImageSpaceParameterData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ImpactSwap.hpp" />

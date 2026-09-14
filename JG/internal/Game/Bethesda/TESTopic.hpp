@@ -74,12 +74,12 @@ public:
 	bool IsPersuasion() const;
 
 
-	TESTopicInfo* GetInfoByID(uint32_t auiFormID, bool abReverse);
+	TESTopicInfo* GetInfoByID(FormID auiFormID, bool abReverse);
 
 	TESTopicInfo* GetInfoByIndex(const TESQuest* apQuest, uint32_t auiIndex) const;
 	static TESTopicInfo* GetInfoByIndex(const QuestInfo* apQuestInfo, uint32_t auiIndex);
 
-	bool InsertInfo(TESQuest* apQuest, TESTopicInfo* apTopicInfo, uint32_t auiPreviousInfoID);
+	bool InsertInfo(TESQuest* apQuest, TESTopicInfo* apTopicInfo, FormID auiPreviousInfoID);
 
 	TopicInfoArray* GetInfoArray(const TESQuest* apQuest) const;
 

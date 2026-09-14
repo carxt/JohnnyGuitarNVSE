@@ -24,7 +24,7 @@ bool Cmd_GetNthRegionWeatherGlobal_Execute(COMMAND_ARGS) {
 		if (pWeatherData && !pWeatherData->kWeatherList.IsEmpty()) {
 			auto pItem = pWeatherData->kWeatherList.GetAt(iIndex);
 			if (pItem && pItem->GetItem() && pItem->GetItem()->uiChance)
-				*reinterpret_cast<uint32_t*>(result) = pItem->GetItem()->pChanceVar->GetFormID();
+				*reinterpret_cast<FormID*>(result) = pItem->GetItem()->pChanceVar->GetFormID();
 		}
 	}
 	return true;

@@ -1,7 +1,7 @@
 #include "BGSSaveFormBuffer.hpp"
 
 // GAME - 0x865AD0
-void BGSSaveFormBuffer::SetHeader(uint32_t auiFormID, uint32_t auiChangeFlags, FORM_TYPE aeFormType, uint8_t aucVersion) {
+void BGSSaveFormBuffer::SetHeader(FormID auiFormID, uint32_t auiChangeFlags, FORM_TYPE aeFormType, uint8_t aucVersion) {
     ThisCall(0x865AD0, this, auiFormID, auiChangeFlags, aeFormType, aucVersion);
 }
 

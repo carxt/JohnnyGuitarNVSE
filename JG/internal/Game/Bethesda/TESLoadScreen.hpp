@@ -11,8 +11,8 @@ public:
 	~TESLoadScreen();
 
 	struct LoadForm {
-		uint32_t uiFormID;
-		uint32_t uiWorldID;
+		FormID 	 uiFormID;
+		FormID 	 uiWorldID;
 		uint32_t uiCellKey;
 	};
 

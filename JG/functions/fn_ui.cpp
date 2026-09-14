@@ -15,7 +15,7 @@
 
 #include <vector>
 
-extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+extern InventoryRef* (*InventoryRefGetForID)(FormID refID);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 	if (PlayerCharacter::GetSingleton()) {
@@ -252,7 +252,7 @@ bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectREFR* markerRef = ThisCall<TESObjectREFR*>(0x77A400, PlayerCharacter::GetSingleton());
 	if (markerRef) {
-		*(uint32_t*)result = markerRef->GetFormID();
+		*(FormID*)result = markerRef->GetFormID();
 	}
 	return true;
 }
