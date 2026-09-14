@@ -883,6 +883,9 @@
     <ClCompile Include="internal\Game\Bethesda\TESWorldSpace.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiCriticalSection.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">

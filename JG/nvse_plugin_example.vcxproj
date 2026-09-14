@@ -655,6 +655,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TimeGlobal.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiColor.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiColorA.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiCriticalSection.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiCullingProcess.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiExtraData.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFixedString.cpp" />
