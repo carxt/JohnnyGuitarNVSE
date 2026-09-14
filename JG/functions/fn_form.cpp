@@ -1104,29 +1104,30 @@ bool Cmd_GetActorEffectType_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetBodyPartTraitString_Execute(COMMAND_ARGS) {
-	const char* resStr = nullptr;
-	BGSBodyPartData* bpData = nullptr;
-	uint32_t partID;
-	uint32_t traitID;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bpData, &partID, &traitID) && bpData) {
-		if (IS_ID(bpData, BGSBodyPartData) && (partID <= 14) && (traitID <= 5)) {
-			if (const BGSBodyPart* bodyPart = bpData->bodyParts[partID]) {
-				switch (traitID) {
+	const char* pText = nullptr;
+	BGSBodyPartData* pPartData = nullptr;
+	BODY_PART_TYPE ePartType;
+	uint32_t uiStringType;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pPartData, &ePartType, &uiStringType) && pPartData && InRange(ePartType)) {
+		if (IS_ID(pPartData, BGSBodyPartData) && (uiStringType <= 5)) {
+			const BGSBodyPart* pBodyPart = pPartData->GetBodyPart(ePartType);
+			if (pBodyPart) {
+				switch (uiStringType) {
 				case 1:
-					resStr = bodyPart->GetNodeName();
+					pText = pBodyPart->GetNodeName();
 					break;
 				case 2:
-					resStr = bodyPart->GetTargetName();
+					pText = pBodyPart->GetTargetName();
 					break;
 				case 3:
-					resStr = bodyPart->GetIKStartNodeName();
+					pText = pBodyPart->GetIKStartNodeName();
 					break;
 				case 4:
-					resStr = bodyPart->GetPartName();
+					pText = pBodyPart->GetPartName();
 					break;
 				case 5:
-					resStr = bodyPart->GetGoreObjectName();
+					pText = pBodyPart->GetGoreObjectName();
 					break;
 				default:
 					break;
@@ -1134,10 +1135,10 @@ bool Cmd_GetBodyPartTraitString_Execute(COMMAND_ARGS) {
 			}
 		}
 
-		if (!resStr)
-			resStr = "";
+		if (!pText)
+			pText = "";
 
-		g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pText);
 	}
 	return true;
 }

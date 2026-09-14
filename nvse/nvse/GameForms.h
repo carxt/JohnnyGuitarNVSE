@@ -69,6 +69,7 @@
 #include "Bethesda/AlchemyItem.hpp"
 #include "Bethesda/BGSAcousticSpace.hpp"
 #include "Bethesda/BGSAddonNode.hpp"
+#include "Bethesda/BGSBodyPartData.hpp"
 #include "Bethesda/BGSCameraShot.hpp"
 #include "Bethesda/BGSDebris.hpp"
 #include "Bethesda/BGSDefaultObjectManager.hpp"
@@ -2013,45 +2014,6 @@ public:
 static_assert(sizeof(TESImageSpaceModifier) == 0x730);
 #else
 static_assert(sizeof(TESImageSpaceModifier) == 0x74C);
-#endif
-
-// 74
-class BGSBodyPartData : public TESForm {
-public:
-	BGSBodyPartData();
-	~BGSBodyPartData();
-
-	enum {
-		eBodyPart_Torso = 0,
-		eBodyPart_Head1,
-		eBodyPart_Head2,
-		eBodyPart_LeftArm1,
-		eBodyPart_LeftArm2,
-		eBodyPart_RightArm1,
-		eBodyPart_RightArm2,
-		eBodyPart_LeftLeg1,
-		eBodyPart_LeftLeg2,
-		eBodyPart_LeftLeg3,
-		eBodyPart_RightLeg1,
-		eBodyPart_RightLeg2,
-		eBodyPart_RightLeg3,
-		eBodyPart_Brain,
-		eBodyPart_Weapon,
-	};
-
-	TESModel		model;				// 018
-	BGSPreloadable	preloadable;		// 030
-#ifdef GAME
-	BGSBodyPart* bodyParts[15];		// 034
-#else
-	BSSimpleList<BGSBodyPart*> bodyParts;
-#endif
-	BGSRagdoll* ragDoll;			// 070
-};
-#ifdef GAME
-static_assert(sizeof(BGSBodyPartData) == 0x74);
-#else
-static_assert(sizeof(BGSBodyPartData) == 0x60);
 #endif
 
 // BGSCameraPath (38)
