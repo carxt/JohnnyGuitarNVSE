@@ -133,9 +133,6 @@
     <ClCompile Include="..\shared\BSMemory\BSScrapMemory.cpp">
       <Filter>shared\BSMemory</Filter>
     </ClCompile>
-    <ClCompile Include="internal\netimmerse.cpp">
-      <Filter>internal</Filter>
-    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
@@ -886,6 +883,24 @@
     <ClCompile Include="internal\Game\Gamebryo\NiCriticalSection.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectCELL.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiAVObject.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiNode.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiSwitchNode.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiBound.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSLightingTemplate.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1169,9 +1184,6 @@
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\FileFinder.hpp">
-      <Filter>internal\Game\Bethesda</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\FormID.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\GameSettingCollection.hpp">
@@ -2303,6 +2315,40 @@
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\TESWorldSpace.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\FormID_View.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESObjectCELL.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSLightingTemplate.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\CellData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiAVObject.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiNode.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiSwitchNode.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiBound.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSMultiBound.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSMultiBoundNode.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSMultiBoundShape.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSNiNode.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>

@@ -265,7 +265,7 @@ bool TESWorldSpace::GetParentUseFlag(ParentUseBit auiBit) const {
 #ifdef GAME
     return ThisCall<bool>(0x586340, this, auiBit);
 #else
-    return auiBit > ParentUseBit::COUNT || usParentUseFlags.GetBit(auiBit);
+    return auiBit >= ParentUseBit::COUNT || usParentUseFlags.GetBit(auiBit);
 #endif
 }
 

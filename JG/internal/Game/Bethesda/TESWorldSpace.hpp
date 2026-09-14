@@ -75,29 +75,32 @@ public:
 
 	struct ALIGN2 _ParentUseFlags {
 		enum Flags : uint16_t {
-			LAND	= 1u << 0,
-			LOD		= 1u << 1,
-			MAP		= 1u << 2,
-			WATER	= 1u << 3,
-			CLIMATE	= 1u << 4,
+			LAND		= 1u << 0,
+			LOD			= 1u << 1,
+			MAP			= 1u << 2,
+			WATER		= 1u << 3,
+			CLIMATE		= 1u << 4,
+			IMAGESPACE	= 1u << 5,
 		};
 
 		struct FlagBits {
 			enum Bits : uint16_t {
-				LAND	= 0,
-				LOD		= 1,
-				MAP		= 2,
-				WATER	= 3,
-				CLIMATE = 4,
+				LAND		= 0,
+				LOD			= 1,
+				MAP			= 2,
+				WATER		= 3,
+				CLIMATE		= 4,
+				IMAGESPACE	= 5,
 				COUNT
 			};
 		};
 
-		bool bLand		: 1;
-		bool bLOD		: 1;
-		bool bMap		: 1;
-		bool bWater		: 1;
-		bool bClimate	: 1;
+		bool bLand			: 1;
+		bool bLOD			: 1;
+		bool bMap			: 1;
+		bool bWater			: 1;
+		bool bClimate		: 1;
+		bool bImageSpace	: 1;
 	};
 	using ParentUseFlags	= _ParentUseFlags::Flags;
 	using ParentUseBit		= _ParentUseFlags::FlagBits::Bits;

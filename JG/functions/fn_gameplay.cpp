@@ -217,10 +217,10 @@ bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 		TESForm* pSpace = nullptr;
 		TESObjectCELL* pParentCell = PlayerCharacter::GetSingleton()->parentCell;
 		if (pParentCell) {
-			if (pParentCell->IsInterior())
+			if (pParentCell->GetInterior())
 				pSpace = pParentCell;
 			else
-				pSpace = pParentCell->worldSpace;
+				pSpace = pParentCell->GetWorldSpace();
 		}
 		if (pSpace) {
 			PlayerCharacter::GetSingleton()->SetPlayerMapMarker(kPos, pSpace);
@@ -668,7 +668,7 @@ bool Cmd_GetMoonPhase_Execute(COMMAND_ARGS) {
 bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* pCell = thisObj->GetParentCell();
-	if (!pCell || pCell->IsInterior())
+	if (!pCell || pCell->GetInterior())
 		return true;
 
 	TESObjectLAND* pLand = pCell->GetLand();
@@ -747,8 +747,8 @@ TESWorldSpace* __fastcall GetWorldSpace(const TESObjectREFR* apRef) {
 	if (!pCell)
 		pCell = apRef->childCell.GetSaveParentCell();
 
-	if (pCell && !pCell->IsInterior()) 
-		return pCell->worldSpace;
+	if (pCell && !pCell->GetInterior()) 
+		return pCell->GetWorldSpace();
 
 	return nullptr;
 }
@@ -756,8 +756,8 @@ TESWorldSpace* __fastcall GetWorldSpace(const TESObjectREFR* apRef) {
 bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cLocationName[MAX_PATH] = {};
-	if (thisObj->parentCell && thisObj->parentCell->IsInterior()) {
-		strcpy_s(cLocationName, thisObj->parentCell->fullName.GetFullName());
+	if (thisObj->parentCell && thisObj->parentCell->GetInterior()) {
+		strcpy_s(cLocationName, thisObj->parentCell->GetFullName());
 	}
 	else {
 		const TESWorldSpace* pWorld = GetWorldSpace(thisObj);
@@ -966,7 +966,7 @@ bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* pCell = PlayerCharacter::GetSingleton()->parentCell;
 	if (pCell)
-		*result = ProcessLists::GetSingleton()->AreHostileActorsNear(pCell->IsInterior());
+		*result = ProcessLists::GetSingleton()->AreHostileActorsNear(pCell->GetInterior());
 	return true;
 }
 
@@ -1020,7 +1020,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
-	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->IsInterior();
+	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->GetInterior();
 	float interiorDistanceSquared = fSneakMaxDistance * fSneakMaxDistance;
 	float exteriorDistanceSquared = (fSneakMaxDistance * fSneakExteriorDistanceMult) * (fSneakMaxDistance * fSneakExteriorDistanceMult);
 	float maxDist = isInterior ? interiorDistanceSquared : exteriorDistanceSquared;
@@ -1093,7 +1093,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
-	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->IsInterior();
+	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->GetInterior();
 	float maxDist = isInterior ? powf(fSneakMaxDistance, 2) : powf((fSneakMaxDistance * fSneakExteriorDistanceMult), 2);
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;

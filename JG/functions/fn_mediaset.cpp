@@ -7,17 +7,13 @@ bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESObjectCELL* pCell = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL))
-	{
-		ExtraCellAcousticSpace* pXAcousticSpace = pCell->extraDataList.GetExtraData<ExtraCellAcousticSpace>();
-		if (pXAcousticSpace && pXAcousticSpace->pSpace)
-		{
-			*(DWORD*)result = pXAcousticSpace->pSpace->GetFormID();
-		}
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
+		BGSAcousticSpace* pAcousticSpace = pCell->GetAcousticSpace();
+		if (pAcousticSpace)
+			*reinterpret_cast<FormID*>(result) = pAcousticSpace->GetFormID();
+
 		if (IsConsoleMode())
-		{
-			Console_Print("GetAcousticSpace  >> 0x%lx", *(DWORD*)result);
-		}
+			Console_Print("GetAcousticSpace  >> 0x%lx", *reinterpret_cast<FormID*>(result));
 	}
 	return true;
 }
@@ -27,27 +23,20 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
 	*result = 0;
 	TESObjectCELL* pCell = nullptr;
 	BGSAcousticSpace* pAcousticSpace = nullptr;
-	uintptr_t ExtraCellAcousticSpace_Update = 0x041C090;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, pAcousticSpace) && pCell)
 	{
-		if (!IS_TYPE(pCell, TESObjectCELL)) [[unlikely]]
-		{
+		if (!IS_TYPE(pCell, TESObjectCELL)) [[unlikely]] {
 			if (IsConsoleMode())
-			{
 				Console_Print("SetAcousticSpace >> Passed an invalid cell");
-			}
 			return true;
 		}
 
-		if (pAcousticSpace && !IS_TYPE(pAcousticSpace, BGSAcousticSpace)) [[unlikely]]
-		{
+		if (pAcousticSpace && !IS_TYPE(pAcousticSpace, BGSAcousticSpace)) [[unlikely]] {
 			if (IsConsoleMode())
-			{
 				Console_Print("SetAcousticSpace >> Passed an invalid acoustic space");
-			}
 			return true;
 		}
-		ThisCall(ExtraCellAcousticSpace_Update, &pCell->extraDataList, pAcousticSpace);
+		pCell->SetAcousticSpace(pAcousticSpace);
 	}
 	return true;
 }

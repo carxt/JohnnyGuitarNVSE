@@ -37,7 +37,7 @@ public:
 
 	TESFORM_TYPE(BGSAcousticSpace);
 
-	bool IsInterior() const;
+	bool GetInterior() const;
 	void SetInterior(bool abInterior);
 
 	TESSound* GetDawnSound() const;

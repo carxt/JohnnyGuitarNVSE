@@ -1,7 +1,7 @@
 #include "BGSAcousticSpace.hpp"
 
 // GAME - 0x58A200
-bool BGSAcousticSpace::IsInterior() const {
+bool BGSAcousticSpace::GetInterior() const {
     return bIsInterior;
 }
 

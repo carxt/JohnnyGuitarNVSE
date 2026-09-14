@@ -268,13 +268,3 @@ static const char** s_procNames = (const char**)0x011A3CC0;
 #else
 #error unsupported Fallout version
 #endif
-
-// GAME - 0x541AC0
-void TESObjectCELL::CellRefLockEnter() {
-	ThisCall(0x541AC0, this);
-}
-
-// GAME - 0x541AE0
-void TESObjectCELL::CellRefLockLeave() {
-	ThisCall(0x541AE0, this);
-}

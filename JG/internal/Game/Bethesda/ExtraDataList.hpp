@@ -6,6 +6,14 @@
 
 class AlchemyItem;
 class TESForm;
+class BGSEncounterZone;
+class BGSAcousticSpace;
+class TESClimate;
+class TESWaterForm;
+class ImpactSwap;
+class BGSMusicType;
+class TESGlobal;
+class TESImageSpace;
 
 class ExtraDataList : public BaseExtraList {
 public:
@@ -24,6 +32,36 @@ public:
 
 	TESForm* GetEmittanceSource() const;
 	void SetEmittanceSource(TESForm* apSource);
+
+	BGSEncounterZone* GetEncounterZone() const;
+	void SetEncounterZone(BGSEncounterZone* apZone);
+
+	BGSAcousticSpace* GetAcousticSpace() const;
+	void SetAcousticSpace(BGSAcousticSpace* apSpace);
+
+	TESClimate* GetClimate() const;
+	void SetClimate(TESClimate* apClimate);
+
+	TESWaterForm* GetWaterType() const;
+	void SetWaterType(TESWaterForm* apWater);
+
+	ImpactSwap* GetImpactSwap() const;
+	void SetImpactSwap(ImpactSwap* apSwap);
+
+	BGSMusicType* GetMusicType() const;
+	void SetMusicType(BGSMusicType* aeType);
+
+	TESGlobal* GetGlobal() const;
+	void SetGlobal(TESGlobal* apGlobal);
+
+	int32_t GetRank() const;
+	void SetRank(int32_t aiRank);
+
+	TESForm* GetOwner() const;
+	void SetOwnership(TESForm* apOwner);
+
+	TESImageSpace* GetImageSpace() const;
+	void SetImageSpace(TESImageSpace* apImageSpace);
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

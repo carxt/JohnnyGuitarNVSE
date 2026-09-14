@@ -3,7 +3,7 @@
 #include "NiTypes.h"
 #include "GameTypes.h"
 
-#include "Gamebryo/NiObjectNET.hpp"
+#include "Gamebryo/NiSwitchNode.hpp"
 #include "Gamebryo/NiRTTI.hpp"
 #include "Gamebryo/NiCullingProcess.hpp"
 #include "Gamebryo/NiAlphaAccumulator.hpp"
@@ -15,6 +15,7 @@
 #include "Bethesda/NiUpdateData.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
 #include "Bethesda/BSCullingProcess.hpp"
+#include "Bethesda/BSMultiBoundNode.hpp"
 
 struct NavMeshInfo;
 class bhkRigidBody;
@@ -322,8 +323,6 @@ public:
 };
 static_assert(sizeof(NiControllerSequence) == 0x74);
 
-class NiObjectNET;
-
 // 34
 class NiTimeController : public NiObject {
 public:
@@ -555,31 +554,6 @@ public:
 
 	Tile* parentTile;	// 0C
 	NiNode* parentNode;	// 10
-};
-
-// 18
-class NiProperty : public NiObjectNET {
-public:
-	NiProperty();
-	~NiProperty();
-
-	virtual uint32_t	GetPropertyType();
-	virtual void	UpdateController(float arg);
-
-	enum {
-		kPropertyType_Alpha = 0,
-		kPropertyType_Culling = 1,
-		kPropertyType_Material = 2,
-		kPropertyType_Shade = 3,
-		kPropertyType_TileShader = kPropertyType_Shade,
-		kPropertyType_Stencil = 4,
-		kPropertyType_Texturing = 5,
-		kPropertyType_Dither = 8,
-		kPropertyType_Specular = 9,
-		kPropertyType_VertexColor = 10,
-		kPropertyType_ZBuffer = 11,
-		kPropertyType_Fog = 13,
-	};
 };
 
 // 4C
@@ -1267,203 +1241,6 @@ static_assert(sizeof(WaterShaderProperty) == 0x150);
 
 class NiDynamicEffectState;
 
-// 9C
-class NiAVObject : public NiObjectNET {
-public:
-	NiAVObject();
-	~NiAVObject();
-
-	virtual void			UpdateControllers(NiUpdateData& arData);
-	virtual void			ApplyTransform(NiMatrix3& arMat, NiPoint3& arTrn, bool abOnLeft);
-	virtual void			SetMaterialNeedsUpdate(bool abNeedsUpdate);
-	virtual void			SetDefaultMaterialNeedsUpdateFlag(bool abNeedsUpdate);
-	virtual NiAVObject*		GetObjectByName(const NiFixedString& arName) const;
-	virtual void			SetSelectiveUpdateFlags(bool& arSelectiveUpdate, bool abSelectiveUpdateTransforms, bool& arRigid);
-	virtual void			UpdateDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
-	virtual void			UpdateSelectedDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
-	virtual void			UpdateRigidDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
-	virtual void			UpdatePropertiesDownward(NiPropertyState* apParentState);
-	virtual void			UpdateEffectsDownward(NiDynamicEffectState* apEffectState);
-	virtual void			UpdateWorldData(NiUpdateData& arData);
-	virtual void			UpdateWorldBound();
-	virtual void			UpdateTransformAndBounds(NiUpdateData& arData);
-	virtual void			PreAttachUpdate(NiNode* apEventualParent, NiUpdateData& arData);
-	virtual void			PreAttachUpdateProperties(NiNode* apEventualParent);
-	virtual void			PreAttachUpdateEffects(NiNode* apEventualParent);
-	virtual void			PostAttachUpdate();
-	virtual void			OnVisible(NiCullingProcess* apCuller);
-	virtual void			PurgeRendererData(NiDX9Renderer* apRenderer);
-
-	NiNode*							m_pkParent;				// 18
-	NiPointer<bhkNiCollisionObject>	m_spCollisionObject;		// 1C
-	NiBound*						m_pWorldBound;			// 20
-	DList<NiProperty>				m_propertyList;			// 24
-	Bitfield32						m_uiFlags;				// 30
-	NiTransform						m_kLocal;
-	NiTransform						m_kWorld;
-
-#ifdef GAME
-	static constexpr AddressPtr<NiBound, 0x11F4288> kNullBound;
-#else
-	static constexpr AddressPtr<NiBound, 0xF1FD88> kNullBound;
-#endif
-
-	NiProperty* GetProperty(uint32_t auiType) const;
-
-	void SetAppCulled(bool abCulled) {
-		m_uiFlags.Set(1, abCulled);
-	}
-
-	bool GetAppCulled() const {
-		return m_uiFlags.GetBit(0);
-	}
-
-	void SetAlwaysDraw(bool abVal) {
-		ThisCall(0x546780, this, abVal);
-	}
-
-	void SetFixedBound(bool abVal) {
-		m_uiFlags.Set(0x2000, abVal);
-	}
-
-	void SetIgnoreFade(bool abVal) {
-		m_uiFlags.Set(0x8000, abVal);
-	}
-
-	void DumpProperties();
-	void DumpParents();
-
-	void Update(NiUpdateData& arData) {
-		ThisCall(0xA59C60, this, &arData);
-	}
-
-	void Update() {
-		NiUpdateData kData;
-		Update(kData);
-	}
-
-	void UpdateSelected(NiUpdateData& arData) {
-		ThisCall(0xA59C90, this, &arData);
-	}
-
-	void UpdateSelected() {
-		NiUpdateData kData;
-		Update(kData);
-	}
-
-	void UpdateProperties() {
-		ThisCall(0xA5A040, this);
-	}
-
-	void SetLocalRotate(const NiMatrix3& arMat) {
-		m_kLocal.m_kRotate = arMat;
-	}
-
-	void SetLocalTranslate(const NiPoint3& arTrn) {
-		m_kLocal.m_kTranslate = arTrn;
-	}
-
-	void SetLocalScale(float afScale) {
-		m_kLocal.m_fScale = afScale;
-	}
-
-	NiTimeController* GetController(const NiRTTI* apRTTI) const {
-		return ThisCall<NiTimeController*>(0xA5C570, this, apRTTI);
-	}
-
-	template <class ControllerType>
-	ControllerType* GetController() const {
-		return static_cast<ControllerType*>(GetController(&ControllerType::ms_RTTI));
-	}
-
-	const NiBound& GetWorldBound() const {
-		return m_pWorldBound ? *m_pWorldBound : kNullBound;
-	}
-
-	NiNode* GetParent() const {
-		return m_pkParent;
-	}
-};
-
-// AC
-class NiNode : public NiAVObject {
-public:
-	NiNode();
-	~NiNode();
-
-	virtual void	AttachChild(NiAVObject* apChild, bool abFirstAvail);
-	virtual void	InsertChildAt(uint32_t i, NiAVObject* apChild);
-	virtual void	DetachChildAlt(NiAVObject* apChild, NiPointer<NiAVObject>& arResult);
-	virtual void	DetachChild(NiAVObject* apChild);
-	virtual void	DetachChildAtAlt(uint32_t i, NiPointer<NiAVObject>& arResult);
-	virtual void	DetachChildAt(uint32_t i);
-	virtual void	SetAtAlt(uint32_t i, NiAVObject* apChild, NiPointer<NiAVObject>& arResult);
-	virtual void	SetAt(uint32_t i, NiAVObject* apChild);
-	virtual void	UpdateUpwardPass();
-
-	NiTObjectArray<NiPointer<NiAVObject>>	m_kChildren;		// 9C
-
-	static NiNode* Create(uint16_t ausChildCount = 0);
-
-	NiAVObject* GetBlock(const char* blockName);
-	NiNode* GetNode(const char* nodeName);
-
-	uint32_t GetArrayCount() const {
-		return m_kChildren.GetSize();
-	}
-
-	uint32_t GetChildCount() const {
-		return m_kChildren.GetEffectiveSize();
-	}
-
-	NiAVObject* GetAt(uint32_t auiIndex) const {
-		return m_kChildren.GetAt(auiIndex);
-	}
-
-	NiAVObject* GetAtChecked(uint32_t auiIndex) const {
-		if (GetArrayCount() <= auiIndex)
-			return nullptr;
-
-		return GetAt(auiIndex);
-	}
-
-	void RemoveChildren() {
-		m_kChildren.RemoveAll();
-	}
-};
-static_assert(sizeof(NiNode) == 0xAC);
-
-class NiSwitchNode : public NiNode {
-public:
-	struct ALIGN2 _SwitchFlags {
-		enum Flags : uint16_t {
-			UPDATE_ONLY_ACTIVE_CHILD	= 1u << 0,
-			UPDATE_CONTROLLERS			= 1u << 1,
-		};
-
-		bool bUpdateOnlyActiveChild : 1;
-		bool bUpdateControllers		: 1;
-	};
-	using SwitchFlags = _SwitchFlags::Flags;
-
-	Bitfield<_SwitchFlags>		m_usFlags;
-	int32_t						m_iIndex;
-	float						m_fSavedTime;
-	uint32_t					m_uiRevID;
-	NiTPrimitiveArray<uint32_t>	m_kChildRevID;
-
-	NIRTTI_ADDRESS(0x11F5EB4);
-
-	void SetIndex(int32_t aiIndex) {
-		if (aiIndex >= -1 && aiIndex < static_cast<int32_t>(m_kChildren.GetSize()))
-			m_iIndex = aiIndex;
-	}
-
-	int32_t GetIndex() const {
-		return m_iIndex;
-	}
-};
-
 class NiCamera;
 class NiLODNode;
 
@@ -1521,21 +1298,6 @@ public:
 	void TurnFadeNodeOn() {
 		ThisCall(0x476AB0, this);
 	};
-};
-
-// B4
-class BSMultiBoundNode : public NiNode {
-public:
-	BSMultiBoundNode();
-	~BSMultiBoundNode();
-
-	virtual void	Unk_40(uint32_t arg1, uint32_t arg2);
-	virtual void	Unk_41(void);
-	virtual void	Unk_42(uint32_t arg1);
-	virtual void	Unk_43(uint32_t arg1);
-	virtual void	Unk_44(uint32_t arg1);
-
-	uint32_t			unkAC[2];		// AC
 };
 
 // B8
@@ -2397,6 +2159,8 @@ public:
 };
 static_assert(sizeof(RendererData) == 0x54);
 
+class NiGeometryBufferData;
+
 // 40
 class NiGeometryData : public NiObject {
 public:
@@ -2410,22 +2174,22 @@ public:
 	virtual bool	Unk_27(uint32_t arg);
 	virtual void	Unk_28(void);
 
-	uint16_t			numVertices;	// 08
-	uint16_t			word0A;			// 0A
-	uint16_t			word0C;			// 0C
-	uint16_t			word0E;			// 0E
-	NiBound		bounds;			// 10
-	NiPoint3* vertices;		// 20
-	NiPoint3* normals;		// 24
-	NiColorA* vertexColors;	// 28
-	UVCoord* uvCoords;		// 2C
-	uint32_t			unk30;			// 30
-	RendererData* rendererData;	// 34
-	uint8_t			byte38;			// 38
-	uint8_t			byte39;			// 39
-	uint8_t			byte3A;			// 3A
-	uint8_t			byte3B;			// 3B
-	uint32_t			unk3C;			// 3C
+	uint16_t							m_usVertices;
+	uint16_t							m_usID;
+	Bitfield16							m_usDataFlags;
+	Bitfield16							m_usDirtyFlags;
+	NiBound								m_kBound;
+	NiPoint3*							m_pkVertex;
+	NiPoint3*							m_pkNormal;
+	NiColorA*							m_pkColor;
+	NiPoint2*							m_pkTexture;
+	void*								m_spAdditionalGeomData;
+	NiGeometryBufferData*				m_pkBuffData;
+	Bitfield8							m_ucKeepFlags;
+	Bitfield8							m_ucCompressFlags;
+	bool								m_bVBLocked;
+	bool								m_bVBLockWrite;
+	bool								m_bSaveVertexData;
 };
 static_assert(sizeof(NiGeometryData) == 0x40);
 

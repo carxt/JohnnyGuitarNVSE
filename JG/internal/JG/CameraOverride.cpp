@@ -33,8 +33,8 @@ namespace CameraOverride {
 					const TESObjectREFR* pTrackRef = static_cast<const TESObjectREFR*>(pForm);
 					const NiNode* pRootNode = pTrackRef->Get3D();
 					NiPoint3 kPos;
-					if (pRootNode && pRootNode->m_pWorldBound && pRootNode->m_pWorldBound->iRadius) {
-						kPos = pRootNode->m_pWorldBound->kCenter;
+					if (pRootNode && pRootNode->IsVisualObject()) {
+						kPos = pRootNode->m_pWorldBound->GetCenter();
 					}
 					else {
 						kPos = pTrackRef->GetLocationOnReference();
