@@ -115,6 +115,7 @@
 #include "Bethesda/TESLevCreature.hpp"
 #include "Bethesda/TESLevItem.hpp"
 #include "Bethesda/TESLoadScreen.hpp"
+#include "Bethesda/TESNPC.hpp"
 #include "Bethesda/TESObjectACTI.hpp"
 #include "Bethesda/TESObjectANIO.hpp"
 #include "Bethesda/TESObjectARMA.hpp"
@@ -126,6 +127,7 @@
 #include "Bethesda/TESObjectMISC.hpp"
 #include "Bethesda/TESObjectSTAT.hpp"
 #include "Bethesda/TESQuest.hpp"
+#include "Bethesda/TESRace.hpp"
 #include "Bethesda/TESRegion.hpp"
 #include "Bethesda/TESSkill.hpp"
 #include "Bethesda/TESTopic.hpp"
@@ -507,73 +509,6 @@ static_assert(sizeof(BGSTextureSet) == 0xA0);
 #else
 static_assert(sizeof(BGSTextureSet) == 0x10C);
 #endif
-
-// 4E4 - incomplete
-class TESRace : public TESForm {
-public:
-	// 18
-	struct FaceGenData {
-		uint32_t	unk00;
-		uint32_t	unk04;
-		uint32_t	unk08;
-		uint32_t	unk0C;
-		uint32_t	unk10;
-		uint32_t	unk14;
-	};
-
-	// 2
-	struct SkillMod {
-		uint8_t	actorValue;
-		char	mod;
-	};
-
-	enum {
-		kFlag_Playable = 0x00000001,
-		kFlag_Child = 0x00000004,
-	};
-
-	TESRace();
-	~TESRace();
-
-	TESFullName		fullName;				// 018
-	TESDescription	desc;					// 024
-	TESSpellList	spells;					// 02C
-	TESReactionForm	reaction;				// 040
-
-	SkillMod		skillMods[7];			// 050
-	uint8_t			pad05E[2];				// 05E
-	float			height[2];				// 060 male/female
-	float			weight[2];				// 068 male/female
-	uint32_t			raceFlags;				// 070
-
-	TESAttributes	baseAttributes[2];		// 074 male/female
-	tList<TESHair>	hairs;					// 08C
-	TESHair* defaultHair[2];			// 094 male/female
-	uint8_t			defaultHairColor[2];	// 09C male/female
-	uint8_t			fill09E[2];				// 09E
-
-	uint32_t			unk0A0[(0xA8 - 0xA0) >> 2];	// 0A0
-
-	tList<TESEyes>	eyes;					// 0A8
-
-	TESModel		faceModels[2][8];			// 0B0	male/female Head, Ears, Mouth, TeethLower, TeethUpper, Tongue, LeftEye, RightEye
-	TESTexture		faceTextures[2][8];			// 230	male/female Head, Ears, Mouth, TeethLower, TeethUpper, Tongue, LeftEye, RightEye
-	TESTexture		bodyPartsTextures[2][3];	// 2F0	male/female	UpperBody, LeftHand, RightHand
-	TESModel		bodyModels[2][3];			// 338	male/female	UpperBody, LeftHand, RightHand
-	BGSTextureModel	bodyTextures[2];			// 3C8	male/female	EGT file, not DDS.
-	FaceGenData		unk3F8[2][4];				// 3F8  male/female
-
-	uint32_t			unk4B8[(0x4CC - 0x4B8) >> 2]; // 4B8
-
-	BSString			name;				// 4CC
-	NiTPrimitiveArray <void*>	faceGenUndo;		// 4D4 - NiTPrimitiveArray<FaceGenUndo *>
-	uint32_t				unk4E4[6];			// 4E4
-	BGSVoiceType*		voiceTypes[2];		// 4FC // VTCK male/female
-	TESRace*			ageRace[2];			// 504 // ONAM/YNAM
-
-	bool IsPlayable() const { return (raceFlags & kFlag_Playable) == kFlag_Playable; }
-	void SetPlayable(bool doset) { if (doset) raceFlags |= kFlag_Playable; else raceFlags &= ~kFlag_Playable; }
-};
 
 // 68
 class TESSound : public TESBoundAnimObject {
@@ -1069,149 +1004,6 @@ public:
 	}
 };
 static_assert(sizeof(BipedAnim) == 0x2B4);
-
-// 20
-struct FaceGenData {
-	enum FGGeoSymmetry {
-		kBrow_HighLow,
-		kBrowInner_HighLow,
-		kBrowOuter_HighLow,
-		kCheekbone_LowHigh,
-		kCheekbone_ShallowPronounced,
-		kCheekbone_ThinWide,
-		kCheek_ConcaveConvex,
-		kCheek_RoundGaunt,
-		kChin_ForwardBackward,
-		kChin_PronouncedRecessed,
-		kChin_RetractedJutting,
-		kChin_ShallowDeep,
-		kChin_SmallLarge,
-		kChin_TallShort,
-		kChin_WideThin,
-		kEyes_DownUp,
-		kEyes_SmallLarge,
-		kEyes_TiltInwardOutward,
-		kEyes_TogetherApart,
-		kFace_BrowNoseChinRatio,
-		kFace_ForeheadSellionNoseRatio,
-		kFace_HeavyLight,
-		kFace_RoundGaunt,
-		kFace_ThinWide,
-		kForehead_SmallLarge,
-		kForehead_TallShort,
-		kForehead_TiltForwardBackward,
-		kJaw_RetractedJutting,
-		kJaw_WideThin,
-		kJawNeck_SlopeHighLow,
-		kJawline_ConcaveConvex,
-		kMouth_DrawnPursed,
-		kMouth_HappySad,
-		kMouth_HighLow,
-		kMouth_Lips_DeflatedInflated,
-		kMouth_Lips_LargeSmall,
-		kMouth_Lips_PuckeredRetracted,
-		kMouth_ProtrudingRetracted,
-		kMouth_TiltUpDown,
-		kMouth_UnderbiteOverbite,
-		kMouthChin_DistanceShortLong,
-		kNose_BridgeShallowDeep,
-		kNose_BridgeShortLong,
-		kNose_DownUp,
-		kNose_FlatPointed,
-		kNose_NostrilTiltUpDown,
-		kNose_NostrilSmallLarge,
-		kNose_NostrilWideThin,
-		kNose_RegionConcaveConvex,
-		kNose_SellionDownUp,
-		kNose_SellionShallowDeep,
-		kNose_SellionShallowDeep2, //This one also seems to control the brow ridge
-		kNose_SellionThinWide,
-		kNose_ShortLong,
-		kNose_TiltDownUp,
-		kMaxSize //This is actually a valid property but it's not exposed normally. Seems to control upper cranial width.
-	};
-	enum FGGeoAsym {
-		kBrowRidge_ForwardAxisTwist,
-		kCheekbone_ProtrusionAsymmetry,
-		kChin_ChinAxisTwist,
-		kChin_ForwardAxisTwist,
-		kChin_TransverseShift,
-		kEyes_HeightDisparity,
-		kEyes_TransverseShift,
-		kFace_CoronalBend,
-		kFace_CoronalShear,
-		kFace_VerticalAxisTwist,
-		kForehead_ForwardAxisTwist,
-		kMouth_CornersTransverseShift,
-		kMouth_ForwardAxisTwist,
-		kMouth_TransverseShift,
-		kMouth_TwistAndShift,
-		kMouthNose_CoronalShear,
-		kMouthNose_TransverseShift,
-		kNose_BridgeTransverseShift,
-		kNose_FrontalAxisTwist,
-		kNose_SellionTransverseShift,
-		kNose_TipTransverseShift,
-		kNose_TransverseShift,
-		kNose_VerticalAxisTwist,
-		kNoseRegion_FrontalAxisTwist,
-		kNostrils_FrontalAxisTwist,
-		kMax, ////Seems to control face assymetry, but it's not exposed to GECK, either.
-	};
-
-	uint32_t		unk00;		// 00
-	void* unk04;		// 04
-	uint32_t		unk08;		// 08
-	float** values;	// 0C
-	uint32_t		useOffset;	// 10
-	uint32_t		maxOffset;	// 14
-	uint32_t		count;		// 18
-	uint32_t		size;		// 1C
-};
-
-// 1EC
-class TESNPC : public TESActorBase {
-public:
-	TESNPC();
-	~TESNPC();
-
-	TESRaceForm				race;				// 10C
-	uint8_t					skillValues[14];	// 114
-	uint8_t					skillOffsets[14];	// 122
-	TESClass* classID;			// 130
-	FaceGenData				faceGenData[3];		// 134
-	uint32_t					unk194[8];			// 194
-	FaceGenData* faceGenDataPtr;	// 1B4
-	TESHair* hair;				// 1B8
-	float					hairLength;			// 1BC
-	TESEyes* eyes;				// 1C0
-	BSFaceGenNiNode* unk1C4;			// 1C4
-	BSFaceGenNiNode* unk1C8;			// 1C8
-	uint32_t					unk1CC;				// 1CC
-	uint16_t					unk1D0;				// 1D0
-	uint16_t					unk1D2;				// 1D2
-	TESCombatStyle* combatStyle;		// 1D4
-	uint32_t					hairColor;			// 1D8
-	tList<BGSHeadPart>		headPart;			// 1DC
-	uint32_t					impactMaterialType;	// 1E4
-#ifdef GAME
-	uint32_t					unk01E8;			// 1E8
-	TESRace* race1EC;			// 1EC
-	TESNPC* copyFrom;			// 1F0	Not set once PlayerRef exists and the target is the Player
-#endif
-	float					height;				// 1F4
-	float					weight;				// 1F8	Aparently, getWeight purposly returns height except for the player.
-	NiTPrimitiveArray<FaceGenUndo*>	faceGenUndo;		// 1FC
-
-	void SetSex(uint32_t flags);
-	void SetRace(TESRace* pRace);
-	void CopyAppearance(TESNPC* srcNPC);
-};
-#ifdef GAME
-static_assert(sizeof(TESNPC) == 0x20C);
-#else
-static_assert(sizeof(TESNPC) == 0x234);
-#endif
 
 struct AreaPointEntry {
 	float	x;

@@ -1420,22 +1420,22 @@ bool Cmd_GetContainerSound_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetRaceFlag_Execute(COMMAND_ARGS) {
-	TESRace* race = nullptr;
-	UINT32 bit;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &race, &bit) && race && IS_TYPE(race, TESRace)) {
-		*result = (race->raceFlags & 1 << bit);
+	TESRace* pRace = nullptr;
+	uint32_t uiBit = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRace, &uiBit) && pRace && IS_TYPE(pRace, TESRace)) {
+		*result = pRace->kData.uiFlags.GetBit(uiBit);
 		if (IsConsoleMode()) Console_Print("GetRaceFlag >> %.f", *result);
 	}
 	return true;
 }
 
 bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
-	TESRace* race = nullptr;
-	UINT32 bit;
-	UINT32 setorclear;
+	TESRace* pRace = nullptr;
+	uint32_t uiBit = 0;
+	BOOL bSet = FALSE;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &race, &bit, &setorclear) && race && IS_TYPE(race, TESRace)) {
-		setorclear ? race->raceFlags |= (1 << bit) : race->raceFlags &= ~(1 << bit);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRace, &uiBit, &bSet) && pRace && IS_TYPE(pRace, TESRace)) {
+		pRace->kData.uiFlags.SetBit(uiBit, bSet);
 		*result = 1;
 	}
 	return true;
@@ -1499,17 +1499,17 @@ bool Cmd_SetEquipType_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
-	TESRace* race = nullptr;
-	uint32_t modelID, isFemale;
-	const char* path = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &race, &modelID, &isFemale) && race && IS_TYPE(race, TESRace)) {
-		if (isFemale <= 1 && modelID <= 7) {
-			path = race->faceModels[isFemale][modelID].GetModel();
-			if (path) {
-				g_strInterface->Assign(PASS_COMMAND_ARGS, path);
-				if (IsConsoleMode()) {
-					Console_Print("GetRaceHeadModelPath %i %i >> %s", modelID, isFemale, path);
-				}
+	*result = 0;
+	TESRace* pRace = nullptr;
+	TESRace::HeadPart ePart;
+	SEX eSex;
+	const char* pPath = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRace, &ePart, &eSex) && pRace && IS_TYPE(pRace, TESRace)) {
+		if (InRange(eSex) && ePart < TESRace::HeadPart::COUNT) {
+			pPath = pRace->GetHeadPartModel(eSex, ePart)->GetModel();
+			g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
+			if (IsConsoleMode()) {
+				Console_Print("GetRaceHeadModelPath %i %i >> %s", ePart, eSex, pPath);
 			}
 		}
 	}
@@ -1517,17 +1517,17 @@ bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
-	TESRace* race = nullptr;
-	uint32_t modelID, isFemale;
-	const char* path = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &race, &modelID, &isFemale) && race && IS_TYPE(race, TESRace)) {
-		if (isFemale <= 1 && modelID <= 2) {
-			path = race->bodyModels[isFemale][modelID].GetModel();
-			if (path) {
-				g_strInterface->Assign(PASS_COMMAND_ARGS, path);
-				if (IsConsoleMode()) {
-					Console_Print("GetRaceModelPath %i %i >> %s", modelID, isFemale, path);
-				}
+	*result = 0;
+	TESRace* pRace = nullptr;
+	TESRace::BodyPart ePart;
+	SEX eSex;
+	const char* pPath = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRace, &ePart, &eSex) && pRace && IS_TYPE(pRace, TESRace)) {
+		if (InRange(eSex) && ePart < TESRace::BodyPart::COUNT) {
+			pPath = pRace->GetBodyPartModel(eSex, ePart)->GetModel();
+			g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
+			if (IsConsoleMode()) {
+				Console_Print("GetRaceBodyModelPath %i %i >> %s", ePart, eSex, pPath);
 			}
 		}
 	}
@@ -1574,7 +1574,7 @@ SPEC_NOINLINE bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL) {
 	if (pBase) {
 		FORM_TYPE eType = pBase->GetFormType();
 		if (eType == FORM_TYPE::TESNPC)
-			*result = static_cast<TESNPC*>(pBase)->height;
+			*result = static_cast<TESNPC*>(pBase)->GetHeight();
 		else if (eType == FORM_TYPE::TESCreature)
 			*result = static_cast<TESCreature*>(pBase)->GetBaseScale();
 	}

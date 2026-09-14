@@ -613,6 +613,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESModel.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESModelList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESModelTextureSwap.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESNPC.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObject.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectACTI.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectANIO.cpp" />
@@ -629,6 +630,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESQuest.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESQuestStage.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESQuestStageItem.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESRace.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESRaceForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESReactionForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESRegion.cpp" />
@@ -1195,6 +1197,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESModelPSA.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESModelRDT.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESModelTextureSwap.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESNPC.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObject.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectACTI.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectANIO.hpp" />
@@ -1215,6 +1218,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESQuest.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESQuestStage.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESQuestStageItem.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESRace.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESRaceForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESReactionForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESRegion.hpp" />
@@ -1246,6 +1250,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TLSData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TimeGlobal.hpp" />
     <ClInclude Include="internal\Game\Bethesda\WeatherEntry.hpp" />
+    <ClInclude Include="internal\Game\FaceGen\FR2MatrixVTC.hpp" />
+    <ClInclude Include="internal\Game\FaceGen\oldstd.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiAccumulator.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiAlphaAccumulator.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiAVObjectPalette.hpp" />
@@ -1409,6 +1415,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <None Include="internal\Game\Bethesda\BSTCommonLLMessageQueue.inl" />
     <None Include="internal\Game\Bethesda\BSTCommonMessageQueue.inl" />
     <None Include="internal\Game\Bethesda\SettingT.inl" />
+    <None Include="internal\Game\FaceGen\FR2MatrixVTC.inl" />
     <None Include="internal\Game\Gamebryo\NiPoint2.inl" />
     <None Include="internal\Game\Gamebryo\NiPoint3.inl" />
     <None Include="internal\Game\Gamebryo\NiPoint4.inl" />
