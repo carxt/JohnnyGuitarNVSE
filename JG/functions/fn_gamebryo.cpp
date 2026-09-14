@@ -128,7 +128,7 @@ static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* ap
 static void __fastcall InvalidateRenderPassesRecurse(const NiAVObject* apObject) {
 	BSShaderProperty* pShaderProp = static_cast<BSShaderProperty*>(apObject->GetProperty(NiProperty::Type::SHADE));
 	if (pShaderProp)
-		pShaderProp->InvalidateState();
+		pShaderProp->InvalidateRenderPassState();
 
 	if (apObject->IsNode()) {
 		const NiNode* pNode = static_cast<const NiNode*>(apObject);

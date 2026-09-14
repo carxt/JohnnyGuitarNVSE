@@ -1236,8 +1236,8 @@ bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTalkingActivator* activator = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &activator) && activator && IS_TYPE(activator, BGSTalkingActivator)) {
-		if (activator->talkingActor) {
-			*(FormID*)result = activator->talkingActor->GetFormID();
+		if (activator->GetTempRef()) {
+			*(FormID*)result = activator->GetTempRef()->GetFormID();
 		}
 		if (IsConsoleMode()) Console_Print("GetTalkingActivatorActor >> 0x%X", *result);
 	}

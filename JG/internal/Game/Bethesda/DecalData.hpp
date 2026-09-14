@@ -54,9 +54,7 @@ public:
 
 	uint32_t GetDecalColor() const;
 
-#ifdef GAME
 	static DecalData* GetDefaultDecalData();
-#endif
 };
 
 ASSERT_SIZE(DecalData, 0x24);

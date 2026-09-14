@@ -92,6 +92,9 @@
 #include "Bethesda/BGSRadiationStage.hpp"
 #include "Bethesda/BGSRagdoll.hpp"
 #include "Bethesda/BGSStaticCollection.hpp"
+#include "Bethesda/BGSTalkingActivator.hpp"
+#include "Bethesda/BGSTerminal.hpp"
+#include "Bethesda/BGSTextureSet.hpp"
 #include "Bethesda/BGSVoiceType.hpp"
 #include "Bethesda/EffectSetting.hpp"
 #include "Bethesda/EnchantmentItem.hpp"
@@ -133,6 +136,7 @@
 #include "Bethesda/TESRace.hpp"
 #include "Bethesda/TESRegion.hpp"
 #include "Bethesda/TESSkill.hpp"
+#include "Bethesda/TESSound.hpp"
 #include "Bethesda/TESTopic.hpp"
 #include "Bethesda/TESTopicInfo.hpp"
 #include "Bethesda/TESWaterForm.hpp"
@@ -442,180 +446,6 @@ class BGSNote;
 class TESLeveledList;
 class TESImageSpaceModifier;
 class QueuedFile;
-
-// 020
-class BGSTextureSet;
-
-// 8
-// ### derives from NiObject
-class BSTextureSet {
-public:
-	BSTextureSet();
-	~BSTextureSet();
-
-	void* _vtbl;	// 0
-	uint32_t	unk04;		// 4
-};
-
-// A0
-class BGSTextureSet : public TESBoundObject {
-public:
-	BGSTextureSet();
-	~BGSTextureSet();
-
-	enum	// texture types
-	{
-		kDiffuse = 0,
-		kNormal,
-		kEnvMask,
-		kGlow,
-		kParallax,
-		kEnv
-	};
-
-	enum {
-		kTexFlag_NoSpecMap = 0x0001,
-	};
-
-	// 24
-	struct DecalInfo {
-		enum {
-			kFlag_Parallax = 0x01,
-			kFlag_AlphaBlend = 0x02,
-			kFlag_AlphaTest = 0x04,
-		};
-
-		float	minWidth;		// 00
-		float	maxWidth;		// 04
-		float	minHeight;		// 08
-		float	maxHeight;		// 0C
-		float	depth;			// 10
-		float	shininess;		// 14
-		float	parallaxScale;	// 18
-		uint8_t	parallaxPasses;	// 1C
-		uint8_t	flags;			// 1D
-		uint8_t	pad1E[2];		// 1E
-		uint32_t	color;			// 20
-	};
-
-	BSTextureSet	bsTexSet;		// 30
-
-	TESTexture		textures[6];	// 38
-	DecalInfo* decalInfo;	// 80
-	uint16_t			texFlags;		// 84
-#ifdef GAME
-	BSFileEntry* pTextureFileEntries[6];
-#endif
-};
-
-#ifdef GAME
-static_assert(sizeof(BGSTextureSet) == 0xA0);
-#else
-static_assert(sizeof(BGSTextureSet) == 0x10C);
-#endif
-
-// 68
-class TESSound : public TESBoundAnimObject {
-public:
-	TESSound();
-	~TESSound();
-
-	enum {
-		kFlag_RandomFrequencyShift = 1,
-		kFlag_PlayAtRandom = 2,
-		kFlag_EnvironmentIgnored = 4,
-		kFlag_RandomLocation = 8,
-		kFlag_Loop = 16,
-		kFlag_MenuSound = 32,
-		kFlag_2D = 64,
-		kFlag_360LFE = 128,
-		kFlag_DialogueSound = 256,
-		kFlag_EnvelopeFast = 512,
-		kFlag_EnvelopeSlow = 1024,
-		kFlag_2DRadius = 2048,
-		kFlag_MuteWhenSubmerged = 4096,
-		kFlag_StartAtRandomPosition = 8192,
-	};
-
-	TESSoundFile	soundFile;				// 30
-
-	uint32_t			unk3C;					// 3C
-	uint16_t			unk40;					// 40
-	uint16_t			unk42;					// 42
-	uint8_t			minAttenuationDist;		// 44
-	uint8_t			maxAttenuationDist;		// 45
-	int16_t			frequencyAdj;			// 46
-	uint32_t			soundFlags;				// 48
-	uint16_t			staticAttenuation;		// 4C
-	uint8_t			endsAt;					// 4E
-	uint8_t			startsAt;				// 4F
-	uint16_t			attenuationCurve[5];	// 50
-	uint16_t			reverbAttenuation;		// 5A
-	uint32_t			priority;				// 5C
-	uint32_t			unk60;					// 60
-	uint32_t			unk64;					// 64
-
-	void SetFlag(uint32_t pFlag, bool bEnable) {
-		if (bEnable) soundFlags |= pFlag;
-		else soundFlags &= ~pFlag;
-	}
-};
-
-// 98
-class BGSTalkingActivator : public TESObjectACTI {
-public:
-	BGSTalkingActivator();
-	~BGSTalkingActivator();
-
-	Actor* talkingActor;		// 90
-	BGSVoiceType* voiceType;	// 94
-};
-#ifdef GAME
-static_assert(sizeof(BGSTalkingActivator) == 0x98);
-#else
-static_assert(sizeof(BGSTalkingActivator) == 0xCC);
-#endif
-
-// BGSTerminal (9C)
-class BGSTerminal : public TESObjectACTI {
-public:
-	BGSTerminal();
-	~BGSTerminal();
-
-	enum {
-		kTerminalFlagLeveled = 1 << 0,
-		kTerminalFlagUnlocked = 1 << 1,
-		kTerminalFlagAltColors = 1 << 2,
-		kTerminalFlagHideWelcome = 1 << 3,
-	};
-
-	enum {
-		kEntryFlagAddNote = 1 << 0,
-		kEntryFlagForceRedraw = 1 << 1,
-	};
-
-	struct TermData {
-		uint8_t difficulty;       // 0: very easy, 1: easy, 2: average, 3: hard, 4: very hard, 5: requires key
-		uint8_t terminalFlags;
-		uint8_t type;             // 0-9, corresponds to GECK types 1-10
-	};
-
-	struct MenuEntry {
-		BSString			entryText;
-		BSString			resultText;
-		Script*				resultScript;
-		uint8_t				pad[78];
-		TESCondition		conditions;
-		BGSNote*			displayNote;
-		BGSTerminal*		subMenu;
-		uint8_t				entryFlags;
-	};
-
-	BSString			desc;			// 090	DESC
-	tList<MenuEntry>	menuEntries;	// 098
-	BGSNote*			password;		// 0A0	PNAM
-	TermData			data;			// 0A4	DNAM
-};
 
 // IngredientItem (A4)
 class IngredientItem;

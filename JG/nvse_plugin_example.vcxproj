@@ -519,6 +519,9 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSTalkingActivator.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSTerminal.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSTextureSet.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSTouchSpellForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSArchive.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSCriticalSection.cpp" />
@@ -532,6 +535,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\BSRenderedTexture.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSSemaphore.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSShaderManager.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSShaderProperty.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSShaderUtil.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSSpinLock.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSTextureManager.cpp" />
@@ -641,6 +645,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESRegionDataList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESResponse.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESScriptableForm.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESSound.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESSoundFile.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESSpellList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESTexture.cpp" />
@@ -676,6 +681,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiPoint3.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiPoint4.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiRenderer.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiShadeProperty.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiSwitchNode.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiTexture.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiTransform.cpp" />
@@ -1023,7 +1029,10 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSStaticCollection.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSTalkingActivator.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSTerminal.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSTextureModel.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSTextureSet.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSTouchSpellForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSVoiceType.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSArchive.hpp" />
@@ -1049,6 +1058,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSScrapHeapQueueElem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSemaphore.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSShaderManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSShaderProperty.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSShaderUtil.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleArray.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleArrayRefCounted.hpp" />
@@ -1061,6 +1071,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSTCommonMessageQueue.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSTCommonScrapHeapMessageQueue.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSTextureManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSTextureSet.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSTimer.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSTMessageQueue.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSUtilities.hpp" />
@@ -1250,6 +1261,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESResponse.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESScriptableForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESSkill.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESSound.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESSoundFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESSpellList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESTexture.hpp" />
@@ -1308,6 +1320,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiRefObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRenderer.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiRTTI.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiShadeProperty.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSmartPointer.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiStringExtraData.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiSwitchNode.hpp" />

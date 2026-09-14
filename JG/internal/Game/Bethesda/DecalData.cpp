@@ -72,9 +72,11 @@ uint32_t DecalData::GetDecalColor() const {
     return kData.uiColor;
 }
 
-#ifdef GAME
 // GAME - 0x56A8C0
 DecalData* DecalData::GetDefaultDecalData() {
+#ifdef GAME
     return CdeclCall<DecalData*>(0x56A8C0);
-}
+#else
+    return reinterpret_cast<DecalData*>(0xE9BA70);
 #endif
+}

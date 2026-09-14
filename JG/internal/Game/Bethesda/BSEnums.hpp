@@ -1966,6 +1966,19 @@ using CONDITION_COMPARISON = _ConditionComparison::Comparison;
 
 #pragma endregion
 
+struct _LockLevel {
+	enum Level {
+		VERY_EASY,
+		EASY,
+		AVERAGE,
+		HARD,
+		VERY_HARD,
+		IMPOSSIBLE,
+		COUNT,
+	};
+};
+using LOCK_LEVEL = _LockLevel::Level;
+
 struct _SoundLevel {
 	enum Level {
 		LOUD,
