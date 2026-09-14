@@ -135,6 +135,7 @@
 #include "Bethesda/TESTopicInfo.hpp"
 #include "Bethesda/TESWaterForm.hpp"
 #include "Bethesda/TESWeather.hpp"
+#include "Bethesda/TESWorldSpace.hpp"
 #include "Obsidian/BGSDehydrationStage.hpp"
 #include "Obsidian/BGSHungerStage.hpp"
 #include "Obsidian/BGSSleepDeprevationStage.hpp"
@@ -1213,7 +1214,8 @@ static_assert(sizeof(TESObjectCELL) == 0x100);
 #endif
 
 // 3C	Init proc: 0x6FC490
-struct BGSTerrainManager {
+class BGSTerrainManager {
+public:
 	// 60
 	struct LODNode {
 		BGSTerrainManager* parent;		// 00
@@ -1265,106 +1267,6 @@ struct BGSTerrainManager {
 	BSSimpleArray<TESObjectREFR*>	array2C;	// 2C
 };
 static_assert(sizeof(BGSTerrainManager) == 0x3C);
-
-typedef NiTPointerMap<int32_t, TESObjectCELL*> CellPointerMap;
-
-// EC
-class NiPoint3;
-class TESWorldSpace : public TESForm, public TESFullName, public TESTexture {
-public:
-	TESWorldSpace();
-	~TESWorldSpace();
-
-	// Returns true if name has changed
-	virtual bool	GetMapNameForLocation(BSString& arName, NiPoint3 akLocation) const;
-	virtual void	Unk_4F(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6);
-
-	struct DCoordXY {
-		int32_t	X;
-		int32_t	Y;
-	};
-
-	struct WCoordXY {
-		int16_t	X;
-		int16_t	Y;
-	};
-
-	struct OFFSET_DATA {
-		uint32_t*	pCellFileOffsets;
-		NiPoint2	kOffsetMinCoords;
-		NiPoint2	kOffsetMaxCoords;
-		uint32_t	uiFileOffset;
-	};	// 014
-
-	struct MapData {
-		DCoordXY	usableDimensions;	// 00
-		WCoordXY	cellNWCoordinates;	// 08
-		WCoordXY	cellSECoordinates;	// 0C
-	};	// 010
-
-	typedef NiTPointerMap<uint32_t, BSSimpleList<TESObjectREFR*>*>	RefListPointerMap;
-	typedef NiTMap<TESFile*, TESWorldSpace::OFFSET_DATA*>			OffsetDataMap;
-	enum {
-		kWorldFlag_SmallWorld = 1 << 0,
-		kWorldFlag_NoFastTravel = 1 << 1,
-		kWorldFlag_NoLODWater = 1 << 4,
-		kWorldFlag_NoLODNoise = 1 << 5,
-		kWorldFlag_NoFallDamage = 1 << 6,
-		kWorldFlag_WaterAdjustment = 1 << 7,
-
-		kParentFlag_UseLandData = 1 << 0,
-		kParentFlag_UseLODData = 1 << 1,
-		kParentFlag_UseMapData = 1 << 2,
-		kParentFlag_UseWaterData = 1 << 3,
-		kParentFlag_UseClimateData = 1 << 4,
-		kParentFlag_UseISData = 1 << 5,
-	};
-
-	CellPointerMap*						pCellMap;
-	TESObjectCELL*						pPersistentCell;
-	uint32_t							kTerrainLODManager; // Unused
-	BGSTerrainManager*					pTerrainManager;
-	TESClimate*							pClimate;
-	TESImageSpace*						pImageSpace;
-	ImpactSwap*							pImpactSwap;
-	Bitfield8							ucWorldFlags;
-	Bitfield16							usParentUseFlags;
-#ifdef GAME
-	RefListPointerMap					kFixedPersistentRefMap;			// 50
-	BSSimpleList<TESObjectREFR*>		kMobilePersistentRefs;
-	NiTMap<uint32_t, TESObjectREFR*>*	pOverlappedMultiBoundMap;
-#endif
-	NiPointer<NiRefObject>				spPortalGraph;
-	TESWorldSpace*						pParentWorld;			// 70
-	TESWaterForm*						pWorldWater;
-	TESWaterForm*						pLODWater;
-	float								fWaterLODHeight;
-	MapData								kMapData;			// 80
-	float								worldMapScale;		// 90
-	float								worldMapCellX;		// 94
-	float								worldMapCellY;		// 98
-	BGSMusicType*						pMusic;
-	NiPoint2							kMinCoords;
-	NiPoint2							kMaxCoords;
-#ifdef GAME
-	OffsetDataMap						kOffsetMap;
-	BSString							strEditorID;
-#endif
-	float								fDefaultLandHeight;
-	float								fDefaultWaterHeight;
-	BGSEncounterZone*					pEncounterZone;
-	TESTexture							kCanopyShadowTexture;
-	TESTexture							kWaterNoiseTexture;
-
-	TESWorldSpace* GetRootMapWorld();
-
-	float GetDefaultLandHeight() const { return fDefaultLandHeight; }
-};
-#ifdef GAME
-static_assert(sizeof(TESWorldSpace) == 0xEC);
-#else
-static_assert(sizeof(TESWorldSpace) == 0xFC);
-#endif
 
 class ScriptVariable {
 public:

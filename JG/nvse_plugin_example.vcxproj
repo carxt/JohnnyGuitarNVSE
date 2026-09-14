@@ -650,6 +650,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESWeather.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWeatherList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWeightForm.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESWorldSpace.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TLSData.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TimeGlobal.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiColor.cpp" />
@@ -1249,6 +1250,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESWeather.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESWeatherList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESWeightForm.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESWorldSpace.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TLSData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TimeGlobal.hpp" />
     <ClInclude Include="internal\Game\Bethesda\WeatherEntry.hpp" />
