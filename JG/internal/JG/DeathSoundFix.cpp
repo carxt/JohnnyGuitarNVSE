@@ -2,6 +2,7 @@
 #include "GameObjects.h"
 #include "GameProcess.h"
 #include "GameSound.h"
+#include "Bethesda/DialoguePackage.hpp"
 
 namespace DeathSoundFix {
 	
@@ -11,7 +12,7 @@ namespace DeathSoundFix {
 		//all the checks can be skipped because they were done above already
 		if (apActor->GetDead()) {
 			if (DialoguePackage* pPackage = static_cast<DialoguePackage*>(apProcess->GetCurrentPackage())) {
-				if ((apActor != pPackage->subject) && (apActor == pPackage->speaker)) { //check for subject because in some cases, subject == target
+				if ((apActor != pPackage->GetTargetOfConversation()) && (apActor == pPackage->GetActorStartedConversation())) { //check for subject because in some cases, subject == target
 					return -1.0f;
 				}
 			}

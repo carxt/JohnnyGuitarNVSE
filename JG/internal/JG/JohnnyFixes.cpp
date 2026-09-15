@@ -4,6 +4,8 @@
 #include "GameProcess.h"
 #include "GameSettings.h"
 #include "GameUI.h"
+#include "Bethesda/BSShaderManager.hpp"
+#include "Bethesda/DialoguePackage.hpp"
 
 #include "SkyUpdateFixes.hpp"
 #include "EditorIDRestoration.hpp"
@@ -324,7 +326,7 @@ namespace JohnnyFixes {
 		ThisCall(kSetCellImageSpaceDetour, apCell, apImageSpace);
 		const PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
 		if (apImageSpace && pPlayer->parentCell && pPlayer->parentCell == apCell)
-			CdeclCall(0xB4F430, apImageSpace->traitValues);
+			BSShaderManager::SetImageSpaceParameters(&apImageSpace->kData);
 	}
 
 	namespace NoHeadlessTalkingFix {
@@ -338,8 +340,8 @@ namespace JohnnyFixes {
 				if (pAIProcess && pAIProcess->processLevel == PROCESS_TYPE::HIGH && apActor->GetDead()) {
 					const DialoguePackage* pPackage = static_cast<DialoguePackage*>(pAIProcess->GetCurrentPackage());
 					if (pPackage) {
-						const bool bDialoguePackage = pPackage->type == PACKAGE_TYPE::DIALOGUE || pPackage->type == PACKAGE_TYPE::IN_GAME_DIALOGUE;
-						if (bDialoguePackage && (apActor != pPackage->subject) && (apActor == pPackage->speaker))
+						const bool bDialoguePackage = pPackage->GetPackType() == PACKAGE_TYPE::DIALOGUE || pPackage->GetPackType() == PACKAGE_TYPE::IN_GAME_DIALOGUE;
+						if (bDialoguePackage && (apActor != pPackage->GetTargetOfConversation()) && (apActor == pPackage->GetActorStartedConversation()))
 							bCanSpeak = false;
 					}
 				}
