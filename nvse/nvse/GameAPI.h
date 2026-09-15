@@ -483,6 +483,14 @@ public:
 		return ucArchiveFlags.bHasFileStrings;
 	}
 
+	const char* GetFileNameForFileEntry(BSFileEntry* apFileEntry) {
+#ifdef GAME
+		return ThisCall<const char*>(0xAF9BA0, this, apFileEntry);
+#else
+		return ThisCall<const char*>(0x8A8580, this, apFileEntry);
+#endif
+	}
+
 	bool FindFile(const BSHash& arDirectoryHash, const BSHash& arFileNameHash, uint32_t& arDirectoryID, uint32_t& arFileID, const char* apFileName) {
 #ifdef GAME
 		return ThisCall<bool>(0xAF9BF0, this, &arDirectoryHash, &arFileNameHash, &arDirectoryID, &arFileID, apFileName);
