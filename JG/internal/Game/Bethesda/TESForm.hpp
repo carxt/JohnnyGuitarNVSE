@@ -345,6 +345,9 @@ public:
 	FormID GetLoadFormID() const;
 	uint32_t GetFileCount() const;
 
+	bool IsDefaultForm() const;
+	static bool IsDefaultForm(FormID auiID);
+
 	static TESForm* GetFormByNumericID(FormID auiFormID);
 	static TESForm* GetFormByEditorID(const char* apEDID);
 

@@ -2,6 +2,7 @@
 
 #include "BSSimpleArray.hpp"
 #include "BSSimpleList.hpp"
+#include "TESFile.hpp"
 #include "Gamebryo/NiTPrimitiveArray.hpp"
 #include "Gamebryo/NiTPointerList.hpp"
 
@@ -80,6 +81,51 @@ class TESWaterForm;
 class TESWeather;
 class TESWorldSpace;
 
+inline constexpr uint32_t HAS_SMALL_PLUGINS_FLAG	= 0x40;
+inline constexpr uint32_t HAS_OVERLAY_PLUGINS_FLAG	= 0x80;
+
+#pragma warning(disable:4624)
+class CompiledFiles {
+public:
+	union {
+		struct {
+			BSSimpleArray<TESFile*> kNormalFiles;
+			BSSimpleArray<TESFile*> kSmallFiles;
+			BSSimpleArray<TESFile*> kOverlayFiles;
+			uint32_t				padding[0xF4];
+		};
+
+		struct {
+			uint32_t	uiCompiledFileCount;
+			TESFile*	pFileArray[0xFF];
+		};
+	};
+
+protected:
+	friend class TESDataHandler;
+	uint32_t __fastcall GetFileCount() const;
+
+	TESFile* __fastcall GetFile(uint32_t auiIndex) const;
+
+#if ESL_SUPPORT
+	uint32_t __fastcall GetSmallFileCount() const;
+
+	TESFile* __fastcall GetSmallFile(uint32_t auiIndex) const;
+#endif
+
+#if OVERLAY_SUPPORT
+	uint32_t __fastcall GetOverlayFileCount() const;
+
+	TESFile* __fastcall GetOverlayFile(uint32_t auiIndex) const;
+#endif
+
+public:
+#if ESL_SUPPORT || OVERLAY_SUPPORT
+	void Initialize();
+#endif
+};
+#pragma warning(default:4624)
+
 class TESDataHandler {
 public:
 	TESDataHandler();
@@ -152,8 +198,7 @@ public:
 	FormID									uiNextCreatedRefID;		// 208
 	TESFile*								pActiveFile;			// 20C
 	BSSimpleList<TESFile*>					kFiles;					// 210
-	uint32_t								uiCompiledFileCount;	// 214
-	TESFile*								pFileArray[0xFF];		// 218
+	CompiledFiles							kCompiledFiles;			// 218
 	bool									bMasterSave;			// 618
 	bool									bSaveLoadGame;			// 619
 	bool									bSaveLoad;				// 61A
@@ -178,6 +223,34 @@ public:
 	static TESDataHandler* GetSingleton();
 
 	BSSimpleList<TESFile*>* GetFileList();
+	const BSSimpleList<TESFile*>* GetFileList() const;
+
+	TESFile* GetListFile(uint32_t auiIndex) const;
+	TESFile* GetListFile(const char* apFileName) const;
+
+	uint32_t GetCompiledFileCount() const;
+	TESFile* GetCompiledFile(uint32_t auiIndex) const;
+	TESFile* GetCompiledFileForFormID(uint32_t auiFormID) const;
+
+
+#if ESL_SUPPORT || OVERLAY_SUPPORT
+	bool SupportsSmallPugins() const { return ucDLCFlags.Get(HAS_SMALL_PLUGINS_FLAG); }
+	bool SupportsOverlayPugins() const { return ucDLCFlags.Get(HAS_OVERLAY_PLUGINS_FLAG); }
+	bool SupportsAllPlugins() const { return ucDLCFlags.Get(HAS_SMALL_PLUGINS_FLAG | HAS_OVERLAY_PLUGINS_FLAG) == (HAS_SMALL_PLUGINS_FLAG | HAS_OVERLAY_PLUGINS_FLAG); }
+	static bool HasSmallPluginSupport() { return TESDataHandler::GetSingleton()->SupportsSmallPugins(); }
+	static bool HasOverlayPluginSupport() { return TESDataHandler::GetSingleton()->SupportsOverlayPugins(); }
+	static bool HasExtendedPlugins() { return TESDataHandler::GetSingleton()->ucDLCFlags.Get(HAS_SMALL_PLUGINS_FLAG | HAS_OVERLAY_PLUGINS_FLAG); }
+#endif
+
+#if ESL_SUPPORT
+	uint32_t GetSmallCompiledFileCount() const;
+	TESFile* GetSmallFile(uint32_t auiIndex) const;
+#endif
+
+#if OVERLAY_SUPPORT
+	uint32_t GetOverlayFileCount() const;
+	TESFile* GetOverlayFile(uint32_t auiIndex) const;
+#endif
 
 	TESRegionDataManager* GetRegionDataManager() const;
 

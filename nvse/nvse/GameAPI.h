@@ -8,6 +8,8 @@
 #include "Bethesda/BSFileEntry.hpp"
 #include "Bethesda/BSCriticalSection.hpp"
 
+#include "Bethesda/BGSSaveLoadGame.hpp"
+
 struct ParamInfo;
 class TESForm;
 class TESObjectREFR;
@@ -675,27 +677,13 @@ union preloadData {
 	PreloadREFRdata	refr;
 };
 
-class BGSLoadGameBuffer {
-public:
-	BGSLoadGameBuffer();
-	~BGSLoadGameBuffer();
-
-	virtual uint8_t			GetSaveFormVersion(void);	// replaced in descendant
-	virtual TESForm* getForm(void);				// only implemented in descendants
-	virtual TESObjectREFR* getREFR(void);				// only implemented in descendants
-	virtual Actor* getActor(void);				// only implemented in descendants
-
-	char* chunk;			// 004
-	uint32_t	chunkSize;		// 008
-	uint32_t	chunkConsumed;	// 00C
-};
-
 struct BGSFormChanges {
 	uint32_t	changeFlags;
 	uint32_t	unk004;			// Pointer to the changed record or the save record ?
 };
 
-struct	BGSSaveLoadChangesMap {
+class BGSSaveLoadChangesMap {
+public:
 	NiTPointerMap<uint32_t, BGSFormChanges*> kChangeMap;
 };
 
@@ -718,97 +706,6 @@ class BGSReconstructFormsInAllFilesMap;
 class BGSSaveLoadFormIDMap;
 class BGSSaveLoadQueuedSubBufferMap;
 class BGSSaveLoadHistory;
-
-class BGSSaveLoadGame	// 0x011DDF38
-{
-public:
-	BGSSaveLoadGame();
-	~BGSSaveLoadGame();
-
-	typedef uint32_t	RefID;
-	typedef uint32_t	IndexRefID;
-	struct RefIDIndexMapping	// reversible map between refID and loaded form index
-	{
-		NiTMap<RefID, IndexRefID>* map000;	// 000
-		NiTMap<IndexRefID, RefID>* map010;	// 010
-		uint32_t			            countRefID;	// 020
-	};
-
-	struct SaveChapters	// 06E	chapter table in save
-	{
-		struct RefIDArray	// List of all refID referenced in save for tranlation in RefIDIndexMapping
-		{
-			uint32_t	count;	// 000
-			RefID	IDs[1];	// 004
-		};
-
-		RefIDArray* arr000;	// 000
-		RefIDArray* arr004;	// 004
-	};
-
-	struct BGSSaveLoadReferencesMap {
-		NiTPointerMap<uint32_t, uint32_t>					kMovedReferencesMap;
-		BGSCellNumericIDArrayMap							kInteriorReferencesMap;
-		NiTPointerMap<uint32_t, BGSCellNumericIDArrayMap*>	kWorldspaceReferencesMap;
-	};
-
-	struct ALIGN4 _GlobalFlags {
-		enum Flags : uint32_t {
-			GLOBAL_BLOCK_CHANGES	= 1u << 0,
-			SAVE_GAME_LOADING		= 1u << 1,
-			SAVE_GAME_SAVING		= 1u << 2,
-			INITING_FORMS			= 1u << 3,
-			DEFER_INIT_FORMS		= 1u << 4,
-			POSITIONING_PLAYER		= 1u << 5,
-			PLAYER_LOCATION_INVALID = 1u << 6,
-			SAVE_LOAD_FAILED		= 1u << 7,
-		};
-
-		bool bGlobalBlockChanges	: 1;
-		bool bSaveGameLoading		: 1;
-		bool bSaveGameSaving		: 1;
-		bool bInitingForms			: 1;
-		bool bDeferInitForms		: 1;
-		bool bPositioningPlayer		: 1;
-		bool bPlayerLocationInvalid : 1;
-		bool bSaveLoadFailed		: 1;
-	};
-	using GlobalFlags = _GlobalFlags::Flags;
-
-	BGSSaveLoadChangesMap*					pChangesMap;
-	BGSSaveLoadChangesMap*					pOldChangesMap;
-	BGSSaveLoadFormIDMap*					pFormIDMap;
-	BGSSaveLoadFormIDMap*					pWorldspaceFormIDMap;
-	BGSSaveLoadReferencesMap*				pReferencesMap;
-	BGSSaveLoadQueuedSubBufferMap*			pQueuedSubBuffersMap;
-	NiTMap<uint32_t, uint32_t>*				pChangedFormIDMap;
-	BGSSaveLoadHistory*						pHistory;
-	BGSReconstructFormsInAllFilesMap*		pReconstructForms;
-	BSSimpleArray<BGSLoadFormBuffer*>		kChangedForms;
-	NiTMap<uint32_t, Actor*>				kQueuedInitPackageLocationsActorMap;
-	uint8_t									ucSaveMods[255];
-	uint8_t									ucLoadedMods[255];
-	Bitfield<_GlobalFlags>					uiGlobalFlags;
-	uint8_t									ucCurrentMinorVersion;
-
-	static BGSSaveLoadGame* GetSingleton() {
-		return *reinterpret_cast<BGSSaveLoadGame**>(0x11DDF38);
-	}
-
-	bool GetSaveGameLoading() const {
-		return uiGlobalFlags.bSaveGameLoading;
-	}
-
-	bool GetThreadAllowChanges() const {
-		return ThisCall<bool>(0x462480, this);
-	}
-
-	[[nodiscard("Previous value")]] bool SetThreadAllowChanges(bool abAllow) {
-		return ThisCall<bool>(0x4623F0, this, abAllow);
-	}
-};
-
-ASSERT_SIZE(BGSSaveLoadGame, 0x24C);
 
 class AutoSaveFormChanges {
 	bool bOrgVal;

@@ -30,6 +30,7 @@
 #include "WorldToScreen.hpp"
 #include "NewNiObjects.hpp"
 #include "FormSkeletons.hpp"
+#include "MorePluginTypes.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
 
@@ -285,12 +286,17 @@ namespace JohnnyPatches {
 		DialogueResponseOverride::Install();
 #endif
 		NewNiObjects::Install();
+
+		MorePluginTypes::Install();
 	}
 
 	void PostLoadInit() {
 #ifdef GAME
 		if (bUseFormSkeletons)
 			FormSkeletons::Install();
+
+		MorePluginTypes::InitJIPHooks();
+		MorePluginTypes::InitCommandHooks();
 #endif
 		if (bBSAUpgrade)
 			BSAUpgrade::Install();

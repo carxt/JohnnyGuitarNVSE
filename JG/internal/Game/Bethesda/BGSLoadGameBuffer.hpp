@@ -27,6 +27,16 @@ public:
 	char*		pBuffer;
 	uint32_t	uiBufferSize;
 	uint32_t	uiBufferPosition;
+
+	int32_t Load(BGSSaveLoadFile* apFile);
+	void LoadData(char* apData, uint32_t auiSize);
+
+	template <typename T>
+	void LoadData(T* apData) {
+		LoadData((char*)apData, sizeof(T));
+	}
+	
+	char* LoadString(char* apText);
 };
 
 ASSERT_SIZE(BGSLoadGameBuffer, 0x10);

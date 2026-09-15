@@ -3,7 +3,11 @@
 #include "BSEnums.hpp"
 #include "BSSimpleList.hpp"
 #include "BSStringT.hpp"
+#include "FormID_View.hpp"
 #include "Gamebryo/NiTPointerMap.hpp"
+
+#define ESL_SUPPORT 1
+#define OVERLAY_SUPPORT 1
 
 class TESObjectCELL;
 class TESForm;
@@ -102,6 +106,7 @@ public:
 	TESFile**							ppMasters;
 	_FILETIME							kDeletedFormTime;
 	uint8_t								ucCompileIndex;
+	uint16_t							usSmallCompileIndex;
 	BSString							strAuthor;
 	BSString							strDescription;
 	void*								pDecompressedFormBuffer;
@@ -121,7 +126,34 @@ public:
 
 	TESFile* GetThreadSafeParent() const;
 
+	TESFile* GetIndexFile(uint32_t auiIndex) const;
+
 	bool IsMaster() const;
+	void SetMaster(bool abMaster);
+
+#ifdef ESL_SUPPORT
+	bool IsSmallFile() const;
+	void SetSmallFile(bool abSmallFile);
+#endif
+
+#ifdef OVERLAY_SUPPORT
+	bool IsOverlay() const;
+	void SetOverlay(bool abOverlay);
+#endif
+
+	uint8_t GetCompileIndex() const;
+	void SetCompileIndex(uint8_t aucIndex);
+
+#ifdef ESL_SUPPORT
+	uint16_t GetSmallCompileIndex() const;
+	void SetSmallCompileIndex(uint16_t ausIndex);
+#endif
+
+	bool OpenTES(uint32_t aeAccessMode, bool abLock);
+
+	void AdjustFormIDFileIndex(FormID& auiFormID) const;
+
+	static TESFile* GetFileForTempID(FormID auiTempID);
 };
 
 ASSERT_SIZE(WIN32_FIND_DATA, 0x140);

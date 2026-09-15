@@ -375,6 +375,17 @@ uint32_t TESForm::GetFileCount() const {
 	return kFiles.ItemsInList();
 }
 
+// GAME - 0x484E40
+bool TESForm::IsDefaultForm() const {
+	return IsDefaultForm(GetFormID());
+}
+
+// GAME - 0x484B40
+// GECK - 0x4F7F40
+bool TESForm::IsDefaultForm(FormID auiID) {
+	return FormID_View(auiID).IsDefault();
+}
+
 // GAME - 0x4839C0
 // GECK - 0x4F9620
 TESForm* TESForm::GetFormByNumericID(FormID auiFormID) {
