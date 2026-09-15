@@ -43,22 +43,22 @@ float __fastcall fastDTan(float value) {
 
 #ifdef GAME
 void __fastcall setVarByName(VARARGS, const char* var_name, float value) {
-	ListNode<VariableInfo>* traverse = scriptObj->varList.Head();
-	VariableInfo* varInfo;
+	auto pIter = scriptObj->GetVariableList();
 	const std::string_view strName(var_name);
-	do {
-		varInfo = traverse->data;
-		if (varInfo) {
-			const std::string_view strVariableName(varInfo->name.pString, varInfo->name.GetLength());
+	while (pIter) {
+		ScriptVariable* pVariable = pIter->GetItem();
+		if (pVariable) {
+			const std::string_view strVariableName(pVariable->name.pString, pVariable->name.GetLength());
 			if (strVariableName == strName) {
-				ScriptVar* scv = eventList->GetVariable(varInfo->idx);
+				ScriptVar* scv = eventList->GetVariable(pVariable->idx);
 				if (scv) {
 					scv->data = value;
 					break;
 				}
 			}
 		}
-	} while (traverse = traverse->next);
+		pIter = pIter->GetNext();
+	}
 }
 
 //Only ready for a 24-bit BMP, will check for non-24 bit later.

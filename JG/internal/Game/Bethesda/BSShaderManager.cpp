@@ -41,3 +41,10 @@ ShadowSceneNode* BSShaderManager::GetShadowSceneNode(uint32_t aeType) {
 const NiFixedString& BSShaderManager::GetTexPercTag() {
 	return *pTexPercTag;
 }
+
+#ifdef GAME
+// GAME - 0xB4F430
+void BSShaderManager::SetImageSpaceParameters(ImageSpaceParameterData* apParams) {
+	CdeclCall(0xB4F430, apParams);
+}
+#endif

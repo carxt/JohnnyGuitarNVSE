@@ -2,7 +2,7 @@
 
 // GAME - 0x40FE80
 bool BaseExtraList::HasExtra(uint8_t aucType) const {
-#if JIP_CHANGES
+#if USE_MODDED_CHANGES // JIP
 	constexpr uint32_t ARRAY_SIZE = 19;
 #else
 	constexpr uint32_t ARRAY_SIZE = 21;

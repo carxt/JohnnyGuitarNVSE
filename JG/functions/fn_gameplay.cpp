@@ -36,29 +36,34 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 #define NUM_ARGS *((uint8_t*)scriptData + *opcodeOffsetPtr)
 
 extern void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...);
-extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+extern InventoryRef* (*InventoryRefGetForID)(FormID refID);
 
 bool Cmd_StopHolotape_Execute(COMMAND_ARGS) {
 	*result = 0;
+	MapMenu* pMapMenu = MapMenu::GetSingleton();
+	if (!pMapMenu)
+		return true;
+
 	BOOL bPlayStopSound = FALSE;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &bPlayStopSound);
-	MapMenu* pMapMenu = MapMenu::GetSingleton();
-	if (pMapMenu) {
-		bNoHolotapeStopSound = bPlayStopSound == FALSE;
-		pMapMenu->StopHolotape();
-		*result = 1;
-	}
+
+	bNoHolotapeStopSound = bPlayStopSound == FALSE;
+	pMapMenu->StopHolotape();
+	*result = 1;
 
 	return true;
 }
 
 bool Cmd_PlayHolotape_Execute(COMMAND_ARGS) {
 	*result = 0;
+	MapMenu* pMapMenu = MapMenu::GetSingleton();
+	if (!pMapMenu)
+		return true;
+
 	BGSNote* pNote = nullptr;
 	BOOL bPlayStartStopSound = TRUE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &bPlayStartStopSound) && pNote && IS_TYPE(pNote, BGSNote) && (pNote->type == BGSNote::kVoice || pNote->type == BGSNote::kSound)){
-		MapMenu* pMapMenu = MapMenu::GetSingleton();
-		if (pMapMenu) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote, &bPlayStartStopSound) && pNote && IS_TYPE(pNote, BGSNote)) {
+		if (pNote->GetNoteType() == BGSNote::Type::VOICE || pNote->GetNoteType() == BGSNote::Type::SOUND) {
 			pMapMenu->PlayHolotape(pNote, bPlayStartStopSound > 0);
 			*result = 1;
 		}
@@ -72,7 +77,7 @@ bool Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS) {
 	TESCasino* pCasino = nullptr;
 	int32_t iEarnings;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &iEarnings) && pCasino && IS_TYPE(pCasino, TESCasino)) {
-		const uint32_t uiFormID = pCasino->GetFormID();
+		const FormID uiFormID = pCasino->GetFormID();
 		auto pIter = PlayerCharacter::GetSingleton()->casinoDataList;
 		while (pIter && !pIter->IsEmpty()) {
 			CasinoStats* pStats = pIter->GetItem();
@@ -98,7 +103,7 @@ bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESCasino* pCasino = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino) && pCasino && IS_TYPE(pCasino, TESCasino)) {
-		const uint32_t uiFormID = pCasino->GetFormID();
+		const FormID uiFormID = pCasino->GetFormID();
 		auto pIter = PlayerCharacter::GetSingleton()->casinoDataList;
 		while (pIter && !pIter->IsEmpty()) {
 			CasinoStats* pStats = pIter->GetItem();
@@ -118,7 +123,7 @@ bool Cmd_GetCasinoDeckTexture_Execute(COMMAND_ARGS) {
 	TESCasino* pCasino = nullptr;
 	uint32_t uiDeck = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &uiDeck) && pCasino && IS_TYPE(pCasino, TESCasino) && uiDeck >= 0 && uiDeck <= 3) {
-		const char* pPath = pCasino->blackjackDeck[uiDeck].GetTextureName();
+		const char* pPath = pCasino->kTextures[uiDeck].GetTextureName();
 		if (IsConsoleMode())
 			Console_Print("GetCasinoDeckTexture >> %s", pPath);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
@@ -132,7 +137,7 @@ bool Cmd_SetCasinoDeckTexture_Execute(COMMAND_ARGS) {
 	uint32_t uiDeck;
 	char cPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &uiDeck, &cPath) && pCasino && IS_TYPE(pCasino, TESCasino) && cPath[0] && uiDeck >= 0 && uiDeck <= 3) {
-		pCasino->blackjackDeck[uiDeck].SetTextureName(cPath);
+		pCasino->kTextures[uiDeck].SetTextureName(cPath);
 		*result = 1;
 	}
 	return true;
@@ -141,10 +146,10 @@ bool Cmd_SetCasinoDeckTexture_Execute(COMMAND_ARGS) {
 bool Cmd_GetCasinoChip_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESCasino* pCasino = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino) && pCasino && pCasino->currencyRefID) {
-		TESForm* pChipForm = TESForm::GetFormByNumericID(pCasino->currencyRefID);
-		if (pChipForm)
-			*reinterpret_cast<uint32_t*>(result) = pChipForm->GetFormID();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino) && pCasino) {
+		TESForm* pChip = pCasino->GetChipType();
+		if (pChip)
+			*reinterpret_cast<FormID*>(result) = pChip->GetFormID();
 	}
 	return true;
 }
@@ -154,7 +159,7 @@ bool Cmd_SetCasinoChip_Execute(COMMAND_ARGS) {
 	TESCasino* pCasino = nullptr;
 	TESForm* pChip = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &pChip) && pCasino && IS_TYPE(pCasino, TESCasino) && pChip && IS_TYPE(pChip, TESCasinoChips)) {
-		pCasino->currencyRefID = pChip->GetFormID();
+		pCasino->kData.uiCasinoChipID = pChip->GetFormID();
 		*result = 1;
 	}
 	return true;
@@ -212,10 +217,10 @@ bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 		TESForm* pSpace = nullptr;
 		TESObjectCELL* pParentCell = PlayerCharacter::GetSingleton()->parentCell;
 		if (pParentCell) {
-			if (pParentCell->IsInterior())
+			if (pParentCell->GetInterior())
 				pSpace = pParentCell;
 			else
-				pSpace = pParentCell->worldSpace;
+				pSpace = pParentCell->GetWorldSpace();
 		}
 		if (pSpace) {
 			PlayerCharacter::GetSingleton()->SetPlayerMapMarker(kPos, pSpace);
@@ -663,7 +668,7 @@ bool Cmd_GetMoonPhase_Execute(COMMAND_ARGS) {
 bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* pCell = thisObj->GetParentCell();
-	if (!pCell || pCell->IsInterior())
+	if (!pCell || pCell->GetInterior())
 		return true;
 
 	TESObjectLAND* pLand = pCell->GetLand();
@@ -675,7 +680,7 @@ bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 	pLand->GetCoordData(kCoordData, rPos, 1);
 	TESLandTexture* pTexture = pLand->GetMainTexture(rPos);
 	if (pTexture)
-		*reinterpret_cast<uint32_t*>(result) = pTexture->GetFormID();
+		*reinterpret_cast<FormID*>(result) = pTexture->GetFormID();
 	return true;
 }
 
@@ -742,8 +747,8 @@ TESWorldSpace* __fastcall GetWorldSpace(const TESObjectREFR* apRef) {
 	if (!pCell)
 		pCell = apRef->childCell.GetSaveParentCell();
 
-	if (pCell && !pCell->IsInterior()) 
-		return pCell->worldSpace;
+	if (pCell && !pCell->GetInterior()) 
+		return pCell->GetWorldSpace();
 
 	return nullptr;
 }
@@ -751,8 +756,8 @@ TESWorldSpace* __fastcall GetWorldSpace(const TESObjectREFR* apRef) {
 bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cLocationName[MAX_PATH] = {};
-	if (thisObj->parentCell && thisObj->parentCell->IsInterior()) {
-		strcpy_s(cLocationName, thisObj->parentCell->fullName.GetFullName());
+	if (thisObj->parentCell && thisObj->parentCell->GetInterior()) {
+		strcpy_s(cLocationName, thisObj->parentCell->GetFullName());
 	}
 	else {
 		const TESWorldSpace* pWorld = GetWorldSpace(thisObj);
@@ -863,7 +868,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems) && container) {
 		if (checkItems) {
-			TESForm* containerOwner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::GetOwner
+			TESForm* containerOwner = container->GetOwner();
 			if (!containerOwner) return true;
 			ExtraContainerChanges* xChanges = thisObj->extraDataList.GetExtraData<ExtraContainerChanges>();
 			if (!xChanges || !xChanges->pChanges || !xChanges->pChanges->pItems)
@@ -893,7 +898,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 			}
 		}
 		else {
-			TESForm* owner = ThisCall<TESForm*>(0x567790, container); // TESObjectREFR::GetOwner
+			TESForm* owner = container->GetOwner();
 			ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, owner); // Actor::StealAlarm
 			*result = 1;
 		}
@@ -906,7 +911,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	Actor* actor = static_cast<Actor*>(thisObj);
 	ItemChange* weapInfo = actor->baseProcess->GetCurrentWeapon();
 	if (weapInfo && weapInfo->pObject) {
-		bool hasDecreaseSpreadEffect = ThisCall<bool>(0x4BDA70, weapInfo, 3);
+		bool hasDecreaseSpreadEffect = weapInfo->HasModEffectActive(3);
 		double minSpread = ThisCall<double>(0x524B80, weapInfo->pObject, hasDecreaseSpreadEffect);
 		double weapSpread = ThisCall<float>(0x524BE0, weapInfo->pObject, hasDecreaseSpreadEffect);
 		double spread = ThisCall<double>(0x8B0DD0, actor, 1);
@@ -914,7 +919,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 		float totalSpread = (weapSpread * spread + minSpread) * 0.01745329238474369;
 
 		TESAmmo* eqAmmo = ThisCall<TESAmmo*>(0x525980, weapInfo->pObject, static_cast<MobileObject*>(actor));
-		totalSpread = CdeclCall<float>(0x59A030, 3, (eqAmmo ? &eqAmmo->effectList : nullptr), totalSpread);
+		totalSpread = TESAmmoEffect::ApplyAmmoEffect(AMMO_EFFECT_TYPE::SPREAD, (eqAmmo ? eqAmmo->GetAmmoEffectList() : nullptr), totalSpread);
 
 		double spreadPenalty = ThisCall<double>(0x8B0DD0, actor, 2);
 
@@ -923,7 +928,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 		float noIdea = ThisCall<HighProcess*>(0x8D8520, actor)->angle1D0;
 		totalSpread = totalSpread + noIdea;
 
-		bool hasSplitBeamEffect = ThisCall<bool>(0x4BDA70, weapInfo, 0xC);
+		bool hasSplitBeamEffect = weapInfo->HasModEffectActive(0xC);
 		if (hasSplitBeamEffect) {
 			totalSpread *= ThisCall<float>(0x4BCF60, weapInfo->pObject, 0xC, 1);
 		}
@@ -961,7 +966,7 @@ bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* pCell = PlayerCharacter::GetSingleton()->parentCell;
 	if (pCell)
-		*result = ProcessLists::GetSingleton()->AreHostileActorsNear(pCell->IsInterior());
+		*result = ProcessLists::GetSingleton()->AreHostileActorsNear(pCell->GetInterior());
 	return true;
 }
 
@@ -1015,7 +1020,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
-	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->IsInterior();
+	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->GetInterior();
 	float interiorDistanceSquared = fSneakMaxDistance * fSneakMaxDistance;
 	float exteriorDistanceSquared = (fSneakMaxDistance * fSneakExteriorDistanceMult) * (fSneakMaxDistance * fSneakExteriorDistanceMult);
 	float maxDist = isInterior ? interiorDistanceSquared : exteriorDistanceSquared;
@@ -1038,7 +1043,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 		}
 	}
 
-	if (closestHostile)	*(uint32_t*)result = closestHostile->GetFormID();
+	if (closestHostile)	*(FormID*)result = closestHostile->GetFormID();
 
 	return true;
 }
@@ -1088,7 +1093,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
-	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->IsInterior();
+	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->GetInterior();
 	float maxDist = isInterior ? powf(fSneakMaxDistance, 2) : powf((fSneakMaxDistance * fSneakExteriorDistanceMult), 2);
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;
@@ -1271,9 +1276,9 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 	float fFadeOutTime = -1;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSoundForm, &pSource, &fFadeOutTime) && pSoundForm && IS_TYPE(pSoundForm, TESSound) && pSource) {
-		if (pSoundForm->soundFile.GetSoundFileLength()) {
+		if (pSoundForm->GetSoundFileLength()) {
 			CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
-			const char* pSoundPath = pSoundForm->soundFile.GetSoundFile();
+			const char* pSoundPath = pSoundForm->GetSoundFile();
 			uint32_t uiKey;
 			auto kObjIter = BSAudioManager::Get()->soundPlayingObjects.GetFirstPos();
 			while (kObjIter) {
@@ -1320,7 +1325,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	//removal support by jazzisparis
 	*result = 0;
 	AlchemyItem* pPoison = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pPoison) && (!pPoison || (IS_TYPE(pPoison, AlchemyItem) && pPoison->IsPoison()))) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pPoison) && (!pPoison || (IS_TYPE(pPoison, AlchemyItem) && pPoison->CanBePoison()))) {
 		TESObjectWEAP* pWeapon = nullptr;
 		ExtraDataList* pExtraDataList = nullptr;
 		if (!thisObj->IsActor()) {
@@ -1633,6 +1638,6 @@ bool Cmd_GetPCRootWorldspace_Execute(COMMAND_ARGS) {
 	*result = 0;
 	auto pMapMenu = MapMenu::GetSingleton();
 	if (pMapMenu && pMapMenu->parentmostLastExtDoorWorldspace)
-		*reinterpret_cast<uint32_t*>(result) = pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
+		*reinterpret_cast<FormID*>(result) = pMapMenu->parentmostLastExtDoorWorldspace->GetFormID();
 	return true; 
 }

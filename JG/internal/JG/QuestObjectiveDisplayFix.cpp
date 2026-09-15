@@ -1,23 +1,23 @@
 #include "QuestObjectiveDisplayFix.hpp"
-#include <GameObjects.h>
+#include <GameForms.h>
 
 namespace QuestObjectiveDisplayFix {
 
 	HookUtils::JumpDetour kDetour;
 
-	static uint32_t __fastcall QuestObjectiveDisplayHook(const BGSQuestObjective* apObjective) {
-		uint32_t uiResult;
+	static bool __fastcall QuestObjectiveDisplayHook(const BGSQuestObjective* apObjective) {
+		bool bResult;
 		if (kDetour)
-			uiResult = ThisCall<uint32_t>(kDetour, apObjective);
+			bResult = ThisCall<bool>(kDetour, apObjective);
 		else
-			uiResult = apObjective->status & BGSQuestObjective::eQObjStatus_displayed;
+			bResult = apObjective->CheckState(BGSQuestObjective::State::DISPLAYED);
 
-		if (uiResult) {
-			if (!(apObjective->displayText.GetLength() || apObjective->quest->GetFullNameLength()))
-				uiResult = 0;
+		if (bResult) {
+			if (!(apObjective->GetDisplayTextLength() || apObjective->GetOwner()->GetFullNameLength()))
+				bResult = false;
 		}
 
-		return uiResult;
+		return bResult;
 	}
 
 	void Install() {

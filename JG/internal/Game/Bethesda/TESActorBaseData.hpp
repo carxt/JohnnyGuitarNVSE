@@ -2,42 +2,43 @@
 
 #include "BaseFormComponent.hpp"
 #include "BSSimpleList.hpp"
+#include "FactionRank.hpp"
 
 class BGSVoiceType;
 class TESFaction;
 class TESForm;
 class TESLevItem;
-class FactionRank;
 class Actor;
+class TESActorBase;
 
 class TESActorBaseData : public BaseFormComponent {
 public:
 	TESActorBaseData();
 	~TESActorBaseData();
 
-	virtual void			CopyFromTemplateForm(TESForm* apForm);
-	virtual bool			GetNoVATSmelee() const;
-	virtual bool			GetAllowPCDialogue() const; 
-	virtual bool			GetAllowPickpocket() const; 
-	virtual bool			GetIsGhost() const;
-	virtual bool			GetInvulnerable() const;
-	virtual bool			GetCantOpenDoors() const;
-	virtual bool			GetCanBeAllRaces() const;
-	virtual bool			GetAutoCalcServiceFlags() const;
-	virtual bool			GetNoPersuasion() const;
-	virtual bool			GetNoLeftArm() const;
-	virtual bool			GetNoRightArn() const;
-	virtual bool			GetNoHead() const;
-	virtual bool			GetNoShadow() const;
-	virtual bool			GetNoBloodSpray() const;
-	virtual void			SetNoBloodSpray(bool abVal);
-	virtual bool			GetNoBloodDecal() const;
-	virtual void			SetNoBloodDecal(bool abVal);
-	virtual uint32_t		GetMaterialType() const;
-	virtual void			SetMaterialType(uint32_t aeType);
-	virtual uint32_t		GetFatigue() const;
-	virtual float			GetKarma() const;
-	virtual BGSVoiceType*	GetVoiceType() const;
+	virtual void					CopyFromTemplateForm(TESForm* apForm);
+	virtual bool					GetNoVATSmelee() const;
+	virtual bool					GetAllowPCDialogue() const; 
+	virtual bool					GetAllowPickpocket() const; 
+	virtual bool					GetIsGhost() const;
+	virtual bool					GetInvulnerable() const;
+	virtual bool					GetCantOpenDoors() const;
+	virtual bool					GetCanBeAllRaces() const;
+	virtual bool					GetAutoCalcServiceFlags() const;
+	virtual bool					GetNoPersuasion() const;
+	virtual bool					GetNoLeftArm() const;
+	virtual bool					GetNoRightArn() const;
+	virtual bool					GetNoHead() const;
+	virtual bool					GetNoShadow() const;
+	virtual bool					GetNoBloodSpray() const;
+	virtual void					SetNoBloodSpray(bool abVal);
+	virtual bool					GetNoBloodDecal() const;
+	virtual void					SetNoBloodDecal(bool abVal);
+	virtual IMPACT_MATERIAL_TYPE	GetBloodImpactMaterial() const;
+	virtual void					SetBloodImpactMaterial(IMPACT_MATERIAL_TYPE aeType);
+	virtual uint32_t				GetFatigue() const;
+	virtual float					GetKarma() const;
+	virtual BGSVoiceType*			GetVoiceType() const;
 
 	struct ALIGN4 _ActorBaseFlags {
 		enum Flags : uint32_t {
@@ -57,7 +58,7 @@ public:
 			//							  1u << 10,
 			NO_BLOOD_SPRAY				= 1u << 11,
 			NO_BLOOD_DECAL				= 1u << 12,
-			//							  1u << 13,
+			NO_RUMORS					= 1u << 14,
 			//							  1u << 14,
 			CREATURE_NO_HEAD			= 1u << 15,
 			CREATURE_NO_RIGHT_ARM		= 1u << 16,
@@ -93,7 +94,7 @@ public:
 			bool 						: 1;
 			bool bNoBloodSpray			: 1;
 			bool bNoBloodDecal			: 1;
-			bool 						: 1;
+			bool bNoRumors				: 1;
 			bool 						: 1;
 			bool bNoHead				: 1;
 			bool bNoRightArm			: 1;
@@ -128,7 +129,7 @@ public:
 			bool 						: 1;
 			bool bNoBloodSpray			: 1;
 			bool bNoBloodDecal			: 1;
-			bool 						: 1;
+			bool bNoRumors				: 1;
 			bool 						: 1;
 			bool 						: 1;
 			bool 						: 1;
@@ -207,7 +208,7 @@ public:
 		uint16_t					usCalcLevelMax;
 		uint16_t					usSpeedMultiplier;
 		float						fKarma;
-		uint16_t					usDispositionBase;
+		uint16_t					usBaseDisposition;
 		Bitfield<_TemplateUseFlags>	usTemplateFlags;
 	};
 
@@ -216,32 +217,92 @@ public:
 	BGSVoiceType*					pVoiceType;
 	TESForm*						pTemplateForm;
 #ifdef GAME
-	Bitfield32						uiChangedFlags;
+	Bitfield32						uiChangeFlags;
 #endif
 	BSSimpleList<FactionRank*>		kFactions;
 
 	const Bitfield<_ActorBaseFlags>& GetFlags() const { return kActorData.uiFlags; }
-	Bitfield<_ActorBaseFlags>& GetFlags() { return kActorData.uiFlags; }
+	const CharacterBaseFlags& GetCharacterFlags() const { return GetFlags().AsCharacter(); }
+	const CreatureBaseFlags& GetCreatureFlags() const { return GetFlags().AsCreature(); }
+	void SetFlags(uint32_t auiFlags);
 
-	const CharacterBaseFlags& GetBaseCharacterFlags() const { return kActorData.uiFlags.AsCharacter(); }
-	CharacterBaseFlags& GetBaseCharacterFlags() { return kActorData.uiFlags.AsCharacter(); }
+	bool GetFlag(ActorBaseFlags aeFlag) const;
+	void SetFlag(ActorBaseFlags aeFlag, bool abVal, bool abAddChange);
 
-	const CreatureBaseFlags& GetBaseCreatureFlags() const { return kActorData.uiFlags.AsCreature(); }
-	CreatureBaseFlags& GetBaseCreatureFlags() { return kActorData.uiFlags.AsCreature(); }
+	bool IsFemale() const { return GetCharacterFlags().bFemale; };
 
-	bool GetFlag(ActorBaseFlags aeFlag) const { return kActorData.uiFlags.Get(aeFlag); }
-	void SetFlag(ActorBaseFlags aeFlag, bool abVal) { kActorData.uiFlags.Set(aeFlag, abVal); }
+	bool GetEssential() const;
+	void SetEssential(bool abVal);
 
-	bool IsFemale() const { return GetBaseCharacterFlags().bFemale; }
+	bool GetRespawn() const;
+
+	bool GetMatchesPCLevel() const;
+	void SetMatchesPCLevel(bool abVal);
+
+	bool GetRunsInLow() const;
+	void SetRunsInLow(bool abVal, bool abAddChange);
+
+	bool GetNoRumors() const;
+
+	bool GetKnockedDowns() const;
+
+	bool GetNotPushable() const;
+
+	bool GetNoRotatingToHeadtrack() const;
+
+	// Getter is virtual
+	void SetFatigue(uint16_t ausVal);
+
+	uint16_t GetBarterGold() const;
+	void SetBarterGold(uint16_t ausVal);
+
+	uint16_t GetLevelExact() const;
+	void SetLevel(uint16_t ausVal);
+
+	uint16_t GetCalcLevelMin() const;
+	void SetCalcLevelMin(uint16_t ausVal);
+
+	uint16_t GetCalcLevelMax() const;
+	void SetCalcLevelMax(uint16_t ausVal);
+
+	uint16_t GetSpeedMult() const;
+	void SetSpeedMult(uint16_t ausVal);
+
+	uint16_t GetBaseDisposition() const;
+	void SetBaseDisposition(uint16_t ausVal);
+
+	// Getter is virtual
+	void SetKarma(float afVal);
+
+	TESLevItem* GetDeathItem() const;
+	void SetDeathItem(TESLevItem* apItem);
+
+	// Getter is virtual
+	void SetVoiceType(BGSVoiceType* apVoice);
+
+	TESForm* GetTemplateForm() const;
+	void SetTemplateForm(TESForm* apTemplate);
+
+#ifdef GAME
+	uint32_t GetChangeFlags() const;
+#endif
 
 	const BSSimpleList<FactionRank*>* GetFactionList() const;
 	BSSimpleList<FactionRank*>* GetFactionList();
 
+	bool IsInFaction(const TESFaction* apFaction) const;
+
+	bool IsInEvilFactionsOnly() const;
+
 	int32_t GetFactionRank(const TESFaction* apFaction, bool abPlayer) const;
+
+	uint16_t GetLevel() const;
 
 	bool GetUsesLeveledTemplate() const;
 
 	static uint32_t GetAlignmentForKarma(float afKarma);
+
+	static TESActorBase* GetLeveledTemplateInHierarchy(TESActorBase* apBase, uint16_t& arFlags);
 
 #ifdef GAME
 	static const char* GetKarmicTitle(Actor* apActor);

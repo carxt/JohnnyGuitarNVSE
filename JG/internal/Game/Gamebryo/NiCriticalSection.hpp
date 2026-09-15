@@ -1,48 +1,20 @@
 #pragma once
 
-class __declspec(align(128)) NiCriticalSection {
+class alignas(128) NiCriticalSection {
 public:
-	NiCriticalSection() {
-		InitializeCriticalSection(&m_kCriticalSection);
-		m_ulThreadOwner = 0;
-		m_uiLockCount = 0;
-	}
-
-	~NiCriticalSection() {
-		DeleteCriticalSection(&m_kCriticalSection);
-	}
+	NiCriticalSection() noexcept;
+	~NiCriticalSection() noexcept;
 
 	CRITICAL_SECTION	m_kCriticalSection;
-	uint32_t			m_ulThreadOwner;
-	uint32_t			m_uiLockCount;
 
-	void Lock() {
-		EnterCriticalSection(&m_kCriticalSection); 
-	}
+	void Lock() noexcept;
+	[[nodiscard]] bool TryLock() noexcept;
+	void Unlock() noexcept;
 
-	void Unlock() {
-		LeaveCriticalSection(&m_kCriticalSection);
-	}
-
-	bool TryLock() {
-		return TryEnterCriticalSection(&m_kCriticalSection);
-	}
+	// STL compatibility
+	inline void lock() noexcept	{ Lock(); };
+	[[nodiscard]] inline bool try_lock() noexcept { return TryLock(); };
+	inline void unlock() noexcept { Unlock(); };
 };
 
 ASSERT_SIZE(NiCriticalSection, 0x80);
-
-struct NiCriticalSectionScope {
-	NiCriticalSectionScope(NiCriticalSection& aCriticalSection) : rCriticalSection(aCriticalSection) {
-		rCriticalSection.Lock();
-	}
-
-	NiCriticalSectionScope(NiCriticalSection* apCriticalSection) : rCriticalSection(*apCriticalSection) {
-		rCriticalSection.Lock();
-	}
-
-	~NiCriticalSectionScope() {
-		rCriticalSection.Unlock();
-	}
-
-	NiCriticalSection& rCriticalSection;
-};

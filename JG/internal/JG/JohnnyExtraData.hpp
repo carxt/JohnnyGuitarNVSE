@@ -30,7 +30,7 @@ public:
 		TESForm*	pExternalEmittanceSource;
 	};
 
-	uint32_t	uiFormID;
+	FormID		uiFormID;
 	TESForm*	pOwner;
 	FormData	kFormData;
 	ScriptData	kScriptData;

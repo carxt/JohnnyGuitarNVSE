@@ -11,13 +11,17 @@
 #include <JG/ExtraMarkerIcons.hpp>
 #include <JG/ScriptUtils.hpp>
 
-extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+#include "Shared/BSMemory/BSScrapMemory.hpp"
+
+#include <vector>
+
+extern InventoryRef* (*InventoryRefGetForID)(FormID refID);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 	if (PlayerCharacter::GetSingleton()) {
 		auto headNode = PlayerCharacter::GetSingleton()->questObjectiveList.Head();
 		while (headNode) {
-			Console_Print("objective %s from quest %s", headNode->data->displayText.c_str(), headNode->data->quest->GetEditorName());
+			Console_Print("objective %s from quest %s", headNode->data->GetDisplayText(), headNode->data->GetOwner()->GetEditorName());
 			headNode = headNode->next;
 		}
 	}
@@ -25,50 +29,53 @@ bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks
 	return true;
 }
 
+template<typename T>
+using ScrapVector = std::vector<T, BSScrapAllocator<T>>;
+
 bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
-	TESQuest* quest = nullptr;
+	TESQuest* pQuest = nullptr;
 	*result = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &quest) || !PlayerCharacter::GetSingleton())
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest) || !PlayerCharacter::GetSingleton())
 		return true;
 
-	auto& list = PlayerCharacter::GetSingleton()->questObjectiveList;
-	if (list.Empty())
+	auto& kList = PlayerCharacter::GetSingleton()->questObjectiveList;
+	if (kList.Empty())
 		return true;
 
-	std::vector<BGSQuestObjective*> matching;
-	std::vector<BGSQuestObjective*> others;
+	ScrapVector<BGSQuestObjective*> kMatching;
+	ScrapVector<BGSQuestObjective*> kOthers;
 
-	auto node = list.Head();
+	auto node = kList.Head();
 	while (node) {
 		if (node->data) {
-			if (node->data->quest == quest)
-				matching.push_back(node->data);
+			if (node->data->GetOwner() == pQuest)
+				kMatching.push_back(node->data);
 			else
-				others.push_back(node->data);
+				kOthers.push_back(node->data);
 		}
 		node = node->next;
 	}
 
-	if (matching.empty())
+	if (kMatching.empty())
 		return true;
 
-	node = list.Head();
+	node = kList.Head();
 	while (node->next) {
 		auto next = node->next;
 		node->next = next->next;
 		BSMemory::free(next);
 	}
 
-	node->data = matching[0];
-	for (size_t i = 1; i < matching.size(); i++)
-		list.Append(matching[i]);
-	for (auto obj : others)
-		list.Append(obj);
+	node->data = kMatching[0];
+	for (size_t i = 1; i < kMatching.size(); i++)
+		kList.Append(kMatching[i]);
+	for (auto obj : kOthers)
+		kList.Append(obj);
 
-	MapMenu* mapMenu = MapMenu::GetSingleton();
-	if (mapMenu) {
-		mapMenu->questList.FreeAllTiles();
-		mapMenu->questList.itemCount = 0;
+	MapMenu* pMapMenu = MapMenu::GetSingleton();
+	if (pMapMenu) {
+		pMapMenu->questList.RemoveAll();
+		pMapMenu->questList.itemCount = 0;
 	}
 
 	*result = 1;
@@ -245,7 +252,7 @@ bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectREFR* markerRef = ThisCall<TESObjectREFR*>(0x77A400, PlayerCharacter::GetSingleton());
 	if (markerRef) {
-		*(uint32_t*)result = markerRef->GetFormID();
+		*(FormID*)result = markerRef->GetFormID();
 	}
 	return true;
 }

@@ -210,7 +210,6 @@ class ExpressionParser
 
 	uint32_t	MatchOpenBracket(Operator* openBracOp);
 	std::string GetCurToken();
-	VariableInfo* LookupVariable(const char* varName, Script::RefVariable* refVar = NULL);
 
 public:
 	ExpressionParser(ScriptBuffer* scriptBuf, ScriptLineBuffer* lineBuf);

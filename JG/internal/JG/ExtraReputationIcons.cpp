@@ -7,7 +7,7 @@
 #include "unordered_map"
 
 namespace ExtraReputationIcons {
-	using FactionsMap = std::unordered_map<uint32_t, std::array<NiFixedString, 4>>;
+	using FactionsMap = std::unordered_map<FormID, std::array<NiFixedString, 4>>;
 	FactionsMap* pFactionIconsMap = nullptr;
 	SRWLOCK kMapLock = SRWLOCK_INIT;
 
@@ -134,7 +134,7 @@ namespace ExtraReputationIcons {
 	}
 
 	SPEC_NOINLINE void __fastcall Set(TESReputation* apReputation, Tier aeTier, const char* apPath) {
-		const uint32_t uiFormID = apReputation->GetFormID();
+		const FormID uiFormID = apReputation->GetFormID();
 		
 		SRWUniqueLock kLock(kMapLock);
 		if (apPath && apPath[0]) {

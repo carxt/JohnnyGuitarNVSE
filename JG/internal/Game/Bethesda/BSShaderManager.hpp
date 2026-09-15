@@ -6,6 +6,7 @@ class ShadowSceneNode;
 class NiDX9Renderer;
 class NiFixedString;
 class ImageSpaceManager;
+class ImageSpaceParameterData;
 
 class BSShaderManager {
 public:
@@ -29,6 +30,10 @@ public:
 	static ShadowSceneNode* GetShadowSceneNode(uint32_t aeType);
 
 	static const NiFixedString& GetTexPercTag();
+
+#ifdef GAME
+	static void SetImageSpaceParameters(ImageSpaceParameterData* apParams);
+#endif
 
 private:
 #ifdef GAME

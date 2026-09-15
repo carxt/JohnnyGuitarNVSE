@@ -8,7 +8,7 @@ namespace CameraOverride {
 	NiMatrix3 kCameraIdentity = NiMatrix3(0, 0, 1,
 										  1, 0, 0,
 										  0, 1, 0);
-	uint32_t uiReferenceToTrack = 0;
+	FormID uiReferenceToTrack = 0;
 	bool bOverrideCameraPos = false;
 	bool bOverrideCameraRot = false;
 	int32_t eAxis = -3;
@@ -33,8 +33,8 @@ namespace CameraOverride {
 					const TESObjectREFR* pTrackRef = static_cast<const TESObjectREFR*>(pForm);
 					const NiNode* pRootNode = pTrackRef->Get3D();
 					NiPoint3 kPos;
-					if (pRootNode && pRootNode->m_pWorldBound && pRootNode->m_pWorldBound->iRadius) {
-						kPos = pRootNode->m_pWorldBound->kCenter;
+					if (pRootNode && pRootNode->IsVisualObject()) {
+						kPos = pRootNode->m_pWorldBound->GetCenter();
 					}
 					else {
 						kPos = pTrackRef->GetLocationOnReference();

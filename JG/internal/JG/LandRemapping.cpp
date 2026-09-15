@@ -22,7 +22,7 @@ namespace LandRemapping {
 
 	struct LandData {
 		uint32_t uiCoords;
-		uint32_t uiWorldID;
+		FormID uiWorldID;
 
 		int16_t GetX() const {
 			return int16_t((uiCoords >> 16) & 0xFFFF);
@@ -32,12 +32,12 @@ namespace LandRemapping {
 			return int16_t(uiCoords & 0xFFFF);
 		}
 
-		uint32_t GetWorld() const {
+		FormID GetWorld() const {
 			return uiWorldID;
 		}
 	};
 
-	using LandRemapMap = std::unordered_map<uint32_t, LandData>;
+	using LandRemapMap = std::unordered_map<FormID, LandData>;
 
 	LandRemapMap* pRemappedLands = nullptr;
 
@@ -55,7 +55,7 @@ namespace LandRemapping {
 		if (!pRemappedLands)
 			return false;
 
-		const uint32_t uiFormID = apLand->GetFormID();
+		const FormID uiFormID = apLand->GetFormID();
 		auto it = pRemappedLands->find(uiFormID);
 		const bool bRemapped = it != pRemappedLands->end();
 		if (!bRemapped) [[likely]]
@@ -72,7 +72,7 @@ namespace LandRemapping {
 		if (!GetLandRemapData(apLand, &kData)) [[likely]]
 			return nullptr;
 
-		const uint32_t uiWorldFormID = kData.uiWorldID;
+		const FormID uiWorldFormID = kData.uiWorldID;
 		if (!uiWorldFormID) [[unlikely]]
 			return nullptr;
 
@@ -158,7 +158,7 @@ namespace LandRemapping {
 		}
 	};
 
-	void __fastcall RemapLand(uint32_t auiLandFormID, const TESWorldSpace* apWorld, int16_t asX, int16_t asY) {
+	void __fastcall RemapLand(FormID auiLandFormID, const TESWorldSpace* apWorld, int16_t asX, int16_t asY) {
 		if (!apWorld) {
 			if (pRemappedLands)
 				pRemappedLands->erase(auiLandFormID);
@@ -224,7 +224,7 @@ namespace LandRemapping {
 		writeFunc(&uiMapSize, sizeof(uiMapSize));
 
 		for (auto& it : *pRemappedLands) {
-			writeFunc(&it.first, sizeof(uint32_t));
+			writeFunc(&it.first, sizeof(FormID));
 			writeFunc(&it.second, sizeof(LandData));
 			DEBUG_MSG("Serialized remapped land: %08X -> world %08X, coords %i, %i", it.first, it.second.uiWorldID, it.second.GetX(), it.second.GetY());
 		}
@@ -238,14 +238,14 @@ namespace LandRemapping {
 
 		if (uiMapSize > 0) {
 			for (uint32_t i = 0; i < uiMapSize; i++) {
-				uint32_t uiFormID = 0;
+				FormID uiFormID = 0;
 				LandData kData;
-				readFunc(&uiFormID, sizeof(uint32_t));
+				readFunc(&uiFormID, sizeof(FormID));
 				readFunc(&kData, sizeof(LandData));
 
 				DEBUG_MSG("Deserialized remapped land: %08X -> world %08X, coords %i, %i", uiFormID, kData.uiWorldID, kData.GetX(), kData.GetY());
 
-				uint32_t uiResolvedLandID = 0;
+				FormID uiResolvedLandID = 0;
 				if (_ResolveFormID(uiFormID, &uiResolvedLandID) && _ResolveFormID(kData.uiWorldID, &kData.uiWorldID)) {
 					DEBUG_MSG("Resolved remapped land: %08X -> world %08X, coords %i, %i", uiResolvedLandID, kData.uiWorldID, kData.GetX(), kData.GetY());
 					

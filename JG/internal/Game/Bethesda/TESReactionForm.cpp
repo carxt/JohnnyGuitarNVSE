@@ -39,6 +39,13 @@ void TESReactionForm::SetReaction(TESForm* apForm, int32_t aiReaction) {
 #endif
 }
 
+#ifdef GAME
+// GAME - 0x48C0B0
+void TESReactionForm::ModReaction(TESForm* apForm, int32_t aiReaction) {
+    ThisCall(0x48C0B0, this, apForm, aiReaction);
+}
+#endif
+
 // GAME - 0x48C1B0
 // GECK - 0x509200
 FIGHT_REACTION TESReactionForm::GetFactionCombatRelation(const TESForm* apForm) const {

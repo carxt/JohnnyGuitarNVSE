@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BSEnums.hpp"
 #include "BSSimpleList.hpp"
 #include "BSStringT.hpp"
 #include "Gamebryo/NiTPointerMap.hpp"
@@ -14,7 +15,7 @@ struct FORM {
 	uint32_t	uiRecordType;
 	uint32_t	uiDataSize;
 	Bitfield32	uiFormFlags;
-	uint32_t	uiFormID;
+	FormID		uiFormID;
 	uint32_t	uiVersionControl;
 	uint16_t	usFormVersion;
 	uint16_t	usVCVersion;
@@ -32,7 +33,7 @@ public:
 
 		float		fVersion;
 		uint32_t	uiRecordCount;
-		uint32_t	uiNextFormID;
+		FormID		uiNextFormID;
 	};
 
 	struct ALIGN4 _FileFlags {
@@ -110,7 +111,7 @@ public:
 #else
 	TESFile*							pUnkTESFile_428;
 	bool								bMaybeShouldBeReloaded;
-	uint32_t*							pOwnedForms;
+	FormID*								pOwnedForms;
 	uint32_t							uiOwnedFormCount;
 #endif
 

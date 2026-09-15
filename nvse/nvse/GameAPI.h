@@ -346,47 +346,6 @@ public:
 };
 static_assert(sizeof(ConsoleManager) == 0x914);
 
-// A plugin author requested the ability to use OBSE format specifiers to format strings with the args
-// coming from a source other than script.
-// So changed ExtractFormattedString to take an object derived from following class, containing the args
-// Probably doesn't belong in GameAPI.h but utilizes a bunch of stuff defined here and can't think of a better place for it
-class FormatStringArgs {
-public:
-	enum argType {
-		kArgType_Float,
-		kArgType_Form		// TESForm*
-	};
-
-	virtual bool Arg(argType asType, void* outResult) = 0;	// retrieve next arg
-	virtual bool SkipArgs(uint32_t numToSkip) = 0;			// skip specified # of args
-	virtual bool HasMoreArgs() = 0;
-	virtual std::string GetFormatString() = 0;						// return format string
-};
-
-// concrete class used for extracting script args
-class ScriptFormatStringArgs : public FormatStringArgs {
-public:
-	virtual bool Arg(argType asType, void* outResult);
-	virtual bool SkipArgs(uint32_t numToSkip);
-	virtual bool HasMoreArgs();
-	virtual std::string GetFormatString();
-
-	ScriptFormatStringArgs(uint32_t _numArgs, uint8_t* _scriptData, Script* _scriptObj, ScriptLocals* _eventList);
-	uint32_t GetNumArgs();
-	uint8_t* GetScriptData();
-
-private:
-	uint32_t			numArgs;
-	uint8_t* scriptData;
-	Script* scriptObj;
-	ScriptLocals* eventList;
-	std::string fmtString;
-};
-bool SCRIPT_ASSERT(bool expr, Script* script, const char* errorMsg, ...);
-
-bool ExtractSetStatementVar(Script* script, ScriptLocals* eventList, void* scriptDataIn, double* outVarData, uint8_t* outModIndex = NULL, bool shortPath = false);
-bool ExtractFormattedString(FormatStringArgs& args, char* buffer);
-
 class ChangesMap;
 class InteriorCellNewReferencesMap;
 class ExteriorCellNewReferencesMap;
@@ -839,9 +798,28 @@ public:
 	bool GetSaveGameLoading() const {
 		return uiGlobalFlags.bSaveGameLoading;
 	}
+
+	bool GetThreadAllowChanges() const {
+		return ThisCall<bool>(0x462480, this);
+	}
+
+	[[nodiscard("Previous value")]] bool SetThreadAllowChanges(bool abAllow) {
+		return ThisCall<bool>(0x4623F0, this, abAllow);
+	}
 };
 
 ASSERT_SIZE(BGSSaveLoadGame, 0x24C);
+
+class AutoSaveFormChanges {
+	bool bOrgVal;
+public:
+	AutoSaveFormChanges(bool abAllow) noexcept {
+		bOrgVal = BGSSaveLoadGame::GetSingleton()->SetThreadAllowChanges(abAllow);
+	}
+	~AutoSaveFormChanges() noexcept {
+		std::ignore = BGSSaveLoadGame::GetSingleton()->SetThreadAllowChanges(bOrgVal);
+	}
+};
 
 #if RUNTIME
 class SaveGameManager {

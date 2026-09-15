@@ -1,7 +1,7 @@
 #include "BSCriticalSection.hpp"
 
 // GAME - 0x44FAE0
-BSCriticalSection::BSCriticalSection() {
+BSCriticalSection::BSCriticalSection() noexcept {
 #ifdef GAME
 	ThisCall(0x44FAE0, this);
 #else
@@ -10,7 +10,7 @@ BSCriticalSection::BSCriticalSection() {
 }
 
 // GAME - 0x44FB00
-BSCriticalSection::~BSCriticalSection() {
+BSCriticalSection::~BSCriticalSection() noexcept {
 #ifdef GAME
 	ThisCall(0x44FB00, this);
 #else
@@ -19,7 +19,7 @@ BSCriticalSection::~BSCriticalSection() {
 }
 
 // GAME - 0x4538E0
-void BSCriticalSection::Lock(const char* apName) {
+void BSCriticalSection::Lock(const char* apName) noexcept {
 #ifdef GAME
 	ThisCall(0x4538E0, this, apName);
 #else
@@ -28,7 +28,7 @@ void BSCriticalSection::Lock(const char* apName) {
 }
 
 // GAME - 0x44B130
-bool BSCriticalSection::TryLock() {
+bool BSCriticalSection::TryLock() noexcept {
 #ifdef GAME
 	return ThisCall<bool>(0x44B130, this);
 #else
@@ -37,7 +37,7 @@ bool BSCriticalSection::TryLock() {
 }
 
 // GAME - 0x82F1F0
-void BSCriticalSection::Unlock() {
+void BSCriticalSection::Unlock() noexcept {
 #ifdef GAME
 	ThisCall(0x82F1F0, this);
 #else
@@ -46,11 +46,11 @@ void BSCriticalSection::Unlock() {
 }
 
 // GAME - 0x4538A0
-void BSCriticalSection::Enter(const char* apName) {
+void BSCriticalSection::Enter(const char* apName) noexcept {
 	Lock(apName);
 }
 
 // GAME - 0x4538C0
-void BSCriticalSection::Leave() {
+void BSCriticalSection::Leave() noexcept {
 	Unlock();
 }

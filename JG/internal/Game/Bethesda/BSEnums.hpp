@@ -2,6 +2,9 @@
 
 #pragma region Forms
 
+using FormID	= uint32_t;
+using RefID		= uint32_t;
+
 struct _FormType {
 	enum Type : uint32_t {
 		NONE = 0,
@@ -369,6 +372,60 @@ struct _FightReaction {
 	};
 };
 using FIGHT_REACTION = _FightReaction::Type;
+
+struct _SkillSpecialization {
+	enum Type {
+		NONE	= -1,
+		COMBAT	= 0,
+		MAGIC	= 1,
+		STEALTH	= 2,
+		COUNT
+	};
+};
+using SKILL_SPECIALIZATION = _SkillSpecialization::Type;
+
+struct ALIGN4 _ServiceFlags {
+	enum Flags : uint32_t {
+		WEAPONS		= 1u << 0,
+		ARMOR		= 1u << 1,
+		ALCOHOL		= 1u << 2,
+		BOOKS		= 1u << 3,
+		FOOD		= 1u << 4,
+		CHEMS		= 1u << 5,
+		STIMPAKS	= 1u << 6,
+		LIGHTS		= 1u << 7,
+		APPARATUS	= 1u << 8,
+
+		MISC		= 1u << 10,
+		SPELLS		= 1u << 11,
+		MAGIC_ITEMS	= 1u << 12,
+		POTIONS		= 1u << 13,
+		TRAINING	= 1u << 14,
+
+		RECHARGE	= 1u << 16,
+		REPAIR		= 1u << 17,
+	};
+
+	bool bWeapons		: 1;
+	bool bArmor			: 1;
+	bool bAlcohol		: 1;
+	bool bBooks			: 1;
+	bool bFood			: 1;
+	bool bChems			: 1;
+	bool bStimpaks		: 1;
+	bool bLights		: 1;
+	bool bApparatus		: 1;
+	bool 				: 1;
+	bool bMisc			: 1;
+	bool bSpells		: 1;
+	bool bMagicItems	: 1;
+	bool bPotions		: 1;
+	bool bTraining		: 1;
+	bool 				: 1;
+	bool bRecharge		: 1;
+	bool bRepair		: 1;
+};
+using SERVICE_FLAGS = _ServiceFlags::Flags;
 
 #pragma endregion
 
@@ -955,7 +1012,7 @@ struct _AnimGroup {
 		COUNT,
 	};
 };
-using ANIM_GROUP = _AnimGroup::Group;
+using ANIM_GROUP_TYPE = _AnimGroup::Group;
 
 enum ANIM_GROUP_ACTION {
 	AGA_NONE					= -1,
@@ -1083,79 +1140,35 @@ struct _AnimationIdlePlayType {
 };
 using ANIM_IDLE_PLAY_TYPE = _AnimationIdlePlayType::Type;
 
-#pragma endregion
-
-#pragma region Weapons
-
-enum WEAPON_TYPE {
-	WEAPON_TYPE_HAND_TO_HAND_MELEE		= 0,
-	WEAPON_TYPE_ONE_HAND_MELEE			= 1,
-	WEAPON_TYPE_TWO_HAND_MELEE			= 2,
-	WEAPON_TYPE_ONE_HAND_PISTOL			= 3,
-	WEAPON_TYPE_ONE_HAND_PISTOL_ENERGY	= 4,
-	WEAPON_TYPE_TWO_HAND_RIFLE			= 5,
-	WEAPON_TYPE_TWO_HAND_AUTOMATIC		= 6,
-	WEAPON_TYPE_TWO_HAND_RIFLE_ENERGY	= 7,
-	WEAPON_TYPE_TWO_HAND_HANDLE			= 8,
-	WEAPON_TYPE_TWO_HAND_LAUNCHER		= 9,
-	WEAPON_TYPE_ONE_HAND_GRENADE		= 10,
-	WEAPON_TYPE_ONE_HAND_MINE			= 11,
-	WEAPON_TYPE_ONE_HAND_LUNCHBOX_MINE	= 12,
-	WEAPON_TYPE_ONE_HAND_THROWN			= 13,
-	WEAPON_TYPE_COUNT,
+struct _AttackAnimation {
+	enum Animation {
+		DEFAULT				= 255,
+		ATTACK_3			= 38,
+		ATTACK_4			= 44,
+		ATTACK_5			= 50,
+		ATTACK_6			= 56,
+		ATTACK_7			= 62,
+		ATTACK_8			= 68,
+		ATTACK_9			= 144,
+		ATTACK_LEFT			= 26,
+		ATTACK_LOOP			= 74,
+		ATTACK_RIGHT		= 32,
+		ATTACK_SPIN			= 80,
+		ATTACK_SPIN_2		= 86,
+		ATTACK_THROW		= 114,
+		ATTACK_THROW_2		= 120,
+		ATTACK_THROW_3		= 126,
+		ATTACK_THROW_4		= 132,
+		ATTACK_THROW_5		= 138,
+		ATTACK_THROW_6		= 150,
+		ATTACK_THROW_7		= 156,
+		ATTACK_THROW_8		= 162,
+		PLACE_MINE			= 102,
+		PLACE_MINE_2		= 108,
+		COUNT				= 23,
+	};
 };
-
-enum COMBAT_WEAPON_TYPE {
-	COMBAT_WEAPON_TYPE_RANGED_EXPLOSIVE = 0,
-	COMBAT_WEAPON_TYPE_RANGED			= 1,
-	COMBAT_WEAPON_TYPE_MELEE			= 2,
-	COMBAT_WEAPON_TYPE_GRENADE			= 3,
-	COMBAT_WEAPON_TYPE_MINE				= 4,
-	COMBAT_WEAPON_TYPE_THROWN			= 5,
-	COMBAT_WEAPON_TYPE_NONE				= 6,
-	COMBAT_WEAPON_TYPE_INVALID			= 7,
-
-	COMBAT_WEAPON_TYPE_COUNT = COMBAT_WEAPON_TYPE_NONE,
-};
-
-enum WEAPON_SOUND {
-	WEAPON_SOUND_SHOOT_3D = 0,
-	WEAPON_SOUND_SHOOT_2D,
-	WEAPON_SOUND_SHOOT_3D_LOOPING,
-	WEAPON_SOUND_NO_AMMO,
-	WEAPON_SOUND_SWING = WEAPON_SOUND_NO_AMMO,
-	WEAPON_SOUND_BLOCK,
-	WEAPON_SOUND_IDLE,
-	WEAPON_SOUND_EQUIP,
-	WEAPON_SOUND_UNEQUIP
-};
-
-enum ATTACK_ANIMATION {
-	ATTACK_ANIMATION_DEFAULT		= 255,
-	ATTACK_ANIMATION_ATTACK_3		= 38,
-	ATTACK_ANIMATION_ATTACK_4		= 44,
-	ATTACK_ANIMATION_ATTACK_5		= 50,
-	ATTACK_ANIMATION_ATTACK_6		= 56,
-	ATTACK_ANIMATION_ATTACK_7		= 62,
-	ATTACK_ANIMATION_ATTACK_8		= 68,
-	ATTACK_ANIMATION_ATTACK_9		= 144,
-	ATTACK_ANIMATION_ATTACK_LEFT	= 26,
-	ATTACK_ANIMATION_ATTACK_LOOP	= 74,
-	ATTACK_ANIMATION_ATTACK_RIGHT	= 32,
-	ATTACK_ANIMATION_ATTACK_SPIN	= 80,
-	ATTACK_ANIMATION_ATTACK_SPIN_2	= 86,
-	ATTACK_ANIMATION_ATTACK_THROW	= 114,
-	ATTACK_ANIMATION_ATTACK_THROW_2 = 120,
-	ATTACK_ANIMATION_ATTACK_THROW_3 = 126,
-	ATTACK_ANIMATION_ATTACK_THROW_4 = 132,
-	ATTACK_ANIMATION_ATTACK_THROW_5 = 138,
-	ATTACK_ANIMATION_ATTACK_THROW_6 = 150,
-	ATTACK_ANIMATION_ATTACK_THROW_7 = 156,
-	ATTACK_ANIMATION_ATTACK_THROW_8 = 162,
-	ATTACK_ANIMATION_PLACE_MINE		= 102,
-	ATTACK_ANIMATION_PLACE_MINE_2	= 108,
-	ATTACK_ANIMATION_COUNT			= 23,
-};
+using ATTACK_ANIMATION = _AttackAnimation::Animation;
 
 enum RELOAD_ANIM {
 	RELOAD_ANIM_A = 0,
@@ -1183,14 +1196,79 @@ enum RELOAD_ANIM {
 	RELOAD_ANIM_Z,
 	RELOAD_ANIM_COUNT,
 };
-static_assert(RELOAD_ANIM_COUNT == 23);
 
-enum WEAPON_RUMBLE_PATTERN {
-	WEAPON_RUMBLE_PATTERN_CONSTANT = 0,
-	WEAPON_RUMBLE_PATTERN_SQUARE,
-	WEAPON_RUMBLE_PATTERN_TRIANGLE,
-	WEAPON_RUMBLE_PATTERN_SAWTOOTH
+#pragma endregion
+
+#pragma region Weapons
+
+struct _WeaponType {
+	enum Type {
+		HAND_TO_HAND_MELEE		= 0,
+		ONE_HAND_MELEE			= 1,
+		TWO_HAND_MELEE			= 2,
+		ONE_HAND_PISTOL			= 3,
+		ONE_HAND_PISTOL_ENERGY	= 4,
+		TWO_HAND_RIFLE			= 5,
+		TWO_HAND_AUTOMATIC		= 6,
+		TWO_HAND_RIFLE_ENERGY	= 7,
+		TWO_HAND_HANDLE			= 8,
+		TWO_HAND_LAUNCHER		= 9,
+		ONE_HAND_GRENADE		= 10,
+		ONE_HAND_MINE			= 11,
+		ONE_HAND_LUNCHBOX_MINE	= 12,
+		ONE_HAND_THROWN			= 13,
+		COUNT,
+	};
 };
+using WEAPON_TYPE = _WeaponType::Type;
+
+struct _WeaponSound {
+	enum Sound {
+		SHOOT_3D = 0,
+		SHOOT_2D,
+		SHOOT_3D_LOOPING,
+		NO_AMMO,
+		SWING = NO_AMMO,
+		BLOCK,
+		IDLE,
+		EQUIP,
+		UNEQUIP
+	};
+};
+using WEAPON_SOUND = _WeaponSound::Sound;
+
+struct _WeaponRumblePattern {
+	enum Pattern {
+		CONSTANT = 0,
+		SQUARE,
+		TRIANGLE,
+		SAWTOOTH
+	};
+};
+using WEAPON_RUMBLE_PATTERN = _WeaponRumblePattern::Pattern;
+
+struct _WeaponModEffectType {
+	enum Type : uint32_t {
+		NONE					= 0,
+		INCREASE_WEAPON_DAMAGE	= 1,
+		INCREASE_CLIP_SIZE		= 2,
+		DECREASE_SPREAD			= 3,
+		DECREASE_WEIGHT			= 4,
+		AMMO_REGEN_SHOT			= 5,
+		AMMO_REGEN_SECONDS		= 6,
+		EQUIP_SPEED				= 7,
+		FIRE_SPEED				= 8,
+		PROJECTILE_SPEED		= 9,
+		MAX_HEALTH				= 10,
+		SILENCE					= 11,
+		SPLIT_BEAM				= 12,
+		VATS_BONUS				= 13,
+		IRON_SITES				= 14,
+		VATS_SPECIAL_ATTACK		= 15,
+		COUNT,
+	};
+};
+using WEAPON_MOD_EFFECT_TYPE = _WeaponModEffectType::Type;
 
 #pragma endregion
 
@@ -1316,14 +1394,16 @@ enum COMBAT_EXECUTION_FLAGS : uint32_t {
 	COMBAT_EXECUTION_FLAG_CAN_MELEE_TARGET	= 18,
 	COMBAT_EXECUTION_FLAG_START				= COMBAT_EXECUTION_FLAG_GROUP_SEARCHING,
 	COMBAT_EXECUTION_FLAG_COUNT				= 19,
-
 };
 
-enum COMBAT_ITEM_TYPE {
-	COMBAT_ITEM_TYPE_RESTORE	= 0,
-	COMBAT_ITEM_TYPE_BUFF		= 1,
-	COMBAT_ITEM_TYPE_COUNT,
+struct _CombatItemType {
+	enum Type {
+		RESTORE,
+		BUFF,
+		COUNT,
+	};
 };
+using COMBAT_ITEM_TYPE = _CombatItemType::Type;
 
 struct _LocationTargetType {
 	enum Type : uint8_t {
@@ -1398,6 +1478,22 @@ struct _CombatGroupStrategy {
 };
 using COMBAT_GROUP_STRATEGY = _CombatGroupStrategy::Type;
 
+struct _CombatWeaponType {
+	enum Type {
+		RANGED_EXPLOSIVE	= 0,
+		RANGED				= 1,
+		MELEE				= 2,
+		GRENADE				= 3,
+		MINE				= 4,
+		THROWN				= 5,
+		NONE				= 6,
+		INVALID				= 7,
+
+		COUNT = NONE,
+	};
+};
+using COMBAT_WEAPON_TYPE = _CombatWeaponType::Type;
+
 #pragma endregion
 
 #pragma region Sex
@@ -1415,6 +1511,8 @@ using SEX = _Sex::Sex;
 
 #pragma endregion
 
+#pragma region Dialogue
+
 struct _DialogueType {
 	enum Type {
 		TOPIC			= 0,
@@ -1429,6 +1527,53 @@ struct _DialogueType {
 	};
 };
 using DIALOGUE_TYPE = _DialogueType::Type;
+
+struct _DialogueSpeaker {
+	enum Type : uint32_t {
+		TARGET	= 0,
+		SELF	= 1,
+		EITHER	= 2,
+		COUNT,
+	};
+};
+using DIALOGUE_SPEAKER = _DialogueSpeaker::Type;
+
+struct _DialogueEmotion {
+	enum Emotion {
+		NEUTRAL		= 0,
+		ANGER		= 1,
+		DISGUST		= 2,
+		FEAR		= 3,
+		SAD			= 4,
+		HAPPY		= 5,
+		SURPRISE	= 6,
+		PAINED		= 7,
+		COUNT
+	};
+};
+using DIALOGUE_EMOTION = _DialogueEmotion::Emotion;
+
+struct _DialogueScriptType {
+	enum Type : uint32_t {
+		BEGIN = 0,
+		END = 1,
+		COUNT,
+	};
+};
+using DIALOGUE_SCRIPT_TYPE = _DialogueScriptType::Type;
+
+struct _DialogueDummyState {
+	enum State : uint32_t {
+		NONE		= 0,
+		DUMMY		= 1,
+		EITHER		= 2,
+		NON_DUMMY	= 3,
+		COUNT
+	};
+};
+using DIALOGUE_DUMMY_STATE = _DialogueDummyState::State;
+
+#pragma endregion
 
 struct _FactionRelation {
 	enum Type : uint32_t {
@@ -1450,51 +1595,74 @@ struct _ActorSegmentInView {
 };
 using ACTOR_SEGMENT_IN_VIEW = _ActorSegmentInView::Type;
 
-enum HavokMaterialType {
-	BHK_MATERIAL_STONE				= 0,
-	BHK_MATERIAL_CLOTH				= 1,
-	BHK_MATERIAL_DIRT				= 2,
-	BHK_MATERIAL_GLASS				= 3,
-	BHK_MATERIAL_GRASS				= 4,
-	BHK_MATERIAL_METAL				= 5,
-	BHK_MATERIAL_ORGANIC			= 6,
-	BHK_MATERIAL_SKIN				= 7,
-	BHK_MATERIAL_WATER				= 8,
-	BHK_MATERIAL_WOOD				= 9,
-	BHK_MATERIAL_HEAVYSTONE			= 10,
-	BHK_MATERIAL_HEAVYMETAL			= 11,
-	BHK_MATERIAL_HEAVYWOOD			= 12,
-	BHK_MATERIAL_CHAIN				= 13,
-	BHK_MATERIAL_SNOW				= 14,
-	BHK_MATERIAL_ELEVATOR			= 15,
-	BHK_MATERIAL_HOLLOWMETAL		= 16,
-	BHK_MATERIAL_SHEETMETAL			= 17,
-	BHK_MATERIAL_SAND				= 18,
-	BHK_MATERIAL_BROKENCONCRETE		= 19,
-	BHK_MATERIAL_VEHICLEBODY		= 20,
-	BHK_MATERIAL_VEHICLEPARTSOLID	= 21,
-	BHK_MATERIAL_VEHICLEPARTHOLLOW	= 22,
-	BHK_MATERIAL_BARREL				= 23,
-	BHK_MATERIAL_BOTTLE				= 24,
-	BHK_MATERIAL_SODACAN			= 25,
-	BHK_MATERIAL_PISTOL				= 26,
-	BHK_MATERIAL_RIFLE				= 27,
-	BHK_MATERIAL_SHOPPINGCART		= 28,
-	BHK_MATERIAL_LUNCHBOX			= 29,
-	BHK_MATERIAL_BABYRATTLE			= 30,
-	BHK_MATERIAL_RUBBERBALL			= 31,
-	BHK_MATERIAL_CHAINLINK			= 32,
-	BHK_MATERIAL_TILE				= 33,
-	BHK_MATERIAL_CARPET				= 34,
-	BHK_MATERIAL_TUMBLEWEED			= 35,
-	BHK_MATERIAL_MAX,
-
-	BHK_MATERIAL_FLAG_PLATFORM		= 0x20, // FO3 only
-	BHK_MATERIAL_FLAG_STAIRS		= 0x40,
-
-	BHK_MATERIAL_MASK				= 0x1F,
-	BHK_MATERIAL_MASK_FIXED			= 0x3F,
+struct _HavokMaterialType {
+	enum Type : uint32_t {
+		NONE				= UINT32_MAX,
+		STONE				= 0,
+		CLOTH				= 1,
+		DIRT				= 2,
+		GLASS				= 3,
+		GRASS				= 4,
+		METAL				= 5,
+		ORGANIC				= 6,
+		SKIN				= 7,
+		WATER				= 8,
+		WOOD				= 9,
+		HEAVY_STONE			= 10,
+		HEAVY_METAL			= 11,
+		HEAVY_WOOD			= 12,
+		CHAIN				= 13,
+		SNOW				= 14,
+		ELEVATOR			= 15,
+		HOLLOW_METAL		= 16,
+		SHEET_METAL			= 17,
+		SAND				= 18,
+		BROKEN_CONCRETE		= 19,
+		VEHICLE_BODY		= 20,
+		VEHICLE_PART_SOLID	= 21,
+		VEHICLE_PART_HOLLOW	= 22,
+		BARREL				= 23,
+		BOTTLE				= 24,
+		SODACAN				= 25,
+		PISTOL				= 26,
+		RIFLE				= 27,
+		SHOPPING_CART		= 28,
+		LUNCHBOX			= 29,
+		BABY_RATTLE			= 30,
+		RUBBER_BALL			= 31,
+		CHAIN_LINK			= 32,
+		TILE				= 33,
+		CARPET				= 34,
+		TUMBLEWEED			= 35,
+		COUNT,
+	
+		FLAG_PLATFORM		= 0x20, // FO3 only
+		FLAG_STAIRS			= 0x40,
+	
+		MATERIAL_MASK		= 0x1F,
+	};
 };
+using HK_MATERIAL_TYPE = _HavokMaterialType::Type;
+
+struct _ImpactMaterialType {
+	enum Type : uint32_t {
+		NONE			= UINT32_MAX,
+		STONE			= 0,
+		DIRT			= 1,
+		GRASS			= 2,
+		GLASS			= 3,
+		METAL			= 4,
+		WOOD			= 5,
+		ORGANIC			= 6,
+		CLOTH			= 7,
+		WATER			= 8,
+		HOLLOW_METAL	= 9,
+		ORGANIC_BUG		= 10,
+		ORGANIC_GLOW	= 11,
+		COUNT,
+	};
+};
+using IMPACT_MATERIAL_TYPE = _ImpactMaterialType::Type;
 
 enum SoundMessageType : uint32_t {
 	SM_PLAY						= 0x1,
@@ -1836,3 +2004,93 @@ struct _ConditionComparison {
 using CONDITION_COMPARISON = _ConditionComparison::Comparison;
 
 #pragma endregion
+
+struct _LockLevel {
+	enum Level {
+		VERY_EASY,
+		EASY,
+		AVERAGE,
+		HARD,
+		VERY_HARD,
+		IMPOSSIBLE,
+		COUNT,
+	};
+};
+using LOCK_LEVEL = _LockLevel::Level;
+
+struct _SoundLevel {
+	enum Level {
+		LOUD,
+		NORMAL,
+		SILENT,
+		COUNT,
+	};
+};
+using SOUND_LEVEL = _SoundLevel::Level;
+
+struct _CreatureSoundType {
+	enum Type {
+		LEFT		= 0,
+		RIGHT		= 1,
+		BACKLEFT	= 2,
+		BACKRIGHT	= 3,
+		IDLE		= 4,
+		AWARE		= 5,
+		ATTACK		= 6,
+		HIT			= 7,
+		DEATH		= 8,
+		WEAPON		= 9,
+		MOVEMENT	= 10,
+		AWAKE		= 11,
+		AUX1		= 12,
+		AUX2		= 13,
+		AUX3		= 14,
+		AUX4		= 15,
+		AUX5		= 16,
+		AUX6		= 17,
+		AUX7		= 18,
+		AUX8		= 19,
+		JUMP		= 20,
+		LOOP		= 21,
+		COUNT		= 22
+	};
+};
+using CREATURE_SOUND_TYPE = _CreatureSoundType::Type;
+
+struct _CellEnvironmentType {
+	enum Type {
+		NONE				= 0,
+		DEFAULT				= 1,
+		GENERIC				= 2,
+		PADDED_CELL			= 3,
+		ROOM				= 4,
+		BATHROOM			= 5,
+		LIVING_ROOM			= 6,
+		STONE_ROOM			= 7,
+		AUDITORIUM			= 8,
+		CONCERT_HALL		= 9,
+		CAVE				= 10,
+		ARENA				= 11,
+		HANGAR				= 12,
+		CARPETED_HALLWAY	= 13,
+		HALLWAY				= 14,
+		STONE_CORRIDOR		= 15,
+		ALLEY				= 16,
+		FOREST				= 17,
+		CITY				= 18,
+		MOUNTAINS			= 19,
+		QUARRY				= 20,
+		PLAIN				= 21,
+		PARKING_LOT			= 22,
+		SEWER_PIPE			= 23,
+		UNDERWATER			= 24,
+		SMALL_ROOM			= 25,
+		MEDIUM_ROOM			= 26,
+		LARGE_ROOM			= 27,
+		MEDIUM_HALL			= 28,
+		LARGE_HALL			= 29,
+		PLATE				= 30,
+		COUNT,
+	};
+};
+using CELL_ENVIRONMENT_TYPE = _CellEnvironmentType::Type;

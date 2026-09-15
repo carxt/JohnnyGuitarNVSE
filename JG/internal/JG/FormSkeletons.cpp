@@ -1,12 +1,12 @@
 #include "FormSkeletons.hpp"
-#include "GameForms.h"
+#include "Bethesda/TESActorBase.hpp"
 
 namespace FormSkeletons {
 
 	HookUtils::CallDetour kCopyBoundDataDetour;
-	void __fastcall CopyBoundAndModel(TESNPC* apThis, void*, TESNPC* apSource) {
+	void __fastcall CopyBoundAndModel(TESActorBase* apThis, void*, TESActorBase* apSource) {
 		ThisCall(kCopyBoundDataDetour, apThis, apSource);
-		ThisCall(0x489430, &apThis->model, &apSource->model);
+		ThisCall(0x489430, static_cast<TESModel*>(apThis), static_cast<TESModel*>(apSource));
 	}
 
 	void Install() {

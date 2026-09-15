@@ -1,24 +1,25 @@
 #pragma once
 
 #include "Utilities.h"
-#include "internal/Game/Gamebryo/NiFixedString.hpp"
-#include "internal/Game/Gamebryo/NiSmartPointer.hpp"
-#include "internal/Game/Gamebryo/NiTObjectArray.hpp"
-#include "internal/Game/Gamebryo/NiTPrimitiveArray.hpp"
-#include "internal/Game/Gamebryo/NiTLargePrimitiveArray.hpp"
-#include "internal/Game/Gamebryo/NiTPointerList.hpp"
-#include "internal/Game/Gamebryo/NiTPointerMap.hpp"
-#include "internal/Game/Gamebryo/NiTStringPointerMap.hpp"
-#include "internal/Game/Gamebryo/NiTPrimitiveSet.hpp"
-#include "internal/Game/Gamebryo/NiTObjectSet.hpp"
-#include "internal/Game/Gamebryo/NiRTTI.hpp"
-#include "internal/Game/Gamebryo/NiPoint2.hpp"
-#include "internal/Game/Gamebryo/NiPoint3.hpp"
-#include "internal/Game/Gamebryo/NiPoint4.hpp"
-#include "internal/Game/Gamebryo/NiTransform.hpp"
-#include "internal/Game/Gamebryo/NiFrustum.hpp"
-#include "internal/Game/Gamebryo/NiColor.hpp"
-#include "internal/Game/Gamebryo/NiColorA.hpp"
+#include "Gamebryo/NiBound.hpp"
+#include "Gamebryo/NiColor.hpp"
+#include "Gamebryo/NiColorA.hpp"
+#include "Gamebryo/NiFixedString.hpp"
+#include "Gamebryo/NiFrustum.hpp"
+#include "Gamebryo/NiPoint2.hpp"
+#include "Gamebryo/NiPoint3.hpp"
+#include "Gamebryo/NiPoint4.hpp"
+#include "Gamebryo/NiRTTI.hpp"
+#include "Gamebryo/NiSmartPointer.hpp"
+#include "Gamebryo/NiTLargePrimitiveArray.hpp"
+#include "Gamebryo/NiTObjectArray.hpp"
+#include "Gamebryo/NiTObjectSet.hpp"
+#include "Gamebryo/NiTPointerList.hpp"
+#include "Gamebryo/NiTPointerMap.hpp"
+#include "Gamebryo/NiTPrimitiveArray.hpp"
+#include "Gamebryo/NiTPrimitiveSet.hpp"
+#include "Gamebryo/NiTransform.hpp"
+#include "Gamebryo/NiTStringPointerMap.hpp"
 
 struct NiQuaternion;
 
@@ -33,17 +34,6 @@ struct NiQuaternion
 	void EulerYPR(NiPoint3 &ypr);
 	void RotationMatrix(NiMatrix3 &rotMatrix);
 	void Dump();
-};
-
-// 10
-class NiBound
-{
-public:
-	NiPoint3	kCenter;
-	union {
-		float	fRadius;
-		int		iRadius;
-	};
 };
 
 // 10

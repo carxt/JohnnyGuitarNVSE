@@ -45,7 +45,7 @@ extern NVSECommandTableInterface* g_cmdTableInterface;
 #ifdef GAME
 extern NVSEScriptInterface* g_scriptInterface;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
-extern InventoryRef* (*InventoryRefGetForID)(uint32_t auiFormID);
+extern InventoryRef* (*InventoryRefGetForID)(FormID auiFormID);
 extern TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
 #endif
 
@@ -882,7 +882,7 @@ namespace JIPFixes {
 			TESSound* pSound = nullptr;
 			char cPath[1024];
 			if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSound, &cPath) && pSound)
-				pSound->soundFile.SetSoundFile(cPath);
+				pSound->SetSoundFile(cPath);
 			return true;
 		}
 
@@ -1387,7 +1387,7 @@ namespace JIPFixes {
 			AutoLineWidth kLineWidthFix(MAX_LINE_WIDTH);
 			auto kIter = TESForm::pAllForms->GetFirstPos();
 			while (kIter) {
-				uint32_t uiID = 0;
+				FormID uiID = 0;
 				TESForm* pForm = nullptr;
 				TESForm::pAllForms->GetNext(kIter, uiID, pForm);
 
@@ -1888,7 +1888,7 @@ namespace JIPFixes {
 						ExtraDataList* pExtraList = pHotkeyItem->pExtraLists ? pHotkeyItem->pExtraLists->GetItem() : nullptr;
 						TESObjectREFR* pInvRef = InventoryRefCreateEntry(PlayerCharacter::GetSingleton(), pHotkeyItem->pObject, pHotkeyItem->iNumber, pExtraList);
 						if (pInvRef)
-							*reinterpret_cast<uint32_t*>(result) = pInvRef->GetFormID();
+							*reinterpret_cast<FormID*>(result) = pInvRef->GetFormID();
 					}
 
 					delete pHotkeyItem;

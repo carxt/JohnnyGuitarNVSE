@@ -6,13 +6,14 @@
 
 class TESConditionItem;
 class TESObjectREFR;
+class TESForm;
 
 class TESCondition {
 public:
+	BSSimpleList<TESConditionItem*> kHead;
 #ifdef EDITOR
 	uint8_t							unk08;
 #endif
-	BSSimpleList<TESConditionItem*> kHead;
 
 	const BSSimpleList<TESConditionItem*>* GetHead() const {
 		return &kHead;
@@ -21,12 +22,22 @@ public:
 		return &kHead;
 	}
 
+#ifdef GAME
 	bool IsTrue(TESObjectREFR* apActionRef, TESObjectREFR* apTargetRef) const;
+#endif
+
+#ifdef EDITOR
+	void RegisterForm(TESForm* apForm);
+#endif
 
 	static const char* GetComparisonConditionSymbol(CONDITION_COMPARISON aeComparison);
 
 private:
+#ifdef GAME
 	static constexpr AddressPtr<const char*, 0x119C020, 6> pComparisonConditionSymbols;
+#else
+	static constexpr AddressPtr<const char*, 0xE918B8, 6> pComparisonConditionSymbols;
+#endif
 };
 
 #ifdef GAME
@@ -50,12 +61,17 @@ struct ConditionItemData {
 			RUN_ON_TARGET			= 1u << 1,
 			USE_GLOBAL				= 1u << 2,
 			RUN_ON_REFERENCE		= 1u << 3,
+
+			COMPARISON_CONDITION_POS	= 5,
+			COMPARISON_CONDITION_MASK	= 0xE0,
 		};
 
-		bool bOr					: 1;
-		bool bRunOnTarget			: 1;
-		bool bUseGlobal				: 1;
-		bool bRunOnReference		: 1;
+		bool	bOr						: 1;
+		bool	bRunOnTarget			: 1;
+		bool	bUseGlobal				: 1;
+		bool	bRunOnReference			: 1;
+		bool							: 1;
+		uint8_t	eComparisonCondition	: 3;
 	};
 	using ConditionItemDataFlags = _ConditionItemDataFlags::Flags;
 

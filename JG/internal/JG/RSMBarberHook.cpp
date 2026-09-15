@@ -7,12 +7,12 @@ namespace RSMBarberHook {
 	uintptr_t RSMDestructorOriginal = (uintptr_t)0x07AC530;
 
 	bool __fastcall hk_TESHair_IsPlayable(TESHair* ptr_hair) {
-		return (ptr_hair->IsPlayable()) && (haircutSetList.Find(ptr_hair->GetFormID()));
+		return ptr_hair->GetPlayable() && (haircutSetList.Find(ptr_hair->GetFormID()));
 
 	}
 
 	bool __fastcall hk_BGSHeadPart_IsPlayable(BGSHeadPart* ptr_hdpt) {
-		return (ptr_hdpt->headFlags & 0x1) && (beardSetList.Find(ptr_hdpt->GetFormID()));
+		return ptr_hdpt->GetPlayable() && (beardSetList.Find(ptr_hdpt->GetFormID()));
 	}
 	DWORD __fastcall hk_RSMDestroy(void* thisObj, void* EDX, BOOL heapFree) {
 		auto ret = ThisCall<DWORD>(RSMDestructorOriginal, thisObj, heapFree);
@@ -61,22 +61,23 @@ namespace RSMBarberHook {
 		auto playerBase = reinterpret_cast<TESNPC*>(PlayerCharacter::GetSingleton()->GetActorBase());
 		haircutSetList.bIsWhiteList = bool(flags & kFlag_WhiteListHair);
 		if (haircutSetList.bIsWhiteList) {
-			haircutSetList.Add(playerBase->hair->GetFormID());
+			haircutSetList.Add(playerBase->GetHair()->GetFormID());
 		}
 		else {
-			haircutSetList.Remove(playerBase->hair->GetFormID());
+			haircutSetList.Remove(playerBase->GetHair()->GetFormID());
 
 		}
 		beardSetList.bIsWhiteList = bool(flags & kFlag_WhiteListBeard);
-		if (beardSetList.bIsWhiteList) {
-			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
-				if (*iter) { beardSetList.Add((*iter)->GetFormID()); };
+		auto pIter = playerBase->GetHeadPartList();
+		while (pIter && !pIter->IsEmpty()) {
+			const BGSHeadPart* pPart = pIter->GetItem();
+			if (pPart) {
+				if (beardSetList.bIsWhiteList)
+					beardSetList.Add(pPart->GetFormID());
+				else
+					beardSetList.Remove(pPart->GetFormID());
 			}
-		}
-		else {
-			for (auto iter = playerBase->headPart.Begin(); !iter.End(); iter.Next()) {
-				if (*iter) { beardSetList.Remove((*iter)->GetFormID()); };
-			}
+			pIter = pIter->GetNext();
 		}
 		CdeclCall<void>(0x705870, 2);
 	}

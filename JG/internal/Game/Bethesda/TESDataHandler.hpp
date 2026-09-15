@@ -5,6 +5,7 @@
 #include "Gamebryo/NiTPrimitiveArray.hpp"
 #include "Gamebryo/NiTPointerList.hpp"
 
+using FormID = uint32_t;
 class BGSAcousticSpace;
 class BGSAddonNode;
 class BGSBodyPartData;
@@ -148,7 +149,7 @@ public:
 	NiTPrimitiveArray<TESObjectCELL*>		kCellArray;				// 1DC
 	NiTPrimitiveArray<BGSAddonNode*>		kAddonArray;			// 1EC
 	NiTPointerList<TESForm*>				kBadForms;				// 1FC
-	uint32_t								uiNextCreatedRefID;		// 208
+	FormID									uiNextCreatedRefID;		// 208
 	TESFile*								pActiveFile;			// 20C
 	BSSimpleList<TESFile*>					kFiles;					// 210
 	uint32_t								uiCompiledFileCount;	// 214
@@ -164,74 +165,87 @@ public:
 	bool									bLoadingFiles;			// 620
 	bool									bIsLoading;				// 621
 	uint8_t									ucGameSettingsLoadState;// 622
-	TESRegionDataManager*					pRegionManager;			// 624
+	TESRegionDataManager*					pRegionDataManager;		// 624
 	InventoryChanges*						pBarterContainer;		// 628
 	InventoryChanges*						pRecipeContainer;		// 62C
 	TESForm*								pSpotterEffect;			// 630
 	TESForm*								pItemDetectedEffect;	// 634
 	TESForm*								pCatEyeMobileEffect;	// 638
+#ifdef EDITOR
+	const char*								pBetaCommentPath;
+#endif
 
 	static TESDataHandler* GetSingleton();
+
 	BSSimpleList<TESFile*>* GetFileList();
+
+	TESRegionDataManager* GetRegionDataManager() const;
 
 	bool AddFormToDataHandler(TESForm* apForm);
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESDataHandler, 0x63C);
-
+#else
+ASSERT_SIZE(TESDataHandler, 0x640);
+#endif
 
 #ifdef GAME
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA220> pDoorMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA224> pMapMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA228> pAudioMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA22C> pAudioBuoyMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA230> pBoundMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA234> pPlaneMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA238> pRoomMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA23C> pPortalMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA240> pCollisionMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA244> pXMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA248> pXMarkerHeading;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA24C> pCOCMarkerHeading;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA250> pTravelMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA254> pNorthMarker;
-static constexpr AddressPtr<const TESObjectDOOR*, 0x11CA258> pDefaultDoor;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA25C> pTempleMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA260> pHolyMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA264> pRadiationMarker;
-static constexpr AddressPtr<const TESObjectMISC*, 0x11CA268> pLockpick;
-static constexpr AddressPtr<const TESObjectSTAT*, 0x11CA26C> pHorseMarker;
-static constexpr AddressPtr<const TESWaterForm*,  0x11CA53C> pDefaultWater;
-static constexpr AddressPtr<const TESObjectWEAP*, 0x11CA278> pDefaultUnarmedWeapon;
-static constexpr AddressPtr<const TESObjectACTI*, 0x11CA27C> pAshPile1;
-static constexpr AddressPtr<const TESObjectACTI*, 0x11CA280> pAshPile2;
-static constexpr AddressPtr<const BGSExplosion*,  0x11CA284> pWaterExplosion;
-static constexpr AddressPtr<const TESObjectWEAP*, 0x11CA288> pGasTrapDummyWeap;
+static constexpr inline AddressPtr<const BGSVoiceType*,  0x11CB298> pMaleVoice;
+static constexpr inline AddressPtr<const BGSVoiceType*,  0x11CB29C> pFemaleVoice;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA220> pDoorMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA224> pMapMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA228> pAudioMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA22C> pAudioBuoyMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA230> pBoundMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA234> pPlaneMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA238> pRoomMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA23C> pPortalMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA240> pCollisionMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA244> pXMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA248> pXMarkerHeading;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA24C> pCOCMarkerHeading;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA250> pTravelMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA254> pNorthMarker;
+static constexpr inline AddressPtr<const TESObjectDOOR*, 0x11CA258> pDefaultDoor;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA25C> pTempleMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA260> pHolyMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA264> pRadiationMarker;
+static constexpr inline AddressPtr<const TESObjectMISC*, 0x11CA268> pLockpick;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0x11CA26C> pHorseMarker;
+static constexpr inline AddressPtr<const TESWaterForm*,  0x11CA53C> pDefaultWater;
+static constexpr inline AddressPtr<const TESObjectWEAP*, 0x11CA278> pDefaultUnarmedWeapon;
+static constexpr inline AddressPtr<const TESObjectACTI*, 0x11CA27C> pAshPile1;
+static constexpr inline AddressPtr<const TESObjectACTI*, 0x11CA280> pAshPile2;
+static constexpr inline AddressPtr<const BGSExplosion*,  0x11CA284> pWaterExplosion;
+static constexpr inline AddressPtr<const TESObjectWEAP*, 0x11CA288> pGasTrapDummyWeap;
 #else
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA30> pDoorMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA34> pMapMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA38> pAudioMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA3C> pAudioBuoyMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA40> pBoundMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA44> pPlaneMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA48> pRoomMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA4C> pPortalMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA50> pCollisionMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA54> pXMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA58> pXMarkerHeading;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA5C> pCOCMarkerHeading;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA60> pTravelMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA64> pNorthMarker;
-static constexpr AddressPtr<const TESObjectDOOR*, 0xEDDA68> pDefaultDoor;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA6C> pTempleMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA70> pHolyMarker;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA74> pRadiationMarker;
-static constexpr AddressPtr<const TESObjectMISC*, 0xEDDA78> pLockpick;
-static constexpr AddressPtr<const TESObjectSTAT*, 0xEDDA7C> pHorseMarker;
-static constexpr AddressPtr<const TESWaterForm*,  0xEDDD7C> pDefaultWater;
-static constexpr AddressPtr<const TESObjectWEAP*, 0xEDDA88> pDefaultUnarmedWeapon;
-static constexpr AddressPtr<const TESObjectACTI*, 0xEDDA8C> pAshPile1;
-static constexpr AddressPtr<const TESObjectACTI*, 0xEDDA90> pAshPile2;
-static constexpr AddressPtr<const BGSExplosion*,  0xEDDA94> pWaterExplosion;
-static constexpr AddressPtr<const TESObjectWEAP*, 0xEDDA98> pGasTrapDummyWeap;
+static constexpr inline AddressPtr<const BGSVoiceType*,  0xED7C9C> pMaleVoice;
+static constexpr inline AddressPtr<const BGSVoiceType*,  0xED7CA0> pFemaleVoice;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA30> pDoorMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA34> pMapMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA38> pAudioMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA3C> pAudioBuoyMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA40> pBoundMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA44> pPlaneMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA48> pRoomMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA4C> pPortalMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA50> pCollisionMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA54> pXMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA58> pXMarkerHeading;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA5C> pCOCMarkerHeading;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA60> pTravelMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA64> pNorthMarker;
+static constexpr inline AddressPtr<const TESObjectDOOR*, 0xEDDA68> pDefaultDoor;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA6C> pTempleMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA70> pHolyMarker;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA74> pRadiationMarker;
+static constexpr inline AddressPtr<const TESObjectMISC*, 0xEDDA78> pLockpick;
+static constexpr inline AddressPtr<const TESObjectSTAT*, 0xEDDA7C> pHorseMarker;
+static constexpr inline AddressPtr<const TESWaterForm*,  0xEDDD7C> pDefaultWater;
+static constexpr inline AddressPtr<const TESObjectWEAP*, 0xEDDA88> pDefaultUnarmedWeapon;
+static constexpr inline AddressPtr<const TESObjectACTI*, 0xEDDA8C> pAshPile1;
+static constexpr inline AddressPtr<const TESObjectACTI*, 0xEDDA90> pAshPile2;
+static constexpr inline AddressPtr<const BGSExplosion*,  0xEDDA94> pWaterExplosion;
+static constexpr inline AddressPtr<const TESObjectWEAP*, 0xEDDA98> pGasTrapDummyWeap;
 #endif

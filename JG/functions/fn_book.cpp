@@ -1,23 +1,24 @@
 #include "fn_book.h"
-#include "GameAPI.h"
-#include "decoding.h"
+#include "Bethesda/TESObjectBOOK.hpp"
+#include "JG/ScriptUtils.hpp"
 
 bool Cmd_GetBookFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectBOOK* book = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book) && book && IS_TYPE(book, TESObjectBOOK)) {
-		*result = book->flags;
-		if (IsConsoleMode()) Console_Print("GetBookFlags >> %.f", *result);
+	TESObjectBOOK* pBook = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBook) && pBook && IS_ID(pBook, TESObjectBOOK)) {
+		*result = pBook->kData.ucFlags;
+		if (IsConsoleMode()) 
+			Console_Print("GetBookFlags >> %.f", *result);
 	}
 	return true;
 }
 
 bool Cmd_SetBookFlags_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t flags;
-	TESObjectBOOK* book = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book, &flags) && book && IS_TYPE(book, TESObjectBOOK)) {
-		book->flags = flags;
+	uint32_t uiFlags = 0;
+	TESObjectBOOK* pBook = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBook, &uiFlags) && pBook && IS_ID(pBook, TESObjectBOOK)) {
+		pBook->kData.ucFlags = uiFlags;
 		*result = 1;
 	}
 	return true;
@@ -25,28 +26,21 @@ bool Cmd_SetBookFlags_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetBookSkill_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectBOOK* book = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book) && book && IS_TYPE(book, TESObjectBOOK)) {
-		*result = (book->skillCode == 255 ? -1 : book->skillCode + 32);
-		if (IsConsoleMode()) Console_Print("GetBookSkill >> %.f", *result);
+	TESObjectBOOK* pBook = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBook) && pBook && IS_ID(pBook, TESObjectBOOK)) {
+		*result = pBook->GetTeaches();
+		if (IsConsoleMode()) 
+			Console_Print("GetBookSkill >> %.f", *result);
 	}
 	return true;
 }
 
 bool Cmd_SetBookSkill_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectBOOK* book = nullptr;
-	uint32_t skill;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &book, &skill) && book && IS_TYPE(book, TESObjectBOOK)) {
-		if (skill == -1) {
-			book->skillCode = -1;
-		}
-		else if (skill < kAVCode_Barter || skill >= kAVCode_InventoryWeight) {
-			return true;
-		}
-		else {
-			book->skillCode = skill - 32;
-		}
+	TESObjectBOOK* pBook = nullptr;
+	ActorValue::Index eActorValue = ActorValue::Index::NONE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBook, &eActorValue) && pBook && IS_ID(pBook, TESObjectBOOK) && ScriptUtils::InRange(eActorValue)) {
+		pBook->SetTeaches(eActorValue);
 		*result = 1;
 	}
 	return true;

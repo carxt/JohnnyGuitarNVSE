@@ -18,8 +18,14 @@ ASSERT_SIZE(FunctionData, 0xC);
 class TESParameters {
 public:
 	static uint32_t GetParamCount(const FunctionData* apData);
+	
 	static bool		GetParamIsTESForm(const FunctionData* apData, uint32_t auiParam);
+	
 	static bool		GetParamIsReference(const FunctionData* apData, uint32_t auiParam);
+	
+#ifdef GAME
 	static bool		GetParamIsScriptVariable(const FunctionData* apData, uint32_t auiParam);
+#endif
+
 	static Script*	GetScriptFromParam(uint32_t auiParam, const FunctionData* apData);
 };

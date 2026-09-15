@@ -8,9 +8,9 @@ public:
 	virtual ~BaseExtraList();
 
 	BSExtraData*	pHead;
-#if !JIP_CHANGES
+#if !USE_MODDED_CHANGES
 	Bitfield8		ucPresenceBitfield[21];
-#else
+#else // JIP
 	Bitfield8		ucPresenceBitfield[19];
 	Bitfield8		ucJIPRefFlags; // TESObjectREFR only
 	union

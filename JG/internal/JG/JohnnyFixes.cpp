@@ -4,6 +4,8 @@
 #include "GameProcess.h"
 #include "GameSettings.h"
 #include "GameUI.h"
+#include "Bethesda/BSShaderManager.hpp"
+#include "Bethesda/DialoguePackage.hpp"
 
 #include "SkyUpdateFixes.hpp"
 #include "EditorIDRestoration.hpp"
@@ -225,7 +227,7 @@ namespace JohnnyFixes {
 	}
 
 	HookUtils::CallDetour kGetFileChunkDataDetour;
-	void __fastcall TESRegionDataSoundIncidentalIDHook(TESFile* apFile, void* edx, uint32_t* apFormID) {
+	void __fastcall TESRegionDataSoundIncidentalIDHook(TESFile* apFile, void* edx, FormID* apFormID) {
 		ThisCall(kGetFileChunkDataDetour, apFile, apFormID);
 		if (*apFormID)
 			CdeclCall(0x485D50, apFormID, apFile);
@@ -324,13 +326,13 @@ namespace JohnnyFixes {
 		ThisCall(kSetCellImageSpaceDetour, apCell, apImageSpace);
 		const PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
 		if (apImageSpace && pPlayer->parentCell && pPlayer->parentCell == apCell)
-			CdeclCall(0xB4F430, apImageSpace->traitValues);
+			BSShaderManager::SetImageSpaceParameters(&apImageSpace->kData);
 	}
 
 	namespace NoHeadlessTalkingFix {
 
 		bool __fastcall CanSpeakThroughHead(Actor* apActor) {
-			const bool bNoHead = ThisCall<bool>(0x573090, apActor, BGSBodyPartData::eBodyPart_Head1) || ThisCall<bool>(0x573090, apActor, BGSBodyPartData::eBodyPart_Head2);
+			const bool bNoHead = ThisCall<bool>(0x573090, apActor, BODY_PART_TYPE::HEAD_1) || ThisCall<bool>(0x573090, apActor, BODY_PART_TYPE::HEAD_2);
 
 			bool bCanSpeak = !bNoHead;
 			if (bCanSpeak) {
@@ -338,8 +340,8 @@ namespace JohnnyFixes {
 				if (pAIProcess && pAIProcess->processLevel == PROCESS_TYPE::HIGH && apActor->GetDead()) {
 					const DialoguePackage* pPackage = static_cast<DialoguePackage*>(pAIProcess->GetCurrentPackage());
 					if (pPackage) {
-						const bool bDialoguePackage = pPackage->type == PACKAGE_TYPE::DIALOGUE || pPackage->type == PACKAGE_TYPE::IN_GAME_DIALOGUE;
-						if (bDialoguePackage && (apActor != pPackage->subject) && (apActor == pPackage->speaker))
+						const bool bDialoguePackage = pPackage->GetPackType() == PACKAGE_TYPE::DIALOGUE || pPackage->GetPackType() == PACKAGE_TYPE::IN_GAME_DIALOGUE;
+						if (bDialoguePackage && (apActor != pPackage->GetTargetOfConversation()) && (apActor == pPackage->GetActorStartedConversation()))
 							bCanSpeak = false;
 					}
 				}

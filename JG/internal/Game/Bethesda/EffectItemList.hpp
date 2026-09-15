@@ -4,6 +4,9 @@
 #include "BSSimpleList.hpp"
 #include "EffectArchetypes.hpp"
 #include "EffectItem.hpp"
+#ifdef EDITOR
+#include "EffectSetting.hpp"
+#endif
 
 class Actor;
 
@@ -19,6 +22,9 @@ public:
 	virtual uint32_t	GetLevel() const;
 
 	uint32_t uiHostileCount;
+#ifdef EDITOR
+	EffectSetting kSetting;
+#endif
 
 	bool CanBePoison() const;
 
@@ -29,4 +35,8 @@ public:
 #endif
 };
 
+#ifdef GAME
 ASSERT_SIZE(EffectItemList, 0x10);
+#else
+ASSERT_SIZE(EffectItemList, 0xF0);
+#endif

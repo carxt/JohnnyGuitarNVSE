@@ -40,28 +40,28 @@ bool Cmd_NullArgs_Execute(COMMAND_ARGS) {
 
 
 bool Cmd_GetAllGameRadios_Execute(COMMAND_ARGS) {
-	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	tList<TESObjectACTI>* g_gameRadios = (tList<TESObjectACTI>*)0x11C8264;
-	for (auto radioIter = g_gameRadios->Begin(); !radioIter.End(); radioIter.Next()) {
-		if (*radioIter) {
-			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
-		}
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	auto pIter = BGSTalkingActivator::kAllRadioStations->GetHead();
+	for (; pIter && !pIter->IsEmpty(); pIter = pIter->GetNext()) {
+		TESObjectREFR* pRef = pIter->GetItem();
+		if (pRef)
+			g_arrInterface->AppendElement(pArray, NVSEArrayElement(pRef));
 	}
-	g_arrInterface->AssignCommandResult(radioArr, result);
+	g_arrInterface->AssignCommandResult(pArray, result);
 	return true;
 }
 
 
 bool Cmd_GetAvailableRadios_Execute(COMMAND_ARGS) {
-	NVSEArrayVar* radioArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	tList<TESObjectACTI> availableRadios = {};
-	CdeclCall<void>(0x04FF1A0, thisObj, &availableRadios, nullptr);
-	for (auto radioIter = availableRadios.Begin(); !radioIter.End(); radioIter.Next()) {
-		if (*radioIter && !CdeclCall<bool>(0x0079BE30, *radioIter) && JohnnyRadios::IsAvailable((*radioIter)->GetFormID())) {
-			g_arrInterface->AppendElement(radioArr, NVSEArrayElement(*radioIter));
-		}
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	BSSimpleList<TESObjectREFR*> kRadios;
+	BGSTalkingActivator::GetRadioStationsInRangeOfRef(thisObj, &kRadios, nullptr);
+	for (auto pIter = kRadios.GetHead(); pIter && !pIter->IsEmpty(); pIter = pIter->GetNext()) {
+		TESObjectREFR* pRef = pIter->GetItem();
+		if (pRef && CdeclCall<bool>(0x79BE30, pRef) && JohnnyRadios::IsAvailable(pRef->GetFormID()))
+			g_arrInterface->AppendElement(pArray, NVSEArrayElement(pRef));
 	}
-	g_arrInterface->AssignCommandResult(radioArr, result);
+	g_arrInterface->AssignCommandResult(pArray, result);
 	return true;
 }
 
@@ -292,7 +292,7 @@ bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetDefaultHeapSize_Execute(COMMAND_ARGS) {
-	uint32_t heapSize = *(reinterpret_cast<uint32_t*>(0x866E9F + 1));
+	uint32_t heapSize = *(reinterpret_cast<FormID*>(0x866E9F + 1));
 	*result = heapSize / 1024 / 1024;
 	if (IsConsoleMode())
 		Console_Print("DefaultHeapInitialAllocMB >> `%f", *result);
@@ -305,7 +305,7 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cEDID) && cEDID[0]) {
 		const TESForm* pForm = TESForm::GetFormByEditorID(cEDID);
 		if (pForm)
-			*reinterpret_cast<uint32_t*>(result) = pForm->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pForm->GetFormID();
 
 		if (IsConsoleMode())
 			Console_Print("EditorIDToFormID >> 0x%08X", *result);

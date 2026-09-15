@@ -3,17 +3,20 @@
 #include "NiTypes.h"
 #include "GameTypes.h"
 
-#include "Gamebryo/NiObjectNET.hpp"
+#include "Gamebryo/NiSwitchNode.hpp"
 #include "Gamebryo/NiRTTI.hpp"
 #include "Gamebryo/NiCullingProcess.hpp"
 #include "Gamebryo/NiAlphaAccumulator.hpp"
 #include "Gamebryo/NiRenderer.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 #include "Gamebryo/NiStringExtraData.hpp"
+#include "Gamebryo/NiTexture.hpp"
 #include "Bethesda/BSXFlags.hpp"
 #include "Bethesda/NiUpdateData.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
 #include "Bethesda/BSCullingProcess.hpp"
+#include "Bethesda/BSMultiBoundNode.hpp"
+#include "Bethesda/BSShaderProperty.hpp"
 
 struct NavMeshInfo;
 class bhkRigidBody;
@@ -321,8 +324,6 @@ public:
 };
 static_assert(sizeof(NiControllerSequence) == 0x74);
 
-class NiObjectNET;
-
 // 34
 class NiTimeController : public NiObject {
 public:
@@ -554,31 +555,6 @@ public:
 
 	Tile* parentTile;	// 0C
 	NiNode* parentNode;	// 10
-};
-
-// 18
-class NiProperty : public NiObjectNET {
-public:
-	NiProperty();
-	~NiProperty();
-
-	virtual uint32_t	GetPropertyType();
-	virtual void	UpdateController(float arg);
-
-	enum {
-		kPropertyType_Alpha = 0,
-		kPropertyType_Culling = 1,
-		kPropertyType_Material = 2,
-		kPropertyType_Shade = 3,
-		kPropertyType_TileShader = kPropertyType_Shade,
-		kPropertyType_Stencil = 4,
-		kPropertyType_Texturing = 5,
-		kPropertyType_Dither = 8,
-		kPropertyType_Specular = 9,
-		kPropertyType_VertexColor = 10,
-		kPropertyType_ZBuffer = 11,
-		kPropertyType_Fog = 13,
-	};
 };
 
 // 4C
@@ -897,317 +873,8 @@ public:
 	uint32_t				unk18;		// 18
 };
 
-class NiShadeProperty : public NiProperty {
-public:
-	Bitfield16	m_usFlags;
-	int32_t		iShaderPropertyType;
-};
-ASSERT_SIZE(NiShadeProperty, 0x20);
-
 class ShadowSceneLight;
 class BSShaderAccumulator;
-
-// 60
-class BSShaderProperty : public NiShadeProperty {
-public:
-	BSShaderProperty();
-	~BSShaderProperty();
-
-	class RenderPass {
-	public:
-		NiGeometry*			pGeometry;
-		uint16_t			usPassEnum;
-		uint8_t				eAccumulationHint;
-		bool				bFirstPass;
-		bool				bLastPass;
-		uint8_t				ucNumLights;
-		uint8_t				ucMaxNumLights;
-		uint8_t				ucExtraParam;
-		ShadowSceneLight**	ppSceneLights;
-	};
-
-	class RenderPassArray : public NiTObjectArray<RenderPass*> {
-	public:
-		uint32_t uiPassCount;
-	};
-
-	virtual void						CopyTo(BSShaderProperty* apTarget);
-	virtual void						CopyToMembers(BSShaderProperty* apTarget);
-	virtual void						SetupGeometry(NiGeometry* apGeometry);
-	virtual RenderPassArray*			GetRenderPasses(const NiGeometry* apGeometry, const uint32_t auiEnabledPasses, uint16_t* apusPassCount, const uint32_t aeRenderMode, BSShaderAccumulator* apAccumulator, bool abAddPass);
-	virtual uint16_t					GetNumberofPasses(NiGeometry* apGeometry);
-	virtual RenderPassArray*			GetSIBlockRenderPasses() const;
-	virtual RenderPass*					GetRenderDepthPass(NiGeometry* apGeometry);
-	virtual BSShaderProperty*			ClarifyShader(NiGeometry* apGeometry, bool unk0 = 0, bool unk2 = 1);
-	virtual NiSourceTexture*			GetBaseTexture() const;
-	virtual RenderPassArray*			GetWaterFogPassList(NiGeometry* apGeometry);
-	virtual void						GetTextureUse(void* apCountFunc, class BGSTextureUseMap* apTexMap) const;
-	virtual void						PrecacheTextures() const;
-
-	struct ALIGN4 _ShaderFlags {
-		struct _Bits {
-			enum Bits {
-				SPECULAR						= 0,
-				SKINNED							= 1,
-				LOW_DETAIL						= 2,
-				VERTEX_ALPHA					= 3,
-				MOTION_BLUR						= 4,
-				SINGLE_PASS						= 5,
-				FALLOFF							= 6,
-				ENVIRONMENT_MAPPING				= 7,
-				ALPHA_TEXTURE					= 8,
-				ZPREPASS						= 9,
-				FACEGEN							= 10,
-				PARALLAX						= 11,
-				MODEL_SPACE_NORMALS				= 12,
-				NON_PROJECTIVE_SHADOWS			= 13,
-				LANDSCAPE						= 14,
-				REFRACTION						= 15,
-				REFRACTION_FIRE					= 16,
-				EYE_ENVIRONMENT_MAPPING			= 17,
-				HAIR							= 18,
-				DYNAMIC_ALPHA					= 19,
-				LOCAL_MAP_HIDE_SECRET			= 20,
-				WINDOW_ENVIRONMENT_MAPPING		= 21,
-				TREE_BILLBOARD					= 22,
-				SHADOW_FRUSTUM					= 23,
-				MULTIPLE_TEXTURES				= 24,
-				REMAPPABLE_TEXTURES				= 25,
-				DECAL							= 26,
-				DYNAMIC_DECAL					= 27,
-				PARALLAX_OCCLUSION				= 28,
-				EXTERNAL_EMITTANCE				= 29,
-				SHADOW_MAP						= 30,
-				ZBUFFER_TEST					= 31,
-				ZBUFFER_WRITE					= 32,
-				LOD_LANDSCAPE					= 33,
-				LOD_BUILDING					= 34,
-				NO_FADE							= 35,
-				REFRACTION_TINT					= 36,
-				VERTEX_COLORS					= 37,
-				FIRST_PERSON					= 38,
-				
-				// HairShaderProperty
-				FIRST_LIGHT_IS_POINTLIGHT		= 39,
-				SECOND_LIGHT					= 40,
-				THIRD_LIGHT						= 41,
-				
-				// TallGrassShaderProperty
-				VERTEX_LIGHTING					= 42,
-				UNIFORM_SCALE					= 43,
-				FIT_SLOPE						= 44,
-				BILLBOARD						= 45,
-				
-				NO_LOD_LAND_BLEND				= 46,
-				ENVMAP_LIGHT_FADE				= 47,
-				WIREFRAME						= 48,
-				VATS_SELECTION					= 49,
-				SHOW_IN_LOCAL_MAP				= 50,
-				PREMULT_ALPHA					= 51,
-				SKIP_NORMAL_MAPS				= 52,
-				ALPHA_DECAL						= 53,
-				NO_TRANSPARENCY_MULTISAMPLING	= 54,
-				STINGER_PROP					= 55,
-				UNK3							= 56,
-				UNK4							= 57,
-				UNK5							= 58,
-				UNK6							= 59,
-				UNK7							= 60,
-				UNK8							= 61,
-				SOFT_DEPTH						= 62,
-				REALTIME_CUBEMAP				= 63,
-				MAX_FLAGS						= 64
-			};
-		};
-		using Bits = _Bits::Bits;
-
-		struct _Flags {
-			enum Flags1 : uint32_t {
-				SPECULAR						= 1u << Bits::SPECULAR,
-				SKINNED							= 1u << Bits::SKINNED,
-				LOW_DETAIL						= 1u << Bits::LOW_DETAIL,
-				VERTEX_ALPHA					= 1u << Bits::VERTEX_ALPHA,
-				MOTION_BLUR						= 1u << Bits::MOTION_BLUR,
-				SINGLE_PASS						= 1u << Bits::SINGLE_PASS,
-				FALLOFF							= 1u << Bits::FALLOFF,
-				ENVIRONMENT_MAPPING				= 1u << Bits::ENVIRONMENT_MAPPING,
-				ALPHA_TEXTURE					= 1u << Bits::ALPHA_TEXTURE,
-				ZPREPASS						= 1u << Bits::ZPREPASS,
-				FACEGEN							= 1u << Bits::FACEGEN,
-				PARALLAX						= 1u << Bits::PARALLAX,
-				MODEL_SPACE_NORMALS				= 1u << Bits::MODEL_SPACE_NORMALS,
-				NON_PROJECTIVE_SHADOWS			= 1u << Bits::NON_PROJECTIVE_SHADOWS,
-				LANDSCAPE						= 1u << Bits::LANDSCAPE,
-				REFRACTION						= 1u << Bits::REFRACTION,
-				REFRACTION_FIRE					= 1u << Bits::REFRACTION_FIRE,
-				EYE_ENVIRONMENT_MAPPING			= 1u << Bits::EYE_ENVIRONMENT_MAPPING,
-				HAIR							= 1u << Bits::HAIR,
-				DYNAMIC_ALPHA					= 1u << Bits::DYNAMIC_ALPHA,
-				LOCAL_MAP_HIDE_SECRET			= 1u << Bits::LOCAL_MAP_HIDE_SECRET,
-				WINDOW_ENVIRONMENT_MAPPING		= 1u << Bits::WINDOW_ENVIRONMENT_MAPPING,
-				TREE_BILLBOARD					= 1u << Bits::TREE_BILLBOARD,
-				SHADOW_FRUSTUM					= 1u << Bits::SHADOW_FRUSTUM,
-				MULTIPLE_TEXTURES				= 1u << Bits::MULTIPLE_TEXTURES,
-				REMAPPABLE_TEXTURES				= 1u << Bits::REMAPPABLE_TEXTURES,
-				DECAL							= 1u << Bits::DECAL,
-				DYNAMIC_DECAL					= 1u << Bits::DYNAMIC_DECAL,
-				PARALLAX_OCCLUSION				= 1u << Bits::PARALLAX_OCCLUSION,
-				EXTERNAL_EMITTANCE				= 1u << Bits::EXTERNAL_EMITTANCE,
-				SHADOW_MAP						= 1u << Bits::SHADOW_MAP,
-				ZBUFFER_TEST					= 1u << Bits::ZBUFFER_TEST,
-			};
-			
-			enum Flags2 : uint32_t {
-				ZBUFFER_WRITE					= 1u << (Bits::ZBUFFER_WRITE - 32),
-				LOD_LANDSCAPE					= 1u << (Bits::LOD_LANDSCAPE - 32),
-				LOD_BUILDING					= 1u << (Bits::LOD_BUILDING - 32),
-				NO_FADE							= 1u << (Bits::NO_FADE - 32),
-				REFRACTION_TINT					= 1u << (Bits::REFRACTION_TINT - 32),
-				VERTEX_COLORS					= 1u << (Bits::VERTEX_COLORS - 32),
-				FIRST_PERSON					= 1u << (Bits::FIRST_PERSON - 32),
-				FIRST_LIGHT_IS_POINTLIGHT		= 1u << (Bits::FIRST_LIGHT_IS_POINTLIGHT - 32),
-				SECOND_LIGHT					= 1u << (Bits::SECOND_LIGHT - 32),
-				THIRD_LIGHT						= 1u << (Bits::THIRD_LIGHT - 32),
-				VERTEX_LIGHTING					= 1u << (Bits::VERTEX_LIGHTING - 32),
-				UNIFORM_SCALE					= 1u << (Bits::UNIFORM_SCALE - 32),
-				FIT_SLOPE						= 1u << (Bits::FIT_SLOPE - 32),
-				BILLBOARD						= 1u << (Bits::BILLBOARD - 32),
-				NO_LOD_LAND_BLEND				= 1u << (Bits::NO_LOD_LAND_BLEND - 32),
-				ENVMAP_LIGHT_FADE				= 1u << (Bits::ENVMAP_LIGHT_FADE - 32),
-				WIREFRAME						= 1u << (Bits::WIREFRAME - 32),
-				VATS_SELECTION					= 1u << (Bits::VATS_SELECTION - 32),
-				SHOW_IN_LOCAL_MAP				= 1u << (Bits::SHOW_IN_LOCAL_MAP - 32),
-				PREMULT_ALPHA					= 1u << (Bits::PREMULT_ALPHA - 32),
-				SKIP_NORMAL_MAPS				= 1u << (Bits::SKIP_NORMAL_MAPS - 32),
-				ALPHA_DECAL						= 1u << (Bits::ALPHA_DECAL - 32),
-				NO_TRANSPARENCY_MULTISAMPLING	= 1u << (Bits::NO_TRANSPARENCY_MULTISAMPLING - 32),
-				STINGER_PROP					= 1u << (Bits::STINGER_PROP - 32),
-				UNK3							= 1u << (Bits::UNK3 - 32),
-				UNK4							= 1u << (Bits::UNK4 - 32),
-				UNK5							= 1u << (Bits::UNK5 - 32),
-				UNK6							= 1u << (Bits::UNK6 - 32),
-				UNK7							= 1u << (Bits::UNK7 - 32),
-				UNK8							= 1u << (Bits::UNK8 - 32),
-				SOFT_DEPTH						= 1u << (Bits::SOFT_DEPTH - 32),
-				REALTIME_CUBEMAP				= 1u << (Bits::REALTIME_CUBEMAP - 32),
-			};
-		};
-		using Flags1 = _Flags::Flags1;
-		using Flags2 = _Flags::Flags2;
-
-		bool bSpecular						: 1;
-		bool bSkinned						: 1;
-		bool bLowDetail						: 1;
-		bool bVertexAlpha					: 1;
-		bool bMotionBlur					: 1;
-		bool bSinglePass					: 1;
-		bool bFalloff						: 1;
-		bool bEnvironmentMapping			: 1;
-		bool bAlphaTexture					: 1;
-		bool bZPrepass						: 1;
-		bool bFacegen						: 1;
-		bool bParallax						: 1;
-		bool bModelSpaceNormals				: 1;
-		bool bNonProjectiveShadows			: 1;
-		bool bLandscape						: 1;
-		bool bRefraction					: 1;
-		bool bFireRefraction				: 1;
-		bool bEyeEnvironmentMapping			: 1;
-		bool bHair							: 1;
-		bool bDynamicAlpha					: 1;
-		bool bLocalMapHideSecret			: 1;
-		bool bWindowEnvironmentMapping		: 1;
-		bool bTreeBillboard					: 1;
-		bool bShadowFrustum					: 1;
-		bool bMultipleTextures				: 1;
-		bool bRemappableTextures			: 1;
-		bool bDecal							: 1;
-		bool bDynamicDecal					: 1;
-		bool bParallaxOcclusion				: 1;
-		bool bExternalEmittance				: 1;
-		bool bShadowMap						: 1;
-		bool bZBufferTest					: 1;
-		bool bZBufferWrite					: 1;
-		bool bLODLandscape					: 1;
-		bool bLODBuilding					: 1;
-		bool bNoFade						: 1;
-		bool bRefractionTint				: 1;
-		bool bVertexColors					: 1;
-		bool b1stPerson						: 1;
-		bool b1stLightIsPointlight			: 1;
-		bool b2ndLight						: 1;
-		bool b3rdLight						: 1;
-		bool bVertexLighting				: 1;
-		bool bUniformScale					: 1;
-		bool bFitSlope						: 1;
-		bool bBillboardEnvFade				: 1;
-		bool bNoLODLandBlend				: 1;
-		bool bEnvmapLightFade				: 1;
-		bool bWireframe						: 1;
-		bool bVatsSelection					: 1;
-		bool bShowInLocalMap				: 1;
-		bool bPremultAlpha					: 1;
-		bool bSkipNormalMaps				: 1;
-		bool bAlphaDecal					: 1;
-		bool bNoTransparencyMultisampling	: 1;
-		bool bStingerProp					: 1;
-		bool bUnk3							: 1;
-		bool bUnk4							: 1;
-		bool bUnk5							: 1;
-		bool bUnk6							: 1;
-		bool bUnk7							: 1;
-		bool bUnk8							: 1;
-		bool bSoftDepth						: 1;
-		bool bRealtimeCubemap				: 1;
-	};
-	using ShaderBits = _ShaderFlags::_Bits::Bits;
-
-	Bitfield32			ulFlags[2];
-	float				fAlpha;
-	float				fFadeAlpha;
-	float				fEnvMapScale;
-	float				fCameraDistance;
-	int32_t				iLastRenderPassState;
-	RenderPassArray*	pRenderPassArray;
-	RenderPassArray*	pDepthMapRenderPassArray;
-	RenderPassArray*	pConstAlphaRenderPassArray;
-	RenderPassArray*	pLocalMapRenderPassArray;
-	RenderPassArray*	pSIBlockRenderPassArray;
-	RenderPassArray*	pWaterFogRenderPassArray;
-	RenderPassArray*	pSilhouettePassArray;
-	int32_t				iShader;
-	float				fDepthBias;
-
-	bool GetFlag(ShaderBits aeBit) const {
-		const uint32_t uiFlagSet = aeBit >> 5;
-		const uint32_t uiBit = aeBit % 32;
-		return ulFlags[uiFlagSet].GetBit(uiBit);
-	}
-
-	void SetFlag(ShaderBits aeBit, bool abEnable) {
-		bool bClear = false;
-		const uint32_t uiFlagSet = aeBit >> 5;
-		const uint32_t uiBit = aeBit % 32;
-		if (abEnable)
-			bClear = ulFlags[uiFlagSet].GetAndSetBit(uiBit) == false;
-		else
-			bClear = ulFlags[uiFlagSet].GetAndClearBit(uiBit) == true;
-
-		if (bClear)
-			iLastRenderPassState = 0;
-	}
-
-	void ClearRenderPasses() {
-		if (pRenderPassArray)
-			pRenderPassArray->uiPassCount = 0;
-	}
-
-	void InvalidateState() {
-		iLastRenderPassState = -1;
-	}
-};
-static_assert(sizeof(BSShaderProperty) == 0x60);
-
 // 150
 class WaterShaderProperty : public BSShaderProperty {
 public:
@@ -1266,203 +933,6 @@ static_assert(sizeof(WaterShaderProperty) == 0x150);
 
 class NiDynamicEffectState;
 
-// 9C
-class NiAVObject : public NiObjectNET {
-public:
-	NiAVObject();
-	~NiAVObject();
-
-	virtual void			UpdateControllers(NiUpdateData& arData);
-	virtual void			ApplyTransform(NiMatrix3& arMat, NiPoint3& arTrn, bool abOnLeft);
-	virtual void			SetMaterialNeedsUpdate(bool abNeedsUpdate);
-	virtual void			SetDefaultMaterialNeedsUpdateFlag(bool abNeedsUpdate);
-	virtual NiAVObject*		GetObjectByName(const NiFixedString& arName) const;
-	virtual void			SetSelectiveUpdateFlags(bool& arSelectiveUpdate, bool abSelectiveUpdateTransforms, bool& arRigid);
-	virtual void			UpdateDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
-	virtual void			UpdateSelectedDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
-	virtual void			UpdateRigidDownwardPass(NiUpdateData& arData, uint32_t auiFlags);
-	virtual void			UpdatePropertiesDownward(NiPropertyState* apParentState);
-	virtual void			UpdateEffectsDownward(NiDynamicEffectState* apEffectState);
-	virtual void			UpdateWorldData(NiUpdateData& arData);
-	virtual void			UpdateWorldBound();
-	virtual void			UpdateTransformAndBounds(NiUpdateData& arData);
-	virtual void			PreAttachUpdate(NiNode* apEventualParent, NiUpdateData& arData);
-	virtual void			PreAttachUpdateProperties(NiNode* apEventualParent);
-	virtual void			PreAttachUpdateEffects(NiNode* apEventualParent);
-	virtual void			PostAttachUpdate();
-	virtual void			OnVisible(NiCullingProcess* apCuller);
-	virtual void			PurgeRendererData(NiDX9Renderer* apRenderer);
-
-	NiNode*							m_pkParent;				// 18
-	NiPointer<bhkNiCollisionObject>	m_spCollisionObject;		// 1C
-	NiBound*						m_pWorldBound;			// 20
-	DList<NiProperty>				m_propertyList;			// 24
-	Bitfield32						m_uiFlags;				// 30
-	NiTransform						m_kLocal;
-	NiTransform						m_kWorld;
-
-#ifdef GAME
-	static constexpr AddressPtr<NiBound, 0x11F4288> kNullBound;
-#else
-	static constexpr AddressPtr<NiBound, 0xF1FD88> kNullBound;
-#endif
-
-	NiProperty* GetProperty(uint32_t auiType) const;
-
-	void SetAppCulled(bool abCulled) {
-		m_uiFlags.Set(1, abCulled);
-	}
-
-	bool GetAppCulled() const {
-		return m_uiFlags.GetBit(0);
-	}
-
-	void SetAlwaysDraw(bool abVal) {
-		ThisCall(0x546780, this, abVal);
-	}
-
-	void SetFixedBound(bool abVal) {
-		m_uiFlags.Set(0x2000, abVal);
-	}
-
-	void SetIgnoreFade(bool abVal) {
-		m_uiFlags.Set(0x8000, abVal);
-	}
-
-	void DumpProperties();
-	void DumpParents();
-
-	void Update(NiUpdateData& arData) {
-		ThisCall(0xA59C60, this, &arData);
-	}
-
-	void Update() {
-		NiUpdateData kData;
-		Update(kData);
-	}
-
-	void UpdateSelected(NiUpdateData& arData) {
-		ThisCall(0xA59C90, this, &arData);
-	}
-
-	void UpdateSelected() {
-		NiUpdateData kData;
-		Update(kData);
-	}
-
-	void UpdateProperties() {
-		ThisCall(0xA5A040, this);
-	}
-
-	void SetLocalRotate(const NiMatrix3& arMat) {
-		m_kLocal.m_kRotate = arMat;
-	}
-
-	void SetLocalTranslate(const NiPoint3& arTrn) {
-		m_kLocal.m_kTranslate = arTrn;
-	}
-
-	void SetLocalScale(float afScale) {
-		m_kLocal.m_fScale = afScale;
-	}
-
-	NiTimeController* GetController(const NiRTTI* apRTTI) const {
-		return ThisCall<NiTimeController*>(0xA5C570, this, apRTTI);
-	}
-
-	template <class ControllerType>
-	ControllerType* GetController() const {
-		return static_cast<ControllerType*>(GetController(&ControllerType::ms_RTTI));
-	}
-
-	const NiBound& GetWorldBound() const {
-		return m_pWorldBound ? *m_pWorldBound : kNullBound;
-	}
-
-	NiNode* GetParent() const {
-		return m_pkParent;
-	}
-};
-
-// AC
-class NiNode : public NiAVObject {
-public:
-	NiNode();
-	~NiNode();
-
-	virtual void	AttachChild(NiAVObject* apChild, bool abFirstAvail);
-	virtual void	InsertChildAt(uint32_t i, NiAVObject* apChild);
-	virtual void	DetachChildAlt(NiAVObject* apChild, NiPointer<NiAVObject>& arResult);
-	virtual void	DetachChild(NiAVObject* apChild);
-	virtual void	DetachChildAtAlt(uint32_t i, NiPointer<NiAVObject>& arResult);
-	virtual void	DetachChildAt(uint32_t i);
-	virtual void	SetAtAlt(uint32_t i, NiAVObject* apChild, NiPointer<NiAVObject>& arResult);
-	virtual void	SetAt(uint32_t i, NiAVObject* apChild);
-	virtual void	UpdateUpwardPass();
-
-	NiTObjectArray<NiPointer<NiAVObject>>	m_kChildren;		// 9C
-
-	static NiNode* Create(uint16_t ausChildCount = 0);
-
-	NiAVObject* GetBlock(const char* blockName);
-	NiNode* GetNode(const char* nodeName);
-
-	uint32_t GetArrayCount() const {
-		return m_kChildren.GetSize();
-	}
-
-	uint32_t GetChildCount() const {
-		return m_kChildren.GetEffectiveSize();
-	}
-
-	NiAVObject* GetAt(uint32_t auiIndex) const {
-		return m_kChildren.GetAt(auiIndex);
-	}
-
-	NiAVObject* GetAtChecked(uint32_t auiIndex) const {
-		if (GetArrayCount() <= auiIndex)
-			return nullptr;
-
-		return GetAt(auiIndex);
-	}
-
-	void RemoveChildren() {
-		m_kChildren.RemoveAll();
-	}
-};
-static_assert(sizeof(NiNode) == 0xAC);
-
-class NiSwitchNode : public NiNode {
-public:
-	struct ALIGN2 _SwitchFlags {
-		enum Flags : uint16_t {
-			UPDATE_ONLY_ACTIVE_CHILD	= 1u << 0,
-			UPDATE_CONTROLLERS			= 1u << 1,
-		};
-
-		bool bUpdateOnlyActiveChild : 1;
-		bool bUpdateControllers		: 1;
-	};
-	using SwitchFlags = _SwitchFlags::Flags;
-
-	Bitfield<_SwitchFlags>		m_usFlags;
-	int32_t						m_iIndex;
-	float						m_fSavedTime;
-	uint32_t					m_uiRevID;
-	NiTPrimitiveArray<uint32_t>	m_kChildRevID;
-
-	NIRTTI_ADDRESS(0x11F5EB4);
-
-	void SetIndex(int32_t aiIndex) {
-		if (aiIndex >= -1 && aiIndex < static_cast<int32_t>(m_kChildren.GetSize()))
-			m_iIndex = aiIndex;
-	}
-
-	int32_t GetIndex() const {
-		return m_iIndex;
-	}
-};
-
 class NiCamera;
 class NiLODNode;
 
@@ -1520,21 +990,6 @@ public:
 	void TurnFadeNodeOn() {
 		ThisCall(0x476AB0, this);
 	};
-};
-
-// B4
-class BSMultiBoundNode : public NiNode {
-public:
-	BSMultiBoundNode();
-	~BSMultiBoundNode();
-
-	virtual void	Unk_40(uint32_t arg1, uint32_t arg2);
-	virtual void	Unk_41(void);
-	virtual void	Unk_42(uint32_t arg1);
-	virtual void	Unk_43(uint32_t arg1);
-	virtual void	Unk_44(uint32_t arg1);
-
-	uint32_t			unkAC[2];		// AC
 };
 
 // B8
@@ -2187,46 +1642,6 @@ public:
 	uint32_t				unk6C;			// 6C
 };
 
-// 30
-class NiTexture : public NiObjectNET {
-public:
-	NiTexture();
-	~NiTexture();
-
-	virtual void	Unk_23(void);
-	virtual void	Unk_24(void);
-	virtual void	Unk_25(void);
-	virtual void	Unk_26(void);
-	virtual void	Unk_27(void);
-	virtual void	Unk_28(void);
-
-	enum {
-		kPxlLayout_Palette8BPP = 0,
-		kPxlLayout_Raw16BPP,
-		kPxlLayout_Raw32BPP,
-		kPxlLayout_Compressed,
-		kPxlLayout_Bumpmap,
-		kPxlLayout_Palette4BPP,
-		kPxlLayout_Default,
-
-		kAlphaFmt_None = 0,
-		kAlphaFmt_Binary1BPP,
-		kAlphaFmt_Smooth8BPP,
-		kAlphaFmt_Default,
-
-		kMipMapFmt_Disabled = 0,
-		kMipMapFmt_Enabled,
-		kMipMapFmt_Default,
-	};
-
-	uint32_t				pixelLayout;	// 18
-	uint32_t				alphaFormat;	// 1C
-	uint32_t				mipmapFormat;	// 20
-	NiDX9TextureData* textureData;	// 24
-	NiTexture* prev;			// 28
-	NiTexture* next;			// 2C
-};
-
 // 48
 class NiSourceTexture : public NiTexture {
 public:
@@ -2436,6 +1851,8 @@ public:
 };
 static_assert(sizeof(RendererData) == 0x54);
 
+class NiGeometryBufferData;
+
 // 40
 class NiGeometryData : public NiObject {
 public:
@@ -2449,22 +1866,22 @@ public:
 	virtual bool	Unk_27(uint32_t arg);
 	virtual void	Unk_28(void);
 
-	uint16_t			numVertices;	// 08
-	uint16_t			word0A;			// 0A
-	uint16_t			word0C;			// 0C
-	uint16_t			word0E;			// 0E
-	NiBound		bounds;			// 10
-	NiPoint3* vertices;		// 20
-	NiPoint3* normals;		// 24
-	NiColorA* vertexColors;	// 28
-	UVCoord* uvCoords;		// 2C
-	uint32_t			unk30;			// 30
-	RendererData* rendererData;	// 34
-	uint8_t			byte38;			// 38
-	uint8_t			byte39;			// 39
-	uint8_t			byte3A;			// 3A
-	uint8_t			byte3B;			// 3B
-	uint32_t			unk3C;			// 3C
+	uint16_t							m_usVertices;
+	uint16_t							m_usID;
+	Bitfield16							m_usDataFlags;
+	Bitfield16							m_usDirtyFlags;
+	NiBound								m_kBound;
+	NiPoint3*							m_pkVertex;
+	NiPoint3*							m_pkNormal;
+	NiColorA*							m_pkColor;
+	NiPoint2*							m_pkTexture;
+	void*								m_spAdditionalGeomData;
+	NiGeometryBufferData*				m_pkBuffData;
+	Bitfield8							m_ucKeepFlags;
+	Bitfield8							m_ucCompressFlags;
+	bool								m_bVBLocked;
+	bool								m_bVBLockWrite;
+	bool								m_bSaveVertexData;
 };
 static_assert(sizeof(NiGeometryData) == 0x40);
 

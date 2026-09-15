@@ -15,7 +15,7 @@ TESForm* TESObjectREFR::GetBaseForm()
 		baseform = this->baseForm;
 		if (baseform->GetCompileIndex() == 0xFF) {
 			if (IS_TYPE(baseform, BGSPlaceableWater))
-				return ((BGSPlaceableWater*)baseform)->water;
+				return ((BGSPlaceableWater*)baseform)->kData.pWaterType;
 
 			ExtraLeveledCreature* pLevCrea = extraDataList.GetExtraData<ExtraLeveledCreature>();
 			if (pLevCrea && pLevCrea->pOriginalBase)
@@ -127,24 +127,29 @@ TESActorBase* Actor::GetActorBase() {
 }
 
 NiNode* TESObjectREFR::GetNode(const char* nodeName) {
-	NiNode* rootNode = Get3D();
-	return rootNode ? (*nodeName ? rootNode->GetNode(nodeName) : rootNode) : NULL;
+	NiNode* pRoot = Get3D();
+	if (!pRoot)
+		return nullptr;
+
+	NiAVObject* pObj = pRoot->GetObjectByName(nodeName);
+	return pObj ? pObj->IsNode() : nullptr;
 }
 hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) {
-	NiNode* rootNode = Get3D();
-	if (rootNode) {
-		NiNode* targetNode = rootNode->GetNode(nodeName);
-		if (targetNode && targetNode->m_spCollisionObject) {
-			bhkWorldObject* hWorldObj = targetNode->m_spCollisionObject->worldObj;
-			if (hWorldObj) {
-				hkpRigidBody* rigidBody = (hkpRigidBody*)hWorldObj->refObject;
-				uint8_t motionType = rigidBody->motion.type;
-				if ((motionType == 2) || (motionType == 3) || (motionType == 6))
-					return rigidBody;
-			}
+	NiNode* pRoot = Get3D();
+	if (!pRoot)
+		return nullptr;
+
+	NiAVObject* pObj = pRoot->GetObjectByName(nodeName);
+	if (pObj && pObj->m_spCollisionObject) {
+		bhkWorldObject* hWorldObj = pObj->m_spCollisionObject->worldObj;
+		if (hWorldObj) {
+			hkpRigidBody* rigidBody = (hkpRigidBody*)hWorldObj->refObject;
+			uint8_t motionType = rigidBody->motion.type;
+			if ((motionType == 2) || (motionType == 3) || (motionType == 6))
+				return rigidBody;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 NiAVObject* TESObjectREFR::GetNiBlock(const char* blockName) {

@@ -7,17 +7,13 @@ bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESObjectCELL* pCell = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL))
-	{
-		ExtraCellAcousticSpace* pXAcousticSpace = pCell->extraDataList.GetExtraData<ExtraCellAcousticSpace>();
-		if (pXAcousticSpace && pXAcousticSpace->pSpace)
-		{
-			*(DWORD*)result = pXAcousticSpace->pSpace->GetFormID();
-		}
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
+		BGSAcousticSpace* pAcousticSpace = pCell->GetAcousticSpace();
+		if (pAcousticSpace)
+			*reinterpret_cast<FormID*>(result) = pAcousticSpace->GetFormID();
+
 		if (IsConsoleMode())
-		{
-			Console_Print("GetAcousticSpace  >> 0x%lx", *(DWORD*)result);
-		}
+			Console_Print("GetAcousticSpace  >> 0x%lx", *reinterpret_cast<FormID*>(result));
 	}
 	return true;
 }
@@ -27,27 +23,20 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
 	*result = 0;
 	TESObjectCELL* pCell = nullptr;
 	BGSAcousticSpace* pAcousticSpace = nullptr;
-	uintptr_t ExtraCellAcousticSpace_Update = 0x041C090;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, pAcousticSpace) && pCell)
 	{
-		if (!IS_TYPE(pCell, TESObjectCELL)) [[unlikely]]
-		{
+		if (!IS_TYPE(pCell, TESObjectCELL)) [[unlikely]] {
 			if (IsConsoleMode())
-			{
 				Console_Print("SetAcousticSpace >> Passed an invalid cell");
-			}
 			return true;
 		}
 
-		if (pAcousticSpace && !IS_TYPE(pAcousticSpace, BGSAcousticSpace)) [[unlikely]]
-		{
+		if (pAcousticSpace && !IS_TYPE(pAcousticSpace, BGSAcousticSpace)) [[unlikely]] {
 			if (IsConsoleMode())
-			{
 				Console_Print("SetAcousticSpace >> Passed an invalid acoustic space");
-			}
 			return true;
 		}
-		ThisCall(ExtraCellAcousticSpace_Update, &pCell->extraDataList, pAcousticSpace);
+		pCell->SetAcousticSpace(pAcousticSpace);
 	}
 	return true;
 }
@@ -57,7 +46,7 @@ SPEC_NOINLINE bool Cmd_AudioMarkerGetCurrent_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (PlayerCharacter::GetSingleton() && PlayerCharacter::GetSingleton()->currMusicMarker) {
 		if (TESObjectREFR* pMarkerRef = PlayerCharacter::GetSingleton()->currMusicMarker->pReference)
-			*reinterpret_cast<uint32_t*>(result) = pMarkerRef->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pMarkerRef->GetFormID();
 	}
 	return true;
 }
@@ -76,7 +65,7 @@ SPEC_NOINLINE bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
 			uintptr_t uiCtrlFormID = pExtraMarker->pData->uiMediaLocationController;
 			TESForm* pFoundForm = TESForm::GetFormByNumericID(uiCtrlFormID);
 			if (pFoundForm->GetFormType() == FORM_TYPE::MediaLocationController)
-				*reinterpret_cast<uint32_t*>(result) = pFoundForm->GetFormID();
+				*reinterpret_cast<FormID*>(result) = pFoundForm->GetFormID();
 		}
 	}
 	return true;
@@ -86,7 +75,7 @@ bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
 	Cmd_AudioMarkerGetController_Eval(thisObj, nullptr, nullptr, result);
 	if (thisObj && IsConsoleMode()) {
 		if (*result)
-			Console_Print("AudioMarkerGetController >> 0x%lx", *reinterpret_cast<uint32_t*>(result));
+			Console_Print("AudioMarkerGetController >> 0x%lx", *reinterpret_cast<FormID*>(result));
 		else
 			Console_Print("Calling reference is not an AudioMarker");
 	}
@@ -188,13 +177,15 @@ bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset = nullptr;
-	int traitID = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && mediaset && IS_TYPE(mediaset, MediaSet)) {
-		switch (traitID) {
+	*result = 0;
+	MediaSet* pMediaSet = nullptr;
+	int32_t iTrait = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iTrait) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
+		switch (iTrait) {
 		case 0:
-			*result = mediaset->uiType;
+			*result = pMediaSet->GetType();
 			break;
 		case 1:
 		case 2:
@@ -202,7 +193,7 @@ bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 		case 4:
 		case 5:
 		case 6:
-			*result = mediaset->data[traitID - 1].dB;
+			*result = pMediaSet->kLayers[iTrait - 1].fAttenuation;
 			break;
 		case 7:
 		case 8:
@@ -210,39 +201,41 @@ bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 		case 10:
 		case 11:
 		case 12:
-			*result = mediaset->data[traitID - 7].boundary;
+			*result = pMediaSet->kLayers[iTrait - 7].fPercent;
 			break;
 		case 13:
-			*result = mediaset->flags;
+			*result = pMediaSet->ucEnableFlags;
 			break;
 		case 14:
-			*result = mediaset->DNAM;
+			*result = pMediaSet->fWaitTime;
 			break;
 		case 15:
-			*result = mediaset->ENAM;
+			*result = pMediaSet->fLoopFadeOut;
 			break;
 		case 16:
-			*result = mediaset->FNAM;
+			*result = pMediaSet->fRecoveryTime;
 			break;
 		case 17:
-			*result = mediaset->GNAM;
+			*result = pMediaSet->fNightTimeMax;
 			break;
 		}
+
 		if (IsConsoleMode())
-			Console_Print("GetMediaSetTraitNumeric %d >> %.2f", traitID, *result);
+			Console_Print("GetMediaSetTraitNumeric %d >> %.2f", iTrait, *result);
 	}
 	return true;
 }
+
 bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset = nullptr;
-	int traitID = -1;
-	float newVal = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newVal) && mediaset && IS_TYPE(mediaset, MediaSet)) {
+	MediaSet* pMediaSet = nullptr;
+	int32_t iTrait = -1;
+	float fValue = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iTrait, &fValue) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
 		*result = 1;
-		switch (traitID) {
+		switch (iTrait) {
 		case 0:
-			mediaset->uiType = newVal;
+			pMediaSet->SetType(MediaSet::Type(fValue));
 			break;
 		case 1:
 		case 2:
@@ -250,7 +243,7 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 		case 4:
 		case 5:
 		case 6:
-			mediaset->data[traitID - 1].dB = newVal;
+			pMediaSet->kLayers[iTrait - 1].fAttenuation = fValue;
 			break;
 		case 7:
 		case 8:
@@ -258,22 +251,22 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 		case 10:
 		case 11:
 		case 12:
-			mediaset->data[traitID - 7].boundary = newVal;
+			pMediaSet->kLayers[iTrait - 7].fPercent = fValue;
 			break;
 		case 13:
-			mediaset->flags = newVal;
+			pMediaSet->ucEnableFlags = fValue;
 			break;
 		case 14:
-			mediaset->DNAM = newVal;
+			pMediaSet->fWaitTime = fValue;
 			break;
 		case 15:
-			mediaset->ENAM = newVal;
+			pMediaSet->fLoopFadeOut = fValue;
 			break;
 		case 16:
-			mediaset->FNAM = newVal;
+			pMediaSet->fRecoveryTime = fValue;
 			break;
 		case 17:
-			mediaset->GNAM = newVal;
+			pMediaSet->fNightTimeMax = fValue;
 			break;
 		default:
 			*result = 0;
@@ -282,38 +275,44 @@ bool Cmd_SetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
 bool Cmd_GetMediaSetTraitSound_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset = nullptr;
-	int traitID = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && mediaset && IS_TYPE(mediaset, MediaSet)) {
-		switch (traitID) {
+	*result = 0;
+	MediaSet* pMediaSet = nullptr;
+	int32_t iSoundType = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iSoundType) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
+		TESSound* pSound = nullptr;
+		switch (iSoundType) {
 		case 0:
-			*(uint32_t*)result = mediaset->HNAM->GetFormID();
+			pSound = pMediaSet->GetSoundA();
 			break;
 		case 1:
-			*(uint32_t*)result = mediaset->INAM->GetFormID();
+			pSound = pMediaSet->GetSoundB();
 			break;
 		}
+
+		if (pSound)
+			*reinterpret_cast<FormID*>(result) = pSound->GetFormID();
 	}
 	return true;
 }
 
 bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset = nullptr;
-	TESSound* soundForm = nullptr;
-	int traitID = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &soundForm) && mediaset && IS_TYPE(mediaset, MediaSet)) {
-		if (soundForm && !IS_TYPE(soundForm, TESSound))
+	MediaSet* pMediaSet = nullptr;
+	TESSound* pSound = nullptr;
+	int32_t iSoundType = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iSoundType, &pSound) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
+		if (pSound && !IS_TYPE(pSound, TESSound))
 			return true;
 
-		switch (traitID) {
+		switch (iSoundType) {
 		case 0:
-			mediaset->HNAM = soundForm;
+			pMediaSet->SetSoundA(pSound);
 			*result = 1;
 			break;
 		case 1:
-			mediaset->INAM = soundForm;
+			pMediaSet->SetSoundB(pSound);
 			*result = 1;
 			break;
 		}
@@ -322,28 +321,28 @@ bool Cmd_SetMediaSetTraitSound_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset = nullptr;
-	int traitID = -1;
-	const char* resStr = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID) && mediaset && IS_TYPE(mediaset, MediaSet)) {
-		if (traitID >= 0 && traitID <= 5) {
-			resStr = mediaset->data[traitID].filepath.c_str();
-			g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
+	*result = 0;
+	MediaSet* pMediaSet = nullptr;
+	int32_t iLayer = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iLayer) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
+		if (iLayer >= 0 && iLayer <= 5) {
+			const char* pName = pMediaSet->kLayers[iLayer].strName.c_str();
+			g_strInterface->Assign(PASS_COMMAND_ARGS, pName);
 			if (IsConsoleMode())
-				Console_Print("GetMediaSetTraitString %d >> %s", traitID, resStr);
+				Console_Print("GetMediaSetTraitString %d >> %s", iLayer, pName);
 		}
 	}
 	return true;
 }
 
 bool Cmd_SetMediaSetTraitString_Execute(COMMAND_ARGS) {
-	MediaSet* mediaset = nullptr;
-	int traitID = -1;
-	char newStr[MAX_PATH] = {};
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &mediaset, &traitID, &newStr) && mediaset && IS_TYPE(mediaset, MediaSet)) {
-		if (traitID >= 0 && traitID <= 5) {
-			mediaset->data[traitID].filepath.Set(newStr);
+	MediaSet* pMediaSet = nullptr;
+	int32_t iLayer = -1;
+	char cName[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMediaSet, &iLayer, &cName) && pMediaSet && IS_TYPE(pMediaSet, MediaSet)) {
+		if (iLayer >= 0 && iLayer <= 5) {
+			pMediaSet->kLayers[iLayer].strName.Set(cName);
 			*result = 1;
 		}
 	}

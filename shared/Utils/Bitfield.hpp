@@ -201,7 +201,7 @@ namespace _BitfieldInternal {
 		template<const uint32_t BIT>
 			requires ValidBitIndex<TYPE, BIT>
 		constexpr bool GetAndSetBit() noexcept {
-			if constexpr (HasInstructions_v<TYPE>())
+			if constexpr (HasInstructions_v<TYPE>)
 				return _bittestandset(reinterpret_cast<long*>(this), BIT);
 			else {
 				const bool bVal = As<BitGetterForIndex<TYPE, BIT>>().bValue;
@@ -213,7 +213,7 @@ namespace _BitfieldInternal {
 		template <const uint32_t BIT>
 			requires ValidBitIndex<TYPE, BIT>
 		constexpr bool GetAndClearBit() noexcept {
-			if constexpr (HasInstructions_v<TYPE>())
+			if constexpr (HasInstructions_v<TYPE>)
 				return _bittestandreset(reinterpret_cast<long*>(this), BIT);
 			else {
 				const bool bVal = As<BitGetterForIndex<TYPE, BIT>>().bValue;
