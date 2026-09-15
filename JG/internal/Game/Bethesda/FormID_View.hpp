@@ -34,7 +34,7 @@ public:
 	constexpr void			SetSmallID(uint16_t ausSmallID) noexcept		{ usSmallID = ausSmallID; }
 
 	constexpr uint8_t		GetCompileIndex() const noexcept				{ return ucCompileIndex; }
-	constexpr void			GetCompileIndex(uint8_t aucIndex) noexcept		{ ucCompileIndex = aucIndex; }
+	constexpr void			SetCompileIndex(uint8_t aucIndex) noexcept		{ ucCompileIndex = aucIndex; }
 
 	constexpr uint16_t		GetSmallIndex() const noexcept					{ return usSmallIndex; }
 	constexpr void			SetSmallIndex(uint16_t ausSmallIndex) noexcept	{ usSmallIndex = ausSmallIndex; }
