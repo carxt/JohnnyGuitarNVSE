@@ -57,4 +57,4 @@ public:
 
 #define NiSmartPointer(className) \
     class className; \
-    typedef NiPointer<className> className##Ptr;
+    using className##Ptr = NiPointer<className>;

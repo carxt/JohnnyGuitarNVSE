@@ -55,6 +55,7 @@ bool BSXFlags::GetIKTarget() const {
 	return GetFlags(IK_TARGET);
 }
 
+// GAME - 0x448A80
 const NiFixedString& BSXFlags::GetTag() {
 	return *pTag;
 }

@@ -1,16 +1,20 @@
 #include "fn_ui.h"
-#include "Shared/Utils/StackObject.hpp"
-#include <GameObjects.h>
-#include <GameUI.h>
-#include <JG/RSMBarberHook.hpp>
-#include <JG/ExtraMiscStats.hpp>
 #include <decoding.h>
+#include <GameObjects.h>
 #include <GameRTTI.h>
-#include <Bethesda/FileFinder.hpp>
-#include <JG/ExtraReputationIcons.hpp>
-#include <JG/ExtraMarkerIcons.hpp>
-#include <JG/ScriptUtils.hpp>
+#include <GameUI.h>
 
+#include "Bethesda/FileFinder.hpp"
+
+#include "JG/ExtraMarkerIcons.hpp"
+#include "JG/ExtraMiscStats.hpp"
+#include "JG/ExtraReputationIcons.hpp"
+#include "JG/RSMBarberHook.hpp"
+#include "JG/ScriptUtils.hpp"
+
+#include "NVSE/InventoryRef.hpp"
+
+#include "Shared/Utils/StackObject.hpp"
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 
 #include <vector>

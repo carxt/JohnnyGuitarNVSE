@@ -1,18 +1,22 @@
 #include "fn_gameplay.h"
 
-#include "Bethesda/BSUtilities.hpp"
-#include "Bethesda/GameSettingCollection.hpp"
-#include "Bethesda/INISettingCollection.hpp"
-#include "Bethesda/TESDataHandler.hpp"
-#include "Bethesda/TESObject.hpp"
-#include "Bethesda/TESObjectList.hpp"
-#include "Bethesda/TESHavokUtilities.hpp"
 #include "decoding.h"
 #include "GameEffects.h"
 #include "GameForms.h"
 #include "GameProcess.h"
 #include "GameRTTI.h"
 #include "GameUI.h"
+
+#include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/INISettingCollection.hpp"
+#include "Bethesda/Moon.hpp"
+#include "Bethesda/TESDataHandler.hpp"
+#include "Bethesda/TESHavokUtilities.hpp"
+#include "Bethesda/TESObject.hpp"
+#include "Bethesda/TESObjectList.hpp"
+#include "Bethesda/BGSEntryPoint.hpp"
+
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
 #include "JG/DisabledArrowKeys.hpp"
@@ -25,6 +29,8 @@
 #include "JG/ScriptUtils.hpp"
 #include "JG/WorldToScreen.hpp"
 
+#include "NVSE/InventoryRef.hpp"
+
 #include <shared/BSMemory/BSScrapMemory.hpp>
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
@@ -35,7 +41,6 @@ void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(s
 
 #define NUM_ARGS *((uint8_t*)scriptData + *opcodeOffsetPtr)
 
-extern void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...);
 extern InventoryRef* (*InventoryRefGetForID)(FormID refID);
 
 bool Cmd_StopHolotape_Execute(COMMAND_ARGS) {
@@ -840,7 +845,7 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	bool hasImprovedDetection = false;
 	if (accountForImprovedDetection) {
 		float hasPerk = 0.0; //copying code at 0x77A0C4
-		ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, PlayerCharacter::GetSingleton(), &hasPerk);
+		BGSEntryPoint::HandleEntryPoint(BGSEntryPointType::HAS_IMPROVED_DETECTION, PlayerCharacter::GetSingleton(), &hasPerk);
 		if (hasPerk > 0.0)
 			hasImprovedDetection = true;
 	}
@@ -1344,7 +1349,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 			}
 		}
 
-		if (pWeapon && pExtraDataList && (pWeapon->weaponSkill == kAVCode_Unarmed || pWeapon->weaponSkill == kAVCode_MeleeWeapons)) {
+		if (pWeapon && pExtraDataList && (pWeapon->weaponSkill == ActorValue::Index::UNARMED || pWeapon->weaponSkill == ActorValue::Index::MELEE_WEAPONS)) {
 			if (pPoison)
 				pExtraDataList->SetPoison(pPoison);
 			else

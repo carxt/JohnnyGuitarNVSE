@@ -1,17 +1,26 @@
 #include "fn_utility.h"
-#include "Bethesda/BSUtilities.hpp"
-#include <JG/ExtraUISounds.hpp>
-#include <JG/ExtraReputationIcons.hpp>
-#include <JG/JohnnyPatches.hpp>
-#include <shared/BSMemory/BSScrapMemory.hpp>
 #include "GameProcess.h"
+#include <decoding.h>
 #include <GameUI.h>
 #include <misc/misc.h>
-#include <decoding.h>
-#include <JG/CameraOverride.hpp>
-#include <JG/JohnnyRadios.hpp>
-#include <JG/DisabledLevelUp.hpp>
-#include <JIP/JIPUtils.hpp>
+
+#include "Bethesda/BSCustomSplatterExtraData.hpp"
+#include "Bethesda/BSShaderBloodSplatterProperty.hpp"
+#include "Bethesda/BSShaderManager.hpp"
+#include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/ScreenCustomSplatter.hpp"
+#include "Bethesda/Sky.hpp"
+
+#include "JG/CameraOverride.hpp"
+#include "JG/DisabledLevelUp.hpp"
+#include "JG/ExtraReputationIcons.hpp"
+#include "JG/ExtraUISounds.hpp"
+#include "JG/JohnnyPatches.hpp"
+#include "JG/JohnnyRadios.hpp"
+#include "JIP/JIPUtils.hpp"
+
+#include <shared/BSMemory/BSScrapMemory.hpp>
+
 #include <random>
 
 extern DWORD dwGameStartTimestamp;
@@ -479,13 +488,51 @@ bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+
+static void __fastcall ActivateSplatter(uint32_t auiCount, float afDuration, float afSizeMult, float afOpacityMult, NiTexture* apAlphaTex, NiTexture* apColorTex, NiTexture* apFlareTex) {
+	if (!ScreenCustomSplatter::bEnabled || auiCount == 0)
+		return;
+
+	NiNode* pNewNode = ScreenCustomSplatter::CreateGeometry(auiCount, afSizeMult, afOpacityMult);
+	ScreenCustomSplatter::uiCount += auiCount;
+
+	BSSplatterData kSplatterData{};
+	kSplatterData.fAge = 0.f;
+	kSplatterData.fDuration = afDuration;
+	kSplatterData.fAlpha = 1.f;
+	kSplatterData.uiCount = auiCount;
+
+	BSCustomSplatterExtraData* pExtraData = BSCustomSplatterExtraData::Create(kSplatterData);
+	pNewNode->AddExtraData(pExtraData);
+
+	NiTriShape* pShape = static_cast<NiTriShape*>(pNewNode->GetAt(0));
+	BSShaderBloodSplatterProperty* pShaderProp = static_cast<BSShaderBloodSplatterProperty*>(pShape->shaderProp);
+
+	if (apAlphaTex)
+		pShaderProp->SetTexture(0, apAlphaTex);
+
+	if (apColorTex)
+		pShaderProp->SetTexture(1, apColorTex);
+
+	// IsHDR
+	if (BSShaderManager::bHDR && apFlareTex) {
+		NiTriShape* pHDRShape = static_cast<NiTriShape*>(pNewNode->GetAt(1));
+		pShaderProp = static_cast<BSShaderBloodSplatterProperty*>(pHDRShape->shaderProp);
+		pShaderProp->SetTexture(0, apFlareTex);
+	}
+
+	ScreenCustomSplatter::GetCurrentRoot()->AttachChild(pNewNode, true);
+	BSShaderBloodSplatterProperty::SetFadeSourceRecurse(pNewNode, &pExtraData->kData.fAlpha);
+	NiUpdateData kUpdateData = NiUpdateData();
+	ScreenCustomSplatter::GetCurrentRoot()->Update(kUpdateData);
+};
+
 bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 	uint32_t uiCount = 0;
 	uint32_t uiNoFade = 0;
 	float fDuration = 0.f;
 	float fSizeMult = 0.f;
 	float fOpacityMult = 0.f;
-
 
 	char cTexturePath0[MAX_PATH] = {};
 	char cTexturePath1[MAX_PATH] = {};
@@ -500,9 +547,9 @@ bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 		pTES->CreateTextureImage(cTexturePath0, pAlphaTex, false, false);
 		pTES->CreateTextureImage(cTexturePath1, pColorTex, false, false);
 		pTES->CreateTextureImage(cTexturePath2, pFlareTex, false, false);
-		*(bool*)0x11C77E9 = uiNoFade;
+		ScreenCustomSplatter::bSecondsForFade = uiNoFade;
 
-		ScreenCustomSplatter::ActivateAlt(uiCount, fDuration, fSizeMult, fOpacityMult, pAlphaTex, pColorTex, pFlareTex);
+		ActivateSplatter(uiCount, fDuration, fSizeMult, fOpacityMult, pAlphaTex, pColorTex, pFlareTex);
 		*result = 1;
 		return true;
 	}

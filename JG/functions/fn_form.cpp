@@ -1,34 +1,39 @@
 #include "fn_form.h"
-#include "GameSettings.h"
-#include "Bethesda/TESObjectList.hpp"
-#include "GameObjects.h"
+#include "decoding.h"
+#include "GameData.h"
 #include "GameForms.h"
+#include "GameObjects.h"
+#include "GameProcess.h"
+#include "GameRTTI.h"
+#include "GameTasks.h"
+#include "PluginAPI.h"
+
+#include "Bethesda/AILinearTaskThreadManager.hpp"
+#include "Bethesda/BGSLoadGameSubBuffer.hpp"
+#include "Bethesda/BGSPrimitive.hpp"
+#include "Bethesda/BGSSaveFormBuffer.hpp"
+#include "Bethesda/BSShaderManager.hpp"
+#include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/INIPrefSettingCollection.hpp"
+#include "Bethesda/TESMain.hpp"
+#include "Bethesda/TESObjectList.hpp"
+
+#include "NVSE/InventoryRef.hpp"
+
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 #include "Shared/Utils/StackObject.hpp"
-#include <PluginAPI.h>
-#include <GameExtraData.h>
-#include "GameProcess.h"
-#include "GameTasks.h"
-#include <unordered_map>
+
+#include "events/LambdaVariableContext.h"
+#include "JG/AnimActivationHeight.hpp"
+#include "JG/BarterFilter.hpp"
+#include "JG/ExternalEmittanceOnBases.hpp"
 #include "JG/JGSetList.hpp"
-#include <JG/BarterFilter.hpp>
-#include <JG/JohnnyExtraData.hpp>
-#include <JG/AnimActivationHeight.hpp>
-#include <GameData.h>
-#include <GameRTTI.h>
-#include "decoding.h"
-#include <events/LambdaVariableContext.h>
+#include "JG/JohnnyExtraData.hpp"
+#include "JG/LandRemapping.hpp"
+#include "JG/TaskQueue.hpp"
+
 #include <numbers>
-#include <Bethesda/AILinearTaskThreadManager.hpp>
-#include <JG/TaskQueue.hpp>
-#include <JG/LandRemapping.hpp>
-#include <JG/ExternalEmittanceOnBases.hpp>
-#include <Bethesda/BSShaderManager.hpp>
-#include <Bethesda/TESMain.hpp>
-#include <Bethesda/BSUtilities.hpp>
-#include <Bethesda/BGSLoadGameSubBuffer.hpp>
-#include <Bethesda/BGSSaveFormBuffer.hpp>
-#include <Bethesda/INIPrefSettingCollection.hpp>
+#include <unordered_map>
 
 #include "JG/ScriptUtils.hpp"
 using namespace ScriptUtils;
@@ -1760,7 +1765,7 @@ bool Cmd_RemovePrimitive_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetPrimitiveType_Execute(COMMAND_ARGS) {
 	ExtraPrimitive* pPrimitive = thisObj->extraDataList.GetExtraData<ExtraPrimitive>();
-	*result = (pPrimitive && pPrimitive->pPrimitive) ? pPrimitive->pPrimitive->type : 0;
+	*result = (pPrimitive && pPrimitive->pPrimitive) ? pPrimitive->pPrimitive->GetType() : 0;
 	return true;
 }
 

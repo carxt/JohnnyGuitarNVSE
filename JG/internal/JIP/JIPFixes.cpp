@@ -14,10 +14,10 @@
 #include "Bethesda/TimeGlobal.hpp"
 #include "Bethesda/AILinearTaskThreadManager.hpp"
 #include "Bethesda/MenuConsole.hpp"
+#include "Bethesda/Sky.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 
 #include "decoding.h"
-#include "events/EventFramework.h"
 #include "GameData.h"
 #include "GameObjects.h"
 #include "GameOSDepend.h"
@@ -25,19 +25,23 @@
 #include "GameRTTI.h"
 #include "GameTasks.h"
 #include "GameTiles.h"
+#include "GameUI.h"
 #include "ParamInfos.h"
 #include "PluginAPI.h"
 #include "utility.h"
 
+#include "events/EventFramework.h"
+
 #include "JG/JohnnyExtraData.hpp"
 #include "JG/ScriptUtils.hpp"
+
+#include "NVSE/InventoryRef.hpp"
+
 #include "internal/CommandOpcodes.h"
 
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 #include "Shared/Utils/StackObject.hpp"
 #include "Shared/Utils/CustomClass.hpp"
-
-#include <GameUI.h>
 
 class BSRenderedTexture;
 
@@ -1956,7 +1960,7 @@ namespace JIPFixes {
 		bool Cmd_TriggerLightningFX_Execute(COMMAND_ARGS) {
 			*result = 0;
 			Sky* pSky = Sky::GetSingleton();
-			if (pSky && pSky->GetIsRaining()) {
+			if (pSky && pSky->IsRaining()) {
 				pSky->fFlash = 1;
 				pSky->uiFlashTime = TimeGlobal::GetSingleton()->uiLastTime;
 				*result = 1;

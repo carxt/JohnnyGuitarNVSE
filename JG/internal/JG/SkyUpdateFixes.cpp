@@ -1,7 +1,7 @@
 #include "SkyUpdateFixes.hpp"
 #include "GameForms.h"
 #include "GameAPI.h"
-#include "decoding.h"
+#include "Bethesda/Sky.hpp"
 #include "JIP/JIPUtils.hpp"
 
 namespace SkyUpdateFixes {

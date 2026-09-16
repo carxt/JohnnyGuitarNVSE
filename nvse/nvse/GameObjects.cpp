@@ -171,6 +171,13 @@ bool TESObjectREFR::GetDisabled(bool checkQueue) const
 	return (fn_GetDisabled(this) && !fn_InEnableRefs(this) ) || fn_InPendingDisableRefs(this);
 }
 
+BSSimpleList<ItemChange*>* TESObjectREFR::GetContainerChangesList() {
+	ExtraContainerChanges* xChanges = extraDataList.GetExtraData<ExtraContainerChanges>();
+	if (xChanges && xChanges->pChanges)
+		return xChanges->pChanges->pItems;
+	return nullptr;
+}
+
 // GAME - 0x8B36F0
 bool Actor::SetPathfindingGoal(TESObjectREFR* apTargetRef, float afTargetRadius, PathingAvoidNodeArray* apAvoidNodes) {
 	return ThisCall<bool>(0x8B36F0, this, apTargetRef, afTargetRadius, apAvoidNodes);

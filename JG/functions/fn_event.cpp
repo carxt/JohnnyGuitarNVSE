@@ -39,7 +39,7 @@ bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { PlayerCharacter::GetSingleton(), -1 };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID < ActorValue::Index::COUNT) {
 		JohnnyEvents::RegisterOnActorValueChange(script, (void**)&filter, setOrRemove > 0, flags);
 	}
 	return true;
@@ -50,7 +50,7 @@ bool Cmd_SetOnNPCActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID <= kAVCode_DamageThreshold) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID < ActorValue::Index::COUNT) {
 		JohnnyEvents::RegisterOnNPCActorValueChange(script, (void**)&filter, setOrRemove > 0, flags);
 	}
 	return true;

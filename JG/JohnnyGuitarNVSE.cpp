@@ -25,7 +25,6 @@ BS_ALLOCATORS
 IDebugLog	   gLog(JohnnyPluginData::JG_LOG_PATH);
 
 #ifdef GAME
-void (*ApplyPerkModifiers)(PerkEntryPointID entryPointID, TESObjectREFR* perkOwner, void* arg3, ...) = (void (*)(PerkEntryPointID, TESObjectREFR*, void*, ...))0x5E58F0;
 InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
 
