@@ -1,8 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-#include <vector>
-
 class TESObjectREFR;
 class Script;
 class ScriptLocals;
@@ -106,8 +103,6 @@ enum CommandReturnType : uint8_t
 	kRetnType_Max
 };
 
-const char* CommandReturnTypeToString(CommandReturnType in);
-
 struct CommandInfo;
 
 struct ParamInfo
@@ -115,9 +110,6 @@ struct ParamInfo
 	const char	* typeStr;	// can also be used to name the arg
 	uint32_t		typeID;		// ParamType
 	uint32_t		isOptional;	// do other bits do things?
-
-	std::string GetAsString(const CommandInfo& info) const;
-	const char* GetArgTypeAsString(const CommandInfo& info) const;
 };
 
 #define USE_EXTRACT_ARGS_EX NVSE_CORE
@@ -245,17 +237,6 @@ inline bool Cmd_Default_Eval(COMMAND_ARGS_EVAL) { return true; }
 #define HANDLER_EVAL(x)	reinterpret_cast<Cmd_Eval>(0x5BB810)
 #endif
 
-const uint32_t kNVSEOpcodeStart = 0x1400;
-const uint32_t kNVSEOpcodeTest = 0x2000;
-
-struct CommandMetadata
-{
-	CommandMetadata() :parentPlugin(kNVSEOpcodeStart), returnType(kRetnType_Default) { }
-
-	uint32_t				parentPlugin;
-	CommandReturnType	returnType;
-};
-
 struct CommandInfo
 {
 	const char	* longName;		// 00
@@ -272,18 +253,4 @@ struct CommandInfo
 	Cmd_Eval	eval;			// 20
 
 	uint32_t		flags;			// 24		might be more than one field (reference to 25 as a byte)
-
-	bool	IsDeprecated() const;
-	const char* GetOriginName(CommandMetadata* metadata = nullptr) const;
-
-	// Wiki has different styles of using the origin name, hence "originOrCategory" arg.
-	// For example, for Function template, origin can look like: "JohnnyGuitar".
-	// For function categories, it can look like: "Functions (JohnnyGuitar NVSE)".
-	// Plus some inconsistencies, so it'll have to be hardcoded for certain plugins for convenience.
-	std::string GetWikiStyleOriginName(bool originOrCategory, CommandMetadata* metadata = nullptr) const;
-
-	void	DumpFunctionDef(CommandMetadata* metadata = nullptr) const;
-	void	DumpDocs(CommandMetadata* metadata = nullptr) const;
-	void	DumpWikiDocs(const char* versionNumberStr = nullptr) const;
-	std::string GetDescription(const bool forWiki) const;
 };

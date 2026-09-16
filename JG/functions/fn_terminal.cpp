@@ -1,9 +1,9 @@
 #include "fn_terminal.h"
-#include <GameUI.h>
+#include "Bethesda/Interface.hpp"
 
 bool Cmd_RefreshTerminalMenu_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ComputersMenu* g_computersMenu = *(ComputersMenu**)0x11D9334;
+	void* g_computersMenu = *(void**)0x11D9334;
 	if (g_computersMenu) {
 		ThisCall(0x7586E0, g_computersMenu, 0);
 		*result = 1;

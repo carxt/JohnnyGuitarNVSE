@@ -1,10 +1,10 @@
 #include "fn_ui.h"
-#include <decoding.h>
-#include <GameObjects.h>
-#include <GameRTTI.h>
-#include <GameUI.h>
+#include "decoding.h"
+#include "GameUI.h"
 
 #include "Bethesda/FileFinder.hpp"
+#include "Bethesda/ExtraMapMarker.hpp"
+#include "Bethesda/ItemChange.hpp"
 
 #include "JG/ExtraMarkerIcons.hpp"
 #include "JG/ExtraMiscStats.hpp"

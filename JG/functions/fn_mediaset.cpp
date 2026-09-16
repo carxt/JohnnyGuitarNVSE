@@ -1,7 +1,8 @@
 #include "fn_mediaset.h"
-#include <GameExtraData.h>
 #include <GameObjects.h>
-#include "decoding.h"
+#include "Bethesda/ExtraRadius.hpp"
+#include "Bethesda/Interface.hpp"
+#include "Obsidian/ExtraAudioMarker.hpp"
 
 bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS)
 {

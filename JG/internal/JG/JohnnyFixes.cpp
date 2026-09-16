@@ -7,6 +7,7 @@
 #ifdef GAME
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/DialoguePackage.hpp"
+#include "Bethesda/ItemChange.hpp"
 
 #include "SkyUpdateFixes.hpp"
 #include "EditorIDRestoration.hpp"

@@ -925,7 +925,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="..\nvse\nvse\GameBSExtraData.h" />
     <ClInclude Include="..\nvse\nvse\GameData.h" />
     <ClInclude Include="..\nvse\nvse\GameEffects.h" />
-    <ClInclude Include="..\nvse\nvse\GameExtraData.h" />
     <ClInclude Include="..\nvse\nvse\GameForms.h" />
     <ClInclude Include="..\nvse\nvse\GameObjects.h" />
     <ClInclude Include="..\nvse\nvse\GameOSDepend.h" />

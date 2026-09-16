@@ -14,7 +14,11 @@
 #include "Bethesda/BGSSaveFormBuffer.hpp"
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/ExtraActivateRef.hpp"
+#include "Bethesda/ExtraHotkey.hpp"
+#include "Bethesda/ExtraPrimitive.hpp"
 #include "Bethesda/INIPrefSettingCollection.hpp"
+#include "Bethesda/ItemChange.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TESObjectList.hpp"
 

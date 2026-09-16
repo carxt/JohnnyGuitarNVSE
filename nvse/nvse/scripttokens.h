@@ -7,15 +7,11 @@ extern int32_t EXPECTED_TOKEN_COUNT;
 extern int32_t FUNCTION_CONTEXT_COUNT;
 #endif
 
-#include "GameScript.h"
 #include "CommandTable.h"
-#include "GameForms.h"
 #include "ArrayVar.h"
 
 #if RUNTIME
 #include "StringVar.h"
-#include "GameAPI.h"
-
 #endif
 
 struct Operator;

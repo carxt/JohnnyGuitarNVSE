@@ -16,6 +16,7 @@
 #include "Bethesda/TESObject.hpp"
 #include "Bethesda/TESObjectList.hpp"
 #include "Bethesda/BGSEntryPoint.hpp"
+#include "Bethesda/ExtraContainerChanges.hpp"
 
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
@@ -32,6 +33,8 @@
 #include "NVSE/InventoryRef.hpp"
 
 #include <shared/BSMemory/BSScrapMemory.hpp>
+
+#include <unordered_map>
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
 (void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
@@ -892,8 +895,8 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 					xData = xdlIter->GetItem();
 					xdlIter = xdlIter->GetNext();
 					if (xData) {
-						ExtraOwnership* xOwn = xData->GetExtraData<ExtraOwnership>();
-						if (xOwn && xOwn->pOwner && xOwn->pOwner->GetFormID() == containerOwner->GetFormID()) {
+						TESForm* pOwner = xData->GetOwner();
+						if (pOwner && pOwner->GetFormID() == containerOwner->GetFormID()) {
 							ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, containerOwner); // Actor::StealAlarm
 							*result = 1;
 							return true;

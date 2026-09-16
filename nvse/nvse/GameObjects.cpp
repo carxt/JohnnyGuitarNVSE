@@ -1,11 +1,15 @@
 #include "GameObjects.h"
 #include "GameRTTI.h"
-#include "GameExtraData.h"
 #include "GameTasks.h"
 #include "GameUI.h"
 #include "GameProcess.h"
 #include "CommandTable.h"
 
+#include "Bethesda/ExtraCombatStyle.hpp"
+#include "Bethesda/ExtraLeveledCreature.hpp"
+#include "Bethesda/ExtraScript.hpp"
+#include "Bethesda/ExtraContainerChanges.hpp"
+#include "Bethesda/ExtraPersistentCell.hpp"
 #include "Bethesda/BSUtilities.hpp"
 
 TESForm* TESObjectREFR::GetBaseForm()

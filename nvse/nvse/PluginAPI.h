@@ -26,11 +26,6 @@ enum
 
 enum
 {
-	kPluginOpcode_Debug = kNVSEOpcodeTest,
-};
-
-enum
-{
 	kInterface_Serialization = 0,
 	kInterface_Console,
 
@@ -407,7 +402,7 @@ struct NVSEArrayVarInterface
 			kType_Array,
 		};
 
-		void Reset() { if (type == kType_String) { FormHeap_Free(str); } type = kType_Invalid; str = NULL; }
+		void Reset() { if (type == kType_String) { BSMemory::free(str); } type = kType_Invalid; str = NULL; }
 		~Element() { Reset(); }
 
 		Element() : type(kType_Invalid) { }
@@ -740,7 +735,7 @@ public:
 	virtual ~PluginFormExtraData() {};
 	virtual void DeleteThis() {
 		this->~PluginFormExtraData();
-		FormHeap_Free(this);
+		BSMemory::free(this);
 	};
 
 	void IncRefCount() {

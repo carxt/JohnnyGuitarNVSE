@@ -3,6 +3,7 @@
 #include "GameRTTI.h"
 #include "GameObjects.h"
 #include "GameData.h"
+#include "Bethesda/ExtraContainerChanges.hpp"
 
 TESForm* __fastcall GetTESForm(const TESForm* apForm) {
 	if (!apForm) 

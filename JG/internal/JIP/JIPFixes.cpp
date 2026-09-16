@@ -15,6 +15,7 @@
 #include "Bethesda/AILinearTaskThreadManager.hpp"
 #include "Bethesda/MenuConsole.hpp"
 #include "Bethesda/Sky.hpp"
+#include "Bethesda/InventoryChanges.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 
 #include "decoding.h"
@@ -42,6 +43,8 @@
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 #include "Shared/Utils/StackObject.hpp"
 #include "Shared/Utils/CustomClass.hpp"
+
+#include <unordered_map>
 
 class BSRenderedTexture;
 

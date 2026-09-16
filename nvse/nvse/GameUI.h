@@ -1,6 +1,5 @@
 #pragma once
 
-#include "GameExtraData.h"
 #include "GameForms.h"
 #include "GameTiles.h"
 #include "GameTypes.h"
@@ -20,6 +19,7 @@ class BSShaderAccumulator;
 class ShadowSceneNode;
 class NiSourceTexture;
 class FORenderedMenu;
+class ItemChange;
 
 struct PackedMenu;
 

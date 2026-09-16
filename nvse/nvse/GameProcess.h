@@ -1,7 +1,6 @@
 #pragma once
 #include "GameForms.h"
 #include "GameObjects.h"
-#include "GameExtraData.h"
 
 class BSTempEffect;
 class NiBSBoneLODController;
