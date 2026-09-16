@@ -21,7 +21,7 @@ bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks
 	if (PlayerCharacter::GetSingleton()) {
 		auto headNode = PlayerCharacter::GetSingleton()->questObjectiveList.Head();
 		while (headNode) {
-			Console_Print("objective %s from quest %s", headNode->data->GetDisplayText(), headNode->data->GetOwner()->GetEditorName());
+			Interface::PrintLine("objective %s from quest %s", headNode->data->GetDisplayText(), headNode->data->GetOwner()->GetEditorName());
 			headNode = headNode->next;
 		}
 	}
@@ -120,7 +120,7 @@ bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
 		*result = ExtraMiscStats::GetStat(name);
-		if (IsConsoleMode()) Console_Print("GetExtraMiscStat \"%s\": %.f", name, *result);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetExtraMiscStat \"%s\": %.f", name, *result);
 	}
 	return true;
 }
@@ -158,8 +158,8 @@ bool Cmd_GetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 		if (pCustomIcon)
 			pIcon = pCustomIcon;
 	
-		if (IsConsoleMode())
-			Console_Print("GetCustomReputationChangeIcon \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetCustomReputationChangeIcon \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
 	}
 	g_strInterface->Assign(PASS_COMMAND_ARGS, pIcon);
 	return true;
@@ -176,7 +176,7 @@ bool Cmd_GetSystemColorAlt_Execute(COMMAND_ARGS) {
 		bOut->data = color & 0xFF;
 		gOut->data = (color >> 8) & 0xFF;
 		rOut->data = (color >> 16) & 0xFF;
-		if (IsConsoleMode()) Console_Print("GetSystemColor %d >> %d %d %d", type, rOut->data, gOut->data, bOut->data);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetSystemColor %d >> %d %d %d", type, rOut->data, gOut->data, bOut->data);
 	}
 	return true;
 }
@@ -186,7 +186,7 @@ bool Cmd_GetSystemColor_Execute(COMMAND_ARGS) {
 		SystemColorManager* colorMgr = SystemColorManager::GetSingleton();
 		uint32_t color = (colorMgr->GetColor(type) >> 0x8);
 		*result = color;
-		if (IsConsoleMode()) Console_Print("GetSystemColor %d >> 0x%X", type, color);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetSystemColor %d >> 0x%X", type, color);
 	}
 	return true;
 };
@@ -275,8 +275,8 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace) && pWorldSpace && IS_TYPE(pWorldSpace, TESWorldSpace) && pWorldSpace->GetTextureNameLength()) {
 		strcpy_s(cPath, pWorldSpace->GetTextureName());
 		g_strInterface->Assign(PASS_COMMAND_ARGS, cPath);
-		if (IsConsoleMode())
-			Console_Print("GetWorldSpaceMapTexture >> %s", cPath);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetWorldSpaceMapTexture >> %s", cPath);
 	}
 	return true;
 }
@@ -300,8 +300,8 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	else {
 		ExtraMarkerIcons::SetMapMarkerIcon(form, iconPath);
 	}
-	if (IsConsoleMode())
-		Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->GetFormID(), iconPath);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("SetCustomMapMarkerIcon >> %u, %s", form->GetFormID(), iconPath);
 	return true;
 }
 
@@ -315,8 +315,8 @@ bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 
 	const char* resStr = ExtraMarkerIcons::GetMapMarker(thisObj, mapMarkerExtra->pData->usType);
 	g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
-	if (IsConsoleMode())
-		Console_Print("GetCustomMapMarkerIcon >> %s", resStr);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetCustomMapMarkerIcon >> %s", resStr);
 	return true;
 }
 
@@ -325,7 +325,7 @@ bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
 	SleepWaitMenu* swMenu = SleepWaitMenu::Get();
 	if (!swMenu) return true;
 	*result = DWORD(swMenu->isRest) + 1;
-	if (IsConsoleMode()) Console_Print("GetSleepWaitMenuState >> %.f", *result);
+	if (Script::GetConsoleOuput()) Interface::PrintLine("GetSleepWaitMenuState >> %.f", *result);
 	return true;
 }
 
@@ -514,8 +514,8 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 					Tile* pChild = pParent->children.GetNext(kIter);
 					if (pChild == pEntryTile) {
 						*result = uiIndex;
-						if (IsConsoleMode())
-							Console_Print("GetMenuItemListIndex >> %d", uiIndex);
+						if (Script::GetConsoleOuput())
+							Interface::PrintLine("GetMenuItemListIndex >> %d", uiIndex);
 						return true;
 					}
 					++uiIndex;

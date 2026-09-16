@@ -124,8 +124,8 @@ bool Cmd_GetCasinoDeckTexture_Execute(COMMAND_ARGS) {
 	uint32_t uiDeck = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &uiDeck) && pCasino && IS_TYPE(pCasino, TESCasino) && uiDeck >= 0 && uiDeck <= 3) {
 		const char* pPath = pCasino->kTextures[uiDeck].GetTextureName();
-		if (IsConsoleMode())
-			Console_Print("GetCasinoDeckTexture >> %s", pPath);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetCasinoDeckTexture >> %s", pPath);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
 	}
 	return true;
@@ -491,8 +491,8 @@ bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 	}
 	g_arrInterface->AppendElements(pointArr, kResult.x, kResult.y, kResult.z, kResult.w);
 
-	if (IsConsoleMode()) {
-		Console_Print("GetClosestNavMeshTriangle >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
+	if (Script::GetConsoleOuput()) {
+		Interface::PrintLine("GetClosestNavMeshTriangle >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
 	}
 
 	g_arrInterface->AssignCommandResult(pointArr, result);
@@ -532,12 +532,12 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 
 	if (bResult) {
 		g_arrInterface->AppendElements(pointArr, kResult.x, kResult.y, kResult.z, kResult.w);
-		if (IsConsoleMode()) {
-			Console_Print("GetPointInNavMesh >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
+		if (Script::GetConsoleOuput()) {
+			Interface::PrintLine("GetPointInNavMesh >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
 		}
 	}
-	else if (IsConsoleMode()) {
-		Console_Print("GetPointInNavMesh >> Point not found.");
+	else if (Script::GetConsoleOuput()) {
+		Interface::PrintLine("GetPointInNavMesh >> Point not found.");
 
 	}
 
@@ -813,8 +813,8 @@ bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 		thisObj->IsActor() && (IsCombatTarget(pActor, PlayerCharacter::GetSingleton()) || IsHostileCompassTarget(thisObj))) {
 		*result = 1;
 	}
-	if (IsConsoleMode()) 
-		Console_Print("IsCrimeOrEnemy >> %.f", *result);
+	if (Script::GetConsoleOuput()) 
+		Interface::PrintLine("IsCrimeOrEnemy >> %.f", *result);
 	return true;
 }
 
@@ -934,8 +934,8 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 		}
 		*result = totalSpread;
 	}
-	if (IsConsoleMode()) 
-		Console_Print("GetCalculatedSpread >> %f", *result);
+	if (Script::GetConsoleOuput()) 
+		Interface::PrintLine("GetCalculatedSpread >> %f", *result);
 	return true;
 }
 
@@ -979,8 +979,8 @@ bool Cmd_ToggleCombatMusic_Execute(COMMAND_ARGS) {
 
 bool Cmd_IsCombatMusicEnabled_Execute(COMMAND_ARGS) {
 	*result = JohnnyPatches::bCombatMusicDisabled == false;
-	if (IsConsoleMode())
-		Console_Print("IsCombatMusicEnabled >> %.f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("IsCombatMusicEnabled >> %.f", *result);
 	return true;
 }
 
@@ -991,8 +991,8 @@ SPEC_NOINLINE bool Cmd_IsCompassHostile_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_IsCompassHostile_Execute(COMMAND_ARGS) {
 	Cmd_IsCompassHostile_Eval(thisObj, nullptr, nullptr, result);
-	if (IsConsoleMode()) 
-		Console_Print("IsCompassHostile >> %.f", *result);
+	if (Script::GetConsoleOuput()) 
+		Interface::PrintLine("IsCompassHostile >> %.f", *result);
 	return true;
 }
 
@@ -1196,8 +1196,8 @@ SPEC_NOINLINE bool Cmd_GetRunSpeed_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
 	Cmd_GetRunSpeed_Eval(thisObj, nullptr, nullptr, result);
-	if (IsConsoleMode()) 
-		Console_Print("GetRunSpeed >> %.2f", *result);
+	if (Script::GetConsoleOuput()) 
+		Interface::PrintLine("GetRunSpeed >> %.2f", *result);
 	return true;
 }
 
@@ -1357,9 +1357,9 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 
 bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	*result = 0;
-	Interface::Menus eMenu = Interface::NoMenu;
+	Interface::Menus eMenu = Interface::Menus::NoMenu;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &eMenu);
-	if (eMenu == Interface::NoMenu || eMenu == Interface::Inventory || eMenu == Interface::Stats || eMenu == Interface::PipboyData) {
+	if (eMenu == Interface::Menus::NoMenu || eMenu == Interface::Menus::Inventory || eMenu == Interface::Menus::Stats || eMenu == Interface::Menus::PipboyData) {
 		InterfaceManager* pMgr = InterfaceManager::GetSingleton();
 		if (pMgr) {
 			if (pMgr->pipBoyMode == 0)
@@ -1389,8 +1389,8 @@ SPEC_INLINE bool Cmd_IsLevelUpMenuEnabled_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_IsLevelUpMenuEnabled_Execute(COMMAND_ARGS) {
 	Cmd_IsLevelUpMenuEnabled_Eval(nullptr, nullptr, nullptr, result);
-	if (IsConsoleMode())
-		Console_Print("IsLevelUpMenuEnabled >> %.f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("IsLevelUpMenuEnabled >> %.f", *result);
 	return true;
 }
 
@@ -1429,8 +1429,8 @@ bool Cmd_DisableMuzzleFlashLights_Execute(COMMAND_ARGS) {
 	if (ScriptUtils::InRange(eMode))
 		*result = DisabledMuzzleFlashLights::SetMode(eMode);
 
-	if (IsConsoleMode()) 
-		Console_Print("DisableMuzzleFlashLights >> %.f", *result);
+	if (Script::GetConsoleOuput()) 
+		Interface::PrintLine("DisableMuzzleFlashLights >> %.f", *result);
 	return true;
 }
 
@@ -1526,8 +1526,8 @@ SPEC_INLINE bool Cmd_GetGrenadeHoldTime_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
 	Cmd_GetGrenadeHoldTime_Eval(nullptr, nullptr, nullptr, result);
-	if (IsConsoleMode())
-		Console_Print("GetGrenadeHoldTime >> %f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetGrenadeHoldTime >> %f", *result);
 	return true;
 }
 
@@ -1555,8 +1555,8 @@ bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
 		});
 
 	g_arrInterface->AssignCommandResult(weaponArray, result);
-	if (IsConsoleMode())
-		Console_Print("GetWeaponsForMod >> Found %d weapon(s)", g_arrInterface->GetArraySize(weaponArray));
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetWeaponsForMod >> Found %d weapon(s)", g_arrInterface->GetArraySize(weaponArray));
 
 	return true;
 }
@@ -1572,8 +1572,8 @@ SPEC_NOINLINE bool Cmd_IsInDialogueWithPlayer_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_IsInDialogueWithPlayer_Execute(COMMAND_ARGS) {
 	Cmd_IsInDialogueWithPlayer_Eval(thisObj, nullptr, nullptr, result);
-	if (IsConsoleMode())
-		Console_Print("IsInDialogueWithPlayer >> %f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("IsInDialogueWithPlayer >> %f", *result);
 	return true;
 }
 
@@ -1614,8 +1614,8 @@ SPEC_INLINE bool Cmd_GetYieldTimer_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_GetYieldTimer_Execute(COMMAND_ARGS) {
 	Cmd_GetYieldTimer_Eval(nullptr, nullptr, nullptr, result);
-	if (IsConsoleMode())
-		Console_Print("GetYieldTimer >> %f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetYieldTimer >> %f", *result);
 	return true;
 }
 

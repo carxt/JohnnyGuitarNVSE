@@ -33,8 +33,8 @@ bool Cmd_GetTerminalMenuItemFlags_Execute(COMMAND_ARGS) {
 		auto pPos = pTerminal->GetMenuItemList()->GetAt(uiMenuEntry);
 		if (pPos && pPos->GetItem()) {
 			*result = pPos->GetItem()->ucFlags;
-			if (IsConsoleMode())
-				Console_Print("GetTerminalMenuItemFlags %d >> %.f", uiMenuEntry, *result);
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("GetTerminalMenuItemFlags %d >> %.f", uiMenuEntry, *result);
 		}
 	}
 	return true;
@@ -61,8 +61,8 @@ bool Cmd_GetTerminalMenuItemCount_Execute(COMMAND_ARGS) {
 	BGSTerminal* pTerminal = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal) && pTerminal && IS_TYPE(pTerminal, BGSTerminal)) {
 		*result = pTerminal->GetMenuItemList()->ItemsInList();
-		if (IsConsoleMode()) 
-			Console_Print("GetTerminalMenuItemCount >> %.f", *result);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetTerminalMenuItemCount >> %.f", *result);
 	}
 	return true;
 }
@@ -158,8 +158,8 @@ bool Cmd_GetTerminalMenuItemText_Execute(COMMAND_ARGS) {
 			}
 		}
 		g_strInterface->Assign(PASS_COMMAND_ARGS, pText);
-		if (IsConsoleMode()) 
-			Console_Print("GetTerminalMenuItemText >> %s", pText);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetTerminalMenuItemText >> %s", pText);
 	}
 	return true;
 }

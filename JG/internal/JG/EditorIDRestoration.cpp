@@ -1,6 +1,7 @@
 #include "GameObjects.h"
 #include "GameData.h"
 #include "JohnnyExtraData.hpp"
+#include "Bethesda/MenuConsole.hpp"
 #include "misc/misc.h"
 
 STACK_FRAME_OPT_ENABLE
@@ -512,7 +513,7 @@ namespace EDIDRestoration {
 			const float fRandom01 = CdeclCall<float>(0x5C5420);
 			if (fRandom01 < 0.001f)
 				pName = "slop";
-			Console_Print("Some EDIDs are conflicting! Check JohnnyGuitarNVSE.log for details. (Ignore this message if you are not a %s author.)", pName);
+			MenuConsole::GetSingleton()->Print("Some EDIDs are conflicting! Check JohnnyGuitarNVSE.log for details. (Ignore this message if you are not a %s author.)", pName);
 		}
 	}
 

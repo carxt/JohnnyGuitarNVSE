@@ -27,6 +27,7 @@
 
 #include <GameUI.h>
 #include <GameObjects.h>
+#include "Bethesda/MenuConsole.hpp"
 #endif
 #include "JIP/JIPFixes.hpp"
 
@@ -63,7 +64,7 @@ static SPEC_NOINLINE void DeferredInit() {
 	EDIDRestoration::PrintErrors();
 	NiGlobalStringTable::RemoveUnusedStrings();
 
-	Console_Print("JohnnyGuitar version: %.2f", JohnnyPluginData::JG_VERSION_DECIMAL);
+	MenuConsole::GetSingleton()->Print("JohnnyGuitar version: %.2f", JohnnyPluginData::JG_VERSION_DECIMAL);
 }
 
 static void MainGameLoop() {

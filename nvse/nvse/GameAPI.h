@@ -25,8 +25,6 @@ static const uint32_t s_Console__Print = 0x0071D0A0;
 
 extern bool extraTraces;
 
-void Console_Print(const char* fmt, ...);
-
 //typedef void * (* _FormHeap_Allocate)(uint32_t size);
 //extern const _FormHeap_Allocate FormHeap_Allocate;
 //
@@ -41,7 +39,6 @@ extern const _ExtractArgs ExtractArgs;
 typedef TESForm* (*_CreateFormInstance)(uint8_t type);
 extern const _CreateFormInstance CreateFormInstance;
 
-bool IsConsoleMode();
 bool GetConsoleEcho();
 void SetConsoleEcho(bool doEcho);
 const char* GetFullName(TESForm* baseForm);

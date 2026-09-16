@@ -943,6 +943,12 @@
     <ClCompile Include="internal\Game\Bethesda\TESPackage.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\MenuConsole.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Interface.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -2455,6 +2461,12 @@
     <ClInclude Include="internal\Game\Bethesda\TESPackage.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MenuConsole.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Interface.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -2520,6 +2532,9 @@
     </None>
     <None Include="internal\Game\FaceGen\FR2MatrixVTC.inl">
       <Filter>internal\Game\FaceGen</Filter>
+    </None>
+    <None Include="internal\Game\Bethesda\Interface.inl">
+      <Filter>internal\Game\Bethesda</Filter>
     </None>
   </ItemGroup>
 </Project>

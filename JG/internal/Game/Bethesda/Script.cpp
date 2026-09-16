@@ -80,4 +80,9 @@ bool Script::Run(TESObjectREFR* apOwner, ScriptLocals* apLocals, TESObjectREFR* 
 bool Script::SetActionFlag(TESForm* apForm, ExtraDataList* apList, uint32_t aeEvent) {
 	return CdeclCall<bool>(0x5AC750, apForm, apList, aeEvent);
 }
+
+// GAME - 0x5E23F0
+bool Script::GetConsoleOuput() {
+	return CdeclCall<bool>(0x5E23F0);
+}
 #endif

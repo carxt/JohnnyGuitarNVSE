@@ -13,6 +13,7 @@
 #include "Bethesda/TESHavokUtilities.hpp"
 #include "Bethesda/TimeGlobal.hpp"
 #include "Bethesda/AILinearTaskThreadManager.hpp"
+#include "Bethesda/MenuConsole.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 
 #include "decoding.h"
@@ -1274,10 +1275,10 @@ namespace JIPFixes {
 					TruncateString(pFullName, cTruncatedFullName, std::clamp<uint32_t>(uiTruncatedLength, 8, sizeof(cTruncatedFullName)));
 					pFullName = cTruncatedFullName;
 				}
-				Console_Print("%08X | %s | %s (%s) | %s", apForm->GetFormID(), pType, pEDID, pFullName, pFileName);
+				Interface::PrintLine("%08X | %s | %s (%s) | %s", apForm->GetFormID(), pType, pEDID, pFullName, pFileName);
 			}
 			else {
-				Console_Print("%08X | %s | %s | %s", apForm->GetFormID(), pType, pEDID, pFileName);
+				Interface::PrintLine("%08X | %s | %s | %s", apForm->GetFormID(), pType, pEDID, pFileName);
 			}
 		}
 
@@ -1480,7 +1481,7 @@ namespace JIPFixes {
 				char cErrorBuffer[512];
 				our_snprintf(cErrorBuffer, sizeof(cErrorBuffer), "Error! \"%s\" has been unloaded while being processed by OnClickMenuHandler. Do NOT do this!", pTilePath);
 				_MESSAGE(cErrorBuffer);
-				Console_Print(cErrorBuffer);
+				MenuConsole::GetSingleton()->Print(cErrorBuffer);
 				*reinterpret_cast<DWORD*>(pEBP + 0xC) = 0;
 				return false;
 			}

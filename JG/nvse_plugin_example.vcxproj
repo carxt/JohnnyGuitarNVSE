@@ -575,11 +575,21 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp" />
     <ClCompile Include="internal\Game\Bethesda\GameSettingCollection.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ImpactSwap.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\Interface.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\InventoryChanges.cpp" />
     <ClCompile Include="internal\Game\Bethesda\InventoryIterator.cpp" />
     <ClCompile Include="internal\Game\Bethesda\IOTask.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ItemChange.cpp" />
     <ClCompile Include="internal\Game\Bethesda\MagicItem.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\MenuConsole.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\MenuTopic.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
@@ -1157,6 +1167,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\ImpactSwap.hpp" />
     <ClInclude Include="internal\Game\Bethesda\INIPrefSettingCollection.hpp" />
     <ClInclude Include="internal\Game\Bethesda\INISettingCollection.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\Interface.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\IntSeenData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\InventoryChanges.hpp" />
     <ClInclude Include="internal\Game\Bethesda\InventoryIterator.hpp" />
@@ -1167,6 +1182,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\MagicSystem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MapMarkerData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MemoryContexts.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\MenuConsole.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\MenuTopic.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
@@ -1477,6 +1497,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <None Include="internal\Game\Bethesda\BSTask.inl" />
     <None Include="internal\Game\Bethesda\BSTCommonLLMessageQueue.inl" />
     <None Include="internal\Game\Bethesda\BSTCommonMessageQueue.inl" />
+    <None Include="internal\Game\Bethesda\Interface.inl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </None>
     <None Include="internal\Game\Bethesda\SettingT.inl" />
     <None Include="internal\Game\FaceGen\FR2MatrixVTC.inl" />
     <None Include="internal\Game\Gamebryo\NiPoint2.inl" />

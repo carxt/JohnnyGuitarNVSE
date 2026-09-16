@@ -386,7 +386,7 @@ namespace MersenneTwister {
 #if RUNTIME
 
 const char GetSeparatorChar(Script* script) {
-	if (IsConsoleMode()) {
+	if (Script::GetConsoleOuput()) {
 		if (script && script->GetCompileIndex() != 0xFF)
 			return '|';
 		else
@@ -397,7 +397,7 @@ const char GetSeparatorChar(Script* script) {
 }
 
 const char* GetSeparatorChars(Script* script) {
-	if (IsConsoleMode()) {
+	if (Script::GetConsoleOuput()) {
 		if (script && script->GetCompileIndex() != 0xFF)
 			return "|";
 		else
@@ -411,9 +411,9 @@ const char* GetSeparatorChars(Script* script) {
 //{
 //	uint32_t numLines = str.length() / 500;
 //	for (uint32_t i = 0; i < numLines; i++)
-//		Console_Print("%s ...", str.substr(i*500, 500).c_str());
+//		Interface::PrintLine("%s ...", str.substr(i*500, 500).c_str());
 //
-//	Console_Print("%s", str.substr(numLines*500, str.length() - numLines*500).c_str());
+//	Interface::PrintLine("%s", str.substr(numLines*500, str.length() - numLines*500).c_str());
 //}
 
 #endif

@@ -1,7 +1,8 @@
 #include "fn_file.h"
 #include "GameSound.h"
 #include "GameObjects.h"
-#include <Bethesda/FileFinder.hpp>
+#include "Bethesda/FileFinder.hpp"
+#include "Bethesda/Interface.hpp"
 #include <misc/misc.h>
 
 bool Cmd_IsBSALoaded_Execute(COMMAND_ARGS) {
@@ -60,7 +61,7 @@ bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 			file->Seek(0x1C, 1);
 			file->DoRead(&mipMapCount, sizeof(mipMapCount));
 			*result = mipMapCount;
-			if (IsConsoleMode()) Console_Print("GetTextureMipMapCount >> %.f", *result);
+			if (Script::GetConsoleOuput()) Interface::PrintLine("GetTextureMipMapCount >> %.f", *result);
 			file->Destructor(true);
 		}
 	}
@@ -77,7 +78,7 @@ bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 			file->Seek(0x57, 1);
 			file->DoRead(&format, 1);
 			*result = format - '0';
-			if (IsConsoleMode()) Console_Print("GetTextureFormat >> %.f", *result);
+			if (Script::GetConsoleOuput()) Interface::PrintLine("GetTextureFormat >> %.f", *result);
 			file->Destructor(true);
 		}
 	}
@@ -96,7 +97,7 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 			file->Seek(0x10, 1);
 			file->DoRead(&width, sizeof(width));
 			*result = width;
-			if (IsConsoleMode()) Console_Print("GetTextureWidth >> %.f", *result);
+			if (Script::GetConsoleOuput()) Interface::PrintLine("GetTextureWidth >> %.f", *result);
 			file->Destructor(true);
 		}
 	}
@@ -114,7 +115,7 @@ bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 			file->Seek(0x0C, 1);
 			file->DoRead(&height, sizeof(height));
 			*result = height;
-			if (IsConsoleMode()) Console_Print("GetTextureHeight >> %.f", *result);
+			if (Script::GetConsoleOuput()) Interface::PrintLine("GetTextureHeight >> %.f", *result);
 			file->Destructor(true);
 		}
 	}
@@ -132,8 +133,8 @@ bool Cmd_MD5File_Execute(COMMAND_ARGS) {
 		uint32_t length = MAX_PATH - (lastSlash - filename);
 		strcpy_s(lastSlash, length, path);
 		GetMD5File(filename, outHash);
-		if (IsConsoleMode())
-			Console_Print(outHash);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine(outHash);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, outHash);
 	}
 	return true;
@@ -150,8 +151,8 @@ bool Cmd_SHA1File_Execute(COMMAND_ARGS) {
 		uint32_t length = MAX_PATH - (lastSlash - filename);
 		strcpy_s(lastSlash, length, path);
 		GetSHA1File(filename, outHash);
-		if (IsConsoleMode())
-			Console_Print(outHash);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine(outHash);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, outHash);
 	}
 	return true;

@@ -130,35 +130,35 @@ namespace JohnnyFixes {
 		}
 
 		void __stdcall HandleSettingType(Setting* apSetting, Setting::Type type) {
-			if (!IsConsoleMode())
+			if (!Script::GetConsoleOuput())
 				return;
 
 			const char* const pKey = apSetting->pKey;
 
 			switch (type) {
 				case Setting::kSetting_Bool:
-					Console_Print("INISetting %s >> %i", pKey, apSetting->uValue.b);
+					Interface::PrintLine("INISetting %s >> %i", pKey, apSetting->uValue.b);
 					break;
 				case Setting::kSetting_Integer:
-					Console_Print("INISetting %s >> %d", pKey, apSetting->uValue.i);
+					Interface::PrintLine("INISetting %s >> %d", pKey, apSetting->uValue.i);
 					break;
 				case Setting::kSetting_Unsigned:
-					Console_Print("INISetting %s >> %X", pKey, apSetting->uValue.u);
+					Interface::PrintLine("INISetting %s >> %X", pKey, apSetting->uValue.u);
 					break;
 				case Setting::kSetting_Float:
-					Console_Print("INISetting %s >> %.2f", pKey, apSetting->uValue.f);
+					Interface::PrintLine("INISetting %s >> %.2f", pKey, apSetting->uValue.f);
 					break;
 				case Setting::kSetting_String:
-					Console_Print("INISetting %s >> '%s'", pKey, apSetting->uValue.str);
+					Interface::PrintLine("INISetting %s >> '%s'", pKey, apSetting->uValue.str);
 					break;
 				case Setting::kSetting_r:
-					Console_Print("INISetting %s >> R: %d G: %d B: %d", pKey, apSetting->uValue.rgb[3], apSetting->uValue.rgb[2], apSetting->uValue.rgb[1]);
+					Interface::PrintLine("INISetting %s >> R: %d G: %d B: %d", pKey, apSetting->uValue.rgb[3], apSetting->uValue.rgb[2], apSetting->uValue.rgb[1]);
 					break;
 				case Setting::kSetting_a:
-					Console_Print("INISetting %s >> R: %d G: %d B: %d alpha: %d", pKey, apSetting->uValue.rgb[3], apSetting->uValue.rgb[2], apSetting->uValue.rgb[1], apSetting->uValue.rgb[0]);
+					Interface::PrintLine("INISetting %s >> R: %d G: %d B: %d alpha: %d", pKey, apSetting->uValue.rgb[3], apSetting->uValue.rgb[2], apSetting->uValue.rgb[1], apSetting->uValue.rgb[0]);
 					break;
 				default:
-					Console_Print("INISetting %s >> UNKNOWN TYPE", pKey);
+					Interface::PrintLine("INISetting %s >> UNKNOWN TYPE", pKey);
 					break;
 			}
 		}
@@ -294,9 +294,9 @@ namespace JohnnyFixes {
 			arResult = 1;
 		}
 
-		if (IsConsoleMode()) {
+		if (Script::GetConsoleOuput()) {
 			// Reuse the original string, no need to duplicate *all* data
-			Console_Print(((const char*)0x10350A8), arResult);
+			Interface::PrintLine(((const char*)0x10350A8), arResult);
 		}
 
 		return true;

@@ -1,6 +1,6 @@
 #include "fn_av.h"
 #include "GameObjects.h"
-#include "GameAPI.h"
+#include "Bethesda/Interface.hpp"
 
 inline Cmd_Execute Cmd_GetAV		= reinterpret_cast<Cmd_Execute>(0x5BD8A0);
 inline Cmd_Execute Cmd_SetAV		= reinterpret_cast<Cmd_Execute>(0x5BDCD0);
@@ -24,8 +24,8 @@ bool Cmd_GetThresholdedActorValue_Execute(COMMAND_ARGS) {
 	ActorValue::Index eActorValue = ActorValue::Index::NONE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eActorValue) && thisObj->IsActor()) {
 		Cmd_GetThresholdedActorValue_Eval(thisObj, (void*)eActorValue, nullptr, result);
-		if (IsConsoleMode())
-			Console_Print("GetThresholdAV %s >> %.2f", ActorValue::GetActorValueName(eActorValue), *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetThresholdAV %s >> %.2f", ActorValue::GetActorValueName(eActorValue), *result);
 	}
 	return true;
 }

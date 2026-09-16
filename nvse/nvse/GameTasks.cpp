@@ -33,7 +33,7 @@ void IOManager::DumpQueuedTasks() {
 		if (!qr)
 			continue;
 		else if (qr->refr) {
-			Console_Print("\t%s (%08x)", GetFullName(qr->refr), qr->refr->GetFormID());
+			Interface::PrintLine("\t%s (%08x)", GetFullName(qr->refr), qr->refr->GetFormID());
 			_MESSAGE("\t%s (%08x)", GetFullName(qr->refr), qr->refr->GetFormID());
 		}
 		else

@@ -7,6 +7,7 @@
 #include "GameScript.h"
 #include "StringVar.h"
 #include <Bethesda/TLSData.hpp>
+#include "Bethesda/Interface.hpp"
 
 static NVSEStringVarInterface* s_StringVarInterface = NULL;
 bool extraTraces = false;
@@ -55,10 +56,6 @@ const _ShowCompilerError ShowCompilerError = (_ShowCompilerError)0x005C5730;	// 
 
 #if RUNTIME
 
-bool IsConsoleMode() {
-	return TLSData::Get()->bConsoleOutput;
-}
-
 bool GetConsoleEcho() {
 	return *bEchoConsole != 0;
 }
@@ -81,19 +78,6 @@ ConsoleManager* ConsoleManager::GetSingleton(void) {
 	return (ConsoleManager*)ConsoleManager_GetSingleton(true);
 }
 
-void Console_Print(const char* fmt, ...) {
-	ConsoleManager* mgr = ConsoleManager::GetSingleton();
-	if (mgr) {
-		va_list	args;
-
-		va_start(args, fmt);
-
-		CALL_MEMBER_FN(mgr, Print)(fmt, args);
-
-		va_end(args);
-	}
-}
-
 SaveGameManager* SaveGameManager::GetSingleton() {
 	return *g_saveGameManager;
 }
@@ -110,7 +94,7 @@ void ScriptLocals::Dump(void) {
 	for (uint32_t n = 0; n < nEvents; ++n) {
 		Event* pEvent = m_eventList->GetNthItem(n);
 		if (pEvent) {
-			Console_Print("%08X (%s) %08X", pEvent->object, GetObjectClassName(pEvent->object), pEvent->eventMask);
+			Interface::PrintLine("%08X (%s) %08X", pEvent->object, GetObjectClassName(pEvent->object), pEvent->eventMask);
 		}
 	}
 }
