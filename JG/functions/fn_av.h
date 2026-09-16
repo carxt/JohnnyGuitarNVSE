@@ -9,4 +9,4 @@ DEFINE_COMMAND_ALT_PLUGIN(ForceActorValueAlt, ForceAVAlt, , true, kParams_TwoInt
 DEFINE_COMMAND_ALT_PLUGIN(DamageActorValueAlt, DamageAVAlt, , true, kParams_OneInt_OneFloat);
 DEFINE_COMMAND_ALT_PLUGIN(RestoreActorValueAlt, RestoreAVAlt, , true, kParams_OneInt_OneFloat);
 DEFINE_COMMAND_ALT_PLUGIN(ModActorValueAlt, ModAVAlt, , true, kParams_TwoInts);
-DEFINE_COMMAND_ALT_PLUGIN(GetThresholdedActorValue, GetThresholdAV, , true, kParams_OneActorValue);
+DEFINE_CMD_ALT_COND_PLUGIN(GetThresholdedActorValue, GetThresholdAV, , true, kParams_OneActorValue);
