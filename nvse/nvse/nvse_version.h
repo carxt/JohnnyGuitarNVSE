@@ -12,6 +12,10 @@
 // build numbers do not appear to follow the same format as with oblivion
 #define MAKE_NEW_VEGAS_VERSION_EX(major, minor, build, sub)	(((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFFF) << 4) | (sub & 0xF))
 #define MAKE_NEW_VEGAS_VERSION(major, minor, build)			MAKE_NEW_VEGAS_VERSION_EX(major, minor, build, 0)
+#define UNPACK_NEW_VEGAS_VERSION(version, major, minor, build)	\
+	major = (version >> 24) & 0xFF; \
+	minor = (version >> 16) & 0xFF; \
+	build = (version >> 4) & 0xFFF; \
 
 // assume the major version number is 1.x
 #define RUNTIME_VERSION_1_0_0_240	MAKE_NEW_VEGAS_VERSION(0, 0, 240)		// 0x00000F00

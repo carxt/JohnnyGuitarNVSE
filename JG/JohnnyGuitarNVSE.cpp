@@ -127,7 +127,13 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Query(const NVSEInterface* apNVSE, PluginInfo*
 
 	if (apNVSE->nvseVersion < PACKED_NVSE_VERSION) {
 		char cBuffer[128];
-		sprintf_s(cBuffer, "NVSE version is outdated. This plugin requires v%i.%i.%i minimum.", NVSE_VERSION_INTEGER, NVSE_VERSION_INTEGER_MINOR, NVSE_VERSION_INTEGER_BETA);
+		uint32_t uiMajor = 0;
+		uint32_t uiMinor = 0;
+		uint32_t uiBuild = 0;
+		UNPACK_NEW_VEGAS_VERSION(apNVSE->nvseVersion, uiMajor, uiMinor, uiBuild);
+		sprintf_s(cBuffer, "Your xNVSE version is too old!\nInstalled: %i.%i.%i\nRequired: %i.%i.%i",
+			uiMajor, uiMinor, uiBuild, 
+			NVSE_VERSION_INTEGER, NVSE_VERSION_INTEGER_MINOR, NVSE_VERSION_INTEGER_BETA);
 		MessageBoxA(nullptr, cBuffer, JohnnyPluginData::JG_FULL_NAME, MB_OK | MB_ICONERROR);
 		return false;
 	}
