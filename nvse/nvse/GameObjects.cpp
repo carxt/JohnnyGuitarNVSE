@@ -1,11 +1,15 @@
 #include "GameObjects.h"
 #include "GameRTTI.h"
-#include "GameExtraData.h"
 #include "GameTasks.h"
 #include "GameUI.h"
 #include "GameProcess.h"
 #include "CommandTable.h"
 
+#include "Bethesda/ExtraCombatStyle.hpp"
+#include "Bethesda/ExtraLeveledCreature.hpp"
+#include "Bethesda/ExtraScript.hpp"
+#include "Bethesda/ExtraContainerChanges.hpp"
+#include "Bethesda/ExtraPersistentCell.hpp"
 #include "Bethesda/BSUtilities.hpp"
 
 TESForm* TESObjectREFR::GetBaseForm()
@@ -169,6 +173,13 @@ bool TESObjectREFR::GetDisabled(bool checkQueue) const
 	bool((__cdecl * fn_InEnableRefs)) (const TESObjectREFR*) = decltype(fn_InEnableRefs)(0x05AA680);
 	bool((__cdecl * fn_InPendingDisableRefs)) (const TESObjectREFR*) = decltype(fn_InPendingDisableRefs)(0x05AA630);
 	return (fn_GetDisabled(this) && !fn_InEnableRefs(this) ) || fn_InPendingDisableRefs(this);
+}
+
+BSSimpleList<ItemChange*>* TESObjectREFR::GetContainerChangesList() {
+	ExtraContainerChanges* xChanges = extraDataList.GetExtraData<ExtraContainerChanges>();
+	if (xChanges && xChanges->pChanges)
+		return xChanges->pChanges->pItems;
+	return nullptr;
 }
 
 // GAME - 0x8B36F0

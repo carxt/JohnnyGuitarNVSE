@@ -13,10 +13,12 @@
 #include "Bethesda/TESHavokUtilities.hpp"
 #include "Bethesda/TimeGlobal.hpp"
 #include "Bethesda/AILinearTaskThreadManager.hpp"
+#include "Bethesda/MenuConsole.hpp"
+#include "Bethesda/Sky.hpp"
+#include "Bethesda/InventoryChanges.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 
 #include "decoding.h"
-#include "events/EventFramework.h"
 #include "GameData.h"
 #include "GameObjects.h"
 #include "GameOSDepend.h"
@@ -24,19 +26,25 @@
 #include "GameRTTI.h"
 #include "GameTasks.h"
 #include "GameTiles.h"
+#include "GameUI.h"
 #include "ParamInfos.h"
 #include "PluginAPI.h"
 #include "utility.h"
 
+#include "events/EventFramework.h"
+
 #include "JG/JohnnyExtraData.hpp"
 #include "JG/ScriptUtils.hpp"
+
+#include "NVSE/InventoryRef.hpp"
+
 #include "internal/CommandOpcodes.h"
 
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 #include "Shared/Utils/StackObject.hpp"
 #include "Shared/Utils/CustomClass.hpp"
 
-#include <GameUI.h>
+#include <unordered_map>
 
 class BSRenderedTexture;
 
@@ -1274,10 +1282,10 @@ namespace JIPFixes {
 					TruncateString(pFullName, cTruncatedFullName, std::clamp<uint32_t>(uiTruncatedLength, 8, sizeof(cTruncatedFullName)));
 					pFullName = cTruncatedFullName;
 				}
-				Console_Print("%08X | %s | %s (%s) | %s", apForm->GetFormID(), pType, pEDID, pFullName, pFileName);
+				Interface::PrintLine("%08X | %s | %s (%s) | %s", apForm->GetFormID(), pType, pEDID, pFullName, pFileName);
 			}
 			else {
-				Console_Print("%08X | %s | %s | %s", apForm->GetFormID(), pType, pEDID, pFileName);
+				Interface::PrintLine("%08X | %s | %s | %s", apForm->GetFormID(), pType, pEDID, pFileName);
 			}
 		}
 
@@ -1480,7 +1488,7 @@ namespace JIPFixes {
 				char cErrorBuffer[512];
 				our_snprintf(cErrorBuffer, sizeof(cErrorBuffer), "Error! \"%s\" has been unloaded while being processed by OnClickMenuHandler. Do NOT do this!", pTilePath);
 				_MESSAGE(cErrorBuffer);
-				Console_Print(cErrorBuffer);
+				MenuConsole::GetSingleton()->Print(cErrorBuffer);
 				*reinterpret_cast<DWORD*>(pEBP + 0xC) = 0;
 				return false;
 			}
@@ -1955,7 +1963,7 @@ namespace JIPFixes {
 		bool Cmd_TriggerLightningFX_Execute(COMMAND_ARGS) {
 			*result = 0;
 			Sky* pSky = Sky::GetSingleton();
-			if (pSky && pSky->GetIsRaining()) {
+			if (pSky && pSky->IsRaining()) {
 				pSky->fFlash = 1;
 				pSky->uiFlashTime = TimeGlobal::GetSingleton()->uiLastTime;
 				*result = 1;

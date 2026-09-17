@@ -70,6 +70,8 @@ public:
 	bool Run(TESObjectREFR* apOwner, ScriptLocals* apLocals, TESObjectREFR* apOwnerContainer, bool abIsPartialScript);
 
 	static bool SetActionFlag(TESForm* apForm, ExtraDataList* apList, uint32_t aeEvent);
+
+	static bool GetConsoleOuput();
 #endif
 };
 

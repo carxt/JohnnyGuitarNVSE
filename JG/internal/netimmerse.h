@@ -11,6 +11,7 @@
 #include "Gamebryo/NiAVObjectPalette.hpp"
 #include "Gamebryo/NiStringExtraData.hpp"
 #include "Gamebryo/NiTexture.hpp"
+#include "Gamebryo/NiTexturingProperty.hpp"
 #include "Bethesda/BSXFlags.hpp"
 #include "Bethesda/NiUpdateData.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
@@ -722,15 +723,6 @@ public:
 	void SetTestMode(TestFunction aeTestFunc) {
 		m_usFlags.ucTestFunc = aeTestFunc;
 	}
-};
-
-// 30
-class NiTexturingProperty : public NiProperty {
-public:
-	NiTexturingProperty();
-	~NiTexturingProperty();
-
-	uint32_t				unk18[6];	// 18
 };
 
 // 24

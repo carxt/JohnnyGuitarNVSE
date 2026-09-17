@@ -2,7 +2,6 @@
 
 #include "GameForms.h"
 #include "GameBSExtraData.h"
-#include "GameExtraData.h"
 #include "GameSound.h"
 #include "Bethesda/BGSEntryPointPerkEntry.hpp"
 #include "Obsidian/AudioMarkerInfo.hpp"
@@ -11,6 +10,8 @@ class ScriptLocals;
 class ActiveEffect;
 class Animation;
 class MapMarkerData;
+class ExtraContainerChanges;
+class ItemChange;
 
 #if 1
 static const uint32_t s_TESObject_REFR_init = 0x55A2F0;			// TESObject_REFR initialization routine (first reference to s_TESObject_REFR_vtbl)
@@ -207,8 +208,6 @@ public:
 
 	TESForm* GetEmittanceSource() const { return ThisCall<TESForm*>(0x569580, this); }
 	void SetEmittanceSource(TESForm* apSource) { extraDataList.SetEmittanceSource(apSource); }
-
-	MEMBER_FN_PREFIX(TESObjectREFR);
 };
 
 #ifdef GAME

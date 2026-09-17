@@ -1,6 +1,7 @@
 #include "ExtraReputationIcons.hpp"
 #include "Bethesda/FileFinder.hpp"
 #include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/Interface.hpp"
 #include "GameAPI.h"
 #include "GameForms.h"
 #include "array"
@@ -162,7 +163,7 @@ namespace ExtraReputationIcons {
 		SRWSharedLock kLock(kMapLock);
 		auto it = pFactionIconsMap->begin();
 		for (auto const& it : *pFactionIconsMap) {
-			Console_Print("0x%X - %s %s %s %s", it.first, it.second[0], it.second[1], it.second[2], it.second[3]);
+			Interface::PrintLine("0x%X - %s %s %s %s", it.first, it.second[0], it.second[1], it.second[2], it.second[3]);
 		}
 	}
 

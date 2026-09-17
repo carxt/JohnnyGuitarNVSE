@@ -7,6 +7,7 @@
 #include "GameScript.h"
 #include "StringVar.h"
 #include <Bethesda/TLSData.hpp>
+#include "Bethesda/Interface.hpp"
 
 static NVSEStringVarInterface* s_StringVarInterface = NULL;
 bool extraTraces = false;
@@ -17,12 +18,6 @@ typedef void* (*_GetSingleton)(bool canCreateNew);
 #ifdef GAME
 
 const _ExtractArgs ExtractArgs = (_ExtractArgs)0x005ACCB0;
-
-const _FormHeap_Allocate FormHeap_Allocate = (_FormHeap_Allocate)0x00401000;
-const _FormHeap_Free FormHeap_Free = (_FormHeap_Free)0x00401030;
-
-const _LookupFormByID LookupFormByID = (_LookupFormByID)0x004839C0;
-const _CreateFormInstance CreateFormInstance = (_CreateFormInstance)0x00465110;
 
 const _GetSingleton ConsoleManager_GetSingleton = (_GetSingleton)0x0071B160;
 bool* bEchoConsole = (bool*)0x011F158C;
@@ -45,19 +40,12 @@ SaveGameManager** g_saveGameManager = (SaveGameManager**)0x011DE134;
 //	FormMap* g_FormMap = (FormMap *)0x009EE18C;		// currently unused
 //	TESDataHandler ** g_dataHandler = (TESDataHandler **)0x00A0E064;
 //	TES** g_TES = (TES**)0x00A0ABB0;
-const _LookupFormByID LookupFormByID = (_LookupFormByID)0x004F9620;	// Call between third reference to RTTI_TESWorldspace and RuntimeDynamicCast
 const _GetFormByID GetFormByID = (_GetFormByID)(0x004F9650); // Search for aNonPersistentR and aPlayer (third call below aPlayer, second is LookupFomrByID)
-const _FormHeap_Allocate FormHeap_Allocate = (_FormHeap_Allocate)0x00401000;
-const _FormHeap_Free FormHeap_Free = (_FormHeap_Free)0x0000401180;
 const _ShowCompilerError ShowCompilerError = (_ShowCompilerError)0x005C5730;	// Called with aNonPersistentR (still same sub as the other one)
 
 #endif
 
 #if RUNTIME
-
-bool IsConsoleMode() {
-	return TLSData::Get()->bConsoleOutput;
-}
 
 bool GetConsoleEcho() {
 	return *bEchoConsole != 0;
@@ -81,19 +69,6 @@ ConsoleManager* ConsoleManager::GetSingleton(void) {
 	return (ConsoleManager*)ConsoleManager_GetSingleton(true);
 }
 
-void Console_Print(const char* fmt, ...) {
-	ConsoleManager* mgr = ConsoleManager::GetSingleton();
-	if (mgr) {
-		va_list	args;
-
-		va_start(args, fmt);
-
-		CALL_MEMBER_FN(mgr, Print)(fmt, args);
-
-		va_end(args);
-	}
-}
-
 SaveGameManager* SaveGameManager::GetSingleton() {
 	return *g_saveGameManager;
 }
@@ -110,7 +85,7 @@ void ScriptLocals::Dump(void) {
 	for (uint32_t n = 0; n < nEvents; ++n) {
 		Event* pEvent = m_eventList->GetNthItem(n);
 		if (pEvent) {
-			Console_Print("%08X (%s) %08X", pEvent->object, GetObjectClassName(pEvent->object), pEvent->eventMask);
+			Interface::PrintLine("%08X (%s) %08X", pEvent->object, pEvent->object->GetFormTypeString(), pEvent->eventMask);
 		}
 	}
 }

@@ -1,7 +1,8 @@
 #include "fn_mediaset.h"
-#include <GameExtraData.h>
 #include <GameObjects.h>
-#include "decoding.h"
+#include "Bethesda/ExtraRadius.hpp"
+#include "Bethesda/Interface.hpp"
+#include "Obsidian/ExtraAudioMarker.hpp"
 
 bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS)
 {
@@ -12,8 +13,8 @@ bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS)
 		if (pAcousticSpace)
 			*reinterpret_cast<FormID*>(result) = pAcousticSpace->GetFormID();
 
-		if (IsConsoleMode())
-			Console_Print("GetAcousticSpace  >> 0x%lx", *reinterpret_cast<FormID*>(result));
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetAcousticSpace  >> 0x%lx", *reinterpret_cast<FormID*>(result));
 	}
 	return true;
 }
@@ -26,14 +27,14 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, pAcousticSpace) && pCell)
 	{
 		if (!IS_TYPE(pCell, TESObjectCELL)) [[unlikely]] {
-			if (IsConsoleMode())
-				Console_Print("SetAcousticSpace >> Passed an invalid cell");
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("SetAcousticSpace >> Passed an invalid cell");
 			return true;
 		}
 
 		if (pAcousticSpace && !IS_TYPE(pAcousticSpace, BGSAcousticSpace)) [[unlikely]] {
-			if (IsConsoleMode())
-				Console_Print("SetAcousticSpace >> Passed an invalid acoustic space");
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("SetAcousticSpace >> Passed an invalid acoustic space");
 			return true;
 		}
 		pCell->SetAcousticSpace(pAcousticSpace);
@@ -73,11 +74,11 @@ SPEC_NOINLINE bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
 	Cmd_AudioMarkerGetController_Eval(thisObj, nullptr, nullptr, result);
-	if (thisObj && IsConsoleMode()) {
+	if (thisObj && Script::GetConsoleOuput()) {
 		if (*result)
-			Console_Print("AudioMarkerGetController >> 0x%lx", *reinterpret_cast<FormID*>(result));
+			Interface::PrintLine("AudioMarkerGetController >> 0x%lx", *reinterpret_cast<FormID*>(result));
 		else
-			Console_Print("Calling reference is not an AudioMarker");
+			Interface::PrintLine("Calling reference is not an AudioMarker");
 	}
 	return true;
 }
@@ -89,11 +90,11 @@ bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
 		ExtraAudioMarker* audioMrkr = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
 		if (audioMrkr && audioMrkr->pData) {
 			audioMrkr->pData->uiMediaLocationController = locationController->GetFormID();
-			Console_Print("AudioMarkerSetController >> 0x%lx, %s", locationController->GetFormID(), locationController->GetFormEditorID());
+			Interface::PrintLine("AudioMarkerSetController >> 0x%lx, %s", locationController->GetFormID(), locationController->GetFormEditorID());
 
 		}
-		else if (IsConsoleMode()) {
-			Console_Print("Calling reference is not an AudioMarker");
+		else if (Script::GetConsoleOuput()) {
+			Interface::PrintLine("Calling reference is not an AudioMarker");
 		}
 	}
 	return true;
@@ -130,10 +131,10 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 				break;
 
 			}
-			Console_Print("AudioMarkerSetProperty >> %s, %d, %.2f", thisObj->GetFormEditorID(), type, newVal);
+			Interface::PrintLine("AudioMarkerSetProperty >> %s, %d, %.2f", thisObj->GetFormEditorID(), type, newVal);
 		}
-		else if (IsConsoleMode()) {
-			Console_Print("Calling reference is not an AudioMarker");
+		else if (Script::GetConsoleOuput()) {
+			Interface::PrintLine("Calling reference is not an AudioMarker");
 		}
 	}
 	return true;
@@ -169,10 +170,10 @@ bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
 
 			}
 
-			Console_Print("AudioMarkerGetProperty >> %s, %d, %.2f", thisObj->GetFormEditorID(), type, *result);
+			Interface::PrintLine("AudioMarkerGetProperty >> %s, %d, %.2f", thisObj->GetFormEditorID(), type, *result);
 		}
-		else if (IsConsoleMode()) {
-			Console_Print("Calling reference is not an AudioMarker");
+		else if (Script::GetConsoleOuput()) {
+			Interface::PrintLine("Calling reference is not an AudioMarker");
 		}
 	}
 	return true;
@@ -220,8 +221,8 @@ bool Cmd_GetMediaSetTraitNumeric_Execute(COMMAND_ARGS) {
 			break;
 		}
 
-		if (IsConsoleMode())
-			Console_Print("GetMediaSetTraitNumeric %d >> %.2f", iTrait, *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetMediaSetTraitNumeric %d >> %.2f", iTrait, *result);
 	}
 	return true;
 }
@@ -328,8 +329,8 @@ bool Cmd_GetMediaSetTraitString_Execute(COMMAND_ARGS) {
 		if (iLayer >= 0 && iLayer <= 5) {
 			const char* pName = pMediaSet->kLayers[iLayer].strName.c_str();
 			g_strInterface->Assign(PASS_COMMAND_ARGS, pName);
-			if (IsConsoleMode())
-				Console_Print("GetMediaSetTraitString %d >> %s", iLayer, pName);
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("GetMediaSetTraitString %d >> %s", iLayer, pName);
 		}
 	}
 	return true;

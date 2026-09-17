@@ -1,5 +1,6 @@
 #include "fn_book.h"
 #include "Bethesda/TESObjectBOOK.hpp"
+#include "Bethesda/Interface.hpp"
 #include "JG/ScriptUtils.hpp"
 
 bool Cmd_GetBookFlags_Execute(COMMAND_ARGS) {
@@ -7,8 +8,8 @@ bool Cmd_GetBookFlags_Execute(COMMAND_ARGS) {
 	TESObjectBOOK* pBook = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBook) && pBook && IS_ID(pBook, TESObjectBOOK)) {
 		*result = pBook->kData.ucFlags;
-		if (IsConsoleMode()) 
-			Console_Print("GetBookFlags >> %.f", *result);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetBookFlags >> %.f", *result);
 	}
 	return true;
 }
@@ -29,8 +30,8 @@ bool Cmd_GetBookSkill_Execute(COMMAND_ARGS) {
 	TESObjectBOOK* pBook = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pBook) && pBook && IS_ID(pBook, TESObjectBOOK)) {
 		*result = pBook->GetTeaches();
-		if (IsConsoleMode()) 
-			Console_Print("GetBookSkill >> %.f", *result);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetBookSkill >> %.f", *result);
 	}
 	return true;
 }

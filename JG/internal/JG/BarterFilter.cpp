@@ -1,7 +1,8 @@
 #include "BarterFilter.hpp"
-#include "GameExtraData.h"
 #include "GameObjects.h"
 #include "GameUI.h"
+
+#include "Bethesda/ItemChange.hpp"
 
 #include "JGSetList.hpp"
 

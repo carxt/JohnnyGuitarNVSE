@@ -1,17 +1,26 @@
 #include "fn_utility.h"
-#include "Bethesda/BSUtilities.hpp"
-#include <JG/ExtraUISounds.hpp>
-#include <JG/ExtraReputationIcons.hpp>
-#include <JG/JohnnyPatches.hpp>
-#include <shared/BSMemory/BSScrapMemory.hpp>
 #include "GameProcess.h"
+#include <decoding.h>
 #include <GameUI.h>
 #include <misc/misc.h>
-#include <decoding.h>
-#include <JG/CameraOverride.hpp>
-#include <JG/JohnnyRadios.hpp>
-#include <JG/DisabledLevelUp.hpp>
-#include <JIP/JIPUtils.hpp>
+
+#include "Bethesda/BSCustomSplatterExtraData.hpp"
+#include "Bethesda/BSShaderBloodSplatterProperty.hpp"
+#include "Bethesda/BSShaderManager.hpp"
+#include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/ScreenCustomSplatter.hpp"
+#include "Bethesda/Sky.hpp"
+
+#include "JG/CameraOverride.hpp"
+#include "JG/DisabledLevelUp.hpp"
+#include "JG/ExtraReputationIcons.hpp"
+#include "JG/ExtraUISounds.hpp"
+#include "JG/JohnnyPatches.hpp"
+#include "JG/JohnnyRadios.hpp"
+#include "JIP/JIPUtils.hpp"
+
+#include <shared/BSMemory/BSScrapMemory.hpp>
+
 #include <random>
 
 extern DWORD dwGameStartTimestamp;
@@ -23,8 +32,8 @@ SPEC_INLINE bool Cmd_GameGetSecondsPassed_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_GameGetSecondsPassed_Execute(COMMAND_ARGS) {
 	Cmd_GameGetSecondsPassed_Eval(thisObj, 0, 0, result);
-	if (IsConsoleMode())
-		Console_Print("GameGetSecondsPassed >> %0.2f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GameGetSecondsPassed >> %0.2f", *result);
 	return true;
 }
 
@@ -128,7 +137,7 @@ bool Cmd_IsDLLLoaded_Execute(COMMAND_ARGS) {
 				*result = 1;
 			}
 		}
-		if (IsConsoleMode()) Console_Print("IsDLLLoaded \"%s\" >> %.f", dllName, *result);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("IsDLLLoaded \"%s\" >> %.f", dllName, *result);
 	}
 	return true;
 }
@@ -257,7 +266,7 @@ bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 			*result = pFile->ucCompileIndex;
 		else
 			*result = 0xFF;
-		if (IsConsoleMode()) Console_Print("GetFormOverrideIndex >> %.f", *result);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetFormOverrideIndex >> %.f", *result);
 	}
 	return true;
 }
@@ -271,8 +280,8 @@ SPEC_NOINLINE bool Cmd_GetPipBoyMode_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_GetPipBoyMode_Execute(COMMAND_ARGS) {
 	Cmd_GetPipBoyMode_Eval(nullptr, nullptr, nullptr, result);
-	if (IsConsoleMode())
-		Console_Print("GetPipBoyMode >> %.2f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetPipBoyMode >> %.2f", *result);
 	return true;
 }
 
@@ -294,8 +303,8 @@ bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 bool Cmd_GetDefaultHeapSize_Execute(COMMAND_ARGS) {
 	uint32_t heapSize = *(reinterpret_cast<FormID*>(0x866E9F + 1));
 	*result = heapSize / 1024 / 1024;
-	if (IsConsoleMode())
-		Console_Print("DefaultHeapInitialAllocMB >> `%f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("DefaultHeapInitialAllocMB >> `%f", *result);
 	return true;
 }
 
@@ -307,16 +316,16 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 		if (pForm)
 			*reinterpret_cast<FormID*>(result) = pForm->GetFormID();
 
-		if (IsConsoleMode())
-			Console_Print("EditorIDToFormID >> 0x%08X", *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("EditorIDToFormID >> 0x%08X", *result);
 	}
 	return true;
 }
 
 bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
 	TESForm* form = nullptr;
-	if (thisObj) Console_Print("0x%08X", thisObj);
-	else if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) Console_Print("0x%08X", form);
+	if (thisObj) Interface::PrintLine("0x%08X", thisObj);
+	else if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) Interface::PrintLine("0x%08X", form);
 	return true;
 }
 
@@ -327,11 +336,11 @@ bool Cmd_RefAddrxData_Execute(COMMAND_ARGS) {
 		if (type < EXTRA_DATA_TYPE::COUNT) {
 			void* res = thisObj->extraDataList.GetExtraData(type);
 			if (res) {
-				Console_Print("0x%08X", res);
+				Interface::PrintLine("0x%08X", res);
 				return true;
 			}
 		}
-		Console_Print("Not found");
+		Interface::PrintLine("Not found");
 	}
 	return true;
 }
@@ -366,8 +375,8 @@ bool Cmd_GetTimePlayed_Execute(COMMAND_ARGS) {
 	uint32_t uiType = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &uiType);
 	Cmd_GetTimePlayed_Eval(nullptr, reinterpret_cast<void*>(uiType), nullptr, result);
-	if (IsConsoleMode())
-		Console_Print("GetTimePlayed >> %f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetTimePlayed >> %f", *result);
 	return true;
 }
 
@@ -409,8 +418,8 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
 	uint32_t uiPatch = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiPatch)) {
 		Cmd_GetJohnnyPatch_Eval(nullptr, reinterpret_cast<void*>(uiPatch), nullptr, result);
-		if (IsConsoleMode())
-			Console_Print("GetJohnnyPatch %d >> %d", uiPatch, *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetJohnnyPatch %d >> %d", uiPatch, *result);
 	}
 	return true;
 }
@@ -424,8 +433,8 @@ bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
 		if (form)
 			edid = form->GetFormEditorID();
 		g_strInterface->Assign(PASS_COMMAND_ARGS, edid);
-		if (IsConsoleMode())
-			Console_Print("GetEditorID >> %s", edid);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetEditorID >> %s", edid);
 	}
 	return true;
 }
@@ -471,13 +480,52 @@ bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 			if (auto BipedAnim = ((Character*)thisObj)->pBipedAnim) {
 				if (BipedAnim->kBones[optIdx].pParent && BipedAnim->kBones[optIdx].pParent->IsNode()) {
 					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->kBones[optIdx].pParent->m_kName);
-					if (IsConsoleMode())
-						Console_Print("GetOptionalBone >> %s", BipedAnim->kBones[optIdx].pParent->m_kName);
+					if (Script::GetConsoleOuput())
+						Interface::PrintLine("GetOptionalBone >> %s", BipedAnim->kBones[optIdx].pParent->m_kName);
 				}
 			}
 	}
 	return true;
 }
+
+
+static void __fastcall ActivateSplatter(uint32_t auiCount, float afDuration, float afSizeMult, float afOpacityMult, NiTexture* apAlphaTex, NiTexture* apColorTex, NiTexture* apFlareTex) {
+	if (!ScreenCustomSplatter::bEnabled || auiCount == 0)
+		return;
+
+	NiNode* pNewNode = ScreenCustomSplatter::CreateGeometry(auiCount, afSizeMult, afOpacityMult);
+	ScreenCustomSplatter::uiCount += auiCount;
+
+	BSSplatterData kSplatterData{};
+	kSplatterData.fAge = 0.f;
+	kSplatterData.fDuration = afDuration;
+	kSplatterData.fAlpha = 1.f;
+	kSplatterData.uiCount = auiCount;
+
+	BSCustomSplatterExtraData* pExtraData = BSCustomSplatterExtraData::Create(kSplatterData);
+	pNewNode->AddExtraData(pExtraData);
+
+	NiTriShape* pShape = static_cast<NiTriShape*>(pNewNode->GetAt(0));
+	BSShaderBloodSplatterProperty* pShaderProp = static_cast<BSShaderBloodSplatterProperty*>(pShape->shaderProp);
+
+	if (apAlphaTex)
+		pShaderProp->SetTexture(0, apAlphaTex);
+
+	if (apColorTex)
+		pShaderProp->SetTexture(1, apColorTex);
+
+	// IsHDR
+	if (BSShaderManager::bHDR && apFlareTex) {
+		NiTriShape* pHDRShape = static_cast<NiTriShape*>(pNewNode->GetAt(1));
+		pShaderProp = static_cast<BSShaderBloodSplatterProperty*>(pHDRShape->shaderProp);
+		pShaderProp->SetTexture(0, apFlareTex);
+	}
+
+	ScreenCustomSplatter::GetCurrentRoot()->AttachChild(pNewNode, true);
+	BSShaderBloodSplatterProperty::SetFadeSourceRecurse(pNewNode, &pExtraData->kData.fAlpha);
+	NiUpdateData kUpdateData = NiUpdateData();
+	ScreenCustomSplatter::GetCurrentRoot()->Update(kUpdateData);
+};
 
 bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 	uint32_t uiCount = 0;
@@ -485,7 +533,6 @@ bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 	float fDuration = 0.f;
 	float fSizeMult = 0.f;
 	float fOpacityMult = 0.f;
-
 
 	char cTexturePath0[MAX_PATH] = {};
 	char cTexturePath1[MAX_PATH] = {};
@@ -500,9 +547,9 @@ bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 		pTES->CreateTextureImage(cTexturePath0, pAlphaTex, false, false);
 		pTES->CreateTextureImage(cTexturePath1, pColorTex, false, false);
 		pTES->CreateTextureImage(cTexturePath2, pFlareTex, false, false);
-		*(bool*)0x11C77E9 = uiNoFade;
+		ScreenCustomSplatter::bSecondsForFade = uiNoFade;
 
-		ScreenCustomSplatter::ActivateAlt(uiCount, fDuration, fSizeMult, fOpacityMult, pAlphaTex, pColorTex, pFlareTex);
+		ActivateSplatter(uiCount, fDuration, fSizeMult, fOpacityMult, pAlphaTex, pColorTex, pFlareTex);
 		*result = 1;
 		return true;
 	}
@@ -521,7 +568,7 @@ bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	*result = JohnnyPatches::fViewmodelNearDistance;
-	if (IsConsoleMode()) Console_Print("GetViewmodelClipDistance >> %.3f", *result);
+	if (Script::GetConsoleOuput()) Interface::PrintLine("GetViewmodelClipDistance >> %.3f", *result);
 	return true;
 }
 
@@ -598,8 +645,8 @@ bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
 		pRed->data = rColor.r;
 		pGreen->data = rColor.g;
 		pBlue->data = rColor.b;
-		if (IsConsoleMode()) 
-			Console_Print("GetCurrentSkyColor %d >> %f %f %f", eColorType, rColor.r, rColor.g, rColor.b);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetCurrentSkyColor %d >> %f %f %f", eColorType, rColor.r, rColor.g, rColor.b);
 		*result = 1;
 	}
 	return true;

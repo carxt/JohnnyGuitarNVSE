@@ -27,8 +27,6 @@ static const uint32_t s_Console__Print = 0x0071D0A0;
 
 extern bool extraTraces;
 
-void Console_Print(const char* fmt, ...);
-
 //typedef void * (* _FormHeap_Allocate)(uint32_t size);
 //extern const _FormHeap_Allocate FormHeap_Allocate;
 //
@@ -43,7 +41,6 @@ extern const _ExtractArgs ExtractArgs;
 typedef TESForm* (*_CreateFormInstance)(uint8_t type);
 extern const _CreateFormInstance CreateFormInstance;
 
-bool IsConsoleMode();
 bool GetConsoleEcho();
 void SetConsoleEcho(bool doEcho);
 const char* GetFullName(TESForm* baseForm);
@@ -483,6 +480,14 @@ public:
 
 	bool GetHasFileStrings() const {
 		return ucArchiveFlags.bHasFileStrings;
+	}
+
+	const char* GetFileNameForFileEntry(BSFileEntry* apFileEntry) {
+#ifdef GAME
+		return ThisCall<const char*>(0xAF9BA0, this, apFileEntry);
+#else
+		return ThisCall<const char*>(0x8A8580, this, apFileEntry);
+#endif
 	}
 
 	bool FindFile(const BSHash& arDirectoryHash, const BSHash& arFileNameHash, uint32_t& arDirectoryID, uint32_t& arFileID, const char* apFileName) {

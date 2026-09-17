@@ -35,6 +35,12 @@ public:
 	static void SetImageSpaceParameters(ImageSpaceParameterData* apParams);
 #endif
 
+#ifdef GAME
+	static constexpr AddressPtr<bool, 0x11F941E> bHDR;
+#else
+	static constexpr AddressPtr<bool, 0xF23E6E> bHDR;
+#endif
+
 private:
 #ifdef GAME
 	static constexpr AddressPtr<NiFixedString*, 0x11F94BC> pTexPercTag;

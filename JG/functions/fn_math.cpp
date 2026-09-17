@@ -6,6 +6,7 @@
 #include "JG/WorldToScreen.hpp"
 
 #include "Bethesda/TESMain.hpp"
+#include "Bethesda/Interface.hpp"
 
 enum FOVType {
 	VIEWMODEL	= 0,
@@ -60,8 +61,8 @@ bool Cmd_GetRGBColor_Execute(COMMAND_ARGS) {
 	uint32_t uiR, uiG, uiB;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiR, &uiG, &uiB) && uiR <= UINT8_MAX && uiG <= UINT8_MAX && uiB <= UINT8_MAX) {
 		*result = uint32_t(((uiR & UINT8_MAX) << 16) + ((uiG & UINT8_MAX) << 8) + (uiB & UINT8_MAX));
-		if (IsConsoleMode()) 
-			Console_Print("0x%X", (uint32_t)*result);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("0x%X", (uint32_t)*result);
 	}
 	return true;
 }
@@ -238,8 +239,8 @@ bool Cmd_GetVector3DDistance_Execute(COMMAND_ARGS) {
 	NiPoint3 kPosB;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kPosA.x, &kPosA.y, &kPosA.z, &kPosB.x, &kPosB.y, &kPosB.z)) {
 		*result = kPosA.Distance(kPosB);
-		if (IsConsoleMode()) 
-			Console_Print("Get3DDistance >> %f", *result);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("Get3DDistance >> %f", *result);
 	}
 	return true;
 }
@@ -273,8 +274,8 @@ bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	
 	*result = pObject->m_kWorld.m_kTranslate.Distance(kPos);
 	
-	if (IsConsoleMode()) 
-		Console_Print("Get3DDistanceToNiNode >> %f", *result);
+	if (Script::GetConsoleOuput()) 
+		Interface::PrintLine("Get3DDistanceToNiNode >> %f", *result);
 	return true;
 }
 
@@ -294,8 +295,8 @@ bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 
 	*result = pObjectA->m_kWorld.m_kTranslate.Distance(pObjectB->m_kWorld.m_kTranslate);
 
-	if (IsConsoleMode()) 
-		Console_Print("Get3DDistanceBetweenNiNodes >> %f", *result);
+	if (Script::GetConsoleOuput()) 
+		Interface::PrintLine("Get3DDistanceBetweenNiNodes >> %f", *result);
 	return true;
 }
 

@@ -1,6 +1,7 @@
 #include "fn_region.h"
 #include "Bethesda/TESRegionDataManager.hpp"
 #include "Bethesda/TESDataHandler.hpp"
+#include "Bethesda/Interface.hpp"
 
 TESRegionDataWeather* __fastcall GetWeatherData(const TESRegion* apRegion) {
 	TESRegionData* pData = apRegion->GetRegionDataList()->Find(REGION_DATA_ID::WEATHER);
@@ -101,8 +102,8 @@ bool Cmd_GetRegionWeathers_Execute(COMMAND_ARGS) {
 				WeatherEntry* pEntry = pIter->GetItem();
 				if (pEntry) {
 					g_arrInterface->AppendElement(pArray, NVSEArrayElement(pEntry->pWeather));
-					if (IsConsoleMode())
-						Console_Print(pEntry->pWeather->GetFormEditorID());
+					if (Script::GetConsoleOuput())
+						Interface::PrintLine(pEntry->pWeather->GetFormEditorID());
 				}
 				pIter = pIter->GetNext();
 			}
@@ -131,8 +132,8 @@ bool Cmd_GetRegionWeatherOverride_Execute(COMMAND_ARGS) {
 		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
 		if (pWeatherData) {
 			*result = pWeatherData->bOverride;
-			if (IsConsoleMode()) {
-				Console_Print("GetRegionWeatherOverride >> %.f", *result);
+			if (Script::GetConsoleOuput()) {
+				Interface::PrintLine("GetRegionWeatherOverride >> %.f", *result);
 			}
 		}
 	}
@@ -159,8 +160,8 @@ bool Cmd_GetRegionWeatherPriority_Execute(COMMAND_ARGS) {
 		TESRegionDataWeather* pWeatherData = GetWeatherData(pRegion);
 		if (pWeatherData) {
 			*result = pWeatherData->GetPriority();
-			if (IsConsoleMode()) {
-				Console_Print("GetRegionWeatherPriority >> %.f", *result);
+			if (Script::GetConsoleOuput()) {
+				Interface::PrintLine("GetRegionWeatherPriority >> %.f", *result);
 			}
 		}
 	}
@@ -192,8 +193,8 @@ bool Cmd_IsWeatherInRegion_Execute(COMMAND_ARGS) {
 			while (pIter && !pIter->IsEmpty()) {
 				WeatherEntry* pEntry = pIter->GetItem();
 				if (pEntry && pEntry->pWeather == pWeather) {
-					if (IsConsoleMode())
-						Console_Print("The weather is found in Region Data");
+					if (Script::GetConsoleOuput())
+						Interface::PrintLine("The weather is found in Region Data");
 
 					*result = 1;
 					return true;
@@ -201,8 +202,8 @@ bool Cmd_IsWeatherInRegion_Execute(COMMAND_ARGS) {
 
 				pIter = pIter->GetNext();
 			}
-			if (IsConsoleMode())
-				Console_Print("The weather is NOT found in Region Data");
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("The weather is NOT found in Region Data");
 		}
 	}
 	return true;
@@ -220,16 +221,16 @@ bool Cmd_RemoveRegionWeather_Execute(COMMAND_ARGS) {
 				WeatherEntry* pEntry = pIter->GetItem();
 				if (pEntry && pEntry->pWeather == pWeather) {
 					pIter->RemoveHead();
-					if (IsConsoleMode())
-						Console_Print("The weather is removed from Region Data");
+					if (Script::GetConsoleOuput())
+						Interface::PrintLine("The weather is removed from Region Data");
 					*result = 1;
 					return true;
 				}
 
 				pIter = pIter->GetNext();
 			}
-			if (IsConsoleMode())
-				Console_Print("The pWeather is NOT found in Region Data");
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("The pWeather is NOT found in Region Data");
 		}
 	}
 	return true;

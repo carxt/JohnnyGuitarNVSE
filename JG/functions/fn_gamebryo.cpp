@@ -10,6 +10,7 @@
 #include "Bethesda/AILinearTaskThreadManager.hpp"
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/BSWindModifier.hpp"
+#include "Bethesda/Interface.hpp"
 
 #include <JG/TaskQueue.hpp>
 #include "JG/ScriptUtils.hpp"
@@ -519,19 +520,19 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 				NiControllerManager* pCtrlMgr = pTarget->GetController<NiControllerManager>();
 				if (pCtrlMgr) {
 					*result = pCtrlMgr->IsSequenceActive(cSequenceName);
-					if (IsConsoleMode())
-						Console_Print("IsNiSequenceActive >> %s: %s", cSequenceName, *result ? "true" : "false");
+					if (Script::GetConsoleOuput())
+						Interface::PrintLine("IsNiSequenceActive >> %s: %s", cSequenceName, *result ? "true" : "false");
 				}
-				else if (IsConsoleMode()) {
-					Console_Print("Controller not found");
+				else if (Script::GetConsoleOuput()) {
+					Interface::PrintLine("Controller not found");
 				}
 			}
-			else if (IsConsoleMode()) {
-				Console_Print("Block not found: %s", cObjectName);
+			else if (Script::GetConsoleOuput()) {
+				Interface::PrintLine("Block not found: %s", cObjectName);
 			}
 		}
-		else if (IsConsoleMode()) {
-			Console_Print("Root node not found");
+		else if (Script::GetConsoleOuput()) {
+			Interface::PrintLine("Root node not found");
 		}
 	}
 	return true;
@@ -1013,8 +1014,8 @@ bool Cmd_GetNiLightColor_Execute(COMMAND_ARGS) {
 		pGreen->data = kColor.g;
 		pBlue->data = kColor.b;
 
-		if (IsConsoleMode())
-			Console_Print("GetNiLightColor %i >> %f %f %f", eItem, kColor.r, kColor.g, kColor.b);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetNiLightColor %i >> %f %f %f", eItem, kColor.r, kColor.g, kColor.b);
 
 		*result = 1;
 	}

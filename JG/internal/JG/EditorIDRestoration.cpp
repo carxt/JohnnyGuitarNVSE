@@ -1,6 +1,7 @@
 #include "GameObjects.h"
 #include "GameData.h"
 #include "JohnnyExtraData.hpp"
+#include "Bethesda/MenuConsole.hpp"
 #include "misc/misc.h"
 
 STACK_FRAME_OPT_ENABLE
@@ -356,7 +357,7 @@ namespace EDIDRestoration {
 		return 0;
 	}
 
-	HookUtils::CallDetour kRemoveFromDataStructures[2];
+	HookUtils::CallDetour kRemoveFromDataStructures;
 	class TESFormEx : public TESForm {
 	public:
 		uint32_t hk_GetFormEditorIDLength() const noexcept {
@@ -408,10 +409,9 @@ namespace EDIDRestoration {
 			return false;
 		}
 
-		// Removes EDIDs from the map when form is marked as temporary, or added to the garbage collector
-		template<uint32_t INDEX>
+		// Removes EDIDs from the map when form is marked as temporary
 		void hk_DetachEditorIDs() noexcept {
-			ThisCall(kRemoveFromDataStructures[INDEX], this);
+			ThisCall(kRemoveFromDataStructures, this);
 			JohnnyExtraData* pData = JohnnyExtraData::Find(this);
 			if (pData) [[likely]]
 				pData->DetachEditorIDs();
@@ -461,8 +461,7 @@ namespace EDIDRestoration {
 		Map::InitHooks();
 		IgnoredConflicts::InitializeStrings();
 
-		kRemoveFromDataStructures[0].ReplaceCall(0x48449A, &TESFormEx::hk_DetachEditorIDs<0>); // TESForm::SetTemporary
-		kRemoveFromDataStructures[1].ReplaceCall(0x8680A4, &TESFormEx::hk_DetachEditorIDs<1>); // GarbageCollector::Add(TESObjectREFR)
+		kRemoveFromDataStructures.ReplaceCall(0x48449A, &TESFormEx::hk_DetachEditorIDs); // TESForm::SetTemporary
 
 		HookUtils::WriteRelJump(0x483A00, TESFormEx::hk_GetFormByEditorID); // TESForm::GetFormByEditorID - adds a lock
 
@@ -512,7 +511,7 @@ namespace EDIDRestoration {
 			const float fRandom01 = CdeclCall<float>(0x5C5420);
 			if (fRandom01 < 0.001f)
 				pName = "slop";
-			Console_Print("Some EDIDs are conflicting! Check JohnnyGuitarNVSE.log for details. (Ignore this message if you are not a %s author.)", pName);
+			MenuConsole::GetSingleton()->Print("Some EDIDs are conflicting! Check JohnnyGuitarNVSE.log for details. (Ignore this message if you are not a %s author.)", pName);
 		}
 	}
 

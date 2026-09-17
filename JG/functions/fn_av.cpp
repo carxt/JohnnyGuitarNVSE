@@ -1,22 +1,31 @@
 #include "fn_av.h"
 #include "GameObjects.h"
-#include "GameAPI.h"
+#include "Bethesda/Interface.hpp"
 
-bool(__cdecl* Cmd_GetAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BD8A0;
-bool(__cdecl* Cmd_SetAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BDCD0;
-bool(__cdecl* Cmd_ForceAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BE190;
-bool(__cdecl* Cmd_ModAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BDE40;
-bool(__cdecl* Cmd_DamageAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BDF20;
-bool(__cdecl* Cmd_RestoreAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BE080;
-bool(__cdecl* Cmd_GetBaseAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BE6E0;
+inline Cmd_Execute Cmd_GetAV		= reinterpret_cast<Cmd_Execute>(0x5BD8A0);
+inline Cmd_Execute Cmd_SetAV		= reinterpret_cast<Cmd_Execute>(0x5BDCD0);
+inline Cmd_Execute Cmd_ForceAV		= reinterpret_cast<Cmd_Execute>(0x5BE190);
+inline Cmd_Execute Cmd_ModAV		= reinterpret_cast<Cmd_Execute>(0x5BDE40);
+inline Cmd_Execute Cmd_DamageAV		= reinterpret_cast<Cmd_Execute>(0x5BDF20);
+inline Cmd_Execute Cmd_RestoreAV	= reinterpret_cast<Cmd_Execute>(0x5BE080);
+inline Cmd_Execute Cmd_GetBaseAV	= reinterpret_cast<Cmd_Execute>(0x5BE6E0);
+
+bool Cmd_GetThresholdedActorValue_Eval(COMMAND_ARGS_EVAL) {
+	*result = 0;
+	if (thisObj && thisObj->IsActor()) {
+		const ActorValue::Index eActorValue = static_cast<ActorValue::Index>(reinterpret_cast<uint32_t>(arg1));
+		*result = static_cast<Actor*>(thisObj)->avOwner.GetClampedActorValueF(eActorValue);
+	}
+	return true;
+}
 
 bool Cmd_GetThresholdedActorValue_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t avCode;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &avCode) && thisObj->IsActor()) {
-		Actor* actor = (Actor*)thisObj;
-		*result = ThisCall<double>(0x66EF50, &actor->avOwner, avCode);
-		if (IsConsoleMode()) Console_Print("GetThresholdAV %d >> %.2f", avCode, *result);
+	ActorValue::Index eActorValue = ActorValue::Index::NONE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eActorValue) && thisObj->IsActor()) {
+		Cmd_GetThresholdedActorValue_Eval(thisObj, (void*)eActorValue, nullptr, result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetThresholdAV %s >> %.2f", ActorValue::GetActorValueName(eActorValue), *result);
 	}
 	return true;
 }

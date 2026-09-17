@@ -1,34 +1,43 @@
 #include "fn_form.h"
-#include "GameSettings.h"
-#include "Bethesda/TESObjectList.hpp"
-#include "GameObjects.h"
+#include "decoding.h"
+#include "GameData.h"
 #include "GameForms.h"
+#include "GameObjects.h"
+#include "GameProcess.h"
+#include "GameRTTI.h"
+#include "GameTasks.h"
+#include "PluginAPI.h"
+
+#include "Bethesda/AILinearTaskThreadManager.hpp"
+#include "Bethesda/BGSLoadGameSubBuffer.hpp"
+#include "Bethesda/BGSPrimitive.hpp"
+#include "Bethesda/BGSSaveFormBuffer.hpp"
+#include "Bethesda/BSShaderManager.hpp"
+#include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/ExtraActivateRef.hpp"
+#include "Bethesda/ExtraHotkey.hpp"
+#include "Bethesda/ExtraPrimitive.hpp"
+#include "Bethesda/INIPrefSettingCollection.hpp"
+#include "Bethesda/ItemChange.hpp"
+#include "Bethesda/TESMain.hpp"
+#include "Bethesda/TESObjectList.hpp"
+
+#include "NVSE/InventoryRef.hpp"
+
 #include "Shared/BSMemory/BSScrapMemory.hpp"
 #include "Shared/Utils/StackObject.hpp"
-#include <PluginAPI.h>
-#include <GameExtraData.h>
-#include "GameProcess.h"
-#include "GameTasks.h"
-#include <unordered_map>
+
+#include "events/LambdaVariableContext.h"
+#include "JG/AnimActivationHeight.hpp"
+#include "JG/BarterFilter.hpp"
+#include "JG/ExternalEmittanceOnBases.hpp"
 #include "JG/JGSetList.hpp"
-#include <JG/BarterFilter.hpp>
-#include <JG/JohnnyExtraData.hpp>
-#include <JG/AnimActivationHeight.hpp>
-#include <GameData.h>
-#include <GameRTTI.h>
-#include "decoding.h"
-#include <events/LambdaVariableContext.h>
+#include "JG/JohnnyExtraData.hpp"
+#include "JG/LandRemapping.hpp"
+#include "JG/TaskQueue.hpp"
+
 #include <numbers>
-#include <Bethesda/AILinearTaskThreadManager.hpp>
-#include <JG/TaskQueue.hpp>
-#include <JG/LandRemapping.hpp>
-#include <JG/ExternalEmittanceOnBases.hpp>
-#include <Bethesda/BSShaderManager.hpp>
-#include <Bethesda/TESMain.hpp>
-#include <Bethesda/BSUtilities.hpp>
-#include <Bethesda/BGSLoadGameSubBuffer.hpp>
-#include <Bethesda/BGSSaveFormBuffer.hpp>
-#include <Bethesda/INIPrefSettingCollection.hpp>
+#include <unordered_map>
 
 #include "JG/ScriptUtils.hpp"
 using namespace ScriptUtils;
@@ -233,8 +242,8 @@ bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
 		const FormID uiSellerFormID = pSeller ? pSeller->GetFormID() : 0;
 
 		*result = BarterFilter::IsHidden(uiFormID, uiSellerFormID);
-		if (IsConsoleMode())
-			Console_Print("IsItemBarterHiddenEx >> %f", *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("IsItemBarterHiddenEx >> %f", *result);
 	}
 	return true;
 }
@@ -318,8 +327,8 @@ bool Cmd_GetFactionFlags_Execute(COMMAND_ARGS) {
 	TESFaction* pFaction = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pFaction) && pFaction && IS_ID(pFaction, TESFaction)) {
 		*result = pFaction->kData.uiFlags;
-		if (IsConsoleMode()) 
-			Console_Print("GetFactionFlags >> %.f", *result);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetFactionFlags >> %.f", *result);
 	}
 	return true;
 }
@@ -594,8 +603,8 @@ bool Cmd_GetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, &eTrait) && InRange(eTrait) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
 		*result = GetInteriorDataValue(pCell->GetInteriorData(), eTrait);
 
-		if (IsConsoleMode())
-			Console_Print("GetInteriorLightingTraitNumeric %d >> %.2f", eTrait, *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetInteriorLightingTraitNumeric %d >> %.2f", eTrait, *result);
 	}
 	return true;
 }
@@ -608,8 +617,8 @@ bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell, &eTrait, &fValue) && InRange(eTrait) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
 		*result = SetInteriorDataValue(pCell->GetInteriorData(), eTrait, fValue);
 
-		if (IsConsoleMode())
-			Console_Print("SetInteriorLightingTraitNumeric %d >> %.2f", eTrait, fValue);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("SetInteriorLightingTraitNumeric %d >> %.2f", eTrait, fValue);
 	}
 	return true;
 }
@@ -697,7 +706,7 @@ bool Cmd_GetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	ExtraActivateRef* xActivateRef = thisObj->extraDataList.GetExtraData<ExtraActivateRef>();
 	if (xActivateRef) {
 		g_strInterface->Assign(PASS_COMMAND_ARGS, xActivateRef->strActivationPrompt.c_str());
-		if (IsConsoleMode()) Console_Print("GetRefActivationPromptOverride >> %s", xActivateRef->strActivationPrompt.c_str());
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetRefActivationPromptOverride >> %s", xActivateRef->strActivationPrompt.c_str());
 	}
 	return true;
 }
@@ -792,7 +801,7 @@ bool Cmd_GetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
 		default:
 			return true;
 		}
-		if (IsConsoleMode()) Console_Print("GetIdleMarkerTraitNumeric %d >> %.2f", traitID, *result);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetIdleMarkerTraitNumeric %d >> %.2f", traitID, *result);
 	}
 	return true;
 }
@@ -1096,7 +1105,7 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 49:
 			color = SwapRGB(((uint32_t*)pShader)[6 + traitID]);
 			*result = color;
-			if (IsConsoleMode()) Console_Print("GetEffectShaderTraitNumeric %d >> 0x%X", traitID, color);
+			if (Script::GetConsoleOuput()) Interface::PrintLine("GetEffectShaderTraitNumeric %d >> 0x%X", traitID, color);
 			return true;
 			break;
 		case 1:
@@ -1116,7 +1125,7 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 			*result = ((float*)pShader)[6 + traitID];
 			break;
 		}
-		if (IsConsoleMode()) Console_Print("GetEffectShaderTraitNumeric %d >> %.2f", traitID, *result);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetEffectShaderTraitNumeric %d >> %.2f", traitID, *result);
 	}
 	return true;
 }
@@ -1171,8 +1180,8 @@ bool Cmd_FaceGenGetNthProperty_Execute(COMMAND_ARGS) {
 		uintptr_t propertyListMajorIdx = (PropertyIndex - propertyListMinorIdx) / 2;
 		if (auto FaceGenPTR = TESNPC_GetFaceGenData(npc)) {
 			*result = CdeclCall<float>(0x652230, FaceGenPTR, propertyListMajorIdx, propertyListMinorIdx, PropertyIndex);
-			if (IsConsoleMode())
-				Console_Print("GetFaceGenNthProperty %.2f", *result);
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("GetFaceGenNthProperty %.2f", *result);
 		}
 	}
 	return true;
@@ -1191,8 +1200,8 @@ bool Cmd_FaceGenSetNthProperty_Execute(COMMAND_ARGS) {
 		if (auto FaceGenPTR = TESNPC_GetFaceGenData(npc)) {
 			CdeclCall<void>(0x652320, FaceGenPTR, propertyListMajorIdx, PropertyListIndex, PropertyIndex, val);
 			*result = 1;
-			if (IsConsoleMode()) {
-				Console_Print("SetFaceGenNthProperty called");
+			if (Script::GetConsoleOuput()) {
+				Interface::PrintLine("SetFaceGenNthProperty called");
 			}
 		}
 	}
@@ -1227,7 +1236,7 @@ bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 	else {
 		title = CdeclCall<char*>(0x47E0E0, PlayerCharacter::GetSingleton()); // Actor::GetKarmaTitle
 	}
-	if (IsConsoleMode()) Console_Print("GetPlayerKarmaTitle >> %s", title);
+	if (Script::GetConsoleOuput()) Interface::PrintLine("GetPlayerKarmaTitle >> %s", title);
 	g_strInterface->Assign(PASS_COMMAND_ARGS, title);
 	return true;
 }
@@ -1239,7 +1248,7 @@ bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
 		if (activator->GetTempRef()) {
 			*(FormID*)result = activator->GetTempRef()->GetFormID();
 		}
-		if (IsConsoleMode()) Console_Print("GetTalkingActivatorActor >> 0x%X", *result);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetTalkingActivatorActor >> 0x%X", *result);
 	}
 	return true;
 }
@@ -1249,7 +1258,7 @@ bool Cmd_GetActorEffectType_Execute(COMMAND_ARGS) {
 	SpellItem* pSpell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSpell) && pSpell && IS_TYPE(pSpell, SpellItem)) {
 		*result = pSpell->GetSpellType();
-		if (IsConsoleMode()) Console_Print("GetActorEffectType >> %.2f", *result);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetActorEffectType >> %.2f", *result);
 	}
 	else {
 		*result = -1;
@@ -1312,7 +1321,7 @@ bool Cmd_GetMessageIconPath_Execute(COMMAND_ARGS) {
 			if (pIcon)
 				pPath = pIcon->GetMessageIconTextureName();
 		}
-		if (IsConsoleMode()) Console_Print("GetMessageIconPath >> %s", pPath);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetMessageIconPath >> %s", pPath);
 		g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
 	}
 	return true;
@@ -1361,8 +1370,8 @@ bool Cmd_GetQuestDelay_Execute(COMMAND_ARGS) {
 	TESQuest* pQuest = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest) && pQuest && IS_TYPE(pQuest, TESQuest)) {
 		*result = pQuest->GetScriptProcessingDelay();
-		if (IsConsoleMode())
-			Console_Print("GetQuestDelay >> %.3f", *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetQuestDelay >> %.3f", *result);
 	}
 	return true;
 }
@@ -1389,7 +1398,7 @@ bool Cmd_GetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 			*result = weap->modRequired;
 			break;
 		}
-		if (IsConsoleMode()) Console_Print("GetWeaponVATSTraitNumeric %d >> %f", traitID, *result);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetWeaponVATSTraitNumeric %d >> %f", traitID, *result);
 	}
 	return true;
 }
@@ -1437,8 +1446,8 @@ bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
 	TESQuest* pQuest = nullptr;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest);
 	Cmd_GetQuestFailed_Eval(nullptr, pQuest, nullptr, result);
-	if (IsConsoleMode())
-		Console_Print("GetQuestFailed >> %.2f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetQuestFailed >> %.2f", *result);
 	return true;
 }
 
@@ -1449,7 +1458,7 @@ bool Cmd_GetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && weapon && IS_TYPE(weapon, TESObjectWEAP)) {
 		modelPath = weapon->kWorldModel.GetModel();
 		g_strInterface->Assign(PASS_COMMAND_ARGS, modelPath);
-		if (IsConsoleMode()) Console_Print("GetWeaponWorldModelPath >> %s", modelPath);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetWeaponWorldModelPath >> %s", modelPath);
 	}
 	return true;
 }
@@ -1579,7 +1588,7 @@ bool Cmd_GetRaceFlag_Execute(COMMAND_ARGS) {
 	uint32_t uiBit = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRace, &uiBit) && pRace && IS_TYPE(pRace, TESRace)) {
 		*result = pRace->kData.uiFlags.GetBit(uiBit);
-		if (IsConsoleMode()) Console_Print("GetRaceFlag >> %.f", *result);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetRaceFlag >> %.f", *result);
 	}
 	return true;
 }
@@ -1606,8 +1615,8 @@ SPEC_NOINLINE bool Cmd_GetLifeState_Eval(COMMAND_ARGS_EVAL) {
 
 bool Cmd_GetLifeState_Execute(COMMAND_ARGS) {
 	Cmd_GetLifeState_Eval(thisObj, nullptr, nullptr, result);
-	if (IsConsoleMode()) 
-		Console_Print("GetLifeState >> %.f", *result);
+	if (Script::GetConsoleOuput()) 
+		Interface::PrintLine("GetLifeState >> %.f", *result);
 	return true;
 }
 
@@ -1663,8 +1672,8 @@ bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
 		if (InRange(eSex) && ePart < TESRace::HeadPart::COUNT) {
 			pPath = pRace->GetHeadPartModel(eSex, ePart)->GetModel();
 			g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
-			if (IsConsoleMode()) {
-				Console_Print("GetRaceHeadModelPath %i %i >> %s", ePart, eSex, pPath);
+			if (Script::GetConsoleOuput()) {
+				Interface::PrintLine("GetRaceHeadModelPath %i %i >> %s", ePart, eSex, pPath);
 			}
 		}
 	}
@@ -1681,8 +1690,8 @@ bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
 		if (InRange(eSex) && ePart < TESRace::BodyPart::COUNT) {
 			pPath = pRace->GetBodyPartModel(eSex, ePart)->GetModel();
 			g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
-			if (IsConsoleMode()) {
-				Console_Print("GetRaceBodyModelPath %i %i >> %s", ePart, eSex, pPath);
+			if (Script::GetConsoleOuput()) {
+				Interface::PrintLine("GetRaceBodyModelPath %i %i >> %s", ePart, eSex, pPath);
 			}
 		}
 	}
@@ -1699,8 +1708,8 @@ bool Cmd_GetFacegenModelFlag_Execute(COMMAND_ARGS) {
 		if (pBipedModel) {
 			const SEX eSex = bFemale ? SEX::FEMALE : SEX::MALE;
 			*result = pBipedModel->kBipedModels[eSex].ucFlags.GetBit(uiBit);
-			if (IsConsoleMode())
-				Console_Print("GetFacegenModelFlag %i %i >> %.f", uiBit, bFemale, *result);
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("GetFacegenModelFlag %i %i >> %.f", uiBit, bFemale, *result);
 		}
 	}
 	return true;
@@ -1743,8 +1752,8 @@ bool Cmd_GetBaseScale_Execute(COMMAND_ARGS) {
 	TESActorBase* pBase = nullptr;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pBase);
 	Cmd_GetBaseScale_Eval(thisObj, pBase, nullptr, result);
-	if (IsConsoleMode())
-		Console_Print("GetBaseScale : %0.2f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetBaseScale : %0.2f", *result);
 	return true;
 }
 
@@ -1760,7 +1769,7 @@ bool Cmd_RemovePrimitive_Execute(COMMAND_ARGS) {
 }
 bool Cmd_GetPrimitiveType_Execute(COMMAND_ARGS) {
 	ExtraPrimitive* pPrimitive = thisObj->extraDataList.GetExtraData<ExtraPrimitive>();
-	*result = (pPrimitive && pPrimitive->pPrimitive) ? pPrimitive->pPrimitive->type : 0;
+	*result = (pPrimitive && pPrimitive->pPrimitive) ? pPrimitive->pPrimitive->GetType() : 0;
 	return true;
 }
 
@@ -1769,8 +1778,8 @@ bool Cmd_GetMusicTypePath_Execute(COMMAND_ARGS) {
 	const char* pPath = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMusic) && pMusic && IS_TYPE(pMusic, BGSMusicType)) {
 		pPath = pMusic->GetSoundFile();
-		if (IsConsoleMode())
-			Console_Print("GetMusicTypePath >> %s", pPath);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetMusicTypePath >> %s", pPath);
 	}
 	g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
 	return true;
@@ -1780,8 +1789,8 @@ bool Cmd_GetMusicTypeDB_Execute(COMMAND_ARGS) {
 	BGSMusicType* pMusic = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMusic) && pMusic && IS_TYPE(pMusic, BGSMusicType)) {
 		*result = pMusic->fAttenuation;
-		if (IsConsoleMode())
-			Console_Print("GetMusicTypeDB >> %f", *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetMusicTypeDB >> %f", *result);
 	}
 	return true;
 }
@@ -1896,8 +1905,8 @@ bool Cmd_GetIMODAnimatable_Execute(COMMAND_ARGS) {
 	TESImageSpaceModifier* imod = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &imod) && imod && IS_TYPE(imod, TESImageSpaceModifier)) {
 		*result = imod->animable;
-		if (IsConsoleMode())
-			Console_Print("GetIMODAnimatable >> %.f", *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetIMODAnimatable >> %.f", *result);
 	}
 	return true;
 }
@@ -1908,8 +1917,8 @@ bool Cmd_SetIMODAnimatable_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &imod, &newVal) && imod && IS_TYPE(imod, TESImageSpaceModifier) && (newVal == 0 || newVal == 1)) {
 		imod->animable = newVal;
 		*result = 1;
-		if (IsConsoleMode())
-			Console_Print("SetIMODAnimatable >> %d", imod->animable);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("SetIMODAnimatable >> %d", imod->animable);
 	}
 	return true;
 }
@@ -1953,8 +1962,8 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	midHiProc->weaponInfo = nullptr;
 	*result = GetWeaponDPS(&(PlayerCharacter::GetSingleton()->avOwner), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
 	midHiProc->weaponInfo = weaponInfo;
-	if (IsConsoleMode())
-		Console_Print("GetCalculatedWeaponDPS >> %f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetCalculatedWeaponDPS >> %f", *result);
 	return true;
 }
 
@@ -1965,8 +1974,8 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 		if (pCell->GetSeenData())
 			*result = 1;
 
-		if (IsConsoleMode())
-			Console_Print("IsCellVisited >> %.0f", *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("IsCellVisited >> %.0f", *result);
 	}
 	return true;
 }
@@ -1990,8 +1999,8 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 			const uint32_t uiGameHoursPassed = Calendar::GetSingleton()->GetHoursPassed();
 			*result = (uiGameHoursPassed - uiDetachTime) >= uiHoursToRespawnCell;
 		}
-		if (IsConsoleMode())
-			Console_Print("IsCellExpired >> %.0f", *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("IsCellExpired >> %.0f", *result);
 	}
 	return true;
 }
@@ -2104,8 +2113,8 @@ bool Cmd_GetCameraShotTraitNumeric_Execute(COMMAND_ARGS) {
 			return true;
 		}
 
-		if (IsConsoleMode())
-			Console_Print("GetCameraShotTraitNumeric %d >> %.2f", eTraitID, *result);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetCameraShotTraitNumeric %d >> %.2f", eTraitID, *result);
 	}
 	return true;
 }
@@ -2158,8 +2167,8 @@ bool Cmd_GetCameraShotFlags_Execute(COMMAND_ARGS) {
 	BGSCameraShot* pCameraShot = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
 		*result = pCameraShot->kData.uiFlags;
-		if (IsConsoleMode())
-			Console_Print("GetCameraShotFlags >> %08X", pCameraShot->kData.uiFlags);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetCameraShotFlags >> %08X", pCameraShot->kData.uiFlags);
 	}
 	return true;
 }
@@ -2181,8 +2190,8 @@ bool Cmd_GetCameraShotPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCameraShot) && pCameraShot && IS_TYPE(pCameraShot, BGSCameraShot)) {
 		const char* pModel = pCameraShot->GetModel();
 		g_strInterface->Assign(PASS_COMMAND_ARGS, pModel);
-		if (IsConsoleMode())
-			Console_Print("GetCameraShotPath >> %s", pModel);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetCameraShotPath >> %s", pModel);
 	}
 	return true;
 }
@@ -2206,8 +2215,8 @@ bool Cmd_GetCameraShotImageSpaceModifier_Execute(COMMAND_ARGS) {
 		if (pIMOD) {
 			*reinterpret_cast<FormID*>(result) = pIMOD->GetFormID();
 		}
-		if (IsConsoleMode())
-			Console_Print("GetCameraShotImageSpaceModifier >> %s", pIMOD ? pIMOD->GetFormEditorID() : "None");
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetCameraShotImageSpaceModifier >> %s", pIMOD ? pIMOD->GetFormEditorID() : "None");
 	}
 	return true;
 }
@@ -2772,7 +2781,7 @@ bool Cmd_GetRecipeCategoryFlags_Execute(COMMAND_ARGS) {
 	TESRecipeCategory* pCategory = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCategory) && pCategory && IS_TYPE(pCategory, TESRecipeCategory)) {
 		*result = pCategory->ucFlags;
-		if (IsConsoleMode()) Console_Print("GetRecipeCategoryFlags >> %.f", *result);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetRecipeCategoryFlags >> %.f", *result);
 	}
 	return true;
 }
@@ -2799,8 +2808,8 @@ bool Cmd_RemapLand_Execute(COMMAND_ARGS) {
 		}
 
 		if (pWorld && !bValidCoord) {
-			if (IsConsoleMode())
-				Console_Print("RemapLand >> You must provide valid cell coordinates");
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("RemapLand >> You must provide valid cell coordinates");
 			return true;
 		}
 
@@ -2811,8 +2820,8 @@ bool Cmd_RemapLand_Execute(COMMAND_ARGS) {
 				bFoundLand = true;
 			}
 			else {
-				if (IsConsoleMode())
-					Console_Print("RemapLand >> Found form is not to a TESObjectLAND!");
+				if (Script::GetConsoleOuput())
+					Interface::PrintLine("RemapLand >> Found form is not to a TESObjectLAND!");
 				return true;
 			}
 		}
@@ -2893,8 +2902,8 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 
 	g_strInterface->Assign(PASS_COMMAND_ARGS, cEffects);
 
-	if (IsConsoleMode())
-		Console_Print("GetItemEffectString >> %s", cEffects);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetItemEffectString >> %s", cEffects);
 
 	return true;
 }
@@ -3014,8 +3023,8 @@ bool Cmd_IsCarryable_Execute(COMMAND_ARGS) {
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pForm);
 	Cmd_IsCarryable_Eval(thisObj, pForm, nullptr, result);
 
-	if (IsConsoleMode())
-		Console_Print("IsCarryable >> %f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("IsCarryable >> %f", *result);
 
 	return true;
 }
@@ -3425,8 +3434,8 @@ bool Cmd_GetReputationTitle_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation) && pReputation && IS_TYPE(pReputation, TESReputation)) {
 		pTitle = pReputation->GetReputationTitle();
 
-		if (IsConsoleMode())
-			Console_Print("GetReputationTitle >> \"%s\": \"%s\"", pReputation->GetFullName(), pTitle);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetReputationTitle >> \"%s\": \"%s\"", pReputation->GetFullName(), pTitle);
 	}
 	g_strInterface->Assign(PASS_COMMAND_ARGS, pTitle);
 	return true;
@@ -3439,8 +3448,8 @@ bool Cmd_GetReputationIcon_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pReputation) && pReputation && IS_TYPE(pReputation, TESReputation)) {
 		pIcon = pReputation->GetReputationIcon();
 
-		if (IsConsoleMode())
-			Console_Print("GetReputationIcon >> \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetReputationIcon >> \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
 	}
 	g_strInterface->Assign(PASS_COMMAND_ARGS, pIcon);
 	return true;
@@ -3464,8 +3473,8 @@ bool Cmd_GetReputationFormIcon_Execute(COMMAND_ARGS) {
 		else if (eIconType == ReputationIconType::MESSAGE)
 			pIcon = pReputation->GetMessageIconTextureName();
 	
-		if (IsConsoleMode())
-			Console_Print("GetReputationFormIcon >> \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetReputationFormIcon >> \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
 	}
 	g_strInterface->Assign(PASS_COMMAND_ARGS, pIcon);
 	return true;

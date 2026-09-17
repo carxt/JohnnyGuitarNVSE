@@ -14,6 +14,7 @@ struct ScriptToken;
 #include "Serialization.h"
 #include "GameAPI.h"
 #include <map>
+#include <vector>
 
 // NVSE array datatype, represented by std::map<ArrayKey, ArrayElement>
 // Data elements can be of mixed types (string, uint32_t/formID, float)
