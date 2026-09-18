@@ -76,7 +76,7 @@ bool Cmd_GetAvailableRadios_Execute(COMMAND_ARGS) {
 
 bool Cmd_RollCredits_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ThisCall(0x75F2A0, nullptr);
+	CdeclCall<bool>(0x75F2A0);
 	return true;
 }
 
@@ -87,7 +87,7 @@ bool Cmd_DumpIconMap_Execute(COMMAND_ARGS) {
 
 bool Cmd_UpdateCrosshairPrompt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ThisCall(0x778B10, nullptr);
+	CdeclCall(0x778B10);
 	return true;
 }
 enum EType {
