@@ -30,7 +30,7 @@ namespace HookUtils {
 	class MemoryUnlock {
 		const uintptr_t _addr;
 		const uintptr_t _size;
-		DWORD _oldProtect;
+		unsigned long	_oldProtect;
 	public:
 		MemoryUnlock(uintptr_t address, uintptr_t size = sizeof(uintptr_t), uint32_t flags = 0x40) noexcept; // flags set to PAGE_EXECUTE_READWRITE
 		~MemoryUnlock() noexcept;
@@ -125,49 +125,15 @@ namespace HookUtils {
 	protected:
 		uintptr_t overwritten_addr = 0;
 
-		static DECLSPEC_NOINLINE void __fastcall ShowError(uintptr_t address, const char* actionName) noexcept {
-			char cTextBuffer[72];
-			sprintf_s(cTextBuffer, "Cannot write detour - address 0x%08X is not a %s.", address, actionName);
-			MessageBoxA(nullptr, cTextBuffer, "Hook Error", MB_OK | MB_ICONERROR);
-		}
+		static __declspec(noinline) void __fastcall ShowError(uintptr_t address, const char* actionName) noexcept;
 
-		[[nodiscard]] static DECLSPEC_NOINLINE bool __fastcall ValidateCallAddress(uintptr_t address, bool noError = false) noexcept {
-			if (*reinterpret_cast<uint8_t*>(address) != 0xE8) [[unlikely]] {
-				if (!noError) [[unlikely]] {
-					ShowError(address, "function call");
-				}
-				return false;
-			}
-			return true;
-		}
+		[[nodiscard]] static __declspec(noinline) bool __fastcall ValidateCallAddress(uintptr_t address, bool noError = false) noexcept;
 
-		[[nodiscard]] static DECLSPEC_NOINLINE bool __fastcall ValidateJumpAddress(uintptr_t address, bool noError = false) noexcept {
-			if (*reinterpret_cast<uint8_t*>(address) != 0xE9) [[unlikely]] {
-				if (!noError) [[unlikely]] {
-					ShowError(address, "jump");
-				}
-				return false;
-			}
-			return true;
-		}
+		[[nodiscard]] static __declspec(noinline) bool __fastcall ValidateJumpAddress(uintptr_t address, bool noError = false) noexcept;
 
-		[[nodiscard]] DECLSPEC_NOINLINE bool __fastcall CanWriteCall(uintptr_t address, bool optional) noexcept {
-			bool bHook = optional;
-			if (ValidateCallAddress(address, optional)) [[likely]] {
-				overwritten_addr = GetRelJumpAddr(address);
-				bHook = true;
-			}
-			return bHook;
-		}
+		[[nodiscard]] __declspec(noinline) bool __fastcall CanWriteCall(uintptr_t address, bool optional) noexcept;
 
-		[[nodiscard]] DECLSPEC_NOINLINE bool __fastcall CanWriteJump(uintptr_t address, bool optional) noexcept {
-			bool bHook = optional;
-			if (ValidateJumpAddress(address, optional)) [[likely]] {
-				overwritten_addr = GetRelJumpAddr(address);
-				bHook = true;
-			}
-			return bHook;
-		}
+		[[nodiscard]] __declspec(noinline) bool __fastcall CanWriteJump(uintptr_t address, bool optional) noexcept;
 
 	public:
 		[[nodiscard]] inline uintptr_t GetOverwrittenAddr() const noexcept { return overwritten_addr; }
