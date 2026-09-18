@@ -1018,6 +1018,9 @@
     <ClCompile Include="internal\JG\Fixes\FileFixes.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TaskQueueInterface.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -2649,6 +2652,9 @@
     </ClInclude>
     <ClInclude Include="internal\JG\Fixes\FileFixes.hpp">
       <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TaskQueueInterface.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

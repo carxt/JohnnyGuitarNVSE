@@ -17,6 +17,7 @@
 #include "Bethesda/Sky.hpp"
 #include "Bethesda/InventoryChanges.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
+#include "Bethesda/TaskQueueInterface.hpp"
 
 #include "decoding.h"
 #include "GameData.h"

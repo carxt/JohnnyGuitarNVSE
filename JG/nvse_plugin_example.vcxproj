@@ -627,6 +627,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\Setting.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Sky.cpp" />
     <ClCompile Include="internal\Game\Bethesda\SkyTextureManager.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TaskQueueInterface.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\TESActorBase.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESActorBaseData.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESAIForm.cpp" />
@@ -1342,6 +1347,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\SpellItem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Stars.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Sun.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TaskQueueInterface.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\TESActorBase.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESActorBaseData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESAIForm.hpp" />

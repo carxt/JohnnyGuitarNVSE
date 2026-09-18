@@ -359,16 +359,3 @@ public:
 	}
 
 };
-
-class NiAVObject;
-
-class TaskQueueInterface {
-public:
-	static TaskQueueInterface* GetSingleton() {
-		return *reinterpret_cast<TaskQueueInterface**>(0x11DF1A8);
-	}
-
-	void QueueBiped3DDetach(NiAVObject* apObject) {
-		ThisCall(0x87ACB0, this, apObject);
-	}
-};
