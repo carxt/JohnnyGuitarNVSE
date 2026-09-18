@@ -123,27 +123,6 @@ namespace JohnnyFixes {
 	}
 	STACK_FRAME_OPT_RESET
 
-	bool __cdecl IsCurrentFurnitureRefHook(TESObjectREFR* apRef, void* apComparedRef, void*, double& arResult) {
-		arResult = 0;
-		Actor* pActor = nullptr;
-
-		if (apRef && apRef->IsActor()) {
-			pActor = static_cast<Actor*>(apRef);
-		}
-
-		// Game does not null check the base process
-		if (pActor && pActor->baseProcess && pActor->baseProcess->GetCurrentFurnitureRef() == apComparedRef) {
-			arResult = 1;
-		}
-
-		if (Script::GetConsoleOuput()) {
-			// Reuse the original string, no need to duplicate *all* data
-			Interface::PrintLine(((const char*)0x10350A8), arResult);
-		}
-
-		return true;
-	}
-
 	HookUtils::CallDetour kSetCellImageSpaceDetour;
 	STACK_FRAME_OPT_ENABLE
 	void __fastcall SetCellImageSpaceHook(TESObjectCELL* apCell, void*, TESImageSpace* apImageSpace) {
@@ -214,8 +193,8 @@ namespace JohnnyFixes {
 		// fix NPE in BSTempEffectSimpleDecal
 		HookUtils::WriteRelJump(0x68D2EB, SimpleDecalHook);
 
-		// Fix for missing baseprocess null check
-		HookUtils::WriteRelJump(0x59DF40, IsCurrentFurnitureRefHook);
+		// Nullcheck caller's AI process in IsCurrentFurnitureRef
+		HookUtils::SafeWriteBuf(0x59DF88, "\x85\xC0\x74\x18\x8B\x10\x89\xC1");
 
 		// AnimData NPEs
 		// fix NPE in AnimData freeing
