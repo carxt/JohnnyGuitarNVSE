@@ -47,44 +47,6 @@ public:
 	bool TryEnter() { return TryEnterCriticalSection(&critSection) != 0; }
 };
 
-class LightCS {
-	uint32_t	owningThread;
-	uint32_t	enterCount;
-
-public:
-	LightCS() : owningThread(0), enterCount(0) {}
-
-	void Enter();
-	void EnterSleep();
-	void Leave();
-};
-union Coordinate {
-	uint32_t		xy;
-	struct {
-		int16_t	y;
-		int16_t	x;
-	};
-
-	Coordinate() {}
-	Coordinate(int16_t _x, int16_t _y) : x(_x), y(_y) {}
-
-	inline Coordinate& operator =(const Coordinate& rhs) {
-		xy = rhs.xy;
-		return *this;
-	}
-	inline Coordinate& operator =(const uint32_t& rhs) {
-		xy = rhs;
-		return *this;
-	}
-
-	inline bool operator ==(const Coordinate& rhs) { return xy == rhs.xy; }
-	inline bool operator !=(const Coordinate& rhs) { return xy != rhs.xy; }
-
-	inline Coordinate operator +(const char* rhs) {
-		return Coordinate(x + rhs[0], y + rhs[1]);
-	}
-};
-
 template <typename T1, typename T2> inline T1 GetMin(T1 value1, T2 value2) {
 	return (value1 < value2) ? value1 : value2;
 }
@@ -267,7 +229,3 @@ void DumpMemImg(void* data, uint32_t size, uint8_t extra = 0);
 void GetMD5File(const char* filePath, char* outHash);
 
 void GetSHA1File(const char* filePath, char* outHash);
-
-// Taken from xNVSE
-// Pair this with _AddressOfReturnAddress()
-uint8_t* GetParentBasePtr(void* addressOfReturnAddress, bool lambda = false);

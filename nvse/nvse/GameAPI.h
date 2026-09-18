@@ -13,90 +13,7 @@ class TESForm;
 class TESObjectREFR;
 class BaseExtraList;
 
-#define playerID	0x7
-#define playerRefID 0x14
-
-#if 1
-static const uint32_t s_Console__Print = 0x0071D0A0;
-#elif EDITOR
-#else
-#error
-#endif
-
-extern bool extraTraces;
-
-//typedef void * (* _FormHeap_Allocate)(uint32_t size);
-//extern const _FormHeap_Allocate FormHeap_Allocate;
-//
-//typedef void (* _FormHeap_Free)(void * ptr);
-//extern const _FormHeap_Free FormHeap_Free;
-
-#if RUNTIME
-
-typedef bool (*_ExtractArgs)(ParamInfo* paramInfo, void* scriptData, uint32_t* arg2, TESObjectREFR* arg3, TESObjectREFR* arg4, Script* script, ScriptLocals* eventList, ...);
-extern const _ExtractArgs ExtractArgs;
-
-typedef TESForm* (*_CreateFormInstance)(uint8_t type);
-extern const _CreateFormInstance CreateFormInstance;
-
-bool GetConsoleEcho();
-void SetConsoleEcho(bool doEcho);
-const char* GetFullName(TESForm* baseForm);
-const char* GetActorValueString(uint32_t actorValue); // should work now
-uint32_t GetActorValueForString(const char* strActorVal, bool bForScript = false);
-
-typedef char* (*_GetActorValueName)(uint32_t actorValueCode);
-extern const _GetActorValueName GetActorValueName;
-uint32_t GetActorValueMax(uint32_t actorValueCode);
-
-typedef void (*_ShowMessageBox_Callback)(void);
-extern const _ShowMessageBox_Callback ShowMessageBox_Callback;
-
-// unk1 = 0
-// unk2 = 0
-// callback = may be NULL apparently
-// unk4 = 0
-// unk5 = 0x17 (why?)
-// unk6 = 0
-// unk7 = 0
-// then buttons
-// then NULL
-typedef bool (*_ShowMessageBox)(const char* message, uint32_t unk1, uint32_t unk2, _ShowMessageBox_Callback callback, uint32_t unk4, uint32_t unk5, float unk6, float unk7, ...);
-extern const _ShowMessageBox ShowMessageBox;
-
-// set to scriptObj->GetFormID() after calling ShowMessageBox()
-// GetButtonPressed checks this before returning a value, if it doesn't match it returns -1
-typedef uint32_t* _ShowMessageBox_pScriptRefID;
-extern const _ShowMessageBox_pScriptRefID ShowMessageBox_pScriptRefID;
-typedef uint8_t* _ShowMessageBox_button;
-extern const _ShowMessageBox_button ShowMessageBox_button;
-
-// unk1 = 0
-// unk3 = 0, "UIVATSInsufficientAP" (sound?)
-// duration = 2
-// unk5 = 0
-typedef bool (*_QueueUIMessage)(const char* msgText, uint32_t iconType, const char* iconPath, const char* soundPath, float displayTime, uint8_t unk5);
-extern const _QueueUIMessage QueueUIMessage;
-
-#else
-
-typedef TESForm* (__cdecl* _GetFormByID)(const char* editorID);
-extern const _GetFormByID GetFormByID;
-
-typedef void(__cdecl* _ShowCompilerError)(ScriptBuffer* Buffer, const char* format, ...);
-extern const _ShowCompilerError		ShowCompilerError;
-
-#endif
-
 const uint32_t kMaxMessageLength = 0x4000;
-
-struct NVSEStringVarInterface;
-// Problem: plugins may want to use %z specifier in format strings, but don't have access to StringVarMap
-// Could change params to ExtractFormatStringArgs to include an NVSEStringVarInterface* but
-//  this would break existing plugins
-// Instead allow plugins to register their NVSEStringVarInterface for use
-// I'm sure there is a better way to do this but I haven't found it
-void RegisterStringVarInterface(NVSEStringVarInterface* intfc);
 
 struct ScriptVar {
 	uint32_t		id;
@@ -166,15 +83,8 @@ public:
 	VarList* m_vars;		// 0C
 	Struct10* unk010;		// 10
 
-	void Dump(void);
 	ScriptVar* GetVariable(uint32_t id);
-	uint32_t ResetAllVariables();
 };
-
-ScriptLocals* EventListFromForm(TESForm* form);
-
-typedef bool (*_MarkBaseExtraListScriptEvent)(TESForm* target, BaseExtraList* extraList, uint32_t eventMask);
-extern const _MarkBaseExtraListScriptEvent MarkBaseExtraListScriptEvent;
 
 struct ExtractedParam {
 	// float/double types are kept as pointers
@@ -211,137 +121,6 @@ struct ExtractedParam {
 		} var;
 	} data;
 };
-
-enum EActorVals {
-	eActorVal_Aggression = 0,
-	eActorVal_Confidence = 1,
-	eActorVal_Energy = 2,
-	eActorVal_Responsibility = 3,
-	eActorVal_Mood = 4,
-
-	eActorVal_Strength = 5,
-	eActorVal_Perception = 6,
-	eActorVal_Endurance = 7,
-	eActorVal_Charisma = 8,
-	eActorVal_Intelligence = 9,
-	eActorVal_Agility = 10,
-	eActorVal_Luck = 11,
-	eActorVal_SpecialStart = eActorVal_Strength,
-	eActorVal_SpecialEnd = eActorVal_Luck,
-
-	eActorVal_ActionPoints = 12,
-	eActorVal_CarryWeight = 13,
-	eActorVal_CritChance = 14,
-	eActorVal_HealRate = 15,
-	eActorVal_Health = 16,
-	eActorVal_MeleeDamage = 17,
-	eActorVal_DamageResistance = 18,
-	eActorVal_PoisonResistance = 19,
-	eActorVal_RadResistance = 20,
-	eActorVal_SpeedMultiplier = 21,
-	eActorVal_Fatigue = 22,
-	eActorVal_Karma = 23,
-	eActorVal_XP = 24,
-
-	eActorVal_Head = 25,
-	eActorVal_Torso = 26,
-	eActorVal_LeftArm = 27,
-	eActorVal_RightArm = 28,
-	eActorVal_LeftLeg = 29,
-	eActorVal_RightLeg = 30,
-	eActorVal_Brain = 31,
-	eActorVal_BodyPartStart = eActorVal_Head,
-	eActorVal_BodyPartEnd = eActorVal_Brain,
-
-	eActorVal_Barter = 32,
-	eActorVal_BigGuns = 33,
-	eActorVal_EnergyWeapons = 34,
-	eActorVal_Explosives = 35,
-	eActorVal_Lockpick = 36,
-	eActorVal_Medicine = 37,
-	eActorVal_MeleeWeapons = 38,
-	eActorVal_Repair = 39,
-	eActorVal_Science = 40,
-	eActorVal_Guns = 41,
-	eActorVal_Sneak = 42,
-	eActorVal_Speech = 43,
-	eActorVal_Survival = 44,
-	eActorVal_Unarmed = 45,
-	eActorVal_SkillsStart = eActorVal_Barter,
-	eActorVal_SkillsEnd = eActorVal_Unarmed,
-
-	eActorVal_InventoryWeight = 46,
-	eActorVal_Paralysis = 47,
-	eActorVal_Invisibility = 48,
-	eActorVal_Chameleon = 49,
-	eActorVal_NightEye = 50,
-	eActorVal_Turbo = 51,
-	eActorVal_FireResistance = 52,
-	eActorVal_WaterBreathing = 53,
-	eActorVal_RadLevel = 54,
-	eActorVal_BloodyMess = 55,
-	eActorVal_UnarmedDamage = 56,
-	eActorVal_Assistance = 57,
-
-	eActorVal_ElectricResistance = 58,
-	eActorVal_FrostResistance = 59,
-
-	eActorVal_EnergyResistance = 60,
-	eActorVal_EMPResistance = 61,
-	eActorVal_Var1Medical = 62,
-	eActorVal_Var2 = 63,
-	eActorVal_Var3 = 64,
-	eActorVal_Var4 = 65,
-	eActorVal_Var5 = 66,
-	eActorVal_Var6 = 67,
-	eActorVal_Var7 = 68,
-	eActorVal_Var8 = 69,
-	eActorVal_Var9 = 70,
-	eActorVal_Var10 = 71,
-
-	eActorVal_IgnoreCrippledLimbs = 72,
-	eActorVal_Dehydration = 73,
-	eActorVal_Hunger = 74,
-	eActorVal_Sleepdeprevation = 75,
-	eActorVal_Damagethreshold = 76,
-	eActorVal_FalloutMax = eActorVal_Damagethreshold,
-	eActorVal_NoActorValue = 256,
-};
-
-// 914
-class ConsoleManager {
-public:
-#if RUNTIME
-	MEMBER_FN_PREFIX(ConsoleManager);
-	DEFINE_MEMBER_FN(Print, void, s_Console__Print, const char* fmt, va_list args);
-#endif
-
-	ConsoleManager();
-	~ConsoleManager();
-
-	struct TextNode {
-		TextNode* next;
-		TextNode* prev;
-		BSString		text;
-	};
-
-	struct TextList {
-		TextNode* first;
-		TextNode* last;
-		uint32_t		count;
-	};
-
-	void* scriptContext;		// 000
-	TextList	printedLines;		// 004
-	TextList	inputHistory;		// 010
-	uint32_t		unk01C;				// 01C
-	uint32_t		unk020;				// 020
-	uint32_t		unk024;				// 024
-	uint32_t		unk028[571];		// 028
-
-	static ConsoleManager* GetSingleton(void);
-};
-static_assert(sizeof(ConsoleManager) == 0x914);
 
 class ChangesMap;
 class InteriorCellNewReferencesMap;
@@ -704,15 +483,6 @@ struct	BGSSaveLoadChangesMap {
 	NiTPointerMap<uint32_t, BGSFormChanges*> kChangeMap;
 };
 
-
-#if 1
-const uint32_t _SaveGameManager_ConstructSavegameFilename = 0x0084FF90;
-const uint32_t _SaveGameManager_ConstructSavegamePath = 0x0084FF30;
-#elif EDITOR
-#else
-#error
-#endif
-
 class BGSCellNumericIDArrayMap : public NiTMap<uint32_t, BSSimpleArray<uint32_t>*> {
 public:
 };
@@ -825,52 +595,6 @@ public:
 		std::ignore = BGSSaveLoadGame::GetSingleton()->SetThreadAllowChanges(bOrgVal);
 	}
 };
-
-#if RUNTIME
-class SaveGameManager {
-public:
-	SaveGameManager();
-	~SaveGameManager();
-
-	static SaveGameManager* GetSingleton();
-	MEMBER_FN_PREFIX(SaveGameManager);
-	DEFINE_MEMBER_FN(ConstructSavegameFilename, void, _SaveGameManager_ConstructSavegameFilename,
-		const char* filename, char* outputBuf, bool bTempFile);
-	DEFINE_MEMBER_FN(ConstructSavegamePath, void, _SaveGameManager_ConstructSavegamePath, char* outputBuf);
-
-	struct SaveGameData {
-		const char* name;		// 00
-		uint32_t		unk04;		// 04
-		uint32_t		saveNumber;	// 08 index?
-		const char* pcName;	// 0C
-		const char* pcTitle;	// 10
-		const char* location;	// 14
-		const char* time;		// 18
-	};
-
-	tList<SaveGameData>* saveList;		// 00
-	uint32_t					numSaves;		// 04
-	uint32_t					unk08;			// 08
-	uint8_t					unk0C;			// 0C	flag for either opened or writable or useSeparator (|)
-	uint8_t					unk0D;
-	uint8_t					unk0E;
-	uint8_t					unk0F;
-	/*
-		const char				* unk10;		// 10 name of most recently loaded/saved game?
-		uint32_t					unk14;			// 14 init to -1
-		uint8_t					unk18;			// 18
-		uint8_t					pad19[3];
-		uint8_t					unk20;			// 20 init to 1
-		uint8_t					unk21;
-		uint8_t					pad22[2];
-		uint32_t					unk24;			// 24
-		uint32_t					unk28;			// 28
-	*/
-};
-
-std::string GetSavegamePath();
-
-#endif
 
 enum Coords {
 	kCoords_X = 0,	// 00

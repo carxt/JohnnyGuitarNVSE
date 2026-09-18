@@ -7,7 +7,6 @@
 
 #include "Bethesda/ExtraCombatStyle.hpp"
 #include "Bethesda/ExtraLeveledCreature.hpp"
-#include "Bethesda/ExtraScript.hpp"
 #include "Bethesda/ExtraContainerChanges.hpp"
 #include "Bethesda/ExtraPersistentCell.hpp"
 #include "Bethesda/BSUtilities.hpp"
@@ -27,12 +26,6 @@ TESForm* TESObjectREFR::GetBaseForm()
 		}
 	}
 	return baseform;
-}
-
-// GAME - 0x5673E0
-ScriptLocals* TESObjectREFR::GetScriptLocals() const {
-	ExtraScript* xScript = extraDataList.GetExtraData<ExtraScript>();
-	return xScript ? xScript->pLocals : NULL;
 }
 
 PlayerCharacter* PlayerCharacter::GetSingleton() {
@@ -97,13 +90,6 @@ const char* TESObjectREFR::GetFullName() const {
 extern bool (*Cmd_Update3D)(COMMAND_ARGS);
 void TESObjectREFR::Update3D() {
 	Cmd_Update3D(nullptr, nullptr, this, nullptr, nullptr, nullptr, nullptr, nullptr);
-}
-
-TESObjectREFR* TESObjectREFR::Create(bool bTemp) {
-	TESObjectREFR* refr = BSMemory::malloc<TESObjectREFR>();
-	ThisCall(s_TESObject_REFR_init, refr);
-	if (bTemp) ThisCall(0x484490, refr);
-	return refr;
 }
 
 TESBoundObject* GetPermanentBaseForm(TESObjectREFR* apReference)	// For LevelledForm, find real baseForm, not temporary one.

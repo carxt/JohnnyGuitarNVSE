@@ -3,6 +3,7 @@
 #include "GameProcess.h"
 #include "decoding.h"
 #include "JohnnyMessageData.hpp"
+#include <utility.h>
 #include <internal/Game/Bethesda/DialogueResponse.hpp>
 #include <internal/Game/Bethesda/MenuTopic.hpp>
 

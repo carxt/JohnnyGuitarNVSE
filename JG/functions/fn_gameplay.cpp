@@ -35,6 +35,8 @@
 #include "Shared/BSMemory/BSMemoryUtils.hpp"
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
+#include "utility.h"
+
 #include <unordered_map>
 
 void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =

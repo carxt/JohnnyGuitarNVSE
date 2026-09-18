@@ -2,9 +2,6 @@
 #include "GameObjects.h"
 #include <internal/Game/Bethesda/Conversation.hpp>
 
-uint8_t* g_MenuVisibilityArray = (uint8_t*)0x011F308F;
-NiTPrimitiveArray<Tile*>* g_TileMenuArray = (NiTPrimitiveArray<Tile*> *)0x011F3508;
-
 InterfaceManager* InterfaceManager::GetSingleton(void) {
 	return *(InterfaceManager**)0x011D8A80;
 }

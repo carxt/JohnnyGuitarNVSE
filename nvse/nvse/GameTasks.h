@@ -3,42 +3,6 @@
 #include "GameTypes.h"
 #include "NiTypes.h"
 #include "Bethesda/QueuedFile.hpp"
-//#include "NiNodes.h"
-
-/*******************************************************
-*
-* BSTask
-*	IOTask
-*		QueuedFile
-*			QueuedFileEntry
-*				QueuedModel
-*					QueuedDistantLOD
-*					QueuedTreeModel
-*				QueuedTexture
-*					QueuedTreeBillboard
-*				QueuedKF
-*					QueuedAnimIdle
-*				DistantLODLoaderTask
-*				TerrainLODQuadLoadTask
-*				SkyTask
-*				LipTask
-*				GrassLoadTask
-*			QueuedReference
-*				QueuedTree
-*				QueuedActor
-*					QueuedCharacter
-*						QueuedPlayer
-*					QueuedCreature
-*			QueuedHead
-*			QueuedHelmet
-*			QueuedMagicItem
-*		AttachDistant3DTask
-*		ExteriorCellLoaderTask
-*
-* NiTArray< NiPointer<QueuedFile> >
-*	QueuedChildren
-*
-*********************************************************/
 
 class TESObjectREFR;
 class TESModel;
@@ -236,61 +200,6 @@ public:
 	uint32_t			unk034;				// 034
 };
 
-/*
-// 38
-class QueuedHelmet : public QueuedFile
-{
-public:
-	QueuedHelmet();
-	~QueuedHelmet();
-
-	QueuedCharacter		* queuedCharacter;		// 18
-	QueuedChildren		* queuedChildren;		// 1C
-	void				* unk20;				// 20
-	QueuedModel			* queuedModel;			// 24
-	BSFaceGenModel		* faceGenModel;			// 28
-	NiNode				* niNode;				// 2C
-	Character			* character;			// 30
-	uint32_t				unk34;					// 34
-};
-
-// 30
-class BSTaskManager : public LockFreeMap< NiPointer< BSTask > >
-{
-public:
-	virtual void Unk_0F(uint32_t arg0) = 0;
-	virtual void Unk_10(uint32_t arg0) = 0;
-	virtual void Unk_11(uint32_t arg0) = 0;
-	virtual void Unk_12(void) = 0;
-	virtual void Unk_13(uint32_t arg0) = 0;
-
-	uint32_t				unk1C;			// 1C
-	uint32_t				unk20;			// 20
-	uint32_t				numThreads;		// 24
-	BSTaskManagerThread	** threads;		// 28 array of size numThreads
-	uint32_t				unk2C;			// 2C
-};
-
-// 3C
-class IOManager : public BSTaskManager
-{
-public:
-	virtual void Unk_14(uint32_t arg0) = 0;
-
-	static IOManager* GetSingleton();
-
-	uint32_t									unk30;			// 30
-	LockFreeQueue< NiPointer< IOTask > >	* taskQueue;	// 34
-	uint32_t									unk38;			// 38
-
-	bool IsInQueue(TESObjectREFR *refr);
-	void QueueForDeletion(TESObjectREFR* refr);
-	void DumpQueuedTasks();
-};
-
-extern IOManager** g_ioManager;
-*/
-
 template <typename T_Key, typename T_Data> class LockFreeMap {
 public:
 	virtual void	Unk_00(void);
@@ -352,10 +261,6 @@ public:
 
 	TESModel* GetModelForBoundObject(TESBoundObject* apBoundObject, TESObjectREFR* apRef);
 
-	// GAME - 0x447080
-	// GECK - 0x4C0040
-	NiNode* LoadFile(const char* apPath, uint32_t  aeLODFadeMult = 0, bool abAssignShaders = true, bool abSuppressWarning = false, bool abKeepUV = false, bool abNoUseCountIncrease = false) {
-		return ThisCall<NiNode*>(0x447080, this, apPath, aeLODFadeMult, abAssignShaders, abSuppressWarning, abKeepUV, abNoUseCountIncrease);
-	}
+	NiNode* LoadFile(const char* apPath, uint32_t  aeLODFadeMult = 0, bool abAssignShaders = true, bool abSuppressWarning = false, bool abKeepUV = false, bool abNoUseCountIncrease = false);
 
 };

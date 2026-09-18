@@ -78,12 +78,6 @@
     <ClCompile Include="..\nvse\nvse\GameObjects.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameScript.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
@@ -1036,9 +1030,6 @@
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameObjects.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="..\nvse\nvse\GameOSDepend.h">
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameRTTI.h">

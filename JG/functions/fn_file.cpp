@@ -4,6 +4,7 @@
 #include "Bethesda/FileFinder.hpp"
 #include "Bethesda/Interface.hpp"
 #include <misc/misc.h>
+#include <utility.h>
 
 bool Cmd_IsBSALoaded_Execute(COMMAND_ARGS) {
 	char path[MAX_PATH] = {};

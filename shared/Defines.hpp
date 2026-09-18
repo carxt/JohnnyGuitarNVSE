@@ -66,6 +66,15 @@ __forceinline auto CallImport(uint32_t _addr, Args ...args) noexcept(false) {
 	return (*reinterpret_cast<decltype(T_Func)*>(_addr))(std::forward<Args>(args)...);
 }
 
+__forceinline uint8_t* __fastcall GetParentBasePtr(void* addressOfReturnAddress = _AddressOfReturnAddress(), bool lambda = false) noexcept(false) {
+	auto* basePtr = static_cast<uint8_t*>(addressOfReturnAddress) - 4;
+#if _DEBUG
+	if (lambda) // in debug mode, lambdas are wrapped inside a closure wrapper function, so one more step needed
+		basePtr = *reinterpret_cast<uint8_t**>(basePtr);
+#endif
+	return *reinterpret_cast<uint8_t**>(basePtr);
+}
+
 #pragma region Macros
 #define EXTERN_DLL_EXPORT extern "C" __declspec(dllexport)
 

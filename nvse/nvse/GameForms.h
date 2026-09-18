@@ -877,7 +877,7 @@ public:
 	struct LODNode {
 		BGSTerrainManager* parent;		// 00
 		uint32_t			lodLevel;		// 04
-		Coordinate		cellXY;			// 08
+		uint32_t		cellXY;			// 08
 		uint8_t			byte0C;			// 0C
 		uint8_t			byte0D;			// 0D
 		uint8_t			byte0E;			// 0E
@@ -911,8 +911,8 @@ public:
 	LODNode* lodNode;	// 04
 	NiNode* node08;	// 08
 	NiNode* node0C;	// 0C
-	Coordinate						coordNW;	// 10
-	Coordinate						coordSE;	// 14
+	uint32_t						coordNW;	// 10
+	uint32_t						coordSE;	// 14
 	uint32_t							ukn18;		// 18
 	uint32_t							ukn1C;		// 1C
 	uint32_t							ukn20;		// 20

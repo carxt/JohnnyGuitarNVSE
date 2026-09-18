@@ -2,11 +2,8 @@
 
 #include "nvse/GameTypes.h"
 #include "Gamebryo/NiTList.hpp"
-
-typedef uint32_t(*_TraitNameToID)(const char* traitName);
-extern const _TraitNameToID TraitNameToID;
-
-const char* TraitIDToName(int id);	// slow
+#include "Bethesda/BSSimpleArray.hpp"
+#include "Bethesda/BSStringT.hpp"
 
 //	Tile
 //		TileRect		3C
@@ -154,15 +151,6 @@ public:
 		kTileID_max
 	};
 
-	MEMBER_FN_PREFIX(Tile);
-#if 1
-	DEFINE_MEMBER_FN(SetStringValue, void, 0x00A01350, uint32_t valueID, const char* str, bool bPropagate);
-	DEFINE_MEMBER_FN(SetFloatValue, void, 0x00A012D0, uint32_t valueID, float num, bool bPropagate);
-#elif EDITOR
-#else
-#error
-#endif
-
 	virtual ~Tile();
 	virtual void		Init(Tile* parent, const char* name, Tile* replacedChild);
 	virtual NiNode* CalcNode(void);
@@ -258,25 +246,11 @@ public:
 	uint8_t						unk35;			// 35
 	uint8_t						pad35[2];		// 36
 
-	static uint32_t	TraitNameToID(const char* traitName);
-	static uint32_t	TraitNameToIDAdd(const char* traitName);
+	static uint32_t	TextToTrait(const char* traitName);
 	Value* GetValue(uint32_t typeID);
-	Value* GetValueName(const char* valueName);
 	float			GetFloat(uint32_t id);
-	Tile* GetChild(const char* childName);
-	Tile* GetComponent(const char* componentTile, const char*& trait);
-	Tile* GetComponentTile(const char* componentTile);
-	Value* GetComponentValue(const char* componentPath);
-	Tile* ReadXML(const char* xmlPath);
-	char* GetComponentFullName(char* resStr);
 	void			SetFloat(uint32_t id, float fltVal, bool bPropagate = true) { ThisCall(0xA012D0, this, id, fltVal, bPropagate); }
 	void			SetString(uint32_t id, const char* strVal, bool bPropagate = true) { ThisCall(0xA01350, this, id, strVal, bPropagate); }
-	Menu* GetParentMenu();
-	void			DeleteChildren();
-	void			PokeValue(uint32_t valueID);
-	void			FakeClick();
-
-	void			Dump();
 
 	static void Lock() {
 		CdeclCall(0xA044F0);
@@ -320,5 +294,3 @@ public:
 class TileText : public Tile {
 public:
 };
-
-void Debug_DumpTraits(void);

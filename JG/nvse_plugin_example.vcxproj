@@ -355,17 +355,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp" />
     <ClCompile Include="..\nvse\nvse\GameForms.cpp" />
     <ClCompile Include="..\nvse\nvse\GameObjects.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\nvse\nvse\GameProcess.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameScript.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTiles.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
@@ -1025,11 +1019,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="..\nvse\nvse\GameEffects.h" />
     <ClInclude Include="..\nvse\nvse\GameForms.h" />
     <ClInclude Include="..\nvse\nvse\GameObjects.h" />
-    <ClInclude Include="..\nvse\nvse\GameOSDepend.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameProcess.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
