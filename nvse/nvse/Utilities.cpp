@@ -1,8 +1,6 @@
 #include "Utilities.h"
 #include <shared/BSMemory/BSMemory.hpp>
 
-#if RUNTIME
-
 char* CopyCString(const char* src) {
 	uint32_t length = strlen(src);
 	if (!length) return NULL;
@@ -10,5 +8,3 @@ char* CopyCString(const char* src) {
 	strcpy_s(result, length + 1, src);
 	return result;
 }
-
-#endif

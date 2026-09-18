@@ -1,6 +1,5 @@
 #include "nvse/GameUI.h"
 #include "GameObjects.h"
-#ifdef GAME
 #include <internal/Game/Bethesda/Conversation.hpp>
 
 uint8_t* g_MenuVisibilityArray = (uint8_t*)0x011F308F;
@@ -117,4 +116,3 @@ void MapMenu::StopHolotape()
 	*(uint8_t*)0x11DCFA4 = false;
 	ThisCall(0x775670, HUDMainMenu::GetSingleton()); // ClearSubtitlesString
 }
-#endif
