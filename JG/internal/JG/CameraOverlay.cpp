@@ -8,7 +8,8 @@
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TimeGlobal.hpp"
 
-#include <shared/Utils/CustomGameSetting.hpp>
+#include <Shared/Utils/CustomGameSetting.hpp>
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 #pragma comment(lib, "d3d9.lib")
 

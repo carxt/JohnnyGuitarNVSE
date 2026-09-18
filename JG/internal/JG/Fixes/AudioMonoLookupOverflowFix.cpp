@@ -1,5 +1,7 @@
 #include "AudioMonoLookupOverflowFix.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace AudioMonoLookupOverflowFix {
 
 	char* __cdecl strstrHook(char* apBuffer, const char* apSuffix) {

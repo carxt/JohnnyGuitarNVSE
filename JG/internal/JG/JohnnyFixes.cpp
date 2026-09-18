@@ -24,6 +24,8 @@
 #endif
 #include "Fixes/FileFixes.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace JohnnyFixes {
 #ifdef GAME
 	SPEC_NAKED void InventoryAmmoHook() {

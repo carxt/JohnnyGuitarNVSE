@@ -4,6 +4,8 @@
 #include "GameSound.h"
 #include "Bethesda/DialoguePackage.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace DeathSoundFix {
 	
 	int32_t iDeathSoundMaxTimer = 10;

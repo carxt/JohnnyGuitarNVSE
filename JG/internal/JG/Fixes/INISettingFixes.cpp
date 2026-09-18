@@ -4,6 +4,8 @@
 #include "Bethesda/Script.hpp"
 #include "Bethesda/Interface.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace INISettingFixes {
 	STACK_FRAME_OPT_ENABLE
 

@@ -27,7 +27,6 @@
 #include "NPCAccuracy.hpp"
 #include "Fixes\RadioSkipOGGWAVPatch.hpp"
 #include "WorldToScreen.hpp"
-#include "NewNiObjects.hpp"
 #include "FormSkeletons.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
@@ -37,6 +36,8 @@
 #endif
 #include "BSAUpgrade.hpp"
 #include "NewNiObjects.hpp"
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace JohnnyPatches {
 

@@ -2,6 +2,7 @@
 #pragma once
 
 #include <intrin.h>
+#include <limits>
 
 const double
 kDblZero = 0,
@@ -32,7 +33,7 @@ kFlt4096 = 4096.0F,
 kFlt10000 = 10000.0F,
 kFlt12288 = 12288.0F,
 kFlt40000 = 40000.0F,
-kFltMax = FLT_MAX;
+kFltMax = std::numeric_limits<float>::max();
 
 class CriticalSection {
 	CRITICAL_SECTION	critSection;

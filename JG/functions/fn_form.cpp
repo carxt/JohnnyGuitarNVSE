@@ -24,7 +24,7 @@
 
 #include "NVSE/InventoryRef.hpp"
 
-#include "Shared/BSMemory/BSScrapMemory.hpp"
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
 #include "Shared/Utils/StackObject.hpp"
 
 #include "events/LambdaVariableContext.h"

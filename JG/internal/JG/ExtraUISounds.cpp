@@ -2,6 +2,8 @@
 #include "GameSound.h"
 #include "GameForms.h"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace ExtraUISounds {
 
 	uint32_t uiQuestSounds[QuestUpdateManager::UpdateType::COUNT] = {};

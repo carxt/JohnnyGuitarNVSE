@@ -2,7 +2,8 @@
 #include "GameObjects.h"
 #include "Bethesda/ExtraFactionChanges.hpp"
 
-#include <Shared/BSMemory/BSScrapMemory.hpp>
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 #include <unordered_map>
 #include <algorithm>

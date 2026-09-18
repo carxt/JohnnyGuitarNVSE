@@ -4,6 +4,8 @@
 
 #include "Bethesda/TESMain.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace WorldToScreen {
 
 	CameraParams kCameraData;

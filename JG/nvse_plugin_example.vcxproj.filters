@@ -2656,6 +2656,9 @@
     <ClInclude Include="internal\Game\Bethesda\TaskQueueInterface.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="..\shared\BSMemory\BSMemoryUtils.hpp">
+      <Filter>shared\BSMemory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

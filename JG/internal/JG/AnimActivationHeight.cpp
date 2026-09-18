@@ -1,6 +1,8 @@
 #include "AnimActivationHeight.hpp"
 #include <GameObjects.h>
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace AnimActivationHeight {
 
 	float fActivationHeight = 0.f;

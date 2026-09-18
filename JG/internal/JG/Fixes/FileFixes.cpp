@@ -1,6 +1,8 @@
 #include "FileFixes.hpp"
 #include <GameAPI.h>
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace FileFixes {
 
 	// Betheda allocates a fixed-size buffer, then proceeds to read file data into it

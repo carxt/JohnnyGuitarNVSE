@@ -2,16 +2,12 @@
 
 #pragma warning(disable: 4100 4201 4244 4324 4389 5054 28159)
 
-#include <d3d9.h>
-
-#include <Windows.Foundation.h>
-#include <wrl\wrappers\corewrappers.h>
-#include <wrl\client.h>
+#include <windows.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <cmath>
-#include <string>
-#include <cassert>
+#include <assert.h>
+#include <xutility>
 
 #define USE_MODDED_CHANGES 1
 
@@ -20,11 +16,8 @@ constexpr inline auto our_sprintf	= sprintf;
 constexpr inline auto our_vsprintf	= vsprintf;
 constexpr inline auto our_vsnprintf	= vsnprintf;
 
-#include "Utils/DebugLog.hpp"
 #include "Utils/Bitfield.hpp"
 #include "Utils/AddressPtr.hpp"
-
-#include "SafeWrite/SafeWrite.hpp"
 
 // Game unit conversion constants
 constexpr inline double dM2NI	= 69.99125671386719;	// 1 Meter to Ni

@@ -3,6 +3,8 @@
 #include <GameProcess.h>
 #include "Bethesda/DialoguePackage.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace NoHeadlessTalkingFix {
 
 	bool __fastcall CanSpeakThroughHead(Actor* apActor) {

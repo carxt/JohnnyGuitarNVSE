@@ -1,6 +1,8 @@
 #include "AmmoEffectListNullChecks.hpp"
 #include "Obsidian/TESAmmoEffect.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace AmmoEffectListNullChecks {
 
 	template<uint32_t uiAddress>

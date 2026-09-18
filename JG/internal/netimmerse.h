@@ -19,6 +19,8 @@
 #include "Bethesda/BSMultiBoundNode.hpp"
 #include "Bethesda/BSShaderProperty.hpp"
 
+#include <d3d9.h>
+
 struct NavMeshInfo;
 class bhkRigidBody;
 class TESObjectCELL;

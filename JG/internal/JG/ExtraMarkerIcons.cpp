@@ -1,5 +1,7 @@
 #include "ExtraMarkerIcons.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace ExtraMarkerIcons {
 	std::unordered_map<FormID, char*> markerIconMap;
 	char** defaultMarkerList = (char**)0x11A0404;

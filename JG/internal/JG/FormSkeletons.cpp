@@ -1,6 +1,8 @@
 #include "FormSkeletons.hpp"
 #include "Bethesda/TESActorBase.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace FormSkeletons {
 
 	HookUtils::CallDetour kCopyBoundDataDetour;

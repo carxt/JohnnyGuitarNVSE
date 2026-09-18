@@ -2,6 +2,8 @@
 #include "Bethesda/GameSettingCollection.hpp"
 #include "JohnnyGameSettings.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace DialogueResponseOverride {
 
 	std::unordered_map<FormID, std::map<uint32_t, DialogueEmotionOverride>> overrideMap;

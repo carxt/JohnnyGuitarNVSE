@@ -15,7 +15,7 @@
 #include "NVSE/InventoryRef.hpp"
 
 #include "Shared/Utils/StackObject.hpp"
-#include "Shared/BSMemory/BSScrapMemory.hpp"
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
 
 #include <vector>
 

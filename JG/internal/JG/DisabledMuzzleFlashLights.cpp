@@ -1,6 +1,8 @@
 #include "DisabledMuzzleFlashLights.hpp"
 #include "GameObjects.h"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace DisabledMuzzleFlashLights {
 
 	Mode eDisableMode = Mode::ENABLE;

@@ -1,6 +1,8 @@
 #include "CameraOverride.hpp"
 #include <GameObjects.h>
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace CameraOverride {
 
 	NiPoint3 kCameraPos;

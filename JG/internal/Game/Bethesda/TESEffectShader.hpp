@@ -4,6 +4,8 @@
 #include "TESTexture.hpp"
 #include "Gamebryo/NiPoint3.hpp"
 
+#include <d3d9types.h>
+
 class BGSDebris;
 
 class TESEffectShader : public TESForm {

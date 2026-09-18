@@ -3,6 +3,8 @@
 #include <GameObjects.h>
 #include <GameProcess.h>
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace BipedAnimFixes {
 
 	HookUtils::CallDetour kSetBipedWeaponDetour;

@@ -1,6 +1,8 @@
 #include "MediaLocationControllerTweaks.hpp"
 #include <GameForms.h>
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 class PlayerCharacter;
 
 namespace MediaLocationControllerTweaks {

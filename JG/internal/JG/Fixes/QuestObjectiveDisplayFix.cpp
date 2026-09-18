@@ -1,6 +1,8 @@
 #include "QuestObjectiveDisplayFix.hpp"
 #include <GameForms.h>
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace QuestObjectiveDisplayFix {
 
 	HookUtils::JumpDetour kDetour;

@@ -2,6 +2,8 @@
 
 #include "NiMemObject.hpp"
 
+#include <d3d9types.h>
+
 class SPEC_EMPTY_BASES NiPixelFormat : public NiMemObject {
 public:
 	struct _Format {

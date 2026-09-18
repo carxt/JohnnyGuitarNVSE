@@ -41,9 +41,11 @@
 
 #include "internal/CommandOpcodes.h"
 
-#include "Shared/BSMemory/BSScrapMemory.hpp"
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
 #include "Shared/Utils/StackObject.hpp"
 #include "Shared/Utils/CustomClass.hpp"
+#include "Shared/Utils/DebugLog.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 #include <unordered_map>
 

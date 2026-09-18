@@ -4,6 +4,8 @@
 #include "Bethesda/Sky.hpp"
 #include "JIP/JIPUtils.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace SkyUpdateFixes {
 
 	// Game does not update sky elements properly

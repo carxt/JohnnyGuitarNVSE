@@ -2,6 +2,8 @@
 #include "GameObjects.h"
 #include "GameProcess.h"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace CustomCameraShake {
 	float mult = 0, duration = 0;
 	bool __fastcall fn_camAltShakeHook(Actor* a_refr, void* edx, NiMatrix3* outMatrix) {

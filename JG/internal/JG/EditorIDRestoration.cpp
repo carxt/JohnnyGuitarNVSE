@@ -4,6 +4,9 @@
 #include "Bethesda/MenuConsole.hpp"
 #include "misc/misc.h"
 
+#include "Shared/Utils/DebugLog.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 STACK_FRAME_OPT_ENABLE
 
 namespace EDIDRestoration {

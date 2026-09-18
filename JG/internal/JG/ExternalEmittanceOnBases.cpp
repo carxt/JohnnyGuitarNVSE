@@ -3,6 +3,8 @@
 
 #include <GameObjects.h>
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace ExternalEmittanceOnBases {
 
 	HookUtils::CallDetour kGetBaseformDetour;

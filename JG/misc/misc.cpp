@@ -1,7 +1,7 @@
 #include "misc.h"
 #include <internal\utility.h>
 #include <GameAPI.h>
-#include "Shared/BSMemory/BSScrapMemory.hpp"
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
 
 float __fastcall tan_p(float angle) {
 	angle *= kDbl4dPI;

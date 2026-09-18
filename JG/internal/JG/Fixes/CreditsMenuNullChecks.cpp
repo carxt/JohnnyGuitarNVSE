@@ -1,5 +1,7 @@
 #include "CreditsMenuNullChecks.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 class StartMenu;
 
 namespace CreditsMenuNullChecks {

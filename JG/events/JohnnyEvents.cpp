@@ -6,6 +6,8 @@
 #include <internal/Game/Bethesda/DialogueResponse.hpp>
 #include <internal/Game/Bethesda/MenuTopic.hpp>
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 class InventoryChanges;
 
 extern NVSEScriptInterface* g_scriptInterface;

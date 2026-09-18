@@ -1,6 +1,8 @@
 #include "DestructionFixes.hpp"
 #include "Bethesda/TESForm.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace DestructionFixes {
 
 	STACK_FRAME_OPT_ENABLE

@@ -5,7 +5,8 @@
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/FixedStrings.hpp"
 
-#include <shared/BSMemory/BSScrapMemory.hpp>
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 #include <unordered_map>
 #include <vector>

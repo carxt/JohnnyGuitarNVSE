@@ -2,6 +2,8 @@
 #include "GameForms.h"
 #include "GameSound.h"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace RadioSkipOGGWAVPatch {
 	//Fix playback
 	unsigned int BSWin32Audio_GetTimePassed()

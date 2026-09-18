@@ -4,6 +4,8 @@
 
 #include "JGSetList.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace FilteredBarberMenu {
 	STACK_FRAME_OPT_ENABLE
 

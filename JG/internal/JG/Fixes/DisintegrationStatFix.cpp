@@ -1,5 +1,7 @@
 #include "DisintegrationStatFix.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace DisintegrationStatFix {
 
 	void Install() {

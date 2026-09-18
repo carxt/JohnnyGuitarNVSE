@@ -1,6 +1,8 @@
 #include "JIPUtils.hpp"
 #include "PluginAPI.h"
 
+#include "Shared/Utils/DebugLog.hpp"
+
 #include <array>
 
 extern NVSECommandTableInterface* g_cmdTableInterface;

@@ -123,7 +123,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GAME;WIN32;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;RUNTIME;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;NOMINMAX;NOSERVICE;NOMCX;NOIME;GAME;RUNTIME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -158,7 +158,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>EDITOR;WIN32;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;NOMINMAX;NOSERVICE;NOMCX;NOIME;EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -196,7 +196,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GAME;WIN32;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;RUNTIME;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;NOMINMAX;NOSERVICE;NOMCX;NOIME;GAME;RUNTIME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -236,7 +236,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>EDITOR;WIN32;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;NOMINMAX;NOSERVICE;NOMCX;NOIME;EDITOR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -277,7 +277,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>GAME;WIN32;NDEBUG;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;RUNTIME;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;NOMINMAX;NOSERVICE;NOMCX;NOIME;GAME;RUNTIME;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
@@ -314,7 +314,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;$(SolutionDir)\..\JohnnyGuitar;$(SolutionDir)internal;$(SolutionDir)\..\JohnnyGuitar\md5;$(SolutionDir)\..\JohnnyGuitar\sha1;$(SolutionDir)internal\Game;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>EDITOR;WIN32;NDEBUG;_WINDOWS;_USRDLL;RUNTIME_VERSION=0x040020D0;WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;WIN32_LEAN_AND_MEAN;NOMINMAX;NOSERVICE;NOMCX;NOIME;EDITOR;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -987,6 +987,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="..\nvse\nvse\GameUI.h" />
     <ClInclude Include="..\nvse\nvse\ParamInfos.h" />
     <ClInclude Include="..\nvse\nvse\Utilities.h" />
+    <ClInclude Include="..\shared\BSMemory\BSMemoryUtils.hpp" />
     <ClInclude Include="..\shared\BSMemory\BSMemory.hpp" />
     <ClInclude Include="..\shared\BSMemory\BSScrapMemory.hpp" />
     <ClInclude Include="..\shared\Defines.hpp" />

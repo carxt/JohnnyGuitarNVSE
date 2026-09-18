@@ -1,5 +1,7 @@
 #include "TESEffectShaderFixes.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace TESEffectShaderFixes {
 
 	SPEC_NAKED void SkinChecks_Asm() {

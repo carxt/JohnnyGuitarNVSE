@@ -1,7 +1,12 @@
 #include "BSAUpgrade.hpp"
-#include "JG/JohnnyPluginData.hpp"
 #include <GameAPI.h>
 #include <PluginAPI.h>
+
+#include "JG/JohnnyPluginData.hpp"
+
+#include "Shared/Utils/DebugLog.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 #include <mutex>
 
 extern NVSECommandTableInterface* g_cmdTableInterface;

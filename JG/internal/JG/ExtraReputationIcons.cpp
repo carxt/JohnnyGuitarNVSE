@@ -4,8 +4,11 @@
 #include "Bethesda/Interface.hpp"
 #include "GameAPI.h"
 #include "GameForms.h"
-#include "array"
-#include "unordered_map"
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
+#include <array>
+#include <unordered_map>
 
 namespace ExtraReputationIcons {
 	using FactionsMap = std::unordered_map<FormID, std::array<NiFixedString, 4>>;

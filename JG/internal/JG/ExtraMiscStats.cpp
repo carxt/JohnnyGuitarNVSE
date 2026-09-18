@@ -2,6 +2,8 @@
 #include "GameUI.h"
 #include "Bethesda/Setting.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace ExtraMiscStats {
 	std::unordered_map<std::string, int> miscStatMap;
 	std::unordered_set<std::string> availableMiscStats;

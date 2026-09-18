@@ -6,6 +6,8 @@
 
 #include "JGSetList.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 #include "unordered_map"
 
 namespace BarterFilter {

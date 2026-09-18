@@ -1,5 +1,7 @@
 #include "DisabledLevelUp.hpp"	
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace DisabledLevelUp {
 
 	bool bShowLevelUp = true;

@@ -19,7 +19,7 @@
 #include "JG/JohnnyRadios.hpp"
 #include "JIP/JIPUtils.hpp"
 
-#include <shared/BSMemory/BSScrapMemory.hpp>
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
 
 #include <random>
 
