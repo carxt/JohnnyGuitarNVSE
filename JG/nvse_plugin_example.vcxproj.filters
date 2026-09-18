@@ -412,7 +412,7 @@
     <ClCompile Include="internal\JG\NPCAccuracy.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\RSMBarberHook.cpp">
+    <ClCompile Include="internal\JG\FilteredBarberMenu.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\LandRemapping.cpp">
@@ -1708,7 +1708,7 @@
     <ClInclude Include="internal\JG\QuestObjectiveDisplayFix.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\RSMBarberHook.hpp">
+    <ClInclude Include="internal\JG\FilteredBarberMenu.hpp">
       <Filter>internal\JG\Features</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\NPCAccuracy.hpp">

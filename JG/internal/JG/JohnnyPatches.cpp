@@ -26,7 +26,6 @@
 #include "MediaLocationControllerTweaks.hpp"
 #include "NPCAccuracy.hpp"
 #include "RadioSkipOGGWAVPatch.hpp"
-#include "RSMBarberHook.hpp"
 #include "WorldToScreen.hpp"
 #include "NewNiObjects.hpp"
 #include "FormSkeletons.hpp"
@@ -260,9 +259,6 @@ namespace JohnnyPatches {
 		ExtraReputationIcons::Install();
 
 		ExtraMiscStats::Install();
-
-		// Hairstyle handlers
-		RSMBarberHook::Install();
 
 		BarterFilter::Install();
 

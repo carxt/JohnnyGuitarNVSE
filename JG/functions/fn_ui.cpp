@@ -9,7 +9,7 @@
 #include "JG/ExtraMarkerIcons.hpp"
 #include "JG/ExtraMiscStats.hpp"
 #include "JG/ExtraReputationIcons.hpp"
-#include "JG/RSMBarberHook.hpp"
+#include "JG/FilteredBarberMenu.hpp"
 #include "JG/ScriptUtils.hpp"
 
 #include "NVSE/InventoryRef.hpp"
@@ -87,15 +87,15 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
+	*result = 0;
+	uint32_t uiFlags = 0;
+	BGSListForm* pFormList = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags, &pFormList)) {
+		if (pFormList && !IS_ID(pFormList, BGSListForm))
+			pFormList = nullptr;
 
-	BGSListForm* formList = nullptr;
-	uint32_t flags = 0;
-	if (!PlayerCharacter::GetSingleton()) return true;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &formList)) {
-		if (formList && IS_TYPE(formList, BGSListForm)) {
-			RSMBarberHook::Load(formList);
-		}
-		RSMBarberHook::ShowMenu(flags);
+		FilteredBarberMenu::ShowMenu(uiFlags, pFormList);
+		*result = 1;
 	}
 	return true;
 }

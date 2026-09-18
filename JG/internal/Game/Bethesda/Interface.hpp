@@ -127,6 +127,9 @@ public:
 	static NiAVObject* CopyOrDeepCopyNode(NiAVObject* apObject);
 
 
+	static void CreateRaceSexMenu(uint32_t aeType);
+
+
 	static void PrintLine(const char* apText, auto...args);
 	
 	static bool ShowMessage(const char* apText, Emotion aeEmotion, const char* apImagePath, const char* apSoundName = nullptr, float afTime = 2.f, bool abInstant = false);

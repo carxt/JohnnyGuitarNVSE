@@ -20,7 +20,7 @@
 #include "LandRemapping.hpp"
 #include "MediaLocationControllerTweaks.hpp"
 #include "NPCAccuracy.hpp"
-#include "RSMBarberHook.hpp"
+#include "FilteredBarberMenu.hpp"
 #include "TaskQueue.hpp"
 
 #include "functions/fn_gameplay.h"
@@ -99,7 +99,7 @@ static void __fastcall GameReset(uint32_t aeType) {
 
 	DisabledSaves::Reset();
 	ExtraMiscStats::Reset();
-	RSMBarberHook::Reset();
+	FilteredBarberMenu::Reset();
 	JohnnyRadios::Reset();
 	BarterFilter::Reset();
 	NPCAccuracy::Reset();
