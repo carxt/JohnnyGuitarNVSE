@@ -1,4 +1,8 @@
 #include "JohnnyGameSettings.hpp"
+#include <GameForms.h>
+#include "Bethesda/GameSettingCollection.hpp"
+
+class NiNode;
 
 namespace JohnnyGameSettings {
 	CustomGameSetting fCombatLocationTargetRadiusMaxBase;

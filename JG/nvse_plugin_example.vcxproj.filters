@@ -400,13 +400,13 @@
     <ClCompile Include="internal\JG\WorldToScreen.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\DeathSoundFix.cpp">
+    <ClCompile Include="internal\JG\Fixes\DeathSoundFix.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp">
+    <ClCompile Include="internal\JG\Fixes\QuestObjectiveDisplayFix.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\RadioSkipOGGWAVPatch.cpp">
+    <ClCompile Include="internal\JG\Fixes\RadioSkipOGGWAVPatch.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\NPCAccuracy.cpp">
@@ -472,7 +472,7 @@
     <ClCompile Include="internal\JG\AddItemMessages.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\SkyUpdateFixes.cpp">
+    <ClCompile Include="internal\JG\Fixes\SkyUpdateFixes.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\MediaLocationControllerTweaks.cpp">
@@ -988,12 +988,39 @@
     <ClCompile Include="internal\Game\Bethesda\ImageSpaceModifierInstanceDRB.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\AmmoEffectListNullChecks.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\AudioMonoLookupOverflowFix.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\BipedAnimFixes.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\CreditsMenuNullChecks.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\DestructionFixes.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\DisintegrationStatFix.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\NoHeadlessTalkingFix.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\TESEffectShaderFixes.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\INISettingFixes.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\FileFixes.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="..\nvse\nvse\GameBSExtraData.h">
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameData.h">
@@ -1012,9 +1039,6 @@
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameRTTI.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="..\nvse\nvse\GameSettings.h">
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameTasks.h">
@@ -1699,13 +1723,13 @@
     <ClInclude Include="internal\JG\WorldToScreen.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\DeathSoundFix.hpp">
+    <ClInclude Include="internal\JG\Fixes\DeathSoundFix.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\RadioSkipOGGWAVPatch.hpp">
+    <ClInclude Include="internal\JG\Fixes\RadioSkipOGGWAVPatch.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\QuestObjectiveDisplayFix.hpp">
+    <ClInclude Include="internal\JG\Fixes\QuestObjectiveDisplayFix.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\FilteredBarberMenu.hpp">
@@ -1771,7 +1795,7 @@
     <ClInclude Include="internal\JG\AddItemMessages.hpp">
       <Filter>internal\JG\Features</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\SkyUpdateFixes.hpp">
+    <ClInclude Include="internal\JG\Fixes\SkyUpdateFixes.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BSWindModifier.hpp">
@@ -2592,6 +2616,39 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSEntryPoint.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\INISettingFixes.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\Utils\CustomGameSetting.hpp">
+      <Filter>shared\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\DisintegrationStatFix.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\AmmoEffectListNullChecks.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\AudioMonoLookupOverflowFix.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\BipedAnimFixes.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\CreditsMenuNullChecks.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\DestructionFixes.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\NoHeadlessTalkingFix.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\TESEffectShaderFixes.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\FileFixes.hpp">
+      <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

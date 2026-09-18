@@ -1,5 +1,5 @@
 #include "DialogueResponseOverride.hpp"
-#include <GameSettings.h>
+#include "Bethesda/GameSettingCollection.hpp"
 #include "JohnnyGameSettings.hpp"
 
 namespace DialogueResponseOverride {
@@ -33,7 +33,6 @@ namespace DialogueResponseOverride {
 		if (auto diaCont = overrideMap.find(topicInfo->GetFormID()); diaCont != overrideMap.end())
 		{
 
-			Setting* iSTDEmotionVal = (Setting*)0x11CBDF4;
 			if (auto diaItem = diaCont->second.find(topicInfoResponse->GetResponseID()); diaItem != diaCont->second.end())
 			{
 				if (diaItem->second.m_emotionType < kEmotionMax)
@@ -47,7 +46,7 @@ namespace DialogueResponseOverride {
 				}
 				if ((responseCol->emotionType > 0) && JohnnyGameSettings::iOverrideDialogueEmotionValues.Int() >= 1)
 				{
-					responseCol->emotionValue = iSTDEmotionVal->Int();
+					responseCol->emotionValue = GameSettingCollection::iStandardEmotionValue->Int();
 				}
 
 				if (IS_TYPE(diaItem->second.m_speakerAnimation, TESIdleForm) || (diaItem->second.m_speakerAnimation == NULL))

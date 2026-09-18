@@ -2,7 +2,6 @@
 
 #include "Utilities.h"
 #include "GameTypes.h"
-#include "GameBSExtraData.h"
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
 

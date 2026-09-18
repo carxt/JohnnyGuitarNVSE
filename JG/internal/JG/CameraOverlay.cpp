@@ -1,13 +1,14 @@
 #include "CameraOverlay.hpp"
 #include <GameObjects.h>
 #include <GameUI.h>
-#include <GameSettings.h>
 
 #include "Bethesda/BSRenderedTexture.hpp"
 #include "Bethesda/BSShaderUtil.hpp"
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TimeGlobal.hpp"
+
+#include <shared/Utils/CustomGameSetting.hpp>
 
 #pragma comment(lib, "d3d9.lib")
 
