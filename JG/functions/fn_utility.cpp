@@ -108,9 +108,9 @@ bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	uint32_t stopAnim = 0;
 	Actor* actor = (Actor*)thisObj;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &stopAnim);
-	if (actor && actor->IsActor() && actor->baseProcess->GetIdleForm350()) {
-		actor->baseProcess->ResetQueuedIdleFlags();
-		actor->baseProcess->SetIdleForm350(nullptr);
+	if (actor && actor->IsActor() && actor->GetCurrentAIProcess()->GetCurrentProcessIdle()) {
+		actor->GetCurrentAIProcess()->ClearPostAnimationActions();
+		actor->GetCurrentAIProcess()->SetCurrentProcessIdle(nullptr);
 		if (stopAnim > 0) ThisCall(0x498910, actor->GetAnimation(), 1, 1); // SpecialIdleFree
 		*result = 1;
 	}

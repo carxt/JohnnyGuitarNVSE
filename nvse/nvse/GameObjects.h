@@ -3,7 +3,11 @@
 #include "GameForms.h"
 #include "GameSound.h"
 #include "Bethesda/BGSEntryPointPerkEntry.hpp"
+#ifdef GAME
+#include "Bethesda/MobileObject.hpp"
+#else
 #include "Bethesda/TESObjectREFR.hpp"
+#endif
 #include "Obsidian/AudioMarkerInfo.hpp"
 
 class ScriptLocals;
@@ -43,86 +47,10 @@ TESBoundObject* __fastcall GetPermanentBaseForm(TESObjectREFR* apReference);	// 
 
 class BaseProcess;
 
-// 88
-class MobileObject : public TESObjectREFR {
-public:
-	MobileObject();
-	~MobileObject();
-
-	virtual void		Unk_90(void);
-	virtual void		Unk_91(void);
-	virtual void		Unk_92(void);
-	virtual void		Unk_93(void);
-	virtual void		Unk_94(void);
-	virtual void		Jump(void);
-	virtual void		Unk_96(void);
-	virtual void		Unk_97(void);
-	virtual void		Unk_98(void);
-	virtual void		Unk_99(void);
-	virtual void		Unk_9A(void);
-	virtual void		Unk_9B(void);
-	virtual void		Unk_9C(void);
-	virtual void		Unk_9D(void);
-	virtual void		Unk_9E(void);
-	virtual void		Unk_9F(void);
-	virtual void		Unk_A0(void);
-	virtual void		Unk_A1(void);
-	virtual void		Unk_A2(void);
-	virtual void		Unk_A3(void);
-	virtual void		Unk_A4(void);
-	virtual void		Unk_A5(void);
-	virtual void		Unk_A6(void);
-	virtual void		Unk_A7(void);
-	virtual void		Unk_A8(void);
-	virtual void		Unk_A9(void);
-	virtual void		Unk_AA(void);
-	virtual void		Unk_AB(void);
-	virtual void		Unk_AC(void);
-	virtual void		Unk_AD(void);
-	virtual void		Unk_AE(void);
-	virtual float		GetZRotation(bool arg1);
-	virtual void		Unk_B0(void);
-	virtual void		Unk_B1(void);
-	virtual void		Unk_B2(void);
-	virtual void		Unk_B3(void);
-	virtual void		Unk_B4(void);
-	virtual void		Unk_B5(void);
-	virtual void		Unk_B6(void);
-	virtual void		Unk_B7(void);
-	virtual void		Unk_B8(void);
-	virtual void		Unk_B9(void);
-	virtual void		Unk_BA(void);
-	virtual void		Unk_BB(void);
-	virtual void		Unk_BC(void);
-	virtual void		Unk_BD(void);
-	virtual void		Unk_BE(void);
-	virtual void		Unk_BF(void);
-	virtual void		Unk_C0(void);
-
-	BaseProcess* baseProcess;	// 68
-	uint32_t			unk6C;			// 6C - loaded
-	TESObjectREFR* unk70;			// 70 - loaded
-	uint32_t			unk74;			// 74 - loaded
-	uint32_t			unk78;			// 78 - loaded
-	bool			bSpeakingDone;			// 7C - loaded
-	uint8_t			unk7D;			// 7D - loaded
-	uint8_t			unk7E;			// 7E - loaded
-	uint8_t			unk7F;			// 7F - loaded
-	uint8_t			unk80;			// 80 - loaded
-	uint8_t			unk81;			// 81 - loaded
-	uint8_t			unk82;			// 82
-	uint8_t			unk83;			// 83 - loaded
-	uint8_t			unk84;			// 84 - loaded
-	uint8_t			unk85;			// 85 - loaded
-	uint8_t			unk86;			// 86 - loaded
-	uint8_t			unk87;			// 87	Init'd to the inverse of NoLowLevelProcessing
-};
-#ifdef GAME
-static_assert(sizeof(MobileObject) == 0x88);
-#endif
 class MagicTarget;
 typedef tList<ActiveEffect> ActiveEffectList;
 
+#ifdef GAME
 // 0C
 class MagicCaster {
 public:
@@ -1043,4 +971,5 @@ public:
 };
 #ifdef GAME
 static_assert(sizeof(Explosion) == 0x104);
+#endif
 #endif

@@ -909,7 +909,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* actor = static_cast<Actor*>(thisObj);
-	ItemChange* weapInfo = actor->baseProcess->GetCurrentWeapon();
+	ItemChange* weapInfo = actor->GetCurrentAIProcess()->GetCurrentWeapon();
 	if (weapInfo && weapInfo->pObject) {
 		bool hasDecreaseSpreadEffect = weapInfo->HasModEffectActive(3);
 		double minSpread = ThisCall<double>(0x524B80, weapInfo->pObject, hasDecreaseSpreadEffect);
@@ -925,7 +925,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 
 		totalSpread += spreadPenalty * GameSettingCollection::fNPCMaxGunWobbleAngle->Float() * 0.01745329238474369;
 
-		float noIdea = ThisCall<HighProcess*>(0x8D8520, actor)->angle1D0;
+		float noIdea = actor->GetCurrentAIProcess()->GetAimLooking();
 		totalSpread = totalSpread + noIdea;
 
 		bool hasSplitBeamEffect = weapInfo->HasModEffectActive(0xC);
@@ -1116,7 +1116,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	}
 
 	if (closestHostile) {
-		auto playerRotation = PlayerCharacter::GetSingleton()->GetZRotation(0);
+		auto playerRotation = PlayerCharacter::GetSingleton()->GetHeading(false);
 		double headingAngle = GetAngleBetweenPoints(closestHostile->GetLocationOnReference(), playerPos, playerRotation);
 
 		// shift the coordinates from -180:180 to 0:360 and offset them (360 / 8 quadrants / 2) degrees
@@ -1228,9 +1228,9 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 		thisObj->AddChange(0x400000);
 
 		if (!actor->IsPlayerRef()) {
-			BaseProcess* base = actor->baseProcess;
+			BaseProcess* base = actor->GetCurrentAIProcess();
 			if (base) {
-				base->Unk_EC(avCode);
+				base->SetCachedActorValueOutOfDate(avCode);
 			}
 		}
 
@@ -1256,9 +1256,9 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 		thisObj->AddChange(0x800000);
 
 		if (!actor->IsPlayerRef()) {
-			BaseProcess* base = actor->baseProcess;
+			BaseProcess* base = actor->GetCurrentAIProcess();
 			if (base) {
-				base->Unk_EC(avCode);
+				base->SetCachedActorValueOutOfDate(avCode);
 			}
 		}
 
@@ -1337,7 +1337,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 			pExtraDataList = pInvRef->pExtraDataList;
 		}
 		else {
-			ItemChange* pWeaponItem = ((Actor*)thisObj)->baseProcess->GetCurrentWeapon();
+			ItemChange* pWeaponItem = ((Actor*)thisObj)->GetCurrentAIProcess()->GetCurrentWeapon();
 			if (pWeaponItem && pWeaponItem->pExtraLists) {
 				pWeapon = static_cast<TESObjectWEAP*>(pWeaponItem->pObject);
 				pExtraDataList = pWeaponItem->pExtraLists->GetItem();

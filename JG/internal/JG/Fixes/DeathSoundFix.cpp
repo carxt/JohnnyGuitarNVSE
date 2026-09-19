@@ -19,17 +19,17 @@ namespace DeathSoundFix {
 				}
 			}
 		}
-		return apProcess->dyingTimer + iDeathSoundMaxTimer;
+		return apProcess->fGreetingTimer + iDeathSoundMaxTimer;
 	}
 	float __fastcall FixDeathSounds(HighProcess* apProcess, Actor* apActor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
-		return apProcess->dyingTimer + iDeathSoundMaxTimer;
+		return apProcess->fGreetingTimer + iDeathSoundMaxTimer;
 	}
 
 
 	float __fastcall FixDeathSoundsAlt(HighProcess* apProcess, Actor* apActor) { //Alternate complex, confusing, potentially buggy fix.
 		constexpr float DYING_TIMER_MIN = FLT_EPSILON * 10; //Establish low tolerance, this should be ideal. Unless someone sets fDyingTimer to 0 or something, but that's their problem.
-		float fDyingTimer = apProcess->dyingTimer;
-		bool bKeepTalking = apActor->IsTalking() || !(apActor->unk80 & 1);
+		float fDyingTimer = apProcess->fGreetingTimer;
+		bool bKeepTalking = apActor->IsTalking() || !apActor->bVoiceFileDone;
 		if (bKeepTalking) {
 			if (fDyingTimer <= DYING_TIMER_MIN) 
 				fDyingTimer = DYING_TIMER_MIN;

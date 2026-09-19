@@ -200,9 +200,9 @@ bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 	if (!thisObj) { return true; }
 	*result = 0;
 	if (thisObj->IsActor()) {
-		auto actorProcess = ((Actor*)thisObj)->baseProcess;
+		auto actorProcess = ((Actor*)thisObj)->GetCurrentAIProcess();
 		if (actorProcess) {
-			auto furniRef = actorProcess->GetCurrentFurnitureRef();
+			auto furniRef = actorProcess->GetCurrentFurniture();
 			if (furniRef) {
 				*(FormID*)result = furniRef->GetFormID();
 			}
@@ -1952,16 +1952,16 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 		}
 	}
 	else if NOT_ID(weapon, TESObjectWEAP) return true;
-	MiddleHighProcess* midHiProc = (MiddleHighProcess*)PlayerCharacter::GetSingleton()->baseProcess;
-	ItemChange* weaponInfo = midHiProc->weaponInfo;
+	MiddleHighProcess* midHiProc = (MiddleHighProcess*)PlayerCharacter::GetSingleton()->GetCurrentAIProcess();
+	ItemChange* weaponInfo = midHiProc->GetCurrentWeapon();
 	TESForm* ammo = nullptr;
-	if (!extendPtr && weaponInfo && (weaponInfo->pObject == weapon) && midHiProc->ammoInfo)
-		ammo = midHiProc->ammoInfo->pObject;
+	if (!extendPtr && weaponInfo && (weaponInfo->pObject == weapon) && midHiProc->GetCurrentAmmo())
+		ammo = midHiProc->GetCurrentAmmo()->pObject;
 	if (!ammo)
 		ammo = weapon->GetAmmo();
-	midHiProc->weaponInfo = nullptr;
+	midHiProc->pCurrentWeapon = nullptr;
 	*result = GetWeaponDPS(&(PlayerCharacter::GetSingleton()->avOwner), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
-	midHiProc->weaponInfo = weaponInfo;
+	midHiProc->pCurrentWeapon = weaponInfo;
 	if (Script::GetConsoleOuput())
 		Interface::PrintLine("GetCalculatedWeaponDPS >> %f", *result);
 	return true;
@@ -2729,15 +2729,15 @@ bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
 		const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
 		if (thisObj->IsActor()) {
 			Actor* pActor = static_cast<Actor*>(thisObj);
-			if (pActor->baseProcess) {
+			if (pActor->GetCurrentAIProcess()) {
 				// Creatures can't refresh their models in vanilla, so we have to handle them ourselves.
 				if (pActor->IsCreature()) {
 					RequestModelUpdate(thisObj, uiFlags, bQueue);
 				}
 				else {
-					pActor->baseProcess->Set3DUpdateFlag(uiFlags);
+					pActor->GetCurrentAIProcess()->Set3DUpdateFlag(uiFlags);
 					if (!bQueue)
-						pActor->baseProcess->Update3DModel(pActor);
+						pActor->GetCurrentAIProcess()->Update3DModel(pActor);
 
 
 					const uint32_t uiCustomFlags = uiFlags & uiAddedFlags;
@@ -3013,12 +3013,12 @@ bool Cmd_PickIdleEx_Execute(COMMAND_ARGS) {
 		return true;
 	
 	Actor* pUser = static_cast<Actor*>(thisObj);
-	if (!pUser->baseProcess)
+	if (!pUser->GetCurrentAIProcess())
 		return true;
 
 	TESObjectREFR* pTargetRef = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetRef) && pTargetRef && pTargetRef->GetObjectReference()) {
-		LowProcess* pAIProcess = static_cast<LowProcess*>(pUser->baseProcess);
+		LowProcess* pAIProcess = static_cast<LowProcess*>(pUser->GetCurrentAIProcess());
 		const TESObjectREFR* pOrgTarget = pAIProcess->pTarget;
 		pAIProcess->pTarget = pTargetRef;
 		*result = pAIProcess->FindSpecialIdletoPlay(pUser, pTargetRef->GetObjectReference(), pTargetRef);
@@ -3108,7 +3108,7 @@ bool Cmd_GetAltTextures_Execute(COMMAND_ARGS) {
 namespace {
 
 	static bool __fastcall HasScopedWeapon(Character* apCharacter) {
-		ItemChange* pItem = apCharacter->baseProcess->GetCurrentWeapon();
+		ItemChange* pItem = apCharacter->GetCurrentAIProcess()->GetCurrentWeapon();
 		if (pItem) {
 			TESObjectWEAP* pWeapon = static_cast<TESObjectWEAP*>(pItem->pObject);
 			return pWeapon && pWeapon->HasScope() && (!pWeapon->HasModScope() || pItem->HasModEffectActive(0xE));
@@ -3131,8 +3131,8 @@ namespace {
 			return nullptr;
 
 		Character* pChar = static_cast<Character*>(apReference);
-		const BaseProcess* pProcess = pChar->baseProcess;
-		if (!pProcess || pProcess->processLevel != PROCESS_TYPE::HIGH)
+		const BaseProcess* pProcess = pChar->GetCurrentAIProcess();
+		if (!pProcess || pProcess->GetProcessLevel() != PROCESS_TYPE::HIGH)
 			return nullptr;
 
 		if (!pChar->Get3DVerySimple())

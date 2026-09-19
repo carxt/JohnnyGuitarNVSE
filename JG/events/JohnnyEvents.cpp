@@ -584,12 +584,12 @@ namespace JohnnyEvents {
 			static inline HookUtils::VirtFuncDetour kDetour;
 
 			static bool __fastcall Hook(Actor* apActor) {
-				if (!apActor || !apActor->baseProcess) [[unlikely]]
+				if (!apActor || !apActor->GetCurrentAIProcess()) [[unlikely]]
 					return true;
 
-				const uint32_t eOldLevel = apActor->baseProcess->processLevel;
+				const uint32_t eOldLevel = apActor->GetCurrentAIProcess()->GetProcessLevel();
 				const bool bResult = ThisCall<bool>(kDetour, apActor);
-				const uint32_t eNewLevel = apActor->baseProcess->processLevel;
+				const uint32_t eNewLevel = apActor->GetCurrentAIProcess()->GetProcessLevel();
 				Events::OnProcessChangeEvent(apActor, eOldLevel, eNewLevel);
 				return bResult;
 			}

@@ -1059,8 +1059,8 @@ namespace JIPFixes {
 				return true;
 
 			Actor* pActor = static_cast<Actor*>(thisObj);
-			BaseProcess* pProcess = pActor->baseProcess;
-			if (!pProcess || pProcess->processLevel != PROCESS_TYPE::HIGH)
+			BaseProcess* pProcess = pActor->GetCurrentAIProcess();
+			if (!pProcess || pProcess->GetProcessLevel() != PROCESS_TYPE::HIGH)
 				return true;
 
 			const NiAVObject* pRoot = thisObj->Get3DVerySimple();
@@ -1537,17 +1537,23 @@ namespace JIPFixes {
 
 	namespace PowerArmorCondition {
 
+#ifdef GAME
 		STACK_FRAME_OPT_ENABLE
 		bool Cmd_GetPCCanUsePowerArmor_Eval(COMMAND_ARGS_EVAL) {
 			*result = PlayerCharacter::GetSingleton()->canUsePA;
 			return true;
 		}
 		STACK_FRAME_OPT_RESET
+#endif
 
 		void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetPCCanUsePowerArmor));
 			if (pInfo) {
+#ifdef GAME
 				pInfo->eval = Cmd_GetPCCanUsePowerArmor_Eval;
+#else
+				pInfo->eval = reinterpret_cast<Cmd_Eval>(0x5BB810);
+#endif
 			}
 		}
 	}

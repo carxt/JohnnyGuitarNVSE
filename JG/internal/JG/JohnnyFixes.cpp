@@ -136,9 +136,9 @@ namespace JohnnyFixes {
 	STACK_FRAME_OPT_RESET
 
 	void ClearPlayerFurniture() {
-		BaseProcess* pAIProcess = PlayerCharacter::GetSingleton()->baseProcess;
+		BaseProcess* pAIProcess = PlayerCharacter::GetSingleton()->GetCurrentAIProcess();
 		if (pAIProcess)
-			pAIProcess->SetFurnitureRef(PlayerCharacter::GetSingleton(), 0, nullptr, 0x7F);
+			pAIProcess->SetSitSleepState(PlayerCharacter::GetSingleton(), SIT_SLEEP_STATE::NORMAL, nullptr, 0x7F);
 	}
 #endif
 

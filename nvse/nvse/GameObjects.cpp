@@ -34,6 +34,7 @@ TESBoundObject* __fastcall GetPermanentBaseForm(TESObjectREFR* apReference) {
 	return nullptr;
 }
 
+#ifdef GAME
 PlayerCharacter* PlayerCharacter::GetSingleton() {
 	return *(PlayerCharacter**)0x11DEA3C;
 }
@@ -56,8 +57,8 @@ BipedAnim* PlayerCharacter::GetBiped(bool abFirstPerson) const {
 Animation* PlayerCharacter::GetAnimation(bool abFirstPerson) const {
 	if (abFirstPerson)
 		return p1stPersonAnimation;
-	else if (baseProcess)
-		return baseProcess->GetAnimation();
+	else if (pCurrentProcess)
+		return pCurrentProcess->GetAnimation();
 	else
 		return nullptr;
 }
@@ -109,3 +110,4 @@ bool Actor::IsInDialogueWithPlayer() const {
 bool Actor::GetRespawn() const {
 	return ThisCall<bool>(0x87F4A0, this);
 }
+#endif

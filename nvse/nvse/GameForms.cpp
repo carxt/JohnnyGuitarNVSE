@@ -23,6 +23,7 @@ TESAmmo* TESObjectWEAP::GetAmmo() {
 #endif
 }
 
+#ifdef GAME
 TESForm* TESObjectWEAP::GetAmmoInInventory()
 {
 	if (ammo.pAmmo) {
@@ -46,3 +47,4 @@ TESForm* TESObjectWEAP::GetAmmoInInventory()
 	}
 	return nullptr;
 }
+#endif
