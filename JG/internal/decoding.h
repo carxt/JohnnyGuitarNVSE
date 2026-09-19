@@ -412,14 +412,25 @@ public:
 #ifdef GAME
 static_assert(sizeof(NavMesh) == 0x108);
 #endif
-typedef NiPointer<NavMesh> NavMeshPtr;
-
-
-class NavMeshArray : public BSSimpleArray<NavMeshPtr>
-{
+class NavMeshPtr : public NiPointer<NavMesh> {
 public:
-	inline NavMeshPtr GetAt(uint32_t auiIndex)
-	{
+	using NiPointer<NavMesh>::NiPointer;
+	NavMeshPtr& operator=(NavMesh* apObject) { NiPointer<NavMesh>::operator=(apObject); return *this; }
+
+	// GAME - 0x464FC0
+	static void MakeNavMeshPtr(NavMeshPtr& arNavMeshOut, NavMesh* apNavMesh) {
+		arNavMeshOut = NavMeshPtr(apNavMesh);
+	}
+
+	// GAME - 0x464FC0
+	static NavMeshPtr MakeNavMeshPtr(NavMesh* apNavMesh) {
+		return NavMeshPtr(apNavMesh);
+	}
+};
+
+class NavMeshArray : public BSSimpleArray<NavMeshPtr> {
+public:
+	inline NavMeshPtr GetAt(uint32_t auiIndex) {
 		if (auiIndex >= uiSize)
 			return nullptr;
 		else

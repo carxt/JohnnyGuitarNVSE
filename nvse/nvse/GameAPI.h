@@ -631,7 +631,7 @@ struct NavMeshTriangle {
 	uint32_t	uiFlags;
 };	// Alloc'd by 0x10
 
-struct NavMeshInfo;
+class NavMeshInfo;
 
 struct EdgeExtraInfo {
 	struct Connection {

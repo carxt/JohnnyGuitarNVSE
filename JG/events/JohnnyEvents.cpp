@@ -110,7 +110,7 @@ namespace JohnnyEvents {
 		}
 
 		static void __fastcall OnDying(Actor* apActor) {
-			if (apActor && apActor->IsActor() && apActor->lifeState == 1) {
+			if (apActor && apActor->IsActor() && apActor->GetLifeState() == ACTOR_LIFE_STATE::DYING) {
 				{
 					using namespace JohnnyMessageData;
 					SendNVSEMessage(JG_OnDying, apActor);
@@ -273,7 +273,7 @@ namespace JohnnyEvents {
 					SendNVSEMessage(JG_OnAVChange, kData);
 				}
 
-				if (pActor && pActor->IsPlayerRef()) {
+				if (pActor && pActor->IsPlayer()) {
 					for (auto const& rCallback : OnAVChangeHandler->callbacks) {
 						FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
 						if (pFilter->IsInFilter(1, aeActorValue)) {
@@ -290,7 +290,7 @@ namespace JohnnyEvents {
 				else {
 					for (auto const& rCallback : OnNPCAVChangeHandler->callbacks) {
 						FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-						if (pFilter->IsInFilter(1, aeActorValue) && (pFilter->IsInFilter(0, pForm->GetFormID()) || (pActor && pFilter->IsInFilter(0, pActor->GetOriginalObjectReference()->GetFormID())))) {
+						if (pFilter->IsInFilter(1, aeActorValue) && (pFilter->IsInFilter(0, pForm->GetFormID()) || (pActor && pFilter->IsInFilter(0, pActor->GetTemplateObjectReference()->GetFormID())))) {
 
 							const bool bFullValues = rCallback.UserFlags.Get(1);
 
@@ -314,7 +314,7 @@ namespace JohnnyEvents {
 
 				for (auto const& rCallback : OnPLChangeHandler->callbacks) {
 					FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-					if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetOriginalObjectReference()->GetFormID())) && pFilter->IsInFilter(1, aeNewLevel)) {
+					if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetTemplateObjectReference()->GetFormID())) && pFilter->IsInFilter(1, aeNewLevel)) {
 						CallUDF(rCallback.script, nullptr, OnPLChangeHandler->numMaxArgs, apActor, aeOldLevel, aeNewLevel);
 					}
 				}
@@ -498,7 +498,7 @@ namespace JohnnyEvents {
 				if (kDetour)
 					ThisCall(kDetour, apActor, apPerk, aucRank, abTeammate);
 				else
-					apActor->SetPerkRank(apPerk, aucRank, abTeammate);
+					apActor->AddPerk(apPerk, aucRank, abTeammate);
 			}
 
 		public:

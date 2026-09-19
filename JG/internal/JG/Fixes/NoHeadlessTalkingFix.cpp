@@ -13,7 +13,7 @@ namespace NoHeadlessTalkingFix {
 		bool bCanSpeak = !bNoHead;
 		if (bCanSpeak) {
 			const BaseProcess* pAIProcess = apActor->GetCurrentAIProcess();
-			if (pAIProcess && pAIProcess->GetProcessLevel() == PROCESS_TYPE::HIGH && apActor->GetDead()) {
+			if (pAIProcess && pAIProcess->GetProcessLevel() == PROCESS_TYPE::HIGH && apActor->IsDead(true)) {
 				const DialoguePackage* pPackage = static_cast<DialoguePackage*>(pAIProcess->GetCurrentPackage());
 				if (pPackage) {
 					const bool bDialoguePackage = pPackage->GetPackType() == PACKAGE_TYPE::DIALOGUE || pPackage->GetPackType() == PACKAGE_TYPE::IN_GAME_DIALOGUE;

@@ -145,6 +145,9 @@ public:
 	void SetObjectReference(TESBoundObject* apObject);
 
 	TESBoundObject* GetOriginalObjectReference() const;
+#ifdef GAME
+	TESBoundObject* GetTemplateObjectReference() const;
+#endif
 
 	bool GetIsOfType(const TESBoundObject* apObject) const;
 

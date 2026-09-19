@@ -5,22 +5,7 @@
 #include "GameProcess.h"
 #include "CommandTable.h"
 
-#include "Bethesda/ExtraCombatStyle.hpp"
-#include "Bethesda/ExtraLeveledCreature.hpp"
-#include "Bethesda/ExtraContainerChanges.hpp"
-#include "Bethesda/ExtraPersistentCell.hpp"
-#include "Bethesda/BSUtilities.hpp"
-
-TESForm* __fastcall GetBaseForm(TESObjectREFR* apReference) {
-	TESBoundObject* pBase = apReference->GetOriginalObjectReference();
-	if (pBase) {
-		TESWaterForm* pWaterType = pBase->GetWaterType();
-		if (pWaterType)
-			return pWaterType;
-	}
-	return pBase;
-}
-
+#ifdef GAME
 extern bool (*Cmd_Update3D)(COMMAND_ARGS);
 void __fastcall UpdateReference3D(TESObjectREFR* apReference) {
 	double dResult;
@@ -28,13 +13,6 @@ void __fastcall UpdateReference3D(TESObjectREFR* apReference) {
 	Cmd_Update3D(nullptr, nullptr, apReference, nullptr, nullptr, nullptr, &dResult, &uiOffset);
 }
 
-TESBoundObject* __fastcall GetPermanentBaseForm(TESObjectREFR* apReference) {
-	if (apReference)
-		return apReference->GetOriginalObjectReference();
-	return nullptr;
-}
-
-#ifdef GAME
 PlayerCharacter* PlayerCharacter::GetSingleton() {
 	return *(PlayerCharacter**)0x11DEA3C;
 }
@@ -61,53 +39,5 @@ Animation* PlayerCharacter::GetAnimation(bool abFirstPerson) const {
 		return pCurrentProcess->GetAnimation();
 	else
 		return nullptr;
-}
-
-TESCombatStyle* Actor::GetCombatStyle() 
-{
-	ExtraCombatStyle* xCmbStyle = GetExtra()->GetExtraData<ExtraCombatStyle>();
-	if (xCmbStyle && xCmbStyle->pCombatStyle) return xCmbStyle->pCombatStyle;
-	return ((TESActorBase*)GetObjectReference())->GetCombatStyle();
-}
-
-TESActorBase* Actor::GetActorBase() {
-	ExtraLeveledCreature* xLvlCre = GetExtra()->GetExtraData<ExtraLeveledCreature>();
-	return (xLvlCre && xLvlCre->pTemplate) ? (TESActorBase*)xLvlCre->pTemplate : (TESActorBase*)GetObjectReference();
-}
-
-TESObjectWEAP* Actor::GetEquippedWeapon() {
-	return ThisCall<TESObjectWEAP*>(0x8A1710, this);
-}
-
-// GAME - 0x8B36F0
-bool Actor::SetPathfindingGoal(TESObjectREFR* apTargetRef, float afTargetRadius, PathingAvoidNodeArray* apAvoidNodes) {
-	return ThisCall<bool>(0x8B36F0, this, apTargetRef, afTargetRadius, apAvoidNodes);
-}
-
-// GAME - 0x8B3690
-bool Actor::SetPathfindingGoal(const NiPoint3& arGoalLocation, TESObjectCELL* apCell, TESWorldSpace* apWorldSpace, float afTargetRadius, PathingAvoidNodeArray* apAvoidNodes) {
-	return ThisCall<bool>(0x8B3690, this, &arGoalLocation, apCell, apWorldSpace, afTargetRadius, apAvoidNodes);
-}
-
-// GAME - 0x8B37C0
-bool Actor::SetPathfindingGoalAndAngle(TESObjectREFR* apTargetRef, float afTargetRadius, PathingAvoidNodeArray* apAvoidNodes) {
-	return ThisCall<bool>(0x8B37C0, this, apTargetRef, afTargetRadius, apAvoidNodes);
-}
-
-// GAME - 0x8B3750
-bool Actor::SetPathfindingGoalAndAngle(const NiPoint3& arGoalLocation, TESObjectCELL* apCell, TESWorldSpace* apWorldSpace, float afTargetRadius, float afTargetAngle, PathingAvoidNodeArray* apAvoidNodes) {
-	return ThisCall<bool>(0x8B3750, this, &arGoalLocation, apCell, apWorldSpace, afTargetRadius, afTargetAngle, apAvoidNodes);
-}
-
-void Actor::StopMoving() {
-	ThisCall(0x8B3AB0, this);
-}
-
-bool Actor::IsInDialogueWithPlayer() const {
-	return ThisCall<bool>(0x933840, this);
-}
-
-bool Actor::GetRespawn() const {
-	return ThisCall<bool>(0x87F4A0, this);
 }
 #endif

@@ -2279,7 +2279,7 @@ namespace JIPFixes {
 		class Hook : public Actor {
 		public:
 			float GetGunSpreadHook(enum SpreadMode aeMode) {
-				if (jipActorFlags2 & 8)
+				if (ucJIPActorFlags2.GetBit(3))
 					return 0.f;
 
 				return ThisCall<float>(kGetGunSpreadDetour, this, aeMode);
@@ -2332,9 +2332,9 @@ namespace JIPFixes {
 
 		HookUtils::CallDetour kDetour;
 		void __fastcall ClearJIPFlagsAndInit(Actor* apActor, void*, bool abAddProcess) {
-			apActor->jipActorFlags1 = 0;
-			apActor->jipActorFlags2 = 0;
-			apActor->jipActorFlags3 = 0;
+			apActor->ucJIPActorFlags1 = 0;
+			apActor->ucJIPActorFlags2 = 0;
+			apActor->ucJIPActorFlags3 = 0;
 			ThisCall(kDetour, apActor, abAddProcess);
 		}
 

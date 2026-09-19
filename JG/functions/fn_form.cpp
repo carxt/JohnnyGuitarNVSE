@@ -1139,7 +1139,7 @@ bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 
 	if (pTarget) {
-		const uint32_t uiActorLevel = pTarget->avOwner.GetActorLevel();
+		const uint32_t uiActorLevel = pTarget->GetActorLevel();
 		auto pIter = TESDataHandler::GetSingleton()->kPerks.GetHead();
 		while (pIter && !pIter->IsEmpty()) {
 			BGSPerk* pPerk = pIter->GetItem();
@@ -1214,7 +1214,7 @@ bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 	uint32_t titleOrTier = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &titleOrTier);
 	if (titleOrTier == 1) {
-		int karmaTier = CdeclCall<int>(0x47E040, PlayerCharacter::GetSingleton()->avOwner.GetActorValueF(ActorValue::Index::KARMA)); // GetKarmaTier
+		int karmaTier = CdeclCall<int>(0x47E040, PlayerCharacter::GetSingleton()->GetActorValueF(ActorValue::Index::KARMA)); // GetKarmaTier
 		switch (karmaTier) {
 		case 0:
 			title = *(char**)0x11D41B4; // sAlignGood
@@ -1523,7 +1523,7 @@ bool Cmd_GetCreatureCombatSkill_Execute(COMMAND_ARGS) {
 		if (!thisObj || !thisObj->IsCreature()) 
 			return true;
 		
-		pCreature = static_cast<TESCreature*>(static_cast<Actor*>(thisObj)->GetActorBase());
+		pCreature = static_cast<TESCreature*>(static_cast<Actor*>(thisObj)->GetTemplateObjectReference());
 	}
 
 	if (pCreature && pCreature->GetFormType() == FORM_TYPE::TESCreature)
@@ -1609,7 +1609,7 @@ bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 SPEC_NOINLINE bool Cmd_GetLifeState_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
 	if (thisObj && thisObj->IsActor())
-		*result = static_cast<Actor*>(thisObj)->lifeState;
+		*result = static_cast<Actor*>(thisObj)->GetLifeState();
 	return true;
 }
 
@@ -1960,7 +1960,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	if (!ammo)
 		ammo = weapon->GetAmmo();
 	midHiProc->pCurrentWeapon = nullptr;
-	*result = GetWeaponDPS(&(PlayerCharacter::GetSingleton()->avOwner), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
+	*result = GetWeaponDPS(PlayerCharacter::GetSingleton(), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
 	midHiProc->pCurrentWeapon = weaponInfo;
 	if (Script::GetConsoleOuput())
 		Interface::PrintLine("GetCalculatedWeaponDPS >> %f", *result);
@@ -2934,7 +2934,7 @@ bool Cmd_SetIKState_Execute(COMMAND_ARGS) {
 	BOOL bToggle = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &bToggle) && InRange(eType) && thisObj->IsActor()) {
 		const Actor* pActor = static_cast<Actor*>(thisObj);
-		bhkRagdollController* pCtrl = pActor->ragDollController;
+		bhkRagdollController* pCtrl = pActor->pRagdollController;
 		if (pCtrl) {
 			switch (eType) {
 				case IKType::LOOK:
@@ -2960,7 +2960,7 @@ SPEC_NOINLINE bool Cmd_GetIKState_Eval(COMMAND_ARGS_EVAL) {
 	const IKType eType = *reinterpret_cast<IKType*>(&arg1);
 	if (InRange(eType) && thisObj->IsActor()) {
 		const Actor* pActor = static_cast<Actor*>(thisObj);
-		bhkRagdollController* pCtrl = pActor->ragDollController;
+		bhkRagdollController* pCtrl = pActor->pRagdollController;
 		if (pCtrl) {
 			switch (eType) {
 				case IKType::LOOK:

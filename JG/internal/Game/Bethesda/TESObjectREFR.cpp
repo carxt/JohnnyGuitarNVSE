@@ -31,6 +31,15 @@ TESBoundObject* TESObjectREFR::GetOriginalObjectReference() const {
 		return GetObjectReference();
 }
 
+#ifdef GAME
+TESBoundObject* TESObjectREFR::GetTemplateObjectReference() const {
+	TESBoundObject* pBase = GetObjectReference();
+	if (IsLeveledCreature())
+		pBase = GetExtra()->GetLevCreaTemplate();
+	return pBase;
+}
+#endif
+
 // GAME - 0x55D3B0
 bool TESObjectREFR::GetIsOfType(const TESBoundObject* apObject) const {
 #ifdef GAME

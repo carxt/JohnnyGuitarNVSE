@@ -24,7 +24,7 @@
 
 #include <d3d9.h>
 
-struct NavMeshInfo;
+class NavMeshInfo;
 class bhkRigidBody;
 class TESObjectCELL;
 class bhkPhantom;

@@ -14,7 +14,7 @@ bool Cmd_GetThresholdedActorValue_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj && thisObj->IsActor()) {
 		const ActorValue::Index eActorValue = static_cast<ActorValue::Index>(reinterpret_cast<uint32_t>(arg1));
-		*result = static_cast<Actor*>(thisObj)->avOwner.GetClampedActorValueF(eActorValue);
+		*result = static_cast<Actor*>(thisObj)->GetClampedActorValueF(eActorValue);
 	}
 	return true;
 }

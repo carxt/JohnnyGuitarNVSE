@@ -39,8 +39,6 @@
 
 #include <unordered_map>
 
-void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
-(void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
@@ -249,11 +247,11 @@ bool Cmd_SetActorMovementFlags_Execute(COMMAND_ARGS) {
 		if (thisObj)
 			pActor = static_cast<Actor*>(thisObj);
 
-		if (pActor->IsActor() && pActor->actorMover) {
+		if (pActor->IsActor() && pActor->pActorMover) {
 			if (uiFlags)
-				pActor->actorMover->ForceMoveMode(uiFlags);
+				pActor->pActorMover->ForceMoveMode(uiFlags);
 			else
-				pActor->actorMover->ClearForcedMoveMode();
+				pActor->pActorMover->ClearForcedMoveMode();
 			*result = 1;
 		}
 	}
@@ -269,7 +267,7 @@ bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 		bool bAlwaysRun = (alwaysRun > 0);
 		PlayerCharacter::GetSingleton()->alwaysRun = bAlwaysRun;
 		if (updateMovementFlags) {
-			PlayerMover* playerMover = (PlayerMover*)PlayerCharacter::GetSingleton()->actorMover;
+			PlayerMover* playerMover = (PlayerMover*)PlayerCharacter::GetSingleton()->pActorMover;
 			uint32_t flags = playerMover->pcMovementFlags;
 			if (bAlwaysRun) {
 				flags |= 0x200;
@@ -277,7 +275,7 @@ bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 			else {
 				flags &= ~0x200;
 			}
-			PlayerCharacter::GetSingleton()->actorMover->ForceMoveMode(flags);
+			PlayerCharacter::GetSingleton()->pActorMover->ForceMoveMode(flags);
 		}
 		*result = 1;
 	}
@@ -298,7 +296,7 @@ bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 SPEC_NOINLINE bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj->IsActor())
-		*result = static_cast<Actor*>(thisObj)->magicTarget.HasDamageHealthEffect();
+		*result = static_cast<Actor*>(thisObj)->HasDamageHealthEffect();
 	return true;
 }
 
@@ -598,39 +596,38 @@ using ScrapMap = std::unordered_map<KEY, DATA, std::hash<KEY>, std::equal_to<KEY
 
 bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NVSEArrayVar* effArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	ScrapMap<TESForm*, std::pair<float, float>> tempEffectMap;
-	if (auto iter = PlayerCharacter::GetSingleton()->magicTarget.GetEffectList()->Head())
-	{
-		do
-		{
-			if (ActiveEffect* activeEff = iter->data; activeEff && activeEff->bActive && !activeEff->bTerminated &&
-				activeEff->magicItem && ValidTempEffect(activeEff->effectItem))
-				if (TESForm* form = DYNAMIC_CAST(activeEff->magicItem, MagicItem, TESForm))
-				{
-					if (form->GetFormType() == FORM_TYPE::AlchemyItem) {
-						float timeLeft = activeEff->duration - activeEff->timeElapsed;
-						auto it = tempEffectMap.find(form);
-						if (it != tempEffectMap.end() && it->second.second < activeEff->duration) {
-							it->second.first = timeLeft;
-							it->second.second = activeEff->duration;
-						}
-						else {
-							tempEffectMap.insert({ form, {timeLeft, activeEff->duration} });
-						}
+	NVSEArrayVar* pEffArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	auto pList = PlayerCharacter::GetSingleton()->GetActiveEffectList();
+	if (pList && !pList->IsEmpty()) {
+		ScrapMap<TESForm*, std::pair<float, float>> kTempEffectMap;
+		while (pList && !pList->IsEmpty()) {
+			const ActiveEffect* pEffect = pList->GetItem();
+			pList = pList->GetNext();
+			if (pEffect && pEffect->IsActive() && !pEffect->IsDone() && pEffect->GetSpell() && ValidTempEffect(pEffect->GetEffectItem())) {
+				TESForm* pForm = DYNAMIC_CAST(pEffect->GetSpell(), MagicItem, TESForm);
+				if (pForm && pForm->GetFormType() == FORM_TYPE::AlchemyItem) {
+					const float fTimeLeft = pEffect->GetDuration() - pEffect->GetElapsedTime();
+					auto it = kTempEffectMap.find(pForm);
+					if (it != kTempEffectMap.end() && it->second.second < pEffect->GetDuration()) {
+						it->second.first = fTimeLeft;
+						it->second.second = pEffect->GetDuration();
+					}
+					else {
+						kTempEffectMap.insert({ pForm, {fTimeLeft, pEffect->GetDuration()} });
 					}
 				}
-		} while (iter = iter->next);
+			}
+		}
 
-	}
-	if (!tempEffectMap.empty()) {
-		for (auto& effect : tempEffectMap) {
-			NVSEArrayVar* effArrInner = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-			g_arrInterface->AppendElements(effArrInner, effect.first, effect.second.first, effect.second.second);
-			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effArrInner));
+		if (!kTempEffectMap.empty()) {
+			for (auto& effect : kTempEffectMap) {
+				NVSEArrayVar* pEffArrInner = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+				g_arrInterface->AppendElements(pEffArrInner, effect.first, effect.second.first, effect.second.second);
+				g_arrInterface->AppendElement(pEffArr, NVSEArrayElement(pEffArrInner));
+			}
 		}
 	}
-	g_arrInterface->AssignCommandResult(effArr, result);
+	g_arrInterface->AssignCommandResult(pEffArr, result);
 	return true;
 }
 
@@ -650,7 +647,7 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	int delta = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &delta);
-	int karmaBefore = PlayerCharacter::GetSingleton()->avOwner.GetActorValueI(ActorValue::Index::KARMA);
+	int karmaBefore = PlayerCharacter::GetSingleton()->GetActorValueI(ActorValue::Index::KARMA);
 	int ikarmaMax = GameSettingCollection::iKarmaMax->Int();
 	int iKarmaMin = GameSettingCollection::iKarmaMin->Int();
 	if (delta >= 0 && ((delta + karmaBefore) > ikarmaMax)) {
@@ -660,7 +657,7 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 		delta = iKarmaMin - karmaBefore;
 	}
 	if (delta != 0) {
-		PlayerCharacter::GetSingleton()->ModActorValue(ActorValue::Index::KARMA, delta, 0);
+		PlayerCharacter::GetSingleton()->PermanentModActorValueI(ActorValue::Index::KARMA, delta, 0);
 		*result = 1;
 	}
 	return true;
@@ -782,9 +779,9 @@ bool Cmd_GetLocationSpecificLoadScreensOnly_Execute(COMMAND_ARGS) {
 }
 
 bool __fastcall IsCombatTarget(const Actor* source, const Actor* toSearch) {
-	if (source->isInCombat && source->combatTargets) {
-		Actor** actorsArr = source->combatTargets->pBuffer;
-		uint32_t count = source->combatTargets->uiSize;
+	if (source->bIsInCombat && source->pCombatTargets) {
+		Actor** actorsArr = source->pCombatTargets->pBuffer;
+		uint32_t count = source->pCombatTargets->uiSize;
 		if (!actorsArr)
 			return false;
 		for (; count; count--, actorsArr++) {
@@ -809,7 +806,7 @@ bool __fastcall IsHostileCompassTarget(const TESObjectREFR* apTarget) {
 bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* pActor = static_cast<Actor*>(thisObj);
-	if (ThisCall<bool>(0x579690, thisObj) && (!thisObj->IsActor() || !pActor->isTeammate) ||
+	if (ThisCall<bool>(0x579690, thisObj) && (!thisObj->IsActor() || !pActor->IsPlayerTeammate()) ||
 		thisObj->IsActor() && (IsCombatTarget(pActor, PlayerCharacter::GetSingleton()) || IsHostileCompassTarget(thisObj))) {
 		*result = 1;
 	}
@@ -851,8 +848,8 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 		PlayerCharacter::CompassTarget* target = pIter->GetItem();
 		pIter = pIter->GetNext();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0
-				|| target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
+			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0
+				|| target->target->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
 			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
@@ -941,24 +938,29 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 
 bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t index;
-	float modTimeLeft;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &index, &modTimeLeft) || !thisObj->IsActor()) return true;
-	ActiveEffectList* effList = ((Actor*)thisObj)->magicTarget.GetEffectList();
-	if (!effList) return true;
-	ListNode<ActiveEffect>* iter = effList->Head();
-	ActiveEffect* activeEff;
-	do {
-		activeEff = iter->data;
-		if (!activeEff || !activeEff->bApplied || !ValidTempEffect(activeEff->effectItem) || !activeEff->magicItem ||
-			!DYNAMIC_CAST(activeEff->magicItem, MagicItem, TESForm)) continue;
-		if (!index--) {
-			activeEff->timeElapsed += -modTimeLeft;
-			if (activeEff->timeElapsed > activeEff->duration) activeEff->Remove(true);
+	uint32_t uiIndex;
+	float fTimeLeftMod;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &uiIndex, &fTimeLeftMod) || !thisObj->IsActor()) 
+		return true;
+
+	auto pIter = static_cast<Actor*>(thisObj)->GetActiveEffectList();
+	if (!pIter || pIter->IsEmpty())
+		return true;
+
+	while (pIter && !pIter->IsEmpty()) {
+		ActiveEffect* pEffect = pIter->GetItem();
+		pIter = pIter->GetNext();
+		if (!pEffect || !pEffect->IsActive() || !ValidTempEffect(pEffect->GetEffectItem()) || !pEffect->GetSpell() || !DYNAMIC_CAST(pEffect->GetSpell(), MagicItem, TESForm))
+			continue;
+
+		if (!uiIndex--) {
+			pEffect->fElapsedTime += -fTimeLeftMod;
+			if (pEffect->GetElapsedTime() > pEffect->GetDuration())
+				pEffect->Dispel(true);
 			*result = 1;
 			break;
 		}
-	} while (iter = iter->next);
+	};
 	return true;
 }
 
@@ -1032,7 +1034,7 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 		PlayerCharacter::CompassTarget* target = pIter->GetItem();
 		pIter = pIter->GetNext();
 		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
+			if (skipInvisible > 0 && (target->target->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetLocationOnReference().SqrDistance(playerPos);
@@ -1104,7 +1106,7 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 		pIter = pIter->GetNext();
 
 		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
+			if (skipInvisible > 0 && (target->target->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetLocationOnReference().SqrDistance(playerPos);
@@ -1216,27 +1218,23 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
 
 bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ActorValue::Index avCode = ActorValue::Index::NONE;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode) && ScriptUtils::InRange(avCode)) {
-		Actor* actor = (Actor*)thisObj;
-		ActorValueOwner* avOwner = &actor->avOwner;
-		float oldVal = avOwner->GetActorValueF(avCode);
+	ActorValue::Index eActorValue = ActorValue::Index::NONE;
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &eActorValue)) {
+		Actor* pActor = static_cast<Actor*>(thisObj);
+		const float fOldVal = pActor->GetActorValueF(eActorValue);
 
-		tList<void>* actorPermSetAVList = &actor->list0E0;
-		void* avEntry = ThisCall<void*>(0x937760, actorPermSetAVList, avCode);
-		ThisCall(0x937400, actorPermSetAVList, avEntry);
-		thisObj->AddChange(0x400000);
+		Modifier* pModifier = pActor->kBaseValueOverrides.GetModifierItem(eActorValue);
+		pActor->kBaseValueOverrides.DeleteModifier(pModifier);
+		pActor->AddChange(0x400000);
 
-		if (!actor->IsPlayerRef()) {
-			BaseProcess* base = actor->GetCurrentAIProcess();
-			if (base) {
-				base->SetCachedActorValueOutOfDate(avCode);
-			}
+		if (!pActor->IsPlayer()) {
+			BaseProcess* pAIProcess = pActor->GetCurrentAIProcess();
+			if (pAIProcess)
+				pAIProcess->SetCachedActorValueOutOfDate(eActorValue);
 		}
 
-		// call handle change with new value
-		float newVal = avOwner->GetActorValueF(avCode);
-		HandleActorValueChange(avOwner, avCode, oldVal, newVal, nullptr);
+		const float fNewVal = pActor->GetActorValueF(eActorValue);
+		ActorValue::CheckCallModifiedCallback(pActor, eActorValue, fOldVal, fNewVal, nullptr);
 		*result = 1;
 	}
 	return true;
@@ -1244,27 +1242,23 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 
 bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ActorValue::Index avCode = ActorValue::Index::NONE;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode) && ScriptUtils::InRange(avCode)) {
-		Actor* actor = (Actor*)thisObj;
-		ActorValueOwner* avOwner = &actor->avOwner;
-		float oldVal = avOwner->GetActorValueF(avCode);
+	ActorValue::Index eActorValue = ActorValue::Index::NONE;
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &eActorValue)) {
+		Actor* pActor = static_cast<Actor*>(thisObj);
+		const float fOldVal = pActor->GetActorValueF(eActorValue);
 
-		tList<void>* actorPermForceAVList = &actor->list0D0;
-		void* avEntry = ThisCall<void*>(0x937760, actorPermForceAVList, avCode);
-		ThisCall(0x937400, actorPermForceAVList, avEntry);
-		thisObj->AddChange(0x800000);
+		Modifier* pModifier = pActor->kPermanentModifiers.GetModifierItem(eActorValue);
+		pActor->kPermanentModifiers.DeleteModifier(pModifier);
+		pActor->AddChange(0x800000);
 
-		if (!actor->IsPlayerRef()) {
-			BaseProcess* base = actor->GetCurrentAIProcess();
-			if (base) {
-				base->SetCachedActorValueOutOfDate(avCode);
-			}
+		if (!pActor->IsPlayer()) {
+			BaseProcess* pAIProcess = pActor->GetCurrentAIProcess();
+			if (pAIProcess)
+				pAIProcess->SetCachedActorValueOutOfDate(eActorValue);
 		}
 
-		// call handle change with new value
-		float newVal = avOwner->GetActorValueF(avCode);
-		HandleActorValueChange(avOwner, avCode, oldVal, newVal, nullptr);
+		const float fNewVal = pActor->GetActorValueF(eActorValue);
+		ActorValue::CheckCallModifiedCallback(pActor, eActorValue, fOldVal, fNewVal, nullptr);
 		*result = 1;
 	}
 	return true;
@@ -1456,7 +1450,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cCasingNodeName, &cNewCasingPath)) {
 		Actor* pActor = static_cast<Actor*>(thisObj);
 
-		TESObjectWEAP* pWeapon = pActor->GetEquippedWeapon();
+		TESObjectWEAP* pWeapon = pActor->GetCurrentWeapon();
 		if (!pWeapon)
 			return true;
 

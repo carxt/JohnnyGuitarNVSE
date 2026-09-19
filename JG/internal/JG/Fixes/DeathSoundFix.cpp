@@ -12,7 +12,7 @@ namespace DeathSoundFix {
 
 	float __fastcall FixDeathSoundsTopic(HighProcess* apProcess, Actor* apActor) { //Simpler fix, though we run the risk of overassumptions. 14 seconds should be more than enough though tbh.
 		//all the checks can be skipped because they were done above already
-		if (apActor->GetDead()) {
+		if (apActor->IsDead(true)) {
 			if (DialoguePackage* pPackage = static_cast<DialoguePackage*>(apProcess->GetCurrentPackage())) {
 				if ((apActor != pPackage->GetTargetOfConversation()) && (apActor == pPackage->GetActorStartedConversation())) { //check for subject because in some cases, subject == target
 					return -1.0f;
