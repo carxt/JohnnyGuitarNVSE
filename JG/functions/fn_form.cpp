@@ -2,7 +2,6 @@
 #include "decoding.h"
 #include "GameData.h"
 #include "GameForms.h"
-#include "GameObjects.h"
 #include "GameProcess.h"
 #include "GameRTTI.h"
 #include "GameTasks.h"
@@ -22,6 +21,7 @@
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TESObjectList.hpp"
 #include "Bethesda/GrenadeProjectile.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 
@@ -1653,8 +1653,7 @@ bool Cmd_SetEquipType_Execute(COMMAND_ARGS) {
 	TESForm* pForm = nullptr;
 	BGSEquipType::Type eType = BGSEquipType::Type::NONE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &eType) && pForm && InRange(eType)) {
-		pForm = GetTESForm(pForm);
-		BGSEquipType* pEquipType = DYNAMIC_CAST(pForm, TESForm, BGSEquipType);
+		BGSEquipType* pEquipType = DYNAMIC_CAST(GetTESObject(pForm), TESForm, BGSEquipType);
 		if (pEquipType) {
 			pEquipType->SetEquipType(eType);
 			*result = 1;

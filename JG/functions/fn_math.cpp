@@ -1,5 +1,4 @@
 #include "fn_math.h"
-#include "GameObjects.h"
 #include "GameProcess.h"
 #include "misc/misc.h"
 #include "netimmerse.h"
@@ -8,6 +7,7 @@
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/Interface.hpp"
 #include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 enum FOVType {
 	VIEWMODEL	= 0,

@@ -1,6 +1,9 @@
 #include "NPCAccuracy.hpp"
-#include "GameObjects.h"
 #include "Bethesda/ExtraFactionChanges.hpp"
+#include "Bethesda/Actor.hpp"
+#include "Bethesda/TESActorBase.hpp"
+#include "Bethesda/TESFaction.hpp"
+#include "Bethesda/TESCombatStyle.hpp"
 
 #include "Shared/BSMemory/BSMemoryUtils.hpp"
 #include "Shared/SafeWrite/SafeWrite.hpp"

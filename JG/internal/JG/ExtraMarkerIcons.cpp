@@ -1,9 +1,13 @@
 #include "ExtraMarkerIcons.hpp"
 
+#include "Bethesda/TESObjectREFR.hpp"
 #include "Shared/SafeWrite/SafeWrite.hpp"
+
+#include <unordered_map>
 
 namespace ExtraMarkerIcons {
 	std::unordered_map<FormID, char*> markerIconMap;
+
 	char** defaultMarkerList = (char**)0x11A0404;
 
 	void SetMapMarkerIcon(TESObjectREFR* marker, char* iconPath) {

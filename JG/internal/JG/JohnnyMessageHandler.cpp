@@ -22,11 +22,12 @@
 #include "NPCAccuracy.hpp"
 #include "FilteredBarberMenu.hpp"
 #include "TaskQueue.hpp"
+#include "ScriptUtils.hpp"
 
 #include "functions/fn_gameplay.h"
 
 #include <GameUI.h>
-#include <GameObjects.h>
+#include "Bethesda/PlayerCharacter.hpp"
 #include "Bethesda/MenuConsole.hpp"
 #endif
 #include "JIP/JIPFixes.hpp"
@@ -34,8 +35,6 @@
 #include "Bethesda/AutoMemContext.hpp"
 
 DWORD dwGameStartTimestamp = 0;
-bool (*Cmd_Update3D)(COMMAND_ARGS) = 0;
-extern NVSECommandTableInterface* g_cmdTableInterface;
 
 // The reason we're doing functions per event is because we don't want a massive, cache destroying message handler function
 
@@ -46,10 +45,7 @@ static SPEC_NOINLINE void PostPostLoad() {
 	}
 #ifdef GAME
 	JohnnyPatches::PostLoadInit();
-
-	const CommandInfo* pUpdate3D = g_cmdTableInterface->GetByOpcode(CommandOpcodes::kUpdate3D);
-	if (pUpdate3D)
-		Cmd_Update3D = pUpdate3D->execute;
+	ScriptUtils::InitData();
 #endif
 }
 

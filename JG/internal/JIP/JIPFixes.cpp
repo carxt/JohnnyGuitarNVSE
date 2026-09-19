@@ -2,35 +2,34 @@
 #include "JIPSettings.hpp"
 #include "JIPUtils.hpp"
 
+#ifdef GAME
+#include "decoding.h"
+#include "GameData.h"
+#include "GameProcess.h"
+#include "GameTasks.h"
+#include "GameTiles.h"
+#include "GameUI.h"
+#include "GameRTTI.h"
+#include "utility.h"
+
+#include "Bethesda/AILinearTaskThreadManager.hpp"
 #include "Bethesda/AutoMemContext.hpp"
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/BSShaderUtil.hpp"
 #include "Bethesda/BSStringT.hpp"
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/FixedStrings.hpp"
+#include "Bethesda/InventoryChanges.hpp"
+#include "Bethesda/MenuConsole.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 #include "Bethesda/RendererSettingCollection.hpp"
 #include "Bethesda/Setting.hpp"
-#include "Bethesda/TESHavokUtilities.hpp"
-#include "Bethesda/TimeGlobal.hpp"
-#include "Bethesda/AILinearTaskThreadManager.hpp"
-#include "Bethesda/MenuConsole.hpp"
 #include "Bethesda/Sky.hpp"
-#include "Bethesda/InventoryChanges.hpp"
 #include "Bethesda/TaskQueueInterface.hpp"
+#include "Bethesda/TESHavokUtilities.hpp"
 #include "Bethesda/TESMain.hpp"
+#include "Bethesda/TimeGlobal.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
-
-#include "decoding.h"
-#include "GameData.h"
-#include "GameObjects.h"
-#include "GameProcess.h"
-#include "GameRTTI.h"
-#include "GameTasks.h"
-#include "GameTiles.h"
-#include "GameUI.h"
-#include "ParamInfos.h"
-#include "PluginAPI.h"
-#include "utility.h"
 
 #include "events/EventFramework.h"
 
@@ -39,19 +38,23 @@
 
 #include "NVSE/InventoryRef.hpp"
 
-#include "internal/CommandOpcodes.h"
-
 #include "Shared/BSMemory/BSMemoryUtils.hpp"
 #include "Shared/Utils/StackObject.hpp"
 #include "Shared/Utils/CustomClass.hpp"
+
+#include <unordered_map>
+#endif
+
+#include "ParamInfos.h"
+#include "PluginAPI.h"
+
+#include "internal/CommandOpcodes.h"
+
 #include "Shared/Utils/DebugLog.hpp"
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
-#include <unordered_map>
-
 class BSRenderedTexture;
 
-extern bool bFixJIP;
 extern NVSECommandTableInterface* g_cmdTableInterface;
 #ifdef GAME
 extern NVSEScriptInterface* g_scriptInterface;

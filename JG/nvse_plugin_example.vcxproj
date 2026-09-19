@@ -354,7 +354,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp" />
     <ClCompile Include="..\nvse\nvse\GameForms.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameObjects.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTiles.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
@@ -1111,7 +1110,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="..\nvse\nvse\GameData.h" />
     <ClInclude Include="..\nvse\nvse\GameEffects.h" />
     <ClInclude Include="..\nvse\nvse\GameForms.h" />
-    <ClInclude Include="..\nvse\nvse\GameObjects.h" />
     <ClInclude Include="..\nvse\nvse\GameProcess.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>

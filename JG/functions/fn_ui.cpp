@@ -5,6 +5,7 @@
 #include "Bethesda/FileFinder.hpp"
 #include "Bethesda/ExtraMapMarker.hpp"
 #include "Bethesda/ItemChange.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "JG/ExtraMarkerIcons.hpp"
 #include "JG/ExtraMiscStats.hpp"

@@ -1,7 +1,6 @@
 #include "DeathSoundFix.hpp"
-#include "GameObjects.h"
 #include "GameProcess.h"
-#include "GameSound.h"
+#include "Bethesda/Actor.hpp"
 #include "Bethesda/DialoguePackage.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"

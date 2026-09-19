@@ -1,8 +1,8 @@
 #include "WorldToScreen.hpp"
-#include "GameObjects.h"
 #include "netimmerse.h"
 
 #include "Bethesda/TESMain.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 

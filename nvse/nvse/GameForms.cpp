@@ -1,29 +1,12 @@
 #include "GameForms.h"
-#include "GameObjects.h"
+#ifdef GAME
+#include "Bethesda/PlayerCharacter.hpp"
 #include "Bethesda/ExtraContainerChanges.hpp"
 
-TESForm* __fastcall GetTESForm(const TESForm* apForm) {
-	if (!apForm) 
-		return nullptr;
-
-	if (apForm->IsReference()) {
-		const TESObjectREFR* refr = static_cast<const TESObjectREFR*>(apForm);
-		if (refr->GetObjectReference()) 
-			return refr->GetObjectReference();
-	}
-
-	return const_cast<TESForm*>(apForm);
-}
-
 TESAmmo* TESObjectWEAP::GetAmmo() {
-#ifdef GAME
 	return ammo.GetAmmoHelper();
-#else
-	return nullptr;
-#endif
 }
 
-#ifdef GAME
 TESForm* TESObjectWEAP::GetAmmoInInventory()
 {
 	if (ammo.pAmmo) {

@@ -1,5 +1,5 @@
 #include "EventFramework.h"
-#include "GameObjects.h"
+#include "Bethesda/TESObjectREFR.hpp"
 
 bool (*CallUDF)(Script* funcScript, TESObjectREFR* callingObj, uint8_t numArgs, ...);
 std::mutex eventInfosMutex;

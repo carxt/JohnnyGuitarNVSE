@@ -1,5 +1,6 @@
 #include "CameraOverride.hpp"
-#include <GameObjects.h>
+#include "netimmerse.h"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 

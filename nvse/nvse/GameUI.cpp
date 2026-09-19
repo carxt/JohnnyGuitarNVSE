@@ -1,6 +1,6 @@
 #include "nvse/GameUI.h"
-#include "GameObjects.h"
-#include <internal/Game/Bethesda/Conversation.hpp>
+#include "Bethesda/Conversation.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 InterfaceManager* InterfaceManager::GetSingleton(void) {
 	return *(InterfaceManager**)0x011D8A80;

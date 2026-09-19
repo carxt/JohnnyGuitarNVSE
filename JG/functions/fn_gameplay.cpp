@@ -18,6 +18,7 @@
 #include "Bethesda/BGSEntryPoint.hpp"
 #include "Bethesda/ExtraContainerChanges.hpp"
 #include "Bethesda/PlayerMover.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"

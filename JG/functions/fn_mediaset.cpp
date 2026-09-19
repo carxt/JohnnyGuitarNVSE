@@ -1,5 +1,5 @@
 #include "fn_mediaset.h"
-#include <GameObjects.h>
+#include "Bethesda/PlayerCharacter.hpp"
 #include "Bethesda/ExtraRadius.hpp"
 #include "Bethesda/Interface.hpp"
 #include "Obsidian/AudioMarkerInfo.hpp"

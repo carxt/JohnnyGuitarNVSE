@@ -1,6 +1,6 @@
 #include "BipedAnimFixes.hpp"
 #include "Bethesda/ItemChange.hpp"
-#include <GameObjects.h>
+#include "Bethesda/Actor.hpp"
 #include <GameProcess.h>
 
 #include "Shared/SafeWrite/SafeWrite.hpp"

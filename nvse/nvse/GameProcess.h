@@ -1,6 +1,5 @@
 #pragma once
 #include "GameForms.h"
-#include "GameObjects.h"
 #include "Bethesda/HighProcess.hpp"
 #include "Bethesda/HitData.hpp"
 

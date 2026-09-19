@@ -2,7 +2,6 @@
 #include <GameSound.h>
 #include <GameUI.h>
 #include <GameAPI.h>
-#include <GameObjects.h>
 #include "Bethesda/GridCellArray.hpp"
 
 class LoadedAreaBound;

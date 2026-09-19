@@ -1,5 +1,4 @@
 #pragma once
-#include "GameObjects.h"
 
 #include "Bethesda/ValueModifierEffect.hpp"
 

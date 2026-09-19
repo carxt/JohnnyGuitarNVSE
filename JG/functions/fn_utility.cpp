@@ -10,6 +10,7 @@
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/ScreenCustomSplatter.hpp"
 #include "Bethesda/Sky.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "JG/CameraOverride.hpp"
 #include "JG/DisabledLevelUp.hpp"

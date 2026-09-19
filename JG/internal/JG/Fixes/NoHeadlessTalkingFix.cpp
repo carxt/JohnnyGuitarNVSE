@@ -1,7 +1,7 @@
 #include "NoHeadlessTalkingFix.hpp"
-#include <GameObjects.h>
 #include <GameProcess.h>
 #include "Bethesda/DialoguePackage.hpp"
+#include "Bethesda/Actor.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
