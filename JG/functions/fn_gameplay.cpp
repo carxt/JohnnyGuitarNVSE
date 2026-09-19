@@ -87,22 +87,22 @@ bool Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS) {
 	int32_t iEarnings;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &iEarnings) && pCasino && IS_TYPE(pCasino, TESCasino)) {
 		const FormID uiFormID = pCasino->GetFormID();
-		auto pIter = PlayerCharacter::GetSingleton()->casinoDataList;
+		auto pIter = PlayerCharacter::GetSingleton()->pCasinoData;
 		while (pIter && !pIter->IsEmpty()) {
-			CasinoStats* pStats = pIter->GetItem();
-			if (pStats && pStats->casinoRefID == uiFormID) {
-				pStats->earnings = iEarnings;
+			CasinoData* pStats = pIter->GetItem();
+			if (pStats && pStats->uiCasinoFormID == uiFormID) {
+				pStats->iEarnings = iEarnings;
 				*result = 1;
 				return true;
 			}
 			pIter = pIter->GetNext();
 		}
 
-		CasinoStats* pStats = BSMemory::malloc<CasinoStats>();
-		pStats->earningStage = 0;
-		pStats->earnings = iEarnings;
-		pStats->casinoRefID = uiFormID;
-		PlayerCharacter::GetSingleton()->casinoDataList->AddHead(pStats);
+		CasinoData* pStats = BSMemory::malloc<CasinoData>();
+		pStats->sEarningsLevel = 0;
+		pStats->iEarnings = iEarnings;
+		pStats->uiCasinoFormID = uiFormID;
+		PlayerCharacter::GetSingleton()->pCasinoData->AddHead(pStats);
 	}
 
 	return true;
@@ -113,11 +113,11 @@ bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS) {
 	TESCasino* pCasino = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino) && pCasino && IS_TYPE(pCasino, TESCasino)) {
 		const FormID uiFormID = pCasino->GetFormID();
-		auto pIter = PlayerCharacter::GetSingleton()->casinoDataList;
+		auto pIter = PlayerCharacter::GetSingleton()->pCasinoData;
 		while (pIter && !pIter->IsEmpty()) {
-			CasinoStats* pStats = pIter->GetItem();
-			if (pStats && pStats->casinoRefID == uiFormID) {
-				*result = pStats->earnings;
+			CasinoData* pStats = pIter->GetItem();
+			if (pStats && pStats->uiCasinoFormID == uiFormID) {
+				*result = pStats->iEarnings;
 				return true;
 			}
 			pIter = pIter->GetNext();
@@ -265,7 +265,7 @@ bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 	ExtractArgsEx(EXTRACT_ARGS_EX, &alwaysRun, &updateMovementFlags);
 	if (alwaysRun > -1) {
 		bool bAlwaysRun = (alwaysRun > 0);
-		PlayerCharacter::GetSingleton()->alwaysRun = bAlwaysRun;
+		PlayerCharacter::GetSingleton()->bAlwaysRun = bAlwaysRun;
 		if (updateMovementFlags) {
 			PlayerMover* playerMover = (PlayerMover*)PlayerCharacter::GetSingleton()->pActorMover;
 			uint32_t flags = playerMover->pcMovementFlags;
@@ -287,7 +287,7 @@ bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 	int32_t iAutoMove = -1;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &iAutoMove);
 	if (iAutoMove > -1) {
-		PlayerCharacter::GetSingleton()->autoMove = iAutoMove > 0;
+		PlayerCharacter::GetSingleton()->bAutoMove = iAutoMove > 0;
 		*result = 1;
 	}
 	return true;
@@ -792,10 +792,10 @@ bool __fastcall IsCombatTarget(const Actor* source, const Actor* toSearch) {
 }
 
 bool __fastcall IsHostileCompassTarget(const TESObjectREFR* apTarget) {
-	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
 	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::CompassTarget* pTarget = pIter->GetItem();
-		if (pTarget->isHostile && pTarget->target == apTarget)
+		PlayerCharacter::PerceivedActor* pTarget = pIter->GetItem();
+		if (pTarget->bIsHostile && pTarget->pActor == apTarget)
 			return true;
 
 		pIter = pIter->GetNext();
@@ -806,7 +806,7 @@ bool __fastcall IsHostileCompassTarget(const TESObjectREFR* apTarget) {
 bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* pActor = static_cast<Actor*>(thisObj);
-	if (ThisCall<bool>(0x579690, thisObj) && (!thisObj->IsActor() || !pActor->IsPlayerTeammate()) ||
+	if (thisObj->IsCrimeToActivate() && (!thisObj->IsActor() || !pActor->IsPlayerTeammate()) ||
 		thisObj->IsActor() && (IsCombatTarget(pActor, PlayerCharacter::GetSingleton()) || IsHostileCompassTarget(thisObj))) {
 		*result = 1;
 	}
@@ -817,7 +817,7 @@ bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 
 bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESForm* pOwner = ThisCall<TESForm*>(0x567790, thisObj); // TESObjectREFR::GetOwner
+	TESForm* pOwner = thisObj->GetOwner();
 	if (pOwner) {
 		ThisCall(0x8C0EC0, PlayerCharacter::GetSingleton(), thisObj, pOwner, 0xFFFFFFFF); // Actor::TrespassAlarm
 		*result = 1;
@@ -843,16 +843,16 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	}
 
 	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
 	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		PlayerCharacter::PerceivedActor* target = pIter->GetItem();
 		pIter = pIter->GetNext();
-		if (target->isHostile) {
-			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0
-				|| target->target->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
+		if (target->bIsHostile) {
+			if (skipInvisible > 0 && !hasImprovedDetection && (target->pActor->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0
+				|| target->pActor->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
-			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
+			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->pActor));
 		}
 	}
 	g_arrInterface->AssignCommandResult(hostileArr, result);
@@ -1029,18 +1029,18 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
 	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		PlayerCharacter::PerceivedActor* target = pIter->GetItem();
 		pIter = pIter->GetNext();
-		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
+		if (target->bIsHostile) {
+			if (skipInvisible > 0 && (target->pActor->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->pActor->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
-			auto distToPlayer = target->target->GetLocationOnReference().SqrDistance(playerPos);
+			auto distToPlayer = target->pActor->GetPosition().SqrDistance(playerPos);
 			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
-				closestHostile = target->target;
+				closestHostile = target->pActor;
 			}
 		}
 	}
@@ -1100,19 +1100,19 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
 	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		PlayerCharacter::PerceivedActor* target = pIter->GetItem();
 		pIter = pIter->GetNext();
 
-		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
+		if (target->bIsHostile) {
+			if (skipInvisible > 0 && (target->pActor->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->pActor->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
-			auto distToPlayer = target->target->GetLocationOnReference().SqrDistance(playerPos);
+			auto distToPlayer = target->pActor->GetLocationOnReference().SqrDistance(playerPos);
 			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
-				closestHostile = target->target;
+				closestHostile = target->pActor;
 			}
 		}
 	}
@@ -1514,7 +1514,7 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 }
 
 SPEC_INLINE bool Cmd_GetGrenadeHoldTime_Eval(COMMAND_ARGS_EVAL) {
-	*result = PlayerCharacter::GetSingleton()->timeGrenadeHeld;
+	*result = PlayerCharacter::GetSingleton()->fProjectileReleaseTimer;
 	return true;
 }
 

@@ -23,10 +23,12 @@ extern InventoryRef* (*InventoryRefGetForID)(FormID refID);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 	if (PlayerCharacter::GetSingleton()) {
-		auto headNode = PlayerCharacter::GetSingleton()->questObjectiveList.Head();
-		while (headNode) {
-			Interface::PrintLine("objective %s from quest %s", headNode->data->GetDisplayText(), headNode->data->GetOwner()->GetEditorName());
-			headNode = headNode->next;
+		auto pIter = PlayerCharacter::GetSingleton()->kQuestObjectives.GetHead();
+		while (pIter && !pIter->IsEmpty()) {
+			BGSQuestObjective* pObjective = pIter->GetItem();
+			pIter = pIter->GetNext();
+			if (pObjective)
+				Interface::PrintLine("objective %s from quest %s", pObjective->GetDisplayText(), pObjective->GetOwner()->GetEditorName());
 		}
 	}
 
@@ -42,39 +44,39 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest) || !PlayerCharacter::GetSingleton())
 		return true;
 
-	auto& kList = PlayerCharacter::GetSingleton()->questObjectiveList;
-	if (kList.Empty())
+	auto& kList = PlayerCharacter::GetSingleton()->kQuestObjectives;
+	if (kList.IsEmpty())
 		return true;
 
 	ScrapVector<BGSQuestObjective*> kMatching;
 	ScrapVector<BGSQuestObjective*> kOthers;
 
-	auto node = kList.Head();
-	while (node) {
-		if (node->data) {
-			if (node->data->GetOwner() == pQuest)
-				kMatching.push_back(node->data);
+	auto node = kList.GetHead();
+	while (node && !node->IsEmpty()) {
+		if (node->GetItem()) {
+			if (node->GetItem()->GetOwner() == pQuest)
+				kMatching.push_back(node->GetItem());
 			else
-				kOthers.push_back(node->data);
+				kOthers.push_back(node->GetItem());
 		}
-		node = node->next;
+		node = node->GetNext();
 	}
 
 	if (kMatching.empty())
 		return true;
 
-	node = kList.Head();
-	while (node->next) {
-		auto next = node->next;
-		node->next = next->next;
+	node = kList.GetHead();
+	while (node->GetNext()) {
+		auto next = node->GetNext();
+		node->SetNext(next->GetNext());
 		BSMemory::free(next);
 	}
 
-	node->data = kMatching[0];
+	node->SetItem(kMatching[0]);
 	for (size_t i = 1; i < kMatching.size(); i++)
-		kList.Append(kMatching[i]);
+		kList.AddTail(kMatching[i]);
 	for (auto obj : kOthers)
-		kList.Append(obj);
+		kList.AddTail(obj);
 
 	MapMenu* pMapMenu = MapMenu::GetSingleton();
 	if (pMapMenu) {

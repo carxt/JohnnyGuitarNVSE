@@ -1061,12 +1061,4 @@ static_assert(sizeof(TESImageSpaceModifier) == 0x730);
 static_assert(sizeof(TESImageSpaceModifier) == 0x74C);
 #endif
 
-struct CasinoStats
-{
-	uint32_t casinoRefID;
-	int32_t earnings;
-	uint16_t earningStage;
-	uint8_t gap0A[2];
-};
-
 extern TESForm* __fastcall GetTESForm(const TESForm* apForm);

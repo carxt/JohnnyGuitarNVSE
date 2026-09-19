@@ -718,6 +718,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\PackageTarget.cpp" />
     <ClCompile Include="internal\Game\Bethesda\PathingLocation.cpp" />
     <ClCompile Include="internal\Game\Bethesda\PathingNode.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\PlayerCharacter.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\ScrapHeap.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ScreenCustomSplatter.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
@@ -1410,6 +1415,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\CharacterProgression.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\Clouds.hpp" />
     <ClInclude Include="internal\Game\Bethesda\CombatTimer.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
@@ -1617,6 +1627,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\PathingNode.hpp" />
     <ClInclude Include="internal\Game\Bethesda\PathingRequest.hpp" />
     <ClInclude Include="internal\Game\Bethesda\PathingSolution.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\PlayerCharacter.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\Precipitation.hpp" />
     <ClInclude Include="internal\Game\Bethesda\QuestUpdateManager.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
@@ -1655,6 +1670,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TeleportPath.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESActorBase.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESActorBaseData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESAIForm.hpp" />

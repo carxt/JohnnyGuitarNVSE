@@ -45,8 +45,8 @@ bool Cmd_SetAcousticSpace_Execute(COMMAND_ARGS)
 
 SPEC_NOINLINE bool Cmd_AudioMarkerGetCurrent_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	if (PlayerCharacter::GetSingleton() && PlayerCharacter::GetSingleton()->currMusicMarker) {
-		if (TESObjectREFR* pMarkerRef = PlayerCharacter::GetSingleton()->currMusicMarker->pReference)
+	if (PlayerCharacter::GetSingleton() && PlayerCharacter::GetSingleton()->pCurrMusicMarker) {
+		if (TESObjectREFR* pMarkerRef = PlayerCharacter::GetSingleton()->pCurrMusicMarker->pReference)
 			*reinterpret_cast<FormID*>(result) = pMarkerRef->GetFormID();
 	}
 	return true;

@@ -1540,7 +1540,7 @@ namespace JIPFixes {
 #ifdef GAME
 		STACK_FRAME_OPT_ENABLE
 		bool Cmd_GetPCCanUsePowerArmor_Eval(COMMAND_ARGS_EVAL) {
-			*result = PlayerCharacter::GetSingleton()->canUsePA;
+			*result = PlayerCharacter::GetSingleton()->bCanUsePowerArmor;
 			return true;
 		}
 		STACK_FRAME_OPT_RESET

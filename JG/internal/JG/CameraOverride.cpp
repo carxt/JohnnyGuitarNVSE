@@ -17,7 +17,7 @@ namespace CameraOverride {
 
 	static SPEC_NOINLINE void __fastcall SetCameraTranslate(NiNode* apThis, uint32_t auiAddress, NiPoint3& arPos) {
 		PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
-		if (bOverrideCameraPos && pPlayer->IsThirdPerson())
+		if (bOverrideCameraPos && pPlayer->Is3rdPerson())
 			arPos = kCameraPos;
 
 		ThisCall(auiAddress, apThis, &arPos);
@@ -28,7 +28,7 @@ namespace CameraOverride {
 		if (eAxis == CameraRotationType::ROTATE_RESET) {
 			kCameraRot = arRot;
 		}
-		else if (bOverrideCameraRot && PlayerCharacter::GetSingleton()->IsThirdPerson()) {
+		else if (bOverrideCameraRot && PlayerCharacter::GetSingleton()->Is3rdPerson()) {
 			if (eAxis == CameraRotationType::ROTATE_TO_TARGET) {
 				const TESForm* pForm = TESForm::GetFormByNumericID(uiReferenceToTrack);
 				if (pForm->IsReference() && pCamera) {

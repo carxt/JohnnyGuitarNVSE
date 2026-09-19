@@ -20,10 +20,10 @@ SPEC_NOINLINE bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL) {
 	const FOVType eFOV = *reinterpret_cast<FOVType*>(&arg1);
 	switch (eFOV) {
 		case FOVType::VIEWMODEL:
-			*result = PlayerCharacter::GetSingleton()->firstPersonFOV;
+			*result = PlayerCharacter::GetSingleton()->Get1stPersonFOV();
 			break;
 		case FOVType::WORLD:
-			*result = PlayerCharacter::GetSingleton()->worldFOV;
+			*result = PlayerCharacter::GetSingleton()->GetWorldFOV();
 			break;
 		default:
 			*result = TESMain::GetWorldSceneGraph()->fCurrentFOV;
@@ -48,8 +48,8 @@ bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS) {
 
 	ASSUME_ASSERT(pViewmodelFOV && pWorldFOV);
 
-	pViewmodelFOV->data = PlayerCharacter::GetSingleton()->firstPersonFOV;
-	pWorldFOV->data = PlayerCharacter::GetSingleton()->worldFOV;
+	pViewmodelFOV->data = PlayerCharacter::GetSingleton()->Get1stPersonFOV();
+	pWorldFOV->data = PlayerCharacter::GetSingleton()->GetWorldFOV();
 	if (pCurrentFOV)
 		pCurrentFOV->data = TESMain::GetWorldSceneGraph()->fCurrentFOV;
 
