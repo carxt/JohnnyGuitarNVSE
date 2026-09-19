@@ -3178,8 +3178,8 @@ namespace {
 			BipedAnim* pBiped3rd = pPlayer->GetBiped(false);
 			for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
 				if (uiValidParts.GetBit(i)) {
-					pBiped1st->RemovePart(i, true);
-					pBiped3rd->RemovePart(i, true);
+					pBiped1st->RemovePart(BIPED_OBJECT(i), true);
+					pBiped3rd->RemovePart(BIPED_OBJECT(i), true);
 				}
 			}
 
@@ -3195,7 +3195,7 @@ namespace {
 
 			for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
 				if (uiValidParts.GetBit(i)) {
-					pBiped->RemovePart(i, true);
+					pBiped->RemovePart(BIPED_OBJECT(i), true);
 				}
 			}
 

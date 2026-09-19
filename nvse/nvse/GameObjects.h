@@ -4,7 +4,8 @@
 #include "GameSound.h"
 #include "Bethesda/BGSEntryPointPerkEntry.hpp"
 #ifdef GAME
-#include "Bethesda/Actor.hpp"
+#include "Bethesda/Character.hpp"
+#include "Bethesda/Creature.hpp"
 #else
 #include "Bethesda/TESObjectREFR.hpp"
 #endif
@@ -82,37 +83,6 @@ class PathingAvoidNodeArray;
 
 typedef ActiveEffect* (*ActiveEffectCreate)(MagicCaster* magCaster, MagicItem* magItem, EffectItem* effItem);
 
-// 1C0
-class Creature : public Actor {
-public:
-	Creature();
-	~Creature();
-
-	virtual void	Unk_137(void);
-
-	uint32_t			unk1B4[3];			// 1B4
-};
-
-// 1C8
-class Character : public Actor {
-public:
-	Character();
-	~Character();
-
-	virtual void	Unk_137(void);
-	virtual void	Unk_138(void);
-
-	BipedAnim* pBipedAnim;	// 1B4
-	float			totalArmorDR;		// 1B8
-	float			totalArmorDT;		// 1BC
-	uint8_t			isTrespassing;		// 1C0
-	uint8_t			byt1C1;				// 1C1
-	uint16_t			unk1C2;				// 1C2
-	float			unk1C4;				// 1C4
-};
-#ifdef GAME
-static_assert(sizeof(Character) == 0x1C8);
-#endif
 class bhkRigidBody;
 struct ParentSpaceNode;
 struct TeleportLink;

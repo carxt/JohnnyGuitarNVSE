@@ -1034,8 +1034,8 @@ namespace JIPFixes {
 
 		uint32_t uiWeaponHasScope = 0;
 
-		SPEC_NOINLINE void __fastcall DetachBiped(BipedAnim* apBiped, uint32_t auiIndex) {
-			NiPointer<NiNode> spNode = apBiped->kObjects[auiIndex].pPartObject;
+		SPEC_NOINLINE void __fastcall DetachBiped(BipedAnim* apBiped, BIPED_OBJECT aeObject) {
+			NiPointer<NiAVObject> spNode = apBiped->kObjects[aeObject].pPartClone;
 			// Should not be doing this, since the command can run while rendering/3D updates happen on other threads
 			// If so, RemovePart/RemoveWeapon will queue the detach and cleanup, but we need the model to be detached *right now*
 			// By detaching here, we allow the game to only queue the cleanup, partial success I guess
@@ -1043,10 +1043,10 @@ namespace JIPFixes {
 			if (spNode && spNode->GetParent())
 				spNode->GetParent()->DetachChild(spNode);
 
-			if (auiIndex == BIPED_OBJECT::WEAPON)
+			if (aeObject == BIPED_OBJECT::WEAPON)
 				apBiped->RemoveBipedWeapon();
 			else
-				apBiped->RemovePart(auiIndex, true);
+				apBiped->RemovePart(aeObject, true);
 		}
 
 		bool Cmd_ReloadEquippedModels_Execute(COMMAND_ARGS) {
@@ -1097,15 +1097,15 @@ namespace JIPFixes {
 					BipedAnim* pBiped3rd = pPlayer->GetBiped(false);
 					for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
 						if (uiValidParts.GetBit(i)) {
-							DetachBiped(pBiped1st, i);
-							DetachBiped(pBiped3rd, i);
+							DetachBiped(pBiped1st, BIPED_OBJECT(i));
+							DetachBiped(pBiped3rd, BIPED_OBJECT(i));
 						}
 					}
 				}
 				else {
 					for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
 						if (uiValidParts.GetBit(i)) {
-							DetachBiped(pBiped, i);
+							DetachBiped(pBiped, BIPED_OBJECT(i));
 						}
 					}
 				}
