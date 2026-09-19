@@ -163,7 +163,7 @@ namespace CameraOverlay {
 		TESObjectREFR*		pReference = nullptr;
 
 		NiNode* GetRoot() const {
-			return static_cast<NiNode*>(pReference->Get3DSimple());
+			return static_cast<NiNode*>(pReference->Get3DVerySimple());
 		}
 
 		NiNode* __fastcall Initialize(const char* apName) {

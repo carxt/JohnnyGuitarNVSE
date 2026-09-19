@@ -226,7 +226,7 @@ bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 	NiPoint3 kPos;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kPos.x, &kPos.y, &kPos.z)) {
 		TESForm* pSpace = nullptr;
-		TESObjectCELL* pParentCell = PlayerCharacter::GetSingleton()->parentCell;
+		TESObjectCELL* pParentCell = PlayerCharacter::GetSingleton()->GetParentCell();
 		if (pParentCell) {
 			if (pParentCell->GetInterior())
 				pSpace = pParentCell;
@@ -580,11 +580,11 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 		if (ref == nullptr) {
 			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
 		}
-		if (ref->Get3DSimple()) {
+		if (ref->Get3DVerySimple()) {
 			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
 			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(sound->GetFormID(), uiFlags);
 			handle.SetPosition(ref->GetLocationOnReference());
-			handle.SetObjectToFollow(ref->Get3DSimple());
+			handle.SetObjectToFollow(ref->Get3DVerySimple());
 			uint32_t time = fTime * 1000.0;
 			handle.FadeInPlay(time);
 			*result = 1;
@@ -753,25 +753,14 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-TESWorldSpace* __fastcall GetWorldSpace(const TESObjectREFR* apRef) {
-	const TESObjectCELL* pCell = apRef->parentCell;
-	if (!pCell)
-		pCell = apRef->childCell.GetSaveParentCell();
-
-	if (pCell && !pCell->GetInterior()) 
-		return pCell->GetWorldSpace();
-
-	return nullptr;
-}
-
 bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cLocationName[MAX_PATH] = {};
-	if (thisObj->parentCell && thisObj->parentCell->GetInterior()) {
-		strcpy_s(cLocationName, thisObj->parentCell->GetFullName());
+	if (thisObj->GetParentCell() && thisObj->GetParentCell()->GetInterior()) {
+		strcpy_s(cLocationName, thisObj->GetParentCell()->GetFullName());
 	}
 	else {
-		const TESWorldSpace* pWorld = GetWorldSpace(thisObj);
+		const TESWorldSpace* pWorld = thisObj->GetWorldSpace();
 		if (pWorld) {
 			BSString strName;
 			pWorld->GetMapNameForLocation(strName, thisObj->GetLocationOnReference());
@@ -881,7 +870,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 		if (checkItems) {
 			TESForm* containerOwner = container->GetOwner();
 			if (!containerOwner) return true;
-			ExtraContainerChanges* xChanges = thisObj->extraDataList.GetExtraData<ExtraContainerChanges>();
+			ExtraContainerChanges* xChanges = thisObj->GetExtra()->GetExtraData<ExtraContainerChanges>();
 			if (!xChanges || !xChanges->pChanges || !xChanges->pChanges->pItems)
 				return true;
 			BSSimpleList<ItemChange*>* contChangesIter = xChanges->pChanges->pItems->GetHead();
@@ -975,7 +964,7 @@ bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 
 bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL* pCell = PlayerCharacter::GetSingleton()->parentCell;
+	TESObjectCELL* pCell = PlayerCharacter::GetSingleton()->GetParentCell();
 	if (pCell)
 		*result = ProcessLists::GetSingleton()->AreHostileActorsNear(pCell->GetInterior());
 	return true;

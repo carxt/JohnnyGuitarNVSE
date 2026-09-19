@@ -1048,7 +1048,7 @@ TESForm* TESObjectCELL::GetOwner() const {
 #endif
 }
 
-// GAME - 0x567960
+// GAME - 0x546AA0
 TESGlobal* TESObjectCELL::GetOwnershipGlobal() const {
 #ifdef GAME
     return ThisCall<TESGlobal*>(0x546AA0, this);

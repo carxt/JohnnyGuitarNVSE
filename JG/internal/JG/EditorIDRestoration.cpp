@@ -435,9 +435,6 @@ namespace EDIDRestoration {
 			if (!pName || !pName[0])
 				pName = GetFormEditorID();
 
-			if (!pName || !pName[0])
-				pName = baseForm->GetFormEditorID();
-
 			return pName;
 		}
 	};

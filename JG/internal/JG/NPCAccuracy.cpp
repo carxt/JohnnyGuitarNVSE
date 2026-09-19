@@ -82,7 +82,7 @@ namespace NPCAccuracy {
 		TESActorBase* pActorBase = static_cast<TESActorBase*>(GetPermanentBaseForm(apActor));
 		ScrapVector<FormID> kFactions = GetFactionsInList(pActorBase->GetFactionList());
 
-		const ExtraFactionChanges* pFactionChanges = apActor->extraDataList.GetExtraData<ExtraFactionChanges>();
+		const ExtraFactionChanges* pFactionChanges = apActor->GetExtra()->GetExtraData<ExtraFactionChanges>();
 		if (pFactionChanges && pFactionChanges->pFactionChanges) {
 			ScrapVector<FormID> kAdditionalFactions = GetFactionsInList(pFactionChanges->pFactionChanges);
 			kFactions.append_range(kAdditionalFactions);

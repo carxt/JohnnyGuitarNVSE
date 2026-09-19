@@ -8,8 +8,8 @@ TESForm* __fastcall GetTESForm(const TESForm* apForm) {
 
 	if (apForm->IsReference()) {
 		const TESObjectREFR* refr = static_cast<const TESObjectREFR*>(apForm);
-		if (refr->baseForm) 
-			return refr->baseForm;
+		if (refr->GetObjectReference()) 
+			return refr->GetObjectReference();
 	}
 
 	return const_cast<TESForm*>(apForm);
@@ -28,7 +28,7 @@ TESForm* TESObjectWEAP::GetAmmoInInventory()
 	if (ammo.pAmmo) {
 		if (IS_TYPE(ammo.pAmmo, BGSListForm)) {
 			BGSListForm* ammoList = (BGSListForm*)ammo.pAmmo;
-			ExtraContainerChanges* xChanges = PlayerCharacter::GetSingleton()->extraDataList.GetExtraData<ExtraContainerChanges>();
+			ExtraContainerChanges* xChanges = PlayerCharacter::GetSingleton()->GetExtra()->GetExtraData<ExtraContainerChanges>();
 			if (ammoList && xChanges && xChanges->pChanges) {
 				auto* pIter = ammoList->GetFormList();
 				while (pIter && !pIter->IsEmpty()) {

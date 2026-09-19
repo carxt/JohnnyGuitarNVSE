@@ -1015,6 +1015,9 @@
     <ClCompile Include="internal\Game\Bethesda\TaskQueueInterface.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectREFR.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -2649,6 +2652,9 @@
     </ClInclude>
     <ClInclude Include="..\shared\BSMemory\BSMemoryUtils.hpp">
       <Filter>shared\BSMemory</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectREFR.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

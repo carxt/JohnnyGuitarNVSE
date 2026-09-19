@@ -61,7 +61,7 @@ bool Cmd_AudioMarkerGetCurrent_Execute(COMMAND_ARGS) {
 SPEC_NOINLINE bool Cmd_AudioMarkerGetController_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj) {
-		ExtraAudioMarker* pExtraMarker = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
+		ExtraAudioMarker* pExtraMarker = thisObj->GetExtra()->GetExtraData<ExtraAudioMarker>();
 		if (pExtraMarker && pExtraMarker->pData) {
 			uintptr_t uiCtrlFormID = pExtraMarker->pData->uiMediaLocationController;
 			TESForm* pFoundForm = TESForm::GetFormByNumericID(uiCtrlFormID);
@@ -87,7 +87,7 @@ bool Cmd_AudioMarkerGetController_Execute(COMMAND_ARGS) {
 bool Cmd_AudioMarkerSetController_Execute(COMMAND_ARGS) {
 	MediaLocationController* locationController;
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &locationController) && locationController && IS_TYPE(locationController, MediaLocationController)) {
-		ExtraAudioMarker* audioMrkr = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
+		ExtraAudioMarker* audioMrkr = thisObj->GetExtra()->GetExtraData<ExtraAudioMarker>();
 		if (audioMrkr && audioMrkr->pData) {
 			audioMrkr->pData->uiMediaLocationController = locationController->GetFormID();
 			Interface::PrintLine("AudioMarkerSetController >> 0x%lx, %s", locationController->GetFormID(), locationController->GetFormEditorID());
@@ -111,8 +111,8 @@ bool Cmd_AudioMarkerSetProperty_Execute(COMMAND_ARGS) {
 		kFlags
 	};
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type, &newVal)) {
-		ExtraAudioMarker* audioMrkr = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
-		ExtraRadius* rad = thisObj->extraDataList.GetExtraData<ExtraRadius>();
+		ExtraAudioMarker* audioMrkr = thisObj->GetExtra()->GetExtraData<ExtraAudioMarker>();
+		ExtraRadius* rad = thisObj->GetExtra()->GetExtraData<ExtraRadius>();
 		if (audioMrkr && audioMrkr->pData) {
 			switch (type) {
 			case kRadius:
@@ -149,8 +149,8 @@ bool Cmd_AudioMarkerGetProperty_Execute(COMMAND_ARGS) {
 		kFlags
 	};
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
-		ExtraAudioMarker* audioMrkr = thisObj->extraDataList.GetExtraData<ExtraAudioMarker>();
-		ExtraRadius* rad = thisObj->extraDataList.GetExtraData<ExtraRadius>();
+		ExtraAudioMarker* audioMrkr = thisObj->GetExtra()->GetExtraData<ExtraAudioMarker>();
+		ExtraRadius* rad = thisObj->GetExtra()->GetExtraData<ExtraRadius>();
 		if (audioMrkr && audioMrkr->pData) {
 			switch (type) {
 			case kRadius:

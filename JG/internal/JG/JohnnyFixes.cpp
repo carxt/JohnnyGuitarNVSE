@@ -130,7 +130,7 @@ namespace JohnnyFixes {
 	void __fastcall SetCellImageSpaceHook(TESObjectCELL* apCell, void*, TESImageSpace* apImageSpace) {
 		ThisCall(kSetCellImageSpaceDetour, apCell, apImageSpace);
 		const PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
-		if (apImageSpace && pPlayer->parentCell && pPlayer->parentCell == apCell)
+		if (apImageSpace && pPlayer->GetParentCell() && pPlayer->GetParentCell() == apCell)
 			BSShaderManager::SetImageSpaceParameters(&apImageSpace->kData);
 	}
 	STACK_FRAME_OPT_RESET

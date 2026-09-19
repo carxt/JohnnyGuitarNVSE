@@ -33,10 +33,10 @@ namespace CameraOverride {
 				const TESForm* pForm = TESForm::GetFormByNumericID(uiReferenceToTrack);
 				if (pForm->IsReference() && pCamera) {
 					const TESObjectREFR* pTrackRef = static_cast<const TESObjectREFR*>(pForm);
-					const NiNode* pRootNode = pTrackRef->Get3D();
+					const NiAVObject* pRefRoot = pTrackRef->Get3D();
 					NiPoint3 kPos;
-					if (pRootNode && pRootNode->IsVisualObject()) {
-						kPos = pRootNode->m_pWorldBound->GetCenter();
+					if (pRefRoot && pRefRoot->IsVisualObject()) {
+						kPos = pRefRoot->m_pWorldBound->GetCenter();
 					}
 					else {
 						kPos = pTrackRef->GetLocationOnReference();

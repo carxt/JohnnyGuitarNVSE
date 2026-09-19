@@ -336,7 +336,7 @@ namespace JIPFixes {
 
 		void __fastcall DetachObjects(TESObjectREFR* apRef, const char* apName) {
 			const NiFixedString strName(apName);
-			NiPointer<NiAVObject> spScene = apRef->Get3DSimple();
+			NiPointer<NiAVObject> spScene = apRef->Get3DVerySimple();
 			ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(0);
 			if (spScene) [[likely]] {
 				NiPointer<NiAVObject> spObj = spScene->GetObjectByName(strName);
@@ -1063,7 +1063,7 @@ namespace JIPFixes {
 			if (!pProcess || pProcess->processLevel != PROCESS_TYPE::HIGH)
 				return true;
 
-			const NiNode* pRoot = thisObj->Get3D();
+			const NiAVObject* pRoot = thisObj->Get3DVerySimple();
 			BipedAnim* pBiped = thisObj->GetBiped();
 			if (!pRoot || !pBiped)
 				return true;

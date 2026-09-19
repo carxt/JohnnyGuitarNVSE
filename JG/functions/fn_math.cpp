@@ -7,6 +7,7 @@
 
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/Interface.hpp"
+#include "Bethesda/BSUtilities.hpp"
 
 enum FOVType {
 	VIEWMODEL	= 0,
@@ -250,7 +251,7 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 	const Actor* pActor = static_cast<Actor*>(thisObj);
 	char cObjectName[MAX_PATH];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName) && pActor->IsMobileObject() && pActor->baseProcess) {
-		const NiAVObject* pObject = thisObj->GetNiBlock(cObjectName);
+		const NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->Get3DVerySimple(), cObjectName);
 		const ActorHitData* pHitData = pActor->baseProcess->GetHitData();
 		if (!pHitData || !pObject) 
 			return true;
@@ -268,7 +269,7 @@ bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	if (!thisObj || !(ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &kPos.x, &kPos.y, &kPos.z))) 
 		return true;
 
-	const NiAVObject* pObject = thisObj->GetNiBlock(cObjectName);
+	const NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->Get3DVerySimple(), cObjectName);
 	if (!pObject) 
 		return true;
 	
@@ -288,8 +289,8 @@ bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pRefA, &pRefB, &cObjectNameA, &cObjectNameB)) 
 		return true;
 
-	const NiAVObject* pObjectA = pRefA->GetNiBlock(cObjectNameA);
-	const NiAVObject* pObjectB = pRefB->GetNiBlock(cObjectNameB);
+	const NiAVObject* pObjectA = BSUtilities::GetObjectByName(pRefA->Get3DVerySimple(), cObjectNameA);
+	const NiAVObject* pObjectB = BSUtilities::GetObjectByName(pRefB->Get3DVerySimple(), cObjectNameB);
 	if (!pObjectA || !pObjectB) 
 		return true;
 
@@ -310,7 +311,7 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 	char cOutZ[VAR_NAME_SIZE];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cOutX, &cOutY, &cOutZ, &kPos.x, &kPos.y, &kPos.z, &eHandleType, &pRef)) {
 		if (pRef)
-			kPos += pRef->pos;
+			kPos += pRef->GetPosition();
 
 		NiPoint3 kResult = { 0.f, 0.f, 0.f };
 		*result = (WorldToScreen::WorldToScreen(kPos, kResult, eHandleType) ? 1.0 : 0.0);
@@ -333,7 +334,7 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pOutX, &pOutY, &pOutZ, &kPos.x, &kPos.y, &kPos.z, &eHandleType, &pRef)) {
 		ASSUME_ASSERT(pOutX && pOutY && pOutZ);
 		if (pRef)
-			kPos += pRef->pos; 
+			kPos += pRef->GetPosition(); 
 
 		NiPoint3 kResult = { 0.f, 0.f, 0.f };
 		*result = (WorldToScreen::WorldToScreen(kPos, kResult, eHandleType) ? 1.0 : 0.0);

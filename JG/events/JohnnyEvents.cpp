@@ -212,7 +212,7 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnLimbGoneHandler->callbacks) {
 				FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-				if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->baseForm->GetFormID())) && pFilter->IsInFilter(1, aeLimb)) {
+				if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetObjectReference()->GetFormID())) && pFilter->IsInFilter(1, aeLimb)) {
 					CallUDF(rCallback.script, nullptr, OnLimbGoneHandler->numMaxArgs, apActor, aeLimb);
 				}
 			}
@@ -229,7 +229,7 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnCrosshairHandler->callbacks) {
 				FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-				if ((pFilter->IsInFilter(0, apRef->GetFormID()) || pFilter->IsInFilter(0, apRef->baseForm->GetFormID())) && pFilter->IsInFilter(1, apRef->baseForm->GetFormType())) {
+				if ((pFilter->IsInFilter(0, apRef->GetFormID()) || pFilter->IsInFilter(0, apRef->GetObjectReference()->GetFormID())) && pFilter->IsInFilter(1, apRef->GetObjectReference()->GetFormType())) {
 					CallUDF(rCallback.script, nullptr, OnCrosshairHandler->numMaxArgs, apRef);
 				}
 			}
@@ -247,7 +247,7 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnTakeBackItemHandler->callbacks) {
 				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.eventFilter);
-				if (pFilter->IsBaseInFilter(0, apObject) && (pFilter->IsInFilter(1, apOwner->GetFormID()) || pFilter->IsInFilter(1, apOwner->baseForm->GetFormID()))) {
+				if (pFilter->IsBaseInFilter(0, apObject) && (pFilter->IsInFilter(1, apOwner->GetFormID()) || pFilter->IsInFilter(1, apOwner->GetObjectReference()->GetFormID()))) {
 					CallUDF(rCallback.script, nullptr, OnTakeBackItemHandler->numMaxArgs, apOwner, apObject, aiNumber);
 				}
 			}
@@ -290,7 +290,7 @@ namespace JohnnyEvents {
 				else {
 					for (auto const& rCallback : OnNPCAVChangeHandler->callbacks) {
 						FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-						if (pFilter->IsInFilter(1, aeActorValue) && (pFilter->IsInFilter(0, pForm->GetFormID()) || (pActor && pFilter->IsInFilter(0, pActor->GetBaseForm()->GetFormID())))) {
+						if (pFilter->IsInFilter(1, aeActorValue) && (pFilter->IsInFilter(0, pForm->GetFormID()) || (pActor && pFilter->IsInFilter(0, pActor->GetOriginalObjectReference()->GetFormID())))) {
 
 							const bool bFullValues = rCallback.UserFlags.Get(1);
 
@@ -314,7 +314,7 @@ namespace JohnnyEvents {
 
 				for (auto const& rCallback : OnPLChangeHandler->callbacks) {
 					FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-					if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetBaseForm()->GetFormID())) && pFilter->IsInFilter(1, aeNewLevel)) {
+					if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetOriginalObjectReference()->GetFormID())) && pFilter->IsInFilter(1, aeNewLevel)) {
 						CallUDF(rCallback.script, nullptr, OnPLChangeHandler->numMaxArgs, apActor, aeOldLevel, aeNewLevel);
 					}
 				}
