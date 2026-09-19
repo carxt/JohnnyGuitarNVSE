@@ -17,6 +17,7 @@
 #include "Bethesda/TESObjectList.hpp"
 #include "Bethesda/BGSEntryPoint.hpp"
 #include "Bethesda/ExtraContainerChanges.hpp"
+#include "Bethesda/PlayerMover.hpp"
 
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
@@ -267,15 +268,10 @@ bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 		bool bAlwaysRun = (alwaysRun > 0);
 		PlayerCharacter::GetSingleton()->bAlwaysRun = bAlwaysRun;
 		if (updateMovementFlags) {
-			PlayerMover* playerMover = (PlayerMover*)PlayerCharacter::GetSingleton()->pActorMover;
-			uint32_t flags = playerMover->pcMovementFlags;
-			if (bAlwaysRun) {
-				flags |= 0x200;
-			}
-			else {
-				flags &= ~0x200;
-			}
-			PlayerCharacter::GetSingleton()->pActorMover->ForceMoveMode(flags);
+			PlayerMover* playerMover = static_cast<PlayerMover*>(PlayerCharacter::GetSingleton()->pActorMover);
+			auto uiFlags = playerMover->uiMoveMode;
+			uiFlags.bRunning = bAlwaysRun;
+			PlayerCharacter::GetSingleton()->pActorMover->ForceMoveMode(uiFlags);
 		}
 		*result = 1;
 	}

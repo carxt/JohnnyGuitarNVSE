@@ -21,6 +21,7 @@
 #include "Bethesda/ItemChange.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TESObjectList.hpp"
+#include "Bethesda/GrenadeProjectile.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 
@@ -2052,11 +2053,19 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_GetMineArmedEx_Execute(COMMAND_ARGS)
-{
-	if (GrenadeProjectile* projectile = (GrenadeProjectile*)thisObj; IS_ID(projectile, GrenadeProjectile) && !(projectile->projFlags & 0x200) &&
-		(((BGSProjectile*)thisObj->GetObjectReference())->GetData().uiFlags.Get(0x426) == 0x26))
+bool Cmd_GetMineArmedEx_Execute(COMMAND_ARGS) {
+	*result = 0;
+	if (!IS_ID(thisObj, GrenadeProjectile))
+		return true;
+
+	const GrenadeProjectile* pGrenade = static_cast<GrenadeProjectile*>(thisObj);
+	const BGSProjectile* pBase = pGrenade->GetProjectileBase();
+	if (!pBase)
+		return true;
+	
+	if (!pGrenade->uiProjectileFlags.bTurnedOff && pGrenade->IsMine() && pBase->GetCanTurnOff())
 		*result = 1;
+
 	return true;
 }
 

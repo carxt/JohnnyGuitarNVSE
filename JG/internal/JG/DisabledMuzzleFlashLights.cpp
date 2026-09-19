@@ -1,5 +1,6 @@
 #include "DisabledMuzzleFlashLights.hpp"
-#include "GameObjects.h"
+#include "Bethesda/MuzzleFlash.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
@@ -11,8 +12,8 @@ namespace DisabledMuzzleFlashLights {
 
 	void __fastcall CreateMuzzleFlashLightsHook(MuzzleFlash* apMuzzleFlash) {
 		if (eDisableMode == Mode::ENABLE
-			|| (eDisableMode == Mode::DISABLE_NPCS && apMuzzleFlash->pSourceActor == PlayerCharacter::GetSingleton())
-			|| (eDisableMode == Mode::DISABLE_PLAYER && apMuzzleFlash->pSourceActor != PlayerCharacter::GetSingleton())) {
+			|| (eDisableMode == Mode::DISABLE_NPCS && apMuzzleFlash->GetParentRef() == PlayerCharacter::GetSingleton())
+			|| (eDisableMode == Mode::DISABLE_PLAYER && apMuzzleFlash->GetParentRef() != PlayerCharacter::GetSingleton())) {
 
 			ThisCall(kDetour, apMuzzleFlash);
 		}

@@ -2,6 +2,7 @@
 #include <GameObjects.h>
 #include "Bethesda/ExtraRadius.hpp"
 #include "Bethesda/Interface.hpp"
+#include "Obsidian/AudioMarkerInfo.hpp"
 #include "Obsidian/ExtraAudioMarker.hpp"
 
 bool Cmd_GetAcousticSpace_Execute(COMMAND_ARGS)
