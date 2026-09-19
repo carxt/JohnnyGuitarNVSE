@@ -1,6 +1,6 @@
 #include "BipedAnimFixes.hpp"
 #include "Bethesda/ItemChange.hpp"
-#include <GameObjects.h>
+#include "Bethesda/Actor.hpp"
 #include <GameProcess.h>
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
@@ -14,8 +14,8 @@ namespace BipedAnimFixes {
 		TESObjectREFR* pReference = *reinterpret_cast<TESObjectREFR**>(pEBP + 0x8);
 		if (pReference && pReference->IsActor()) {
 			Actor* pActor = static_cast<Actor*>(pReference);
-			if (pActor->baseProcess) {
-				ItemChange* pWeaponItem = pActor->baseProcess->GetCurrentWeapon();
+			if (pActor->GetCurrentAIProcess()) {
+				ItemChange* pWeaponItem = pActor->GetCurrentAIProcess()->GetCurrentWeapon();
 				if (pWeaponItem)
 					aucModSlots = pWeaponItem->GetModSlots();
 			}

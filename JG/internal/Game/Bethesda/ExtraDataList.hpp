@@ -14,6 +14,9 @@ class ImpactSwap;
 class BGSMusicType;
 class TESGlobal;
 class TESImageSpace;
+class TESActorBase;
+class InventoryChanges;
+class LockData;
 
 class ExtraDataList : public BaseExtraList {
 public:
@@ -26,6 +29,9 @@ public:
 #endif
 
 	void CopyListForReference(ExtraDataList* apCopy, bool abRemove);
+
+	TESActorBase* GetLevCreaTemplate() const;
+	TESActorBase* GetLevCreaOriginalBase() const;
 
 	void SetPoison(AlchemyItem* apPoison);
 	void RemovePoison();
@@ -62,6 +68,15 @@ public:
 
 	TESImageSpace* GetImageSpace() const;
 	void SetImageSpace(TESImageSpace* apImageSpace);
+
+	bool GetIgnoredBySandbox() const;
+	void SetIgnoredBySandbox(bool abVal);
+
+	InventoryChanges* GetContainerChanges() const;
+	void SetContainerChanges(InventoryChanges* apChanges);
+
+	void SetLock(LockData* apLock);
+	LockData* GetLock() const;
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

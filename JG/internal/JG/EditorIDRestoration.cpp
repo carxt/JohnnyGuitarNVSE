@@ -1,7 +1,8 @@
-#include "GameObjects.h"
+#include "EditorIDRestoration.hpp"
 #include "GameData.h"
 #include "JohnnyExtraData.hpp"
 #include "Bethesda/MenuConsole.hpp"
+#include "Bethesda/TESObjectREFR.hpp"
 #include "misc/misc.h"
 
 #include "Shared/Utils/DebugLog.hpp"
@@ -434,9 +435,6 @@ namespace EDIDRestoration {
 			const char* pName = GetFullName();
 			if (!pName || !pName[0])
 				pName = GetFormEditorID();
-
-			if (!pName || !pName[0])
-				pName = baseForm->GetFormEditorID();
 
 			return pName;
 		}

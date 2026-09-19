@@ -1,26 +1,10 @@
 #include "GameForms.h"
-#include "GameObjects.h"
+#ifdef GAME
+#include "Bethesda/PlayerCharacter.hpp"
 #include "Bethesda/ExtraContainerChanges.hpp"
 
-TESForm* __fastcall GetTESForm(const TESForm* apForm) {
-	if (!apForm) 
-		return nullptr;
-
-	if (apForm->IsReference()) {
-		const TESObjectREFR* refr = static_cast<const TESObjectREFR*>(apForm);
-		if (refr->baseForm) 
-			return refr->baseForm;
-	}
-
-	return const_cast<TESForm*>(apForm);
-}
-
 TESAmmo* TESObjectWEAP::GetAmmo() {
-#ifdef GAME
 	return ammo.GetAmmoHelper();
-#else
-	return nullptr;
-#endif
 }
 
 TESForm* TESObjectWEAP::GetAmmoInInventory()
@@ -28,7 +12,7 @@ TESForm* TESObjectWEAP::GetAmmoInInventory()
 	if (ammo.pAmmo) {
 		if (IS_TYPE(ammo.pAmmo, BGSListForm)) {
 			BGSListForm* ammoList = (BGSListForm*)ammo.pAmmo;
-			ExtraContainerChanges* xChanges = PlayerCharacter::GetSingleton()->extraDataList.GetExtraData<ExtraContainerChanges>();
+			ExtraContainerChanges* xChanges = PlayerCharacter::GetSingleton()->GetExtra()->GetExtraData<ExtraContainerChanges>();
 			if (ammoList && xChanges && xChanges->pChanges) {
 				auto* pIter = ammoList->GetFormList();
 				while (pIter && !pIter->IsEmpty()) {
@@ -46,3 +30,4 @@ TESForm* TESObjectWEAP::GetAmmoInInventory()
 	}
 	return nullptr;
 }
+#endif

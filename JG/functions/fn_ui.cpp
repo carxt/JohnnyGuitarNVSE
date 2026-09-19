@@ -5,6 +5,7 @@
 #include "Bethesda/FileFinder.hpp"
 #include "Bethesda/ExtraMapMarker.hpp"
 #include "Bethesda/ItemChange.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "JG/ExtraMarkerIcons.hpp"
 #include "JG/ExtraMiscStats.hpp"
@@ -23,10 +24,12 @@ extern InventoryRef* (*InventoryRefGetForID)(FormID refID);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 	if (PlayerCharacter::GetSingleton()) {
-		auto headNode = PlayerCharacter::GetSingleton()->questObjectiveList.Head();
-		while (headNode) {
-			Interface::PrintLine("objective %s from quest %s", headNode->data->GetDisplayText(), headNode->data->GetOwner()->GetEditorName());
-			headNode = headNode->next;
+		auto pIter = PlayerCharacter::GetSingleton()->kQuestObjectives.GetHead();
+		while (pIter && !pIter->IsEmpty()) {
+			BGSQuestObjective* pObjective = pIter->GetItem();
+			pIter = pIter->GetNext();
+			if (pObjective)
+				Interface::PrintLine("objective %s from quest %s", pObjective->GetDisplayText(), pObjective->GetOwner()->GetEditorName());
 		}
 	}
 
@@ -42,39 +45,39 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest) || !PlayerCharacter::GetSingleton())
 		return true;
 
-	auto& kList = PlayerCharacter::GetSingleton()->questObjectiveList;
-	if (kList.Empty())
+	auto& kList = PlayerCharacter::GetSingleton()->kQuestObjectives;
+	if (kList.IsEmpty())
 		return true;
 
 	ScrapVector<BGSQuestObjective*> kMatching;
 	ScrapVector<BGSQuestObjective*> kOthers;
 
-	auto node = kList.Head();
-	while (node) {
-		if (node->data) {
-			if (node->data->GetOwner() == pQuest)
-				kMatching.push_back(node->data);
+	auto node = kList.GetHead();
+	while (node && !node->IsEmpty()) {
+		if (node->GetItem()) {
+			if (node->GetItem()->GetOwner() == pQuest)
+				kMatching.push_back(node->GetItem());
 			else
-				kOthers.push_back(node->data);
+				kOthers.push_back(node->GetItem());
 		}
-		node = node->next;
+		node = node->GetNext();
 	}
 
 	if (kMatching.empty())
 		return true;
 
-	node = kList.Head();
-	while (node->next) {
-		auto next = node->next;
-		node->next = next->next;
+	node = kList.GetHead();
+	while (node->GetNext()) {
+		auto next = node->GetNext();
+		node->SetNext(next->GetNext());
 		BSMemory::free(next);
 	}
 
-	node->data = kMatching[0];
+	node->SetItem(kMatching[0]);
 	for (size_t i = 1; i < kMatching.size(); i++)
-		kList.Append(kMatching[i]);
+		kList.AddTail(kMatching[i]);
 	for (auto obj : kOthers)
-		kList.Append(obj);
+		kList.AddTail(obj);
 
 	MapMenu* pMapMenu = MapMenu::GetSingleton();
 	if (pMapMenu) {
@@ -288,7 +291,7 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	TESObjectREFR* form;
 	char iconPath[MAX_PATH] = {};
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || !form || (!IS_TYPE(form, BGSListForm) && (!form->IsReference() || !form->IsMapMarker() || !form->extraDataList.HasExtra<ExtraMapMarker>())))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || !form || (!IS_TYPE(form, BGSListForm) && (!form->IsReference() || !form->IsMapMarker() || !form->GetExtra()->HasExtra<ExtraMapMarker>())))
 		return true;
 	if (IS_TYPE(form, BGSListForm)) {
 		BSSimpleList<TESForm*>* pIter = ((BGSListForm*)form)->GetFormList();
@@ -296,7 +299,7 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 			TESObjectREFR* ref = (TESObjectREFR*)pIter->GetItem();
 			pIter = pIter->GetNext();
 
-			if (ref && ref->IsReference() && ref->IsMapMarker() && ref->extraDataList.HasExtra<ExtraMapMarker>()) {
+			if (ref && ref->IsReference() && ref->IsMapMarker() && ref->GetExtra()->HasExtra<ExtraMapMarker>()) {
 				ExtraMarkerIcons::SetMapMarkerIcon(ref, iconPath);
 			}
 		}
@@ -313,7 +316,7 @@ bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	if (!thisObj || (!thisObj->IsReference() || !thisObj->IsMapMarker()))
 		return true;
 
-	ExtraMapMarker* mapMarkerExtra = thisObj->extraDataList.GetExtraData<ExtraMapMarker>();
+	ExtraMapMarker* mapMarkerExtra = thisObj->GetExtra()->GetExtraData<ExtraMapMarker>();
 	if (!mapMarkerExtra || !mapMarkerExtra->pData)
 		return true;
 
@@ -376,7 +379,7 @@ float CalculateRepairedHealth(ItemChange* target, ItemChange* repairItem) {
 	if (!target || !repairItem) return 0.0f;
 	float targetHealth = target->GetItemHealth(true);
 	float repairItemHealth = repairItem->GetItemHealth(true);
-	int repairSkill = PlayerCharacter::GetSingleton()->avOwner.GetActorValueI(ActorValue::Index::REPAIR);
+	int repairSkill = PlayerCharacter::GetSingleton()->GetActorValueI(ActorValue::Index::REPAIR);
 	int outParam = -1;
 	double result = CdeclCall<double>(0x648090, repairSkill, targetHealth, repairItemHealth, &outParam);
 	return (float)(result / 100.0);

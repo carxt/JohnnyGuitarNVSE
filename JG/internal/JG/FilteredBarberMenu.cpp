@@ -1,5 +1,9 @@
 #include "FilteredBarberMenu.hpp"
-#include "GameObjects.h"
+#include "Bethesda/PlayerCharacter.hpp"
+#include "Bethesda/BGSListForm.hpp"
+#include "Bethesda/TESNPC.hpp"
+#include "Bethesda/BGSHeadPart.hpp"
+#include "Bethesda/TESHair.hpp"
 #include "Bethesda/Interface.hpp"
 
 #include "JGSetList.hpp"

@@ -1,6 +1,8 @@
 #pragma once
 
 class NiAVObject;
+class TESForm;
+class TESObject;
 class TESObjectREFR;
 class NiDefaultAVObjectPalette;
 class BGSLoadGameSubBuffer;
@@ -33,5 +35,14 @@ namespace ScriptUtils {
 	SPEC_NOINLINE void __fastcall SaveAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation);
 
 	SPEC_NOINLINE void __fastcall LoadAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation);
+
+	void __fastcall UpdateReference3D(TESObjectREFR* apReference);
+
+	TESObject* __fastcall GetTESObject(const TESForm* apForm);
+}
+
+namespace ScriptUtils {
+
+	void InitData();
 
 }

@@ -1,7 +1,7 @@
 #include "ExternalEmittanceOnBases.hpp"
-#include "JohnnyExtraData.hpp"
+#include "Bethesda/TESObjectREFR.hpp"
 
-#include <GameObjects.h>
+#include "JohnnyExtraData.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 

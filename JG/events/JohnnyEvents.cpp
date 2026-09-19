@@ -4,8 +4,10 @@
 #include "decoding.h"
 #include "JohnnyMessageData.hpp"
 #include <utility.h>
-#include <internal/Game/Bethesda/DialogueResponse.hpp>
-#include <internal/Game/Bethesda/MenuTopic.hpp>
+
+#include "Bethesda/DialogueResponse.hpp"
+#include "Bethesda/MenuTopic.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
@@ -110,7 +112,7 @@ namespace JohnnyEvents {
 		}
 
 		static void __fastcall OnDying(Actor* apActor) {
-			if (apActor && apActor->IsActor() && apActor->lifeState == 1) {
+			if (apActor && apActor->IsActor() && apActor->GetLifeState() == ACTOR_LIFE_STATE::DYING) {
 				{
 					using namespace JohnnyMessageData;
 					SendNVSEMessage(JG_OnDying, apActor);
@@ -212,7 +214,7 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnLimbGoneHandler->callbacks) {
 				FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-				if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->baseForm->GetFormID())) && pFilter->IsInFilter(1, aeLimb)) {
+				if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetObjectReference()->GetFormID())) && pFilter->IsInFilter(1, aeLimb)) {
 					CallUDF(rCallback.script, nullptr, OnLimbGoneHandler->numMaxArgs, apActor, aeLimb);
 				}
 			}
@@ -229,7 +231,7 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnCrosshairHandler->callbacks) {
 				FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-				if ((pFilter->IsInFilter(0, apRef->GetFormID()) || pFilter->IsInFilter(0, apRef->baseForm->GetFormID())) && pFilter->IsInFilter(1, apRef->baseForm->GetFormType())) {
+				if ((pFilter->IsInFilter(0, apRef->GetFormID()) || pFilter->IsInFilter(0, apRef->GetObjectReference()->GetFormID())) && pFilter->IsInFilter(1, apRef->GetObjectReference()->GetFormType())) {
 					CallUDF(rCallback.script, nullptr, OnCrosshairHandler->numMaxArgs, apRef);
 				}
 			}
@@ -247,7 +249,7 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnTakeBackItemHandler->callbacks) {
 				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.eventFilter);
-				if (pFilter->IsBaseInFilter(0, apObject) && (pFilter->IsInFilter(1, apOwner->GetFormID()) || pFilter->IsInFilter(1, apOwner->baseForm->GetFormID()))) {
+				if (pFilter->IsBaseInFilter(0, apObject) && (pFilter->IsInFilter(1, apOwner->GetFormID()) || pFilter->IsInFilter(1, apOwner->GetObjectReference()->GetFormID()))) {
 					CallUDF(rCallback.script, nullptr, OnTakeBackItemHandler->numMaxArgs, apOwner, apObject, aiNumber);
 				}
 			}
@@ -273,7 +275,7 @@ namespace JohnnyEvents {
 					SendNVSEMessage(JG_OnAVChange, kData);
 				}
 
-				if (pActor && pActor->IsPlayerRef()) {
+				if (pActor && pActor->IsPlayer()) {
 					for (auto const& rCallback : OnAVChangeHandler->callbacks) {
 						FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
 						if (pFilter->IsInFilter(1, aeActorValue)) {
@@ -290,7 +292,7 @@ namespace JohnnyEvents {
 				else {
 					for (auto const& rCallback : OnNPCAVChangeHandler->callbacks) {
 						FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-						if (pFilter->IsInFilter(1, aeActorValue) && (pFilter->IsInFilter(0, pForm->GetFormID()) || (pActor && pFilter->IsInFilter(0, pActor->GetBaseForm()->GetFormID())))) {
+						if (pFilter->IsInFilter(1, aeActorValue) && (pFilter->IsInFilter(0, pForm->GetFormID()) || (pActor && pFilter->IsInFilter(0, pActor->GetTemplateObjectReference()->GetFormID())))) {
 
 							const bool bFullValues = rCallback.UserFlags.Get(1);
 
@@ -314,7 +316,7 @@ namespace JohnnyEvents {
 
 				for (auto const& rCallback : OnPLChangeHandler->callbacks) {
 					FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-					if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetBaseForm()->GetFormID())) && pFilter->IsInFilter(1, aeNewLevel)) {
+					if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetTemplateObjectReference()->GetFormID())) && pFilter->IsInFilter(1, aeNewLevel)) {
 						CallUDF(rCallback.script, nullptr, OnPLChangeHandler->numMaxArgs, apActor, aeOldLevel, aeNewLevel);
 					}
 				}
@@ -498,7 +500,7 @@ namespace JohnnyEvents {
 				if (kDetour)
 					ThisCall(kDetour, apActor, apPerk, aucRank, abTeammate);
 				else
-					apActor->SetPerkRank(apPerk, aucRank, abTeammate);
+					apActor->AddPerk(apPerk, aucRank, abTeammate);
 			}
 
 		public:
@@ -584,12 +586,12 @@ namespace JohnnyEvents {
 			static inline HookUtils::VirtFuncDetour kDetour;
 
 			static bool __fastcall Hook(Actor* apActor) {
-				if (!apActor || !apActor->baseProcess) [[unlikely]]
+				if (!apActor || !apActor->GetCurrentAIProcess()) [[unlikely]]
 					return true;
 
-				const uint32_t eOldLevel = apActor->baseProcess->processLevel;
+				const uint32_t eOldLevel = apActor->GetCurrentAIProcess()->GetProcessLevel();
 				const bool bResult = ThisCall<bool>(kDetour, apActor);
-				const uint32_t eNewLevel = apActor->baseProcess->processLevel;
+				const uint32_t eNewLevel = apActor->GetCurrentAIProcess()->GetProcessLevel();
 				Events::OnProcessChangeEvent(apActor, eOldLevel, eNewLevel);
 				return bResult;
 			}

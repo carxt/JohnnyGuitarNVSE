@@ -1,5 +1,6 @@
 #include "TESContainer.hpp"
-#include <GameObjects.h>
+#include "TESObjectREFR.hpp"
+#include "TESObjectLIGH.hpp"
 
 // GAME - 0x717E50
 const BSSimpleList<ContainerObject*>* TESContainer::GetObjectList() const {
@@ -73,7 +74,7 @@ bool TESContainer::ContainerCanHoldForm(const TESForm* apForm) {
 
 	if (apForm->IsReference()) {
 		const TESObjectREFR* pRef = static_cast<const TESObjectREFR*>(apForm);
-		return ContainerCanHoldForm(pRef->baseForm);
+		return ContainerCanHoldForm(pRef->GetObjectReference());
 	}
 	else if (apForm->GetFormType() == FORM_TYPE::TESObjectLIGH) {
 		const TESObjectLIGH* pLight = static_cast<const TESObjectLIGH*>(apForm);

@@ -1,8 +1,8 @@
 #include "WorldToScreen.hpp"
-#include "GameObjects.h"
 #include "netimmerse.h"
 
 #include "Bethesda/TESMain.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
@@ -92,7 +92,7 @@ namespace WorldToScreen {
 		if (!pSceneGraph || !pPlayer)
 			return;
 
-		if (apCamera != pSceneGraph->spCamera || fabs(afFOV - pPlayer->worldFOV) > ZERO_TOLERANCE)
+		if (apCamera != pSceneGraph->spCamera || fabs(afFOV - pPlayer->GetWorldFOV()) > ZERO_TOLERANCE)
 			return;
 
 		kCameraData.kLocal = apCamera->m_kLocal.m_kTranslate;

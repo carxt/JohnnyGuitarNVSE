@@ -8,6 +8,7 @@
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/DialoguePackage.hpp"
 #include "Bethesda/ItemChange.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "Fixes/AmmoEffectListNullChecks.hpp"
 #include "Fixes/AudioMonoLookupOverflowFix.hpp"
@@ -130,15 +131,15 @@ namespace JohnnyFixes {
 	void __fastcall SetCellImageSpaceHook(TESObjectCELL* apCell, void*, TESImageSpace* apImageSpace) {
 		ThisCall(kSetCellImageSpaceDetour, apCell, apImageSpace);
 		const PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
-		if (apImageSpace && pPlayer->parentCell && pPlayer->parentCell == apCell)
+		if (apImageSpace && pPlayer->GetParentCell() && pPlayer->GetParentCell() == apCell)
 			BSShaderManager::SetImageSpaceParameters(&apImageSpace->kData);
 	}
 	STACK_FRAME_OPT_RESET
 
 	void ClearPlayerFurniture() {
-		BaseProcess* pAIProcess = PlayerCharacter::GetSingleton()->baseProcess;
+		BaseProcess* pAIProcess = PlayerCharacter::GetSingleton()->GetCurrentAIProcess();
 		if (pAIProcess)
-			pAIProcess->SetFurnitureRef(PlayerCharacter::GetSingleton(), 0, nullptr, 0x7F);
+			pAIProcess->SetSitSleepState(PlayerCharacter::GetSingleton(), SIT_SLEEP_STATE::NORMAL, nullptr, 0x7F);
 	}
 #endif
 

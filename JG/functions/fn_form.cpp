@@ -2,7 +2,6 @@
 #include "decoding.h"
 #include "GameData.h"
 #include "GameForms.h"
-#include "GameObjects.h"
 #include "GameProcess.h"
 #include "GameRTTI.h"
 #include "GameTasks.h"
@@ -21,6 +20,8 @@
 #include "Bethesda/ItemChange.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TESObjectList.hpp"
+#include "Bethesda/GrenadeProjectile.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 
@@ -200,9 +201,9 @@ bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
 	if (!thisObj) { return true; }
 	*result = 0;
 	if (thisObj->IsActor()) {
-		auto actorProcess = ((Actor*)thisObj)->baseProcess;
+		auto actorProcess = ((Actor*)thisObj)->GetCurrentAIProcess();
 		if (actorProcess) {
-			auto furniRef = actorProcess->GetCurrentFurnitureRef();
+			auto furniRef = actorProcess->GetCurrentFurniture();
 			if (furniRef) {
 				*(FormID*)result = furniRef->GetFormID();
 			}
@@ -250,8 +251,8 @@ bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
 
 SPEC_NOINLINE bool Cmd_IsRadioRefPlaying_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	if (thisObj && thisObj->baseForm && IS_TYPE(thisObj->baseForm, TESObjectACTI)) {
-		TESObjectACTI* baseActi = static_cast<TESObjectACTI*>(thisObj->baseForm);
+	if (thisObj && thisObj->GetObjectReference() && IS_TYPE(thisObj->GetObjectReference(), TESObjectACTI)) {
+		TESObjectACTI* baseActi = static_cast<TESObjectACTI*>(thisObj->GetObjectReference());
 		if (baseActi->GetRadioStation()) {
 			*result = (CdeclCall<void*>(0x0832930, thisObj) != nullptr);
 		}
@@ -265,8 +266,8 @@ bool Cmd_IsRadioRefPlaying_Execute(COMMAND_ARGS) {
 
 bool Cmd_TuneRadioRef_Execute(COMMAND_ARGS) {
 	BGSTalkingActivator* actiDst = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &actiDst) && thisObj && thisObj->baseForm && IS_TYPE(thisObj->baseForm, TESObjectACTI)) {
-		if (TESObjectACTI* actiBase = (TESObjectACTI*)thisObj->baseForm) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &actiDst) && thisObj && thisObj->GetObjectReference() && IS_TYPE(thisObj->GetObjectReference(), TESObjectACTI)) {
+		if (TESObjectACTI* actiBase = (TESObjectACTI*)thisObj->GetObjectReference()) {
 			BGSTalkingActivator* originalTK = actiBase->GetRadioStation();
 			if (actiDst == nullptr) {
 				actiDst = originalTK;
@@ -668,7 +669,7 @@ bool Cmd_SetRefEncounterZone_Execute(COMMAND_ARGS) {
 	BGSEncounterZone* pZone = nullptr;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pZone);
 	if (!pZone || IS_TYPE(pZone, BGSEncounterZone)) {
-		thisObj->extraDataList.SetEncounterZone(pZone);
+		thisObj->GetExtra()->SetEncounterZone(pZone);
 		*result = 1;
 	}
 	return true;
@@ -676,7 +677,7 @@ bool Cmd_SetRefEncounterZone_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetRefEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSEncounterZone* pZone = thisObj->extraDataList.GetEncounterZone();
+	BGSEncounterZone* pZone = thisObj->GetExtra()->GetEncounterZone();
 	if (pZone)
 		*(FormID*)result = pZone->GetFormID();
 	return true;
@@ -686,7 +687,7 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char newPrompt[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPrompt)) {
-		ExtraActivateRef* xActivateRef = thisObj->extraDataList.GetExtraData<ExtraActivateRef>();
+		ExtraActivateRef* xActivateRef = thisObj->GetExtra()->GetExtraData<ExtraActivateRef>();
 		if (xActivateRef) {
 			xActivateRef->strActivationPrompt.Set(newPrompt);
 		}
@@ -694,7 +695,7 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 			xActivateRef = BSMemory::malloc<ExtraActivateRef>();
 			ThisCall(0x4338B0, xActivateRef);
 			xActivateRef->strActivationPrompt.Set(newPrompt);
-			thisObj->extraDataList.AddExtra(xActivateRef);
+			thisObj->GetExtra()->AddExtra(xActivateRef);
 		}
 		*result = 1;
 	}
@@ -703,7 +704,7 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ExtraActivateRef* xActivateRef = thisObj->extraDataList.GetExtraData<ExtraActivateRef>();
+	ExtraActivateRef* xActivateRef = thisObj->GetExtra()->GetExtraData<ExtraActivateRef>();
 	if (xActivateRef) {
 		g_strInterface->Assign(PASS_COMMAND_ARGS, xActivateRef->strActivationPrompt.c_str());
 		if (Script::GetConsoleOuput()) Interface::PrintLine("GetRefActivationPromptOverride >> %s", xActivateRef->strActivationPrompt.c_str());
@@ -1139,7 +1140,7 @@ bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 
 	if (pTarget) {
-		const uint32_t uiActorLevel = pTarget->avOwner.GetActorLevel();
+		const uint32_t uiActorLevel = pTarget->GetActorLevel();
 		auto pIter = TESDataHandler::GetSingleton()->kPerks.GetHead();
 		while (pIter && !pIter->IsEmpty()) {
 			BGSPerk* pPerk = pIter->GetItem();
@@ -1214,7 +1215,7 @@ bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 	uint32_t titleOrTier = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &titleOrTier);
 	if (titleOrTier == 1) {
-		int karmaTier = CdeclCall<int>(0x47E040, PlayerCharacter::GetSingleton()->avOwner.GetActorValueF(ActorValue::Index::KARMA)); // GetKarmaTier
+		int karmaTier = CdeclCall<int>(0x47E040, PlayerCharacter::GetSingleton()->GetActorValueF(ActorValue::Index::KARMA)); // GetKarmaTier
 		switch (karmaTier) {
 		case 0:
 			title = *(char**)0x11D41B4; // sAlignGood
@@ -1523,7 +1524,7 @@ bool Cmd_GetCreatureCombatSkill_Execute(COMMAND_ARGS) {
 		if (!thisObj || !thisObj->IsCreature()) 
 			return true;
 		
-		pCreature = static_cast<TESCreature*>(static_cast<Actor*>(thisObj)->GetActorBase());
+		pCreature = static_cast<TESCreature*>(static_cast<Actor*>(thisObj)->GetTemplateObjectReference());
 	}
 
 	if (pCreature && pCreature->GetFormType() == FORM_TYPE::TESCreature)
@@ -1609,7 +1610,7 @@ bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 SPEC_NOINLINE bool Cmd_GetLifeState_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
 	if (thisObj && thisObj->IsActor())
-		*result = static_cast<Actor*>(thisObj)->lifeState;
+		*result = static_cast<Actor*>(thisObj)->GetLifeState();
 	return true;
 }
 
@@ -1652,8 +1653,7 @@ bool Cmd_SetEquipType_Execute(COMMAND_ARGS) {
 	TESForm* pForm = nullptr;
 	BGSEquipType::Type eType = BGSEquipType::Type::NONE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &eType) && pForm && InRange(eType)) {
-		pForm = GetTESForm(pForm);
-		BGSEquipType* pEquipType = DYNAMIC_CAST(pForm, TESForm, BGSEquipType);
+		BGSEquipType* pEquipType = DYNAMIC_CAST(GetTESObject(pForm), TESForm, BGSEquipType);
 		if (pEquipType) {
 			pEquipType->SetEquipType(eType);
 			*result = 1;
@@ -1759,16 +1759,16 @@ bool Cmd_GetBaseScale_Execute(COMMAND_ARGS) {
 
 bool Cmd_RemovePrimitive_Execute(COMMAND_ARGS) {
 	*result = 0;
-	if (thisObj->extraDataList.HasExtra<ExtraPrimitive>()) {
-		ExtraPrimitive* pPrimitive = thisObj->extraDataList.GetExtraData<ExtraPrimitive>();
-		thisObj->extraDataList.RemoveExtra(pPrimitive, true);
-		thisObj->Update3D();
+	if (thisObj->GetExtra()->HasExtra<ExtraPrimitive>()) {
+		ExtraPrimitive* pPrimitive = thisObj->GetExtra()->GetExtraData<ExtraPrimitive>();
+		thisObj->GetExtra()->RemoveExtra(pPrimitive, true);
+		UpdateReference3D(thisObj);
 		*result = 1;
 	}
 	return true;
 }
 bool Cmd_GetPrimitiveType_Execute(COMMAND_ARGS) {
-	ExtraPrimitive* pPrimitive = thisObj->extraDataList.GetExtraData<ExtraPrimitive>();
+	ExtraPrimitive* pPrimitive = thisObj->GetExtra()->GetExtraData<ExtraPrimitive>();
 	*result = (pPrimitive && pPrimitive->pPrimitive) ? pPrimitive->pPrimitive->GetType() : 0;
 	return true;
 }
@@ -1934,7 +1934,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 		if (!thisObj) return true;
 		InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
 		if (!invRef) {
-			TESForm* base = thisObj->baseForm;
+			TESForm* base = thisObj->GetObjectReference();
 			if (IS_ID(base, TESObjectWEAP))
 				weapon = (TESObjectWEAP*)base;
 			else
@@ -1952,16 +1952,16 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 		}
 	}
 	else if NOT_ID(weapon, TESObjectWEAP) return true;
-	MiddleHighProcess* midHiProc = (MiddleHighProcess*)PlayerCharacter::GetSingleton()->baseProcess;
-	ItemChange* weaponInfo = midHiProc->weaponInfo;
+	MiddleHighProcess* midHiProc = (MiddleHighProcess*)PlayerCharacter::GetSingleton()->GetCurrentAIProcess();
+	ItemChange* weaponInfo = midHiProc->GetCurrentWeapon();
 	TESForm* ammo = nullptr;
-	if (!extendPtr && weaponInfo && (weaponInfo->pObject == weapon) && midHiProc->ammoInfo)
-		ammo = midHiProc->ammoInfo->pObject;
+	if (!extendPtr && weaponInfo && (weaponInfo->pObject == weapon) && midHiProc->GetCurrentAmmo())
+		ammo = midHiProc->GetCurrentAmmo()->pObject;
 	if (!ammo)
 		ammo = weapon->GetAmmo();
-	midHiProc->weaponInfo = nullptr;
-	*result = GetWeaponDPS(&(PlayerCharacter::GetSingleton()->avOwner), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
-	midHiProc->weaponInfo = weaponInfo;
+	midHiProc->pCurrentWeapon = nullptr;
+	*result = GetWeaponDPS(PlayerCharacter::GetSingleton(), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
+	midHiProc->pCurrentWeapon = weaponInfo;
 	if (Script::GetConsoleOuput())
 		Interface::PrintLine("GetCalculatedWeaponDPS >> %f", *result);
 	return true;
@@ -2052,11 +2052,19 @@ bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_GetMineArmedEx_Execute(COMMAND_ARGS)
-{
-	if (GrenadeProjectile* projectile = (GrenadeProjectile*)thisObj; IS_ID(projectile, GrenadeProjectile) && !(projectile->projFlags & 0x200) &&
-		(((BGSProjectile*)thisObj->baseForm)->GetData().uiFlags.Get(0x426) == 0x26))
+bool Cmd_GetMineArmedEx_Execute(COMMAND_ARGS) {
+	*result = 0;
+	if (!IS_ID(thisObj, GrenadeProjectile))
+		return true;
+
+	const GrenadeProjectile* pGrenade = static_cast<GrenadeProjectile*>(thisObj);
+	const BGSProjectile* pBase = pGrenade->GetProjectileBase();
+	if (!pBase)
+		return true;
+	
+	if (!pGrenade->uiProjectileFlags.bTurnedOff && pGrenade->IsMine() && pBase->GetCanTurnOff())
 		*result = 1;
+
 	return true;
 }
 
@@ -2257,7 +2265,7 @@ namespace RefWalker {
 
 		bool __fastcall CheckFormType(TESObjectREFR* apRef) const {
 			for (FORM_TYPE eTypeFilter : kTypeFilters) {
-				if (apRef->GetFormType() == eTypeFilter || apRef->baseForm->GetFormType() == eTypeFilter)
+				if (apRef->GetFormType() == eTypeFilter || apRef->GetObjectReference()->GetFormType() == eTypeFilter)
 					return true;
 			}
 
@@ -2265,7 +2273,7 @@ namespace RefWalker {
 		}
 
 		bool __fastcall CheckDistance(TESObjectREFR* apRef) const {
-			const float fDistance = apRef->pos.SqrDistance(NiPoint3(kPosAndDist));
+			const float fDistance = apRef->GetPosition().SqrDistance(NiPoint3(kPosAndDist));
 			return fDistance <= kPosAndDist.w;
 		}
 
@@ -2281,12 +2289,12 @@ namespace RefWalker {
 		}
 
 		bool __fastcall CheckAngle(TESObjectREFR* apRef) const {
-			const NiPoint3 kVector = apRef->pos - NiPoint3(kPosAndDist);
+			const NiPoint3 kVector = apRef->GetPosition() - NiPoint3(kPosAndDist);
 			return std::abs(GetAngle(kVector, fHeading)) <= fConeSize;
 		}
 
 		bool __fastcall CheckDistanceAndAngle(TESObjectREFR* apRef) const {
-			const NiPoint3 kVector = apRef->pos - NiPoint3(kPosAndDist);
+			const NiPoint3 kVector = apRef->GetPosition() - NiPoint3(kPosAndDist);
 			const float fDistance = kVector.SqrLength();
 			if (fDistance > kPosAndDist.w)
 				return false;
@@ -2295,7 +2303,7 @@ namespace RefWalker {
 		}
 
 		bool __fastcall CheckParentCell(TESObjectREFR* apRef) const {
-			return apRef->parentCell == pSpace;
+			return apRef->GetParentCell() == pSpace;
 		}
 
 		bool __fastcall CheckParentWorld(TESObjectREFR* apRef) const {
@@ -2327,7 +2335,7 @@ namespace RefWalker {
 				continue;
 
 			constexpr uint32_t uiDisallowedFlags = TESForm::FormFlags::STILL_LOADING | TESForm::FormFlags::DELETED | TESForm::FormFlags::DISABLED;
-			if (pRef && pRef->uiFormFlags.IsClear(uiDisallowedFlags) && pRef->GetInitialized() && pRef->baseForm && pRef->Get3DSimple()) {
+			if (pRef && pRef->uiFormFlags.IsClear(uiDisallowedFlags) && pRef->GetInitialized() && pRef->GetObjectReference() && pRef->Get3DVerySimple()) {
 				if (arFilter(pRef))
 					uiCount += CallUDF(arFilter.pScript, pCaller, 1, pRef);
 			}
@@ -2369,7 +2377,7 @@ namespace RefWalker {
 				continue;
 
 			constexpr uint32_t uiDisallowedFlags = TESForm::FormFlags::STILL_LOADING | TESForm::FormFlags::DELETED | TESForm::FormFlags::DISABLED;
-			if (pObject && pObject->uiFormFlags.IsClear(uiDisallowedFlags) && pObject->GetInitialized() && pObject->baseForm) {
+			if (pObject && pObject->uiFormFlags.IsClear(uiDisallowedFlags) && pObject->GetInitialized() && pObject->GetObjectReference()) {
 				if (arFilter(pObject))
 					uiCount += CallUDF(arFilter.pScript, pCaller, 1, pObject);
 			}
@@ -2416,13 +2424,8 @@ bool Cmd_CallPerRef_Execute(COMMAND_ARGS) {
 		if (fDistanceFilter < 0.f)
 			fDistanceFilter = 0.f;
 
-		NiPoint4 kPosAndDist;
 		TESObjectREFR* pCaller = thisObj ? thisObj : PlayerCharacter::GetSingleton();
-		const NiPoint3* pPos = pCaller->PosVector();
-		kPosAndDist.x = pPos->x;
-		kPosAndDist.y = pPos->y;
-		kPosAndDist.z = pPos->z;
-		kPosAndDist.w = fDistanceFilter * fDistanceFilter;
+		const NiPoint4 kPosAndDist(pCaller->GetPosition(), fDistanceFilter * fDistanceFilter);
 
 		if (pCell && !IS_TYPE(pCell, TESObjectCELL))
 			pCell = nullptr;
@@ -2430,7 +2433,7 @@ bool Cmd_CallPerRef_Execute(COMMAND_ARGS) {
 		if (!pCell && TES::GetSingleton()->currentInterior)
 			pCell = TES::GetSingleton()->currentInterior;
 
-		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->rot.z, kPosAndDist);
+		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->GetRotation().z, kPosAndDist);
 		if (eFormFilter)
 			kFilterData.kTypeFilters.push_back(eFormFilter);
 
@@ -2490,13 +2493,8 @@ bool Cmd_CallPerRefEx_Execute(COMMAND_ARGS) {
 		if (fDistanceFilter < 0.f)
 			fDistanceFilter = 0.f;
 
-		NiPoint4 kPosAndDist;
 		TESObjectREFR* pCaller = thisObj ? thisObj : PlayerCharacter::GetSingleton();
-		const NiPoint3* pPos = pCaller->PosVector();
-		kPosAndDist.x = pPos->x;
-		kPosAndDist.y = pPos->y;
-		kPosAndDist.z = pPos->z;
-		kPosAndDist.w = fDistanceFilter * fDistanceFilter;
+		const NiPoint4 kPosAndDist(pCaller->GetPosition(), fDistanceFilter * fDistanceFilter);
 
 		if (pCell && !IS_TYPE(pCell, TESObjectCELL))
 			pCell = nullptr;
@@ -2504,7 +2502,7 @@ bool Cmd_CallPerRefEx_Execute(COMMAND_ARGS) {
 		if (!pCell && TES::GetSingleton()->currentInterior)
 			pCell = TES::GetSingleton()->currentInterior;
 
-		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->rot.z, kPosAndDist);
+		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->GetRotation().z, kPosAndDist);
 		BSScrapBuffer<NVSEArrayElement> kElements(uiArraySize);
 		g_arrInterface->GetElements(pTypeArray, kElements.get(), nullptr);
 		kFilterData.kTypeFilters.resize(uiArraySize);
@@ -2543,15 +2541,9 @@ bool Cmd_CallPerMobileObject_Execute(COMMAND_ARGS) {
 		if (fDistanceFilter < 0.f)
 			fDistanceFilter = 0.f;
 
-		NiPoint4 kPosAndDist;
 		TESObjectREFR* pCaller = thisObj ? thisObj : PlayerCharacter::GetSingleton();
-		const NiPoint3* pPos = pCaller->PosVector();
-		kPosAndDist.x = pPos->x;
-		kPosAndDist.y = pPos->y;
-		kPosAndDist.z = pPos->z;
-		kPosAndDist.w = fDistanceFilter * fDistanceFilter;
-
-		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->rot.z, kPosAndDist, pSpace);
+		const NiPoint4 kPosAndDist(pCaller->GetPosition(), fDistanceFilter * fDistanceFilter);
+		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->GetRotation().z, kPosAndDist, pSpace);
 		if (eFormFilter)
 			kFilterData.kTypeFilters.push_back(eFormFilter);
 
@@ -2620,14 +2612,9 @@ bool Cmd_CallPerMobileObjectEx_Execute(COMMAND_ARGS) {
 		if (fDistanceFilter < 0.f)
 			fDistanceFilter = 0.f;
 
-		NiPoint4 kPosAndDist;
 		TESObjectREFR* pCaller = thisObj ? thisObj : PlayerCharacter::GetSingleton();
-		const NiPoint3* pPos = pCaller->PosVector();
-		kPosAndDist.x = pPos->x;
-		kPosAndDist.y = pPos->y;
-		kPosAndDist.z = pPos->z;
-		kPosAndDist.w = fDistanceFilter * fDistanceFilter;
-		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->rot.z, kPosAndDist, pSpace);
+		const NiPoint4 kPosAndDist(pCaller->GetPosition(), fDistanceFilter * fDistanceFilter);
+		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->GetRotation().z, kPosAndDist, pSpace);
 
 		BSScrapBuffer<NVSEArrayElement> kElements(uiArraySize);
 		g_arrInterface->GetElements(pTypeArray, kElements.get(), nullptr);
@@ -2687,10 +2674,10 @@ static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_
 		BGSLoadGameSubBuffer kSavedAnim;
 		SaveAnimation(kSavedAnim, apReference, apReference->GetAnimation());
 
-		apReference->Update3D();
+		UpdateReference3D(apReference);
 		ThisCall(0x456520, *reinterpret_cast<DWORD**>(0x1202D98));
 
-		NiAVObject* pRoot = apReference->Get3DSimple();
+		NiAVObject* pRoot = apReference->Get3DVerySimple();
 		if (pRoot && pRoot->IsFadeNode())
 			static_cast<BSFadeNode*>(pRoot)->TurnFadeNodeOn();
 
@@ -2701,7 +2688,7 @@ static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_
 		apReference->SetScale(apReference->GetRawScale());
 
 	if (auiFlags & UPDATE_LIGHTS) {
-		NiAVObject* pRoot = apReference->Get3DSimple();
+		NiAVObject* pRoot = apReference->Get3DVerySimple();
 		if (pRoot) {
 			ShadowSceneNode* pSSN = FindSceneNodeRecurse(pRoot);
 			if (pSSN)
@@ -2744,21 +2731,21 @@ bool Cmd_Update3DAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	uint32_t uiFlags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags) && uiFlags) {
-		if (!thisObj->Get3DSimple() || thisObj->IsStillLoading())
+		if (!thisObj->Get3DVerySimple() || thisObj->IsStillLoading())
 			return true;
 
 		const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
 		if (thisObj->IsActor()) {
 			Actor* pActor = static_cast<Actor*>(thisObj);
-			if (pActor->baseProcess) {
+			if (pActor->GetCurrentAIProcess()) {
 				// Creatures can't refresh their models in vanilla, so we have to handle them ourselves.
 				if (pActor->IsCreature()) {
 					RequestModelUpdate(thisObj, uiFlags, bQueue);
 				}
 				else {
-					pActor->baseProcess->Set3DUpdateFlag(uiFlags);
+					pActor->GetCurrentAIProcess()->Set3DUpdateFlag(uiFlags);
 					if (!bQueue)
-						pActor->baseProcess->Update3DModel(pActor);
+						pActor->GetCurrentAIProcess()->Update3DModel(pActor);
 
 
 					const uint32_t uiCustomFlags = uiFlags & uiAddedFlags;
@@ -2856,7 +2843,7 @@ bool Cmd_GetItemEffectString_Execute(COMMAND_ARGS) {
 	if (!pForm) {
 		if (!thisObj) 
 			return true;
-		pForm = thisObj->baseForm;
+		pForm = thisObj->GetObjectReference();
 	}
 
 	if (!pForm)
@@ -2955,7 +2942,7 @@ bool Cmd_SetIKState_Execute(COMMAND_ARGS) {
 	BOOL bToggle = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &bToggle) && InRange(eType) && thisObj->IsActor()) {
 		const Actor* pActor = static_cast<Actor*>(thisObj);
-		bhkRagdollController* pCtrl = pActor->ragDollController;
+		bhkRagdollController* pCtrl = pActor->pRagdollController;
 		if (pCtrl) {
 			switch (eType) {
 				case IKType::LOOK:
@@ -2981,7 +2968,7 @@ SPEC_NOINLINE bool Cmd_GetIKState_Eval(COMMAND_ARGS_EVAL) {
 	const IKType eType = *reinterpret_cast<IKType*>(&arg1);
 	if (InRange(eType) && thisObj->IsActor()) {
 		const Actor* pActor = static_cast<Actor*>(thisObj);
-		bhkRagdollController* pCtrl = pActor->ragDollController;
+		bhkRagdollController* pCtrl = pActor->pRagdollController;
 		if (pCtrl) {
 			switch (eType) {
 				case IKType::LOOK:
@@ -3034,15 +3021,15 @@ bool Cmd_PickIdleEx_Execute(COMMAND_ARGS) {
 		return true;
 	
 	Actor* pUser = static_cast<Actor*>(thisObj);
-	if (!pUser->baseProcess)
+	if (!pUser->GetCurrentAIProcess())
 		return true;
 
 	TESObjectREFR* pTargetRef = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetRef) && pTargetRef && pTargetRef->baseForm) {
-		LowProcess* pAIProcess = static_cast<LowProcess*>(pUser->baseProcess);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetRef) && pTargetRef && pTargetRef->GetObjectReference()) {
+		LowProcess* pAIProcess = static_cast<LowProcess*>(pUser->GetCurrentAIProcess());
 		const TESObjectREFR* pOrgTarget = pAIProcess->pTarget;
 		pAIProcess->pTarget = pTargetRef;
-		*result = pAIProcess->FindSpecialIdletoPlay(pUser, pTargetRef->baseForm, pTargetRef);
+		*result = pAIProcess->FindSpecialIdletoPlay(pUser, pTargetRef->GetObjectReference(), pTargetRef);
 		pAIProcess->pTarget = pOrgTarget;
 	}
 
@@ -3129,7 +3116,7 @@ bool Cmd_GetAltTextures_Execute(COMMAND_ARGS) {
 namespace {
 
 	static bool __fastcall HasScopedWeapon(Character* apCharacter) {
-		ItemChange* pItem = apCharacter->baseProcess->GetCurrentWeapon();
+		ItemChange* pItem = apCharacter->GetCurrentAIProcess()->GetCurrentWeapon();
 		if (pItem) {
 			TESObjectWEAP* pWeapon = static_cast<TESObjectWEAP*>(pItem->pObject);
 			return pWeapon && pWeapon->HasScope() && (!pWeapon->HasModScope() || pItem->HasModEffectActive(0xE));
@@ -3152,11 +3139,11 @@ namespace {
 			return nullptr;
 
 		Character* pChar = static_cast<Character*>(apReference);
-		const BaseProcess* pProcess = pChar->baseProcess;
-		if (!pProcess || pProcess->processLevel != PROCESS_TYPE::HIGH)
+		const BaseProcess* pProcess = pChar->GetCurrentAIProcess();
+		if (!pProcess || pProcess->GetProcessLevel() != PROCESS_TYPE::HIGH)
 			return nullptr;
 
-		if (!pChar->Get3DSimple())
+		if (!pChar->Get3DVerySimple())
 			return nullptr;
 
 		return pChar->GetBiped();
@@ -3199,8 +3186,8 @@ namespace {
 			BipedAnim* pBiped3rd = pPlayer->GetBiped(false);
 			for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
 				if (uiValidParts.GetBit(i)) {
-					pBiped1st->RemovePart(i, true);
-					pBiped3rd->RemovePart(i, true);
+					pBiped1st->RemovePart(BIPED_OBJECT(i), true);
+					pBiped3rd->RemovePart(BIPED_OBJECT(i), true);
 				}
 			}
 
@@ -3216,7 +3203,7 @@ namespace {
 
 			for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
 				if (uiValidParts.GetBit(i)) {
-					pBiped->RemovePart(i, true);
+					pBiped->RemovePart(BIPED_OBJECT(i), true);
 				}
 			}
 
@@ -3340,7 +3327,7 @@ void __fastcall SetEmittanceSourceForRef(TESObjectREFR* apRef, TESForm* apSource
 	if (pExistingSource == apSource)
 		return;
 
-	TESObjectCELL* pCell = apRef->GetParentCell();
+	TESObjectCELL* pCell = apRef->GetSaveParentCell();
 	if (pCell) {
 		pCell->CellRefLockEnter();
 

@@ -1,8 +1,9 @@
 #include "fn_file.h"
 #include "GameSound.h"
-#include "GameObjects.h"
 #include "Bethesda/FileFinder.hpp"
 #include "Bethesda/Interface.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
+
 #include <misc/misc.h>
 #include <utility.h>
 
@@ -226,9 +227,9 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &fadeInTime, &voiceFlag, &loopFlag, &bDontCacheFlag) && path[0]) {
 		TESObjectREFR* ref = thisObj;
 		if (ref == nullptr) {
-			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
+			ref = PlayerCharacter::GetSingleton();
 		}
-		if (ref->Get3DSimple()) {
+		if (ref->Get3DVerySimple()) {
 			bool bVoiceFlag = (voiceFlag > 0);
 			bool bLoopFlag = (loopFlag > 0);
 			uint32_t audioFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
@@ -243,7 +244,7 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 			}
 			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(path, BSAudioManager::AudioFlags(audioFlags), nullptr);
 			handle.SetPosition(ref->GetLocationOnReference());
-			handle.SetObjectToFollow(ref->Get3DSimple());
+			handle.SetObjectToFollow(ref->Get3DVerySimple());
 			if (fadeInTime <= 0) {
 				handle.Play(false);
 			}

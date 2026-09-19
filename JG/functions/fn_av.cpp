@@ -1,5 +1,5 @@
 #include "fn_av.h"
-#include "GameObjects.h"
+#include "Bethesda/Actor.hpp"
 #include "Bethesda/Interface.hpp"
 
 inline Cmd_Execute Cmd_GetAV		= reinterpret_cast<Cmd_Execute>(0x5BD8A0);
@@ -14,7 +14,7 @@ bool Cmd_GetThresholdedActorValue_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj && thisObj->IsActor()) {
 		const ActorValue::Index eActorValue = static_cast<ActorValue::Index>(reinterpret_cast<uint32_t>(arg1));
-		*result = static_cast<Actor*>(thisObj)->avOwner.GetClampedActorValueF(eActorValue);
+		*result = static_cast<Actor*>(thisObj)->GetClampedActorValueF(eActorValue);
 	}
 	return true;
 }

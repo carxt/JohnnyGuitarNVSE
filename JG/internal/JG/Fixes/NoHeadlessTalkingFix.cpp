@@ -1,7 +1,7 @@
 #include "NoHeadlessTalkingFix.hpp"
-#include <GameObjects.h>
 #include <GameProcess.h>
 #include "Bethesda/DialoguePackage.hpp"
+#include "Bethesda/Actor.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
@@ -12,8 +12,8 @@ namespace NoHeadlessTalkingFix {
 
 		bool bCanSpeak = !bNoHead;
 		if (bCanSpeak) {
-			const BaseProcess* pAIProcess = apActor->baseProcess;
-			if (pAIProcess && pAIProcess->processLevel == PROCESS_TYPE::HIGH && apActor->GetDead()) {
+			const BaseProcess* pAIProcess = apActor->GetCurrentAIProcess();
+			if (pAIProcess && pAIProcess->GetProcessLevel() == PROCESS_TYPE::HIGH && apActor->IsDead(true)) {
 				const DialoguePackage* pPackage = static_cast<DialoguePackage*>(pAIProcess->GetCurrentPackage());
 				if (pPackage) {
 					const bool bDialoguePackage = pPackage->GetPackType() == PACKAGE_TYPE::DIALOGUE || pPackage->GetPackType() == PACKAGE_TYPE::IN_GAME_DIALOGUE;

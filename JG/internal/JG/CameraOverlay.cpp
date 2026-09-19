@@ -1,5 +1,4 @@
 #include "CameraOverlay.hpp"
-#include <GameObjects.h>
 #include <GameUI.h>
 
 #include "Bethesda/BSRenderedTexture.hpp"
@@ -7,6 +6,7 @@
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TimeGlobal.hpp"
+#include "Bethesda/TESObjectREFR.hpp"
 
 #include <Shared/Utils/CustomGameSetting.hpp>
 #include "Shared/SafeWrite/SafeWrite.hpp"
@@ -163,7 +163,7 @@ namespace CameraOverlay {
 		TESObjectREFR*		pReference = nullptr;
 
 		NiNode* GetRoot() const {
-			return static_cast<NiNode*>(pReference->Get3DSimple());
+			return static_cast<NiNode*>(pReference->Get3DVerySimple());
 		}
 
 		NiNode* __fastcall Initialize(const char* apName) {

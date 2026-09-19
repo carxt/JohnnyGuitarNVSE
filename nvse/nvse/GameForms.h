@@ -785,62 +785,6 @@ static_assert(sizeof(TESObjectWEAP) == 0x470);
 
 class BSFaceGenNiNode;
 
-// 2B0
-class BipedAnim {
-public:
-	enum eOptionalBoneType {
-		kOptionalBone_Bip01Head = 0,
-		kOptionalBone_Weapon = 1,
-		kOptionalBone_Bip01LForeTwist = 2,
-		kOptionalBone_Bip01Spine2 = 3,
-		kOptionalBone_Bip01Neck1 = 4,
-	};
-
-	// 08
-	struct OptionalBone {
-		bool	bExists;
-		NiNode* pParent;
-	};
-
-	// 10
-	struct Data {
-		union									// 00 can be a modelled form (Armor or Weapon) or a Race if not equipped
-		{
-			TESForm*		pItem;
-			TESObjectARMO*	pArmor;
-			TESObjectWEAP*	pWeapon;
-			TESRace*		pRace;
-		};
-		TESModel*	pPartModel;
-		NiNode*		pPartObject;
-		bool		bSkinned;
-	};
-
-	NiNode*				pRoot;			// 000 receive Bip01 node, then optionally Bip01Head, Weapon, Bip01LForeTwist, Bip01Spine2, Bip01Neck1
-	OptionalBone		kBones[5];		// 004
-	Data				kObjects[20];	// 02C indexed by the EquipSlot
-	Data				kBufferedObjects[20];	// 16C indexed by the EquipSlot
-	float				fWeaponOffset;
-	TESObjectREFR*		pRequester;
-
-	void RemoveBipedWeapon() {
-		ThisCall(0x4AB5B0, this);
-	}
-
-	void RemovePart(uint32_t aeObject, bool abClear, void* apClearValue = nullptr) {
-		ThisCall(0x4AAFF0, this, aeObject, abClear, apClearValue);
-	}
-
-	static void RunBiped3DDetach(NiAVObject* apObject) {
-		CdeclCall(0x4AB0C0, apObject);
-	}
-
-	static void AttachToSkeleton(NiNode* apSkeleton, NiAVObject* apSkin, NiNode* apParentNode, bool abShowWarnings = false) {
-		CdeclCall(0x4ADE40, apSkeleton, apSkin, apParentNode, abShowWarnings);
-	}
-};
-static_assert(sizeof(BipedAnim) == 0x2B4);
-
 struct AreaPointEntry {
 	float	x;
 	float	y;
@@ -1116,13 +1060,5 @@ static_assert(sizeof(TESImageSpaceModifier) == 0x730);
 #else
 static_assert(sizeof(TESImageSpaceModifier) == 0x74C);
 #endif
-
-struct CasinoStats
-{
-	uint32_t casinoRefID;
-	int32_t earnings;
-	uint16_t earningStage;
-	uint8_t gap0A[2];
-};
 
 extern TESForm* __fastcall GetTESForm(const TESForm* apForm);

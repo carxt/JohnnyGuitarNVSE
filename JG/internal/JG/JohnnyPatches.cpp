@@ -1,7 +1,6 @@
 #include "JohnnyPatches.hpp"
 #ifdef GAME
 #include "decoding.h"
-#include "GameObjects.h"
 #include "GameProcess.h"
 #include "GameSound.h"
 #include "GameUI.h"
@@ -30,6 +29,7 @@
 #include "FormSkeletons.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include <algorithm>
 #include <unordered_set>

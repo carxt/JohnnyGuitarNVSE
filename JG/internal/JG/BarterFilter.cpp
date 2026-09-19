@@ -1,8 +1,8 @@
 #include "BarterFilter.hpp"
-#include "GameObjects.h"
 #include "GameUI.h"
 
 #include "Bethesda/ItemChange.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "JGSetList.hpp"
 
@@ -83,7 +83,7 @@ namespace BarterFilter {
 			if (it != rItems.end()) {
 				auto& rBarterSet = it->second;
 				bShouldHide = rBarterSet.contains(pMerchant->GetFormID())
-					|| rBarterSet.contains(pMerchant->baseForm->GetFormID())
+					|| rBarterSet.contains(pMerchant->GetObjectReference()->GetFormID())
 					|| rBarterSet.contains(0)
 					|| rBarterSet.contains(PlayerCharacter::GetSingleton()->GetFormID());
 			}
