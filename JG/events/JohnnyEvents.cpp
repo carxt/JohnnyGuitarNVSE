@@ -19,6 +19,8 @@ namespace JohnnyEvents {
 
 	namespace Events {
 
+		STACK_FRAME_OPT_ENABLE
+
 		EventInformation* OnDyingHandler;
 		EventInformation* OnStartQuestHandler;
 		EventInformation* OnStopQuestHandler;
@@ -50,8 +52,8 @@ namespace JohnnyEvents {
 				using namespace JohnnyMessageData;
 				SendNVSEMessage(JG_OnRenderGamePreUpdate);
 			}
-			for (auto const& rCallback : OnRenderGamePreUpdateHandler->callbacks) {
-				CallUDF(rCallback.script, nullptr, OnRenderGamePreUpdateHandler->numMaxArgs);
+			for (auto const& rCallback : OnRenderGamePreUpdateHandler->kCallbacks) {
+				CallUDF(rCallback.pScript, nullptr, OnRenderGamePreUpdateHandler->ucMaxArgsCount);
 			}
 		}
 
@@ -62,8 +64,8 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnRenderGameModeUpdate, kData);
 			}
 
-			for (auto const& rCallback : OnRenderGameModeUpdateHandler->callbacks) {
-				CallUDF(rCallback.script, nullptr, OnRenderGameModeUpdateHandler->numMaxArgs);
+			for (auto const& rCallback : OnRenderGameModeUpdateHandler->kCallbacks) {
+				CallUDF(rCallback.pScript, nullptr, OnRenderGameModeUpdateHandler->ucMaxArgsCount);
 			}
 
 		}
@@ -75,13 +77,16 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnRenderRenderedMenuUpdate, kData);
 			}
 
-			for (auto const& rCallback : OnRenderRenderedMenuUpdateHandler->callbacks) {
-				CallUDF(rCallback.script, nullptr, OnRenderRenderedMenuUpdateHandler->numMaxArgs);
+			for (auto const& rCallback : OnRenderRenderedMenuUpdateHandler->kCallbacks) {
+				CallUDF(rCallback.pScript, nullptr, OnRenderRenderedMenuUpdateHandler->ucMaxArgsCount);
 			}
 		}
 
 		static void __fastcall OnRemovePerk(Actor* apActor, BGSPerk* apPerk, bool abTeammate) {
-			if (!apActor->GetPerkRank(apPerk, abTeammate))
+			if (!apPerk) [[unlikely]]
+				return;
+
+			if (!apActor->GetPerkRank(apPerk, abTeammate)) [[unlikely]]
 				return;
 
 			{
@@ -90,23 +95,26 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnRemovePerk, kData);
 			}
 
-			for (auto const& rCallback : OnRemovePerkHandler->callbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apPerk)) {
-					CallUDF(rCallback.script, apActor, OnRemovePerkHandler->numMaxArgs, apPerk);
+			for (auto const& rCallback : OnRemovePerkHandler->kCallbacks) {
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apPerk)) {
+					CallUDF(rCallback.pScript, apActor, OnRemovePerkHandler->ucMaxArgsCount, apPerk);
 				}
 			}
 		}
 
 		static SPEC_NOINLINE void __fastcall OnAddPerk(Actor* apActor, BGSPerk* apPerk, uint8_t aucRank, bool abTeammate) {
+			if (!apPerk) [[unlikely]]
+				return;
+
 			{
 				using namespace JohnnyMessageData;
 				PerkAddData kData(apActor, apPerk, abTeammate, aucRank);
 				SendNVSEMessage(JG_OnAddPerk, kData);
 			}
-
-			for (auto const& rCallback : OnAddPerkHandler->callbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apPerk)) {
-					CallUDF(rCallback.script, apActor, OnAddPerkHandler->numMaxArgs, apPerk, aucRank - 1, aucRank);
+			
+			for (auto const& rCallback : OnAddPerkHandler->kCallbacks) {
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apPerk)) {
+					CallUDF(rCallback.pScript, apActor, OnAddPerkHandler->ucMaxArgsCount, apPerk, aucRank - 1, aucRank);
 				}
 			}
 		}
@@ -118,10 +126,10 @@ namespace JohnnyEvents {
 					SendNVSEMessage(JG_OnDying, apActor);
 				}
 
-				if ((apActor->GetFullName()[0] || apActor == PlayerCharacter::GetSingleton())) {
-					for (auto const& rCallback : OnDyingHandler->callbacks) {
-						if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apActor)) {
-							CallUDF(rCallback.script, nullptr, OnDyingHandler->numMaxArgs, apActor);
+				if (apActor == PlayerCharacter::GetSingleton() || apActor->GetFullName()[0]) {
+					for (auto const& rCallback : OnDyingHandler->kCallbacks) {
+						if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsRefInFilter(0, apActor)) {
+							CallUDF(rCallback.pScript, nullptr, OnDyingHandler->ucMaxArgsCount, apActor);
 						}
 					}
 				}
@@ -135,9 +143,9 @@ namespace JohnnyEvents {
 			}
 
 			const EventInformation* pEvent = abStarted ? OnStartQuestHandler : OnStopQuestHandler;
-			for (auto const& rCallback : pEvent->callbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apQuest)) {
-					CallUDF(rCallback.script, nullptr, pEvent->numMaxArgs, apQuest);
+			for (auto const& rCallback : pEvent->kCallbacks) {
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apQuest)) {
+					CallUDF(rCallback.pScript, nullptr, pEvent->ucMaxArgsCount, apQuest);
 				}
 			}
 		}
@@ -148,9 +156,9 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnCompleteQuest, apQuest);
 			}
 
-			for (auto const& rCallback : OnCompleteQuestHandler->callbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apQuest)) {
-					CallUDF(rCallback.script, nullptr, OnCompleteQuestHandler->numMaxArgs, apQuest);
+			for (auto const& rCallback : OnCompleteQuestHandler->kCallbacks) {
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apQuest)) {
+					CallUDF(rCallback.pScript, nullptr, OnCompleteQuestHandler->ucMaxArgsCount, apQuest);
 				}
 			}
 		}
@@ -161,9 +169,9 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnFailQuest, apQuest);
 			}
 
-			for (auto const& rCallback : OnFailQuestHandler->callbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apQuest)) {
-					CallUDF(rCallback.script, nullptr, OnFailQuestHandler->numMaxArgs, apQuest);
+			for (auto const& rCallback : OnFailQuestHandler->kCallbacks) {
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apQuest)) {
+					CallUDF(rCallback.pScript, nullptr, OnFailQuestHandler->ucMaxArgsCount, apQuest);
 				}
 			}
 		}
@@ -174,8 +182,8 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnSettingsUpdate);
 			}
 
-			for (auto const& rCallback : OnSettingsUpdateHandler->callbacks) {
-				CallUDF(rCallback.script, nullptr, OnSettingsUpdateHandler->numMaxArgs);
+			for (auto const& rCallback : OnSettingsUpdateHandler->kCallbacks) {
+				CallUDF(rCallback.pScript, nullptr, OnSettingsUpdateHandler->ucMaxArgsCount);
 			}
 		}
 
@@ -185,9 +193,9 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnSeenDataUpdate, apCell);
 			}
 
-			for (auto const& rCallback : OnSeenDataUpdateHandler->callbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apCell)) {
-					CallUDF(rCallback.script, nullptr, OnSeenDataUpdateHandler->numMaxArgs, apCell);
+			for (auto const& rCallback : OnSeenDataUpdateHandler->kCallbacks) {
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apCell)) {
+					CallUDF(rCallback.pScript, nullptr, OnSeenDataUpdateHandler->ucMaxArgsCount, apCell);
 				}
 			}
 		}
@@ -198,9 +206,9 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnChallengeComplete, apChallenge);
 			}
 
-			for (auto const& rCallback : OnChallengeCompleteHandler->callbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.eventFilter)->IsBaseInFilter(0, apChallenge)) {
-					CallUDF(rCallback.script, nullptr, OnChallengeCompleteHandler->numMaxArgs, apChallenge);
+			for (auto const& rCallback : OnChallengeCompleteHandler->kCallbacks) {
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apChallenge)) {
+					CallUDF(rCallback.pScript, nullptr, OnChallengeCompleteHandler->ucMaxArgsCount, apChallenge);
 				}
 			}
 		}
@@ -212,10 +220,10 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnLimbGone, kData);
 			}
 
-			for (auto const& rCallback : OnLimbGoneHandler->callbacks) {
-				FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-				if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetObjectReference()->GetFormID())) && pFilter->IsInFilter(1, aeLimb)) {
-					CallUDF(rCallback.script, nullptr, OnLimbGoneHandler->numMaxArgs, apActor, aeLimb);
+			for (auto const& rCallback : OnLimbGoneHandler->kCallbacks) {
+				auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
+				if (pFilter->IsIntInFilter(aeLimb) && pFilter->IsRefInFilter(0, apActor)) {
+					CallUDF(rCallback.pScript, nullptr, OnLimbGoneHandler->ucMaxArgsCount, apActor, aeLimb);
 				}
 			}
 		}
@@ -229,10 +237,10 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnCrosshair, apRef);
 			}
 
-			for (auto const& rCallback : OnCrosshairHandler->callbacks) {
-				FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-				if ((pFilter->IsInFilter(0, apRef->GetFormID()) || pFilter->IsInFilter(0, apRef->GetObjectReference()->GetFormID())) && pFilter->IsInFilter(1, apRef->GetObjectReference()->GetFormType())) {
-					CallUDF(rCallback.script, nullptr, OnCrosshairHandler->numMaxArgs, apRef);
+			for (auto const& rCallback : OnCrosshairHandler->kCallbacks) {
+				auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
+				if (pFilter->IsRefInFilter(0, apRef) && pFilter->IsNonRefFormInFilter(1, apRef->GetObjectReference())) {
+					CallUDF(rCallback.pScript, nullptr, OnCrosshairHandler->ucMaxArgsCount, apRef);
 				}
 			}
 		}
@@ -247,10 +255,10 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnTakeBackItem, kData);
 			}
 
-			for (auto const& rCallback : OnTakeBackItemHandler->callbacks) {
-				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.eventFilter);
-				if (pFilter->IsBaseInFilter(0, apObject) && (pFilter->IsInFilter(1, apOwner->GetFormID()) || pFilter->IsInFilter(1, apOwner->GetObjectReference()->GetFormID()))) {
-					CallUDF(rCallback.script, nullptr, OnTakeBackItemHandler->numMaxArgs, apOwner, apObject, aiNumber);
+			for (auto const& rCallback : OnTakeBackItemHandler->kCallbacks) {
+				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.pFilter);
+				if (pFilter->IsNonRefFormInFilter(0, apObject) && pFilter->IsRefInFilter(1, apOwner)) {
+					CallUDF(rCallback.pScript, nullptr, OnTakeBackItemHandler->ucMaxArgsCount, apOwner, apObject, aiNumber);
 				}
 			}
 		}
@@ -267,39 +275,37 @@ namespace JohnnyEvents {
 
 			TESForm* pForm = apActor->GetAsForm();
 			if (pForm && int32_t(fNewValueFloor) != int32_t(fPreviousValueFloor)) {
-				Actor* pActor = pForm->IsActor() ? static_cast<Actor*>(pForm) : nullptr;
-
 				{
 					using namespace JohnnyMessageData;
 					ActorValueChangeData kData(pForm, aeActorValue, fNewValue, fPreviousValue);
 					SendNVSEMessage(JG_OnAVChange, kData);
 				}
 
-				if (pActor && pActor->IsPlayer()) {
-					for (auto const& rCallback : OnAVChangeHandler->callbacks) {
-						FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-						if (pFilter->IsInFilter(1, aeActorValue)) {
+				if (pForm == PlayerCharacter::GetSingleton()) {
+					for (auto const& rCallback : OnAVChangeHandler->kCallbacks) {
+						auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
+						if (pFilter->IsIntInFilter(aeActorValue)) {
 
-							const bool bFullValues = rCallback.UserFlags.Get(1);
+							const bool bFullValues = rCallback.usUserFlags.Get(1);
 
 							const float& fNewVal = bFullValues ? fNewValue : fNewValueFloor;
 							const float& fPrevVal = bFullValues ? fPreviousValue : fPreviousValueFloor;
 
-							CallUDF(rCallback.script, nullptr, OnAVChangeHandler->numMaxArgs, aeActorValue, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
+							CallUDF(rCallback.pScript, nullptr, OnAVChangeHandler->ucMaxArgsCount, aeActorValue, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
 						}
 					}
 				}
 				else {
-					for (auto const& rCallback : OnNPCAVChangeHandler->callbacks) {
-						FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-						if (pFilter->IsInFilter(1, aeActorValue) && (pFilter->IsInFilter(0, pForm->GetFormID()) || (pActor && pFilter->IsInFilter(0, pActor->GetTemplateObjectReference()->GetFormID())))) {
+					for (auto const& rCallback : OnNPCAVChangeHandler->kCallbacks) {
+						auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
+						if (pFilter->IsIntInFilter(aeActorValue) && pFilter->IsAnyFormInFilter(0, pForm)) {
 
-							const bool bFullValues = rCallback.UserFlags.Get(1);
+							const bool bFullValues = rCallback.usUserFlags.Get(1);
 
 							const float& fNewVal = bFullValues ? fNewValue : fNewValueFloor;
 							const float& fPrevVal = bFullValues ? fPreviousValue : fPreviousValueFloor;
 
-							CallUDF(rCallback.script, nullptr, OnNPCAVChangeHandler->numMaxArgs, pForm, aeActorValue, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
+							CallUDF(rCallback.pScript, nullptr, OnNPCAVChangeHandler->ucMaxArgsCount, pForm, aeActorValue, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
 						}
 					}
 				}
@@ -314,10 +320,10 @@ namespace JohnnyEvents {
 					SendNVSEMessage(JG_OnPLChange, kData);
 				}
 
-				for (auto const& rCallback : OnPLChangeHandler->callbacks) {
-					FilterFormInt* pFilter = reinterpret_cast<FilterFormInt*>(rCallback.eventFilter);
-					if ((pFilter->IsInFilter(0, apActor->GetFormID()) || pFilter->IsInFilter(0, apActor->GetTemplateObjectReference()->GetFormID())) && pFilter->IsInFilter(1, aeNewLevel)) {
-						CallUDF(rCallback.script, nullptr, OnPLChangeHandler->numMaxArgs, apActor, aeOldLevel, aeNewLevel);
+				for (auto const& rCallback : OnPLChangeHandler->kCallbacks) {
+					auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
+					if (pFilter->IsIntInFilter(aeNewLevel) && pFilter->IsRefInFilter(0, apActor)) {
+						CallUDF(rCallback.pScript, nullptr, OnPLChangeHandler->ucMaxArgsCount, apActor, aeOldLevel, aeNewLevel);
 					}
 				}
 			}
@@ -329,10 +335,10 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnSleepWaitEvent, apMenu);
 			}
 
-			for (auto const& rCallback : OnSleepWaitEventHandler->callbacks) {
-				auto pFilter = reinterpret_cast<FilterInt*>(rCallback.eventFilter);
-				if (pFilter->IsInFilter(0, uint32_t(apMenu->isRest) + 1) || pFilter->IsInFilter(0, 0)) {
-					CallUDF(rCallback.script, nullptr, OnSleepWaitEventHandler->numMaxArgs, (int(apMenu->isRest) + 1));
+			for (auto const& rCallback : OnSleepWaitEventHandler->kCallbacks) {
+				auto pFilter = reinterpret_cast<FilterInt*>(rCallback.pFilter);
+				if (pFilter->IsIntInFilter(0, uint32_t(apMenu->isRest) + 1) || pFilter->IsIntInFilter(0, 0)) {
+					CallUDF(rCallback.pScript, nullptr, OnSleepWaitEventHandler->ucMaxArgsCount, (int(apMenu->isRest) + 1));
 				}
 			}
 		}
@@ -347,10 +353,10 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnRadioPostSoundAttach, kData);
 			}
 
-			for (auto const& rCallback : OnRadioPostSoundAttachHandler->callbacks) {
-				FilterForm* pFilter = reinterpret_cast<FilterForm*>(rCallback.eventFilter);
-				if (pFilter->IsBaseInFilter(0, apRadio)) {
-					CallUDF(rCallback.script, nullptr, OnRadioPostSoundAttachHandler->numMaxArgs, apRadio, abActive ? 1u : 0u);
+			for (auto const& rCallback : OnRadioPostSoundAttachHandler->kCallbacks) {
+				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.pFilter);
+				if (pFilter->IsAnyFormInFilter(0, apRadio)) {
+					CallUDF(rCallback.pScript, nullptr, OnRadioPostSoundAttachHandler->ucMaxArgsCount, apRadio, abActive ? 1u : 0u);
 				}
 			}
 		}
@@ -362,10 +368,10 @@ namespace JohnnyEvents {
 			}
 
 			const uint32_t uiMenuID = apMenu ? apMenu->GetID() : -1;
-			for (auto const& rCallback : OnKeyboardControllerSelectionChangeHandler->callbacks) {
-				auto pFilter = reinterpret_cast<FilterInt*>(rCallback.eventFilter);
-				if (pFilter->IsInFilter(0, uiMenuID) || pFilter->IsInFilter(0, 0)) {
-					CallUDF(rCallback.script, nullptr, OnKeyboardControllerSelectionChangeHandler->numMaxArgs, uiMenuID);
+			for (auto const& rCallback : OnKeyboardControllerSelectionChangeHandler->kCallbacks) {
+				auto pFilter = reinterpret_cast<FilterInt*>(rCallback.pFilter);
+				if (pFilter->IsIntInFilter(0, uiMenuID) || pFilter->IsIntInFilter(0, 0)) {
+					CallUDF(rCallback.pScript, nullptr, OnKeyboardControllerSelectionChangeHandler->ucMaxArgsCount, uiMenuID);
 				}
 			}
 		}
@@ -383,10 +389,10 @@ namespace JohnnyEvents {
 			const uint32_t uiY = *reinterpret_cast<uint32_t*>(&akPos.y);
 			const uint32_t uiZ = *reinterpret_cast<uint32_t*>(&akPos.z);
 
-			for (auto const& rCallback : OnGeneralSubtitleHandler->callbacks) {
-				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.eventFilter);
-				if (pFilter->IsInFilter(0, apTarget) || pFilter->IsInFilter(0, 0)) {
-					CallUDF(rCallback.script, nullptr, OnGeneralSubtitleHandler->numMaxArgs, pSubtitleString, apTarget, uiX, uiY, uiZ);
+			for (auto const& rCallback : OnGeneralSubtitleHandler->kCallbacks) {
+				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.pFilter);
+				if (pFilter->IsRefInFilter(0, apTarget) || pFilter->FilterForm::IsInFilter(0, 0)) {
+					CallUDF(rCallback.pScript, nullptr, OnGeneralSubtitleHandler->ucMaxArgsCount, pSubtitleString, apTarget, uiX, uiY, uiZ);
 				}
 			}
 			return;
@@ -418,10 +424,10 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnNPCResponse, kData);
 			}
 
-			for (auto const& rCallback : OnNPCResponseHandler->callbacks) {
-				auto pFilter = reinterpret_cast<FilterInt*>(rCallback.eventFilter);
-				if (pFilter->IsInFilter(0, uiEmotionID) || pFilter->IsInFilter(0, 0)) {
-					CallUDF(rCallback.script, nullptr, OnNPCResponseHandler->numMaxArgs, pResponseString, pVoicePath, uiEmotionID, uiEmotionValue, uiResponseNumber);
+			for (auto const& rCallback : OnNPCResponseHandler->kCallbacks) {
+				auto pFilter = reinterpret_cast<FilterInt*>(rCallback.pFilter);
+				if (pFilter->IsIntInFilter(0, uiEmotionID) || pFilter->IsIntInFilter(0, 0)) {
+					CallUDF(rCallback.pScript, nullptr, OnNPCResponseHandler->ucMaxArgsCount, pResponseString, pVoicePath, uiEmotionID, uiEmotionValue, uiResponseNumber);
 				}
 			}
 		}
@@ -435,10 +441,10 @@ namespace JohnnyEvents {
 
 			const uint32_t uiPos = *reinterpret_cast<uint32_t*>(&apRep->fPositiveReputation);
 			const uint32_t uiNeg = *reinterpret_cast<uint32_t*>(&apRep->fNegativeReputation);
-			for (auto const& rCallback : OnReputationChangeHandler->callbacks) {
-				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.eventFilter);
-				if (pFilter->IsBaseInFilter(0, apRep)) {
-					CallUDF(rCallback.script, nullptr, OnReputationChangeHandler->numMaxArgs, apRep, uiPos, uiNeg);
+			for (auto const& rCallback : OnReputationChangeHandler->kCallbacks) {
+				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.pFilter);
+				if (pFilter->IsNonRefFormInFilter(0, apRep)) {
+					CallUDF(rCallback.pScript, nullptr, OnReputationChangeHandler->ucMaxArgsCount, apRep, uiPos, uiNeg);
 				}
 			}
 		}
@@ -472,16 +478,21 @@ namespace JohnnyEvents {
 			OnRenderGameModeUpdateHandler = JGCreateEvent("OnRenderGameModeUpdateHandler", 0, 0, nullptr);
 			OnRenderRenderedMenuUpdateHandler = JGCreateEvent("OnRenderRenderedMenuUpdateHandler", 0, 0, nullptr);
 		}
+
+		STACK_FRAME_OPT_RESET
 	}
 
 	namespace Hooks {
 		HookUtils::CallDetour kOnRenderGamePreUpdateDetour;
+		STACK_FRAME_OPT_ENABLE
 		static bool OnRenderGamePreUpdate() {
 			Events::OnRenderGamePreUpdate();
 			return CdeclCall<bool>(kOnRenderGamePreUpdateDetour);
 		}
+		STACK_FRAME_OPT_RESET
 
 		HookUtils::VirtCallDetour kOnRemovePerkDetour;
+		STACK_FRAME_OPT_ENABLE
 		static void __fastcall OnRemovePerk(Actor* apActor, void*, BGSPerk* apPerk, bool abTeammate) {
 			Events::OnRemovePerk(apActor, apPerk, abTeammate);
 			if (kOnRemovePerkDetour)
@@ -489,6 +500,7 @@ namespace JohnnyEvents {
 			else
 				apActor->RemovePerk(apPerk, abTeammate);
 		}
+		STACK_FRAME_OPT_RESET
 
 		template<uint32_t uiAddress>
 		class OnAddPerkHook {
@@ -510,34 +522,44 @@ namespace JohnnyEvents {
 		};
 
 		HookUtils::CallDetour kOnCrosshairDetour;
+		STACK_FRAME_OPT_ENABLE
 		static uint32_t __fastcall OnCrosshair(TESObjectREFR* apRef) {
 			Events::OnCrosshair(apRef);
 			return ThisCall<uint32_t>(kOnCrosshairDetour, apRef);
 		}
+		STACK_FRAME_OPT_RESET
 
 		HookUtils::CallDetour kOnLimbGoneDetour;
+		STACK_FRAME_OPT_ENABLE
 		static bool __fastcall OnLimbGone(ExtraDismemberedLimbs* apLimbData, void*, Actor* apActor, uint32_t aeLimb, bool abExplodedLimb) {
 			Events::OnLimbGone(apLimbData, apActor, aeLimb, abExplodedLimb);
 			return ThisCall<bool>(kOnLimbGoneDetour, apLimbData, apActor, aeLimb, abExplodedLimb);
 		}
+		STACK_FRAME_OPT_RESET
 
 		HookUtils::CallDetour kOnCompleteQuestDetour;
+		STACK_FRAME_OPT_ENABLE
 		static void __cdecl OnCompleteQuest(TESQuest* apQuest) {
 			Events::OnCompleteQuest(apQuest);
 			CdeclCall(kOnCompleteQuestDetour, apQuest);
 		}
+		STACK_FRAME_OPT_RESET
 
 		HookUtils::CallDetour kOnFailQuestDetour;
+		STACK_FRAME_OPT_ENABLE
 		static void __cdecl OnFailQuest(TESQuest* apQuest) {
 			Events::OnFailQuest(apQuest);
 			CdeclCall(kOnFailQuestDetour, apQuest);
 		}
+		STACK_FRAME_OPT_RESET
 
 		HookUtils::CallDetour kOnSettingsUpdateDetour;
+		STACK_FRAME_OPT_ENABLE
 		void* __cdecl OnSettingsUpdate() {
 			Events::OnSettingsUpdate();
 			return CdeclCall<void*>(kOnSettingsUpdateDetour);
 		}
+		STACK_FRAME_OPT_RESET
 
 		template<uint32_t uiAddress>
 		class OnSeenDataUpdateHook {
@@ -570,16 +592,20 @@ namespace JohnnyEvents {
 		};
 
 		HookUtils::CallDetour kOnRenderGameModeUpdateDetour;
+		STACK_FRAME_OPT_ENABLE
 		static void __fastcall OnRenderGameModeUpdate(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
 			Events::OnRenderGameModeUpdate(apDestination, abRenderedMenuMode, abSkipFirstPerson);
 			ThisCall(kOnRenderGameModeUpdateDetour, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
 		}
+		STACK_FRAME_OPT_RESET
 
 		HookUtils::CallDetour kOnRenderRenderedMenuUpdateDetour;
+		STACK_FRAME_OPT_ENABLE
 		static void __fastcall OnRenderRenderedMenuUpdate(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
 			Events::OnRenderRenderedMenuUpdate(apDestination, abRenderedMenuMode, abSkipFirstPerson);
 			ThisCall(kOnRenderRenderedMenuUpdateDetour, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
 		}
+		STACK_FRAME_OPT_RESET
 
 		template<uint32_t uiAddress>
 		class OnProcessChangeEventHook {
@@ -643,18 +669,22 @@ namespace JohnnyEvents {
 		TESObjectREFR* pItemOwnerRef = nullptr;
 
 		HookUtils::CallDetour kOnTakeBackItemOwnerDetour;
+		STACK_FRAME_OPT_ENABLE
 		static ExtraDataList* __fastcall OnTakeBackItem_StoreOwner(TESObjectREFR* apRef) {
 			pItemOwnerRef = apRef;
 			return ThisCall<ExtraDataList*>(kOnTakeBackItemOwnerDetour, apRef);
 		}
+		STACK_FRAME_OPT_RESET
 
 		HookUtils::CallDetour kOnTakeBackItemDetour;
+		STACK_FRAME_OPT_ENABLE
 		static TESObjectREFR* __fastcall OnTakeBackItem(InventoryChanges* apInvChanges, void*, TESObjectREFR* apRef, TESBoundObject* apObject, bool abStealing, int32_t aiNumber, ExtraDataList* apExtraList, bool abDropWorld, TESObjectREFR* apOtherContainer, const NiPoint3* apPoint, const NiPoint3* apRotate, bool abDelete, bool abPreferStolen, ItemChange* apItemChange) {
 			TESObjectREFR* pOwner = apOtherContainer->IsActor() ? apOtherContainer : pItemOwnerRef;
 			Events::OnTakeBackItem(pOwner, apObject, aiNumber);
 			pItemOwnerRef = nullptr;
 			return ThisCall<TESObjectREFR*>(kOnTakeBackItemDetour, apInvChanges, apRef, apObject, abStealing, aiNumber, apExtraList, abDropWorld, apOtherContainer, apPoint, apRotate, abDelete, abPreferStolen, apItemChange);
 		}
+		STACK_FRAME_OPT_RESET
 
 		template <uintptr_t auiAddress>
 		class OnRadioPostSoundAttachHook {
@@ -692,35 +722,43 @@ namespace JohnnyEvents {
 		};
 
 		HookUtils::VirtFuncDetour kSleepOnClickDetour;
+		STACK_FRAME_OPT_ENABLE
 		static void __fastcall OnSleepWaitEvent(SleepWaitMenu* apMenu, void*, uint32_t auiTileID, Tile* apTarget) {
 			ThisCall(kSleepOnClickDetour, apMenu, auiTileID, apTarget);
 			if (auiTileID == 4)
 				Events::OnSleepWaitEvent(apMenu, auiTileID);
 		}
+		STACK_FRAME_OPT_RESET
 
 		//Fires when general subtitles are sent to the HUD.
 		HookUtils::CallDetour kGeneralSubtitleDetour;
+		STACK_FRAME_OPT_ENABLE
 		static bool __fastcall OnGeneralSubtitle(HUDMainMenu* apMenu, void*, const char* apText, BSSoundHandle akSound, NiPoint3 akPos, TESObjectREFR* apTarget, bool abInstant) {
 			if (apText)
 				Events::OnGeneralSubtitle(apText, akPos, apTarget);
 
 			return ThisCall<bool>(kGeneralSubtitleDetour, apMenu, apText, akSound, akPos, apTarget, abInstant);
 		}
+		STACK_FRAME_OPT_RESET
 
 		HookUtils::CallDetour kOnNPCResponseDetour;
+		STACK_FRAME_OPT_ENABLE
 		static bool __fastcall OnNPCResponse(MenuTopic* apThis) {
 			if (apThis->pFirstResponse)
 				Events::OnNPCResponse(apThis->pFirstResponse->GetItem());
 			return ThisCall<bool>(kOnNPCResponseDetour, apThis);
 		}
+		STACK_FRAME_OPT_RESET
 
 		HookUtils::VirtFuncDetour kReputationChangeDetour;
+		STACK_FRAME_OPT_ENABLE
 		static void __fastcall OnReputationChange(TESReputation* apThis, void*, uint32_t auiChangeFlag) {
 			if (auiChangeFlag & 2)
 				Events::OnReputationChange(apThis);
 
 			ThisCall(kReputationChangeDetour, apThis, auiChangeFlag);
 		}
+		STACK_FRAME_OPT_RESET
 
 		static void Init() {
 			kOnDyingDetour.ReplaceCall(0x89F49F, OnDying);
@@ -809,6 +847,7 @@ namespace JohnnyEvents {
 		Hooks::Init();
 	}
 
+	STACK_FRAME_OPT_ENABLE
 	void Reset() {
 		Events::OnDyingHandler->FlushEventCallbacks();
 		Events::OnLimbGoneHandler->FlushEventCallbacks();
@@ -950,5 +989,7 @@ namespace JohnnyEvents {
 	void RegisterOnTakeBackItem(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags) {
 		Register(Events::OnTakeBackItemHandler, apScript, apFilters, abToggle, auiUserFlags);
 	}
+
+	STACK_FRAME_OPT_RESET
 }
 

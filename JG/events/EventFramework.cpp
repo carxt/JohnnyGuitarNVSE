@@ -1,155 +1,231 @@
 #include "EventFramework.h"
 #include "Bethesda/TESObjectREFR.hpp"
+#include "Bethesda/ExtraLeveledCreature.hpp"
+
+STACK_FRAME_OPT_ENABLE
 
 bool (*CallUDF)(Script* funcScript, TESObjectREFR* callingObj, uint8_t numArgs, ...);
-std::mutex eventInfosMutex;
+std::shared_mutex kEventInfosMutex;
 std::vector<EventInfo> kEventInfos;
 
-void* __fastcall GenericCreateFilter(void** Filters, uint32_t numFilters) {
-	return new FilterForm(Filters, numFilters);
+void* __fastcall GenericCreateFilter(void** appFilters, uint32_t auiFilterCount) {
+	return new FilterForm(appFilters, auiFilterCount);
 }
 
-EventInfo __cdecl JGCreateEvent(const char* EventName, uint8_t maxArgs, uint8_t maxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t)) {
-	std::lock_guard<std::mutex> lock(eventInfosMutex);
-	EventInfo eventinfo = new EventInformation(EventName, maxArgs, maxFilters, CreatorFunction);
-	kEventInfos.push_back(eventinfo);
-	return eventinfo;
+EventInfo __cdecl JGCreateEvent(const char* apEventName, uint8_t aucMaxArgs, uint8_t aucMaxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t)) {
+	std::lock_guard kGuard(kEventInfosMutex);
+	EventInfo pEventInfo = new EventInformation(apEventName, aucMaxArgs, aucMaxFilters, CreatorFunction);
+	kEventInfos.push_back(pEventInfo);
+	return pEventInfo;
 }
 
-void __cdecl JGFreeEvent(EventInfo& toRemove) {
-	std::lock_guard<std::mutex> lock(eventInfosMutex);
-	if (!toRemove) return;
-	auto it = std::find(std::begin(kEventInfos), std::end(kEventInfos), toRemove);
+void __cdecl JGFreeEvent(EventInfo& arEvent) {
+	if (!arEvent)
+		return;
+
+	std::lock_guard kGuard(kEventInfosMutex);
+	auto it = std::find(kEventInfos.begin(), kEventInfos.end(), arEvent);
 	if (it != kEventInfos.end()) {
 		delete* it;
 		it = kEventInfos.erase(it);
 	}
-	toRemove = nullptr;
+	arEvent = nullptr;
 }
 
-FilterBase::FilterSet* FilterBase::GetFilter(uint32_t index) {
-	if (index >= numFilters) return nullptr;
-	return &(filterSet[index]);
+FilterBase::FilterSet* __fastcall FilterBase::GetFilter(uint32_t auiIndex) const {
+	if (auiIndex >= uiFilterCount) [[unlikely]]
+		return nullptr;
+
+	return &(pFilterSets[auiIndex]);
 }
 
-FilterBase::FilterBase(void** filters, uint32_t nuFilters) {
-	numFilters = nuFilters;
-	filterSet = new FilterSet[numFilters];
-	genFilters = new FilterType[numFilters];
-	for (uint32_t i = 0; i < nuFilters; i++) genFilters[i].ptr = filters[i];
+FilterBase::FilterBase(void** appFilters, uint32_t auiFilterCount) {
+	uiFilterCount = auiFilterCount;
+	pFilterSets = new FilterSet[uiFilterCount];
+	pFilterTypes = new FilterType[uiFilterCount];
+	for (uint32_t i = 0; i < auiFilterCount; i++) 
+		pFilterTypes[i].pVal = appFilters[i];
 }
 
 FilterBase::~FilterBase() {
-	delete[] filterSet;
-	delete[] genFilters;
+	delete[] pFilterSets;
+	delete[] pFilterTypes;
 }
 
-bool FilterBase::IsInFilter(uint32_t filterNum, FilterType toSearch) {
-	FilterSet* FilterSet = GetFilter(filterNum);
-	return FilterSet && (FilterSet->empty() || FilterSet->find(toSearch.refID) != FilterSet->end());
+bool FilterBase::IsInFilter(uint32_t auiIndex, FilterType auFilter) const {
+	const FilterSet* pFilters = GetFilter(auiIndex);
+	return pFilters && pFilters->contains(auFilter.uiFormID);
 }
 
-bool FilterBase::IsFilterEmpty(uint32_t num) {
-	FilterSet* filters = GetFilter(num);
-	return !filters || filters->empty();
+bool FilterBase::IsFilterEmpty(uint32_t auiIndex) {
+	const FilterSet* pFilters = GetFilter(auiIndex);
+	return !pFilters || pFilters->empty();
 }
 
-void FilterBase::InsertToFilter(uint32_t num, FilterType toInsert) {
-	FilterSet* filters = GetFilter(num);
-	if (filters) filters->insert(toInsert.refID);
+void FilterBase::InsertToFilter(uint32_t auiIndex, FilterType auFilter) {
+	FilterSet* pFilters = GetFilter(auiIndex);
+	if (pFilters) 
+		pFilters->insert(auFilter.uiFormID);
 }
 
-void FilterBase::DeleteFromFilter(uint32_t num, FilterType toDelete) {
-	FilterSet* filters = GetFilter(num);
-	if (filters) filters->erase(toDelete.refID);
+void FilterBase::DeleteFromFilter(uint32_t auiIndex, FilterType auFilter) {
+	FilterSet* pFilters = GetFilter(auiIndex);
+	if (pFilters) 
+		pFilters->erase(auFilter.uiFormID);
 }
 
-bool FilterBase::IsFilterEqual(FilterType filter, uint32_t num) {
-	return (filter.ptr == genFilters[num].ptr);
+bool FilterBase::IsFilterEqual(FilterType auFilter, uint32_t auiIndex) {
+	return auFilter.pVal == pFilterTypes[auiIndex].pVal;
+}
+
+bool __fastcall FilterForm::DoFilterForm(const FilterSet& arSet, const TESForm* apForm) {
+	return arSet.contains(apForm->GetFormID());
+}
+
+bool __fastcall FilterForm::DoFilterRef(const FilterSet& arSet, const TESObjectREFR* apRef) {
+	if (arSet.contains(apRef->GetFormID()))
+		return true;
+
+	const TESBoundObject* pBase = apRef->GetObjectReference();
+	if (pBase && !pBase->GetTemporary()) [[likely]] {
+		if (arSet.contains(pBase->GetFormID()))
+			return true;
+
+		if (pBase->GetFormType() == FORM_TYPE::BGSPlaceableWater) [[unlikely]] {
+			const TESWaterForm* pWater = pBase->GetWaterType();
+			if (pWater && arSet.contains(pWater->GetFormID()))
+				return true;
+		}
+
+		if (apRef->IsLeveledCreature()) [[unlikely]] {
+			const ExtraLeveledCreature* pExtra = apRef->GetExtraData<ExtraLeveledCreature>();
+			pBase = pExtra->pTemplate;
+			if (pBase && arSet.contains(pBase->GetFormID()))
+				return true;
+
+			pBase = pExtra->pOriginalBase;
+			if (pBase && arSet.contains(pBase->GetFormID()))
+				return true;
+		}
+	}
+
+	return false;
 }
 
 bool FilterForm::IsAcceptedParameter(FilterType parameter) {
-	return parameter.form->GetFormType() != FORM_TYPE::TESObjectSTAT;
+	return parameter.pForm->GetFormType() != FORM_TYPE::TESObjectSTAT;
 }
 
 void FilterForm::SetUpFiltering() {
-	for (uint32_t i = 0; i < numFilters; i++) {
-		TESForm* currentFilter = genFilters[i].form;
-		if (!currentFilter) continue;
-		if (!(IsAcceptedParameter(currentFilter))) continue;
-		if (currentFilter->IsReference()) {
-			InsertToFilter(i, ((TESObjectREFR*)currentFilter)->GetObjectReference()->GetFormID());
-			continue;
-		}
-		if (IS_TYPE(currentFilter, BGSListForm)) {
-			BSSimpleList<TESForm*>* pIter = ((BGSListForm*)currentFilter)->GetFormList();
-			while (pIter && !pIter->IsEmpty()) {
-				TESForm* pForm = pIter->GetItem();
-				pIter = pIter->GetNext();
-				if (pForm && !pForm->IsReference() && IsAcceptedParameter(pForm))
-					InsertToFilter(i, pForm->GetFormID());
-			};
-		}
-		else InsertToFilter(i, currentFilter->GetFormID());
+	for (uint32_t i = 0; i < uiFilterCount; ++i) {
+		const TESForm* pCurrentForm = pFilterTypes[i].pForm;
+		if (pCurrentForm) [[likely]]
+			InsertForm(i, pCurrentForm);
 	}
 }
 
-bool FilterForm::IsBaseInFilter(uint32_t filterNum, TESForm* form) {
-	if (!form) return false;
-	if (form->IsReference()) return IsInFilter(filterNum, ((TESObjectREFR*)form)->GetObjectReference()->GetFormID());
-	return IsInFilter(filterNum, form->GetFormID());
+bool __fastcall FilterForm::IsAnyFormInFilter(uint32_t auiIndex, const TESForm* apForm) const {
+	if (!apForm) [[unlikely]]
+		return false;
+
+	const FilterSet* pFilter = GetFilter(auiIndex);
+	if (!pFilter || pFilter->empty()) [[unlikely]]
+		return false;
+
+	if (TESObjectREFR::IsReferenceFormType(apForm->GetFormType()))
+		return DoFilterRef(*pFilter, static_cast<const TESObjectREFR*>(apForm));
+	else
+		return DoFilterForm(*pFilter, apForm);
 }
 
-void FilterForm::insertFormList(BGSListForm* formlist, uint32_t filter) {
-	BSSimpleList<TESForm*>* pIter = formlist->GetFormList();
+bool __fastcall FilterForm::IsNonRefFormInFilter(uint32_t auiIndex, const TESForm* apForm) const {
+	if (!apForm) [[unlikely]]
+		return false;
+
+	const FilterSet* pFilter = GetFilter(auiIndex);
+	if (!pFilter || pFilter->empty()) [[unlikely]]
+		return false;
+
+	assert(!apForm->IsReference());
+	return DoFilterForm(*pFilter, apForm);
+}
+
+bool __fastcall FilterForm::IsRefInFilter(uint32_t auiIndex, const TESObjectREFR* apRef) const {
+	if (!apRef) [[unlikely]]
+		return false;
+
+	const FilterSet* pFilter = GetFilter(auiIndex);
+	if (!pFilter || pFilter->empty()) [[unlikely]]
+		return false;
+
+	return DoFilterRef(*pFilter, apRef);
+}
+
+void __fastcall FilterForm::InsertForm(uint32_t auiIndex, const TESForm* apForm) {
+	const FORM_TYPE eFormType = apForm->GetFormType();
+	if (TESObjectREFR::IsReferenceFormType(eFormType)) [[unlikely]] {
+		InsertReference(auiIndex, static_cast<const TESObjectREFR*>(apForm));
+	}
+	else if (eFormType == FORM_TYPE::BGSListForm) [[unlikely]] {
+		InsertFormList(auiIndex, static_cast<const BGSListForm*>(apForm));
+	}
+	else if (IsAcceptedParameter(apForm)) [[likely]] {
+		FilterBase::InsertToFilter(auiIndex, apForm->GetFormID());
+	}
+}
+
+void __fastcall FilterForm::InsertReference(uint32_t auiIndex, const TESObjectREFR* apRef) {
+	const TESForm* pBase = apRef->GetObjectReference();
+	if (pBase && IsAcceptedParameter(pBase)) [[likely]]
+		FilterBase::InsertToFilter(auiIndex, pBase->GetFormID());
+}
+
+void __fastcall FilterForm::InsertFormList(uint32_t auiIndex, const BGSListForm* apFormList) {
+	const BSSimpleList<TESForm*>* pIter = apFormList->GetFormList();
 	while (pIter && !pIter->IsEmpty()){
-		TESForm* pForm = pIter->GetItem();
+		const TESForm* pForm = pIter->GetItem();
 		pIter = pIter->GetNext();
-		if (pForm)
-			InsertToFilter(filter, pForm->GetFormID());
+		if (pForm) [[likely]] {
+			InsertForm(auiIndex, pForm);
+		}
 	};
 }
 
-bool FilterInt::IsFilterEqual(FilterType Filter, uint32_t nuFilter) {
-	return Filter.intVal == genFilters[nuFilter].intVal;
-}
-
 void FilterInt::SetUpFiltering() {
-	for (uint32_t i = 0; i < numFilters; i++) {
-		if (genFilters[i].intVal != -1) InsertToFilter(i, genFilters[i].intVal);
+	for (uint32_t i = 0; i < uiFilterCount; i++) {
+		if (pFilterTypes[i].iVal != -1) 
+			FilterBase::InsertToFilter(i, pFilterTypes[i].iVal);
 	}
 }
 
-void* __fastcall FilterInt::Create(void** filters, uint32_t nuFilters) {
-	return new FilterInt(filters, nuFilters);
+void* __fastcall FilterInt::Create(void** appFilters, uint32_t auiFilterCount) {
+	return new FilterInt(appFilters, auiFilterCount);
+}
+
+bool FilterFormInt::IsAcceptedParameter(FilterType parameter) {
+	return parameter.pForm->GetFormID() != 0x3B; // xMarker
 }
 
 void FilterFormInt::SetUpFiltering() {
-	if (genFilters[1].intVal != -1) InsertToFilter(1, genFilters[1].intVal);
-	TESForm* currentFilter = genFilters[0].form;
-	if (!currentFilter) return;
-	if (IS_TYPE(currentFilter, BGSListForm)) {
-		BSSimpleList<TESForm*>* pIter = ((BGSListForm*)currentFilter)->GetFormList();
-		while (pIter && !pIter->IsEmpty()) {
-			TESForm* pForm = pIter->GetItem();
-			pIter = pIter->GetNext();
-			if (pForm && IsAcceptedParameter(pForm))
-				InsertToFilter(0, pForm->GetFormID());
-		};
-	}
-	else if (IsAcceptedParameter(currentFilter)) InsertToFilter(0, currentFilter->GetFormID());
+	if (pFilterTypes[1].iVal != -1) 
+		FilterBase::InsertToFilter(1, pFilterTypes[1].iVal);
+
+	const TESForm* pCurrentForm = pFilterTypes[0].pForm;
+	if (pCurrentForm) [[likely]]
+		InsertForm(0, pCurrentForm);
 }
 
-void* __fastcall FilterFormInt::Create(void** filters, uint32_t nuFilters) {
-	return new FilterFormInt(filters, nuFilters);
+void* __fastcall FilterFormInt::Create(void** appFilters, uint32_t auiFilterCount) {
+	return new FilterFormInt(appFilters, auiFilterCount);
 }
 
-EventInformation::EventInformation(const char* EventName, uint8_t& numMaxArgs, uint8_t& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t)) {
-	this->name = EventName;
-	this->numMaxArgs = numMaxArgs;
-	this->numMaxFilters = numMaxFilters;
+EventInformation::EventInformation(const char* apEventName, uint8_t& arMaxArgs, uint8_t& arMaxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t)) {
+	this->pName = apEventName;
+	this->ucMaxArgsCount = arMaxArgs;
+	this->ucMaxFilterCount = arMaxFilters;
 	this->CreateFilter = GenericCreateFilter;
-	if (CreatorFunction) this->CreateFilter = CreatorFunction;
+	if (CreatorFunction) 
+		this->CreateFilter = CreatorFunction;
 }
 
 EventInformation::~EventInformation() {
@@ -157,88 +233,104 @@ EventInformation::~EventInformation() {
 }
 
 void EventInformation::FlushEventCallbacks() {
-	for (auto& event : callbacks) {
-		delete event.eventFilter;
+	for (auto& event : kCallbacks) {
+		delete event.pFilter;
 	}
-	callbacks.clear();
+	kCallbacks.clear();
 }
 
-void EventInformation::RegisterEvent(Script* script, void** filters, uint32_t userFlags) {
-	uint32_t maxFilters = this->numMaxFilters;
-	for (auto& event : this->callbacks) {
-		if (script == event.script) {
-			if (!maxFilters) return;
-			if (!event.eventFilter->GetNumFilters()) continue;
-			uint32_t i = 0; // filter iterator
-			for (; i < maxFilters; i++) {
-				if (!(event.eventFilter->IsFilterEqual(filters[i], i))) break;
+void EventInformation::RegisterEvent(Script* apScript, void** appFilters, uint32_t auiUserFlags) {
+	const uint32_t uiMaxFilterCount = ucMaxFilterCount;
+	for (auto& rEvent : kCallbacks) {
+		if (apScript == rEvent.pScript) {
+			if (!uiMaxFilterCount) [[unlikely]]
+				return;
+			
+			if (!rEvent.pFilter->GetNumFilters()) [[unlikely]]
+				continue;
+			
+			uint32_t i = 0; // auFilter iterator
+			for (; i < uiMaxFilterCount; i++) {
+				if (!rEvent.pFilter->IsFilterEqual(appFilters[i], i)) 
+					break;
 			}
-			if (i >= maxFilters) return;
+			
+			if (i >= uiMaxFilterCount) 
+				return;
 		}
 	}
-	std::shared_lock rLock(queueLock);
-	for (auto& event : this->eventAddQueue) {
-		if (script == event.script) {
-			if (!maxFilters) return;
-			if (!event.eventFilter->GetNumFilters()) continue;
-			uint32_t i = 0; // filter iterator
-			for (; i < maxFilters; i++) {
-				if (!(event.eventFilter->IsFilterEqual(filters[i], i))) break;
+	
+	{
+		std::shared_lock rLock(kQueueLock);
+		for (auto& rEvent : kEventAddQueue) {
+			if (apScript == rEvent.pScript) {
+				if (!uiMaxFilterCount) [[unlikely]]
+					return;
+
+				if (!rEvent.pFilter->GetNumFilters()) [[unlikely]]
+					continue;
+
+				uint32_t i = 0; // auFilter iterator
+				for (; i < uiMaxFilterCount; i++) {
+					if (!rEvent.pFilter->IsFilterEqual(appFilters[i], i))
+						break;
+				}
+
+				if (i >= uiMaxFilterCount)
+					return;
 			}
-			if (i >= maxFilters) return;
 		}
 	}
-	rLock.unlock();
-	EventBase event;
-	event.UserFlags = userFlags;
-	event.script = script;
-	event.capturedLambdaVars = LambdaVariableContext(script);
-	if (maxFilters) {
-		event.eventFilter = static_cast<IFilter*>(this->CreateFilter(filters, maxFilters));
-		event.eventFilter->SetUpFiltering();
+
+	EventBase kEvent;
+	kEvent.usUserFlags = auiUserFlags;
+	kEvent.pScript = apScript;
+	kEvent.pLambdaVars = LambdaVariableContext(apScript);
+	if (uiMaxFilterCount) {
+		kEvent.pFilter = static_cast<IFilter*>(this->CreateFilter(appFilters, uiMaxFilterCount));
+		kEvent.pFilter->SetUpFiltering();
 	}
-	std::unique_lock wLock(queueLock);
-	this->eventAddQueue.push_back(std::move(event));
+	std::unique_lock wLock(kQueueLock);
+	kEventAddQueue.push_back(std::move(kEvent));
 }
 
-void EventInformation::RemoveEvent(Script* script, void** filters) {
-	for (auto& event : callbacks) {
-		if (script != event.script) continue;
+void EventInformation::RemoveEvent(Script* apScript, void** appFilters) {
+	for (auto& rEvent : kCallbacks) {
+		if (apScript != rEvent.pScript) 
+			continue;
 
-		bool skip = false;
-
-		if (auto eventFilters = event.eventFilter) {
-			uint32_t maxFilters = eventFilters->GetNumFilters();
-			for (uint32_t i = 0; i < maxFilters; i++) {
-				if (!(event.eventFilter->IsFilterEqual(filters[i], i))) {
-					skip = true;
+		bool bSkip = false;
+		if (auto eventFilters = rEvent.pFilter) {
+			const uint32_t uiFilterCount = eventFilters->GetNumFilters();
+			for (uint32_t i = 0; i < uiFilterCount; ++i) {
+				if (!rEvent.pFilter->IsFilterEqual(appFilters[i], i)) {
+					bSkip = true;
 					break;
 				}
 			}
 		}
-		if (!skip) {
-			event.SetDeleted(true);
-		}
 
+		if (!bSkip)
+			rEvent.SetDeleted(true);
 	}
 }
 
 void EventInformation::AddQueuedEvents() {
-	callbacks.insert(callbacks.end(), std::make_move_iterator(eventAddQueue.begin()),
-		std::make_move_iterator(eventAddQueue.end()));
-	eventAddQueue.clear();
+	kCallbacks.insert(kCallbacks.end(), std::make_move_iterator(kEventAddQueue.begin()), std::make_move_iterator(kEventAddQueue.end()));
+	kEventAddQueue.clear();
 }
 
 void EventInformation::DeleteEvents() {
-	auto it = callbacks.begin();
-	while (it != callbacks.end()) {
+	auto it = kCallbacks.begin();
+	while (it != kCallbacks.end()) {
 		if (it->GetDeleted()) {
-			delete it->eventFilter;
+			delete it->pFilter;
 
-			it = callbacks.erase(it);
+			it = kCallbacks.erase(it);
 		}
 		else {
 			++it;
 		}
 	}
 }
+STACK_FRAME_OPT_RESET

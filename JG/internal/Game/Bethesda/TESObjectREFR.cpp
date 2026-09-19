@@ -899,5 +899,8 @@ bool TESObjectREFR::RemoveMasterParticleAddonNodes(NiNode* apNode) {
 
 // GAME - 0x564900
 bool TESObjectREFR::IsReferenceFormType(FORM_TYPE aeFormType) {
-	return aeFormType >= FORM_TYPE::TESObjectREFR && (aeFormType <= FORM_TYPE::FlameProjectile || aeFormType == FORM_TYPE::ContinuousBeamProjectile);
+	if (aeFormType >= FORM_TYPE::TESObjectREFR && aeFormType <= FORM_TYPE::FlameProjectile) [[likely]]
+		return true;
+
+	return aeFormType == FORM_TYPE::ContinuousBeamProjectile;
 }
