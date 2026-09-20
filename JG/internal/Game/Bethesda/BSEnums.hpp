@@ -158,6 +158,7 @@ struct _ExtraDataType {
 		ExtraAction						= 14,
 		ExtraStartingPosition			= 15,
 		ExtraAnim						= 16,
+		ExtraBiped						= 17, // GECK
 		ExtraUsedMarkers				= 18,
 		ExtraDistantData				= 19,
 		ExtraRagDollData				= 20,
@@ -192,7 +193,7 @@ struct _ExtraDataType {
 		ExtraSeed						= 49,
 		NonActorMagicCaster				= 50,
 		NonActorMagicTarget				= 51,
-		ExtraMasterFileCell				= 52,
+		ExtraMasterFileCell				= 52, // GECK only
 		ExtraPlayerCrimeList			= 53,
 		//								  54,
 		ExtraEnableStateParent			= 55,
@@ -215,8 +216,8 @@ struct _ExtraDataType {
 		ExtraRefractionProperty			= 72,
 		ExtraStartingWorldOrCell		= 73,
 		ExtraHotkey						= 74,
-		ExtraEditorRef3DData			= 75,
-		ExtraEditorRefMoveData			= 76,
+		ExtraEditorRef3DData			= 75, // GECK only
+		ExtraEditorRefMoveData			= 76, // GECK only
 		ExtraInfoGeneralTopic			= 77,
 		ExtraHasNoRumors				= 78,
 		ExtraSound						= 79,
@@ -285,6 +286,28 @@ struct _ExtraDataType {
 		ExtraAudioBuoyMarker			= 145,
 		ExtraSpecialRenderFlags			= 146,
 		COUNT,
+
+		// GECK-specific extra data for windows
+#ifdef EDITOR
+		DialogExtraParam				= 0,
+		DialogExtraLocalCopy			= 1,
+		DialogExtraColorControl			= 2,
+		DialogExtraSubWindow			= 4,
+		DialogExtraCurrCondItem			= 5,
+		DialogExtraWorkingData			= 6,
+		DialogExtraFactionData			= 7,
+		DialogExtraPopupMenu			= 8,
+		DialogExtraRefSelectControl		= 9,
+		DialogExtraReactionData			= 11,
+		DialogExtraPreviewControl		= 12,
+		DialogExtraFreeformFaceControl	= 13,
+		DialogExtraDialogData			= 14,
+		DialogExtraNotifyInfo			= 15,
+		DialogExtraQuestStageData		= 16,
+		DialogExtraTimer				= 17,
+		DialogExtraQuestFilter			= 18,
+		DialogExtraRects				= 19,
+#endif
 	};
 };
 using EXTRA_DATA_TYPE = _ExtraDataType::Type;
