@@ -197,6 +197,10 @@ namespace MorePluginTypes {
 				}
 				return this;
 			}
+
+			TESFile* GetCompiledFile(uint32_t auiIndex) const {
+				return kCompiledFiles.GetFile(auiIndex);
+			}
 		};
 
 		HookUtils::CallDetour kSetTempIDOwnedByFileDetour;
@@ -335,7 +339,7 @@ namespace MorePluginTypes {
 
 			// TESDataHandler::GetCompiledFile
 			{
-				HookUtils::WriteRelJump(0x465010, &TESDataHandler::GetCompiledFile);
+				HookUtils::WriteRelJump(0x465010, &TESDataHandlerEx::GetCompiledFile);
 			}
 
 			// TESFile::GetThreadSafeFileForThread
@@ -373,7 +377,7 @@ namespace MorePluginTypes {
 						pFile = kFiles.GetAt(ucIndex);
 				}
 				else if (bSupportESLs && ucIndex == 0xFE) {
-					const uint8_t ucSmallIndex = (auiFormID >> 12) & 0xFFF;
+					const uint8_t ucSmallIndex = FormID_View(auiFormID).GetSmallIndex();
 					if (ucSmallIndex < kSmallFiles.GetSize())
 						pFile = kSmallFiles.GetAt(ucSmallIndex);
 				}
@@ -644,11 +648,11 @@ namespace MorePluginTypes {
 
 	namespace OtherHooks {
 
-		FormID __fastcall GetRawFormID(const TESForm* pForm) {
-			if (bSupportESLs && pForm->GetCompileIndex() == 0xFE)
-				return FormID_View(pForm->GetFormID()).GetSmallID();
+		FormID __fastcall GetRawFormID(const TESForm* apForm) {
+			if (apForm->GetCompileIndex() == 0xFE)
+				return FormID_View(apForm->GetFormID()).GetSmallID();
 			else
-				return FormID_View(pForm->GetFormID()).GetID();
+				return FormID_View(apForm->GetFormID()).GetID();
 		}
 
 		HookUtils::CallDetour kScriptLoadDetour;
@@ -681,6 +685,9 @@ namespace MorePluginTypes {
 			HookUtils::SafeWrite16(0x461DD5, 0x5174);
 			HookUtils::SafeWrite16(0x461DE4, 0x4275);
 			HookUtils::SafeWriteBuf(0x461E28, "\x8B\x45\x9C\x05\x10\x02\x00\x00\x89\x45\xD8\xEB\x08\x8B\x45\xD8\x8B\x40\x04\xEB\xF3\x83\xF8\x00\x0F\x84\xA0\x03\x00\x00\x8B\x08\x85\xC9\x74\xE9\x8A\x91\x0C\x04\x00\x00\x80\xFA\xFF\x74\xDE\x89\x4D\xD4\xEB\x0A");
+		
+			// Just for an error message in FalloutAudio::ResolveSoundName...
+			HookUtils::ReplaceCall(0x82D2FD, &TESDataHandler::GetCompiledFileCount);
 		}
 
 	}

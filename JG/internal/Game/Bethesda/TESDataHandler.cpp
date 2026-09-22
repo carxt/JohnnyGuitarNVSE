@@ -22,25 +22,14 @@ const BSSimpleList<TESFile*>* TESDataHandler::GetFileList() const {
 TESFile* TESDataHandler::GetListFile(uint32_t auiIndex) const {
 #ifdef GAME
 	const BSSimpleList<TESFile*>* pIter = GetFileList();
-
-	uint32_t i = 0;
-	if (auiIndex) {
-		while (true) {
-			pIter = pIter->GetNext();
-			if (!pIter)
-				break;
-
-			if (pIter->GetItem() && ++i < auiIndex)
-				continue;
-
-			return pIter->GetItem();
-		}
-	}
-	else {
-		if (pIter)
-			return pIter->GetItem();
+	for (uint32_t i = 0; i < auiIndex; ++i) {
+		pIter = pIter->GetNext();
+		if (!pIter || !pIter->GetItem())
+			break;
 	}
 
+	if (pIter)
+		return pIter->GetItem();
 	return nullptr;
 #else
 	return ThisCall<TESFile*>(0x4CF380, this, auiIndex);
@@ -68,6 +57,7 @@ TESFile* TESDataHandler::GetListFile(const char* apFileName) const {
 #endif
 }
 
+// GAME - 0x51F550
 uint32_t TESDataHandler::GetCompiledFileCount() const {
 	return kCompiledFiles.GetFileCount();
 }
@@ -75,7 +65,11 @@ uint32_t TESDataHandler::GetCompiledFileCount() const {
 // GAME - 0x465010
 // GECK - 0x4CDFA0
 TESFile* TESDataHandler::GetCompiledFile(uint32_t auiIndex) const {
-	return kCompiledFiles.GetFile(auiIndex);
+#ifdef GAME
+	return ThisCall<TESFile*>(0x465010, this, auiIndex);
+#else
+	return ThisCall<TESFile*>(0x4CDFA0, this, auiIndex);
+#endif
 }
 
 TESFile* TESDataHandler::GetCompiledFileForFormID(uint32_t auiFormID) const {

@@ -101,8 +101,6 @@ public:
 		};
 	};
 
-protected:
-	friend class TESDataHandler;
 	uint32_t __fastcall GetFileCount() const;
 
 	TESFile* __fastcall GetFile(uint32_t auiIndex) const;
@@ -119,7 +117,6 @@ protected:
 	TESFile* __fastcall GetOverlayFile(uint32_t auiIndex) const;
 #endif
 
-public:
 #if ESL_SUPPORT || OVERLAY_SUPPORT
 	void Initialize();
 #endif
