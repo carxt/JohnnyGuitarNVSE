@@ -970,8 +970,8 @@ namespace MorePluginTypes {
 			if (ucFileIndex == 0xFF)
 				return true;
 
-			if (bSupportESLs && ucIndex == ucFileIndex && pFile->IsSmallFile()) {
-				const uint16_t usSmallIndex = (uiFormID >> 12) & 0xFFF;
+			if (bSupportESLs && ucIndex == 0xFE && ucIndex == ucFileIndex) {
+				const uint16_t usSmallIndex = FormID_View(scriptObj->GetFormID()).GetSmallIndex();
 				if (pFile->GetSmallCompileIndex() > usSmallIndex) {
 					*result = 1;
 					return true;
