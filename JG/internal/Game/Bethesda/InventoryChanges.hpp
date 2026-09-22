@@ -47,7 +47,7 @@ public:
 
 	float GetEquippedWeight(const Actor* apOwner) const;
 	
-	using IterateFunc = bool(*__cdecl)(ItemChange* apItemChange, void* apUserData);
+	using IterateFunc = bool(__cdecl*)(ItemChange* apItemChange, void* apUserData);
 	int32_t IterateInventory(IterateFunc apFunc, void* apUserData, uint32_t auiIterateFlags) const;
 
 	bool GetNextItem(InventoryIterator& arIter, ItemChange*& arItem, uint8_t aucFindFlags);
