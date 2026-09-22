@@ -645,8 +645,7 @@ namespace MorePluginTypes {
 	namespace OtherHooks {
 
 		FormID __fastcall GetRawFormID(const TESForm* pForm) {
-			const TESFile* pFile = pForm->GetFile(0);
-			if (pFile && bSupportESLs && pFile->IsSmallFile())
+			if (bSupportESLs && pForm->GetCompileIndex() == 0xFE)
 				return FormID_View(pForm->GetFormID()).GetSmallID();
 			else
 				return FormID_View(pForm->GetFormID()).GetID();
