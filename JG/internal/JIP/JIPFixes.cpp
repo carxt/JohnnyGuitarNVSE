@@ -1903,14 +1903,13 @@ namespace JIPFixes {
 				const int32_t iCorrectedHotKey = iHotkey - 1;
 				const InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(PlayerCharacter::GetSingleton());
 				if (pInvChanges) {
-					ItemChange* pHotkeyItem = pInvChanges->GetHotkeyItem(iCorrectedHotKey);
+					ClonedItemChange* pHotkeyItem = pInvChanges->GetHotkeyItem(iCorrectedHotKey);
 					if (pHotkeyItem) {
 						ExtraDataList* pExtraList = pHotkeyItem->pExtraLists ? pHotkeyItem->pExtraLists->GetItem() : nullptr;
 						TESObjectREFR* pInvRef = InventoryRefCreateEntry(PlayerCharacter::GetSingleton(), pHotkeyItem->pObject, pHotkeyItem->iNumber, pExtraList);
 						if (pInvRef)
 							*reinterpret_cast<FormID*>(result) = pInvRef->GetFormID();
 					}
-
 					delete pHotkeyItem;
 				}
 			}
@@ -1933,7 +1932,7 @@ namespace JIPFixes {
 
                 const int32_t iCorrectedHotKey = iHotkey - 1;
 
-                InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(PlayerCharacter::GetSingleton());
+                InventoryChanges* pInvChanges = InventoryChanges::GetOrAddInventoryChanges(PlayerCharacter::GetSingleton());
                 if (pInvChanges) {
                     ItemChange* pHotkeyItem = pInvChanges->GetHotkeyItem(iCorrectedHotKey);
                     if (pHotkeyItem)

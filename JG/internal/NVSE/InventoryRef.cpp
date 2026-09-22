@@ -4,7 +4,7 @@
 #include "Bethesda/TESObjectREFR.hpp"
 
 bool __fastcall InventoryRef::CreateExtraData(BSExtraData* apExtraData) {
-	InventoryChanges* pInvChanges = pContainerRef->GetExtra()->GetContainerChanges();
+	InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(pContainerRef);
 	if (!pInvChanges)
 		return false;
 
