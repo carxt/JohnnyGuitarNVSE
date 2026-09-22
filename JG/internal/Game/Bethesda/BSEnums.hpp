@@ -158,7 +158,7 @@ struct _ExtraDataType {
 		ExtraAction						= 14,
 		ExtraStartingPosition			= 15,
 		ExtraAnim						= 16,
-		ExtraBiped						= 17, // GECK
+		ExtraBiped						= 17, // GECK only
 		ExtraUsedMarkers				= 18,
 		ExtraDistantData				= 19,
 		ExtraRagDollData				= 20,
@@ -229,6 +229,7 @@ struct _ExtraDataType {
 		ExtraTalkingActor				= 85,
 		ExtraObjectHealth				= 86,
 		ExtraDecalRefs					= 87,
+		ExtraDecalTargets				= 88, // GECK only
 		ExtraCellImageSpace				= 89,
 		ExtraNavMeshPortal				= 90,
 		ExtraModelSwap					= 91,
@@ -236,6 +237,7 @@ struct _ExtraDataType {
 		ExtraRadiation					= 93,
 		ExtraFactionChanges				= 94,
 		ExtraDismemberedLimbs			= 95,
+		ExtraActorCause					= 96,
 		ExtraMultiBound					= 97,
 		ExtraMultiBoundData				= 98,
 		ExtraMultiBoundRef				= 99,
@@ -245,6 +247,7 @@ struct _ExtraDataType {
 		ExtraEmittanceSource			= 103,
 		ExtraRadioData					= 104,
 		ExtraCombatStyle				= 105,
+		ExtraLinkColorPair				= 106, // GECK only
 		ExtraPrimitive					= 107,
 		ExtraOpenCloseActivateRef		= 108,
 		ExtraAnimNoteReceiver			= 109,
