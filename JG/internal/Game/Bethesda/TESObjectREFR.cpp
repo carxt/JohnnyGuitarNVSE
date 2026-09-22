@@ -798,10 +798,8 @@ int32_t TESObjectREFR::GetInventoryObjectCount(TESBoundObject* apObject) const {
 #ifdef GAME
 	return ThisCall<int32_t>(0x575610, this, apObject);
 #else
-	InventoryChanges* pChanges = InventoryChanges::GetInventoryChanges(const_cast<TESObjectREFR*>(this));
-	if (pChanges)
-		return pChanges->GetObjectCount(apObject);
-	return 0;
+	InventoryChanges* pChanges = InventoryChanges::GetInventoryChanges(this);
+	return pChanges ? pChanges->GetObjectCount(apObject) : 0;
 #endif
 }
 
