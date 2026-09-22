@@ -99,15 +99,12 @@ void TESRace::ClearHairList() {
 }
 
 // GAME - 0x6137B0
+// GECK - 0x584DB0
 TESHair* TESRace::GetRaceHair(FormID auiFormID) const {
 #ifdef GAME
 	return ThisCall<TESHair*>(0x6137B0, this, auiFormID);
 #else
-	for (auto pIter = GetHairList(); pIter && pIter->GetItem(); pIter = pIter->GetNext()) {
-		if (pIter->GetItem()->GetFormID() == auiFormID)
-			return pIter->GetItem();
-	}
-	return nullptr;
+	return ThisCall<TESHair*>(0x584DB0, this, auiFormID);
 #endif
 }
 
@@ -142,14 +139,12 @@ void TESRace::SetDefaultHairColor(SEX aeSex, uint8_t aucColor) {
 }
 
 // GAME - 0x613120
+// GECK - 0x5840E0
 float TESRace::GetClampFaceGeoValue() const {
 #ifdef GAME
 	return ThisCall<float>(0x613120, this);
 #else
-	if (fClampFaceGeoValues[0] <= 0.f)
-		return 5.f;
-	else
-		return fClampFaceGeoValues[0];
+	return ThisCall<float>(0x5840E0, this);
 #endif
 }
 
@@ -158,14 +153,12 @@ void TESRace::SetClampFaceGeoValue(float afVal) {
 }
 
 // GAME - 0x613160
+// GECK - 0x584110
 float TESRace::GetClampFaceGeoValue2() const {
 #ifdef GAME
 	return ThisCall<float>(0x613160, this);
 #else
-	if (fClampFaceGeoValues[1] <= 0.f)
-		return 3.f;
-	else
-		return fClampFaceGeoValues[1];
+	return ThisCall<float>(0x584110, this);
 #endif
 }
 
@@ -193,15 +186,12 @@ void TESRace::ClearEyeColorList() {
 }
 
 // GAME - 0x6138B0
+// GECK - 0x584DE0
 TESEyes* TESRace::GetRaceEyeColor(FormID auiFormID) const {
 #ifdef GAME
 	return ThisCall<TESEyes*>(0x6138B0, this, auiFormID);
 #else
-	for (auto pIter = GetEyeColorList(); pIter && pIter->GetItem(); pIter = pIter->GetNext()) {
-		if (pIter->GetItem()->GetFormID() == auiFormID)
-			return pIter->GetItem();
-	}
-	return nullptr;
+	return ThisCall<TESEyes*>(0x584DE0, this, auiFormID);
 #endif
 }
 
@@ -235,13 +225,12 @@ void TESRace::SetHeadPartModel(SEX aeSex, HeadPart aePart, const char* apPath) {
 }
 
 // GAME - 0x613B20
+// GECK - 0x584520
 const TESTexture* TESRace::GetHeadPartTexture(SEX aeSex, HeadPart aePart) const {
 #ifdef GAME
 	return ThisCall<TESTexture*>(0x613B20, this, aeSex, aePart);
 #else
-	if (aeSex < SEX::COUNT && aePart < HeadPart::COUNT)
-		return &kHeadTextures[aeSex][aePart];
-	return nullptr;
+	return ThisCall<TESTexture*>(0x584520, this, aeSex, aePart);
 #endif
 }
 

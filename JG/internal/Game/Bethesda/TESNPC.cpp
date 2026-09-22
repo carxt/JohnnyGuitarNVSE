@@ -9,11 +9,12 @@ TESClass* TESNPC::GetClass() const {
 }
 
 // GAME - 0x601C70
+// GECK - 0x56F380
 void TESNPC::SetClass(TESClass* apClass) {
 #ifdef GAME
 	ThisCall(0x601C70, this, apClass);
 #else
-	pClass = apClass;
+	ThisCall(0x56F380, this, apClass);
 #endif
 }
 

@@ -97,7 +97,7 @@ public:
 	FileHeader							kHeader;
 	Bitfield<_FileFlags>				uiFlags;
 	BSSimpleList<const char*>			kListMasters;
-	BSSimpleList<const FILETIME*>		kMastersData;
+	BSSimpleList<const ULARGE_INTEGER*>	kMastersData;
 	uint32_t							uiMasterCount;
 	TESFile**							ppMasters;
 	_FILETIME							kDeletedFormTime;
@@ -107,10 +107,10 @@ public:
 	void*								pDecompressedFormBuffer;
 	uint32_t							uiDecompressedFormBufferSize;
 #ifdef GAME
-	bool								bMaybeShouldBeReloaded;
+	bool								bDLC;
 #else
-	TESFile*							pUnkTESFile_428;
-	bool								bMaybeShouldBeReloaded;
+	TESFile*							pLocalFile;
+	bool								bDLC;
 	FormID*								pOwnedForms;
 	uint32_t							uiOwnedFormCount;
 #endif
