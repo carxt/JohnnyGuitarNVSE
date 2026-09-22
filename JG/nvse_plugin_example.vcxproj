@@ -1935,6 +1935,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\ExtraAudioMarker.hpp" />
+    <ClInclude Include="internal\Game\Obsidian\FastInventoryIterator.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\MediaLocationController.hpp" />
     <ClInclude Include="internal\Game\Obsidian\MediaSet.hpp" />
     <ClInclude Include="internal\Game\Obsidian\TESAmmoEffect.hpp" />

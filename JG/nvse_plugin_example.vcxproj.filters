@@ -2872,6 +2872,9 @@
     <ClInclude Include="internal\Game\Obsidian\ContinuousBeamProjectile.hpp">
       <Filter>internal\Game\Obsidian</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\FastInventoryIterator.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
