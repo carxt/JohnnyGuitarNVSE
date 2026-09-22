@@ -594,7 +594,12 @@ using ScrapMap = std::unordered_map<KEY, DATA, std::hash<KEY>, std::equal_to<KEY
 bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NVSEArrayVar* pEffArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	auto pList = PlayerCharacter::GetSingleton()->GetActiveEffectList();
+
+	Actor* pActor = PlayerCharacter::GetSingleton();
+	if (thisObj && thisObj->IsActor())
+		pActor = static_cast<Actor*>(thisObj);
+
+	auto pList = pActor->GetActiveEffectList();
 	if (pList && !pList->IsEmpty()) {
 		ScrapMap<TESForm*, std::pair<float, float>> kTempEffectMap;
 		while (pList && !pList->IsEmpty()) {
