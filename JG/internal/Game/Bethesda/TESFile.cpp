@@ -1,5 +1,9 @@
 #include "TESFile.hpp"
 
+#if ESL_SUPPORT || OVERLAY_SUPPORT
+#include "Shared/Utils/DebugLog.hpp"
+#endif
+
 // GAME - 0x4739B0
 // GECK - 0x4E2E40
 TESFile* TESFile::GetThreadSafeFile() {

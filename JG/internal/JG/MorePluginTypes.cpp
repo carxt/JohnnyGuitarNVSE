@@ -12,7 +12,10 @@
 #include "internal/CommandOpcodes.h"
 #include <ScriptUtils.h>
 #include <JIP/JIPUtils.hpp>
-#include <shared/Utils/StackObject.hpp>
+
+#include "Shared/Utils/DebugLog.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
+#include "Shared/Utils/StackObject.hpp"
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern NVSEStringVarInterface* g_strInterface;
@@ -411,7 +414,7 @@ namespace MorePluginTypes {
 						pFile = nullptr;
 						kFiles.Add(pFile);
 						ucLoadOrderChanges.Set(1);
-						Console_Print("Missing mod %s", cModName);
+						_MESSAGE("Missing mod %s", cModName);
 					}
 
 					if (kFiles.GetSize() != pDataHandler->GetCompiledFileCount())
@@ -438,7 +441,7 @@ namespace MorePluginTypes {
 							bResult = false;
 							pFile = nullptr;
 							kSmallFiles.Add(pFile);
-							Console_Print("Missing small mod %s", cModName);
+							_MESSAGE("Missing small mod %s", cModName);
 							ucLoadOrderChanges.Set(2);
 						}
 					}
