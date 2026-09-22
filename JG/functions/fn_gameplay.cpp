@@ -558,7 +558,7 @@ bool __fastcall ValidTempEffect(const EffectItem* apEffectItem) {
 		return false;
 
 	const auto eArchetype = apEffectItem->GetEffectSetting()->GetEffectArchetype();
-	return !eArchetype == EffectArchetypes::Type::VALUE_MODIFIER
+	return eArchetype == EffectArchetypes::Type::VALUE_MODIFIER
 		|| (eArchetype == EffectArchetypes::Type::SCRIPT && apEffectItem->GetEffectSetting()->GetFlags().bDisplayEffectName)
 		|| (eArchetype >= EffectArchetypes::Type::INVISIBILITY && eArchetype <= EffectArchetypes::Type::DARKNESS)
 		|| (eArchetype == EffectArchetypes::Type::PARALYSIS)
