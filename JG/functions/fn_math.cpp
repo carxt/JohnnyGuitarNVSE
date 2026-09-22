@@ -1,5 +1,4 @@
 #include "fn_math.h"
-#include "GameObjects.h"
 #include "GameProcess.h"
 #include "misc/misc.h"
 #include "netimmerse.h"
@@ -7,6 +6,8 @@
 
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/Interface.hpp"
+#include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 enum FOVType {
 	VIEWMODEL	= 0,
@@ -19,10 +20,10 @@ SPEC_NOINLINE bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL) {
 	const FOVType eFOV = *reinterpret_cast<FOVType*>(&arg1);
 	switch (eFOV) {
 		case FOVType::VIEWMODEL:
-			*result = PlayerCharacter::GetSingleton()->firstPersonFOV;
+			*result = PlayerCharacter::GetSingleton()->Get1stPersonFOV();
 			break;
 		case FOVType::WORLD:
-			*result = PlayerCharacter::GetSingleton()->worldFOV;
+			*result = PlayerCharacter::GetSingleton()->GetWorldFOV();
 			break;
 		default:
 			*result = TESMain::GetWorldSceneGraph()->fCurrentFOV;
@@ -47,8 +48,8 @@ bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS) {
 
 	ASSUME_ASSERT(pViewmodelFOV && pWorldFOV);
 
-	pViewmodelFOV->data = PlayerCharacter::GetSingleton()->firstPersonFOV;
-	pWorldFOV->data = PlayerCharacter::GetSingleton()->worldFOV;
+	pViewmodelFOV->data = PlayerCharacter::GetSingleton()->Get1stPersonFOV();
+	pWorldFOV->data = PlayerCharacter::GetSingleton()->GetWorldFOV();
 	if (pCurrentFOV)
 		pCurrentFOV->data = TESMain::GetWorldSceneGraph()->fCurrentFOV;
 
@@ -249,13 +250,13 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 	*result = 0;
 	const Actor* pActor = static_cast<Actor*>(thisObj);
 	char cObjectName[MAX_PATH];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName) && pActor->IsMobileObject() && pActor->baseProcess) {
-		const NiAVObject* pObject = thisObj->GetNiBlock(cObjectName);
-		const ActorHitData* pHitData = pActor->baseProcess->GetHitData();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName) && pActor->IsMobileObject() && pActor->GetCurrentAIProcess()) {
+		const NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->Get3DVerySimple(), cObjectName);
+		const HitData* pHitData = pActor->GetCurrentAIProcess()->GetLastHitData();
 		if (!pHitData || !pObject) 
 			return true;
 		
-		*result = pObject->m_kWorld.m_kTranslate.Distance(pHitData->impactPos);
+		*result = pObject->m_kWorld.m_kTranslate.Distance(pHitData->kImpactPos);
 	}
 
 	return true;
@@ -268,7 +269,7 @@ bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	if (!thisObj || !(ExtractArgsEx(EXTRACT_ARGS_EX, &cObjectName, &kPos.x, &kPos.y, &kPos.z))) 
 		return true;
 
-	const NiAVObject* pObject = thisObj->GetNiBlock(cObjectName);
+	const NiAVObject* pObject = BSUtilities::GetObjectByName(thisObj->Get3DVerySimple(), cObjectName);
 	if (!pObject) 
 		return true;
 	
@@ -288,8 +289,8 @@ bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pRefA, &pRefB, &cObjectNameA, &cObjectNameB)) 
 		return true;
 
-	const NiAVObject* pObjectA = pRefA->GetNiBlock(cObjectNameA);
-	const NiAVObject* pObjectB = pRefB->GetNiBlock(cObjectNameB);
+	const NiAVObject* pObjectA = BSUtilities::GetObjectByName(pRefA->Get3DVerySimple(), cObjectNameA);
+	const NiAVObject* pObjectB = BSUtilities::GetObjectByName(pRefB->Get3DVerySimple(), cObjectNameB);
 	if (!pObjectA || !pObjectB) 
 		return true;
 
@@ -310,7 +311,7 @@ bool Cmd_JGLegacyWorldToScreen_Execute(COMMAND_ARGS) {
 	char cOutZ[VAR_NAME_SIZE];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cOutX, &cOutY, &cOutZ, &kPos.x, &kPos.y, &kPos.z, &eHandleType, &pRef)) {
 		if (pRef)
-			kPos += pRef->pos;
+			kPos += pRef->GetPosition();
 
 		NiPoint3 kResult = { 0.f, 0.f, 0.f };
 		*result = (WorldToScreen::WorldToScreen(kPos, kResult, eHandleType) ? 1.0 : 0.0);
@@ -333,7 +334,7 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pOutX, &pOutY, &pOutZ, &kPos.x, &kPos.y, &kPos.z, &eHandleType, &pRef)) {
 		ASSUME_ASSERT(pOutX && pOutY && pOutZ);
 		if (pRef)
-			kPos += pRef->pos; 
+			kPos += pRef->GetPosition(); 
 
 		NiPoint3 kResult = { 0.f, 0.f, 0.f };
 		*result = (WorldToScreen::WorldToScreen(kPos, kResult, eHandleType) ? 1.0 : 0.0);

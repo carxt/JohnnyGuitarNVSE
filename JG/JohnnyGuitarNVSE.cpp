@@ -1,5 +1,4 @@
 #include "JohnnyGuitarNVSE.h"
-#include "decoding.h"
 #include "nvse_version.h"
 
 #include "Bethesda/AutoMemContext.hpp"
@@ -19,6 +18,9 @@
 #include "JG/TaskQueue.hpp"
 
 #include "JIP/JIPFixes.hpp"
+
+#include "Shared/Utils/DebugLog.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 BS_ALLOCATORS
 

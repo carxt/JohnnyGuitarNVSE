@@ -3,6 +3,8 @@
 #include "BSShaderProperty.hpp"
 #include "Gamebryo/NiTexturingProperty.hpp"
 
+#include <d3d9types.h>
+
 class NiAVObject;
 
 class BSShaderBloodSplatterProperty : public BSShaderProperty {

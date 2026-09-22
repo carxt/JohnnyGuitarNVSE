@@ -1,4 +1,7 @@
 #include "ExtraDataList.hpp"
+#ifdef EDITOR
+#include "ExtraLeveledCreature.hpp"
+#endif
 
 ExtraDataList* ExtraDataList::Create() {
 #ifdef GAME
@@ -32,6 +35,26 @@ void ExtraDataList::CopyListForReference(ExtraDataList* apCopy, bool abRemove) {
 	ThisCall(0x412490, this, apCopy, abRemove);
 #else
 	ThisCall(0x4B1D10, this, apCopy, abRemove);
+#endif
+}
+
+// GAME - 0x4216F0
+// GECK - 0x4AB720
+TESActorBase* ExtraDataList::GetLevCreaOriginalBase() const {
+#ifdef GAME
+	return ThisCall<TESActorBase*>(0x4216F0, this);
+#else
+	return ThisCall<TESActorBase*>(0x4AB720, this);
+#endif
+}
+
+// GAME - 0x421720
+TESActorBase* ExtraDataList::GetLevCreaTemplate() const {
+#ifdef GAME
+	return ThisCall<TESActorBase*>(0x421720, this);
+#else
+	const ExtraLeveledCreature* pData = GetExtraData<ExtraLeveledCreature>();
+	return pData ? pData->pTemplate : nullptr;
 #endif
 }
 
@@ -271,5 +294,65 @@ void ExtraDataList::SetImageSpace(TESImageSpace* apImageSpace) {
 	ThisCall(0x41C290, this, apImageSpace);
 #else
 	ThisCall(0x4AD8A0, this, apImageSpace);
+#endif
+}
+
+// GAME - 0x42F2D0
+// GECK - 0x4ABF90
+bool ExtraDataList::GetIgnoredBySandbox() const {
+#ifdef GAME
+	return ThisCall<bool>(0x42F2D0, this);
+#else
+	return ThisCall<bool>(0x4ABF90, this);
+#endif
+}
+
+// GAME - 0x42F200
+// GECK - 0x4AE8C0
+void ExtraDataList::SetIgnoredBySandbox(bool abIgnored) {
+#ifdef GAME
+	ThisCall(0x42F200, this, abIgnored);
+#else
+	ThisCall(0x4AE8C0, this, abIgnored);
+#endif
+}
+
+// GAME - 0x418520
+// GECK - 0x4A9A60
+InventoryChanges* ExtraDataList::GetContainerChanges() const {
+#ifdef GAME
+	return ThisCall<InventoryChanges*>(0x418520, this);
+#else
+	return ThisCall<InventoryChanges*>(0x4A9A60, this);
+#endif
+}
+
+// GAME - 0x419650
+// GECK - 0x4A9E20
+void ExtraDataList::SetContainerChanges(InventoryChanges* apChanges) {
+#ifdef GAME
+	ThisCall(0x419650, this, apChanges);
+#else
+	ThisCall(0x4A9E20, this, apChanges);
+#endif
+}
+
+// GAME - 0x4182B0
+// GECK - 0x4A9910
+LockData* ExtraDataList::GetLock() const {
+#ifdef GAME
+	return ThisCall<LockData*>(0x4182B0, this);
+#else
+	return ThisCall<LockData*>(0x4A9910, this);
+#endif
+}
+
+// GAME - 0x419050
+// GECK - 0x4A9D20
+void ExtraDataList::SetLock(LockData* apLock) {
+#ifdef GAME
+	ThisCall(0x419050, this, apLock);
+#else
+	ThisCall(0x4A9D20, this, apLock);
 #endif
 }

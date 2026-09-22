@@ -8,6 +8,8 @@
 #include "shared/BSMemory/BSMemory.hpp"
 #include "shared/BSMemory/BSScrapMemory.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 #include <vector>
 #include <algorithm>
 #include <execution>

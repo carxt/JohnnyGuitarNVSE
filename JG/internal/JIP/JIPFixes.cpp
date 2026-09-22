@@ -2,34 +2,34 @@
 #include "JIPSettings.hpp"
 #include "JIPUtils.hpp"
 
+#ifdef GAME
+#include "decoding.h"
+#include "GameData.h"
+#include "GameProcess.h"
+#include "GameTasks.h"
+#include "GameTiles.h"
+#include "GameUI.h"
+#include "GameRTTI.h"
+#include "utility.h"
+
+#include "Bethesda/AILinearTaskThreadManager.hpp"
 #include "Bethesda/AutoMemContext.hpp"
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/BSShaderUtil.hpp"
 #include "Bethesda/BSStringT.hpp"
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/FixedStrings.hpp"
+#include "Bethesda/InventoryChanges.hpp"
+#include "Bethesda/MenuConsole.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 #include "Bethesda/RendererSettingCollection.hpp"
 #include "Bethesda/Setting.hpp"
-#include "Bethesda/TESHavokUtilities.hpp"
-#include "Bethesda/TimeGlobal.hpp"
-#include "Bethesda/AILinearTaskThreadManager.hpp"
-#include "Bethesda/MenuConsole.hpp"
 #include "Bethesda/Sky.hpp"
-#include "Bethesda/InventoryChanges.hpp"
+#include "Bethesda/TaskQueueInterface.hpp"
+#include "Bethesda/TESHavokUtilities.hpp"
+#include "Bethesda/TESMain.hpp"
+#include "Bethesda/TimeGlobal.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
-
-#include "decoding.h"
-#include "GameData.h"
-#include "GameObjects.h"
-#include "GameOSDepend.h"
-#include "GameProcess.h"
-#include "GameRTTI.h"
-#include "GameTasks.h"
-#include "GameTiles.h"
-#include "GameUI.h"
-#include "ParamInfos.h"
-#include "PluginAPI.h"
-#include "utility.h"
 
 #include "events/EventFramework.h"
 
@@ -38,17 +38,23 @@
 
 #include "NVSE/InventoryRef.hpp"
 
-#include "internal/CommandOpcodes.h"
-
-#include "Shared/BSMemory/BSScrapMemory.hpp"
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
 #include "Shared/Utils/StackObject.hpp"
 #include "Shared/Utils/CustomClass.hpp"
 
 #include <unordered_map>
+#endif
+
+#include "ParamInfos.h"
+#include "PluginAPI.h"
+
+#include "internal/CommandOpcodes.h"
+
+#include "Shared/Utils/DebugLog.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 class BSRenderedTexture;
 
-extern bool bFixJIP;
 extern NVSECommandTableInterface* g_cmdTableInterface;
 #ifdef GAME
 extern NVSEScriptInterface* g_scriptInterface;
@@ -333,7 +339,7 @@ namespace JIPFixes {
 
 		void __fastcall DetachObjects(TESObjectREFR* apRef, const char* apName) {
 			const NiFixedString strName(apName);
-			NiPointer<NiAVObject> spScene = apRef->Get3DSimple();
+			NiPointer<NiAVObject> spScene = apRef->Get3DVerySimple();
 			ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(0);
 			if (spScene) [[likely]] {
 				NiPointer<NiAVObject> spObj = spScene->GetObjectByName(strName);
@@ -1031,8 +1037,8 @@ namespace JIPFixes {
 
 		uint32_t uiWeaponHasScope = 0;
 
-		SPEC_NOINLINE void __fastcall DetachBiped(BipedAnim* apBiped, uint32_t auiIndex) {
-			NiPointer<NiNode> spNode = apBiped->kObjects[auiIndex].pPartObject;
+		SPEC_NOINLINE void __fastcall DetachBiped(BipedAnim* apBiped, BIPED_OBJECT aeObject) {
+			NiPointer<NiAVObject> spNode = apBiped->kObjects[aeObject].pPartClone;
 			// Should not be doing this, since the command can run while rendering/3D updates happen on other threads
 			// If so, RemovePart/RemoveWeapon will queue the detach and cleanup, but we need the model to be detached *right now*
 			// By detaching here, we allow the game to only queue the cleanup, partial success I guess
@@ -1040,10 +1046,10 @@ namespace JIPFixes {
 			if (spNode && spNode->GetParent())
 				spNode->GetParent()->DetachChild(spNode);
 
-			if (auiIndex == BIPED_OBJECT::WEAPON)
+			if (aeObject == BIPED_OBJECT::WEAPON)
 				apBiped->RemoveBipedWeapon();
 			else
-				apBiped->RemovePart(auiIndex, true);
+				apBiped->RemovePart(aeObject, true);
 		}
 
 		bool Cmd_ReloadEquippedModels_Execute(COMMAND_ARGS) {
@@ -1056,11 +1062,11 @@ namespace JIPFixes {
 				return true;
 
 			Actor* pActor = static_cast<Actor*>(thisObj);
-			BaseProcess* pProcess = pActor->baseProcess;
-			if (!pProcess || pProcess->processLevel != PROCESS_TYPE::HIGH)
+			BaseProcess* pProcess = pActor->GetCurrentAIProcess();
+			if (!pProcess || pProcess->GetProcessLevel() != PROCESS_TYPE::HIGH)
 				return true;
 
-			const NiNode* pRoot = thisObj->Get3D();
+			const NiAVObject* pRoot = thisObj->Get3DVerySimple();
 			BipedAnim* pBiped = thisObj->GetBiped();
 			if (!pRoot || !pBiped)
 				return true;
@@ -1094,15 +1100,15 @@ namespace JIPFixes {
 					BipedAnim* pBiped3rd = pPlayer->GetBiped(false);
 					for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
 						if (uiValidParts.GetBit(i)) {
-							DetachBiped(pBiped1st, i);
-							DetachBiped(pBiped3rd, i);
+							DetachBiped(pBiped1st, BIPED_OBJECT(i));
+							DetachBiped(pBiped3rd, BIPED_OBJECT(i));
 						}
 					}
 				}
 				else {
 					for (uint32_t i = 0; i < BIPED_OBJECT::COUNT; i++) {
 						if (uiValidParts.GetBit(i)) {
-							DetachBiped(pBiped, i);
+							DetachBiped(pBiped, BIPED_OBJECT(i));
 						}
 					}
 				}
@@ -1534,17 +1540,23 @@ namespace JIPFixes {
 
 	namespace PowerArmorCondition {
 
+#ifdef GAME
 		STACK_FRAME_OPT_ENABLE
 		bool Cmd_GetPCCanUsePowerArmor_Eval(COMMAND_ARGS_EVAL) {
-			*result = PlayerCharacter::GetSingleton()->canUsePA;
+			*result = PlayerCharacter::GetSingleton()->bCanUsePowerArmor;
 			return true;
 		}
 		STACK_FRAME_OPT_RESET
+#endif
 
 		void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetPCCanUsePowerArmor));
 			if (pInfo) {
+#ifdef GAME
 				pInfo->eval = Cmd_GetPCCanUsePowerArmor_Eval;
+#else
+				pInfo->eval = reinterpret_cast<Cmd_Eval>(0x5BB810);
+#endif
 			}
 		}
 	}
@@ -2270,7 +2282,7 @@ namespace JIPFixes {
 		class Hook : public Actor {
 		public:
 			float GetGunSpreadHook(enum SpreadMode aeMode) {
-				if (jipActorFlags2 & 8)
+				if (ucJIPActorFlags2.GetBit(3))
 					return 0.f;
 
 				return ThisCall<float>(kGetGunSpreadDetour, this, aeMode);
@@ -2323,9 +2335,9 @@ namespace JIPFixes {
 
 		HookUtils::CallDetour kDetour;
 		void __fastcall ClearJIPFlagsAndInit(Actor* apActor, void*, bool abAddProcess) {
-			apActor->jipActorFlags1 = 0;
-			apActor->jipActorFlags2 = 0;
-			apActor->jipActorFlags3 = 0;
+			apActor->ucJIPActorFlags1 = 0;
+			apActor->ucJIPActorFlags2 = 0;
+			apActor->ucJIPActorFlags3 = 0;
 			ThisCall(kDetour, apActor, abAddProcess);
 		}
 

@@ -1,12 +1,14 @@
 #include "AnimActivationHeight.hpp"
-#include <GameObjects.h>
+#include "Bethesda/TESObjectREFR.hpp"
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace AnimActivationHeight {
 
 	float fActivationHeight = 0.f;
 
 	STACK_FRAME_OPT_ENABLE
-	SPEC_NOINLINE static void __fastcall SetHeight(const Actor* __restrict apActivator, const TESObjectREFR* __restrict apTarget) {
+	SPEC_NOINLINE static void __fastcall SetHeight(const TESObjectREFR* __restrict apActivator, const TESObjectREFR* __restrict apTarget) {
 		fActivationHeight = apTarget->GetLocationOnReference().z - apActivator->GetLocationOnReference().z;
 	}
 	STACK_FRAME_OPT_RESET
@@ -21,7 +23,7 @@ namespace AnimActivationHeight {
 		float GetEyeLevelHook() {
 			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 			const TESObjectREFR* pRef = *reinterpret_cast<TESObjectREFR**>(pEBP + iOffset);
-			const Actor* pThis = reinterpret_cast<Actor*>(this);
+			const TESObjectREFR* pThis = reinterpret_cast<TESObjectREFR*>(this);
 			SetHeight(pThis, pRef);
 			return ThisCall<float>(kDetour, this);
 		}

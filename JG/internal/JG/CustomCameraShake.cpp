@@ -1,6 +1,7 @@
 #include "CustomCameraShake.hpp"
-#include "GameObjects.h"
 #include "GameProcess.h"
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace CustomCameraShake {
 	float mult = 0, duration = 0;

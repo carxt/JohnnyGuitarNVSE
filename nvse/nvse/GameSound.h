@@ -2,6 +2,9 @@
 #include "GameTypes.h"
 #include "Bethesda/BSSoundHandle.hpp"
 #include "Bethesda/BSSoundInfo.hpp"
+#include "Gamebryo/NiSmartPointer.hpp"
+#include "Gamebryo/NiTPointerMap.hpp"
+#include "Gamebryo/NiTPointerList.hpp"
 
 class NiAVObject;
 class TESSound;

@@ -1,5 +1,7 @@
 #include "AddItemMessages.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace AddItemMessages {
 
 	// When adding item lists, allow per-item "Item Added" messages instead of issuing one message for the last item added

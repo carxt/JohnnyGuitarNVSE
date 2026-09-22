@@ -3,6 +3,7 @@
 #include "direct.h"
 #include "share.h"
 #include "shlobj.h"
+#include <cstdio>
 
 STACK_FRAME_OPT_ENABLE
 

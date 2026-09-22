@@ -1,10 +1,6 @@
 #include "nvse/GameUI.h"
-#include "GameObjects.h"
-#ifdef GAME
-#include <internal/Game/Bethesda/Conversation.hpp>
-
-uint8_t* g_MenuVisibilityArray = (uint8_t*)0x011F308F;
-NiTPrimitiveArray<Tile*>* g_TileMenuArray = (NiTPrimitiveArray<Tile*> *)0x011F3508;
+#include "Bethesda/Conversation.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 InterfaceManager* InterfaceManager::GetSingleton(void) {
 	return *(InterfaceManager**)0x011D8A80;
@@ -117,4 +113,3 @@ void MapMenu::StopHolotape()
 	*(uint8_t*)0x11DCFA4 = false;
 	ThisCall(0x775670, HUDMainMenu::GetSingleton()); // ClearSubtitlesString
 }
-#endif

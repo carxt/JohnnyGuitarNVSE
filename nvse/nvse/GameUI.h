@@ -431,7 +431,7 @@ public:
 
 		if (this->itemCount == 1)
 		{
-			auto numVisibleItemsTrait = TraitNameToID("_number_of_visible_items");
+			auto numVisibleItemsTrait = Tile::TextToTrait("_number_of_visible_items");
 			if (this->parentTile->GetFloat(numVisibleItemsTrait) > 0)
 			{
 				auto valPtr = ThisCall<Tile::Value*>(0xA00E90, this->parentTile, kTileValue_height);
@@ -470,13 +470,13 @@ public:
 
 	void SetParentEnabled(bool isEnabled)
 	{
-		static uint32_t enabledTrait = TraitNameToID("_enabled");
+		static uint32_t enabledTrait = Tile::TextToTrait("_enabled");
 		parentTile->SetFloat(enabledTrait, isEnabled);
 	}
 
 	bool IsEnabled()
 	{
-		static uint32_t enabledTrait = TraitNameToID("_enabled");
+		static uint32_t enabledTrait = Tile::TextToTrait("_enabled");
 		return parentTile && parentTile->GetFloat(enabledTrait);
 	}
 
@@ -1487,7 +1487,7 @@ public:
 };
 static_assert(sizeof(HackingMenu) == 0x1DC);
 
-struct ActorHitData;
+class HitData;
 struct VATSTargetInfo {
 	uint32_t actionType;
 	uint8_t isSuccess;
@@ -1499,7 +1499,7 @@ struct VATSTargetInfo {
 	uint8_t gap0A[2];
 	TESObjectREFR* ref;
 	uint32_t avCode;
-	ActorHitData* hitData;
+	HitData* hitData;
 	float unk18;
 	float unk1C;
 	float apCost;

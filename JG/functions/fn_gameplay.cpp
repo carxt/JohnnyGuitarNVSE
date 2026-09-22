@@ -17,6 +17,8 @@
 #include "Bethesda/TESObjectList.hpp"
 #include "Bethesda/BGSEntryPoint.hpp"
 #include "Bethesda/ExtraContainerChanges.hpp"
+#include "Bethesda/PlayerMover.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
@@ -32,12 +34,13 @@
 
 #include "NVSE/InventoryRef.hpp"
 
-#include <shared/BSMemory/BSScrapMemory.hpp>
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
+#include "utility.h"
 
 #include <unordered_map>
 
-void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, float oldVal, float newVal, ActorValueOwner* avOwner2) =
-(void(__cdecl*)(ActorValueOwner*, int, float, float, ActorValueOwner*))0x66EE50;
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
@@ -86,22 +89,22 @@ bool Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS) {
 	int32_t iEarnings;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino, &iEarnings) && pCasino && IS_TYPE(pCasino, TESCasino)) {
 		const FormID uiFormID = pCasino->GetFormID();
-		auto pIter = PlayerCharacter::GetSingleton()->casinoDataList;
+		auto pIter = PlayerCharacter::GetSingleton()->pCasinoData;
 		while (pIter && !pIter->IsEmpty()) {
-			CasinoStats* pStats = pIter->GetItem();
-			if (pStats && pStats->casinoRefID == uiFormID) {
-				pStats->earnings = iEarnings;
+			CasinoData* pStats = pIter->GetItem();
+			if (pStats && pStats->uiCasinoFormID == uiFormID) {
+				pStats->iEarnings = iEarnings;
 				*result = 1;
 				return true;
 			}
 			pIter = pIter->GetNext();
 		}
 
-		CasinoStats* pStats = BSMemory::malloc<CasinoStats>();
-		pStats->earningStage = 0;
-		pStats->earnings = iEarnings;
-		pStats->casinoRefID = uiFormID;
-		PlayerCharacter::GetSingleton()->casinoDataList->AddHead(pStats);
+		CasinoData* pStats = BSMemory::malloc<CasinoData>();
+		pStats->sEarningsLevel = 0;
+		pStats->iEarnings = iEarnings;
+		pStats->uiCasinoFormID = uiFormID;
+		PlayerCharacter::GetSingleton()->pCasinoData->AddHead(pStats);
 	}
 
 	return true;
@@ -112,11 +115,11 @@ bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS) {
 	TESCasino* pCasino = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino) && pCasino && IS_TYPE(pCasino, TESCasino)) {
 		const FormID uiFormID = pCasino->GetFormID();
-		auto pIter = PlayerCharacter::GetSingleton()->casinoDataList;
+		auto pIter = PlayerCharacter::GetSingleton()->pCasinoData;
 		while (pIter && !pIter->IsEmpty()) {
-			CasinoStats* pStats = pIter->GetItem();
-			if (pStats && pStats->casinoRefID == uiFormID) {
-				*result = pStats->earnings;
+			CasinoData* pStats = pIter->GetItem();
+			if (pStats && pStats->uiCasinoFormID == uiFormID) {
+				*result = pStats->iEarnings;
 				return true;
 			}
 			pIter = pIter->GetNext();
@@ -223,7 +226,7 @@ bool Cmd_SetCustomMapMarker_Execute(COMMAND_ARGS) {
 	NiPoint3 kPos;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kPos.x, &kPos.y, &kPos.z)) {
 		TESForm* pSpace = nullptr;
-		TESObjectCELL* pParentCell = PlayerCharacter::GetSingleton()->parentCell;
+		TESObjectCELL* pParentCell = PlayerCharacter::GetSingleton()->GetParentCell();
 		if (pParentCell) {
 			if (pParentCell->GetInterior())
 				pSpace = pParentCell;
@@ -246,11 +249,11 @@ bool Cmd_SetActorMovementFlags_Execute(COMMAND_ARGS) {
 		if (thisObj)
 			pActor = static_cast<Actor*>(thisObj);
 
-		if (pActor->IsActor() && pActor->actorMover) {
+		if (pActor->IsActor() && pActor->pActorMover) {
 			if (uiFlags)
-				pActor->actorMover->ForceMoveMode(uiFlags);
+				pActor->pActorMover->ForceMoveMode(uiFlags);
 			else
-				pActor->actorMover->ClearForcedMoveMode();
+				pActor->pActorMover->ClearForcedMoveMode();
 			*result = 1;
 		}
 	}
@@ -264,17 +267,12 @@ bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 	ExtractArgsEx(EXTRACT_ARGS_EX, &alwaysRun, &updateMovementFlags);
 	if (alwaysRun > -1) {
 		bool bAlwaysRun = (alwaysRun > 0);
-		PlayerCharacter::GetSingleton()->alwaysRun = bAlwaysRun;
+		PlayerCharacter::GetSingleton()->bAlwaysRun = bAlwaysRun;
 		if (updateMovementFlags) {
-			PlayerMover* playerMover = (PlayerMover*)PlayerCharacter::GetSingleton()->actorMover;
-			uint32_t flags = playerMover->pcMovementFlags;
-			if (bAlwaysRun) {
-				flags |= 0x200;
-			}
-			else {
-				flags &= ~0x200;
-			}
-			PlayerCharacter::GetSingleton()->actorMover->ForceMoveMode(flags);
+			PlayerMover* playerMover = static_cast<PlayerMover*>(PlayerCharacter::GetSingleton()->pActorMover);
+			auto uiFlags = playerMover->uiMoveMode;
+			uiFlags.bRunning = bAlwaysRun;
+			PlayerCharacter::GetSingleton()->pActorMover->ForceMoveMode(uiFlags);
 		}
 		*result = 1;
 	}
@@ -286,7 +284,7 @@ bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 	int32_t iAutoMove = -1;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &iAutoMove);
 	if (iAutoMove > -1) {
-		PlayerCharacter::GetSingleton()->autoMove = iAutoMove > 0;
+		PlayerCharacter::GetSingleton()->bAutoMove = iAutoMove > 0;
 		*result = 1;
 	}
 	return true;
@@ -295,7 +293,7 @@ bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 SPEC_NOINLINE bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj->IsActor())
-		*result = static_cast<Actor*>(thisObj)->magicTarget.HasDamageHealthEffect();
+		*result = static_cast<Actor*>(thisObj)->HasDamageHealthEffect();
 	return true;
 }
 
@@ -577,11 +575,11 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 		if (ref == nullptr) {
 			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
 		}
-		if (ref->Get3DSimple()) {
+		if (ref->Get3DVerySimple()) {
 			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
 			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(sound->GetFormID(), uiFlags);
 			handle.SetPosition(ref->GetLocationOnReference());
-			handle.SetObjectToFollow(ref->Get3DSimple());
+			handle.SetObjectToFollow(ref->Get3DVerySimple());
 			uint32_t time = fTime * 1000.0;
 			handle.FadeInPlay(time);
 			*result = 1;
@@ -595,39 +593,38 @@ using ScrapMap = std::unordered_map<KEY, DATA, std::hash<KEY>, std::equal_to<KEY
 
 bool Cmd_GetTempIngestibleEffects_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NVSEArrayVar* effArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	ScrapMap<TESForm*, std::pair<float, float>> tempEffectMap;
-	if (auto iter = PlayerCharacter::GetSingleton()->magicTarget.GetEffectList()->Head())
-	{
-		do
-		{
-			if (ActiveEffect* activeEff = iter->data; activeEff && activeEff->bActive && !activeEff->bTerminated &&
-				activeEff->magicItem && ValidTempEffect(activeEff->effectItem))
-				if (TESForm* form = DYNAMIC_CAST(activeEff->magicItem, MagicItem, TESForm))
-				{
-					if (form->GetFormType() == FORM_TYPE::AlchemyItem) {
-						float timeLeft = activeEff->duration - activeEff->timeElapsed;
-						auto it = tempEffectMap.find(form);
-						if (it != tempEffectMap.end() && it->second.second < activeEff->duration) {
-							it->second.first = timeLeft;
-							it->second.second = activeEff->duration;
-						}
-						else {
-							tempEffectMap.insert({ form, {timeLeft, activeEff->duration} });
-						}
+	NVSEArrayVar* pEffArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	auto pList = PlayerCharacter::GetSingleton()->GetActiveEffectList();
+	if (pList && !pList->IsEmpty()) {
+		ScrapMap<TESForm*, std::pair<float, float>> kTempEffectMap;
+		while (pList && !pList->IsEmpty()) {
+			const ActiveEffect* pEffect = pList->GetItem();
+			pList = pList->GetNext();
+			if (pEffect && pEffect->IsActive() && !pEffect->IsDone() && pEffect->GetSpell() && ValidTempEffect(pEffect->GetEffectItem())) {
+				TESForm* pForm = DYNAMIC_CAST(pEffect->GetSpell(), MagicItem, TESForm);
+				if (pForm && pForm->GetFormType() == FORM_TYPE::AlchemyItem) {
+					const float fTimeLeft = pEffect->GetDuration() - pEffect->GetElapsedTime();
+					auto it = kTempEffectMap.find(pForm);
+					if (it != kTempEffectMap.end() && it->second.second < pEffect->GetDuration()) {
+						it->second.first = fTimeLeft;
+						it->second.second = pEffect->GetDuration();
+					}
+					else {
+						kTempEffectMap.insert({ pForm, {fTimeLeft, pEffect->GetDuration()} });
 					}
 				}
-		} while (iter = iter->next);
+			}
+		}
 
-	}
-	if (!tempEffectMap.empty()) {
-		for (auto& effect : tempEffectMap) {
-			NVSEArrayVar* effArrInner = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-			g_arrInterface->AppendElements(effArrInner, effect.first, effect.second.first, effect.second.second);
-			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effArrInner));
+		if (!kTempEffectMap.empty()) {
+			for (auto& effect : kTempEffectMap) {
+				NVSEArrayVar* pEffArrInner = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+				g_arrInterface->AppendElements(pEffArrInner, effect.first, effect.second.first, effect.second.second);
+				g_arrInterface->AppendElement(pEffArr, NVSEArrayElement(pEffArrInner));
+			}
 		}
 	}
-	g_arrInterface->AssignCommandResult(effArr, result);
+	g_arrInterface->AssignCommandResult(pEffArr, result);
 	return true;
 }
 
@@ -647,7 +644,7 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	int delta = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &delta);
-	int karmaBefore = PlayerCharacter::GetSingleton()->avOwner.GetActorValueI(ActorValue::Index::KARMA);
+	int karmaBefore = PlayerCharacter::GetSingleton()->GetActorValueI(ActorValue::Index::KARMA);
 	int ikarmaMax = GameSettingCollection::iKarmaMax->Int();
 	int iKarmaMin = GameSettingCollection::iKarmaMin->Int();
 	if (delta >= 0 && ((delta + karmaBefore) > ikarmaMax)) {
@@ -657,7 +654,7 @@ bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 		delta = iKarmaMin - karmaBefore;
 	}
 	if (delta != 0) {
-		PlayerCharacter::GetSingleton()->ModActorValue(ActorValue::Index::KARMA, delta, 0);
+		PlayerCharacter::GetSingleton()->PermanentModActorValueI(ActorValue::Index::KARMA, delta, 0);
 		*result = 1;
 	}
 	return true;
@@ -750,25 +747,14 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-TESWorldSpace* __fastcall GetWorldSpace(const TESObjectREFR* apRef) {
-	const TESObjectCELL* pCell = apRef->parentCell;
-	if (!pCell)
-		pCell = apRef->childCell.GetSaveParentCell();
-
-	if (pCell && !pCell->GetInterior()) 
-		return pCell->GetWorldSpace();
-
-	return nullptr;
-}
-
 bool Cmd_GetLocationName_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cLocationName[MAX_PATH] = {};
-	if (thisObj->parentCell && thisObj->parentCell->GetInterior()) {
-		strcpy_s(cLocationName, thisObj->parentCell->GetFullName());
+	if (thisObj->GetParentCell() && thisObj->GetParentCell()->GetInterior()) {
+		strcpy_s(cLocationName, thisObj->GetParentCell()->GetFullName());
 	}
 	else {
-		const TESWorldSpace* pWorld = GetWorldSpace(thisObj);
+		const TESWorldSpace* pWorld = thisObj->GetWorldSpace();
 		if (pWorld) {
 			BSString strName;
 			pWorld->GetMapNameForLocation(strName, thisObj->GetLocationOnReference());
@@ -790,9 +776,9 @@ bool Cmd_GetLocationSpecificLoadScreensOnly_Execute(COMMAND_ARGS) {
 }
 
 bool __fastcall IsCombatTarget(const Actor* source, const Actor* toSearch) {
-	if (source->isInCombat && source->combatTargets) {
-		Actor** actorsArr = source->combatTargets->pBuffer;
-		uint32_t count = source->combatTargets->uiSize;
+	if (source->bIsInCombat && source->pCombatTargets) {
+		Actor** actorsArr = source->pCombatTargets->pBuffer;
+		uint32_t count = source->pCombatTargets->uiSize;
 		if (!actorsArr)
 			return false;
 		for (; count; count--, actorsArr++) {
@@ -803,10 +789,10 @@ bool __fastcall IsCombatTarget(const Actor* source, const Actor* toSearch) {
 }
 
 bool __fastcall IsHostileCompassTarget(const TESObjectREFR* apTarget) {
-	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
 	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::CompassTarget* pTarget = pIter->GetItem();
-		if (pTarget->isHostile && pTarget->target == apTarget)
+		PlayerCharacter::PerceivedActor* pTarget = pIter->GetItem();
+		if (pTarget->bIsHostile && pTarget->pActor == apTarget)
 			return true;
 
 		pIter = pIter->GetNext();
@@ -817,7 +803,7 @@ bool __fastcall IsHostileCompassTarget(const TESObjectREFR* apTarget) {
 bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* pActor = static_cast<Actor*>(thisObj);
-	if (ThisCall<bool>(0x579690, thisObj) && (!thisObj->IsActor() || !pActor->isTeammate) ||
+	if (thisObj->IsCrimeToActivate() && (!thisObj->IsActor() || !pActor->IsPlayerTeammate()) ||
 		thisObj->IsActor() && (IsCombatTarget(pActor, PlayerCharacter::GetSingleton()) || IsHostileCompassTarget(thisObj))) {
 		*result = 1;
 	}
@@ -828,7 +814,7 @@ bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 
 bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESForm* pOwner = ThisCall<TESForm*>(0x567790, thisObj); // TESObjectREFR::GetOwner
+	TESForm* pOwner = thisObj->GetOwner();
 	if (pOwner) {
 		ThisCall(0x8C0EC0, PlayerCharacter::GetSingleton(), thisObj, pOwner, 0xFFFFFFFF); // Actor::TrespassAlarm
 		*result = 1;
@@ -854,16 +840,16 @@ bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	}
 
 	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
 	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		PlayerCharacter::PerceivedActor* target = pIter->GetItem();
 		pIter = pIter->GetNext();
-		if (target->isHostile) {
-			if (skipInvisible > 0 && !hasImprovedDetection && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0
-				|| target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
+		if (target->bIsHostile) {
+			if (skipInvisible > 0 && !hasImprovedDetection && (target->pActor->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0
+				|| target->pActor->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
-			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->target));
+			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->pActor));
 		}
 	}
 	g_arrInterface->AssignCommandResult(hostileArr, result);
@@ -878,7 +864,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 		if (checkItems) {
 			TESForm* containerOwner = container->GetOwner();
 			if (!containerOwner) return true;
-			ExtraContainerChanges* xChanges = thisObj->extraDataList.GetExtraData<ExtraContainerChanges>();
+			ExtraContainerChanges* xChanges = thisObj->GetExtra()->GetExtraData<ExtraContainerChanges>();
 			if (!xChanges || !xChanges->pChanges || !xChanges->pChanges->pItems)
 				return true;
 			BSSimpleList<ItemChange*>* contChangesIter = xChanges->pChanges->pItems->GetHead();
@@ -917,7 +903,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* actor = static_cast<Actor*>(thisObj);
-	ItemChange* weapInfo = actor->baseProcess->GetCurrentWeapon();
+	ItemChange* weapInfo = actor->GetCurrentAIProcess()->GetCurrentWeapon();
 	if (weapInfo && weapInfo->pObject) {
 		bool hasDecreaseSpreadEffect = weapInfo->HasModEffectActive(3);
 		double minSpread = ThisCall<double>(0x524B80, weapInfo->pObject, hasDecreaseSpreadEffect);
@@ -933,7 +919,7 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 
 		totalSpread += spreadPenalty * GameSettingCollection::fNPCMaxGunWobbleAngle->Float() * 0.01745329238474369;
 
-		float noIdea = ThisCall<HighProcess*>(0x8D8520, actor)->angle1D0;
+		float noIdea = actor->GetCurrentAIProcess()->GetAimLooking();
 		totalSpread = totalSpread + noIdea;
 
 		bool hasSplitBeamEffect = weapInfo->HasModEffectActive(0xC);
@@ -949,30 +935,35 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 
 bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t index;
-	float modTimeLeft;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &index, &modTimeLeft) || !thisObj->IsActor()) return true;
-	ActiveEffectList* effList = ((Actor*)thisObj)->magicTarget.GetEffectList();
-	if (!effList) return true;
-	ListNode<ActiveEffect>* iter = effList->Head();
-	ActiveEffect* activeEff;
-	do {
-		activeEff = iter->data;
-		if (!activeEff || !activeEff->bApplied || !ValidTempEffect(activeEff->effectItem) || !activeEff->magicItem ||
-			!DYNAMIC_CAST(activeEff->magicItem, MagicItem, TESForm)) continue;
-		if (!index--) {
-			activeEff->timeElapsed += -modTimeLeft;
-			if (activeEff->timeElapsed > activeEff->duration) activeEff->Remove(true);
+	uint32_t uiIndex;
+	float fTimeLeftMod;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &uiIndex, &fTimeLeftMod) || !thisObj->IsActor()) 
+		return true;
+
+	auto pIter = static_cast<Actor*>(thisObj)->GetActiveEffectList();
+	if (!pIter || pIter->IsEmpty())
+		return true;
+
+	while (pIter && !pIter->IsEmpty()) {
+		ActiveEffect* pEffect = pIter->GetItem();
+		pIter = pIter->GetNext();
+		if (!pEffect || !pEffect->IsActive() || !ValidTempEffect(pEffect->GetEffectItem()) || !pEffect->GetSpell() || !DYNAMIC_CAST(pEffect->GetSpell(), MagicItem, TESForm))
+			continue;
+
+		if (!uiIndex--) {
+			pEffect->fElapsedTime += -fTimeLeftMod;
+			if (pEffect->GetElapsedTime() > pEffect->GetDuration())
+				pEffect->Dispel(true);
 			*result = 1;
 			break;
 		}
-	} while (iter = iter->next);
+	};
 	return true;
 }
 
 bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL* pCell = PlayerCharacter::GetSingleton()->parentCell;
+	TESObjectCELL* pCell = PlayerCharacter::GetSingleton()->GetParentCell();
 	if (pCell)
 		*result = ProcessLists::GetSingleton()->AreHostileActorsNear(pCell->GetInterior());
 	return true;
@@ -1035,18 +1026,18 @@ bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
 	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		PlayerCharacter::PerceivedActor* target = pIter->GetItem();
 		pIter = pIter->GetNext();
-		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
+		if (target->bIsHostile) {
+			if (skipInvisible > 0 && (target->pActor->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->pActor->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
-			auto distToPlayer = target->target->GetLocationOnReference().SqrDistance(playerPos);
+			auto distToPlayer = target->pActor->GetPosition().SqrDistance(playerPos);
 			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
-				closestHostile = target->target;
+				closestHostile = target->pActor;
 			}
 		}
 	}
@@ -1106,25 +1097,25 @@ bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	Actor* closestHostile = nullptr;
 	uint32_t skipInvisible = 0;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto pIter = PlayerCharacter::GetSingleton()->compassTargets;
+	auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
 	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::CompassTarget* target = pIter->GetItem();
+		PlayerCharacter::PerceivedActor* target = pIter->GetItem();
 		pIter = pIter->GetNext();
 
-		if (target->isHostile) {
-			if (skipInvisible > 0 && (target->target->avOwner.GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->target->avOwner.GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
+		if (target->bIsHostile) {
+			if (skipInvisible > 0 && (target->pActor->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->pActor->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
 				continue;
 			}
-			auto distToPlayer = target->target->GetLocationOnReference().SqrDistance(playerPos);
+			auto distToPlayer = target->pActor->GetLocationOnReference().SqrDistance(playerPos);
 			if (distToPlayer < maxDist) {
 				maxDist = distToPlayer;
-				closestHostile = target->target;
+				closestHostile = target->pActor;
 			}
 		}
 	}
 
 	if (closestHostile) {
-		auto playerRotation = PlayerCharacter::GetSingleton()->GetZRotation(0);
+		auto playerRotation = PlayerCharacter::GetSingleton()->GetHeading(false);
 		double headingAngle = GetAngleBetweenPoints(closestHostile->GetLocationOnReference(), playerPos, playerRotation);
 
 		// shift the coordinates from -180:180 to 0:360 and offset them (360 / 8 quadrants / 2) degrees
@@ -1224,27 +1215,23 @@ bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
 
 bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ActorValue::Index avCode = ActorValue::Index::NONE;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode) && ScriptUtils::InRange(avCode)) {
-		Actor* actor = (Actor*)thisObj;
-		ActorValueOwner* avOwner = &actor->avOwner;
-		float oldVal = avOwner->GetActorValueF(avCode);
+	ActorValue::Index eActorValue = ActorValue::Index::NONE;
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &eActorValue)) {
+		Actor* pActor = static_cast<Actor*>(thisObj);
+		const float fOldVal = pActor->GetActorValueF(eActorValue);
 
-		tList<void>* actorPermSetAVList = &actor->list0E0;
-		void* avEntry = ThisCall<void*>(0x937760, actorPermSetAVList, avCode);
-		ThisCall(0x937400, actorPermSetAVList, avEntry);
-		thisObj->AddChange(0x400000);
+		Modifier* pModifier = pActor->kBaseValueOverrides.GetModifierItem(eActorValue);
+		pActor->kBaseValueOverrides.DeleteModifier(pModifier);
+		pActor->AddChange(0x400000);
 
-		if (!actor->IsPlayerRef()) {
-			BaseProcess* base = actor->baseProcess;
-			if (base) {
-				base->Unk_EC(avCode);
-			}
+		if (!pActor->IsPlayer()) {
+			BaseProcess* pAIProcess = pActor->GetCurrentAIProcess();
+			if (pAIProcess)
+				pAIProcess->SetCachedActorValueOutOfDate(eActorValue);
 		}
 
-		// call handle change with new value
-		float newVal = avOwner->GetActorValueF(avCode);
-		HandleActorValueChange(avOwner, avCode, oldVal, newVal, nullptr);
+		const float fNewVal = pActor->GetActorValueF(eActorValue);
+		ActorValue::CheckCallModifiedCallback(pActor, eActorValue, fOldVal, fNewVal, nullptr);
 		*result = 1;
 	}
 	return true;
@@ -1252,27 +1239,23 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 
 bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ActorValue::Index avCode = ActorValue::Index::NONE;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &avCode) && ScriptUtils::InRange(avCode)) {
-		Actor* actor = (Actor*)thisObj;
-		ActorValueOwner* avOwner = &actor->avOwner;
-		float oldVal = avOwner->GetActorValueF(avCode);
+	ActorValue::Index eActorValue = ActorValue::Index::NONE;
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &eActorValue)) {
+		Actor* pActor = static_cast<Actor*>(thisObj);
+		const float fOldVal = pActor->GetActorValueF(eActorValue);
 
-		tList<void>* actorPermForceAVList = &actor->list0D0;
-		void* avEntry = ThisCall<void*>(0x937760, actorPermForceAVList, avCode);
-		ThisCall(0x937400, actorPermForceAVList, avEntry);
-		thisObj->AddChange(0x800000);
+		Modifier* pModifier = pActor->kPermanentModifiers.GetModifierItem(eActorValue);
+		pActor->kPermanentModifiers.DeleteModifier(pModifier);
+		pActor->AddChange(0x800000);
 
-		if (!actor->IsPlayerRef()) {
-			BaseProcess* base = actor->baseProcess;
-			if (base) {
-				base->Unk_EC(avCode);
-			}
+		if (!pActor->IsPlayer()) {
+			BaseProcess* pAIProcess = pActor->GetCurrentAIProcess();
+			if (pAIProcess)
+				pAIProcess->SetCachedActorValueOutOfDate(eActorValue);
 		}
 
-		// call handle change with new value
-		float newVal = avOwner->GetActorValueF(avCode);
-		HandleActorValueChange(avOwner, avCode, oldVal, newVal, nullptr);
+		const float fNewVal = pActor->GetActorValueF(eActorValue);
+		ActorValue::CheckCallModifiedCallback(pActor, eActorValue, fOldVal, fNewVal, nullptr);
 		*result = 1;
 	}
 	return true;
@@ -1345,7 +1328,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 			pExtraDataList = pInvRef->pExtraDataList;
 		}
 		else {
-			ItemChange* pWeaponItem = ((Actor*)thisObj)->baseProcess->GetCurrentWeapon();
+			ItemChange* pWeaponItem = ((Actor*)thisObj)->GetCurrentAIProcess()->GetCurrentWeapon();
 			if (pWeaponItem && pWeaponItem->pExtraLists) {
 				pWeapon = static_cast<TESObjectWEAP*>(pWeaponItem->pObject);
 				pExtraDataList = pWeaponItem->pExtraLists->GetItem();
@@ -1464,7 +1447,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cCasingNodeName, &cNewCasingPath)) {
 		Actor* pActor = static_cast<Actor*>(thisObj);
 
-		TESObjectWEAP* pWeapon = pActor->GetEquippedWeapon();
+		TESObjectWEAP* pWeapon = pActor->GetCurrentWeapon();
 		if (!pWeapon)
 			return true;
 
@@ -1528,7 +1511,7 @@ bool Cmd_PathToRef_Execute(COMMAND_ARGS) {
 }
 
 SPEC_INLINE bool Cmd_GetGrenadeHoldTime_Eval(COMMAND_ARGS_EVAL) {
-	*result = PlayerCharacter::GetSingleton()->timeGrenadeHeld;
+	*result = PlayerCharacter::GetSingleton()->fProjectileReleaseTimer;
 	return true;
 }
 

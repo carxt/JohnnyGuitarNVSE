@@ -78,12 +78,4 @@ struct ScriptLineBuffer
 	uint32_t				cmdOpcode;			// 410 not initialized. Opcode of command being parsed
 	uint32_t				callingRefIndex;	// 414 not initialized. Zero if cmd not invoked with dot syntax
 	uint32_t				unk418;				// 418
-
-	// these write data and update dataOffset
-	bool Write(const void* buf, uint32_t bufsize);
-	bool WriteFloat(double buf);
-	bool WriteString(const char* buf);
-	bool Write32(uint32_t buf);
-	bool Write16(uint16_t buf);
-	bool WriteByte(uint8_t buf);
 };

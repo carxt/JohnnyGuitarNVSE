@@ -2,7 +2,6 @@
 #include <GameSound.h>
 #include <GameUI.h>
 #include <GameAPI.h>
-#include <GameObjects.h>
 #include "Bethesda/GridCellArray.hpp"
 
 class LoadedAreaBound;
@@ -412,14 +411,25 @@ public:
 #ifdef GAME
 static_assert(sizeof(NavMesh) == 0x108);
 #endif
-typedef NiPointer<NavMesh> NavMeshPtr;
-
-
-class NavMeshArray : public BSSimpleArray<NavMeshPtr>
-{
+class NavMeshPtr : public NiPointer<NavMesh> {
 public:
-	inline NavMeshPtr GetAt(uint32_t auiIndex)
-	{
+	using NiPointer<NavMesh>::NiPointer;
+	NavMeshPtr& operator=(NavMesh* apObject) { NiPointer<NavMesh>::operator=(apObject); return *this; }
+
+	// GAME - 0x464FC0
+	static void MakeNavMeshPtr(NavMeshPtr& arNavMeshOut, NavMesh* apNavMesh) {
+		arNavMeshOut = NavMeshPtr(apNavMesh);
+	}
+
+	// GAME - 0x464FC0
+	static NavMeshPtr MakeNavMeshPtr(NavMesh* apNavMesh) {
+		return NavMeshPtr(apNavMesh);
+	}
+};
+
+class NavMeshArray : public BSSimpleArray<NavMeshPtr> {
+public:
+	inline NavMeshPtr GetAt(uint32_t auiIndex) {
 		if (auiIndex >= uiSize)
 			return nullptr;
 		else
@@ -603,15 +613,8 @@ enum SpecialInputCode
 	kInputCode_PageDown = 0x8000000A
 };
 
-struct SingleTimer
-{
-	float startTime;
-};
-
-struct TimePair : SingleTimer
-{
-	float cooldownTime;
-};
+#ifdef GAME
+#include "Bethesda/CombatTimer.hpp"
 
 struct CombatState
 {
@@ -648,9 +651,9 @@ struct CombatState
 	float timerLastFiredProjectile;
 	float timer_maybeFlee0A0;
 	float timerProjectile0A4;
-	TimePair timer0A8;
-	TimePair timer0B0;
-	TimePair timer0B8;
+	CombatTimer timer0A8;
+	CombatTimer timer0B0;
+	CombatTimer timer0B8;
 	float timer0C0;
 	void* ptr0C4;
 	uint8_t initialConfidence;
@@ -700,26 +703,27 @@ struct CombatState
 	tList<void*>* ammoItemsList;
 	tList<void*>* weaponItemsList;
 	TESBoundObject* ingestiblesRestoreAndBuff[2];
-	TimePair combatRestoreAndBuffItemTimers[2];
+	CombatTimer combatRestoreAndBuffItemTimers[2];
 	TESForm* combatItem1BC;
 	Actor* actor1C0;
 	CombatController* cmbtCtrl;
 	uint8_t byte1C8_maybeInitializing;
 	uint8_t byte1C9;
 	uint8_t gap1CA[2];
-	TimePair timer1CC;
-	TimePair findBetterWeaponTimer;
-	TimePair explosiveProjectileBlockedResetTimer;
-	TimePair avoidThreatsTimer;
-	TimePair takeCoverTimer;
-	TimePair timer1F4;
-	TimePair timer1FC;
-	TimePair strengthUpdateTimer;
-	TimePair combatThreatRatioTimer;
-	TimePair embeddedWeaponSwitchTimer;
-	TimePair inventoryUpdateTimer;
+	CombatTimer timer1CC;
+	CombatTimer findBetterWeaponTimer;
+	CombatTimer explosiveProjectileBlockedResetTimer;
+	CombatTimer avoidThreatsTimer;
+	CombatTimer takeCoverTimer;
+	CombatTimer timer1F4;
+	CombatTimer timer1FC;
+	CombatTimer strengthUpdateTimer;
+	CombatTimer combatThreatRatioTimer;
+	CombatTimer embeddedWeaponSwitchTimer;
+	CombatTimer inventoryUpdateTimer;
 	uint32_t ptr224;
 	int32_t unk228;
 };
 
 static_assert(sizeof(CombatState) == 0x22C);
+#endif

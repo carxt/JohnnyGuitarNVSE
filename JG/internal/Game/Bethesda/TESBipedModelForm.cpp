@@ -1,7 +1,8 @@
 #include "TESBipedModelForm.hpp"
 #ifndef GAME
 #include <GameRTTI.h>
-#include <GameObjects.h>
+#include "TESObjectREFR.hpp"
+#include "TESActorBase.hpp"
 #endif
 
 // GAME - 0x480D30

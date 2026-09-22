@@ -43,28 +43,6 @@ namespace BSMemory {
 	}
 }
 
-template<typename T>
-class BSMemoryAllocator : public std::allocator<T> {
-public:
-	using value_type = T;
-	BSMemoryAllocator() = default;
-
-	template<typename U>
-	BSMemoryAllocator(const BSMemoryAllocator<U>&) {}
-
-	[[nodiscard]] __declspec(allocator) inline T* allocate(std::size_t n) {
-		return BSMemory::malloc<T>(n);
-	}
-
-	[[nodiscard]] constexpr std::allocation_result<T*> allocate_at_least(const std::size_t n) {
-		return { allocate(n), n };
-	}
-
-	inline void deallocate(T* p, std::size_t) noexcept {
-		BSMemory::free(p);
-	}
-};
-
 #define BS_ALLOCATORS \
 _VCRT_EXPORT_STD _NODISCARD _Ret_notnull_ _Post_writable_byte_size_(_Size) _VCRT_ALLOCATOR \
 void* __CRTDECL operator new(size_t _Size) { return BSMemory::malloc(_Size); } \

@@ -75,15 +75,6 @@
     <ClCompile Include="..\nvse\nvse\GameForms.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameObjects.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameScript.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
@@ -394,25 +385,22 @@
     <ClCompile Include="internal\JG\JohnnyCommands.cpp">
       <Filter>internal\JG\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameProcess.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="internal\JG\WorldToScreen.cpp">
       <Filter>internal\JG</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\DeathSoundFix.cpp">
+    <ClCompile Include="internal\JG\Fixes\DeathSoundFix.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\QuestObjectiveDisplayFix.cpp">
+    <ClCompile Include="internal\JG\Fixes\QuestObjectiveDisplayFix.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\RadioSkipOGGWAVPatch.cpp">
+    <ClCompile Include="internal\JG\Fixes\RadioSkipOGGWAVPatch.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\NPCAccuracy.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\RSMBarberHook.cpp">
+    <ClCompile Include="internal\JG\FilteredBarberMenu.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\LandRemapping.cpp">
@@ -472,7 +460,7 @@
     <ClCompile Include="internal\JG\AddItemMessages.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
-    <ClCompile Include="internal\JG\SkyUpdateFixes.cpp">
+    <ClCompile Include="internal\JG\Fixes\SkyUpdateFixes.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
     <ClCompile Include="internal\JG\MediaLocationControllerTweaks.cpp">
@@ -988,6 +976,117 @@
     <ClCompile Include="internal\Game\Bethesda\ImageSpaceModifierInstanceDRB.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\AmmoEffectListNullChecks.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\AudioMonoLookupOverflowFix.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\BipedAnimFixes.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\CreditsMenuNullChecks.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\DestructionFixes.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\DisintegrationStatFix.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\NoHeadlessTalkingFix.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\TESEffectShaderFixes.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\INISettingFixes.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\FileFixes.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TaskQueueInterface.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectREFR.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\LowProcess.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\MobileObject.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ModifierList.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ActorPackage.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BaseProcess.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSCloneReserver.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\CFilter.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\CombatTimer.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\CombatTimeStamp.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\HitData.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\FurnitureMark.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Actor.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\MagicTarget.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ActorMover.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\PathingLocation.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\PathingNode.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\VirtualPathingNode.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ActiveEffect.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BipedAnim.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Character.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Creature.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\PlayerCharacter.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Projectile.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\MuzzleFlash.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Explosion.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BGSLoadGameBuffer.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
@@ -1008,9 +1107,6 @@
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="..\nvse\nvse\GameBSExtraData.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameData.h">
       <Filter>nvse</Filter>
     </ClInclude>
@@ -1020,16 +1116,7 @@
     <ClInclude Include="..\nvse\nvse\GameForms.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="..\nvse\nvse\GameObjects.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="..\nvse\nvse\GameOSDepend.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameRTTI.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="..\nvse\nvse\GameSettings.h">
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameTasks.h">
@@ -1714,16 +1801,16 @@
     <ClInclude Include="internal\JG\WorldToScreen.hpp">
       <Filter>internal\JG</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\DeathSoundFix.hpp">
+    <ClInclude Include="internal\JG\Fixes\DeathSoundFix.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\RadioSkipOGGWAVPatch.hpp">
+    <ClInclude Include="internal\JG\Fixes\RadioSkipOGGWAVPatch.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\QuestObjectiveDisplayFix.hpp">
+    <ClInclude Include="internal\JG\Fixes\QuestObjectiveDisplayFix.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\RSMBarberHook.hpp">
+    <ClInclude Include="internal\JG\FilteredBarberMenu.hpp">
       <Filter>internal\JG\Features</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\NPCAccuracy.hpp">
@@ -1786,7 +1873,7 @@
     <ClInclude Include="internal\JG\AddItemMessages.hpp">
       <Filter>internal\JG\Features</Filter>
     </ClInclude>
-    <ClInclude Include="internal\JG\SkyUpdateFixes.hpp">
+    <ClInclude Include="internal\JG\Fixes\SkyUpdateFixes.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BSWindModifier.hpp">
@@ -2608,6 +2695,198 @@
     <ClInclude Include="internal\Game\Bethesda\BGSEntryPoint.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\INISettingFixes.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\Utils\CustomGameSetting.hpp">
+      <Filter>shared\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\DisintegrationStatFix.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\AmmoEffectListNullChecks.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\AudioMonoLookupOverflowFix.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\BipedAnimFixes.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\CreditsMenuNullChecks.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\DestructionFixes.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\NoHeadlessTalkingFix.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\TESEffectShaderFixes.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\FileFixes.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TaskQueueInterface.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\shared\BSMemory\BSMemoryUtils.hpp">
+      <Filter>shared\BSMemory</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectREFR.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ModifierList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\LowProcess.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MiddleHighProcess.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MiddleLowProcess.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MobileObject.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Modifier.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ActorPackage.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ActorPackageData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BaseProcess.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSCloneReserver.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\CFilter.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\CombatTimer.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\CombatTimeStamp.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\DetectionState.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\FastModifierCollection.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\HighProcess.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\HitData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\FurnitureMark.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Actor.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MagicCaster.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MagicTarget.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ActorMover.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\PathingLocation.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\PathingNode.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\PathingRequest.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\PathingSolution.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\VirtualPathingNode.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ActorLockData.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\PathingAvoidNode.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\PathingAvoidNodeArray.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ActorPathingMessage.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ActorPathingMessageQueue.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSTFreeList.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ActiveEffect.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ValueModifierEffect.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BipedAnim.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Character.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Creature.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\PlayerCharacter.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TeleportPath.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\CharacterProgression.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\PlayerMover.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Projectile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MuzzleFlash.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Explosion.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\GrenadeProjectile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MissileProjectile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BeamProjectile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\FlameProjectile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\ContinuousBeamProjectile.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSSaveLoadGame.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
@@ -2696,6 +2975,9 @@
       <Filter>internal\Game\Bethesda</Filter>
     </None>
     <None Include="internal\Game\Bethesda\BGSEntryPoint.inl">
+      <Filter>internal\Game\Bethesda</Filter>
+    </None>
+    <None Include="internal\Game\Bethesda\BSTFreeList.inl">
       <Filter>internal\Game\Bethesda</Filter>
     </None>
   </ItemGroup>

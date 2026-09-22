@@ -19,7 +19,12 @@
 #include "Bethesda/BSMultiBoundNode.hpp"
 #include "Bethesda/BSShaderProperty.hpp"
 
-struct NavMeshInfo;
+#include "Bethesda/BSSimpleArray.hpp"
+#include "Bethesda/BSSimpleList.hpp"
+
+#include <d3d9.h>
+
+class NavMeshInfo;
 class bhkRigidBody;
 class TESObjectCELL;
 class bhkPhantom;

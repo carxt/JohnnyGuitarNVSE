@@ -1,8 +1,12 @@
 #include "NPCAccuracy.hpp"
-#include "GameObjects.h"
 #include "Bethesda/ExtraFactionChanges.hpp"
+#include "Bethesda/Actor.hpp"
+#include "Bethesda/TESActorBase.hpp"
+#include "Bethesda/TESFaction.hpp"
+#include "Bethesda/TESCombatStyle.hpp"
 
-#include <Shared/BSMemory/BSScrapMemory.hpp>
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 #include <unordered_map>
 #include <algorithm>
@@ -78,10 +82,10 @@ namespace NPCAccuracy {
 	}
 
 	static SPEC_NOINLINE ScrapVector<FormID> __fastcall GetFactionsForActor(Actor* apActor) {
-		TESActorBase* pActorBase = static_cast<TESActorBase*>(GetPermanentBaseForm(apActor));
+		TESActorBase* pActorBase = static_cast<TESActorBase*>(apActor->GetTemplateObjectReference());
 		ScrapVector<FormID> kFactions = GetFactionsInList(pActorBase->GetFactionList());
 
-		const ExtraFactionChanges* pFactionChanges = apActor->extraDataList.GetExtraData<ExtraFactionChanges>();
+		const ExtraFactionChanges* pFactionChanges = apActor->GetExtra()->GetExtraData<ExtraFactionChanges>();
 		if (pFactionChanges && pFactionChanges->pFactionChanges) {
 			ScrapVector<FormID> kAdditionalFactions = GetFactionsInList(pFactionChanges->pFactionChanges);
 			kFactions.append_range(kAdditionalFactions);
@@ -101,7 +105,7 @@ namespace NPCAccuracy {
 
 		fMultiplier *= pMultipliers->GetMultiplier(apActor, AccuracyMultipliers::ACTOR);
 		
-		const TESBoundObject* pBaseForm = GetPermanentBaseForm(apActor);
+		const TESBoundObject* pBaseForm = apActor->GetTemplateObjectReference();
 		if (pBaseForm) [[likely]]
 			fMultiplier *= pMultipliers->GetMultiplier(pBaseForm, AccuracyMultipliers::ACTOR_BASE);
 

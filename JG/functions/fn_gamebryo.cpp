@@ -1,6 +1,5 @@
 #include "fn_gamebryo.h"
 
-#include <GameObjects.h>
 #include <GameTasks.h>
 
 #include "Gamebryo/NiParticleSystem.hpp"

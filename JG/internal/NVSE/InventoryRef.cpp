@@ -1,10 +1,14 @@
 #include "InventoryRef.hpp"
 #include "Bethesda/InventoryChanges.hpp"
 #include "Bethesda/ExtraDataList.hpp"
-#include <GameObjects.h>
+#include "Bethesda/TESObjectREFR.hpp"
 
 bool __fastcall InventoryRef::CreateExtraData(BSExtraData* apExtraData) {
-	BSSimpleList<ItemChange*>* pItemChanges = pContainerRef->GetContainerChangesList();
+	InventoryChanges* pInvChanges = pContainerRef->GetExtra()->GetContainerChanges();
+	if (!pInvChanges)
+		return false;
+
+	BSSimpleList<ItemChange*>* pItemChanges = pInvChanges->pItems;
 	if (!pItemChanges)
 		return false;
 

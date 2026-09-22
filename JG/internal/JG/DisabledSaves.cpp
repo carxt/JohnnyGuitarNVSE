@@ -1,8 +1,11 @@
 #include "DisabledSaves.hpp"
 #include <Bethesda/BGSSaveLoadManager.hpp>
 #include <Bethesda/GameSettingCollection.hpp>
-#include <unordered_map>
 #include <utility.h>
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
+#include <unordered_map>
 
 namespace DisabledSaves {
 

@@ -1,11 +1,6 @@
 #pragma once
 
-#include "Utilities.h"
-#include "NiTypes.h"
-#include "internal/utility.h"
-#include "internal/Game/Bethesda/BSSimpleList.hpp"
-#include "internal/Game/Bethesda/BSSimpleArray.hpp"
-#include "internal/Game/Bethesda/BSStringT.hpp"
+#include "Shared/BSMemory/BSMemory.hpp"
 
 enum {
 	eListInvalid = -1,

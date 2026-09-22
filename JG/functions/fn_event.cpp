@@ -1,7 +1,7 @@
 #include "fn_event.h"
 #include "events/EventFramework.h"
 #include "events/JohnnyEvents.hpp"
-#include "GameObjects.h"
+#include "Bethesda/PlayerCharacter.hpp"
 
 bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
 	uint32_t setOrRemove = 0;

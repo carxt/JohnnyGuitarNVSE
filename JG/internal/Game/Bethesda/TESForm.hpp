@@ -12,6 +12,7 @@
 
 class NiColor;
 class BGSSaveGameBuffer;
+class BGSSaveFormBuffer;
 class BGSLoadFormBuffer;
 class TESObjectREFR;
 class TESBoundObject;

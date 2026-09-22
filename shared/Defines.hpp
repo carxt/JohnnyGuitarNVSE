@@ -2,16 +2,12 @@
 
 #pragma warning(disable: 4100 4201 4244 4324 4389 5054 28159)
 
-#include <d3d9.h>
-
-#include <Windows.Foundation.h>
-#include <wrl\wrappers\corewrappers.h>
-#include <wrl\client.h>
+#include <windows.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <cmath>
-#include <string>
-#include <cassert>
+#include <assert.h>
+#include <xutility>
 
 #define USE_MODDED_CHANGES 1
 
@@ -20,11 +16,8 @@ constexpr inline auto our_sprintf	= sprintf;
 constexpr inline auto our_vsprintf	= vsprintf;
 constexpr inline auto our_vsnprintf	= vsnprintf;
 
-#include "Utils/DebugLog.hpp"
 #include "Utils/Bitfield.hpp"
 #include "Utils/AddressPtr.hpp"
-
-#include "SafeWrite/SafeWrite.hpp"
 
 // Game unit conversion constants
 constexpr inline double dM2NI	= 69.99125671386719;	// 1 Meter to Ni
@@ -71,6 +64,15 @@ __forceinline T_Ret FastCall(uint32_t _addr, Args ...args) noexcept(false) {
 template <auto T_Func, typename ...Args>
 __forceinline auto CallImport(uint32_t _addr, Args ...args) noexcept(false) {
 	return (*reinterpret_cast<decltype(T_Func)*>(_addr))(std::forward<Args>(args)...);
+}
+
+__forceinline uint8_t* __fastcall GetParentBasePtr(void* addressOfReturnAddress = _AddressOfReturnAddress(), bool lambda = false) noexcept(false) {
+	auto* basePtr = static_cast<uint8_t*>(addressOfReturnAddress) - 4;
+#if _DEBUG
+	if (lambda) // in debug mode, lambdas are wrapped inside a closure wrapper function, so one more step needed
+		basePtr = *reinterpret_cast<uint8_t**>(basePtr);
+#endif
+	return *reinterpret_cast<uint8_t**>(basePtr);
 }
 
 #pragma region Macros

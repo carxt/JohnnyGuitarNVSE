@@ -22,6 +22,7 @@
 #include "JG/CustomHUDShake.hpp"
 #include "JG/AnimActivationHeight.hpp"
 #include "JG/ExternalEmittanceOnBases.hpp"
+#include "JG/FilteredBarberMenu.hpp"
 
 ExpressionEvaluatorUtils s_expEvalUtils;
 #endif
@@ -35,6 +36,7 @@ namespace JohnnyCommands {
 #ifdef GAME
 		AnimActivationHeight::Init();
 		ExternalEmittanceOnBases::Install();
+		FilteredBarberMenu::Install();
 		apNVSE->InitExpressionEvaluatorUtils(&s_expEvalUtils);
 #endif
 	}

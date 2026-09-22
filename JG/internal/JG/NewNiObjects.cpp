@@ -1,5 +1,8 @@
 #include "NewNiObjects.hpp"
 
+#include "Shared/Utils/DebugLog.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace NewNiObjects {
 
 	STACK_FRAME_OPT_ENABLE

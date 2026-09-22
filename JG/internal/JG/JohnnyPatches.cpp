@@ -1,7 +1,6 @@
 #include "JohnnyPatches.hpp"
 #ifdef GAME
 #include "decoding.h"
-#include "GameObjects.h"
 #include "GameProcess.h"
 #include "GameSound.h"
 #include "GameUI.h"
@@ -11,7 +10,7 @@
 #include "CameraOverlay.hpp"
 #include "CameraOverride.hpp"
 #include "CustomCameraShake.hpp"
-#include "DeathSoundFix.hpp"
+#include "Fixes\DeathSoundFix.hpp"
 #include "DialogueResponseOverride.hpp"
 #include "DisabledArrowKeys.hpp"
 #include "DisabledLevelUp.hpp"
@@ -25,20 +24,21 @@
 #include "LandRemapping.hpp"
 #include "MediaLocationControllerTweaks.hpp"
 #include "NPCAccuracy.hpp"
-#include "RadioSkipOGGWAVPatch.hpp"
-#include "RSMBarberHook.hpp"
+#include "Fixes\RadioSkipOGGWAVPatch.hpp"
 #include "WorldToScreen.hpp"
-#include "NewNiObjects.hpp"
 #include "FormSkeletons.hpp"
 #include "MorePluginTypes.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include <algorithm>
 #include <unordered_set>
 #endif
 #include "BSAUpgrade.hpp"
 #include "NewNiObjects.hpp"
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace JohnnyPatches {
 
@@ -261,9 +261,6 @@ namespace JohnnyPatches {
 		ExtraReputationIcons::Install();
 
 		ExtraMiscStats::Install();
-
-		// Hairstyle handlers
-		RSMBarberHook::Install();
 
 		BarterFilter::Install();
 
