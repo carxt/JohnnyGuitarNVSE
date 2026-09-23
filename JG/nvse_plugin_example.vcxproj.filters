@@ -1093,6 +1093,9 @@
     <ClCompile Include="internal\Game\Bethesda\Explosion.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\XMLBufferFix.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -2934,6 +2937,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\FastInventoryIterator.hpp">
       <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\XMLBufferFix.hpp">
+      <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
