@@ -2256,6 +2256,19 @@ namespace JIPFixes {
 			InitializeMap();
 
 			kRegisterGameSetting.ReplaceCall(0x404E87, &Hook::RegisterGameSetting);
+			
+			// Fix for SetStringSetting not setting values properly
+			// Game stores the value in the same buffer as name + uses uppercase "S" prefix to signify heap usage
+			// Lack of that prefix means it will not free the existing buffer when a new val is set (with say, SetGameSetting)
+			// Epic mem leak time
+			// 
+			// 
+			// mov     ecx, esi			// Setting ptr
+			// push    edi				// String ptr
+			// mov     eax, 0xC33170	// Setting::operator==(const char*)
+			// call    eax
+			// jmp     +6
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x100444CD), "\x89\xF1\x57\xB8\x70\x31\xC3\x00\xFF\xD0\xEB\x06");
 		}
 	}
 
