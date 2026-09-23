@@ -67,6 +67,12 @@
     <Filter Include="internal\NVSE">
       <UniqueIdentifier>{e64a960d-c7c0-48cd-94f4-f52ab472b116}</UniqueIdentifier>
     </Filter>
+    <Filter Include="internal\Editor">
+      <UniqueIdentifier>{8809b1d8-902c-4f36-bdb2-1e2a999911b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="internal\Editor\Bethesda">
+      <UniqueIdentifier>{112f5d87-8348-49b8-8175-7cb206ad2884}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
@@ -2871,6 +2877,60 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\ContinuousBeamProjectile.hpp">
       <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraWorkingData.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraColorControl.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraCurrCondItem.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraDialogData.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraFactionData.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraFreeformFaceControl.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraLocalCopy.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraNotifyInfo.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraParam.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraPopupMenu.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraPreviewControl.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraQuestFilter.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraQuestStageData.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraReactionData.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraRects.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraRefSelectControl.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraSubWindow.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\DialogExtraTimer.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\FastInventoryIterator.hpp">
       <Filter>internal\Game\Obsidian</Filter>
