@@ -2938,6 +2938,12 @@
     <ClInclude Include="internal\Game\Obsidian\FastInventoryIterator.hpp">
       <Filter>internal\Game\Obsidian</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\TESCellUseList.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Editor\Bethesda\GameSetting.hpp">
+      <Filter>internal\Editor\Bethesda</Filter>
+    </ClInclude>
     <ClInclude Include="internal\JG\Fixes\XMLBufferFix.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>

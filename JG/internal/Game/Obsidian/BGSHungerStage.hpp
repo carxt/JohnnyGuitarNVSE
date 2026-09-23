@@ -4,7 +4,7 @@
 
 class SpellItem;
 
-class BGSHungerStage : public TESForm {
+class BGSHungerStage : public TESFormBase {
 public:
 	BGSHungerStage();
 	~BGSHungerStage();

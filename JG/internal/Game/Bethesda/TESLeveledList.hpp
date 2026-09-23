@@ -28,6 +28,13 @@ public:
 	virtual uint8_t		GetChanceNone() const;
 	virtual bool		GetMultCalc() const;
 	virtual uint32_t	GetMaxLevelDifference() const;
+#ifdef EDITOR
+	virtual void		Func_15(TESContainer* apContainer, uint32_t auiLevel, void*);
+	virtual void		Func_16(HWND);
+	virtual bool		Func_17();
+	virtual bool		Func_18();
+	virtual void		Func_19(void*, void*);
+#endif
 
 	struct ALIGN1 _LeveledListFlags {
 		enum Flags : uint8_t {

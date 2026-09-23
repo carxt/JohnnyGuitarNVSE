@@ -4,7 +4,7 @@
 #include "CellData.hpp"
 #include "Gamebryo/NiColor.hpp"
 
-class BGSLightingTemplate : public TESForm {
+class BGSLightingTemplate : public TESFormBase {
 public:
 	BGSLightingTemplate();
 	~BGSLightingTemplate();

@@ -14,7 +14,7 @@ public:
 	TESTexture	kInsignia;
 };
 
-class TESFaction : public TESForm, public TESFullName, public TESReactionForm {
+class TESFaction : public TESFormBase, public TESFullName, public TESReactionForm {
 public:
 	TESFaction();
 	~TESFaction();

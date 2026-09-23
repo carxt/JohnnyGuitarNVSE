@@ -375,6 +375,23 @@ uint32_t TESForm::GetFileCount() const {
 	return kFiles.ItemsInList();
 }
 
+#ifdef EDITOR
+// GECK - 0x4FB210
+void TESForm::AddUser(TESForm* apUser) {
+	ThisCall(0x4FB210, this, apUser);
+}
+
+// GECK - 0x4FB250
+void TESForm::RemoveUser(TESForm* apUser) {
+	ThisCall(0x4FB250, this, apUser);
+}
+
+// GECK - 0x4F9F80
+uint32_t TESForm::GetUserCount() const {
+	return ThisCall<uint32_t>(0x4F9F80, this);
+}
+#endif
+
 // GAME - 0x4839C0
 // GECK - 0x4F9620
 TESForm* TESForm::GetFormByNumericID(FormID auiFormID) {

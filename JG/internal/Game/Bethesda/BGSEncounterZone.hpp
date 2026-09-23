@@ -2,7 +2,7 @@
 
 #include "TESForm.hpp"
 
-class BGSEncounterZone : public TESForm {
+class BGSEncounterZone : public TESFormBase {
 public:
 	BGSEncounterZone();
 	~BGSEncounterZone();

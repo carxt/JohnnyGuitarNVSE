@@ -7,7 +7,7 @@
 class TESModelList : public BaseFormComponent {
 public:
 	TESModelList();
-	virtual ~TESModelList();
+	~TESModelList();
 
 	BSSimpleList<const char*>	kModels;
 	TESTextureListArray			kTextures;

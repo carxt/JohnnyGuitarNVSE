@@ -6,7 +6,7 @@
 
 class TESNPC;
 
-class TESEyes : public TESForm, public TESFullName, public TESTexture {
+class TESEyes : public TESFormBase, public TESFullName, public TESTexture {
 public:
 	TESEyes();
 	~TESEyes();

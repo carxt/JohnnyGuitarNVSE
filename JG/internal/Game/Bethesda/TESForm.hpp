@@ -5,7 +5,7 @@
 #include "BSSimpleList.hpp"
 #include "TESFile.hpp"
 #include "BSTCaseInsensitiveStringMap.hpp"
-#include "Gamebryo/NiTLargeArray.hpp"
+#include "Gamebryo/NiTLargePrimitiveArray.hpp"
 
 #define IS_ID(form, type) (form->GetFormType() == FORM_TYPE::##type)
 #define NOT_ID(form, type) (form->GetFormType() != FORM_TYPE::##type)
@@ -114,7 +114,7 @@ public:
 	virtual bool			Unk_66();
 	virtual bool			Unk_67() const;
 	virtual bool			Unk_68();
-	virtual void			Unk_69(BSString& arString); // Get texture/model path?
+	virtual void			GetAssetPath(BSString& arPath);
 	virtual void			Unk_70();
 	virtual void			Unk_71();
 	virtual void			Unk_72();
@@ -248,11 +248,14 @@ public:
 	const char* GetFormTypeString() const;
 
 #ifdef GAME
-	static constexpr AddressPtr<NiTPointerMap<FormID, TESForm*>*, 0x11C54C0>		pAllForms;
-	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0x11C54C8>	pAllFormsByEditorID;
+	static constexpr AddressPtr<NiTPointerMap<FormID, TESForm*>*, 0x11C54C0>					pAllForms;
+	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0x11C54C8>				pAllFormsByEditorID;
+	static constexpr AddressPtr<NiTLargePrimitiveArray<TESForm*>*, 0x11C54C4>					pAlteredForms;
 #else
-	static constexpr AddressPtr<NiTPointerMap<FormID, TESForm*>*, 0xED56CC>		pAllForms;
-	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0xED56D4>	pAllFormsByEditorID;
+	static constexpr AddressPtr<NiTPointerMap<FormID, TESForm*>*, 0xED56CC>						pAllForms;
+	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0xED56D4>				pAllFormsByEditorID;
+	static constexpr AddressPtr<NiTLargePrimitiveArray<TESForm*>*, 0xED56D0>					pAlteredForms;
+	static constexpr AddressPtr<NiTPointerMap<TESForm*, BSSimpleList<TESForm*>*>*, 0xED56D8>	pUsageMap;
 #endif
 
 #ifdef EDITOR
@@ -346,6 +349,12 @@ public:
 	FormID GetLoadFormID() const;
 	uint32_t GetFileCount() const;
 
+#ifdef EDITOR
+	void AddUser(TESForm* apUser);
+	void RemoveUser(TESForm* apUser);
+	uint32_t GetUserCount() const;
+#endif
+
 	static TESForm* GetFormByNumericID(FormID auiFormID);
 	static TESForm* GetFormByEditorID(const char* apEDID);
 
@@ -358,4 +367,20 @@ public:
 ASSERT_SIZE(TESForm, 0x18);
 #else
 ASSERT_SIZE(TESForm, 0x2C);
+#endif
+
+#ifdef GAME
+// GECK uses TESFormIDListView
+using TESFormBase = TESForm;
+#else
+class TESFormIDListView : public TESForm {
+public:
+	virtual void Unk_94(HWND, const char*);
+	virtual void Unk_95(HWND);
+};
+
+ASSERT_SIZE(TESFormIDListView, sizeof(TESForm));
+
+// Game uses TESForm
+using TESFormBase = TESFormIDListView;
 #endif

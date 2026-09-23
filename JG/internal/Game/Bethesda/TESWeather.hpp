@@ -6,7 +6,7 @@
 #include "TESTexture1024.hpp"
 #include "TESModel.hpp"
 
-class TESWeather : public TESForm, public TESImageSpaceModifiableCountForm<6> {
+class TESWeather : public TESFormBase, public TESImageSpaceModifiableCountForm<6> {
 public:
 	TESWeather();
 	~TESWeather();

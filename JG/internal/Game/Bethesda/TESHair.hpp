@@ -7,7 +7,7 @@
 
 class TESNPC;
 
-class TESHair : public TESForm, public TESFullName, public TESModel, public TESTexture {
+class TESHair : public TESFormBase, public TESFullName, public TESModel, public TESTexture {
 public:
 	TESHair();
 	~TESHair();

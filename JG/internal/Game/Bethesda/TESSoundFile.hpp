@@ -7,6 +7,9 @@ class TESSoundFile : public BaseFormComponent {
 public:
 	TESSoundFile();
 
+#ifdef EDITOR
+	virtual void	Func_12(HWND, int32_t);
+#endif
 	virtual void	SetSoundFile(const char* apPath);
 
 	BSString	strPath;

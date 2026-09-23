@@ -5,7 +5,7 @@
 class SpellItem;
 
 // sic!
-class BGSSleepDeprevationStage : public TESForm {
+class BGSSleepDeprevationStage : public TESFormBase {
 public:
 	BGSSleepDeprevationStage();
 	~BGSSleepDeprevationStage();

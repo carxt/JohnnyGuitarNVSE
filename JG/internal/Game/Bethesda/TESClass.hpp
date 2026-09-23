@@ -6,7 +6,7 @@
 #include "TESTexture.hpp"
 #include "TESAttributes.hpp"
 
-class TESClass : public TESForm, public TESFullName, public TESDescription, public TESTexture, public TESAttributes {
+class TESClass : public TESFormBase, public TESFullName, public TESDescription, public TESTexture, public TESAttributes {
 public:
 	TESClass();
 	~TESClass();

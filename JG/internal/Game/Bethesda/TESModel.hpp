@@ -6,14 +6,21 @@
 
 class TESForm;
 class TESModelTextureSwap;
+class NiAVObject;
 
 class TESModel : public BaseFormComponent {
 public:
 	TESModel();
 	virtual							~TESModel();
 	virtual const char*				GetModel() const;
+#ifdef EDITOR
+	virtual void					Func_14(HWND, int32_t);
+#endif
 	virtual void					SetModel(const char* apPath);
 	virtual TESModelTextureSwap*	GetAsModelMaterialSwap() const;
+#ifdef EDITOR
+	virtual bool					Func_17(NiAVObject* apScene, TESForm* apForm);
+#endif
 
 	struct ALIGN1 _Flags {
 		enum Flags : uint8_t {
