@@ -21,6 +21,7 @@
 #include "Fixes/QuestObjectiveDisplayFix.hpp"
 #include "Fixes/SkyUpdateFixes.hpp"
 #include "Fixes/TESEffectShaderFixes.hpp"
+#include "Fixes/XMLBufferFix.hpp"
 #include "EditorIDRestoration.hpp"
 #endif
 #include "Fixes/FileFixes.hpp"
@@ -229,6 +230,8 @@ namespace JohnnyFixes {
 		BipedAnimFixes::Install();
 
 		TESEffectShaderFixes::Install();
+
+		XMLBufferFix::Install();
 #endif
 
 		FileFixes::Install();
