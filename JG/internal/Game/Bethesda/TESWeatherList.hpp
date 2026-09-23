@@ -16,7 +16,11 @@ public:
 	virtual void*	Func4(HWND);
 	virtual void	Func5(HWND);
 
-	uint32_t uiDialogs[6];
+	uint32_t	uiWeatherListID;
+	uint32_t	uiComboBoxID;
+	uint32_t	uiAddButtonID;
+	uint32_t	uiPopupID;
+	uint32_t	uiDialogs[2];
 #endif
 
 	TESWeather* GetRandomWeather() const;
