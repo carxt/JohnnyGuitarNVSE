@@ -7,7 +7,7 @@ class QueuedFile;
 class BGSPreloadable : public BaseFormComponent {
 public:
 	BGSPreloadable();
-	virtual ~BGSPreloadable();
+	~BGSPreloadable();
 
 	virtual void	Preload(IO_TASK_PRIORITY aePriority, QueuedFile* apFile);
 };

@@ -2,7 +2,7 @@
 
 #include "TESForm.hpp"
 
-class BGSVoiceType : public TESForm {
+class BGSVoiceType : public TESFormBase {
 public:
 	BGSVoiceType();
 	~BGSVoiceType();

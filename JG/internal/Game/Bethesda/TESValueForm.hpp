@@ -7,11 +7,12 @@ class TESForm;
 class TESValueForm : public BaseFormComponent {
 public:
 	TESValueForm();
-	virtual ~TESValueForm();
-
+	~TESValueForm();
+#ifdef GAME
 	virtual uint32_t	GetSaveSizeTES(uint32_t auiChangeFlags) const;
 	virtual void		SaveGameTES(uint32_t auiChangeFlags);
 	virtual void		LoadGameTES(uint32_t auiChangeFlags, uint32_t auiCurrentFlags);
+#endif
 
 	uint32_t	uiValue;
 

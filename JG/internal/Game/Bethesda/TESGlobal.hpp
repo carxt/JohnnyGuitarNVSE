@@ -2,7 +2,7 @@
 
 #include "TESForm.hpp"
 
-class TESGlobal : public TESForm {
+class TESGlobal : public TESFormBase {
 public:
 	TESGlobal();
 	~TESGlobal();

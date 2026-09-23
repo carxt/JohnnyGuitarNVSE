@@ -7,7 +7,7 @@
 
 struct WeatherEntry;
 
-class TESClimate : public TESForm {
+class TESClimate : public TESFormBase {
 public:
 	TESClimate();
 	~TESClimate();

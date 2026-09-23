@@ -5,7 +5,7 @@
 #include "TESDescription.hpp"
 #include "ActorValue.hpp"
 
-class TESSkill : public TESForm, public TESDescription, public TESTexture {
+class TESSkill : public TESFormBase, public TESDescription, public TESTexture {
 public:
 	TESSkill();
 	~TESSkill();

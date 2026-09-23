@@ -39,6 +39,9 @@ public:
 	virtual uint32_t				GetFatigue() const;
 	virtual float					GetKarma() const;
 	virtual BGSVoiceType*			GetVoiceType() const;
+#ifdef EDITOR
+	virtual void					Func_35(HWND);
+#endif
 
 	struct ALIGN4 _ActorBaseFlags {
 		enum Flags : uint32_t {

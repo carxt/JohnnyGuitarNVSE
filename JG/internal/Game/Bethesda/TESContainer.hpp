@@ -11,6 +11,10 @@ public:
 	TESContainer();
 	~TESContainer();
 
+#ifdef EDITOR
+	virtual void Func_12(TESContainer*, void*, void*);
+#endif
+
 	BSSimpleList<ContainerObject*> kObjects;
 
 	const BSSimpleList<ContainerObject*>* GetObjectList() const;

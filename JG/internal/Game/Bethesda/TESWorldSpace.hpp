@@ -20,7 +20,7 @@ class TESGrassAreaParam;
 class ImpactSwap;
 class BSPortalGraph;
 
-class TESWorldSpace : public TESForm, public TESFullName, public TESTexture {
+class TESWorldSpace : public TESFormBase, public TESFullName, public TESTexture {
 public:
 	TESWorldSpace();
 	~TESWorldSpace();

@@ -5,7 +5,7 @@
 #include "TESModelTextureSwap.hpp"
 #include "BSSimpleList.hpp"
 
-class BGSHeadPart : public TESForm, public TESFullName, public TESModelTextureSwap {
+class BGSHeadPart : public TESFormBase, public TESFullName, public TESModelTextureSwap {
 public:
 	BGSHeadPart();
 	~BGSHeadPart();

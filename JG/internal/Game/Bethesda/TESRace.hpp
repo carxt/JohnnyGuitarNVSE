@@ -19,7 +19,7 @@ class TESNPC;
 class BGSVoiceType;
 class FaceGenUndo;
 
-class TESRace : public TESForm, public TESFullName, public TESDescription, public TESSpellList, public TESReactionForm {
+class TESRace : public TESFormBase, public TESFullName, public TESDescription, public TESSpellList, public TESReactionForm {
 public:
 	TESRace();
 	~TESRace();

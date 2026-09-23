@@ -4,7 +4,7 @@
 
 class SpellItem;
 
-class BGSDehydrationStage : public TESForm {
+class BGSDehydrationStage : public TESFormBase {
 public:
 	BGSDehydrationStage();
 	~BGSDehydrationStage();

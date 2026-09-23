@@ -4,7 +4,7 @@
 
 class SpellItem;
 
-class BGSRadiationStage : public TESForm {
+class BGSRadiationStage : public TESFormBase {
 public:
 	BGSRadiationStage();
 	~BGSRadiationStage();

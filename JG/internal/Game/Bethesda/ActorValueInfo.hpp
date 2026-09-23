@@ -8,7 +8,7 @@
 
 class ActorValueOwner;
 
-class ActorValueInfo : public TESForm, public TESFullName, public TESDescription, public TESIcon {
+class ActorValueInfo : public TESFormBase, public TESFullName, public TESDescription, public TESIcon {
 public:
 	ActorValueInfo();
 	~ActorValueInfo();

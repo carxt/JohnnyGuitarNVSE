@@ -974,7 +974,7 @@ static_assert(sizeof(CombatController) == 0x188);
 class TESLevSpell;
 
 // 730
-class TESImageSpaceModifier : public TESForm {
+class TESImageSpaceModifier : public TESFormBase {
 public:
 	TESImageSpaceModifier();
 	~TESImageSpaceModifier();
