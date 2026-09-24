@@ -12,7 +12,7 @@
 #pragma warning(disable : 4302)
 #pragma optimize("y", on)
 
-namespace BSMemory { 
+namespace BSMemory {
 
 	// -------------------------------------------------------------------------
 	// Internal globals and functions
@@ -20,6 +20,8 @@ namespace BSMemory {
 	static INIT_ONCE		kInitOnce = INIT_ONCE_STATIC_INIT;
 	static void*			pMemoryManager = nullptr;
 	static void* __fastcall	InitAllocator(void* apThis, void*, size_t size);
+
+	static constexpr bool	ASSERT_EMPTY_FREES = false;
 
 	namespace CurrentMemManager {
 		static void*	(__thiscall* Allocate)(void* apThis, size_t size) = reinterpret_cast<decltype(Allocate)>(InitAllocator);
@@ -42,6 +44,7 @@ namespace BSMemory {
 
 	__declspec(allocator) __declspec(restrict) void* __cdecl calloc(size_t num, size_t size) {
 		const size_t stSize = num * size;
+
 		void* pMemory = malloc(stSize);
 		assert(pMemory);
 
@@ -70,10 +73,11 @@ namespace BSMemory {
 
 	__declspec(noalias) void __cdecl free(void* ptr) {
 		assert(pMemoryManager);
-		assert(ptr);
 
-		if (!ptr)
+		if (!ptr) {
+			assert(!ASSERT_EMPTY_FREES);
 			return;
+		}
 
 		CurrentMemManager::Deallocate(pMemoryManager, ptr);
 	}
@@ -84,10 +88,11 @@ namespace BSMemory {
 
 	__declspec(noalias) void __cdecl aligned_free(void* ptr) {
 		assert(pMemoryManager);
-		assert(ptr);
 
-		if (!ptr)
+		if (!ptr) {
+			assert(!ASSERT_EMPTY_FREES);
 			return;
+		}
 
 		uint8_t* pMemory = static_cast<uint8_t*>(ptr);
 		pMemory = pMemory - pMemory[-1];

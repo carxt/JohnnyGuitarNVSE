@@ -19,11 +19,13 @@ namespace BSScrapMemory {
 	static void*			pMemoryManager = nullptr;
 	static void* __fastcall	InitAllocator(void* apThis);
 
+	static constexpr bool	ASSERT_EMPTY_FREES = true;
+
 	struct alignas(4) ScrapHeap {
-		const char* pBufferStart;
-		const char* pStackPos;
-		const char* pBufferEnd;
-		void*		pLastBlock;
+		const char* const pBufferStart;
+		const char* const pStackPos;
+		const char* const pBufferEnd;
+		void*		const pLastBlock;
 	};
 
 	namespace CurrentMemoryManager {
@@ -36,19 +38,18 @@ namespace BSScrapMemory {
 
 		static void*		(__thiscall* Allocate)(ScrapHeap* apThis, size_t size, size_t alignment) = nullptr;
 		static void			(__thiscall* Deallocate)(ScrapHeap* apThis, void* ptr) = nullptr;
-		static size_t		(__thiscall* Size)(ScrapHeap* apThis, void* ptr) = nullptr;
+		static size_t		(__thiscall* Size)(const ScrapHeap* apThis, void* ptr) = nullptr;
 
-		static inline uint32_t GetMaxMemory() { 
-			assert(pMaxMemory);
-			return *pMaxMemory; 
-		}
-
-		static inline uint32_t __fastcall GetAllocatedMemory(ScrapHeap* apScrapHeap) {
+		static inline uint32_t __fastcall GetAllocatedMemory(const ScrapHeap* apScrapHeap) {
 			return apScrapHeap->pStackPos - apScrapHeap->pBufferStart;
 		}
 
-		static inline bool __fastcall HasSpace(ScrapHeap* apScrapHeap, size_t size) {
-			return (size + CurrentScrapHeap::GetAllocatedMemory(apScrapHeap)) < CurrentScrapHeap::GetMaxMemory();
+		static inline bool __fastcall HasSpace(const ScrapHeap* apScrapHeap, size_t size) {
+			if (pMaxMemory) [[likely]]
+				return (size + GetAllocatedMemory(apScrapHeap)) < *pMaxMemory;
+
+			// Some kind of heap replacer is being used - have to go blind
+			return true;
 		}
 	}
 
@@ -59,13 +60,14 @@ namespace BSScrapMemory {
 	__declspec(allocator) __declspec(restrict) void* malloc(size_t size) {
 		ScrapHeap* pHeap = CurrentMemoryManager::GetThreadScrapHeap(pMemoryManager);
 		assert(pHeap);
-		assert(size < CurrentScrapHeap::GetMaxMemory());
 		assert(CurrentScrapHeap::HasSpace(pHeap, size));
+
 		return CurrentScrapHeap::Allocate(pHeap, size, 4);
 	}
 
 	__declspec(allocator) __declspec(restrict) void* calloc(size_t num, size_t size) {
 		const size_t stSize = num * size;
+
 		void* pMemory = malloc(stSize);
 		assert(pMemory);
 
@@ -76,21 +78,18 @@ namespace BSScrapMemory {
 	}
 
 	__declspec(allocator) __declspec(restrict) void* aligned_alloc(size_t alignment, size_t size) {
-		assert(pMemoryManager);
-		assert(size < CurrentScrapHeap::GetMaxMemory());
-
 		ScrapHeap* pHeap = CurrentMemoryManager::GetThreadScrapHeap(pMemoryManager);
 		assert(pHeap);
 		assert(CurrentScrapHeap::HasSpace(pHeap, size));
+
 		return CurrentScrapHeap::Allocate(pHeap, size, alignment);
 	}
 
 	__declspec(noalias) void free(void* ptr) {
-		assert(pMemoryManager);
-		assert(ptr);
-
-		if (!ptr)
+		if (!ptr) {
+			assert(!ASSERT_EMPTY_FREES);
 			return;
+		}
 
 		ScrapHeap* pHeap = CurrentMemoryManager::GetThreadScrapHeap(pMemoryManager);
 		assert(pHeap);
@@ -111,9 +110,7 @@ namespace BSScrapMemory {
 	}
 
 	__declspec(noalias) size_t msize(void* ptr) {
-		assert(pMemoryManager);
-
-		ScrapHeap* pHeap = CurrentMemoryManager::GetThreadScrapHeap(pMemoryManager);
+		const ScrapHeap* pHeap = CurrentMemoryManager::GetThreadScrapHeap(pMemoryManager);
 		assert(pHeap);
 
 		return CurrentScrapHeap::Size(pHeap, ptr);
@@ -144,6 +141,11 @@ namespace BSScrapMemory {
 			CurrentScrapHeap::Size						= reinterpret_cast<decltype(CurrentScrapHeap::Size)>(0xAA5710);
 			CurrentScrapHeap::pMaxMemory				= reinterpret_cast<uint32_t*>(0xAA5ED1);
 			CurrentMemoryManager::GetThreadScrapHeap	= reinterpret_cast<decltype(CurrentMemoryManager::GetThreadScrapHeap)>(0xAA42E0);
+		
+			// Check if ScrapHeapManager::Init is not modified
+			// Heap replacers (usually) hook it or nop it, meaning it's not possible for us to assume ScrapHeap's layout nor limits
+			if (*reinterpret_cast<uint8_t*>(0xAA58D0) != 0x55)
+				CurrentScrapHeap::pMaxMemory = nullptr;
 		}
 
 		if (!static_cast<char*>(pMemoryManager)[0]) {
@@ -163,7 +165,7 @@ namespace BSScrapMemory {
 	}
 
 	bool __fastcall hasSpace(size_t size) {
-		ScrapHeap* pHeap = CurrentMemoryManager::GetThreadScrapHeap(pMemoryManager);
+		const ScrapHeap* pHeap = CurrentMemoryManager::GetThreadScrapHeap(pMemoryManager);
 		assert(pHeap);
 
 		return CurrentScrapHeap::HasSpace(pHeap, size);
