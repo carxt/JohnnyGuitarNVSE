@@ -52,17 +52,25 @@ public:
 template<typename T>
 class BSScrapBuffer {
 public:
-	inline BSScrapBuffer(std::size_t size) : size(size) {
-		data = BSScrapMemory::malloc<T>(size);
-		if constexpr (!std::is_trivially_constructible_v<T>) {
-			for (std::size_t i = 0; i < size; i++) {
-				new (&data[i]) T();
+	inline BSScrapBuffer(size_t count) {
+		if (BSScrapMemory::hasSpace<T>(count)) [[likely]] {
+			dataCount = count;
+			data = BSScrapMemory::malloc<T>(count);
+			if constexpr (!std::is_trivially_constructible_v<T>) {
+				for (size_t i = 0; i < count; i++) {
+					new (&data[i]) T();
+				}
 			}
+		}
+		else [[unlikely]] {
+			dataCount = 0;
+			data = nullptr;
+			assert(false);
 		}
 	}
 	inline ~BSScrapBuffer() {
 		if constexpr (!std::is_trivially_destructible_v<T>) {
-			for (std::size_t i = 0; i < size; i++) {
+			for (size_t i = 0; i < dataCount; i++) {
 				data[i].~T();
 			}
 		}
@@ -73,11 +81,11 @@ public:
 		return data;
 	}
 
-	inline T& operator[](std::size_t index) {
+	inline T& operator[](size_t index) {
 		return data[index];
 	}
 
 private:
-	T*			data;
-	std::size_t size;
+	T*		data;
+	size_t	dataCount;
 };

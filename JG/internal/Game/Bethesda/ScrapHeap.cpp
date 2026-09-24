@@ -77,3 +77,15 @@ uint32_t ScrapHeap::GetAllocationCount() const noexcept {
 	return ThisCall<uint32_t>(0x855D20, this);
 #endif
 }
+
+bool ScrapHeap::HasSpaceAvailable(uint32_t auiSize) const noexcept {
+	return (auiSize + GetAllocatedMemory()) < GetMaxMemory();
+}
+
+uint32_t ScrapHeap::GetMinMemory() noexcept {
+	return uiMinMemory;
+}
+
+uint32_t ScrapHeap::GetMaxMemory() noexcept {
+	return uiMaxMemory;
+}
