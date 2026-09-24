@@ -61,13 +61,21 @@ TESLeveledList* TESLeveledList::GetFormAsLeveledList(const TESForm* apForm) {
 
 // GAME - 0x487BA0
 LeveledObject::LeveledObject() {
+#ifdef GAME
+	ThisCall(0x487BA0, this);
+#else
 	pForm		= nullptr;
 	pItemExtra	= nullptr;
 	usCount		= 1;
 	usLevel		= 1;
+#endif
 }
 
 // GAME - 0x487620
 LeveledObject::~LeveledObject() {
+#ifdef GAME
+	ThisCall(0x487620, this);
+#else
 	BSMemory::free(pItemExtra);
+#endif
 }
