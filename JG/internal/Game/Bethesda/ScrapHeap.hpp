@@ -30,9 +30,6 @@ public:
 	char*	pEndHeap;
 	Block*	pLastBlock;
 
-	static constexpr uint32_t MIN_MEMORY = B_KiB(64);
-	static constexpr uint32_t MAX_MEMORY = B_MiB(8);
-
 	template <typename T>
 	[[nodiscard]] __declspec(restrict) __declspec(allocator) T* AllocateT(uint32_t auiCount = 1, uint32_t auiAlignment = alignof(T)) noexcept {
 		return static_cast<T*>(Allocate(auiCount * sizeof(T), auiAlignment));
@@ -48,6 +45,22 @@ public:
 	uint32_t	Size(const void* apMem) const noexcept;
 
 	uint32_t	GetAllocationCount() const noexcept;
+
+	bool		HasSpaceAvailable(uint32_t auiSize) const noexcept;
+
+	static uint32_t GetMinMemory() noexcept;
+	static uint32_t GetMaxMemory() noexcept;
+
+private:
+	// Not actual globals, reading values inlined into functions
+	// This is to support modded overrides if needed
+#ifdef GAME
+	static constexpr AddressPtr<uint32_t, 0xAA56D2> uiMinMemory;
+	static constexpr AddressPtr<uint32_t, 0xAA5ED1> uiMaxMemory;
+#else
+	static constexpr AddressPtr<uint32_t, 0x855BF2> uiMinMemory;
+	static constexpr AddressPtr<uint32_t, 0x8563F1> uiMaxMemory;
+#endif
 };
 
 [[nodiscard]] __declspec(restrict) __declspec(allocator) inline void* operator new(std::size_t auiCount, ScrapHeap& arHeap) {
