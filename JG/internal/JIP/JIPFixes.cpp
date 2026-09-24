@@ -29,6 +29,7 @@
 #include "Bethesda/TESHavokUtilities.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TimeGlobal.hpp"
+#include "Bethesda/BGSChangeFlags.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 
 #include "events/EventFramework.h"
@@ -183,12 +184,15 @@ namespace JIPFixes {
 						pLight->pLightForm = static_cast<TESObjectLIGH*>(pForm);
 
 						NiAVObject* pIter = pLight;
-						do {
+						while (true) {
 							if (pIter->m_uiFlags.GetAndSetBit(29))
 								break;
 
+							if (pIter == apRoot)
+								break;
+
 							pIter = pIter->GetParent();
-						} while (pIter != apRoot);
+						};
 					}
 				}
 				apObject->RemoveExtraData(strLightFormEDID);
@@ -2003,18 +2007,19 @@ namespace JIPFixes {
 			if (!pList || !pForm)
 				return true;
 
+			const bool bHadScriptObjects = !pList->kScriptAddedObjects.IsEmpty();
+
 			uint32_t uiDeletedCount = 0;
 			auto pIter = pList->GetLeveledList();
 			while (pIter && !pIter->IsEmpty()) {
 				LeveledObject* pItem = pIter->GetItem();
 				if (pItem && pItem->pForm == pForm) {
-
 					auto pScriptIter = pList->kScriptAddedObjects.GetHead();
 					while (pScriptIter && !pScriptIter->IsEmpty()) {
-						auto pItem = pScriptIter->GetItem();
-						if (pItem == pItem)
+						if (pScriptIter->GetItem() == pItem)
 							pScriptIter->RemoveHead();
-						pScriptIter = pScriptIter->GetNext();
+						else
+							pScriptIter = pScriptIter->GetNext();
 					}
 
 					delete pItem;
@@ -2026,8 +2031,8 @@ namespace JIPFixes {
 				}
 			}
 
-			if (pList->kScriptAddedObjects.IsEmpty())
-				pListForm->RemoveChange(0x80000000);
+			if (bHadScriptObjects && pList->kScriptAddedObjects.IsEmpty())
+				pListForm->RemoveChange(BGSChangeFlag::LEVELED_LIST_ADDED_OBJECT);
 
 			*result = uiDeletedCount;
 			return true;
@@ -2043,6 +2048,8 @@ namespace JIPFixes {
 			if (!pList)
 				return true;
 
+			const bool bHadScriptObjects = !pList->kScriptAddedObjects.IsEmpty();
+
 			uint32_t uiDeletedCount = 0;
 			auto pIter = pList->GetLeveledList();
 			while (pIter && !pIter->IsEmpty()) {
@@ -2050,10 +2057,10 @@ namespace JIPFixes {
 				if (pItem) {
 					auto pScriptIter = pList->kScriptAddedObjects.GetHead();
 					while (pScriptIter && !pScriptIter->IsEmpty()) {
-						auto pItem = pScriptIter->GetItem();
-						if (pItem == pItem)
+						if (pScriptIter->GetItem() == pItem)
 							pScriptIter->RemoveHead();
-						pScriptIter = pScriptIter->GetNext();
+						else
+							pScriptIter = pScriptIter->GetNext();
 					}
 
 					delete pItem;
@@ -2065,8 +2072,8 @@ namespace JIPFixes {
 				}
 			}
 
-			if (pList->kScriptAddedObjects.IsEmpty())
-				pListForm->RemoveChange(0x80000000);
+			if (bHadScriptObjects && pList->kScriptAddedObjects.IsEmpty())
+				pListForm->RemoveChange(BGSChangeFlag::LEVELED_LIST_ADDED_OBJECT);
 
 			*result = uiDeletedCount;
 			return true;
@@ -2083,6 +2090,8 @@ namespace JIPFixes {
 			if (!pList)
 				return true;
 
+			const bool bHadScriptObjects = !pList->kScriptAddedObjects.IsEmpty();
+
 			auto pIter = pList->GetLeveledList();
 			while (pIter && !pIter->IsEmpty()) {
 				if (uiIndex == 0) {
@@ -2090,10 +2099,10 @@ namespace JIPFixes {
 					if (pItem) {
 						auto pScriptIter = pList->kScriptAddedObjects.GetHead();
 						while (pScriptIter && !pScriptIter->IsEmpty()) {
-							auto pItem = pScriptIter->GetItem();
-							if (pItem == pItem)
+							if (pScriptIter->GetItem() == pItem)
 								pScriptIter->RemoveHead();
-							pScriptIter = pScriptIter->GetNext();
+							else
+								pScriptIter = pScriptIter->GetNext();
 						}
 
 						delete pItem;
@@ -2108,8 +2117,8 @@ namespace JIPFixes {
 				}
 			}
 
-			if (pList->kScriptAddedObjects.IsEmpty())
-				pListForm->RemoveChange(0x80000000);
+			if (bHadScriptObjects && pList->kScriptAddedObjects.IsEmpty())
+				pListForm->RemoveChange(BGSChangeFlag::LEVELED_LIST_ADDED_OBJECT);
 
 			return true;
 		}
