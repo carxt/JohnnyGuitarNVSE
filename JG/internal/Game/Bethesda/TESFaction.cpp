@@ -126,7 +126,7 @@ int32_t TESFaction::GetMinorCrime() const {
 void TESFaction::SetMinorCrime(int32_t aiCount) {
     iMinorCrime = aiCount;
 #ifdef GAME
-    AddChange(ChangeFlags::CHANGE_FACTION_CRIME_COUNTS);
+    AddChange(BGSChangeFlag::FACTION_CRIME_COUNTS);
 #endif
 }
 
@@ -138,7 +138,7 @@ int32_t TESFaction::GetMajorCrime() const {
 void TESFaction::SetMajorCrime(int32_t aiCount) {
     iMajorCrime = aiCount;
 #ifdef GAME
-    AddChange(ChangeFlags::CHANGE_FACTION_CRIME_COUNTS);
+    AddChange(BGSChangeFlag::FACTION_CRIME_COUNTS);
 #endif
 }
 
