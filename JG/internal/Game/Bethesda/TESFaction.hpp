@@ -97,8 +97,11 @@ public:
 #ifdef GAME
 	void AddMinorCrime(int32_t aiCount, bool abModRep);
 	void AddMajorCrime(int32_t aiCount, bool abModRep);
+#endif
 
+	int32_t GetFactionReaction(TESFaction* apFaction) const;
 	void SetFactionReaction(TESFaction* apFaction, int32_t aiReaction);
+#ifdef GAME
 	void ModFactionReaction(TESFaction* apFaction, int32_t aiReaction);
 #endif
 
