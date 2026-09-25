@@ -86,7 +86,7 @@ namespace JohnnyGameSettings {
 
 		static float __fastcall Hook(TESObjectWEAP* apWeapon) {
 			float fMaxRange = ThisCall<float>(kDetour, apWeapon);
-			if (!apWeapon->IsFixedRange() && apWeapon->IsRangedWeapon())
+			if (!apWeapon->GetIsRangeFixed() && apWeapon->IsRangedWeapon())
 				fMaxRange *= fCombatRangedWeaponRangeBaseMult.Float();
 			return fMaxRange;
 		}

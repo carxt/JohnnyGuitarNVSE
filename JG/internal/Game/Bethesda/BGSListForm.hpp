@@ -15,6 +15,8 @@ public:
 	BSSimpleList<TESForm*>* GetFormList();
 	const BSSimpleList<TESForm*>* GetFormList() const;
 
+	bool IsEmpty() const;
+
 	int32_t GetItemIndex(const TESForm* apForm) const;
 };
 

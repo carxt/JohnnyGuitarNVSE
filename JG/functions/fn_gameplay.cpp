@@ -1340,7 +1340,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 			}
 		}
 
-		if (pWeapon && pExtraDataList && (pWeapon->weaponSkill == ActorValue::Index::UNARMED || pWeapon->weaponSkill == ActorValue::Index::MELEE_WEAPONS)) {
+		if (pWeapon && pExtraDataList && (pWeapon->GetWeaponSkill() == ActorValue::Index::UNARMED || pWeapon->GetWeaponSkill() == ActorValue::Index::MELEE_WEAPONS)) {
 			if (pPoison)
 				pExtraDataList->SetPoison(pPoison);
 			else
@@ -1476,8 +1476,8 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 
 		BSString strOrgCasingPath;
 		if (cNewCasingPath[0] != 0) {
-			strOrgCasingPath = std::move(pWeapon->shellCasingModel.strModel);
-			pWeapon->shellCasingModel.SetModel(cNewCasingPath);
+			strOrgCasingPath = std::move(pWeapon->kShellCasingModel.strModel);
+			pWeapon->kShellCasingModel.SetModel(cNewCasingPath);
 		}
 
 		pWeapon->EjectShellCasing(pActor);
@@ -1486,7 +1486,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 			spOrgCasingNode->m_kWorld = kOrgTrans;
 
 		if (strOrgCasingPath)
-			pWeapon->shellCasingModel.strModel = std::move(strOrgCasingPath);
+			pWeapon->kShellCasingModel.strModel = std::move(strOrgCasingPath);
 
 		*result = 1;
 	}
@@ -1529,8 +1529,8 @@ bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectIMOD* targetMod = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &targetMod) || !targetMod || NOT_ID(targetMod, TESObjectIMOD))
+	TESObjectIMOD* pTargetMod = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetMod) || !pTargetMod || NOT_ID(pTargetMod, TESObjectIMOD))
 		return true;
 
 	TESDataHandler* pDataHandler = TESDataHandler::GetSingleton();
@@ -1543,7 +1543,7 @@ bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
 		TESObjectWEAP* pWeapon = static_cast<TESObjectWEAP*>(apObject);
 
 		for (uint32_t uiSlot = 0; uiSlot < 3; uiSlot++) {
-			if (pWeapon->itemMod[uiSlot] == targetMod) {
+			if (pWeapon->pModObjects[uiSlot] == pTargetMod) {
 				g_arrInterface->AppendElement(weaponArray, NVSEArrayElement(pWeapon));
 				break;
 			}

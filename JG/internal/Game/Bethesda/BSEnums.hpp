@@ -760,8 +760,9 @@ struct _AnimGroupWeapon {
 using ANIM_GROUP_WEAPON = _AnimGroupWeapon::Weapon;
 
 struct _AnimGroup {
-	enum Group : uint16_t {
-		NONE = 255,
+	enum Group  {
+		NONE = -1,
+
 		IDLE = 0,
 		DYNAMIC_IDLE,
 		SPECIAL_IDLE,
@@ -977,8 +978,9 @@ struct _AnimGroup {
 		RELOAD_Y,
 		RELOAD_Z,
 
-		_RELOAD_START	= RELOAD_W_START,
-		_RELOAD_END		= RELOAD_Z,
+		_RELOAD_START			= RELOAD_A,
+		_LOOPING_RELOAD_START	= RELOAD_W,
+		_RELOAD_END				= RELOAD_Z,
 
 		JAM_A,
 		JAM_B,
@@ -1196,35 +1198,6 @@ struct _AttackAnimation {
 };
 using ATTACK_ANIMATION = _AttackAnimation::Animation;
 
-enum RELOAD_ANIM {
-	RELOAD_ANIM_A = 0,
-	RELOAD_ANIM_B,
-	RELOAD_ANIM_C,
-	RELOAD_ANIM_D,
-	RELOAD_ANIM_E,
-	RELOAD_ANIM_F,
-	RELOAD_ANIM_G,
-	RELOAD_ANIM_H,
-	RELOAD_ANIM_I,
-	RELOAD_ANIM_J,
-	RELOAD_ANIM_K,
-	RELOAD_ANIM_L,
-	RELOAD_ANIM_M,
-	RELOAD_ANIM_N,
-	RELOAD_ANIM_O,
-	RELOAD_ANIM_P,
-	RELOAD_ANIM_Q,
-	RELOAD_ANIM_R,
-	RELOAD_ANIM_S,
-	RELOAD_ANIM_W,
-	RELOAD_ANIM_X,
-	RELOAD_ANIM_Y,
-	RELOAD_ANIM_Z,
-	RELOAD_ANIM_COUNT,
-};
-
-#pragma endregion
-
 #pragma region Weapons
 
 struct _WeaponType {
@@ -1250,15 +1223,19 @@ using WEAPON_TYPE = _WeaponType::Type;
 
 struct _WeaponSound {
 	enum Sound {
-		SHOOT_3D = 0,
-		SHOOT_2D,
-		SHOOT_3D_LOOPING,
-		NO_AMMO,
-		SWING = NO_AMMO,
-		BLOCK,
-		IDLE,
-		EQUIP,
-		UNEQUIP
+		ATTACK					= 0,
+		ATTACK_DISTANT			= 1,
+		ATTACK_2D				= 2,
+		ATTACK_LOOP				= 3,
+		ATTACK_FAIL				= 4,
+		MELEE_BLOCK				= 5,
+		IDLE					= 6,
+		EQUIP					= 7,
+		UNEQUIP					= 8,
+		ATTACK_MODDED			= 9,
+		ATTACK_MODDED_DISTANT	= 10,
+		ATTACK_MODDED_2D		= 11,
+		COUNT,
 	};
 };
 using WEAPON_SOUND = _WeaponSound::Sound;
@@ -1272,6 +1249,16 @@ struct _WeaponRumblePattern {
 	};
 };
 using WEAPON_RUMBLE_PATTERN = _WeaponRumblePattern::Pattern;
+
+struct _WeaponHitBehavior {
+	enum Behavior {
+		NORMAL					= 0,
+		DISMEMBER_ONLY			= 1,
+		EXPLODE_ONLY			= 2,
+		NO_DISMEMBER_OR_EXPLODE	= 3,
+	};
+};
+using WEAPON_HIT_BEHAVIOR = _WeaponHitBehavior::Behavior;
 
 struct _WeaponModEffectType {
 	enum Type : uint32_t {
@@ -1291,6 +1278,7 @@ struct _WeaponModEffectType {
 		VATS_BONUS				= 13,
 		IRON_SITES				= 14,
 		VATS_SPECIAL_ATTACK		= 15,
+		SILENCER				= 16,
 		COUNT,
 	};
 };

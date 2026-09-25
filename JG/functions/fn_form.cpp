@@ -335,14 +335,11 @@ bool Cmd_GetFactionFlags_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_RemoveScopeModelPath_Execute(COMMAND_ARGS) {
-	TESObjectWEAP* weapon = nullptr;
-	TESModel* model = nullptr;
 	*result = 0;
-
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && weapon && IS_TYPE(weapon, TESObjectWEAP)) {
-		if (weapon && weapon->HasScope()) model = &(weapon->kScope);
-		if (model) {
-			model->SetModel("");
+	TESObjectWEAP* pWeapon = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon) && pWeapon && IS_ID(pWeapon, TESObjectWEAP)) {
+		if (pWeapon && pWeapon->GetHasScope()) {
+			pWeapon->GetScopeModel()->SetModel("");
 			*result = 1;
 		}
 	}
@@ -717,15 +714,12 @@ bool Cmd_GetWeaponAltTextures_Execute(COMMAND_ARGS) {
 	TESObjectWEAP* pWeapon;
 	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
-		TESModelTextureSwap* pModel = &pWeapon->textureSwap;
-		if (pModel) {
-			auto pIter = pModel->GetTexSwapList();
-			while (pIter && !pIter->IsEmpty()) {
-				TEX_SWAP* pEntry = pIter->GetItem();
-				pIter = pIter->GetNext();
-				if (pEntry && pEntry->pTextureSet) {
-					g_arrInterface->AppendElement(pArray, NVSEArrayElement(pEntry->pTextureSet));
-				}
+		auto pIter = pWeapon->GetTexSwapList();
+		while (pIter && !pIter->IsEmpty()) {
+			TEX_SWAP* pEntry = pIter->GetItem();
+			pIter = pIter->GetNext();
+			if (pEntry && pEntry->pTextureSet) {
+				g_arrInterface->AppendElement(pArray, NVSEArrayElement(pEntry->pTextureSet));
 			}
 		}
 	}
@@ -847,16 +841,17 @@ bool Cmd_GetAltTexturesEx_Execute(COMMAND_ARGS) {
 	TESForm* pForm = nullptr;
 	uint32_t uiWhichModel;
 	NVSEArrayVar* pMap = g_arrInterface->CreateMap(nullptr, nullptr, 0, scriptObj);
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &uiWhichModel) && pForm && (IS_TYPE(pForm, TESObjectARMO) || IS_TYPE(pForm, TESObjectWEAP))) {
-		TESModelTextureSwap* pModel;
-		if (IS_TYPE(pForm, TESObjectARMO)) {
-			TESObjectARMO* pArmor = DYNAMIC_CAST(pForm, TESForm, TESObjectARMO);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &uiWhichModel) && pForm) {
+		const TESModelTextureSwap* pModel = nullptr;
+		if (IS_ID(pForm, TESObjectARMO) || IS_ID(pForm, TESObjectARMA)) {
+			TESObjectARMO* pArmor = static_cast<TESObjectARMO*>(pForm);
 			pModel = GetArmorModel(pArmor, uiWhichModel);
 		}
-		else {
-			TESObjectWEAP* pWeapon = DYNAMIC_CAST(pForm, TESForm, TESObjectWEAP);
-			pModel = &pWeapon->textureSwap;
+		else if (IS_ID(pForm, TESObjectWEAP)) {
+			TESObjectWEAP* pWeapon = static_cast<TESObjectWEAP*>(pForm);
+			pModel = pWeapon;
 		}
+
 		if (pModel) {
 			auto pIter = pModel->GetTexSwapList();
 			while (pIter && !pIter->IsEmpty()) {
@@ -900,17 +895,13 @@ bool Cmd_SetWeaponAltTexture_Execute(COMMAND_ARGS) {
 	BGSTextureSet* pTextureSet = nullptr;
 	int32_t iIndex = -1;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &iIndex, &pTextureSet) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP) && pTextureSet && IS_TYPE(pTextureSet, BGSTextureSet)) {
-		TESModelTextureSwap* pModel = &pWeapon->textureSwap;
-		if (!pModel)
-			return true;
-
-		TEX_SWAP* pSwap = pModel->GetTexSwap(iIndex);
+		TEX_SWAP* pSwap = pWeapon->GetTexSwap(iIndex);
 		if (pSwap) {
 			pSwap->pTextureSet = pTextureSet;
 			*result = 1;
 		}
 		else {
-			pModel->AddTexSwap("", iIndex, pTextureSet);
+			pWeapon->AddTexSwap("", iIndex, pTextureSet);
 			*result = 1;
 		}
 	}
@@ -946,17 +937,13 @@ bool Cmd_ClearWeaponAltTexture_Execute(COMMAND_ARGS) {
 	TESObjectWEAP* pWeapon;
 	int32_t iIndex = -2;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &iIndex) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
-		TESModelTextureSwap* pModel = &pWeapon->textureSwap;
-		if (!pModel)
-			return true;
-
 		if (iIndex == -1) {
-			pModel->ClearTexSwapList();
+			pWeapon->ClearTexSwapList();
 			*result = 1;
 			return true;
 		}
 		else {
-			pModel->RemoveTexSwap(iIndex);
+			pWeapon->RemoveTexSwap(iIndex);
 			*result = 1;
 			return true;
 		}
@@ -1379,53 +1366,54 @@ bool Cmd_GetQuestDelay_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* weap = nullptr;
-	uint32_t traitID = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &traitID) && weap && IS_TYPE(weap, TESObjectWEAP)) {
-		switch (traitID) {
+	TESObjectWEAP* pWeapon = nullptr;
+	uint32_t uiTrait = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &uiTrait) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
+		switch (uiTrait) {
 		case 1:
-			*result = weap->vatsSkill;
+			*result = pWeapon->GetVATSSpecialAttackSkillRequirement();
 			break;
 		case 2:
-			*result = weap->vatsDamMult;
+			*result = pWeapon->GetVATSSpecialAttackDamageMultiplier();
 			break;
 		case 3:
-			*result = weap->vatsAP;
+			*result = pWeapon->GetVATSSpecialAttackAPCost();
 			break;
 		case 4:
-			*result = weap->isSilent;
+			*result = pWeapon->GetVATSSpecialAttackSilent();
 			break;
 		case 5:
-			*result = weap->modRequired;
+			*result = pWeapon->GetVATSSpecialAttackModRequirement();
 			break;
 		}
-		if (Script::GetConsoleOuput()) Interface::PrintLine("GetWeaponVATSTraitNumeric %d >> %f", traitID, *result);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetWeaponVATSTraitNumeric %d >> %f", uiTrait, *result);
 	}
 	return true;
 }
 
 bool Cmd_SetWeaponVATSTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* weap = nullptr;
-	uint32_t traitID = 0;
-	float value;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &traitID, &value) && weap && IS_TYPE(weap, TESObjectWEAP)) {
+	TESObjectWEAP* pWeapon = nullptr;
+	uint32_t uiTrait = 0;
+	float fValue;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &uiTrait, &fValue) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
 		*result = 1;
-		switch (traitID) {
+		switch (uiTrait) {
 		case 1:
-			weap->vatsSkill = value;
+			pWeapon->SetVATSSpecialAttackSkillRequirement(fValue);
 			break;
 		case 2:
-			weap->vatsDamMult = value;
+			pWeapon->SetVATSSpecialAttackDamageMultiplier(fValue);
 			break;
 		case 3:
-			weap->vatsAP = value;
+			pWeapon->SetVATSSpecialAttackAPCost(fValue);
 			break;
 		case 4:
-			weap->isSilent = (value > 0 ? 1 : 0);
+			pWeapon->SetVATSSpecialAttackSilent(fValue > 0.f);
 			break;
 		case 5:
-			weap->modRequired = (value > 0 ? 1 : 0);
+			pWeapon->SetVATSSpecialAttackModRequirement(fValue > 0.f);
 			break;
 		default:
 			*result = 0;
@@ -1828,36 +1816,36 @@ bool Cmd_GetBufferedCellsAlt_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
-	TESObjectWEAP* weap = nullptr;
-	int id = -1;
-	TESObjectSTAT* model = nullptr;
+	TESObjectWEAP* pWeapon = nullptr;
+	uint32_t uiType = -1;
+	TESObjectSTAT* pStatic = nullptr;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &id, &model) && weap && IS_TYPE(weap, TESObjectWEAP) && (!model || IS_TYPE(model, TESObjectSTAT)) && id <= 7) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &uiType, &pStatic) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP) && (!pStatic || IS_TYPE(pStatic, TESObjectSTAT)) && uiType <= 7) {
 		*result = 1;
-		switch (id) {
+		switch (uiType) {
 		case 0:
-			weap->worldStatic = model;
+			pWeapon->p1stPersonObject = pStatic;
 			break;
 		case 1:
-			weap->modStatics[0] = model;
+			pWeapon->p1stPersonModObjects[0] = pStatic;
 			break;
 		case 2:
-			weap->modStatics[1] = model;
+			pWeapon->p1stPersonModObjects[1] = pStatic;
 			break;
 		case 3:
-			weap->modStatics[3] = model;
+			pWeapon->p1stPersonModObjects[3] = pStatic;
 			break;
 		case 4:
-			weap->modStatics[2] = model;
+			pWeapon->p1stPersonModObjects[2] = pStatic;
 			break;
 		case 5:
-			weap->modStatics[5] = model;
+			pWeapon->p1stPersonModObjects[5] = pStatic;
 			break;
 		case 6:
-			weap->modStatics[4] = model;
+			pWeapon->p1stPersonModObjects[4] = pStatic;
 			break;
 		case 7:
-			weap->modStatics[6] = model;
+			pWeapon->p1stPersonModObjects[6] = pStatic;
 			break;
 		default:
 			*result = 0;
@@ -1868,35 +1856,39 @@ bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
-	TESObjectWEAP* weap = nullptr;
-	int id = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weap, &id) && weap && IS_TYPE(weap, TESObjectWEAP) && id <= 7) {
-		switch (id) {
+	TESObjectWEAP* pWeapon = nullptr;
+	uint32_t uiType = -1;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &uiType) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP) && uiType <= 7) {
+		TESObjectSTAT* pStatic = nullptr;
+		switch (uiType) {
 		case 0:
-			*(FormID*)result = weap->worldStatic != nullptr ? weap->worldStatic->GetFormID() : 0;
+			pStatic = pWeapon->p1stPersonObject;
 			break;
 		case 1:
-			*(FormID*)result = weap->modStatics[0] != nullptr ? weap->modStatics[0]->GetFormID() : 0;
+			pStatic = pWeapon->p1stPersonModObjects[0];
 			break;
 		case 2:
-			*(FormID*)result = weap->modStatics[1] != nullptr ? weap->modStatics[1]->GetFormID() : 0;
+			pStatic = pWeapon->p1stPersonModObjects[1];
 			break;
 		case 3:
-			*(FormID*)result = weap->modStatics[3] != nullptr ? weap->modStatics[3]->GetFormID() : 0;
+			pStatic = pWeapon->p1stPersonModObjects[3];
 			break;
 		case 4:
-			*(FormID*)result = weap->modStatics[2] != nullptr ? weap->modStatics[2]->GetFormID() : 0;
+			pStatic = pWeapon->p1stPersonModObjects[2];
 			break;
 		case 5:
-			*(FormID*)result = weap->modStatics[5] != nullptr ? weap->modStatics[5]->GetFormID() : 0;
+			pStatic = pWeapon->p1stPersonModObjects[5];
 			break;
 		case 6:
-			*(FormID*)result = weap->modStatics[4] != nullptr ? weap->modStatics[4]->GetFormID() : 0;
+			pStatic = pWeapon->p1stPersonModObjects[4];
 			break;
 		case 7:
-			*(FormID*)result = weap->modStatics[6] != nullptr ? weap->modStatics[6]->GetFormID() : 0;
+			pStatic = pWeapon->p1stPersonModObjects[6];
 			break;
 		}
+
+		if (pStatic)
+			*reinterpret_cast<FormID*>(result) = pStatic->GetFormID();
 	}
 	return true;
 }
@@ -1958,7 +1950,7 @@ bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	if (!extendPtr && weaponInfo && (weaponInfo->pObject == weapon) && midHiProc->GetCurrentAmmo())
 		ammo = midHiProc->GetCurrentAmmo()->pObject;
 	if (!ammo)
-		ammo = weapon->GetAmmo();
+		ammo = weapon->GetCurrentAmmo(nullptr);
 	midHiProc->pCurrentWeapon = nullptr;
 	*result = GetWeaponDPS(PlayerCharacter::GetSingleton(), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
 	midHiProc->pCurrentWeapon = weaponInfo;
@@ -3119,7 +3111,7 @@ namespace {
 		ItemChange* pItem = apCharacter->GetCurrentAIProcess()->GetCurrentWeapon();
 		if (pItem) {
 			TESObjectWEAP* pWeapon = static_cast<TESObjectWEAP*>(pItem->pObject);
-			return pWeapon && pWeapon->HasScope() && (!pWeapon->HasModScope() || pItem->HasModEffectActive(0xE));
+			return pWeapon && pWeapon->GetHasScope() && (!pWeapon->GetHasModScope() || pItem->HasModEffectActive(WEAPON_MOD_EFFECT_TYPE::IRON_SITES));
 		}
 		return false;
 	}
@@ -3128,7 +3120,7 @@ namespace {
 		TESObjectWEAP* pWeapon = apBiped->kObjects[BIPED_OBJECT::WEAPON].pWeapon;
 		if (pWeapon && HasScopedWeapon(apCharacter)) {
 			const bool bScopeVisible = HUDMainMenu::GetSingleton()->bScopeVisible;
-			Interface::InitGunScope(&pWeapon->kScope);
+			Interface::InitGunScope(pWeapon->GetScopeModel());
 			Interface::SetGunScopeVisible(bScopeVisible);
 		}
 	}

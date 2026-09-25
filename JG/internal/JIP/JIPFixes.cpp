@@ -1124,7 +1124,7 @@ namespace JIPFixes {
 						TESObjectWEAP* pWeapon = pBiped->kObjects[BIPED_OBJECT::WEAPON].pWeapon;
 						if (pWeapon && ThisCall<bool>(uiWeaponHasScope, pActor)) {
 							const bool bScopeVisible = HUDMainMenu::GetSingleton()->bScopeVisible;
-							Interface::InitGunScope(&pWeapon->kScope);
+							Interface::InitGunScope(pWeapon->GetScopeModel());
 							Interface::SetGunScopeVisible(bScopeVisible);
 						}
 					}

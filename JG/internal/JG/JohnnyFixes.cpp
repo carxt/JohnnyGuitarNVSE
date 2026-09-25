@@ -30,13 +30,41 @@
 
 namespace JohnnyFixes {
 #ifdef GAME
-	SPEC_NAKED void InventoryAmmoHook() {
-		static constexpr uint32_t uiReturnAddr = 0x7080A8;
-		__asm {
-			mov		ecx, dword ptr[ebp - 0x2D4]
-			call	TESObjectWEAP::GetAmmoInInventory
-			mov		dword ptr[ebp - 0x2C8], eax
-			jmp		uiReturnAddr
+	namespace WeaponStatsUseInvAmmo {
+		static TESForm* __fastcall GetAmmoInInventory(TESObjectWEAP* apWeapon) {
+			BGSListForm* pAmmoList = apWeapon->GetAmmoFormList();
+			if (pAmmoList && !pAmmoList->IsEmpty()) {
+				const InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(PlayerCharacter::GetSingleton());
+				if (pInvChanges) {
+					auto pIter = pAmmoList->GetFormList();
+					while (pIter && !pIter->IsEmpty()) {
+						TESForm* pForm = pIter->GetItem();
+						pIter = pIter->GetNext();
+
+						if (IS_ID(pForm, TESAmmo)) {
+							int32_t iCount = pInvChanges->GetObjectCount(static_cast<TESAmmo*>(pForm));
+							if (iCount > 0)
+								return pForm;
+						}
+					}
+				}
+			}
+			return nullptr;
+		}
+
+		SPEC_NAKED void InventoryAmmoHook() {
+			static constexpr uint32_t uiReturnAddr = 0x7080A8;
+			__asm {
+				mov		ecx, dword ptr [ebp - 0x2D4]
+				call	GetAmmoInInventory
+				mov		dword ptr [ebp - 0x2C8], eax
+				jmp		uiReturnAddr
+			}
+		}
+
+		void Install() {
+			// Use available ammo in inventory instead of NULL when default ammo isn't present
+			HookUtils::WriteRelJump(0x70809E, InventoryAmmoHook);
 		}
 	}
 
@@ -149,8 +177,7 @@ namespace JohnnyFixes {
 		// for Runtime EDIDs
 		EDIDRestoration::InitHooks();
 
-		// use available ammo in inventory instead of NULL when default ammo isn't present
-		HookUtils::WriteRelJump(0x70809E, InventoryAmmoHook);
+		WeaponStatsUseInvAmmo::Install();
 
 		// fix ammo effects list being checked for non-TESAmmo's when the Rock-It-Launcher is equipped
 		AmmoEffectListNullChecks::Install();

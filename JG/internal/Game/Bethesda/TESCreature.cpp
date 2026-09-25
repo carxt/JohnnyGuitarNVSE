@@ -1,6 +1,6 @@
 #include "TESCreature.hpp"
 #ifdef EDITOR
-#include <GameForms.h>
+#include "TESObjectWEAP.hpp"
 #endif
 
 // GAME - 0x5F90C0
@@ -156,7 +156,7 @@ bool TESCreature::CanWearItem(TESForm* apForm) const {
 		return true;
 
 	// Yes, the weapon handling is weird
-	return eFormType == FORM_TYPE::TESObjectWEAP && static_cast<TESObjectWEAP*>(apForm)->IsEmbeddedWeapon();
+	return eFormType == FORM_TYPE::TESObjectWEAP && static_cast<TESObjectWEAP*>(apForm)->GetIsEmbeddedWeapon();
 #endif
 }
 
