@@ -78,9 +78,6 @@
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameForms.cpp">
-      <Filter>nvse</Filter>
-    </ClCompile>
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
@@ -1095,6 +1092,9 @@
     </ClCompile>
     <ClCompile Include="internal\JG\Fixes\XMLBufferFix.cpp">
       <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\TESObjectWEAP.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2946,6 +2946,9 @@
     </ClInclude>
     <ClInclude Include="internal\JG\Fixes\XMLBufferFix.hpp">
       <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TESObjectWEAP.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

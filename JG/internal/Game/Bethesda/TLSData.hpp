@@ -64,6 +64,7 @@ struct TLSData {
 	static TLSData* Get();
 
 	static uint32_t GetMemContext();
+	static uint32_t GetAndSetMemContext(uint32_t index);
 	static void SetMemContext(uint32_t index);
 
 	static uint32_t GetBatchRendererIndex();

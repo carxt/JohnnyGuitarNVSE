@@ -152,12 +152,27 @@ void TESFaction::AddMinorCrime(int32_t aiCount, bool abModRep) {
 void TESFaction::AddMajorCrime(int32_t aiCount, bool abModRep) {
     ThisCall(0x5FDA50, this, aiCount, abModRep);
 }
+#endif
+
+// GAME - 0x5FD3B0
+int32_t TESFaction::GetFactionReaction(TESFaction* apFaction) const {
+#ifdef GAME
+    return ThisCall<int32_t>(0x5FD3B0, this, apFaction);
+#else
+    return GetReaction(apFaction);
+#endif
+}
 
 // GAME - 0x5FD3D0
 void TESFaction::SetFactionReaction(TESFaction* apFaction, int32_t aiReaction) {
+#ifdef GAME
     ThisCall(0x5FD3D0, this, apFaction, aiReaction);
+#else
+    SetReaction(apFaction, aiReaction);
+#endif
 }
 
+#ifdef GAME
 // GAME - 0x5FD400
 void TESFaction::ModFactionReaction(TESFaction* apFaction, int32_t aiReaction) {
     ThisCall(0x5FD400, this, apFaction, aiReaction);
@@ -165,7 +180,7 @@ void TESFaction::ModFactionReaction(TESFaction* apFaction, int32_t aiReaction) {
 #endif
 
 FIGHT_REACTION TESFaction::GetFactionFightReaction(TESFaction* apFaction) const {
-    return GetFactionCombatRelation(apFaction);
+    return GetFightReaction(apFaction);
 }
 
 #ifdef GAME

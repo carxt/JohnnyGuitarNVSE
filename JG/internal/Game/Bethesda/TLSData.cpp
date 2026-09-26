@@ -18,6 +18,13 @@ uint32_t TLSData::GetMemContext() {
 	return Get()->eMemContext;
 }
 
+uint32_t TLSData::GetAndSetMemContext(uint32_t index) {
+	TLSData* pData = Get();
+	uint32_t eOldContext = pData->eMemContext;
+	pData->eMemContext = index;
+	return eOldContext;
+}
+
 // GAME - 0x404F30
 void TLSData::SetMemContext(uint32_t index) {
 	Get()->eMemContext = index;

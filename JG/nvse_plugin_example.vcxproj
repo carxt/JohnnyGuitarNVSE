@@ -353,7 +353,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameForms.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTiles.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
@@ -811,6 +810,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESObjectMISC.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectREFR.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESObjectSTAT.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESObjectWEAP.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESPackage.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESParameters.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESQuest.cpp" />
@@ -1907,6 +1907,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESObjectMISC.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectREFR.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESObjectSTAT.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESObjectWEAP.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESPackage.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESPackageData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESParameters.hpp" />
