@@ -2369,6 +2369,23 @@ namespace JIPFixes {
 			kDetour.ReplaceCall(0x87D5BA, ClearJIPFlagsAndInit);
 		}
 	}
+
+	namespace OnRagdollEventFix {
+
+		void InitHooks() {
+			// Use TESObjectREFR::FindReferenceFor3D instead of assuming the parent node is a scene root
+			// Not all skeletons have collision set up that way, and Mad got sad 
+			
+			// push    eax
+			// mov     eax, 0x56F930 (TESObjectREFR::FindReferenceFor3D)
+			// call    eax
+			// add     esp, 4
+			// test    eax, eax
+			// jz      EXIT
+			// jmp     +8
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1000990A), "\x50\xB8\x30\xF9\x56\x00\xFF\xD0\x83\xC4\x04\x85\xC0\x74\x15\xEB\x08");
+		}
+	}
 #endif
 
 	namespace LogMover {
@@ -2447,6 +2464,7 @@ namespace JIPFixes {
 		AddItemAltNoCond::InitHooks();
 		ExtraDataFixes::InitHooks();
 		EDIDLookupFix::InitHooks();
+		OnRagdollEventFix::InitHooks();
 		ModelFixes::InitStrings();
 #endif
 	}
