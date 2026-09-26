@@ -1404,8 +1404,8 @@ bool Cmd_StopVATSCam_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-static inline constexpr AddressPtr<float, 0x11DFED4> fCameraShakeMult;
-static inline constexpr AddressPtr<float, 0x11DFED8> fCameraShakeCurrentTime;
+constexpr inline AddressPtr<float, 0x11DFED4> fCameraShakeMult;
+constexpr inline AddressPtr<float, 0x11DFED8> fCameraShakeCurrentTime;
 
 bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 	*result = 0;

@@ -1621,7 +1621,7 @@ namespace JIPFixes {
 		constexpr float WATER_OPACITY = 0.8f;
 		constexpr float WATER_REFLECTIVITY = 0.3f;
 
-		static constexpr AddressPtr<NiPointer<BSRenderedTexture>, 0x11C7C2C>	spSkyReflectionMap;
+		constexpr inline AddressPtr<NiPointer<BSRenderedTexture>, 0x11C7C2C> spSkyReflectionMap;
 
 		STACK_FRAME_OPT_ENABLE
 
