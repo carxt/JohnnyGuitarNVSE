@@ -24,6 +24,7 @@
 #include "Bethesda/TESImageSpaceModifier.hpp"
 #include "Bethesda/TESDataHandler.hpp"
 #include "Bethesda/Animation.hpp"
+#include "Bethesda/TES.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 
@@ -2346,11 +2347,11 @@ namespace RefWalker {
 		}
 		else {
 			uint32_t uiCount = 0;
-			GridCellArray* pArray = TES::GetSingleton()->gridCellArray;
-			int32_t iGridSize = pArray->iDimension;
+			const GridCellArray* pArray = TES::GetSingleton()->pGridCellArray;
+			const int32_t iGridSize = pArray->iDimension;
 			for (int32_t x = 0; x < iGridSize; x++) {
 				for (int32_t y = 0; y < iGridSize; y++) {
-					GridCell* pGridCell = pArray->GetCell(x, y);
+					const GridCell* pGridCell = pArray->GetCell(x, y);
 					if (pGridCell->pCell)
 						uiCount += IterateCellReferencesFiltered(pGridCell->pCell, arFilter);
 				}
@@ -2426,8 +2427,8 @@ bool Cmd_CallPerRef_Execute(COMMAND_ARGS) {
 		if (pCell && !IS_TYPE(pCell, TESObjectCELL))
 			pCell = nullptr;
 
-		if (!pCell && TES::GetSingleton()->currentInterior)
-			pCell = TES::GetSingleton()->currentInterior;
+		if (!pCell && TES::GetSingleton()->GetInterior())
+			pCell = TES::GetSingleton()->GetInterior();
 
 		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->GetRotation().z, kPosAndDist);
 		if (eFormFilter)
@@ -2495,8 +2496,8 @@ bool Cmd_CallPerRefEx_Execute(COMMAND_ARGS) {
 		if (pCell && !IS_TYPE(pCell, TESObjectCELL))
 			pCell = nullptr;
 
-		if (!pCell && TES::GetSingleton()->currentInterior)
-			pCell = TES::GetSingleton()->currentInterior;
+		if (!pCell && TES::GetSingleton()->GetInterior())
+			pCell = TES::GetSingleton()->GetInterior();
 
 		FilterData kFilterData(pCaller, pScript, fAngleFilter, pCaller->GetRotation().z, kPosAndDist);
 		BSScrapBuffer<NVSEArrayElement> kElements(uiArraySize);

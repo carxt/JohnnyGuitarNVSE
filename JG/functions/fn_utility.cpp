@@ -12,6 +12,7 @@
 #include "Bethesda/Sky.hpp"
 #include "Bethesda/Animation.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
+#include "Bethesda/TES.hpp"
 
 #include "JG/CameraOverride.hpp"
 #include "JG/DisabledLevelUp.hpp"
@@ -566,18 +567,18 @@ bool Cmd_TriggerScreenSplatterEx_Execute(COMMAND_ARGS) {
 	char cTexturePath1[MAX_PATH] = {};
 	char cTexturePath2[MAX_PATH] = {};
 
-	NiSourceTexture* pAlphaTex = nullptr;
-	NiSourceTexture* pColorTex = nullptr;
-	NiSourceTexture* pFlareTex = nullptr;
-
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiCount, &fDuration, &fSizeMult, &fOpacityMult, &cTexturePath0, &cTexturePath1, &cTexturePath2, &uiNoFade)) {
+		NiPointer<NiTexture> spAlphaTex = nullptr;
+		NiPointer<NiTexture> spColorTex = nullptr;
+		NiPointer<NiTexture> spFlareTex = nullptr;
+
 		TES* pTES = TES::GetSingleton();
-		pTES->CreateTextureImage(cTexturePath0, pAlphaTex, false, false);
-		pTES->CreateTextureImage(cTexturePath1, pColorTex, false, false);
-		pTES->CreateTextureImage(cTexturePath2, pFlareTex, false, false);
+		pTES->CreateTextureImage(cTexturePath0, spAlphaTex, false, false);
+		pTES->CreateTextureImage(cTexturePath1, spColorTex, false, false);
+		pTES->CreateTextureImage(cTexturePath2, spFlareTex, false, false);
 		ScreenCustomSplatter::bSecondsForFade = uiNoFade;
 
-		ActivateSplatter(uiCount, fDuration, fSizeMult, fOpacityMult, pAlphaTex, pColorTex, pFlareTex);
+		ActivateSplatter(uiCount, fDuration, fSizeMult, fOpacityMult, spAlphaTex, spColorTex, spFlareTex);
 		*result = 1;
 		return true;
 	}

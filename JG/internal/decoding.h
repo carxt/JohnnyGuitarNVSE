@@ -2,7 +2,6 @@
 #include <GameSound.h>
 #include <GameUI.h>
 #include <GameAPI.h>
-#include "Bethesda/GridCellArray.hpp"
 
 class LoadedAreaBound;
 struct ExtraAudioMarkerData;
@@ -28,123 +27,6 @@ struct DetectionData
 	uint8_t byte1F; // 1F
 	int32_t detectionModSneak;
 };
-
-// A0
-struct WaterSurfaceManager
-{
-	// 30
-	struct WaterGroup
-	{
-		TESWaterForm* waterForm; // 00
-		uint32_t unk04; // 04
-		uint32_t unk08; // 08
-		float flt0C; // 0C	Always 1.0 ?
-		float waterHeight; // 10
-		uint32_t unk14; // 14
-		uint32_t unk18; // 18
-		float flt1C; // 1C	-flt0C
-		float flt20; // 20	-waterHeight
-		DList<TESObjectREFR> waterPlanes; // 24
-	};
-
-	struct Struct8C
-	{
-		uint32_t unk00;
-		uint32_t unk04;
-		uint32_t unk08;
-	};
-
-	uint32_t unk00; // 00
-	uint32_t unk04; // 04
-	NiObject* object08; // 08
-	NiObject* object0C; // 0C
-	NiObject* object10; // 10
-	NiObject* object14; // 14
-	NiObject* object18; // 18
-	NiObject* object1C; // 1C	Seen NiSourceTexture
-	NiObject* object20; // 20
-	uint32_t unk24; // 24
-	uint32_t unk28; // 28
-	uint32_t unk2C; // 2C
-	uint32_t unk30; // 30
-	uint32_t unk34; // 34
-	uint32_t unk38; // 38
-	DList<WaterGroup> waterGroups; // 3C
-	WaterGroup* waterLOD; // 48	(Assumed)
-	NiTPointerMap<TESObjectREFR*, TESObjectREFR*>	 map4C; // 4C
-	NiTPointerMap<TESObjectREFR*, TESObjectREFR*>	 map5C; // 5C
-	NiTPointerMap<TESWaterForm*, bool>				map6C; // 6C
-	NiTPointerMap<TESObjectREFR*, void*> map7C; // 7C
-	Struct8C unk8C; // 8C
-	float flt98; // 98
-	uint32_t unk9C; // 9C
-};
-
-static_assert(sizeof(WaterSurfaceManager) == 0xA0);
-
-class ImageSpaceModifierInstance;
-
-// C4
-class TES
-{
-public:
-	TES();
-	~TES();
-
-	virtual void Fn_00(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5);
-
-	uint32_t unk04; // 04
-	GridCellArray* gridCellArray; // 08
-	NiNode* niNode0C; // 0C
-	NiNode* niNode10; // 10
-	NiNode* rootNode; // 14
-	BSTempNodeManager* tempNodeMgr; // 18
-	NiDirectionalLight* directionalLight; // 1C
-	void* ptr20; // 20
-	int32_t extGridX; // 24
-	int32_t extGridY; // 28
-	int32_t extCoordX; // 2C
-	int32_t extCoordY; // 30
-	TESObjectCELL* currentInterior; // 34
-	TESObjectCELL** interiorsBuffer; // 38
-	TESObjectCELL** exteriorsBuffer; // 3C
-	uint32_t unk40[9]; // 40
-	WaterSurfaceManager* waterManager; // 64
-	Sky* sky; // 68
-	BSSimpleList<ImageSpaceModifierInstance*> activeIMODs; // 6C
-	uint32_t unk74[3]; // 74
-	float flt80; // 80	Abs X distance from centre of grid.
-	float flt84; // 84	Abs Y distance from centre of grid.
-	TESWorldSpace* currentWrldspc; // 88
-	tList<uint32_t> list8C; // 8C
-	tList<uint32_t> list94; // 94
-	tList<uint32_t> list9C; // 9C
-	QueuedFile* unkA4; // A4
-	NiSourceTexture* unkA8; // A8
-	QueuedFile* unkAC; // AC
-	void* ptrB0; // B0
-	uint32_t unkB4[2]; // B4
-	NavMeshInfoMap* navMeshInfoMap; // BC
-	LoadedAreaBound* areaBound; // C0
-
-	bool GetTerrainHeight(float* posXY, float* result);
-
-	static TES* GetSingleton()
-	{
-		return *(TES**)0x11DEA10;
-	}
-
-	void CreateTextureImage(const char* apPath, NiSourceTexture*& aspTexture, bool abNoFileOK, bool abArchiveOnly)
-	{
-		ThisCall(0x4568C0, this, apPath, &aspTexture, abNoFileOK, abArchiveOnly);
-	}
-
-	TESObjectCELL* GetCellForPoint(NiPoint3 akPoint) const {
-		return ThisCall<TESObjectCELL*>(0x4519D0, this, akPoint);
-	}
-};
-
-static_assert(sizeof(TES) == 0xC4);
 
 struct FontHeightData
 {

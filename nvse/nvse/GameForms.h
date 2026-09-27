@@ -403,72 +403,6 @@ enum ObjectVtbl {
 #define IS_TYPE(form, type) (*(uint32_t*)form == kVtbl_##type)
 #define NOT_TYPE(form, type) (*(uint32_t*)form != kVtbl_##type)
 
-class TESFile;
-class TESFullName;
-class EnchantmentItem;
-class TESSound;
-class BGSItemList;
-class Character;
-class EffectItem;
-class EffectSetting;
-class TESAmmo;
-class TESAmmoEffect;
-class BGSListForm;
-class BoundObjectListHead;
-class BGSVoiceType;
-class TESFaction;
-class SpellItem;
-class TESLevSpell;
-class BGSRagdoll;
-class BGSBodyPartData;
-class TESRace;
-class TESQuest;
-class BGSExplosion;
-class BGSDebris;
-class BGSProjectile;
-class BGSImpactDataSet;
-class FaceGenUndo;
-class TESCombatStyle;
-class TESWorldSpace;
-class BGSLightingTemplate;
-class TESImageSpace;
-class TESWaterForm;
-class Script;
-class TESObjectREFR;
-class TESChildCell;
-class ScriptLocals;
-class TESEffectShader;
-class TESPackage;
-class Actor;
-class TESNPC;
-class TESGlobal;
-class BGSImpactData;
-class BGSMusicType;
-class BGSEncounterZone;
-class BGSNote;
-class TESLeveledList;
-class TESImageSpaceModifier;
-class QueuedFile;
-
-// IngredientItem (A4)
-class IngredientItem;
-
-class NiPointLight;
-
-// TESObjectTREE (94)
-class TESObjectTREE;
-
-// TESFlora (90)
-class TESFlora;
-
-class BSFaceGenNiNode;
-
-// NavMeshInfoMap (40)
-class NavMeshInfoMap;
-
-class NavMesh;
-class NavMeshArray;
-
 class CellMopp : public NiRefObject {
 public:
 	NiTObjectArray<NiPointer<bhkRigidBody>> kRigidBodies;
@@ -578,8 +512,5 @@ public:
 };
 static_assert(sizeof(CombatController) == 0x188);
 #endif
-
-// TESLevSpell (44)
-class TESLevSpell;
 
 extern TESForm* __fastcall GetTESForm(const TESForm* apForm);

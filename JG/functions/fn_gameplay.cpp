@@ -21,6 +21,7 @@
 #include "Bethesda/TESObject.hpp"
 #include "Bethesda/TESObjectList.hpp"
 #include "Bethesda/NavMeshObstacleManager.hpp"
+#include "Bethesda/TES.hpp"
 
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
@@ -480,7 +481,7 @@ bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 
 	NiPoint4 kResult = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
 
-	TESObjectCELL* pInterior = TES::GetSingleton()->currentInterior;
+	TESObjectCELL* pInterior = TES::GetSingleton()->GetInterior();
 	uint32_t uiGridSize = INISettingCollection::General::uGridsToLoad->UInt();
 
 	if (pInterior) {
@@ -489,7 +490,7 @@ bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 	else {
 		for (uint32_t x = 0; x < uiGridSize; x++) {
 			for (uint32_t y = 0; y < uiGridSize; y++) {
-				TESObjectCELL* pCell = TES::GetSingleton()->gridCellArray->GetCell(x, y)->pCell;
+				TESObjectCELL* pCell = TES::GetSingleton()->GetGridCell(x, y)->pCell;
 				if (!pCell)
 					continue;
 
@@ -511,7 +512,7 @@ bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NiPoint4 kResult;
-	TESObjectCELL* pInterior = TES::GetSingleton()->currentInterior;
+	TESObjectCELL* pInterior = TES::GetSingleton()->GetInterior();
 
 	uint32_t uiGridSize = INISettingCollection::General::uGridsToLoad->UInt();
 
@@ -529,7 +530,7 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 	else {
 		for (uint32_t x = 0; x < uiGridSize && !bResult; x++) {
 			for (uint32_t y = 0; y < uiGridSize && !bResult; y++) {
-				TESObjectCELL* pCell = TES::GetSingleton()->gridCellArray->GetCell(x, y)->pCell;
+				TESObjectCELL* pCell = TES::GetSingleton()->GetGridCell(x, y)->pCell;
 				if (!pCell)
 					continue;
 

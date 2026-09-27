@@ -1,6 +1,6 @@
 #include "SkyUpdateFixes.hpp"
 #include "GameForms.h"
-#include "GameAPI.h"
+#include "Bethesda/BGSSaveLoadGame.hpp"
 #include "Bethesda/Sky.hpp"
 #include "JIP/JIPUtils.hpp"
 
@@ -258,7 +258,7 @@ namespace SkyUpdateFixes {
 #if 1
 					// Bethesda I hate you so much
 					// (Save loading is single threaded so this is fine)
-					const bool bSaveGameLoading = BGSSaveLoadGame::GetSingleton()->uiGlobalFlags.bSaveGameLoading;
+					const bool bSaveGameLoading = BGSSaveLoadGame::GetSingleton()->GetSaveGameLoading();
 					Sun* pSun = pSky->pSun;
 					Stars* pStars = pSky->pStars;
 					Moon* pMasser = pSky->pMasser;

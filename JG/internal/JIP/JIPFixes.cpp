@@ -30,6 +30,7 @@
 #include "Bethesda/TimeGlobal.hpp"
 #include "Bethesda/BGSChangeFlags.hpp"
 #include "Bethesda/TESDataHandler.hpp"
+#include "Bethesda/TES.hpp"
 #include "Bethesda/Animation.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 
@@ -1666,7 +1667,7 @@ namespace JIPFixes {
 				apWaterShaderProp->bRefractions = false;
 				apWaterShaderProp->kVarAmounts.fWaterReflectivityAmt = WATER_REFLECTIVITY;
 				apWaterShaderProp->kVarAmounts.fWaterOpacity = WATER_OPACITY;
-				if (!TES::GetSingleton()->currentInterior && spSkyReflectionMap.Get()) {
+				if (!TES::GetSingleton()->GetInterior() && spSkyReflectionMap.Get()) {
 					if (apWaterShaderProp->bReflections) {
 						apWaterShaderProp->spReflectionMap = spSkyReflectionMap.Get();
 					}
@@ -1727,7 +1728,7 @@ namespace JIPFixes {
 		};
 
 		void __fastcall RenderWater(void* apWaterManager, NiCamera* apCamera) {
-			if (TES::GetSingleton()->currentInterior)
+			if (TES::GetSingleton()->GetInterior())
 				return;
 
 			BSShaderAccumulator* pAccum = TESMain::GetSingleton()->spDrawWorldAccum;
