@@ -7,18 +7,20 @@
 #include "GameRTTI.h"
 #include "GameUI.h"
 
+#include "Bethesda/BGSEntryPoint.hpp"
 #include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/ExtraContainerChanges.hpp"
 #include "Bethesda/GameSettingCollection.hpp"
 #include "Bethesda/INISettingCollection.hpp"
 #include "Bethesda/Moon.hpp"
+#include "Bethesda/NavMesh.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
+#include "Bethesda/PlayerMover.hpp"
 #include "Bethesda/TESDataHandler.hpp"
 #include "Bethesda/TESHavokUtilities.hpp"
 #include "Bethesda/TESObject.hpp"
 #include "Bethesda/TESObjectList.hpp"
-#include "Bethesda/BGSEntryPoint.hpp"
-#include "Bethesda/ExtraContainerChanges.hpp"
-#include "Bethesda/PlayerMover.hpp"
-#include "Bethesda/PlayerCharacter.hpp"
+#include "Bethesda/NavMeshObstacleManager.hpp"
 
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
@@ -322,9 +324,9 @@ static void __fastcall GetClosestNavMeshTriangle(const TESObjectCELL* apCell, co
 	if (!pNavMeshArray)
 		return;
 
-	for (uint32_t i = 0; i < pNavMeshArray->GetSize(); i++) {
+	for (uint32_t i = 0; i < pNavMeshArray->GetNavMeshCount(); i++) {
 
-		NavMeshPtr spNavMesh = pNavMeshArray->GetAt(i);
+		NavMeshPtr spNavMesh = pNavMeshArray->GetNavMeshByIndex(i);
 		if (!spNavMesh)
 			continue;
 
@@ -334,13 +336,13 @@ static void __fastcall GetClosestNavMeshTriangle(const TESObjectCELL* apCell, co
 
 		for (uint32_t j = 0; j < spNavMesh->GetTriangleCount(); j++) {
 			NavMeshTriangle* pNavMeshTriangle = spNavMesh->GetTriangle(j);
-			if (checkDisabled && ((pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0))
+			if (checkDisabled && pNavMeshTriangle->IsDisabled())
 				continue;
 
 			// Get triangle vertices
 			NiPoint3 kVerts[3];
 			for (uint32_t k = 0; k < 3; k++) {
-				NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->sVertices[k]);
+				NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->GetVertex(k));
 				if (!pVertex)
 					continue;
 
@@ -370,9 +372,9 @@ static bool __fastcall GetPointNavMesh(const TESObjectCELL* apCell, const NiPoin
 	if (!pNavMeshArray)
 		return false;
 
-	for (uint32_t i = 0; i < pNavMeshArray->GetSize(); i++) {
+	for (uint32_t i = 0; i < pNavMeshArray->GetNavMeshCount(); i++) {
 
-		NavMeshPtr spNavMesh = pNavMeshArray->GetAt(i);
+		NavMeshPtr spNavMesh = pNavMeshArray->GetNavMeshByIndex(i);
 		if (!spNavMesh)
 			continue;
 
@@ -384,13 +386,13 @@ static bool __fastcall GetPointNavMesh(const TESObjectCELL* apCell, const NiPoin
 			NavMeshTriangle* pNavMeshTriangle = spNavMesh->GetTriangle(j);
 			if (!pNavMeshTriangle)
 				continue;
-			if (checkDisabled && (pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0)
+			if (checkDisabled && pNavMeshTriangle->IsDisabled())
 				continue;
 
 			// Get triangle vertices
 			NiPoint3 kVerts[3];
 			for (uint32_t k = 0; k < 3; k++) {
-				NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->sVertices[k]);
+				NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->GetVertex(k));
 				if (!pVertex)
 					continue;
 

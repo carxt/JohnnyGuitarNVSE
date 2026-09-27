@@ -84,22 +84,6 @@ public:
 
 static_assert(sizeof(LoadedAreaBound) == 0x44);
 
-// 8C
-class ObstacleData : public NiRefObject
-{
-public:
-	ObstacleData();
-	~ObstacleData();
-
-	uint32_t unk08; // 08
-	NiRefObject* object0C; // 0C
-	uint32_t unk10[25]; // 10
-	uint8_t byte74; // 74
-	uint8_t byte75[3]; // 75
-	BSSimpleArray<NavMeshInfo*> navMeshInfos; // 78
-	NiRefObject* object88; // 88
-};
-
 // 40
 struct QuaternionKey {
 	float			time;			// 00

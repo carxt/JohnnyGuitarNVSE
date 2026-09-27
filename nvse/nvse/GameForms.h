@@ -463,21 +463,6 @@ class TESFlora;
 
 class BSFaceGenNiNode;
 
-struct AreaPointEntry {
-	float	x;
-	float	y;
-};
-typedef tList<AreaPointEntry> AreaPointEntryList;
-
-struct RegionAreaEntry {
-	AreaPointEntryList	points;
-	uint32_t				unk08[2];
-	float				unk10[4];
-	uint32_t				edgeFallOff;
-	uint32_t				pointCount;
-};
-typedef tList<RegionAreaEntry> RegionAreaEntryList;
-
 // NavMeshInfoMap (40)
 class NavMeshInfoMap;
 
@@ -492,60 +477,6 @@ public:
 		ThisCall(0x621E60, this);
 	}
 };
-// 3C	Init proc: 0x6FC490
-class BGSTerrainManager {
-public:
-	// 60
-	struct LODNode {
-		BGSTerrainManager* parent;		// 00
-		uint32_t			lodLevel;		// 04
-		uint32_t		cellXY;			// 08
-		uint8_t			byte0C;			// 0C
-		uint8_t			byte0D;			// 0D
-		uint8_t			byte0E;			// 0E
-		uint8_t			byte0F;			// 0F
-		uint32_t			ukn10;			// 10
-		void* object;		// 14
-		uint32_t			ukn18;			// 18
-		uint32_t			ukn1C;			// 1C
-		LODNode* linked[4];		// 20
-		uint32_t			unk30;			// 30
-		float			flt34;			// 34
-		float			flt38;			// 38
-		float			flt3C;			// 3C
-		float			flt40;			// 40
-		float			flt44;			// 44
-		float			flt48;			// 48
-		float			flt4C;			// 4C
-		uint32_t			unk50;			// 50
-		uint32_t			ukn54;			// 54
-		uint32_t			ukn58;			// 58
-		uint8_t			byte5C;			// 5C
-		uint8_t			byte5D;			// 5D
-		uint8_t			byte5E;			// 5E
-		uint8_t			byte5F;			// 5F
-
-		LODNode* GetNodeByCoord(uint32_t coord);
-	};
-	static_assert(sizeof(LODNode) == 0x60);
-
-	TESWorldSpace* world;		// 00
-	LODNode* lodNode;	// 04
-	NiNode* node08;	// 08
-	NiNode* node0C;	// 0C
-	uint32_t						coordNW;	// 10
-	uint32_t						coordSE;	// 14
-	uint32_t							ukn18;		// 18
-	uint32_t							ukn1C;		// 1C
-	uint32_t							ukn20;		// 20
-	uint32_t							lodLevel;	// 24
-	uint8_t							byte28;		// 28
-	uint8_t							byte29;		// 29
-	uint8_t							byte2A;		// 2A
-	uint8_t							byte2B;		// 2B
-	BSSimpleArray<TESObjectREFR*>	array2C;	// 2C
-};
-static_assert(sizeof(BGSTerrainManager) == 0x3C);
 
 class ScriptVariable {
 public:
