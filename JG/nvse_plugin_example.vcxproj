@@ -482,6 +482,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\AlchemyItem.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\Animation.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\AnimIdle.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BaseExtraList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BaseProcess.cpp">
@@ -766,6 +768,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESActorBaseData.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESAIForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESAmmo.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\TESAnimGroup.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESAttackDamageForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESAttributes.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESBipedModelForm.cpp" />
@@ -1132,7 +1135,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\CommandTable.h" />
     <ClInclude Include="..\nvse\nvse\GameAPI.h" />
-    <ClInclude Include="..\nvse\nvse\GameData.h" />
     <ClInclude Include="..\nvse\nvse\GameEffects.h" />
     <ClInclude Include="..\nvse\nvse\GameForms.h" />
     <ClInclude Include="..\nvse\nvse\GameProcess.h">
@@ -1318,6 +1320,9 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\AlchemyItem.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\Animation.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\AnimGroup_View.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\AnimIdle.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Atmosphere.hpp" />
     <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseExtraList.hpp" />
@@ -1880,6 +1885,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESAIForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESAmmo.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESAnimation.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\TESAnimGroup.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESAttackDamageForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESAttributes.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TESBipedModelForm.hpp" />

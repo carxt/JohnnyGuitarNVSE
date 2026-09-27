@@ -984,19 +984,6 @@ public:
 	~SceneGraph();
 };
 
-// 3C
-class TESAnimGroup : public NiRefObject {
-public:
-	TESAnimGroup();
-	~TESAnimGroup();
-
-	uint32_t			unk08[2];	// 08
-	uint8_t			index;		// 10
-	uint8_t			unk11;		// 11
-	uint8_t			unk12[1];	// 12
-	uint32_t			unk14[10];	// 14
-};
-
 class NiVBBlock;
 class NiDX9LightManager;
 

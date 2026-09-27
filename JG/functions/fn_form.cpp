@@ -1,6 +1,5 @@
 #include "fn_form.h"
 #include "decoding.h"
-#include "GameData.h"
 #include "GameForms.h"
 #include "GameProcess.h"
 #include "GameRTTI.h"
@@ -23,6 +22,8 @@
 #include "Bethesda/GrenadeProjectile.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
 #include "Bethesda/TESImageSpaceModifier.hpp"
+#include "Bethesda/TESDataHandler.hpp"
+#include "Bethesda/Animation.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 

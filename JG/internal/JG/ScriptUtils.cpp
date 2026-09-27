@@ -3,8 +3,7 @@
 #include "CommandTable.h"
 #include "CommandOpcodes.h"
 
-#include "GameProcess.h"
-
+#include "Bethesda/Animation.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
 #include "Bethesda/BGSSaveFormBuffer.hpp"
 #include "Bethesda/BGSLoadGameSubBuffer.hpp"

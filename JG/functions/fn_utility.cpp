@@ -10,6 +10,7 @@
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/ScreenCustomSplatter.hpp"
 #include "Bethesda/Sky.hpp"
+#include "Bethesda/Animation.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
 
 #include "JG/CameraOverride.hpp"
@@ -18,6 +19,7 @@
 #include "JG/ExtraUISounds.hpp"
 #include "JG/JohnnyPatches.hpp"
 #include "JG/JohnnyRadios.hpp"
+#include "JG/ScriptUtils.hpp"
 #include "JIP/JIPUtils.hpp"
 
 #include "Shared/BSMemory/BSMemoryUtils.hpp"
@@ -106,13 +108,24 @@ enum EType {
 
 bool Cmd_RefreshIdle_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t stopAnim = 0;
-	Actor* actor = (Actor*)thisObj;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &stopAnim);
-	if (actor && actor->IsActor() && actor->GetCurrentAIProcess()->GetCurrentProcessIdle()) {
-		actor->GetCurrentAIProcess()->ClearPostAnimationActions();
-		actor->GetCurrentAIProcess()->SetCurrentProcessIdle(nullptr);
-		if (stopAnim > 0) ThisCall(0x498910, actor->GetAnimation(), 1, 1); // SpecialIdleFree
+	if (!thisObj->IsActor())
+		return true;
+
+	Actor* pActor = static_cast<Actor*>(thisObj);
+	BaseProcess* pAIProcess = pActor->GetCurrentAIProcess();
+	if (!pAIProcess)
+		return true;
+
+	BOOL bStopAnim = FALSE;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &bStopAnim);
+	if (pAIProcess->GetCurrentProcessIdle()) {
+		pAIProcess->ClearPostAnimationActions();
+		pAIProcess->SetCurrentProcessIdle(nullptr);
+		if (bStopAnim > 0) {
+			Animation* pAnim = pActor->GetAnimation();
+			if (pAnim)
+				pAnim->SpecialIdleFree(true, true);
+		}
 		*result = 1;
 	}
 	return true;
@@ -241,12 +254,11 @@ bool Cmd_ar_SortEditor_Execute(COMMAND_ARGS) {
 
 SPEC_NOINLINE bool Cmd_GetSequenceAnimGroup_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
-	const uint32_t uiSequence = reinterpret_cast<uint32_t>(arg1);
-	if (thisObj && uiSequence < 8) {
+	const ANIM_GROUP_SECTION eSequence = static_cast<ANIM_GROUP_SECTION>(reinterpret_cast<uint32_t>(arg1));
+	if (thisObj && eSequence < ANIM_GROUP_SECTION::COUNT) {
 		const Animation* pAnim = thisObj->GetAnimation();
-		if (pAnim && pAnim->animSequence[uiSequence]) {
-			const uint16_t usGroupID = pAnim->groupIDs[uiSequence] & 0xFF;
-			*result = usGroupID;
+		if (pAnim && pAnim->GetCurrentSequence(eSequence)) {
+			*result = AnimGroup_View(pAnim->usGroups[eSequence]).GetType();
 		}
 	}
 	return true;
@@ -668,21 +680,21 @@ bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-void __fastcall StopAnimLoop(Animation* apAnimation, uint32_t aiGroup) {
-	if (aiGroup == -1) {
-		for (uint32_t i = 0; i < 8; ++i) {
-			apAnimation->uiLoopCounts[i] = 0;
+void __fastcall StopAnimLoop(Animation* apAnimation, ANIM_GROUP_SECTION aeGroup) {
+	if (aeGroup == ANIM_GROUP_SECTION::NONE) {
+		for (uint32_t i = 0; i < ANIM_GROUP_SECTION::COUNT; ++i) {
+			apAnimation->iLoopCounts[i] = 0;
 		}
 	}
 	else {
-		apAnimation->uiLoopCounts[aiGroup] = 0;
+		apAnimation->iLoopCounts[aeGroup] = 0;
 	}
 }
 
 bool Cmd_StopIdleLoop_Execute(COMMAND_ARGS) {
-	int32_t eGroup = -1;
+	ANIM_GROUP_SECTION eGroup = ANIM_GROUP_SECTION::NONE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eGroup)) {
-		if (eGroup != -1 && (eGroup < 0 || eGroup > 7))
+		if (eGroup != ANIM_GROUP_SECTION::NONE && !ScriptUtils::InRange(eGroup))
 			return true;
 
 		if (thisObj == PlayerCharacter::GetSingleton()) {
