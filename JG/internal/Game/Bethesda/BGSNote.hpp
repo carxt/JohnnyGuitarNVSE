@@ -17,7 +17,7 @@ public:
 	~BGSNote();
 
 	struct _Type {
-		enum Type : uint8_t {
+		enum Type {
 			SOUND	= 0,
 			TEXT	= 1,
 			IMAGE	= 2,
@@ -34,7 +34,7 @@ public:
 	};
 	TESActorBase*				pSpeaker;
 	BSSimpleList<TESQuest*>		kOwnerQuests;
-	Type						eNoteType;
+	int8_t						eNoteType;
 	bool						bHasBeenRead;
 
 	TESFORM_TYPE(BGSNote);
