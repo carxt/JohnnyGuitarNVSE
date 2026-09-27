@@ -7,6 +7,8 @@
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TimeGlobal.hpp"
 #include "Bethesda/TESObjectREFR.hpp"
+#include "Bethesda/BSAnimGroupSequence.hpp"
+#include "Gamebryo/NiControllerManager.hpp"
 
 #include <Shared/Utils/CustomGameSetting.hpp>
 #include "Shared/SafeWrite/SafeWrite.hpp"

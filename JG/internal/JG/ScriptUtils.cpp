@@ -1,13 +1,14 @@
 #include "ScriptUtils.hpp"
-#include <PluginAPI.h>
+#include "PluginAPI.h"
 #include "CommandTable.h"
 #include "CommandOpcodes.h"
-#include "netimmerse.h"
+
 #include "GameProcess.h"
 
 #include "Bethesda/PlayerCharacter.hpp"
 #include "Bethesda/BGSSaveFormBuffer.hpp"
 #include "Bethesda/BGSLoadGameSubBuffer.hpp"
+#include "Gamebryo/NiControllerManager.hpp"
 
 #include "shared/Utils/StackObject.hpp"
 

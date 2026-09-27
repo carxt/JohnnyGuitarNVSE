@@ -9,6 +9,7 @@
 #include "Bethesda/DialoguePackage.hpp"
 #include "Bethesda/ItemChange.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
+#include "Gamebryo/NiControllerSequence.hpp"
 
 #include "Fixes/AmmoEffectListNullChecks.hpp"
 #include "Fixes/AudioMonoLookupOverflowFix.hpp"

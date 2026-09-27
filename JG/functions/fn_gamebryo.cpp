@@ -6,6 +6,7 @@
 #include "Gamebryo/NiPSysBoxEmitter.hpp"
 #include "Gamebryo/NiPSysEmitter.hpp"
 #include "Gamebryo/NiPSysModifier.hpp"
+#include "Gamebryo/NiControllerManager.hpp"
 #include "Bethesda/AILinearTaskThreadManager.hpp"
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/BSWindModifier.hpp"
@@ -516,11 +517,14 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 				pTarget = BSUtilities::GetObjectByName(pRoot, cObjectName);
 
 			if (pTarget) {
-				NiControllerManager* pCtrlMgr = pTarget->GetController<NiControllerManager>();
+				const NiControllerManager* pCtrlMgr = pTarget->GetController<NiControllerManager>();
 				if (pCtrlMgr) {
-					*result = pCtrlMgr->IsSequenceActive(cSequenceName);
-					if (Script::GetConsoleOuput())
-						Interface::PrintLine("IsNiSequenceActive >> %s: %s", cSequenceName, *result ? "true" : "false");
+					const NiControllerSequence* pSequence = pCtrlMgr->GetSequenceByName(cSequenceName);
+					if (pSequence) {
+						*result = pSequence->GetState() != NiControllerSequence::AnimState::INACTIVE;
+						if (Script::GetConsoleOuput())
+							Interface::PrintLine("IsNiSequenceActive >> %s: %s", cSequenceName, *result ? "true" : "false");
+					}
 				}
 				else if (Script::GetConsoleOuput()) {
 					Interface::PrintLine("Controller not found");

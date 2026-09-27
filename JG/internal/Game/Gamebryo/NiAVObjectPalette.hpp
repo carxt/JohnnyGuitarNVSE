@@ -3,6 +3,7 @@
 #include "NiObject.hpp"
 
 class NiAVObject;
+class NiFixedString;
 
 NiSmartPointer(NiAVObjectPalette);
 

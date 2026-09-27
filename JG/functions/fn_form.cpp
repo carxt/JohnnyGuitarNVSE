@@ -22,6 +22,7 @@
 #include "Bethesda/TESObjectList.hpp"
 #include "Bethesda/GrenadeProjectile.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
+#include "Bethesda/TESImageSpaceModifier.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 
@@ -1894,9 +1895,10 @@ bool Cmd_GetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetIMODAnimatable_Execute(COMMAND_ARGS) {
-	TESImageSpaceModifier* imod = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &imod) && imod && IS_TYPE(imod, TESImageSpaceModifier)) {
-		*result = imod->animable;
+	*result = 0;
+	TESImageSpaceModifier* pModifier = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pModifier) && pModifier && IS_TYPE(pModifier, TESImageSpaceModifier)) {
+		*result = pModifier->GetAnimatable();
 		if (Script::GetConsoleOuput())
 			Interface::PrintLine("GetIMODAnimatable >> %.f", *result);
 	}
@@ -1904,13 +1906,14 @@ bool Cmd_GetIMODAnimatable_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetIMODAnimatable_Execute(COMMAND_ARGS) {
-	TESImageSpaceModifier* imod = nullptr;
-	int newVal = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &imod, &newVal) && imod && IS_TYPE(imod, TESImageSpaceModifier) && (newVal == 0 || newVal == 1)) {
-		imod->animable = newVal;
+	*result = 0;
+	TESImageSpaceModifier* pModifier = nullptr;
+	BOOL bAnimatable = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pModifier, &bAnimatable) && pModifier && IS_TYPE(pModifier, TESImageSpaceModifier)) {
+		pModifier->SetAnimatable(bAnimatable > 0);
 		*result = 1;
 		if (Script::GetConsoleOuput())
-			Interface::PrintLine("SetIMODAnimatable >> %d", imod->animable);
+			Interface::PrintLine("SetIMODAnimatable >> %d", pModifier->GetAnimatable());
 	}
 	return true;
 }

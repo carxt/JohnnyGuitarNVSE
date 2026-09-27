@@ -820,6 +820,8 @@ public:
 	uint32_t			unk38[6];
 };
 
+class NiControllerSequence;
+
 // 278
 class HUDMainMenu : public Menu			// 1004
 {
