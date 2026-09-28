@@ -2,7 +2,7 @@
 
 #include "BSMemObject.hpp"
 
-// Clone of BSMapBase lmao
+// Clone of NiTMapBase lmao
 // Doesn't call RemoveAll in the destructor, can have null hash table, and calls ClearValue and SetValue in SetAt
 
 typedef void* BSMapIterator;
