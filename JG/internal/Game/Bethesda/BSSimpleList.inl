@@ -37,7 +37,7 @@ inline T& BSSimpleList<T>::GetItem() {
 // GAME - 0x726C60
 template<class T>
 inline void BSSimpleList<T>::SetItem(const T& arItem) {
-	if (arItem)
+	if (arItem != T(0))
 		m_item = arItem;
 }
 
@@ -71,10 +71,10 @@ inline bool BSSimpleList<T>::IsEmpty() const {
 // GAME - 0x631540
 template<class T>
 inline void BSSimpleList<T>::AddHead(const T& arItem) {
-	if (!arItem)
+	if (arItem == T(0))
 		return;
 
-	if (m_item) {
+	if (m_item != T(0)) {
 		BSSimpleList<T>* pNewEntry = new BSSimpleList<T>(m_item);
 		pNewEntry->m_pkNext = m_pkNext;
 		m_pkNext = pNewEntry;
@@ -88,12 +88,12 @@ inline void BSSimpleList<T>::AddHead(const T& arItem) {
 // GAME - 0xAF25B0, 0x905820, 0xB63BF0
 template<class T>
 inline void BSSimpleList<T>::AddTail(const T& arItem) {
-	if (!arItem)
+	if (arItem == T(0))
 		return;
 
 	BSSimpleList<T>* pTail = GetTail();
 
-	if (pTail->m_item) {
+	if (pTail->m_item != T(0)) {
 		pTail->m_pkNext = new BSSimpleList<T>(arItem);
 	}
 	else {
@@ -219,7 +219,7 @@ inline void BSSimpleList<T>::Insert(const T& arItem, int32_t(__cdecl* apCompare)
 		BSSimpleList<T>* pPrev = nullptr;
 		bool bDone = false;
 		while (pIter && !bDone) {
-			if (pIter->m_item) {
+			if (pIter->m_item != T(0)) {
 				if (apCompare(arItem, pIter->m_item) > 0) {
 					if (!pIter->m_pkNext) {
 						pIter->m_pkNext = new BSSimpleList<T>(arItem);

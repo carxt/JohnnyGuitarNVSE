@@ -3,7 +3,7 @@
 #include "GameForms.h"
 #include "GameTiles.h"
 #include "GameTypes.h"
-#include "GameSound.h"
+#include "Bethesda/BSSoundHandle.hpp"
 #include "Bethesda/Interface.hpp"
 
 struct BGSSaveLoadFileEntry;
@@ -574,9 +574,9 @@ public:
 	uint8_t							gap08D[3];
 	BGSNote* currentNote;
 	uint32_t							timeNoteViewed;
-	SoundList						holotapeDialogues;
+	BSSimpleList<BSSoundHandle>			holotapeDialogues;
 	BSSimpleArray<char>				holotapeSubtitles;	// 0A8
-	SoundList*				currentHolotapeDialogueSound;
+	BSSimpleList<BSSoundHandle>*				currentHolotapeDialogueSound;
 	uint8_t							isHolotapeVoicePlaying;
 	uint8_t							pad0BD[3];
 	float							holotapeTotalTime;
