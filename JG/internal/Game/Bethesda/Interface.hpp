@@ -130,13 +130,13 @@ public:
 	static void CreateRaceSexMenu(uint32_t aeType);
 
 
-	static void PrintLine(const char* apText, auto...args);
+	static void PrintLine(const char* apText, auto ...args);
 	
 	static bool ShowMessage(const char* apText, Emotion aeEmotion, const char* apImagePath, const char* apSoundName = nullptr, float afTime = 2.f, bool abInstant = false);
 	
-	static bool CreateMessageMenu(const char* apText, const char* apIcon, const char* apTitle, MessageBoxCallback apCallback, int8_t acFirstButtonResult = 1, int32_t aiWarningContext = 0, float afAlpha = 0.f, float afMenuWidth = 0.f, auto...args);
+	static bool CreateMessageMenu(const char* apText, const char* apIcon, const char* apTitle, MessageBoxCallback apCallback, int8_t acFirstButtonResult = 1, int32_t aiWarningContext = 0, float afAlpha = 0.f, float afMenuWidth = 0.f, auto ...args);
 	
-	static bool CreateMessageMenuSound(const char* apText, const char* apIcon, const char* apTitle, const char* apSound, MessageBoxCallback apCallback, int8_t acFirstButtonResult = 1, int32_t aiWarningContext = 0, float afAlpha = 0.f, float afMenuWidth = 0.f, auto...args);
+	static bool CreateMessageMenuSound(const char* apText, const char* apIcon, const char* apTitle, const char* apSound, MessageBoxCallback apCallback, int8_t acFirstButtonResult = 1, int32_t aiWarningContext = 0, float afAlpha = 0.f, float afMenuWidth = 0.f, auto ...args);
 };
 
 #include "Interface.inl"

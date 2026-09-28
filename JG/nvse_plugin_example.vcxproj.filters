@@ -3334,5 +3334,8 @@
     <None Include="internal\Game\Gamebryo\NiTFixedStringMapBase.inl">
       <Filter>internal\Game\Gamebryo</Filter>
     </None>
+    <None Include="internal\Game\Bethesda\BSShaderProperty.inl">
+      <Filter>internal\Game\Bethesda</Filter>
+    </None>
   </ItemGroup>
 </Project>

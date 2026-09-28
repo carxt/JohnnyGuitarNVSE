@@ -2418,6 +2418,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <None Include="internal\Game\Bethesda\BGSEntryPoint.inl" />
     <None Include="internal\Game\Bethesda\BSMap.inl" />
     <None Include="internal\Game\Bethesda\BSMapBase.inl" />
+    <None Include="internal\Game\Bethesda\BSShaderProperty.inl" />
     <None Include="internal\Game\Bethesda\BSSimpleArray.inl" />
     <None Include="internal\Game\Bethesda\BSSimpleList.inl" />
     <None Include="internal\Game\Bethesda\BSStringT.inl" />
