@@ -3,22 +3,28 @@
 #include "decoding.h"
 #include "GameEffects.h"
 #include "GameForms.h"
-#include "GameProcess.h"
 #include "GameRTTI.h"
 #include "GameUI.h"
 
+#include "Bethesda/BGSEntryPoint.hpp"
 #include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/ExtraContainerChanges.hpp"
 #include "Bethesda/GameSettingCollection.hpp"
 #include "Bethesda/INISettingCollection.hpp"
 #include "Bethesda/Moon.hpp"
+#include "Bethesda/NavMesh.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
+#include "Bethesda/PlayerMover.hpp"
 #include "Bethesda/TESDataHandler.hpp"
 #include "Bethesda/TESHavokUtilities.hpp"
 #include "Bethesda/TESObject.hpp"
 #include "Bethesda/TESObjectList.hpp"
-#include "Bethesda/BGSEntryPoint.hpp"
-#include "Bethesda/ExtraContainerChanges.hpp"
-#include "Bethesda/PlayerMover.hpp"
-#include "Bethesda/PlayerCharacter.hpp"
+#include "Bethesda/NavMeshObstacleManager.hpp"
+#include "Bethesda/TES.hpp"
+#include "Bethesda/BSAudio.hpp"
+#include "Bethesda/BSGameSound.hpp"
+#include "Bethesda/BSAudioManager.hpp"
+#include "Bethesda/ProcessLists.hpp"
 
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
@@ -40,6 +46,7 @@
 #include "utility.h"
 
 #include <unordered_map>
+#include <mutex>
 
 bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
 bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
@@ -322,9 +329,9 @@ static void __fastcall GetClosestNavMeshTriangle(const TESObjectCELL* apCell, co
 	if (!pNavMeshArray)
 		return;
 
-	for (uint32_t i = 0; i < pNavMeshArray->GetSize(); i++) {
+	for (uint32_t i = 0; i < pNavMeshArray->GetNavMeshCount(); i++) {
 
-		NavMeshPtr spNavMesh = pNavMeshArray->GetAt(i);
+		NavMeshPtr spNavMesh = pNavMeshArray->GetNavMeshByIndex(i);
 		if (!spNavMesh)
 			continue;
 
@@ -334,13 +341,13 @@ static void __fastcall GetClosestNavMeshTriangle(const TESObjectCELL* apCell, co
 
 		for (uint32_t j = 0; j < spNavMesh->GetTriangleCount(); j++) {
 			NavMeshTriangle* pNavMeshTriangle = spNavMesh->GetTriangle(j);
-			if (checkDisabled && ((pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0))
+			if (checkDisabled && pNavMeshTriangle->IsDisabled())
 				continue;
 
 			// Get triangle vertices
 			NiPoint3 kVerts[3];
 			for (uint32_t k = 0; k < 3; k++) {
-				NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->sVertices[k]);
+				NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->GetVertex(k));
 				if (!pVertex)
 					continue;
 
@@ -370,9 +377,9 @@ static bool __fastcall GetPointNavMesh(const TESObjectCELL* apCell, const NiPoin
 	if (!pNavMeshArray)
 		return false;
 
-	for (uint32_t i = 0; i < pNavMeshArray->GetSize(); i++) {
+	for (uint32_t i = 0; i < pNavMeshArray->GetNavMeshCount(); i++) {
 
-		NavMeshPtr spNavMesh = pNavMeshArray->GetAt(i);
+		NavMeshPtr spNavMesh = pNavMeshArray->GetNavMeshByIndex(i);
 		if (!spNavMesh)
 			continue;
 
@@ -384,13 +391,13 @@ static bool __fastcall GetPointNavMesh(const TESObjectCELL* apCell, const NiPoin
 			NavMeshTriangle* pNavMeshTriangle = spNavMesh->GetTriangle(j);
 			if (!pNavMeshTriangle)
 				continue;
-			if (checkDisabled && (pNavMeshTriangle->uiFlags & NavMeshTriangle::DISABLED) != 0)
+			if (checkDisabled && pNavMeshTriangle->IsDisabled())
 				continue;
 
 			// Get triangle vertices
 			NiPoint3 kVerts[3];
 			for (uint32_t k = 0; k < 3; k++) {
-				NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->sVertices[k]);
+				NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->GetVertex(k));
 				if (!pVertex)
 					continue;
 
@@ -478,7 +485,7 @@ bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 
 	NiPoint4 kResult = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
 
-	TESObjectCELL* pInterior = TES::GetSingleton()->currentInterior;
+	TESObjectCELL* pInterior = TES::GetSingleton()->GetInterior();
 	uint32_t uiGridSize = INISettingCollection::General::uGridsToLoad->UInt();
 
 	if (pInterior) {
@@ -487,7 +494,7 @@ bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 	else {
 		for (uint32_t x = 0; x < uiGridSize; x++) {
 			for (uint32_t y = 0; y < uiGridSize; y++) {
-				TESObjectCELL* pCell = TES::GetSingleton()->gridCellArray->GetCell(x, y)->pCell;
+				TESObjectCELL* pCell = TES::GetSingleton()->GetGridCell(x, y)->pCell;
 				if (!pCell)
 					continue;
 
@@ -509,7 +516,7 @@ bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
 bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NiPoint4 kResult;
-	TESObjectCELL* pInterior = TES::GetSingleton()->currentInterior;
+	TESObjectCELL* pInterior = TES::GetSingleton()->GetInterior();
 
 	uint32_t uiGridSize = INISettingCollection::General::uGridsToLoad->UInt();
 
@@ -527,7 +534,7 @@ bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 	else {
 		for (uint32_t x = 0; x < uiGridSize && !bResult; x++) {
 			for (uint32_t y = 0; y < uiGridSize && !bResult; y++) {
-				TESObjectCELL* pCell = TES::GetSingleton()->gridCellArray->GetCell(x, y)->pCell;
+				TESObjectCELL* pCell = TES::GetSingleton()->GetGridCell(x, y)->pCell;
 				if (!pCell)
 					continue;
 
@@ -569,19 +576,20 @@ bool __fastcall ValidTempEffect(const EffectItem* apEffectItem) {
 bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 	*result = 0;
 	float fTime = 0;
-	TESSound* sound;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &sound, &fTime) && sound && IS_TYPE(sound, TESSound)) {
-		TESObjectREFR* ref = thisObj;
-		if (ref == nullptr) {
-			ref = (TESObjectREFR*)PlayerCharacter::GetSingleton();
+	TESSound* apSound;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &apSound, &fTime) && apSound && IS_TYPE(apSound, TESSound)) {
+		TESObjectREFR* pRef = thisObj;
+		if (pRef == nullptr) {
+			pRef = (TESObjectREFR*)PlayerCharacter::GetSingleton();
 		}
-		if (ref->Get3DVerySimple()) {
-			uint32_t uiFlags = BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100;
-			BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(sound->GetFormID(), uiFlags);
-			handle.SetPosition(ref->GetLocationOnReference());
-			handle.SetObjectToFollow(ref->Get3DVerySimple());
-			uint32_t time = fTime * 1000.0;
-			handle.FadeInPlay(time);
+
+		NiAVObject* pRef3D = pRef->Get3DVerySimple();
+		if (pRef3D) {
+			constexpr uint32_t uiFlags = BSGameSound::TypeFlags::IS_3D | BSGameSound::TypeFlags::ONE_SHOT;
+			BSSoundHandle hSound = BSAudio::GetSingleton()->GetSoundHandleByFormID(apSound->GetFormID(), uiFlags);
+			hSound.SetPosition(pRef->GetLocationOnReference());
+			hSound.SetObjectToFollow(pRef3D);
+			hSound.FadeInPlay(fTime * 1000);
 			*result = 1;
 		}
 	}
@@ -716,18 +724,18 @@ bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESSound* pSoundForm = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSoundForm) && pSoundForm && IS_TYPE(pSoundForm, TESSound)) {
-		CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
+		BSAudioManager* pMgr = BSAudioManager::GetSingleton();
+		std::scoped_lock lock(pMgr->kProcessingCritSection);
 		BSGameSound* pSound;
 		uint32_t uiKey;
-		auto kIter = BSAudioManager::Get()->playingSounds.GetFirstPos();
+		auto kIter = pMgr->kPlayingSounds.GetFirstPos();
 		while (kIter) {
-			BSAudioManager::Get()->playingSounds.GetNext(kIter, uiKey, pSound);
-			if (!pSound || pSound->sourceSound != pSoundForm)
+			pMgr->kPlayingSounds.GetNext(kIter, uiKey, pSound);
+			if (!pSound || pSound->pSourceSound != pSoundForm)
 				continue;
 
-			BSSoundHandle handle;
-			handle.uiSoundID = pSound->mapKey;
-			handle.Stop();
+			BSSoundHandle hSound(pSound->GetID());
+			hSound.Stop();
 			*result = 1;
 		}
 	}
@@ -737,16 +745,19 @@ bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ListNode<BSTempEffect>* iter = ProcessLists::GetSingleton()->tempEffects.Head();
-	MagicShaderHitEffect* effect;
+	auto pIter = ProcessLists::GetSingleton()->kTempEffects.GetHead();
 	NVSEArrayVar* effArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	while (pIter && !pIter->IsEmpty()) {
+		NiPointer<BSTempEffect> spEffect = pIter->GetItem();
+		pIter = pIter->GetNext();
+		if (!spEffect || !IS_TYPE(spEffect.m_pObject, MagicShaderHitEffect))
+			continue;
 
-	do {
-		effect = (MagicShaderHitEffect*)iter->data;
-		if (effect && IS_TYPE(effect, MagicShaderHitEffect) && effect->flags != 1 && effect->target && effect->target->GetFormID() == thisObj->GetFormID()) {
-			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effect->effectShader));
+		MagicShaderHitEffect* pHitEffect = static_cast<MagicShaderHitEffect*>(spEffect.m_pObject);
+		if (pHitEffect->ucFlags != 1 && pHitEffect->pTarget && pHitEffect->pTarget == thisObj) {
+			g_arrInterface->AppendElement(effArr, NVSEArrayElement(pHitEffect->effectShader));
 		}
-	} while (iter = iter->next);
+	}
 
 	g_arrInterface->AssignCommandResult(effArr, result);
 	return true;
@@ -1271,36 +1282,34 @@ bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
 	TESObjectREFR* pSource = nullptr;
 	float fFadeOutTime = -1;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSoundForm, &pSource, &fFadeOutTime) && pSoundForm && IS_TYPE(pSoundForm, TESSound) && pSource) {
-		if (pSoundForm->GetSoundFileLength()) {
-			CSLock lock(BSAudioManager::Get()->kMessageProcessingCS);
-			const char* pSoundPath = pSoundForm->GetSoundFile();
-			uint32_t uiKey;
-			auto kObjIter = BSAudioManager::Get()->soundPlayingObjects.GetFirstPos();
-			while (kObjIter) {
-				NiPointer<NiAVObject> spObject;
-				BSAudioManager::Get()->soundPlayingObjects.GetNext(kObjIter, uiKey, spObject);
-				if (!spObject || !spObject->IsFadeNode())
-					continue;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSoundForm, &pSource, &fFadeOutTime) && pSoundForm && IS_TYPE(pSoundForm, TESSound) && pSource && pSoundForm->GetSoundFileLength()) {
+		const char* pSoundPath = pSoundForm->GetSoundFile();
+		BSAudioManager* pMgr = BSAudioManager::GetSingleton();
 
-				BSFadeNode* pFadeNode = static_cast<BSFadeNode*>(spObject.m_pObject);
-				if (pFadeNode->pLinkedObj != pSource)
-					continue;
+		std::scoped_lock kLock(pMgr->kProcessingCritSection);
+		uint32_t uiKey;
+		auto kObjIter = pMgr->kMovingObjects.GetFirstPos();
+		while (kObjIter) {
+			NiPointer<NiAVObject> spObject;
+			pMgr->kMovingObjects.GetNext(kObjIter, uiKey, spObject);
+			if (!spObject || !spObject->IsFadeNode())
+				continue;
 
-				BSGameSound* pSound;
-				BSAudioManager::Get()->playingSounds.GetAt(uiKey, pSound);
-				if (pSound && StrBeginsCI(pSound->filePath + 0xB, pSoundPath)) {
-					BSSoundHandle kHandle;
-					kHandle.uiSoundID = pSound->mapKey;
+			BSFadeNode* pFadeNode = static_cast<BSFadeNode*>(spObject.m_pObject);
+			if (pFadeNode->pLinkedObj != pSource)
+				continue;
 
-					if (fFadeOutTime == -1)
-						kHandle.Stop();
-					else
-						kHandle.FadeOutAndRelease(fFadeOutTime * 1000.0);
+			BSGameSound* pSound = nullptr;
+			pMgr->kPlayingSounds.GetAt(uiKey, pSound);
+			if (pSound && StrBeginsCI(pSound->GetFileName() + 0xB, pSoundPath)) {
+				BSSoundHandle hSound(pSound->GetID());
+				if (fFadeOutTime < 0.f)
+					hSound.Stop();
+				else
+					hSound.FadeOutAndRelease(fFadeOutTime * 1000.0);
 
-					*result = 1;
-					break;
-				}
+				*result = 1;
+				break;
 			}
 		}
 	}
@@ -1340,7 +1349,7 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 			}
 		}
 
-		if (pWeapon && pExtraDataList && (pWeapon->weaponSkill == ActorValue::Index::UNARMED || pWeapon->weaponSkill == ActorValue::Index::MELEE_WEAPONS)) {
+		if (pWeapon && pExtraDataList && (pWeapon->GetWeaponSkill() == ActorValue::Index::UNARMED || pWeapon->GetWeaponSkill() == ActorValue::Index::MELEE_WEAPONS)) {
 			if (pPoison)
 				pExtraDataList->SetPoison(pPoison);
 			else
@@ -1404,8 +1413,8 @@ bool Cmd_StopVATSCam_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-static inline constexpr AddressPtr<float, 0x11DFED4> fCameraShakeMult;
-static inline constexpr AddressPtr<float, 0x11DFED8> fCameraShakeCurrentTime;
+constexpr inline AddressPtr<float, 0x11DFED4> fCameraShakeMult;
+constexpr inline AddressPtr<float, 0x11DFED8> fCameraShakeCurrentTime;
 
 bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -1476,8 +1485,8 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 
 		BSString strOrgCasingPath;
 		if (cNewCasingPath[0] != 0) {
-			strOrgCasingPath = std::move(pWeapon->shellCasingModel.strModel);
-			pWeapon->shellCasingModel.SetModel(cNewCasingPath);
+			strOrgCasingPath = std::move(pWeapon->kShellCasingModel.strModel);
+			pWeapon->kShellCasingModel.SetModel(cNewCasingPath);
 		}
 
 		pWeapon->EjectShellCasing(pActor);
@@ -1486,7 +1495,7 @@ bool Cmd_EjectCasing_Execute(COMMAND_ARGS) {
 			spOrgCasingNode->m_kWorld = kOrgTrans;
 
 		if (strOrgCasingPath)
-			pWeapon->shellCasingModel.strModel = std::move(strOrgCasingPath);
+			pWeapon->kShellCasingModel.strModel = std::move(strOrgCasingPath);
 
 		*result = 1;
 	}
@@ -1529,8 +1538,8 @@ bool Cmd_GetGrenadeHoldTime_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectIMOD* targetMod = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &targetMod) || !targetMod || NOT_ID(targetMod, TESObjectIMOD))
+	TESObjectIMOD* pTargetMod = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pTargetMod) || !pTargetMod || NOT_ID(pTargetMod, TESObjectIMOD))
 		return true;
 
 	TESDataHandler* pDataHandler = TESDataHandler::GetSingleton();
@@ -1543,7 +1552,7 @@ bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
 		TESObjectWEAP* pWeapon = static_cast<TESObjectWEAP*>(apObject);
 
 		for (uint32_t uiSlot = 0; uiSlot < 3; uiSlot++) {
-			if (pWeapon->itemMod[uiSlot] == targetMod) {
+			if (pWeapon->pModObjects[uiSlot] == pTargetMod) {
 				g_arrInterface->AppendElement(weaponArray, NVSEArrayElement(pWeapon));
 				break;
 			}

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "GameForms.h"
-#include "GameTiles.h"
 #include "GameTypes.h"
-#include "GameSound.h"
+#include "Bethesda/BSSoundHandle.hpp"
 #include "Bethesda/Interface.hpp"
+#include "Bethesda/Tile.hpp"
 
 struct BGSSaveLoadFileEntry;
 struct PerkRank;
@@ -20,6 +20,10 @@ class ShadowSceneNode;
 class NiSourceTexture;
 class FORenderedMenu;
 class ItemChange;
+class TileRect;
+class TileText;
+class TileMenu;
+class TileImage;
 
 struct PackedMenu;
 
@@ -397,13 +401,13 @@ public:
 
 		auto menu = ThisCall<Menu*>(0xA03C90, this->parentTile);
 		Tile* newTile = ThisCall<Tile*>(0xA1DDB0, menu, this->parentTile, _template, nullptr);
-		if (!newTile->GetValue(kTileValue_id))
+		if (!newTile->GetValue(TILE_TRAIT::ID))
 		{
-			newTile->SetFloat(kTileValue_id, -1);
+			newTile->SetFloat(TILE_TRAIT::ID, -1.f);
 		}
 		if (text)
 		{
-			newTile->SetString(kTileValue_string, text);
+			newTile->SetString(TILE_TRAIT::STRING, text);
 		}
 
 		auto listItem = BSMemory::malloc<ListBoxItem<Item*>>();
@@ -426,7 +430,7 @@ public:
 				ThisCall(0x7269D0, this, newTile);
 				ThisCall(0x71AD30, this);
 			}
-			newTile->SetFloat(kTileValue_listindex, this->itemCount++);
+			newTile->SetUInt(TILE_TRAIT::LIST_INDEX, this->itemCount++);
 		}
 
 		if (this->itemCount == 1)
@@ -434,13 +438,13 @@ public:
 			auto numVisibleItemsTrait = Tile::TextToTrait("_number_of_visible_items");
 			if (this->parentTile->GetFloat(numVisibleItemsTrait) > 0)
 			{
-				auto valPtr = ThisCall<Tile::Value*>(0xA00E90, this->parentTile, kTileValue_height);
-				ThisCall(0xA09200, valPtr);
-				ThisCall(0xA09130, valPtr, kTileValue_Copy, newTile, kTileValue_height);
+				auto valPtr = this->parentTile->GetValue(TILE_TRAIT::HEIGHT);
+				valPtr->ClearActions();
+				valPtr->AddAction(TILE_VALUE_ACTION::COPY, newTile, TILE_TRAIT::HEIGHT);
 
-				auto numVisible = this->parentTile->GetFloat(numVisibleItemsTrait);
-				ThisCall(0xA09080, valPtr, kTileValue_Mul, numVisible);
-				ThisCall(0xA09410, valPtr, 0);
+				float numVisible = this->parentTile->GetFloat(numVisibleItemsTrait);
+				valPtr->AddAction(TILE_VALUE_ACTION::MUL, numVisible);
+				valPtr->CalculateValue(false);
 			}
 		}
 
@@ -574,9 +578,9 @@ public:
 	uint8_t							gap08D[3];
 	BGSNote* currentNote;
 	uint32_t							timeNoteViewed;
-	SoundList						holotapeDialogues;
+	BSSimpleList<BSSoundHandle>			holotapeDialogues;
 	BSSimpleArray<char>				holotapeSubtitles;	// 0A8
-	SoundList*				currentHolotapeDialogueSound;
+	BSSimpleList<BSSoundHandle>*				currentHolotapeDialogueSound;
 	uint8_t							isHolotapeVoicePlaying;
 	uint8_t							pad0BD[3];
 	float							holotapeTotalTime;
@@ -819,6 +823,8 @@ public:
 
 	uint32_t			unk38[6];
 };
+
+class NiControllerSequence;
 
 // 278
 class HUDMainMenu : public Menu			// 1004

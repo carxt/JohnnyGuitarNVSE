@@ -59,8 +59,8 @@ class ObjectToAcquire;
 class LipSynchAnim;
 class TESBoundObject;
 class TESObjectSTAT;
+class WadingWaterData;
 struct FurnitureMark;
-struct WadingWaterData;
 
 class BaseProcess {
 public:

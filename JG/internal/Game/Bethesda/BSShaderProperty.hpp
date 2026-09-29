@@ -63,8 +63,7 @@ public:
 		uint8_t				ucExtraParam;
 		ShadowSceneLight**	ppSceneLights;
 
-		template<typename ...Args>
-		void SetLights(uint8_t aucNumLights, Args ...args);
+		void SetLights(uint8_t aucNumLights, auto ...args);
 
 		NiGeometry* GetGeometry() const;
 
@@ -435,13 +434,4 @@ ASSERT_SIZE(BSShaderProperty, 0x60);
 ASSERT_SIZE(BSShaderProperty::RenderPass, 0x10);
 ASSERT_SIZE(BSShaderProperty::RenderPassArray, 0x14);
 
-// GAME - 0xBA8C50
-// GECK - 0x908950
-template<typename ...Args>
-inline void BSShaderProperty::RenderPass::SetLights(uint8_t aucNumLights, Args ...args) {
-#ifdef GAME
-	CdeclCall(0xBA8C50, this, aucNumLights, std::forward<Args>(args)...);
-#else
-	CdeclCall(0x908950, this, aucNumLights, std::forward<Args>(args)...);
-#endif
-}
+#include "BSShaderProperty.inl"

@@ -397,7 +397,7 @@ bool Cmd_UpdateRepairMenu_Execute(COMMAND_ARGS) {
 		auto listItem = iter->GetItem();
 		if (listItem && listItem->tile && listItem->object) {
 			float repairedHealth = CalculateRepairedHealth(target, listItem->object);
-			listItem->tile->SetFloat(kTileValue_user0, repairedHealth);
+			listItem->tile->SetFloat(TILE_TRAIT::USER0, repairedHealth);
 		}
 	} while (iter = iter->GetNext());
 	*result = 1;
@@ -410,7 +410,7 @@ bool Cmd_SetWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 	char cScopePath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cScopePath, &pScopeForm)) {
 		if (pScopeForm && pScopeForm->GetFormType() == FORM_TYPE::TESObjectWEAP) {
-			TESModel* pModel = &static_cast<TESObjectWEAP*>(pScopeForm)->kScope;
+			TESModel* pModel = static_cast<TESObjectWEAP*>(pScopeForm)->GetScopeModel();
 			Interface::InitGunScope(pModel);
 
 		}
@@ -511,14 +511,14 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 					continue;
 
 				const Tile* pEntryTile = pItem->tile;
-				const Tile* pParent = pEntryTile->parent;
+				const Tile* pParent = pEntryTile->GetParent();
 				if (!pParent) [[unlikely]]
 					continue;
 
-				auto kIter = pParent->children.GetHeadPos();
+				auto kIter = pParent->kChildren.GetHeadPos();
 				uint32_t uiIndex = 0;
 				while (kIter) {
-					Tile* pChild = pParent->children.GetNext(kIter);
+					Tile* pChild = pParent->kChildren.GetNext(kIter);
 					if (pChild == pEntryTile) {
 						*result = uiIndex;
 						if (Script::GetConsoleOuput())

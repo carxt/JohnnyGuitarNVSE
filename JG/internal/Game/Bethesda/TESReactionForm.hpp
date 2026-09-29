@@ -34,7 +34,7 @@ public:
 	void ModReaction(TESForm* apForm, int32_t aiReaction);
 #endif
 
-	FIGHT_REACTION GetFactionCombatRelation(const TESForm* apForm) const;
+	FIGHT_REACTION GetFightReaction(const TESForm* apForm) const;
 #ifdef GAME
 	void SetFightReaction(TESForm* apForm, FIGHT_REACTION aeFightReaction);
 #endif

@@ -66,6 +66,11 @@ __forceinline auto CallImport(uint32_t _addr, Args ...args) noexcept(false) {
 	return (*reinterpret_cast<decltype(T_Func)*>(_addr))(std::forward<Args>(args)...);
 }
 
+template <class T_Func>
+__forceinline auto CustomCall(uint32_t _addr, auto ...args) noexcept(false) {
+	return reinterpret_cast<T_Func*>(_addr)(std::forward<decltype(args)>(args)...);
+}
+
 __forceinline uint8_t* __fastcall GetParentBasePtr(void* addressOfReturnAddress = _AddressOfReturnAddress(), bool lambda = false) noexcept(false) {
 	auto* basePtr = static_cast<uint8_t*>(addressOfReturnAddress) - 4;
 #if _DEBUG

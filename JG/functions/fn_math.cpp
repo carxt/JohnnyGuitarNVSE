@@ -1,9 +1,9 @@
 #include "fn_math.h"
-#include "GameProcess.h"
 #include "misc/misc.h"
 #include "netimmerse.h"
 #include "JG/WorldToScreen.hpp"
 
+#include "Bethesda/HitData.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/Interface.hpp"
 #include "Bethesda/BSUtilities.hpp"

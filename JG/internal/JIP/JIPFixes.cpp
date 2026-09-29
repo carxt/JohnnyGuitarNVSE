@@ -4,21 +4,21 @@
 
 #ifdef GAME
 #include "decoding.h"
-#include "GameData.h"
-#include "GameProcess.h"
 #include "GameTasks.h"
-#include "GameTiles.h"
 #include "GameUI.h"
 #include "GameRTTI.h"
 #include "utility.h"
 
 #include "Bethesda/AILinearTaskThreadManager.hpp"
+#include "Bethesda/Animation.hpp"
 #include "Bethesda/AutoMemContext.hpp"
+#include "Bethesda/BGSChangeFlags.hpp"
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/BSShaderUtil.hpp"
 #include "Bethesda/BSStringT.hpp"
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/FixedStrings.hpp"
+#include "Bethesda/HighProcess.hpp"
 #include "Bethesda/InventoryChanges.hpp"
 #include "Bethesda/MenuConsole.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
@@ -26,10 +26,12 @@
 #include "Bethesda/Setting.hpp"
 #include "Bethesda/Sky.hpp"
 #include "Bethesda/TaskQueueInterface.hpp"
+#include "Bethesda/TES.hpp"
+#include "Bethesda/TESDataHandler.hpp"
 #include "Bethesda/TESHavokUtilities.hpp"
 #include "Bethesda/TESMain.hpp"
+#include "Bethesda/TileImage.hpp"
 #include "Bethesda/TimeGlobal.hpp"
-#include "Bethesda/BGSChangeFlags.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 
 #include "events/EventFramework.h"
@@ -1124,7 +1126,7 @@ namespace JIPFixes {
 						TESObjectWEAP* pWeapon = pBiped->kObjects[BIPED_OBJECT::WEAPON].pWeapon;
 						if (pWeapon && ThisCall<bool>(uiWeaponHasScope, pActor)) {
 							const bool bScopeVisible = HUDMainMenu::GetSingleton()->bScopeVisible;
-							Interface::InitGunScope(&pWeapon->kScope);
+							Interface::InitGunScope(pWeapon->GetScopeModel());
 							Interface::SetGunScopeVisible(bScopeVisible);
 						}
 					}
@@ -1137,9 +1139,9 @@ namespace JIPFixes {
 					Animation* pAnim1st = pPlayer->GetAnimation(true);
 					Animation* pAnim3rd = pPlayer->GetAnimation(false);
 
-					if (bWeaponDrawn && pAnim1st->animSequence[ANIM_GROUP_SECTION::WEAPON])
+					if (bWeaponDrawn && pAnim1st->GetCurrentSequence(ANIM_GROUP_SECTION::WEAPON))
 						pAnim1st->BlendOut(ANIM_GROUP_SECTION::WEAPON, bIronSights);
-					if (bWeaponDrawn && pAnim3rd->animSequence[ANIM_GROUP_SECTION::WEAPON])
+					if (bWeaponDrawn && pAnim3rd->GetCurrentSequence(ANIM_GROUP_SECTION::WEAPON))
 						pAnim3rd->BlendOut(ANIM_GROUP_SECTION::WEAPON, bIronSights);
 
 					pAnim1st->ReloadTargets(true);
@@ -1148,7 +1150,7 @@ namespace JIPFixes {
 				else {
 					Animation* pAnim = pActor->GetAnimation();
 
-					if (bWeaponDrawn && pAnim->animSequence[ANIM_GROUP_SECTION::WEAPON])
+					if (bWeaponDrawn && pAnim->GetCurrentSequence(ANIM_GROUP_SECTION::WEAPON))
 						pAnim->BlendOut(ANIM_GROUP_SECTION::WEAPON, bIronSights);
 					pActor->ReloadTargets(false);
 				}
@@ -1503,7 +1505,7 @@ namespace JIPFixes {
 				return false;
 			}
 			else if (pClickedTile) {
-				return g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, pClickedTile->name.c_str());
+				return g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, pClickedTile->GetName());
 			}
 			else {
 				return g_scriptInterface->CallFunctionAlt(apScript, apRef, aucArgCount, auiMenuID, auiTileID, cEmptyBuffer);
@@ -1570,12 +1572,12 @@ namespace JIPFixes {
 
 		STACK_FRAME_OPT_ENABLE
 		uint32_t __fastcall GetTileIndex(Tile* apTile) {
-			const Tile* pParent = apTile->parent;
+			const Tile* pParent = apTile->GetParent();
 			if (pParent) [[likely]] {
-				auto kIter = pParent->children.GetHeadPos();
+				auto kIter = pParent->kChildren.GetHeadPos();
 				uint32_t uiIndex = 0;
 				while (kIter) {
-					const Tile* pChild = pParent->children.GetNext(kIter);
+					const Tile* pChild = pParent->kChildren.GetNext(kIter);
 					if (pChild == apTile)
 						return uiIndex;
 					++uiIndex;
@@ -1621,7 +1623,7 @@ namespace JIPFixes {
 		constexpr float WATER_OPACITY = 0.8f;
 		constexpr float WATER_REFLECTIVITY = 0.3f;
 
-		static constexpr AddressPtr<NiPointer<BSRenderedTexture>, 0x11C7C2C>	spSkyReflectionMap;
+		constexpr inline AddressPtr<NiPointer<BSRenderedTexture>, 0x11C7C2C> spSkyReflectionMap;
 
 		STACK_FRAME_OPT_ENABLE
 
@@ -1665,7 +1667,7 @@ namespace JIPFixes {
 				apWaterShaderProp->bRefractions = false;
 				apWaterShaderProp->kVarAmounts.fWaterReflectivityAmt = WATER_REFLECTIVITY;
 				apWaterShaderProp->kVarAmounts.fWaterOpacity = WATER_OPACITY;
-				if (!TES::GetSingleton()->currentInterior && spSkyReflectionMap.Get()) {
+				if (!TES::GetSingleton()->GetInterior() && spSkyReflectionMap.Get()) {
 					if (apWaterShaderProp->bReflections) {
 						apWaterShaderProp->spReflectionMap = spSkyReflectionMap.Get();
 					}
@@ -1726,7 +1728,7 @@ namespace JIPFixes {
 		};
 
 		void __fastcall RenderWater(void* apWaterManager, NiCamera* apCamera) {
-			if (TES::GetSingleton()->currentInterior)
+			if (TES::GetSingleton()->GetInterior())
 				return;
 
 			BSShaderAccumulator* pAccum = TESMain::GetSingleton()->spDrawWorldAccum;
@@ -1854,8 +1856,8 @@ namespace JIPFixes {
 				}
 				pUIMgr->cursorX = fPosX;
 				pUIMgr->cursorY = fPosY;
-				pUIMgr->cursor->node->m_kLocal.m_kTranslate.x = (fPosX * fUIPixelSize) - fScreenWidth;
-				pUIMgr->cursor->node->m_kLocal.m_kTranslate.z = fScreenHeight - (fPosY * fUIPixelSize);
+				pUIMgr->cursor->GetModel()->m_kLocal.m_kTranslate.x = (fPosX * fUIPixelSize) - fScreenWidth;
+				pUIMgr->cursor->GetModel()->m_kLocal.m_kTranslate.z = fScreenHeight - (fPosY * fUIPixelSize);
 				*result = 1;
 			}
 

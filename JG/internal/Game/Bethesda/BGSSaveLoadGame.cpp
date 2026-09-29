@@ -49,6 +49,7 @@ bool BGSSaveLoadGame::GetThreadAllowChanges() {
 	return ThisCall<bool>(0x462480, this);
 }
 
+// GAME - 0x4623F0
 bool BGSSaveLoadGame::SetThreadAllowChanges(bool abEnable) {
 	return ThisCall<bool>(0x4623F0, this, abEnable);
 }
@@ -61,6 +62,11 @@ bool BGSSaveLoadGame::GetLoadingMovedRefs() {
 // GAME - 0x4121B0
 bool BGSSaveLoadGame::GetReconstructingForms() {
 	return ThisCall<bool>(0x4121B0, this);
+}
+
+// GAME - 0x570F00
+bool BGSSaveLoadGame::GetAllowChanges() const {
+	return ThisCall<bool>(0x570F00, this);
 }
 
 #if ESL_SUPPORT || OVERLAY_SUPPORT
@@ -91,11 +97,12 @@ uint8_t BGSSaveLoadGame::GetSaveMod(uint8_t aucIndex) const {
 }
 #endif
 
-// GAME - 0x8492B0
-void BGSSaveLoadGame::InitForms(bool abLowPriority) {
-    ThisCall(0x8492B0, this, abLowPriority);
+// GAME - 0x84A6D0
+bool BGSSaveLoadGame::GetChange(const TESForm* apForm, BGSChangeFlags aFlags) const {
+	return ThisCall<bool>(0x84A6D0, this, apForm, aFlags);
 }
 
-void BGSSaveLoadGame::LoadCell(TESObjectCELL* apCell) {
-    ThisCall(0x849B10, this, apCell);
+// GAME - 0x849CC0
+bool BGSSaveLoadGame::HasReferenceChangedCells(FormID auiFormID) const {
+	return ThisCall<bool>(0x849CC0, this, auiFormID);
 }

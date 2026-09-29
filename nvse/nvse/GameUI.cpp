@@ -1,4 +1,6 @@
 #include "nvse/GameUI.h"
+#include "Bethesda/BSAudio.hpp"
+#include "Bethesda/BSGameSound.hpp"
 #include "Bethesda/Conversation.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
 
@@ -23,9 +25,9 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 	}
 	if (note->GetNoteType() == BGSNote::Type::SOUND)
 	{
-		BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(note->GetNoteSound()->GetFormID(), BSAudioManager::kAudioFlags_2D | BSAudioManager::kAudioFlags_100);
+		BSSoundHandle sound = BSAudio::GetSingleton()->GetSoundHandleByFormID(note->GetNoteSound()->GetFormID(), BSGameSound::TypeFlags::IS_2D | BSGameSound::TypeFlags::ONE_SHOT);
 
-		holotapeDialogues.Append(&sound);
+		holotapeDialogues.AddTail(sound);
 		isHolotapeVoicePlaying = true;
 	}
 	else if (note->GetNoteType() == BGSNote::Type::VOICE)
@@ -59,9 +61,9 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 					ThisCall(0x61F170, topicInfo, 0, character);
 
 					// append sound
-					BSSoundHandle toPlay = BSWin32Audio::GetSingleton()->GetSoundHandleByFilePath(currentResponse->strVoiceFilePath.c_str(), audioFlags, nullptr);
+					BSSoundHandle toPlay = BSAudio::GetSingleton()->GetSoundHandleByFilePath(currentResponse->strVoiceFilePath.c_str(), audioFlags, nullptr);
 					toPlay.SetVolume(0.9f);
-					holotapeDialogues.Append(&toPlay);
+					holotapeDialogues.AddTail(toPlay);
 
 					ThisCall(0x61F170, topicInfo, 1, character);
 				} while (currentItem->NextResponse());
@@ -76,7 +78,7 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 	{
 		if (playStartStopSound)
 		{
-			BSSoundHandle sound = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStart", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
+			BSSoundHandle sound = BSAudio::GetSingleton()->GetSoundHandleByEditorID("UIPipBoyHolotapeStart", BSGameSound::TypeFlags::IS_2D | BSGameSound::TypeFlags::ONE_SHOT | BSGameSound::TypeFlags::SYSTEM_SOUND);
 			sound.SetPosition(PlayerCharacter::GetSingleton()->GetLocationOnReference());
 			sound.Play(false);
 		}
@@ -85,18 +87,18 @@ void MapMenu::PlayHolotape(BGSNote* note, bool playStartStopSound)
 			bNoHolotapeStopSound = true;
 		}
 		*(uint8_t*)0x11DCFA4 = true;
-		ThisCall(0xAD85A0, BSWin32Audio::GetSingleton()); // FadeInDialogueSound
+		BSAudio::GetSingleton()->EnterDialogue();
 	}
 }
 
 void MapMenu::StopHolotape()
 {
 
-	if (currentHolotapeDialogueSound && currentHolotapeDialogueSound->data.IsPlaying())
+	if (currentHolotapeDialogueSound && currentHolotapeDialogueSound->GetItem().IsPlaying())
 	{
-		currentHolotapeDialogueSound->data.Stop();
+		currentHolotapeDialogueSound->GetItem().Stop();
 	}
-	holotapeDialogues.FreeAll();
+	holotapeDialogues.RemoveAll();
 	ThisCall(0x7A1C30, &holotapeSubtitles, 1);
 	currentHolotapeDialogueSound = nullptr;
 	holotapeTotalTime = 0.0f;
@@ -104,12 +106,12 @@ void MapMenu::StopHolotape()
 	isHolotapeVoicePlaying = 0;
 	if (!bNoHolotapeStopSound)
 	{
-		BSSoundHandle handle = BSWin32Audio::GetSingleton()->GetSoundHandleByEditorName("UIPipBoyHolotapeStop", BSAudioManager::kAudioFlags_100 | BSAudioManager::kAudioFlags_SystemSound | BSAudioManager::kAudioFlags_2D);
+		BSSoundHandle handle = BSAudio::GetSingleton()->GetSoundHandleByEditorID("UIPipBoyHolotapeStop", BSGameSound::TypeFlags::IS_2D | BSGameSound::TypeFlags::ONE_SHOT | BSGameSound::TypeFlags::SYSTEM_SOUND);
 		handle.SetPosition(PlayerCharacter::GetSingleton()->GetLocationOnReference());
 		handle.Play(false);
 	}
 	bNoHolotapeStopSound = false;
-	ThisCall(0xAD8650, BSWin32Audio::GetSingleton()); // FadeOutDialogueSound
+	BSAudio::GetSingleton()->ExitDialogue();
 	*(uint8_t*)0x11DCFA4 = false;
 	ThisCall(0x775670, HUDMainMenu::GetSingleton()); // ClearSubtitlesString
 }

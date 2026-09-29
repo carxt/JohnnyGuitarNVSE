@@ -2,7 +2,7 @@
 
 // GAME - 0x5E8D40
 BGSNote::Type BGSNote::GetNoteType() const {
-    return eNoteType;
+    return static_cast<Type>(eNoteType);
 }
 
 // GAME - 0x5E8F90

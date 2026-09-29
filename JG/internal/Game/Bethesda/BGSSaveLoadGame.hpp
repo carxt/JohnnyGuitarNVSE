@@ -1,7 +1,7 @@
 #pragma once
 
-#include "TESFile.hpp"
 #include "BGSSaveLoadFormIDMap.hpp"
+#include "BGSChangeFlags.hpp"
 #include "BSSimpleArray.hpp"
 #include "Gamebryo/NiTPointerMap.hpp"
 
@@ -18,6 +18,7 @@ class BGSSaveLoadReferencesMap;
 class Actor;
 class TESObjectCELL;
 class TESFile;
+class TESForm;
 
 class BGSSaveLoadGame {
 public:
@@ -96,8 +97,11 @@ public:
 	bool GetLoadingMovedRefs();
 	bool GetReconstructingForms();
 
+	bool GetAllowChanges() const;
+
 #if ESL_SUPPORT || OVERLAY_SUPPORT
 	TESFile* GetSaveMod(uint8_t aucIndex) const;
+	
 #if ESL_SUPPORT
 	TESFile* GetSmallSaveMod(uint16_t ausIndex) const;
 
@@ -108,8 +112,10 @@ public:
 	uint8_t GetSaveMod(uint8_t aucIndex) const;
 #endif
 
-	void InitForms(bool abLowPriority);
-	void LoadCell(TESObjectCELL* apCell);
+
+	bool GetChange(const TESForm* apForm, BGSChangeFlags aFlags) const;
+
+	bool HasReferenceChangedCells(FormID auiFormID) const;
 };
 
 ASSERT_SIZE(BGSSaveLoadGame, 0x24C);

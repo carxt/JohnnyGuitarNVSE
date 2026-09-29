@@ -10,6 +10,10 @@ const BSSimpleList<TESForm*>* BGSListForm::GetFormList() const {
     return &kList;
 }
 
+bool BGSListForm::IsEmpty() const {
+    return kList.IsEmpty();
+}
+
 // GAME - 0x58FF60
 // GECK - 0x5AD550
 int32_t BGSListForm::GetItemIndex(const TESForm* apForm) const {

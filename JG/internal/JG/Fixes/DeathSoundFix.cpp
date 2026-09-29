@@ -1,9 +1,11 @@
 #include "DeathSoundFix.hpp"
-#include "GameProcess.h"
 #include "Bethesda/Actor.hpp"
+#include "Bethesda/HighProcess.hpp"
 #include "Bethesda/DialoguePackage.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
+
+#include <float.h>
 
 namespace DeathSoundFix {
 	

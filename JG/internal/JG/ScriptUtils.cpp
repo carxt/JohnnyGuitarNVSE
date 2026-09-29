@@ -1,13 +1,14 @@
 #include "ScriptUtils.hpp"
-#include <PluginAPI.h>
+#include "PluginAPI.h"
 #include "CommandTable.h"
 #include "CommandOpcodes.h"
-#include "netimmerse.h"
-#include "GameProcess.h"
 
-#include "Bethesda/PlayerCharacter.hpp"
-#include "Bethesda/BGSSaveFormBuffer.hpp"
+#include "Bethesda/Animation.hpp"
 #include "Bethesda/BGSLoadGameSubBuffer.hpp"
+#include "Bethesda/BGSSaveFormBuffer.hpp"
+#include "Bethesda/BGSSaveLoadGame.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
+#include "Gamebryo/NiControllerManager.hpp"
 
 #include "shared/Utils/StackObject.hpp"
 
@@ -16,6 +17,14 @@ extern NVSECommandTableInterface* g_cmdTableInterface;
 namespace ScriptUtils {
 
 	Cmd_Execute Cmd_Update3D = nullptr;
+
+	AutoSaveFormChanges::AutoSaveFormChanges(bool abAllow) noexcept {
+		bOrgVal = BGSSaveLoadGame::GetSingleton()->SetThreadAllowChanges(abAllow);
+	}
+
+	AutoSaveFormChanges::~AutoSaveFormChanges() noexcept {
+		std::ignore = BGSSaveLoadGame::GetSingleton()->SetThreadAllowChanges(bOrgVal);
+	}
 
 	NiAVObject* __fastcall GetReferenceScene(TESObjectREFR* apRef, bool abFirstPerson) {
 		if (apRef == PlayerCharacter::GetSingleton())
