@@ -116,10 +116,6 @@ public:
 
 	TESFile* __fastcall GetOverlayFile(uint32_t auiIndex) const;
 #endif
-
-#if ESL_SUPPORT || OVERLAY_SUPPORT
-	void Initialize();
-#endif
 };
 #pragma warning(default:4624)
 

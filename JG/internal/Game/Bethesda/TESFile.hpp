@@ -151,9 +151,11 @@ public:
 
 	bool OpenTES(uint32_t aeAccessMode, bool abLock);
 
-	void AdjustFormIDFileIndex(FormID& auiFormID) const;
+	void AdjustFormIDFileIndex(FormID& arFormID) const;
 
-	static TESFile* GetFileForTempID(FormID auiTempID);
+#ifdef GAME
+	static TESFile* GetFileForTempID(FormID auiFormID);
+#endif
 };
 
 ASSERT_SIZE(WIN32_FIND_DATA, 0x140);

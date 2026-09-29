@@ -44,7 +44,7 @@ TESFile* TESDataHandler::GetListFile(const char* apFileName) const {
 	if (!apFileName)
 		return nullptr;
 
-	BSSimpleList<TESFile*>* pIter = GetFileList();
+	const BSSimpleList<TESFile*>* pIter = GetFileList();
 	while (pIter && pIter->GetItem()) {
 		TESFile* pFile = pIter->GetItem();
 		if (pFile && !_stricmp(pFile->GetName(), apFileName))
@@ -182,17 +182,5 @@ TESFile* __fastcall CompiledFiles::GetOverlayFile(uint32_t auiIndex) const {
 		return nullptr;
 
 	return kOverlayFiles.GetAt(auiIndex);
-}
-#endif
-
-#if ESL_SUPPORT || OVERLAY_SUPPORT
-void CompiledFiles::Initialize() {
-	new (&kNormalFiles) BSSimpleArray<TESFile*>(0, 0);
-
-	new (&kSmallFiles) BSSimpleArray<TESFile*>(0, 0);
-
-	new (&kOverlayFiles) BSSimpleArray<TESFile*>(0, 0);
-
-	memset(padding, 0xDEADBEEF, sizeof(padding));
 }
 #endif

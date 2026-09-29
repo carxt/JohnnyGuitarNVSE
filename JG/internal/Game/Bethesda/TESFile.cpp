@@ -99,15 +99,15 @@ bool TESFile::OpenTES(uint32_t aeAccessMode, bool abLock) {
 #endif
 }
 
-void TESFile::AdjustFormIDFileIndex(FormID& auiFormID) const {
-	FormID_View& vFormID = reinterpret_cast<FormID_View&>(auiFormID);
+void TESFile::AdjustFormIDFileIndex(FormID& arFormID) const {
+	FormID_View& vFormID = reinterpret_cast<FormID_View&>(arFormID);
 	const TESFile* pIndexFile = this;
 #if OVERLAY_SUPPORT
 	if (IsOverlay()) {
 		pIndexFile = GetIndexFile(1);
 		if (!pIndexFile)
 			pIndexFile = this;
-		_MESSAGE("[ TESFile::AdjustFormIDFileIndex ] Overlay file %s - using %s master for %08X", this->GetName(), pIndexFile->GetName(), auiFormID);
+		_MESSAGE("[ TESFile::AdjustFormIDFileIndex ] Overlay file %s - using %s master for %08X", this->GetName(), pIndexFile->GetName(), arFormID);
 	}
 #endif
 
@@ -116,7 +116,7 @@ void TESFile::AdjustFormIDFileIndex(FormID& auiFormID) const {
 		vFormID.SetCompileIndex(0xFE);
 		vFormID.SetSmallIndex(pIndexFile->GetSmallCompileIndex());
 		if (!IsOverlay())
-			_MESSAGE("[ TESFile::AdjustFormIDFileIndex ] Small file (%s): %08X", pIndexFile->GetName(), auiFormID);
+			_MESSAGE("[ TESFile::AdjustFormIDFileIndex ] Small file (%s): %08X", pIndexFile->GetName(), arFormID);
 		return;
 	}
 #endif
@@ -125,7 +125,9 @@ void TESFile::AdjustFormIDFileIndex(FormID& auiFormID) const {
 	vFormID.SetCompileIndex(ucIndex);
 }
 
+#ifdef GAME
 // GAME - 0x474060
-TESFile* TESFile::GetFileForTempID(FormID auiTempID) {
-	return CdeclCall<TESFile*>(0x474060, auiTempID);
+TESFile* TESFile::GetFileForTempID(FormID auiFormID) {
+	return CdeclCall<TESFile*>(0x474060, auiFormID);
 }
+#endif

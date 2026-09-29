@@ -22,8 +22,8 @@ extern NVSEStringVarInterface* g_strInterface;
 extern NVSEScriptInterface* g_scriptInterface;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 
-bool bSupportESLs = true;
-bool bSupportOverlays = true;
+constexpr bool bSupportESLs		= true;
+constexpr bool bSupportOverlays = true;
 
 namespace MorePluginTypes {
 
@@ -139,12 +139,15 @@ namespace MorePluginTypes {
 		}
 
 		void __fastcall AdjustFormIDFileIndex(TESFile* apFile, TESFile* apIndexFile) {
-			TESFile* pIndexFile = apIndexFile ? apIndexFile : apFile;
+			if (TESForm::IsDefaultForm(apFile->kCurrentForm.uiFormID))
+				return;
+
+			const TESFile* pIndexFile = apIndexFile ? apIndexFile : apFile;
 			pIndexFile->AdjustFormIDFileIndex(apFile->kCurrentForm.uiFormID);
 		}
 
 		SPEC_NAKED void AdjustFormIDFileIndex_Asm() {
-			static constexpr uint32_t uiReturnAddr = 0x472CEC;
+			static constexpr uint32_t uiReturnAddr = 0x472D23;
 			__asm {
 				mov     ecx, [ebp - 0xC]
 				mov     edx, [ebp - 0x8]
@@ -153,14 +156,15 @@ namespace MorePluginTypes {
 			}
 		}
 
-		void __fastcall AdjustFormIDFileIndex_CellSearch(TESFile* apFile, FORM* apCurrentForm) {
+		FormID __fastcall AdjustFormIDFileIndex_CellSearch(TESFile* apFile, FORM* apCurrentForm) {
 			FormID uiFormID = apCurrentForm->uiFormID;
-			uint8_t ucIndex = FormID_View(uiFormID).GetCompileIndex();
-			TESFile* pIndexFile = apFile->GetIndexFile(ucIndex + 1);
+			const uint8_t ucIndex = FormID_View(uiFormID).GetCompileIndex();
+			const TESFile* pIndexFile = apFile->GetIndexFile(ucIndex + 1);
 			if (!pIndexFile)
 				pIndexFile = apFile;
 
 			pIndexFile->AdjustFormIDFileIndex(uiFormID);
+			return uiFormID;
 		}
 
 		SPEC_NAKED void AdjustFormIDFileIndex_CellSearch_Asm() {
@@ -169,6 +173,7 @@ namespace MorePluginTypes {
 				mov     ecx, [ebp - 0x2C]
 				mov     edx, [ebp - 0x30]
 				call	AdjustFormIDFileIndex_CellSearch
+				mov     [ebp - 0x3C], eax
 				jmp		uiReturnAddr
 			}
 		}
@@ -193,7 +198,11 @@ namespace MorePluginTypes {
 				if (bSupportESLs || bSupportOverlays) {
 					ucDLCFlags.Set(HAS_SMALL_PLUGINS_FLAG, bSupportESLs);
 					ucDLCFlags.Set(HAS_OVERLAY_PLUGINS_FLAG, bSupportOverlays);
-					kCompiledFiles.Initialize();
+
+					new (&kCompiledFiles.kNormalFiles)	BSSimpleArray<TESFile*>(0, 0);
+					new (&kCompiledFiles.kSmallFiles)	BSSimpleArray<TESFile*>(0, 0);
+					new (&kCompiledFiles.kOverlayFiles) BSSimpleArray<TESFile*>(0, 0);
+					memset(kCompiledFiles.padding, 0xCCCCCCCC, sizeof(kCompiledFiles.padding));
 				}
 				return this;
 			}
@@ -253,13 +262,13 @@ namespace MorePluginTypes {
 		class TESFormEx : public TESForm {
 		public:
 			static void __cdecl AddCompileIndex(FormID& auiID, TESFile* apFile) {
-				if (!TESForm::IsDefaultForm(auiID) && apFile) {
+				if (!IsDefaultForm(auiID) && apFile) {
 					const uint8_t ucIndex = FormID_View(auiID).GetCompileIndex();
-					TESFile* pIndexFile = apFile->GetIndexFile(ucIndex + 1);
-					if (pIndexFile)
-						pIndexFile->AdjustFormIDFileIndex(auiID);
-					else
-						apFile->AdjustFormIDFileIndex(auiID);
+					const TESFile* pIndexFile = apFile->GetIndexFile(ucIndex + 1);
+					if (!pIndexFile)
+						pIndexFile = apFile;
+					
+					pIndexFile->AdjustFormIDFileIndex(auiID);
 				}
 			}
 		};
@@ -268,11 +277,20 @@ namespace MorePluginTypes {
 		const char cExtensionSearchQuery[] = "*.es";
 
 		void InitHooks() {
+			// Load all files with extensions that start with ".es"
+			// Feel free to come up with your own weird extension names, I think only the mod managers and xEdit will complain
 			HookUtils::SafeWrite8(0x4625B7 + 6, 0x1);
 			HookUtils::SafeWrite32(0x4625F8 + 1, uint32_t(&cExtensionSearchQueryWildcard));
 			HookUtils::SafeWrite32(0xAF47C4 + 1, uint32_t(&cExtensionSearchQuery));
 
 			kDataHandlerConstructorDetour.ReplaceCall(0x44FF95, &TESDataHandlerEx::InitializeDataHandler);
+
+			// Don't pre-create thread-specific files for AILinearTaskThreads
+			// It's already wasteful in vanilla
+			// Only dialogue, quest logs, descriptions and cells need them, and not all of that is actually done on those threads
+			// Doing it with all overlays and ESLs is only worse
+			// They'll get created on-demand instead
+			HookUtils::PatchMemoryNopRange(0x8C70A5, 0x8C70B0);
 
 			// TESDataHandler::ConstructObject
 			{
@@ -352,18 +370,20 @@ namespace MorePluginTypes {
 
 	namespace SaveLoadHooks {
 
+		constexpr int32_t VANILLA_MINOR_VERSION = 27;
+		constexpr int32_t VANILLA_MAJOR_VERSION = 48;
+		constexpr int32_t ESL_MINOR_VERSION = VANILLA_MINOR_VERSION + 1;
+		constexpr int32_t ESL_MAJOR_VERSION = VANILLA_MAJOR_VERSION + 1;
+
 		HookUtils::CallDetour kSaveLoadGameConstructorDetour;
 		class BGSSaveLoadGameEx : public BGSSaveLoadGame {
 		public:
-			void InitializeArrays() {
-				new (&kFiles) BSSimpleArray<TESFile*>(0, 0);
-				new (&kSmallFiles) BSSimpleArray<TESFile*>(0, 0);
-				ucLoadOrderChanges = 0;
-			}
-
 			BGSSaveLoadGame* InitializeSaveLoadGame() {
 				ThisCall(kSaveLoadGameConstructorDetour, this);
-				InitializeArrays();
+				new (&kFiles)		BSSimpleArray<TESFile*>(0, 0);
+				new (&kSmallFiles)	BSSimpleArray<TESFile*>(0, 0);
+				memset(padding, 0xCCCCCCCC, sizeof(padding));
+				ucLoadOrderChanges = 0;
 				return this;
 			}
 
@@ -371,15 +391,15 @@ namespace MorePluginTypes {
 				const uint8_t ucIndex = FormID_View(auiFormID).GetCompileIndex();
 				const uint8_t ucMaxIndex = SupportsSmallPlugins() ? 0xFE : 0xFF;
 
-				TESFile* pFile = nullptr;
-				if (ucIndex != ucMaxIndex) {
+				const TESFile* pFile = nullptr;
+				if (ucIndex < ucMaxIndex) {
 					if (ucIndex < kFiles.GetSize())
 						pFile = kFiles.GetAt(ucIndex);
 				}
 				else if (bSupportESLs && ucIndex == 0xFE) {
-					const uint8_t ucSmallIndex = FormID_View(auiFormID).GetSmallIndex();
-					if (ucSmallIndex < kSmallFiles.GetSize())
-						pFile = kSmallFiles.GetAt(ucSmallIndex);
+					const uint16_t usSmallIndex = FormID_View(auiFormID).GetSmallIndex();
+					if (usSmallIndex < kSmallFiles.GetSize())
+						pFile = kSmallFiles.GetAt(usSmallIndex);
 				}
 
 				if (pFile) {
@@ -395,7 +415,7 @@ namespace MorePluginTypes {
 				kFiles.Clear();
 				kSmallFiles.Clear();
 				_MESSAGE("Loading plugin list");
-				TESDataHandler* pDataHandler = TESDataHandler::GetSingleton();
+				const TESDataHandler* pDataHandler = TESDataHandler::GetSingleton();
 				StackObject<BGSLoadGameBuffer, 0x8646B0, 0x8646F0> kBuffer;
 				kBuffer->Load(apFile);
 
@@ -404,22 +424,22 @@ namespace MorePluginTypes {
 				_MESSAGE("Mod count: %d", ucModCount);
 				bool bResult = true;
 
-				for (uint32_t i = 0; i < ucModCount; i++) {
+				for (uint32_t i = 0; i < ucModCount; ++i) {
 					char cModName[MAX_PATH];
 					kBuffer->LoadString(cModName);
 
 					TESFile* pFile = pDataHandler->GetListFile(cModName);
-					if (pFile && pFile->ucCompileIndex != 0xFF) {
+					if (pFile && pFile->GetCompileIndex() != 0xFF) {
 						_MESSAGE("Mod %s", cModName);
-						kFiles.Add(pFile);
 					}
 					else {
 						bResult = false;
 						pFile = nullptr;
-						kFiles.Add(pFile);
 						ucLoadOrderChanges.Set(1);
 						_MESSAGE("Missing mod %s", cModName);
 					}
+
+					kFiles.Add(pFile);
 
 					if (kFiles.GetSize() != pDataHandler->GetCompiledFileCount())
 						ucLoadOrderChanges.Set(1);
@@ -432,22 +452,21 @@ namespace MorePluginTypes {
 					if (!usSmallModCount)
 						return bResult;
 
-					for (uint32_t i = 0; i < usSmallModCount; i++) {
+					for (uint32_t i = 0; i < usSmallModCount; ++i) {
 						char cModName[MAX_PATH];
 						kBuffer->LoadString(cModName);
 
 						TESFile* pFile = pDataHandler->GetListFile(cModName);
-						if (pFile && pFile->ucCompileIndex != 0xFF) {
+						if (pFile && pFile->GetCompileIndex() != 0xFF) {
 							_MESSAGE("Small mod %s", cModName);
-							kSmallFiles.Add(pFile);
 						}
 						else {
 							bResult = false;
 							pFile = nullptr;
-							kSmallFiles.Add(pFile);
 							_MESSAGE("Missing small mod %s", cModName);
 							ucLoadOrderChanges.Set(2);
 						}
+						kSmallFiles.Add(pFile);
 					}
 					if (kSmallFiles.GetSize() != pDataHandler->GetSmallCompiledFileCount())
 						ucLoadOrderChanges.Set(2);
@@ -458,20 +477,20 @@ namespace MorePluginTypes {
 
 			void SavePluginList(BGSSaveLoadFile* apFile) const {
 				StackObject<BGSSaveGameBuffer, 0x865BD0, 0x865C10> kBuffer;
-				const uint8_t ucModCount = TESDataHandler::GetSingleton()->GetCompiledFileCount();
+				const TESDataHandler* pDataHandler = TESDataHandler::GetSingleton();
+				const uint8_t ucModCount = pDataHandler->GetCompiledFileCount();
 				kBuffer->SaveData(ucModCount);
-				for (uint32_t i = 0; i < ucModCount; i++) {
-					TESFile* pFile = TESDataHandler::GetSingleton()->GetCompiledFile(i);
-					if (pFile) {
+				for (uint32_t i = 0; i < ucModCount; ++i) {
+					const TESFile* pFile = pDataHandler->GetCompiledFile(i);
+					if (pFile)
 						kBuffer->SaveString(pFile->GetName(), 0);
-					}
 				}
 
-				if (BGSSaveLoadManager::GetSingleton()->GetMinorVersion() > 27) {
-					const uint16_t usSmallModCount = TESDataHandler::GetSingleton()->GetSmallCompiledFileCount();
+				if (BGSSaveLoadManager::GetSingleton()->GetMinorVersion() > VANILLA_MINOR_VERSION) {
+					const uint16_t usSmallModCount = pDataHandler->GetSmallCompiledFileCount();
 					kBuffer->SaveData(usSmallModCount);
-					for (uint32_t i = 0; i < usSmallModCount; i++) {
-						TESFile* pFile = TESDataHandler::GetSingleton()->GetSmallFile(i);
+					for (uint32_t i = 0; i < usSmallModCount; ++i) {
+						const TESFile* pFile = pDataHandler->GetSmallFile(i);
 						if (pFile)
 							kBuffer->SaveString(pFile->GetName(), 0);
 					}
@@ -481,11 +500,6 @@ namespace MorePluginTypes {
 			}
 		};
 
-
-		constexpr int32_t VANILLA_MINOR_VERSION = 27;
-		constexpr int32_t VANILLA_MAJOR_VERSION = 48;
-		constexpr int32_t ESL_MINOR_VERSION = VANILLA_MINOR_VERSION + 1;
-		constexpr int32_t ESL_MAJOR_VERSION = VANILLA_MAJOR_VERSION + 1;
 		class BGSSaveLoadManagerEx : public BGSSaveLoadManager {
 		public:
 			int32_t GetMinorVersion() const {
@@ -510,7 +524,7 @@ namespace MorePluginTypes {
 		class BGSSaveLoadFormIDMapEx : public BGSSaveLoadFormIDMap {
 		public:
 			FormID ConvertFormID(FormID auiFormID) const {
-				if (FormID_View(auiFormID).GetCompileIndex() == 0xFF)
+				if (FormID_View(auiFormID).IsCreated())
 					return auiFormID;
 				else
 					return reinterpret_cast<BGSSaveLoadGameEx*>(BGSSaveLoadGame::GetSingleton())->GetConvertedFormID(auiFormID);
@@ -531,7 +545,7 @@ namespace MorePluginTypes {
 
 				const TESDataHandler* pDataHandler = TESDataHandler::GetSingleton();
 				if (bSupportESLs && ucIndex == 0xFE) {
-					uint16_t usSmallIndex = FormID_View(auiFormID).GetSmallIndex();
+					const uint16_t usSmallIndex = FormID_View(auiFormID).GetSmallIndex();
 					if (usSmallIndex < pDataHandler->GetSmallCompiledFileCount())
 						return pDataHandler->GetSmallFile(usSmallIndex);
 				}
@@ -540,74 +554,6 @@ namespace MorePluginTypes {
 				}
 
 				return nullptr;
-			}
-		};
-
-		class BGSNumericIDIndexEx : public BGSNumericIDIndex {
-		public:
-			static constexpr uint32_t ID_EMPTY		= 0x400000;
-			static constexpr uint32_t ID_PRESENT	= 0x800000;
-			static constexpr uint32_t ID_FLAGS_MASK	= ID_EMPTY | ID_PRESENT;
-
-			void SetNumericID(FormID auiFormID) {
-
-				FormID uiFormID = 0;
-#if 0
-
-				if (BGSSaveLoadManager::GetSingleton()->GetMinorVersion() <= 27) {
-					_MESSAGE("Saving Save ver 27, using old FormID resolve");
-					uiFormID = BGSSaveLoadGame::GetSingleton()->pFormIDMap->AddFormID(auiFormID);
-					if (FormID_View(auiFormID).GetIndex() == 0xFF)
-						uiFormID = (uiFormID | ID_PRESENT);
-				}
-				else {
-					const uint8_t ucIndex = FormID_View(auiFormID).GetIndex();
-					_MESSAGE("Saving Save ver 28, using new FormID resolve");
-					if (auiFormID && (!ucIndex || ucIndex == 0xFF)) {
-						if ((auiFormID & ID_FLAGS_MASK) != 0)
-							_MESSAGE("[ BGSNumericIDIndex::SetNumericID ] Flag already set on FormID %08X", auiFormID);
-
-						const uint32_t uiMask = ucIndex ? ID_PRESENT : ID_EMPTY;
-						uiFormID = auiFormID | uiMask;
-					}
-					else {
-						uiFormID = BGSSaveLoadGame::GetSingleton()->pFormIDMap->AddFormID(auiFormID);
-					}
-				}
-#else
-				uiFormID = BGSSaveLoadGame::GetSingleton()->pFormIDMap->AddFormID(auiFormID);
-				if (FormID_View(auiFormID).GetCompileIndex() == 0xFF)
-					uiFormID = (uiFormID | ID_PRESENT);
-#endif
-				ucData1 = (uiFormID >> 16) & 0xFF;
-				ucData2 = (uiFormID >> 8) & 0xFF;
-				ucData3 = uiFormID & 0xFF;
-			}
-
-			uint32_t GetNumericID() const {
-				const uint32_t uiID = uint32_t(ucData3) + (uint32_t(ucData2) << 8) + (uint32_t(ucData1) << 16);
-				uint32_t uiMask = 0xFF000000;
-#if 0
-				if (!BGSSaveLoadGame::GetSingleton()->SupportsSmallPlugins()) {
-					if ((uiID & ID_PRESENT) != 0)
-						return uiID & 0x7FFFFF | uiMask;
-					else
-						return BGSSaveLoadGame::GetSingleton()->pFormIDMap->GetFormID(uiID);
-				}
-				if ((uiID & ID_FLAGS_MASK) == 0)
-					return BGSSaveLoadGame::GetSingleton()->pFormIDMap->GetFormID(uiID);
-
-
-				if ((uiID & ID_EMPTY) != 0)
-					uiMask = 0;
-
-				return uiID & ~ID_FLAGS_MASK | uiMask;
-#else
-				if ((uiID & ID_PRESENT) != 0)
-					return uiID & 0x7FFFFF | uiMask;
-				else
-					return BGSSaveLoadGame::GetSingleton()->pFormIDMap->GetFormID(uiID);
-#endif
 			}
 		};
 
@@ -639,9 +585,6 @@ namespace MorePluginTypes {
 			HookUtils::WriteRelJump(0x846D80, &BGSSaveLoadFormIDMapEx::ConvertFormID);
 
 			HookUtils::WriteRelJump(0x843FE0, &BGSReconstructFormsInAllFilesMapEx::GetFileForFormID);
-
-			HookUtils::WriteRelJump(0x853570, &BGSNumericIDIndexEx::SetNumericID); // Tweaks' inlines conflict
-			HookUtils::WriteRelJump(0x853500, &BGSNumericIDIndexEx::GetNumericID);
 		}
 
 	}
@@ -658,7 +601,7 @@ namespace MorePluginTypes {
 		HookUtils::CallDetour kScriptLoadDetour;
 		void __fastcall LoadScriptForm(TESForm* apThis, void*, TESFile* apFile) {
 			ThisCall(kScriptLoadDetour, apThis, apFile);
-			TESFile* pOrgFile = apThis->GetFile(0);
+			const TESFile* pOrgFile = apThis->GetFile(0);
 			if (bSupportESLs && pOrgFile->IsSmallFile()) {
 				char cMessage[MAX_PATH];
 				our_snprintf(cMessage, sizeof(cMessage), "%s has Script %08X (%s), but is an ESL. Not allowed! Time to die.", pOrgFile->GetName(), apThis->GetFormID(), apThis->GetFormEditorID());
@@ -931,7 +874,7 @@ namespace MorePluginTypes {
 	bool JIP_GetModName(COMMAND_ARGS) {
 		char cName[MAX_PATH] = {};
 		uint32_t uiIndex = 0;
-		BOOL bKeepExtension = false;
+		BOOL bKeepExtension = FALSE;
 		const uint32_t uiMaxIndex = bSupportESLs ? 0xFE : 0xFF;
 		if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiIndex, &bKeepExtension) && uiIndex < uiMaxIndex) {
 			TESFile* pFile = TESDataHandler::GetSingleton()->GetCompiledFile(uiIndex);
@@ -957,8 +900,8 @@ namespace MorePluginTypes {
 			const FormID uiFormID = scriptObj->GetFormID();
 			const uint8_t ucIndex = scriptObj->GetCompileIndex();
 
-			TESFile* pFile = pForm->GetFile(-1);
-			if (!pFile)
+			const TESFile* pFile = pForm->GetFile(-1);
+			if (!pFile) [[unlikely]]
 				return true;
 
 			if (bSupportOverlays && pFile->IsOverlay()) {
@@ -967,7 +910,7 @@ namespace MorePluginTypes {
 			}
 
 			const uint8_t ucFileIndex = pFile->GetCompileIndex();
-			if (ucFileIndex == 0xFF)
+			if (ucFileIndex == 0xFF) [[unlikely]]
 				return true;
 
 			if (bSupportESLs && ucIndex == 0xFE && ucIndex == ucFileIndex) {
