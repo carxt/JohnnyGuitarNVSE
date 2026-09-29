@@ -354,11 +354,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp" />
     <ClCompile Include="..\nvse\nvse\GameTasks.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameTiles.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\nvse\nvse\GameUI.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
@@ -869,6 +864,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TESWeatherList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWeightForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TESWorldSpace.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\Tile.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\TLSData.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TimeGlobal.cpp" />
     <ClCompile Include="internal\Game\Bethesda\VirtualPathingNode.cpp" />
@@ -1161,11 +1161,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameRTTI.h" />
     <ClInclude Include="..\nvse\nvse\GameTasks.h" />
-    <ClInclude Include="..\nvse\nvse\GameTiles.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
-    </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameTypes.h" />
     <ClInclude Include="..\nvse\nvse\GameUI.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
@@ -2039,6 +2034,31 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\TESWorldSpace.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ThreadSafeStructures.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ThreadSpecificInterfaceManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\Tile.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TileImage.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TileMenu.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TileRect.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\TileText.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\TLSData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\TimeGlobal.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ValueModifierEffect.hpp">

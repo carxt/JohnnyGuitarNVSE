@@ -1201,6 +1201,8 @@ struct _AttackAnimation {
 };
 using ATTACK_ANIMATION = _AttackAnimation::Animation;
 
+#pragma endregion
+
 #pragma region Weapons
 
 struct _WeaponType {
@@ -1774,6 +1776,8 @@ struct _RayCastPathResult {
 };
 using RAYCAST_PATH_RESULT = _RayCastPathResult::Result;
 
+#pragma region Archive
+
 struct _ArchiveTypeIndex {
 	enum Index : uint32_t {
 		MESHES		= 0,
@@ -1807,6 +1811,8 @@ struct _ArchiveType {
 	};
 };
 using ARCHIVE_TYPE = _ArchiveType::Type;
+
+#pragma endregion
 
 struct _BodyPartType {
 	enum Type : int32_t {
@@ -2111,3 +2117,172 @@ struct _CellEnvironmentType {
 	};
 };
 using CELL_ENVIRONMENT_TYPE = _CellEnvironmentType::Type;
+
+#pragma region Tiles
+
+struct _TileType {
+	enum Type {
+		NULL_TYPE	= 0x0,
+		FIRST_TYPE	= 0x385,
+		RECT		= 0x385,
+		IMAGE		= 0x386,
+		_3D			= 0x388,
+		MENU		= 0x389,
+		HOTRECT		= 0x38A,
+		WINDOW		= 0x38B,
+		RADIAL		= 0x38C,
+		LAST_TYPE	= 0x38C,
+		TEMPLATE	= 0x3E7,
+	};
+};
+using TILE_TYPE = _TileType::Type;
+
+struct _TileTrait {
+	enum Trait : int32_t {
+		X					= 0xFA1,
+		Y,
+		VISIBLE,
+		CLASS,
+		CLIP_WINDOW			= 0xFA6,
+		STACKING_TYPE,
+		LOCUS,
+		ALPHA,
+		ID,
+		DISABLE_FADE,
+		LIST_INDEX,
+		DEPTH,
+		CLIPS,
+		TARGET,
+		HEIGHT,
+		WIDTH,
+		RED,
+		GREEN,
+		BLUE,
+		TILE,
+		CHILD_COUNT,
+		JUSTIFY,
+		ZOOM,
+		FONT,
+		WRAP_WIDTH,
+		WRAP_LIMIT,
+		WRAP_LINES,
+		PAGE_NUM,
+		IS_HTML,
+		CROP_OFFSET_Y,
+		CROP_Y = CROP_OFFSET_Y,
+		CROP_OFFSET_X,
+		CROP_X = CROP_OFFSET_X,
+		MENU_FADE,
+		EXPLORE_FADE,
+		MOUSEOVER,
+		STRING,
+		SHIFT_CLICKED,
+		CLICKED				= 0xFC7,
+		CLICK_SOUND			= 0xFCB,
+		FILE_NAME,
+		FILE_WIDTH,
+		FILE_HEIGHT,
+		REPEAT_VERTICAL,
+		REPEAT_HORIZONTAL,
+		ANIMATION			= 0xFD2,
+		LINE_COUNT			= 0xDD4,
+		PAGE_COUNT,
+		XDEFAULT,
+		X_UP,
+		X_DOWN,
+		X_LEFT,
+		X_RIGHT,
+		X_BUTTON_A			= 0xFDD,
+		X_BUTTON_B,
+		X_BUTTON_X,
+		X_BUTTON_Y,
+		X_BUTTON_LT,
+		X_BUTTON_RT,
+		X_BUTTON_LB,
+		X_BUTTON_RB,
+		X_BUTTON_START		= 0xFE7,
+		MOUSEOVER_SOUND,
+		DRAGGABLE,
+		DRAG_START_X,
+		DRAG_START_Y,
+		DRAG_OFFSET_X,
+		DRAG_OFFSET_Y,
+		DRAG_DELTA_X,
+		DRAG_DELTA_Y,
+		DRAG_X,
+		DRAG_Y,
+		WHEELABLE,
+		WHEEL_MOVED,
+		SYSTEM_COLOR,
+		BRIGHTNESS,
+		LINEGAP				= 0xFF7,
+		RESOLUTION_CONVERTER,
+		TEX_ATLAS,
+		ROTATE_ANGLE,
+		ROTATE_AXIS_X,
+		ROTATE_AXIS_Y,
+
+		USER0				= 0x1004,
+		USER1,
+		USER2,
+		USER3,
+		USER4,
+		USER5,
+		USER6,
+		USER7,
+		USER8,
+		USER9,
+		USER10,
+		USER11,
+		USER12,
+		USER13,
+		USER14,
+		USER15,
+		USER16,
+
+		LAST_TRAIT			= 0x101D,
+		
+		MENU_LEVEL			= 0x1771,
+		DELETE_ON_FADE		= 0x1772,
+		MENU_THICKNESS		= 0x1773,
+		NO_CLICK_PAST_DONE	= 0x1776,
+		MIXED_MENU_DONE		= 0x1777,
+		DOES_NOT_STACK		= 0x1778,
+		MENU_VISIBLE		= 0x1779,
+	};
+};
+using TILE_TRAIT = _TileTrait::Trait;
+
+struct _TileValueAction {
+	enum Type {
+		COPY = 0x7D0,
+		ADD,
+		SUB,
+		MUL,
+		DIV,
+		MIN,
+		MAX,
+		MOD,
+		FLOOR,
+		CEIL,
+		ABS,
+		ROUND,
+		GT,
+		GTE,
+		EQ,
+		NEQ,
+		LT,
+		LTE,
+		AND,
+		OR,
+		NOT,
+		ONLY_IF,
+		ONLY_IF_NOT,
+		REF,
+		BEGIN,
+		END,
+	};
+};
+using TILE_VALUE_ACTION = _TileValueAction::Type;
+
+#pragma endregion
