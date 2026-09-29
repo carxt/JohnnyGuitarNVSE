@@ -3,7 +3,7 @@
 #include "BSMemObject.hpp"
 #include "ThreadSafeStructures.hpp"
 
-class SPEC_EMPTY_BASES InterfacedClass : public BSMemObject {
+class SPEC_EMPTY_BASES InterfacedClass {
 public:
 	InterfacedClass() {};
 	virtual			~InterfacedClass() {};

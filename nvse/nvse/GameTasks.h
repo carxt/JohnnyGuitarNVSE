@@ -2,7 +2,8 @@
 
 #include "GameTypes.h"
 #include "NiTypes.h"
-#include "Bethesda/QueuedFile.hpp"
+#include "Bethesda/QueuedFileEntry.hpp"
+#include "Bethesda/LockFreeMap.hpp"
 
 class TESObjectREFR;
 class TESModel;
@@ -82,18 +83,6 @@ class QueuedPlayer : public QueuedCharacter {
 public:
 	QueuedPlayer();
 	~QueuedPlayer();
-};
-
-// 030
-class QueuedFileEntry : public QueuedFile {
-public:
-	QueuedFileEntry();
-	~QueuedFileEntry();
-
-	virtual bool Unk_0B(void) = 0;
-
-	char* name;		// 028
-	BSAData* bsaData;	// 02C
 };
 
 class Model // NiObject
@@ -198,36 +187,6 @@ public:
 	TESNPC* npc;				// 028
 	BSFaceGenNiNode* faceNiNodes[2];	// 02C OBSE presumably male and female
 	uint32_t			unk034;				// 034
-};
-
-template <typename T_Key, typename T_Data> class LockFreeMap {
-public:
-	virtual void	Unk_00(void);
-	virtual void	Unk_01(void);
-	virtual bool	Lookup(T_Key key, void** result);
-	virtual void	Unk_03(void);
-	virtual void	Unk_04(void);
-	virtual void	Unk_05(void);
-	virtual void	Unk_06(void);
-	virtual void	Unk_07(void);
-	virtual void	Unk_08(void);
-	virtual void	Unk_09(void);
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-	virtual void	Unk_0C(void);
-	virtual void	Unk_0D(void);
-	virtual void	Unk_0E(void);
-	virtual void	Unk_0F(void);
-	virtual void	Unk_10(void);
-	virtual void	Unk_11(void);
-	virtual void	Unk_12(void);
-
-	void* ptr04;			// 04
-	uint32_t		numBuckets;		// 08
-	void* ptr0C;			// 0C
-	uint32_t		unk10;			// 10
-	void* ptr14;			// 14
-	uint32_t		numItems;		// 18
 };
 
 class AnimIdle;

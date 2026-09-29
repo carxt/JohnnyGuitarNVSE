@@ -2,8 +2,8 @@
 
 #include "IOTask.hpp"
 #include "QueuedChildren.hpp"
+#include "MemoryContexts.hpp"
 
-class QueuedReference;
 class QueuedChildren;
 class QueuedParents;
 class NiObject;
@@ -19,10 +19,19 @@ public:
 	virtual void NotifyChildFinished(QueuedFile* apParent);
 	virtual void CheckFinished();
 
-	uint32_t					eContext;
-	NiPointer<QueuedReference>	spParent;
-	QueuedChildren*				pChildren;
-	QueuedParents*				pParents;
+	MEM_CONTEXT				eContext;
+	NiPointer<QueuedFile>	spParent;
+	QueuedChildren*			pChildren;
+	QueuedParents*			pAdditionalParents;
+
+	static QueuedFile* Create(IO_TASK_PRIORITY aePriority);
+
+	void SetParent(QueuedFile* apParent);
+
+	uint32_t GetChildCount() const;
+	void AddChild(QueuedFile* apChild);
+
+	void AddAdditionalParent(QueuedFile* apParent);
 };
 
 ASSERT_SIZE(QueuedFile, 0x28);

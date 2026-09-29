@@ -687,6 +687,19 @@ struct _Procedure {
 };
 using PROCEDURE = _Procedure::Type;
 
+struct _CrimeType {
+	enum Type {
+		NONE		= -1,
+		STEAL		= 0,
+		PICKPOCKET	= 1,
+		TRESPASS	= 2,
+		ATTACK		= 3,
+		MURDER		= 4,
+		COUNT,
+	};
+};
+using CRIME_TYPE = _CrimeType::Type;
+
 #pragma endregion
 
 #pragma region Animations

@@ -3,7 +3,6 @@
 #include "decoding.h"
 #include "GameEffects.h"
 #include "GameForms.h"
-#include "GameProcess.h"
 #include "GameRTTI.h"
 #include "GameUI.h"
 
@@ -25,6 +24,7 @@
 #include "Bethesda/BSAudio.hpp"
 #include "Bethesda/BSGameSound.hpp"
 #include "Bethesda/BSAudioManager.hpp"
+#include "Bethesda/ProcessLists.hpp"
 
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
@@ -745,16 +745,19 @@ bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ListNode<BSTempEffect>* iter = ProcessLists::GetSingleton()->tempEffects.Head();
-	MagicShaderHitEffect* effect;
+	auto pIter = ProcessLists::GetSingleton()->kTempEffects.GetHead();
 	NVSEArrayVar* effArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	while (pIter && !pIter->IsEmpty()) {
+		NiPointer<BSTempEffect> spEffect = pIter->GetItem();
+		pIter = pIter->GetNext();
+		if (!spEffect || !IS_TYPE(spEffect.m_pObject, MagicShaderHitEffect))
+			continue;
 
-	do {
-		effect = (MagicShaderHitEffect*)iter->data;
-		if (effect && IS_TYPE(effect, MagicShaderHitEffect) && effect->flags != 1 && effect->target && effect->target->GetFormID() == thisObj->GetFormID()) {
-			g_arrInterface->AppendElement(effArr, NVSEArrayElement(effect->effectShader));
+		MagicShaderHitEffect* pHitEffect = static_cast<MagicShaderHitEffect*>(spEffect.m_pObject);
+		if (pHitEffect->ucFlags != 1 && pHitEffect->pTarget && pHitEffect->pTarget == thisObj) {
+			g_arrInterface->AppendElement(effArr, NVSEArrayElement(pHitEffect->effectShader));
 		}
-	} while (iter = iter->next);
+	}
 
 	g_arrInterface->AssignCommandResult(effArr, result);
 	return true;

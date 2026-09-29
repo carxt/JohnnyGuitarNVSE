@@ -1,7 +1,6 @@
 #include "fn_form.h"
 #include "decoding.h"
 #include "GameForms.h"
-#include "GameProcess.h"
 #include "GameRTTI.h"
 #include "GameTasks.h"
 #include "PluginAPI.h"
@@ -25,6 +24,8 @@
 #include "Bethesda/TESDataHandler.hpp"
 #include "Bethesda/Animation.hpp"
 #include "Bethesda/TES.hpp"
+#include "Bethesda/ProcessLists.hpp"
+#include "Bethesda/HighProcess.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 
@@ -2363,13 +2364,13 @@ namespace RefWalker {
 	uint32_t SPEC_NOINLINE __fastcall IterateMobileObjects(PROCESS_TYPE aeProcessLevel, const FilterData& arFilter) {
 		uint32_t uiCount = 0;
 		TESObjectREFR* pCaller = arFilter.pCaller;
-		ProcessLists* pPL = ProcessLists::GetSingleton();
+		ProcessArray* pProcesses = ProcessLists::GetSingleton()->GetProcessArray();
 
-		const uint32_t uiBegin = pPL->beginOffsets[aeProcessLevel];
-		const uint32_t uiEnd = pPL->endOffsets[aeProcessLevel];
+		const uint32_t uiBegin = pProcesses->GetHead(aeProcessLevel);
+		const uint32_t uiEnd = pProcesses->GetTail(aeProcessLevel);
 
 		for (uint32_t i = uiBegin; i < uiEnd; i++) {
-			MobileObject* pObject = pPL->objects.GetAt(i);
+			MobileObject* pObject = pProcesses->GetItem(i);
 			if (pObject == pCaller)
 				continue;
 

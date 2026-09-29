@@ -1,7 +1,6 @@
 #include "JohnnyPatches.hpp"
 #ifdef GAME
 #include "decoding.h"
-#include "GameProcess.h"
 #include "GameUI.h"
 
 #include "AddItemMessages.hpp"

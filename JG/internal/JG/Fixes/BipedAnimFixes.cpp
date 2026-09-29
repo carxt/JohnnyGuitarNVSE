@@ -1,8 +1,9 @@
 #include "BipedAnimFixes.hpp"
 #include "Bethesda/ItemChange.hpp"
 #include "Bethesda/Actor.hpp"
+#include "Bethesda/BaseProcess.hpp"
+#include "Bethesda/BSXFlags.hpp"
 #include "Gamebryo/NiControllerManager.hpp"
-#include <GameProcess.h>
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
