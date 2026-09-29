@@ -65,6 +65,12 @@ public:
 		void AddAction(TILE_VALUE_ACTION aeActionType, float afValue);
 		void ClearActions();
 
+		const char* GetString() const;
+		void SetString(const char* apString, bool abClearActions);
+
+		float GetFloat() const;
+		void SetFloat(float afValue, bool abClearActions);
+
 		void CalculateValue(bool abForceUpdate);
 	};
 

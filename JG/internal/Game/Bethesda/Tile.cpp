@@ -150,6 +150,24 @@ void Tile::Value::ClearActions() {
 	ThisCall(0xA09200, this);
 }
 
+const char* Tile::Value::GetString() const {
+	return pTextValue;
+}
+
+// GAME - 0xA0A300
+void Tile::Value::SetString(const char* apString, bool abClearActions) {
+	ThisCall(0xA0A300, this, apString, abClearActions);
+}
+
+float Tile::Value::GetFloat() const {
+	return fValue;
+}
+
+// GAME - 0xA0A270
+void Tile::Value::SetFloat(float afValue, bool abClearActions) {
+	ThisCall(0xA0A270, this, afValue, abClearActions);
+}
+
 // GAME - 0xA09410
 void Tile::Value::CalculateValue(bool abForceUpdate) {
 	ThisCall(0xA09410, this, abForceUpdate);

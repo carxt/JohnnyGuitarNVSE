@@ -55,7 +55,7 @@ namespace ExtraMiscStats {
 			recalculateStatFilters = true;
 		}
 		else if (auto listIdxTileVal = tile->GetValue(TILE_TRAIT::LIST_INDEX)) {
-			if (listIdxTileVal && listIdxTileVal->fValue < 0) {
+			if (listIdxTileVal && listIdxTileVal->GetFloat() < 0) {
 				recalculateStatFilters = true;
 			}
 		}
