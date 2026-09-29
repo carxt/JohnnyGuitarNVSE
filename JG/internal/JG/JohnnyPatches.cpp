@@ -279,10 +279,10 @@ namespace JohnnyPatches {
 		NPCAccuracy::Install();
 
 		DialogueResponseOverride::Install();
-#endif
-		NewNiObjects::Install();
 
 		MorePluginTypes::Install();
+#endif
+		NewNiObjects::Install();
 	}
 
 	void PostLoadInit() {

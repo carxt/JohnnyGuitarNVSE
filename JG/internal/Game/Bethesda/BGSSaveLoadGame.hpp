@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TESFile.hpp"
 #include "BGSSaveLoadFormIDMap.hpp"
 #include "BGSChangeFlags.hpp"
 #include "BSSimpleArray.hpp"

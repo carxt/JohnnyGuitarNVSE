@@ -1021,7 +1021,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="internal\JG\BSAUpgrade.cpp" />
-    <ClCompile Include="internal\JG\MorePluginTypes.cpp" />
+    <ClCompile Include="internal\JG\MorePluginTypes.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\JG\NewNiObjects.cpp" />
     <ClCompile Include="internal\JG\Fixes\SkyUpdateFixes.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
@@ -2371,7 +2375,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="internal\JG\MorePluginTypes.hpp" />
+    <ClInclude Include="internal\JG\MorePluginTypes.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\JG\NewNiObjects.hpp" />
     <ClInclude Include="internal\JG\Fixes\SkyUpdateFixes.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
