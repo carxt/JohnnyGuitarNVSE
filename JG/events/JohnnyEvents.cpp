@@ -1,6 +1,5 @@
 #include "JohnnyEvents.hpp"
 #include "EventFramework.h"
-#include "GameProcess.h"
 #include "decoding.h"
 #include "JohnnyMessageData.hpp"
 #include <utility.h>

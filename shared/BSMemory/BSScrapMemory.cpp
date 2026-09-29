@@ -57,7 +57,7 @@ namespace BSScrapMemory {
 	// Functions made to be used by the user
 	// They are also used to replace new and delete operators
 	// -------------------------------------------------------------------------
-	__declspec(allocator) __declspec(restrict) void* malloc(size_t size) {
+	__declspec(allocator) __declspec(restrict) void* __cdecl malloc(size_t size) {
 		ScrapHeap* pHeap = CurrentMemoryManager::GetThreadScrapHeap(pMemoryManager);
 		assert(pHeap);
 		assert(CurrentScrapHeap::HasSpace(pHeap, size));
@@ -65,7 +65,7 @@ namespace BSScrapMemory {
 		return CurrentScrapHeap::Allocate(pHeap, size, 4);
 	}
 
-	__declspec(allocator) __declspec(restrict) void* calloc(size_t num, size_t size) {
+	__declspec(allocator) __declspec(restrict) void* __cdecl calloc(size_t num, size_t size) {
 		const size_t stSize = num * size;
 
 		void* pMemory = malloc(stSize);
@@ -77,7 +77,7 @@ namespace BSScrapMemory {
 		return pMemory;
 	}
 
-	__declspec(allocator) __declspec(restrict) void* aligned_alloc(size_t alignment, size_t size) {
+	__declspec(allocator) __declspec(restrict) void* __cdecl aligned_alloc(size_t alignment, size_t size) {
 		ScrapHeap* pHeap = CurrentMemoryManager::GetThreadScrapHeap(pMemoryManager);
 		assert(pHeap);
 		assert(CurrentScrapHeap::HasSpace(pHeap, size));
@@ -85,7 +85,7 @@ namespace BSScrapMemory {
 		return CurrentScrapHeap::Allocate(pHeap, size, alignment);
 	}
 
-	__declspec(noalias) void free(void* ptr) {
+	__declspec(noalias) void __cdecl free(void* ptr) {
 		if (!ptr) {
 			assert(!ASSERT_EMPTY_FREES);
 			return;
@@ -101,7 +101,7 @@ namespace BSScrapMemory {
 		free(ptr);
 	}
 
-	__declspec(noalias) void aligned_free(void* ptr) {
+	__declspec(noalias) void __cdecl aligned_free(void* ptr) {
 		free(ptr);
 	}
 
@@ -109,7 +109,7 @@ namespace BSScrapMemory {
 		return aligned_free(ptr);
 	}
 
-	__declspec(noalias) size_t msize(void* ptr) {
+	__declspec(noalias) size_t __cdecl msize(void* ptr) {
 		const ScrapHeap* pHeap = CurrentMemoryManager::GetThreadScrapHeap(pMemoryManager);
 		assert(pHeap);
 

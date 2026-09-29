@@ -1,22 +1,16 @@
 #include "RadioSkipOGGWAVPatch.hpp"
-#include "GameForms.h"
-#include "GameSound.h"
+#include "Bethesda/BSAudio.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace RadioSkipOGGWAVPatch {
 	//Fix playback
-	unsigned int BSWin32Audio_GetTimePassed()
-	{
-		auto pBSWin32Audio = BSWin32Audio::GetSingleton();
-		return ThisCall<unsigned int>(0x63D040, pBSWin32Audio);
 
-	}
 	void* hk_QueryRadioSkipUpdate(BSSoundHandle* pSound, unsigned int iOffset, bool bDoRewind)
 	{
 		unsigned int lMsToRewind = 50; //the default value added by the game to skip
 		unsigned int lRewindedOffset = iOffset - lMsToRewind;
-		if (bDoRewind && ((BSWin32Audio_GetTimePassed()) <= iOffset))
+		if (bDoRewind && BSAudio::GetSingleton()->GetSynchTime() <= iOffset)
 		{
 			return NULL;
 		}

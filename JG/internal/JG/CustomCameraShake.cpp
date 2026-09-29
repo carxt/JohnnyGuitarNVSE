@@ -1,15 +1,17 @@
 #include "CustomCameraShake.hpp"
-#include "GameProcess.h"
+#include "Bethesda/Animation.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace CustomCameraShake {
 	float mult = 0, duration = 0;
-	bool __fastcall fn_camAltShakeHook(Actor* a_refr, void* edx, NiMatrix3* outMatrix) {
-		NiMatrix3 shakeMatrix = {};
-		Animation* anData = ThisCall<Animation*>(0x08B70D0, a_refr);
-		if (!anData) return true;
-		float timePassed = anData->flt0D0;
+	bool __fastcall fn_camAltShakeHook(Actor* apActor, void* edx, NiMatrix3* outMatrix) {
+		Animation* pAnimation = ThisCall<Animation*>(0x8B70D0, apActor); // Actor::GetAnimation
+		if (!pAnimation) 
+			return true;
+
+		NiMatrix3 shakeMatrix;
+		float timePassed = pAnimation->GetTimePassed();
 		auto originalShakeMult = *(float*)(0x11DFED4), originalShakeTime = *(float*)(0x11DFED8);
 		*(float*)(0x11DFED4) = mult;
 		*(float*)(0x11DFED8) = duration;

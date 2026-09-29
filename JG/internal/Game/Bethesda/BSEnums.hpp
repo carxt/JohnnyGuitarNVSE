@@ -687,6 +687,19 @@ struct _Procedure {
 };
 using PROCEDURE = _Procedure::Type;
 
+struct _CrimeType {
+	enum Type {
+		NONE		= -1,
+		STEAL		= 0,
+		PICKPOCKET	= 1,
+		TRESPASS	= 2,
+		ATTACK		= 3,
+		MURDER		= 4,
+		COUNT,
+	};
+};
+using CRIME_TYPE = _CrimeType::Type;
+
 #pragma endregion
 
 #pragma region Animations
@@ -760,8 +773,9 @@ struct _AnimGroupWeapon {
 using ANIM_GROUP_WEAPON = _AnimGroupWeapon::Weapon;
 
 struct _AnimGroup {
-	enum Group : uint16_t {
-		NONE = 255,
+	enum Group  {
+		NONE = -1,
+
 		IDLE = 0,
 		DYNAMIC_IDLE,
 		SPECIAL_IDLE,
@@ -977,8 +991,9 @@ struct _AnimGroup {
 		RELOAD_Y,
 		RELOAD_Z,
 
-		_RELOAD_START	= RELOAD_W_START,
-		_RELOAD_END		= RELOAD_Z,
+		_RELOAD_START			= RELOAD_A,
+		_LOOPING_RELOAD_START	= RELOAD_W,
+		_RELOAD_END				= RELOAD_Z,
 
 		JAM_A,
 		JAM_B,
@@ -1040,64 +1055,67 @@ struct _AnimGroup {
 };
 using ANIM_GROUP_TYPE = _AnimGroup::Group;
 
-enum ANIM_GROUP_ACTION {
-	AGA_NONE					= -1,
+struct _AnimGroupAction {
+	enum Action {
+		NONE					= -1,
+		COUNT					= 5,
 
-	AGA_START					= 0,
-	AGA_STOP					= 1,
+		START					= 0,
+		STOP					= 1,
 
-	AGA_LOOP_START				= 0,
-	AGA_LOOP_STOP				= 1,
+		LOOP_START				= 0,
+		LOOP_STOP				= 1,
 
-	AGA_SPECIAL_IDLE_START		= 0,
-	AGA_SPECIAL_IDLE_LOOP_START	= 1,
-	AGA_SPECIAL_IDLE_LOOP_STOP	= 2,
-	AGA_SPECIAL_IDLE_STOP		= 3,
+		SPECIAL_IDLE_START		= 0,
+		SPECIAL_IDLE_LOOP_START	= 1,
+		SPECIAL_IDLE_LOOP_STOP	= 2,
+		SPECIAL_IDLE_STOP		= 3,
 
-	AGA_LOOPING_RELOAD_START	= 0,
-	AGA_LOOPING_RELOAD_LOOP		= 1,
-	AGA_LOOPING_RELOAD_STOP		= 2,
+		LOOPING_RELOAD_START	= 0,
+		LOOPING_RELOAD_LOOP		= 1,
+		LOOPING_RELOAD_STOP		= 2,
 
-	AGA_ATTACK_START			= 0,
-	AGA_ATTACK_HIT				= 1,
-	AGA_ATTACK_EJECT			= 2,
-	AGA_ATTACK_POWER_STOP		= 2,
-	AGA_ATTACK_SWITCH			= 3,
-	AGA_ATTACK_STOP				= 4,
+		ATTACK_START			= 0,
+		ATTACK_HIT				= 1,
+		ATTACK_EJECT			= 2,
+		ATTACK_POWER_STOP		= 2,
+		ATTACK_SWITCH			= 3,
+		ATTACK_STOP				= 4,
 
-	AGA_ATTACK_MINE_START		= 0,
-	AGA_ATTACK_MINE_RELEASE		= 1,
-	AGA_ATTACK_MINE_ATTACH		= 2,
-	AGA_ATTACK_MINE_STOP		= 3,
+		ATTACK_MINE_START		= 0,
+		ATTACK_MINE_RELEASE		= 1,
+		ATTACK_MINE_ATTACH		= 2,
+		ATTACK_MINE_STOP		= 3,
 
-	AGA_ATTACK_SPIN_START		= 0,
-	AGA_ATTACK_SPIN_FIRE		= 1,
-	AGA_ATTACK_SPIN_LOOP		= 2,
-	AGA_ATTACK_SPIN_STOP		= 3,
+		ATTACK_SPIN_START		= 0,
+		ATTACK_SPIN_FIRE		= 1,
+		ATTACK_SPIN_LOOP		= 2,
+		ATTACK_SPIN_STOP		= 3,
 
-	AGA_ATTACK_THROW_START		= 0,
-	AGA_ATTACK_THROW_HOLD		= 1,
-	AGA_ATTACK_THROW_RELEASE	= 2,
-	AGA_ATTACK_THROW_ATTACH		= 3,
-	AGA_ATTACK_THROW_STOP		= 4,
-	ANIM_GROUP_ACTION_COUNT		= 5,
+		ATTACK_THROW_START		= 0,
+		ATTACK_THROW_HOLD		= 1,
+		ATTACK_THROW_RELEASE	= 2,
+		ATTACK_THROW_ATTACH		= 3,
+		ATTACK_THROW_STOP		= 4,
 
-	AGA_BLOCK_START				= 0,
-	AGA_BLOCK_ATTACK			= 1,
-	AGA_BLOCK_STOP				= 2,
+		BLOCK_START				= 0,
+		BLOCK_ATTACK			= 1,
+		BLOCK_STOP				= 2,
 
-	AGA_EQUIP_START				= 0,
-	AGA_EQUIP_ATTACH			= 1,
-	AGA_EQUIP_STOP				= 2,
+		EQUIP_START				= 0,
+		EQUIP_ATTACH			= 1,
+		EQUIP_STOP				= 2,
 
-	AGA_UNEQUIP_START			= 0,
-	AGA_UNEQUIP_DETACH			= 1,
-	AGA_UNEQUIP_STOP			= 2,
+		UNEQUIP_START			= 0,
+		UNEQUIP_DETACH			= 1,
+		UNEQUIP_STOP			= 2,
 
-	AGA_CAST_START				= 0,
-	AGA_CAST_HIT				= 1,
-	AGA_CAST_STOP				= 2,
+		CAST_START				= 0,
+		CAST_HIT				= 1,
+		CAST_STOP				= 2,
+	};
 };
+using ANIM_GROUP_ACTION = _AnimGroupAction::Action;
 
 struct _AnimationGroupActionType {
 	enum Type : uint32_t {
@@ -1196,33 +1214,6 @@ struct _AttackAnimation {
 };
 using ATTACK_ANIMATION = _AttackAnimation::Animation;
 
-enum RELOAD_ANIM {
-	RELOAD_ANIM_A = 0,
-	RELOAD_ANIM_B,
-	RELOAD_ANIM_C,
-	RELOAD_ANIM_D,
-	RELOAD_ANIM_E,
-	RELOAD_ANIM_F,
-	RELOAD_ANIM_G,
-	RELOAD_ANIM_H,
-	RELOAD_ANIM_I,
-	RELOAD_ANIM_J,
-	RELOAD_ANIM_K,
-	RELOAD_ANIM_L,
-	RELOAD_ANIM_M,
-	RELOAD_ANIM_N,
-	RELOAD_ANIM_O,
-	RELOAD_ANIM_P,
-	RELOAD_ANIM_Q,
-	RELOAD_ANIM_R,
-	RELOAD_ANIM_S,
-	RELOAD_ANIM_W,
-	RELOAD_ANIM_X,
-	RELOAD_ANIM_Y,
-	RELOAD_ANIM_Z,
-	RELOAD_ANIM_COUNT,
-};
-
 #pragma endregion
 
 #pragma region Weapons
@@ -1250,15 +1241,19 @@ using WEAPON_TYPE = _WeaponType::Type;
 
 struct _WeaponSound {
 	enum Sound {
-		SHOOT_3D = 0,
-		SHOOT_2D,
-		SHOOT_3D_LOOPING,
-		NO_AMMO,
-		SWING = NO_AMMO,
-		BLOCK,
-		IDLE,
-		EQUIP,
-		UNEQUIP
+		ATTACK					= 0,
+		ATTACK_DISTANT			= 1,
+		ATTACK_2D				= 2,
+		ATTACK_LOOP				= 3,
+		ATTACK_FAIL				= 4,
+		MELEE_BLOCK				= 5,
+		IDLE					= 6,
+		EQUIP					= 7,
+		UNEQUIP					= 8,
+		ATTACK_MODDED			= 9,
+		ATTACK_MODDED_DISTANT	= 10,
+		ATTACK_MODDED_2D		= 11,
+		COUNT,
 	};
 };
 using WEAPON_SOUND = _WeaponSound::Sound;
@@ -1272,6 +1267,16 @@ struct _WeaponRumblePattern {
 	};
 };
 using WEAPON_RUMBLE_PATTERN = _WeaponRumblePattern::Pattern;
+
+struct _WeaponHitBehavior {
+	enum Behavior {
+		NORMAL					= 0,
+		DISMEMBER_ONLY			= 1,
+		EXPLODE_ONLY			= 2,
+		NO_DISMEMBER_OR_EXPLODE	= 3,
+	};
+};
+using WEAPON_HIT_BEHAVIOR = _WeaponHitBehavior::Behavior;
 
 struct _WeaponModEffectType {
 	enum Type : uint32_t {
@@ -1291,6 +1296,7 @@ struct _WeaponModEffectType {
 		VATS_BONUS				= 13,
 		IRON_SITES				= 14,
 		VATS_SPECIAL_ATTACK		= 15,
+		SILENCER				= 16,
 		COUNT,
 	};
 };
@@ -1783,6 +1789,8 @@ struct _RayCastPathResult {
 };
 using RAYCAST_PATH_RESULT = _RayCastPathResult::Result;
 
+#pragma region Archive
+
 struct _ArchiveTypeIndex {
 	enum Index : uint32_t {
 		MESHES		= 0,
@@ -1816,6 +1824,8 @@ struct _ArchiveType {
 	};
 };
 using ARCHIVE_TYPE = _ArchiveType::Type;
+
+#pragma endregion
 
 struct _BodyPartType {
 	enum Type : int32_t {
@@ -2120,3 +2130,172 @@ struct _CellEnvironmentType {
 	};
 };
 using CELL_ENVIRONMENT_TYPE = _CellEnvironmentType::Type;
+
+#pragma region Tiles
+
+struct _TileType {
+	enum Type {
+		NULL_TYPE	= 0x0,
+		FIRST_TYPE	= 0x385,
+		RECT		= 0x385,
+		IMAGE		= 0x386,
+		_3D			= 0x388,
+		MENU		= 0x389,
+		HOTRECT		= 0x38A,
+		WINDOW		= 0x38B,
+		RADIAL		= 0x38C,
+		LAST_TYPE	= 0x38C,
+		TEMPLATE	= 0x3E7,
+	};
+};
+using TILE_TYPE = _TileType::Type;
+
+struct _TileTrait {
+	enum Trait : int32_t {
+		X					= 0xFA1,
+		Y,
+		VISIBLE,
+		CLASS,
+		CLIP_WINDOW			= 0xFA6,
+		STACKING_TYPE,
+		LOCUS,
+		ALPHA,
+		ID,
+		DISABLE_FADE,
+		LIST_INDEX,
+		DEPTH,
+		CLIPS,
+		TARGET,
+		HEIGHT,
+		WIDTH,
+		RED,
+		GREEN,
+		BLUE,
+		TILE,
+		CHILD_COUNT,
+		JUSTIFY,
+		ZOOM,
+		FONT,
+		WRAP_WIDTH,
+		WRAP_LIMIT,
+		WRAP_LINES,
+		PAGE_NUM,
+		IS_HTML,
+		CROP_OFFSET_Y,
+		CROP_Y = CROP_OFFSET_Y,
+		CROP_OFFSET_X,
+		CROP_X = CROP_OFFSET_X,
+		MENU_FADE,
+		EXPLORE_FADE,
+		MOUSEOVER,
+		STRING,
+		SHIFT_CLICKED,
+		CLICKED				= 0xFC7,
+		CLICK_SOUND			= 0xFCB,
+		FILE_NAME,
+		FILE_WIDTH,
+		FILE_HEIGHT,
+		REPEAT_VERTICAL,
+		REPEAT_HORIZONTAL,
+		ANIMATION			= 0xFD2,
+		LINE_COUNT			= 0xDD4,
+		PAGE_COUNT,
+		XDEFAULT,
+		X_UP,
+		X_DOWN,
+		X_LEFT,
+		X_RIGHT,
+		X_BUTTON_A			= 0xFDD,
+		X_BUTTON_B,
+		X_BUTTON_X,
+		X_BUTTON_Y,
+		X_BUTTON_LT,
+		X_BUTTON_RT,
+		X_BUTTON_LB,
+		X_BUTTON_RB,
+		X_BUTTON_START		= 0xFE7,
+		MOUSEOVER_SOUND,
+		DRAGGABLE,
+		DRAG_START_X,
+		DRAG_START_Y,
+		DRAG_OFFSET_X,
+		DRAG_OFFSET_Y,
+		DRAG_DELTA_X,
+		DRAG_DELTA_Y,
+		DRAG_X,
+		DRAG_Y,
+		WHEELABLE,
+		WHEEL_MOVED,
+		SYSTEM_COLOR,
+		BRIGHTNESS,
+		LINEGAP				= 0xFF7,
+		RESOLUTION_CONVERTER,
+		TEX_ATLAS,
+		ROTATE_ANGLE,
+		ROTATE_AXIS_X,
+		ROTATE_AXIS_Y,
+
+		USER0				= 0x1004,
+		USER1,
+		USER2,
+		USER3,
+		USER4,
+		USER5,
+		USER6,
+		USER7,
+		USER8,
+		USER9,
+		USER10,
+		USER11,
+		USER12,
+		USER13,
+		USER14,
+		USER15,
+		USER16,
+
+		LAST_TRAIT			= 0x101D,
+		
+		MENU_LEVEL			= 0x1771,
+		DELETE_ON_FADE		= 0x1772,
+		MENU_THICKNESS		= 0x1773,
+		NO_CLICK_PAST_DONE	= 0x1776,
+		MIXED_MENU_DONE		= 0x1777,
+		DOES_NOT_STACK		= 0x1778,
+		MENU_VISIBLE		= 0x1779,
+	};
+};
+using TILE_TRAIT = _TileTrait::Trait;
+
+struct _TileValueAction {
+	enum Type {
+		COPY = 0x7D0,
+		ADD,
+		SUB,
+		MUL,
+		DIV,
+		MIN,
+		MAX,
+		MOD,
+		FLOOR,
+		CEIL,
+		ABS,
+		ROUND,
+		GT,
+		GTE,
+		EQ,
+		NEQ,
+		LT,
+		LTE,
+		AND,
+		OR,
+		NOT,
+		ONLY_IF,
+		ONLY_IF_NOT,
+		REF,
+		BEGIN,
+		END,
+	};
+};
+using TILE_VALUE_ACTION = _TileValueAction::Type;
+
+#pragma endregion

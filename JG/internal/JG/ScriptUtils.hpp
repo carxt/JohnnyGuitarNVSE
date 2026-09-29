@@ -16,6 +16,14 @@ namespace ScriptUtils {
 		return value > T::NONE && value < T::COUNT;
 	}
 
+	class AutoSaveFormChanges {
+		bool bOrgVal;
+	public:
+		AutoSaveFormChanges(bool abAllow) noexcept;
+		~AutoSaveFormChanges() noexcept;
+	};
+
+
 	SPEC_NOINLINE NiAVObject* __fastcall GetReferenceScene(TESObjectREFR* apRef, bool abFirstPerson);
 
 	void RecurseAndAddObjectsToPalette(NiAVObject* apObject, NiDefaultAVObjectPalette* apPalette);

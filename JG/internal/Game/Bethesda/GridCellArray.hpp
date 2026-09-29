@@ -19,7 +19,7 @@ public:
 	bool							bLandAttached;
 	NiPointer<BSRenderedTexture>	spShadowMask;
 
-	GridCell* GetCell(int32_t aiX, int32_t aiY);
+	GridCell* GetCell(int32_t aiX, int32_t aiY) const;
 };
 
 ASSERT_SIZE(GridCellArray, 0x28);
