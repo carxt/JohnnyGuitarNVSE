@@ -1,25 +1,25 @@
 #include "NamedSpellLights.hpp"
-#include "GameEffects.h"
-#include "GameRTTI.h"
-
+#include "Bethesda/ActiveEffect.hpp"
 #include "Bethesda/MagicSystem.hpp"
+#include "Bethesda/SpellItem.hpp"
+#include "Gamebryo/NiAVObject.hpp"
+
+#include <GameRTTI.h>
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace NamedSpellLights {
 
 	STACK_FRAME_OPT_DISABLE
-		NiPointLight* __fastcall SetLightNameHook(NiPointer<NiPointLight>& arLight) {
+		NiAVObject* __fastcall SetLightNameHook(NiPointer<NiAVObject>& arLight) {
 		uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 		const ActiveEffect* pEffect = *reinterpret_cast<ActiveEffect**>(pEBP - 0x60);
-		const MagicItem* pMagicItem = pEffect->magicItem;
-		if (pMagicItem) {
-			const TESForm* pMagicItemForm = DYNAMIC_CAST(pMagicItem, MagicItem, TESForm);
-			if (pMagicItemForm == MagicSystem::pPipBoyLightSpell) {
-				// For consistenty with Mobile Pipboy Light
-				arLight->SetName("PipboyLight");
-			}
-			else {
+		const MagicItem* pSpell = pEffect->GetSpell();
+		if (pSpell) [[likely]] {
+			const TESForm* pMagicItemForm = DYNAMIC_CAST(pSpell, MagicItem, TESForm);
+			if (pMagicItemForm) [[likely]] {
 				const char* pEDID = pMagicItemForm->GetFormEditorID();
-				if (pEDID && pEDID[0]) {
+				if (pEDID && pEDID[0]) [[likely]] {
 					char cName[MAX_PATH];
 					our_snprintf(cName, sizeof(cName), "%s_PointLight", pEDID);
 					arLight->SetName(cName);
