@@ -1,13 +1,17 @@
 #include "ExtraReputationIcons.hpp"
 #include "Bethesda/FileFinder.hpp"
 #include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/Interface.hpp"
 #include "GameAPI.h"
 #include "GameForms.h"
-#include "array"
-#include "unordered_map"
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
+#include <array>
+#include <unordered_map>
 
 namespace ExtraReputationIcons {
-	using FactionsMap = std::unordered_map<uint32_t, std::array<NiFixedString, 4>>;
+	using FactionsMap = std::unordered_map<FormID, std::array<NiFixedString, 4>>;
 	FactionsMap* pFactionIconsMap = nullptr;
 	SRWLOCK kMapLock = SRWLOCK_INIT;
 
@@ -134,7 +138,7 @@ namespace ExtraReputationIcons {
 	}
 
 	SPEC_NOINLINE void __fastcall Set(TESReputation* apReputation, Tier aeTier, const char* apPath) {
-		const uint32_t uiFormID = apReputation->GetFormID();
+		const FormID uiFormID = apReputation->GetFormID();
 		
 		SRWUniqueLock kLock(kMapLock);
 		if (apPath && apPath[0]) {
@@ -162,7 +166,7 @@ namespace ExtraReputationIcons {
 		SRWSharedLock kLock(kMapLock);
 		auto it = pFactionIconsMap->begin();
 		for (auto const& it : *pFactionIconsMap) {
-			Console_Print("0x%X - %s %s %s %s", it.first, it.second[0], it.second[1], it.second[2], it.second[3]);
+			Interface::PrintLine("0x%X - %s %s %s %s", it.first, it.second[0], it.second[1], it.second[2], it.second[3]);
 		}
 	}
 

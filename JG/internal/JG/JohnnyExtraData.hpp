@@ -8,7 +8,9 @@
 class JohnnyExtraData : public PluginFormExtraData, public BSMemObject {
 public:
 	JohnnyExtraData();
-	virtual ~JohnnyExtraData() override;
+	virtual ~JohnnyExtraData() final;
+	virtual const NiFixedString& GetName() const final;
+	virtual bool OnRemoval(TESForm* apForm, uint32_t aeRemovalReason) final;
 
 	enum EDIDResult : uint8_t {
 		FAILURE			= 0,
@@ -20,27 +22,35 @@ public:
 
 	// Persistent
 	struct FormData {
+#ifdef GAME
 		EDIDList	kEditorIDs;
+#endif
 	};
 
 	// Temporary
 	struct ScriptData {
+#ifdef GAME
 		TESForm*	pExternalEmittanceSource;
+#endif
 	};
 
-	uint32_t	uiFormID;
+	FormID		uiFormID;
 	TESForm*	pOwner;
 	FormData	kFormData;
 	ScriptData	kScriptData;
 
+#ifdef GAME
 	const NiFixedString& GetEditorID() const;
 	EDIDResult __fastcall SetEditorID(const NiFixedString& arEDID);
 	EDIDResult __fastcall RemoveEditorID(const NiFixedString& arEDID);
 
 	TESForm* __fastcall GetExternalEmittanceSource() const;
 	void __fastcall SetExternalEmittanceSource(TESForm* apSource);
+#else
+	const char* GetEditorID() const;
+#endif
 
-	static const NiFixedString& GetName();
+	static const NiFixedString& GetDataName();
 
 	static void __fastcall Initialize(NVSEDataInterface* apNVSEData);
 

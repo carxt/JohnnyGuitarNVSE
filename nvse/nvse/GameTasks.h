@@ -2,43 +2,8 @@
 
 #include "GameTypes.h"
 #include "NiTypes.h"
-#include "Bethesda/QueuedFile.hpp"
-//#include "NiNodes.h"
-
-/*******************************************************
-*
-* BSTask
-*	IOTask
-*		QueuedFile
-*			QueuedFileEntry
-*				QueuedModel
-*					QueuedDistantLOD
-*					QueuedTreeModel
-*				QueuedTexture
-*					QueuedTreeBillboard
-*				QueuedKF
-*					QueuedAnimIdle
-*				DistantLODLoaderTask
-*				TerrainLODQuadLoadTask
-*				SkyTask
-*				LipTask
-*				GrassLoadTask
-*			QueuedReference
-*				QueuedTree
-*				QueuedActor
-*					QueuedCharacter
-*						QueuedPlayer
-*					QueuedCreature
-*			QueuedHead
-*			QueuedHelmet
-*			QueuedMagicItem
-*		AttachDistant3DTask
-*		ExteriorCellLoaderTask
-*
-* NiTArray< NiPointer<QueuedFile> >
-*	QueuedChildren
-*
-*********************************************************/
+#include "Bethesda/QueuedFileEntry.hpp"
+#include "Bethesda/LockFreeMap.hpp"
 
 class TESObjectREFR;
 class TESModel;
@@ -118,18 +83,6 @@ class QueuedPlayer : public QueuedCharacter {
 public:
 	QueuedPlayer();
 	~QueuedPlayer();
-};
-
-// 030
-class QueuedFileEntry : public QueuedFile {
-public:
-	QueuedFileEntry();
-	~QueuedFileEntry();
-
-	virtual bool Unk_0B(void) = 0;
-
-	char* name;		// 028
-	BSAData* bsaData;	// 02C
 };
 
 class Model // NiObject
@@ -236,91 +189,6 @@ public:
 	uint32_t			unk034;				// 034
 };
 
-/*
-// 38
-class QueuedHelmet : public QueuedFile
-{
-public:
-	QueuedHelmet();
-	~QueuedHelmet();
-
-	QueuedCharacter		* queuedCharacter;		// 18
-	QueuedChildren		* queuedChildren;		// 1C
-	void				* unk20;				// 20
-	QueuedModel			* queuedModel;			// 24
-	BSFaceGenModel		* faceGenModel;			// 28
-	NiNode				* niNode;				// 2C
-	Character			* character;			// 30
-	uint32_t				unk34;					// 34
-};
-
-// 30
-class BSTaskManager : public LockFreeMap< NiPointer< BSTask > >
-{
-public:
-	virtual void Unk_0F(uint32_t arg0) = 0;
-	virtual void Unk_10(uint32_t arg0) = 0;
-	virtual void Unk_11(uint32_t arg0) = 0;
-	virtual void Unk_12(void) = 0;
-	virtual void Unk_13(uint32_t arg0) = 0;
-
-	uint32_t				unk1C;			// 1C
-	uint32_t				unk20;			// 20
-	uint32_t				numThreads;		// 24
-	BSTaskManagerThread	** threads;		// 28 array of size numThreads
-	uint32_t				unk2C;			// 2C
-};
-
-// 3C
-class IOManager : public BSTaskManager
-{
-public:
-	virtual void Unk_14(uint32_t arg0) = 0;
-
-	static IOManager* GetSingleton();
-
-	uint32_t									unk30;			// 30
-	LockFreeQueue< NiPointer< IOTask > >	* taskQueue;	// 34
-	uint32_t									unk38;			// 38
-
-	bool IsInQueue(TESObjectREFR *refr);
-	void QueueForDeletion(TESObjectREFR* refr);
-	void DumpQueuedTasks();
-};
-
-extern IOManager** g_ioManager;
-*/
-
-template <typename T_Key, typename T_Data> class LockFreeMap {
-public:
-	virtual void	Unk_00(void);
-	virtual void	Unk_01(void);
-	virtual bool	Lookup(T_Key key, void** result);
-	virtual void	Unk_03(void);
-	virtual void	Unk_04(void);
-	virtual void	Unk_05(void);
-	virtual void	Unk_06(void);
-	virtual void	Unk_07(void);
-	virtual void	Unk_08(void);
-	virtual void	Unk_09(void);
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-	virtual void	Unk_0C(void);
-	virtual void	Unk_0D(void);
-	virtual void	Unk_0E(void);
-	virtual void	Unk_0F(void);
-	virtual void	Unk_10(void);
-	virtual void	Unk_11(void);
-	virtual void	Unk_12(void);
-
-	void* ptr04;			// 04
-	uint32_t		numBuckets;		// 08
-	void* ptr0C;			// 0C
-	uint32_t		unk10;			// 10
-	void* ptr14;			// 14
-	uint32_t		numItems;		// 18
-};
-
 class AnimIdle;
 class Animation;
 class QueuedReplacementKFList;
@@ -352,23 +220,6 @@ public:
 
 	TESModel* GetModelForBoundObject(TESBoundObject* apBoundObject, TESObjectREFR* apRef);
 
-	// GAME - 0x447080
-	// GECK - 0x4C0040
-	NiNode* LoadFile(const char* apPath, uint32_t  aeLODFadeMult = 0, bool abAssignShaders = true, bool abSuppressWarning = false, bool abKeepUV = false, bool abNoUseCountIncrease = false) {
-		return ThisCall<NiNode*>(0x447080, this, apPath, aeLODFadeMult, abAssignShaders, abSuppressWarning, abKeepUV, abNoUseCountIncrease);
-	}
+	NiNode* LoadFile(const char* apPath, uint32_t  aeLODFadeMult = 0, bool abAssignShaders = true, bool abSuppressWarning = false, bool abKeepUV = false, bool abNoUseCountIncrease = false);
 
-};
-
-class NiAVObject;
-
-class TaskQueueInterface {
-public:
-	static TaskQueueInterface* GetSingleton() {
-		return *reinterpret_cast<TaskQueueInterface**>(0x11DF1A8);
-	}
-
-	void QueueBiped3DDetach(NiAVObject* apObject) {
-		ThisCall(0x87ACB0, this, apObject);
-	}
 };

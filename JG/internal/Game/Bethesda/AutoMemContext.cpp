@@ -13,11 +13,11 @@ AutoMemContext::~AutoMemContext() {
 
 // GAME - 0x404F00
 void AutoMemContext::Enter(MEM_CONTEXT aeMemContext, bool abOverridable, const char* apFile, uint32_t auiLine) {
-	eOldMemContext = GetMemContext();
-	SetMemContext(aeMemContext);
+	eOldMemContext = GetAndSetMemContext(aeMemContext);
 }
 
 // GAME - 0x404F70
+// GECK - 0x40C8A0
 void AutoMemContext::Leave() const {
 	SetMemContext(eOldMemContext);
 }
@@ -25,6 +25,10 @@ void AutoMemContext::Leave() const {
 // GAME - 0x404F50
 MEM_CONTEXT GetMemContext() {
 	return static_cast<MEM_CONTEXT>(TLSData::GetMemContext());
+}
+
+MEM_CONTEXT GetAndSetMemContext(MEM_CONTEXT aeMemContext) {
+	return static_cast<MEM_CONTEXT>(TLSData::GetAndSetMemContext(aeMemContext));
 }
 
 // GAME - 0x404F30

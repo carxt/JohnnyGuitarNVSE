@@ -1,14 +1,30 @@
 #include "ScriptUtils.hpp"
-#include "GameObjects.h"
-#include "GameProcess.h"
-#include "netimmerse.h"
+#include "PluginAPI.h"
+#include "CommandTable.h"
+#include "CommandOpcodes.h"
 
-#include "Bethesda/BGSSaveFormBuffer.hpp"
+#include "Bethesda/Animation.hpp"
 #include "Bethesda/BGSLoadGameSubBuffer.hpp"
+#include "Bethesda/BGSSaveFormBuffer.hpp"
+#include "Bethesda/BGSSaveLoadGame.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
+#include "Gamebryo/NiControllerManager.hpp"
 
 #include "shared/Utils/StackObject.hpp"
 
+extern NVSECommandTableInterface* g_cmdTableInterface;
+
 namespace ScriptUtils {
+
+	Cmd_Execute Cmd_Update3D = nullptr;
+
+	AutoSaveFormChanges::AutoSaveFormChanges(bool abAllow) noexcept {
+		bOrgVal = BGSSaveLoadGame::GetSingleton()->SetThreadAllowChanges(abAllow);
+	}
+
+	AutoSaveFormChanges::~AutoSaveFormChanges() noexcept {
+		std::ignore = BGSSaveLoadGame::GetSingleton()->SetThreadAllowChanges(bOrgVal);
+	}
 
 	NiAVObject* __fastcall GetReferenceScene(TESObjectREFR* apRef, bool abFirstPerson) {
 		if (apRef == PlayerCharacter::GetSingleton())
@@ -83,6 +99,39 @@ namespace ScriptUtils {
 				apReference->LoadAnimation(pLoadBuffer);
 			ThisCall(0x81DB60, pLoadBuffer, true); // BGSLoadFormBuffer destructor
 		}
+	}
+
+	void __fastcall UpdateReference3D(TESObjectREFR* apReference) {
+		double dResult;
+		uint32_t uiOffset = 0;
+		Cmd_Update3D(nullptr, nullptr, apReference, nullptr, nullptr, nullptr, &dResult, &uiOffset);
+	}
+
+	TESObject* __fastcall GetTESObject(const TESForm* apForm) {
+		if (!apForm)
+			return nullptr;
+
+		if (apForm->IsReference()) {
+			const TESObjectREFR* refr = static_cast<const TESObjectREFR*>(apForm);
+			TESBoundObject* pObject = refr->GetObjectReference();
+			if (pObject)
+				return pObject;
+		}
+
+		if (apForm->IsObject())
+			return static_cast<TESObject*>(const_cast<TESForm*>(apForm));
+
+		return nullptr;
+	}
+
+}
+
+namespace ScriptUtils {
+
+	void InitData() {
+		const CommandInfo* pUpdate3D = g_cmdTableInterface->GetByOpcode(CommandOpcodes::kUpdate3D);
+		if (pUpdate3D)
+			Cmd_Update3D = pUpdate3D->execute;
 	}
 
 }

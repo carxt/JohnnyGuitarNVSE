@@ -1,9 +1,6 @@
 #include "JohnnyPatches.hpp"
-
+#ifdef GAME
 #include "decoding.h"
-#include "GameObjects.h"
-#include "GameProcess.h"
-#include "GameSound.h"
 #include "GameUI.h"
 
 #include "AddItemMessages.hpp"
@@ -11,7 +8,7 @@
 #include "CameraOverlay.hpp"
 #include "CameraOverride.hpp"
 #include "CustomCameraShake.hpp"
-#include "DeathSoundFix.hpp"
+#include "Fixes\DeathSoundFix.hpp"
 #include "DialogueResponseOverride.hpp"
 #include "DisabledArrowKeys.hpp"
 #include "DisabledLevelUp.hpp"
@@ -25,18 +22,27 @@
 #include "LandRemapping.hpp"
 #include "MediaLocationControllerTweaks.hpp"
 #include "NPCAccuracy.hpp"
-#include "RadioSkipOGGWAVPatch.hpp"
-#include "RSMBarberHook.hpp"
+#include "Fixes\RadioSkipOGGWAVPatch.hpp"
 #include "WorldToScreen.hpp"
-#include "NewNiObjects.hpp"
 #include "FormSkeletons.hpp"
 #include "NamedSpellLights.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
 
 #include <algorithm>
+#include <unordered_set>
+#endif
+#include "BSAUpgrade.hpp"
+#include "NewNiObjects.hpp"
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace JohnnyPatches {
+
+	bool bFixJIP = true;
+	bool bBSAUpgrade = true;
+#ifdef GAME
 	bool bFixFleeing = false;
 	bool bFixItemStacks = false;
 	bool bResetVanityCam = false;
@@ -47,7 +53,6 @@ namespace JohnnyPatches {
 	bool bFixDeathSounds = true;
 	bool bPatchPainedPlayer = false;
 	bool bDisableDeathResponses = false;
-	bool bFixJIP = true;
 	bool bDisableDLLCompatibilityRoutines = false;
 	bool bCombatMusicDisabled = false;
 	bool bMultipleAddItemMessages = false;
@@ -152,6 +157,7 @@ namespace JohnnyPatches {
 	void Update() {
 		ResetVanityWheel();
 	}
+#endif
 
 	void ReadINI() {
 		char filename[MAX_PATH];
@@ -159,6 +165,11 @@ namespace JohnnyPatches {
 		char* lastSlash = strrchr(filename, '\\') + 1;
 		uint32_t length = MAX_PATH - (lastSlash - filename);;
 		strcpy_s(lastSlash, length, "Data\\nvse\\plugins\\JohnnyGuitar.ini");
+		bFixJIP = GetPrivateProfileInt("MAIN", "bJIPFixes", 1, filename);
+		bBSAUpgrade = GetPrivateProfileInt("MAIN", "bBSAUpgrade", 1, filename);
+		if (bBSAUpgrade)
+			BSAUpgrade::ReadINI(filename);
+#ifdef GAME
 		bFixFleeing = GetPrivateProfileInt("MAIN", "bFixFleeing", 1, filename);
 		bFixItemStacks = GetPrivateProfileInt("MAIN", "bFixItemStackCount", 1, filename);
 		bFixNPCShootingAngle = GetPrivateProfileInt("MAIN", "bFixNPCShootingAngle", 1, filename);
@@ -171,13 +182,14 @@ namespace JohnnyPatches {
 		bPatchPainedPlayer = GetPrivateProfileInt("MAIN", "bRemovePlayerPainExpression", 0, filename);
 		bMultipleAddItemMessages = GetPrivateProfileInt("MAIN", "bMultipleAddItemMessages", 0, filename);
 		bUseFormSkeletons = GetPrivateProfileInt("MAIN", "bUseFormSkeletons", 0, filename);
-		bFixJIP = GetPrivateProfileInt("MAIN", "bJIPFixes", 1, filename);
 		bFixOggWavRadioPlayback = GetPrivateProfileInt("MAIN", "bFixOggWavRadioPlayback", 1, filename);
 		DeathSoundFix::iDeathSoundMaxTimer = GetPrivateProfileInt("DeathResponses", "iDeathSoundMAXTimer", 10, filename); //Hidden, don't actually expose it in the INI
 		bDisableDLLCompatibilityRoutines = GetPrivateProfileInt("Misc", "bDisableDLLCompatibilityRoutines", 0, filename); //Hidden
+#endif
 	}
 
 	void Init() {
+#ifdef GAME
 		if (bFixOggWavRadioPlayback)
 			RadioSkipOGGWAVPatch::Install();
 
@@ -248,9 +260,6 @@ namespace JohnnyPatches {
 
 		ExtraMiscStats::Install();
 
-		// Hairstyle handlers
-		RSMBarberHook::Install();
-
 		BarterFilter::Install();
 
 		kSetViewFrustumDetour.ReplaceCall(0x8752F2, SetViewmodelFrustumHook);
@@ -270,31 +279,37 @@ namespace JohnnyPatches {
 		NPCAccuracy::Install();
 
 		DialogueResponseOverride::Install();
-
+#endif
 		NewNiObjects::Install();
 
 		NamedSpellLights::Install();
 	}
 
 	void PostLoadInit() {
+#ifdef GAME
 		if (bUseFormSkeletons)
 			FormSkeletons::Install();
+#endif
+		if (bBSAUpgrade)
+			BSAUpgrade::Install();
 	}
 
 	void DeferredInit() {
+#ifdef GAME
 		fVanityWheelState = GameSettingCollection::fChaseCameraMax->Float();
+#endif
 	}
 
 }
 
+#ifdef GAME
 // exports
-extern "C" {
-	bool __cdecl JGSetViewmodelClipDistance(float value) {
-		JohnnyPatches::fViewmodelNearDistance = value;
-		return true;
-	}
-
-	float __cdecl JGGetViewmodelClipDistance() {
-		return JohnnyPatches::fViewmodelNearDistance;
-	}
+EXTERN_DLL_EXPORT bool __cdecl JGSetViewmodelClipDistance(float value) {
+	JohnnyPatches::fViewmodelNearDistance = value;
+	return true;
 }
+
+EXTERN_DLL_EXPORT float __cdecl JGGetViewmodelClipDistance() {
+	return JohnnyPatches::fViewmodelNearDistance;
+}
+#endif

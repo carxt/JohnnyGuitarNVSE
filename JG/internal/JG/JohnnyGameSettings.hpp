@@ -1,5 +1,6 @@
 #pragma once
-#include <GameSettings.h>
+
+#include <shared/Utils/CustomGameSetting.hpp>
 
 namespace JohnnyGameSettings {
 

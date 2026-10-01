@@ -2,6 +2,8 @@
 #include <JG/ExtraMiscStats.hpp>
 #include <JG/LandRemapping.hpp>
 
+#include "Shared/Utils/DebugLog.hpp"
+
 namespace JohnnySerialization {
 
 	bool (*_WriteRecord)(uint32_t type, uint32_t version, const void* buffer, uint32_t length);

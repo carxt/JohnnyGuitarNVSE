@@ -31,17 +31,23 @@ void NiPoint3::operator=(const NiPoint2& arOther) noexcept {
 }
 
 // GAME - 0x525340
+// GECK - 0x614500
 void NiPoint3::UnitizeVector(NiPoint3& arVector) noexcept {
 #if USE_DXMATH
     DirectX::XMVECTOR kV = DirectX::XMLoadNiPoint3(arVector);
     kV = DirectX::XMVector3Normalize(kV);
 	DirectX::XMStoreNiPoint3(arVector, kV);
 #else
+#ifdef GAME
 	CdeclCall(0x525340, &arVector);
+#else
+	CdeclCall(0x614500, &arVector);
+#endif
 #endif
 }
 
 // GAME - 0xA7E960
+// GECK - 0x82FC90
 void NiPoint3::UnitizeVectors(NiPoint3* apVectors, uint32_t auiCount, uint32_t auiStride) noexcept {
 #if USE_DXMATH
 	for (uint32_t i = 0; i < auiCount; ++i) {
@@ -51,6 +57,10 @@ void NiPoint3::UnitizeVectors(NiPoint3* apVectors, uint32_t auiCount, uint32_t a
         DirectX::XMStoreFloat3(&rVector, kV);
     }
 #else
+#ifdef GAME
 	CdeclCall(0xA7E960, apVectors, auiCount, auiStride);
+#else
+	CdeclCall(0x82FC90, apVectors, auiCount, auiStride);
+#endif
 #endif
 }

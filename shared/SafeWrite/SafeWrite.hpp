@@ -30,7 +30,7 @@ namespace HookUtils {
 	class MemoryUnlock {
 		const uintptr_t _addr;
 		const uintptr_t _size;
-		DWORD _oldProtect;
+		unsigned long	_oldProtect;
 	public:
 		MemoryUnlock(uintptr_t address, uintptr_t size = sizeof(uintptr_t), uint32_t flags = 0x40) noexcept; // flags set to PAGE_EXECUTE_READWRITE
 		~MemoryUnlock() noexcept;
@@ -74,7 +74,6 @@ namespace HookUtils {
 	inline void SafeWriteBuf(uintptr_t address, const char(&data)[N]) noexcept {
 		SafeWriteBuf(address, data, N - 1);
 	}
-
 
 	template <WritableFunction T>
 	inline void __fastcall ReplaceCall(uintptr_t address, T target) noexcept {
@@ -126,36 +125,20 @@ namespace HookUtils {
 	protected:
 		uintptr_t overwritten_addr = 0;
 
-		static DECLSPEC_NOINLINE bool __fastcall ValidateCallAddress(uintptr_t address, const char* caller, bool noError = false) noexcept {
-			if (*reinterpret_cast<uint8_t*>(address) != 0xE8) {
-				if (!noError) {
-					char cTextBuffer[72];
-					sprintf_s(cTextBuffer, "Cannot write detour - address 0x%08X is not a function call.", address);
-					MessageBoxA(nullptr, cTextBuffer, caller, MB_OK | MB_ICONERROR);
-				}
-				return false;
-			}
-			return true;
-		}
+		static __declspec(noinline) void __fastcall ShowError(uintptr_t address, const char* actionName) noexcept;
 
-		static DECLSPEC_NOINLINE bool __fastcall ValidateJumpAddress(uintptr_t address, const char* caller, bool noError = false) noexcept {
-			if (*reinterpret_cast<uint8_t*>(address) != 0xE9) {
-				if (!noError) {
-					char cTextBuffer[72];
-					sprintf_s(cTextBuffer, "Cannot write detour - address 0x%08X is not a jump.", address);
-					MessageBoxA(nullptr, cTextBuffer, caller, MB_OK | MB_ICONERROR);
-				}
-				return false;
-			}
-			return true;
-		}
+		[[nodiscard]] static __declspec(noinline) bool __fastcall ValidateCallAddress(uintptr_t address, bool noError = false) noexcept;
+
+		[[nodiscard]] static __declspec(noinline) bool __fastcall ValidateJumpAddress(uintptr_t address, bool noError = false) noexcept;
+
+		[[nodiscard]] __declspec(noinline) bool __fastcall CanWriteCall(uintptr_t address, bool optional) noexcept;
+
+		[[nodiscard]] __declspec(noinline) bool __fastcall CanWriteJump(uintptr_t address, bool optional) noexcept;
 
 	public:
 		[[nodiscard]] inline uintptr_t GetOverwrittenAddr() const noexcept { return overwritten_addr; }
 
-		operator uintptr_t () const {
-			return GetOverwrittenAddr();
-		}
+		operator uintptr_t() const noexcept { return GetOverwrittenAddr(); }
 
 		template <DetourFunction T>
 		inline void __fastcall SafeWrite32(uintptr_t address, T target) noexcept {
@@ -169,25 +152,13 @@ namespace HookUtils {
 	public:
 		template <DetourFunction T>
 		inline void __fastcall WriteRelCall(uintptr_t address, T target, bool optional = false) noexcept {
-			bool bHook = optional;
-			if (ValidateCallAddress(address, __FUNCTION__, optional)) {
-				overwritten_addr = GetRelJumpAddr(address);
-				bHook = true;
-			}
-
-			if (bHook)
+			if (CanWriteCall(address, optional)) [[likely]]
 				HookUtils::WriteRelCall(address, target);
 		}
 
 		template <DetourFunction T>
 		inline void __fastcall ReplaceCall(uintptr_t address, T target, bool optional = false) noexcept {
-			bool bHook = optional;
-			if (ValidateCallAddress(address, __FUNCTION__, optional)) {
-				overwritten_addr = GetRelJumpAddr(address);
-				bHook = true;
-			}
-
-			if (bHook)
+			if (CanWriteCall(address, optional)) [[likely]]
 				HookUtils::ReplaceCall(address, target);
 		}
 	};
@@ -196,13 +167,7 @@ namespace HookUtils {
 	public:
 		template <DetourFunction T>
 		inline void __fastcall WriteRelJump(uintptr_t address, T target, bool optional = false) noexcept {
-			bool bHook = optional;
-			if (ValidateJumpAddress(address, __FUNCTION__, optional)) {
-				overwritten_addr = GetRelJumpAddr(address);
-				bHook = true;
-			}
-
-			if (bHook)
+			if (CanWriteJump(address, optional)) [[likely]]
 				HookUtils::WriteRelJump(address, target);
 		}
 	};
@@ -222,7 +187,7 @@ namespace HookUtils {
 	public:
 		template <DetourFunction T>
 		inline void __fastcall ReplaceVirtualCall(uintptr_t address, T target, uint32_t overwriteLength) noexcept {
-			if (*reinterpret_cast<uint8_t*>(address) == 0xE8)
+			if (*reinterpret_cast<uint8_t*>(address) == 0xE8) [[unlikely]]
 				overwritten_addr = GetRelJumpAddr(address);
 
 			HookUtils::ReplaceVirtualCall(address, target, overwriteLength);

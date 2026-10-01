@@ -2,7 +2,13 @@
 
 // GAME - 0x6166E0
 const char* TESReputation::GetReputationMainIcon() const {
+#ifdef GAME
     return ThisCall<const char*>(0x6166E0, this);
+#else
+    if (GetTextureNameLength())
+        return GetTextureName();
+    return "";
+#endif
 }
 
 void TESReputation::SetReputationMainIcon(const char* apPath) {
@@ -11,14 +17,29 @@ void TESReputation::SetReputationMainIcon(const char* apPath) {
 
 // GAME - 0x6155C0
 float TESReputation::GetReputationValue(Type aeType) const {
+#ifdef GAME
     return ThisCall<float>(0x6155C0, this, aeType);
+#else
+    if (aeType == Type::POSITIVE)
+        return fPositiveReputation;
+    else
+		return fNegativeReputation;
+#endif
 }
 
 // GAME - 0x615580
 void TESReputation::SetReputationValue(Type aeType, float afValue) {
+#ifdef GAME
     ThisCall(0x615580, this, aeType, afValue);
+#else
+    if (aeType == Type::POSITIVE)
+        fPositiveReputation = afValue;
+    else
+        fNegativeReputation = afValue;
+#endif
 }
 
+#ifdef GAME
 // GAME - 0x615730
 void TESReputation::AddReputationValue(Type aeType, float afValue) {
     ThisCall(0x615730, this, aeType, afValue);
@@ -83,3 +104,4 @@ const char* TESReputation::GetReputationDesc() const {
 const char* TESReputation::GetReputationIcon() const {
     return ThisCall<const char*>(0x6167D0, this);
 }
+#endif

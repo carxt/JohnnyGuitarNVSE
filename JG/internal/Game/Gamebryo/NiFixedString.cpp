@@ -80,6 +80,7 @@ bool NiFixedString::Includes(const char* apToFind) const noexcept {
 	return strstr(m_kHandle, apToFind) != nullptr;
 }
 
+// GAME - 0x9A3830
 bool operator==(const NiFixedString& arString1, const NiFixedString& arString2) noexcept {
 	return arString1.m_kHandle == arString2.m_kHandle;
 }

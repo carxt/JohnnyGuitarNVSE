@@ -3,13 +3,15 @@
 #include <unordered_set>
 
 template <class T>
-struct JGSetList {
+class JGSetList {
+public:
+	JGSetList(bool abIsWhiteList = false) : bIsWhiteList(abIsWhiteList) {};
 
-	bool bIsWhiteList = false;
-	std::unordered_set<T> kSet;
+	std::unordered_set<T>	kSet;
+	bool					bIsWhiteList;
 
 	bool __fastcall Find(const T& obj) const {
-		return bool(kSet.count(obj)) == bIsWhiteList;
+		return kSet.contains(obj) == bIsWhiteList;
 	}
 
 	void __fastcall Add(const T& obj) {

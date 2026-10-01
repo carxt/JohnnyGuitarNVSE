@@ -15,7 +15,7 @@ struct TLSData {
 	class SCRIPT_LOCAL*					pLastVar;					// ScriptLocals
 	uint32_t							uiLastVarSearchID;			// ScriptLocals
 	class ScriptLocals*					pLastVarSearchScriptLocals;	// ScriptLocals
-	class SCRIPT_REFERENCED_OBJECT*		pLastRefObject;				// Script
+	class ScriptReferencedObject*		pLastRefObject;				// Script
 	uint32_t							uiLastRefSearchIndex;		// Script
 	class ScriptLocals*					pLastScriptLocals;			// Script
 	class Script*						pLastRefSearchScript;		// Script
@@ -64,6 +64,7 @@ struct TLSData {
 	static TLSData* Get();
 
 	static uint32_t GetMemContext();
+	static uint32_t GetAndSetMemContext(uint32_t index);
 	static void SetMemContext(uint32_t index);
 
 	static uint32_t GetBatchRendererIndex();

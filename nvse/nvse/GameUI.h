@@ -1,10 +1,10 @@
 #pragma once
 
-#include "GameExtraData.h"
 #include "GameForms.h"
-#include "GameTiles.h"
 #include "GameTypes.h"
-#include "GameSound.h"
+#include "Bethesda/BSSoundHandle.hpp"
+#include "Bethesda/Interface.hpp"
+#include "Bethesda/Tile.hpp"
 
 struct BGSSaveLoadFileEntry;
 struct PerkRank;
@@ -19,92 +19,13 @@ class BSShaderAccumulator;
 class ShadowSceneNode;
 class NiSourceTexture;
 class FORenderedMenu;
+class ItemChange;
+class TileRect;
+class TileText;
+class TileMenu;
+class TileImage;
 
 struct PackedMenu;
-
-
-class Interface {
-public:
-	enum Menus {
-		NoMenu					= 0,
-		MainFour				= 1,
-		OtherRoot				= 2,
-		Console					= 3,
-
-		Message					= 1001,
-		Inventory				= 1002,
-		Stats					= 1003,
-		HUDMainMenu				= 1004,
-		Loading					= 1007,
-		Container				= 1008,
-		Dialog					= 1009,
-		SleepWait				= 1012,
-		Pause					= 1013,
-		LockPick				= 1014,
-		Quantity				= 1016,
-		AudioMenu				= 1017,
-		VideoMenu				= 1018,
-		GamePlayMenu			= 1020,
-		PipboyData				= 1023,
-		BookMenu				= 1026,
-		LevelUp					= 1027,
-		PipboyRepair			= 1035,
-		RaceMenu				= 1036,
-		SurgeryMenu				= 1036,
-		BarberMenu				= 1036,
-		Credits					= 1047,
-		CharGen					= 1048,
-		TextEdit				= 1051,
-		Barter					= 1053,
-		Surgery					= 1054,
-		Hacking					= 1055,
-		VATS					= 1056,
-		Computers				= 1057,
-		VendorRepair			= 1058,
-		Tutorial				= 1059,
-		SPECIALBook				= 1060,
-		ItemModMenu				= 1061,
-		LoveTester				= 1074,
-		CompanionWheel			= 1075,
-		MedicalQuestionnaire	= 1076,
-		Recipe					= 1077,
-		SlotMachine				= 1080,
-		BlackJack				= 1081,
-		Roulette				= 1082,
-		Caravan					= 1083,
-		Traits					= 1084,
-	};
-
-	static constexpr AddressPtr<bool, 0x11D8907> bIsLoadingNewGame;
-
-	static FOPipboyManager* GetPipboy() {
-		return CdeclCall<FOPipboyManager*>(0x705990);
-	}
-
-	static void InitGunScope(TESModel* apModel) {
-		CdeclCall(0x709C20, apModel);
-	}
-
-	static void SetGunScopeVisible(bool abVisible) {
-		CdeclCall(0x709C40, abVisible);
-	}
-
-	static void ClearGunScope() {
-		CdeclCall(0x709CA0);
-	}
-
-	static bool IsLoadingMenuVisible() {
-		return CdeclCall<bool>(0x705E80);
-	}
-
-	static uint32_t GetTopMenuID() {
-		return CdeclCall<uint32_t>(0x7023C0);
-	}
-
-	static NiAVObject* CopyOrDeepCopyNode(NiAVObject* apObject) {
-		return CdeclCall<NiAVObject*>(0x707870, apObject);
-	}
-};
 
 // 584
 class InterfaceManager {
@@ -480,13 +401,13 @@ public:
 
 		auto menu = ThisCall<Menu*>(0xA03C90, this->parentTile);
 		Tile* newTile = ThisCall<Tile*>(0xA1DDB0, menu, this->parentTile, _template, nullptr);
-		if (!newTile->GetValue(kTileValue_id))
+		if (!newTile->GetValue(TILE_TRAIT::ID))
 		{
-			newTile->SetFloat(kTileValue_id, -1);
+			newTile->SetFloat(TILE_TRAIT::ID, -1.f);
 		}
 		if (text)
 		{
-			newTile->SetString(kTileValue_string, text);
+			newTile->SetString(TILE_TRAIT::STRING, text);
 		}
 
 		auto listItem = BSMemory::malloc<ListBoxItem<Item*>>();
@@ -509,21 +430,21 @@ public:
 				ThisCall(0x7269D0, this, newTile);
 				ThisCall(0x71AD30, this);
 			}
-			newTile->SetFloat(kTileValue_listindex, this->itemCount++);
+			newTile->SetUInt(TILE_TRAIT::LIST_INDEX, this->itemCount++);
 		}
 
 		if (this->itemCount == 1)
 		{
-			auto numVisibleItemsTrait = TraitNameToID("_number_of_visible_items");
+			auto numVisibleItemsTrait = Tile::TextToTrait("_number_of_visible_items");
 			if (this->parentTile->GetFloat(numVisibleItemsTrait) > 0)
 			{
-				auto valPtr = ThisCall<Tile::Value*>(0xA00E90, this->parentTile, kTileValue_height);
-				ThisCall(0xA09200, valPtr);
-				ThisCall(0xA09130, valPtr, kTileValue_Copy, newTile, kTileValue_height);
+				auto valPtr = this->parentTile->GetValue(TILE_TRAIT::HEIGHT);
+				valPtr->ClearActions();
+				valPtr->AddAction(TILE_VALUE_ACTION::COPY, newTile, TILE_TRAIT::HEIGHT);
 
-				auto numVisible = this->parentTile->GetFloat(numVisibleItemsTrait);
-				ThisCall(0xA09080, valPtr, kTileValue_Mul, numVisible);
-				ThisCall(0xA09410, valPtr, 0);
+				float numVisible = this->parentTile->GetFloat(numVisibleItemsTrait);
+				valPtr->AddAction(TILE_VALUE_ACTION::MUL, numVisible);
+				valPtr->CalculateValue(false);
 			}
 		}
 
@@ -553,13 +474,13 @@ public:
 
 	void SetParentEnabled(bool isEnabled)
 	{
-		static uint32_t enabledTrait = TraitNameToID("_enabled");
+		static uint32_t enabledTrait = Tile::TextToTrait("_enabled");
 		parentTile->SetFloat(enabledTrait, isEnabled);
 	}
 
 	bool IsEnabled()
 	{
-		static uint32_t enabledTrait = TraitNameToID("_enabled");
+		static uint32_t enabledTrait = Tile::TextToTrait("_enabled");
 		return parentTile && parentTile->GetFloat(enabledTrait);
 	}
 
@@ -657,9 +578,9 @@ public:
 	uint8_t							gap08D[3];
 	BGSNote* currentNote;
 	uint32_t							timeNoteViewed;
-	SoundList						holotapeDialogues;
+	BSSimpleList<BSSoundHandle>			holotapeDialogues;
 	BSSimpleArray<char>				holotapeSubtitles;	// 0A8
-	SoundList*				currentHolotapeDialogueSound;
+	BSSimpleList<BSSoundHandle>*				currentHolotapeDialogueSound;
 	uint8_t							isHolotapeVoicePlaying;
 	uint8_t							pad0BD[3];
 	float							holotapeTotalTime;
@@ -902,6 +823,8 @@ public:
 
 	uint32_t			unk38[6];
 };
+
+class NiControllerSequence;
 
 // 278
 class HUDMainMenu : public Menu			// 1004
@@ -1570,7 +1493,7 @@ public:
 };
 static_assert(sizeof(HackingMenu) == 0x1DC);
 
-struct ActorHitData;
+class HitData;
 struct VATSTargetInfo {
 	uint32_t actionType;
 	uint8_t isSuccess;
@@ -1582,7 +1505,7 @@ struct VATSTargetInfo {
 	uint8_t gap0A[2];
 	TESObjectREFR* ref;
 	uint32_t avCode;
-	ActorHitData* hitData;
+	HitData* hitData;
 	float unk18;
 	float unk1C;
 	float apCost;
@@ -1761,8 +1684,8 @@ public:
 	uint32_t						unk068;			// 068
 	ListBox<TESRecipe>			recipeList;		// 06C
 	ListBox<TESRecipe>* unk09C;		// 09C
-	ListBox<RecipeComponent>	componentList;	// 0A0
-	ListBox<Condition>			conditionList;	// 0D0
+	ListBox<TESRecipeComponent>	componentList;	// 0A0
+	ListBox<TESConditionItem>			conditionList;	// 0D0
 	uint32_t						unk100;			// 100
 };
 

@@ -2,6 +2,9 @@
 
 #pragma region Forms
 
+using FormID	= uint32_t;
+using RefID		= uint32_t;
+
 struct _FormType {
 	enum Type : uint32_t {
 		NONE = 0,
@@ -155,6 +158,7 @@ struct _ExtraDataType {
 		ExtraAction						= 14,
 		ExtraStartingPosition			= 15,
 		ExtraAnim						= 16,
+		ExtraBiped						= 17, // GECK only
 		ExtraUsedMarkers				= 18,
 		ExtraDistantData				= 19,
 		ExtraRagDollData				= 20,
@@ -189,7 +193,7 @@ struct _ExtraDataType {
 		ExtraSeed						= 49,
 		NonActorMagicCaster				= 50,
 		NonActorMagicTarget				= 51,
-		ExtraMasterFileCell				= 52,
+		ExtraMasterFileCell				= 52, // GECK only
 		ExtraPlayerCrimeList			= 53,
 		//								  54,
 		ExtraEnableStateParent			= 55,
@@ -212,8 +216,8 @@ struct _ExtraDataType {
 		ExtraRefractionProperty			= 72,
 		ExtraStartingWorldOrCell		= 73,
 		ExtraHotkey						= 74,
-		ExtraEditorRef3DData			= 75,
-		ExtraEditorRefMoveData			= 76,
+		ExtraEditorRef3DData			= 75, // GECK only
+		ExtraEditorRefMoveData			= 76, // GECK only
 		ExtraInfoGeneralTopic			= 77,
 		ExtraHasNoRumors				= 78,
 		ExtraSound						= 79,
@@ -225,6 +229,7 @@ struct _ExtraDataType {
 		ExtraTalkingActor				= 85,
 		ExtraObjectHealth				= 86,
 		ExtraDecalRefs					= 87,
+		ExtraDecalTargets				= 88, // GECK only
 		ExtraCellImageSpace				= 89,
 		ExtraNavMeshPortal				= 90,
 		ExtraModelSwap					= 91,
@@ -232,6 +237,7 @@ struct _ExtraDataType {
 		ExtraRadiation					= 93,
 		ExtraFactionChanges				= 94,
 		ExtraDismemberedLimbs			= 95,
+		ExtraActorCause					= 96,
 		ExtraMultiBound					= 97,
 		ExtraMultiBoundData				= 98,
 		ExtraMultiBoundRef				= 99,
@@ -241,6 +247,7 @@ struct _ExtraDataType {
 		ExtraEmittanceSource			= 103,
 		ExtraRadioData					= 104,
 		ExtraCombatStyle				= 105,
+		ExtraLinkColorPair				= 106, // GECK only
 		ExtraPrimitive					= 107,
 		ExtraOpenCloseActivateRef		= 108,
 		ExtraAnimNoteReceiver			= 109,
@@ -282,6 +289,28 @@ struct _ExtraDataType {
 		ExtraAudioBuoyMarker			= 145,
 		ExtraSpecialRenderFlags			= 146,
 		COUNT,
+
+		// GECK-specific extra data for windows
+#ifdef EDITOR
+		DialogExtraParam				= 0,
+		DialogExtraLocalCopy			= 1,
+		DialogExtraColorControl			= 2,
+		DialogExtraSubWindow			= 4,
+		DialogExtraCurrCondItem			= 5,
+		DialogExtraWorkingData			= 6,
+		DialogExtraFactionData			= 7,
+		DialogExtraPopupMenu			= 8,
+		DialogExtraRefSelectControl		= 9,
+		DialogExtraReactionData			= 11,
+		DialogExtraPreviewControl		= 12,
+		DialogExtraFreeformFaceControl	= 13,
+		DialogExtraDialogData			= 14,
+		DialogExtraNotifyInfo			= 15,
+		DialogExtraQuestStageData		= 16,
+		DialogExtraTimer				= 17,
+		DialogExtraQuestFilter			= 18,
+		DialogExtraRects				= 19,
+#endif
 	};
 };
 using EXTRA_DATA_TYPE = _ExtraDataType::Type;
@@ -303,6 +332,7 @@ struct _ProcessType {
 	};
 };
 using PROCESS_TYPE = _ProcessType::Type;
+using PROCESS_LEVEL = _ProcessType::Type;
 
 struct _Confidence {
 	enum Type : uint8_t {
@@ -332,6 +362,96 @@ struct _SitSleepState {
 	};
 };
 using SIT_SLEEP_STATE = _SitSleepState::State;
+
+struct _LifeState {
+	enum State {
+		ALIVE			= 0,
+		DYING			= 1,
+		DEAD			= 2,
+		UNCONSCIOUS		= 3,
+		REANIMATE		= 4,
+		RESTRAINED		= 5,
+		ESSENTIAL_DOWN	= 6,
+	};
+};
+using ACTOR_LIFE_STATE = _LifeState::State;
+
+struct _CriticalStage {
+	enum Stage {
+		NONE				= 0,
+		GOO_START			= 1,
+		GOO_END				= 2,
+		DISINTEGRATE_START	= 3,
+		DISINTEGRATE_END	= 4,
+		COUNT				= 5,
+	};
+};
+using ACTOR_CRITICAL_STAGE = _CriticalStage::Stage;
+
+struct _FightReaction {
+	enum Type : uint32_t {
+		NEUTRAL	= 0,
+		ENEMY	= 1,
+		ALLY	= 2,
+		FRIEND	= 3,
+		COUNT,
+	};
+};
+using FIGHT_REACTION = _FightReaction::Type;
+
+struct _SkillSpecialization {
+	enum Type {
+		NONE	= -1,
+		COMBAT	= 0,
+		MAGIC	= 1,
+		STEALTH	= 2,
+		COUNT
+	};
+};
+using SKILL_SPECIALIZATION = _SkillSpecialization::Type;
+
+struct ALIGN4 _ServiceFlags {
+	enum Flags : uint32_t {
+		WEAPONS		= 1u << 0,
+		ARMOR		= 1u << 1,
+		ALCOHOL		= 1u << 2,
+		BOOKS		= 1u << 3,
+		FOOD		= 1u << 4,
+		CHEMS		= 1u << 5,
+		STIMPAKS	= 1u << 6,
+		LIGHTS		= 1u << 7,
+		APPARATUS	= 1u << 8,
+
+		MISC		= 1u << 10,
+		SPELLS		= 1u << 11,
+		MAGIC_ITEMS	= 1u << 12,
+		POTIONS		= 1u << 13,
+		TRAINING	= 1u << 14,
+
+		RECHARGE	= 1u << 16,
+		REPAIR		= 1u << 17,
+	};
+
+	bool bWeapons		: 1;
+	bool bArmor			: 1;
+	bool bAlcohol		: 1;
+	bool bBooks			: 1;
+	bool bFood			: 1;
+	bool bChems			: 1;
+	bool bStimpaks		: 1;
+	bool bLights		: 1;
+	bool bApparatus		: 1;
+	bool 				: 1;
+	bool bMisc			: 1;
+	bool bSpells		: 1;
+	bool bMagicItems	: 1;
+	bool bPotions		: 1;
+	bool bTraining		: 1;
+	bool 				: 1;
+	bool bRecharge		: 1;
+	bool bRepair		: 1;
+};
+using SERVICE_FLAGS = _ServiceFlags::Flags;
 
 #pragma endregion
 
@@ -567,6 +687,19 @@ struct _Procedure {
 };
 using PROCEDURE = _Procedure::Type;
 
+struct _CrimeType {
+	enum Type {
+		NONE		= -1,
+		STEAL		= 0,
+		PICKPOCKET	= 1,
+		TRESPASS	= 2,
+		ATTACK		= 3,
+		MURDER		= 4,
+		COUNT,
+	};
+};
+using CRIME_TYPE = _CrimeType::Type;
+
 #pragma endregion
 
 #pragma region Animations
@@ -640,8 +773,9 @@ struct _AnimGroupWeapon {
 using ANIM_GROUP_WEAPON = _AnimGroupWeapon::Weapon;
 
 struct _AnimGroup {
-	enum Group : uint16_t {
-		NONE = 255,
+	enum Group  {
+		NONE = -1,
+
 		IDLE = 0,
 		DYNAMIC_IDLE,
 		SPECIAL_IDLE,
@@ -857,8 +991,9 @@ struct _AnimGroup {
 		RELOAD_Y,
 		RELOAD_Z,
 
-		_RELOAD_START	= RELOAD_W_START,
-		_RELOAD_END		= RELOAD_Z,
+		_RELOAD_START			= RELOAD_A,
+		_LOOPING_RELOAD_START	= RELOAD_W,
+		_RELOAD_END				= RELOAD_Z,
 
 		JAM_A,
 		JAM_B,
@@ -918,66 +1053,69 @@ struct _AnimGroup {
 		COUNT,
 	};
 };
-using ANIM_GROUP = _AnimGroup::Group;
+using ANIM_GROUP_TYPE = _AnimGroup::Group;
 
-enum ANIM_GROUP_ACTION {
-	AGA_NONE					= -1,
+struct _AnimGroupAction {
+	enum Action {
+		NONE					= -1,
+		COUNT					= 5,
 
-	AGA_START					= 0,
-	AGA_STOP					= 1,
+		START					= 0,
+		STOP					= 1,
 
-	AGA_LOOP_START				= 0,
-	AGA_LOOP_STOP				= 1,
+		LOOP_START				= 0,
+		LOOP_STOP				= 1,
 
-	AGA_SPECIAL_IDLE_START		= 0,
-	AGA_SPECIAL_IDLE_LOOP_START	= 1,
-	AGA_SPECIAL_IDLE_LOOP_STOP	= 2,
-	AGA_SPECIAL_IDLE_STOP		= 3,
+		SPECIAL_IDLE_START		= 0,
+		SPECIAL_IDLE_LOOP_START	= 1,
+		SPECIAL_IDLE_LOOP_STOP	= 2,
+		SPECIAL_IDLE_STOP		= 3,
 
-	AGA_LOOPING_RELOAD_START	= 0,
-	AGA_LOOPING_RELOAD_LOOP		= 1,
-	AGA_LOOPING_RELOAD_STOP		= 2,
+		LOOPING_RELOAD_START	= 0,
+		LOOPING_RELOAD_LOOP		= 1,
+		LOOPING_RELOAD_STOP		= 2,
 
-	AGA_ATTACK_START			= 0,
-	AGA_ATTACK_HIT				= 1,
-	AGA_ATTACK_EJECT			= 2,
-	AGA_ATTACK_POWER_STOP		= 2,
-	AGA_ATTACK_SWITCH			= 3,
-	AGA_ATTACK_STOP				= 4,
+		ATTACK_START			= 0,
+		ATTACK_HIT				= 1,
+		ATTACK_EJECT			= 2,
+		ATTACK_POWER_STOP		= 2,
+		ATTACK_SWITCH			= 3,
+		ATTACK_STOP				= 4,
 
-	AGA_ATTACK_MINE_START		= 0,
-	AGA_ATTACK_MINE_RELEASE		= 1,
-	AGA_ATTACK_MINE_ATTACH		= 2,
-	AGA_ATTACK_MINE_STOP		= 3,
+		ATTACK_MINE_START		= 0,
+		ATTACK_MINE_RELEASE		= 1,
+		ATTACK_MINE_ATTACH		= 2,
+		ATTACK_MINE_STOP		= 3,
 
-	AGA_ATTACK_SPIN_START		= 0,
-	AGA_ATTACK_SPIN_FIRE		= 1,
-	AGA_ATTACK_SPIN_LOOP		= 2,
-	AGA_ATTACK_SPIN_STOP		= 3,
+		ATTACK_SPIN_START		= 0,
+		ATTACK_SPIN_FIRE		= 1,
+		ATTACK_SPIN_LOOP		= 2,
+		ATTACK_SPIN_STOP		= 3,
 
-	AGA_ATTACK_THROW_START		= 0,
-	AGA_ATTACK_THROW_HOLD		= 1,
-	AGA_ATTACK_THROW_RELEASE	= 2,
-	AGA_ATTACK_THROW_ATTACH		= 3,
-	AGA_ATTACK_THROW_STOP		= 4,
-	ANIM_GROUP_ACTION_COUNT		= 5,
+		ATTACK_THROW_START		= 0,
+		ATTACK_THROW_HOLD		= 1,
+		ATTACK_THROW_RELEASE	= 2,
+		ATTACK_THROW_ATTACH		= 3,
+		ATTACK_THROW_STOP		= 4,
 
-	AGA_BLOCK_START				= 0,
-	AGA_BLOCK_ATTACK			= 1,
-	AGA_BLOCK_STOP				= 2,
+		BLOCK_START				= 0,
+		BLOCK_ATTACK			= 1,
+		BLOCK_STOP				= 2,
 
-	AGA_EQUIP_START				= 0,
-	AGA_EQUIP_ATTACH			= 1,
-	AGA_EQUIP_STOP				= 2,
+		EQUIP_START				= 0,
+		EQUIP_ATTACH			= 1,
+		EQUIP_STOP				= 2,
 
-	AGA_UNEQUIP_START			= 0,
-	AGA_UNEQUIP_DETACH			= 1,
-	AGA_UNEQUIP_STOP			= 2,
+		UNEQUIP_START			= 0,
+		UNEQUIP_DETACH			= 1,
+		UNEQUIP_STOP			= 2,
 
-	AGA_CAST_START				= 0,
-	AGA_CAST_HIT				= 1,
-	AGA_CAST_STOP				= 2,
+		CAST_START				= 0,
+		CAST_HIT				= 1,
+		CAST_STOP				= 2,
+	};
 };
+using ANIM_GROUP_ACTION = _AnimGroupAction::Action;
 
 struct _AnimationGroupActionType {
 	enum Type : uint32_t {
@@ -1046,114 +1184,123 @@ struct _AnimationIdlePlayType {
 };
 using ANIM_IDLE_PLAY_TYPE = _AnimationIdlePlayType::Type;
 
+struct _AttackAnimation {
+	enum Animation {
+		DEFAULT				= 255,
+		ATTACK_3			= 38,
+		ATTACK_4			= 44,
+		ATTACK_5			= 50,
+		ATTACK_6			= 56,
+		ATTACK_7			= 62,
+		ATTACK_8			= 68,
+		ATTACK_9			= 144,
+		ATTACK_LEFT			= 26,
+		ATTACK_LOOP			= 74,
+		ATTACK_RIGHT		= 32,
+		ATTACK_SPIN			= 80,
+		ATTACK_SPIN_2		= 86,
+		ATTACK_THROW		= 114,
+		ATTACK_THROW_2		= 120,
+		ATTACK_THROW_3		= 126,
+		ATTACK_THROW_4		= 132,
+		ATTACK_THROW_5		= 138,
+		ATTACK_THROW_6		= 150,
+		ATTACK_THROW_7		= 156,
+		ATTACK_THROW_8		= 162,
+		PLACE_MINE			= 102,
+		PLACE_MINE_2		= 108,
+		COUNT				= 23,
+	};
+};
+using ATTACK_ANIMATION = _AttackAnimation::Animation;
+
 #pragma endregion
 
 #pragma region Weapons
 
-enum WEAPON_TYPE {
-	WEAPON_TYPE_HAND_TO_HAND_MELEE		= 0,
-	WEAPON_TYPE_ONE_HAND_MELEE			= 1,
-	WEAPON_TYPE_TWO_HAND_MELEE			= 2,
-	WEAPON_TYPE_ONE_HAND_PISTOL			= 3,
-	WEAPON_TYPE_ONE_HAND_PISTOL_ENERGY	= 4,
-	WEAPON_TYPE_TWO_HAND_RIFLE			= 5,
-	WEAPON_TYPE_TWO_HAND_AUTOMATIC		= 6,
-	WEAPON_TYPE_TWO_HAND_RIFLE_ENERGY	= 7,
-	WEAPON_TYPE_TWO_HAND_HANDLE			= 8,
-	WEAPON_TYPE_TWO_HAND_LAUNCHER		= 9,
-	WEAPON_TYPE_ONE_HAND_GRENADE		= 10,
-	WEAPON_TYPE_ONE_HAND_MINE			= 11,
-	WEAPON_TYPE_ONE_HAND_LUNCHBOX_MINE	= 12,
-	WEAPON_TYPE_ONE_HAND_THROWN			= 13,
-	WEAPON_TYPE_COUNT,
+struct _WeaponType {
+	enum Type {
+		HAND_TO_HAND_MELEE		= 0,
+		ONE_HAND_MELEE			= 1,
+		TWO_HAND_MELEE			= 2,
+		ONE_HAND_PISTOL			= 3,
+		ONE_HAND_PISTOL_ENERGY	= 4,
+		TWO_HAND_RIFLE			= 5,
+		TWO_HAND_AUTOMATIC		= 6,
+		TWO_HAND_RIFLE_ENERGY	= 7,
+		TWO_HAND_HANDLE			= 8,
+		TWO_HAND_LAUNCHER		= 9,
+		ONE_HAND_GRENADE		= 10,
+		ONE_HAND_MINE			= 11,
+		ONE_HAND_LUNCHBOX_MINE	= 12,
+		ONE_HAND_THROWN			= 13,
+		COUNT,
+	};
 };
+using WEAPON_TYPE = _WeaponType::Type;
 
-enum COMBAT_WEAPON_TYPE {
-	COMBAT_WEAPON_TYPE_RANGED_EXPLOSIVE = 0,
-	COMBAT_WEAPON_TYPE_RANGED			= 1,
-	COMBAT_WEAPON_TYPE_MELEE			= 2,
-	COMBAT_WEAPON_TYPE_GRENADE			= 3,
-	COMBAT_WEAPON_TYPE_MINE				= 4,
-	COMBAT_WEAPON_TYPE_THROWN			= 5,
-	COMBAT_WEAPON_TYPE_NONE				= 6,
-	COMBAT_WEAPON_TYPE_INVALID			= 7,
-
-	COMBAT_WEAPON_TYPE_COUNT = COMBAT_WEAPON_TYPE_NONE,
+struct _WeaponSound {
+	enum Sound {
+		ATTACK					= 0,
+		ATTACK_DISTANT			= 1,
+		ATTACK_2D				= 2,
+		ATTACK_LOOP				= 3,
+		ATTACK_FAIL				= 4,
+		MELEE_BLOCK				= 5,
+		IDLE					= 6,
+		EQUIP					= 7,
+		UNEQUIP					= 8,
+		ATTACK_MODDED			= 9,
+		ATTACK_MODDED_DISTANT	= 10,
+		ATTACK_MODDED_2D		= 11,
+		COUNT,
+	};
 };
+using WEAPON_SOUND = _WeaponSound::Sound;
 
-enum WEAPON_SOUND {
-	WEAPON_SOUND_SHOOT_3D = 0,
-	WEAPON_SOUND_SHOOT_2D,
-	WEAPON_SOUND_SHOOT_3D_LOOPING,
-	WEAPON_SOUND_NO_AMMO,
-	WEAPON_SOUND_SWING = WEAPON_SOUND_NO_AMMO,
-	WEAPON_SOUND_BLOCK,
-	WEAPON_SOUND_IDLE,
-	WEAPON_SOUND_EQUIP,
-	WEAPON_SOUND_UNEQUIP
+struct _WeaponRumblePattern {
+	enum Pattern {
+		CONSTANT = 0,
+		SQUARE,
+		TRIANGLE,
+		SAWTOOTH
+	};
 };
+using WEAPON_RUMBLE_PATTERN = _WeaponRumblePattern::Pattern;
 
-enum ATTACK_ANIMATION {
-	ATTACK_ANIMATION_DEFAULT		= 255,
-	ATTACK_ANIMATION_ATTACK_3		= 38,
-	ATTACK_ANIMATION_ATTACK_4		= 44,
-	ATTACK_ANIMATION_ATTACK_5		= 50,
-	ATTACK_ANIMATION_ATTACK_6		= 56,
-	ATTACK_ANIMATION_ATTACK_7		= 62,
-	ATTACK_ANIMATION_ATTACK_8		= 68,
-	ATTACK_ANIMATION_ATTACK_9		= 144,
-	ATTACK_ANIMATION_ATTACK_LEFT	= 26,
-	ATTACK_ANIMATION_ATTACK_LOOP	= 74,
-	ATTACK_ANIMATION_ATTACK_RIGHT	= 32,
-	ATTACK_ANIMATION_ATTACK_SPIN	= 80,
-	ATTACK_ANIMATION_ATTACK_SPIN_2	= 86,
-	ATTACK_ANIMATION_ATTACK_THROW	= 114,
-	ATTACK_ANIMATION_ATTACK_THROW_2 = 120,
-	ATTACK_ANIMATION_ATTACK_THROW_3 = 126,
-	ATTACK_ANIMATION_ATTACK_THROW_4 = 132,
-	ATTACK_ANIMATION_ATTACK_THROW_5 = 138,
-	ATTACK_ANIMATION_ATTACK_THROW_6 = 150,
-	ATTACK_ANIMATION_ATTACK_THROW_7 = 156,
-	ATTACK_ANIMATION_ATTACK_THROW_8 = 162,
-	ATTACK_ANIMATION_PLACE_MINE		= 102,
-	ATTACK_ANIMATION_PLACE_MINE_2	= 108,
-	ATTACK_ANIMATION_COUNT			= 23,
+struct _WeaponHitBehavior {
+	enum Behavior {
+		NORMAL					= 0,
+		DISMEMBER_ONLY			= 1,
+		EXPLODE_ONLY			= 2,
+		NO_DISMEMBER_OR_EXPLODE	= 3,
+	};
 };
+using WEAPON_HIT_BEHAVIOR = _WeaponHitBehavior::Behavior;
 
-enum RELOAD_ANIM {
-	RELOAD_ANIM_A = 0,
-	RELOAD_ANIM_B,
-	RELOAD_ANIM_C,
-	RELOAD_ANIM_D,
-	RELOAD_ANIM_E,
-	RELOAD_ANIM_F,
-	RELOAD_ANIM_G,
-	RELOAD_ANIM_H,
-	RELOAD_ANIM_I,
-	RELOAD_ANIM_J,
-	RELOAD_ANIM_K,
-	RELOAD_ANIM_L,
-	RELOAD_ANIM_M,
-	RELOAD_ANIM_N,
-	RELOAD_ANIM_O,
-	RELOAD_ANIM_P,
-	RELOAD_ANIM_Q,
-	RELOAD_ANIM_R,
-	RELOAD_ANIM_S,
-	RELOAD_ANIM_W,
-	RELOAD_ANIM_X,
-	RELOAD_ANIM_Y,
-	RELOAD_ANIM_Z,
-	RELOAD_ANIM_COUNT,
+struct _WeaponModEffectType {
+	enum Type : uint32_t {
+		NONE					= 0,
+		INCREASE_WEAPON_DAMAGE	= 1,
+		INCREASE_CLIP_SIZE		= 2,
+		DECREASE_SPREAD			= 3,
+		DECREASE_WEIGHT			= 4,
+		AMMO_REGEN_SHOT			= 5,
+		AMMO_REGEN_SECONDS		= 6,
+		EQUIP_SPEED				= 7,
+		FIRE_SPEED				= 8,
+		PROJECTILE_SPEED		= 9,
+		MAX_HEALTH				= 10,
+		SILENCE					= 11,
+		SPLIT_BEAM				= 12,
+		VATS_BONUS				= 13,
+		IRON_SITES				= 14,
+		VATS_SPECIAL_ATTACK		= 15,
+		SILENCER				= 16,
+		COUNT,
+	};
 };
-static_assert(RELOAD_ANIM_COUNT == 23);
-
-enum WEAPON_RUMBLE_PATTERN {
-	WEAPON_RUMBLE_PATTERN_CONSTANT = 0,
-	WEAPON_RUMBLE_PATTERN_SQUARE,
-	WEAPON_RUMBLE_PATTERN_TRIANGLE,
-	WEAPON_RUMBLE_PATTERN_SAWTOOTH
-};
+using WEAPON_MOD_EFFECT_TYPE = _WeaponModEffectType::Type;
 
 #pragma endregion
 
@@ -1279,14 +1426,16 @@ enum COMBAT_EXECUTION_FLAGS : uint32_t {
 	COMBAT_EXECUTION_FLAG_CAN_MELEE_TARGET	= 18,
 	COMBAT_EXECUTION_FLAG_START				= COMBAT_EXECUTION_FLAG_GROUP_SEARCHING,
 	COMBAT_EXECUTION_FLAG_COUNT				= 19,
-
 };
 
-enum COMBAT_ITEM_TYPE {
-	COMBAT_ITEM_TYPE_RESTORE	= 0,
-	COMBAT_ITEM_TYPE_BUFF		= 1,
-	COMBAT_ITEM_TYPE_COUNT,
+struct _CombatItemType {
+	enum Type {
+		RESTORE,
+		BUFF,
+		COUNT,
+	};
 };
+using COMBAT_ITEM_TYPE = _CombatItemType::Type;
 
 struct _LocationTargetType {
 	enum Type : uint8_t {
@@ -1361,6 +1510,22 @@ struct _CombatGroupStrategy {
 };
 using COMBAT_GROUP_STRATEGY = _CombatGroupStrategy::Type;
 
+struct _CombatWeaponType {
+	enum Type {
+		RANGED_EXPLOSIVE	= 0,
+		RANGED				= 1,
+		MELEE				= 2,
+		GRENADE				= 3,
+		MINE				= 4,
+		THROWN				= 5,
+		NONE				= 6,
+		INVALID				= 7,
+
+		COUNT = NONE,
+	};
+};
+using COMBAT_WEAPON_TYPE = _CombatWeaponType::Type;
+
 #pragma endregion
 
 #pragma region Sex
@@ -1378,6 +1543,8 @@ using SEX = _Sex::Sex;
 
 #pragma endregion
 
+#pragma region Dialogue
+
 struct _DialogueType {
 	enum Type {
 		TOPIC			= 0,
@@ -1392,6 +1559,53 @@ struct _DialogueType {
 	};
 };
 using DIALOGUE_TYPE = _DialogueType::Type;
+
+struct _DialogueSpeaker {
+	enum Type : uint32_t {
+		TARGET	= 0,
+		SELF	= 1,
+		EITHER	= 2,
+		COUNT,
+	};
+};
+using DIALOGUE_SPEAKER = _DialogueSpeaker::Type;
+
+struct _DialogueEmotion {
+	enum Emotion {
+		NEUTRAL		= 0,
+		ANGER		= 1,
+		DISGUST		= 2,
+		FEAR		= 3,
+		SAD			= 4,
+		HAPPY		= 5,
+		SURPRISE	= 6,
+		PAINED		= 7,
+		COUNT
+	};
+};
+using DIALOGUE_EMOTION = _DialogueEmotion::Emotion;
+
+struct _DialogueScriptType {
+	enum Type : uint32_t {
+		BEGIN = 0,
+		END = 1,
+		COUNT,
+	};
+};
+using DIALOGUE_SCRIPT_TYPE = _DialogueScriptType::Type;
+
+struct _DialogueDummyState {
+	enum State : uint32_t {
+		NONE		= 0,
+		DUMMY		= 1,
+		EITHER		= 2,
+		NON_DUMMY	= 3,
+		COUNT
+	};
+};
+using DIALOGUE_DUMMY_STATE = _DialogueDummyState::State;
+
+#pragma endregion
 
 struct _FactionRelation {
 	enum Type : uint32_t {
@@ -1413,51 +1627,74 @@ struct _ActorSegmentInView {
 };
 using ACTOR_SEGMENT_IN_VIEW = _ActorSegmentInView::Type;
 
-enum HavokMaterialType {
-	BHK_MATERIAL_STONE				= 0,
-	BHK_MATERIAL_CLOTH				= 1,
-	BHK_MATERIAL_DIRT				= 2,
-	BHK_MATERIAL_GLASS				= 3,
-	BHK_MATERIAL_GRASS				= 4,
-	BHK_MATERIAL_METAL				= 5,
-	BHK_MATERIAL_ORGANIC			= 6,
-	BHK_MATERIAL_SKIN				= 7,
-	BHK_MATERIAL_WATER				= 8,
-	BHK_MATERIAL_WOOD				= 9,
-	BHK_MATERIAL_HEAVYSTONE			= 10,
-	BHK_MATERIAL_HEAVYMETAL			= 11,
-	BHK_MATERIAL_HEAVYWOOD			= 12,
-	BHK_MATERIAL_CHAIN				= 13,
-	BHK_MATERIAL_SNOW				= 14,
-	BHK_MATERIAL_ELEVATOR			= 15,
-	BHK_MATERIAL_HOLLOWMETAL		= 16,
-	BHK_MATERIAL_SHEETMETAL			= 17,
-	BHK_MATERIAL_SAND				= 18,
-	BHK_MATERIAL_BROKENCONCRETE		= 19,
-	BHK_MATERIAL_VEHICLEBODY		= 20,
-	BHK_MATERIAL_VEHICLEPARTSOLID	= 21,
-	BHK_MATERIAL_VEHICLEPARTHOLLOW	= 22,
-	BHK_MATERIAL_BARREL				= 23,
-	BHK_MATERIAL_BOTTLE				= 24,
-	BHK_MATERIAL_SODACAN			= 25,
-	BHK_MATERIAL_PISTOL				= 26,
-	BHK_MATERIAL_RIFLE				= 27,
-	BHK_MATERIAL_SHOPPINGCART		= 28,
-	BHK_MATERIAL_LUNCHBOX			= 29,
-	BHK_MATERIAL_BABYRATTLE			= 30,
-	BHK_MATERIAL_RUBBERBALL			= 31,
-	BHK_MATERIAL_CHAINLINK			= 32,
-	BHK_MATERIAL_TILE				= 33,
-	BHK_MATERIAL_CARPET				= 34,
-	BHK_MATERIAL_TUMBLEWEED			= 35,
-	BHK_MATERIAL_MAX,
-
-	BHK_MATERIAL_FLAG_PLATFORM		= 0x20, // FO3 only
-	BHK_MATERIAL_FLAG_STAIRS		= 0x40,
-
-	BHK_MATERIAL_MASK				= 0x1F,
-	BHK_MATERIAL_MASK_FIXED			= 0x3F,
+struct _HavokMaterialType {
+	enum Type : uint32_t {
+		NONE				= UINT32_MAX,
+		STONE				= 0,
+		CLOTH				= 1,
+		DIRT				= 2,
+		GLASS				= 3,
+		GRASS				= 4,
+		METAL				= 5,
+		ORGANIC				= 6,
+		SKIN				= 7,
+		WATER				= 8,
+		WOOD				= 9,
+		HEAVY_STONE			= 10,
+		HEAVY_METAL			= 11,
+		HEAVY_WOOD			= 12,
+		CHAIN				= 13,
+		SNOW				= 14,
+		ELEVATOR			= 15,
+		HOLLOW_METAL		= 16,
+		SHEET_METAL			= 17,
+		SAND				= 18,
+		BROKEN_CONCRETE		= 19,
+		VEHICLE_BODY		= 20,
+		VEHICLE_PART_SOLID	= 21,
+		VEHICLE_PART_HOLLOW	= 22,
+		BARREL				= 23,
+		BOTTLE				= 24,
+		SODACAN				= 25,
+		PISTOL				= 26,
+		RIFLE				= 27,
+		SHOPPING_CART		= 28,
+		LUNCHBOX			= 29,
+		BABY_RATTLE			= 30,
+		RUBBER_BALL			= 31,
+		CHAIN_LINK			= 32,
+		TILE				= 33,
+		CARPET				= 34,
+		TUMBLEWEED			= 35,
+		COUNT,
+	
+		FLAG_PLATFORM		= 0x20, // FO3 only
+		FLAG_STAIRS			= 0x40,
+	
+		MATERIAL_MASK		= 0x1F,
+	};
 };
+using HK_MATERIAL_TYPE = _HavokMaterialType::Type;
+
+struct _ImpactMaterialType {
+	enum Type : uint32_t {
+		NONE			= UINT32_MAX,
+		STONE			= 0,
+		DIRT			= 1,
+		GRASS			= 2,
+		GLASS			= 3,
+		METAL			= 4,
+		WOOD			= 5,
+		ORGANIC			= 6,
+		CLOTH			= 7,
+		WATER			= 8,
+		HOLLOW_METAL	= 9,
+		ORGANIC_BUG		= 10,
+		ORGANIC_GLOW	= 11,
+		COUNT,
+	};
+};
+using IMPACT_MATERIAL_TYPE = _ImpactMaterialType::Type;
 
 enum SoundMessageType : uint32_t {
 	SM_PLAY						= 0x1,
@@ -1552,6 +1789,8 @@ struct _RayCastPathResult {
 };
 using RAYCAST_PATH_RESULT = _RayCastPathResult::Result;
 
+#pragma region Archive
+
 struct _ArchiveTypeIndex {
 	enum Index : uint32_t {
 		MESHES		= 0,
@@ -1586,6 +1825,8 @@ struct _ArchiveType {
 };
 using ARCHIVE_TYPE = _ArchiveType::Type;
 
+#pragma endregion
+
 struct _BodyPartType {
 	enum Type : int32_t {
 		NONE = -1,
@@ -1608,6 +1849,7 @@ struct _BodyPartType {
 	};
 };
 using BODY_PART_TYPE = _BodyPartType::Type;
+using LIMB_TYPE = _BodyPartType::Type;
 
 struct _DetectionLevel {
 	enum Level : uint32_t {
@@ -1753,3 +1995,307 @@ struct _BSIntersectResult {
 	};
 };
 using BS_INTERSECT_RESULT = _BSIntersectResult::Result;
+
+struct _RegionDataType {
+	enum Type {
+		NONE		= 0,
+		GENERAL		= 1,
+		OBJECTS		= 2,
+		WEATHER		= 3,
+		MAP			= 4,
+		LANDSCAPE	= 5,
+		GRASS		= 6,
+		SOUND		= 7,
+		IMPOSTER	= 8,
+		COUNT		= 9,
+	};
+};
+using REGION_DATA_ID = _RegionDataType::Type;
+
+#pragma region Conditions
+
+struct _ConditionRunOn {
+	enum RunOn : uint32_t {
+		SUBJECT,
+		TARGET,
+		REFERENCE,
+		COMBAT_TARGET,
+		LINKED_REFERENCE,
+		COUNT,
+	};
+};
+using CONDITION_RUN_ON = _ConditionRunOn::RunOn;
+
+struct _ConditionComparison {
+	enum Comparison : uint32_t {
+		EQUAL,
+		NOT_EQUAL,
+		GREATER_THAN,
+		GREATER_THAN_OR_EQUAL,
+		LESS_THAN,
+		LESS_THAN_OR_EQUAL,
+		COUNT,
+	};
+};
+using CONDITION_COMPARISON = _ConditionComparison::Comparison;
+
+#pragma endregion
+
+struct _LockLevel {
+	enum Level {
+		VERY_EASY,
+		EASY,
+		AVERAGE,
+		HARD,
+		VERY_HARD,
+		IMPOSSIBLE,
+		COUNT,
+	};
+};
+using LOCK_LEVEL = _LockLevel::Level;
+
+struct _SoundLevel {
+	enum Level {
+		LOUD,
+		NORMAL,
+		SILENT,
+		COUNT,
+	};
+};
+using SOUND_LEVEL = _SoundLevel::Level;
+
+struct _CreatureSoundType {
+	enum Type {
+		LEFT		= 0,
+		RIGHT		= 1,
+		BACKLEFT	= 2,
+		BACKRIGHT	= 3,
+		IDLE		= 4,
+		AWARE		= 5,
+		ATTACK		= 6,
+		HIT			= 7,
+		DEATH		= 8,
+		WEAPON		= 9,
+		MOVEMENT	= 10,
+		AWAKE		= 11,
+		AUX1		= 12,
+		AUX2		= 13,
+		AUX3		= 14,
+		AUX4		= 15,
+		AUX5		= 16,
+		AUX6		= 17,
+		AUX7		= 18,
+		AUX8		= 19,
+		JUMP		= 20,
+		LOOP		= 21,
+		COUNT		= 22
+	};
+};
+using CREATURE_SOUND_TYPE = _CreatureSoundType::Type;
+
+struct _CellEnvironmentType {
+	enum Type {
+		NONE				= 0,
+		DEFAULT				= 1,
+		GENERIC				= 2,
+		PADDED_CELL			= 3,
+		ROOM				= 4,
+		BATHROOM			= 5,
+		LIVING_ROOM			= 6,
+		STONE_ROOM			= 7,
+		AUDITORIUM			= 8,
+		CONCERT_HALL		= 9,
+		CAVE				= 10,
+		ARENA				= 11,
+		HANGAR				= 12,
+		CARPETED_HALLWAY	= 13,
+		HALLWAY				= 14,
+		STONE_CORRIDOR		= 15,
+		ALLEY				= 16,
+		FOREST				= 17,
+		CITY				= 18,
+		MOUNTAINS			= 19,
+		QUARRY				= 20,
+		PLAIN				= 21,
+		PARKING_LOT			= 22,
+		SEWER_PIPE			= 23,
+		UNDERWATER			= 24,
+		SMALL_ROOM			= 25,
+		MEDIUM_ROOM			= 26,
+		LARGE_ROOM			= 27,
+		MEDIUM_HALL			= 28,
+		LARGE_HALL			= 29,
+		PLATE				= 30,
+		COUNT,
+	};
+};
+using CELL_ENVIRONMENT_TYPE = _CellEnvironmentType::Type;
+
+#pragma region Tiles
+
+struct _TileType {
+	enum Type {
+		NULL_TYPE	= 0x0,
+		FIRST_TYPE	= 0x385,
+		RECT		= 0x385,
+		IMAGE		= 0x386,
+		_3D			= 0x388,
+		MENU		= 0x389,
+		HOTRECT		= 0x38A,
+		WINDOW		= 0x38B,
+		RADIAL		= 0x38C,
+		LAST_TYPE	= 0x38C,
+		TEMPLATE	= 0x3E7,
+	};
+};
+using TILE_TYPE = _TileType::Type;
+
+struct _TileTrait {
+	enum Trait : int32_t {
+		X					= 0xFA1,
+		Y,
+		VISIBLE,
+		CLASS,
+		CLIP_WINDOW			= 0xFA6,
+		STACKING_TYPE,
+		LOCUS,
+		ALPHA,
+		ID,
+		DISABLE_FADE,
+		LIST_INDEX,
+		DEPTH,
+		CLIPS,
+		TARGET,
+		HEIGHT,
+		WIDTH,
+		RED,
+		GREEN,
+		BLUE,
+		TILE,
+		CHILD_COUNT,
+		JUSTIFY,
+		ZOOM,
+		FONT,
+		WRAP_WIDTH,
+		WRAP_LIMIT,
+		WRAP_LINES,
+		PAGE_NUM,
+		IS_HTML,
+		CROP_OFFSET_Y,
+		CROP_Y = CROP_OFFSET_Y,
+		CROP_OFFSET_X,
+		CROP_X = CROP_OFFSET_X,
+		MENU_FADE,
+		EXPLORE_FADE,
+		MOUSEOVER,
+		STRING,
+		SHIFT_CLICKED,
+		CLICKED				= 0xFC7,
+		CLICK_SOUND			= 0xFCB,
+		FILE_NAME,
+		FILE_WIDTH,
+		FILE_HEIGHT,
+		REPEAT_VERTICAL,
+		REPEAT_HORIZONTAL,
+		ANIMATION			= 0xFD2,
+		LINE_COUNT			= 0xDD4,
+		PAGE_COUNT,
+		XDEFAULT,
+		X_UP,
+		X_DOWN,
+		X_LEFT,
+		X_RIGHT,
+		X_BUTTON_A			= 0xFDD,
+		X_BUTTON_B,
+		X_BUTTON_X,
+		X_BUTTON_Y,
+		X_BUTTON_LT,
+		X_BUTTON_RT,
+		X_BUTTON_LB,
+		X_BUTTON_RB,
+		X_BUTTON_START		= 0xFE7,
+		MOUSEOVER_SOUND,
+		DRAGGABLE,
+		DRAG_START_X,
+		DRAG_START_Y,
+		DRAG_OFFSET_X,
+		DRAG_OFFSET_Y,
+		DRAG_DELTA_X,
+		DRAG_DELTA_Y,
+		DRAG_X,
+		DRAG_Y,
+		WHEELABLE,
+		WHEEL_MOVED,
+		SYSTEM_COLOR,
+		BRIGHTNESS,
+		LINEGAP				= 0xFF7,
+		RESOLUTION_CONVERTER,
+		TEX_ATLAS,
+		ROTATE_ANGLE,
+		ROTATE_AXIS_X,
+		ROTATE_AXIS_Y,
+
+		USER0				= 0x1004,
+		USER1,
+		USER2,
+		USER3,
+		USER4,
+		USER5,
+		USER6,
+		USER7,
+		USER8,
+		USER9,
+		USER10,
+		USER11,
+		USER12,
+		USER13,
+		USER14,
+		USER15,
+		USER16,
+
+		LAST_TRAIT			= 0x101D,
+		
+		MENU_LEVEL			= 0x1771,
+		DELETE_ON_FADE		= 0x1772,
+		MENU_THICKNESS		= 0x1773,
+		NO_CLICK_PAST_DONE	= 0x1776,
+		MIXED_MENU_DONE		= 0x1777,
+		DOES_NOT_STACK		= 0x1778,
+		MENU_VISIBLE		= 0x1779,
+	};
+};
+using TILE_TRAIT = _TileTrait::Trait;
+
+struct _TileValueAction {
+	enum Type {
+		COPY = 0x7D0,
+		ADD,
+		SUB,
+		MUL,
+		DIV,
+		MIN,
+		MAX,
+		MOD,
+		FLOOR,
+		CEIL,
+		ABS,
+		ROUND,
+		GT,
+		GTE,
+		EQ,
+		NEQ,
+		LT,
+		LTE,
+		AND,
+		OR,
+		NOT,
+		ONLY_IF,
+		ONLY_IF_NOT,
+		REF,
+		BEGIN,
+		END,
+	};
+};
+using TILE_VALUE_ACTION = _TileValueAction::Type;
+
+#pragma endregion

@@ -1,16 +1,29 @@
 #pragma once
 
 #include "TESObject.hpp"
+#ifdef EDITOR
+#include "Bethesda/TESCellUseList.hpp"
+class TESContainer;
+class ContainerItemExtra;
+#endif
 
 class NiNode;
 
+#ifdef GAME
 class TESBoundObject : public TESObject {
+#else
+class TESBoundObject : public TESObject, public TESCellUseList {
+#endif
 public:
 	TESBoundObject();
 	~TESBoundObject();
 
 	virtual NiNode* Clone3DAlt(TESObjectREFR* apRequester);
 	virtual bool	ReplaceModelAlt(const char* apPath);
+#ifdef EDITOR
+	virtual void	Unk_112(TESContainer* apContainer, int, ContainerItemExtra* apExtra);
+	virtual void	Unk_113(int);
+#endif
 
 	struct Bounds {
 		Bounds() : x(0), y(0), z(0) {};
@@ -29,9 +42,16 @@ public:
 		Bounds kMax;
 	};
 
-	BoundData kBoundData;
+	BoundData			kBoundData;
+#ifdef EDITOR
+	uint32_t			uiReferenceCount;
+#endif
 
 	float GetBoundSize() const;
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESBoundObject, 0x30)
+#else
+ASSERT_SIZE(TESBoundObject, 0x54)
+#endif

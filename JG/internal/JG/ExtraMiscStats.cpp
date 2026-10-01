@@ -2,6 +2,8 @@
 #include "GameUI.h"
 #include "Bethesda/Setting.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace ExtraMiscStats {
 	std::unordered_map<std::string, int> miscStatMap;
 	std::unordered_set<std::string> availableMiscStats;
@@ -18,20 +20,21 @@ namespace ExtraMiscStats {
 			value = g_miscStatData[id]->Int();
 		}
 		else {
-			std::string sName = tile->name.pString;
-			auto it = miscStatMap.find(sName);
+			const std::string strName(tile->strName.GetString(), tile->strName.GetLength());
+			auto it = miscStatMap.find(strName);
 			if (it != miscStatMap.end()) {
 				value = it->second;
 			}
 		}
 
-		tile->SetFloat(kTileValue_user1, (float)value, 1);
+		tile->SetFloat(TILE_TRAIT::USER1, (float)value, 1);
 	}
 	bool __cdecl ShouldHideStat(uint32_t* id) {
 		if ((uint32_t)id >= 43) {
 			Tile* tile = StatsMenu::Get()->miscStatIDList.GetTileFromItem(&id);
-			std::string sName = tile->name.c_str();
-			if (miscStatMap.find(sName) == miscStatMap.end()) return true;
+			const std::string strName(tile->strName.GetString(), tile->strName.GetLength());
+			if (miscStatMap.find(strName) == miscStatMap.end()) 
+				return true;
 		}
 		return false;
 	}
@@ -40,23 +43,23 @@ namespace ExtraMiscStats {
 		auto iter = StatsMenu::Get()->miscStatIDList.GetHead();
 		do
 		{
-			if (iter->GetItem() && iter->GetItem()->tile && !strcmp(iter->GetItem()->tile->name.c_str(), name)) {
+			if (iter->GetItem() && iter->GetItem()->tile && !strcmp(iter->GetItem()->tile->GetName(), name)) {
 				tile = iter->GetItem()->tile;
 				break;
 			}
 		} while (iter = iter->GetNext());
 		if (!tile) {
 			tile = ThisCall<Tile*>(0x7E1190, &StatsMenu::Get()->miscStatIDList, StatsMenu::Get()->miscStatIDList.itemCount, 0, 0, 0);
-			tile->SetString(kTileValue_string, name, 1);
-			tile->name.Set(name);
+			tile->SetString(TILE_TRAIT::STRING, name, 1);
+			tile->SetName(name);
 			recalculateStatFilters = true;
 		}
-		else if (auto listIdxTileVal = tile->GetValue(kTileValue_listindex)) {
-			if (listIdxTileVal && listIdxTileVal->num < 0) {
+		else if (auto listIdxTileVal = tile->GetValue(TILE_TRAIT::LIST_INDEX)) {
+			if (listIdxTileVal && listIdxTileVal->GetFloat() < 0) {
 				recalculateStatFilters = true;
 			}
 		}
-		tile->SetFloat(kTileValue_user1, (float)value, 1);
+		tile->SetFloat(TILE_TRAIT::USER1, (float)value, 1);
 	}
 
 	void Reset() {

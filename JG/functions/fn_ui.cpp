@@ -1,74 +1,88 @@
 #include "fn_ui.h"
-#include "Shared/Utils/StackObject.hpp"
-#include <GameObjects.h>
-#include <GameUI.h>
-#include <JG/RSMBarberHook.hpp>
-#include <JG/ExtraMiscStats.hpp>
-#include <decoding.h>
-#include <GameRTTI.h>
-#include <Bethesda/FileFinder.hpp>
-#include <JG/ExtraReputationIcons.hpp>
-#include <JG/ExtraMarkerIcons.hpp>
-#include <JG/ScriptUtils.hpp>
+#include "decoding.h"
+#include "GameUI.h"
 
-extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+#include "Bethesda/FileFinder.hpp"
+#include "Bethesda/ExtraMapMarker.hpp"
+#include "Bethesda/ItemChange.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
+
+#include "JG/ExtraMarkerIcons.hpp"
+#include "JG/ExtraMiscStats.hpp"
+#include "JG/ExtraReputationIcons.hpp"
+#include "JG/FilteredBarberMenu.hpp"
+#include "JG/ScriptUtils.hpp"
+
+#include "NVSE/InventoryRef.hpp"
+
+#include "Shared/Utils/StackObject.hpp"
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
+
+#include <vector>
+
+extern InventoryRef* (*InventoryRefGetForID)(FormID refID);
 
 bool Cmd_DumpQuestObjectiveList_Execute(COMMAND_ARGS) { //Does not update Tweaks.
 	if (PlayerCharacter::GetSingleton()) {
-		auto headNode = PlayerCharacter::GetSingleton()->questObjectiveList.Head();
-		while (headNode) {
-			Console_Print("objective %s from quest %s", headNode->data->displayText.c_str(), headNode->data->quest->GetEditorName());
-			headNode = headNode->next;
+		auto pIter = PlayerCharacter::GetSingleton()->kQuestObjectives.GetHead();
+		while (pIter && !pIter->IsEmpty()) {
+			BGSQuestObjective* pObjective = pIter->GetItem();
+			pIter = pIter->GetNext();
+			if (pObjective)
+				Interface::PrintLine("objective %s from quest %s", pObjective->GetDisplayText(), pObjective->GetOwner()->GetEditorName());
 		}
 	}
 
 	return true;
 }
 
+template<typename T>
+using ScrapVector = std::vector<T, BSScrapAllocator<T>>;
+
 bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
-	TESQuest* quest = nullptr;
+	TESQuest* pQuest = nullptr;
 	*result = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &quest) || !PlayerCharacter::GetSingleton())
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pQuest) || !PlayerCharacter::GetSingleton())
 		return true;
 
-	auto& list = PlayerCharacter::GetSingleton()->questObjectiveList;
-	if (list.Empty())
+	auto& kList = PlayerCharacter::GetSingleton()->kQuestObjectives;
+	if (kList.IsEmpty())
 		return true;
 
-	std::vector<BGSQuestObjective*> matching;
-	std::vector<BGSQuestObjective*> others;
+	ScrapVector<BGSQuestObjective*> kMatching;
+	ScrapVector<BGSQuestObjective*> kOthers;
 
-	auto node = list.Head();
-	while (node) {
-		if (node->data) {
-			if (node->data->quest == quest)
-				matching.push_back(node->data);
+	auto node = kList.GetHead();
+	while (node && !node->IsEmpty()) {
+		if (node->GetItem()) {
+			if (node->GetItem()->GetOwner() == pQuest)
+				kMatching.push_back(node->GetItem());
 			else
-				others.push_back(node->data);
+				kOthers.push_back(node->GetItem());
 		}
-		node = node->next;
+		node = node->GetNext();
 	}
 
-	if (matching.empty())
+	if (kMatching.empty())
 		return true;
 
-	node = list.Head();
-	while (node->next) {
-		auto next = node->next;
-		node->next = next->next;
+	node = kList.GetHead();
+	while (node->GetNext()) {
+		auto next = node->GetNext();
+		node->SetNext(next->GetNext());
 		BSMemory::free(next);
 	}
 
-	node->data = matching[0];
-	for (size_t i = 1; i < matching.size(); i++)
-		list.Append(matching[i]);
-	for (auto obj : others)
-		list.Append(obj);
+	node->SetItem(kMatching[0]);
+	for (size_t i = 1; i < kMatching.size(); i++)
+		kList.AddTail(kMatching[i]);
+	for (auto obj : kOthers)
+		kList.AddTail(obj);
 
-	MapMenu* mapMenu = MapMenu::GetSingleton();
-	if (mapMenu) {
-		mapMenu->questList.FreeAllTiles();
-		mapMenu->questList.itemCount = 0;
+	MapMenu* pMapMenu = MapMenu::GetSingleton();
+	if (pMapMenu) {
+		pMapMenu->questList.RemoveAll();
+		pMapMenu->questList.itemCount = 0;
 	}
 
 	*result = 1;
@@ -76,15 +90,15 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ShowBarberMenuEx_Execute(COMMAND_ARGS) {
+	*result = 0;
+	uint32_t uiFlags = 0;
+	BGSListForm* pFormList = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiFlags, &pFormList)) {
+		if (pFormList && !IS_ID(pFormList, BGSListForm))
+			pFormList = nullptr;
 
-	BGSListForm* formList = nullptr;
-	uint32_t flags = 0;
-	if (!PlayerCharacter::GetSingleton()) return true;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &formList)) {
-		if (formList && IS_TYPE(formList, BGSListForm)) {
-			RSMBarberHook::Load(formList);
-		}
-		RSMBarberHook::ShowMenu(flags);
+		FilteredBarberMenu::ShowMenu(uiFlags, pFormList);
+		*result = 1;
 	}
 	return true;
 }
@@ -113,7 +127,7 @@ bool Cmd_GetExtraMiscStat_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &name)) {
 		*result = ExtraMiscStats::GetStat(name);
-		if (IsConsoleMode()) Console_Print("GetExtraMiscStat \"%s\": %.f", name, *result);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetExtraMiscStat \"%s\": %.f", name, *result);
 	}
 	return true;
 }
@@ -151,8 +165,8 @@ bool Cmd_GetCustomReputationChangeIcon_Execute(COMMAND_ARGS) {
 		if (pCustomIcon)
 			pIcon = pCustomIcon;
 	
-		if (IsConsoleMode())
-			Console_Print("GetCustomReputationChangeIcon \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetCustomReputationChangeIcon \"%s\": \"%s\"", pReputation->GetFullName(), pIcon);
 	}
 	g_strInterface->Assign(PASS_COMMAND_ARGS, pIcon);
 	return true;
@@ -169,7 +183,7 @@ bool Cmd_GetSystemColorAlt_Execute(COMMAND_ARGS) {
 		bOut->data = color & 0xFF;
 		gOut->data = (color >> 8) & 0xFF;
 		rOut->data = (color >> 16) & 0xFF;
-		if (IsConsoleMode()) Console_Print("GetSystemColor %d >> %d %d %d", type, rOut->data, gOut->data, bOut->data);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetSystemColor %d >> %d %d %d", type, rOut->data, gOut->data, bOut->data);
 	}
 	return true;
 }
@@ -179,7 +193,7 @@ bool Cmd_GetSystemColor_Execute(COMMAND_ARGS) {
 		SystemColorManager* colorMgr = SystemColorManager::GetSingleton();
 		uint32_t color = (colorMgr->GetColor(type) >> 0x8);
 		*result = color;
-		if (IsConsoleMode()) Console_Print("GetSystemColor %d >> 0x%X", type, color);
+		if (Script::GetConsoleOuput()) Interface::PrintLine("GetSystemColor %d >> 0x%X", type, color);
 	}
 	return true;
 };
@@ -225,14 +239,15 @@ bool Cmd_QueueCinematicText_Execute(COMMAND_ARGS) {
 };
 
 bool Cmd_SetBipedIconPathAlt_Execute(COMMAND_ARGS) {
-	BOOL bFemale = 0;
+	BOOL bFemale = FALSE;
 	TESForm* pForm = nullptr;
 	char cPath[MAX_PATH] = {};
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &bFemale, &pForm) && pForm) {
-		TESBipedModelForm* pBipedModel = DYNAMIC_CAST(pForm, TESForm, TESBipedModelForm);
+		TESBipedModelForm* pBipedModel = TESBipedModelForm::GetFormAsBipedModel(pForm);
 		if (pBipedModel) {
-			pBipedModel->icon[bFemale].SetTextureName(cPath);
+			const SEX eSex = bFemale ? SEX::FEMALE : SEX::MALE;
+			pBipedModel->SetIcon(eSex, cPath);
 			*result = 1;
 		}
 	}
@@ -244,7 +259,7 @@ bool Cmd_GetCustomMapMarker_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectREFR* markerRef = ThisCall<TESObjectREFR*>(0x77A400, PlayerCharacter::GetSingleton());
 	if (markerRef) {
-		*(uint32_t*)result = markerRef->GetFormID();
+		*(FormID*)result = markerRef->GetFormID();
 	}
 	return true;
 }
@@ -267,8 +282,8 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorldSpace) && pWorldSpace && IS_TYPE(pWorldSpace, TESWorldSpace) && pWorldSpace->GetTextureNameLength()) {
 		strcpy_s(cPath, pWorldSpace->GetTextureName());
 		g_strInterface->Assign(PASS_COMMAND_ARGS, cPath);
-		if (IsConsoleMode())
-			Console_Print("GetWorldSpaceMapTexture >> %s", cPath);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetWorldSpaceMapTexture >> %s", cPath);
 	}
 	return true;
 }
@@ -276,7 +291,7 @@ bool Cmd_GetWorldSpaceMapTexture_Execute(COMMAND_ARGS) {
 bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	TESObjectREFR* form;
 	char iconPath[MAX_PATH] = {};
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || !form || (!IS_TYPE(form, BGSListForm) && (!form->IsReference() || !form->IsMapMarker() || !form->extraDataList.HasExtra<ExtraMapMarker>())))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &iconPath) || !form || (!IS_TYPE(form, BGSListForm) && (!form->IsReference() || !form->IsMapMarker() || !form->GetExtra()->HasExtra<ExtraMapMarker>())))
 		return true;
 	if (IS_TYPE(form, BGSListForm)) {
 		BSSimpleList<TESForm*>* pIter = ((BGSListForm*)form)->GetFormList();
@@ -284,7 +299,7 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 			TESObjectREFR* ref = (TESObjectREFR*)pIter->GetItem();
 			pIter = pIter->GetNext();
 
-			if (ref && ref->IsReference() && ref->IsMapMarker() && ref->extraDataList.HasExtra<ExtraMapMarker>()) {
+			if (ref && ref->IsReference() && ref->IsMapMarker() && ref->GetExtra()->HasExtra<ExtraMapMarker>()) {
 				ExtraMarkerIcons::SetMapMarkerIcon(ref, iconPath);
 			}
 		}
@@ -292,8 +307,8 @@ bool Cmd_SetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	else {
 		ExtraMarkerIcons::SetMapMarkerIcon(form, iconPath);
 	}
-	if (IsConsoleMode())
-		Console_Print("SetCustomMapMarkerIcon >> %u, %s", form->GetFormID(), iconPath);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("SetCustomMapMarkerIcon >> %u, %s", form->GetFormID(), iconPath);
 	return true;
 }
 
@@ -301,14 +316,14 @@ bool Cmd_GetCustomMapMarkerIcon_Execute(COMMAND_ARGS) {
 	if (!thisObj || (!thisObj->IsReference() || !thisObj->IsMapMarker()))
 		return true;
 
-	ExtraMapMarker* mapMarkerExtra = thisObj->extraDataList.GetExtraData<ExtraMapMarker>();
+	ExtraMapMarker* mapMarkerExtra = thisObj->GetExtra()->GetExtraData<ExtraMapMarker>();
 	if (!mapMarkerExtra || !mapMarkerExtra->pData)
 		return true;
 
 	const char* resStr = ExtraMarkerIcons::GetMapMarker(thisObj, mapMarkerExtra->pData->usType);
 	g_strInterface->Assign(PASS_COMMAND_ARGS, resStr);
-	if (IsConsoleMode())
-		Console_Print("GetCustomMapMarkerIcon >> %s", resStr);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetCustomMapMarkerIcon >> %s", resStr);
 	return true;
 }
 
@@ -317,7 +332,7 @@ bool Cmd_GetSleepWaitMenuState_Execute(COMMAND_ARGS) {
 	SleepWaitMenu* swMenu = SleepWaitMenu::Get();
 	if (!swMenu) return true;
 	*result = DWORD(swMenu->isRest) + 1;
-	if (IsConsoleMode()) Console_Print("GetSleepWaitMenuState >> %.f", *result);
+	if (Script::GetConsoleOuput()) Interface::PrintLine("GetSleepWaitMenuState >> %.f", *result);
 	return true;
 }
 
@@ -364,7 +379,7 @@ float CalculateRepairedHealth(ItemChange* target, ItemChange* repairItem) {
 	if (!target || !repairItem) return 0.0f;
 	float targetHealth = target->GetItemHealth(true);
 	float repairItemHealth = repairItem->GetItemHealth(true);
-	int repairSkill = PlayerCharacter::GetSingleton()->avOwner.GetActorValueI(kAVCode_Repair);
+	int repairSkill = PlayerCharacter::GetSingleton()->GetActorValueI(ActorValue::Index::REPAIR);
 	int outParam = -1;
 	double result = CdeclCall<double>(0x648090, repairSkill, targetHealth, repairItemHealth, &outParam);
 	return (float)(result / 100.0);
@@ -382,7 +397,7 @@ bool Cmd_UpdateRepairMenu_Execute(COMMAND_ARGS) {
 		auto listItem = iter->GetItem();
 		if (listItem && listItem->tile && listItem->object) {
 			float repairedHealth = CalculateRepairedHealth(target, listItem->object);
-			listItem->tile->SetFloat(kTileValue_user0, repairedHealth);
+			listItem->tile->SetFloat(TILE_TRAIT::USER0, repairedHealth);
 		}
 	} while (iter = iter->GetNext());
 	*result = 1;
@@ -395,7 +410,7 @@ bool Cmd_SetWeaponScopeUIModel_Execute(COMMAND_ARGS) {
 	char cScopePath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cScopePath, &pScopeForm)) {
 		if (pScopeForm && pScopeForm->GetFormType() == FORM_TYPE::TESObjectWEAP) {
-			TESModel* pModel = &static_cast<TESObjectWEAP*>(pScopeForm)->kScope;
+			TESModel* pModel = static_cast<TESObjectWEAP*>(pScopeForm)->GetScopeModel();
 			Interface::InitGunScope(pModel);
 
 		}
@@ -496,18 +511,18 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 					continue;
 
 				const Tile* pEntryTile = pItem->tile;
-				const Tile* pParent = pEntryTile->parent;
+				const Tile* pParent = pEntryTile->GetParent();
 				if (!pParent) [[unlikely]]
 					continue;
 
-				auto kIter = pParent->children.GetHeadPos();
+				auto kIter = pParent->kChildren.GetHeadPos();
 				uint32_t uiIndex = 0;
 				while (kIter) {
-					Tile* pChild = pParent->children.GetNext(kIter);
+					Tile* pChild = pParent->kChildren.GetNext(kIter);
 					if (pChild == pEntryTile) {
 						*result = uiIndex;
-						if (IsConsoleMode())
-							Console_Print("GetMenuItemListIndex >> %d", uiIndex);
+						if (Script::GetConsoleOuput())
+							Interface::PrintLine("GetMenuItemListIndex >> %d", uiIndex);
 						return true;
 					}
 					++uiIndex;

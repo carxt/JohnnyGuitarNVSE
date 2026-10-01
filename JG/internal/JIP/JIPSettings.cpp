@@ -1,6 +1,8 @@
 #include "JIPSettings.hpp"
 #include "JIPUtils.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace JIPSettings {
 
 	bool IsSettingClear(const char* apSetting, const char* apPath) {

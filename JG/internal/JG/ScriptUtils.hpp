@@ -1,6 +1,8 @@
 #pragma once
 
 class NiAVObject;
+class TESForm;
+class TESObject;
 class TESObjectREFR;
 class NiDefaultAVObjectPalette;
 class BGSLoadGameSubBuffer;
@@ -13,6 +15,14 @@ namespace ScriptUtils {
 	inline bool __fastcall InRange(volatile T value) {
 		return value > T::NONE && value < T::COUNT;
 	}
+
+	class AutoSaveFormChanges {
+		bool bOrgVal;
+	public:
+		AutoSaveFormChanges(bool abAllow) noexcept;
+		~AutoSaveFormChanges() noexcept;
+	};
+
 
 	SPEC_NOINLINE NiAVObject* __fastcall GetReferenceScene(TESObjectREFR* apRef, bool abFirstPerson);
 
@@ -33,5 +43,14 @@ namespace ScriptUtils {
 	SPEC_NOINLINE void __fastcall SaveAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation);
 
 	SPEC_NOINLINE void __fastcall LoadAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation);
+
+	void __fastcall UpdateReference3D(TESObjectREFR* apReference);
+
+	TESObject* __fastcall GetTESObject(const TESForm* apForm);
+}
+
+namespace ScriptUtils {
+
+	void InitData();
 
 }

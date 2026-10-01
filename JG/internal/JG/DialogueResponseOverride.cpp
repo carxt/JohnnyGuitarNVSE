@@ -1,11 +1,13 @@
 #include "DialogueResponseOverride.hpp"
-#include <GameSettings.h>
+#include "Bethesda/GameSettingCollection.hpp"
 #include "JohnnyGameSettings.hpp"
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace DialogueResponseOverride {
 
-	std::unordered_map<uint32_t, std::map<uint32_t, DialogueEmotionOverride>> overrideMap;
-	std::unordered_map<uint32_t, std::map<uint32_t, DialogueCache>> cachedDialogueInfo;
+	std::unordered_map<FormID, std::map<uint32_t, DialogueEmotionOverride>> overrideMap;
+	std::unordered_map<FormID, std::map<uint32_t, DialogueCache>> cachedDialogueInfo;
 
 	static uintptr_t originalTopicInfoLoad = 0x104D5D4;
 	DWORD __fastcall hk_TESTopicInfo_Load(TESTopicInfo* topicInfo, void* edx, TESFile* modInfo)
@@ -13,32 +15,27 @@ namespace DialogueResponseOverride {
 		DWORD retVal = ThisCall<DWORD>(originalTopicInfoLoad, topicInfo, modInfo);
 		if (retVal)
 		{
-			auto responseList = ThisCall<TESTopicInfoResponse**>(0x061E780, topicInfo, NULL);
-			if (auto responseItem = *responseList)
-			{
-				do
-				{
-					DialogueCache diaCache = {};
-					diaCache.emotionType = responseItem->data.emotionType;
-					diaCache.emotionValue = responseItem->data.emotionValue;
-					diaCache.responseNumber = responseItem->data.responseNumber;
-					diaCache.speakerAnimation = (responseItem->spkeakerAnimation) ? responseItem->spkeakerAnimation->GetFormID() : 0;
-					diaCache.listenerAnimation = (responseItem->listenerAnimation) ? responseItem->listenerAnimation->GetFormID() : 0;
-					cachedDialogueInfo[topicInfo->GetFormID()][responseItem->data.responseNumber] = diaCache;
-				} while (responseItem = responseItem->next);
+			ResponseListWrapper* responseList = ThisCall<ResponseListWrapper*>(0x061E780, topicInfo, NULL);
+			for (TESResponse* pIter = responseList->pHead; pIter; pIter = pIter->GetNext()) {
+				DialogueCache diaCache = {};
+				diaCache.emotionType = pIter->GetEmotion();
+				diaCache.emotionValue = pIter->GetEmotionValue();
+				diaCache.responseNumber = pIter->GetResponseID();
+				diaCache.speakerAnimation = pIter->GetSpeakerIdle() ? pIter->GetSpeakerIdle()->GetFormID() : 0;
+				diaCache.listenerAnimation = pIter->GetListenerIdle() ? pIter->GetListenerIdle()->GetFormID() : 0;
+				cachedDialogueInfo[topicInfo->GetFormID()][pIter->GetResponseID()] = diaCache;
 			}
 		}
 		return retVal;
 	}
 
 	static  DialogueResponse* __fastcall DialogueResponse_Init(DialogueResponse* responseCol,
-		void* edx, TESQuest* quest, TESTopic* topic, TESTopicInfo* topicInfo, Actor* speaker, TESTopicInfoResponse* topicInfoResponse)
+		void* edx, TESQuest* quest, TESTopic* topic, TESTopicInfo* topicInfo, Actor* speaker, TESResponse* topicInfoResponse)
 	{
 		if (auto diaCont = overrideMap.find(topicInfo->GetFormID()); diaCont != overrideMap.end())
 		{
 
-			Setting* iSTDEmotionVal = (Setting*)0x11CBDF4;
-			if (auto diaItem = diaCont->second.find(topicInfoResponse->data.responseNumber); diaItem != diaCont->second.end())
+			if (auto diaItem = diaCont->second.find(topicInfoResponse->GetResponseID()); diaItem != diaCont->second.end())
 			{
 				if (diaItem->second.m_emotionType < kEmotionMax)
 				{
@@ -51,7 +48,7 @@ namespace DialogueResponseOverride {
 				}
 				if ((responseCol->emotionType > 0) && JohnnyGameSettings::iOverrideDialogueEmotionValues.Int() >= 1)
 				{
-					responseCol->emotionValue = iSTDEmotionVal->Int();
+					responseCol->emotionValue = GameSettingCollection::iStandardEmotionValue->Int();
 				}
 
 				if (IS_TYPE(diaItem->second.m_speakerAnimation, TESIdleForm) || (diaItem->second.m_speakerAnimation == NULL))
@@ -89,7 +86,7 @@ namespace DialogueResponseOverride {
 		HookUtils::WriteRelJump(0x083D413, (uintptr_t)asm_jumpManHook);
 	}
 
-	DialogueEmotionOverride GetDialogueResponse(uint32_t refId, uint32_t responseNumber, DialogueEmotionOverride& newOverride)
+	DialogueEmotionOverride GetDialogueResponse(FormID refId, uint32_t responseNumber, DialogueEmotionOverride& newOverride)
 	{
 		TESIdleForm* speakerAnim = *(TESIdleForm**)0x11CA244;
 		TESIdleForm* listenerAnim = *(TESIdleForm**)0x11CA244;
@@ -104,7 +101,7 @@ namespace DialogueResponseOverride {
 
 	}
 
-	void Set(uint32_t formID, uint32_t responseNumber, uint32_t emotion, int32_t emotionValue, TESIdleForm* speakerAnim, TESIdleForm* listenerAnim, uint32_t flags) 
+	void Set(FormID formID, uint32_t responseNumber, uint32_t emotion, int32_t emotionValue, TESIdleForm* speakerAnim, TESIdleForm* listenerAnim, uint32_t flags) 
 	{
 		auto it = overrideMap[formID].find(responseNumber);
 		//if (it != overrideMap[dialogResponse->GetFormID()].end())
@@ -120,7 +117,7 @@ namespace DialogueResponseOverride {
 		}
 	}
 
-	void Remove(uint32_t formID, uint32_t responseNumber)
+	void Remove(FormID formID, uint32_t responseNumber)
 	{
 		auto it = overrideMap.find(formID);
 		if (it != overrideMap.end())
@@ -133,7 +130,7 @@ namespace DialogueResponseOverride {
 		}
 	}
 
-	uint32_t GetResponseAmount(uint32_t formID) {
+	uint32_t GetResponseAmount(FormID formID) {
 		auto it = cachedDialogueInfo.find(formID);
 		if (it != cachedDialogueInfo.end())
 		{

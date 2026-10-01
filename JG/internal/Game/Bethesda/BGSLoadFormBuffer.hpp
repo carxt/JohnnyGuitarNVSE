@@ -26,7 +26,7 @@ public:
 	};
 	using LoadFormBufferFlags = _LoadFormBufferFlags::Flags;
 
-	uint32_t						uiFormID;
+	FormID							uiFormID;
 	BGSSaveLoadFormHeader			kHeader;
 	uint32_t						uiBufferSize;
 	TESForm*						pForm;

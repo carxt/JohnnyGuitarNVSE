@@ -8,7 +8,11 @@ namespace JohnnyPluginData {
 
 	constexpr const char* JG_PLUGIN_NAME = "JohnnyGuitarNVSE";
 
+#ifdef GAME
 	constexpr const char* JG_LOG_PATH = "logs\\JohnnyGuitarNVSE.log";
+#else
+	constexpr const char* JG_LOG_PATH = "logs\\JohnnyGuitarNVSE_GECK.log";
+#endif
 
 	constexpr uint32_t JG_VERSION = 528;
 

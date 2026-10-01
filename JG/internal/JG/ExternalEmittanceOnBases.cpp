@@ -1,7 +1,9 @@
 #include "ExternalEmittanceOnBases.hpp"
+#include "Bethesda/TESObjectREFR.hpp"
+
 #include "JohnnyExtraData.hpp"
 
-#include <GameObjects.h>
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace ExternalEmittanceOnBases {
 

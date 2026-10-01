@@ -48,6 +48,8 @@ public:
 		return uValue.str;
 	}
 
+	Setting& operator==(const char *apString);
+
 	int32_t Int() const {
 		return uValue.i;
 	}
