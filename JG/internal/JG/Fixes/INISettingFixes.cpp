@@ -39,31 +39,34 @@ namespace INISettingFixes {
 			return;
 
 		const char* const pKey = apSetting->pKey;
-
+		const char* pFormatString = reinterpret_cast<const char*>(0x103A440); // INISetting %s >> %i;
 		switch (type) {
-			case Setting::kSetting_Bool:
-				Interface::PrintLine("INISetting %s >> %i", pKey, apSetting->uValue.b);
+			case Setting::Type::BOOL:
+				Interface::PrintLine(pFormatString, pKey, apSetting->Bool());
 				break;
-			case Setting::kSetting_Integer:
-				Interface::PrintLine("INISetting %s >> %d", pKey, apSetting->uValue.i);
+			case Setting::Type::INT:
+				Interface::PrintLine(pFormatString, pKey, apSetting->Int());
 				break;
-			case Setting::kSetting_Unsigned:
-				Interface::PrintLine("INISetting %s >> %X", pKey, apSetting->uValue.u);
+			case Setting::Type::UINT:
+				Interface::PrintLine("INISetting %s >> %u", pKey, apSetting->UInt());
 				break;
-			case Setting::kSetting_Float:
-				Interface::PrintLine("INISetting %s >> %.2f", pKey, apSetting->uValue.f);
+			case Setting::Type::FLOAT:
+				pFormatString = reinterpret_cast<const char*>(0x103A428); // INISetting %s >> %.2f
+				Interface::PrintLine(pFormatString, pKey, apSetting->Float());
 				break;
-			case Setting::kSetting_String:
-				Interface::PrintLine("INISetting %s >> '%s'", pKey, apSetting->uValue.str);
+			case Setting::Type::STRING:
+				pFormatString = reinterpret_cast<const char*>(0x103A410); // INISetting %s >> '%s'
+				Interface::PrintLine(pFormatString, pKey, apSetting->String());
 				break;
-			case Setting::kSetting_r:
-				Interface::PrintLine("INISetting %s >> R: %d G: %d B: %d", pKey, apSetting->uValue.rgb[3], apSetting->uValue.rgb[2], apSetting->uValue.rgb[1]);
+			case Setting::Type::RGB:
+				Interface::PrintLine("INISetting %s >> R: %i G: %i B: %i", pKey, apSetting->uValue.r[3], apSetting->uValue.r[2], apSetting->uValue.r[1]);
 				break;
-			case Setting::kSetting_a:
-				Interface::PrintLine("INISetting %s >> R: %d G: %d B: %d alpha: %d", pKey, apSetting->uValue.rgb[3], apSetting->uValue.rgb[2], apSetting->uValue.rgb[1], apSetting->uValue.rgb[0]);
+			case Setting::Type::RGBA:
+				Interface::PrintLine("INISetting %s >> R: %i G: %i B: %d A: %i", pKey, apSetting->uValue.a[3], apSetting->uValue.a[2], apSetting->uValue.a[1], apSetting->uValue.a[0]);
 				break;
 			default:
-				Interface::PrintLine("INISetting %s >> UNKNOWN TYPE", pKey);
+				pFormatString = reinterpret_cast<const char*>(0x103A3F0); // INISetting %s >> UNKNOWN TYPE
+				Interface::PrintLine(pFormatString, pKey);
 				break;
 		}
 	}

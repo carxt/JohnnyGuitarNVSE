@@ -6,93 +6,77 @@ public:
 	virtual ~Setting();
 	virtual bool IsPrefSetting() const;
 
-	enum Type {
-		kSetting_Bool = 0,
-		kSetting_c,
-		kSetting_h,
-		kSetting_Integer,
-		kSetting_Unsigned,
-		kSetting_Float,
-		kSetting_String,
-		kSetting_r,
-		kSetting_a,
-		kSetting_Other
+	struct _Type {
+		enum Type {
+			BOOL = 0,
+			CHAR,
+			UCHAR,
+			INT,
+			UINT,
+			FLOAT,
+			STRING,
+			RGB,
+			RGBA,
+			OTHER
+		};
 	};
+	using Type = _Type::Type;
 
-	union Info {
-		const char*		str;
-		int32_t			i;
-		uint32_t		u;
-		float			f;
+	union Value {
 		bool			b;
 		int8_t			c;
 		uint8_t			h;
-		DWORD			r;
-		uint8_t			rgb[4];
+		int32_t			i;
+		uint32_t		u;
+		float			f;
+		const char*		s;
+		uint8_t			r[3];
+		uint8_t			a[4];
 	};
 
-	Info		uValue;
+	Value		uValue;
 	const char* pKey;
 
+	const Value& GetValue() const;
+	Value& GetValue();
+
+	const char* Key() const;
+
+	Type DataType() const;
 	static Type DataType(const char* apKey);
 
-	Type GetType() const {
-		return DataType(pKey);
-	}
+	uint32_t DataSize() const;
 
-	Info& GetValue() {
-		return uValue;
-	}
+	bool Bool() const;
+	operator bool() const;
+	Setting& operator=(bool abValue);
 
-	const char* String() const {
-		return uValue.str;
-	}
+	char Char() const;
+	operator char() const;
+	Setting& operator=(char acValue);
 
-	Setting& operator==(const char *apString);
+	unsigned char UChar() const;
+	operator unsigned char() const;
+	Setting& operator=(unsigned char aucValue);
 
-	int32_t Int() const {
-		return uValue.i;
-	}
+	int32_t Int() const;
+	operator int32_t() const;
+	Setting& operator=(int32_t aiValue);
 
-	uint32_t UInt() const {
-		return uValue.u;
-	}
+	uint32_t UInt() const;
+	operator uint32_t() const;
+	Setting& operator=(uint32_t auiValue);
 
-	float Float() const {
-		return uValue.f;
-	}
+	float Float() const;
+	operator float() const;
+	Setting& operator=(float afValue);
 
-	bool Bool() const {
-		return uValue.b;
-	}
+	const char* String() const;
+	operator const char*() const;
+	Setting& operator=(const char* apValue);
 
-	char Char() const {
-		return uValue.c;
-	}
-
-	operator bool() const {
-		return Bool();
-	}
-
-	operator int() const {
-		return Int();
-	}
-
-	operator unsigned int() const {
-		return UInt();
-	}
-
-	operator float() const {
-		return Float();
-	}
-
-	operator const char* () const {
-		return String();
-	}
-
-	operator char() const {
-		return Char();
-	}
+	bool operator==(bool abVal) const;
+	bool operator==(int32_t aiVal) const;
 };
 
 ASSERT_SIZE(Setting, 0xC);

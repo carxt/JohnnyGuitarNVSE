@@ -2276,7 +2276,7 @@ namespace JIPFixes {
 			// 
 			// mov     ecx, esi			// Setting ptr
 			// push    edi				// String ptr
-			// mov     eax, 0xC33170	// Setting::operator==(const char*)
+			// mov     eax, 0xC33170	// Setting::operator=(const char*)
 			// call    eax
 			// jmp     +6
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x100444CD), "\x89\xF1\x57\xB8\x70\x31\xC3\x00\xFF\xD0\xEB\x06");
