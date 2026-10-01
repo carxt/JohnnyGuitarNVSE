@@ -6,6 +6,7 @@ HitData::HitData() {
 }
 
 HitData::HitData(const HitData& arOther) {
+	uiRefCount = 0;
 	Copy(arOther);
 }
 
