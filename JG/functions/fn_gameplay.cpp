@@ -21,9 +21,6 @@
 #include "Bethesda/TESObjectList.hpp"
 #include "Bethesda/NavMeshObstacleManager.hpp"
 #include "Bethesda/TES.hpp"
-#include "Bethesda/BSAudio.hpp"
-#include "Bethesda/BSGameSound.hpp"
-#include "Bethesda/BSAudioManager.hpp"
 #include "Bethesda/ProcessLists.hpp"
 
 #include "JG/CustomCameraShake.hpp"
@@ -572,30 +569,6 @@ bool __fastcall ValidTempEffect(const EffectItem* apEffectItem) {
 		|| (eArchetype >= EffectArchetypes::Type::CONCUSSION);
 }
 
-
-bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
-	*result = 0;
-	float fTime = 0;
-	TESSound* apSound;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &apSound, &fTime) && apSound && IS_TYPE(apSound, TESSound)) {
-		TESObjectREFR* pRef = thisObj;
-		if (pRef == nullptr) {
-			pRef = (TESObjectREFR*)PlayerCharacter::GetSingleton();
-		}
-
-		NiAVObject* pRef3D = pRef->Get3DVerySimple();
-		if (pRef3D) {
-			constexpr uint32_t uiFlags = BSGameSound::TypeFlags::IS_3D | BSGameSound::TypeFlags::ONE_SHOT;
-			BSSoundHandle hSound = BSAudio::GetSingleton()->GetSoundHandleByFormID(apSound->GetFormID(), uiFlags);
-			hSound.SetPosition(pRef->GetLocationOnReference());
-			hSound.SetObjectToFollow(pRef3D);
-			hSound.FadeInPlay(fTime * 1000);
-			*result = 1;
-		}
-	}
-	return true;
-}
-
 template<typename KEY, typename DATA>
 using ScrapMap = std::unordered_map<KEY, DATA, std::hash<KEY>, std::equal_to<KEY>, BSScrapAllocator<std::pair<const KEY, DATA>>>;
 
@@ -717,29 +690,6 @@ bool Cmd_AddNavmeshObstacle_Execute(COMMAND_ARGS) {
 		NavMeshObstacleManager::GetSingleton()->AddObstacleForReference(thisObj);
 		*result = 1;
 	}
-	return true;
-}
-
-bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
-	*result = 0;
-	TESSound* pSoundForm = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSoundForm) && pSoundForm && IS_TYPE(pSoundForm, TESSound)) {
-		BSAudioManager* pMgr = BSAudioManager::GetSingleton();
-		std::scoped_lock lock(pMgr->kProcessingCritSection);
-		BSGameSound* pSound;
-		uint32_t uiKey;
-		auto kIter = pMgr->kPlayingSounds.GetFirstPos();
-		while (kIter) {
-			pMgr->kPlayingSounds.GetNext(kIter, uiKey, pSound);
-			if (!pSound || pSound->pSourceSound != pSoundForm)
-				continue;
-
-			BSSoundHandle hSound(pSound->GetID());
-			hSound.Stop();
-			*result = 1;
-		}
-	}
-
 	return true;
 }
 
@@ -1273,45 +1223,6 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 		const float fNewVal = pActor->GetActorValueF(eActorValue);
 		ActorValue::CheckCallModifiedCallback(pActor, eActorValue, fOldVal, fNewVal, nullptr);
 		*result = 1;
-	}
-	return true;
-}
-
-bool Cmd_StopSoundAlt_Execute(COMMAND_ARGS) {
-	TESSound* pSoundForm = nullptr;
-	TESObjectREFR* pSource = nullptr;
-	float fFadeOutTime = -1;
-	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSoundForm, &pSource, &fFadeOutTime) && pSoundForm && IS_TYPE(pSoundForm, TESSound) && pSource && pSoundForm->GetSoundFileLength()) {
-		const char* pSoundPath = pSoundForm->GetSoundFile();
-		BSAudioManager* pMgr = BSAudioManager::GetSingleton();
-
-		std::scoped_lock kLock(pMgr->kProcessingCritSection);
-		uint32_t uiKey;
-		auto kObjIter = pMgr->kMovingObjects.GetFirstPos();
-		while (kObjIter) {
-			NiPointer<NiAVObject> spObject;
-			pMgr->kMovingObjects.GetNext(kObjIter, uiKey, spObject);
-			if (!spObject || !spObject->IsFadeNode())
-				continue;
-
-			BSFadeNode* pFadeNode = static_cast<BSFadeNode*>(spObject.m_pObject);
-			if (pFadeNode->pLinkedObj != pSource)
-				continue;
-
-			BSGameSound* pSound = nullptr;
-			pMgr->kPlayingSounds.GetAt(uiKey, pSound);
-			if (pSound && StrBeginsCI(pSound->GetFileName() + 0xB, pSoundPath)) {
-				BSSoundHandle hSound(pSound->GetID());
-				if (fFadeOutTime < 0.f)
-					hSound.Stop();
-				else
-					hSound.FadeOutAndRelease(fFadeOutTime * 1000.0);
-
-				*result = 1;
-				break;
-			}
-		}
 	}
 	return true;
 }

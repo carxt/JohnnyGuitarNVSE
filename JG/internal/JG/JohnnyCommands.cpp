@@ -12,6 +12,7 @@
 #include "functions/fn_math.h"
 #include "functions/fn_mediaset.h"
 #include "functions/fn_region.h"
+#include "functions/fn_sound.h"
 #include "functions/fn_terminal.h"
 #include "functions/fn_ui.h"
 #include "functions/fn_utility.h"

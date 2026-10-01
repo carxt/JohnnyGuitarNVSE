@@ -45,6 +45,7 @@ public:
 	void PrependController(NiTimeController* apController);
 	void RemoveController(NiTimeController* apController);
 
+	bool HasExtraData() const;
 	NiExtraData* GetExtraData(const NiFixedString& arKey) const;
 	bool AddExtraData(NiExtraData* apExtraData);
 	bool AddExtraData(const NiFixedString& arKey, NiExtraData* apExtraData);

@@ -30,6 +30,10 @@ void NiObjectNET::RemoveController(NiTimeController* apController) {
 #endif
 }
 
+bool NiObjectNET::HasExtraData() const {
+	return m_usExtraDataSize != 0;
+}
+
 // GAME - 0xA5BDD0
 // GECK - 0x8185B0
 NiExtraData* NiObjectNET::GetExtraData(const NiFixedString& arKey) const {

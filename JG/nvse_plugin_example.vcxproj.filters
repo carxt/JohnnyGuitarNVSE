@@ -1207,6 +1207,15 @@
     <ClCompile Include="internal\Game\Bethesda\ProcessLists.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="functions\fn_sound.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSAddonNodeSoundHandleExtra.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Obsidian\FalloutAudioMedia.cpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -3330,6 +3339,15 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\MagicHitEffect.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\fn_sound.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSAddonNodeSoundHandleExtra.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\FalloutAudioMedia.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
