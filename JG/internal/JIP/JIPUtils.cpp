@@ -3,7 +3,7 @@
 
 #include "Shared/Utils/DebugLog.hpp"
 
-#include <array>
+#include <vector>
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 
@@ -15,9 +15,10 @@ namespace JIPUtils {
 	constexpr uint32_t JIP_TARGET_HASH = 0x9DF36B6;
 	constexpr uint32_t JIP_TARGET_SIZE = 502272;
 
-	static constexpr std::array<uint32_t, CRC32_TABLE_SIZE> initCRC32Table() {
+	static constexpr std::vector<uint32_t> initCRC32Table() {
 		constexpr uint32_t polynomial = 0xEDB88320;
-		std::array<uint32_t, CRC32_TABLE_SIZE> crc32table;
+		std::vector<uint32_t> crc32table;
+		crc32table.resize(CRC32_TABLE_SIZE);
 		for (uint32_t i = 0; i < CRC32_TABLE_SIZE; i++) {
 			uint32_t crc = i;
 			for (uint32_t j = 0; j < 8; j++) {
@@ -33,7 +34,7 @@ namespace JIPUtils {
 
 
 	static uint32_t crc32(const uint8_t* data, size_t length) {
-		constexpr std::array<uint32_t, CRC32_TABLE_SIZE> crc32table = initCRC32Table();
+		const std::vector<uint32_t> crc32table = initCRC32Table();
 		uint32_t crc = 0xFFFFFFFF;
 		for (size_t i = 0; i < length; i++) {
 			uint8_t byte = data[i];
