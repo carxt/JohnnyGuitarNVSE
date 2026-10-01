@@ -172,6 +172,11 @@ bool Actor::GetIsUnconscious() const {
 	return ThisCall<bool>(0x437BD0, this);
 }
 
+// GAME - 0x87F260
+bool Actor::HasBlood() const {
+	return ThisCall<bool>(0x87F260, this);
+}
+
 // GAME - 0x5678A0
 bool Actor::IsEvil() const {
 	return ThisCall<bool>(0x5678A0, this);
@@ -336,5 +341,10 @@ void Actor::SetLastSeenTime() {
 // GAME - 0x8B0B00
 void Actor::ReloadTargets(bool abReload) {
 	ThisCall(0x8B0B00, this, abReload);
+}
+
+// GAME - 0x8C0460
+void Actor::AttackAlarm(TESObjectREFR* apAttacker, bool abMinorCrime, bool abModDisposition) {
+	ThisCall(0x8C0460, this, apAttacker, abMinorCrime, abModDisposition);
 }
 #endif

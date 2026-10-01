@@ -344,6 +344,8 @@ public:
 	bool HasShadow() const;
 	bool GetIsUnconscious() const;
 
+	bool HasBlood() const;
+
 	bool IsEvil() const;
 
 	bool ShouldReset(uint32_t auiCurrentTime) const;
@@ -409,6 +411,8 @@ public:
 	void SetLastSeenTime();
 
 	void ReloadTargets(bool abReload);
+
+	void AttackAlarm(TESObjectREFR* apAttacker, bool abMinorCrime, bool abModDisposition = true);
 };
 
 ASSERT_SIZE(Actor, 0x1B4);

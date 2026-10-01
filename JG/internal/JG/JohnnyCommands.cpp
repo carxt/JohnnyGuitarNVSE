@@ -9,6 +9,7 @@
 #include "functions/fn_form.h"
 #include "functions/fn_gamebryo.h"
 #include "functions/fn_gameplay.h"
+#include "functions/fn_hit.h"
 #include "functions/fn_math.h"
 #include "functions/fn_mediaset.h"
 #include "functions/fn_region.h"
@@ -24,6 +25,7 @@
 #include "JG/AnimActivationHeight.hpp"
 #include "JG/ExternalEmittanceOnBases.hpp"
 #include "JG/FilteredBarberMenu.hpp"
+#include "JG/PlayerBodyOverlay.hpp"
 
 ExpressionEvaluatorUtils s_expEvalUtils;
 #endif
@@ -38,6 +40,7 @@ namespace JohnnyCommands {
 		AnimActivationHeight::Init();
 		ExternalEmittanceOnBases::Install();
 		FilteredBarberMenu::Install();
+		PlayerBodyOverlay::Install();
 		apNVSE->InitExpressionEvaluatorUtils(&s_expEvalUtils);
 #endif
 	}
@@ -454,6 +457,13 @@ namespace JohnnyCommands {
 		REG_TYPED_CMD(GetReputationIcon, String);
 		REG_TYPED_CMD(GetReputationFormIcon, String);
 		REG_CMD(SetReputationFormIcon);
+		REG_CMD(ApplyHitData);
+		REG_CMD(GetObjectMaterial);
+		REG_CMD(ApplyObjectImpact);
+		REG_CMD(InterruptWeaponAnim);
+		REG_CMD(ApplyRagdollForce);
+		REG_CMD(Set3rdPersonOverlay);
+		REG_CMD(Set3rdPersonOverlayCullParts);
 	}
 
 }
