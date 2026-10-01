@@ -11,4 +11,8 @@ public:
     TESFORM_TYPE(TESLevItem);
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESLevItem, 0x4C)
+#else
+ASSERT_SIZE(TESLevItem, 0x68)
+#endif

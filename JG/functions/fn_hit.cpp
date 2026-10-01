@@ -1,14 +1,18 @@
 #include "fn_hit.h"
 
+#include "Bethesda/Animation.hpp"
+#include "Bethesda/BSAudio.hpp"
 #include "Bethesda/BSEnums.hpp"
+#include "Bethesda/BSGameSound.hpp"
 #include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/HighProcess.hpp"
+#include "Bethesda/HitData.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
+#include "Bethesda/TES.hpp"
 #include "Bethesda/TESDataHandler.hpp"
-#include "Gamebryo/NiFixedString.hpp"
+#include "Gamebryo/NiNode.hpp"
 
 #include <GameForms.h>
-#include <GameObjects.h>
-#include <GameProcess.h>
-#include <GameSound.h>
 #include <netimmerse.h>
 #include <decoding.h>
 
@@ -20,8 +24,6 @@
 #include <limits>
 
 namespace {
-
-using ImpactSwap = TESWorldSpace::ImpactSwap;
 
 constexpr uintptr_t kAddrCreateTempEffectParticle = 0x6890B0;
 constexpr uintptr_t kAddrDecalManagerSingleton = 0x11C57F8;
@@ -37,76 +39,17 @@ constexpr uint32_t kShapeGetContainerVtableSlot = 4;
 constexpr uint32_t kShapeGetChildVtableSlot = 5;
 constexpr uint32_t kRigidBodyCenterVtableSlot = 0xF0 / 4;
 
-static_assert(sizeof(ActorHitData) == 0x64);
-static_assert(offsetof(ActorHitData, source) == 0x00);
-static_assert(offsetof(ActorHitData, target) == 0x04);
-static_assert(offsetof(ActorHitData, unk0C) == 0x0C);
-static_assert(offsetof(ActorHitData, hitLocation) == 0x10);
-static_assert(offsetof(ActorHitData, healthDmg) == 0x14);
-static_assert(offsetof(ActorHitData, wpnBaseDmg) == 0x18);
-static_assert(offsetof(ActorHitData, fatigueDmg) == 0x1C);
-static_assert(offsetof(ActorHitData, limbDmg) == 0x20);
-static_assert(offsetof(ActorHitData, weapon) == 0x30);
-static_assert(offsetof(ActorHitData, healthPerc) == 0x34);
-static_assert(offsetof(ActorHitData, impactPos) == 0x38);
-static_assert(offsetof(ActorHitData, impactAngle) == 0x44);
-static_assert(offsetof(ActorHitData, flags) == 0x58);
-static_assert(offsetof(ActorHitData, dmgMult) == 0x5C);
-static_assert(sizeof(TESObjectWEAP) == 0x388);
-static_assert(offsetof(TESObjectWEAP, weaponSkill) == 0x15C);
-static_assert(offsetof(TESObjectWEAP, impactDataSet) == 0x24C);
-static_assert(sizeof(BGSImpactData) == 0x78);
-static_assert(offsetof(BGSImpactData, model) == 0x18);
-static_assert(offsetof(BGSImpactData, effectDuration) == 0x30);
-static_assert(offsetof(BGSImpactData, angleThreshold) == 0x38);
-static_assert(offsetof(BGSImpactData, placementRadius) == 0x3C);
-static_assert(offsetof(BGSImpactData, textureSet) == 0x48);
-static_assert(offsetof(BGSImpactData, sound1) == 0x4C);
-static_assert(offsetof(BGSImpactData, sound2) == 0x50);
-static_assert(offsetof(BGSImpactData, decalMaxWidth) == 0x58);
-static_assert(offsetof(BGSImpactData, decalMaxHeight) == 0x60);
-static_assert(offsetof(BGSImpactData, decalDepth) == 0x64);
-static_assert(offsetof(BGSImpactData, decalShininess) == 0x68);
-static_assert(offsetof(BGSImpactData, parallaxScale) == 0x6C);
-static_assert(offsetof(BGSImpactData, parallaxPasses) == 0x70);
-static_assert(offsetof(BGSImpactData, decalFlags) == 0x71);
-static_assert(offsetof(BGSImpactData, decalColor) == 0x74);
-static_assert(sizeof(BGSImpactDataSet) == 0x4C);
-static_assert(offsetof(BGSImpactDataSet, impactDatas) == 0x1C);
-static_assert(sizeof(TESSound) == 0x68);
-static_assert(offsetof(TESForm, uiFormID) == 0x0C);
-static_assert(sizeof(BSSoundHandle) == 0x0C);
-static_assert(offsetof(BSSoundHandle, uiSoundID) == 0x00);
-static_assert(offsetof(TESNPC, impactMaterialType) == 0x1E4);
-static_assert(offsetof(TESCreature, materialType) == 0x148);
-static_assert(sizeof(Animation) == 0x12C);
-static_assert(offsetof(Animation, unk0D8) == 0xD8);
-static_assert(offsetof(Animation, animSequence) == 0xE0);
-static_assert(offsetof(BaseProcess, processLevel) == 0x28);
-static_assert(offsetof(HighProcess, animData) == 0x1C0);
-static_assert(offsetof(HighProcess, currentAction) == 0x2EC);
-static_assert(offsetof(TESObjectREFR, baseForm) == 0x20);
-static_assert(offsetof(TESObjectREFR, pos) == 0x30);
-static_assert(offsetof(TESObjectREFR, parentCell) == 0x40);
-static_assert(offsetof(TESObjectREFR, extraDataList) == 0x44);
-static_assert(offsetof(TESObjectREFR, renderState) == 0x64);
-static_assert(offsetof(TESObjectREFR::RenderState, rootNode) == 0x14);
-static_assert(offsetof(MobileObject, baseProcess) == 0x68);
-static_assert(sizeof(NiAVObject) == 0x9C);
-static_assert(offsetof(NiAVObject, m_spCollisionObject) == 0x1C);
-static_assert(offsetof(NiAVObject, m_kWorld) == 0x68);
-
 static bool IsFinite3(float afX, float afY, float afZ) {
 	return std::isfinite(afX) && std::isfinite(afY) && std::isfinite(afZ);
 }
 
-static NiPoint3 GetActorHitWorldPos(Actor* apActor, BODY_PART_TYPE aeLocation, NiNode** appRootOut) {
+static NiPoint3 GetActorHitWorldPos(Actor* apActor, BODY_PART_TYPE aeLocation, NiAVObject** appRootOut) {
 	// Get3DSimple, not Get3D. The player override returns the 1st person arms in 1st person.
-	NiNode* pScene = apActor->Get3DSimple();
+	NiAVObject* pScene = apActor->Get3DSimple();
 	if (appRootOut)
 		*appRootOut = pScene;
 	if (pScene) {
-		NiAVObject* pBone = apActor->baseProcess->GetDamageNode(aeLocation);
+		NiAVObject* pBone = apActor->GetCurrentAIProcess()->GetDamageNode(aeLocation);
 		if (pBone)
 			return pBone->m_kWorld.m_kTranslate;
 
@@ -120,7 +63,7 @@ static NiPoint3 HitFXDirection(Actor* apAttacker, const NiPoint3& arPos) {
 	if (!apAttacker)
 		return NiPoint3::UNIT_Y;
 
-	NiPoint3 kDir = apAttacker->pos - arPos;
+	NiPoint3 kDir = apAttacker->GetPosition() - arPos;
 	kDir.Unitize();
 	if (kDir == NiPoint3::ZERO)
 		return NiPoint3::UNIT_Y;
@@ -131,23 +74,19 @@ static int32_t MaterialTypeToImpactData(uint32_t aeHavokMaterial) {
 	return CdeclCall<int32_t>(0x58E8F0, aeHavokMaterial);
 }
 
-static int32_t __fastcall GetActorBodyMaterial(Actor* apActor) {
-	TESActorBase* pBase = static_cast<TESActorBase*>(apActor->baseForm);
+static IMPACT_MATERIAL_TYPE __fastcall GetActorBodyMaterial(Actor* apActor) {
+	TESActorBase* pBase = apActor->GetActorBase();
 	if (!pBase)
-		return -1;
+		return IMPACT_MATERIAL_TYPE::NONE;
 
-	return pBase->baseData.GetBloodImpactMaterial();
+	return pBase->GetBloodImpactMaterial();
 }
 
 static void PlayImpactSound(TESSound* apSound, const NiPoint3& arPos, NiAVObject* apNode) {
 	if (!apSound || !apSound->uiFormID)
 		return;
 	
-	BSWin32Audio* pAudio = BSWin32Audio::GetSingleton();
-	if (!pAudio)
-		return;
-
-	BSSoundHandle kHandle = pAudio->GetSoundHandleByFormID(apSound->uiFormID, BSAudioManager::kAudioFlags_3D | BSAudioManager::kAudioFlags_100);
+	BSSoundHandle kHandle = BSAudio::GetSingleton()->GetSoundHandleByFormID(apSound->uiFormID, BSGameSound::TypeFlags::IS_3D | BSGameSound::TypeFlags::ONE_SHOT);
 	if (kHandle.uiSoundID == 0xFFFFFFFF)
 		return;
 
@@ -162,11 +101,11 @@ static void PlayImpactParticle(TESObjectCELL* apCell, BGSImpactData* apImpact, c
 	if (!apCell)
 		return;
 
-	const char* pModelPath = apImpact->model.GetModel();
+	const char* pModelPath = apImpact->GetModel();
 	if (!pModelPath || !pModelPath[0])
 		return;
 
-	CdeclCall(kAddrCreateTempEffectParticle, apCell, apImpact->effectDuration, pModelPath, arDir, arPos, 1.f, 7, nullptr);
+	CdeclCall(kAddrCreateTempEffectParticle, apCell, apImpact->GetEffectDuration(), pModelPath, arDir, arPos, 1.f, 7, nullptr);
 }
 
 struct GeometryDecalCreateData {
@@ -210,7 +149,7 @@ static_assert(offsetof(GeometryDecalCreateData, pParentCell) == 0x48);
 static_assert(offsetof(GeometryDecalCreateData, uiHitLocationFlags) == 0x6C);
 
 static void AddActorBloodDecal(Actor* apTarget, NiAVObject* apNode, BGSImpactData* apImpact, int32_t aiLocation, const NiPoint3& arPos, const NiPoint3& arDir) {
-	if (!apNode || !apImpact->textureSet || !apTarget->parentCell)
+	if (!apNode || !apImpact->GetDecalTextureSet() || !apTarget->GetParentCell())
 		return;
 
 	GeometryDecalCreateData kData;
@@ -219,49 +158,49 @@ static void AddActorBloodDecal(Actor* apTarget, NiAVObject* apNode, BGSImpactDat
 	kData.kPoint18 = arDir;
 	kData.pActor = apTarget;
 	kData.pNode = apNode;
-	kData.pTextureSet = apImpact->textureSet;
-	kData.fWidth = apImpact->decalMaxWidth;
-	kData.fHeight = apImpact->decalMaxHeight;
-	kData.fDepth = apImpact->decalDepth > 0.f ? apImpact->decalDepth : 48.f;
-	kData.fParallaxScale = apImpact->parallaxScale;
-	kData.fSpecular = apImpact->decalShininess;
-	kData.fEpsilon = apImpact->angleThreshold;
-	kData.fPlacementRadius = apImpact->placementRadius;
-	kData.fColorR = static_cast<float>(apImpact->decalColor & 0xFF) / 255.f;
-	kData.fColorG = static_cast<float>((apImpact->decalColor >> 8) & 0xFF) / 255.f;
-	kData.fColorB = static_cast<float>((apImpact->decalColor >> 16) & 0xFF) / 255.f;
+	kData.pTextureSet = apImpact->GetDecalTextureSet();
+	kData.fWidth = apImpact->GetDecalMaxWidth();
+	kData.fHeight = apImpact->GetDecalMaxHeight();
+	kData.fDepth = apImpact->GetDecalDepth() > 0.f ? apImpact->GetDecalDepth() : 48.f;
+	kData.fParallaxScale = apImpact->GetDecalParallaxScale();
+	kData.fSpecular = apImpact->GetDecalShininess();
+	kData.fEpsilon = apImpact->GetDecalAngleThreshold();
+	kData.fPlacementRadius = apImpact->GetPlacementRadius();
+	kData.fColorR = static_cast<float>(apImpact->GetDecalColor() & 0xFF) / 255.f;
+	kData.fColorG = static_cast<float>((apImpact->GetDecalColor() >> 8) & 0xFF) / 255.f;
+	kData.fColorB = static_cast<float>((apImpact->GetDecalColor() >> 16) & 0xFF) / 255.f;
 	kData.uiHitLocationFlags = 1u << aiLocation;
-	kData.ucParallax = (apImpact->decalFlags & 1) ? 1 : 0;
-	kData.ucAlphaBlend = (apImpact->decalFlags & 2) ? 1 : 0;
-	kData.ucAlphaTest = (apImpact->decalFlags & 4) ? 1 : 0;
-	kData.ucParallaxPasses = apImpact->parallaxPasses;
+	kData.ucParallax = apImpact->GetIsParallax();
+	kData.ucAlphaBlend = apImpact->GetAlphaBlending();
+	kData.ucAlphaTest = apImpact->GetAlphaTesting();
+	kData.ucParallaxPasses = apImpact->GetDecalParallaxPasses();
 	kData.ucModelSpace = 1;
 
-	ThisCall(0x4A3FE0, apTarget->parentCell, &kData, 2, false);
+	ThisCall(0x4A3FE0, apTarget->GetParentCell(), &kData, 2, false);
 }
 
-static void SpawnActorHitFX(Actor* apTarget, Actor* apAttacker, TESObjectWEAP* apWeapon, BODY_PART_TYPE aiLocation, int32_t aiMaterial, bool abBlood, bool abSound) {
-	if ((!abBlood && !abSound) || !apWeapon || !apWeapon->impactDataSet || !apTarget->parentCell)
+static void SpawnActorHitFX(Actor* apTarget, Actor* apAttacker, TESObjectWEAP* apWeapon, BODY_PART_TYPE aeBodyPart, IMPACT_MATERIAL_TYPE aeMaterial, bool abBlood, bool abSound) {
+	if ((!abBlood && !abSound) || !apWeapon || !apWeapon->GetImpactDataSet() || !apTarget->GetParentCell())
 		return;
 
-	if (aiMaterial < 0 || aiMaterial >= ImpactSwap::eMT_Max)
+	if (aeMaterial < 0 || aeMaterial >= ImpactSwap::FootstepMaterialType::COUNT)
 		return;
 
-	BGSImpactData* pImpact = apWeapon->impactDataSet->impactDatas[aiMaterial];
+	BGSImpactData* pImpact = apWeapon->GetImpactDataSet()->GetImpactData(aeMaterial);
 	if (!pImpact)
 		return;
 
-	NiNode* pNode = nullptr;
-	const NiPoint3 kPos = GetActorHitWorldPos(apTarget, aiLocation, &pNode);
+	NiAVObject* pNode = nullptr;
+	const NiPoint3 kPos = GetActorHitWorldPos(apTarget, aeBodyPart, &pNode);
 	const NiPoint3 kDir = HitFXDirection(apAttacker, kPos);
 
 	if (abBlood && apTarget->HasBlood()) {
-		PlayImpactParticle(apTarget->parentCell, pImpact, kPos, kDir);
-		AddActorBloodDecal(apTarget, pNode, pImpact, aiLocation, kPos, kDir);
+		PlayImpactParticle(apTarget->GetParentCell(), pImpact, kPos, kDir);
+		AddActorBloodDecal(apTarget, pNode, pImpact, aeBodyPart, kPos, kDir);
 	}
 	if (abSound) {
-		PlayImpactSound(pImpact->sound1, kPos, pNode);
-		PlayImpactSound(pImpact->sound2, kPos, pNode);
+		PlayImpactSound(pImpact->GetSoundA(), kPos, pNode);
+		PlayImpactSound(pImpact->GetSoundB(), kPos, pNode);
 	}
 }
 
@@ -281,10 +220,10 @@ bool Cmd_ApplyHitData_Execute(COMMAND_ARGS) {
 		return true;
 
 	Actor* pTarget = static_cast<Actor*>(thisObj);
-	if (!pTarget->IsActor() || !pTarget->baseProcess)
+	if (!pTarget->IsActor() || !pTarget->GetCurrentAIProcess())
 		return true;
 
-	TESActorBase* pTargetBase = static_cast<TESActorBase*>(pTarget->baseForm);
+	TESActorBase* pTargetBase = pTarget->GetActorBase();
 	if (!pTargetBase)
 		return true;
 
@@ -304,7 +243,7 @@ bool Cmd_ApplyHitData_Execute(COMMAND_ARGS) {
 	if (eHitLocation < BODY_PART_TYPE::NONE || eHitLocation > BODY_PART_TYPE::BRAIN)
 		eHitLocation = BODY_PART_TYPE::NONE;
 
-	if (pAttacker && (!pAttacker->IsActor() || !pAttacker->baseProcess))
+	if (pAttacker && (!pAttacker->IsActor() || !pAttacker->GetCurrentAIProcess()))
 		return true;
 
 	if (pWeaponForm && !pWeaponForm->IsWeapon())
@@ -312,27 +251,25 @@ bool Cmd_ApplyHitData_Execute(COMMAND_ARGS) {
 
 	TESObjectWEAP* pWeapon = ResolveHitWeapon(pWeaponForm);
 
-	ActorHitData kHit;
-	kHit.source = pAttacker;
-	kHit.target = pTarget;
-	kHit.unk0C = pWeapon ? pWeapon->weaponSkill : kAVCode_Unarmed;
-	kHit.hitLocation = eHitLocation;
-	kHit.healthDmg = fHealth;
-	kHit.wpnBaseDmg = fHealth;
-	kHit.fatigueDmg = fFatigue;
-	kHit.limbDmg = fLimb;
-	kHit.weapon = pWeapon;
-	kHit.healthPerc = pWeapon ? 1.f : 0.f;
-	kHit.impactPos = GetActorHitWorldPos(pTarget, eHitLocation, nullptr);
-	kHit.impactAngle = pAttacker
-		? HitFXDirection(pTarget, pAttacker->pos)
-		: NiPoint3(0.f, 0.f, 1.f);
-	kHit.flags = uiFlags;
-	kHit.dmgMult = 1.f;
+	HitData* pHitData = new HitData();
+	pHitData->pSource = pAttacker;
+	pHitData->pTarget = pTarget;
+	pHitData->eWeaponSkill = pWeapon ? pWeapon->GetWeaponSkill() : ActorValue::Index::UNARMED;
+	pHitData->eDamageLimb = eHitLocation;
+	pHitData->fHealthDamage = fHealth;
+	pHitData->fBaseWeaponDamage = fHealth;
+	pHitData->fFatigueDamage = fFatigue;
+	pHitData->fLimbDamage = fLimb;
+	pHitData->pWeapon = pWeapon;
+	pHitData->fHealthPercent = pWeapon ? 1.f : 0.f;
+	pHitData->kImpactPos = GetActorHitWorldPos(pTarget, eHitLocation, nullptr);
+	pHitData->kImpactAngle = pAttacker ? HitFXDirection(pTarget, pAttacker->GetPosition()) : NiPoint3::UNIT_Z;
+	pHitData->uiFlags = uiFlags;
+	pHitData->fDamageMult = 1.f;
 
-	NiPointer<ActorHitData> spHitData(&kHit);
+	NiPointer<HitData> spHitData(pHitData);
 
-	BaseProcess* pProc = pTarget->baseProcess;
+	BaseProcess* pProc = pTarget->GetCurrentAIProcess();
 	bool bCopiedHitData = false;
 	pProc->SetLastHitData(spHitData);
 	if (pAttacker)
@@ -348,11 +285,11 @@ bool Cmd_ApplyHitData_Execute(COMMAND_ARGS) {
 	if (fLimb > 0.f && eHitLocation >= 0) {
 		BGSBodyPart* pBodyPart = pBodyPartData->GetBodyPart(eHitLocation);
 		if (pBodyPart)
-			pTarget->DamageActorValue(pBodyPart->GetActorValue(), -fLimb, pAttacker);
+			pTarget->DamageModActorValueF(static_cast<ActorValue::Index>(pBodyPart->GetActorValue()), -fLimb, pAttacker);
 
 	}
 	if (bFireOnHit) {
-		ExtraDataList* pExtra = &pTarget->extraDataList;
+		ExtraDataList* pExtra = pTarget->GetExtra();
 		if (pAttacker)
 			Script::SetActionFlag(pAttacker, pExtra, 0x80);
 		if (pWeapon)
@@ -363,13 +300,13 @@ bool Cmd_ApplyHitData_Execute(COMMAND_ARGS) {
 		pTarget->AttackAlarm(pAttacker, false);
 
 	if (fFatigue > 0.f)
-		pTarget->DamageActorValue(kAVCode_Fatigue, -fFatigue, pAttacker);
+		pTarget->DamageModActorValueF(ActorValue::Index::FATIGUE, -fFatigue, pAttacker);
 
-	if (pWeaponForm && pWeapon && pWeapon->impactDataSet && (bFireBlood || bFireSound)) {
+	if (pWeaponForm && pWeapon && pWeapon->GetImpactDataSet() && (bFireBlood || bFireSound)) {
 		BODY_PART_TYPE eBloodLoc = (eHitLocation >= 0) ? eHitLocation : BODY_PART_TYPE::TORSO;
-		int32_t iMaterial = GetActorBodyMaterial(pTarget);
-		if (iMaterial >= 0) {
-			SpawnActorHitFX(pTarget, pAttacker, pWeapon, eBloodLoc, iMaterial, bFireBlood != 0, bFireSound != 0);
+		IMPACT_MATERIAL_TYPE eMaterial = GetActorBodyMaterial(pTarget);
+		if (eMaterial >= 0) {
+			SpawnActorHitFX(pTarget, pAttacker, pWeapon, eBloodLoc, eMaterial, bFireBlood != 0, bFireSound != 0);
 		}
 	}
 
@@ -616,13 +553,13 @@ static void __cdecl FirstMaterialCallback(bhkNiCollisionObject* apCollisionObjec
 	}
 }
 
-static int32_t GetObjectImpactMaterial(TESObjectREFR* apRef) {
+static IMPACT_MATERIAL_TYPE GetObjectImpactMaterial(TESObjectREFR* apRef) {
 	if (apRef->IsActor())
 		return GetActorBodyMaterial(static_cast<Actor*>(apRef));
 
 	NiAVObject* pRoot = apRef->Get3D();
 	if (!pRoot)
-		return -1;
+		return IMPACT_MATERIAL_TYPE::NONE;
 	bhkWorld::ObjectRecData kData;
 	kData.bRecurse = true;
 	kData.eAction = 0;
@@ -630,7 +567,7 @@ static int32_t GetObjectImpactMaterial(TESObjectREFR* apRef) {
 	bhkWorld::DoObjectRec(pRoot, kData, FirstMaterialCallback);
 	if (kData.uData[0].i < 0)
 		kData.uData[0].i = CollisionObjectMaterial(pRoot->m_spCollisionObject);
-	return kData.uData[0].i;
+	return static_cast<IMPACT_MATERIAL_TYPE>(kData.uData[0].i);
 }
 
 }
@@ -665,7 +602,7 @@ bool Cmd_ApplyObjectImpact_Execute(COMMAND_ARGS) {
 	if (!thisObj)
 		return true;
 
-	int32_t iMaterial = -1;
+	IMPACT_MATERIAL_TYPE iMaterial = IMPACT_MATERIAL_TYPE::NONE;
 	TESForm* pWeaponForm = nullptr;
 	uint32_t bSound = 1, bParticle = 1;
 	float fPosX = 3.0e38f, fPosY = 3.0e38f, fPosZ = 3.0e38f;
@@ -680,29 +617,30 @@ bool Cmd_ApplyObjectImpact_Execute(COMMAND_ARGS) {
 		return true;
 
 	TESObjectWEAP* pWeapon = ResolveHitWeapon(pWeaponForm);
-	if (!pWeapon || !pWeapon->impactDataSet)
+	if (!pWeapon || !pWeapon->GetImpactDataSet())
 		return true;
 
 	if (iMaterial < 0)
 		iMaterial = GetObjectImpactMaterial(thisObj);
-	if (iMaterial < 0 || iMaterial >= ImpactSwap::eMT_Max)
+
+	if (iMaterial < 0 || iMaterial >= IMPACT_MATERIAL_TYPE::COUNT)
 		return true;
 
-	BGSImpactData* pImpact = pWeapon->impactDataSet->impactDatas[iMaterial];
+	BGSImpactData* pImpact = pWeapon->GetImpactDataSet()->GetImpactData(iMaterial);
 	if (!pImpact)
 		return true;
 
 	NiPoint3 kPos = (fPosX > 1.0e38f || fPosY > 1.0e38f || fPosZ > 1.0e38f)
-		? thisObj->pos
+		? thisObj->GetPosition()
 		: NiPoint3(fPosX, fPosY, fPosZ);
 	const NiPoint3 kDir = HitFXDirection(
 		reinterpret_cast<Actor*>(PlayerCharacter::GetSingleton()), kPos);
 
 	if (bParticle)
-		PlayImpactParticle(thisObj->parentCell, pImpact, kPos, kDir);
+		PlayImpactParticle(thisObj->GetParentCell(), pImpact, kPos, kDir);
 	if (bSound) {
-		PlayImpactSound(pImpact->sound1, kPos, nullptr);
-		PlayImpactSound(pImpact->sound2, kPos, nullptr);
+		PlayImpactSound(pImpact->GetSoundA(), kPos, nullptr);
+		PlayImpactSound(pImpact->GetSoundB(), kPos, nullptr);
 	}
 	*result = iMaterial;
 	return true;
@@ -714,21 +652,21 @@ bool Cmd_InterruptWeaponAnim_Execute(COMMAND_ARGS) {
 		return true;
 
 	Actor* pActor = static_cast<Actor*>(thisObj);
-	if (!pActor->IsActor() || !pActor->baseProcess)
+	if (!pActor->IsActor() || !pActor->GetCurrentAIProcess())
 		return true;
 
-	HighProcess* pProc = static_cast<HighProcess*>(pActor->baseProcess);
+	HighProcess* pProc = static_cast<HighProcess*>(pActor->GetCurrentAIProcess());
 
-	if (pProc->processLevel != 0)
+	if (pProc->GetProcessLevel() != PROCESS_LEVEL::HIGH)
 		return true;
 
-	Animation* pAnimation = pProc->animData;
+	Animation* pAnimation = pProc->GetAnimation();
 	if (!pAnimation)
 		return true;
 
-	const int16_t sOldAction = pProc->currentAction;
+	const ANIMATION_ACTION sOldAction = pProc->GetAnimAction();
 	// Never clear an attack sequence. The queued melee task does not null-check it.
-	if (sOldAction >= HighProcess::kAnimAction_Attack && sOldAction <= HighProcess::kAnimAction_Attack_Throw_Release) {
+	if (pActor->IsAttacking()) {
 		*result = -3;
 		return true;
 	}
@@ -819,7 +757,7 @@ bool Cmd_ApplyRagdollForce_Execute(COMMAND_ARGS) {
 		return true;
 
 	Actor* pActor = static_cast<Actor*>(thisObj);
-	if (!pActor->IsActor() || !pActor->baseProcess)
+	if (!pActor->IsActor() || !pActor->GetCurrentAIProcess())
 		return true;
 
 	// Get3DSimple, not Get3D. The player override returns the 1st person arms in 1st person.

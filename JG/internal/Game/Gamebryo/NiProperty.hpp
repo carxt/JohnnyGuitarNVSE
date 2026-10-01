@@ -11,19 +11,22 @@ public:
 	NiProperty();
 	virtual ~NiProperty();
 
-	enum PropertyType : uint32_t {
-		ALPHA,
-		CULLING,
-		MATERIAL,
-		SHADE,
-		STENCIL,
-		TEXTURING,
-		WIREFRAME,
-		MAX_TYPES
+	struct _Type {
+		enum Type : uint32_t {
+			ALPHA,
+			CULLING,
+			MATERIAL,
+			SHADE,
+			STENCIL,
+			TEXTURING,
+			WIREFRAME,
+			COUNT
+		};
 	};
+	using Type = _Type::Type;
 
-	virtual PropertyType	Type() const;
-	virtual void			Update(NiUpdateData& arUpdateData);
+	virtual Type	GetType() const;
+	virtual void	Update(NiUpdateData& arData);
 
 	NIRTTI_ADDRESS(0x11F4420);
 };

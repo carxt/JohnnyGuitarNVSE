@@ -318,12 +318,12 @@ public:
 
 	uint32_t		eMaterialType;
 
-	HavokMaterialType GetMaterial() const {
-		return ThisCall<HavokMaterialType>(0x6205A0, this);
+	HK_MATERIAL_TYPE GetMaterial() const {
+		return ThisCall<HK_MATERIAL_TYPE>(0x6205A0, this);
 	}
 
-	HavokMaterialType GetSubshapeMaterial(uint32_t auiKey) const {
-		return ThisCall<HavokMaterialType>(0xC84F10, this, auiKey);
+	HK_MATERIAL_TYPE GetSubshapeMaterial(uint32_t auiKey) const {
+		return ThisCall<HK_MATERIAL_TYPE>(0xC84F10, this, auiKey);
 	}
 
 	static bhkShape* Getbhk(const hkpShape* apShape) {
@@ -1263,6 +1263,14 @@ public:
 	virtual void	Unk_3F(void);
 
 	uint32_t			unk14[2];		// 14
+
+	uint32_t GetMotionType() const {
+		return ThisCall<uint32_t>(0x517630, this);
+	}
+
+	static bool IsMotionTypeDynamic(const uint32_t& arMotionType) {
+		return CdeclCall<bool>(0xC8CCE0, &arMotionType);
+	}
 };
 
 // 50

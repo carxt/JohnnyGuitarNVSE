@@ -4,39 +4,7 @@
 #include "internal/md5/md5.h"
 #include "internal/sha1/sha1.h"
 #include <time.h>
-void LightCS::Enter() {
-	uint32_t threadID = GetCurrentThreadId();
-	if (owningThread == threadID) {
-		enterCount++;
-		return;
-	}
-	while (InterlockedCompareExchange(&owningThread, threadID, 0));
-	enterCount = 1;
-}
 
-#define FAST_SLEEP_COUNT 10000UL
-
-void LightCS::EnterSleep() {
-	uint32_t threadID = GetCurrentThreadId();
-	if (owningThread == threadID) {
-		enterCount++;
-		return;
-	}
-	uint32_t fastIdx = FAST_SLEEP_COUNT;
-	while (InterlockedCompareExchange(&owningThread, threadID, 0)) {
-		if (fastIdx) {
-			fastIdx--;
-			Sleep(0);
-		}
-		else Sleep(1);
-	}
-	enterCount = 1;
-}
-
-void LightCS::Leave() {
-	if (!--enterCount)
-		owningThread = 0;
-}
 bool fCompare(float lval, float rval) {
 	return fabs(lval - rval) < FLT_EPSILON;
 }
@@ -1282,14 +1250,4 @@ void GetSHA1File(const char* filePath, char* outHash) {
 		sprintf_s(outHash, 3, "%02X", digest[idx]);
 
 	BSMemory::free(digest);
-}
-
-// Taken from xNVSE
-uint8_t* GetParentBasePtr(void* addressOfReturnAddress, bool lambda) {
-	auto* basePtr = static_cast<uint8_t*>(addressOfReturnAddress) - 4;
-#if _DEBUG
-	if (lambda) // in debug mode, lambdas are wrapped inside a closure wrapper function, so one more step needed
-		basePtr = *reinterpret_cast<uint8_t**>(basePtr);
-#endif
-	return *reinterpret_cast<uint8_t**>(basePtr);
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-typedef void* (*_Fallout_DynamicCast)(const void* inptr, int VfDelta, const void* SrcType, const void* TargetType, int isReference);
+using _Fallout_DynamicCast = void*(__cdecl*)(const void* inptr, int VfDelta, const void* SrcType, const void* TargetType, int isReference);
 
 #ifdef GAME
 #include "GameRTTI_1_4_0_525.inc"

@@ -1,5 +1,6 @@
 #pragma once
 
+using FormID = uint32_t;
 class TESWorldSpace;
 class TESObjectLAND;
 
@@ -9,7 +10,7 @@ namespace LandRemapping {
 
 	void Reset();
 
-	void __fastcall RemapLand(uint32_t auiLandFormID, const TESWorldSpace* apWorld, int16_t asX, int16_t asY);
+	void __fastcall RemapLand(FormID auiLandFormID, const TESWorldSpace* apWorld, int16_t asX, int16_t asY);
 
 	void __fastcall ReloadModel(TESObjectLAND* apLand, bool abLoad);
 

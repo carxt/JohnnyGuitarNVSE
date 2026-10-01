@@ -13,31 +13,40 @@
 #include "functions/fn_math.h"
 #include "functions/fn_mediaset.h"
 #include "functions/fn_region.h"
+#include "functions/fn_sound.h"
 #include "functions/fn_terminal.h"
 #include "functions/fn_ui.h"
 #include "functions/fn_utility.h"
 
 #include "JG/JohnnyPluginData.hpp"
+#ifdef GAME
 #include "JG/DisabledSaves.hpp"
 #include "JG/CustomHUDShake.hpp"
 #include "JG/AnimActivationHeight.hpp"
+#include "JG/ExternalEmittanceOnBases.hpp"
+#include "JG/FilteredBarberMenu.hpp"
+#include "JG/PlayerBodyOverlay.hpp"
+
+ExpressionEvaluatorUtils s_expEvalUtils;
+#endif
 
 #define REG_CMD(name) apNVSE->RegisterCommand(&kCommandInfo_##name);
 #define REG_TYPED_CMD(name, type) apNVSE->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 
-ExpressionEvaluatorUtils s_expEvalUtils;
-
 namespace JohnnyCommands {
 
-	void InitCommandData() {
+	void InitCommandData(const NVSEInterface* apNVSE) {
+#ifdef GAME
 		AnimActivationHeight::Init();
+		ExternalEmittanceOnBases::Install();
+		FilteredBarberMenu::Install();
+		PlayerBodyOverlay::Install();
+		apNVSE->InitExpressionEvaluatorUtils(&s_expEvalUtils);
+#endif
 	}
 
 	void Init(const NVSEInterface* apNVSE) {
-		if (apNVSE->isEditor == 0) {
-			InitCommandData();
-			apNVSE->InitExpressionEvaluatorUtils(&s_expEvalUtils);
-		}
+		InitCommandData(apNVSE);
 
 		apNVSE->SetOpcodeBase(JohnnyPluginData::JG_OPCODE_BASE);
 
@@ -435,6 +444,19 @@ namespace JohnnyCommands {
 		REG_CMD(GetNiLightValue);
 		REG_CMD(SetNiLightColor);
 		REG_CMD(GetNiLightColor);
+		REG_CMD(ReloadEquippedModelsAlt);
+		REG_CMD(ar_IsFormInList);
+		REG_TYPED_CMD(GetExternalEmittanceSource, Form);
+		REG_CMD(SetExternalEmittanceSource);
+		REG_TYPED_CMD(GetProjectileMuzzleFlashLight, Form);
+		REG_CMD(SetProjectileMuzzleFlashLight);
+		REG_CMD(SetShaderPropertyFlag);
+		REG_CMD(GetShaderPropertyFlag);
+		REG_TYPED_CMD(GetCustomReputationChangeIcon, String);
+		REG_TYPED_CMD(GetReputationTitle, String);
+		REG_TYPED_CMD(GetReputationIcon, String);
+		REG_TYPED_CMD(GetReputationFormIcon, String);
+		REG_CMD(SetReputationFormIcon);
 		REG_CMD(ApplyHitData);
 		REG_CMD(GetObjectMaterial);
 		REG_CMD(ApplyObjectImpact);

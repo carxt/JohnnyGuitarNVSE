@@ -1,10 +1,6 @@
 #pragma once
 #include "fn_common.h"
 
-#include "Bethesda/BSUtilities.hpp"
-#include "Bethesda/AILinearTaskThreadManager.hpp"
-#include <GameObjects.h>
-
 DEFINE_COMMAND_PLUGIN(SetAlphaPropertyValue, , true, kParams_SetPropertyValue);
 DEFINE_COMMAND_PLUGIN(GetAlphaPropertyValue, , true, kParams_GetPropertyValue);
 DEFINE_COMMAND_PLUGIN(SetStencilPropertyValue, , true, kParams_SetPropertyValue);
@@ -25,3 +21,5 @@ DEFINE_COMMAND_PLUGIN(SetNiLightValue, , true, kParams_SetNiLightValue);
 DEFINE_COMMAND_PLUGIN(GetNiLightValue, , true, kParams_GetPropertyValue);
 DEFINE_COMMAND_PLUGIN(SetNiLightColor, , true, kParams_SetNiLightColor);
 DEFINE_COMMAND_PLUGIN(GetNiLightColor, , true, kParams_GetNiLightColor);
+DEFINE_COMMAND_PLUGIN(SetShaderPropertyFlag, , true, kParams_SetPropertyValue);
+DEFINE_COMMAND_PLUGIN(GetShaderPropertyFlag, , true, kParams_GetPropertyValue);

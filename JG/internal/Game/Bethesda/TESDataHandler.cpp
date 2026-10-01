@@ -13,6 +13,11 @@ BSSimpleList<TESFile*>* TESDataHandler::GetFileList() {
 	return &kFiles;
 }
 
+// GAME - 0x740940
+TESRegionDataManager* TESDataHandler::GetRegionDataManager() const {
+	return pRegionDataManager;
+}
+
 // GAME - 0x4603B0
 // GECK - 0x4DA6C0
 bool TESDataHandler::AddFormToDataHandler(TESForm* apForm) {

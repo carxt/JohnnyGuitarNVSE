@@ -18,6 +18,8 @@ public:
 	const char* GetFullName() const;
 	static const char* GetFullName(const TESForm* apForm);
 
+	void SetFullName(const char* apName);
+
 	uint32_t GetFullNameLength() const;
 	static uint32_t GetFullNameLength(const TESForm* apForm);
 };

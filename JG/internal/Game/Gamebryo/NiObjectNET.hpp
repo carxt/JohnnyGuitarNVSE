@@ -32,7 +32,7 @@ public:
 	static constexpr AddressPtr<NiCriticalSection, 0xF1FE80> kExtraDataLock;
 #endif
 
-	const char* GetName() const { return m_kName.m_kHandle; };
+	const NiFixedString& GetName() const { return m_kName; };
 	void SetName(const NiFixedString& arString) { m_kName = arString;	};
 
 	NiTimeController* GetControllers() const { return m_spControllers; };
@@ -42,8 +42,10 @@ public:
 		return static_cast<ControllerType*>(GetController(&ControllerType::ms_RTTI));
 	}
 
+	void PrependController(NiTimeController* apController);
 	void RemoveController(NiTimeController* apController);
 
+	bool HasExtraData() const;
 	NiExtraData* GetExtraData(const NiFixedString& arKey) const;
 	bool AddExtraData(NiExtraData* apExtraData);
 	bool AddExtraData(const NiFixedString& arKey, NiExtraData* apExtraData);

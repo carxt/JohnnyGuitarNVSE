@@ -28,6 +28,8 @@ public:
 
 	uint32_t GetLength() const noexcept;
 
+	uint32_t GetRefCount() const noexcept;
+
 	bool Includes(const char* apToFind) const noexcept;
 };
 

@@ -2,17 +2,14 @@
 
 #include "Bethesda/BSExtraData.hpp"
 #include "Bethesda/TESMain.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
+#include "Gamebryo/NiNode.hpp"
 #include "netimmerse.h"
 #include "utility.h"
 #include "shared/SafeWrite/SafeWrite.hpp"
+#include "shared/Utils/DebugLog.hpp"
 
-#include <GameObjects.h>
 #include <decoding.h>
-
-#include <Windows.h>
-#include <cstddef>
-#include <cmath>
-#include <cstring>
 
 namespace PlayerBodyOverlay {
 namespace {
@@ -74,7 +71,7 @@ namespace {
 	static_assert(sizeof(ExtraRefractionPropertyView) == 0x10);
 	static_assert(offsetof(ExtraRefractionPropertyView, fRefractionAmount) == 0xC);
 
-	NiNode* GetPlayerBodyRootFast() {
+	NiAVObject* GetPlayerBodyRootFast() {
 		return PlayerCharacter::GetSingleton()->Get3D(false);
 	}
 
@@ -82,7 +79,7 @@ namespace {
 		float fRefraction = 0.0f;
 		PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
 		BSExtraData* pExtra = pPlayer
-			? pPlayer->extraDataList.GetExtraData(EXTRA_DATA_TYPE::ExtraRefractionProperty)
+			? pPlayer->GetExtraData(EXTRA_DATA_TYPE::ExtraRefractionProperty)
 			: nullptr;
 		if (pExtra)
 			fRefraction = reinterpret_cast<ExtraRefractionPropertyView*>(pExtra)->fRefractionAmount;
@@ -177,7 +174,7 @@ namespace {
 				RegisterBodyGeometry(pChild, apAccum, auiDepth + 1);
 	}
 
-	bool RegisterBodyGuarded(NiNode* apBody3p, BSShaderAccumulator* apAccum) {
+	bool RegisterBodyGuarded(NiAVObject* apBody3p, BSShaderAccumulator* apAccum) {
 		RegisterBodyGeometry(apBody3p, apAccum, 0);
 		return true;
 	}
@@ -352,7 +349,7 @@ namespace {
 		return true;
 	}
 
-	bool ApplyTransformsGuarded(NiNode* apBody3p, const NiPoint3& arDelta,
+	bool ApplyTransformsGuarded(NiAVObject* apBody3p, const NiPoint3& arDelta,
 			const NiPoint3& arRotateSourcePivot, const NiPoint3& arRotateTargetPivot,
 			const NiMatrix3& arCameraDeltaRot, bool abRotateWithCamera,
 			TransformBackup* apBackups, uint32_t auiMax, uint32_t& arCount) {
@@ -512,7 +509,7 @@ namespace {
 		return true;
 	}
 
-	bool CullPartitionsGuarded(NiNode* apBody3p, const CullConfig& arConfig,
+	bool CullPartitionsGuarded(NiAVObject* apBody3p, const CullConfig& arConfig,
 			PartitionBackup* apBackups, uint32_t auiMax, uint32_t& arCount) {
 		arCount = 0;
 		uint32_t uiUnusedFlagCount = 0;
@@ -522,7 +519,7 @@ namespace {
 		return bOk;
 	}
 
-	bool ApplyCullPreviewBracket(NiNode* apBody3p, const CullConfig& arConfig,
+	bool ApplyCullPreviewBracket(NiAVObject* apBody3p, const CullConfig& arConfig,
 			PartitionBackup* apPartitionBackups, uint32_t auiMaxPartitions, uint32_t& arPartitionCount,
 			FlagBackup* apFlagBackups, uint32_t auiMaxFlags, uint32_t& arFlagCount) {
 		arPartitionCount = 0;
@@ -585,7 +582,7 @@ namespace {
 		rFlags1 = (rFlags1 | kShaderFlag1_Refraction) & ~kShaderFlag1_FireRefraction;
 		rFlags2 = (rFlags2 & ~kShaderFlag2_RefractionTint) | kShaderFlag2_FirstPerson;
 		*pRefractionPower = afRefraction;
-		pShader->InvalidateState();
+		pShader->InvalidateRenderPassState();
 		return true;
 	}
 
@@ -631,11 +628,11 @@ namespace {
 			*reinterpret_cast<float*>(
 				reinterpret_cast<uint8_t*>(pShader) + kOffShader_RefractionPower) =
 				apBackups[auiCount].fSavedRefractionPower;
-			pShader->InvalidateState();
+			pShader->InvalidateRenderPassState();
 		}
 	}
 
-	bool PatchRefractionGuarded(NiNode* apBody3p, float afRefraction, ShaderBackup* apBackups, uint32_t auiMax, uint32_t& arCount) {
+	bool PatchRefractionGuarded(NiAVObject* apBody3p, float afRefraction, ShaderBackup* apBackups, uint32_t auiMax, uint32_t& arCount) {
 		arCount = 0;
 		if (afRefraction <= 0.0f)
 			return true;
@@ -671,7 +668,7 @@ namespace {
 			InjectionState& arState, float afRefraction) {
 		if (!apCamera)
 			return;
-		NiNode* pBody3p = GetPlayerBodyRootFast();
+		NiAVObject* pBody3p = GetPlayerBodyRootFast();
 		if (!pBody3p)
 			return;
 
@@ -760,7 +757,7 @@ namespace {
 		const LONG iSuppressFrames = g_disableSuppressFrameBudget;
 		const bool bSuppressBody = g_enabled || iSuppressFrames > 0;
 		if (bSuppressBody) {
-			if (NiNode* pBody3p = GetPlayerBodyRootFast()) {
+			if (NiAVObject* pBody3p = GetPlayerBodyRootFast()) {
 				pBodyFlags = &pBody3p->m_uiFlags.GetField();
 				uiSaved = *pBodyFlags;
 				*pBodyFlags = uiSaved | kNiFlagHidden;
@@ -768,7 +765,7 @@ namespace {
 		} else {
 			const CullConfig kPreviewConfig = GetCullConfig();
 			if (kPreviewConfig.iPartMode) {
-				if (NiNode* pBody3p = GetPlayerBodyRootFast())
+				if (NiAVObject* pBody3p = GetPlayerBodyRootFast())
 					ApplyCullPreviewBracket(pBody3p, kPreviewConfig,
 						kPreviewPartitions, kPartitionMax, uiPreviewPartitionCount,
 						kPreviewFlags, kFlagMax, uiPreviewFlagCount);

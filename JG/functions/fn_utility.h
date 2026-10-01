@@ -16,7 +16,7 @@ DEFINE_COMMAND_PLUGIN(GetFormOverrideIndex, , false, kParams_OneForm);
 DEFINE_CMD_COND_PLUGIN(GetSequenceAnimGroup, , true, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(ar_SortEditor, , false, kParams_OneInt_OneOptionalInt)
 DEFINE_COMMAND_PLUGIN(SetUIUpdateSound, , false, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , false, kParams_OneInt_OneForm_OneInt);
+DEFINE_COMMAND_PLUGIN(ar_IsFormInList, , false, kParams_OneInt_OneFormList_OneInt);
 DEFINE_COMMAND_PLUGIN(IsDLLLoaded, , false, kParams_OneString_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(RefreshIdle, , true, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(ExitGameAlt, , false, nullptr);

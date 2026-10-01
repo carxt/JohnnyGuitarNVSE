@@ -1,5 +1,9 @@
 #include "ExtraUISounds.hpp"
-#include "GameSound.h"
+#include "Bethesda/BSAudio.hpp"
+#include "Bethesda/BSGameSound.hpp"
+#include "Bethesda/TESSound.hpp"
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace ExtraUISounds {
 
@@ -9,7 +13,7 @@ namespace ExtraUISounds {
 	class Hook {
 	public:
 		bool PlayQuestSound(bool abLoop) {
-			constexpr uint32_t uiSoundFlags = 0x121;
+			constexpr uint32_t uiSoundFlags = BSGameSound::TypeFlags::IS_2D | BSGameSound::TypeFlags::ONE_SHOT | BSGameSound::TypeFlags::SYSTEM_SOUND;
 
 			BSSoundHandle& rSound = *reinterpret_cast<BSSoundHandle*>(this);
 	
@@ -18,7 +22,7 @@ namespace ExtraUISounds {
 				const QuestUpdateManager::QuestUpdate* pUpdate = pIter->GetItem();
 				const QuestUpdateManager::UpdateType eType = pUpdate->eUpdateType;
 				if (eType < QuestUpdateManager::UpdateType::COUNT && uiQuestSounds[eType])
-					rSound = BSWin32Audio::GetSingleton()->GetSoundHandleByFormID(uiQuestSounds[eType], uiSoundFlags);
+					rSound = BSAudio::GetSingleton()->GetSoundHandleByFormID(uiQuestSounds[eType], uiSoundFlags);
 			}
 			return ThisCall<bool>(kPlayQuestSoundDetour, this, abLoop);
 		}

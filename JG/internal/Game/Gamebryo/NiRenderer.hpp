@@ -60,6 +60,7 @@ public:
 	NiAccumulator* GetSorter() const;
 	void SetSorter(NiAccumulator* apAccumulator);
 
+	FrameState GetFrameState() const;
 	bool GetInsideFrameState() const;
 
 	void LockRenderer();

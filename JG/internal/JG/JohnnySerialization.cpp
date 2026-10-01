@@ -2,6 +2,8 @@
 #include <JG/ExtraMiscStats.hpp>
 #include <JG/LandRemapping.hpp>
 
+#include "Shared/Utils/DebugLog.hpp"
+
 namespace JohnnySerialization {
 
 	bool (*_WriteRecord)(uint32_t type, uint32_t version, const void* buffer, uint32_t length);
@@ -27,10 +29,6 @@ namespace JohnnySerialization {
 			_OpenRecord(kRecordID_LandRemap, SERIALIZATION_VERSION);
 			LandRemapping::SerializeData(_WriteRecordData);
 		}
-	}
-
-	void PreLoadGameCallback(void*) {
-
 	}
 
 	void LoadGameCallback(void*)
@@ -71,7 +69,6 @@ namespace JohnnySerialization {
 		_ReadRecordData = serialization->ReadRecordData;
 		_ResolveFormID = serialization->ResolveRefID;
 		_OpenRecord = serialization->OpenRecord;
-		serialization->SetPreLoadCallback(nvse->GetPluginHandle(), PreLoadGameCallback);
 		serialization->SetLoadCallback(nvse->GetPluginHandle(), LoadGameCallback);
 		serialization->SetSaveCallback(nvse->GetPluginHandle(), SaveGameCallback);
 	}

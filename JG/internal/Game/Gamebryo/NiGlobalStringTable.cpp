@@ -36,6 +36,13 @@ void NiGlobalStringTable::DecRefCount(GlobalStringHandle& arHandle) noexcept {
     InterlockedDecrement(reinterpret_cast<size_t*>(GetRealBufferStart(arHandle)));
 }
 
+uint32_t NiGlobalStringTable::GetRefCount(const GlobalStringHandle& arHandle) noexcept {
+    if (!arHandle) [[unlikely]]
+        return 0;
+
+    return *reinterpret_cast<size_t*>(GetRealBufferStart(arHandle));
+}
+
 uint32_t NiGlobalStringTable::GetLength(const GlobalStringHandle& arHandle) noexcept {
     if (!arHandle) [[unlikely]]
 		return 0;

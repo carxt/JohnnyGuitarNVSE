@@ -4,19 +4,20 @@
 #include "BSStringT.hpp"
 #include "BSSimpleList.hpp"
 #include "TESFile.hpp"
-#include "FormID.hpp"
 #include "BSTCaseInsensitiveStringMap.hpp"
-#include "Gamebryo/NiTLargeArray.hpp"
+#include "Gamebryo/NiTLargePrimitiveArray.hpp"
 
 #define IS_ID(form, type) (form->GetFormType() == FORM_TYPE::##type)
 #define NOT_ID(form, type) (form->GetFormType() != FORM_TYPE::##type)
 
 class NiColor;
 class BGSSaveGameBuffer;
+class BGSSaveFormBuffer;
 class BGSLoadFormBuffer;
 class TESObjectREFR;
 class TESBoundObject;
 class Script;
+struct TESBitArrayFile;
 
 struct FORM_ENUM_STRING {
 	uint8_t			ucFormID;
@@ -42,6 +43,7 @@ public:
 	virtual bool			SavesBeforeAlt(TESForm* apForm) const;
 	virtual TESForm*		CreateDuplicateForm(bool abCreateEditorID, NiTPointerMap<TESForm*, TESForm*>* apCopyMap);
 	virtual void			PostDuplicateProcess(NiTPointerMap<TESForm*, TESForm*>* apCopyMap);
+#ifdef GAME
 	virtual void			AddChange(uint32_t auiChangedFlags);
 	virtual void			RemoveChange(uint32_t auiChangedFlags);
 	virtual uint32_t		GetSaveSize(uint32_t auiChangedFlags) const;
@@ -58,6 +60,7 @@ public:
 	virtual bool			FindInFileFast(TESFile* apFile);
 	virtual void			CheckSaveGame(BGSLoadFormBuffer* apBuffer);
 	virtual void			FinishLoadGameBGS(BGSLoadFormBuffer* apBuffer);
+#endif
 	virtual void			InitItem();
 	virtual uint32_t		GetSavedFormType() const;
 	virtual void			GetFormDetailedString(BSString& arDest) const;
@@ -67,9 +70,9 @@ public:
 	virtual bool			GetRandomAnim() const;
 	virtual bool			GetNeedtoChangeProcess() const;
 	virtual bool			GetDangerous() const;
-	virtual bool			GetHasPLSpecTex() const;
+	virtual bool			GetHasSpecificTextures() const;
 	virtual bool			GetObstacle() const;
-	virtual bool			GetContinuousBroadcast() const;
+	virtual bool			GetNavMeshGround() const;
 	virtual bool			GetOnLocalMap() const;
 	virtual void			SetCastsShadows(bool abShadowCaster);
 	virtual NiColor*		GetEmittanceColor();
@@ -79,6 +82,9 @@ public:
 	virtual void			SetHasSpokenFlag(bool abTalkedTo);
 	virtual void			SetHavokDeath(bool abDied);
 	virtual void			SetNeedToChangeProcess(bool abChange);
+#ifdef EDITOR
+	virtual uint32_t		GetNavMeshGenType() const;
+#endif
 	virtual void			SaveObjectBound() const;
 	virtual void			LoadObjectBound(TESFile* apFile);
 	virtual bool			IsBoundObject() const;
@@ -94,14 +100,52 @@ public:
 	virtual bool			Compare(TESForm* apForm);
 	virtual bool			BelongsInGroup(FORM* apGroupFORM, bool abAllowParentGroups, bool abCurrentOnly) const;
 	virtual void			CreateGroupData(FORM* apForm, FORM* apOutGroupFORM) const;
+#ifdef EDITOR
+	virtual const char*		GetFormEditorID() const;
+#endif
 	virtual bool			IsParentForm() const;
 	virtual bool			IsParentFormTree() const;
 	virtual bool			IsFormTypeChild(uint8_t aucFormType) const;
+#ifdef GAME
 	virtual bool			Activate(TESObjectREFR* apItemActivated, TESObjectREFR* apActionRef, bool abSound, TESBoundObject* apObjectToGet, int32_t aiCount);
+#else
+	virtual bool			Unk_64();
+	virtual void			Unk_65();
+	virtual bool			Unk_66();
+	virtual bool			Unk_67() const;
+	virtual bool			Unk_68();
+	virtual void			GetAssetPath(BSString& arPath);
+	virtual void			Unk_70();
+	virtual void			Unk_71();
+	virtual void			Unk_72();
+	virtual bool			Unk_73(int,int,int);
+	virtual void			Unk_74(TESForm*);
+	virtual bool			Unk_75(int);
+	virtual void			Unk_76(BSSimpleList<TESFile*>* apFiles, BSString& arString) const;
+	virtual bool			Unk_77(TESBitArrayFile* apFile, uint32_t); // Checkout?
+	virtual bool			Unk_78();
+	virtual bool			Unk_79(TESBitArrayFile* apFile); // Undo checkout?
+	virtual void			Unk_80(); // Deletes the file list
+	virtual bool			Unk_81(); // Revert or Reload
+#endif
 	virtual void			SetFormID(uint32_t auiID, bool abUpdateFile);
+#ifdef EDITOR
+	virtual void			Unk_83();
+	virtual bool			DialogCallback(HWND ahWindow, int, int, int, int*);
+	virtual bool			HasAllRequiredDlgItems(HWND ahWindow) const;
+	virtual void			LoadDialog(HWND ahWindow) const;
+	virtual void			Unk_87(HWND ahWindow);
+	virtual void			Unk_88(HWND ahWindow);
+	virtual INT_PTR			OpenDialog(HWND, bool, bool) const;
+	virtual void 			CreateDisplayString(void*) const;
+	virtual int32_t			CompareOrder(TESForm* apForm, int32_t aiMode); // -3/3 compares by TESFullName, -2/2 by FormID, -1/1 by EDID
+	virtual void			Unk_92(HWND);
+#endif
 	virtual const char*		GetObjectTypeName() const;
+#ifdef GAME
 	virtual const char*		GetFormEditorID() const;
 	virtual bool			SetFormEditorID(const char* apID);
+#endif
 
 	struct EditorData {
 		BSString	strEditorID;
@@ -179,15 +223,21 @@ public:
 	using FormFlags = _FormFlags::Flags;
 
 	uint8_t					eFormType;
-#if JIP_CHANGES
+#if USE_MODDED_CHANGES // JIP
 	Bitfield8				ucJIPFormFlags5;
 	Bitfield16				usJIPFormFlags6;
 #endif
 	Bitfield<_FormFlags>	uiFormFlags;
 	FormID					uiFormID;
+#ifdef GAME
 	BSSimpleList<TESFile*>	kFiles;
+#else
+	EditorData				kEditorData;
+	BSSimpleList<TESFile*>	kFiles;
+	bool					bUnk28;
+#endif
 
-	uint32_t	GetFormID() const;
+	FormID		GetFormID() const;
 	FORM_TYPE	GetFormType() const;
 	uint8_t		GetCompileIndex() const;
 
@@ -198,11 +248,18 @@ public:
 	const char* GetFormTypeString() const;
 
 #ifdef GAME
-	static constexpr AddressPtr<NiTPointerMap<uint32_t, TESForm*>*, 0x11C54C0>		pAllForms;
-	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0x11C54C8>	pAllFormsByEditorID;
+	static constexpr AddressPtr<NiTPointerMap<FormID, TESForm*>*, 0x11C54C0>					pAllForms;
+	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0x11C54C8>				pAllFormsByEditorID;
+	static constexpr AddressPtr<NiTLargePrimitiveArray<TESForm*>*, 0x11C54C4>					pAlteredForms;
 #else
-	static constexpr AddressPtr<NiTPointerMap<uint32_t, TESForm*>*, 0xED56CC>		pAllForms;
-	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0xED56D4>	pAllFormsByEditorID;
+	static constexpr AddressPtr<NiTPointerMap<FormID, TESForm*>*, 0xED56CC>						pAllForms;
+	static constexpr AddressPtr<BSTCaseInsensitiveStringMap<TESForm*>*, 0xED56D4>				pAllFormsByEditorID;
+	static constexpr AddressPtr<NiTLargePrimitiveArray<TESForm*>*, 0xED56D0>					pAlteredForms;
+	static constexpr AddressPtr<NiTPointerMap<TESForm*, BSSimpleList<TESForm*>*>*, 0xED56D8>	pUsageMap;
+#endif
+
+#ifdef EDITOR
+	bool SetFormEditorID(const char* apID);
 #endif
 
 	bool IsWeapon() const { return eFormType == FORM_TYPE::TESObjectWEAP; }
@@ -288,16 +345,42 @@ public:
 
 	TESFile* GetFile(int32_t aiIndex) const;
 	TESFile* GetOwnerMaster() const;
-	uint32_t GetFormIDWithoutIndex() const;
-	uint32_t GetLoadFormID() const;
+	FormID GetFormIDWithoutIndex() const;
+	FormID GetLoadFormID() const;
 	uint32_t GetFileCount() const;
 
-	static TESForm* GetFormByNumericID(uint32_t auID);
+#ifdef EDITOR
+	void AddUser(TESForm* apUser);
+	void RemoveUser(TESForm* apUser);
+	uint32_t GetUserCount() const;
+#endif
+
+	static TESForm* GetFormByNumericID(FormID auiFormID);
 	static TESForm* GetFormByEditorID(const char* apEDID);
 
-	static const FORM_ENUM_STRING* GetFormEnumString(uint8_t aucFormID);
+	static const FORM_ENUM_STRING* GetFormEnumString(uint8_t aucFormType);
 
 	static uint32_t GetFormTypeFromFormString(uint32_t auiFormString);
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESForm, 0x18);
+#else
+ASSERT_SIZE(TESForm, 0x2C);
+#endif
+
+#ifdef GAME
+// GECK uses TESFormIDListView
+using TESFormBase = TESForm;
+#else
+class TESFormIDListView : public TESForm {
+public:
+	virtual void Unk_94(HWND, const char*);
+	virtual void Unk_95(HWND);
+};
+
+ASSERT_SIZE(TESFormIDListView, sizeof(TESForm));
+
+// Game uses TESForm
+using TESFormBase = TESFormIDListView;
+#endif

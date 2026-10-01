@@ -1,14 +1,18 @@
 #include "BarterFilter.hpp"
-#include "GameExtraData.h"
 #include "GameUI.h"
 
+#include "Bethesda/ItemChange.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
+
 #include "JGSetList.hpp"
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 #include "unordered_map"
 
 namespace BarterFilter {
-	using SellerFilter = std::unordered_set<uint32_t>;
-	using ItemFilterMap = std::unordered_map<uint32_t, SellerFilter>;
+	using SellerFilter = std::unordered_set<FormID>;
+	using ItemFilterMap = std::unordered_map<FormID, SellerFilter>;
 
 	struct BarterFilters {
 		enum FilterType {
@@ -19,12 +23,12 @@ namespace BarterFilter {
 
 		ItemFilterMap kItems[FilterType::COUNT];
 
-		bool __fastcall Add(FilterType auiFilter, uint32_t auiItemFormID, uint32_t auiSellerFormID) {
+		bool __fastcall Add(FilterType auiFilter, FormID auiItemFormID, FormID auiSellerFormID) {
 			kItems[auiFilter][auiItemFormID].insert(auiSellerFormID);
 			return true;
 		}
 
-		bool __fastcall Remove(FilterType auiFilter, uint32_t auiItemFormID, uint32_t auiSellerFormID) {
+		bool __fastcall Remove(FilterType auiFilter, FormID auiItemFormID, FormID auiSellerFormID) {
 			bool bResult = false;
 			ItemFilterMap& rItems = kItems[auiFilter];
 			auto it = rItems.find(auiItemFormID);
@@ -41,7 +45,7 @@ namespace BarterFilter {
 			return bResult;
 		}
 		
-		bool __fastcall Find(FilterType auiFilter, uint32_t auiItemFormID, uint32_t auiSellerFormID) {
+		bool __fastcall Find(FilterType auiFilter, FormID auiItemFormID, FormID auiSellerFormID) {
 			bool bResult = false;
 			ItemFilterMap& rItems = kItems[auiFilter];
 			auto it = rItems.find(auiItemFormID);
@@ -79,7 +83,7 @@ namespace BarterFilter {
 			if (it != rItems.end()) {
 				auto& rBarterSet = it->second;
 				bShouldHide = rBarterSet.contains(pMerchant->GetFormID())
-					|| rBarterSet.contains(pMerchant->baseForm->GetFormID())
+					|| rBarterSet.contains(pMerchant->GetObjectReference()->GetFormID())
 					|| rBarterSet.contains(0)
 					|| rBarterSet.contains(PlayerCharacter::GetSingleton()->GetFormID());
 			}
@@ -129,7 +133,7 @@ namespace BarterFilter {
 		}
 	}
 
-	bool __fastcall Add(uint32_t auiItemFormID, uint32_t auiFlags, uint32_t auiSellerFormID) {
+	bool __fastcall Add(FormID auiItemFormID, uint32_t auiFlags, FormID auiSellerFormID) {
 		bool bResult = false;
 
 		if (!pBarterFilters)
@@ -145,7 +149,7 @@ namespace BarterFilter {
 		return bResult;
 	}
 
-	bool __fastcall Remove(uint32_t auiItemFormID, uint32_t auiFlags, uint32_t auiSellerFormID) {
+	bool __fastcall Remove(FormID auiItemFormID, uint32_t auiFlags, FormID auiSellerFormID) {
 		bool bResult = false;
 		if (pBarterFilters) {
 			for (uint32_t i = 0; i < BarterFilters::COUNT; ++i) {
@@ -157,7 +161,7 @@ namespace BarterFilter {
 		return bResult;
 	}
 
-	uint32_t __fastcall IsHidden(uint32_t auiItemFormID, uint32_t auiSellerFormID) {
+	uint32_t __fastcall IsHidden(FormID auiItemFormID, FormID auiSellerFormID) {
 		uint32_t uiResult = 0;
 		if (pBarterFilters) {
 			for (uint32_t i = 0; i < BarterFilters::COUNT; ++i) {

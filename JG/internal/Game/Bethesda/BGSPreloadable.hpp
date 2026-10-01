@@ -1,0 +1,15 @@
+#pragma once
+
+#include "BaseFormComponent.hpp"
+
+class QueuedFile;
+
+class BGSPreloadable : public BaseFormComponent {
+public:
+	BGSPreloadable();
+	~BGSPreloadable();
+
+	virtual void	Preload(IO_TASK_PRIORITY aePriority, QueuedFile* apFile);
+};
+
+ASSERT_SIZE(BGSPreloadable, 0x4);

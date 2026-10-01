@@ -42,9 +42,13 @@ public:
 
 	static BGSSaveLoadManager* GetSingleton();
 
-	uint8_t GetMinorVersion() const;
-	void GetFullFileName(const char* apFilename, char* apFullPath);
+	int32_t GetMajorVersion() const;
+	int32_t GetMinorVersion() const;
+
+	void GetFullFileName(const char* apFilename, char* apFullPath) const;
+
 	void GetFullPath(const char* apFilename, char* apFullPath, bool abTemp);
+
 	void GetSaveDirectoryPath(char* apPath);
 };
 

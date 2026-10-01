@@ -32,9 +32,25 @@ public:
 	virtual uint32_t		DecRef(); // GECK only
 	virtual NiNode*			LoadGraphics(TESObjectREFR* apRef);
 
-	TESObjectList*	pList;
-	TESObject*		pPrev;
-	TESObject*		pNext;
+#ifdef EDITOR
+	struct ReferenceList {
+		struct Item {
+			TESObjectREFR*	pReference;
+			Item*			pPrev;
+			Item*			pNext;
+		};
+
+		Item*		pHead;
+		uint32_t	uiCount;
+	};
+#endif
+
+	TESObjectList*		pList;
+#ifdef EDITOR
+	ReferenceList*		pReferences;
+#endif
+	TESObject*			pPrev;
+	TESObject*			pNext;
 
 	TESObject* GetNext() const;
 	TESObject* GetPrev() const;
@@ -44,4 +60,8 @@ public:
 	static uint32_t GetHealth(const TESObject* apObject);
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESObject, 0x24)
+#else
+ASSERT_SIZE(TESObject, 0x3C)
+#endif

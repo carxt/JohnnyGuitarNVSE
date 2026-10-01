@@ -2,29 +2,22 @@
 
 #pragma warning(disable: 4100 4201 4244 4324 4389 5054 28159)
 
-#include <d3d9.h>
-
-#include <Windows.Foundation.h>
-#include <wrl\wrappers\corewrappers.h>
-#include <wrl\client.h>
+#include <windows.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <cmath>
-#include <string>
-#include <cassert>
+#include <assert.h>
+#include <xutility>
 
-#define JIP_CHANGES 1
+#define USE_MODDED_CHANGES 1
 
 constexpr inline auto our_snprintf	= snprintf;
 constexpr inline auto our_sprintf	= sprintf;
 constexpr inline auto our_vsprintf	= vsprintf;
 constexpr inline auto our_vsnprintf	= vsnprintf;
 
-#include "Utils/DebugLog.hpp"
 #include "Utils/Bitfield.hpp"
 #include "Utils/AddressPtr.hpp"
-
-#include "SafeWrite/SafeWrite.hpp"
 
 // Game unit conversion constants
 constexpr inline double dM2NI	= 69.99125671386719;	// 1 Meter to Ni
@@ -66,6 +59,25 @@ __forceinline T_Ret CdeclCall(uint32_t _addr, Args ...args) noexcept(false) {
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret FastCall(uint32_t _addr, Args ...args) noexcept(false) {
 	return ((T_Ret(__fastcall*)(Args...))_addr)(std::forward<Args>(args)...);
+}
+
+template <auto T_Func, typename ...Args>
+__forceinline auto CallImport(uint32_t _addr, Args ...args) noexcept(false) {
+	return (*reinterpret_cast<decltype(T_Func)*>(_addr))(std::forward<Args>(args)...);
+}
+
+template <class T_Func>
+__forceinline auto CustomCall(uint32_t _addr, auto ...args) noexcept(false) {
+	return reinterpret_cast<T_Func*>(_addr)(std::forward<decltype(args)>(args)...);
+}
+
+__forceinline uint8_t* __fastcall GetParentBasePtr(void* addressOfReturnAddress = _AddressOfReturnAddress(), bool lambda = false) noexcept(false) {
+	auto* basePtr = static_cast<uint8_t*>(addressOfReturnAddress) - 4;
+#if _DEBUG
+	if (lambda) // in debug mode, lambdas are wrapped inside a closure wrapper function, so one more step needed
+		basePtr = *reinterpret_cast<uint8_t**>(basePtr);
+#endif
+	return *reinterpret_cast<uint8_t**>(basePtr);
 }
 
 #pragma region Macros
@@ -112,6 +124,7 @@ __forceinline T_Ret FastCall(uint32_t _addr, Args ...args) noexcept(false) {
 #define SPEC_NOALIAS		__declspec(noalias)
 #define SPEC_EMPTY_BASES	__declspec(empty_bases)
 #define SPEC_NAKED			__declspec(naked)
+#define SPEC_NOVTABLE		__declspec(novtable)
 
 #define _HELPER_COMBINE1(X,Y) X##Y
 #define _HELPER_COMBINE(X,Y) _HELPER_COMBINE1(X,Y)

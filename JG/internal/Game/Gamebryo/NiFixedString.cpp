@@ -69,6 +69,10 @@ uint32_t NiFixedString::GetLength() const noexcept {
 	return NiGlobalStringTable::GetLength(m_kHandle);
 }
 
+uint32_t NiFixedString::GetRefCount() const noexcept {
+	return NiGlobalStringTable::GetRefCount(m_kHandle);
+}
+
 bool NiFixedString::Includes(const char* apToFind) const noexcept {
 	if (!m_kHandle || !apToFind)
 		return false;
@@ -76,6 +80,7 @@ bool NiFixedString::Includes(const char* apToFind) const noexcept {
 	return strstr(m_kHandle, apToFind) != nullptr;
 }
 
+// GAME - 0x9A3830
 bool operator==(const NiFixedString& arString1, const NiFixedString& arString2) noexcept {
 	return arString1.m_kHandle == arString2.m_kHandle;
 }

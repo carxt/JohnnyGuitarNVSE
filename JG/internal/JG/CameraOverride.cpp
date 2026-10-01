@@ -1,5 +1,8 @@
 #include "CameraOverride.hpp"
-#include <GameObjects.h>
+#include "netimmerse.h"
+#include "Bethesda/PlayerCharacter.hpp"
+
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace CameraOverride {
 
@@ -8,14 +11,14 @@ namespace CameraOverride {
 	NiMatrix3 kCameraIdentity = NiMatrix3(0, 0, 1,
 										  1, 0, 0,
 										  0, 1, 0);
-	uint32_t uiReferenceToTrack = 0;
+	FormID uiReferenceToTrack = 0;
 	bool bOverrideCameraPos = false;
 	bool bOverrideCameraRot = false;
 	int32_t eAxis = -3;
 
 	static SPEC_NOINLINE void __fastcall SetCameraTranslate(NiNode* apThis, uint32_t auiAddress, NiPoint3& arPos) {
 		PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
-		if (bOverrideCameraPos && pPlayer->IsThirdPerson())
+		if (bOverrideCameraPos && pPlayer->Is3rdPerson())
 			arPos = kCameraPos;
 
 		ThisCall(auiAddress, apThis, &arPos);
@@ -26,18 +29,18 @@ namespace CameraOverride {
 		if (eAxis == CameraRotationType::ROTATE_RESET) {
 			kCameraRot = arRot;
 		}
-		else if (bOverrideCameraRot && PlayerCharacter::GetSingleton()->IsThirdPerson()) {
+		else if (bOverrideCameraRot && PlayerCharacter::GetSingleton()->Is3rdPerson()) {
 			if (eAxis == CameraRotationType::ROTATE_TO_TARGET) {
 				const TESForm* pForm = TESForm::GetFormByNumericID(uiReferenceToTrack);
 				if (pForm->IsReference() && pCamera) {
 					const TESObjectREFR* pTrackRef = static_cast<const TESObjectREFR*>(pForm);
-					const NiNode* pRootNode = pTrackRef->Get3D();
+					const NiAVObject* pRefRoot = pTrackRef->Get3D();
 					NiPoint3 kPos;
-					if (pRootNode && pRootNode->m_pWorldBound && pRootNode->m_pWorldBound->iRadius) {
-						kPos = pRootNode->m_pWorldBound->kCenter;
+					if (pRefRoot && pRefRoot->IsVisualObject()) {
+						kPos = pRefRoot->m_pWorldBound->GetCenter();
 					}
 					else {
-						kPos = pTrackRef->GetPos();
+						kPos = pTrackRef->GetLocationOnReference();
 					}
 
 					pCamera->m_pkParent = nullptr;

@@ -1,26 +1,12 @@
 #pragma once
 
-#include "Utilities.h"
-#include "NiTypes.h"
-#include "internal/utility.h"
-#include "internal/Game/Bethesda/BSSimpleList.hpp"
-#include "internal/Game/Bethesda/BSSimpleArray.hpp"
-#include "internal/Game/Bethesda/BSStringT.hpp"
+#include "Shared/BSMemory/BSMemory.hpp"
 
 enum {
 	eListInvalid = -1,
 	eListEnd = -2,
 	eListCount = -3,
 };
-
-typedef void* (*_FormHeap_Allocate)(uint32_t size);
-extern const _FormHeap_Allocate FormHeap_Allocate;
-
-typedef void (*_FormHeap_Free)(void* ptr);
-extern const _FormHeap_Free FormHeap_Free;
-
-typedef TESForm* (*_LookupFormByID)(uint32_t id);
-extern const _LookupFormByID LookupFormByID;
 
 template <typename T_Data> struct ListNode {
 	T_Data* data;
