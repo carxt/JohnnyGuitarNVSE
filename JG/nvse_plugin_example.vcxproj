@@ -501,7 +501,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BGSAcousticSpace.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSAddonNode.cpp" />
-    <ClCompile Include="internal\Game\Bethesda\BGSAddonNodeSoundHandleExtra.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BGSAddonNodeSoundHandleExtra.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BGSAmmoForm.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSBipedModelList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BGSBodyPart.cpp" />
@@ -1399,7 +1403,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSAbilityPerkEntry.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSAcousticSpace.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSAddonNode.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\BGSAddonNodeSoundHandleExtra.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BGSAddonNodeSoundHandleExtra.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BGSAmmoForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSBipedModelList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSBodyPart.hpp" />
