@@ -1216,6 +1216,9 @@
     <ClCompile Include="internal\Game\Obsidian\FalloutAudioMedia.cpp">
       <Filter>internal\Game\Obsidian</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\NamedSpellLights.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -3348,6 +3351,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\FalloutAudioMedia.hpp">
       <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\NamedSpellLights.hpp">
+      <Filter>internal\JG\Features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

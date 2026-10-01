@@ -1,5 +1,7 @@
 #pragma once
 
+class SpellItem;
+
 class MagicSystem {
 public:
 	struct _SpellType {
@@ -54,4 +56,6 @@ public:
 		};
 	};
 	using CastingType = _CastingType::Type;
+  
+  static inline constexpr AddressPtr<SpellItem*, 0x11C358C> pPipBoyLightSpell;
 };
