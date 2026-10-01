@@ -114,11 +114,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_GECK</TargetName>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -290,6 +292,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <ExceptionHandling>false</ExceptionHandling>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AdditionalOptions>/Gw %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -301,6 +305,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
@@ -328,6 +333,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <ExceptionHandling>false</ExceptionHandling>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AdditionalOptions>/Gw %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>
@@ -341,6 +348,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>psapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
