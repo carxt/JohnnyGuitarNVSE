@@ -1,20 +1,20 @@
 #include "fn_file.h"
 #include "Bethesda/FileFinder.hpp"
 #include "Bethesda/Interface.hpp"
+#include "Bethesda/Archive.hpp"
+#include "Bethesda/ArchiveManager.hpp"
 
 #include <misc/misc.h>
 #include <utility.h>
 
 bool Cmd_IsBSALoaded_Execute(COMMAND_ARGS) {
-	char path[MAX_PATH] = {};
-	char fixPath[MAX_PATH];
+	char cPath[MAX_PATH] = {};
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
-		snprintf(fixPath, MAX_PATH, "DATA\\%s", path);
-		DWORD* archive = CdeclCall<DWORD*>(0xAF5320, fixPath); // ArchiveManager::GetArchiveByName
-		if (archive != nullptr) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
+		char cFullPath[MAX_PATH];
+		our_snprintf(cFullPath, sizeof(cFullPath), "DATA\\%s", cPath);
+		if (ArchiveManager::GetArchiveByName(cFullPath))
 			*result = 1;
-		}
 	}
 	return true;
 }
@@ -33,34 +33,41 @@ void resolveTexturePath(char* path, uint32_t bufferSize) {
 
 bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
-		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
-		if (file != nullptr) {
-			DWORD mipMapCount = 0;
-			file->Seek(0x1C, 1);
-			file->DoRead(&mipMapCount, sizeof(mipMapCount));
-			*result = mipMapCount;
-			if (Script::GetConsoleOuput()) Interface::PrintLine("GetTextureMipMapCount >> %.f", *result);
-			file->Destructor(true);
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
+		resolveTexturePath(cPath, sizeof(cPath));
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		if (pFile) {
+			uint32_t uiMipCount = 0;
+			pFile->Seek(0x1C, SEEK_CUR);
+			pFile->ReadF(&uiMipCount, sizeof(uiMipCount));
+			*result = uiMipCount;
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("GetTextureMipMapCount >> %.f", *result);
+			
+			delete pFile;
 		}
 	}
 	return true;
 }
+
 bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
-		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
-		if (file != nullptr) {
-			char format = 0;
-			file->Seek(0x57, 1);
-			file->DoRead(&format, 1);
-			*result = format - '0';
-			if (Script::GetConsoleOuput()) Interface::PrintLine("GetTextureFormat >> %.f", *result);
-			file->Destructor(true);
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
+		resolveTexturePath(cPath, sizeof(cPath));
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		if (pFile) {
+			char cFormat = 0;
+			pFile->Seek(0x57, SEEK_CUR);
+			pFile->ReadF(&cFormat, sizeof(cFormat));
+
+			*result = cFormat - '0';
+
+			if (Script::GetConsoleOuput()) 
+				Interface::PrintLine("GetTextureFormat >> %.f", *result);
+
+			delete pFile;
 		}
 	}
 	return true;
@@ -68,19 +75,22 @@ bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char path[MAX_PATH] = {};
-	//char fixPath[MAX_PATH];
-	uint32_t useDataTextures = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path, &useDataTextures) && path[0]) {
-		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
-		if (file != nullptr) {
-			DWORD width = 0;
-			file->Seek(0x10, 1);
-			file->DoRead(&width, sizeof(width));
-			*result = width;
-			if (Script::GetConsoleOuput()) Interface::PrintLine("GetTextureWidth >> %.f", *result);
-			file->Destructor(true);
+	char cPath[MAX_PATH] = {};
+	BOOL bUseDataTextures = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &bUseDataTextures) && cPath[0]) {
+		resolveTexturePath(cPath, sizeof(cPath));
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		if (pFile) {
+			uint32_t uiWidth = 0;
+			pFile->Seek(0x10, SEEK_CUR);
+			pFile->ReadF(&uiWidth, sizeof(uiWidth));
+			
+			*result = uiWidth;
+
+			if (Script::GetConsoleOuput()) 
+				Interface::PrintLine("GetTextureWidth >> %.f", *result);
+
+			delete pFile;
 		}
 	}
 	return true;
@@ -88,17 +98,21 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char path[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &path) && path[0]) {
-		resolveTexturePath(path, sizeof(path));
-		BSFile* file = FileFinder::GetSingleton()->GetFile(path, FileFinder::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
-		if (file != nullptr) {
-			DWORD height = 0;
-			file->Seek(0x0C, 1);
-			file->DoRead(&height, sizeof(height));
-			*result = height;
-			if (Script::GetConsoleOuput()) Interface::PrintLine("GetTextureHeight >> %.f", *result);
-			file->Destructor(true);
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
+		resolveTexturePath(cPath, sizeof(cPath));
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		if (pFile) {
+			uint32_t uiHeight = 0;
+			pFile->Seek(0x0C, 1);
+			pFile->ReadF(&uiHeight, sizeof(uiHeight));
+
+			*result = uiHeight;
+
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("GetTextureHeight >> %.f", *result);
+
+			delete pFile;
 		}
 	}
 	return true;

@@ -492,6 +492,8 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\AlchemyItem.cpp" />
     <ClCompile Include="internal\Game\Bethesda\Animation.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AnimIdle.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\Archive.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\ArchiveManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\AutoMemContext.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BaseExtraList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BaseProcess.cpp">
@@ -597,6 +599,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BSDirectoryEntry.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSFile.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSFileEntry.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSGameSound.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSNonReentrantSpinLock.cpp" />
@@ -905,6 +908,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\VirtualPathingNode.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiAnimationKey.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiAVObject.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiBinaryStream.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiBound.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiColor.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiColorA.cpp" />
@@ -914,6 +918,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Gamebryo\NiCullingProcess.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiDefaultAVObjectPalette.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiExtraData.cpp" />
+    <ClCompile Include="internal\Game\Gamebryo\NiFile.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFixedString.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiFrustumPlanes.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiGlobalStringTable.cpp" />
@@ -1391,6 +1396,9 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\AnimGroup_View.hpp" />
     <ClInclude Include="internal\Game\Bethesda\AnimIdle.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\Archive.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ArchiveFile.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ArchiveManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\Atmosphere.hpp" />
     <ClInclude Include="internal\Game\Bethesda\AutoMemContext.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BaseExtraList.hpp" />
@@ -1558,6 +1566,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSDirectoryEntry.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSFileEntry.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSGameSound.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSHash.hpp" />
@@ -2185,6 +2194,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiAVObject.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiAVObjectPalette.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiBackToFrontAccumulator.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiBinaryStream.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiBound.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiColor.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiColorA.hpp" />
@@ -2197,6 +2207,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiCullingProcess.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiDefaultAVObjectPalette.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiExtraData.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiFile.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFixedString.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFloatData.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiFloatInterpController.hpp" />

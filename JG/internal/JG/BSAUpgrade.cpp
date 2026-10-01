@@ -1,5 +1,5 @@
 #include "BSAUpgrade.hpp"
-#include <GameAPI.h>
+#include "Bethesda/ArchiveFile.hpp"
 #include <PluginAPI.h>
 
 #include "JG/JohnnyPluginData.hpp"
@@ -26,7 +26,7 @@ namespace BSAUpgrade {
 
 		void __fastcall SeekArchive(ArchiveFile* apFile, uint32_t auiTargetFilePos) {
 			const int64_t llTargetFilePos = auiTargetFilePos;
-			const int64_t llCurrentPos = apFile->spArchive->m_uiCurrentFilePos;
+			const int64_t llCurrentPos = apFile->spArchive->GetCurrentFilePos();
 
 			int64_t llSeekOffset = llTargetFilePos - llCurrentPos;
 
@@ -41,7 +41,7 @@ namespace BSAUpgrade {
 
 			SeekFile(apFile->spArchive, int32_t(llSeekOffset), FILE_CURRENT);
 
-			assert(apFile->spArchive->m_uiCurrentFilePos == auiTargetFilePos);
+			assert(apFile->spArchive->GetCurrentFilePos() == auiTargetFilePos);
 		}
 
 		SPEC_NAKED void SeekArchive_Asm() {
