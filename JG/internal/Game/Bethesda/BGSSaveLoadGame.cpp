@@ -71,7 +71,7 @@ bool BGSSaveLoadGame::GetAllowChanges() const {
 
 // GAME - 0x846DE0
 uint8_t BGSSaveLoadGame::GetSaveMod(uint8_t aucIndex) const {
-	return ucSaveMods[aucIndex];
+	return ThisCall<uint8_t>(0x846DE0, this, aucIndex);
 }
 
 // GAME - 0x84A6D0
