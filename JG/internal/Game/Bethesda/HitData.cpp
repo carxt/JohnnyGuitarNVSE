@@ -2,7 +2,11 @@
 
 // GAME - 0x9B4D90
 HitData::HitData() {
-	ThisCall(0x87CEA0, this);
+	ThisCall(0x9B4D90, this);
+}
+
+HitData::HitData(const HitData& arOther) {
+	Copy(arOther);
 }
 
 HitData::~HitData() {
@@ -21,4 +25,14 @@ void HitData::Copy(const HitData& arOther) {
 HitData& HitData::operator=(const HitData& arOther) {
 	Copy(arOther);
 	return *this;
+}
+
+// GAME - 0x87ADF0
+void HitData::IncRefCount() {
+	ThisCall(0x87ADF0, this);
+}
+
+// GAME - 0x87CEA0
+void HitData::DecRefCount() {
+	ThisCall(0x87CEA0, this);
 }

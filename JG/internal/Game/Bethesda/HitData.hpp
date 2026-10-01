@@ -13,6 +13,7 @@ class VATS_COMMAND;
 class SPEC_EMPTY_BASES HitData : public BSMemObject {
 public:
 	HitData();
+	HitData(const HitData& arOther);
 	~HitData();
 
 	struct ALIGN4 _HitDataFlags {
@@ -83,16 +84,8 @@ public:
 	void Copy(const HitData& arOther);
 	HitData& operator=(const HitData& arOther);
 
-	// GAME - 0x87ADF0
-	inline void IncRefCount() {
-		InterlockedIncrement(&uiRefCount);
-	}
-
-	// GAME - 0x87CEA0
-	inline void DecRefCount() {
-		if (!InterlockedDecrement(&uiRefCount))
-			delete this;
-	}
+	void IncRefCount();
+	void DecRefCount();
 };
 
 ASSERT_SIZE(HitData, 0x64);
