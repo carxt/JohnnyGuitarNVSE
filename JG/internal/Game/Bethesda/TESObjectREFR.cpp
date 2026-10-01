@@ -222,7 +222,10 @@ NiAVObject* TESObjectREFR::Get3DSimple() const {
 
 NiAVObject* TESObjectREFR::Get3DVerySimple() const {
 #ifdef GAME
-	return pLoadedData ? pLoadedData->spSceneRoot : nullptr;
+	if (pLoadedData) [[likely]]
+		return pLoadedData->spSceneRoot;
+	else
+		return nullptr;
 #else
 	// GECK stores 3D in ExtraData, so there's no difference
 	return Get3DSimple();
