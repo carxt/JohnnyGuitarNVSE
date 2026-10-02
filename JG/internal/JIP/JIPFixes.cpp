@@ -265,6 +265,17 @@ namespace JIPFixes {
 				pTarget->AttachChild(pCopy, true);
 
 				ScriptUtils::RecurseAddObjectsToPalette(apRoot, pCopy);
+				
+				if (pCopy->IsNode()) {
+					bool bAnim = false;
+					bAnim |= TESObjectREFR::AddAddonNodes(static_cast<NiNode*>(pCopy));
+					bAnim |= TESObjectREFR::AddMasterParticleAddonNodes(static_cast<NiNode*>(pCopy));
+					if (bAnim) {
+						NiUpdateData kData(0.f, bAnim);
+						pCopy->UpdateProperties();
+						pCopy->Update(kData);
+					}
+				}
 
 				NiUpdateData kData;
 				pTarget->UpdateTransformAndBounds(kData);
