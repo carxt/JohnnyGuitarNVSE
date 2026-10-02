@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Bethesda/TESForm.hpp"
+#include "Bethesda/TESFullName.hpp"
 
 class TESRecipeCategory : public TESForm, public TESFullName {
 public:

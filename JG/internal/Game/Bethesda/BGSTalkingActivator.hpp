@@ -14,6 +14,8 @@ public:
 	TESObjectREFR*	pTempRef;
 	BGSVoiceType*	pVoiceType;
 
+	TESFORM_TYPE(BGSTalkingActivator);
+
 #ifdef GAME
 	static constexpr AddressPtr<BSSimpleList<TESObjectREFR*>, 0x11C8264> kAllRadioStations;
 #endif

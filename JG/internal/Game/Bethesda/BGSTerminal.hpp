@@ -40,6 +40,8 @@ public:
 	BGSNote*							pPassword;
 	Data								kData;
 
+	TESFORM_TYPE(BGSTerminal);
+
 	BSSimpleList<TERMINAL_MENU_ITEM*>* GetMenuItemList();
 	const BSSimpleList<TERMINAL_MENU_ITEM*>* GetMenuItemList() const;
 	void AddMenuItem(TERMINAL_MENU_ITEM* apItem);

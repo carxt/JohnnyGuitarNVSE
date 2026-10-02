@@ -13,6 +13,8 @@ public:
 	TESSound*	pLoopSound;
 	Data		kData;
 
+	TESFORM_TYPE(BGSMovableStatic);
+
 	TESSound* GetLoopingSound() const;
 	void SetLoopingSound(TESSound* apSound);
 };
