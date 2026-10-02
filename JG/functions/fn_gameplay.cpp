@@ -1,7 +1,6 @@
 #include "fn_gameplay.h"
 
 #include "decoding.h"
-#include "GameEffects.h"
 #include "GameForms.h"
 #include "GameRTTI.h"
 #include "GameUI.h"
@@ -22,6 +21,8 @@
 #include "Bethesda/NavMeshObstacleManager.hpp"
 #include "Bethesda/TES.hpp"
 #include "Bethesda/ProcessLists.hpp"
+#include "Bethesda/ActiveEffect.hpp"
+#include "Bethesda/MagicShaderHitEffect.hpp"
 
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
@@ -695,21 +696,22 @@ bool Cmd_AddNavmeshObstacle_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 	*result = 0;
-	auto pIter = ProcessLists::GetSingleton()->kTempEffects.GetHead();
-	NVSEArrayVar* effArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	auto pIter = ProcessLists::GetSingleton()->kMagicEffects.GetHead();
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	while (pIter && !pIter->IsEmpty()) {
 		NiPointer<BSTempEffect> spEffect = pIter->GetItem();
 		pIter = pIter->GetNext();
-		if (!spEffect || !IS_TYPE(spEffect.m_pObject, MagicShaderHitEffect))
+
+		if (!spEffect)
 			continue;
 
-		MagicShaderHitEffect* pHitEffect = static_cast<MagicShaderHitEffect*>(spEffect.m_pObject);
-		if (pHitEffect->ucFlags != 1 && pHitEffect->pTarget && pHitEffect->pTarget == thisObj) {
-			g_arrInterface->AppendElement(effArr, NVSEArrayElement(pHitEffect->effectShader));
+		MagicShaderHitEffect* pHitEffect = spEffect->NiDynamicCast<MagicShaderHitEffect>();
+		if (pHitEffect && pHitEffect->GetFinished() && pHitEffect->GetTarget() == thisObj) {
+			g_arrInterface->AppendElement(pArray, NVSEArrayElement(pHitEffect->pEffectShader));
 		}
 	}
 
-	g_arrInterface->AssignCommandResult(effArr, result);
+	g_arrInterface->AssignCommandResult(pArray, result);
 	return true;
 }
 

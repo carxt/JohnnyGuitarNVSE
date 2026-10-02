@@ -32,6 +32,7 @@
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TileImage.hpp"
 #include "Bethesda/TimeGlobal.hpp"
+#include "Bethesda/WaterShaderProperty.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 
 #include "events/EventFramework.h"

@@ -1234,12 +1234,15 @@
     <ClCompile Include="internal\Game\Gamebryo\NiFile.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSShaderLightingProperty.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\MagicHitEffect.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="..\nvse\nvse\GameEffects.h">
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameForms.h">
@@ -3387,6 +3390,21 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiBinaryStream.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSShaderTextureSet.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSShaderLightingProperty.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSShaderPPLightingProperty.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\WaterShaderProperty.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MagicShaderHitEffect.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

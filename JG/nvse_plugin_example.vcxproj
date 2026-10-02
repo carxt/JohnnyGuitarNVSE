@@ -620,6 +620,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSShaderLightingProperty.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSShaderManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSShaderProperty.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSShaderUtil.cpp" />
@@ -723,6 +724,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\IOTask.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ItemChange.cpp" />
     <ClCompile Include="internal\Game\Bethesda\LowProcess.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\MagicHitEffect.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
@@ -1198,7 +1204,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\CommandTable.h" />
     <ClInclude Include="..\nvse\nvse\GameAPI.h" />
-    <ClInclude Include="..\nvse\nvse\GameEffects.h" />
     <ClInclude Include="..\nvse\nvse\GameForms.h" />
     <ClInclude Include="..\nvse\nvse\GameRTTI.h" />
     <ClInclude Include="..\nvse\nvse\GameTasks.h" />
@@ -1600,8 +1605,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSShaderLightingProperty.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSShaderManager.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSShaderPPLightingProperty.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSShaderProperty.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSShaderTextureSet.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSShaderUtil.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleArray.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSSimpleArrayRefCounted.hpp" />
@@ -1853,9 +1861,18 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="internal\Game\Bethesda\MagicHitEffect.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\MagicHitEffect.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\MagicItem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MagicItemForm.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\MagicShaderHitEffect.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\MagicSystem.hpp" />
     <ClInclude Include="internal\Game\Bethesda\MagicTarget.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
@@ -2185,6 +2202,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\VirtualPathingNode.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\WaterShaderProperty.hpp" />
     <ClInclude Include="internal\Game\Bethesda\WeatherEntry.hpp" />
     <ClInclude Include="internal\Game\FaceGen\FR2MatrixVTC.hpp" />
     <ClInclude Include="internal\Game\FaceGen\oldstd.hpp" />
