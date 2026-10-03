@@ -26,6 +26,7 @@
 #include "WorldToScreen.hpp"
 #include "FormSkeletons.hpp"
 #include "NamedSpellLights.hpp"
+#include "MorePluginTypes.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
@@ -281,6 +282,8 @@ namespace JohnnyPatches {
 		DialogueResponseOverride::Install();
 
 		NamedSpellLights::Install();
+
+		MorePluginTypes::Install();
 #endif
 		NewNiObjects::Install();
 	}
@@ -289,6 +292,9 @@ namespace JohnnyPatches {
 #ifdef GAME
 		if (bUseFormSkeletons)
 			FormSkeletons::Install();
+
+		MorePluginTypes::InitJIPHooks();
+		MorePluginTypes::InitCommandHooks();
 #endif
 		if (bBSAUpgrade)
 			BSAUpgrade::Install();

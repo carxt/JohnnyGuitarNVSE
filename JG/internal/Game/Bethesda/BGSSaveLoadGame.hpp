@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TESFile.hpp"
 #include "BGSSaveLoadFormIDMap.hpp"
 #include "BGSChangeFlags.hpp"
 #include "BSSimpleArray.hpp"
@@ -68,8 +69,15 @@ public:
 	BGSReconstructFormsInAllFilesMap*			pReconstructForms;
 	BSSimpleArray<BGSLoadFormBuffer*>			kChangedForms;
 	NiTMap<uint32_t, Actor*>					kQueuedInitPackageLocationsActorMap;
+#if ESL_SUPPORT || OVERLAY_SUPPORT
+	BSSimpleArray<TESFile*>						kFiles;
+	BSSimpleArray<TESFile*>						kSmallFiles;
+	Bitfield8									ucLoadOrderChanges;
+	uint8_t										padding[478];
+#else
 	uint8_t										ucSaveMods[255];
 	uint8_t										ucLoadedMods[255];
+#endif
 	Bitfield<_GlobalFlags>						uiGlobalFlags;
 	uint8_t										ucCurrentMinorVersion;
 
@@ -92,7 +100,19 @@ public:
 
 	bool GetAllowChanges() const;
 
+#if ESL_SUPPORT || OVERLAY_SUPPORT
+	TESFile* GetSaveMod(uint8_t aucIndex) const;
+	
+#if ESL_SUPPORT
+	TESFile* GetSmallSaveMod(uint16_t ausIndex) const;
+
+	bool SupportsSmallPlugins() const;
+#endif
+
+#else
 	uint8_t GetSaveMod(uint8_t aucIndex) const;
+#endif
+
 
 	bool GetChange(const TESForm* apForm, BGSChangeFlags aFlags) const;
 
