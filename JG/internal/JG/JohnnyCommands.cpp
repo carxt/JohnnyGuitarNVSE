@@ -12,6 +12,7 @@
 #include "functions/fn_math.h"
 #include "functions/fn_mediaset.h"
 #include "functions/fn_region.h"
+#include "functions/fn_sound.h"
 #include "functions/fn_terminal.h"
 #include "functions/fn_ui.h"
 #include "functions/fn_utility.h"
@@ -453,6 +454,7 @@ namespace JohnnyCommands {
 		REG_TYPED_CMD(GetReputationIcon, String);
 		REG_TYPED_CMD(GetReputationFormIcon, String);
 		REG_CMD(SetReputationFormIcon);
+		REG_CMD(ToggleAddonNodes);
 	}
 
 }

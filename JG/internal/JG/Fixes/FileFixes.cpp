@@ -1,5 +1,6 @@
 #include "FileFixes.hpp"
-#include <GameAPI.h>
+#include "Bethesda/Archive.hpp"
+#include "Bethesda/ArchiveFile.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 

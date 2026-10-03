@@ -23,3 +23,4 @@ DEFINE_COMMAND_PLUGIN(SetNiLightColor, , true, kParams_SetNiLightColor);
 DEFINE_COMMAND_PLUGIN(GetNiLightColor, , true, kParams_GetNiLightColor);
 DEFINE_COMMAND_PLUGIN(SetShaderPropertyFlag, , true, kParams_SetPropertyValue);
 DEFINE_COMMAND_PLUGIN(GetShaderPropertyFlag, , true, kParams_GetPropertyValue);
+DEFINE_COMMAND_PLUGIN(ToggleAddonNodes, , true, kParams_GetPropertyValue);

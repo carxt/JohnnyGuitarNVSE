@@ -93,7 +93,7 @@ bool BGSSaveLoadGame::SupportsSmallPlugins() const {
 #else
 // GAME - 0x846DE0
 uint8_t BGSSaveLoadGame::GetSaveMod(uint8_t aucIndex) const {
-	return ucSaveMods[aucIndex];
+	return ThisCall<uint8_t>(0x846DE0, this, aucIndex);
 }
 #endif
 

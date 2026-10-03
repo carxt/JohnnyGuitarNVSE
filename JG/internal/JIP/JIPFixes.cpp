@@ -32,6 +32,7 @@
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TileImage.hpp"
 #include "Bethesda/TimeGlobal.hpp"
+#include "Bethesda/WaterShaderProperty.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 
 #include "events/EventFramework.h"
@@ -264,6 +265,17 @@ namespace JIPFixes {
 				pTarget->AttachChild(pCopy, true);
 
 				ScriptUtils::RecurseAddObjectsToPalette(apRoot, pCopy);
+				
+				if (pCopy->IsNode()) {
+					bool bAnim = false;
+					bAnim |= TESObjectREFR::AddAddonNodes(static_cast<NiNode*>(pCopy));
+					bAnim |= TESObjectREFR::AddMasterParticleAddonNodes(static_cast<NiNode*>(pCopy));
+					if (bAnim) {
+						NiUpdateData kData(0.f, bAnim);
+						pCopy->UpdateProperties();
+						pCopy->Update(kData);
+					}
+				}
 
 				NiUpdateData kData;
 				pTarget->UpdateTransformAndBounds(kData);
@@ -957,13 +969,13 @@ namespace JIPFixes {
 					uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 					TESObjectREFR* pOwner = *reinterpret_cast<TESObjectREFR**>(pEBP + 0xC);
 					if (pOwner) {
-						for (auto const& callback : OnDialogTopicHandler->callbacks) {
-							auto filter = reinterpret_cast<FilterForm*>(callback.eventFilter);
-							if (filter->IsFilterEmpty(0) || filter->IsBaseInFilter(0, this)) {
-								CallUDF(callback.script, pOwner, OnDialogTopicHandler->numMaxArgs, this);
+						for (auto const& callback : OnDialogTopicHandler->kCallbacks) {
+							auto filter = reinterpret_cast<FilterForm*>(callback.pFilter);
+							if (filter->IsFilterEmpty(0) || filter->IsNonRefFormInFilter(0, this)) {
+								CallUDF(callback.pScript, pOwner, OnDialogTopicHandler->ucMaxArgsCount, this);
 							}
-							else if (pParentTopic && filter->IsBaseInFilter(0, pParentTopic)) {
-								CallUDF(callback.script, pOwner, OnDialogTopicHandler->numMaxArgs, pParentTopic);
+							else if (pParentTopic && filter->IsNonRefFormInFilter(0, pParentTopic)) {
+								CallUDF(callback.pScript, pOwner, OnDialogTopicHandler->ucMaxArgsCount, pParentTopic);
 							}
 						}
 					}
@@ -2276,7 +2288,7 @@ namespace JIPFixes {
 			// 
 			// mov     ecx, esi			// Setting ptr
 			// push    edi				// String ptr
-			// mov     eax, 0xC33170	// Setting::operator==(const char*)
+			// mov     eax, 0xC33170	// Setting::operator=(const char*)
 			// call    eax
 			// jmp     +6
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x100444CD), "\x89\xF1\x57\xB8\x70\x31\xC3\x00\xFF\xD0\xEB\x06");

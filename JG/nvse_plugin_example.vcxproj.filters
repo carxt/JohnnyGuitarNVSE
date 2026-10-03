@@ -1207,6 +1207,39 @@
     <ClCompile Include="internal\Game\Bethesda\ProcessLists.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="functions\fn_sound.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BGSAddonNodeSoundHandleExtra.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Obsidian\FalloutAudioMedia.cpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\NamedSpellLights.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Archive.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ArchiveManager.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSFile.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiBinaryStream.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiFile.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSShaderLightingProperty.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\MagicHitEffect.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
     <ClCompile Include="internal\JG\MorePluginTypes.cpp">
       <Filter>internal\JG\Features</Filter>
     </ClCompile>
@@ -1219,9 +1252,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
-      <Filter>nvse</Filter>
-    </ClInclude>
-    <ClInclude Include="..\nvse\nvse\GameEffects.h">
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="..\nvse\nvse\GameForms.h">
@@ -3338,6 +3368,51 @@
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\MagicHitEffect.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\fn_sound.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BGSAddonNodeSoundHandleExtra.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Obsidian\FalloutAudioMedia.hpp">
+      <Filter>internal\Game\Obsidian</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\NamedSpellLights.hpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Archive.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ArchiveFile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ArchiveManager.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSFile.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiFile.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiBinaryStream.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSShaderTextureSet.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSShaderLightingProperty.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSShaderPPLightingProperty.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\WaterShaderProperty.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\MagicShaderHitEffect.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\MorePluginTypes.hpp">

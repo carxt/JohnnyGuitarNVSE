@@ -6,6 +6,7 @@
 #include "Bethesda/BGSSaveLoadManager.hpp"
 #include "Bethesda/BGSLoadGameBuffer.hpp"
 #include "Bethesda/BGSSaveGameBuffer.hpp"
+#include "Bethesda/BGSSaveLoadGame.hpp"
 #include "Bethesda/BGSReconstructFormsInAllFilesMap.hpp"
 
 #include "JG/JohnnySerialization.hpp"

@@ -23,6 +23,8 @@ public:
 
 	Bitfield<_FurnitureFlags> uiFurnitureFlags;
 
+	TESFORM_TYPE(TESFurniture);
+
 	bool GetMarkerEnabled(uint32_t auiIndex) const;
 	void SetMarkerEnabled(uint32_t auiIndex, bool abEnabled);
 

@@ -1,33 +1,35 @@
 #pragma once
 
-#include "BSSimpleArray.hpp"
+#include "BSFile.hpp"
 #include "BSEnums.hpp"
-
-class BSFile;
+#include "BSSimpleArray.hpp"
+#include "BSSimpleList.hpp"
 
 class FileFinder {
 public:
 	BSSimpleArray<const char*> kPaths;
 
-	enum LOOKIN_FLAGS : uint8_t {
-		SKIP_NONE		= 0x0,
-		SKIP_ARCHIVE	= 0x1,
-		SKIP_CWD		= 0x2,
-		SKIP_PATHS		= 0x4,
+	struct _LookInFlags {
+		enum Flags {
+			SKIP_NONE		= 0,
+			SKIP_ARCHIVE	= 1,
+			SKIP_CWD		= 2,
+			SKIP_PATHS		= 4,
+		};
 	};
-	enum OpenMode {
-		READ_ONLY	= 0,
-		WRITE_ONLY	= 1,
-		APPEND_ONLY = 2,
-	};
+	using LookInFlags = _LookInFlags::Flags;
 
 	static FileFinder* GetSingleton();
 
-	bool Exist(const char* apFileName, char* apFilePath = nullptr, uint32_t auiFlags = SKIP_NONE, ARCHIVE_TYPE aeArchiveType = ARCHIVE_TYPE::ALL) const;
+	bool Exist(const char* apFileName, char* apFilePath = nullptr, uint32_t auiFlags = LookInFlags::SKIP_NONE, ARCHIVE_TYPE aeArchiveType = ARCHIVE_TYPE::ALL) const;
 
-	static BSFile* GetFile(const char* apFileName, OpenMode aeMode, uint32_t auiSize, ARCHIVE_TYPE aeArchiveType = ARCHIVE_TYPE::ALL);
+	uint32_t LookForFile(const char* apFileName, uint32_t auiFlags = LookInFlags::SKIP_NONE, ARCHIVE_TYPE aeArchiveType = ARCHIVE_TYPE::ALL) const;
 
-	static bool Locate(const char* apFileName, char* apFilePath = nullptr, uint32_t auiFlags = SKIP_NONE, ARCHIVE_TYPE aeArchiveType = ARCHIVE_TYPE::ALL);
+	static BSFile* GetFile(const char* apFileName, NiFile::OpenMode aeMode, uint32_t auiSize, ARCHIVE_TYPE aeArchiveType = ARCHIVE_TYPE::ALL);
+
+	static bool Locate(const char* apFileName, char* apFilePath, uint32_t auiFlags = LookInFlags::SKIP_NONE, ARCHIVE_TYPE aeArchiveType = ARCHIVE_TYPE::ALL);
+
+	static BSSimpleList<char const*>* BuildFileList(const char* apSearchName, const char* apBaseFilename, ARCHIVE_TYPE aeArchiveType, BSSimpleList<char const*>* apFileList);
 };
 
 ASSERT_SIZE(FileFinder, 0x10);

@@ -25,6 +25,7 @@
 #include "Fixes\RadioSkipOGGWAVPatch.hpp"
 #include "WorldToScreen.hpp"
 #include "FormSkeletons.hpp"
+#include "NamedSpellLights.hpp"
 #include "MorePluginTypes.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
@@ -279,6 +280,8 @@ namespace JohnnyPatches {
 		NPCAccuracy::Install();
 
 		DialogueResponseOverride::Install();
+
+		NamedSpellLights::Install();
 
 		MorePluginTypes::Install();
 #endif

@@ -8,7 +8,7 @@ bool Cmd_SetJohnnyOnLimbGoneEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.pForm, &filter.iVal) && script && IS_TYPE(script, Script)) {
 		JohnnyEvents::RegisterOnLimbGone(script, (void**)&filter, setOrRemove > 0);
 	}
 	return true;
@@ -27,7 +27,7 @@ bool Cmd_SetJohnnyOnCrosshairEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.pForm, &filter.iVal) && script && IS_TYPE(script, Script)) {
 		JohnnyEvents::RegisterOnCrosshair(script, (void**)&filter, setOrRemove > 0);
 	}
 	return true;
@@ -38,7 +38,7 @@ bool Cmd_SetOnActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { PlayerCharacter::GetSingleton(), -1 };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID < ActorValue::Index::COUNT) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.iVal) && script && IS_TYPE(script, Script) && filter.iVal < ActorValue::Index::COUNT) {
 		JohnnyEvents::RegisterOnActorValueChange(script, (void**)&filter, setOrRemove > 0, flags);
 	}
 	return true;
@@ -49,7 +49,7 @@ bool Cmd_SetOnNPCActorValueChangeEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 };
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script) && filter.intID < ActorValue::Index::COUNT) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.pForm, &filter.iVal) && script && IS_TYPE(script, Script) && filter.iVal < ActorValue::Index::COUNT) {
 		JohnnyEvents::RegisterOnNPCActorValueChange(script, (void**)&filter, setOrRemove > 0, flags);
 	}
 	return true;
@@ -170,7 +170,7 @@ bool Cmd_SetOnProcessLevelChangeEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterFormInt::Data filter = { nullptr, -1 }; // you always need to make a array of pointers the size of the maximum arguments in the filter, it doesn't matter if most are empty. Framework caveat.
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.form, &filter.intID) && script && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.pForm, &filter.iVal) && script && IS_TYPE(script, Script)) {
 		JohnnyEvents::RegisterOnProcessLevelChange(script, (void**)&filter, setOrRemove > 0);
 	}
 	return true;
@@ -193,7 +193,7 @@ bool Cmd_SetJohnnyOnKeyboardControllerSelectionChangeEventHandler_Execute(COMMAN
 	Script* script = nullptr;
 	FilterInt::Data filter{};
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.iVal) && script && IS_TYPE(script, Script)) {
 		JohnnyEvents::RegisterOnInputSwitch(script, (void**)&filter, setOrRemove > 0);
 	}
 	return true;
@@ -207,7 +207,7 @@ bool Cmd_SetJohnnyOnSleepWaitEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterInt::Data filter{};
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.iVal) && script && IS_TYPE(script, Script)) {
 		JohnnyEvents::RegisterOnSleepWait(script, (void**)&filter, setOrRemove > 0);
 	}
 	return true;
@@ -230,7 +230,7 @@ bool Cmd_SetOnNPCResponseEventHandler_Execute(COMMAND_ARGS) {
 	Script* script = nullptr;
 	FilterInt::Data filter{};
 	uint32_t flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.intID) && script && IS_TYPE(script, Script)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags, &filter.iVal) && script && IS_TYPE(script, Script)) {
 		JohnnyEvents::RegisterOnNPCResponse(script, (void**)&filter, setOrRemove > 0);
 	}
 	return true;

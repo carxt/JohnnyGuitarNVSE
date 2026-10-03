@@ -24,7 +24,15 @@ public:
 	ActiveEffect*	pActiveEffect;
 	TESObjectREFR*	pTarget;
 	float			fElapsedTime;
-	Bitfield8		ucFlags;
+	bool			bFinished;
+
+	NIRTTI_ADDRESS(0x11DC6B4);
+
+	ActiveEffect* GetActiveEffect() const;
+
+	TESObjectREFR* GetTarget() const;
+	
+	bool GetFinished() const;
 };
 
 ASSERT_SIZE(MagicHitEffect, 0x28);

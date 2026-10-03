@@ -11,6 +11,7 @@
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/BSWindModifier.hpp"
 #include "Bethesda/Interface.hpp"
+#include "Bethesda/TESObjectREFR.hpp"
 
 #include <JG/TaskQueue.hpp>
 #include "JG/ScriptUtils.hpp"
@@ -108,6 +109,15 @@ enum class LightColorItem : int32_t {
 	DIFFUSE,
 	AMBIENT,
 	COUNT
+};
+
+enum class ToggleAddonNodesState {
+	NONE				= -1,
+	REMOVE				= 0,
+	ADD					= 1,
+	DISABLE_PARTICLES	= 2,
+	ENABLE_PARTICLES	= 3,
+	COUNT,
 };
 
 static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const char* apObjectName, NiProperty::Type aeType) {
@@ -407,7 +417,7 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 	BOOL bUpdateControllers = FALSE;
 	BOOL bFirstPerson = FALSE;
 	char cName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &fTime, &bUpdateControllers, &cName, &bFirstPerson) && InRange<NiUpdateType>(eType)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &fTime, &bUpdateControllers, &cName, &bFirstPerson) && InRange(eType)) {
 		NiAVObject* pRoot = GetReferenceScene(thisObj, bFirstPerson);
 
 		NiAVObject* pTarget = nullptr;
@@ -418,7 +428,7 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 
 		if (pTarget) {
 			const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
-			NiUpdateData kData(fTime > 0.f ? fTime : 0.f, bUpdateControllers, bQueue);
+			NiUpdateData kData(fTime > -FLT_MAX ? fTime : 0.f, bUpdateControllers, bQueue);
 			switch (eType) {
 			case NiUpdateType::FULL:
 				pTarget->Update(kData);
@@ -1057,6 +1067,41 @@ bool Cmd_GetShaderPropertyFlag_Execute(COMMAND_ARGS) {
 			return true;
 
 		*result = pShade->GetFlag(eBit);
+	}
+	return true;
+}
+
+bool Cmd_ToggleAddonNodes_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cObjectName[MAX_PATH] = {};
+	ToggleAddonNodesState eState = ToggleAddonNodesState::COUNT;
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eState, &bFirstPerson) && cObjectName[0] && InRange(eState)) {
+		NiAVObject* pScene = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (pScene && pScene->IsNode()) {
+			NiNode* pNode = static_cast<NiNode*>(pScene);
+			
+			bool bResult = false;
+			switch (eState) {
+				case ToggleAddonNodesState::REMOVE:
+					bResult |= TESObjectREFR::RemoveAddonNodes(pNode);
+					break;
+				case ToggleAddonNodesState::DISABLE_PARTICLES:
+					bResult |= TESObjectREFR::RemoveMasterParticleAddonNodes(pNode);
+					break;
+				case ToggleAddonNodesState::ADD:
+					bResult |= TESObjectREFR::AddAddonNodes(pNode);
+				case ToggleAddonNodesState::ENABLE_PARTICLES:
+					bResult |= TESObjectREFR::AddMasterParticleAddonNodes(pNode);
+					if (bResult) {
+						NiUpdateData kData(0.f, true);
+						pNode->UpdateProperties();
+						pNode->Update(kData);
+					}
+					break;
+			}
+			*result = bResult;
+		}
 	}
 	return true;
 }

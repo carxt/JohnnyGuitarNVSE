@@ -12,6 +12,8 @@ public:
 	uint32_t				uiNumAddedObjects;
 #endif
 
+	TESFORM_TYPE(BGSListForm);
+
 	BSSimpleList<TESForm*>* GetFormList();
 	const BSSimpleList<TESForm*>* GetFormList() const;
 

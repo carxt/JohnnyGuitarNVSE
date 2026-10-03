@@ -133,7 +133,7 @@ struct _FormType {
 };
 using FORM_TYPE = _FormType::Type;
 
-#define TESFORM_TYPE(data) static constexpr FORM_TYPE _TYPE = FORM_TYPE::data;
+#define TESFORM_TYPE(data) static constexpr FORM_TYPE _TYPE = FORM_TYPE::data
 
 #pragma endregion
 
