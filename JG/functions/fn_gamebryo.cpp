@@ -1077,7 +1077,7 @@ bool Cmd_ToggleAddonNodes_Execute(COMMAND_ARGS) {
 	ToggleAddonNodesState eState = ToggleAddonNodesState::COUNT;
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eState, &bFirstPerson) && cObjectName[0] && InRange(eState)) {
-		NiAVObject* pScene = GetReferenceScene(thisObj, bFirstPerson);
+		NiAVObject* pScene = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
 		if (pScene && pScene->IsNode()) {
 			NiNode* pNode = static_cast<NiNode*>(pScene);
 			
