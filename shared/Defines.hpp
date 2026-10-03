@@ -34,31 +34,26 @@ constexpr inline double dNI2MM  = 1.0 / dMM2NI;			// 1 Ni to Millimeter
 constexpr inline float fHK2NI = static_cast<float>(dDM2NI); // 1 Havok to Ni
 constexpr inline float fNI2HK = static_cast<float>(dNI2DM); // 1 Ni to Havok
 
+class __single_inheritance _ThisCallClass;
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret ThisCall(uint32_t _addr, const void* _this, Args ...args) noexcept(false) {
-	if constexpr (std::is_class_v<T_Ret>) {
-		T_Ret ret;
-		((T_Ret * (__thiscall*)(const void*, T_Ret&, Args...))_addr)(_this, ret, std::forward<Args>(args)...);
-		return ret;
-	}
-	else {
-		return ((T_Ret(__thiscall*)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
-	}
+	const auto func = *reinterpret_cast<T_Ret(__thiscall _ThisCallClass::**)(Args...)const>(&_addr);
+	return (reinterpret_cast<const _ThisCallClass*>(_this)->*func)(std::forward<Args>(args)...);
 }
 
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret StdCall(uint32_t _addr, Args ...args) noexcept(false) {
-	return ((T_Ret(__stdcall*)(Args...))_addr)(std::forward<Args>(args)...);
+	return reinterpret_cast<T_Ret(__stdcall*)(Args...)>(_addr)(std::forward<Args>(args)...);
 }
 
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret CdeclCall(uint32_t _addr, Args ...args) noexcept(false) {
-	return ((T_Ret(__cdecl*)(Args...))_addr)(std::forward<Args>(args)...);
+	return reinterpret_cast<T_Ret(__cdecl*)(Args...)>(_addr)(std::forward<Args>(args)...);
 }
 
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret FastCall(uint32_t _addr, Args ...args) noexcept(false) {
-	return ((T_Ret(__fastcall*)(Args...))_addr)(std::forward<Args>(args)...);
+	return reinterpret_cast<T_Ret(__fastcall*)(Args...)>(_addr)(std::forward<Args>(args)...);
 }
 
 template <auto T_Func, typename ...Args>
