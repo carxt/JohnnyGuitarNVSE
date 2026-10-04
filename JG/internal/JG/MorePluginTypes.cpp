@@ -672,28 +672,6 @@ namespace MorePluginTypes {
 		return 0;
 	}
 
-	uint32_t uiRefToStringRet = 0;
-	SPEC_NAKED void JIP_RefToString_Asm() {
-		__asm {
-			mov		ecx, edi
-			push	0xFFFFFFFF
-			call	TESForm::GetFile
-			mov		esi, eax
-			jmp		uiRefToStringRet
-		}
-	}
-
-	uint32_t uiGetModNameRet = 0;
-	SPEC_NAKED void JIP_GetModName_Asm() {
-		__asm {
-			push	ecx
-			mov		ecx, dword ptr ds:[0x11C3F2C]
-			call	TESDataHandler::GetCompiledFile
-			mov		edx, eax
-			jmp		uiGetModNameRet
-		}
-	}
-
 	TESFile* __fastcall GetOverridingMod(TESForm* apForm) {
 		return apForm->GetFile(-1);
 	}
@@ -1053,7 +1031,7 @@ namespace MorePluginTypes {
 		}
 	}
 
-		namespace JIPExtraData {
+	namespace JIPExtraData {
 
 		constexpr uint32_t EXTRA_DATA_SAVE_VERSION = 3;
 
@@ -1312,9 +1290,13 @@ namespace MorePluginTypes {
 		HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100016C0), JIP_GetResolvedFormID);
 
 		// TESForm::RefToString
-		HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10057C1E) + 2, 0xFE);
-		HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10057C26), JIP_RefToString_Asm);
-		uiRefToStringRet = JIPUtils::GetAddress(0x10057C32);
+		// mov     ecx, edi
+		// push    0xFFFFFFFF
+		// mov     eax, 484E60h // TESForm::GetFile
+		// call    eax
+		// mov     esi, eax
+		// jmp     +9
+		HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10057C1A), "\x89\xF9\x6A\xFF\xB8\x60\x4E\x48\x00\xFF\xD0\x89\xC6\xEB\x09");
 
 		// ModLogPrint
 		// mov     edi, eax
@@ -1326,9 +1308,13 @@ namespace MorePluginTypes {
 		HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x1003CF53), 7);
 
 		// GetModName
-		HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10043FAF) + 2, 0xFE);
-		HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10043FB7), JIP_GetModName_Asm);
-		uiRefToStringRet = JIPUtils::GetAddress(0x10043FC3);
+		// push	   [ebp - 0x8]
+		// mov     ecx, dword ptr ds:[0x11C3F2C] // pDataHandler
+		// mov     eax, 0x465010 // TESDataHandler::GetCompiledFile
+		// call    eax
+		// mov     edx, eax
+		// jmp     +3
+		HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10043FAC), "\xFF\x75\xF8\x8B\x0D\x2C\x3F\x1C\x01\xB8\x10\x50\x46\x00\xFF\xD0\x89\xC2\xEB\x03");
 
 		JIPAuxVars::InitHooks();
 
@@ -1344,29 +1330,6 @@ namespace MorePluginTypes {
 }
 
 namespace MorePluginTypes {
-
-	bool JIP_GetModName(COMMAND_ARGS) {
-		char cName[MAX_PATH] = {};
-		uint32_t uiIndex = 0;
-		BOOL bKeepExtension = FALSE;
-		const uint32_t uiMaxIndex = bSupportESLs ? 0xFE : 0xFF;
-		if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiIndex, &bKeepExtension) && uiIndex < uiMaxIndex) {
-			TESFile* pFile = TESDataHandler::GetSingleton()->GetCompiledFile(uiIndex);
-			const char* pName = "    ";
-			if (pFile)
-				pName = pFile->GetName();
-
-			strcpy_s(cName, pName);
-			if (cName[0] && !bKeepExtension) {
-				char* pDot = strrchr(cName, '.');
-				if (pDot)
-					*pDot = 0;
-			}
-		}
-
-		g_strInterface->Assign(PASS_COMMAND_ARGS, cName);
-		return true;
-	}
 
 	bool JIP_IsFormOverridden(COMMAND_ARGS) {
 		TESForm* pForm = nullptr;
@@ -1449,12 +1412,6 @@ namespace MorePluginTypes {
 
 		uiHexToUIntAddr = JIPUtils::GetAddress(0x10006660);
 
-		{
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetModName));
-			if (pInfo) {
-				pInfo->execute = JIP_GetModName;
-			}
-		}
 		{
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kIsFormOverridden));
 			if (pInfo) {
