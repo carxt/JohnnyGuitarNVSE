@@ -906,6 +906,27 @@ namespace MorePluginTypes {
 			}
 		}
 
+		uint32_t uiSkipLoadModAddr = 0x100156C0;
+		SPEC_NAKED void JIP_SkipLoadMod_Asm() {
+			__asm {
+				mov		edx, dword ptr[ebp - 0x28]
+				cmp		edx, SCRIPT_VAR_SAVE_VERSION
+				jl		SKIP_ESL
+
+				movzx   eax, byte ptr[esi + 3]
+				lea     esi, [esi + 12]
+				jmp		EXIT
+
+				SKIP_ESL:
+				movzx   eax, byte ptr[esi + 1]
+				lea     esi, [esi + 10]
+
+				EXIT:
+				lea     esi, [esi + eax]
+				jmp		uiSkipLoadModAddr
+			}
+		}
+
 		void InitHooks() {
 			// Script::AddVariable
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1000214C) + 1, 0x14);
@@ -938,6 +959,9 @@ namespace MorePluginTypes {
 			uiLoadModAddr = JIPUtils::GetAddress(0x10015662);
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1001565F) + 2, 9);
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10015665), "\x85\xC9\xEB\x03");
+
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100156B6), JIP_SkipLoadMod_Asm);
+			uiSkipLoadModAddr = JIPUtils::GetAddress(0x100156C0);
 		}
 
 	}
