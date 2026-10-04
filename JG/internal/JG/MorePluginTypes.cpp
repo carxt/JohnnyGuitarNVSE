@@ -638,6 +638,9 @@ namespace MorePluginTypes {
 	}
 
 	void InitHooks() {
+		if (!bSupportESLs && !bSupportOverlays)
+			return;
+
 		SaveLoadHooks::InitHooks();
 		FileHooks::InitHooks();
 		OtherHooks::InitHooks();
@@ -1141,6 +1144,9 @@ namespace MorePluginTypes {
 	}
 
 	void InitJIPHooks() {
+		if (!bSupportESLs && !bSupportOverlays)
+			return;
+
 		if (!JIPUtils::IsValid())
 			return;
 
@@ -1298,6 +1304,9 @@ namespace MorePluginTypes {
 	}
 
 	void InitCommandHooks() {
+		if (!bSupportESLs && !bSupportOverlays)
+			return;
+
 		if (!JIPUtils::IsValid())
 			return;
 
@@ -1342,6 +1351,9 @@ namespace MorePluginTypes {
 	}
 
 	void Install() {
+		if (!bSupportESLs && !bSupportOverlays)
+			return;
+
 		kDetour.ReplaceCall(0x86A91A, InitDelayedHooks);
 	}
 
