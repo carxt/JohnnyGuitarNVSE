@@ -614,18 +614,6 @@ namespace MorePluginTypes {
 				return FormID_View(apForm->GetFormID()).GetID();
 		}
 
-		HookUtils::CallDetour kScriptLoadDetour;
-		void __fastcall LoadScriptForm(TESForm* apThis, void*, TESFile* apFile) {
-			ThisCall(kScriptLoadDetour, apThis, apFile);
-			const TESFile* pOrgFile = apThis->GetFile(0);
-			if (bSupportESLs && pOrgFile->IsSmallFile()) {
-				char cMessage[MAX_PATH];
-				our_snprintf(cMessage, sizeof(cMessage), "%s has Script %08X (%s), but is an ESL. Not allowed! Time to die.", pOrgFile->GetName(), apThis->GetFormID(), apThis->GetFormEditorID());
-				MessageBox(nullptr, cMessage, "AAAAAAA", MB_ICONERROR);
-				ExitProcess(0);
-			}
-		}
-
 		void InitHooks() {
 			if (bSupportESLs) {
 				HookUtils::ReplaceCall(0x604384, GetRawFormID); // TESNPC::GetHeadPartModTextureFileName
@@ -635,8 +623,6 @@ namespace MorePluginTypes {
 				HookUtils::ReplaceCall(0x617460, GetRawFormID); // TESResponse::GetAudioFilename
 				HookUtils::ReplaceCall(0x5441F1, GetRawFormID); // TESObjectCELL::GetGroupBlockKey
 				HookUtils::ReplaceCall(0x544251, GetRawFormID); // TESObjectCELL::GetGroupSubBlockKey
-
-				kScriptLoadDetour.ReplaceCall(0x5ABA3D, LoadScriptForm);
 			}
 
 			// Handle TESDataHandler::GetExtCellDataFromFileByEditorID
