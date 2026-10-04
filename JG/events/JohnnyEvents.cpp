@@ -9,10 +9,29 @@
 #include "Bethesda/PlayerCharacter.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
+#include <shared/Utils/DebugLog.hpp>
 
 class InventoryChanges;
 
 extern NVSEScriptInterface* g_scriptInterface;
+
+namespace JohnnyEvents {
+
+	thread_local AVChangeMode eAVChangeMode = AVChangeMode::MOD;
+
+	STACK_FRAME_OPT_ENABLE
+	EXTERN_DLL_EXPORT SPEC_NOINLINE AVChangeMode SetAVChangeMode(AVChangeMode aeMode) {
+		assert(aeMode == AVChangeMode::SET || aeMode == AVChangeMode::MOD);
+		auto eOld = eAVChangeMode;
+		eAVChangeMode = aeMode;
+		return eOld;
+	}
+
+	EXTERN_DLL_EXPORT SPEC_NOINLINE AVChangeMode GetAVChangeMode() {
+		return eAVChangeMode;
+	}
+	STACK_FRAME_OPT_RESET
+}
 
 namespace JohnnyEvents {
 
@@ -262,14 +281,13 @@ namespace JohnnyEvents {
 			}
 		}
 
-		static void __fastcall OnAVChange(ActorValueOwner* apActor, ActorValue::Index aeActorValue, float afPreviousValue, float afModValue, void* apChangeCallback) {
-			if (!apChangeCallback)
-				afPreviousValue = apActor->GetActorValueF(aeActorValue) - afModValue;
-
-			const float fNewValue = afPreviousValue + afModValue;
+		static void __fastcall OnAVChange(ActorValueOwner* apActor, ActorValue::Index aeActorValue, float afPreviousValue, float afNewValue) {
+			const float fNewValue = GetAVChangeMode() == AVChangeMode::SET ? afNewValue : afPreviousValue + afNewValue;
+			const float fNewValueClamped = apActor->GetActorValueF(aeActorValue);
 			const float fPreviousValue = afPreviousValue;
 
 			const float fNewValueFloor = floor(fNewValue);
+			const float fNewValueClampedFloor = floor(fNewValueClamped);
 			const float fPreviousValueFloor = floor(fPreviousValue);
 
 			TESForm* pForm = apActor->GetAsForm();
@@ -280,17 +298,30 @@ namespace JohnnyEvents {
 					SendNVSEMessage(JG_OnAVChange, kData);
 				}
 
+				auto pCallUDF = [=](const EventBase& arCallback) {
+					const bool bNoFloor = arCallback.usUserFlags.GetBit<0>();
+					const bool bUseClamp = arCallback.usUserFlags.GetBit<1>();
+
+					uint32_t uiPrev = reinterpret_cast<const uint32_t&>(bNoFloor ? fPreviousValue : fPreviousValueFloor);
+					uint32_t uiNew = reinterpret_cast<const uint32_t&>(fNewValueFloor);
+					if (bUseClamp) [[unlikely]] {
+						if (int32_t(fNewValueClampedFloor) == int32_t(fPreviousValueFloor))
+							return;
+
+						uiNew = reinterpret_cast<const uint32_t&>(bNoFloor ? fNewValueClamped : fNewValueClampedFloor);
+					}
+					else if (bNoFloor) [[unlikely]] {
+						uiNew = reinterpret_cast<const uint32_t&>(fNewValue);
+					}
+
+					CallUDF(arCallback.pScript, nullptr, OnAVChangeHandler->ucMaxArgsCount, aeActorValue, uiPrev, uiNew);
+				};
+
 				if (pForm == PlayerCharacter::GetSingleton()) {
 					for (auto const& rCallback : OnAVChangeHandler->kCallbacks) {
 						auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
 						if (pFilter->IsIntInFilter(aeActorValue)) {
-
-							const bool bFullValues = rCallback.usUserFlags.Get(1);
-
-							const float& fNewVal = bFullValues ? fNewValue : fNewValueFloor;
-							const float& fPrevVal = bFullValues ? fPreviousValue : fPreviousValueFloor;
-
-							CallUDF(rCallback.pScript, nullptr, OnAVChangeHandler->ucMaxArgsCount, aeActorValue, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
+							pCallUDF(rCallback);
 						}
 					}
 				}
@@ -298,13 +329,7 @@ namespace JohnnyEvents {
 					for (auto const& rCallback : OnNPCAVChangeHandler->kCallbacks) {
 						auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
 						if (pFilter->IsIntInFilter(aeActorValue) && pFilter->IsAnyFormInFilter(0, pForm)) {
-
-							const bool bFullValues = rCallback.usUserFlags.Get(1);
-
-							const float& fNewVal = bFullValues ? fNewValue : fNewValueFloor;
-							const float& fPrevVal = bFullValues ? fPreviousValue : fPreviousValueFloor;
-
-							CallUDF(rCallback.pScript, nullptr, OnNPCAVChangeHandler->ucMaxArgsCount, pForm, aeActorValue, *(uint32_t*)&fPrevVal, *(uint32_t*)&fNewVal);
+							pCallUDF(rCallback);
 						}
 					}
 				}
@@ -630,14 +655,24 @@ namespace JohnnyEvents {
 		HookUtils::CallDetour kOnAVChangeDetour;
 		STACK_FRAME_OPT_DISABLE
 		static ActorValueInfo* __cdecl OnAVChange(ActorValue::Index aeActorValue) {
-			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+			DWORD* pReturnAddrAddr = static_cast<DWORD*>(_AddressOfReturnAddress());
+			uint8_t* pEBP = GetParentBasePtr(pReturnAddrAddr);
 			ActorValueOwner* pActor = *reinterpret_cast<ActorValueOwner**>(pEBP + 0x8);
 			float fOldVal = *reinterpret_cast<float*>(pEBP + 0x10);
 			float fNewVal = *reinterpret_cast<float*>(pEBP + 0x14);
 			ActorValueInfo* pInfo = CdeclCall<ActorValueInfo*>(kOnAVChangeDetour, aeActorValue);
-			if (pInfo)
-				Events::OnAVChange(pActor, aeActorValue, fOldVal, fNewVal, pInfo->pModifiedCallback);
+			if (pInfo) [[likely]]
+				Events::OnAVChange(pActor, aeActorValue, fOldVal, fNewVal);
 			return pInfo;
+		}
+		STACK_FRAME_OPT_RESET
+
+		HookUtils::CallDetour kOnAVChangeSetDetour;
+		STACK_FRAME_OPT_ENABLE
+		void __cdecl OnAVChangeModeSet(ActorValueOwner* apActor, ActorValue::Index aeIndex, float afOldVal, float afNewVal, ActorValueOwner* apActorSource) {
+			auto ePrevMode = JohnnyEvents::SetAVChangeMode(AVChangeMode::SET);
+			CdeclCall(kOnAVChangeSetDetour, apActor, aeIndex, afOldVal, afNewVal, apActorSource);
+			JohnnyEvents::SetAVChangeMode(ePrevMode);
 		}
 		STACK_FRAME_OPT_RESET
 
@@ -787,6 +822,28 @@ namespace JohnnyEvents {
 			kOnRemovePerkDetour.ReplaceVirtualCall(0x5D4F89, OnRemovePerk, 8);
 
 			kOnAVChangeDetour.ReplaceCall(0x66EE58, OnAVChange);
+			kOnAVChangeSetDetour.ReplaceCall(0x880842, OnAVChangeModeSet);
+			// Game only passes the old value if AV has a change callback. 
+			// Since we're hooking that for our own event callback, we always need the prev value
+			// Nuking only the conditional jumps, ActorValueHasOnChangedCallback calls are preserved in case someone hoooooks them
+			{
+				HookUtils::PatchMemoryNop(0x88071A, 2); // Actor::SetActorValueF
+				HookUtils::PatchMemoryNop(0x8809C6, 2); // Actor::TempModActorValueI
+				HookUtils::PatchMemoryNop(0x880B53, 2); // Actor::TempModActorValueF
+				HookUtils::PatchMemoryNop(0x880CE6, 2); // Actor::PermanentModActorValueI
+				HookUtils::PatchMemoryNop(0x880E83, 2); // Actor::PermanentModActorValueF
+				HookUtils::PatchMemoryNop(0x881026, 2); // Actor::DamageModActorValueI
+				HookUtils::PatchMemoryNop(0x8811B3, 2); // Actor::DamageModActorValueF
+				HookUtils::PatchMemoryNop(0x881397, 2); // Actor::ModActorBaseValueF
+				HookUtils::PatchMemoryNop(0x93A90A, 2); // PlayerCharacter::ModActorBaseValueI
+				HookUtils::PatchMemoryNop(0x93AA2A, 2); // PlayerCharacter::ModActorBaseValueF
+				HookUtils::PatchMemoryNop(0x93AECE, 2); // PlayerCharacter::TempModActorValueI
+				HookUtils::PatchMemoryNop(0x93B001, 2); // PlayerCharacter::TempModActorValueF
+				HookUtils::PatchMemoryNop(0x93B15D, 2); // PlayerCharacter::PermanentModActorValueI
+				HookUtils::PatchMemoryNop(0x93B2B0, 2); // PlayerCharacter::PermanentModActorValueF
+				HookUtils::PatchMemoryNop(0x93B47A, 2); // PlayerCharacter::DamageModActorValueI
+				HookUtils::PatchMemoryNop(0x93B87D, 2); // PlayerCharacter::DamageModActorValueF
+			}
 
 			// MoveToHigh
 			OnProcessChangeEventHook<0x108AC7C>();
