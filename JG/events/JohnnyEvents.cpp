@@ -262,11 +262,8 @@ namespace JohnnyEvents {
 			}
 		}
 
-		static void __fastcall OnAVChange(ActorValueOwner* apActor, ActorValue::Index aeActorValue, float afPreviousValue, float afModValue, void* apChangeCallback) {
-			if (!apChangeCallback)
-				afPreviousValue = apActor->GetActorValueF(aeActorValue) - afModValue;
-
-			const float fNewValue = afPreviousValue + afModValue;
+		static void __fastcall OnAVChange(ActorValueOwner* apActor, ActorValue::Index aeActorValue, float afPreviousValue, float afNewValue, void* apChangeCallback) {
+			const float fNewValue = afNewValue;
 			const float fPreviousValue = afPreviousValue;
 
 			const float fNewValueFloor = floor(fNewValue);
@@ -787,6 +784,27 @@ namespace JohnnyEvents {
 			kOnRemovePerkDetour.ReplaceVirtualCall(0x5D4F89, OnRemovePerk, 8);
 
 			kOnAVChangeDetour.ReplaceCall(0x66EE58, OnAVChange);
+			// Game only passes the old value if AV has a change callback. 
+			// Since we're hooking that for our own event callback, we always need the prev value
+			// Nuking only the conditional jumps, ActorValueHasOnChangedCallback calls are preserved in case someone hoooooks them
+			{
+				HookUtils::PatchMemoryNop(0x88071A, 2); // Actor::SetActorValueF
+				HookUtils::PatchMemoryNop(0x8809C6, 2); // Actor::TempModActorValueI
+				HookUtils::PatchMemoryNop(0x880B53, 2); // Actor::TempModActorValueF
+				HookUtils::PatchMemoryNop(0x880CE6, 2); // Actor::PermanentModActorValueI
+				HookUtils::PatchMemoryNop(0x880E83, 2); // Actor::PermanentModActorValueF
+				HookUtils::PatchMemoryNop(0x881026, 2); // Actor::DamageModActorValueI
+				HookUtils::PatchMemoryNop(0x8811B3, 2); // Actor::DamageModActorValueF
+				HookUtils::PatchMemoryNop(0x881397, 2); // Actor::ModActorBaseValueF
+				HookUtils::PatchMemoryNop(0x93A90A, 2); // PlayerCharacter::ModActorBaseValueI
+				HookUtils::PatchMemoryNop(0x93AA2A, 2); // PlayerCharacter::ModActorBaseValueF
+				HookUtils::PatchMemoryNop(0x93AECE, 2); // PlayerCharacter::TempModActorValueI
+				HookUtils::PatchMemoryNop(0x93B001, 2); // PlayerCharacter::TempModActorValueF
+				HookUtils::PatchMemoryNop(0x93B15D, 2); // PlayerCharacter::PermanentModActorValueI
+				HookUtils::PatchMemoryNop(0x93B2B0, 2); // PlayerCharacter::PermanentModActorValueF
+				HookUtils::PatchMemoryNop(0x93B47A, 2); // PlayerCharacter::DamageModActorValueI
+				HookUtils::PatchMemoryNop(0x93B87D, 2); // PlayerCharacter::DamageModActorValueF
+			}
 
 			// MoveToHigh
 			OnProcessChangeEventHook<0x108AC7C>();
