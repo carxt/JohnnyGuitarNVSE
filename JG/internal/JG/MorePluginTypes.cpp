@@ -1053,6 +1053,140 @@ namespace MorePluginTypes {
 		}
 	}
 
+		namespace JIPExtraData {
+
+		constexpr uint32_t EXTRA_DATA_SAVE_VERSION = 3;
+
+		uint32_t uiRefHasExtraDataReturnAddr;
+		SPEC_NAKED void RefHasExtraData_Asm() {
+			__asm {
+				mov     eax, [ebp - 0x4]
+				test    eax, eax
+				jnz		SELECT_FILE
+
+				mov     ecx, [ebp + 0x18]
+				call	GetOverridingMod
+				jmp		EXIT
+
+				SELECT_FILE:
+				push	eax
+				mov		ecx, dword ptr ds:[0x11C3F2C] // pDataHandler
+				call	TESDataHandler::GetCompiledFile
+
+				EXIT:
+				mov		[ebp - 0x4], eax
+				test	eax, eax
+				jmp		uiRefHasExtraDataReturnAddr
+			}
+		}
+
+		uint32_t uiGetRefExtraDataReturnAddr;
+		SPEC_NAKED void GetRefExtraData_Asm() {
+			__asm {
+				test    ebx, ebx
+				jnz		SELECT_FILE
+
+				mov     ecx, [ebp + 0x18]
+				call	GetOverridingMod
+				mov		ebx, eax
+				jmp		EXIT
+
+				SELECT_FILE:
+				push	ebx
+				mov		ecx, dword ptr ds:[0x11C3F2C] // pDataHandler
+				call	TESDataHandler::GetCompiledFile
+				mov		ebx, eax
+
+				EXIT:
+				test	ebx, ebx
+				jmp		uiGetRefExtraDataReturnAddr
+			}
+		}
+
+		uint32_t uiSaveModAddr;
+		SPEC_NAKED void JIP_SaveMod_Asm() {
+			__asm {
+				mov		eax, [esi]
+				push	eax
+				call	JIP_SaveMod
+				jmp		uiSaveModAddr
+			}
+		}
+
+		uint32_t uiLoadModAddr;
+		SPEC_NAKED void JIP_LoadMod_Asm() {
+			__asm {
+				mov		[ebp - 0x30], eax
+
+				mov		cl, [esi]
+				add		esi, 1
+
+				mov		edx, dword ptr[ebp - 0x28]
+				cmp		edx, EXTRA_DATA_SAVE_VERSION
+				jl		SKIP_ESL
+
+				push	1
+				movzx	edx, word ptr[esi]
+				add		esi, 2
+				jmp		LOAD_VAR
+
+				SKIP_ESL:
+				mov		edx, 0
+				push	0
+
+				LOAD_VAR:
+				call	JIP_LoadMod
+				mov		[ebp - 0xC], eax
+
+				mov		edi, dword ptr[esi]
+				mov		[ebp - 0x1C], edi
+				add     esi, 4
+
+				movzx   edi, word ptr[esi]
+				mov		[ebp - 0x18], edi
+				add		esi, 2
+
+				movzx   edi, word ptr[esi]
+				mov     [ebp - 0x38], edi
+				add		esi, 2
+
+				mov		[ebp - 0x34], esi
+
+				jmp		uiLoadModAddr
+			}
+		}
+
+		void InitHooks() {
+			// Cmd_RefHasExtraData_Execute
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1002E0DC), RefHasExtraData_Asm);
+			uiRefHasExtraDataReturnAddr = JIPUtils::GetAddress(0x1002E0F6);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1002E0F6), 0x74);
+
+			// Cmd_GetRefExtraData_Execute
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1002E1B6), GetRefExtraData_Asm);
+			uiGetRefExtraDataReturnAddr = JIPUtils::GetAddress(0x1002E1CB);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1002E1CB) + 1, 0x84);
+
+			// Cmd_SetRefExtraData_Execute
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1002E28C), GetOverridingModOrID);
+			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x1002E291), 3);
+
+			// SaveGameCallback
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10016761 + 1), EXTRA_DATA_SAVE_VERSION);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10016862), JIP_SaveMod_Asm);
+			uiSaveModAddr = JIPUtils::GetAddress(0x1001686C);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x100167EA), "\x6B\xD0\x0B");
+
+			// LoadGameCallback
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10015B33 + 3), EXTRA_DATA_SAVE_VERSION);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10015BB1), JIP_LoadMod_Asm);
+			uiLoadModAddr = JIPUtils::GetAddress(0x10015BDB);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10015BDB), 0x85);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10015C1C), "\x8B\x45\xF4\x90");
+		}
+
+	}
+
 	namespace JIPLinkedRefs {
 
 		constexpr uint32_t LINKED_REF_SAVE_VERSION = 10;
@@ -1141,6 +1275,7 @@ namespace MorePluginTypes {
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10015D45), "\x8B\x45\xF4\x85\xC0\x74\x6F\xEB\x06");
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10015D5A), 0x89);
 		}
+
 	}
 
 	void InitJIPHooks() {
@@ -1200,6 +1335,8 @@ namespace MorePluginTypes {
 		JIPScriptVars::InitHooks();
 
 		JIPRefMaps::InitHooks();
+
+		JIPExtraData::InitHooks();
 
 		JIPLinkedRefs::InitHooks();
 	}
