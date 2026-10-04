@@ -140,11 +140,17 @@ namespace MorePluginTypes {
 		}
 
 		void __fastcall AdjustFormIDFileIndex(TESFile* apFile, TESFile* apIndexFile) {
-			if (TESForm::IsDefaultForm(apFile->kCurrentForm.uiFormID))
-				return;
+			FormID_View uiDefaultFormIDCheck = apFile->kCurrentForm.uiFormID;
+			if (!apFile->IsSmallFile() && !apFile->IsOverlay())
+				uiDefaultFormIDCheck.SetCompileIndex(0);
 
-			const TESFile* pIndexFile = apIndexFile ? apIndexFile : apFile;
-			pIndexFile->AdjustFormIDFileIndex(apFile->kCurrentForm.uiFormID);
+			if (uiDefaultFormIDCheck.IsDefault()) {
+				reinterpret_cast<FormID_View&>(apFile->kCurrentForm.uiFormID).SetCompileIndex(0);
+			}
+			else {
+				const TESFile* pIndexFile = apIndexFile ? apIndexFile : apFile;
+				pIndexFile->AdjustFormIDFileIndex(apFile->kCurrentForm.uiFormID);
+			}
 		}
 
 		SPEC_NAKED void AdjustFormIDFileIndex_Asm() {
