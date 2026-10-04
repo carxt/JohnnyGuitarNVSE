@@ -35,6 +35,7 @@
 #include "JG/NPCAccuracy.hpp"
 #include "JG/ScriptUtils.hpp"
 #include "JG/WorldToScreen.hpp"
+#include <Events/JohnnyEvents.hpp>
 
 #include "NVSE/InventoryRef.hpp"
 
@@ -1199,7 +1200,9 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 		}
 
 		const float fNewVal = pActor->GetActorValueF(eActorValue);
+		auto ePrevMode = JohnnyEvents::SetAVChangeMode(JohnnyEvents::AVChangeMode::SET);
 		ActorValue::CheckCallModifiedCallback(pActor, eActorValue, fOldVal, fNewVal, nullptr);
+		JohnnyEvents::SetAVChangeMode(ePrevMode);
 		*result = 1;
 	}
 	return true;
@@ -1223,7 +1226,9 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 		}
 
 		const float fNewVal = pActor->GetActorValueF(eActorValue);
+		auto ePrevMode = JohnnyEvents::SetAVChangeMode(JohnnyEvents::AVChangeMode::SET);
 		ActorValue::CheckCallModifiedCallback(pActor, eActorValue, fOldVal, fNewVal, nullptr);
+		JohnnyEvents::SetAVChangeMode(ePrevMode);
 		*result = 1;
 	}
 	return true;
