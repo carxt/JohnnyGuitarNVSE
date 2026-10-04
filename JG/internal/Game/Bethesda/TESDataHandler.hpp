@@ -223,7 +223,7 @@ public:
 
 	uint32_t GetCompiledFileCount() const;
 	TESFile* GetCompiledFile(uint32_t auiIndex) const;
-	TESFile* GetCompiledFileForFormID(uint32_t auiFormID) const;
+	TESFile* GetCompiledFileForFormID(FormID auiFormID) const;
 
 
 #if ESL_SUPPORT || OVERLAY_SUPPORT

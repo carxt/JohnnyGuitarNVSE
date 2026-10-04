@@ -72,7 +72,7 @@ TESFile* TESDataHandler::GetCompiledFile(uint32_t auiIndex) const {
 #endif
 }
 
-TESFile* TESDataHandler::GetCompiledFileForFormID(uint32_t auiFormID) const {
+TESFile* TESDataHandler::GetCompiledFileForFormID(FormID auiFormID) const {
 	const uint8_t ucIndex = FormID_View(auiFormID).GetCompileIndex();
 	if (ucIndex == 0xFF)
 		return nullptr;
@@ -141,18 +141,14 @@ uint32_t __fastcall CompiledFiles::GetFileCount() const {
 }
 
 TESFile* __fastcall CompiledFiles::GetFile(uint32_t auiIndex) const {
-	ASSUME_ASSERT(auiIndex < 0xFF);
-#if ESL_SUPPORT || OVERLAY_SUPPORT
 	if (auiIndex >= GetFileCount())
 		return nullptr;
 
+#if ESL_SUPPORT || OVERLAY_SUPPORT
 	if (TESDataHandler::HasExtendedPlugins())
 		return kNormalFiles.GetAt(auiIndex);
-
-	return pFileArray[auiIndex];
-#else
-	return pFileArray[auiIndex];
 #endif
+	return pFileArray[auiIndex];
 }
 
 #if ESL_SUPPORT

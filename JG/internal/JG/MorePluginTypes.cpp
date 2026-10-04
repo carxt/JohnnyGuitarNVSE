@@ -215,7 +215,16 @@ namespace MorePluginTypes {
 			}
 
 			TESFile* GetCompiledFile(uint32_t auiIndex) const {
-				return kCompiledFiles.GetFile(auiIndex);
+				if (auiIndex == 0xFF)
+					return nullptr;
+
+				if (FormID_View(auiIndex).IsSmall() && SupportsSmallPugins()) {
+					const uint16_t usSmallIndex = FormID_View(auiIndex).GetSmallIndex();
+					return kCompiledFiles.GetSmallFile(usSmallIndex);
+				}
+				else {
+					return kCompiledFiles.GetFile(auiIndex);
+				}
 			}
 		};
 
