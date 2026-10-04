@@ -645,10 +645,6 @@ namespace MorePluginTypes {
 
 }
 
-namespace JazzAuxVars {
-
-}
-
 namespace MorePluginTypes {
 
 	static TESFile* __fastcall JIP_LookupModByName(TESDataHandler* apThis, const char* apFileName) {
@@ -656,7 +652,7 @@ namespace MorePluginTypes {
 	}
 
 	static bool __fastcall JIP_GetResolvedModIndex(uint8_t& arIndex) {
-		if (arIndex >= 0xFE)
+		if (arIndex == 0xFF)
 			return true;
 
 		TESFile* pFile = BGSSaveLoadGame::GetSingleton()->GetSaveMod(arIndex);
@@ -665,6 +661,12 @@ namespace MorePluginTypes {
 
 		arIndex = pFile->GetCompileIndex();
 		return true;
+	}
+
+	static FormID __fastcall JIP_GetResolvedFormID(FormID& arFormID) {
+		if (JohnnySerialization::_ResolveFormID(arFormID, &arFormID))
+			return arFormID;
+		return 0;
 	}
 
 	uint32_t uiRefToStringRet = 0;
@@ -693,58 +695,80 @@ namespace MorePluginTypes {
 		return apForm->GetFile(-1);
 	}
 
-#if 0
+	TESFile* __fastcall GetOverridingModOrID(TESForm* apForm) {
+		TESFile* pFile = apForm->GetFile(-1);
+		if (pFile)
+			return pFile;
+		return reinterpret_cast<TESFile*>(0xFF);
+	}
+
+	void __cdecl JIP_SaveMod(const TESFile* apFile) {
+		bool bValidFile = apFile != reinterpret_cast<TESFile*>(0xFF);
+		const uint8_t ucModIndex = bValidFile ? apFile->GetCompileIndex() : 0xFF;
+		const uint16_t ucSmallIndex = bValidFile ? apFile->GetSmallCompileIndex() : 0;
+		JohnnySerialization::_WriteRecord8(ucModIndex);
+		JohnnySerialization::_WriteRecord16(ucSmallIndex);
+	}
+
+	void __cdecl JIP_SaveModNoTempIndex(const TESFile* apFile) {
+		const uint8_t ucModIndex = apFile ? apFile->GetCompileIndex() : 0xFF;
+		const uint16_t ucSmallIndex = apFile ? apFile->GetSmallCompileIndex() : 0;
+		JohnnySerialization::_WriteRecord8(ucModIndex);
+		JohnnySerialization::_WriteRecord16(ucSmallIndex);
+	}
+
+	TESFile* __fastcall JIP_LoadMod(uint8_t aucIndex, uint16_t ausSmallIndex, bool abSupportsESL) {
+		FormID_View uiTempFormID(0);
+		if (abSupportsESL)
+			uiTempFormID.SetSmallIndex(ausSmallIndex);
+		else if (aucIndex == 0xFE && TESDataHandler::HasSmallPluginSupport())
+			return nullptr;
+
+		uiTempFormID.SetCompileIndex(aucIndex);
+		return TESDataHandler::GetSingleton()->GetCompiledFileForFormID(uiTempFormID.Get());
+	}
+
 	// I'm having more fun than you can imagine
 	namespace JIPAuxVars {
 
 		constexpr uint32_t AUX_VAR_SAVE_VERSION = 11;
 
-		TESFile* __fastcall GetOverridingModOrID(TESForm* apForm) {
-			TESFile* pFile = apForm->GetFile(-1);
-			if (pFile)
-				return pFile;
-			return reinterpret_cast<TESFile*>(0xFF);
-		}
-
-		void __fastcall JIP_SaveAuxVarMod(TESFile* apFile) {
-			assert(apFile);
-			const char* pName = "RUNTIME";
-			if (apFile != reinterpret_cast<TESFile*>(0xFF))
-				pName = apFile->GetName();
-			
-			uint8_t ucLength = StrLen(pName);
-			JohnnySerialization::_WriteRecordData(&ucLength, 1);
-			JohnnySerialization::_WriteRecordData(pName, ucLength);
-		}
-
-		uint32_t uiSaveAuxVarModAddr = 0x100162C3;
-		SPEC_NAKED void JIP_SaveAuxVarMod_Asm() {
+		uint32_t uiSaveModAddr = 0x100162BC;
+		SPEC_NAKED void JIP_SaveMod_Asm() {
 			__asm {
-				mov     ecx, [esi + 4]
-				call	JIP_SaveAuxVarMod
-				movzx   eax, word ptr[esi + 0x10]
-				jmp		uiSaveAuxVarModAddr
+				mov     eax, [esi + 4]
+				push	eax
+				call	JIP_SaveMod
+				jmp		uiSaveModAddr
 			}
 		}
 
-		void __fastcall JIP_LoadAuxVarMod(TESFile* apFile) {
-			assert(apFile);
-			const char* pName = "RUNTIME";
-			if (apFile != reinterpret_cast<TESFile*>(0xFF))
-				pName = apFile->GetName();
-
-			uint8_t ucLength = StrLen(pName);
-			JohnnySerialization::_WriteRecordData(&ucLength, 1);
-			JohnnySerialization::_WriteRecordData(pName, ucLength);
-		}
-
-		uint32_t uiLoadAuxVarModAddr = 0x100162C3;
-		SPEC_NAKED void JIP_LoadAuxVarMod_Asm() {
+		uint32_t uiLoadModAddr = 0x10015722;
+		SPEC_NAKED void JIP_LoadMod_Asm() {
 			__asm {
-				mov     ecx, [esi + 4]
-				call	JIP_LoadAuxVarMod
-				movzx   eax, word ptr[esi + 0x10]
-				jmp		uiLoadAuxVarModAddr
+				mov		cl, [esi]
+				add		esi, 1
+
+				mov		edx, dword ptr[ebp - 0x28]
+				cmp		edx, AUX_VAR_SAVE_VERSION
+				jl		SKIP_ESL
+
+				push	1
+				movzx	edx, word ptr[esi]
+				add		esi, 2
+				jmp		LOAD_VAR
+
+				SKIP_ESL:
+				mov		edx, 0
+				push	0
+
+				LOAD_VAR:
+				call	JIP_LoadMod
+				mov		[ebp - 0xC], eax
+				movzx   ebx, word ptr[esi]
+				add     esi, 2
+				mov		[ebp - 0x1C], ebx
+				jmp		uiLoadModAddr
 			}
 		}
 
@@ -807,16 +831,290 @@ namespace MorePluginTypes {
 
 			// Save
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10016261) + 1, AUX_VAR_SAVE_VERSION);
-			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100162B1) , JIP_SaveAuxVarMod_Asm);
-			uiSaveAuxVarModAddr = JIPUtils::GetAddress(0x100162C3);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100162B1) , JIP_SaveMod_Asm);
+			uiSaveModAddr = JIPUtils::GetAddress(0x100162BC);
 
 			// Load
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100156EA) + 3, AUX_VAR_SAVE_VERSION); 
-			// TODO
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10015713), JIP_LoadMod_Asm);
+			uiLoadModAddr = JIPUtils::GetAddress(0x10015722);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10015722), "\x85\xC0\x0F\x84\xA1\x01\x00\x00\xEB\x0E");
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1001578E), "\x8B\x4D\xF4\x90");
 		}
 
 	}
-#endif
+
+	namespace JIPScriptVars {
+
+		constexpr uint32_t SCRIPT_VAR_SAVE_VERSION = 10;
+
+		uint32_t uiSetVariableReturnAddr = 0x100024DB;
+		SPEC_NAKED void SetScriptVar_Asm() {
+			__asm {
+				mov     eax, [ebp + 0x14]
+				mov     edi, [ebp - 8]
+				mov		[ecx], edi
+				mov		[ecx + 4], eax
+				jmp		uiSetVariableReturnAddr
+			}
+		}
+
+		uint32_t uiSaveModAddr = 0x1001619B;
+		SPEC_NAKED void JIP_SaveMod_Asm() {
+			__asm {
+				mov     eax, [edi + 0x10]
+				push	eax
+				call	JIP_SaveModNoTempIndex
+				jmp		uiSaveModAddr
+			}
+		}
+
+		uint32_t uiLoadModAddr = 0x10015662;
+		SPEC_NAKED void JIP_LoadMod_Asm() {
+			__asm {
+				mov		cl, [esi]
+				add		esi, 1
+
+				mov		edx, dword ptr[ebp - 0x28]
+				cmp		edx, SCRIPT_VAR_SAVE_VERSION
+				jl		SKIP_ESL
+
+				push	1
+				movzx	edx, word ptr[esi]
+				add		esi, 2
+				jmp		LOAD_VAR
+
+				SKIP_ESL:
+				mov		edx, 0
+				push	0
+
+				LOAD_VAR:
+				call	JIP_LoadMod
+				mov		[ebp - 0xC], eax
+				mov		ecx, eax
+
+				dec     ebx
+				lea     eax, [esi + 1]
+				mov		[ebp - 0x38], eax
+				movzx   eax, byte ptr[esi]
+				add     esi, eax
+				mov     al, [esi + 1]
+				lea     edi, [esi + 1]
+				mov     byte ptr[esi + 1], 0
+				add     esi, 9
+				jmp		uiLoadModAddr
+			}
+		}
+
+		void InitHooks() {
+			// Script::AddVariable
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1000214C) + 1, 0x14);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100024E2) + 1, 0x14);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100024D0), SetScriptVar_Asm);
+			uiSetVariableReturnAddr = JIPUtils::GetAddress(0x100024DB);
+
+			// ScriptVariableAction_Execute
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10034C8E), GetOverridingMod);
+
+			// Cmd_RemoveAllAddedVariables_Execute
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10034DF8), GetOverridingMod);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10034E01), "\x89\xC1\x89\x4D\xFC");
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10034E31), 0x39);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10034E6E), "\x8B\x4D\xFC");
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10034EA3), "\x8B\x4D\xFC");
+
+			// Cmd_ClearJIPSavedData_Execute
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1003CB3C), GetOverridingMod);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1003CB45), "\x89\xC1\x90");
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1003CBC5), "\x8B\x4D\x10\x90");
+			
+			// SaveGameCallback
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100160F3) + 1, SCRIPT_VAR_SAVE_VERSION);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10016190), JIP_SaveMod_Asm);
+			uiSaveModAddr = JIPUtils::GetAddress(0x1001619B);
+
+			// LoadGameCallback
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10015640), JIP_LoadMod_Asm);
+			uiLoadModAddr = JIPUtils::GetAddress(0x10015662);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1001565F) + 2, 9);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10015665), "\x85\xC9\xEB\x03");
+		}
+
+	}
+
+	namespace JIPRefMaps {
+
+		constexpr uint32_t REF_MAP_SAVE_VERSION = 11;
+
+		uint32_t uiSaveModAddr = 0x1001655F;
+		SPEC_NAKED void JIP_SaveMod_Asm() {
+			__asm {
+				mov     eax, [edi + 0x4]
+				push	eax
+				call	JIP_SaveMod
+				jmp		uiSaveModAddr
+			}
+		}
+
+		uint32_t uiLoadModAddr = 0x10015993;
+		SPEC_NAKED void JIP_LoadMod_Asm() {
+			__asm {
+				mov		cl, [esi]
+				add		esi, 1
+
+				mov		edx, dword ptr[ebp - 0x28]
+				cmp		edx, REF_MAP_SAVE_VERSION
+				jl		SKIP_ESL
+
+				push	1
+				movzx	edx, word ptr[esi]
+				add		esi, 2
+				jmp		LOAD_VAR
+
+				SKIP_ESL:
+				mov		edx, 0
+				push	0
+
+				LOAD_VAR:
+				call	JIP_LoadMod
+				mov		[ebp - 0xC], eax
+
+				movzx   edi, word ptr[esi]
+				add     esi, 2
+				mov		[ebp - 0x1C], edi
+
+				jmp		uiLoadModAddr
+			}
+		}
+
+		void InitHooks() {
+			// RMFind
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x100334AF), GetOverridingModOrID);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x100334B4), "\x89\xC2\x90");
+
+			// Cmd_RefMapArrayGetAll_Execute
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10033E55), GetOverridingModOrID);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x100334B4), "\x89\xC6\x90");
+
+			// RefMapAddValue
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x100340CC), GetOverridingModOrID);
+			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x100340D1), 3);
+
+			// Cmd_RefMapArrayErase_Execute
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10034500), GetOverridingModOrID);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10034505), "\x89\xC7\x90");
+
+			// Cmd_RefMapArrayValidate_Execute
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10034754), GetOverridingModOrID);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10034759), "\x89\xC7\x90");
+
+			// Cmd_RefMapArrayDestroy_Execute
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x100349C2), GetOverridingModOrID);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x100349C7), "\x89\xC7\x90");
+
+			// SaveGameCallback
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10016504) + 1, REF_MAP_SAVE_VERSION);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10016554), JIP_SaveMod_Asm);
+			uiSaveModAddr = JIPUtils::GetAddress(0x1001655F);
+
+			// LoadGameCallback
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10015941) + 3, REF_MAP_SAVE_VERSION);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1001596C), JIP_LoadMod_Asm);
+			uiLoadModAddr = JIPUtils::GetAddress(0x1001597B);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1001597B), "\x85\xC0\x0F\x84\x5E\x01\x00\x00\xEB\x0E");
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10015A1A), "\x8B\x4D\xF4\x90");
+		}
+	}
+
+	namespace JIPLinkedRefs {
+
+		constexpr uint32_t LINKED_REF_SAVE_VERSION = 10;
+
+		uint32_t uiSetRefReturnAddr = 0x100027C0;
+		SPEC_NAKED void SetRef_Asm() {
+			__asm {
+				mov     eax, [ebp + 0x8]
+				mov     eax, [eax + 0xC]
+				mov		[ecx], eax
+				mov     eax, [ebp + 0xC]
+				mov		[ecx + 0x4], eax
+				jmp		uiSetRefReturnAddr
+			}
+		}
+
+		uint32_t uiSaveModAddr = 0x100169D4;
+		SPEC_NAKED void JIP_SaveMod_Asm() {
+			__asm {
+				add     esp, 4
+				mov		eax, [edi + 0xC]
+				push	eax
+				call	JIP_SaveMod
+				jmp		uiSaveModAddr
+			}
+		}
+
+		uint32_t uiLoadModAddr = 0x10015D2C;
+		SPEC_NAKED void JIP_LoadMod_Asm() {
+			__asm {
+				mov		[ebp - 0x5C], eax
+
+				mov		eax, dword ptr [esi]
+				mov		[ebp - 0x8], eax // FormID
+				add		esi, 4
+
+				mov		eax, dword ptr [esi]
+				mov     [ebp - 0x30], eax // Link FormID
+				add		esi, 4
+
+				mov		cl, [esi]
+				add		esi, 1
+
+				mov		edx, dword ptr[ebp - 0x28]
+				cmp		edx, LINKED_REF_SAVE_VERSION
+				jl		SKIP_ESL
+
+				push	1
+				movzx	edx, word ptr[esi]
+				add		esi, 2
+				jmp		LOAD_VAR
+
+				SKIP_ESL:
+				mov		edx, 0
+				push	0
+
+				LOAD_VAR:
+				call	JIP_LoadMod
+				mov		[ebp - 0xC], eax
+
+				lea     ecx, [ebp - 0x8]
+
+				jmp		uiLoadModAddr
+			}
+		}
+
+		void InitHooks() {
+			// TESObjectREFR::SetLinkedRef
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100027B2), SetRef_Asm);
+			uiSetRefReturnAddr = JIPUtils::GetAddress(0x100027C0);
+
+			// Cmd_SetLinkedReference_Execute
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10028DFF), GetOverridingModOrID);
+
+			// Cmd_ClearJIPSavedData_Execute
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1003CD25), "\x8B\x41\x0C\x90");
+
+			// SaveGameCallback
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10016966) + 1, LINKED_REF_SAVE_VERSION);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100169C6), JIP_SaveMod_Asm);
+			uiSaveModAddr = JIPUtils::GetAddress(0x100169D4);
+
+			// LoadGameCallback
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10015D11), JIP_LoadMod_Asm);
+			uiLoadModAddr = JIPUtils::GetAddress(0x10015D2C);
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10015D45), "\x8B\x45\xF4\x85\xC0\x74\x6F\xEB\x06");
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10015D5A), 0x89);
+		}
+	}
 
 	void InitJIPHooks() {
 		if (!JIPUtils::IsValid())
@@ -846,6 +1144,8 @@ namespace MorePluginTypes {
 
 		HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100016A0), JIP_GetResolvedModIndex);
 
+		HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100016C0), JIP_GetResolvedFormID);
+
 		// TESForm::RefToString
 		HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10057C1E) + 2, 0xFE);
 		HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10057C26), JIP_RefToString_Asm);
@@ -865,8 +1165,13 @@ namespace MorePluginTypes {
 		HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10043FB7), JIP_GetModName_Asm);
 		uiRefToStringRet = JIPUtils::GetAddress(0x10043FC3);
 
-		// Auxvars
-		//JIPAuxVars::InitHooks();
+		JIPAuxVars::InitHooks();
+
+		JIPScriptVars::InitHooks();
+
+		JIPRefMaps::InitHooks();
+
+		JIPLinkedRefs::InitHooks();
 	}
 
 }
