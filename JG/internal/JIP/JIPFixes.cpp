@@ -2159,7 +2159,7 @@ namespace JIPFixes {
 		}
 	}
 
-	namespace ExtraDataFixes {
+	namespace SerializationFixes {
 
 		// Credits to alex19ep for finding the bug and analysis
 
@@ -2197,6 +2197,9 @@ namespace JIPFixes {
 			// Raise current version to 2
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10015B33 + 3), uiJIPExtraDataVersion);
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10016761 + 1), uiJIPExtraDataVersion);
+
+			// Fix offset when skipping script vars (is +9 instead of +10)
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100156BA) + 2, 0xA);
 		}
 	}
 
@@ -2476,7 +2479,7 @@ namespace JIPFixes {
 		GetSelectedItemRefFix::InitHooks();
 		Update3DTweak::InitHooks();
 		AddItemAltNoCond::InitHooks();
-		ExtraDataFixes::InitHooks();
+		SerializationFixes::InitHooks();
 		EDIDLookupFix::InitHooks();
 		OnRagdollEventFix::InitHooks();
 		ModelFixes::InitStrings();
