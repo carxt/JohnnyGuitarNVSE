@@ -290,7 +290,7 @@ namespace MorePluginTypes {
 		};
 
 		const char cExtensionSearchQueryWildcard[] = "*.es*";
-		const char cExtensionSearchQuery[] = "*.es";
+		const char cExtensionSearchQuery[] = ".es";
 
 		void InitHooks() {
 			// Load all files with extensions that start with ".es"
