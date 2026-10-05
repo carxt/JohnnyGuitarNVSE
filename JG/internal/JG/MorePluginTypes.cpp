@@ -1328,6 +1328,12 @@ namespace MorePluginTypes {
 
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1003F3AE), CCCOnLoad_3_Asm);
 			uiCCCOnLoad_3_ReturnAddr = JIPUtils::GetAddress(0x1003F3C3);
+
+			// Cmd_CCCSMS_Execute
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10041595), 0x8B);
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x10041595) + 2, uint32_t(&pJIP_CCC));
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100415B6), 0x39);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100415B6) + 2, 0x10);
 			
 			// TODO: Mod FormIDs are still hardcoded; will work only if they are full plugins
 		}
