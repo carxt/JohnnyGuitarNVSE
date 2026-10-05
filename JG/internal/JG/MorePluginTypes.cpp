@@ -667,9 +667,16 @@ namespace MorePluginTypes {
 	}
 
 	static FormID __fastcall JIP_GetResolvedFormID(FormID& arFormID) {
-		if (JohnnySerialization::_ResolveFormID(arFormID, &arFormID))
+		if (arFormID == 0)
+			return 0;
+
+		if (FormID_View(arFormID).IsCreated())
 			return arFormID;
-		return 0;
+
+		FormID uiFormID = 0;
+		JohnnySerialization::_ResolveFormID(arFormID, &uiFormID);
+		arFormID = uiFormID;
+		return uiFormID;
 	}
 
 	TESFile* __fastcall GetOverridingMod(TESForm* apForm) {
@@ -1315,6 +1322,19 @@ namespace MorePluginTypes {
 		// mov     edx, eax
 		// jmp     +3
 		HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10043FAC), "\xFF\x75\xF8\x8B\x0D\x2C\x3F\x1C\x01\xB8\x10\x50\x46\x00\xFF\xD0\x89\xC2\xEB\x03");
+
+		{
+			// Original GetResolvedRefID is in asm, and doesn't edit ECX
+			// Thus... compiler reuses ECX after the call
+			// This obviously doesn't work with me (us??) replacing GetResolvedRefID...
+			
+			// AuxVariableValue::ReadValData
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1000798F), "\x8B\x45\x08\x83\xC0\x04\xEB\xE4");
+
+			// LoadGameCallback
+			HookUtils::SafeWrite16(JIPUtils::GetAddress(0x10015E59), 0x9050);
+			HookUtils::SafeWrite16(JIPUtils::GetAddress(0x10015E96), 0x9050);
+		}
 
 		JIPAuxVars::InitHooks();
 
