@@ -1263,6 +1263,77 @@ namespace MorePluginTypes {
 
 	}
 
+	namespace JIPCCC {
+
+		// 0x1007673B
+		static TESFile* pJIP_CCC = nullptr;
+		static const char* pEDID_Version = "iJIPCCCVersion";
+		static const char* pEDID_Startup = "iJIPCCCStartup";
+		static const char* pEDID_CurrentTask = "JIPCCCCurrentTask";
+
+		uint32_t uiCCCOnLoad_1_ReturnAddr = 0x1003F1F7;
+		SPEC_NAKED void CCCOnLoad_1_Asm() {
+			__asm {
+				mov     ecx, [ebp + 0x18]
+				push    0
+				mov     eax, 0x484E60 // TESForm::GetFile
+				call    eax
+
+				mov		pJIP_CCC, eax
+
+				push	pEDID_Version
+				mov		eax, 0x483A00 // TESForm::GetFormByEditorID
+				call	eax
+				add     esp, 4
+
+				push    esi
+				jmp		uiCCCOnLoad_1_ReturnAddr
+			}
+		}
+
+		uint32_t uiCCCOnLoad_2_ReturnAddr = 0x1003FDA6;
+		SPEC_NAKED void CCCOnLoad_2_Asm() {
+			__asm {
+				push	pEDID_Version
+				mov		eax, 0x483A00 // TESForm::GetFormByEditorID
+				call	eax
+				add     esp, 4
+
+				jmp		uiCCCOnLoad_2_ReturnAddr
+			}
+		}
+
+		uint32_t uiCCCOnLoad_3_ReturnAddr = 0x1003FDA6;
+		SPEC_NAKED void CCCOnLoad_3_Asm() {
+			__asm {
+				push	pEDID_CurrentTask
+				mov		eax, 0x483A00 // TESForm::GetFormByEditorID
+				call	eax
+				add     esp, 4
+
+				jmp		uiCCCOnLoad_3_ReturnAddr
+			}
+		}
+
+		void InitHooks() {
+			// Oh Jazz...
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1003F1C9), 0x83);
+			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1003F1C9) + 2, uint32_t(&pJIP_CCC));
+
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1003F1D8), CCCOnLoad_1_Asm);
+			uiCCCOnLoad_1_ReturnAddr = JIPUtils::GetAddress(0x1003F1F7);
+
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1003FD9A), CCCOnLoad_2_Asm);
+			uiCCCOnLoad_2_ReturnAddr = JIPUtils::GetAddress(0x1003FDA6);
+
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1003F3AE), CCCOnLoad_3_Asm);
+			uiCCCOnLoad_3_ReturnAddr = JIPUtils::GetAddress(0x1003F3C3);
+			
+			// TODO: Mod FormIDs are still hardcoded; will work only if they are full plugins
+		}
+
+	}
+
 	void InitJIPHooks() {
 		if (!bSupportESLs && !bSupportOverlays)
 			return;
@@ -1345,6 +1416,8 @@ namespace MorePluginTypes {
 		JIPExtraData::InitHooks();
 
 		JIPLinkedRefs::InitHooks();
+
+		JIPCCC::InitHooks();
 	}
 
 }
