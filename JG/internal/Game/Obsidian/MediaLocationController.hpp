@@ -42,7 +42,7 @@ public:
 			LOOP_POS			= 4,
 
 			DEFAULT_TIME 		= 1u << 6,
-#if USE_MODDED_CHANGES
+#if USE_JG_CHANGES
 			IGNORE_ACTOR_COUNT	= 1u << 8,
 #endif
 		};
@@ -51,7 +51,7 @@ public:
 		uint8_t	eLoop				: 2;
 		bool	bDefaultTime		: 1;
 		bool						: 1;
-#if USE_MODDED_CHANGES
+#if USE_JG_CHANGES
 		bool	bIgnoreActorCount	: 1; // Added by JohnnyGuitar
 #endif
 	};

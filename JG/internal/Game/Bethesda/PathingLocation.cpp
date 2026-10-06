@@ -1,8 +1,12 @@
 #include "PathingLocation.hpp"
 
 // GAME - 0x6DCFE0
-void PathingLocation::SetAllMeshesReachable(uint32_t aeFlags) {
-	ThisCall(0x6DCFE0, this, aeFlags);
+void PathingLocation::SetAllMeshesReachable(BOOL abVal) {
+#ifdef GAME
+	ThisCall(0x6DCFE0, this, abVal);
+#else
+	ucFlags.bAllMeshesReachable = abVal;
+#endif
 }
 
 // GAME - 0x6DD280
@@ -26,6 +30,11 @@ bool PathingLocation::GetNavMeshAndTriangle(NavMeshPtr& arNavMesh, uint16_t& arT
 }
 
 // GAME - 0x6DD4F0
+// GECK - 0x6DE950
 TESObjectCELL* PathingLocation::GetCell() const {
+#ifdef GAME
 	return ThisCall<TESObjectCELL*>(0x6DD4F0, this);
+#else
+	return ThisCall<TESObjectCELL*>(0x6DE950, this);
+#endif
 }

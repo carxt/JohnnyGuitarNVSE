@@ -106,7 +106,7 @@ public:
 	TESQuest*				pOwnerQuest;
 #ifdef GAME
 	uint32_t				uiFileOffset;
-#if USE_MODDED_CHANGES // JIP
+#if USE_JIP_CHANGES // JIP
 	TESTopic*				pParentTopic;
 #endif
 #else
@@ -179,7 +179,7 @@ public:
 	TESQuest* GetOwnerQuest() const;
 	void SetOwnerQuest(TESQuest* apQuest);
 
-#if USE_MODDED_CHANGES || EDITOR
+#if USE_JIP_CHANGES || EDITOR
 	TESTopic* GetParentTopic() const;
 #endif
 
@@ -191,7 +191,7 @@ public:
 };
 
 #ifdef GAME
-#if USE_MODDED_CHANGES
+#if USE_JIP_CHANGES
 ASSERT_SIZE(TESTopicInfo, 0x54);
 #else
 ASSERT_SIZE(TESTopicInfo, 0x50);

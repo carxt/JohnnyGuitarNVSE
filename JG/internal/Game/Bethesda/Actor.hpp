@@ -216,7 +216,7 @@ public:
 	BSSimpleList<uint32_t>				kCastPowers;
 	BSSimpleList<DispositionModifier*>	kDispositionModifiers;
 	bool								bIsInCombat;
-#if USE_MODDED_CHANGES
+#if USE_JIP_CHANGES
 	Bitfield8							ucJIPActorFlags1;
 	Bitfield8							ucJIPActorFlags2;
 	Bitfield8							ucJIPActorFlags3;
@@ -227,7 +227,7 @@ public:
 	float								fLastUpdate;
 	bool								bDeadFlag;
 	uint8_t								byte119;
-#if USE_MODDED_CHANGES
+#if USE_JIP_CHANGES
 	uint16_t							usJIP11A;
 #endif
 	Bitfield<_VisibilityFlags>			uiVisibilityMask;
@@ -241,7 +241,7 @@ public:
 	BSSimpleArray<Actor*>*				pCombatAllies;
 	bool								bAttackOnNextTheft;
 	uint8_t								byte135;
-#if USE_MODDED_CHANGES
+#if USE_JIP_CHANGES
 	uint16_t							usJIP136;
 #endif
 	uint32_t							uiPickPocketCaughtDate;
@@ -259,7 +259,7 @@ public:
 	float								fHeadTrackTimer;
 	bool								bWasInFrustum;
 	bool								bShouldRotateToTrack;
-#if USE_MODDED_CHANGES
+#if USE_JIP_CHANGES
 	uint16_t							usJIP15E;
 #endif
 	NiPoint3							kEditorLocationCoords;
@@ -267,7 +267,7 @@ public:
 	TESForm*							pEditorLocation;
 	bool								bSetOnDeath;
 	bool								bContainerReset;
-#if USE_MODDED_CHANGES
+#if USE_JIP_CHANGES
 	uint16_t							usJIP176;
 #endif
 	float								fGunSkillGun;
