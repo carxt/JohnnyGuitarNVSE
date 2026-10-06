@@ -917,8 +917,6 @@ namespace MorePluginTypes {
 
 		void InitHooks() {
 			// Script::AddVariable
-			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1000214C) + 1, 0x14);
-			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100024E2) + 1, 0x14);
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100024D0), SetScriptVar_Asm);
 			uiSetVariableReturnAddr = JIPUtils::GetAddress(0x100024DB);
 
