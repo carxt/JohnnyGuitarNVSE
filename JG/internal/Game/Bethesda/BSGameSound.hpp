@@ -185,7 +185,7 @@ public:
 	float						fEndTime;
 	Bitfield32					uiWeatherFlags;
 	uint16_t					usSamplesPerSecond;
-#if USE_MODDED_CHANGES // JIP
+#if USE_JIP_CHANGES // JIP
 	char						cFileName[254];
 	TESSound*					pSourceSound;
 #else

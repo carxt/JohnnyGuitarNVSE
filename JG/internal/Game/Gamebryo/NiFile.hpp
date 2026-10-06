@@ -2,7 +2,7 @@
 
 #include "NiBinaryStream.hpp"
 
-#if USE_MODDED_CHANGES // MLF
+#if USE_MLF_CHANGES // MLF
 using NiFileHandle = HANDLE;
 #else
 using NiFileHandle = FILE*;

@@ -11,6 +11,15 @@
 
 #define USE_MODDED_CHANGES 1
 
+#if USE_MODDED_CHANGES
+#ifdef GAME
+#define USE_JIP_CHANGES 1
+#define USE_TWEAKS_CHANGES 1
+#endif
+#define USE_JG_CHANGES 1
+#define USE_MLF_CHANGES 1
+#endif
+
 constexpr inline auto our_snprintf	= snprintf;
 constexpr inline auto our_sprintf	= sprintf;
 constexpr inline auto our_vsprintf	= vsprintf;

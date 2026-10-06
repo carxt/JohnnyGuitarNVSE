@@ -223,7 +223,7 @@ public:
 	using FormFlags = _FormFlags::Flags;
 
 	uint8_t					eFormType;
-#if USE_MODDED_CHANGES // JIP
+#if USE_JIP_CHANGES // JIP
 	Bitfield8				ucJIPFormFlags5;
 	Bitfield16				usJIPFormFlags6;
 #endif

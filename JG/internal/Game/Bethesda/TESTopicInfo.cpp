@@ -272,7 +272,7 @@ void TESTopicInfo::SetOwnerQuest(TESQuest* apQuest) {
 	pOwnerQuest = apQuest;
 }
 
-#if USE_MODDED_CHANGES || EDITOR
+#if USE_JIP_CHANGES || EDITOR
 TESTopic* TESTopicInfo::GetParentTopic() const {
 	return pParentTopic;
 }
