@@ -188,10 +188,10 @@ public:
 #if USE_JIP_CHANGES // JIP
 	char						cFileName[254];
 	TESSound*					pSourceSound;
+	float						fFrequencyMod;
 #else
 	char						cFileName[MAX_PATH];
 #endif
-	float						fFrequencyMod;
 	float						fMaxDist;
 	float						fMinDist;
 	uint32_t					uiSoundHash;
