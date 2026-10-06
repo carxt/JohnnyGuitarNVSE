@@ -17,9 +17,11 @@ public:
 	BGSListForm* GetAmmoFormList() const;
 	void SetFormAmmo(TESForm* apAmmo);
 
-#ifdef GAME
+	const char* GetAmmoFormEditorID() const;
+
 	TESAmmo* GetAmmoHelper() const;
 
+#ifdef GAME
 	bool IsRockItLauncher() const;
 #endif
 };

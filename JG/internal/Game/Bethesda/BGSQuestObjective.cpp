@@ -52,15 +52,19 @@ BSSimpleList<TESQuestTarget*>* BGSQuestObjective::GetTargetList() {
     return &kTargets;
 }
 
-#ifdef GAME
 // GAME - 0x7AF430
 BGSQuestObjective::State BGSQuestObjective::GetState() const {
     return eState;
 }
 
 // GAME - 0x5EC5D0
+// GECK - 0xC86740
 void BGSQuestObjective::SetState(State aeState) {
+#ifdef GAME
     ThisCall(0x5EC5D0, this, aeState);
+#else
+    eState = aeState;
+#endif
 }
 
 // GAME - 0x50F9C0
@@ -75,14 +79,23 @@ bool BGSQuestObjective::CheckState(State aeState) const {
 
 // GAME - 0x5A5DC0
 bool BGSQuestObjective::GetCompleted() const {
+#ifdef GAME
     return ThisCall<bool>(0x5A5DC0, this);
+#else
+    return eState > State::DISPLAYED;
+#endif
 }
 
 // GAME - 0x5A5E70
 bool BGSQuestObjective::GetDisplayed() const {
+#ifdef GAME
     return ThisCall<bool>(0x5A5E70, this);
+#else
+    return eState & State::DISPLAYED;
+#endif
 }
 
+#ifdef GAME
 // GAME - 0x5EC500
 void BGSQuestObjective::UpdateCurrentTargetList(BSSimpleList<TESQuestTarget*>* apListToFill) {
     ThisCall(0x5EC500, this, apListToFill);
