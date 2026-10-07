@@ -69,7 +69,11 @@ bool BGSSaveLoadGame::GetAllowChanges() const {
 	return ThisCall<bool>(0x570F00, this);
 }
 
-#if ESL_SUPPORT || OVERLAY_SUPPORT
+#if TESFILE_NEW_TYPES
+bool BGSSaveLoadGame::SupportsNewFileTypes() const {
+	return ucCurrentMinorVersion >= 28;
+}
+
 TESFile* BGSSaveLoadGame::GetSaveMod(uint8_t aucIndex) const {
 	if (aucIndex >= kFiles.GetSize())
 		return nullptr;
@@ -77,7 +81,6 @@ TESFile* BGSSaveLoadGame::GetSaveMod(uint8_t aucIndex) const {
 	return kFiles.GetAt(aucIndex);
 }
 
-#if ESL_SUPPORT
 TESFile* BGSSaveLoadGame::GetSmallSaveMod(uint16_t ausIndex) const {
 	if (ausIndex >= kSmallFiles.GetSize())
 		return nullptr;
@@ -85,11 +88,12 @@ TESFile* BGSSaveLoadGame::GetSmallSaveMod(uint16_t ausIndex) const {
 	return kSmallFiles.GetAt(ausIndex);
 }
 
-bool BGSSaveLoadGame::SupportsSmallPlugins() const {
-	return ucCurrentMinorVersion >= 28;
-}
-#endif
+TESFile* BGSSaveLoadGame::GetMediumSaveMod(uint8_t aucIndex) const {
+	if (aucIndex >= kMediumFiles.GetSize())
+		return nullptr;
 
+	return kMediumFiles.GetAt(aucIndex);
+}
 #else
 // GAME - 0x846DE0
 uint8_t BGSSaveLoadGame::GetSaveMod(uint8_t aucIndex) const {

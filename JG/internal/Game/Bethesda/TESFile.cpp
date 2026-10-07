@@ -1,6 +1,6 @@
 #include "TESFile.hpp"
 
-#if ESL_SUPPORT || OVERLAY_SUPPORT
+#if TESFILE_NEW_TYPES
 #include "Shared/Utils/DebugLog.hpp"
 #endif
 
@@ -44,7 +44,11 @@ void TESFile::SetMaster(bool abMaster) {
 	uiFlags.bMaster = abMaster;
 }
 
-#if ESL_SUPPORT
+#if TESFILE_NEW_TYPES
+bool TESFile::IsSpecialFile() const {
+	return uiFlags.Get(FileFlags::SMALL | FileFlags::OVERLAY | FileFlags::MEDIUM);
+}
+
 bool TESFile::IsSmallFile() const {
 	return uiFlags.bSmall;
 }
@@ -52,15 +56,21 @@ bool TESFile::IsSmallFile() const {
 void TESFile::SetSmallFile(bool abSmallFile) {
 	uiFlags.bSmall = abSmallFile;
 }
-#endif
 
-#if OVERLAY_SUPPORT
 bool TESFile::IsOverlay() const {
 	return uiFlags.bOverlay;
 }
 
 void TESFile::SetOverlay(bool abOverlay) {
 	uiFlags.bOverlay = abOverlay;
+}
+
+bool TESFile::IsMediumFile() const {
+	return uiFlags.bMedium;
+}
+
+void TESFile::SetMediumFile(bool abMedium) {
+	uiFlags.bMedium = abMedium;
 }
 #endif
 
@@ -77,17 +87,37 @@ uint8_t TESFile::GetCompileIndex() const {
 // GAME - 0x473210
 // GECK - 0x4DE6D0
 void TESFile::SetCompileIndex(uint8_t aucIndex) {
-	kHeader.uiNextFormID = kHeader.uiNextFormID & 0xFFFFFF | (aucIndex << 24);
+	reinterpret_cast<FormID_View&>(kHeader.uiNextFormID).SetCompileIndex(aucIndex);
 	ucCompileIndex = aucIndex;
 }
 
+uint16_t TESFile::GetSecondCompileIndex() const {
+	return usSmallCompileIndex;
+}
+
+void TESFile::SetSecondCompileIndex(uint16_t ausIndex) {
+	usSmallCompileIndex = ausIndex;
+}
+
+#ifdef TESFILE_NEW_TYPES
 uint16_t TESFile::GetSmallCompileIndex() const {
 	return usSmallCompileIndex;
 }
 
 void TESFile::SetSmallCompileIndex(uint16_t ausIndex) {
+	reinterpret_cast<FormID_View&>(kHeader.uiNextFormID).SetSmallIndex(ausIndex);
 	usSmallCompileIndex = ausIndex;
 }
+
+uint8_t TESFile::GetMediumCompileIndex() const {
+	return ucMediumCompileIndex;
+}
+
+void TESFile::SetMediumCompileIndex(uint8_t aucIndex) {
+	reinterpret_cast<FormID_View&>(kHeader.uiNextFormID).SetMediumIndex(aucIndex);
+	ucMediumCompileIndex = aucIndex;
+}
+#endif
 
 // GAME - 0x470C70
 // GECK - 0x4E20A0
@@ -102,21 +132,22 @@ bool TESFile::OpenTES(uint32_t aeAccessMode, bool abLock) {
 void TESFile::AdjustFormIDFileIndex(FormID& arFormID) const {
 	FormID_View& vFormID = reinterpret_cast<FormID_View&>(arFormID);
 	const TESFile* pIndexFile = this;
-#if OVERLAY_SUPPORT
+#if TESFILE_NEW_TYPES
 	if (IsOverlay()) {
 		pIndexFile = GetIndexFile(1);
 		if (!pIndexFile)
 			pIndexFile = this;
-		_MESSAGE("[ TESFile::AdjustFormIDFileIndex ] Overlay file %s - using %s master for %08X", this->GetName(), pIndexFile->GetName(), arFormID);
 	}
-#endif
 
-#if ESL_SUPPORT
+	if (pIndexFile->IsMediumFile()) {
+		vFormID.SetCompileIndex(0xFD);
+		vFormID.SetMediumIndex(pIndexFile->GetMediumCompileIndex());
+		return;
+	}
+
 	if (pIndexFile->IsSmallFile()) {
 		vFormID.SetCompileIndex(0xFE);
 		vFormID.SetSmallIndex(pIndexFile->GetSmallCompileIndex());
-		if (!IsOverlay())
-			_MESSAGE("[ TESFile::AdjustFormIDFileIndex ] Small file (%s): %08X", pIndexFile->GetName(), arFormID);
 		return;
 	}
 #endif

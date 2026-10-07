@@ -23,32 +23,39 @@ extern NVSEStringVarInterface* g_strInterface;
 extern NVSEScriptInterface* g_scriptInterface;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 
-constexpr bool bSupportESLs		= true;
-constexpr bool bSupportOverlays = true;
-
 namespace MorePluginTypes {
+
+	class FormID_ViewEx : public FormID_View {
+	public:
+		constexpr uint32_t		GetProperID() const noexcept { if (IsMedium()) return GetMediumID(); if (IsSmall()) return GetSmallID(); return GetID(); }
+		constexpr uint32_t		GetProperIndex() const noexcept { if (IsMedium()) return GetMediumIndex(); if (IsSmall()) return GetSmallIndex(); return GetCompileIndex(); }
+	};
 
 	namespace FileHooks {
 
 		static constexpr AddressPtr<uint32_t, 0x11C3F24> iTotalForms;
 
 		void __fastcall OpenCustomPlugins(TESDataHandler* apDataHandler) {
-			if (bSupportESLs) {
-				for (uint32_t i = 0; i < apDataHandler->GetSmallCompiledFileCount(); ++i) {
-					TESFile* pFile = apDataHandler->GetSmallFile(i);
-					if (pFile->OpenTES(0, false))
-						iTotalForms += pFile->kHeader.uiRecordCount;
-					else
-						_MESSAGE("Failed to open small file \"%s\"", pFile->GetName());
-				}
+			for (uint32_t i = 0; i < apDataHandler->GetSmallCompiledFileCount(); ++i) {
+				TESFile* pFile = apDataHandler->GetSmallFile(i);
+				if (pFile->OpenTES(0, false))
+					iTotalForms += pFile->kHeader.uiRecordCount;
+				else
+					_MESSAGE("Failed to open small file \"%s\"", pFile->GetName());
 			}
 
-			if (bSupportOverlays) {
-				for (uint32_t i = 0; i < apDataHandler->GetOverlayFileCount(); ++i) {
-					TESFile* pFile = apDataHandler->GetOverlayFile(i);
-					if (!pFile->OpenTES(0, false))
-						_MESSAGE("Failed to open overlay file \"%s\"", pFile->GetName());
-				}
+			for (uint32_t i = 0; i < apDataHandler->GetMediumCompiledFileCount(); ++i) {
+				TESFile* pFile = apDataHandler->GetMediumFile(i);
+				if (pFile->OpenTES(0, false))
+					iTotalForms += pFile->kHeader.uiRecordCount;
+				else
+					_MESSAGE("Failed to open medium file \"%s\"", pFile->GetName());
+			}
+
+			for (uint32_t i = 0; i < apDataHandler->GetOverlayFileCount(); ++i) {
+				TESFile* pFile = apDataHandler->GetOverlayFile(i);
+				if (!pFile->OpenTES(0, false))
+					_MESSAGE("Failed to open overlay file \"%s\"", pFile->GetName());
 			}
 		}
 
@@ -69,7 +76,7 @@ namespace MorePluginTypes {
 
 		void __fastcall AddCompiledFile(TESDataHandler* apDataHandler, TESFile* apFile) {
 			CompiledFiles& rCompiledFiles = apDataHandler->kCompiledFiles;
-			if (bSupportOverlays && apFile->IsOverlay()) {
+			if (apFile->IsOverlay()) {
 				if (apFile->uiMasterCount == 0) {
 					_MESSAGE("[ TESDataHandler::AddCompiledFile ] Overlay file has no masters!", apFile->GetName());
 					return;
@@ -84,14 +91,32 @@ namespace MorePluginTypes {
 #if 1
 				const TESFile* pMaster = apFile->GetIndexFile(1);
 				apFile->SetCompileIndex(pMaster->GetCompileIndex());
-				apFile->SetSmallCompileIndex(pMaster->GetSmallCompileIndex());
+				if (pMaster->IsSmallFile())
+					apFile->SetSmallCompileIndex(pMaster->GetSmallCompileIndex());
+				else if (pMaster->IsMediumFile())
+					apFile->SetMediumCompileIndex(pMaster->GetMediumCompileIndex());
 #endif
 				rCompiledFiles.kOverlayFiles.Add(apFile);
 				_MESSAGE("[ TESDataHandler::AddCompiledFile ] Adding overlay file %s", apFile->GetName());
 				return;
 			}
 
-			if (bSupportESLs && apFile->IsSmallFile()) {
+			if (apFile->IsMediumFile()) {
+				if (rCompiledFiles.kMediumFiles.IsInArray(apFile))
+					return;
+
+				const uint32_t uiIndex = rCompiledFiles.kMediumFiles.Add(apFile);
+				if (uiIndex > 0xFF) {
+					_MESSAGE("[ TESDataHandler::AddCompiledFile ] Too many medium files");
+					DebugBreak();
+				}
+				_MESSAGE("[ TESDataHandler::AddCompiledFile ] Adding medium file %s - FD%02X", apFile->GetName(), uiIndex);
+				apFile->SetCompileIndex(0xFD);
+				apFile->SetMediumCompileIndex(uiIndex);
+				return;
+			}
+
+			if (apFile->IsSmallFile()) {
 				if (rCompiledFiles.kSmallFiles.IsInArray(apFile))
 					return;
 
@@ -116,7 +141,7 @@ namespace MorePluginTypes {
 			}
 			_MESSAGE("[ TESDataHandler::AddCompiledFile ] Adding file %s - %02X", apFile->GetName(), uiIndex);
 			apFile->SetCompileIndex(uiIndex);
-			apFile->SetSmallCompileIndex(0);
+			apFile->SetSecondCompileIndex(0);
 		}
 
 		SPEC_NAKED void AddCompileFile_Asm() {
@@ -141,7 +166,7 @@ namespace MorePluginTypes {
 
 		void __fastcall AdjustFormIDFileIndex(TESFile* apFile, TESFile* apIndexFile) {
 			FormID_View uiDefaultFormIDCheck = apFile->kCurrentForm.uiFormID;
-			if (!apFile->IsSmallFile() && !apFile->IsOverlay())
+			if (!apFile->IsSpecialFile())
 				uiDefaultFormIDCheck.SetCompileIndex(0);
 
 			if (uiDefaultFormIDCheck.IsDefault()) {
@@ -202,15 +227,13 @@ namespace MorePluginTypes {
 		public:
 			TESDataHandler* InitializeDataHandler() {
 				ThisCall(kDataHandlerConstructorDetour, this);
-				if (bSupportESLs || bSupportOverlays) {
-					ucDLCFlags.Set(HAS_SMALL_PLUGINS_FLAG, bSupportESLs);
-					ucDLCFlags.Set(HAS_OVERLAY_PLUGINS_FLAG, bSupportOverlays);
+				ucDLCFlags.Set(HAS_NEW_FILE_TYPES, true);
 
-					new (&kCompiledFiles.kNormalFiles)	BSSimpleArray<TESFile*>(0, 0);
-					new (&kCompiledFiles.kSmallFiles)	BSSimpleArray<TESFile*>(0, 0);
-					new (&kCompiledFiles.kOverlayFiles) BSSimpleArray<TESFile*>(0, 0);
-					memset(kCompiledFiles.padding, 0xCCCCCCCC, sizeof(kCompiledFiles.padding));
-				}
+				new (&kCompiledFiles.kNormalFiles)	BSSimpleArray<TESFile*>(0, 0);
+				new (&kCompiledFiles.kSmallFiles)	BSSimpleArray<TESFile*>(0, 0);
+				new (&kCompiledFiles.kOverlayFiles) BSSimpleArray<TESFile*>(0, 0);
+				new (&kCompiledFiles.kMediumFiles) BSSimpleArray<TESFile*>(0, 0);
+				memset(kCompiledFiles.padding, 0xCCCCCCCC, sizeof(kCompiledFiles.padding));
 				return this;
 			}
 
@@ -218,7 +241,11 @@ namespace MorePluginTypes {
 				if (auiIndex == 0xFF)
 					return nullptr;
 
-				if (FormID_View(auiIndex).IsSmall() && SupportsSmallPugins()) {
+				if (FormID_View(auiIndex).IsMedium() && SupportsNewFileTypes()) {
+					const uint8_t usMediumIndex = FormID_View(auiIndex).GetMediumIndex();
+					return kCompiledFiles.GetMediumFile(usMediumIndex);
+				}
+				else if (FormID_View(auiIndex).IsSmall() && SupportsNewFileTypes()) {
 					const uint16_t usSmallIndex = FormID_View(auiIndex).GetSmallIndex();
 					return kCompiledFiles.GetSmallFile(usSmallIndex);
 				}
@@ -244,31 +271,38 @@ namespace MorePluginTypes {
 			}
 
 			void SetThreadSafeParent(TESFile* apParent) {
-				if (bSupportESLs) {
-					SetSmallCompileIndex(0);
-					SetSmallFile(apParent->IsSmallFile());
+				SetSecondCompileIndex(0);
+
+				if (apParent->IsMediumFile()) {
+					SetMediumFile(true);
+					SetMediumCompileIndex(apParent->GetMediumCompileIndex());
+				}
+
+				if (apParent->IsSmallFile()) {
+					SetSmallFile(true);
 					SetSmallCompileIndex(apParent->GetSmallCompileIndex());
 				}
 
-				if (bSupportOverlays) {
-					SetOverlay(apParent->IsOverlay());
-				}
+				if (apParent->IsOverlay())
+					SetOverlay(true);
+
 				ThisCall(kSetThreadSafeParentDetour, this, apParent);
 			}
 
 			void SetFileFlags(uint32_t auiLanguage) {
-				if (bSupportESLs) {
-					SetSmallCompileIndex(0);
-					SetSmallFile(kCurrentForm.uiFormFlags.Get(TESFile::FileFlags::SMALL));
-				}
+				SetSecondCompileIndex(0);
 
-				if (bSupportOverlays) {
-					SetOverlay(kCurrentForm.uiFormFlags.Get(TESFile::FileFlags::OVERLAY));
+				SetMediumFile(kCurrentForm.uiFormFlags.Get(TESFile::FileFlags::MEDIUM));
 
-					if (IsOverlay() && !uiMasterCount) {
-						_MESSAGE("Overlay file %s - no masters", GetName());
-						DebugBreak();
-					}
+				SetSmallFile(kCurrentForm.uiFormFlags.Get(TESFile::FileFlags::SMALL));
+
+				assert(IsMediumFile() + IsSmallFile() < 2);
+
+				SetOverlay(kCurrentForm.uiFormFlags.Get(TESFile::FileFlags::OVERLAY));
+
+				if (IsOverlay() && !uiMasterCount) {
+					_MESSAGE("Overlay file %s - no masters", GetName());
+					DebugBreak();
 				}
 
 				ThisCall(kSetFileLanguageDetour, this, auiLanguage);
@@ -396,26 +430,34 @@ namespace MorePluginTypes {
 		public:
 			BGSSaveLoadGame* InitializeSaveLoadGame() {
 				ThisCall(kSaveLoadGameConstructorDetour, this);
+				uiLoadOrderChanges = 0;
 				new (&kFiles)		BSSimpleArray<TESFile*>(0, 0);
 				new (&kSmallFiles)	BSSimpleArray<TESFile*>(0, 0);
+				new (&kMediumFiles)	BSSimpleArray<TESFile*>(0, 0);
 				memset(padding, 0xCCCCCCCC, sizeof(padding));
-				ucLoadOrderChanges = 0;
 				return this;
 			}
 
 			FormID GetConvertedFormID(FormID auiFormID) const {
 				const uint8_t ucIndex = FormID_View(auiFormID).GetCompileIndex();
-				const uint8_t ucMaxIndex = SupportsSmallPlugins() ? 0xFE : 0xFF;
+				if (ucIndex == 0xFF)
+					return 0;
 
 				const TESFile* pFile = nullptr;
-				if (ucIndex < ucMaxIndex) {
-					if (ucIndex < kFiles.GetSize())
-						pFile = kFiles.GetAt(ucIndex);
+				if (SupportsNewFileTypes() && ucIndex >= 0xFD) {
+					if (ucIndex == 0xFD) {
+						const uint8_t ucMediumIndex = FormID_View(auiFormID).GetMediumIndex();
+						if (ucMediumIndex < kMediumFiles.GetSize())
+							pFile = kMediumFiles.GetAt(ucMediumIndex);
+					}
+					else if (ucIndex == 0xFE) {
+						const uint16_t usSmallIndex = FormID_View(auiFormID).GetSmallIndex();
+						if (usSmallIndex < kSmallFiles.GetSize())
+							pFile = kSmallFiles.GetAt(usSmallIndex);
+					}
 				}
-				else if (bSupportESLs && ucIndex == 0xFE) {
-					const uint16_t usSmallIndex = FormID_View(auiFormID).GetSmallIndex();
-					if (usSmallIndex < kSmallFiles.GetSize())
-						pFile = kSmallFiles.GetAt(usSmallIndex);
+				else if (ucIndex < kFiles.GetSize()) {
+					pFile = kFiles.GetAt(ucIndex);
 				}
 
 				if (pFile) {
@@ -428,64 +470,95 @@ namespace MorePluginTypes {
 			}
 
 			bool LoadPluginList(BGSSaveLoadFile* apFile) {
+				bool bResult = true;
+
 				kFiles.Clear();
 				kSmallFiles.Clear();
+				kMediumFiles.Clear();
 				_MESSAGE("Loading plugin list");
 				const TESDataHandler* pDataHandler = TESDataHandler::GetSingleton();
 				StackObject<BGSLoadGameBuffer, 0x8646B0, 0x8646F0> kBuffer;
 				kBuffer->Load(apFile);
-
+				
 				uint8_t ucModCount = 0;
 				kBuffer->LoadData(&ucModCount);
-				_MESSAGE("Mod count: %d", ucModCount);
-				bool bResult = true;
-
-				for (uint32_t i = 0; i < ucModCount; ++i) {
-					char cModName[MAX_PATH];
-					kBuffer->LoadString(cModName);
-
-					TESFile* pFile = pDataHandler->GetListFile(cModName);
-					if (pFile && pFile->GetCompileIndex() != 0xFF) {
-						_MESSAGE("Mod %s", cModName);
-					}
-					else {
-						bResult = false;
-						pFile = nullptr;
-						ucLoadOrderChanges.Set(1);
-						_MESSAGE("Missing mod %s", cModName);
-					}
-
-					kFiles.Add(pFile);
-
-					if (kFiles.GetSize() != pDataHandler->GetCompiledFileCount())
-						ucLoadOrderChanges.Set(1);
-				}
-
-				if (SupportsSmallPlugins()) {
-					uint16_t usSmallModCount = 0;
-					kBuffer->LoadData(&usSmallModCount);
-					_MESSAGE("Small mod count: %d", usSmallModCount);
-					if (!usSmallModCount)
-						return bResult;
-
-					for (uint32_t i = 0; i < usSmallModCount; ++i) {
+				if (ucModCount) {
+					_MESSAGE("Mod count: %d", ucModCount);
+					
+					for (uint32_t i = 0; i < ucModCount; ++i) {
 						char cModName[MAX_PATH];
 						kBuffer->LoadString(cModName);
 
 						TESFile* pFile = pDataHandler->GetListFile(cModName);
-						if (pFile && pFile->GetCompileIndex() != 0xFF) {
-							_MESSAGE("Small mod %s", cModName);
+						if (pFile && !pFile->IsSpecialFile() && pFile->GetCompileIndex() != 0xFF) {
+							_MESSAGE("Mod %s", cModName);
 						}
 						else {
 							bResult = false;
 							pFile = nullptr;
-							_MESSAGE("Missing small mod %s", cModName);
-							ucLoadOrderChanges.Set(2);
+							uiLoadOrderChanges.SetBit<0>();
+							_MESSAGE("Missing mod %s", cModName);
 						}
-						kSmallFiles.Add(pFile);
+
+						kFiles.Add(pFile);
 					}
-					if (kSmallFiles.GetSize() != pDataHandler->GetSmallCompiledFileCount())
-						ucLoadOrderChanges.Set(2);
+
+					if (kFiles.GetSize() != pDataHandler->GetCompiledFileCount())
+						uiLoadOrderChanges.SetBit<0>();
+				}
+
+				if (SupportsNewFileTypes()) {
+					uint16_t usSmallModCount = 0;
+					kBuffer->LoadData(&usSmallModCount);
+					_MESSAGE("Small mod count: %d", usSmallModCount);
+					if (usSmallModCount) {
+						for (uint32_t i = 0; i < usSmallModCount; ++i) {
+							char cModName[MAX_PATH];
+							kBuffer->LoadString(cModName);
+
+							TESFile* pFile = pDataHandler->GetListFile(cModName);
+							if (pFile && pFile->IsSmallFile() && pFile->GetCompileIndex() != 0xFF) {
+								_MESSAGE("Small mod %s", cModName);
+							}
+							else {
+								bResult = false;
+								pFile = nullptr;
+								_MESSAGE("Missing small mod %s", cModName);
+								uiLoadOrderChanges.SetBit<1>();
+							}
+
+							kSmallFiles.Add(pFile);
+						}
+
+						if (kSmallFiles.GetSize() != pDataHandler->GetSmallCompiledFileCount())
+							uiLoadOrderChanges.SetBit<1>();
+					}
+
+					uint32_t uiMediumModCount = 0;
+					kBuffer->LoadData(&uiMediumModCount);
+					_MESSAGE("Medium mod count: %d", uiMediumModCount);
+					if (uiMediumModCount) {
+						for (uint32_t i = 0; i < uiMediumModCount; ++i) {
+							char cModName[MAX_PATH];
+							kBuffer->LoadString(cModName);
+
+							TESFile* pFile = pDataHandler->GetListFile(cModName);
+							if (pFile && pFile->IsMediumFile() && pFile->GetCompileIndex() != 0xFF) {
+								_MESSAGE("Medium mod %s", cModName);
+							}
+							else {
+								bResult = false;
+								pFile = nullptr;
+								_MESSAGE("Missing medium mod %s", cModName);
+								uiLoadOrderChanges.SetBit<2>();
+							}
+
+							kMediumFiles.Add(pFile);
+						}
+
+						if (kMediumFiles.GetSize() != pDataHandler->GetSmallCompiledFileCount())
+							uiLoadOrderChanges.SetBit<2>();
+					}
 				}
 
 				return bResult;
@@ -502,11 +575,20 @@ namespace MorePluginTypes {
 						kBuffer->SaveString(pFile->GetName(), 0);
 				}
 
-				if (BGSSaveLoadManager::GetSingleton()->GetMinorVersion() > VANILLA_MINOR_VERSION) {
+				if (BGSSaveLoadManager::GetSingleton()->GetMinorVersion() >= ESL_MINOR_VERSION) {
 					const uint16_t usSmallModCount = pDataHandler->GetSmallCompiledFileCount();
 					kBuffer->SaveData(usSmallModCount);
 					for (uint32_t i = 0; i < usSmallModCount; ++i) {
 						const TESFile* pFile = pDataHandler->GetSmallFile(i);
+						if (pFile)
+							kBuffer->SaveString(pFile->GetName(), 0);
+					}
+
+					// Bethesda apparently uses uint32_t here, based on MO2's save read code
+					const uint32_t uiMediumModCount = pDataHandler->GetMediumCompiledFileCount();
+					kBuffer->SaveData(uiMediumModCount);
+					for (uint32_t i = 0; i < uiMediumModCount; ++i) {
+						const TESFile* pFile = pDataHandler->GetMediumFile(i);
 						if (pFile)
 							kBuffer->SaveString(pFile->GetName(), 0);
 					}
@@ -560,7 +642,12 @@ namespace MorePluginTypes {
 					return pFile;
 
 				const TESDataHandler* pDataHandler = TESDataHandler::GetSingleton();
-				if (bSupportESLs && ucIndex == 0xFE) {
+				if (ucIndex == 0xFD) {
+					const uint8_t ucMediumIndex = FormID_View(auiFormID).GetMediumIndex();
+					if (ucMediumIndex < pDataHandler->GetMediumCompiledFileCount())
+						return pDataHandler->GetMediumFile(ucMediumIndex);
+				}
+				else if (ucIndex == 0xFE) {
 					const uint16_t usSmallIndex = FormID_View(auiFormID).GetSmallIndex();
 					if (usSmallIndex < pDataHandler->GetSmallCompiledFileCount())
 						return pDataHandler->GetSmallFile(usSmallIndex);
@@ -608,22 +695,17 @@ namespace MorePluginTypes {
 	namespace OtherHooks {
 
 		FormID __fastcall GetRawFormID(const TESForm* apForm) {
-			if (apForm->GetCompileIndex() == 0xFE)
-				return FormID_View(apForm->GetFormID()).GetSmallID();
-			else
-				return FormID_View(apForm->GetFormID()).GetID();
+			return FormID_ViewEx(apForm->GetFormID()).GetProperID();
 		}
 
 		void InitHooks() {
-			if (bSupportESLs) {
-				HookUtils::ReplaceCall(0x604384, GetRawFormID); // TESNPC::GetHeadPartModTextureFileName
-				HookUtils::ReplaceCall(0x60439B, GetRawFormID);	// TESNPC::GetHeadPartModTextureFileName
-				HookUtils::ReplaceCall(0x614863, GetRawFormID); // TESRace::GetBodyModTextureName
-				HookUtils::ReplaceCall(0x614873, GetRawFormID); // TESRace::GetBodyModTextureName
-				HookUtils::ReplaceCall(0x617460, GetRawFormID); // TESResponse::GetAudioFilename
-				HookUtils::ReplaceCall(0x5441F1, GetRawFormID); // TESObjectCELL::GetGroupBlockKey
-				HookUtils::ReplaceCall(0x544251, GetRawFormID); // TESObjectCELL::GetGroupSubBlockKey
-			}
+			HookUtils::ReplaceCall(0x604384, GetRawFormID); // TESNPC::GetHeadPartModTextureFileName
+			HookUtils::ReplaceCall(0x60439B, GetRawFormID);	// TESNPC::GetHeadPartModTextureFileName
+			HookUtils::ReplaceCall(0x614863, GetRawFormID); // TESRace::GetBodyModTextureName
+			HookUtils::ReplaceCall(0x614873, GetRawFormID); // TESRace::GetBodyModTextureName
+			HookUtils::ReplaceCall(0x617460, GetRawFormID); // TESResponse::GetAudioFilename
+			HookUtils::ReplaceCall(0x5441F1, GetRawFormID); // TESObjectCELL::GetGroupBlockKey
+			HookUtils::ReplaceCall(0x544251, GetRawFormID); // TESObjectCELL::GetGroupSubBlockKey
 
 			// Handle TESDataHandler::GetExtCellDataFromFileByEditorID
 			HookUtils::SafeWrite8(0x461D71 + 1, 0x50);
@@ -638,9 +720,6 @@ namespace MorePluginTypes {
 	}
 
 	void InitHooks() {
-		if (!bSupportESLs && !bSupportOverlays)
-			return;
-
 		SaveLoadHooks::InitHooks();
 		FileHooks::InitHooks();
 		OtherHooks::InitHooks();
@@ -691,25 +770,24 @@ namespace MorePluginTypes {
 	}
 
 	void __cdecl JIP_SaveMod(const TESFile* apFile) {
-		bool bValidFile = apFile != reinterpret_cast<TESFile*>(0xFF);
-		const uint8_t ucModIndex = bValidFile ? apFile->GetCompileIndex() : 0xFF;
-		const uint16_t ucSmallIndex = bValidFile ? apFile->GetSmallCompileIndex() : 0;
-		JohnnySerialization::_WriteRecord8(ucModIndex);
-		JohnnySerialization::_WriteRecord16(ucSmallIndex);
+		bool bValidFile = apFile && apFile != reinterpret_cast<TESFile*>(0xFF);
+		const uint8_t ucIndex = bValidFile ? apFile->GetCompileIndex() : 0xFF;
+		const uint16_t usSecondIndex = bValidFile ? apFile->GetSecondCompileIndex() : 0;
+		JohnnySerialization::_WriteRecord8(ucIndex);
+		JohnnySerialization::_WriteRecord16(usSecondIndex);
 	}
 
-	void __cdecl JIP_SaveModNoTempIndex(const TESFile* apFile) {
-		const uint8_t ucModIndex = apFile ? apFile->GetCompileIndex() : 0xFF;
-		const uint16_t ucSmallIndex = apFile ? apFile->GetSmallCompileIndex() : 0;
-		JohnnySerialization::_WriteRecord8(ucModIndex);
-		JohnnySerialization::_WriteRecord16(ucSmallIndex);
-	}
-
-	TESFile* __fastcall JIP_LoadMod(uint8_t aucIndex, uint16_t ausSmallIndex, bool abSupportsESL) {
+	TESFile* __fastcall JIP_LoadMod(uint8_t aucIndex, uint16_t ausSecondIndex, bool abSupportsSpecial) {
 		FormID_View uiTempFormID(0);
-		if (abSupportsESL)
-			uiTempFormID.SetSmallIndex(ausSmallIndex);
-		else if (aucIndex == 0xFE && TESDataHandler::HasSmallPluginSupport())
+		if (abSupportsSpecial) {
+			if (aucIndex == 0xFD)
+				uiTempFormID.SetMediumIndex(ausSecondIndex);
+			else if (aucIndex == 0xFE)
+				uiTempFormID.SetSmallIndex(ausSecondIndex);
+		}
+		else if (aucIndex == 0xFE)
+			return nullptr;
+		else if (aucIndex == 0xFD)
 			return nullptr;
 
 		uiTempFormID.SetCompileIndex(aucIndex);
@@ -852,7 +930,7 @@ namespace MorePluginTypes {
 			__asm {
 				mov     eax, [edi + 0x10]
 				push	eax
-				call	JIP_SaveModNoTempIndex
+				call	JIP_SaveMod
 				jmp		uiSaveModAddr
 			}
 		}
@@ -943,7 +1021,6 @@ namespace MorePluginTypes {
 			// LoadGameCallback
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10015640), JIP_LoadMod_Asm);
 			uiLoadModAddr = JIPUtils::GetAddress(0x10015662);
-			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1001565F) + 2, 9);
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10015665), "\x85\xC9\xEB\x03");
 
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100156B6), JIP_SkipLoadMod_Asm);
@@ -1339,9 +1416,6 @@ namespace MorePluginTypes {
 	}
 
 	void InitJIPHooks() {
-		if (!bSupportESLs && !bSupportOverlays)
-			return;
-
 		if (!JIPUtils::IsValid())
 			return;
 
@@ -1438,7 +1512,7 @@ namespace MorePluginTypes {
 			if (!pFile) [[unlikely]]
 				return true;
 
-			if (bSupportOverlays && pFile->IsOverlay()) {
+			if (pFile->IsOverlay()) {
 				*result = 1;
 				return true;
 			}
@@ -1447,7 +1521,14 @@ namespace MorePluginTypes {
 			if (ucFileIndex == 0xFF) [[unlikely]]
 				return true;
 
-			if (bSupportESLs && ucIndex == 0xFE && ucIndex == ucFileIndex) {
+			if (ucIndex == 0xFD && ucIndex == ucFileIndex) {
+				const uint8_t ucMediumIndex = FormID_View(scriptObj->GetFormID()).GetMediumIndex();
+				if (pFile->GetMediumCompileIndex() > ucMediumIndex) {
+					*result = 1;
+					return true;
+				}
+			}
+			if (ucIndex == 0xFE && ucIndex == ucFileIndex) {
 				const uint16_t usSmallIndex = FormID_View(scriptObj->GetFormID()).GetSmallIndex();
 				if (pFile->GetSmallCompileIndex() > usSmallIndex) {
 					*result = 1;
@@ -1465,7 +1546,7 @@ namespace MorePluginTypes {
 
 	bool JIP_GetLoadOrderChanged(COMMAND_ARGS) {
 		const BGSSaveLoadGame* pSaveLoad = BGSSaveLoadGame::GetSingleton();
-		*result = pSaveLoad->ucLoadOrderChanges;
+		*result = pSaveLoad->uiLoadOrderChanges;
 		return true;
 	}
 
@@ -1501,9 +1582,6 @@ namespace MorePluginTypes {
 	}
 
 	void InitCommandHooks() {
-		if (!bSupportESLs && !bSupportOverlays)
-			return;
-
 		if (!JIPUtils::IsValid())
 			return;
 
@@ -1542,9 +1620,6 @@ namespace MorePluginTypes {
 	}
 
 	void Install() {
-		if (!bSupportESLs && !bSupportOverlays)
-			return;
-
 		kDetour.ReplaceCall(0x86A91A, InitDelayedHooks);
 	}
 

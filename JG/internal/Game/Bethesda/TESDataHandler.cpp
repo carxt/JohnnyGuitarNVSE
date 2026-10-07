@@ -77,38 +77,54 @@ TESFile* TESDataHandler::GetCompiledFileForFormID(FormID auiFormID) const {
 	if (ucIndex == 0xFF)
 		return nullptr;
 
-#if ESL_SUPPORT
-	if (ucIndex == 0xFE && SupportsSmallPugins()) {
-		const uint16_t usSmallIndex = FormID_View(auiFormID).GetSmallIndex();
-		return kCompiledFiles.GetSmallFile(usSmallIndex);
+#if TESFILE_NEW_TYPES
+	if (SupportsNewFileTypes()) {
+		if (ucIndex == 0xFD) {
+			const uint8_t ucMediumIndex = FormID_View(auiFormID).GetMediumIndex();
+			return kCompiledFiles.GetMediumFile(ucMediumIndex);
+		}
+		else if (ucIndex == 0xFE) {
+			const uint16_t usSmallIndex = FormID_View(auiFormID).GetSmallIndex();
+			return kCompiledFiles.GetSmallFile(usSmallIndex);
+		}
 	}
 #endif
 	return kCompiledFiles.GetFile(ucIndex);
 }
 
-#if ESL_SUPPORT
+#if TESFILE_NEW_TYPES
 uint32_t TESDataHandler::GetSmallCompiledFileCount() const {
-	if (SupportsSmallPugins())
+	if (SupportsNewFileTypes())
 		return kCompiledFiles.GetSmallFileCount();
 	return 0;
 }
 
 TESFile* TESDataHandler::GetSmallFile(uint32_t auiIndex) const {
-	if (SupportsSmallPugins())
+	if (SupportsNewFileTypes())
 		return kCompiledFiles.GetSmallFile(auiIndex);
 	return nullptr;
 }
-#endif
 
-#if OVERLAY_SUPPORT
+uint32_t TESDataHandler::GetMediumCompiledFileCount() const {
+	if (SupportsNewFileTypes())
+		return kCompiledFiles.GetMediumFileCount();
+	return 0;
+}
+
+TESFile* TESDataHandler::GetMediumFile(uint32_t auiIndex) const {
+	if (SupportsNewFileTypes())
+		return kCompiledFiles.GetMediumFile(auiIndex);
+	return nullptr;
+}
+
 uint32_t TESDataHandler::GetOverlayFileCount() const {
-	if (SupportsOverlayPugins())
+	if (SupportsNewFileTypes())
 		return kCompiledFiles.GetOverlayFileCount();
 	return 0;
 }
 
 TESFile* TESDataHandler::GetOverlayFile(uint32_t auiIndex) const {
-	if (SupportsOverlayPugins())
+	if (SupportsNewFileTypes())
 		return kCompiledFiles.GetOverlayFile(auiIndex);
 	return nullptr;
 }
@@ -130,50 +146,58 @@ bool TESDataHandler::AddFormToDataHandler(TESForm* apForm) {
 }
 
 uint32_t __fastcall CompiledFiles::GetFileCount() const {
-#if ESL_SUPPORT || OVERLAY_SUPPORT
-	if (TESDataHandler::HasExtendedPlugins())
+#if TESFILE_NEW_TYPES
+	if (TESDataHandler::HasNewFileTypeSupport())
 		return kNormalFiles.GetSize();
-
-	return uiCompiledFileCount;
-#else
-	return uiCompiledFileCount;
 #endif
+	return uiCompiledFileCount;
 }
 
 TESFile* __fastcall CompiledFiles::GetFile(uint32_t auiIndex) const {
 	if (auiIndex >= GetFileCount())
 		return nullptr;
 
-#if ESL_SUPPORT || OVERLAY_SUPPORT
-	if (TESDataHandler::HasExtendedPlugins())
+#if TESFILE_NEW_TYPES
+	if (TESDataHandler::HasNewFileTypeSupport())
 		return kNormalFiles.GetAt(auiIndex);
 #endif
 	return pFileArray[auiIndex];
 }
 
-#if ESL_SUPPORT
+#if TESFILE_NEW_TYPES
 uint32_t __fastcall CompiledFiles::GetSmallFileCount() const {
-	assert(TESDataHandler::HasExtendedPlugins());
+	assert(TESDataHandler::HasNewFileTypeSupport());
 	return kSmallFiles.GetSize();
 }
 
 TESFile* __fastcall CompiledFiles::GetSmallFile(uint32_t auiIndex) const {
-	assert(TESDataHandler::HasExtendedPlugins());
+	assert(TESDataHandler::HasNewFileTypeSupport());
 	if (auiIndex >= GetSmallFileCount())
 		return nullptr;
 
 	return kSmallFiles.GetAt(auiIndex);
 }
-#endif
 
-#if OVERLAY_SUPPORT
+uint32_t __fastcall CompiledFiles::GetMediumFileCount() const {
+	assert(TESDataHandler::HasNewFileTypeSupport());
+	return kMediumFiles.GetSize();
+}
+
+TESFile* __fastcall CompiledFiles::GetMediumFile(uint32_t auiIndex) const {
+	assert(TESDataHandler::HasNewFileTypeSupport());
+	if (auiIndex >= GetMediumFileCount())
+		return nullptr;
+
+	return kMediumFiles.GetAt(auiIndex);
+}
+
 uint32_t __fastcall CompiledFiles::GetOverlayFileCount() const {
-	assert(TESDataHandler::HasOverlayPluginSupport());
+	assert(TESDataHandler::HasNewFileTypeSupport());
 	return kOverlayFiles.GetSize();
 }
 
 TESFile* __fastcall CompiledFiles::GetOverlayFile(uint32_t auiIndex) const {
-	assert(TESDataHandler::HasOverlayPluginSupport());
+	assert(TESDataHandler::HasNewFileTypeSupport());
 	if (auiIndex >= GetOverlayFileCount())
 		return nullptr;
 

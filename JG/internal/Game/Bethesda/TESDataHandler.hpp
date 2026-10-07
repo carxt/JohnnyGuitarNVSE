@@ -81,8 +81,7 @@ class TESWaterForm;
 class TESWeather;
 class TESWorldSpace;
 
-inline constexpr uint32_t HAS_SMALL_PLUGINS_FLAG	= 0x40;
-inline constexpr uint32_t HAS_OVERLAY_PLUGINS_FLAG	= 0x80;
+inline constexpr uint32_t HAS_NEW_FILE_TYPES	= 0x80;
 
 #pragma warning(disable:4624)
 class CompiledFiles {
@@ -92,7 +91,8 @@ public:
 			BSSimpleArray<TESFile*> kNormalFiles;
 			BSSimpleArray<TESFile*> kSmallFiles;
 			BSSimpleArray<TESFile*> kOverlayFiles;
-			uint32_t				padding[0xF4];
+			BSSimpleArray<TESFile*> kMediumFiles;
+			uint32_t				padding[0xE4];
 		};
 
 		struct {
@@ -105,18 +105,21 @@ public:
 
 	TESFile* __fastcall GetFile(uint32_t auiIndex) const;
 
-#if ESL_SUPPORT
+#if TESFILE_NEW_TYPES
 	uint32_t __fastcall GetSmallFileCount() const;
 
 	TESFile* __fastcall GetSmallFile(uint32_t auiIndex) const;
-#endif
 
-#if OVERLAY_SUPPORT
+	uint32_t __fastcall GetMediumFileCount() const;
+
+	TESFile* __fastcall GetMediumFile(uint32_t auiIndex) const;
+
 	uint32_t __fastcall GetOverlayFileCount() const;
 
 	TESFile* __fastcall GetOverlayFile(uint32_t auiIndex) const;
 #endif
 };
+ASSERT_SIZE(CompiledFiles, 0x400);
 #pragma warning(default:4624)
 
 class TESDataHandler {
@@ -226,21 +229,16 @@ public:
 	TESFile* GetCompiledFileForFormID(FormID auiFormID) const;
 
 
-#if ESL_SUPPORT || OVERLAY_SUPPORT
-	bool SupportsSmallPugins() const { return ucDLCFlags.Get(HAS_SMALL_PLUGINS_FLAG); }
-	bool SupportsOverlayPugins() const { return ucDLCFlags.Get(HAS_OVERLAY_PLUGINS_FLAG); }
-	bool SupportsAllPlugins() const { return ucDLCFlags.Get(HAS_SMALL_PLUGINS_FLAG | HAS_OVERLAY_PLUGINS_FLAG) == (HAS_SMALL_PLUGINS_FLAG | HAS_OVERLAY_PLUGINS_FLAG); }
-	static bool HasSmallPluginSupport() { return TESDataHandler::GetSingleton()->SupportsSmallPugins(); }
-	static bool HasOverlayPluginSupport() { return TESDataHandler::GetSingleton()->SupportsOverlayPugins(); }
-	static bool HasExtendedPlugins() { return TESDataHandler::GetSingleton()->ucDLCFlags.Get(HAS_SMALL_PLUGINS_FLAG | HAS_OVERLAY_PLUGINS_FLAG); }
-#endif
+#if TESFILE_NEW_TYPES
+	bool SupportsNewFileTypes() const { return ucDLCFlags.Get(HAS_NEW_FILE_TYPES); }
+	static bool HasNewFileTypeSupport() { return TESDataHandler::GetSingleton()->SupportsNewFileTypes(); }
 
-#if ESL_SUPPORT
 	uint32_t GetSmallCompiledFileCount() const;
 	TESFile* GetSmallFile(uint32_t auiIndex) const;
-#endif
 
-#if OVERLAY_SUPPORT
+	uint32_t GetMediumCompiledFileCount() const;
+	TESFile* GetMediumFile(uint32_t auiIndex) const;
+
 	uint32_t GetOverlayFileCount() const;
 	TESFile* GetOverlayFile(uint32_t auiIndex) const;
 #endif
