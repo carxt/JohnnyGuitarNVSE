@@ -10,6 +10,7 @@
 #include "Bethesda/BGSReconstructFormsInAllFilesMap.hpp"
 
 #include "JG/JohnnySerialization.hpp"
+#include "JG/JohnnyPluginData.hpp"
 #include "internal/CommandOpcodes.h"
 #include <ScriptUtils.h>
 #include <JIP/JIPUtils.hpp>
@@ -24,6 +25,8 @@ extern NVSEScriptInterface* g_scriptInterface;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 
 namespace MorePluginTypes {
+
+	bool bValid = false;
 
 	class FormID_ViewEx : public FormID_View {
 	public:
@@ -1416,6 +1419,9 @@ namespace MorePluginTypes {
 	}
 
 	void InitJIPHooks() {
+		if (!bValid)
+			return;
+
 		if (!JIPUtils::IsValid())
 			return;
 
@@ -1582,6 +1588,9 @@ namespace MorePluginTypes {
 	}
 
 	void InitCommandHooks() {
+		if (!bValid)
+			return;
+
 		if (!JIPUtils::IsValid())
 			return;
 
@@ -1620,6 +1629,12 @@ namespace MorePluginTypes {
 	}
 
 	void Install() {
+		const PluginInfo* pMLF = g_cmdTableInterface->GetPluginInfoByDLLName("mlf");
+		if (!pMLF) {
+			MessageBoxA(nullptr, "Mod Limit Fix not found! Please install it in order to use new plugin types.", JohnnyPluginData::JG_FULL_NAME, MB_OK | MB_ICONERROR);
+			return;
+		}
+		bValid = true;
 		kDetour.ReplaceCall(0x86A91A, InitDelayedHooks);
 	}
 
