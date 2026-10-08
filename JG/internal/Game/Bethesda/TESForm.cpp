@@ -367,7 +367,11 @@ TESFile* TESForm::GetOwnerMaster() const {
 
 // GAME - 0x485BC0
 FormID TESForm::GetFormIDWithoutIndex() const {
+#ifdef GAME
+	return ThisCall<FormID>(0x485BC0, this);
+#else
 	return FormID_View(uiFormID).GetID();
+#endif
 }
 
 // GAME - 0x5504E0

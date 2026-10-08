@@ -709,6 +709,7 @@ namespace MorePluginTypes {
 			HookUtils::ReplaceCall(0x617460, GetRawFormID); // TESResponse::GetAudioFilename
 			HookUtils::ReplaceCall(0x5441F1, GetRawFormID); // TESObjectCELL::GetGroupBlockKey
 			HookUtils::ReplaceCall(0x544251, GetRawFormID); // TESObjectCELL::GetGroupSubBlockKey
+			HookUtils::WriteRelJump(0x485BC0, GetRawFormID); // TESForm::GetFormIDWithoutIndex
 
 			// Handle TESDataHandler::GetExtCellDataFromFileByEditorID
 			HookUtils::SafeWrite8(0x461D71 + 1, 0x50);
