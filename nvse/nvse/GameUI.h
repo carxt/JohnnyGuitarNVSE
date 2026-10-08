@@ -330,7 +330,7 @@ public:
 					return iter->GetItem() ? iter->GetItem()->tile : NULL;
 				}
 				index--;
-			} while (iter = iter->GetNext());
+			} while ((iter = iter->GetNext()));
 		}
 		return NULL;
 	}

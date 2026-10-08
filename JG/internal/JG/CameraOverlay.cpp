@@ -115,7 +115,7 @@ namespace CameraOverlay {
 
 #pragma region Enums
 	struct _OverlayTypes {
-		enum Types {
+		enum Types : uint32_t {
 			PRE_IMAGESPACE,
 			POST_IMAGESPACE,
 			PRE_INTERFACE,
@@ -126,7 +126,7 @@ namespace CameraOverlay {
 	using OverlayTypes = _OverlayTypes::Types;
 
 	struct _CameraVariants {
-		enum Variants {
+		enum Variants : uint32_t {
 			NORMAL,
 			ORTHO,
 			COUNT,
@@ -482,7 +482,7 @@ namespace CameraOverlay {
 	}
 
 	void Init() {
-		constexpr uint32_t uiChildCount = (OverlayTypes::COUNT * CameraVariants::COUNT) + CameraVariants::COUNT;
+		constexpr uint32_t uiChildCount = (static_cast<uint32_t>(OverlayTypes::COUNT) * static_cast<uint32_t>(CameraVariants::COUNT)) + CameraVariants::COUNT;
 		spSceneOverlayRoot = NiNode::Create(uiChildCount);
 		spSceneOverlayRoot->SetName("JG_CameraOverlaySceneRoot");
 		spSceneOverlayRoot->SetAlwaysDraw(true);

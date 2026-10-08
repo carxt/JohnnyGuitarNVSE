@@ -26,6 +26,7 @@
 #include "Bethesda/TES.hpp"
 #include "Bethesda/ProcessLists.hpp"
 #include "Bethesda/HighProcess.hpp"
+#include "Bethesda/GameSettingCollection.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 
@@ -736,7 +737,7 @@ bool Cmd_GetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 	BGSIdleMarker* marker;
 	NVSEArrayVar* idleArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker) && marker && IS_TYPE(marker, BGSIdleMarker) && marker->GetIdleCount() > 0) {
-		for (int i = 0; i < marker->GetIdleCount(); i++) {
+		for (uint32_t i = 0; i < marker->GetIdleCount(); i++) {
 			g_arrInterface->AppendElement(idleArr, NVSEArrayElement(marker->ppIdles[i]));
 		}
 	}
@@ -1131,7 +1132,7 @@ bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 
 	if (pTarget) {
-		const uint32_t uiActorLevel = pTarget->GetActorLevel();
+		const int32_t iActorLevel = pTarget->GetActorLevel();
 		auto pIter = TESDataHandler::GetSingleton()->kPerks.GetHead();
 		while (pIter && !pIter->IsEmpty()) {
 			BGSPerk* pPerk = pIter->GetItem();
@@ -1142,7 +1143,7 @@ bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 
 			const uint8_t ucRank = pTarget->GetPerkRank(pPerk, false);
 			if (ucRank < pPerk->GetNumRanks() && !pPerk->GetIsTrait() && pPerk->IsPerkAttainable(pTarget) && pPerk->GetIsPlayable()) {
-				if (pPerk->IsPerkAvailable(pTarget) && pPerk->GetLevel() <= uiActorLevel)
+				if (pPerk->IsPerkAvailable(pTarget) && pPerk->GetLevel() <= iActorLevel)
 					g_arrInterface->AppendElement(pArray, NVSEArrayElement(pPerk));
 			}
 		}
@@ -1202,34 +1203,34 @@ bool Cmd_FaceGenSetNthProperty_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetPlayerKarmaTitle_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char* title;
-	uint32_t titleOrTier = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &titleOrTier);
-	if (titleOrTier == 1) {
-		int karmaTier = CdeclCall<int>(0x47E040, PlayerCharacter::GetSingleton()->GetActorValueF(ActorValue::Index::KARMA)); // GetKarmaTier
+	const char* pTitle = "";
+	BOOL bUseAlignment = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &bUseAlignment);
+	if (bUseAlignment == 1) {
+		int karmaTier = TESActorBaseData::GetAlignmentForKarma(PlayerCharacter::GetSingleton()->GetActorValueF(ActorValue::Index::KARMA));
 		switch (karmaTier) {
 		case 0:
-			title = *(char**)0x11D41B4; // sAlignGood
+			pTitle = GameSettingCollection::sAlignGood;
 			break;
 		case 1:
-			title = *(char**)0x11D3208; // sAlignNeutral
+			pTitle = GameSettingCollection::sAlignNeutral;
 			break;
 		case 2:
-			title = *(char**)0x11D4580; // sAlignEvil
+			pTitle = GameSettingCollection::sAlignEvil;
 			break;
 		case 3:
-			title = *(char**)0x11D5000; // sAlignVeryGood
+			pTitle = GameSettingCollection::sAlignVeryGood;
 			break;
 		case 4:
-			title = *(char**)0x11D31D8; // sAlignVeryEvil
+			pTitle = GameSettingCollection::sAlignVeryEvil;
 			break;
 		}
 	}
 	else {
-		title = CdeclCall<char*>(0x47E0E0, PlayerCharacter::GetSingleton()); // Actor::GetKarmaTitle
+		pTitle = TESActorBaseData::GetKarmicTitle(PlayerCharacter::GetSingleton());
 	}
-	if (Script::GetConsoleOuput()) Interface::PrintLine("GetPlayerKarmaTitle >> %s", title);
-	g_strInterface->Assign(PASS_COMMAND_ARGS, title);
+	if (Script::GetConsoleOuput()) Interface::PrintLine("GetPlayerKarmaTitle >> %s", pTitle);
+	g_strInterface->Assign(PASS_COMMAND_ARGS, pTitle);
 	return true;
 }
 
@@ -1821,7 +1822,7 @@ bool Cmd_GetBufferedCellsAlt_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 	TESObjectWEAP* pWeapon = nullptr;
-	uint32_t uiType = -1;
+	uint32_t uiType = UINT32_MAX;
 	TESObjectSTAT* pStatic = nullptr;
 	*result = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &uiType, &pStatic) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP) && (!pStatic || IS_TYPE(pStatic, TESObjectSTAT)) && uiType <= 7) {
@@ -1861,7 +1862,7 @@ bool Cmd_SetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetWeapon1stPersonModel_Execute(COMMAND_ARGS) {
 	TESObjectWEAP* pWeapon = nullptr;
-	uint32_t uiType = -1;
+	uint32_t uiType = UINT32_MAX;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &uiType) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP) && uiType <= 7) {
 		TESObjectSTAT* pStatic = nullptr;
 		switch (uiType) {
@@ -1981,15 +1982,12 @@ bool Cmd_IsCellVisited_Execute(COMMAND_ARGS) {
 bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESObjectCELL* pCell = nullptr;
-	uint32_t iHoursToRespawnCell = *(uint32_t*)0x11CA164;
-	int32_t detachTime = 0;
-	float gameHoursPassed = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCell) && pCell && IS_TYPE(pCell, TESObjectCELL)) {
 		const uint32_t uiDetachTime = pCell->GetDetachTime();
 		if (uiDetachTime == 0) {
 			*result = -1;
 		}
-		else if (uiDetachTime == uint32_t(-1) || uiDetachTime == uint32_t(-2)) { // -1 is used by ResetInterior, -2 by ShowOff's ResetInteriorAlt.
+		else if (uiDetachTime == static_cast<uint32_t>(-1) || uiDetachTime == static_cast<uint32_t>(-2)) { // -1 is used by ResetInterior, -2 by ShowOff's ResetInteriorAlt.
 			*result = 1;
 		}
 		else {
@@ -3161,7 +3159,6 @@ namespace {
 
 		const bool bReloadWeapon = uiValidParts.GetAndClearBit(BIPED_OBJECT::WEAPON);
 		const bool bPlayer = apCharacter == PlayerCharacter::GetSingleton();
-		bool bPlayerHasIS = false;
 
 		BGSLoadGameSubBuffer kSavedAnim1st;
 		BGSLoadGameSubBuffer kSavedAnim3rd;

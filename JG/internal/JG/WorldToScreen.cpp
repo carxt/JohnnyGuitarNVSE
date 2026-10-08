@@ -79,7 +79,7 @@ namespace WorldToScreen {
 			}
 			return false;
 		}
-		arOut.z = arCamera.kWorld.Distance(arPos);
+		//arOut.z = arCamera.kWorld.Distance(arPos);
 	}
 
 	bool __fastcall WorldToScreen(const NiPoint3& arPos, NiPoint3& arOut, int aeOffscreenHandleType, float afZeroTolerance) {

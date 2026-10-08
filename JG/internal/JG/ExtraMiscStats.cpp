@@ -47,7 +47,7 @@ namespace ExtraMiscStats {
 				tile = iter->GetItem()->tile;
 				break;
 			}
-		} while (iter = iter->GetNext());
+		} while ((iter = iter->GetNext()));
 		if (!tile) {
 			tile = ThisCall<Tile*>(0x7E1190, &StatsMenu::Get()->miscStatIDList, StatsMenu::Get()->miscStatIDList.itemCount, 0, 0, 0);
 			tile->SetString(TILE_TRAIT::STRING, name, 1);

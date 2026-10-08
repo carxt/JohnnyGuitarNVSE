@@ -479,7 +479,7 @@ bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 	BOOL bFirstPerson = FALSE;
 
 	NVSEArrayElement kElements[4];
-	NVSEArrayVar* pOutArray;
+	NVSEArrayVar* pOutArray = nullptr;
 
 	bool bValid = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName, &bFirstPerson)) {

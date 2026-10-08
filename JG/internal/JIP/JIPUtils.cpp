@@ -91,7 +91,6 @@ namespace JIPUtils {
 			return;
 		}
 
-		DWORD dwBytesRead = 0;
 		HANDLE hMemoryMapping = CreateFileMapping(hJIPFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
 		if (!hMemoryMapping) {
 			CloseHandle(hJIPFile);

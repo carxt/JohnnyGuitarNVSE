@@ -32,7 +32,7 @@ bool Cmd_SetDialogResponseOverrideValues_Execute(COMMAND_ARGS) {
 
 	uint32_t responseEmotion = 0;
 	int32_t responseEmotionValue = 0;
-	uint32_t flags = -1;
+	uint32_t flags = UINT32_MAX;
 	//Init to xMarker
 	TESIdleForm* speakerAnim = *(TESIdleForm**)0x11CA244;
 	TESIdleForm* listenerAnim = *(TESIdleForm**)0x11CA244;
@@ -146,7 +146,6 @@ bool Cmd_SetSaidOnce_Execute(COMMAND_ARGS) {
 bool Cmd_GetTopicInfo_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESTopic* pTargetTopic = nullptr;
-	int32_t iIndex = -1;
 	TESQuest* pQuest = nullptr;
 
 	NVSEArrayVar* pStoredInfos = g_arrInterface->CreateArray(nullptr, 0, scriptObj);

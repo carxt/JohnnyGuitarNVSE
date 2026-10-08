@@ -435,8 +435,8 @@ bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fMultiplier, &pForm)) {
 		TESForm* pTarget = pForm ? pForm : thisObj;
 		if (pTarget) {
-			if (fabs(fMultiplier) < FLT_EPSILON)
-				fMultiplier = FLT_EPSILON + DBL_EPSILON;
+			if (fabs(fMultiplier) < std::numeric_limits<float>::epsilon())
+				fMultiplier = std::numeric_limits<float>::epsilon() * 2;
 
 			NPCAccuracy::SetMultiplier(pTarget, fMultiplier);
 		}

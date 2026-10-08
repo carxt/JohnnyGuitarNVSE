@@ -9,7 +9,7 @@ ScriptVar* ScriptLocals::GetVariable(uint32_t id) {
 			scriptVar = varIter->data;
 			if (scriptVar && (scriptVar->id == id))
 				return scriptVar;
-		} while (varIter = varIter->next);
+		} while ((varIter = varIter->next));
 	}
 	return NULL;
 }

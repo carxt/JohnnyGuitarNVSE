@@ -164,9 +164,8 @@ namespace ExtraReputationIcons {
 			return;
 
 		SRWSharedLock kLock(kMapLock);
-		auto it = pFactionIconsMap->begin();
 		for (auto const& it : *pFactionIconsMap) {
-			Interface::PrintLine("0x%X - %s %s %s %s", it.first, it.second[0], it.second[1], it.second[2], it.second[3]);
+			Interface::PrintLine("0x%X - %s %s %s %s", it.first, it.second[0].c_str(), it.second[1].c_str(), it.second[2].c_str(), it.second[3].c_str());
 		}
 	}
 

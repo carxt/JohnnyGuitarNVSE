@@ -349,7 +349,6 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BOOL bLocal = FALSE;
-	TESObjectREFR* pRef = nullptr;
 	char cOutX[VAR_NAME_SIZE]; 
 	char cOutY[VAR_NAME_SIZE];
 	char cOutZ[VAR_NAME_SIZE];

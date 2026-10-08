@@ -358,7 +358,6 @@ namespace JIPFixes {
 		void __fastcall DetachObjects(TESObjectREFR* apRef, const char* apName) {
 			const NiFixedString strName(apName);
 			NiPointer<NiAVObject> spScene = apRef->Get3DVerySimple();
-			ShadowSceneNode* pSSN = BSShaderManager::GetShadowSceneNode(0);
 			if (spScene) [[likely]] {
 				NiPointer<NiAVObject> spObj = spScene->GetObjectByName(strName);
 				if (spObj)
@@ -2319,7 +2318,7 @@ namespace JIPFixes {
 		STACK_FRAME_OPT_ENABLE
 		class Hook : public Actor {
 		public:
-			float GetGunSpreadHook(enum SpreadMode aeMode) {
+			float GetGunSpreadHook(uint32_t aeMode) {
 				if (ucJIPActorFlags2.GetBit(3))
 					return 0.f;
 
@@ -2341,7 +2340,6 @@ namespace JIPFixes {
 		class Hook {
 		public:
 			NiAVObject* GenDynamic(TESObjectREFR* apRequester, BSFadeNode* apNode, bool abForceDynamic) {
-				TESObjectLIGH* pLight = reinterpret_cast<TESObjectLIGH*>(this);
 				NiNode* pLightNode = apNode;
 				NiAVObject* pAttach = BSUtilities::GetObjectByName(apNode, FixedStrings::GetAttachLight());
 				if (pAttach && pAttach->IsNode())

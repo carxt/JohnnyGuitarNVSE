@@ -5,7 +5,7 @@
 class BGSChangeFlags {
 public:
 	struct _ChangeFlags {
-		enum Flags {
+		enum Flags : uint32_t {
 			FORM_FLAGS						= 0x1,
 	
 			// TESForm
