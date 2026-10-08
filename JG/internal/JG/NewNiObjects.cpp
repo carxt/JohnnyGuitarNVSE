@@ -1,4 +1,5 @@
 #include "NewNiObjects.hpp"
+#include "Gamebryo/NiLight.hpp"
 
 #include "Shared/Utils/DebugLog.hpp"
 #include "Shared/SafeWrite/SafeWrite.hpp"

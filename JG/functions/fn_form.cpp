@@ -27,6 +27,7 @@
 #include "Bethesda/ProcessLists.hpp"
 #include "Bethesda/HighProcess.hpp"
 #include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/BSFadeNode.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 

@@ -8,7 +8,11 @@
 #include "Bethesda/TimeGlobal.hpp"
 #include "Bethesda/TESObjectREFR.hpp"
 #include "Bethesda/BSAnimGroupSequence.hpp"
+#include "Bethesda/SceneGraph.hpp"
+#include "Bethesda/BSFadeNode.hpp"
 #include "Gamebryo/NiControllerManager.hpp"
+#include "Gamebryo/NiCamera.hpp"
+#include "Gamebryo/NiDirectionalLight.hpp"
 
 #include <Shared/Utils/CustomGameSetting.hpp>
 #include "Shared/SafeWrite/SafeWrite.hpp"
@@ -183,7 +187,7 @@ namespace CameraOverlay {
 
 			BSFadeNode* pRoot = BSFadeNode::CreateObject();
 			pRoot->SetName(cRootName);
-			pRoot->pLinkedObj = pReference;
+			pRoot->SetReference(pReference);
 			pRoot->TurnFadeNodeOn();
 			pRoot->SetAlwaysDraw(true);
 			pRoot->SetIgnoreFade(true);

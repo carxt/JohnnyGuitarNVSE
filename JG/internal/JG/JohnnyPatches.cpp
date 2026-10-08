@@ -29,6 +29,7 @@
 
 #include "Bethesda/GameSettingCollection.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
+#include "Gamebryo/NiCamera.hpp"
 
 #include <algorithm>
 #include <unordered_set>

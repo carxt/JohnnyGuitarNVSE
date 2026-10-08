@@ -1,8 +1,9 @@
 #include "WorldToScreen.hpp"
-#include "netimmerse.h"
 
 #include "Bethesda/TESMain.hpp"
+#include "Bethesda/SceneGraph.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
+#include "Gamebryo/NiCamera.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
@@ -47,20 +48,20 @@ namespace WorldToScreen {
 		arOut.x = arOut.x * fInvW;
 		arOut.y = arOut.y * fInvW;
 
-		arOut.x *= (arCamera.m_kPort.r - arCamera.m_kPort.l) * 0.5f;
-		arOut.y *= (arCamera.m_kPort.t - arCamera.m_kPort.b) * 0.5f;
+		arOut.x *= (arCamera.m_kPort.m_right - arCamera.m_kPort.m_left) * 0.5f;
+		arOut.y *= (arCamera.m_kPort.m_top - arCamera.m_kPort.m_bottom) * 0.5f;
 
-		arOut.x += (arCamera.m_kPort.r + arCamera.m_kPort.l) * 0.5f;
-		arOut.y += (arCamera.m_kPort.t + arCamera.m_kPort.b) * 0.5f;
+		arOut.x += (arCamera.m_kPort.m_right + arCamera.m_kPort.m_left) * 0.5f;
+		arOut.y += (arCamera.m_kPort.m_top + arCamera.m_kPort.m_bottom) * 0.5f;
 
-		arOut.y = arCamera.m_kPort.t - arOut.y;
-		if (arOut.x >= arCamera.m_kPort.l && arOut.x <= arCamera.m_kPort.r &&
-			arOut.y >= arCamera.m_kPort.b && arOut.y <= arCamera.m_kPort.t && st == 0) {
+		arOut.y = arCamera.m_kPort.m_top - arOut.y;
+		if (arOut.x >= arCamera.m_kPort.m_left && arOut.x <= arCamera.m_kPort.m_right &&
+			arOut.y >= arCamera.m_kPort.m_bottom && arOut.y <= arCamera.m_kPort.m_top && st == 0) {
 			return true;
 		}
 		else {
 			if (aeOffscreenHandleType < 2) {
-				float x2 = arCamera.m_kPort.r / 2, y2 = arCamera.m_kPort.t / 2;
+				float x2 = arCamera.m_kPort.m_right / 2, y2 = arCamera.m_kPort.m_top / 2;
 				float d = std::sqrt((((arOut.x - x2) * (arOut.x - x2))) + ((arOut.y - y2) * (arOut.y - y2))); // Distance
 				float r = y2 / d; // Segment ratio
 				arOut.x = (((r * arOut.x + (1 - r) * x2)));// find point that divides the segment
