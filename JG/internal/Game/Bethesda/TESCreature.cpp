@@ -148,7 +148,6 @@ bool TESCreature::CanWearItem(TESForm* apForm) const {
 #ifdef GAME
 	return ThisCall<bool>(0x5FA120, this, apForm);
 #else
-	const FORM_TYPE eFormType = apForm->GetFormType();
 	if (eFormType == FORM_TYPE::TESObjectLIGH)
 		return true;
 

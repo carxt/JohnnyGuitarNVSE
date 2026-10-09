@@ -9,32 +9,32 @@ Bitfield<TESWeather::_WeatherDataFlags>& TESWeather::GetWeatherFlags() {
 }
 
 // GAME - 0x6347A0
-const TESTexture1024* TESWeather::GetCloudTexture(uint32_t auiLayer) const {
+const TESTexture1024* TESWeather::GetCloudTexture(int32_t aiLayer) const {
 #ifdef GAME
-	return ThisCall<TESTexture1024*>(0x6347A0, this, auiLayer);
+	return ThisCall<TESTexture1024*>(0x6347A0, this, aiLayer);
 #else
-	return &kCloudTexture[auiLayer];
+	return &kCloudTexture[aiLayer];
 #endif
 }
 
-TESTexture1024* TESWeather::GetCloudTexture(uint32_t auiLayer) {
+TESTexture1024* TESWeather::GetCloudTexture(int32_t aiLayer) {
 #ifdef GAME
-	return ThisCall<TESTexture1024*>(0x6347A0, this, auiLayer);
+	return ThisCall<TESTexture1024*>(0x6347A0, this, aiLayer);
 #else
-	return &kCloudTexture[auiLayer];
+	return &kCloudTexture[aiLayer];
 #endif
 }
 
 // GAME - 0x6347C0
-float TESWeather::GetCloudLayerSpeed(uint32_t auiLayer, float afMax, float afMin) const {
+float TESWeather::GetCloudLayerSpeed(int32_t aiLayer, float afMax, float afMin) const {
 #ifdef GAME
-	return ThisCall<float>(0x6347C0, this, auiLayer, afMax, afMin);
+	return ThisCall<float>(0x6347C0, this, aiLayer, afMax, afMin);
 #else
 	uint8_t ucSpeed = 51;
 	if (iNumCloudLayers > 0) {
-		if (auiLayer >= iNumCloudLayers)
-			auiLayer = 0;
-		ucSpeed = ucCloudSpeed[auiLayer];
+		if (aiLayer >= iNumCloudLayers)
+			aiLayer = 0;
+		ucSpeed = ucCloudSpeed[aiLayer];
 	}
 	return (ucSpeed * (1.0 / 255.0) * (afMax - afMin) + afMin);
 #endif
@@ -42,11 +42,11 @@ float TESWeather::GetCloudLayerSpeed(uint32_t auiLayer, float afMax, float afMin
 
 // GAME - 0x63BC60
 // GECK - 0x680340
-uint32_t TESWeather::GetCloudColor(uint32_t auiLayer, ColorTime aeTime) const {
+uint32_t TESWeather::GetCloudColor(int32_t aiLayer, ColorTime aeTime) const {
 #ifdef GAME
-	return ThisCall<uint32_t>(0x63BC60, this, auiLayer, aeTime);
+	return ThisCall<uint32_t>(0x63BC60, this, aiLayer, aeTime);
 #else
-	return ThisCall<uint32_t>(0x680340, this, auiLayer, aeTime);
+	return ThisCall<uint32_t>(0x680340, this, aiLayer, aeTime);
 #endif
 }
 

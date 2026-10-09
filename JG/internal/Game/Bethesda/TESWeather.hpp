@@ -150,12 +150,12 @@ public:
 	const Bitfield<_WeatherDataFlags>& GetWeatherFlags() const;
 	Bitfield<_WeatherDataFlags>& GetWeatherFlags();
 
-	const TESTexture1024* GetCloudTexture(uint32_t auiLayer) const;
-	TESTexture1024* GetCloudTexture(uint32_t auiLayer);
+	const TESTexture1024* GetCloudTexture(int32_t aiLayer) const;
+	TESTexture1024* GetCloudTexture(int32_t aiLayer);
 
-	float GetCloudLayerSpeed(uint32_t auiLayer, float afMax, float afMin) const;
+	float GetCloudLayerSpeed(int32_t aiLayer, float afMax, float afMin) const;
 
-	uint32_t GetCloudColor(uint32_t auiLayer, ColorTime aeTime) const;
+	uint32_t GetCloudColor(int32_t aiLayer, ColorTime aeTime) const;
 
 	const TESModel* GetPrecipitationModel() const;
 	TESModel* GetPrecipitationModel();

@@ -358,7 +358,6 @@ bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_RefAddrxData_Execute(COMMAND_ARGS) {
-	TESForm* form = nullptr;
 	DWORD type;
 	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
 		if (type < EXTRA_DATA_TYPE::COUNT) {
@@ -474,7 +473,7 @@ bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS) {
-	uintptr_t optIdx = -1;
+	uint32_t optIdx = UINT32_MAX;
 	*result = 0;
 	char boneName[MAX_PATH] = { 0 };
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, optIdx, &boneName)) {
@@ -501,7 +500,7 @@ bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
-	uintptr_t optIdx = -1;
+	uint32_t optIdx = UINT32_MAX;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &optIdx)) {
 		if (thisObj && thisObj->IsCharacter() && optIdx <= 4)
@@ -509,7 +508,7 @@ bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
 				if (BipedAnim->kBones[optIdx].pParent && BipedAnim->kBones[optIdx].pParent->IsNode()) {
 					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->kBones[optIdx].pParent->m_kName);
 					if (Script::GetConsoleOuput())
-						Interface::PrintLine("GetOptionalBone >> %s", BipedAnim->kBones[optIdx].pParent->m_kName);
+						Interface::PrintLine("GetOptionalBone >> %s", BipedAnim->kBones[optIdx].pParent->m_kName.c_str());
 				}
 			}
 	}
@@ -639,13 +638,13 @@ bool Cmd_ar_Shuffle_Execute(COMMAND_ARGS) {
 
 		BSScrapBuffer<NVSEArrayElement> kArrayElements(uiArraySize);
 		g_arrInterface->GetElements(pInArray, kArrayElements.get(), nullptr);
-		for (uint32_t uiCounter = (uiArraySize - 1); uiCounter >= 1; uiCounter--) {
-			std::uniform_int_distribution<> kDistrib(1, uiCounter);
+		for (int32_t iCounter = (uiArraySize - 1); iCounter >= 1; iCounter--) {
+			std::uniform_int_distribution<> kDistrib(1, iCounter);
 			const int32_t iPicker = kDistrib(*kGenerator.get());
-			if (iPicker < uiCounter) {
+			if (iPicker < iCounter) {
 				NVSEArrayElement kTemp = std::move(kArrayElements[iPicker]);
-				kArrayElements[iPicker] = std::move(kArrayElements[uiCounter]);
-				kArrayElements[uiCounter] = std::move(kTemp);
+				kArrayElements[iPicker] = std::move(kArrayElements[iCounter]);
+				kArrayElements[iCounter] = std::move(kTemp);
 			}
 		}
 

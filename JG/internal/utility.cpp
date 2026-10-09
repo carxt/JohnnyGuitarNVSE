@@ -989,7 +989,7 @@ int __fastcall StrToInt(const char* str) {
 	bool neg = *str == '-';
 	if (neg) str++;
 	char chr;
-	while (chr = *str++) {
+	while ((chr = *str++)) {
 		if ((chr < '0') || (chr > '9')) break;
 		result *= 10;
 		result += chr - '0';
@@ -1004,7 +1004,7 @@ double __fastcall StrToDbl(const char* str) {
 	bool neg = *str == '-', point = false;
 	if (neg) str++;
 	char chr;
-	while (chr = *str++) {
+	while ((chr = *str++)) {
 		if ((chr >= '0') && (chr <= '9')) {
 			if (point) divisor *= 10;
 			intPart *= 10;
@@ -1139,7 +1139,7 @@ void FileStream::WriteBuf(const void* inData, uint32_t inLength) {
 
 void FileStream::MakeAllDirs(char* fullPath) {
 	char* traverse = fullPath, curr;
-	while (curr = *traverse) {
+	while ((curr = *traverse)) {
 		if ((curr == '\\') || (curr == '/')) {
 			*traverse = 0;
 			CreateDirectory(fullPath, NULL);
@@ -1160,7 +1160,7 @@ LineIterator::LineIterator(const char* filePath, char* buffer) {
 	sourceFile.ReadBuf(dataPtr, length);
 	*(uint16_t*)(dataPtr + length) = 0x300;
 	uint8_t data;
-	while (data = *buffer) {
+	while ((data = *buffer)) {
 		if ((data == '\n') || (data == '\r'))
 			*buffer = 0;
 		buffer++;

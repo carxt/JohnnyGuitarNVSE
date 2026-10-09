@@ -7,6 +7,11 @@
 #include "Gamebryo/NiPSysEmitter.hpp"
 #include "Gamebryo/NiPSysModifier.hpp"
 #include "Gamebryo/NiControllerManager.hpp"
+#include "Gamebryo/NiAlphaProperty.hpp"
+#include "Gamebryo/NiMaterialProperty.hpp"
+#include "Gamebryo/NiStencilProperty.hpp"
+#include "Gamebryo/NiDirectionalLight.hpp"
+#include "Gamebryo/NiSpotLight.hpp"
 #include "Bethesda/AILinearTaskThreadManager.hpp"
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/BSWindModifier.hpp"
@@ -312,7 +317,7 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 			pStencil->SetStencilPassAction(static_cast<NiStencilProperty::Action>(uiValue));
 			break;
 		case StencilPropertyItem::TEST_FUNC:
-			pStencil->SetStencilFunction(static_cast<NiStencilProperty::TestFunc>(uiValue));
+			pStencil->SetStencilFunction(static_cast<NiStencilProperty::TestFunction>(uiValue));
 			break;
 		default:
 			__assume(0);
@@ -479,7 +484,7 @@ bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 	BOOL bFirstPerson = FALSE;
 
 	NVSEArrayElement kElements[4];
-	NVSEArrayVar* pOutArray;
+	NVSEArrayVar* pOutArray = nullptr;
 
 	bool bValid = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName, &bFirstPerson)) {

@@ -176,7 +176,6 @@ bool Cmd_GetSystemColorAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	ScriptVar* rOut, * gOut, * bOut;
 	uint32_t type;
-	uint8_t color[3] = { 0, 0, 0 };
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &type, &rOut, &gOut, &bOut) && type > 0 && type <= 5) {
 		SystemColorManager* colorMgr = SystemColorManager::GetSingleton();
 		uint32_t color = (colorMgr->GetColor(type) >> 0x8);
@@ -399,7 +398,7 @@ bool Cmd_UpdateRepairMenu_Execute(COMMAND_ARGS) {
 			float repairedHealth = CalculateRepairedHealth(target, listItem->object);
 			listItem->tile->SetFloat(TILE_TRAIT::USER0, repairedHealth);
 		}
-	} while (iter = iter->GetNext());
+	} while ((iter = iter->GetNext()));
 	*result = 1;
 	return true;
 }

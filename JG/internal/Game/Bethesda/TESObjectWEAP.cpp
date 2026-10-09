@@ -905,7 +905,7 @@ float TESObjectWEAP::GetModValue(ModSlot aeSlot, uint8_t aucValue) const {
 	return ThisCall<float>(0x4BD9D0, this, aeSlot, aucValue);
 #else
 	for (uint32_t i = 0; i < 3; ++i) {
-		if (aeSlot != 1u << i)
+		if (aeSlot != (1u << i))
 			continue;
 
 		if (aucValue == 0)
@@ -940,10 +940,10 @@ float TESObjectWEAP::GetWeight(bool abModded) {
 #ifdef GAME
 	return ThisCall<float>(0x4BE380, this, abModded);
 #else
-	float fWeight = GetFormWeight();
+	float fFinalWeight = GetFormWeight();
 	if (abModded)
-		fWeight =- GetModEffectValue(WEAPON_MOD_EFFECT_TYPE::DECREASE_WEIGHT, 0);
-	return fWeight;
+		fFinalWeight =- GetModEffectValue(WEAPON_MOD_EFFECT_TYPE::DECREASE_WEIGHT, 0);
+	return fFinalWeight;
 #endif
 }
 

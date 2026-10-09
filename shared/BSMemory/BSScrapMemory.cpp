@@ -105,7 +105,7 @@ namespace BSScrapMemory {
 		free(ptr);
 	}
 
-	void __cdecl free_aligned_sized(void* ptr, size_t alignment, size_t size) {
+	__declspec(noalias) void __cdecl free_aligned_sized(void* ptr, size_t alignment, size_t size) {
 		return aligned_free(ptr);
 	}
 

@@ -8,6 +8,7 @@
 #include "Bethesda/Interface.hpp"
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
+#include "Bethesda/SceneGraph.hpp"
 
 enum FOVType {
 	VIEWMODEL	= 0,
@@ -26,7 +27,7 @@ SPEC_NOINLINE bool Cmd_GetPlayerCamFOV_Eval(COMMAND_ARGS_EVAL) {
 			*result = PlayerCharacter::GetSingleton()->GetWorldFOV();
 			break;
 		default:
-			*result = TESMain::GetWorldSceneGraph()->fCurrentFOV;
+			*result = TESMain::GetWorldSceneGraph()->GetCameraFOV();
 			break;
 	}
 	return true;
@@ -51,7 +52,7 @@ bool Cmd_GetPackedPlayerFOV_Execute(COMMAND_ARGS) {
 	pViewmodelFOV->data = PlayerCharacter::GetSingleton()->Get1stPersonFOV();
 	pWorldFOV->data = PlayerCharacter::GetSingleton()->GetWorldFOV();
 	if (pCurrentFOV)
-		pCurrentFOV->data = TESMain::GetWorldSceneGraph()->fCurrentFOV;
+		pCurrentFOV->data = TESMain::GetWorldSceneGraph()->GetCameraFOV();
 
 	*result = 1;
 	return true;
@@ -349,7 +350,6 @@ bool Cmd_WorldToScreen_Execute(COMMAND_ARGS) {
 bool Cmd_GetCameraTranslation_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BOOL bLocal = FALSE;
-	TESObjectREFR* pRef = nullptr;
 	char cOutX[VAR_NAME_SIZE]; 
 	char cOutY[VAR_NAME_SIZE];
 	char cOutZ[VAR_NAME_SIZE];

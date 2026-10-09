@@ -4,6 +4,7 @@
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/FixedStrings.hpp"
+#include "Gamebryo/NiCamera.hpp"
 
 #include "Shared/BSMemory/BSMemoryUtils.hpp"
 #include "Shared/SafeWrite/SafeWrite.hpp"

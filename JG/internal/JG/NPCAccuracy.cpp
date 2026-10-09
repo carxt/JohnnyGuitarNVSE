@@ -123,7 +123,7 @@ namespace NPCAccuracy {
 	HookUtils::CallDetour kGetGunSpreadDetour;
 	class Hook : public Actor {
 	public:
-		float GetGunSkillHook(enum SpreadMode aeMode) {
+		float GetGunSkillHook(uint32_t aeMode) {
 			float fSpread = ThisCall<float>(kGetGunSpreadDetour, this, aeMode);
 			if (fSpread != 0.f)
 				fSpread *= GetAdditionalWobbleMultiplier(this);

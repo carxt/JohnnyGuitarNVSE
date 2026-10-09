@@ -1,6 +1,8 @@
 #include "CameraOverride.hpp"
-#include "netimmerse.h"
 #include "Bethesda/PlayerCharacter.hpp"
+#include "Gamebryo/NiNode.hpp"
+#include "Gamebryo/NiBound.hpp"
+#include "Gamebryo/NiCamera.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
