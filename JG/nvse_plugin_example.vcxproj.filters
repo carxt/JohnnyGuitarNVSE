@@ -1279,6 +1279,9 @@
     <ClCompile Include="internal\Game\Bethesda\SceneGraph.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\RefDestructorFix.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -3495,6 +3498,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\SceneGraph.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\RefDestructorFix.hpp">
+      <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
