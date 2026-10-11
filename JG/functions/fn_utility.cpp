@@ -25,6 +25,7 @@
 #include "Shared/BSMemory/BSMemoryUtils.hpp"
 
 #include <random>
+#include <Xinput.h>
 
 extern DWORD dwGameStartTimestamp;
 
@@ -718,5 +719,72 @@ bool Cmd_StopIdleLoop_Execute(COMMAND_ARGS) {
 		}
 
 	}
+	return true;
+}
+
+// GetControllerStickRaw stick:int axis:int
+// stick: 0 = left, 1 = right. axis: 0 = X, 1 = Y (up = positive).
+// Returns the stick value straight from XInput in the range -1..1, with no deadzone applied
+// (the game and other getters apply a per-axis deadzone, which discards the smaller axis on
+// diagonal input). Returns 0 if no controller is connected or the arguments are out of range.
+namespace RawControllerInput {
+	using XInputGetState_t = DWORD(WINAPI*)(DWORD, XINPUT_STATE*);
+
+	static XInputGetState_t pXInputGetState = nullptr;
+	static bool bLookedUp = false;
+	static int iPadIndex = -1;
+	static DWORD uiLastScan = 0;
+
+	static bool GetState(XINPUT_STATE& arState) {
+		if (!bLookedUp) {
+			bLookedUp = true;
+			static const char* const kDLLNames[] = { "xinput1_3.dll", "xinput1_4.dll", "xinput9_1_0.dll" };
+			for (const char* pName : kDLLNames) {
+				HMODULE hModule = GetModuleHandleA(pName);
+				if (!hModule)
+					hModule = LoadLibraryA(pName);
+				if (hModule) {
+					pXInputGetState = reinterpret_cast<XInputGetState_t>(GetProcAddress(hModule, "XInputGetState"));
+					if (pXInputGetState)
+						break;
+				}
+			}
+		}
+		if (!pXInputGetState)
+			return false;
+
+		// Reading a connected pad is cheap; polling empty slots is not, so rescan at most once a second.
+		if (iPadIndex >= 0) {
+			if (pXInputGetState(iPadIndex, &arState) == ERROR_SUCCESS)
+				return true;
+			iPadIndex = -1;
+		}
+		const DWORD uiNow = GetTickCount();
+		if (uiLastScan && (uiNow - uiLastScan) < 1000)
+			return false;
+		uiLastScan = uiNow;
+		for (DWORD i = 0; i < XUSER_MAX_COUNT; i++) {
+			if (pXInputGetState(i, &arState) == ERROR_SUCCESS) {
+				iPadIndex = static_cast<int>(i);
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
+bool Cmd_GetControllerStickRaw_Execute(COMMAND_ARGS) {
+	*result = 0;
+	uint32_t uiStick = 0, uiAxis = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiStick, &uiAxis) && uiStick <= 1 && uiAxis <= 1) {
+		XINPUT_STATE kState = {};
+		if (RawControllerInput::GetState(kState)) {
+			const XINPUT_GAMEPAD& kPad = kState.Gamepad;
+			const SHORT sValue = uiStick ? (uiAxis ? kPad.sThumbRY : kPad.sThumbRX) : (uiAxis ? kPad.sThumbLY : kPad.sThumbLX);
+			*result = sValue < 0 ? sValue / 32768.0 : sValue / 32767.0;
+		}
+	}
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetControllerStickRaw >> %.4f", *result);
 	return true;
 }
