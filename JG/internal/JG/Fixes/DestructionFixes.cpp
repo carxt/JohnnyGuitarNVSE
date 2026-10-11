@@ -23,6 +23,19 @@ namespace DestructionFixes {
 		// Naturally, fixed in CE...
 		// I'm replacing it with a virtual call for better compat (sadly no space to do an inline write)
 		HookUtils::ReplaceCall(0x475EA1, SetDeleteVirt);
+
+
+		// Remove disabled/deleted refs during BGSDestructibleObjectForm::UpdateDestructibleObjects
+		// Say the line Bart
+		// 
+		// call		TESForm::GetDisabledOrDeleted
+		// test		al, al
+		// jz		+26
+		// push		[ebp - 0x10]
+		// call		BGSDestructibleObjectForm::RemoveDestructibleObject
+		// add		esp, 4
+		// jmp		-79
+		HookUtils::SafeWriteBuf(0x47734B, "\xE8\x40\x08\xFC\xFF\x84\xC0\x74\x1A\xFF\x75\xF0\xE8\xB4\x00\x00\x00\x83\xC4\x04\xEB\xAF");
 	}
 
 }
