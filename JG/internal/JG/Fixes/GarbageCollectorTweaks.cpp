@@ -47,7 +47,7 @@ namespace GarbageCollectorTweaks {
 
 		// Nullcheck ref at the start of the func
 		// Bethesda nullchecks it... after using it
-		kGetFormIDDetour.ReplaceCall(0x8680A4, GetFormID);
+		kGetFormIDDetour.ReplaceCall(0x867FCE, GetFormID);
 
 		// Remove ref from various containers - normally they get removed in the destructor itself
 		// Aka, too late
