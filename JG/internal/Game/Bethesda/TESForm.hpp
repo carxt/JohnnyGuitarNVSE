@@ -343,10 +343,11 @@ public:
 	// Get is virtual
 	void SetContinuousBroadcast(bool abVal);
 
+	bool GetDisabledOrDeleted() const;
+
 	TESFile* GetFile(int32_t aiIndex) const;
 	TESFile* GetOwnerMaster() const;
 	FormID GetFormIDWithoutIndex() const;
-	FormID GetLoadFormID() const;
 	uint32_t GetFileCount() const;
 
 #ifdef EDITOR

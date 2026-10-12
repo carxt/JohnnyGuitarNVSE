@@ -1,6 +1,8 @@
 #include "ExtraDataList.hpp"
 #ifdef EDITOR
 #include "ExtraLeveledCreature.hpp"
+#include "ExtraActivateRef.hpp"
+#include "ExtraActivateRefChildren.hpp"
 #endif
 
 ExtraDataList* ExtraDataList::Create() {
@@ -354,5 +356,223 @@ void ExtraDataList::SetLock(LockData* apLock) {
 	ThisCall(0x419050, this, apLock);
 #else
 	ThisCall(0x4A9D20, this, apLock);
+#endif
+}
+
+// GAME - 0x41E7B0
+// GECK - 0x4AB0A0
+RefActivateData* ExtraDataList::GetActivateData(TESObjectREFR* apRef) const {
+#ifdef GAME
+	return ThisCall<RefActivateData*>(0x41E7B0, this, apRef);
+#else
+	return ThisCall<RefActivateData*>(0x4AB0A0, this, apRef);
+#endif
+}
+
+// GAME - 0x41E9E0
+float ExtraDataList::GetActivateDelay(TESObjectREFR* apRef) const {
+#ifdef GAME
+	return ThisCall<float>(0x41E9E0, this, apRef);
+#else
+	const ExtraActivateRef* pData = GetExtraData<ExtraActivateRef>();
+	if (pData) {
+		const RefActivateData* pActivateData = pData->GetData(apRef);
+		if (pActivateData)
+			return pActivateData->fActivateDelay;
+	}
+	return 0.f;
+#endif
+}
+
+// GAME - 0x41EA30
+// GECK - 0x4AEE50
+void ExtraDataList::SetActivateDelay(TESObjectREFR* apRef, float afDelay) {
+#ifdef GAME
+	ThisCall(0x41EA30, this, apRef, afDelay);
+#else
+	ThisCall(0x4AEE50, this, apRef, afDelay);
+#endif
+}
+
+// GAME - 0x41EC80
+// GECK - 0x4B0900
+BSString ExtraDataList::GetActivateTextOverride() const {
+#ifdef GAME
+	return ThisCall<BSString>(0x41EC80, this);
+#else
+	return ThisCall<BSString>(0x4B0900, this);
+#endif
+}
+
+// GAME - 0x41ECE0
+// GECK - 0x4AEF30
+void ExtraDataList::SetActivateTextOverride(const char* apText) {
+#ifdef GAME
+	ThisCall(0x41ECE0, this, apText);
+#else
+	ThisCall(0x4AEF30, this, apText);
+#endif
+}
+
+// GAME - 0x41E780
+// GECK - 0x4AB080
+BSSimpleList<RefActivateData*>* ExtraDataList::GetActivateParentList() const {
+#ifdef GAME
+	return ThisCall<BSSimpleList<RefActivateData*>*>(0x41E780, this);
+#else
+	return ThisCall<BSSimpleList<RefActivateData*>*>(0x4AB080, this);
+#endif
+}
+
+// GAME - 0x41E7F0
+// GECK - 0x4AED40
+void ExtraDataList::AddActivateParent(TESObjectREFR* apRef) {
+#ifdef GAME
+	ThisCall(0x41E7F0, this, apRef);
+#else
+	ThisCall(0x4AED40, this, apRef);
+#endif
+}
+
+// GAME - 0x41E960
+// GECK - 0x4B08A0
+void ExtraDataList::RemoveActivateParent(TESObjectREFR* apRef) {
+#ifdef GAME
+	ThisCall(0x41E960, this, apRef);
+#else
+	ThisCall(0x4B08A0, this, apRef);
+#endif
+}
+
+// GAME - 0x41EDA0
+// GECK - 0x4AB190
+BSSimpleList<RefActivateData*>* ExtraDataList::GetActivateRefChildren() const {
+#ifdef GAME
+	return ThisCall<BSSimpleList<RefActivateData*>*>(0x41EDA0, this);
+#else
+	return ThisCall<BSSimpleList<RefActivateData*>*>(0x4AB190, this);
+#endif
+}
+
+// GAME - 0x41EDD0
+// GECK - 0x4AEFD0
+void ExtraDataList::AddActivateRefChild(TESObjectREFR* apRef) {
+#ifdef GAME
+	ThisCall(0x41EDD0, this, apRef);
+#else
+	ThisCall(0x4AEFD0, this, apRef);
+#endif
+}
+
+// GAME - 0x41EF20
+// GECK - 0x4B0950
+void ExtraDataList::RemoveActivateRefChild(TESObjectREFR* apRef) {
+#ifdef GAME
+	ThisCall(0x41EF20, this, apRef);
+#else
+	ThisCall(0x4B0950, this, apRef);
+#endif
+}
+
+// GAME - 0x41F020
+float ExtraDataList::GetActivateChildrenTimer() const {
+#ifdef GAME
+	return ThisCall<float>(0x41F020, this);
+#else
+	const ExtraActivateRefChildren* pData = GetExtraData<ExtraActivateRefChildren>();
+	return pData ? pData->fActivateTimer : -1.f;
+#endif
+}
+
+// GAME - 0x41EFF0
+void ExtraDataList::SetActivateChildrenTimer(float afTimer) {
+#ifdef GAME
+	ThisCall(0x41EFF0, this, afTimer);
+#else
+	ExtraActivateRefChildren* pData = GetExtraData<ExtraActivateRefChildren>();
+	if (pData)
+		pData->fActivateTimer = afTimer;
+#endif
+}
+
+#ifdef GAME
+// GAME - 0x418A40
+BSSoundHandle ExtraDataList::GetActivateLoopSound() const {
+	return ThisCall<BSSoundHandle>(0x418A40, this);
+}
+
+// GAME - 0x41A6A0
+void ExtraDataList::SetActivateLoopSound(BSSoundHandle& arSound) {
+	ThisCall(0x41A6A0, this, &arSound);
+}
+#endif
+
+// GAME - 0x41DA10
+// GECK - 0x4AAB00
+TESObjectREFR* ExtraDataList::GetEnableStateParent() const {
+#ifdef GAME
+	return ThisCall<TESObjectREFR*>(0x41DA10, this);
+#else
+	return ThisCall<TESObjectREFR*>(0x4AAB00, this);
+#endif
+}
+
+// GAME - 0x41DA40
+// GECK - 0x4AAB20
+void ExtraDataList::SetEnableStateParent(TESObjectREFR* apRef) {
+#ifdef GAME
+	ThisCall(0x41DA40, this, apRef);
+#else
+	ThisCall(0x4AAB20, this, apRef);
+#endif
+}
+
+// GAME - 0x41DB00
+// GECK - 0x4AABF0
+bool ExtraDataList::IsEnableStateInverse() const {
+#ifdef GAME
+	return ThisCall<bool>(0x41DB00, this);
+#else
+	return ThisCall<bool>(0x4AABF0, this);
+#endif
+}
+
+// GAME - 0x41DC70
+// GECK - 0x4AACB0
+void ExtraDataList::SetEnableStateParentFlags(uint8_t aucFlags) {
+#ifdef GAME
+	ThisCall(0x41DC70, this, aucFlags);
+#else
+	ThisCall(0x4AACB0, this, aucFlags);
+#endif
+}
+
+// GAME - 0x41DCA0
+// GECK - 0x4AACD0
+BSSimpleList<TESObjectREFR*>* ExtraDataList::GetEnableStateChildren() const {
+#ifdef GAME
+	return ThisCall<BSSimpleList<TESObjectREFR*>*>(0x41DCA0, this);
+#else
+	return ThisCall<BSSimpleList<TESObjectREFR*>*>(0x4AACD0, this);
+#endif
+}
+
+// GAME - 0x41DCD0
+// GECK - 0x4AEBE0
+void ExtraDataList::AddEnableStateChild(TESObjectREFR* apRef) {
+#ifdef GAME
+	ThisCall(0x41DCD0, this, apRef);
+#else
+	ThisCall(0x4AEBE0, this, apRef);
+#endif
+}
+
+// GAME - 0x41DDA0
+// GECK - 0x4B0800
+void ExtraDataList::RemoveEnableStateChild(TESObjectREFR* apRef) {
+#ifdef GAME
+	ThisCall(0x41DDA0, this, apRef);
+#else
+	ThisCall(0x4B0800, this, apRef);
 #endif
 }

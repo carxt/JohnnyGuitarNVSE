@@ -3,6 +3,7 @@
 #include "BaseExtraList.hpp"
 #include "BSSimpleList.hpp"
 #include "BSStringT.hpp"
+#include "BSSoundHandle.hpp"
 
 class AlchemyItem;
 class TESForm;
@@ -17,6 +18,8 @@ class TESImageSpace;
 class TESActorBase;
 class InventoryChanges;
 class LockData;
+class TESObjectREFR;
+class RefActivateData;
 
 class ExtraDataList : public BaseExtraList {
 public:
@@ -75,8 +78,42 @@ public:
 	InventoryChanges* GetContainerChanges() const;
 	void SetContainerChanges(InventoryChanges* apChanges);
 
-	void SetLock(LockData* apLock);
 	LockData* GetLock() const;
+	void SetLock(LockData* apLock);
+
+	RefActivateData* GetActivateData(TESObjectREFR* apRef) const;
+
+	float GetActivateDelay(TESObjectREFR* apRef) const;
+	void SetActivateDelay(TESObjectREFR* apRef, float afDelay);
+
+	BSString GetActivateTextOverride() const;
+	void SetActivateTextOverride(const char* apText);
+
+	BSSimpleList<RefActivateData*>* GetActivateParentList() const;
+	void AddActivateParent(TESObjectREFR* apRef);
+	void RemoveActivateParent(TESObjectREFR* apRef);
+
+	BSSimpleList<RefActivateData*>* GetActivateRefChildren() const;
+	void AddActivateRefChild(TESObjectREFR* apRef);
+	void RemoveActivateRefChild(TESObjectREFR* apRef);
+
+	float GetActivateChildrenTimer() const;
+	void SetActivateChildrenTimer(float afTimer);
+
+#ifdef GAME
+	BSSoundHandle GetActivateLoopSound() const;
+	void SetActivateLoopSound(BSSoundHandle& arSound);
+#endif
+
+	TESObjectREFR* GetEnableStateParent() const;
+	void SetEnableStateParent(TESObjectREFR* apRef);
+
+	bool IsEnableStateInverse() const;
+	void SetEnableStateParentFlags(uint8_t aucFlags);
+
+	BSSimpleList<TESObjectREFR*>* GetEnableStateChildren() const;
+	void AddEnableStateChild(TESObjectREFR* apRef);
+	void RemoveEnableStateChild(TESObjectREFR* apRef);
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);
