@@ -52,152 +52,165 @@ const char* TESForm::GetFormTypeString() const {
 
 // GAME - 0x460250
 bool TESForm::GetMaster() const {
-	return uiFormFlags.IsSet(FormFlags::MASTER);
+	return uiFormFlags.IsSet<FormFlags::MASTER> ();
 }
 
 // GAME - 0x4844F0
+// GECK - 0x4F7C60
 void TESForm::SetMaster(bool abVal) {
-	uiFormFlags.Set(FormFlags::MASTER, abVal);
+#ifdef GAME
+	ThisCall(0x4844F0, this, abVal);
+#else
+	ThisCall(0x4F7C60, this, abVal);
+#endif
 }
 
 // GAME - 0x460340
 bool TESForm::GetAltered() const {
-	return uiFormFlags.IsSet(FormFlags::ALTERED);
+	return uiFormFlags.IsSet<FormFlags::ALTERED>();
 }
 
 // GAME - 0x4013E0
 bool TESForm::GetInitialized() const {
-	return uiFormFlags.IsSet(FormFlags::INITIALIZED);
+	return uiFormFlags.IsSet<FormFlags::INITIALIZED>();
 }
 
 // GAME - 0x484AB0
 void TESForm::SetInitialized(bool abVal) {
-	uiFormFlags.Set(FormFlags::INITIALIZED, abVal);
+	uiFormFlags.Set<FormFlags::INITIALIZED>(abVal);
 }
 
 // GAME - 0x50D4A0
 bool TESForm::GetNoCollision() const {
-	return uiFormFlags.IsSet(FormFlags::NO_COLLISION);
+	return uiFormFlags.IsSet<FormFlags::NO_COLLISION>();
 }
 
 // GAME - 0x693EF0
+// GECK - 0x693EF0
 void TESForm::SetNoCollision(bool abVal) {
-	uiFormFlags.Set(FormFlags::NO_COLLISION, abVal);
+	uiFormFlags.Set<FormFlags::NO_COLLISION>(abVal);
 }
 
 // GAME - 0x440D80
 bool TESForm::GetDeleted() const {
-	return uiFormFlags.IsSet(FormFlags::DELETED);
+	return uiFormFlags.IsSet<FormFlags::DELETED>();
 }
 
 // GAME - 0x549580
 bool TESForm::GetTreeLOD() const {
 	assert(GetFormType() == FORM_TYPE::TESObjectTREE);
-	return uiFormFlags.IsSet(FormFlags::TREE_LOD);
+	return uiFormFlags.IsSet<FormFlags::TREE_LOD>();
 }
 
 void TESForm::SetTreeLOD(bool abVal) {
 	assert(GetFormType() == FORM_TYPE::TESObjectTREE);
-	uiFormFlags.Set(FormFlags::TREE_LOD, abVal);
+	uiFormFlags.Set<FormFlags::TREE_LOD>(abVal);
 }
 
 // GAME - 0x549580
 bool TESForm::GetInPlaceableWater() const {
 	assert(GetFormType() != FORM_TYPE::TESObjectDOOR);
-	return uiFormFlags.IsSet(FormFlags::IN_PLACEABLE_WATER);
+	return uiFormFlags.IsSet<FormFlags::IN_PLACEABLE_WATER>();
 }
 
 // GAME - 0x484A10
 void TESForm::SetInPlaceableWater(bool abVal) {
 	assert(GetFormType() != FORM_TYPE::TESObjectDOOR);
-	uiFormFlags.Set(FormFlags::IN_PLACEABLE_WATER, abVal);
 #ifdef GAME
-	AddChange(0x1);
+	ThisCall(0x484A10, this, abVal);
+#else
+	uiFormFlags.Set<FormFlags::IN_PLACEABLE_WATER>(abVal);
 #endif
 }
 
 // GAME - 0x549580
 bool TESForm::GetBorderRegion() const {
 	assert(GetFormType() == FORM_TYPE::TESRegion);
-	return uiFormFlags.IsSet(FormFlags::BORDER_REGION);
+	return uiFormFlags.IsSet<FormFlags::BORDER_REGION>();
 }
 
 void TESForm::SetBorderRegion(bool abVal) {
 	assert(GetFormType() == FORM_TYPE::TESRegion);
-	uiFormFlags.Set(FormFlags::BORDER_REGION, abVal);
+	uiFormFlags.Set<FormFlags::BORDER_REGION>(abVal);
 }
 
 // GAME - 0x448A20
 bool TESForm::GetFireOff() const {
-	return uiFormFlags.IsSet(FormFlags::FIRE_OFF);
+	return uiFormFlags.IsSet<FormFlags::FIRE_OFF>();
 }
 
 // GAME - 0x484A70
+// GECK - 0x4F7E80
 void TESForm::SetFireOff(bool abVal) {
-	uiFormFlags.Set(FormFlags::FIRE_OFF, abVal);
+#ifdef GAME
+	ThisCall(0x484A70, this, abVal);
+#else
+	ThisCall(0x4F7E80, this, abVal);
+#endif
 }
 
 // GAME - 0x440DA0
 bool TESForm::GetDisabled() const {
 	assert(IsReference());
-	return uiFormFlags.IsSet(FormFlags::DISABLED);
+	return uiFormFlags.IsSet<FormFlags::DISABLED>();
 }
 
 // GAME - 0x484AF0
 void TESForm::SetDisabled(bool abVal) {
 	assert(IsReference());
-	uiFormFlags.Set(FormFlags::DISABLED, abVal);
 #ifdef GAME
-	AddChange(0x1);
+	ThisCall(0x484AF0, this, abVal);
+#else
+	uiFormFlags.Set<FormFlags::DISABLED>(abVal);
 #endif
 }
 
 // GAME - 0x508D70
 bool TESForm::GetEmpty() const {
 	assert(GetFormType() == FORM_TYPE::TESFlora);
-	return uiFormFlags.IsSet(FormFlags::EMPTY);
+	return uiFormFlags.IsSet<FormFlags::EMPTY>();
 }
 
 // GAME - 0x484580
 // GECK - N/A
 void TESForm::SetEmpty(bool abVal) {
-#ifdef GAME
 	assert(GetFormType() == FORM_TYPE::TESFlora);
-	if (abVal) {
-		AddChange(0x200000);
-		uiFormFlags.Set(FormFlags::EMPTY);
-	}
-	else {
-		RemoveChange(0x200000);
-		uiFormFlags.Clear(FormFlags::EMPTY);
-	}
+#ifdef GAME
+	ThisCall(0x484580, this, abVal);
+#else
+	uiFormFlags.Set<FormFlags::EMPTY>(abVal);
 #endif
 }
 
 // GAME - 0x508D70
 bool TESForm::GetResetDestruct() const {
-	return uiFormFlags.IsSet(FormFlags::RESET_DESTRUCT);
+	return uiFormFlags.IsSet<FormFlags::RESET_DESTRUCT>();
 }
 
 // GAME - 0x484610
 void TESForm::SetResetDestruct(bool abVal) {
-	uiFormFlags.Set(FormFlags::RESET_DESTRUCT, abVal);
+	uiFormFlags.Set<FormFlags::RESET_DESTRUCT>(abVal);
 }
 
 // GAME - 0x508D70
 bool TESForm::GetHasResults() const {
 	assert(GetFormType() == FORM_TYPE::TESTopicInfo || GetFormType() == FORM_TYPE::TESTopic);
-	return uiFormFlags.IsSet(FormFlags::HAS_RESULTS);
+	return uiFormFlags.IsSet<FormFlags::HAS_RESULTS>();
 }
 
+// GECK - 0x4F7CA0
 void TESForm::SetHasResults(bool abVal) {
 	assert(GetFormType() == FORM_TYPE::TESTopicInfo || GetFormType() == FORM_TYPE::TESTopic);
-	uiFormFlags.Set(FormFlags::HAS_RESULTS, abVal);
+#ifdef GAME
+	uiFormFlags.Set<FormFlags::HAS_RESULTS>(abVal);
+#else
+	ThisCall(0x4F7CA0, this, abVal);
+#endif
 }
 
 // GAME - 0x4077C0
 bool TESForm::GetTemporary() const {
-	return uiFormFlags.IsSet(FormFlags::TEMPORARY);
+	return uiFormFlags.IsSet<FormFlags::TEMPORARY>();
 }
 
 // GAME - 0x484490
@@ -213,136 +226,174 @@ void TESForm::SetTemporary() {
 // GAME - 0x564E40
 bool TESForm::GetMustBeVisibleDistant() const {
 	assert(!IsReference());
-	return uiFormFlags.IsSet(FormFlags::VISIBLE_DISTANT);
+	return uiFormFlags.IsSet<FormFlags::VISIBLE_DISTANT>();
 }
 
 void TESForm::SetMustBeVisibleDistant(bool abVal) {
 	assert(!IsReference());
-	uiFormFlags.Set(FormFlags::VISIBLE_DISTANT, abVal);
+	uiFormFlags.Set<FormFlags::VISIBLE_DISTANT>(abVal);
 }
 
 // GAME - 0x576D30
 bool TESForm::IsStillLoading() const {
-	return uiFormFlags.IsSet(FormFlags::STILL_LOADING);
+	return uiFormFlags.IsSet<FormFlags::STILL_LOADING>();
 }
 
 // GAME - 0x46A010
 void TESForm::SetStillLoading(bool abVal) {
-	uiFormFlags.Set(FormFlags::STILL_LOADING, abVal);
+#ifdef GAME
+	ThisCall(0x46A010, this, abVal);
+#else
+	uiFormFlags.Set<FormFlags::STILL_LOADING>(abVal);
+#endif
 }
 
 bool TESForm::GetBeingDropped() const {
 	assert(IsReference());
-	return uiFormFlags.IsSet(FormFlags::BEING_DROPPED);
+	return uiFormFlags.IsSet<FormFlags::BEING_DROPPED>();
 }
 
 // GAME - 0x954910
 void TESForm::SetBeingDropped(bool abVal) {
 	assert(IsReference());
-	uiFormFlags.Set(FormFlags::BEING_DROPPED, abVal);
+#ifdef GAME
+	ThisCall(0x954910, this, abVal);
+#else
+	uiFormFlags.Set<FormFlags::BEING_DROPPED>(abVal);
+#endif
 }
 
 // GAME - 0x477BA0
 bool TESForm::GetDestroyed() const {
 	assert(IsReference());	
-	return uiFormFlags.IsSet(FormFlags::DESTROYED);
+	return uiFormFlags.IsSet<FormFlags::DESTROYED>();
 }
 
 // GAME - 0x484650
 void TESForm::SetDestroyed(bool abVal) {
 	assert(IsReference());
-	uiFormFlags.Set(FormFlags::DESTROYED, abVal);
 #ifdef GAME
-	AddChange(0x1);
+	ThisCall(0x484650, this, abVal);
+#else
+	uiFormFlags.Set<FormFlags::DESTROYED>(abVal);
 #endif
 }
 
 // GAME - 0x452370
 bool TESForm::GetDestructible() const {
 	assert(IsReference());
-	return uiFormFlags.IsSet(FormFlags::DESTRUCTIBLE);
+	return uiFormFlags.IsSet<FormFlags::DESTRUCTIBLE>();
 }
 
 // GAME - 0x4846A0
 void TESForm::SetDestructible(bool abVal) {
 	assert(IsReference());
-	uiFormFlags.Set(FormFlags::DESTRUCTIBLE, abVal);
+#ifdef GAME
+	ThisCall(0x4846A0, this, abVal);
+#else
+	uiFormFlags.Set<FormFlags::DESTRUCTIBLE>(abVal);
+#endif
 }
 
 // GAME - 0x401210
 bool TESForm::GetNoAIAcquire() const {
 	assert(IsReference());
-	return uiFormFlags.IsSet(FormFlags::NO_AI_ACQUIRE);
+	return uiFormFlags.IsSet<FormFlags::NO_AI_ACQUIRE>();
 }
 
+// GECK - 0x4F7E60
 void TESForm::SetNoAIAcquire(bool abVal) {
 	assert(IsReference());
-	uiFormFlags.Set(FormFlags::NO_AI_ACQUIRE, abVal);
+#ifdef GAME
+	uiFormFlags.Set<FormFlags::NO_AI_ACQUIRE>(abVal);
+#else
+	ThisCall(0x4F7E60, this, abVal);
+#endif
 }
 
 // GAME - 0x5760E0
 bool TESForm::GetVATSTarget() const {
 	assert(IsReference());
-	return uiFormFlags.IsSet(FormFlags::VATS_TARGET_OVERRIDE);
+	return uiFormFlags.IsSet<FormFlags::VATS_TARGET_OVERRIDE>();
 }
 
 // GAME - 0x4846E0
 void TESForm::SetVATSTarget(bool abVal) {
 	assert(IsReference());
-	uiFormFlags.Set(FormFlags::VATS_TARGET_OVERRIDE, abVal);
 #ifdef GAME
-	AddChange(0x1);
+	ThisCall(0x4846E0, this, abVal);
+#else
+	uiFormFlags.Set<FormFlags::VATS_TARGET_OVERRIDE>(abVal);
 #endif
 }
 
 // GAME - 0x56C760
 bool TESForm::GetDisableFade() const {
 	assert(IsReference());
-	return uiFormFlags.IsSet(FormFlags::DISABLE_FADE);
+	return uiFormFlags.IsSet<FormFlags::DISABLE_FADE>();
 }
 
 // GAME - 0x56C780
 void TESForm::SetDisableFade(bool abVal) {
 	assert(IsReference());
-	uiFormFlags.Set(FormFlags::DISABLE_FADE, abVal);
+#ifdef GAME
+	ThisCall(0x56C780, this, abVal);
+#else
+	uiFormFlags.Set<FormFlags::DISABLE_FADE>(abVal);
+#endif
 }
 
 // GAME - 0x548700
 bool TESForm::GetReflectedByAutoWater() const {
 	assert(IsReference());
-	return uiFormFlags.IsSet(FormFlags::REFLECTED_BY_AUTO_WATER);
+	return uiFormFlags.IsSet<FormFlags::REFLECTED_BY_AUTO_WATER>();
 }
 
+// GECK - 0x4F7EA0
 void TESForm::SetReflectedByAutoWater(bool abVal) {
 	assert(IsReference());
-	uiFormFlags.Set(FormFlags::REFLECTED_BY_AUTO_WATER, abVal);
+#ifdef GAME
+	uiFormFlags.Set<FormFlags::REFLECTED_BY_AUTO_WATER>(abVal);
+#else
+	ThisCall(0x4F7EA0, this, abVal);
+#endif
 }
 
 // GAME - 0x885A30
 bool TESForm::GetRefractedByAutoWater() const {
 	assert(IsReference());
-	return uiFormFlags.IsSet(FormFlags::REFRACTED_BY_AUTO_WATER);
+	return uiFormFlags.IsSet<FormFlags::REFRACTED_BY_AUTO_WATER>();
 }
 
+// GECK - 0x4F7EC0
 void TESForm::SetRefractedByAutoWater(bool abVal) {
 	assert(IsReference());
-	uiFormFlags.Set(FormFlags::REFRACTED_BY_AUTO_WATER, abVal);
+#ifdef GAME
+	uiFormFlags.Set<FormFlags::REFRACTED_BY_AUTO_WATER>(abVal);
+#else
+	ThisCall(0x4F7EC0, this, abVal);
+#endif
 }
 
 // GAME - 0x885A30
 bool TESForm::GetChildCanUse() const {
 	assert(GetFormType() == FORM_TYPE::TESObjectACTI || GetFormType() == FORM_TYPE::TESFurniture || GetFormType() == FORM_TYPE::BGSIdleMarker);
-	return uiFormFlags.IsSet(FormFlags::CHILD_CAN_USE);
+	return uiFormFlags.IsSet<FormFlags::CHILD_CAN_USE>();
 }
 
 void TESForm::SetChildCanUse(bool abVal) {
 	assert(GetFormType() == FORM_TYPE::TESObjectACTI || GetFormType() == FORM_TYPE::TESFurniture || GetFormType() == FORM_TYPE::BGSIdleMarker);
-	uiFormFlags.Set(FormFlags::CHILD_CAN_USE, abVal);
+	uiFormFlags.Set<FormFlags::CHILD_CAN_USE>(abVal);
 }
 
 void TESForm::SetContinuousBroadcast(bool abVal) {
 	assert(GetFormType() == FORM_TYPE::BGSTalkingActivator);
-	uiFormFlags.Set(FormFlags::CONTINUOUS_BROADCAST, abVal);
+	uiFormFlags.Set<FormFlags::CONTINUOUS_BROADCAST>(abVal);
+}
+
+// GAME - 0x437B90
+bool TESForm::GetDisabledOrDeleted() const {
+	return uiFormFlags.IsSet(FormFlags::DISABLED | FormFlags::DELETED);
 }
 
 // GAME - 0x484E60
@@ -367,7 +418,11 @@ TESFile* TESForm::GetOwnerMaster() const {
 
 // GAME - 0x485BC0
 FormID TESForm::GetFormIDWithoutIndex() const {
+#ifdef GAME
+	return ThisCall<FormID>(0x485BC0, this);
+#else
 	return FormID_View(uiFormID).GetID();
+#endif
 }
 
 // GAME - 0x5504E0
