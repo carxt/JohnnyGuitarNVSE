@@ -1279,6 +1279,9 @@
     <ClCompile Include="internal\Game\Bethesda\SceneGraph.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\GarbageCollectorTweaks.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\ExtraActivateRef.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
@@ -3498,6 +3501,9 @@
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\SceneGraph.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\GarbageCollectorTweaks.hpp">
+      <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\ExtraActivateRefChildren.hpp">
       <Filter>internal\Game\Bethesda</Filter>
