@@ -698,6 +698,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ExtraActivateRef.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ExtraDataList.cpp" />
     <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp" />
     <ClCompile Include="internal\Game\Bethesda\FurnitureMark.cpp" />
@@ -1778,12 +1779,14 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\ExtraActivateRef.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ExtraActivateRefChildren.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraCellAcousticSpace.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraCombatStyle.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraContainerChanges.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraDataList.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraDetachTime.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraDismemberedLimbs.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ExtraEnableStateParent.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraEncounterZone.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraFactionChanges.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraHotkey.hpp" />

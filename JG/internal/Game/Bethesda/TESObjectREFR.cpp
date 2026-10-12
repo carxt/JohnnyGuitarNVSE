@@ -749,6 +749,26 @@ LockData* TESObjectREFR::GetLock() const {
 #endif
 }
 
+// GAME - 0x56A9F0
+// GECK - 0x63E6E0
+TESObjectREFR* TESObjectREFR::GetEnableStateParent() const {
+#ifdef GAME
+	return ThisCall<TESObjectREFR*>(0x56A9F0, this);
+#else
+	return ThisCall<TESObjectREFR*>(0x63E6E0, this);
+#endif
+}
+
+// GAME - 0x56AA10
+// GECK - 0x6457A0
+void TESObjectREFR::SetEnableStateParent(TESObjectREFR* apParent) {
+#ifdef GAME
+	ThisCall(0x56AA10, this, apParent);
+#else
+	ThisCall(0x6457A0, this, apParent);
+#endif
+}
+
 // GAME - 0x5656D0
 // GECK - 0x63DCC0
 bool TESObjectREFR::HasScript() const {
