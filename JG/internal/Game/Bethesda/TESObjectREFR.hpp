@@ -326,6 +326,9 @@ public:
 	LockData* GetMyLock() const;
 	LockData* GetLock() const;
 
+	TESObjectREFR* GetEnableStateParent() const;
+	void SetEnableStateParent(TESObjectREFR* apParent);
+
 	bool HasScript() const;
 
 #ifdef GAME
