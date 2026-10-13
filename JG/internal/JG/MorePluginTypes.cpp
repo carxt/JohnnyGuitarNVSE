@@ -326,15 +326,7 @@ namespace MorePluginTypes {
 			}
 		};
 
-		const char cExtensionSearchQueryWildcard[] = "*.es*";
-		const char cExtensionSearchQuery[] = ".es";
-
 		void InitHooks() {
-			// Load all files with extensions that start with ".es"
-			// Feel free to come up with your own weird extension names, I think only the mod managers and xEdit will complain
-			HookUtils::SafeWrite8(0x4625B7 + 6, 0x1);
-			HookUtils::SafeWrite32(0x4625F8 + 1, uint32_t(&cExtensionSearchQueryWildcard));
-			HookUtils::SafeWrite32(0xAF47C4 + 1, uint32_t(&cExtensionSearchQuery));
 
 			kDataHandlerConstructorDetour.ReplaceCall(0x44FF95, &TESDataHandlerEx::InitializeDataHandler);
 
