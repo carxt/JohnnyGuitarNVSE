@@ -8,6 +8,7 @@
 #include "TESForm.hpp"
 #include "TESFullName.hpp"
 #include "TESTexture.hpp"
+#include "BSSpinLock.hpp"
 #include "Gamebryo/NiTMap.hpp"
 
 class NiNode;

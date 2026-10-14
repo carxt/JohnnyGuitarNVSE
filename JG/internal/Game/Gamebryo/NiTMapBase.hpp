@@ -1,11 +1,11 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
 typedef void* NiTMapIterator;
 
 template <class T_Key, class T_Data> 
-class SPEC_EMPTY_BASES NiTMapItem : public NiMemObject {
+class SPEC_EMPTY_BASES NiTMapItem : public BSMemObject {
 public:
     NiTMapItem* m_pkNext;
     T_Key       m_key;
@@ -13,7 +13,7 @@ public:
 };
 
 template <class Allocator, class T_Key, class T_Data>
-class SPEC_EMPTY_BASES NiTMapBase : public NiMemObject {
+class SPEC_EMPTY_BASES NiTMapBase : public BSMemObject {
 public:
     struct AntiBloatAllocator : public Allocator {
         uint32_t m_uiCount;

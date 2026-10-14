@@ -1,6 +1,7 @@
 #pragma once
 
 #include "NiTStringTemplateMap.hpp"
+#include "NiMemory.hpp"
 
 // GAME - 0x4055D0
 template<class T_Parent, class T_Data>
@@ -17,7 +18,7 @@ inline NiTStringTemplateMap<T_Parent, T_Data>::~NiTStringTemplateMap() {
 			while (pItem) {
 				NiTMapItem<const char*, T_Data>* pSave = pItem;
 				pSave = pItem->m_pkNext;
-				NiFree((char*)pSave->m_key);
+				NiFree(const_cast<char*>(pSave->m_key));
 			}
 		}
 	}
@@ -46,7 +47,7 @@ inline void NiTStringTemplateMap<T_Parent, T_Data>::SetValue(NiTMapItem<const ch
 	if (m_bCopy) {
 		uint32_t uiLen = strlen(apKey) + 1;
 		apItem->m_key = NiAlloc<char>(uiLen);
-		strcpy_s((char*)apItem->m_key, uiLen, apKey);
+		strcpy_s(const_cast<char*>(apItem->m_key), uiLen, apKey);
 	}
 	else {
 		apItem->m_key = apKey;
@@ -58,7 +59,7 @@ inline void NiTStringTemplateMap<T_Parent, T_Data>::SetValue(NiTMapItem<const ch
 template<class T_Parent, class T_Data>
 inline void NiTStringTemplateMap<T_Parent, T_Data>::ClearValue(NiTMapItem<const char*, T_Data>* apItem) {
 	if (m_bCopy) {
-		NiFree((char*)apItem->m_key);
+		NiFree(const_cast<char*>(apItem->m_key));
 	}
 }
 

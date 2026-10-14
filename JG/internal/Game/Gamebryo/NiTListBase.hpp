@@ -1,11 +1,11 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
 typedef void* NiTListIterator;
 
 template <class T_Data>
-class SPEC_EMPTY_BASES NiTListItem : public NiMemObject {
+class SPEC_EMPTY_BASES NiTListItem : public BSMemObject {
 public:
 	NiTListItem* m_pkNext;
 	NiTListItem* m_pkPrev;
@@ -13,7 +13,7 @@ public:
 };
 
 template <class Allocator, class T_Data>
-class SPEC_EMPTY_BASES NiTListBase : public NiMemObject {
+class SPEC_EMPTY_BASES NiTListBase : public BSMemObject {
 public:
     NiTListBase();
     ~NiTListBase();

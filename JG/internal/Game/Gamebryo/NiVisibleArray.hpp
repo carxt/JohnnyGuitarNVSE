@@ -1,10 +1,10 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
 class NiGeometry;
 
-class SPEC_EMPTY_BASES NiVisibleArray : public NiMemObject {
+class SPEC_EMPTY_BASES NiVisibleArray : public BSMemObject {
 public:
 	NiGeometry**	m_ppkArray;
 	uint32_t		m_uiCurrentSize;

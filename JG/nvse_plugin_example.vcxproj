@@ -2337,7 +2337,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiTMap.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTMapBase.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTNewInterface.hpp" />
-    <ClInclude Include="internal\Game\Gamebryo\NiTObjectAllocator.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTObjectArray.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTObjectList.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTObjectSet.hpp" />
@@ -2668,12 +2667,16 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <None Include="internal\Game\Gamebryo\NiPoint4.inl" />
     <None Include="internal\Game\Gamebryo\NiQuaternion.inl" />
     <None Include="internal\Game\Gamebryo\NiTArray.inl" />
+    <None Include="internal\Game\Gamebryo\NiTDefaultAllocator.inl" />
     <None Include="internal\Game\Gamebryo\NiTFixedStringMap.inl" />
     <None Include="internal\Game\Gamebryo\NiTFixedStringMapBase.inl" />
     <None Include="internal\Game\Gamebryo\NiTLargeArray.inl" />
     <None Include="internal\Game\Gamebryo\NiTListBase.inl" />
+    <None Include="internal\Game\Gamebryo\NiTMallocInterface.inl" />
     <None Include="internal\Game\Gamebryo\NiTMap.inl" />
     <None Include="internal\Game\Gamebryo\NiTMapBase.inl" />
+    <None Include="internal\Game\Gamebryo\NiTNewInterface.inl" />
+    <None Include="internal\Game\Gamebryo\NiTPointerAllocator.inl" />
     <None Include="internal\Game\Gamebryo\NiTPointerListBase.inl" />
     <None Include="internal\Game\Gamebryo\NiTPointerMap.inl" />
     <None Include="internal\Game\Gamebryo\NiTStringTemplateMap.inl" />

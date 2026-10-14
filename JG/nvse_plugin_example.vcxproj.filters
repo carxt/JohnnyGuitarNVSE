@@ -1459,9 +1459,6 @@
     <ClInclude Include="internal\Game\Gamebryo\NiTNewInterface.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Gamebryo\NiTObjectAllocator.hpp">
-      <Filter>internal\Game\Gamebryo</Filter>
-    </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiTObjectArray.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
@@ -3594,6 +3591,18 @@
     </None>
     <None Include="internal\Game\Bethesda\BSTStaticFreeList.inl">
       <Filter>internal\Game\Bethesda</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiTPointerAllocator.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiTDefaultAllocator.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiTMallocInterface.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiTNewInterface.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
     </None>
   </ItemGroup>
 </Project>

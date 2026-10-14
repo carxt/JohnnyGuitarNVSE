@@ -3,7 +3,7 @@
 #include "NiTFixedStringMap.hpp"
 
 template<class T_Data>
-inline NiTFixedStringMap<T_Data>::NiTFixedStringMap(uint32_t auiHashSize) : NiTFixedStringMapBase<NiTDefaultAllocator<T_Data>, T_Data>(auiHashSize) {
+inline NiTFixedStringMap<T_Data>::NiTFixedStringMap(uint32_t auiHashSize) : NiTFixedStringMapBase<NiTDefaultAllocator<NiTMapItem<NiFixedString, T_Data>>, T_Data>(auiHashSize) {
 }
 
 // GAME - 0xA2EB40
