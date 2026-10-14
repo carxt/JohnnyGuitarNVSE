@@ -1629,6 +1629,8 @@ namespace MorePluginTypes {
 		}
 		bValid = true;
 		kDetour.ReplaceCall(0x86A91A, InitDelayedHooks);
+		InitJIPHooks();
+		InitCommandHooks();
 	}
 
 }

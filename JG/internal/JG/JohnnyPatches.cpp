@@ -283,8 +283,6 @@ namespace JohnnyPatches {
 		DialogueResponseOverride::Install();
 
 		NamedSpellLights::Install();
-
-		MorePluginTypes::Install();
 #endif
 		NewNiObjects::Install();
 	}
@@ -294,8 +292,7 @@ namespace JohnnyPatches {
 		if (bUseFormSkeletons)
 			FormSkeletons::Install();
 
-		MorePluginTypes::InitJIPHooks();
-		MorePluginTypes::InitCommandHooks();
+		MorePluginTypes::Install();
 #endif
 		if (bBSAUpgrade)
 			BSAUpgrade::Install();
