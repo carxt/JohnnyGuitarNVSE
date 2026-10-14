@@ -65,8 +65,8 @@ extern NVSECommandTableInterface* g_cmdTableInterface;
 #ifdef GAME
 extern NVSEScriptInterface* g_scriptInterface;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
-extern InventoryRef* (*InventoryRefGetForID)(FormID auiFormID);
-extern TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
+extern _InventoryReferenceGetForRefID InventoryRefGetForID;
+extern _InventoryReferenceCreateEntry InventoryRefCreateEntry;
 #endif
 
 namespace {

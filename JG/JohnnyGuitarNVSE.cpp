@@ -27,8 +27,8 @@ BS_ALLOCATORS
 IDebugLog	   gLog(JohnnyPluginData::JG_LOG_PATH);
 
 #ifdef GAME
-InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
-TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
+_InventoryReferenceGetForRefID InventoryRefGetForID;
+_InventoryReferenceCreateEntry InventoryRefCreateEntry;
 
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
@@ -58,8 +58,8 @@ void OnNVSELoadInit(const NVSEInterface* apNVSE) {
 	g_arrInterface = static_cast<NVSEArrayVarInterface*>(apNVSE->QueryInterface(kInterface_ArrayVar));
 	g_strInterface = static_cast<NVSEStringVarInterface*>(apNVSE->QueryInterface(kInterface_StringVar));
 
-	InventoryRefGetForID = static_cast<InventoryRef * (*)(uint32_t)>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
-	InventoryRefCreateEntry = static_cast<TESObjectREFR * (__stdcall*)(TESObjectREFR*, TESForm*, uint32_t, ExtraDataList*)>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreateEntry));
+	InventoryRefGetForID = static_cast<_InventoryReferenceGetForRefID>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
+	InventoryRefCreateEntry = static_cast<_InventoryReferenceCreateEntry>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreateEntry));
 	CaptureLambdaVars = static_cast<_CaptureLambdaVars>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
 	UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
 	ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
