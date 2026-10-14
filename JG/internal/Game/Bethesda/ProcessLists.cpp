@@ -18,3 +18,8 @@ ProcessArray* ProcessLists::GetProcessArray() {
 bool ProcessLists::AreHostileActorsNear(bool abInterior) {
 	return ThisCall<bool>(0x9764A0, this, abInterior);
 }
+
+// GAME - 0x96F400
+void ProcessLists::RemoveActorFromTempChangeList(Actor* apActor) {
+	ThisCall(0x96F400, this, apActor);
+}
