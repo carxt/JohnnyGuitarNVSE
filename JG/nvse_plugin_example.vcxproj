@@ -701,6 +701,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\ExtraActivateRef.cpp" />
     <ClCompile Include="internal\Game\Bethesda\ExtraDataList.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\FalloutRadio.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp" />
     <ClCompile Include="internal\Game\Bethesda\FurnitureMark.cpp" />
     <ClCompile Include="internal\Game\Bethesda\GameSettingCollection.cpp" />

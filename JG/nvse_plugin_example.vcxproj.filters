@@ -1282,6 +1282,9 @@
     <ClCompile Include="internal\Game\Bethesda\ExtraActivateRef.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\FalloutRadio.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BSFaceGenManager.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
