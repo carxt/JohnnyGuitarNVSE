@@ -2317,3 +2317,30 @@ struct _LODMultType {
 	};
 };
 using LOD_MULT_TYPE = _LODMultType::Type;
+
+struct _FaceGenDataType {
+	enum Type {
+		GEOMETRY	= 0,
+		TEXTURE		= 1,
+		COUNT		= 2,
+	};
+};
+using FaceGenDataType = _FaceGenDataType::Type;
+
+struct _FaceGenSymmetryType {
+	enum Type {
+		SYMMMETRIC	= 0,
+		ASYMMETRIC	= 1,
+		COUNT		= 2,
+	};
+};
+using FaceGenSymmetryType = _FaceGenSymmetryType::Type;
+
+struct _FaceGenAttributeType {
+	enum Type {
+		AGE			= 0,
+		GENDER		= 1,
+		COUNT		= 2,
+	};
+};
+using FaceGenAttributeType = _FaceGenAttributeType::Type;

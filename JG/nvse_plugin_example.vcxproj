@@ -599,6 +599,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\BSDirectoryEntry.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSExtraData.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\BSFaceGenManager.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSFadeNode.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSFile.cpp" />
     <ClCompile Include="internal\Game\Bethesda\BSFileEntry.cpp" />
@@ -1593,6 +1594,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BSDirectoryEntry.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSEnums.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSExtraData.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\BSFaceGenManager.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSFadeNode.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSFile.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSFileEntry.hpp" />
