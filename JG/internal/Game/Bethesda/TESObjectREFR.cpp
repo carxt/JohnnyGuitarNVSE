@@ -769,6 +769,16 @@ void TESObjectREFR::SetEnableStateParent(TESObjectREFR* apParent) {
 #endif
 }
 
+// GAME - 0x569080
+// GECK - 0x63E450
+AudioMarkerData* TESObjectREFR::GetAudioMarkerData() const {
+#ifdef GAME
+	return ThisCall<AudioMarkerData*>(0x569080, this);
+#else
+	return ThisCall<AudioMarkerData*>(0x63E450, this);
+#endif
+}
+
 // GAME - 0x5656D0
 // GECK - 0x63DCC0
 bool TESObjectREFR::HasScript() const {

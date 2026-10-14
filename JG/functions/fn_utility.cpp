@@ -50,7 +50,6 @@ bool Cmd_NullArgs_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-
 bool Cmd_GetAllGameRadios_Execute(COMMAND_ARGS) {
 	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	auto pIter = BGSTalkingActivator::kAllRadioStations->GetHead();
@@ -90,9 +89,10 @@ bool Cmd_DumpIconMap_Execute(COMMAND_ARGS) {
 
 bool Cmd_UpdateCrosshairPrompt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	CdeclCall(0x778B10);
+	HUDMainMenu::RefreshInfoForRef();
 	return true;
 }
+
 enum EType {
 	kSetting_Bool = 0,
 	kSetting_c,
@@ -272,14 +272,16 @@ bool Cmd_GetSequenceAnimGroup_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetFormOverrideIndex_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESForm* form = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) {
-		TESFile* pFile = form->GetFile(-1);
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && pForm) {
+		TESFile* pFile = pForm->GetFile(-1);
 		if (pFile)
 			*result = pFile->ucCompileIndex;
 		else
 			*result = 0xFF;
-		if (Script::GetConsoleOuput()) Interface::PrintLine("GetFormOverrideIndex >> %.f", *result);
+
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetFormOverrideIndex >> %.f", *result);
 	}
 	return true;
 }
@@ -329,8 +331,8 @@ bool Cmd_GetLinearVelocity_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetDefaultHeapSize_Execute(COMMAND_ARGS) {
-	uint32_t heapSize = *(reinterpret_cast<FormID*>(0x866E9F + 1));
-	*result = heapSize / 1024 / 1024;
+	const uint32_t uiHeapSize = *(reinterpret_cast<uint32_t*>(0x866E9F + 1));
+	*result = uiHeapSize / 1024.f / 1024.f;
 	if (Script::GetConsoleOuput())
 		Interface::PrintLine("DefaultHeapInitialAllocMB >> `%f", *result);
 	return true;
@@ -351,19 +353,21 @@ bool Cmd_EditorIDToFormID_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_RefAddr_Execute(COMMAND_ARGS) {
-	TESForm* form = nullptr;
-	if (thisObj) Interface::PrintLine("0x%08X", thisObj);
-	else if (ExtractArgsEx(EXTRACT_ARGS_EX, &form) && form) Interface::PrintLine("0x%08X", form);
+	TESForm* pForm = nullptr;
+	if (thisObj) 
+		Interface::PrintLine("0x%08X", thisObj);
+	else if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && pForm) 
+		Interface::PrintLine("0x%08X", pForm);
 	return true;
 }
 
 bool Cmd_RefAddrxData_Execute(COMMAND_ARGS) {
-	DWORD type;
-	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &type)) {
-		if (type < EXTRA_DATA_TYPE::COUNT) {
-			void* res = thisObj->GetExtra()->GetExtraData(type);
-			if (res) {
-				Interface::PrintLine("0x%08X", res);
+	uint32_t eType;
+	if (thisObj && ExtractArgsEx(EXTRACT_ARGS_EX, &eType)) {
+		if (eType < EXTRA_DATA_TYPE::COUNT) {
+			BSExtraData* pData = thisObj->GetExtra()->GetExtraData(eType);
+			if (pData) {
+				Interface::PrintLine("0x%08X", pData);
 				return true;
 			}
 		}
@@ -452,16 +456,18 @@ bool Cmd_GetJohnnyPatch_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetEditorID_Execute(COMMAND_ARGS) {
-	TESForm* form = nullptr;
-	const char* edid = "";
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form)) {
-		if (!form)
-			form = thisObj;
-		if (form)
-			edid = form->GetFormEditorID();
-		g_strInterface->Assign(PASS_COMMAND_ARGS, edid);
+	TESForm* pForm = nullptr;
+	const char* pEDID = "";
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm)) {
+		if (!pForm)
+			pForm = thisObj;
+		
+		if (pForm)
+			pEDID = pForm->GetFormEditorID();
+		
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pEDID);
 		if (Script::GetConsoleOuput())
-			Interface::PrintLine("GetEditorID >> %s", edid);
+			Interface::PrintLine("GetEditorID >> %s", pEDID);
 	}
 	return true;
 }
@@ -473,44 +479,38 @@ bool Cmd_ExitGameAlt_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_SetOptionalBone_Execute(COMMAND_ARGS) {
-	uint32_t optIdx = UINT32_MAX;
 	*result = 0;
-	char boneName[MAX_PATH] = { 0 };
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, optIdx, &boneName)) {
-		if (optIdx > 4) return true;
-		auto doUpdateBone = [optIdx, &boneName, &result](BipedAnim* BipedAnim) {
-			if (BipedAnim) {
-				if (BipedAnim->pRoot && BipedAnim->pRoot->IsNode()) {
-					auto vb = CdeclCall<NiNode*>(0x04AAE30, BipedAnim->pRoot, boneName);
-					if (vb && vb->IsNode()) {
-						BipedAnim->kBones[optIdx].pParent = vb;
-						*result = 1;
-					}
+	BIPED_BONE eBone = BIPED_BONE::NONE;
+	char cObjectName[MAX_PATH] = {};
+	if (thisObj->IsCharacter() && ExtractArgsEx(EXTRACT_ARGS_EX, eBone, &cObjectName) && ScriptUtils::InRange(eBone)) {
+		auto ChangeBone = [eBone, &cObjectName, &result](BipedAnim* apAnim) {
+			if (apAnim && apAnim->pRoot && apAnim->pRoot->IsNode()) {
+				NiAVObject* pObject = BSUtilities::GetObjectByName(apAnim->pRoot, cObjectName);
+				if (pObject && pObject->IsNode()) {
+					apAnim->kBones[eBone].pParent = static_cast<NiNode*>(pObject);
+					*result = 1;
 				}
 			}
-			};
-		if (thisObj && thisObj->IsCharacter()) {
-			doUpdateBone(((Character*)thisObj)->pBipedAnim);
-			if (thisObj == PlayerCharacter::GetSingleton()) {
-				doUpdateBone(((PlayerCharacter*)thisObj)->p1stPersonBipedAnim);
-			}
+		};
+		
+		ChangeBone(static_cast<Character*>(thisObj)->pBipedAnim);
+		if (thisObj == PlayerCharacter::GetSingleton()) {
+			ChangeBone(static_cast<PlayerCharacter*>(thisObj)->p1stPersonBipedAnim);
 		}
 	}
 	return true;
 }
 
 bool Cmd_GetOptionalBone_Execute(COMMAND_ARGS) {
-	uint32_t optIdx = UINT32_MAX;
-
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &optIdx)) {
-		if (thisObj && thisObj->IsCharacter() && optIdx <= 4)
-			if (auto BipedAnim = ((Character*)thisObj)->pBipedAnim) {
-				if (BipedAnim->kBones[optIdx].pParent && BipedAnim->kBones[optIdx].pParent->IsNode()) {
-					g_strInterface->Assign(PASS_COMMAND_ARGS, BipedAnim->kBones[optIdx].pParent->m_kName);
-					if (Script::GetConsoleOuput())
-						Interface::PrintLine("GetOptionalBone >> %s", BipedAnim->kBones[optIdx].pParent->m_kName.c_str());
-				}
-			}
+	BIPED_BONE eBone = BIPED_BONE::NONE;
+	if (thisObj->IsCharacter() && ExtractArgsEx(EXTRACT_ARGS_EX, &eBone) && ScriptUtils::InRange(eBone)) {
+		const BipedAnim* pAnim = static_cast<Character*>(thisObj)->pBipedAnim;
+		const NiNode* pBone = pAnim ? pAnim->GetParentBone(eBone) : nullptr;
+		if (pBone) {
+			g_strInterface->Assign(PASS_COMMAND_ARGS, pBone->GetName());
+			if (Script::GetConsoleOuput())
+				Interface::PrintLine("GetOptionalBone >> %s", pBone->GetName().c_str());
+		}
 	}
 	return true;
 }
@@ -541,7 +541,6 @@ static void __fastcall ActivateSplatter(uint32_t auiCount, float afDuration, flo
 	if (apColorTex)
 		pShaderProp->SetTexture(1, apColorTex);
 
-	// IsHDR
 	if (BSShaderManager::bHDR && apFlareTex) {
 		NiTriShape* pHDRShape = static_cast<NiTriShape*>(pNewNode->GetAt(1));
 		pShaderProp = static_cast<BSShaderBloodSplatterProperty*>(pHDRShape->shaderProp);
@@ -595,7 +594,8 @@ bool Cmd_SetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetViewmodelClipDistance_Execute(COMMAND_ARGS) {
 	*result = JohnnyPatches::fViewmodelNearDistance;
-	if (Script::GetConsoleOuput()) Interface::PrintLine("GetViewmodelClipDistance >> %.3f", *result);
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetViewmodelClipDistance >> %.3f", *result);
 	return true;
 }
 
@@ -679,7 +679,7 @@ bool Cmd_GetCurrentSkyColor_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-void __fastcall StopAnimLoop(Animation* apAnimation, ANIM_GROUP_SECTION aeGroup) {
+static void __fastcall StopAnimLoop(Animation* apAnimation, ANIM_GROUP_SECTION aeGroup) {
 	if (aeGroup == ANIM_GROUP_SECTION::NONE) {
 		for (uint32_t i = 0; i < ANIM_GROUP_SECTION::COUNT; ++i) {
 			apAnimation->iLoopCounts[i] = 0;

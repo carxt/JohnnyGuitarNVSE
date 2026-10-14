@@ -257,7 +257,7 @@ bool Cmd_Get3DDistanceFromHitToNiNode_Execute(COMMAND_ARGS) {
 		if (!pHitData || !pObject) 
 			return true;
 		
-		*result = pObject->m_kWorld.m_kTranslate.Distance(pHitData->kImpactPos);
+		*result = pObject->GetWorldTranslate().Distance(pHitData->kImpactPos);
 	}
 
 	return true;
@@ -274,7 +274,7 @@ bool Cmd_Get3DDistanceToNiNode_Execute(COMMAND_ARGS) {
 	if (!pObject) 
 		return true;
 	
-	*result = pObject->m_kWorld.m_kTranslate.Distance(kPos);
+	*result = pObject->GetWorldTranslate().Distance(kPos);
 	
 	if (Script::GetConsoleOuput()) 
 		Interface::PrintLine("Get3DDistanceToNiNode >> %f", *result);
@@ -295,7 +295,7 @@ bool Cmd_Get3DDistanceBetweenNiNodes_Execute(COMMAND_ARGS) {
 	if (!pObjectA || !pObjectB) 
 		return true;
 
-	*result = pObjectA->m_kWorld.m_kTranslate.Distance(pObjectB->m_kWorld.m_kTranslate);
+	*result = pObjectA->GetWorldTranslate().Distance(pObjectB->GetWorldTranslate());
 
 	if (Script::GetConsoleOuput()) 
 		Interface::PrintLine("Get3DDistanceBetweenNiNodes >> %f", *result);

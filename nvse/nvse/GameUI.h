@@ -1039,6 +1039,10 @@ public:
 	static void SetMenuMode(uint32_t aeMenuMode) {
 		CdeclCall(0x771700, aeMenuMode);
 	}
+
+	static void RefreshInfoForRef() {
+		CdeclCall(0x778B10);
+	}
 };
 static_assert(sizeof(HUDMainMenu) == 0x278);
 
@@ -1579,6 +1583,14 @@ public:
 	uint32_t				unk28[33];		// 28
 	TESObjectREFR* targetRef;		// AC
 	uint32_t				unkB0[19];		// B0
+
+	static ComputersMenu* GetSingleton() {
+		return *reinterpret_cast<ComputersMenu**>(0x11D9334);
+	}
+
+	void DisplayTerminal(bool abAddToStack) {
+		ThisCall(0x7586E0, this, abAddToStack);
+	}
 };
 
 // A0

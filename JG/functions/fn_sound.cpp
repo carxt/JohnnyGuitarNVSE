@@ -10,7 +10,7 @@
 
 #include <mutex>
 
-SPEC_NOINLINE void __fastcall RemoveSoundExtra(NiAVObject* apObject, uint32_t auiSoundID) {
+static SPEC_NOINLINE void __fastcall RemoveSoundExtra(NiAVObject* apObject, uint32_t auiSoundID) {
 	if (!apObject->HasExtraData())
 		return;
 

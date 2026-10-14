@@ -36,6 +36,7 @@ class TESModel;
 class BGSLoadGameBuffer;
 class TESTopicInfo;
 class NiAVObject;
+class AudioMarkerData;
 
 struct LoadedRefData;
 
@@ -328,6 +329,8 @@ public:
 
 	TESObjectREFR* GetEnableStateParent() const;
 	void SetEnableStateParent(TESObjectREFR* apParent);
+
+	AudioMarkerData* GetAudioMarkerData() const;
 
 	bool HasScript() const;
 
