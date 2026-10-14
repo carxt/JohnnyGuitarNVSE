@@ -98,3 +98,8 @@ void PlayerCharacter::SetPlayerMapMarker(NiPoint3 akLocation, TESForm* apSpace) 
 void PlayerCharacter::RemovePlayerMapMarker() {
 	ThisCall(0x952F90, this);
 }
+
+// GAME - 0x93E770
+void PlayerCharacter::ResetKillCam(KILL_CAM_TYPE aeOldType, bool abForce) {
+	ThisCall(0x93E770, this, aeOldType, abForce);
+}

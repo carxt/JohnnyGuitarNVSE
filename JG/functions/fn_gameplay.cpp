@@ -23,6 +23,7 @@
 #include "Bethesda/ProcessLists.hpp"
 #include "Bethesda/ActiveEffect.hpp"
 #include "Bethesda/MagicShaderHitEffect.hpp"
+#include "Bethesda/BGSChangeFlags.hpp"
 
 #include "JG/CustomCameraShake.hpp"
 #include "JG/CustomHUDShake.hpp"
@@ -45,11 +46,11 @@
 #include "utility.h"
 
 #include <unordered_map>
+#include <span>
 #include <mutex>
 
-bool(*Cmd_HighLightBodyPart)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB570;
-bool(*Cmd_DeactivateAllHighlights)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB6C0;
-void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
+inline Cmd_Execute Cmd_HighLightBodyPart = reinterpret_cast<Cmd_Execute>(0x5BB570);
+inline Cmd_Execute Cmd_DeactivateAllHighlights = reinterpret_cast<Cmd_Execute>(0x5BB6C0);
 
 #define NUM_ARGS *((uint8_t*)scriptData + *opcodeOffsetPtr)
 
@@ -116,14 +117,14 @@ bool Cmd_SetCasinoWinnings_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool __cdecl Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS) {
+bool Cmd_GetCasinoWinnings_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESCasino* pCasino = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pCasino) && pCasino && IS_TYPE(pCasino, TESCasino)) {
 		const FormID uiFormID = pCasino->GetFormID();
 		auto pIter = PlayerCharacter::GetSingleton()->pCasinoData;
 		while (pIter && !pIter->IsEmpty()) {
-			CasinoData* pStats = pIter->GetItem();
+			const CasinoData* pStats = pIter->GetItem();
 			if (pStats && pStats->uiCasinoFormID == uiFormID) {
 				*result = pStats->iEarnings;
 				return true;
@@ -268,17 +269,17 @@ bool Cmd_SetActorMovementFlags_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetAlwaysRun_Execute(COMMAND_ARGS) {
 	*result = 0;
-	int alwaysRun = -1;
-	int updateMovementFlags = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &alwaysRun, &updateMovementFlags);
-	if (alwaysRun > -1) {
-		bool bAlwaysRun = (alwaysRun > 0);
+	int32_t iAlwaysRun = -1;
+	BOOL bUpdateFlags = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &iAlwaysRun, &bUpdateFlags);
+	if (iAlwaysRun > -1) {
+		const bool bAlwaysRun = iAlwaysRun > 0;
 		PlayerCharacter::GetSingleton()->bAlwaysRun = bAlwaysRun;
-		if (updateMovementFlags) {
-			PlayerMover* playerMover = static_cast<PlayerMover*>(PlayerCharacter::GetSingleton()->pActorMover);
-			auto uiFlags = playerMover->uiMoveMode;
+		if (bUpdateFlags) {
+			PlayerMover* pMover = static_cast<PlayerMover*>(PlayerCharacter::GetSingleton()->pActorMover);
+			auto uiFlags = pMover->uiMoveMode;
 			uiFlags.bRunning = bAlwaysRun;
-			PlayerCharacter::GetSingleton()->pActorMover->ForceMoveMode(uiFlags);
+			pMover->ForceMoveMode(uiFlags);
 		}
 		*result = 1;
 	}
@@ -298,7 +299,7 @@ bool Cmd_SetAutoMove_Execute(COMMAND_ARGS) {
 
 SPEC_NOINLINE bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	if (thisObj->IsActor())
+	if (thisObj && thisObj->IsActor())
 		*result = static_cast<Actor*>(thisObj)->HasDamageHealthEffect();
 	return true;
 }
@@ -306,127 +307,6 @@ SPEC_NOINLINE bool Cmd_HasHealthDamageEffect_Eval(COMMAND_ARGS_EVAL) {
 bool Cmd_HasHealthDamageEffect_Execute(COMMAND_ARGS) {
 	return Cmd_HasHealthDamageEffect_Eval(thisObj, nullptr, nullptr, result);
 }
-
-static float Sign(const NiPoint3& p1, const NiPoint3& p2, const NiPoint3& p3) {
-	return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
-}
-
-static bool PointInTriangle(const NiPoint3& pt, const NiPoint3& v1, const NiPoint3& v2, const NiPoint3& v3) {
-	bool b1 = Sign(pt, v1, v2) < 0.0;
-	bool b2 = Sign(pt, v2, v3) < 0.0;
-	bool b3 = Sign(pt, v3, v1) < 0.0;
-
-	return (b1 == b2) && (b2 == b3);
-}
-
-static NiPoint3 __fastcall GetTriangleCenter(const NiPoint3& v1, const NiPoint3& v2, const NiPoint3& v3) {
-	return NiPoint3((v1.x + v2.x + v3.x) / 3.0f, (v1.y + v2.y + v3.y) / 3.0f, (v1.z + v2.z + v3.z) / 3.0f);
-}
-
-static void __fastcall GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
-	NavMeshArray* pNavMeshArray = apCell->pNavMeshes;
-	if (!pNavMeshArray)
-		return;
-
-	for (uint32_t i = 0; i < pNavMeshArray->GetNavMeshCount(); i++) {
-
-		NavMeshPtr spNavMesh = pNavMeshArray->GetNavMeshByIndex(i);
-		if (!spNavMesh)
-			continue;
-
-		NavMeshInfo* pInfo = spNavMesh->pNavMeshInfo;
-		if (!pInfo)
-			continue;
-
-		for (uint32_t j = 0; j < spNavMesh->GetTriangleCount(); j++) {
-			NavMeshTriangle* pNavMeshTriangle = spNavMesh->GetTriangle(j);
-			if (checkDisabled && pNavMeshTriangle->IsDisabled())
-				continue;
-
-			// Get triangle vertices
-			NiPoint3 kVerts[3];
-			for (uint32_t k = 0; k < 3; k++) {
-				NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->GetVertex(k));
-				if (!pVertex)
-					continue;
-
-				kVerts[k] = *pVertex;
-			}
-
-
-			NiPoint3 kTriCenter = GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
-
-			if (zLimit > 0 && fabs(kTriCenter.z - arPointToTest.z) > zLimit) continue;
-
-			// Get distance to triangle center
-			float fDist = arPointToTest.Distance(kTriCenter);
-
-			if (fDist < arOut.w) {
-				arOut.w = fDist;
-				arOut.x = kTriCenter.x;
-				arOut.y = kTriCenter.y;
-				arOut.z = kTriCenter.z;
-			}
-		}
-	}
-}
-
-static bool __fastcall GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint3& arPointToTest, bool checkDisabled, float zLimit, NiPoint4& arOut) {
-	NavMeshArray* pNavMeshArray = apCell->pNavMeshes;
-	if (!pNavMeshArray)
-		return false;
-
-	for (uint32_t i = 0; i < pNavMeshArray->GetNavMeshCount(); i++) {
-
-		NavMeshPtr spNavMesh = pNavMeshArray->GetNavMeshByIndex(i);
-		if (!spNavMesh)
-			continue;
-
-		NavMeshInfo* pInfo = spNavMesh->pNavMeshInfo;
-		if (!pInfo)
-			continue;
-
-		for (uint32_t j = 0; j < spNavMesh->GetTriangleCount(); j++) {
-			NavMeshTriangle* pNavMeshTriangle = spNavMesh->GetTriangle(j);
-			if (!pNavMeshTriangle)
-				continue;
-			if (checkDisabled && pNavMeshTriangle->IsDisabled())
-				continue;
-
-			// Get triangle vertices
-			NiPoint3 kVerts[3];
-			for (uint32_t k = 0; k < 3; k++) {
-				NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->GetVertex(k));
-				if (!pVertex)
-					continue;
-
-				kVerts[k] = *pVertex;
-			}
-
-
-			// Check if player is inside the triangle
-			if (PointInTriangle(arPointToTest, kVerts[0], kVerts[1], kVerts[2])) {
-				// Get triangle center
-				NiPoint3 kTriCenter = GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
-
-				if (zLimit > 0 && fabs(kTriCenter.z - arPointToTest.z) > zLimit) continue;
-
-
-				// Get distance to triangle center
-				float fDist = arPointToTest.Distance(kTriCenter);
-
-				arOut.x = kTriCenter.x;
-				arOut.y = kTriCenter.y;
-				arOut.z = kTriCenter.z;
-				arOut.w = fDist;
-
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
 
 bool Cmd_SetExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 	*result = 0;
@@ -473,91 +353,206 @@ bool Cmd_RemoveExtraAccuracyPenaltyMult_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
-	*result = 0;
-
-	NiPoint3 kPointToTest;
-	uint32_t checkDisabled = 0;
-	float zLimit = 0;
-	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &kPointToTest.x, &kPointToTest.y, &kPointToTest.z, &checkDisabled, &zLimit)) return true;
-
-	NiPoint4 kResult = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
-
-	TESObjectCELL* pInterior = TES::GetSingleton()->GetInterior();
-	uint32_t uiGridSize = INISettingCollection::General::uGridsToLoad->UInt();
-
-	if (pInterior) {
-		GetClosestNavMeshTriangle(pInterior, kPointToTest, (checkDisabled > 0), zLimit, kResult);
+namespace {
+	static float __fastcall Sign(const NiPoint3& p1, const NiPoint3& p2, const NiPoint3& p3) {
+		return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
 	}
-	else {
-		for (uint32_t x = 0; x < uiGridSize; x++) {
-			for (uint32_t y = 0; y < uiGridSize; y++) {
-				TESObjectCELL* pCell = TES::GetSingleton()->GetGridCell(x, y)->pCell;
-				if (!pCell)
+
+	static bool __fastcall PointInTriangle(const NiPoint3& pt, const NiPoint3& v1, const NiPoint3& v2, const NiPoint3& v3) {
+		bool b1 = Sign(pt, v1, v2) < 0.0;
+		bool b2 = Sign(pt, v2, v3) < 0.0;
+		bool b3 = Sign(pt, v3, v1) < 0.0;
+
+		return (b1 == b2) && (b2 == b3);
+	}
+
+	static NiPoint3 __fastcall GetTriangleCenter(const NiPoint3& v1, const NiPoint3& v2, const NiPoint3& v3) {
+		return NiPoint3((v1.x + v2.x + v3.x) / 3.0f, (v1.y + v2.y + v3.y) / 3.0f, (v1.z + v2.z + v3.z) / 3.0f);
+	}
+
+	static bool __fastcall GetClosestNavMeshTriangle(const TESObjectCELL* apCell, const NiPoint4& arPointToTest, bool abCheckDisabled, NiPoint4& arOut) {
+		const NavMeshArray* pNavMeshArray = apCell->GetNavMeshArray();
+		if (!pNavMeshArray) [[unlikely]]
+			return false;
+
+		const NiPoint3 kPointToTest = static_cast<NiPoint3>(arPointToTest);
+		const float fZLimit = arPointToTest.w;
+
+		for (uint32_t i = 0; i < pNavMeshArray->GetNavMeshCount(); i++) {
+			const NavMeshPtr spNavMesh = pNavMeshArray->GetNavMeshByIndex(i);
+			if (!spNavMesh) [[unlikely]]
+				continue;
+
+			const NavMeshInfo* pInfo = spNavMesh->pNavMeshInfo;
+			if (!pInfo) [[unlikely]]
+				continue;
+
+			for (uint32_t j = 0; j < spNavMesh->GetTriangleCount(); j++) {
+				const NavMeshTriangle* pNavMeshTriangle = spNavMesh->GetTriangle(j);
+				if (abCheckDisabled && pNavMeshTriangle->IsDisabled())
 					continue;
 
-				GetClosestNavMeshTriangle(pCell, kPointToTest, (checkDisabled > 0), zLimit, kResult);
+				// Get triangle vertices
+				NiPoint3 kVerts[3];
+				for (uint32_t k = 0; k < 3; k++) {
+					const NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->GetVertex(k));
+					if (!pVertex) [[unlikely]]
+						continue;
+
+					kVerts[k] = *pVertex;
+				}
+
+
+				const NiPoint3 kTriCenter = GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
+				if (fZLimit > 0 && fabs(kTriCenter.z - kPointToTest.z) > fZLimit)
+					continue;
+
+				// Get distance to triangle center
+				float fDist = kPointToTest.SqrDistance(kTriCenter);
+
+				if (fDist < arOut.w) {
+					arOut.x = kTriCenter.x;
+					arOut.y = kTriCenter.y;
+					arOut.z = kTriCenter.z;
+					arOut.w = fDist;
+				}
 			}
 		}
+		return true;
 	}
-	g_arrInterface->AppendElements(pointArr, kResult.x, kResult.y, kResult.z, kResult.w);
 
-	if (Script::GetConsoleOuput()) {
+	static bool __fastcall GetPointNavMesh(const TESObjectCELL* apCell, const NiPoint4& arPointToTest, bool abCheckDisabled, NiPoint4& arOut) {
+		NavMeshArray* pNavMeshArray = apCell->GetNavMeshArray();
+		if (!pNavMeshArray) [[unlikely]]
+			return false;
+
+		const NiPoint3 kPointToTest = static_cast<NiPoint3>(arPointToTest);
+		const float fZLimit = arPointToTest.w;
+
+		for (uint32_t i = 0; i < pNavMeshArray->GetNavMeshCount(); i++) {
+			const NavMeshPtr spNavMesh = pNavMeshArray->GetNavMeshByIndex(i);
+			if (!spNavMesh) [[unlikely]]
+				continue;
+
+			NavMeshInfo* pInfo = spNavMesh->pNavMeshInfo;
+			if (!pInfo) [[unlikely]]
+				continue;
+
+			for (uint32_t j = 0; j < spNavMesh->GetTriangleCount(); j++) {
+				const NavMeshTriangle* pNavMeshTriangle = spNavMesh->GetTriangle(j);
+				if (!pNavMeshTriangle) [[unlikely]]
+					continue;
+
+				if (abCheckDisabled && pNavMeshTriangle->IsDisabled())
+					continue;
+
+				// Get triangle vertices
+				NiPoint3 kVerts[3];
+				for (uint32_t k = 0; k < 3; k++) {
+					NiPoint3* pVertex = spNavMesh->GetVertex(pNavMeshTriangle->GetVertex(k));
+					if (!pVertex) [[unlikely]]
+						continue;
+
+					kVerts[k] = *pVertex;
+				}
+
+				// Check if player is inside the triangle
+				if (PointInTriangle(kPointToTest, kVerts[0], kVerts[1], kVerts[2])) {
+					// Get triangle center
+					const NiPoint3 kTriCenter = GetTriangleCenter(kVerts[0], kVerts[1], kVerts[2]);
+					if (fZLimit > 0 && fabs(kTriCenter.z - kPointToTest.z) > fZLimit)
+						continue;
+
+					// Get distance to triangle center
+					float fDist = kPointToTest.SqrDistance(kTriCenter);
+					arOut.x = kTriCenter.x;
+					arOut.y = kTriCenter.y;
+					arOut.z = kTriCenter.z;
+					arOut.w = fDist;
+
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+}
+
+bool Cmd_GetNearestNavMeshTriangle_Execute(COMMAND_ARGS) {
+	*result = 0;
+	NiPoint4 kResult = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
+	NiPoint4 kPointToTest = { FLT_MAX, FLT_MAX, FLT_MAX, 0.f };
+	BOOL bCheckDisabledArg = FALSE;
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kPointToTest.x, &kPointToTest.y, &kPointToTest.z, &bCheckDisabledArg, &kPointToTest.w)) {
+		const TESObjectCELL* pInterior = TES::GetSingleton()->GetInterior();
+		const bool bCheckDisabled = (bCheckDisabledArg > 0);
+		if (pInterior) {
+			GetClosestNavMeshTriangle(pInterior, kPointToTest, bCheckDisabled, kResult);
+		}
+		else {
+			const uint32_t uiGridSize = TES::GetSingleton()->pGridCellArray->GetDimension();
+			for (uint32_t x = 0; x < uiGridSize; x++) {
+				for (uint32_t y = 0; y < uiGridSize; y++) {
+					TESObjectCELL* pCell = TES::GetSingleton()->GetGridCell(x, y)->pCell;
+					if (pCell) [[likely]]
+						GetClosestNavMeshTriangle(pCell, kPointToTest, bCheckDisabled, kResult);
+				}
+			}
+		}
+
+		kResult.w = sqrtf(kResult.w);
+		g_arrInterface->AppendElements(pArray, kResult.x, kResult.y, kResult.z, kResult.w);
+	}
+
+	if (Script::GetConsoleOuput()) [[unlikely]]
 		Interface::PrintLine("GetClosestNavMeshTriangle >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
-	}
 
-	g_arrInterface->AssignCommandResult(pointArr, result);
+	g_arrInterface->AssignCommandResult(pArray, result);
 
 	return true;
 }
 
 bool Cmd_GetPointInNavMesh_Execute(COMMAND_ARGS) {
 	*result = 0;
-	NiPoint4 kResult;
-	TESObjectCELL* pInterior = TES::GetSingleton()->GetInterior();
-
-	uint32_t uiGridSize = INISettingCollection::General::uGridsToLoad->UInt();
-
-	NiPoint3 kPointToTest;
-	uint32_t checkDisabled = 0;
-	float zLimit = 0;
-	NVSEArrayVar* pointArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &kPointToTest.x, &kPointToTest.y, &kPointToTest.z, &checkDisabled, &zLimit))	return true;
-
+	NiPoint4 kResult = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
+	NiPoint4 kPointToTest = { FLT_MAX, FLT_MAX, FLT_MAX, 0.f };
+	BOOL bCheckDisabledArg = FALSE;
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	bool bResult = false;
-	if (pInterior) {
-		bResult = GetPointNavMesh(pInterior, kPointToTest, (checkDisabled > 0), zLimit, kResult);
-	}
-	else {
-		for (uint32_t x = 0; x < uiGridSize && !bResult; x++) {
-			for (uint32_t y = 0; y < uiGridSize && !bResult; y++) {
-				TESObjectCELL* pCell = TES::GetSingleton()->GetGridCell(x, y)->pCell;
-				if (!pCell)
-					continue;
-
-				bResult = GetPointNavMesh(pCell, kPointToTest, (checkDisabled > 0), zLimit, kResult);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kPointToTest.x, &kPointToTest.y, &kPointToTest.z, &bCheckDisabledArg, &kPointToTest.w)) {
+		const TESObjectCELL* pInterior = TES::GetSingleton()->GetInterior();
+		const bool bCheckDisabled = (bCheckDisabledArg > 0);
+		if (pInterior) {
+			bResult = GetPointNavMesh(pInterior, kPointToTest, bCheckDisabled, kResult);
+		}
+		else {
+			const uint32_t uiGridSize = TES::GetSingleton()->pGridCellArray->GetDimension();
+			for (uint32_t x = 0; x < uiGridSize && !bResult; x++) {
+				for (uint32_t y = 0; y < uiGridSize && !bResult; y++) {
+					TESObjectCELL* pCell = TES::GetSingleton()->GetGridCell(x, y)->pCell;
+					if (pCell) [[likely]]
+						bResult = GetPointNavMesh(pCell, kPointToTest, bCheckDisabled, kResult);
+				}
 			}
 		}
-	}
 
-	if (bResult) {
-		g_arrInterface->AppendElements(pointArr, kResult.x, kResult.y, kResult.z, kResult.w);
-		if (Script::GetConsoleOuput()) {
-			Interface::PrintLine("GetPointInNavMesh >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
+		if (bResult) {
+			kResult.w = sqrtf(kResult.w);
+			g_arrInterface->AppendElements(pArray, kResult.x, kResult.y, kResult.z, kResult.w);
 		}
 	}
-	else if (Script::GetConsoleOuput()) {
-		Interface::PrintLine("GetPointInNavMesh >> Point not found.");
 
+	if (Script::GetConsoleOuput()) [[unlikely]] {
+		if (bResult)
+			Interface::PrintLine("GetPointInNavMesh >> Point found at (%f, %f, %f) with distance %f", kResult.x, kResult.y, kResult.z, kResult.w);
+		else
+			Interface::PrintLine("GetPointInNavMesh >> Point not found.");
 	}
 
-	g_arrInterface->AssignCommandResult(pointArr, result);
+	g_arrInterface->AssignCommandResult(pArray, result);
 	return bResult;
 }
-
-
 
 bool __fastcall ValidTempEffect(const EffectItem* apEffectItem) {
 	if (!apEffectItem || (apEffectItem->GetDuration() <= 0) || !apEffectItem->GetEffectSetting())
@@ -630,19 +625,19 @@ bool Cmd_SetCameraShakeNoHUDShudder_Execute(COMMAND_ARGS) {
 
 bool Cmd_RewardKarmaAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
-	int delta = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &delta);
-	int karmaBefore = PlayerCharacter::GetSingleton()->GetActorValueI(ActorValue::Index::KARMA);
-	int ikarmaMax = GameSettingCollection::iKarmaMax->Int();
-	int iKarmaMin = GameSettingCollection::iKarmaMin->Int();
-	if (delta >= 0 && ((delta + karmaBefore) > ikarmaMax)) {
-		delta = ikarmaMax - karmaBefore;
+	int32_t iDelta = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &iDelta);
+	const int32_t iKarmaBefore = PlayerCharacter::GetSingleton()->GetActorValueI(ActorValue::Index::KARMA);
+	const int32_t iKarmaMax = GameSettingCollection::iKarmaMax->Int();
+	const int32_t iKarmaMin = GameSettingCollection::iKarmaMin->Int();
+	if (iDelta >= 0 && ((iDelta + iKarmaBefore) > iKarmaMax)) {
+		iDelta = iKarmaMax - iKarmaBefore;
 	}
-	else if (delta < 0 && ((delta + karmaBefore) < iKarmaMin)) {
-		delta = iKarmaMin - karmaBefore;
+	else if (iDelta < 0 && ((iDelta + iKarmaBefore) < iKarmaMin)) {
+		iDelta = iKarmaMin - iKarmaBefore;
 	}
-	if (delta != 0) {
-		PlayerCharacter::GetSingleton()->PermanentModActorValueI(ActorValue::Index::KARMA, delta, 0);
+	if (iDelta != 0) {
+		PlayerCharacter::GetSingleton()->PermanentModActorValueI(ActorValue::Index::KARMA, iDelta, nullptr);
 		*result = 1;
 	}
 	return true;
@@ -654,8 +649,7 @@ SPEC_INLINE bool Cmd_GetMoonPhase_Eval(COMMAND_ARGS_EVAL) {
 }
 
 bool Cmd_GetMoonPhase_Execute(COMMAND_ARGS) {
-	Cmd_GetMoonPhase_Eval(nullptr, nullptr, nullptr, result);
-	return true;
+	return Cmd_GetMoonPhase_Eval(nullptr, nullptr, nullptr, result);
 }
 
 bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
@@ -665,13 +659,13 @@ bool Cmd_GetLandTextureUnderFeet_Execute(COMMAND_ARGS) {
 		return true;
 
 	TESObjectLAND* pLand = pCell->GetLand();
-	if (!pLand)
+	if (!pLand) [[unlikely]]
 		return true;
 
-	const NiPoint3& rPos = thisObj->GetLocationOnReference();
+	const NiPoint3 kPos = thisObj->GetLocationOnReference();
 	COORD_DATA kCoordData;
-	pLand->GetCoordData(kCoordData, rPos, 1);
-	TESLandTexture* pTexture = pLand->GetMainTexture(rPos);
+	pLand->GetCoordData(kCoordData, kPos, true);
+	const TESLandTexture* pTexture = pLand->GetMainTexture(kPos);
 	if (pTexture)
 		*reinterpret_cast<FormID*>(result) = pTexture->GetFormID();
 	return true;
@@ -703,7 +697,7 @@ bool Cmd_GetPlayingEffectShaders_Execute(COMMAND_ARGS) {
 		NiPointer<BSTempEffect> spEffect = pIter->GetItem();
 		pIter = pIter->GetNext();
 
-		if (!spEffect)
+		if (!spEffect) [[unlikely]]
 			continue;
 
 		MagicShaderHitEffect* pHitEffect = spEffect->NiDynamicCast<MagicShaderHitEffect>();
@@ -740,21 +734,7 @@ SPEC_INLINE bool Cmd_GetLocationSpecificLoadScreensOnly_Eval(COMMAND_ARGS_EVAL) 
 }
 
 bool Cmd_GetLocationSpecificLoadScreensOnly_Execute(COMMAND_ARGS) {
-	Cmd_GetLocationSpecificLoadScreensOnly_Eval(nullptr, nullptr, nullptr, result);
-	return true;
-}
-
-bool __fastcall IsCombatTarget(const Actor* source, const Actor* toSearch) {
-	if (source->bIsInCombat && source->pCombatTargets) {
-		Actor** actorsArr = source->pCombatTargets->pBuffer;
-		uint32_t count = source->pCombatTargets->uiSize;
-		if (!actorsArr)
-			return false;
-		for (; count; count--, actorsArr++) {
-			if (*actorsArr == toSearch) return true;
-		}
-	}
-	return false;
+	return Cmd_GetLocationSpecificLoadScreensOnly_Eval(nullptr, nullptr, nullptr, result);
 }
 
 bool __fastcall IsHostileCompassTarget(const TESObjectREFR* apTarget) {
@@ -772,8 +752,9 @@ bool __fastcall IsHostileCompassTarget(const TESObjectREFR* apTarget) {
 bool Cmd_IsCrimeOrEnemy_Execute(COMMAND_ARGS) {
 	*result = 0;
 	Actor* pActor = static_cast<Actor*>(thisObj);
-	if (thisObj->IsCrimeToActivate() && (!thisObj->IsActor() || !pActor->IsPlayerTeammate()) ||
-		thisObj->IsActor() && (IsCombatTarget(pActor, PlayerCharacter::GetSingleton()) || IsHostileCompassTarget(thisObj))) {
+	const bool bIsActor = thisObj->IsActor();
+	if (thisObj->IsCrimeToActivate() && (!bIsActor || !pActor->IsPlayerTeammate()) || bIsActor && 
+		(pActor->IsInCombatWithActor(PlayerCharacter::GetSingleton()) || IsHostileCompassTarget(thisObj))) {
 		*result = 1;
 	}
 	if (Script::GetConsoleOuput()) 
@@ -785,74 +766,83 @@ bool Cmd_SendTrespassAlarmAlt_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESForm* pOwner = thisObj->GetOwner();
 	if (pOwner) {
-		ThisCall(0x8C0EC0, PlayerCharacter::GetSingleton(), thisObj, pOwner, 0xFFFFFFFF); // Actor::TrespassAlarm
+		PlayerCharacter::GetSingleton()->TrespassAlarm(thisObj, pOwner, -1);
 		*result = 1;
 	}
 	return true;
 }
 
+static bool __fastcall IsActorInvisible(Actor* apActor) {
+	if (apActor->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0)
+		return true;
+	
+	if (apActor->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)
+		return true;
+
+	return false;
+}
+
 bool Cmd_GetCompassHostiles_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t skipInvisible = 0;
+	BOOL bSkipInvisibleArg = FALSE;
+	BOOL bAccountForImprovedDetection = FALSE; // If player has ImprovedDetection perk effect, then they'll see invisible actors in compass.
+	ExtractArgsEx(EXTRACT_ARGS_EX, &bSkipInvisibleArg, &bAccountForImprovedDetection);
 
-	//If player has ImprovedDetection perk effect, then they'll see invisible actors in compass.
-	uint32_t accountForImprovedDetection = 0;
-
-	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible, &accountForImprovedDetection);
-
-	bool hasImprovedDetection = false;
-	if (accountForImprovedDetection) {
-		float hasPerk = 0.0; //copying code at 0x77A0C4
-		BGSEntryPoint::HandleEntryPoint(BGSEntryPointType::HAS_IMPROVED_DETECTION, PlayerCharacter::GetSingleton(), &hasPerk);
-		if (hasPerk > 0.0)
-			hasImprovedDetection = true;
+	bool bHasImprovedDetection = false;
+	if (bAccountForImprovedDetection) {
+		float fHasPerk = 0.f; //copying code at 0x77A0C4
+		BGSEntryPoint::HandleEntryPoint(BGSEntryPointType::HAS_IMPROVED_DETECTION, PlayerCharacter::GetSingleton(), &fHasPerk);
+		if (fHasPerk > 0.f)
+			bHasImprovedDetection = true;
 	}
 
-	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	const bool bSkipInvisible = bSkipInvisibleArg > 0;
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
 	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::PerceivedActor* target = pIter->GetItem();
+		const PlayerCharacter::PerceivedActor* pTarget = pIter->GetItem();
 		pIter = pIter->GetNext();
-		if (target->bIsHostile) {
-			if (skipInvisible > 0 && !hasImprovedDetection && (target->pActor->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0
-				|| target->pActor->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
+		if (pTarget->bIsHostile) {
+			if (bSkipInvisible && !bHasImprovedDetection && IsActorInvisible(pTarget->pActor))
 				continue;
-			}
-			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(target->pActor));
+			g_arrInterface->AppendElement(pArray, NVSEArrayElement(pTarget->pActor));
 		}
 	}
-	g_arrInterface->AssignCommandResult(hostileArr, result);
+	g_arrInterface->AssignCommandResult(pArray, result);
 	return true;
 }
 
 bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
-	TESObjectREFR* container;
-	int checkItems = 0;
+	TESObjectREFR* pContainer;
+	BOOL bCheckItems = FALSE;
 	*result = 0;
-	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &container, &checkItems) && container) {
-		if (checkItems) {
-			TESForm* containerOwner = container->GetOwner();
-			if (!containerOwner) return true;
-			ExtraContainerChanges* xChanges = thisObj->GetExtra()->GetExtraData<ExtraContainerChanges>();
-			if (!xChanges || !xChanges->pChanges || !xChanges->pChanges->pItems)
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &pContainer, &bCheckItems) && pContainer) {
+		Actor* pCaller = static_cast<Actor*>(thisObj);
+		TESForm* pContainerOwner = pContainer->GetOwner();
+		if (bCheckItems) {
+			if (!pContainerOwner)
 				return true;
-			BSSimpleList<ItemChange*>* contChangesIter = xChanges->pChanges->pItems->GetHead();
-			while (contChangesIter && !contChangesIter->IsEmpty()){
-				ItemChange* entry = contChangesIter->GetItem();
-				contChangesIter = contChangesIter->GetNext();
 
-				if (!entry || !entry->pExtraLists || !entry->pObject)
+			const InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(thisObj);
+			if (!pInvChanges || !pInvChanges->pItems)
+				return true;
+
+			const BSSimpleList<ItemChange*>* pItemIter = pInvChanges->pItems->GetHead();
+			while (pItemIter && !pItemIter->IsEmpty()) {
+				const ItemChange* pItem = pItemIter->GetItem();
+				pItemIter = pItemIter->GetNext();
+
+				if (!pItem || !pItem->GetExtraDataList() || !pItem->GetItemObject())
 					continue;
 
-				BSSimpleList<ExtraDataList*>* xdlIter = entry->pExtraLists->GetHead();
-				ExtraDataList* xData;
-				while (xdlIter && !xdlIter->IsEmpty()){
-					xData = xdlIter->GetItem();
-					xdlIter = xdlIter->GetNext();
-					if (xData) {
-						TESForm* pOwner = xData->GetOwner();
-						if (pOwner && pOwner->GetFormID() == containerOwner->GetFormID()) {
-							ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, containerOwner); // Actor::StealAlarm
+				const BSSimpleList<ExtraDataList*>* pExtraIter = pItem->GetExtraDataList();
+				while (pExtraIter && !pExtraIter->IsEmpty()) {
+					const ExtraDataList* pExtraList = pExtraIter->GetItem();
+					pExtraIter = pExtraIter->GetNext();
+					if (pExtraList) [[likely]] {
+						const TESForm* pOwner = pExtraList->GetOwner();
+						if (pOwner && pOwner == pContainerOwner) {
+							pCaller->StealAlarm(pContainer, nullptr, 0, 1, pContainerOwner);
 							*result = 1;
 							return true;
 						}
@@ -861,8 +851,7 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 			}
 		}
 		else {
-			TESForm* owner = container->GetOwner();
-			ThisCall(0x8BFA40, thisObj, container, nullptr, nullptr, 1, owner); // Actor::StealAlarm
+			pCaller->StealAlarm(pContainer, nullptr, 0, 1, pContainerOwner);
 			*result = 1;
 		}
 	}
@@ -871,31 +860,36 @@ bool Cmd_SendStealingAlarm_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 	*result = 0;
-	Actor* actor = static_cast<Actor*>(thisObj);
-	ItemChange* weapInfo = actor->GetCurrentAIProcess()->GetCurrentWeapon();
-	if (weapInfo && weapInfo->pObject) {
-		bool hasDecreaseSpreadEffect = weapInfo->HasModEffectActive(3);
-		double minSpread = ThisCall<double>(0x524B80, weapInfo->pObject, hasDecreaseSpreadEffect);
-		double weapSpread = ThisCall<float>(0x524BE0, weapInfo->pObject, hasDecreaseSpreadEffect);
-		double spread = ThisCall<double>(0x8B0DD0, actor, 1);
+	if (!thisObj->IsActor())
+		return true;
 
-		float totalSpread = (weapSpread * spread + minSpread) * 0.01745329238474369;
+	Actor* pActor = static_cast<Actor*>(thisObj);
+	ItemChange* pWeaponItem = pActor->GetCurrentAIProcess()->GetCurrentWeapon();
+	if (pWeaponItem && pWeaponItem->pObject) {
+		TESObjectWEAP* pWeapon = static_cast<TESObjectWEAP*>(pWeaponItem->pObject);
+		const bool bDecreaseSpread = pWeaponItem->HasModEffectActive(WEAPON_MOD_EFFECT_TYPE::DECREASE_SPREAD);
+		const float fMinSpread = pWeapon->GetMinSpread(bDecreaseSpread);
+		const float fWeapSpread = pWeapon->GetSpread(bDecreaseSpread);
+		const float fGunSkill = pActor->GetGunSkill(GUN_SKILL_TYPE::GUN);
 
-		TESAmmo* eqAmmo = ThisCall<TESAmmo*>(0x525980, weapInfo->pObject, static_cast<MobileObject*>(actor));
-		totalSpread = TESAmmoEffect::ApplyAmmoEffect(AMMO_EFFECT_TYPE::SPREAD, (eqAmmo ? eqAmmo->GetAmmoEffectList() : nullptr), totalSpread);
+		float fTotalSpread = (fWeapSpread * fGunSkill + fMinSpread) * 0.01745329238474369;
 
-		double spreadPenalty = ThisCall<double>(0x8B0DD0, actor, 2);
+		TESAmmo* pAmmo = pWeapon->GetCurrentAmmo(pActor);
+		fTotalSpread = TESAmmoEffect::ApplyAmmoEffect(AMMO_EFFECT_TYPE::SPREAD, (pAmmo ? pAmmo->GetAmmoEffectList() : nullptr), fTotalSpread);
 
-		totalSpread += spreadPenalty * GameSettingCollection::fNPCMaxGunWobbleAngle->Float() * 0.01745329238474369;
+		// Mods hook the 2nd GetGunSkill, so we want to use that
+		const uintptr_t uiGetActorGunSkillAddr = HookUtils::GetRelJumpAddr(0x524019);
+		float fActorSkill = ThisCall<float>(uiGetActorGunSkillAddr, pActor, GUN_SKILL_TYPE::ACTOR);
+		fTotalSpread += fActorSkill * GameSettingCollection::fNPCMaxGunWobbleAngle->Float() * 0.01745329238474369f;
 
-		float noIdea = actor->GetCurrentAIProcess()->GetAimLooking();
-		totalSpread = totalSpread + noIdea;
+		const float fAimLooking = pActor->GetCurrentAIProcess()->GetAimLooking();
+		fTotalSpread = fTotalSpread + fAimLooking;
 
-		bool hasSplitBeamEffect = weapInfo->HasModEffectActive(0xC);
-		if (hasSplitBeamEffect) {
-			totalSpread *= ThisCall<float>(0x4BCF60, weapInfo->pObject, 0xC, 1);
-		}
-		*result = totalSpread;
+		const bool bHasSplitBeam = pWeaponItem->HasModEffectActive(WEAPON_MOD_EFFECT_TYPE::SPLIT_BEAM);
+		if (bHasSplitBeam)
+			fTotalSpread *= pWeapon->GetModEffectValue(WEAPON_MOD_EFFECT_TYPE::SPLIT_BEAM, 1);
+
+		*result = fTotalSpread;
 	}
 	if (Script::GetConsoleOuput()) 
 		Interface::PrintLine("GetCalculatedSpread >> %f", *result);
@@ -904,8 +898,8 @@ bool Cmd_GetCalculatedSpread_Execute(COMMAND_ARGS) {
 
 bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t uiIndex;
-	float fTimeLeftMod;
+	uint32_t uiIndex = 0;
+	float fTimeLeftMod = 0.f;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &uiIndex, &fTimeLeftMod) || !thisObj->IsActor()) 
 		return true;
 
@@ -932,7 +926,7 @@ bool Cmd_ModNthTempEffectTimeLeft_Execute(COMMAND_ARGS) {
 
 bool Cmd_IsHostilesNearby_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectCELL* pCell = PlayerCharacter::GetSingleton()->GetParentCell();
+	const TESObjectCELL* pCell = PlayerCharacter::GetSingleton()->GetParentCell();
 	if (pCell)
 		*result = ProcessLists::GetSingleton()->AreHostileActorsNear(pCell->GetInterior());
 	return true;
@@ -972,7 +966,7 @@ bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
 	uint32_t flags;
 	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &flags)) {
 		HookUtils::SafeWrite32(0x771A53, flags);
-		HUDMainMenu_UpdateVisibilityState(HUDMainMenu::kHUDState_RECALCULATE);
+		HUDMainMenu::SetMenuMode(HUDMainMenu::kHUDState_RECALCULATE);
 	}
 	else {
 		RestoreDisabledPlayerControlsHUDFlags();
@@ -981,118 +975,112 @@ bool Cmd_SetDisablePlayerControlsHUDVisibilityFlags_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+namespace {
+
+	static Actor* __fastcall GetNearestCompassHostile(bool bSkipInvisible) {
+		auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
+		if (!pIter || pIter->IsEmpty()) [[unlikely]]
+			return nullptr;
+
+		const NiPoint3 kPlayerPos = PlayerCharacter::GetSingleton()->GetLocationOnReference();
+		const bool bInterior = PlayerCharacter::GetSingleton()->GetParentCell()->GetInterior();
+
+		const float fSneakMaxDistance = GameSettingCollection::fSneakMaxDistance;
+		const float fSneakExteriorDistanceMult = GameSettingCollection::fSneakExteriorDistanceMult;
+		const float fInteriorDistSqr = fSneakMaxDistance * fSneakMaxDistance;
+		const float fExteriorDistSqr = (fSneakMaxDistance * fSneakExteriorDistanceMult) * (fSneakMaxDistance * fSneakExteriorDistanceMult);
+		float fMaxDist = bInterior ? fInteriorDistSqr : fExteriorDistSqr;
+
+		Actor* pClosestHostile = nullptr;
+		while (pIter && !pIter->IsEmpty()) {
+			PlayerCharacter::PerceivedActor* pTarget = pIter->GetItem();
+			pIter = pIter->GetNext();
+
+			if (pTarget->bIsHostile) {
+				if (bSkipInvisible && IsActorInvisible(pTarget->pActor))
+					continue;
+
+				auto distToPlayer = pTarget->pActor->GetLocationOnReference().SqrDistance(kPlayerPos);
+				if (distToPlayer < fMaxDist) {
+					fMaxDist = distToPlayer;
+					pClosestHostile = pTarget->pActor;
+				}
+			}
+		}
+
+		return pClosestHostile;
+	}
+
+	static double __fastcall GetVectorAngle2D(const NiPoint3& pt) {
+		double angle;
+		if (pt.y == 0) {
+			if (pt.x <= 0) {
+				angle = kDblPIx3d2;
+			}
+			else {
+				angle = kDblPId2;
+			}
+		}
+		else {
+			double ratio = pt.x / pt.y;
+			angle = dAtan(ratio);
+			if (pt.y < 0.0) {
+				angle += kDblPI;
+			}
+		}
+
+		return angle;
+	}
+
+	static double __fastcall GetAngleBetweenPoints(const NiPoint3& actorPos, const NiPoint3& playerPos, float offset) {
+		NiPoint3 diff = actorPos - playerPos;
+
+		double angle = GetVectorAngle2D(diff) - offset;
+		if (angle > -kDblPI) {
+			if (angle > kDblPI) {
+				angle = kDblPIx2 - angle;
+			}
+		}
+		else {
+			angle += kDblPIx2;
+		}
+		return angle * 57.295779513;
+	}
+
+}
+
 bool Cmd_GetNearestCompassHostile_Execute(COMMAND_ARGS) {
 	*result = -1;
 
-	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetLocationOnReference();
+	BOOL bSkipInvisibleArg = 0;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &bSkipInvisibleArg);
 
-	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
-	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
-	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->GetInterior();
-	float interiorDistanceSquared = fSneakMaxDistance * fSneakMaxDistance;
-	float exteriorDistanceSquared = (fSneakMaxDistance * fSneakExteriorDistanceMult) * (fSneakMaxDistance * fSneakExteriorDistanceMult);
-	float maxDist = isInterior ? interiorDistanceSquared : exteriorDistanceSquared;
-	Actor* closestHostile = nullptr;
-	uint32_t skipInvisible = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
-	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::PerceivedActor* target = pIter->GetItem();
-		pIter = pIter->GetNext();
-		if (target->bIsHostile) {
-			if (skipInvisible > 0 && (target->pActor->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->pActor->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
-				continue;
-			}
-			auto distToPlayer = target->pActor->GetPosition().SqrDistance(playerPos);
-			if (distToPlayer < maxDist) {
-				maxDist = distToPlayer;
-				closestHostile = target->pActor;
-			}
-		}
-	}
-
-	if (closestHostile)	*(FormID*)result = closestHostile->GetFormID();
+	const Actor* pClosestHostile = GetNearestCompassHostile(bSkipInvisibleArg > 0);
+	if (pClosestHostile)
+		*reinterpret_cast<FormID*>(result) = pClosestHostile->GetFormID();
 
 	return true;
 }
 
-double __fastcall GetVectorAngle2D(const NiPoint3& pt) {
-	double angle;
-	if (pt.y == 0) {
-		if (pt.x <= 0) {
-			angle = kDblPIx3d2;
-		}
-		else {
-			angle = kDblPId2;
-		}
-	}
-	else {
-		double ratio = pt.x / pt.y;
-		angle = dAtan(ratio);
-		if (pt.y < 0.0) {
-			angle += kDblPI;
-		}
-	}
-
-	return angle;
-}
-
-
-double __fastcall GetAngleBetweenPoints(const NiPoint3& actorPos, const NiPoint3& playerPos, float offset) {
-	NiPoint3 diff = actorPos - playerPos;
-
-	double angle = GetVectorAngle2D(diff) - offset;
-	if (angle > -kDblPI) {
-		if (angle > kDblPI) {
-			angle = kDblPIx2 - angle;
-		}
-	}
-	else {
-		angle += kDblPIx2;
-	}
-	return angle * 57.295779513;
-}
-
-
 bool Cmd_GetNearestCompassHostileDirection_Execute(COMMAND_ARGS) {
 	*result = -1;
 
-	const NiPoint3& playerPos = PlayerCharacter::GetSingleton()->GetLocationOnReference();
+	BOOL bSkipInvisibleArg = FALSE;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &bSkipInvisibleArg);
 
-	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
-	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
-	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->GetInterior();
-	float maxDist = isInterior ? powf(fSneakMaxDistance, 2) : powf((fSneakMaxDistance * fSneakExteriorDistanceMult), 2);
-	Actor* closestHostile = nullptr;
-	uint32_t skipInvisible = 0;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &skipInvisible);
-	auto pIter = PlayerCharacter::GetSingleton()->pPerceivedActors;
-	while (pIter && !pIter->IsEmpty()) {
-		PlayerCharacter::PerceivedActor* target = pIter->GetItem();
-		pIter = pIter->GetNext();
+	const Actor* pClosestHostile = GetNearestCompassHostile(bSkipInvisibleArg > 0);
 
-		if (target->bIsHostile) {
-			if (skipInvisible > 0 && (target->pActor->GetActorValueI(ActorValue::Index::INVISIBILITY) > 0 || target->pActor->GetActorValueI(ActorValue::Index::CHAMELEON) > 0)) {
-				continue;
-			}
-			auto distToPlayer = target->pActor->GetLocationOnReference().SqrDistance(playerPos);
-			if (distToPlayer < maxDist) {
-				maxDist = distToPlayer;
-				closestHostile = target->pActor;
-			}
-		}
-	}
-
-	if (closestHostile) {
-		auto playerRotation = PlayerCharacter::GetSingleton()->GetHeading(false);
-		double headingAngle = GetAngleBetweenPoints(closestHostile->GetLocationOnReference(), playerPos, playerRotation);
+	if (pClosestHostile) {
+		float fHeading = PlayerCharacter::GetSingleton()->GetHeading(false);
+		double dAngle = GetAngleBetweenPoints(pClosestHostile->GetLocationOnReference(), PlayerCharacter::GetSingleton()->GetLocationOnReference(), fHeading);
 
 		// shift the coordinates from -180:180 to 0:360 and offset them (360 / 8 quadrants / 2) degrees
-		int angle = headingAngle + 180 + 22.5;
+		int iAngle = dAngle + 180 + 22.5;
 
 		// convert the angle to which quadrant the NPC is in
-		angle /= 45;
-		*result = (angle + 4) % 8; // make 0 in front, 1 front right, 2 right, 3 back right ...
+		iAngle /= 45;
+
+		*result = (iAngle + 4) % 8; // make 0 in front, 1 front right, 2 right, 3 back right ...
 	}
 
 	return true;
@@ -1108,35 +1096,37 @@ bool Cmd_DeactivateAllHighlightsAlt_Execute(COMMAND_ARGS) {
 bool Cmd_RemoveHighlightedRef_Execute(COMMAND_ARGS) {
 	*result = 0;
 
-	if (!thisObj) return true;
+	if (!thisObj) 
+		return true;
 
-	InterfaceManager* interfaceMgr = InterfaceManager::GetSingleton();
-	if (!interfaceMgr) return true;
+	InterfaceManager* pUIMgr = InterfaceManager::GetSingleton();
+	if (!pUIMgr) 
+		return true;
 
-	VATSHighlightData* vatsData = interfaceMgr->GetVATSHighlightData();
+	VATSHighlightData* pVATSEffect = pUIMgr->GetVATSHighlightData();
 
-	for (uint32_t index = vatsData->numHighlighted; index;) {
-		if (vatsData->highlightedRefs[--index].refr != thisObj)
+	for (uint32_t i = pVATSEffect->numHighlighted; i;) {
+		if (pVATSEffect->highlightedRefs[--i].refr != thisObj)
 			continue;
 
-		if (--vatsData->numHighlighted) {
-			if (index == vatsData->numHighlighted) {
-				vatsData->highlightedRefs[index].refr = nullptr;
-				vatsData->highlightedRefs[index].node = nullptr;
+		if (--pVATSEffect->numHighlighted) {
+			if (i == pVATSEffect->numHighlighted) {
+				pVATSEffect->highlightedRefs[i].refr = nullptr;
+				pVATSEffect->highlightedRefs[i].node = nullptr;
 			}
 			else {
-				vatsData->highlightedRefs[index] = vatsData->highlightedRefs[vatsData->numHighlighted];
+				pVATSEffect->highlightedRefs[i] = pVATSEffect->highlightedRefs[pVATSEffect->numHighlighted];
 			}
-			if (vatsData->highlightMain.refr == thisObj) {
-				vatsData->highlightMain = vatsData->highlightedRefs[0];
+			if (pVATSEffect->highlightMain.refr == thisObj) {
+				pVATSEffect->highlightMain = pVATSEffect->highlightedRefs[0];
 			}
 		}
 		else {
-			vatsData->highlightedRefs[0].refr = nullptr;
-			vatsData->highlightedRefs[0].node = nullptr;
-			vatsData->highlightMain.refr = nullptr;
-			vatsData->highlightMain.node = nullptr;
-			vatsData->highlightState = 0;
+			pVATSEffect->highlightedRefs[0].refr = nullptr;
+			pVATSEffect->highlightedRefs[0].node = nullptr;
+			pVATSEffect->highlightMain.refr = nullptr;
+			pVATSEffect->highlightMain.node = nullptr;
+			pVATSEffect->highlightState = 0;
 		}
 
 		*result = 1;
@@ -1170,12 +1160,14 @@ bool Cmd_GetRunSpeed_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_ToggleNthPipboyLight_Execute(COMMAND_ARGS) {
-	uint32_t index, isVisible;
+	uint32_t uiIndex = UINT32_MAX;
+	BOOL bVisibleArg = FALSE;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &index, &isVisible) && index < 3) {
-		FOPipboyManager* pipboyManager = InterfaceManager::GetSingleton()->pipboyManager;
-		if (pipboyManager->byte028 && pipboyManager->pipboyLightGlow[index]) {
-			pipboyManager->pipboyLightGlow[index]->SetAppCulled(!isVisible);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiIndex, &bVisibleArg) && uiIndex < 3 && InterfaceManager::GetSingleton()) {
+		FOPipboyManager* pPipBoyMgr = InterfaceManager::GetSingleton()->pipboyManager;
+		if (pPipBoyMgr->byte028 && pPipBoyMgr->pipboyLightGlow[uiIndex]) {
+			const bool bVisible = bVisibleArg > 0;
+			pPipBoyMgr->pipboyLightGlow[uiIndex]->SetAppCulled(bVisible);
 			*result = 1;
 		}
 	}
@@ -1191,7 +1183,7 @@ bool Cmd_UnsetAV_Execute(COMMAND_ARGS) {
 
 		Modifier* pModifier = pActor->kBaseValueOverrides.GetModifierItem(eActorValue);
 		pActor->kBaseValueOverrides.DeleteModifier(pModifier);
-		pActor->AddChange(0x400000);
+		pActor->AddChange(BGSChangeFlag::ACTOR_OVERRIDE_MODIFIERS);
 
 		if (!pActor->IsPlayer()) {
 			BaseProcess* pAIProcess = pActor->GetCurrentAIProcess();
@@ -1217,7 +1209,7 @@ bool Cmd_UnforceAV_Execute(COMMAND_ARGS) {
 
 		Modifier* pModifier = pActor->kPermanentModifiers.GetModifierItem(eActorValue);
 		pActor->kPermanentModifiers.DeleteModifier(pModifier);
-		pActor->AddChange(0x800000);
+		pActor->AddChange(BGSChangeFlag::ACTOR_PERMANENT_MODIFIERS);
 
 		if (!pActor->IsPlayer()) {
 			BaseProcess* pAIProcess = pActor->GetCurrentAIProcess();
@@ -1251,20 +1243,20 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pPoison) && (!pPoison || (IS_TYPE(pPoison, AlchemyItem) && pPoison->CanBePoison()))) {
 		TESObjectWEAP* pWeapon = nullptr;
 		ExtraDataList* pExtraDataList = nullptr;
-		if (!thisObj->IsActor()) {
+		if (thisObj->IsActor()) {
+			ItemChange* pWeaponItem = static_cast<Actor*>(thisObj)->GetCurrentAIProcess()->GetCurrentWeapon();
+			if (pWeaponItem && pWeaponItem->pExtraLists) {
+				pWeapon = static_cast<TESObjectWEAP*>(pWeaponItem->pObject);
+				pExtraDataList = pWeaponItem->pExtraLists->GetItem();
+			}
+		}
+		else {
 			InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
 			if (!pInvRef || !pInvRef->pForm || pInvRef->pForm->GetFormType() != FORM_TYPE::TESObjectWEAP)
 				return true;
 
 			pWeapon = static_cast<TESObjectWEAP*>(pInvRef->pForm);
 			pExtraDataList = pInvRef->pExtraDataList;
-		}
-		else {
-			ItemChange* pWeaponItem = ((Actor*)thisObj)->GetCurrentAIProcess()->GetCurrentWeapon();
-			if (pWeaponItem && pWeaponItem->pExtraLists) {
-				pWeapon = static_cast<TESObjectWEAP*>(pWeaponItem->pObject);
-				pExtraDataList = pWeaponItem->pExtraLists->GetItem();
-			}
 		}
 
 		if (pWeapon && pExtraDataList && (pWeapon->GetWeaponSkill() == ActorValue::Index::UNARMED || pWeapon->GetWeaponSkill() == ActorValue::Index::MELEE_WEAPONS)) {
@@ -1283,12 +1275,12 @@ bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	Interface::Menus eMenu = Interface::Menus::NoMenu;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &eMenu);
 	if (eMenu == Interface::Menus::NoMenu || eMenu == Interface::Menus::Inventory || eMenu == Interface::Menus::Stats || eMenu == Interface::Menus::PipboyData) {
-		InterfaceManager* pMgr = InterfaceManager::GetSingleton();
-		if (pMgr) {
-			if (pMgr->pipBoyMode == 0)
-				pMgr->OpenPipboy(nullptr, eMenu);
-			else if (pMgr->pipBoyMode == 3)
-				pMgr->ClosePipboy(nullptr);
+		InterfaceManager* pUIMgr = InterfaceManager::GetSingleton();
+		if (pUIMgr) {
+			if (pUIMgr->pipBoyMode == 0)
+				pUIMgr->OpenPipboy(nullptr, eMenu);
+			else if (pUIMgr->pipBoyMode == 3)
+				pUIMgr->ClosePipboy(nullptr);
 			*result = 1;
 		}
 	}
@@ -1327,7 +1319,8 @@ bool Cmd_Jump_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_StopVATSCam_Execute(COMMAND_ARGS) {
-	ThisCall(0x93E770, PlayerCharacter::GetSingleton(), 2, 0);
+	PlayerCharacter::GetSingleton()->ResetKillCam(KILL_CAM_TYPE::VATS, false);
+	*result = 1;
 	return true;
 }
 
@@ -1336,7 +1329,8 @@ constexpr inline AddressPtr<float, 0x11DFED8> fCameraShakeCurrentTime;
 
 bool Cmd_SetCameraShake_Execute(COMMAND_ARGS) {
 	*result = 0;
-	float fShakeMult, fTime;
+	float fShakeMult;
+	float fTime;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fShakeMult, &fTime)) {
 		fCameraShakeMult = fShakeMult;
 		fCameraShakeCurrentTime = fTime;
@@ -1468,14 +1462,13 @@ bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
 			return;
 
 		TESObjectWEAP* pWeapon = static_cast<TESObjectWEAP*>(apObject);
-
 		for (uint32_t uiSlot = 0; uiSlot < 3; uiSlot++) {
 			if (pWeapon->pModObjects[uiSlot] == pTargetMod) {
 				g_arrInterface->AppendElement(weaponArray, NVSEArrayElement(pWeapon));
 				break;
 			}
 		}
-		});
+	});
 
 	g_arrInterface->AssignCommandResult(weaponArray, result);
 	if (Script::GetConsoleOuput())
@@ -1486,9 +1479,8 @@ bool Cmd_GetWeaponsForMod_Execute(COMMAND_ARGS) {
 
 SPEC_NOINLINE bool Cmd_IsInDialogueWithPlayer_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	if (thisObj && thisObj->IsActor()) {
-		Actor* pActor = static_cast<Actor*>(thisObj);
-		*result = pActor->IsInDialogueWithPlayer();
+	if (thisObj && thisObj->IsMobileObject()) {
+		*result = static_cast<Actor*>(thisObj)->IsInDialogueWithPlayer();
 	}
 	return true;
 }
@@ -1505,7 +1497,7 @@ bool Cmd_PathToPoint_Execute(COMMAND_ARGS) {
 	NiPoint3 kTarget;
 	float fFaceAngle = FLT_MAX;
 	float fRadius = -1.f;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &kTarget.x, &kTarget.y, &kTarget.z, &fRadius, &fFaceAngle) && thisObj->IsActor()) {
+	if (thisObj->IsActor() && ExtractArgsEx(EXTRACT_ARGS_EX, &kTarget.x, &kTarget.y, &kTarget.z, &fRadius, &fFaceAngle)) {
 		Actor* pActor = static_cast<Actor*>(thisObj);
 		TESObjectCELL* pCell = TES::GetSingleton()->GetCellForPoint(kTarget);
 		if (pCell) {

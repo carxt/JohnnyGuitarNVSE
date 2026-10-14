@@ -2345,7 +2345,7 @@ namespace RefWalker {
 		else {
 			uint32_t uiCount = 0;
 			const GridCellArray* pArray = TES::GetSingleton()->pGridCellArray;
-			const int32_t iGridSize = pArray->iDimension;
+			const int32_t iGridSize = pArray->uiDimension;
 			for (int32_t x = 0; x < iGridSize; x++) {
 				for (int32_t y = 0; y < iGridSize; y++) {
 					const GridCell* pGridCell = pArray->GetCell(x, y);

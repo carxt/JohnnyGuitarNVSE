@@ -381,6 +381,8 @@ public:
 
 	void SetPlayerMapMarker(NiPoint3 akLocation, TESForm* apSpace);
 	void RemovePlayerMapMarker();
+
+	void ResetKillCam(KILL_CAM_TYPE aeOldType, bool abForce);
 };
 
 ASSERT_SIZE(PlayerCharacter, 0xE50);

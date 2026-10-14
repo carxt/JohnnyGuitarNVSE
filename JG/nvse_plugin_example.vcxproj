@@ -709,6 +709,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\FileFinder.cpp" />
     <ClCompile Include="internal\Game\Bethesda\FurnitureMark.cpp" />
     <ClCompile Include="internal\Game\Bethesda\GameSettingCollection.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\GridArray.cpp" />
     <ClCompile Include="internal\Game\Bethesda\GridCellArray.cpp" />
     <ClCompile Include="internal\Game\Bethesda\HitData.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>

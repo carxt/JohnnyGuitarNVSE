@@ -349,6 +349,32 @@ void TESObjectWEAP::SetHasModScope(bool abVal) {
 	kData.uiFlagsEx.bHasModScope = abVal;
 }
 
+// GAME - 0x524B80
+float TESObjectWEAP::GetMinSpread(bool abModded) const {
+#ifdef GAME
+	return ThisCall<float>(0x524B80, this, abModded);
+#else
+	if (!abModded)
+		return kData.fMinSpread;
+
+	const float fCalculated = kData.fMinSpread - GetModEffectValue(WEAPON_MOD_EFFECT_TYPE::DECREASE_SPREAD, 0);
+	return std::max(0.f, fCalculated);
+#endif
+}
+
+// GAME - 0x524BE0
+float TESObjectWEAP::GetSpread(bool abModded) const {
+#ifdef GAME
+	return ThisCall<float>(0x524BE0, this, abModded);
+#else
+	if (!abModded)
+		return kData.fSpread;
+
+	const float fCalculated = kData.fSpread - GetModEffectValue(WEAPON_MOD_EFFECT_TYPE::DECREASE_SPREAD, 0);
+	return std::max(0.f, fCalculated);
+#endif
+}
+
 // GAME - 0x645C20
 uint16_t TESObjectWEAP::GetCriticalDamage() const {
 	return kCriticalData.usCriticalDamage;

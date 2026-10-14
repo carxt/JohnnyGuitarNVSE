@@ -322,6 +322,10 @@ public:
 	bool GetHasModScope() const;
 	void SetHasModScope(bool abVal);
 
+	float GetMinSpread(bool abModded) const;
+	
+	float GetSpread(bool abModded) const;
+
 	uint16_t GetCriticalDamage() const;
 	void SetCriticalDamage(uint16_t ausVal);
 

@@ -1035,6 +1035,10 @@ public:
 	static void SetHUDShake(float afShakePower) {
 		CdeclCall(0x94C3A0, afShakePower);
 	}
+
+	static void SetMenuMode(uint32_t aeMenuMode) {
+		CdeclCall(0x771700, aeMenuMode);
+	}
 };
 static_assert(sizeof(HUDMainMenu) == 0x278);
 
