@@ -26,6 +26,7 @@
 #include "WorldToScreen.hpp"
 #include "FormSkeletons.hpp"
 #include "NamedSpellLights.hpp"
+#include "MorePluginTypes.hpp"
 
 #include "Bethesda/GameSettingCollection.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
@@ -290,6 +291,8 @@ namespace JohnnyPatches {
 #ifdef GAME
 		if (bUseFormSkeletons)
 			FormSkeletons::Install();
+
+		MorePluginTypes::Install();
 #endif
 		if (bBSAUpgrade)
 			BSAUpgrade::Install();
