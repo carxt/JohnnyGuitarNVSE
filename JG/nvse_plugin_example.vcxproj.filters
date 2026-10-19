@@ -1291,6 +1291,15 @@
     <ClCompile Include="internal\Game\Bethesda\ExtraActivateRef.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\FalloutRadio.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\BSFaceGenManager.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\GridArray.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -1466,9 +1475,6 @@
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiTNewInterface.hpp">
-      <Filter>internal\Game\Gamebryo</Filter>
-    </ClInclude>
-    <ClInclude Include="internal\Game\Gamebryo\NiTObjectAllocator.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiTObjectArray.hpp">
@@ -3526,6 +3532,9 @@
     <ClInclude Include="internal\Game\Bethesda\ExtraEnableStateParent.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSFaceGenManager.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -3615,6 +3624,18 @@
     </None>
     <None Include="internal\Game\Bethesda\BSTStaticFreeList.inl">
       <Filter>internal\Game\Bethesda</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiTPointerAllocator.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiTDefaultAllocator.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiTMallocInterface.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiTNewInterface.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
     </None>
   </ItemGroup>
 </Project>

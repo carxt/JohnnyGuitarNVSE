@@ -43,6 +43,7 @@ public:
 
 	BSStringT&			operator+=(const T* apText);
 	BSStringT&			operator+=(const BSStringT& arOther);
+
 	const T*			operator[](uint32_t auiIndex);
 						operator const T* ();
 
@@ -57,5 +58,8 @@ public:
 
 #include "BSStringT.inl"
 
-typedef BSStringT<char>		BSString;
-typedef BSStringT<wchar_t>	BSWideString;
+using BSString		= BSStringT<char>;
+using BSWideString	= BSStringT<wchar_t>;
+
+ASSERT_SIZE(BSString, 0x8);
+ASSERT_SIZE(BSWideString, 0x8);

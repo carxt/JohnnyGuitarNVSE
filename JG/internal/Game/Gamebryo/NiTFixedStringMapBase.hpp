@@ -4,7 +4,7 @@
 #include "NiFixedString.hpp"
 
 template <class Allocator, class T_Data>
-class SPEC_EMPTY_BASES NiTFixedStringMapBase : public NiMemObject {
+class SPEC_EMPTY_BASES NiTFixedStringMapBase : public BSMemObject {
 public:
 	NiTFixedStringMapBase(uint32_t auiHashSize = 37);
 	NiTFixedStringMapBase(const NiTFixedStringMapBase&) = delete;

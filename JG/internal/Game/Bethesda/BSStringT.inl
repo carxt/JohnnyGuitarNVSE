@@ -31,6 +31,7 @@ inline BSStringT<T>::BSStringT() {
 }
 
 // GAME - 0x40C0E0
+// GECK - 0x4070F0
 template<typename T>
 inline BSStringT<T>::BSStringT(const T* apText) {
 	Init();
@@ -38,6 +39,7 @@ inline BSStringT<T>::BSStringT(const T* apText) {
 }
 
 // GAME - 0x4047F0
+// GECK - 0x4070C0
 template<typename T>
 inline BSStringT<T>::BSStringT(const BSStringT& arSrc) {
 	Init();
@@ -63,6 +65,7 @@ inline void BSStringT<T>::Init() {
 }
 
 // GAME - 0x4037D0
+// GECK - 0x40CBF0
 template<typename T>
 inline BSStringT<T>::~BSStringT() {
 	Set(nullptr);
@@ -75,6 +78,7 @@ inline const T* BSStringT<T>::GetString() const {
 }
 
 // GAME - 0x4048E0
+// GECK - 0x405280
 template<typename T>
 inline uint32_t BSStringT<T>::GetLength() const {
 	if (usLength == UINT16_MAX) [[unlikely]] {
@@ -109,6 +113,7 @@ inline uint32_t BSStringT<T>::GetByteLengthWithNull() const {
 }
 
 // GAME - 0x4037F0
+// GECK - 0x405B40
 template<typename T>
 inline bool BSStringT<T>::Set(const T* apText, uint32_t auiLength) {
 	const uint32_t uiLength = apText ? BSstrlen(apText) : 0;
@@ -144,8 +149,9 @@ inline bool BSStringT<T>::Set(const T* apText, uint32_t auiLength) {
 }
 
 // GAME - 0x438470
+// GECK - 0x406710
 template<typename T>
-inline bool BSStringT<T>::Set(const BSStringT<T>& arSource) {
+inline bool BSStringT<T>::Set(const BSStringT& arSource) {
 	const uint32_t uiLength = arSource.GetLength();
 	if (uiLength > GetMaxLength()) {
 		T* pOrgStr = pString;
@@ -172,6 +178,7 @@ inline bool BSStringT<T>::Set(const BSStringT<T>& arSource) {
 }
 
 // GAME - 0x408A80
+// GECK - 0x40BB10
 template<typename T>
 inline int32_t BSStringT<T>::StrCmp(const T* apText, bool abNotCaseSensitive) const {
 	if (apText && GetString()) {
@@ -190,11 +197,12 @@ inline int32_t BSStringT<T>::StrCmp(const T* apText, bool abNotCaseSensitive) co
 
 // GAME - 0x501C90
 template<typename T>
-inline int32_t BSStringT<T>::StrCmp(const BSStringT<T>& arOther, bool abNotCaseSensitive) const {
+inline int32_t BSStringT<T>::StrCmp(const BSStringT& arOther, bool abNotCaseSensitive) const {
 	return StrCmp(arOther.GetString(), abNotCaseSensitive);
 }
 
 // GAME - 0x438390
+// GECK - 0x407080
 template<typename T>
 inline BSStringT<T>& BSStringT<T>::operator=(const T* apText) {
 	Set(apText);
@@ -203,13 +211,13 @@ inline BSStringT<T>& BSStringT<T>::operator=(const T* apText) {
 
 // GAME - 0x501C10
 template<typename T>
-inline BSStringT<T>& BSStringT<T>::operator=(const BSStringT<T>& arOther) {
+inline BSStringT<T>& BSStringT<T>::operator=(const BSStringT& arOther) {
 	Set(arOther);
 	return *this;
 }
 
 template<typename T>
-inline BSStringT<T>& BSStringT<T>::operator=(BSStringT<T>&& arOther) {
+inline BSStringT<T>& BSStringT<T>::operator=(BSStringT&& arOther) {
 	pString = arOther.pString;
 	usLength = arOther.usLength;
 	usMaxLength = arOther.usMaxLength;
@@ -226,11 +234,12 @@ inline bool BSStringT<T>::operator==(const T* apText) const {
 
 // GAME - 0x501C60
 template<typename T>
-inline bool BSStringT<T>::operator==(const BSStringT<T>& arOther) const {
+inline bool BSStringT<T>::operator==(const BSStringT& arOther) const {
 	return StrCmp(arOther, true) == 0;
 }
 
 // GAME - 0x404820
+// GECK - 0x405C40
 template<typename T>
 inline BSStringT<T>& BSStringT<T>::operator+=(const T* apText) {
 	if (!apText)
@@ -253,8 +262,9 @@ inline BSStringT<T>& BSStringT<T>::operator+=(const T* apText) {
 }
 
 // GAME - 0x7E0D80
+// GECK - 0x406810
 template<typename T>
-inline BSStringT<T>& BSStringT<T>::operator+=(const BSStringT<T>& arOther) {
+inline BSStringT<T>& BSStringT<T>::operator+=(const BSStringT& arOther) {
 	if (!arOther)
 		return *this;
 
@@ -286,6 +296,7 @@ inline BSStringT<T>::operator const T* () {
 }
 
 // GAME - 0x406F60
+// GECK - 0x407120
 template<typename T>
 inline void BSStringT<T>::SPrintF(const T* apFmt, ...) {
 	va_list args;
@@ -295,6 +306,7 @@ inline void BSStringT<T>::SPrintF(const T* apFmt, ...) {
 }
 
 // GAME - 0x406F90
+// GECK - 0x4069E0
 template<typename T>
 inline void BSStringT<T>::VSPrintF(const T* apFmt, va_list args) {
 	T cBuffer[1024];
@@ -320,3 +332,131 @@ template<typename T>
 inline const T* BSStringT<T>::c_str() const {
 	return pString ? pString : "";
 }
+
+#pragma region Specializations - char
+
+// GAME - 0x40C0E0
+// GECK - 0x4070F0
+inline BSStringT<char>::BSStringT(const char* apText) {
+#ifdef GAME
+	ThisCall(0x40C0E0, this, apText);
+#else
+	ThisCall(0x4070F0, this, apText);
+#endif
+}
+
+// GAME - 0x4047F0
+// GECK - 0x4070C0
+inline BSStringT<char>::BSStringT(const BSStringT<char>& arSrc) {
+#ifdef GAME
+	ThisCall(0x4047F0, this, &arSrc);
+#else
+	ThisCall(0x4070C0, this, &arSrc);
+#endif
+}
+
+// GAME - 0x4037D0
+// GECK - 0x40CBF0
+inline BSStringT<char>::~BSStringT() {
+#ifdef GAME
+	ThisCall(0x4037D0, this);
+#else
+	ThisCall(0x40CBF0, this);
+#endif
+}
+
+// GAME - 0x4048E0
+// GECK - 0x405280
+inline uint32_t BSStringT<char>::GetLength() const {
+#ifdef GAME
+	return ThisCall<uint32_t>(0x4048E0, this);
+#else
+	return ThisCall<uint32_t>(0x405280, this);
+#endif
+}
+
+// GAME - 0x4037F0
+// GECK - 0x405B40
+inline bool BSStringT<char>::Set(const char* apText, uint32_t auiLength) {
+#ifdef GAME
+	return ThisCall<bool>(0x4037F0, this, apText, auiLength);
+#else
+	return ThisCall<bool>(0x405B40, this, apText, auiLength);
+#endif
+}
+
+// GAME - 0x438470
+// GECK - 0x406710
+inline bool BSStringT<char>::Set(const BSStringT<char>& arSource) {
+#ifdef GAME
+	return ThisCall<bool>(0x438470, this, &arSource);
+#else
+	return ThisCall<bool>(0x406710, this, &arSource);
+#endif
+}
+
+// GAME - 0x408A80
+// GECK - 0x40BB10
+inline int32_t BSStringT<char>::StrCmp(const char* apText, bool abNotCaseSensitive) const {
+#ifdef GAME
+	return ThisCall<int32_t>(0x408A80, this, apText, abNotCaseSensitive);
+#else
+	return ThisCall<int32_t>(0x40BB10, this, apText, abNotCaseSensitive);
+#endif
+}
+
+// GAME - 0x404820
+// GECK - 0x405C40
+inline BSStringT<char>& BSStringT<char>::operator+=(const char* apText) {
+#ifdef GAME
+	return ThisCall<BSStringT<char>&>(0x404820, this, apText);
+#else
+	return ThisCall<BSStringT<char>&>(0x405C40, this, apText);
+#endif
+}
+
+// GAME - 0x7E0D80
+// GECK - 0x406810
+inline BSStringT<char>& BSStringT<char>::operator+=(const BSStringT<char>& arOther) {
+#ifdef GAME
+	return ThisCall<BSStringT<char>&>(0x7E0D80, this, &arOther);
+#else
+	return ThisCall<BSStringT<char>&>(0x406810, this, &arOther);
+#endif
+}
+
+// GAME - 0x406F90
+// GECK - 0x4069E0
+inline void BSStringT<char>::VSPrintF(const char* apFmt, va_list args) {
+#ifdef GAME
+	ThisCall(0x406F90, this, apFmt, args);
+#else
+	ThisCall(0x4069E0, this, apFmt, args);
+#endif
+}
+
+#pragma endregion
+
+#pragma region Specializations - wchar_t
+
+// GAME - 0xAFFF50
+// GECK - 0x8A0E30
+inline bool BSStringT<wchar_t>::Set(const wchar_t* apText, uint32_t auiLength) {
+#ifdef GAME
+	return ThisCall<bool>(0xAFFF50, this, apText, auiLength);
+#else
+	return ThisCall<bool>(0x8A0E30, this, apText, auiLength);
+#endif
+}
+
+// GAME - 0xB00120
+// GECK - 0x8A1000
+inline BSStringT<wchar_t>& BSStringT<wchar_t>::operator+=(const wchar_t* apText) {
+#ifdef GAME
+	return ThisCall<BSStringT<wchar_t>&>(0xB00120, this, apText);
+#else
+	return ThisCall<BSStringT<wchar_t>&>(0x8A1000, this, apText);
+#endif
+}
+
+#pragma endregion

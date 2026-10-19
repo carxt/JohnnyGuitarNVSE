@@ -1,6 +1,7 @@
 #pragma once
 
 #include "NiTMapBase.hpp"
+#include "NiMemory.hpp"
 
 // GAME - 0x405630
 template<class Allocator, class T_Key, class T_Data>

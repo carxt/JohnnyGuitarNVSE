@@ -3,7 +3,7 @@
 #include "NiGlobalStringTable.hpp"
 #include <string_view>
 
-class SPEC_EMPTY_BASES NiFixedString : public NiMemObject {
+class SPEC_EMPTY_BASES NiFixedString : public BSMemObject {
 public:
 	NiFixedString() noexcept;
 	NiFixedString(const char* apString) noexcept;

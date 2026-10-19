@@ -43,4 +43,7 @@ public:
 	static constexpr AddressPtr<uint32_t, 0x11DD43C> uiRadioState;
 	static constexpr AddressPtr<TESSound*, 0x11DD440> pRadioAttenuationModel;
 	static constexpr AddressPtr<BSSimpleList<FORadioStation*>, 0x11DD554> kActiveRadioStations;
+
+	static FORadioReceiver* GetActiveReceiver(TESObjectREFR* apReceiverRef);
+	static void ActivateRadio(TESObjectREFR* apRadioRef, bool abEnable);
 };
