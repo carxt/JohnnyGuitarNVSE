@@ -6,12 +6,22 @@
 
 namespace JohnnySerialization {
 
-	bool (*_WriteRecord)(uint32_t type, uint32_t version, const void* buffer, uint32_t length);
-	bool (*_WriteRecordData)(const void* buffer, uint32_t length);
-	bool (*_GetNextRecordInfo)(uint32_t* type, uint32_t* version, uint32_t* length);
-	uint32_t(*_ReadRecordData)(void* buffer, uint32_t length);
-	bool (*_ResolveFormID)(uint32_t refID, uint32_t* outRefID);
-	bool (*_OpenRecord)(uint32_t type, uint32_t version);
+	bool		(__cdecl* _WriteRecord)(uint32_t type, uint32_t version, const void* buffer, uint32_t length);
+	bool		(__cdecl* _WriteRecordData)(const void* buffer, uint32_t length);
+	bool		(__cdecl* _GetNextRecordInfo)(uint32_t* type, uint32_t* version, uint32_t* length);
+	uint32_t	(__cdecl* _ReadRecordData)(void* buffer, uint32_t length);
+	bool		(__cdecl* _ResolveFormID)(uint32_t refID, uint32_t* outRefID);
+	bool		(__cdecl* _OpenRecord)(uint32_t type, uint32_t version);
+
+	void		(__cdecl* _WriteRecord8)(uint8_t inData);
+	void		(__cdecl* _WriteRecord16)(uint16_t inData);
+	void		(__cdecl* _WriteRecord32)(uint32_t inData);
+	void		(__cdecl* _WriteRecord64)(const void* inData);
+
+	uint8_t		(__cdecl* _ReadRecord8)();
+	uint16_t	(__cdecl* _ReadRecord16)();
+	uint32_t	(__cdecl* _ReadRecord32)();
+	void		(__cdecl* _ReadRecord64)(void* outData);
 
 #define SERIALIZATION_VERSION 1
 
@@ -69,6 +79,15 @@ namespace JohnnySerialization {
 		_ReadRecordData = serialization->ReadRecordData;
 		_ResolveFormID = serialization->ResolveRefID;
 		_OpenRecord = serialization->OpenRecord;
+		_WriteRecord8 = serialization->WriteRecord8;
+		_WriteRecord16 = serialization->WriteRecord16;
+		_WriteRecord32 = serialization->WriteRecord32;
+		_WriteRecord64 = serialization->WriteRecord64;
+		_ReadRecord8 = serialization->ReadRecord8;
+		_ReadRecord16 = serialization->ReadRecord16;
+		_ReadRecord32 = serialization->ReadRecord32;
+		_ReadRecord64 = serialization->ReadRecord64;
+
 		serialization->SetLoadCallback(nvse->GetPluginHandle(), LoadGameCallback);
 		serialization->SetSaveCallback(nvse->GetPluginHandle(), SaveGameCallback);
 	}
