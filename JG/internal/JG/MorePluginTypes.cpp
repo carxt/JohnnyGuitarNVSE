@@ -203,7 +203,7 @@ namespace MorePluginTypes {
 		}
 
 		SPEC_NAKED void AdjustFormIDFileIndex_CellSearch_Asm() {
-			static constexpr uint32_t uiReturnAddr = 0x461FB2;
+			static constexpr uint32_t uiReturnAddr = 0x461FA6;
 			__asm {
 				mov     ecx, [ebp - 0x2C]
 				mov     edx, [ebp - 0x30]
