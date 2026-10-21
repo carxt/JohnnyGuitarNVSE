@@ -285,13 +285,11 @@ namespace MorePluginTypes {
 					SetMediumFile(true);
 					SetMediumCompileIndex(apParent->GetMediumCompileIndex());
 				}
-
-				if (apParent->IsSmallFile()) {
+				else if (apParent->IsSmallFile()) {
 					SetSmallFile(true);
 					SetSmallCompileIndex(apParent->GetSmallCompileIndex());
 				}
-
-				if (apParent->IsOverlay())
+				else if (apParent->IsOverlay())
 					SetOverlay(true);
 
 				ThisCall(kSetThreadSafeParentDetour, this, apParent);
@@ -304,14 +302,15 @@ namespace MorePluginTypes {
 
 				SetSmallFile(kCurrentForm.uiFormFlags.Get(TESFile::FileFlags::SMALL));
 
-				assert(IsMediumFile() + IsSmallFile() < 2);
-
 				SetOverlay(kCurrentForm.uiFormFlags.Get(TESFile::FileFlags::OVERLAY));
 
-				if (IsOverlay() && !uiMasterCount) {
-					_MESSAGE("Overlay file %s - no masters", GetName());
+				if (IsOverlay() && (!uiMasterCount || IsSmallFile() || IsMediumFile())) {
+					_MESSAGE("%s is an invalid Overlay file! (Has no masters or is flagged as medium or small)", GetName());
 					DebugBreak();
+					SetOverlay(false);
 				}
+
+				assert((IsMediumFile() + IsSmallFile() + IsOverlay()) < 2);
 
 				ThisCall(kSetFileLanguageDetour, this, auiLanguage);
 			}
