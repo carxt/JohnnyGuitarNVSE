@@ -241,20 +241,25 @@ namespace MorePluginTypes {
 			}
 
 			TESFile* GetCompiledFile(uint32_t auiIndex) const {
-				if (auiIndex == 0xFF)
-					return nullptr;
+				if (auiIndex > 0xFF) {
+					const FormID_View vFormID(auiIndex);
+					if (vFormID.IsCreated()) [[unlikely]]
+						return nullptr;
 
-				if (FormID_View(auiIndex).IsMedium() && SupportsNewFileTypes()) {
-					const uint8_t usMediumIndex = FormID_View(auiIndex).GetMediumIndex();
-					return kCompiledFiles.GetMediumFile(usMediumIndex);
+					if (vFormID.IsMedium()) {
+						const uint8_t usMediumIndex = vFormID.GetMediumIndex();
+						return kCompiledFiles.GetMediumFile(usMediumIndex);
+					}
+
+					if (vFormID.IsSmall()) {
+						const uint16_t usSmallIndex = vFormID.GetSmallIndex();
+						return kCompiledFiles.GetSmallFile(usSmallIndex);
+					}
+
+					auiIndex = vFormID.GetCompileIndex();
 				}
-				else if (FormID_View(auiIndex).IsSmall() && SupportsNewFileTypes()) {
-					const uint16_t usSmallIndex = FormID_View(auiIndex).GetSmallIndex();
-					return kCompiledFiles.GetSmallFile(usSmallIndex);
-				}
-				else {
-					return kCompiledFiles.GetFile(auiIndex);
-				}
+
+				return kCompiledFiles.GetFile(auiIndex);
 			}
 		};
 
