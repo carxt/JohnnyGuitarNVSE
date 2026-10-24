@@ -729,6 +729,8 @@ namespace MorePluginTypes {
 
 namespace MorePluginTypes {
 
+	static TESFile* RUNTIME_FILE = reinterpret_cast<TESFile*>(0xFF);
+
 	static TESFile* __fastcall JIP_LookupModByName(TESDataHandler* apThis, const char* apFileName) {
 		return apThis->GetListFile(apFileName);
 	}
@@ -752,10 +754,8 @@ namespace MorePluginTypes {
 		if (FormID_View(arFormID).IsCreated())
 			return arFormID;
 
-		FormID uiFormID = 0;
-		JohnnySerialization::_ResolveFormID(arFormID, &uiFormID);
-		arFormID = uiFormID;
-		return uiFormID;
+		JohnnySerialization::_ResolveFormID(arFormID, &arFormID);
+		return arFormID;
 	}
 
 	TESFile* __fastcall GetOverridingMod(TESForm* apForm) {
@@ -766,11 +766,11 @@ namespace MorePluginTypes {
 		TESFile* pFile = apForm->GetFile(-1);
 		if (pFile)
 			return pFile;
-		return reinterpret_cast<TESFile*>(0xFF);
+		return RUNTIME_FILE;
 	}
 
 	void __cdecl JIP_SaveMod(const TESFile* apFile) {
-		bool bValidFile = apFile && apFile != reinterpret_cast<TESFile*>(0xFF);
+		bool bValidFile = apFile && apFile != RUNTIME_FILE;
 		const uint8_t ucIndex = bValidFile ? apFile->GetCompileIndex() : 0xFF;
 		const uint16_t usSecondIndex = bValidFile ? apFile->GetSecondCompileIndex() : 0;
 		JohnnySerialization::_WriteRecord8(ucIndex);
@@ -778,20 +778,31 @@ namespace MorePluginTypes {
 	}
 
 	TESFile* __fastcall JIP_LoadMod(uint8_t aucIndex, uint16_t ausSecondIndex, bool abSupportsSpecial) {
-		FormID_View uiTempFormID(0);
+		if (aucIndex == 0xFF)
+			return RUNTIME_FILE;
+
+		FormID_View vTempFormID(0);
 		if (abSupportsSpecial) {
 			if (aucIndex == 0xFD)
-				uiTempFormID.SetMediumIndex(ausSecondIndex);
+				vTempFormID.SetMediumIndex(ausSecondIndex);
 			else if (aucIndex == 0xFE)
-				uiTempFormID.SetSmallIndex(ausSecondIndex);
+				vTempFormID.SetSmallIndex(ausSecondIndex);
 		}
 		else if (aucIndex == 0xFE)
 			return nullptr;
 		else if (aucIndex == 0xFD)
 			return nullptr;
 
-		uiTempFormID.SetCompileIndex(aucIndex);
-		return TESDataHandler::GetSingleton()->GetCompiledFileForFormID(uiTempFormID.Get());
+		vTempFormID.SetCompileIndex(aucIndex);
+
+		FormID uiFormID = vTempFormID.Get();
+		if (JohnnySerialization::_ResolveFormID(uiFormID, &uiFormID)) {
+			TESFile* pFile = TESDataHandler::GetSingleton()->GetCompiledFileForFormID(uiFormID);
+			assert(pFile);
+			return pFile;
+		}
+		else
+			return nullptr;
 	}
 
 	// I'm having more fun than you can imagine
@@ -902,6 +913,7 @@ namespace MorePluginTypes {
 
 			// Load
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100156EA) + 3, AUX_VAR_SAVE_VERSION); 
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100156EE) + 1, 0x8F);
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10015713), JIP_LoadMod_Asm);
 			uiLoadModAddr = JIPUtils::GetAddress(0x10015722);
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10015722), "\x85\xC0\x0F\x84\xA1\x01\x00\x00\xEB\x0E");
@@ -999,17 +1011,17 @@ namespace MorePluginTypes {
 			uiSetVariableReturnAddr = JIPUtils::GetAddress(0x100024DB);
 
 			// ScriptVariableAction_Execute
-			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10034C8E), GetOverridingMod);
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10034C8E), GetOverridingModOrID);
 
 			// Cmd_RemoveAllAddedVariables_Execute
-			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10034DF8), GetOverridingMod);
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10034DF8), GetOverridingModOrID);
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10034E01), "\x89\xC1\x89\x4D\xFC");
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10034E31), 0x39);
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10034E6E), "\x8B\x4D\xFC");
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10034EA3), "\x8B\x4D\xFC");
 
 			// Cmd_ClearJIPSavedData_Execute
-			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1003CB3C), GetOverridingMod);
+			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1003CB3C), GetOverridingModOrID);
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1003CB45), "\x89\xC1\x90");
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1003CBC5), "\x8B\x4D\x10\x90");
 			
@@ -1106,6 +1118,7 @@ namespace MorePluginTypes {
 
 			// LoadGameCallback
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10015941) + 3, REF_MAP_SAVE_VERSION);
+			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x10015945) + 1, 0x8F);
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1001596C), JIP_LoadMod_Asm);
 			uiLoadModAddr = JIPUtils::GetAddress(0x1001597B);
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1001597B), "\x85\xC0\x0F\x84\x5E\x01\x00\x00\xEB\x0E");
