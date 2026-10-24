@@ -16,8 +16,9 @@
 #include <JIP/JIPUtils.hpp>
 
 #include "Shared/Utils/DebugLog.hpp"
-#include "Shared/SafeWrite/SafeWrite.hpp"
 #include "Shared/Utils/StackObject.hpp"
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 extern NVSEStringVarInterface* g_strInterface;
@@ -25,8 +26,6 @@ extern NVSEScriptInterface* g_scriptInterface;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 
 namespace MorePluginTypes {
-
-	bool bValid = false;
 
 	class FormID_ViewEx : public FormID_View {
 	public:
@@ -1429,9 +1428,6 @@ namespace MorePluginTypes {
 	}
 
 	void InitJIPHooks() {
-		if (!bValid)
-			return;
-
 		if (!JIPUtils::IsValid())
 			return;
 
@@ -1521,7 +1517,6 @@ namespace MorePluginTypes {
 	bool JIP_IsFormOverridden(COMMAND_ARGS) {
 		TESForm* pForm = nullptr;
 		if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && pForm) {
-			const FormID uiFormID = scriptObj->GetFormID();
 			const uint8_t ucIndex = scriptObj->GetCompileIndex();
 
 			const TESFile* pFile = pForm->GetFile(-1);
@@ -1598,9 +1593,6 @@ namespace MorePluginTypes {
 	}
 
 	void InitCommandHooks() {
-		if (!bValid)
-			return;
-
 		if (!JIPUtils::IsValid())
 			return;
 
@@ -1630,6 +1622,60 @@ namespace MorePluginTypes {
 
 namespace MorePluginTypes {
 
+	template<class T>
+	using ScrapVector = std::vector<T, BSScrapAllocator<T>>;
+
+	struct ModInfo {
+		const char* pModName;
+		uint32_t	uiLastVersion;
+	};
+
+	// Versions here are the last known unsupported versions
+	ModInfo kMods[] = {
+		{ "nvse_stewie_tweaks", 1000 },
+		{ "ShowOffNVSE", 184 },
+		{ "kNVSE", 37 },
+		{ "itr-nvse", 20202 },
+		{ "ttw_nvse", 333 },
+		{ "yUI", 140 },
+		{ "yGTM", 210 },
+		{ "CellOffsetGenerator", 108 },
+		{ "BaseObjectSwapper", 2 },
+	};
+
+	static bool __fastcall CheckMod(ModInfo& arMod, ScrapVector<BSString>& arNames) {
+		const PluginInfo* pPlugin = g_cmdTableInterface->GetPluginInfoByDLLName(arMod.pModName);
+		if (pPlugin && pPlugin->version <= arMod.uiLastVersion) {
+			arNames.push_back(pPlugin->name);
+			return false;
+		}
+		return true;
+	}
+
+	static bool __fastcall CheckMods() {
+		bool bResult = true;
+		ScrapVector<BSString> kNames;
+		kNames.reserve(9);
+		for (ModInfo& rMod : kMods) {
+			if (!CheckMod(rMod, kNames))
+				bResult = false;
+		}
+
+		if (!bResult) {
+			constexpr const char MESSAGE_START[] = "You have following NVSE plugins that do not support ESLs:\n";
+			constexpr const char MESSAGE_END[] = "\nESL functionality will be disabled.";
+			BSString strMessage(MESSAGE_START);
+			for (BSString& rName : kNames) {
+				strMessage += rName;
+				strMessage += "\n";
+			}
+			strMessage += MESSAGE_END;
+			MessageBoxA(nullptr, strMessage.GetString(), JohnnyPluginData::JG_FULL_NAME, MB_OK | MB_ICONWARNING);
+		}
+
+		return bResult;
+	}
+
 	// We must hook after all plugins finish loading to avoid being overwritten, especially by Stewie...
 
 	HookUtils::CallDetour kDetour;
@@ -1644,10 +1690,12 @@ namespace MorePluginTypes {
 			MessageBoxA(nullptr, "Mod Limit Fix not found! Please install it in order to use new plugin types.", JohnnyPluginData::JG_FULL_NAME, MB_OK | MB_ICONERROR);
 			return;
 		}
-		bValid = true;
-		kDetour.ReplaceCall(0x86A91A, InitDelayedHooks);
-		InitJIPHooks();
-		InitCommandHooks();
+
+		if (CheckMods()) {
+			kDetour.ReplaceCall(0x86A91A, InitDelayedHooks);
+			InitJIPHooks();
+			InitCommandHooks();
+		}
 	}
 
 }
