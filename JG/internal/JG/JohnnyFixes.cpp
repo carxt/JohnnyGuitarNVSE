@@ -23,6 +23,7 @@
 #include "Fixes/TESEffectShaderFixes.hpp"
 #include "Fixes/XMLBufferFix.hpp"
 #include "Fixes/RefDestructorFix.hpp"
+#include "Fixes/GarbageCollectorTweaks.hpp"
 #include "EditorIDRestoration.hpp"
 #endif
 #include "Fixes/FileFixes.hpp"
@@ -262,6 +263,8 @@ namespace JohnnyFixes {
 		XMLBufferFix::Install();
 
 		RefDestructorFix::Install();
+    
+		GarbageCollectorTweaks::Install();
 #endif
 
 		FileFixes::Install();
