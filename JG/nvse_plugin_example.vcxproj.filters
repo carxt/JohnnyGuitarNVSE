@@ -1288,8 +1288,14 @@
     <ClCompile Include="internal\Game\Bethesda\BGSSaveGameBuffer.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\GarbageCollectorTweaks.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\ExtraActivateRef.cpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\RefDestructorFix.cpp">
+      <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\FalloutRadio.cpp">
       <Filter>internal\Game\Bethesda</Filter>
@@ -1299,6 +1305,9 @@
     </ClCompile>
     <ClCompile Include="internal\Game\Bethesda\GridArray.cpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\CellDataLoadWarning.cpp">
+      <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -3526,14 +3535,23 @@
     <ClInclude Include="internal\Game\Bethesda\ReconstructFormData.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\GarbageCollectorTweaks.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\ExtraActivateRefChildren.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\ExtraEnableStateParent.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\RefDestructorFix.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\BSFaceGenManager.hpp">
       <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\CellDataLoadWarning.hpp">
+      <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

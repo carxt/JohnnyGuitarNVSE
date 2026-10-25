@@ -61,6 +61,8 @@ public:
 
 	bool AreHostileActorsNear(bool abInterior);
 
+	void RemoveActorFromTempChangeList(Actor* apActor);
+
 	static constexpr AddressPtr<int32_t, 0x11E0360> iGameDay;
 	static constexpr AddressPtr<int32_t, 0x11A39C4> iGameMonth;
 	static constexpr AddressPtr<int32_t, 0x11E035C> iGameYear;

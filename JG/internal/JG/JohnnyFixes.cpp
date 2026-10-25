@@ -22,6 +22,9 @@
 #include "Fixes/SkyUpdateFixes.hpp"
 #include "Fixes/TESEffectShaderFixes.hpp"
 #include "Fixes/XMLBufferFix.hpp"
+#include "Fixes/CellDataLoadWarning.hpp"
+#include "Fixes/RefDestructorFix.hpp"
+#include "Fixes/GarbageCollectorTweaks.hpp"
 #include "EditorIDRestoration.hpp"
 #endif
 #include "Fixes/FileFixes.hpp"
@@ -259,6 +262,12 @@ namespace JohnnyFixes {
 		TESEffectShaderFixes::Install();
 
 		XMLBufferFix::Install();
+
+		CellDataLoadWarning::Install();
+    
+		RefDestructorFix::Install();
+    
+		GarbageCollectorTweaks::Install();
 #endif
 
 		FileFixes::Install();
