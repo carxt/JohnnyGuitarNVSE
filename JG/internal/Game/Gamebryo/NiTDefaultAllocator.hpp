@@ -1,27 +1,18 @@
 #pragma once
 
-#include "NiMemObject.hpp"
-
-#define NiTDefaultAllocator DFALL
+#include "Bethesda/BSMemObject.hpp"
 
 template <class T>
 class NiTDefaultAllocator {
 protected:
-    class SPEC_EMPTY_BASES AllocNode : public NiMemObject {
+    class SPEC_EMPTY_BASES AllocNode : public BSMemObject {
     public:
-        AllocNode*  m_pkNext = nullptr;
-        void*       m_pkData = nullptr;
         T           m_element;
     };
 
 public:
-    void* Allocate() {
-        AllocNode* pNode = new AllocNode;
-        pNode->m_element = T(0);
-        return (void*)pNode;
-    }
-
-    void Deallocate(void* p) {
-        delete (AllocNode*)p;
-    }
+    SPEC_RESTRICT void* Allocate();
+    void Deallocate(void* apData);
 };
+
+#include "NiTDefaultAllocator.inl"

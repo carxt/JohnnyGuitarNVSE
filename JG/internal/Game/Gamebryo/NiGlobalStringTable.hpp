@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
 #if !(USE_JIP_CHANGES || USE_JG_CHANGES)
 #include "NiTPrimitiveArray.hpp"
@@ -10,12 +10,12 @@
 class NiFixedString;
 
 // Replaced by JIP and JG
-class SPEC_EMPTY_BASES NiGlobalStringTable : public NiMemObject {
+class SPEC_EMPTY_BASES NiGlobalStringTable : public BSMemObject {
 public:
 	typedef char* GlobalStringHandle;
 
 #if !(USE_JIP_CHANGES || USE_JG_CHANGES)
-	NiTPrimitiveArray<GlobalStringHandle>	m_kHashArray[512];
+	NiTPrimitiveArray<GlobalStringHandle>	m_kHashArray[513];
 	NiCriticalSection						m_kCriticalSection;
 #endif
 

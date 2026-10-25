@@ -114,6 +114,9 @@ public:
 	BSSimpleList<TESObjectREFR*>* GetEnableStateChildren() const;
 	void AddEnableStateChild(TESObjectREFR* apRef);
 	void RemoveEnableStateChild(TESObjectREFR* apRef);
+
+	float GetRadius() const;
+	void SetRadius(float afRadius);
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

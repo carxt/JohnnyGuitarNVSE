@@ -576,3 +576,23 @@ void ExtraDataList::RemoveEnableStateChild(TESObjectREFR* apRef) {
 	ThisCall(0x4B0800, this, apRef);
 #endif
 }
+
+// GAME - 0x422320
+// GECK - 0x4ABC90
+float ExtraDataList::GetRadius() const {
+#ifdef GAME
+	return ThisCall<float>(0x422320, this);
+#else
+	return ThisCall<float>(0x4ABC90, this);
+#endif
+}
+
+// GAME - 0x422220
+// GECK - 0x4ABC10
+void ExtraDataList::SetRadius(float afRadius) {
+#ifdef GAME
+	ThisCall(0x422220, this, afRadius);
+#else
+	ThisCall(0x4ABC10, this, afRadius);
+#endif
+}

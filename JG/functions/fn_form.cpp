@@ -1,33 +1,35 @@
 #include "fn_form.h"
-#include "decoding.h"
-#include "GameForms.h"
 #include "GameRTTI.h"
+#include "GameUI.h"
 #include "GameTasks.h"
 #include "PluginAPI.h"
 
 #include "Bethesda/AILinearTaskThreadManager.hpp"
+#include "Bethesda/Animation.hpp"
 #include "Bethesda/BGSLoadGameSubBuffer.hpp"
 #include "Bethesda/BGSPrimitive.hpp"
 #include "Bethesda/BGSSaveFormBuffer.hpp"
+#include "Bethesda/BSFaceGenManager.hpp"
+#include "Bethesda/BSFadeNode.hpp"
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/BSUtilities.hpp"
 #include "Bethesda/ExtraActivateRef.hpp"
 #include "Bethesda/ExtraHotkey.hpp"
 #include "Bethesda/ExtraPrimitive.hpp"
+#include "Bethesda/FalloutRadio.hpp"
+#include "Bethesda/GameSettingCollection.hpp"
+#include "Bethesda/GrenadeProjectile.hpp"
+#include "Bethesda/HighProcess.hpp"
 #include "Bethesda/INIPrefSettingCollection.hpp"
+#include "Bethesda/Interface.hpp"
 #include "Bethesda/ItemChange.hpp"
+#include "Bethesda/PlayerCharacter.hpp"
+#include "Bethesda/ProcessLists.hpp"
+#include "Bethesda/TES.hpp"
+#include "Bethesda/TESDataHandler.hpp"
+#include "Bethesda/TESImageSpaceModifier.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TESObjectList.hpp"
-#include "Bethesda/GrenadeProjectile.hpp"
-#include "Bethesda/PlayerCharacter.hpp"
-#include "Bethesda/TESImageSpaceModifier.hpp"
-#include "Bethesda/TESDataHandler.hpp"
-#include "Bethesda/Animation.hpp"
-#include "Bethesda/TES.hpp"
-#include "Bethesda/ProcessLists.hpp"
-#include "Bethesda/HighProcess.hpp"
-#include "Bethesda/GameSettingCollection.hpp"
-#include "Bethesda/BSFadeNode.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 
@@ -50,7 +52,7 @@
 using namespace ScriptUtils;
 
 extern bool (*CallUDF)(class Script* funcScript, class TESObjectREFR* callingObj, uint8_t numArgs, ...);
-extern InventoryRef* (*InventoryRefGetForID)(FormID refID);
+extern _InventoryReferenceGetForRefID InventoryRefGetForID;
 
 float(*GetWeaponDPS)(ActorValueOwner* avOwner, TESObjectWEAP* weapon, float condition, uint8_t arg4, ItemChange* entry, uint8_t arg6, uint8_t arg7, int arg8, float arg9, float arg10, uint8_t arg11, uint8_t arg12, TESForm* ammo) =
 (float(*)(ActorValueOwner*, TESObjectWEAP*, float, uint8_t, ItemChange*, uint8_t, uint8_t, int, float, float, uint8_t, uint8_t, TESForm*))0x645380;
@@ -133,7 +135,7 @@ bool Cmd_GetNoteTopic_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
-		TESTopic* pTopic = pNote->GetNoteTopic();
+		const TESTopic* pTopic = pNote->GetNoteTopic();
 		if (pTopic)
 			*reinterpret_cast<FormID*>(result) = pTopic->GetFormID();
 	}
@@ -155,7 +157,7 @@ bool Cmd_GetNoteSound_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
-		TESSound* pSound = pNote->GetNoteSound();
+		const TESSound* pSound = pNote->GetNoteSound();
 		if (pSound)
 			*reinterpret_cast<FormID*>(result) = pSound->GetFormID();
 	}
@@ -196,7 +198,7 @@ bool Cmd_GetNoteSpeaker_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSNote* pNote = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNote) && pNote && IS_TYPE(pNote, BGSNote)) {
-		TESActorBase* pSpeaker = pNote->GetNoteSpeaker();
+		const TESActorBase* pSpeaker = pNote->GetNoteSpeaker();
 		if (pSpeaker)
 			*reinterpret_cast<FormID*>(result) = pSpeaker->GetFormID();
 	}
@@ -204,24 +206,17 @@ bool Cmd_GetNoteSpeaker_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_GetCurrentFurnitureRef_Execute(COMMAND_ARGS) {
-	if (!thisObj) { return true; }
 	*result = 0;
-	if (thisObj->IsActor()) {
-		auto actorProcess = ((Actor*)thisObj)->GetCurrentAIProcess();
-		if (actorProcess) {
-			auto furniRef = actorProcess->GetCurrentFurniture();
-			if (furniRef) {
-				*(FormID*)result = furniRef->GetFormID();
-			}
+	if (thisObj && thisObj->IsActor()) {
+		const BaseProcess* pAIProcess = static_cast<Actor*>(thisObj)->GetCurrentAIProcess();
+		if (pAIProcess) {
+			const TESObjectREFR* pFurniture = pAIProcess->GetCurrentFurniture();
+			if (pFurniture)
+				*reinterpret_cast<FormID*>(result) = pFurniture->GetFormID();
 		}
-
 	}
 	return true;
 }
-
-float(__fastcall* GetBaseScale)(TESObjectREFR*) = (float(__fastcall*)(TESObjectREFR*)) 0x00567400;
-void* (__thiscall* TESNPC_GetFaceGenData)(TESNPC*) = (void* (__thiscall*)(TESNPC*)) 0x0601800;
-
 
 bool Cmd_HideItemBarterEx_Execute(COMMAND_ARGS) {
 	const TESForm* pItem = nullptr;
@@ -258,10 +253,9 @@ bool Cmd_IsItemBarterHiddenEx_Execute(COMMAND_ARGS) {
 SPEC_NOINLINE bool Cmd_IsRadioRefPlaying_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj && thisObj->GetObjectReference() && IS_TYPE(thisObj->GetObjectReference(), TESObjectACTI)) {
-		TESObjectACTI* baseActi = static_cast<TESObjectACTI*>(thisObj->GetObjectReference());
-		if (baseActi->GetRadioStation()) {
-			*result = (CdeclCall<void*>(0x0832930, thisObj) != nullptr);
-		}
+		TESObjectACTI* pActivator = static_cast<TESObjectACTI*>(thisObj->GetObjectReference());
+		if (pActivator->GetRadioStation())
+			*result = FalloutRadio::GetActiveReceiver(thisObj) != nullptr;
 	}
 	return true;
 }
@@ -271,20 +265,22 @@ bool Cmd_IsRadioRefPlaying_Execute(COMMAND_ARGS) {
 }
 
 bool Cmd_TuneRadioRef_Execute(COMMAND_ARGS) {
-	BGSTalkingActivator* actiDst = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &actiDst) && thisObj && thisObj->GetObjectReference() && IS_TYPE(thisObj->GetObjectReference(), TESObjectACTI)) {
-		if (TESObjectACTI* actiBase = (TESObjectACTI*)thisObj->GetObjectReference()) {
-			BGSTalkingActivator* originalTK = actiBase->GetRadioStation();
-			if (actiDst == nullptr) {
-				actiDst = originalTK;
+	BGSTalkingActivator* pTalkingActivator = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTalkingActivator) && thisObj && thisObj->GetObjectReference() && IS_TYPE(thisObj->GetObjectReference(), TESObjectACTI)) {
+		TESObjectACTI* pActivator = static_cast<TESObjectACTI*>(thisObj->GetObjectReference());
+		if (pActivator) {
+			BGSTalkingActivator* pRadio = pActivator->GetRadioStation();
+			if (!pTalkingActivator) {
+				pTalkingActivator = pRadio;
 			}
-			if (IS_TYPE(actiDst, BGSTalkingActivator)) {
-				auto activateState = CdeclCall<unsigned int>(0x047B250, thisObj);
-				if ((CdeclCall<void*>(0x0832930, thisObj) != nullptr) || (activateState == 1) || (activateState == 2)) { //the exact same logic the game uses
-					CdeclCall<void*>(0x08325B0, thisObj, 0);
-					actiBase->SetRadioStation(actiDst);
-					CdeclCall<void*>(0x08325B0, thisObj, 1);
-					actiBase->SetRadioStation(originalTK);
+			if (IS_TYPE(pTalkingActivator, BGSTalkingActivator)) {
+				const BGSOpenCloseForm::OpenCloseState eState = BGSOpenCloseForm::GetOpenState(thisObj);
+				const bool bActive = (eState == BGSOpenCloseForm::OpenCloseState::OPEN || eState == BGSOpenCloseForm::OpenCloseState::OPENING);
+				if (FalloutRadio::GetActiveReceiver(thisObj) || bActive) {
+					FalloutRadio::ActivateRadio(thisObj, false);
+					pActivator->SetRadioStation(pTalkingActivator);
+					FalloutRadio::ActivateRadio(thisObj, true);
+					pActivator->SetRadioStation(pRadio);
 				}
 			}
 		}
@@ -372,104 +368,95 @@ namespace {
 		uint8_t a;
 	};
 
-	enum class LightingTemplateTraits {
-		NONE = 0,
+	struct _LightingTemplateTraits {
+		enum Traits {
+			NONE = 0,
 
-		AMBIENT_RED = 1,
-		AMBIENT_GREEN = 2,
-		AMBIENT_BLUE = 3,
+			AMBIENT_RED = 1,
+			AMBIENT_GREEN = 2,
+			AMBIENT_BLUE = 3,
 
-		DIRECTIONAL_RED = 4,
-		DIRECTIONAL_GREEN = 5,
-		DIRECTIONAL_BLUE = 6,
+			DIRECTIONAL_RED = 4,
+			DIRECTIONAL_GREEN = 5,
+			DIRECTIONAL_BLUE = 6,
 
-		FOG_RED = 7,
-		FOG_GREEN = 8,
-		FOG_BLUE = 9,
+			FOG_RED = 7,
+			FOG_GREEN = 8,
+			FOG_BLUE = 9,
 
-		FOG_NEAR = 10,
-		FOG_FAR = 11,
+			FOG_NEAR = 10,
+			FOG_FAR = 11,
 
-		DIRECTIONAL_XY = 12,
-		DIRECTIONAL_Z = 13,
-		DIRECTIONAL_FADE = 14,
+			DIRECTIONAL_XY = 12,
+			DIRECTIONAL_Z = 13,
+			DIRECTIONAL_FADE = 14,
 
-		CLIP_DISTANCE = 15,
+			CLIP_DISTANCE = 15,
 
-		FOG_POWER = 16,
+			FOG_POWER = 16,
 
-		COUNT
+			COUNT
+		};
+	};
+	using LightingTemplateTraits = _LightingTemplateTraits::Traits;
+
+	struct _InteriorDataTraits {
+		enum Traits {
+			NONE = -1,
+
+			AMBIENT_RED = 0,
+			AMBIENT_GREEN = 1,
+			AMBIENT_BLUE = 2,
+
+			DIRECTIONAL_RED = 3,
+			DIRECTIONAL_GREEN = 4,
+			DIRECTIONAL_BLUE = 5,
+
+			DIRECTIONAL_XY = 6,
+			DIRECTIONAL_Z = 7,
+			DIRECTIONAL_FADE = 8,
+
+			FOG_RED = 9,
+			FOG_GREEN = 10,
+			FOG_BLUE = 11,
+
+			FOG_NEAR = 12,
+			FOG_FAR = 13,
+
+			FOG_POWER = 14,
+
+			CLIP_DISTANCE = 15,
+
+			COUNT
+		};
+	};
+	using InteriorDataTraits = _InteriorDataTraits::Traits;
+
+	static constexpr int8_t kLightingToInteriorData[LightingTemplateTraits::COUNT] = {
+		InteriorDataTraits::NONE,				// 0
+		InteriorDataTraits::AMBIENT_RED,		// 1
+		InteriorDataTraits::AMBIENT_GREEN,		// 2
+		InteriorDataTraits::AMBIENT_BLUE,		// 3
+		InteriorDataTraits::DIRECTIONAL_RED,	// 4
+		InteriorDataTraits::DIRECTIONAL_GREEN,	// 5
+		InteriorDataTraits::DIRECTIONAL_BLUE,	// 6
+		InteriorDataTraits::FOG_RED,			// 7
+		InteriorDataTraits::FOG_GREEN,			// 8
+		InteriorDataTraits::FOG_BLUE,			// 9
+		InteriorDataTraits::FOG_NEAR,			// 10
+		InteriorDataTraits::FOG_FAR,			// 11
+		InteriorDataTraits::DIRECTIONAL_XY,		// 12
+		InteriorDataTraits::DIRECTIONAL_Z,		// 13
+		InteriorDataTraits::DIRECTIONAL_FADE,	// 14
+		InteriorDataTraits::CLIP_DISTANCE,		// 15
+		InteriorDataTraits::FOG_POWER,			// 17
 	};
 
-	enum class InteriorDataTraits {
-		NONE = -1,
-
-		AMBIENT_RED = 0,
-		AMBIENT_GREEN = 1,
-		AMBIENT_BLUE = 2,
-
-		DIRECTIONAL_RED = 3,
-		DIRECTIONAL_GREEN = 4,
-		DIRECTIONAL_BLUE = 5,
-
-		DIRECTIONAL_XY = 6,
-		DIRECTIONAL_Z = 7,
-		DIRECTIONAL_FADE = 8,
-
-		FOG_RED = 9,
-		FOG_GREEN = 10,
-		FOG_BLUE = 11,
-
-		FOG_NEAR = 12,
-		FOG_FAR = 13,
-
-		FOG_POWER = 14,
-
-		CLIP_DISTANCE = 15,
-
-		COUNT
-	};
-
-	SPEC_NOINLINE InteriorDataTraits ConvertTemplateType(LightingTemplateTraits aeType) {
-		switch (aeType) {
-			case LightingTemplateTraits::AMBIENT_RED:
-				return InteriorDataTraits::AMBIENT_RED;
-			case LightingTemplateTraits::AMBIENT_GREEN:
-				return InteriorDataTraits::AMBIENT_GREEN;
-			case LightingTemplateTraits::AMBIENT_BLUE:
-				return InteriorDataTraits::AMBIENT_BLUE;
-			case LightingTemplateTraits::DIRECTIONAL_RED:
-				return InteriorDataTraits::DIRECTIONAL_RED;
-			case LightingTemplateTraits::DIRECTIONAL_GREEN:
-				return InteriorDataTraits::DIRECTIONAL_GREEN;
-			case LightingTemplateTraits::DIRECTIONAL_BLUE:
-				return InteriorDataTraits::DIRECTIONAL_BLUE;
-			case LightingTemplateTraits::DIRECTIONAL_XY:
-				return InteriorDataTraits::DIRECTIONAL_XY;
-			case LightingTemplateTraits::DIRECTIONAL_Z:
-				return InteriorDataTraits::DIRECTIONAL_Z;
-			case LightingTemplateTraits::DIRECTIONAL_FADE:
-				return InteriorDataTraits::DIRECTIONAL_FADE;
-			case LightingTemplateTraits::FOG_RED:
-				return InteriorDataTraits::FOG_RED;
-			case LightingTemplateTraits::FOG_GREEN:
-				return InteriorDataTraits::FOG_GREEN;
-			case LightingTemplateTraits::FOG_BLUE:
-				return InteriorDataTraits::FOG_BLUE;
-			case LightingTemplateTraits::FOG_NEAR:
-				return InteriorDataTraits::FOG_NEAR;
-			case LightingTemplateTraits::FOG_FAR:
-				return InteriorDataTraits::FOG_FAR;
-			case LightingTemplateTraits::FOG_POWER:
-				return InteriorDataTraits::FOG_POWER;
-			case LightingTemplateTraits::CLIP_DISTANCE:
-				return InteriorDataTraits::CLIP_DISTANCE;
-			default:
-				return InteriorDataTraits::NONE;
-		}
+	static SPEC_INLINE InteriorDataTraits __fastcall ConvertTemplateType(LightingTemplateTraits aeType) {
+		return static_cast<InteriorDataTraits>(kLightingToInteriorData[aeType]);
 	}
 
-	SPEC_NOINLINE double __fastcall GetInteriorDataValue(InteriorCellData* apData, InteriorDataTraits aeType) {
+	static SPEC_NOINLINE float __fastcall GetInteriorDataValue(InteriorCellData* apData, InteriorDataTraits aeType) {
 		if (!apData)
 			return 0.f;
 
@@ -511,7 +498,7 @@ namespace {
 		}
 	}
 
-	SPEC_NOINLINE bool __fastcall SetInteriorDataValue(InteriorCellData* apData, InteriorDataTraits aeType, float afValue) {
+	static SPEC_NOINLINE bool __fastcall SetInteriorDataValue(InteriorCellData* apData, InteriorDataTraits aeType, float afValue) {
 		if (!apData)
 			return false;
 
@@ -570,11 +557,11 @@ namespace {
 		return true;
 	}
 
-	double __fastcall GetLightingTemplateValue(BGSLightingTemplate* apTemplate, LightingTemplateTraits aeType) {
+	static SPEC_INLINE float __fastcall GetLightingTemplateValue(BGSLightingTemplate* apTemplate, LightingTemplateTraits aeType) {
 		return GetInteriorDataValue(&apTemplate->kData, ConvertTemplateType(aeType));
 	}
 
-	bool __fastcall SetLightingTemplateValue(BGSLightingTemplate* apTemplate, LightingTemplateTraits aeType, float afValue) {
+	static SPEC_INLINE bool __fastcall SetLightingTemplateValue(BGSLightingTemplate* apTemplate, LightingTemplateTraits aeType, float afValue) {
 		return SetInteriorDataValue(&apTemplate->kData, ConvertTemplateType(aeType), afValue);
 	}
 }
@@ -629,13 +616,14 @@ bool Cmd_SetInteriorLightingTraitNumeric_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSEncounterZone* zone = nullptr;
-	TESWorldSpace* world;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &world, &zone);
-	if (!world || !IS_TYPE(world, TESWorldSpace))
+	BGSEncounterZone* pZone = nullptr;
+	TESWorldSpace* pWorld = nullptr;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pWorld, &pZone);
+	if (!pWorld || !IS_TYPE(pWorld, TESWorldSpace))
 		return true;
-	if (!zone || IS_TYPE(zone, BGSEncounterZone)) {
-		world->pEncounterZone = zone;
+
+	if (!pZone || IS_TYPE(pZone, BGSEncounterZone)) {
+		pWorld->SetEncouterZone(pZone);
 		*result = 1;
 	}
 	return true;
@@ -643,11 +631,11 @@ bool Cmd_SetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetWorldspaceEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESWorldSpace* world = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &world) && world && IS_TYPE(world, TESWorldSpace)) {
-		BGSEncounterZone* zone = world->pEncounterZone;
-		if (zone)
-			*(FormID*)result = zone->GetFormID();
+	TESWorldSpace* pWorld = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWorld) && pWorld && IS_TYPE(pWorld, TESWorldSpace)) {
+		const BGSEncounterZone* pZone = pWorld->GetEncounterZone();
+		if (pZone)
+			*reinterpret_cast<FormID*>(result) = pZone->GetFormID();
 	}
 	return true;
 }
@@ -682,24 +670,15 @@ bool Cmd_GetRefEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSEncounterZone* pZone = thisObj->GetExtra()->GetEncounterZone();
 	if (pZone)
-		*(FormID*)result = pZone->GetFormID();
+		*reinterpret_cast<FormID*>(result) = pZone->GetFormID();
 	return true;
 }
 
 bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	char newPrompt[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &newPrompt)) {
-		ExtraActivateRef* xActivateRef = thisObj->GetExtra()->GetExtraData<ExtraActivateRef>();
-		if (xActivateRef) {
-			xActivateRef->strActivationPrompt.Set(newPrompt);
-		}
-		else {
-			xActivateRef = BSMemory::malloc<ExtraActivateRef>();
-			ThisCall(0x4338B0, xActivateRef);
-			xActivateRef->strActivationPrompt.Set(newPrompt);
-			thisObj->GetExtra()->AddExtra(xActivateRef);
-		}
+	char cPrompt[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPrompt)) {
+		thisObj->GetExtra()->SetActivateTextOverride(cPrompt);
 		*result = 1;
 	}
 	return true;
@@ -707,17 +686,18 @@ bool Cmd_SetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetRefActivationPromptOverride_Execute(COMMAND_ARGS) {
 	*result = 0;
-	ExtraActivateRef* xActivateRef = thisObj->GetExtra()->GetExtraData<ExtraActivateRef>();
-	if (xActivateRef) {
-		g_strInterface->Assign(PASS_COMMAND_ARGS, xActivateRef->strActivationPrompt.c_str());
-		if (Script::GetConsoleOuput()) Interface::PrintLine("GetRefActivationPromptOverride >> %s", xActivateRef->strActivationPrompt.c_str());
+	ExtraActivateRef* pActivateRef = thisObj->GetExtra()->GetExtraData<ExtraActivateRef>();
+	if (pActivateRef) {
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pActivateRef->strActivationPrompt.c_str());
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetRefActivationPromptOverride >> %s", pActivateRef->strActivationPrompt.c_str());
 	}
 	return true;
 }
 
 bool Cmd_GetWeaponAltTextures_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* pWeapon;
+	TESObjectWEAP* pWeapon = nullptr;
 	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
 		auto pIter = pWeapon->GetTexSwapList();
@@ -735,24 +715,24 @@ bool Cmd_GetWeaponAltTextures_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSIdleMarker* marker;
-	NVSEArrayVar* idleArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker) && marker && IS_TYPE(marker, BGSIdleMarker) && marker->GetIdleCount() > 0) {
-		for (uint32_t i = 0; i < marker->GetIdleCount(); i++) {
-			g_arrInterface->AppendElement(idleArr, NVSEArrayElement(marker->ppIdles[i]));
+	BGSIdleMarker* pMarker = nullptr;
+	NVSEArrayVar* pArray = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMarker) && pMarker && IS_TYPE(pMarker, BGSIdleMarker) && pMarker->GetIdleCount() > 0) {
+		for (uint32_t i = 0; i < pMarker->GetIdleCount(); i++) {
+			g_arrInterface->AppendElement(pArray, NVSEArrayElement(pMarker->ppIdles[i]));
 		}
 	}
-	g_arrInterface->AssignCommandResult(idleArr, result);
+	g_arrInterface->AssignCommandResult(pArray, result);
 	return true;
 }
 
 bool Cmd_SetIdleMarkerAnimation_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSIdleMarker* marker = nullptr;
-	TESIdleForm* newAnim = nullptr;
-	uint32_t animId;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker, &animId, &newAnim) && marker && IS_TYPE(marker, BGSIdleMarker) && marker->GetIdleCount() > animId) {
-		marker->ppIdles[animId] = newAnim;
+	BGSIdleMarker* pMarker = nullptr;
+	TESIdleForm* pIdle = nullptr;
+	uint32_t uiIndex;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMarker, &uiIndex, &pIdle) && pMarker && IS_TYPE(pMarker, BGSIdleMarker) && pMarker->GetIdleCount() > uiIndex) {
+		pMarker->ppIdles[uiIndex] = pIdle;
 		*result = 1;
 	}
 	return true;
@@ -760,24 +740,30 @@ bool Cmd_SetIdleMarkerAnimation_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSIdleMarker* marker = nullptr;
-	uint32_t arrID;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker, &arrID) && marker && IS_TYPE(marker, BGSIdleMarker)) {
-		NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
-		if (!inArr) return true;
-		uint32_t size = g_arrInterface->GetArraySize(inArr);
-		if (!size) return true;
+	BGSIdleMarker* pMarker = nullptr;
+	uint32_t uiArrayID = UINT32_MAX;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMarker, &uiArrayID) && pMarker && IS_TYPE(pMarker, BGSIdleMarker)) {
+		NVSEArrayVar* pArray = g_arrInterface->LookupArrayByID(uiArrayID);
+		if (!pArray) 
+			return true;
 
-		BSScrapBuffer<NVSEArrayElement> elements(size);
-		g_arrInterface->GetElements(inArr, elements.get(), nullptr);
-		TESIdleForm** idleList = BSMemory::malloc<TESIdleForm*>(size);
-		for (uint32_t i = 0; i < size; i++) {
-			idleList[i] = (TESIdleForm*)elements[i].GetTESForm();
+		uint32_t uiArraySize = g_arrInterface->GetArraySize(pArray);
+		if (!uiArraySize) 
+			return true;
+
+		assert(uiArraySize < UINT8_MAX);
+
+		BSScrapBuffer<NVSEArrayElement> kElements(uiArraySize);
+		g_arrInterface->GetElements(pArray, kElements.get(), nullptr);
+		TESIdleForm** ppNewIdles = BSMemory::malloc<TESIdleForm*>(uiArraySize);
+		for (uint32_t i = 0; i < uiArraySize; i++) {
+			ppNewIdles[i] = static_cast<TESIdleForm*>(kElements[i].GetTESForm());
 		}
-		if (marker->ppIdles) 
-			BSMemory::free(marker->ppIdles);
-		marker->ppIdles = idleList;
-		marker->ucIdleCount = size;
+
+		if (pMarker->ppIdles) 
+			BSMemory::free(pMarker->ppIdles);
+		pMarker->ppIdles = ppNewIdles;
+		pMarker->ucIdleCount = uiArraySize;
 		*result = 1;
 	}
 
@@ -786,39 +772,40 @@ bool Cmd_SetIdleMarkerAnimations_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSIdleMarker* marker = nullptr;
-	uint32_t traitID;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker, &traitID) && marker && IS_TYPE(marker, BGSIdleMarker)) {
-		switch (traitID) {
+	BGSIdleMarker* pMarker = nullptr;
+	uint32_t uiTrait = UINT32_MAX;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMarker, &uiTrait) && pMarker && IS_TYPE(pMarker, BGSIdleMarker)) {
+		switch (uiTrait) {
 		case 1:
-			*result = marker->ucIdleFlags.Get();
+			*result = pMarker->ucIdleFlags.Get();
 			break;
 		case 2:
-			*result = marker->fTimerCheckForIdle;
+			*result = pMarker->fTimerCheckForIdle;
 			break;
 		case 3:
-			*result = marker->GetIdleCount();
+			*result = pMarker->GetIdleCount();
 			break;
 		default:
 			return true;
 		}
-		if (Script::GetConsoleOuput()) Interface::PrintLine("GetIdleMarkerTraitNumeric %d >> %.2f", traitID, *result);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetIdleMarkerTraitNumeric %d >> %.2f", uiTrait, *result);
 	}
 	return true;
 }
 
 bool Cmd_SetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	BGSIdleMarker* marker = nullptr;
-	uint32_t traitID;
-	float newVal;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &marker, &traitID, &newVal) && marker && IS_TYPE(marker, BGSIdleMarker)) {
-		switch (traitID) {
+	BGSIdleMarker* pMarker = nullptr;
+	uint32_t uiTrait = UINT32_MAX;
+	float fValue;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pMarker, &uiTrait, &fValue) && pMarker && IS_TYPE(pMarker, BGSIdleMarker)) {
+		switch (uiTrait) {
 		case 1:
-			marker->ucIdleFlags = newVal;
+			pMarker->ucIdleFlags = fValue;
 			break;
 		case 2:
-			marker->fTimerCheckForIdle = newVal;
+			pMarker->fTimerCheckForIdle = fValue;
 			break;
 		default:
 			return true;
@@ -827,16 +814,16 @@ bool Cmd_SetIdleMarkerTraitNumeric_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
-TESModelTextureSwap* GetArmorModel(TESObjectARMO* armor, uint32_t id) {
-	switch (id) {
+TESModelTextureSwap* __fastcall GetArmorModel(TESObjectARMO* apArmor, uint32_t auiType) {
+	switch (auiType) {
 	case 1:
-		return &armor->kBipedModels[SEX::MALE];
+		return &apArmor->kBipedModels[SEX::MALE];
 	case 2:
-		return &armor->kBipedModels[SEX::FEMALE];
+		return &apArmor->kBipedModels[SEX::FEMALE];
 	case 3:
-		return &armor->kWorldModels[SEX::MALE];
+		return &apArmor->kWorldModels[SEX::MALE];
 	case 4:
-		return &armor->kWorldModels[SEX::FEMALE];
+		return &apArmor->kWorldModels[SEX::FEMALE];
 	default:
 		return nullptr;
 	}
@@ -1025,20 +1012,20 @@ bool Cmd_GetEffectShaderTexturePath_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-uint32_t SwapRGB(uint32_t rgbhex) {
-	uint32_t r = (rgbhex >> 0x10) & 0xFF;
-	uint32_t g = (rgbhex >> 0x8) & 0xFF;
-	uint32_t b = (rgbhex) & 0xFF;
+static uint32_t __fastcall SwapRGB(uint32_t rgbhex) {
+	const uint32_t r = (rgbhex >> 0x10) & 0xFF;
+	const uint32_t g = (rgbhex >> 0x8) & 0xFF;
+	const uint32_t b = (rgbhex) & 0xFF;
 	return (b << 0x10) + (g << 0x8) + r;
 }
 
 bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESEffectShader* pShader;
-	uint32_t traitID;
-	float fValue;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &traitID, &fValue) && pShader && IS_TYPE(pShader, TESEffectShader) && traitID >= 0 && traitID <= 76) {
-		switch (traitID) {
+	TESEffectShader* pShader = nullptr;
+	uint32_t uiTrait = UINT32_MAX;
+	float fValue = 0.f;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &uiTrait, &fValue) && pShader && IS_TYPE(pShader, TESEffectShader) && uiTrait >= 0 && uiTrait <= 76) {
+		switch (uiTrait) {
 		case 0:
 			pShader->GetData()->ucFlags = static_cast<uint8_t>(fValue);
 			break;
@@ -1054,7 +1041,7 @@ bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 47:
 		case 48:
 		case 49:
-			((uint32_t*)pShader)[6 + traitID] = SwapRGB((uint32_t)fValue);
+			reinterpret_cast<uint32_t*>(pShader)[6 + uiTrait] = SwapRGB(static_cast<uint32_t>(fValue));
 			break;
 		case 1:
 		case 2:
@@ -1067,10 +1054,10 @@ bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 67:
 		case 69:
 		case 70:
-			((uint32_t*)pShader)[6 + traitID] = (uint32_t)fValue;
+			reinterpret_cast<uint32_t*>(pShader)[6 + uiTrait] = static_cast<uint32_t>(fValue);
 			break;
 		default:
-			((float*)pShader)[6 + traitID] = fValue;
+			reinterpret_cast<float*>(pShader)[6 + uiTrait] = fValue;
 			break;
 		}
 		*result = 1;
@@ -1080,26 +1067,27 @@ bool Cmd_SetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESEffectShader* pShader;
-	uint32_t traitID;
-	uint32_t color;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &traitID) && pShader && IS_TYPE(pShader, TESEffectShader) && traitID >= 0 && traitID <= 76) {
-		switch (traitID) {
+	TESEffectShader* pShader = nullptr;
+	uint32_t uiTrait = UINT32_MAX;
+	uint32_t uiColor;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pShader, &uiTrait) && pShader && IS_TYPE(pShader, TESEffectShader) && uiTrait >= 0 && uiTrait <= 76) {
+		switch (uiTrait) {
 		case 0:
 			*result = pShader->GetData()->ucFlags;
 			break;
 		case 61:
 			if (pShader->GetAddonModels())
-				*result = pShader->GetAddonModels()->GetFormID();
+				*reinterpret_cast<FormID*>(result) = pShader->GetAddonModels()->GetFormID();
 			break;
 		case 4:
 		case 14:
 		case 47:
 		case 48:
 		case 49:
-			color = SwapRGB(((uint32_t*)pShader)[6 + traitID]);
-			*result = color;
-			if (Script::GetConsoleOuput()) Interface::PrintLine("GetEffectShaderTraitNumeric %d >> 0x%X", traitID, color);
+			uiColor = SwapRGB(reinterpret_cast<uint32_t*>(pShader)[6 + uiTrait]);
+			*result = uiColor;
+			if (Script::GetConsoleOuput()) 
+				Interface::PrintLine("GetEffectShaderTraitNumeric %d >> 0x%08X", uiTrait, uiColor);
 			return true;
 			break;
 		case 1:
@@ -1113,13 +1101,14 @@ bool Cmd_GetEffectShaderTraitNumeric_Execute(COMMAND_ARGS) {
 		case 67:
 		case 69:
 		case 70:
-			*result = ((uint32_t*)pShader)[6 + traitID];
+			*result = reinterpret_cast<uint32_t*>(pShader)[6 + uiTrait];
 			break;
 		default:
-			*result = ((float*)pShader)[6 + traitID];
+			*result = reinterpret_cast<float*>(pShader)[6 + uiTrait];
 			break;
 		}
-		if (Script::GetConsoleOuput()) Interface::PrintLine("GetEffectShaderTraitNumeric %d >> %.2f", traitID, *result);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetEffectShaderTraitNumeric %d >> %.2f", uiTrait, *result);
 	}
 	return true;
 }
@@ -1157,46 +1146,43 @@ bool Cmd_GetAvailablePerks_Execute(COMMAND_ARGS) {
 bool Cmd_FaceGenRefreshAppearance_Execute(COMMAND_ARGS) {
 	*result = 0;
 	if (thisObj && thisObj->IsCharacter()) {
-		ThisCall(0x08D3FA0, thisObj);
+		static_cast<Character*>(thisObj)->Reset3D();
 		*result = 1;
 	}
 	return true;
 }
 
 bool Cmd_FaceGenGetNthProperty_Execute(COMMAND_ARGS) {
-	TESNPC* npc = nullptr;
-	uint32_t PropertyListIndex = 0;
-	uint32_t PropertyIndex = 0;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &npc, &PropertyListIndex, &PropertyIndex) && npc && IS_TYPE(npc, TESNPC) && PropertyListIndex < 3) {
-
-		uintptr_t propertyListMinorIdx = PropertyListIndex % 2;
-		uintptr_t propertyListMajorIdx = (PropertyIndex - propertyListMinorIdx) / 2;
-		if (auto FaceGenPTR = TESNPC_GetFaceGenData(npc)) {
-			*result = CdeclCall<float>(0x652230, FaceGenPTR, propertyListMajorIdx, propertyListMinorIdx, PropertyIndex);
-			if (Script::GetConsoleOuput())
-				Interface::PrintLine("GetFaceGenNthProperty %.2f", *result);
+	TESNPC* pNPC = nullptr;
+	uint32_t uiData = 0;
+	uint32_t uiCtrlID = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNPC, &uiData, &uiCtrlID) && pNPC && IS_TYPE(pNPC, TESNPC) && uiData < 3) {
+		const FaceGenCoords* pCoords = pNPC->GetOffsetFaceCoord();
+		if (pCoords) {
+			const FaceGenSymmetryType eSymmetry = static_cast<FaceGenSymmetryType>(uiData % FaceGenSymmetryType::COUNT);
+			const FaceGenDataType eType = static_cast<FaceGenDataType>((uiCtrlID - eSymmetry) / FaceGenDataType::COUNT);
+			*result = BSFaceGenManager::GetFaceCoordValue(pCoords, eType, eSymmetry, uiCtrlID);
 		}
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetFaceGenNthProperty %.2f", *result);
 	}
 	return true;
 }
 
 bool Cmd_FaceGenSetNthProperty_Execute(COMMAND_ARGS) {
-	TESNPC* npc = nullptr;
-	uint32_t PropertyListIndex = 0;
-	uint32_t PropertyIndex = 0;
-	float val = 0;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &npc, &PropertyListIndex, &PropertyIndex, &val) && npc && IS_TYPE(npc, TESNPC) && PropertyListIndex < 3) {
-		uintptr_t propertyListMinorIdx = PropertyListIndex % 2;
-		uintptr_t propertyListMajorIdx = (PropertyIndex - propertyListMinorIdx) / 2;
-
-		if (auto FaceGenPTR = TESNPC_GetFaceGenData(npc)) {
-			CdeclCall<void>(0x652320, FaceGenPTR, propertyListMajorIdx, PropertyListIndex, PropertyIndex, val);
+	TESNPC* pNPC = nullptr;
+	uint32_t uiData = 0;
+	uint32_t uiCtrlID = 0;
+	float fValue = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pNPC, &uiData, &uiCtrlID, &fValue) && pNPC && IS_TYPE(pNPC, TESNPC) && uiData < 3) {
+		FaceGenCoords* pCoords = pNPC->GetOffsetFaceCoord();
+		if (pCoords) {
+			const FaceGenSymmetryType eSymmetry = static_cast<FaceGenSymmetryType>(uiData % FaceGenSymmetryType::COUNT);
+			const FaceGenDataType eType = static_cast<FaceGenDataType>((uiCtrlID - eSymmetry) / FaceGenDataType::COUNT);
+			BSFaceGenManager::SetFaceCoordValue(pCoords, eType, eSymmetry, uiCtrlID, fValue);
 			*result = 1;
-			if (Script::GetConsoleOuput()) {
-				Interface::PrintLine("SetFaceGenNthProperty called");
-			}
 		}
 	}
 	return true;
@@ -1240,7 +1226,7 @@ bool Cmd_GetTalkingActivatorActor_Execute(COMMAND_ARGS) {
 	BGSTalkingActivator* activator = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &activator) && activator && IS_TYPE(activator, BGSTalkingActivator)) {
 		if (activator->GetTempRef()) {
-			*(FormID*)result = activator->GetTempRef()->GetFormID();
+			*reinterpret_cast<FormID*>(result) = activator->GetTempRef()->GetFormID();
 		}
 		if (Script::GetConsoleOuput()) Interface::PrintLine("GetTalkingActivatorActor >> 0x%X", *result);
 	}
@@ -1252,7 +1238,8 @@ bool Cmd_GetActorEffectType_Execute(COMMAND_ARGS) {
 	SpellItem* pSpell = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSpell) && pSpell && IS_TYPE(pSpell, SpellItem)) {
 		*result = pSpell->GetSpellType();
-		if (Script::GetConsoleOuput()) Interface::PrintLine("GetActorEffectType >> %.2f", *result);
+		if (Script::GetConsoleOuput()) 
+			Interface::PrintLine("GetActorEffectType >> %.2f", *result);
 	}
 	else {
 		*result = -1;
@@ -1448,22 +1435,23 @@ bool Cmd_GetQuestFailed_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* weapon = nullptr;
-	const char* modelPath = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon) && weapon && IS_TYPE(weapon, TESObjectWEAP)) {
-		modelPath = weapon->kWorldModel.GetModel();
-		g_strInterface->Assign(PASS_COMMAND_ARGS, modelPath);
-		if (Script::GetConsoleOuput()) Interface::PrintLine("GetWeaponWorldModelPath >> %s", modelPath);
+	TESObjectWEAP* pWeapon = nullptr;
+	const char* pPath = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
+		pPath = pWeapon->kWorldModel.GetModel();
+		g_strInterface->Assign(PASS_COMMAND_ARGS, pPath);
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetWeaponWorldModelPath >> %s", pPath);
 	}
 	return true;
 }
 
 bool Cmd_SetWeaponWorldModelPath_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* weapon = nullptr;
-	char modelPath[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &weapon, &modelPath) && weapon && IS_TYPE(weapon, TESObjectWEAP)) {
-		weapon->kWorldModel.SetModel(modelPath);
+	TESObjectWEAP* pWeapon = nullptr;
+	char cPath[MAX_PATH] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon, &cPath) && pWeapon && IS_TYPE(pWeapon, TESObjectWEAP)) {
+		pWeapon->kWorldModel.SetModel(cPath);
 		*result = 1;
 	}
 	return true;
@@ -1580,8 +1568,8 @@ bool Cmd_GetContainerSound_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetRaceFlag_Execute(COMMAND_ARGS) {
 	TESRace* pRace = nullptr;
-	uint32_t uiBit = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRace, &uiBit) && pRace && IS_TYPE(pRace, TESRace)) {
+	uint32_t uiBit = 32;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRace, &uiBit) && pRace && IS_TYPE(pRace, TESRace) && uiBit < 32) {
 		*result = pRace->kData.uiFlags.GetBit(uiBit);
 		if (Script::GetConsoleOuput()) Interface::PrintLine("GetRaceFlag >> %.f", *result);
 	}
@@ -1590,10 +1578,10 @@ bool Cmd_GetRaceFlag_Execute(COMMAND_ARGS) {
 
 bool Cmd_SetRaceFlag_Execute(COMMAND_ARGS) {
 	TESRace* pRace = nullptr;
-	uint32_t uiBit = 0;
+	uint32_t uiBit = 32;
 	BOOL bSet = FALSE;
 	*result = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRace, &uiBit, &bSet) && pRace && IS_TYPE(pRace, TESRace)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRace, &uiBit, &bSet) && pRace && IS_TYPE(pRace, TESRace) && uiBit < 32) {
 		pRace->kData.uiFlags.SetBit(uiBit, bSet);
 		*result = 1;
 	}
@@ -1659,8 +1647,8 @@ bool Cmd_SetEquipType_Execute(COMMAND_ARGS) {
 bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESRace* pRace = nullptr;
-	TESRace::HeadPart ePart;
-	SEX eSex;
+	TESRace::HeadPart ePart = TESRace::HeadPart::COUNT;
+	SEX eSex = SEX::NONE;
 	const char* pPath = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRace, &ePart, &eSex) && pRace && IS_TYPE(pRace, TESRace)) {
 		if (InRange(eSex) && ePart < TESRace::HeadPart::COUNT) {
@@ -1677,8 +1665,8 @@ bool Cmd_GetRaceHeadModelPath_Execute(COMMAND_ARGS) {
 bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESRace* pRace = nullptr;
-	TESRace::BodyPart ePart;
-	SEX eSex;
+	TESRace::BodyPart ePart = TESRace::BodyPart::COUNT;
+	SEX eSex = SEX::NONE;
 	const char* pPath = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pRace, &ePart, &eSex) && pRace && IS_TYPE(pRace, TESRace)) {
 		if (InRange(eSex) && ePart < TESRace::BodyPart::COUNT) {
@@ -1695,7 +1683,7 @@ bool Cmd_GetRaceBodyModelPath_Execute(COMMAND_ARGS) {
 bool Cmd_GetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESForm* pForm = nullptr;
-	uint32_t uiBit = 0;
+	uint32_t uiBit = 8;
 	BOOL bFemale = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &uiBit, &bFemale) && pForm && uiBit < 8) {
 		TESBipedModelForm* pBipedModel = TESBipedModelForm::GetFormAsBipedModel(pForm);
@@ -1712,7 +1700,7 @@ bool Cmd_GetFacegenModelFlag_Execute(COMMAND_ARGS) {
 bool Cmd_SetFacegenModelFlag_Execute(COMMAND_ARGS) {
 	*result = 0;
 	TESForm* pForm = nullptr;
-	uint32_t uiBit = 0;
+	uint32_t uiBit = 8;
 	BOOL bFemale = FALSE;
 	BOOL bEnable = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm, &uiBit, &bFemale, &bEnable) && pForm && uiBit < 8) {
@@ -1730,14 +1718,14 @@ SPEC_NOINLINE bool Cmd_GetBaseScale_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	TESActorBase* pBase = reinterpret_cast<TESActorBase*>(arg1);
 	if (pBase) {
-		FORM_TYPE eType = pBase->GetFormType();
+		const FORM_TYPE eType = pBase->GetFormType();
 		if (eType == FORM_TYPE::TESNPC)
 			*result = static_cast<TESNPC*>(pBase)->GetHeight();
 		else if (eType == FORM_TYPE::TESCreature)
 			*result = static_cast<TESCreature*>(pBase)->GetBaseScale();
 	}
 	else if (thisObj) {
-		*result = GetBaseScale(thisObj);
+		*result = thisObj->GetScale();
 	}
 	return true;
 }
@@ -1926,42 +1914,52 @@ bool Cmd_SetIMODAnimatable_Execute(COMMAND_ARGS) {
 // A modified version of GetCalculatedWeaponDamage, all credits go to JazzIsParis
 bool Cmd_GetCalculatedWeaponDPS_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* weapon = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &weapon)) return true;
-	float condition = 1.0F;
-	ExtraDataList* extendPtr = nullptr;
-	if (!weapon) {
-		if (!thisObj) return true;
-		InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
-		if (!invRef) {
-			TESForm* base = thisObj->GetObjectReference();
-			if (IS_ID(base, TESObjectWEAP))
-				weapon = (TESObjectWEAP*)base;
-			else
+	TESObjectWEAP* pWeapon = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon)) 
+		return true;
+
+	float fCondition = 1.f;
+	ExtraDataList* pExtraList = nullptr;
+	if (!pWeapon) {
+		if (!thisObj) 
+			return true;
+		
+		InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
+		if (!pInvRef) {
+			TESForm* pBaseForm = thisObj->GetObjectReference();
+			if (!pBaseForm || !IS_ID(pBaseForm, TESObjectWEAP))
 				return true;
 
-			condition = thisObj->GetHealth();
+			pWeapon = static_cast<TESObjectWEAP*>(pBaseForm);
+			fCondition = thisObj->GetHealth();
 		}
-		else {
-			weapon = (TESObjectWEAP*)invRef->pForm;
-			if NOT_ID(weapon, TESObjectWEAP) return true;
-			if (invRef->pExtraDataList) {
-				condition = invRef->pItemChange->GetItemHealth(true) / 100.0F;
-				extendPtr = invRef->pExtraDataList;
+		else if (pInvRef->pForm && IS_ID(pInvRef->pForm, TESObjectWEAP)) {
+			pWeapon = static_cast<TESObjectWEAP*>(pInvRef->pForm);
+			if (pInvRef->pExtraDataList) {
+				fCondition = pInvRef->pItemChange->GetItemHealth(true) / 100.0F;
+				pExtraList = pInvRef->pExtraDataList;
 			}
 		}
 	}
-	else if NOT_ID(weapon, TESObjectWEAP) return true;
-	MiddleHighProcess* midHiProc = (MiddleHighProcess*)PlayerCharacter::GetSingleton()->GetCurrentAIProcess();
-	ItemChange* weaponInfo = midHiProc->GetCurrentWeapon();
-	TESForm* ammo = nullptr;
-	if (!extendPtr && weaponInfo && (weaponInfo->pObject == weapon) && midHiProc->GetCurrentAmmo())
-		ammo = midHiProc->GetCurrentAmmo()->pObject;
-	if (!ammo)
-		ammo = weapon->GetCurrentAmmo(nullptr);
-	midHiProc->pCurrentWeapon = nullptr;
-	*result = GetWeaponDPS(PlayerCharacter::GetSingleton(), weapon, condition, 1, weaponInfo, 0, 0, -1, 0.0, 0.0, 0, 0, ammo);
-	midHiProc->pCurrentWeapon = weaponInfo;
+
+	if (!pWeapon || !IS_ID(pWeapon, TESObjectWEAP))
+		return true;
+
+	MiddleHighProcess* pAIProcess = static_cast<MiddleHighProcess*>(PlayerCharacter::GetSingleton()->GetCurrentAIProcess());
+
+	ItemChange* pWeaponItem = pAIProcess->GetCurrentWeapon();
+
+	TESForm* pAmmo = nullptr;
+	if (!pExtraList && pWeaponItem && pWeaponItem->pObject == pWeapon && pAIProcess->GetCurrentAmmo())
+		pAmmo = pAIProcess->GetCurrentAmmo()->pObject;
+
+	if (!pAmmo)
+		pAmmo = pWeapon->GetCurrentAmmo(nullptr);
+
+	pAIProcess->pCurrentWeapon = nullptr;
+	*result = GetWeaponDPS(PlayerCharacter::GetSingleton(), pWeapon, fCondition, 1, pWeaponItem, 0, 0, -1, 0.0, 0.0, 0, 0, pAmmo);
+	pAIProcess->pCurrentWeapon = pWeaponItem;
+
 	if (Script::GetConsoleOuput())
 		Interface::PrintLine("GetCalculatedWeaponDPS >> %f", *result);
 	return true;
@@ -1988,7 +1986,8 @@ bool Cmd_IsCellExpired_Execute(COMMAND_ARGS) {
 		if (uiDetachTime == 0) {
 			*result = -1;
 		}
-		else if (uiDetachTime == static_cast<uint32_t>(-1) || uiDetachTime == static_cast<uint32_t>(-2)) { // -1 is used by ResetInterior, -2 by ShowOff's ResetInteriorAlt.
+		else if (uiDetachTime == static_cast<uint32_t>(-1) || uiDetachTime == static_cast<uint32_t>(-2)) { 
+			// -1 is used by ResetInterior, -2 by ShowOff's ResetInteriorAlt.
 			*result = 1;
 		}
 		else {
@@ -2020,29 +2019,27 @@ bool Cmd_GetBaseEffectArchetype_Execute(COMMAND_ARGS) {
 	return true;
 }
 
-bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetHotkeySlot_Execute(COMMAND_ARGS) {
 	*result = 0;
-
 	if (!thisObj)
 		return true;
 
-	InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
+	const InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
 	if (!pInvRef || pInvRef->pContainerRef != PlayerCharacter::GetSingleton())
 		return true;
 
 	if (!pInvRef->pForm)
 		return true;
 
-	FORM_TYPE eFormType = pInvRef->pForm->GetFormType();
+	const FORM_TYPE eFormType = pInvRef->pForm->GetFormType();
 	if (eFormType != FORM_TYPE::TESObjectARMO && eFormType != FORM_TYPE::TESObjectWEAP && eFormType != FORM_TYPE::AlchemyItem && eFormType != FORM_TYPE::TESObjectBOOK)
 		return true;
 
-	ExtraDataList* pExtraData = pInvRef->pExtraDataList;
+	const ExtraDataList* pExtraData = pInvRef->pExtraDataList;
 	if (!pExtraData)
 		return true;
 
-	ExtraHotkey* pHotkey = pExtraData->GetExtraData<ExtraHotkey>();
+	const ExtraHotkey* pHotkey = pExtraData->GetExtraData<ExtraHotkey>();
 	if (pHotkey)
 		*result = pHotkey->ucIndex + 1;
 
@@ -2319,7 +2316,7 @@ namespace RefWalker {
 		}
 	};
 
-	uint32_t SPEC_NOINLINE __fastcall IterateCellReferencesFiltered(TESObjectCELL* apCell, const FilterData& arFilter) {
+	static uint32_t SPEC_NOINLINE __fastcall IterateCellReferencesFiltered(TESObjectCELL* apCell, const FilterData& arFilter) {
 		uint32_t uiCount = 0;
 		TESObjectREFR* pCaller = arFilter.pCaller;
 		apCell->CellRefLockEnter();
@@ -2341,14 +2338,14 @@ namespace RefWalker {
 		return uiCount;
 	}
 
-	uint32_t SPEC_NOINLINE __fastcall IterateCells(TESObjectCELL* apCell, const FilterData& arFilter) {
+	static uint32_t SPEC_NOINLINE __fastcall IterateCells(TESObjectCELL* apCell, const FilterData& arFilter) {
 		if (apCell) {
 			return IterateCellReferencesFiltered(apCell, arFilter);
 		}
 		else {
 			uint32_t uiCount = 0;
 			const GridCellArray* pArray = TES::GetSingleton()->pGridCellArray;
-			const int32_t iGridSize = pArray->iDimension;
+			const int32_t iGridSize = pArray->uiDimension;
 			for (int32_t x = 0; x < iGridSize; x++) {
 				for (int32_t y = 0; y < iGridSize; y++) {
 					const GridCell* pGridCell = pArray->GetCell(x, y);
@@ -2360,7 +2357,7 @@ namespace RefWalker {
 		}
 	}
 
-	uint32_t SPEC_NOINLINE __fastcall IterateMobileObjects(PROCESS_TYPE aeProcessLevel, const FilterData& arFilter) {
+	static uint32_t SPEC_NOINLINE __fastcall IterateMobileObjects(PROCESS_TYPE aeProcessLevel, const FilterData& arFilter) {
 		uint32_t uiCount = 0;
 		TESObjectREFR* pCaller = arFilter.pCaller;
 		ProcessArray* pProcesses = ProcessLists::GetSingleton()->GetProcessArray();
@@ -2383,27 +2380,27 @@ namespace RefWalker {
 		return uiCount;
 	}
 
-	bool __fastcall DistanceFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
+	static bool __fastcall DistanceFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
 		return arFilter.CheckDistance(apRef);
 	}
 
-	bool __fastcall AngleFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
+	static bool __fastcall AngleFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
 		return arFilter.CheckAngle(apRef);
 	}
 
-	bool __fastcall DistanceAndAngleFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
+	static bool __fastcall DistanceAndAngleFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
 		return arFilter.CheckDistanceAndAngle(apRef);
 	}
 
-	bool __fastcall TypeFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
+	static bool __fastcall TypeFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
 		return arFilter.CheckFormType(apRef);
 	}
 
-	bool __fastcall CellFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
+	static bool __fastcall CellFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
 		return arFilter.CheckParentCell(apRef);
 	}
 
-	bool __fastcall WorldFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
+	static bool __fastcall WorldFilter(const FilterData& arFilter, TESObjectREFR* apRef) {
 		return arFilter.CheckParentWorld(apRef);
 	}
 }

@@ -2317,3 +2317,51 @@ struct _LODMultType {
 	};
 };
 using LOD_MULT_TYPE = _LODMultType::Type;
+
+struct _FaceGenDataType {
+	enum Type {
+		GEOMETRY	= 0,
+		TEXTURE		= 1,
+		COUNT,
+	};
+};
+using FaceGenDataType = _FaceGenDataType::Type;
+
+struct _FaceGenSymmetryType {
+	enum Type {
+		SYMMMETRIC	= 0,
+		ASYMMETRIC	= 1,
+		COUNT,
+	};
+};
+using FaceGenSymmetryType = _FaceGenSymmetryType::Type;
+
+struct _FaceGenAttributeType {
+	enum Type {
+		AGE			= 0,
+		GENDER		= 1,
+		COUNT,
+	};
+};
+using FaceGenAttributeType = _FaceGenAttributeType::Type;
+
+struct _GunSkillType {
+	enum Type {
+		HUD		= 0,
+		GUN		= 1,
+		ACTOR	= 2,
+		VATS	= 3,
+		COUNT,
+	};
+};
+using GUN_SKILL_TYPE = _GunSkillType::Type;
+
+struct _KillCamType {
+	enum Type {
+		NONE	= 0,
+		PLAYER	= 1,
+		VATS	= 2,
+		COUNT,
+	};
+};
+using KILL_CAM_TYPE = _KillCamType::Type;

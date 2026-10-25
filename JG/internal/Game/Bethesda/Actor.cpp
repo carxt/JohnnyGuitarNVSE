@@ -228,8 +228,13 @@ bool Actor::GetShouldAttack(Actor* apTarget, bool a3, int32_t& a4, bool a5) {
 }
 
 // GAME - 0x8BC700
-bool Actor::GetIsActorCombatTarget(Actor* apTarget) const {
+bool Actor::IsInCombatWithActor(Actor* apTarget) const {
 	return ThisCall<bool>(0x8BC700, this, apTarget);
+}
+
+// GAME - 0x8B0DD0
+float Actor::GetGunSkill(GUN_SKILL_TYPE aeSkill) const {
+	return ThisCall<float>(0x8B0DD0, this, aeSkill);
 }
 
 // GAME - 0x8BC9D0
@@ -276,6 +281,16 @@ void Actor::AddDeathItems() {
 // GAME - 0x891190
 void Actor::UpdateWeaponHealth(bool abForce) {
 	ThisCall(0x891190, this, abForce);
+}
+
+// GAME - 0x8BFA40
+void Actor::StealAlarm(TESObjectREFR* apRef, TESBoundObject* apObject, int32_t aiCrime, int32_t aiStolenCount, TESForm* apOwnership) {
+	ThisCall(0x8BFA40, this, apRef, apObject, aiCrime, aiStolenCount, apOwnership);
+}
+
+// GAME - 0x8C0EC0
+int32_t Actor::TrespassAlarm(TESObjectREFR* apRef, TESForm* apOwnership, int32_t aiCrime) {
+	return ThisCall<int32_t>(0x8C0EC0, this, apRef, apOwnership, aiCrime);
 }
 
 // GAME - 0x88C570

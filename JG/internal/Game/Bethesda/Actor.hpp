@@ -366,7 +366,9 @@ public:
 
 	bool GetShouldAttack(Actor* apTarget, bool a3, int32_t& a4, bool a5);
 	
-	bool GetIsActorCombatTarget(Actor* apTarget) const;
+	bool IsInCombatWithActor(Actor* apTarget) const;
+
+	float GetGunSkill(GUN_SKILL_TYPE aeSkill) const;
 
 	bool CanUseWeapon(TESObjectWEAP* apWeapon, bool abAllowNonPlayable) const;
 
@@ -383,6 +385,9 @@ public:
 	void AddDeathItems();
 
 	void UpdateWeaponHealth(bool abForce);
+
+	void StealAlarm(TESObjectREFR* apRef, TESBoundObject* apObject, int32_t aiCrime, int32_t aiStolenCount, TESForm* apOwnership);
+	int32_t TrespassAlarm(TESObjectREFR* apRef, TESForm* apOwnership, int32_t aiCrime);
 
 	bool IsPointInCone(const NiPoint3& arPoint, float afConeSize) const;
 

@@ -34,6 +34,7 @@
 #include "Bethesda/TimeGlobal.hpp"
 #include "Bethesda/BSFadeNode.hpp"
 #include "Bethesda/WaterShaderProperty.hpp"
+#include "Gamebryo/NiControllerManager.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 #include "Gamebryo/NiPointLight.hpp"
 
@@ -65,8 +66,8 @@ extern NVSECommandTableInterface* g_cmdTableInterface;
 #ifdef GAME
 extern NVSEScriptInterface* g_scriptInterface;
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
-extern InventoryRef* (*InventoryRefGetForID)(FormID auiFormID);
-extern TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
+extern _InventoryReferenceGetForRefID InventoryRefGetForID;
+extern _InventoryReferenceCreateEntry InventoryRefCreateEntry;
 #endif
 
 namespace {
@@ -2403,6 +2404,62 @@ namespace JIPFixes {
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1000990A), "\x50\xB8\x30\xF9\x56\x00\xFF\xD0\x83\xC4\x04\x85\xC0\x74\x15\xEB\x08");
 		}
 	}
+
+	namespace SetAnimFreqBufferFix {
+
+		// Original char buffer has size of... 64
+		// ...Yea
+
+		bool Cmd_SetAnimSequenceFrequency_Execute(COMMAND_ARGS) {
+			*result = 0;
+			if (thisObj->IsActor() && static_cast<Actor*>(thisObj)->GetLifeState() == ACTOR_LIFE_STATE::DYING) [[unlikely]]
+				return true;
+
+			NiPointer<NiAVObject> spRoot = thisObj->Get3D();
+			if (!spRoot) [[unlikely]]
+				return true;
+
+			char cSequenceName[512] = {};
+			float fFrequency = 1.f;
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &cSequenceName, &fFrequency)) [[likely]] {
+				NiPointer<NiControllerManager> spMgr = spRoot->GetController<NiControllerManager>();
+				if (!spMgr) [[unlikely]]
+					return true;
+
+				const uint32_t uiCount = spMgr->GetSequenceCount();
+				if (!uiCount) [[unlikely]]
+					return true;
+
+				if (cSequenceName[0] == '*') {
+					for (uint32_t i = 0; i < uiCount; ++i) {
+						NiControllerSequence* pSeq = spMgr->GetSequenceAt(i);
+						if (pSeq) [[likely]]
+							pSeq->m_fFrequency = fFrequency;
+					}
+					*result = 1;
+				}
+				else {
+					for (uint32_t i = 0; i < uiCount; ++i) {
+						NiControllerSequence* pSeq = spMgr->GetSequenceAt(i);
+						if (pSeq && StrEqualCI(pSeq->GetName().c_str(), cSequenceName)) {
+							pSeq->m_fFrequency = fFrequency;
+							*result = 1;
+							break;
+						}
+					}
+				}
+			}
+
+			return true;
+		}
+
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetAnimSequenceFrequency));
+			if (pInfo) {
+				pInfo->execute = Cmd_SetAnimSequenceFrequency_Execute;
+			}
+		}
+	}
 #endif
 
 	namespace LogMover {
@@ -2501,6 +2558,7 @@ namespace JIPFixes {
 		LeveledListFixes::InitHooks();
 		TriggerLightningFXFix::InitHooks();
 		SetHotkeyItemRefFix::InitHooks();
+		SetAnimFreqBufferFix::InitHooks();
 #endif
 	}
 

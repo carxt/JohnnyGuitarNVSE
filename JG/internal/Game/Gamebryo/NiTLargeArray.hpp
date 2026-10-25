@@ -1,9 +1,9 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
 template <class T_Data, class Allocator>
-class SPEC_EMPTY_BASES NiTLargeArray : public NiMemObject {
+class SPEC_EMPTY_BASES NiTLargeArray : public BSMemObject {
 public:
 	NiTLargeArray(uint32_t auiMaxSize = 0, uint32_t auiGrowBy = 1);
 	virtual ~NiTLargeArray();
