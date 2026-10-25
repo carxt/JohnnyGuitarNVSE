@@ -720,3 +720,28 @@ bool Cmd_StopIdleLoop_Execute(COMMAND_ARGS) {
 	}
 	return true;
 }
+
+// GetControllerStickRaw stick:int axis:int
+// stick: 0 = left, 1 = right. axis: 0 = X, 1 = Y (up = positive).
+// Returns the stick value the game polled this frame, in the range -1..1, before any deadzone
+// (the game and the other getters apply a per-axis deadzone, which discards the smaller axis on
+// diagonal input). Returns 0 if no controller is connected or the arguments are out of range.
+//
+// GAME - 0xA23390 Controls::GetControllerValue(padIndex, valueID): IDs 7/8/9/10 return
+// sThumbLX/LY/RX/RY straight from the game's XINPUT_STATE (0x11F35A8) as read, or 0 when the
+// controller-connected byte (0x11F35C8) is 0. The game's own look code calls it with IDs 9/10 and
+// applies the deadzone afterwards. These IDs only read those globals, not the Controls instance.
+bool Cmd_GetControllerStickRaw_Execute(COMMAND_ARGS) {
+	*result = 0;
+	uint32_t uiStick = 0, uiAxis = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiStick, &uiAxis) && uiStick <= 1 && uiAxis <= 1) {
+		void* pControls = *reinterpret_cast<void**>(0x11F35CC);
+		if (pControls) {
+			const int32_t iValue = ThisCall<int32_t>(0xA23390, pControls, 0, 7 + uiStick * 2 + uiAxis);
+			*result = iValue < 0 ? iValue / 32768.0 : iValue / 32767.0;
+		}
+	}
+	if (Script::GetConsoleOuput())
+		Interface::PrintLine("GetControllerStickRaw >> %.4f", *result);
+	return true;
+}
