@@ -57,6 +57,10 @@ namespace MorePluginTypes {
 
 	namespace FileHooks {
 
+		// Min file version required to have a full FormID range
+		// Read: allows using 0x0-0x800 IDs
+		static constexpr float FULL_FORMID_RANGE_FILE_VERSION = 1.35f;
+
 		static constexpr AddressPtr<uint32_t, 0x11C3F24> iTotalForms;
 
 		void __fastcall OpenCustomPlugins(TESDataHandler* apDataHandler) {
@@ -187,7 +191,7 @@ namespace MorePluginTypes {
 
 		void __fastcall AdjustFormIDFileIndex(TESFile* apFile, TESFile* apIndexFile) {
 			FormID_View uiDefaultFormIDCheck = apFile->kCurrentForm.uiFormID;
-			if (!apFile->IsSpecialFile())
+			if (apFile->kHeader.fVersion < FULL_FORMID_RANGE_FILE_VERSION)
 				uiDefaultFormIDCheck.SetCompileIndex(0);
 
 			if (uiDefaultFormIDCheck.IsDefault()) {
@@ -348,6 +352,8 @@ namespace MorePluginTypes {
 		};
 
 		void InitHooks() {
+			constexpr double dVersion = static_cast<double>(FULL_FORMID_RANGE_FILE_VERSION + std::numeric_limits<float>::epsilon());
+			HookUtils::SafeWrite64(0x101A208, std::bit_cast<uint64_t>(dVersion));
 
 			kDataHandlerConstructorDetour.ReplaceCall(0x44FF95, &TESDataHandlerEx::InitializeDataHandler);
 
