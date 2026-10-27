@@ -846,9 +846,9 @@ namespace MorePluginTypes {
 				cmp		edx, AUX_VAR_SAVE_VERSION
 				jl		SKIP_ESL
 
-				push	1
 				movzx	edx, word ptr[esi]
 				add		esi, 2
+				push	1
 				jmp		LOAD_VAR
 
 				SKIP_ESL:
