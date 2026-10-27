@@ -20,5 +20,8 @@ namespace JohnnySerialization {
 	extern uint32_t	(__cdecl* _ReadRecord32)();
 	extern void		(__cdecl* _ReadRecord64)(void* outData);
 
+	extern const TESFile*							(__cdecl *_ResolveMod)(uint32_t index, NVSESerializationInterface::ModListType modType);
+	extern NVSESerializationInterface::ModListType	(__cdecl *_GetModType)(const TESFile* mod);
+
 	void Init(const NVSEInterface* nvse);
 }

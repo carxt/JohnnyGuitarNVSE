@@ -23,6 +23,9 @@ namespace JohnnySerialization {
 	uint32_t	(__cdecl* _ReadRecord32)();
 	void		(__cdecl* _ReadRecord64)(void* outData);
 
+	const TESFile*							(__cdecl *_ResolveMod)(uint32_t index, NVSESerializationInterface::ModListType modType);
+	NVSESerializationInterface::ModListType	(__cdecl *_GetModType)(const TESFile* mod);
+
 #define SERIALIZATION_VERSION 1
 
 	enum RecordIDs {
@@ -87,6 +90,8 @@ namespace JohnnySerialization {
 		_ReadRecord16 = serialization->ReadRecord16;
 		_ReadRecord32 = serialization->ReadRecord32;
 		_ReadRecord64 = serialization->ReadRecord64;
+		_ResolveMod = serialization->ResolveMod;
+		_GetModType = serialization->GetModType;
 
 		serialization->SetLoadCallback(nvse->GetPluginHandle(), LoadGameCallback);
 		serialization->SetSaveCallback(nvse->GetPluginHandle(), SaveGameCallback);
