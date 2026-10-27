@@ -33,6 +33,28 @@ namespace MorePluginTypes {
 		constexpr uint32_t		GetProperIndex() const noexcept { if (IsMedium()) return GetMediumIndex(); if (IsSmall()) return GetSmallIndex(); return GetCompileIndex(); }
 	};
 
+	static bool __fastcall AdjustFormIDForFile(const TESFile* apFile, FormID& arFormID) {
+		if (apFile->IsOverlay())
+			return false;
+
+		FormID_View& vFormID = reinterpret_cast<FormID_View&>(arFormID);
+		const TESFile* pIndexFile = apFile;
+		
+		if (pIndexFile->IsMediumFile()) {
+			vFormID.SetCompileIndex(0xFD);
+			vFormID.SetMediumIndex(pIndexFile->GetMediumCompileIndex());
+		}
+		else if (pIndexFile->IsSmallFile()) {
+			vFormID.SetCompileIndex(0xFE);
+			vFormID.SetSmallIndex(pIndexFile->GetSmallCompileIndex());
+		}
+		else {
+			const uint8_t ucIndex = pIndexFile->GetCompileIndex();
+			vFormID.SetCompileIndex(ucIndex);
+		}
+		return true;
+	}
+
 	namespace FileHooks {
 
 		static constexpr AddressPtr<uint32_t, 0x11C3F24> iTotalForms;
@@ -173,7 +195,7 @@ namespace MorePluginTypes {
 			}
 			else {
 				const TESFile* pIndexFile = apIndexFile ? apIndexFile : apFile;
-				pIndexFile->AdjustFormIDFileIndex(apFile->kCurrentForm.uiFormID);
+				AdjustFormIDForFile(pIndexFile, apFile->kCurrentForm.uiFormID);
 			}
 		}
 
@@ -194,7 +216,7 @@ namespace MorePluginTypes {
 			if (!pIndexFile)
 				pIndexFile = apFile;
 
-			pIndexFile->AdjustFormIDFileIndex(uiFormID);
+			AdjustFormIDForFile(pIndexFile, uiFormID);
 			return uiFormID;
 		}
 
@@ -320,7 +342,7 @@ namespace MorePluginTypes {
 					if (!pIndexFile)
 						pIndexFile = apFile;
 					
-					pIndexFile->AdjustFormIDFileIndex(auiID);
+					AdjustFormIDForFile(pIndexFile, auiID);
 				}
 			}
 		};
@@ -456,7 +478,7 @@ namespace MorePluginTypes {
 				}
 
 				if (pFile) {
-					pFile->AdjustFormIDFileIndex(auiFormID);
+					AdjustFormIDForFile(pFile, auiFormID);
 					return auiFormID;
 				}
 
@@ -1571,7 +1593,7 @@ namespace MorePluginTypes {
 
 		FormID uiFormID = HexToUInt(cFormID);
 		if (pFile)
-			pFile->AdjustFormIDFileIndex(uiFormID);
+			AdjustFormIDForFile(pFile, uiFormID);
 		else
 			uiFormID = FormID_View(ucModIndex, uiFormID).Get();
 
