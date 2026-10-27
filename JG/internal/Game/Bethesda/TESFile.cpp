@@ -87,8 +87,11 @@ uint8_t TESFile::GetCompileIndex() const {
 // GAME - 0x473210
 // GECK - 0x4DE6D0
 void TESFile::SetCompileIndex(uint8_t aucIndex) {
-	reinterpret_cast<FormID_View&>(kHeader.uiNextFormID).SetCompileIndex(aucIndex);
-	ucCompileIndex = aucIndex;
+#ifdef GAME
+	ThisCall(0x473210, this, aucIndex);
+#else
+	ThisCall(0x4DE6D0, this, aucIndex);
+#endif
 }
 
 uint16_t TESFile::GetSecondCompileIndex() const {
