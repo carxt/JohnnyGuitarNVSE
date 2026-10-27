@@ -622,7 +622,7 @@ namespace MorePluginTypes {
 				if (TESDataHandler::GetSingleton()->GetSmallCompiledFileCount())
 					iVersion = ESL_MINOR_VERSION;
 
-				_MESSAGE("Using minor version %i", iVersion);
+				//_MESSAGE("Using minor version %i", iVersion);
 				return iVersion;
 			}
 
@@ -631,7 +631,7 @@ namespace MorePluginTypes {
 				if (TESDataHandler::GetSingleton()->GetSmallCompiledFileCount())
 					iVersion = ESL_MAJOR_VERSION;
 
-				_MESSAGE("Using major version %i", iVersion);
+				//_MESSAGE("Using major version %i", iVersion);
 				return iVersion;
 			}
 		};
