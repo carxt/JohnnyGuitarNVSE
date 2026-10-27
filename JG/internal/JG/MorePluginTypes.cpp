@@ -766,39 +766,31 @@ namespace MorePluginTypes {
 	}
 
 	void __cdecl JIP_SaveMod(const TESFile* apFile) {
-		bool bValidFile = apFile && apFile != RUNTIME_FILE;
-		const uint8_t ucIndex = bValidFile ? apFile->GetCompileIndex() : 0xFF;
-		const uint16_t usSecondIndex = bValidFile ? apFile->GetSecondCompileIndex() : 0;
-		JohnnySerialization::_WriteRecord8(ucIndex);
-		JohnnySerialization::_WriteRecord16(usSecondIndex);
+		const bool bValidFile = apFile && apFile != RUNTIME_FILE;
+		uint8_t ucModType = 0xFF;
+		uint16_t usIndex = 0xFFFF;
+		if (bValidFile) {
+			ucModType = JohnnySerialization::_GetModType(apFile);
+			usIndex = apFile->IsSpecialFile() ? apFile->GetSecondCompileIndex() : apFile->GetCompileIndex();
+		}
+		JohnnySerialization::_WriteRecord8(ucModType);
+		JohnnySerialization::_WriteRecord16(usIndex);
 	}
 
-	TESFile* __fastcall JIP_LoadMod(uint8_t aucIndex, uint16_t ausSecondIndex, bool abSupportsSpecial) {
-		if (aucIndex == 0xFF)
+	const TESFile* __fastcall JIP_LoadMod(uint8_t aucVal, uint16_t ausIndex, bool abSupportsSpecial) {
+		if (aucVal == 0xFF)
 			return RUNTIME_FILE;
 
-		FormID_View vTempFormID(0);
-		if (abSupportsSpecial) {
-			if (aucIndex == 0xFD)
-				vTempFormID.SetMediumIndex(ausSecondIndex);
-			else if (aucIndex == 0xFE)
-				vTempFormID.SetSmallIndex(ausSecondIndex);
-		}
-		else if (aucIndex == 0xFE)
-			return nullptr;
-		else if (aucIndex == 0xFD)
-			return nullptr;
-
-		vTempFormID.SetCompileIndex(aucIndex);
-
-		FormID uiFormID = vTempFormID.Get();
-		if (JohnnySerialization::_ResolveFormID(uiFormID, &uiFormID)) {
-			TESFile* pFile = TESDataHandler::GetSingleton()->GetCompiledFileForFormID(uiFormID);
-			assert(pFile);
-			return pFile;
-		}
+		const TESFile* pFile = nullptr;
+		NVSESerializationInterface::ModListType eType = NVSESerializationInterface::ModListType::kNormal;
+		if (abSupportsSpecial)
+			eType = static_cast<NVSESerializationInterface::ModListType>(aucVal);
 		else
-			return nullptr;
+			ausIndex = aucVal;
+
+		pFile = JohnnySerialization::_ResolveMod(ausIndex, eType);
+		assert(pFile);
+		return pFile;
 	}
 
 	// I'm having more fun than you can imagine
@@ -1573,7 +1565,7 @@ namespace MorePluginTypes {
 		TESFile* pFile = nullptr;
 		if (_stricmp(cModName, "none")){
 			pFile = TESDataHandler::GetSingleton()->GetListFile(cModName);
-			if (!pFile)
+			if (!pFile || pFile->IsOverlay())
 				return true;
 		}
 
