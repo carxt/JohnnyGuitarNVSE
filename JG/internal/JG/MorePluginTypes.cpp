@@ -89,17 +89,14 @@ namespace MorePluginTypes {
 					return;
 				}
 
-				// TEST TEST TEST! Should we? Or should we not
-#if 1
-				const TESFile* pMaster = apFile->GetIndexFile(1);
-				apFile->SetCompileIndex(pMaster->GetCompileIndex());
-				if (pMaster->IsSmallFile())
-					apFile->SetSmallCompileIndex(pMaster->GetSmallCompileIndex());
-				else if (pMaster->IsMediumFile())
-					apFile->SetMediumCompileIndex(pMaster->GetMediumCompileIndex());
-#endif
-				rCompiledFiles.kOverlayFiles.Add(apFile);
-				_MESSAGE("[ TESDataHandler::AddCompiledFile ] Adding overlay file %s", apFile->GetName());
+				const uint32_t uiIndex = rCompiledFiles.kOverlayFiles.Add(apFile);
+				if (uiIndex > 0xFFFF) {
+					_MESSAGE("[ TESDataHandler::AddCompiledFile ] Too many overlay files");
+					DebugBreak();
+				}
+				_MESSAGE("[ TESDataHandler::AddCompiledFile ] Adding overlay file %s - FF%04X", apFile->GetName(), uiIndex);
+				apFile->SetCompileIndex(0xFF);
+				apFile->SetSecondCompileIndex(uiIndex);
 				return;
 			}
 
@@ -273,23 +270,22 @@ namespace MorePluginTypes {
 				if (!pIndexFile)
 					pIndexFile = apFile;
 
-				pIndexFile->AdjustFormIDFileIndex(auiFormID);
+				AdjustFormIDForFile(pIndexFile, auiFormID);
 				CdeclCall(kSetTempIDOwnedByFileDetour, auiFormID, apFile);
 			}
 
 			void SetThreadSafeParent(TESFile* apParent) {
-				SetSecondCompileIndex(0);
+				SetSecondCompileIndex(apParent->GetSecondCompileIndex());
 
 				if (apParent->IsMediumFile()) {
 					SetMediumFile(true);
-					SetMediumCompileIndex(apParent->GetMediumCompileIndex());
 				}
 				else if (apParent->IsSmallFile()) {
 					SetSmallFile(true);
-					SetSmallCompileIndex(apParent->GetSmallCompileIndex());
 				}
-				else if (apParent->IsOverlay())
+				else if (apParent->IsOverlay()) {
 					SetOverlay(true);
+				}
 
 				ThisCall(kSetThreadSafeParentDetour, this, apParent);
 			}
@@ -375,7 +371,8 @@ namespace MorePluginTypes {
 
 				// Load forms
 				HookUtils::SafeWriteBuf(0x4638CD, "\x8B\x85\xB8\xF9\xFF\xFF\x05\x10\x02\x00\x00\xC6\x85\x0B\xFA\xFF\xFF\x01\x89\x85\x7C\xFF\xFF\xFF\x83\xF8\x00\x0F\x84\xB1\x00\x00\x00\xEB\x12\xC6\x85\x0B\xFA\xFF\xFF\x00\x8B\x85\x7C\xFF\xFF\xFF\x8B\x40\x04\xEB\xDD\x8B\x08\x8A\x81\x0C\x04\x00\x00\x3C\xFF\x75\x09");
-				// 0x46390E - could check for overlays, if their index remains 0xFF? TODO
+				HookUtils::WriteRelCall(0x46390E, &TESFile::IsOverlay);
+				HookUtils::SafeWriteBuf(0x463913, "\x85\xC0\x74\xD9");
 				HookUtils::SafeWriteBuf(0x463925, "\x8B\x08\xEB\x09"); // Get TESFile* from the iterator
 				HookUtils::SafeWriteBuf(0x463941, "\x8B\x0A\xEB\x09"); // Get TESFile* from the iterator
 				HookUtils::WriteRelJump(0x46395A, 0x4638F0);
