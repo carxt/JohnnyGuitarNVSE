@@ -17,6 +17,7 @@
 #include "Bethesda/BSWindModifier.hpp"
 #include "Bethesda/Interface.hpp"
 #include "Bethesda/TESObjectREFR.hpp"
+#include "Bethesda/NiObjectGarbage.hpp"
 
 #include <JG/TaskQueue.hpp>
 #include "JG/ScriptUtils.hpp"
@@ -125,6 +126,7 @@ enum class ToggleAddonNodesState {
 	COUNT,
 };
 
+[[nodiscard]]
 static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const char* apObjectName, NiProperty::Type aeType) {
 	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, apObjectName);
 	if (!pObject)
@@ -133,12 +135,35 @@ static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const Ni
 	return { pObject->GetProperty(aeType), pObject };
 }
 
+[[nodiscard]]
 static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* apRoot, const char* apObjectName) {
 	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, apObjectName);
 	if (!pObject)
 		return nullptr;
 
 	return pObject->NiDynamicCast<NiParticleSystem>();
+}
+
+static void __fastcall DisposeNiObject(NiRefObject* apObject) {
+	if (apObject->GetRefCount() <= 1)
+		NiObjectGarbage::Add(apObject);
+}
+
+template <class T> requires (std::is_base_of_v<NiProperty, T>)
+[[nodiscard]]
+static NiPointer<T> __fastcall CloneProperty(NiAVObject* apOwner, NiPointer<T>& arPropertyPtr) {
+	apOwner->DetachProperty(arPropertyPtr);
+
+	const bool bOrgUnique = arPropertyPtr->GetUnique();
+	NiPointer<T> spNewProperty = static_cast<T*>(arPropertyPtr->Clone());
+	arPropertyPtr->SetUnique(bOrgUnique);
+
+	apOwner->AttachProperty(spNewProperty);
+
+	DisposeNiObject(arPropertyPtr);
+	arPropertyPtr = nullptr;
+
+	return spNewProperty;
 }
 
 static void __fastcall InvalidateRenderPassesRecurse(const NiAVObject* apObject) {
@@ -209,36 +234,47 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	uint32_t uiValue = 0;
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+	BOOL bMakeUnique = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson, &bMakeUnique) && cObjectName[0] && InRange(eItem)) {
 		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::ALPHA);
-		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
-		if (!pAlpha)
+		NiPointer<NiAlphaProperty> spFoundAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
+		if (!spFoundAlpha)
 			return true;
+
+		NiPointer<NiAVObject> spOwner = kObjects.second;
+		NiPointer<NiAlphaProperty> spAlpha;
+		if (bMakeUnique)
+			spAlpha = CloneProperty(spOwner, spFoundAlpha);
+		else
+			spAlpha = spFoundAlpha;
 
 		switch (eItem) {
 		case AlphaPropertyItem::BLEND_TOGGLE:
-			pAlpha->SetAlphaBlending(uiValue != 0);
+			spAlpha->SetAlphaBlending(uiValue != 0);
 			break;
 		case AlphaPropertyItem::SOURCE_BLEND_MODE:
-			pAlpha->SetSrcBlendMode(static_cast<NiAlphaProperty::AlphaFunction>(uiValue));
+			spAlpha->SetSrcBlendMode(static_cast<NiAlphaProperty::AlphaFunction>(uiValue));
 			break;
 		case AlphaPropertyItem::DEST_BLEND_MODE:
-			pAlpha->SetDestBlendMode(static_cast<NiAlphaProperty::AlphaFunction>(uiValue));
+			spAlpha->SetDestBlendMode(static_cast<NiAlphaProperty::AlphaFunction>(uiValue));
 			break;
 		case AlphaPropertyItem::TEST_TOGGLE:
-			pAlpha->SetAlphaTesting(uiValue != 0);
+			spAlpha->SetAlphaTesting(uiValue != 0);
 			break;
 		case AlphaPropertyItem::TEST_FUNC:
-			pAlpha->SetTestMode(static_cast<NiAlphaProperty::TestFunction>(uiValue));
+			spAlpha->SetTestMode(static_cast<NiAlphaProperty::TestFunction>(uiValue));
 			break;
 		case AlphaPropertyItem::TEST_REF:
-			pAlpha->SetTestRef(static_cast<uint8_t>(uiValue));
+			spAlpha->SetTestRef(static_cast<uint8_t>(uiValue));
 			break;
 		default:
 			__assume(0);
 		}
 
-		InvalidateRenderPasses(kObjects.second);
+		if (bMakeUnique)
+			spOwner->UpdateProperties();
+
+		InvalidateRenderPasses(spOwner);
 
 		*result = 1;
 	}
@@ -252,32 +288,34 @@ bool Cmd_GetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
 		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::ALPHA);
-		const NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
-		if (!pAlpha)
+		const NiPointer<NiAlphaProperty> spAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
+		if (!spAlpha)
 			return true;
 
 		switch (eItem) {
 		case AlphaPropertyItem::BLEND_TOGGLE:
-			*result = pAlpha->GetAlphaBlending() ? 1 : 0;
+			*result = spAlpha->GetAlphaBlending() ? 1 : 0;
 			break;
 		case AlphaPropertyItem::SOURCE_BLEND_MODE:
-			*result = pAlpha->GetSrcBlendMode();
+			*result = spAlpha->GetSrcBlendMode();
 			break;
 		case AlphaPropertyItem::DEST_BLEND_MODE:
-			*result = pAlpha->GetDestBlendMode();
+			*result = spAlpha->GetDestBlendMode();
 			break;
 		case AlphaPropertyItem::TEST_TOGGLE:
-			*result = pAlpha->GetAlphaTesting() ? 1 : 0;
+			*result = spAlpha->GetAlphaTesting() ? 1 : 0;
 			break;
 		case AlphaPropertyItem::TEST_FUNC:
-			*result = pAlpha->GetTestMode();
+			*result = spAlpha->GetTestMode();
 			break;
 		case AlphaPropertyItem::TEST_REF:
-			*result = pAlpha->GetTestRef();
+			*result = spAlpha->GetTestRef();
 			break;
 		default:
 			__assume(0);
 		}
+
+		assert(spAlpha->GetRefCount() > 1);
 	}
 	return true;
 }
@@ -288,42 +326,53 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	uint32_t uiValue = 0;
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+	BOOL bMakeUnique = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson, &bMakeUnique) && cObjectName[0] && InRange(eItem)) {
 		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::STENCIL);
-		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
-		if (!pStencil)
+		NiPointer<NiStencilProperty> spFoundStencil = static_cast<NiStencilProperty*>(kObjects.first);
+		if (!spFoundStencil)
 			return true;
+
+		NiPointer<NiAVObject> spOwner = kObjects.second;
+		NiPointer<NiStencilProperty> spStencil;
+		if (bMakeUnique)
+			spStencil = CloneProperty(spOwner, spFoundStencil);
+		else
+			spStencil = spFoundStencil;
 
 		switch (eItem) {
 		case StencilPropertyItem::ENABLED_TOGGLE:
-			pStencil->SetStencilOn(uiValue != 0);
+			spStencil->SetStencilOn(uiValue != 0);
 			break;
 		case StencilPropertyItem::DRAW_MODE:
-			pStencil->SetDrawMode(static_cast<NiStencilProperty::DrawMode>(uiValue));
+			spStencil->SetDrawMode(static_cast<NiStencilProperty::DrawMode>(uiValue));
 			break;
 		case StencilPropertyItem::REF_VALUE:
-			pStencil->SetStencilReference(static_cast<uint8_t>(uiValue));
+			spStencil->SetStencilReference(static_cast<uint8_t>(uiValue));
 			break;
 		case StencilPropertyItem::MASK_VALUE:
-			pStencil->SetStencilMask(static_cast<uint8_t>(uiValue));
+			spStencil->SetStencilMask(static_cast<uint8_t>(uiValue));
 			break;
 		case StencilPropertyItem::FAIL_ACTION:
-			pStencil->SetStencilFailAction(static_cast<NiStencilProperty::Action>(uiValue));
+			spStencil->SetStencilFailAction(static_cast<NiStencilProperty::Action>(uiValue));
 			break;
 		case StencilPropertyItem::ZFAIL_ACTION:
-			pStencil->SetStencilZFailAction(static_cast<NiStencilProperty::Action>(uiValue));
+			spStencil->SetStencilZFailAction(static_cast<NiStencilProperty::Action>(uiValue));
 			break;
 		case StencilPropertyItem::PASS_ACTION:
-			pStencil->SetStencilPassAction(static_cast<NiStencilProperty::Action>(uiValue));
+			spStencil->SetStencilPassAction(static_cast<NiStencilProperty::Action>(uiValue));
 			break;
 		case StencilPropertyItem::TEST_FUNC:
-			pStencil->SetStencilFunction(static_cast<NiStencilProperty::TestFunction>(uiValue));
+			spStencil->SetStencilFunction(static_cast<NiStencilProperty::TestFunction>(uiValue));
 			break;
 		default:
 			__assume(0);
 		}
 
-		InvalidateRenderPasses(kObjects.second);
+		if (bMakeUnique)
+			spOwner->UpdateProperties();
+
+		InvalidateRenderPasses(spOwner);
 
 		*result = 1;
 	}
@@ -337,34 +386,34 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
 		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::STENCIL);
-		const NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
-		if (!pStencil)
+		const NiPointer<NiStencilProperty> spStencil = static_cast<NiStencilProperty*>(kObjects.first);
+		if (!spStencil)
 			return true;
 
 		switch (eItem) {
 		case StencilPropertyItem::ENABLED_TOGGLE:
-			*result = pStencil->GetStencilOn() ? 1 : 0;
+			*result = spStencil->GetStencilOn() ? 1 : 0;
 			break;
 		case StencilPropertyItem::DRAW_MODE:
-			*result = pStencil->GetDrawMode();
+			*result = spStencil->GetDrawMode();
 			break;
 		case StencilPropertyItem::REF_VALUE:
-			*result = pStencil->GetStencilReference();
+			*result = spStencil->GetStencilReference();
 			break;
 		case StencilPropertyItem::MASK_VALUE:
-			*result = pStencil->GetStencilMask();
+			*result = spStencil->GetStencilMask();
 			break;
 		case StencilPropertyItem::FAIL_ACTION:
-			*result = pStencil->GetStencilFailAction();
+			*result = spStencil->GetStencilFailAction();
 			break;
 		case StencilPropertyItem::ZFAIL_ACTION:
-			*result = pStencil->GetStencilZFailAction();
+			*result = spStencil->GetStencilZFailAction();
 			break;
 		case StencilPropertyItem::PASS_ACTION:
-			*result = pStencil->GetStencilPassAction();
+			*result = spStencil->GetStencilPassAction();
 			break;
 		case StencilPropertyItem::TEST_FUNC:
-			*result = pStencil->GetStencilFunction();
+			*result = spStencil->GetStencilFunction();
 			break;
 		default:
 			__assume(0);
@@ -1047,13 +1096,16 @@ bool Cmd_SetShaderPropertyFlag_Execute(COMMAND_ARGS) {
 	BOOL bValue = FALSE;
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eBit, &bValue, &bFirstPerson) && cObjectName[0] && eBit >= 0 && eBit < BSShaderProperty::ShaderBits::MAX_FLAGS) {
+	BOOL bMakeUnique = FALSE; // Each shader property already is unique, so this is unused
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eBit, &bValue, &bFirstPerson, &bMakeUnique) && cObjectName[0] && eBit >= 0 && eBit < BSShaderProperty::ShaderBits::MAX_FLAGS) {
 		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::SHADE);
-		BSShaderProperty* pShade = static_cast<BSShaderProperty*>(kObjects.first);
-		if (!pShade)
+		NiPointer<BSShaderProperty> spShade = static_cast<BSShaderProperty*>(kObjects.first);
+		if (!spShade)
 			return true;
 
-		pShade->SetFlag(eBit, bValue);
+		assert(spShade->IsKindOf<BSShaderProperty>());
+
+		spShade->SetFlag(eBit, bValue);
 
 		*result = 1;
 	}
@@ -1067,11 +1119,13 @@ bool Cmd_GetShaderPropertyFlag_Execute(COMMAND_ARGS) {
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eBit, &bFirstPerson) && cObjectName[0] && eBit >= 0 && eBit < BSShaderProperty::ShaderBits::MAX_FLAGS) {
 		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::SHADE);
-		const BSShaderProperty* pShade = static_cast<BSShaderProperty*>(kObjects.first);
-		if (!pShade)
+		NiPointer<BSShaderProperty> spShade = static_cast<BSShaderProperty*>(kObjects.first);
+		if (!spShade)
 			return true;
 
-		*result = pShade->GetFlag(eBit);
+		assert(spShade->IsKindOf<BSShaderProperty>());
+
+		*result = spShade->GetFlag(eBit);
 	}
 	return true;
 }

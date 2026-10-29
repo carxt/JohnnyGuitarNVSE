@@ -1039,6 +1039,7 @@ static ParamInfo kParams_SetPropertyValue[] =
 	{ "Item",			kParamType_Integer, 0 },
 	{ "Value",			kParamType_Integer, 0 },
 	{ "First Person",	kParamType_Integer, 1 },
+	{ "Make Unique",	kParamType_Integer, 1 },
 };
 
 static ParamInfo kParams_GetPropertyValue[] =

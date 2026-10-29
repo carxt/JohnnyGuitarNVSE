@@ -68,3 +68,13 @@ NiStencilProperty::TestFunction NiStencilProperty::GetStencilFunction() const {
 void NiStencilProperty::SetStencilFunction(NiStencilProperty::TestFunction aeFunc) {
 	m_usFlags.ucTestFunc = aeFunc;
 }
+
+#if USE_JG_CHANGES
+bool NiStencilProperty::GetUnique() const {
+	return m_usExtraFlags.bUnique;
+}
+
+void NiStencilProperty::SetUnique(bool abUnique) {
+	m_usExtraFlags.bUnique;
+}
+#endif
