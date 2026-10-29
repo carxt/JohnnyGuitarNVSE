@@ -1039,7 +1039,7 @@ namespace MorePluginTypes {
 			// Cmd_ClearJIPSavedData_Execute
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1003CB3C), GetOverridingModOrID);
 			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1003CB45), "\x89\xC1\x90");
-			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1003CBC5), "\x8B\x4D\x10\x90");
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x1003CBC5), "\x8B\x47\x10\x90");
 			
 			// SaveGameCallback
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100160F3) + 1, SCRIPT_VAR_SAVE_VERSION);
@@ -1109,7 +1109,7 @@ namespace MorePluginTypes {
 
 			// Cmd_RefMapArrayGetAll_Execute
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10033E55), GetOverridingModOrID);
-			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x100334B4), "\x89\xC6\x90");
+			HookUtils::SafeWriteBuf(JIPUtils::GetAddress(0x10033E5A), "\x89\xC6\x90");
 
 			// RefMapAddValue
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x100340CC), GetOverridingModOrID);
