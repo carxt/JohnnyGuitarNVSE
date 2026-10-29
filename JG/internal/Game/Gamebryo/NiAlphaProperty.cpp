@@ -75,7 +75,7 @@ bool NiAlphaProperty::GetUnique() const {
 }
 
 void NiAlphaProperty::SetUnique(bool abUnique) {
-	m_usFlags.bUnique;
+	m_usFlags.bUnique = abUnique;
 }
 #endif
 

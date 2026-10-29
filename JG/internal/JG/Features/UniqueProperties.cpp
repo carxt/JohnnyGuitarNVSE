@@ -1,4 +1,8 @@
 #include "UniqueProperties.hpp"
+#include "Gamebryo/NiExtraData.hpp"
+#include "Gamebryo/NiStencilProperty.hpp"
+#include "Gamebryo/NiAlphaProperty.hpp"
+#include "Gamebryo/NiMaterialProperty.hpp"
 #include <shared/SafeWrite/SafeWrite.hpp>
 
 namespace UniqueProperties {
@@ -6,8 +10,43 @@ namespace UniqueProperties {
 	// TLDR:
 	// Stencil, alpha and material properties default to being shared, unless they have controllers
 	// Abusing free flag space in stencil and alpha properties to have this be toggleable on a per instance bassis
-	// TODO:
-	// Decide how to handle material properties
+	// Material props don't have any flags, ExtraData it is then...
+
+	static NiFixedString strNoShare;
+	static NiPointer<NiExtraData> spUniquePropertyExtra;
+
+	EXTERN_DLL_EXPORT bool __fastcall GetStencilPropertyUnique(const NiStencilProperty* apProperty) {
+		return apProperty->GetUnique();
+	}
+
+	EXTERN_DLL_EXPORT void __fastcall SetStencilPropertyUnique(NiStencilProperty* apProperty, bool abUnique) {
+		apProperty->SetUnique(abUnique);
+	}
+
+	EXTERN_DLL_EXPORT bool __fastcall GetAlphaPropertyUnique(const NiAlphaProperty* apProperty) {
+		return apProperty->GetUnique();
+	}
+
+	EXTERN_DLL_EXPORT void __fastcall SetAlphaPropertyUnique(NiAlphaProperty* apProperty, bool abUnique) {
+		apProperty->SetUnique(abUnique);
+	}
+
+	EXTERN_DLL_EXPORT bool __fastcall GetMaterialPropertyUnique(const NiMaterialProperty* apProperty) {
+		return apProperty->GetExtraData(strNoShare) != nullptr;
+	}
+
+	EXTERN_DLL_EXPORT void __fastcall SetMaterialPropertyUnique(NiMaterialProperty* apProperty, bool abUnique) {
+		if (abUnique) {
+			if (!GetMaterialPropertyUnique(apProperty)) {
+				if (!spUniquePropertyExtra) [[unlikely]]
+					spUniquePropertyExtra = NiExtraData::CreateObject();
+				apProperty->AddExtraData(strNoShare, spUniquePropertyExtra);
+			}
+		}
+		else {
+			apProperty->RemoveExtraData(strNoShare);
+		}
+	}
 
 	namespace Stencil {
 
@@ -87,9 +126,48 @@ namespace UniqueProperties {
 
 	}
 
+	namespace Material {
+
+#ifdef GAME
+		static constexpr inline uint32_t uiCloneHookAddr = 0xA75733;
+#else
+		static constexpr inline uint32_t uiCloneHookAddr = 0x820983;
+#endif
+
+		SPEC_NAKED void NiMaterialPropertyClone_Asm() {
+			static constexpr uint32_t uiCopyUnique = uiCloneHookAddr + 0x6;
+			static constexpr uint32_t uiCopyShared = uiCloneHookAddr + 0x48;
+			__asm {
+				cmp     dword ptr [edi + 0xC], 0
+				jne		UNIQUE
+
+				cmp     word ptr [edi + 0x14], 0
+				jz		SHARED
+
+				call	GetMaterialPropertyUnique
+				test	al, al
+				jnz		UNIQUE
+
+				SHARED:
+				jmp		uiCopyShared
+
+				UNIQUE:
+				jmp		uiCopyUnique
+			}
+		}
+
+		void InitHooks() {
+			HookUtils::WriteRelJump(uiCloneHookAddr, NiMaterialPropertyClone_Asm);
+		}
+
+	}
+
 	void Install() {
 		Stencil::InitHooks();
 		Alpha::InitHooks();
+		Material::InitHooks();
+
+		strNoShare = "Unique";
 	}
 
 }

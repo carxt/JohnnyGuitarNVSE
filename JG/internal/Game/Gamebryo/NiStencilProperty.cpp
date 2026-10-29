@@ -75,6 +75,6 @@ bool NiStencilProperty::GetUnique() const {
 }
 
 void NiStencilProperty::SetUnique(bool abUnique) {
-	m_usExtraFlags.bUnique;
+	m_usExtraFlags.bUnique = abUnique;
 }
 #endif
