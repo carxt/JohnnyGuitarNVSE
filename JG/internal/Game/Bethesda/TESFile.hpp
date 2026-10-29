@@ -3,7 +3,10 @@
 #include "BSEnums.hpp"
 #include "BSSimpleList.hpp"
 #include "BSStringT.hpp"
+#include "FormID_View.hpp"
 #include "Gamebryo/NiTPointerMap.hpp"
+
+#define TESFILE_NEW_TYPES 1
 
 class TESObjectCELL;
 class TESForm;
@@ -48,6 +51,7 @@ public:
 			LOCALIZED		= 1u << 7,
 			SMALL			= 1u << 8,
 			OVERLAY 		= 1u << 9,
+			MEDIUM			= 1u << 10,
 		};
 
 		bool bMaster		: 1;
@@ -60,6 +64,7 @@ public:
 		bool bLocalized		: 1;
 		bool bSmall			: 1;
 		bool bOverlay		: 1;
+		bool bMedium		: 1;
 	};
 	using FileFlags = _FileFlags::Flags;
 
@@ -102,6 +107,10 @@ public:
 	TESFile**							ppMasters;
 	_FILETIME							kDeletedFormTime;
 	uint8_t								ucCompileIndex;
+	union {
+		uint16_t						usSmallCompileIndex;
+		uint8_t							ucMediumCompileIndex;
+	};
 	BSString							strAuthor;
 	BSString							strDescription;
 	void*								pDecompressedFormBuffer;
@@ -121,7 +130,45 @@ public:
 
 	TESFile* GetThreadSafeParent() const;
 
+	TESFile* GetIndexFile(uint32_t auiIndex) const;
+
 	bool IsMaster() const;
+	void SetMaster(bool abMaster);
+
+#if TESFILE_NEW_TYPES
+	bool IsSpecialFile() const;
+
+	bool IsSmallFile() const;
+	void SetSmallFile(bool abSmallFile);
+
+	bool IsOverlay() const;
+	void SetOverlay(bool abOverlay);
+
+	bool IsMediumFile() const;
+	void SetMediumFile(bool abMedium);
+#endif
+
+	uint8_t GetCompileIndex() const;
+	void SetCompileIndex(uint8_t aucIndex);
+
+	uint16_t GetSecondCompileIndex() const;
+	void SetSecondCompileIndex(uint16_t ausIndex);
+
+#ifdef TESFILE_NEW_TYPES
+	uint16_t GetSmallCompileIndex() const;
+	void SetSmallCompileIndex(uint16_t ausIndex);
+
+	uint8_t GetMediumCompileIndex() const;
+	void SetMediumCompileIndex(uint8_t aucIndex);
+#endif
+
+	bool OpenTES(uint32_t aeAccessMode, bool abLock);
+
+	void AdjustFormIDFileIndex(FormID& arFormID) const;
+
+#ifdef GAME
+	static TESFile* GetFileForTempID(FormID auiFormID);
+#endif
 };
 
 ASSERT_SIZE(WIN32_FIND_DATA, 0x140);
