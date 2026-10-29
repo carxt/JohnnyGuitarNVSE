@@ -14,6 +14,10 @@ public:
 
 	uint32_t m_uiRefCount;
 
+	inline uint32_t GetRefCount() const {
+		return m_uiRefCount;
+	}
+
 	// GAME - 0x40F6E0
 	inline void IncRefCount() {
 		InterlockedIncrement(&m_uiRefCount);

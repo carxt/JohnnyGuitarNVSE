@@ -1300,6 +1300,12 @@
     <ClCompile Include="internal\JG\Fixes\CellDataLoadWarning.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\NiObjectGarbage.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Features\UniqueProperties.cpp">
+      <Filter>internal\JG\Features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -3531,6 +3537,12 @@
     </ClInclude>
     <ClInclude Include="internal\JG\Fixes\CellDataLoadWarning.hpp">
       <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\NiObjectGarbage.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Features\UniqueProperties.hpp">
+      <Filter>internal\JG\Features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

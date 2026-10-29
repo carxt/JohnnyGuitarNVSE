@@ -34,6 +34,17 @@ public:
 	};
 	using Flags = _Flags::Flags;
 
+#if USE_JG_CHANGES
+	struct ALIGN2 _ExtraFlags {
+		enum Flags {
+			UNIQUE	= 0x1,
+		};
+
+		bool	bUnique	: 1;
+	};
+	using ExtraFlags = _ExtraFlags::Flags;
+#endif
+
 	struct _TestFunc {
 		enum Func {
 			NEVER,
@@ -73,9 +84,12 @@ public:
 	};
 	using DrawMode = _DrawMode::Mode;
 
-	Bitfield<_Flags>	m_usFlags;
-	uint32_t			m_uiRef;
-	uint32_t			m_uiMask;
+	Bitfield<_Flags>		m_usFlags;
+#if USE_JG_CHANGES
+	Bitfield<_ExtraFlags>	m_usExtraFlags;
+#endif
+	uint32_t				m_uiRef;
+	uint32_t				m_uiMask;
 
 	CREATE_OBJECT(NiStencilProperty, 0xA6F410);
 	NIRTTI_ADDRESS(0x11F4A0C);
@@ -103,6 +117,11 @@ public:
 
 	TestFunction GetStencilFunction() const;
 	void SetStencilFunction(TestFunction aeFunc);
+
+#if USE_JG_CHANGES
+	bool GetUnique() const;
+	void SetUnique(bool abUnique);
+#endif
 };
 
 ASSERT_SIZE(NiStencilProperty, 0x24);

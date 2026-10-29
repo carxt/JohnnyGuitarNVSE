@@ -21,7 +21,10 @@ public:
 			TEST_ENABLE			= 0x0200,
 			TEST_FUNC			= 0x1C00,
 			TEST_FUNC_POS		= 10,
-			ALPHA_NOSORTER		= 0x2000
+			ALPHA_NOSORTER		= 0x2000,
+#if USE_JG_CHANGES
+			UNIQUE				= 0x4000
+#endif
 		};
 
 		bool	bAlphaBlending	: 1;
@@ -31,6 +34,9 @@ public:
 		bool	bAlphaTesting	: 1;
 		uint8_t ucTestFunc		: 3;
 		bool	bNoSorter		: 1;
+#if USE_JG_CHANGES
+		bool	bUnique			: 1;
+#endif
 	};
 	using Flags = _Flags::Flags;
 
@@ -90,6 +96,11 @@ public:
 
 	TestFunction GetTestMode() const;
 	void SetTestMode(TestFunction aeTestFunc);
+
+#if USE_JG_CHANGES
+	bool GetUnique() const;
+	void SetUnique(bool abUnique);
+#endif
 
 	static AlphaFunction GetNiAlphaFunctionFromD3D(D3DBLEND aeBlend);
 };

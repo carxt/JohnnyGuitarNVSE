@@ -36,6 +36,7 @@
 #endif
 #include "BSAUpgrade.hpp"
 #include "NewNiObjects.hpp"
+#include "Features/UniqueProperties.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
@@ -283,6 +284,8 @@ namespace JohnnyPatches {
 
 		NamedSpellLights::Install();
 #endif
+		UniqueProperties::Install();
+
 		NewNiObjects::Install();
 	}
 

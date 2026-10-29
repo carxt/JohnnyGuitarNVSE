@@ -69,6 +69,16 @@ void NiAlphaProperty::SetTestMode(TestFunction aeTestFunc) {
 	m_usFlags.ucTestFunc = aeTestFunc;
 }
 
+#if USE_JG_CHANGES
+bool NiAlphaProperty::GetUnique() const {
+	return m_usFlags.bUnique;
+}
+
+void NiAlphaProperty::SetUnique(bool abUnique) {
+	m_usFlags.bUnique = abUnique;
+}
+#endif
+
 // GAME - 0xBA5060
 NiAlphaProperty::AlphaFunction NiAlphaProperty::GetNiAlphaFunctionFromD3D(D3DBLEND aeBlend) {
 	return D3DBlendToNiBlend[aeBlend];

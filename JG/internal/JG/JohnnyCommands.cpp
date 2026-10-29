@@ -455,6 +455,8 @@ namespace JohnnyCommands {
 		REG_TYPED_CMD(GetReputationFormIcon, String);
 		REG_CMD(SetReputationFormIcon);
 		REG_CMD(ToggleAddonNodes);
+		REG_CMD(SetMaterialPropertyValueEx);
+		REG_CMD(GetMaterialPropertyValueEx);
 	}
 
 }
