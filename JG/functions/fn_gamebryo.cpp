@@ -170,17 +170,17 @@ template <class T> requires (std::is_base_of_v<NiProperty, T>)
 static bool __fastcall CloneProperty(NiAVObject* apOwner, NiPointer<T>& arPropertyPtr) {
 	const bool bOrgUnique = UniqueProperties::GetPropertyUnique(arPropertyPtr);
 	if (!bOrgUnique) {
-		UniqueProperties::SetPropertyUnique(arPropertyPtr, bOrgUnique);
-
 		NiPointer<T> spOldProperty = arPropertyPtr;
+		
+		UniqueProperties::SetPropertyUnique(spOldProperty, true);
 
 		apOwner->DetachProperty(spOldProperty);
 
-		NiPointer<T> spNewProperty = static_cast<T*>(spOldProperty->Clone());
+		arPropertyPtr = static_cast<T*>(spOldProperty->Clone());
 
-		apOwner->AttachProperty(spNewProperty);
+		apOwner->AttachProperty(arPropertyPtr);
 
-		arPropertyPtr = spNewProperty;
+		UniqueProperties::SetPropertyUnique(spOldProperty, bOrgUnique);
 
 		DisposeNiObject(spOldProperty);
 
