@@ -1042,6 +1042,15 @@ static ParamInfo kParams_SetPropertyValue[] =
 	{ "Make Unique",	kParamType_Integer, 1 },
 };
 
+static ParamInfo kParams_SetPropertyValueFloat[] =
+{
+	{ "Block Name",		kParamType_String,	0 },
+	{ "Item",			kParamType_Integer, 0 },
+	{ "Value",			kParamType_Float,	0 },
+	{ "First Person",	kParamType_Integer, 1 },
+	{ "Make Unique",	kParamType_Integer, 1 },
+};
+
 static ParamInfo kParams_GetPropertyValue[] =
 {
 	{ "Block Name",		kParamType_String,	0 },

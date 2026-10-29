@@ -19,6 +19,8 @@
 #include "Bethesda/TESObjectREFR.hpp"
 #include "Bethesda/NiObjectGarbage.hpp"
 
+#include <JG/Features/UniqueProperties.hpp>
+
 #include <JG/TaskQueue.hpp>
 #include "JG/ScriptUtils.hpp"
 using namespace ScriptUtils;
@@ -44,6 +46,20 @@ enum class StencilPropertyItem : int32_t {
 	ZFAIL_ACTION,
 	PASS_ACTION,
 	TEST_FUNC,
+	COUNT
+};
+
+enum class MaterialPropertyItem : int32_t {
+	NONE = -1,
+	SPEC_R,
+	SPEC_G,
+	SPEC_B,
+	EMIT_R,
+	EMIT_G,
+	EMIT_B,
+	GLOSS,
+	ALPHA,
+	EMIT_MULT,
 	COUNT
 };
 
@@ -151,19 +167,26 @@ static void __fastcall DisposeNiObject(NiRefObject* apObject) {
 
 template <class T> requires (std::is_base_of_v<NiProperty, T>)
 [[nodiscard]]
-static NiPointer<T> __fastcall CloneProperty(NiAVObject* apOwner, NiPointer<T>& arPropertyPtr) {
-	apOwner->DetachProperty(arPropertyPtr);
+static bool __fastcall CloneProperty(NiAVObject* apOwner, NiPointer<T>& arPropertyPtr) {
+	const bool bOrgUnique = UniqueProperties::GetPropertyUnique(arPropertyPtr);
+	if (!bOrgUnique) {
+		UniqueProperties::SetPropertyUnique(arPropertyPtr, bOrgUnique);
 
-	const bool bOrgUnique = arPropertyPtr->GetUnique();
-	NiPointer<T> spNewProperty = static_cast<T*>(arPropertyPtr->Clone());
-	arPropertyPtr->SetUnique(bOrgUnique);
+		NiPointer<T> spOldProperty = arPropertyPtr;
 
-	apOwner->AttachProperty(spNewProperty);
+		apOwner->DetachProperty(spOldProperty);
 
-	DisposeNiObject(arPropertyPtr);
-	arPropertyPtr = nullptr;
+		NiPointer<T> spNewProperty = static_cast<T*>(spOldProperty->Clone());
 
-	return spNewProperty;
+		apOwner->AttachProperty(spNewProperty);
+
+		arPropertyPtr = spNewProperty;
+
+		DisposeNiObject(spOldProperty);
+
+		return true;
+	}
+	return false;
 }
 
 static void __fastcall InvalidateRenderPassesRecurse(const NiAVObject* apObject) {
@@ -237,16 +260,14 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	BOOL bMakeUnique = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson, &bMakeUnique) && cObjectName[0] && InRange(eItem)) {
 		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::ALPHA);
-		NiPointer<NiAlphaProperty> spFoundAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
-		if (!spFoundAlpha)
+		NiPointer<NiAlphaProperty> spAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
+		if (!spAlpha)
 			return true;
 
 		NiPointer<NiAVObject> spOwner = kObjects.second;
-		NiPointer<NiAlphaProperty> spAlpha;
+		bool bUpdateAllProps = false;
 		if (bMakeUnique)
-			spAlpha = CloneProperty(spOwner, spFoundAlpha);
-		else
-			spAlpha = spFoundAlpha;
+			bUpdateAllProps = CloneProperty(spOwner, spAlpha);
 
 		switch (eItem) {
 		case AlphaPropertyItem::BLEND_TOGGLE:
@@ -271,7 +292,7 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 			__assume(0);
 		}
 
-		if (bMakeUnique)
+		if (bUpdateAllProps)
 			spOwner->UpdateProperties();
 
 		InvalidateRenderPasses(spOwner);
@@ -329,16 +350,14 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	BOOL bMakeUnique = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson, &bMakeUnique) && cObjectName[0] && InRange(eItem)) {
 		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::STENCIL);
-		NiPointer<NiStencilProperty> spFoundStencil = static_cast<NiStencilProperty*>(kObjects.first);
-		if (!spFoundStencil)
+		NiPointer<NiStencilProperty> spStencil = static_cast<NiStencilProperty*>(kObjects.first);
+		if (!spStencil)
 			return true;
 
 		NiPointer<NiAVObject> spOwner = kObjects.second;
-		NiPointer<NiStencilProperty> spStencil;
+		bool bUpdateAllProps = false;
 		if (bMakeUnique)
-			spStencil = CloneProperty(spOwner, spFoundStencil);
-		else
-			spStencil = spFoundStencil;
+			bUpdateAllProps = CloneProperty(spOwner, spStencil);
 
 		switch (eItem) {
 		case StencilPropertyItem::ENABLED_TOGGLE:
@@ -369,7 +388,7 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 			__assume(0);
 		}
 
-		if (bMakeUnique)
+		if (bUpdateAllProps)
 			spOwner->UpdateProperties();
 
 		InvalidateRenderPasses(spOwner);
@@ -417,6 +436,96 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 			break;
 		default:
 			__assume(0);
+		}
+	}
+	return true;
+}
+
+bool Cmd_SetMaterialPropertyValueEx_Execute(COMMAND_ARGS) {
+	*result = 0;
+	MaterialPropertyItem eItem = MaterialPropertyItem::NONE;
+	float fValue = 0.f;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	BOOL bMakeUnique = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &fValue, &bFirstPerson, &bMakeUnique) && cObjectName[0] && InRange(eItem)) {
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::MATERIAL);
+		NiPointer<NiMaterialProperty> spMaterial = static_cast<NiMaterialProperty*>(kObjects.first);
+		if (!spMaterial)
+			return true;
+
+		NiPointer<NiAVObject> spOwner = kObjects.second;
+		bool bUpdateAllProps = false;
+		if (bMakeUnique)
+			bUpdateAllProps = CloneProperty(spOwner, spMaterial);
+
+		switch (eItem) {
+		case MaterialPropertyItem::SPEC_R:
+		case MaterialPropertyItem::SPEC_G:
+		case MaterialPropertyItem::SPEC_B:
+			spMaterial->m_kSpec[static_cast<uint32_t>(eItem) - static_cast<uint32_t>(MaterialPropertyItem::SPEC_R)] = fValue;
+			spMaterial->SetChanged();
+			break;
+		case MaterialPropertyItem::EMIT_R:
+		case MaterialPropertyItem::EMIT_G:
+		case MaterialPropertyItem::EMIT_B:
+			spMaterial->m_kEmit[static_cast<uint32_t>(eItem) - static_cast<uint32_t>(MaterialPropertyItem::EMIT_R)] = fValue;
+			spMaterial->SetChanged();
+			break;
+		case MaterialPropertyItem::GLOSS:
+			spMaterial->SetShineness(fValue);
+			break;
+		case MaterialPropertyItem::ALPHA:
+			spMaterial->SetAlpha(fValue);
+			break;
+		case MaterialPropertyItem::EMIT_MULT:
+			spMaterial->SetEmittanceMult(fValue);
+			break;
+		default:
+			__assume(0);
+		}
+
+		if (bUpdateAllProps)
+			spOwner->UpdateProperties();
+
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetMaterialPropertyValueEx_Execute(COMMAND_ARGS) {
+	*result = 0;
+	MaterialPropertyItem eItem = MaterialPropertyItem::NONE;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::MATERIAL);
+		const NiPointer<NiMaterialProperty> spMaterial = static_cast<NiMaterialProperty*>(kObjects.first);
+		if (!spMaterial)
+			return true;
+
+		switch (eItem) {
+			case MaterialPropertyItem::SPEC_R:
+			case MaterialPropertyItem::SPEC_G:
+			case MaterialPropertyItem::SPEC_B:
+				*result = spMaterial->m_kSpec[static_cast<uint32_t>(eItem) - static_cast<uint32_t>(MaterialPropertyItem::SPEC_R)];
+				break;
+			case MaterialPropertyItem::EMIT_R:
+			case MaterialPropertyItem::EMIT_G:
+			case MaterialPropertyItem::EMIT_B:
+				*result = spMaterial->m_kEmit[static_cast<uint32_t>(eItem) - static_cast<uint32_t>(MaterialPropertyItem::EMIT_R)];
+				break;
+			case MaterialPropertyItem::GLOSS:
+				*result = spMaterial->GetShineness();
+				break;
+			case MaterialPropertyItem::ALPHA:
+				*result = spMaterial->GetAlpha();
+				break;
+			case MaterialPropertyItem::EMIT_MULT:
+				*result = spMaterial->GetEmittanceMult();
+				break;
+			default:
+				__assume(0);
 		}
 	}
 	return true;

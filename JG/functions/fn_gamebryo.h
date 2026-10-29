@@ -5,6 +5,8 @@ DEFINE_COMMAND_PLUGIN(SetAlphaPropertyValue, , true, kParams_SetPropertyValue);
 DEFINE_COMMAND_PLUGIN(GetAlphaPropertyValue, , true, kParams_GetPropertyValue);
 DEFINE_COMMAND_PLUGIN(SetStencilPropertyValue, , true, kParams_SetPropertyValue);
 DEFINE_COMMAND_PLUGIN(GetStencilPropertyValue, , true, kParams_GetPropertyValue);
+DEFINE_COMMAND_PLUGIN(SetMaterialPropertyValueEx, , true, kParams_SetPropertyValueFloat);
+DEFINE_COMMAND_PLUGIN(GetMaterialPropertyValueEx, , true, kParams_GetPropertyValue);
 DEFINE_COMMAND_PLUGIN(SetSwitchNodeIndex, , true, kParams_SetSwitchNodeIndex);
 DEFINE_COMMAND_PLUGIN(GetSwitchNodeIndex, , true, kParams_GetSwitchNodeIndex);
 DEFINE_COMMAND_PLUGIN(SetNiLODLevel, , false, kParams_OneInt);
