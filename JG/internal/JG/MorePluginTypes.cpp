@@ -391,21 +391,81 @@ namespace MorePluginTypes {
 				HookUtils::WriteRelJump(0x4636F2, OpenCustomPlugins_Asm);
 
 				// Load archives
-				HookUtils::SafeWriteBuf(0x4636FD, "\x89\x85\x7C\xFF\xFF\xFF\xEB\x0E\x8B\x85\x7C\xFF\xFF\xFF\x8B\x40\x04\xEB\xED"); // Loop start + increment
-				HookUtils::SafeWriteBuf(0x463719, "\x83\xFA\x00\x0F\x84\x74\x01\x00\x00\xEB\x01"); // Iterator nullcheck, loop break
-				HookUtils::SafeWriteBuf(0x463748, "\x8B\x08\xEB\x09"); // Get TESFile* from the iterator
-				HookUtils::SafeWriteBuf(0x463772, "\x8B\x08\xEB\x09\xE9\x07\x01\x00\x00"); // Get TESFile* from the iterator + add continue jmp for the failed index check
-				HookUtils::WriteRelJump(0x463891, 0x463705); // Jump back to the top
+				{
+					// Loop start + increment
+					HookUtils::SafeWriteBuf(0x4636FD, 
+						"\x89\x85\x7C\xFF\xFF\xFF"		// mov     [ebp-0x84], eax	; Set iter, loop starts here
+						"\xEB\x0B"						// jmp     0x463710			; Jump below, onto the iter nullcheck
+
+						"\x8B\x85\x7C\xFF\xFF\xFF"		// mov     eax, [ebp-0x84]	; Grab iter ptr
+						"\x8B\x40\x04"					// mov     eax, [eax+0x4]	; Move to the next entry
+						"\xEB\xED"						// jmp     0x4636FD			; Jump to loop start
+
+						"\x85\xC0"						// test    eax, eax			; Nullcheck the iter
+						"\x0F\x84\x7E\x01\x00\x00"		// jz      0x463896			; Exit loop
+						"\xEB\x0B"						// jmp     0x463725			; Continue loop
+					);
+					
+					// Get TESFile* from the iterator
+					HookUtils::SafeWriteBuf(0x463748, 
+						"\x8B\x08"						// mov     ecx, [eax]
+						"\xEB\x09"						// jmp     0x463755			; Jump onto TESFile::GetListMasters
+					);
+
+					// Get TESFile* from the iterator
+					HookUtils::SafeWriteBuf(0x463772, 
+						"\x8B\x08"						// mov     ecx, [eax]
+						"\xEB\x09"						// jmp     0x46377F			; Jump onto TESFile::GetFilename
+					);
+
+					// Jump back to the top
+					HookUtils::WriteRelJump(0x463891, 0x463705);
+				}
+
 
 				// Load forms
-				HookUtils::SafeWriteBuf(0x4638CD, "\x8B\x85\xB8\xF9\xFF\xFF\x05\x10\x02\x00\x00\xC6\x85\x0B\xFA\xFF\xFF\x01\x89\x85\x7C\xFF\xFF\xFF\x83\xF8\x00\x0F\x84\xB1\x00\x00\x00\xEB\x12\xC6\x85\x0B\xFA\xFF\xFF\x00\x8B\x85\x7C\xFF\xFF\xFF\x8B\x40\x04\xEB\xDD\x8B\x08\x8A\x81\x0C\x04\x00\x00\x3C\xFF\x75\x09");
-				HookUtils::WriteRelCall(0x46390E, &TESFile::IsOverlay);
-				HookUtils::SafeWriteBuf(0x463913, "\x85\xC0\x74\xD9");
-				HookUtils::SafeWriteBuf(0x463925, "\x8B\x08\xEB\x09"); // Get TESFile* from the iterator
-				HookUtils::SafeWriteBuf(0x463941, "\x8B\x0A\xEB\x09"); // Get TESFile* from the iterator
-				HookUtils::WriteRelJump(0x46395A, 0x4638F0);
-				HookUtils::SafeWriteBuf(0x46396D, "\x8B\x10\xEB\x09");
-				HookUtils::WriteRelJump(0x46399A, 0x4638F0);
+				{
+					HookUtils::SafeWriteBuf(0x4638CD,
+						"\x8B\x85\xB8\xF9\xFF\xFF"			//	mov     eax, [ebp-0x648]		; Load TESDataHandler
+						"\x05\x10\x02\x00\x00"				//	add     eax, 0x210				; Load BSSimpleList<TESFile*>* as iter
+						"\xC6\x85\x0B\xFA\xFF\xFF\x01"		//	mov     byte ptr [ebp-0x5F5], 1 ; Default "bNoExistingForms" to 1
+						"\x85\xC0"							//	test    eax, eax				; Loop starts here, nullcheck the iter
+						"\x0F\x84\xB8\x00\x00\x00"			//	jz      0x46399F				; Exit the loop if null
+
+						"\x89\x85\x7C\xFF\xFF\xFF"			//	mov     [ebp-0x84], eax			; Store iter
+						"\xEB\x28"							//	jmp     0x463917				; Jump forward to load forms
+
+															//	This runs *after* each load, using this space to not waste gaps (plus I'm limited by short jumps)
+						"\xC6\x85\x0B\xFA\xFF\xFF\x00"		//	mov     byte ptr [ebp-0x5F5], 0 ; Set "bNoExistingForms" to 0
+						"\x8B\x85\x7C\xFF\xFF\xFF"			//	mov     eax, [ebp-0x84]			; Grab iter ptr
+						"\x8B\x40\x04"						//	mov     eax, [eax+0x4]			; Move to the next entry
+						"\xEB\xDE"							//	jmp     0x4638DF				; Jump to loop start
+					);
+
+					// Get TESFile* from the iterator
+					HookUtils::SafeWriteBuf(0x463925, 
+						"\x8B\x08"							// mov     ecx, [eax]
+						"\xEB\x09"							// jmp     0x463932		; Jump to TESFile::GetFile
+					);
+
+					// Get TESFile* from the iterator
+					HookUtils::SafeWriteBuf(0x463941, 
+						"\x8B\x0A"							// mov     ecx, [edx]
+						"\xEB\x09"							// jmp     0x46394E		; Jump to TESFile::GetDLC
+					);
+
+					// File is somehow invalid, skip form loading, go to the next entry in the list
+					HookUtils::WriteRelJump(0x46395A, 0x4638EF);
+
+					// Get TESFile* from the iterator
+					HookUtils::SafeWriteBuf(0x46396D, 
+						"\x8B\x10"							// mov     edx, [eax]
+						"\xEB\x09"							// jmp     0x46397A		; Jump to TESDataHandler::ConstructObjectList
+					);
+
+					// Form loading is done (or failed), go to the next entry in the list
+					HookUtils::WriteRelJump(0x46399A, 0x4638EF);
+				}
 			}
 
 			// TESForm::AddCompileIndex
