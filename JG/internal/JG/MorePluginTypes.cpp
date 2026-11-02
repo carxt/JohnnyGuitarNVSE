@@ -393,7 +393,7 @@ namespace MorePluginTypes {
 				// Load archives
 				HookUtils::SafeWriteBuf(0x4636FD, "\x89\x85\x7C\xFF\xFF\xFF\xEB\x0E\x8B\x85\x7C\xFF\xFF\xFF\x8B\x40\x04\xEB\xED"); // Loop start + increment
 				HookUtils::SafeWriteBuf(0x463719, "\x83\xFA\x00\x0F\x84\x74\x01\x00\x00\xEB\x01"); // Iterator nullcheck, loop break
-				HookUtils::SafeWriteBuf(0x463748, "\x8B\x08\x8A\x81\x0C\x04\x00\x00\x3C\xFF\x74\x22\x90"); // Get TESFile* from the iterator + check if index is valid
+				HookUtils::SafeWriteBuf(0x463748, "\x8B\x08\xEB\x09"); // Get TESFile* from the iterator
 				HookUtils::SafeWriteBuf(0x463772, "\x8B\x08\xEB\x09\xE9\x07\x01\x00\x00"); // Get TESFile* from the iterator + add continue jmp for the failed index check
 				HookUtils::WriteRelJump(0x463891, 0x463705); // Jump back to the top
 
