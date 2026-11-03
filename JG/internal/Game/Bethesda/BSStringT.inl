@@ -290,9 +290,10 @@ inline const T* BSStringT<T>::operator[](uint32_t auiIndex) noexcept {
 	return &pString[pString ? auiIndex : 0];
 }
 
+// GAME - 0x559450
 template<typename T>
-inline BSStringT<T>::operator const T* () noexcept {
-	return GetString();
+inline BSStringT<T>::operator const T* () const noexcept {
+	return pString;
 }
 
 // GAME - 0x406F60
