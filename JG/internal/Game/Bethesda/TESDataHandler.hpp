@@ -191,7 +191,11 @@ public:
 	bool AddFormToDataHandler(TESForm* apForm);
 
 	BGSAddonNode* GetAddonNode(uint32_t auiIndex) const;
+#if USE_JG_CHANGES
 	uint32_t GetAddonNodeCount() const;
+#else
+	uint32_t GetAddonNodeArraySize() const;
+#endif
 
 	void AddAddonNode(BGSAddonNode* apNode);
 	void RemoveAddonNode(BGSAddonNode* apNode);

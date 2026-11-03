@@ -38,18 +38,25 @@ BGSAddonNode* TESDataHandler::GetAddonNode(uint32_t auiIndex) const {
 #endif
 }
 
+#if USE_JG_CHANGES
 // GAME - 0x45A120
 uint32_t TESDataHandler::GetAddonNodeCount() const {
 #ifdef GAME
 	return ThisCall<uint32_t>(0x45A120, this);
 #else
-#if USE_JG_CHANGES
 	return kAddons.GetCount();
+#endif
+}
+#else
+// GAME - 0x45A120
+uint32_t TESDataHandler::GetAddonNodeArraySize() const {
+#ifdef GAME
+	return ThisCall<uint32_t>(0x45A120, this);
 #else
 	return kAddons.GetSize();
 #endif
-#endif
 }
+#endif
 
 // GAME - 0x461820
 // GECK - 0x4D8AA0
