@@ -1300,6 +1300,9 @@
     <ClCompile Include="internal\JG\Fixes\CellDataLoadWarning.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\AddonNodeMap.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -3530,6 +3533,9 @@
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
     <ClInclude Include="internal\JG\Fixes\CellDataLoadWarning.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\AddonNodeMap.hpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClInclude>
   </ItemGroup>

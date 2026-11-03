@@ -45,7 +45,7 @@ public:
 	BSStringT&			operator+=(const BSStringT& arOther) noexcept;
 
 	const T*			operator[](uint32_t auiIndex) noexcept;
-						operator const T* () noexcept;
+						operator const T* () const noexcept;
 
 	void				SPrintF(const T* apFmt, ...) noexcept;
 	void				VSPrintF(const T* apFmt, va_list args) noexcept;

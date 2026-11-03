@@ -30,6 +30,7 @@
 #include "Bethesda/TESImageSpaceModifier.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TESObjectList.hpp"
+#include "Bethesda/MenuConsole.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 
@@ -3471,6 +3472,39 @@ bool Cmd_SetReputationFormIcon_Execute(COMMAND_ARGS) {
 		else if (eIconType == ReputationIconType::MESSAGE)
 			pReputation->SetMessageIconTextureName(cPath);
 		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetAddonNodeIndex_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSAddonNode* pAddonNode = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pAddonNode) && pAddonNode && IS_TYPE(pAddonNode, BGSAddonNode)) {
+		*result = pAddonNode->GetIndex();
+	}
+	return true;
+}
+
+bool Cmd_GetAddonNodeSound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSAddonNode* pAddonNode = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pAddonNode) && pAddonNode && IS_ID(pAddonNode, BGSAddonNode)) {
+		const TESSound* pSound = pAddonNode->GetSound();
+		if (pSound)
+			*reinterpret_cast<FormID*>(result) = pSound->GetFormID();;
+	}
+	return true;
+}
+
+bool Cmd_SetAddonNodeSound_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BGSAddonNode* pAddonNode = nullptr;
+	TESSound* pNewSound = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pAddonNode, &pNewSound) && pAddonNode && IS_ID(pAddonNode, BGSAddonNode)) {
+		if (!pNewSound || (pNewSound && IS_ID(pNewSound, TESSound))) {
+			pAddonNode->SetSound(pNewSound);
+			*result = 1;
+		}
 	}
 	return true;
 }

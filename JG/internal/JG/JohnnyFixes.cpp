@@ -28,6 +28,7 @@
 #include "EditorIDRestoration.hpp"
 #endif
 #include "Fixes/FileFixes.hpp"
+#include "Fixes/AddonNodeMap.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
@@ -271,6 +272,8 @@ namespace JohnnyFixes {
 #endif
 
 		FileFixes::Install();
+
+		AddonNodeMap::Install();
 	}
 
 }
