@@ -11,9 +11,9 @@ public:
 	BSStringT(BSStringT&& arSrc) noexcept;
 	~BSStringT() noexcept;
 
-	T*			pString		= nullptr;
-	uint16_t	usLength	= 0;
-	uint16_t	usMaxLength = 0;
+	T*			pString;
+	uint16_t	usLength;
+	uint16_t	usMaxLength;
 
 	void				Init() noexcept;
 
