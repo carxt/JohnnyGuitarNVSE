@@ -1,5 +1,6 @@
 #include "QuestObjectiveDisplayFix.hpp"
-#include <GameForms.h>
+#include "Bethesda/BGSQuestObjective.hpp"
+#include "Bethesda/TESQuest.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 

@@ -4,7 +4,7 @@
 
 namespace TESEffectShaderFixes {
 
-	SPEC_NAKED void SkinChecks_Asm() {
+	static SPEC_NAKED void SkinChecks_Asm() {
 		static constexpr uint32_t uiFailAddr	= 0x507C19;
 		static constexpr uint32_t uiSuccessAddr	= 0x507C1D;
 		static constexpr uint32_t uiReturnAddr	= 0x507BE8;

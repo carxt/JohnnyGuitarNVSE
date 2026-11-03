@@ -41,7 +41,9 @@ namespace LandRemapping {
 
 	using LandRemapMap = std::unordered_map<FormID, LandData>;
 
-	LandRemapMap* pRemappedLands = nullptr;
+	STACK_FRAME_OPT_ENABLE
+
+	static LandRemapMap* pRemappedLands = nullptr;
 
 	static SPEC_NOINLINE void CreateMap() {
 		if (!pRemappedLands)
@@ -85,80 +87,115 @@ namespace LandRemapping {
 			return nullptr;
 	}
 
-	template<uint32_t uiAddress>
-	class IsLandRemappedHook {
-		static inline HookUtils::CallDetour kDetour;
+	STACK_FRAME_OPT_RESET
 
-		bool Hook() const {
-			const TESObjectLAND* pThis = reinterpret_cast<const TESObjectLAND*>(this);
-			if (GetLandRemapData(pThis)) [[unlikely]]
+	namespace Hooks {
+
+		STACK_FRAME_OPT_ENABLE
+
+		static SPEC_NOINLINE bool __fastcall IsLandRemapped(TESObjectLAND* apLand, uintptr_t auiAddress) {
+			if (GetLandRemapData(apLand)) [[unlikely]]
 				return true;
 
-			return ThisCall<bool>(kDetour, this);
+			return ThisCall<bool>(auiAddress, apLand);
 		}
 
-	public:
-		IsLandRemappedHook() {
-			kDetour.ReplaceCall(uiAddress, &IsLandRemappedHook::Hook);
-		}
-	};
-
-	template<uint32_t uiAddress>
-	class GetRemapWorldHook {
-		static inline HookUtils::CallDetour kDetour;
-
-		TESWorldSpace* Hook() const {
-			const TESObjectLAND* pThis = reinterpret_cast<const TESObjectLAND*>(this);
-			TESWorldSpace* pWorld = GetLandRemapTargetWorld(pThis);
+		static SPEC_NOINLINE TESWorldSpace* __fastcall GetRemapWorld(TESObjectLAND* apLand, uintptr_t auiAddress) {
+			TESWorldSpace* pWorld = GetLandRemapTargetWorld(apLand);
 			if (pWorld) [[unlikely]]
 				return pWorld;
 
-			return ThisCall<TESWorldSpace*>(kDetour, pThis);
+			return ThisCall<TESWorldSpace*>(auiAddress, apLand);
 		}
 
-	public:
-		GetRemapWorldHook() {
-			kDetour.ReplaceCall(uiAddress, &GetRemapWorldHook::Hook);
-		}
-	};
-
-	template<uint32_t uiAddress>
-	class GetLandXHook {
-		static inline HookUtils::CallDetour kDetour;
-
-		int32_t Hook() const {
-			const TESObjectLAND* pThis = reinterpret_cast<const TESObjectLAND*>(this);
+		static SPEC_NOINLINE int32_t __fastcall GetLandX(TESObjectLAND* apLand, uintptr_t auiAddress) {
 			LandData kData;
-			if (GetLandRemapData(pThis, &kData)) [[unlikely]]
+			if (GetLandRemapData(apLand, &kData)) [[unlikely]]
 				return kData.GetX();
 
-			return ThisCall<int32_t>(kDetour, pThis);
+			return ThisCall<int32_t>(auiAddress, apLand);
 		}
 
-	public:
-		GetLandXHook() {
-			kDetour.ReplaceCall(uiAddress, &GetLandXHook::Hook);
-		}
-	};
-
-	template<uint32_t uiAddress>
-	class GetLandYHook {
-		static inline HookUtils::CallDetour kDetour;
-
-		int32_t Hook() const {
-			const TESObjectLAND* pThis = reinterpret_cast<const TESObjectLAND*>(this);
+		static SPEC_NOINLINE int32_t __fastcall GetLandY(TESObjectLAND* apLand, uintptr_t auiAddress) {
 			LandData kData;
-			if (GetLandRemapData(pThis, &kData)) [[unlikely]]
+			if (GetLandRemapData(apLand, &kData)) [[unlikely]]
 				return kData.GetY();
 
-			return ThisCall<int32_t>(kDetour, pThis);
+			return ThisCall<int32_t>(auiAddress, apLand);
 		}
 
-	public:
-		GetLandYHook() {
-			kDetour.ReplaceCall(uiAddress, &GetLandYHook::Hook);
+		template<uint32_t uiAddress>
+		class IsLandRemappedHook {
+			static inline HookUtils::CallDetour kDetour;
+
+			bool Hook() {
+				return IsLandRemapped(reinterpret_cast<TESObjectLAND*>(this), kDetour);
+			}
+
+		public:
+			IsLandRemappedHook() {
+				kDetour.ReplaceCall(uiAddress, &IsLandRemappedHook::Hook);
+			}
+		};
+
+		template<uint32_t uiAddress>
+		class GetRemapWorldHook {
+			static inline HookUtils::CallDetour kDetour;
+
+			TESWorldSpace* Hook() {
+				return GetRemapWorld(reinterpret_cast<TESObjectLAND*>(this), kDetour);
+			}
+
+		public:
+			GetRemapWorldHook() {
+				kDetour.ReplaceCall(uiAddress, &GetRemapWorldHook::Hook);
+			}
+		};
+
+		template<uint32_t uiAddress>
+		class GetLandXHook {
+			static inline HookUtils::CallDetour kDetour;
+
+			int32_t Hook() {
+				return GetLandX(reinterpret_cast<TESObjectLAND*>(this), kDetour);
+			}
+
+		public:
+			GetLandXHook() {
+				kDetour.ReplaceCall(uiAddress, &GetLandXHook::Hook);
+			}
+		};
+
+		template<uint32_t uiAddress>
+		class GetLandYHook {
+			static inline HookUtils::CallDetour kDetour;
+
+			int32_t Hook() {
+				return GetLandY(reinterpret_cast<TESObjectLAND*>(this), kDetour);
+			}
+
+		public:
+			GetLandYHook() {
+				kDetour.ReplaceCall(uiAddress, &GetLandYHook::Hook);
+			}
+		};
+
+		static void Init() {
+			IsLandRemappedHook<0x534BA8>();
+			IsLandRemappedHook<0x535D75>();
+			IsLandRemappedHook<0x535C2D>();
+			IsLandRemappedHook<0x535FD6>();
+
+			GetRemapWorldHook<0x535E22>();
+
+			GetLandXHook<0x535E4A>();
+
+			GetLandYHook<0x535E3E>();
 		}
-	};
+
+		STACK_FRAME_OPT_RESET
+
+	}
 
 	void __fastcall RemapLand(FormID auiLandFormID, const TESWorldSpace* apWorld, int16_t asX, int16_t asY) {
 		if (!apWorld) {
@@ -271,16 +308,7 @@ namespace LandRemapping {
 	}
 
 	void Install() {
-		IsLandRemappedHook<0x534BA8>();
-		IsLandRemappedHook<0x535D75>();
-		IsLandRemappedHook<0x535C2D>();
-		IsLandRemappedHook<0x535FD6>();
-
-		GetRemapWorldHook<0x535E22>();
-
-		GetLandXHook<0x535E4A>();
-
-		GetLandYHook<0x535E3E>();
+		Hooks::Init();
 	}
 
 	void Reset() {

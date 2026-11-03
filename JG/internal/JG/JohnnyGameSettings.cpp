@@ -1,5 +1,5 @@
 #include "JohnnyGameSettings.hpp"
-#include <GameForms.h>
+#include "Bethesda/TESObjectWEAP.hpp"
 #include "Bethesda/GameSettingCollection.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
@@ -159,7 +159,7 @@ namespace JohnnyGameSettings {
 	};
 #endif
 
-	void InitCombatValues() { 
+	static void InitCombatValues() {
 		fCombatLocationTargetRadiusMaxBase.Initialize("fCombatLocationTargetRadiusMaxBase", 10.0f);
 		fCombatRangedWeaponRangeBaseMult.Initialize("fCombatRangedWeaponRangeBaseMult", 1.0f);
 
@@ -199,7 +199,7 @@ namespace JohnnyGameSettings {
 #endif
 	}
 
-	void InitOverrideDialogueEmotionValues() {
+	static void InitOverrideDialogueEmotionValues() {
 		iOverrideDialogueEmotionValues.Initialize("iOverrideDialogueEmotionValues", 0);
 
 #ifdef GAME
@@ -207,7 +207,7 @@ namespace JohnnyGameSettings {
 #endif
 	}
 
-	void InitSandboxValues() {
+	static void InitSandboxValues() {
 		fSandboxDurationMultSitting.Initialize("fSandboxDurationMultSitting", 2.f);
 		fSandboxDurationMultSleeping.Initialize("fSandboxDurationMultSleeping", 2.f);
 		fSandboxDurationMultDialogue.Initialize("fSandboxDurationMultDialogue", 0.5f);
@@ -227,7 +227,7 @@ namespace JohnnyGameSettings {
 #endif
 	}
 
-	void InitPathingValues() {
+	static void InitPathingValues() {
 		fPreferredTriangleCostMultiplier.Initialize("fPreferredTriangleCostMultiplier", 0.01f);
 		fMinimalUsePathingCost.Initialize("fMinimalUsePathingCost", 409600.f);
 
@@ -242,7 +242,7 @@ namespace JohnnyGameSettings {
 #endif
 	}
 
-	void InitAIValues() {
+	static void InitAIValues() {
 		fAIDialogueDistance.Initialize("fAIDialogueDistance", 400.f);
 
 #ifdef GAME
@@ -251,8 +251,8 @@ namespace JohnnyGameSettings {
 	}
 
 #ifdef GAME
-	HookUtils::CallDetour kHavokInitDetour;
-	void __cdecl DeferredHavokInitHook() {
+	static HookUtils::CallDetour kHavokInitDetour;
+	static void __cdecl DeferredHavokInitHook() {
 		CdeclCall(kHavokInitDetour);
 
 		// The reason we are only setting values is because game already has globals for them
@@ -279,7 +279,7 @@ namespace JohnnyGameSettings {
 	}
 #endif
 
-	void InitHavokValues() {
+	static void InitHavokValues() {
 		fHavokCalculatePitchTimeOut.Initialize("fHavokCalculatePitchTimeOut", 5.f);
 		fHavokMaxSlopeDefault.Initialize("fHavokMaxSlopeDefault", 47.f);
 
@@ -288,7 +288,7 @@ namespace JohnnyGameSettings {
 #endif
 	}
 
-	void InitNPCValues() {
+	static void InitNPCValues() {
 		fNPCMaxGunWobbleAngleVATS.Initialize("fNPCMaxGunWobbleAngleVATS", 15.f);
 
 #ifdef GAME
@@ -296,7 +296,7 @@ namespace JohnnyGameSettings {
 #endif
 	}
 
-	void InitModelPathValues() {
+	static void InitModelPathValues() {
 #ifdef GAME
 		{
 			const char* pString = reinterpret_cast<const char*>(0x10744E4);

@@ -17,7 +17,7 @@ namespace ExtraMarkerIcons {
 		strcpy_s(pathCopy, bufferSize, iconPath);
 
 		if (pos != markerIconMap.end()) {
-			delete[] pos->second;
+			BSMemory::free(pos->second);
 			pos->second = pathCopy;
 		}
 		else {

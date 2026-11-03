@@ -11,9 +11,10 @@
 #include <unordered_map>
 
 namespace ExtraReputationIcons {
+
 	using FactionsMap = std::unordered_map<FormID, std::array<NiFixedString, 4>>;
-	FactionsMap* pFactionIconsMap = nullptr;
-	SRWLOCK kMapLock = SRWLOCK_INIT;
+	static FactionsMap* pFactionIconsMap = nullptr;
+	static SRWLOCK kMapLock = SRWLOCK_INIT;
 
 	constexpr uint8_t ucReactionMap[Tier::COUNT][Tier::COUNT] = {
 		{ Tier::NEUTRAL, Tier::NEUTRAL, Tier::VERY_HAPPY, Tier::VERY_HAPPY },
@@ -22,14 +23,14 @@ namespace ExtraReputationIcons {
 		{ Tier::SAD,	 Tier::SAD,		Tier::IN_PAIN,	  Tier::IN_PAIN }
 	};
 
-	SPEC_NOINLINE Tier __fastcall GetCurrentTier(const TESReputation* apReputation) {
+	static SPEC_NOINLINE Tier __fastcall GetCurrentTier(const TESReputation* apReputation) {
 		const uint8_t ucNegative = apReputation->GetReputationLevel(TESReputationType::NEGATIVE);
 		const uint8_t ucPositive = apReputation->GetReputationLevel(TESReputationType::POSITIVE);
 		return static_cast<Tier>(ucReactionMap[ucNegative][ucPositive]);
 	}
 
 	STACK_FRAME_OPT_ENABLE
-	SPEC_NOINLINE const char* __fastcall GetCustomIcon(const TESReputation* apReputation, const Setting* apGameSetting = nullptr) {
+	static SPEC_NOINLINE const char* __fastcall GetCustomIcon(const TESReputation* apReputation, const Setting* apGameSetting = nullptr) {
 		if (!pFactionIconsMap)
 			return nullptr;
 
@@ -53,69 +54,83 @@ namespace ExtraReputationIcons {
 		}
 		return nullptr;
 	}
-	STACK_FRAME_OPT_RESET
 
-	template<uint32_t uiAddress>
-	class GetReputationIconHook {
-		static inline HookUtils::CallDetour kDetour;
+	namespace Hooks {
 
-		const char* Hook() {
-			TESReputation* pThis = reinterpret_cast<TESReputation*>(this);
-			const char* pPath = GetCustomIcon(pThis);
+		static SPEC_NOINLINE const char* __fastcall GetReputationIcon(TESReputation* apReputation, uintptr_t auiAddress) {
+			const char* pPath = GetCustomIcon(apReputation);
 			if (pPath)
 				return pPath;
 
-			return ThisCall<const char*>(kDetour, pThis);
+			return ThisCall<const char*>(auiAddress, apReputation);
 		}
 
-	public:
-		GetReputationIconHook() {
-			kDetour.ReplaceCall(uiAddress, &GetReputationIconHook::Hook);
-		}
-	};
-
-	template<uint32_t uiAddress, uint32_t uiOffset>
-	class GetReputationMessageIconHook {
-		static inline HookUtils::CallDetour kDetour;
-
-		const char* Hook() {
-			Setting* pThis = reinterpret_cast<Setting*>(this);
-			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
-			TESReputation* pReputation = *reinterpret_cast<TESReputation**>(pEBP - uiOffset);
-			if (pReputation) {
-				const char* pPath = GetCustomIcon(pReputation, pThis);
+		static SPEC_NOINLINE const char* __fastcall GetReputationMessageIcon(Setting* apSetting, uintptr_t auiAddress, TESReputation* apReputation) {
+			if (apReputation) {
+				const char* pPath = GetCustomIcon(apReputation, apSetting);
 				if (pPath)
 					return pPath;
 			}
-			return ThisCall<const char*>(kDetour, pThis);
+			return ThisCall<const char*>(auiAddress, apSetting);
 		}
+		STACK_FRAME_OPT_RESET
 
-	public:
-		GetReputationMessageIconHook() {
-			kDetour.ReplaceCall(uiAddress, &GetReputationMessageIconHook::Hook);
+		template<uint32_t uiAddress>
+		class GetReputationIconHook {
+			static inline HookUtils::CallDetour kDetour;
+
+			const char* Hook() {
+				return GetReputationIcon(reinterpret_cast<TESReputation*>(this), kDetour);
+			}
+
+		public:
+			GetReputationIconHook() {
+				kDetour.ReplaceCall(uiAddress, &GetReputationIconHook::Hook);
+			}
+		};
+
+		template<uint32_t uiAddress, uint32_t uiOffset>
+		class GetReputationMessageIconHook {
+			static inline HookUtils::CallDetour kDetour;
+
+			const char* Hook() {
+				Setting* pThis = reinterpret_cast<Setting*>(this);
+				uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+				TESReputation* pReputation = *reinterpret_cast<TESReputation**>(pEBP - uiOffset);
+				return GetReputationMessageIcon(pThis, kDetour, pReputation);
+			}
+
+		public:
+			GetReputationMessageIconHook() {
+				kDetour.ReplaceCall(uiAddress, &GetReputationMessageIconHook::Hook);
+			}
+		};
+
+		static void Init() {
+			// SetCustomReputationChangeIcon
+			GetReputationIconHook<0x6156A2>();
+			GetReputationIconHook<0x6156FB>();
+
+			// TESReputation::RemoveReputationExact
+			GetReputationMessageIconHook<0x615B19, 0x110>();
+			GetReputationMessageIconHook<0x615C04, 0x110>();
+
+			// TESReputation::AddReputationExact
+			GetReputationMessageIconHook<0x615855, 0x110>();
+			GetReputationMessageIconHook<0x61594C, 0x110>();
+
+			// TESReputation::RemoveReputation
+			GetReputationMessageIconHook<0x61610A, 0x128>();
+			GetReputationMessageIconHook<0x616203, 0x128>();
+
+			// TESReputation::AddReputation
+			GetReputationMessageIconHook<0x615F0B, 0x128>();
+			GetReputationMessageIconHook<0x615E06, 0x128>();
 		}
-	};
+	}
 
 	void Install() {
-		// SetCustomReputationChangeIcon
-		GetReputationIconHook<0x6156A2>();
-		GetReputationIconHook<0x6156FB>();
-
-		// TESReputation::RemoveReputationExact
-		GetReputationMessageIconHook<0x615B19, 0x110>();
-		GetReputationMessageIconHook<0x615C04, 0x110>();
-
-		// TESReputation::AddReputationExact
-		GetReputationMessageIconHook<0x615855, 0x110>();
-		GetReputationMessageIconHook<0x61594C, 0x110>();
-
-		// TESReputation::RemoveReputation
-		GetReputationMessageIconHook<0x61610A, 0x128>();
-		GetReputationMessageIconHook<0x616203, 0x128>();
-
-		// TESReputation::AddReputation
-		GetReputationMessageIconHook<0x615F0B, 0x128>();
-		GetReputationMessageIconHook<0x615E06, 0x128>();
+		Hooks::Init();
 	}
 
 	STACK_FRAME_OPT_ENABLE
@@ -170,4 +185,5 @@ namespace ExtraReputationIcons {
 	}
 
 	STACK_FRAME_OPT_RESET
+
 }

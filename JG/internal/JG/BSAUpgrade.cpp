@@ -12,11 +12,12 @@
 extern NVSECommandTableInterface* g_cmdTableInterface;
 
 namespace BSAUpgrade {
+
 	STACK_FRAME_OPT_ENABLE
 	
 	namespace FullOffsetRange {
 
-		inline void __fastcall SeekFile(NiFile* apFile, int32_t aiOffset, int32_t aiMode) {
+		static inline void __fastcall SeekFile(NiFile* apFile, int32_t aiOffset, int32_t aiMode) {
 #ifdef GAME
 			ThisCall(0xAA16D0, apFile, aiOffset, aiMode);
 #else
@@ -24,7 +25,7 @@ namespace BSAUpgrade {
 #endif
 		}
 
-		void __fastcall SeekArchive(ArchiveFile* apFile, uint32_t auiTargetFilePos) {
+		static void __fastcall SeekArchive(ArchiveFile* apFile, uint32_t auiTargetFilePos) {
 			const int64_t llTargetFilePos = auiTargetFilePos;
 			const int64_t llCurrentPos = apFile->spArchive->GetCurrentFilePos();
 
@@ -44,7 +45,7 @@ namespace BSAUpgrade {
 			assert(apFile->spArchive->GetCurrentFilePos() == auiTargetFilePos);
 		}
 
-		SPEC_NAKED void SeekArchive_Asm() {
+		static SPEC_NAKED void SeekArchive_Asm() {
 #ifdef GAME
 			static constexpr uint32_t uiReturnAddr = 0xAFB9BD;
 #else
@@ -58,7 +59,7 @@ namespace BSAUpgrade {
 			}
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 #ifdef GAME
 			constexpr uint32_t MLF_MIN_VER = 6;
 #else
@@ -174,13 +175,13 @@ namespace BSAUpgrade {
 
 		thread_local NiPointer<Archive> spLastArchive;
 
-		SPEC_NOINLINE Archive* __fastcall GetCachedArchive() { return spLastArchive; }
-		SPEC_NOINLINE void __fastcall CacheArchive(Archive* apArchive) { spLastArchive = apArchive; }
+		static SPEC_NOINLINE Archive* __fastcall GetCachedArchive() { return spLastArchive; }
+		static SPEC_NOINLINE void __fastcall CacheArchive(Archive* apArchive) { spLastArchive = apArchive; }
 
 #pragma region GetArchiveForFile
 		// GAME - 0xAF6160
 		// GECK - 0x8A4B40
-		Archive* __fastcall GetCachedArchiveForFile(const BSHash& arDirHash, const BSHash& arFileHash, ARCHIVE_TYPE aeArchiveType, const char* apFileName) {
+		static Archive* __fastcall GetCachedArchiveForFile(const BSHash& arDirHash, const BSHash& arFileHash, ARCHIVE_TYPE aeArchiveType, const char* apFileName) {
 			Archive* pArchive = GetCachedArchive();
 			if (pArchive && pArchive->IsType(aeArchiveType)) {
 				uint32_t uiDir = 0;
@@ -194,7 +195,7 @@ namespace BSAUpgrade {
 		
 		// GAME - 0xAF61D0
 		// GECK - 0x8A4BB0
-		SPEC_NAKED void GetCachedArchiveForFile_Asm() {
+		static SPEC_NAKED void GetCachedArchiveForFile_Asm() {
 #ifdef  GAME
 			static constexpr uint32_t uiReturnAddr = 0xAF6307;
 			static constexpr uint32_t uiSearchAddr = 0xAF61DB;
@@ -228,7 +229,7 @@ namespace BSAUpgrade {
 
 		// GAME - 0xAF6287
 		// GECK - 0x8A4C67
-		SPEC_NAKED void Cache_GetCachedArchiveForFile_Asm() {
+		static SPEC_NAKED void Cache_GetCachedArchiveForFile_Asm() {
 #ifdef GAME
 			static constexpr uint32_t uiReturnAddr = 0xAF6290;
 #else
@@ -248,7 +249,7 @@ namespace BSAUpgrade {
 #pragma region GetArchiveForFileEntry
 		// GAME - 0xAF6910
 		// GECK - 0x8A52F0
-		Archive* __fastcall GetCachedArchiveForFileEntry(BSFileEntry* apFileEntry, ARCHIVE_TYPE aeArchiveType) {
+		static Archive* __fastcall GetCachedArchiveForFileEntry(BSFileEntry* apFileEntry, ARCHIVE_TYPE aeArchiveType) {
 			Archive* pArchive = GetCachedArchive();
 			if (pArchive && (pArchive->IsType(aeArchiveType))) {
 				if (pArchive->IsFileEntryInArchive(apFileEntry)) {
@@ -261,7 +262,7 @@ namespace BSAUpgrade {
 #pragma warning(disable: 4733)
 		// GAME - 0xAF692F
 		// GECK - 0x8A530F
-		SPEC_NAKED void GetCachedArchiveForFileEntry_Asm() {
+		static SPEC_NAKED void GetCachedArchiveForFileEntry_Asm() {
 #ifdef GAME
 			static constexpr uint32_t uiReturnAddr = 0xAF6B8F;
 			static constexpr uint32_t uiSearchAddr = 0xAF6935;
@@ -289,7 +290,7 @@ namespace BSAUpgrade {
 
 		// GAME - 0xAF69E9
 		// GECK - 0x8A53C9
-		SPEC_NAKED void Cache_GetCachedArchiveForFileEntry1_Asm() {
+		static SPEC_NAKED void Cache_GetCachedArchiveForFileEntry1_Asm() {
 #ifdef GAME
 			static constexpr uint32_t uiReturnAddr = 0xAF69F2;
 #else
@@ -306,7 +307,7 @@ namespace BSAUpgrade {
 
 		// GAME - 0xAF6B0F
 		// GECK - 0x8A54EF
-		SPEC_NAKED void Cache_GetCachedArchiveForFileEntry2_Asm() {
+		static SPEC_NAKED void Cache_GetCachedArchiveForFileEntry2_Asm() {
 #ifdef  GAME
 			static constexpr uint32_t uiReturnAddr = 0xAF6B18;
 #else
@@ -326,7 +327,7 @@ namespace BSAUpgrade {
 #pragma region GetFile
 		// GAME - 0xAF5FA0
 		// GECK - 0x8A4980
-		ArchiveFile* __fastcall GetFileFromCachedArchive(const BSHash& arDirHash, const BSHash& arFileHash, ARCHIVE_TYPE aeArchiveType, const char* apFileName, uint32_t auiBufferSize) {
+		static ArchiveFile* __fastcall GetFileFromCachedArchive(const BSHash& arDirHash, const BSHash& arFileHash, ARCHIVE_TYPE aeArchiveType, const char* apFileName, uint32_t auiBufferSize) {
 			Archive* pArchive = GetCachedArchive();
 			if (pArchive && pArchive->IsType(aeArchiveType)) {
 				uint32_t uiDir = 0;
@@ -343,7 +344,7 @@ namespace BSAUpgrade {
 
 		// GAME - 0xAF600E
 		// GECK - 0x8A49EE
-		SPEC_NAKED void GetFileFromCachedArchive_Asm() {
+		static SPEC_NAKED void GetFileFromCachedArchive_Asm() {
 #ifdef GAME
 			static constexpr uint32_t uiReturnAddr = 0xAF6143;
 			static constexpr uint32_t uiSearchAddr = 0xAF6014;
@@ -376,7 +377,7 @@ namespace BSAUpgrade {
 
 		// GAME - 0xAF60CE
 		// GECK - 0x8A4AAE
-		SPEC_NAKED void Cache_GetFileFromCachedArchive_Asm() {
+		static SPEC_NAKED void Cache_GetFileFromCachedArchive_Asm() {
 #ifdef GAME
 			static constexpr uint32_t uiReturnAddr = 0xAF60D7;
 #else
@@ -395,7 +396,7 @@ namespace BSAUpgrade {
 #pragma region GetFileEntryForFileFromAllArchives
 		// GAME - 0xAF6540
 		// GECK - 0x8A4F20
-		BSFileEntry* __fastcall GetFileEntryFromCachedArchive(const BSHash& arDirHash, const BSHash& arFileHash, ARCHIVE_TYPE_INDEX aeArchiveTypeIndex, const char* apFileName) {
+		static BSFileEntry* __fastcall GetFileEntryFromCachedArchive(const BSHash& arDirHash, const BSHash& arFileHash, ARCHIVE_TYPE_INDEX aeArchiveTypeIndex, const char* apFileName) {
 			Archive* pArchive = GetCachedArchive();
 			if (pArchive && pArchive->IsType(aeArchiveTypeIndex)) {
 				BSFileEntry* pFileEntry = pArchive->GetFileEntryForFile(arDirHash, arFileHash, apFileName);
@@ -408,7 +409,7 @@ namespace BSAUpgrade {
 
 		// GAME - 0xAF6565
 		// GECK - 0x8A5095
-		SPEC_NAKED void GetFileEntryForFileFromAllArchives_Asm() {
+		static SPEC_NAKED void GetFileEntryForFileFromAllArchives_Asm() {
 #ifdef GAME
 			static constexpr uint32_t uiReturnAddr = 0xAF667C;
 			static constexpr uint32_t uiSearchAddr = 0xAF656A;
@@ -440,7 +441,7 @@ namespace BSAUpgrade {
 
 		// GAME - 0xAF6607
 		// GECK - 0x8A512A
-		SPEC_NAKED void Cache_GetFileEntryForFileFromAllArchives_Asm() {
+		static SPEC_NAKED void Cache_GetFileEntryForFileFromAllArchives_Asm() {
 #ifdef GAME
 			static constexpr uint32_t uiReturnAddr = 0xAF660F;
 #define REGISTER eax
@@ -460,7 +461,7 @@ namespace BSAUpgrade {
 		}
 #pragma endregion
 
-		void InitHooks() {
+		static void InitHooks() {
 #ifdef GAME
 			HookUtils::WriteRelJump(0xAF61D0, GetCachedArchiveForFile_Asm);
 			HookUtils::WriteRelJump(0xAF6287, Cache_GetCachedArchiveForFile_Asm);
@@ -493,9 +494,9 @@ namespace BSAUpgrade {
 
 	namespace ArchiveInvalidation {
 
-		constexpr char DATA_PATH[] = "Data\\";
+		static constexpr inline char DATA_PATH[] = "Data\\";
 
-		uint32_t __fastcall CheckArchiveFiles(Archive* apArchive) {
+		static uint32_t __fastcall CheckArchiveFiles(Archive* apArchive) {
 			if ((!apArchive->GetHasDirectoryStrings() || !apArchive->GetHasFileStrings())) [[unlikely]] {
 				return 0;
 			}
@@ -562,7 +563,7 @@ namespace BSAUpgrade {
 			return uiInvalidedFiles;
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 #ifdef GAME
 			HookUtils::WriteRelJump(0xAFAD00, CheckArchiveFiles);
 			HookUtils::SafeWrite8(0xAFB17B, 0x74);

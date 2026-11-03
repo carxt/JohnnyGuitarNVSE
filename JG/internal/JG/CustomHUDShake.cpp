@@ -1,12 +1,12 @@
 #include "CustomHUDShake.hpp"	
-#include <unordered_map>
 #include <GameUI.h>
+#include <unordered_map>
 
 namespace CustomHUDShake {
 
 	using ShakeRequestMap = std::unordered_map<const TESFile*, float>;
 
-	ShakeRequestMap* pShakeRequests = nullptr;
+	static ShakeRequestMap* pShakeRequests = nullptr;
 
 	static float GetHUDShakePower() {
 		if (!pShakeRequests || pShakeRequests->empty())

@@ -335,6 +335,13 @@ inline const T* BSStringT<T>::c_str() const noexcept {
 
 #pragma region Specializations - char
 
+#ifdef GAME
+// GAME - 0x403970
+inline BSStringT<char>::BSStringT() noexcept {
+	ThisCall(0x403970, this);
+}
+#endif
+
 // GAME - 0x40C0E0
 // GECK - 0x4070F0
 inline BSStringT<char>::BSStringT(const char* apText) noexcept {
@@ -374,6 +381,18 @@ inline uint32_t BSStringT<char>::GetLength() const noexcept {
 	return ThisCall<uint32_t>(0x405280, this);
 #endif
 }
+
+#ifdef GAME
+// GAME - 0x4039C0
+inline void BSStringT<char>::SetLength(uint32_t auiLength) noexcept {
+	ThisCall(0x4039C0, this, auiLength);
+}
+
+// GAME - 0x403A00
+inline void BSStringT<char>::SetMaxLength(uint32_t auiLength) noexcept {
+	ThisCall(0x403A00, this, auiLength);
+}
+#endif
 
 // GAME - 0x4037F0
 // GECK - 0x405B40

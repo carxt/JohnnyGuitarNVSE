@@ -33,7 +33,7 @@ namespace JIPUtils {
 	}
 
 
-	static uint32_t crc32(const uint8_t* data, size_t length) {
+	static uint32_t __fastcall crc32(const uint8_t* data, size_t length) {
 		const std::vector<uint32_t> crc32table = initCRC32Table();
 		uint32_t crc = 0xFFFFFFFF;
 		for (size_t i = 0; i < length; i++) {
@@ -43,7 +43,7 @@ namespace JIPUtils {
 		return crc ^ 0xFFFFFFFF;
 	}
 
-	void ShowErrorMessage(const char* fmt, ...) {
+	static void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
 		const char* pSuffix = "\n\nJIP LN Fixes will be disabled.\nTo disable this message, set bJIPFixes to 0 in JohnnyGuitar.ini or use the latest supported JIP LN 57.30";

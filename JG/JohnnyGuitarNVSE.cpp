@@ -45,7 +45,7 @@ NVSEDataInterface* g_dataInterface = NULL;
 uint32_t g_pluginHandle = 0;
 
 // Runs during NVSEPlugin_Load
-void OnNVSELoadInit(const NVSEInterface* apNVSE) {
+static void OnNVSELoadInit(const NVSEInterface* apNVSE) {
 	JohnnyPatches::ReadINI();
 
 	g_pluginHandle = apNVSE->GetPluginHandle();
@@ -78,7 +78,7 @@ void OnNVSELoadInit(const NVSEInterface* apNVSE) {
 // Runs on program's WinMain
 // For the game, it's on NVSEPlugin_Load itself
 // For GECK, NVSEPlugin_Load works like game's NVSEPlugin_Preload, so a hook is needed to init at a similar point to the game
-void OnMainInit() {
+static void OnMainInit() {
 	FixedStringsRework::Init();
 	JohnnyExtraData::Initialize(g_dataInterface);
 	JohnnyFixes::Init();
@@ -92,8 +92,8 @@ void OnMainInit() {
 #ifndef GAME
 // Detour MessageHandler::Init - it's the first function called in GECK's WinMain, after CLI arguments have been read
 // Runs after GECK Extender
-HookUtils::CallDetour kGECKWinMainDetour;
-void __cdecl OnGECKMain(bool a1, bool a2, bool a3, bool a4, void* a5) {
+static HookUtils::CallDetour kGECKWinMainDetour;
+static void __cdecl OnGECKMain(bool a1, bool a2, bool a3, bool a4, void* a5) {
 	OnMainInit();
 	CdeclCall(kGECKWinMainDetour, a1, a2, a3, a4, a5);
 }
@@ -155,6 +155,7 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* apNVSE) {
 	return true;
 }
 
+STACK_FRAME_OPT_ENABLE
 BOOL WINAPI DllMain(
 	HANDLE  hDllHandle,
 	DWORD   dwReason,
@@ -164,3 +165,4 @@ BOOL WINAPI DllMain(
 		DisableThreadLibraryCalls((HMODULE)hDllHandle);
 	return TRUE;
 }
+STACK_FRAME_OPT_RESET

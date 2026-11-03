@@ -7,7 +7,7 @@ namespace XMLBufferFix {
 	// Beth allocates a string buffer without adding space for a null terminator
 	// Chaos ensues, 7 hours wasted debugging UIO and JIP
 
-	SPEC_NAKED void BufferSizeFix() {
+	static SPEC_NAKED void BufferSizeFix() {
 		static constexpr uint32_t uiReturnAddr = 0xA1CFB6;
 		__asm {
 			mov     eax, [ebp - 4]

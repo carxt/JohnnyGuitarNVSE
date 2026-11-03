@@ -4,7 +4,7 @@
 
 namespace AudioMonoLookupOverflowFix {
 
-	char* __cdecl strstrHook(char* apBuffer, const char* apSuffix) {
+	static char* __cdecl strstrHook(char* apBuffer, const char* apSuffix) {
 		if (!strstr(apBuffer, apSuffix)) {
 			char* pDot = strrchr(apBuffer, '.');
 			if (pDot) {

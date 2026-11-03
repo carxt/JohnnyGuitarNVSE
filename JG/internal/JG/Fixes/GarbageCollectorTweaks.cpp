@@ -8,12 +8,12 @@
 namespace GarbageCollectorTweaks {
 
 	STACK_FRAME_OPT_ENABLE
-	HookUtils::CallDetour kGetFormIDDetour;
+	static HookUtils::CallDetour kGetFormIDDetour;
 	static uint32_t __fastcall GetFormID(TESForm* apForm) {
 		return apForm ? ThisCall<uint32_t>(kGetFormIDDetour, apForm) : 0;
 	}
 
-	HookUtils::CallDetour kRelease3DRelatedDataDetour;
+	static HookUtils::CallDetour kRelease3DRelatedDataDetour;
 	static void __fastcall Release3DRelatedData(TESObjectREFR* apRef) {
 		if (apRef->GetInitialized()) {
 			ExtraDataList* pExtra = apRef->GetExtra();
@@ -36,7 +36,7 @@ namespace GarbageCollectorTweaks {
 		ThisCall(kRelease3DRelatedDataDetour, apRef);
 	}
 
-	HookUtils::CallDetour kGetLODTreeDetour;
+	static HookUtils::CallDetour kGetLODTreeDetour;
 	static bool __fastcall GetLODTree(TESForm* apForm) {
 		return apForm ? ThisCall<bool>(kGetLODTreeDetour, apForm) : false;
 	}

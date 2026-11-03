@@ -33,9 +33,9 @@ ExpressionEvaluatorUtils s_expEvalUtils;
 
 namespace JohnnyCommands {
 
-	void InitCommandData(const NVSEInterface* apNVSE) {
+	static void InitCommandData(const NVSEInterface* apNVSE) {
 #ifdef GAME
-		AnimActivationHeight::Init();
+		AnimActivationHeight::Install();
 		ExternalEmittanceOnBases::Install();
 		FilteredBarberMenu::Install();
 		apNVSE->InitExpressionEvaluatorUtils(&s_expEvalUtils);

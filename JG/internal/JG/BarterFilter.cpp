@@ -11,6 +11,10 @@
 #include "unordered_map"
 
 namespace BarterFilter {
+
+	// Stack frame optimizations are enabled in file's properties! Macros are symbolic
+	STACK_FRAME_OPT_ENABLE
+
 	using SellerFilter = std::unordered_set<FormID>;
 	using ItemFilterMap = std::unordered_map<FormID, SellerFilter>;
 
@@ -57,7 +61,7 @@ namespace BarterFilter {
 			return bResult;
 		}
 
-		DECLSPEC_NOINLINE bool __fastcall ShouldHideItem(FilterType auiFilter, const ItemChange* apItem) const {
+		bool __fastcall ShouldHideItem(FilterType auiFilter, const ItemChange* apItem) const {
 			bool bShouldHide = false;
 			const BarterMenu* pBarterMenu = BarterMenu::GetSingleton();
 			if (!pBarterMenu) [[unlikely]]
@@ -98,32 +102,42 @@ namespace BarterFilter {
 		SHOW_IN_VENDOR = 1 << 1,
 	};
 
+	namespace Hooks {
 
-
-	template <uintptr_t uiAddress, BarterFilters::FilterType eFilter>
-	class BarterHook {
-	private:
-		static inline HookUtils::CallDetour kDetour;
-	public:
-		static bool __cdecl FilterHook(ItemChange* apItem) {
-			bool bShouldHide = CdeclCall<bool>(kDetour, apItem);
-			if (bShouldHide || !pBarterFilters)
-				return bShouldHide;
-
-			return pBarterFilters->ShouldHideItem(eFilter, apItem);
+		static SPEC_NOINLINE bool __fastcall ShouldHideItem(uintptr_t auiAddress, ItemChange* apItem, BarterFilters::FilterType aeFilter) {
+			const bool bShouldHide = CdeclCall<bool>(auiAddress, apItem);
+			if (!bShouldHide && pBarterFilters)
+				return pBarterFilters->ShouldHideItem(aeFilter, apItem);
+			return bShouldHide;
 		}
 
-		BarterHook() {
-			kDetour.SafeWrite32(uiAddress + 1, BarterHook::FilterHook);
+		template <uintptr_t uiAddress, BarterFilters::FilterType eFilter>
+		class BarterHook {
+		private:
+			static inline HookUtils::CallDetour kDetour;
+
+			static bool __cdecl FilterHook(ItemChange* apItem) {
+				return ShouldHideItem(kDetour, apItem, eFilter);
+			}
+
+		public:
+			BarterHook() {
+				kDetour.SafeWrite32(uiAddress + 1, BarterHook::FilterHook);
+			}
+		};
+
+		static void Init() {
+			BarterHook<0x72DA1C, BarterFilters::PLAYER>(); // BarterMenu::DoClick
+			BarterHook<0x72DACA, BarterFilters::VENDOR>(); // BarterMenu::DoClick
+
+			BarterHook<0x72E1BE, BarterFilters::PLAYER>(); // BarterMenu::UpdateLists
+			BarterHook<0x72E207, BarterFilters::VENDOR>(); // BarterMenu::UpdateLists
 		}
-	};
+
+	}
 
 	void Install() {
-		BarterHook<0x72DA1C, BarterFilters::PLAYER>(); // BarterMenu::DoClick
-		BarterHook<0x72DACA, BarterFilters::VENDOR>(); // BarterMenu::DoClick
-
-		BarterHook<0x72E1BE, BarterFilters::PLAYER>(); // BarterMenu::UpdateLists
-		BarterHook<0x72E207, BarterFilters::VENDOR>(); // BarterMenu::UpdateLists
+		Hooks::Init();
 	}
 
 	void Reset() {
@@ -171,4 +185,7 @@ namespace BarterFilter {
 
 		return uiResult;
 	}
+
+	STACK_FRAME_OPT_RESET
+
 };
