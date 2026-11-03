@@ -6,7 +6,7 @@
 namespace DestructionFixes {
 
 	STACK_FRAME_OPT_ENABLE
-	void __fastcall SetDeleteVirt(TESForm* apForm, void*, bool abDelete) {
+	static void __fastcall SetDeleteVirt(TESForm* apForm, void*, bool abDelete) {
 		apForm->SetDelete(abDelete);
 	}
 	STACK_FRAME_OPT_RESET

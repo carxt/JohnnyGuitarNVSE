@@ -8,7 +8,7 @@ namespace RefDestructorFix {
 	// ExtraData corruption my ass
 	// (Fixed in CE, naturally)
 
-	SPEC_NAKED void FormInitCheck_Asm() {
+	static SPEC_NAKED void FormInitCheck_Asm() {
 		static constexpr uint32_t uiReturnAddr = 0x55A961;
 		static constexpr uint32_t uiSkipAddr = 0x55AA5B;
 		__asm {

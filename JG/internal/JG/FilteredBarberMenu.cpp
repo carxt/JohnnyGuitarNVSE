@@ -11,39 +11,52 @@
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace FilteredBarberMenu {
+
 	STACK_FRAME_OPT_ENABLE
 
 	static JGSetList<FormID>* pHairStyles = nullptr;
 	static JGSetList<FormID>* pBeards = nullptr;
 
-	template<uint32_t uiAddress, JGSetList<FormID>*& pList>
-	class IsPartPlayableHook {
-		static inline HookUtils::CallDetour kDetour;
+	namespace Hooks {
 
-		bool Hook() {
-			bool bPlayable = ThisCall<bool>(kDetour, this);
-			if (bPlayable && pList)
-				bPlayable = pList->Find(reinterpret_cast<TESForm*>(this)->GetFormID());
+		static SPEC_NOINLINE bool __fastcall IsPartPlayable(TESForm* apForm, uintptr_t auiAddress, JGSetList<FormID>* apList) {
+			bool bPlayable = ThisCall<bool>(auiAddress, apForm);
+			if (bPlayable && apList)
+				bPlayable = apList->Find(apForm->GetFormID());
 			return bPlayable;
 		}
 
-	public:
-		IsPartPlayableHook() {
-			kDetour.ReplaceCall(uiAddress, &IsPartPlayableHook::Hook);
-		}
-	};
+		template<uint32_t uiAddress, JGSetList<FormID>*& pList>
+		class IsPartPlayableHook {
+			static inline HookUtils::CallDetour kDetour;
 
-	HookUtils::CallDetour kRaceSexMenuDestructorDetour;
-	static void __fastcall ReleaseModelsAndLists(TESRace* apRace) {
-		ThisCall(kRaceSexMenuDestructorDetour, apRace);
-		Reset();
+			bool Hook() {
+				return IsPartPlayable(reinterpret_cast<TESForm*>(this), kDetour, pList);
+			}
+
+		public:
+			IsPartPlayableHook() {
+				kDetour.ReplaceCall(uiAddress, &IsPartPlayableHook::Hook);
+			}
+		};
+
+		HookUtils::CallDetour kRaceSexMenuDestructorDetour;
+		static void __fastcall ReleaseModelsAndLists(TESRace* apRace) {
+			ThisCall(kRaceSexMenuDestructorDetour, apRace);
+			Reset();
+		}
+
+		static void Init() {
+			kRaceSexMenuDestructorDetour.ReplaceCall(0x7AC5BE, ReleaseModelsAndLists);
+			IsPartPlayableHook<0x7AD35C, pBeards>();
+			IsPartPlayableHook<0x7AF35B, pHairStyles>();
+			IsPartPlayableHook<0x7B1D4A, pHairStyles>();
+		}
+
 	}
 
 	void Install() {
-		kRaceSexMenuDestructorDetour.ReplaceCall(0x7AC5BE, ReleaseModelsAndLists);
-		IsPartPlayableHook<0x7AD35C, pBeards>();
-		IsPartPlayableHook<0x7AF35B, pHairStyles>();
-		IsPartPlayableHook<0x7B1D4A, pHairStyles>();
+		Hooks::Init();
 	}
 
 	SPEC_NOINLINE void Reset() {
@@ -107,4 +120,5 @@ namespace FilteredBarberMenu {
 	}
 
 	STACK_FRAME_OPT_RESET
+
 }

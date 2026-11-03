@@ -55,7 +55,7 @@ namespace JohnnyFixes {
 			return nullptr;
 		}
 
-		SPEC_NAKED void InventoryAmmoHook() {
+		static SPEC_NAKED void InventoryAmmoHook() {
 			static constexpr uint32_t uiReturnAddr = 0x7080A8;
 			__asm {
 				mov		ecx, dword ptr [ebp - 0x2D4]
@@ -71,9 +71,9 @@ namespace JohnnyFixes {
 		}
 	}
 
-	HookUtils::CallDetour kDestroyContainerMenuDetour;
+	static HookUtils::CallDetour kDestroyContainerMenuDetour;
 	STACK_FRAME_OPT_ENABLE
-	void __fastcall OnCloseContainerHook(ContainerMenu* apMenu) {
+	static void __fastcall OnCloseContainerHook(ContainerMenu* apMenu) {
 		TESObjectREFR* pRef = apMenu->containerRef;
 		if (pRef && pRef->IsActor())
 			static_cast<Actor*>(pRef)->bSpeakingDone = true;
@@ -81,7 +81,7 @@ namespace JohnnyFixes {
 	}
 	STACK_FRAME_OPT_RESET
 
-	SPEC_NAKED void NPCIncrementingChallengesHook() {
+	static SPEC_NAKED void NPCIncrementingChallengesHook() {
 		static constexpr uint32_t uiReturnAddr = 0x88D0D8;
 		static constexpr uint32_t uiNoIncrementAddr = 0x88D100;
 		__asm {
@@ -100,16 +100,16 @@ namespace JohnnyFixes {
 		}
 	}
 
-	HookUtils::CallDetour kGetFileChunkDataDetour;
+	static HookUtils::CallDetour kGetFileChunkDataDetour;
 	STACK_FRAME_OPT_ENABLE
-	void __fastcall TESRegionDataSoundIncidentalIDHook(TESFile* apFile, void* edx, FormID* apFormID) {
+	static void __fastcall TESRegionDataSoundIncidentalIDHook(TESFile* apFile, void* edx, FormID* apFormID) {
 		ThisCall(kGetFileChunkDataDetour, apFile, apFormID);
 		if (*apFormID)
 			CdeclCall(0x485D50, apFormID, apFile);
 	}
 	STACK_FRAME_OPT_RESET
 
-	SPEC_NAKED void StimpakHotkeyHook() {
+	static SPEC_NAKED void StimpakHotkeyHook() {
 		__asm {
 			xor		eax, eax
 			test	ecx, ecx
@@ -120,7 +120,7 @@ namespace JohnnyFixes {
 		}
 	}
 
-	SPEC_NAKED void SimpleDecalHook() {
+	static SPEC_NAKED void SimpleDecalHook() {
 		static constexpr uint32_t uiReturnAddr = 0x68D64B;
 		static constexpr uint32_t uiContinueAddr = 0x68D30C;
 		__asm {
@@ -134,7 +134,7 @@ namespace JohnnyFixes {
 		}
 	}
 
-	SPEC_NAKED void AnimDataNullCheck() {
+	static SPEC_NAKED void AnimDataNullCheck() {
 		__asm {
 			push	0x490BD8
 			mov		eax, dword ptr[ebp - 0xA4]
@@ -150,17 +150,17 @@ namespace JohnnyFixes {
 		}
 	}
 
-	HookUtils::CallDetour kRemoveSequenceDetour;
+	static HookUtils::CallDetour kRemoveSequenceDetour;
 	STACK_FRAME_OPT_ENABLE
-	void __fastcall RemoveSequenceNullCheck(NiControllerManager* apManager, void*, NiControllerSequence* apSequence, NiPointer<NiControllerSequence>& arResult) {
+	static void __fastcall RemoveSequenceNullCheck(NiControllerManager* apManager, void*, NiControllerSequence* apSequence, NiPointer<NiControllerSequence>& arResult) {
 		if (apManager)
 			ThisCall(kRemoveSequenceDetour, apManager, apSequence, &arResult);
 	}
 	STACK_FRAME_OPT_RESET
 
-	HookUtils::CallDetour kSetCellImageSpaceDetour;
+	static HookUtils::CallDetour kSetCellImageSpaceDetour;
 	STACK_FRAME_OPT_ENABLE
-	void __fastcall SetCellImageSpaceHook(TESObjectCELL* apCell, void*, TESImageSpace* apImageSpace) {
+	static void __fastcall SetCellImageSpaceHook(TESObjectCELL* apCell, void*, TESImageSpace* apImageSpace) {
 		ThisCall(kSetCellImageSpaceDetour, apCell, apImageSpace);
 		const PlayerCharacter* pPlayer = PlayerCharacter::GetSingleton();
 		if (apImageSpace && pPlayer->GetParentCell() && pPlayer->GetParentCell() == apCell)

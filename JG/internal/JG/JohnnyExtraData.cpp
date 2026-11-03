@@ -14,12 +14,12 @@
 #endif
 
 namespace JohnnyExtraDataGlobals {
-	NiFixedString strName;
+	static NiFixedString strName;
 
-	_PluginFormExtraData_Get pfGet = nullptr;
-	_PluginFormExtraData_Add pfAdd = nullptr;
-	_PluginFormExtraData_RemoveByName pfRemoveByName = nullptr;
-	_PluginFormExtraData_RemoveByPtr pfRemoveByPtr = nullptr;
+	static _PluginFormExtraData_Get pfGet = nullptr;
+	static _PluginFormExtraData_Add pfAdd = nullptr;
+	static _PluginFormExtraData_RemoveByName pfRemoveByName = nullptr;
+	static _PluginFormExtraData_RemoveByPtr pfRemoveByPtr = nullptr;
 }
 
 JohnnyExtraData::JohnnyExtraData() : PluginFormExtraData() {

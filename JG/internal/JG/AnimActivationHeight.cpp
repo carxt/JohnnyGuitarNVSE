@@ -5,62 +5,70 @@
 
 namespace AnimActivationHeight {
 
-	float fActivationHeight = 0.f;
+	static float fActivationHeight = 0.f;
 
-	STACK_FRAME_OPT_ENABLE
-	SPEC_NOINLINE static void __fastcall SetHeight(const TESObjectREFR* __restrict apActivator, const TESObjectREFR* __restrict apTarget) {
-		fActivationHeight = apTarget->GetLocationOnReference().z - apActivator->GetLocationOnReference().z;
+	namespace Hooks {
+
+		STACK_FRAME_OPT_ENABLE
+		static SPEC_NOINLINE void __fastcall SetHeight(const TESObjectREFR* __restrict apActivator, const TESObjectREFR* __restrict apTarget) {
+			fActivationHeight = apTarget->GetLocationOnReference().z - apActivator->GetLocationOnReference().z;
+		}
+		STACK_FRAME_OPT_RESET
+
+		// WARNING
+		// Amazingly, #pragma optimize does not apply to functions in templates
+		// So never ever enable "Omit frame pointers", otherwise this will break :)
+		template<uint32_t uiAddress, int32_t iOffset>
+		class Set_Hook {
+			static inline HookUtils::CallDetour kDetour;
+
+			float GetEyeLevelHook() {
+				uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+				const TESObjectREFR* pRef = *reinterpret_cast<TESObjectREFR**>(pEBP + iOffset);
+				const TESObjectREFR* pThis = reinterpret_cast<TESObjectREFR*>(this);
+				SetHeight(pThis, pRef);
+				return ThisCall<float>(kDetour, this);
+			}
+
+		public:
+			Set_Hook() {
+				kDetour.ReplaceCall(uiAddress, &Set_Hook::GetEyeLevelHook);
+			}
+		};
+
+		template<uint32_t uiAddress>
+		class Reset_Hook {
+			static inline HookUtils::CallDetour kDetour;
+
+			static void SetUsedItemLevelHook(int32_t aiLevel) {
+				fActivationHeight = 0.f;
+				CdeclCall(kDetour, aiLevel);
+			}
+
+		public:
+			Reset_Hook() {
+				kDetour.ReplaceCall(uiAddress, &Reset_Hook::SetUsedItemLevelHook);
+			}
+		};
+
+		static void Init() {
+			Set_Hook<0x4FCA4D, 0x8>(); // BGSPlaceableWater::Activate
+			Reset_Hook<0x4FCB22>();
+
+			Set_Hook<0x51146C, 0x8>(); // TESObjectACTI::Activate
+			Reset_Hook<0x511550>();
+
+			Set_Hook<0x8930BC, 0x10>(); // Actor::PutItemInReference
+			Reset_Hook<0x893178>();
+
+			Set_Hook<0x8FF0DF, 0x10>(); // LowProcess::FindSpecialIdletoPlay
+			Reset_Hook<0x8FF199>();
+		}
+
 	}
-	STACK_FRAME_OPT_RESET
 
-	// WARNING
-	// Amazingly, #pragma optimize does not apply to functions in templates
-	// So never ever enable "Omit frame pointers", otherwise this will break :)
-	template<uint32_t uiAddress, int32_t iOffset>
-	class Set_Hook {
-		static inline HookUtils::CallDetour kDetour;
-
-		float GetEyeLevelHook() {
-			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
-			const TESObjectREFR* pRef = *reinterpret_cast<TESObjectREFR**>(pEBP + iOffset);
-			const TESObjectREFR* pThis = reinterpret_cast<TESObjectREFR*>(this);
-			SetHeight(pThis, pRef);
-			return ThisCall<float>(kDetour, this);
-		}
-
-	public:
-		Set_Hook() {
-			kDetour.ReplaceCall(uiAddress, &Set_Hook::GetEyeLevelHook);
-		}
-	};
-
-	template<uint32_t uiAddress>
-	class Reset_Hook {
-		static inline HookUtils::CallDetour kDetour;
-
-		static void SetUsedItemLevelHook(int32_t aiLevel) {
-			fActivationHeight = 0.f;
-			CdeclCall(kDetour, aiLevel);
-		}
-
-	public:
-		Reset_Hook() {
-			kDetour.ReplaceCall(uiAddress, &Reset_Hook::SetUsedItemLevelHook);
-		}
-	};
-
-	void Init() {
-		Set_Hook<0x4FCA4D, 0x8>(); // BGSPlaceableWater::Activate
-		Reset_Hook<0x4FCB22>();
-
-		Set_Hook<0x51146C, 0x8>(); // TESObjectACTI::Activate
-		Reset_Hook<0x511550>();
-
-		Set_Hook<0x8930BC, 0x10>(); // Actor::PutItemInReference
-		Reset_Hook<0x893178>();
-
-		Set_Hook<0x8FF0DF, 0x10>(); // LowProcess::FindSpecialIdletoPlay
-		Reset_Hook<0x8FF199>();
+	void Install() {
+		Hooks::Init();
 	}
 
 	float GetHeight() {

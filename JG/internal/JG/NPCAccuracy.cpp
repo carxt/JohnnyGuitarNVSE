@@ -67,9 +67,9 @@ namespace NPCAccuracy {
 		}
 	};
 
-	AccuracyMultipliers* pMultipliers = nullptr;
+	static AccuracyMultipliers* pMultipliers = nullptr;
 
-	static ScrapVector<FormID> __fastcall GetFactionsInList(const BSSimpleList<FactionRank*>* apList) {
+	static SPEC_NOINLINE ScrapVector<FormID> __fastcall GetFactionsInList(const BSSimpleList<FactionRank*>* apList) {
 		ScrapVector<FormID> kFactions;
 		auto pIter = apList->GetHead();
 		while (pIter && !pIter->IsEmpty()) {
@@ -90,9 +90,9 @@ namespace NPCAccuracy {
 			ScrapVector<FormID> kAdditionalFactions = GetFactionsInList(pFactionChanges->pFactionChanges);
 			kFactions.append_range(kAdditionalFactions);
 
-			std::sort(kFactions.begin(), kFactions.end());
+			std::ranges::sort(kFactions);
 
-			auto kNewEnd = std::unique(kFactions.begin(), kFactions.end());
+			auto kNewEnd = std::ranges::unique(kFactions).begin();
 			kFactions.erase(kNewEnd, kFactions.end());
 		}
 		return kFactions;
@@ -100,9 +100,6 @@ namespace NPCAccuracy {
 
 	static SPEC_NOINLINE float __fastcall GetAdditionalWobbleMultiplier(Actor* apActor) {
 		float fMultiplier = 1.f;
-		if (!pMultipliers) 
-			return fMultiplier;
-
 		fMultiplier *= pMultipliers->GetMultiplier(apActor, AccuracyMultipliers::ACTOR);
 		
 		const TESBoundObject* pBaseForm = apActor->GetTemplateObjectReference();
@@ -120,16 +117,29 @@ namespace NPCAccuracy {
 		return fMultiplier;
 	}
 
-	HookUtils::CallDetour kGetGunSpreadDetour;
-	class Hook : public Actor {
-	public:
-		float GetGunSkillHook(uint32_t aeMode) {
-			float fSpread = ThisCall<float>(kGetGunSpreadDetour, this, aeMode);
-			if (fSpread != 0.f)
-				fSpread *= GetAdditionalWobbleMultiplier(this);
-			return fSpread;
+	namespace Hooks {
+
+		STACK_FRAME_OPT_ENABLE
+
+		static HookUtils::CallDetour kGetGunSpreadDetour;
+		class GetGunSkillHook {
+		public:
+			float Hook(uint32_t aeMode) {
+				Actor* pActor = reinterpret_cast<Actor*>(this);
+				float fSpread = ThisCall<float>(kGetGunSpreadDetour, pActor, aeMode);
+				if (std::bit_cast<int32_t>(fSpread) && pMultipliers)
+					fSpread *= GetAdditionalWobbleMultiplier(pActor);
+				return fSpread;
+			}
+		};
+
+		static void Init() {
+			kGetGunSpreadDetour.ReplaceCall(0x524019, &GetGunSkillHook::Hook);
 		}
-	};
+
+		STACK_FRAME_OPT_RESET
+
+	}
 
 	void Reset() {
 		if (pMultipliers)
@@ -201,6 +211,6 @@ namespace NPCAccuracy {
 	}
 
 	void Install() {
-		kGetGunSpreadDetour.ReplaceCall(0x0524019, &Hook::GetGunSkillHook);
+		Hooks::Init();
 	}
 };

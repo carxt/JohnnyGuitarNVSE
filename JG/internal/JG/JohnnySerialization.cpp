@@ -20,7 +20,7 @@ namespace JohnnySerialization {
 		kRecordID_LandRemap = 'JGLR',
 	};
 
-	void SaveGameCallback(void*) {
+	static void __cdecl SaveGameCallback(void*) {
 		if (ExtraMiscStats::HasDataToSave()) {
 			_OpenRecord(kRecordID_MiscStats, SERIALIZATION_VERSION);
 			ExtraMiscStats::SerializeData(_WriteRecordData);
@@ -31,7 +31,7 @@ namespace JohnnySerialization {
 		}
 	}
 
-	void LoadGameCallback(void*)
+	static void __cdecl LoadGameCallback(void*)
 	{
 		using namespace ExtraMiscStats;
 		uint32_t type, version, length;

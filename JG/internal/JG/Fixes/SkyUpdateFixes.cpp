@@ -8,6 +8,9 @@
 
 namespace SkyUpdateFixes {
 
+	// Stack frame optimizations are enabled in file's properties! Macros are symbolic
+	STACK_FRAME_OPT_ENABLE
+
 	// Game does not update sky elements properly
 	// 
 	// Clouds can disappear randomly when exiting interiors
@@ -24,12 +27,11 @@ namespace SkyUpdateFixes {
 	namespace CloudUpdateHooks {
 
 		namespace {
-			constexpr const char cEmptyCloudPath[] = "Sky\\Alpha.dds";
-			constexpr uint32_t uiEmptyCloudPathLength = sizeof(cEmptyCloudPath) - 1;
+			constexpr std::string_view svEmptyCloudPath = "Sky\\Alpha.dds";
 
 			static bool __fastcall IsEmptyTexture(const BSString& arTexturePath) {
 				const uint32_t uiLength = arTexturePath.GetLength();
-				return !uiLength || (uiLength == uiEmptyCloudPathLength && arTexturePath.StrCmp(cEmptyCloudPath, true) == 0);
+				return !uiLength || (uiLength == svEmptyCloudPath.length() && arTexturePath.StrCmp(svEmptyCloudPath.data(), true) == 0);
 			}
 
 			static void __fastcall CullCloudLayer(uint32_t auiLayer) {
@@ -55,10 +57,20 @@ namespace SkyUpdateFixes {
 				}
 				return apTexture;
 			}
+
+			static SPEC_NOINLINE TESTexture* __fastcall GetCloudTexture(TESWeather* apWeather, uintptr_t auiAddress, uint32_t auiLayer) {
+				const TESWeather* pLastWeather = Sky::GetSingleton()->pLastWeather;
+
+				// Last weather takes priority
+				const TESWeather* pWeather = pLastWeather ? pLastWeather : apWeather;
+
+				if (pWeather)
+					return ThisCall<TESTexture*>(auiAddress, pWeather, auiLayer);
+				return nullptr;
+			}
 		}
 
-		HookUtils::CallDetour kClearTransTexturesDetour;
-
+		static HookUtils::CallDetour kClearTransTexturesDetour;
 		class Hook {
 		public:
 			void ClearAllTextures() {
@@ -73,15 +85,7 @@ namespace SkyUpdateFixes {
 			static inline HookUtils::CallDetour kDetour;
 
 			TESTexture* Hook(uint32_t auiLayer) {
-				THIS_OBJ(TESWeather);
-				const TESWeather* pLastWeather = Sky::GetSingleton()->pLastWeather;
-
-				// Last weather takes priority
-				const TESWeather* pWeather = pLastWeather ? pLastWeather : pThis;
-
-				if (pWeather)
-					return ThisCall<TESTexture*>(kDetour, pWeather, auiLayer);
-				return nullptr;
+				return GetCloudTexture(reinterpret_cast<TESWeather*>(this), kDetour, auiLayer);
 			}
 
 		public:
@@ -105,7 +109,7 @@ namespace SkyUpdateFixes {
 			}
 		};
 	
-		SPEC_NAKED void ClearCloudTextures_Asm() {
+		static SPEC_NAKED void ClearCloudTextures_Asm() {
 			static constexpr uint32_t uiReturnAddr = 0x63D40B;
 			__asm {
 				mov     dword ptr[ecx + 0x14], 0 // Overwritten code
@@ -121,7 +125,7 @@ namespace SkyUpdateFixes {
 			}
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			// Clear current textures in Sky::ResetWeather
 			kClearTransTexturesDetour.ReplaceCall(0x63D0B3, &Hook::ClearAllTextures);
 
@@ -148,9 +152,9 @@ namespace SkyUpdateFixes {
 
 	namespace ResetAndUpdateHooks {
 
-		HookUtils::CallDetour kUpdateHDRValues_SetModeDetour;
-		HookUtils::CallDetour kUpdateHDRValues_ResetWeatherDetour;
-		HookUtils::CallDetour kSetAccelerationDetour;
+		static HookUtils::CallDetour kUpdateHDRValues_SetModeDetour;
+		static HookUtils::CallDetour kUpdateHDRValues_ResetWeatherDetour;
+		static HookUtils::CallDetour kSetAccelerationDetour;
 
 		class Hook {
 		private:
@@ -192,7 +196,7 @@ namespace SkyUpdateFixes {
 			}
 		};
 
-		SPEC_NAKED void ResetInForceWeather_Asm() {
+		static SPEC_NAKED void ResetInForceWeather_Asm() {
 			static constexpr uint32_t uiReturnAddr = 0x63D0EB;
 			__asm {
 				mov		[ebp - 0x4], ecx
@@ -202,7 +206,7 @@ namespace SkyUpdateFixes {
 			}
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			// Call Sky::ResetWeather at the start of Sky::ForceWeather
 			HookUtils::WriteRelJump(0x63D0E4, ResetInForceWeather_Asm);
 
@@ -229,10 +233,10 @@ namespace SkyUpdateFixes {
 
 	namespace SaveLoadHooks {
 
-		HookUtils::CallDetour kGetWeatherUpdateFlagDetour;
+		static HookUtils::CallDetour kGetWeatherUpdateFlagDetour;
 
-		uintptr_t uiLoadGame_SkyUpdate;
-		uintptr_t uiLoadGame_UpdateHDRValues;
+		static uintptr_t uiLoadGame_SkyUpdate;
+		static uintptr_t uiLoadGame_UpdateHDRValues;
 
 		class Hook {
 		public:
@@ -287,7 +291,7 @@ namespace SkyUpdateFixes {
 			}
 		};
 
-		SPEC_NAKED void RevertSky_Asm() {
+		static SPEC_NAKED void RevertSky_Asm() {
 			static constexpr uint32_t uiReturnAddr = 0x84C44E;
 			__asm {
 				call	Hook::RevertSky
@@ -296,7 +300,7 @@ namespace SkyUpdateFixes {
 			}
 		}
 
-		SPEC_NAKED void FinishLoadGame_Asm() {
+		static SPEC_NAKED void FinishLoadGame_Asm() {
 			static constexpr uint32_t uiReturnAddr = 0x84C23B;
 			__asm {
 				call	Hook::SkyFinishLoadGame
@@ -305,7 +309,7 @@ namespace SkyUpdateFixes {
 			}
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			// Skip Update calls in Sky::LoadGame, handled by FinishLoadGame
 			HookUtils::WriteRelJump(0x63EEDC, 0x63EEF2);
 
@@ -334,5 +338,7 @@ namespace SkyUpdateFixes {
 	}
 
 #undef THIS_OBJ
+
+	STACK_FRAME_OPT_RESET
 
 }

@@ -107,7 +107,7 @@ namespace JIPFixes {
 		};
 
 		STACK_FRAME_OPT_ENABLE
-		bool __fastcall ScriptCompiler_Compile(void* apThis, void*, void* apScript, ScriptCompileData* apCompileData) {
+		static bool __fastcall ScriptCompiler_Compile(void* apThis, void*, void* apScript, ScriptCompileData* apCompileData) {
 			if (apCompileData->strCompilerName.pString && apCompileData->strCompilerName.pString[0] == 'C') {
 				apCompileData->eCompilerIndex = strcmp(apCompileData->strCompilerName.pString, "Console") == 0;
 			}
@@ -116,7 +116,7 @@ namespace JIPFixes {
 		}
 		STACK_FRAME_OPT_RESET
 
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x10059A86 + 1), uint32_t(ScriptCompiler_Compile));
 		}
 
@@ -209,7 +209,7 @@ namespace JIPFixes {
 			InitLightsRecurse(apObject, apObject);
 		}
 
-		NiAVObject* __fastcall DoAttachModel(NiAVObject* apTarget, const char* apCommandString, NiFixedString* apName, NiNode* apRoot) {
+		static NiAVObject* __fastcall DoAttachModel(NiAVObject* apTarget, const char* apCommandString, NiFixedString* apName, NiNode* apRoot) {
 			if (!apTarget || !apTarget->IsNode()) [[unlikely]]
 				return nullptr;
 
@@ -298,7 +298,7 @@ namespace JIPFixes {
 			return pCopy;
 		}
 
-		void __fastcall DoInsertNode(NiAVObject* apTarget, const char* apCommandString, const char* apTargetName, NiNode* apRoot) {
+		static void __fastcall DoInsertNode(NiAVObject* apTarget, const char* apCommandString, const char* apTargetName, NiNode* apRoot) {
 			if (!apTarget || !apRoot)
 				return;
 
@@ -345,11 +345,11 @@ namespace JIPFixes {
 			}
 		}
 
-		void __fastcall SetOjectName(NiObjectNET* apThis, const char* apName) {
+		static void __fastcall SetOjectName(NiObjectNET* apThis, const char* apName) {
 			apThis->SetName(apName);
 		}
 
-		void __fastcall DetachChild(NiNode* apThis, void*, NiAVObject* apChild) {
+		static void __fastcall DetachChild(NiNode* apThis, void*, NiAVObject* apChild) {
 			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 			BOOL bFirstPerson = *reinterpret_cast<BOOL*>(pEBP + 0x4);
 			TESObjectREFR* pRef = *reinterpret_cast<TESObjectREFR**>(pEBP + 0x10);
@@ -358,7 +358,7 @@ namespace JIPFixes {
 			DetachObject(pSceneRoot, apChild);
 		}
 
-		void __fastcall DetachObjects(TESObjectREFR* apRef, const char* apName) {
+		static void __fastcall DetachObjects(TESObjectREFR* apRef, const char* apName) {
 			const NiFixedString strName(apName);
 			NiPointer<NiAVObject> spScene = apRef->Get3DVerySimple();
 			if (spScene) [[likely]] {
@@ -374,8 +374,8 @@ namespace JIPFixes {
 			}
 		}
 
-		uint32_t uiReturnAddr;
-		SPEC_NAKED void DetachObjects_Asm() {
+		static uint32_t uiReturnAddr;
+		static SPEC_NAKED void DetachObjects_Asm() {
 			__asm {
 				mov     ecx, [esp + 0x34]
 				call	DetachObjects
@@ -383,7 +383,7 @@ namespace JIPFixes {
 			}
 		}
 
-		NiAVObject* __fastcall FindObjectRef(TESObjectREFR* apRef, const char* apObjectName) {
+		static NiAVObject* __fastcall FindObjectRef(TESObjectREFR* apRef, const char* apObjectName) {
 			const NiAVObject* pRoot = apRef->Get3D();
 			if (!pRoot || !apObjectName || !apObjectName[0]) [[unlikely]]
 				return nullptr;
@@ -391,12 +391,12 @@ namespace JIPFixes {
 			return pRoot->GetObjectByName(apObjectName);
 		}
 
-		NiNode* __fastcall FindNodeRef(TESObjectREFR* apRef, const char* apObjectName) {
+		static NiNode* __fastcall FindNodeRef(TESObjectREFR* apRef, const char* apObjectName) {
 			NiAVObject* pObject = FindObjectRef(apRef, apObjectName);
 			return pObject ? pObject->IsNode() : nullptr;
 		}
 
-		NiAVObject* __fastcall FindObject(NiAVObject* apObject, const char* apObjectName) {
+		static NiAVObject* __fastcall FindObject(NiAVObject* apObject, const char* apObjectName) {
 			if (!apObjectName || apObjectName[0] == 0) [[unlikely]]
 				return nullptr;
 
@@ -410,7 +410,7 @@ namespace JIPFixes {
 			return apObject->GetObjectByName(strName);
 		}
 
-		NiAVObject* __fastcall FindObjectSimple(NiAVObject* apObject, const char* apObjectName) {
+		static NiAVObject* __fastcall FindObjectSimple(NiAVObject* apObject, const char* apObjectName) {
 			return apObject->GetObjectByName(apObjectName);
 		}
 
@@ -419,9 +419,9 @@ namespace JIPFixes {
 			// Using & as a skinned attach indicator
 			// See the DoAttachModel code above (oh no, recursive comment jumps)
 
-			uint32_t uiSuffixHandlingAddr = 0x1002BDBE;
-			uint32_t uiCopyPathAddr = 0x1002BDD1;
-			SPEC_NAKED void SkinnedSupport_Asm() {
+			static uint32_t uiSuffixHandlingAddr = 0x1002BDBE;
+			static uint32_t uiCopyPathAddr = 0x1002BDD1;
+			static SPEC_NAKED void SkinnedSupport_Asm() {
 				__asm {
 					cmp     cl, '&'
 					jnz		CONTINUE_CHECK
@@ -440,7 +440,7 @@ namespace JIPFixes {
 				}
 			}
 
-			void InitHooks() {
+			static void InitHooks() {
 				HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1002BDBE) + 1, 0x48);
 				HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1002BDB9), SkinnedSupport_Asm);
 				uiSuffixHandlingAddr = JIPUtils::GetAddress(0x1002BDBE);
@@ -448,7 +448,7 @@ namespace JIPFixes {
 			}
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			SkinnedAttach::InitHooks();
 
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10003E50), SetOjectName);
@@ -467,7 +467,7 @@ namespace JIPFixes {
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10004080), FindObjectSimple);
 		}
 
-		void InitStrings() {
+		static void InitStrings() {
 			strLightFormEDID = "LIGH_EDID";
 		}
 
@@ -475,7 +475,7 @@ namespace JIPFixes {
 
 	namespace NotifyDurationFix {
 		// This was painful
-		uint32_t uiDefaultTimes[] = {
+		static constexpr uint32_t uiDefaultTimes[] = {
 			0x4825C5,
 			0x482619,
 			0x4C5623,
@@ -670,7 +670,7 @@ namespace JIPFixes {
 			0x96A240,
 		};
 
-		void InitHooks() {
+		static void InitHooks() {
 			const uint32_t uiJIPMessageDurationAddr = JIPUtils::GetAddress(0x1006A1B4);
 			for (uint32_t uiAddress : uiDefaultTimes)
 				HookUtils::SafeWrite32(uiAddress + 2, uiJIPMessageDurationAddr);
@@ -680,25 +680,25 @@ namespace JIPFixes {
 	}
 
 	namespace CloseActiveMenuFix {
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1003B87B + 1), 0x7A);
 		}
 	}
 
 	namespace FireWeaponFix {
-		thread_local bool bScriptedCall = false;
-		uint32_t uiDoFireWeaponAddr = 0;
 
+		static thread_local bool bScriptedCall = false;
+		static uint32_t uiDoFireWeaponAddr = 0;
 
 		STACK_FRAME_OPT_ENABLE
 
-		void __fastcall DoFireWeaponExWrapper(Actor* apActor, void*, TESObjectWEAP* apWeapon) {
+		static void __fastcall DoFireWeaponExWrapper(Actor* apActor, void*, TESObjectWEAP* apWeapon) {
 			bScriptedCall = true;
 			FastCall(uiDoFireWeaponAddr, apActor, nullptr, apWeapon);
 			bScriptedCall = false;
 		}
 
-		HookUtils::VirtCallDetour kDetour;
+		static HookUtils::VirtCallDetour kDetour;
 		class ActorEx : public Actor {
 		public:
 			CombatController* GetCombatControllerEx() {
@@ -717,18 +717,19 @@ namespace JIPFixes {
 
 		STACK_FRAME_OPT_RESET
 
-		void InitHooks() {
+		static void InitHooks() {
 			uiDoFireWeaponAddr = JIPUtils::GetAddress(0x1001B6F0);
 			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1001B827) + 4, uint32_t(DoFireWeaponExWrapper));
 
 			kDetour.ReplaceVirtualCall(0x523B3F, &ActorEx::GetCombatControllerEx, 8);
 		}
+
 	}
 
 	namespace ItemDescriptionFixFix {
 
 		STACK_FRAME_OPT_ENABLE
-		const char* __fastcall ConstructItemEntryNameHookFix(TESBoundObject* apObject, uint32_t* arLength) {
+		static const char* __fastcall ConstructItemEntryNameHookFix(TESBoundObject* apObject, uint32_t* arLength) {
 			*arLength = 0;
 			const TESFullName* pFullName = DYNAMIC_CAST(apObject, TESBoundObject, TESFullName);
 			if (!pFullName)
@@ -763,7 +764,7 @@ namespace JIPFixes {
 			}
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			uiFailAddr		= JIPUtils::GetAddress(0x1000DF10);
 			uiSuccessAddr	= JIPUtils::GetAddress(0x1000DECA);
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000DEC2), ConstructItemEntryNameHookFix_Asm);
@@ -794,7 +795,7 @@ namespace JIPFixes {
 		};
 		STACK_FRAME_OPT_RESET
 
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x1000A09A), &Hook::UpdateTransformAndBounds, 6);
 			HookUtils::ReplaceVirtualCall(JIPUtils::GetAddress(0x10019C7A), &Hook::UpdateDownwardPass, 6);
 
@@ -817,7 +818,7 @@ namespace JIPFixes {
 		static uint32_t uiFoundStringAddr = 0x1000CE06;
 		static uint32_t uiNewStringAddr = 0x1000CDDB;
 
-		int32_t __fastcall StrCmp(const char* a, const char* b) {
+		static int32_t __fastcall StrCmp(const char* a, const char* b) {
 			return strcmp(a, b);
 		}
 
@@ -848,12 +849,12 @@ namespace JIPFixes {
 			}
 		}
 
-		void* __fastcall StaticAlloc(size_t aSize) {
+		static void* __fastcall StaticAlloc(size_t aSize) {
 			MEMORY_CONTEXT(MC_STATIC_VARS);
 			return BSMemory::malloc(aSize);
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			// Replaced by us now - see FixedStringsRework.cpp
 #if 0
 			uiFoundStringAddr = JIPUtils::GetAddress(0x1000CE06);
@@ -882,17 +883,17 @@ namespace JIPFixes {
 	}
 
 	namespace PerkEntryFix {
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x1000F3F3), 6);
 		}
 	}
 
 	namespace CopyFaceGenFromFix {
 
-		bool(__cdecl* CopyFaceGenFrom)(COMMAND_ARGS) = nullptr;
+		static Cmd_Execute CopyFaceGenFrom = nullptr;
 
 		STACK_FRAME_OPT_ENABLE
-		bool Cmd_CopyFaceGenFrom_Execute(COMMAND_ARGS) {
+		static bool Cmd_CopyFaceGenFrom_Execute(COMMAND_ARGS) {
 			const bool bLoadFaceGenHeadEGTFilesOrg = *reinterpret_cast<bool*>(0x11D5AE0);
 			const bool bResult = CopyFaceGenFrom(PASS_COMMAND_ARGS);
 			*reinterpret_cast<bool*>(0x11D5AE0) = bLoadFaceGenHeadEGTFilesOrg;
@@ -900,7 +901,7 @@ namespace JIPFixes {
 		}
 		STACK_FRAME_OPT_RESET
 
-		void InitHooks() {
+		static void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kCopyFaceGenFrom));
 			if (pInfo) {
 				CopyFaceGenFrom = pInfo->execute;
@@ -910,9 +911,9 @@ namespace JIPFixes {
 	}
 
 	namespace SoundSourceFileFix {
-		bool(__cdecl* SetSoundSourceFile)(COMMAND_ARGS) = nullptr;
+		static Cmd_Execute SetSoundSourceFile = nullptr;
 
-		bool Cmd_SetSoundSourceFile_Execute(COMMAND_ARGS) {
+		static bool Cmd_SetSoundSourceFile_Execute(COMMAND_ARGS) {
 			TESSound* pSound = nullptr;
 			char cPath[1024];
 			if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSound, &cPath) && pSound)
@@ -920,7 +921,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetSoundSourceFile));
 			if (pInfo) {
 				SetSoundSourceFile = pInfo->execute;
@@ -934,9 +935,9 @@ namespace JIPFixes {
 	namespace SetOnDialogTopicEventHandlerEx {
 
 #ifdef GAME
-		EventInformation* OnDialogTopicHandler = nullptr;
+		static EventInformation* OnDialogTopicHandler = nullptr;
 
-		bool Cmd_SetOnDialogTopicEventHandler_JG_Execute(COMMAND_ARGS) {
+		static bool Cmd_SetOnDialogTopicEventHandler_JG_Execute(COMMAND_ARGS) {
 			BOOL setOrRemove = FALSE;
 			Script* script = nullptr;
 			TESForm* filter[1] = { nullptr };
@@ -955,7 +956,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-		HookUtils::CallDetour kGetResultScript;
+		static HookUtils::CallDetour kGetResultScript;
 		STACK_FRAME_OPT_DISABLE
 		class TESTopicInfoEx : public TESTopicInfo {
 		public:
@@ -989,7 +990,7 @@ namespace JIPFixes {
 		STACK_FRAME_OPT_RESET
 #endif
 
-		void InitHooks() {
+		static void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetOnDialogTopicEventHandler));
 			if (pInfo) {
 				HookUtils::SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
@@ -1008,9 +1009,9 @@ namespace JIPFixes {
 	namespace RespawnDisableFix {
 
 #ifdef GAME
-		bool(__cdecl* ClearDeadActors)(COMMAND_ARGS) = nullptr;
+		static Cmd_Execute ClearDeadActors = nullptr;
 
-		thread_local BOOL bSkipRespawning = FALSE;
+		static thread_local bool bSkipRespawning = false;
 
 		STACK_FRAME_OPT_ENABLE
 
@@ -1024,10 +1025,10 @@ namespace JIPFixes {
 			}
 		};
 
-		bool Cmd_ClearDeadActors_Execute(COMMAND_ARGS) {
+		static bool Cmd_ClearDeadActors_Execute(COMMAND_ARGS) {
 			if (ExtractArgsEx(EXTRACT_ARGS_EX, &bSkipRespawning)) {
 				ClearDeadActors(PASS_COMMAND_ARGS);
-				bSkipRespawning = FALSE;
+				bSkipRespawning = false;
 			}
 			return true;
 		}
@@ -1035,7 +1036,7 @@ namespace JIPFixes {
 		STACK_FRAME_OPT_RESET
 #endif
 
-		void InitHooks() {
+		static void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kClearDeadActors));
 			if (pInfo) {
 				pInfo->params = kParams_OneOptionalInt;
@@ -1055,9 +1056,9 @@ namespace JIPFixes {
 #ifdef GAME
 	namespace ModelReloadFix {
 
-		uint32_t uiWeaponHasScope = 0;
+		static uint32_t uiWeaponHasScope = 0;
 
-		SPEC_NOINLINE void __fastcall DetachBiped(BipedAnim* apBiped, BIPED_OBJECT aeObject) {
+		static SPEC_NOINLINE void __fastcall DetachBiped(BipedAnim* apBiped, BIPED_OBJECT aeObject) {
 			NiPointer<NiAVObject> spNode = apBiped->kObjects[aeObject].pPartClone;
 			// Should not be doing this, since the command can run while rendering/3D updates happen on other threads
 			// If so, RemovePart/RemoveWeapon will queue the detach and cleanup, but we need the model to be detached *right now*
@@ -1072,7 +1073,7 @@ namespace JIPFixes {
 				apBiped->RemovePart(aeObject, true);
 		}
 
-		bool Cmd_ReloadEquippedModels_Execute(COMMAND_ARGS) {
+		static bool Cmd_ReloadEquippedModels_Execute(COMMAND_ARGS) {
 			const TESMain* pMain = TESMain::GetSingleton();
 			if (pMain->bIsFlyCam && pMain->bFreezeTime)
 				return true;
@@ -1174,7 +1175,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			uiWeaponHasScope = JIPUtils::GetAddress(0x10058F10);
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kReloadEquippedModels));
 			if (pInfo) {
@@ -1218,11 +1219,11 @@ namespace JIPFixes {
 			ONLY = 2
 		};
 
-		void __fastcall StringToLower(std::string_view& arString) {
+		static void __fastcall StringToLower(std::string_view& arString) {
 			std::transform(arString.begin(), arString.end(), const_cast<char*>(arString.data()), [](unsigned char c) { return std::tolower(c); });
 		}
 
-		bool __fastcall CaseInsensitiveSubStr(const std::string_view& arString, const std::string_view& arSubString, size_t aStartPos = 0) {
+		static bool __fastcall CaseInsensitiveSubStr(const std::string_view& arString, const std::string_view& arSubString, size_t aStartPos = 0) {
 			auto it = std::search(
 				arString.begin() + aStartPos, arString.end(),
 				arSubString.begin(), arSubString.end(),
@@ -1231,7 +1232,7 @@ namespace JIPFixes {
 			return (it != arString.end());
 		}
 
-		bool __fastcall CaseInsensitiveStrCmp(const std::string_view& arString, const std::string_view& arSubString) {
+		static bool __fastcall CaseInsensitiveStrCmp(const std::string_view& arString, const std::string_view& arSubString) {
 			if (arString.length() != arSubString.length())
 				return false;
 
@@ -1243,7 +1244,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-		bool __fastcall FindSubstring(const std::string_view& arString, const std::string_view& arSubString, bool abExact = true) {
+		static bool __fastcall FindSubstring(const std::string_view& arString, const std::string_view& arSubString, bool abExact = true) {
 			if (arSubString.empty())
 				return false;
 
@@ -1274,7 +1275,7 @@ namespace JIPFixes {
 				return CaseInsensitiveSubStr(arString, arSubString);
 		}
 
-		void __fastcall TruncateString(const char* apString, char* apBuffer, size_t aBufferSize) {
+		static 	void __fastcall TruncateString(const char* apString, char* apBuffer, size_t aBufferSize) {
 			constexpr const char SUFFIX[] = "...";
 			const uint32_t uiCopySize = aBufferSize - sizeof(SUFFIX) - 1;
 			memcpy(apBuffer, apString, uiCopySize);
@@ -1282,7 +1283,7 @@ namespace JIPFixes {
 			apBuffer[aBufferSize - 1] = '\0';
 		}
 
-		void __fastcall DisplayForm(const TESForm* apForm, const char* apEDID) {
+		static void __fastcall DisplayForm(const TESForm* apForm, const char* apEDID) {
 			const TESFile* pFile = apForm->GetFile(0);
 			const char* pFullName = apForm->IsReference() ? static_cast<const TESObjectREFR*>(apForm)->GetFullName() : TESFullName::GetFullName(apForm);
 			const char* pFileName = pFile ? pFile->GetName() : "Runtime";
@@ -1315,7 +1316,7 @@ namespace JIPFixes {
 			}
 		}
 
-		bool __fastcall SearchEDID(const TESForm* apForm, const std::string_view& arSearch) {
+		static bool __fastcall SearchEDID(const TESForm* apForm, const std::string_view& arSearch) {
 			JohnnyExtraData* pJGE = JohnnyExtraData::Find(apForm);
 			if (!pJGE)
 				return false;
@@ -1335,7 +1336,7 @@ namespace JIPFixes {
 			return false;
 		}
 
-		bool __fastcall SearchFullName(const TESForm* apForm, const std::string_view& arSearch) {
+		static bool __fastcall SearchFullName(const TESForm* apForm, const std::string_view& arSearch) {
 			const char* pFullName = apForm->IsReference() ? static_cast<const TESObjectREFR*>(apForm)->GetFullName() : TESFullName::GetFullName(apForm);
 			if (pFullName && pFullName[0]) {
 				if (FindSubstring(pFullName, arSearch, false)) {
@@ -1346,7 +1347,7 @@ namespace JIPFixes {
 			return false;
 		}
 
-		bool __fastcall GetFiles(std::vector<TESFile*, BSScrapAllocator<TESFile*>>& arFiles, const std::string_view& arSearch) {
+		static bool __fastcall GetFiles(std::vector<TESFile*, BSScrapAllocator<TESFile*>>& arFiles, const std::string_view& arSearch) {
 			auto pIter = TESDataHandler::GetSingleton()->kFiles.GetHead();
 			while (pIter && !pIter->IsEmpty()) {
 				TESFile* pFile = pIter->GetItem();
@@ -1357,7 +1358,7 @@ namespace JIPFixes {
 			return !arFiles.empty();
 		}
 
-		bool __fastcall SearchFiles(const TESForm* apForm, const std::vector<TESFile*, BSScrapAllocator<TESFile*>>& arFiles) {
+		static bool __fastcall SearchFiles(const TESForm* apForm, const std::vector<TESFile*, BSScrapAllocator<TESFile*>>& arFiles) {
 			const TESFile* pFile = apForm->GetFile(0);
 			if (!pFile)
 				return false;
@@ -1365,12 +1366,12 @@ namespace JIPFixes {
 			return std::find(arFiles.begin(), arFiles.end(), pFile) != arFiles.end();
 		}
 
-		bool __fastcall SearchType(const TESForm* apForm, const std::vector<FORM_TYPE, BSScrapAllocator<FORM_TYPE>>& arTypes) {
+		static bool __fastcall SearchType(const TESForm* apForm, const std::vector<FORM_TYPE, BSScrapAllocator<FORM_TYPE>>& arTypes) {
 			const FORM_TYPE eFormType = apForm->GetFormType();
 			return std::find(arTypes.begin(), arTypes.end(), eFormType) != arTypes.end();
 		}
 
-		bool Cmd_Search_JG_Execute(COMMAND_ARGS) {
+		static bool Cmd_Search_JG_Execute(COMMAND_ARGS) {
 			char cSearchBuffer[256] = { 0 };
 			char cTypeBufer[128] = { 0 };
 			char cPluginBuffer[MAX_PATH] = { 0 };
@@ -1449,8 +1450,8 @@ namespace JIPFixes {
 			return true;
 		}
 
-		bool(__cdecl* Cmd_Search_Org_Parse)(uint32_t, ParamInfo*, ScriptLineBuffer*, ScriptBuffer*) = nullptr;
-		bool Cmd_Search_JG_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf) {
+		static Cmd_Parse Cmd_Search_Org_Parse = nullptr;
+		static bool Cmd_Search_JG_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf) {
 			// Replace "" with " " because obsnig is stupid and doesn't allow empty strings as params
 			const char* pText = lineBuf->paramText;
 			char cNewText[512] = { 0 };
@@ -1468,7 +1469,7 @@ namespace JIPFixes {
 		}
 #endif
 
-		void InitHooks() {
+		static void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSearch));
 			if (pInfo) {
 				pInfo->params		= kSearchParams;
@@ -1486,7 +1487,7 @@ namespace JIPFixes {
 
 #ifdef GAME
 	namespace WeaponModEffectsFix {
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x1003DA30), 5);
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1003DA2B + 2), 0xF);
 		}
@@ -1495,19 +1496,19 @@ namespace JIPFixes {
 	namespace OnMenuClickFix {
 
 		static inline Tile* const INVALID_TILE = reinterpret_cast<Tile*>(-1);
-		Tile* pClickedTile = INVALID_TILE;
-		uint32_t uiMenuHandleClickHook = 0;
-		char cEmptyBuffer[4] = { 0 };
+		static Tile* pClickedTile = INVALID_TILE;
+		static uint32_t uiMenuHandleClickHook = 0;
+		static char cEmptyBuffer[4] = { 0 };
 
 		STACK_FRAME_OPT_ENABLE
-		void __fastcall MenuHandleClickHookDetour(void* apMenu, void* edx, uint32_t auiTileID, Tile* apTile) {
+		static void __fastcall MenuHandleClickHookDetour(void* apMenu, void* edx, uint32_t auiTileID, Tile* apTile) {
 			pClickedTile = apTile;
 			FastCall(uiMenuHandleClickHook, apMenu, edx, auiTileID, apTile);
 		}
 		STACK_FRAME_OPT_RESET
 
 		STACK_FRAME_OPT_DISABLE
-		bool __cdecl CallFunctionAlt(Script* apScript, TESObjectREFR* apRef, uint8_t aucArgCount, uint32_t auiMenuID, uint32_t auiTileID, const char* apTileString) {
+		static bool __cdecl CallFunctionAlt(Script* apScript, TESObjectREFR* apRef, uint8_t aucArgCount, uint32_t auiMenuID, uint32_t auiTileID, const char* apTileString) {
 			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 			if (pClickedTile == INVALID_TILE) {
 				const char* pTilePath = reinterpret_cast<const char*>(pEBP - 0x94);
@@ -1527,7 +1528,7 @@ namespace JIPFixes {
 		}
 		STACK_FRAME_OPT_RESET
 
-		HookUtils::CallDetour kRemoveTileFromUpdateList;
+		static HookUtils::CallDetour kRemoveTileFromUpdateList;
 		STACK_FRAME_OPT_ENABLE
 		class Hook {
 		public:
@@ -1540,7 +1541,7 @@ namespace JIPFixes {
 		};
 		STACK_FRAME_OPT_RESET
 
-		void InitHooks() {
+		static void InitHooks() {
 			uiMenuHandleClickHook = JIPUtils::GetAddress(0x10008570);
 			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x10039C8A) + 1, uint32_t(MenuHandleClickHookDetour));
 			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1003A008) + 1, uint32_t(MenuHandleClickHookDetour));
@@ -1562,14 +1563,14 @@ namespace JIPFixes {
 
 #ifdef GAME
 		STACK_FRAME_OPT_ENABLE
-		bool Cmd_GetPCCanUsePowerArmor_Eval(COMMAND_ARGS_EVAL) {
+		static bool Cmd_GetPCCanUsePowerArmor_Eval(COMMAND_ARGS_EVAL) {
 			*result = PlayerCharacter::GetSingleton()->bCanUsePowerArmor;
 			return true;
 		}
 		STACK_FRAME_OPT_RESET
 #endif
 
-		void InitHooks() {
+		static void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetPCCanUsePowerArmor));
 			if (pInfo) {
 #ifdef GAME
@@ -1585,7 +1586,7 @@ namespace JIPFixes {
 	namespace GetMenuItemListRefsFix {
 
 		STACK_FRAME_OPT_ENABLE
-		uint32_t __fastcall GetTileIndex(Tile* apTile) {
+		static uint32_t __fastcall GetTileIndex(Tile* apTile) {
 			const Tile* pParent = apTile->GetParent();
 			if (pParent) [[likely]] {
 				auto kIter = pParent->kChildren.GetHeadPos();
@@ -1741,7 +1742,7 @@ namespace JIPFixes {
 			}
 		};
 
-		void __fastcall RenderWater(void* apWaterManager, NiCamera* apCamera) {
+		static void __fastcall RenderWater(void* apWaterManager, NiCamera* apCamera) {
 			if (TES::GetSingleton()->GetInterior())
 				return;
 
@@ -1752,7 +1753,7 @@ namespace JIPFixes {
 			}
 		}
 
-		void __cdecl AccumulateScene(NiCamera* apCamera, NiNode* apNode, BSCullingProcess* apCullingProcess) {
+		static void __cdecl AccumulateScene(NiCamera* apCamera, NiNode* apNode, BSCullingProcess* apCullingProcess) {
 			BSShaderAccumulator* pAccum = TESMain::GetSingleton()->spDrawWorldAccum;
 			BSShaderAccumulator* pCullingAccum = static_cast<BSShaderAccumulator*>(apCullingProcess->GetAccumulator());
 			pCullingAccum->bCellHasWater = pAccum->bCellHasWater;
@@ -1777,7 +1778,7 @@ namespace JIPFixes {
 
 		STACK_FRAME_OPT_RESET
 
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x10004963) + 1, uint32_t(AccumulateScene));
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1002D27D), RenderWater);
 			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x10004976), 2);
@@ -1804,7 +1805,7 @@ namespace JIPFixes {
 			}
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			uiReturnAddr = JIPUtils::GetAddress(0x10038FA2);
 			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10038F4A), GetBarterRef_Asm);
 		}
@@ -1812,22 +1813,22 @@ namespace JIPFixes {
 
 	namespace Update3DTweak {
 
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x1005825F) + 1, 0); // Change priority to critical
 		}
 	}
 
 	namespace AddItemAltNoCond {
 
-		uint32_t uiSetItemHealthAddr;
+		static uint32_t uiSetItemHealthAddr;
 		STACK_FRAME_OPT_ENABLE
-		void __fastcall SetItemHealth(TESContainer* apContainer, float afHealth) {
+		static void __fastcall SetItemHealth(TESContainer* apContainer, float afHealth) {
 			if (afHealth >= 0.f)
 				FastCall(uiSetItemHealthAddr, apContainer, afHealth);
 		}
 		STACK_FRAME_OPT_RESET
 
-		void InitHooks() {
+		static void InitHooks() {
 			uiSetItemHealthAddr = JIPUtils::GetAddress(0x1000D520);
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10058476), SetItemHealth);
 		}
@@ -1837,9 +1838,9 @@ namespace JIPFixes {
 	namespace CursorPosUICords {
 
 #ifdef GAME
-		bool* pbHUDCursorMode = nullptr;
+		static bool* pbHUDCursorMode = nullptr;
 
-		bool Cmd_GetCursorPos_Execute(COMMAND_ARGS) {
+		static bool Cmd_GetCursorPos_Execute(COMMAND_ARGS) {
 			*result = 0;
 			char cAxis;
 			BOOL bUICoordinates = FALSE;
@@ -1855,7 +1856,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-		bool Cmd_SetCursorPos_Execute(COMMAND_ARGS) {
+		static bool Cmd_SetCursorPos_Execute(COMMAND_ARGS) {
 			*result = 0;
 			float fPosX, fPosY;
 			BOOL bUICoordinates = FALSE;
@@ -1879,7 +1880,7 @@ namespace JIPFixes {
 		}
 #endif
 
-		void InitHooks() {
+		static void InitHooks() {
 #ifdef GAME
 			pbHUDCursorMode = reinterpret_cast<bool*>(JIPUtils::GetAddress(0x10076378));
 #endif
@@ -1909,7 +1910,7 @@ namespace JIPFixes {
 #ifdef GAME
 	namespace SetHotkeyItemRefFix {
 
-		uint32_t uiJIPCreateExtraDataAddr;
+		static uint32_t uiJIPCreateExtraDataAddr;
 		class JIPInventoryRef : public InventoryRef {
 		public:
 			ExtraDataList* CreateExtraData() {
@@ -1917,7 +1918,7 @@ namespace JIPFixes {
 			}
 		};
 
-		bool Cmd_GetHotkeyItemRef_Execute(COMMAND_ARGS) {
+		static bool Cmd_GetHotkeyItemRef_Execute(COMMAND_ARGS) {
 			int32_t iHotkey = 0;
 			if (ExtractArgsEx(EXTRACT_ARGS_EX, &iHotkey) && iHotkey > 0) {
 				const int32_t iCorrectedHotKey = iHotkey - 1;
@@ -1936,7 +1937,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-        bool Cmd_SetHotkeyItemRef_Execute(COMMAND_ARGS) {
+		static bool Cmd_SetHotkeyItemRef_Execute(COMMAND_ARGS) {
             int32_t iHotkey = 0;
             if (ExtractArgsEx(EXTRACT_ARGS_EX, &iHotkey) && iHotkey > 0) {
                 InventoryRef* pInvRef = InventoryRefGetForID(thisObj->GetFormID());
@@ -1972,7 +1973,7 @@ namespace JIPFixes {
             return true;
         }
 
-		void InitHooks() {
+		static void InitHooks() {
 			uiJIPCreateExtraDataAddr = JIPUtils::GetAddress(0x10002A00);
 			{
 				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetHotkeyItemRef));
@@ -1991,7 +1992,7 @@ namespace JIPFixes {
 
 	namespace TriggerLightningFXFix {
 
-		bool Cmd_TriggerLightningFX_Execute(COMMAND_ARGS) {
+		static bool Cmd_TriggerLightningFX_Execute(COMMAND_ARGS) {
 			*result = 0;
 			Sky* pSky = Sky::GetSingleton();
 			if (pSky && pSky->IsRaining()) {
@@ -2002,7 +2003,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kTriggerLightningFX));
 			if (pInfo) {
 				pInfo->execute = Cmd_TriggerLightningFX_Execute;
@@ -2012,7 +2013,7 @@ namespace JIPFixes {
 
 	namespace LeveledListFixes {
 
-		bool Cmd_LeveledListRemoveForm_Execute(COMMAND_ARGS) {
+		static bool Cmd_LeveledListRemoveForm_Execute(COMMAND_ARGS) {
 			*result = 0;
 			TESForm* pListForm = nullptr;
 			TESForm* pForm = nullptr;
@@ -2054,7 +2055,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-		bool Cmd_LeveledListClear_Execute(COMMAND_ARGS) {
+		static bool Cmd_LeveledListClear_Execute(COMMAND_ARGS) {
 			*result = 0;
 			TESForm* pListForm = nullptr;
 			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm))
@@ -2095,7 +2096,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-		bool Cmd_RemoveNthLevItem_Execute(COMMAND_ARGS) {
+		static bool Cmd_RemoveNthLevItem_Execute(COMMAND_ARGS) {
 			*result = 0;
 			TESForm* pListForm = nullptr;
 			uint32_t uiIndex = 0;
@@ -2139,7 +2140,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			{
 				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kLeveledListRemoveForm));
 				if (pInfo) {
@@ -2187,7 +2188,7 @@ namespace JIPFixes {
 			}
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			uiReturnAddr = JIPUtils::GetAddress(0x10015B43);
 			uiGiveUpAddr = JIPUtils::GetAddress(0x10015560);
 
@@ -2224,16 +2225,16 @@ namespace JIPFixes {
 		};
 
 		static constexpr uint32_t uiMapSize = 4096;
-		SettingsMap* pGSMap = nullptr;
+		static SettingsMap* pGSMap = nullptr;
 
 		STACK_FRAME_OPT_ENABLE
 
-		uint32_t uiHashAddr;
+		static uint32_t uiHashAddr;
 		static inline uint32_t __fastcall StrHashCI(const char* apKey) {
 			return FastCall<uint32_t>(uiHashAddr, apKey);
 		}
 
-		uint32_t uiAllocAddr;
+		static uint32_t uiAllocAddr;
 		template<typename T>
 		inline T* PoolAlloc(uint32_t auiCount = 1) {
 			return FastCall<T*>(uiAllocAddr, sizeof(T) * auiCount);
@@ -2263,7 +2264,7 @@ namespace JIPFixes {
 			++pGSMap->uiCount;
 		}
 
-		HookUtils::CallDetour kRegisterGameSetting;
+		static HookUtils::CallDetour kRegisterGameSetting;
 		class Hook {
 		public:
 			void RegisterGameSetting(const char* apKey, Setting* apSetting) {
@@ -2274,7 +2275,7 @@ namespace JIPFixes {
 
 		STACK_FRAME_OPT_RESET
 
-		void InitHooks() {
+		static void InitHooks() {
 			uiHashAddr = JIPUtils::GetAddress(0x100010F0);
 			uiAllocAddr = JIPUtils::GetAddress(0x10003C80);
 
@@ -2303,12 +2304,12 @@ namespace JIPFixes {
 	namespace EDIDLookupFix {
 
 		STACK_FRAME_OPT_ENABLE
-		TESForm* __fastcall GetEDID(void* apThis, const char* apEDID) {
+		static TESForm* __fastcall GetEDID(void* apThis, const char* apEDID) {
 			return TESForm::GetFormByEditorID(apEDID);
 		}
 		STACK_FRAME_OPT_RESET
 
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x1000178C), GetEDID);
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10002E25), GetEDID);
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10009ACB), GetEDID);
@@ -2317,7 +2318,7 @@ namespace JIPFixes {
 
 	namespace SanerWeaponWobbleHook {
 
-		HookUtils::CallDetour kGetGunSpreadDetour;
+		static HookUtils::CallDetour kGetGunSpreadDetour;
 		STACK_FRAME_OPT_ENABLE
 		class Hook : public Actor {
 		public:
@@ -2330,7 +2331,7 @@ namespace JIPFixes {
 		};
 		STACK_FRAME_OPT_RESET
 
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x1000BA54), JIPUtils::GetAddress(0x1000BA63));
 			kGetGunSpreadDetour.ReplaceCall(0x524019, &Hook::GetGunSpreadHook);
 		}
@@ -2338,8 +2339,8 @@ namespace JIPFixes {
 
 	namespace ProjectileLightFix {
 
-		uint32_t uiCreateJIPLightAddr;
-		HookUtils::CallDetour kFreeLightDetour;
+		static uint32_t uiCreateJIPLightAddr;
+		static HookUtils::CallDetour kFreeLightDetour;
 		class Hook {
 		public:
 			NiAVObject* GenDynamic(TESObjectREFR* apRequester, BSFadeNode* apNode, bool abForceDynamic) {
@@ -2359,7 +2360,7 @@ namespace JIPFixes {
 			}
 		};
 
-		void InitHooks() {
+		static void InitHooks() {
 			uiCreateJIPLightAddr = JIPUtils::GetAddress(0x10009B80);
 			HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x100127E0), JIPUtils::GetAddress(0x100127FE));
 
@@ -2372,15 +2373,15 @@ namespace JIPFixes {
 
 		// Genuinely one of the most stupid things I've seen here so far
 
-		HookUtils::CallDetour kDetour;
-		void __fastcall ClearJIPFlagsAndInit(Actor* apActor, void*, bool abAddProcess) {
+		static HookUtils::CallDetour kDetour;
+		static void __fastcall ClearJIPFlagsAndInit(Actor* apActor, void*, bool abAddProcess) {
 			apActor->ucJIPActorFlags1 = 0;
 			apActor->ucJIPActorFlags2 = 0;
 			apActor->ucJIPActorFlags3 = 0;
 			ThisCall(kDetour, apActor, abAddProcess);
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::PatchMemoryNopRange(JIPUtils::GetAddress(0x100123BE), JIPUtils::GetAddress(0x100123CF));
 
 			HookUtils::SafeWriteBuf(0x483522, "\xC7\x41\x04\x00\x00\x00\x00\xC7\x41");
@@ -2390,7 +2391,7 @@ namespace JIPFixes {
 
 	namespace OnRagdollEventFix {
 
-		void InitHooks() {
+		static void InitHooks() {
 			// Use TESObjectREFR::FindReferenceFor3D instead of assuming the parent node is a scene root
 			// Not all skeletons have collision set up that way, and Mad got sad 
 			
@@ -2410,7 +2411,7 @@ namespace JIPFixes {
 		// Original char buffer has size of... 64
 		// ...Yea
 
-		bool Cmd_SetAnimSequenceFrequency_Execute(COMMAND_ARGS) {
+		static bool Cmd_SetAnimSequenceFrequency_Execute(COMMAND_ARGS) {
 			*result = 0;
 			if (thisObj->IsActor() && static_cast<Actor*>(thisObj)->GetLifeState() == ACTOR_LIFE_STATE::DYING) [[unlikely]]
 				return true;
@@ -2453,7 +2454,7 @@ namespace JIPFixes {
 			return true;
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetAnimSequenceFrequency));
 			if (pInfo) {
 				pInfo->execute = Cmd_SetAnimSequenceFrequency_Execute;
@@ -2464,7 +2465,7 @@ namespace JIPFixes {
 
 	namespace LogMover {
 
-		void InitHooks() {
+		static void InitHooks() {
 			// We're using JIP's fs functions to avoid issues with our Debug build's imports
 			using pfn_fclose = int(__cdecl*)(FILE*);
 			using pfn_fsopen = FILE*(__cdecl*)(const char*, const char*, int);
@@ -2487,9 +2488,9 @@ namespace JIPFixes {
 
 	namespace VersionPrint {
 
-		const char cVersionString[] = "JIP LN version: %.2f + JohnnyGuitar Fixes and Tweaks";
+		constexpr const char cVersionString[] = "JIP LN version: %.2f + JohnnyGuitar Fixes and Tweaks";
 
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::SafeWrite32(JIPUtils::GetAddress(0x1001359D) + 1, size_t(&cVersionString));
 		}
 

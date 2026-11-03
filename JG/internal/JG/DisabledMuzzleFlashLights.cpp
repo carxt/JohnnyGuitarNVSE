@@ -7,35 +7,42 @@
 
 namespace DisabledMuzzleFlashLights {
 
-	Mode eDisableMode = Mode::ENABLE;
+	static Mode eDisableMode = Mode::ENABLE;
 
-	HookUtils::CallDetour kDetour;
+	namespace Hooks {
 
-	void __fastcall CreateMuzzleFlashLightsHook(MuzzleFlash* apMuzzleFlash) {
-		if (eDisableMode == Mode::ENABLE
-			|| (eDisableMode == Mode::DISABLE_NPCS && apMuzzleFlash->GetParentRef() == PlayerCharacter::GetSingleton())
-			|| (eDisableMode == Mode::DISABLE_PLAYER && apMuzzleFlash->GetParentRef() != PlayerCharacter::GetSingleton())) {
+		static HookUtils::CallDetour kDetour;
+		static void __fastcall CreateMuzzleFlashLightsHook(MuzzleFlash* apMuzzleFlash) {
+			if (eDisableMode == Mode::ENABLE
+				|| (eDisableMode == Mode::DISABLE_NPCS && apMuzzleFlash->GetParentRef() == PlayerCharacter::GetSingleton())
+				|| (eDisableMode == Mode::DISABLE_PLAYER && apMuzzleFlash->GetParentRef() != PlayerCharacter::GetSingleton())) {
 
-			ThisCall(kDetour, apMuzzleFlash);
+				ThisCall(kDetour, apMuzzleFlash);
+			}
 		}
+
+		static void Init() {
+			kDetour.ReplaceCall(0x9BAFED, CreateMuzzleFlashLightsHook);
+		}
+
 	}
 
 	void Install() {
-		kDetour.ReplaceCall(0x9BAFED, CreateMuzzleFlashLightsHook);
+		Hooks::Init();
 	}
 
 	void Reset() {
 		eDisableMode = Mode::ENABLE; //reset the muzzle hook every time
 	}
 
-	SPEC_NOINLINE void __fastcall ToggleMuzzleFlashLight(MuzzleFlash* apFlash, bool abEnable) {
+	static SPEC_NOINLINE void __fastcall ToggleMuzzleFlashLight(MuzzleFlash* apFlash, bool abEnable) {
 		if (abEnable)
 			apFlash->AttachLight();
 		else
 			apFlash->DetachLight();
 	}
 
-	SPEC_NOINLINE void __fastcall ToggleLightForActors(bool abEnable) {
+	static SPEC_NOINLINE void __fastcall ToggleLightForActors(bool abEnable) {
 		ProcessLists* pLists = ProcessLists::GetSingleton();
 		const ProcessArray* pArray = pLists->GetProcessArray();
 		pLists->kUpdateLock.Lock();
@@ -53,7 +60,7 @@ namespace DisabledMuzzleFlashLights {
 		pLists->kUpdateLock.Unlock();
 	}
 
-	SPEC_NOINLINE void __fastcall ToggleLightForPlayer(bool abEnable) {
+	static SPEC_NOINLINE void __fastcall ToggleLightForPlayer(bool abEnable) {
 		BaseProcess* pAIProcess = PlayerCharacter::GetSingleton()->GetCurrentAIProcess();
 		MuzzleFlash* pFlash = pAIProcess->GetCurrentMuzzleFlash();
 		if (pFlash)

@@ -62,12 +62,12 @@ namespace JohnnyPatches {
 	int32_t iFPSCapLoadScreen = 0;
 	float fViewmodelNearDistance = 0.f;
 
-	HookUtils::CallDetour kPlayerInCombatDetour;
-	bool __fastcall FleeFixHook(PlayerCharacter* apPlayer, void*, bool& abUnseen) {
+	static HookUtils::CallDetour kPlayerInCombatDetour;
+	static bool __fastcall FleeFixHook(PlayerCharacter* apPlayer, void*, bool& abUnseen) {
 		return ThisCall<bool>(kPlayerInCombatDetour, apPlayer, &abUnseen) && !abUnseen;
 	}
 
-	TESObjectREFR* __fastcall DropItemHook(PlayerCharacter* apPlayer, void*, TESForm* apItem, ExtraDataList* apExtraList, uint32_t aiCount, const NiPoint3* apPoint, const NiPoint3* apRotate) {
+	static TESObjectREFR* __fastcall DropItemHook(PlayerCharacter* apPlayer, void*, TESForm* apItem, ExtraDataList* apExtraList, uint32_t aiCount, const NiPoint3* apPoint, const NiPoint3* apRotate) {
 		if (aiCount > 10000) {
 			for (aiCount; aiCount > 10000; aiCount -= 10000) {
 				apPlayer->DropObject(apItem, apExtraList, 10000, apPoint, apRotate);
@@ -76,7 +76,7 @@ namespace JohnnyPatches {
 		return apPlayer->DropObject(apItem, apExtraList, aiCount, apPoint, apRotate);
 	}
 
-	SPEC_NAKED void PatchPlayerPainHook() {
+	static SPEC_NAKED void PatchPlayerPainHook() {
 		_asm {
 			mov		ecx, dword ptr[ebp - 0x180]
 			cmp		ecx, dword ptr ds : [0x11DEA3C]
@@ -91,7 +91,7 @@ namespace JohnnyPatches {
 		}
 	}
 
-	SPEC_NAKED void DisableDeathResponsesHook() {
+	static SPEC_NAKED void DisableDeathResponsesHook() {
 		__asm {
 			movzx	eax, byte ptr ss : [ebp - 0x10]
 			test	eax, eax
@@ -107,16 +107,16 @@ namespace JohnnyPatches {
 		}
 	}
 
-	HookUtils::CallDetour kShouldPlayCombatMusicDetour;
-	bool __fastcall CombatMusicHook(void* apManager) {
+	static HookUtils::CallDetour kShouldPlayCombatMusicDetour;
+	static bool __fastcall CombatMusicHook(void* apManager) {
 		if (bCombatMusicDisabled) 
 			return false;
 		return ThisCall<bool>(kShouldPlayCombatMusicDetour, apManager);
 	}
 
 
-	HookUtils::CallDetour kSetViewFrustumDetour;
-	void __fastcall SetViewmodelFrustumHook(NiCamera* apCamera, void*, NiFrustum& arViewFrustum) {
+	static HookUtils::CallDetour kSetViewFrustumDetour;
+	static void __fastcall SetViewmodelFrustumHook(NiCamera* apCamera, void*, NiFrustum& arViewFrustum) {
 		if (fViewmodelNearDistance > 0.f) {
 			NiFrustum kFrustum = arViewFrustum;
 			kFrustum.m_fNear = std::max(fViewmodelNearDistance, 0.001f);
@@ -131,15 +131,15 @@ namespace JohnnyPatches {
 		}
 	}
 
-	HookUtils::CallDetour kHolotapePlayDetour;
-	void __fastcall StopHolotapeSoundHook(BSSoundHandle* apHandle, void*, bool abLoop) {
+	static HookUtils::CallDetour kHolotapePlayDetour;
+	static void __fastcall StopHolotapeSoundHook(BSSoundHandle* apHandle, void*, bool abLoop) {
 		if (!bNoHolotapeStopSound)
 			ThisCall(kHolotapePlayDetour, apHandle, abLoop);
 		bNoHolotapeStopSound = false;
 	}
 
 	static float fVanityWheelState;
-	void ResetVanityWheel() {
+	static void ResetVanityWheel() {
 		if (!bResetVanityCam) 
 			return;
 

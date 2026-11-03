@@ -5,11 +5,13 @@
 
 namespace FormSkeletons {
 
-	HookUtils::CallDetour kCopyBoundDataDetour;
-	void __fastcall CopyBoundAndModel(TESActorBase* apThis, void*, TESActorBase* apSource) {
+	STACK_FRAME_OPT_ENABLE
+	static HookUtils::CallDetour kCopyBoundDataDetour;
+	static void __fastcall CopyBoundAndModel(TESActorBase* apThis, void*, TESActorBase* apSource) {
 		ThisCall(kCopyBoundDataDetour, apThis, apSource);
 		ThisCall(0x489430, static_cast<TESModel*>(apThis), static_cast<TESModel*>(apSource));
 	}
+	STACK_FRAME_OPT_RESET
 
 	void Install() {
 		// Jazzoid stubs TESNPC::SetModel, so game can never set the model

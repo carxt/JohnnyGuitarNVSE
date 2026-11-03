@@ -16,7 +16,7 @@ extern NVSECommandTableInterface* g_cmdTableInterface;
 
 namespace ScriptUtils {
 
-	Cmd_Execute Cmd_Update3D = nullptr;
+	static Cmd_Execute Cmd_Update3D = nullptr;
 
 	AutoSaveFormChanges::AutoSaveFormChanges(bool abAllow) noexcept {
 		bOrgVal = BGSSaveLoadGame::GetSingleton()->SetThreadAllowChanges(abAllow);

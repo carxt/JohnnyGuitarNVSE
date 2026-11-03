@@ -12,7 +12,7 @@ namespace CellDataLoadWarning {
 	// Slightly above karut tier
 	// At least makes debugging straightforward
 
-	bool __fastcall PrintCellErrorMsg(const TESObjectCELL* apCell, const TESFile* apFile) {
+	static bool __fastcall PrintCellErrorMsg(const TESObjectCELL* apCell, const TESFile* apFile) {
 		const char* pType = apCell->GetInterior() ? "interior" : "exterior";
 		char cMessage[1024];
 		our_snprintf(cMessage, sizeof(cMessage), 
