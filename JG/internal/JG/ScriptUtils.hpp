@@ -16,6 +16,10 @@ namespace ScriptUtils {
 		return value > T::NONE && value < T::COUNT;
 	}
 
+	inline bool __fastcall IsWildcard(const char* text) {
+		return text[0] == '*' && text[1] == 0;
+	}
+
 	class AutoSaveFormChanges {
 		bool bOrgVal;
 	public:
