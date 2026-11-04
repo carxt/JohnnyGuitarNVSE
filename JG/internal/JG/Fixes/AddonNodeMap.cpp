@@ -35,10 +35,14 @@ namespace AddonNodeMap {
 
 	int32_t __fastcall ShowConflictMessage(BGSAddonNode* apNode, BGSAddonNode* apFoundNode) {
 		char cMessage[1024];
-		our_snprintf(cMessage, sizeof(cMessage), 
-			"FORMS: Addon Node %08X \"%s\" is trying to use index %i, but Addon Node %08X \"%s\" already uses that index.", 
-			apNode->GetFormID(), apNode->GetFormEditorID(), apNode->GetIndex(),
-			apFoundNode->GetFormID(), apFoundNode->GetFormEditorID());
+		const TESFile* pFile = apNode->GetFile(0);
+		const TESFile* pFoundFile = apFoundNode->GetFile(0);
+		const char* pFileName = pFile ? pFile->GetName() : "Unknown";
+		const char* pFoundFileName = pFoundFile ? pFoundFile->GetName() : "Unknown";
+		our_snprintf(cMessage, sizeof(cMessage),
+			"Addon Node %08X (\"%s\") from \"%s\" is trying to use index %i, but Addon Node %08X (\"%s\") from \"%s\" already uses that index.",
+			apNode->GetFormID(), apNode->GetFormEditorID(), pFileName, apNode->GetIndex(),
+			apFoundNode->GetFormID(), apFoundNode->GetFormEditorID(), pFoundFileName);
 		return MessageBox(nullptr, cMessage, "Addon Node Conflict!", MB_OK | MB_ICONERROR);
 	}
 
