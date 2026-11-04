@@ -1076,36 +1076,59 @@ bool Cmd_GetShaderPropertyFlag_Execute(COMMAND_ARGS) {
 	return true;
 }
 
+static SPEC_NOINLINE bool __fastcall ToggleAddonNodes(NiNode* apNode, ToggleAddonNodesState aeState) {
+	bool bResult = false;
+	switch (aeState) {
+		case ToggleAddonNodesState::REMOVE:
+			bResult |= TESObjectREFR::RemoveAddonNodes(apNode);
+			break;
+		case ToggleAddonNodesState::DISABLE_PARTICLES:
+			bResult |= TESObjectREFR::RemoveMasterParticleAddonNodes(apNode);
+			break;
+		case ToggleAddonNodesState::ADD:
+			bResult |= TESObjectREFR::AddAddonNodes(apNode);
+		case ToggleAddonNodesState::ENABLE_PARTICLES:
+			bResult |= TESObjectREFR::AddMasterParticleAddonNodes(apNode);
+			if (bResult) {
+				NiUpdateData kData(0.f, true);
+				apNode->UpdateProperties();
+				apNode->Update(kData);
+			}
+			break;
+		default:
+			__assume(0);
+	}
+	return bResult;
+}
+
 bool Cmd_ToggleAddonNodes_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cObjectName[MAX_PATH] = {};
 	ToggleAddonNodesState eState = ToggleAddonNodesState::COUNT;
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eState, &bFirstPerson) && cObjectName[0] && InRange(eState)) {
-		NiAVObject* pScene = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
-		if (pScene && pScene->IsNode()) {
-			NiNode* pNode = static_cast<NiNode*>(pScene);
-			
-			bool bResult = false;
-			switch (eState) {
-				case ToggleAddonNodesState::REMOVE:
-					bResult |= TESObjectREFR::RemoveAddonNodes(pNode);
-					break;
-				case ToggleAddonNodesState::DISABLE_PARTICLES:
-					bResult |= TESObjectREFR::RemoveMasterParticleAddonNodes(pNode);
-					break;
-				case ToggleAddonNodesState::ADD:
-					bResult |= TESObjectREFR::AddAddonNodes(pNode);
-				case ToggleAddonNodesState::ENABLE_PARTICLES:
-					bResult |= TESObjectREFR::AddMasterParticleAddonNodes(pNode);
-					if (bResult) {
-						NiUpdateData kData(0.f, true);
-						pNode->UpdateProperties();
-						pNode->Update(kData);
-					}
-					break;
+		NiPointer<NiAVObject> spScene = GetReferenceScene(thisObj, bFirstPerson);
+		if (!IsWildcard(cObjectName))
+			spScene = BSUtilities::GetObjectByName(spScene, cObjectName);
+
+		if (spScene && spScene->IsNode()) {
+			NiNode* pNode = static_cast<NiNode*>(spScene.m_pObject);
+			if (AILinearTaskThreadManager::ShouldQueue3DTask()) {
+				QueuedTask kTask;
+				kTask.kItems[0].p = pNode;
+				kTask.kItems[1].ui = static_cast<uint32_t>(eState);
+				pNode->IncRefCount();
+				kTask.pFunction = QUEUED_TASK{
+					NiNode* pNode = reinterpret_cast<NiNode*>(arTask.kItems[0].p);
+					ToggleAddonNodes(pNode, static_cast<ToggleAddonNodesState>(arTask.kItems[1].ui));
+					pNode->DecRefCount();
+				};
+				TaskQueue::QueueTask(kTask);
+				*result = 2;
 			}
-			*result = bResult;
+			else {
+				*result = ToggleAddonNodes(pNode, eState);
+			}
 		}
 	}
 	return true;

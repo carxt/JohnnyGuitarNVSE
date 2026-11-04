@@ -5,6 +5,9 @@
 #include "TESFile.hpp"
 #include "Gamebryo/NiTPrimitiveArray.hpp"
 #include "Gamebryo/NiTPointerList.hpp"
+#if USE_JG_CHANGES
+#include "Gamebryo/NiTPointerMap.hpp"
+#endif
 
 using FormID = uint32_t;
 class BGSAcousticSpace;
@@ -189,7 +192,11 @@ public:
 	BSSimpleList<MediaLocationController*>	kMediaLocControllers;	// 1D0
 	TESRegionList*							pRegions;				// 1D8
 	NiTPrimitiveArray<TESObjectCELL*>		kCellArray;				// 1DC
-	NiTPrimitiveArray<BGSAddonNode*>		kAddonArray;			// 1EC
+#if USE_JG_CHANGES
+	NiTPointerMap<uint32_t, BGSAddonNode*>	kAddons;				// 1EC
+#else
+	NiTPrimitiveArray<BGSAddonNode*>		kAddons;				// 1EC
+#endif
 	NiTPointerList<TESForm*>				kBadForms;				// 1FC
 	FormID									uiNextCreatedRefID;		// 208
 	TESFile*								pActiveFile;			// 20C
@@ -246,6 +253,16 @@ public:
 	TESRegionDataManager* GetRegionDataManager() const;
 
 	bool AddFormToDataHandler(TESForm* apForm);
+
+	BGSAddonNode* GetAddonNode(uint32_t auiIndex) const;
+#if USE_JG_CHANGES
+	uint32_t GetAddonNodeCount() const;
+#else
+	uint32_t GetAddonNodeArraySize() const;
+#endif
+
+	void AddAddonNode(BGSAddonNode* apNode);
+	void RemoveAddonNode(BGSAddonNode* apNode);
 };
 
 #ifdef GAME
