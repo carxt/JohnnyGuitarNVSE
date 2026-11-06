@@ -1715,9 +1715,9 @@ namespace JIPFixes {
 			}
 
 			void _Append(NiGeometry* apGeom) {
-				BSShaderProperty* pShaderProp = apGeom->shaderProp;
+				BSShaderProperty* pShaderProp = apGeom->GetShadeProperty<BSShaderProperty>();
 				if (pShaderProp->iShader == 17) {
-					if (!DowngradeWaterShader(static_cast<WaterShaderProperty*>(const_cast<BSShaderProperty*>(pShaderProp))))
+					if (!DowngradeWaterShader(static_cast<WaterShaderProperty*>(pShaderProp)))
 						return;
 				}
 

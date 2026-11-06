@@ -533,7 +533,7 @@ static void __fastcall ActivateSplatter(uint32_t auiCount, float afDuration, flo
 	pNewNode->AddExtraData(pExtraData);
 
 	NiTriShape* pShape = static_cast<NiTriShape*>(pNewNode->GetAt(0));
-	BSShaderBloodSplatterProperty* pShaderProp = static_cast<BSShaderBloodSplatterProperty*>(pShape->shaderProp);
+	BSShaderBloodSplatterProperty* pShaderProp = pShape->GetShadeProperty<BSShaderBloodSplatterProperty>();
 
 	if (apAlphaTex)
 		pShaderProp->SetTexture(0, apAlphaTex);
@@ -543,7 +543,7 @@ static void __fastcall ActivateSplatter(uint32_t auiCount, float afDuration, flo
 
 	if (BSShaderManager::bHDR && apFlareTex) {
 		NiTriShape* pHDRShape = static_cast<NiTriShape*>(pNewNode->GetAt(1));
-		pShaderProp = static_cast<BSShaderBloodSplatterProperty*>(pHDRShape->shaderProp);
+		pShaderProp = pHDRShape->GetShadeProperty<BSShaderBloodSplatterProperty>();
 		pShaderProp->SetTexture(0, apFlareTex);
 	}
 

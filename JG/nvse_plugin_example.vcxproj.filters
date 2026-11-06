@@ -1303,6 +1303,45 @@
     <ClCompile Include="internal\JG\Fixes\AddonNodeMap.cpp">
       <Filter>internal\JG\Fixes</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiAdditionalGeometryData.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiBillboardNode.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiGeometry.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiGeometryData.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiSkinData.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiSkinInstance.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiSkinPartition.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiTriBasedGeom.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiTriBasedGeomData.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiTriShape.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiTriShapeData.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiTriStrips.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Gamebryo\NiTriStripsData.cpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -3537,6 +3576,48 @@
     </ClInclude>
     <ClInclude Include="internal\JG\Fixes\AddonNodeMap.hpp">
       <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiAdditionalGeometryData.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiBillboardNode.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiGeometry.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiGeometryData.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NIShaderDeclaration.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiSkinData.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiSkinInstance.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiSkinPartition.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiTriBasedGeom.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiTriBasedGeomData.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiTriShape.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiTriShapeData.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiTriStrips.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiTriStripsData.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
