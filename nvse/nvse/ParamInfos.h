@@ -100,6 +100,16 @@ static ParamInfo kParams_OneString_OneOptionalFloat_FourOptionalInts[] =
 	{ "integer", kParamType_Integer, 1 },
 	{ "integer", kParamType_Integer, 1 },
 };
+static ParamInfo kParams_OneString_OneOptionalFloat_FiveOptionalInts[] =
+{
+	{ "string",	kParamType_String,	0 },
+	{ "float", kParamType_Float, 1 },
+	{ "integer", kParamType_Integer, 1 },
+	{ "integer", kParamType_Integer, 1 },
+	{ "integer", kParamType_Integer, 1 },
+	{ "integer", kParamType_Integer, 1 },
+	{ "integer", kParamType_Integer, 1 },
+};
 
 static ParamInfo kParams_TwoFloats[] =
 {
@@ -335,6 +345,12 @@ static ParamInfo kParams_OneForm_OneFloat[] =
 {
 	{	"form",		kParamType_AnyForm,	0	},
 	{	"float",	kParamType_Float,	0	},
+};
+static ParamInfo kParams_OneForm_OneFloat_OneOptionalInt[] =
+{
+	{	"form",		kParamType_AnyForm,	0	},
+	{	"float",	kParamType_Float,	0	},
+	{	"int",	kParamType_Integer,	1	},
 };
 static ParamInfo kParams_OneForm_OneOptionalForm[] =
 {

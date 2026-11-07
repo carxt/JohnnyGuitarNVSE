@@ -84,9 +84,10 @@ bool Cmd_StopSoundLooping_Execute(COMMAND_ARGS) {
 
 bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 	*result = 0;
-	float fTime = -1.f;
 	TESSound* pSoundForm = nullptr;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSoundForm, &fTime) && pSoundForm && IS_TYPE(pSoundForm, TESSound)) {
+	float fTime = -1.f;
+	uint32_t uiSeekPos = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSoundForm, &fTime, &uiSeekPos) && pSoundForm && IS_TYPE(pSoundForm, TESSound)) {
 		TESObjectREFR* pRef = thisObj;
 		if (!pRef)
 			pRef = PlayerCharacter::GetSingleton();
@@ -98,10 +99,15 @@ bool Cmd_PlaySoundFade_Execute(COMMAND_ARGS) {
 			if (hSound != UINT32_MAX) {
 				hSound.SetPosition(pRef->GetLocationOnReference());
 				hSound.SetObjectToFollow(pRef3D);
+
+				if (uiSeekPos)
+					hSound.Seek(uiSeekPos);
+
 				if (fTime > 0.f)
 					hSound.FadeInPlay(fTime * 1000);
 				else
 					hSound.Play(false);
+
 				*result = 1;
 			}
 		}
@@ -137,7 +143,8 @@ bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
 	BOOL bSystemSound = FALSE;
 	BOOL bLoop = FALSE;
 	BOOL bDontCache = FALSE;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &fFadeInTime, &bVoice, &bSystemSound, &bLoop, &bDontCache) && cPath[0]) {
+	uint32_t uiSeekPos = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &fFadeInTime, &bVoice, &bSystemSound, &bLoop, &bDontCache, &uiSeekPos) && cPath[0]) {
 		Bitfield32 uiAudioFlags = BSGameSound::TypeFlags::IS_2D | BSGameSound::TypeFlags::ONE_SHOT;
 		uiAudioFlags.Set<BSGameSound::TypeFlags::VOICE>(bVoice > 0);
 		uiAudioFlags.Set<BSGameSound::TypeFlags::SYSTEM_SOUND>(bSystemSound > 0);
@@ -146,10 +153,14 @@ bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
 
 		BSSoundHandle hSound = BSAudio::GetSingleton()->GetSoundHandleByFilePath(cPath, uiAudioFlags, nullptr);
 		if (hSound != UINT32_MAX) {
+			if (uiSeekPos)
+				hSound.Seek(uiSeekPos);
+
 			if (fFadeInTime <= 0)
 				hSound.Play(false);
 			else
 				hSound.FadeInPlay(fFadeInTime * 1000);
+
 			*result = 1;
 		}
 	}
@@ -159,11 +170,12 @@ bool Cmd_PlaySoundFromPath_Execute(COMMAND_ARGS) {
 bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 	*result = 0;
 	char cPath[MAX_PATH] = {};
+	float fFadeInTime = -1.f;
 	BOOL bVoice = FALSE;
 	BOOL bLoop = FALSE;
 	BOOL bDontCache = FALSE;
-	float fFadeInTime = -1;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &fFadeInTime, &bVoice, &bLoop, &bDontCache) && cPath[0]) {
+	uint32_t uiSeekPos = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &fFadeInTime, &bVoice, &bLoop, &bDontCache, &uiSeekPos) && cPath[0]) {
 		const TESObjectREFR* pRef = thisObj ? thisObj : PlayerCharacter::GetSingleton();
 
 		NiAVObject* pRef3D = pRef->Get3DVerySimple();
@@ -177,10 +189,15 @@ bool Cmd_PlaySound3DFromPath_Execute(COMMAND_ARGS) {
 			if (hSound != UINT32_MAX) {
 				hSound.SetPosition(pRef->GetLocationOnReference());
 				hSound.SetObjectToFollow(pRef3D);
+
+				if (uiSeekPos)
+					hSound.Seek(uiSeekPos);
+
 				if (fFadeInTime <= 0)
 					hSound.Play(false);
 				else
 					hSound.FadeInPlay(fFadeInTime * 1000);
+
 				*result = 1;
 			}
 		}
