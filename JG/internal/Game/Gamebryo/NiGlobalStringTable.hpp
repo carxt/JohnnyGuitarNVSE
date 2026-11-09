@@ -12,7 +12,7 @@ class NiFixedString;
 // Replaced by JIP and JG
 class SPEC_EMPTY_BASES NiGlobalStringTable : public BSMemObject {
 public:
-	typedef char* GlobalStringHandle;
+	using GlobalStringHandle = char*;
 
 #if !(USE_JIP_CHANGES || USE_JG_CHANGES)
 	NiTPrimitiveArray<GlobalStringHandle>	m_kHashArray[513];

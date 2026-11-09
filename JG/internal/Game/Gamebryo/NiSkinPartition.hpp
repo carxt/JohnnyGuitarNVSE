@@ -58,7 +58,7 @@ public:
 		const BoneSet&	m_kSet1;
 	};
 
-	typedef NiTPrimitiveSet<BoneSet*> NiBoneSetCollection;
+	using NiBoneSetCollection = NiTPrimitiveSet<BoneSet*>;
 
 	uint32_t	m_uiPartitions;
 	Partition*	m_pkPartitions;

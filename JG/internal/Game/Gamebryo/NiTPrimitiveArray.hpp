@@ -11,4 +11,4 @@ public:
 
 ASSERT_SIZE(NiTPrimitiveArray<void*>, 0x10);
 
-typedef NiTPrimitiveArray<const char*> NiViewerStringsArray;
+using NiViewerStringsArray = NiTPrimitiveArray<const char*>;
