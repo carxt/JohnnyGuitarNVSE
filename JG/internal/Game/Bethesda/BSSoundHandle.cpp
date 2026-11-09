@@ -10,7 +10,7 @@ BSSoundHandle::BSSoundHandle(uint32_t auiSoundID) : uiSoundID(auiSoundID), bAssu
 BSSoundHandle::BSSoundHandle(const BSSoundHandle& arOther) : uiSoundID(arOther.uiSoundID), bAssumeSuccess(arOther.bAssumeSuccess), eState(arOther.eState) {}
 
 // GAME - 0x418900
-BSSoundHandle BSSoundHandle::operator=(const BSSoundHandle& arOther) {
+BSSoundHandle& BSSoundHandle::operator=(const BSSoundHandle& arOther) {
 	uiSoundID = arOther.uiSoundID;
 	bAssumeSuccess = arOther.bAssumeSuccess;
 	eState = arOther.eState;

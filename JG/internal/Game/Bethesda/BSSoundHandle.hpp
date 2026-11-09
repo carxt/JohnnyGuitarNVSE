@@ -26,7 +26,7 @@ public:
 	bool			bAssumeSuccess;
 	AssumedState	eState;
 
-	BSSoundHandle operator=(const BSSoundHandle& arOther);
+	BSSoundHandle& operator=(const BSSoundHandle& arOther);
 
 	bool operator==(const BSSoundHandle& arOther) const;
 
