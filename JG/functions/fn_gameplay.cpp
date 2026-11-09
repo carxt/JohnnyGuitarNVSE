@@ -1272,9 +1272,9 @@ bool Cmd_ApplyWeaponPoison_Execute(COMMAND_ARGS) {
 
 bool Cmd_TogglePipBoy_Execute(COMMAND_ARGS) {
 	*result = 0;
-	Interface::Menus eMenu = Interface::Menus::NoMenu;
+	Interface::MenuID eMenu = Interface::MenuID::NoMenu;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &eMenu);
-	if (eMenu == Interface::Menus::NoMenu || eMenu == Interface::Menus::Inventory || eMenu == Interface::Menus::Stats || eMenu == Interface::Menus::PipboyData) {
+	if (eMenu == Interface::MenuID::NoMenu || eMenu == Interface::MenuID::Inventory || eMenu == Interface::MenuID::Stats || eMenu == Interface::MenuID::PipboyData) {
 		InterfaceManager* pUIMgr = InterfaceManager::GetSingleton();
 		if (pUIMgr) {
 			if (pUIMgr->pipBoyMode == 0)

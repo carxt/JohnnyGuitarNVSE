@@ -391,7 +391,7 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnKeyboardControllerSelectionChange, apMenu);
 			}
 
-			const uint32_t uiMenuID = apMenu ? apMenu->GetID() : -1;
+			const uint32_t uiMenuID = apMenu ? apMenu->GetMenuID() : -1;
 			for (auto const& rCallback : OnKeyboardControllerSelectionChangeHandler->kCallbacks) {
 				auto pFilter = reinterpret_cast<FilterInt*>(rCallback.pFilter);
 				if (pFilter->IsIntInFilter(0, uiMenuID) || pFilter->IsIntInFilter(0, 0)) {

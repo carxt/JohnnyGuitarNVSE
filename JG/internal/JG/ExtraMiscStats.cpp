@@ -29,9 +29,9 @@ namespace ExtraMiscStats {
 
 		tile->SetFloat(TILE_TRAIT::USER1, (float)value, 1);
 	}
-	bool __cdecl ShouldHideStat(uint32_t* id) {
-		if ((uint32_t)id >= 43) {
-			Tile* tile = StatsMenu::Get()->miscStatIDList.GetTileFromItem(&id);
+	bool __cdecl ShouldHideStat(uint32_t id) {
+		if (id >= 43) {
+			Tile* tile = StatsMenu::Get()->miscStatIDList.GetTileFor(id);
 			const std::string strName(tile->strName.GetString(), tile->strName.GetLength());
 			if (miscStatMap.find(strName) == miscStatMap.end()) 
 				return true;
@@ -43,13 +43,13 @@ namespace ExtraMiscStats {
 		auto iter = StatsMenu::Get()->miscStatIDList.GetHead();
 		do
 		{
-			if (iter->GetItem() && iter->GetItem()->tile && !strcmp(iter->GetItem()->tile->GetName(), name)) {
-				tile = iter->GetItem()->tile;
+			if (iter->GetItem() && iter->GetItem()->pTile && !strcmp(iter->GetItem()->pTile->GetName(), name)) {
+				tile = iter->GetItem()->pTile;
 				break;
 			}
 		} while ((iter = iter->GetNext()));
 		if (!tile) {
-			tile = ThisCall<Tile*>(0x7E1190, &StatsMenu::Get()->miscStatIDList, StatsMenu::Get()->miscStatIDList.itemCount, 0, 0, 0);
+			tile = StatsMenu::Get()->miscStatIDList.AddItem(StatsMenu::Get()->miscStatIDList.usNextIndex, 0, 0, 0);
 			tile->SetString(TILE_TRAIT::STRING, name, 1);
 			tile->SetName(name);
 			recalculateStatFilters = true;
@@ -72,7 +72,7 @@ namespace ExtraMiscStats {
 	}
 
 	void Update() {
-		if (StatsMenu::Get() && InterfaceManager::GetSingleton() && Menu::IsMenuVisible(Interface::Menus::Stats) && recalculateStatFilters) {
+		if (StatsMenu::Get() && InterfaceManager::GetSingleton() && Menu::IsMenuVisible(Interface::MenuID::Stats) && recalculateStatFilters) {
 			recalculateStatFilters = false;
 			StatsMenu::Get()->miscStatIDList.Filter(ShouldHideStat);
 

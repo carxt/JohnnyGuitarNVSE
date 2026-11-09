@@ -1342,6 +1342,12 @@
     <ClCompile Include="internal\Game\Gamebryo\NiTriStripsData.cpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Menu.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\Tile3D.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -3619,6 +3625,21 @@
     <ClInclude Include="internal\Game\Gamebryo\NiTriStripsData.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Menu.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ListBox.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ListBoxBase.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\BSConcepts.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\Tile3D.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -3720,6 +3741,9 @@
     </None>
     <None Include="internal\Game\Gamebryo\NiTNewInterface.inl">
       <Filter>internal\Game\Gamebryo</Filter>
+    </None>
+    <None Include="internal\Game\Bethesda\ListBox.inl">
+      <Filter>internal\Game\Bethesda</Filter>
     </None>
   </ItemGroup>
 </Project>
