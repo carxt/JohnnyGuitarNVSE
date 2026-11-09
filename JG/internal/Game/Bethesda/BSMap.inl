@@ -22,6 +22,6 @@ inline BSMapItem<T_Key, T_Data>* BSMap<T_Key, T_Data>::NewItem() {
 // GAME - 0x438940
 template<class T_Key, class T_Data>
 inline void BSMap<T_Key, T_Data>::DeleteItem(BSMapItem<T_Key, T_Data>* apItem) {
-	apItem->m_val = 0;
+	apItem->m_val = BSMapBase<T_Key, T_Data>::_Empty(0);
 	BSMemory::free(apItem);
 }

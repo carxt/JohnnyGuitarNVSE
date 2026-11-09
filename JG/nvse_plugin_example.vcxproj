@@ -2336,6 +2336,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiColorData.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiColorInterpolator.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiColorKey.hpp" />
+    <ClInclude Include="internal\Game\Gamebryo\NiConcepts.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiControllerManager.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiControllerSequence.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiCriticalSection.hpp" />
@@ -2420,7 +2421,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Gamebryo\NiTMapBase.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTNewInterface.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTObjectArray.hpp" />
-    <ClInclude Include="internal\Game\Gamebryo\NiTObjectList.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTObjectSet.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTPointerAllocator.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiTPointerList.hpp" />

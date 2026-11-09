@@ -3,8 +3,11 @@
 #include "NiTMap.hpp"
 #include "NiFixedString.hpp"
 
-template <class Allocator, class T_Data>
+template <class Allocator, NiC::NiMapItem T_Data>
 class SPEC_EMPTY_BASES NiTFixedStringMapBase : public BSMemObject {
+protected:
+	using _Empty = NiC::PickEmptyType<T_Data>;
+
 public:
 	NiTFixedStringMapBase(uint32_t auiHashSize = 37);
 	NiTFixedStringMapBase(const NiTFixedStringMapBase&) = delete;

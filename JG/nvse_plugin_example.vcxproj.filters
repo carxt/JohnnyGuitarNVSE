@@ -3640,6 +3640,9 @@
     <ClInclude Include="internal\Game\Bethesda\Tile3D.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Gamebryo\NiConcepts.hpp">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
