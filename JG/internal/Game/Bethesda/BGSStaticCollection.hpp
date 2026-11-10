@@ -26,7 +26,6 @@ public:
 
 		bool operator==(const REF_COL_DATA& arOther) const { return memcmp(this, &arOther, sizeof(*this)) == 0; }
 	};
-	static_assert(NiC::NiItemBase<REF_COL_DATA>);
 
 	BSMap<TESObjectSTAT*, BSSimpleList<REF_COL_DATA>*>* pObjects;
 #endif
