@@ -12,6 +12,7 @@
 #include "Bethesda/Animation.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
 #include "Bethesda/TES.hpp"
+#include "Bethesda/Controls.hpp"
 
 #include "JG/CameraOverride.hpp"
 #include "JG/DisabledLevelUp.hpp"
@@ -717,6 +718,48 @@ bool Cmd_StopIdleLoop_Execute(COMMAND_ARGS) {
 			}
 		}
 
+	}
+	return true;
+}
+
+bool Cmd_GetControllerStickRaw_Execute(COMMAND_ARGS) {
+	*result = 0;
+	uint32_t uiStick = 0;
+	uint32_t eAxis = Controls::JoystickAxis::NONE;
+	BOOL bRawInt = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiStick, &eAxis, &bRawInt)) {
+		uint32_t uiJoystick = 0;
+		switch (uiStick) {
+			case 0: // Left
+				eAxis += Controls::JoystickAxis::L_THUMB_X;
+				break;
+			case 1: // Right
+				eAxis += Controls::JoystickAxis::R_THUMB_X;
+				break;
+			default: // Joysticks
+				uiJoystick = uiStick - 2;
+				eAxis += Controls::JoystickAxis::MOV_X;
+				break;
+		}
+
+		if (uiJoystick >= 8) [[unlikely]]
+			return true;
+
+		const int32_t iValue = Controls::GetSingleton()->GetJoystickAxis(uiJoystick, static_cast<Controls::JoystickAxis>(eAxis));
+		if (!iValue) [[unlikely]]
+			return true;
+
+		if (bRawInt || eAxis < Controls::JoystickAxis::L_THUMB_X) {
+			*result = iValue;
+		}
+		else {
+			// -32768 to 32767
+			constexpr double CTRL_MAX = 32767.0;
+			constexpr double CTRL_MIN = 32768.0;
+
+			const double dDiv = iValue > 0 ? CTRL_MAX : CTRL_MIN;
+			*result = iValue / dDiv;
+		}
 	}
 	return true;
 }
