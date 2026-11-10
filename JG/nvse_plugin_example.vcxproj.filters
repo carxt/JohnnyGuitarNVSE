@@ -1528,9 +1528,6 @@
     <ClInclude Include="internal\Game\Gamebryo\NiTObjectArray.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Game\Gamebryo\NiTObjectList.hpp">
-      <Filter>internal\Game\Gamebryo</Filter>
-    </ClInclude>
     <ClInclude Include="internal\Game\Gamebryo\NiTPointerList.hpp">
       <Filter>internal\Game\Gamebryo</Filter>
     </ClInclude>
