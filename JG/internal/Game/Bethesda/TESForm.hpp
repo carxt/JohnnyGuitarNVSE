@@ -350,6 +350,9 @@ public:
 	FormID GetFormIDWithoutIndex() const;
 	uint32_t GetFileCount() const;
 
+	bool IsDefaultForm() const;
+	static bool IsDefaultForm(FormID auiID);
+
 #ifdef EDITOR
 	void AddUser(TESForm* apUser);
 	void RemoveUser(TESForm* apUser);

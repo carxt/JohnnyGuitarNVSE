@@ -686,6 +686,9 @@ struct NVSEDataInterface
 		kNVSEData_PluginFormExtraDataAdd,
 		kNVSEData_PluginFormExtraDataRemoveByName,
 		kNVSEData_PluginFormExtraDataRemoveByPtr,
+
+		kNVSEData_AdjustFormIDForMod,
+		kNVSEData_AdjustFormIDForModByName,
 		
 		kNVSEData_FuncMax,
 	};
@@ -728,6 +731,9 @@ typedef uint32_t(__fastcall* _PluginFormExtraData_GetAll)(const TESForm* form, N
 typedef bool(__fastcall* _PluginFormExtraData_Add)(TESForm* form, PluginFormExtraData* formExtraData);
 typedef bool(__fastcall* _PluginFormExtraData_RemoveByName)(TESForm* form, const char* name);
 typedef bool(__fastcall* _PluginFormExtraData_RemoveByPtr)(TESForm* form, PluginFormExtraData* formExtraData);
+
+typedef bool(__fastcall* _AdjustFormIDForMod)(const TESFile* mod, uint32_t& formID);
+typedef bool(__fastcall* _AdjustFormIDForModByName)(const char* modName, uint32_t& formID);
 
 // --- PluginFormExtraData ---
 // Extend this class and allocate on game's heap, then use the static methods to add, get, or remove it from a form
@@ -973,7 +979,7 @@ struct NVSESerializationInterface
 {
 	enum
 	{
-		kVersion = 2,
+		kVersion = 3,
 	};
 
 	typedef void (* EventCallback)(void * reserved);
@@ -1015,6 +1021,20 @@ struct NVSESerializationInterface
 	void	(*ReadRecord64)(void *outData);
 
 	void	(*SkipNBytes)(uint32_t byteNum);
+
+	enum ModListType : uint8_t {
+		kNormal = 0,
+		kSmall = 1,
+		kMedium = 2,
+		kOverlay = 3,
+
+		kCount,
+
+		kInvalid = UINT8_MAX
+	};
+
+	const TESFile* (*ResolveMod)(uint32_t index, ModListType modType);
+	ModListType(*GetModType)(const TESFile* mod);
 };
 
 #ifdef RUNTIME
