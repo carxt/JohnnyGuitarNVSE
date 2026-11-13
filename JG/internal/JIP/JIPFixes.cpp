@@ -930,130 +930,7 @@ namespace JIPFixes {
 		}
 
 	}
-#endif
 
-	namespace SetOnDialogTopicEventHandlerEx {
-
-#ifdef GAME
-		static EventInformation* OnDialogTopicHandler = nullptr;
-
-		static bool Cmd_SetOnDialogTopicEventHandler_JG_Execute(COMMAND_ARGS) {
-			BOOL setOrRemove = FALSE;
-			Script* script = nullptr;
-			TESForm* filter[1] = { nullptr };
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &script, &setOrRemove, &filter[0]) && script && IS_TYPE(script, Script)) {
-				TESForm* pFilterForm = filter[0];
-
-				if (!pFilterForm || IS_TYPE(pFilterForm, TESTopic) || IS_TYPE(pFilterForm, TESTopicInfo)) {
-					if (OnDialogTopicHandler) {
-						if (setOrRemove)
-							OnDialogTopicHandler->RegisterEvent(script, (void**)&filter);
-						else
-							OnDialogTopicHandler->RemoveEvent(script, (void**)&filter);
-					}
-				}
-			}
-			return true;
-		}
-
-		static HookUtils::CallDetour kGetResultScript;
-		STACK_FRAME_OPT_DISABLE
-		class TESTopicInfoEx : public TESTopicInfo {
-		public:
-			enum ResultScriptType : uint32_t {
-				BEGIN	= 0,
-				END		= 1,
-				COUNT	= 2,
-			};
-
-
-			Script* GetResultScript(ResultScriptType aeScript) {
-				if (aeScript == ResultScriptType::BEGIN) {
-					uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
-					TESObjectREFR* pOwner = *reinterpret_cast<TESObjectREFR**>(pEBP + 0xC);
-					if (pOwner) {
-						for (auto const& callback : OnDialogTopicHandler->kCallbacks) {
-							auto filter = reinterpret_cast<FilterForm*>(callback.pFilter);
-							if (filter->IsFilterEmpty(0) || filter->IsNonRefFormInFilter(0, this)) {
-								CallUDF(callback.pScript, pOwner, OnDialogTopicHandler->ucMaxArgsCount, this);
-							}
-							else if (pParentTopic && filter->IsNonRefFormInFilter(0, pParentTopic)) {
-								CallUDF(callback.pScript, pOwner, OnDialogTopicHandler->ucMaxArgsCount, pParentTopic);
-							}
-						}
-					}
-				}
-
-				return ThisCall<Script*>(kGetResultScript, this, aeScript);
-			}
-		};
-		STACK_FRAME_OPT_RESET
-#endif
-
-		static void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetOnDialogTopicEventHandler));
-			if (pInfo) {
-				HookUtils::SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
-#ifdef GAME
-				pInfo->execute = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
-				
-				OnDialogTopicHandler = JGCreateEvent("OnDialogTopicHandler", 1, 1);
-				kGetResultScript.ReplaceCall(0x61F18B, &TESTopicInfoEx::GetResultScript);
-				HookUtils::SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8");
-#endif
-			}
-		}
-
-	}
-
-	namespace RespawnDisableFix {
-
-#ifdef GAME
-		static Cmd_Execute ClearDeadActors = nullptr;
-
-		static thread_local bool bSkipRespawning = false;
-
-		STACK_FRAME_OPT_ENABLE
-
-		class HighProcessEx : public HighProcess {
-		public:
-			void FadeAndDisable(Actor* apActor) {
-				if (bSkipRespawning && apActor->GetRespawn())
-					return;
-
-				ThisCall(0x8FEB60, this, apActor);
-			}
-		};
-
-		static bool Cmd_ClearDeadActors_Execute(COMMAND_ARGS) {
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &bSkipRespawning)) {
-				ClearDeadActors(PASS_COMMAND_ARGS);
-				bSkipRespawning = false;
-			}
-			return true;
-		}
-
-		STACK_FRAME_OPT_RESET
-#endif
-
-		static void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kClearDeadActors));
-			if (pInfo) {
-				pInfo->params = kParams_OneOptionalInt;
-				pInfo->numParams = ARRAYSIZE(kParams_OneOptionalInt);
-#ifdef GAME
-				ClearDeadActors = pInfo->execute;
-				pInfo->execute = Cmd_ClearDeadActors_Execute;
-
-				HookUtils::WriteRelCall(JIPUtils::GetAddress(0x10030C38), &HighProcessEx::FadeAndDisable);
-				HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x10030C3D), 2);
-#endif
-			}
-		}
-
-	}
-
-#ifdef GAME
 	namespace ModelReloadFix {
 
 		static uint32_t uiWeaponHasScope = 0;
@@ -1183,309 +1060,7 @@ namespace JIPFixes {
 			}
 		}
 	}
-#endif
 
-	namespace BetterSearch {
-
-		static ParamInfo kSearchParams[] =
-		{
-			{ "Query", kParamType_String, false },
-			{ "Form Type", kParamType_String, true },
-			{ "Plugin Name", kParamType_String, true },
-			{ "Runtime Form Handling (0 - none, 1 - skip, 2 - only)", kParamType_Integer, true }
-		};
-
-#ifdef GAME
-		constexpr uint32_t MAX_LINE_WIDTH = 1700;
-		constexpr uint32_t MAX_LINE_LENGTH = 120;
-
-		class AutoLineWidth {
-			static constexpr uint32_t LINE_WIDTH_ADDR = 0x71D122 + 6;
-
-			uint32_t uiOriginalWidth;
-		public:
-			AutoLineWidth(uint32_t auiNewWidth) {
-				uiOriginalWidth = *reinterpret_cast<uint32_t*>(LINE_WIDTH_ADDR);
-				HookUtils::SafeWrite32(LINE_WIDTH_ADDR, auiNewWidth);
-			}
-			~AutoLineWidth() {
-				HookUtils::SafeWrite32(LINE_WIDTH_ADDR, uiOriginalWidth);
-			}
-		};
-
-		enum RuntimeFormHandling {
-			NONE = 0,
-			SKIP = 1,
-			ONLY = 2
-		};
-
-		static void __fastcall StringToLower(std::string_view& arString) {
-			std::transform(arString.begin(), arString.end(), const_cast<char*>(arString.data()), [](unsigned char c) { return std::tolower(c); });
-		}
-
-		static bool __fastcall CaseInsensitiveSubStr(const std::string_view& arString, const std::string_view& arSubString, size_t aStartPos = 0) {
-			auto it = std::search(
-				arString.begin() + aStartPos, arString.end(),
-				arSubString.begin(), arSubString.end(),
-				[](char ch1, char ch2) { return std::tolower(ch1) == ch2; }
-			);
-			return (it != arString.end());
-		}
-
-		static bool __fastcall CaseInsensitiveStrCmp(const std::string_view& arString, const std::string_view& arSubString) {
-			if (arString.length() != arSubString.length())
-				return false;
-
-			// Substring is assumed to be already lowercased
-			for (size_t i = 0; i < arString.length(); ++i) {
-				if (std::tolower(arString[i]) != arSubString[i])
-					return false;
-			}
-			return true;
-		}
-
-		static bool __fastcall FindSubstring(const std::string_view& arString, const std::string_view& arSubString, bool abExact = true) {
-			if (arSubString.empty())
-				return false;
-
-			if (arSubString.front() == '*' && arSubString.length() == 1)
-				return true;
-
-			if (arSubString.front() == '*' && arSubString.back() == '*') {
-				uint32_t uiCount = arSubString.length() >= 2 ? arSubString.length() - 2 : 0;
-				uiCount = std::clamp(uiCount, 0u, arString.length());
-				const std::string_view svSubStr = arSubString.substr(1, uiCount);
-				return CaseInsensitiveSubStr(arString, svSubStr);
-			}
-			else if (arSubString.front() == '*') {
-				const std::string_view svSubStr = arSubString.substr(1);
-				uint32_t uiStartPos = arString.length() >= svSubStr.length() ? arString.length() - svSubStr.length() : 0;
-				uiStartPos = std::clamp(uiStartPos, 0u, arString.length());
-				return CaseInsensitiveStrCmp(arString.substr(uiStartPos), svSubStr);
-			}
-			else if (arSubString.back() == '*') {
-				uint32_t uiCount = arString.length() >= arSubString.length() - 1 ? arSubString.length() - 1 : arString.length();
-				uiCount = std::clamp(uiCount, 0u, arString.length());
-				const std::string_view svSubStr = arSubString.substr(0, uiCount);
-				return CaseInsensitiveStrCmp(arString.substr(0, svSubStr.length()), svSubStr);
-			}
-			else if (abExact)
-				return CaseInsensitiveStrCmp(arString, arSubString);
-			else
-				return CaseInsensitiveSubStr(arString, arSubString);
-		}
-
-		static 	void __fastcall TruncateString(const char* apString, char* apBuffer, size_t aBufferSize) {
-			constexpr const char SUFFIX[] = "...";
-			const uint32_t uiCopySize = aBufferSize - sizeof(SUFFIX) - 1;
-			memcpy(apBuffer, apString, uiCopySize);
-			memcpy(apBuffer + uiCopySize, SUFFIX, sizeof(SUFFIX));
-			apBuffer[aBufferSize - 1] = '\0';
-		}
-
-		static void __fastcall DisplayForm(const TESForm* apForm, const char* apEDID) {
-			const TESFile* pFile = apForm->GetFile(0);
-			const char* pFullName = apForm->IsReference() ? static_cast<const TESObjectREFR*>(apForm)->GetFullName() : TESFullName::GetFullName(apForm);
-			const char* pFileName = pFile ? pFile->GetName() : "Runtime";
-			const char* pType = apForm->GetFormTypeName();
-			const char* pEDID = (apEDID && apEDID[0]) ? apEDID : "NO-EDID";
-			if (pFullName && pFullName[0]) {
-				constexpr uint32_t FRONT_PADDING = 24; // Tweaks' time + FormID
-				constexpr uint32_t SEPARATOR_PADDING = 3 * 3; // " | "
-				constexpr uint32_t BRACKETS_PADDING = 2; // "()"
-				const uint32_t uiTypeLength = strlen(pType);
-				const uint32_t uiEDIDLength = strlen(pEDID);
-				const uint32_t uiFileNameLength = strlen(pFileName);
-				const uint32_t uiFullNameLength = strlen(pFullName);
-
-				const uint32_t uiTotalLength = FRONT_PADDING + uiTypeLength + uiEDIDLength + uiFullNameLength + uiFileNameLength + SEPARATOR_PADDING + BRACKETS_PADDING;
-
-				char cTruncatedFullName[32];
-				// TLDR: Console's line breaks suck ass, so let's try to avoid them as much as possible
-				if (uiTotalLength > MAX_LINE_LENGTH) {
-					const uint32_t uiExcessLength = uiTotalLength - MAX_LINE_LENGTH;
-					const uint32_t uiTruncatedLength = uiFullNameLength >= uiExcessLength ? (uiFullNameLength - uiExcessLength) : uiExcessLength;
-					// If we need to trim, truncate the full name and add "..." at the end
-					TruncateString(pFullName, cTruncatedFullName, std::clamp<uint32_t>(uiTruncatedLength, 8, sizeof(cTruncatedFullName)));
-					pFullName = cTruncatedFullName;
-				}
-				Interface::PrintLine("%08X | %s | %s (%s) | %s", apForm->GetFormID(), pType, pEDID, pFullName, pFileName);
-			}
-			else {
-				Interface::PrintLine("%08X | %s | %s | %s", apForm->GetFormID(), pType, pEDID, pFileName);
-			}
-		}
-
-		static bool __fastcall SearchEDID(const TESForm* apForm, const std::string_view& arSearch) {
-			JohnnyExtraData* pJGE = JohnnyExtraData::Find(apForm);
-			if (!pJGE)
-				return false;
-
-			auto pEDIDIter = pJGE->kFormData.kEditorIDs.GetHead();
-			while (pEDIDIter && !pEDIDIter->IsEmpty()) {
-				const NiFixedString& rEDID = pEDIDIter->GetItem();
-				pEDIDIter = pEDIDIter->GetNext();
-
-				std::string_view svEDID(rEDID.c_str(), rEDID.GetLength());
-				if (FindSubstring(svEDID, arSearch, false)) {
-					DisplayForm(apForm, rEDID.c_str());
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		static bool __fastcall SearchFullName(const TESForm* apForm, const std::string_view& arSearch) {
-			const char* pFullName = apForm->IsReference() ? static_cast<const TESObjectREFR*>(apForm)->GetFullName() : TESFullName::GetFullName(apForm);
-			if (pFullName && pFullName[0]) {
-				if (FindSubstring(pFullName, arSearch, false)) {
-					DisplayForm(apForm, apForm->GetFormEditorID());
-					return true;
-				}
-			}
-			return false;
-		}
-
-		static bool __fastcall GetFiles(std::vector<TESFile*, BSScrapAllocator<TESFile*>>& arFiles, const std::string_view& arSearch) {
-			auto pIter = TESDataHandler::GetSingleton()->kFiles.GetHead();
-			while (pIter && !pIter->IsEmpty()) {
-				TESFile* pFile = pIter->GetItem();
-				pIter = pIter->GetNext();
-				if (pFile && FindSubstring(pFile->GetName(), arSearch))
-					arFiles.push_back(pFile);
-			}
-			return !arFiles.empty();
-		}
-
-		static bool __fastcall SearchFiles(const TESForm* apForm, const std::vector<TESFile*, BSScrapAllocator<TESFile*>>& arFiles) {
-			const TESFile* pFile = apForm->GetFile(0);
-			if (!pFile)
-				return false;
-
-			return std::find(arFiles.begin(), arFiles.end(), pFile) != arFiles.end();
-		}
-
-		static bool __fastcall SearchType(const TESForm* apForm, const std::vector<FORM_TYPE, BSScrapAllocator<FORM_TYPE>>& arTypes) {
-			const FORM_TYPE eFormType = apForm->GetFormType();
-			return std::find(arTypes.begin(), arTypes.end(), eFormType) != arTypes.end();
-		}
-
-		static bool Cmd_Search_JG_Execute(COMMAND_ARGS) {
-			char cSearchBuffer[256] = { 0 };
-			char cTypeBufer[128] = { 0 };
-			char cPluginBuffer[MAX_PATH] = { 0 };
-			RuntimeFormHandling eRuntimeHandling = RuntimeFormHandling::SKIP;
-			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &cSearchBuffer, &cTypeBufer, &cPluginBuffer, &eRuntimeHandling))
-				return true;
-
-			if (!cSearchBuffer[0])
-				return true;
-
-			bool bSearchFiles = false;
-			bool bSearchType = false;
-
-			std::string_view svSearch(cSearchBuffer);
-			StringToLower(svSearch);
-
-			std::vector<TESFile*, BSScrapAllocator<TESFile*>> kFiles;
-			if (cPluginBuffer[0] && cPluginBuffer[0] != ' ') {
-				std::string_view svPlugin(cPluginBuffer);
-				if (svPlugin.front() != '*' || svPlugin.length() > 1) {
-					StringToLower(svPlugin);
-					GetFiles(kFiles, svPlugin);
-					bSearchFiles = true;
-				}
-			}
-
-			std::vector<FORM_TYPE, BSScrapAllocator<FORM_TYPE>> kFormTypes;
-			if (cTypeBufer[0] && cTypeBufer[0] != ' ') {
-				if (cTypeBufer[0] >= '0' && cTypeBufer[0] <= '9') {
-					FORM_TYPE eFormType = static_cast<FORM_TYPE>(atoi(cTypeBufer));
-					if (eFormType > FORM_TYPE::NONE && eFormType < FORM_TYPE::COUNT)
-						kFormTypes.push_back(eFormType);
-					bSearchType = true;
-				}
-				else {
-					std::string_view svType(cTypeBufer);
-					if (svType.front() != '*' || svType.length() > 1) {
-						StringToLower(svType);
-						for (uint32_t i = FORM_TYPE::NONE; i < FORM_TYPE::COUNT; i++) {
-							if (FindSubstring(TESForm::GetFormTypeString(i), svType) || FindSubstring(TESForm::GetFormTypeName(i), svType))
-								kFormTypes.push_back(static_cast<FORM_TYPE>(i));
-						}
-						bSearchType = true;
-					}
-				}
-			}
-
-			AutoLineWidth kLineWidthFix(MAX_LINE_WIDTH);
-			auto kIter = TESForm::pAllForms->GetFirstPos();
-			while (kIter) {
-				FormID uiID = 0;
-				TESForm* pForm = nullptr;
-				TESForm::pAllForms->GetNext(kIter, uiID, pForm);
-
-				constexpr uint32_t uiDisallowedFlags = TESForm::FormFlags::DELETED | TESForm::FormFlags::STILL_LOADING;
-				if (pForm && pForm->uiFormFlags.IsClear(uiDisallowedFlags)) {
-					if (eRuntimeHandling != RuntimeFormHandling::NONE) {
-						bool bRuntime = pForm->kFiles.IsEmpty();
-						if (eRuntimeHandling == RuntimeFormHandling::SKIP && bRuntime)
-							continue;
-						else if (eRuntimeHandling == RuntimeFormHandling::ONLY && !bRuntime)
-							continue;
-					}
-
-					if (bSearchType && (kFormTypes.empty() || !SearchType(pForm, kFormTypes)))
-						continue;
-
-					if (bSearchFiles && (kFiles.empty() || !SearchFiles(pForm, kFiles)))
-						continue;
-
-					if (!SearchEDID(pForm, svSearch))
-						SearchFullName(pForm, svSearch);
-				}
-			}
-
-			return true;
-		}
-
-		static Cmd_Parse Cmd_Search_Org_Parse = nullptr;
-		static bool Cmd_Search_JG_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf) {
-			// Replace "" with " " because obsnig is stupid and doesn't allow empty strings as params
-			const char* pText = lineBuf->paramText;
-			char cNewText[512] = { 0 };
-			uint32_t uiNewTextLen = 0;
-			for (uint32_t i = 0; i < lineBuf->paramTextLen; i++) {
-				cNewText[uiNewTextLen++] = pText[i];
-				if (pText[i] == '"' && pText[i + 1] == '"') {
-					cNewText[uiNewTextLen] = ' ';
-					uiNewTextLen++;
-				}
-			}
-			strcpy_s(lineBuf->paramText, cNewText);
-			lineBuf->paramTextLen = uiNewTextLen;
-			return Cmd_Search_Org_Parse(numParams, paramInfo, lineBuf, scriptBuf);
-		}
-#endif
-
-		static void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSearch));
-			if (pInfo) {
-				pInfo->params		= kSearchParams;
-				pInfo->numParams	= ARRAYSIZE(kSearchParams);
-
-#ifdef GAME
-				Cmd_Search_Org_Parse = pInfo->parse;
-				pInfo->execute = Cmd_Search_JG_Execute;
-				pInfo->parse = Cmd_Search_JG_Parse;
-#endif
-			}
-		}
-
-	}
-
-#ifdef GAME
 	namespace WeaponModEffectsFix {
 		static void InitHooks() {
 			HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x1003DA30), 5);
@@ -1557,32 +1132,7 @@ namespace JIPFixes {
 			kRemoveTileFromUpdateList.ReplaceCall(0x706C98, &Hook::CleanupTile);
 		}
 	}
-#endif
 
-	namespace PowerArmorCondition {
-
-#ifdef GAME
-		STACK_FRAME_OPT_ENABLE
-		static bool Cmd_GetPCCanUsePowerArmor_Eval(COMMAND_ARGS_EVAL) {
-			*result = PlayerCharacter::GetSingleton()->bCanUsePowerArmor;
-			return true;
-		}
-		STACK_FRAME_OPT_RESET
-#endif
-
-		static void InitHooks() {
-			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetPCCanUsePowerArmor));
-			if (pInfo) {
-#ifdef GAME
-				pInfo->eval = Cmd_GetPCCanUsePowerArmor_Eval;
-#else
-				pInfo->eval = reinterpret_cast<Cmd_Eval>(0x5BB810);
-#endif
-			}
-		}
-	}
-
-#ifdef GAME
 	namespace GetMenuItemListRefsFix {
 
 		STACK_FRAME_OPT_ENABLE
@@ -1833,81 +1383,7 @@ namespace JIPFixes {
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10058476), SetItemHealth);
 		}
 	}
-#endif
 
-	namespace CursorPosUICords {
-
-#ifdef GAME
-		static bool* pbHUDCursorMode = nullptr;
-
-		static bool Cmd_GetCursorPos_Execute(COMMAND_ARGS) {
-			*result = 0;
-			char cAxis;
-			BOOL bUICoordinates = FALSE;
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &cAxis, &bUICoordinates)) {
-				float fCursorPos = (cAxis == 'X' || cAxis == 'x') ? InterfaceManager::GetSingleton()->cursorX : InterfaceManager::GetSingleton()->cursorY;
-				if (bUICoordinates) {
-					const float fUIPixelSize = *reinterpret_cast<float*>(0x11D8A48);
-					fCursorPos *= fUIPixelSize;
-				}
-				*result = fCursorPos;
-			}
-
-			return true;
-		}
-
-		static bool Cmd_SetCursorPos_Execute(COMMAND_ARGS) {
-			*result = 0;
-			float fPosX, fPosY;
-			BOOL bUICoordinates = FALSE;
-			InterfaceManager* pUIMgr = InterfaceManager::GetSingleton();
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &fPosX, &fPosY, &bUICoordinates) && (pUIMgr->IsInMenuMode() || *pbHUDCursorMode)) {
-				const float fUIPixelSize = *reinterpret_cast<float*>(0x11D8A48);
-				const float fScreenWidth = RendererSettingCollection::Display::iSizeW->Int() * fUIPixelSize * 0.5f;
-				const float fScreenHeight = RendererSettingCollection::Display::iSizeH->Int() * fUIPixelSize * 0.5f;
-				if (bUICoordinates) {
-					fPosX /= fUIPixelSize;
-					fPosY /= fUIPixelSize;
-				}
-				pUIMgr->cursorX = fPosX;
-				pUIMgr->cursorY = fPosY;
-				pUIMgr->cursor->GetModel()->m_kLocal.m_kTranslate.x = (fPosX * fUIPixelSize) - fScreenWidth;
-				pUIMgr->cursor->GetModel()->m_kLocal.m_kTranslate.z = fScreenHeight - (fPosY * fUIPixelSize);
-				*result = 1;
-			}
-
-			return true;
-		}
-#endif
-
-		static void InitHooks() {
-#ifdef GAME
-			pbHUDCursorMode = reinterpret_cast<bool*>(JIPUtils::GetAddress(0x10076378));
-#endif
-			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetCursorPos));
-				if (pInfo) {
-					pInfo->params = kParams_OneAxis_OneOptionalInt;
-					pInfo->numParams = ARRAYSIZE(kParams_OneAxis_OneOptionalInt);
-#ifdef GAME
-					pInfo->execute = Cmd_GetCursorPos_Execute;
-#endif
-				}
-			}
-			{
-				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetCursorPos));
-				if (pInfo) {
-					pInfo->params = kParams_TwoFloats_OneOptionalInt;
-					pInfo->numParams = ARRAYSIZE(kParams_TwoFloats_OneOptionalInt);
-#ifdef GAME
-					pInfo->execute = Cmd_SetCursorPos_Execute;
-#endif
-				}
-			}
-		}
-	}
-
-#ifdef GAME
 	namespace SetHotkeyItemRefFix {
 
 		static uint32_t uiJIPCreateExtraDataAddr;
@@ -2463,6 +1939,524 @@ namespace JIPFixes {
 	}
 #endif
 
+#pragma region GAME + GECK
+
+	namespace SetOnDialogTopicEventHandlerEx {
+
+#ifdef GAME
+		static EventInformation* OnDialogTopicHandler = nullptr;
+
+		static bool Cmd_SetOnDialogTopicEventHandler_JG_Execute(COMMAND_ARGS) {
+			BOOL setOrRemove = FALSE;
+			Script* script = nullptr;
+			TESForm* filter[1] = { nullptr };
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &script, &setOrRemove, &filter[0]) && script && IS_TYPE(script, Script)) {
+				TESForm* pFilterForm = filter[0];
+
+				if (!pFilterForm || IS_TYPE(pFilterForm, TESTopic) || IS_TYPE(pFilterForm, TESTopicInfo)) {
+					if (OnDialogTopicHandler) {
+						if (setOrRemove)
+							OnDialogTopicHandler->RegisterEvent(script, (void**)&filter);
+						else
+							OnDialogTopicHandler->RemoveEvent(script, (void**)&filter);
+					}
+				}
+			}
+			return true;
+		}
+
+		static HookUtils::CallDetour kGetResultScript;
+		STACK_FRAME_OPT_DISABLE
+		class TESTopicInfoEx : public TESTopicInfo {
+		public:
+			enum ResultScriptType : uint32_t {
+				BEGIN	= 0,
+				END		= 1,
+				COUNT	= 2,
+			};
+
+
+			Script* GetResultScript(ResultScriptType aeScript) {
+				if (aeScript == ResultScriptType::BEGIN) {
+					uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+					TESObjectREFR* pOwner = *reinterpret_cast<TESObjectREFR**>(pEBP + 0xC);
+					if (pOwner) {
+						for (auto const& callback : OnDialogTopicHandler->kCallbacks) {
+							auto filter = reinterpret_cast<FilterForm*>(callback.pFilter);
+							if (filter->IsFilterEmpty(0) || filter->IsNonRefFormInFilter(0, this)) {
+								CallUDF(callback.pScript, pOwner, OnDialogTopicHandler->ucMaxArgsCount, this);
+							}
+							else if (pParentTopic && filter->IsNonRefFormInFilter(0, pParentTopic)) {
+								CallUDF(callback.pScript, pOwner, OnDialogTopicHandler->ucMaxArgsCount, pParentTopic);
+							}
+						}
+					}
+				}
+
+				return ThisCall<Script*>(kGetResultScript, this, aeScript);
+			}
+		};
+		STACK_FRAME_OPT_RESET
+#endif
+
+		static void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetOnDialogTopicEventHandler));
+			if (pInfo) {
+				HookUtils::SafeWrite32(reinterpret_cast<SIZE_T>(&pInfo->params[2].isOptional), 1);
+#ifdef GAME
+				pInfo->execute = Cmd_SetOnDialogTopicEventHandler_JG_Execute;
+				
+				OnDialogTopicHandler = JGCreateEvent("OnDialogTopicHandler", 1, 1);
+				kGetResultScript.ReplaceCall(0x61F18B, &TESTopicInfoEx::GetResultScript);
+				HookUtils::SafeWriteBuf(0x61F184, "\x8B\x45\x08\x50\x8B\x4D\xF4\xE8");
+#endif
+			}
+		}
+
+	}
+
+	namespace RespawnDisableFix {
+
+#ifdef GAME
+		static Cmd_Execute ClearDeadActors = nullptr;
+
+		static thread_local bool bSkipRespawning = false;
+
+		STACK_FRAME_OPT_ENABLE
+
+		class HighProcessEx : public HighProcess {
+		public:
+			void FadeAndDisable(Actor* apActor) {
+				if (bSkipRespawning && apActor->GetRespawn())
+					return;
+
+				ThisCall(0x8FEB60, this, apActor);
+			}
+		};
+
+		static bool Cmd_ClearDeadActors_Execute(COMMAND_ARGS) {
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &bSkipRespawning)) {
+				ClearDeadActors(PASS_COMMAND_ARGS);
+				bSkipRespawning = false;
+			}
+			return true;
+		}
+
+		STACK_FRAME_OPT_RESET
+#endif
+
+		static void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kClearDeadActors));
+			if (pInfo) {
+				pInfo->params = kParams_OneOptionalInt;
+				pInfo->numParams = ARRAYSIZE(kParams_OneOptionalInt);
+#ifdef GAME
+				ClearDeadActors = pInfo->execute;
+				pInfo->execute = Cmd_ClearDeadActors_Execute;
+
+				HookUtils::WriteRelCall(JIPUtils::GetAddress(0x10030C38), &HighProcessEx::FadeAndDisable);
+				HookUtils::PatchMemoryNop(JIPUtils::GetAddress(0x10030C3D), 2);
+#endif
+			}
+		}
+
+	}
+
+	namespace BetterSearch {
+
+		static ParamInfo kSearchParams[] =
+		{
+			{ "Query", kParamType_String, false },
+			{ "Form Type", kParamType_String, true },
+			{ "Plugin Name", kParamType_String, true },
+			{ "Runtime Form Handling (0 - none, 1 - skip, 2 - only)", kParamType_Integer, true }
+		};
+
+#ifdef GAME
+		constexpr uint32_t MAX_LINE_WIDTH = 1700;
+		constexpr uint32_t MAX_LINE_LENGTH = 120;
+
+		class AutoLineWidth {
+			static constexpr uint32_t LINE_WIDTH_ADDR = 0x71D122 + 6;
+
+			uint32_t uiOriginalWidth;
+		public:
+			AutoLineWidth(uint32_t auiNewWidth) {
+				uiOriginalWidth = *reinterpret_cast<uint32_t*>(LINE_WIDTH_ADDR);
+				HookUtils::SafeWrite32(LINE_WIDTH_ADDR, auiNewWidth);
+			}
+			~AutoLineWidth() {
+				HookUtils::SafeWrite32(LINE_WIDTH_ADDR, uiOriginalWidth);
+			}
+		};
+
+		enum RuntimeFormHandling {
+			NONE = 0,
+			SKIP = 1,
+			ONLY = 2
+		};
+
+		static void __fastcall StringToLower(std::string_view& arString) {
+			std::transform(arString.begin(), arString.end(), const_cast<char*>(arString.data()), [](unsigned char c) { return std::tolower(c); });
+		}
+
+		static bool __fastcall CaseInsensitiveSubStr(const std::string_view& arString, const std::string_view& arSubString, size_t aStartPos = 0) {
+			auto it = std::search(
+				arString.begin() + aStartPos, arString.end(),
+				arSubString.begin(), arSubString.end(),
+				[](char ch1, char ch2) { return std::tolower(ch1) == ch2; }
+			);
+			return (it != arString.end());
+		}
+
+		static bool __fastcall CaseInsensitiveStrCmp(const std::string_view& arString, const std::string_view& arSubString) {
+			if (arString.length() != arSubString.length())
+				return false;
+
+			// Substring is assumed to be already lowercased
+			for (size_t i = 0; i < arString.length(); ++i) {
+				if (std::tolower(arString[i]) != arSubString[i])
+					return false;
+			}
+			return true;
+		}
+
+		static bool __fastcall FindSubstring(const std::string_view& arString, const std::string_view& arSubString, bool abExact = true) {
+			if (arSubString.empty())
+				return false;
+
+			if (arSubString.front() == '*' && arSubString.length() == 1)
+				return true;
+
+			if (arSubString.front() == '*' && arSubString.back() == '*') {
+				uint32_t uiCount = arSubString.length() >= 2 ? arSubString.length() - 2 : 0;
+				uiCount = std::clamp(uiCount, 0u, arString.length());
+				const std::string_view svSubStr = arSubString.substr(1, uiCount);
+				return CaseInsensitiveSubStr(arString, svSubStr);
+			}
+			else if (arSubString.front() == '*') {
+				const std::string_view svSubStr = arSubString.substr(1);
+				uint32_t uiStartPos = arString.length() >= svSubStr.length() ? arString.length() - svSubStr.length() : 0;
+				uiStartPos = std::clamp(uiStartPos, 0u, arString.length());
+				return CaseInsensitiveStrCmp(arString.substr(uiStartPos), svSubStr);
+			}
+			else if (arSubString.back() == '*') {
+				uint32_t uiCount = arString.length() >= arSubString.length() - 1 ? arSubString.length() - 1 : arString.length();
+				uiCount = std::clamp(uiCount, 0u, arString.length());
+				const std::string_view svSubStr = arSubString.substr(0, uiCount);
+				return CaseInsensitiveStrCmp(arString.substr(0, svSubStr.length()), svSubStr);
+			}
+			else if (abExact)
+				return CaseInsensitiveStrCmp(arString, arSubString);
+			else
+				return CaseInsensitiveSubStr(arString, arSubString);
+		}
+
+		static 	void __fastcall TruncateString(const char* apString, char* apBuffer, size_t aBufferSize) {
+			constexpr const char SUFFIX[] = "...";
+			const uint32_t uiCopySize = aBufferSize - sizeof(SUFFIX) - 1;
+			memcpy(apBuffer, apString, uiCopySize);
+			memcpy(apBuffer + uiCopySize, SUFFIX, sizeof(SUFFIX));
+			apBuffer[aBufferSize - 1] = '\0';
+		}
+
+		static void __fastcall DisplayForm(const TESForm* apForm, const char* apEDID) {
+			const TESFile* pFile = apForm->GetFile(0);
+			const char* pFullName = apForm->IsReference() ? static_cast<const TESObjectREFR*>(apForm)->GetFullName() : TESFullName::GetFullName(apForm);
+			const char* pFileName = pFile ? pFile->GetName() : "Runtime";
+			const char* pType = apForm->GetFormTypeName();
+			const char* pEDID = (apEDID && apEDID[0]) ? apEDID : "NO-EDID";
+			if (pFullName && pFullName[0]) {
+				constexpr uint32_t FRONT_PADDING = 24; // Tweaks' time + FormID
+				constexpr uint32_t SEPARATOR_PADDING = 3 * 3; // " | "
+				constexpr uint32_t BRACKETS_PADDING = 2; // "()"
+				const uint32_t uiTypeLength = strlen(pType);
+				const uint32_t uiEDIDLength = strlen(pEDID);
+				const uint32_t uiFileNameLength = strlen(pFileName);
+				const uint32_t uiFullNameLength = strlen(pFullName);
+
+				const uint32_t uiTotalLength = FRONT_PADDING + uiTypeLength + uiEDIDLength + uiFullNameLength + uiFileNameLength + SEPARATOR_PADDING + BRACKETS_PADDING;
+
+				char cTruncatedFullName[32];
+				// TLDR: Console's line breaks suck ass, so let's try to avoid them as much as possible
+				if (uiTotalLength > MAX_LINE_LENGTH) {
+					const uint32_t uiExcessLength = uiTotalLength - MAX_LINE_LENGTH;
+					const uint32_t uiTruncatedLength = uiFullNameLength >= uiExcessLength ? (uiFullNameLength - uiExcessLength) : uiExcessLength;
+					// If we need to trim, truncate the full name and add "..." at the end
+					TruncateString(pFullName, cTruncatedFullName, std::clamp<uint32_t>(uiTruncatedLength, 8, sizeof(cTruncatedFullName)));
+					pFullName = cTruncatedFullName;
+				}
+				Interface::PrintLine("%08X | %s | %s (%s) | %s", apForm->GetFormID(), pType, pEDID, pFullName, pFileName);
+			}
+			else {
+				Interface::PrintLine("%08X | %s | %s | %s", apForm->GetFormID(), pType, pEDID, pFileName);
+			}
+		}
+
+		static bool __fastcall SearchEDID(const TESForm* apForm, const std::string_view& arSearch) {
+			JohnnyExtraData* pJGE = JohnnyExtraData::Find(apForm);
+			if (!pJGE)
+				return false;
+
+			auto pEDIDIter = pJGE->kFormData.kEditorIDs.GetHead();
+			while (pEDIDIter && !pEDIDIter->IsEmpty()) {
+				const NiFixedString& rEDID = pEDIDIter->GetItem();
+				pEDIDIter = pEDIDIter->GetNext();
+
+				std::string_view svEDID(rEDID.c_str(), rEDID.GetLength());
+				if (FindSubstring(svEDID, arSearch, false)) {
+					DisplayForm(apForm, rEDID.c_str());
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		static bool __fastcall SearchFullName(const TESForm* apForm, const std::string_view& arSearch) {
+			const char* pFullName = apForm->IsReference() ? static_cast<const TESObjectREFR*>(apForm)->GetFullName() : TESFullName::GetFullName(apForm);
+			if (pFullName && pFullName[0]) {
+				if (FindSubstring(pFullName, arSearch, false)) {
+					DisplayForm(apForm, apForm->GetFormEditorID());
+					return true;
+				}
+			}
+			return false;
+		}
+
+		static bool __fastcall GetFiles(std::vector<TESFile*, BSScrapAllocator<TESFile*>>& arFiles, const std::string_view& arSearch) {
+			auto pIter = TESDataHandler::GetSingleton()->kFiles.GetHead();
+			while (pIter && !pIter->IsEmpty()) {
+				TESFile* pFile = pIter->GetItem();
+				pIter = pIter->GetNext();
+				if (pFile && FindSubstring(pFile->GetName(), arSearch))
+					arFiles.push_back(pFile);
+			}
+			return !arFiles.empty();
+		}
+
+		static bool __fastcall SearchFiles(const TESForm* apForm, const std::vector<TESFile*, BSScrapAllocator<TESFile*>>& arFiles) {
+			const TESFile* pFile = apForm->GetFile(0);
+			if (!pFile)
+				return false;
+
+			return std::find(arFiles.begin(), arFiles.end(), pFile) != arFiles.end();
+		}
+
+		static bool __fastcall SearchType(const TESForm* apForm, const std::vector<FORM_TYPE, BSScrapAllocator<FORM_TYPE>>& arTypes) {
+			const FORM_TYPE eFormType = apForm->GetFormType();
+			return std::find(arTypes.begin(), arTypes.end(), eFormType) != arTypes.end();
+		}
+
+		static bool Cmd_Search_JG_Execute(COMMAND_ARGS) {
+			char cSearchBuffer[256] = { 0 };
+			char cTypeBufer[128] = { 0 };
+			char cPluginBuffer[MAX_PATH] = { 0 };
+			RuntimeFormHandling eRuntimeHandling = RuntimeFormHandling::SKIP;
+			if (!ExtractArgsEx(EXTRACT_ARGS_EX, &cSearchBuffer, &cTypeBufer, &cPluginBuffer, &eRuntimeHandling))
+				return true;
+
+			if (!cSearchBuffer[0])
+				return true;
+
+			bool bSearchFiles = false;
+			bool bSearchType = false;
+
+			std::string_view svSearch(cSearchBuffer);
+			StringToLower(svSearch);
+
+			std::vector<TESFile*, BSScrapAllocator<TESFile*>> kFiles;
+			if (cPluginBuffer[0] && cPluginBuffer[0] != ' ') {
+				std::string_view svPlugin(cPluginBuffer);
+				if (svPlugin.front() != '*' || svPlugin.length() > 1) {
+					StringToLower(svPlugin);
+					GetFiles(kFiles, svPlugin);
+					bSearchFiles = true;
+				}
+			}
+
+			std::vector<FORM_TYPE, BSScrapAllocator<FORM_TYPE>> kFormTypes;
+			if (cTypeBufer[0] && cTypeBufer[0] != ' ') {
+				if (cTypeBufer[0] >= '0' && cTypeBufer[0] <= '9') {
+					FORM_TYPE eFormType = static_cast<FORM_TYPE>(atoi(cTypeBufer));
+					if (eFormType > FORM_TYPE::NONE && eFormType < FORM_TYPE::COUNT)
+						kFormTypes.push_back(eFormType);
+					bSearchType = true;
+				}
+				else {
+					std::string_view svType(cTypeBufer);
+					if (svType.front() != '*' || svType.length() > 1) {
+						StringToLower(svType);
+						for (uint32_t i = FORM_TYPE::NONE; i < FORM_TYPE::COUNT; i++) {
+							if (FindSubstring(TESForm::GetFormTypeString(i), svType) || FindSubstring(TESForm::GetFormTypeName(i), svType))
+								kFormTypes.push_back(static_cast<FORM_TYPE>(i));
+						}
+						bSearchType = true;
+					}
+				}
+			}
+
+			AutoLineWidth kLineWidthFix(MAX_LINE_WIDTH);
+			auto kIter = TESForm::pAllForms->GetFirstPos();
+			while (kIter) {
+				FormID uiID = 0;
+				TESForm* pForm = nullptr;
+				TESForm::pAllForms->GetNext(kIter, uiID, pForm);
+
+				constexpr uint32_t uiDisallowedFlags = TESForm::FormFlags::DELETED | TESForm::FormFlags::STILL_LOADING;
+				if (pForm && pForm->uiFormFlags.IsClear(uiDisallowedFlags)) {
+					if (eRuntimeHandling != RuntimeFormHandling::NONE) {
+						bool bRuntime = pForm->kFiles.IsEmpty();
+						if (eRuntimeHandling == RuntimeFormHandling::SKIP && bRuntime)
+							continue;
+						else if (eRuntimeHandling == RuntimeFormHandling::ONLY && !bRuntime)
+							continue;
+					}
+
+					if (bSearchType && (kFormTypes.empty() || !SearchType(pForm, kFormTypes)))
+						continue;
+
+					if (bSearchFiles && (kFiles.empty() || !SearchFiles(pForm, kFiles)))
+						continue;
+
+					if (!SearchEDID(pForm, svSearch))
+						SearchFullName(pForm, svSearch);
+				}
+			}
+
+			return true;
+		}
+
+		static Cmd_Parse Cmd_Search_Org_Parse = nullptr;
+		static bool Cmd_Search_JG_Parse(uint32_t numParams, ParamInfo* paramInfo, ScriptLineBuffer* lineBuf, ScriptBuffer* scriptBuf) {
+			// Replace "" with " " because obsnig is stupid and doesn't allow empty strings as params
+			const char* pText = lineBuf->paramText;
+			char cNewText[512] = { 0 };
+			uint32_t uiNewTextLen = 0;
+			for (uint32_t i = 0; i < lineBuf->paramTextLen; i++) {
+				cNewText[uiNewTextLen++] = pText[i];
+				if (pText[i] == '"' && pText[i + 1] == '"') {
+					cNewText[uiNewTextLen] = ' ';
+					uiNewTextLen++;
+				}
+			}
+			strcpy_s(lineBuf->paramText, cNewText);
+			lineBuf->paramTextLen = uiNewTextLen;
+			return Cmd_Search_Org_Parse(numParams, paramInfo, lineBuf, scriptBuf);
+		}
+#endif
+
+		static void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSearch));
+			if (pInfo) {
+				pInfo->params		= kSearchParams;
+				pInfo->numParams	= ARRAYSIZE(kSearchParams);
+
+#ifdef GAME
+				Cmd_Search_Org_Parse = pInfo->parse;
+				pInfo->execute = Cmd_Search_JG_Execute;
+				pInfo->parse = Cmd_Search_JG_Parse;
+#endif
+			}
+		}
+
+	}
+
+	namespace CursorPosUICords {
+
+#ifdef GAME
+		static bool* pbHUDCursorMode = nullptr;
+
+		static bool Cmd_GetCursorPos_Execute(COMMAND_ARGS) {
+			*result = 0;
+			char cAxis;
+			BOOL bUICoordinates = FALSE;
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &cAxis, &bUICoordinates)) {
+				float fCursorPos = (cAxis == 'X' || cAxis == 'x') ? InterfaceManager::GetSingleton()->cursorX : InterfaceManager::GetSingleton()->cursorY;
+				if (bUICoordinates) {
+					const float fUIPixelSize = *reinterpret_cast<float*>(0x11D8A48);
+					fCursorPos *= fUIPixelSize;
+				}
+				*result = fCursorPos;
+			}
+
+			return true;
+		}
+
+		static bool Cmd_SetCursorPos_Execute(COMMAND_ARGS) {
+			*result = 0;
+			float fPosX, fPosY;
+			BOOL bUICoordinates = FALSE;
+			InterfaceManager* pUIMgr = InterfaceManager::GetSingleton();
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &fPosX, &fPosY, &bUICoordinates) && (pUIMgr->IsInMenuMode() || *pbHUDCursorMode)) {
+				const float fUIPixelSize = *reinterpret_cast<float*>(0x11D8A48);
+				const float fScreenWidth = RendererSettingCollection::Display::iSizeW->Int() * fUIPixelSize * 0.5f;
+				const float fScreenHeight = RendererSettingCollection::Display::iSizeH->Int() * fUIPixelSize * 0.5f;
+				if (bUICoordinates) {
+					fPosX /= fUIPixelSize;
+					fPosY /= fUIPixelSize;
+				}
+				pUIMgr->cursorX = fPosX;
+				pUIMgr->cursorY = fPosY;
+				pUIMgr->cursor->GetModel()->m_kLocal.m_kTranslate.x = (fPosX * fUIPixelSize) - fScreenWidth;
+				pUIMgr->cursor->GetModel()->m_kLocal.m_kTranslate.z = fScreenHeight - (fPosY * fUIPixelSize);
+				*result = 1;
+			}
+
+			return true;
+		}
+#endif
+
+		static void InitHooks() {
+#ifdef GAME
+			pbHUDCursorMode = reinterpret_cast<bool*>(JIPUtils::GetAddress(0x10076378));
+#endif
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetCursorPos));
+				if (pInfo) {
+					pInfo->params = kParams_OneAxis_OneOptionalInt;
+					pInfo->numParams = ARRAYSIZE(kParams_OneAxis_OneOptionalInt);
+#ifdef GAME
+					pInfo->execute = Cmd_GetCursorPos_Execute;
+#endif
+				}
+			}
+			{
+				CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetCursorPos));
+				if (pInfo) {
+					pInfo->params = kParams_TwoFloats_OneOptionalInt;
+					pInfo->numParams = ARRAYSIZE(kParams_TwoFloats_OneOptionalInt);
+#ifdef GAME
+					pInfo->execute = Cmd_SetCursorPos_Execute;
+#endif
+				}
+			}
+		}
+	}
+
+	namespace PowerArmorCondition {
+
+#ifdef GAME
+		STACK_FRAME_OPT_ENABLE
+		static bool Cmd_GetPCCanUsePowerArmor_Eval(COMMAND_ARGS_EVAL) {
+			*result = PlayerCharacter::GetSingleton()->bCanUsePowerArmor;
+			return true;
+		}
+		STACK_FRAME_OPT_RESET
+#endif
+
+		static void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kGetPCCanUsePowerArmor));
+			if (pInfo) {
+#ifdef GAME
+				pInfo->eval = Cmd_GetPCCanUsePowerArmor_Eval;
+#else
+				pInfo->eval = reinterpret_cast<Cmd_Eval>(0x5BB810);
+#endif
+			}
+		}
+	}
+
 	namespace LogMover {
 
 		static void InitHooks() {
@@ -2495,6 +2489,8 @@ namespace JIPFixes {
 		}
 
 	}
+
+#pragma endregion
 
 	void InitData() {
 		JIPUtils::Init();
