@@ -21,8 +21,8 @@ public:
 	};
 	using Emotion = _Emotion::Emotion;
 
-	struct _Menus {
-		enum Menus {
+	struct _MenuID {
+		enum Menu {
 			NoMenu					= 0,
 			MainFour				= 1,
 			OtherRoot				= 2,
@@ -72,7 +72,24 @@ public:
 			Traits					= 1084,
 		};
 	};
-	using Menus = _Menus::Menus;
+	using MenuID = _MenuID::Menu;
+
+	struct _FadeState {
+		enum State {
+			FADE_SHOWN		= 0x1,
+			FADE_HIDDEN		= 0x4,
+			FADE_NOT_HIDDEN	= 0xB,
+
+			FADING_IN		= 0x8,
+			FADING_OUT		= 0x2,
+
+			FADE_IN_SHOWN	= 0x9,
+			FADE_OUT_SHOWN	= 0x3,
+
+			FADE_ALL		= 0xF,
+		};
+	};
+	using FadeState = _FadeState::State;
 
 	static constexpr AddressPtr<bool, 0x11D8907> bIsLoadingNewGame;
 
@@ -91,7 +108,7 @@ public:
 	static bool IsInDialog();
 
 
-	static bool IsMenuIDVisible(Menus aeMenu, uint32_t auiFlags);
+	static bool IsMenuIDVisible(MenuID aeMenu, uint32_t auiFlags);
 	
 	static bool IsDebugTextVisible();
 	
@@ -100,9 +117,9 @@ public:
 	static bool IsLoadingMenuVisible();
 
 
-	static bool IsTopMenuID(Menus aeMenu);
+	static bool IsTopMenuID(MenuID aeMenu);
 
-	static Menus GetTopMenuID();
+	static MenuID GetTopMenuID();
 
 	
 	static TESObjectREFR* GetActivateTarget();

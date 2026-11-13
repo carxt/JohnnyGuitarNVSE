@@ -132,6 +132,12 @@ namespace AddonNodeMap {
 #else
 		HookUtils::WriteRelJump(0x4DB42C, InitAddonNodeMap_asm);
 
+		// TESDataHandler::ClearData
+		// lea		ecx, [esi+0x1EC]
+		// call		0x6262D0 (RemoveAll)
+		// jmp		0x4D67B9 (Exit)
+		HookUtils::SafeWriteBuf(0x4D6786, "\x8D\x8E\xEC\x01\x00\x00\xE8\x3F\xFB\x14\x00\xEB\x26");
+
 		HookUtils::WriteRelJump(0x4D8AA0, &TESDataHandlerEx::AddAddonNode);
 		HookUtils::WriteRelJump(0x4CF0C8, 0xC30410); // RemoveAt (TESDataHandler::RemoveAddonNode)
 		HookUtils::WriteRelJump(0x4CF090, &TESDataHandlerEx::GetAddonNode);

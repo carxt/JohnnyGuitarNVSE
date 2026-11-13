@@ -3,7 +3,7 @@
 #include "NiTLargeArray.hpp"
 
 // GAME - 0x864160
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline NiTLargeArray<T_Data, Allocator>::NiTLargeArray(uint32_t auiMaxSize, uint32_t auiGrowBy) {
 	m_uiMaxSize = auiMaxSize;
 	m_uiGrowBy = auiGrowBy;
@@ -17,33 +17,33 @@ inline NiTLargeArray<T_Data, Allocator>::NiTLargeArray(uint32_t auiMaxSize, uint
 }
 
 // GAME - 0x864100
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline NiTLargeArray<T_Data, Allocator>::~NiTLargeArray() {
 	Allocator::Deallocate(m_pBase);
 }
 
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline uint32_t NiTLargeArray<T_Data, Allocator>::GetSize() const {
 	return m_uiSize;
 }
 
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline uint32_t NiTLargeArray<T_Data, Allocator>::GetEffectiveSize() const {
 	return m_uiESize;
 }
 
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline uint32_t NiTLargeArray<T_Data, Allocator>::GetAllocatedSize() const {
 	return m_uiMaxSize;
 }
 
-template <class T_Data, class Allocator>
+template <NiC::NiItem T_Data, class Allocator>
 inline bool NiTLargeArray<T_Data, Allocator>::IsEmpty() const {
 	return m_uiESize == 0;
 }
 
 // GAME - 0x864280
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline void NiTLargeArray<T_Data, Allocator>::SetSize(uint32_t auiMaxSize) {
 	const uint32_t usMaxSize = static_cast<uint32_t>(auiMaxSize);
 
@@ -53,8 +53,8 @@ inline void NiTLargeArray<T_Data, Allocator>::SetSize(uint32_t auiMaxSize) {
 	uint32_t i;
 	if (usMaxSize < m_uiSize) {
 		for (i = usMaxSize; i < m_uiSize; i++) {
-			if (m_pBase[i] != T_Data(0)) {
-				m_pBase[i] = T_Data(0);
+			if (m_pBase[i] != _Empty(0)) {
+				m_pBase[i] = _Empty(0);
 				m_uiESize--;
 			}
 		}
@@ -69,7 +69,7 @@ inline void NiTLargeArray<T_Data, Allocator>::SetSize(uint32_t auiMaxSize) {
 			m_pBase[i] = pSaveBase[i];
 		}
 		for (i = m_uiSize; i < m_uiMaxSize; i++) {
-			m_pBase[i] = T_Data(0);
+			m_pBase[i] = _Empty(0);
 		}
 	}
 	else {
@@ -78,31 +78,31 @@ inline void NiTLargeArray<T_Data, Allocator>::SetSize(uint32_t auiMaxSize) {
 	Allocator::Deallocate(pSaveBase);
 }
 
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline void NiTLargeArray<T_Data, Allocator>::SetGrowBy(uint32_t auiGrowBy) {
 	m_uiGrowBy = static_cast<uint32_t>(auiGrowBy);
 }
 
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline T_Data& NiTLargeArray<T_Data, Allocator>::GetAt(uint32_t auiIndex) const {
 	return m_pBase[auiIndex];
 }
 
 // GAME - 0x61BD20
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline void NiTLargeArray<T_Data, Allocator>::SetAt(uint32_t auiIndex, const T_Data& arData) {
 	ASSUME_ASSERT(auiIndex <= m_uiMaxSize);
 	if (auiIndex >= m_uiSize) {
 		m_uiSize = auiIndex + 1;
-		if (arData != T_Data(0))
+		if (arData != _Empty(0))
 			m_uiESize++;
 	}
 	else {
-		if (arData != T_Data(0)) {
-			if (m_pBase[auiIndex] == T_Data(0))
+		if (arData != _Empty(0)) {
+			if (m_pBase[auiIndex] == _Empty(0))
 				m_uiESize++;
 		}
-		else if (m_pBase[auiIndex] != T_Data(0))
+		else if (m_pBase[auiIndex] != _Empty(0))
 			m_uiESize--;
 	}
 
@@ -110,7 +110,7 @@ inline void NiTLargeArray<T_Data, Allocator>::SetAt(uint32_t auiIndex, const T_D
 }
 
 // GAME - 0x864240
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline uint32_t NiTLargeArray<T_Data, Allocator>::SetAtGrow(uint32_t auiIndex, const T_Data& arData) {
 	if (auiIndex >= m_uiMaxSize)
 		SetSize(auiIndex + m_uiGrowBy);
@@ -120,19 +120,19 @@ inline uint32_t NiTLargeArray<T_Data, Allocator>::SetAtGrow(uint32_t auiIndex, c
 }
 
 // GAME - 0x863D90
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline uint32_t NiTLargeArray<T_Data, Allocator>::Add(const T_Data& arData) {
 	return SetAtGrow(m_uiSize, arData);
 }
 
 // GAME - 0xA65F80
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline uint32_t NiTLargeArray<T_Data, Allocator>::AddFirstEmpty(const T_Data& arData) {
-	if (arData == T_Data(0))
+	if (arData == _Empty(0))
 		return UINT32_MAX;
 
 	for (uint32_t i = 0; i < m_uiSize; i++) {
-		if (m_pBase[i] == T_Data(0)) {
+		if (m_pBase[i] == _Empty(0)) {
 			m_pBase[i] = arData;
 			m_uiESize++;
 			return i;
@@ -143,15 +143,15 @@ inline uint32_t NiTLargeArray<T_Data, Allocator>::AddFirstEmpty(const T_Data& ar
 }
 
 // GAME - 0x486B80
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline T_Data NiTLargeArray<T_Data, Allocator>::RemoveAt(uint32_t auiIndex) {
 	if (auiIndex >= m_uiSize)
-		return T_Data(0);
+		return _Empty(0);
 
 	T_Data kElement = m_pBase[auiIndex];
-	m_pBase[auiIndex] = T_Data(0);
+	m_pBase[auiIndex] = _Empty(0);
 
-	if (kElement != T_Data(0))
+	if (kElement != _Empty(0))
 		m_uiESize--;
 
 	if (auiIndex == m_uiSize - 1)
@@ -160,54 +160,54 @@ inline T_Data NiTLargeArray<T_Data, Allocator>::RemoveAt(uint32_t auiIndex) {
 	return kElement;
 }
 
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline T_Data NiTLargeArray<T_Data, Allocator>::RemoveAtAndFill(uint32_t auiIndex) {
 	if (auiIndex >= m_uiSize)
-		return T_Data(0);
+		return _Empty(0);
 
 	m_uiSize--;
 	T_Data kElement = m_pBase[auiIndex];
 
 	m_pBase[auiIndex] = m_pBase[m_uiSize];
-	m_pBase[m_uiSize] = T_Data(0);
+	m_pBase[m_uiSize] = _Empty(0);
 
-	if (kElement != T_Data(0))
+	if (kElement != _Empty(0))
 		m_uiESize--;
 
 	return kElement;
 }
 
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline T_Data NiTLargeArray<T_Data, Allocator>::RemoveEnd() {
 	if (m_uiSize == 0)
-		return T_Data(0);
+		return _Empty(0);
 
 	m_uiSize--;
 	T_Data kElement = m_pBase[m_uiSize];
-	m_pBase[m_uiSize] = T_Data(0);
+	m_pBase[m_uiSize] = _Empty(0);
 
-	if (kElement != T_Data(0))
+	if (kElement != _Empty(0))
 		m_uiESize--;
 
 	return kElement;
 }
 
 // GAME - 0x863DB0
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline void NiTLargeArray<T_Data, Allocator>::RemoveAll() {
 	for (uint32_t i = 0; i < m_uiSize; i++)
-		m_pBase[i] = T_Data(0);
+		m_pBase[i] = _Empty(0);
 
 	m_uiSize = 0;
 	m_uiESize = 0;
 }
 
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline uint32_t NiTLargeArray<T_Data, Allocator>::Remove(const T_Data& arData) {
-	if (arData != T_Data(0)) {
+	if (arData != _Empty(0)) {
 		for (uint32_t i = 0; i < m_uiSize; i++) {
 			if (m_pBase[i] == arData) {
-				m_pBase[i] = T_Data(0);
+				m_pBase[i] = _Empty(0);
 
 				m_uiESize--;
 				if (i == m_uiSize - 1)
@@ -222,14 +222,14 @@ inline uint32_t NiTLargeArray<T_Data, Allocator>::Remove(const T_Data& arData) {
 }
 
 // GAME - 0x61BDC0
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline void NiTLargeArray<T_Data, Allocator>::Compact() {
 	if (m_uiESize == m_uiSize)
 		return;
 
 	if (m_uiESize) {
 		for (uint32_t i = 0, j = 0; i < m_uiSize; i++) {
-			if (m_pBase[i] != T_Data(0)) {
+			if (m_pBase[i] != _Empty(0)) {
 				if (m_pBase[j] != m_pBase[i])
 					m_pBase[j] = m_pBase[i];
 				j++;
@@ -253,10 +253,10 @@ inline void NiTLargeArray<T_Data, Allocator>::Compact() {
 	Allocator::Deallocate(pSaveBase);
 }
 
-template<class T_Data, class Allocator>
+template<NiC::NiItem T_Data, class Allocator>
 inline void NiTLargeArray<T_Data, Allocator>::UpdateSize() {
 	while (m_uiSize > 0) {
-		if (m_pBase[m_uiSize - 1] != T_Data(0))
+		if (m_pBase[m_uiSize - 1] != _Empty(0))
 			break;
 
 		m_uiSize--;

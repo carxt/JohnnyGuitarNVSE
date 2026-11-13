@@ -1,13 +1,14 @@
 #pragma once
 
 #include "BSMemObject.hpp"
+#include "BSConcepts.hpp"
 
 // Clone of NiTMapBase lmao
 // Doesn't call RemoveAll in the destructor, can have null hash table, and calls ClearValue and SetValue in SetAt
 
-typedef void* BSMapIterator;
+using BSMapIterator = void*;
 
-template <class T_Key, class T_Data>
+template <BSC::BSMapKey T_Key, BSC::BSMapItem T_Data>
 class SPEC_EMPTY_BASES BSMapItem : public BSMemObject {
 public:
     BSMapItem*  m_pkNext;
@@ -15,8 +16,11 @@ public:
     T_Data      m_val;
 };
 
-template <class T_Key, class T_Data>
+template <BSC::BSMapKey T_Key, BSC::BSMapItem T_Data>
 class SPEC_EMPTY_BASES BSMapBase : public BSMemObject {
+protected:
+    using _Empty = NiC::PickEmptyType<T_Data>;
+
 public:
     BSMapBase(uint32_t auiHashSize = 37);
     BSMapBase(const BSMapBase&) = delete;

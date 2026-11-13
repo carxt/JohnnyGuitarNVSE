@@ -4,7 +4,7 @@
 #include "NiMemory.hpp"
 
 // GAME - 0x405630
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline NiTMapBase<Allocator, T_Key, T_Data>::NiTMapBase(uint32_t auiHashSize) {
     m_uiHashSize = auiHashSize;
     m_kAllocator.m_uiCount = 0;
@@ -14,47 +14,47 @@ inline NiTMapBase<Allocator, T_Key, T_Data>::NiTMapBase(uint32_t auiHashSize) {
 }
 
 // GAME - 0x405370
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline NiTMapBase<Allocator, T_Key, T_Data>::~NiTMapBase() {
     RemoveAll();
     NiFree(m_ppkHashTable);
 }
 
 // GAME - 0x6C6A60
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline uint32_t NiTMapBase<Allocator, T_Key, T_Data>::KeyToHashIndex(const T_Key aKey) const {
     return uint32_t(size_t(aKey) % m_uiHashSize);
 }
 
 // GAME - 0x6B81D0
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline bool NiTMapBase<Allocator, T_Key, T_Data>::IsKeysEqual(const T_Key aKey1, const T_Key aKey2) const {
     return aKey1 == aKey2;
 }
 
 // GAME - 0x863840
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline void NiTMapBase<Allocator, T_Key, T_Data>::SetValue(NiTMapItem<T_Key, T_Data>* apItem, T_Key aKey, T_Data aData) {
     apItem->m_key = aKey;
     apItem->m_val = aData;
 }
 
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline void NiTMapBase<Allocator, T_Key, T_Data>::ClearValue(NiTMapItem<T_Key, T_Data>* apItem) {
 }
 
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline uint32_t NiTMapBase<Allocator, T_Key, T_Data>::GetCount() const {
     return m_kAllocator.m_uiCount;
 }
 
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline bool NiTMapBase<Allocator, T_Key, T_Data>::IsEmpty() const {
     return m_kAllocator.m_uiCount == 0;
 }
 
 // GAME - 0x57C850
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline bool NiTMapBase<Allocator, T_Key, T_Data>::GetAt(const T_Key aKey, T_Data& arData) const {
     const uint32_t uiHashIndex = KeyToHashIndex(aKey);
     NiTMapItem<T_Key, T_Data>* pItem = m_ppkHashTable[uiHashIndex];
@@ -69,7 +69,7 @@ inline bool NiTMapBase<Allocator, T_Key, T_Data>::GetAt(const T_Key aKey, T_Data
 }
 
 // GAME - 0x844700
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline void NiTMapBase<Allocator, T_Key, T_Data>::SetAt(T_Key aKey, T_Data aData) {
     const uint32_t uiHashIndex = KeyToHashIndex(aKey);
     NiTMapItem<T_Key, T_Data>* pItem = m_ppkHashTable[uiHashIndex];
@@ -88,7 +88,7 @@ inline void NiTMapBase<Allocator, T_Key, T_Data>::SetAt(T_Key aKey, T_Data aData
 }
 
 // GAME - 0x405430
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline bool NiTMapBase<Allocator, T_Key, T_Data>::RemoveAt(const T_Key aKey) {
     const uint32_t uiIndex = KeyToHashIndex(aKey);
     NiTMapItem<T_Key, T_Data>* pItem = m_ppkHashTable[uiIndex];
@@ -121,7 +121,7 @@ inline bool NiTMapBase<Allocator, T_Key, T_Data>::RemoveAt(const T_Key aKey) {
 }
 
 // GAME - 0x438AF0
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline void NiTMapBase<Allocator, T_Key, T_Data>::RemoveAll() {
     for (uint32_t i = 0; i < m_uiHashSize; i++) {
         while (m_ppkHashTable[i]) {
@@ -136,7 +136,7 @@ inline void NiTMapBase<Allocator, T_Key, T_Data>::RemoveAll() {
 }
 
 // GAME - 0x4B9BA0
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline NiTMapIterator NiTMapBase<Allocator, T_Key, T_Data>::GetFirstPos() const {
     for (uint32_t i = 0; i < m_uiHashSize; i++) {
         if (m_ppkHashTable[i])
@@ -146,7 +146,7 @@ inline NiTMapIterator NiTMapBase<Allocator, T_Key, T_Data>::GetFirstPos() const 
 }
 
 // GAME - 0x6B7F20
-template<class Allocator, class T_Key, class T_Data>
+template<class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
 inline void NiTMapBase<Allocator, T_Key, T_Data>::GetNext(NiTMapIterator& arPos, T_Key& arKey, T_Data& arData) const {
     NiTMapItem<T_Key, T_Data>* pItem = static_cast<NiTMapItem<T_Key, T_Data>*>(arPos);
 

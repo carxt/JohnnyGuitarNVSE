@@ -82,7 +82,7 @@ bool Cmd_PushUIQuestToTop_Execute(COMMAND_ARGS) {
 	MapMenu* pMapMenu = MapMenu::GetSingleton();
 	if (pMapMenu) {
 		pMapMenu->questList.RemoveAll();
-		pMapMenu->questList.itemCount = 0;
+		pMapMenu->questList.usNextIndex = 0;
 	}
 
 	*result = 1;
@@ -394,9 +394,9 @@ bool Cmd_UpdateRepairMenu_Execute(COMMAND_ARGS) {
 	if (!iter) return true;
 	do {
 		auto listItem = iter->GetItem();
-		if (listItem && listItem->tile && listItem->object) {
-			float repairedHealth = CalculateRepairedHealth(target, listItem->object);
-			listItem->tile->SetFloat(TILE_TRAIT::USER0, repairedHealth);
+		if (listItem && listItem->pTile && listItem->tData) {
+			float repairedHealth = CalculateRepairedHealth(target, listItem->tData);
+			listItem->pTile->SetFloat(TILE_TRAIT::USER0, repairedHealth);
 		}
 	} while ((iter = iter->GetNext()));
 	*result = 1;
@@ -448,29 +448,29 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 	BOOL bRightSide = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &bRightSide)) {
 		// Find listbox
-		const ListBox<ItemChange>* pListBox = nullptr;
+		const ListBox<ItemChange*>* pListBox = nullptr;
 		switch (Interface::GetTopMenuID()) {
-			case Interface::Menus::MainFour:
+			case Interface::MenuID::MainFour:
 			{
-				if (Menu::IsMenuVisible(Interface::Menus::PipboyRepair))
+				if (Menu::IsMenuVisible(Interface::MenuID::PipboyRepair))
 					pListBox = &RepairMenu::GetSingleton()->repairItems;
-				else if (Menu::IsMenuVisible(Interface::Menus::Inventory))
+				else if (Menu::IsMenuVisible(Interface::MenuID::Inventory))
 					pListBox = &InventoryMenu::GetSingleton()->itemList;
 				break;
 			}
-			case Interface::Menus::Container:
+			case Interface::MenuID::Container:
 			{
 				const ContainerMenu* pMenu = ContainerMenu::GetSingleton();
 				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
-			case Interface::Menus::Barter:
+			case Interface::MenuID::Barter:
 			{
 				const BarterMenu* pMenu = BarterMenu::GetSingleton();
 				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
-			case Interface::Menus::VendorRepair:
+			case Interface::MenuID::VendorRepair:
 				pListBox = &RepairServicesMenu::GetSingleton()->itemList;
 				break;
 			default:
@@ -487,8 +487,8 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 		for (auto pIter = pListBox->GetHead(); pIter && !pIter->IsEmpty(); pIter = pIter->GetNext()) {
 			auto pItem = pIter->GetItem();
 
-			if (pItem && pItem->tile && pItem->object) {
-				const ItemChange* pItemChange = pItem->object;
+			if (pItem && pItem->pTile && pItem->tData) {
+				const ItemChange* pItemChange = pItem->tData;
 
 				if (pItemChange->pObject != pInvRef->pForm)
 					continue;
@@ -509,7 +509,7 @@ bool Cmd_GetMenuItemListIndex_Execute(COMMAND_ARGS) {
 				if (!bMatched)
 					continue;
 
-				const Tile* pEntryTile = pItem->tile;
+				const Tile* pEntryTile = pItem->pTile;
 				const Tile* pParent = pEntryTile->GetParent();
 				if (!pParent) [[unlikely]]
 					continue;
@@ -542,30 +542,30 @@ bool Cmd_SelectMenuItemListIndex_Execute(COMMAND_ARGS) {
 	BOOL bRightSide = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &uiTileIndex, &bRightSide)) {
 		// Find listbox
-		ListBox<ItemChange>* pListBox = nullptr;
+		ListBox<ItemChange*>* pListBox = nullptr;
 		switch (Interface::GetTopMenuID())
 		{
-			case Interface::Menus::MainFour:
+			case Interface::MenuID::MainFour:
 				{
-					if (Menu::IsMenuVisible(Interface::Menus::PipboyRepair))
+					if (Menu::IsMenuVisible(Interface::MenuID::PipboyRepair))
 						pListBox = &RepairMenu::GetSingleton()->repairItems;
-					else if (Menu::IsMenuVisible(Interface::Menus::Inventory))
+					else if (Menu::IsMenuVisible(Interface::MenuID::Inventory))
 						pListBox = &InventoryMenu::GetSingleton()->itemList;
 					break;
 				}
-			case Interface::Menus::Container:
+			case Interface::MenuID::Container:
 			{
 				ContainerMenu* pMenu = ContainerMenu::GetSingleton();
 				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
-			case Interface::Menus::Barter:
+			case Interface::MenuID::Barter:
 			{
 				BarterMenu* pMenu = BarterMenu::GetSingleton();
 				pListBox = bRightSide ? &pMenu->rightItems : &pMenu->leftItems;
 				break;
 			}
-			case Interface::Menus::VendorRepair:
+			case Interface::MenuID::VendorRepair:
 				pListBox = &RepairServicesMenu::GetSingleton()->itemList;
 				break;
 			default:
@@ -576,9 +576,9 @@ bool Cmd_SelectMenuItemListIndex_Execute(COMMAND_ARGS) {
 			return true;
 
 		// Select tile
-		if (uiTileIndex < pListBox->itemCount) {
-			Tile* tile = pListBox->GetNthTile(uiTileIndex);
-			pListBox->SetSelectedTile(tile);
+		if (uiTileIndex < pListBox->usNextIndex) {
+			Tile* tile = pListBox->GetTileAt(uiTileIndex, true);
+			pListBox->Highlight(tile);
 			pListBox->ScrollToHighlight();
 			*result = 1;
 		}

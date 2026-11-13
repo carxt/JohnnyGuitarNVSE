@@ -1,9 +1,13 @@
 #pragma once
 
 #include "Bethesda/BSMemObject.hpp"
+#include "NiConcepts.hpp"
 
-template <class T_Data, class Allocator>
+template <NiC::NiItem T_Data, class Allocator>
 class SPEC_EMPTY_BASES NiTArray : public BSMemObject {
+protected:
+	using _Empty = NiC::PickEmptyType<T_Data>;
+
 public:
 	NiTArray(uint32_t auiMaxSize = 0, uint32_t auiGrowBy = 1);
 	virtual ~NiTArray();

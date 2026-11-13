@@ -23,7 +23,7 @@ inline NiTMapItem<NiFixedString, T_Data>* NiTFixedStringMap<T_Data>::NewItem() {
 // GAME - 0xAA0330
 template<class T_Data>
 inline void NiTFixedStringMap<T_Data>::DeleteItem(NiTMapItem<NiFixedString, T_Data>* apItem) {
-	apItem->m_key = 0;
-	apItem->m_val = 0;
+	apItem->m_key = nullptr;
+	apItem->m_val = NiTFixedStringMapBase<NiTDefaultAllocator<NiTMapItem<NiFixedString, T_Data>>, T_Data>::_Empty(0);
 	this->m_kAllocator.Deallocate(apItem);
 }

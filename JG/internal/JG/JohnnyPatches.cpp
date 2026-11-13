@@ -283,6 +283,9 @@ namespace JohnnyPatches {
 		DialogueResponseOverride::Install();
 
 		NamedSpellLights::Install();
+
+		// Remove "Seek" request being restricted to music sounds
+		HookUtils::WriteRelJump(0xADFA1F, 0xADFA38);
 #endif
 		NewNiObjects::Install();
 	}

@@ -16,6 +16,7 @@
 #include "Gamebryo/NiFloatInterpolator.hpp"
 #include "Gamebryo/NiFloatInterpController.hpp"
 #include "Gamebryo/NiAlphaProperty.hpp"
+#include "Gamebryo/NiTriShape.hpp"
 #include "Bethesda/BSXFlags.hpp"
 #include "Bethesda/NiUpdateData.hpp"
 #include "Bethesda/BSRenderedTexture.hpp"
@@ -185,15 +186,6 @@ public:
 
 	Tile* parentTile;	// 0C
 	NiNode* parentNode;	// 10
-};
-
-// 1C
-class NiCullingProperty : public NiProperty {
-public:
-	NiCullingProperty();
-	~NiCullingProperty();
-
-	uint32_t				unk18;		// 18
 };
 
 class ShadowSceneLight;
@@ -773,116 +765,6 @@ public:
 };
 static_assert(sizeof(BSShaderAccumulator) == 0x280);
 
-struct UVCoord {
-	float		x;
-	float		y;
-
-	UVCoord() {}
-	UVCoord(float _x, float _y) : x(_x), y(_y) {}
-};
-
-struct NiTriangle {
-	uint16_t		point1;
-	uint16_t		point2;
-	uint16_t		point3;
-};
-
-// 54
-class RendererData		//	010F017C
-{
-public:
-	RendererData();
-	~RendererData();
-
-	virtual RendererData* Destructor(bool doFree);
-	virtual bool			Unk_01(uint32_t arg1);
-
-	uint32_t						flags;			// 04
-	NiUnsharedGeometryGroup* unsharedGeom;	// 08
-	uint32_t						unk0C;			// 0C
-	void* ptr10;			// 10
-	uint32_t						unk14;			// 14
-	uint32_t						unk18;			// 18	Vertices/Normals count
-	uint32_t						unk1C;			// 1C		"			"
-	uint32_t						finished;		// 20
-	void* ptr24;			// 24
-	void* ptr28;			// 28
-	uint32_t						trianglePoints;	// 2C
-	uint32_t						unk30;			// 30	Byte size of triangles array
-	void* ptr34;			// 34
-	uint32_t						unk38;			// 38
-	uint32_t						unk3C;			// 3C
-	uint32_t						unk40;			// 40	Triangle count
-	uint32_t						unk44;			// 44		"
-	uint32_t						unk48;			// 48
-	uint32_t						unk4C;			// 4C
-	NiTriangle* triangles;		// 50	Same ptr as in NiTriShapeData
-};
-static_assert(sizeof(RendererData) == 0x54);
-
-class NiGeometryBufferData;
-
-// 40
-class NiGeometryData : public NiObject {
-public:
-	NiGeometryData();
-	~NiGeometryData();
-
-	virtual void	Unk_23(uint32_t arg);
-	virtual void	Unk_24(void);
-	virtual void	Unk_25(void);
-	virtual void	Unk_26(void);
-	virtual bool	Unk_27(uint32_t arg);
-	virtual void	Unk_28(void);
-
-	uint16_t							m_usVertices;
-	uint16_t							m_usID;
-	Bitfield16							m_usDataFlags;
-	Bitfield16							m_usDirtyFlags;
-	NiBound								m_kBound;
-	NiPoint3*							m_pkVertex;
-	NiPoint3*							m_pkNormal;
-	NiColorA*							m_pkColor;
-	NiPoint2*							m_pkTexture;
-	void*								m_spAdditionalGeomData;
-	NiGeometryBufferData*				m_pkBuffData;
-	Bitfield8							m_ucKeepFlags;
-	Bitfield8							m_ucCompressFlags;
-	bool								m_bVBLocked;
-	bool								m_bVBLockWrite;
-	bool								m_bSaveVertexData;
-};
-static_assert(sizeof(NiGeometryData) == 0x40);
-
-// 44
-class NiTriBasedGeomData : public NiGeometryData {
-public:
-	NiTriBasedGeomData();
-	~NiTriBasedGeomData();
-
-	virtual void	Unk_29(uint32_t arg);
-	virtual void	Unk_2A(void);
-	virtual void	Unk_2B(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
-	virtual void	Unk_2C(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
-
-	uint16_t			numTriangles;		// 40
-	uint8_t			pad42[2];			// 42
-};
-
-// 58
-class NiTriShapeData : public NiTriBasedGeomData {
-public:
-	NiTriShapeData();
-	~NiTriShapeData();
-
-	uint32_t			trianglePoints;	// 44
-	NiTriangle* triangles;		// 48
-	uint16_t* points;		// 4C
-	uint32_t			unk50;			// 50
-	uint32_t			unk54;			// 54
-};
-static_assert(sizeof(NiTriShapeData) == 0x58);
-
 // 14
 class NiShader : public NiRefObject {
 public:
@@ -940,137 +822,7 @@ public:
 	uint32_t			unk10;		// 10
 };
 
-// 90
-class TileShader : public NiShader {
-public:
-	TileShader();
-	~TileShader();
-
-	virtual void	Unk_2F(void);
-	virtual void	Unk_30(void);
-	virtual void	Unk_31(void);
-	virtual void	Unk_32(void);
-	virtual void	Unk_33(void);
-	virtual void	Unk_34(void);
-	virtual void	Unk_35(void);
-	virtual void	Unk_36(void);
-	virtual void	Unk_37(void);
-	virtual void	Unk_38(void);
-	virtual void	Unk_39(void);
-	virtual void	Unk_3A(void);
-	virtual void	Unk_3B(void);
-	virtual void	Unk_3C(void);
-	virtual void	Unk_3D(void);
-	virtual void	Unk_3E(void);
-	virtual void	Unk_3F(void);
-	virtual void	Unk_40(void);
-	virtual void	Unk_41(void);
-	virtual void	Unk_42(void);
-	virtual void	Unk_43(void);
-	virtual void	Unk_44(void);
-	virtual void	Unk_45(void);
-	virtual void	Unk_46(void);
-	virtual void	Unk_47(void);
-	virtual void	Unk_48(void);
-	virtual void	Unk_49(void);
-	virtual void	Unk_4A(void);
-	virtual void	Unk_4B(void);
-	virtual void	Unk_4C(void);
-	virtual void	Unk_4D(void);
-	virtual void	Unk_4E(void);
-	virtual void	Unk_4F(void);
-	virtual void	Unk_50(void);
-	virtual void	Unk_51(void);
-	virtual void	Unk_52(void);
-	virtual void	Unk_53(void);
-
-	uint32_t			unk14[31];		// 14
-};
-static_assert(sizeof(TileShader) == 0x90);
-
-// C4
-class NiGeometry : public NiAVObject {
-public:
-	NiGeometry();
-	~NiGeometry();
-
-	virtual void	Unk_37(uint32_t arg1);
-	virtual void	Unk_38(uint32_t arg1);
-	virtual void	Unk_39(void);
-	virtual void	Unk_3A(void);
-	virtual void	Unk_3B(uint32_t arg1);
-
-	NiAlphaProperty*		alphaProp;		// 9C	Seen NiAlphaProperty
-	NiProperty*				niPropA0;		// A0	Seen NiCullingProperty
-	NiMaterialProperty*		materialProp;		// A4	Seen NiMaterialProperty
-	BSShaderProperty*		shaderProp;		// A8	Seen TileShaderProperty
-	NiStencilProperty*		stencilProp;		// AC	Seen NiStencilProperty
-	NiTexturingProperty*	texturingProp;		// B0	Seen NiTexturingProperty
-	uint32_t					unkB4;			// B4
-	NiGeometryData*			geometryData;	// B8	Seen NiTriShapeData
-	uint32_t					unkBC;			// BC
-	NiShader*				shader;		// C0
-};
-static_assert(sizeof(NiGeometry) == 0xC4);
-
-// C4
-class NiTriBasedGeom : public NiGeometry {
-public:
-	NiTriBasedGeom();
-	~NiTriBasedGeom();
-
-	virtual void	Unk_3C(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
-};
-
-// C4
-class NiTriShape : public NiTriBasedGeom {
-public:
-	NiTriShape();
-	~NiTriShape();
-};
-
-// D4
-class BSScissorTriShape : public NiTriShape {
-public:
-	BSScissorTriShape();
-	~BSScissorTriShape();
-
-	uint32_t			unkC4;			// C4
-	uint32_t			unkC8;			// C8
-	uint32_t			width;			// CC
-	uint32_t			height;			// D0
-};
-static_assert(sizeof(BSScissorTriShape) == 0xD4);
-
-// 14C
-class ParticleShaderProperty : public BSShaderProperty {
-public:
-	ParticleShaderProperty();
-	~ParticleShaderProperty();
-
-	uint32_t			unk060[59];		// 060
-};
-static_assert(sizeof(ParticleShaderProperty) == 0x14C);
-
 class BSCompoundFrustum;
-
-class NiTreeCtrl
-{
-public:
-	static NiTreeCtrl* Create(NiNode* apNode)
-	{
-		NiTreeCtrl* pAlloc = CdeclCall<NiTreeCtrl*>(0x401000, 0x30U);
-
-		DWORD* pTESMain = *(DWORD**)0x11DEA0C;
-		return ThisCall<NiTreeCtrl*>(0x4D61B0, pAlloc, pTESMain[3], pTESMain[2], apNode, "Test", 0x80000000,
-			0x80000000, 800, 600);
-	}
-
-	void CreateTree(NiNode* apNode, const char* apName)
-	{
-		ThisCall(0x4D64C0, this, apNode, apName);
-	}
-};
 
 class NiRenderTargetGroup : public NiObject {
 public:

@@ -178,4 +178,4 @@ ASSERT_SIZE(TESFile, 0x42C);
 ASSERT_SIZE(TESFile, 0x438);
 #endif
 
-typedef TESFile ModInfo;
+using ModInfo = TESFile;

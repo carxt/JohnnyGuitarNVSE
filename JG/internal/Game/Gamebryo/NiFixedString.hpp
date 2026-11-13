@@ -6,14 +6,18 @@
 class SPEC_EMPTY_BASES NiFixedString : public BSMemObject {
 public:
 	NiFixedString() noexcept;
+	NiFixedString(std::nullptr_t) noexcept;
 	NiFixedString(const char* apString) noexcept;
 	NiFixedString(const NiFixedString& arString) noexcept;
 	~NiFixedString() noexcept;
 
 	NiGlobalStringTable::GlobalStringHandle m_kHandle;
 
+	NiFixedString& operator=(std::nullptr_t) noexcept;
 	NiFixedString& operator=(const char* apString) noexcept;
 	NiFixedString& operator=(const NiFixedString& arString) noexcept;
+
+	friend bool operator==(const NiFixedString& arString, std::nullptr_t) noexcept;
 	friend bool operator==(const NiFixedString& arString1, const NiFixedString& arString2) noexcept;
 	friend bool operator==(const NiFixedString& arString, const char* apString) noexcept;
 	friend bool operator==(const char* apString, const NiFixedString& arString) noexcept;
@@ -29,6 +33,10 @@ public:
 	uint32_t GetLength() const noexcept;
 
 	uint32_t GetRefCount() const noexcept;
+
+	bool Equals(const char* apString) const noexcept;
+
+	bool EqualsNoCase(const char* apString) const noexcept;
 
 	bool Includes(const char* apToFind) const noexcept;
 };

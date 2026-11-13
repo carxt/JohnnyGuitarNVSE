@@ -458,6 +458,7 @@ namespace JohnnyCommands {
 		REG_CMD(GetAddonNodeIndex);
 		REG_TYPED_CMD(GetAddonNodeSound, Form);
 		REG_CMD(SetAddonNodeSound);
+		REG_CMD(GetControllerStickRaw);
 	}
 
 }

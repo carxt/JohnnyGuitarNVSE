@@ -2,7 +2,7 @@
 
 #include "Bethesda/BSMemObject.hpp"
 
-typedef void* NiTListIterator;
+using NiTListIterator = void*;
 
 template <class T_Data>
 class SPEC_EMPTY_BASES NiTListItem : public BSMemObject {
