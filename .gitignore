@@ -242,3 +242,7 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/JG/ReleaseDebug
+/JG/Release_GECK
+/JG/ReleaseDebug_GECK
+/JG/Debug_GECK

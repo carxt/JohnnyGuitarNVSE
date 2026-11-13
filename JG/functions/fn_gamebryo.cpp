@@ -1,13 +1,24 @@
 #include "fn_gamebryo.h"
 
+#include <GameTasks.h>
+
 #include "Gamebryo/NiParticleSystem.hpp"
 #include "Gamebryo/NiPSysBoxEmitter.hpp"
 #include "Gamebryo/NiPSysEmitter.hpp"
 #include "Gamebryo/NiPSysModifier.hpp"
+#include "Gamebryo/NiControllerManager.hpp"
+#include "Gamebryo/NiAlphaProperty.hpp"
+#include "Gamebryo/NiMaterialProperty.hpp"
+#include "Gamebryo/NiStencilProperty.hpp"
+#include "Gamebryo/NiDirectionalLight.hpp"
+#include "Gamebryo/NiSpotLight.hpp"
+#include "Bethesda/AILinearTaskThreadManager.hpp"
+#include "Bethesda/BSUtilities.hpp"
+#include "Bethesda/BSWindModifier.hpp"
+#include "Bethesda/Interface.hpp"
+#include "Bethesda/TESObjectREFR.hpp"
 
 #include <JG/TaskQueue.hpp>
-#include <GameTasks.h>
-
 #include "JG/ScriptUtils.hpp"
 using namespace ScriptUtils;
 
@@ -47,6 +58,8 @@ enum class NiUpdateType : int32_t {
 	HAVOK_SYNC_BOTH,
 	HAVOK_SYNC_TO,
 	HAVOK_SYNC_FROM,
+	OBJECT_PALETTE_ADD,
+	OBJECT_PALETTE_REMOVE,
 	COUNT
 };
 
@@ -79,19 +92,59 @@ enum class ParticleModifierItem : int32_t {
 	BOX_EMITTER_HEIGHT,
 	BOX_EMITTER_DEPTH,
 
+	// BSWindModifier
+
+	WIND_MODIFIER_STRENGTH,
+
 	COUNT
 };
 
-static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const NiFixedString& arObjectName, uint32_t aeType) {
-	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
+enum class LightItem : int32_t {
+	NONE = -1,
+	DIMMER,
+	RADIUS,
+	OUTER_SPOT_ANGLE,
+	INNER_SPOT_ANGLE,
+	SPOT_EXPONENT,
+	COUNT
+};
+
+enum class LightColorItem : int32_t {
+	NONE = -1,
+	DIFFUSE,
+	AMBIENT,
+	COUNT
+};
+
+enum class ToggleAddonNodesState {
+	NONE				= -1,
+	REMOVE				= 0,
+	ADD					= 1,
+	DISABLE_PARTICLES	= 2,
+	ENABLE_PARTICLES	= 3,
+	COUNT,
+};
+
+static SPEC_NOINLINE NiAVObject* __fastcall GetObjectByName(const NiAVObject* apRoot, const char* apObjectName) {
+	if (apRoot) {
+		if (apObjectName && apObjectName[0] && !IsWildcard(apObjectName))
+			return BSUtilities::GetObjectByName(apRoot, apObjectName);
+		else
+			return const_cast<NiAVObject*>(apRoot);
+	}
+	return nullptr;
+}
+
+static std::pair<NiProperty*, NiAVObject*> __fastcall GetPropertyByName(const NiAVObject* apRoot, const char* apObjectName, NiProperty::Type aeType) {
+	NiAVObject* pObject = GetObjectByName(apRoot, apObjectName);
 	if (!pObject)
 		return { nullptr, nullptr };
 
 	return { pObject->GetProperty(aeType), pObject };
 }
 
-static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* apRoot, const NiFixedString& arObjectName) {
-	NiAVObject* pObject = BSUtilities::GetObjectByName(apRoot, arObjectName);
+static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* apRoot, const char* apObjectName) {
+	NiAVObject* pObject = GetObjectByName(apRoot, apObjectName);
 	if (!pObject)
 		return nullptr;
 
@@ -99,9 +152,9 @@ static NiParticleSystem* __fastcall GetParticleSystemByName(const NiAVObject* ap
 }
 
 static void __fastcall InvalidateRenderPassesRecurse(const NiAVObject* apObject) {
-	BSShaderProperty* pShaderProp = static_cast<BSShaderProperty*>(apObject->GetProperty(NiProperty::kPropertyType_Shade));
+	BSShaderProperty* pShaderProp = static_cast<BSShaderProperty*>(apObject->GetProperty(NiProperty::Type::SHADE));
 	if (pShaderProp)
-		pShaderProp->InvalidateState();
+		pShaderProp->InvalidateRenderPassState();
 
 	if (apObject->IsNode()) {
 		const NiNode* pNode = static_cast<const NiNode*>(apObject);
@@ -149,6 +202,17 @@ static void __fastcall SynchronizeHavok(NiAVObject* apObject, bhkNiCollisionObje
 	}
 }
 
+static void __fastcall UpdateObjectPalette(NiAVObject* apRoot, NiAVObject* apObject, bool abAdd) {
+	NiDefaultAVObjectPalette* pPalette = GetObjectPalette(apObject);
+	if (!pPalette && apRoot != apObject)
+		pPalette = GetObjectPalette(apRoot);
+
+	if (abAdd)
+		ScriptUtils::RecurseAndAddObjectsToPalette(apObject, pPalette);
+	else
+		ScriptUtils::RecurseAndRemoveObjectsFromPalette(apObject, pPalette);
+}
+
 bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	*result = 0;
 	AlphaPropertyItem eItem = AlphaPropertyItem::NONE;
@@ -156,7 +220,7 @@ bool Cmd_SetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::ALPHA);
 		NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
 		if (!pAlpha)
 			return true;
@@ -197,7 +261,7 @@ bool Cmd_GetAlphaPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Alpha);
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::ALPHA);
 		const NiAlphaProperty* pAlpha = static_cast<NiAlphaProperty*>(kObjects.first);
 		if (!pAlpha)
 			return true;
@@ -235,7 +299,7 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &uiValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::STENCIL);
 		NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
 		if (!pStencil)
 			return true;
@@ -263,7 +327,7 @@ bool Cmd_SetStencilPropertyValue_Execute(COMMAND_ARGS) {
 			pStencil->SetStencilPassAction(static_cast<NiStencilProperty::Action>(uiValue));
 			break;
 		case StencilPropertyItem::TEST_FUNC:
-			pStencil->SetStencilFunction(static_cast<NiStencilProperty::TestFunc>(uiValue));
+			pStencil->SetStencilFunction(static_cast<NiStencilProperty::TestFunction>(uiValue));
 			break;
 		default:
 			__assume(0);
@@ -282,7 +346,7 @@ bool Cmd_GetStencilPropertyValue_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
-		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::kPropertyType_Stencil);
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::STENCIL);
 		const NiStencilProperty* pStencil = static_cast<NiStencilProperty*>(kObjects.first);
 		if (!pStencil)
 			return true;
@@ -325,7 +389,7 @@ bool Cmd_SetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 	int32_t iIndex = 0;
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &iIndex, &bFirstPerson) && cObjectName[0]) {
-		NiAVObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		NiAVObject* pObject = GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
 		if (pObject && pObject->IsExactKindOf<NiSwitchNode>()) {
 			static_cast<NiSwitchNode*>(pObject)->SetIndex(iIndex);
 			*result = 1;
@@ -339,7 +403,7 @@ bool Cmd_GetSwitchNodeIndex_Execute(COMMAND_ARGS) {
 	char cObjectName[MAX_PATH] = {};
 	BOOL bFirstPerson = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &bFirstPerson) && cObjectName[0]) {
-		const NiAVObject* pObject = BSUtilities::GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		const NiAVObject* pObject = GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
 		if (pObject && pObject->IsExactKindOf<NiSwitchNode>())
 			*result = static_cast<const NiSwitchNode*>(pObject)->GetIndex();
 	}
@@ -364,22 +428,18 @@ bool Cmd_GetNiLODLevel_Execute(COMMAND_ARGS) {
 bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 	*result = 0;
 	NiUpdateType eType = NiUpdateType::NONE;
-	float fTime = FLT_MAX;
+	float fTime = -FLT_MAX;
 	BOOL bUpdateControllers = FALSE;
 	BOOL bFirstPerson = FALSE;
 	char cName[MAX_PATH] = {};
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &fTime, &bUpdateControllers, &cName, &bFirstPerson) && InRange<NiUpdateType>(eType)) {
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &eType, &fTime, &bUpdateControllers, &cName, &bFirstPerson) && InRange(eType)) {
 		NiAVObject* pRoot = GetReferenceScene(thisObj, bFirstPerson);
 
-		NiAVObject* pTarget = nullptr;
-		if (cName[0])
-			pTarget = BSUtilities::GetObjectByName(pRoot, cName);
-		else
-			pTarget = pRoot;
+		NiAVObject* pTarget = GetObjectByName(pRoot, cName);
 
 		if (pTarget) {
 			const bool bQueue = AILinearTaskThreadManager::ShouldQueue3DTask();
-			NiUpdateData kData(fTime != FLT_MAX ? fTime : 0.f, bUpdateControllers, bQueue);
+			NiUpdateData kData(fTime > -FLT_MAX ? fTime : 0.f, bUpdateControllers, bQueue);
 			switch (eType) {
 			case NiUpdateType::FULL:
 				pTarget->Update(kData);
@@ -411,10 +471,14 @@ bool Cmd_UpdateScenegraph_Execute(COMMAND_ARGS) {
 			case NiUpdateType::HAVOK_SYNC_FROM:
 				SynchronizeHavok(pTarget, bhkNiCollisionObject::SYNC_FROM_HAVOK, bQueue);
 				break;
+			case NiUpdateType::OBJECT_PALETTE_ADD:
+			case NiUpdateType::OBJECT_PALETTE_REMOVE:
+				UpdateObjectPalette(pRoot, pTarget, eType == NiUpdateType::OBJECT_PALETTE_ADD);
+				break;
 			default:
 				__assume(0);
 			}
-			*result = 1;
+			*result = bQueue ? 2 : 1;
 		}
 	}
 	return true;
@@ -426,24 +490,20 @@ bool Cmd_GetNiBound_Execute(COMMAND_ARGS) {
 	BOOL bFirstPerson = FALSE;
 
 	NVSEArrayElement kElements[4];
-	NVSEArrayVar* pOutArray;
+	NVSEArrayVar* pOutArray = nullptr;
 
 	bool bValid = false;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cName, &bFirstPerson)) {
 		const NiAVObject* pRoot = GetReferenceScene(thisObj, bFirstPerson);
 
-		const NiAVObject* pTarget = nullptr;
-		if (cName[0])
-			pTarget = BSUtilities::GetObjectByName(pRoot, cName);
-		else
-			pTarget = pRoot;
+		const NiAVObject* pTarget = GetObjectByName(pRoot, cName);
 
 		if (pTarget && pTarget->m_pWorldBound) {
 			const NiBound& rBound = pTarget->GetWorldBound();
-			kElements[0] = rBound.kCenter.x;
-			kElements[1] = rBound.kCenter.y;
-			kElements[2] = rBound.kCenter.z;
-			kElements[3] = rBound.fRadius;
+			kElements[0] = rBound.GetCenter().x;
+			kElements[1] = rBound.GetCenter().y;
+			kElements[2] = rBound.GetCenter().z;
+			kElements[3] = rBound.GetRadius();
 			pOutArray = g_arrInterface->CreateArray(kElements, 4, scriptObj);
 			bValid = true;
 		}
@@ -469,27 +529,28 @@ bool Cmd_IsNiSequenceActive_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cSequenceName, &cObjectName, &bFirstPerson) && cSequenceName[0]) {
 		const NiAVObject* pRoot = GetReferenceScene(thisObj, bFirstPerson);
 		if (pRoot) {
-			const NiAVObject* pTarget = pRoot;
-			if (cObjectName[0])
-				pTarget = BSUtilities::GetObjectByName(pRoot, cObjectName);
+			const NiAVObject* pTarget = GetObjectByName(pRoot, cObjectName);
 
 			if (pTarget) {
-				NiControllerManager* pCtrlMgr = pTarget->GetController<NiControllerManager>();
+				const NiControllerManager* pCtrlMgr = pTarget->GetController<NiControllerManager>();
 				if (pCtrlMgr) {
-					*result = pCtrlMgr->IsSequenceActive(cSequenceName);
-					if (IsConsoleMode())
-						Console_Print("IsNiSequenceActive >> %s: %s", cSequenceName, *result ? "true" : "false");
+					const NiControllerSequence* pSequence = pCtrlMgr->GetSequenceByName(cSequenceName);
+					if (pSequence) {
+						*result = pSequence->GetState() != NiControllerSequence::AnimState::INACTIVE;
+						if (Script::GetConsoleOuput())
+							Interface::PrintLine("IsNiSequenceActive >> %s: %s", cSequenceName, *result ? "true" : "false");
+					}
 				}
-				else if (IsConsoleMode()) {
-					Console_Print("Controller not found");
+				else if (Script::GetConsoleOuput()) {
+					Interface::PrintLine("Controller not found");
 				}
 			}
-			else if (IsConsoleMode()) {
-				Console_Print("Block not found: %s", cObjectName);
+			else if (Script::GetConsoleOuput()) {
+				Interface::PrintLine("Block not found: %s", cObjectName);
 			}
 		}
-		else if (IsConsoleMode()) {
-			Console_Print("Root node not found");
+		else if (Script::GetConsoleOuput()) {
+			Interface::PrintLine("Root node not found");
 		}
 	}
 	return true;
@@ -504,9 +565,7 @@ bool Cmd_StopNiSequence_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cSequenceName, &fEaseOutTime, &cObjectName, &bFirstPerson) && cSequenceName[0]) {
 		const NiAVObject* pRoot = GetReferenceScene(thisObj, bFirstPerson);
 		if (pRoot) {
-			const NiAVObject* pTarget = pRoot;
-			if (cObjectName[0])
-				pTarget = BSUtilities::GetObjectByName(pRoot, cObjectName);
+			const NiAVObject* pTarget = GetObjectByName(pRoot, cObjectName);
 
 			if (pTarget) {
 				NiControllerManager* pCtrlMgr = pTarget->GetController<NiControllerManager>();
@@ -611,6 +670,16 @@ bool Cmd_SetNiPSysModifierValue_Execute(COMMAND_ARGS) {
 						break;
 				}
 			}
+
+			if (const auto pWindModifier = spModifier->NiDynamicCast<BSWindModifier>()) {
+				switch (eItem) {
+					case ParticleModifierItem::WIND_MODIFIER_STRENGTH:
+						pWindModifier->fStrength = fValue;
+						return;
+					default:
+						break;
+				}
+			}
 		});
 	}
 	return true;
@@ -705,6 +774,16 @@ bool Cmd_GetNiPSysModifierValue_Execute(COMMAND_ARGS) {
 						break;
 				}
 			}
+
+			if (const auto pWindModifier = spModifier->NiDynamicCast<BSWindModifier>()) {
+				switch (eItem) {
+					case ParticleModifierItem::WIND_MODIFIER_STRENGTH:
+						*result = pWindModifier->fStrength;
+						return;
+					default:
+						break;
+				}
+			}
 		});
 	}
 	return true;
@@ -786,6 +865,264 @@ bool Cmd_GetParticleEmitterSpawnRate_Execute(COMMAND_ARGS) {
 				NiFloatInterpolator* pInterp = pEmitterCtrl->GetBirthRateInterpolator();
 				if (pInterp)
 					*result = pInterp->m_fFloatValue;
+			}
+		}
+	}
+	return true;
+}
+
+bool Cmd_SetNiLightValue_Execute(COMMAND_ARGS) {
+	*result = 0;
+	LightItem eItem = LightItem::NONE;
+	float fValue = 0;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &fValue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiObject* pObject = GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (!pObject)
+			return true;
+
+		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
+		if (!pLight)
+			return true;
+
+		NiSpotLight* pSpotLight = nullptr;
+		if (eItem >= LightItem::OUTER_SPOT_ANGLE && eItem <= LightItem::SPOT_EXPONENT) {
+			pSpotLight = pLight->NiDynamicCast<NiSpotLight>();
+			if (!pSpotLight)
+				return true;
+		}
+
+		switch (eItem) {
+			case LightItem::DIMMER:
+				pLight->SetDimmer(fValue);
+				break;
+			case LightItem::RADIUS:
+				pLight->SetLightRadius(fValue);
+				break;
+			case LightItem::OUTER_SPOT_ANGLE:
+				pSpotLight->SetOuterSpotAngle(fValue);
+				break;
+			case LightItem::INNER_SPOT_ANGLE:
+				pSpotLight->SetInnerSpotAngle(fValue);
+				break;
+			case LightItem::SPOT_EXPONENT:
+				pSpotLight->SetSpotExponent(fValue);
+				break;
+			default:
+				__assume(0);
+		}
+
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetNiLightValue_Execute(COMMAND_ARGS) {
+	*result = 0;
+	LightItem eItem = LightItem::NONE;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiObject* pObject = GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (!pObject)
+			return true;
+
+		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
+		if (!pLight)
+			return true;
+
+		NiSpotLight* pSpotLight = nullptr;
+		if (eItem >= LightItem::OUTER_SPOT_ANGLE && eItem <= LightItem::SPOT_EXPONENT) {
+			pSpotLight = pLight->NiDynamicCast<NiSpotLight>();
+			if (!pSpotLight)
+				return true;
+		}
+
+		switch (eItem) {
+			case LightItem::DIMMER:
+				*result = pLight->GetDimmer();
+				break;
+			case LightItem::RADIUS:
+				*result = pLight->GetLightRadius();
+				break;
+			case LightItem::OUTER_SPOT_ANGLE:
+				*result = pSpotLight->GetOuterSpotAngle();
+				break;
+			case LightItem::INNER_SPOT_ANGLE:
+				*result = pSpotLight->GetInnerSpotAngle();
+				break;
+			case LightItem::SPOT_EXPONENT:
+				*result = pSpotLight->GetSpotExponent();
+				break;
+			default:
+				__assume(0);
+		}
+	}
+	return true;
+}
+
+bool Cmd_SetNiLightColor_Execute(COMMAND_ARGS) {
+	*result = 0;
+	LightColorItem eItem = LightColorItem::NONE;
+	NiColor kColor;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &kColor.r, &kColor.g, &kColor.b, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		NiObject* pObject = GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (!pObject)
+			return true;
+
+		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
+		if (!pLight)
+			return true;
+
+		switch (eItem) {
+			case LightColorItem::DIFFUSE:
+				pLight->SetDiffuseColor(kColor);
+				break;
+			case LightColorItem::AMBIENT:
+				pLight->SetAmbientColor(kColor);
+				break;
+			default:
+				__assume(0);
+		}
+
+		*result = 1;
+	}
+
+	return true;
+}
+
+bool Cmd_GetNiLightColor_Execute(COMMAND_ARGS) {
+	*result = 0;
+
+	ScriptVar* pRed = nullptr;
+	ScriptVar* pGreen = nullptr;
+	ScriptVar* pBlue = nullptr;
+
+	LightColorItem eItem = LightColorItem::NONE;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eItem, &pRed, &pGreen, &pBlue, &bFirstPerson) && cObjectName[0] && InRange(eItem)) {
+		ASSUME_ASSERT(pRed && pGreen && pBlue);
+		NiObject* pObject = GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (!pObject)
+			return true;
+
+		NiLight* pLight = pObject->NiDynamicCast<NiLight>();
+		if (!pLight)
+			return true;
+
+		NiColor kColor;
+		switch (eItem) {
+			case LightColorItem::DIFFUSE:
+				kColor = pLight->GetDiffuseColor();
+				break;
+			case LightColorItem::AMBIENT:
+				kColor = pLight->GetAmbientColor();
+				break;
+			default:
+				__assume(0);
+		}
+
+		pRed->data = kColor.r;
+		pGreen->data = kColor.g;
+		pBlue->data = kColor.b;
+
+		if (Script::GetConsoleOuput())
+			Interface::PrintLine("GetNiLightColor %i >> %f %f %f", eItem, kColor.r, kColor.g, kColor.b);
+
+		*result = 1;
+	}
+
+	return true;
+}
+
+bool Cmd_SetShaderPropertyFlag_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BSShaderProperty::ShaderBits eBit = BSShaderProperty::ShaderBits::MAX_FLAGS;
+	BOOL bValue = FALSE;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eBit, &bValue, &bFirstPerson) && cObjectName[0] && eBit >= 0 && eBit < BSShaderProperty::ShaderBits::MAX_FLAGS) {
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::SHADE);
+		BSShaderProperty* pShade = static_cast<BSShaderProperty*>(kObjects.first);
+		if (!pShade)
+			return true;
+
+		pShade->SetFlag(eBit, bValue);
+
+		*result = 1;
+	}
+	return true;
+}
+
+bool Cmd_GetShaderPropertyFlag_Execute(COMMAND_ARGS) {
+	*result = 0;
+	BSShaderProperty::ShaderBits eBit = BSShaderProperty::ShaderBits::MAX_FLAGS;
+	char cObjectName[MAX_PATH] = {};
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eBit, &bFirstPerson) && cObjectName[0] && eBit >= 0 && eBit < BSShaderProperty::ShaderBits::MAX_FLAGS) {
+		auto kObjects = GetPropertyByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName, NiProperty::Type::SHADE);
+		const BSShaderProperty* pShade = static_cast<BSShaderProperty*>(kObjects.first);
+		if (!pShade)
+			return true;
+
+		*result = pShade->GetFlag(eBit);
+	}
+	return true;
+}
+
+static SPEC_NOINLINE bool __fastcall ToggleAddonNodes(NiNode* apNode, ToggleAddonNodesState aeState) {
+	bool bResult = false;
+	switch (aeState) {
+		case ToggleAddonNodesState::REMOVE:
+			bResult |= TESObjectREFR::RemoveAddonNodes(apNode);
+			break;
+		case ToggleAddonNodesState::DISABLE_PARTICLES:
+			bResult |= TESObjectREFR::RemoveMasterParticleAddonNodes(apNode);
+			break;
+		case ToggleAddonNodesState::ADD:
+			bResult |= TESObjectREFR::AddAddonNodes(apNode);
+		case ToggleAddonNodesState::ENABLE_PARTICLES:
+			bResult |= TESObjectREFR::AddMasterParticleAddonNodes(apNode);
+			if (bResult) {
+				NiUpdateData kData(0.f, true);
+				apNode->UpdateProperties();
+				apNode->Update(kData);
+			}
+			break;
+		default:
+			__assume(0);
+	}
+	return bResult;
+}
+
+bool Cmd_ToggleAddonNodes_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char cObjectName[MAX_PATH] = {};
+	ToggleAddonNodesState eState = ToggleAddonNodesState::COUNT;
+	BOOL bFirstPerson = FALSE;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, cObjectName, &eState, &bFirstPerson) && cObjectName[0] && InRange(eState)) {
+		NiPointer<NiAVObject> spScene = GetObjectByName(GetReferenceScene(thisObj, bFirstPerson), cObjectName);
+		if (spScene && spScene->IsNode()) {
+			NiNode* pNode = static_cast<NiNode*>(spScene.m_pObject);
+			if (AILinearTaskThreadManager::ShouldQueue3DTask()) {
+				QueuedTask kTask;
+				kTask.kItems[0].p = pNode;
+				kTask.kItems[1].ui = static_cast<uint32_t>(eState);
+				pNode->IncRefCount();
+				kTask.pFunction = QUEUED_TASK{
+					NiNode* pNode = reinterpret_cast<NiNode*>(arTask.kItems[0].p);
+					ToggleAddonNodes(pNode, static_cast<ToggleAddonNodesState>(arTask.kItems[1].ui));
+					pNode->DecRefCount();
+				};
+				TaskQueue::QueueTask(kTask);
+				*result = 2;
+			}
+			else {
+				*result = ToggleAddonNodes(pNode, eState);
 			}
 		}
 	}

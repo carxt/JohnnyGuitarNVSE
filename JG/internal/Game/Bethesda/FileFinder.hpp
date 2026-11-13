@@ -1,38 +1,35 @@
-#include "GameTypes.h"
-#include "GameAPI.h"
-#include "Utilities.h"
+#pragma once
 
-struct FileFinder {
-	BSSimpleArray<const char*> Paths;
+#include "BSFile.hpp"
+#include "BSEnums.hpp"
+#include "BSSimpleArray.hpp"
+#include "BSSimpleList.hpp"
 
-	enum LOOKIN_FLAGS : uint8_t {
-		SKIP_NONE = 0x0,
-		SKIP_ARCHIVE = 0x1,
-		SKIP_CWD = 0x2,
-		SKIP_PATHS = 0x4,
+class FileFinder {
+public:
+	BSSimpleArray<const char*> kPaths;
+
+	struct _LookInFlags {
+		enum Flags {
+			SKIP_NONE		= 0,
+			SKIP_ARCHIVE	= 1,
+			SKIP_CWD		= 2,
+			SKIP_PATHS		= 4,
+		};
 	};
-	enum OpenMode {
-		READ_ONLY = 0x0,
-		WRITE_ONLY = 0x1,
-		APPEND_ONLY = 0x2,
-	};
-	enum ARCHIVE_TYPE {
-		ARCHIVE_TYPE_ALL_ = 0xFFFFFFFF,
-		ARCHIVE_TYPE_ALL = 0xFFFF,
-		ARCHIVE_TYPE_MESHES = 0x1,
-		ARCHIVE_TYPE_TEXTURES = 0x2,
-		ARCHIVE_TYPE_MENUS = 0x4,
-		ARCHIVE_TYPE_SOUNDS = 0x8,
-		ARCHIVE_TYPE_VOICES = 0x10,
-		ARCHIVE_TYPE_SHADERS = 0x20,
-		ARCHIVE_TYPE_TREES = 0x40,
-		ARCHIVE_TYPE_FONTS = 0x80,
-		ARCHIVE_TYPE_MISC = 0x100,
-		ARCHIVE_TYPE_COUNT = 9,
-	};
+	using LookInFlags = _LookInFlags::Flags;
 
 	static FileFinder* GetSingleton();
-	static BSFile* GetFile(const char* apName, OpenMode aeMode, int aiSize, ARCHIVE_TYPE aeArchiveType);
-	static bool Locate(const char* apName, const char* apFilePath, uint32_t aiFlags, ARCHIVE_TYPE aiArchiveType);
-	bool Exist(const char* apName, const char* apFilePath, uint32_t aiFlags, ARCHIVE_TYPE aiArchiveType);
+
+	bool Exist(const char* apFileName, char* apFilePath = nullptr, uint32_t auiFlags = LookInFlags::SKIP_NONE, ARCHIVE_TYPE aeArchiveType = ARCHIVE_TYPE::ALL) const;
+
+	uint32_t LookForFile(const char* apFileName, uint32_t auiFlags = LookInFlags::SKIP_NONE, ARCHIVE_TYPE aeArchiveType = ARCHIVE_TYPE::ALL) const;
+
+	static BSFile* GetFile(const char* apFileName, NiFile::OpenMode aeMode, uint32_t auiSize, ARCHIVE_TYPE aeArchiveType = ARCHIVE_TYPE::ALL);
+
+	static bool Locate(const char* apFileName, char* apFilePath, uint32_t auiFlags = LookInFlags::SKIP_NONE, ARCHIVE_TYPE aeArchiveType = ARCHIVE_TYPE::ALL);
+
+	static BSSimpleList<char const*>* BuildFileList(const char* apSearchName, const char* apBaseFilename, ARCHIVE_TYPE aeArchiveType, BSSimpleList<char const*>* apFileList);
 };
+
+ASSERT_SIZE(FileFinder, 0x10);

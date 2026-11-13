@@ -3,6 +3,9 @@
 #include "direct.h"
 #include "share.h"
 #include "shlobj.h"
+#include <cstdio>
+
+STACK_FRAME_OPT_ENABLE
 
 std::FILE*			IDebugLog::logFile = NULL;
 char				IDebugLog::sourceBuf[16] = { 0 };
@@ -323,3 +326,5 @@ int IDebugLog::RoundToTab(int spaces)
 {
 	return (spaces + 3) & ~3;
 }
+
+STACK_FRAME_OPT_RESET

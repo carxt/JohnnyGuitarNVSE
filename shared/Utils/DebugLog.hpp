@@ -15,12 +15,12 @@ public:
 	IDebugLog(const char* name);
 	~IDebugLog();
 
-	static void			Open(const char* path);
-	static void			OpenRelative(int folderID, const char* relPath);
+	static void	__fastcall Open(const char* path);
+	static void	__fastcall OpenRelative(int folderID, const char* relPath);
 
-	static void			Message(const char* message, const char* source = NULL);
-	static void			FormattedMessage(const char* fmt, ...);
-	static void			FormattedMessage(const char* fmt, va_list args);
+	static void	__fastcall Message(const char* message, const char* source = NULL);
+	static void	__fastcall FormattedMessage(const char* fmt, ...);
+	static void	__fastcall FormattedMessage(const char* fmt, va_list args);
 
 	enum LogLevel
 	{
@@ -32,33 +32,33 @@ public:
 		kLevel_DebugMessage
 	};
 
-	static void			Log(LogLevel level, const char* fmt, va_list args);
+	static void	__fastcall Log(LogLevel level, const char* fmt, va_list args);
 
-	static void			SetSource(const char* source);
-	static void			ClearSource(void);
+	static void	__fastcall SetSource(const char* source);
+	static void	__fastcall ClearSource(void);
 
-	static void			Indent(void);
-	static void			Outdent(void);
+	static void	__fastcall Indent(void);
+	static void	__fastcall Outdent(void);
 
-	static void			OpenBlock(void);
-	static void			CloseBlock(void);
+	static void	__fastcall OpenBlock(void);
+	static void	__fastcall CloseBlock(void);
 
-	static void			SetAutoFlush(bool inAutoFlush);
+	static void	__fastcall SetAutoFlush(bool inAutoFlush);
 
-	static void			SetLogLevel(LogLevel in) { logLevel = in; }
-	static void			SetPrintLevel(LogLevel in) { printLevel = in; }
+	static void	__fastcall SetLogLevel(LogLevel in) { logLevel = in; }
+	static void	__fastcall SetPrintLevel(LogLevel in) { printLevel = in; }
 
 private:
-	static void			MakeAllDirs(const char* path);
+	static void	__fastcall MakeAllDirs(const char* path);
 
-	static void			PrintSpaces(int numSpaces);
-	static void			PrintText(const char* buf);
-	static void			NewLine(void);
+	static void	__fastcall PrintSpaces(int numSpaces);
+	static void	__fastcall PrintText(const char* buf);
+	static void	__fastcall NewLine(void);
 
-	static void			SeekCursor(int position);
+	static void	__fastcall SeekCursor(int position);
 
-	static int			TabSize(void);
-	static int			RoundToTab(int spaces);
+	static int	__fastcall TabSize(void);
+	static int	__fastcall RoundToTab(int spaces);
 
 	static FILE* logFile;			//!< the output file
 

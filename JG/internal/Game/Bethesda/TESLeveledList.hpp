@@ -28,6 +28,13 @@ public:
 	virtual uint8_t		GetChanceNone() const;
 	virtual bool		GetMultCalc() const;
 	virtual uint32_t	GetMaxLevelDifference() const;
+#ifdef EDITOR
+	virtual void		Func_15(TESContainer* apContainer, uint32_t auiLevel, void*);
+	virtual void		Func_16(HWND);
+	virtual bool		Func_17();
+	virtual bool		Func_18();
+	virtual void		Func_19(void*, void*);
+#endif
 
 	struct ALIGN1 _LeveledListFlags {
 		enum Flags : uint8_t {
@@ -46,7 +53,9 @@ public:
 	uint8_t							ucChanceNone;
 	Bitfield<_LeveledListFlags>		ucFlags;
 	TESGlobal*						pChanceGlobal;
+#ifdef GAME
 	BSSimpleList<LeveledObject*>	kScriptAddedObjects;
+#endif
 
 	const BSSimpleList<LeveledObject*>* GetLeveledList() const;
 	BSSimpleList<LeveledObject*>* GetLeveledList();
@@ -62,4 +71,8 @@ public:
 	static TESLeveledList* GetFormAsLeveledList(const TESForm* apForm);
 };
 
+#ifdef GAME
 ASSERT_SIZE(TESLeveledList, 0x1C);
+#else
+ASSERT_SIZE(TESLeveledList, 0x14);
+#endif

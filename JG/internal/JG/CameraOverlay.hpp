@@ -1,7 +1,5 @@
 #pragma once
 
-class TESObjectREFR;
-
 namespace CameraOverlay {
 
 	void Install();

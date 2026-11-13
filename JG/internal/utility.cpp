@@ -4,39 +4,7 @@
 #include "internal/md5/md5.h"
 #include "internal/sha1/sha1.h"
 #include <time.h>
-void LightCS::Enter() {
-	uint32_t threadID = GetCurrentThreadId();
-	if (owningThread == threadID) {
-		enterCount++;
-		return;
-	}
-	while (InterlockedCompareExchange(&owningThread, threadID, 0));
-	enterCount = 1;
-}
 
-#define FAST_SLEEP_COUNT 10000UL
-
-void LightCS::EnterSleep() {
-	uint32_t threadID = GetCurrentThreadId();
-	if (owningThread == threadID) {
-		enterCount++;
-		return;
-	}
-	uint32_t fastIdx = FAST_SLEEP_COUNT;
-	while (InterlockedCompareExchange(&owningThread, threadID, 0)) {
-		if (fastIdx) {
-			fastIdx--;
-			Sleep(0);
-		}
-		else Sleep(1);
-	}
-	enterCount = 1;
-}
-
-void LightCS::Leave() {
-	if (!--enterCount)
-		owningThread = 0;
-}
 bool fCompare(float lval, float rval) {
 	return fabs(lval - rval) < FLT_EPSILON;
 }
@@ -1021,7 +989,7 @@ int __fastcall StrToInt(const char* str) {
 	bool neg = *str == '-';
 	if (neg) str++;
 	char chr;
-	while (chr = *str++) {
+	while ((chr = *str++)) {
 		if ((chr < '0') || (chr > '9')) break;
 		result *= 10;
 		result += chr - '0';
@@ -1036,7 +1004,7 @@ double __fastcall StrToDbl(const char* str) {
 	bool neg = *str == '-', point = false;
 	if (neg) str++;
 	char chr;
-	while (chr = *str++) {
+	while ((chr = *str++)) {
 		if ((chr >= '0') && (chr <= '9')) {
 			if (point) divisor *= 10;
 			intPart *= 10;
@@ -1171,7 +1139,7 @@ void FileStream::WriteBuf(const void* inData, uint32_t inLength) {
 
 void FileStream::MakeAllDirs(char* fullPath) {
 	char* traverse = fullPath, curr;
-	while (curr = *traverse) {
+	while ((curr = *traverse)) {
 		if ((curr == '\\') || (curr == '/')) {
 			*traverse = 0;
 			CreateDirectory(fullPath, NULL);
@@ -1192,7 +1160,7 @@ LineIterator::LineIterator(const char* filePath, char* buffer) {
 	sourceFile.ReadBuf(dataPtr, length);
 	*(uint16_t*)(dataPtr + length) = 0x300;
 	uint8_t data;
-	while (data = *buffer) {
+	while ((data = *buffer)) {
 		if ((data == '\n') || (data == '\r'))
 			*buffer = 0;
 		buffer++;
@@ -1280,14 +1248,6 @@ void GetSHA1File(const char* filePath, char* outHash) {
 
 	for (uint8_t idx = 0; idx < 0x14; idx++, outHash += 2)
 		sprintf_s(outHash, 3, "%02X", digest[idx]);
-}
 
-// Taken from xNVSE
-uint8_t* GetParentBasePtr(void* addressOfReturnAddress, bool lambda) {
-	auto* basePtr = static_cast<uint8_t*>(addressOfReturnAddress) - 4;
-#if _DEBUG
-	if (lambda) // in debug mode, lambdas are wrapped inside a closure wrapper function, so one more step needed
-		basePtr = *reinterpret_cast<uint8_t**>(basePtr);
-#endif
-	return *reinterpret_cast<uint8_t**>(basePtr);
+	BSMemory::free(digest);
 }

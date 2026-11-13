@@ -1,5 +1,5 @@
 #include "TESMain.hpp"
-#include <netimmerse.h>
+#include "Bethesda/SceneGraph.hpp"
 
 TESMain* TESMain::GetSingleton() {
 	return *reinterpret_cast<TESMain**>(0x11DEA0C);

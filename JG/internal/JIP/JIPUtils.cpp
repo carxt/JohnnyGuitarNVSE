@@ -1,7 +1,9 @@
 #include "JIPUtils.hpp"
 #include "PluginAPI.h"
 
-#include <array>
+#include "Shared/Utils/DebugLog.hpp"
+
+#include <vector>
 
 extern NVSECommandTableInterface* g_cmdTableInterface;
 
@@ -13,9 +15,10 @@ namespace JIPUtils {
 	constexpr uint32_t JIP_TARGET_HASH = 0x9DF36B6;
 	constexpr uint32_t JIP_TARGET_SIZE = 502272;
 
-	static constexpr std::array<uint32_t, CRC32_TABLE_SIZE> initCRC32Table() {
+	static constexpr std::vector<uint32_t> initCRC32Table() {
 		constexpr uint32_t polynomial = 0xEDB88320;
-		std::array<uint32_t, CRC32_TABLE_SIZE> crc32table;
+		std::vector<uint32_t> crc32table;
+		crc32table.resize(CRC32_TABLE_SIZE);
 		for (uint32_t i = 0; i < CRC32_TABLE_SIZE; i++) {
 			uint32_t crc = i;
 			for (uint32_t j = 0; j < 8; j++) {
@@ -30,8 +33,8 @@ namespace JIPUtils {
 	}
 
 
-	static uint32_t crc32(const uint8_t* data, size_t length) {
-		constexpr std::array<uint32_t, CRC32_TABLE_SIZE> crc32table = initCRC32Table();
+	static uint32_t __fastcall crc32(const uint8_t* data, size_t length) {
+		const std::vector<uint32_t> crc32table = initCRC32Table();
 		uint32_t crc = 0xFFFFFFFF;
 		for (size_t i = 0; i < length; i++) {
 			uint8_t byte = data[i];
@@ -40,7 +43,7 @@ namespace JIPUtils {
 		return crc ^ 0xFFFFFFFF;
 	}
 
-	void ShowErrorMessage(const char* fmt, ...) {
+	static void ShowErrorMessage(const char* fmt, ...) {
 		char cBuffer[512];
 		const char* pPrefix = "JIP LN Fixes error:\n";
 		const char* pSuffix = "\n\nJIP LN Fixes will be disabled.\nTo disable this message, set bJIPFixes to 0 in JohnnyGuitar.ini or use the latest supported JIP LN 57.30";
@@ -88,7 +91,6 @@ namespace JIPUtils {
 			return;
 		}
 
-		DWORD dwBytesRead = 0;
 		HANDLE hMemoryMapping = CreateFileMapping(hJIPFile, nullptr, PAGE_READONLY, 0, 0, nullptr);
 		if (!hMemoryMapping) {
 			CloseHandle(hJIPFile);

@@ -1,5 +1,7 @@
 #include "DisabledArrowKeys.hpp"
 
+#include "Shared/SafeWrite/SafeWrite.hpp"
+
 namespace DisabledArrowKeys {
 	bool bArrowKeysDisabled = false;
 

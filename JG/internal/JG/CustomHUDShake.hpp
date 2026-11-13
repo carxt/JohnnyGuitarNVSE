@@ -1,9 +1,14 @@
 #pragma once
 
+class TESFile;
+
 namespace CustomHUDShake {
-	void Init();
+
 	void Reset();
+
 	void Update();
-	float Get(uint8_t modId);
-	void Set(uint8_t modId, float power);
+
+	float __fastcall Get(const TESFile* apFile);
+	void __fastcall Set(const TESFile* apFile, float afPower);
+
 }

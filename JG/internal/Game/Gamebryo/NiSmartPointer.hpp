@@ -1,9 +1,9 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
 template <class T>
-class SPEC_EMPTY_BASES NiPointer : public NiMemObject {
+class SPEC_EMPTY_BASES NiPointer : public BSMemObject {
 public:
 	// GAME - 0x6694E0
 	__forceinline NiPointer() : m_pObject(nullptr) {}
@@ -57,4 +57,4 @@ public:
 
 #define NiSmartPointer(className) \
     class className; \
-    typedef NiPointer<className> className##Ptr;
+    using className##Ptr = NiPointer<className>;

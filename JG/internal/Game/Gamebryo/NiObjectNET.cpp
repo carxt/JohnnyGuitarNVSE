@@ -1,5 +1,25 @@
 #include "NiObjectNET.hpp"
 
+// GAME - 0x413F40
+const NiFixedString& NiObjectNET::GetName() const {
+	return m_kName;
+}
+
+// GAME - 0x43B9F0
+// GECK - 0x818130
+void NiObjectNET::SetName(const NiFixedString& arName) {
+#ifdef GAME
+	ThisCall(0x43B9F0, this, &arName);
+#else
+	ThisCall(0x818130, this, &arName);
+#endif
+}
+
+// GAME - 0x43B230
+NiTimeController* NiObjectNET::GetControllers() const { 
+	return m_spControllers; 
+};
+
 // GAME - 0xA5C570
 // GECK - 0x818D30
 NiTimeController* NiObjectNET::GetController(const NiRTTI* apRTTI) const {
@@ -7,6 +27,16 @@ NiTimeController* NiObjectNET::GetController(const NiRTTI* apRTTI) const {
 	return ThisCall<NiTimeController*>(0xA5C570, this, apRTTI);
 #else
 	return ThisCall<NiTimeController*>(0x818D30, this, apRTTI);
+#endif
+}
+
+// GAME - 0xA5C400
+// GECK - 0x818BC0
+void NiObjectNET::PrependController(NiTimeController* apController) {
+#ifdef GAME
+	ThisCall(0xA5C400, this, apController);
+#else
+	ThisCall(0x818BC0, this, apController);
 #endif
 }
 
@@ -18,6 +48,10 @@ void NiObjectNET::RemoveController(NiTimeController* apController) {
 #else
 	ThisCall(0x818C40, this, apController);
 #endif
+}
+
+bool NiObjectNET::HasExtraData() const {
+	return m_usExtraDataSize != 0;
 }
 
 // GAME - 0xA5BDD0
@@ -71,8 +105,13 @@ void NiObjectNET::DeleteExtraData(uint16_t ausIndex) {
 }
 
 // GAME - 0xA5BFA0
+// GECK - 0x818780
 void NiObjectNET::RemoveAllExtraData() {
+#ifdef GAME
 	ThisCall(0xA5BFA0, this);
+#else
+	ThisCall(0x818780, this);
+#endif
 }
 
 // GAME - 0x4AD1B0

@@ -13,9 +13,11 @@ public:
 		int32_t		iOwnerRank;
 		void*		pUnion;
 	};
-	float	fHealth;
+	float	fHealthMult;
 
+#ifdef GAME
 	void AddToExtraDataList(ExtraDataList* apExtraList, TESHealthForm* apHealth);
+#endif
 };
 
 ASSERT_SIZE(ContainerItemExtra, 0xC);

@@ -16,10 +16,10 @@ class BSTask {
 public:
 	BSTask();
 	virtual ~BSTask();
-	virtual void Run() = 0;
-	virtual void Finish() = 0;
+	virtual void Run();
+	virtual void Finish();
 	virtual void Cancel(BS_TASK_STATE aeState, BSTask<T>* apParent);
-	virtual bool GetDescription(const char* apDescription, size_t aiBufferSize);
+	virtual bool GetDescription(const char* apDescription, uint32_t auiBufferSize);
 
 	alignas(alignof(T)) uint32_t	uiRefCount;
 	BS_TASK_STATE					eState;
@@ -27,41 +27,26 @@ public:
 	mutable T						iKey;
 #pragma pack(pop)
 
+#ifdef GAME
 	static constexpr AddressPtr<uint32_t, 0x11C3B38> uiTotalTaskCount;
+#else
+	static constexpr AddressPtr<uint32_t, 0xEDCDE8> uiTotalTaskCount;
+#endif
 
-	// GAME - 0x92C870
-	void IncRefCount() {
-		InterlockedIncrement(&uiRefCount);
-	}
+	void IncRefCount();
+	void DecRefCount();
 
-	// GAME - 0x44DD60
-	// GECK - 0x4BBB60
-	void DecRefCount() {
-		if (!InterlockedDecrement(&uiRefCount))
-			delete this;
-	}
+	bool SwitchState(BS_TASK_STATE aeCurrentState, BS_TASK_STATE aeNewState);
 
-	// GAME - 0x449190
-	bool SwitchState(BS_TASK_STATE aeCurrentState, BS_TASK_STATE aeNewState) {
-		return InterlockedCompareExchange(reinterpret_cast<LONG*>(&eState), LONG(aeNewState), LONG(aeCurrentState)) == aeCurrentState;
-	}
+	bool IsPending() const;
 
-	bool IsCancelled() const {
-		return eState == BS_TASK_STATE_CANCELED;
-	}
+	bool IsCompleted() const;
 
-	bool IsPending() const {
-		return eState == BS_TASK_STATE_PENDING;
-	}
+	bool IsCancelled() const;
 
-	// GAME - 0x44E0D0
-	T GetKey() const {
-		return iKey;
-	}
+	T GetKey() const;
 
-	uint8_t GetFileIndexFromKey() const {
-		return (iKey >> 56) & 0xFF;
-	}
+	uint8_t GetFileIndexFromKey() const;
 };
 
 ASSERT_SIZE(BSTask<int64_t>, 0x18);

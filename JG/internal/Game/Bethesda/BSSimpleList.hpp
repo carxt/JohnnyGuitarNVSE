@@ -1,11 +1,16 @@
 #pragma once
 
 #include "BSMemObject.hpp"
+#include "BSConcepts.hpp"
 
-
-template <class T>
+template <BSC::BSLItem T>
 class SPEC_EMPTY_BASES BSSimpleList : public BSMemObject {
+protected:
+	using _Empty = NiC::PickEmptyType<T>;
+
 public:
+	using pfnCompareFunc_t = int32_t(__cdecl*)(T aA, T aB);
+
 	BSSimpleList();
 	BSSimpleList(const T& arItem);
 	BSSimpleList(const T& arItem, BSSimpleList<T>* apNext);
@@ -42,7 +47,7 @@ public:
 
 	void Remove(const T& arItem);
 
-	void Insert(const T& arItem, int32_t(__cdecl* apCompare)(const T& arItem1, const T& arItem2));
+	void Insert(const T& arItem, pfnCompareFunc_t apCompareFunc);
 
 	// Custom methods
 

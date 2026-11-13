@@ -13,6 +13,7 @@ DEFINE_COMMAND_PLUGIN(QueueObjectiveText, , false, kParams_OneString_TwoOptional
 DEFINE_COMMAND_PLUGIN(GetSystemColor, , false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetSystemColorAlt, , false, kParams_OneInt_ThreeScriptVars);
 DEFINE_COMMAND_ALT_PLUGIN(SetCustomReputationChangeIcon, scrci, , false, kParams_OneForm_OneInt_OneString);
+DEFINE_COMMAND_ALT_PLUGIN(GetCustomReputationChangeIcon, gcrci, , false, kParams_OneForm_OneInt);
 DEFINE_COMMAND_PLUGIN(GetExtraMiscStat, , false, kParams_OneString);
 DEFINE_COMMAND_PLUGIN(ModExtraMiscStat, , false, kParams_OneString_OneInt);
 DEFINE_COMMAND_PLUGIN(InitExtraMiscStat, , false, kParams_OneString);
@@ -20,7 +21,7 @@ DEFINE_COMMAND_PLUGIN(ShowBarberMenuEx, , false, kParams_OneInt_OneOptionalForm)
 DEFINE_COMMAND_ALT_PLUGIN(PushUIQuestToTop, PushSelectedQuestInterfaceListEntryToTheTopOfThePipBoyQuestLogInterfaceImmediately, , false, kParams_OneQuest);
 DEFINE_COMMAND_PLUGIN(DumpQuestObjectiveList, , false, nullptr); //DO NOT REGISTER YET.
 DEFINE_COMMAND_PLUGIN(GetSleepWaitMenuState, , false, nullptr);
-DEFINE_CMD_ALT_COND_PLUGIN(IsMenuPaused, , "", false, kParams_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(IsMenuPaused, , false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(SetHUDVisibilityOverride, "Sets HUD element visibility override flags", false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(GetHUDVisibilityOverride, "Gets HUD element visibility override flags", false, nullptr);
 DEFINE_COMMAND_PLUGIN(UpdateRepairMenu, , false, nullptr);

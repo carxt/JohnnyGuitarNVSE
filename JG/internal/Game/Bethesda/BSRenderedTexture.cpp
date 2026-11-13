@@ -1,4 +1,7 @@
 #include "BSRenderedTexture.hpp"
+#ifndef GAME
+#include "Gamebryo/NiRenderer.hpp"
+#endif
 
 // GAME - 0xB6B260
 // GECK - 0x902710
@@ -12,7 +15,11 @@ NiRenderTargetGroup* BSRenderedTexture::GetGroup() const {
 
 // GAME - 0x4E9510
 bool BSRenderedTexture::IsOutsideFrame() {
+#ifdef GAME
 	return CdeclCall<bool>(0x4E9510);
+#else
+	return NiRenderer::GetRenderer()->GetFrameState() == NiRenderer::FrameState::OUTSIDE_FRAME;
+#endif
 }
 
 // GAME - 0xB6B890
@@ -55,20 +62,21 @@ void BSRenderedTexture::StopOffscreen() {
 #endif
 }
 
-// GAME - 0xB6B7D0
-// GECK - 0x902BA0
-void BSRenderedTexture::Begin(NiRenderTargetGroup* apGroup, uint32_t uiClearMode) {
 #ifdef GAME
+// GAME - 0xB6B7D0
+void BSRenderedTexture::Begin(NiRenderTargetGroup* apGroup, uint32_t uiClearMode) {
 	CdeclCall(0xB6B7D0, apGroup, uiClearMode);
-#else
-	CdeclCall(0x902BA0, apGroup, uiClearMode);
-#endif
 }
+#endif
 
 // GAME - 0x54EDE0
-// GECK - None
+// GECK - 0x902BA0
 void BSRenderedTexture::BeginTexture(BSRenderedTexture* apTexture, uint32_t auiClearMode) {
+#ifdef GAME
 	CdeclCall(0x54EDE0, apTexture, auiClearMode);
+#else
+	CdeclCall(0x902BA0, apTexture, auiClearMode);
+#endif
 }
 
 // GAME - 0xB6B840

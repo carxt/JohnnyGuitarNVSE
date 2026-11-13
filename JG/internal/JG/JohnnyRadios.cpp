@@ -4,7 +4,7 @@
 
 namespace JohnnyRadios {
 	static ULONGLONG timer = GetTickCount64();
-	std::unordered_set<DWORD> availableRadios;
+	std::unordered_set<FormID> availableRadios;
 
 	void Reset() {
 		availableRadios.clear();
@@ -24,7 +24,7 @@ namespace JohnnyRadios {
 		}
 
 	}
-	bool IsAvailable(uint32_t formID)
+	bool IsAvailable(FormID formID)
 	{
 		return availableRadios.count(formID) > 0;
 	}

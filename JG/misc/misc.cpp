@@ -1,17 +1,17 @@
 #include "misc.h"
 #include <internal\utility.h>
 #include <GameAPI.h>
-#include "Shared/BSMemory/BSScrapMemory.hpp"
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
 
 float __fastcall tan_p(float angle) {
-	angle *= kDbl4dPI;
+	angle *= static_cast<float>(kDbl4dPI);
 	double ang2 = angle * angle;
 	return angle * (211.849369664121 - 12.5288887278448 * ang2) / (269.7350131214121 + ang2 * (ang2 - 71.4145309347748));
 }
 
 float __fastcall dTan(float angle) {
-	while (angle > kDblPIx2)
-		angle -= kDblPIx2;
+	while (angle > static_cast<float>(kDblPIx2))
+		angle -= static_cast<float>(kDblPIx2);
 
 	int octant = int(angle * kDbl4dPI);
 	switch (octant) {
@@ -41,23 +41,24 @@ float __fastcall fastDTan(float value) {
 	return (sign ? -tempRes : tempRes);
 }
 
+#ifdef GAME
 void __fastcall setVarByName(VARARGS, const char* var_name, float value) {
-	ListNode<VariableInfo>* traverse = scriptObj->varList.Head();
-	VariableInfo* varInfo;
+	auto pIter = scriptObj->GetVariableList();
 	const std::string_view strName(var_name);
-	do {
-		varInfo = traverse->data;
-		if (varInfo) {
-			const std::string_view strVariableName(varInfo->name.pString, varInfo->name.GetLength());
+	while (pIter) {
+		ScriptVariable* pVariable = pIter->GetItem();
+		if (pVariable) {
+			const std::string_view strVariableName(pVariable->name.pString, pVariable->name.GetLength());
 			if (strVariableName == strName) {
-				ScriptVar* scv = eventList->GetVariable(varInfo->idx);
+				ScriptVar* scv = eventList->GetVariable(pVariable->idx);
 				if (scv) {
 					scv->data = value;
 					break;
 				}
 			}
 		}
-	} while (traverse = traverse->next);
+		pIter = pIter->GetNext();
+	}
 }
 
 //Only ready for a 24-bit BMP, will check for non-24 bit later.
@@ -70,8 +71,8 @@ bool __fastcall ReadBMP24(char* filename, unsigned long& R, unsigned long& G, un
 
 	char info[54];
 	fread(info, sizeof(char), 54, f);
-	int width = *(int*)&info[18];
-	int height = *(int*)&info[22];
+	uint32_t width = *(uint32_t*)&info[18];
+	uint32_t height = *(uint32_t*)&info[22];
 	if (width < PixelW || height < PixelH) return false;
 	int XPadding = (width * 3 + 3) & (~3);
 	BSScrapBuffer<BYTE> data(XPadding);
@@ -85,3 +86,4 @@ bool __fastcall ReadBMP24(char* filename, unsigned long& R, unsigned long& G, un
 	fclose(f);
 	return true;
 }
+#endif

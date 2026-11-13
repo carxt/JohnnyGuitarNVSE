@@ -1,9 +1,9 @@
 #include "NiFixedString.hpp"
 #include "NiGlobalStringTable.hpp"
 
-NiFixedString::NiFixedString() noexcept {
-	m_kHandle = nullptr;
-}
+NiFixedString::NiFixedString() noexcept : m_kHandle(nullptr) {}
+
+NiFixedString::NiFixedString(std::nullptr_t) noexcept : m_kHandle(nullptr) {}
 
 // GAME - 0x438170
 // GECK - 0x43D6B0
@@ -14,6 +14,7 @@ NiFixedString::NiFixedString(const char* apString) noexcept {
 		m_kHandle = nullptr;
 }
 
+// GAME - 0x48AF40
 NiFixedString::NiFixedString(const NiFixedString& arString) noexcept {
 	NiGlobalStringTable::IncRefCount(const_cast<NiGlobalStringTable::GlobalStringHandle&>(arString.m_kHandle));
 	m_kHandle = arString.m_kHandle;
@@ -23,6 +24,13 @@ NiFixedString::NiFixedString(const NiFixedString& arString) noexcept {
 // GECK - 0x43D6E0
 NiFixedString::~NiFixedString() noexcept {
 	NiGlobalStringTable::DecRefCount(m_kHandle);
+}
+
+NiFixedString& NiFixedString::operator=(std::nullptr_t) noexcept {
+	if (m_kHandle)
+		NiGlobalStringTable::DecRefCount(m_kHandle);
+	m_kHandle = nullptr;
+	return *this;
 }
 
 // GAME - 0xA2E750
@@ -69,6 +77,32 @@ uint32_t NiFixedString::GetLength() const noexcept {
 	return NiGlobalStringTable::GetLength(m_kHandle);
 }
 
+uint32_t NiFixedString::GetRefCount() const noexcept {
+	return NiGlobalStringTable::GetRefCount(m_kHandle);
+}
+
+// GAME - 0xA305E0
+bool NiFixedString::Equals(const char* apString) const noexcept {
+	if (m_kHandle == apString)
+		return true;
+
+	if (!m_kHandle || !apString)
+		return false;
+
+	return !strcmp(m_kHandle, apString);
+}
+
+// GAME - 0x48AF90
+bool NiFixedString::EqualsNoCase(const char* apString) const noexcept {
+	if (m_kHandle == apString)
+		return true;
+
+	if (!m_kHandle || !apString)
+		return false;
+
+	return !_stricmp(m_kHandle, apString);
+}
+
 bool NiFixedString::Includes(const char* apToFind) const noexcept {
 	if (!m_kHandle || !apToFind)
 		return false;
@@ -76,6 +110,11 @@ bool NiFixedString::Includes(const char* apToFind) const noexcept {
 	return strstr(m_kHandle, apToFind) != nullptr;
 }
 
+bool operator==(const NiFixedString& arString, std::nullptr_t) noexcept {
+	return arString.m_kHandle == nullptr;
+}
+
+// GAME - 0x9A3830
 bool operator==(const NiFixedString& arString1, const NiFixedString& arString2) noexcept {
 	return arString1.m_kHandle == arString2.m_kHandle;
 }
@@ -83,21 +122,9 @@ bool operator==(const NiFixedString& arString1, const NiFixedString& arString2) 
 // GAME - 0xA305E0
 // GECK - 0x7D8060
 bool operator==(const NiFixedString& arString, const char* apString) noexcept {
-	if (arString.m_kHandle == apString)
-		return true;
-
-	if (!arString.m_kHandle || !apString)
-		return false;
-
-	return !strcmp(arString.m_kHandle, apString);
+	return arString.Equals(apString);
 }
 
 bool operator==(const char* apString, const NiFixedString& arString) noexcept {
-	if (arString.m_kHandle == apString)
-		return true;
-
-	if (!arString.m_kHandle || !apString)
-		return false;
-
-	return !strcmp(arString.m_kHandle, apString);
+	return arString.Equals(apString);
 }

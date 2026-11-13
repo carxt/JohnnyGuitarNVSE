@@ -7,7 +7,7 @@ class TESBoundObject;
 class ContainerObject {
 public:
 	int32_t				iCount;
-	TESForm*			pForm;
+	TESBoundObject*		pObject;
 	ContainerItemExtra* pItemExtra;
 };
 

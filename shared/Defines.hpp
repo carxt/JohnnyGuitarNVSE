@@ -1,30 +1,38 @@
 #pragma once
 
-#pragma warning(disable: 4100 4201 4244 4324 4389 5054 28159)
+// 4100 - unreferenced formal parameter
+// 4201 - nonstandard extension used : nameless struct/union
+// 4244 - 'argument' : conversion from 'type1' to 'type2', possible loss of data
+// 4324 - 'type': structure was padded due to alignment specifier
+// 4505 - 'function' : unreferenced local function has been removed
+// 4530 - C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+#pragma warning(disable: 4100 4201 4244 4324 4505 4530 28159)
 
-#include <d3d9.h>
-
-#include <Windows.Foundation.h>
-#include <wrl\wrappers\corewrappers.h>
-#include <wrl\client.h>
+#include <windows.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <cmath>
-#include <string>
-#include <cassert>
+#include <assert.h>
+#include <xutility>
 
-#define JIP_CHANGES 1
+#define USE_MODDED_CHANGES 1
+
+#if USE_MODDED_CHANGES
+#ifdef GAME
+#define USE_JIP_CHANGES 1
+#define USE_TWEAKS_CHANGES 1
+#endif
+#define USE_JG_CHANGES 1
+#define USE_MLF_CHANGES 1
+#endif
 
 constexpr inline auto our_snprintf	= snprintf;
 constexpr inline auto our_sprintf	= sprintf;
 constexpr inline auto our_vsprintf	= vsprintf;
 constexpr inline auto our_vsnprintf	= vsnprintf;
 
-#include "Utils/DebugLog.hpp"
 #include "Utils/Bitfield.hpp"
 #include "Utils/AddressPtr.hpp"
-
-#include "SafeWrite/SafeWrite.hpp"
 
 // Game unit conversion constants
 constexpr inline double dM2NI	= 69.99125671386719;	// 1 Meter to Ni
@@ -41,31 +49,45 @@ constexpr inline double dNI2MM  = 1.0 / dMM2NI;			// 1 Ni to Millimeter
 constexpr inline float fHK2NI = static_cast<float>(dDM2NI); // 1 Havok to Ni
 constexpr inline float fNI2HK = static_cast<float>(dNI2DM); // 1 Ni to Havok
 
+class __single_inheritance _ThisCallClass;
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret ThisCall(uint32_t _addr, const void* _this, Args ...args) noexcept(false) {
-	if constexpr (std::is_class_v<T_Ret>) {
-		T_Ret ret;
-		((T_Ret * (__thiscall*)(const void*, T_Ret&, Args...))_addr)(_this, ret, std::forward<Args>(args)...);
-		return ret;
-	}
-	else {
-		return ((T_Ret(__thiscall*)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
-	}
+	const auto func = *reinterpret_cast<T_Ret(__thiscall _ThisCallClass::**)(Args...)const>(&_addr);
+	return (reinterpret_cast<const _ThisCallClass*>(_this)->*func)(std::forward<Args>(args)...);
 }
 
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret StdCall(uint32_t _addr, Args ...args) noexcept(false) {
-	return ((T_Ret(__stdcall*)(Args...))_addr)(std::forward<Args>(args)...);
+	return reinterpret_cast<T_Ret(__stdcall*)(Args...)>(_addr)(std::forward<Args>(args)...);
 }
 
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret CdeclCall(uint32_t _addr, Args ...args) noexcept(false) {
-	return ((T_Ret(__cdecl*)(Args...))_addr)(std::forward<Args>(args)...);
+	return reinterpret_cast<T_Ret(__cdecl*)(Args...)>(_addr)(std::forward<Args>(args)...);
 }
 
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret FastCall(uint32_t _addr, Args ...args) noexcept(false) {
-	return ((T_Ret(__fastcall*)(Args...))_addr)(std::forward<Args>(args)...);
+	return reinterpret_cast<T_Ret(__fastcall*)(Args...)>(_addr)(std::forward<Args>(args)...);
+}
+
+template <auto T_Func, typename ...Args>
+__forceinline auto CallImport(uint32_t _addr, Args ...args) noexcept(false) {
+	return (*reinterpret_cast<decltype(T_Func)*>(_addr))(std::forward<Args>(args)...);
+}
+
+template <class T_Func>
+__forceinline auto CustomCall(uint32_t _addr, auto ...args) noexcept(false) {
+	return reinterpret_cast<T_Func*>(_addr)(std::forward<decltype(args)>(args)...);
+}
+
+__forceinline uint8_t* __fastcall GetParentBasePtr(void* addressOfReturnAddress = _AddressOfReturnAddress(), bool lambda = false) noexcept(false) {
+	auto* basePtr = static_cast<uint8_t*>(addressOfReturnAddress) - 4;
+#if _DEBUG
+	if (lambda) // in debug mode, lambdas are wrapped inside a closure wrapper function, so one more step needed
+		basePtr = *reinterpret_cast<uint8_t**>(basePtr);
+#endif
+	return *reinterpret_cast<uint8_t**>(basePtr);
 }
 
 #pragma region Macros
@@ -112,14 +134,26 @@ __forceinline T_Ret FastCall(uint32_t _addr, Args ...args) noexcept(false) {
 #define SPEC_NOALIAS		__declspec(noalias)
 #define SPEC_EMPTY_BASES	__declspec(empty_bases)
 #define SPEC_NAKED			__declspec(naked)
+#define SPEC_NOVTABLE		__declspec(novtable)
 
 #define _HELPER_COMBINE1(X,Y) X##Y
 #define _HELPER_COMBINE(X,Y) _HELPER_COMBINE1(X,Y)
 
+#ifdef NDEBUG
 #define STACK_FRAME_OPT_ENABLE  _Pragma("optimize(\"y\", on)")
 #define STACK_FRAME_OPT_DISABLE _Pragma("optimize(\"y\", off)")
 #define STACK_FRAME_OPT_RESET   _Pragma("optimize(\"\", on)")
 
 #define RUNTIME_CHECKS_DISABLE _Pragma("runtime_checks(\"\", off)")
 #define RUNTIME_CHECKS_RESET   _Pragma("runtime_checks(\"\", restore)")
+#else
+#define STACK_FRAME_OPT_ENABLE
+#define STACK_FRAME_OPT_DISABLE
+#define STACK_FRAME_OPT_RESET
+
+#define RUNTIME_CHECKS_DISABLE
+#define RUNTIME_CHECKS_RESET
+#endif
+
+
 #pragma endregion

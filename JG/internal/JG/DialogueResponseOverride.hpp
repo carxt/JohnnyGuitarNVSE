@@ -64,7 +64,7 @@ namespace DialogueResponseOverride {
 	};
 
 	void Install();
-	void Set(uint32_t formID, uint32_t responseNumber, uint32_t emotion, int32_t emotionValue, TESIdleForm* speakerAnim, TESIdleForm* listenerAnim, uint32_t flags);
-	void Remove(uint32_t formID, uint32_t responseNumber);
-	uint32_t GetResponseAmount(uint32_t formID);
+	void Set(FormID formID, uint32_t responseNumber, uint32_t emotion, int32_t emotionValue, TESIdleForm* speakerAnim, TESIdleForm* listenerAnim, uint32_t flags);
+	void Remove(FormID formID, uint32_t responseNumber);
+	uint32_t GetResponseAmount(FormID formID);
 };

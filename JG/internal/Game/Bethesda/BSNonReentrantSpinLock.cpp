@@ -19,3 +19,7 @@ bool BSNonReentrantSpinLock::TryLock() {
 void BSNonReentrantSpinLock::Unlock() {
 	uiLock = 0;
 }
+
+bool BSNonReentrantSpinLock::IsLocked() const noexcept {
+	return uiLock != 0;
+}

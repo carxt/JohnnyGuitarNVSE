@@ -1,21 +1,21 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
-#if !JIP_CHANGES
-#include "NiTArray.hpp"
+#if !(USE_JIP_CHANGES || USE_JG_CHANGES)
+#include "NiTPrimitiveArray.hpp"
 #include "NiCriticalSection.hpp"
 #endif
 
 class NiFixedString;
 
 // Replaced by JIP and JG
-class SPEC_EMPTY_BASES NiGlobalStringTable : public NiMemObject {
+class SPEC_EMPTY_BASES NiGlobalStringTable : public BSMemObject {
 public:
-	typedef char* GlobalStringHandle;
+	using GlobalStringHandle = char*;
 
-#if !JIP_CHANGES
-	NiTPrimitiveArray<GlobalStringHandle>	m_kHashArray[512];
+#if !(USE_JIP_CHANGES || USE_JG_CHANGES)
+	NiTPrimitiveArray<GlobalStringHandle>	m_kHashArray[513];
 	NiCriticalSection						m_kCriticalSection;
 #endif
 
@@ -32,11 +32,12 @@ public:
 
 	static void IncRefCount(GlobalStringHandle& arHandle) noexcept;
 	static void DecRefCount(GlobalStringHandle& arHandle) noexcept;
+	static uint32_t GetRefCount(const GlobalStringHandle& arHandle) noexcept;
 	static uint32_t GetLength(const GlobalStringHandle& arHandle) noexcept;
 
 	static char* GetRealBufferStart(const GlobalStringHandle& arHandle) noexcept;
 };
 
-#if !JIP_CHANGES
+#if !(USE_JIP_CHANGES || USE_JG_CHANGES)
 ASSERT_SIZE(NiGlobalStringTable, 0x2100);
 #endif

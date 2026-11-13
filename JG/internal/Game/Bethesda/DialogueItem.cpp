@@ -2,21 +2,15 @@
 
 // GAME - 0x83C7B0
 bool DialogueItem::FirstResponse() {
-    pCurrentResponse = &kResponses;
-    return pCurrentResponse->GetItem() != nullptr;
+    return ThisCall<bool>(0x83C7B0, this);
 }
 
 // GAME - 0x83C7E0
 bool DialogueItem::NextResponse() {
-    if (pCurrentResponse)
-        pCurrentResponse = pCurrentResponse->GetNext();
-
-    return pCurrentResponse != nullptr;
+    return ThisCall<bool>(0x83C7E0, this);
 }
 
 // GAME - 0x83C820
 DialogueResponse* DialogueItem::GetCurrentItem() const {
-    if (pCurrentResponse)
-        return pCurrentResponse->GetItem();
-    return nullptr;
+    return ThisCall<DialogueResponse*>(0x83C820, this);
 }

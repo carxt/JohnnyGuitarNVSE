@@ -2,6 +2,7 @@
 
 #include "BSTCommonLLMessageQueue.hpp"
 
+// GAME - 0x6EC090
 template<class T>
 inline BSTCommonLLMessageQueue<T>::BSTCommonLLMessageQueue(BSTFreeList<T>* apList) {
 	pFreeList = apList;
@@ -9,6 +10,7 @@ inline BSTCommonLLMessageQueue<T>::BSTCommonLLMessageQueue(BSTFreeList<T>* apLis
 	ppTail = &pHead;
 }
 
+// GAME - 0x6EC130
 template<class T>
 inline BSTCommonLLMessageQueue<T>::~BSTCommonLLMessageQueue() {
 	T kMessage{};

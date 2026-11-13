@@ -2,6 +2,14 @@
 #include "GameScript.h"
 namespace JohnnyEvents {
 
+	enum class AVChangeMode {
+		MOD = 0,
+		SET = 1,
+	};
+
+	EXTERN_DLL_EXPORT AVChangeMode SetAVChangeMode(AVChangeMode aeMode);
+	EXTERN_DLL_EXPORT AVChangeMode GetAVChangeMode();
+
 	void RegisterOnDying(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
 	void RegisterOnStartQuest(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);
 	void RegisterOnStopQuest(Script* apScript, void** apFilters, bool abToggle, uint32_t auiUserFlags = 0);

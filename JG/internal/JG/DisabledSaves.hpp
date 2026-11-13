@@ -1,5 +1,7 @@
 #pragma once
 
+class TESFile;
+
 namespace DisabledSaves {
 
 	struct _SaveTypeBits {
@@ -26,8 +28,8 @@ namespace DisabledSaves {
 	};
 	using SaveTypeFlags = _SaveTypeFlags::Flags;
 
-	void Init();
 	void Install();
 	void Reset();
-	void Toggle(uint8_t aucMod, bool abToggle, uint32_t auiTypeFlags);
+	void __fastcall Toggle(const TESFile* apFile, uint32_t auiTypeFlags, bool abToggle);
+
 }

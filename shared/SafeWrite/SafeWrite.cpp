@@ -104,6 +104,50 @@ namespace HookUtils {
 		FlushInstructionCache(GetCurrentProcess(), reinterpret_cast<void*>(address), size);
 	}
 
+	void __fastcall Detour::ShowError(uintptr_t address, const char* actionName) noexcept {
+		char cTextBuffer[72];
+		sprintf_s(cTextBuffer, "Cannot write detour - address 0x%08X is not a %s.", address, actionName);
+		MessageBoxA(nullptr, cTextBuffer, "Hook Error", MB_OK | MB_ICONERROR);
+	}
+
+	bool __fastcall Detour::ValidateCallAddress(uintptr_t address, bool noError) noexcept {
+		if (*reinterpret_cast<uint8_t*>(address) != 0xE8) [[unlikely]] {
+			if (!noError) [[unlikely]] {
+				ShowError(address, "function call");
+			}
+			return false;
+		}
+		return true;
+	}
+
+	bool __fastcall Detour::ValidateJumpAddress(uintptr_t address, bool noError) noexcept {
+		if (*reinterpret_cast<uint8_t*>(address) != 0xE9) [[unlikely]] {
+			if (!noError) [[unlikely]] {
+				ShowError(address, "jump");
+			}
+			return false;
+		}
+		return true;
+	}
+
+	bool __fastcall Detour::CanWriteCall(uintptr_t address, bool optional) noexcept {
+		bool bHook = optional;
+		if (ValidateCallAddress(address, optional)) [[likely]] {
+			overwritten_addr = GetRelJumpAddr(address);
+			bHook = true;
+		}
+		return bHook;
+	}
+
+	bool __fastcall Detour::CanWriteJump(uintptr_t address, bool optional) noexcept {
+		bool bHook = optional;
+		if (ValidateJumpAddress(address, optional)) [[likely]] {
+			overwritten_addr = GetRelJumpAddr(address);
+			bHook = true;
+		}
+		return bHook;
+	}
+
 }
 
 STACK_FRAME_OPT_RESET

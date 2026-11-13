@@ -4,8 +4,10 @@
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/FixedStrings.hpp"
+#include "Gamebryo/NiCamera.hpp"
 
-#include <shared/BSMemory/BSScrapMemory.hpp>
+#include "Shared/BSMemory/BSMemoryUtils.hpp"
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 #include <unordered_map>
 #include <vector>
@@ -22,7 +24,7 @@ namespace LandRemapping {
 
 	struct LandData {
 		uint32_t uiCoords;
-		uint32_t uiWorldID;
+		FormID uiWorldID;
 
 		int16_t GetX() const {
 			return int16_t((uiCoords >> 16) & 0xFFFF);
@@ -32,68 +34,185 @@ namespace LandRemapping {
 			return int16_t(uiCoords & 0xFFFF);
 		}
 
-		uint32_t GetWorld() const {
+		FormID GetWorld() const {
 			return uiWorldID;
 		}
 	};
 
-	std::unordered_map<uint32_t, LandData> kRemappedLands;
+	using LandRemapMap = std::unordered_map<FormID, LandData>;
 
-	class Hooks {
-	public:
-		bool IsRemapped() const {
-			const TESObjectLAND* pThis = reinterpret_cast<const TESObjectLAND*>(this);
-			const uint32_t uiFormID = pThis->GetFormID();
-			if (auto it = kRemappedLands.find(uiFormID); it != kRemappedLands.end())
-				return true;
-			return pThis->GetLandRemapped();
-		}
+	STACK_FRAME_OPT_ENABLE
 
-		TESWorldSpace* GetRemapWorld() const {
-			const TESObjectLAND* pThis = reinterpret_cast<const TESObjectLAND*>(this);
-			const uint32_t uiFormID = pThis->GetFormID();
-			if (auto it = kRemappedLands.find(uiFormID); it != kRemappedLands.end()) {
-				TESForm* pForm = TESForm::GetFormByNumericID(it->second.GetWorld());
-				if (pForm->GetFormType() == FORM_TYPE::TESWorldSpace)
-					return static_cast<TESWorldSpace*>(pForm);
-				else
-					return nullptr;
-			}
-			return ThisCall<TESWorldSpace*>(0x5340B0, pThis);
-		}
+	static LandRemapMap* pRemappedLands = nullptr;
 
-		int32_t GetRemapX() const {
-			const TESObjectLAND* pThis = reinterpret_cast<const TESObjectLAND*>(this);
-			const uint32_t uiFormID = pThis->GetFormID();
-			if (auto it = kRemappedLands.find(uiFormID); it != kRemappedLands.end())
-				return it->second.GetX();
+	static SPEC_NOINLINE void CreateMap() {
+		if (!pRemappedLands)
+			pRemappedLands = new LandRemapMap();
+	}
 
-			return pThis->GetDataX();
-		}
+	static SPEC_NOINLINE void DestroyMap() {
+		delete pRemappedLands;
+		pRemappedLands = nullptr;
+	}
+
+	static SPEC_NOINLINE bool __fastcall GetLandRemapData(const TESObjectLAND* apLand, LandData* apData = nullptr) {
+		if (!pRemappedLands)
+			return false;
+
+		const FormID uiFormID = apLand->GetFormID();
+		auto it = pRemappedLands->find(uiFormID);
+		const bool bRemapped = it != pRemappedLands->end();
+		if (!bRemapped) [[likely]]
+			return false;
 		
-		int32_t GetRemapY() const {
-			const TESObjectLAND* pThis = reinterpret_cast<const TESObjectLAND*>(this);
-			const uint32_t uiFormID = pThis->GetFormID();
-			if (auto it = kRemappedLands.find(uiFormID); it != kRemappedLands.end())
-				return it->second.GetY();
+		if (apData) [[likely]]
+			*apData = it->second;
 
-			return pThis->GetDataY();
+		return true;
+	}
+
+	static SPEC_NOINLINE TESWorldSpace* __fastcall GetLandRemapTargetWorld(const TESObjectLAND* apLand) {
+		LandData kData;
+		if (!GetLandRemapData(apLand, &kData)) [[likely]]
+			return nullptr;
+
+		const FormID uiWorldFormID = kData.uiWorldID;
+		if (!uiWorldFormID) [[unlikely]]
+			return nullptr;
+
+		TESForm* pForm = TESForm::GetFormByNumericID(uiWorldFormID);
+		if (pForm && pForm->GetFormType() == FORM_TYPE::TESWorldSpace) [[likely]]
+			return static_cast<TESWorldSpace*>(pForm);
+		else
+			return nullptr;
+	}
+
+	STACK_FRAME_OPT_RESET
+
+	namespace Hooks {
+
+		STACK_FRAME_OPT_ENABLE
+
+		static SPEC_NOINLINE bool __fastcall IsLandRemapped(TESObjectLAND* apLand, uintptr_t auiAddress) {
+			if (GetLandRemapData(apLand)) [[unlikely]]
+				return true;
+
+			return ThisCall<bool>(auiAddress, apLand);
 		}
-	};
 
-	void RemapLand(uint32_t auiLandFormID, TESWorldSpace* apWorld, int16_t asX, int16_t asY) {
+		static SPEC_NOINLINE TESWorldSpace* __fastcall GetRemapWorld(TESObjectLAND* apLand, uintptr_t auiAddress) {
+			TESWorldSpace* pWorld = GetLandRemapTargetWorld(apLand);
+			if (pWorld) [[unlikely]]
+				return pWorld;
+
+			return ThisCall<TESWorldSpace*>(auiAddress, apLand);
+		}
+
+		static SPEC_NOINLINE int32_t __fastcall GetLandX(TESObjectLAND* apLand, uintptr_t auiAddress) {
+			LandData kData;
+			if (GetLandRemapData(apLand, &kData)) [[unlikely]]
+				return kData.GetX();
+
+			return ThisCall<int32_t>(auiAddress, apLand);
+		}
+
+		static SPEC_NOINLINE int32_t __fastcall GetLandY(TESObjectLAND* apLand, uintptr_t auiAddress) {
+			LandData kData;
+			if (GetLandRemapData(apLand, &kData)) [[unlikely]]
+				return kData.GetY();
+
+			return ThisCall<int32_t>(auiAddress, apLand);
+		}
+
+		template<uint32_t uiAddress>
+		class IsLandRemappedHook {
+			static inline HookUtils::CallDetour kDetour;
+
+			bool Hook() {
+				return IsLandRemapped(reinterpret_cast<TESObjectLAND*>(this), kDetour);
+			}
+
+		public:
+			IsLandRemappedHook() {
+				kDetour.ReplaceCall(uiAddress, &IsLandRemappedHook::Hook);
+			}
+		};
+
+		template<uint32_t uiAddress>
+		class GetRemapWorldHook {
+			static inline HookUtils::CallDetour kDetour;
+
+			TESWorldSpace* Hook() {
+				return GetRemapWorld(reinterpret_cast<TESObjectLAND*>(this), kDetour);
+			}
+
+		public:
+			GetRemapWorldHook() {
+				kDetour.ReplaceCall(uiAddress, &GetRemapWorldHook::Hook);
+			}
+		};
+
+		template<uint32_t uiAddress>
+		class GetLandXHook {
+			static inline HookUtils::CallDetour kDetour;
+
+			int32_t Hook() {
+				return GetLandX(reinterpret_cast<TESObjectLAND*>(this), kDetour);
+			}
+
+		public:
+			GetLandXHook() {
+				kDetour.ReplaceCall(uiAddress, &GetLandXHook::Hook);
+			}
+		};
+
+		template<uint32_t uiAddress>
+		class GetLandYHook {
+			static inline HookUtils::CallDetour kDetour;
+
+			int32_t Hook() {
+				return GetLandY(reinterpret_cast<TESObjectLAND*>(this), kDetour);
+			}
+
+		public:
+			GetLandYHook() {
+				kDetour.ReplaceCall(uiAddress, &GetLandYHook::Hook);
+			}
+		};
+
+		static void Init() {
+			IsLandRemappedHook<0x534BA8>();
+			IsLandRemappedHook<0x535D75>();
+			IsLandRemappedHook<0x535C2D>();
+			IsLandRemappedHook<0x535FD6>();
+
+			GetRemapWorldHook<0x535E22>();
+
+			GetLandXHook<0x535E4A>();
+
+			GetLandYHook<0x535E3E>();
+		}
+
+		STACK_FRAME_OPT_RESET
+
+	}
+
+	void __fastcall RemapLand(FormID auiLandFormID, const TESWorldSpace* apWorld, int16_t asX, int16_t asY) {
 		if (!apWorld) {
-			kRemappedLands.erase(auiLandFormID);
+			if (pRemappedLands)
+				pRemappedLands->erase(auiLandFormID);
 		}
 		else {
+			CreateMap();
+
 			LandData kData;
 			kData.uiCoords = TESObjectCELL::GetCoord(asX, asY);
 			kData.uiWorldID = apWorld->GetFormID();
-			kRemappedLands[auiLandFormID] = kData;
+			pRemappedLands->insert({ auiLandFormID, kData });
 		}
 	}
 
-	void ReloadModel(TESObjectLAND* apLand, bool abLoad) {
+	void __fastcall ReloadModel(TESObjectLAND* apLand, bool abLoad) {
 		// TallGrassShaderProperty::RemoveFromCell
 		CdeclCall(0xB61570, apLand->GetDataX(), apLand->GetDataY());
 
@@ -132,22 +251,25 @@ namespace LandRemapping {
 	}
 
 	bool HasDataToSave() {
-		return !kRemappedLands.empty();
+		return pRemappedLands && !pRemappedLands->empty();
 	}
 
-	void SerializeData(WriteFunc writeFunc) {
+	void __fastcall SerializeData(WriteFunc writeFunc) {
+		if (!pRemappedLands)
+			return;
+
 		DEBUG_MSG("Serializing remapped lands...");
-		uint32_t uiMapSize = kRemappedLands.size();
+		uint32_t uiMapSize = pRemappedLands->size();
 		writeFunc(&uiMapSize, sizeof(uiMapSize));
 
-		for (auto& it : kRemappedLands) {
-			writeFunc(&it.first, sizeof(uint32_t));
+		for (auto& it : *pRemappedLands) {
+			writeFunc(&it.first, sizeof(FormID));
 			writeFunc(&it.second, sizeof(LandData));
 			DEBUG_MSG("Serialized remapped land: %08X -> world %08X, coords %i, %i", it.first, it.second.uiWorldID, it.second.GetX(), it.second.GetY());
 		}
 	}
 
-	void DeserializeData(ReadFunc readFunc) {
+	void __fastcall DeserializeData(ReadFunc readFunc) {
 		DEBUG_MSG("Deserializing remapped lands...");
 		using namespace JohnnySerialization;
 		uint32_t uiMapSize = 0;
@@ -155,45 +277,47 @@ namespace LandRemapping {
 
 		if (uiMapSize > 0) {
 			for (uint32_t i = 0; i < uiMapSize; i++) {
-				uint32_t uiFormID = 0;
+				FormID uiFormID = 0;
 				LandData kData;
-				readFunc(&uiFormID, sizeof(uint32_t));
+				readFunc(&uiFormID, sizeof(FormID));
 				readFunc(&kData, sizeof(LandData));
 
 				DEBUG_MSG("Deserialized remapped land: %08X -> world %08X, coords %i, %i", uiFormID, kData.uiWorldID, kData.GetX(), kData.GetY());
 
-				uint32_t uiResolvedLandID = 0;
+				FormID uiResolvedLandID = 0;
 				if (_ResolveFormID(uiFormID, &uiResolvedLandID) && _ResolveFormID(kData.uiWorldID, &kData.uiWorldID)) {
 					DEBUG_MSG("Resolved remapped land: %08X -> world %08X, coords %i, %i", uiResolvedLandID, kData.uiWorldID, kData.GetX(), kData.GetY());
-					kRemappedLands[uiResolvedLandID] = kData;
+					
+					CreateMap();
+
+					pRemappedLands->insert({ uiResolvedLandID, kData });
 				}
 			}
 		}
 
-		for (auto& it : kRemappedLands) {
-			TESForm* pForm = TESForm::GetFormByNumericID(it.first);
-			if (pForm && pForm->GetFormType() == FORM_TYPE::TESObjectLAND) {
-				TESObjectLAND* pLand = static_cast<TESObjectLAND*>(pForm);
-				DEBUG_MSG("Reloading remapped land: %08X", it.first);
-				ReloadModel(pLand, true);
+		if (pRemappedLands) {
+			for (auto& it : *pRemappedLands) {
+				TESForm* pForm = TESForm::GetFormByNumericID(it.first);
+				if (pForm && pForm->GetFormType() == FORM_TYPE::TESObjectLAND) {
+					TESObjectLAND* pLand = static_cast<TESObjectLAND*>(pForm);
+					DEBUG_MSG("Reloading remapped land: %08X", it.first);
+					ReloadModel(pLand, true);
+				}
 			}
 		}
 	}
 
 	void Install() {
-		HookUtils::ReplaceCall(0x534BA8, &Hooks::IsRemapped);
-		HookUtils::ReplaceCall(0x535D75, &Hooks::IsRemapped);
-		HookUtils::ReplaceCall(0x535C2D, &Hooks::IsRemapped);
-		HookUtils::ReplaceCall(0x535FD6, &Hooks::IsRemapped);
-		HookUtils::ReplaceCall(0x535E22, &Hooks::GetRemapWorld);
-		HookUtils::ReplaceCall(0x535E4A, &Hooks::GetRemapX);
-		HookUtils::ReplaceCall(0x535E3E, &Hooks::GetRemapY);
+		Hooks::Init();
 	}
 
 	void Reset() {
+		if (!pRemappedLands)
+			return;
+
 		DEBUG_MSG("Resetting remapped lands...");
 		std::vector<TESObjectLAND*, BSScrapAllocator<TESObjectLAND*>> kLandsToReload;
-		for (auto& it : kRemappedLands) {
+		for (auto& it : *pRemappedLands) {
 			TESForm* pForm = TESForm::GetFormByNumericID(it.first);
 			if (pForm && pForm->GetFormType() == FORM_TYPE::TESObjectLAND) {
 				TESObjectLAND* pLand = static_cast<TESObjectLAND*>(pForm);
@@ -202,7 +326,7 @@ namespace LandRemapping {
 			}
 		}
 
-		kRemappedLands.clear();
+		DestroyMap();
 
 		for (TESObjectLAND* pLand : kLandsToReload) {
 			DEBUG_MSG("Reloading land: %08X", pLand->GetFormID());

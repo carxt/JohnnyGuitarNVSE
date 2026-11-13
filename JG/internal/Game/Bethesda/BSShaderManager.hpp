@@ -6,6 +6,7 @@ class ShadowSceneNode;
 class NiDX9Renderer;
 class NiFixedString;
 class ImageSpaceManager;
+class ImageSpaceParameterData;
 
 class BSShaderManager {
 public:
@@ -20,8 +21,6 @@ public:
 	};
 	using SceneGraphType = _SSNType::Type;
 
-	static constexpr AddressPtr<NiFixedString*, 0x11F94BC> pTexPercTag;
-
 	static NiDX9Renderer* GetRenderer();
 
 	static BSTextureManager* GetTextureManager();
@@ -31,4 +30,21 @@ public:
 	static ShadowSceneNode* GetShadowSceneNode(uint32_t aeType);
 
 	static const NiFixedString& GetTexPercTag();
+
+#ifdef GAME
+	static void SetImageSpaceParameters(ImageSpaceParameterData* apParams);
+#endif
+
+#ifdef GAME
+	static constexpr AddressPtr<bool, 0x11F941E> bHDR;
+#else
+	static constexpr AddressPtr<bool, 0xF23E6E> bHDR;
+#endif
+
+private:
+#ifdef GAME
+	static constexpr AddressPtr<NiFixedString*, 0x11F94BC> pTexPercTag;
+#else
+	static constexpr AddressPtr<NiFixedString*, 0xF23F0C>  pTexPercTag;
+#endif
 };

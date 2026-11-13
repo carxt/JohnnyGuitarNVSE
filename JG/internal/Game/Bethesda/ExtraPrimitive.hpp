@@ -1,15 +1,14 @@
 #pragma once
 
 #include "BSExtraData.hpp"
-
-class BGSPrimitive;
+#include "BGSPrimitive.hpp"
 
 class ExtraPrimitive : public BSExtraData {
 public:
 	ExtraPrimitive();
 	~ExtraPrimitive();
 
-	BGSPrimitive *pPrimitive;
+	BGSPrimitive* pPrimitive;
 
 	BSEXTRA_TYPE(ExtraPrimitive);
 };

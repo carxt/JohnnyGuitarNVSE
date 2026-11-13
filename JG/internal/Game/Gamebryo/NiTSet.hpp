@@ -1,11 +1,11 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 #include "NiTMallocInterface.hpp"
 #include "NiTNewInterface.hpp"
 
 template <class T_Data, class Allocator>
-class SPEC_EMPTY_BASES NiTSet : public NiMemObject {
+class SPEC_EMPTY_BASES NiTSet : public BSMemObject {
 public:
 	NiTSet(uint32_t auiInitialSize) {
 		if (auiInitialSize > 0) {

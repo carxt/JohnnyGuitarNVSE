@@ -3,7 +3,11 @@
 
 // GAME - 0x4A0E90
 NiDX9Renderer* BSShaderManager::GetRenderer() {
+#ifdef GAME
 	return *reinterpret_cast<NiPointer<NiDX9Renderer>*>(0x11F9508);
+#else
+	return *reinterpret_cast<NiPointer<NiDX9Renderer>*>(0xF23F58);
+#endif
 }
 
 // GAME - 0x4A0EA0
@@ -26,10 +30,21 @@ ImageSpaceManager* BSShaderManager::GetImageSpaceManager() {
 
 // GAME - 0x450B80
 ShadowSceneNode* BSShaderManager::GetShadowSceneNode(uint32_t aeType) {
-    return reinterpret_cast<ShadowSceneNode**>(0x11F91C8)[aeType];
+#ifdef GAME
+	return reinterpret_cast<ShadowSceneNode**>(0x11F91C8)[aeType];
+#else
+    return reinterpret_cast<ShadowSceneNode**>(0xF23C18)[aeType];
+#endif
 }
 
 // GAME - 0x539F40
 const NiFixedString& BSShaderManager::GetTexPercTag() {
 	return *pTexPercTag;
 }
+
+#ifdef GAME
+// GAME - 0xB4F430
+void BSShaderManager::SetImageSpaceParameters(ImageSpaceParameterData* apParams) {
+	CdeclCall(0xB4F430, apParams);
+}
+#endif

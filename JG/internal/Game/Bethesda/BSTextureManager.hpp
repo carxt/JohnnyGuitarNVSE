@@ -3,6 +3,8 @@
 #include "Gamebryo/NiTPointerList.hpp"
 #include "Gamebryo/NiSmartPointer.hpp"
 
+#include <d3d9types.h>
+
 class NiDX9Renderer;
 class NiTexture;
 class NiDepthStencilBuffer;

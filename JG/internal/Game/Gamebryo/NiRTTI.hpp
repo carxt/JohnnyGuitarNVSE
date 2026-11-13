@@ -1,8 +1,8 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
-class SPEC_EMPTY_BASES NiRTTI : public NiMemObject {
+class SPEC_EMPTY_BASES NiRTTI : public BSMemObject {
 public:
 	NiRTTI() { m_pcName = nullptr; m_pkBaseRTTI = nullptr; }
 	NiRTTI(const char* apName, const NiRTTI* const apBase) { m_pcName = apName; m_pkBaseRTTI = apBase; }
@@ -46,7 +46,7 @@ ASSERT_SIZE(NiRTTI, 0x8);
     static inline const NiRTTI ms_RTTI = NiRTTI(#classname, baseclassname##::ms_RTTI);
 
 #define NiImplementGetRTTI(classname) \
-	inline const NiRTTI* GetRTTIEx() {return &classname##::ms_RTTI;}
+	inline const NiRTTI* _GetRTTI() {return &classname##::ms_RTTI;}
 
 #define NiNewRTTI(classname, baseclassname) \
 	NiImplementRTTI(classname, baseclassname) \

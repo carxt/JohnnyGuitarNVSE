@@ -1,17 +1,26 @@
 #include "CameraOverlay.hpp"
-#include <GameObjects.h>
 #include <GameUI.h>
-#include <GameSettings.h>
 
 #include "Bethesda/BSRenderedTexture.hpp"
 #include "Bethesda/BSShaderUtil.hpp"
 #include "Bethesda/BSShaderManager.hpp"
 #include "Bethesda/TESMain.hpp"
 #include "Bethesda/TimeGlobal.hpp"
+#include "Bethesda/TESObjectREFR.hpp"
+#include "Bethesda/BSAnimGroupSequence.hpp"
+#include "Bethesda/SceneGraph.hpp"
+#include "Bethesda/BSFadeNode.hpp"
+#include "Gamebryo/NiControllerManager.hpp"
+#include "Gamebryo/NiCamera.hpp"
+#include "Gamebryo/NiDirectionalLight.hpp"
+
+#include <Shared/Utils/CustomGameSetting.hpp>
+#include "Shared/SafeWrite/SafeWrite.hpp"
 
 #pragma comment(lib, "d3d9.lib")
 
 namespace Utils {
+
 	class AutoLightOffset {
 		ShadowSceneNode* pSceneNode;
 		NiPoint3 kOrgEyePos;
@@ -55,7 +64,7 @@ namespace Utils {
 		}
 	};
 
-	void __fastcall RenderScene(NiAVObject* apScene, NiCamera* apCamera, BSShaderAccumulator* apAccumulator) {
+	static void __fastcall RenderScene(NiAVObject* apScene, NiCamera* apCamera, BSShaderAccumulator* apAccumulator) {
 		BSCullingProcess* pCuller = TESMain::GetWorldSceneGraph()->pCuller;
 
 		pCuller->PushCullMode(BS_CULLING_TYPE::ALL_PASS);
@@ -70,7 +79,7 @@ namespace Utils {
 		pCuller->PopCullMode();
 	}
 
-	void __fastcall UpdateAnimManager(NiControllerManager* apManager, TESObjectREFR* apOwner) {
+	static void __fastcall UpdateAnimManager(NiControllerManager* apManager, TESObjectREFR* apOwner) {
 		uint32_t uiPlayingAnims = 0;
 		for (uint32_t i = 0; i < apManager->GetSequenceCount(); ++i) {
 			NiControllerSequence* pSequence = apManager->GetSequenceAt(i);
@@ -86,7 +95,7 @@ namespace Utils {
 			apManager->SetActive(false);
 	}
 
-	void __fastcall UpdateAnimsRecurse(NiAVObject* apObject, TESObjectREFR* apRef) {
+	static void __fastcall UpdateAnimsRecurse(NiAVObject* apObject, TESObjectREFR* apRef) {
 		NiControllerManager* pManager = apObject->GetController<NiControllerManager>();
 		if (pManager && pManager->GetActive()) [[unlikely]] {
 			UpdateAnimManager(pManager, apRef);
@@ -103,6 +112,7 @@ namespace Utils {
 			}
 		}
 	}
+
 }
 
 namespace CameraOverlay {
@@ -111,7 +121,7 @@ namespace CameraOverlay {
 
 #pragma region Enums
 	struct _OverlayTypes {
-		enum Types {
+		enum Types : uint32_t {
 			PRE_IMAGESPACE,
 			POST_IMAGESPACE,
 			PRE_INTERFACE,
@@ -122,7 +132,7 @@ namespace CameraOverlay {
 	using OverlayTypes = _OverlayTypes::Types;
 
 	struct _CameraVariants {
-		enum Variants {
+		enum Variants : uint32_t {
 			NORMAL,
 			ORTHO,
 			COUNT,
@@ -132,21 +142,21 @@ namespace CameraOverlay {
 #pragma endregion
 
 	static float fUpdateTime = 0.f;
-	static NiPointer<NiNode>	spSceneOverlayRoot;
-	static NiPointer<BSShaderAccumulator> spAccumulator;
-	static NiPointer<NiCamera>  spCameras[CameraVariants::COUNT];
+	static NiPointer<NiNode>				spSceneOverlayRoot;
+	static NiPointer<BSShaderAccumulator>	spAccumulator;
+	static NiPointer<NiCamera>				spCameras[CameraVariants::COUNT];
 
-	CustomGameSetting kJG_OverrideLighting;
-	CustomGameSetting kJG_OverrideLightingValues;
-	CustomGameSetting kJG_SunlightColor_R;
-	CustomGameSetting kJG_SunlightColor_G;
-	CustomGameSetting kJG_SunlightColor_B;
-	CustomGameSetting kJG_SunlightDir_X;
-	CustomGameSetting kJG_SunlightDir_Y;
-	CustomGameSetting kJG_SunlightDir_Z;
-	CustomGameSetting kJG_AmbientColor_R;
-	CustomGameSetting kJG_AmbientColor_G;
-	CustomGameSetting kJG_AmbientColor_B;
+	static CustomGameSetting kJG_OverrideLighting;
+	static CustomGameSetting kJG_OverrideLightingValues;
+	static CustomGameSetting kJG_SunlightColor_R;
+	static CustomGameSetting kJG_SunlightColor_G;
+	static CustomGameSetting kJG_SunlightColor_B;
+	static CustomGameSetting kJG_SunlightDir_X;
+	static CustomGameSetting kJG_SunlightDir_Y;
+	static CustomGameSetting kJG_SunlightDir_Z;
+	static CustomGameSetting kJG_AmbientColor_R;
+	static CustomGameSetting kJG_AmbientColor_G;
+	static CustomGameSetting kJG_AmbientColor_B;
 	
 	static constexpr const char cBaseRefName[] = "JG_CameraOverlayRef";
 
@@ -161,7 +171,7 @@ namespace CameraOverlay {
 		TESObjectREFR*		pReference = nullptr;
 
 		NiNode* GetRoot() const {
-			return static_cast<NiNode*>(pReference->Get3DSimple());
+			return static_cast<NiNode*>(pReference->Get3DVerySimple());
 		}
 
 		NiNode* __fastcall Initialize(const char* apName) {
@@ -179,7 +189,7 @@ namespace CameraOverlay {
 
 			BSFadeNode* pRoot = BSFadeNode::CreateObject();
 			pRoot->SetName(cRootName);
-			pRoot->pLinkedObj = pReference;
+			pRoot->SetReference(pReference);
 			pRoot->TurnFadeNodeOn();
 			pRoot->SetAlwaysDraw(true);
 			pRoot->SetIgnoreFade(true);
@@ -260,7 +270,7 @@ namespace CameraOverlay {
 
 	static Overlay kOverlays[OverlayTypes::COUNT][CameraVariants::COUNT];
 
-	bool __fastcall RenderOverlay(BSRenderedTexture* apTexture, uint32_t aeOverlay) {
+	static bool __fastcall RenderOverlay(BSRenderedTexture* apTexture, uint32_t aeOverlay) {
 		bool bRendered = false;
 		if (spSceneOverlayRoot && spSceneOverlayRoot->GetChildCount()) [[likely]] {
 			{
@@ -341,59 +351,70 @@ namespace CameraOverlay {
 		return bRendered;
 	}
 
-	template <uint32_t auiAddress, int32_t aiOffset>
-	class RenderHookDetour {
-	public:
-		static inline HookUtils::CallDetour kDetour;
+	namespace Hooks {
 
-		template <int32_t aiOffset>
-		static bool __cdecl RenderHook() {
-			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
-			BSRenderedTexture* pTexture = *reinterpret_cast<BSRenderedTexture**>(pEBP + aiOffset);
-			RenderOverlay(pTexture, OverlayTypes::PRE_IMAGESPACE);
-			return CdeclCall<bool>(kDetour);
+		template <uint32_t auiAddress, int32_t aiOffset>
+		class RenderHookDetour {
+		public:
+			static inline HookUtils::CallDetour kDetour;
+
+			template <int32_t aiOffset>
+			static bool __cdecl RenderHook() {
+				uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+				BSRenderedTexture* pTexture = *reinterpret_cast<BSRenderedTexture**>(pEBP + aiOffset);
+				RenderOverlay(pTexture, OverlayTypes::PRE_IMAGESPACE);
+				return CdeclCall<bool>(kDetour);
+			}
+
+			RenderHookDetour() {
+				kDetour.ReplaceCall(auiAddress, RenderHook<aiOffset>);
+			}
+		};
+
+		static HookUtils::CallDetour kPostISRenderDetour;
+		static bool __cdecl PostISRenderHook() {
+			RenderOverlay(nullptr, OverlayTypes::POST_IMAGESPACE);
+			return CdeclCall<bool>(kPostISRenderDetour);
 		}
 
-		RenderHookDetour() {
-			kDetour.ReplaceCall(auiAddress, RenderHook<aiOffset>);
-		}	
-	};
+		static HookUtils::CallDetour kRenderUIDetour;
+		class InterfaceRender : public InterfaceManager {
+		public:
+			void RenderUIHook(BSCullingProcess* apCuller, bool abPipboyVisible) {
+				if (BSRenderedTexture::IsOutsideFrame() || Interface::IsLoadingMenuVisible()) [[unlikely]] {
+					ThisCall(kRenderUIDetour, this, apCuller, abPipboyVisible);
+				}
+				else [[likely]] {
+					RenderOverlay(nullptr, OverlayTypes::PRE_INTERFACE);
 
-	HookUtils::CallDetour kPostISRenderDetour;
-	bool __cdecl PostISRenderHook() {
-		RenderOverlay(nullptr, OverlayTypes::POST_IMAGESPACE);
-		return CdeclCall<bool>(kPostISRenderDetour);
-	}
+					const bool bCursorCulled = pCursorRoot->GetAppCulled();
+					if (pCursorRoot)
+						pCursorRoot->SetAppCulled(true);
 
-	HookUtils::CallDetour kRenderUIDetour;
-	class InterfaceRender : public InterfaceManager {
-	public:
-		void RenderUIHook(BSCullingProcess* apCuller, bool abPipboyVisible) {
-			if (BSRenderedTexture::IsOutsideFrame() || Interface::IsLoadingMenuVisible()) [[unlikely]] {
-				ThisCall(kRenderUIDetour, this, apCuller, abPipboyVisible);
-			}
-			else [[likely]] {
-				RenderOverlay(nullptr, OverlayTypes::PRE_INTERFACE);
+					ThisCall(kRenderUIDetour, this, apCuller, abPipboyVisible);
 
-				const bool bCursorCulled = pCursorRoot->GetAppCulled();
-				if (pCursorRoot)
-					pCursorRoot->SetAppCulled(true);
+					RenderOverlay(nullptr, OverlayTypes::POST_INTERFACE);
 
-				ThisCall(kRenderUIDetour, this, apCuller, abPipboyVisible);
+					if (pCursorRoot) {
+						pCursorRoot->SetAppCulled(bCursorCulled);
 
-				RenderOverlay(nullptr, OverlayTypes::POST_INTERFACE);
-
-				if (pCursorRoot) {
-					pCursorRoot->SetAppCulled(bCursorCulled);
-
-					Utils::RenderScene(pCursorRoot, spSceneGraph->spCamera, spInterfaceAccum);
+						Utils::RenderScene(pCursorRoot, spSceneGraph->spCamera, spInterfaceAccum);
+					}
 				}
 			}
+		};
+
+		static void Init() {
+			RenderHookDetour<0x8710C4, -0x28>(); // Normal
+			RenderHookDetour<0x870B69, -0x1C>(); // Wireframe
+			RenderHookDetour<0x87096C, -0x14>(); // PipBoy
+
+			kPostISRenderDetour.ReplaceCall(0x8703F1, PostISRenderHook);
+			kRenderUIDetour.ReplaceCall(0x7144D3, &InterfaceRender::RenderUIHook);
 		}
-	};
+	}
 
-
-	static NiCamera* CreateCamera(bool abOrtho) {
+	static NiCamera* __fastcall CreateCamera(bool abOrtho) {
 		constexpr float fFOV = 85.f;
 
 		NiCamera* pCamera = NiCamera::CreateObject();
@@ -423,7 +444,7 @@ namespace CameraOverlay {
 		return pCamera;
 	}
 
-	void InitializeAccumulator() {
+	static void __fastcall InitializeAccumulator() {
 		spAccumulator = BSShaderAccumulator::Create();
 
 		// Free unused data
@@ -435,14 +456,14 @@ namespace CameraOverlay {
 		spAccumulator->pInstanceRenderer = nullptr;
 	}
 
-	void __fastcall InitializeCameras(NiNode* apRoot) {
+	static void __fastcall InitializeCameras(NiNode* apRoot) {
 		for (uint32_t i = 0; i < CameraVariants::COUNT; ++i) {
 			spCameras[i] = CreateCamera(i == CameraVariants::ORTHO);
 			apRoot->AttachChild(spCameras[i], true);
 		}
 	}
 
-	void __fastcall InitializeReferences(NiNode* apRoot) {
+	static void __fastcall InitializeReferences(NiNode* apRoot) {
 		char cNameBuffer[256];
 		for (uint32_t i = 0; i < OverlayTypes::COUNT; ++i) {
 			for (uint32_t j = 0; j < CameraVariants::COUNT; ++j) {
@@ -452,7 +473,7 @@ namespace CameraOverlay {
 		}
 	}
 
-	void __fastcall InitializeGameSettings() {
+	static void __fastcall InitializeGameSettings() {
 		kJG_OverrideLighting.Initialize("iJG_Overlay_OverrideLighting", 0);
 		kJG_OverrideLightingValues.Initialize("iJG_OverrideLightingValues", 0);
 		kJG_SunlightColor_R.Initialize("fJG_Overlay_SunlightColor_R", 1.f);
@@ -468,17 +489,11 @@ namespace CameraOverlay {
 
 	void Install() {
 		InitializeGameSettings();
-
-		RenderHookDetour<0x8710C4, -0x28>(); // Normal
-		RenderHookDetour<0x870B69, -0x1C>(); // Wireframe
-		RenderHookDetour<0x87096C, -0x14>(); // PipBoy
-
-		kPostISRenderDetour.ReplaceCall(0x8703F1, PostISRenderHook);
-		kRenderUIDetour.ReplaceCall(0x7144D3, &InterfaceRender::RenderUIHook);
+		Hooks::Init();
 	}
 
 	void Init() {
-		constexpr uint32_t uiChildCount = (OverlayTypes::COUNT * CameraVariants::COUNT) + CameraVariants::COUNT;
+		constexpr uint32_t uiChildCount = (static_cast<uint32_t>(OverlayTypes::COUNT) * static_cast<uint32_t>(CameraVariants::COUNT)) + CameraVariants::COUNT;
 		spSceneOverlayRoot = NiNode::Create(uiChildCount);
 		spSceneOverlayRoot->SetName("JG_CameraOverlaySceneRoot");
 		spSceneOverlayRoot->SetAlwaysDraw(true);
