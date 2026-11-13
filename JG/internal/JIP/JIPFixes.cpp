@@ -34,6 +34,9 @@
 #include "Bethesda/TimeGlobal.hpp"
 #include "Bethesda/BSFadeNode.hpp"
 #include "Bethesda/WaterShaderProperty.hpp"
+#include "Bethesda/ExtraHotkey.hpp"
+#include "Bethesda/ExtraItemDropper.hpp"
+#include "Obsidian/ExtraWeaponModFlags.hpp"
 #include "Gamebryo/NiControllerManager.hpp"
 #include "Gamebryo/NiAVObjectPalette.hpp"
 #include "Gamebryo/NiPointLight.hpp"
@@ -1833,6 +1836,34 @@ namespace JIPFixes {
 			HookUtils::ReplaceCall(JIPUtils::GetAddress(0x10058476), SetItemHealth);
 		}
 	}
+
+	namespace ModFlagsFix {
+		uint8_t __fastcall GetModFlags(ItemChange* apItem) {
+			if (apItem && apItem->pObject && apItem->pObject->GetFormType() == FORM_TYPE::TESObjectWEAP && apItem->GetExtraDataList()) {
+				auto pIter = apItem->GetExtraDataList();
+				while (pIter && !pIter->IsEmpty()) {
+					const ExtraDataList* pList = pIter->GetItem();
+					if (pList) [[likely]] {
+						const ExtraWeaponModFlags* pModFlags = nullptr;
+						const ExtraItemDropper* pDropper = pList->GetExtraData<ExtraItemDropper>();
+						if (pDropper && pDropper->pDropper)
+							pModFlags = pDropper->pDropper->GetExtraData<ExtraWeaponModFlags>();
+						else
+							pModFlags = pList->GetExtraData<ExtraWeaponModFlags>();
+
+						if (pModFlags)
+							return pModFlags->ucWeaponModsActive;
+					}
+					pIter = pIter->GetNext();
+				}
+			}
+			return 0;
+		}
+
+		void InitHooks() {
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000DD40), GetModFlags);
+		}
+	}
 #endif
 
 	namespace CursorPosUICords {
@@ -2203,6 +2234,128 @@ namespace JIPFixes {
 
 			// Fix offset when skipping script vars (is +9 instead of +10)
 			HookUtils::SafeWrite8(JIPUtils::GetAddress(0x100156BA) + 2, 0xA);
+		}
+	}
+
+	namespace VanillaExtraDataGetter {
+
+		void InitHooks() {
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x100573D0), 0x410220);
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10057580), 0x419AD0);
+		}
+	}
+
+	namespace HotKeyClearFix {
+
+		void __fastcall ClearHotkey(ExtraDataList* apExtraList) {
+			if (!apExtraList) [[unlikely]]
+				return;
+
+			const ExtraHotkey* pHotKey = apExtraList->GetExtraData<ExtraHotkey>();
+			if (!pHotKey) [[likely]]
+				return;
+
+			const InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(PlayerCharacter::GetSingleton());
+			if (!pInvChanges)
+				return;
+
+			const uint8_t ucIndex = pHotKey->ucIndex;
+
+			auto pChangeIter = pInvChanges->pItems;
+			while (pChangeIter && !pChangeIter->IsEmpty()) {
+				const ItemChange* pItem = pChangeIter->GetItem();
+				pChangeIter = pChangeIter->GetNext();
+				if (!pItem || !pItem->pObject || !pItem->GetExtraDataList())
+					continue;
+
+				const FORM_TYPE eType = pItem->pObject->GetFormType();
+				if (eType != FORM_TYPE::TESAmmo && eType != FORM_TYPE::TESObjectMISC && eType <= FORM_TYPE::AlchemyItem) {
+					auto pExtraIter = pItem->GetExtraDataList();
+					while (pExtraIter && !pExtraIter->IsEmpty()) {
+						ExtraDataList* pItemExtraList = pExtraIter->GetItem();
+						pExtraIter = pExtraIter->GetNext();
+						if (!pItemExtraList)
+							continue;
+
+						const ExtraHotkey* pItemHotKey = pItemExtraList->GetExtraData<ExtraHotkey>();
+						if (pItemHotKey && pItemHotKey->ucIndex == ucIndex)
+							pItemExtraList->RemoveExtra<ExtraHotkey>();
+					}
+				}
+			}
+		}
+
+		void InitHooks() {
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x1000DC20), ClearHotkey);
+		}
+	}
+
+	namespace RemoveItemFix {
+
+		class Hook : public TESObjectREFR {
+		public:
+			void RemoveItemTarget(TESForm* apItem, TESObjectREFR* apOtherContainer, int32_t aiAmount, bool abSteal) {
+				if (apItem->GetFormType() == FORM_TYPE::BGSListForm) {
+					auto pIter = static_cast<BGSListForm*>(apItem)->GetFormList();
+					while (pIter && !pIter->IsEmpty()) {
+						if (pIter->GetItem()) [[likely]]
+							RemoveItemTarget(pIter->GetItem(), apOtherContainer, aiAmount, abSteal);
+						pIter = pIter->GetNext();
+					};
+				}
+				else if (apItem->IsBoundObject() && TESContainer::ContainerCanHoldType(apItem->GetFormType())) {
+					TESBoundObject* pObject = static_cast<TESBoundObject*>(apItem);
+					InventoryChanges* pInvChanges = InventoryChanges::GetInventoryChanges(this);
+					int32_t iItemCount = pInvChanges ? pInvChanges->GetObjectCount(pObject) : 0;
+					if (iItemCount < 1)
+						return;
+
+					if (aiAmount > 0 && aiAmount < iItemCount)
+						iItemCount = aiAmount;
+
+					ItemChange* pItemChange = pInvChanges->GetObjectInList(pObject, true, 0);
+					if (pItemChange && pItemChange->GetExtraDataList() && !pItemChange->GetExtraDataList()->IsEmpty()) {
+						auto pExtraLists = pItemChange->GetExtraDataList();
+						const uint32_t uiExtraCount = pExtraLists->ItemsInList();
+
+						BSScrapBuffer<ExtraDataList*> kTempLists(uiExtraCount);
+						{
+							uint32_t i = 0;
+							auto pIter = pExtraLists;
+							while (pIter && !pIter->IsEmpty()) {
+								ExtraDataList* pList = pIter->GetItem();
+								if (pList) [[likely]]
+									kTempLists[i++] = pList;
+								pIter = pIter->GetNext();
+							}
+						}
+
+						uint32_t i = 0;
+						while (iItemCount && i < uiExtraCount) {
+							ExtraDataList* pExtraList = kTempLists[i];
+							if (pExtraList) [[likely]] {
+								int32_t iExactCount = pExtraList->GetCount();
+								if (iExactCount < 1)
+									iExactCount = 1;
+								else if (iExactCount > iItemCount)
+									iExactCount = iItemCount;
+
+								RemoveItem(pObject, pExtraList, iExactCount, abSteal, false, apOtherContainer, nullptr, nullptr, false, false);
+
+								iItemCount -= iExactCount;
+							}
+							++i;
+						}
+					}
+
+					if (iItemCount > 0)
+						RemoveItem(pObject, nullptr, iItemCount, abSteal, false, apOtherContainer, nullptr, nullptr, false, false);
+				}
+			}
+		};
+
+		void InitHooks() {
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10058500), &Hook::RemoveItemTarget);
 		}
 	}
 

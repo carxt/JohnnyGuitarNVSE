@@ -596,3 +596,23 @@ void ExtraDataList::SetRadius(float afRadius) {
 	ThisCall(0x4ABC10, this, afRadius);
 #endif
 }
+
+// GAME - 0x418770
+// GECK - 0x4A9B90
+int16_t ExtraDataList::GetCount() const {
+#ifdef GAME
+	return ThisCall<int16_t>(0x418770, this);
+#else
+	return ThisCall<int16_t>(0x4A9B90, this);
+#endif
+}
+
+// GAME - 0x419AD0
+// GECK - 0x4ACBF0
+void ExtraDataList::SetCount(int16_t asCount) {
+#ifdef GAME
+	ThisCall(0x419AD0, this, asCount);
+#else
+	ThisCall(0x4ACBF0, this, asCount);
+#endif
+}

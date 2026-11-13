@@ -1864,7 +1864,6 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\ExtraRadius.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraScript.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraSeenData.hpp" />
-    <ClInclude Include="internal\Game\Bethesda\ExtraWeaponModFlags.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FactionRank.hpp" />
     <ClInclude Include="internal\Game\Bethesda\FalloutAudio.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
@@ -2461,6 +2460,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="internal\Game\Obsidian\ExtraAudioMarker.hpp" />
+    <ClInclude Include="internal\Game\Obsidian\ExtraWeaponModFlags.hpp" />
     <ClInclude Include="internal\Game\Obsidian\FalloutAudioMedia.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>

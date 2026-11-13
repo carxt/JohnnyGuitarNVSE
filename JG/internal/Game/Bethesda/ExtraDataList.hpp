@@ -117,6 +117,9 @@ public:
 
 	float GetRadius() const;
 	void SetRadius(float afRadius);
+
+	int16_t GetCount() const;
+	void SetCount(int16_t asCount);
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);
