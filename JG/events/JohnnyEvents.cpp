@@ -138,7 +138,7 @@ namespace JohnnyEvents {
 		}
 
 		static void __fastcall OnDying(Actor* apActor) {
-			if (apActor && apActor->IsActor() && apActor->GetLifeState() == ACTOR_LIFE_STATE::DYING) {
+			if (apActor->GetLifeState() == ACTOR_LIFE_STATE::DYING) {
 				{
 					using namespace JohnnyMessageData;
 					SendNVSEMessage(JG_OnDying, apActor);
