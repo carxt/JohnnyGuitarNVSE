@@ -21,19 +21,19 @@ union FilterType {
 	float			fVal;
 	char*			pcVal;
 
-	FilterType() : pVal(nullptr) {}
+	constexpr FilterType() : pVal(nullptr) {}
 
-	FilterType(void* apVal) : pVal(apVal) {}
+	constexpr FilterType(void* apVal) : pVal(apVal) {}
 
-	FilterType(const TESForm* apForm) : pForm(apForm) {}
+	constexpr FilterType(const TESForm* apForm) : pForm(apForm) {}
 
-	FilterType(FormID auiFormID) : uiFormID(auiFormID) {}
+	constexpr FilterType(FormID auiFormID) : uiFormID(auiFormID) {}
 
-	FilterType(int32_t aiVal) : iVal(aiVal) {}
+	constexpr FilterType(int32_t aiVal) : iVal(aiVal) {}
 
-	FilterType(float fltVal) : fVal(fltVal) {}
+	constexpr FilterType(float fltVal) : fVal(fltVal) {}
 
-	FilterType(char* str) : pcVal(str) {}
+	constexpr FilterType(char* str) : pcVal(str) {}
 };
 
 class IFilter {
@@ -100,6 +100,7 @@ public:
 class FilterForm : public FilterBase {
 protected:
 	static bool __fastcall DoFilterForm(const FilterSet& arSet, const TESForm* apForm);
+	static bool __fastcall DoFilterBase(const FilterSet& arSet, const TESBoundObject* apObject);
 	static bool __fastcall DoFilterRef(const FilterSet& arSet, const TESObjectREFR* apRef);
 
 public:
@@ -109,17 +110,19 @@ public:
 
 	void SetUpFiltering() override;
 
-	bool __fastcall IsAnyFormInFilter(uint32_t auiIndex, const TESForm* apForm) const;
+	bool __fastcall IsAnyFormInFilter(const TESForm* apForm, uint32_t auiIndex) const;
 	
-	bool __fastcall IsNonRefFormInFilter(uint32_t auiIndex, const TESForm* apForm) const;
+	bool __fastcall IsFormInFilter(const TESForm* apForm, uint32_t auiIndex) const;
 
-	bool __fastcall IsRefInFilter(uint32_t auiIndex, const TESObjectREFR* apRef) const;
+	bool __fastcall IsBaseFormInFilter(const TESBoundObject* apObject, uint32_t auiIndex) const;
 
-	void __fastcall InsertForm(uint32_t auiIndex, const TESForm* apForm);
+	bool __fastcall IsRefInFilter(const TESObjectREFR* apRef, uint32_t auiIndex) const;
 
-	void __fastcall InsertFormList(uint32_t auiIndex, const BGSListForm* apFormList);
+	void __fastcall InsertForm(const TESForm* apForm, uint32_t auiIndex);
 
-	void __fastcall InsertReference(uint32_t auiIndex, const TESObjectREFR* apRef);
+	void __fastcall InsertFormList(const BGSListForm* apFormList, uint32_t auiIndex);
+
+	void __fastcall InsertReference(const TESObjectREFR* apRef, uint32_t auiIndex);
 };
 
 class FilterInt : public FilterBase {
@@ -158,8 +161,8 @@ public:
 	static void* __fastcall Create(void** appFilters, uint32_t auiFilterCount);
 };
 
-class EventBase
-{
+class EventInformation;
+class EventBase {
 public:
 	Bitfield16				usFlags;
 	Bitfield16				usUserFlags;
@@ -175,10 +178,11 @@ public:
 
 	bool GetDeleted() const { return usFlags.GetBit<DELETED>(); }
 	void SetDeleted(bool abVal) { usFlags.SetBit<DELETED>(abVal); }
+
+	inline bool __fastcall CallScript(const EventInformation* apEvent, TESObjectREFR* apCaller = nullptr, auto ...args) const;
 };
 
-class EventInformation
-{
+class EventInformation {
 private:
 	void* (__fastcall*		CreateFilter)(void**, uint32_t); // supposed to be passing itself
 	std::vector<EventBase>	kEventAddQueue;
@@ -204,6 +208,10 @@ public:
 
 	void virtual DeleteEvents() final;
 };
+
+inline bool __fastcall EventBase::CallScript(const EventInformation* apEvent, TESObjectREFR* apCaller, auto ...args) const {
+	return CallUDF(pScript, apCaller, apEvent->ucMaxArgsCount, std::forward<decltype(args)>(args)...);
+}
 
 typedef EventInformation* EventInfo;
 extern std::vector<EventInfo> kEventInfos;

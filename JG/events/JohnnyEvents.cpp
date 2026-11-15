@@ -17,7 +17,7 @@ extern NVSEScriptInterface* g_scriptInterface;
 
 namespace JohnnyEvents {
 
-	thread_local AVChangeMode eAVChangeMode = AVChangeMode::MOD;
+	static thread_local AVChangeMode eAVChangeMode = AVChangeMode::MOD;
 
 	STACK_FRAME_OPT_ENABLE
 	EXTERN_DLL_EXPORT SPEC_NOINLINE AVChangeMode SetAVChangeMode(AVChangeMode aeMode) {
@@ -39,31 +39,31 @@ namespace JohnnyEvents {
 
 		STACK_FRAME_OPT_ENABLE
 
-		EventInformation* OnDyingHandler;
-		EventInformation* OnStartQuestHandler;
-		EventInformation* OnStopQuestHandler;
-		EventInformation* OnFailQuestHandler;
-		EventInformation* OnCompleteQuestHandler;
-		EventInformation* OnSeenDataUpdateHandler;
-		EventInformation* OnLimbGoneHandler;
-		EventInformation* OnChallengeCompleteHandler;
-		EventInformation* OnCrosshairHandler;
-		EventInformation* OnSettingsUpdateHandler;
-		EventInformation* OnAddPerkHandler;
-		EventInformation* OnRemovePerkHandler;
-		EventInformation* OnRenderGamePreUpdateHandler;
-		EventInformation* OnRenderGameModeUpdateHandler;
-		EventInformation* OnRenderRenderedMenuUpdateHandler;
-		EventInformation* OnAVChangeHandler;
-		EventInformation* OnPLChangeHandler;
-		EventInformation* OnRadioPostSoundAttachHandler;
-		EventInformation* OnKeyboardControllerSelectionChangeHandler;
-		EventInformation* OnSleepWaitEventHandler;
-		EventInformation* OnTakeBackItemHandler;
-		EventInformation* OnNPCResponseHandler;
-		EventInformation* OnGeneralSubtitleHandler;
-		EventInformation* OnReputationChangeHandler;
-		EventInformation* OnNPCAVChangeHandler;
+		static EventInformation* OnDyingHandler;
+		static EventInformation* OnStartQuestHandler;
+		static EventInformation* OnStopQuestHandler;
+		static EventInformation* OnFailQuestHandler;
+		static EventInformation* OnCompleteQuestHandler;
+		static EventInformation* OnSeenDataUpdateHandler;
+		static EventInformation* OnLimbGoneHandler;
+		static EventInformation* OnChallengeCompleteHandler;
+		static EventInformation* OnCrosshairHandler;
+		static EventInformation* OnSettingsUpdateHandler;
+		static EventInformation* OnAddPerkHandler;
+		static EventInformation* OnRemovePerkHandler;
+		static EventInformation* OnRenderGamePreUpdateHandler;
+		static EventInformation* OnRenderGameModeUpdateHandler;
+		static EventInformation* OnRenderRenderedMenuUpdateHandler;
+		static EventInformation* OnAVChangeHandler;
+		static EventInformation* OnPLChangeHandler;
+		static EventInformation* OnRadioPostSoundAttachHandler;
+		static EventInformation* OnKeyboardControllerSelectionChangeHandler;
+		static EventInformation* OnSleepWaitEventHandler;
+		static EventInformation* OnTakeBackItemHandler;
+		static EventInformation* OnNPCResponseHandler;
+		static EventInformation* OnGeneralSubtitleHandler;
+		static EventInformation* OnReputationChangeHandler;
+		static EventInformation* OnNPCAVChangeHandler;
 
 		static void __fastcall OnRenderGamePreUpdate() {
 			{
@@ -71,7 +71,7 @@ namespace JohnnyEvents {
 				SendNVSEMessage(JG_OnRenderGamePreUpdate);
 			}
 			for (auto const& rCallback : OnRenderGamePreUpdateHandler->kCallbacks) {
-				CallUDF(rCallback.pScript, nullptr, OnRenderGamePreUpdateHandler->ucMaxArgsCount);
+				rCallback.CallScript(OnRenderGamePreUpdateHandler);
 			}
 		}
 
@@ -83,7 +83,7 @@ namespace JohnnyEvents {
 			}
 
 			for (auto const& rCallback : OnRenderGameModeUpdateHandler->kCallbacks) {
-				CallUDF(rCallback.pScript, nullptr, OnRenderGameModeUpdateHandler->ucMaxArgsCount);
+				rCallback.CallScript(OnRenderGameModeUpdateHandler);
 			}
 
 		}
@@ -96,7 +96,7 @@ namespace JohnnyEvents {
 			}
 
 			for (auto const& rCallback : OnRenderRenderedMenuUpdateHandler->kCallbacks) {
-				CallUDF(rCallback.pScript, nullptr, OnRenderRenderedMenuUpdateHandler->ucMaxArgsCount);
+				rCallback.CallScript(OnRenderRenderedMenuUpdateHandler);
 			}
 		}
 
@@ -114,13 +114,13 @@ namespace JohnnyEvents {
 			}
 
 			for (auto const& rCallback : OnRemovePerkHandler->kCallbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apPerk)) {
-					CallUDF(rCallback.pScript, apActor, OnRemovePerkHandler->ucMaxArgsCount, apPerk);
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsFormInFilter(apPerk, 0)) {
+					rCallback.CallScript(OnRemovePerkHandler, apActor, apPerk);
 				}
 			}
 		}
 
-		static SPEC_NOINLINE void __fastcall OnAddPerk(Actor* apActor, BGSPerk* apPerk, uint8_t aucRank, bool abTeammate) {
+		static void __fastcall OnAddPerk(Actor* apActor, BGSPerk* apPerk, uint8_t aucRank, bool abTeammate) {
 			if (!apPerk) [[unlikely]]
 				return;
 
@@ -131,8 +131,8 @@ namespace JohnnyEvents {
 			}
 			
 			for (auto const& rCallback : OnAddPerkHandler->kCallbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apPerk)) {
-					CallUDF(rCallback.pScript, apActor, OnAddPerkHandler->ucMaxArgsCount, apPerk, aucRank - 1, aucRank);
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsFormInFilter(apPerk, 0)) {
+					rCallback.CallScript(OnAddPerkHandler, apActor, apPerk, aucRank - 1, aucRank);
 				}
 			}
 		}
@@ -146,8 +146,8 @@ namespace JohnnyEvents {
 
 				if (apActor == PlayerCharacter::GetSingleton() || apActor->GetFullName()[0]) {
 					for (auto const& rCallback : OnDyingHandler->kCallbacks) {
-						if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsRefInFilter(0, apActor)) {
-							CallUDF(rCallback.pScript, nullptr, OnDyingHandler->ucMaxArgsCount, apActor);
+						if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsRefInFilter(apActor, 0)) {
+							rCallback.CallScript(OnDyingHandler, nullptr, apActor);
 						}
 					}
 				}
@@ -162,8 +162,8 @@ namespace JohnnyEvents {
 
 			const EventInformation* pEvent = abStarted ? OnStartQuestHandler : OnStopQuestHandler;
 			for (auto const& rCallback : pEvent->kCallbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apQuest)) {
-					CallUDF(rCallback.pScript, nullptr, pEvent->ucMaxArgsCount, apQuest);
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsFormInFilter(apQuest, 0)) {
+					rCallback.CallScript(pEvent, nullptr, apQuest);
 				}
 			}
 		}
@@ -175,8 +175,8 @@ namespace JohnnyEvents {
 			}
 
 			for (auto const& rCallback : OnCompleteQuestHandler->kCallbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apQuest)) {
-					CallUDF(rCallback.pScript, nullptr, OnCompleteQuestHandler->ucMaxArgsCount, apQuest);
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsFormInFilter(apQuest, 0)) {
+					rCallback.CallScript(OnCompleteQuestHandler, nullptr, apQuest);
 				}
 			}
 		}
@@ -188,8 +188,8 @@ namespace JohnnyEvents {
 			}
 
 			for (auto const& rCallback : OnFailQuestHandler->kCallbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apQuest)) {
-					CallUDF(rCallback.pScript, nullptr, OnFailQuestHandler->ucMaxArgsCount, apQuest);
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsFormInFilter(apQuest, 0)) {
+					rCallback.CallScript(OnFailQuestHandler, nullptr, apQuest);
 				}
 			}
 		}
@@ -201,32 +201,32 @@ namespace JohnnyEvents {
 			}
 
 			for (auto const& rCallback : OnSettingsUpdateHandler->kCallbacks) {
-				CallUDF(rCallback.pScript, nullptr, OnSettingsUpdateHandler->ucMaxArgsCount);
+				rCallback.CallScript(OnSettingsUpdateHandler);
 			}
 		}
 
-		static SPEC_NOINLINE void __fastcall OnSeenDataUpdate(TESObjectCELL* apCell) {
+		static void __fastcall OnSeenDataUpdate(TESObjectCELL* apCell) {
 			{
 				using namespace JohnnyMessageData;
 				SendNVSEMessage(JG_OnSeenDataUpdate, apCell);
 			}
 
 			for (auto const& rCallback : OnSeenDataUpdateHandler->kCallbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apCell)) {
-					CallUDF(rCallback.pScript, nullptr, OnSeenDataUpdateHandler->ucMaxArgsCount, apCell);
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsFormInFilter(apCell, 0)) {
+					rCallback.CallScript(OnSeenDataUpdateHandler, nullptr, apCell);
 				}
 			}
 		}
 
-		static SPEC_NOINLINE void __fastcall OnChallengeComplete(TESChallenge* apChallenge) {
+		static void __fastcall OnChallengeComplete(TESChallenge* apChallenge) {
 			{
 				using namespace JohnnyMessageData;
 				SendNVSEMessage(JG_OnChallengeComplete, apChallenge);
 			}
 
 			for (auto const& rCallback : OnChallengeCompleteHandler->kCallbacks) {
-				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsNonRefFormInFilter(0, apChallenge)) {
-					CallUDF(rCallback.pScript, nullptr, OnChallengeCompleteHandler->ucMaxArgsCount, apChallenge);
+				if (reinterpret_cast<FilterForm*>(rCallback.pFilter)->IsFormInFilter(apChallenge, 0)) {
+					rCallback.CallScript(OnChallengeCompleteHandler, nullptr, apChallenge);
 				}
 			}
 		}
@@ -240,8 +240,8 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnLimbGoneHandler->kCallbacks) {
 				auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
-				if (pFilter->IsIntInFilter(aeLimb) && pFilter->IsRefInFilter(0, apActor)) {
-					CallUDF(rCallback.pScript, nullptr, OnLimbGoneHandler->ucMaxArgsCount, apActor, aeLimb);
+				if (pFilter->IsIntInFilter(aeLimb) && pFilter->IsRefInFilter(apActor, 0)) {
+					rCallback.CallScript(OnLimbGoneHandler, nullptr, apActor, aeLimb);
 				}
 			}
 		}
@@ -257,8 +257,8 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnCrosshairHandler->kCallbacks) {
 				auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
-				if (pFilter->IsRefInFilter(0, apRef) && pFilter->IsNonRefFormInFilter(1, apRef->GetObjectReference())) {
-					CallUDF(rCallback.pScript, nullptr, OnCrosshairHandler->ucMaxArgsCount, apRef);
+				if (pFilter->IsRefInFilter(apRef, 0) && pFilter->IsBaseFormInFilter(apRef->GetObjectReference(), 1)) {
+					rCallback.CallScript(OnCrosshairHandler, nullptr, apRef);
 				}
 			}
 		}
@@ -275,8 +275,8 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnTakeBackItemHandler->kCallbacks) {
 				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.pFilter);
-				if (pFilter->IsNonRefFormInFilter(0, apObject) && pFilter->IsRefInFilter(1, apOwner)) {
-					CallUDF(rCallback.pScript, nullptr, OnTakeBackItemHandler->ucMaxArgsCount, apOwner, apObject, aiNumber);
+				if (pFilter->IsBaseFormInFilter(apObject, 0) && pFilter->IsRefInFilter(apOwner, 1)) {
+					rCallback.CallScript(OnTakeBackItemHandler, nullptr, apOwner, apObject, aiNumber);
 				}
 			}
 		}
@@ -298,7 +298,7 @@ namespace JohnnyEvents {
 					SendNVSEMessage(JG_OnAVChange, kData);
 				}
 
-				auto pCallUDF = [=](const EventBase& arCallback) {
+				auto pCallUDF = [=](const EventBase& arCallback, const EventInformation* apEvent) {
 					const bool bNoFloor = arCallback.usUserFlags.GetBit<0>();
 					const bool bUseClamp = arCallback.usUserFlags.GetBit<1>();
 
@@ -314,29 +314,29 @@ namespace JohnnyEvents {
 						uiNew = reinterpret_cast<const uint32_t&>(fNewValue);
 					}
 
-					CallUDF(arCallback.pScript, nullptr, OnAVChangeHandler->ucMaxArgsCount, aeActorValue, uiPrev, uiNew);
+					arCallback.CallScript(apEvent, nullptr, aeActorValue, uiPrev, uiNew);
 				};
 
 				if (pForm == PlayerCharacter::GetSingleton()) {
 					for (auto const& rCallback : OnAVChangeHandler->kCallbacks) {
 						auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
 						if (pFilter->IsIntInFilter(aeActorValue)) {
-							pCallUDF(rCallback);
+							pCallUDF(rCallback, OnAVChangeHandler);
 						}
 					}
 				}
 				else {
 					for (auto const& rCallback : OnNPCAVChangeHandler->kCallbacks) {
 						auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
-						if (pFilter->IsIntInFilter(aeActorValue) && pFilter->IsAnyFormInFilter(0, pForm)) {
-							pCallUDF(rCallback);
+						if (pFilter->IsIntInFilter(aeActorValue) && pFilter->IsAnyFormInFilter(pForm, 0)) {
+							pCallUDF(rCallback, OnNPCAVChangeHandler);
 						}
 					}
 				}
 			}
 		}
 
-		static SPEC_NOINLINE void __fastcall OnProcessChangeEvent(Actor* apActor, uint32_t aeOldLevel, uint32_t aeNewLevel) {
+		static void __fastcall OnProcessChangeEvent(Actor* apActor, uint32_t aeOldLevel, uint32_t aeNewLevel) {
 			if (aeOldLevel != aeNewLevel) {
 				{
 					using namespace JohnnyMessageData;
@@ -346,8 +346,8 @@ namespace JohnnyEvents {
 
 				for (auto const& rCallback : OnPLChangeHandler->kCallbacks) {
 					auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
-					if (pFilter->IsIntInFilter(aeNewLevel) && pFilter->IsRefInFilter(0, apActor)) {
-						CallUDF(rCallback.pScript, nullptr, OnPLChangeHandler->ucMaxArgsCount, apActor, aeOldLevel, aeNewLevel);
+					if (pFilter->IsIntInFilter(aeNewLevel) && pFilter->IsRefInFilter(apActor, 0)) {
+						rCallback.CallScript(OnPLChangeHandler, nullptr, apActor, aeOldLevel, aeNewLevel);
 					}
 				}
 			}
@@ -362,12 +362,12 @@ namespace JohnnyEvents {
 			for (auto const& rCallback : OnSleepWaitEventHandler->kCallbacks) {
 				auto pFilter = reinterpret_cast<FilterInt*>(rCallback.pFilter);
 				if (pFilter->IsIntInFilter(0, uint32_t(apMenu->isRest) + 1) || pFilter->IsIntInFilter(0, 0)) {
-					CallUDF(rCallback.pScript, nullptr, OnSleepWaitEventHandler->ucMaxArgsCount, (int(apMenu->isRest) + 1));
+					rCallback.CallScript(OnSleepWaitEventHandler, nullptr, (int(apMenu->isRest) + 1));
 				}
 			}
 		}
 
-		static SPEC_NOINLINE void __fastcall OnRadioPostSoundAttach(TESObjectACTI* apRadio, bool abActive) {
+		static void __fastcall OnRadioPostSoundAttach(TESObjectACTI* apRadio, bool abActive) {
 			if (!apRadio)
 				return;
 
@@ -379,13 +379,13 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnRadioPostSoundAttachHandler->kCallbacks) {
 				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.pFilter);
-				if (pFilter->IsAnyFormInFilter(0, apRadio)) {
-					CallUDF(rCallback.pScript, nullptr, OnRadioPostSoundAttachHandler->ucMaxArgsCount, apRadio, abActive ? 1u : 0u);
+				if (pFilter->IsAnyFormInFilter(apRadio, 0)) {
+					rCallback.CallScript(OnRadioPostSoundAttachHandler, nullptr, apRadio, abActive ? 1u : 0u);
 				}
 			}
 		}
 
-		static SPEC_NOINLINE void __fastcall OnKeyboardControllerSelectionChange(InterfaceManager* apManager, Menu* apMenu) {
+		static void __fastcall OnKeyboardControllerSelectionChange(InterfaceManager* apManager, Menu* apMenu) {
 			{
 				using namespace JohnnyMessageData;
 				SendNVSEMessage(JG_OnKeyboardControllerSelectionChange, apMenu);
@@ -395,7 +395,7 @@ namespace JohnnyEvents {
 			for (auto const& rCallback : OnKeyboardControllerSelectionChangeHandler->kCallbacks) {
 				auto pFilter = reinterpret_cast<FilterInt*>(rCallback.pFilter);
 				if (pFilter->IsIntInFilter(0, uiMenuID) || pFilter->IsIntInFilter(0, 0)) {
-					CallUDF(rCallback.pScript, nullptr, OnKeyboardControllerSelectionChangeHandler->ucMaxArgsCount, uiMenuID);
+					rCallback.CallScript(OnKeyboardControllerSelectionChangeHandler, nullptr, uiMenuID);
 				}
 			}
 		}
@@ -415,8 +415,8 @@ namespace JohnnyEvents {
 
 			for (auto const& rCallback : OnGeneralSubtitleHandler->kCallbacks) {
 				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.pFilter);
-				if (pFilter->IsRefInFilter(0, apTarget) || pFilter->FilterForm::IsInFilter(0, 0)) {
-					CallUDF(rCallback.pScript, nullptr, OnGeneralSubtitleHandler->ucMaxArgsCount, pSubtitleString, apTarget, uiX, uiY, uiZ);
+				if (pFilter->IsRefInFilter(apTarget, 0) || pFilter->FilterForm::IsInFilter(0, 0)) {
+					rCallback.CallScript(OnGeneralSubtitleHandler, nullptr, pSubtitleString, apTarget, uiX, uiY, uiZ);
 				}
 			}
 			return;
@@ -451,7 +451,7 @@ namespace JohnnyEvents {
 			for (auto const& rCallback : OnNPCResponseHandler->kCallbacks) {
 				auto pFilter = reinterpret_cast<FilterInt*>(rCallback.pFilter);
 				if (pFilter->IsIntInFilter(0, uiEmotionID) || pFilter->IsIntInFilter(0, 0)) {
-					CallUDF(rCallback.pScript, nullptr, OnNPCResponseHandler->ucMaxArgsCount, pResponseString, pVoicePath, uiEmotionID, uiEmotionValue, uiResponseNumber);
+					rCallback.CallScript(OnNPCResponseHandler, nullptr, pResponseString, pVoicePath, uiEmotionID, uiEmotionValue, uiResponseNumber);
 				}
 			}
 		}
@@ -467,8 +467,8 @@ namespace JohnnyEvents {
 			const uint32_t uiNeg = *reinterpret_cast<uint32_t*>(&apRep->fNegativeReputation);
 			for (auto const& rCallback : OnReputationChangeHandler->kCallbacks) {
 				auto pFilter = reinterpret_cast<FilterForm*>(rCallback.pFilter);
-				if (pFilter->IsNonRefFormInFilter(0, apRep)) {
-					CallUDF(rCallback.pScript, nullptr, OnReputationChangeHandler->ucMaxArgsCount, apRep, uiPos, uiNeg);
+				if (pFilter->IsFormInFilter(apRep, 0)) {
+					rCallback.CallScript(OnReputationChangeHandler, nullptr, apRep, uiPos, uiNeg);
 				}
 			}
 		}
@@ -507,292 +507,377 @@ namespace JohnnyEvents {
 	}
 
 	namespace Hooks {
-		HookUtils::CallDetour kOnRenderGamePreUpdateDetour;
-		STACK_FRAME_OPT_ENABLE
-		static bool OnRenderGamePreUpdate() {
-			Events::OnRenderGamePreUpdate();
-			return CdeclCall<bool>(kOnRenderGamePreUpdateDetour);
+
+		namespace {
+			HookUtils::CallDetour kOnRenderGamePreUpdateDetour;
+			STACK_FRAME_OPT_ENABLE
+			bool OnRenderGamePreUpdate() {
+				Events::OnRenderGamePreUpdate();
+				return CdeclCall<bool>(kOnRenderGamePreUpdateDetour);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		HookUtils::VirtCallDetour kOnRemovePerkDetour;
-		STACK_FRAME_OPT_ENABLE
-		static void __fastcall OnRemovePerk(Actor* apActor, void*, BGSPerk* apPerk, bool abTeammate) {
-			Events::OnRemovePerk(apActor, apPerk, abTeammate);
-			if (kOnRemovePerkDetour)
-				ThisCall(kOnRemovePerkDetour, apActor, apPerk, abTeammate);
-			else
-				apActor->RemovePerk(apPerk, abTeammate);
+		namespace {
+			HookUtils::VirtCallDetour kOnRemovePerkDetour;
+			STACK_FRAME_OPT_ENABLE
+			void __fastcall OnRemovePerk(Actor* apActor, void*, BGSPerk* apPerk, bool abTeammate) {
+				Events::OnRemovePerk(apActor, apPerk, abTeammate);
+				if (kOnRemovePerkDetour)
+					ThisCall(kOnRemovePerkDetour, apActor, apPerk, abTeammate);
+				else
+					apActor->RemovePerk(apPerk, abTeammate);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		template<uint32_t uiAddress>
-		class OnAddPerkHook {
-			static inline HookUtils::VirtCallDetour kDetour;
-
-			static void __fastcall Hook(Actor* apActor, void*, BGSPerk* apPerk, uint8_t aucRank, bool abTeammate) {
+		namespace {
+			STACK_FRAME_OPT_ENABLE
+			SPEC_NOINLINE void __fastcall DoAddPerk(Actor* apActor, uint32_t auiAddress, BGSPerk* apPerk, uint8_t aucRank, bool abTeammate) {
 				Events::OnAddPerk(apActor, apPerk, aucRank, abTeammate);
 
-				if (kDetour)
-					ThisCall(kDetour, apActor, apPerk, aucRank, abTeammate);
+				if (auiAddress)
+					ThisCall(auiAddress, apActor, apPerk, aucRank, abTeammate);
 				else
 					apActor->AddPerk(apPerk, aucRank, abTeammate);
 			}
+			STACK_FRAME_OPT_RESET
 
-		public:
-			OnAddPerkHook() {
-				kDetour.ReplaceVirtualCall(uiAddress, Hook, 8);
+			template<uint32_t uiAddress>
+			class OnAddPerkHook {
+				static inline HookUtils::VirtCallDetour kDetour;
+
+				void Hook(BGSPerk* apPerk, uint8_t aucRank, bool abTeammate) {
+					DoAddPerk(reinterpret_cast<Actor*>(this), kDetour, apPerk, aucRank, abTeammate);
+				}
+
+			public:
+				OnAddPerkHook() {
+					kDetour.ReplaceVirtualCall(uiAddress, &OnAddPerkHook::Hook, 8);
+				}
+			};
+		}
+
+		namespace {
+			HookUtils::CallDetour kOnCrosshairDetour;
+			STACK_FRAME_OPT_ENABLE
+			uint32_t __fastcall OnCrosshair(TESObjectREFR* apRef) {
+				Events::OnCrosshair(apRef);
+				return ThisCall<uint32_t>(kOnCrosshairDetour, apRef);
 			}
-		};
-
-		HookUtils::CallDetour kOnCrosshairDetour;
-		STACK_FRAME_OPT_ENABLE
-		static uint32_t __fastcall OnCrosshair(TESObjectREFR* apRef) {
-			Events::OnCrosshair(apRef);
-			return ThisCall<uint32_t>(kOnCrosshairDetour, apRef);
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		HookUtils::CallDetour kOnLimbGoneDetour;
-		STACK_FRAME_OPT_ENABLE
-		static bool __fastcall OnLimbGone(ExtraDismemberedLimbs* apLimbData, void*, Actor* apActor, uint32_t aeLimb, bool abExplodedLimb) {
-			Events::OnLimbGone(apLimbData, apActor, aeLimb, abExplodedLimb);
-			return ThisCall<bool>(kOnLimbGoneDetour, apLimbData, apActor, aeLimb, abExplodedLimb);
+		namespace {
+			HookUtils::CallDetour kOnLimbGoneDetour;
+			STACK_FRAME_OPT_ENABLE
+			bool __fastcall OnLimbGone(ExtraDismemberedLimbs* apLimbData, void*, Actor* apActor, uint32_t aeLimb, bool abExplodedLimb) {
+				Events::OnLimbGone(apLimbData, apActor, aeLimb, abExplodedLimb);
+				return ThisCall<bool>(kOnLimbGoneDetour, apLimbData, apActor, aeLimb, abExplodedLimb);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		HookUtils::CallDetour kOnCompleteQuestDetour;
-		STACK_FRAME_OPT_ENABLE
-		static void __cdecl OnCompleteQuest(TESQuest* apQuest) {
-			Events::OnCompleteQuest(apQuest);
-			CdeclCall(kOnCompleteQuestDetour, apQuest);
+		namespace {
+			HookUtils::CallDetour kOnCompleteQuestDetour;
+			STACK_FRAME_OPT_ENABLE
+			void __cdecl OnCompleteQuest(TESQuest* apQuest) {
+				Events::OnCompleteQuest(apQuest);
+				CdeclCall(kOnCompleteQuestDetour, apQuest);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		HookUtils::CallDetour kOnFailQuestDetour;
-		STACK_FRAME_OPT_ENABLE
-		static void __cdecl OnFailQuest(TESQuest* apQuest) {
-			Events::OnFailQuest(apQuest);
-			CdeclCall(kOnFailQuestDetour, apQuest);
+		namespace {
+			HookUtils::CallDetour kOnFailQuestDetour;
+			STACK_FRAME_OPT_ENABLE
+			void __cdecl OnFailQuest(TESQuest* apQuest) {
+				Events::OnFailQuest(apQuest);
+				CdeclCall(kOnFailQuestDetour, apQuest);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		HookUtils::CallDetour kOnSettingsUpdateDetour;
-		STACK_FRAME_OPT_ENABLE
-		void* __cdecl OnSettingsUpdate() {
-			Events::OnSettingsUpdate();
-			return CdeclCall<void*>(kOnSettingsUpdateDetour);
+		namespace {
+			HookUtils::CallDetour kOnSettingsUpdateDetour;
+			STACK_FRAME_OPT_ENABLE
+			void* __cdecl OnSettingsUpdate() {
+				Events::OnSettingsUpdate();
+				return CdeclCall<void*>(kOnSettingsUpdateDetour);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		template<uint32_t uiAddress>
-		class OnSeenDataUpdateHook {
-			static inline HookUtils::CallDetour kDetour;
-
-			static ExtraDataList* __fastcall Hook(TESObjectCELL* apCell) {
+		namespace {
+			STACK_FRAME_OPT_ENABLE
+			SPEC_NOINLINE ExtraDataList* __fastcall DoOnSeenData(TESObjectCELL* apCell, uint32_t auiAddress) {
 				Events::OnSeenDataUpdate(apCell);
-				return ThisCall<ExtraDataList*>(kDetour, apCell);
+				return ThisCall<ExtraDataList*>(auiAddress, apCell);
 			}
+			STACK_FRAME_OPT_RESET
 
-		public:
-			OnSeenDataUpdateHook() {
-				kDetour.ReplaceCall(uiAddress, Hook);
-			}
-		};
+			template<uint32_t uiAddress>
+			class OnSeenDataUpdateHook {
+				static inline HookUtils::CallDetour kDetour;
 
-		template<uint32_t uiAddress>
-		class OnChallengeCompleteHook {
-			static inline HookUtils::CallDetour kDetour;
+				ExtraDataList* Hook() {
+					return DoOnSeenData(reinterpret_cast<TESObjectCELL*>(this), kDetour);
+				}
 
-			static uint32_t __fastcall Hook(TESChallenge* apChallenge) {
+			public:
+				OnSeenDataUpdateHook() {
+					kDetour.ReplaceCall(uiAddress, &OnSeenDataUpdateHook::Hook);
+				}
+			};
+		}
+
+		namespace {
+			STACK_FRAME_OPT_ENABLE
+			SPEC_NOINLINE uint32_t __fastcall DoChallengeComplete(TESChallenge* apChallenge, uint32_t auiAddress) {
 				Events::OnChallengeComplete(apChallenge);
-				return ThisCall<uint32_t>(kDetour, apChallenge);
+				return ThisCall<uint32_t>(auiAddress, apChallenge);
 			}
+			STACK_FRAME_OPT_RESET
 
-		public:
-			OnChallengeCompleteHook() {
-				kDetour.ReplaceCall(uiAddress, Hook);
+			template<uint32_t uiAddress>
+			class OnChallengeCompleteHook {
+				static inline HookUtils::CallDetour kDetour;
+
+				uint32_t Hook() {
+					return DoChallengeComplete(reinterpret_cast<TESChallenge*>(this), kDetour);
+				}
+
+			public:
+				OnChallengeCompleteHook() {
+					kDetour.ReplaceCall(uiAddress, &OnChallengeCompleteHook::Hook);
+				}
+			};
+		}
+
+		namespace {
+			HookUtils::CallDetour kOnRenderGameModeUpdateDetour;
+			STACK_FRAME_OPT_ENABLE
+			void __fastcall OnRenderGameModeUpdate(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
+				Events::OnRenderGameModeUpdate(apDestination, abRenderedMenuMode, abSkipFirstPerson);
+				ThisCall(kOnRenderGameModeUpdateDetour, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
 			}
-		};
-
-		HookUtils::CallDetour kOnRenderGameModeUpdateDetour;
-		STACK_FRAME_OPT_ENABLE
-		static void __fastcall OnRenderGameModeUpdate(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
-			Events::OnRenderGameModeUpdate(apDestination, abRenderedMenuMode, abSkipFirstPerson);
-			ThisCall(kOnRenderGameModeUpdateDetour, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		HookUtils::CallDetour kOnRenderRenderedMenuUpdateDetour;
-		STACK_FRAME_OPT_ENABLE
-		static void __fastcall OnRenderRenderedMenuUpdate(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
-			Events::OnRenderRenderedMenuUpdate(apDestination, abRenderedMenuMode, abSkipFirstPerson);
-			ThisCall(kOnRenderRenderedMenuUpdateDetour, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
+		namespace {
+			HookUtils::CallDetour kOnRenderRenderedMenuUpdateDetour;
+			STACK_FRAME_OPT_ENABLE
+			void __fastcall OnRenderRenderedMenuUpdate(void* apMain, void*, BSRenderedTexture* apDestination, bool abRenderedMenuMode, bool abSkipFirstPerson) {
+				Events::OnRenderRenderedMenuUpdate(apDestination, abRenderedMenuMode, abSkipFirstPerson);
+				ThisCall(kOnRenderRenderedMenuUpdateDetour, apMain, apDestination, abRenderedMenuMode, abSkipFirstPerson);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		template<uint32_t uiAddress>
-		class OnProcessChangeEventHook {
-			static inline HookUtils::VirtFuncDetour kDetour;
+		namespace {
+			STACK_FRAME_OPT_ENABLE
+			SPEC_NOINLINE bool __fastcall DoProcessChange(Actor* apActor, uint32_t auiAddress) {
+				const BaseProcess* pProcess = apActor->GetCurrentAIProcess();
+				if (!pProcess) [[unlikely]]
+					return ThisCall<bool>(auiAddress, apActor);
 
-			static bool __fastcall Hook(Actor* apActor) {
-				if (!apActor || !apActor->GetCurrentAIProcess()) [[unlikely]]
-					return true;
-
-				const uint32_t eOldLevel = apActor->GetCurrentAIProcess()->GetProcessLevel();
-				const bool bResult = ThisCall<bool>(kDetour, apActor);
-				const uint32_t eNewLevel = apActor->GetCurrentAIProcess()->GetProcessLevel();
+				const uint32_t eOldLevel = pProcess->GetProcessLevel();
+				const bool bResult = ThisCall<bool>(auiAddress, apActor);
+				const uint32_t eNewLevel = pProcess->GetProcessLevel();
 				Events::OnProcessChangeEvent(apActor, eOldLevel, eNewLevel);
 				return bResult;
 			}
+			STACK_FRAME_OPT_RESET
 
-		public:
-			OnProcessChangeEventHook() {
-				kDetour.ReplaceVirtualFunc(uiAddress, Hook);
+			template<uint32_t uiAddress>
+			class OnProcessChangeEventHook {
+				static inline HookUtils::VirtFuncDetour kDetour;
+
+				bool Hook() {
+					return DoProcessChange(reinterpret_cast<Actor*>(this), kDetour);
+				}
+
+			public:
+				OnProcessChangeEventHook() {
+					kDetour.ReplaceVirtualFunc(uiAddress, &OnProcessChangeEventHook::Hook);
+				}
+			};
+		}
+
+		namespace {
+			HookUtils::CallDetour kOnAVChangeDetour;
+			STACK_FRAME_OPT_DISABLE
+			ActorValueInfo* __cdecl OnAVChange(ActorValue::Index aeActorValue) {
+				DWORD* pReturnAddrAddr = static_cast<DWORD*>(_AddressOfReturnAddress());
+				uint8_t* pEBP = GetParentBasePtr(pReturnAddrAddr);
+				ActorValueOwner* pActor = *reinterpret_cast<ActorValueOwner**>(pEBP + 0x8);
+				float fOldVal = *reinterpret_cast<float*>(pEBP + 0x10);
+				float fNewVal = *reinterpret_cast<float*>(pEBP + 0x14);
+				ActorValueInfo* pInfo = CdeclCall<ActorValueInfo*>(kOnAVChangeDetour, aeActorValue);
+				if (pInfo) [[likely]]
+					Events::OnAVChange(pActor, aeActorValue, fOldVal, fNewVal);
+				return pInfo;
 			}
-		};
+			STACK_FRAME_OPT_RESET
 
-		HookUtils::CallDetour kOnAVChangeDetour;
-		STACK_FRAME_OPT_DISABLE
-		static ActorValueInfo* __cdecl OnAVChange(ActorValue::Index aeActorValue) {
-			DWORD* pReturnAddrAddr = static_cast<DWORD*>(_AddressOfReturnAddress());
-			uint8_t* pEBP = GetParentBasePtr(pReturnAddrAddr);
-			ActorValueOwner* pActor = *reinterpret_cast<ActorValueOwner**>(pEBP + 0x8);
-			float fOldVal = *reinterpret_cast<float*>(pEBP + 0x10);
-			float fNewVal = *reinterpret_cast<float*>(pEBP + 0x14);
-			ActorValueInfo* pInfo = CdeclCall<ActorValueInfo*>(kOnAVChangeDetour, aeActorValue);
-			if (pInfo) [[likely]]
-				Events::OnAVChange(pActor, aeActorValue, fOldVal, fNewVal);
-			return pInfo;
+			HookUtils::CallDetour kOnAVChangeSetDetour;
+			STACK_FRAME_OPT_ENABLE
+			void __cdecl OnAVChangeModeSet(ActorValueOwner* apActor, ActorValue::Index aeIndex, float afOldVal, float afNewVal, ActorValueOwner* apActorSource) {
+				auto ePrevMode = JohnnyEvents::SetAVChangeMode(AVChangeMode::SET);
+				CdeclCall(kOnAVChangeSetDetour, apActor, aeIndex, afOldVal, afNewVal, apActorSource);
+				JohnnyEvents::SetAVChangeMode(ePrevMode);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		HookUtils::CallDetour kOnAVChangeSetDetour;
-		STACK_FRAME_OPT_ENABLE
-		void __cdecl OnAVChangeModeSet(ActorValueOwner* apActor, ActorValue::Index aeIndex, float afOldVal, float afNewVal, ActorValueOwner* apActorSource) {
-			auto ePrevMode = JohnnyEvents::SetAVChangeMode(AVChangeMode::SET);
-			CdeclCall(kOnAVChangeSetDetour, apActor, aeIndex, afOldVal, afNewVal, apActorSource);
-			JohnnyEvents::SetAVChangeMode(ePrevMode);
+		namespace {
+			HookUtils::CallDetour kOnDyingDetour;
+			STACK_FRAME_OPT_DISABLE
+			void __fastcall OnDying(void* apThis) {
+				uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+				Actor* pActor = *reinterpret_cast<Actor**>(pEBP - 0x18);
+				Events::OnDying(pActor);
+				ThisCall(kOnDyingDetour, apThis);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		HookUtils::CallDetour kOnDyingDetour;
-		STACK_FRAME_OPT_DISABLE
-		static void __fastcall OnDying(void* apThis) {
-			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
-			Actor* pActor = *reinterpret_cast<Actor**>(pEBP - 0x18);
-			Events::OnDying(pActor);
-			ThisCall(kOnDyingDetour, apThis);
+		namespace {
+			HookUtils::VirtCallDetour kOnQuestStartStopDetour;
+			STACK_FRAME_OPT_DISABLE
+			void __fastcall OnQuestStartStop(TESQuest* apQuest, void*, uint32_t auiChangeFlag) {
+				if (kOnQuestStartStopDetour)
+					ThisCall(kOnQuestStartStopDetour, apQuest, auiChangeFlag);
+				else
+					apQuest->AddChange(auiChangeFlag);
+
+				uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
+				const bool bEnabled = reinterpret_cast<bool*>(pEBP + 0x8);
+				Events::OnQuestStartStop(apQuest, bEnabled);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		HookUtils::VirtCallDetour kOnQuestStartStopDetour;
-		STACK_FRAME_OPT_DISABLE
-		static void __fastcall OnQuestStartStop(TESQuest* apQuest, void*, uint32_t auiChangeFlag) {
-			if (kOnQuestStartStopDetour)
-				ThisCall(kOnQuestStartStopDetour, apQuest, auiChangeFlag);
-			else
-				apQuest->AddChange(auiChangeFlag);
-			
-			uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
-			const bool bEnabled = reinterpret_cast<bool*>(pEBP + 0x8);
-			Events::OnQuestStartStop(apQuest, bEnabled);
+		namespace {
+			TESObjectREFR* pItemOwnerRef = nullptr;
+
+			HookUtils::CallDetour kOnTakeBackItemOwnerDetour;
+			STACK_FRAME_OPT_ENABLE
+			ExtraDataList* __fastcall OnTakeBackItem_StoreOwner(TESObjectREFR* apRef) {
+				pItemOwnerRef = apRef;
+				return ThisCall<ExtraDataList*>(kOnTakeBackItemOwnerDetour, apRef);
+			}
+			STACK_FRAME_OPT_RESET
+
+			HookUtils::CallDetour kOnTakeBackItemDetour;
+			STACK_FRAME_OPT_ENABLE
+			TESObjectREFR* __fastcall OnTakeBackItem(InventoryChanges* apInvChanges, void*, TESObjectREFR* apRef, TESBoundObject* apObject, bool abStealing, int32_t aiNumber, ExtraDataList* apExtraList, bool abDropWorld, TESObjectREFR* apOtherContainer, const NiPoint3* apPoint, const NiPoint3* apRotate, bool abDelete, bool abPreferStolen, ItemChange* apItemChange) {
+				TESObjectREFR* pOwner = apOtherContainer->IsActor() ? apOtherContainer : pItemOwnerRef;
+				Events::OnTakeBackItem(pOwner, apObject, aiNumber);
+				pItemOwnerRef = nullptr;
+				return ThisCall<TESObjectREFR*>(kOnTakeBackItemDetour, apInvChanges, apRef, apObject, abStealing, aiNumber, apExtraList, abDropWorld, apOtherContainer, apPoint, apRotate, abDelete, abPreferStolen, apItemChange);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		TESObjectREFR* pItemOwnerRef = nullptr;
-
-		HookUtils::CallDetour kOnTakeBackItemOwnerDetour;
-		STACK_FRAME_OPT_ENABLE
-		static ExtraDataList* __fastcall OnTakeBackItem_StoreOwner(TESObjectREFR* apRef) {
-			pItemOwnerRef = apRef;
-			return ThisCall<ExtraDataList*>(kOnTakeBackItemOwnerDetour, apRef);
-		}
-		STACK_FRAME_OPT_RESET
-
-		HookUtils::CallDetour kOnTakeBackItemDetour;
-		STACK_FRAME_OPT_ENABLE
-		static TESObjectREFR* __fastcall OnTakeBackItem(InventoryChanges* apInvChanges, void*, TESObjectREFR* apRef, TESBoundObject* apObject, bool abStealing, int32_t aiNumber, ExtraDataList* apExtraList, bool abDropWorld, TESObjectREFR* apOtherContainer, const NiPoint3* apPoint, const NiPoint3* apRotate, bool abDelete, bool abPreferStolen, ItemChange* apItemChange) {
-			TESObjectREFR* pOwner = apOtherContainer->IsActor() ? apOtherContainer : pItemOwnerRef;
-			Events::OnTakeBackItem(pOwner, apObject, aiNumber);
-			pItemOwnerRef = nullptr;
-			return ThisCall<TESObjectREFR*>(kOnTakeBackItemDetour, apInvChanges, apRef, apObject, abStealing, aiNumber, apExtraList, abDropWorld, apOtherContainer, apPoint, apRotate, abDelete, abPreferStolen, apItemChange);
-		}
-		STACK_FRAME_OPT_RESET
-
-		template <uintptr_t auiAddress>
-		class OnRadioPostSoundAttachHook {
-		private:
-			static inline HookUtils::CallDetour kDetour;
-		public:
-			static void  __cdecl Hook(TESObjectACTI* apRef, bool abActive) {
-				CdeclCall(kDetour, apRef, abActive);
+		namespace {
+			STACK_FRAME_OPT_ENABLE
+			SPEC_NOINLINE void __fastcall DoRadioPostSoundAttach(TESObjectACTI* apRef, uint32_t auiAddress, bool abActive) {
+				CdeclCall(auiAddress, apRef, abActive);
 				Events::OnRadioPostSoundAttach(apRef, abActive);
 			}
+			STACK_FRAME_OPT_RESET
 
-			OnRadioPostSoundAttachHook() {
-				kDetour.ReplaceCall(auiAddress, Hook);
-			}
-		};
+			template <uintptr_t auiAddress>
+			class OnRadioPostSoundAttachHook {
+			private:
+				static inline HookUtils::CallDetour kDetour;
 
-		template <uintptr_t auiAddress>
-		class OnKeyboardControllerSelectionChangeHook {
-		private:
-			static inline HookUtils::CallDetour kDetour;
+				static void __cdecl Hook(TESObjectACTI* apRef, bool abActive) {
+					DoRadioPostSoundAttach(apRef, kDetour, abActive);
+				}
 
-			static void __fastcall Hook(InterfaceManager* apInterfaceManager, void*, Tile* apTarget, int32_t aiType, bool abPlaySounds) {
+			public:
+				OnRadioPostSoundAttachHook() {
+					kDetour.ReplaceCall(auiAddress, Hook);
+				}
+			};
+		}
+
+		namespace {
+			STACK_FRAME_OPT_ENABLE
+			SPEC_NOINLINE void __fastcall DoKeyboardControllerSelection(InterfaceManager* apInterfaceManager, uint32_t auiAddress, Tile* apTarget, int32_t aiType, bool abPlaySounds) {
 				void* pMenuManager = CdeclCall<void*>(0x71E290, true);
 				Menu* pFrontmostMenu = ThisCall<Menu*>(0x720E60, pMenuManager); // MenuManager::GetFrontmostMenu
 				const bool bFireEvent = apInterfaceManager->activeTileAlt != apTarget;
-				ThisCall(kDetour, apInterfaceManager, apTarget, aiType, abPlaySounds);
+				ThisCall(auiAddress, apInterfaceManager, apTarget, aiType, abPlaySounds);
 				if (bFireEvent)
 					Events::OnKeyboardControllerSelectionChange(apInterfaceManager, pFrontmostMenu);
 			}
+			STACK_FRAME_OPT_RESET
 
-		public:
-			OnKeyboardControllerSelectionChangeHook() {
-				kDetour.ReplaceCall(auiAddress, Hook);
+			template <uintptr_t auiAddress>
+			class OnKeyboardControllerSelectionChangeHook {
+			private:
+				static inline HookUtils::CallDetour kDetour;
+
+				void Hook(Tile* apTarget, int32_t aiType, bool abPlaySounds) {
+					DoKeyboardControllerSelection(reinterpret_cast<InterfaceManager*>(this), kDetour, apTarget, aiType, abPlaySounds);
+				}
+
+			public:
+				OnKeyboardControllerSelectionChangeHook() {
+					kDetour.ReplaceCall(auiAddress, &OnKeyboardControllerSelectionChangeHook::Hook);
+				}
+			};
+		}
+
+		namespace {
+			HookUtils::VirtFuncDetour kSleepOnClickDetour;
+			STACK_FRAME_OPT_ENABLE
+			void __fastcall OnSleepWaitEvent(SleepWaitMenu* apMenu, void*, uint32_t auiTileID, Tile* apTarget) {
+				ThisCall(kSleepOnClickDetour, apMenu, auiTileID, apTarget);
+				if (auiTileID == 4)
+					Events::OnSleepWaitEvent(apMenu, auiTileID);
 			}
-		};
-
-		HookUtils::VirtFuncDetour kSleepOnClickDetour;
-		STACK_FRAME_OPT_ENABLE
-		static void __fastcall OnSleepWaitEvent(SleepWaitMenu* apMenu, void*, uint32_t auiTileID, Tile* apTarget) {
-			ThisCall(kSleepOnClickDetour, apMenu, auiTileID, apTarget);
-			if (auiTileID == 4)
-				Events::OnSleepWaitEvent(apMenu, auiTileID);
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		//Fires when general subtitles are sent to the HUD.
-		HookUtils::CallDetour kGeneralSubtitleDetour;
-		STACK_FRAME_OPT_ENABLE
-		static bool __fastcall OnGeneralSubtitle(HUDMainMenu* apMenu, void*, const char* apText, BSSoundHandle akSound, NiPoint3 akPos, TESObjectREFR* apTarget, bool abInstant) {
-			if (apText)
-				Events::OnGeneralSubtitle(apText, akPos, apTarget);
+		namespace {
+			//Fires when general subtitles are sent to the HUD.
+			HookUtils::CallDetour kGeneralSubtitleDetour;
+			STACK_FRAME_OPT_ENABLE
+			bool __fastcall OnGeneralSubtitle(HUDMainMenu* apMenu, void*, const char* apText, BSSoundHandle akSound, NiPoint3 akPos, TESObjectREFR* apTarget, bool abInstant) {
+				if (apText)
+					Events::OnGeneralSubtitle(apText, akPos, apTarget);
 
-			return ThisCall<bool>(kGeneralSubtitleDetour, apMenu, apText, akSound, akPos, apTarget, abInstant);
+				return ThisCall<bool>(kGeneralSubtitleDetour, apMenu, apText, akSound, akPos, apTarget, abInstant);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		HookUtils::CallDetour kOnNPCResponseDetour;
-		STACK_FRAME_OPT_ENABLE
-		static bool __fastcall OnNPCResponse(MenuTopic* apThis) {
-			if (apThis->pFirstResponse)
-				Events::OnNPCResponse(apThis->pFirstResponse->GetItem());
-			return ThisCall<bool>(kOnNPCResponseDetour, apThis);
+		namespace {
+			HookUtils::CallDetour kOnNPCResponseDetour;
+			STACK_FRAME_OPT_ENABLE
+			bool __fastcall OnNPCResponse(MenuTopic* apThis) {
+				if (apThis->pFirstResponse)
+					Events::OnNPCResponse(apThis->pFirstResponse->GetItem());
+				return ThisCall<bool>(kOnNPCResponseDetour, apThis);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
-		HookUtils::VirtFuncDetour kReputationChangeDetour;
-		STACK_FRAME_OPT_ENABLE
-		static void __fastcall OnReputationChange(TESReputation* apThis, void*, uint32_t auiChangeFlag) {
-			if (auiChangeFlag & 2)
-				Events::OnReputationChange(apThis);
+		namespace {
+			HookUtils::VirtFuncDetour kReputationChangeDetour;
+			STACK_FRAME_OPT_ENABLE
+			void __fastcall OnReputationChange(TESReputation* apThis, void*, uint32_t auiChangeFlag) {
+				if (auiChangeFlag & 2)
+					Events::OnReputationChange(apThis);
 
-			ThisCall(kReputationChangeDetour, apThis, auiChangeFlag);
+				ThisCall(kReputationChangeDetour, apThis, auiChangeFlag);
+			}
+			STACK_FRAME_OPT_RESET
 		}
-		STACK_FRAME_OPT_RESET
 
 		static void Init() {
 			kOnDyingDetour.ReplaceCall(0x89F49F, OnDying);

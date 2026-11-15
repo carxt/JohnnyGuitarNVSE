@@ -1981,13 +1981,13 @@ namespace JIPFixes {
 					uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 					TESObjectREFR* pOwner = *reinterpret_cast<TESObjectREFR**>(pEBP + 0xC);
 					if (pOwner) {
-						for (auto const& callback : OnDialogTopicHandler->kCallbacks) {
-							auto filter = reinterpret_cast<FilterForm*>(callback.pFilter);
-							if (filter->IsFilterEmpty(0) || filter->IsNonRefFormInFilter(0, this)) {
-								CallUDF(callback.pScript, pOwner, OnDialogTopicHandler->ucMaxArgsCount, this);
+						for (auto const& rCallback : OnDialogTopicHandler->kCallbacks) {
+							auto pFilter = reinterpret_cast<FilterForm*>(rCallback.pFilter);
+							if (pFilter->IsFilterEmpty(0) || pFilter->IsFormInFilter(this, 0)) {
+								rCallback.CallScript(OnDialogTopicHandler, pOwner, this);
 							}
-							else if (pParentTopic && filter->IsNonRefFormInFilter(0, pParentTopic)) {
-								CallUDF(callback.pScript, pOwner, OnDialogTopicHandler->ucMaxArgsCount, pParentTopic);
+							else if (pParentTopic && pFilter->IsFormInFilter(pParentTopic, 0)) {
+								rCallback.CallScript(OnDialogTopicHandler, pOwner, pParentTopic);
 							}
 						}
 					}
