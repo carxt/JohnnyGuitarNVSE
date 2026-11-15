@@ -129,8 +129,11 @@ bool __fastcall FilterForm::IsAnyFormInFilter(uint32_t auiIndex, const TESForm* 
 		return false;
 
 	const FilterSet* pFilter = GetFilter(auiIndex);
-	if (!pFilter || pFilter->empty()) [[unlikely]]
+	if (!pFilter) [[unlikely]]
 		return false;
+
+	if (pFilter->empty())
+		return true;
 
 	if (TESObjectREFR::IsReferenceFormType(apForm->GetFormType()))
 		return DoFilterRef(*pFilter, static_cast<const TESObjectREFR*>(apForm));
@@ -143,8 +146,11 @@ bool __fastcall FilterForm::IsNonRefFormInFilter(uint32_t auiIndex, const TESFor
 		return false;
 
 	const FilterSet* pFilter = GetFilter(auiIndex);
-	if (!pFilter || pFilter->empty()) [[unlikely]]
+	if (!pFilter) [[unlikely]]
 		return false;
+
+	if (pFilter->empty())
+		return true;
 
 	assert(!apForm->IsReference());
 	return DoFilterForm(*pFilter, apForm);
@@ -155,8 +161,11 @@ bool __fastcall FilterForm::IsRefInFilter(uint32_t auiIndex, const TESObjectREFR
 		return false;
 
 	const FilterSet* pFilter = GetFilter(auiIndex);
-	if (!pFilter || pFilter->empty()) [[unlikely]]
+	if (!pFilter) [[unlikely]]
 		return false;
+
+	if (pFilter->empty())
+		return true;
 
 	return DoFilterRef(*pFilter, apRef);
 }
