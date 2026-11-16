@@ -1994,6 +1994,11 @@ namespace JIPFixes {
 			return true;
 		}
 
+		void __fastcall SetPos(TESObjectREFR* apRef, void*, const NiPoint3& arPosition) {
+			apRef->SetLocationOnReference(arPosition);
+			apRef->Update3DPosition();
+		}
+
 		void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetPosEx));
 			if (pInfo) {
@@ -2001,6 +2006,8 @@ namespace JIPFixes {
 				pInfo->execute = Cmd_SetPosEx_Execute;
 				uiGetTranslatedPosAddr = JIPUtils::GetAddress(0x100589C0);
 			}
+
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10058780), SetPos);
 		}
 
 	}
