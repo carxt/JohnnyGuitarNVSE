@@ -42,6 +42,7 @@
 
 #include "JG/JohnnyExtraData.hpp"
 #include "JG/ScriptUtils.hpp"
+#include "JG/TaskQueue.hpp"
 
 #include "NVSE/InventoryRef.hpp"
 
@@ -1940,18 +1941,13 @@ namespace JIPFixes {
 
 	namespace BetterSetPosEx {
 
-		static Cmd_Execute SetPosEx;
-
 		static uint32_t uiGetTranslatedPosAddr;
 		static __m128 __fastcall GetTranslatedPos(TESObjectREFR* apReference, __m128& arPosition) {
 			using func_t = __m128(__vectorcall)(TESObjectREFR*, __m128*);
 			return CustomCall<func_t>(uiGetTranslatedPosAddr, apReference, &arPosition);
 		}
-
-		bool Cmd_SetPosEx_Execute(COMMAND_ARGS) {
-			if (thisObj != PlayerCharacter::GetSingleton())
-				return SetPosEx(PASS_COMMAND_ARGS);
-
+		
+		static bool Cmd_SetPosEx_Execute(COMMAND_ARGS) {
 			NiPoint3 kPosition;
 			uint32_t eMode = 0;
 			if (ExtractArgsEx(EXTRACT_ARGS_EX, &kPosition.x, &kPosition.y, &kPosition.z, &eMode)) {
@@ -1971,38 +1967,41 @@ namespace JIPFixes {
 						break;
 				}
 
-				TESObjectCELL* pTargetCell = TES::GetSingleton()->GetCellForPoint(kFinalPos);
-				if (pTargetCell) {
-					thisObj->SetLocationOnReference(kFinalPos);
-					thisObj->Update3DPosition();
-				}
-				else {
-					PlayerCharacter::PositionRequest* pPosRequest = new PlayerCharacter::PositionRequest();
-					TESObjectCELL* pCell = thisObj->GetParentCell();
-					TESWorldSpace* pWorld = thisObj->GetWorldSpace();
-					if (pWorld)
-						pPosRequest->pWorld = pWorld;
-					else if (pCell && pCell->GetInterior())
-						pPosRequest->pInterior = pCell;
-					pPosRequest->bResetWeather = true;
-					pPosRequest->kPos = kFinalPos;
-					pPosRequest->kRot = thisObj->GetRotation();
-					PlayerCharacter::GetSingleton()->RequestPositionPlayer(pPosRequest);
-					Interface::CloseConsole();
-				}
+				JohnnyExtraData* pExtraData = JohnnyExtraData::GetOrCreate(thisObj);
+				pExtraData->IncRefCount();
+
+				QueuedTask kTask;
+				kTask.kItems[0].p = pExtraData;
+				kTask.kItems[1].f = kFinalPos.x;
+				kTask.kItems[2].f = kFinalPos.y;
+				kTask.kItems[3].f = kFinalPos.z;
+				kTask.pFunction = QUEUED_TASK{
+					JohnnyExtraData * pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
+					TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pData->pOwner);
+					if (pRef) {
+						NiPoint3 kPos;
+						kPos.x = arTask.kItems[1].f;
+						kPos.y = arTask.kItems[2].f;
+						kPos.z = arTask.kItems[3].f;
+
+						ScriptUtils::MoveRefTo(pRef, kPos, pRef->GetRotation());
+					}
+					pData->DecRefCount();
+				};
+				TaskQueue::QueueTask(kTask);
+				*result = 1;
 			}
 			return true;
 		}
 
-		void __fastcall SetPos(TESObjectREFR* apRef, void*, const NiPoint3& arPosition) {
+		static void __fastcall SetPos(TESObjectREFR* apRef, void*, const NiPoint3& arPosition) {
 			apRef->SetLocationOnReference(arPosition);
 			apRef->Update3DPosition();
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetPosEx));
 			if (pInfo) {
-				SetPosEx = pInfo->execute;
 				pInfo->execute = Cmd_SetPosEx_Execute;
 				uiGetTranslatedPosAddr = JIPUtils::GetAddress(0x100589C0);
 			}

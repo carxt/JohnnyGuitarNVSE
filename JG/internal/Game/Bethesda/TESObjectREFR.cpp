@@ -862,6 +862,11 @@ void TESObjectREFR::SaveAnimation(BGSSaveFormBuffer* apBuffer) {
 void TESObjectREFR::LoadAnimation(BGSLoadFormBuffer* apBuffer) { 
 	ThisCall(0x5636E0, this, apBuffer); 
 }
+
+// GAME - 0x573800
+void TESObjectREFR::MoveRefToNewSpace(TESObjectREFR* apRef, TESObjectCELL* apCell, TESWorldSpace* apWorld) {
+	CdeclCall(0x573800, apRef, apCell, apWorld);
+}
 #endif
 
 // GAME - 0x56F930

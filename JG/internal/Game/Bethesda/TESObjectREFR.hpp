@@ -356,6 +356,8 @@ public:
 
 	void SaveAnimation(BGSSaveFormBuffer* apBuffer);
 	void LoadAnimation(BGSLoadFormBuffer* apBuffer);
+
+	static void MoveRefToNewSpace(TESObjectREFR* apRef, TESObjectCELL* apCell, TESWorldSpace* apWorld);
 #endif
 
 	static TESObjectREFR* FindReferenceFor3D(NiAVObject* apObject);

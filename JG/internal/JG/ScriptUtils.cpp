@@ -8,6 +8,9 @@
 #include "Bethesda/BGSSaveFormBuffer.hpp"
 #include "Bethesda/BGSSaveLoadGame.hpp"
 #include "Bethesda/PlayerCharacter.hpp"
+#include "Bethesda/ProcessLists.hpp"
+#include "Bethesda/Interface.hpp"
+#include "Bethesda/TES.hpp"
 #include "Gamebryo/NiControllerManager.hpp"
 
 #include "shared/Utils/StackObject.hpp"
@@ -99,6 +102,81 @@ namespace ScriptUtils {
 				apReference->LoadAnimation(pLoadBuffer);
 			ThisCall(0x81DB60, pLoadBuffer, true); // BGSLoadFormBuffer destructor
 		}
+	}
+
+	// Based on MoveTo + CE's SetPos (which is just tweaked MoveTo)
+	// Aka cooler MoveTo
+	SPEC_NOINLINE void __fastcall MoveRefTo(TESObjectREFR* apRef, const NiPoint3& arPos, const NiPoint3& arRot, TESObjectREFR* apTarget, TESObjectCELL* apCell, TESWorldSpace* apWorld) {
+		Actor* pActor = apRef->IsActor() ? static_cast<Actor*>(apRef) : nullptr;
+		const bool bPlayer = pActor == PlayerCharacter::GetSingleton();
+
+		const TESWorldSpace* pCurrentWorld = apRef->GetWorldSpace();
+		const TESObjectCELL* pCurrentCell = apRef->GetParentCell();
+
+		const TESObjectREFR* pLocationRef = apTarget ? apTarget : apRef;
+
+		TESWorldSpace* pTargetWorld = apWorld ? apWorld : pLocationRef->GetWorldSpace();
+		TESObjectCELL* pParentCell = apCell ? apCell : pLocationRef->GetParentCell();
+
+		TESObjectCELL* pTargetCell = nullptr;
+		if (pTargetWorld)
+			pTargetCell = TES::GetSingleton()->GetCellForPoint(arPos);
+		else if (pParentCell && pParentCell->GetInterior())
+			pTargetCell = pParentCell;
+
+		const bool bNewWorld = pCurrentWorld && pTargetWorld && pCurrentWorld != pTargetWorld;
+		const bool bNewCell = pCurrentCell && pTargetCell && pCurrentCell != pTargetCell;
+		const bool bNewSpace = bNewWorld || bNewCell;
+
+		if (pActor) {
+			if (bNewSpace)
+				ProcessLists::GetSingleton()->StopCombatAndAlarmOnActor(pActor, false);
+
+			BaseProcess* pAIProc = pActor->GetCurrentAIProcess();
+			if (pAIProc && pAIProc->GetSitSleepState() != SIT_SLEEP_STATE::NORMAL)
+				pActor->GetOutofFurnitureQuick();
+		}
+
+		if (bPlayer && !pTargetCell) {
+			PlayerCharacter::PositionRequest* pPosRequest = new PlayerCharacter::PositionRequest();
+
+			if (pTargetWorld)
+				pPosRequest->pWorld = pTargetWorld;
+			else if (pTargetCell && pTargetCell->GetInterior())
+				pPosRequest->pInterior = pTargetCell;
+
+			pPosRequest->bResetWeather = true;
+			pPosRequest->kPos = arPos;
+			pPosRequest->kRot = arRot;
+			pPosRequest->pFastTravelMarker = apTarget;
+			PlayerCharacter::GetSingleton()->RequestPositionPlayer(pPosRequest);
+			Interface::CloseConsole();
+		}
+		else if (pActor && !apRef->IsDead(false)) {
+			pActor->MoveActorAndFollowers(arPos, arRot.z, pTargetCell, pTargetWorld, true, bNewSpace);
+		}
+		else {
+			apRef->SetLocationOnReference(arPos);
+			apRef->SetAngleOnReference(arRot);
+
+			if (pTargetCell && TES::GetSingleton()->IsCellLoaded(pTargetCell, false))
+				apRef->Update3DPosition();
+
+			TESObjectREFR::MoveRefToNewSpace(apRef, pTargetCell, pTargetWorld);
+
+			const TESObjectCELL* pCurrParentCell = apRef->GetParentCell();
+			if (pCurrParentCell) [[likely]] {
+				if (TES::GetSingleton()->IsCellLoaded(pCurrParentCell, false))
+					apRef->InitHavok();
+			}
+
+			if (pActor) [[unlikely]] {
+				pActor->FadeIn();
+				pActor->UpdateAlpha();
+			}
+		}
+
+		PlayerCharacter::GetSingleton()->CheckForQuestTargetUpdate(apRef);
 	}
 
 	void __fastcall UpdateReference3D(TESObjectREFR* apReference) {
