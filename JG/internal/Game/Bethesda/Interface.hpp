@@ -144,6 +144,9 @@ public:
 	static NiAVObject* CopyOrDeepCopyNode(NiAVObject* apObject);
 
 
+	static void CloseConsole();
+
+
 	static void CreateRaceSexMenu(uint32_t aeType);
 
 

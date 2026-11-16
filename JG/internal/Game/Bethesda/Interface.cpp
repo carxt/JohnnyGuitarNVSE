@@ -110,6 +110,11 @@ NiAVObject* Interface::CopyOrDeepCopyNode(NiAVObject* apObject) {
 	return CdeclCall<NiAVObject*>(0x707870, apObject);
 }
 
+// GAME - 0x703DA0
+void Interface::CloseConsole() {
+	CdeclCall(0x703DA0);
+}
+
 // GAME - 0x705870
 void Interface::CreateRaceSexMenu(uint32_t aeType) {
 	CdeclCall(0x705870, aeType);

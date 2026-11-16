@@ -75,15 +75,15 @@ public:
 	};
 
 	struct PositionRequest {
-		TESWorldSpace*	pWorld;
-		TESObjectCELL*	pInterior;
-		NiPoint3		kPos;
-		NiPoint3		kRot;
-		bool			bResetWeather;
-		void(__cdecl*	pfnArrivalFunc)(void*);
-		void*			pArrivalFuncData;
-		TESObjectREFR*	pFurnitureRef;
-		TESObjectREFR*	pFastTravelMarker;
+		TESWorldSpace*	pWorld					= nullptr;
+		TESObjectCELL*	pInterior				= nullptr;
+		NiPoint3		kPos					= NiPoint3::ZERO;
+		NiPoint3		kRot					= NiPoint3::ZERO;
+		bool			bResetWeather			= false;
+		void(__cdecl*	pfnArrivalFunc)(void*)	= nullptr;
+		void*			pArrivalFuncData		= nullptr;
+		TESObjectREFR*	pFurnitureRef			= nullptr;
+		TESObjectREFR*	pFastTravelMarker		= nullptr;
 	};
 
 	struct _ModifierGroup {
@@ -383,6 +383,8 @@ public:
 	void RemovePlayerMapMarker();
 
 	void ResetKillCam(KILL_CAM_TYPE aeOldType, bool abForce);
+
+	void RequestPositionPlayer(PositionRequest* apRequest);
 };
 
 ASSERT_SIZE(PlayerCharacter, 0xE50);
