@@ -125,7 +125,7 @@ namespace ScriptUtils {
 			pTargetCell = pParentCell;
 
 		const bool bNewWorld = pCurrentWorld && pTargetWorld && pCurrentWorld != pTargetWorld;
-		const bool bNewCell = pCurrentCell && pTargetCell && pCurrentCell != pTargetCell;
+		const bool bNewCell = pCurrentCell && pCurrentCell != pTargetCell;
 		const bool bNewSpace = bNewWorld || bNewCell;
 
 		if (pActor) {
@@ -162,12 +162,14 @@ namespace ScriptUtils {
 			if (pTargetCell && TES::GetSingleton()->IsCellLoaded(pTargetCell, false))
 				apRef->Update3DPosition();
 
-			TESObjectREFR::MoveRefToNewSpace(apRef, pTargetCell, pTargetWorld);
+			if (bNewSpace) {
+				TESObjectREFR::MoveRefToNewSpace(apRef, pTargetCell, pTargetWorld);
 
-			const TESObjectCELL* pCurrParentCell = apRef->GetParentCell();
-			if (pCurrParentCell) [[likely]] {
-				if (TES::GetSingleton()->IsCellLoaded(pCurrParentCell, false))
-					apRef->InitHavok();
+				const TESObjectCELL* pCurrParentCell = apRef->GetParentCell();
+				if (pCurrParentCell) [[likely]] {
+					if (TES::GetSingleton()->IsCellLoaded(pCurrParentCell, false))
+						apRef->InitHavok();
+				}
 			}
 		}
 
