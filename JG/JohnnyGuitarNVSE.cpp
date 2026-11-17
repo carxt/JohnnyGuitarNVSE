@@ -27,8 +27,8 @@ BS_ALLOCATORS
 IDebugLog	   gLog(JohnnyPluginData::JG_LOG_PATH);
 
 #ifdef GAME
-InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
-TESObjectREFR* (__stdcall* InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, uint32_t countDelta, ExtraDataList* xData);
+_InventoryReferenceGetForRefID InventoryRefGetForID;
+_InventoryReferenceCreateEntry InventoryRefCreateEntry;
 
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
@@ -45,7 +45,7 @@ NVSEDataInterface* g_dataInterface = NULL;
 uint32_t g_pluginHandle = 0;
 
 // Runs during NVSEPlugin_Load
-void OnNVSELoadInit(const NVSEInterface* apNVSE) {
+static void OnNVSELoadInit(const NVSEInterface* apNVSE) {
 	JohnnyPatches::ReadINI();
 
 	g_pluginHandle = apNVSE->GetPluginHandle();
@@ -58,8 +58,8 @@ void OnNVSELoadInit(const NVSEInterface* apNVSE) {
 	g_arrInterface = static_cast<NVSEArrayVarInterface*>(apNVSE->QueryInterface(kInterface_ArrayVar));
 	g_strInterface = static_cast<NVSEStringVarInterface*>(apNVSE->QueryInterface(kInterface_StringVar));
 
-	InventoryRefGetForID = static_cast<InventoryRef * (*)(uint32_t)>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
-	InventoryRefCreateEntry = static_cast<TESObjectREFR * (__stdcall*)(TESObjectREFR*, TESForm*, uint32_t, ExtraDataList*)>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreateEntry));
+	InventoryRefGetForID = static_cast<_InventoryReferenceGetForRefID>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID));
+	InventoryRefCreateEntry = static_cast<_InventoryReferenceCreateEntry>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreateEntry));
 	CaptureLambdaVars = static_cast<_CaptureLambdaVars>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList));
 	UncaptureLambdaVars = static_cast<_UncaptureLambdaVars>(g_dataInterface->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList));
 	ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
@@ -78,7 +78,7 @@ void OnNVSELoadInit(const NVSEInterface* apNVSE) {
 // Runs on program's WinMain
 // For the game, it's on NVSEPlugin_Load itself
 // For GECK, NVSEPlugin_Load works like game's NVSEPlugin_Preload, so a hook is needed to init at a similar point to the game
-void OnMainInit() {
+static void OnMainInit() {
 	FixedStringsRework::Init();
 	JohnnyExtraData::Initialize(g_dataInterface);
 	JohnnyFixes::Init();
@@ -92,8 +92,8 @@ void OnMainInit() {
 #ifndef GAME
 // Detour MessageHandler::Init - it's the first function called in GECK's WinMain, after CLI arguments have been read
 // Runs after GECK Extender
-HookUtils::CallDetour kGECKWinMainDetour;
-void __cdecl OnGECKMain(bool a1, bool a2, bool a3, bool a4, void* a5) {
+static HookUtils::CallDetour kGECKWinMainDetour;
+static void __cdecl OnGECKMain(bool a1, bool a2, bool a3, bool a4, void* a5) {
 	OnMainInit();
 	CdeclCall(kGECKWinMainDetour, a1, a2, a3, a4, a5);
 }
@@ -155,6 +155,7 @@ EXTERN_DLL_EXPORT bool NVSEPlugin_Load(const NVSEInterface* apNVSE) {
 	return true;
 }
 
+STACK_FRAME_OPT_ENABLE
 BOOL WINAPI DllMain(
 	HANDLE  hDllHandle,
 	DWORD   dwReason,
@@ -164,3 +165,4 @@ BOOL WINAPI DllMain(
 		DisableThreadLibraryCalls((HMODULE)hDllHandle);
 	return TRUE;
 }
+STACK_FRAME_OPT_RESET

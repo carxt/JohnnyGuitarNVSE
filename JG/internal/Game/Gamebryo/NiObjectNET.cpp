@@ -1,5 +1,25 @@
 #include "NiObjectNET.hpp"
 
+// GAME - 0x413F40
+const NiFixedString& NiObjectNET::GetName() const {
+	return m_kName;
+}
+
+// GAME - 0x43B9F0
+// GECK - 0x818130
+void NiObjectNET::SetName(const NiFixedString& arName) {
+#ifdef GAME
+	ThisCall(0x43B9F0, this, &arName);
+#else
+	ThisCall(0x818130, this, &arName);
+#endif
+}
+
+// GAME - 0x43B230
+NiTimeController* NiObjectNET::GetControllers() const { 
+	return m_spControllers; 
+};
+
 // GAME - 0xA5C570
 // GECK - 0x818D30
 NiTimeController* NiObjectNET::GetController(const NiRTTI* apRTTI) const {

@@ -1,6 +1,12 @@
 #pragma once
 
-#pragma warning(disable: 4100 4201 4244 4324 4389 5054 28159)
+// 4100 - unreferenced formal parameter
+// 4201 - nonstandard extension used : nameless struct/union
+// 4244 - 'argument' : conversion from 'type1' to 'type2', possible loss of data
+// 4324 - 'type': structure was padded due to alignment specifier
+// 4505 - 'function' : unreferenced local function has been removed
+// 4530 - C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+#pragma warning(disable: 4100 4201 4244 4324 4505 4530 28159)
 
 #include <windows.h>
 #include <stdint.h>
@@ -10,6 +16,15 @@
 #include <xutility>
 
 #define USE_MODDED_CHANGES 1
+
+#if USE_MODDED_CHANGES
+#ifdef GAME
+#define USE_JIP_CHANGES 1
+#define USE_TWEAKS_CHANGES 1
+#endif
+#define USE_JG_CHANGES 1
+#define USE_MLF_CHANGES 1
+#endif
 
 constexpr inline auto our_snprintf	= snprintf;
 constexpr inline auto our_sprintf	= sprintf;

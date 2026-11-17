@@ -42,7 +42,6 @@ public:
 	const BSSimpleList<TESQuestTarget*>* GetTargetList() const;
 	BSSimpleList<TESQuestTarget*>* GetTargetList();
 
-#ifdef GAME
 	State GetState() const;
 	void SetState(State aeState);
 	void SetStateSimple(State aeState);
@@ -53,6 +52,7 @@ public:
 
 	bool GetDisplayed() const;
 
+#ifdef GAME
 	void UpdateCurrentTargetList(BSSimpleList<TESQuestTarget*>* apListToFill);
 #endif
 };

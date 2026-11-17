@@ -21,14 +21,11 @@ uint8_t TESRegionData::GetPriority() const {
 }
 
 // GAME - 0x4F15C0
+// GECK - 0x53A4F0
 bool TESRegionData::SetPriority(uint8_t aucPriority) {
 #ifdef GAME
     return ThisCall<bool>(0x4F15C0, this, aucPriority);
 #else
-    if (aucPriority > 100)
-        return false;
-
-    ucPriority = aucPriority;
-    return true;
+    return ThisCall<bool>(0x53A4F0, this, aucPriority);
 #endif
 }

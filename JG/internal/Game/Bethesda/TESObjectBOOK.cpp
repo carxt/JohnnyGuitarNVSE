@@ -31,7 +31,7 @@ ActorValue::Index TESObjectBOOK::GetTeaches() const {
 // GECK - 0x5F7300 - Inlined
 void TESObjectBOOK::SetTeaches(ActorValue::Index aeIndex) {
     if (aeIndex == ActorValue::Index::NONE)
-        kData.eTeaches = -1;
+        kData.eTeaches = ActorValue::Index::NONE;
     else
         kData.eTeaches = ActorValue::ToArrayIndex(ActorValue::Section::SKILL, aeIndex);
 }

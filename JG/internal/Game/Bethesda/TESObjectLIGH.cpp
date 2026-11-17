@@ -89,7 +89,7 @@ bool TESObjectLIGH::GetSpotShadow() const {
     return kData.uiFlags.bSpotShadow;
 }
 
-#if USE_MODDED_CHANGES // JIP
+#if USE_JIP_CHANGES // JIP
 bool TESObjectLIGH::GetColorShift() const {
 	return kData.uiFlags.bColorShift;
 }

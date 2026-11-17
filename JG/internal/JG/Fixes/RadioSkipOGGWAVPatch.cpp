@@ -8,8 +8,6 @@ namespace RadioSkipOGGWAVPatch {
 
 	void* hk_QueryRadioSkipUpdate(BSSoundHandle* pSound, unsigned int iOffset, bool bDoRewind)
 	{
-		unsigned int lMsToRewind = 50; //the default value added by the game to skip
-		unsigned int lRewindedOffset = iOffset - lMsToRewind;
 		if (bDoRewind && BSAudio::GetSingleton()->GetSynchTime() <= iOffset)
 		{
 			return NULL;

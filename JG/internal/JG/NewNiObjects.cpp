@@ -1,4 +1,5 @@
 #include "NewNiObjects.hpp"
+#include "Gamebryo/NiLight.hpp"
 
 #include "Shared/Utils/DebugLog.hpp"
 #include "Shared/SafeWrite/SafeWrite.hpp"
@@ -45,13 +46,13 @@ namespace NewNiObjects {
 		}
 	}
 
-	void InitNewLoaders() {
+	static SPEC_NOINLINE void InitNewLoaders() {
 		_MESSAGE("Registering new NiObjects...");
 		NiStream::RegisterLoader("NiLightRadiusController", NiLightRadiusController::CreateObject);
 	}
 
-	HookUtils::CallDetour kInitLoadersDetour;
-	void __cdecl InitLoadersHook() {
+	static HookUtils::CallDetour kInitLoadersDetour;
+	static void __cdecl InitLoadersHook() {
 		CdeclCall(kInitLoadersDetour);
 		InitNewLoaders();
 	}

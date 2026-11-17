@@ -1,6 +1,6 @@
 #include "TESNPC.hpp"
-#ifdef EDITOR
-#include "TESRace.hpp"
+#ifdef GAME
+#include "TESClass.hpp"
 #endif
 
 // GAME - 0x502430
@@ -177,5 +177,14 @@ uint32_t TESNPC::GetFormHealthLeveled(bool abAddBase) {
 	return ThisCall<uint32_t>(0x603FC0, this, abAddBase);
 #else
 	return ThisCall<uint32_t>(0x56F780, this, abAddBase);
+#endif
+}
+
+// GECK - 0x56F2C0
+const char* TESNPC::GetClassEditorID() const {
+#ifdef GAME
+	return pClass ? pClass->GetFormEditorID() : "";
+#else
+	return ThisCall<const char*>(0x56F2C0, this);
 #endif
 }

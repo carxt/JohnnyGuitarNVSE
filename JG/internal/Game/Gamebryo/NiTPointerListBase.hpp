@@ -1,9 +1,13 @@
 #pragma once
 
 #include "NiTListBase.hpp"
+#include "NiConcepts.hpp"
 
-template <class Allocator, class T_Data>
-class NiTPointerListBase : public NiTListBase <Allocator, T_Data> {
+template <class Allocator, NiC::NiItem T_Data>
+class NiTPointerListBase : public NiTListBase<Allocator, T_Data> {
+protected:
+    using _Empty = NiC::PickEmptyType<T_Data>;
+
 public:
     ~NiTPointerListBase();
 

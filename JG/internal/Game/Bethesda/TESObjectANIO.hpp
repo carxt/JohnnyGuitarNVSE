@@ -17,6 +17,8 @@ public:
 	TESIdleForm* GetIdleAnim() const;
 	void SetIdleAnim(TESIdleForm* apIdle);
 
+	const char* GetIdleAnimEditorID() const;
+
 	bool GetUsesIdle(TESIdleForm* apIdle) const;
 };
 

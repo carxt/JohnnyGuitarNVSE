@@ -4,7 +4,7 @@
 
 // GAME - 0xB998E0
 template<class Allocator, class T_Data>
-inline NiTListBase<Allocator, T_Data>::NiTListBase() : m_pkHead(0), m_pkTail(0) { 
+inline NiTListBase<Allocator, T_Data>::NiTListBase() : m_pkHead(nullptr), m_pkTail(nullptr) {
 	m_kAllocator.m_uiCount = 0; 
 }
 
@@ -36,12 +36,12 @@ inline NiTListIterator NiTListBase<Allocator, T_Data>::GetTailPos() const {
 // GAME - 0x7B52D0
 template<class Allocator, class T_Data>
 inline NiTListIterator NiTListBase<Allocator, T_Data>::GetNextPos(NiTListIterator akPos) const {
-	return akPos ? static_cast<NiTListItem<T_Data>*>(akPos)->m_pkNext : 0;
+	return akPos ? static_cast<NiTListItem<T_Data>*>(akPos)->m_pkNext : nullptr;
 }
 
 template<class Allocator, class T_Data>
 inline NiTListIterator NiTListBase<Allocator, T_Data>::GetPrevPos(NiTListIterator akPos) const {
-	return akPos ? static_cast<NiTListItem<T_Data>*>(akPos)->m_pkPrev : 0;
+	return akPos ? static_cast<NiTListItem<T_Data>*>(akPos)->m_pkPrev : nullptr;
 }
 
 // GAME - 0x49FA20

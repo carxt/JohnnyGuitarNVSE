@@ -33,9 +33,9 @@ ExpressionEvaluatorUtils s_expEvalUtils;
 
 namespace JohnnyCommands {
 
-	void InitCommandData(const NVSEInterface* apNVSE) {
+	static void InitCommandData(const NVSEInterface* apNVSE) {
 #ifdef GAME
-		AnimActivationHeight::Init();
+		AnimActivationHeight::Install();
 		ExternalEmittanceOnBases::Install();
 		FilteredBarberMenu::Install();
 		apNVSE->InitExpressionEvaluatorUtils(&s_expEvalUtils);
@@ -455,6 +455,10 @@ namespace JohnnyCommands {
 		REG_TYPED_CMD(GetReputationFormIcon, String);
 		REG_CMD(SetReputationFormIcon);
 		REG_CMD(ToggleAddonNodes);
+		REG_CMD(GetAddonNodeIndex);
+		REG_TYPED_CMD(GetAddonNodeSound, Form);
+		REG_CMD(SetAddonNodeSound);
+		REG_CMD(GetControllerStickRaw);
 	}
 
 }

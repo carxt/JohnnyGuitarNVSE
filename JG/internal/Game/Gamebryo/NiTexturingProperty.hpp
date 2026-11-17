@@ -51,7 +51,7 @@ public:
 	};
 	using ClampMode = _ClampMode::Mode;
 
-	class SPEC_EMPTY_BASES Map : public NiMemObject {
+	class SPEC_EMPTY_BASES Map : public BSMemObject {
 	public:
 		Map();
 		virtual				~Map();

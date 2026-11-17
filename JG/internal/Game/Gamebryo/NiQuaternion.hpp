@@ -1,11 +1,11 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
 class NiPoint3;
 class NiMatrix3;
 
-class SPEC_EMPTY_BASES NiQuaternion : public NiMemObject {
+class SPEC_EMPTY_BASES NiQuaternion : public BSMemObject {
 public:
 	NiQuaternion() noexcept;
 	NiQuaternion(float afW, float afX, float afY, float afZ) noexcept;

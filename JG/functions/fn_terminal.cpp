@@ -1,11 +1,11 @@
 #include "fn_terminal.h"
+#include "GameUI.h"
 #include "Bethesda/Interface.hpp"
 
 bool Cmd_RefreshTerminalMenu_Execute(COMMAND_ARGS) {
 	*result = 0;
-	void* g_computersMenu = *(void**)0x11D9334;
-	if (g_computersMenu) {
-		ThisCall(0x7586E0, g_computersMenu, 0);
+	if (ComputersMenu::GetSingleton()) {
+		ComputersMenu::GetSingleton()->DisplayTerminal(false);
 		*result = 1;
 	}
 	return true;
@@ -74,7 +74,7 @@ bool Cmd_GetTerminalMenuItemSubmenu_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal, &uiMenuEntry) && pTerminal && IS_TYPE(pTerminal, BGSTerminal)) {
 		auto pPos = pTerminal->GetMenuItemList()->GetAt(uiMenuEntry);
 		if (pPos && pPos->GetItem() && pPos->GetItem()->pSubMenu)
-			*(FormID*)result = pPos->GetItem()->pSubMenu->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pPos->GetItem()->pSubMenu->GetFormID();
 	}
 	return true;
 }
@@ -116,7 +116,7 @@ bool Cmd_GetTerminalMenuItemNote_Execute(COMMAND_ARGS) {
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal, &uiMenuEntry) && pTerminal && IS_TYPE(pTerminal, BGSTerminal)) {
 		auto pPos = pTerminal->GetMenuItemList()->GetAt(uiMenuEntry);
 		if (pPos && pPos->GetItem() && pPos->GetItem()->pDisplayNote)
-			*(FormID*)result = pPos->GetItem()->pDisplayNote->GetFormID();
+			*reinterpret_cast<FormID*>(result) = pPos->GetItem()->pDisplayNote->GetFormID();
 	}
 	return true;
 }
@@ -168,9 +168,8 @@ bool Cmd_AddTerminalMenuItem_Execute(COMMAND_ARGS) {
 	*result = 0;
 	BGSTerminal* pTerminal = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pTerminal) && pTerminal && IS_TYPE(pTerminal, BGSTerminal)) {
-		TERMINAL_MENU_ITEM* pItem = BSMemory::malloc<TERMINAL_MENU_ITEM>();
+		TERMINAL_MENU_ITEM* pItem = BSMemory::create<TERMINAL_MENU_ITEM, 0x500960>();
 		if (pItem) {
-			ThisCall(0x500960, pItem); // Constructor
 			pTerminal->AddMenuItem(pItem);
 			*result = 1;
 		}

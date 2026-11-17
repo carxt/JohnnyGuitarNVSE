@@ -97,7 +97,7 @@ public:
 	using WeaponFlagsEx = _WeaponFlagsEx::Flags;
 
 	struct _ModSlot {
-		enum Slot {
+		enum Slot : uint32_t {
 			MOD_1 = 1u << 0,
 			MOD_2 = 1u << 1,
 			MOD_3 = 1u << 2,
@@ -321,6 +321,10 @@ public:
 
 	bool GetHasModScope() const;
 	void SetHasModScope(bool abVal);
+
+	float GetMinSpread(bool abModded) const;
+	
+	float GetSpread(bool abModded) const;
 
 	uint16_t GetCriticalDamage() const;
 	void SetCriticalDamage(uint16_t ausVal);

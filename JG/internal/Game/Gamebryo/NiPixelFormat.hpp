@@ -1,10 +1,10 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
 #include <d3d9types.h>
 
-class SPEC_EMPTY_BASES NiPixelFormat : public NiMemObject {
+class SPEC_EMPTY_BASES NiPixelFormat : public BSMemObject {
 public:
 	struct _Format {
 		enum Format {

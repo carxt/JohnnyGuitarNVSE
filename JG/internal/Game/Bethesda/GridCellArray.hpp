@@ -13,7 +13,6 @@ struct GridCell {
 
 class GridCellArray : public GridArray {
 public:
-	int32_t							iDimension;
 	GridCell*						pGridCells;
 	NiPoint3						kWorldCenter;
 	bool							bLandAttached;

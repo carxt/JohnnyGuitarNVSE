@@ -424,10 +424,10 @@ const char* TESWorldSpace::GetWorldMapTextureName() const {
 #ifdef GAME
     return ThisCall<const char*>(0x586440, this);
 #else
-    TESWorldSpace* pParentWorld = GetParentWorld(ParentUseBit::MAP);
-    if (!pParentWorld)
+    TESWorldSpace* pParent = GetParentWorld(ParentUseBit::MAP);
+    if (!pParent)
         return GetTextureName();
-    return pParentWorld->GetTextureName();
+    return pParent->GetTextureName();
 #endif
 }
 

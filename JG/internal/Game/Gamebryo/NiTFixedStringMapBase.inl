@@ -2,7 +2,7 @@
 
 #include "NiTFixedStringMapBase.hpp"
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline NiTFixedStringMapBase<Allocator, T_Data>::NiTFixedStringMapBase(uint32_t auiHashSize) {
 	m_uiHashSize = auiHashSize;
 	m_kAllocator.m_uiCount = 0;
@@ -13,44 +13,44 @@ inline NiTFixedStringMapBase<Allocator, T_Data>::NiTFixedStringMapBase(uint32_t 
 }
 
 // GAME - 0xA6EA00
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline NiTFixedStringMapBase<Allocator, T_Data>::~NiTFixedStringMapBase() {
 	NiTFixedStringMapBase<Allocator, T_Data>::RemoveAll();
 	NiFree(m_ppkHashTable);
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline uint32_t NiTFixedStringMapBase<Allocator, T_Data>::GetCount() const {
 	return m_kAllocator.m_uiCount;
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline bool NiTFixedStringMapBase<Allocator, T_Data>::IsEmpty() const {
 	return m_kAllocator.m_uiCount == 0;
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline uint32_t NiTFixedStringMapBase<Allocator, T_Data>::KeyToHashIndex(const NiFixedString& arString) const {
 	const char* pKey = arString;
 	return uint32_t(size_t(pKey) % m_uiHashSize);
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline bool NiTFixedStringMapBase<Allocator, T_Data>::IsKeysEqual(const NiFixedString& arString1, const NiFixedString& arString2) const {
 	return arString1 == arString2;
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline void NiTFixedStringMapBase<Allocator, T_Data>::SetValue(NiTMapItem<NiFixedString, T_Data>* apItem, const NiFixedString& arString, T_Data akData) {
 	apItem->m_key = arString;
 	apItem->m_val = akData;
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline void NiTFixedStringMapBase<Allocator, T_Data>::ClearValue(NiTMapItem<NiFixedString, T_Data>* apItem) {
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline bool NiTFixedStringMapBase<Allocator, T_Data>::GetAt(const NiFixedString& arString, T_Data& arData) const {
 	const uint32_t uiHashIndex = KeyToHashIndex(arString);
 	NiTMapItem<NiFixedString, T_Data>* pItem = m_ppkHashTable[uiHashIndex];
@@ -64,7 +64,7 @@ inline bool NiTFixedStringMapBase<Allocator, T_Data>::GetAt(const NiFixedString&
 	return false;
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline void NiTFixedStringMapBase<Allocator, T_Data>::SetAt(const NiFixedString& arString, T_Data akData) {
 	const uint32_t uiHashIndex = KeyToHashIndex(arString);
 	NiTMapItem<NiFixedString, T_Data>* pItem = m_ppkHashTable[uiHashIndex];
@@ -82,7 +82,7 @@ inline void NiTFixedStringMapBase<Allocator, T_Data>::SetAt(const NiFixedString&
 	++m_kAllocator.m_uiCount;
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline NiTMapIterator NiTFixedStringMapBase<Allocator, T_Data>::GetFirstPos() const {
 	for (uint32_t i = 0; i < m_uiHashSize; i++) {
 		if (m_ppkHashTable[i])
@@ -91,7 +91,7 @@ inline NiTMapIterator NiTFixedStringMapBase<Allocator, T_Data>::GetFirstPos() co
 	return nullptr;
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline void NiTFixedStringMapBase<Allocator, T_Data>::GetNext(NiTMapIterator& arPos, NiFixedString& arString, T_Data& arData) const {
 	NiTMapItem<NiFixedString, T_Data>* pItem = static_cast<NiTMapItem<NiFixedString, T_Data>*>(arPos);
 
@@ -115,7 +115,7 @@ inline void NiTFixedStringMapBase<Allocator, T_Data>::GetNext(NiTMapIterator& ar
 	arPos = nullptr;
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline void NiTFixedStringMapBase<Allocator, T_Data>::RemoveAll() {
 	for (uint32_t i = 0; i < m_uiHashSize; i++) {
 		while (m_ppkHashTable[i]) {
@@ -129,7 +129,7 @@ inline void NiTFixedStringMapBase<Allocator, T_Data>::RemoveAll() {
 	m_kAllocator.m_uiCount = 0;
 }
 
-template<class Allocator, class T_Data>
+template<class Allocator, NiC::NiMapItem T_Data>
 inline bool NiTFixedStringMapBase<Allocator, T_Data>::RemoveAt(const NiFixedString& arString) {
 	const uint32_t uiIndex = KeyToHashIndex(arString);
 	NiTMapItem<NiFixedString, T_Data>* pItem = m_ppkHashTable[uiIndex];

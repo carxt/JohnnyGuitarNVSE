@@ -170,6 +170,7 @@ struct TypeSignature
 };
 
 class ImageSpaceModifierInstanceForm;
+class NiPointLight;
 
 // 48
 struct VATSCameraData

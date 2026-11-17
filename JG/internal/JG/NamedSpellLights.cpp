@@ -11,7 +11,7 @@
 namespace NamedSpellLights {
 
 	STACK_FRAME_OPT_DISABLE
-		NiAVObject* __fastcall SetLightNameHook(NiPointer<NiAVObject>& arLight) {
+	static NiAVObject* __fastcall SetLightNameHook(NiPointer<NiAVObject>& arLight) {
 		uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 		const ActiveEffect* pEffect = *reinterpret_cast<ActiveEffect**>(pEBP - 0x60);
 		const MagicItem* pSpell = pEffect->GetSpell();

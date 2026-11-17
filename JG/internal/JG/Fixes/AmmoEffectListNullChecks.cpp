@@ -5,22 +5,27 @@
 
 namespace AmmoEffectListNullChecks {
 
+	STACK_FRAME_OPT_ENABLE
+
+	static SPEC_NOINLINE BSSimpleList<TESAmmoEffect*>* __fastcall GetAmmoEffectsCheckType(TESForm* apForm, uintptr_t auiAddress) {
+		if (IS_ID(apForm, TESAmmo))
+			return ThisCall<BSSimpleList<TESAmmoEffect*>*>(auiAddress, apForm);
+		return nullptr;
+	}
+
 	template<uint32_t uiAddress>
 	class NullCheckHook {
 		static inline HookUtils::CallDetour kDetour;
 
-		static BSSimpleList<TESAmmoEffect*>* __fastcall GetAmmoEffectsCheckType(TESForm* apForm) {
-			if (IS_ID(apForm, TESAmmo))
-				return ThisCall<BSSimpleList<TESAmmoEffect*>*>(kDetour, apForm);
-			return nullptr;
+		BSSimpleList<TESAmmoEffect*>* Hook() {
+			return GetAmmoEffectsCheckType(reinterpret_cast<TESForm*>(this), kDetour);
 		}
 
 	public:
 		NullCheckHook() {
-			kDetour.ReplaceCall(uiAddress, GetAmmoEffectsCheckType);
+			kDetour.ReplaceCall(uiAddress, &NullCheckHook::Hook);
 		}
 	};
-
 
 	void Install() {
 		NullCheckHook<0x523AD8>();
@@ -32,5 +37,7 @@ namespace AmmoEffectListNullChecks {
 		NullCheckHook<0x9B5D2B>();
 		NullCheckHook<0x9B6267>();
 	}
+
+	STACK_FRAME_OPT_RESET
 
 }

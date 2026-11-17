@@ -1,9 +1,9 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
 template <class T> 
-class SPEC_EMPTY_BASES NiRect : public NiMemObject {
+class SPEC_EMPTY_BASES NiRect : public BSMemObject {
 public:
 	NiRect(T left = T(0), T right = T(0), T top = T(0), T bottom = T(0)) {
 		m_left = left;

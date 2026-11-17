@@ -12,11 +12,14 @@ public:
 	NiObjectNET();
 	virtual ~NiObjectNET();
 
-	enum CopyType {
-		COPY_NONE	= 0,
-		COPY_EXACT	= 1,
-		COPY_UNIQUE = 2,
+	struct _CopyType {
+		enum Type {
+			NONE	= 0,
+			EXACT	= 1,
+			UNIQUE	= 2,
+		};
 	};
+	using CopyType = _CopyType::Type;
 
 	NiFixedString					m_kName;
 	NiPointer<NiTimeController>		m_spControllers;
@@ -26,16 +29,10 @@ public:
 
 	NIRTTI_ADDRESS(0x11F4304);
 
-#ifdef GAME
-	static constexpr AddressPtr<NiCriticalSection, 0x11F4380> kExtraDataLock;
-#else
-	static constexpr AddressPtr<NiCriticalSection, 0xF1FE80> kExtraDataLock;
-#endif
+	const NiFixedString& GetName() const;
+	void SetName(const NiFixedString& arString);
 
-	const NiFixedString& GetName() const { return m_kName; };
-	void SetName(const NiFixedString& arString) { m_kName = arString;	};
-
-	NiTimeController* GetControllers() const { return m_spControllers; };
+	NiTimeController* GetControllers() const;
 	NiTimeController* GetController(const NiRTTI* apRTTI) const;
 	template <class ControllerType>
 	ControllerType* GetController() const {

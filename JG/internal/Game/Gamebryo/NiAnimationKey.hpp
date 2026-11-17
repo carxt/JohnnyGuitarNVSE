@@ -1,10 +1,10 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
 class NiStream;
 
-class SPEC_EMPTY_BASES NiAnimationKey : public NiMemObject {
+class SPEC_EMPTY_BASES NiAnimationKey : public BSMemObject {
 public:
 	NiAnimationKey() : m_fTime(0) {};
 	~NiAnimationKey() = default;

@@ -111,9 +111,11 @@ public:
 
 #ifdef GAME
 	uint32_t GetCurrentStage() const;
+#endif
 
 	void SetAllObjectivesComplete(bool abVal);
 
+#ifdef GAME
 	void ResetQuest();
 
 	void RunScript();

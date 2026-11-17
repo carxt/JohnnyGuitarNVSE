@@ -45,12 +45,12 @@ bool Animation::HasQueuedReload() const {
 
 // GAME - 0x8DA3D0
 TESIdleForm* Animation::GetIdleForm() const {
-    return spAnimIdle ? spAnimIdle->pIdleForm : nullptr;
+    return spAnimIdle ? spAnimIdle->GetIdleForm() : nullptr;
 }
 
 // GAME - 0x921E30
 BSAnimGroupSequence* Animation::GetIdleAnimSequence() const {
-    return spAnimIdle ? spAnimIdle->spSequence : nullptr;
+    return spAnimIdle ? spAnimIdle->GetSequence() : nullptr;
 }
 
 // GAME - 0x491040

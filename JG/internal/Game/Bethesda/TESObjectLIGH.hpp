@@ -33,7 +33,7 @@ public:
 			PULSE_SLOW			= 1u << 8,
 			SPOTLIGHT			= 1u << 9,
 			SPOT_SHADOW			= 1u << 10,
-#if USE_MODDED_CHANGES // JIP
+#if USE_JIP_CHANGES // JIP
 			COLOR_SHIFT			= 1u << 11,
 			COLOR_SHIFT_SLOW	= 1u << 12,
 #endif
@@ -50,7 +50,7 @@ public:
 		bool bPulseSlow			: 1;
 		bool bSpotlight			: 1;
 		bool bSpotShadow		: 1;
-#if USE_MODDED_CHANGES // JIP
+#if USE_JIP_CHANGES // JIP
 		bool bColorShift		: 1;
 		bool bColorShiftSlow	: 1;
 #endif
@@ -116,7 +116,7 @@ public:
 
 	bool GetSpotShadow() const;
 
-#if USE_MODDED_CHANGES // JIP
+#if USE_JIP_CHANGES // JIP
 	bool GetColorShift() const;
 
 	bool GetColorShiftSlow() const;

@@ -34,7 +34,7 @@ public:
 
 	struct Data {
 		Bitfield<_BookFlags>	ucFlags;
-		uint8_t					eTeaches;
+		int8_t					eTeaches;
 	};
 
 	Data kData;

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <GameForms.h>
+#include "Gamebryo/NiPoint3.hpp"
+#include "Gamebryo/NiRect.hpp"
 
 namespace WorldToScreen {
 
@@ -10,7 +11,7 @@ namespace WorldToScreen {
 		NiPoint3		kWorld;
 		NiPoint3		kLocal;
 		float			m_aafWorldToCam[4][4];
-		NiViewport		m_kPort;
+		NiRect<float>	m_kPort;
 	};
 
 	extern CameraParams kCameraData;

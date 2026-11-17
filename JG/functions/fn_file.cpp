@@ -36,7 +36,7 @@ bool Cmd_GetTextureMipMapCount_Execute(COMMAND_ARGS) {
 	char cPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
 		resolveTexturePath(cPath, sizeof(cPath));
-		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, UINT32_MAX, ARCHIVE_TYPE::TEXTURES);
 		if (pFile) {
 			uint32_t uiMipCount = 0;
 			pFile->Seek(0x1C, SEEK_CUR);
@@ -56,7 +56,7 @@ bool Cmd_GetTextureFormat_Execute(COMMAND_ARGS) {
 	char cPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
 		resolveTexturePath(cPath, sizeof(cPath));
-		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, UINT32_MAX, ARCHIVE_TYPE::TEXTURES);
 		if (pFile) {
 			char cFormat = 0;
 			pFile->Seek(0x57, SEEK_CUR);
@@ -79,7 +79,7 @@ bool Cmd_GetTextureWidth_Execute(COMMAND_ARGS) {
 	BOOL bUseDataTextures = FALSE;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath, &bUseDataTextures) && cPath[0]) {
 		resolveTexturePath(cPath, sizeof(cPath));
-		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, UINT32_MAX, ARCHIVE_TYPE::TEXTURES);
 		if (pFile) {
 			uint32_t uiWidth = 0;
 			pFile->Seek(0x10, SEEK_CUR);
@@ -101,7 +101,7 @@ bool Cmd_GetTextureHeight_Execute(COMMAND_ARGS) {
 	char cPath[MAX_PATH] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &cPath) && cPath[0]) {
 		resolveTexturePath(cPath, sizeof(cPath));
-		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, -1, ARCHIVE_TYPE::TEXTURES);
+		BSFile* pFile = FileFinder::GetSingleton()->GetFile(cPath, NiFile::OpenMode::READ_ONLY, UINT32_MAX, ARCHIVE_TYPE::TEXTURES);
 		if (pFile) {
 			uint32_t uiHeight = 0;
 			pFile->Seek(0x0C, 1);

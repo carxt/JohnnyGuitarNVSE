@@ -137,3 +137,6 @@ DEFINE_COMMAND_PLUGIN(GetReputationTitle, , false, kParams_OneReputation);
 DEFINE_COMMAND_PLUGIN(GetReputationIcon, , false, kParams_OneReputation);
 DEFINE_COMMAND_PLUGIN(GetReputationFormIcon, , false, kParams_GetReputationFormIcon);
 DEFINE_COMMAND_PLUGIN(SetReputationFormIcon, , false, kParams_SetReputationFormIcon);
+DEFINE_COMMAND_PLUGIN(GetAddonNodeIndex, , false, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(GetAddonNodeSound, , false, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(SetAddonNodeSound, , false, kParams_OneForm_OneOptionalForm);

@@ -7,23 +7,29 @@
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace INISettingFixes {
+	
+	// Stack frame optimizations are enabled in file's properties! Macros are symbolic
 	STACK_FRAME_OPT_ENABLE
+
+	static SPEC_NOINLINE Setting* __fastcall GetINISetting(INISettingCollection* apINICollection, uintptr_t auiAddress, const char* apSettingName) {
+		Setting* pINISetting = ThisCall<Setting*>(auiAddress, apINICollection, apSettingName);
+		if (!pINISetting)
+			pINISetting = ThisCall<Setting*>(auiAddress, SettingT<RendererSettingCollection>::GetCollection(), apSettingName);
+
+		return pINISetting;
+	}
 
 	template<uint32_t uiAddress>
 	class GetINISettingHook {
 		static inline HookUtils::CallDetour kDetour;
 
-		static Setting* __fastcall Hook(INISettingCollection* apINICollection, void*, const char* apSettingName) {
-			Setting* pINISetting = ThisCall<Setting*>(kDetour, apINICollection, apSettingName);
-			if (pINISetting)
-				return pINISetting;
-
-			RendererSettingCollection* pRendererSettings = SettingT<RendererSettingCollection>::GetCollection();
-			return ThisCall<Setting*>(kDetour, pRendererSettings, apSettingName);
+		Setting* Hook(const char* apSettingName) {
+			return GetINISetting(reinterpret_cast<INISettingCollection*>(this), kDetour, apSettingName);
 		}
+
 	public:
 		GetINISettingHook() {
-			kDetour.ReplaceCall(uiAddress, GetINISettingHook::Hook);
+			kDetour.ReplaceCall(uiAddress, &GetINISettingHook::Hook);
 		}
 	};
 

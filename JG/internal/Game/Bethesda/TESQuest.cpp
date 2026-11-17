@@ -75,16 +75,12 @@ BSSimpleList<BGSQuestObjective*>* TESQuest::GetObjectiveList() {
 }
 
 // GAME - 0x60C8E0
+// GECK - 0x57B860
 BGSQuestObjective* TESQuest::GetObjective(uint32_t auiIndex) const {
 #ifdef GAME
 	return ThisCall<BGSQuestObjective*>(0x60C8E0, this, auiIndex);
 #else
-	for (auto pIter = GetObjectiveList(); pIter && !pIter->IsEmpty(); pIter = pIter->GetNext()) {
-		BGSQuestObjective* pObjective = pIter->GetItem();
-		if (pObjective && pObjective->GetIndex() == auiIndex)
-			return pObjective;
-	}
-	return nullptr;
+	return ThisCall<BGSQuestObjective*>(0x57B860, this, auiIndex);
 #endif
 }
 
@@ -224,12 +220,19 @@ ScriptLocals* TESQuest::GetScriptLocals() const {
 uint32_t TESQuest::GetCurrentStage() const {
 	return ucCurrentStage;
 }
+#endif
 
 // GAME - 0x60C950
+// GECK - 0x57B8A0
 void TESQuest::SetAllObjectivesComplete(bool abVal) {
+#ifdef GAME
 	ThisCall(0x60C950, this, abVal);
+#else
+	ThisCall(0x57B8A0, this, abVal);
+#endif
 }
 
+#ifdef GAME
 // GAME - 0x60D720
 void TESQuest::ResetQuest() {
 	ThisCall(0x60D720, this);

@@ -1,7 +1,7 @@
 #pragma once
 
 // Tweaks gets rid of debug data, as it's unused and just wastes memory
-#if !USE_MODDED_CHANGES
+#if !USE_TWEAKS_CHANGES
 #include "BSDebugSoundInfo.hpp"
 #endif
 
@@ -13,12 +13,12 @@ public:
 	Bitfield32			uiAudioFlags;
 	uint32_t			uiDuration;
 	bool				bIsPlaying;
-#if !USE_MODDED_CHANGES
+#if !USE_TWEAKS_CHANGES
 	BSDebugSoundInfo	kDebugData;
 #endif
 };
 
-#if USE_MODDED_CHANGES
+#if USE_TWEAKS_CHANGES
 ASSERT_SIZE(BSSoundInfo, 0x18);
 #else
 ASSERT_SIZE(BSSoundInfo, 0x254);

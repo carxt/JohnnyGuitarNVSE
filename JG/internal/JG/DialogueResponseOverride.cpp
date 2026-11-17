@@ -93,7 +93,7 @@ namespace DialogueResponseOverride {
 		auto it = overrideMap[refId].find(responseNumber);
 		if (it == overrideMap[refId].end())
 		{
-			overrideMap[refId][responseNumber] = DialogueEmotionOverride(INT_MAX, -1, speakerAnim, listenerAnim, -1);
+			overrideMap[refId][responseNumber] = DialogueEmotionOverride(INT_MAX, -1, speakerAnim, listenerAnim, UINT32_MAX);
 
 		}
 		DialogueEmotionOverride currentOverride = overrideMap[refId][responseNumber];

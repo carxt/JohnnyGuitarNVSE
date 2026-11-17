@@ -100,7 +100,7 @@ public:
 
 		void ScanForDeletedNodes();
 	};
-	typedef ThreadSpecificInterfaceManager<LockFreeMapInterface> Manager;
+	using Manager = ThreadSpecificInterfaceManager<LockFreeMapInterface>;
 
 	class LockFreeMapIterator {
 	public:

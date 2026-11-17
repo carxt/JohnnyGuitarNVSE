@@ -2,14 +2,14 @@
 #include "JohnnyExtraData.hpp"
 #include "Bethesda/MenuConsole.hpp"
 #include "Bethesda/TESObjectREFR.hpp"
-#include "misc/misc.h"
 
 #include "Shared/Utils/DebugLog.hpp"
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
-STACK_FRAME_OPT_ENABLE
-
 namespace EDIDRestoration {
+
+	// Stack frame optimizations are enabled in file's properties! Macros are symbolic
+	STACK_FRAME_OPT_ENABLE
 
 #define DEBUG_PRINTS 0
 
@@ -19,7 +19,7 @@ namespace EDIDRestoration {
 #define DEBUG_MSG(...) __noop(__VA_ARGS__)
 #endif
 
-	bool bHadEDIDConflicts = false;
+	static bool bHadEDIDConflicts = false;
 	SRWLOCK kEDIDMapLock = SRWLOCK_INIT;
 
 	static constexpr uint32_t TESForm_Vtables[] = {
@@ -350,158 +350,159 @@ namespace EDIDRestoration {
 		DEBUG_MSG("Added EDID \"%s\" for form %08X to map", arEDID, apForm->GetFormID());
 	}
 
-	// exported
-	uint32_t __cdecl JGNVSE_GetFormIDFromEDID(const char* apEDID) noexcept {
-		if (apEDID && apEDID[0]) [[likely]] {
-			const TESForm* pForm = Map::Get(apEDID);
-			if (pForm)
-				return pForm->GetFormID();
-		}
-		return 0;
-	}
+	namespace Hooks {
 
-	HookUtils::CallDetour kRemoveFromDataStructures;
-	class TESFormEx : public TESForm {
-	public:
-		uint32_t hk_GetFormEditorIDLength() const noexcept {
-			return ExtraData::GetEDIDLength(this);
-		}
+		static HookUtils::CallDetour kRemoveFromDataStructures;
+		class TESFormEx : public TESForm {
+		public:
+			uint32_t hk_GetFormEditorIDLength() const noexcept {
+				return ExtraData::GetEDIDLength(this);
+			}
 
-		// vftable + 0x130
-		const char* hk_GetFormEditorID() const noexcept {
-			return ExtraData::GetEDIDString(this);
-		}
+			// vftable + 0x130
+			const char* hk_GetFormEditorID() const noexcept {
+				return ExtraData::GetEDIDString(this);
+			}
 
-		// vftable + 0x134
-		bool hk_SetFormEditorID(const char* apEDID) noexcept {
-			DEBUG_MSG("\nForm %08X: Attempting to set EDID to \"%s\"...", GetFormID(), apEDID ? apEDID : "!!NULL!!");
-			if (apEDID && apEDID[0]) [[likely]] {
-				if (apEDID[0] == 'S' && strcmp(apEDID + 1, "ysWindowCompileAndRun") == 0) [[unlikely]] {
-					apEDID = "Console Command";
-				}
-
-				const NiFixedString strEDID(apEDID);
-				const JohnnyExtraData::EDIDResult eAdded = ExtraData::AddEDID(this, strEDID);
-				const bool bSuccess = eAdded == JohnnyExtraData::EDIDResult::SUCCESS;
-				if (bSuccess) [[likely]] {
-					DEBUG_MSG("Added EDID \"%s\" to form %08X", apEDID, GetFormID());
-					if (!GetTemporary() && GetFormID()) [[likely]] {
-						AddToGameMap(this, strEDID);
+			// vftable + 0x134
+			bool hk_SetFormEditorID(const char* apEDID) noexcept {
+				DEBUG_MSG("\nForm %08X: Attempting to set EDID to \"%s\"...", GetFormID(), apEDID ? apEDID : "!!NULL!!");
+				if (apEDID && apEDID[0]) [[likely]] {
+					if (apEDID[0] == 'S' && strcmp(apEDID + 1, "ysWindowCompileAndRun") == 0) [[unlikely]] {
+						apEDID = "Console Command";
 					}
-				}
+
+					const NiFixedString strEDID(apEDID);
+					const JohnnyExtraData::EDIDResult eAdded = ExtraData::AddEDID(this, strEDID);
+					const bool bSuccess = eAdded == JohnnyExtraData::EDIDResult::SUCCESS;
+					if (bSuccess) [[likely]] {
+						DEBUG_MSG("Added EDID \"%s\" to form %08X", apEDID, GetFormID());
+						if (!GetTemporary() && GetFormID()) [[likely]] {
+							AddToGameMap(this, strEDID);
+						}
+					}
 #if DEBUG_PRINTS
-				else if (eAdded == JohnnyExtraData::EDIDResult::ALREADY_EXISTS) {
-					TESForm* pMapForm = Map::Get(apEDID);
-					if (pMapForm == this) [[unlikely]] {
-						DEBUG_MSG("EDID \"%s\" is already set for form %08X, skipping adding to game map!", apEDID, GetFormID());
+					else if (eAdded == JohnnyExtraData::EDIDResult::ALREADY_EXISTS) {
+						TESForm* pMapForm = Map::Get(apEDID);
+						if (pMapForm == this) [[unlikely]] {
+							DEBUG_MSG("EDID \"%s\" is already set for form %08X, skipping adding to game map!", apEDID, GetFormID());
+						}
+						else if (pMapForm) {
+							DEBUG_MSG("EDID \"%s\" is already set for form %08X, but map entry uses form %08X!", apEDID, GetFormID(), pMapForm->GetFormID());
+						}
+						else {
+							DEBUG_MSG("EDID \"%s\" is already set for form %08X, but no map entry exists!", apEDID, GetFormID());
+						}
 					}
-					else if (pMapForm) {
-						DEBUG_MSG("EDID \"%s\" is already set for form %08X, but map entry uses form %08X!", apEDID, GetFormID(), pMapForm->GetFormID());
+					else if (eAdded == JohnnyExtraData::EDIDResult::FAILURE) {
+						DEBUG_MSG("Failed to add EDID \"%s\" to form %08X!", apEDID, GetFormID());
 					}
-					else {
-						DEBUG_MSG("EDID \"%s\" is already set for form %08X, but no map entry exists!", apEDID, GetFormID());
-					}
-				}
-				else if (eAdded == JohnnyExtraData::EDIDResult::FAILURE) {
-					DEBUG_MSG("Failed to add EDID \"%s\" to form %08X!", apEDID, GetFormID());
-				}
 #endif
 
-				return bSuccess;
+					return bSuccess;
+				}
+				return false;
 			}
-			return false;
-		}
 
-		// Removes EDIDs from the map when form is marked as temporary
-		void hk_DetachEditorIDs() noexcept {
-			ThisCall(kRemoveFromDataStructures, this);
-			JohnnyExtraData* pData = JohnnyExtraData::Find(this);
-			if (pData) [[likely]]
-				pData->DetachEditorIDs();
-		}
+			// Removes EDIDs from the map when form is marked as temporary
+			void hk_DetachEditorIDs() noexcept {
+				ThisCall(kRemoveFromDataStructures, this);
+				JohnnyExtraData* pData = JohnnyExtraData::Find(this);
+				if (pData) [[likely]]
+					pData->DetachEditorIDs();
+			}
 
-		static TESForm* hk_GetFormByEditorID(const char* apEDID) noexcept {
-			if (apEDID && apEDID[0]) [[likely]]
-				return Map::Get(apEDID);
-			return nullptr;
-		}
-	};
+			static TESForm* hk_GetFormByEditorID(const char* apEDID) noexcept {
+				if (apEDID && apEDID[0]) [[likely]]
+					return Map::Get(apEDID);
+				return nullptr;
+			}
+		};
 
-	class TESObjectREFREx : public TESObjectREFR {
-	public:
-		const char* GetNameForConsole() noexcept {
-			// TESObjectREFR::GetFullName calls TESFullName::GetFullName on baseform + JIP's ref name override
-			const char* pName = GetFullName();
-			if (!pName || !pName[0])
-				pName = GetFormEditorID();
+		class TESObjectREFREx : public TESObjectREFR {
+		public:
+			const char* GetNameForConsole() noexcept {
+				// TESObjectREFR::GetFullName calls TESFullName::GetFullName on baseform + JIP's ref name override
+				const char* pName = GetFullName();
+				if (!pName || !pName[0])
+					pName = GetFormEditorID();
 
-			return pName;
-		}
-	};
+				return pName;
+			}
+		};
 
-	template<uint32_t VTABLE_ADDR>
-	class CustomSetReplacer {
-	private:
-		static inline HookUtils::VirtFuncDetour kDetour;
-
-		bool SetFormEditorID(const char* apEDID) noexcept {
-			const bool bResult = ThisCall<bool>(kDetour, this, apEDID);
+		static SPEC_NOINLINE bool __fastcall CustomSetFormEditorID(TESFormEx* apForm, uintptr_t auiAddress, const char* apEDID) {
+			const bool bResult = ThisCall<bool>(auiAddress, apForm, apEDID);
 			if (bResult)
-				return reinterpret_cast<TESFormEx*>(this)->hk_SetFormEditorID(apEDID);
+				return apForm->hk_SetFormEditorID(apEDID);
 			return bResult;
 		}
 
-	public:
-		CustomSetReplacer() noexcept {
-			kDetour.ReplaceVirtualFunc(VTABLE_ADDR, &CustomSetReplacer::SetFormEditorID);
+		template<uint32_t VTABLE_ADDR>
+		class CustomSetReplacer {
+		private:
+			static inline HookUtils::VirtFuncDetour kDetour;
+
+			bool Hook(const char* apEDID) noexcept {
+				return CustomSetFormEditorID(reinterpret_cast<TESFormEx*>(this), kDetour, apEDID);
+			}
+
+		public:
+			CustomSetReplacer() noexcept {
+				kDetour.ReplaceVirtualFunc(VTABLE_ADDR, &CustomSetReplacer::Hook);
+			}
+		};
+	
+		static void Init() {
+			Map::InitHooks();
+
+			kRemoveFromDataStructures.ReplaceCall(0x48449A, &TESFormEx::hk_DetachEditorIDs); // TESForm::SetTemporary
+
+			HookUtils::WriteRelJump(0x483A00, TESFormEx::hk_GetFormByEditorID); // TESForm::GetFormByEditorID - adds a lock
+
+			HookUtils::WriteRelJump(0x474CB0, &TESFormEx::hk_GetFormEditorIDLength); // TESForm::GetFormEditorIDLength
+
+			HookUtils::ReplaceCall(0x486903, &TESFormEx::hk_GetFormEditorID); // TESForm::GetFormDetailedString
+			HookUtils::ReplaceCall(0x451CBA, &TESFormEx::hk_GetFormEditorID); // TESObjectCELL::GetCellName
+			HookUtils::ReplaceCall(0x558796, &TESFormEx::hk_GetFormEditorID); // TESObjectCELL::SaveRenderFailureData
+			HookUtils::ReplaceCall(0x55D498, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::GetFormEditorID
+			HookUtils::ReplaceCall(0x55D683, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::GetFormDetailedString
+			HookUtils::ReplaceCall(0x55DF83, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
+			HookUtils::ReplaceCall(0x55E076, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
+			HookUtils::ReplaceCall(0x55E0CC, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
+			HookUtils::ReplaceCall(0x61DA92, &TESFormEx::hk_GetFormEditorID); // TESTopicInfo::GetFormDetailedString
+
+			HookUtils::ReplaceCall(0x71B748, &TESObjectREFREx::GetNameForConsole); // replaces empty string with editor id in selected ref name in console
+			HookUtils::ReplaceCall(0x710BFC, &TESObjectREFREx::GetNameForConsole);
+
+			HookUtils::ReplaceCall(0x66FF57, &TESFormEx::hk_SetFormEditorID); // ActorValueInfo::ActorValueInfo
+			HookUtils::ReplaceCall(0x58D7BC, &TESFormEx::hk_SetFormEditorID); // BGSDefaultObjectManager::BGSDefaultObjectManager
+
+			for (uint32_t i = 0; i < ARRAYSIZE(TESForm_Vtables); i++) {
+				if (*reinterpret_cast<uintptr_t*>(TESForm_Vtables[i] + 0x130) == 0x00401280)
+					HookUtils::ReplaceVirtualFunc(TESForm_Vtables[i] + 0x130, &TESFormEx::hk_GetFormEditorID);
+
+				if (*reinterpret_cast<uintptr_t*>(TESForm_Vtables[i] + 0x134) == 0x00401290)
+					HookUtils::ReplaceVirtualFunc(TESForm_Vtables[i] + 0x134, &TESFormEx::hk_SetFormEditorID);
+			}
+
+			// These forms already have SetFormEditorID that stores EDID in ExtraData, or a member variable
+			// We wrap these functions to ensure the EDID is also stored in JohnnyExtraData, and updated in the game map
+			CustomSetReplacer<0x102EAE8> kTESObjectCELL;
+			CustomSetReplacer<0x1031A90> kTESWorldSpace;
+			CustomSetReplacer<0x1036658> kTESGlobal;
+			CustomSetReplacer<0x1045130> kTESSound;
+			CustomSetReplacer<0x1047470> kBGSVoiceType;
+			CustomSetReplacer<0x1049E40> kTESIdleForm;
+			CustomSetReplacer<0x104AD78> kTESQuest;
+			CustomSetReplacer<0x104B5F0> kTESRace;
+			CustomSetReplacer<0x104D2D0> kTESTopic;
 		}
-	};
+	}
 
 	void InitHooks() {
-		Map::InitHooks();
 		IgnoredConflicts::InitializeStrings();
-
-		kRemoveFromDataStructures.ReplaceCall(0x48449A, &TESFormEx::hk_DetachEditorIDs); // TESForm::SetTemporary
-
-		HookUtils::WriteRelJump(0x483A00, TESFormEx::hk_GetFormByEditorID); // TESForm::GetFormByEditorID - adds a lock
-
-		HookUtils::WriteRelJump(0x474CB0, &TESFormEx::hk_GetFormEditorIDLength); // TESForm::GetFormEditorIDLength
-
-		HookUtils::ReplaceCall(0x486903, &TESFormEx::hk_GetFormEditorID); // TESForm::GetFormDetailedString
-		HookUtils::ReplaceCall(0x451CBA, &TESFormEx::hk_GetFormEditorID); // TESObjectCELL::GetCellName
-		HookUtils::ReplaceCall(0x558796, &TESFormEx::hk_GetFormEditorID); // TESObjectCELL::SaveRenderFailureData
-		HookUtils::ReplaceCall(0x55D498, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::GetFormEditorID
-		HookUtils::ReplaceCall(0x55D683, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::GetFormDetailedString
-		HookUtils::ReplaceCall(0x55DF83, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
-		HookUtils::ReplaceCall(0x55E076, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
-		HookUtils::ReplaceCall(0x55E0CC, &TESFormEx::hk_GetFormEditorID); // TESObjectREFR::InitItem
-		HookUtils::ReplaceCall(0x61DA92, &TESFormEx::hk_GetFormEditorID); // TESTopicInfo::GetFormDetailedString
-		
-		HookUtils::ReplaceCall(0x71B748, &TESObjectREFREx::GetNameForConsole); // replaces empty string with editor id in selected ref name in console
-		HookUtils::ReplaceCall(0x710BFC, &TESObjectREFREx::GetNameForConsole);
-
-		HookUtils::ReplaceCall(0x66FF57, &TESFormEx::hk_SetFormEditorID); // ActorValueInfo::ActorValueInfo
-		HookUtils::ReplaceCall(0x58D7BC, &TESFormEx::hk_SetFormEditorID); // BGSDefaultObjectManager::BGSDefaultObjectManager
-
-		for (uint32_t i = 0; i < ARRAYSIZE(TESForm_Vtables); i++) {
-			if (*reinterpret_cast<uintptr_t*>(TESForm_Vtables[i] + 0x130) == 0x00401280)
-				HookUtils::ReplaceVirtualFunc(TESForm_Vtables[i] + 0x130, &TESFormEx::hk_GetFormEditorID);
-
-			if (*reinterpret_cast<uintptr_t*>(TESForm_Vtables[i] + 0x134) == 0x00401290)
-				HookUtils::ReplaceVirtualFunc(TESForm_Vtables[i] + 0x134, &TESFormEx::hk_SetFormEditorID);
-		}
-
-		// These forms already have SetFormEditorID that stores EDID in ExtraData, or a member variable
-		// We wrap these functions to ensure the EDID is also stored in JohnnyExtraData, and updated in the game map
-		CustomSetReplacer<0x102EAE8> kTESObjectCELL;
-		CustomSetReplacer<0x1031A90> kTESWorldSpace;
-		CustomSetReplacer<0x1036658> kTESGlobal;
-		CustomSetReplacer<0x1045130> kTESSound;
-		CustomSetReplacer<0x1047470> kBGSVoiceType;
-		CustomSetReplacer<0x1049E40> kTESIdleForm;
-		CustomSetReplacer<0x104AD78> kTESQuest;
-		CustomSetReplacer<0x104B5F0> kTESRace;
-		CustomSetReplacer<0x104D2D0> kTESTopic;
+		Hooks::Init();
 	}
 
 	void PrintErrors() {
@@ -515,6 +516,16 @@ namespace EDIDRestoration {
 		}
 	}
 
-}
+	// exported
+	uint32_t __cdecl JGNVSE_GetFormIDFromEDID(const char* apEDID) noexcept {
+		if (apEDID && apEDID[0]) [[likely]] {
+			const TESForm* pForm = Map::Get(apEDID);
+			if (pForm)
+				return pForm->GetFormID();
+		}
+		return 0;
+	}
+	
+	STACK_FRAME_OPT_RESET
 
-STACK_FRAME_OPT_RESET
+}

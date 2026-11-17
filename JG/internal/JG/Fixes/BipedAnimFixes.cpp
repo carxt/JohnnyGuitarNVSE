@@ -9,9 +9,9 @@
 
 namespace BipedAnimFixes {
 
-	HookUtils::CallDetour kSetBipedWeaponDetour;
+	static HookUtils::CallDetour kSetBipedWeaponDetour;
 	STACK_FRAME_OPT_DISABLE
-	void __fastcall SetBipedWeaponModFix(BipedAnim* apThis, void*, TESObjectWEAP* apWeapon, uint8_t aucModSlots) {
+	static void __fastcall SetBipedWeaponModFix(BipedAnim* apThis, void*, TESObjectWEAP* apWeapon, uint8_t aucModSlots) {
 		uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 		TESObjectREFR* pReference = *reinterpret_cast<TESObjectREFR**>(pEBP + 0x8);
 		if (pReference && pReference->IsActor()) {
@@ -26,9 +26,9 @@ namespace BipedAnimFixes {
 	}
 	STACK_FRAME_OPT_RESET
 
-	HookUtils::CallDetour kRemoveAllExtraDetour;
+	static HookUtils::CallDetour kRemoveAllExtraDetour;
 	STACK_FRAME_OPT_ENABLE
-	void __fastcall ReattachBSXFlags(NiAVObject* apObject) {
+	static void __fastcall ReattachBSXFlags(NiAVObject* apObject) {
 		const NiFixedString& rFlagsTag = BSXFlags::GetTag();
 		NiPointer<NiExtraData> spFlags = apObject->GetExtraData(rFlagsTag);
 		ThisCall(kRemoveAllExtraDetour, apObject);
@@ -37,9 +37,9 @@ namespace BipedAnimFixes {
 	}
 	STACK_FRAME_OPT_RESET
 
-	HookUtils::CallDetour kSetClonePtrDetour;
+	static HookUtils::CallDetour kSetClonePtrDetour;
 	STACK_FRAME_OPT_DISABLE
-	NiRefObjectPtr* __fastcall AddControllerToBiped(NiRefObjectPtr* apThis, void*, NiAVObject* apClone) {
+	static NiRefObjectPtr* __fastcall AddControllerToBiped(NiRefObjectPtr* apThis, void*, NiAVObject* apClone) {
 		uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 		NiAVObject* pNewObj = *reinterpret_cast<NiAVObject**>(pEBP - 0x18);
 		if (pNewObj) {
@@ -52,11 +52,11 @@ namespace BipedAnimFixes {
 		}
 		return ThisCall<NiRefObjectPtr*>(kSetClonePtrDetour, apThis, apClone);
 	}
-	STACK_FRAME_OPT_RESET;
+	STACK_FRAME_OPT_RESET
 
-	HookUtils::CallDetour kFindSkinnedNodeDetour;
+	static HookUtils::CallDetour kFindSkinnedNodeDetour;
 	STACK_FRAME_OPT_ENABLE
-	bool __cdecl FindSkinnedNode(NiAVObject* apObject) {
+	static bool __cdecl FindSkinnedNode(NiAVObject* apObject) {
 		if (BSXFlags::GetFlags(apObject, BSXFlags::SKINNED_WEAPON))
 			return false;
 

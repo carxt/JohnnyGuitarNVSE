@@ -25,7 +25,10 @@ public:
 
 	void SetCastingType(MagicSystem::CastingType aeType);
 
+	const char* GetFormEnchantingEditorID() const;
+
 	static EnchantmentItem* GetFormEnchanting(const TESForm* apForm);
+	static const char* GetFormEnchantingEditorID(const TESForm* apForm);
 };
 
 ASSERT_SIZE(TESEnchantableForm, 0x10);

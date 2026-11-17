@@ -7,18 +7,26 @@
 
 namespace ExternalEmittanceOnBases {
 
-	HookUtils::CallDetour kGetBaseformDetour;
-	TESBoundObject* __fastcall AddEmittanceSourceHook(TESObjectREFR* apReference) {
-		TESBoundObject* pBase = ThisCall<TESBoundObject*>(kGetBaseformDetour, apReference);
-		TESForm* pSource = GetExternalEmittanceSource(pBase);
-		if (pSource)
-			apReference->SetEmittanceSource(pSource);
+	namespace Hooks {
 
-		return pBase;
+		static HookUtils::CallDetour kGetBaseformDetour;
+		static TESBoundObject* __fastcall AddEmittanceSourceHook(TESObjectREFR* apReference) {
+			TESBoundObject* pBase = ThisCall<TESBoundObject*>(kGetBaseformDetour, apReference);
+			TESForm* pSource = GetExternalEmittanceSource(pBase);
+			if (pSource)
+				apReference->SetEmittanceSource(pSource);
+
+			return pBase;
+		}
+
+		static void Init() {
+			kGetBaseformDetour.ReplaceCall(0x5694E0, AddEmittanceSourceHook);
+		}
+
 	}
 
 	void Install() {
-		kGetBaseformDetour.ReplaceCall(0x5694E0, AddEmittanceSourceHook);
+		Hooks::Init();
 	}
 
 	TESForm* __fastcall GetExternalEmittanceSource(const TESBoundObject* apObject) {

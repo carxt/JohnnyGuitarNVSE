@@ -2,7 +2,7 @@
 
 namespace AnimActivationHeight {
 
-	void Init();
+	void Install();
 	
 	float GetHeight();
 

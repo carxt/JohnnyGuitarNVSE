@@ -96,6 +96,8 @@ public:
 	void ReplaceRefModel(TESObjectREFR* apRef);
 
 	uint32_t GetFormHealthLeveled(bool abAddBase);
+
+	const char* GetClassEditorID() const;
 };
 
 #ifdef GAME

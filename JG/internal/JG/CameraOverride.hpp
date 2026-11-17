@@ -21,9 +21,9 @@ namespace CameraOverride {
 
 	void Install();
 
-	void OverridePos(bool abOverride, const NiPoint3& arNewPos);
+	void __fastcall OverridePos(bool abOverride, const NiPoint3& arNewPos);
 
-	void OverrideRot(bool abOverride, CameraRotationType aeRotType, float afAngle, const TESObjectREFR* apRef);
+	void __fastcall OverrideRot(bool abOverride, CameraRotationType aeRotType, float afAngle, const TESObjectREFR* apRef);
 
 
 } 

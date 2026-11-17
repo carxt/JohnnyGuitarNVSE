@@ -24,6 +24,8 @@ public:
 	BSString						strActivationPrompt;
 
 	BSEXTRA_TYPE(ExtraActivateRef);
+
+	RefActivateData* GetData(TESObjectREFR* apRef) const;
 };
 
 ASSERT_SIZE(ExtraActivateRef, 0x20);

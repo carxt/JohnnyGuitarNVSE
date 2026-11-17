@@ -1,8 +1,8 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
 
-class SPEC_EMPTY_BASES NiRTTI : public NiMemObject {
+class SPEC_EMPTY_BASES NiRTTI : public BSMemObject {
 public:
 	NiRTTI() { m_pcName = nullptr; m_pkBaseRTTI = nullptr; }
 	NiRTTI(const char* apName, const NiRTTI* const apBase) { m_pcName = apName; m_pkBaseRTTI = apBase; }

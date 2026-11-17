@@ -7,7 +7,7 @@
 
 namespace NoHeadlessTalkingFix {
 
-	bool __fastcall CanSpeakThroughHead(Actor* apActor) {
+	static bool __fastcall CanSpeakThroughHead(Actor* apActor) {
 		const bool bNoHead = ThisCall<bool>(0x573090, apActor, BODY_PART_TYPE::HEAD_1) || ThisCall<bool>(0x573090, apActor, BODY_PART_TYPE::HEAD_2);
 
 		bool bCanSpeak = !bNoHead;
@@ -25,8 +25,9 @@ namespace NoHeadlessTalkingFix {
 		return bCanSpeak;
 	}
 
-	HookUtils::CallDetour kCanTalkDetour;
-	BaseProcess* __fastcall NoHeadlessTalkingHook(Actor* apActor) {
+	static HookUtils::CallDetour kCanTalkDetour;
+	STACK_FRAME_OPT_DISABLE
+	static BaseProcess* __fastcall NoHeadlessTalkingHook(Actor* apActor) {
 		uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 		Actor* pSpeaker = *reinterpret_cast<Actor**>(pEBP + 0x8);
 
@@ -36,6 +37,7 @@ namespace NoHeadlessTalkingFix {
 
 		return pAIProcess;
 	}
+	STACK_FRAME_OPT_RESET
 
 	void Install() {
 		kCanTalkDetour.ReplaceCall(0x8EC54D, NoHeadlessTalkingHook);

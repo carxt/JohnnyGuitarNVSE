@@ -5,15 +5,35 @@
 STACK_FRAME_OPT_ENABLE
 
 bool (*CallUDF)(Script* funcScript, TESObjectREFR* callingObj, uint8_t numArgs, ...);
-std::shared_mutex kEventInfosMutex;
+static std::shared_mutex kEventInfosMutex;
 std::vector<EventInfo> kEventInfos;
+
+static SPEC_NOINLINE bool __fastcall IsValidForm(const TESForm* apForm) {
+	static constexpr uint32_t DISALLOWED_FLAGS = TESForm::FormFlags::TEMPORARY | TESForm::FormFlags::STILL_LOADING | TESForm::FormFlags::DELETED;
+
+	if (!apForm) [[unlikely]]
+		return false;
+
+	if (apForm->uiFormID == 0) [[unlikely]]
+		return false;
+
+	if (apForm->uiFormFlags.Get(DISALLOWED_FLAGS)) [[unlikely]]
+		return false;
+
+	if (apForm->IsReference() && !apForm->GetInitialized()) [[unlikely]] {
+		assert(false);
+		return false;
+	}
+
+	return true;
+}
 
 void* __fastcall GenericCreateFilter(void** appFilters, uint32_t auiFilterCount) {
 	return new FilterForm(appFilters, auiFilterCount);
 }
 
 EventInfo __cdecl JGCreateEvent(const char* apEventName, uint8_t aucMaxArgs, uint8_t aucMaxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t)) {
-	std::lock_guard kGuard(kEventInfosMutex);
+	std::scoped_lock kGuard(kEventInfosMutex);
 	EventInfo pEventInfo = new EventInformation(apEventName, aucMaxArgs, aucMaxFilters, CreatorFunction);
 	kEventInfos.push_back(pEventInfo);
 	return pEventInfo;
@@ -23,7 +43,7 @@ void __cdecl JGFreeEvent(EventInfo& arEvent) {
 	if (!arEvent)
 		return;
 
-	std::lock_guard kGuard(kEventInfosMutex);
+	std::scoped_lock kGuard(kEventInfosMutex);
 	auto it = std::find(kEventInfos.begin(), kEventInfos.end(), arEvent);
 	if (it != kEventInfos.end()) {
 		delete* it;
@@ -79,32 +99,39 @@ bool FilterBase::IsFilterEqual(FilterType auFilter, uint32_t auiIndex) {
 }
 
 bool __fastcall FilterForm::DoFilterForm(const FilterSet& arSet, const TESForm* apForm) {
-	return arSet.contains(apForm->GetFormID());
+	return arSet.empty() || arSet.contains(apForm->GetFormID());
+}
+
+bool __fastcall FilterForm::DoFilterBase(const FilterSet& arSet, const TESBoundObject* apObject) {
+	if (DoFilterForm(arSet, apObject))
+		return true;
+
+	if (apObject->GetFormType() == FORM_TYPE::BGSPlaceableWater) [[unlikely]] {
+		const TESWaterForm* pWater = apObject->GetWaterType();
+		if (IsValidForm(pWater) && arSet.contains(pWater->GetFormID()))
+			return true;
+	}
+
+	return false;
 }
 
 bool __fastcall FilterForm::DoFilterRef(const FilterSet& arSet, const TESObjectREFR* apRef) {
-	if (arSet.contains(apRef->GetFormID()))
+	if (DoFilterForm(arSet, apRef))
 		return true;
 
 	const TESBoundObject* pBase = apRef->GetObjectReference();
-	if (pBase && !pBase->GetTemporary()) [[likely]] {
-		if (arSet.contains(pBase->GetFormID()))
+	if (IsValidForm(pBase)) [[likely]] {
+		if (DoFilterBase(arSet, pBase))
 			return true;
-
-		if (pBase->GetFormType() == FORM_TYPE::BGSPlaceableWater) [[unlikely]] {
-			const TESWaterForm* pWater = pBase->GetWaterType();
-			if (pWater && arSet.contains(pWater->GetFormID()))
-				return true;
-		}
 
 		if (apRef->IsLeveledCreature()) [[unlikely]] {
 			const ExtraLeveledCreature* pExtra = apRef->GetExtraData<ExtraLeveledCreature>();
 			pBase = pExtra->pTemplate;
-			if (pBase && arSet.contains(pBase->GetFormID()))
+			if (IsValidForm(pBase) && arSet.contains(pBase->GetFormID()))
 				return true;
 
 			pBase = pExtra->pOriginalBase;
-			if (pBase && arSet.contains(pBase->GetFormID()))
+			if (IsValidForm(pBase) && arSet.contains(pBase->GetFormID()))
 				return true;
 		}
 	}
@@ -120,73 +147,94 @@ void FilterForm::SetUpFiltering() {
 	for (uint32_t i = 0; i < uiFilterCount; ++i) {
 		const TESForm* pCurrentForm = pFilterTypes[i].pForm;
 		if (pCurrentForm) [[likely]]
-			InsertForm(i, pCurrentForm);
+			InsertForm(pCurrentForm, i);
 	}
 }
 
-bool __fastcall FilterForm::IsAnyFormInFilter(uint32_t auiIndex, const TESForm* apForm) const {
-	if (!apForm) [[unlikely]]
+bool __fastcall FilterForm::IsAnyFormInFilter(const TESForm* apForm, uint32_t auiIndex) const {
+	if (!IsValidForm(apForm)) [[unlikely]]
 		return false;
 
 	const FilterSet* pFilter = GetFilter(auiIndex);
-	if (!pFilter || pFilter->empty()) [[unlikely]]
+	if (!pFilter) [[unlikely]]
 		return false;
 
-	if (TESObjectREFR::IsReferenceFormType(apForm->GetFormType()))
+	if (apForm->IsReference()) [[likely]]
 		return DoFilterRef(*pFilter, static_cast<const TESObjectREFR*>(apForm));
-	else
+	else if (apForm->IsBoundObject()) [[likely]]
+		return DoFilterBase(*pFilter, static_cast<const TESBoundObject*>(apForm));
+	else [[unlikely]]
 		return DoFilterForm(*pFilter, apForm);
 }
 
-bool __fastcall FilterForm::IsNonRefFormInFilter(uint32_t auiIndex, const TESForm* apForm) const {
-	if (!apForm) [[unlikely]]
+bool __fastcall FilterForm::IsFormInFilter(const TESForm* apForm, uint32_t auiIndex) const {
+	if (!IsValidForm(apForm)) [[unlikely]]
 		return false;
 
 	const FilterSet* pFilter = GetFilter(auiIndex);
-	if (!pFilter || pFilter->empty()) [[unlikely]]
+	if (!pFilter) [[unlikely]]
 		return false;
 
-	assert(!apForm->IsReference());
+	assert(!apForm->IsReference() && !apForm->IsBoundObject());
+
 	return DoFilterForm(*pFilter, apForm);
 }
 
-bool __fastcall FilterForm::IsRefInFilter(uint32_t auiIndex, const TESObjectREFR* apRef) const {
-	if (!apRef) [[unlikely]]
+bool __fastcall FilterForm::IsBaseFormInFilter(const TESBoundObject* apObject, uint32_t auiIndex) const {
+	if (!IsValidForm(apObject)) [[unlikely]]
 		return false;
 
 	const FilterSet* pFilter = GetFilter(auiIndex);
-	if (!pFilter || pFilter->empty()) [[unlikely]]
+	if (!pFilter) [[unlikely]]
 		return false;
+
+	assert(apObject->IsBoundObject());
+
+	return DoFilterBase(*pFilter, apObject);
+}
+
+bool __fastcall FilterForm::IsRefInFilter(const TESObjectREFR* apRef, uint32_t auiIndex) const {
+	if (!IsValidForm(apRef)) [[unlikely]]
+		return false;
+
+	const FilterSet* pFilter = GetFilter(auiIndex);
+	if (!pFilter) [[unlikely]]
+		return false;
+
+	assert(apRef->IsReference());
 
 	return DoFilterRef(*pFilter, apRef);
 }
 
-void __fastcall FilterForm::InsertForm(uint32_t auiIndex, const TESForm* apForm) {
+void __fastcall FilterForm::InsertForm(const TESForm* apForm, uint32_t auiIndex) {
+	if (!IsValidForm(apForm)) [[unlikely]]
+		return;
+
 	const FORM_TYPE eFormType = apForm->GetFormType();
 	if (TESObjectREFR::IsReferenceFormType(eFormType)) [[unlikely]] {
-		InsertReference(auiIndex, static_cast<const TESObjectREFR*>(apForm));
+		InsertReference(static_cast<const TESObjectREFR*>(apForm), auiIndex);
 	}
 	else if (eFormType == FORM_TYPE::BGSListForm) [[unlikely]] {
-		InsertFormList(auiIndex, static_cast<const BGSListForm*>(apForm));
+		InsertFormList(static_cast<const BGSListForm*>(apForm), auiIndex);
 	}
 	else if (IsAcceptedParameter(apForm)) [[likely]] {
 		FilterBase::InsertToFilter(auiIndex, apForm->GetFormID());
 	}
 }
 
-void __fastcall FilterForm::InsertReference(uint32_t auiIndex, const TESObjectREFR* apRef) {
+void __fastcall FilterForm::InsertReference(const TESObjectREFR* apRef, uint32_t auiIndex) {
 	const TESForm* pBase = apRef->GetObjectReference();
-	if (pBase && IsAcceptedParameter(pBase)) [[likely]]
+	if (IsValidForm(pBase) && IsAcceptedParameter(pBase)) [[likely]]
 		FilterBase::InsertToFilter(auiIndex, pBase->GetFormID());
 }
 
-void __fastcall FilterForm::InsertFormList(uint32_t auiIndex, const BGSListForm* apFormList) {
+void __fastcall FilterForm::InsertFormList(const BGSListForm* apFormList, uint32_t auiIndex) {
 	const BSSimpleList<TESForm*>* pIter = apFormList->GetFormList();
 	while (pIter && !pIter->IsEmpty()){
 		const TESForm* pForm = pIter->GetItem();
 		pIter = pIter->GetNext();
 		if (pForm) [[likely]] {
-			InsertForm(auiIndex, pForm);
+			InsertForm(pForm, auiIndex);
 		}
 	};
 }
@@ -212,7 +260,7 @@ void FilterFormInt::SetUpFiltering() {
 
 	const TESForm* pCurrentForm = pFilterTypes[0].pForm;
 	if (pCurrentForm) [[likely]]
-		InsertForm(0, pCurrentForm);
+		InsertForm(pCurrentForm, 0);
 }
 
 void* __fastcall FilterFormInt::Create(void** appFilters, uint32_t auiFilterCount) {

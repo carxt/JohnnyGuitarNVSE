@@ -20,10 +20,16 @@ public:
 	virtual void  LoadGame(BGSLoadGameBuffer* apBuffer);
 #endif
 
-	enum Flags {
-		ALL_MESHES_REACHABLE = 1u << 0,
-		UNUSED				 = 1u << 1,
+	struct ALIGN1 _Flags {
+		enum Flags {
+			ALL_MESHES_REACHABLE = 1u << 0,
+			UNUSED				 = 1u << 1,
+		};
+
+		bool bAllMeshesReachable	: 1;
+		bool bUnused				: 1;
 	};
+	using Flags = _Flags::Flags;
 
 	NiPoint3						kLocation;
 	NavMeshInfo*					pNavMeshInfo;
@@ -32,10 +38,10 @@ public:
 	TESWorldSpace*					pWorldSpace;
 	uint32_t						uiCellCoords;
 	uint16_t						usTriangle;
-	Bitfield8						ucFlags;
+	Bitfield<_Flags>				ucFlags;
 	uint8_t							ucClientData;
 	
-	void SetAllMeshesReachable(uint32_t aeFlags);
+	void SetAllMeshesReachable(BOOL abVal);
 	void SetupData(NiPoint3& arLocation, TESObjectCELL* apCell, TESWorldSpace* apWorld);
 
 	bool GetNavMeshAndTriangle(NavMeshPtr& arNavMesh, uint16_t& arTriangle) const;

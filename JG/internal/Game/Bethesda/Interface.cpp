@@ -36,7 +36,7 @@ bool Interface::IsInDialog() {
 }
 
 // GAME - 0x702680
-bool Interface::IsMenuIDVisible(Menus aeMenu, uint32_t auiFlags) {
+bool Interface::IsMenuIDVisible(MenuID aeMenu, uint32_t auiFlags) {
 	return CdeclCall<bool>(0x702680, aeMenu, auiFlags);
 }
 
@@ -56,13 +56,13 @@ bool Interface::IsLoadingMenuVisible() {
 }
 
 // GAME - 0x702450
-bool Interface::IsTopMenuID(Menus aeMenu) {
+bool Interface::IsTopMenuID(MenuID aeMenu) {
 	return CdeclCall<bool>(0x702450, aeMenu);
 }
 
 // GAME - 0x7023C0
-Interface::Menus Interface::GetTopMenuID() {
-	return CdeclCall<Menus>(0x7023C0);
+Interface::MenuID Interface::GetTopMenuID() {
+	return CdeclCall<MenuID>(0x7023C0);
 }
 
 // GAME - 0x703350
@@ -108,6 +108,11 @@ void Interface::ClearGunScope() {
 // GAME - 0x707870
 NiAVObject* Interface::CopyOrDeepCopyNode(NiAVObject* apObject) {
 	return CdeclCall<NiAVObject*>(0x707870, apObject);
+}
+
+// GAME - 0x703DA0
+void Interface::CloseConsole() {
+	CdeclCall(0x703DA0);
 }
 
 // GAME - 0x705870

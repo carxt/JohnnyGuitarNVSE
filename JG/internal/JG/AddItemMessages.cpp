@@ -6,7 +6,7 @@ namespace AddItemMessages {
 
 	// When adding item lists, allow per-item "Item Added" messages instead of issuing one message for the last item added
 
-	SPEC_NAKED void MessageLoop_Asm() {
+	static SPEC_NAKED void MessageLoop_Asm() {
 		static constexpr uint32_t uiReturnAddr		= 0x482201;
 		static constexpr uint32_t uiDestructorAddr	= 0x4037D0;
 		__asm {

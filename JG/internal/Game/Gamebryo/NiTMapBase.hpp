@@ -1,19 +1,23 @@
 #pragma once
 
-#include "NiMemObject.hpp"
+#include "Bethesda/BSMemObject.hpp"
+#include "NiConcepts.hpp"
 
-typedef void* NiTMapIterator;
+using NiTMapIterator = void*;
 
-template <class T_Key, class T_Data> 
-class SPEC_EMPTY_BASES NiTMapItem : public NiMemObject {
+template <NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
+class SPEC_EMPTY_BASES NiTMapItem : public BSMemObject {
 public:
     NiTMapItem* m_pkNext;
     T_Key       m_key;
     T_Data      m_val;
 };
 
-template <class Allocator, class T_Key, class T_Data>
-class SPEC_EMPTY_BASES NiTMapBase : public NiMemObject {
+template <class Allocator, NiC::NiMapKey T_Key, NiC::NiMapItem T_Data>
+class SPEC_EMPTY_BASES NiTMapBase : public BSMemObject {
+protected:
+    using _Empty = NiC::PickEmptyType<T_Data>;
+
 public:
     struct AntiBloatAllocator : public Allocator {
         uint32_t m_uiCount;

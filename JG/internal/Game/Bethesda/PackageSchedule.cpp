@@ -91,7 +91,6 @@ const char* PackageSchedule::GetDayOfWeekName() const {
 // GECK - 0x4A0080
 const char* PackageSchedule::GetMonthName() const {
 #ifdef GAME
-	const Month eMonth = GetStartMonth();
 	if (eMonth < Month::JANUARY || eMonth >= Month::COUNT)
 		return "Any";
 	else

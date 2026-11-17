@@ -2,7 +2,7 @@
 
 #include "NiFixedString.hpp"
 
-class SPEC_EMPTY_BASES NiTextKey : public NiMemObject {
+class SPEC_EMPTY_BASES NiTextKey : public BSMemObject {
 public:
 	float			m_fTime;
 	NiFixedString	m_kText;

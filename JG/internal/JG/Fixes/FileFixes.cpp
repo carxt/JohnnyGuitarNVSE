@@ -9,7 +9,7 @@ namespace FileFixes {
 	// Betheda allocates a fixed-size buffer, then proceeds to read file data into it
 	// ...using file size for the read amount
 	// naturally, this means it can overflow, mainly with decompressed vanilla BSAs or loose files
-	SPEC_NAKED void FontFileSizeFix_Asm() {
+	static SPEC_NAKED void FontFileSizeFix_Asm() {
 		static constexpr uint32_t uiReturnAddr = 0xA154E3;
 		__asm {
 			// Get file size
@@ -34,8 +34,8 @@ namespace FileFixes {
 		}
 	}
 
-	HookUtils::CallDetour kGetFileDetour;
-	ArchiveFile* __cdecl GetFileByFileEntry(ARCHIVE_TYPE_INDEX aeArchiveTypeIndex, BSFileEntry* apFileEntry, uint32_t auiBufferSize, const char* apName) {
+	static HookUtils::CallDetour kGetFileDetour;
+	static ArchiveFile* __cdecl GetFileByFileEntry(ARCHIVE_TYPE_INDEX aeArchiveTypeIndex, BSFileEntry* apFileEntry, uint32_t auiBufferSize, const char* apName) {
 		ArchiveFile* pFile = CdeclCall<ArchiveFile*>(kGetFileDetour, aeArchiveTypeIndex, apFileEntry, auiBufferSize, apName);
 		if (pFile && pFile->spArchive) {
 			if (!pFile->cFileName[0] && aeArchiveTypeIndex == ARCHIVE_TYPE_INDEX::TEXTURES) {

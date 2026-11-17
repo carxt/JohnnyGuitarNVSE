@@ -1,5 +1,5 @@
 #include "MediaLocationControllerTweaks.hpp"
-#include <GameForms.h>
+#include "Obsidian/MediaLocationController.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
@@ -10,8 +10,8 @@ namespace MediaLocationControllerTweaks {
 	// Allows overriding current MediaLocationController through scripts
 	namespace ControllerOverride {
 
-		bool bOverrideActive = false;
-		MediaLocationController* pOverrideController = nullptr;
+		static bool bOverrideActive = false;
+		static MediaLocationController* pOverrideController = nullptr;
 
 		template<uint32_t uiAddress>
 		class GetOverridenControllerHook {
@@ -29,17 +29,17 @@ namespace MediaLocationControllerTweaks {
 			}
 		};
 
-		void Reset() {
+		static void Reset() {
 			bOverrideActive = false;
 			pOverrideController = nullptr;
 		}
 
-		void Set(MediaLocationController* apController) {
+		static void Set(MediaLocationController* apController) {
 			bOverrideActive = true;
 			pOverrideController = apController;
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			GetOverridenControllerHook<0x82FC95>();
 			GetOverridenControllerHook<0x82FCA9>();
 		}
@@ -52,14 +52,14 @@ namespace MediaLocationControllerTweaks {
 	// That said, we don't prevent the actual counting code, so it can freely count hostile actors and trigger combat-relevant code paths
 	namespace ActorCountCheckOverride {
 
-		bool __fastcall ShouldOverrideCount(MediaLocationController* apController) {
+		static bool __fastcall ShouldOverrideCount(MediaLocationController* apController) {
 			const bool bIgnoreActorCount = apController->uiFlags.bIgnoreActorCount;
 			if (bIgnoreActorCount)
 				apController->uiFoundFactionActors = 1;
 			return bIgnoreActorCount;
 		}
 
-		SPEC_NAKED void FactionCheck_Asm() {
+		static SPEC_NAKED void FactionCheck_Asm() {
 			static constexpr uint32_t uiReturnAddr = 0x595785;
 			__asm {
 				mov     ecx, [ebp - 0x50]
@@ -70,9 +70,10 @@ namespace MediaLocationControllerTweaks {
 			}
 		}
 
-		void InitHooks() {
+		static void InitHooks() {
 			HookUtils::WriteRelJump(0x59577D, FactionCheck_Asm);
 		}
+
 	}
 
 	void ResetOverride() {

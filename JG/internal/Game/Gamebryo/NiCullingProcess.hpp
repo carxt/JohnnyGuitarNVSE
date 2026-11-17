@@ -7,7 +7,7 @@
 class NiVisibleArray;
 class NiAVObject;
 
-class SPEC_EMPTY_BASES NiCullingProcess : public NiMemObject {
+class SPEC_EMPTY_BASES NiCullingProcess : public BSMemObject {
 public:
 	NiCullingProcess();
 

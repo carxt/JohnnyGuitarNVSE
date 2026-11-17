@@ -5,7 +5,7 @@
 
 namespace JIPSettings {
 
-	bool IsSettingClear(const char* apSetting, const char* apPath) {
+	static bool IsSettingClear(const char* apSetting, const char* apPath) {
 		return GetPrivateProfileInt("JIP", apSetting, 1, apPath) == 0;
 	}
 
