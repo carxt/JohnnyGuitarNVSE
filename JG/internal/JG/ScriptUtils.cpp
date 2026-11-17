@@ -169,11 +169,6 @@ namespace ScriptUtils {
 				if (TES::GetSingleton()->IsCellLoaded(pCurrParentCell, false))
 					apRef->InitHavok();
 			}
-
-			if (pActor) [[unlikely]] {
-				pActor->FadeIn();
-				pActor->UpdateAlpha();
-			}
 		}
 
 		PlayerCharacter::GetSingleton()->CheckForQuestTargetUpdate(apRef);
