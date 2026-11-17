@@ -596,3 +596,45 @@ void ExtraDataList::SetRadius(float afRadius) {
 	ThisCall(0x4ABC10, this, afRadius);
 #endif
 }
+
+#ifdef GAME
+// GAME - 0x418890
+void ExtraDataList::GetSound(BSSoundHandle& arSound) const {
+	ThisCall(0x418890, this, &arSound);
+}
+
+// GAME - 0x41A800
+void ExtraDataList::SetSound(const BSSoundHandle& arSound) {
+	ThisCall(0x41A800, this, &arSound);
+}
+#endif
+
+// GAME - 0x41F140
+// GECK - 0x4AB270
+BSSimpleList<ReflectedRefData*>* ExtraDataList::GetReflectedRefs() const {
+#ifdef GAME
+	return ThisCall<BSSimpleList<ReflectedRefData*>*>(0x41F140, this);
+#else
+	return ThisCall<BSSimpleList<ReflectedRefData*>*>(0x4AB270, this);
+#endif
+}
+
+// GAME - 0x41F4C0
+// GECK - 0x4AF260
+void ExtraDataList::SetReflectsRef(TESObjectREFR* apRef, bool abVal) {
+#ifdef GAME
+	ThisCall(0x41F4C0, this, apRef, abVal);
+#else
+	ThisCall(0x4AF260, this, apRef, abVal);
+#endif
+}
+
+// GAME - 0x41F650
+// GECK - 0x4AF330
+void ExtraDataList::SetRefractsRef(TESObjectREFR* apRef, bool abVal) {
+#ifdef GAME
+	ThisCall(0x41F650, this, apRef, abVal);
+#else
+	ThisCall(0x4AF330, this, apRef, abVal);
+#endif
+}
