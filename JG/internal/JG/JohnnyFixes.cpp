@@ -25,6 +25,7 @@
 #include "Fixes/CellDataLoadWarning.hpp"
 #include "Fixes/RefDestructorFix.hpp"
 #include "Fixes/GarbageCollectorTweaks.hpp"
+#include "Fixes/RefPositionUpdateFix.hpp"
 #include "EditorIDRestoration.hpp"
 #endif
 #include "Fixes/FileFixes.hpp"
@@ -270,8 +271,10 @@ namespace JohnnyFixes {
     
 		GarbageCollectorTweaks::Install();
     
-    // Nullcheck offset data in TESWorldSpace::GetExtCellDataFromFileByEditorID	
+		// Nullcheck offset data in TESWorldSpace::GetExtCellDataFromFileByEditorID	
 		HookUtils::SafeWriteBuf(0x585997, "\x85\xC0\x74\xC2\x83\x38\x00\x74\xBD\x90");
+
+		RefPositionUpdateFix::Install();
 #endif
 
 		FileFixes::Install();

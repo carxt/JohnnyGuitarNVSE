@@ -67,6 +67,11 @@ public:
 #ifdef GAME
 	PlaceableWaterGroup* FindWaterGroup(TESObjectREFR* apWaterRef, TESObjectREFR* apLookupRef, float afHeight) const;
 #endif
+
+	bool AddPlaceableWater(TESObjectREFR* apWaterRef);
+	bool AddPlaceableWater(TESObjectREFR* apWaterRef, const NiPoint3& arPos, const NiMatrix3& arRot);
+	bool RemovePlaceableWater(TESObjectREFR* apWaterRef);
+	bool RemovePlaceableWater(TESObjectREFR* apWaterRef, const NiPoint3& arPos, const NiMatrix3& arRot);
 };
 
 #ifdef GAME

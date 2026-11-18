@@ -1351,6 +1351,12 @@
     <ClCompile Include="internal\Game\Bethesda\Controls.cpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="internal\Game\Bethesda\ZoneEntry.cpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\RefPositionUpdateFix.cpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\nvse\GameAPI.h">
@@ -3646,6 +3652,21 @@
     <ClInclude Include="internal\Game\Bethesda\Controls.hpp">
       <Filter>internal\Game\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ExtraReflectedRefs.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\ZoneEntry.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\bhkTTNode.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Game\Bethesda\WaterZone.hpp">
+      <Filter>internal\Game\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\RefPositionUpdateFix.hpp">
+      <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -3749,6 +3770,9 @@
       <Filter>internal\Game\Gamebryo</Filter>
     </None>
     <None Include="internal\Game\Bethesda\ListBox.inl">
+      <Filter>internal\Game\Bethesda</Filter>
+    </None>
+    <None Include="internal\Game\Bethesda\bhkTTNode.inl">
       <Filter>internal\Game\Bethesda</Filter>
     </None>
   </ItemGroup>
