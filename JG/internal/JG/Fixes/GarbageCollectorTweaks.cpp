@@ -16,14 +16,13 @@ namespace GarbageCollectorTweaks {
 	static HookUtils::CallDetour kRelease3DRelatedDataDetour;
 	static void __fastcall Release3DRelatedData(TESObjectREFR* apRef) {
 		if (apRef->GetInitialized()) {
+			apRef->SetEnableStateParent(nullptr);
+
 			ExtraDataList* pExtra = apRef->GetExtra();
 			for (auto pIter = pExtra->GetActivateRefChildren(); pIter && !pIter->IsEmpty(); pIter = pIter->GetNext()) {
 				pIter->GetItem()->pActivateRef->GetExtra()->RemoveActivateParent(apRef);
 			}
 
-			TESObjectREFR* pParent = apRef->GetEnableStateParent();
-			if (pParent)
-				pParent->GetExtra()->RemoveEnableStateChild(apRef);
 
 			for (auto pIter = pExtra->GetEnableStateChildren(); pIter && !pIter->IsEmpty(); pIter = pExtra->GetEnableStateChildren()) {
 				pIter->GetItem()->SetEnableStateParent(nullptr);

@@ -1937,6 +1937,80 @@ namespace JIPFixes {
 			}
 		}
 	}
+
+	namespace BetterSetPosEx {
+
+		static Cmd_Execute SetPosEx;
+
+		static uint32_t uiGetTranslatedPosAddr;
+		static __m128 __fastcall GetTranslatedPos(TESObjectREFR* apReference, __m128& arPosition) {
+			using func_t = __m128(__vectorcall)(TESObjectREFR*, __m128*);
+			return CustomCall<func_t>(uiGetTranslatedPosAddr, apReference, &arPosition);
+		}
+
+		bool Cmd_SetPosEx_Execute(COMMAND_ARGS) {
+			if (thisObj != PlayerCharacter::GetSingleton())
+				return SetPosEx(PASS_COMMAND_ARGS);
+
+			NiPoint3 kPosition;
+			uint32_t eMode = 0;
+			if (ExtractArgsEx(EXTRACT_ARGS_EX, &kPosition.x, &kPosition.y, &kPosition.z, &eMode)) {
+				NiPoint3 kFinalPos = kPosition;
+				switch (eMode) {
+					case 1:
+						{
+							__m128 kPosVec = reinterpret_cast<__m128&>(kPosition);
+							__m128 kTranslatedPosVec = GetTranslatedPos(thisObj, kPosVec);
+							kFinalPos = { kTranslatedPosVec.m128_f32[0], kTranslatedPosVec.m128_f32[1], kTranslatedPosVec.m128_f32[2] };
+						}
+						break;
+					case 2:
+						kFinalPos += thisObj->GetPosition();
+						break;
+					default:
+						break;
+				}
+
+				TESObjectCELL* pTargetCell = TES::GetSingleton()->GetCellForPoint(kFinalPos);
+				if (pTargetCell) {
+					thisObj->SetLocationOnReference(kFinalPos);
+					thisObj->Update3DPosition();
+				}
+				else {
+					PlayerCharacter::PositionRequest* pPosRequest = new PlayerCharacter::PositionRequest();
+					TESObjectCELL* pCell = thisObj->GetParentCell();
+					TESWorldSpace* pWorld = thisObj->GetWorldSpace();
+					if (pWorld)
+						pPosRequest->pWorld = pWorld;
+					else if (pCell && pCell->GetInterior())
+						pPosRequest->pInterior = pCell;
+					pPosRequest->bResetWeather = true;
+					pPosRequest->kPos = kFinalPos;
+					pPosRequest->kRot = thisObj->GetRotation();
+					PlayerCharacter::GetSingleton()->RequestPositionPlayer(pPosRequest);
+					Interface::CloseConsole();
+				}
+			}
+			return true;
+		}
+
+		void __fastcall SetPos(TESObjectREFR* apRef, void*, const NiPoint3& arPosition) {
+			apRef->SetLocationOnReference(arPosition);
+			apRef->Update3DPosition();
+		}
+
+		void InitHooks() {
+			CommandInfo* pInfo = const_cast<CommandInfo*>(g_cmdTableInterface->GetByOpcode(CommandOpcodes::kSetPosEx));
+			if (pInfo) {
+				SetPosEx = pInfo->execute;
+				pInfo->execute = Cmd_SetPosEx_Execute;
+				uiGetTranslatedPosAddr = JIPUtils::GetAddress(0x100589C0);
+			}
+
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10058780), SetPos);
+		}
+
+	}
 #endif
 
 #pragma region GAME + GECK
@@ -1981,13 +2055,13 @@ namespace JIPFixes {
 					uint8_t* pEBP = GetParentBasePtr(_AddressOfReturnAddress());
 					TESObjectREFR* pOwner = *reinterpret_cast<TESObjectREFR**>(pEBP + 0xC);
 					if (pOwner) {
-						for (auto const& callback : OnDialogTopicHandler->kCallbacks) {
-							auto filter = reinterpret_cast<FilterForm*>(callback.pFilter);
-							if (filter->IsFilterEmpty(0) || filter->IsNonRefFormInFilter(0, this)) {
-								CallUDF(callback.pScript, pOwner, OnDialogTopicHandler->ucMaxArgsCount, this);
+						for (auto const& rCallback : OnDialogTopicHandler->kCallbacks) {
+							auto pFilter = reinterpret_cast<FilterForm*>(rCallback.pFilter);
+							if (pFilter->IsFilterEmpty(0) || pFilter->IsFormInFilter(this, 0)) {
+								rCallback.CallScript(OnDialogTopicHandler, pOwner, this);
 							}
-							else if (pParentTopic && filter->IsNonRefFormInFilter(0, pParentTopic)) {
-								CallUDF(callback.pScript, pOwner, OnDialogTopicHandler->ucMaxArgsCount, pParentTopic);
+							else if (pParentTopic && pFilter->IsFormInFilter(pParentTopic, 0)) {
+								rCallback.CallScript(OnDialogTopicHandler, pOwner, pParentTopic);
 							}
 						}
 					}
@@ -2556,6 +2630,7 @@ namespace JIPFixes {
 		TriggerLightningFXFix::InitHooks();
 		SetHotkeyItemRefFix::InitHooks();
 		SetAnimFreqBufferFix::InitHooks();
+		BetterSetPosEx::InitHooks();
 #endif
 	}
 
