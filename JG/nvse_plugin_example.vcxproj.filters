@@ -3775,5 +3775,14 @@
     <None Include="internal\Game\Bethesda\bhkTTNode.inl">
       <Filter>internal\Game\Bethesda</Filter>
     </None>
+    <None Include="internal\Game\Gamebryo\NiMatrix3.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiColor.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
+    <None Include="internal\Game\Gamebryo\NiColorA.inl">
+      <Filter>internal\Game\Gamebryo</Filter>
+    </None>
   </ItemGroup>
 </Project>
