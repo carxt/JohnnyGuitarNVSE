@@ -2268,11 +2268,11 @@ namespace JIPFixes {
 		}
 
 		static bool __fastcall SearchEDID(const TESForm* apForm, const std::string_view& arSearch) {
-			JohnnyExtraData* pJGE = JohnnyExtraData::Find(apForm);
+			JohnnyExtraData* pJGE = JohnnyExtraData::Get(apForm);
 			if (!pJGE)
 				return false;
 
-			auto pEDIDIter = pJGE->kFormData.kEditorIDs.GetHead();
+			auto pEDIDIter = pJGE->GetEditorIDHead();
 			while (pEDIDIter && !pEDIDIter->IsEmpty()) {
 				const NiFixedString& rEDID = pEDIDIter->GetItem();
 				pEDIDIter = pEDIDIter->GetNext();

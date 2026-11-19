@@ -7,6 +7,17 @@
 
 namespace ExternalEmittanceOnBases {
 
+	class BaseExternalEmittanceData : public FormExtraData {
+	public:
+		JG_FED_NAME("JGBEE");
+		JG_FED_FUNCS(BaseExternalEmittanceData);
+
+		TESForm* pSource = nullptr;
+
+		TESForm* __fastcall GetExternalEmittanceSource() const { return pSource; }
+		void __fastcall SetExternalEmittanceSource(TESForm* apSource) { pSource = apSource; };
+	};
+
 	namespace Hooks {
 
 		static HookUtils::CallDetour kGetBaseformDetour;
@@ -30,7 +41,7 @@ namespace ExternalEmittanceOnBases {
 	}
 
 	TESForm* __fastcall GetExternalEmittanceSource(const TESBoundObject* apObject) {
-		JohnnyExtraData* pData = JohnnyExtraData::Find(apObject);
+		const BaseExternalEmittanceData* pData = BaseExternalEmittanceData::Get(apObject);
 		if (!pData)
 			return nullptr;
 
@@ -38,16 +49,14 @@ namespace ExternalEmittanceOnBases {
 	}
 
 	void __fastcall SetExternalEmittanceSource(TESBoundObject* apObject, TESForm* apSource) {
-		JohnnyExtraData* pData = nullptr;
-		if (apSource)
-			pData = JohnnyExtraData::GetOrCreate(apObject);
-		else
-			pData = JohnnyExtraData::Find(apObject);
-
-		if (!pData)
-			return;
-
-		pData->SetExternalEmittanceSource(apSource);
+		if (apSource) {
+			BaseExternalEmittanceData* pData = BaseExternalEmittanceData::GetOrCreate(apObject);
+			if (pData)
+				pData->SetExternalEmittanceSource(apSource);
+		}
+		else {
+			BaseExternalEmittanceData::Remove(apObject);
+		}
 	}
 
 }

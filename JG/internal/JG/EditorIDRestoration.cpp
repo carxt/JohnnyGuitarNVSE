@@ -249,7 +249,7 @@ namespace EDIDRestoration {
 	namespace ExtraData {
 
 		static JohnnyExtraData::EDIDResult __fastcall AddEDID(TESForm* apForm, const NiFixedString& arEDID) noexcept {
-			JohnnyExtraData* pData = JohnnyExtraData::GetOrCreate(apForm);
+			JohnnyExtraData* pData = FormExtraData::GetOrCreate<JohnnyExtraData>(apForm);
 			if (!pData) [[unlikely]]
 				return JohnnyExtraData::EDIDResult::FAILURE;
 
@@ -257,7 +257,7 @@ namespace EDIDRestoration {
 		}
 
 		static JohnnyExtraData::EDIDResult __fastcall RemoveEDID(const TESForm* apForm, const NiFixedString& arEDID) noexcept {
-			JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			JohnnyExtraData* pData = JohnnyExtraData::Get(apForm);
 			if (!pData) [[unlikely]]
 				return JohnnyExtraData::EDIDResult::FAILURE;
 
@@ -265,7 +265,7 @@ namespace EDIDRestoration {
 		}
 
 		static JohnnyExtraData::EDIDResult __fastcall GetEDID(const TESForm* apForm, NiFixedString& arOutEDID) noexcept {
-			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			const JohnnyExtraData* pData = JohnnyExtraData::Get(apForm);
 			if (pData && pData->GetEditorID()) [[likely]] {
 				arOutEDID = pData->GetEditorID();
 				return JohnnyExtraData::EDIDResult::SUCCESS;
@@ -274,14 +274,14 @@ namespace EDIDRestoration {
 		}
 
 		static const char* __fastcall GetEDIDString(const TESForm* apForm) noexcept {
-			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			const JohnnyExtraData* pData = JohnnyExtraData::Get(apForm);
 			if (pData && pData->GetEditorID()) [[likely]]
 				return pData->GetEditorID().c_str();
 			return "";
 		}
 
 		static uint32_t __fastcall GetEDIDLength(const TESForm* apForm) noexcept {
-			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			const JohnnyExtraData* pData = JohnnyExtraData::Get(apForm);
 			if (pData && pData->GetEditorID()) [[likely]]
 				return pData->GetEditorID().GetLength();
 			return 0;
@@ -407,7 +407,7 @@ namespace EDIDRestoration {
 			// Removes EDIDs from the map when form is marked as temporary
 			void hk_DetachEditorIDs() noexcept {
 				ThisCall(kRemoveFromDataStructures, this);
-				JohnnyExtraData* pData = JohnnyExtraData::Find(this);
+				JohnnyExtraData* pData = JohnnyExtraData::Get(this);
 				if (pData) [[likely]]
 					pData->DetachEditorIDs();
 			}
