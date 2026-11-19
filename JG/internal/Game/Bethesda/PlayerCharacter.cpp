@@ -108,3 +108,13 @@ void PlayerCharacter::ResetKillCam(KILL_CAM_TYPE aeOldType, bool abForce) {
 void PlayerCharacter::RequestPositionPlayer(PositionRequest* apRequest) {
 	ThisCall(0x93BE30, this, apRequest);
 }
+
+// GAME - 0x952C30
+void PlayerCharacter::CheckForQuestTargetUpdate(TESObjectREFR* apRef) {
+	ThisCall(0x952C30, this, apRef);
+}
+
+// GAME - 0x456540
+PlayerCharacter::PositionRequest::PositionRequest() {
+	ThisCall(0x456540, this);
+}
