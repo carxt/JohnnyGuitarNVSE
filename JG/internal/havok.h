@@ -1016,6 +1016,10 @@ public:
 	uint32_t					unk610[11];			// 610
 	hkArray<hkCdPoint>		arr63C;				// 63C
 	uint32_t					unk648[6];			// 648
+
+	void SetWaterHeight(float afHeight) {
+		ThisCall(0x57B1D0, this, afHeight);
+	}
 };
 static_assert(sizeof(bhkCharacterController) == 0x660);
 

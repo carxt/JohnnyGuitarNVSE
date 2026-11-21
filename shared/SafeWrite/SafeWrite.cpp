@@ -5,11 +5,15 @@ STACK_FRAME_OPT_ENABLE
 
 namespace HookUtils {
 
-	MemoryUnlock::MemoryUnlock(uintptr_t addr, uintptr_t size, uint32_t flags) noexcept : _addr(addr), _size(size) {
+	DECLSPEC_NOINLINE MemoryUnlock::MemoryUnlock(uintptr_t address, size_t size) noexcept : _addr(address), _size(size) {
+		VirtualProtect(reinterpret_cast<void*>(_addr), _size, PAGE_EXECUTE_READWRITE, &_oldProtect);
+	}
+
+	DECLSPEC_NOINLINE MemoryUnlock::MemoryUnlock(uintptr_t address, size_t size, uint32_t flags) noexcept : _addr(address), _size(size) {
 		VirtualProtect(reinterpret_cast<void*>(_addr), _size, flags, &_oldProtect);
 	}
 
-	MemoryUnlock::~MemoryUnlock() noexcept {
+	DECLSPEC_NOINLINE MemoryUnlock::~MemoryUnlock() noexcept {
 		VirtualProtect(reinterpret_cast<void*>(_addr), _size, _oldProtect, &_oldProtect);
 	}
 
@@ -60,7 +64,7 @@ namespace HookUtils {
 		SafeWrite<uint64_t>(address, data);
 	}
 
-	SPEC_NOINLINE void __fastcall SafeWriteBuf(uintptr_t address, const void* data, uint32_t dataLength) noexcept {
+	DECLSPEC_NOINLINE void __fastcall SafeWriteBuf(uintptr_t address, const void* data, uint32_t dataLength) noexcept {
 		MemoryUnlock unlock(address, dataLength);
 		memcpy(reinterpret_cast<void*>(address), data, dataLength);
 	}
@@ -69,11 +73,11 @@ namespace HookUtils {
 		SafeWriteRel<uint8_t>(address, target);
 	}
 
-	SPEC_NOINLINE void __fastcall ReplaceVirtualCall(uintptr_t address, uintptr_t target, uint32_t overwriteLength) noexcept {
+	DECLSPEC_NOINLINE void __fastcall ReplaceVirtualCall(uintptr_t address, uintptr_t target, uint32_t overwriteLength) noexcept {
 		constexpr uint32_t call_length = 5;
-		bool validOverwrite = overwriteLength > call_length;
-		MemoryUnlock unlock(address, validOverwrite ? overwriteLength : call_length);
-		if (validOverwrite)
+		const bool nopCode = overwriteLength > call_length;
+		MemoryUnlock unlock(address, nopCode ? overwriteLength : call_length);
+		if (nopCode)
 			memset(reinterpret_cast<void*>(address + call_length), 0x90, overwriteLength - call_length);
 
 		RawWrite<uint8_t>(address, 0xE8);
@@ -96,7 +100,7 @@ namespace HookUtils {
 		SafeWriteRel<uint16_t>(address, target, 0x8E0F);
 	}
 
-	SPEC_NOINLINE void __fastcall PatchMemoryNop(uintptr_t address, uint32_t size) noexcept {
+	DECLSPEC_NOINLINE void __fastcall PatchMemoryNop(uintptr_t address, uint32_t size) noexcept {
 		{
 			MemoryUnlock unlock(address, size);
 			memset(reinterpret_cast<void*>(address), 0x90, size);

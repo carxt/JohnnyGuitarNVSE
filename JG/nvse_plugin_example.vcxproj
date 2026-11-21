@@ -955,6 +955,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="internal\Game\Bethesda\TLSData.cpp" />
     <ClCompile Include="internal\Game\Bethesda\TimeGlobal.cpp" />
     <ClCompile Include="internal\Game\Bethesda\VirtualPathingNode.cpp" />
+    <ClCompile Include="internal\Game\Bethesda\ZoneEntry.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiAdditionalGeometryData.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiAlphaProperty.cpp" />
     <ClCompile Include="internal\Game\Gamebryo\NiAnimationKey.cpp" />
@@ -1112,6 +1113,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="internal\JG\Fixes\RefDestructorFix.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="internal\JG\Fixes\RefPositionUpdateFix.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
@@ -1641,6 +1647,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\BGSTextureSet.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSTouchSpellForm.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BGSVoiceType.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\bhkTTNode.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BipedAnim.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSAnimGroupSequence.hpp" />
     <ClInclude Include="internal\Game\Bethesda\BSArchive.hpp" />
@@ -1877,6 +1884,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClInclude Include="internal\Game\Bethesda\ExtraPoison.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraPrimitive.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraRadius.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ExtraReflectedRefs.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraScript.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraSeenData.hpp" />
     <ClInclude Include="internal\Game\Bethesda\ExtraWeaponModFlags.hpp" />
@@ -2342,7 +2350,9 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     </ClInclude>
     <ClInclude Include="internal\Game\Bethesda\VirtualPathingNode.hpp" />
     <ClInclude Include="internal\Game\Bethesda\WaterShaderProperty.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\WaterZone.hpp" />
     <ClInclude Include="internal\Game\Bethesda\WeatherEntry.hpp" />
+    <ClInclude Include="internal\Game\Bethesda\ZoneEntry.hpp" />
     <ClInclude Include="internal\Game\FaceGen\FR2MatrixVTC.hpp" />
     <ClInclude Include="internal\Game\FaceGen\oldstd.hpp" />
     <ClInclude Include="internal\Game\Gamebryo\NiAccumulator.hpp" />
@@ -2588,6 +2598,11 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="internal\JG\Fixes\RefPositionUpdateFix.hpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_GECK|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="internal\JG\Fixes\TESEffectShaderFixes.hpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_GECK|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ReleaseDebug_GECK|Win32'">true</ExcludedFromBuild>
@@ -2763,6 +2778,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
   <ItemGroup>
     <None Include="exports.def" />
     <None Include="internal\Game\Bethesda\BGSEntryPoint.inl" />
+    <None Include="internal\Game\Bethesda\bhkTTNode.inl" />
     <None Include="internal\Game\Bethesda\BSMap.inl" />
     <None Include="internal\Game\Bethesda\BSMapBase.inl" />
     <None Include="internal\Game\Bethesda\BSShaderProperty.inl" />
@@ -2798,6 +2814,9 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     </None>
     <None Include="internal\Game\Bethesda\SettingT.inl" />
     <None Include="internal\Game\FaceGen\FR2MatrixVTC.inl" />
+    <None Include="internal\Game\Gamebryo\NiColor.inl" />
+    <None Include="internal\Game\Gamebryo\NiColorA.inl" />
+    <None Include="internal\Game\Gamebryo\NiMatrix3.inl" />
     <None Include="internal\Game\Gamebryo\NiPoint2.inl" />
     <None Include="internal\Game\Gamebryo\NiPoint3.inl" />
     <None Include="internal\Game\Gamebryo\NiPoint4.inl" />

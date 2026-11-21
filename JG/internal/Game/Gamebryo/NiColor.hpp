@@ -7,9 +7,9 @@ class NiColorA;
 
 class SPEC_EMPTY_BASES NiColor : public BSMemObject {
 public:
-	explicit NiColor(float afValue) noexcept;
-	NiColor(float afR = 0.f, float afG = 0.f, float afB = 0.f) noexcept;
-	NiColor(const NiColor& arOther) noexcept;
+	constexpr explicit NiColor(float afValue) noexcept;
+	constexpr NiColor(float afR = 0.f, float afG = 0.f, float afB = 0.f) noexcept;
+	constexpr NiColor(const NiColor& arOther) noexcept;
 	explicit NiColor(const NiPoint3& arOther) noexcept;
 	explicit NiColor(const NiColorA& arOther) noexcept;
 
@@ -26,42 +26,44 @@ public:
 	static const NiColor MAGENTA;
 	static const NiColor CYAN;
 
-	float& operator[](uint32_t i) noexcept;
-	const float& operator[](uint32_t i) const noexcept;
+	constexpr float& operator[](uint32_t i) noexcept;
+	constexpr const float& operator[](uint32_t i) const noexcept;
 
-	explicit operator float* () noexcept;
+	constexpr explicit operator float* () noexcept;
 
-	bool operator==(const NiColor& arOther) const noexcept;
+	constexpr bool operator==(const NiColor& arOther) const noexcept;
 
-	NiColor operator-() const noexcept;
+	constexpr NiColor operator-() const noexcept;
 
-	NiColor operator+(const NiColor& arOther) const noexcept;
-	NiColor operator-(const NiColor& arOther) const noexcept;
-	float	operator*(const NiColor& arOther) const noexcept;
-	NiColor operator/(const NiColor& arOther) const noexcept;
+	constexpr NiColor operator+(const NiColor& arOther) const noexcept;
+	constexpr NiColor operator-(const NiColor& arOther) const noexcept;
+	constexpr float	  operator*(const NiColor& arOther) const noexcept;
+	constexpr NiColor operator/(const NiColor& arOther) const noexcept;
 
-	NiColor operator+(float afVal) const noexcept;
-	NiColor operator-(float afVal) const noexcept;
-	NiColor operator*(float afVal) const noexcept;
-	NiColor operator/(float afVal) const noexcept;
+	constexpr NiColor operator+(float afVal) const noexcept;
+	constexpr NiColor operator-(float afVal) const noexcept;
+	constexpr NiColor operator*(float afVal) const noexcept;
+	constexpr NiColor operator/(float afVal) const noexcept;
 
-	NiColor& operator+=(const NiColor& arOther) noexcept;
-	NiColor& operator-=(const NiColor& arOther) noexcept;
-	NiColor& operator*=(const NiColor& arOther) noexcept;
-	NiColor& operator/=(const NiColor& arOther) noexcept;
+	constexpr NiColor& operator+=(const NiColor& arOther) noexcept;
+	constexpr NiColor& operator-=(const NiColor& arOther) noexcept;
+	constexpr NiColor& operator*=(const NiColor& arOther) noexcept;
+	constexpr NiColor& operator/=(const NiColor& arOther) noexcept;
 
-	NiColor& operator+=(float afVal) noexcept;
-	NiColor& operator-=(float afVal) noexcept;
-	NiColor& operator*=(float afVal) noexcept;
-	NiColor& operator/=(float afVal) noexcept;
+	constexpr NiColor& operator+=(float afVal) noexcept;
+	constexpr NiColor& operator-=(float afVal) noexcept;
+	constexpr NiColor& operator*=(float afVal) noexcept;
+	constexpr NiColor& operator/=(float afVal) noexcept;
 
-	friend NiColor operator*(float afVal, const NiColor& arOther) noexcept;
+	friend constexpr NiColor operator*(float afVal, const NiColor& arOther) noexcept;
 
-	void Scale() noexcept;
+	constexpr void Scale() noexcept;
 
-	void Clamp() noexcept;
+	constexpr void Clamp() noexcept;
 
-	float Luminance() const noexcept;
+	constexpr float Luminance() const noexcept;
 };
+
+#include "NiColor.inl"
 
 ASSERT_SIZE(NiColor, 0xC);

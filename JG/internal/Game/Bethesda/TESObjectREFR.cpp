@@ -844,13 +844,13 @@ int32_t TESObjectREFR::GetInventoryCount(bool abBarter, bool abIncludeNonPlayabl
 
 
 // GAME - 0x5754A0
-ItemChange* TESObjectREFR::GetInventoryItem(uint32_t auiIndex, bool abBarter) const {
-	return ThisCall<ItemChange*>(0x5754A0, this, auiIndex, abBarter);
+ClonedItemChange* TESObjectREFR::GetInventoryItem(uint32_t auiIndex, bool abBarter) const {
+	return ThisCall<ClonedItemChange*>(0x5754A0, this, auiIndex, abBarter);
 }
 
 // GAME - 0x576260
-ItemChange* TESObjectREFR::GetInventoryItem(TESBoundObject* apObject, FormID auiFormID) const {
-	return ThisCall<ItemChange*>(0x576260, this, apObject, auiFormID);
+ClonedItemChange* TESObjectREFR::GetInventoryItem(TESBoundObject* apObject, FormID auiFormID) const {
+	return ThisCall<ClonedItemChange*>(0x576260, this, apObject, auiFormID);
 }
 
 // GAME - 0x563650

@@ -20,6 +20,7 @@ class InventoryChanges;
 class LockData;
 class TESObjectREFR;
 class RefActivateData;
+class ReflectedRefData;
 
 class ExtraDataList : public BaseExtraList {
 public:
@@ -117,6 +118,15 @@ public:
 
 	float GetRadius() const;
 	void SetRadius(float afRadius);
+
+#ifdef GAME
+	void GetSound(BSSoundHandle& arSound) const;
+	void SetSound(const BSSoundHandle& arSound);
+#endif
+
+	BSSimpleList<ReflectedRefData*>* GetReflectedRefs() const;
+	void SetReflectsRef(TESObjectREFR* apRef, bool abVal);
+	void SetRefractsRef(TESObjectREFR* apRef, bool abVal);
 };
 
 ASSERT_SIZE(ExtraDataList, 0x20);

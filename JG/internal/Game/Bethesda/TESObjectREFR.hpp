@@ -351,8 +351,8 @@ public:
 	int32_t GetInventoryObjectCount(TESBoundObject* apObject) const;
 #ifdef GAME
 	int32_t GetInventoryCount(bool abBarter, bool abIncludeNonPlayable) const;
-	[[nodiscard]] ItemChange* GetInventoryItem(uint32_t auiIndex, bool abBarter) const;
-	[[nodiscard]] ItemChange* GetInventoryItem(TESBoundObject* apObject, FormID auiFormID = 0) const;
+	[[nodiscard]] ClonedItemChange* GetInventoryItem(uint32_t auiIndex, bool abBarter) const;
+	[[nodiscard]] ClonedItemChange* GetInventoryItem(TESBoundObject* apObject, FormID auiFormID = 0) const;
 
 	void SaveAnimation(BGSSaveFormBuffer* apBuffer);
 	void LoadAnimation(BGSLoadFormBuffer* apBuffer);

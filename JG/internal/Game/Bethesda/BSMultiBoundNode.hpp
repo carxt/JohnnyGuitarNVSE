@@ -16,8 +16,8 @@ public:
 
 	virtual BSMultiBoundRoom*	GetMultiBoundRoom() const;
 	virtual bool				IsPointWithin(const NiPoint3& arPoint) const;
-	virtual uint32_t			CheckBound(const BSMultiBound& arBound) const;
-	virtual uint32_t			CheckNiBound(const NiBound& arBound) const;
+	virtual BS_INTERSECT_RESULT	CheckBound(const BSMultiBound& arBound) const;
+	virtual BS_INTERSECT_RESULT	CheckNiBound(const NiBound& arBound) const;
 
 	BSMultiBoundPtr spMultiBound;
 	BS_CULLING_TYPE	eCullingMode;

@@ -4,11 +4,9 @@ namespace HookUtils {
 
 	namespace {
 		template <typename T>
-		class _MethodConverter {
-			union {
-				const T		func;
-				uintptr_t	funcPtr;
-			};
+		union _MethodConverter {
+			const T		func;
+			uintptr_t	funcPtr;
 		public:
 			constexpr _MethodConverter(const T function) noexcept : func(function) {};
 
@@ -16,23 +14,22 @@ namespace HookUtils {
 		};
 
 		template <typename T>
-		concept WritableFunction =
-			std::is_member_function_pointer_v<T> ||
-			std::is_pointer_v<T> ||
-			std::is_integral_v<T>;
+		concept DetourFunction = std::is_member_function_pointer_v<T> || std::is_pointer_v<T>;
 
 		template <typename T>
-		concept DetourFunction =
-			std::is_member_function_pointer_v<T> ||
-			std::is_pointer_v<T>;
+		concept WritableData = DetourFunction<T> || std::is_integral_v<T>;
+
+		template <WritableData T>
+		using ResolveWriteValue = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
 	}
 
 	class MemoryUnlock {
 		const uintptr_t _addr;
-		const uintptr_t _size;
+		const size_t	_size;
 		unsigned long	_oldProtect;
 	public:
-		MemoryUnlock(uintptr_t address, uintptr_t size = sizeof(uintptr_t), uint32_t flags = 0x40) noexcept; // flags set to PAGE_EXECUTE_READWRITE
+		MemoryUnlock(uintptr_t address, size_t size) noexcept; // flags set to PAGE_EXECUTE_READWRITE
+		MemoryUnlock(uintptr_t address, size_t size, uint32_t flags) noexcept;
 		~MemoryUnlock() noexcept;
 	};
 
@@ -70,39 +67,34 @@ namespace HookUtils {
 		PatchMemoryNop(startAddress, endAddress - startAddress);
 	}
 
-	template <uintptr_t N>
-	inline void SafeWriteBuf(uintptr_t address, const char(&data)[N]) noexcept {
+	template <uint32_t N>
+	inline void __fastcall SafeWriteBuf(uintptr_t address, const char(&data)[N]) noexcept {
 		SafeWriteBuf(address, data, N - 1);
 	}
 
-	template <WritableFunction T>
+	template <WritableData T>
 	inline void __fastcall ReplaceCall(uintptr_t address, T target) noexcept {
-		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
-		ReplaceCall(address, _TYPE(target));
+		ReplaceCall(address, ResolveWriteValue<T>(target));
 	}
 
-	template <WritableFunction T>
+	template <WritableData T>
 	inline void __fastcall WriteRelCall(uintptr_t address, T target) noexcept {
-		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
-		WriteRelCall(address, _TYPE(target));
+		WriteRelCall(address, ResolveWriteValue<T>(target));
 	}
 
-	template <WritableFunction T>
+	template <WritableData T>
 	inline void __fastcall WriteRelJump(uintptr_t address, T target) noexcept {
-		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
-		WriteRelJump(address, _TYPE(target));
+		WriteRelJump(address, ResolveWriteValue<T>(target));
 	}
 
-	template <WritableFunction T>
+	template <WritableData T>
 	inline void __fastcall ReplaceVirtualCall(uintptr_t address, T target, uint32_t overwriteLength) noexcept {
-		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
-		ReplaceVirtualCall(address, _TYPE(target), overwriteLength);
+		ReplaceVirtualCall(address, ResolveWriteValue<T>(target), overwriteLength);
 	}
 
-	template <WritableFunction T>
+	template <WritableData T>
 	inline void __fastcall ReplaceVirtualFunc(uintptr_t address, T target) noexcept {
-		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
-		SafeWrite32(address, _TYPE(target));
+		SafeWrite32(address, ResolveWriteValue<T>(target));
 	}
 
 	constexpr void** __fastcall GetVTable(void* __restrict apClass) noexcept {
@@ -113,10 +105,9 @@ namespace HookUtils {
 		*reinterpret_cast<void***>(apClass) = apVTable;
 	}
 
-	template <typename T>
+	template <WritableData T>
 	inline void __fastcall ReplaceVTableEntry(void** apVTable, uint32_t auiPosition, T target) noexcept {
-		using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
-		reinterpret_cast<uintptr_t*>(apVTable)[auiPosition] = _TYPE(target);
+		reinterpret_cast<uintptr_t*>(apVTable)[auiPosition] = ResolveWriteValue<T>(target);
 	}
 
 	// Stores the function-to-call before overwriting it, to allow calling the overwritten function after our hook is over.
@@ -142,9 +133,8 @@ namespace HookUtils {
 
 		template <DetourFunction T>
 		inline void __fastcall SafeWrite32(uintptr_t address, T target) noexcept {
-			using _TYPE = std::conditional_t<std::is_member_function_pointer_v<T>, _MethodConverter<T>, uintptr_t>;
 			overwritten_addr = GetWriteAddr(address);
-			HookUtils::SafeWrite32(address, _TYPE(target));
+			HookUtils::SafeWrite32(address, ResolveWriteValue<T>(target));
 		}
 	};
 
