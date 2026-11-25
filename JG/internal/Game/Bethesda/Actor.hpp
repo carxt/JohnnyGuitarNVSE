@@ -395,8 +395,6 @@ public:
 
 	uint32_t IntegrateFactionLists(TESFaction** apArray, uint32_t auiArraySize, const BSSimpleList<FactionRank*>* apFactionList, const BSSimpleList<FactionRank*>* apExtraFactionList) const;
 
-	void InitiateDeadReaction(Actor* apTarget);
-
 	bool CalculateLOS(const NiPoint3& arTargetPos, bool abUseEyeLevel, bool abSkipConeTest);
 
 	bool LineOfSight(bool abRunFormula, Actor* apTarget, bool abUseEyeLevel, ACTOR_SEGMENT_IN_VIEW& aeInView, bool abFull360);
@@ -414,6 +412,14 @@ public:
 	void SetLastSeenTime();
 
 	void ReloadTargets(bool abReload);
+
+	void FadeIn();
+
+	void UpdateAlpha();
+
+	void GetOutofFurnitureQuick();
+
+	void MoveActorAndFollowers(const NiPoint3& arPos, float afAngle, TESObjectCELL* apParentCell, TESWorldSpace* apWorldSpace, bool abUseFollowerSpacing, bool abMoveFollowersEvenIfVisible);
 };
 
 ASSERT_SIZE(Actor, 0x1B4);

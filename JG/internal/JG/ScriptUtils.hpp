@@ -4,9 +4,12 @@ class NiAVObject;
 class TESForm;
 class TESObject;
 class TESObjectREFR;
+class TESObjectCELL;
+class TESWorldSpace;
 class NiDefaultAVObjectPalette;
 class BGSLoadGameSubBuffer;
 class Animation;
+class NiPoint3;
 
 namespace ScriptUtils {
 
@@ -47,6 +50,8 @@ namespace ScriptUtils {
 	SPEC_NOINLINE void __fastcall SaveAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation);
 
 	SPEC_NOINLINE void __fastcall LoadAnimation(BGSLoadGameSubBuffer& arBuffer, TESObjectREFR* apReference, Animation* apAnimation);
+
+	SPEC_NOINLINE void __fastcall MoveRefTo(TESObjectREFR* apRef, const NiPoint3& arPos, const NiPoint3& arRot, TESObjectREFR* apTarget = nullptr, TESObjectCELL* apCell = nullptr, TESWorldSpace* apWorld = nullptr);
 
 	void __fastcall UpdateReference3D(TESObjectREFR* apReference);
 

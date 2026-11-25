@@ -352,4 +352,24 @@ void Actor::SetLastSeenTime() {
 void Actor::ReloadTargets(bool abReload) {
 	ThisCall(0x8B0B00, this, abReload);
 }
+
+// GAME - 0x8BCD20
+void Actor::FadeIn() {
+	ThisCall(0x8BCD20, this);
+}
+
+// GAME - 0x8C4640
+void Actor::UpdateAlpha() {
+	ThisCall(0x8C4640, this);
+}
+
+// GAME - 0x88D640
+void Actor::GetOutofFurnitureQuick() {
+	ThisCall(0x88D640, this);
+}
+
+// GAME - 0x8AD1C0
+void Actor::MoveActorAndFollowers(const NiPoint3& arPos, float afAngle, TESObjectCELL* apParentCell, TESWorldSpace* apWorldSpace, bool abUseFollowerSpacing, bool abMoveFollowersEvenIfVisible) {
+	ThisCall(0x8AD1C0, this, &arPos, afAngle, apParentCell, apWorldSpace, abUseFollowerSpacing, abMoveFollowersEvenIfVisible);
+}
 #endif

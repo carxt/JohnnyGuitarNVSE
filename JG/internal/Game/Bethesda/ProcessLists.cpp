@@ -23,3 +23,8 @@ bool ProcessLists::AreHostileActorsNear(bool abInterior) {
 void ProcessLists::RemoveActorFromTempChangeList(Actor* apActor) {
 	ThisCall(0x96F400, this, apActor);
 }
+
+// GAME - 0x972840
+void ProcessLists::StopCombatAndAlarmOnActor(Actor* apActor, bool abNotAlarm) {
+	ThisCall(0x972840, this, apActor, abNotAlarm);
+}
