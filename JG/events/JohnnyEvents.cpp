@@ -283,11 +283,9 @@ namespace JohnnyEvents {
 
 		static void __fastcall OnAVChange(ActorValueOwner* apActor, ActorValue::Index aeActorValue, float afPreviousValue, float afNewValue) {
 			const float fNewValue = GetAVChangeMode() == AVChangeMode::SET ? afNewValue : afPreviousValue + afNewValue;
-			const float fNewValueClamped = apActor->GetActorValueF(aeActorValue);
 			const float fPreviousValue = afPreviousValue;
 
 			const float fNewValueFloor = floor(fNewValue);
-			const float fNewValueClampedFloor = floor(fNewValueClamped);
 			const float fPreviousValueFloor = floor(fPreviousValue);
 
 			TESForm* pForm = apActor->GetAsForm();
@@ -298,30 +296,45 @@ namespace JohnnyEvents {
 					SendNVSEMessage(JG_OnAVChange, kData);
 				}
 
-				auto pCallUDF = [=](const EventBase& arCallback, const EventInformation* apEvent) {
+				const float fNewValueClamped = apActor->GetActorValueF(aeActorValue);
+				const float fNewValueClampedFloor = floor(fNewValueClamped);
+
+				// "fui" indeed, welcome to the hungarian notation hell
+				// We're bit casting here because you can't pass floats directly
+				// Man, what a mess this whole event is
+				const uint32_t fuiNewValue				= std::bit_cast<uint32_t>(fNewValue);
+				const uint32_t fuiNewValueClamped		= std::bit_cast<uint32_t>(fNewValueClamped);
+				const uint32_t fuiPreviousValue			= std::bit_cast<uint32_t>(fPreviousValue);
+
+				const uint32_t fuiNewValueFloor			= std::bit_cast<uint32_t>(fNewValueFloor);
+				const uint32_t fuiNewValueClampedFloor	= std::bit_cast<uint32_t>(fNewValueClampedFloor);
+				const uint32_t fuiPreviousValueFloor	= std::bit_cast<uint32_t>(fPreviousValueFloor);
+
+				auto GetValues = [=](const EventBase& arCallback, uint32_t& arPrev, uint32_t& arNew) -> bool {
 					const bool bNoFloor = arCallback.usUserFlags.GetBit<0>();
 					const bool bUseClamp = arCallback.usUserFlags.GetBit<1>();
 
-					uint32_t uiPrev = reinterpret_cast<const uint32_t&>(bNoFloor ? fPreviousValue : fPreviousValueFloor);
-					uint32_t uiNew = reinterpret_cast<const uint32_t&>(fNewValueFloor);
+					arPrev = bNoFloor ? fuiPreviousValue : fuiPreviousValueFloor;
+					arNew = fuiNewValueFloor;
 					if (bUseClamp) [[unlikely]] {
-						if (int32_t(fNewValueClampedFloor) == int32_t(fPreviousValueFloor))
-							return;
+						if (fuiNewValueClampedFloor == fuiPreviousValueFloor) [[unlikely]]
+							return false;
 
-						uiNew = reinterpret_cast<const uint32_t&>(bNoFloor ? fNewValueClamped : fNewValueClampedFloor);
+						arNew = bNoFloor ? fuiNewValueClamped : fuiNewValueClampedFloor;
 					}
 					else if (bNoFloor) [[unlikely]] {
-						uiNew = reinterpret_cast<const uint32_t&>(fNewValue);
+						arNew = fuiNewValue;
 					}
-
-					arCallback.CallScript(apEvent, nullptr, aeActorValue, uiPrev, uiNew);
+					return true;
 				};
 
 				if (pForm == PlayerCharacter::GetSingleton()) {
 					for (auto const& rCallback : OnAVChangeHandler->kCallbacks) {
 						auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
 						if (pFilter->IsIntInFilter(aeActorValue)) {
-							pCallUDF(rCallback, OnAVChangeHandler);
+							uint32_t uiPrev = 0, uiNew = 0;
+							if (GetValues(rCallback, uiPrev, uiNew)) [[likely]]
+								rCallback.CallScript(OnAVChangeHandler, nullptr, aeActorValue, uiPrev, uiNew);
 						}
 					}
 				}
@@ -329,7 +342,9 @@ namespace JohnnyEvents {
 					for (auto const& rCallback : OnNPCAVChangeHandler->kCallbacks) {
 						auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
 						if (pFilter->IsIntInFilter(aeActorValue) && pFilter->IsAnyFormInFilter(pForm, 0)) {
-							pCallUDF(rCallback, OnNPCAVChangeHandler);
+							uint32_t uiPrev = 0, uiNew = 0;
+							if (GetValues(rCallback, uiPrev, uiNew)) [[likely]]
+								rCallback.CallScript(OnNPCAVChangeHandler, nullptr, pForm, aeActorValue, uiPrev, uiNew);
 						}
 					}
 				}

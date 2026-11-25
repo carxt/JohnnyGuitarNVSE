@@ -29,9 +29,6 @@ namespace GarbageCollectorTweaks {
 			}
 		}
 
-		if (apRef->IsActor())
-			ProcessLists::GetSingleton()->RemoveActorFromTempChangeList(static_cast<Actor*>(apRef));
-
 		ThisCall(kRelease3DRelatedDataDetour, apRef);
 	}
 
