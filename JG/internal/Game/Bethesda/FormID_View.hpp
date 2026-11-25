@@ -8,13 +8,18 @@ class FormID_View {
 protected:
 	union {
 		struct {
-			uint32_t uiID				: 24;
-			uint32_t ucCompileIndex		: 8;
+			uint32_t uiID					: 24;
+			uint32_t ucCompileIndex			: 8;
 		};
 		struct {
-			uint32_t usSmallID			: 12;
-			uint32_t usSmallIndex		: 12;
-			const uint32_t ucFixedIndex	: 8;
+			uint32_t usSmallID				: 12;
+			uint32_t usSmallIndex			: 12;
+			const uint32_t ucFixedIndexS	: 8;
+		};
+		struct {
+			uint32_t usMediumID				: 16;
+			uint32_t ucMediumIndex			: 8;
+			const uint32_t ucFixedIndexM	: 8;
 		};
 		FormID uiFormID;
 	};
@@ -22,7 +27,7 @@ protected:
 public:
 	constexpr FormID_View(FormID auiFormID) noexcept : uiFormID(auiFormID) {}
 	constexpr explicit FormID_View(uint8_t aucIndex, uint32_t auiID) noexcept : uiID(auiID), ucCompileIndex(aucIndex) {}
-	constexpr explicit FormID_View(uint16_t ausSmallIndex, uint16_t ausID) noexcept : usSmallID(ausID), usSmallIndex(ausSmallIndex), ucFixedIndex(0xFE) { }
+	constexpr explicit FormID_View(uint16_t ausSmallIndex, uint16_t ausID) noexcept : usSmallID(ausID), usSmallIndex(ausSmallIndex), ucFixedIndexS(0xFE) { }
 
 	constexpr FormID		Get() const noexcept							{ return uiFormID; }
 	constexpr void			Set(FormID auiFormID) noexcept					{ uiFormID = auiFormID; }
@@ -39,8 +44,15 @@ public:
 	constexpr uint16_t		GetSmallIndex() const noexcept					{ return usSmallIndex; }
 	constexpr void			SetSmallIndex(uint16_t ausSmallIndex) noexcept	{ usSmallIndex = ausSmallIndex; }
 
+	constexpr uint16_t		GetMediumID() const noexcept					{ return usMediumID; }
+	constexpr void			SetMediumID(uint16_t ausMediumID) noexcept		{ usMediumID = ausMediumID; }
+
+	constexpr uint8_t		GetMediumIndex() const noexcept					{ return ucMediumIndex; }
+	constexpr void			SetMediumIndex(uint8_t aucMediumIndex) noexcept	{ ucMediumIndex = aucMediumIndex; }
+
 	constexpr bool			IsCreated() const noexcept						{ return ucCompileIndex == 0xFF; }
 	constexpr bool			IsSmall() const noexcept						{ return ucCompileIndex == 0xFE; }
+	constexpr bool			IsMedium() const noexcept						{ return ucCompileIndex == 0xFD; }
 	constexpr bool			IsDefault() const noexcept						{ return uiFormID != 0 && uiFormID < 0x800; }
 };
 
