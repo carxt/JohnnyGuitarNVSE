@@ -298,30 +298,31 @@ namespace JohnnyEvents {
 					SendNVSEMessage(JG_OnAVChange, kData);
 				}
 
-				auto pCallUDF = [=](const EventBase& arCallback, const EventInformation* apEvent) {
+				auto GetValues = [=](const EventBase& arCallback, uint32_t& arPrev, uint32_t& arNew) -> bool {
 					const bool bNoFloor = arCallback.usUserFlags.GetBit<0>();
 					const bool bUseClamp = arCallback.usUserFlags.GetBit<1>();
 
-					uint32_t uiPrev = reinterpret_cast<const uint32_t&>(bNoFloor ? fPreviousValue : fPreviousValueFloor);
-					uint32_t uiNew = reinterpret_cast<const uint32_t&>(fNewValueFloor);
+					arPrev = reinterpret_cast<const uint32_t&>(bNoFloor ? fPreviousValue : fPreviousValueFloor);
+					arNew = reinterpret_cast<const uint32_t&>(fNewValueFloor);
 					if (bUseClamp) [[unlikely]] {
-						if (int32_t(fNewValueClampedFloor) == int32_t(fPreviousValueFloor))
-							return;
+						if (int32_t(fNewValueClampedFloor) == int32_t(fPreviousValueFloor)) [[unlikely]]
+							return false;
 
-						uiNew = reinterpret_cast<const uint32_t&>(bNoFloor ? fNewValueClamped : fNewValueClampedFloor);
+						arNew = reinterpret_cast<const uint32_t&>(bNoFloor ? fNewValueClamped : fNewValueClampedFloor);
 					}
 					else if (bNoFloor) [[unlikely]] {
-						uiNew = reinterpret_cast<const uint32_t&>(fNewValue);
+						arNew = reinterpret_cast<const uint32_t&>(fNewValue);
 					}
-
-					arCallback.CallScript(apEvent, nullptr, aeActorValue, uiPrev, uiNew);
+					return true;
 				};
 
 				if (pForm == PlayerCharacter::GetSingleton()) {
 					for (auto const& rCallback : OnAVChangeHandler->kCallbacks) {
 						auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
 						if (pFilter->IsIntInFilter(aeActorValue)) {
-							pCallUDF(rCallback, OnAVChangeHandler);
+							uint32_t uiPrev = 0, uiNew = 0;
+							if (GetValues(rCallback, uiPrev, uiNew)) [[likely]]
+								rCallback.CallScript(OnAVChangeHandler, nullptr, aeActorValue, uiPrev, uiNew);
 						}
 					}
 				}
@@ -329,7 +330,9 @@ namespace JohnnyEvents {
 					for (auto const& rCallback : OnNPCAVChangeHandler->kCallbacks) {
 						auto pFilter = reinterpret_cast<FilterFormInt*>(rCallback.pFilter);
 						if (pFilter->IsIntInFilter(aeActorValue) && pFilter->IsAnyFormInFilter(pForm, 0)) {
-							pCallUDF(rCallback, OnNPCAVChangeHandler);
+							uint32_t uiPrev = 0, uiNew = 0;
+							if (GetValues(rCallback, uiPrev, uiNew)) [[likely]]
+								rCallback.CallScript(OnNPCAVChangeHandler, nullptr, pForm, aeActorValue, uiPrev, uiNew);
 						}
 					}
 				}
