@@ -2011,6 +2011,34 @@ namespace JIPFixes {
 		}
 
 	}
+
+	namespace SetAnimActionProcessCheck {
+
+		static uint32_t uiReturnAddr = 0;
+		static uint32_t uiExitAddr = 0;
+		static SPEC_NAKED void CheckProcessLevel_Asm() {
+			__asm {
+				mov     ecx, [ebp - 0x10]			// Actor*
+				mov     eax, [ecx + 0x68]			// BaseProces*
+				cmp		dword ptr [eax + 0x28], 0	// Check if it's HighProcess
+				jz		VALID_PROC
+
+				pop		eax
+				jmp		uiExitAddr
+
+				VALID_PROC:
+				jmp		uiReturnAddr
+			}
+		}
+
+		static void InitHooks() {
+			HookUtils::WriteRelJump(JIPUtils::GetAddress(0x10008E51), CheckProcessLevel_Asm);
+			uiReturnAddr = JIPUtils::GetAddress(0x10008E57);
+			uiExitAddr = JIPUtils::GetAddress(0x10008ECE);
+		}
+
+	}
+
 #endif
 
 #pragma region GAME + GECK
@@ -2610,6 +2638,8 @@ namespace JIPFixes {
 		SerializationFixes::InitHooks();
 		EDIDLookupFix::InitHooks();
 		OnRagdollEventFix::InitHooks();
+		SetAnimActionProcessCheck::InitHooks();
+
 		ModelFixes::InitStrings();
 #endif
 	}
