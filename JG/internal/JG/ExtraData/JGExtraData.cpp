@@ -173,8 +173,7 @@ SPEC_NOINLINE void JGExtraData::DetachEditorIDs() {
 			pIter = pIter->GetNext();
 		}
 		ReleaseSRWLockExclusive(&EDIDRestoration::kEDIDMapLock);
-
-		kEditorIDs.RemoveAll();
 	}
+	kEditorIDs.RemoveAll();
 }
 #endif
