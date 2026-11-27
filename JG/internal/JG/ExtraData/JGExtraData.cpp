@@ -21,6 +21,9 @@ class PointerPool {
 
 public:
 	SPEC_NOINLINE T* __fastcall Pop() {
+		if (kStack.empty())
+			return nullptr;
+
 		AcquireSRWLockExclusive(&kLock);
 		T* pData = kStack.top();
 		if (pData)
