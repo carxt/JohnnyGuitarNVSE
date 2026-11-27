@@ -73,6 +73,9 @@
     <Filter Include="internal\Editor\Bethesda">
       <UniqueIdentifier>{112f5d87-8348-49b8-8175-7cb206ad2884}</UniqueIdentifier>
     </Filter>
+    <Filter Include="internal\JG\Core\ExtraData">
+      <UniqueIdentifier>{00f917f9-b242-4137-a2a5-8aaaab0e5d78}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\nvse\nvse\GameAPI.cpp">
@@ -1356,6 +1359,12 @@
     </ClCompile>
     <ClCompile Include="internal\JG\Fixes\RefPositionUpdateFix.cpp">
       <Filter>internal\JG\Fixes</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\JG\ExtraData\JGExtraData.cpp">
+      <Filter>internal\JG\Core\ExtraData</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\NVSE\FormExtraData.cpp">
+      <Filter>internal\NVSE</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -3666,6 +3675,15 @@
     </ClInclude>
     <ClInclude Include="internal\JG\Fixes\RefPositionUpdateFix.hpp">
       <Filter>internal\JG\Fixes</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\ExtraData\JGExtraEmittanceSource.hpp">
+      <Filter>internal\JG\Core\ExtraData</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\JG\ExtraData\JGExtraData.hpp">
+      <Filter>internal\JG\Core\ExtraData</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\NVSE\FormExtraData.hpp">
+      <Filter>internal\NVSE</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

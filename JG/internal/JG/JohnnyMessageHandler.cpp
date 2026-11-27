@@ -13,7 +13,6 @@
 #include "EditorIDRestoration.hpp"
 #include "events/JohnnyEvents.hpp"
 #include "ExtraMiscStats.hpp"
-#include "JohnnyExtraData.hpp"
 #include "JohnnyFixes.hpp"
 #include "JohnnyPluginData.hpp"
 #include "JohnnyRadios.hpp"
@@ -77,8 +76,6 @@ static void MainGameLoop() {
 }
 
 static void __fastcall GameReset(uint32_t aeType) {
-	JohnnyExtraDataArray::GetInstance().ResetScriptData();
-
 	if (aeType == NVSEMessagingInterface::kMessage_NewGame)
 		CameraOverlay::ReInit();
 	else

@@ -1,22 +1,11 @@
 #include "ExternalEmittanceOnBases.hpp"
-#include "Bethesda/TESObjectREFR.hpp"
-
 #include "JohnnyExtraData.hpp"
+
+#include "Bethesda/TESObjectREFR.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
 namespace ExternalEmittanceOnBases {
-
-	class BaseExternalEmittanceData : public FormExtraData {
-	public:
-		JG_FED_NAME("JGBEE");
-		JG_FED_FUNCS(BaseExternalEmittanceData);
-
-		TESForm* pSource = nullptr;
-
-		TESForm* __fastcall GetExternalEmittanceSource() const { return pSource; }
-		void __fastcall SetExternalEmittanceSource(TESForm* apSource) { pSource = apSource; };
-	};
 
 	namespace Hooks {
 
@@ -41,7 +30,7 @@ namespace ExternalEmittanceOnBases {
 	}
 
 	TESForm* __fastcall GetExternalEmittanceSource(const TESBoundObject* apObject) {
-		const BaseExternalEmittanceData* pData = BaseExternalEmittanceData::Get(apObject);
+		const JGExtraEmittanceSource* pData = JGExtraEmittanceSource::Get(apObject);
 		if (!pData)
 			return nullptr;
 
@@ -50,12 +39,12 @@ namespace ExternalEmittanceOnBases {
 
 	void __fastcall SetExternalEmittanceSource(TESBoundObject* apObject, TESForm* apSource) {
 		if (apSource) {
-			BaseExternalEmittanceData* pData = BaseExternalEmittanceData::GetOrCreate(apObject);
+			JGExtraEmittanceSource* pData = JGExtraEmittanceSource::GetOrCreate(apObject);
 			if (pData)
 				pData->SetExternalEmittanceSource(apSource);
 		}
 		else {
-			BaseExternalEmittanceData::Remove(apObject);
+			std::ignore = JGExtraEmittanceSource::Remove(apObject);
 		}
 	}
 

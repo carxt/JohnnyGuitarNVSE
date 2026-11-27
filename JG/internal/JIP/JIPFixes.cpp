@@ -2268,7 +2268,7 @@ namespace JIPFixes {
 		}
 
 		static bool __fastcall SearchEDID(const TESForm* apForm, const std::string_view& arSearch) {
-			JohnnyExtraData* pJGE = JohnnyExtraData::Get(apForm);
+			JGExtraData* pJGE = JGExtraData::Get(apForm);
 			if (!pJGE)
 				return false;
 
