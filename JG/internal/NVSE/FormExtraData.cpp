@@ -1,11 +1,17 @@
 #include "FormExtraData.hpp"
 
-#include <forward_list>
+#include "Bethesda/AutoMemContext.hpp"
 
-static std::forward_list<std::pair<NiFixedString&, const char*>> kRegistrationQueue;
+#include <forward_list>
+#include <shared/Utils/DebugLog.hpp>
+
+static std::forward_list<std::pair<NiFixedString&, const char*>>* pRegistrationQueue = nullptr;
 
 SPEC_NOINLINE bool __fastcall NVSE::FormExtraData::RegisterExtraData(NiFixedString& arName, const char* apName) {
-	kRegistrationQueue.push_front({ arName, apName });
+	MEMORY_CONTEXT(MC_DEFAULT);
+	if (!pRegistrationQueue)
+		pRegistrationQueue = new std::forward_list<std::pair<NiFixedString&, const char*>>();
+	pRegistrationQueue->push_front({ arName, apName });
 	return true;
 }
 
@@ -15,8 +21,11 @@ void __fastcall NVSE::FormExtraData::Init(NVSEDataInterface* apNVSEData) {
 	pfRemoveByName	= static_cast<decltype(pfRemoveByName)>(apNVSEData->GetFunc(NVSEDataInterface::kNVSEData_PluginFormExtraDataRemoveByName));
 	pfRemoveByPtr	= static_cast<decltype(pfRemoveByPtr)>(apNVSEData->GetFunc(NVSEDataInterface::kNVSEData_PluginFormExtraDataRemoveByPtr));
 
-	for (auto& rItem : kRegistrationQueue) {
-		rItem.first = rItem.second;
+	if (pRegistrationQueue) {
+		for (auto& rItem : *pRegistrationQueue) {
+			rItem.first = rItem.second;
+		}
+		delete pRegistrationQueue;
+		pRegistrationQueue = nullptr;
 	}
-	kRegistrationQueue.clear();
 }
