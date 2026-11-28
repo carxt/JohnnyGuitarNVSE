@@ -58,6 +58,7 @@ SPEC_NOINLINE JGExtraData::~JGExtraData() {
 SPEC_NOINLINE void JGExtraData::Reset() {
 #ifdef GAME
 	DetachEditorIDs();
+	kEditorIDs.RemoveAll();
 #endif
 	pOwner = nullptr;
 }
@@ -174,6 +175,5 @@ SPEC_NOINLINE void JGExtraData::DetachEditorIDs() {
 		}
 		ReleaseSRWLockExclusive(&EDIDRestoration::kEDIDMapLock);
 	}
-	kEditorIDs.RemoveAll();
 }
 #endif
