@@ -1,4 +1,7 @@
 #include "JGExtraData.hpp"
+
+#include "Bethesda/AutoMemContext.hpp"
+
 #include <vector>
 #include <stack>
 #ifdef GAME
