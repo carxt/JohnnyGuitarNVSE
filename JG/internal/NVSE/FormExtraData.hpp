@@ -28,7 +28,7 @@ NVSE_FED_FUNCS(x)
 	template<class T>
 	concept FED_HasOnAdd = requires (T * a, TESForm * b) { a->OnAdd(b); };
 
-	class FormExtraData : public PluginFormExtraData, public BSMemObject {
+	class SPEC_NOVTABLE FormExtraData : public PluginFormExtraData, public BSMemObject {
 	protected:
 		static inline _PluginFormExtraData_Get				pfGet = nullptr;
 		static inline _PluginFormExtraData_Add				pfAdd = nullptr;
