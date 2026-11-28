@@ -21,6 +21,7 @@ void __fastcall NVSE::FormExtraData::Init(NVSEDataInterface* apNVSEData) {
 	if (pRegistrationQueue) {
 		for (auto& rItem : *pRegistrationQueue) {
 			rItem.first = rItem.second;
+			_MESSAGE("Registering Form ExtraData \"%s\"", rItem.second);
 		}
 		delete pRegistrationQueue;
 		pRegistrationQueue = nullptr;
