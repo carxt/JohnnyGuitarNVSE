@@ -39,8 +39,10 @@ public:
 		if (TryAcquireSRWLockExclusive(&kLock)) {
 			if (kStack.size() + 1 < uiMaxSize) {
 				DEBUG_MSG("[ JGED | 0x%08X ] Storing to pool", apData);
-				kStack.push(apData);
 				bResult = true;
+
+				MEMORY_CONTEXT(MC_DEFAULT);
+				kStack.push(apData);
 			}
 			ReleaseSRWLockExclusive(&kLock);
 		}
