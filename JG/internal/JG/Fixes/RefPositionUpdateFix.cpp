@@ -186,7 +186,7 @@ namespace RefPositionUpdateFix {
 
 	static void __fastcall QueueMoveWater(TESObjectREFR* apWaterRef, NiAVObject* ap3D) {
 		if (AILinearTaskThreadManager::ShouldQueue3DTask()) {
-			JohnnyExtraData* pData = JohnnyExtraData::GetOrCreate(apWaterRef);
+			JGExtraData* pData = JGExtraData::GetOrCreate(apWaterRef);
 			if (!pData) [[unlikely]]
 				return;
 
@@ -195,9 +195,9 @@ namespace RefPositionUpdateFix {
 			QueuedTask kTask;
 			kTask.kItems[0].p = pData;
 			kTask.pFunction = QUEUED_TASK{
-				JohnnyExtraData * pData = static_cast<JohnnyExtraData*>(arTask.kItems[0].p);
-				if (pData && pData->pOwner) [[likely]] {
-					TESObjectREFR* pWaterRef = static_cast<TESObjectREFR*>(pData->pOwner);
+				JGExtraData * pData = static_cast<JGExtraData*>(arTask.kItems[0].p);
+				if (pData && pData->GetOwner()) [[likely]] {
+					TESObjectREFR* pWaterRef = static_cast<TESObjectREFR*>(pData->GetOwner());
 					NiAVObject* p3D = pWaterRef->Get3D();
 					if (p3D) [[likely]]
 						MoveWater(pWaterRef, p3D);

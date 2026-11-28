@@ -813,7 +813,7 @@ public:
 	virtual const NiFixedString& GetName() const = 0;
 
 	// Do not change, nor override
-	virtual uint32_t GetVersion() const { return kVersion; };
+	virtual uint32_t GetVersion() const final { return kVersion; };
 
 	// Return your own version here
 	// This method is only for other NVSE plugins, NVSE itself does not use it
@@ -825,10 +825,10 @@ public:
 	virtual bool OnRemoval(TESForm* removedFrom, uint32_t removalReason) { return true; };
 
 	// Reserved for future NVSE's use
-	virtual uint32_t Reserved0(void*, void*) { return 0; };
-	virtual uint32_t Reserved1(void*, void*) { return 0; };
-	virtual uint32_t Reserved2(void*, void*) { return 0; };
-	virtual uint32_t Reserved3(void*, void*) { return 0; };
+	virtual uint32_t Reserved0(void*, void*) final { return 0; };
+	virtual uint32_t Reserved1(void*, void*) final { return 0; };
+	virtual uint32_t Reserved2(void*, void*) final { return 0; };
+	virtual uint32_t Reserved3(void*, void*) final { return 0; };
 
 	// -------------------------------
 

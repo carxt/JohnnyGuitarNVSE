@@ -80,7 +80,7 @@ static void OnNVSELoadInit(const NVSEInterface* apNVSE) {
 // For GECK, NVSEPlugin_Load works like game's NVSEPlugin_Preload, so a hook is needed to init at a similar point to the game
 static void OnMainInit() {
 	FixedStringsRework::Init();
-	JohnnyExtraData::Initialize(g_dataInterface);
+	JohnnyExtraData::Init(g_dataInterface);
 	JohnnyFixes::Init();
 	JohnnyPatches::Init();
 	JohnnyGameSettings::Init();

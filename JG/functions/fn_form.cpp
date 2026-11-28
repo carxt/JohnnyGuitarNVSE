@@ -2698,15 +2698,15 @@ static void __fastcall RefreshReferenceModel(TESObjectREFR* apReference, uint32_
 
 static void __fastcall RequestModelUpdate(TESObjectREFR* apReference, uint32_t auiFlags, bool abQueue) {
 	if (abQueue) {
-		JohnnyExtraData* pExtraData = JohnnyExtraData::GetOrCreate(apReference);
+		JGExtraData* pExtraData = JGExtraData::GetOrCreate(apReference);
 		pExtraData->IncRefCount();
 
 		QueuedTask kTask;
 		kTask.kItems[0].p = pExtraData;
 		kTask.kItems[1].ui = auiFlags;
 		kTask.pFunction = QUEUED_TASK{
-			JohnnyExtraData* pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
-			TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pData->pOwner);
+			JGExtraData* pData = reinterpret_cast<JGExtraData*>(arTask.kItems[0].p);
+			TESObjectREFR* pRef = pData->GetOwner<TESObjectREFR>();
 			if (pRef) {
 				uint32_t uiFlags = arTask.kItems[1].ui;
 				RefreshReferenceModel(pRef, uiFlags);
@@ -3243,15 +3243,15 @@ namespace {
 
 static void __fastcall RequestBipedModelUpdate(Character* apCharacter, int32_t aiTargetObject, bool abQueue) {
 	if (abQueue) {
-		JohnnyExtraData* pExtraData = JohnnyExtraData::GetOrCreate(apCharacter);
+		JGExtraData* pExtraData = JGExtraData::GetOrCreate(apCharacter);
 		pExtraData->IncRefCount();
 
 		QueuedTask kTask;
 		kTask.kItems[0].p = pExtraData;
 		kTask.kItems[1].i = aiTargetObject;
 		kTask.pFunction = QUEUED_TASK{
-			JohnnyExtraData* pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
-			Character* pChar = static_cast<Character*>(pData->pOwner);
+			JGExtraData* pData = reinterpret_cast<JGExtraData*>(arTask.kItems[0].p);
+			Character* pChar = pData->GetOwner<Character>();
 			if (pChar) {
 				int32_t iTargetObject = arTask.kItems[1].i;
 				ReloadBipedModels(pChar, iTargetObject);
@@ -3354,16 +3354,16 @@ bool Cmd_SetExternalEmittanceSource_Execute(COMMAND_ARGS) {
 		if (pForm->IsReference()) {
 			TESObjectREFR* pReference = static_cast<TESObjectREFR*>(pForm);
 			if (AILinearTaskThreadManager::GetRunningThreads()) {
-				JohnnyExtraData* pExtraData = JohnnyExtraData::GetOrCreate(pReference);
+				JGExtraData* pExtraData = JGExtraData::GetOrCreate(pReference);
 				pExtraData->IncRefCount();
 
 				QueuedTask kTask;
 				kTask.kItems[0].p = pExtraData;
 				kTask.kItems[1].p = pSource;
 				kTask.pFunction = QUEUED_TASK{
-					JohnnyExtraData* pData = reinterpret_cast<JohnnyExtraData*>(arTask.kItems[0].p);
+					JGExtraData* pData = reinterpret_cast<JGExtraData*>(arTask.kItems[0].p);
 					TESForm* pSource = reinterpret_cast<TESForm*>(arTask.kItems[1].p);
-					TESObjectREFR* pRef = static_cast<TESObjectREFR*>(pData->pOwner);
+					TESObjectREFR* pRef = pData->GetOwner<TESObjectREFR>();
 					SetEmittanceSourceForRef(pRef, pSource);
 					pData->DecRefCount();
 				};

@@ -248,40 +248,40 @@ namespace EDIDRestoration {
 
 	namespace ExtraData {
 
-		static JohnnyExtraData::EDIDResult __fastcall AddEDID(TESForm* apForm, const NiFixedString& arEDID) noexcept {
-			JohnnyExtraData* pData = JohnnyExtraData::GetOrCreate(apForm);
+		static JGExtraData::EDIDResult __fastcall AddEDID(TESForm* apForm, const NiFixedString& arEDID) noexcept {
+			JGExtraData* pData = JGExtraData::GetOrCreate(apForm);
 			if (!pData) [[unlikely]]
-				return JohnnyExtraData::EDIDResult::FAILURE;
+				return JGExtraData::EDIDResult::FAILURE;
 
 			return pData->SetEditorID(arEDID);
 		}
 
-		static JohnnyExtraData::EDIDResult __fastcall RemoveEDID(const TESForm* apForm, const NiFixedString& arEDID) noexcept {
-			JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+		static JGExtraData::EDIDResult __fastcall RemoveEDID(const TESForm* apForm, const NiFixedString& arEDID) noexcept {
+			JGExtraData* pData = JGExtraData::Get(apForm);
 			if (!pData) [[unlikely]]
-				return JohnnyExtraData::EDIDResult::FAILURE;
+				return JGExtraData::EDIDResult::FAILURE;
 
 			return pData->RemoveEditorID(arEDID);
 		}
 
-		static JohnnyExtraData::EDIDResult __fastcall GetEDID(const TESForm* apForm, NiFixedString& arOutEDID) noexcept {
-			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+		static JGExtraData::EDIDResult __fastcall GetEDID(const TESForm* apForm, NiFixedString& arOutEDID) noexcept {
+			const JGExtraData* pData = JGExtraData::Get(apForm);
 			if (pData && pData->GetEditorID()) [[likely]] {
 				arOutEDID = pData->GetEditorID();
-				return JohnnyExtraData::EDIDResult::SUCCESS;
+				return JGExtraData::EDIDResult::SUCCESS;
 			}
-			return JohnnyExtraData::EDIDResult::FAILURE;
+			return JGExtraData::EDIDResult::FAILURE;
 		}
 
 		static const char* __fastcall GetEDIDString(const TESForm* apForm) noexcept {
-			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			const JGExtraData* pData = JGExtraData::Get(apForm);
 			if (pData && pData->GetEditorID()) [[likely]]
 				return pData->GetEditorID().c_str();
 			return "";
 		}
 
 		static uint32_t __fastcall GetEDIDLength(const TESForm* apForm) noexcept {
-			const JohnnyExtraData* pData = JohnnyExtraData::Find(apForm);
+			const JGExtraData* pData = JGExtraData::Get(apForm);
 			if (pData && pData->GetEditorID()) [[likely]]
 				return pData->GetEditorID().GetLength();
 			return 0;
@@ -373,8 +373,8 @@ namespace EDIDRestoration {
 					}
 
 					const NiFixedString strEDID(apEDID);
-					const JohnnyExtraData::EDIDResult eAdded = ExtraData::AddEDID(this, strEDID);
-					const bool bSuccess = eAdded == JohnnyExtraData::EDIDResult::SUCCESS;
+					const JGExtraData::EDIDResult eAdded = ExtraData::AddEDID(this, strEDID);
+					const bool bSuccess = eAdded == JGExtraData::EDIDResult::SUCCESS;
 					if (bSuccess) [[likely]] {
 						DEBUG_MSG("Added EDID \"%s\" to form %08X", apEDID, GetFormID());
 						if (!GetTemporary() && GetFormID()) [[likely]] {
@@ -382,7 +382,7 @@ namespace EDIDRestoration {
 						}
 					}
 #if DEBUG_PRINTS
-					else if (eAdded == JohnnyExtraData::EDIDResult::ALREADY_EXISTS) {
+					else if (eAdded == JGExtraData::EDIDResult::ALREADY_EXISTS) {
 						TESForm* pMapForm = Map::Get(apEDID);
 						if (pMapForm == this) [[unlikely]] {
 							DEBUG_MSG("EDID \"%s\" is already set for form %08X, skipping adding to game map!", apEDID, GetFormID());
@@ -394,7 +394,7 @@ namespace EDIDRestoration {
 							DEBUG_MSG("EDID \"%s\" is already set for form %08X, but no map entry exists!", apEDID, GetFormID());
 						}
 					}
-					else if (eAdded == JohnnyExtraData::EDIDResult::FAILURE) {
+					else if (eAdded == JGExtraData::EDIDResult::FAILURE) {
 						DEBUG_MSG("Failed to add EDID \"%s\" to form %08X!", apEDID, GetFormID());
 					}
 #endif
@@ -407,7 +407,7 @@ namespace EDIDRestoration {
 			// Removes EDIDs from the map when form is marked as temporary
 			void hk_DetachEditorIDs() noexcept {
 				ThisCall(kRemoveFromDataStructures, this);
-				JohnnyExtraData* pData = JohnnyExtraData::Find(this);
+				JGExtraData* pData = JGExtraData::Get(this);
 				if (pData) [[likely]]
 					pData->DetachEditorIDs();
 			}

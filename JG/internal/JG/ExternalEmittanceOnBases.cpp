@@ -1,7 +1,7 @@
 #include "ExternalEmittanceOnBases.hpp"
-#include "Bethesda/TESObjectREFR.hpp"
-
 #include "JohnnyExtraData.hpp"
+
+#include "Bethesda/TESObjectREFR.hpp"
 
 #include "Shared/SafeWrite/SafeWrite.hpp"
 
@@ -30,7 +30,7 @@ namespace ExternalEmittanceOnBases {
 	}
 
 	TESForm* __fastcall GetExternalEmittanceSource(const TESBoundObject* apObject) {
-		JohnnyExtraData* pData = JohnnyExtraData::Find(apObject);
+		const JGExtraEmittanceSource* pData = JGExtraEmittanceSource::Get(apObject);
 		if (!pData)
 			return nullptr;
 
@@ -38,16 +38,14 @@ namespace ExternalEmittanceOnBases {
 	}
 
 	void __fastcall SetExternalEmittanceSource(TESBoundObject* apObject, TESForm* apSource) {
-		JohnnyExtraData* pData = nullptr;
-		if (apSource)
-			pData = JohnnyExtraData::GetOrCreate(apObject);
-		else
-			pData = JohnnyExtraData::Find(apObject);
-
-		if (!pData)
-			return;
-
-		pData->SetExternalEmittanceSource(apSource);
+		if (apSource) {
+			JGExtraEmittanceSource* pData = JGExtraEmittanceSource::GetOrCreate(apObject);
+			if (pData)
+				pData->SetExternalEmittanceSource(apSource);
+		}
+		else {
+			std::ignore = JGExtraEmittanceSource::Remove(apObject);
+		}
 	}
 
 }
