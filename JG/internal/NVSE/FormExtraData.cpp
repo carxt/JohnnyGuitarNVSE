@@ -1,14 +1,11 @@
 #include "FormExtraData.hpp"
 
-#include "Bethesda/AutoMemContext.hpp"
-
 #include <forward_list>
 #include <shared/Utils/DebugLog.hpp>
 
 static std::forward_list<std::pair<NiFixedString&, const char*>>* pRegistrationQueue = nullptr;
 
 SPEC_NOINLINE bool __fastcall NVSE::FormExtraData::RegisterExtraData(NiFixedString& arName, const char* apName) {
-	MEMORY_CONTEXT(MC_DEFAULT);
 	if (!pRegistrationQueue)
 		pRegistrationQueue = new std::forward_list<std::pair<NiFixedString&, const char*>>();
 	pRegistrationQueue->push_front({ arName, apName });
