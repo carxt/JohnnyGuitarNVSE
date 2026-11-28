@@ -144,7 +144,7 @@ namespace AddonNodeMap {
 
 		// BGSSceneInfo::CollectSceneDataFromAddonNodes
 		// Disable because cba atm
-		HookUtils::WriteRelJump(0x51DB24, 0x51DC55);
+		HookUtils::WriteRelJump(0x51DB2B, 0x51DC55);
 #endif
 	}
 
