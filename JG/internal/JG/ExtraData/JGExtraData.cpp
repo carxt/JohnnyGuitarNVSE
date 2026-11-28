@@ -26,8 +26,10 @@ public:
 
 		AcquireSRWLockExclusive(&kLock);
 		T* pData = kStack.top();
-		if (pData)
+		if (pData) {
+			DEBUG_MSG("[ JGED | 0x%08X ] Reusing from pool", pData);
 			kStack.pop();
+		}
 		ReleaseSRWLockExclusive(&kLock);
 		return pData;
 	}
@@ -36,6 +38,7 @@ public:
 		bool bResult = false;
 		if (TryAcquireSRWLockExclusive(&kLock)) {
 			if (kStack.size() + 1 < uiMaxSize) {
+				DEBUG_MSG("[ JGED | 0x%08X ] Storing to pool", apData);
 				kStack.push(apData);
 				bResult = true;
 			}
@@ -56,16 +59,18 @@ SPEC_NOINLINE JGExtraData::~JGExtraData() {
 }
 
 SPEC_NOINLINE void JGExtraData::Reset() {
+	if (pOwner) {
+		DEBUG_MSG("[ JGED | 0x%08X ] Resetting for form %08X (\"%s\")", this, pOwner->GetFormID(), GetOwnerEDID());
 #ifdef GAME
-	DetachEditorIDs();
-	kEditorIDs.RemoveAll();
+		DetachEditorIDs();
+		kEditorIDs.RemoveAll();
 #endif
-	pOwner = nullptr;
+		pOwner = nullptr;
+	}
 }
 
 SPEC_NOINLINE void JGExtraData::DeleteThis() {
 	assert(refCount == 0);
-	DEBUG_MSG("Deleting JGExtraData for %08X (\"%s\")", pOwner ? pOwner->GetFormID() : 0, GetOwnerEDID());
 	Reset();
 	const bool bPooled = kFreeDataPool.Push(this);
 	if (!bPooled)
@@ -76,8 +81,11 @@ SPEC_NOINLINE bool JGExtraData::OnRemoval(TESForm* apForm, uint32_t aeRemovalRea
 	switch (aeRemovalReason) {
 		case PluginFormExtraData::RemovalReason::kFormDeletion:
 		case PluginFormExtraData::RemovalReason::kTrashedReference:
-			DEBUG_MSG("%08X (\"%s\") got deleted!", apForm->GetFormID(), GetOwnerEDID());
+			DEBUG_MSG("[ JGED | 0x%08X ] Form %08X (\"%s\") got deleted!", this, apForm->GetFormID(), GetOwnerEDID());
 			Reset();
+			break;
+		case PluginFormExtraData::RemovalReason::kManualRequest:
+			DEBUG_MSG("[ JGED | 0x%08X ] Manually removed from the map!", this);
 			break;
 		default:
 			break;
@@ -122,32 +130,33 @@ const NiFixedString& JGExtraData::GetEditorID() const {
 
 SPEC_NOINLINE JGExtraData::EDIDResult __fastcall JGExtraData::SetEditorID(const NiFixedString& arEDID) {
 	if (!arEDID.GetLength()) {
-		DEBUG_MSG("%08X Tried to set an empty EDID", pOwner->GetFormID());
+		DEBUG_MSG("[ JGED | 0x%08X ] Form %08X tried to set an empty EDID", this, pOwner->GetFormID());
 		return EDIDResult::FAILURE;
 	}
 
 	if (!GetEditorID()) {
-		DEBUG_MSG("%08X Adding EDID \"%s\"", pOwner->GetFormID(), arEDID);
+		DEBUG_MSG("[ JGED | 0x%08X ] Form %08X is adding EDID \"%s\"", this, pOwner->GetFormID(), arEDID.c_str());
 		kEditorIDs.SetItem(arEDID);
 		return EDIDResult::SUCCESS;
 	}
 	else if (GetEditorID() != arEDID) {
 		if (kEditorIDs.IsInList(arEDID)) {
-			DEBUG_MSG("%08X EDID alias \"%s\" already exists", pOwner->GetFormID(), arEDID);
+			DEBUG_MSG("[ JGED | 0x%08X ] EDID alias \"%s\" for form %08X already exists", this, arEDID.c_str(), pOwner->GetFormID());
 			return EDIDResult::ALREADY_EXISTS;
 		}
 
 		kEditorIDs.AddHead(arEDID);
-		DEBUG_MSG("%08X Adding EDID alias \"%s\"", pOwner->GetFormID(), arEDID);
+		DEBUG_MSG("[ JGED | 0x%08X ] Form %08X is adding EDID alias \"%s\"", this, pOwner->GetFormID(), arEDID.c_str());
 		return EDIDResult::SUCCESS;
 	}
 	else {
-		DEBUG_MSG("%08X EDID \"%s\" is already set", pOwner->GetFormID(), arEDID);
+		DEBUG_MSG("[ JGED | 0x%08X ] Form %08X already has EDID \"%s\"", this, pOwner->GetFormID(), arEDID.c_str());
 		return EDIDResult::ALREADY_EXISTS;
 	}
 }
 
 JGExtraData::EDIDResult __fastcall JGExtraData::RemoveEditorID(const NiFixedString& arEDID) {
+	DEBUG_MSG("[ JGED | 0x%08X ] Form %08X is removing EDID \"%s\"", this, pOwner->GetFormID(), arEDID.c_str());
 	kEditorIDs.Remove(arEDID);
 	return EDIDResult::SUCCESS;
 }
@@ -158,17 +167,18 @@ JGExtraData::EDIDList* JGExtraData::GetEditorIDHead() {
 
 SPEC_NOINLINE void JGExtraData::DetachEditorIDs() {
 	if (pOwner && !pOwner->GetTemporary() && !kEditorIDs.IsEmpty()) {
+		DEBUG_MSG("[ JGED | 0x%08X ] Detaching EDIDs for form %08X", this, pOwner->GetFormID());
 		auto pIter = kEditorIDs.GetHead();
 		AcquireSRWLockExclusive(&EDIDRestoration::kEDIDMapLock);
 		while (pIter) {
 			TESForm* pFoundForm = nullptr;
 			if (TESForm::pAllFormsByEditorID->GetAt(pIter->GetItem(), pFoundForm) && pFoundForm){
 				if (pFoundForm == pOwner) {
-					DEBUG_MSG("%08X Removing EDID \"%s\"", pOwner->GetFormID(), pIter->GetItem());
+					DEBUG_MSG("		Removing EDID \"%s\"", pIter->GetItem().c_str());
 					TESForm::pAllFormsByEditorID->RemoveAt(pIter->GetItem());
 				}
 				else {
-					DEBUG_MSG("%08X Tried to remove EDID \"%s\" belonging to %08X", pOwner->GetFormID(), pIter->GetItem(), pFoundForm->GetFormID());
+					DEBUG_MSG("		Tried to remove EDID \"%s\" belonging to form %08X", pIter->GetItem().c_str(), pFoundForm->GetFormID());
 				}
 			}
 			pIter = pIter->GetNext();
